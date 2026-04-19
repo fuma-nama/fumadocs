@@ -1,5 +1,5 @@
 import { expect, test } from 'vitest';
-import { createGetUrl, getSlugs, loader, LoaderOptions, Source } from '@/source';
+import { createGetUrl, getSlugs, loader, LoaderOptions, StaticSource } from '@/source';
 import type { ReactElement } from 'react';
 import { removeUndefined } from '@/utils/remove-undefined';
 import { lucideIconsPlugin } from '@/source/plugins/lucide-icons';
@@ -35,8 +35,8 @@ test('Get URL: Base', () => {
 const pageTreeTests: {
   title: string;
   output: string;
-  source: Source;
-  loader?: Partial<LoaderOptions>;
+  source: StaticSource;
+  loader?: Pick<Partial<LoaderOptions>, 'i18n'>;
 }[] = [
   {
     title: 'Basic',

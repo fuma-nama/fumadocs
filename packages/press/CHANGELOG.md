@@ -1,5 +1,11 @@
 # fumapress
 
+## 0.1.29
+
+### Patch Changes
+
+- a744f9f: Support frontmatter parsing at core-level
+
 ## 0.1.28
 
 ### Patch Changes

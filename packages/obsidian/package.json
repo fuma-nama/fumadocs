@@ -1,6 +1,6 @@
 {
   "name": "fumadocs-obsidian",
-  "version": "0.0.15",
+  "version": "0.1.0",
   "description": "Obsidian Integration for Fumadocs",
   "keywords": [
     "Docs",
@@ -44,7 +44,6 @@
   },
   "dependencies": {
     "github-slugger": "^2.0.0",
-    "gray-matter": "^4.0.3",
     "js-yaml": "^4.1.1",
     "remark-math": "^6.0.0",
     "remark-mdx": "^3.1.1",
@@ -72,9 +71,9 @@
   },
   "peerDependencies": {
     "@types/react": "*",
-    "fumadocs-core": "^15.0.0 || ^16.0.0",
-    "react": "*",
-    "react-dom": "*"
+    "fumadocs-core": "^16.8.0",
+    "react": "^19.2.0",
+    "react-dom": "^19.2.0"
   },
   "peerDependenciesMeta": {
     "@types/react": {

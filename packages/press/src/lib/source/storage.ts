@@ -1,8 +1,8 @@
 import type { ContentConfig } from '@/config/global';
 import fs from 'node:fs/promises';
 import { glob } from 'tinyglobby';
-import grayMatter from 'gray-matter';
 import path from 'node:path';
+import { frontmatter as parseFrontmatter } from 'fumadocs-core/content/md/frontmatter';
 import { metaSchema, pageSchema } from 'fumadocs-core/source/schema';
 import { type NormalizedProjectConfig, normalizeProjects } from './config';
 
@@ -116,7 +116,7 @@ async function md(
   file: string,
 ): Promise<RawPage> {
   const content = await fs.readFile(absolutePath, 'utf-8');
-  const parsed = grayMatter({ content });
+  const parsed = parseFrontmatter(content);
 
   // use default frontmatter if invalid in Fumadocs' spec
   const { data: frontmatter = {} } = pageSchema.partial().loose().safeParse(parsed.data);

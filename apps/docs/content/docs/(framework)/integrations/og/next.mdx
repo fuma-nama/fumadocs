@@ -12,10 +12,8 @@ You can generate metadata images dynamically using `next/og`.
 Add the following under your loader, and define image metadata for pages:
 
 ```ts tab="lib/source.ts"
-import { type InferPageType } from 'fumadocs-core/source';
-
 // [!code ++:8]
-export function getPageImage(page: InferPageType<typeof source>) {
+export function getPageImage(page: (typeof source)['$inferPage']) {
   const segments = [...page.slugs, 'image.png'];
 
   return {

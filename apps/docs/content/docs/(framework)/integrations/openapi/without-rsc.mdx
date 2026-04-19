@@ -61,19 +61,19 @@ See [`createOpenAPI()`](/docs/integrations/openapi/server) & [`<APIPage />`](/do
 You can generate pages dynamically by integrating into [Loader API](/docs/headless/source-api/source).
 
 ```ts title="lib/source.ts"
-import { loader, multiple } from 'fumadocs-core/source';
+import { loader } from 'fumadocs-core/source';
 import { openapiPlugin, openapiSource } from 'fumadocs-openapi/server';
 import { docs } from 'collections/server';
 import { openapi } from '@/lib/openapi';
 
 export const source = loader(
   // [!code ++:6]
-  multiple({
+  {
     docs: docs.toFumadocsSource(),
     openapi: await openapiSource(openapi, {
       baseDir: 'openapi',
     }),
-  }),
+  },
   {
     baseUrl: '/docs',
     plugins: [openapiPlugin()],
@@ -93,7 +93,7 @@ import { source } from '@/lib/source';
 
 const page = source.getPage(['...']);
 
-if (page.data.type === 'openapi') {
+if (page.type === 'openapi') {
   // page data for generated OpenAPI pages
   console.log(page.data);
 } else {
@@ -104,14 +104,12 @@ if (page.data.type === 'openapi') {
 Update all references to the pages of `source`, for example:
 
 ```ts title="lib/source.ts"
-import type { InferPageType } from 'fumadocs-core/source';
-
 /**
  * return page content for LLMs
  */
-export async function getLLMText(page: InferPageType<typeof source>) {
+export async function getLLMText(page: (typeof source)['$inferPage']) {
   // [!code ++:4]
-  if (page.data.type === 'openapi') {
+  if (page.type === 'openapi') {
     // e.g. return the stringified OpenAPI schema
     return JSON.stringify(page.data.getSchema().bundled, null, 2);
   }
@@ -171,7 +169,7 @@ const serverLoader = createServerFn({
 
     const pageTree = await source.serializePageTree(source.getPageTree());
     // different result for OpenAPI pages [!code ++:9]
-    if (page.data.type === 'openapi') {
+    if (page.type === 'openapi') {
       return {
         type: 'openapi',
         title: page.data.title,

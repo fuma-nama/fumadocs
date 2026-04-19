@@ -6,39 +6,46 @@ import { joinPath } from './path';
 import { normalizeUrl } from '@/utils/normalize-url';
 import { SlugFn, slugsPlugin } from '@/source/plugins/slugs';
 import { iconPlugin, type IconResolver } from '@/source/plugins/icon';
-import type { MetaData, PageData, Source, SourceConfig } from './source';
+import type { MetaData, PageData, StaticSource } from './source';
 import { visit } from '@/page-tree/utils';
 import path from 'node:path';
 import type { PageTreeTransformer } from '@/source/page-tree/builder';
 import type { SerializedPageTree } from './client';
 import { FileSystem } from './storage/file-system';
+import type { GenerateMeta, GeneratePage, GenerateStorage } from './types';
+
+type ResolvedInput = StaticSource | Record<string, StaticSource>;
 
 export interface LoaderConfig {
-  source: SourceConfig;
+  page: Page;
+  meta: Meta;
   i18n: I18nConfig | undefined;
 }
 
-export interface LoaderOptions<C extends LoaderConfig = LoaderConfig> {
+export interface LoaderOptions<
+  S extends ContentStorage = ContentStorage,
+  I18n extends I18nConfig | undefined = I18nConfig | undefined,
+> {
   baseUrl: string;
-  i18n?: C['i18n'];
+  i18n?: I18n;
   url?: (slugs: string[], locale?: string) => string;
 
   /**
    * Additional options for page tree builder
    */
-  pageTree?: Partial<PageTreeOptions<C>>;
+  pageTree?: Partial<PageTreeOptions<S>>;
 
   plugins?:
     | LoaderPluginOption[]
     | ((context: {
-        typedPlugin: (plugin: LoaderPlugin<C>) => LoaderPlugin;
+        typedPlugin: (plugin: LoaderPlugin<S>) => LoaderPlugin;
       }) => LoaderPluginOption[]);
   icon?: IconResolver;
-  slugs?: SlugFn<C>;
+  slugs?: SlugFn<S>;
 }
 
 export interface ResolvedLoaderConfig {
-  source: Source;
+  input: ResolvedInput;
   url: (slugs: string[], locale?: string) => string;
 
   plugins: LoaderPlugin[];
@@ -60,7 +67,11 @@ interface SharedFileInfo {
   absolutePath?: string;
 }
 
-export interface Page<Data = PageData> extends SharedFileInfo {
+export interface Page<
+  Type extends string | undefined = string | undefined,
+  Data extends PageData = PageData,
+> extends SharedFileInfo {
+  type: Type;
   slugs: string[];
   url: string;
   data: Data;
@@ -68,11 +79,15 @@ export interface Page<Data = PageData> extends SharedFileInfo {
   locale?: string | undefined;
 }
 
-export interface Meta<Data = MetaData> extends SharedFileInfo {
+export interface Meta<
+  Type extends string | undefined = string | undefined,
+  Data extends MetaData = MetaData,
+> extends SharedFileInfo {
+  type: Type;
   data: Data;
 }
 
-export interface LoaderOutput<Config extends LoaderConfig> {
+export interface LoaderOutput<Config extends LoaderConfig = LoaderConfig> {
   pageTree: Config['i18n'] extends I18nConfig ? Record<string, PageTree.Root> : PageTree.Root;
 
   getPageTree: (locale?: string) => PageTree.Root;
@@ -94,7 +109,7 @@ export interface LoaderOutput<Config extends LoaderConfig> {
     },
   ) =>
     | {
-        page: Page<Config['source']['pageData']>;
+        page: Config['page'];
         hash?: string;
       }
     | undefined;
@@ -103,7 +118,7 @@ export interface LoaderOutput<Config extends LoaderConfig> {
    *
    * - relative file paths, like `./my/page.mdx`.
    */
-  resolveHref: (href: string, parent: Page<Config['source']['pageData']>) => string;
+  resolveHref: (href: string, parent: Config['page']) => string;
 
   /**
    * @internal
@@ -115,14 +130,14 @@ export interface LoaderOutput<Config extends LoaderConfig> {
    *
    * @param language - If unspecified, list pages from all languages.
    */
-  getPages: (language?: string) => Page<Config['source']['pageData']>[];
+  getPages: (language?: string) => Config['page'][];
 
   /**
    * get each language and its pages, empty if i18n is not enabled.
    */
   getLanguages: () => {
     language: string;
-    pages: Page<Config['source']['pageData']>[];
+    pages: Config['page'][];
   }[];
 
   /**
@@ -130,20 +145,14 @@ export interface LoaderOutput<Config extends LoaderConfig> {
    *
    * @param language - If unspecified, the default language will be used.
    */
-  getPage: (
-    slugs: string[] | undefined,
-    language?: string,
-  ) => Page<Config['source']['pageData']> | undefined;
+  getPage: (slugs: string[] | undefined, language?: string) => Config['page'] | undefined;
 
-  getNodePage: (
-    node: PageTree.Item,
-    language?: string,
-  ) => Page<Config['source']['pageData']> | undefined;
+  getNodePage: (node: PageTree.Item, language?: string) => Config['page'] | undefined;
 
   getNodeMeta: (
     node: PageTree.Folder | PageTree.Root,
     language?: string,
-  ) => Meta<Config['source']['metaData']> | undefined;
+  ) => Config['meta'] | undefined;
 
   /**
    * generate static params for Next.js SSG
@@ -160,6 +169,9 @@ export interface LoaderOutput<Config extends LoaderConfig> {
    * serialize page tree for non-RSC environments
    */
   serializePageTree: (tree: PageTree.Root) => Promise<SerializedPageTree>;
+
+  get $inferPage(): Config['page'];
+  get $inferMeta(): Config['meta'];
 }
 
 function createPageIndexer({ url }: ResolvedLoaderConfig) {
@@ -179,6 +191,7 @@ function createPageIndexer({ url }: ResolvedLoaderConfig) {
 
         if (item.format === 'meta') {
           pathToMeta.set(path, {
+            type: item.type,
             path: item.path,
             absolutePath: item.absolutePath,
             data: item.data,
@@ -187,8 +200,9 @@ function createPageIndexer({ url }: ResolvedLoaderConfig) {
         }
 
         const page: Page = {
-          absolutePath: item.absolutePath,
+          type: item.type,
           path: item.path,
+          absolutePath: item.absolutePath,
           url: url(item.slugs, lang),
           slugs: item.slugs,
           data: item.data,
@@ -250,44 +264,38 @@ export function createGetUrl(baseUrl: string, i18n?: I18nConfig): ResolvedLoader
   };
 }
 
-export function loader<
-  Config extends SourceConfig,
-  I18n extends I18nConfig | undefined = undefined,
->(
-  source: Source<Config>,
-  options: LoaderOptions<{
-    source: NoInfer<Config>;
-    i18n: I18n;
-  }>,
+export function loader<I extends ResolvedInput, I18n extends I18nConfig | undefined = undefined>(
+  source: I,
+  options: LoaderOptions<NoInfer<GenerateStorage<I>>, I18n>,
 ): LoaderOutput<{
-  source: Config;
+  meta: GenerateMeta<I>;
+  page: GeneratePage<I>;
   i18n: I18n;
 }>;
 
-export function loader<
-  Config extends SourceConfig,
-  I18n extends I18nConfig | undefined = undefined,
->(
-  options: LoaderOptions<{
-    source: NoInfer<Config>;
-    i18n: I18n;
-  }> & {
-    source: Source<Config>;
+export function loader<I extends ResolvedInput, I18n extends I18nConfig | undefined = undefined>(
+  options: LoaderOptions<NoInfer<GenerateStorage<I>>, I18n> & {
+    source: I;
   },
 ): LoaderOutput<{
-  source: Config;
+  meta: GenerateMeta<I>;
+  page: GeneratePage<I>;
   i18n: I18n;
 }>;
 
-export function loader(
+export function loader<I extends ResolvedInput, I18n extends I18nConfig | undefined = undefined>(
   ...args:
     | [
         LoaderOptions & {
-          source: Source;
+          source: I;
         },
       ]
-    | [Source, LoaderOptions]
-): LoaderOutput<LoaderConfig> {
+    | [I, LoaderOptions]
+): LoaderOutput<{
+  meta: GenerateMeta<I>;
+  page: GeneratePage<I>;
+  i18n: I18n;
+}> {
   const loaderConfig =
     args.length === 2 ? resolveConfig(args[0], args[1]) : resolveConfig(args[0].source, args[0]);
   const { i18n } = loaderConfig;
@@ -336,10 +344,10 @@ export function loader(
     }
   }
 
-  return {
+  const out: LoaderOutput = {
     _i18n: i18n,
     get pageTree() {
-      return getPageTrees() as unknown as LoaderOutput<LoaderConfig>['pageTree'];
+      return getPageTrees() as never;
     },
     set pageTree(v) {
       pageTrees = v;
@@ -458,16 +466,18 @@ export function loader(
       };
     },
   };
+
+  return out as never;
 }
 
 function resolveConfig(
-  source: Source,
+  input: ResolvedInput,
   { slugs, icon, plugins = [], baseUrl, url, ...base }: LoaderOptions,
 ): ResolvedLoaderConfig {
   let config: ResolvedLoaderConfig = {
     ...base,
     url: url ? (...args) => normalizeUrl(url(...args)) : createGetUrl(baseUrl, base.i18n),
-    source,
+    input,
     plugins: buildPlugins([
       icon && iconPlugin(icon),
       ...(typeof plugins === 'function'
@@ -487,7 +497,7 @@ function resolveConfig(
   return config;
 }
 
-export interface LoaderPlugin<Config extends LoaderConfig = LoaderConfig> {
+export interface LoaderPlugin<S extends ContentStorage = ContentStorage> {
   name?: string;
 
   /**
@@ -505,17 +515,17 @@ export interface LoaderPlugin<Config extends LoaderConfig = LoaderConfig> {
   /**
    * transform the storage after loading
    */
-  transformStorage?: (context: { storage: ContentStorage<Config['source']> }) => void;
+  transformStorage?: (context: { storage: S }) => void;
 
   /**
    * transform the generated page tree
    */
-  transformPageTree?: PageTreeTransformer<Config['source']>;
+  transformPageTree?: PageTreeTransformer<S>;
 }
 
-export type LoaderPluginOption<Config extends LoaderConfig = LoaderConfig> =
-  | LoaderPlugin<Config>
-  | LoaderPluginOption<Config>[]
+export type LoaderPluginOption<S extends ContentStorage = ContentStorage> =
+  | LoaderPlugin<S>
+  | LoaderPluginOption<S>[]
   | undefined;
 
 const priorityMap = {
@@ -540,11 +550,7 @@ function buildPlugins(plugins: LoaderPluginOption[], sort = true): LoaderPlugin[
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any -- infer types
-export type InferPageType<Utils extends LoaderOutput<any>> =
-  Utils extends LoaderOutput<infer Config> ? Page<Config['source']['pageData']> : never;
+export type InferPageType<Utils extends LoaderOutput<any>> = Utils['$inferPage'];
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any -- infer types
-export type InferMetaType<Utils extends LoaderOutput<any>> =
-  Utils extends LoaderOutput<infer Config> ? Meta<Config['source']['metaData']> : never;
-
-export * from './loader/llms';
+export type InferMetaType<Utils extends LoaderOutput<any>> = Utils['$inferMeta'];

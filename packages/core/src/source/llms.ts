@@ -1,4 +1,4 @@
-import type { LoaderConfig, LoaderOutput } from '../loader';
+import type { LoaderConfig, LoaderOutput } from './loader';
 import type * as PageTree from '@/page-tree';
 
 interface Context {
@@ -14,7 +14,10 @@ export interface LLMsConfig {
   ) => string;
 }
 
-export function llms<C extends LoaderConfig>(loader: LoaderOutput<C>, config: LLMsConfig = {}) {
+export function llms<C extends LoaderConfig = LoaderConfig>(
+  loader: LoaderOutput<C>,
+  config: LLMsConfig = {},
+) {
   const {
     TAB = '  ',
     renderName = (node, ctx): string => {

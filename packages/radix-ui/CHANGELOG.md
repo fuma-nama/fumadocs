@@ -1,5 +1,11 @@
 # fumadocs-ui
 
+## 16.8.0
+
+### Patch Changes
+
+- Updated dependencies [68c2b49]
+
 ## 16.7.16
 
 ### Patch Changes

@@ -40,7 +40,7 @@ const serverLoader = createServerFn({
     if (!page) throw notFound();
 
     const pageTree = await source.serializePageTree(source.getPageTree());
-    if (page.data.type === 'openapi') {
+    if (page.type === 'openapi') {
       return {
         type: 'openapi',
         title: page.data.title,

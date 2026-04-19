@@ -1,5 +1,5 @@
 import path from 'node:path';
-import matter from 'gray-matter';
+import { frontmatter } from 'fumadocs-core/content/md/frontmatter';
 import { type Frontmatter, frontmatterSchema } from '@/utils/schema';
 import { slash } from '@/utils/slash';
 import type { VaultFile } from '@/read-vaults';
@@ -107,7 +107,7 @@ export function buildStorage(
         content: rawFile.content,
       };
     } else if (['.md', '.mdx'].includes(ext)) {
-      const { data, content } = matter(String(rawFile.content));
+      const { data, content } = frontmatter(String(rawFile.content));
       if (enforceMdx) {
         outPath = outPath.slice(0, -path.extname(outPath).length) + '.mdx';
       }

@@ -1,5 +1,7 @@
 # create-next-docs-app
 
+## 16.0.96
+
 ## 16.0.95
 
 ### Patch Changes

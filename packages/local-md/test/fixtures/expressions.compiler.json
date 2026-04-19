@@ -1,0 +1,19 @@
+{
+  "code": "\"use strict\";\nconst {Fragment: _Fragment, jsx: _jsx, jsxs: _jsxs} = arguments[0];\nlet toc = [{\n  depth: 1,\n  url: \"#mdx-expressions\",\n  title: _jsx(_Fragment, {\n    children: \"MDX expressions\"\n  })\n}];\nfunction _createMdxContent(props) {\n  const _components = {\n    h1: \"h1\",\n    p: \"p\",\n    ...props.components\n  };\n  return _jsxs(_Fragment, {\n    children: [_jsx(_components.h1, {\n      id: \"mdx-expressions\",\n      children: \"MDX expressions\"\n    }), \"\\n\", _jsx(\"div\", {\n      \"data-sum\": 1 + 2,\n      \"data-product\": 2 * 3,\n      id: \"sum-box\",\n      children: _jsx(_components.p, {\n        children: \"Static body\"\n      })\n    }), \"\\n\", _jsx(\"abbr\", {\n      title: ['a', 'b'].join('-'),\n      children: \"Joined\"\n    })]\n  });\n}\nfunction MDXContent(props = {}) {\n  const {wrapper: MDXLayout} = props.components || ({});\n  return MDXLayout ? _jsx(MDXLayout, {\n    ...props,\n    children: _jsx(_createMdxContent, {\n      ...props\n    })\n  }) : _createMdxContent(props);\n}\nreturn {\n  toc,\n  default: MDXContent\n};\n",
+  "data": {
+    "structuredData": {
+      "contents": [
+        {
+          "heading": "mdx-expressions",
+          "content": "Static body"
+        }
+      ],
+      "headings": [
+        {
+          "id": "mdx-expressions",
+          "content": "MDX expressions"
+        }
+      ]
+    }
+  }
+}

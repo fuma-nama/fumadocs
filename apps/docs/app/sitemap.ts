@@ -8,7 +8,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const url = (path: string): string => new URL(path, baseUrl).toString();
   const items = await Promise.all(
     source.getPages().map(async (page) => {
-      if (page.data.type === 'openapi') return;
+      if (page.type === 'openapi') return;
       const { lastModified } = await page.data.load();
 
       return {

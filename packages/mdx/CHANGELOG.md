@@ -1,5 +1,11 @@
 # next-docs-mdx
 
+## 14.3.1
+
+### Patch Changes
+
+- a744f9f: Support frontmatter parsing at core-level
+
 ## 14.3.0
 
 ### Minor Changes

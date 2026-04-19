@@ -1,4 +1,4 @@
-import { fumaMatter } from '@/utils/fuma-matter';
+import { frontmatter } from 'fumadocs-core/content/md/frontmatter';
 import type { Loader } from '@/loaders/adapter';
 import { z } from 'zod';
 import type { DocCollectionItem } from '@/config/build';
@@ -28,7 +28,7 @@ export function createMdxLoader({ getCore }: ConfigLoader): Loader {
     async load({ getSource, development: isDevelopment, query, compiler, filePath }) {
       let core = await getCore();
       const value = await getSource();
-      const matter = fumaMatter(value);
+      const matter = frontmatter(value);
       const { collection: collectionName, workspace, only } = querySchema.parse(query);
       if (workspace) {
         core = core.getWorkspaces().get(workspace) ?? core;

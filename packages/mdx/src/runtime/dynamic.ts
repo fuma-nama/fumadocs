@@ -1,7 +1,7 @@
 import { buildConfig, type DocCollectionItem } from '@/config/build';
 import { buildMDX, type CompiledMDXProperties } from '@/loaders/mdx/build-mdx';
 import { pathToFileURL } from 'node:url';
-import { fumaMatter } from '@/utils/fuma-matter';
+import { frontmatter } from 'fumadocs-core/content/md/frontmatter';
 import fs from 'node:fs/promises';
 import { server, type ServerOptions } from './server';
 import { type CoreOptions, createCore } from '@/core';
@@ -70,7 +70,7 @@ export async function dynamic<Config, TC extends InternalTypeConfig>(
 
     async function compile({ info, data }: LazyEntry<unknown>) {
       let content = await fs.readFile(info.fullPath, 'utf-8');
-      content = fumaMatter(content).content;
+      content = frontmatter(content).content;
 
       const compiled = await buildMDX(core, collection, {
         filePath: info.fullPath,

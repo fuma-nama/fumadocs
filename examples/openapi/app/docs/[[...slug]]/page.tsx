@@ -13,7 +13,7 @@ export default async function Page(props: { params: Promise<{ slug?: string[] }>
     notFound();
   }
 
-  if (page.data.type === 'openapi') {
+  if (page.type === 'openapi') {
     return (
       <DocsPage toc={page.data.toc} full>
         <DocsTitle>{page.data.title}</DocsTitle>

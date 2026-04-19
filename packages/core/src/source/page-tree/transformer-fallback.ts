@@ -1,15 +1,10 @@
-import {
-  FileSystem,
-  type ContentStorage,
-  type PageTreeBuilderContext,
-  type PageTreeTransformer,
-  type SourceConfig,
-} from '@/source';
+import { FileSystem, type PageTreeBuilderContext, type PageTreeTransformer } from '@/source';
 import { PageTreeBuilder } from '@/source/page-tree/builder';
+import type { ContentStorage } from '../storage/content';
 
 export function transformerFallback(): PageTreeTransformer {
   const addedFiles = new Set<string>();
-  function shouldIgnore(context: PageTreeBuilderContext<SourceConfig>) {
+  function shouldIgnore(context: PageTreeBuilderContext) {
     return context.custom?._fallback === true;
   }
 

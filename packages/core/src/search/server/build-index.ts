@@ -53,7 +53,7 @@ function isBreadcrumbItem(item: unknown): item is string {
 
 export function buildBreadcrumbs<C extends LoaderConfig>(
   source: LoaderOutput<C>,
-  page: Page<C['source']['pageData']>,
+  page: C['page'],
 ): string[] | undefined {
   const pageTree = source.getPageTree(page.locale);
   const path = findPath(pageTree.children, (node) => node.type === 'page' && node.url === page.url);

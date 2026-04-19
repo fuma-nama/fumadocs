@@ -1,4 +1,4 @@
-import { type InferPageType, loader, source } from 'fumadocs-core/source';
+import { loader, source } from 'fumadocs-core/source';
 import { revalidable } from '@/lib/revalidable';
 import { lucideIconsPlugin } from 'fumadocs-core/source/lucide-icons';
 import { getPages } from './storage';
@@ -15,7 +15,7 @@ export const getSource = revalidable({
 });
 
 export type Source = Awaited<ReturnType<typeof getSource>>;
-export type SourcePage = InferPageType<Source>;
+export type SourcePage = Source['$inferPage'];
 
 export function getPageImage(slugs: string[]) {
   const segments = [...slugs, 'image.webp'];

@@ -12,7 +12,9 @@ export type {
 } from './page-tree/builder';
 export type {
   ContentStorage,
-  ContentStorageFile,
   ContentStorageMetaFile,
   ContentStoragePageFile,
 } from './storage/content';
+
+// TODO: remove this on next major
+export * from './llms';

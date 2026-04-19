@@ -11,8 +11,9 @@ export default defineConfig({
     'src/{toc,link,breadcrumb,dynamic-link}.tsx',
     'src/page-tree/index.ts',
     'src/{negotiation,content}/*',
+    'src/content/md/*.ts',
     'src/content/mdx/preset-*.ts',
-    'src/source/{index,schema}.ts',
+    'src/source/{index,llms,dynamic,schema}.ts',
     'src/source/client/*.{ts,tsx}',
     'src/source/plugins/{lucide-icons,slugs,status-badges}.{ts,tsx}',
     'src/search/{index,client,server,algolia,orama-cloud,orama-cloud-legacy,mixedbread,flexsearch}.ts',
@@ -37,6 +38,7 @@ export default defineConfig({
       'negotiator',
       'npm-to-yarn',
       '@formatjs/fast-memoize',
+      '@shikijs/transformers',
     ],
   },
   exports: {

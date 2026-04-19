@@ -1,0 +1,14 @@
+{
+  "code": "\"use strict\";\nconst {Fragment: _Fragment, jsx: _jsx, jsxs: _jsxs} = arguments[0];\nconst ignored = _jsx(\"span\", {\n  children: \"Ignored export\"\n});\nlet toc = [{\n  depth: 1,\n  url: \"#jsx-expressions\",\n  title: _jsx(_Fragment, {\n    children: \"JSX expressions\"\n  })\n}];\nfunction _createMdxContent(props) {\n  const _components = {\n    h1: \"h1\",\n    ...props.components\n  };\n  return _jsxs(_Fragment, {\n    children: [_jsx(_components.h1, {\n      id: \"jsx-expressions\",\n      children: \"JSX expressions\"\n    }), \"\\n\", \"\\n\", _jsx(\"div\", {\n      id: \"native-jsx\",\n      children: \"Native JSX child\"\n    }), \"\\n\", _jsxs(_Fragment, {\n      children: [_jsx(\"span\", {\n        \"data-inline\": \"one\",\n        children: \"A\"\n      }), _jsx(\"span\", {\n        \"data-inline\": \"two\",\n        children: \"B\"\n      })]\n    })]\n  });\n}\nfunction MDXContent(props = {}) {\n  const {wrapper: MDXLayout} = props.components || ({});\n  return MDXLayout ? _jsx(MDXLayout, {\n    ...props,\n    children: _jsx(_createMdxContent, {\n      ...props\n    })\n  }) : _createMdxContent(props);\n}\nreturn {\n  ignored,\n  toc,\n  default: MDXContent\n};\n",
+  "data": {
+    "structuredData": {
+      "contents": [],
+      "headings": [
+        {
+          "id": "jsx-expressions",
+          "content": "JSX expressions"
+        }
+      ]
+    }
+  }
+}

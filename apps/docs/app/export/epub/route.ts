@@ -7,7 +7,7 @@ export async function GET(): Promise<Response> {
   const buffer = await exportEpub({
     source,
     getMarkdown(page) {
-      if (page.data.type === 'docs') return page.data.getText('raw');
+      if (page.type === 'docs') return page.data.getText('raw');
     },
     title: 'Fumadocs Documentation',
     author: 'Fuma Nama',

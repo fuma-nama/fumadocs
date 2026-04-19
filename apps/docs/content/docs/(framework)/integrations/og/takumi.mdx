@@ -67,10 +67,8 @@ You can generate metadata images dynamically using `@takumi-rs/image-response`.
 Add the following under your loader, and define image metadata for pages:
 
 ```ts tab="Next.js" title="lib/source.ts"
-import { type InferPageType } from 'fumadocs-core/source';
-
 // [!code ++:8]
-export function getPageImage(page: InferPageType<typeof source>) {
+export function getPageImage(page: (typeof source)['$inferPage']) {
   const segments = [...page.slugs, 'image.webp'];
 
   return {

@@ -1,6 +1,6 @@
-import { Source } from '@/source';
+import { StaticSource } from '@/source';
 
-export const source: Source = {
+export const source: StaticSource = {
   files: [
     {
       type: 'meta',

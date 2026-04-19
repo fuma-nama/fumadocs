@@ -1,6 +1,6 @@
 {
   "name": "fumadocs-epub",
-  "version": "1.0.2",
+  "version": "1.1.0",
   "description": "EPUB export for Fumadocs documentation",
   "keywords": [
     "documentation",
@@ -54,7 +54,7 @@
     "vfile": "^6.0.3"
   },
   "peerDependencies": {
-    "fumadocs-core": "^15.0.0 || ^16.0.0"
+    "fumadocs-core": "^16.8.0"
   },
   "engines": {
     "node": ">=18"

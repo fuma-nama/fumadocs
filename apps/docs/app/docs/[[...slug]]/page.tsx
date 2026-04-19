@@ -51,7 +51,7 @@ export default async function Page(props: PageProps<'/docs/[[...slug]]'>) {
       />
     );
 
-  if (page.data.type === 'openapi') {
+  if (page.type === 'openapi') {
     const { APIPage } = await import('@/components/api-page');
     return (
       <DocsPage full>

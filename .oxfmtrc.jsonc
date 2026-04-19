@@ -23,6 +23,7 @@
 
     "packages/mdx-remote/test/fixtures/**/*.js",
     "packages/mdx-remote/test/fixtures/**/*.json",
+    "packages/local-md/test/fixtures/**/*.json",
     "packages/core/test/fixtures/page-trees/**/*.json",
 
     "routeTree.gen.ts",

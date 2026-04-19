@@ -9,19 +9,19 @@ description: Setup sources for Loader API
 
 ### Multiple Sources
 
-Use `multiple` to combine multiple sources into one.
+Pass a record of source objects instead
 
 ```ts
-import { loader, multiple } from 'fumadocs-core/source';
+import { loader } from 'fumadocs-core/source';
 import { openapiPlugin, openapiSource } from 'fumadocs-openapi/server';
 import { blog, docs } from 'collections/server';
 import { lucideIconsPlugin } from 'fumadocs-core/source/lucide-icons';
 
 export const source = loader(
-  multiple({
+  {
     docs: docs.toFumadocsSource(),
     openapi: blog.toFumadocsSource(),
-  }),
+  },
   {
     baseUrl: '/docs',
   },
@@ -33,7 +33,7 @@ To access properties exclusive to each source:
 ```ts
 const page = source.getPage(['...']);
 
-if (page.data.type === 'docs') {
+if (page.type === 'docs') {
   console.log(page.data);
 } else {
   console.log(page.data);

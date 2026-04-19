@@ -1,6 +1,6 @@
 {
   "name": "@fumadocs/mdx-remote",
-  "version": "1.4.8",
+  "version": "1.4.9",
   "description": "The remote MDX files adapter for Fumadocs",
   "keywords": [
     "Docs",
@@ -38,7 +38,7 @@
   },
   "dependencies": {
     "@mdx-js/mdx": "^3.1.1",
-    "gray-matter": "^4.0.3",
+    "js-yaml": "^4.1.1",
     "unified": "^11.0.5",
     "vfile": "^6.0.3",
     "zod": "^4.3.6"
