@@ -12,7 +12,6 @@ export type {
 } from './page-tree/builder';
 export type {
   ContentStorage,
-  ContentStorageFile,
   ContentStorageMetaFile,
   ContentStoragePageFile,
 } from './storage/content';

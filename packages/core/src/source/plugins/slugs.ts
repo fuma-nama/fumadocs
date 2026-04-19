@@ -1,20 +1,18 @@
 import { basename, dirname, extname } from '@/source/path';
-import type { ContentStoragePageFile } from '../storage/content';
-import type { LoaderConfig, LoaderPlugin } from '../loader';
+import type { ContentStorage } from '../storage/content';
+import type { LoaderPlugin } from '../loader';
 
 /**
  * a function to generate slugs, return `undefined` to fallback to default generation.
  */
-export type SlugFn<Config extends LoaderConfig = LoaderConfig> = (
-  file: ContentStoragePageFile<Config['source']>,
+export type SlugFn<S extends ContentStorage<any, any> = ContentStorage<any, any>> = (
+  file: S extends ContentStorage<infer P, any> ? P : never,
 ) => string[] | undefined;
 
 /**
  * Generate slugs for pages if missing
  */
-export function slugsPlugin<Config extends LoaderConfig = LoaderConfig>(
-  slugFn?: SlugFn<Config>,
-): LoaderPlugin<Config> {
+export function slugsPlugin(slugFn?: SlugFn): LoaderPlugin {
   function isIndex(file: string) {
     return basename(file, extname(file)) === 'index';
   }
@@ -58,9 +56,7 @@ export function slugsPlugin<Config extends LoaderConfig = LoaderConfig>(
  *
  * @param key - the property name in file data to generate slugs, default to `slug`.
  */
-export function slugsFromData<Config extends LoaderConfig = LoaderConfig>(
-  key = 'slug',
-): SlugFn<Config> {
+export function slugsFromData(key = 'slug'): SlugFn {
   return (file) => {
     const k = key as keyof typeof file.data;
 

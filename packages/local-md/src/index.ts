@@ -11,7 +11,7 @@ import { cache } from 'react';
 export interface LocalMarkdownConfig<
   FrontmatterSchema extends StandardSchemaV1,
   MetaSchema extends StandardSchemaV1,
-> {
+> extends MarkdownCompilerOptions {
   /**
    * root directory for content files.
    */
@@ -20,7 +20,6 @@ export interface LocalMarkdownConfig<
    * a list of glob patterns, customise the content files to be scanned.
    */
   include?: string[];
-  mdxOptions?: MarkdownCompilerOptions;
   rendererOptions?: MarkdownRendererOptions;
 
   frontmatterSchema?: FrontmatterSchema;
@@ -68,7 +67,7 @@ export function localMd<
   config: LocalMarkdownConfig<FrontmatterSchema, MetaSchema>,
 ): LocalMarkdown<FrontmatterSchema, MetaSchema> {
   const storage = createStorage(config);
-  const compiler = createMarkdownCompiler(config.mdxOptions);
+  const compiler = createMarkdownCompiler(config);
   const renderer = createMarkdownRenderer(compiler, config.rendererOptions);
 
   let cachedSource: Promise<GetSource<FrontmatterSchema, MetaSchema>> | null = null;
@@ -144,7 +143,7 @@ export function localMd<
         return (v = fn(source));
       });
     },
-    async toSource() {
+    toSource() {
       return (cachedSource ??= createSource());
     },
   };

@@ -1,44 +1,36 @@
 import type * as PageTree from '@/page-tree/definitions';
-import type { LoaderConfig, ResolvedLoaderConfig } from '@/source/loader';
+import type { ResolvedLoaderConfig } from '@/source/loader';
 import type { ContentStorage } from '@/source/storage/content';
 import { basename, extname, joinPath } from '@/source/path';
 import { transformerFallback } from '@/source/page-tree/transformer-fallback';
-import type { SourceConfig } from '../source';
 
-export interface PageTreeBuilderContext<Config extends SourceConfig = SourceConfig> {
+export interface PageTreeBuilderContext<S extends ContentStorage = ContentStorage> {
   idPrefix: string;
   noRef: boolean;
-  transformers: PageTreeTransformer<Config>[];
+  transformers: PageTreeTransformer<S>[];
 
   builder: PageTreeBuilder;
-  storage: ContentStorage<Config>;
+  storage: S;
   getUrl: ResolvedLoaderConfig['url'];
 
-  storages?: Record<string, ContentStorage<Config>>;
+  storages?: Record<string, S>;
   locale?: string;
   custom?: Record<string, unknown>;
 }
 
-export interface PageTreeTransformer<Config extends SourceConfig = SourceConfig> {
-  file?: (
-    this: PageTreeBuilderContext<Config>,
-    node: PageTree.Item,
-    filePath?: string,
-  ) => PageTree.Item;
+export interface PageTreeTransformer<S extends ContentStorage = ContentStorage> {
+  file?: (this: PageTreeBuilderContext<S>, node: PageTree.Item, filePath?: string) => PageTree.Item;
   folder?: (
-    this: PageTreeBuilderContext<Config>,
+    this: PageTreeBuilderContext<S>,
     node: PageTree.Folder,
     folderPath: string,
     metaPath?: string,
   ) => PageTree.Folder;
-  separator?: (
-    this: PageTreeBuilderContext<Config>,
-    node: PageTree.Separator,
-  ) => PageTree.Separator;
-  root?: (this: PageTreeBuilderContext<Config>, node: PageTree.Root) => PageTree.Root;
+  separator?: (this: PageTreeBuilderContext<S>, node: PageTree.Separator) => PageTree.Separator;
+  root?: (this: PageTreeBuilderContext<S>, node: PageTree.Root) => PageTree.Root;
 }
 
-export interface PageTreeOptions<Config extends LoaderConfig = LoaderConfig> {
+export interface PageTreeOptions<S extends ContentStorage = ContentStorage> {
   /** generate URL from page */
   url: ResolvedLoaderConfig['url'];
 
@@ -60,7 +52,7 @@ export interface PageTreeOptions<Config extends LoaderConfig = LoaderConfig> {
   /**
    * Additional page tree transformers to apply
    */
-  transformers?: PageTreeTransformer<Config['source']>[];
+  transformers?: PageTreeTransformer<S>[];
 
   /** custom context */
   context?: Record<string, unknown>;

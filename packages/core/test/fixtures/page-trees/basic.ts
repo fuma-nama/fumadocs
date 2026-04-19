@@ -1,6 +1,6 @@
-import type { Source } from '@/source';
+import type { StaticSource } from '@/source';
 
-export const source: Source = {
+export const source: StaticSource = {
   files: [
     {
       type: 'page',
@@ -19,7 +19,7 @@ export const source: Source = {
   ],
 };
 
-export const noMeta: Source = {
+export const noMeta: StaticSource = {
   files: [
     {
       type: 'page',

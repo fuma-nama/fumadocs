@@ -1,6 +1,6 @@
-import { Source } from '@/source';
+import type { StaticSource } from '@/source';
 
-export const source: Source = {
+export const source: StaticSource = {
   files: [
     {
       type: 'meta',
@@ -30,7 +30,7 @@ export const source: Source = {
 // 1. directly specified (e.g. path in `pages`).
 // 2. extracted (e.g. `...dir`).
 // 3. rest `...`.
-export const withPriority: Source = {
+export const withPriority: StaticSource = {
   files: [
     {
       type: 'page',
