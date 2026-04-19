@@ -11,11 +11,11 @@
   "dependencies": {
     "@react-router/node": "^7.14.1",
     "@react-router/serve": "^7.14.1",
-    "@takumi-rs/image-response": "^1.0.9",
+    "@takumi-rs/image-response": "^1.0.14",
     "fumadocs-core": "workspace:*",
     "fumadocs-mdx": "workspace:*",
     "fumadocs-ui": "workspace:*",
-    "isbot": "^5.1.38",
+    "isbot": "^5.1.39",
     "lucide-react": "^1.8.0",
     "react": "^19.2.5",
     "react-dom": "^19.2.5",
@@ -31,7 +31,7 @@
     "@types/react-dom": "^19.2.3",
     "react-router-devtools": "^6.2.0",
     "tailwindcss": "^4.2.2",
-    "typescript": "^6.0.2",
+    "typescript": "^6.0.3",
     "vite": "^8.0.8"
   }
 }

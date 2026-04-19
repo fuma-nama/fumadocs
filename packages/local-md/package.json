@@ -66,7 +66,7 @@
     "react-dom": "^19.2.5",
     "stable-hash": "^0.0.6",
     "tsconfig": "workspace:*",
-    "tsdown": "0.21.8",
+    "tsdown": "0.21.9",
     "vite": "^8.0.8"
   },
   "peerDependencies": {

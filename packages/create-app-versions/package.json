@@ -6,8 +6,8 @@
   "dependencies": {
     "@biomejs/biome": "^2.4.12",
     "@orama/core": "^1.2.19",
-    "@takumi-rs/image-response": "^1.0.9",
-    "eslint": "^10.2.0",
+    "@takumi-rs/image-response": "^1.0.14",
+    "eslint": "^10.2.1",
     "fumadocs-core": "workspace:*",
     "fumadocs-mdx": "workspace:*",
     "fumadocs-ui": "workspace:*",

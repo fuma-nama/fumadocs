@@ -46,7 +46,7 @@
     "react-error-boundary": "^6.1.1",
     "tailwindcss": "^4.2.2",
     "tsconfig": "workspace:*",
-    "tsdown": "0.21.8"
+    "tsdown": "0.21.9"
   },
   "peerDependencies": {
     "@types/react": "*",

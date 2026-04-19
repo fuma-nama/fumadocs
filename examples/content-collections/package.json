@@ -11,17 +11,17 @@
     "@fumadocs/content-collections": "workspace:*",
     "fumadocs-core": "workspace:*",
     "fumadocs-ui": "workspace:*",
-    "next": "16.2.3",
+    "next": "16.2.4",
     "react": "^19.2.5",
     "react-dom": "^19.2.5"
   },
   "devDependencies": {
-    "@content-collections/core": "^0.14.3",
+    "@content-collections/core": "^0.15.0",
     "@content-collections/mdx": "^0.2.2",
     "@content-collections/next": "^0.2.11",
     "@types/mdx": "^2.0.13",
     "@types/react": "^19.2.14",
     "@types/react-dom": "^19.2.3",
-    "typescript": "^6.0.2"
+    "typescript": "^6.0.3"
   }
 }

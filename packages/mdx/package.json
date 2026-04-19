@@ -78,16 +78,16 @@
     "@types/react": "^19.2.14",
     "fumadocs-core": "workspace:*",
     "mdast-util-directive": "^3.1.0",
-    "next": "16.2.3",
+    "next": "16.2.4",
     "react": "^19.2.5",
     "remark": "^15.0.1",
     "remark-directive": "^4.0.0",
     "remark-mdx": "^3.1.1",
-    "rolldown": "1.0.0-rc.15",
+    "rolldown": "1.0.0-rc.16",
     "tsconfig": "workspace:*",
-    "tsdown": "0.21.8",
+    "tsdown": "0.21.9",
     "vite": "^8.0.8",
-    "webpack": "^5.106.1"
+    "webpack": "^5.106.2"
   },
   "peerDependencies": {
     "@types/mdast": "*",

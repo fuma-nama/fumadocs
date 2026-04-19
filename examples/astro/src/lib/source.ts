@@ -1,4 +1,4 @@
-import type { Source } from 'fumadocs-core/source';
+import type { StaticSource } from 'fumadocs-core/source';
 import { loader } from 'fumadocs-core/source';
 import { type CollectionEntry, getCollection } from 'astro:content';
 import * as path from 'node:path';
@@ -18,7 +18,7 @@ export async function getFullExport(entry: CollectionEntry<'docs'>) {
 }
 
 async function createMySource() {
-  const out: Source<{
+  const out: StaticSource<{
     metaData: CollectionEntry<'meta'>['data'];
     pageData: CollectionEntry<'docs'>['data'] & {
       _raw: CollectionEntry<'docs'>;

@@ -10,7 +10,7 @@
     "types:check": "fumadocs-mdx && tsc --noEmit"
   },
   "dependencies": {
-    "@takumi-rs/image-response": "^1.0.9",
+    "@takumi-rs/image-response": "^1.0.14",
     "fumadocs-core": "workspace:*",
     "fumadocs-mdx": "workspace:*",
     "fumadocs-ui": "workspace:*",
@@ -28,7 +28,7 @@
     "@types/react": "^19.2.14",
     "@types/react-dom": "^19.2.3",
     "tailwindcss": "^4.2.2",
-    "typescript": "^6.0.2",
+    "typescript": "^6.0.3",
     "vite": "^8.0.8"
   }
 }

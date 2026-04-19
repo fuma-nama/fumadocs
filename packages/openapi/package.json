@@ -72,9 +72,9 @@
   "devDependencies": {
     "@fastify/deepmerge": "^3.2.1",
     "@fumadocs/tailwind": "workspace:*",
-    "@scalar/api-client-react": "^2.0.1",
-    "@scalar/json-magic": "^0.12.5",
-    "@scalar/openapi-upgrader": "^0.2.4",
+    "@scalar/api-client-react": "^2.0.3",
+    "@scalar/json-magic": "^0.12.7",
+    "@scalar/openapi-upgrader": "^0.2.5",
     "@types/js-yaml": "^4.0.9",
     "@types/node": "25.6.0",
     "@types/react": "^19.2.14",
@@ -84,7 +84,7 @@
     "json-schema-typed": "^8.0.2",
     "tailwindcss": "^4.2.2",
     "tsconfig": "workspace:*",
-    "tsdown": "0.21.8"
+    "tsdown": "0.21.9"
   },
   "peerDependencies": {
     "@scalar/api-client-react": "2.x.x",

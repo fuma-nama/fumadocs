@@ -1,11 +1,11 @@
 import { MethodLabel } from '@/ui/components/method-label';
 import {
   PathUtils,
+  type StaticSource,
   type LoaderPlugin,
   type MetaData,
   type PageData,
   type PageTreeTransformer,
-  type Source,
   type VirtualFile,
 } from 'fumadocs-core/source';
 import type { OpenAPIServer } from '@/server/create';
@@ -101,7 +101,7 @@ export async function openapiSource(
   server: OpenAPIServer,
   options: OpenAPISourceOptions = {},
 ): Promise<
-  Source<{
+  StaticSource<{
     metaData: MetaData;
     pageData: OpenAPIPageData;
   }>
