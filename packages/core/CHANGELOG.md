@@ -1,5 +1,7 @@
 # fumadocs-core
 
+## 16.8.1
+
 ## 16.8.0
 
 ### Minor Changes
