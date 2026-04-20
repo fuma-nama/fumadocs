@@ -45,7 +45,7 @@ export interface SimpleOptions extends SharedOptions {
   indexes: Index[] | Dynamic<Index>;
 
   /**
-   * Customise search options on server
+   * Customize search options on server
    */
   search?: Partial<SearchParams<Orama<typeof simpleSchema>, SimpleDocument>>;
 }
@@ -54,7 +54,7 @@ export interface AdvancedOptions extends SharedOptions {
   indexes: AdvancedIndex[] | Dynamic<AdvancedIndex>;
 
   /**
-   * Customise search options on server
+   * Customize search options on server
    */
   search?: Partial<SearchParams<Orama<typeof advancedSchema>, AdvancedDocument>>;
 }

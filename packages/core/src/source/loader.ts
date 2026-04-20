@@ -157,8 +157,8 @@ export interface LoaderOutput<Config extends LoaderConfig = LoaderConfig> {
   /**
    * generate static params for Next.js SSG
    *
-   * @param slug - customise parameter name for slugs
-   * @param lang - customise parameter name for lang
+   * @param slug - customize parameter name for slugs
+   * @param lang - customize parameter name for lang
    */
   generateParams: <TSlug extends string = 'slug', TLang extends string = 'lang'>(
     slug?: TSlug,

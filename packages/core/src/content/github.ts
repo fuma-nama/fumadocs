@@ -49,7 +49,7 @@ export interface GetGithubLastCommitOptions {
  * Get the last edit time of a file using GitHub API
  *
  * By default, this will cache the result forever.
- * Set `options.next.revalidate` to customise this.
+ * Set `options.next.revalidate` to customize this.
  */
 export async function getGithubLastEdit({
   repo,

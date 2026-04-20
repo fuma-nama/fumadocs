@@ -20,7 +20,7 @@ interface SlotPrintInfo {
 }
 
 export async function customise(config: LoadedConfig, connector: RegistryConnector) {
-  intro(picocolors.bgBlack(picocolors.whiteBright('Customise Fumadocs UI')));
+  intro(picocolors.bgBlack(picocolors.whiteBright('Customize Fumadocs UI')));
 
   const installer = new FumadocsComponentInstaller(connector, config);
   const subRegistry = UIRegistries[config.uiLibrary];
@@ -30,7 +30,7 @@ export async function customise(config: LoadedConfig, connector: RegistryConnect
     {
       layout: (): Promise<TargetInfo | symbol> =>
         select({
-          message: 'What do you want to customise?',
+          message: 'What do you want to customize?',
           options: [
             {
               label: 'Docs Layout',
@@ -92,7 +92,7 @@ export async function customise(config: LoadedConfig, connector: RegistryConnect
         if (selected.id === 'home') return Promise.resolve(selected);
 
         return select<TargetInfo>({
-          message: 'Which part do you want to customise?',
+          message: 'Which part do you want to customize?',
           options: [
             {
               label: 'All',

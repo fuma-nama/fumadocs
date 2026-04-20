@@ -17,7 +17,7 @@ export interface LocalMarkdownConfig<
    */
   dir: string;
   /**
-   * a list of glob patterns, customise the content files to be scanned.
+   * a list of glob patterns, customize the content files to be scanned.
    */
   include?: string[];
   rendererOptions?: MarkdownRendererOptions;

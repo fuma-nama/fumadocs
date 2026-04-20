@@ -18,7 +18,7 @@ export interface DevServerOptions {
   port: number;
   host?: string;
   /**
-   * customise chokidar, by default, file watcher will watch all files under the `dir` directory.
+   * customize chokidar, by default, file watcher will watch all files under the `dir` directory.
    */
   watchOptions?: (options: ChokidarOptions) => ChokidarOptions;
 }

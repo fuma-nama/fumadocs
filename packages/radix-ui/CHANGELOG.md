@@ -1023,7 +1023,7 @@
 ### Patch Changes
 
 - 6de6ff3: Restrict exports of `layouts` to avoid projects importing internal/unstable APIs
-- f0b1fee: Improve layout component customisation experience by handling RWD automatically
+- f0b1fee: Improve layout component customization experience by handling RWD automatically
   - fumadocs-core@15.6.11
 
 ## 15.6.10
@@ -1406,7 +1406,7 @@
 
 ### Patch Changes
 
-- eb18da9: Support `searchToggle` option to customise search toggle
+- eb18da9: Support `searchToggle` option to customize search toggle
 - 085e39f: Fix inline code issues
 - 4d50bcf: fix banner overlapping with collapsible control
 - Updated dependencies [ec85a6c]
@@ -1515,7 +1515,7 @@
 
 ### Patch Changes
 
-- b790699: Support `themeSwitch` option in layouts to customise theme switch
+- b790699: Support `themeSwitch` option in layouts to customize theme switch
 - Updated dependencies [72f79cf]
   - fumadocs-core@15.0.17
 
@@ -2358,7 +2358,7 @@
 
 - b02eebf: **Move `keepCodeBlockBackground` option to code block component**
 
-  **why:** Easier to customise code block styles.
+  **why:** Easier to customize code block styles.
 
   **migrate:**
 
@@ -2507,7 +2507,7 @@
   />;
   ```
 
-  You can ignore this if you didn't customise the default `pre` element.
+  You can ignore this if you didn't customize the default `pre` element.
 
 - 4373231: **Remove `RollButton` component**
 
@@ -3316,7 +3316,7 @@
 
 - 2ea9437: **Change usage of Code Block component**
 
-  The inner `pre` element is now separated from code block container, making it easier to customise.`
+  The inner `pre` element is now separated from code block container, making it easier to customize.`
 
   Before:
 

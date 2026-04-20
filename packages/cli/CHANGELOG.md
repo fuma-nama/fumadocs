@@ -40,7 +40,7 @@
 
 ### Patch Changes
 
-- 823d880: Support slot in customise command
+- 823d880: Support slot in customize command
 
 ## 1.3.1
 
@@ -72,7 +72,7 @@
 ### Patch Changes
 
 - c22f6ee: bump tsdown
-- 4c570ce: add Flux layout to customise option
+- 4c570ce: add Flux layout to customize option
 
 ## 1.2.3
 
@@ -102,7 +102,7 @@
 
 ### Minor Changes
 
-- 897fdef: Update `customise` command to support Fumadocs UI 16.2.0
+- 897fdef: Update `customize` command to support Fumadocs UI 16.2.0
 
 ## 1.0.3
 
@@ -149,13 +149,13 @@
 
 ### Patch Changes
 
-- 482f728: add home layout to customise option
+- 482f728: add home layout to customize option
 
 ## 0.1.0
 
 ### Minor Changes
 
-- 72a3e8c: Add customise command
+- 72a3e8c: Add customize command
 
 ## 0.0.8
 

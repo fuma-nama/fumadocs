@@ -31,7 +31,7 @@ export function Banner({
   variant?: BannerVariant;
 
   /**
-   * For rainbow variant only, customise the colors
+   * For rainbow variant only, customize the colors
    */
   rainbowColors?: string[];
 

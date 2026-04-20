@@ -24,7 +24,7 @@ void generateFiles({
 
 ### `per`
 
-Customise the content of pages, default to `operation`.
+Customize the content of pages, default to `operation`.
 
 <Callout>Operation refers to an API endpoint with specific method like `/api/weather:GET`.</Callout>
 
@@ -43,7 +43,7 @@ void generateFiles({
 });
 ```
 
-When set to `custom`, you can pass a function to fully customise the generation process:
+When set to `custom`, you can pass a function to fully customize the generation process:
 
 ```ts title="Example"
 import { generateFiles, OperationOutput } from 'fumadocs-openapi';
@@ -142,7 +142,7 @@ import { generateFiles } from 'fumadocs-openapi';
 void generateFiles({
   meta: true,
 
-  // or customise how folders are represented:
+  // or customize how folders are represented:
   meta: {
     folderStyle: 'separator',
   },
@@ -199,7 +199,7 @@ void generateFiles({
 
 ### `frontmatter`
 
-Customise the frontmatter of MDX files.
+Customize the frontmatter of MDX files.
 
 By default, it includes:
 

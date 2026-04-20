@@ -566,7 +566,7 @@
   import { createAPIPage } from "fumadocs-openapi/ui";
 
   export const APIPage = createAPIPage(openapi, {
-    // e.g. customise render functions
+    // e.g. customize render functions
     content: {
       renderResponseTabs,
       renderAPIExampleLayout,
@@ -589,7 +589,7 @@
   })
   ```
 
-  You can customise the renderers of different layouts:
+  You can customize the renderers of different layouts:
 
   ```tsx
   // components/api-page.tsx
@@ -1945,7 +1945,7 @@
 
 ### Patch Changes
 
-- 5730116: Improve experience to customise API Playground
+- 5730116: Improve experience to customize API Playground
 - Updated dependencies [886da49]
 - Updated dependencies [04e6c6e]
   - fumadocs-ui@15.0.11
@@ -2906,7 +2906,7 @@
 
 ### Minor Changes
 
-- abf84bb: Support to customise/disable TypeScript Response generation
+- abf84bb: Support to customize/disable TypeScript Response generation
 - 40728a1: Support custom fields (auth, query, header, path and body)
 
 ### Patch Changes
@@ -3069,11 +3069,11 @@
 
   **migrate:**
 
-  Removed the `render` option from `generate`, `generateFiles` and `generateTags`, use `frontmatter` to customise frontmatter, `imports` to customise imports.
+  Removed the `render` option from `generate`, `generateFiles` and `generateTags`, use `frontmatter` to customize frontmatter, `imports` to customize imports.
 
 - 284a571: **Support Custom MDX Renderer.**
 
-  **why:** Allow people to customise how the MDX file is generated.
+  **why:** Allow people to customize how the MDX file is generated.
 
   **migrate:**
 

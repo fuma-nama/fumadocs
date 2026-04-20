@@ -10,9 +10,9 @@ date: 2025-08-22
 The early mistake of Fumadocs was **Fumadocs CLI being too late and not getting enough mentions on docs**.
 
 To push the CLI approach further like the recent Shadcn CLI support, there are changes we have to make.
-Early adopters will face problems if their customisations went beyond what our abstraction can mitigate.
+Early adopters will face problems if their customizations went beyond what our abstraction can mitigate.
 
-**For example:** A small CSS change can still break hacky CSS customisations. We can only ensure backward compatibility for the ones scoped by CSS selectors, or exposed options:
+**For example:** A small CSS change can still break hacky CSS customizations. We can only ensure backward compatibility for the ones scoped by CSS selectors, or exposed options:
 
 ```css
 #nd-sidebar {
@@ -24,13 +24,13 @@ Early adopters will face problems if their customisations went beyond what our a
 For CLI to work better, we need layout components to be entirely independent for modularization. A ideal state is that:
 
 - Normal users can use exposed options, enjoying UI iterations from upstream.
-- Advanced customisations can use Fumadocs CLI, avoiding upstream changes.
+- Advanced customizations can use Fumadocs CLI, avoiding upstream changes.
 
-Same as the solution described in [this post about UI Customisation](/blog/customise-ui#the-solution).
+Same as the solution described in [this post about UI Customization](/blog/customize-ui#the-solution).
 
 ### A Good Example
 
-For lighter customisations like nuqs did, a PR to migrate from old versions [#1056](https://github.com/47ng/nuqs/pull/1056) can reduce code on user land and migration is simple.
+For lighter customizations like nuqs did, a PR to migrate from old versions [#1056](https://github.com/47ng/nuqs/pull/1056) can reduce code on user land and migration is simple.
 
 ### The Problems
 
@@ -64,7 +64,7 @@ Using it properly can already reduce a massive amount of work, we have [a specs 
 
 #### CSS Variables being Neglected
 
-Fumadocs is using CSS variables for all colors since the beginning, the naming is identical to Shadcn UI which makes customisation easy.
+Fumadocs is using CSS variables for all colors since the beginning, the naming is identical to Shadcn UI which makes customization easy.
 
 But I noticed some are overriding the Tailwind CSS **classes** rather than **colors**, like:
 
@@ -86,7 +86,7 @@ Now we also have a Shadcn UI preset to reuse your colors from main app.
 
 ### Early Reflections
 
-I think the CLI approach is correct, it'll be the primary way for advanced customisation.
+I think the CLI approach is correct, it'll be the primary way for advanced customization.
 
 My future plans:
 

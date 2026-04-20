@@ -41,7 +41,7 @@ import { loader } from 'fumadocs-core/source';
 
 loader({
   baseUrl: '/docs',
-  // or you can customise it with function
+  // or you can customize it with function
   url(slugs, locale) {
     if (locale) return '/' + [locale, 'docs', ...slugs].join('/');
     return '/' + ['docs', ...slugs].join('/');

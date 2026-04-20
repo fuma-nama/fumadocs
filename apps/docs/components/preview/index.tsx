@@ -227,7 +227,7 @@ export function banner(): ReactNode {
           ]}
           changeLayout={false}
         >
-          customise the <code>rainbow</code> variant
+          customize the <code>rainbow</code> variant
         </Banner>
       </div>
     </Wrapper>

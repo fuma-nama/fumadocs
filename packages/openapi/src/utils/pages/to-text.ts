@@ -18,7 +18,7 @@ export interface PagesToTextOptions {
   }[];
 
   /**
-   * Customise frontmatter.
+   * Customize frontmatter.
    *
    * A `full: true` property will be added by default.
    */

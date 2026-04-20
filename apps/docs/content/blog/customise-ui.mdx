@@ -1,5 +1,5 @@
 ---
-title: Rethink how we customise UI
+title: Rethink how we customize UI
 description: Deep dive on how Fumadocs UI is designed
 author: Fuma Nama
 date: 2025-04-15
@@ -10,8 +10,8 @@ date: 2025-04-15
 Making a docs framework isn't challenging, the hardest problem is how I can make it perfect for everyone, from the perspective of users and developers.
 Undoubtedly, this is **a dilemma** for all frameworks, or even library authors — You cannot write generic code that works out-of-the-box, there's no piece of software that is straight usable while being generic.
 
-For example, headless UI libraries like **Radix UI** gave us the concept of generic UI components: bare UI primitives that we can customise according to our aesthetics.
-However, you'll need time to tune them, these primitives are unusable without further customisations.
+For example, headless UI libraries like **Radix UI** gave us the concept of generic UI components: bare UI primitives that we can customize according to our aesthetics.
+However, you'll need time to tune them, these primitives are unusable without further customizations.
 
 Yep it's 2025, **Shadcn UI** had led a "revolution" on Web Development. It's a great combination of headless UI and styled defaults that takes an extra step away!
 But our problem remains unsolved, it might be preposterous that it becomes "unstyled" again when a vast majority of new sites adopted Shadcn UI.
@@ -22,7 +22,7 @@ Eventually, **Shadcn-like design became the default styles**, so once again, we 
 ### What should we do?
 
 As a docs framework started from **"being flexible"**, Fumadocs must be customisable, tuned to meet developers' preferences.
-We will need to take customisation seriously if DX is what we aim. And most importantly, **it should encourage developers with a sense of beauty to customise.**
+We will need to take customization seriously if DX is what we aim. And most importantly, **it should encourage developers with a sense of beauty to customize.**
 
 ## The Solution
 
@@ -39,12 +39,12 @@ Most developers have no desire to install dozens of components just to change a 
 The kernel of Fumadocs, or the spirit we're pursuing is the latter one. I crafted Fumadocs CLI, a version of Shadcn UI dedicated for Fumadocs, the whole solution is now simplified into a single command:
 
 ```package-install
-npx @fumadocs/cli customise
+npx @fumadocs/cli customize
 ```
 
 It accounts for two types:
 
-- Customise the default styles when the exposed options are inadequate.
+- Customize the default styles when the exposed options are inadequate.
 - Roll their own layout from scratch.
 
 The first one is self-evident, people will always have absurd needs that we have not even considered.
@@ -56,10 +56,10 @@ This methodology, inspired by ejection, brings some nice advantages:
 
 #### Don't break anything when you upgrade Fumadocs
 
-Fumadocs need to be opinionated. Hence, we need to iterate the UI frequently which apparently will break people's hacky customisations.
+Fumadocs need to be opinionated. Hence, we need to iterate the UI frequently which apparently will break people's hacky customizations.
 The charm of Fumadocs CLI is that once you've installed the layout, it stays the same forever regardless of future iterations on Fumadocs UI.
 
-It gives the courage for Fumadocs UI to iterate, and developers to customise unburnt by the fear of upgrading dependencies.
+It gives the courage for Fumadocs UI to iterate, and developers to customize unburnt by the fear of upgrading dependencies.
 
 #### Looks Clean
 

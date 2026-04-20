@@ -46,7 +46,7 @@ export interface BaseLayoutProps {
   searchToggle?: SearchToggleOptions;
 
   /**
-   * @deprecated this is now optional for i18n setups, you can still customise language switch from `slots`.
+   * @deprecated this is now optional for i18n setups, you can still customize language switch from `slots`.
    */
   i18n?: boolean | I18nConfig;
 }
