@@ -30,7 +30,7 @@ export function dynamicLoader<I extends Input, I18n extends I18nConfig | undefin
   source: I extends Record<infer K, SourceUnion> ? K : undefined;
 }> {
   let loaderCacheKey: ResolvedSource | undefined;
-  let loaderCache: LoaderOutput | undefined;
+  let loaderCache: LoaderOutput<DynamicLoaderConfig> | undefined;
   const sourceCache = new Map<DynamicSource, Promise<StaticSource>>();
 
   function configureSources() {
@@ -73,12 +73,15 @@ export function dynamicLoader<I extends Input, I18n extends I18nConfig | undefin
       const resolved = await resolveSources();
 
       if (loaderCacheKey && isEqual(loaderCacheKey, resolved)) {
-        return loaderCache as LoaderOutput<any>;
+        return loaderCache!;
       }
 
       loaderCacheKey = resolved;
-      loaderCache = loader(resolved, options as never) as LoaderOutput;
-      return loaderCache as LoaderOutput<any>;
+      loaderCache = loader(
+        resolved,
+        options as never,
+      ) as unknown as LoaderOutput<DynamicLoaderConfig>;
+      return loaderCache;
     }),
     $inferPage: undefined as never,
     $inferMeta: undefined as never,

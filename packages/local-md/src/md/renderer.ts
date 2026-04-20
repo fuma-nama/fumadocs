@@ -10,13 +10,13 @@ import type { CompileResult, MarkdownCompiler } from './compiler';
 import { pathToFileURL } from 'node:url';
 import type { MDXComponents, MDXContent } from 'mdx/types';
 
-export interface PageRenderer {
+export interface PageRenderer<ModuleExports = Record<string, unknown>> {
   structuredData: StructuredData;
   render: (
     components?: MDXComponents,
     context?: Record<string, unknown>,
   ) => Promise<{
-    exports: Record<string, unknown>;
+    exports: ModuleExports;
     toc: TOCItemType[];
     body: ReactNode;
   }>;
@@ -44,7 +44,7 @@ export function createMarkdownRenderer(
   const cache = new WeakMap<RawPage<unknown>, Promise<CompileResult>>();
 
   return {
-    async compile<V>(page: RawPage<V>): Promise<PageRenderer> {
+    async compile<V, M = Record<string, unknown>>(page: RawPage<V>): Promise<PageRenderer<M>> {
       let promise = cache.get(page);
       if (!promise) {
         promise = compiler.compile({
@@ -101,7 +101,7 @@ export function createMarkdownRenderer(
             return {
               toc,
               body: render(compiled.tree),
-              exports: executor.getExports(),
+              exports: executor.getExports() as M,
             };
           }
 
@@ -118,7 +118,7 @@ export function createMarkdownRenderer(
           return {
             toc: out.toc ?? [],
             body: JsxRuntime.jsx(out.default, { components }),
-            exports: out,
+            exports: out as M,
           };
         },
       };

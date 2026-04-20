@@ -121,8 +121,8 @@ export function createMarkdownCompiler(options?: MarkdownCompilerOptions): Markd
       development: false,
       remarkPlugins: plugins(
         remarkGfm,
-        remarkCodeTabOptions !== false &&
-          plugin(remarkHeading, { generateToc: false, ...remarkCodeTabOptions }),
+        remarkHeadingOptions !== false &&
+          plugin(remarkHeading, { generateToc: false, ...remarkHeadingOptions }),
         remarkNpmOptions !== false && plugin(remarkNpm, remarkNpmOptions),
         remarkCodeTabOptions !== false && plugin(remarkCodeTab, remarkCodeTabOptions),
         ...(remarkPlugins ?? []),

@@ -3,8 +3,9 @@ import fs from 'node:fs/promises';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { renderToStaticMarkup } from 'react-dom/server';
+import { executorNative } from '@/js/executor-native';
 import { createMarkdownCompiler, MarkdownCompiler } from '@/md/compiler';
-import { createMarkdownRenderer } from '@/md/renderer';
+import { createMarkdownRenderer, type MarkdownRendererOptions } from '@/md/renderer';
 import type { RawPage } from '@/storage';
 import type { TOCItemType } from 'fumadocs-core/toc';
 
@@ -27,8 +28,12 @@ function serializeToc(toc: TOCItemType[] | undefined) {
   }));
 }
 
-function serializeRenderer(page: RawPage<Record<string, unknown>>, compiler: MarkdownCompiler) {
-  const renderer = createMarkdownRenderer(compiler);
+function serializeRenderer(
+  page: RawPage,
+  compiler: MarkdownCompiler,
+  options?: MarkdownRendererOptions,
+) {
+  const renderer = createMarkdownRenderer(compiler, options);
   return renderer.compile(page);
 }
 
@@ -84,6 +89,33 @@ for (const { name, file } of cases) {
 
     await expect(JSON.stringify(payload, null, 2)).toMatchFileSnapshot(
       path.join(fixturesDir, `${name}.renderer.json`),
+    );
+  });
+
+  test(`renderer (native): ${name}`, async () => {
+    const { filePath, content } = await readFixture(file);
+    const compiler = createMarkdownCompiler();
+    const pageRenderer = await serializeRenderer(
+      {
+        path: file,
+        absolutePath: filePath,
+        title: name,
+        content,
+        frontmatter: {},
+      },
+      compiler,
+      { executor: executorNative },
+    );
+
+    const { body, toc } = await pageRenderer.render();
+    const payload = {
+      structuredData: pageRenderer.structuredData,
+      bodyHtml: renderToStaticMarkup(body),
+      toc: serializeToc(toc),
+    };
+
+    await expect(JSON.stringify(payload, null, 2)).toMatchFileSnapshot(
+      path.join(fixturesDir, `${name}.renderer.native.json`),
     );
   });
 }
