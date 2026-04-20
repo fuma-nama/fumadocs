@@ -1,4 +1,4 @@
-import { getPageImage, getPageMarkdownUrl, source } from '@/lib/source';
+import { getPageImage, getPageMarkdownUrl, getSource } from '@/lib/source';
 import {
   DocsBody,
   DocsDescription,
@@ -17,19 +17,19 @@ import { findSiblings } from 'fumadocs-core/page-tree';
 
 export default async function Page(props: PageProps<'/docs/[[...slug]]'>) {
   const params = await props.params;
-  const s = await source.get();
-  const page = s.getPage(params.slug);
+  const docs = await getSource();
+  const page = docs.getPage(params.slug);
   if (!page) notFound();
 
   const { render } = await page.data.load();
   const { toc, body } = await render(
     getMDXComponents({
       // this allows you to link to other pages with relative file paths
-      a: createRelativeLink(s, page),
+      a: createRelativeLink(docs, page),
       DocsCategory({ url = page.url }: { url?: string }) {
         return (
           <Cards>
-            {findSiblings(s.getPageTree(), url).map((item) => {
+            {findSiblings(docs.getPageTree(), url).map((item) => {
               if (item.type === 'separator') return;
               if (item.type === 'folder') {
                 if (!item.index) return;
@@ -66,12 +66,14 @@ export default async function Page(props: PageProps<'/docs/[[...slug]]'>) {
 }
 
 export async function generateStaticParams() {
-  return (await source.get()).generateParams();
+  const docs = await getSource();
+  return docs.generateParams();
 }
 
 export async function generateMetadata(props: PageProps<'/docs/[[...slug]]'>): Promise<Metadata> {
+  const docs = await getSource();
   const params = await props.params;
-  const page = (await source.get()).getPage(params.slug);
+  const page = docs.getPage(params.slug);
   if (!page) notFound();
 
   return {
