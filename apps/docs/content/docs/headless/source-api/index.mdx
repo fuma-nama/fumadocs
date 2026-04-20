@@ -105,7 +105,7 @@ If translations are missing for a page, it fallbacks to [`fallbackLanguage`](/do
 
 ## Output
 
-The loader outputs a source object.
+It outputs a content loader instance.
 
 ### Get Page
 
@@ -211,4 +211,45 @@ function MyComponent() {
   // now render it (e.g. via Fumadocs UI)
   return <DocsLayout tree={pageTree}>...</DocsLayout>;
 }
+```
+
+## Dynamic Loader
+
+`dynamicLoader()` provides extra revalidation functionality to content sources, you should use it with a [dynamic source](/docs/headless/source-api/source#dynamic-source).
+
+```ts
+import { dynamicLoader } from 'fumadocs-core/source/dynamic';
+import { createMySource } from './my-source';
+
+const source = dynamicLoader(createMySource(), {
+  baseUrl: '/docs',
+});
+
+export async function getSource() {
+  return source.get();
+}
+```
+
+When you call `await source.get()`, it returns a normal content loader object:
+
+```ts
+const docs = await getSource();
+
+const page = docs.getPage(['...']);
+```
+
+### Revalidation
+
+Dynamic sources are cached by the loader.
+
+If your source changes over time, call `revalidate()` to clear the cache:
+
+```ts
+source.revalidate();
+```
+
+For [multi-source](/docs/headless/source-api#multiple-sources) setups, you can revalidate a specific source:
+
+```ts
+source.revalidate('docs');
 ```
