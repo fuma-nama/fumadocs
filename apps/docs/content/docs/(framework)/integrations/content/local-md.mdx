@@ -11,13 +11,20 @@ As compared to [MDX Remote](/docs/integrations/content/mdx-remote), it is more c
 
 As compared to [Fumadocs MDX](/docs/mdx), it doesn't need a type-gen or bundler to work, but build-time image optimization will be disabled.
 
+### Limitations
+
+- No build-time image optimization.
+- No imports/exports in MDX files, but you can pass variables & components at render phase.
+
 ## Setup
 
 Install the package:
 
 ```package-install
-@fumadocs/local-md
+@fumadocs/local-md shiki
 ```
+
+> `shiki` is installed because it has to be externalized by the bundler.
 
 Create a `localMd` instance and connect it to Fumadocs:
 
