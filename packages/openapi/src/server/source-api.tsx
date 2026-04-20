@@ -1,7 +1,7 @@
 import { MethodLabel } from '@/ui/components/method-label';
 import {
   PathUtils,
-  type StaticSource,
+  type Source,
   type LoaderPlugin,
   type MetaData,
   type PageData,
@@ -101,7 +101,7 @@ export async function openapiSource(
   server: OpenAPIServer,
   options: OpenAPISourceOptions = {},
 ): Promise<
-  StaticSource<{
+  Source<{
     metaData: MetaData;
     pageData: OpenAPIPageData;
   }>

@@ -18,7 +18,7 @@ export default defineConfig({
     exclude: ['bin'],
   },
   deps: {
-    onlyBundle: ['ignore', 'stable-hash'],
-    neverBundle: ['mdx/types'],
+    onlyBundle: ['ignore'],
+    neverBundle: [],
   },
 });

@@ -55,6 +55,7 @@
     "@types/estree": "^1.0.8",
     "@types/estree-jsx": "^1.0.5",
     "@types/hast": "^3.0.4",
+    "@types/mdx": "^2.0.13",
     "@types/node": "25.6.0",
     "@types/react": "^19.2.14",
     "@types/react-dom": "^19.2.3",
@@ -64,7 +65,6 @@
     "ignore": "^7.0.5",
     "react": "^19.2.5",
     "react-dom": "^19.2.5",
-    "stable-hash": "^0.0.6",
     "tsconfig": "workspace:*",
     "tsdown": "0.21.9",
     "vite": "^8.0.8"
@@ -73,6 +73,7 @@
     "@types/estree": "*",
     "@types/estree-jsx": "*",
     "@types/hast": "*",
+    "@types/mdx": "*",
     "@types/react": "*",
     "@types/unist": "*",
     "fumadocs-core": "^16.8.0",
@@ -80,6 +81,9 @@
     "react-dom": "^19.2.0"
   },
   "peerDependenciesMeta": {
+    "@types/mdx": {
+      "optional": true
+    },
     "@types/estree": {
       "optional": true
     },

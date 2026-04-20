@@ -155,7 +155,7 @@
   },
   "peerDependencies": {
     "@mdx-js/mdx": "*",
-    "@mixedbread/sdk": "^0.46.0",
+    "@mixedbread/sdk": "0.x.x",
     "@orama/core": "1.x.x",
     "@oramacloud/client": "2.x.x",
     "@tanstack/react-router": "1.x.x",

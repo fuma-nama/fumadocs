@@ -3,16 +3,17 @@ import type { StructuredData } from 'fumadocs-core/mdx-plugins';
 import type { ReactNode } from 'react';
 import type { RawPage } from '@/storage';
 import * as JsxRuntime from 'react/jsx-runtime';
-import { type Components, toJsxRuntime } from 'hast-util-to-jsx-runtime';
-import { Root } from 'hast';
+import { toJsxRuntime } from 'hast-util-to-jsx-runtime';
+import type { Root } from 'hast';
 import type { JSExecutor, JSExecutorConfig } from '@/js/executor';
 import type { CompileResult, MarkdownCompiler } from './compiler';
 import { pathToFileURL } from 'node:url';
+import type { MDXComponents, MDXContent } from 'mdx/types';
 
 export interface PageRenderer {
   structuredData: StructuredData;
   render: (
-    components?: Components,
+    components?: MDXComponents,
     context?: Record<string, unknown>,
   ) => Promise<{
     exports: Record<string, unknown>;
@@ -118,7 +119,7 @@ export function createMarkdownRenderer(
           );
           const out = _out as {
             toc?: TOCItemType[];
-            default: (props: { components?: Components }) => ReactNode;
+            default: MDXContent;
           };
 
           return {

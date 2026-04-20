@@ -1,4 +1,4 @@
-import type { MetaData, PageData, StaticSource, VirtualFile } from 'fumadocs-core/source';
+import type { MetaData, PageData, Source, VirtualFile } from 'fumadocs-core/source';
 import * as path from 'node:path';
 import type { DocCollection, DocsCollection, MetaCollection } from '@/config';
 import type { StandardSchemaV1 } from '@standard-schema/spec';
@@ -30,7 +30,7 @@ export interface DocsCollectionEntry<
 > {
   docs: DocCollectionEntry<Name, Frontmatter, TC>[];
   meta: MetaCollectionEntry<Meta>[];
-  toFumadocsSource: () => StaticSource<{
+  toFumadocsSource: () => Source<{
     pageData: DocCollectionEntry<Name, Frontmatter, TC>;
     metaData: MetaCollectionEntry<Meta>;
   }>;
@@ -44,7 +44,7 @@ export interface AsyncDocsCollectionEntry<
 > {
   docs: AsyncDocCollectionEntry<Name, Frontmatter, TC>[];
   meta: MetaCollectionEntry<Meta>[];
-  toFumadocsSource: () => StaticSource<{
+  toFumadocsSource: () => Source<{
     pageData: AsyncDocCollectionEntry<Name, Frontmatter, TC>;
     metaData: MetaCollectionEntry<Meta>;
   }>;
@@ -230,7 +230,7 @@ export function toFumadocsSource<
 >(
   pages: Page[],
   metas: Meta[],
-): StaticSource<{
+): Source<{
   pageData: Page;
   metaData: Meta;
 }> {
