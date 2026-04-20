@@ -155,3 +155,11 @@ export function localMd<
 }
 
 export type { RawMeta, RawPage } from './storage';
+export type {
+  MDXProcessorOptions,
+  CompileResult,
+  MarkdownCompilerOptions,
+  MarkdownCompiler,
+  MarkdownProcessorOptions,
+} from './md/compiler';
+export type { MarkdownRendererOptions, PageRenderer } from './md/renderer';
