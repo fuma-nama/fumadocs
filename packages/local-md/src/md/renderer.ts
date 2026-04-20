@@ -3,7 +3,7 @@ import type { StructuredData } from 'fumadocs-core/mdx-plugins';
 import type { ReactNode } from 'react';
 import type { RawPage } from '@/storage';
 import * as JsxRuntime from 'react/jsx-runtime';
-import { toJsxRuntime } from 'hast-util-to-jsx-runtime';
+import { type Evaluater, toJsxRuntime } from 'hast-util-to-jsx-runtime';
 import type { Root } from 'hast';
 import type { JSExecutor, JSExecutorConfig } from '@/js/executor';
 import type { CompileResult, MarkdownCompiler } from './compiler';
@@ -68,12 +68,12 @@ export function createMarkdownRenderer(
         },
         async render(components, userContext) {
           if (compiled.type === 'ast') {
+            const context = { ...components, ...userContext };
             const executor = await getExecutor({
               jsx: JsxRuntime,
               filePath: page.absolutePath,
             });
-
-            const context = { ...components, ...userContext };
+            const evaluater = toEvaluater(executor, context);
 
             function render(tree: Root): ReactNode {
               return toJsxRuntime(tree, {
@@ -81,14 +81,7 @@ export function createMarkdownRenderer(
                 components,
                 development: false,
                 createEvaluater() {
-                  return {
-                    evaluateProgram(program) {
-                      return executor.program(program, context);
-                    },
-                    evaluateExpression(node) {
-                      return executor.expression(node, context);
-                    },
-                  };
+                  return evaluater;
                 },
                 ...JsxRuntime,
               });
@@ -150,4 +143,15 @@ async function executeMdx(compiled: string, baseUrl: string, scope?: object) {
 
   const hydrateFn = new AsyncFunction(...Object.keys(fullScope), compiled);
   return await hydrateFn.apply(hydrateFn, Object.values(fullScope));
+}
+
+function toEvaluater(executor: JSExecutor, context: Record<string, unknown>): Evaluater {
+  return {
+    evaluateProgram(program) {
+      return executor.program(program, context);
+    },
+    evaluateExpression(node) {
+      return executor.expression(node, context);
+    },
+  };
 }

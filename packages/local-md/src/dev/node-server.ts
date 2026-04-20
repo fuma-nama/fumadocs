@@ -68,12 +68,6 @@ export async function startDevServer(options: DevServerOptions): Promise<DevServ
 
   wss.on('connection', (client) => {
     clients.set(client, new Set());
-    client.send(
-      encodeDevEvent({
-        type: 'connected',
-        timestamp: Date.now(),
-      }),
-    );
 
     client.on('message', async (data) => {
       const decoded = decodeDevClientEvent(rawDataToString(data));
