@@ -1,5 +1,17 @@
 # @fuma-docs/openapi
 
+## 10.8.0
+
+### Minor Changes
+
+- cfeb2c5: Fix `@scalar/api-client-react` version as 2.0.2 has a breaking change
+
+### Patch Changes
+
+- Updated dependencies [3ae8809]
+  - fumadocs-ui@16.8.1
+  - fumadocs-core@16.8.1
+
 ## 10.7.1
 
 ### Patch Changes
