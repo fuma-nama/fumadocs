@@ -5,8 +5,8 @@ import type { LoaderPlugin } from '../loader';
 /**
  * a function to generate slugs, return `undefined` to fallback to default generation.
  */
-export type SlugFn<S extends ContentStorage<any, any> = ContentStorage<any, any>> = (
-  file: S extends ContentStorage<infer P, any> ? P : never,
+export type SlugFn<S = ContentStorage> = (
+  file: S extends ContentStorage<infer P, unknown> ? P : never,
 ) => string[] | undefined;
 
 /**

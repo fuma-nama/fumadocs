@@ -17,7 +17,7 @@ export interface LocalMarkdownConfig<
    */
   dir: string;
   /**
-   * a list of glob patterns, customise the content files to be scanned.
+   * a list of glob patterns, customize the content files to be scanned.
    */
   include?: string[];
   rendererOptions?: MarkdownRendererOptions;
@@ -32,35 +32,30 @@ export interface LocalMarkdown<
 > {
   /** connect to dev server, required for hot reload */
   devServer: (url?: string) => Promise<void>;
-  staticSource: () => Promise<GetSourceStatic<FrontmatterSchema, MetaSchema>>;
-  dynamicSource: () => GetSourceDynamic<FrontmatterSchema, MetaSchema>;
+  staticSource: <ModuleExports = Record<string, unknown>>() => Promise<
+    StaticSource<{
+      pageData: LocalMarkdownPage<StandardSchemaV1.InferOutput<FrontmatterSchema>, ModuleExports>;
+      metaData: StandardSchemaV1.InferOutput<MetaSchema> & MetaData;
+    }>
+  >;
+  dynamicSource: <ModuleExports = Record<string, unknown>>() => DynamicSource<{
+    pageData: LocalMarkdownPage<StandardSchemaV1.InferOutput<FrontmatterSchema>, ModuleExports>;
+    metaData: StandardSchemaV1.InferOutput<MetaSchema> & MetaData;
+  }>;
 
   invalidateFile: (file: string) => void;
 }
 
-type GetSourceStatic<
-  FrontmatterSchema extends StandardSchemaV1,
-  MetaSchema extends StandardSchemaV1,
-> = StaticSource<{
-  pageData: LocalMarkdownPage<StandardSchemaV1.InferOutput<FrontmatterSchema>>;
-  metaData: StandardSchemaV1.InferOutput<MetaSchema> & MetaData;
-}>;
-
-type GetSourceDynamic<
-  FrontmatterSchema extends StandardSchemaV1,
-  MetaSchema extends StandardSchemaV1,
-> = DynamicSource<{
-  pageData: LocalMarkdownPage<StandardSchemaV1.InferOutput<FrontmatterSchema>>;
-  metaData: StandardSchemaV1.InferOutput<MetaSchema> & MetaData;
-}>;
-
-export interface LocalMarkdownPage<Frontmatter> {
+export interface LocalMarkdownPage<
+  Frontmatter = Record<string, unknown>,
+  ModuleExports = Record<string, unknown>,
+> {
   title: string;
   description?: string;
   content: string;
   frontmatter: Frontmatter;
 
-  load: () => Promise<PageRenderer>;
+  load: () => Promise<PageRenderer<ModuleExports>>;
 }
 
 export function localMd<
@@ -73,12 +68,17 @@ export function localMd<
   const compiler = createMarkdownCompiler(config);
   const renderer = createMarkdownRenderer(compiler, config.rendererOptions);
   const registeredLoaders = new Set<DynamicLoader>();
-  let cachedStaticSource: Promise<GetSourceStatic<FrontmatterSchema, MetaSchema>> | null = null;
+  let cachedStaticSource: Promise<
+    StaticSource<{
+      pageData: LocalMarkdownPage<StandardSchemaV1.InferOutput<FrontmatterSchema>, never>;
+      metaData: StandardSchemaV1.InferOutput<MetaSchema> & MetaData;
+    }>
+  > | null = null;
 
   async function createFiles() {
     const { metas, pages } = await storage.getPages();
     const files: VirtualFile<{
-      pageData: LocalMarkdownPage<StandardSchemaV1.InferOutput<FrontmatterSchema>>;
+      pageData: LocalMarkdownPage<StandardSchemaV1.InferOutput<FrontmatterSchema>, never>;
       metaData: StandardSchemaV1.InferOutput<MetaSchema> & MetaData;
     }>[] = [];
 

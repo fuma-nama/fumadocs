@@ -3,19 +3,20 @@ import type { StructuredData } from 'fumadocs-core/mdx-plugins';
 import type { ReactNode } from 'react';
 import type { RawPage } from '@/storage';
 import * as JsxRuntime from 'react/jsx-runtime';
-import { type Components, toJsxRuntime } from 'hast-util-to-jsx-runtime';
-import { Root } from 'hast';
+import { type Evaluater, toJsxRuntime } from 'hast-util-to-jsx-runtime';
+import type { Root } from 'hast';
 import type { JSExecutor, JSExecutorConfig } from '@/js/executor';
 import type { CompileResult, MarkdownCompiler } from './compiler';
 import { pathToFileURL } from 'node:url';
+import type { MDXComponents, MDXContent } from 'mdx/types';
 
-export interface PageRenderer {
+export interface PageRenderer<ModuleExports = Record<string, unknown>> {
   structuredData: StructuredData;
   render: (
-    components?: Components,
+    components?: MDXComponents,
     context?: Record<string, unknown>,
   ) => Promise<{
-    exports: Record<string, unknown>;
+    exports: ModuleExports;
     toc: TOCItemType[];
     body: ReactNode;
   }>;
@@ -43,7 +44,7 @@ export function createMarkdownRenderer(
   const cache = new WeakMap<RawPage<unknown>, Promise<CompileResult>>();
 
   return {
-    async compile<V>(page: RawPage<V>): Promise<PageRenderer> {
+    async compile<V, M = Record<string, unknown>>(page: RawPage<V>): Promise<PageRenderer<M>> {
       let promise = cache.get(page);
       if (!promise) {
         promise = compiler.compile({
@@ -67,12 +68,12 @@ export function createMarkdownRenderer(
         },
         async render(components, userContext) {
           if (compiled.type === 'ast') {
+            const context = { ...components, ...userContext };
             const executor = await getExecutor({
               jsx: JsxRuntime,
               filePath: page.absolutePath,
             });
-
-            const context = { ...components, ...userContext };
+            const evaluater = toEvaluater(executor, context);
 
             function render(tree: Root): ReactNode {
               return toJsxRuntime(tree, {
@@ -80,14 +81,7 @@ export function createMarkdownRenderer(
                 components,
                 development: false,
                 createEvaluater() {
-                  return {
-                    evaluateProgram(program) {
-                      return executor.program(program, context);
-                    },
-                    evaluateExpression(node) {
-                      return executor.expression(node, context);
-                    },
-                  };
+                  return evaluater;
                 },
                 ...JsxRuntime,
               });
@@ -107,7 +101,7 @@ export function createMarkdownRenderer(
             return {
               toc,
               body: render(compiled.tree),
-              exports: executor.getExports(),
+              exports: executor.getExports() as M,
             };
           }
 
@@ -118,13 +112,13 @@ export function createMarkdownRenderer(
           );
           const out = _out as {
             toc?: TOCItemType[];
-            default: (props: { components?: Components }) => ReactNode;
+            default: MDXContent;
           };
 
           return {
             toc: out.toc ?? [],
             body: JsxRuntime.jsx(out.default, { components }),
-            exports: out,
+            exports: out as M,
           };
         },
       };
@@ -149,4 +143,15 @@ async function executeMdx(compiled: string, baseUrl: string, scope?: object) {
 
   const hydrateFn = new AsyncFunction(...Object.keys(fullScope), compiled);
   return await hydrateFn.apply(hydrateFn, Object.values(fullScope));
+}
+
+function toEvaluater(executor: JSExecutor, context: Record<string, unknown>): Evaluater {
+  return {
+    evaluateProgram(program) {
+      return executor.program(program, context);
+    },
+    evaluateExpression(node) {
+      return executor.expression(node, context);
+    },
+  };
 }

@@ -68,7 +68,7 @@
 
 ### Patch Changes
 
-- b867d07: Support customise scope variables
+- b867d07: Support customize scope variables
 
 ## 1.4.1
 

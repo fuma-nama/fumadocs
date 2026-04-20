@@ -35,7 +35,7 @@ export const projectConfigSchema = z.object({
    */
   dir: z.string(),
   /**
-   * a list of glob patterns, customise the content files to be scanned.
+   * a list of glob patterns, customize the content files to be scanned.
    */
   include: z.array(z.string()).optional(),
   /**
@@ -43,7 +43,7 @@ export const projectConfigSchema = z.object({
    */
   assetsDir: z.array(z.string()).optional(),
   /**
-   * customise chokidar, by default, file watcher will watch all files under the `dir` directory.
+   * customize chokidar, by default, file watcher will watch all files under the `dir` directory.
    */
   watchOptions: z.custom<(options: ChokidarOptions) => ChokidarOptions>().optional(),
 });

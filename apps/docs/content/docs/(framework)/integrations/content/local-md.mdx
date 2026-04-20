@@ -1,0 +1,256 @@
+---
+title: Local Markdown
+description: Content source for local Markdown content.
+---
+
+## Introduction
+
+`@fumadocs/local-md` is a content source for local Markdown/MDX files, it is bundleless (works fully at runtime) by design.
+
+As compared to [MDX Remote](/docs/integrations/content/mdx-remote), it is more comprehensive & robust while focused solely on local files.
+
+As compared to [Fumadocs MDX](/docs/mdx), it doesn't need a type-gen or bundler to work, but build-time image optimization will be disabled.
+
+## Setup
+
+Install the package:
+
+```package-install
+@fumadocs/local-md
+```
+
+Create a `localMd` instance and connect it to Fumadocs:
+
+```ts title="lib/source.ts"
+import { dynamicLoader } from 'fumadocs-core/source/dynamic';
+import { localMd } from '@fumadocs/local-md';
+
+const docs = localMd({
+  dir: 'content/docs',
+  // options
+});
+
+const docsLoader = dynamicLoader(docs.dynamicSource(), {
+  baseUrl: '/docs',
+});
+
+export async function getSource() {
+  return docsLoader.get();
+}
+```
+
+### Schema
+
+You may pass `frontmatterSchema` and `metaSchema` to customize the validation schemas:
+
+```ts title="lib/source.ts"
+import { localMd } from '@fumadocs/local-md';
+import { pageSchema, metaSchema } from 'fumadocs-core/source/schema';
+
+const docs = localMd({
+  dir: 'content/docs',
+  frontmatterSchema: pageSchema.extend({
+    // ...
+  }),
+  metaSchema: metaSchema.extend({
+    // ...
+  }),
+});
+```
+
+## Usage
+
+The recommended integration is:
+
+1. Create `localMd({ dir })` for your content directory.
+2. Pass `docs.dynamicSource()` to `dynamicLoader()`.
+3. Read the source in your route/layout and render it with Fumadocs UI.
+
+For example, in a docs layout:
+
+```tsx title="app/docs/layout.tsx"
+import { getSource } from '@/lib/source';
+import { DocsLayout } from 'fumadocs-ui/layouts/docs';
+
+export default async function Layout({ children }: LayoutProps<'/docs'>) {
+  const docs = await getSource();
+
+  return <DocsLayout tree={docs.getPageTree()}>{children}</DocsLayout>;
+}
+```
+
+The returned source from `docsLoader.get()` is a normal [content loader](/docs/headless/source-api) instance.
+
+### Hot Reload
+
+`local-md` works at runtime, but during development you can connect to its dev server for file watching.
+
+Start the dev server with `local-md dev -- xxx` like:
+
+```json title="package.json"
+{
+  "scripts": {
+    "dev": "local-md dev -- npm next dev"
+  }
+}
+```
+
+And connect to it:
+
+```ts title="lib/source.ts"
+import { localMd } from '@fumadocs/local-md';
+
+const docs = localMd({
+  dir: 'content/docs',
+});
+
+// change it if you use a different framework (e.g. import.meta.env.DEV)
+if (process.env.NODE_ENV === 'development') {
+  void docs.devServer();
+}
+```
+
+This keeps the loader in sync when local Markdown or MDX files change.
+
+### JavaScript Engine
+
+When compiling Markdown files (`*.md`), `@fumadocs/local-md` uses a virtual JavaScript engine to avoid `eval()` at runtime.
+
+This allows your app to work on environments like Cloudflare Worker, while the performance will be slower than the native JavaScript JIT compiler.
+
+### Disable Revalidation
+
+You can use `staticSource()` when you only need a one-time snapshot without revalidation.
+
+It works with a normal `loader()` instead of only `dynamicLoader()`:
+
+```ts title="lib/source.ts"
+import { loader } from 'fumadocs-core/source';
+import { localMd } from '@fumadocs/local-md';
+
+const docs = localMd({
+  dir: 'content/docs',
+});
+
+export const source = loader(await docs.staticSource(), {
+  baseUrl: '/docs',
+});
+```
+
+## Migration from Fumadocs MDX
+
+If you're already using Fumadocs MDX for local docs content, migrating is usually straightforward.
+
+### Before
+
+With Fumadocs MDX, a common setup looks like:
+
+```ts tab="source.config.ts"
+import { defineDocs, defineConfig } from 'fumadocs-mdx/config';
+
+export const docs = defineDocs({
+  dir: 'content/docs',
+});
+
+export default defineConfig();
+```
+
+```ts tab="lib/source.ts"
+import { docs } from 'collections/server';
+import { loader } from 'fumadocs-core/source';
+
+export const source = loader({
+  baseUrl: '/docs',
+  source: docs.toFumadocsSource(),
+});
+```
+
+### After
+
+With `@fumadocs/local-md`, you can replace that setup with:
+
+```ts title="lib/source.ts"
+import { dynamicLoader } from 'fumadocs-core/source/dynamic';
+import { localMd } from '@fumadocs/local-md';
+
+const docs = localMd({
+  dir: 'content/docs',
+});
+
+if (process.env.NODE_ENV === 'development') {
+  void docs.devServer();
+}
+
+const docsLoader = dynamicLoader(docs.dynamicSource(), {
+  baseUrl: '/docs',
+});
+
+export async function getSource() {
+  return docsLoader.get();
+}
+```
+
+Then:
+
+- remove `source.config.ts`.
+- remove framework-specific MDX integration like `createMDX()` in `next.config.mjs`.
+- replace `collections/server` imports with a loader created from `localMd()`.
+
+Finally, update references to your `source` object with `getSource()`:
+
+```tsx title="app/docs/layout.tsx"
+import { getSource } from '@/lib/source';
+import { DocsLayout } from 'fumadocs-ui/layouts/docs';
+
+export default async function Layout({ children }: LayoutProps<'/docs'>) {
+  // [!code --]
+  return <DocsLayout tree={source.getPageTree()}>{children}</DocsLayout>;
+
+  // [!code ++:2]
+  const docs = await getSource();
+  return <DocsLayout tree={docs.getPageTree()}>{children}</DocsLayout>;
+}
+```
+
+And the type of pages is also changed:
+
+```tsx tab="Before"
+const page = source.getPage(['...']);
+
+// title & description are unchanged
+page.data.title;
+
+// custom frontmatter properties
+page.data.full;
+
+// getText() API
+await page.data.getText('processed');
+
+// compiled properties:
+page.data.structuredData;
+page.data.toc;
+return (
+  <div>
+    <page.data.body components={{}} />
+  </div>
+);
+```
+
+```tsx tab="After"
+const page = docs.getPage(['...']);
+
+// title & description are unchanged
+page.data.title;
+
+// custom frontmatter properties
+page.data.frontmatter.full;
+
+// there's no getText() API, use data.content instead
+console.log(page.data.content);
+
+// compiled properties:
+const { structuredData, render } = await page.data.load();
+const { toc, body } = await render(mdxComponents);
+
+return <div>{body}</div>;
+```

@@ -39,7 +39,7 @@ export interface RootProviderProps {
   search?: Partial<SearchOptions>;
 
   /**
-   * Customise options for `next-themes`
+   * Customize options for `next-themes`
    */
   theme?: ThemeOptions;
 

@@ -210,7 +210,7 @@ function PageTOCPopoverTrigger({ className, ...props }: ComponentProps<'button'>
       {...props}
     >
       <ProgressCircle
-        value={(selectedIdx + 1) / Math.max(1, items.length)}
+        value={(items.findLastIndex((item) => item.active) + 1) / Math.max(1, items.length)}
         max={1}
         className={cn('shrink-0', open && 'text-fd-primary')}
       />
@@ -254,14 +254,15 @@ function clamp(input: number, min: number, max: number): number {
 
 function ProgressCircle({
   value,
-  strokeWidth = 2,
-  size = 24,
+  strokeWidth = 1.5,
+  size = 18,
   min = 0,
   max = 100,
+  style,
   ...restSvgProps
 }: ProgressCircleProps) {
   const normalizedValue = clamp(value, min, max);
-  const radius = (size - strokeWidth) / 2;
+  const radius = size / 2 - strokeWidth;
   const circumference = 2 * Math.PI * radius;
   const progress = (normalizedValue / max) * circumference;
   const circleProps = {
@@ -279,6 +280,7 @@ function ProgressCircle({
       aria-valuenow={normalizedValue}
       aria-valuemin={min}
       aria-valuemax={max}
+      style={{ width: size, height: size, ...style }}
       {...restSvgProps}
     >
       <circle {...circleProps} className="stroke-current/25" />

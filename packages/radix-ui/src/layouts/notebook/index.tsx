@@ -10,21 +10,17 @@ import {
 } from '@/layouts/shared';
 import { type DocsSlots, LayoutBody } from './client';
 
-export interface DocsLayoutProps extends BaseLayoutProps {
+export interface DocsLayoutProps extends Omit<BaseLayoutProps, 'nav'> {
   tree: PageTree.Root;
   tabs?: LayoutTab[] | GetLayoutTabsOptions | false;
   tabMode?: 'sidebar' | 'navbar';
   sidebar?: SidebarOptions;
-  nav?: Nav;
+  nav?: NavOptions & { mode?: 'top' | 'auto' };
   containerProps?: HTMLAttributes<HTMLDivElement>;
   slots?: Partial<DocsSlots>;
 }
 
-interface Nav extends NavOptions {
-  mode?: 'top' | 'auto';
-}
-
-interface SidebarOptions extends SidebarProps, SidebarProviderProps {
+export interface SidebarOptions extends SidebarProps, SidebarProviderProps {
   /**
    * @deprecated use layout-level `tabs` option instead.
    */

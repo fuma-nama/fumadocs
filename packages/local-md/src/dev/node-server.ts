@@ -18,7 +18,7 @@ export interface DevServerOptions {
   port: number;
   host?: string;
   /**
-   * customise chokidar, by default, file watcher will watch all files under the `dir` directory.
+   * customize chokidar, by default, file watcher will watch all files under the `dir` directory.
    */
   watchOptions?: (options: ChokidarOptions) => ChokidarOptions;
 }
@@ -68,12 +68,6 @@ export async function startDevServer(options: DevServerOptions): Promise<DevServ
 
   wss.on('connection', (client) => {
     clients.set(client, new Set());
-    client.send(
-      encodeDevEvent({
-        type: 'connected',
-        timestamp: Date.now(),
-      }),
-    );
 
     client.on('message', async (data) => {
       const decoded = decodeDevClientEvent(rawDataToString(data));

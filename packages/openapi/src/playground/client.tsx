@@ -113,7 +113,7 @@ export interface PlaygroundClientOptions {
   /**
    * render the input for API endpoint body.
    *
-   * @see renderParameterField for customisation tips
+   * @see renderParameterField for customization tips
    */
   renderBodyField?: (fieldName: 'body', info: RequestBodyInfo) => ReactNode;
 }

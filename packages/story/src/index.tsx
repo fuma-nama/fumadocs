@@ -40,7 +40,7 @@ export interface ArgsOptions<C extends FC<any> = FC<any>> {
     | Partial<ComponentPropsWithoutRef<C>>
     | (() => Awaitable<Partial<ComponentPropsWithoutRef<C>>>);
   /**
-   * customise the generated controls, by default generated from component props using TypeScript compiler.
+   * customize the generated controls, by default generated from component props using TypeScript compiler.
    */
   controls?:
     | {

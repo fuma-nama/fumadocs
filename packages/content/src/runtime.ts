@@ -1,6 +1,6 @@
 import type { FileCollectionStore } from 'fuma-content/collections/runtime/file-store';
 import type { MDXStoreLazyData, MDXStoreData } from 'fuma-content/collections/mdx/runtime';
-import type { MetaData, PageData, Source } from 'fumadocs-core/source';
+import type { MetaData, PageData, StaticSource } from 'fumadocs-core/source';
 
 type ToPageData<T> =
   T extends MDXStoreData<infer Frontmatter>
@@ -16,7 +16,7 @@ export function toFumadocsSource<
   >,
   Meta extends { data: MetaData } = { data: MetaData },
 >(mdxStore?: FileCollectionStore<Mdx>, metaStore?: FileCollectionStore<Meta>) {
-  const out: Source<{
+  const out: StaticSource<{
     pageData: ToPageData<Mdx>;
     metaData: Meta['data'];
   }> = { files: [] };

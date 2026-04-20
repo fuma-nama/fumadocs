@@ -9,10 +9,6 @@ export interface DevClientEvent {
 
 export type DevServerEvent =
   | {
-      type: 'connected';
-      timestamp: number;
-    }
-  | {
       type: 'change';
       event: DevWatchEvent;
       absolutePath: string;

@@ -1,4 +1,4 @@
-import { loader, type MetaData, type Source, type VirtualFile } from 'fumadocs-core/source';
+import { loader, type MetaData, type StaticSource, type VirtualFile } from 'fumadocs-core/source';
 import { getPosts } from '@/lib/query';
 import type { Post } from '@/lib/types';
 import type { StructuredData } from 'fumadocs-core/mdx-plugins';
@@ -12,7 +12,7 @@ export const source = loader({
 });
 
 async function createMarbleSource(): Promise<
-  Source<{
+  StaticSource<{
     metaData: MetaData;
     pageData: Post;
   }>

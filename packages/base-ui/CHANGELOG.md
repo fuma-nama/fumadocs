@@ -1,5 +1,12 @@
 # @fumadocs/base-ui
 
+## 16.8.1
+
+### Patch Changes
+
+- 3ae8809: Improve TOC sizing
+  - fumadocs-core@16.8.1
+
 ## 16.8.0
 
 ### Patch Changes

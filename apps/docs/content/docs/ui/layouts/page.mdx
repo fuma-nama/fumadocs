@@ -6,7 +6,7 @@ description: A page in your documentation
 Page is the base element of a documentation, it includes Table of contents,
 Footer, and Breadcrumb.
 
-<Customisation />
+<Customization />
 
 ## Usage
 
@@ -137,7 +137,7 @@ import { DocsPage } from 'fumadocs-ui/layouts/<layout>/page';
 <DocsPage toc={headings}>...</DocsPage>;
 ```
 
-You can customise it with `tableOfContent`, or with `tableOfContentPopover` on smaller devices.
+You can customize it with `tableOfContent`, or with `tableOfContentPopover` on smaller devices.
 
 ```tsx title="page.tsx"
 import { DocsPage } from 'fumadocs-ui/layouts/<layout>/page';
@@ -230,7 +230,7 @@ npx @fumadocs/cli add slots/flux/page/toc
 
 Footer is a navigation element that has two buttons to jump to the next and previous pages. When not specified, it shows the neighbour pages found from page tree.
 
-Customise the footer with the `footer` prop:
+Customize the footer with the `footer` prop:
 
 ```tsx
 import { DocsPage } from 'fumadocs-ui/layouts/<layout>/page';
@@ -282,7 +282,7 @@ npx @fumadocs/cli add slots/flux/page/footer
 
 A navigation element, shown only when user is navigating in folders.
 
-Customise the breadcrumb with the `breadcrumb` option:
+Customize the breadcrumb with the `breadcrumb` option:
 
 ```tsx
 import { DocsPage } from 'fumadocs-ui/layouts/<layout>/page';

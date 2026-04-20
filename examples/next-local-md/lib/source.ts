@@ -7,17 +7,21 @@ const docs = localMd({
   dir: 'content/docs',
 });
 
-if (process.env.NODE_ENV === 'development' && import.meta.turbopackHot) {
+if (process.env.NODE_ENV === 'development') {
   void docs.devServer();
 }
 
 // See https://fumadocs.dev/docs/headless/source-api for more info
-export const source = dynamicLoader(docs.dynamicSource(), {
+export const docsLoader = dynamicLoader(docs.dynamicSource(), {
   baseUrl: docsRoute,
   plugins: [lucideIconsPlugin()],
 });
 
-export function getPageImage(page: (typeof source)['$inferPage']) {
+export async function getSource() {
+  return docsLoader.get();
+}
+
+export function getPageImage(page: (typeof docsLoader)['$inferPage']) {
   const segments = [...page.slugs, 'image.png'];
 
   return {
@@ -26,7 +30,7 @@ export function getPageImage(page: (typeof source)['$inferPage']) {
   };
 }
 
-export function getPageMarkdownUrl(page: (typeof source)['$inferPage']) {
+export function getPageMarkdownUrl(page: (typeof docsLoader)['$inferPage']) {
   const segments = [...page.slugs, 'content.md'];
 
   return {
@@ -35,7 +39,7 @@ export function getPageMarkdownUrl(page: (typeof source)['$inferPage']) {
   };
 }
 
-export async function getLLMText(page: (typeof source)['$inferPage']) {
+export async function getLLMText(page: (typeof docsLoader)['$inferPage']) {
   return `# ${page.data.title} (${page.url})
 
 ${page.data.content}`;

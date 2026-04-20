@@ -17,7 +17,7 @@ import { Card, Cards } from 'fumadocs-ui/components/card';
 import { getMDXComponents } from '@/components/mdx';
 import { Banner } from 'fumadocs-ui/components/banner';
 import { Installation } from '@/components/preview/installation';
-import { Customisation } from '@/components/preview/customisation';
+import { Customization } from '@/components/preview/customization';
 import {
   DocsBody,
   DocsPage,
@@ -123,7 +123,7 @@ export default async function Page(props: PageProps<'/docs/[[...slug]]'>) {
               return <DocsCategory url={url ?? page.url} />;
             },
             Installation,
-            Customisation,
+            Customization,
           })}
         />
         {page.data.index ? <DocsCategory url={page.url} /> : null}

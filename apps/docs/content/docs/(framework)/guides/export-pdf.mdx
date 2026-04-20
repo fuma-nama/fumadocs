@@ -21,7 +21,7 @@ import path from 'node:path';
 const browser = await puppeteer.launch();
 const outDir = 'pdfs';
 // update this [!code highlight]
-const urls = ['/docs/ui', '/docs/ui/customisations'];
+const urls = ['/docs/ui', '/docs/ui/customizations'];
 
 async function exportPdf(pathname: string) {
   const page = await browser.newPage();

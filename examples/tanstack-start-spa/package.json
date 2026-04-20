@@ -12,9 +12,9 @@
   },
   "dependencies": {
     "@orama/orama": "^3.1.18",
-    "@tanstack/react-router": "1.168.22",
+    "@tanstack/react-router": "1.168.23",
     "@tanstack/react-router-devtools": "1.166.13",
-    "@tanstack/react-start": "1.167.41",
+    "@tanstack/react-start": "1.167.42",
     "@tanstack/start-static-server-functions": "1.166.33",
     "fumadocs-core": "workspace:*",
     "fumadocs-mdx": "workspace:*",
@@ -32,10 +32,10 @@
     "@types/react": "^19.2.14",
     "@types/react-dom": "^19.2.3",
     "@vitejs/plugin-react": "^6.0.1",
-    "nitro": "^3.0.260311-beta",
+    "nitro": "3.0.260415-beta",
     "serve": "^14.2.6",
     "srvx": "^0.11.15",
     "tailwindcss": "^4.2.2",
-    "typescript": "^6.0.2"
+    "typescript": "^6.0.3"
   }
 }

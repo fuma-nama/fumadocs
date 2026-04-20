@@ -5,7 +5,7 @@ description: The UI for document search
 
 ## Overview
 
-You can customise Search UI from [`<RootProvider />`](/docs/ui/layouts/root-provider).
+You can customize Search UI from [`<RootProvider />`](/docs/ui/layouts/root-provider).
 
 ```tsx title="app/layout.tsx"
 import { RootProvider } from 'fumadocs-ui/provider/<framework>';
@@ -33,7 +33,7 @@ export default function Layout({ children }: { children: ReactNode }) {
 
 ### Hot Keys
 
-Customise the hot keys to trigger search dialog, by default it's <kbd>⌘</kbd> <kbd>K</kbd> or <kbd>Ctrl</kbd> <kbd>K</kbd>.
+Customize the hot keys to trigger search dialog, by default it's <kbd>⌘</kbd> <kbd>K</kbd> or <kbd>Ctrl</kbd> <kbd>K</kbd>.
 
 ```tsx
 import { RootProvider } from 'fumadocs-ui/provider/<framework>';
@@ -108,7 +108,7 @@ export default function DefaultSearchDialog(props: SharedProps) {
 
 The content in search result supports Markdown, match highlights are expressed using `<mark />`.
 
-You can customise the Markdown renderer.
+You can customize the Markdown renderer.
 
 ```tsx title="components/search.tsx"
 <SearchDialogList

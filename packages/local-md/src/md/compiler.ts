@@ -1,11 +1,14 @@
 import { remarkGfm } from 'fumadocs-core/mdx-plugins/remark-gfm';
 import { plugin, plugins } from './utils';
-import { remarkHeading } from 'fumadocs-core/mdx-plugins/remark-heading';
-import { remarkNpm } from 'fumadocs-core/mdx-plugins/remark-npm';
-import { remarkCodeTab } from 'fumadocs-core/mdx-plugins/remark-code-tab';
-import { rehypeCode } from 'fumadocs-core/mdx-plugins/rehype-code';
-import { rehypeToc } from 'fumadocs-core/mdx-plugins/rehype-toc';
-import { remarkStructure } from 'fumadocs-core/mdx-plugins/remark-structure';
+import { remarkHeading, type RemarkHeadingOptions } from 'fumadocs-core/mdx-plugins/remark-heading';
+import { remarkNpm, type RemarkNpmOptions } from 'fumadocs-core/mdx-plugins/remark-npm';
+import {
+  remarkCodeTab,
+  type RemarkCodeTabOptions,
+} from 'fumadocs-core/mdx-plugins/remark-code-tab';
+import { rehypeCode, type RehypeCodeOptions } from 'fumadocs-core/mdx-plugins/rehype-code';
+import { rehypeToc, type RehypeTocOptions } from 'fumadocs-core/mdx-plugins/rehype-toc';
+import { remarkStructure, type StructureOptions } from 'fumadocs-core/mdx-plugins/remark-structure';
 import { Compatible, VFile } from 'vfile';
 import type { Root } from 'hast';
 import * as Mdx from '@mdx-js/mdx';
@@ -15,13 +18,29 @@ import remarkRehype, { type Options as RemarkRehypeOptions } from 'remark-rehype
 
 export interface MarkdownCompilerOptions {
   mdOptions?: MarkdownProcessorOptions;
-  mdxOptions?: Mdx.ProcessorOptions;
+  mdxOptions?: MDXProcessorOptions;
 }
 
 export interface MarkdownProcessorOptions {
   remarkPlugins?: PluggableList;
   rehypePlugins?: PluggableList;
   remarkRehypeOptions?: RemarkRehypeOptions;
+
+  remarkStructureOptions?: StructureOptions | false;
+  remarkHeadingOptions?: RemarkHeadingOptions | false;
+  remarkCodeTabOptions?: RemarkCodeTabOptions | false;
+  remarkNpmOptions?: RemarkNpmOptions | false;
+  rehypeCodeOptions?: RehypeCodeOptions | false;
+  rehypeTocOptions?: RehypeTocOptions | false;
+}
+
+export interface MDXProcessorOptions extends Mdx.ProcessorOptions {
+  remarkStructureOptions?: StructureOptions | false;
+  remarkHeadingOptions?: RemarkHeadingOptions | false;
+  remarkCodeTabOptions?: RemarkCodeTabOptions | false;
+  remarkNpmOptions?: RemarkNpmOptions | false;
+  rehypeCodeOptions?: RehypeCodeOptions | false;
+  rehypeTocOptions?: RehypeTocOptions | false;
 }
 
 export interface MarkdownCompiler {
@@ -45,31 +64,56 @@ export function createMarkdownCompiler(options?: MarkdownCompilerOptions): Markd
   let md: ReturnType<typeof createMdCompiler> | undefined;
 
   function createMdCompiler() {
-    const mdOptions = options?.mdOptions ?? {};
+    const {
+      remarkHeadingOptions,
+      rehypeCodeOptions,
+      rehypePlugins,
+      rehypeTocOptions,
+      remarkCodeTabOptions,
+      remarkNpmOptions,
+      remarkPlugins,
+      remarkRehypeOptions,
+      remarkStructureOptions,
+    } = options?.mdOptions ?? {};
+
     return remark()
       .use(
         plugins(
           remarkGfm,
-          plugin(remarkHeading, { generateToc: false }),
-          plugin(remarkNpm, { persist: { id: 'package-manager' } }),
-          remarkCodeTab,
-          remarkStructure,
-          ...(mdOptions.remarkPlugins ?? []),
+          remarkHeadingOptions !== false &&
+            plugin(remarkHeading, { generateToc: false, ...remarkHeadingOptions }),
+          remarkNpmOptions !== false && plugin(remarkNpm, remarkNpmOptions),
+          remarkCodeTabOptions !== false && plugin(remarkCodeTab, remarkCodeTabOptions),
+          ...(remarkPlugins ?? []),
+          remarkStructureOptions !== false && plugin(remarkStructure, remarkStructureOptions),
         ),
       )
       .use(remarkRehype, {
         passThrough: ['mdxJsxFlowElement', 'mdxJsxTextElement'],
-        ...mdOptions.remarkRehypeOptions,
+        ...remarkRehypeOptions,
       })
-      .use([
-        plugin(rehypeCode, { lazy: true, fallbackLanguage: 'text' }),
-        plugin(rehypeToc, { exportToc: { as: 'data' } }),
-        ...(mdOptions.rehypePlugins ?? []),
-      ]);
+      .use(
+        plugins(
+          rehypeCodeOptions !== false && plugin(rehypeCode, rehypeCodeOptions),
+          ...(rehypePlugins ?? []),
+          rehypeTocOptions !== false &&
+            plugin(rehypeToc, { exportToc: { as: 'data' }, ...rehypeTocOptions }),
+        ),
+      );
   }
 
   function createMdxCompiler() {
-    const mdxOptions = options?.mdxOptions ?? {};
+    const {
+      remarkCodeTabOptions,
+      remarkHeadingOptions,
+      remarkNpmOptions,
+      remarkStructureOptions,
+      rehypeCodeOptions,
+      rehypeTocOptions,
+      remarkPlugins,
+      rehypePlugins,
+      ...mdxOptions
+    } = options?.mdxOptions ?? {};
 
     return Mdx.createProcessor({
       ...mdxOptions,
@@ -77,17 +121,19 @@ export function createMarkdownCompiler(options?: MarkdownCompilerOptions): Markd
       development: false,
       remarkPlugins: plugins(
         remarkGfm,
-        plugin(remarkHeading, { generateToc: false }),
-        plugin(remarkNpm, { persist: { id: 'package-manager' } }),
-        remarkCodeTab,
-        remarkStructure,
-        ...(mdxOptions.remarkPlugins ?? []),
+        remarkHeadingOptions !== false &&
+          plugin(remarkHeading, { generateToc: false, ...remarkHeadingOptions }),
+        remarkNpmOptions !== false && plugin(remarkNpm, remarkNpmOptions),
+        remarkCodeTabOptions !== false && plugin(remarkCodeTab, remarkCodeTabOptions),
+        ...(remarkPlugins ?? []),
+        remarkStructureOptions !== false && plugin(remarkStructure, remarkStructureOptions),
       ),
-      rehypePlugins: [
-        plugin(rehypeCode, { lazy: true, fallbackLanguage: 'text' }),
-        plugin(rehypeToc, { exportToc: { as: 'esm', name: 'toc' } }),
-        ...(mdxOptions.rehypePlugins ?? []),
-      ],
+      rehypePlugins: plugins(
+        rehypeCodeOptions !== false && plugin(rehypeCode, rehypeCodeOptions),
+        ...(rehypePlugins ?? []),
+        rehypeTocOptions !== false &&
+          plugin(rehypeToc, { exportToc: { as: 'esm', name: 'toc' }, ...rehypeTocOptions }),
+      ),
     });
   }
 

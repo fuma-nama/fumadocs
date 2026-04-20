@@ -13,7 +13,7 @@ Previously, it was a simple function to generate multiple MDX files/pages from y
 We tested it on public OpenAPI schemas such as Unkey, Vercel and examples from Scalar and Swagger's Museum schema.
 
 Since these schemas were written for different docs solutions, or even their custom ones.
-We made `generateFiles()` too complicated to be capable of producing best results for various schema styles, and it's even harder to customise the generated file paths of API docs.
+We made `generateFiles()` too complicated to be capable of producing best results for various schema styles, and it's even harder to customize the generated file paths of API docs.
 
 This update also include:
 
@@ -37,9 +37,9 @@ The behaviour of `groupBy` API is also changed.
 | route | `{endpoint_path}/{method}.mdx` (ignores `name` option) |
 | none  | `{operationId ?? endpoint_path}.mdx` (default)         |
 
-### Customise Output
+### Customize Output
 
-The usage of `name` option is renewed, it can be used to customise the output path of files.
+The usage of `name` option is renewed, it can be used to customize the output path of files.
 
 ```ts
 import { generateFiles } from 'fumadocs-openapi';

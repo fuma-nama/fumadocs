@@ -7,7 +7,7 @@ import type { StandardSchemaV1 } from '@standard-schema/spec';
 import type { PageData } from 'fumadocs-core/source';
 import * as defaultSchemas from 'fumadocs-core/source/schema';
 
-export interface RawPage<Frontmatter> {
+export interface RawPage<Frontmatter = Record<string, unknown>> {
   path: string;
   absolutePath: string;
 
@@ -17,7 +17,7 @@ export interface RawPage<Frontmatter> {
   frontmatter: Frontmatter;
 }
 
-export interface RawMeta<Data> {
+export interface RawMeta<Data = Record<string, unknown>> {
   path: string;
   absolutePath: string;
   data: Data;

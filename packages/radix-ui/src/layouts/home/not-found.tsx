@@ -4,7 +4,7 @@ import Link from 'fumadocs-core/link';
 import { HomeIcon } from 'lucide-react';
 
 /**
- * the default not found page content, please make your own if you want to customise it.
+ * the default not found page content, please make your own if you want to customize it.
  */
 export function DefaultNotFound() {
   return (

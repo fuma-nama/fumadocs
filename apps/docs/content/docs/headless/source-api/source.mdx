@@ -5,7 +5,7 @@ description: Setup sources for Loader API
 
 ## Overview
 
-`loader()` accepts different content sources based on a `source` interface.
+Content loader accepts different content sources based on a `source` interface.
 
 ### Multiple Sources
 
@@ -40,16 +40,16 @@ if (page.type === 'docs') {
 }
 ```
 
-### Custom Source
+### Static Source
 
-To plug your own content source, create a `Source` object.
+To plug your own content source, create a `StaticSource` object.
 
 Since Loader API doesn't rely on file system, file paths only allow virtual paths like `file.mdx` and `content/file.mdx`, `./file.mdx` and `D://content/file.mdx` are not allowed.
 
 ```ts twoslash
-import { Source } from 'fumadocs-core/source';
+import type { StaticSource } from 'fumadocs-core/source';
 
-export function createMySource(): Source<{
+export function createMySource(): StaticSource<{
   metaData: { title: string; pages: string[] }; // Your custom type
   pageData: { title: string; description?: string }; // Your custom type
 }> {
@@ -76,3 +76,46 @@ export function createMySource(): Source<{
   };
 }
 ```
+
+### Dynamic Source
+
+For content sources with revalidation, return a `DynamicSource` instead:
+
+```ts
+import type { DynamicSource } from 'fumadocs-core/source';
+
+export function createMySource(): DynamicSource<{
+  metaData: { title: string; pages: string[] };
+  pageData: { title: string; description?: string };
+}> {
+  return {
+    async files() {
+      return [
+        {
+          type: 'page',
+          path: 'folder/index.mdx',
+          data: {
+            title: 'Hello World',
+          },
+        },
+        {
+          type: 'meta',
+          path: 'meta.json',
+          data: {
+            title: 'Docs',
+            pages: ['folder'],
+          },
+        },
+      ];
+    },
+    configure(loader) {
+      // you can revalidate the loader from source, e.g.
+      onMyEvent(() => {
+        loader.revalidate();
+      });
+    },
+  };
+}
+```
+
+Dynamic sources can only be consumed by [`dynamicLoader()`](/docs/headless/source-api#dynamic-loader).

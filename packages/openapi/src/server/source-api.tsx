@@ -1,11 +1,11 @@
 import { MethodLabel } from '@/ui/components/method-label';
 import {
   PathUtils,
+  type Source,
   type LoaderPlugin,
   type MetaData,
   type PageData,
   type PageTreeTransformer,
-  type Source,
   type VirtualFile,
 } from 'fumadocs-core/source';
 import type { OpenAPIServer } from '@/server/create';

@@ -105,7 +105,7 @@ export interface CreateAPIPageOptions {
   mediaAdapters?: Record<string, MediaAdapter>;
 
   /**
-   * Customise page content
+   * Customize page content
    */
   content?: {
     renderResponseTabs?: (tabs: ResponseTab[], ctx: RenderContext) => ReactNode;
@@ -190,7 +190,7 @@ export interface CreateAPIPageOptions {
   };
 
   /**
-   * Customise API playground
+   * Customize API playground
    */
   playground?: {
     /**

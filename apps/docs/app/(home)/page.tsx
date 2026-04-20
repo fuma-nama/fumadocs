@@ -203,9 +203,9 @@ function Aesthetics() {
         <p className="mb-4">
           Fumadocs offer well-designed themes, with a headless mode to plug your own UI.
         </p>
-        <p className="mb-4">Pro designer? Customise the theme using Fumadocs CLI.</p>
+        <p className="mb-4">Pro designer? Customize the theme using Fumadocs CLI.</p>
         <ServerCodeBlock
-          code={`pnpm dlx @fumadocs/cli customise\n\n> Choose a layout to customise...`}
+          code={`pnpm dlx @fumadocs/cli customize\n\n> Choose a layout to customize...`}
           lang="bash"
         />
       </div>

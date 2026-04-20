@@ -126,7 +126,7 @@ export interface RemarkAutoTypeTableOptions {
   renderType?: MarkdownRenderer['renderTypeToHast'];
 
   /**
-   * Customise type table generation
+   * Customize type table generation
    */
   options?: GenerateTypeTableOptions;
 
