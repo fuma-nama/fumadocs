@@ -37,12 +37,15 @@ export async function startDevServer(options: DevServerOptions): Promise<DevServ
   let watchOptions: ChokidarOptions = {
     ignoreInitial: true,
     followSymlinks: false,
-    ignored(file) {
+    ignored(file, _stats) {
+      if (!_stats || !_stats.isFile()) return false;
+
       for (const client of clients) {
         for (const [dir, { matcher }] of client.watching) {
           if (matcher(path.relative(dir, file))) return false;
         }
       }
+
       return true;
     },
   };
