@@ -1,5 +1,12 @@
 # fumadocs-ui
 
+## 16.8.2
+
+### Patch Changes
+
+- 0e8405a: Update default OG image
+  - fumadocs-core@16.8.2
+
 ## 16.8.1
 
 ### Patch Changes
