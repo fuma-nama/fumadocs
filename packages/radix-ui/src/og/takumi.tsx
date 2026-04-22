@@ -30,6 +30,7 @@ export function generateOGImage(options: GenerateProps & ImageResponseOptions): 
   );
 }
 
+// TODO: sync with og.tsx once Takumi supported dashed border-style
 export function generate({
   primaryColor = 'rgba(255,150,255,0.3)',
   primaryTextColor = 'rgb(255,150,255)',
