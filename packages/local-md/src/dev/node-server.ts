@@ -1,18 +1,17 @@
 import { type ChokidarOptions, type FSWatcher, watch } from 'chokidar';
-import ignore, { type Ignore } from 'ignore';
-import fs from 'node:fs/promises';
-import path from 'node:path';
 import {
   decodeDevClientEvent,
   encodeDevEvent,
   LOCAL_MD_DEV_PATH,
+  type WatchDirOptions,
   type DevServerEvent,
   type DevWatchEvent,
 } from './shared';
 import { WebSocket, WebSocketServer, type RawData } from 'ws';
+import path from 'node:path';
+import picomatch, { type Matcher } from 'picomatch';
 
 const WATCH_EVENTS = new Set<DevWatchEvent>(['add', 'addDir', 'change', 'unlink', 'unlinkDir']);
-type IgnoredFn = (value: string) => boolean;
 
 export interface DevServerOptions {
   port: number;
@@ -38,15 +37,21 @@ export async function startDevServer(options: DevServerOptions): Promise<DevServ
   let watchOptions: ChokidarOptions = {
     ignoreInitial: true,
     followSymlinks: false,
-    ignored: await fromGitIgnore(process.cwd(), 'node_modules\ndist\nbuild'),
+    ignored(file) {
+      for (const client of clients) {
+        for (const [dir, { matcher }] of client.watching) {
+          if (matcher(path.relative(dir, file))) return false;
+        }
+      }
+      return true;
+    },
   };
   if (options.watchOptions) {
     watchOptions = options.watchOptions(watchOptions);
   }
 
   const watcher = watch([], watchOptions);
-  const clients = new Map<WebSocket, Set<string>>();
-  const watchingDirs = new Map<string, number>();
+  const clients = new Set<Client>();
   const wss = new WebSocketServer({
     path: LOCAL_MD_DEV_PATH,
     port,
@@ -56,45 +61,43 @@ export async function startDevServer(options: DevServerOptions): Promise<DevServ
   function broadcast(event: DevServerEvent) {
     const encoded = encodeDevEvent(event);
 
-    for (const client of clients.keys()) {
-      if (client.readyState !== WebSocket.OPEN) {
+    for (const client of clients) {
+      if (client.socket.readyState !== WebSocket.OPEN) {
         clients.delete(client);
         continue;
       }
 
-      client.send(encoded);
+      client.socket.send(encoded);
     }
   }
 
-  wss.on('connection', (client) => {
-    clients.set(client, new Set());
+  wss.on('connection', (_client) => {
+    const client = new Client(_client);
+    clients.add(client);
 
-    client.on('message', async (data) => {
+    _client.on('message', async (data) => {
       const decoded = decodeDevClientEvent(rawDataToString(data));
       if (!decoded) return;
 
-      if (decoded.type === 'watch') {
-        const absolutePath = decoded.absolutePath;
-        const dirs = clients.get(client);
+      if (decoded.type === 'watch-dir') {
+        const absolutePath = path.resolve(decoded.dir);
 
-        if (dirs && !dirs.has(absolutePath)) {
-          dirs.add(absolutePath);
-          addWatchDir(absolutePath);
+        if (!client.watching.has(absolutePath)) {
+          client.addWatching(absolutePath, decoded);
+          watcher.add(absolutePath);
         }
       }
     });
 
-    client.on('close', () => {
-      const dirs = clients.get(client);
-      if (!dirs) return;
-
-      for (const dir of dirs) removeWatchDir(dir);
+    _client.on('close', () => {
       clients.delete(client);
+      for (const dir of client.watching.keys()) removeWatchDir(dir);
     });
   });
 
   watcher.on('all', (event, filePath) => {
     if (!WATCH_EVENTS.has(event as DevWatchEvent)) return;
+    console.log(`[@fumadocs/local-md] ${event} at "${filePath}"`);
 
     broadcast({
       type: 'change',
@@ -127,9 +130,7 @@ export async function startDevServer(options: DevServerOptions): Promise<DevServ
     host,
     watcher,
     async close() {
-      for (const client of clients.keys()) {
-        client.close();
-      }
+      for (const client of clients) client.close();
       clients.clear();
       wss.close();
 
@@ -143,45 +144,19 @@ export async function startDevServer(options: DevServerOptions): Promise<DevServ
     },
   };
 
-  function addWatchDir(absolutePath: string) {
-    const count = watchingDirs.get(absolutePath) ?? 0;
-    if (count === 0) watcher.add(absolutePath);
-
-    watchingDirs.set(absolutePath, count + 1);
-  }
-
-  function removeWatchDir(absolutePath: string) {
-    const count = watchingDirs.get(absolutePath);
-    if (!count) return;
-
-    if (count === 1) {
-      watchingDirs.delete(absolutePath);
-      watcher.unwatch(absolutePath);
-      return;
+  function removeWatchDir(dir: string) {
+    let hasReference = false;
+    for (const client of clients) {
+      if (client.watching.has(dir)) {
+        hasReference = true;
+        break;
+      }
     }
 
-    watchingDirs.set(absolutePath, count - 1);
+    if (!hasReference) {
+      watcher.unwatch(dir);
+    }
   }
-}
-
-async function fromGitIgnore(dir: string, defaultValue?: string): Promise<IgnoredFn | undefined> {
-  const gitignore = await fs
-    .readFile(path.join(dir, '.gitignore'), 'utf-8')
-    .catch(() => defaultValue);
-
-  if (gitignore) {
-    const ig = ignore();
-    ig.add(gitignore);
-    return toMatcher(dir, ig);
-  }
-}
-
-function toMatcher(dir: string, ig: Ignore): IgnoredFn {
-  return (v) => {
-    const relativePath = path.relative(dir, v);
-    // for invalid path, don't ignore
-    return ignore.isPathValid(relativePath) && ig.checkIgnore(relativePath).ignored;
-  };
 }
 
 function rawDataToString(data: RawData): string {
@@ -190,4 +165,19 @@ function rawDataToString(data: RawData): string {
   if (Array.isArray(data)) return Buffer.concat(data).toString('utf8');
 
   return data.toString('utf8');
+}
+
+class Client {
+  /** dir -> options */
+  readonly watching = new Map<string, { matcher: Matcher }>();
+
+  constructor(readonly socket: WebSocket) {}
+
+  addWatching(dir: string, options: WatchDirOptions) {
+    this.watching.set(dir, { matcher: picomatch(options.includes) });
+  }
+
+  close() {
+    this.socket.close();
+  }
 }

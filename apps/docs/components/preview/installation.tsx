@@ -1,30 +1,12 @@
-import { Tabs, TabsContent, TabsList, TabsTrigger } from 'fumadocs-ui/components/ui/tabs';
 import { ServerCodeBlock } from 'fumadocs-ui/components/codeblock.rsc';
 
 export function Installation({ name }: { name: string }) {
-  const tabs = [{ name: 'Fumadocs CLI', value: 'fumadocs-cli' }];
-
   return (
-    <Tabs className="my-6">
-      <TabsList className="flex flex-col gap-3 text-sm items-start p-3 mb-2 bg-fd-card text-fd-card-foreground rounded-xl border not-prose sm:flex-row">
-        <div className="me-auto">
-          <p className="font-medium">Install to your codebase</p>
-          <p className="mt-1 text-fd-muted-foreground">Easier customization & control.</p>
-        </div>
-        {tabs.map((tab) => (
-          <TabsTrigger
-            key={tab.value}
-            value={tab.value}
-            className="font-medium text-fd-muted-foreground transition-colors data-[state=active]:text-fd-primary"
-          >
-            {tab.name}
-          </TabsTrigger>
-        ))}
-      </TabsList>
+    <div className="p-3 border rounded-xl bg-fd-card text-fd-card-foreground my-6 text-sm not-prose">
+      <p className="font-medium">Install to your codebase</p>
+      <p className="mt-1 mb-4 text-fd-muted-foreground">Easier customization & control.</p>
 
-      <TabsContent value="fumadocs-cli">
-        <ServerCodeBlock code={`npx @fumadocs/cli@latest add ${name}`} lang="bash" />
-      </TabsContent>
-    </Tabs>
+      <ServerCodeBlock code={`npx @fumadocs/cli@latest add ${name}`} lang="bash" />
+    </div>
   );
 }

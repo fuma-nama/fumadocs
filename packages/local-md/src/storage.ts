@@ -6,6 +6,7 @@ import { frontmatter as parseFrontmatter } from 'fumadocs-core/content/md/frontm
 import type { StandardSchemaV1 } from '@standard-schema/spec';
 import type { PageData } from 'fumadocs-core/source';
 import * as defaultSchemas from 'fumadocs-core/source/schema';
+import { defaultInclude } from './shared';
 
 export interface RawPage<Frontmatter = Record<string, unknown>> {
   path: string;
@@ -33,7 +34,7 @@ export function createStorage<
   type $Meta = RawMeta<StandardSchemaV1.InferOutput<MetaSchema>>;
   const filesCache = new Map<string, $Page | $Meta>();
   const {
-    include = ['**/*.{md,mdx,json}'],
+    include = defaultInclude,
     dir,
     frontmatterSchema = defaultSchemas.pageSchema,
     metaSchema = defaultSchemas.metaSchema,

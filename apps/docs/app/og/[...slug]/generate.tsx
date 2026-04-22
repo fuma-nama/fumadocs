@@ -8,12 +8,12 @@ export interface GenerateProps {
 }
 
 const font = readFile('./lib/og/JetBrainsMono-Regular.ttf').then((data) => ({
-  name: 'Mono',
+  name: 'JetBrainsMono',
   data,
   weight: 400,
 }));
 const fontBold = readFile('./lib/og/JetBrainsMono-Bold.ttf').then((data) => ({
-  name: 'Mono',
+  name: 'JetBrainsMono',
   data,
   weight: 600,
 }));
@@ -54,6 +54,7 @@ export function generate({ title, description }: GenerateProps) {
         height: '100%',
         color: 'white',
         backgroundColor: 'rgb(10,10,10)',
+        fontFamily: 'JetBrainsMono',
       }}
     >
       <div
