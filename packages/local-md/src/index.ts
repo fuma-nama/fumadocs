@@ -7,6 +7,7 @@ import { createMarkdownRenderer, MarkdownRendererOptions, PageRenderer } from '.
 import { createMarkdownCompiler, MarkdownCompilerOptions } from './md/compiler';
 import { getDevServerUrlFromEnv } from './dev/shared';
 import type { DynamicLoader } from 'fumadocs-core/source/dynamic';
+import { defaultInclude } from './shared';
 
 export interface LocalMarkdownConfig<
   FrontmatterSchema extends StandardSchemaV1,
@@ -111,10 +112,6 @@ export function localMd<
     return files;
   }
 
-  async function createSource() {
-    return { files: await createFiles() };
-  }
-
   return {
     invalidateFile(file) {
       const absolutePath = path.resolve(file);
@@ -132,7 +129,11 @@ export function localMd<
 
       const { connectDevServer } = await import('@/dev/node-client');
       const conn = connectDevServer(url);
-      conn.watchDir(path.resolve(config.dir));
+      conn.send({
+        type: 'watch-dir',
+        dir: path.resolve(config.dir),
+        includes: config.include ?? defaultInclude,
+      });
 
       conn.subscribe((event) => {
         if (event.type === 'change') {
@@ -149,7 +150,7 @@ export function localMd<
       };
     },
     staticSource() {
-      return (cachedStaticSource ??= createSource());
+      return (cachedStaticSource ??= createFiles().then((files) => ({ files })));
     },
   };
 }

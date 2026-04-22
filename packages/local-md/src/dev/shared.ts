@@ -2,9 +2,13 @@ export const LOCAL_MD_DEV_PATH = '/_fumadocs_local_md';
 
 export type DevWatchEvent = 'add' | 'addDir' | 'change' | 'unlink' | 'unlinkDir';
 
-export interface DevClientEvent {
-  type: 'watch';
-  absolutePath: string;
+export interface DevClientEvent extends WatchDirOptions {
+  type: 'watch-dir';
+}
+
+export interface WatchDirOptions {
+  dir: string;
+  includes: string[];
 }
 
 export type DevServerEvent =

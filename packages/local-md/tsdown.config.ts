@@ -18,7 +18,7 @@ export default defineConfig({
     exclude: ['bin'],
   },
   deps: {
-    onlyBundle: ['ignore'],
+    onlyBundle: [],
     neverBundle: [],
   },
 });

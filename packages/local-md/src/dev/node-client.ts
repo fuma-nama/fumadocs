@@ -21,7 +21,7 @@ export function connectDevServer(url: string): DevServerConnection {
 
 export class DevServerConnection {
   private readonly listeners = new Set<(event: DevServerEvent) => void>();
-  private readonly pendingDirs = new Set<string>();
+  private pendingEvents: DevClientEvent[] = [];
   private socket?: WebSocket;
   readonly url: string;
 
@@ -44,17 +44,6 @@ export class DevServerConnection {
     store.delete(this.url);
   }
 
-  watchDir(dir: string) {
-    if (this.socket && this.socket.readyState === WebSocket.OPEN) {
-      this.send({
-        type: 'watch',
-        absolutePath: dir,
-      });
-    } else {
-      this.pendingDirs.add(dir);
-    }
-  }
-
   private connect() {
     if (this.socket) return;
     const socket = new WebSocket(this.url);
@@ -62,13 +51,10 @@ export class DevServerConnection {
 
     socket.on('open', () => {
       console.log(`[@fumadocs/local-md] connected to dev server at ${this.url}`);
-      for (const dir of this.pendingDirs) {
-        this.send({
-          type: 'watch',
-          absolutePath: dir,
-        });
+      for (const event of this.pendingEvents) {
+        this.send(event);
       }
-      this.pendingDirs.clear();
+      this.pendingEvents = [];
     });
 
     socket.on('message', (data) => {
@@ -92,8 +78,11 @@ export class DevServerConnection {
     }
   }
 
-  private send(message: DevClientEvent) {
-    if (this.socket?.readyState !== WebSocket.OPEN) return;
+  send(message: DevClientEvent) {
+    if (this.socket?.readyState !== WebSocket.OPEN) {
+      this.pendingEvents.push(message);
+      return;
+    }
 
     this.socket.send(encodeDevClientEvent(message));
   }
