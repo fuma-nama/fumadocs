@@ -1,0 +1,101 @@
+---
+title: Customize UI
+description: A complete guide on how to customize Fumadocs UI.
+---
+
+## Introduction
+
+Fumadocs UI provides pre-built components for simplicity, serving as a middleground between "installing all UI code to your codebase" and an opinionated package.
+
+While Fumadocs UI itself has many designs around flexibility & backward compatibility, if used incorrectly, the measures may take no effect.
+
+> It is also recommended to feed this guide to your AI agents, if they may edit your UI.
+
+### Props [step]
+
+You can first check if the options of components can suffice your needs, for example:
+
+```tsx
+<DocsLayout sidebar={{ enabled: false }}>{/* content */}</DocsLayout>
+```
+
+Or styling the container via props:
+
+```tsx
+<DocsLayout
+  containerProps={{
+    className: '...',
+  }}
+>
+  {/* content */}
+</DocsLayout>
+```
+
+Detailed documentations for each component are in the [Fumadocs UI](/docs/ui) section, you can take it as a reference.
+
+Most options support passing JSX elements to allow your own components.
+This approach should suffice most use cases, such as adding sections below table of contents or in sidebar.
+
+### CSS [step]
+
+When the styling is more complicated, some components of Fumadocs UI attaches its own `id` & `data-` attributes for selecting.
+You can target them in your CSS selectors:
+
+```css
+#nd-docs-layout #nd-subnav {
+  background-color: purple;
+}
+
+[data-toc-popover] {
+  background-color: purple;
+}
+```
+
+**Avoid invasive styles, or anything that presume a very specific DOM structure**, as it is difficult to guarantee backward compatibility, especially with newer UI features.
+
+```css title="Bad Example"
+/* avoid targeting elements like this! */
+[data-toc-popover] > div {
+  background-color: purple;
+}
+```
+
+CSS approach can be risky as only the `id` & `data-` attributes can be versioned under its own life cycles, prefer other approaches if possible.
+
+### Install via CLI [step]
+
+For advanced needs beyond the exposed options, or if your custom CSS styles became overly invasive, Fumadocs CLI is a powerful tool.
+
+You can find similar prompts under the relevant component docs, indicating the component is installable, such as:
+
+<Installation name="layouts/docs" />
+
+For **layout components** (which often composes multiple components), Fumadocs CLI has a special `customize` command with granular choices.
+
+```npm
+npx @fumadocs/cli@latest customize
+```
+
+Despite installing the entire layout component, you can choose to install a **slot** (a replaceable part of the layout component).
+Run the command above and you can view the full options.
+
+When installed, make sure to use the installed types over the types exported from Fumadocs UI. For example, if you have installed `layout/docs`, update your imports:
+
+```tsx
+// [!code --]
+import type { DocsLayoutProps } from 'fumadocs-ui/layouts/docs';
+// [!code ++]
+import type { DocsLayoutProps } from '@/components/layout/docs';
+```
+
+This ensure your local components will be decoupled from Fumadocs UI.
+
+While Fumadocs CLI offers full control for the UI code, it is worth mentioning that:
+
+- You won't be able to receive UI updates for the installed the components.
+- You can re-install the component with Fumadocs CLI, but prior customisations will be erased. (You can choose which file to overwrite)
+- Fumadocs CLI will assume the latest Fumadocs Core + UI to be used.
+
+## Other Questions
+
+Feel free to reach out in [GitHub Discussions](https://github.com/fuma-nama/fumadocs/discussions) for questions, or if you have encountered unexpected breakages.
