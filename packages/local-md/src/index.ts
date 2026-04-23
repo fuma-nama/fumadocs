@@ -1,13 +1,19 @@
 import type { DynamicSource, MetaData, StaticSource, VirtualFile } from 'fumadocs-core/source';
 import type { StandardSchemaV1 } from '@standard-schema/spec';
 import path from 'node:path';
-import { createStorage } from './storage';
+import { createStorage, RawPage } from './storage';
 import type * as defaultSchemas from 'fumadocs-core/source/schema';
-import { createMarkdownRenderer, MarkdownRendererOptions, PageRenderer } from './md/renderer';
-import { createMarkdownCompiler, MarkdownCompilerOptions } from './md/compiler';
+import {
+  type MarkdownRenderer,
+  type MarkdownRendererASTOptions,
+  fromAst,
+  fromJS,
+} from './md/renderer';
+import { CompileResult, createMarkdownCompiler, MarkdownCompilerOptions } from './md/compiler';
 import { getDevServerUrlFromEnv } from './dev/shared';
 import type { DynamicLoader } from 'fumadocs-core/source/dynamic';
 import { defaultInclude } from './shared';
+import { pathToFileURL } from 'node:url';
 
 export interface LocalMarkdownConfig<
   FrontmatterSchema extends StandardSchemaV1,
@@ -21,7 +27,7 @@ export interface LocalMarkdownConfig<
    * a list of glob patterns, customize the content files to be scanned.
    */
   include?: string[];
-  rendererOptions?: MarkdownRendererOptions;
+  rendererOptions?: Pick<MarkdownRendererASTOptions, 'executor'>;
 
   frontmatterSchema?: FrontmatterSchema;
   metaSchema?: MetaSchema;
@@ -56,7 +62,7 @@ export interface LocalMarkdownPage<
   content: string;
   frontmatter: Frontmatter;
 
-  load: () => Promise<PageRenderer<ModuleExports>>;
+  load: () => Promise<MarkdownRenderer<ModuleExports>>;
 }
 
 export function localMd<
@@ -67,7 +73,7 @@ export function localMd<
 ): LocalMarkdown<FrontmatterSchema, MetaSchema> {
   const storage = createStorage(config);
   const compiler = createMarkdownCompiler(config);
-  const renderer = createMarkdownRenderer(compiler, config.rendererOptions);
+  const compilerCache = new WeakMap<RawPage<unknown>, Promise<CompileResult>>();
   const registeredLoaders = new Set<DynamicLoader>();
   let cachedStaticSource: Promise<
     StaticSource<{
@@ -93,8 +99,31 @@ export function localMd<
           description: page.description,
           content: page.content,
           frontmatter: page.frontmatter,
-          load() {
-            return renderer.compile(page);
+          async load() {
+            let promise = compilerCache.get(page);
+            if (!promise) {
+              promise = compiler.compile({
+                path: page.absolutePath,
+                value: page.content,
+                data: { frontmatter: page.frontmatter },
+              });
+            }
+
+            const res = await promise;
+            return res.type === 'ast'
+              ? fromAst({
+                  tree: res.tree,
+                  filePath: res.file.path,
+                  rehypeToc: res.file.data.rehypeToc,
+                  structuredData: res.file.data.structuredData,
+                  ...config.rendererOptions,
+                })
+              : fromJS({
+                  code: res.code,
+                  filePath: res.file.path,
+                  baseUrl: pathToFileURL(res.file.path).href,
+                  structuredData: res.file.data.structuredData,
+                });
           },
         },
       });
@@ -163,4 +192,10 @@ export type {
   MarkdownCompiler,
   MarkdownProcessorOptions,
 } from './md/compiler';
-export type { MarkdownRendererOptions, PageRenderer } from './md/renderer';
+export type {
+  MarkdownRendererASTOptions,
+  MarkdownRendererJSOptions,
+  MarkdownRendererSerializedOptions,
+  MarkdownRenderer,
+  MarkdownRendererResult,
+} from './md/renderer';

@@ -1,6 +1,6 @@
 {
   "name": "@fumadocs/local-md",
-  "version": "0.1.2",
+  "version": "0.2.0",
   "description": "The local Markdown files content source for Fumadocs",
   "keywords": [
     "Docs",
@@ -19,6 +19,7 @@
   "type": "module",
   "exports": {
     ".": "./dist/index.js",
+    "./client": "./dist/client.js",
     "./dev/node-client": "./dist/dev/node-client.js",
     "./dev/node-server": "./dist/dev/node-server.js",
     "./dev/react-client": "./dist/dev/react-client.js",

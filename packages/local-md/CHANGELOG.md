@@ -1,5 +1,18 @@
 # @fumadocs/local-md
 
+## 0.2.0
+
+### Minor Changes
+
+- 4f9bd3e: support non-RSC usage
+
+## 0.1.3
+
+### Patch Changes
+
+- 0e8405a: fix file watcher pattern matching
+  - fumadocs-core@16.8.2
+
 ## 0.1.2
 
 ### Patch Changes
