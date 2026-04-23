@@ -1,12 +1,11 @@
 import { expect, test } from 'vitest';
 import fs from 'node:fs/promises';
 import path from 'node:path';
-import { fileURLToPath } from 'node:url';
+import { fileURLToPath, pathToFileURL } from 'node:url';
 import { renderToStaticMarkup } from 'react-dom/server';
 import { executorNative } from '@/js/executor-native';
-import { createMarkdownCompiler, MarkdownCompiler } from '@/md/compiler';
-import { createMarkdownRenderer, type MarkdownRendererOptions } from '@/md/renderer';
-import type { RawPage } from '@/storage';
+import { CompileResult, createMarkdownCompiler } from '@/md/compiler';
+import { fromAst, fromJS } from '@/md/renderer';
 import type { TOCItemType } from 'fumadocs-core/toc';
 
 const cwd = path.dirname(fileURLToPath(import.meta.url));
@@ -28,13 +27,38 @@ function serializeToc(toc: TOCItemType[] | undefined) {
   }));
 }
 
-function serializeRenderer(
-  page: RawPage,
-  compiler: MarkdownCompiler,
-  options?: MarkdownRendererOptions,
-) {
-  const renderer = createMarkdownRenderer(compiler, options);
-  return renderer.compile(page);
+function getRenderer(result: CompileResult) {
+  if (result.type === 'ast')
+    return fromAst({
+      filePath: result.file.path,
+      tree: result.tree,
+      rehypeToc: result.file.data.rehypeToc,
+      structuredData: result.file.data.structuredData,
+    });
+
+  return fromJS({
+    filePath: result.file.path,
+    code: result.code,
+    structuredData: result.file.data.structuredData,
+  });
+}
+
+function getRendererNative(result: CompileResult) {
+  if (result.type === 'ast')
+    return fromAst({
+      filePath: result.file.path,
+      tree: result.tree,
+      rehypeToc: result.file.data.rehypeToc,
+      structuredData: result.file.data.structuredData,
+      executor: executorNative,
+    });
+
+  return fromJS({
+    filePath: result.file.path,
+    code: result.code,
+    baseUrl: pathToFileURL(result.file.path).href,
+    structuredData: result.file.data.structuredData,
+  });
 }
 
 const cases = [
@@ -69,20 +93,14 @@ for (const { name, file } of cases) {
   test(`renderer: ${name}`, async () => {
     const { filePath, content } = await readFixture(file);
     const compiler = createMarkdownCompiler();
-    const pageRenderer = await serializeRenderer(
-      {
-        path: file,
-        absolutePath: filePath,
-        title: name,
-        content,
-        frontmatter: {},
-      },
-      compiler,
-    );
-
-    const { body, toc } = await pageRenderer.render();
+    const compiled = await compiler.compile({
+      path: filePath,
+      value: content,
+    });
+    const renderer = getRenderer(compiled);
+    const { body, toc } = await renderer.render();
     const payload = {
-      structuredData: pageRenderer.structuredData,
+      structuredData: renderer.structuredData,
       bodyHtml: renderToStaticMarkup(body),
       toc: serializeToc(toc),
     };
@@ -95,21 +113,15 @@ for (const { name, file } of cases) {
   test(`renderer (native): ${name}`, async () => {
     const { filePath, content } = await readFixture(file);
     const compiler = createMarkdownCompiler();
-    const pageRenderer = await serializeRenderer(
-      {
-        path: file,
-        absolutePath: filePath,
-        title: name,
-        content,
-        frontmatter: {},
-      },
-      compiler,
-      { executor: executorNative },
-    );
+    const compiled = await compiler.compile({
+      path: filePath,
+      value: content,
+    });
+    const renderer = getRendererNative(compiled);
 
-    const { body, toc } = await pageRenderer.render();
+    const { body, toc } = await renderer.render();
     const payload = {
-      structuredData: pageRenderer.structuredData,
+      structuredData: renderer.structuredData,
       bodyHtml: renderToStaticMarkup(body),
       toc: serializeToc(toc),
     };

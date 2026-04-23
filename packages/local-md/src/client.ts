@@ -1,1 +1,1 @@
-export { fromSerialized } from './md/renderer';
+export { fromSerialized as rendererFromSerialized } from './md/renderer';

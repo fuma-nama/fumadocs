@@ -2,32 +2,40 @@ const owner = 'fuma-nama';
 const repo = 'fumadocs';
 const versionPattern = /^16\.\d+\.\d+(?:-[0-9A-Za-z.-]+)?$/;
 
-type GitRefResponse = {
+interface GitObjectRef {
+  type: 'commit' | 'tag';
+  sha: string;
+}
+
+interface GitRefResponse {
+  object: GitObjectRef;
+}
+
+interface GitTagResponse {
   object: {
-    type: 'commit' | 'tag';
     sha: string;
   };
-};
+}
 
-type GitTagResponse = {
-  object: {
-    sha: string;
-  };
-};
-
-type VercelDeployment = {
+interface VercelDeployment {
   uid: string;
   url: string;
   alias?: string[];
   createdAt: number;
   target?: string;
-};
+}
 
-type VercelDeploymentsResponse = {
+interface VercelDeploymentsResponse {
   deployments?: VercelDeployment[];
-};
+}
 
-export const dynamic = 'force-dynamic';
+interface GitHubRequestOptions {
+  allowNotFound?: boolean;
+}
+
+const tagCommitCache = new Map<string, string | null>();
+const deploymentCache = new Map<string, VercelDeployment | null>();
+
 export const revalidate = false;
 
 export async function GET(request: Request): Promise<Response> {
@@ -109,24 +117,30 @@ export async function GET(request: Request): Promise<Response> {
 }
 
 async function resolveTagCommitSha(tag: string): Promise<string | null> {
+  const cached = getCached(tagCommitCache, tag);
+  if (cached !== undefined) return cached;
+
   const ref = await githubRequest<GitRefResponse>(`/git/ref/tags/${encodeURIComponent(tag)}`, {
     allowNotFound: true,
   });
 
-  if (!ref) return null;
+  if (!ref) {
+    setCache(tagCommitCache, tag, null);
+    return null;
+  }
 
   if (ref.object.type === 'commit') {
+    setCache(tagCommitCache, tag, ref.object.sha);
     return ref.object.sha;
   }
 
   const annotatedTag = await githubRequest<GitTagResponse>(`/git/tags/${ref.object.sha}`);
-  return annotatedTag.object.sha;
+  const resolvedSha = annotatedTag?.object.sha ?? null;
+  setCache(tagCommitCache, tag, resolvedSha);
+  return resolvedSha;
 }
 
-async function githubRequest<T>(
-  path: string,
-  options?: { allowNotFound?: boolean },
-): Promise<T | null> {
+async function githubRequest<T>(path: string, options?: GitHubRequestOptions): Promise<T | null> {
   const headers = new Headers({
     Accept: 'application/vnd.github+json',
     'User-Agent': 'fumadocs-docs-route',
@@ -155,6 +169,9 @@ async function githubRequest<T>(
 }
 
 async function findProductionDeployment(commitSha: string): Promise<VercelDeployment | null> {
+  const cached = getCached(deploymentCache, commitSha);
+  if (cached !== undefined) return cached;
+
   const token = process.env.VERCEL_TOKEN;
   const projectId = process.env.VERCEL_PROJECT_ID;
   const teamId = process.env.VERCEL_TEAM_ID;
@@ -185,5 +202,15 @@ async function findProductionDeployment(commitSha: string): Promise<VercelDeploy
   }
 
   const data = (await response.json()) as VercelDeploymentsResponse;
-  return data.deployments?.[0] ?? null;
+  const deployment = data.deployments?.[0] ?? null;
+  setCache(deploymentCache, commitSha, deployment);
+  return deployment;
+}
+
+function getCached<T>(cache: Map<string, T>, key: string): T | undefined {
+  return cache.get(key);
+}
+
+function setCache<T>(cache: Map<string, T>, key: string, value: T): void {
+  cache.set(key, value);
 }

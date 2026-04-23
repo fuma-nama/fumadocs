@@ -3,7 +3,12 @@ import type { StandardSchemaV1 } from '@standard-schema/spec';
 import path from 'node:path';
 import { createStorage, RawPage } from './storage';
 import type * as defaultSchemas from 'fumadocs-core/source/schema';
-import { type PageRenderer, type MarkdownRendererASTOptions, fromAst, fromJS } from './md/renderer';
+import {
+  type MarkdownRenderer,
+  type MarkdownRendererASTOptions,
+  fromAst,
+  fromJS,
+} from './md/renderer';
 import { CompileResult, createMarkdownCompiler, MarkdownCompilerOptions } from './md/compiler';
 import { getDevServerUrlFromEnv } from './dev/shared';
 import type { DynamicLoader } from 'fumadocs-core/source/dynamic';
@@ -57,7 +62,7 @@ export interface LocalMarkdownPage<
   content: string;
   frontmatter: Frontmatter;
 
-  load: () => Promise<PageRenderer<ModuleExports>>;
+  load: () => Promise<MarkdownRenderer<ModuleExports>>;
 }
 
 export function localMd<
@@ -94,7 +99,7 @@ export function localMd<
           description: page.description,
           content: page.content,
           frontmatter: page.frontmatter,
-          load() {
+          async load() {
             let promise = compilerCache.get(page);
             if (!promise) {
               promise = compiler.compile({
@@ -104,22 +109,21 @@ export function localMd<
               });
             }
 
-            return promise.then((res) =>
-              res.type === 'ast'
-                ? fromAst({
-                    tree: res.tree,
-                    filePath: res.file.path,
-                    rehypeToc: res.file.data.rehypeToc,
-                    structuredData: res.file.data.structuredData,
-                    ...config.rendererOptions,
-                  })
-                : fromJS({
-                    code: res.code,
-                    filePath: res.file.path,
-                    baseUrl: pathToFileURL(res.file.path).href,
-                    structuredData: res.file.data.structuredData,
-                  }),
-            );
+            const res = await promise;
+            return res.type === 'ast'
+              ? fromAst({
+                  tree: res.tree,
+                  filePath: res.file.path,
+                  rehypeToc: res.file.data.rehypeToc,
+                  structuredData: res.file.data.structuredData,
+                  ...config.rendererOptions,
+                })
+              : fromJS({
+                  code: res.code,
+                  filePath: res.file.path,
+                  baseUrl: pathToFileURL(res.file.path).href,
+                  structuredData: res.file.data.structuredData,
+                });
           },
         },
       });
@@ -192,5 +196,6 @@ export type {
   MarkdownRendererASTOptions,
   MarkdownRendererJSOptions,
   MarkdownRendererSerializedOptions,
-  PageRenderer,
+  MarkdownRenderer,
+  MarkdownRendererResult,
 } from './md/renderer';
