@@ -1,13 +1,10 @@
 import type { TOCItemType } from 'fumadocs-core/toc';
-import type { StructuredData } from 'fumadocs-core/mdx-plugins';
+import type { RehypeTOCItemType, StructuredData } from 'fumadocs-core/mdx-plugins';
 import type { ReactNode } from 'react';
-import type { RawPage } from '@/storage';
 import * as JsxRuntime from 'react/jsx-runtime';
 import { type Evaluater, toJsxRuntime } from 'hast-util-to-jsx-runtime';
 import type { Root } from 'hast';
 import type { JSExecutor, JSExecutorConfig } from '@/js/executor';
-import type { CompileResult, MarkdownCompiler } from './compiler';
-import { pathToFileURL } from 'node:url';
 import type { MDXComponents, MDXContent } from 'mdx/types';
 
 export interface PageRenderer<ModuleExports = Record<string, unknown>> {
@@ -20,9 +17,30 @@ export interface PageRenderer<ModuleExports = Record<string, unknown>> {
     toc: TOCItemType[];
     body: ReactNode;
   }>;
+  serialize: () => MarkdownRendererSerializedOptions;
 }
 
-export interface MarkdownRendererOptions {
+export type MarkdownRendererSerializedOptions =
+  | ({
+      type: 'js';
+    } & MarkdownRendererJSOptions)
+  | ({
+      type: 'ast';
+    } & Omit<MarkdownRendererASTOptions, 'executor'>);
+
+export interface MarkdownRendererJSOptions {
+  code: string;
+  filePath: string;
+  baseUrl?: string;
+  structuredData?: StructuredData;
+}
+
+export interface MarkdownRendererASTOptions {
+  tree: Root;
+  filePath: string;
+  structuredData?: StructuredData;
+  rehypeToc?: RehypeTOCItemType[];
+
   /**
    * the engine to execute JavaScript in Markdown, **not used for MDX files, MDX will always use native JS engine.**
    *
@@ -31,99 +49,111 @@ export interface MarkdownRendererOptions {
   executor?: (ctx: JSExecutorConfig) => JSExecutor | Promise<JSExecutor>;
 }
 
-export function createMarkdownRenderer(
-  compiler: MarkdownCompiler,
-  options: MarkdownRendererOptions = {},
-) {
+async function defaultGetExecutor(config: JSExecutorConfig) {
+  const { executorVirtual } = await import('@/js/executor-virtual');
+  return executorVirtual(config);
+}
+
+export function fromAst<M>(options: MarkdownRendererASTOptions): PageRenderer<M> {
   const {
-    executor: getExecutor = async (config) => {
-      const { executorVirtual } = await import('@/js/executor-virtual');
-      return executorVirtual(config);
-    },
+    executor: getExecutor = defaultGetExecutor,
+    filePath,
+    structuredData,
+    rehypeToc,
+    tree,
   } = options;
-  const cache = new WeakMap<RawPage<unknown>, Promise<CompileResult>>();
 
   return {
-    async compile<V, M = Record<string, unknown>>(page: RawPage<V>): Promise<PageRenderer<M>> {
-      let promise = cache.get(page);
-      if (!promise) {
-        promise = compiler.compile({
-          path: page.absolutePath,
-          value: page.content,
-          data: { frontmatter: page.frontmatter },
+    get structuredData() {
+      return (
+        structuredData ?? {
+          headings: [],
+          contents: [],
+        }
+      );
+    },
+    async render(components, userContext) {
+      const context = { ...components, ...userContext };
+      const executor = await getExecutor({
+        jsx: JsxRuntime,
+        filePath,
+      });
+      const evaluater = toEvaluater(executor, context);
+
+      function render(tree: Root): ReactNode {
+        return toJsxRuntime(tree, {
+          filePath,
+          components,
+          development: false,
+          createEvaluater() {
+            return evaluater;
+          },
+          ...JsxRuntime,
         });
-        cache.set(page, promise);
       }
 
-      const compiled = await promise;
+      const toc =
+        rehypeToc?.map(
+          (item): TOCItemType => ({
+            ...item,
+            title: render({
+              type: 'root',
+              children: item.title.children,
+            }),
+          }),
+        ) ?? [];
 
       return {
-        get structuredData() {
-          return (
-            compiled.file.data.structuredData ?? {
-              headings: [],
-              contents: [],
-            }
-          );
-        },
-        async render(components, userContext) {
-          if (compiled.type === 'ast') {
-            const context = { ...components, ...userContext };
-            const executor = await getExecutor({
-              jsx: JsxRuntime,
-              filePath: page.absolutePath,
-            });
-            const evaluater = toEvaluater(executor, context);
+        toc,
+        body: render(tree),
+        exports: executor.getExports() as M,
+      };
+    },
+    serialize() {
+      const { executor: _, ...rest } = options;
 
-            function render(tree: Root): ReactNode {
-              return toJsxRuntime(tree, {
-                filePath: page.absolutePath,
-                components,
-                development: false,
-                createEvaluater() {
-                  return evaluater;
-                },
-                ...JsxRuntime,
-              });
-            }
-
-            const toc =
-              compiled.file.data.rehypeToc?.map(
-                (item): TOCItemType => ({
-                  ...item,
-                  title: render({
-                    type: 'root',
-                    children: item.title.children,
-                  }),
-                }),
-              ) ?? [];
-
-            return {
-              toc,
-              body: render(compiled.tree),
-              exports: executor.getExports() as M,
-            };
-          }
-
-          const _out = await executeMdx(
-            compiled.code,
-            pathToFileURL(page.absolutePath).href,
-            userContext,
-          );
-          const out = _out as {
-            toc?: TOCItemType[];
-            default: MDXContent;
-          };
-
-          return {
-            toc: out.toc ?? [],
-            body: JsxRuntime.jsx(out.default, { components }),
-            exports: out as M,
-          };
-        },
+      return {
+        type: 'ast',
+        ...rest,
       };
     },
   };
+}
+
+export function fromJS<M>(options: MarkdownRendererJSOptions): PageRenderer<M> {
+  const { code, structuredData, baseUrl } = options;
+
+  return {
+    get structuredData() {
+      return (
+        structuredData ?? {
+          headings: [],
+          contents: [],
+        }
+      );
+    },
+    async render(components, userContext) {
+      const _out = await executeMdx(code, baseUrl, userContext);
+      const out = _out as {
+        toc?: TOCItemType[];
+        default: MDXContent;
+      };
+
+      return {
+        toc: out.toc ?? [],
+        body: JsxRuntime.jsx(out.default, { components }),
+        exports: out as M,
+      };
+    },
+    serialize() {
+      return { type: 'js', ...options };
+    },
+  };
+}
+
+export function fromSerialized<M>(options: MarkdownRendererSerializedOptions): PageRenderer<M> {
+  if (options.type === 'js') return fromJS(options);
+  return fromAst(options);
 }
 
 const AsyncFunction: new (...args: string[]) => (...args: unknown[]) => Promise<unknown> =
@@ -132,7 +162,7 @@ const AsyncFunction: new (...args: string[]) => (...args: unknown[]) => Promise<
 /**
  * Note: unsafe by design
  */
-async function executeMdx(compiled: string, baseUrl: string, scope?: object) {
+async function executeMdx(compiled: string, baseUrl: string | undefined, scope?: object) {
   const fullScope = {
     ...scope,
     opts: {

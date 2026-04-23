@@ -19,6 +19,7 @@
   "type": "module",
   "exports": {
     ".": "./dist/index.js",
+    "./client": "./dist/client.js",
     "./dev/node-client": "./dist/dev/node-client.js",
     "./dev/node-server": "./dist/dev/node-server.js",
     "./dev/react-client": "./dist/dev/react-client.js",

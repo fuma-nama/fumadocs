@@ -5,7 +5,7 @@ export default defineConfig({
   fixedExtension: false,
   target: 'es2023',
   entry: [
-    './src/index.ts',
+    './src/{index,client}.ts',
     './src/bin.ts',
     './src/js/*',
     './src/dev/{node-server,node-client,react-client}.ts',
