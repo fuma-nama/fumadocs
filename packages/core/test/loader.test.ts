@@ -431,3 +431,42 @@ test('Loader: Serialize data', async () => {
 
   expect(JSON.stringify(result.pageTree), 'page tree unchanged').toBe(prev);
 });
+
+const i18nMetaSource = {
+  files: [
+    { type: 'meta' as const, path: 'meta.json', data: { title: 'Docs', pages: ['shop-products', 'about', '...'] } },
+    { type: 'page' as const, path: 'shop-products.mdx', data: { title: 'Shop Products EN' } },
+    { type: 'page' as const, path: 'shop-products.fi.mdx', data: { title: 'Shop Products FI' } },
+    { type: 'page' as const, path: 'about.mdx', data: { title: 'About EN' } },
+    { type: 'page' as const, path: 'about.fi.mdx', data: { title: 'About FI' } },
+    { type: 'page' as const, path: 'aaaa.fi.mdx', data: { title: 'Aaaa FI' } },
+  ],
+};
+
+test('i18n: meta.json without locale applies pages order to all locales', () => {
+  const result = loader(i18nMetaSource, {
+    baseUrl: '/',
+    pageTree: { noRef: true },
+    i18n: { defaultLanguage: 'en', languages: ['en', 'fi'] },
+  });
+
+  const trees = result.pageTree as Record<string, any>;
+  expect(trees.en.children[0].name).toBe('Shop Products EN');
+  expect(trees.en.children[1].name).toBe('About EN');
+  expect(trees.fi.children[0].name).toBe('Shop Products FI');
+  expect(trees.fi.children[1].name).toBe('About FI');
+});
+
+test('i18n: meta.json without locale applies pages order to all locales (no fallback)', () => {
+  const result = loader(i18nMetaSource, {
+    baseUrl: '/',
+    pageTree: { noRef: true },
+    i18n: { defaultLanguage: 'en', languages: ['en', 'fi'], fallbackLanguage: null },
+  });
+
+  const trees = result.pageTree as Record<string, any>;
+  expect(trees.en.children[0].name).toBe('Shop Products EN');
+  expect(trees.en.children[1].name).toBe('About EN');
+  expect(trees.fi.children[0].name).toBe('Shop Products FI');
+  expect(trees.fi.children[1].name).toBe('About FI');
+});

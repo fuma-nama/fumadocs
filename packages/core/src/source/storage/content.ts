@@ -63,6 +63,8 @@ const parsers = {
 };
 
 const EmptyLang = Symbol();
+/** non-locale meta files; applied to every locale storage before locale-specific files */
+const BaseLang = Symbol();
 
 /**
  * convert input files into virtual file system.
@@ -74,7 +76,7 @@ export function createContentStorageBuilder(loaderConfig: ResolvedLoaderConfig) 
 
   const parser = i18n ? parsers[i18n.parser ?? 'dot'] : parsers.none;
   const normalized = new Map<
-    string | typeof EmptyLang,
+    string | typeof EmptyLang | typeof BaseLang,
     {
       pathWithoutLocale: string;
       file: ContentStorageMetaFile | ContentStoragePageFile;
@@ -105,9 +107,9 @@ export function createContentStorageBuilder(loaderConfig: ResolvedLoaderConfig) 
         };
       }
 
-      const [pathWithoutLocale, locale = i18n ? i18n.defaultLanguage : EmptyLang] = parser(
-        file.path,
-      );
+      const [pathWithoutLocale, parsedLocale] = parser(file.path);
+      const locale =
+        parsedLocale ?? (i18n ? (file.format === 'meta' ? BaseLang : i18n.defaultLanguage) : EmptyLang);
       let list = normalized.get(locale);
       if (!list) {
         list = [];
@@ -129,6 +131,9 @@ export function createContentStorageBuilder(loaderConfig: ResolvedLoaderConfig) 
 
   function makeStorage(locale: string | typeof EmptyLang, inherit?: ContentStorage) {
     const storage = new FileSystem(inherit);
+    for (const { pathWithoutLocale, file } of normalized.get(BaseLang) ?? []) {
+      storage.write(pathWithoutLocale, file);
+    }
     for (const { pathWithoutLocale, file } of normalized.get(locale) ?? []) {
       storage.write(pathWithoutLocale, file);
     }
