@@ -224,7 +224,7 @@ And the type of pages is also changed:
 ```tsx tab="Before"
 const page = source.getPage(['...']);
 
-// title & description are unchanged
+// title & description
 page.data.title;
 
 // custom frontmatter properties
@@ -246,7 +246,7 @@ return (
 ```tsx tab="After"
 const page = docs.getPage(['...']);
 
-// title & description are unchanged
+// title & description (unchanged)
 page.data.title;
 
 // custom frontmatter properties
@@ -260,4 +260,66 @@ const { structuredData, render } = await page.data.load();
 const { toc, body } = await render(mdxComponents);
 
 return <div>{body}</div>;
+```
+
+### Without RSC
+
+If your setup doesn't support RSC, unlike Fumadocs MDX's `collections/browser` API, `local-md` leverages server payload to send AST, then render Markdown at client-side.
+
+For example, in Tanstack Start:
+
+```tsx title="src/routes/docs/$.tsx"
+import { createFileRoute, notFound } from '@tanstack/react-router';
+import { DocsLayout } from 'fumadocs-ui/layouts/docs';
+import { createServerFn } from '@tanstack/react-start';
+import { getSource } from '@/lib/source';
+import { DocsBody, DocsPage } from 'fumadocs-ui/layouts/docs/page';
+import { useFumadocsLoader } from 'fumadocs-core/source/client';
+import { useMemo } from 'react';
+import { useMDXComponents } from '@/components/mdx';
+import { rendererFromSerialized } from '@fumadocs/local-md/client';
+
+export const Route = createFileRoute('/docs/$')({
+  component: Page,
+  loader: async ({ params }) => {
+    const slugs = params._splat?.split('/') ?? [];
+    return serverLoader({ data: slugs });
+  },
+});
+
+const serverLoader = createServerFn({
+  method: 'GET',
+})
+  .inputValidator((slugs: string[]) => slugs)
+  .handler(async ({ data: slugs }) => {
+    const source = await getSource();
+    const page = source.getPage(slugs);
+    if (!page) throw notFound();
+
+    // compile
+    const { serialize } = await page.data.load();
+
+    return {
+      frontmatter: { ...page.data.frontmatter, _openapi: null },
+      // [!code highlight] pass it to payload
+      render: serialize(),
+      // ...
+    };
+  });
+
+function Page() {
+  const { pageTree, frontmatter, render } = useFumadocsLoader(Route.useLoaderData());
+  // [!code highlight:2] render under sync mode
+  const renderer = useMemo(() => rendererFromSerialized(render), [render]);
+  const { body, toc } = renderer.renderSync(useMDXComponents());
+
+  return (
+    <DocsLayout tree={pageTree}>
+      <DocsPage toc={toc}>
+        {/* ... */}
+        <DocsBody>{body}</DocsBody>
+      </DocsPage>
+    </DocsLayout>
+  );
+}
 ```
