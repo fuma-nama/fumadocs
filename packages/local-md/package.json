@@ -68,9 +68,9 @@
     "react": "^19.2.5",
     "react-dom": "^19.2.5",
     "tsconfig": "workspace:*",
-    "tsdown": "0.21.9",
+    "tsdown": "0.21.10",
     "unified": "^11.0.5",
-    "vite": "^8.0.8"
+    "vite": "^8.0.10"
   },
   "peerDependencies": {
     "@types/estree": "*",

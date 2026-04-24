@@ -17,16 +17,16 @@
     "react": "^19.2.5",
     "react-dom": "^19.2.5",
     "react-server-dom-webpack": "^19.2.5",
-    "waku": "1.0.0-alpha.7"
+    "waku": "1.0.0-alpha.8"
   },
   "devDependencies": {
-    "@tailwindcss/vite": "^4.2.2",
+    "@tailwindcss/vite": "^4.2.4",
     "@types/mdx": "^2.0.13",
     "@types/node": "^25.6.0",
     "@types/react": "^19.2.14",
     "@types/react-dom": "^19.2.3",
-    "tailwindcss": "^4.2.2",
+    "tailwindcss": "^4.2.4",
     "typescript": "^6.0.3",
-    "vite": "^8.0.8"
+    "vite": "^8.0.10"
   }
 }

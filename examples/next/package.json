@@ -12,20 +12,20 @@
     "fumadocs-core": "workspace:*",
     "fumadocs-mdx": "workspace:*",
     "fumadocs-ui": "workspace:*",
-    "lucide-react": "^1.8.0",
+    "lucide-react": "^1.9.0",
     "next": "16.2.4",
     "react": "^19.2.5",
     "react-dom": "^19.2.5",
     "tailwind-merge": "^3.5.0"
   },
   "devDependencies": {
-    "@tailwindcss/postcss": "^4.2.2",
+    "@tailwindcss/postcss": "^4.2.4",
     "@types/mdx": "^2.0.13",
     "@types/node": "^25.6.0",
     "@types/react": "^19.2.14",
     "@types/react-dom": "^19.2.3",
     "postcss": "^8.5.10",
-    "tailwindcss": "^4.2.2",
+    "tailwindcss": "^4.2.4",
     "typescript": "^6.0.3"
   }
 }

@@ -141,7 +141,7 @@
     "@radix-ui/react-slot": "^1.2.4",
     "@radix-ui/react-tabs": "^1.1.13",
     "class-variance-authority": "^0.7.1",
-    "lucide-react": "^1.8.0",
+    "lucide-react": "^1.9.0",
     "motion": "^12.38.0",
     "next-themes": "^0.4.6",
     "react-remove-scroll": "^2.7.2",
@@ -153,8 +153,8 @@
   },
   "devDependencies": {
     "@fumadocs/cli": "workspace:*",
-    "@tailwindcss/cli": "^4.2.2",
-    "@tsdown/css": "^0.21.9",
+    "@tailwindcss/cli": "^4.2.4",
+    "@tsdown/css": "^0.21.10",
     "@types/hast": "^3.0.4",
     "@types/mdx": "^2.0.13",
     "@types/node": "^25.6.0",
@@ -163,9 +163,9 @@
     "fuma-cli": "^0.0.5",
     "fumadocs-core": "workspace:*",
     "react-medium-image-zoom": "^5.4.3",
-    "tailwindcss": "^4.2.2",
+    "tailwindcss": "^4.2.4",
     "tsconfig": "workspace:*",
-    "tsdown": "0.21.9",
+    "tsdown": "0.21.10",
     "unified": "^11.0.5"
   },
   "peerDependencies": {

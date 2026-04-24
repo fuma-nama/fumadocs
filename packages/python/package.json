@@ -44,7 +44,7 @@
   "dependencies": {
     "class-variance-authority": "^0.7.1",
     "js-yaml": "^4.1.1",
-    "lucide-react": "^1.8.0",
+    "lucide-react": "^1.9.0",
     "tailwind-merge": "^3.5.0"
   },
   "devDependencies": {
@@ -54,7 +54,7 @@
     "fumadocs-core": "workspace:*",
     "fumadocs-ui": "workspace:*",
     "tsconfig": "workspace:*",
-    "tsdown": "0.21.9"
+    "tsdown": "0.21.10"
   },
   "peerDependencies": {
     "@types/react": "*",

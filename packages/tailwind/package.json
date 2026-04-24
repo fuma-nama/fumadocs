@@ -31,12 +31,12 @@
   },
   "devDependencies": {
     "@fastify/deepmerge": "^3.2.1",
-    "@tailwindcss/oxide": "^4.2.2",
+    "@tailwindcss/oxide": "^4.2.4",
     "@types/node": "^25.6.0",
     "postcss-selector-parser": "^7.1.1",
-    "tailwindcss": "^4.2.2",
+    "tailwindcss": "^4.2.4",
     "tsconfig": "workspace:*",
-    "tsdown": "0.21.9"
+    "tsdown": "0.21.10"
   },
   "peerDependencies": {
     "@tailwindcss/oxide": "^4.0.0",
