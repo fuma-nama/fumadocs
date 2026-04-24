@@ -97,12 +97,12 @@
 }
 
 /* inline code */
-code.shiki span {
+code.shiki:not(.not-fumadocs-code *) span {
   color: var(--shiki-light);
   font-style: var(--shiki-light-font-style);
 }
 
-.dark code.shiki span {
+.dark code.shiki:not(.not-fumadocs-code *) span {
   color: var(--shiki-dark);
   font-style: var(--shiki-dark-font-style);
 }

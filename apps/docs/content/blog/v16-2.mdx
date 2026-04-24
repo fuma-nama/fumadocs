@@ -65,6 +65,8 @@ The new system fixed most of the flaws, allowing easier visualizations, while re
 
 ## Breaking Changes
 
+### Global Styles
+
 While Fumadocs 16.2 preserves compatibility in several areas, notably:
 
 - The `--fd-layout-width` CSS variable continues to function as expected.
@@ -72,7 +74,14 @@ While Fumadocs 16.2 preserves compatibility in several areas, notably:
 
 However, the shift to the new grid system may impact existing customizations, particularly those dependent on the prior fixed-position logic. We recommend reviewing your implementation carefully and testing thoroughly.
 
-## Minor Changes
+If you have already installed layout components via Fumadocs CLI, replace `preset.css` with `preset-legacy.css` to keep legacy styles & avoid unexpected breakages:
+
+```css title="global.css"
+/* [!code --] */
+@import 'fumadocs-ui/css/preset.css';
+/* [!code ++] */
+@import 'fumadocs-ui/css/preset-legacy.css';
+```
 
 ### No Longer Exposing Internal Components
 
@@ -80,6 +89,56 @@ Layout components such as Root Toggle, Language Toggle, and Theme Toggle are no 
 This decision enables Fumadocs UI to iterate these elements without introducing unexpected breaking changes to usage outside of API surfaces.
 
 **Migration Steps:** Override the relevant layout components with your own implementations, or utilize the Fumadocs CLI commands (`add` or `customize`) to install them locally.
+
+### Removal of Internal Contexts
+
+The following context modules are made private:
+
+- `fumadocs-ui/contexts/sidebar`
+- `fumadocs-ui/contexts/layout`
+
+If you have already installed `<DocsLayout />` via Fumadocs CLI, import the legacy contexts instead:
+
+```ts
+// [!code --:2]
+import {} from 'fumadocs-ui/contexts/sidebar';
+import {} from 'fumadocs-ui/contexts/layout';
+
+// [!code ++:2]
+import {} from 'fumadocs-ui/legacy/sidebar';
+import {} from 'fumadocs-ui/legacy/layout';
+```
+
+And wrap your app under the legacy `<SidebarProvider />`:
+
+```tsx
+import type { ReactNode } from 'react';
+import { SidebarProvider } from 'fumadocs-ui/legacy/sidebar';
+
+export function RootLayout({ children }: { children: ReactNode }) {
+  return <SidebarProvider>{children}</SidebarProvider>;
+}
+```
+
+<Callout title="What if I still use built-in layouts?">
+
+The legacy contexts are made exclusively for layout components installed locally. If you still
+import layout components (e.g. `<DocsLayout />`) from `fumadocs-ui`, migrate your usages as follows:
+
+```tsx
+// [!code --]
+import { useSidebar } from 'fumadocs-ui/contexts/sidebar';
+// [!code ++]
+import { useSidebar } from 'fumadocs-ui/components/sidebar/base';
+```
+
+Ensure the contexts are only accessed within `<DocsLayout />`.
+
+</Callout>
+
+## Minor Changes
+
+The changes below are backward compatible.
 
 ### Importing Page Layouts by Type
 
@@ -101,16 +160,6 @@ import { DocsPage } from 'fumadocs-ui/layouts/notebook/page';
 Styles related to the abandoned `container` utility, and `--spacing-fd-container` variable, have been dropped as they are no longer utilized.
 
 **Migration Steps:** Remove references to these styles from your codebase.
-
-### Relocation of Sidebar Context
-
-The `fumadocs-ui/contexts/sidebar` module has been removed. Access the context via:
-
-```ts
-import { useSidebar } from 'fumadocs-ui/components/sidebar/base';
-```
-
-**Migration Steps:** Update import paths, ensure the context is only accessed within `<DocsLayout />`.
 
 ## Conclusion
 

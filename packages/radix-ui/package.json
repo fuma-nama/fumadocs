@@ -91,6 +91,8 @@
     "./layouts/shared/slots/language-select": "./dist/layouts/shared/slots/language-select.js",
     "./layouts/shared/slots/search-trigger": "./dist/layouts/shared/slots/search-trigger.js",
     "./layouts/shared/slots/theme-switch": "./dist/layouts/shared/slots/theme-switch.js",
+    "./legacy/layout": "./dist/legacy/layout.js",
+    "./legacy/sidebar": "./dist/legacy/sidebar.js",
     "./mdx": {
       "types": "./dist/mdx.d.ts",
       "node": "./dist/mdx.server.js",
@@ -111,14 +113,8 @@
     "./components/image-zoom2.css": "./dist/components/image-zoom2.css",
     "./style.css": "./dist/style.css",
     "./css/*": "./css/*",
-    "./utils/get-sidebar-tabs": {
-      "types": "./dist/components/sidebar/tabs/index.d.ts",
-      "import": "./dist/components/sidebar/tabs/index.js"
-    },
-    "./components/tabs.unstyled": {
-      "types": "./dist/components/ui/tabs.d.ts",
-      "import": "./dist/components/ui/tabs.js"
-    }
+    "./utils/get-sidebar-tabs": "./dist/components/sidebar/tabs/index.js",
+    "./components/tabs.unstyled": "./dist/components/ui/tabs.js"
   },
   "publishConfig": {
     "access": "public"
@@ -128,7 +124,7 @@
     "build:layout": "tsdown --config-loader unrun",
     "build:tailwind": "tailwindcss -i css/style.css -o ./dist/style.css",
     "clean": "rimraf dist",
-    "dev": "concurrently \"tsdown --watch --clean false\" \"tailwindcss -i css/style.css -o ./dist/style.css -w\"",
+    "dev": "concurrently \"tsdown --watch --clean false --config-loader unrun\" \"tailwindcss -i css/style.css -o ./dist/style.css -w\"",
     "lint": "oxlint .",
     "types:check": "tsc --noEmit"
   },
