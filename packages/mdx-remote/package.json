@@ -51,7 +51,7 @@
     "react": "^19.2.5",
     "tinyglobby": "^0.2.16",
     "tsconfig": "workspace:*",
-    "tsdown": "0.21.9"
+    "tsdown": "0.21.10"
   },
   "peerDependencies": {
     "@types/mdx": "*",

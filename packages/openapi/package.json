@@ -62,7 +62,7 @@
     "github-slugger": "^2.0.0",
     "hast-util-to-jsx-runtime": "^2.3.6",
     "js-yaml": "^4.1.1",
-    "lucide-react": "^1.8.0",
+    "lucide-react": "^1.9.0",
     "remark": "^15.0.1",
     "remark-rehype": "^11.1.2",
     "shiki": "^4.0.2",
@@ -71,10 +71,10 @@
   },
   "devDependencies": {
     "@fastify/deepmerge": "^3.2.1",
-    "@fumadocs/tailwind": "workspace:*",
     "@scalar/api-client-react": "2.0.1",
-    "@scalar/json-magic": "^0.12.7",
-    "@scalar/openapi-upgrader": "^0.2.5",
+    "@scalar/json-magic": "^0.12.8",
+    "@scalar/openapi-upgrader": "^0.2.6",
+    "@tailwindcss/oxide": "^4.2.4",
     "@types/js-yaml": "^4.0.9",
     "@types/node": "25.6.0",
     "@types/react": "^19.2.14",
@@ -82,9 +82,9 @@
     "fumadocs-core": "workspace:*",
     "fumadocs-ui": "workspace:*",
     "json-schema-typed": "^8.0.2",
-    "tailwindcss": "^4.2.2",
+    "tailwindcss": "^4.2.4",
     "tsconfig": "workspace:*",
-    "tsdown": "0.21.9"
+    "tsdown": "0.21.10"
   },
   "peerDependencies": {
     "@scalar/api-client-react": "2.0.1",

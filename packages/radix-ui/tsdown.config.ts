@@ -13,6 +13,7 @@ export default defineConfig({
     './src/layouts/**/slots/*',
     './src/layouts/home/{navbar,not-found}.tsx',
     './src/utils/use-*.{ts,tsx}',
+    './src/legacy/*',
   ],
   fixedExtension: false,
   unbundle: true,
@@ -33,14 +34,8 @@ export default defineConfig({
     customExports: {
       './style.css': './dist/style.css',
       './css/*': './css/*',
-      './utils/get-sidebar-tabs': {
-        types: './dist/components/sidebar/tabs/index.d.ts',
-        import: './dist/components/sidebar/tabs/index.js',
-      },
-      './components/tabs.unstyled': {
-        types: './dist/components/ui/tabs.d.ts',
-        import: './dist/components/ui/tabs.js',
-      },
+      './utils/get-sidebar-tabs': './dist/components/sidebar/tabs/index.js',
+      './components/tabs.unstyled': './dist/components/ui/tabs.js',
       './mdx': {
         types: './dist/mdx.d.ts',
         node: './dist/mdx.server.js',
