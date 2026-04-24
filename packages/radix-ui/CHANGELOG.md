@@ -1,5 +1,14 @@
 # fumadocs-ui
 
+## 16.8.3
+
+### Patch Changes
+
+- 8082ef6: Add `legacy/layout` for versions prior to 16.2
+- 8082ef6: Add `css/preset-legacy.css` for versions prior to 16.2
+- 8082ef6: Add `legacy/sidebar` for versions prior to 16.2
+  - fumadocs-core@16.8.3
+
 ## 16.8.2
 
 ### Patch Changes
