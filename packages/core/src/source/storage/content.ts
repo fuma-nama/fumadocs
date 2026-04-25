@@ -1,5 +1,5 @@
 import { FileSystem } from '@/source/storage/file-system';
-import { basename, dirname, joinPath, slash, splitPath } from '@/source/path';
+import { slash, splitPath } from '@/source/path';
 import type { ResolvedLoaderConfig } from '../loader';
 import { isStaticSource, MetaData, PageData, type StaticSource } from '../source';
 
@@ -34,34 +34,6 @@ export interface ContentStoragePageFile<
   data: Data;
 }
 
-function isLocaleValid(locale: string) {
-  return locale.length > 0 && !/\d+/.test(locale);
-}
-
-const parsers = {
-  dir(path: string): [string, string?] {
-    const [locale, ...segs] = path.split('/');
-
-    if (locale && segs.length > 0 && isLocaleValid(locale)) return [segs.join('/'), locale];
-
-    return [path];
-  },
-  dot(path: string): [string, string?] {
-    const dir = dirname(path);
-    const base = basename(path);
-    const parts = base.split('.');
-    if (parts.length < 3) return [path];
-
-    const [locale] = parts.splice(parts.length - 2, 1);
-    if (!isLocaleValid(locale)) return [path];
-
-    return [joinPath(dir, parts.join('.')), locale];
-  },
-  none(path: string): [string, string?] {
-    return [path];
-  },
-};
-
 const EmptyLang = Symbol();
 
 /**
@@ -72,13 +44,45 @@ const EmptyLang = Symbol();
 export function createContentStorageBuilder(loaderConfig: ResolvedLoaderConfig) {
   const { input, plugins, i18n } = loaderConfig;
 
-  const parser = i18n ? parsers[i18n.parser ?? 'dot'] : parsers.none;
-  const normalized = new Map<
+  let parser: (normalizedPath: string) => [string, (string | string[])?];
+  if (!i18n) {
+    parser = (path) => [path];
+  } else if (i18n.parser === 'dir') {
+    const langSet = new Set(i18n.languages);
+
+    parser = (path) => {
+      const [locale, ...segs] = path.split('/');
+      if (!locale || segs.length === 0) return [path];
+
+      if (langSet.has(locale)) return [segs.join('/'), locale];
+      if (locale === '$') return [segs.join('/'), i18n.languages];
+
+      return [path];
+    };
+  } else {
+    const langSet = new Set(i18n.languages);
+
+    parser = (path) => {
+      const segs = path.split('/');
+      const base = segs.pop();
+      if (!base) return [path];
+
+      const parts = base.split('.');
+      if (parts.length < 3) return [path];
+
+      const [locale] = parts.splice(parts.length - 2, 1);
+      segs.push(parts.join('.'));
+
+      if (langSet.has(locale)) return [segs.join('/'), locale];
+      if (locale === '$') return [segs.join('/'), i18n.languages];
+
+      return [path];
+    };
+  }
+
+  const fileMap = new Map<
     string | typeof EmptyLang,
-    {
-      pathWithoutLocale: string;
-      file: ContentStorageMetaFile | ContentStoragePageFile;
-    }[]
+    [storageKey: string, file: ContentStorageMetaFile | ContentStoragePageFile][]
   >();
 
   function scan(type: string | undefined, source: StaticSource) {
@@ -105,19 +109,13 @@ export function createContentStorageBuilder(loaderConfig: ResolvedLoaderConfig) 
         };
       }
 
-      const [pathWithoutLocale, locale = i18n ? i18n.defaultLanguage : EmptyLang] = parser(
-        file.path,
-      );
-      let list = normalized.get(locale);
-      if (!list) {
-        list = [];
-        normalized.set(locale, list);
+      const [storageKey, locale = i18n ? i18n.defaultLanguage : EmptyLang] = parser(file.path);
+      const entry = [storageKey, file];
+      if (Array.isArray(locale)) {
+        for (const item of locale) pushMapList(fileMap, item, entry);
+      } else {
+        pushMapList(fileMap, locale, entry);
       }
-
-      list.push({
-        pathWithoutLocale,
-        file,
-      });
     }
   }
 
@@ -129,8 +127,8 @@ export function createContentStorageBuilder(loaderConfig: ResolvedLoaderConfig) 
 
   function makeStorage(locale: string | typeof EmptyLang, inherit?: ContentStorage) {
     const storage = new FileSystem(inherit);
-    for (const { pathWithoutLocale, file } of normalized.get(locale) ?? []) {
-      storage.write(pathWithoutLocale, file);
+    for (const [storageKey, file] of fileMap.get(locale) ?? []) {
+      storage.write(storageKey, file);
     }
 
     const context = { storage };
@@ -177,4 +175,13 @@ function normalizePath(path: string): string {
   if (segments[0] === '.' || segments[0] === '..')
     throw new Error("It must not start with './' or '../'");
   return segments.join('/');
+}
+
+function pushMapList<K, V>(map: Map<K, V[]>, k: K, v: V) {
+  let list = map.get(k);
+  if (!list) {
+    list = [];
+    map.set(k, list);
+  }
+  list.push(v);
 }

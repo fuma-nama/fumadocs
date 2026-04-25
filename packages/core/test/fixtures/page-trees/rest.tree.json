@@ -1,19 +1,19 @@
 {
+  "type": "root",
   "$id": "root",
+  "name": "Docs",
   "children": [
     {
       "$id": "2-2.mdx",
-      "name": "2.2",
       "type": "page",
-      "url": "/2-2",
+      "name": "2.2",
+      "url": "/2-2"
     },
     {
       "$id": "1-2.mdx",
-      "name": "1.2",
       "type": "page",
-      "url": "/1-2",
-    },
-  ],
-  "name": "Docs",
-  "type": "root",
+      "name": "1.2",
+      "url": "/1-2"
+    }
+  ]
 }

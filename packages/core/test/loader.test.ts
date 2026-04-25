@@ -87,6 +87,18 @@ const pageTreeTests: {
     },
   },
   {
+    title: 'Internationalized Routing: No Fallback',
+    source: (await import('./fixtures/page-trees/i18n')).source,
+    output: './fixtures/page-trees/i18n-no-fallback.tree.json',
+    loader: {
+      i18n: {
+        languages: ['cn', 'en'],
+        defaultLanguage: 'en',
+        fallbackLanguage: null,
+      },
+    },
+  },
+  {
     title: 'Internationalized Routing: dir',
     source: (await import('./fixtures/page-trees/i18n-dir')).source,
     output: './fixtures/page-trees/i18n-dir.test.json',
@@ -115,7 +127,9 @@ for (const pageTreeTest of pageTreeTests) {
       ...pageTreeTest.loader,
     });
 
-    await expect(removeUndefined(source.pageTree, true)).toMatchFileSnapshot(pageTreeTest.output);
+    await expect(
+      JSON.stringify(removeUndefined(source.pageTree, true), null, 2),
+    ).toMatchFileSnapshot(pageTreeTest.output);
   });
 }
 

@@ -1,0 +1,66 @@
+{
+  "cn": {
+    "type": "root",
+    "$id": "cn:root",
+    "name": "Docs Chinese",
+    "children": [
+      {
+        "$id": "cn:test.mdx",
+        "type": "page",
+        "name": "Hello Chinese",
+        "url": "/cn/test"
+      },
+      {
+        "type": "folder",
+        "name": "Nested Chinese",
+        "children": [
+          {
+            "$id": "cn:nested/test.mdx",
+            "type": "page",
+            "name": "Nested Page Chinese",
+            "url": "/cn/nested/test"
+          }
+        ],
+        "$id": "cn:nested"
+      },
+      {
+        "type": "folder",
+        "name": "Docs (Shared)",
+        "children": [],
+        "$id": "cn:secret"
+      }
+    ]
+  },
+  "en": {
+    "type": "root",
+    "$id": "en:root",
+    "name": "Docs English",
+    "children": [
+      {
+        "$id": "en:test.mdx",
+        "type": "page",
+        "name": "Hello",
+        "url": "/en/test"
+      },
+      {
+        "type": "folder",
+        "name": "Nested",
+        "children": [
+          {
+            "$id": "en:nested/test.mdx",
+            "type": "page",
+            "name": "Nested Page",
+            "url": "/en/nested/test"
+          }
+        ],
+        "$id": "en:nested"
+      },
+      {
+        "type": "folder",
+        "name": "Docs (Shared)",
+        "children": [],
+        "$id": "en:secret"
+      }
+    ]
+  }
+}
