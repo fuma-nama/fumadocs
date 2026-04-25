@@ -5,17 +5,20 @@ export function basename(path: string, ext?: string): string {
 }
 
 export function extname(path: string): string {
-  const dotIdx = path.lastIndexOf('.');
-
-  if (dotIdx !== -1) {
-    return path.substring(dotIdx);
+  for (let i = path.length - 1; i >= 0; i--) {
+    const c = path[i];
+    if (c === '.') return path.substring(i);
+    if (c === '/') return '';
   }
 
   return '';
 }
 
 export function dirname(path: string): string {
-  return path.split('/').slice(0, -1).join('/');
+  const idx = path.lastIndexOf('/');
+  if (idx === -1) return '';
+
+  return path.substring(0, idx);
 }
 /**
  * Split path into segments, trailing/leading slashes are removed
@@ -37,13 +40,14 @@ export function splitPath(path: string): string[] {
  */
 export function joinPath(...paths: string[]): string {
   const out = [];
-  const parsed = paths.flatMap(splitPath);
+  const parsed = paths.flatMap((path) => path.split('/'));
 
   for (const seg of parsed) {
     switch (seg) {
       case '..':
         out.pop();
         break;
+      case '':
       case '.':
         break;
       default:

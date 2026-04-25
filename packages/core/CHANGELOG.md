@@ -1,5 +1,12 @@
 # fumadocs-core
 
+## 16.8.4
+
+### Patch Changes
+
+- 61b15e9: fix Shiki languages not loaded under lazy mode
+- 1a5433c: Support `$` in locale for page tree generation
+
 ## 16.8.3
 
 ## 16.8.2

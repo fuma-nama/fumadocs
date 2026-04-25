@@ -1,84 +1,84 @@
 {
+  "type": "root",
   "$id": "root",
+  "name": "Docs",
   "children": [
     {
       "$id": "test.mdx",
-      "name": "Hello",
       "type": "page",
-      "url": "/test",
+      "name": "Hello",
+      "url": "/test"
     },
     {
-      "$id": "(nested)",
+      "type": "folder",
+      "name": "Nested",
       "children": [
         {
           "$id": "(nested)/hello.mdx",
-          "name": "Route Group Page",
           "type": "page",
-          "url": "/hello",
-        },
+          "name": "Route Group Page",
+          "url": "/hello"
+        }
       ],
-      "name": "Nested",
-      "type": "folder",
+      "$id": "(nested)"
     },
     {
-      "$id": "hello",
+      "type": "folder",
+      "name": "Another hello page",
       "children": [],
+      "$id": "hello",
       "index": {
         "$id": "hello/index.mdx",
-        "name": "Another hello page",
         "type": "page",
-        "url": "/hello/index",
-      },
-      "name": "Another hello page",
-      "type": "folder",
+        "name": "Another hello page",
+        "url": "/hello/index"
+      }
     },
     {
-      "$id": "nested",
+      "type": "folder",
+      "name": "Nested",
       "children": [
         {
           "$id": "nested/test.mdx",
-          "name": "Nested Page",
           "type": "page",
-          "url": "/nested/test",
-        },
+          "name": "Nested Page",
+          "url": "/nested/test"
+        }
       ],
-      "name": "Nested",
-      "type": "folder",
+      "$id": "nested"
     },
     {
       "$id": "_0",
-      "name": "Text",
       "type": "page",
-      "url": "https://google.com",
+      "name": "Text",
+      "url": "https://google.com"
     },
     {
       "$id": "_1",
+      "type": "page",
       "icon": "Icon",
       "name": "Text",
-      "type": "page",
-      "url": "https://google.com",
+      "url": "https://google.com"
     },
     {
       "$id": "_2",
-      "external": true,
-      "name": "AI",
       "type": "page",
+      "name": "AI",
       "url": "/llms-full.txt",
-    },
+      "external": true
+    }
   ],
   "fallback": {
+    "type": "root",
     "$id": "fallback:root",
+    "name": "Docs",
     "children": [
       {
         "$id": "fallback:hidden.mdx",
-        "name": "Hidden",
         "type": "page",
-        "url": "/hidden",
-      },
-    ],
-    "name": "Docs",
-    "type": "root",
-  },
-  "name": "Docs",
-  "type": "root",
+        "name": "Hidden",
+        "url": "/hidden"
+      }
+    ]
+  }
 }

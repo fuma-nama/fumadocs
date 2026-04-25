@@ -1,51 +1,51 @@
 {
+  "type": "root",
   "$id": "root",
+  "name": "Docs",
   "children": [
     {
-      "$id": "a",
+      "type": "folder",
+      "name": "A",
       "children": [
         {
           "$id": "a/hello.mdx",
-          "name": "Page A",
           "type": "page",
-          "url": "/a/hello",
-        },
+          "name": "Page A",
+          "url": "/a/hello"
+        }
       ],
-      "name": "A",
-      "type": "folder",
+      "$id": "a"
     },
     {
-      "$id": "c",
+      "type": "folder",
+      "name": "C",
       "children": [
         {
           "$id": "c/test.mdx",
-          "name": "Page C",
           "type": "page",
-          "url": "/c/test",
+          "name": "Page C",
+          "url": "/c/test"
         },
         {
           "$id": "b/index.mdx",
-          "name": "Page B (Index)",
           "type": "page",
-          "url": "/b",
+          "name": "Page B (Index)",
+          "url": "/b"
         },
         {
           "$id": "b/test.mdx",
-          "name": "Page B (Test)",
           "type": "page",
-          "url": "/b/test",
+          "name": "Page B (Test)",
+          "url": "/b/test"
         },
         {
           "$id": "b/hello.mdx",
-          "name": "Page B (Hello)",
           "type": "page",
-          "url": "/b/hello",
-        },
+          "name": "Page B (Hello)",
+          "url": "/b/hello"
+        }
       ],
-      "name": "C",
-      "type": "folder",
-    },
-  ],
-  "name": "Docs",
-  "type": "root",
+      "$id": "c"
+    }
+  ]
 }

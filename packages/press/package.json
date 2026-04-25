@@ -1,6 +1,6 @@
 {
   "name": "fumapress",
-  "version": "0.1.32",
+  "version": "0.1.33",
   "description": "Opinionated Fumadocs for fast content preview",
   "keywords": [
     "Docs",
@@ -69,7 +69,7 @@
     "hono": "^4.12.15",
     "ignore": "^7.0.5",
     "katex": "0.16.45",
-    "lucide-react": "^1.9.0",
+    "lucide-react": "^1.11.0",
     "react": "^19.2.5",
     "react-dom": "^19.2.5",
     "react-server-dom-webpack": "^19.2.5",

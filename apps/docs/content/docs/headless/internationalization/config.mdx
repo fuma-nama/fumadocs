@@ -47,12 +47,9 @@ This may cause undesired cache problems, and need to pay extra attention on SEO 
 
 ### Fallback Language
 
-The fallback language to use when translations are missing for a page, default to your `defaultLanguage`.
+The fallback language to use when translations are missing for a file, default to your `defaultLanguage`.
 
-Supported:
-
-- A language in your `languages` array.
-- When set to `null`, no fallback will be used.
+It accepts one of the languages in your `languages` array.
 
 ```ts
 import { defineI18n } from 'fumadocs-core/i18n';
@@ -60,6 +57,26 @@ import { defineI18n } from 'fumadocs-core/i18n';
 export const i18n = defineI18n({
   languages: ['en', 'cn'],
   defaultLanguage: 'en',
+  // Chinese variant is used if a file is missing in English
   fallbackLanguage: 'cn',
 });
 ```
+
+To disable the fallback behaviour, set it to `null`:
+
+```ts
+import { defineI18n } from 'fumadocs-core/i18n';
+
+export const i18n = defineI18n({
+  languages: ['en', 'cn'],
+  defaultLanguage: 'en',
+  fallbackLanguage: null,
+});
+```
+
+When disabled, no fallback will be used (including `meta.json`). You can still create a shared file for every locale with `$`:
+
+<Files>
+  <File name="my-page.$.md" />
+  <File name="meta.$.json" />
+</Files>

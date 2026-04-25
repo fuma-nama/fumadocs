@@ -1,25 +1,25 @@
 {
+  "type": "root",
   "$id": "root",
+  "name": "Docs",
   "children": [
     {
       "$id": "test.mdx",
-      "name": "Hello",
       "type": "page",
-      "url": "/test",
+      "name": "Hello",
+      "url": "/test"
     },
     {
-      "$id": "hello",
+      "type": "folder",
+      "name": "Hello",
       "children": [],
+      "$id": "hello",
       "index": {
         "$id": "hello/index.mdx",
-        "name": "Hello",
         "type": "page",
-        "url": "/hello",
-      },
-      "name": "Hello",
-      "type": "folder",
-    },
-  ],
-  "name": "Docs",
-  "type": "root",
+        "name": "Hello",
+        "url": "/hello"
+      }
+    }
+  ]
 }

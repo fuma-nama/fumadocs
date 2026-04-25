@@ -1,6 +1,6 @@
 {
   "name": "fumadocs-core",
-  "version": "16.8.3",
+  "version": "16.8.4",
   "description": "The React.js library for building a documentation website",
   "keywords": [
     "Docs",
@@ -120,13 +120,13 @@
     "vfile": "^6.0.3"
   },
   "devDependencies": {
-    "@formatjs/intl-localematcher": "^0.8.3",
+    "@formatjs/intl-localematcher": "^0.8.4",
     "@mdx-js/mdx": "^3.1.1",
     "@mixedbread/sdk": "^0.62.0",
     "@orama/core": "^1.2.19",
     "@oramacloud/client": "^2.1.4",
     "@shikijs/transformers": "^4.0.2",
-    "@tanstack/react-router": "1.168.23",
+    "@tanstack/react-router": "1.168.24",
     "@types/estree-jsx": "^1.0.5",
     "@types/hast": "^3.0.4",
     "@types/js-yaml": "^4.0.9",
@@ -138,7 +138,7 @@
     "algoliasearch": "5.51.0",
     "flexsearch": "^0.8.212",
     "image-size": "^2.0.2",
-    "lucide-react": "^1.9.0",
+    "lucide-react": "^1.11.0",
     "negotiator": "^1.0.0",
     "next": "16.2.4",
     "npm-to-yarn": "^3.0.1",

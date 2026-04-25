@@ -115,12 +115,14 @@ export function createRehypeCode<
     }
 
     const lazy = options.lazy ?? true;
+    let preloadLangs: unknown[] | undefined = options.langs;
+    if (!lazy) {
+      preloadLangs ??= Object.keys(highlighter.getBundledLanguages());
+    }
+
     await Promise.all([
       highlighter.loadTheme(...(getRequiredThemes(options) as never[])),
-      !lazy &&
-        highlighter.loadLanguage(
-          ...((options.langs ?? Object.keys(highlighter.getBundledLanguages())) as never[]),
-        ),
+      preloadLangs && highlighter.loadLanguage(...(preloadLangs as never[])),
     ]);
     return rehypeShikiFromHighlighter(highlighter, {
       ...options,

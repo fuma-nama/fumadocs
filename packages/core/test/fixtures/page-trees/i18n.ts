@@ -21,7 +21,7 @@ export const source: StaticSource = {
       path: 'meta.en.json',
       data: {
         title: 'Docs English',
-        pages: ['test', 'nested'],
+        pages: ['test', 'nested', '...'],
       },
     },
     {
@@ -29,7 +29,7 @@ export const source: StaticSource = {
       path: 'meta.cn.json',
       data: {
         title: 'Docs Chinese',
-        pages: ['test', 'nested'],
+        pages: ['test', 'nested', '...'],
       },
     },
     {
@@ -51,6 +51,14 @@ export const source: StaticSource = {
       path: '/nested/meta.cn.json',
       data: {
         title: 'Nested Chinese',
+      },
+    },
+    {
+      type: 'meta',
+      path: '/secret/meta.$.json',
+      data: {
+        title: 'Docs (Shared)',
+        pages: [],
       },
     },
   ],

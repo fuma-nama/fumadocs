@@ -8,7 +8,7 @@ export async function compileInline() {
     sources: [
       {
         base: path.resolve('src'),
-        pattern: '{components,contexts,provider,utils}/**/*.{ts,tsx}',
+        pattern: 'components/**/*.{ts,tsx}',
         negated: false,
       },
       {

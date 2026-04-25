@@ -1,4 +1,4 @@
-import { dirname, splitPath } from '../path';
+import { dirname } from '../path';
 
 /**
  * In memory file system.
@@ -71,14 +71,18 @@ export class FileSystem<File> {
 
   makeDir(path: string): void {
     const cur: string[] = [];
+    let parentPath = '';
 
-    for (const seg of splitPath(path)) {
+    for (const seg of path.split('/')) {
       cur.push(seg);
       const curPath = cur.join('/');
-      if (this.folders.has(curPath)) continue;
 
-      this.folders.set(curPath, []);
-      this.folders.get(dirname(curPath))!.push(curPath);
+      if (!this.folders.has(curPath)) {
+        this.folders.set(curPath, []);
+        this.folders.get(parentPath)!.push(curPath);
+      }
+
+      parentPath = curPath;
     }
   }
 }
