@@ -1,5 +1,14 @@
 # @fumadocs/base-ui
 
+## 16.8.4
+
+### Patch Changes
+
+- b5ff03b: Support new OG image design for Takumi
+- Updated dependencies [61b15e9]
+- Updated dependencies [1a5433c]
+  - fumadocs-core@16.8.4
+
 ## 16.8.3
 
 ### Patch Changes
