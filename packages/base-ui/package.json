@@ -128,7 +128,7 @@
     "@base-ui/react": "^1.4.1",
     "@fumadocs/tailwind": "workspace:*",
     "class-variance-authority": "^0.7.1",
-    "lucide-react": "^1.9.0",
+    "lucide-react": "^1.11.0",
     "motion": "^12.38.0",
     "next-themes": "^0.4.6",
     "react-remove-scroll": "^2.7.2",

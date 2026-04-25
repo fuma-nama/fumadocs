@@ -11,13 +11,13 @@
     "types:check": "fumadocs-mdx && tsc --noEmit"
   },
   "dependencies": {
-    "@tanstack/react-router": "1.168.23",
+    "@tanstack/react-router": "1.168.24",
     "@tanstack/react-router-devtools": "1.166.13",
-    "@tanstack/react-start": "1.167.42",
+    "@tanstack/react-start": "1.167.48",
     "fumadocs-core": "workspace:*",
     "fumadocs-mdx": "workspace:*",
     "fumadocs-ui": "workspace:*",
-    "lucide-react": "^1.9.0",
+    "lucide-react": "^1.11.0",
     "react": "^19.2.5",
     "react-dom": "^19.2.5",
     "tailwind-merge": "^3.5.0",

@@ -1,0 +1,267 @@
+/* DocumentEditor — writing surface, scoped under .fe-document-editor */
+
+.fe-document-editor__canvas {
+  background: var(--color-fe-input);
+}
+
+.fe-document-editor .ProseMirror {
+  padding: 1.35rem;
+  outline: none;
+  caret-color: var(--color-fe-primary);
+  flex: 1;
+}
+
+.fe-document-editor .ProseMirror:focus-visible {
+  outline: none;
+}
+
+/* Bind ::selection to .ProseMirror (no space before ::). Use fe-info vs fe-input so the band reads on dark surfaces (fe-accent is too close to the canvas). */
+.fe-document-editor .ProseMirror::selection,
+.fe-document-editor .ProseMirror::-moz-selection {
+  background: color-mix(in oklch, var(--color-fe-info) 48%, var(--color-fe-input));
+  color: inherit;
+}
+
+.fe-document-editor .ProseMirror > * + * {
+  margin-top: 0.62em;
+}
+
+.fe-document-editor .ProseMirror h1 {
+  font-size: clamp(1.45rem, 2.8vw, 1.85rem);
+  font-weight: 650;
+  letter-spacing: -0.03em;
+  line-height: 1.18;
+  color: var(--color-fe-foreground);
+}
+
+.fe-document-editor .ProseMirror h2 {
+  font-size: clamp(1.2rem, 2.2vw, 1.38rem);
+  font-weight: 620;
+  letter-spacing: -0.022em;
+  line-height: 1.22;
+  color: color-mix(in oklch, var(--color-fe-foreground) 96%, var(--color-fe-muted-foreground));
+}
+
+.fe-document-editor .ProseMirror h3 {
+  font-size: 1.05rem;
+  font-weight: 600;
+  letter-spacing: -0.014em;
+  line-height: 1.28;
+  color: color-mix(in oklch, var(--color-fe-foreground) 92%, var(--color-fe-muted-foreground));
+}
+
+.fe-document-editor .ProseMirror p {
+  line-height: 1.68;
+  letter-spacing: -0.01em;
+}
+
+.fe-document-editor .ProseMirror blockquote {
+  position: relative;
+  margin: 0.85rem 0;
+  padding: 0.65rem 1rem 0.65rem 1.15rem;
+  border-radius: 0 0.5rem 0.5rem 0;
+  border: 1px solid color-mix(in oklch, var(--color-fe-border) 70%, transparent);
+  border-left-width: 3px;
+  border-left-color: color-mix(in oklch, var(--color-fe-border) 45%, var(--color-fe-ring));
+  background: color-mix(in oklch, var(--color-fe-muted) 35%, transparent);
+  color: color-mix(in oklch, var(--color-fe-muted-foreground) 88%, var(--color-fe-foreground));
+}
+
+.fe-document-editor .ProseMirror ul,
+.fe-document-editor .ProseMirror ol {
+  padding-left: 1.45rem;
+}
+
+.fe-document-editor .ProseMirror li {
+  margin: 0.28em 0;
+  padding-left: 0.2em;
+}
+
+.fe-document-editor .ProseMirror li::marker {
+  color: color-mix(in oklch, var(--color-fe-muted-foreground) 75%, var(--color-fe-ring));
+}
+
+.fe-document-editor .ProseMirror hr {
+  border: none;
+  height: 1px;
+  margin: 1.65rem 0;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    var(--color-fe-border) 12%,
+    var(--color-fe-border) 88%,
+    transparent
+  );
+}
+
+.fe-document-editor .ProseMirror code {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-size: 0.86em;
+  font-weight: 450;
+  padding: 0.14em 0.4em;
+  border-radius: 0.35rem;
+  background: color-mix(in oklch, var(--color-fe-muted) 72%, transparent);
+  border: 1px solid color-mix(in oklch, var(--color-fe-border) 55%, transparent);
+  color: color-mix(in oklch, var(--color-fe-foreground) 92%, var(--color-fe-info));
+}
+
+.fe-document-editor .ProseMirror pre {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-size: 0.8125rem;
+  line-height: 1.58;
+  padding: 1rem 1.05rem;
+  border-radius: 0.65rem;
+  background: color-mix(in oklch, var(--color-fe-background) 55%, var(--color-fe-muted));
+  border: 1px solid color-mix(in oklch, var(--color-fe-border) 80%, transparent);
+  box-shadow: inset 0 1px 0 0 color-mix(in oklch, var(--color-fe-foreground) 4%, transparent);
+  overflow-x: auto;
+}
+
+.fe-document-editor .ProseMirror pre code {
+  padding: 0;
+  border: none;
+  background: none;
+  font-size: inherit;
+  font-weight: inherit;
+  color: inherit;
+}
+
+/* lowlight / highlight.js tokens */
+.fe-document-editor .ProseMirror .hljs-comment,
+.fe-document-editor .ProseMirror .hljs-quote {
+  color: var(--color-fe-muted-foreground);
+  font-style: italic;
+}
+
+.fe-document-editor .ProseMirror .hljs-keyword,
+.fe-document-editor .ProseMirror .hljs-selector-tag,
+.fe-document-editor .ProseMirror .hljs-title {
+  color: color-mix(in oklch, var(--color-fe-info) 72%, var(--color-fe-foreground));
+}
+
+.fe-document-editor .ProseMirror .hljs-string,
+.fe-document-editor .ProseMirror .hljs-attr,
+.fe-document-editor .ProseMirror .hljs-template-variable {
+  color: color-mix(in oklch, var(--color-fe-success) 48%, var(--color-fe-foreground));
+}
+
+.fe-document-editor .ProseMirror .hljs-number,
+.fe-document-editor .ProseMirror .hljs-literal {
+  color: color-mix(in oklch, var(--color-fe-warning) 45%, var(--color-fe-foreground));
+}
+
+.fe-document-editor .ProseMirror .hljs-function,
+.fe-document-editor .ProseMirror .hljs-class {
+  color: color-mix(in oklch, var(--color-fe-ring) 65%, var(--color-fe-foreground));
+}
+
+.fe-document-editor .ProseMirror .tableWrapper {
+  margin: 0.85rem 0;
+  overflow-x: auto;
+  border-radius: 0.55rem;
+  border: 1px solid color-mix(in oklch, var(--color-fe-border) 85%, transparent);
+  background: color-mix(in oklch, var(--color-fe-card) 88%, var(--color-fe-muted));
+  box-shadow: 0 1px 0 0 color-mix(in oklch, var(--color-fe-foreground) 3%, transparent);
+}
+
+.fe-document-editor .ProseMirror table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.875rem;
+}
+
+.fe-document-editor .ProseMirror th,
+.fe-document-editor .ProseMirror td {
+  border: 1px solid color-mix(in oklch, var(--color-fe-border) 70%, transparent);
+  padding: 0.5rem 0.7rem;
+  vertical-align: top;
+  min-width: 5rem;
+}
+
+.fe-document-editor .ProseMirror th {
+  font-weight: 600;
+  text-align: left;
+  background: color-mix(in oklch, var(--color-fe-muted) 48%, transparent);
+  color: color-mix(in oklch, var(--color-fe-foreground) 90%, var(--color-fe-muted-foreground));
+}
+
+.fe-document-editor .ProseMirror td p,
+.fe-document-editor .ProseMirror th p {
+  margin: 0;
+}
+
+.fe-document-editor .ProseMirror .selectedCell {
+  background: color-mix(in oklch, var(--color-fe-accent) 38%, transparent);
+}
+
+.fe-document-editor .ProseMirror img {
+  max-width: 100%;
+  height: auto;
+  border-radius: 0.55rem;
+  border: 1px solid color-mix(in oklch, var(--color-fe-border) 75%, transparent);
+  display: block;
+  margin: 0.65rem 0;
+  box-shadow: 0 10px 32px -16px color-mix(in oklch, var(--color-fe-background) 35%, black);
+}
+
+.fe-document-editor .ProseMirror img.ProseMirror-selectednode {
+  outline: 2px solid color-mix(in oklch, var(--color-fe-ring) 85%, transparent);
+  outline-offset: 3px;
+}
+
+/* Placeholder (@tiptap/extension-placeholder decorations) */
+.fe-document-editor .ProseMirror .is-empty[data-placeholder]::before {
+  content: attr(data-placeholder);
+  float: left;
+  height: 0;
+  pointer-events: none;
+  color: var(--color-fe-muted-foreground);
+  opacity: 0.5;
+  letter-spacing: -0.01em;
+}
+
+.fe-document-editor .ProseMirror.ProseMirror-focused .is-empty[data-placeholder]::before {
+  opacity: 0.68;
+}
+
+.fe-document-drag-handle {
+  z-index: 5;
+}
+
+.fe-document-drag-handle__grip {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.35rem;
+  height: 1.5rem;
+  margin: 0;
+  padding: 0;
+  border: none;
+  border-radius: 0.35rem;
+  background: transparent;
+  color: color-mix(in oklch, var(--color-fe-muted-foreground) 88%, transparent);
+  cursor: grab;
+  opacity: 0.32;
+  transition:
+    opacity 0.14s ease,
+    background 0.14s ease,
+    color 0.14s ease;
+}
+
+.fe-document-drag-handle__grip:hover,
+.fe-document-drag-handle__grip:focus-visible {
+  opacity: 1;
+  background: color-mix(in oklch, var(--color-fe-muted) 55%, transparent);
+  color: var(--color-fe-muted-foreground);
+}
+
+.fe-document-drag-handle__grip:active {
+  cursor: grabbing;
+  opacity: 1;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .fe-slash-row {
+    transition: none !important;
+  }
+}
