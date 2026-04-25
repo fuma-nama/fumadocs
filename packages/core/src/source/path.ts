@@ -44,11 +44,10 @@ export function joinPath(...paths: string[]): string {
 
   for (const seg of parsed) {
     switch (seg) {
-      case '':
-        break;
       case '..':
         out.pop();
         break;
+      case '':
       case '.':
         break;
       default:

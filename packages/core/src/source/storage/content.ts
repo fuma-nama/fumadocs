@@ -110,7 +110,7 @@ export function createContentStorageBuilder(loaderConfig: ResolvedLoaderConfig) 
       }
 
       const [storageKey, locale = i18n ? i18n.defaultLanguage : EmptyLang] = parser(file.path);
-      const entry = [storageKey, file];
+      const entry = [storageKey, file] as const;
       if (Array.isArray(locale)) {
         for (const item of locale) pushMapList(fileMap, item, entry);
       } else {

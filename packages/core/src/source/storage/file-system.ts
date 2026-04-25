@@ -76,10 +76,12 @@ export class FileSystem<File> {
     for (const seg of path.split('/')) {
       cur.push(seg);
       const curPath = cur.join('/');
-      if (this.folders.has(curPath)) continue;
 
-      this.folders.set(curPath, []);
-      this.folders.get(parentPath)!.push(curPath);
+      if (!this.folders.has(curPath)) {
+        this.folders.set(curPath, []);
+        this.folders.get(parentPath)!.push(curPath);
+      }
+
       parentPath = curPath;
     }
   }
