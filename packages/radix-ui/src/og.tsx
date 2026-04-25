@@ -62,7 +62,7 @@ export function generate({
         color: 'white',
         padding: '4rem',
         backgroundColor: '#0c0c0c',
-        border: `18px ${primaryColor}`,
+        border: `18px solid ${primaryColor}`,
       }}
     >
       <p
