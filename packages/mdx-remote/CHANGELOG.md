@@ -1,5 +1,13 @@
 # @fumadocs/mdx-remote
 
+## 1.4.10
+
+### Patch Changes
+
+- 3e85c69: reduce deps
+- Updated dependencies [79d3209]
+  - fumadocs-core@16.8.5
+
 ## 1.4.9
 
 ### Patch Changes

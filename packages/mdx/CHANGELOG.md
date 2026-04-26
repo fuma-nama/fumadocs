@@ -1,5 +1,13 @@
 # next-docs-mdx
 
+## 14.3.2
+
+### Patch Changes
+
+- 79d3209: Deprecate forwarded schemas at `fumadocs-mdx/config`, recommend `fumadocs-core/source/schema` instead.
+- Updated dependencies [79d3209]
+  - fumadocs-core@16.8.5
+
 ## 14.3.1
 
 ### Patch Changes
