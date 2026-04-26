@@ -1,5 +1,13 @@
 # @fumadocs/local-md
 
+## 0.2.1
+
+### Patch Changes
+
+- 79d3209: fix `icon` & `_openapi` page data locations
+- Updated dependencies [79d3209]
+  - fumadocs-core@16.8.5
+
 ## 0.2.0
 
 ### Minor Changes
