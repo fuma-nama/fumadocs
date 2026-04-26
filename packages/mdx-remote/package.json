@@ -40,8 +40,7 @@
     "@mdx-js/mdx": "^3.1.1",
     "js-yaml": "^4.1.1",
     "unified": "^11.0.5",
-    "vfile": "^6.0.3",
-    "zod": "^4.3.6"
+    "vfile": "^6.0.3"
   },
   "devDependencies": {
     "@types/mdx": "^2.0.13",

@@ -14,7 +14,7 @@ The Passed MDX content must be trusted as it allows code execution by default.
 
 </Callout>
 
-### Setup
+## Setup
 
 ```package-install
 @fumadocs/mdx-remote
@@ -23,7 +23,10 @@ The Passed MDX content must be trusted as it allows code execution by default.
 The main feature it offers is the MDX Compiler, it can compile MDX content to JSX nodes.
 Since it doesn't use a bundler, there's some limitations:
 
+- Images have to be optimized at runtime.
 - No imports and exports in MDX files.
+
+### With RSC
 
 It's compatible with Server Components. For example:
 
@@ -37,16 +40,15 @@ const compiler = createCompiler({
   // options
 });
 
-export default async function Page({ params }: { params: { slug?: string[] } }) {
-  const page = getPage(params.slug);
-  const compiled = await compiler.compile({
+export default async function Page({ params }: PageProps<'/docs/[[...slug]]'>) {
+  const { slug } = await params;
+  const page = getPage(slug);
+  const { toc, body: MdxContent } = await compiler.compile({
     source: page.content,
   });
 
-  const MdxContent = compiled.body;
-
   return (
-    <DocsPage toc={compiled.toc}>
+    <DocsPage toc={toc}>
       <DocsBody>
         <MdxContent components={getMDXComponents()} />
       </DocsBody>
@@ -54,6 +56,50 @@ export default async function Page({ params }: { params: { slug?: string[] } }) 
   );
 }
 ```
+
+### Without RSC
+
+Without Server Components, you can enable `skipRender` and pass the compiled code to client instead:
+
+```tsx
+import { createCompiler } from '@fumadocs/mdx-remote';
+import { executeMdxSync } from '@fumadocs/mdx-remote/client';
+import { DocsBody, DocsPage } from 'fumadocs-ui/layouts/docs/page';
+import { getPage } from './my-content-source';
+import { useMemo } from 'react';
+import { getMDXComponents } from '@/components/mdx';
+
+const compiler = createCompiler({
+  // options
+});
+
+// e.g. where you generate loader data
+async function serverPayload(slugs?: string[]) {
+  const page = getPage(slugs);
+  const { compiled, frontmatter } = await compiler.compile({
+    source: page.content,
+    skipRender: true,
+  });
+
+  return { compiled, frontmatter };
+}
+
+function Page() {
+  // read compiled code from server payload
+  const { compiled } = useLoaderData();
+  const { default: MdxContent, toc } = useMemo(() => executeMdxSync(compiled), [compiled]);
+
+  return (
+    <DocsPage toc={toc}>
+      <DocsBody>
+        <MdxContent components={getMDXComponents()} />
+      </DocsBody>
+    </DocsPage>
+  );
+}
+```
+
+> The `frontmatter` property returned by `compile()` is not validated, you may use a library like `zod` to validate its data type.
 
 ### Images
 

@@ -300,7 +300,7 @@ const serverLoader = createServerFn({
     const { serialize } = await page.data.load();
 
     return {
-      frontmatter: { ...page.data.frontmatter, _openapi: null },
+      frontmatter: page.data.frontmatter,
       // [!code highlight] pass it to payload
       render: serialize(),
       // ...
