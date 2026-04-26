@@ -13,6 +13,15 @@ export const metaSchema = z.object({
   icon: z.string().optional(),
 });
 
+export type _JSONType =
+  | number
+  | boolean
+  | string
+  | null
+  | _JSONType[]
+  | {
+      [key: string]: _JSONType;
+    };
 /**
  * Zod 4 schema
  */
@@ -23,5 +32,5 @@ export const pageSchema = z.object({
   full: z.boolean().optional(),
 
   // Fumadocs OpenAPI generated
-  _openapi: z.record(z.string(), z.json()).optional(),
+  _openapi: z.record(z.string(), z.custom<_JSONType>()).optional(),
 });
