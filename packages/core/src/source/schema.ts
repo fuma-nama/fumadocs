@@ -23,5 +23,5 @@ export const pageSchema = z.object({
   full: z.boolean().optional(),
 
   // Fumadocs OpenAPI generated
-  _openapi: z.looseObject({}).optional(),
+  _openapi: z.record(z.string(), z.json()).optional(),
 });

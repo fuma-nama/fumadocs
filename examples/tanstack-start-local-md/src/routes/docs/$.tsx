@@ -38,7 +38,7 @@ const serverLoader = createServerFn({
 
     return {
       path: page.path,
-      frontmatter: { ...page.data.frontmatter, _openapi: null },
+      frontmatter: page.data.frontmatter,
       render: serialize(),
       markdownUrl: getPageMarkdownUrl(page).url,
       pageTree: await source.serializePageTree(source.getPageTree()),

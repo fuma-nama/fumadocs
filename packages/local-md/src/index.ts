@@ -1,4 +1,10 @@
-import type { DynamicSource, MetaData, StaticSource, VirtualFile } from 'fumadocs-core/source';
+import type {
+  DynamicSource,
+  MetaData,
+  PageData,
+  StaticSource,
+  VirtualFile,
+} from 'fumadocs-core/source';
 import type { StandardSchemaV1 } from '@standard-schema/spec';
 import path from 'node:path';
 import { createStorage, RawPage } from './storage';
@@ -59,6 +65,7 @@ export interface LocalMarkdownPage<
 > {
   title: string;
   description?: string;
+  icon?: string;
   content: string;
   frontmatter: Frontmatter;
 
@@ -90,13 +97,19 @@ export function localMd<
     }>[] = [];
 
     for (const page of pages) {
+      const frontmatter = page.frontmatter as PageData & { _openapi?: unknown };
+
       files.push({
         type: 'page',
         path: page.path,
         absolutePath: page.absolutePath,
         data: {
-          title: page.title,
-          description: page.description,
+          title: frontmatter.title ?? path.basename(page.path, path.extname(page.path)),
+          description: frontmatter.description,
+          icon: frontmatter.icon,
+          // for Fumadocs OpenAPI
+          ['_openapi' as never]: frontmatter._openapi,
+
           content: page.content,
           frontmatter: page.frontmatter,
           async load() {
