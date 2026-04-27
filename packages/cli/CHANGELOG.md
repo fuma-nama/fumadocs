@@ -1,5 +1,11 @@
 # fumadocs
 
+## 1.3.9
+
+### Patch Changes
+
+- af7ee2d: fix layout preserve plugin
+
 ## 1.3.8
 
 ### Patch Changes
