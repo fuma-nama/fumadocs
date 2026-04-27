@@ -4,11 +4,53 @@
 :root {
   --background: #ffffff;
   --foreground: #171717;
+  --fe-background: oklch(0.985 0 0);
+  --fe-foreground: oklch(0.18 0.01 260);
+  --fe-card: oklch(1 0 0);
+  --fe-card-foreground: var(--fe-foreground);
+  --fe-popover: oklch(1 0 0);
+  --fe-popover-foreground: var(--fe-foreground);
+  --fe-primary: oklch(0.48 0.18 264);
+  --fe-primary-foreground: oklch(0.99 0 0);
+  --fe-secondary: oklch(0.96 0.01 260);
+  --fe-secondary-foreground: var(--fe-foreground);
+  --fe-muted: oklch(0.94 0.01 260);
+  --fe-muted-foreground: oklch(0.48 0.02 260);
+  --fe-accent: oklch(0.93 0.03 260);
+  --fe-accent-foreground: var(--fe-foreground);
+  --fe-destructive: oklch(0.58 0.22 25);
+  --fe-border: oklch(0.88 0.01 260);
+  --fe-input: oklch(0.98 0 0);
+  --fe-ring: oklch(0.58 0.18 264);
+  --fe-info: oklch(0.62 0.16 240);
+  --fe-success: oklch(0.64 0.15 145);
+  --fe-warning: oklch(0.72 0.16 75);
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
+  --color-fe-background: var(--fe-background);
+  --color-fe-foreground: var(--fe-foreground);
+  --color-fe-card: var(--fe-card);
+  --color-fe-card-foreground: var(--fe-card-foreground);
+  --color-fe-popover: var(--fe-popover);
+  --color-fe-popover-foreground: var(--fe-popover-foreground);
+  --color-fe-primary: var(--fe-primary);
+  --color-fe-primary-foreground: var(--fe-primary-foreground);
+  --color-fe-secondary: var(--fe-secondary);
+  --color-fe-secondary-foreground: var(--fe-secondary-foreground);
+  --color-fe-muted: var(--fe-muted);
+  --color-fe-muted-foreground: var(--fe-muted-foreground);
+  --color-fe-accent: var(--fe-accent);
+  --color-fe-accent-foreground: var(--fe-accent-foreground);
+  --color-fe-destructive: var(--fe-destructive);
+  --color-fe-border: var(--fe-border);
+  --color-fe-input: var(--fe-input);
+  --color-fe-ring: var(--fe-ring);
+  --color-fe-info: var(--fe-info);
+  --color-fe-success: var(--fe-success);
+  --color-fe-warning: var(--fe-warning);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
 }
@@ -17,11 +59,32 @@
   :root {
     --background: #0a0a0a;
     --foreground: #ededed;
+    --fe-background: oklch(0.16 0.01 260);
+    --fe-foreground: oklch(0.94 0.01 260);
+    --fe-card: oklch(0.2 0.01 260);
+    --fe-card-foreground: var(--fe-foreground);
+    --fe-popover: oklch(0.22 0.01 260);
+    --fe-popover-foreground: var(--fe-foreground);
+    --fe-primary: oklch(0.68 0.16 264);
+    --fe-primary-foreground: oklch(0.12 0.02 260);
+    --fe-secondary: oklch(0.24 0.01 260);
+    --fe-secondary-foreground: var(--fe-foreground);
+    --fe-muted: oklch(0.27 0.01 260);
+    --fe-muted-foreground: oklch(0.7 0.02 260);
+    --fe-accent: oklch(0.3 0.03 260);
+    --fe-accent-foreground: var(--fe-foreground);
+    --fe-destructive: oklch(0.66 0.22 25);
+    --fe-border: oklch(0.32 0.01 260);
+    --fe-input: oklch(0.18 0.01 260);
+    --fe-ring: oklch(0.68 0.16 264);
+    --fe-info: oklch(0.72 0.15 240);
+    --fe-success: oklch(0.72 0.14 145);
+    --fe-warning: oklch(0.78 0.15 75);
   }
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-geist-sans), Arial, Helvetica, sans-serif;
 }
