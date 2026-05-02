@@ -17,32 +17,62 @@ const components: Component[] = [
     ],
   },
   {
-    name: 'card',
+    name: 'accordion',
     files: [
       {
         type: 'lib',
-        path: 'card.ts',
-        target: '<dir>/sanity/card.ts',
+        path: 'accordion.ts',
+        target: '<dir>/sanity/accordion.ts',
       },
       {
         type: 'components',
-        path: 'card.component.tsx',
-        target: '<dir>/sanity/card.tsx',
+        path: 'accordion.component.tsx',
+        target: '<dir>/sanity/accordion.tsx',
       },
     ],
   },
   {
-    name: 'callout',
+    name: 'files',
     files: [
       {
         type: 'lib',
-        path: 'callout.ts',
-        target: '<dir>/sanity/callout.ts',
+        path: 'files.ts',
+        target: '<dir>/sanity/files.ts',
       },
       {
         type: 'components',
-        path: 'callout.component.tsx',
-        target: '<dir>/sanity/callout.tsx',
+        path: 'files.component.tsx',
+        target: '<dir>/sanity/files.tsx',
+      },
+    ],
+  },
+  {
+    name: 'steps',
+    files: [
+      {
+        type: 'lib',
+        path: 'steps.ts',
+        target: '<dir>/sanity/steps.ts',
+      },
+      {
+        type: 'components',
+        path: 'steps.component.tsx',
+        target: '<dir>/sanity/steps.tsx',
+      },
+    ],
+  },
+  {
+    name: 'tabs',
+    files: [
+      {
+        type: 'lib',
+        path: 'tabs.ts',
+        target: '<dir>/sanity/tabs.ts',
+      },
+      {
+        type: 'components',
+        path: 'tabs.component.tsx',
+        target: '<dir>/sanity/tabs.tsx',
       },
     ],
   },
