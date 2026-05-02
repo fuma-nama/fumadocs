@@ -20,9 +20,12 @@ const baseHeading: PortableTextBlockComponent = (props) => {
 };
 
 export const baseBlocks: Record<
-  'h1' | 'h2' | 'h3' | 'h4' | 'h5' | 'h6',
+  'h1' | 'h2' | 'h3' | 'h4' | 'h5' | 'h6' | 'normal',
   PortableTextBlockComponent
 > = {
+  normal(props) {
+    return props.isInline ? <span>{props.children}</span> : <p>{props.children}</p>;
+  },
   h1: baseHeading,
   h2: baseHeading,
   h3: baseHeading,
@@ -40,27 +43,29 @@ export interface CodeValue {
 export interface CalloutValue {
   _type: 'callout';
   title?: PortableTextBlock[];
-  children?: PortableTextBlock[];
+  body?: PortableTextBlock[];
   type?: CalloutType;
 }
 
 export interface CardsValue {
   _type: 'cards';
-  children?: CardValue[];
+  items?: CardValue[];
 }
 
 export interface CardValue {
   _type: 'card';
   _key?: string;
   title?: PortableTextBlock[];
-  children?: PortableTextBlock[];
+  body?: PortableTextBlock[];
   url?: string;
 }
 
+function renderInlines(blocks: PortableTextBlock[] | undefined, renderNode: NodeRenderer) {
+  return blocks?.map((node, index) => renderNode({ node, index, isInline: true, renderNode }));
+}
+
 function renderBlocks(blocks: PortableTextBlock[] | undefined, renderNode: NodeRenderer) {
-  return (
-    blocks?.map((node, index) => renderNode({ node, index, isInline: false, renderNode })) ?? null
-  );
+  return blocks?.map((node, index) => renderNode({ node, index, isInline: false, renderNode }));
 }
 
 export const baseComponents: {
@@ -75,23 +80,23 @@ export const baseComponents: {
   callout({ value, renderNode }) {
     return (
       <Callout
-        title={value.title ? renderBlocks(value.title, renderNode) : undefined}
+        title={value.title ? renderInlines(value.title, renderNode) : undefined}
         type={value.type}
       >
-        {renderBlocks(value.children, renderNode)}
+        {renderBlocks(value.body, renderNode)}
       </Callout>
     );
   },
   cards({ value, renderNode }) {
     return (
       <Cards>
-        {value.children?.map((item, i) => (
+        {value.items?.map((item, i) => (
           <Card
             key={item._key ?? i}
-            title={item.title ? renderBlocks(item.title, renderNode) : undefined}
+            title={item.title ? renderInlines(item.title, renderNode) : undefined}
             href={item.url}
           >
-            {renderBlocks(item.children, renderNode)}
+            {renderBlocks(item.body, renderNode)}
           </Card>
         ))}
       </Cards>
@@ -100,10 +105,10 @@ export const baseComponents: {
   card({ value, renderNode }) {
     return (
       <Card
-        title={value.title ? renderBlocks(value.title, renderNode) : undefined}
+        title={value.title ? renderInlines(value.title, renderNode) : undefined}
         href={value.url}
       >
-        {renderBlocks(value.children, renderNode)}
+        {renderBlocks(value.body, renderNode)}
       </Card>
     );
   },

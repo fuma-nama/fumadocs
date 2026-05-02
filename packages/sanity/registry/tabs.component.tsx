@@ -9,7 +9,7 @@ export interface TabValue {
   _key?: string;
   _type: 'tab';
   title?: string;
-  children?: PortableTextBlock[];
+  body?: PortableTextBlock[];
 }
 
 export interface TabsValue {
@@ -28,7 +28,7 @@ export const tabsComponents: {
   tabs: PortableTextTypeComponent<TabsValue>;
 } = {
   tab({ value, renderNode }) {
-    return renderBlocks(value.children, renderNode);
+    return renderBlocks(value.body, renderNode);
   },
   tabs({ value, renderNode }) {
     const items = value.items ?? [];
@@ -46,7 +46,7 @@ export const tabsComponents: {
         </TabsList>
         {items.map((item, i) => (
           <Tab key={item._key ?? i} value={item._key ?? i.toString()}>
-            {renderBlocks(item.children, renderNode)}
+            {renderBlocks(item.body, renderNode)}
           </Tab>
         ))}
       </Tabs>

@@ -6,8 +6,8 @@ export const step = defineType({
   title: 'Step',
   fields: [
     defineField({
-      name: 'children',
-      title: 'Children',
+      name: 'body',
+      title: 'Body',
       type: 'blockContent',
     }),
   ],
@@ -19,10 +19,20 @@ export const steps = defineType({
   title: 'Steps',
   fields: [
     defineField({
-      name: 'children',
-      title: 'Children',
+      name: 'items',
+      title: 'Steps',
       type: 'array',
       of: [{ type: 'step' }],
     }),
   ],
+  preview: {
+    select: {
+      items: 'items',
+    },
+    prepare({ items = [] }) {
+      return {
+        title: `${items.length} Steps`,
+      };
+    },
+  },
 });

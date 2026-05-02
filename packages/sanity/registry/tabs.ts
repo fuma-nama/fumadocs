@@ -12,11 +12,17 @@ export const tab = defineType({
       validation: (r) => r.required(),
     }),
     defineField({
-      name: 'children',
-      title: 'Children',
+      name: 'body',
+      title: 'Body',
       type: 'blockContent',
     }),
   ],
+  preview: {
+    select: {
+      title: 'title',
+      subtitle: 'body',
+    },
+  },
 });
 
 export const tabs = defineType({
@@ -31,4 +37,14 @@ export const tabs = defineType({
       of: [{ type: 'tab' }],
     }),
   ],
+  preview: {
+    select: {
+      items: 'items',
+    },
+    prepare({ items = [] }) {
+      return {
+        title: `${items.length} Tabs`,
+      };
+    },
+  },
 });
