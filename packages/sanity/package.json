@@ -1,0 +1,66 @@
+{
+  "name": "@fumadocs/sanity",
+  "version": "0.0.0",
+  "description": "The official Sanity integration for Fumadocs",
+  "keywords": [
+    "Docs",
+    "Fumadocs"
+  ],
+  "homepage": "https://fumadocs.dev",
+  "license": "MIT",
+  "author": "Fuma Nama",
+  "repository": "github:fuma-nama/fumadocs",
+  "files": [
+    "dist"
+  ],
+  "type": "module",
+  "exports": {
+    ".": "./dist/index.mjs",
+    "./package.json": "./package.json"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "scripts": {
+    "build": "tsdown",
+    "clean": "rimraf dist",
+    "dev": "tsdown --watch --clean false",
+    "lint": "oxlint .",
+    "types:check": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@portabletext/react": "^6.0.3"
+  },
+  "devDependencies": {
+    "@sanity/client": "^7.22.0",
+    "@types/node": "25.6.0",
+    "@types/react": "^19.2.14",
+    "fumadocs-core": "workspace:*",
+    "fumadocs-ui": "workspace:*",
+    "next-sanity": "^12.4.0",
+    "react": "^19.2.5",
+    "sanity": "^5.23.0",
+    "tsconfig": "workspace:*",
+    "tsdown": "0.21.10",
+    "typescript": "^6.0.3"
+  },
+  "peerDependencies": {
+    "@sanity/client": "^7.22.0",
+    "@types/react": "*",
+    "fumadocs-core": "^16.8.0",
+    "next-sanity": "^12.4.0",
+    "react": "^19.2.0",
+    "sanity": "^5.23.0"
+  },
+  "peerDependenciesMeta": {
+    "@sanity/client": {
+      "optional": true
+    },
+    "next-sanity": {
+      "optional": true
+    },
+    "@types/react": {
+      "optional": true
+    }
+  }
+}

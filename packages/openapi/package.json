@@ -15,9 +15,6 @@
     "dist"
   ],
   "type": "module",
-  "main": "./dist/index.js",
-  "module": "./dist/index.js",
-  "types": "./dist/index.d.ts",
   "exports": {
     ".": "./dist/index.js",
     "./i18n": "./dist/i18n.js",
@@ -108,9 +105,9 @@
   },
   "inlinedDependencies": {
     "@fastify/deepmerge": "3.2.1",
-    "@scalar/helpers": "0.4.3",
-    "@scalar/json-magic": "0.12.5",
-    "@scalar/openapi-upgrader": "0.2.4",
+    "@scalar/helpers": "0.5.2",
+    "@scalar/json-magic": "0.12.8",
+    "@scalar/openapi-upgrader": "0.2.6",
     "fast-content-type-parse": "3.0.0",
     "pathe": "2.0.3",
     "yaml": "2.8.3"
