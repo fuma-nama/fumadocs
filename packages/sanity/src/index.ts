@@ -5,17 +5,26 @@ import type { DefinedSanityFetchType } from 'next-sanity/live';
 import type { ReactNode } from 'react';
 import type { PortableTextBlock } from 'sanity';
 
-export interface SanityOptions {
+export interface SanityOptions<Doc extends BaseDoc> {
   docType: string;
   sanityFetch: DefinedSanityFetchType;
+
+  /** generate virtual file path from doc */
+  generatePath?: (doc: ShallowDoc<Doc>) => string;
 }
 
 export interface BaseDoc {
   _id: string;
   _type: string;
-  title: string | null;
-  description?: string | null;
-  slug: string | null;
+  title?: string;
+  description?: string;
+  slug?: BaseSlug;
+}
+
+export interface BaseSlug {
+  _type: 'slug';
+  current?: string;
+  source?: string;
 }
 
 type ShallowDoc<Doc extends BaseDoc> = Pick<
@@ -25,7 +34,6 @@ type ShallowDoc<Doc extends BaseDoc> = Pick<
 
 export type DocToPage<Doc extends BaseDoc> = ShallowDoc<Doc> & {
   title: string;
-  description?: string;
   load: () => Promise<DocToPageLoaded<Doc>>;
   structuredData: () => Promise<StructuredData>;
 };
@@ -35,12 +43,12 @@ export type DocToPageLoaded<Doc extends BaseDoc> = Doc & {
 };
 
 export function createSanitySource<Doc extends BaseDoc>(
-  options: SanityOptions,
+  options: SanityOptions<Doc>,
 ): DynamicSource<{
   pageData: DocToPage<Doc>;
   metaData: MetaData;
 }> {
-  const { docType, sanityFetch } = options;
+  const { docType, sanityFetch, generatePath } = options;
 
   return {
     async files() {
@@ -55,14 +63,13 @@ export function createSanitySource<Doc extends BaseDoc>(
       const data = docs.data as ShallowDoc<Doc>[];
 
       return data.map((file) => {
-        const slugs = file.slug?.split('/') ?? [];
+        const slugs = file.slug?.current?.split('/').filter((v) => v.length > 0) ?? [];
 
         return {
           type: 'page',
           data: {
             ...file,
             title: file.title ?? file._id,
-            description: file.description ?? undefined,
             async load() {
               const info = await sanityFetch({
                 query: `*[_type == $docType && _id == $id][0]{
@@ -123,7 +130,11 @@ export function createSanitySource<Doc extends BaseDoc>(
             },
           },
           slugs,
-          path: [...slugs, 'page.mdx'].join('/'),
+          path: generatePath
+            ? generatePath(file)
+            : slugs.length === 0
+              ? 'index.mdx'
+              : `${slugs.join('/')}.mdx`,
         };
       });
     },
