@@ -1,5 +1,14 @@
 # @fuma-docs/openapi
 
+## 10.8.1
+
+### Patch Changes
+
+- 970b1bf: fix inconsistency in option names
+- Updated dependencies [79d3209]
+  - fumadocs-core@16.8.5
+  - fumadocs-ui@16.8.5
+
 ## 10.8.0
 
 ### Minor Changes

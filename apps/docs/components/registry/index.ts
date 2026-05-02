@@ -1,10 +1,10 @@
 import * as radixUi from '../../../../packages/radix-ui/registry';
 import * as baseUi from '../../../../packages/base-ui/registry';
-import { fileURLToPath } from 'node:url';
+import * as sanity from '../../../../packages/sanity/registry';
 import * as path from 'node:path';
 import type { CompileOptions, Registry } from 'fuma-cli/compiler';
 
-const baseDir = path.join(path.dirname(fileURLToPath(import.meta.url)), '../../');
+const baseDir = path.join(import.meta.dirname, '../../');
 
 export const compileOptions: Partial<CompileOptions> = {
   onUnknownFile(absolutePath) {
@@ -70,9 +70,7 @@ export const compileOptions: Partial<CompileOptions> = {
 export const registry: Registry = {
   dir: baseDir,
   name: 'fumadocs',
-  packageJson: './package.json',
-  tsconfigPath: './tsconfig.json',
-  subRegistries: [radixUi.registry, baseUi.registry],
+  subRegistries: [radixUi.registry, baseUi.registry, sanity.registry],
 
   components: [
     {
@@ -126,8 +124,8 @@ export const registry: Registry = {
     },
     {
       name: 'ai/openrouter',
-      title: 'AI Chat (Next.js + OpenRouter)',
-      description: 'Ask AI dialog for your docs, requires OPENROUTER_API_KEY',
+      title: 'AI Chat (AI SDK)',
+      description: 'Ask AI dialog for your docs, default using OpenRouter',
       files: [
         {
           type: 'components',
@@ -156,7 +154,7 @@ export const registry: Registry = {
     },
     {
       name: 'ai/inkeep',
-      title: 'AI Chat (Next.js + Inkeep AI)',
+      title: 'AI Chat (Inkeep AI)',
       description: 'Ask AI dialog for your docs, requires Inkeep AI',
       files: [
         {
@@ -178,7 +176,7 @@ export const registry: Registry = {
     },
     {
       name: 'og/mono',
-      description: 'Open graph image generation (mono-style)',
+      description: 'Open graph image generation - mono style',
       files: [
         {
           type: 'lib',

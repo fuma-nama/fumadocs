@@ -75,7 +75,9 @@ interface GenerateFilesConfig extends PagesToTextOptions {
 }
 
 interface MetaOptions {
+  /** @deprecated use `folderStyle` instead */
   groupStyle?: 'folder' | 'separator';
+  folderStyle?: 'folder' | 'separator';
 }
 
 export type Config = SchemaToPagesOptions &
@@ -177,7 +179,7 @@ export async function generateFilesOnly(
 
 function generateMeta(context: BeforeWriteContext, options: MetaOptions): OutputFile[] {
   const files: OutputFile[] = [];
-  const { groupStyle = 'folder' } = options;
+  const folderStyle = options.folderStyle ?? options.groupStyle ?? 'folder';
 
   function scan(entries: OutputEntry[], parent?: OutputGroup) {
     const pages: string[] = [];
@@ -190,7 +192,7 @@ function generateMeta(context: BeforeWriteContext, options: MetaOptions): Output
       if (entry.type === 'group') {
         scan(entry.entries, entry);
 
-        if (groupStyle === 'folder') {
+        if (folderStyle === 'folder') {
           pages.push(relativePath);
         } else {
           pages.push(`---${entry.info.title}---`, `...${relativePath}`);

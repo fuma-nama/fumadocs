@@ -1,5 +1,11 @@
 # fumadocs-core
 
+## 16.8.5
+
+### Patch Changes
+
+- 79d3209: Narrow schema type for private OpenAPI properties
+
 ## 16.8.4
 
 ### Patch Changes

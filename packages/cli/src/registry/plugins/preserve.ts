@@ -13,20 +13,20 @@ export function pluginPreserveLayouts(): InstallerPlugin {
   ];
   // original specifier -> new specifier
   const layoutComps: Record<string, string> = {
-    '@/<dir>/home/index.tsx': 'layouts/home',
-    '@/<dir>/shared/index.tsx': 'layouts/shared',
-    '@/<dir>/shared/client.tsx': 'layouts/shared',
-    '@/<dir>/notebook/index.tsx': 'layouts/notebook',
-    '@/<dir>/notebook/client.tsx': 'layouts/notebook',
-    '@/<dir>/notebook/page/index.tsx': 'layouts/notebook/page',
-    '@/<dir>/notebook/page/client.tsx': 'layouts/notebook/page',
-    '@/<dir>/docs/index.tsx': 'layouts/docs',
-    '@/<dir>/docs/client.tsx': 'layouts/docs',
-    '@/<dir>/docs/page/index.tsx': 'layouts/docs/page',
-    '@/<dir>/docs/page/client.tsx': 'layouts/docs/page',
-    '@/<dir>/flux/index.tsx': 'layouts/flux',
-    '@/<dir>/flux/page/index.tsx': 'layouts/flux/page',
-    '@/<dir>/flux/page/client.tsx': 'layouts/flux/page',
+    'local:<dir>/home/index.tsx': 'layouts/home',
+    'local:<dir>/shared/index.tsx': 'layouts/shared',
+    'local:<dir>/shared/client.tsx': 'layouts/shared',
+    'local:<dir>/notebook/index.tsx': 'layouts/notebook',
+    'local:<dir>/notebook/client.tsx': 'layouts/notebook',
+    'local:<dir>/notebook/page/index.tsx': 'layouts/notebook/page',
+    'local:<dir>/notebook/page/client.tsx': 'layouts/notebook/page',
+    'local:<dir>/docs/index.tsx': 'layouts/docs',
+    'local:<dir>/docs/client.tsx': 'layouts/docs',
+    'local:<dir>/docs/page/index.tsx': 'layouts/docs/page',
+    'local:<dir>/docs/page/client.tsx': 'layouts/docs/page',
+    'local:<dir>/flux/index.tsx': 'layouts/flux',
+    'local:<dir>/flux/page/index.tsx': 'layouts/flux/page',
+    'local:<dir>/flux/page/client.tsx': 'layouts/flux/page',
   };
   const layoutNameSet = new Set(layoutNames);
 

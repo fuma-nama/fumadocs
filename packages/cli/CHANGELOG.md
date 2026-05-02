@@ -1,5 +1,17 @@
 # fumadocs
 
+## 1.3.10
+
+### Patch Changes
+
+- 2d22086: Improve for Sanity registry
+
+## 1.3.9
+
+### Patch Changes
+
+- af7ee2d: fix layout preserve plugin
+
 ## 1.3.8
 
 ### Patch Changes

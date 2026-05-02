@@ -4,16 +4,12 @@ import path from 'node:path';
 import { LocalMarkdownConfig } from '.';
 import { frontmatter as parseFrontmatter } from 'fumadocs-core/content/md/frontmatter';
 import type { StandardSchemaV1 } from '@standard-schema/spec';
-import type { PageData } from 'fumadocs-core/source';
 import * as defaultSchemas from 'fumadocs-core/source/schema';
 import { defaultInclude } from './shared';
 
 export interface RawPage<Frontmatter = Record<string, unknown>> {
   path: string;
   absolutePath: string;
-
-  title: string;
-  description?: string;
   content: string;
   frontmatter: Frontmatter;
 }
@@ -81,14 +77,11 @@ export function createStorage<
       throw new Error(`invalid frontmatter in "${absolutePath}": ${message}`);
     }
 
-    const frontmatter = frontmatterResult.value as PageData;
     return {
       path: file,
       absolutePath,
-      title: frontmatter.title ?? path.basename(file, path.extname(file)),
-      description: frontmatter.description,
       content: parsed.content,
-      frontmatter,
+      frontmatter: frontmatterResult.value,
     };
   }
 
