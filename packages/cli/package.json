@@ -35,7 +35,7 @@
   "dependencies": {
     "@clack/prompts": "^1.3.0",
     "commander": "^14.0.3",
-    "fuma-cli": "^0.0.6",
+    "fuma-cli": "^0.1.1",
     "picocolors": "^1.1.1",
     "tinyexec": "^1.1.2",
     "zod": "^4.4.2"

@@ -1,11 +1,10 @@
 import * as radixUi from '../../../../packages/radix-ui/registry';
 import * as baseUi from '../../../../packages/base-ui/registry';
 import * as sanity from '../../../../packages/sanity/registry';
-import { fileURLToPath } from 'node:url';
 import * as path from 'node:path';
 import type { CompileOptions, Registry } from 'fuma-cli/compiler';
 
-const baseDir = path.join(path.dirname(fileURLToPath(import.meta.url)), '../../');
+const baseDir = path.join(import.meta.dirname, '../../');
 
 export const compileOptions: Partial<CompileOptions> = {
   onUnknownFile(absolutePath) {
@@ -71,8 +70,6 @@ export const compileOptions: Partial<CompileOptions> = {
 export const registry: Registry = {
   dir: baseDir,
   name: 'fumadocs',
-  packageJson: './package.json',
-  tsconfigPath: './tsconfig.json',
   subRegistries: [radixUi.registry, baseUi.registry, sanity.registry],
 
   components: [

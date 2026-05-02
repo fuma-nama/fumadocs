@@ -46,7 +46,7 @@
     "@commander-js/extra-typings": "^14.0.0",
     "@fumadocs/cli": "workspace:*",
     "commander": "^14.0.3",
-    "fuma-cli": "^0.0.6",
+    "fuma-cli": "^0.1.1",
     "picocolors": "^1.1.1",
     "tinyexec": "^1.1.2",
     "ts-morph": "^28.0.0"

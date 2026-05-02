@@ -148,7 +148,7 @@
     "@types/node": "^25.6.0",
     "@types/react": "^19.2.14",
     "@types/react-dom": "^19.2.3",
-    "fuma-cli": "^0.0.6",
+    "fuma-cli": "^0.1.1",
     "fumadocs-core": "workspace:*",
     "react-medium-image-zoom": "^5.4.4",
     "tailwindcss": "^4.2.4",

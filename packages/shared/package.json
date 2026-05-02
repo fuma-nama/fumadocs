@@ -2,7 +2,7 @@
   "name": "shared",
   "private": true,
   "dependencies": {
-    "fuma-cli": "^0.0.6",
+    "fuma-cli": "^0.1.1",
     "tinyglobby": "^0.2.16"
   },
   "devDependencies": {
