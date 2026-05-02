@@ -33,12 +33,12 @@
     "types:check": "tsc --noEmit"
   },
   "dependencies": {
-    "@clack/prompts": "^1.2.0",
+    "@clack/prompts": "^1.3.0",
     "commander": "^14.0.3",
     "fuma-cli": "^0.0.6",
     "picocolors": "^1.1.1",
-    "tinyexec": "^1.1.1",
-    "zod": "^4.3.6"
+    "tinyexec": "^1.1.2",
+    "zod": "^4.4.2"
   },
   "devDependencies": {
     "@types/node": "25.6.0",

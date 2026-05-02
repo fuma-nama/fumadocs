@@ -1,5 +1,6 @@
 import * as radixUi from '../../../../packages/radix-ui/registry';
 import * as baseUi from '../../../../packages/base-ui/registry';
+import * as sanity from '../../../../packages/sanity/registry';
 import { fileURLToPath } from 'node:url';
 import * as path from 'node:path';
 import type { CompileOptions, Registry } from 'fuma-cli/compiler';
@@ -72,7 +73,7 @@ export const registry: Registry = {
   name: 'fumadocs',
   packageJson: './package.json',
   tsconfigPath: './tsconfig.json',
-  subRegistries: [radixUi.registry, baseUi.registry],
+  subRegistries: [radixUi.registry, baseUi.registry, sanity.registry],
 
   components: [
     {

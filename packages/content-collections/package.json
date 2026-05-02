@@ -39,7 +39,7 @@
   },
   "dependencies": {
     "unified": "^11.0.5",
-    "zod": "^4.3.6"
+    "zod": "^4.4.2"
   },
   "devDependencies": {
     "@content-collections/core": "^0.15.0",

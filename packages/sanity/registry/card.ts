@@ -8,7 +8,7 @@ export const card = defineType({
     defineField({
       name: 'title',
       title: 'Title',
-      type: 'string',
+      type: 'blockContent',
     }),
     defineField({
       name: 'children',
@@ -19,6 +19,20 @@ export const card = defineType({
       name: 'url',
       type: 'string',
       title: 'card href',
+    }),
+  ],
+});
+
+export const cards = defineType({
+  name: 'cards',
+  type: 'object',
+  description: 'The container of cards',
+  title: 'Cards',
+  fields: [
+    defineField({
+      name: 'children',
+      title: 'Children',
+      type: 'blockContent',
     }),
   ],
 });

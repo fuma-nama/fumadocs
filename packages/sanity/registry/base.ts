@@ -42,10 +42,6 @@ export const docsType = defineType({
       validation: (r) => r.required(),
     }),
     defineField({
-      name: 'publishedAt',
-      type: 'datetime',
-    }),
-    defineField({
       name: 'body',
       type: 'blockContent',
     }),
