@@ -8,12 +8,12 @@ import { Step, Steps } from 'fumadocs-ui/components/steps';
 export interface StepValue {
   _key?: string;
   _type: 'step';
-  children?: PortableTextBlock[];
+  body?: PortableTextBlock[];
 }
 
 export interface StepsValue {
   _type: 'steps';
-  children?: StepValue[];
+  items?: StepValue[];
 }
 
 function renderBlocks(blocks: PortableTextBlock[] | undefined, renderNode: NodeRenderer) {
@@ -27,13 +27,13 @@ export const stepsComponents: {
   steps: PortableTextTypeComponent<StepsValue>;
 } = {
   step({ value, renderNode }) {
-    return <Step>{renderBlocks(value.children, renderNode)}</Step>;
+    return <Step>{renderBlocks(value.body, renderNode)}</Step>;
   },
   steps({ value, renderNode }) {
     return (
       <Steps>
-        {value.children?.map((item, index) => (
-          <Step key={item._key ?? index}>{renderBlocks(item.children, renderNode)}</Step>
+        {value.items?.map((item, index) => (
+          <Step key={item._key ?? index}>{renderBlocks(item.body, renderNode)}</Step>
         ))}
       </Steps>
     );

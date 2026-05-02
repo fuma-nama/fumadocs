@@ -14,6 +14,11 @@ export const file = defineType({
       validation: (r) => r.required(),
     }),
   ],
+  preview: {
+    select: {
+      title: 'name',
+    },
+  },
 });
 
 export const folder = defineType({
@@ -34,12 +39,17 @@ export const folder = defineType({
       initialValue: false,
     }),
     defineField({
-      name: 'children',
-      title: 'Children',
+      name: 'items',
+      title: 'Items',
       type: 'array',
       of: fileTreeItems,
     }),
   ],
+  preview: {
+    select: {
+      title: 'name',
+    },
+  },
 });
 
 export const files = defineType({
@@ -48,10 +58,17 @@ export const files = defineType({
   title: 'Files',
   fields: [
     defineField({
-      name: 'children',
-      title: 'Children',
+      name: 'items',
+      title: 'Items',
       type: 'array',
       of: fileTreeItems,
     }),
   ],
+  preview: {
+    prepare() {
+      return {
+        title: 'File Tree',
+      };
+    },
+  },
 });

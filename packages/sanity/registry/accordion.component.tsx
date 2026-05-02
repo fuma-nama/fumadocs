@@ -11,13 +11,13 @@ export interface AccordionValue {
   title?: PortableTextBlock[];
   id?: string;
   value?: string;
-  children?: PortableTextBlock[];
+  body?: PortableTextBlock[];
 }
 
 export interface AccordionsValue {
   _type: 'accordions';
   type?: 'single' | 'multiple';
-  children?: AccordionValue[];
+  items?: AccordionValue[];
 }
 
 function renderBlocks(blocks: PortableTextBlock[] | undefined, renderNode: NodeRenderer) {
@@ -38,7 +38,7 @@ export const accordionComponents: {
           id={value.id}
           value={value.value ?? value._key}
         >
-          {renderBlocks(value.children, renderNode)}
+          {renderBlocks(value.body, renderNode)}
         </Accordion>
       </Accordions>
     );
@@ -46,14 +46,14 @@ export const accordionComponents: {
   accordions({ value, renderNode }) {
     return (
       <Accordions type={value.type ?? 'single'}>
-        {value.children?.map((item) => (
+        {value.items?.map((item) => (
           <Accordion
             key={item._key}
             title={item.title && renderBlocks(item.title, renderNode)}
             id={item.id}
             value={item.value ?? item._key}
           >
-            {renderBlocks(item.children, renderNode)}
+            {renderBlocks(item.body, renderNode)}
           </Accordion>
         ))}
       </Accordions>

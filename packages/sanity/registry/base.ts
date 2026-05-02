@@ -65,8 +65,8 @@ export const callout = defineType({
       type: 'blockContent',
     }),
     defineField({
-      name: 'children',
-      title: 'Children',
+      name: 'body',
+      title: 'Body',
       type: 'blockContent',
     }),
     defineField({
@@ -83,6 +83,12 @@ export const callout = defineType({
       },
     }),
   ],
+  preview: {
+    select: {
+      title: 'title',
+      subtitle: 'body',
+    },
+  },
 });
 
 export const card = defineType({
@@ -96,16 +102,22 @@ export const card = defineType({
       type: 'blockContent',
     }),
     defineField({
-      name: 'children',
-      title: 'Children',
+      name: 'body',
+      title: 'Body',
       type: 'blockContent',
     }),
     defineField({
       name: 'url',
       type: 'string',
-      title: 'card href',
+      title: 'Link To',
     }),
   ],
+  preview: {
+    select: {
+      title: 'title',
+      subtitle: 'body',
+    },
+  },
 });
 
 export const cards = defineType({
@@ -115,10 +127,20 @@ export const cards = defineType({
   title: 'Cards',
   fields: [
     defineField({
-      name: 'children',
-      title: 'Children',
+      name: 'items',
+      title: 'Items',
       type: 'array',
       of: [{ type: 'card' }],
     }),
   ],
+  preview: {
+    select: {
+      items: 'items',
+    },
+    prepare({ items = [] }) {
+      return {
+        title: `${items.length} Cards`,
+      };
+    },
+  },
 });

@@ -12,12 +12,12 @@ export interface FolderValue {
   _type: 'folder';
   name?: string;
   defaultOpen?: boolean;
-  children?: FileTreeItem[];
+  items?: FileTreeItem[];
 }
 
 export interface FilesValue {
   _type: 'files';
-  children?: FileTreeItem[];
+  items?: FileTreeItem[];
 }
 
 type FileTreeItem = FileValue | FolderValue;
@@ -29,7 +29,7 @@ function renderFileTree(items: FileTreeItem[] | undefined) {
     if (item._type === 'folder') {
       return (
         <Folder key={key} name={item.name ?? ''} defaultOpen={item.defaultOpen}>
-          {renderFileTree(item.children)}
+          {renderFileTree(item.items)}
         </Folder>
       );
     }
@@ -49,11 +49,11 @@ export const filesComponents: {
   folder({ value }) {
     return (
       <Folder name={value.name ?? ''} defaultOpen={value.defaultOpen}>
-        {renderFileTree(value.children)}
+        {renderFileTree(value.items)}
       </Folder>
     );
   },
   files({ value }) {
-    return <Files>{renderFileTree(value.children)}</Files>;
+    return <Files>{renderFileTree(value.items)}</Files>;
   },
 };

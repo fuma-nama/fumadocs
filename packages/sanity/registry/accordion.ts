@@ -22,11 +22,17 @@ export const accordion = defineType({
       type: 'string',
     }),
     defineField({
-      name: 'children',
-      title: 'Children',
+      name: 'body',
+      title: 'Body',
       type: 'blockContent',
     }),
   ],
+  preview: {
+    select: {
+      title: 'title',
+      subtitle: 'body',
+    },
+  },
 });
 
 export const accordions = defineType({
@@ -47,10 +53,21 @@ export const accordions = defineType({
       },
     }),
     defineField({
-      name: 'children',
-      title: 'Children',
+      name: 'items',
+      title: 'Items',
       type: 'array',
       of: [{ type: 'accordion' }],
     }),
   ],
+  preview: {
+    select: {
+      type: 'type',
+    },
+    prepare({ type }) {
+      return {
+        title: 'Accordions',
+        subtitle: type,
+      };
+    },
+  },
 });
