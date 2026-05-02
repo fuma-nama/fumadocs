@@ -1,5 +1,11 @@
 # fumadocs
 
+## 1.3.10
+
+### Patch Changes
+
+- 2d22086: Improve for Sanity registry
+
 ## 1.3.9
 
 ### Patch Changes
