@@ -105,11 +105,11 @@
   },
   "inlinedDependencies": {
     "@fastify/deepmerge": "3.2.1",
-    "@scalar/helpers": "0.5.2",
-    "@scalar/json-magic": "0.12.8",
-    "@scalar/openapi-upgrader": "0.2.6",
+    "@scalar/helpers": "0.5.5",
+    "@scalar/json-magic": "0.12.11",
+    "@scalar/openapi-upgrader": "0.2.7",
     "fast-content-type-parse": "3.0.0",
     "pathe": "2.0.3",
-    "yaml": "2.8.3"
+    "yaml": "2.8.4"
   }
 }
