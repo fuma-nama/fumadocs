@@ -328,7 +328,6 @@ export const registry: Registry = {
     },
     {
       name: 'ai/page-actions',
-      title: 'Page Actions',
       description: 'Common page actions',
       files: [
         {

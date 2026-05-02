@@ -124,8 +124,8 @@ export const registry: Registry = {
     },
     {
       name: 'ai/openrouter',
-      title: 'AI Chat (Next.js + OpenRouter)',
-      description: 'Ask AI dialog for your docs, requires OPENROUTER_API_KEY',
+      title: 'AI Chat (AI SDK)',
+      description: 'Ask AI dialog for your docs, default using OpenRouter',
       files: [
         {
           type: 'components',
@@ -154,7 +154,7 @@ export const registry: Registry = {
     },
     {
       name: 'ai/inkeep',
-      title: 'AI Chat (Next.js + Inkeep AI)',
+      title: 'AI Chat (Inkeep AI)',
       description: 'Ask AI dialog for your docs, requires Inkeep AI',
       files: [
         {
@@ -176,7 +176,7 @@ export const registry: Registry = {
     },
     {
       name: 'og/mono',
-      description: 'Open graph image generation (mono-style)',
+      description: 'Open graph image generation - mono style',
       files: [
         {
           type: 'lib',

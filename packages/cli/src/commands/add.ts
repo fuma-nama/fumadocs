@@ -25,11 +25,11 @@ export async function add(input: string[], connector: RegistryConnector, config:
     const spin = spinner();
     spin.start('fetching registry');
 
-    async function scan(subRegistry?: string): Promise<AddOption[]> {
+    async function scan(subRegistry?: string, prefix?: string): Promise<AddOption[]> {
       const info = await connector.fetchRegistryInfo(subRegistry);
 
       return info.indexes.map((item) => ({
-        label: item.title ?? item.name,
+        label: `${prefix ? `${picocolors.bold(prefix)} - ` : ''}${item.title ?? item.name}`,
         value: { name: item.name, subRegistry },
         hint: item.description,
       }));
@@ -38,7 +38,11 @@ export async function add(input: string[], connector: RegistryConnector, config:
     spin.stop(picocolors.bold(picocolors.greenBright('registry fetched')));
     const value = await autocompleteMultiselect({
       message: 'Select components to install',
-      options: [...(await scan()), ...(await scan(subRegistry))],
+      options: [
+        ...(await scan(undefined, 'common')),
+        ...(await scan('fumadocs/sanity', 'sanity')),
+        ...(await scan(subRegistry, 'ui')),
+      ].sort((a, b) => a.label.localeCompare(b.label)),
     });
 
     if (isCancel(value)) {

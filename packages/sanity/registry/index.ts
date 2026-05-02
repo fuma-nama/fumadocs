@@ -57,7 +57,7 @@ export const registry: Registry = {
       name: 'all',
       subComponents: components.map((comp) => ({
         type: 'sub-registry',
-        subRegistry: 'sanity',
+        subRegistry: 'fumadocs/sanity',
         component: comp.name,
       })),
     },
