@@ -6,7 +6,7 @@ export default defineConfig({
   },
   target: 'es2023',
   format: 'esm',
-  entry: ['./src/index.ts'],
+  entry: ['./src/{index,client}.ts'],
   deps: {
     onlyBundle: [],
   },

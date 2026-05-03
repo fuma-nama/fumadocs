@@ -1,5 +1,7 @@
 # fumadocs-core
 
+## 16.8.6
+
 ## 16.8.5
 
 ### Patch Changes

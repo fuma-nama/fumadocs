@@ -1,6 +1,6 @@
 {
   "name": "@fumadocs/sanity",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "description": "The official Sanity integration for Fumadocs",
   "keywords": [
     "Docs",
@@ -16,6 +16,7 @@
   "type": "module",
   "exports": {
     ".": "./dist/index.mjs",
+    "./client": "./dist/client.mjs",
     "./package.json": "./package.json"
   },
   "publishConfig": {
