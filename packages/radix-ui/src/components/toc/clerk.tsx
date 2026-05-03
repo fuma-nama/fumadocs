@@ -277,15 +277,21 @@ export function TOCItem({
             width: Math.max(l0, l1) + 9,
           }}
         >
-          <path
-            d={
-              l0 === l1
-                ? `M ${l0 + 0.5} 6 L ${l0 + 0.5} 100%`
-                : `M ${l0 + 0.5} 0 C ${l0 + 0.5} 8 ${l1 + 0.5} 4 ${l1 + 0.5} 12 L ${l1 + 0.5} 100%`
-            }
-            stroke="black"
+          {l0 !== l1 && (
+            <path
+              d={`M ${l0 + 0.5} 0 C ${l0 + 0.5} 8 ${l1 + 0.5} 4 ${l1 + 0.5} 12`}
+              stroke="black"
+              strokeWidth="1"
+              fill="none"
+              className="stroke-fd-foreground/10"
+            />
+          )}
+          <line
+            x1={l1 + 0.5}
+            y1={l0 === l1 ? '6' : '12'}
+            x2={l1 + 0.5}
+            y2="100%"
             strokeWidth="1"
-            fill="none"
             className="stroke-fd-foreground/10"
           />
           {item._step !== undefined && (
