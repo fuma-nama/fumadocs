@@ -3,28 +3,39 @@ import type { DynamicSource, MetaData } from 'fumadocs-core/source';
 import type { TOCItemType } from 'fumadocs-core/toc';
 import type { DefinedSanityFetchType } from 'next-sanity/live';
 import type { ReactNode } from 'react';
-import type { PortableTextBlock } from 'sanity';
+import type { PortableTextBlock, SlugValue } from 'sanity';
+import type { QueryParams, SanityClient } from '@sanity/client';
 
-export interface SanityOptions<Doc extends BaseDoc> {
+export type SanityOptions<Doc extends BaseDoc = BaseDoc> =
+  | GenericSanityOptions<Doc>
+  | NextSanityOptions<Doc>;
+
+interface BaseSanityOptions<Doc extends BaseDoc> {
+  /** document name for docs pages */
   docType: string;
-  sanityFetch: DefinedSanityFetchType;
 
-  /** generate virtual file path from doc */
+  /** generate [virtual file path](https://fumadocs.dev/docs/headless/source-api/source#static-source) from document */
   generatePath?: (doc: ShallowDoc<Doc>) => string;
 }
 
+export interface GenericSanityOptions<
+  Doc extends BaseDoc = BaseDoc,
+> extends BaseSanityOptions<Doc> {
+  client: SanityClient;
+}
+
+export interface NextSanityOptions<Doc extends BaseDoc = BaseDoc> extends BaseSanityOptions<Doc> {
+  client?: SanityClient;
+  sanityFetch: DefinedSanityFetchType;
+}
+
+/** your page document must align with this type */
 export interface BaseDoc {
   _id: string;
   _type: string;
   title?: string;
   description?: string;
-  slug?: BaseSlug;
-}
-
-export interface BaseSlug {
-  _type: 'slug';
-  current?: string;
-  source?: string;
+  slug?: SlugValue;
 }
 
 type ShallowDoc<Doc extends BaseDoc> = Pick<
@@ -48,19 +59,28 @@ export function createSanitySource<Doc extends BaseDoc>(
   pageData: DocToPage<Doc>;
   metaData: MetaData;
 }> {
-  const { docType, sanityFetch, generatePath } = options;
+  const { docType, generatePath } = options;
+  let sanityFetch: <R = unknown>(query: string, params?: QueryParams) => Promise<R>;
+
+  if ('sanityFetch' in options) {
+    const fn = options.sanityFetch;
+    sanityFetch = async (query, params) => {
+      const res = await fn({ query, params });
+      return res.data;
+    };
+  } else {
+    const client = options.client;
+    sanityFetch = client.fetch.bind(client);
+  }
 
   return {
     async files() {
-      const docs = await sanityFetch({
-        query: `*[_type == $docType]{
-  _id, _type, title, slug, description
-}`,
-        params: {
+      const data = await sanityFetch<ShallowDoc<Doc>[]>(
+        `*[_type == $docType]{ _id, _type, title, slug, description }`,
+        {
           docType,
         },
-      });
-      const data = docs.data as ShallowDoc<Doc>[];
+      );
 
       return data.map((file) => {
         const slugs = file.slug?.current?.split('/').filter((v) => v.length > 0) ?? [];
@@ -71,17 +91,16 @@ export function createSanitySource<Doc extends BaseDoc>(
             ...file,
             title: file.title ?? file._id,
             async load() {
-              const info = await sanityFetch({
-                query: `*[_type == $docType && _id == $id][0]{
-    ...,
-    "toc": body[style in ["h1", "h2", "h3", "h4", "h5", "h6"]]
-  }`,
-                params: {
+              const data = await sanityFetch<Doc & { toc?: PortableTextBlock[] }>(
+                `*[_type == $docType && _id == $id][0]{
+                  ...,
+                  "toc": body[style in ["h1", "h2", "h3", "h4", "h5", "h6"]]
+                }`,
+                {
                   id: file._id,
                   docType,
                 },
-              });
-              const data = info.data as Doc & { toc?: PortableTextBlock[] };
+              );
 
               return {
                 ...data,
@@ -99,33 +118,30 @@ export function createSanitySource<Doc extends BaseDoc>(
               };
             },
             async structuredData() {
-              const result = await sanityFetch({
-                query: `
-                  *[_type == $docType && _id == $id][0]{
-                    "structuredBody": body[]{
-                      ...,
-                      _type == "block" => {
-                        "heading": select(
-                          style == "h1" => "h1",
-                          style == "h2" => "h2",
-                          style == "h3" => "h3",
-                          style == "h4" => "h4",
-                          style == "h5" => "h5",
-                          style == "h6" => "h6",
-                          null
-                        ),
-                        "content": pt::text(@)
-                      }
+              const data = await sanityFetch<{ structuredBody: StructuredBlock[] } | undefined>(
+                `*[_type == $docType && _id == $id][0]{
+                  "structuredBody": body[]{
+                    ...,
+                    _type == "block" => {
+                      "heading": select(
+                        style == "h1" => "h1",
+                        style == "h2" => "h2",
+                        style == "h3" => "h3",
+                        style == "h4" => "h4",
+                        style == "h5" => "h5",
+                        style == "h6" => "h6",
+                        null
+                      ),
+                      "content": pt::text(@)
                     }
                   }
-                `,
-                params: {
+                }`,
+                {
                   docType,
                   id: file._id,
                 },
-              });
+              );
 
-              const data = result.data as { structuredBody: StructuredBlock[] } | undefined;
               return getStructuredData(data?.structuredBody ?? []);
             },
           },
