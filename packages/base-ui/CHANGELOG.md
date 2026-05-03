@@ -1,5 +1,12 @@
 # @fumadocs/base-ui
 
+## 16.8.6
+
+### Patch Changes
+
+- 1aa48d0: fix RTL layout for Clerk style
+  - fumadocs-core@16.8.6
+
 ## 16.8.5
 
 ### Patch Changes
