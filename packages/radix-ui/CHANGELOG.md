@@ -1,5 +1,12 @@
 # fumadocs-ui
 
+## 16.8.7
+
+### Patch Changes
+
+- 34f37f3: hotfix TOC
+  - fumadocs-core@16.8.7
+
 ## 16.8.6
 
 ### Patch Changes
