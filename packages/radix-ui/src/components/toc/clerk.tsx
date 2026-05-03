@@ -68,24 +68,19 @@ export function TOCItems({ ref, className, thumbBox = true, children, ...props }
 
       if (item._step !== undefined) {
         output.push(
-          <circle
-            key={`${i}-circle`}
-            cx={x}
-            cy={(top + bottom) / 2}
-            r="8"
-            className="fill-fd-primary"
-          />,
-          <text
-            key={`${i}-text`}
-            x={x}
-            y={(top + bottom) / 2}
-            textAnchor="middle"
-            alignmentBaseline="central"
-            dominantBaseline="middle"
-            className="fill-fd-primary-foreground font-medium text-xs leading-none font-mono"
-          >
-            {item._step}
-          </text>,
+          <g key={i} transform={`translate(${x}, ${(top + bottom) / 2})`}>
+            <circle cx="0" cy="0" r="8" className="fill-fd-primary" />
+            <text
+              cx="0"
+              cy="0"
+              textAnchor="middle"
+              alignmentBaseline="central"
+              dominantBaseline="middle"
+              className="fill-fd-primary-foreground font-medium text-xs leading-none font-mono rtl:-scale-x-100"
+            >
+              {item._step}
+            </text>
+          </g>,
         );
       }
 
@@ -209,7 +204,7 @@ function ThumbTrack({ computed, thumbBox }: { computed: ComputedSVG; thumbBox: b
   return (
     <div
       ref={ref}
-      className="absolute top-0 inset-s-0"
+      className="absolute top-0 inset-s-0 origin-center rtl:-scale-x-100"
       style={{
         width: computed.width,
         height: computed.height,
@@ -230,7 +225,7 @@ function ThumbTrack({ computed, thumbBox }: { computed: ComputedSVG; thumbBox: b
       </svg>
       {thumbBox && (
         <div
-          className="absolute size-1 bg-fd-primary rounded-full [offset-distance:var(--offset-distance,0)] opacity-(--opacity,0) transition-[opacity,offset-distance]"
+          className="absolute left-0 size-1 bg-fd-primary rounded-full [offset-distance:var(--offset-distance,0)] opacity-(--opacity,0) transition-[opacity,offset-distance]"
           style={{
             offsetPath: `path("${computed.d}")`,
           }}
@@ -259,15 +254,57 @@ export function TOCItem({
   ...props
 }: Primitive.TOCItemProps & { item: Primitive.TOCItemType }) {
   const items = useTOCItems();
-  const { lowerOffset, offset, upperOffset, isFirst, isLast } = useMemo(() => {
+  const { isFirst, isLast, svg } = useMemo(() => {
     const index = items.indexOf(item);
-    const offset = getLineOffset(item.depth);
+    const isFirst = index === 0;
+    const isLast = index === items.length - 1;
+
+    const l1 = getLineOffset(item.depth);
+    const l0 = isFirst ? l1 : getLineOffset(items[index - 1].depth);
+    const l2 = isLast ? l1 : getLineOffset(items[index + 1].depth);
+
     return {
-      offset,
-      isFirst: index === 0,
-      isLast: index === items.length - 1,
-      upperOffset: index > 0 ? getLineOffset(items[index - 1].depth) : offset,
-      lowerOffset: index + 1 < items.length ? getLineOffset(items[index + 1].depth) : offset,
+      isFirst,
+      isLast,
+      svg: (
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          className={cn(
+            'absolute -top-1.5 inset-s-0 bottom-0 h-[calc(100%+--spacing(1.5))] -z-1 rtl:-scale-x-100',
+            l1 !== l2 && 'h-full bottom-1.5',
+          )}
+          style={{
+            width: Math.max(l0, l1) + 9,
+          }}
+        >
+          <path
+            d={
+              l0 === l1
+                ? `M ${l0 + 0.5} 6 L ${l0 + 0.5} 100%`
+                : `M ${l0 + 0.5} 0 C ${l0 + 0.5} 8 ${l1 + 0.5} 4 ${l1 + 0.5} 12 L ${l1 + 0.5} 100%`
+            }
+            stroke="black"
+            strokeWidth="1"
+            fill="none"
+            className="stroke-fd-foreground/10"
+          />
+          {item._step !== undefined && (
+            <g transform={`translate(${l1 + 0.5}, ${l1 === l2 ? '3' : '6'})`}>
+              <circle cx="0" cy="50%" r="8" className="fill-fd-muted" />
+              <text
+                x="0"
+                y="50%"
+                textAnchor="middle"
+                alignmentBaseline="central"
+                dominantBaseline="middle"
+                className="fill-fd-muted-foreground font-medium text-xs leading-none font-mono rtl:-scale-x-100"
+              >
+                {item._step}
+              </text>
+            </g>
+          )}
+        </svg>
+      ),
     };
   }, [items, item]);
 
@@ -286,47 +323,7 @@ export function TOCItem({
         ...props.style,
       }}
     >
-      {offset !== upperOffset && (
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          viewBox={`${Math.min(offset, upperOffset)} 0 ${Math.abs(upperOffset - offset)} 12`}
-          className="absolute -top-1.5 -z-1"
-          style={{
-            width: Math.abs(upperOffset - offset) + 1,
-            height: 12,
-            insetInlineStart: Math.min(offset, upperOffset),
-          }}
-        >
-          <path
-            d={`M ${upperOffset} 0 C ${upperOffset} 8 ${offset} 4 ${offset} 12`}
-            stroke="black"
-            strokeWidth="1"
-            fill="none"
-            className="stroke-fd-foreground/10"
-          />
-        </svg>
-      )}
-      <div
-        className={cn(
-          'absolute inset-y-0 w-px bg-fd-foreground/10 -z-1',
-          offset !== upperOffset && 'top-1.5',
-          offset !== lowerOffset && 'bottom-1.5',
-        )}
-        style={{
-          insetInlineStart: offset,
-        }}
-      />
-      {item._step !== undefined && (
-        <div
-          className="absolute flex items-center justify-center -translate-1/2 -z-1 size-4 font-mono font-medium text-xs bg-fd-muted text-fd-muted-foreground rounded-full leading-none"
-          style={{
-            top: `calc(50% + ${(isFirst ? -0.75 : 0) + (isLast ? 0.75 : 0)} * var(--spacing))`,
-            insetInlineStart: offset,
-          }}
-        >
-          {item._step}
-        </div>
-      )}
+      {svg}
       {item.title}
     </Primitive.TOCItem>
   );
