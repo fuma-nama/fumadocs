@@ -5,6 +5,7 @@ import type { DefinedSanityFetchType } from 'next-sanity/live';
 import type { ReactNode } from 'react';
 import type { PortableTextBlock, SlugValue } from 'sanity';
 import type { QueryParams, SanityClient } from '@sanity/client';
+import { renderToc } from './client';
 
 export type SanityOptions<Doc extends BaseDoc = BaseDoc> =
   | GenericSanityOptions<Doc>
@@ -50,6 +51,7 @@ export type DocToPage<Doc extends BaseDoc> = ShallowDoc<Doc> & {
 };
 
 export type DocToPageLoaded<Doc extends BaseDoc> = Doc & {
+  _toc: PortableTextBlock[];
   renderToc: (opts: { render: (body: PortableTextBlock) => ReactNode }) => TOCItemType[];
 };
 
@@ -91,10 +93,10 @@ export function createSanitySource<Doc extends BaseDoc>(
             ...file,
             title: file.title ?? file._id,
             async load() {
-              const data = await sanityFetch<Doc & { toc?: PortableTextBlock[] }>(
+              const data = await sanityFetch<Doc & { _toc?: PortableTextBlock[] }>(
                 `*[_type == $docType && _id == $id][0]{
                   ...,
-                  "toc": body[style in ["h1", "h2", "h3", "h4", "h5", "h6"]]
+                  "_toc": body[style in ["h1", "h2", "h3", "h4", "h5", "h6"]]
                 }`,
                 {
                   id: file._id,
@@ -104,16 +106,10 @@ export function createSanitySource<Doc extends BaseDoc>(
 
               return {
                 ...data,
-                renderToc({ render }) {
-                  if (!data.toc) return [];
-
-                  return data.toc.map((item): TOCItemType => {
-                    return {
-                      depth: Number(item.level ?? 0),
-                      title: render({ ...item, style: undefined }),
-                      url: `#${item._key}`,
-                    };
-                  });
+                _toc: data._toc ?? [],
+                renderToc(opts) {
+                  if (!data._toc) return [];
+                  return renderToc({ toc: data._toc, ...opts });
                 },
               };
             },

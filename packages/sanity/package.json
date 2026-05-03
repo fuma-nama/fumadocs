@@ -16,6 +16,7 @@
   "type": "module",
   "exports": {
     ".": "./dist/index.mjs",
+    "./client": "./dist/client.mjs",
     "./package.json": "./package.json"
   },
   "publishConfig": {

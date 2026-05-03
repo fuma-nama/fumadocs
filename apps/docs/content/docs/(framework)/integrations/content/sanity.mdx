@@ -1,0 +1,189 @@
+---
+title: Sanity
+description: Official integration for Sanity.
+---
+
+## Overview
+
+Fumadocs provide an official integration to simplify setup for Sanity CMS, it brings native live preview experience without compromise on performance.
+
+> You can see our [Sanity Example](https://github.com/fuma-nama/fumadocs-sanity) on GitHub.
+
+## Setup
+
+Assume you already have [Sanity](https://sanity.io/docs/getting-started) configured according to their docs.
+
+### Data Types [step]
+
+Run the following command to initialize content types.
+
+```npm
+npx @fumadocs/cli add fumadocs/sanity/base
+```
+
+> Or you can run `npx @fumadocs/cli add` and browse additional Sanity presets to install.
+
+Register the installed types:
+
+```ts tab="schemaTypes/index.ts"
+import { docsType, blockContent, callout, card, cards } from '@/lib/sanity/base';
+
+// [!code ++]
+export const schemaTypes = [blockContent, callout, card, cards, docsType];
+```
+
+```tsx tab="components/sanity.ts"
+import {
+  PortableText,
+  type PortableTextProps,
+  type PortableTextReactComponents,
+} from '@portabletext/react';
+// the installed components
+import { baseBlocks, baseComponents, baseMarks } from './base';
+
+const components: Partial<PortableTextReactComponents> = {
+  block: {
+    // [!code ++]
+    ...baseBlocks,
+  },
+  marks: {
+    // [!code ++]
+    ...baseMarks,
+  },
+  types: {
+    // [!code ++]
+    ...baseComponents,
+  },
+};
+
+export function CustomPortableText(props: PortableTextProps) {
+  return <PortableText {...props} components={{ ...components, ...props.components }} />;
+}
+```
+
+### Content Loader [step]
+
+Install the integration:
+
+```npm
+npm i @fumadocs/sanity
+```
+
+```ts title="lib/source.ts" tab="Next.js (live preview)"
+import { dynamicLoader } from 'fumadocs-core/source/dynamic';
+import { createSanitySource } from '@fumadocs/sanity';
+// the live preview client
+import { sanityFetch } from '@/sanity/lib/live';
+// the generated types
+import type { Docs } from '@/sanity/types';
+import { draftMode } from 'next/headers';
+
+const source = dynamicLoader(
+  createSanitySource<Docs>({
+    sanityFetch,
+    docType: 'docs',
+  }),
+  {
+    baseUrl: '/docs',
+  },
+);
+
+export async function getSource() {
+  const { isEnabled } = await draftMode();
+
+  if (isEnabled) source.revalidate();
+  return source.get();
+}
+```
+
+```ts title="lib/source.ts" tab="Others"
+import { dynamicLoader } from 'fumadocs-core/source/dynamic';
+import { createSanitySource } from '@fumadocs/sanity';
+// the Sanity client
+import { client } from '@/sanity/lib/client';
+// the generated types
+import type { Docs } from '@/sanity/types';
+
+const source = dynamicLoader(
+  createSanitySource<Docs>({
+    client,
+    docType: 'docs',
+  }),
+  {
+    baseUrl: '/docs',
+  },
+);
+
+export async function getSource() {
+  return source.get();
+}
+```
+
+Now update references to your `source` with the `getSource()` function like:
+
+```tsx
+import { getSource } from '@/lib/source';
+import { CustomPortableText } from '@/components/sanity';
+import { DocsPage, DocsBody, DocsDescription, DocsTitle } from 'fumadocs-ui/layouts/docs/page';
+
+// [!code highlight]
+const source = await getSource();
+
+const page = source.getPage(['...']);
+
+// basic info
+console.log(page.data.title, page.data.description);
+
+// [!code highlight] load full info
+const { renderToc, body } = await page.data.load();
+
+// to render docs page content:
+return (
+  // `renderToc()` to render TOC items on server
+  <DocsPage toc={renderToc({ render: (body) => <CustomPortableText value={body} /> })}>
+    <DocsTitle>{page.data.title}</DocsTitle>
+    <DocsDescription>{page.data.description}</DocsDescription>
+    <DocsBody>
+      <CustomPortableText value={body!} />
+    </DocsBody>
+  </DocsPage>
+);
+```
+
+If you are not using React Server Components, `renderToc` can be imported separately:
+
+```tsx
+import { getSource } from '@/lib/source';
+import { renderToc } from '@fumadocs/sanity/client';
+import { CustomPortableText } from '@/components/sanity';
+import { DocsPage, DocsBody, DocsDescription, DocsTitle } from 'fumadocs-ui/layouts/docs/page';
+
+// where you return server payload
+export async function serverPayload(slugs: string[]) {
+  const source = await getSource();
+  const page = source.getPage(slugs);
+  if (!page) throw new Error('not found');
+
+  const { title, description, _toc, body } = await page.data.load();
+  return { title, description, toc: _toc, body };
+}
+
+export function Page() {
+  // receive server payload
+  const { toc, body, title, description } = useLoaderData();
+
+  return (
+    <DocsPage toc={renderToc({ toc, render: (body) => <CustomPortableText value={body} /> })}>
+      <DocsTitle>{title}</DocsTitle>
+      <DocsDescription>{description}</DocsDescription>
+      <DocsBody>
+        <CustomPortableText value={body!} />
+      </DocsBody>
+    </DocsPage>
+  );
+}
+```
+
+### Done [step]
+
+Create documents under the `docs` type in your studio editor, new content will be displayed in the docs route.
