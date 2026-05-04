@@ -1,0 +1,54 @@
+{
+  "name": "@fumadocs/basehub",
+  "version": "0.0.0",
+  "description": "The official BaseHub integration for Fumadocs",
+  "keywords": [
+    "Docs",
+    "Fumadocs"
+  ],
+  "homepage": "https://fumadocs.dev",
+  "license": "MIT",
+  "author": "Fuma Nama",
+  "repository": "github:fuma-nama/fumadocs",
+  "files": [
+    "dist"
+  ],
+  "type": "module",
+  "exports": {
+    ".": "./dist/toc.mjs",
+    "./package.json": "./package.json"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "scripts": {
+    "build": "tsdown",
+    "clean": "rimraf dist",
+    "dev": "tsdown --watch --clean false",
+    "lint": "oxlint .",
+    "types:check": "tsc --noEmit"
+  },
+  "devDependencies": {
+    "@types/node": "25.6.0",
+    "@types/react": "^19.2.14",
+    "basehub": "^9.5.3",
+    "fuma-cli": "^0.1.1",
+    "fumadocs-core": "workspace:*",
+    "fumadocs-ui": "workspace:*",
+    "react": "^19.2.5",
+    "tsconfig": "workspace:*",
+    "tsdown": "0.21.10",
+    "typescript": "^6.0.3"
+  },
+  "peerDependencies": {
+    "@types/react": "*",
+    "basehub": "9.x.x",
+    "fumadocs-core": "^16.8.0",
+    "react": "^19.2.0"
+  },
+  "peerDependenciesMeta": {
+    "@types/react": {
+      "optional": true
+    }
+  }
+}
