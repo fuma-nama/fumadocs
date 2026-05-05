@@ -75,7 +75,7 @@ export default function Page() {
           </p>
           <h1 className="text-4xl my-8 leading-tighter font-medium xl:text-5xl xl:mb-12">
             Build excellent
-            <br className="md:hidden" /> documentations,
+            <br className="md:hidden" /> documentation,
             <br />
             your <span className="text-brand">style</span>.
           </h1>
