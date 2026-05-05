@@ -80,7 +80,7 @@ const { rewrite: rewriteDocs } = rewritePath(
   `${docsContentRoute}{/*path}/content.md`,
 );
 const { rewrite: rewriteSuffix } = rewritePath(
-  `${docsRoute}{/*path}.mdx`,
+  `${docsRoute}{/*path}.md`,
   `${docsContentRoute}{/*path}/content.md`,
 );
 const serverMiddleware: Route.MiddlewareFunction = async ({ request }, next) => {

@@ -179,11 +179,9 @@ export async function getConfig() {
 }
 ```
 
-### `*.mdx` [#mdx-extension]
+### `*.md` [#md-extension]
 
-Allow AI agents to get the content of a page as Markdown/MDX, by appending `.mdx` to the end of path.
-
-Make a route handler to return page content, and a middleware to point to it:
+Allow AI agents to get the content of a page as Markdown/MDX, by appending `.md` to the end of path.
 
 ```ts tab="Next.js" title="app/llms.mdx/docs/[[...slug]]/route.ts"
 import { getLLMText } from '@/lib/get-llm-text';
@@ -217,7 +215,7 @@ const config: NextConfig = {
   async rewrites() {
     return [
       {
-        source: '/docs/:path*.mdx',
+        source: '/docs/:path*.md',
         destination: '/llms.mdx/docs/:path*',
       },
     ];
@@ -259,7 +257,7 @@ import { rewritePath } from 'fumadocs-core/negotiation';
 import type { Route } from './+types/root';
 
 // [!code ++:20]
-const { rewrite: rewriteLLM } = rewritePath('/docs{/*path}.mdx', '/llms.mdx/docs{/*path}');
+const { rewrite: rewriteLLM } = rewritePath('/docs{/*path}.md', '/llms.mdx/docs{/*path}');
 const serverMiddleware: Route.MiddlewareFunction = async ({ request }, next) => {
   const url = new URL(request.url);
   const path = rewriteLLM(url.pathname);
@@ -282,16 +280,43 @@ export default {
 } satisfies Config;
 ```
 
-```ts tab="Tanstack Start" title="src/routes/llms[.]mdx.docs.$.ts"
+```ts tab="Tanstack Start" title="lib/source.ts"
+// create the following utils:
+
+export function markdownPathToSlugs(segs: string[]) {
+  if (segs.length === 0) return [];
+
+  const out = [...segs];
+  out[out.length - 1] = out[out.length - 1].replace(/\.md$/, '');
+  if (out.length === 1 && out[0] === 'index') out.pop();
+  return out;
+}
+
+export function slugsToMarkdownPath(slugs: string[]) {
+  const segments = [...slugs];
+  if (segments.length === 0) {
+    segments.push('index.md');
+  } else {
+    segments[segments.length - 1] += '.md';
+  }
+
+  return {
+    segments,
+    url: `/docs/${segments.join('/')}`,
+  };
+}
+```
+
+```ts tab="Tanstack Start" title="src/routes/docs/{$}[.]md.ts"
 import { createFileRoute, notFound } from '@tanstack/react-router';
-import { source } from '@/lib/source';
+import { source, markdownPathToSlugs } from '@/lib/source';
 import { getLLMText } from '@/lib/get-llm-text';
 
-export const Route = createFileRoute('/llms.mdx/docs/$')({
+export const Route = createFileRoute('/docs/{$}.md')({
   server: {
     handlers: {
       GET: async ({ params }) => {
-        const slugs = params._splat?.split('/') ?? [];
+        const slugs = markdownPathToSlugs(params._splat?.split('/') ?? []);
         const page = source.getPage(slugs);
         if (!page) throw notFound();
 
@@ -303,31 +328,6 @@ export const Route = createFileRoute('/llms.mdx/docs/$')({
       },
     },
   },
-});
-```
-
-```ts tab="Tanstack Start" title="src/start.ts"
-import { createMiddleware, createStart } from '@tanstack/react-start';
-import { rewritePath } from 'fumadocs-core/negotiation';
-import { redirect } from '@tanstack/react-router';
-
-const { rewrite: rewriteLLM } = rewritePath('/docs{/*path}.mdx', '/llms.mdx/docs{/*path}');
-
-const llmMiddleware = createMiddleware().server(({ next, request }) => {
-  const url = new URL(request.url);
-  const path = rewriteLLM(url.pathname);
-
-  if (path) {
-    throw redirect(new URL(path, url));
-  }
-
-  return next();
-});
-
-export const startInstance = createStart(() => {
-  return {
-    requestMiddleware: [llmMiddleware],
-  };
 });
 ```
 
@@ -356,7 +356,7 @@ export default function proxy(request: NextRequest) {
 
 ### Page Actions
 
-Common page actions for AI, require [`*.mdx`](#mdx-extension) to be implemented first.
+Common page actions for AI, require [`*.md`](#md-extension) to be implemented first.
 
 ![AI Page Actions](/docs/ai-page-actions.png)
 
@@ -368,6 +368,7 @@ Use it in your docs page like:
 
 ```tsx title="app/docs/[[...slug]]/page.tsx"
 // URL to fetch Markdown content, only need to append .mdx to URL if you have `*.mdx` configured.
+// Use .md instead for the Tanstack Start example above.
 const markdownUrl = `${page.url}.mdx`
 
 <div className="flex flex-row gap-2 items-center border-b pt-2 pb-6">
