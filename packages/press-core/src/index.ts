@@ -1,12 +1,19 @@
 import * as waku from 'waku';
-import { getLLMText, getPageImage, getPageMarkdownUrl, getSource } from './lib/source';
+import {
+  getLLMText,
+  getPageImage,
+  getSource,
+  markdownPathToSlugs,
+  slugsToMarkdownPath,
+} from './lib/source';
 import { llms } from 'fumadocs-core/source/llms';
 import { unstable_notFound } from 'waku/router/server';
-import { appName } from './lib/shared';
+import { AppContext, parseConfig } from './lib/shared';
 import { createFromSource } from 'fumadocs-core/search/server';
 import type { FC, ReactNode } from 'react';
+import type { Config } from './config';
 
-export interface RouterOptions {
+export interface RouterOptions extends Config {
   root?: FC<{ children: ReactNode }>;
 }
 
@@ -15,6 +22,11 @@ export function createRouter(options: RouterOptions = {}): {
   createPages: () => ReturnType<typeof waku.createPages>;
 } {
   const { root } = options;
+  const config = parseConfig(options);
+  const context: AppContext = {
+    config,
+  };
+
   const createPages: typeof waku.createPages = (fns, options) => {
     return waku.createPages(async (r) => {
       const { createApi, createPage, createRoot } = r;
@@ -37,7 +49,7 @@ export function createRouter(options: RouterOptions = {}): {
           staticPaths: source.getPages().map((page) => page.slugs),
           async component({ slugs }) {
             const mod = await import('./layouts/docs/page');
-            return mod.default({ slugs });
+            return mod.default({ slugs, ...context });
           },
         }),
         createApi({
@@ -62,14 +74,9 @@ export function createRouter(options: RouterOptions = {}): {
           render: 'static',
           path: '/[...slugs]',
           method: 'GET',
-          staticPaths: source.getPages().map((page) => getPageMarkdownUrl(page).segments),
+          staticPaths: source.getPages().map((page) => slugsToMarkdownPath(page.slugs).segments),
           async handler(_req, { params }) {
-            const slugs = [...(params.slugs as string[])];
-            if (slugs.length === 0) unstable_notFound();
-
-            slugs[slugs.length - 1] = slugs[slugs.length - 1]!.replace(/\.md$/, '');
-            if (slugs.length === 1 && slugs[0] === 'index') slugs.pop();
-
+            const slugs = markdownPathToSlugs(params.slugs as string[]);
             const page = source.getPage(slugs);
             if (!page) unstable_notFound();
 
@@ -102,7 +109,7 @@ export function createRouter(options: RouterOptions = {}): {
               generate({
                 title: page.data.title,
                 description: page.data.description,
-                site: appName,
+                site: config.site.name,
               }),
               {
                 width: 1200,

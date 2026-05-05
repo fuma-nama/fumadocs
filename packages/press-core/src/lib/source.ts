@@ -33,8 +33,8 @@ export function getPageImage(slugs: string[]) {
   };
 }
 
-export function getPageMarkdownUrl(page: (typeof source)['$inferPage']) {
-  const segments = [...page.slugs];
+export function slugsToMarkdownPath(slugs: string[]) {
+  const segments = [...slugs];
   if (segments.length === 0) {
     segments.push('index.md');
   } else {
@@ -45,6 +45,16 @@ export function getPageMarkdownUrl(page: (typeof source)['$inferPage']) {
     segments,
     url: `/${segments.join('/')}`,
   };
+}
+
+export function markdownPathToSlugs(segs: string[]) {
+  const slugs = [...segs];
+  if (slugs.length === 0) return [];
+
+  slugs[slugs.length - 1] = slugs[slugs.length - 1]!.replace(/\.md$/, '');
+  if (slugs.length === 1 && slugs[0] === 'index') slugs.pop();
+
+  return slugs;
 }
 
 export async function getLLMText(page: (typeof source)['$inferPage']) {

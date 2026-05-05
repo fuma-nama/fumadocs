@@ -1,4 +1,4 @@
-import { getPageImage, getPageMarkdownUrl, getSource } from '@/lib/source';
+import { getPageImage, getSource, slugsToMarkdownPath } from '@/lib/source';
 import { createRelativeLink } from 'fumadocs-ui/mdx';
 import {
   DocsBody,
@@ -9,12 +9,11 @@ import {
   ViewOptionsPopover,
 } from 'fumadocs-ui/layouts/docs/page';
 import { unstable_notFound } from 'waku/router/server';
-import { gitConfig } from '@/lib/shared';
+import { AppContext, baseOptions, getGitHubFileUrl } from '@/lib/shared';
 import { getMDXComponents } from '@/components/mdx';
 import { DocsLayout } from 'fumadocs-ui/layouts/docs';
-import { baseOptions } from '@/lib/layout.shared';
 
-export default async function Page({ slugs }: { slugs: string[] }) {
+export default async function Page({ slugs, config }: { slugs: string[] } & AppContext) {
   const source = await getSource();
   const page = source.getPage(slugs);
   if (!page) unstable_notFound();
@@ -27,9 +26,9 @@ export default async function Page({ slugs }: { slugs: string[] }) {
     }),
   );
 
-  const markdownUrl = getPageMarkdownUrl(page).url;
+  const markdownUrl = slugsToMarkdownPath(page.slugs).url;
   return (
-    <DocsLayout {...baseOptions()} tree={source.getPageTree()}>
+    <DocsLayout {...baseOptions(config)} tree={source.getPageTree()}>
       <DocsPage toc={toc}>
         <meta property="og:image" content={getPageImage(slugs).url} />
         <DocsTitle>{page.data.title}</DocsTitle>
@@ -38,7 +37,7 @@ export default async function Page({ slugs }: { slugs: string[] }) {
           <MarkdownCopyButton markdownUrl={markdownUrl} />
           <ViewOptionsPopover
             markdownUrl={markdownUrl}
-            githubUrl={`https://github.com/${gitConfig.user}/${gitConfig.repo}/blob/${gitConfig.branch}/content/docs/${page.path}`}
+            githubUrl={page.absolutePath ? getGitHubFileUrl(config, page.absolutePath) : undefined}
           />
         </div>
         <DocsBody>{body}</DocsBody>

@@ -7,7 +7,7 @@
     "dev": "waku dev",
     "build": "waku build",
     "start": "waku start",
-    "types:check": "fumadocs-mdx && tsc --noEmit"
+    "types:check": "tsc --noEmit"
   },
   "dependencies": {
     "@fumapress/core": "workspace:*",
