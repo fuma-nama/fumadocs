@@ -1,6 +1,7 @@
 {
   "name": "@fumapress/core",
   "version": "0.0.1",
+  "private": true,
   "description": "An opinionated docs framework powered by Fumadocs",
   "keywords": [
     "Docs",
