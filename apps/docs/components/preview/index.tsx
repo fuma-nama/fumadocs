@@ -108,7 +108,7 @@ export function accordion(): ReactNode {
     <Wrapper>
       <Accordions type="single" collapsible>
         <Accordion id="what-is-fumadocs" title="What is Fumadocs?">
-          A framework for building documentations
+          A framework for building documentation
         </Accordion>
         <Accordion id="ux" title="What do we love?">
           We love websites with a good user experience
