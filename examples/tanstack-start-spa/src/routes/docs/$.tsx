@@ -39,7 +39,7 @@ const loader = createServerFn({
 
     return {
       path: page.path,
-      markdownUrl: getPageMarkdownUrl(page).url,
+      markdownUrl: getPageMarkdownUrl(page.slugs).url,
       pageTree: await source.serializePageTree(source.getPageTree()),
     };
   });

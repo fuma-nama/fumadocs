@@ -40,7 +40,7 @@ const serverLoader = createServerFn({
       path: page.path,
       frontmatter: page.data.frontmatter,
       render: serialize(),
-      markdownUrl: getPageMarkdownUrl(page).url,
+      markdownUrl: getPageMarkdownUrl(page.slugs).url,
       pageTree: await source.serializePageTree(source.getPageTree()),
     };
   });

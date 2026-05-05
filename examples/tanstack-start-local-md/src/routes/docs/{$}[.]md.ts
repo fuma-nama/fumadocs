@@ -1,13 +1,13 @@
 import { createFileRoute, notFound } from '@tanstack/react-router';
-import { getLLMText, source } from '@/lib/source';
+import { getLLMText, getSource } from '@/lib/source';
 
-export const Route = createFileRoute('/llms.mdx/docs/$')({
+export const Route = createFileRoute('/docs/{$}.md')({
   server: {
     handlers: {
       GET: async ({ params }) => {
-        const slugs = (params._splat ?? '').split('/');
-        // remove the appended "content.md"
+        const slugs = params._splat?.split('/') ?? [];
         slugs.pop();
+        const source = await getSource();
         const page = source.getPage(slugs);
         if (!page) throw notFound();
 

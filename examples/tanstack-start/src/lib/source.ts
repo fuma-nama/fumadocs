@@ -1,7 +1,7 @@
 import { loader } from 'fumadocs-core/source';
 import { docs } from 'collections/server';
 import { lucideIconsPlugin } from 'fumadocs-core/source/lucide-icons';
-import { docsContentRoute, docsRoute } from './shared';
+import { docsRoute } from './shared';
 
 export const source = loader({
   source: docs.toFumadocsSource(),
@@ -9,12 +9,17 @@ export const source = loader({
   plugins: [lucideIconsPlugin()],
 });
 
-export function getPageMarkdownUrl(page: (typeof source)['$inferPage']) {
-  const segments = [...page.slugs, 'content.md'];
+export function getPageMarkdownUrl(slugs: string[]) {
+  const segments = [...slugs];
+  if (segments.length === 0) {
+    segments.push('index.md');
+  } else {
+    segments[segments.length - 1] += '.md';
+  }
 
   return {
     segments,
-    url: `${docsContentRoute}/${segments.join('/')}`,
+    url: `${docsRoute}/${segments.join('/')}`,
   };
 }
 
