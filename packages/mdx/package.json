@@ -24,6 +24,8 @@
     "./bun": "./dist/bun/index.js",
     "./config": "./dist/config/index.js",
     "./next": "./dist/next/index.js",
+    "./node": "./dist/node/index.js",
+    "./node/_loader": "./dist/node/_loader.js",
     "./node/loader": "./dist/node/loader.js",
     "./plugins/index-file": "./dist/plugins/index-file.js",
     "./plugins/json-schema": "./dist/plugins/json-schema.js",
