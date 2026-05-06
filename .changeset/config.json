@@ -4,7 +4,8 @@
   "commit": false,
   "fixed": [
     ["fumadocs-core", "fumadocs-ui", "@fumadocs/base-ui"],
-    ["create-fumadocs-app", "create-fumadocs-versions"]
+    ["create-fumadocs-app", "create-fumadocs-versions"],
+    ["@fumapress/core", "@fumapress/ai"]
   ],
   "access": "restricted",
   "baseBranch": "dev",

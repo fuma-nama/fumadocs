@@ -2964,6 +2964,73 @@ importers:
         specifier: ^8.0.10
         version: 8.0.10(@types/node@25.6.0)(esbuild@0.28.0)(jiti@2.6.1)(terser@5.46.2)(tsx@4.21.0)(yaml@2.8.4)
 
+  packages/press-ai:
+    dependencies:
+      '@ai-sdk/react':
+        specifier: ^3.0.176
+        version: 3.0.176(react@19.2.5)(zod@4.4.2)
+      '@fumapress/core':
+        specifier: workspace:*
+        version: link:../press-core
+      '@radix-ui/react-presence':
+        specifier: ^1.1.5
+        version: 1.1.5(@types/react-dom@19.2.3(@types/react@19.2.14))(@types/react@19.2.14)(react-dom@19.2.5(react@19.2.5))(react@19.2.5)
+      ai:
+        specifier: ^6.0.174
+        version: 6.0.174(zod@4.4.2)
+      flexsearch:
+        specifier: ^0.8.212
+        version: 0.8.212
+      fumadocs-core:
+        specifier: workspace:*
+        version: link:../core
+      fumadocs-ui:
+        specifier: workspace:*
+        version: link:../radix-ui
+      lucide-react:
+        specifier: ^1.14.0
+        version: 1.14.0(react@19.2.5)
+      tailwind-merge:
+        specifier: ^3.5.0
+        version: 3.5.0
+      unist-util-visit:
+        specifier: ^5.1.0
+        version: 5.1.0
+      zod:
+        specifier: ^4.4.2
+        version: 4.4.2
+    devDependencies:
+      '@tailwindcss/oxide':
+        specifier: ^4.2.4
+        version: 4.2.4
+      '@types/hast':
+        specifier: ^3.0.4
+        version: 3.0.4
+      '@types/mdx':
+        specifier: ^2.0.13
+        version: 2.0.13
+      '@types/node':
+        specifier: ^25.6.0
+        version: 25.6.0
+      '@types/react':
+        specifier: ^19.2.14
+        version: 19.2.14
+      react:
+        specifier: ^19.2.5
+        version: 19.2.5
+      react-dom:
+        specifier: ^19.2.5
+        version: 19.2.5(react@19.2.5)
+      tsdown:
+        specifier: 0.21.10
+        version: 0.21.10(@tsdown/css@0.21.10)(oxc-resolver@11.19.1)(typescript@6.0.3)
+      typescript:
+        specifier: ^6.0.3
+        version: 6.0.3
+      waku:
+        specifier: 1.0.0-alpha.9
+        version: 1.0.0-alpha.9(@types/node@25.6.0)(babel-plugin-react-compiler@1.0.0)(esbuild@0.28.0)(jiti@2.6.1)(react-dom@19.2.5(react@19.2.5))(react-server-dom-webpack@19.2.5(react-dom@19.2.5(react@19.2.5))(react@19.2.5)(webpack@5.106.2(esbuild@0.28.0)))(react@19.2.5)(terser@5.46.2)(tsx@4.21.0)(yaml@2.8.4)
+
   packages/press-core:
     dependencies:
       '@takumi-rs/image-response':

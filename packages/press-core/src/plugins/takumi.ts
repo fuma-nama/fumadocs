@@ -1,8 +1,9 @@
 import { slugsToImagePath } from '@/lib/source';
-import { ServerPlugin } from '.';
+import type { ServerPlugin } from '.';
 import { unstable_notFound } from 'waku/router/server';
+import type { GenerateProps } from 'fumadocs-ui/og/takumi';
 
-export function takumiPlugin(): ServerPlugin {
+export function takumiPlugin(options: Partial<GenerateProps> = {}): ServerPlugin {
   return {
     async createPages({ createApi }) {
       createApi({
@@ -31,6 +32,7 @@ export function takumiPlugin(): ServerPlugin {
               title: page.data.title,
               description: page.data.description,
               site: this.config.site.name,
+              ...options,
             }),
             {
               width: 1200,

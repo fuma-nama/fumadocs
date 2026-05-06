@@ -1,7 +1,7 @@
 import { ImageResponse, type ImageResponseOptions } from '@takumi-rs/image-response';
 import type { ReactNode } from 'react';
 
-interface GenerateProps {
+export interface GenerateProps {
   title: ReactNode;
   description?: ReactNode;
   icon?: ReactNode;
