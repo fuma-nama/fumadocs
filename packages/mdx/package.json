@@ -12,34 +12,29 @@
   "repository": "github:fuma-nama/fumadocs",
   "bin": "./dist/bin.js",
   "files": [
-    "loader-mdx.cjs",
-    "loader-meta.cjs",
     "dist"
   ],
   "type": "module",
-  "types": "./dist/index.d.ts",
   "exports": {
-    ".": "./dist/index.js",
-    "./bin": "./dist/bin.js",
-    "./bun": "./dist/bun/index.js",
-    "./config": "./dist/config/index.js",
-    "./next": "./dist/next/index.js",
-    "./node": "./dist/node/index.js",
-    "./node/_loader": "./dist/node/_loader.js",
-    "./node/loader": "./dist/node/loader.js",
-    "./plugins/index-file": "./dist/plugins/index-file.js",
-    "./plugins/json-schema": "./dist/plugins/json-schema.js",
-    "./plugins/last-modified": "./dist/plugins/last-modified.js",
-    "./runtime/browser": "./dist/runtime/browser.js",
-    "./runtime/dynamic": "./dist/runtime/dynamic.js",
-    "./runtime/server": "./dist/runtime/server.js",
-    "./runtime/types": "./dist/runtime/types.js",
-    "./vite": "./dist/vite/index.js",
-    "./webpack/mdx": "./dist/webpack/mdx.js",
-    "./webpack/meta": "./dist/webpack/meta.js",
-    "./package.json": "./package.json",
-    "./loader-mdx": "./loader-mdx.cjs",
-    "./loader-meta": "./loader-meta.cjs"
+    ".": "./dist/index.mjs",
+    "./bin": "./dist/bin.mjs",
+    "./bun": "./dist/bun/index.mjs",
+    "./config": "./dist/config/index.mjs",
+    "./next": "./dist/next/index.mjs",
+    "./node": "./dist/node/index.mjs",
+    "./node/_loader": "./dist/node/_loader.mjs",
+    "./node/loader": "./dist/node/loader.mjs",
+    "./plugins/index-file": "./dist/plugins/index-file.mjs",
+    "./plugins/json-schema": "./dist/plugins/json-schema.mjs",
+    "./plugins/last-modified": "./dist/plugins/last-modified.mjs",
+    "./runtime/browser": "./dist/runtime/browser.mjs",
+    "./runtime/dynamic": "./dist/runtime/dynamic.mjs",
+    "./runtime/server": "./dist/runtime/server.mjs",
+    "./runtime/types": "./dist/runtime/types.mjs",
+    "./vite": "./dist/vite/index.mjs",
+    "./webpack/mdx": "./dist/webpack/mdx.mjs",
+    "./webpack/meta": "./dist/webpack/meta.mjs",
+    "./package.json": "./package.json"
   },
   "publishConfig": {
     "access": "public"
@@ -95,11 +90,11 @@
     "@types/mdast": "*",
     "@types/mdx": "*",
     "@types/react": "*",
-    "fumadocs-core": "^15.0.0 || ^16.0.0",
+    "fumadocs-core": "^16.7.0",
     "mdast-util-directive": "*",
     "next": "^15.3.0 || ^16.0.0",
     "react": "^19.2.0",
-    "vite": "6.x.x || 7.x.x || 8.x.x"
+    "vite": "7.x.x || 8.x.x"
   },
   "peerDependenciesMeta": {
     "mdast-util-directive": {

@@ -1,14 +1,5 @@
 import { defineConfig } from 'tsdown';
 
-const external = ['next', 'typescript', 'webpack', 'bun', 'mdx/types'];
-
-const noExternal = [
-  // TODO: remove this when the min `fumadocs-core` version is above 16.2.3
-  'fumadocs-core/source/schema',
-  // TODO: remove this when the min `fumadocs-core` version is above 16.6.17
-  'fumadocs-core/mdx-plugins/remark-llms',
-];
-
 export default defineConfig({
   entry: [
     './src/{index,bin}.ts',
@@ -19,18 +10,13 @@ export default defineConfig({
     './src/plugins/*.ts',
   ],
   format: 'esm',
-  dts: true,
-  fixedExtension: false,
-  target: 'node22',
-  exports: {
-    customExports: {
-      './loader-mdx': './loader-mdx.cjs',
-      './loader-meta': './loader-meta.cjs',
-    },
+  dts: {
+    sourcemap: false,
   },
+  target: 'node22',
+  exports: true,
   deps: {
-    onlyBundle: noExternal,
-    alwaysBundle: noExternal,
-    neverBundle: external,
+    onlyBundle: [],
+    neverBundle: ['webpack', 'bun'],
   },
 });
