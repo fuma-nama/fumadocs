@@ -7,10 +7,12 @@
     "dev": "waku dev",
     "build": "waku build",
     "start": "waku start",
-    "types:check": "tsc --noEmit"
+    "types:check": "fumadocs-mdx && tsc --noEmit"
   },
   "dependencies": {
     "@fumapress/core": "workspace:*",
+    "fumadocs-core": "workspace:*",
+    "fumadocs-mdx": "workspace:*",
     "react": "^19.2.5",
     "react-dom": "^19.2.5",
     "react-server-dom-webpack": "^19.2.5",

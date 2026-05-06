@@ -1,12 +1,15 @@
 import type { ReactNode } from 'react';
-import { Provider } from '@/components/provider';
+import { RootProvider } from 'fumadocs-ui/provider/waku';
+import appCss from 'virtual:root.css?url';
 
-export default function RootLayout({ children }: { children: ReactNode }) {
+export default function Root({ children }: { children: ReactNode }) {
   return (
     <html lang="en" suppressHydrationWarning>
-      <head />
+      <head>
+        <link rel="stylesheet" href={appCss} />
+      </head>
       <body data-version="1.0" className="flex flex-col min-h-screen">
-        <Provider>{children}</Provider>
+        <RootProvider>{children}</RootProvider>
       </body>
     </html>
   );

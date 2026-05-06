@@ -1,9 +1,18 @@
-import type { ComponentType } from 'react';
 import type { AppContext } from './lib/shared';
+import type { LoaderConfig, LoaderOutput } from 'fumadocs-core/source';
+import type { Awaitable } from './lib/types';
+import type { ServerPlugin } from './plugins';
 
-export interface Config {
+export interface ConfigContext {
+  loaderConfig: LoaderConfig;
+}
+
+export interface Config<C extends ConfigContext = ConfigContext> {
+  /** the default content loader */
+  loader: LoaderOutput<C['loaderConfig']> | (() => Awaitable<LoaderOutput<C['loaderConfig']>>);
+
   site?: SiteConfig;
-  layouts?: Record<string, ComponentType<AppContext & Record<string, unknown>>>;
+  plugins?: ServerPlugin[] | ((ctx: AppContext<C>) => ServerPlugin[]);
 }
 
 export interface SiteConfig {
@@ -18,6 +27,10 @@ export interface SiteConfig {
   };
 }
 
-export function defineConfig(config: Config): Config {
+export function defineConfig<C extends LoaderConfig>(
+  config: Config<{
+    loaderConfig: C;
+  }>,
+): Config<{ loaderConfig: C }> {
   return config;
 }

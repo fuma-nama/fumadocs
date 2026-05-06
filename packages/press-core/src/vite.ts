@@ -1,59 +1,69 @@
-import { defineConfig as base, type Config } from 'waku/config';
+import * as waku from 'waku/config';
+import mdx from 'fumadocs-mdx/vite';
+import type { PluginOption } from 'vite';
+import * as vite from 'vite';
+import { crawlFrameworkPkgs } from 'vitefu';
 
-export function defineConfig(config: Config) {
-  return base({
+export function defineConfig(config: waku.Config) {
+  return waku.defineConfig({
     ...config,
     vite: {
       ...config.vite,
-      // we do this to avoid Vite from bundling React contexts and cause duplicated contexts conflicts.
-      optimizeDeps: {
-        ...config.vite?.optimizeDeps,
-        exclude: [
-          '@fumapress/core',
-          'fumadocs-ui',
-          'fumadocs-core',
-          ...(config.vite?.optimizeDeps?.exclude ?? []),
-        ],
-        include: [
-          'fumadocs-ui > unified',
-          'fumadocs-core > remark',
-          'fumadocs-core > hast-util-to-jsx-runtime',
-          ...(config.vite?.optimizeDeps?.include ?? []),
-        ],
-      },
-      resolve: {
-        tsconfigPaths: true,
-        ...config.vite?.resolve,
-        noExternal:
-          config.vite?.resolve?.noExternal === true
-            ? true
-            : [
-                '@fumapress/core',
-                'fumadocs-core',
-                'fumadocs-ui',
-                'fumadocs-openapi',
-                '@fumadocs/base-ui',
-                ...forceArray(config.vite?.resolve?.noExternal ?? []),
-              ],
-        // only dedupe for public, non-transitive libs
-        dedupe: [
-          '@fumapress/core',
-          'fumadocs-core',
-          'fumadocs-ui',
-          'fumadocs-openapi',
-          '@fumadocs/base-ui',
-          ...(config.vite?.resolve?.dedupe ?? []),
-        ],
-        external:
-          config.vite?.resolve?.external === true
-            ? true
-            : ['@takumi-rs/image-response', ...(config.vite?.resolve?.external ?? [])],
-      },
+      plugins: [press(), ...(config.vite?.plugins ?? [])],
     },
   });
 }
 
-function forceArray<V>(v: V | V[]): V[] {
-  if (Array.isArray(v)) return v;
-  return [v];
+export function press(): PluginOption {
+  return [
+    pressCore(),
+    mdx(
+      vite.runnerImport<Record<string, unknown>>('/source.config').then((mod) => mod.module),
+      {
+        updateViteConfig: false,
+      },
+    ),
+  ];
+}
+
+export function pressCore(): PluginOption {
+  return {
+    name: 'fumapress:core',
+    async config(_, { command }) {
+      const out = await crawlFrameworkPkgs({
+        root: process.cwd(),
+        isBuild: command === 'build',
+        isFrameworkPkgByName(pkgName) {
+          switch (pkgName) {
+            case '@fumapress/core':
+            case 'fumadocs-core':
+            case 'fumadocs-ui':
+            case 'fumadocs-openapi':
+            case '@fumadocs/base-ui':
+            case 'fumadocs-mdx':
+              return true;
+          }
+        },
+      });
+
+      return {
+        ssr: {
+          noExternal: out.ssr.noExternal,
+          external: ['@takumi-rs/image-response'],
+        },
+        optimizeDeps: out.optimizeDeps,
+      };
+    },
+    async resolveId(source, importer, options) {
+      const match = /^virtual:root\.css(\?.*)?$$/.exec(source);
+
+      if (match) {
+        const query = match[1] ?? '';
+        const out = await this.resolve(`/src/app.css${query}`, importer, options);
+        if (out === null)
+          return this.resolve(`@fumapress/core/css/default.css${query}`, importer, options);
+        return out;
+      }
+    },
+  };
 }

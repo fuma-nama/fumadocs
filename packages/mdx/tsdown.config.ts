@@ -14,7 +14,9 @@ export default defineConfig({
     sourcemap: false,
   },
   target: 'node22',
-  exports: true,
+  exports: {
+    bin: './src/bin.ts',
+  },
   deps: {
     onlyBundle: [],
     neverBundle: ['webpack', 'bun'],

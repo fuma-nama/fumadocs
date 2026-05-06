@@ -38,13 +38,13 @@ export interface PluginOptions {
 }
 
 export default async function mdx(
-  config: Record<string, unknown>,
+  config: Record<string, unknown> | Promise<Record<string, unknown>>,
   pluginOptions: PluginOptions = {},
 ): Promise<Plugin> {
   const options = applyDefaults(pluginOptions);
   const core = createViteCore(options);
   await core.init({
-    config: buildConfig(config),
+    config: buildConfig(await config),
   });
 
   const configLoader = createIntegratedConfigLoader(core);

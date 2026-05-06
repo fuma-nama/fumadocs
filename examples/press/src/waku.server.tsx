@@ -1,17 +1,7 @@
-import { createRouter } from '@fumapress/core';
 import adapter from 'waku/adapters/default';
-import RootLayout from './root';
+import pressConfig from '../press.config';
+import { createRouter } from '@fumapress/core/router';
 
-const router = createRouter({
-  root: RootLayout,
-  site: {
-    name: 'Example Site',
-    git: {
-      user: 'fuma-nama',
-      branch: 'main',
-      repo: 'fumadocs',
-    },
-  },
-});
+const router = createRouter(pressConfig);
 
 export default adapter(router.createPages());

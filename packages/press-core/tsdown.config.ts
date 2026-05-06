@@ -6,15 +6,17 @@ import path from 'node:path';
 export default defineConfig({
   target: 'es2023',
   format: 'esm',
-  entry: ['src/{index,vite}.ts', 'src/layouts/root.tsx'],
+  entry: ['src/{index,vite,router}.ts', 'src/plugins/*', 'src/layouts/{docs}.tsx'],
   dts: true,
   exports: {
     customExports: {
       './css/preset.css': './css/preset.css',
+      './css/default.css': './css/default.css',
     },
   },
   deps: {
-    onlyBundle: [],
+    onlyBundle: ['vitefu'],
+    neverBundle: ['virtual:root.css'],
   },
   async onSuccess() {
     await compileInline();

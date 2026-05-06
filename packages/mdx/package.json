@@ -10,7 +10,9 @@
   "license": "MIT",
   "author": "Fuma Nama",
   "repository": "github:fuma-nama/fumadocs",
-  "bin": "./dist/bin.js",
+  "bin": {
+    "fumadocs-mdx": "./dist/bin.mjs"
+  },
   "files": [
     "dist"
   ],
