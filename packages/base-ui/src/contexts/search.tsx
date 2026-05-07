@@ -89,9 +89,7 @@ function MetaOrControl() {
   const [key, setKey] = useState('⌘');
 
   useEffect(() => {
-    const isWindows = window.navigator.userAgent.includes('Windows');
-
-    if (isWindows) setKey('Ctrl');
+    if (/Windows|Linux/i.test(window.navigator.userAgent)) setKey('Ctrl');
   }, []);
 
   return key;
