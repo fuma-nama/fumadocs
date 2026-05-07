@@ -11,7 +11,7 @@
   "author": "Fuma Nama",
   "repository": "github:fuma-nama/fumadocs",
   "bin": {
-    "fumadocs": "./dist/index.js"
+    "cli": "./dist/index.js"
   },
   "files": [
     "dist"
@@ -26,9 +26,9 @@
     "access": "public"
   },
   "scripts": {
-    "build": "tsdown --config-loader unrun",
+    "build": "tsdown",
     "clean": "rimraf dist",
-    "dev": "tsdown --watch --config-loader unrun",
+    "dev": "tsdown --watch",
     "lint": "oxlint .",
     "types:check": "tsc --noEmit"
   },
@@ -38,11 +38,11 @@
     "fuma-cli": "^0.1.1",
     "picocolors": "^1.1.1",
     "tinyexec": "^1.1.2",
-    "zod": "^4.4.2"
+    "zod": "^4.4.3"
   },
   "devDependencies": {
     "@types/node": "25.6.0",
     "tsconfig": "workspace:*",
-    "tsdown": "0.21.10"
+    "tsdown": "0.22.0"
   }
 }

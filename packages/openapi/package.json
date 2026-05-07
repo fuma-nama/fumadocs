@@ -40,7 +40,7 @@
     "access": "public"
   },
   "scripts": {
-    "build": "tsdown --config-loader unrun",
+    "build": "tsdown",
     "clean": "rimraf dist",
     "dev": "tsdown --watch --clean false",
     "lint": "oxlint .",
@@ -69,7 +69,7 @@
   "devDependencies": {
     "@fastify/deepmerge": "^3.2.1",
     "@scalar/api-client-react": "2.0.1",
-    "@scalar/json-magic": "^0.12.11",
+    "@scalar/json-magic": "^0.12.12",
     "@scalar/openapi-upgrader": "^0.2.7",
     "@tailwindcss/oxide": "^4.2.4",
     "@types/js-yaml": "^4.0.9",
@@ -81,7 +81,7 @@
     "json-schema-typed": "^8.0.2",
     "tailwindcss": "^4.2.4",
     "tsconfig": "workspace:*",
-    "tsdown": "0.21.10"
+    "tsdown": "0.22.0"
   },
   "peerDependencies": {
     "@scalar/api-client-react": "2.0.1",
@@ -105,8 +105,8 @@
   },
   "inlinedDependencies": {
     "@fastify/deepmerge": "3.2.1",
-    "@scalar/helpers": "0.5.5",
-    "@scalar/json-magic": "0.12.11",
+    "@scalar/helpers": "0.6.0",
+    "@scalar/json-magic": "0.12.12",
     "@scalar/openapi-upgrader": "0.2.7",
     "fast-content-type-parse": "3.0.0",
     "pathe": "2.0.3",

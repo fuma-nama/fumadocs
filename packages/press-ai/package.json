@@ -32,17 +32,17 @@
     "types:check": "tsc --noEmit"
   },
   "dependencies": {
-    "@ai-sdk/react": "^3.0.176",
+    "@ai-sdk/react": "^3.0.177",
     "@fumapress/core": "workspace:*",
     "@radix-ui/react-presence": "^1.1.5",
-    "ai": "^6.0.174",
+    "ai": "^6.0.175",
     "flexsearch": "^0.8.212",
     "fumadocs-core": "workspace:*",
     "fumadocs-ui": "workspace:*",
     "lucide-react": "^1.14.0",
     "tailwind-merge": "^3.5.0",
     "unist-util-visit": "^5.1.0",
-    "zod": "^4.4.2"
+    "zod": "^4.4.3"
   },
   "devDependencies": {
     "@tailwindcss/oxide": "^4.2.4",
@@ -50,11 +50,11 @@
     "@types/mdx": "^2.0.13",
     "@types/node": "^25.6.0",
     "@types/react": "^19.2.14",
-    "react": "^19.2.5",
-    "react-dom": "^19.2.5",
-    "tsdown": "0.21.10",
+    "react": "^19.2.6",
+    "react-dom": "^19.2.6",
+    "tsdown": "0.22.0",
     "typescript": "^6.0.3",
-    "waku": "1.0.0-alpha.9"
+    "waku": "1.0.0-alpha.10"
   },
   "peerDependencies": {
     "@types/react": "*",

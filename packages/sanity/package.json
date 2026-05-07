@@ -30,7 +30,7 @@
     "types:check": "tsc --noEmit"
   },
   "dependencies": {
-    "@portabletext/react": "^6.0.3"
+    "@portabletext/react": "^6.2.0"
   },
   "devDependencies": {
     "@sanity/client": "^7.22.0",
@@ -39,11 +39,11 @@
     "fuma-cli": "^0.1.1",
     "fumadocs-core": "workspace:*",
     "fumadocs-ui": "workspace:*",
-    "next-sanity": "^12.4.0",
-    "react": "^19.2.5",
-    "sanity": "^5.23.0",
+    "next-sanity": "^12.4.3",
+    "react": "^19.2.6",
+    "sanity": "^5.24.0",
     "tsconfig": "workspace:*",
-    "tsdown": "0.21.10",
+    "tsdown": "0.22.0",
     "typescript": "^6.0.3"
   },
   "peerDependencies": {
