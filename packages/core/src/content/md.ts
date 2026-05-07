@@ -6,7 +6,7 @@ import type { Root } from 'hast';
 import type * as Mdast from 'mdast';
 import * as JsxRuntime from 'react/jsx-runtime';
 import type { PluggableList } from 'unified';
-import { type FC, use } from 'react';
+import { type FC, use, useMemo } from 'react';
 
 export interface MarkdownRendererOptions {
   remarkPlugins?: PluggableList;
@@ -34,7 +34,6 @@ export function createMarkdownRenderer({
     .use(remarkPlugins)
     .use(remarkRehype, remarkRehypeOptions)
     .use(rehypePlugins);
-  const cache: Record<string, Root> = {};
   const promises: Record<string, Promise<Root>> = {};
 
   function render(tree: Root, file: VFile, props: MarkdownProps) {
@@ -46,7 +45,7 @@ export function createMarkdownRenderer({
     });
   }
 
-  function parse(file: VFile, _props: MarkdownProps): Mdast.Root {
+  function parse(file: VFile): Mdast.Root {
     return processor.parse(file) as Mdast.Root;
   }
 
@@ -54,21 +53,22 @@ export function createMarkdownRenderer({
     Markdown(props) {
       const { async = false, children } = props;
       const file = new VFile(children);
-      const key = String(file.value);
+      const id = `${file.path}:${file.value}`;
 
       if (async) {
-        promises[key] ??= processor.run(parse(file, props), file);
-        const out = use(promises[key]);
+        promises[id] ??= processor.run(parse(file), file);
+        const out = use(promises[id]);
         return render(out, file, props);
       }
 
-      cache[key] ??= processor.runSync(parse(file, props), file);
-      return render(cache[key], file, props);
+      // oxlint-disable-next-line eslint-plugin-react-hooks/rules-of-hooks eslint-plugin-react-hooks/exhaustive-deps -- assume `async` unchanged
+      const v = useMemo(() => processor.runSync(parse(file), file), [id]);
+      return render(v, file, props);
     },
     async MarkdownServer(props) {
       const file = new VFile(props.children);
 
-      return render(await processor.run(parse(file, props), file), file, props);
+      return render(await processor.run(parse(file), file), file, props);
     },
   };
 }

@@ -1,5 +1,13 @@
 # fumadocs-ui
 
+## 16.8.8
+
+### Patch Changes
+
+- b494c8d: Support copy ID in headings
+- 03626ba: [Search UI] show `ctrl` for Linux machines
+  - fumadocs-core@16.8.8
+
 ## 16.8.7
 
 ### Patch Changes

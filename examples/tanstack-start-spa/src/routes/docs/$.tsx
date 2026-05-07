@@ -1,7 +1,7 @@
 import { createFileRoute, Link, notFound } from '@tanstack/react-router';
 import { DocsLayout } from 'fumadocs-ui/layouts/docs';
 import { createServerFn } from '@tanstack/react-start';
-import { getPageMarkdownUrl, source } from '@/lib/source';
+import { slugsToMarkdownPath, source } from '@/lib/source';
 import browserCollections from 'collections/browser';
 import {
   DocsBody,
@@ -39,7 +39,7 @@ const loader = createServerFn({
 
     return {
       path: page.path,
-      markdownUrl: getPageMarkdownUrl(page).url,
+      markdownUrl: slugsToMarkdownPath(page.slugs).url,
       pageTree: await source.serializePageTree(source.getPageTree()),
     };
   });

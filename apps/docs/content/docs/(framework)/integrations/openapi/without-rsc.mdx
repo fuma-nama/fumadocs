@@ -182,8 +182,8 @@ const serverLoader = createServerFn({
     return {
       type: 'docs',
       path: page.path,
-      markdownUrl: getPageMarkdownUrl(page).url,
       pageTree,
+      // ...
     };
   });
 

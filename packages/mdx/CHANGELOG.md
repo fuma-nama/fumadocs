@@ -1,5 +1,20 @@
 # next-docs-mdx
 
+## 15.0.0
+
+### Major Changes
+
+- 3de9dfe: **Require ESM for `next.config`**
+
+  Modern Node.js now supports `next.config.mts` format, compatibility layer is no longer needed.
+
+- 3de9dfe: Raise minimum `fumadocs-core` version to `16.7.0`
+
+### Patch Changes
+
+- 5745fcf: Support better Node.js loader registry
+  - fumadocs-core@16.8.8
+
 ## 14.3.2
 
 ### Patch Changes

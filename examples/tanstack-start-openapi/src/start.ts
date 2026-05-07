@@ -1,30 +1,24 @@
 import { createMiddleware, createStart } from '@tanstack/react-start';
-import { isMarkdownPreferred, rewritePath } from 'fumadocs-core/negotiation';
+import { isMarkdownPreferred } from 'fumadocs-core/negotiation';
 import { redirect } from '@tanstack/react-router';
-import { docsContentRoute, docsRoute } from '@/lib/shared';
-
-const { rewrite: rewriteDocs } = rewritePath(
-  `${docsRoute}{/*path}`,
-  `${docsContentRoute}{/*path}/content.md`,
-);
-const { rewrite: rewriteSuffix } = rewritePath(
-  `${docsRoute}{/*path}.mdx`,
-  `${docsContentRoute}{/*path}/content.md`,
-);
+import { docsRoute } from '@/lib/shared';
+import { slugsToMarkdownPath } from './lib/source';
 
 const llmMiddleware = createMiddleware().server(({ next, request }) => {
   const url = new URL(request.url);
-  const path = rewriteSuffix(url.pathname);
 
-  if (path) {
-    throw redirect(new URL(path, url));
-  }
+  if (
+    url.pathname.startsWith(docsRoute) &&
+    !url.pathname.endsWith('.md') &&
+    isMarkdownPreferred(request)
+  ) {
+    const slugs = url.pathname
+      .slice(docsRoute.length)
+      .split('/')
+      .filter((v) => v.length > 0);
+    url.pathname = slugsToMarkdownPath(slugs).url;
 
-  if (isMarkdownPreferred(request)) {
-    const docsPath = rewriteDocs(url.pathname);
-    if (docsPath) {
-      throw redirect(new URL(docsPath, url));
-    }
+    throw redirect(url);
   }
 
   return next();

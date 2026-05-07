@@ -431,10 +431,10 @@ export function SearchDialogListItem({
         </div>
 
         {item.type !== 'page' && (
-          <div role="none" className="absolute start-3 inset-y-0 w-px bg-fd-border" />
+          <div role="none" className="absolute inset-s-3 inset-y-0 w-px bg-fd-border" />
         )}
         {item.type === 'heading' && (
-          <Hash className="absolute start-6 top-2.5 size-4 text-fd-muted-foreground" />
+          <Hash className="absolute inset-s-6 top-2.5 size-4 text-fd-muted-foreground" />
         )}
         <div
           className={cn(

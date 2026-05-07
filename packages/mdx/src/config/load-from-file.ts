@@ -39,7 +39,6 @@ export async function loadConfig(core: Core, build = false): Promise<LoadedConfi
   // always return a new config
   url.searchParams.set('hash', Date.now().toString());
 
-  const config = import(url.href).then((loaded) => buildConfig(loaded as Record<string, unknown>));
-
-  return await config;
+  const loaded = await import(url.href);
+  return buildConfig(loaded as Record<string, unknown>);
 }
