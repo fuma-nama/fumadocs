@@ -2,7 +2,6 @@
   "name": "docs",
   "version": "0.1.3",
   "private": true,
-  "type": "module",
   "scripts": {
     "build": "pnpm build:pre && next build && pnpm build:post",
     "build:pre": "bun ./scripts/pre-build.ts",
