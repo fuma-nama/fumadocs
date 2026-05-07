@@ -55,6 +55,10 @@ export function pressCore(): PluginOption {
       };
     },
     async resolveId(source, importer, options) {
+      if (source === 'virtual:fumapress-core/config') {
+        return this.resolve('/press.config', importer, options);
+      }
+
       const match = /^virtual:root\.css(\?.*)?$$/.exec(source);
 
       if (match) {
@@ -65,5 +69,21 @@ export function pressCore(): PluginOption {
         return out;
       }
     },
+    load(id) {
+      if (id === '\0virtual:vite-rsc-waku/server-entry-inner') {
+        return getManagedServerEntry();
+      }
+    },
   };
+}
+
+function getManagedServerEntry() {
+  return `import adapter from 'waku/adapters/default';
+import pressConfig from 'virtual:fumapress-core/config';
+import { createRouter } from '@fumapress/core/router';
+
+const router = createRouter(pressConfig);
+
+export default adapter(router.createPages());
+`;
 }

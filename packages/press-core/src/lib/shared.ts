@@ -5,6 +5,7 @@ import path from 'node:path';
 import type { LoaderOutput } from 'fumadocs-core/source';
 import type { Awaitable } from './types';
 import type { ServerPlugin } from '@/plugins';
+import type { DocsLayoutContextData } from '@/layouts/docs';
 
 export interface AppContext<C extends ConfigContext = ConfigContext> {
   config: InternalConfig;
@@ -13,6 +14,11 @@ export interface AppContext<C extends ConfigContext = ConfigContext> {
 
   /** always `undefined`, easier way to infer types */
   $context: C;
+
+  /**
+   * custom data in app context, can be referenced from plugins/pages etc
+   */
+  data: AppContextData & Record<string, unknown>;
 }
 
 export interface InternalConfig {
@@ -25,6 +31,10 @@ export interface InternalConfig {
       rootDir: string;
     };
   };
+}
+
+export interface AppContextData {
+  'core:docs-layout'?: DocsLayoutContextData;
 }
 
 export function parseConfig<C extends ConfigContext>(config: Config<C>): InternalConfig {

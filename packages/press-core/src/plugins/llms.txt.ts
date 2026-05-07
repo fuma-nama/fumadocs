@@ -2,7 +2,6 @@ import { llms } from 'fumadocs-core/source/llms';
 import type { ServerPlugin } from '.';
 import type { Awaitable } from '@/lib/types';
 import type { ConfigContext } from '@/config';
-import { markdownPathToSlugs, slugsToMarkdownPath } from '@/lib/source';
 import { unstable_notFound } from 'waku/router/server';
 import { Page } from 'fumadocs-core/source';
 
@@ -16,6 +15,14 @@ export function llmsPlugin<C extends ConfigContext = ConfigContext>(
   const { getLLMText = getLLMTextDefault } = options;
 
   return {
+    init() {
+      this.data['core:docs-layout'] ??= {};
+      this.data['core:docs-layout'].renderers ??= [];
+      this.data['core:docs-layout'].renderers.push(function (res) {
+        res.markdownUrl ??= slugsToMarkdownPath(this.page.slugs).url;
+        return res;
+      });
+    },
     async createPages({ createApi }) {
       createApi({
         render: 'static',
@@ -75,4 +82,28 @@ async function getLLMTextDefault(page: Page) {
   }
 
   throw new Error('[Fumapress] Please specify the `getLLMText()` option');
+}
+
+function markdownPathToSlugs(segs: string[]) {
+  const slugs = [...segs];
+  if (slugs.length === 0) return [];
+
+  slugs[slugs.length - 1] = slugs[slugs.length - 1]!.replace(/\.md$/, '');
+  if (slugs.length === 1 && slugs[0] === 'index') slugs.pop();
+
+  return slugs;
+}
+
+function slugsToMarkdownPath(slugs: string[]) {
+  const segments = [...slugs];
+  if (segments.length === 0) {
+    segments.push('index.md');
+  } else {
+    segments[segments.length - 1] += '.md';
+  }
+
+  return {
+    segments,
+    url: `/${segments.join('/')}`,
+  };
 }

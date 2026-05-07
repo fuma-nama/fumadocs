@@ -1,10 +1,26 @@
-import { slugsToImagePath } from '@/lib/source';
 import type { ServerPlugin } from '.';
 import { unstable_notFound } from 'waku/router/server';
 import type { GenerateProps } from 'fumadocs-ui/og/takumi';
+import { createElement, Fragment } from 'react';
 
 export function takumiPlugin(options: Partial<GenerateProps> = {}): ServerPlugin {
   return {
+    init() {
+      this.data['core:docs-layout'] ??= {};
+      this.data['core:docs-layout'].renderers ??= [];
+      this.data['core:docs-layout'].renderers.push(function (res) {
+        res.body = createElement(
+          Fragment,
+          null,
+          res.body,
+          createElement('meta', {
+            property: 'og:image',
+            content: slugsToImagePath(this.page.slugs),
+          }),
+        );
+        return res;
+      });
+    },
     async createPages({ createApi }) {
       createApi({
         render: 'static',
@@ -43,5 +59,19 @@ export function takumiPlugin(options: Partial<GenerateProps> = {}): ServerPlugin
         },
       });
     },
+  };
+}
+
+function slugsToImagePath(slugs: string[]) {
+  const segments = [...slugs];
+  if (segments.length === 0) {
+    segments.push('index.webp');
+  } else {
+    segments[segments.length - 1] += '.webp';
+  }
+
+  return {
+    segments,
+    url: `/${segments.join('/')}`,
   };
 }

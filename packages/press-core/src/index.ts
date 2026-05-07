@@ -1,2 +1,2 @@
 export * from './config';
-export type { AppContext, InternalConfig } from './lib/shared';
+export type { AppContext, InternalConfig, AppContextData } from './lib/shared';

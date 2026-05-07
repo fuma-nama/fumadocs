@@ -1,6 +1,5 @@
 import type { ConfigContext } from '@/config';
 import { type AppContext, baseOptions } from '@/lib/shared';
-import { slugsToImagePath } from '@/lib/source';
 import type { Awaitable } from '@/lib/types';
 import { HomeLayout } from 'fumadocs-ui/layouts/home';
 import type { ComponentType, ReactNode } from 'react';
@@ -22,11 +21,6 @@ export function createHomeLayout<C extends ConfigContext = ConfigContext>({
 
     const { body } = await render(page);
 
-    return (
-      <HomeLayout {...baseOptions(config)}>
-        <meta property="og:image" content={slugsToImagePath(slugs).url} />
-        {body}
-      </HomeLayout>
-    );
+    return <HomeLayout {...baseOptions(config)}>{body}</HomeLayout>;
   };
 }

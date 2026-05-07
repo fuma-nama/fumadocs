@@ -23,6 +23,7 @@
     "./layouts/home": "./dist/layouts/home.mjs",
     "./plugins": "./dist/plugins/index.mjs",
     "./plugins/llms.txt": "./dist/plugins/llms.txt.mjs",
+    "./plugins/orama-search": "./dist/plugins/orama-search.mjs",
     "./plugins/takumi": "./dist/plugins/takumi.mjs",
     "./router": "./dist/router.mjs",
     "./vite": "./dist/vite.mjs",
