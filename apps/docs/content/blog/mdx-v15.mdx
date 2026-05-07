@@ -1,0 +1,28 @@
+---
+title: Fumadocs MDX 15
+description: Bump minimum Fumadocs version.
+author: Fuma Nama
+date: 2026-05-07
+---
+
+## Overview
+
+This is a boring major release mainly to reduce package size. Breaking changes:
+
+- `fumadocs-core` must be `16.7.0` or above.
+- `next.config` must be ESM.
+
+For Next.js users, if you encounter any error when upgrading, it could be due to ESM compatibility issues, you might be accidentally using CommonJS in `next.config`.
+Consider to rename your config to `next.config.mjs` or `next.config.mts`.
+
+If you prefer to use ESM in your entire project, set this in your `package.json`:
+
+```json title="package.json"
+{
+  "name": "my-app",
+  // [!code ++]
+  "type": "module"
+}
+```
+
+For other unexpected breakages, please open a bug report on our GitHub repository.
