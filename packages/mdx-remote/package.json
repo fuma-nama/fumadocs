@@ -47,10 +47,10 @@
     "@types/node": "25.6.0",
     "@types/react": "^19.2.14",
     "fumadocs-core": "workspace:*",
-    "react": "^19.2.5",
+    "react": "^19.2.6",
     "tinyglobby": "^0.2.16",
     "tsconfig": "workspace:*",
-    "tsdown": "0.21.10"
+    "tsdown": "0.22.0"
   },
   "peerDependencies": {
     "@types/mdx": "*",

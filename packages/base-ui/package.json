@@ -117,7 +117,7 @@
   },
   "scripts": {
     "build": "pnpm build:layout && pnpm build:tailwind",
-    "build:layout": "tsdown --config-loader unrun",
+    "build:layout": "tsdown",
     "build:tailwind": "tailwindcss -i css/style.css -o ./dist/style.css",
     "clean": "rimraf dist",
     "dev": "concurrently \"tsdown --watch --clean false\" \"tailwindcss -i css/style.css -o ./dist/style.css -w\"",
@@ -142,7 +142,7 @@
     "@fumadocs/cli": "workspace:*",
     "@tailwindcss/cli": "^4.2.4",
     "@tailwindcss/oxide": "^4.2.4",
-    "@tsdown/css": "^0.21.10",
+    "@tsdown/css": "^0.22.0",
     "@types/hast": "^3.0.4",
     "@types/mdx": "^2.0.13",
     "@types/node": "^25.6.0",
@@ -150,10 +150,10 @@
     "@types/react-dom": "^19.2.3",
     "fuma-cli": "^0.1.1",
     "fumadocs-core": "workspace:*",
-    "react-medium-image-zoom": "^5.4.4",
+    "react-medium-image-zoom": "^5.4.5",
     "tailwindcss": "^4.2.4",
     "tsconfig": "workspace:*",
-    "tsdown": "0.21.10",
+    "tsdown": "0.22.0",
     "unified": "^11.0.5"
   },
   "peerDependencies": {
@@ -180,6 +180,6 @@
     }
   },
   "inlinedDependencies": {
-    "react-medium-image-zoom": "5.4.4"
+    "react-medium-image-zoom": "5.4.5"
   }
 }

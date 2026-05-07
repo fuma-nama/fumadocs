@@ -4,6 +4,7 @@
     "paths": {
       "@/*": ["./src/*"]
     },
+    "allowImportingTsExtensions": true,
     "noEmit": true,
     "lib": ["ESNext"],
     "module": "ESNext",

@@ -1,6 +1,6 @@
 import { defineConfig } from 'tsdown';
 import fs from 'node:fs/promises';
-import { createConfigSchema } from './src/config';
+import { createConfigSchema } from './src/config.ts';
 import { z } from 'zod';
 
 export default defineConfig({

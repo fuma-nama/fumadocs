@@ -15,11 +15,11 @@
     "fumadocs-mdx": "workspace:*",
     "fumadocs-ui": "workspace:*",
     "lucide-react": "^1.14.0",
-    "react": "^19.2.5",
-    "react-dom": "^19.2.5",
-    "react-server-dom-webpack": "^19.2.5",
+    "react": "^19.2.6",
+    "react-dom": "^19.2.6",
+    "react-server-dom-webpack": "^19.2.6",
     "tailwind-merge": "^3.5.0",
-    "waku": "1.0.0-alpha.9"
+    "waku": "1.0.0-alpha.10"
   },
   "devDependencies": {
     "@tailwindcss/vite": "^4.2.4",
@@ -29,6 +29,6 @@
     "@types/react-dom": "^19.2.3",
     "tailwindcss": "^4.2.4",
     "typescript": "^6.0.3",
-    "vite": "^8.0.10"
+    "vite": "^8.0.11"
   }
 }

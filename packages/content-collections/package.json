@@ -39,7 +39,7 @@
   },
   "dependencies": {
     "unified": "^11.0.5",
-    "zod": "^4.4.2"
+    "zod": "^4.4.3"
   },
   "devDependencies": {
     "@content-collections/core": "^0.15.0",
@@ -47,7 +47,7 @@
     "@types/node": "25.6.0",
     "fumadocs-core": "workspace:*",
     "tsconfig": "workspace:*",
-    "tsdown": "0.21.10"
+    "tsdown": "0.22.0"
   },
   "peerDependencies": {
     "@content-collections/core": "0.x.x",

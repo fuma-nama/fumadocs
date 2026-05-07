@@ -54,10 +54,10 @@
     "unified": "^11.0.5",
     "unist-util-visit": "^5.1.0",
     "vfile": "^6.0.3",
-    "zod": "^4.4.2"
+    "zod": "^4.4.3"
   },
   "devDependencies": {
-    "@types/estree": "^1.0.8",
+    "@types/estree": "^1.0.9",
     "@types/js-yaml": "^4.0.9",
     "@types/mdast": "^4.0.4",
     "@types/node": "25.6.0",
@@ -66,7 +66,7 @@
     "fumadocs-core": "workspace:*",
     "mdast-util-mdx": "^3.0.0",
     "tsconfig": "workspace:*",
-    "tsdown": "0.21.10",
+    "tsdown": "0.22.0",
     "typescript": "^6.0.3"
   },
   "peerDependencies": {

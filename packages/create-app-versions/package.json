@@ -11,7 +11,7 @@
     "fumadocs-core": "workspace:*",
     "fumadocs-mdx": "workspace:*",
     "fumadocs-ui": "workspace:*",
-    "oxlint": "^1.62.0",
-    "react": "^19.2.5"
+    "oxlint": "^1.63.0",
+    "react": "^19.2.6"
   }
 }
