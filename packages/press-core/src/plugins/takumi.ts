@@ -1,4 +1,4 @@
-import type { ServerPlugin } from '.';
+import type { ServerPlugin } from '@/lib/types';
 import { unstable_notFound } from 'waku/router/server';
 import type { GenerateProps } from 'fumadocs-ui/og/takumi';
 import { createElement } from 'react';

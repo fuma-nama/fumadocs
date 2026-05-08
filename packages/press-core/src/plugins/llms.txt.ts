@@ -1,6 +1,5 @@
 import { llms } from 'fumadocs-core/source/llms';
-import type { ServerPlugin } from '.';
-import type { Awaitable } from '@/lib/types';
+import type { Awaitable, ServerPlugin } from '@/lib/types';
 import type { ConfigContext } from '@/config';
 import { unstable_notFound } from 'waku/router/server';
 import type { AppContext } from '@/lib/shared';

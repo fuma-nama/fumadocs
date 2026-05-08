@@ -1,6 +1,5 @@
 import type { AdvancedIndex } from 'fumadocs-core/search/server';
-import type { ServerPlugin } from '.';
-import type { Awaitable } from '@/lib/types';
+import type { Awaitable, ServerPlugin } from '@/lib/types';
 import type { ConfigContext } from '@/config';
 import type { StructuredData } from 'fumadocs-core/mdx-plugins';
 import type { AppContext } from '@/lib/shared';

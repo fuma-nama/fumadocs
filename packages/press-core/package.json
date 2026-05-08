@@ -19,11 +19,9 @@
   "sideEffects": false,
   "exports": {
     ".": "./dist/index.mjs",
-    "./adapters": "./dist/adapters/index.mjs",
     "./adapters/mdx": "./dist/adapters/mdx.mjs",
     "./layouts/docs": "./dist/layouts/docs.mjs",
     "./layouts/home": "./dist/layouts/home.mjs",
-    "./plugins": "./dist/plugins/index.mjs",
     "./plugins/llms.txt": "./dist/plugins/llms.txt.mjs",
     "./plugins/orama-search": "./dist/plugins/orama-search.mjs",
     "./plugins/takumi": "./dist/plugins/takumi.mjs",
@@ -44,7 +42,6 @@
   "dependencies": {
     "@takumi-rs/image-response": "^1.1.2",
     "fumadocs-core": "workspace:*",
-    "fumadocs-mdx": "workspace:*",
     "fumadocs-ui": "workspace:*",
     "lucide-react": "^1.14.0",
     "tailwind-merge": "^3.5.0"
@@ -54,6 +51,7 @@
     "@types/mdx": "^2.0.13",
     "@types/node": "^25.6.2",
     "@types/react": "^19.2.14",
+    "fumadocs-mdx": "workspace:*",
     "react": "^19.2.6",
     "react-dom": "^19.2.6",
     "tsdown": "0.22.0",
@@ -64,12 +62,16 @@
   },
   "peerDependencies": {
     "@types/react": "*",
+    "fumadocs-mdx": "^15.0.0",
     "react": "^19.2.0",
     "react-dom": "^19.2.0",
     "vite": "8.x.x",
     "waku": "1.0.0-alpha.9"
   },
   "peerDependenciesMeta": {
+    "fumadocs-mdx": {
+      "optional": true
+    },
     "@types/react": {
       "optional": true
     },

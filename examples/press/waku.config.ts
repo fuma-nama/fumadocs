@@ -1,8 +1,10 @@
+import { defineConfig } from 'waku/config';
 import tailwindcss from '@tailwindcss/vite';
-import { defineConfig } from '@fumapress/core/vite';
+import press from '@fumapress/core/vite';
+import mdx from 'fumadocs-mdx/vite';
 
 export default defineConfig({
   vite: {
-    plugins: [tailwindcss()],
+    plugins: [press(), mdx(), tailwindcss()],
   },
 });

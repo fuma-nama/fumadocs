@@ -5,6 +5,7 @@ import { oramaSearchPlugin } from '@fumapress/core/plugins/orama-search';
 import { loader } from 'fumadocs-core/source';
 import { docs } from './.source/server';
 import { lucideIconsPlugin } from 'fumadocs-core/source/plugins/lucide-icons';
+import { fumadocsMdx } from '@fumapress/core/adapters/mdx';
 
 export default defineConfig({
   loader: loader(docs.toFumadocsSource(), {
@@ -20,4 +21,5 @@ export default defineConfig({
     },
   },
   plugins: [oramaSearchPlugin(), llmsPlugin(), takumiPlugin()],
+  adapters: [fumadocsMdx()],
 });

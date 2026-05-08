@@ -1,25 +1,8 @@
-import * as waku from 'waku/config';
-import mdx from 'fumadocs-mdx/vite';
 import type { PluginOption } from 'vite';
 import { crawlFrameworkPkgs } from 'vitefu';
 
-export function defineConfig(config: waku.Config) {
-  return waku.defineConfig({
-    ...config,
-    vite: {
-      ...config.vite,
-      plugins: [press(), ...(config.vite?.plugins ?? [])],
-    },
-  });
-}
-
-export function press(): PluginOption {
-  return [
-    pressCore(),
-    mdx(undefined, {
-      updateViteConfig: false,
-    }),
-  ];
+export default function press(): PluginOption {
+  return pressCore();
 }
 
 export function pressCore(): PluginOption {

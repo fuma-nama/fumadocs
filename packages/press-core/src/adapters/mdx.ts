@@ -1,5 +1,5 @@
 import { createElement } from 'react';
-import type { Adapter } from '.';
+import type { Adapter } from '@/lib/types';
 import type { AsyncDocCollectionEntry, DocCollectionEntry } from 'fumadocs-mdx/runtime/server';
 import defaultMdxComponents, { createRelativeLink } from 'fumadocs-ui/mdx';
 

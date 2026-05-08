@@ -1,8 +1,6 @@
 import type { AppContext } from './lib/shared';
 import type { LoaderConfig, LoaderOutput } from 'fumadocs-core/source';
-import type { Awaitable } from './lib/types';
-import type { ServerPlugin } from './plugins';
-import type { Adapter } from './adapters';
+import type { Awaitable, ServerPlugin, Adapter } from '@/lib/types';
 
 export interface ConfigContext {
   loaderConfig: LoaderConfig;

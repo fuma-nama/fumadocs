@@ -3,12 +3,10 @@ import type { BaseLayoutProps } from 'fumadocs-ui/layouts/shared';
 import { getGitRootDir } from './fs';
 import path from 'node:path';
 import type { LoaderOutput, Page } from 'fumadocs-core/source';
-import type { Awaitable } from './types';
-import type { ServerPlugin } from '@/plugins';
+import type { Awaitable, Adapter, ServerPlugin } from './types';
 import type { DocsLayoutContextData } from '@/layouts/docs';
 import { createElement, Fragment, type ReactNode } from 'react';
 import type { HomeLayoutContextData } from '@/layouts/home';
-import type { Adapter } from '@/adapters';
 import { fumadocsMdx } from '@/adapters/mdx';
 
 export interface AppContext<C extends ConfigContext = ConfigContext> {
