@@ -18,7 +18,7 @@ export default defineConfig({
     bin: './src/bin.ts',
   },
   deps: {
-    onlyBundle: [],
+    onlyBundle: ['vitefu'],
     neverBundle: ['webpack', 'bun'],
   },
 });

@@ -50,7 +50,7 @@
   "devDependencies": {
     "@tailwindcss/oxide": "^4.2.4",
     "@types/mdx": "^2.0.13",
-    "@types/node": "^25.6.0",
+    "@types/node": "^25.6.2",
     "@types/react": "^19.2.14",
     "react": "^19.2.6",
     "react-dom": "^19.2.6",

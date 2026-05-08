@@ -15,14 +15,14 @@
     "fumadocs-mdx": "workspace:*",
     "fumadocs-python": "workspace:*",
     "fumadocs-ui": "workspace:*",
-    "next": "16.2.5",
+    "next": "16.2.6",
     "react": "^19.2.6",
     "react-dom": "^19.2.6"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4.2.4",
     "@types/mdx": "^2.0.13",
-    "@types/node": "25.6.0",
+    "@types/node": "25.6.2",
     "@types/react": "^19.2.14",
     "@types/react-dom": "^19.2.3",
     "postcss": "^8.5.14",

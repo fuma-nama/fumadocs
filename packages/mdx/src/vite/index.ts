@@ -1,4 +1,4 @@
-import { mergeConfig, type Plugin, type UserConfig } from 'vite';
+import { runnerImport, type Plugin } from 'vite';
 import { buildConfig } from '@/config/build';
 import { ValidationError } from '@/utils/validation';
 import { createMdxLoader } from '@/loaders/mdx';
@@ -8,6 +8,7 @@ import { _Defaults, createCore } from '@/core';
 import { createIntegratedConfigLoader } from '@/loaders/config';
 import { createMetaLoader } from '@/loaders/meta';
 import indexFile, { IndexFilePluginOptions } from '@/plugins/index-file';
+import { crawlFrameworkPkgs } from 'vitefu';
 
 export interface PluginOptions {
   /**
@@ -38,13 +39,15 @@ export interface PluginOptions {
 }
 
 export default async function mdx(
-  config: Record<string, unknown> | Promise<Record<string, unknown>>,
+  _config?: Record<string, unknown> | Promise<Record<string, unknown>>,
   pluginOptions: PluginOptions = {},
 ): Promise<Plugin> {
   const options = applyDefaults(pluginOptions);
   const core = createViteCore(options);
+  const config =
+    (await _config) ?? (await runnerImport<Record<string, unknown>>(options.configPath)).module;
   await core.init({
-    config: buildConfig(await config),
+    config: buildConfig(config),
   });
 
   const configLoader = createIntegratedConfigLoader(core);
@@ -60,16 +63,28 @@ export default async function mdx(
     name: 'fumadocs-mdx',
     // needed, otherwise other plugins will be executed before our `transform`.
     enforce: 'pre',
-    config(config) {
+    async config(config, { command }) {
       if (!options.updateViteConfig) return config;
 
-      return mergeConfig(config, {
-        resolve: {
-          noExternal: ['fumadocs-core', 'fumadocs-ui', 'fumadocs-openapi', '@fumadocs/base-ui'],
-          // only dedupe for public, non-transitive libs
-          dedupe: ['fumadocs-core', 'fumadocs-ui', 'fumadocs-openapi', '@fumadocs/base-ui'],
+      const out = await crawlFrameworkPkgs({
+        root: process.cwd(),
+        isBuild: command === 'build',
+        isFrameworkPkgByName(pkgName) {
+          if (
+            pkgName.startsWith('@fumapress/') ||
+            pkgName.startsWith('@fumadocs/') ||
+            pkgName.startsWith('fumadocs-')
+          )
+            return true;
         },
-      } satisfies UserConfig);
+      });
+
+      return {
+        ssr: {
+          noExternal: out.ssr.noExternal,
+        },
+        optimizeDeps: out.optimizeDeps,
+      };
     },
     async buildStart() {
       await core.emit({ write: true });

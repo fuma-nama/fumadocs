@@ -13,7 +13,7 @@ export default defineConfig({
     tsconfigPaths: true,
   },
   plugins: [
-    mdx(await import('./source.config')),
+    mdx(),
     tailwindcss(),
     tanstackStart({
       prerender: {
