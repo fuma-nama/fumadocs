@@ -1,24 +1,17 @@
 import type { ServerPlugin } from '.';
 import { unstable_notFound } from 'waku/router/server';
 import type { GenerateProps } from 'fumadocs-ui/og/takumi';
-import { createElement, Fragment } from 'react';
+import { createElement } from 'react';
 
 export function takumiPlugin(options: Partial<GenerateProps> = {}): ServerPlugin {
   return {
     init() {
-      this.data['core:docs-layout'] ??= {};
-      this.data['core:docs-layout'].renderers ??= [];
-      this.data['core:docs-layout'].renderers.push(function (res) {
-        res.body = createElement(
-          Fragment,
-          null,
-          res.body,
-          createElement('meta', {
-            property: 'og:image',
-            content: slugsToImagePath(this.page.slugs),
-          }),
-        );
-        return res;
+      const hooks = (this.data['core:page-meta'] ??= []);
+      hooks.push((page) => {
+        return createElement('meta', {
+          property: 'og:image',
+          content: slugsToImagePath(page.slugs).url,
+        });
       });
     },
     async createPages({ createApi }) {
@@ -34,13 +27,7 @@ export function takumiPlugin(options: Partial<GenerateProps> = {}): ServerPlugin
           const { ImageResponse } = await import('@takumi-rs/image-response');
           const { generate } = await import('fumadocs-ui/og/takumi');
 
-          const slugs = [...(params.slugs as string[])];
-          if (slugs.length === 0) unstable_notFound();
-
-          slugs[slugs.length - 1] = slugs[slugs.length - 1]!.replace(/\.webp$/, '');
-          if (slugs.length === 1 && slugs[0] === 'index') slugs.pop();
-
-          const page = source.getPage(slugs);
+          const page = source.getPage(imagePathToSlugs(params.slugs as string[]));
           if (!page) unstable_notFound();
 
           return new ImageResponse(
@@ -74,4 +61,14 @@ function slugsToImagePath(slugs: string[]) {
     segments,
     url: `/${segments.join('/')}`,
   };
+}
+
+function imagePathToSlugs(segs: string[]) {
+  const slugs = [...segs];
+  if (slugs.length === 0) return slugs;
+
+  slugs[slugs.length - 1] = slugs[slugs.length - 1]!.replace(/\.webp$/, '');
+  if (slugs.length === 1 && slugs[0] === 'index') slugs.pop();
+
+  return slugs;
 }

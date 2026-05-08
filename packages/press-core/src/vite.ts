@@ -1,7 +1,6 @@
 import * as waku from 'waku/config';
 import mdx from 'fumadocs-mdx/vite';
 import type { PluginOption } from 'vite';
-import * as vite from 'vite';
 import { crawlFrameworkPkgs } from 'vitefu';
 
 export function defineConfig(config: waku.Config) {
@@ -17,12 +16,9 @@ export function defineConfig(config: waku.Config) {
 export function press(): PluginOption {
   return [
     pressCore(),
-    mdx(
-      vite.runnerImport<Record<string, unknown>>('/source.config').then((mod) => mod.module),
-      {
-        updateViteConfig: false,
-      },
-    ),
+    mdx(undefined, {
+      updateViteConfig: false,
+    }),
   ];
 }
 
@@ -34,15 +30,12 @@ export function pressCore(): PluginOption {
         root: process.cwd(),
         isBuild: command === 'build',
         isFrameworkPkgByName(pkgName) {
-          switch (pkgName) {
-            case '@fumapress/core':
-            case 'fumadocs-core':
-            case 'fumadocs-ui':
-            case 'fumadocs-openapi':
-            case '@fumadocs/base-ui':
-            case 'fumadocs-mdx':
-              return true;
-          }
+          if (
+            pkgName.startsWith('@fumapress/') ||
+            pkgName.startsWith('@fumadocs/') ||
+            pkgName.startsWith('fumadocs-')
+          )
+            return true;
         },
       });
 

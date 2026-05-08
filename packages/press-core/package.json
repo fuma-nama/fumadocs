@@ -19,6 +19,8 @@
   "sideEffects": false,
   "exports": {
     ".": "./dist/index.mjs",
+    "./adapters": "./dist/adapters/index.mjs",
+    "./adapters/mdx": "./dist/adapters/mdx.mjs",
     "./layouts/docs": "./dist/layouts/docs.mjs",
     "./layouts/home": "./dist/layouts/home.mjs",
     "./plugins": "./dist/plugins/index.mjs",

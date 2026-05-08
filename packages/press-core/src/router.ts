@@ -3,7 +3,6 @@ import { AppContext, parseConfig } from './lib/shared';
 import { type ComponentType, createElement, type ReactNode } from 'react';
 import type { Config, ConfigContext } from './config';
 import { createDocsLayout } from './layouts/docs';
-import defaultMdxComponents, { createRelativeLink } from 'fumadocs-ui/mdx';
 
 export interface RouterOptions<C extends ConfigContext = ConfigContext> {
   root?: ComponentType<AppContext<C> & { children: ReactNode }>;
@@ -25,53 +24,17 @@ export function createRouter<C extends ConfigContext>(
       return createElement(mod.default, props);
     });
 
-  const layoutPage =
-    options.page ??
-    createDocsLayout({
-      async render(page) {
-        if ('load' in page.data && typeof page.data.load === 'function') {
-          const loader = await this.getLoader();
-          const { body: Mdx, toc } = await page.data.load();
-
-          if (typeof Mdx === 'function')
-            return {
-              toc,
-              body: createElement(Mdx, {
-                components: {
-                  ...defaultMdxComponents,
-                  a: createRelativeLink(loader, page),
-                },
-              }),
-            };
-        }
-
-        throw new Error('[Fumapress] Please specify `layouts.page` in your config');
-      },
-    });
+  const layoutPage = options.page ?? createDocsLayout();
 
   const layoutNotFound =
     options.notFound ??
     (async () => {
-      const mod = await import('./layouts/not-found');
-      return mod.default();
+      const mod = await import('fumadocs-ui/layouts/home/not-found');
+      return createElement(mod.DefaultNotFound);
     });
 
   function init() {
-    const context: AppContext<C> = {
-      config: parseConfig(rawConfig),
-      getLoader() {
-        if (typeof rawConfig.loader === 'function') return rawConfig.loader();
-
-        return rawConfig.loader;
-      },
-      plugins: Array.isArray(rawConfig.plugins) ? rawConfig.plugins : [],
-      $context: undefined as never,
-      data: {},
-    };
-
-    if (typeof rawConfig.plugins === 'function') {
-      context.plugins = rawConfig.plugins(context);
-    }
+    const context: AppContext<C> = parseConfig(rawConfig);
 
     for (const plugin of context.plugins) {
       plugin.init?.call(context as unknown as AppContext);

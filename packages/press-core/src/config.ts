@@ -2,6 +2,7 @@ import type { AppContext } from './lib/shared';
 import type { LoaderConfig, LoaderOutput } from 'fumadocs-core/source';
 import type { Awaitable } from './lib/types';
 import type { ServerPlugin } from './plugins';
+import type { Adapter } from './adapters';
 
 export interface ConfigContext {
   loaderConfig: LoaderConfig;
@@ -13,6 +14,8 @@ export interface Config<C extends ConfigContext = ConfigContext> {
 
   site?: SiteConfig;
   plugins?: ServerPlugin[] | ((ctx: AppContext<C>) => ServerPlugin[]);
+  /** adapter for content sources, use `fumadocs-mdx` if not specified */
+  adapters?: Adapter[];
 }
 
 export interface SiteConfig {
