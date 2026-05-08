@@ -14,8 +14,11 @@ export function llmsPlugin<C extends ConfigContext = ConfigContext>(
   const {
     getLLMText = async function getLLMTextDefault(page) {
       for (const adapter of this.adapters) {
-        const txt = await adapter['core:get-llms-text']?.call(this as unknown as AppContext, page);
-        if (txt !== undefined) return txt;
+        const txt = await adapter['core:get-text']?.call(this as unknown as AppContext, page);
+
+        if (txt !== undefined) {
+          return `# ${page.data.title} (${page.url})\n\n${txt}`;
+        }
       }
 
       throw new Error('[Fumapress] Please specify the `getLLMText()` option in llmsPlugin()');
@@ -27,7 +30,7 @@ export function llmsPlugin<C extends ConfigContext = ConfigContext>(
       this.data['core:docs-layout'] ??= {};
       this.data['core:docs-layout'].renderers ??= [];
       this.data['core:docs-layout'].renderers.push(function (res) {
-        res.markdownUrl ??= slugsToMarkdownPath(this.page.slugs).url;
+        res.markdownUrl ??= slugsToMarkdownPath(this.page.slugs, this.page.locale).url;
         return res;
       });
     },
@@ -56,15 +59,17 @@ export function llmsPlugin<C extends ConfigContext = ConfigContext>(
 
       createApi({
         render: 'static',
-        path: '/[...slugs]',
+        path: this.i18nConfig ? '/[lang]/[...slugs]' : '/[...slugs]',
         method: 'GET',
         staticPaths: (await this.getLoader())
           .getPages()
-          .map((page) => slugsToMarkdownPath(page.slugs).segments),
+          .map((page) => slugsToMarkdownPath(page.slugs, page.locale).segments),
         handler: async (_req, { params }) => {
-          const slugs = markdownPathToSlugs(params.slugs as string[]);
           const source = await this.getLoader();
-          const page = source.getPage(slugs);
+          const page = source.getPage(
+            markdownPathToSlugs(params.slugs as string[]),
+            params.lang as string,
+          );
           if (!page) unstable_notFound();
 
           return new Response(await getLLMText.call(this as unknown as AppContext<C>, page), {
@@ -88,12 +93,16 @@ function markdownPathToSlugs(segs: string[]) {
   return slugs;
 }
 
-function slugsToMarkdownPath(slugs: string[]) {
+function slugsToMarkdownPath(slugs: string[], lang?: string) {
   const segments = [...slugs];
   if (segments.length === 0) {
     segments.push('index.md');
   } else {
     segments[segments.length - 1] += '.md';
+  }
+
+  if (lang) {
+    segments.unshift(lang);
   }
 
   return {

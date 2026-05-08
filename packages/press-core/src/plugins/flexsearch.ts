@@ -1,13 +1,13 @@
-import type { AdvancedIndex } from 'fumadocs-core/search/server';
+import type { Index } from 'fumadocs-core/search/flexsearch';
 import type { Awaitable, ServerPlugin } from '@/lib/types';
 import type { ConfigContext } from '@/config';
 import type { AppContext } from '@/lib/shared';
 
-export interface OramaSearchOptions<C extends ConfigContext = ConfigContext> {
-  buildIndex?: (this: AppContext<C>, page: C['loaderConfig']['page']) => Awaitable<AdvancedIndex>;
+export interface FlexsearchOptions<C extends ConfigContext = ConfigContext> {
+  buildIndex?: (this: AppContext<C>, page: C['loaderConfig']['page']) => Awaitable<Index>;
 }
 
-export function oramaSearchPlugin<C extends ConfigContext = ConfigContext>({
+export function flexsearchPlugin<C extends ConfigContext = ConfigContext>({
   buildIndex = async function buildIndexDefault(page) {
     for (const adapter of this.adapters) {
       const structuredData = await adapter['core:get-structured-data']?.call(
@@ -26,18 +26,18 @@ export function oramaSearchPlugin<C extends ConfigContext = ConfigContext>({
       }
     }
 
-    throw new Error('[Fumapress] Please specify the `buildIndex` option to oramaSearchPlugin()');
+    throw new Error('[Fumapress] Please specify the `buildIndex` option to flexsearchPlugin()');
   },
-}: OramaSearchOptions<C> = {}): ServerPlugin {
+}: FlexsearchOptions<C> = {}): ServerPlugin {
   return {
     async createPages({ createApi }) {
-      const { createFromSource } = await import('fumadocs-core/search/server');
+      const { flexsearchFromSource } = await import('fumadocs-core/search/flexsearch');
 
       createApi({
         render: 'dynamic',
         path: '/api/search',
         handlers: {
-          GET: createFromSource(this.getLoader, {
+          GET: flexsearchFromSource(this.getLoader, {
             buildIndex: buildIndex.bind(this as unknown as AppContext<C>),
           }).GET,
         },

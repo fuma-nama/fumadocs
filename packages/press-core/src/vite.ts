@@ -5,7 +5,7 @@ export default function press(): PluginOption {
   return pressCore();
 }
 
-export function pressCore(): PluginOption {
+function pressCore(): PluginOption {
   return {
     name: 'fumapress:core',
     async config(_, { command }) {

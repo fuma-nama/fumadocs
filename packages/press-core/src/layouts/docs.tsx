@@ -1,6 +1,7 @@
 import { ConfigContext } from '@/config';
 import { AppContext, baseOptions, getGitHubFileUrl, renderPageMeta } from '@/lib/shared';
 import type { Awaitable } from '@/lib/types';
+import { Layouts } from '@/router';
 import type { Page } from 'fumadocs-core/source';
 import { TOCItemType } from 'fumadocs-core/toc';
 import { DocsLayout, type DocsLayoutProps } from 'fumadocs-ui/layouts/docs';
@@ -13,7 +14,7 @@ import {
   DocsBody,
   type DocsPageProps,
 } from 'fumadocs-ui/layouts/docs/page';
-import type { ComponentType, ReactNode } from 'react';
+import type { ReactNode } from 'react';
 import { unstable_notFound } from 'waku/router/server';
 
 export interface DocsLayoutOptions<C extends ConfigContext = ConfigContext> {
@@ -60,22 +61,22 @@ export function createDocsLayout<C extends ConfigContext = ConfigContext>({
       pageProps: { toc },
     };
   },
-}: DocsLayoutOptions<C> = {}): ComponentType<AppContext<C> & { slugs: string[] }> {
+}: DocsLayoutOptions<C> = {}): Layouts<C>['page'] {
   return async function Layout(props) {
     const {
       slugs,
-      config,
+      lang,
       getLoader,
       data: { 'core:docs-layout': layoutData },
     } = props;
     const source = await getLoader();
-    const page = source.getPage(slugs);
+    const page = source.getPage(slugs, lang);
     if (!page) unstable_notFound();
 
     let result = (await render.call(props, page)) as DocsLayoutRenderData;
     result.layoutProps ??= {
-      tree: source.getPageTree(),
-      ...baseOptions(config),
+      tree: source.getPageTree(lang),
+      ...baseOptions(props),
     };
 
     if (layoutData?.renderers) {
@@ -97,9 +98,7 @@ export function createDocsLayout<C extends ConfigContext = ConfigContext>({
             {result.markdownUrl && <MarkdownCopyButton markdownUrl={result.markdownUrl} />}
             <ViewOptionsPopover
               markdownUrl={result.markdownUrl}
-              githubUrl={
-                page.absolutePath ? getGitHubFileUrl(config, page.absolutePath) : undefined
-              }
+              githubUrl={page.absolutePath ? getGitHubFileUrl(props, page.absolutePath) : undefined}
             />
           </div>
           <DocsBody>{result.body}</DocsBody>

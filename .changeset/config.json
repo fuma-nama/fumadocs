@@ -15,5 +15,5 @@
     "version": true,
     "tag": false
   },
-  "ignore": ["docs", "example-*", "@fumapress/*"]
+  "ignore": ["docs", "docs-press", "example-*", "@fumapress/*"]
 }

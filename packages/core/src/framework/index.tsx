@@ -22,8 +22,8 @@ interface LinkProps extends ComponentProps<'a'> {
 }
 
 export interface Router {
-  push: (url: string) => void;
-  refresh: () => void;
+  push: (url: string) => void | Promise<void>;
+  refresh: () => void | Promise<void>;
 }
 
 export interface Framework {

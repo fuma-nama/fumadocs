@@ -286,6 +286,55 @@ importers:
         specifier: ^11.0.5
         version: 11.0.5
 
+  apps/press:
+    dependencies:
+      '@fumapress/core':
+        specifier: workspace:*
+        version: link:../../packages/press-core
+      fumadocs-core:
+        specifier: workspace:*
+        version: link:../../packages/core
+      fumadocs-mdx:
+        specifier: workspace:*
+        version: link:../../packages/mdx
+      react:
+        specifier: ^19.2.6
+        version: 19.2.6
+      react-dom:
+        specifier: ^19.2.6
+        version: 19.2.6(react@19.2.6)
+      react-server-dom-webpack:
+        specifier: ^19.2.6
+        version: 19.2.6(react-dom@19.2.6(react@19.2.6))(react@19.2.6)(webpack@5.106.2(esbuild@0.28.0))
+      waku:
+        specifier: 1.0.0-alpha.10
+        version: 1.0.0-alpha.10(@types/node@25.6.2)(babel-plugin-react-compiler@1.0.0)(esbuild@0.28.0)(jiti@2.7.0)(react-dom@19.2.6(react@19.2.6))(react-server-dom-webpack@19.2.6(react-dom@19.2.6(react@19.2.6))(react@19.2.6)(webpack@5.106.2(esbuild@0.28.0)))(react@19.2.6)(terser@5.47.1)(tsx@4.21.0)(yaml@2.8.4)
+    devDependencies:
+      '@tailwindcss/vite':
+        specifier: ^4.2.4
+        version: 4.2.4(vite@8.0.11(@types/node@25.6.2)(esbuild@0.28.0)(jiti@2.7.0)(terser@5.47.1)(tsx@4.21.0)(yaml@2.8.4))
+      '@types/mdx':
+        specifier: ^2.0.13
+        version: 2.0.13
+      '@types/node':
+        specifier: ^25.6.2
+        version: 25.6.2
+      '@types/react':
+        specifier: ^19.2.14
+        version: 19.2.14
+      '@types/react-dom':
+        specifier: ^19.2.3
+        version: 19.2.3(@types/react@19.2.14)
+      tailwindcss:
+        specifier: ^4.2.4
+        version: 4.2.4
+      typescript:
+        specifier: ^6.0.3
+        version: 6.0.3
+      vite:
+        specifier: ^8.0.11
+        version: 8.0.11(@types/node@25.6.2)(esbuild@0.28.0)(jiti@2.7.0)(terser@5.47.1)(tsx@4.21.0)(yaml@2.8.4)
+
   examples/astro:
     dependencies:
       '@astrojs/mdx':
@@ -812,55 +861,6 @@ importers:
       typescript:
         specifier: ^6.0.3
         version: 6.0.3
-
-  examples/press:
-    dependencies:
-      '@fumapress/core':
-        specifier: workspace:*
-        version: link:../../packages/press-core
-      fumadocs-core:
-        specifier: workspace:*
-        version: link:../../packages/core
-      fumadocs-mdx:
-        specifier: workspace:*
-        version: link:../../packages/mdx
-      react:
-        specifier: ^19.2.6
-        version: 19.2.6
-      react-dom:
-        specifier: ^19.2.6
-        version: 19.2.6(react@19.2.6)
-      react-server-dom-webpack:
-        specifier: ^19.2.6
-        version: 19.2.6(react-dom@19.2.6(react@19.2.6))(react@19.2.6)(webpack@5.106.2(esbuild@0.28.0))
-      waku:
-        specifier: 1.0.0-alpha.10
-        version: 1.0.0-alpha.10(@types/node@25.6.2)(babel-plugin-react-compiler@1.0.0)(esbuild@0.28.0)(jiti@2.7.0)(react-dom@19.2.6(react@19.2.6))(react-server-dom-webpack@19.2.6(react-dom@19.2.6(react@19.2.6))(react@19.2.6)(webpack@5.106.2(esbuild@0.28.0)))(react@19.2.6)(terser@5.47.1)(tsx@4.21.0)(yaml@2.8.4)
-    devDependencies:
-      '@tailwindcss/vite':
-        specifier: ^4.2.4
-        version: 4.2.4(vite@8.0.11(@types/node@25.6.2)(esbuild@0.28.0)(jiti@2.7.0)(terser@5.47.1)(tsx@4.21.0)(yaml@2.8.4))
-      '@types/mdx':
-        specifier: ^2.0.13
-        version: 2.0.13
-      '@types/node':
-        specifier: ^25.6.2
-        version: 25.6.2
-      '@types/react':
-        specifier: ^19.2.14
-        version: 19.2.14
-      '@types/react-dom':
-        specifier: ^19.2.3
-        version: 19.2.3(@types/react@19.2.14)
-      tailwindcss:
-        specifier: ^4.2.4
-        version: 4.2.4
-      typescript:
-        specifier: ^6.0.3
-        version: 6.0.3
-      vite:
-        specifier: ^8.0.11
-        version: 8.0.11(@types/node@25.6.2)(esbuild@0.28.0)(jiti@2.7.0)(terser@5.47.1)(tsx@4.21.0)(yaml@2.8.4)
 
   examples/python:
     dependencies:
@@ -3039,6 +3039,9 @@ importers:
       '@takumi-rs/image-response':
         specifier: ^1.1.2
         version: 1.1.2(react-dom@19.2.6(react@19.2.6))(react@19.2.6)
+      flexsearch:
+        specifier: ^0.8.212
+        version: 0.8.212
       fumadocs-core:
         specifier: workspace:*
         version: link:../core
@@ -9910,6 +9913,7 @@ packages:
 
   bun@1.3.13:
     resolution: {integrity: sha512-b9T4xZ8KqCHs4+TkHJv540LG1B8OD7noKu0Qaizusx3jFtMDHY6osNqgbaOlwW2B8RB2AKzz+sjzlGKIGxIjZw==}
+    cpu: [arm64, x64]
     os: [darwin, linux, win32]
     hasBin: true
 

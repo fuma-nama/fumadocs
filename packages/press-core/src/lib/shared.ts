@@ -1,4 +1,4 @@
-import type { Config, ConfigContext } from '@/config';
+import type { Config, ConfigContext, I18nConfig } from '@/config';
 import type { BaseLayoutProps } from 'fumadocs-ui/layouts/shared';
 import { getGitRootDir } from './fs';
 import path from 'node:path';
@@ -10,7 +10,6 @@ import type { HomeLayoutContextData } from '@/layouts/home';
 import { fumadocsMdx } from '@/adapters/mdx';
 
 export interface AppContext<C extends ConfigContext = ConfigContext> {
-  config: InternalConfig;
   getLoader: () => Awaitable<LoaderOutput<C['loaderConfig']>>;
   plugins: ServerPlugin[];
   adapters: Adapter[];
@@ -22,10 +21,9 @@ export interface AppContext<C extends ConfigContext = ConfigContext> {
    * custom data in app context, can be referenced from plugins/pages etc
    */
   data: AppContextData & Record<string, unknown>;
-}
 
-export interface InternalConfig {
-  site: {
+  i18nConfig?: I18nConfig;
+  siteConfig: {
     name: string;
     git?: {
       user: string;
@@ -53,16 +51,15 @@ export function parseConfig<C extends ConfigContext>(config: Config<C>): AppCont
     adapters: config.adapters ?? [fumadocsMdx()],
     $context: undefined as never,
     data: {},
-    config: {
-      site: {
-        name: config.site?.name ?? 'Fumapress',
-        git: config.site?.git
-          ? {
-              ...config.site.git,
-              rootDir: config.site.git.rootDir ?? getGitRootDir() ?? process.cwd(),
-            }
-          : undefined,
-      },
+    i18nConfig: config.i18n,
+    siteConfig: {
+      name: config.site?.name ?? 'Fumapress',
+      git: config.site?.git
+        ? {
+            ...config.site.git,
+            rootDir: config.site.git.rootDir ?? getGitRootDir() ?? process.cwd(),
+          }
+        : undefined,
     },
   };
 
@@ -80,8 +77,8 @@ export function renderPageMeta(page: Page, context: AppContext) {
   return meta.map((fn, i) => createElement(Fragment, { key: i }, fn(page)));
 }
 
-export function getGitHubFileUrl(config: InternalConfig, absolutePath: string): string | undefined {
-  const { git } = config.site;
+export function getGitHubFileUrl(ctx: AppContext, absolutePath: string): string | undefined {
+  const { git } = ctx.siteConfig;
   if (!git) return;
 
   const p = path.relative(git.rootDir, absolutePath).replaceAll(path.sep, '/');
@@ -90,8 +87,8 @@ export function getGitHubFileUrl(config: InternalConfig, absolutePath: string): 
   return `https://github.com/${git.user}/${git.repo}/blob/${git.branch}/${p}`;
 }
 
-export function baseOptions(config: InternalConfig): BaseLayoutProps {
-  const { name, git } = config.site;
+export function baseOptions(ctx: AppContext): BaseLayoutProps {
+  const { name, git } = ctx.siteConfig;
 
   return {
     nav: {

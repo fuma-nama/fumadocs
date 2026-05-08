@@ -1,5 +1,5 @@
-import { existsSync } from 'fs';
-import { join, dirname } from 'path';
+import { existsSync } from 'node:fs';
+import { join, dirname } from 'node:path';
 
 /**
  * Returns the absolute path to the root directory of the current git repository.

@@ -1,9 +1,10 @@
 import type { ConfigContext } from '@/config';
 import { type AppContext, baseOptions, renderPageMeta } from '@/lib/shared';
 import type { Awaitable } from '@/lib/types';
+import type { Layouts } from '@/router';
 import type { Page } from 'fumadocs-core/source';
 import { HomeLayout, type HomeLayoutProps } from 'fumadocs-ui/layouts/home';
-import type { ComponentType, ReactNode } from 'react';
+import type { ReactNode } from 'react';
 import { unstable_notFound } from 'waku/router/server';
 
 export interface HomeLayoutOptions<C extends ConfigContext = ConfigContext> {
@@ -34,20 +35,20 @@ export function createHomeLayout<C extends ConfigContext = ConfigContext>({
 
     throw new Error('[Fumapress] Please specify the `render` option in createHomeLayout()');
   },
-}: HomeLayoutOptions<C>): ComponentType<AppContext<C> & { slugs: string[] }> {
+}: HomeLayoutOptions<C>): Layouts<C>['page'] {
   return async function Layout(props) {
     const {
       slugs,
+      lang,
       getLoader,
-      config,
       data: { 'core:home-layout': layoutData },
     } = props;
     const source = await getLoader();
-    const page = source.getPage(slugs);
+    const page = source.getPage(slugs, lang);
     if (!page) unstable_notFound();
 
     let result = (await render.call(props, page)) as HomeLayoutRenderData;
-    result.layoutProps ??= baseOptions(config);
+    result.layoutProps ??= baseOptions(props);
 
     if (layoutData?.renderers) {
       const renderCtx = { page };

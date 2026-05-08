@@ -29,7 +29,7 @@ export type ChatUIMessage = UIMessage<
 >;
 
 async function chunkedAll<O>(promises: (O | Promise<O>)[]): Promise<O[]> {
-  const SIZE = 50;
+  const SIZE = 100;
   const out: O[] = [];
   for (let i = 0; i < promises.length; i += SIZE) {
     out.push(...(await Promise.all(promises.slice(i, i + SIZE))));
@@ -41,6 +41,7 @@ export interface AIRouteOptions<C extends ConfigContext = ConfigContext> {
   model: LanguageModel;
   systemPrompt?: string;
   pageToIndex?: (
+    this: AppContext<C>,
     page: C['loaderConfig']['page'],
   ) => PageDocument | null | Promise<PageDocument | null>;
 }
@@ -49,27 +50,30 @@ export function createRouteHandler<C extends ConfigContext>(
   options: AIRouteOptions<C>,
   ctx: AppContext<C>,
 ) {
-  const { getLoader, config } = ctx;
+  const { getLoader, siteConfig } = ctx;
   const {
     model,
     systemPrompt = [
-      `You are an AI assistant for "${config.site.name}" documentation site.`,
+      `You are an AI assistant for "${siteConfig.name}" documentation site.`,
       'Use the `search` tool to retrieve relevant docs context before answering when needed.',
       'The `search` tool returns raw JSON results from documentation. Use those results to ground your answer and cite sources as markdown links using the document `url` field when available.',
       'If you cannot find the answer in search results, say you do not know and suggest a better search query.',
     ].join('\n'),
-    pageToIndex = async (page): Promise<PageDocument | null> => {
-      if (!page.data.title || !('getText' in page.data) || typeof page.data.getText !== 'function')
-        return null;
-      const content = await page.data.getText('processed');
-      if (typeof content !== 'string') return null;
+    pageToIndex = async function (page): Promise<PageDocument | null> {
+      for (const adapter of this.adapters) {
+        const txt = await adapter['core:get-text']?.call(this as unknown as AppContext, page);
 
-      return {
-        title: page.data.title,
-        description: page.data.description ?? '',
-        url: page.url,
-        content,
-      };
+        if (txt !== undefined) {
+          return {
+            title: page.data.title ?? '',
+            description: page.data.description ?? '',
+            url: page.url,
+            content: txt,
+          };
+        }
+      }
+
+      return null;
     },
   } = options;
 
@@ -87,7 +91,7 @@ export function createRouteHandler<C extends ConfigContext>(
       },
     });
 
-    const docs = await chunkedAll(source.getPages().map(pageToIndex));
+    const docs = await chunkedAll(source.getPages().map(pageToIndex.bind(ctx)));
 
     for (const doc of docs) {
       if (doc) search.add(doc);

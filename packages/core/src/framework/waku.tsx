@@ -1,13 +1,12 @@
 'use client';
 
-import { type ReactNode, useMemo } from 'react';
+import { type ReactNode, useMemo, useRef } from 'react';
 import { Link, useRouter } from 'waku';
 import { type Framework, FrameworkProvider } from './index.js';
 
 const framework: Framework = {
   usePathname() {
-    const { path } = useRouter();
-    return path;
+    return useRouter().path;
   },
   useParams() {
     const { query } = useRouter();
@@ -23,17 +22,19 @@ const framework: Framework = {
   },
   useRouter() {
     const router = useRouter();
+    const routerRef = useRef(router);
+    routerRef.current = router;
 
     return useMemo(
       () => ({
         push(url: string) {
-          void router.push(url);
+          return routerRef.current.push(url);
         },
         refresh() {
-          void router.push(router.path);
+          return routerRef.current.reload();
         },
       }),
-      [router],
+      [],
     );
   },
   Link({ href, prefetch = true, ...props }) {

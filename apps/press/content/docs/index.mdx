@@ -1,0 +1,102 @@
+---
+title: Introduction
+description: Turn your content into a website.
+icon: Rocket
+---
+
+## What is Fumapress?
+
+Fumapress is a site generator powered by [Fumadocs](https://fumadocs.dev) & [Waku](https://waku.gg), as compared to Fumadocs, it manages more features such as routing, while being more opinionated.
+
+It is perfect if you want a beautiful, flexible docs, without revealing too much complexity.
+
+Since the app is still a Waku.js app, you can easily transition to a full Fumadocs app without heavy migration.
+
+## Getting Started
+
+Install the dependencies:
+
+```npm
+npm i waku @fumapress/core fumadocs-core fumadocs-mdx react react-dom react-server-dom-webpack
+
+npm i tailwindcss @tailwindcss/vite @types/react @types/react-dom typescript vite -D
+```
+
+Create the config files:
+
+```ts tab="waku.config.ts"
+import { defineConfig } from 'waku/config';
+import tailwindcss from '@tailwindcss/vite';
+import press from '@fumapress/core/vite';
+import mdx from 'fumadocs-mdx/vite';
+
+// the config file for Waku & Vite
+export default defineConfig({
+  vite: {
+    plugins: [press(), mdx(), tailwindcss()],
+  },
+});
+```
+
+```ts tab="source.config.ts"
+import { defineDocs } from 'fumadocs-mdx/config';
+import { metaSchema, pageSchema } from 'fumadocs-core/source/schema';
+
+// the config file for Fumadocs MDX, see https://fumadocs.dev/docs/mdx
+export const docs = defineDocs({
+  dir: 'content',
+  docs: {
+    async: true,
+    schema: pageSchema,
+    postprocess: {
+      includeProcessedMarkdown: true,
+    },
+  },
+  meta: {
+    schema: metaSchema,
+  },
+});
+```
+
+```ts tab="press.config.ts"
+import { defineConfig } from '@fumapress/core';
+import { llmsPlugin } from '@fumapress/core/plugins/llms.txt';
+import { takumiPlugin } from '@fumapress/core/plugins/takumi';
+import { oramaSearchPlugin } from '@fumapress/core/plugins/orama-search';
+import { loader } from 'fumadocs-core/source';
+// don't worry if this file is missing, we will run the dev command later to generate this file
+import { docs } from './.source/server';
+import { fumadocsMdx } from '@fumapress/core/adapters/mdx';
+
+export default defineConfig({
+  loader: loader(docs.toFumadocsSource(), {
+    baseUrl: '/',
+  }),
+  site: {
+    name: 'Fumapress',
+  },
+  // extend via plugins
+  plugins: [oramaSearchPlugin(), llmsPlugin(), takumiPlugin()],
+  // use different content sources
+  adapters: [fumadocsMdx()],
+});
+```
+
+Start the dev server:
+
+```npm
+npm waku dev
+```
+
+You can now start writing Markdown files under the `content` directory.
+
+```mdx title="content/index.mdx"
+---
+title: My Page
+description: Hello World
+---
+
+# Overview
+
+This is my first document.
+```

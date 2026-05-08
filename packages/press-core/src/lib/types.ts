@@ -9,7 +9,7 @@ export type Awaitable<T> = T | Promise<T>;
 
 /** allow content sources to implement interfaces for pages, instead of requiring consumers to specify manually */
 export interface Adapter {
-  'core:get-llms-text'?: (this: AppContext, page: Page) => Awaitable<string | undefined>;
+  'core:get-text'?: (this: AppContext, page: Page) => Awaitable<string | undefined>;
   'core:get-structured-data'?: (
     this: AppContext,
     page: Page,

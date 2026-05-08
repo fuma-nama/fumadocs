@@ -5,11 +5,9 @@ import defaultMdxComponents, { createRelativeLink } from 'fumadocs-ui/mdx';
 
 export function fumadocsMdx(): Adapter {
   return {
-    async 'core:get-llms-text'(page) {
+    async 'core:get-text'(page) {
       if (isAsyncEntry(page.data) || isSyncEntry(page.data)) {
-        const processed: string = await page.data.getText('processed');
-
-        return `# ${page.data.title} (${page.url})\n\n${processed}`;
+        return page.data.getText('processed');
       }
     },
     async 'core:get-structured-data'(page) {
