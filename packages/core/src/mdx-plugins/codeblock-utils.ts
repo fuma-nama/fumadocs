@@ -91,6 +91,8 @@ export interface CodeBlockAttributes<Name extends string = string> {
   rest: string;
 }
 
+const AttributeRegex = /(?<=^|\s)(?<name>[a-zA-Z0-9_-]+)(?:=(?:"([^"]*)"|'([^']*)'))?/g;
+
 /**
  * Parse Fumadocs-style code block attributes from meta string, like `title="hello world"`
  */
@@ -98,11 +100,8 @@ export function parseCodeBlockAttributes<Name extends string = string>(
   meta: string,
   allowedNames?: Name[],
 ): CodeBlockAttributes<Name> {
-  let str = meta;
-  const StringRegex = /(?<=^|\s)(?<name>\w+)(?:=(?:"([^"]*)"|'([^']*)'))?/g;
   const attributes: CodeBlockAttributes['attributes'] = {};
-
-  str = str.replaceAll(StringRegex, (match, name, value_1, value_2) => {
+  const rest = meta.replaceAll(AttributeRegex, (match, name, value_1, value_2) => {
     if (allowedNames && !allowedNames.includes(name)) return match;
 
     attributes[name] = value_1 ?? value_2 ?? null;
@@ -110,7 +109,7 @@ export function parseCodeBlockAttributes<Name extends string = string>(
   });
 
   return {
-    rest: str,
+    rest,
     attributes,
   };
 }
