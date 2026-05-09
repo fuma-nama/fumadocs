@@ -29,8 +29,9 @@ export function schemaToString(
             raw: ref ? { $ref: ref } : undefined,
           };
         };
-  function union(union: readonly ParsedSchema[], sep: string, flags: FormatFlags) {
+  function union(union: readonly ParsedSchema[], sep: string, flags: FormatFlags): string {
     const members = new Set();
+    const out: string[] = [];
     let nullable = false;
 
     for (const item of union) {
@@ -38,13 +39,14 @@ export function schemaToString(
 
       if (result === 'null') {
         nullable = true;
-      } else if (result !== 'unknown') {
+      } else if (result !== 'unknown' && !members.has(result)) {
+        out.push(result);
         members.add(result);
       }
     }
 
-    const result = Array.from(members).join(sep);
-    return nullable ? `${result} | null` : result;
+    if (nullable) out.push('null');
+    return out.join(sep);
   }
 
   function run(input: ParsedSchema, flags: FormatFlags): string {
@@ -76,10 +78,12 @@ export function schemaToString(
     if (schema.type === 'array')
       return `array<${schema.items ? run(schema.items, flags | FormatFlags.UseAlias) : 'unknown'}>`;
 
-    const or = schema.oneOf ?? schema.anyOf;
     if (schema.oneOf && schema.anyOf) {
       return `(${union(schema.oneOf, ' | ', flags)}) & (${union(schema.anyOf, ' | ', flags)})`;
-    } else if (or) {
+    }
+
+    const or = schema.oneOf ?? schema.anyOf;
+    if (or) {
       return union(or, ' | ', flags);
     }
 
@@ -87,15 +91,11 @@ export function schemaToString(
       return union(schema.allOf, ' & ', flags);
     }
 
-    if (schema.not) return `not ${run(schema.not, flags)}`;
+    if (schema.not) return `not (${run(schema.not, flags)})`;
     if (schema.type === 'string' && schema.format === 'binary') return 'file';
 
-    if (schema.type && Array.isArray(schema.type)) {
-      return schema.type.filter((v) => v !== 'null').join(' | ');
-    }
-
-    if (schema.type) {
-      return schema.type as string;
+    if (typeof schema.type === 'string') {
+      return schema.type;
     }
 
     return 'unknown';
