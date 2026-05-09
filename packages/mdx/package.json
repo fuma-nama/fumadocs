@@ -56,7 +56,6 @@
     "estree-util-value-to-estree": "^3.5.0",
     "js-yaml": "^4.1.1",
     "mdast-util-mdx": "^3.0.0",
-    "mdast-util-to-markdown": "^2.1.2",
     "picocolors": "^1.1.1",
     "picomatch": "^4.0.4",
     "tinyexec": "^1.1.2",
