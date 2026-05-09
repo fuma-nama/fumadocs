@@ -197,14 +197,16 @@ export function createAutoPreset(options: SchemaToPagesOptions): PagesBuilderCon
           }
 
           for (const tag of tags) {
+            const res = builder.fromTagName(tag);
+            if (!res) continue;
+
             const groupName = slugify(tag);
-            const { displayName, info } = builder.fromTagName(tag)!;
             let group = groups.get(groupName);
             if (!group) {
               group = {
                 type: 'group',
-                info: { title: displayName, description: info.description },
-                tag: info,
+                info: { title: res.displayName, description: res.info.description },
+                tag: res.info,
                 entries: [],
                 schemaId: builder.id,
                 path: groupName,
