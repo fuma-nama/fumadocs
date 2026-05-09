@@ -19,6 +19,7 @@ import { DefaultChatTransport, type Tool, type UIToolInvocation } from 'ai';
 import { Markdown } from './markdown';
 import { Presence } from '@radix-ui/react-presence';
 import type { ChatUIMessage, SearchTool } from '@/api';
+import { useI18n } from 'fumadocs-ui/contexts/i18n';
 
 const Context = createContext<{
   open: boolean;
@@ -106,8 +107,10 @@ export function AISearchInputActions() {
 const StorageKeyInput = '__ai_search_input';
 export function AISearchInput(props: ComponentProps<'form'>) {
   const { status, sendMessage, stop } = useChatContext();
+  const { locale } = useI18n();
   const [input, setInput] = useState(() => localStorage.getItem(StorageKeyInput) ?? '');
   const isLoading = status === 'streaming' || status === 'submitted';
+
   const onStart = (e?: SyntheticEvent) => {
     e?.preventDefault();
     const message = input.trim();
@@ -120,6 +123,7 @@ export function AISearchInput(props: ComponentProps<'form'>) {
           type: 'data-client',
           data: {
             location: location.href,
+            locale: locale ?? null,
           },
         },
         {
@@ -351,25 +355,6 @@ export function AISearchPanel() {
 
   return (
     <>
-      <style>
-        {`
-        @keyframes ask-ai-open {
-          from {
-            translate: 100% 0;
-          }
-          to {
-            translate: 0 0;
-          }
-        }
-        @keyframes ask-ai-close {
-          from {
-            width: var(--ai-chat-width);
-          }
-          to {
-            width: 0px;
-          }
-        }`}
-      </style>
       <Presence present={open}>
         <div
           className={cn(
@@ -386,8 +371,8 @@ export function AISearchPanel() {
             'max-lg:fixed max-lg:inset-x-2 max-lg:inset-y-4 max-lg:border max-lg:rounded-2xl max-lg:shadow-xl',
             'lg:sticky lg:top-0 lg:h-dvh lg:border-s lg:ms-auto lg:in-[#nd-docs-layout]:[grid-area:toc] lg:in-[#nd-notebook-layout]:row-span-full lg:in-[#nd-notebook-layout]:col-start-5',
             open
-              ? 'animate-fd-dialog-in lg:animate-[ask-ai-open_200ms]'
-              : 'animate-fd-dialog-out lg:animate-[ask-ai-close_200ms]',
+              ? 'animate-fd-dialog-in lg:animate-fd-ask-ai-open'
+              : 'animate-fd-dialog-out lg:animate-fd-ask-ai-close',
           )}
         >
           <div className="flex flex-col size-full p-2 lg:p-3 lg:w-(--ai-chat-width)">

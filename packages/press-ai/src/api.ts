@@ -17,6 +17,7 @@ export interface PageDocument extends DocumentData {
   title: string;
   description: string;
   content: string;
+  locale: string;
 }
 
 export type ChatUIMessage = UIMessage<
@@ -24,6 +25,7 @@ export type ChatUIMessage = UIMessage<
   {
     client: {
       location: string;
+      locale: string | null;
     };
   }
 >;
@@ -69,6 +71,7 @@ export function createRouteHandler<C extends ConfigContext>(
             description: page.data.description ?? '',
             url: page.url,
             content: txt,
+            locale: page.locale ?? '',
           };
         }
       }
@@ -87,6 +90,7 @@ export function createRouteHandler<C extends ConfigContext>(
       document: {
         id: 'url',
         index: ['title', 'description', 'content'],
+        tag: ['locale'],
         store: true,
       },
     });
@@ -101,12 +105,14 @@ export function createRouteHandler<C extends ConfigContext>(
   }
 
   const searchTool: SearchTool = tool({
-    description: 'Search the docs content and return raw JSON results.',
+    description:
+      'Search the docs content and return raw JSON results.\nIt will always return search results in the preferred locale selected by user.',
     inputSchema: z.object({
       query: z.string(),
       limit: z.number().int().min(1).max(100).default(10),
     }),
-    async execute({ query, limit }) {
+    async execute({ query, limit }, options) {
+      const context = options.experimental_context as { locale: string | null };
       const source = await getLoader();
       let server = searchServers.get(source);
       if (!server) {
@@ -114,12 +120,24 @@ export function createRouteHandler<C extends ConfigContext>(
         searchServers.set(source, server);
       }
 
-      return await (await server).searchAsync(query, { limit, merge: true, enrich: true });
+      return await (
+        await server
+      ).searchAsync(query, {
+        limit,
+        merge: true,
+        enrich: true,
+        tag: context.locale
+          ? {
+              locale: context.locale,
+            }
+          : undefined,
+      });
     },
   });
 
   async function onRequest(req: Request) {
-    const reqJson = await req.json();
+    const reqJson: { messages: ChatUIMessage[] } = await req.json();
+    let locale: string | null = null;
 
     const result = streamText({
       model,
@@ -127,18 +145,25 @@ export function createRouteHandler<C extends ConfigContext>(
       tools: {
         search: searchTool,
       },
-      messages: [
-        { role: 'system', content: systemPrompt },
-        ...(await convertToModelMessages<ChatUIMessage>(reqJson.messages ?? [], {
-          convertDataPart(part) {
-            if (part.type === 'data-client')
-              return {
-                type: 'text',
-                text: `[Client Context: ${JSON.stringify(part.data)}]`,
-              };
-          },
-        })),
-      ],
+      system: systemPrompt,
+      messages: await convertToModelMessages<ChatUIMessage>(reqJson.messages, {
+        tools: {
+          search: searchTool,
+        },
+        convertDataPart(part) {
+          if (part.type === 'data-client') {
+            locale = part.data.locale;
+
+            return {
+              type: 'text',
+              text: `[Client Context: ${JSON.stringify(part.data)}]`,
+            };
+          }
+        },
+      }),
+      experimental_context: {
+        locale,
+      },
       toolChoice: 'auto',
     });
 
