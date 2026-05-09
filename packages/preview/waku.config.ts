@@ -7,7 +7,6 @@ export default defineConfig({
   unstable_adapter: './src/lib/waku/adapter.ts',
   vite: {
     resolve: {
-      external: ['@takumi-rs/image-response'],
       tsconfigPaths: true,
     },
 

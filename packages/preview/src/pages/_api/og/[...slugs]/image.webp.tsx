@@ -2,9 +2,9 @@ import { getConfigRuntime } from '@/config/load-runtime';
 import { getSource } from '@/lib/source';
 import { generate as DefaultImage } from 'fumadocs-ui/og/takumi';
 import { ApiContext } from 'waku/router';
+import { ImageResponse } from '@takumi-rs/image-response';
 
 export async function GET(_: Request, { params }: ApiContext<'/og/[...slugs]/image.webp'>) {
-  const { ImageResponse } = await import('@takumi-rs/image-response');
   const config = await getConfigRuntime();
   const page = (await getSource(config)).getPage(params.slugs);
 
