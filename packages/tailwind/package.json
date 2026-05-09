@@ -33,7 +33,7 @@
     "@fastify/deepmerge": "^3.2.1",
     "@types/node": "^25.6.2",
     "postcss-selector-parser": "^7.1.1",
-    "tailwindcss": "^4.2.4",
+    "tailwindcss": "^4.3.0",
     "tsconfig": "workspace:*",
     "tsdown": "0.22.0"
   },

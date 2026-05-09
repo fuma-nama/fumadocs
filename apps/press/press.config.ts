@@ -1,4 +1,4 @@
-import { coreI18n, defineConfig, type I18nConfig } from 'fumapress';
+import { defineConfig } from 'fumapress';
 import { llmsPlugin } from 'fumapress/plugins/llms.txt';
 import { takumiPlugin } from 'fumapress/plugins/takumi';
 import { loader } from 'fumadocs-core/source';
@@ -7,23 +7,10 @@ import { lucideIconsPlugin } from 'fumadocs-core/source/plugins/lucide-icons';
 import { fumadocsMdx } from 'fumapress/adapters/mdx';
 import { flexsearchPlugin } from 'fumapress/plugins/flexsearch';
 
-const i18n: I18nConfig = {
-  defaultLanguage: 'en',
-  languages: {
-    en: {
-      displayName: 'English',
-    },
-    cn: {
-      displayName: 'Chinese',
-    },
-  },
-};
-
 export default defineConfig({
   loader: loader(docs.toFumadocsSource(), {
     baseUrl: '/',
     plugins: [lucideIconsPlugin()],
-    i18n: coreI18n(i18n),
   }),
   site: {
     name: 'Fumapress',
@@ -35,5 +22,4 @@ export default defineConfig({
   },
   plugins: [flexsearchPlugin(), llmsPlugin(), takumiPlugin()],
   adapters: [fumadocsMdx()],
-  i18n,
 });

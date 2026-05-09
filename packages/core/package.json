@@ -122,7 +122,7 @@
   "devDependencies": {
     "@formatjs/intl-localematcher": "^0.8.6",
     "@mdx-js/mdx": "^3.1.1",
-    "@mixedbread/sdk": "^0.64.0",
+    "@mixedbread/sdk": "^0.65.0",
     "@orama/core": "^1.2.19",
     "@oramacloud/client": "^2.1.4",
     "@shikijs/transformers": "^4.0.2",

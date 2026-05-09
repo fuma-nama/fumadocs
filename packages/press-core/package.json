@@ -20,6 +20,7 @@
   "exports": {
     ".": "./dist/index.js",
     "./adapters/mdx": "./dist/adapters/mdx.js",
+    "./components/provider": "./dist/components/provider.js",
     "./layouts/docs": "./dist/layouts/docs.js",
     "./layouts/home": "./dist/layouts/home.js",
     "./layouts/root": "./dist/layouts/root.js",
@@ -50,7 +51,7 @@
     "tailwind-merge": "^3.5.0"
   },
   "devDependencies": {
-    "@tailwindcss/oxide": "^4.2.4",
+    "@tailwindcss/oxide": "^4.3.0",
     "@types/mdx": "^2.0.13",
     "@types/node": "^25.6.2",
     "@types/react": "^19.2.14",

@@ -32,9 +32,9 @@
     "types:check": "tsc --noEmit"
   },
   "dependencies": {
-    "@ai-sdk/react": "^3.0.178",
+    "@ai-sdk/react": "^3.0.179",
     "@radix-ui/react-presence": "^1.1.5",
-    "ai": "^6.0.176",
+    "ai": "^6.0.177",
     "flexsearch": "^0.8.212",
     "fumadocs-core": "workspace:*",
     "fumadocs-ui": "workspace:*",
@@ -45,7 +45,7 @@
     "zod": "^4.4.3"
   },
   "devDependencies": {
-    "@tailwindcss/oxide": "^4.2.4",
+    "@tailwindcss/oxide": "^4.3.0",
     "@types/hast": "^3.0.4",
     "@types/mdx": "^2.0.13",
     "@types/node": "^25.6.2",

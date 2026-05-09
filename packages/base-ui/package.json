@@ -140,8 +140,8 @@
   },
   "devDependencies": {
     "@fumadocs/cli": "workspace:*",
-    "@tailwindcss/cli": "^4.2.4",
-    "@tailwindcss/oxide": "^4.2.4",
+    "@tailwindcss/cli": "^4.3.0",
+    "@tailwindcss/oxide": "^4.3.0",
     "@tsdown/css": "^0.22.0",
     "@types/hast": "^3.0.4",
     "@types/mdx": "^2.0.13",
@@ -151,7 +151,7 @@
     "fuma-cli": "^0.1.1",
     "fumadocs-core": "workspace:*",
     "react-medium-image-zoom": "^5.4.5",
-    "tailwindcss": "^4.2.4",
+    "tailwindcss": "^4.3.0",
     "tsconfig": "workspace:*",
     "tsdown": "0.22.0",
     "unified": "^11.0.5"

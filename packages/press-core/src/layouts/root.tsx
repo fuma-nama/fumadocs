@@ -1,14 +1,14 @@
 import { Provider } from '@/components/provider';
-import appCss from 'virtual:root.css?url';
 import type { Layouts } from '@/router';
 import type { ConfigContext } from '@/config';
+import styles from 'virtual:root.css?inline';
 
 export function createRootLayout<C extends ConfigContext = ConfigContext>(): Layouts<C>['root'] {
   return function ({ children, lang, i18nConfig }) {
     return (
       <html lang={lang ?? 'en'} suppressHydrationWarning>
         <head>
-          <link rel="stylesheet" href={appCss} />
+          <style>{styles}</style>
         </head>
         <body data-version="1.0" className="flex flex-col min-h-screen">
           <Provider locale={lang} i18n={i18nConfig}>

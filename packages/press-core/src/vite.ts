@@ -31,22 +31,19 @@ function pressCore(): PluginOption {
         optimizeDeps: out.optimizeDeps,
       };
     },
-    async resolveId(source, importer, options) {
+    async resolveId(source, _importer, options) {
       if (source === 'virtual:fumapress-core/config') {
-        return this.resolve('/press.config', importer, options);
+        return this.resolve('/press.config', undefined, options);
       }
 
-      const match = /^virtual:root\.css(\?.*)?$$/.exec(source);
-
-      if (match) {
-        const query = match[1] ?? '';
-        const out = await this.resolve(`/src/app.css${query}`, importer, options);
-        if (out === null)
-          return this.resolve(`fumapress/css/default.css${query}`, importer, options);
-        return out;
+      if (source === 'virtual:root.css?inline') {
+        return (
+          (await this.resolve(`/src/app.css?inline`)) ??
+          (await this.resolve(`fumapress/css/default.css?inline`))
+        );
       }
     },
-    load(id) {
+    async load(id) {
       if (id === '\0virtual:vite-rsc-waku/server-entry-inner') {
         return getManagedServerEntry();
       }
