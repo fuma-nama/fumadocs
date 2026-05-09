@@ -1,5 +1,14 @@
 # next-docs-mdx
 
+## 15.0.1
+
+### Patch Changes
+
+- 91cac42: remove unused deps
+- 3696a7e: Make source config optional in Vite plugin
+- Updated dependencies [2ca3eab]
+  - fumadocs-core@16.8.9
+
 ## 15.0.0
 
 ### Major Changes

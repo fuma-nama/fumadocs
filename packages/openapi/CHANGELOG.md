@@ -1,5 +1,14 @@
 # @fuma-docs/openapi
 
+## 10.8.2
+
+### Patch Changes
+
+- e89fd74: fix hydration errors
+- Updated dependencies [2ca3eab]
+  - fumadocs-core@16.8.9
+  - fumadocs-ui@16.8.9
+
 ## 10.8.1
 
 ### Patch Changes

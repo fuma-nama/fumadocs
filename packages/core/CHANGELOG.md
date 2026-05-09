@@ -1,5 +1,11 @@
 # fumadocs-core
 
+## 16.8.9
+
+### Patch Changes
+
+- 2ca3eab: Support `tab-group` in codeblock tabs
+
 ## 16.8.8
 
 ## 16.8.7
