@@ -1,21 +1,13 @@
 import { revalidable } from '@/lib/revalidable.js';
-import { defineConfig, type FumapressConfig } from './global.js';
+import { defineConfig, type AppConfig } from './global.js';
 import { checkConfig, findConfigPath } from './load-node.js';
-import { unrun } from 'unrun';
+import { pathToFileURL } from 'node:url';
 
-const DefaultConfig = defineConfig();
-
-async function loadConfig(configPath: string | null): Promise<FumapressConfig> {
-  if (configPath === null) return DefaultConfig;
+async function loadConfig(configPath: string | null): Promise<AppConfig> {
+  if (configPath === null) return defineConfig();
 
   try {
-    const { module } = await unrun<{ default: unknown }>({
-      path: configPath,
-      inputOptions: {
-        cwd: process.env.ROOT_DIR,
-        external: ['*'],
-      },
-    });
+    const module = await import(pathToFileURL(configPath).href);
 
     return checkConfig(configPath, module.default ?? module);
   } catch (error) {
@@ -23,7 +15,7 @@ async function loadConfig(configPath: string | null): Promise<FumapressConfig> {
       `Failed to load config from ${configPath}:`,
       error instanceof Error ? error.message : String(error),
     );
-    return DefaultConfig;
+    return defineConfig();
   }
 }
 

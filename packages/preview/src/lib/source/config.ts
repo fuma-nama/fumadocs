@@ -9,7 +9,11 @@ export function normalizeProjects(projects?: ProjectConfig[]): NormalizedProject
   const baseDir = process.env.ROOT_DIR ?? process.cwd();
 
   if (!projects || projects.length === 0) {
-    projects = getDefaultProjectDirectories().map((dir) => ({ dir, name: path.basename(dir) }));
+    projects = getDefaultProjectDirectories().map((dir) => ({
+      dir,
+      name: path.basename(dir),
+      watch: true,
+    }));
   }
 
   return projects.map((project) => ({

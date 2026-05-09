@@ -73,7 +73,8 @@ export default async function mdx(
           if (
             pkgName.startsWith('@fumapress/') ||
             pkgName.startsWith('@fumadocs/') ||
-            pkgName.startsWith('fumadocs-')
+            pkgName.startsWith('fumadocs-') ||
+            pkgName === 'fumapress'
           )
             return true;
         },

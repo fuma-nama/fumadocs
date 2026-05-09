@@ -1,6 +1,6 @@
 {
-  "name": "fumapress",
-  "version": "0.1.37",
+  "name": "fumadocs-preview",
+  "version": "0.1.0",
   "description": "Opinionated Fumadocs for fast content preview",
   "keywords": [
     "Docs",
@@ -11,7 +11,7 @@
   "author": "Fuma Nama",
   "repository": "github:fuma-nama/fumadocs",
   "bin": {
-    "fumapress": "./dist/lib/cli/index.mjs"
+    "fumadocs-preview": "./dist/lib/cli/index.mjs"
   },
   "files": [
     "dist"
@@ -33,28 +33,17 @@
     "types:check": "tsc --noEmit"
   },
   "dependencies": {
-    "@ai-sdk/react": "^3.0.178",
-    "@openrouter/ai-sdk-provider": "^2.9.0",
-    "@radix-ui/react-presence": "^1.1.5",
     "@takumi-rs/image-response": "^1.1.2",
-    "ai": "^6.0.176",
-    "chokidar": "^5.0.0",
-    "class-variance-authority": "^0.7.1",
     "commander": "^14.0.3",
     "dotenv": "^17.4.2",
-    "flexsearch": "^0.8.212",
-    "fumadocs-core": "workspace:*",
-    "fumadocs-ui": "workspace:*",
-    "remark-gfm": "^4.0.1",
-    "tinyglobby": "^0.2.16",
-    "unist-util-visit": "^5.1.0",
-    "unrun": "^0.3.0",
-    "waku": "1.0.0-alpha.10",
     "zod": "^4.4.3"
   },
   "devDependencies": {
+    "@ai-sdk/react": "^3.0.178",
     "@hono/node-server": "^2.0.1",
     "@hono/node-ws": "^1.3.1",
+    "@openrouter/ai-sdk-provider": "^2.9.0",
+    "@radix-ui/react-presence": "^1.1.5",
     "@tailwindcss/vite": "^4.2.4",
     "@types/hast": "^3.0.4",
     "@types/mdast": "^4.0.4",
@@ -64,7 +53,13 @@
     "@types/react": "^19.2.14",
     "@types/react-dom": "^19.2.3",
     "@types/unist": "^3.0.3",
+    "ai": "^6.0.176",
     "beautiful-mermaid": "^1.1.3",
+    "chokidar": "^5.0.0",
+    "class-variance-authority": "^0.7.1",
+    "flexsearch": "^0.8.212",
+    "fumadocs-core": "workspace:*",
+    "fumadocs-ui": "workspace:*",
     "hast-util-to-jsx-runtime": "^2.3.6",
     "hono": "^4.12.18",
     "ignore": "^7.0.5",
@@ -75,14 +70,27 @@
     "react-server-dom-webpack": "^19.2.6",
     "rehype-katex": "^7.0.1",
     "remark": "^15.0.1",
+    "remark-gfm": "^4.0.1",
     "remark-math": "^6.0.0",
     "remark-rehype": "^11.1.2",
     "tailwind-merge": "^3.5.0",
     "tailwindcss": "^4.2.4",
+    "tinyglobby": "^0.2.16",
     "tsdown": "0.22.0",
     "typescript": "^6.0.3",
     "unified": "^11.0.5",
+    "unist-util-visit": "^5.1.0",
     "vfile": "^6.0.3",
-    "vite": "^8.0.11"
+    "vite": "^8.0.11",
+    "vitefu": "^1.1.3",
+    "waku": "1.0.0-alpha.10"
+  },
+  "peerDependencies": {
+    "fumadocs-ui": "*"
+  },
+  "peerDependenciesMeta": {
+    "fumadocs-ui": {
+      "optional": true
+    }
   }
 }

@@ -1,4 +1,4 @@
-import type { FumapressConfig } from '@/config/global';
+import type { AppConfig } from '@/config/global';
 import { getSource } from '@/lib/source';
 import type { DocsLayoutProps } from 'fumadocs-ui/layouts/docs';
 import type { HomeLayoutProps } from 'fumadocs-ui/layouts/home';
@@ -6,7 +6,7 @@ import { FumadocsLogo } from '@/components/logo';
 import type { BaseLayoutProps } from 'fumadocs-ui/layouts/shared';
 import { getConfigRuntime } from '@/config/load-runtime';
 
-export function layoutConfig(config: FumapressConfig) {
+export function layoutConfig(config: AppConfig) {
   const { base } = config.layout ?? {};
 
   return {

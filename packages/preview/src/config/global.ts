@@ -1,7 +1,5 @@
 import type { BaseLayoutProps } from 'fumadocs-ui/layouts/shared';
 import z from 'zod';
-import type { ChokidarOptions } from 'chokidar';
-import type { LanguageModel } from 'ai';
 
 type Awaitable<T> = T | Promise<T>;
 
@@ -42,10 +40,11 @@ export const projectConfigSchema = z.object({
    * directory to the static assets
    */
   assetsDir: z.array(z.string()).optional(),
+
   /**
-   * customize chokidar, by default, file watcher will watch all files under the `dir` directory.
+   * whether to enable file watch
    */
-  watchOptions: z.custom<(options: ChokidarOptions) => ChokidarOptions>().optional(),
+  watch: z.boolean().default(true),
 });
 
 export const contentConfigSchema = z.object({
@@ -57,9 +56,9 @@ export const contentConfigSchema = z.object({
 
 export const aiConfigSchema = z.object({
   /**
-   * a function to create model interface for AI SDK
+   * model ID
    */
-  createModel: z.custom<() => Awaitable<LanguageModel>>((t) => typeof t === 'function').optional(),
+  model: z.string().optional(),
 });
 
 export const configSchema = z.object({
@@ -71,8 +70,8 @@ export const configSchema = z.object({
 export type LayoutConfig = z.infer<typeof layoutConfigSchema>;
 export type ContentConfig = z.infer<typeof contentConfigSchema>;
 export type ProjectConfig = z.infer<typeof projectConfigSchema>;
-export type FumapressConfig = z.infer<typeof configSchema>;
+export type AppConfig = z.infer<typeof configSchema>;
 
-export function defineConfig(config: FumapressConfig = {}): FumapressConfig {
+export function defineConfig(config: AppConfig = {}): AppConfig {
   return config;
 }

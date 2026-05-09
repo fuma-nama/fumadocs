@@ -1,12 +1,6 @@
 import { getConfigRuntime } from '@/config/load-runtime';
 import type { LanguageModel } from 'ai';
 
-let cached: Promise<LanguageModel> | undefined;
-
-export function defaultModelCached(): Promise<LanguageModel> {
-  return (cached ??= defaultModel());
-}
-
 export async function defaultModel(): Promise<LanguageModel> {
   const { createOpenRouter } = await import('@openrouter/ai-sdk-provider');
   const openrouter = createOpenRouter({
@@ -18,5 +12,5 @@ export async function defaultModel(): Promise<LanguageModel> {
 
 export async function isAISupported() {
   const config = await getConfigRuntime();
-  return config.ai?.createModel !== undefined || process.env.OPENROUTER_API_KEY !== undefined;
+  return config.ai?.model !== undefined || process.env.OPENROUTER_API_KEY !== undefined;
 }

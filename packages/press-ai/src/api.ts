@@ -9,7 +9,7 @@ import {
 } from 'ai';
 import { z } from 'zod';
 import { Document, type MergedDocumentSearchResults, type DocumentData } from 'flexsearch';
-import type { AppContext, ConfigContext } from '@fumapress/core';
+import type { AppContext, ConfigContext } from 'fumapress';
 import type { LoaderOutput } from 'fumadocs-core/source';
 
 export interface PageDocument extends DocumentData {

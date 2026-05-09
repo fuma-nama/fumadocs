@@ -1,10 +1,17 @@
-import { convertToModelMessages, stepCountIs, streamText, tool, type UIMessage } from 'ai';
+import {
+  convertToModelMessages,
+  LanguageModel,
+  stepCountIs,
+  streamText,
+  tool,
+  type UIMessage,
+} from 'ai';
 import { z } from 'zod';
 import { getSource, Source } from '@/lib/source';
 import { Document, type DocumentData } from 'flexsearch';
 import { revalidable } from '@/lib/revalidable';
 import { getConfigRuntime } from '@/config/load-runtime';
-import { defaultModelCached } from '@/lib/ai';
+import { defaultModel } from '@/lib/ai';
 
 interface CustomDocument extends DocumentData {
   url: string;
@@ -43,13 +50,18 @@ const systemPrompt = [
   'If you cannot find the answer in search results, say you do not know and suggest a better search query.',
 ].join('\n');
 
+let cached: Promise<LanguageModel> | undefined;
+
+function defaultModelCached(): Promise<LanguageModel> {
+  return (cached ??= defaultModel());
+}
+
 export async function POST(req: Request) {
-  const { ai: { createModel = defaultModelCached } = {} } = await getConfigRuntime();
+  const config = await getConfigRuntime();
   const reqJson: { messages?: UIMessage[] } = await req.json();
 
-  const model = await createModel();
   const result = streamText({
-    model,
+    model: config.ai?.model ?? (await defaultModelCached()),
     stopWhen: stepCountIs(5),
     tools: {
       search: searchTool,

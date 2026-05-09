@@ -1,6 +1,6 @@
 {
   "name": "@fumapress/ai",
-  "version": "0.0.1",
+  "version": "0.2.0",
   "private": true,
   "description": "AI integration for Fumapress",
   "keywords": [
@@ -33,12 +33,12 @@
   },
   "dependencies": {
     "@ai-sdk/react": "^3.0.178",
-    "@fumapress/core": "workspace:*",
     "@radix-ui/react-presence": "^1.1.5",
     "ai": "^6.0.176",
     "flexsearch": "^0.8.212",
     "fumadocs-core": "workspace:*",
     "fumadocs-ui": "workspace:*",
+    "fumapress": "workspace:*",
     "lucide-react": "^1.14.0",
     "tailwind-merge": "^3.5.0",
     "unist-util-visit": "^5.1.0",

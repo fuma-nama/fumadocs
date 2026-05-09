@@ -1,11 +1,11 @@
-import type { FumapressConfig } from '@/config';
-import { type ChokidarOptions, type Matcher, watch } from 'chokidar';
+import type { AppConfig } from '@/config';
+import { type Matcher, watch } from 'chokidar';
 import { normalizeProjects } from './config';
 import ignore, { type Ignore } from 'ignore';
 import fs from 'node:fs/promises';
 import path from 'node:path';
 
-export async function startWatcher(config: FumapressConfig) {
+export async function startWatcher(config: AppConfig) {
   const projects = normalizeProjects(config.content?.projects);
   // init .gitignore
   const ignored = await Promise.all([
@@ -13,20 +13,17 @@ export async function startWatcher(config: FumapressConfig) {
     ...projects.map((project) => fromGitIgnore(project.dir)),
   ]);
 
-  let options: ChokidarOptions = {
+  const watcher = watch([], {
     ignoreInitial: true,
     followSymlinks: false,
     ignored: ignored.filter((v) => v !== undefined),
-  };
+  });
 
   for (const project of projects) {
-    if (project.watchOptions) options = project.watchOptions(options);
+    if (project.watch) watcher.add(project.dir);
   }
 
-  return watch(
-    projects.map((project) => project.dir),
-    options,
-  );
+  return watcher;
 }
 
 async function fromGitIgnore(dir: string, defaultValue?: string) {

@@ -16,7 +16,8 @@ function pressCore(): PluginOption {
           if (
             pkgName.startsWith('@fumapress/') ||
             pkgName.startsWith('@fumadocs/') ||
-            pkgName.startsWith('fumadocs-')
+            pkgName.startsWith('fumadocs-') ||
+            pkgName === 'fumapress'
           )
             return true;
         },
@@ -41,7 +42,7 @@ function pressCore(): PluginOption {
         const query = match[1] ?? '';
         const out = await this.resolve(`/src/app.css${query}`, importer, options);
         if (out === null)
-          return this.resolve(`@fumapress/core/css/default.css${query}`, importer, options);
+          return this.resolve(`fumapress/css/default.css${query}`, importer, options);
         return out;
       }
     },
@@ -56,7 +57,7 @@ function pressCore(): PluginOption {
 function getManagedServerEntry() {
   return `import adapter from 'waku/adapters/default';
 import pressConfig from 'virtual:fumapress-core/config';
-import { createRouter } from '@fumapress/core/router';
+import { createRouter } from 'fumapress/router';
 
 const router = createRouter(pressConfig);
 

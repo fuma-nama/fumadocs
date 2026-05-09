@@ -1,4 +1,4 @@
-# fumapress
+# fumadocs-preview
 
 ## 0.1.37
 

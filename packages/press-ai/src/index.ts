@@ -1,5 +1,5 @@
 import { type AIRouteOptions, createRouteHandler } from './api';
-import type { ConfigContext, ServerPlugin } from '@fumapress/core';
+import type { ConfigContext, ServerPlugin } from 'fumapress';
 import { createElement } from 'react';
 
 export interface AIOptions<C extends ConfigContext = ConfigContext> extends AIRouteOptions<C> {

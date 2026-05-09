@@ -11,11 +11,11 @@ program
   .action(async () => {
     if ((await findConfigPath()) === null) {
       await fs.writeFile(
-        'fumapress.config.ts',
-        `import { defineConfig } from "fumapress/config";\n\nexport default defineConfig();`,
+        'fumadocs.config.ts',
+        `import { defineConfig } from "fumadocs-preview/config";\n\nexport default defineConfig();`,
       );
 
-      console.log('note: make sure to install `fumapress` as a dev dependency too.');
+      console.log('note: make sure to install `fumadocs-preview` as a dev dependency too.');
     }
   });
 

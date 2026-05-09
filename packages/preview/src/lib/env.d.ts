@@ -3,7 +3,7 @@ declare module 'process' {
     namespace NodeJS {
       interface ProcessEnv {
         /**
-         * the root directory (where fumapress is started)
+         * the root directory (where the app is started)
          */
         ROOT_DIR?: string;
 
