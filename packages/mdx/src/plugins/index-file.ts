@@ -1,10 +1,10 @@
 import type { Core, CoreOptions, Plugin, PluginContext } from '@/core';
 import type { CollectionItem, DocCollectionItem, MetaCollectionItem } from '@/config/build';
-import path from 'path';
+import path from 'node:path';
 import { type CodeGen, createCodegen, ident, slash } from '@/utils/codegen';
 import { glob } from 'tinyglobby';
 import { createFSCache } from '@/utils/fs-cache';
-import { createHash } from 'crypto';
+import { createHash } from 'node:crypto';
 import type { LazyEntry } from '@/runtime/dynamic';
 import type { EmitEntry } from '@/core';
 import { frontmatter } from 'fumadocs-core/content/md/frontmatter';
