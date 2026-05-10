@@ -25,6 +25,7 @@ export interface AppContext<C extends ConfigContext = ConfigContext> {
   data: AppContextData & Record<string, unknown>;
 
   i18nConfig?: I18nConfig;
+  metaConfig?: Config['meta'];
   siteConfig: {
     name: string;
     git?: {
@@ -56,6 +57,7 @@ export function parseConfig<C extends ConfigContext>(config: Config<C>): AppCont
     data: {},
     i18nConfig: config.i18n,
     mode: config.mode ?? 'default',
+    metaConfig: config.meta as Config['meta'],
     siteConfig: {
       name: config.site?.name ?? 'Fumapress',
       git: config.site?.git
@@ -74,11 +76,22 @@ export function parseConfig<C extends ConfigContext>(config: Config<C>): AppCont
   return context;
 }
 
-export function renderPageMeta(page: Page, context: AppContext) {
-  const meta = context.data['core:page-meta'];
-  if (!meta) return;
+export function renderRootMeta(context: AppContext): ReactNode {
+  return context.metaConfig?.root?.call(context);
+}
 
-  return meta.map((fn, i) => createElement(Fragment, { key: i }, fn(page)));
+export function renderPageMeta(page: Page, context: AppContext): ReactNode {
+  return (
+    <>
+      <title>{page.data.title}</title>
+      <meta property="og:title" content={page.data.title} />
+      {page.data.description && <meta property="og:description" content={page.data.description} />}
+      {context.metaConfig?.page?.call(context, page)}
+      {context.data['core:page-meta']?.map((hook, i) => (
+        <Fragment key={i}>{hook(page)}</Fragment>
+      ))}
+    </>
+  );
 }
 
 export function getGitHubFileUrl(ctx: AppContext, absolutePath: string): string | undefined {

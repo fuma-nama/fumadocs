@@ -1,3 +1,5 @@
+// oxlint-disable react-hooks/exhaustive-deps
+// oxlint-disable react-hooks/rules-of-hooks
 import { remark } from 'remark';
 import remarkRehype, { type Options as RemarkRehypeOptions } from 'remark-rehype';
 import { type Compatible, VFile } from 'vfile';
@@ -61,7 +63,6 @@ export function createMarkdownRenderer({
         return render(out, file, props);
       }
 
-      // oxlint-disable-next-line eslint-plugin-react-hooks/rules-of-hooks eslint-plugin-react-hooks/exhaustive-deps -- assume `async` unchanged
       const v = useMemo(() => processor.runSync(parse(file), file), [id]);
       return render(v, file, props);
     },

@@ -1,5 +1,5 @@
 {
-  "name": "docs-press",
+  "name": "example-waku-reproduce",
   "private": true,
   "type": "module",
   "sideEffects": false,
@@ -7,13 +7,9 @@
     "dev": "waku dev",
     "build": "waku build",
     "start": "waku start",
-    "types:check": "fumadocs-mdx && tsc --noEmit"
+    "types:check": "waku router typegen && tsc --noEmit"
   },
   "dependencies": {
-    "fumadocs-core": "workspace:*",
-    "fumadocs-mdx": "workspace:*",
-    "fumadocs-ui": "workspace:^",
-    "fumapress": "workspace:*",
     "react": "^19.2.6",
     "react-dom": "^19.2.6",
     "react-server-dom-webpack": "^19.2.6",

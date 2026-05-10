@@ -12,7 +12,7 @@ export function llmsPlugin<C extends ConfigContext = ConfigContext>(
   options: LLMsOptions<C> = {},
 ): ServerPlugin {
   const {
-    getLLMText = async function getLLMTextDefault(page) {
+    getLLMText: _getLLMText = async function getLLMTextDefault(page) {
       for (const adapter of this.adapters) {
         const txt = await adapter['core:get-text']?.call(this as unknown as AppContext, page);
 
@@ -36,6 +36,7 @@ export function llmsPlugin<C extends ConfigContext = ConfigContext>(
     },
     async createPages({ createApiIsomorphic }) {
       const defaultRenderMode = this.mode === 'dynamic' ? 'dynamic' : 'static';
+      const getLLMText = _getLLMText.bind(this as unknown as AppContext<C>);
 
       createApiIsomorphic({
         render: defaultRenderMode,
@@ -74,7 +75,7 @@ export function llmsPlugin<C extends ConfigContext = ConfigContext>(
           );
           if (!page) unstable_notFound();
 
-          return new Response(await getLLMText.call(this as unknown as AppContext<C>, page), {
+          return new Response(await getLLMText(page), {
             headers: {
               'Content-Type': 'text/markdown',
             },

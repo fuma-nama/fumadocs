@@ -3,6 +3,7 @@ import type { LoaderConfig, LoaderOutput } from 'fumadocs-core/source';
 import type { Awaitable, ServerPlugin, Adapter } from '@/lib/types';
 import type { TranslationsOption } from 'fumadocs-ui/contexts/i18n';
 import type { I18nConfig as CoreI18nConfig } from 'fumadocs-core/i18n';
+import type { ReactNode } from 'react';
 
 export interface ConfigContext {
   loaderConfig: LoaderConfig;
@@ -27,6 +28,14 @@ export interface Config<C extends ConfigContext = ConfigContext> {
   adapters?: Adapter[];
 
   i18n?: I18nConfig;
+
+  meta?: {
+    /** render meta tags for any pages */
+    root?: (this: AppContext<C>) => ReactNode;
+
+    /** render meta tags for page */
+    page?: (this: AppContext<C>, page: C['loaderConfig']['page']) => ReactNode;
+  };
 }
 
 export interface I18nConfig {
