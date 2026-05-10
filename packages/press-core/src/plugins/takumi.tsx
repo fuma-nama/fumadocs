@@ -1,6 +1,6 @@
 import type { Awaitable, ServerPlugin } from '@/lib/types';
 import { unstable_notFound } from 'waku/router/server';
-import { createElement, type ReactNode } from 'react';
+import type { ReactNode } from 'react';
 import type { ConfigContext } from '@/config';
 import type { AppContext } from '@/lib/shared';
 import { ImageResponse, type ImageResponseOptions } from '@takumi-rs/image-response';
@@ -31,14 +31,21 @@ export function takumiPlugin<C extends ConfigContext = ConfigContext>(
       };
     },
   } = options;
+  const width = 1200;
+  const height = 630;
+
   return {
     init() {
       const hooks = (this.data['core:page-meta'] ??= []);
       hooks.push((page) => {
-        return createElement('meta', {
-          property: 'og:image',
-          content: slugsToImagePath(page.slugs, page.locale).url,
-        });
+        return (
+          <>
+            <meta property="og:image" content={slugsToImagePath(page.slugs, page.locale).url} />
+            <meta property="og:image:width" content={`${width}`} />
+            <meta property="og:image:height" content={`${height}`} />
+            <meta property="twitter:card" content="summary_large_image" />
+          </>
+        );
       });
     },
     async createPages({ createApiIsomorphic }) {
@@ -63,8 +70,8 @@ export function takumiPlugin<C extends ConfigContext = ConfigContext>(
 
           const { node, options } = await generate.call(this as unknown as AppContext<C>, page);
           return new ImageResponse(node, {
-            width: 1200,
-            height: 630,
+            width,
+            height,
             ...options,
             format: 'webp',
           });

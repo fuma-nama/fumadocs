@@ -12,6 +12,7 @@
   "dependencies": {
     "fumadocs-core": "workspace:*",
     "fumadocs-mdx": "workspace:*",
+    "fumadocs-ui": "workspace:^",
     "fumapress": "workspace:*",
     "react": "^19.2.6",
     "react-dom": "^19.2.6",
