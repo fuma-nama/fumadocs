@@ -1,7 +1,6 @@
 {
   "name": "@fumapress/ai",
   "version": "0.2.0",
-  "private": true,
   "description": "AI integration for Fumapress",
   "keywords": [
     "Docs",
