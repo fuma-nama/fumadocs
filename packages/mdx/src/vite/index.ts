@@ -96,6 +96,11 @@ export default async function mdx(
       });
     },
     async transform(value, id) {
+      // Vite RSC will pass the compiled MDX file's client module with ID `virtual:vite-rsc/client-references/group/facade:xxx.mdx`.
+      // The format of `value` becomes JavaScript, which will break the MDX compiler.
+      // We have to ignore them.
+      if (id.includes('virtual:vite-rsc')) return null;
+
       try {
         if (metaLoader.filter(id)) {
           return await metaLoader.transform.call(this, value, id);
