@@ -34,21 +34,21 @@ export function llmsPlugin<C extends ConfigContext = ConfigContext>(
         return res;
       });
     },
-    async createPages({ createApi }) {
-      createApi({
-        render: 'static',
+    async createPages({ createApiIsomorphic }) {
+      const defaultRenderMode = this.mode === 'dynamic' ? 'dynamic' : 'static';
+
+      createApiIsomorphic({
+        render: defaultRenderMode,
         path: '/llms.txt',
-        method: 'GET',
         handler: async () => {
           const source = await this.getLoader();
           return new Response(llms(source).index());
         },
       });
 
-      createApi({
-        render: 'static',
+      createApiIsomorphic({
+        render: defaultRenderMode,
         path: '/llms-full.txt',
-        method: 'GET',
         handler: async () => {
           const source = await this.getLoader();
           const scan = source.getPages().map(getLLMText);
@@ -57,13 +57,15 @@ export function llmsPlugin<C extends ConfigContext = ConfigContext>(
         },
       });
 
-      createApi({
-        render: 'static',
+      createApiIsomorphic({
+        render: defaultRenderMode,
         path: this.i18nConfig ? '/[lang]/[...slugs]' : '/[...slugs]',
-        method: 'GET',
-        staticPaths: (await this.getLoader())
-          .getPages()
-          .map((page) => slugsToMarkdownPath(page.slugs, page.locale).segments),
+        staticPaths:
+          defaultRenderMode === 'static'
+            ? (await this.getLoader())
+                .getPages()
+                .map((page) => slugsToMarkdownPath(page.slugs, page.locale).segments)
+            : undefined,
         handler: async (_req, { params }) => {
           const source = await this.getLoader();
           const page = source.getPage(

@@ -8,6 +8,7 @@ import { fumadocsMdx } from 'fumapress/adapters/mdx';
 import { flexsearchPlugin } from 'fumapress/plugins/flexsearch';
 
 export default defineConfig({
+  mode: 'static',
   loader: loader(docs.toFumadocsSource(), {
     baseUrl: '/',
     plugins: [lucideIconsPlugin()],

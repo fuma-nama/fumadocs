@@ -2,6 +2,7 @@ import type { Index } from 'fumadocs-core/search/flexsearch';
 import type { Awaitable, ServerPlugin } from '@/lib/types';
 import type { ConfigContext } from '@/config';
 import type { AppContext } from '@/lib/shared';
+import StaticSearchDialog from '@/components/flexsearch-static';
 
 export interface FlexsearchOptions<C extends ConfigContext = ConfigContext> {
   buildIndex?: (this: AppContext<C>, page: C['loaderConfig']['page']) => Awaitable<Index>;
@@ -30,17 +31,26 @@ export function flexsearchPlugin<C extends ConfigContext = ConfigContext>({
   },
 }: FlexsearchOptions<C> = {}): ServerPlugin {
   return {
-    async createPages({ createApi }) {
+    init() {
+      if (this.mode === 'static') {
+        const hooks = (this.data['core:provider'] ??= []);
+        hooks.push((props) => {
+          props.search ??= {};
+          props.search.SearchDialog ??= StaticSearchDialog;
+          return props;
+        });
+      }
+    },
+    async createPages({ createApiIsomorphic }) {
       const { flexsearchFromSource } = await import('fumadocs-core/search/flexsearch');
+      const server = flexsearchFromSource(this.getLoader, {
+        buildIndex: buildIndex.bind(this as unknown as AppContext<C>),
+      });
 
-      createApi({
-        render: 'dynamic',
+      createApiIsomorphic({
+        render: this.mode === 'static' ? 'static' : 'dynamic',
         path: '/api/search',
-        handlers: {
-          GET: flexsearchFromSource(this.getLoader, {
-            buildIndex: buildIndex.bind(this as unknown as AppContext<C>),
-          }).GET,
-        },
+        handler: this.mode === 'static' ? server.staticGET : server.GET,
       });
     },
   };

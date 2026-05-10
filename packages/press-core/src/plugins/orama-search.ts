@@ -30,17 +30,26 @@ export function oramaSearchPlugin<C extends ConfigContext = ConfigContext>({
   },
 }: OramaSearchOptions<C> = {}): ServerPlugin {
   return {
-    async createPages({ createApi }) {
+    init() {
+      if (this.mode === 'static') {
+        const hooks = (this.data['core:provider'] ??= []);
+        hooks.push(async (props) => {
+          props.search ??= {};
+          props.search.SearchDialog ??= (await import('@/components/orama-search-static')).default;
+          return props;
+        });
+      }
+    },
+    async createPages({ createApiIsomorphic }) {
       const { createFromSource } = await import('fumadocs-core/search/server');
+      const server = createFromSource(this.getLoader, {
+        buildIndex: buildIndex.bind(this as unknown as AppContext<C>),
+      });
 
-      createApi({
-        render: 'dynamic',
+      createApiIsomorphic({
+        render: this.mode === 'static' ? 'static' : 'dynamic',
         path: '/api/search',
-        handlers: {
-          GET: createFromSource(this.getLoader, {
-            buildIndex: buildIndex.bind(this as unknown as AppContext<C>),
-          }).GET,
-        },
+        handler: this.mode === 'static' ? server.staticGET : server.GET,
       });
     },
   };

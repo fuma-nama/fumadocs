@@ -22,8 +22,17 @@ export interface ServerPlugin {
   /** receive & modify context */
   init?: (this: AppContext) => void;
 
-  createPages?: (
-    this: AppContext,
-    fns: Parameters<Parameters<typeof createPages>[0]>[0],
-  ) => Awaitable<void>;
+  createPages?: (this: AppContext, fns: RouteFns) => Awaitable<void>;
 }
+
+export type RouteFns = Parameters<Parameters<typeof createPages>[0]>[0] & {
+  createApiIsomorphic: (config: {
+    render: 'static' | 'dynamic';
+    path: string;
+    staticPaths?: string[][];
+    handler: (
+      req: Request,
+      ctx: { params: Record<string, string | string[]> },
+    ) => Promise<Response>;
+  }) => void;
+};

@@ -41,14 +41,18 @@ export function takumiPlugin<C extends ConfigContext = ConfigContext>(
         });
       });
     },
-    async createPages({ createApi }) {
-      createApi({
-        render: 'static',
+    async createPages({ createApiIsomorphic }) {
+      const renderMode = this.mode === 'dynamic' ? 'dynamic' : 'static';
+
+      createApiIsomorphic({
+        render: renderMode,
         path: this.i18nConfig ? '/[lang]/[...slugs]' : '/[...slugs]',
-        method: 'GET',
-        staticPaths: (await this.getLoader())
-          .getPages()
-          .map((page) => slugsToImagePath(page.slugs, page.locale).segments),
+        staticPaths:
+          renderMode === 'static'
+            ? (await this.getLoader())
+                .getPages()
+                .map((page) => slugsToImagePath(page.slugs, page.locale).segments)
+            : undefined,
         handler: async (_, { params }) => {
           const source = await this.getLoader();
           const page = source.getPage(

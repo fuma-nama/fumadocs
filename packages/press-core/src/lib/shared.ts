@@ -1,4 +1,4 @@
-import type { Config, ConfigContext, I18nConfig } from '@/config';
+import type { BuildMode, Config, ConfigContext, I18nConfig } from '@/config';
 import type { BaseLayoutProps } from 'fumadocs-ui/layouts/shared';
 import { getGitRootDir } from './fs';
 import path from 'node:path';
@@ -8,8 +8,10 @@ import type { DocsLayoutContextData } from '@/layouts/docs';
 import { createElement, Fragment, type ReactNode } from 'react';
 import type { HomeLayoutContextData } from '@/layouts/home';
 import { fumadocsMdx } from '@/adapters/mdx';
+import type { RootProviderProps } from 'fumadocs-ui/provider/waku';
 
 export interface AppContext<C extends ConfigContext = ConfigContext> {
+  mode: BuildMode;
   getLoader: () => Awaitable<LoaderOutput<C['loaderConfig']>>;
   plugins: ServerPlugin[];
   adapters: Adapter[];
@@ -38,6 +40,7 @@ export interface AppContextData {
   'core:page-meta'?: ((page: Page) => ReactNode)[];
   'core:docs-layout'?: DocsLayoutContextData;
   'core:home-layout'?: HomeLayoutContextData;
+  'core:provider'?: ((props: RootProviderProps) => Awaitable<RootProviderProps>)[];
 }
 
 export function parseConfig<C extends ConfigContext>(config: Config<C>): AppContext<C> {
@@ -52,6 +55,7 @@ export function parseConfig<C extends ConfigContext>(config: Config<C>): AppCont
     $context: undefined as never,
     data: {},
     i18nConfig: config.i18n,
+    mode: config.mode ?? 'default',
     siteConfig: {
       name: config.site?.name ?? 'Fumapress',
       git: config.site?.git

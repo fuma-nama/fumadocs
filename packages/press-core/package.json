@@ -20,7 +20,6 @@
   "exports": {
     ".": "./dist/index.js",
     "./adapters/mdx": "./dist/adapters/mdx.js",
-    "./components/provider": "./dist/components/provider.js",
     "./layouts/docs": "./dist/layouts/docs.js",
     "./layouts/home": "./dist/layouts/home.js",
     "./layouts/root": "./dist/layouts/root.js",
@@ -43,6 +42,7 @@
     "types:check": "tsc --noEmit"
   },
   "dependencies": {
+    "@orama/orama": "^3.1.18",
     "@takumi-rs/image-response": "^1.1.2",
     "flexsearch": "^0.8.212",
     "fumadocs-core": "workspace:*",

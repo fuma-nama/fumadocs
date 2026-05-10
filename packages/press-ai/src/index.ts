@@ -26,6 +26,12 @@ export function aiPlugin<C extends ConfigContext = ConfigContext>(
     createPages({ createApi }) {
       const { onRequest } = createRouteHandler(options, this as never);
 
+      if (this.mode === 'static') {
+        throw new Error(
+          "[Fumapress] the @fumapress/ai plugin is not compatible with mode: 'static'",
+        );
+      }
+
       createApi({
         path: '/api/ai',
         render: 'dynamic',

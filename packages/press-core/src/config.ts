@@ -8,7 +8,16 @@ export interface ConfigContext {
   loaderConfig: LoaderConfig;
 }
 
+export type BuildMode = 'static' | 'dynamic' | 'default';
+
 export interface Config<C extends ConfigContext = ConfigContext> {
+  /**
+   * - `static`: always prefer static, including search etc.
+   * - `dynamic`: always prefer dynamic.
+   * - `default`: only certain parts like search routes are dynamic.
+   */
+  mode?: BuildMode;
+
   /** the default content loader */
   loader: LoaderOutput<C['loaderConfig']> | (() => Awaitable<LoaderOutput<C['loaderConfig']>>);
 

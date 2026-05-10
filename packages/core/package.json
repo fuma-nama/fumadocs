@@ -146,7 +146,7 @@
     "react-router": "^7.15.0",
     "remark-directive": "^4.0.0",
     "remark-mdx": "^3.1.1",
-    "remove-markdown": "^0.6.3",
+    "remove-markdown": "^0.6.4",
     "tsconfig": "workspace:*",
     "tsdown": "0.22.0",
     "typescript": "^6.0.3",
@@ -237,6 +237,6 @@
     "negotiator": "1.0.0",
     "npm-to-yarn": "3.0.1",
     "path-to-regexp": "8.4.2",
-    "remove-markdown": "0.6.3"
+    "remove-markdown": "0.6.4"
   }
 }
