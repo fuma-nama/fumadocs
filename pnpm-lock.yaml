@@ -2946,6 +2946,9 @@ importers:
       tailwind-merge:
         specifier: ^3.5.0
         version: 3.5.0
+      vitefu:
+        specifier: ^1.1.3
+        version: 1.1.3(vite@8.0.11(@types/node@25.6.2)(esbuild@0.28.0)(jiti@2.7.0)(terser@5.47.1)(tsx@4.21.0)(yaml@2.8.4))
     devDependencies:
       '@tailwindcss/oxide':
         specifier: ^4.3.0
@@ -2977,9 +2980,6 @@ importers:
       vite:
         specifier: ^8.0.11
         version: 8.0.11(@types/node@25.6.2)(esbuild@0.28.0)(jiti@2.7.0)(terser@5.47.1)(tsx@4.21.0)(yaml@2.8.4)
-      vitefu:
-        specifier: ^1.1.3
-        version: 1.1.3(vite@8.0.11(@types/node@25.6.2)(esbuild@0.28.0)(jiti@2.7.0)(terser@5.47.1)(tsx@4.21.0)(yaml@2.8.4))
       waku:
         specifier: 1.0.0-alpha.10
         version: 1.0.0-alpha.10(@types/node@25.6.2)(babel-plugin-react-compiler@1.0.0)(esbuild@0.28.0)(jiti@2.7.0)(react-dom@19.2.6(react@19.2.6))(react-server-dom-webpack@19.2.6(react-dom@19.2.6(react@19.2.6))(react@19.2.6)(webpack@5.106.2(esbuild@0.28.0)))(react@19.2.6)(terser@5.47.1)(tsx@4.21.0)(yaml@2.8.4)
