@@ -28,12 +28,11 @@ Add the Vite plugin:
 ```ts tab="Vite" title="vite.config.ts"
 import { defineConfig } from 'vite';
 import mdx from 'fumadocs-mdx/vite';
-import * as MdxConfig from './source.config';
 
 export default defineConfig({
   plugins: [
     // [!code ++]
-    mdx(MdxConfig),
+    mdx(),
     // ...
   ],
 });
@@ -42,15 +41,13 @@ export default defineConfig({
 ```ts tab="Waku" title="waku.config.ts"
 import { type Config, defineConfig } from 'waku/config';
 import mdx from 'fumadocs-mdx/vite';
-import * as MdxConfig from './source.config.js';
 import type { UserConfig } from 'vite';
 
 export default defineConfig({
   vite: {
     plugins: [
       // [!code ++]
-      mdx(MdxConfig),
-      tsconfigPaths(),
+      mdx(),
     ],
     resolve: {
       tsconfigPaths: true,

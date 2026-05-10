@@ -24,7 +24,7 @@ export function flexsearchStaticClient(options: FlexsearchStaticOptions = {}): S
   const { from = '/api/search', locale = '', tag } = options;
 
   let dbs = cacheMap.get(from);
-  if (!dbs) {
+  if (!dbs && typeof window !== 'undefined') {
     dbs = init(from);
     cacheMap.set(from, dbs);
   }
@@ -32,7 +32,7 @@ export function flexsearchStaticClient(options: FlexsearchStaticOptions = {}): S
   return {
     deps: [from, locale, tag],
     async search(query) {
-      const loaded = await dbs;
+      const loaded = await dbs!;
       const db = loaded.get(locale);
       if (!db) return [];
       return search(db, query, tag);

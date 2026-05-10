@@ -330,6 +330,38 @@ console.log('A');
 console.log('B');
 ```
 
+To add a persist ID, define `tab-group` at the first codeblock:
+
+````mdx
+```ts tab="Tab 1" tab-group="my-custom-group"
+console.log('A');
+```
+
+```ts tab="Tab 2"
+console.log('B');
+```
+````
+
+```ts tab="Tab 1" tab-group="my-custom-group"
+console.log('A');
+```
+
+```ts tab="Tab 2"
+console.log('B');
+```
+
+Another group:
+
+```ts tab="Tab 1" tab-group="my-custom-group"
+console.log('A');
+```
+
+```ts tab="Tab 2"
+console.log('B');
+```
+
+#### MDX in Tab Groups
+
 While disabled by default, you use MDX in tab values by configuring the remark plugin:
 
 ```ts tab="Fumadocs MDX" title="source.config.ts"

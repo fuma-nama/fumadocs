@@ -29,6 +29,10 @@ export type NoReferenceSwallow<T> = T extends ReferenceObject ? Exclude<T, Refer
 export type ParsedSchema =
   | (JSONSchema & {
       'x-playground-lazy'?: boolean;
+      discriminator?: {
+        propertyName?: string;
+        mapping?: Record<string, string>;
+      };
     })
   | boolean;
 

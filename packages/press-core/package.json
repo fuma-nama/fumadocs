@@ -1,7 +1,6 @@
 {
-  "name": "@fumapress/core",
-  "version": "0.0.1",
-  "private": true,
+  "name": "fumapress",
+  "version": "0.2.0",
   "description": "An opinionated docs framework powered by Fumadocs",
   "keywords": [
     "Docs",
@@ -18,15 +17,17 @@
   "type": "module",
   "sideEffects": false,
   "exports": {
-    ".": "./dist/index.mjs",
-    "./layouts/docs": "./dist/layouts/docs.mjs",
-    "./layouts/home": "./dist/layouts/home.mjs",
-    "./plugins": "./dist/plugins/index.mjs",
-    "./plugins/llms.txt": "./dist/plugins/llms.txt.mjs",
-    "./plugins/orama-search": "./dist/plugins/orama-search.mjs",
-    "./plugins/takumi": "./dist/plugins/takumi.mjs",
-    "./router": "./dist/router.mjs",
-    "./vite": "./dist/vite.mjs",
+    ".": "./dist/index.js",
+    "./adapters/mdx": "./dist/adapters/mdx.js",
+    "./layouts/docs": "./dist/layouts/docs.js",
+    "./layouts/home": "./dist/layouts/home.js",
+    "./layouts/root": "./dist/layouts/root.js",
+    "./plugins/flexsearch": "./dist/plugins/flexsearch.js",
+    "./plugins/llms.txt": "./dist/plugins/llms.txt.js",
+    "./plugins/orama-search": "./dist/plugins/orama-search.js",
+    "./plugins/takumi": "./dist/plugins/takumi.js",
+    "./router": "./dist/router.js",
+    "./vite": "./dist/vite.js",
     "./package.json": "./package.json",
     "./css/preset.css": "./css/preset.css",
     "./css/default.css": "./css/default.css"
@@ -40,18 +41,20 @@
     "types:check": "tsc --noEmit"
   },
   "dependencies": {
+    "@orama/orama": "^3.1.18",
     "@takumi-rs/image-response": "^1.1.2",
+    "flexsearch": "^0.8.212",
     "fumadocs-core": "workspace:*",
-    "fumadocs-mdx": "workspace:*",
     "fumadocs-ui": "workspace:*",
     "lucide-react": "^1.14.0",
     "tailwind-merge": "^3.5.0"
   },
   "devDependencies": {
-    "@tailwindcss/oxide": "^4.2.4",
+    "@tailwindcss/oxide": "^4.3.0",
     "@types/mdx": "^2.0.13",
-    "@types/node": "^25.6.0",
+    "@types/node": "^25.6.2",
     "@types/react": "^19.2.14",
+    "fumadocs-mdx": "workspace:*",
     "react": "^19.2.6",
     "react-dom": "^19.2.6",
     "tsdown": "0.22.0",
@@ -62,12 +65,16 @@
   },
   "peerDependencies": {
     "@types/react": "*",
+    "fumadocs-mdx": "^15.0.0",
     "react": "^19.2.0",
     "react-dom": "^19.2.0",
     "vite": "8.x.x",
     "waku": "1.0.0-alpha.9"
   },
   "peerDependenciesMeta": {
+    "fumadocs-mdx": {
+      "optional": true
+    },
     "@types/react": {
       "optional": true
     },

@@ -80,10 +80,9 @@ export function UsageTab({
   const code = useMemo(() => {
     if (!data) return;
     const url = joinURL(
-      withBase(
-        server ? resolveServerUrl(server.url, server.variables) : '/',
-        typeof window !== 'undefined' ? window.location.origin : 'https://loading',
-      ),
+      server && typeof window !== 'undefined'
+        ? withBase(resolveServerUrl(server.url, server.variables), window.location.origin)
+        : 'https://example.com',
       resolveRequestData(route, data),
     );
 

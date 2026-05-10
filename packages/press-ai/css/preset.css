@@ -1,1 +1,24 @@
 @import './generated.css';
+
+@theme {
+  @keyframes fd-ask-ai-open {
+    from {
+      translate: 100% 0;
+    }
+    to {
+      translate: 0 0;
+    }
+  }
+
+  @keyframes fd-ask-ai-close {
+    from {
+      width: var(--ai-chat-width);
+    }
+    to {
+      width: 0px;
+    }
+  }
+
+  --animate-fd-ask-ai-open: fd-ask-ai-open 200ms;
+  --animate-fd-ask-ai-close: fd-ask-ai-close 200ms;
+}

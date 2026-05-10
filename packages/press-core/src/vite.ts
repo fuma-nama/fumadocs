@@ -1,32 +1,11 @@
-import * as waku from 'waku/config';
-import mdx from 'fumadocs-mdx/vite';
 import type { PluginOption } from 'vite';
-import * as vite from 'vite';
 import { crawlFrameworkPkgs } from 'vitefu';
 
-export function defineConfig(config: waku.Config) {
-  return waku.defineConfig({
-    ...config,
-    vite: {
-      ...config.vite,
-      plugins: [press(), ...(config.vite?.plugins ?? [])],
-    },
-  });
+export default function press(): PluginOption {
+  return pressCore();
 }
 
-export function press(): PluginOption {
-  return [
-    pressCore(),
-    mdx(
-      vite.runnerImport<Record<string, unknown>>('/source.config').then((mod) => mod.module),
-      {
-        updateViteConfig: false,
-      },
-    ),
-  ];
-}
-
-export function pressCore(): PluginOption {
+function pressCore(): PluginOption {
   return {
     name: 'fumapress:core',
     async config(_, { command }) {
@@ -34,15 +13,13 @@ export function pressCore(): PluginOption {
         root: process.cwd(),
         isBuild: command === 'build',
         isFrameworkPkgByName(pkgName) {
-          switch (pkgName) {
-            case '@fumapress/core':
-            case 'fumadocs-core':
-            case 'fumadocs-ui':
-            case 'fumadocs-openapi':
-            case '@fumadocs/base-ui':
-            case 'fumadocs-mdx':
-              return true;
-          }
+          if (
+            pkgName.startsWith('@fumapress/') ||
+            pkgName.startsWith('@fumadocs/') ||
+            pkgName.startsWith('fumadocs-') ||
+            pkgName === 'fumapress'
+          )
+            return true;
         },
       });
 
@@ -54,22 +31,19 @@ export function pressCore(): PluginOption {
         optimizeDeps: out.optimizeDeps,
       };
     },
-    async resolveId(source, importer, options) {
+    async resolveId(source, _importer, options) {
       if (source === 'virtual:fumapress-core/config') {
-        return this.resolve('/press.config', importer, options);
+        return this.resolve('/press.config', undefined, options);
       }
 
-      const match = /^virtual:root\.css(\?.*)?$$/.exec(source);
-
-      if (match) {
-        const query = match[1] ?? '';
-        const out = await this.resolve(`/src/app.css${query}`, importer, options);
-        if (out === null)
-          return this.resolve(`@fumapress/core/css/default.css${query}`, importer, options);
-        return out;
+      if (source === 'virtual:root.css?inline') {
+        return (
+          (await this.resolve(`/src/app.css?inline`)) ??
+          (await this.resolve(`fumapress/css/default.css?inline`))
+        );
       }
     },
-    load(id) {
+    async load(id) {
       if (id === '\0virtual:vite-rsc-waku/server-entry-inner') {
         return getManagedServerEntry();
       }
@@ -80,7 +54,7 @@ export function pressCore(): PluginOption {
 function getManagedServerEntry() {
   return `import adapter from 'waku/adapters/default';
 import pressConfig from 'virtual:fumapress-core/config';
-import { createRouter } from '@fumapress/core/router';
+import { createRouter } from 'fumapress/router';
 
 const router = createRouter(pressConfig);
 

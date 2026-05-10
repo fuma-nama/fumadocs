@@ -2,7 +2,11 @@ import type { Processor, Transformer } from 'unified';
 import type { BlockContent, Code, Root, RootContent } from 'mdast';
 import { visit } from 'unist-util-visit';
 import type { MdxJsxFlowElement } from 'mdast-util-mdx';
-import { generateCodeBlockTabs, parseCodeBlockAttributes } from '@/mdx-plugins/codeblock-utils';
+import {
+  type CodeBlockTabsOptions,
+  generateCodeBlockTabs,
+  parseCodeBlockAttributes,
+} from '@/mdx-plugins/codeblock-utils';
 
 type TabType = 'CodeBlockTabs' | 'Tabs';
 export interface RemarkCodeTabOptions {
@@ -22,6 +26,10 @@ declare module 'mdast' {
      * [Fumadocs: remark-code-tab] the associated tab value
      */
     tab?: string;
+    /**
+     * [Fumadocs: remark-code-tab] the associated tab group ID
+     */
+    tabGroup?: string;
   }
 
   export interface Data {
@@ -41,27 +49,40 @@ type TabHandler = (
 
 const Types: Record<TabType, TabHandler> = {
   CodeBlockTabs(processor, nodes, withMdx, withParent) {
-    const tabs = Array.from(processTabValue(nodes).entries());
+    const tabs = processTabValue(nodes);
+    let isFirstTab = true;
+    const options: CodeBlockTabsOptions = {
+      triggers: [],
+      tabs: [],
+    };
 
-    const node = generateCodeBlockTabs({
-      defaultValue: tabs[0][0],
-      triggers: tabs.map(([name]) => ({
-        value: name,
-        children: [
-          withMdx
-            ? (mdxToAst(processor, name) as unknown as BlockContent)
-            : {
+    for (const [value, list] of tabs) {
+      if (isFirstTab) {
+        const tagGroup = list[0].data?.tabGroup;
+        options.defaultValue = value;
+
+        if (tagGroup) options.persist = { id: tagGroup };
+        isFirstTab = false;
+      }
+
+      options.triggers.push({
+        value,
+        children: withMdx
+          ? (mdxToAst(processor, value).children as BlockContent[])
+          : [
+              {
                 type: 'text',
-                value: name,
+                value,
               },
-        ],
-      })),
-      tabs: tabs.map(([name, codes]) => ({
-        value: name,
-        children: codes,
-      })),
-    });
+            ],
+      });
+      options.tabs.push({
+        value,
+        children: list,
+      });
+    }
 
+    const node = generateCodeBlockTabs(options);
     if (!withParent) return node.children;
     return [node];
   },
@@ -231,7 +252,7 @@ export function remarkCodeTab(
           continue;
         }
 
-        const meta = parseCodeBlockAttributes(child.meta, ['tab']);
+        const meta = parseCodeBlockAttributes(child.meta, ['tab', 'tab-group']);
         if (!meta.attributes.tab) {
           close();
           continue;
@@ -241,6 +262,9 @@ export function remarkCodeTab(
         child.meta = meta.rest;
         child.data ??= {};
         child.data.tab = meta.attributes.tab;
+        if (meta.attributes['tab-group']) {
+          child.data.tabGroup = meta.attributes['tab-group'];
+        }
       }
 
       close();
@@ -254,26 +278,28 @@ function processTabValue(nodes: Code[]) {
   for (let i = 0; i < nodes.length; i++) {
     const node = nodes[i];
     const name = node.data?.tab ?? `Tab ${i + 1}`;
-    const li = out.get(name) ?? [];
+    let li = out.get(name);
+    if (!li) {
+      li = [];
+      out.set(name, li);
+    }
+
     li.push(node);
-    out.set(name, li);
   }
+
   return out;
 }
 
 /**
  * MDX tab name to tab trigger node children
  */
-function mdxToAst(processor: Processor, name: string) {
+function mdxToAst(processor: Processor, name: string): Root {
   const node = processor.parse(name) as Root;
+  node.children = node.children.flatMap((child) => {
+    if (child.type === 'paragraph') return child.children;
 
-  if (node.type === 'root') {
-    node.children = node.children.flatMap((child) => {
-      if (child.type === 'paragraph') return child.children;
-
-      return child;
-    });
-  }
+    return child;
+  });
 
   return node;
 }

@@ -2,13 +2,15 @@ import * as waku from 'waku';
 import { AppContext, parseConfig } from './lib/shared';
 import { type ComponentType, createElement, type ReactNode } from 'react';
 import type { Config, ConfigContext } from './config';
-import { createDocsLayout } from './layouts/docs';
-import defaultMdxComponents, { createRelativeLink } from 'fumadocs-ui/mdx';
+import { unstable_redirect } from 'waku/router/server';
+import { RouteFns } from './lib/types';
 
-export interface RouterOptions<C extends ConfigContext = ConfigContext> {
-  root?: ComponentType<AppContext<C> & { children: ReactNode }>;
-  page?: ComponentType<AppContext<C> & { slugs: string[] }>;
-  notFound?: ComponentType<AppContext<C>>;
+export type RouterOptions<C extends ConfigContext = ConfigContext> = Partial<Layouts<C>>;
+
+export interface Layouts<C extends ConfigContext = ConfigContext> {
+  root: ComponentType<AppContext<C> & { lang?: string; children: ReactNode }>;
+  page: ComponentType<AppContext<C> & { lang?: string; slugs: string[] }>;
+  notFound: ComponentType<AppContext<C> & { lang?: string }>;
 }
 
 export function createRouter<C extends ConfigContext>(
@@ -18,102 +20,130 @@ export function createRouter<C extends ConfigContext>(
   extend: typeof waku.createPages;
   createPages: () => ReturnType<typeof waku.createPages>;
 } {
-  const layoutRoot =
-    options.root ??
-    (async (props) => {
-      const mod = await import('./layouts/root');
-      return createElement(mod.default, props);
-    });
-
-  const layoutPage =
-    options.page ??
-    createDocsLayout({
-      async render(page) {
-        if ('load' in page.data && typeof page.data.load === 'function') {
-          const loader = await this.getLoader();
-          const { body: Mdx, toc } = await page.data.load();
-
-          if (typeof Mdx === 'function')
-            return {
-              toc,
-              body: createElement(Mdx, {
-                components: {
-                  ...defaultMdxComponents,
-                  a: createRelativeLink(loader, page),
-                },
-              }),
-            };
-        }
-
-        throw new Error('[Fumapress] Please specify `layouts.page` in your config');
-      },
-    });
-
-  const layoutNotFound =
-    options.notFound ??
-    (async () => {
-      const mod = await import('./layouts/not-found');
-      return mod.default();
-    });
-
-  function init() {
-    const context: AppContext<C> = {
-      config: parseConfig(rawConfig),
-      getLoader() {
-        if (typeof rawConfig.loader === 'function') return rawConfig.loader();
-
-        return rawConfig.loader;
-      },
-      plugins: Array.isArray(rawConfig.plugins) ? rawConfig.plugins : [],
-      $context: undefined as never,
-      data: {},
-    };
-
-    if (typeof rawConfig.plugins === 'function') {
-      context.plugins = rawConfig.plugins(context);
-    }
+  async function init(): Promise<{ context: AppContext<C> } & Layouts<C>> {
+    const context: AppContext<C> = parseConfig(rawConfig);
 
     for (const plugin of context.plugins) {
       plugin.init?.call(context as unknown as AppContext);
     }
 
-    return context;
+    return {
+      context,
+      root: options.root ?? (await import('./layouts/root')).createRootLayout<C>(),
+      page: options.page ?? (await import('./layouts/docs')).createDocsLayout<C>(),
+      notFound:
+        options.notFound ?? (await import('fumadocs-ui/layouts/home/not-found')).DefaultNotFound,
+    };
   }
 
-  const createPages: typeof waku.createPages = (fns, _o) => {
-    return waku.createPages(async (r) => {
-      const context = init();
-      const { createPage, createRoot } = r;
+  const createPages: typeof waku.createPages = (base, createPagesOptions) => {
+    return waku.createPages(async (_fns) => {
+      const { context, ...layouts } = await init();
 
-      await fns(r);
+      const fns: RouteFns = {
+        ..._fns,
+        createApiIsomorphic(config) {
+          if (config.render === 'static') {
+            _fns.createApi({
+              render: 'static',
+              method: 'GET',
+              staticPaths: config.staticPaths,
+              path: config.path,
+              handler: config.handler,
+            });
+          } else {
+            _fns.createApi({
+              render: 'dynamic',
+              path: config.path,
+              handlers: {
+                GET: config.handler,
+              },
+            });
+          }
+        },
+      };
+
+      await base(fns);
       for (const plugin of context.plugins) {
-        await plugin.createPages?.call(context as unknown as AppContext, r);
+        await plugin.createPages?.call(context as unknown as AppContext, fns);
       }
 
-      createRoot({
-        render: 'static',
-        component(props) {
-          return createElement(layoutRoot, { ...props, ...context });
-        },
-      });
-      createPage({
-        render: 'static',
-        path: '/[...slugs]',
-        staticPaths: (await context.getLoader()).getPages().map((page) => page.slugs),
-        component({ slugs }) {
-          return createElement(layoutPage, { slugs, ...context });
-        },
-      });
-      createPage({
-        render: 'static',
-        path: '/404',
-        component() {
-          return createElement(layoutNotFound, context);
-        },
-      });
+      const defaultRenderMode = context.mode === 'dynamic' ? 'dynamic' : 'static';
+
+      if (context.i18nConfig) {
+        fns.createRoot({
+          render: defaultRenderMode,
+          component({ children }) {
+            return children;
+          },
+        });
+        fns.createLayout({
+          render: defaultRenderMode,
+          path: '/[lang]',
+          component({ children, lang }) {
+            return createElement(layouts.root, { lang, children, ...context });
+          },
+        });
+
+        fns.createPage({
+          render: defaultRenderMode,
+          path: '/[lang]/[...slugs]',
+          staticPaths: (await context.getLoader())
+            .getPages()
+            .map((page) => [page.locale!, ...page.slugs]),
+          component({ slugs, lang }) {
+            return createElement(layouts.page, { lang, slugs, ...context });
+          },
+        });
+
+        fns.createPage({
+          render: defaultRenderMode,
+          path: '/[lang]/404',
+          staticPaths: Object.keys(context.i18nConfig.languages),
+          component({ lang }) {
+            return createElement(layouts.notFound, { lang, ...context });
+          },
+        });
+
+        if (context.mode !== 'static') {
+          // must be dynamic because of redirects
+          fns.createPage({
+            render: 'dynamic',
+            path: '/404',
+            component() {
+              unstable_redirect(`/${context.i18nConfig!.defaultLanguage}`);
+            },
+          });
+        }
+      } else {
+        fns.createRoot({
+          render: defaultRenderMode,
+          component({ children }) {
+            return createElement(layouts.root, { children, ...context });
+          },
+        });
+
+        fns.createPage({
+          render: defaultRenderMode,
+          path: '/[...slugs]',
+          staticPaths: (await context.getLoader()).getPages().map((page) => page.slugs),
+          component({ slugs }) {
+            return createElement(layouts.page, { slugs, ...context });
+          },
+        });
+
+        fns.createPage({
+          render: defaultRenderMode,
+          staticPaths: [],
+          path: '/404',
+          component() {
+            return createElement(layouts.notFound, context);
+          },
+        });
+      }
 
       return null as never;
-    }, _o);
+    }, createPagesOptions);
   };
 
   return {

@@ -45,7 +45,7 @@
   },
   "devDependencies": {
     "@types/mdast": "^4.0.4",
-    "@types/node": "25.6.0",
+    "@types/node": "25.6.2",
     "fumadocs-core": "workspace:*",
     "rimraf": "^6.0.0",
     "tsconfig": "workspace:*",

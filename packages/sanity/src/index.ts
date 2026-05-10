@@ -68,7 +68,7 @@ export function createSanitySource<Doc extends BaseDoc>(
     const fn = options.sanityFetch;
     sanityFetch = async (query, params) => {
       const res = await fn({ query, params });
-      return res.data;
+      return res.data as never;
     };
   } else {
     const client = options.client;

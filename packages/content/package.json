@@ -33,7 +33,7 @@
     "@standard-schema/spec": "^1.1.0"
   },
   "devDependencies": {
-    "@types/node": "^25.6.0",
+    "@types/node": "^25.6.2",
     "fuma-content": "^1.2.3",
     "fumadocs-core": "workspace:*",
     "react-dom": "^19.2.6",
