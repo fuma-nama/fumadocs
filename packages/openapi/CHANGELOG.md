@@ -1,5 +1,14 @@
 # @fuma-docs/openapi
 
+## 10.8.2
+
+### Patch Changes
+
+- e89fd74: fix hydration errors
+- Updated dependencies [2ca3eab]
+  - fumadocs-core@16.8.9
+  - fumadocs-ui@16.8.9
+
 ## 10.8.1
 
 ### Patch Changes
@@ -666,6 +675,7 @@
   ```
 
 - aa4e1ad: **Redesign `createOpenAPI` usage**
+
   1. Isolate API page and API server.
 
   Before:
@@ -1474,6 +1484,7 @@
 - bdef238: **Redesign `generateFiles`**
 
   This redesign will finalize the behaviour of `generateFiles` to make it simpler, consistent across different versions of Fumadocs OpenAPI.
+
   - Abandoned `groupByFolder`, it's deprecated long time ago and can be replaced with `groupBy`.
   - Improved type safety, `groupBy` is now only available with `per` set to `operation`.
   - `name` usage changed (see below).
@@ -1525,6 +1536,7 @@
   ```
 
   With `per: operation`, you can use `groupBy` to group pages:
+
   - tag: `{tag}/{file}`
   - route: `{endpoint}/{method}` (it will ignore the `name` option)
   - none: `{file}` (default)
@@ -3099,6 +3111,7 @@
   **migrate:**
 
   Changed the output of MDX files, the new structure requires components:
+
   - Root
   - API
   - APIInfo
