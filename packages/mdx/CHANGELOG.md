@@ -1,5 +1,11 @@
 # next-docs-mdx
 
+## 15.0.3
+
+### Patch Changes
+
+- 4ac7490: remove vitefu from inline deps
+
 ## 15.0.2
 
 ### Patch Changes
