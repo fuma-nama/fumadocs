@@ -21,7 +21,7 @@ export default defineConfig({
     },
   },
   deps: {
-    onlyBundle: ['vitefu'],
+    onlyBundle: [],
     neverBundle: [/^virtual:/, /^node:/],
   },
   async onSuccess() {

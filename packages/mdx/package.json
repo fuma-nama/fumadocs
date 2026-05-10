@@ -11,31 +11,31 @@
   "author": "Fuma Nama",
   "repository": "github:fuma-nama/fumadocs",
   "bin": {
-    "fumadocs-mdx": "./dist/bin.mjs"
+    "fumadocs-mdx": "./dist/bin.js"
   },
   "files": [
     "dist"
   ],
   "type": "module",
   "exports": {
-    ".": "./dist/index.mjs",
-    "./bin": "./dist/bin.mjs",
-    "./bun": "./dist/bun/index.mjs",
-    "./config": "./dist/config/index.mjs",
-    "./next": "./dist/next/index.mjs",
-    "./node": "./dist/node/index.mjs",
-    "./node/_loader": "./dist/node/_loader.mjs",
-    "./node/loader": "./dist/node/loader.mjs",
-    "./plugins/index-file": "./dist/plugins/index-file.mjs",
-    "./plugins/json-schema": "./dist/plugins/json-schema.mjs",
-    "./plugins/last-modified": "./dist/plugins/last-modified.mjs",
-    "./runtime/browser": "./dist/runtime/browser.mjs",
-    "./runtime/dynamic": "./dist/runtime/dynamic.mjs",
-    "./runtime/server": "./dist/runtime/server.mjs",
-    "./runtime/types": "./dist/runtime/types.mjs",
-    "./vite": "./dist/vite/index.mjs",
-    "./webpack/mdx": "./dist/webpack/mdx.mjs",
-    "./webpack/meta": "./dist/webpack/meta.mjs",
+    ".": "./dist/index.js",
+    "./bin": "./dist/bin.js",
+    "./bun": "./dist/bun/index.js",
+    "./config": "./dist/config/index.js",
+    "./next": "./dist/next/index.js",
+    "./node": "./dist/node/index.js",
+    "./node/_loader": "./dist/node/_loader.js",
+    "./node/loader": "./dist/node/loader.js",
+    "./plugins/index-file": "./dist/plugins/index-file.js",
+    "./plugins/json-schema": "./dist/plugins/json-schema.js",
+    "./plugins/last-modified": "./dist/plugins/last-modified.js",
+    "./runtime/browser": "./dist/runtime/browser.js",
+    "./runtime/dynamic": "./dist/runtime/dynamic.js",
+    "./runtime/server": "./dist/runtime/server.js",
+    "./runtime/types": "./dist/runtime/types.js",
+    "./vite": "./dist/vite/index.js",
+    "./webpack/mdx": "./dist/webpack/mdx.js",
+    "./webpack/meta": "./dist/webpack/meta.js",
     "./package.json": "./package.json"
   },
   "publishConfig": {
@@ -64,6 +64,7 @@
     "unist-util-remove-position": "^5.0.0",
     "unist-util-visit": "^5.1.0",
     "vfile": "^6.0.3",
+    "vitefu": "^1.1.3",
     "zod": "^4.4.3"
   },
   "devDependencies": {
@@ -85,7 +86,6 @@
     "tsconfig": "workspace:*",
     "tsdown": "0.22.0",
     "vite": "^8.0.11",
-    "vitefu": "^1.1.3",
     "webpack": "^5.106.2"
   },
   "peerDependencies": {
@@ -120,8 +120,5 @@
     "vite": {
       "optional": true
     }
-  },
-  "inlinedDependencies": {
-    "vitefu": "1.1.3"
   }
 }

@@ -13,12 +13,13 @@ export default defineConfig({
   dts: {
     sourcemap: false,
   },
-  target: 'node22',
+  target: 'es2023',
+  platform: 'neutral',
   exports: {
     bin: './src/bin.ts',
   },
   deps: {
-    onlyBundle: ['vitefu'],
-    neverBundle: ['webpack', 'bun'],
+    onlyBundle: [],
+    neverBundle: ['webpack', 'bun', /^node:/],
   },
 });
