@@ -75,13 +75,9 @@ export async function crawlFrameworkPkgs(
     _parentIsFrameworkPkg = false,
     hasFrameworkAncestor = false,
   ) {
-    const isRoot = parentDepNames.length === 0;
-    const crawlDevDependencies = isRoot;
-
-    const deps = [
-      ...Object.keys(currentPkgJson.dependencies ?? {}),
-      ...(crawlDevDependencies ? Object.keys(currentPkgJson.devDependencies ?? {}) : []),
-    ].filter((dep) => !parentDepNames.includes(dep));
+    const deps = Object.keys(currentPkgJson.dependencies ?? {}).filter(
+      (dep) => !parentDepNames.includes(dep),
+    );
 
     await Promise.all(
       deps.map(async (dep) => {

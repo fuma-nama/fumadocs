@@ -11,7 +11,7 @@ export function transformerFallback(): PageTreeTransformer {
   return {
     root(root) {
       if (shouldIgnore(this)) return root;
-      const isolatedStorage: ContentStorage = new FileSystem();
+      const isolatedStorage = new FileSystem() as ContentStorage;
       if (addedFiles.size === this.storage.files.size) return root;
 
       for (const file of this.storage.getFiles()) {

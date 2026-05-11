@@ -3,9 +3,15 @@ import { slash, splitPath } from '@/source/path';
 import type { ResolvedLoaderConfig } from '../loader';
 import { isStaticSource, MetaData, PageData, type StaticSource } from '../source';
 
-export type ContentStorage<P = ContentStoragePageFile, M = ContentStorageMetaFile> = FileSystem<
-  P | M
->;
+export type ContentStorage<
+  P extends ContentStoragePageFile = ContentStoragePageFile,
+  M extends ContentStorageMetaFile = ContentStorageMetaFile,
+> = FileSystem<P | M> & {
+  /** always `undefined`, for inferring types only */
+  $inferPage: P;
+  /** always `undefined`, for inferring types only */
+  $inferMeta: M;
+};
 
 /** @internal */
 export interface ContentStorageMetaFile<
@@ -126,7 +132,7 @@ export function createContentStorageBuilder(loaderConfig: ResolvedLoaderConfig) 
   }
 
   function makeStorage(locale: string | typeof EmptyLang, inherit?: ContentStorage) {
-    const storage = new FileSystem(inherit);
+    const storage = new FileSystem(inherit) as ContentStorage;
     for (const [storageKey, file] of fileMap.get(locale) ?? []) {
       storage.write(storageKey, file);
     }
