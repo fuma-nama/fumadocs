@@ -75,8 +75,10 @@ async function getFeedbackDestination() {
 export async function onPageFeedbackAction(feedback: PageFeedback): Promise<ActionResponse> {
   'use server';
   feedback = pageFeedback.parse(feedback);
+  const url = new URL(feedback.url);
+
   return createDiscussionThread(
-    feedback.url,
+    url.pathname,
     `[${feedback.opinion}] ${feedback.message}\n\n> Forwarded from user feedback.`,
   );
 }
@@ -88,7 +90,7 @@ export async function onBlockFeedbackAction(feedback: BlockFeedback): Promise<Ac
   url.hash = feedback.blockId;
 
   return createDiscussionThread(
-    feedback.url,
+    url.pathname,
     `> ${feedback.blockBody}\n\n${feedback.message}\n\n> [Forwarded from user feedback](${url.href}).`,
   );
 }
@@ -103,22 +105,20 @@ async function createDiscussionThread(pageId: string, body: string) {
   if (!category) throw new Error(`Please create a "${DocsCategory}" category in GitHub Discussion`);
 
   const title = `Feedback for ${pageId}`;
-  const {
+  const queryResult: {
     search: {
-      nodes: [discussion],
-    },
-  }: {
-    search: {
-      nodes: { id: string; url: string }[];
+      nodes: { id: string; title: string; url: string }[];
     };
   } = await octokit.graphql(`
           query {
-            search(type: DISCUSSION, query: ${JSON.stringify(`${title} in:title repo:${owner}/${repo} author:@me`)}, first: 1) {
+            search(type: DISCUSSION, query: ${JSON.stringify(`"${title}" in:title repo:${owner}/${repo} author:@me`)}, first: 10) {
               nodes {
-                ... on Discussion { id, url }
+                ... on Discussion { id, title, url }
               }
             }
           }`);
+
+  const discussion = queryResult.search.nodes.find((item) => item.title === title);
 
   if (discussion) {
     const result: {
