@@ -1,0 +1,9 @@
+{
+  "extends": "tsconfig/react-library.json",
+  "compilerOptions": {
+    "module": "esnext",
+    "types": ["node"],
+    "allowImportingTsExtensions": true
+  },
+  "exclude": ["node_modules", "dist"]
+}

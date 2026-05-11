@@ -32,8 +32,7 @@ export const docs = defineDocs({
     async mdxOptions(environment) {
       const { rehypeCodeDefaultOptions } = await import('fumadocs-core/mdx-plugins/rehype-code');
       const { remarkSteps } = await import('fumadocs-core/mdx-plugins/remark-steps');
-      const { remarkFeedbackBlock } =
-        await import('fumadocs-core/mdx-plugins/remark-feedback-block');
+      const { remarkBlockId } = await import('fumadocs-core/mdx-plugins/remark-block-id');
       const { transformerTwoslash } = await import('fumadocs-twoslash');
       const { createFileSystemTypesCache } = await import('fumadocs-twoslash/cache-fs');
       const { default: remarkMath } = await import('remark-math');
@@ -104,7 +103,7 @@ export const docs = defineDocs({
           : [
               remarkSteps,
               remarkMath,
-              remarkFeedbackBlock,
+              [remarkBlockId, { addDataAttribute: 'feedback' }],
               [remarkAutoTypeTable, typeTableOptions],
               remarkTypeScriptToJavaScript,
             ],

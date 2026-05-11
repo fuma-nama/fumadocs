@@ -8,7 +8,6 @@ import { _Defaults, createCore } from '@/core';
 import { createIntegratedConfigLoader } from '@/loaders/config';
 import { createMetaLoader } from '@/loaders/meta';
 import indexFile, { IndexFilePluginOptions } from '@/plugins/index-file';
-import { crawlFrameworkPkgs } from 'vitefu';
 
 export interface PluginOptions {
   /**
@@ -63,29 +62,11 @@ export default async function mdx(
     name: 'fumadocs-mdx',
     // needed, otherwise other plugins will be executed before our `transform`.
     enforce: 'pre',
-    async config(config, { command }) {
-      if (!options.updateViteConfig) return config;
+    async config() {
+      if (!options.updateViteConfig) return;
 
-      const out = await crawlFrameworkPkgs({
-        root: process.cwd(),
-        isBuild: command === 'build',
-        isFrameworkPkgByName(pkgName) {
-          if (
-            pkgName.startsWith('@fumapress/') ||
-            pkgName.startsWith('@fumadocs/') ||
-            pkgName.startsWith('fumadocs-') ||
-            pkgName === 'fumapress'
-          )
-            return true;
-        },
-      });
-
-      return {
-        ssr: {
-          noExternal: out.ssr.noExternal,
-        },
-        optimizeDeps: out.optimizeDeps,
-      };
+      const { getConfig } = await import('@fumadocs/vite');
+      return getConfig({ root: process.cwd() });
     },
     async buildStart() {
       await core.emit({ write: true });
