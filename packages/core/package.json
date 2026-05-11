@@ -42,6 +42,7 @@
     "./mdx-plugins/rehype-code.core": "./dist/mdx-plugins/rehype-code.core.js",
     "./mdx-plugins/rehype-toc": "./dist/mdx-plugins/rehype-toc.js",
     "./mdx-plugins/remark-admonition": "./dist/mdx-plugins/remark-admonition.js",
+    "./mdx-plugins/remark-block-id": "./dist/mdx-plugins/remark-block-id.js",
     "./mdx-plugins/remark-code-tab": "./dist/mdx-plugins/remark-code-tab.js",
     "./mdx-plugins/remark-directive-admonition": "./dist/mdx-plugins/remark-directive-admonition.js",
     "./mdx-plugins/remark-feedback-block": "./dist/mdx-plugins/remark-feedback-block.js",

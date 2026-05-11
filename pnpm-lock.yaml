@@ -44,6 +44,9 @@ importers:
       '@ai-sdk/react':
         specifier: ^3.0.179
         version: 3.0.179(react@19.2.6)(zod@4.4.3)
+      '@floating-ui/react-dom':
+        specifier: ^2.1.8
+        version: 2.1.8(react-dom@19.2.6(react@19.2.6))(react@19.2.6)
       '@fumadocs/story':
         specifier: workspace:*
         version: link:../../packages/story

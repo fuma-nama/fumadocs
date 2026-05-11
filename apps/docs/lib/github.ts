@@ -84,9 +84,12 @@ export async function onPageFeedbackAction(feedback: PageFeedback): Promise<Acti
 export async function onBlockFeedbackAction(feedback: BlockFeedback): Promise<ActionResponse> {
   'use server';
   feedback = blockFeedback.parse(feedback);
+  const url = new URL(feedback.url);
+  url.hash = feedback.blockId;
+
   return createDiscussionThread(
     feedback.url,
-    `> ${feedback.blockBody ?? feedback.blockId}\n\n${feedback.message}\n\n> Forwarded from user feedback.`,
+    `> ${feedback.blockBody}\n\n${feedback.message}\n\n> [Forwarded from user feedback](${url.href}).`,
   );
 }
 

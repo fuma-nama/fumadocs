@@ -6,7 +6,7 @@ export const blockFeedback = z.object({
   message: z.string(),
 
   /** the referenced text of block */
-  blockBody: z.optional(z.string()),
+  blockBody: z.string(),
 });
 
 export const pageFeedback = z.object({
