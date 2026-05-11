@@ -1,5 +1,14 @@
 # next-docs-mdx
 
+## 15.0.3
+
+### Patch Changes
+
+- 2569154: Pre-generate Vite config to prevent CJS compat issues
+- Updated dependencies [062beab]
+- Updated dependencies [505cfe0]
+  - fumadocs-core@16.8.10
+
 ## 15.0.2
 
 ### Patch Changes

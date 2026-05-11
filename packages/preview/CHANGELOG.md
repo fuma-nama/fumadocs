@@ -1,5 +1,12 @@
 # fumadocs-preview
 
+## 0.1.1
+
+### Patch Changes
+
+- 2569154: Pre-generate Vite config to prevent CJS compat issues
+  - fumadocs-ui@16.8.10
+
 ## 0.1.37
 
 ### Patch Changes
