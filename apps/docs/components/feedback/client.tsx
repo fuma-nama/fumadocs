@@ -216,10 +216,6 @@ export function FeedbackText({ onSendAction, children }: FeedbackTextProps) {
     whileElementsMounted: autoUpdate,
   });
 
-  function showPopup(range: Range, blockId: string, selection: string) {
-    _setPopup({ mode: 'tooltip', range, selection, blockId });
-  }
-
   function expandPopup() {
     if (popup?.mode !== 'tooltip') return;
 
@@ -277,7 +273,8 @@ export function FeedbackText({ onSendAction, children }: FeedbackTextProps) {
       },
       contextElement: container,
     });
-    showPopup(range, selectionText, blockId);
+
+    _setPopup({ mode: 'tooltip', range, selection: selectionText, blockId });
   });
 
   const closeOnEscape = useEffectEvent((event: KeyboardEvent) => {
@@ -416,7 +413,7 @@ function FeedbackTextForm({
       <div
         {...container}
         className={cn(
-          'flex flex-col items-center gap-2 text-fd-muted-foreground text-center',
+          'flex flex-col items-center justify-center gap-2 text-fd-muted-foreground text-center',
           container.className,
         )}
       >
@@ -494,8 +491,8 @@ function FeedbackTextForm({
   );
 }
 
-function useSubmissionStorage<Result>(blockId: string, validate: (v: unknown) => Result | null) {
-  const storageKey = `docs-feedback-${blockId}`;
+function useSubmissionStorage<Result>(key: string, validate: (v: unknown) => Result | null) {
+  const storageKey = `docs-feedback-${key}`;
   const [value, setValue] = useState<Result | null>(null);
   const validateCallback = useEffectEvent(validate);
 
