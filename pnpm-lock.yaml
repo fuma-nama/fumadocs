@@ -2514,13 +2514,13 @@ importers:
       vfile:
         specifier: ^6.0.3
         version: 6.0.3
-      vitefu:
-        specifier: ^1.1.3
-        version: 1.1.3(vite@8.0.11(@types/node@25.6.2)(esbuild@0.28.0)(jiti@2.7.0)(terser@5.47.1)(tsx@4.21.0)(yaml@2.8.4))
       zod:
         specifier: ^4.4.3
         version: 4.4.3
     devDependencies:
+      '@fumadocs/vite':
+        specifier: workspace:*
+        version: link:../vite
       '@types/bun':
         specifier: ^1.3.13
         version: 1.3.13
@@ -2822,6 +2822,9 @@ importers:
       '@ai-sdk/react':
         specifier: ^3.0.179
         version: 3.0.179(react@19.2.6)(zod@4.4.3)
+      '@fumadocs/vite':
+        specifier: workspace:*
+        version: link:../vite
       '@hono/node-server':
         specifier: ^2.0.2
         version: 2.0.2(hono@4.12.18)
@@ -3429,6 +3432,66 @@ importers:
       vfile:
         specifier: ^6.0.3
         version: 6.0.3
+
+  packages/vite:
+    devDependencies:
+      '@types/node':
+        specifier: ^25.6.2
+        version: 25.6.2
+      tsconfig:
+        specifier: workspace:*
+        version: link:../tsconfig
+      tsdown:
+        specifier: 0.22.0
+        version: 0.22.0(@tsdown/css@0.22.0)(oxc-resolver@11.19.1)(tsx@4.21.0)(typescript@6.0.3)(unrun@0.3.0)
+      typescript:
+        specifier: ^6.0.3
+        version: 6.0.3
+      vite:
+        specifier: ^8.0.11
+        version: 8.0.11(@types/node@25.6.2)(esbuild@0.28.0)(jiti@2.7.0)(terser@5.47.1)(tsx@4.21.0)(yaml@2.8.4)
+
+  packages/vite-data:
+    dependencies:
+      '@fumadocs/base-ui':
+        specifier: workspace:*
+        version: link:../base-ui
+      '@fumadocs/basehub':
+        specifier: workspace:*
+        version: link:../basehub
+      '@fumadocs/local-md':
+        specifier: workspace:*
+        version: link:../local-md
+      '@fumadocs/mdx-remote':
+        specifier: workspace:*
+        version: link:../mdx-remote
+      '@fumadocs/sanity':
+        specifier: workspace:*
+        version: link:../sanity
+      '@fumadocs/story':
+        specifier: workspace:*
+        version: link:../story
+      '@types/node':
+        specifier: ^25.6.2
+        version: 25.6.2
+      fumadocs-core:
+        specifier: workspace:*
+        version: link:../core
+      fumadocs-mdx:
+        specifier: workspace:*
+        version: link:../mdx
+      fumadocs-openapi:
+        specifier: workspace:*
+        version: link:../openapi
+      fumadocs-twoslash:
+        specifier: workspace:*
+        version: link:../twoslash
+      fumadocs-typescript:
+        specifier: workspace:*
+        version: link:../typescript
+      fumadocs-ui:
+        specifier: workspace:*
+        version: link:../radix-ui
 
 packages:
 

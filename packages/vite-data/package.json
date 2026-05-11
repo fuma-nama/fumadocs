@@ -1,0 +1,18 @@
+{
+  "name": "vite-data",
+  "private": true,
+  "dependencies": {
+    "@fumadocs/base-ui": "workspace:*",
+    "@fumadocs/basehub": "workspace:*",
+    "@fumadocs/local-md": "workspace:*",
+    "@fumadocs/mdx-remote": "workspace:*",
+    "@fumadocs/sanity": "workspace:*",
+    "@fumadocs/story": "workspace:*",
+    "fumadocs-core": "workspace:*",
+    "fumadocs-mdx": "workspace:*",
+    "fumadocs-openapi": "workspace:*",
+    "fumadocs-twoslash": "workspace:*",
+    "fumadocs-typescript": "workspace:*",
+    "fumadocs-ui": "workspace:*"
+  }
+}

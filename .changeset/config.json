@@ -4,8 +4,7 @@
   "commit": false,
   "fixed": [
     ["fumadocs-core", "fumadocs-ui", "@fumadocs/base-ui"],
-    ["create-fumadocs-app", "create-fumadocs-versions"],
-    ["fumapress", "@fumapress/ai"]
+    ["create-fumadocs-app", "create-fumadocs-versions"]
   ],
   "access": "restricted",
   "baseBranch": "dev",
@@ -15,5 +14,5 @@
     "version": true,
     "tag": false
   },
-  "ignore": ["docs", "docs-press", "example-*"]
+  "ignore": ["docs", "vite-data", "example-*"]
 }
