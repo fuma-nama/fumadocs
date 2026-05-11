@@ -54,8 +54,8 @@ export function Feedback({
 }: {
   onSendAction: (feedback: PageFeedback) => Promise<ActionResponse>;
 }) {
-  const url = usePathname();
-  const { previous, setPrevious } = useSubmissionStorage(url, (v) => {
+  const pathname = usePathname();
+  const { previous, setPrevious } = useSubmissionStorage(pathname, (v) => {
     const result = pageFeedbackResult.safeParse(v);
     return result.success ? result.data : null;
   });
@@ -68,7 +68,7 @@ export function Feedback({
 
     startTransition(async () => {
       const feedback: PageFeedback = {
-        url,
+        url: location.href,
         opinion,
         message,
       };
@@ -382,8 +382,8 @@ function FeedbackTextForm({
   onSendAction: (feedback: BlockFeedback) => Promise<ActionResponse>;
   onClose: () => void;
 }) {
-  const url = usePathname();
-  const { previous, setPrevious } = useSubmissionStorage(`${url}-${blockId}`, (v) => {
+  const pathname = usePathname();
+  const { previous, setPrevious } = useSubmissionStorage(`${pathname}-${blockId}`, (v) => {
     const result = blockFeedbackResult.safeParse(v);
     if (result.success) return result.data;
     return null;
@@ -396,7 +396,7 @@ function FeedbackTextForm({
       const feedback: BlockFeedback = {
         blockId,
         blockBody: selection,
-        url,
+        url: location.href,
         message,
       };
 
