@@ -137,7 +137,9 @@ async function createDiscussionThread(pageId: string, body: string) {
     };
   } else {
     const result: {
-      discussion: { id: string; url: string };
+      createDiscussion: {
+        discussion: { id: string; url: string };
+      };
     } = await octokit.graphql(`
             mutation {
               createDiscussion(input: { repositoryId: "${destination.id}", categoryId: "${category.id}", body: ${JSON.stringify(body)}, title: ${JSON.stringify(title)} }) {
@@ -146,7 +148,7 @@ async function createDiscussionThread(pageId: string, body: string) {
             }`);
 
     return {
-      githubUrl: result.discussion.url,
+      githubUrl: result.createDiscussion.discussion.url,
     };
   }
 }
