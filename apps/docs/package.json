@@ -64,7 +64,7 @@
     "remark-mdx": "^3.1.1",
     "remark-rehype": "^11.1.2",
     "shiki": "^4.0.2",
-    "tailwind-merge": "^3.5.0",
+    "tailwind-merge": "^3.6.0",
     "twoslash": "^0.3.8",
     "unist-util-visit": "^5.1.0",
     "zod": "^4.4.3"

@@ -18,7 +18,7 @@
     "react": "^19.2.6",
     "react-dom": "^19.2.6",
     "react-server-dom-webpack": "^19.2.6",
-    "tailwind-merge": "^3.5.0",
+    "tailwind-merge": "^3.6.0",
     "waku": "1.0.0-alpha.10"
   },
   "devDependencies": {
@@ -29,6 +29,6 @@
     "@types/react-dom": "^19.2.3",
     "tailwindcss": "^4.3.0",
     "typescript": "^6.0.3",
-    "vite": "^8.0.11"
+    "vite": "^8.0.12"
   }
 }

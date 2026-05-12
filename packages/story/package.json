@@ -33,7 +33,7 @@
     "@radix-ui/react-select": "^2.2.6",
     "class-variance-authority": "^0.7.1",
     "lucide-react": "^1.14.0",
-    "tailwind-merge": "^3.5.0",
+    "tailwind-merge": "^3.6.0",
     "ts-morph": "^28.0.0"
   },
   "devDependencies": {
