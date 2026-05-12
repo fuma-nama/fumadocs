@@ -181,7 +181,7 @@ async function init(dev: boolean, core: Core): Promise<void> {
   }
 }
 
-export async function postInstall(options: CreateMDXOptions) {
+export async function postInstall(options: CreateMDXOptions = {}) {
   const core = createNextCore(applyDefaults(options));
   await core.init({
     config: loadConfig(core, true),

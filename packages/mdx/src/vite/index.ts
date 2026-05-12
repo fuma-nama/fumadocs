@@ -1,6 +1,5 @@
-import { runnerImport, type Plugin } from 'vite';
+import { type PluginOption, runnerImport } from 'vite';
 import { buildConfig } from '@/config/build';
-import { ValidationError } from '@/utils/validation';
 import { createMdxLoader } from '@/loaders/mdx';
 import { toVite } from '@/loaders/adapter';
 import type { FSWatcher } from 'chokidar';
@@ -40,7 +39,7 @@ export interface PluginOptions {
 export default async function mdx(
   _config?: Record<string, unknown> | Promise<Record<string, unknown>>,
   pluginOptions: PluginOptions = {},
-): Promise<Plugin> {
+): Promise<PluginOption> {
   const options = applyDefaults(pluginOptions);
   const core = createViteCore(options);
   const config =
@@ -58,47 +57,47 @@ export default async function mdx(
     }),
   );
 
-  return {
-    name: 'fumadocs-mdx',
-    // needed, otherwise other plugins will be executed before our `transform`.
-    enforce: 'pre',
-    async config() {
-      if (!options.updateViteConfig) return;
+  return [
+    {
+      name: 'fumadocs-mdx',
+      async config() {
+        if (!options.updateViteConfig) return;
 
-      const { getConfig } = await import('@fumadocs/vite');
-      return getConfig({ root: process.cwd() });
+        const { getConfig } = await import('@fumadocs/vite');
+        return getConfig({ root: process.cwd() });
+      },
+      async buildStart() {
+        await core.emit({ write: true });
+      },
+      async configureServer(server) {
+        await core.initServer({
+          watcher: server.watcher as unknown as FSWatcher,
+        });
+      },
     },
-    async buildStart() {
-      await core.emit({ write: true });
+    {
+      name: 'fumadocs-mdx:mdx',
+      enforce: 'pre',
+      transform: {
+        filter: mdxLoader.filter,
+        async handler(code, id) {
+          // Vite RSC will pass the compiled MDX file's client module with ID `virtual:vite-rsc/client-references/group/facade:xxx.mdx`.
+          // The format of `value` becomes JavaScript, which will break the MDX compiler.
+          // We have to ignore them.
+          if (id.includes('virtual:vite-rsc')) return null;
+          return await mdxLoader.transform.call(this, code, id);
+        },
+      },
     },
-    async configureServer(server) {
-      await core.initServer({
-        watcher: server.watcher as unknown as FSWatcher,
-      });
+    {
+      name: 'fumadocs-mdx:meta',
+      enforce: 'pre',
+      transform: {
+        filter: metaLoader.filter,
+        handler: metaLoader.transform,
+      },
     },
-    async transform(value, id) {
-      // Vite RSC will pass the compiled MDX file's client module with ID `virtual:vite-rsc/client-references/group/facade:xxx.mdx`.
-      // The format of `value` becomes JavaScript, which will break the MDX compiler.
-      // We have to ignore them.
-      if (id.includes('virtual:vite-rsc')) return null;
-
-      try {
-        if (metaLoader.filter(id)) {
-          return await metaLoader.transform.call(this, value, id);
-        }
-
-        if (mdxLoader.filter(id)) {
-          return await mdxLoader.transform.call(this, value, id);
-        }
-      } catch (e) {
-        if (e instanceof ValidationError) {
-          throw new Error(await e.toStringFormatted(), { cause: e });
-        }
-
-        throw e;
-      }
-    },
-  };
+  ];
 }
 
 export async function postInstall(pluginOptions: PluginOptions = {}) {

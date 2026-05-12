@@ -1,5 +1,5 @@
 import { frontmatter } from 'fumadocs-core/content/md/frontmatter';
-import type { Loader } from '@/loaders/adapter';
+import type { Loader, LoaderOutput } from '@/loaders/adapter';
 import { z } from 'zod';
 import type { DocCollectionItem } from '@/config/build';
 import fs from 'node:fs/promises';
@@ -96,8 +96,9 @@ export function createMdxLoader({ getCore }: ConfigLoader): Loader {
         environment: 'bundler',
       });
 
-      const out = {
+      const out: LoaderOutput = {
         code: String(compiled.value),
+        moduleType: 'js',
         map: compiled.map,
       };
 

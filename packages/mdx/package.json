@@ -29,6 +29,7 @@
     "./plugins/index-file": "./dist/plugins/index-file.js",
     "./plugins/json-schema": "./dist/plugins/json-schema.js",
     "./plugins/last-modified": "./dist/plugins/last-modified.js",
+    "./rolldown": "./dist/rolldown/index.js",
     "./runtime/browser": "./dist/runtime/browser.js",
     "./runtime/dynamic": "./dist/runtime/dynamic.js",
     "./runtime/server": "./dist/runtime/server.js",
@@ -96,9 +97,13 @@
     "mdast-util-directive": "*",
     "next": "^15.3.0 || ^16.0.0",
     "react": "^19.2.0",
+    "rolldown": "*",
     "vite": "7.x.x || 8.x.x"
   },
   "peerDependenciesMeta": {
+    "rolldown": {
+      "optional": true
+    },
     "mdast-util-directive": {
       "optional": true
     },
