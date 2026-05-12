@@ -1,5 +1,11 @@
 # next-docs-mdx
 
+## 15.0.4
+
+### Patch Changes
+
+- 819b6ec: Support Rolldown integration
+
 ## 15.0.3
 
 ### Patch Changes
