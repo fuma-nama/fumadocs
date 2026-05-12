@@ -1,6 +1,6 @@
 import { fileURLToPath } from 'node:url';
 import * as path from 'node:path';
-import { commonComponents, findSlotComponents } from '../../shared/registry';
+import { commonComponents, findSlotComponents } from '../../shared/registry.ts';
 import type { Registry } from 'fuma-cli/compiler';
 
 const dir = path.join(path.dirname(fileURLToPath(import.meta.url)), '../src');

@@ -1,6 +1,6 @@
 import type { Route } from './+types/search';
 import { createFromSource } from 'fumadocs-core/search/server';
-import { source } from '@/lib/source';
+import { source } from '#/lib/source.ts';
 import { createTokenizer } from '@orama/tokenizers/mandarin';
 
 const server = createFromSource(source, {

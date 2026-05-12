@@ -5,7 +5,7 @@ import jsonSchema from 'fumadocs-mdx/plugins/json-schema';
 import lastModified from 'fumadocs-mdx/plugins/last-modified';
 import type { ShikiTransformer } from 'shiki';
 import type { RemarkAutoTypeTableOptions } from 'fumadocs-typescript';
-import { defaultShikiOptions } from './lib/shiki';
+import { defaultShikiOptions } from './lib/shiki.ts';
 import { metaSchema, pageSchema } from 'fumadocs-core/source/schema';
 import { visit } from 'unist-util-visit';
 import type { Transformer } from 'unified';
@@ -93,6 +93,7 @@ export const docs = defineDocs({
             },
           },
         },
+        remarkImageOptions: isLint ? false : undefined,
         remarkNpmOptions: {
           persist: {
             id: 'package-manager',
@@ -144,6 +145,7 @@ export const blog = defineCollections({
       remarkCodeTabOptions: {
         parseMdx: true,
       },
+      remarkImageOptions: isLint ? false : undefined,
       remarkNpmOptions: {
         persist: {
           id: 'package-manager',

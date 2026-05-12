@@ -1,4 +1,4 @@
-import { copy } from '@/utils';
+import { copy } from '../src/utils.ts';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import fs from 'node:fs/promises';
@@ -77,6 +77,8 @@ async function main() {
       });
     }),
   );
+
+  console.log('updated create-fumadocs-app');
 }
 
 void main();

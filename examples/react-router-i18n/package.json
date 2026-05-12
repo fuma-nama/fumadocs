@@ -2,8 +2,12 @@
   "name": "example-react-router-i18n",
   "private": true,
   "type": "module",
+  "imports": {
+    "#/collections/*": "./.source/*",
+    "#/*": "./app/*"
+  },
   "scripts": {
-    "build": "bun scripts/generate-info.ts && react-router build",
+    "build": "node scripts/generate-info.ts && react-router build",
     "dev": "react-router dev",
     "start": "react-router-serve ./build/server/index.js",
     "types:check": "react-router typegen && fumadocs-mdx && tsc --noEmit"

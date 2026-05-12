@@ -1,9 +1,9 @@
 import type { Route } from './+types/home';
 import { HomeLayout } from 'fumadocs-ui/layouts/home';
 import { Link } from 'react-router';
-import { baseOptions } from '@/lib/layout.shared';
+import { baseOptions } from '#/lib/layout.shared.tsx';
 
-export function meta({}: Route.MetaArgs) {
+export function meta(_meta: Route.MetaArgs) {
   return [
     { title: 'New React Router App' },
     { name: 'description', content: 'Welcome to React Router!' },

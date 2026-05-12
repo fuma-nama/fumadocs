@@ -11,7 +11,7 @@ import { RootProvider } from 'fumadocs-ui/provider/react-router';
 import type { Route } from './+types/root';
 import './app.css';
 import type { Translations } from 'fumadocs-ui/i18n';
-import { i18n } from '@/lib/i18n';
+import { i18n } from '#/lib/i18n.ts';
 import NotFound from './routes/not-found';
 
 export const links: Route.LinksFunction = () => [

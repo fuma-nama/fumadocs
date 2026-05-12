@@ -42,7 +42,9 @@ export async function generateStaticParams() {
   return source.generateParams();
 }
 
-export async function generateMetadata(props: { params: Promise<{ slug?: string[] }> }) {
+export async function generateMetadata(props: {
+  params: Promise<{ slug?: string[] }>;
+}): Promise<Metadata> {
   const params = await props.params;
   const page = source.getPage(params.slug);
   if (!page) notFound();
@@ -58,5 +60,5 @@ export async function generateMetadata(props: { params: Promise<{ slug?: string[
       card: 'summary_large_image',
       images: image,
     },
-  } satisfies Metadata;
+  };
 }

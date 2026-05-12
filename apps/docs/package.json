@@ -4,12 +4,12 @@
   "private": true,
   "scripts": {
     "build": "pnpm build:pre && next build && pnpm build:post",
-    "build:pre": "bun ./scripts/pre-build.ts",
-    "build:post": "bun ./scripts/post-build.ts",
+    "build:pre": "node ./scripts/pre-build.ts",
+    "build:post": "node ./scripts/post-build.ts",
     "types:check": "fumadocs-mdx && next typegen && tsc --noEmit",
     "clean": "rimraf .next",
     "dev": "next dev",
-    "lint": "fumadocs-mdx && bun ./scripts/lint.ts",
+    "lint": "fumadocs-mdx && node ./scripts/lint.entry.ts",
     "start": "next start"
   },
   "dependencies": {
@@ -97,7 +97,8 @@
     "ts-morph": "^28.0.0",
     "tsconfig": "workspace:*",
     "typescript": "^6.0.3",
-    "unified": "^11.0.5"
+    "unified": "^11.0.5",
+    "unrun": "^0.3.0"
   },
   "browserslist": [
     "extends browserslist-config-baseline/2024"

@@ -39,7 +39,7 @@
     "lint": "oxlint .",
     "postpublish": "echo \"Updating template repo\" && bash ./scripts/update-git-repo.sh",
     "types:check": "tsc --noEmit",
-    "sync": "bun ./scripts/sync.ts"
+    "sync": "node ./scripts/sync.ts"
   },
   "dependencies": {
     "@clack/prompts": "^1.3.0",

@@ -1,4 +1,4 @@
-import { buildRegistry } from '@/scripts/build-registry';
+import { buildRegistry } from './build-registry.ts';
 
 async function main() {
   await Promise.all([buildRegistry()]);
