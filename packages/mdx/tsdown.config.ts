@@ -15,9 +15,7 @@ export default defineConfig({
   },
   target: 'es2023',
   platform: 'neutral',
-  exports: {
-    bin: './src/bin.ts',
-  },
+  exports: true,
   deps: {
     onlyBundle: ['@fumadocs/vite'],
     neverBundle: ['webpack', 'bun', /^node:/],

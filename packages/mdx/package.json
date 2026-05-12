@@ -11,10 +11,11 @@
   "author": "Fuma Nama",
   "repository": "github:fuma-nama/fumadocs",
   "bin": {
-    "fumadocs-mdx": "./dist/bin.js"
+    "fumadocs-mdx": "./bin.js"
   },
   "files": [
-    "dist"
+    "dist",
+    "bin.js"
   ],
   "type": "module",
   "exports": {
