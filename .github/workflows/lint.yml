@@ -19,6 +19,9 @@ jobs:
           node-version: 24
           cache: 'pnpm'
 
+      - name: Add PNPM bin to PATH
+        run: echo "$PNPM_HOME/bin" >> $GITHUB_PATH
+
       - name: Install Dependencies
         run: pnpm i --frozen-lockfile
 

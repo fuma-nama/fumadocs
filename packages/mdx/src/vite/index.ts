@@ -1,4 +1,4 @@
-import { type PluginOption, runnerImport } from 'vite';
+import { type Plugin, runnerImport } from 'vite';
 import { buildConfig } from '@/config/build';
 import { createMdxLoader } from '@/loaders/mdx';
 import { toVite } from '@/loaders/adapter';
@@ -39,7 +39,7 @@ export interface PluginOptions {
 export default async function mdx(
   _config?: Record<string, unknown> | Promise<Record<string, unknown>>,
   pluginOptions: PluginOptions = {},
-): Promise<PluginOption> {
+): Promise<Plugin[]> {
   const options = applyDefaults(pluginOptions);
   const core = createViteCore(options);
   const config =
