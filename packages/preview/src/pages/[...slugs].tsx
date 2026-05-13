@@ -77,7 +77,7 @@ export default async function DocPage({ slugs }: PageProps<'/docs/[...slugs]'>) 
   const config = await getConfigRuntime();
   const source = await getSource(config);
   const page = source.getPage(slugs);
-  const mdPreset = config.layout?.presets?.md ?? 'docs';
+  const mdPreset = config.layout.presets?.md ?? 'docs';
   let mdPresetComponents: MdPresetComponents;
 
   if (mdPreset === 'docs') {

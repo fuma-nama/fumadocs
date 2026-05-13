@@ -1,21 +1,25 @@
 import { revalidable } from '@/lib/revalidable.js';
-import { defineConfig, type AppConfig } from './global.js';
-import { checkConfig, findConfigPath } from './load-node.js';
+import { AppConfig, configSchema, type ParsedAppConfig } from './global.js';
+import { parseConfig, findConfigPath } from './load-node.js';
 import { pathToFileURL } from 'node:url';
 
-async function loadConfig(configPath: string | null): Promise<AppConfig> {
-  if (configPath === null) return defineConfig();
+function getDefaultConfig() {
+  return configSchema.parse({} satisfies AppConfig);
+}
+
+async function loadConfig(configPath: string | null): Promise<ParsedAppConfig> {
+  if (configPath === null) return getDefaultConfig();
 
   try {
     const module = await import(pathToFileURL(configPath).href);
 
-    return checkConfig(configPath, module.default ?? module);
+    return parseConfig(configPath, module.default ?? module);
   } catch (error) {
     console.error(
       `Failed to load config from ${configPath}:`,
       error instanceof Error ? error.message : String(error),
     );
-    return defineConfig();
+    return getDefaultConfig();
   }
 }
 

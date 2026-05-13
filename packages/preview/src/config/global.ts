@@ -18,7 +18,7 @@ export const layoutConfigSchema = z.object({
       /**
        * layout preset for Markdown files.
        */
-      md: z.literal(['docs', 'flux']).optional(),
+      md: z.literal(['docs', 'flux']).default('docs'),
     })
     .optional(),
 });
@@ -52,6 +52,11 @@ export const contentConfigSchema = z.object({
    * a list of project configurations.
    */
   projects: z.array(projectConfigSchema).optional(),
+
+  /**
+   * allow file-system access outside of project directories.
+   */
+  unsafe_disableFileSystemChecks: z.boolean().default(false),
 });
 
 export const aiConfigSchema = z.object({
@@ -62,15 +67,16 @@ export const aiConfigSchema = z.object({
 });
 
 export const configSchema = z.object({
-  layout: layoutConfigSchema.optional(),
-  content: contentConfigSchema.optional(),
+  layout: layoutConfigSchema.default(() => layoutConfigSchema.parse({})),
+  content: contentConfigSchema.default(() => contentConfigSchema.parse({})),
   ai: aiConfigSchema.optional(),
 });
 
 export type LayoutConfig = z.infer<typeof layoutConfigSchema>;
 export type ContentConfig = z.infer<typeof contentConfigSchema>;
 export type ProjectConfig = z.infer<typeof projectConfigSchema>;
-export type AppConfig = z.infer<typeof configSchema>;
+export type AppConfig = z.input<typeof configSchema>;
+export type ParsedAppConfig = z.output<typeof configSchema>;
 
 export function defineConfig(config: AppConfig = {}): AppConfig {
   return config;

@@ -1,4 +1,4 @@
-import type { AppConfig } from '@/config/global';
+import type { ParsedAppConfig } from '@/config/global';
 import { getSource } from '@/lib/source';
 import type { DocsLayoutProps } from 'fumadocs-ui/layouts/docs';
 import type { HomeLayoutProps } from 'fumadocs-ui/layouts/home';
@@ -6,8 +6,8 @@ import { FumadocsLogo } from '@/components/logo';
 import type { BaseLayoutProps } from 'fumadocs-ui/layouts/shared';
 import { getConfigRuntime } from '@/config/load-runtime';
 
-export function layoutConfig(config: AppConfig) {
-  const { base } = config.layout ?? {};
+export function layoutConfig(config: ParsedAppConfig) {
+  const { base } = config.layout;
 
   return {
     async base() {

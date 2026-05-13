@@ -1,10 +1,11 @@
-import type { ContentConfig } from '@/config/global';
+import type { contentConfigSchema } from '@/config/global';
 import fs from 'node:fs/promises';
 import { glob } from 'tinyglobby';
 import path from 'node:path';
 import { frontmatter as parseFrontmatter } from 'fumadocs-core/content/md/frontmatter';
 import { metaSchema, pageSchema } from 'fumadocs-core/source/schema';
 import { type NormalizedProjectConfig, normalizeProjects } from './config';
+import type z from 'zod';
 
 export interface RawPage {
   type: 'page';
@@ -37,7 +38,7 @@ type BuildFileOutput = RawPage | RawMeta | undefined;
 const CHUNK_SIZE = 100;
 export const filesCache = new Map<string, RawPage | RawMeta>();
 
-export async function getPages(config: ContentConfig): Promise<{
+export async function getPages(config: z.output<typeof contentConfigSchema>): Promise<{
   pages: RawPage[];
   metas: RawMeta[];
 }> {

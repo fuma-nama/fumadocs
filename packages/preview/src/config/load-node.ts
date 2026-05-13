@@ -1,4 +1,4 @@
-import { configSchema, type AppConfig } from './global';
+import { configSchema, type ParsedAppConfig } from './global';
 import z from 'zod';
 import fs from 'node:fs';
 import path from 'node:path';
@@ -15,7 +15,7 @@ export async function findConfigPath(): Promise<string | null> {
   return null;
 }
 
-export function checkConfig(file: string, loaded: unknown): AppConfig {
+export function parseConfig(file: string, loaded: unknown): ParsedAppConfig {
   const result = configSchema.safeParse(loaded);
 
   if (result.error) {

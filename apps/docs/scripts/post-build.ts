@@ -1,9 +1,9 @@
 import env from '@next/env';
-import { updateSearchIndexes } from './update-orama-index.ts';
 
 env.loadEnvConfig(process.cwd());
 
 async function main() {
+  const { updateSearchIndexes } = await import('./update-orama-index.ts');
   await Promise.all([updateSearchIndexes()]);
 }
 
