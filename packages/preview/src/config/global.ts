@@ -61,15 +61,17 @@ export const contentConfigSchema = z.object({
 
 export const aiConfigSchema = z.object({
   /**
-   * model ID
+   * Specify a model ID, by default it uses OpenRouter.
    */
   model: z.string().optional(),
+
+  ratelimit: z.boolean().default(true),
 });
 
 export const configSchema = z.object({
   layout: layoutConfigSchema.default(() => layoutConfigSchema.parse({})),
   content: contentConfigSchema.default(() => contentConfigSchema.parse({})),
-  ai: aiConfigSchema.optional(),
+  ai: aiConfigSchema.default(() => aiConfigSchema.parse({})),
 });
 
 export type LayoutConfig = z.infer<typeof layoutConfigSchema>;

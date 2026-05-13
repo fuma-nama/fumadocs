@@ -11,7 +11,7 @@ import { getSource, Source } from '@/lib/source';
 import { Document, type DocumentData } from 'flexsearch';
 import { revalidable } from '@/lib/revalidable';
 import { getConfigRuntime } from '@/config/load-runtime';
-import { defaultModel } from '@/lib/ai';
+import { defaultModel, isAISupported } from '@/lib/ai';
 
 interface CustomDocument extends DocumentData {
   url: string;
@@ -52,24 +52,88 @@ const systemPrompt = [
 
 let cached: Promise<LanguageModel> | undefined;
 
+const rateLimitWindowMs = 60 * 1000;
+const rateLimitMaxRequests = 20;
+const rateLimitBuckets = new Map<string, { count: number; resetAt: number }>();
+
 function defaultModelCached(): Promise<LanguageModel> {
   return (cached ??= defaultModel());
 }
 
+function getClientIp(req: Request): string {
+  const forwardedFor = req.headers.get('x-forwarded-for');
+
+  if (forwardedFor) {
+    const [clientIp] = forwardedFor.split(',');
+
+    if (clientIp) return clientIp.trim();
+  }
+
+  return (
+    req.headers.get('cf-connecting-ip') ??
+    req.headers.get('x-real-ip') ??
+    req.headers.get('x-client-ip') ??
+    'unknown'
+  );
+}
+
+function checkRateLimit(req: Request): { success: true } | { success: false; retryAfter: number } {
+  const now = Date.now();
+  const ip = getClientIp(req);
+  const bucket = rateLimitBuckets.get(ip);
+
+  if (!bucket || bucket.resetAt <= now) {
+    rateLimitBuckets.set(ip, {
+      count: 1,
+      resetAt: now + rateLimitWindowMs,
+    });
+
+    for (const [key, value] of rateLimitBuckets) {
+      if (value.resetAt <= now) rateLimitBuckets.delete(key);
+    }
+
+    return { success: true };
+  }
+
+  if (bucket.count >= rateLimitMaxRequests) {
+    return {
+      success: false,
+      retryAfter: Math.ceil((bucket.resetAt - now) / 1000),
+    };
+  }
+
+  bucket.count++;
+  return { success: true };
+}
+
 export async function POST(req: Request) {
   const config = await getConfigRuntime();
+  const isSupported = await isAISupported();
+  if (!isSupported) return new Response('Not Supported', { status: 400 });
+
+  if (config.ai.ratelimit) {
+    const rateLimit = checkRateLimit(req);
+
+    if (!rateLimit.success) {
+      return new Response('Too many requests', {
+        status: 429,
+        headers: {
+          'Retry-After': String(rateLimit.retryAfter),
+        },
+      });
+    }
+  }
+
   const reqJson: { messages?: UIMessage[] } = await req.json();
 
   const result = streamText({
-    model: config.ai?.model ?? (await defaultModelCached()),
+    model: config.ai.model ?? (await defaultModelCached()),
     stopWhen: stepCountIs(5),
     tools: {
       search: searchTool,
     },
-    messages: [
-      { role: 'system', content: systemPrompt },
-      ...(await convertToModelMessages(reqJson.messages ?? [])),
-    ],
+    system: systemPrompt,
+    messages: await convertToModelMessages(reqJson.messages ?? []),
     toolChoice: 'auto',
   });
 

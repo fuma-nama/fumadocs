@@ -11,7 +11,7 @@ async function loadConfig(configPath: string | null): Promise<ParsedAppConfig> {
   if (configPath === null) return getDefaultConfig();
 
   try {
-    const module = await import(pathToFileURL(configPath).href);
+    const module = await import(/* @vite-ignore */ pathToFileURL(configPath).href);
 
     return parseConfig(configPath, module.default ?? module);
   } catch (error) {

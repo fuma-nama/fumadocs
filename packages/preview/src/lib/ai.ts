@@ -12,5 +12,5 @@ export async function defaultModel(): Promise<LanguageModel> {
 
 export async function isAISupported() {
   const config = await getConfigRuntime();
-  return config.ai?.model !== undefined || process.env.OPENROUTER_API_KEY !== undefined;
+  return config.ai.model !== undefined || process.env.OPENROUTER_API_KEY !== undefined;
 }
