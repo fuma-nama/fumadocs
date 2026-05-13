@@ -60,11 +60,24 @@ export function Operation({
   let callbacksNode: ReactNode = null;
   const exampleRequests = useMemo(() => getExampleRequests(path, method, ctx), [ctx, method, path]);
 
+  const deprecatedBadge = method.deprecated ? (
+    <Badge color="yellow" className="text-xs not-prose">
+      <I18nLabel label="deprecated" />
+    </Badge>
+  ) : null;
+
   if (showTitle) {
     const title = method.summary || (method.operationId ? idToTitle(method.operationId) : path);
 
-    headNode = ctx.renderHeading(headingLevel, title);
+    headNode = (
+      <div className="flex items-center gap-2">
+        {ctx.renderHeading(headingLevel, title)}
+        {deprecatedBadge}
+      </div>
+    );
     headingLevel++;
+  } else if (deprecatedBadge) {
+    headNode = <div className="not-prose mb-4">{deprecatedBadge}</div>;
   }
 
   const contentTypes = body?.content ? Object.entries(body.content) : null;
@@ -283,6 +296,11 @@ export function Operation({
             <code className="flex-1 overflow-auto text-nowrap text-[0.8125rem] text-fd-muted-foreground">
               {path}
             </code>
+            {method.deprecated && (
+              <Badge color="yellow" className="text-xs">
+                <I18nLabel label="deprecated" />
+              </Badge>
+            )}
           </div>
         ),
         apiExample: <UsageTabs method={method} ctx={ctx} />,
