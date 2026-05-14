@@ -1,5 +1,11 @@
 # fumadocs-core
 
+## 16.8.11
+
+### Patch Changes
+
+- 1dc86c7: loosen the range for waku
+
 ## 16.8.10
 
 ### Patch Changes
