@@ -95,6 +95,7 @@ export function createClientAPIPage({
         proxyUrl={ctx.proxyUrl}
         writeOnly
         readOnly={false}
+        deprecated={method.deprecated}
       />
     );
   }

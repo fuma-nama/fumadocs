@@ -351,6 +351,7 @@ paths:
         - Planets
       summary: Delete a planet
       operationId: deletePlanet
+      deprecated: true
       description: This endpoint was used to delete planets. Unfortunately, that
         caused a lot of trouble for planets with life. So, this endpoint is now
         deprecated and should not be used anymore.

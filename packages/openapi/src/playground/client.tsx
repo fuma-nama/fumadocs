@@ -71,6 +71,7 @@ export interface PlaygroundClientProps extends ComponentProps<'form'>, SchemaSco
   /** the OpenAPI document (not dereferenced) */
   doc: Document;
   proxyUrl?: string;
+  deprecated?: boolean;
 }
 
 export type { ResultDisplayProps };
@@ -131,6 +132,7 @@ export default function PlaygroundClient({
   proxyUrl,
   writeOnly,
   readOnly,
+  deprecated,
   ...rest
 }: PlaygroundClientProps) {
   const t = useTranslations();
@@ -279,7 +281,7 @@ export default function PlaygroundClient({
           <ServerSelect className="border-b" />
           <div className="flex flex-row items-center gap-2 text-sm p-3 not-last:pb-0">
             <MethodLabel>{method}</MethodLabel>
-            <Route route={route} className="flex-1" />
+            <Route route={route} className={cn('flex-1', deprecated && 'line-through')} />
             <button
               type="submit"
               className={cn(buttonVariants({ color: 'primary', size: 'sm' }), 'w-14 py-1.5')}
