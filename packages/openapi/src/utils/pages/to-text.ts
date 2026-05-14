@@ -61,13 +61,8 @@ export function toText(
         {
           operations: [entry.item],
         },
-        {
-          ...options,
-          ...entry.info,
-        },
-        {
-          type: 'operation',
-        },
+        options,
+        entry,
       );
     case 'page':
       return generatePage(
@@ -78,18 +73,8 @@ export function toText(
           webhooks: entry.webhooks,
           showTitle: true,
         },
-        {
-          ...options,
-          ...entry.info,
-        },
-        entry.tag
-          ? {
-              type: 'tag',
-              tag: entry.tag,
-            }
-          : {
-              type: 'file',
-            },
+        options,
+        entry,
       );
     case 'webhook':
       return generatePage(
@@ -98,13 +83,8 @@ export function toText(
         {
           webhooks: [entry.item],
         },
-        {
-          ...options,
-          ...entry.info,
-        },
-        {
-          type: 'operation',
-        },
+        options,
+        entry,
       );
   }
 }
@@ -146,7 +126,7 @@ export function generateDocument(
 export type DocumentContext =
   | {
       type: 'tag';
-      tag: TagObject | undefined;
+      tag: TagObject;
     }
   | {
       type: 'operation';
@@ -159,14 +139,19 @@ function generatePage(
   schemaId: string,
   processed: DereferencedDocument,
   pageProps: Omit<ApiPageProps, 'document'>,
-  options: PagesToTextOptions & {
-    title: string;
-    description?: string;
-  },
-  context: DocumentContext,
+  options: PagesToTextOptions,
+  entry: PageOutput | OperationOutput | WebhookOutput,
 ): string {
   const { frontmatter, includeDescription = false } = options;
-  const extend = frontmatter?.(options.title, options.description, context);
+  const extend = frontmatter?.(
+    entry.info.title,
+    entry.info.description,
+    entry.type === 'page'
+      ? entry.tag
+        ? { type: 'tag', tag: entry.tag }
+        : { type: 'file' }
+      : { type: 'operation' },
+  );
   const page: ApiPageProps = {
     ...pageProps,
     document: schemaId,
@@ -178,6 +163,7 @@ function generatePage(
 
     meta = {
       method: operation.method.toUpperCase(),
+      deprecated: entry.info.deprecated,
     };
   } else if (page.webhooks?.length === 1) {
     const webhook = page.webhooks[0];
@@ -185,19 +171,20 @@ function generatePage(
     meta = {
       method: webhook.method.toUpperCase(),
       webhook: true,
+      deprecated: entry.info.deprecated,
     };
   }
 
   const data = toStaticData(page, processed.dereferenced);
   const content: string[] = [];
 
-  if (options.description && includeDescription) content.push(options.description);
+  if (entry.info.description && includeDescription) content.push(entry.info.description);
   content.push(pageContent(page));
 
   return generateDocument(
     {
-      title: options.title,
-      description: !includeDescription ? options.description : undefined,
+      title: entry.info.title,
+      description: !includeDescription ? entry.info.description : undefined,
       full: true,
       ...extend,
       _openapi: {

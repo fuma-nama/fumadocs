@@ -26,6 +26,7 @@ import { RequestTabs } from './request-tabs';
 import { cn } from '@/utils/cn';
 import { getExampleRequests } from './get-example-requests';
 import { SelectTabs, SelectTabTrigger, SelectTab } from '../components/select-tab';
+import { Callout } from 'fumadocs-ui/components/callout';
 
 const paramTypeKeys = ['path', 'query', 'header', 'cookie'] as const;
 
@@ -60,24 +61,24 @@ export function Operation({
   let callbacksNode: ReactNode = null;
   const exampleRequests = useMemo(() => getExampleRequests(path, method, ctx), [ctx, method, path]);
 
-  const deprecatedBadge = method.deprecated ? (
-    <Badge color="yellow" className="text-xs not-prose">
-      <I18nLabel label="deprecated" />
-    </Badge>
-  ) : null;
-
   if (showTitle) {
     const title = method.summary || (method.operationId ? idToTitle(method.operationId) : path);
 
     headNode = (
-      <div className="flex items-center gap-2">
-        {ctx.renderHeading(headingLevel, title)}
-        {deprecatedBadge}
+      <div className="flex gap-2 items-center justify-between">
+        {ctx.renderHeading(headingLevel, title, {
+          className: 'my-0!',
+        })}
+        {method.deprecated && (
+          <Badge color="yellow" className="text-xs not-prose">
+            <I18nLabel label="deprecated" />
+          </Badge>
+        )}
       </div>
     );
     headingLevel++;
-  } else if (deprecatedBadge) {
-    headNode = <div className="not-prose mb-4">{deprecatedBadge}</div>;
+  } else if (method.deprecated) {
+    headNode = <Callout type="warn" title={<I18nLabel label="deprecated" />} className="mt-0!" />;
   }
 
   const contentTypes = body?.content ? Object.entries(body.content) : null;
@@ -293,14 +294,14 @@ export function Operation({
         ) : (
           <div className="flex flex-row items-center gap-2.5 p-3 rounded-xl border bg-fd-card text-fd-card-foreground not-prose">
             <MethodLabel className="text-xs">{method.method}</MethodLabel>
-            <code className="flex-1 overflow-auto text-nowrap text-[0.8125rem] text-fd-muted-foreground">
+            <code
+              className={cn(
+                'flex-1 overflow-auto text-nowrap text-[0.8125rem] text-fd-muted-foreground',
+                method.deprecated && 'line-through',
+              )}
+            >
               {path}
             </code>
-            {method.deprecated && (
-              <Badge color="yellow" className="text-xs">
-                <I18nLabel label="deprecated" />
-              </Badge>
-            )}
           </div>
         ),
         apiExample: <UsageTabs method={method} ctx={ctx} />,
