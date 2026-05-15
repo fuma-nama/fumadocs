@@ -1,4 +1,4 @@
-import type { MetaData, PageData, Source, VirtualFile } from 'fumadocs-core/source';
+import { type MetaData, type PageData, type Source, type VirtualFile } from 'fumadocs-core/source';
 import * as path from 'node:path';
 import type { DocCollection, DocsCollection, MetaCollection } from '@/config';
 import type { StandardSchemaV1 } from '@standard-schema/spec';
@@ -12,6 +12,11 @@ export type DocCollectionEntry<
   Frontmatter = unknown,
   TC extends InternalTypeConfig = InternalTypeConfig,
 > = DocData & DocMethods & Frontmatter & TC['DocData'][Name];
+
+interface ToFumadocsSourceOptions {
+  /** base directory for virtual file paths */
+  baseDir?: string;
+}
 
 export type AsyncDocCollectionEntry<
   Name extends string = string,
@@ -30,7 +35,7 @@ export interface DocsCollectionEntry<
 > {
   docs: DocCollectionEntry<Name, Frontmatter, TC>[];
   meta: MetaCollectionEntry<Meta>[];
-  toFumadocsSource: () => Source<{
+  toFumadocsSource: (options?: ToFumadocsSourceOptions) => Source<{
     pageData: DocCollectionEntry<Name, Frontmatter, TC>;
     metaData: MetaCollectionEntry<Meta>;
   }>;
@@ -44,7 +49,7 @@ export interface AsyncDocsCollectionEntry<
 > {
   docs: AsyncDocCollectionEntry<Name, Frontmatter, TC>[];
   meta: MetaCollectionEntry<Meta>[];
-  toFumadocsSource: () => Source<{
+  toFumadocsSource: (options?: ToFumadocsSourceOptions) => Source<{
     pageData: AsyncDocCollectionEntry<Name, Frontmatter, TC>;
     metaData: MetaCollectionEntry<Meta>;
   }>;
@@ -175,8 +180,8 @@ export function server<Config, TC extends InternalTypeConfig>(options: ServerOpt
       const entry = {
         docs: await this.doc(name, base, docGlob),
         meta: await this.meta(name, base, metaGlob),
-        toFumadocsSource() {
-          return toFumadocsSource(this.docs, this.meta);
+        toFumadocsSource(options) {
+          return toFumadocsSource(this.docs, this.meta, options);
         },
       } satisfies DocsCollectionEntry;
 
@@ -203,8 +208,8 @@ export function server<Config, TC extends InternalTypeConfig>(options: ServerOpt
       const entry = {
         docs: await this.docLazy(name, base, docHeadGlob, docBodyGlob),
         meta: await this.meta(name, base, metaGlob),
-        toFumadocsSource() {
-          return toFumadocsSource(this.docs, this.meta);
+        toFumadocsSource(options) {
+          return toFumadocsSource(this.docs, this.meta, options);
         },
       } satisfies AsyncDocsCollectionEntry;
 
@@ -230,10 +235,12 @@ export function toFumadocsSource<
 >(
   pages: Page[],
   metas: Meta[],
+  options?: ToFumadocsSourceOptions,
 ): Source<{
   pageData: Page;
   metaData: Meta;
 }> {
+  const baseDir = options?.baseDir;
   const files: VirtualFile<{
     pageData: Page;
     metaData: Meta;
@@ -242,7 +249,7 @@ export function toFumadocsSource<
   for (const entry of pages) {
     files.push({
       type: 'page',
-      path: entry.info.path,
+      path: baseDir ? path.join(baseDir, entry.info.path) : entry.info.path,
       absolutePath: entry.info.fullPath,
       data: entry,
     });
@@ -251,7 +258,7 @@ export function toFumadocsSource<
   for (const entry of metas) {
     files.push({
       type: 'meta',
-      path: entry.info.path,
+      path: baseDir ? path.join(baseDir, entry.info.path) : entry.info.path,
       absolutePath: entry.info.fullPath,
       data: entry,
     });

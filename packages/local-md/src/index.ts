@@ -1,9 +1,9 @@
-import type {
-  DynamicSource,
-  MetaData,
-  PageData,
-  StaticSource,
-  VirtualFile,
+import {
+  type DynamicSource,
+  type MetaData,
+  type PageData,
+  type StaticSource,
+  type VirtualFile,
 } from 'fumadocs-core/source';
 import type { StandardSchemaV1 } from '@standard-schema/spec';
 import path from 'node:path';
@@ -45,13 +45,17 @@ export interface LocalMarkdown<
 > {
   /** connect to dev server, required for hot reload */
   devServer: (url?: string) => Promise<void>;
-  staticSource: <ModuleExports = Record<string, unknown>>() => Promise<
+  staticSource: <ModuleExports = Record<string, unknown>>(
+    options?: SourceOptions,
+  ) => Promise<
     StaticSource<{
       pageData: LocalMarkdownPage<StandardSchemaV1.InferOutput<FrontmatterSchema>, ModuleExports>;
       metaData: StandardSchemaV1.InferOutput<MetaSchema> & MetaData;
     }>
   >;
-  dynamicSource: <ModuleExports = Record<string, unknown>>() => DynamicSource<{
+  dynamicSource: <ModuleExports = Record<string, unknown>>(
+    options?: SourceOptions,
+  ) => DynamicSource<{
     pageData: LocalMarkdownPage<StandardSchemaV1.InferOutput<FrontmatterSchema>, ModuleExports>;
     metaData: StandardSchemaV1.InferOutput<MetaSchema> & MetaData;
   }>;
@@ -72,6 +76,11 @@ export interface LocalMarkdownPage<
   load: () => Promise<MarkdownRenderer<ModuleExports>>;
 }
 
+interface SourceOptions {
+  /** base directory for virtual file paths */
+  baseDir?: string;
+}
+
 export function localMd<
   FrontmatterSchema extends StandardSchemaV1 = typeof defaultSchemas.pageSchema,
   MetaSchema extends StandardSchemaV1 = typeof defaultSchemas.metaSchema,
@@ -89,8 +98,9 @@ export function localMd<
     }>
   > | null = null;
 
-  async function createFiles() {
+  async function createFiles(options?: SourceOptions) {
     const { metas, pages } = await storage.getPages();
+    const baseDir = options?.baseDir;
     const files: VirtualFile<{
       pageData: LocalMarkdownPage<StandardSchemaV1.InferOutput<FrontmatterSchema>, never>;
       metaData: StandardSchemaV1.InferOutput<MetaSchema> & MetaData;
@@ -101,7 +111,7 @@ export function localMd<
 
       files.push({
         type: 'page',
-        path: page.path,
+        path: baseDir ? path.join(baseDir, page.path) : page.path,
         absolutePath: page.absolutePath,
         data: {
           title: frontmatter.title ?? path.basename(page.path, path.extname(page.path)),
@@ -145,7 +155,7 @@ export function localMd<
     for (const meta of metas) {
       files.push({
         type: 'meta',
-        path: meta.path,
+        path: baseDir ? path.join(baseDir, meta.path) : meta.path,
         absolutePath: meta.absolutePath,
         data: meta.data!,
       });
@@ -183,16 +193,16 @@ export function localMd<
         }
       });
     },
-    dynamicSource() {
+    dynamicSource(opts) {
       return {
-        files: createFiles,
+        files: () => createFiles(opts),
         configure(loader) {
           registeredLoaders.add(loader);
         },
       };
     },
-    staticSource() {
-      return (cachedStaticSource ??= createFiles().then((files) => ({ files })));
+    staticSource(opts) {
+      return (cachedStaticSource ??= createFiles(opts).then((files) => ({ files })));
     },
   };
 }

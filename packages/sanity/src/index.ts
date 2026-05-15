@@ -6,6 +6,7 @@ import type { ReactNode } from 'react';
 import type { PortableTextBlock, SlugValue } from 'sanity';
 import type { QueryParams, SanityClient } from '@sanity/client';
 import { renderToc } from './client';
+import path from 'node:path';
 
 export type SanityOptions<Doc extends BaseDoc = BaseDoc> =
   | GenericSanityOptions<Doc>
@@ -17,6 +18,9 @@ interface BaseSanityOptions<Doc extends BaseDoc> {
 
   /** generate [virtual file path](https://fumadocs.dev/docs/headless/source-api/source#static-source) from document */
   generatePath?: (doc: ShallowDoc<Doc>) => string;
+
+  /** base directory for the virutal file paths */
+  baseDir?: string;
 }
 
 export interface GenericSanityOptions<
@@ -61,7 +65,7 @@ export function createSanitySource<Doc extends BaseDoc>(
   pageData: DocToPage<Doc>;
   metaData: MetaData;
 }> {
-  const { docType, generatePath } = options;
+  const { docType, baseDir, generatePath } = options;
   let sanityFetch: <R = unknown>(query: string, params?: QueryParams) => Promise<R>;
 
   if ('sanityFetch' in options) {
@@ -86,6 +90,12 @@ export function createSanitySource<Doc extends BaseDoc>(
 
       return data.map((file) => {
         const slugs = file.slug?.current?.split('/').filter((v) => v.length > 0) ?? [];
+        let filePath = generatePath
+          ? generatePath(file)
+          : slugs.length === 0
+            ? 'index.mdx'
+            : `${slugs.join('/')}.mdx`;
+        if (baseDir) filePath = path.join(baseDir, filePath);
 
         return {
           type: 'page',
@@ -142,11 +152,7 @@ export function createSanitySource<Doc extends BaseDoc>(
             },
           },
           slugs,
-          path: generatePath
-            ? generatePath(file)
-            : slugs.length === 0
-              ? 'index.mdx'
-              : `${slugs.join('/')}.mdx`,
+          path: filePath,
         };
       });
     },

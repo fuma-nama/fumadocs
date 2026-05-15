@@ -40,18 +40,19 @@ export function splitPath(path: string): string[] {
  */
 export function joinPath(...paths: string[]): string {
   const out = [];
-  const parsed = paths.flatMap((path) => path.split('/'));
 
-  for (const seg of parsed) {
-    switch (seg) {
-      case '..':
-        out.pop();
-        break;
-      case '':
-      case '.':
-        break;
-      default:
-        out.push(seg);
+  for (const path of paths) {
+    for (const seg of path.split('/')) {
+      switch (seg) {
+        case '..':
+          out.pop();
+          break;
+        case '':
+        case '.':
+          break;
+        default:
+          out.push(seg);
+      }
     }
   }
 
@@ -66,4 +67,18 @@ export function slash(path: string): string {
   }
 
   return path.replaceAll('\\', '/');
+}
+
+/**
+ * Convert (relative) file path to virtual file path.
+ *
+ * @param path - Relative path
+ * @returns Normalized path, with no trailing/leading slashes
+ * @throws Throws error if path starts with `./` or `../`
+ */
+export function normalize(path: string): string {
+  const segments = path.split(/\/|\\/).filter((v) => v.length > 0);
+  if (segments[0] === '.' || segments[0] === '..')
+    throw new Error("It must not start with './' or '../'");
+  return segments.join('/');
 }
