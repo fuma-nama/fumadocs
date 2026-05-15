@@ -454,8 +454,8 @@ function ForEngineers() {
           Framework Agnostic
         </h3>
         <p className="mb-20">
-          Official support for Next.js, Tanstack Start, React Router, Waku — portable to any
-          React framework.
+          Official support for Next.js, Tanstack Start, React Router, Waku — portable to any React
+          framework.
         </p>
         <div className="flex flex-row gap-2 mt-auto bg-brand text-brand-foreground rounded-xl p-2 w-fit">
           <svg
