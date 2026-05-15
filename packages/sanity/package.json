@@ -34,14 +34,14 @@
   },
   "devDependencies": {
     "@sanity/client": "^7.22.0",
-    "@types/node": "25.6.2",
+    "@types/node": "25.7.0",
     "@types/react": "^19.2.14",
     "fuma-cli": "^0.1.1",
     "fumadocs-core": "workspace:*",
     "fumadocs-ui": "workspace:*",
     "next-sanity": "^12.4.5",
     "react": "^19.2.6",
-    "sanity": "^5.24.0",
+    "sanity": "^5.25.1",
     "tsconfig": "workspace:*",
     "tsdown": "0.22.0",
     "typescript": "^6.0.3"

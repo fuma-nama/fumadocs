@@ -38,7 +38,7 @@
     "zod": "^4.4.3"
   },
   "devDependencies": {
-    "@ai-sdk/react": "^3.0.179",
+    "@ai-sdk/react": "^3.0.184",
     "@fumadocs/vite": "workspace:*",
     "@hono/node-server": "^2.0.2",
     "@hono/node-ws": "^1.3.1",
@@ -49,12 +49,12 @@
     "@types/hast": "^3.0.4",
     "@types/mdast": "^4.0.4",
     "@types/mdx": "^2.0.13",
-    "@types/node": "^25.6.2",
+    "@types/node": "^25.7.0",
     "@types/picomatch": "^4.0.3",
     "@types/react": "^19.2.14",
     "@types/react-dom": "^19.2.3",
     "@types/unist": "^3.0.3",
-    "ai": "^6.0.177",
+    "ai": "^6.0.182",
     "beautiful-mermaid": "^1.1.3",
     "chokidar": "^5.0.0",
     "class-variance-authority": "^0.7.1",
@@ -64,8 +64,8 @@
     "hast-util-to-jsx-runtime": "^2.3.6",
     "hono": "^4.12.18",
     "ignore": "^7.0.5",
-    "katex": "0.16.45",
-    "lucide-react": "^1.14.0",
+    "katex": "0.16.46",
+    "lucide-react": "^1.16.0",
     "react": "^19.2.6",
     "react-dom": "^19.2.6",
     "react-server-dom-webpack": "^19.2.6",
@@ -82,9 +82,9 @@
     "unified": "^11.0.5",
     "unist-util-visit": "^5.1.0",
     "vfile": "^6.0.3",
-    "vite": "^8.0.12",
+    "vite": "^8.0.13",
     "vitefu": "^1.1.3",
-    "waku": "1.0.0-alpha.10"
+    "waku": "1.0.0-beta.0"
   },
   "peerDependencies": {
     "fumadocs-ui": "*"
