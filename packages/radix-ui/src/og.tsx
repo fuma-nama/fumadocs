@@ -62,7 +62,7 @@ export function generate({
         color: 'white',
         padding: '4rem',
         backgroundColor: '#0c0c0c',
-        border: `18px solid ${primaryColor}`,
+        borderBottom: `18px solid ${primaryColor}`,
       }}
     >
       <p
@@ -81,7 +81,7 @@ export function generate({
           margin: 0,
           marginTop: '16px',
           paddingBottom: '28px',
-          borderBottom: `8px dashed ${primaryColor}`,
+          borderBottom: `10px dashed ${primaryColor}`,
         }}
       >
         {props.description}

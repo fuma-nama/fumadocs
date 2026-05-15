@@ -1,5 +1,11 @@
 # fumadocs-preview
 
+## 0.1.2
+
+### Patch Changes
+
+- 8a4e1d1: Support file-system checks
+
 ## 0.1.1
 
 ### Patch Changes

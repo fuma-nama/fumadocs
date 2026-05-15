@@ -1,6 +1,6 @@
 {
   "name": "create-fumadocs-versions",
-  "version": "16.0.108",
+  "version": "16.0.111",
   "private": true,
   "description": "Used to track dependency versions in create-fumadocs-app",
   "dependencies": {
@@ -11,7 +11,7 @@
     "fumadocs-core": "workspace:*",
     "fumadocs-mdx": "workspace:*",
     "fumadocs-ui": "workspace:*",
-    "oxlint": "^1.63.0",
+    "oxlint": "^1.64.0",
     "react": "^19.2.6"
   }
 }

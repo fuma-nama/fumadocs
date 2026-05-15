@@ -2,5 +2,11 @@ packages:
   - packages/*
   - apps/*
   - examples/*
-onlyBuiltDependencies:
-  - bun
+allowBuilds:
+  '@parcel/watcher': false
+  core-js: false
+  esbuild: false
+  msw: false
+  protobufjs: false
+  sharp: false
+  vue-demi: false

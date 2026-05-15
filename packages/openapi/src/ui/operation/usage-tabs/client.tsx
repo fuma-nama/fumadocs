@@ -64,6 +64,7 @@ export function UsageTab({
   } = useOperationContext();
   const { server } = useServerContext();
   const codegen = codeUsages.get(id);
+  const [mounted, setMounted] = useState(false);
   const [data, setData] = useState(
     () => examples.find((example) => example.id === selectedExampleId)?.encoded,
   );
@@ -72,6 +73,7 @@ export function UsageTab({
     const listener: ExampleUpdateListener = (_, encoded) => setData(encoded);
 
     addListener(listener);
+    setMounted(true);
     return () => {
       removeListener(listener);
     };
@@ -80,7 +82,7 @@ export function UsageTab({
   const code = useMemo(() => {
     if (!data) return;
     const url = joinURL(
-      server && typeof window !== 'undefined'
+      server && mounted
         ? withBase(resolveServerUrl(server.url, server.variables), window.location.origin)
         : 'https://example.com',
       resolveRequestData(route, data),
@@ -100,7 +102,7 @@ export function UsageTab({
       mediaAdapters,
       server: null,
     });
-  }, [data, server, route, _client, codegen, mediaAdapters]);
+  }, [data, server, route, mounted, _client, codegen, mediaAdapters]);
 
   if (!code) return null;
 

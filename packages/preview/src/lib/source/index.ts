@@ -2,12 +2,12 @@ import { loader, source } from 'fumadocs-core/source';
 import { revalidable } from '@/lib/revalidable';
 import { lucideIconsPlugin } from 'fumadocs-core/source/lucide-icons';
 import { getPages } from './storage';
-import { AppConfig } from '@/config/global';
+import type { ParsedAppConfig } from '@/config/global';
 
 export const getSource = revalidable({
-  async create(config: AppConfig) {
+  async create(config: ParsedAppConfig) {
     return loader({
-      source: source(await getPages(config.content ?? {})),
+      source: source(await getPages(config.content)),
       plugins: [lucideIconsPlugin()],
       baseUrl: '/',
     });

@@ -4,7 +4,8 @@
     "paths": {
       "@/*": ["./src/*"]
     },
-    "types": ["@types/mdx"]
+    "types": ["@types/mdx"],
+    "allowImportingTsExtensions": true
   },
   "exclude": ["node_modules", "dist", "eslint.config.mjs"]
 }

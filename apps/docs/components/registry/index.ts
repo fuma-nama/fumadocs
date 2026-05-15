@@ -1,6 +1,6 @@
-import * as radixUi from '../../../../packages/radix-ui/registry';
-import * as baseUi from '../../../../packages/base-ui/registry';
-import * as sanity from '../../../../packages/sanity/registry';
+import * as radixUi from '../../../../packages/radix-ui/registry/index.ts';
+import * as baseUi from '../../../../packages/base-ui/registry/index.ts';
+import * as sanity from '../../../../packages/sanity/registry/index.ts';
 import * as path from 'node:path';
 import type { CompileOptions, Registry } from 'fuma-cli/compiler';
 

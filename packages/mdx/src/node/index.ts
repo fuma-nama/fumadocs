@@ -9,7 +9,7 @@ export interface NodeLoaderOptions extends Partial<CoreOptions> {
 }
 
 export function register(options: NodeLoaderOptions = {}) {
-  module.register('./_loader.mjs', import.meta.url, {
+  module.register('./_loader.js', import.meta.url, {
     data: options,
   });
 }

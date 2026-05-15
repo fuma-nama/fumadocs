@@ -36,6 +36,7 @@ declare module 'fumadocs-core/source' {
 export interface InternalOpenAPIMeta {
   method?: string;
   webhook?: boolean;
+  deprecated?: boolean;
 }
 
 /**
@@ -53,6 +54,10 @@ export function openapiPlugin(): LoaderPlugin {
 
         const openApiData = file.data._openapi;
         if (!openApiData || typeof openApiData !== 'object') return node;
+
+        if (openApiData.deprecated) {
+          node.name = <span className="fd-page-tree-item-name line-through">{node.name}</span>;
+        }
 
         if (openApiData.webhook) {
           node.name = (
@@ -151,6 +156,7 @@ export async function openapiSource(
                 ? entry.item.method
                 : undefined,
             webhook: entry.type === 'webhook',
+            deprecated: entry.info.deprecated,
           },
         },
       });

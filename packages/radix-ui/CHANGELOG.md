@@ -1,5 +1,12 @@
 # fumadocs-ui
 
+## 16.8.11
+
+### Patch Changes
+
+- Updated dependencies [1dc86c7]
+  - fumadocs-core@16.8.11
+
 ## 16.8.10
 
 ### Patch Changes

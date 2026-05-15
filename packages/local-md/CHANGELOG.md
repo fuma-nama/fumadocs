@@ -1,5 +1,11 @@
 # @fumadocs/local-md
 
+## 0.2.2
+
+### Patch Changes
+
+- 1fb6a61: Support custom base directory for content sources
+
 ## 0.2.1
 
 ### Patch Changes

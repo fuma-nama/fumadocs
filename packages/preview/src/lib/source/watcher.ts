@@ -1,12 +1,12 @@
-import type { AppConfig } from '@/config';
+import type { ParsedAppConfig } from '@/config';
 import { type Matcher, watch } from 'chokidar';
 import { normalizeProjects } from './config';
 import ignore, { type Ignore } from 'ignore';
 import fs from 'node:fs/promises';
 import path from 'node:path';
 
-export async function startWatcher(config: AppConfig) {
-  const projects = normalizeProjects(config.content?.projects);
+export async function startWatcher(config: ParsedAppConfig) {
+  const projects = normalizeProjects(config.content.projects);
   // init .gitignore
   const ignored = await Promise.all([
     fromGitIgnore(process.env.ROOT_DIR ?? process.cwd(), 'node_modules\ndist\nbuild'),

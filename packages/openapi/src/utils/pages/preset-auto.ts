@@ -317,6 +317,7 @@ export function createAutoPreset(options: SchemaToPagesOptions): PagesBuilderCon
           info: {
             title: displayName,
             description: operation.description ?? pathItem.description,
+            deprecated: operation.deprecated,
           },
         });
       }
@@ -330,6 +331,7 @@ export function createAutoPreset(options: SchemaToPagesOptions): PagesBuilderCon
           info: {
             title: displayName,
             description: operation.description ?? pathItem.description,
+            deprecated: operation.deprecated,
           },
           item: webhook,
         });

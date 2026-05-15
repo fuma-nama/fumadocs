@@ -2,7 +2,7 @@ import type { CompilerOptions } from '@/loaders/mdx/build-mdx';
 import type { LoadFnOutput, LoadHook } from 'node:module';
 import { fileURLToPath } from 'node:url';
 import fs from 'node:fs/promises';
-import type { TransformPluginContext } from 'rolldown';
+import type { HookFilter, TransformPluginContext } from 'rolldown';
 import type { Environment, TransformResult } from 'vite';
 import { parse } from 'node:querystring';
 import { ValidationError } from '@/utils/validation';
@@ -90,10 +90,10 @@ export function toNode(loader: Loader): LoadHook {
 }
 
 export interface ViteLoader {
-  filter: (id: string) => boolean;
+  filter: HookFilter;
 
   transform: (
-    this: TransformPluginContext & { environment: Environment },
+    this: TransformPluginContext & { environment?: Environment },
     value: string,
     id: string,
   ) => Promise<TransformResult | null>;
@@ -101,33 +101,40 @@ export interface ViteLoader {
 
 export function toVite(loader: Loader): ViteLoader {
   return {
-    filter(id) {
-      return !loader.test || loader.test.test(id);
+    filter: {
+      id: loader.test,
     },
     async transform(value, id) {
-      const environment = this.environment;
       const [file, query = ''] = id.split('?', 2);
 
-      const result = await loader.load({
-        filePath: file,
-        query: parse(query),
-        getSource() {
-          return value;
-        },
-        development: environment.mode === 'dev',
-        compiler: {
-          addDependency: (file) => {
-            this.addWatchFile(file);
+      try {
+        const result = await loader.load({
+          filePath: file,
+          query: parse(query),
+          getSource() {
+            return value;
           },
-        },
-      });
+          development: this.environment ? this.environment.mode === 'dev' : false,
+          compiler: {
+            addDependency: (file) => {
+              this.addWatchFile(file);
+            },
+          },
+        });
 
-      if (result === null) return null;
-      return {
-        code: result.code,
-        map: result.map as TransformResult['map'],
-        moduleType: result.moduleType,
-      };
+        if (result === null) return null;
+        return {
+          code: result.code,
+          map: result.map as TransformResult['map'],
+          moduleType: result.moduleType,
+        };
+      } catch (e) {
+        if (e instanceof ValidationError) {
+          throw new Error(await e.toStringFormatted(), { cause: e });
+        }
+
+        throw e;
+      }
     },
   };
 }

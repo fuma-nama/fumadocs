@@ -271,7 +271,10 @@ export function remarkInclude(this: Processor): Transformer<Root, Root> {
 
       const attributes = parseElementAttributes(node);
       const { file: relativePath, section } = parseSpecifier(specifier);
-      const targetPath = path.resolve('cwd' in attributes ? file.cwd : file.dirname!, relativePath);
+      const targetPath = path.resolve(
+        'cwd' in attributes || !file.dirname ? file.cwd : file.dirname,
+        relativePath,
+      );
 
       queue.push(
         embedContent(targetPath, section, attributes, file).then((replace) => {

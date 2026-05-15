@@ -1,11 +1,19 @@
-import type { ProjectConfig } from '@/config';
+import type { projectConfigSchema } from '@/config';
 import path from 'node:path';
 import { getDefaultProjectDirectories } from '../env';
+import type z from 'zod';
 
-export type NormalizedProjectConfig = Pick<Required<ProjectConfig>, 'include' | 'dir'> &
-  ProjectConfig;
+export interface NormalizedProjectConfig extends Omit<
+  z.output<typeof projectConfigSchema>,
+  'include' | 'dir'
+> {
+  include: string[];
+  dir: string;
+}
 
-export function normalizeProjects(projects?: ProjectConfig[]): NormalizedProjectConfig[] {
+export function normalizeProjects(
+  projects?: z.output<typeof projectConfigSchema>[],
+): NormalizedProjectConfig[] {
   const baseDir = process.env.ROOT_DIR ?? process.cwd();
 
   if (!projects || projects.length === 0) {

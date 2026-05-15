@@ -1,6 +1,6 @@
 {
   "name": "@fumadocs/base-ui",
-  "version": "16.8.10",
+  "version": "16.8.11",
   "description": "The Base UI version of Fumadocs UI",
   "keywords": [
     "Docs",
@@ -128,14 +128,14 @@
     "@base-ui/react": "^1.4.1",
     "@fumadocs/tailwind": "workspace:*",
     "class-variance-authority": "^0.7.1",
-    "lucide-react": "^1.14.0",
+    "lucide-react": "^1.16.0",
     "motion": "^12.38.0",
     "next-themes": "^0.4.6",
     "react-remove-scroll": "^2.7.2",
     "rehype-raw": "^7.0.0",
     "scroll-into-view-if-needed": "^3.1.0",
     "shiki": "^4.0.2",
-    "tailwind-merge": "^3.5.0",
+    "tailwind-merge": "^3.6.0",
     "unist-util-visit": "^5.1.0"
   },
   "devDependencies": {
@@ -145,7 +145,7 @@
     "@tsdown/css": "^0.22.0",
     "@types/hast": "^3.0.4",
     "@types/mdx": "^2.0.13",
-    "@types/node": "^25.6.2",
+    "@types/node": "^25.7.0",
     "@types/react": "^19.2.14",
     "@types/react-dom": "^19.2.3",
     "fuma-cli": "^0.1.1",
