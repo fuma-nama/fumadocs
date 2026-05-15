@@ -53,7 +53,7 @@ export interface SidebarProviderProps {
   defaultOpenLevel?: number;
 
   /**
-   * Prefetch links, default behaviour depends on your React.js framework.
+   * Prefetch links, default behaviour depends on your React framework.
    */
   prefetch?: boolean;
 

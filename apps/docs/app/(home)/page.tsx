@@ -71,7 +71,7 @@ export default function Page() {
         <Hero />
         <div className="flex flex-col z-2 px-4 size-full md:p-12 max-md:items-center max-md:text-center">
           <p className="mt-12 text-xs text-brand font-medium rounded-full p-2 border border-brand/50 w-fit">
-            the React.js docs framework you love.
+            the React docs framework you love.
           </p>
           <h1 className="text-4xl my-8 leading-tighter font-medium xl:text-5xl xl:mb-12">
             Build excellent
@@ -96,11 +96,11 @@ export default function Page() {
       </div>
       <div className="grid grid-cols-1 gap-10 mt-12 px-6 mx-auto w-full max-w-[1400px] md:px-12 lg:grid-cols-2 lg:mt-20">
         <p className="text-2xl tracking-tight leading-snug font-light col-span-full md:text-3xl xl:text-4xl">
-          Fumadocs is a <span className="text-brand font-medium">React.js</span> documentation
+          Fumadocs is a <span className="text-brand font-medium">React</span> documentation
           framework for <span className="text-brand font-medium">Developers</span>, beautifully
           designed by <span className="text-brand font-medium">Fuma Nama</span>. Bringing powerful
           features for your docs workflows, with high customizability to fit your preferences, works
-          seamlessly with any React.js framework, CMS — anything.
+          seamlessly with any React framework, CMS — anything.
         </p>
         <div className="relative p-4 rounded-2xl col-span-full z-2 overflow-hidden md:p-8">
           <Image
@@ -455,7 +455,7 @@ function ForEngineers() {
         </h3>
         <p className="mb-20">
           Official support for Next.js, Tanstack Start, React Router, Waku — portable to any
-          React.js framework.
+          React framework.
         </p>
         <div className="flex flex-row gap-2 mt-auto bg-brand text-brand-foreground rounded-xl p-2 w-fit">
           <svg

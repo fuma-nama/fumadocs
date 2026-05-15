@@ -24,8 +24,8 @@ Fumadocs 16 removed substantial amount of deprecated APIs accumulated since v15.
 
 - **Default Switch to Shiki's JavaScript Regex Engine**: To ensure seamless compatibility with environments like Cloudflare Workers, the JavaScript engine is now the default over the WASM-based Oniguruma. This change affects `rehype-code` (via the `engine` option) and `fumadocs-core/highlight`.
 
-- **Minimum React.js Version Raised to 19.2.0**: React 19.2 brings crucial performance improvements to Fumadocs UI.
-  - **Next.js Projects**: Next.js projects using Fumadocs UI must use Next.js 16 or later, as Next.js uses its own canary channel for React.js.
+- **Minimum React Version Raised to 19.2.0**: React 19.2 brings crucial performance improvements to Fumadocs UI.
+  - **Next.js Projects**: Next.js projects using Fumadocs UI must use Next.js 16 or later, as Next.js uses its own canary channel for React.
 - **`fumadocs-ui/provider` is removed**:
   - Use `fumadocs-ui/provider/next` for root provider.
   - Use individual exports for contexts from `fumadocs-ui/contexts/*`.

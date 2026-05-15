@@ -14,7 +14,7 @@ export const metadata = createMetadata({
     template: '%s | Fumadocs',
     default: 'Fumadocs',
   },
-  description: 'The React.js documentation framework.',
+  description: 'The React documentation framework.',
   metadataBase: baseUrl,
 });
 

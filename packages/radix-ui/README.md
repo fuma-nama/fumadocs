@@ -1,5 +1,5 @@
 # Fumadocs UI
 
-The React.js docs framework.
+The React docs framework.
 
 [Read Documentation](https://fumadocs.dev/docs/ui)

@@ -11,7 +11,7 @@ export async function GET(): Promise<Response> {
     },
     title: 'Fumadocs Documentation',
     author: 'Fuma Nama',
-    description: 'Documentation for Fumadocs - the React.js documentation framework',
+    description: 'Documentation for Fumadocs - the React documentation framework',
     cover: '/og.png',
   });
   return new Response(new Uint8Array(buffer), {

@@ -13,7 +13,7 @@ Fumadocs 15.2 introduces a layer over `fumadocs-core` to extend support to other
 
 The main focus of Fumadocs is flexibility, I aim to support more frameworks as long as it doesn't change the fundamentals of Fumadocs, like the separation of core and UI package.
 
-The React.js ecosystem is a joy to work with, porting Fumadocs to other frameworks isn't as difficult as I thought.
+The React ecosystem is a joy to work with, porting Fumadocs to other frameworks isn't as difficult as I thought.
 It's also my goal to make it work not only for Next.js devs, but also everyone in the ecosystem who is using a SSR-compatible React framework.
 
 ### Breaking Changes
@@ -65,7 +65,7 @@ pnpm create fumadocs-app
 
 ### Future Plans
 
-15.2 doesn't support Astro, and probably won't unless better React.js support is provided by Astro.
+15.2 doesn't support Astro, and probably won't unless better React support is provided by Astro.
 
 - `transition:persist` is needed for Fumadocs UI layouts, however this will also affect its children (e.g. MDX content), causing page content to be persisted even after navigation.
 - React contexts cannot work across islands, this changes the usage of Fumadocs significantly and hence require a redesign of APIs.
