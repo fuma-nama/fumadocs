@@ -1,5 +1,11 @@
 # next-docs-mdx
 
+## 15.0.5
+
+### Patch Changes
+
+- 1fb6a61: Support custom base directory for content sources
+
 ## 15.0.4
 
 ### Patch Changes
