@@ -1,5 +1,11 @@
 # @fumadocs/sanity
 
+## 0.0.4
+
+### Patch Changes
+
+- 1fb6a61: Support custom base directory for content sources
+
 ## 0.0.3
 
 ### Patch Changes
