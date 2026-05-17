@@ -1,5 +1,11 @@
 # next-docs-mdx
 
+## 15.0.6
+
+### Patch Changes
+
+- da4a81a: Update vite configs
+
 ## 15.0.5
 
 ### Patch Changes

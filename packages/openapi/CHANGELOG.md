@@ -1,5 +1,11 @@
 # @fuma-docs/openapi
 
+## 10.8.5
+
+### Patch Changes
+
+- da4a81a: Bundle `ajv`
+
 ## 10.8.4
 
 ### Patch Changes
