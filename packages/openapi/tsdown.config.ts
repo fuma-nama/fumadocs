@@ -37,9 +37,14 @@ export default defineConfig({
       '@scalar/helpers',
       '@scalar/openapi-upgrader',
 
+      // for Vite RSC compatibility
       'xml-js',
+      'ajv',
+      'fast-deep-equal',
+      'json-schema-traverse',
+      'fast-uri',
     ],
-    neverBundle: [/^node:/],
+    neverBundle: [/^node:/, /ajv(.+)\.d\.ts/],
   },
   exports: {
     enabled: true,

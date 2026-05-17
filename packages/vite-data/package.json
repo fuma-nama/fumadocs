@@ -10,7 +10,6 @@
     "@fumadocs/story": "workspace:*",
     "fumadocs-core": "workspace:*",
     "fumadocs-mdx": "workspace:*",
-    "fumadocs-openapi": "workspace:*",
     "fumadocs-twoslash": "workspace:*",
     "fumadocs-typescript": "workspace:*",
     "fumadocs-ui": "workspace:*"

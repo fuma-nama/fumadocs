@@ -2678,9 +2678,6 @@ importers:
       '@radix-ui/react-slot':
         specifier: ^1.2.4
         version: 1.2.4(@types/react@19.2.14)(react@19.2.6)
-      ajv:
-        specifier: ^8.20.0
-        version: 8.20.0
       chokidar:
         specifier: ^5.0.0
         version: 5.0.0
@@ -2742,6 +2739,9 @@ importers:
       '@types/react':
         specifier: ^19.2.14
         version: 19.2.14
+      ajv:
+        specifier: ^8.20.0
+        version: 8.20.0
       fast-content-type-parse:
         specifier: ^3.0.0
         version: 3.0.0
@@ -3437,9 +3437,6 @@ importers:
       fumadocs-mdx:
         specifier: workspace:*
         version: link:../mdx
-      fumadocs-openapi:
-        specifier: workspace:*
-        version: link:../openapi
       fumadocs-twoslash:
         specifier: workspace:*
         version: link:../twoslash
