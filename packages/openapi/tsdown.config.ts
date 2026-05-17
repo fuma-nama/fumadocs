@@ -36,6 +36,8 @@ export default defineConfig({
       'yaml',
       '@scalar/helpers',
       '@scalar/openapi-upgrader',
+
+      'xml-js',
     ],
     neverBundle: [/^node:/],
   },

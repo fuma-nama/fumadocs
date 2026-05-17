@@ -63,8 +63,7 @@
     "remark": "^15.0.1",
     "remark-rehype": "^11.1.2",
     "shiki": "^4.0.2",
-    "tailwind-merge": "^3.6.0",
-    "xml-js": "^1.6.11"
+    "tailwind-merge": "^3.6.0"
   },
   "devDependencies": {
     "@fastify/deepmerge": "^3.2.1",
@@ -81,7 +80,8 @@
     "json-schema-typed": "^8.0.2",
     "tailwindcss": "^4.3.0",
     "tsconfig": "workspace:*",
-    "tsdown": "0.22.0"
+    "tsdown": "0.22.0",
+    "xml-js": "^1.6.11"
   },
   "peerDependencies": {
     "@scalar/api-client-react": "2.0.1",
@@ -110,6 +110,7 @@
     "@scalar/openapi-upgrader": "0.2.7",
     "fast-content-type-parse": "3.0.0",
     "pathe": "2.0.3",
-    "yaml": "2.8.4"
+    "xml-js": "1.6.11",
+    "yaml": "2.9.0"
   }
 }
