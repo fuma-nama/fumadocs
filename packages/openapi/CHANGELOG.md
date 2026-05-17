@@ -1,5 +1,11 @@
 # @fuma-docs/openapi
 
+## 10.8.4
+
+### Patch Changes
+
+- e84da60: Bundle `xml-js`
+
 ## 10.8.3
 
 ### Patch Changes
