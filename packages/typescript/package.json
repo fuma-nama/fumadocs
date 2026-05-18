@@ -53,7 +53,7 @@
     "@types/estree": "^1.0.9",
     "@types/hast": "^3.0.4",
     "@types/mdast": "^4.0.4",
-    "@types/node": "25.7.0",
+    "@types/node": "25.8.0",
     "@types/react": "^19.2.14",
     "@types/react-dom": "^19.2.3",
     "fumadocs-core": "workspace:*",

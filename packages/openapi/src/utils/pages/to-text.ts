@@ -9,7 +9,7 @@ import {
   type PageOutput,
   type WebhookOutput,
 } from '@/utils/pages/builder';
-import type { InternalOpenAPIMeta } from '@/server/source-api';
+import type { InternalOpenAPIMeta } from '@/server';
 import { toStaticData } from '@/utils/pages/to-static-data';
 import { doubleQuote } from '@/requests/string-utils';
 

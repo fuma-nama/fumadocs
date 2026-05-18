@@ -34,7 +34,7 @@
   },
   "devDependencies": {
     "@sanity/client": "^7.22.0",
-    "@types/node": "25.7.0",
+    "@types/node": "25.8.0",
     "@types/react": "^19.2.14",
     "fuma-cli": "^0.1.1",
     "fumadocs-core": "workspace:*",
