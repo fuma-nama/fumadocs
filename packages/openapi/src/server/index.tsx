@@ -339,3 +339,5 @@ export async function openapiSource(server: OpenAPIServer, options: OpenAPISourc
 export function transformerOpenAPI(): PageTreeTransformer {
   return openapiPlugin().transformPageTree!;
 }
+
+export type { CreateProxyOptions, Proxy } from './proxy';
