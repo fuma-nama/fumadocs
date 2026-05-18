@@ -1,6 +1,6 @@
 import type { DereferencedDocument } from '@/utils/document/dereference';
 import type { OpenAPIServer } from '@/server';
-import type { OperationItem, WebhookItem } from '@/ui/api-page';
+import type { ApiPageProps, OperationItem, WebhookItem } from '@/ui/api-page';
 import type { OperationObject, PathItemObject, TagObject } from '@/types';
 import { getTagDisplayName, methodKeys, type NoReference } from '@/utils/schema';
 import { idToTitle } from '@/utils/id-to-title';
@@ -226,4 +226,27 @@ export function fromSchema(
   });
 
   return files;
+}
+
+export function getPageProps(entry: PageOutput | OperationOutput | WebhookOutput): ApiPageProps {
+  if (entry.type === 'operation')
+    return {
+      document: entry.schemaId,
+      operations: [entry.item],
+      showDescription: true,
+    };
+  if (entry.type === 'webhook')
+    return {
+      document: entry.schemaId,
+      webhooks: [entry.item],
+      showDescription: true,
+    };
+
+  return {
+    showTitle: true,
+    showDescription: true,
+    document: entry.schemaId,
+    operations: entry.operations,
+    webhooks: entry.webhooks,
+  };
 }

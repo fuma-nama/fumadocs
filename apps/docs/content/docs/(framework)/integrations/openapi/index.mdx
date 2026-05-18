@@ -115,7 +115,6 @@ You can also use it without generating real files by integrating into [Loader AP
 
 ```ts title="lib/source.ts"
 import { loader } from 'fumadocs-core/source';
-import { openapiPlugin, openapiSource } from 'fumadocs-openapi/server';
 import { docs } from 'collections/server';
 import { openapi } from '@/lib/openapi';
 
@@ -123,19 +122,19 @@ export const source = loader(
   // [!code ++:6]
   {
     docs: docs.toFumadocsSource(),
-    openapi: await openapiSource(openapi, {
+    openapi: await openapi.staticSource({
       baseDir: 'openapi',
     }),
   },
   {
     baseUrl: '/docs',
-    plugins: [openapiPlugin()],
+    plugins: [openapi.loaderPlugin()],
     // ...
   },
 );
 ```
 
-`openapiSource()` is a server-side API that generates pages directly to your `loader()`, hence it allows dynamic content generation, such as re-generating page tree as schema changes.
+`staticSource()` is a server-side API that generates pages directly to your `loader()`, hence it allows dynamic content generation, such as re-generating page tree as schema changes.
 
 **It will change the type of your pages**, make sure to update all references to your `source`. For example, in your page component:
 

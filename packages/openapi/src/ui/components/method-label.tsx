@@ -35,15 +35,7 @@ export function Badge({
   ...props
 }: Omit<HTMLAttributes<HTMLSpanElement>, 'color'> & VariantProps<typeof badgeVariants>) {
   return (
-    <span
-      className={cn(
-        badgeVariants({
-          color,
-          className,
-        }),
-      )}
-      {...props}
-    >
+    <span className={cn(badgeVariants({ color }), className)} {...props}>
       {props.children}
     </span>
   );

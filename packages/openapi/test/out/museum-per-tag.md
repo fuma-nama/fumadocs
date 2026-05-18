@@ -58,7 +58,6 @@ title: Operations
 description: Operational information about the museum.
 full: true
 _openapi:
-  method: GET
   toc:
     - depth: 2
       title: Get museum hours

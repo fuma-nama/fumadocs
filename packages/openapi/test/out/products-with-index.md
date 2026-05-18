@@ -19,6 +19,7 @@ description: Retrieve inventory details for a specific product.
 full: true
 _openapi:
   method: GET
+  webhook: false
   toc: []
   structuredData:
     headings: []
@@ -38,6 +39,7 @@ description: Retrieve details of a product by its ID.
 full: true
 _openapi:
   method: GET
+  webhook: false
   toc: []
   structuredData:
     headings: []

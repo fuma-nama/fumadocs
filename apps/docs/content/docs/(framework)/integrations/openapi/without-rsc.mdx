@@ -62,7 +62,6 @@ You can generate pages dynamically by integrating into [Loader API](/docs/headle
 
 ```ts title="lib/source.ts"
 import { loader } from 'fumadocs-core/source';
-import { openapiPlugin, openapiSource } from 'fumadocs-openapi/server';
 import { docs } from 'collections/server';
 import { openapi } from '@/lib/openapi';
 
@@ -70,13 +69,13 @@ export const source = loader(
   // [!code ++:6]
   {
     docs: docs.toFumadocsSource(),
-    openapi: await openapiSource(openapi, {
+    openapi: await openapi.staticSource({
       baseDir: 'openapi',
     }),
   },
   {
     baseUrl: '/docs',
-    plugins: [openapiPlugin()],
+    plugins: [openapi.loaderPlugin()],
     // ...
   },
 );
@@ -84,7 +83,7 @@ export const source = loader(
 
 ### Update References to `source` [step]
 
-`openapiSource()` is a server-side API that generates pages directly to your `loader()`, hence allowing dynamic generation (e.g. different page tree as schema changes).
+`staticSource()` is a server-side API that generates pages directly to your `loader()`, hence allowing dynamic generation (e.g. different page tree as schema changes).
 
 But **it will change the type of your pages**, explicit handling of OpenAPI pages is necessary.
 

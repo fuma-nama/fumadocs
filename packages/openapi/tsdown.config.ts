@@ -14,7 +14,7 @@ export default defineConfig({
     './src/ui/client/index.tsx',
     './src/playground/client.tsx',
     './src/scalar/index.tsx',
-    './src/server/index.ts',
+    './src/server/index.tsx',
     './src/requests/generators/*.ts',
   ],
   unbundle: true,

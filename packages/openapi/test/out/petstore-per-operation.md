@@ -4,6 +4,7 @@ title: Create a pet
 full: true
 _openapi:
   method: POST
+  webhook: false
   toc: []
   structuredData:
     headings: []
@@ -21,6 +22,7 @@ title: List all pets
 full: true
 _openapi:
   method: GET
+  webhook: false
   toc: []
   structuredData:
     headings: []
@@ -38,6 +40,7 @@ title: Info for a specific pet
 full: true
 _openapi:
   method: GET
+  webhook: false
   toc: []
   structuredData:
     headings: []

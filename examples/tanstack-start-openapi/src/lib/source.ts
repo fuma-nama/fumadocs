@@ -2,19 +2,18 @@ import { loader } from 'fumadocs-core/source';
 import { docs } from 'collections/server';
 import { lucideIconsPlugin } from 'fumadocs-core/source/lucide-icons';
 import { docsRoute } from './shared';
-import { openapiPlugin, openapiSource } from 'fumadocs-openapi/server';
 import { openapi } from './openapi';
 
 export const source = loader(
   {
     docs: docs.toFumadocsSource(),
-    openapi: await openapiSource(openapi, {
+    openapi: await openapi.staticSource({
       baseDir: 'openapi',
     }),
   },
   {
     baseUrl: docsRoute,
-    plugins: [lucideIconsPlugin(), openapiPlugin()],
+    plugins: [lucideIconsPlugin(), openapi.loaderPlugin()],
   },
 );
 
