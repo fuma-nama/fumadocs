@@ -4,6 +4,7 @@ import type { DocCollection, DocsCollection, MetaCollection } from '@/config';
 import type { StandardSchemaV1 } from '@standard-schema/spec';
 import type { CompiledMDXProperties } from '@/loaders/mdx/build-mdx';
 import type { InternalTypeConfig, DocData, DocMethods, FileInfo, MetaMethods } from './types';
+import type { StructuredData } from 'fumadocs-core/mdx-plugins/remark-structure';
 
 export type MetaCollectionEntry<Data> = Data & MetaMethods;
 
@@ -24,6 +25,7 @@ export type AsyncDocCollectionEntry<
   TC extends InternalTypeConfig = InternalTypeConfig,
 > = {
   load: () => Promise<DocData & TC['DocData'][Name]>;
+  structuredData: () => Promise<StructuredData>;
 } & DocMethods &
   Frontmatter;
 
@@ -137,6 +139,9 @@ export function server<Config, TC extends InternalTypeConfig>(options: ServerOpt
             ...createDocMethods(fileInfo(k, base), content),
             async load() {
               return mapDocData(await content());
+            },
+            async structuredData() {
+              return (await content()).structuredData;
             },
           } satisfies AsyncDocCollectionEntry;
         }),

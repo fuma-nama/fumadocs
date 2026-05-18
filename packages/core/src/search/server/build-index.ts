@@ -24,11 +24,11 @@ export interface SharedIndex {
 export async function buildIndexDefault(page: Page): Promise<SharedIndex> {
   let structuredData: StructuredData | undefined;
 
-  if ('structuredData' in page.data) {
+  if (page.data.structuredData) {
     structuredData =
       typeof page.data.structuredData === 'function'
-        ? ((await page.data.structuredData()) as StructuredData)
-        : (page.data.structuredData as StructuredData);
+        ? await page.data.structuredData()
+        : page.data.structuredData;
   } else if ('load' in page.data && typeof page.data.load === 'function') {
     structuredData = (await page.data.load()).structuredData;
   }
