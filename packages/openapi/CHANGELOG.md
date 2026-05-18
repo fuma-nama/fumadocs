@@ -1,5 +1,14 @@
 # @fuma-docs/openapi
 
+## 10.8.6
+
+### Patch Changes
+
+- 975b530: Add Source API methods & Dynamic Source support to OpenAPI server
+- Updated dependencies [768b676]
+  - fumadocs-core@16.8.12
+  - fumadocs-ui@16.8.12
+
 ## 10.8.5
 
 ### Patch Changes
