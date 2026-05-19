@@ -27,7 +27,7 @@
     "@radix-ui/react-presence": "^1.1.5",
     "@radix-ui/react-tooltip": "^1.2.8",
     "@shikijs/transformers": "^4.0.2",
-    "@takumi-rs/image-response": "^1.1.2",
+    "@takumi-rs/image-response": "^1.2.1",
     "ai": "^6.0.184",
     "class-variance-authority": "^0.7.1",
     "d3-force": "^3.0.0",

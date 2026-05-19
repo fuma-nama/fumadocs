@@ -40,6 +40,12 @@ export interface DocCollection<
   type: 'doc';
 
   postprocess?: Partial<PostprocessOptions>;
+
+  /**
+   * By defining a collection-level MDX options, **the default options & plugins will be removed**.
+   * 
+   * See [`mdxOptions`](https://fumadocs.dev/docs/mdx/collections#mdxoptions) for details.
+   */
   mdxOptions?: ProcessorOptions | ((environment: BuildEnvironment) => Promise<ProcessorOptions>);
 
   /**
@@ -70,7 +76,7 @@ export interface GlobalConfig {
   plugins?: PluginOption[];
 
   /**
-   * Configure global MDX options
+   * Configure global MDX options, will be used by all `doc` collections unless collection-level `mdxOptions` is specified.
    */
   mdxOptions?: MDXPresetOptions | (() => Promise<MDXPresetOptions>);
 
