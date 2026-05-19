@@ -43,7 +43,7 @@ export interface DocCollection<
 
   /**
    * By defining a collection-level MDX options, **the default options & plugins will be removed**.
-   * 
+   *
    * See [`mdxOptions`](https://fumadocs.dev/docs/mdx/collections#mdxoptions) for details.
    */
   mdxOptions?: ProcessorOptions | ((environment: BuildEnvironment) => Promise<ProcessorOptions>);

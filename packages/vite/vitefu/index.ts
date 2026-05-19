@@ -29,6 +29,7 @@ interface PackageJson {
   main?: string;
   module?: string;
   private?: boolean;
+  type?: string;
   [key: string]: unknown;
 }
 
@@ -167,7 +168,7 @@ export async function findClosestPkgJsonPath(
 }
 
 export async function pkgNeedsOptimization(pkgJson: PackageJson): Promise<boolean> {
-  if (pkgJson.module || pkgJson.exports) return false;
+  if (pkgJson.module || pkgJson.exports || pkgJson.type === 'module') return false;
 
   if (pkgJson.main) {
     const entryExt = path.extname(pkgJson.main);
