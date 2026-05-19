@@ -16,6 +16,8 @@ export interface PageTreeBuilderContext<S extends ContentStorage = ContentStorag
   storages?: Record<string, S>;
   locale?: string;
   custom?: Record<string, unknown>;
+
+  sort: PageTreeOptions<S>['sort'];
 }
 
 export interface PageTreeTransformer<S extends ContentStorage = ContentStorage> {
@@ -56,6 +58,12 @@ export interface PageTreeOptions<S extends ContentStorage = ContentStorage> {
 
   /** custom context */
   context?: Record<string, unknown>;
+
+  /** customize the default sorting behaviour (`localeCompare`) */
+  sort?: {
+    locales?: Intl.LocalesArgument;
+    options?: Intl.CollatorOptions;
+  };
 }
 
 const group = /^\((?<name>.+)\)$/;
@@ -102,6 +110,7 @@ export class PageTreeBuilder {
       noRef,
       transformers: this.transformers,
       custom: context,
+      sort: options.sort,
     };
 
     if (Array.isArray(input)) {
@@ -179,7 +188,13 @@ export class PageTreeBuilder {
   ): PageTree.Node[] {
     const items: PageTree.Node[] = [];
     const folders: PageTree.Folder[] = [];
-    const sortedPaths = paths.sort((a, b) => (reversed ? b.localeCompare(a) : a.localeCompare(b)));
+    const sortLocales = this.ctx.sort?.locales;
+    const sortOptions = this.ctx.sort?.options;
+    const sortedPaths = paths.sort((a, b) =>
+      reversed
+        ? b.localeCompare(a, sortLocales, sortOptions)
+        : a.localeCompare(b, sortLocales, sortOptions),
+    );
 
     for (const path of sortedPaths) {
       if (filter && !filter(path)) continue;

@@ -27,6 +27,7 @@ export function transformerFallback(): PageTreeTransformer {
         transformers: this.transformers,
         generateFallback: false,
         context: { ...this.custom, _fallback: true },
+        sort: this.sort,
       }).root();
 
       addedFiles.clear();

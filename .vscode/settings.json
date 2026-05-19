@@ -3,7 +3,7 @@
     ["cva\\(([^)]*)\\)", "[\"'`]([^\"'`]*).*?[\"'`]"],
     ["cn\\(([^)]*)\\)", "(?:'|\"|`)([^']*)(?:'|\"|`)"]
   ],
-  "oxc.enable.oxlint": true,
+  "oxc.enable.oxlint": false,
   "files.associations": {
     "**/packages/create-app/template/**/*": "plaintext"
   },
