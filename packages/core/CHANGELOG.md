@@ -1,5 +1,11 @@
 # fumadocs-core
 
+## 16.8.12
+
+### Patch Changes
+
+- 768b676: Standardize `structuredData` in page data
+
 ## 16.8.11
 
 ### Patch Changes

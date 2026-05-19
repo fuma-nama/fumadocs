@@ -1,5 +1,13 @@
 # next-docs-mdx
 
+## 15.0.7
+
+### Patch Changes
+
+- 768b676: Standardize `structuredData` in page data
+- Updated dependencies [768b676]
+  - fumadocs-core@16.8.12
+
 ## 15.0.6
 
 ### Patch Changes
