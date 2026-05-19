@@ -1,7 +1,7 @@
 import type * as PageTree from '@/page-tree/definitions';
 import type { I18nConfig } from '@/i18n';
 import { createContentStorageBuilder, type ContentStorage } from './storage/content';
-import { PageTreeBuilder, type PageTreeOptions } from '@/source/page-tree/builder';
+import { createPageTreeBuilder, type PageTreeOptions } from '@/source/page-tree/builder';
 import { joinPath } from './path';
 import { normalizeUrl } from '@/utils/normalize-url';
 import { SlugFn, slugsPlugin } from '@/source/plugins/slugs';
@@ -333,12 +333,12 @@ export function loader<I extends ResolvedInput, I18n extends I18nConfig | undefi
     };
 
     if (storage instanceof FileSystem) {
-      const out = new PageTreeBuilder(storage, options).root();
+      const out = createPageTreeBuilder(storage, options).root();
       return (pageTrees = out);
     } else {
       const out: Record<string, PageTree.Root> = {};
       for (const locale in storage) {
-        out[locale] = new PageTreeBuilder([locale, storage], options).root();
+        out[locale] = createPageTreeBuilder([locale, storage], options).root();
       }
       return (pageTrees = out);
     }

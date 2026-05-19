@@ -36,7 +36,7 @@ const pageTreeTests: {
   title: string;
   output: string;
   source: StaticSource;
-  loader?: Pick<Partial<LoaderOptions>, 'i18n'>;
+  loader?: Pick<Partial<LoaderOptions>, 'i18n' | 'pageTree'>;
 }[] = [
   {
     title: 'Basic',
@@ -52,6 +52,16 @@ const pageTreeTests: {
     title: 'Rest',
     source: (await import('./fixtures/page-trees/rest')).source,
     output: './fixtures/page-trees/rest.tree.json',
+  },
+  {
+    title: 'Rest: sort by name',
+    source: (await import('./fixtures/page-trees/rest')).source,
+    output: './fixtures/page-trees/rest-by-name.tree.json',
+    loader: {
+      pageTree: {
+        sort: { by: 'name' },
+      },
+    },
   },
   {
     title: 'Rest: priority',
@@ -121,10 +131,11 @@ for (const pageTreeTest of pageTreeTests) {
   test(`Page Tree: ${pageTreeTest.title}`, async () => {
     const source = loader(pageTreeTest.source, {
       baseUrl: '/',
+      ...pageTreeTest.loader,
       pageTree: {
         noRef: true,
+        ...(pageTreeTest.loader?.pageTree as object),
       },
-      ...pageTreeTest.loader,
     });
 
     await expect(

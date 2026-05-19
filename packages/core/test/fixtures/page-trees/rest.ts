@@ -13,14 +13,14 @@ export const source: StaticSource = {
       type: 'page',
       path: '1-2.mdx',
       data: {
-        title: '1.2',
+        title: 'Orange',
       },
     },
     {
       type: 'page',
       path: '2-2.mdx',
       data: {
-        title: '2.2',
+        title: 'Apple',
       },
     },
   ],

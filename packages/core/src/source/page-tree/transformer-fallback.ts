@@ -1,5 +1,5 @@
 import { FileSystem, type PageTreeBuilderContext, type PageTreeTransformer } from '@/source';
-import { PageTreeBuilder } from '@/source/page-tree/builder';
+import { createPageTreeBuilder } from '@/source/page-tree/builder';
 import type { ContentStorage } from '../storage/content';
 
 export function transformerFallback(): PageTreeTransformer {
@@ -20,14 +20,11 @@ export function transformerFallback(): PageTreeTransformer {
         isolatedStorage.write(file, this.storage.read(file)!);
       }
 
-      root.fallback = new PageTreeBuilder(isolatedStorage, {
-        idPrefix: this.idPrefix ? `fallback:${this.idPrefix}` : 'fallback',
-        url: this.getUrl,
-        noRef: this.noRef,
-        transformers: this.transformers,
+      root.fallback = createPageTreeBuilder(isolatedStorage, {
+        ...this.options,
+        idPrefix: this.options.idPrefix ? `fallback:${this.options.idPrefix}` : 'fallback',
         generateFallback: false,
         context: { ...this.custom, _fallback: true },
-        sort: this.sort,
       }).root();
 
       addedFiles.clear();

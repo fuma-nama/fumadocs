@@ -4,16 +4,16 @@
   "name": "Docs",
   "children": [
     {
-      "$id": "2-2.mdx",
-      "type": "page",
-      "name": "Apple",
-      "url": "/2-2"
-    },
-    {
       "$id": "1-2.mdx",
       "type": "page",
       "name": "Orange",
       "url": "/1-2"
+    },
+    {
+      "$id": "2-2.mdx",
+      "type": "page",
+      "name": "Apple",
+      "url": "/2-2"
     }
   ]
 }

@@ -5,19 +5,14 @@ import { basename, extname, joinPath } from '@/source/path';
 import { transformerFallback } from '@/source/page-tree/transformer-fallback';
 
 export interface PageTreeBuilderContext<S extends ContentStorage = ContentStorage> {
-  idPrefix: string;
-  noRef: boolean;
   transformers: PageTreeTransformer<S>[];
-
   builder: PageTreeBuilder;
   storage: S;
-  getUrl: ResolvedLoaderConfig['url'];
-
   storages?: Record<string, S>;
   locale?: string;
   custom?: Record<string, unknown>;
 
-  sort: PageTreeOptions<S>['sort'];
+  options: PageTreeOptions<S>;
 }
 
 export interface PageTreeTransformer<S extends ContentStorage = ContentStorage> {
@@ -61,6 +56,8 @@ export interface PageTreeOptions<S extends ContentStorage = ContentStorage> {
 
   /** customize the default sorting behaviour (`localeCompare`) */
   sort?: {
+    /** @default 'path' */
+    by?: 'name' | 'path';
     locales?: Intl.LocalesArgument;
     options?: Intl.CollatorOptions;
   };
@@ -74,64 +71,81 @@ const restReversed = 'z...a' as const;
 const extractPrefix = '...';
 const excludePrefix = '!';
 
-export class PageTreeBuilder {
-  private readonly flattenPathToFullPath = new Map<string, string>();
-  private readonly transformers: PageTreeTransformer[] = [];
+const SymbolUnfinished = Symbol('unfinished');
+const SymbolName = Symbol('name');
+const SymbolOwner = Symbol('owner');
+
+interface Attached {
+  [SymbolName]?: string;
+  [SymbolUnfinished]?: boolean;
+  [SymbolOwner]?: { owner: string; priority: number };
+}
+
+export interface PageTreeBuilder {
+  resolveFlattenPath(name: string, format: string): string;
+  root(id?: string, path?: string): PageTree.Root;
+}
+
+export function createPageTreeBuilder(
+  input: ContentStorage | [locale: string, storages: Record<string, ContentStorage>],
+  options: PageTreeOptions,
+): PageTreeBuilder {
+  const flattenPathToFullPath = new Map<string, string>();
+  const transformers: PageTreeTransformer[] = [];
   /** virtual file path -> output page tree node (if cached) */
-  private readonly pathToNode = new Map<string, PageTree.Node>();
-  /** unfinished nodes */
-  private readonly unfinished = new WeakSet<PageTree.Node>();
-  private readonly ownerMap = new Map<PageTree.Node, { owner: string; priority: number }>();
-  private _nextId = 0;
+  const pathToNode = new Map<string, PageTree.Node & Attached>();
+  let nextId = 0;
 
+  const {
+    noRef = false,
+    idPrefix,
+    url: getUrl,
+    generateFallback = true,
+    sort: { by: sortBy = 'path', locales: sortLocales, options: sortOptions } = {},
+  } = options;
   /** passed as additional information to transformers */
-  private readonly ctx: PageTreeBuilderContext;
-  private readonly storage: ContentStorage;
+  let ctx: PageTreeBuilderContext;
 
-  constructor(
-    input: ContentStorage | [locale: string, storages: Record<string, ContentStorage>],
-    options: PageTreeOptions,
-  ) {
-    const {
+  if (options.transformers) transformers.push(...options.transformers);
+  if (generateFallback) transformers.push(transformerFallback());
+
+  if (Array.isArray(input)) {
+    const [locale, storages] = input;
+
+    ctx = {
+      get builder() {
+        return builder;
+      },
+      storage: storages[locale],
+      storages,
+      locale,
       transformers,
-      url,
-      context,
-      generateFallback = true,
-      idPrefix = '',
-      noRef = false,
-    } = options;
-    if (transformers) this.transformers.push(...transformers);
-    if (generateFallback) this.transformers.push(transformerFallback());
-    this.ctx = {
-      builder: this,
-      idPrefix,
-      getUrl: url,
-      storage: undefined as never,
-      noRef,
-      transformers: this.transformers,
-      custom: context,
-      sort: options.sort,
+      custom: options.context,
+      options,
     };
-
-    if (Array.isArray(input)) {
-      const [locale, storages] = input;
-      this.ctx.storage = this.storage = storages[locale];
-      this.ctx.locale = locale;
-      this.ctx.storages = storages;
-    } else {
-      this.ctx.storage = this.storage = input;
-    }
-
-    for (const file of this.storage.getFiles()) {
-      const content = this.storage.read(file)!;
-      const flattenPath = file.substring(0, file.length - extname(file).length);
-
-      this.flattenPathToFullPath.set(flattenPath + '.' + content.format, file);
-    }
+  } else {
+    ctx = {
+      get builder() {
+        return builder;
+      },
+      storage: input,
+      transformers,
+      custom: options.context,
+      options,
+    };
   }
 
-  resolveFlattenPath(name: string, format: string) {
-    return this.flattenPathToFullPath.get(name + '.' + format) ?? name;
+  const { storage, locale } = ctx;
+
+  for (const file of storage.getFiles()) {
+    const content = storage.read(file)!;
+    const flattenPath = file.substring(0, file.length - extname(file).length);
+
+    flattenPathToFullPath.set(flattenPath + '.' + content.format, file);
+  }
+
+  function resolveFlattenPath(name: string, format: string) {
+    return flattenPathToFullPath.get(name + '.' + format) ?? name;
   }
 
   /**
@@ -141,11 +155,11 @@ export class PageTreeBuilder {
    *
    * @returns whether the owner owns the node.
    */
-  private own(ownerPath: string, node: PageTree.Node, priority: number): boolean {
-    if (this.unfinished.has(node)) return false;
-    const existing = this.ownerMap.get(node);
+  function own(ownerPath: string, node: PageTree.Node & Attached, priority: number): boolean {
+    if (node[SymbolUnfinished]) return false;
+    const existing = node[SymbolOwner];
     if (!existing) {
-      this.ownerMap.set(node, { owner: ownerPath, priority });
+      node[SymbolOwner] = { owner: ownerPath, priority };
       return true;
     }
     if (existing.owner === ownerPath) {
@@ -155,7 +169,7 @@ export class PageTreeBuilder {
     if (existing.priority >= priority) return false;
 
     // return ownership
-    const folder = this.pathToNode.get(existing.owner);
+    const folder = pathToNode.get(existing.owner);
     if (folder && folder.type === 'folder') {
       if (folder.index === node) {
         delete folder.index;
@@ -169,53 +183,59 @@ export class PageTreeBuilder {
     return true;
   }
 
-  private transferOwner(ownerPath: string, node: PageTree.Node) {
-    const existing = this.ownerMap.get(node);
+  function transferOwner(ownerPath: string, node: PageTree.Node & Attached) {
+    const existing = node[SymbolOwner];
     if (existing) existing.owner = ownerPath;
   }
 
-  private generateId(localId = `_${this._nextId++}`) {
+  function generateId(localId = `_${nextId++}`) {
     let id = localId;
-    if (this.ctx.locale) id = `${this.ctx.locale}:${id}`;
-    if (this.ctx.idPrefix) id = `${this.ctx.idPrefix}:${id}`;
+    if (locale) id = `${locale}:${id}`;
+    if (idPrefix) id = `${idPrefix}:${id}`;
     return id;
   }
 
-  buildPaths(
+  function buildPaths(
     paths: string[],
     filter?: (file: string) => boolean,
     reversed = false,
   ): PageTree.Node[] {
-    const items: PageTree.Node[] = [];
-    const folders: PageTree.Folder[] = [];
-    const sortLocales = this.ctx.sort?.locales;
-    const sortOptions = this.ctx.sort?.options;
-    const sortedPaths = paths.sort((a, b) =>
-      reversed
-        ? b.localeCompare(a, sortLocales, sortOptions)
-        : a.localeCompare(b, sortLocales, sortOptions),
-    );
+    const nodeToPath = new Map<PageTree.Node & Attached, string>();
+    let indexNode: PageTree.Node | undefined;
 
-    for (const path of sortedPaths) {
+    for (const path of paths) {
       if (filter && !filter(path)) continue;
 
-      const fileNode = this.file(path);
+      const fileNode = buildFile(path);
       if (fileNode) {
-        if (basename(path, extname(path)) === 'index') items.unshift(fileNode);
-        else items.push(fileNode);
+        nodeToPath.set(fileNode, path);
+        if (!indexNode && basename(path, extname(path)) === 'index') {
+          indexNode = fileNode;
+        }
 
         continue;
       }
 
-      const dirNode = this.folder(path);
-      if (dirNode) folders.push(dirNode);
+      const dirNode = buildFolder(path);
+      if (dirNode) nodeToPath.set(dirNode, path);
     }
 
-    items.push(...folders);
-    return items;
+    const factor = reversed ? -1 : 1;
+    const useName = sortBy === 'name';
+
+    return Array.from(nodeToPath.keys()).sort((a, b) => {
+      if (a === indexNode) return -100;
+      if (b === indexNode) return 100;
+      const aT = (useName && a[SymbolName]) || nodeToPath.get(a)!;
+      const bT = (useName && b[SymbolName]) || nodeToPath.get(b)!;
+      const aK = a.type === 'folder' ? 10 : 0;
+      const bK = b.type === 'folder' ? 10 : 0;
+
+      return factor * (aT.localeCompare(bT, sortLocales, sortOptions) + (aK - bK));
+    });
   }
 
-  private resolveFolderItem(
+  function resolveFolderItem(
     folderPath: string,
     item: string,
     outputArray: (PageTree.Node | '...' | 'z...a')[],
@@ -229,15 +249,15 @@ export class PageTreeBuilder {
     let match = separator.exec(item);
     if (match?.groups) {
       let node: PageTree.Separator = {
-        $id: this.generateId(),
+        $id: generateId(),
         type: 'separator',
         icon: match.groups.icon,
         name: match.groups.name,
       };
 
-      for (const transformer of this.transformers) {
+      for (const transformer of transformers) {
         if (!transformer.separator) continue;
-        node = transformer.separator.call(this.ctx, node);
+        node = transformer.separator.call(ctx, node);
       }
       outputArray.push(node);
       return;
@@ -248,7 +268,7 @@ export class PageTreeBuilder {
       const { icon, url, name, external } = match.groups;
 
       let node: PageTree.Item = {
-        $id: this.generateId(),
+        $id: generateId(),
         type: 'page',
         icon,
         name,
@@ -256,9 +276,9 @@ export class PageTreeBuilder {
       };
       if (external) node.external = true;
 
-      for (const transformer of this.transformers) {
+      for (const transformer of transformers) {
         if (!transformer.file) continue;
-        node = transformer.file.call(this.ctx, node);
+        node = transformer.file.call(ctx, node);
       }
       outputArray.push(node);
       return;
@@ -267,56 +287,56 @@ export class PageTreeBuilder {
     if (item.startsWith(excludePrefix)) {
       const path = joinPath(folderPath, item.slice(excludePrefix.length));
       excludedPaths.add(path);
-      excludedPaths.add(this.resolveFlattenPath(path, 'page'));
+      excludedPaths.add(resolveFlattenPath(path, 'page'));
       return;
     }
 
     if (item.startsWith(extractPrefix)) {
       const path = joinPath(folderPath, item.slice(extractPrefix.length));
-      const node = this.folder(path);
+      const node = buildFolder(path);
       if (!node) return;
 
       const children = node.index ? [node.index, ...node.children] : node.children;
-      if (this.own(folderPath, node, 2)) {
+      if (own(folderPath, node, 2)) {
         for (const child of children) {
-          this.transferOwner(folderPath, child);
+          transferOwner(folderPath, child);
           outputArray.push(child);
         }
         excludedPaths.add(path);
       } else {
         for (const child of children) {
-          if (this.own(folderPath, child, 2)) outputArray.push(child);
+          if (own(folderPath, child, 2)) outputArray.push(child);
         }
       }
       return;
     }
 
     let path = joinPath(folderPath, item);
-    let node: PageTree.Node | undefined = this.folder(path);
+    let node: PageTree.Node | undefined = buildFolder(path);
     if (!node) {
-      path = this.resolveFlattenPath(path, 'page');
-      node = this.file(path);
+      path = resolveFlattenPath(path, 'page');
+      node = buildFile(path);
     }
-    if (!node || !this.own(folderPath, node, 2)) return;
+    if (!node || !own(folderPath, node, 2)) return;
     outputArray.push(node);
     excludedPaths.add(path);
   }
 
-  folder(folderPath: string): PageTree.Folder | undefined {
-    const cached = this.pathToNode.get(folderPath);
+  function buildFolder(folderPath: string): PageTree.Folder | undefined {
+    const cached = pathToNode.get(folderPath);
     if (cached) return cached as PageTree.Folder;
 
-    const files = this.storage.readDir(folderPath);
+    const files = storage.readDir(folderPath);
     if (!files) return;
 
     const isGlobalRoot = folderPath === '';
-    const metaPath = this.resolveFlattenPath(joinPath(folderPath, 'meta'), 'meta');
-    const indexPath = this.resolveFlattenPath(joinPath(folderPath, 'index'), 'page');
-    let meta = this.storage.read(metaPath);
+    const metaPath = resolveFlattenPath(joinPath(folderPath, 'meta'), 'meta');
+    const indexPath = resolveFlattenPath(joinPath(folderPath, 'index'), 'page');
+    let meta = storage.read(metaPath);
     if (meta && meta.format !== 'meta') meta = undefined;
 
     const metadata = meta?.data ?? {};
-    let node: PageTree.Folder = {
+    let node: PageTree.Folder & Attached = {
       type: 'folder',
       name: null,
       root: metadata.root,
@@ -324,22 +344,23 @@ export class PageTreeBuilder {
       description: metadata.description,
       collapsible: metadata.collapsible,
       children: [],
-      $id: this.generateId(folderPath),
-      $ref: !this.ctx.noRef && meta ? metaPath : undefined,
+      $id: generateId(folderPath),
+      $ref: !noRef && meta ? metaPath : undefined,
+      [SymbolUnfinished]: true,
     };
-    this.pathToNode.set(folderPath, node);
-    this.unfinished.add(node);
+
+    pathToNode.set(folderPath, node);
 
     if (!(metadata.root ?? isGlobalRoot)) {
-      const file = this.file(indexPath);
-      if (file && this.own(folderPath, file, 0)) node.index = file;
+      const fileNode = buildFile(indexPath);
+      if (fileNode && own(folderPath, fileNode, 0)) node.index = fileNode;
     }
 
     if (metadata.pages) {
       const outputArray: (PageTree.Node | typeof rest | typeof restReversed)[] = [];
       const excludedPaths = new Set<string>();
       for (const item of metadata.pages) {
-        this.resolveFolderItem(folderPath, item, outputArray, excludedPaths);
+        resolveFolderItem(folderPath, item, outputArray, excludedPaths);
       }
 
       if (excludedPaths.has(indexPath)) {
@@ -354,83 +375,92 @@ export class PageTreeBuilder {
           continue;
         }
 
-        const resolvedItem = this.buildPaths(
+        const resolvedItem = buildPaths(
           files,
           (file) => !excludedPaths.has(file),
           item === restReversed,
         );
         for (const child of resolvedItem) {
-          if (this.own(folderPath, child, 0)) node.children.push(child);
+          if (own(folderPath, child, 0)) node.children.push(child);
         }
       }
     } else {
-      for (const item of this.buildPaths(
-        files,
-        node.index ? (file) => file !== indexPath : undefined,
-      )) {
-        if (this.own(folderPath, item, 0)) node.children.push(item);
+      for (const item of buildPaths(files, node.index ? (file) => file !== indexPath : undefined)) {
+        if (own(folderPath, item, 0)) node.children.push(item);
       }
     }
 
     node.icon = metadata.icon ?? node.index?.icon;
     node.name = metadata.title ?? node.index?.name;
-    this.unfinished.delete(node);
+    node[SymbolName] = metadata.title ?? node.index?.[SymbolName as never];
+
     if (!node.name) {
       const folderName = basename(folderPath);
       node.name = pathToName(group.exec(folderName)?.[1] ?? folderName);
     }
-    for (const transformer of this.transformers) {
+    for (const transformer of transformers) {
       if (!transformer.folder) continue;
-      node = transformer.folder.call(this.ctx, node, folderPath, meta ? metaPath : undefined);
+      node = transformer.folder.call(ctx, node, folderPath, meta ? metaPath : undefined);
     }
-    this.pathToNode.set(folderPath, node);
+    pathToNode.set(folderPath, node);
+    delete node[SymbolUnfinished];
     return node;
   }
 
-  file(path: string): PageTree.Item | undefined {
-    const cached = this.pathToNode.get(path);
+  function buildFile(path: string): PageTree.Item | undefined {
+    const cached = pathToNode.get(path);
     if (cached) return cached as PageTree.Item;
 
-    const page = this.storage.read(path);
+    const page = storage.read(path);
     if (!page || page.format !== 'page') return;
 
     const { title, description, icon } = page.data;
-    let item: PageTree.Item = {
-      $id: this.generateId(path),
+    let item: PageTree.Item & Attached = {
+      $id: generateId(path),
       type: 'page',
       name: title ?? pathToName(basename(path, extname(path))),
       description,
       icon,
-      url: this.ctx.getUrl(page.slugs, this.ctx.locale),
-      $ref: !this.ctx.noRef ? path : undefined,
+      url: getUrl(page.slugs, ctx.locale),
+      $ref: !noRef ? path : undefined,
+      [SymbolName]: title,
     };
-    for (const transformer of this.transformers) {
+    for (const transformer of transformers) {
       if (!transformer.file) continue;
-      item = transformer.file.call(this.ctx, item, path);
+      item = transformer.file.call(ctx, item, path);
     }
 
-    this.pathToNode.set(path, item);
+    pathToNode.set(path, item);
     return item;
   }
 
-  root(id = 'root', path = ''): PageTree.Root {
-    const folder = this.folder(path);
-    let root: PageTree.Root = {
-      type: 'root',
-      $ref: folder?.$ref,
-      $id: this.generateId(id),
-      name: folder?.name || 'Docs',
-      description: folder?.description,
-      children: folder ? folder.children : [],
-    };
+  const builder: PageTreeBuilder = {
+    resolveFlattenPath,
+    root(id = 'root', path = ''): PageTree.Root {
+      const node = buildFolder(path);
+      let root: PageTree.Root = {
+        type: 'root',
+        $ref: node?.$ref,
+        $id: generateId(id),
+        name: node?.name || 'Docs',
+        description: node?.description,
+        children: node ? node.children : [],
+      };
 
-    for (const transformer of this.transformers) {
-      if (!transformer.root) continue;
-      root = transformer.root.call(this.ctx, root);
-    }
+      for (const transformer of transformers) {
+        if (!transformer.root) continue;
+        root = transformer.root.call(ctx, root);
+      }
 
-    return root;
-  }
+      for (const node of pathToNode.values()) {
+        delete node[SymbolName];
+        delete node[SymbolOwner];
+      }
+
+      return root;
+    },
+  };
+  return builder;
 }
 
 /**
