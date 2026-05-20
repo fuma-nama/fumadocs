@@ -94,7 +94,7 @@ export function createPageTreeBuilder(
   const transformers: PageTreeTransformer[] = [];
   /** virtual file path -> output page tree node (if cached) */
   const pathToNode = new Map<string, PageTree.Node & Attached>();
-  let nextId = 0;
+  let _nextId = 0;
 
   const {
     noRef = false,
@@ -188,7 +188,7 @@ export function createPageTreeBuilder(
     if (existing) existing.owner = ownerPath;
   }
 
-  function generateId(localId = `_${nextId++}`) {
+  function generateId(localId = `_${_nextId++}`) {
     let id = localId;
     if (locale) id = `${locale}:${id}`;
     if (idPrefix) id = `${idPrefix}:${id}`;
