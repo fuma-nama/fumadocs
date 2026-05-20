@@ -40,7 +40,7 @@ export interface I18nConfig<Languages extends string = string> {
 }
 
 export interface I18nAPI<Languages extends string = string> extends I18nConfig<Languages> {
-  translations: () => TranslationsAPI<Languages, {}>;
+  translations: () => TranslationsAPI<Languages, Record<never, TranslationObject>>;
 }
 
 export function defineI18n<const Languages extends string>(
