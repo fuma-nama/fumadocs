@@ -1,8 +1,10 @@
 'use client';
-import { createContext, type ReactNode, useContext, useMemo, useRef } from 'react';
+import { createContext, type ReactNode, use, useMemo, useRef } from 'react';
 import { usePathname, useRouter } from 'fumadocs-core/framework';
+import { renderTranslation, TranslationObject } from 'fumadocs-core/i18n';
 
-export interface Translations {
+export type Translations = {
+  displayName: string;
   search: string;
   searchNoResult: string;
 
@@ -15,10 +17,6 @@ export interface Translations {
   previousPage: string;
   chooseTheme: string;
   editOnGithub: string;
-}
-
-export type TranslationsOption = {
-  [key: string]: string | TranslationsOption;
 };
 
 interface LocaleItem {
@@ -27,13 +25,14 @@ interface LocaleItem {
 }
 
 interface I18nContextType {
-  text: Translations & TranslationsOption;
+  text: Translations & Record<string, string | Record<string, string>>;
   locale?: string;
   onChange?: (v: string) => void;
   locales?: LocaleItem[];
 }
 
 export const defaultTranslations: Translations = {
+  displayName: 'English',
   search: 'Search',
   searchNoResult: 'No results found',
   toc: 'On this page',
@@ -47,16 +46,31 @@ export const defaultTranslations: Translations = {
 };
 
 const I18nContext = createContext<I18nContextType>({
-  text: { ...defaultTranslations },
+  text: defaultTranslations,
 });
 
-export function I18nLabel(props: { label: keyof Translations }): string {
-  const text = useI18n().text;
-  return text[props.label];
+export function I18nLabel<
+  Obj extends TranslationObject = Translations,
+  K extends keyof Obj = keyof Obj,
+>({
+  label,
+  namespace,
+  params,
+}: {
+  label: K;
+  namespace?: string;
+  params?: Obj[K]['_params'] extends string ? Record<Obj[K]['_params'], string> : never;
+}): string {
+  const t = useTranslations<Obj>(namespace);
+  return renderTranslation(t[label], params!);
 }
 
 export function useI18n(): I18nContextType {
-  return useContext(I18nContext);
+  return use(I18nContext);
+}
+
+export function useTranslations<Obj extends TranslationObject>(namespace?: string): Obj {
+  return (namespace ? use(I18nContext).text[namespace] : use(I18nContext).text) as Obj;
 }
 
 export interface I18nProviderProps {
@@ -73,7 +87,7 @@ export interface I18nProviderProps {
   /**
    * Translations of current locale
    */
-  translations?: TranslationsOption;
+  translations?: Partial<I18nContextType['text']>;
 
   /**
    * Available languages

@@ -1,5 +1,5 @@
 'use client';
-import { useI18n } from '@/contexts/i18n';
+import { useTranslations } from '@/contexts/i18n';
 import { cn } from '@/utils/cn';
 import { type ComponentProps, useCallback, useEffect, useRef, useState } from 'react';
 import { mergeRefs } from '@/utils/merge-refs';
@@ -102,11 +102,11 @@ function TocThumb({ computed }: { computed: ComputedData }) {
 }
 
 export function TOCEmpty() {
-  const { text } = useI18n();
+  const t = useTranslations();
 
   return (
     <div className="rounded-lg border bg-fd-card p-3 text-xs text-fd-muted-foreground">
-      {text.tocNoHeadings}
+      {t.tocNoHeadings}
     </div>
   );
 }

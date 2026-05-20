@@ -14,7 +14,7 @@ import {
   useRef,
   useState,
 } from 'react';
-import { I18nLabel, useI18n } from '@/contexts/i18n';
+import { I18nLabel, useTranslations } from '@/contexts/i18n';
 import { cn } from '@/utils/cn';
 import { Dialog, DialogContent, DialogOverlay, DialogTitle } from '@radix-ui/react-dialog';
 import type { HighlightedText, ReactSortedResult as BaseResultType } from 'fumadocs-core/search';
@@ -219,7 +219,7 @@ export function SearchDialogHeader(props: ComponentProps<'div'>) {
 }
 
 export function SearchDialogInput(props: ComponentProps<'input'>) {
-  const { text } = useI18n();
+  const t = useTranslations();
   const { search, onSearchChange } = useSearch();
 
   return (
@@ -227,7 +227,7 @@ export function SearchDialogInput(props: ComponentProps<'input'>) {
       {...props}
       value={search}
       onChange={(e) => onSearchChange(e.target.value)}
-      placeholder={text.search}
+      placeholder={t.search}
       className="w-0 flex-1 bg-transparent text-lg placeholder:text-fd-muted-foreground focus-visible:outline-none"
     />
   );
@@ -276,7 +276,7 @@ export function SearchDialogOverlay(props: ComponentProps<typeof DialogOverlay>)
 }
 
 export function SearchDialogContent({ children, ...props }: ComponentProps<typeof DialogContent>) {
-  const { text } = useI18n();
+  const t = useTranslations();
 
   return (
     <DialogContent
@@ -288,7 +288,7 @@ export function SearchDialogContent({ children, ...props }: ComponentProps<typeo
         props.className,
       )}
     >
-      <DialogTitle className="hidden">{text.search}</DialogTitle>
+      <DialogTitle className="hidden">{t.search}</DialogTitle>
       {children}
     </DialogContent>
   );

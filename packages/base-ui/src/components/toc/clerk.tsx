@@ -12,7 +12,7 @@ import {
 import { cn } from '@/utils/cn';
 import { useTOCItems } from '.';
 import { mergeRefs } from '@/utils/merge-refs';
-import { useI18n } from '@/contexts/i18n';
+import { useTranslations } from '@/contexts/i18n';
 
 interface ComputedSVG {
   width: number;
@@ -143,11 +143,11 @@ export function TOCItems({ ref, className, thumbBox = true, children, ...props }
 }
 
 export function TOCEmpty() {
-  const { text } = useI18n();
+  const t = useTranslations();
 
   return (
     <div className="rounded-lg border bg-fd-card p-3 text-xs text-fd-muted-foreground">
-      {text.tocNoHeadings}
+      {t.tocNoHeadings}
     </div>
   );
 }

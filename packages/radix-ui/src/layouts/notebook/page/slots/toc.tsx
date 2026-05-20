@@ -2,7 +2,7 @@
 import * as TocDefault from '@/components/toc/default';
 import * as TocClerk from '@/components/toc/clerk';
 import * as Base from '@/components/toc';
-import { I18nLabel, useI18n } from '@/contexts/i18n';
+import { I18nLabel, useTranslations } from '@/contexts/i18n';
 import { cn } from '@/utils/cn';
 import { ChevronDown, Text } from 'lucide-react';
 import {
@@ -193,7 +193,7 @@ export function TOCPopover({
 }
 
 function PageTOCPopoverTrigger({ className, ...props }: ComponentProps<'button'>) {
-  const { text } = useI18n();
+  const t = useTranslations();
   const { open } = use(TocPopoverContext)!;
   const items = Base.useItems();
   const selectedIdx = items.findIndex((item) => item.active);
@@ -222,7 +222,7 @@ function PageTOCPopoverTrigger({ className, ...props }: ComponentProps<'button'>
             showItem && 'opacity-0 -translate-y-full pointer-events-none',
           )}
         >
-          {path?.name ?? text.toc}
+          {path?.name ?? t.toc}
         </span>
         <span
           className={cn(

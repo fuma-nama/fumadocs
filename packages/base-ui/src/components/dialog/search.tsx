@@ -14,7 +14,7 @@ import {
   useRef,
   useState,
 } from 'react';
-import { I18nLabel, useI18n } from '@/contexts/i18n';
+import { I18nLabel, useTranslations } from '@/contexts/i18n';
 import { cn } from '@/utils/cn';
 import { Dialog } from '@base-ui/react/dialog';
 import type { HighlightedText, ReactSortedResult } from 'fumadocs-core/search';
@@ -219,7 +219,7 @@ export function SearchDialogHeader(props: ComponentProps<'div'>) {
 }
 
 export function SearchDialogInput(props: ComponentProps<'input'>) {
-  const { text } = useI18n();
+  const t = useTranslations();
   const { search, onSearchChange } = useSearch();
 
   return (
@@ -227,7 +227,7 @@ export function SearchDialogInput(props: ComponentProps<'input'>) {
       {...props}
       value={search}
       onChange={(e) => onSearchChange(e.target.value)}
-      placeholder={text.search}
+      placeholder={t.search}
       className="w-0 flex-1 bg-transparent text-lg placeholder:text-fd-muted-foreground focus-visible:outline-none"
     />
   );
@@ -285,7 +285,7 @@ export function SearchDialogContent({
   className,
   ...props
 }: ComponentProps<typeof Dialog.Popup>) {
-  const { text } = useI18n();
+  const t = useTranslations();
 
   return (
     <Dialog.Portal>
@@ -301,7 +301,7 @@ export function SearchDialogContent({
           )
         }
       >
-        <Dialog.Title className="hidden">{text.search}</Dialog.Title>
+        <Dialog.Title className="hidden">{t.search}</Dialog.Title>
         {children}
       </Dialog.Popup>
     </Dialog.Portal>

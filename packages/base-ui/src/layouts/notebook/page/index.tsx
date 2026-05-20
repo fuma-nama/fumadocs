@@ -9,7 +9,7 @@ import {
   useState,
 } from 'react';
 import { cn } from '@/utils/cn';
-import { I18nLabel, useI18n } from '@/contexts/i18n';
+import { I18nLabel, useTranslations } from '@/contexts/i18n';
 import {
   TOC,
   TOCPopover,
@@ -206,7 +206,7 @@ export function PageLastUpdate({
   date: value,
   ...props
 }: Omit<ComponentProps<'p'>, 'children'> & { date: Date }) {
-  const { text } = useI18n();
+  const t = useTranslations();
   const [date, setDate] = useState('');
 
   useEffect(() => {
@@ -216,7 +216,7 @@ export function PageLastUpdate({
 
   return (
     <p {...props} className={cn('text-sm text-fd-muted-foreground', props.className)}>
-      {text.lastUpdate} {date}
+      {t.lastUpdate} {date}
     </p>
   );
 }
