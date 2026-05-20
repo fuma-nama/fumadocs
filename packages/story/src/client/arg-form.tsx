@@ -25,6 +25,7 @@ import { stringifyFieldKey } from '@fumari/stf/lib/utils';
 import { validate } from '@/type-tree/validator';
 import { formatDateForInput } from '@/utils/date';
 import { cva } from 'class-variance-authority';
+import { useTranslations } from './i18n';
 
 const labelVariants = cva(
   'text-xs font-mono font-medium text-fd-foreground peer-disabled:cursor-not-allowed peer-disabled:opacity-70',
@@ -119,6 +120,7 @@ export function FieldInput({
   fieldName: FieldKey;
 }) {
   const engine = useDataEngine();
+  const t = useTranslations();
   const [value, setValue] = useFieldValue(fieldName);
   const id = stringifyFieldKey(fieldName);
 
@@ -173,7 +175,7 @@ export function FieldInput({
               {member.label}
             </SelectItem>
           ))}
-          {!isRequired && <SelectItem value="-1">Unset</SelectItem>}
+          {!isRequired && <SelectItem value="-1">{t.unset}</SelectItem>}
         </SelectContent>
       </Select>
     );
@@ -189,9 +191,9 @@ export function FieldInput({
           <SelectValue />
         </SelectTrigger>
         <SelectContent>
-          <SelectItem value="true">True</SelectItem>
-          <SelectItem value="false">False</SelectItem>
-          {!isRequired && <SelectItem value="undefined">Unset</SelectItem>}
+          <SelectItem value="true">{t.booleanTrue}</SelectItem>
+          <SelectItem value="false">{t.booleanFalse}</SelectItem>
+          {!isRequired && <SelectItem value="undefined">{t.unset}</SelectItem>}
         </SelectContent>
       </Select>
     );
@@ -200,7 +202,7 @@ export function FieldInput({
     return renderUnset(
       <Input
         id={id}
-        placeholder="Enter value"
+        placeholder={t.dateInputPlaceholder}
         type="date"
         value={value instanceof Date ? formatDateForInput(value) : ''}
         onChange={(e) => {
@@ -213,7 +215,13 @@ export function FieldInput({
   return renderUnset(
     <Input
       id={id}
-      placeholder="Enter value"
+      placeholder={
+        field.type === 'number'
+          ? t.numberInputPlaceholder
+          : field.type === 'bigint'
+            ? t.bigintInputPlaceholder
+            : t.textInputPlaceholder
+      }
       type={field.type === 'number' || field.type === 'bigint' ? 'number' : 'text'}
       value={String(value ?? '')}
       onChange={(e) => {
@@ -404,6 +412,7 @@ function ArrayInput({
   fieldName: FieldKey;
   items: TypeNode;
 } & ComponentProps<'div'>) {
+  const t = useTranslations();
   const name = fieldName.at(-1) ?? '';
   const { items, insertItem, removeItem } = useArray(fieldName, {
     defaultValue: [],
@@ -425,7 +434,7 @@ function ArrayInput({
           toolbar={
             <button
               type="button"
-              aria-label="Remove Item"
+              aria-label={t.arrayInputRemoveItem}
               className={cn(
                 buttonVariants({
                   color: 'outline',
@@ -453,7 +462,7 @@ function ArrayInput({
         }}
       >
         <Plus className="size-4" />
-        New Item
+        {t.arrayInputAddItem}
       </button>
     </div>
   );

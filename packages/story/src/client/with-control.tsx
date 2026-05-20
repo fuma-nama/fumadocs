@@ -10,6 +10,7 @@ import { ErrorBoundary } from 'react-error-boundary';
 import { FieldSet } from './arg-form';
 import { VariantInfo } from '..';
 import type { TypeNode } from '@/type-tree/types';
+import { useTranslations } from './i18n';
 
 export interface WithControlProps {
   displayName?: string;
@@ -21,6 +22,7 @@ export interface WithControlProps {
 }
 
 export function WithControl({ presets, displayName, Component }: WithControlProps) {
+  const t = useTranslations();
   const [variant, setVariant] = useState(presets[0].variant);
   const preset = presets.find((preset) => preset.variant === variant);
   const stf = useStf({
@@ -47,7 +49,7 @@ export function WithControl({ presets, displayName, Component }: WithControlProp
                 variant="ghost"
                 className="w-fit ms-auto text-fd-muted-foreground text-xs font-medium"
               >
-                <SelectValue placeholder="No Variant">{preset?.variant}</SelectValue>
+                <SelectValue placeholder={t.noVariant}>{preset?.variant}</SelectValue>
               </SelectTrigger>
               <SelectContent>
                 {presets.map((item) => (
@@ -66,7 +68,7 @@ export function WithControl({ presets, displayName, Component }: WithControlProp
             key={variant}
             field={preset.controls}
             fieldName={[]}
-            name="Props"
+            name={t.props}
             className="max-h-[600px] overflow-auto"
           />
         )}
@@ -76,6 +78,7 @@ export function WithControl({ presets, displayName, Component }: WithControlProp
 }
 
 function StoryComponent({ Component }: { Component: FC }) {
+  const t = useTranslations();
   const engine = useDataEngine();
   const timerRef = useRef(0);
   const [args, setArgs] = useState(() => engine.getData());
@@ -93,14 +96,14 @@ function StoryComponent({ Component }: { Component: FC }) {
         <div className="p-3 border rounded-lg bg-fd-card text-fd-card-foreground text-sm">
           <p className="inline-flex items-center gap-2 font-medium mb-2">
             <AlertCircle className="text-fd-error size-4" />
-            Encountered error when rendering the component.
+            {t.renderError}
           </p>
           <p className="text-fd-muted-foreground mb-2">{String(error)}</p>
           <button
             className={cn(buttonVariants({ variant: 'primary', size: 'sm' }))}
             onClick={() => resetErrorBoundary()}
           >
-            Reset
+            {t.reset}
           </button>
         </div>
       )}
