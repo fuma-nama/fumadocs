@@ -77,7 +77,7 @@ export function defineI18n<const Languages extends string>(
             const [preset] = args;
             const t = translations[preset.language];
             for (const [namespace, obj] of Object.entries(preset.value)) {
-              Object.assign(t[namespace], obj);
+              if (t[namespace]) Object.assign(t[namespace], obj);
             }
 
             return this as never;
@@ -139,12 +139,14 @@ export interface TranslationsAPI<
     extension: TranslationsAPIExtension<N, Obj>,
   ) => TranslationsAPI<Languages, Namespaces & { [K in N]: Obj }>;
   add: {
+    /** add translations */
     <N extends keyof Namespaces>(
       namespace: N,
       overrides: {
         [Lang in Languages]?: Partial<Namespaces[N]>;
       },
     ): TranslationsAPI<Languages, Namespaces>;
+    /** add language pack, you should call `extend()` first before adding a language preset */
     (preset: TranslationPreset<Languages, Namespaces>): TranslationsAPI<Languages, Namespaces>;
   };
 }

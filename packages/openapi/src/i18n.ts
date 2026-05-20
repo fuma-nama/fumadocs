@@ -1,4 +1,4 @@
-import { TranslationsAPIExtension, TranslationValue } from 'fumadocs-core/i18n';
+import type { TranslationsAPIExtension, TranslationValue } from 'fumadocs-core/i18n';
 import type { I18nUIConfig } from 'fumadocs-ui/i18n';
 
 export const defaultTranslations = {
