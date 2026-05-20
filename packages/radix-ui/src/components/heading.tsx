@@ -4,6 +4,7 @@ import type { ComponentPropsWithoutRef } from 'react';
 import { cn } from '@/utils/cn';
 import { buttonVariants } from './ui/button';
 import { useCopyButton } from '@/utils/use-copy-button';
+import { useTranslations } from '@/contexts/i18n';
 
 type Types = 'h1' | 'h2' | 'h3' | 'h4' | 'h5' | 'h6';
 type HeadingProps<T extends Types> = Omit<ComponentPropsWithoutRef<T>, 'as'> & {
@@ -12,6 +13,7 @@ type HeadingProps<T extends Types> = Omit<ComponentPropsWithoutRef<T>, 'as'> & {
 
 export function Heading<T extends Types = 'h1'>({ as, ...props }: HeadingProps<T>) {
   const As = as ?? 'h1';
+  const t = useTranslations();
   const [isChecked, onCopy] = useCopyButton(() => {
     if (!props.id) return;
 
@@ -31,7 +33,7 @@ export function Heading<T extends Types = 'h1'>({ as, ...props }: HeadingProps<T
         {props.children}
       </a>
       <button
-        aria-label="Copy Anchor Link"
+        aria-label={t.headingCopyAnchor}
         className={cn(
           buttonVariants({
             variant: 'ghost',

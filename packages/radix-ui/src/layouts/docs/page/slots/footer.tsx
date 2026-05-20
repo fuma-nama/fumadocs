@@ -1,6 +1,6 @@
 'use client';
 
-import { useI18n, useTranslations } from '@/contexts/i18n';
+import { useTranslations } from '@/contexts/i18n';
 import { cn } from '@/utils/cn';
 import { isActive } from '@/utils/urls';
 import { useFooterItems } from '@/utils/use-footer-items';

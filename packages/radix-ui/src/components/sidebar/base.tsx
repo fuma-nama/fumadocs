@@ -27,6 +27,7 @@ import { Presence } from '@radix-ui/react-presence';
 import scrollIntoView from 'scroll-into-view-if-needed';
 import { usePathname } from 'fumadocs-core/framework';
 import { ScrollArea, ScrollViewport } from '../ui/scroll-area';
+import { useTranslations } from '@/contexts/i18n';
 
 interface SidebarContext {
   open: boolean;
@@ -360,9 +361,10 @@ export function SidebarFolderContent(props: CollapsibleContentProps) {
 
 export function SidebarTrigger({ children, ...props }: ComponentProps<'button'>) {
   const { setOpen } = useSidebar();
+  const t = useTranslations();
 
   return (
-    <button aria-label="Open Sidebar" onClick={() => setOpen((prev) => !prev)} {...props}>
+    <button aria-label={t.sidebarOpen} onClick={() => setOpen((prev) => !prev)} {...props}>
       {children}
     </button>
   );
@@ -370,11 +372,12 @@ export function SidebarTrigger({ children, ...props }: ComponentProps<'button'>)
 
 export function SidebarCollapseTrigger(props: ComponentProps<'button'>) {
   const { collapsed, setCollapsed } = useSidebar();
+  const t = useTranslations();
 
   return (
     <button
       type="button"
-      aria-label="Collapse Sidebar"
+      aria-label={t.sidebarCollapse}
       data-collapsed={collapsed}
       onClick={() => {
         setCollapsed((prev) => !prev);

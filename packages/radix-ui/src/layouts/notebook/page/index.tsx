@@ -9,7 +9,7 @@ import {
   useState,
 } from 'react';
 import { cn } from '@/utils/cn';
-import { I18nLabel, useI18n, useTranslations } from '@/contexts/i18n';
+import { I18nLabel, useTranslations } from '@/contexts/i18n';
 import {
   TOC,
   TOCPopover,

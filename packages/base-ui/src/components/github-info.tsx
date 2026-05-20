@@ -16,6 +16,10 @@ export interface RepositoryInfo {
   forks: number;
 }
 
+export interface GithubInfoProps extends ComponentProps<'a'>, FetchRepositoryInfoOptions {
+  locale?: Intl.LocalesArgument;
+}
+
 export async function fetchRepositoryInfo({
   owner,
   repo,
@@ -55,10 +59,12 @@ export async function fetchRepositoryInfo({
 /**
  * Uses compact notation (e.g., 1.5K, 2.3M).
  */
-const defaultFormatter = new Intl.NumberFormat('en', {
+const formatterOptions: Intl.NumberFormatOptions = {
   notation: 'compact',
   maximumFractionDigits: 1,
-});
+};
+
+const defaultFormatter = new Intl.NumberFormat(undefined, formatterOptions);
 
 const promises: Record<string, Promise<RepositoryInfo>> = {};
 
@@ -68,8 +74,9 @@ export function GithubInfo({
   token,
   baseUrl,
   fetchOptions,
+  locale,
   ...props
-}: ComponentProps<'a'> & FetchRepositoryInfoOptions) {
+}: GithubInfoProps) {
   const options: FetchRepositoryInfoOptions = {
     repo,
     owner,
@@ -80,6 +87,7 @@ export function GithubInfo({
   const { stars, forks } = use(
     (promises[JSON.stringify(options)] ??= fetchRepositoryInfo(options)),
   );
+  const formatter = locale ? new Intl.NumberFormat(locale, formatterOptions) : defaultFormatter;
 
   return (
     <a
@@ -101,9 +109,9 @@ export function GithubInfo({
       </p>
       <div className="flex text-xs items-center gap-1 text-fd-muted-foreground">
         <Star className="size-3" />
-        <span>{defaultFormatter.format(stars)}</span>
+        <span>{formatter.format(stars)}</span>
         <GitFork className="size-3 ms-2" />
-        <span>{defaultFormatter.format(forks)}</span>
+        <span>{formatter.format(forks)}</span>
       </div>
     </a>
   );

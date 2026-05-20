@@ -19,6 +19,7 @@ import { ChevronDown, Languages } from 'lucide-react';
 import { useIsScrollTop } from '@/utils/use-is-scroll-top';
 import { useHomeLayout } from '..';
 import type { NavOptions } from '@/layouts/shared';
+import { useTranslations } from '@/contexts/i18n';
 
 export const navItemVariants = cva('[&_svg]:size-4', {
   variants: {
@@ -46,6 +47,7 @@ export function Header(props: ComponentProps<'header'>) {
     slots,
     props: { nav },
   } = useHomeLayout();
+  const t = useTranslations();
   if (nav?.component) return nav.component;
 
   return (
@@ -89,7 +91,7 @@ export function Header(props: ComponentProps<'header'>) {
         <NavigationMenuItem asChild>
           <div>
             <NavigationMenuTrigger
-              aria-label="Toggle Menu"
+              aria-label={t.menuToggle}
               className={cn(
                 buttonVariants({
                   size: 'icon',

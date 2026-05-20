@@ -6,6 +6,7 @@ import { cn } from '@/utils/cn';
 import { useCopyButton } from '@/utils/use-copy-button';
 import { buttonVariants } from '@/components/ui/button';
 import { mergeRefs } from '@/utils/merge-refs';
+import { useTranslations } from '@/contexts/i18n';
 import {
   Accordion as Root,
   AccordionContent,
@@ -80,6 +81,7 @@ export function Accordion({
 }
 
 function CopyButton({ id }: { id: string }) {
+  const t = useTranslations();
   const [checked, onClick] = useCopyButton(() => {
     const url = new URL(window.location.href);
     url.hash = id;
@@ -90,7 +92,7 @@ function CopyButton({ id }: { id: string }) {
   return (
     <button
       type="button"
-      aria-label="Copy Link"
+      aria-label={t.accordionCopyAnchor}
       className={cn(
         buttonVariants({
           color: 'ghost',

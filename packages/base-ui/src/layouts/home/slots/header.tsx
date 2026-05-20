@@ -20,6 +20,7 @@ import { useIsScrollTop } from '@/utils/use-is-scroll-top';
 import { useHomeLayout } from '..';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { mergeRefs } from '@/utils/merge-refs';
+import { useTranslations } from '@/contexts/i18n';
 
 export const navItemVariants = cva('[&_svg]:size-4', {
   variants: {
@@ -50,6 +51,7 @@ export function Header(props: ComponentProps<'header'>) {
   const headerRef = useRef<HTMLElement>(null);
   const listRef = useRef<HTMLUListElement>(null);
   const [open, setOpen] = useState(false);
+  const t = useTranslations();
   const transparentMode = nav?.transparentMode ?? 'none';
   const isTop = useIsScrollTop({ enabled: transparentMode === 'top' }) ?? true;
   const isNavTransparent = transparentMode === 'top' ? isTop : transparentMode === 'always';
@@ -112,7 +114,7 @@ export function Header(props: ComponentProps<'header'>) {
       <div className="flex flex-row items-center ms-auto -me-1.5 lg:hidden">
         {slots.searchTrigger && <slots.searchTrigger.sm hideIfDisabled className="p-2" />}
         <CollapsibleTrigger
-          aria-label="Toggle Menu"
+          aria-label={t.menuToggle}
           className={cn(
             buttonVariants({
               size: 'icon',

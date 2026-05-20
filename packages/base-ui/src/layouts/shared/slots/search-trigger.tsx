@@ -17,6 +17,7 @@ export function SearchTrigger({
   ...props
 }: SearchTriggerProps) {
   const { setOpenSearch, enabled } = useSearchContext();
+  const t = useTranslations();
   if (hideIfDisabled && !enabled) return null;
 
   return (
@@ -30,7 +31,7 @@ export function SearchTrigger({
         props.className,
       )}
       data-search=""
-      aria-label="Open Search"
+      aria-label={t.searchOpen}
       onClick={() => {
         setOpenSearch(true);
       }}

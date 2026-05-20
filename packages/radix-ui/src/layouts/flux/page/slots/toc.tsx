@@ -1,7 +1,7 @@
 'use client';
 
 import * as Base from '@/components/toc';
-import { useI18n, useTranslations } from '@/contexts/i18n';
+import { useTranslations } from '@/contexts/i18n';
 import { useTreePath } from '@/contexts/tree';
 import { cn } from '@/utils/cn';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';

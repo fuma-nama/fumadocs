@@ -5,12 +5,15 @@ import type { TOCItemType } from 'fumadocs-core/toc';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from './ui/collapsible';
 import type { ComponentProps } from 'react';
 import { cn } from '@/utils/cn';
+import { useTranslations } from '@/contexts/i18n';
 
 export interface InlineTocProps extends ComponentProps<typeof Collapsible> {
   items: TOCItemType[];
 }
 
 export function InlineTOC({ items, className, ...props }: InlineTocProps) {
+  const t = useTranslations();
+
   return (
     <Collapsible
       {...props}
@@ -22,8 +25,8 @@ export function InlineTOC({ items, className, ...props }: InlineTocProps) {
       }
     >
       <CollapsibleTrigger className="group inline-flex w-full items-center justify-between px-4 py-2.5 font-medium">
-        {props.children ?? 'Table of Contents'}
-        <ChevronDown className="size-4 transition-transform duration-200 group-data-[open]:rotate-180" />
+        {props.children ?? t.tocInline}
+        <ChevronDown className="size-4 transition-transform duration-200 group-data-open:rotate-180" />
       </CollapsibleTrigger>
       <CollapsibleContent>
         <div className="flex flex-col p-4 pt-0 text-sm text-fd-muted-foreground">

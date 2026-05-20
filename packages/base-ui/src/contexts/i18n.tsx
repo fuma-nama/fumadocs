@@ -1,14 +1,21 @@
 'use client';
 import { createContext, type ReactNode, use, useMemo, useRef } from 'react';
 import { usePathname, useRouter } from 'fumadocs-core/framework';
-import { renderTranslation, TranslationObject } from 'fumadocs-core/i18n';
+import {
+  renderTranslation,
+  type TranslationObject,
+  type TranslationValue,
+} from 'fumadocs-core/i18n';
 
 export type Translations = {
   displayName: string;
   search: string;
   searchNoResult: string;
+  searchOpen: string;
+  searchClose: string;
 
   toc: string;
+  tocInline: string;
   tocNoHeadings: string;
 
   lastUpdate: string;
@@ -17,6 +24,42 @@ export type Translations = {
   previousPage: string;
   chooseTheme: string;
   editOnGithub: string;
+
+  themeToggle: string;
+  themeLight: string;
+  themeDark: string;
+  themeSystem: string;
+
+  codeBlockCopy: string;
+  codeBlockCopied: string;
+
+  accordionCopyAnchor: string;
+  headingCopyAnchor: string;
+  bannerClose: string;
+  menuToggle: string;
+
+  pageActionsCopyMarkdown: string;
+  pageActionsOpen: string;
+  pageActionsOpenGitHub: string;
+  pageActionsViewMarkdown: string;
+  pageActionsOpenScira: string;
+  pageActionsOpenChatGPT: string;
+  pageActionsOpenClaude: string;
+  pageActionsOpenCursor: string;
+  pageActionsOpenInLLMPrompt: TranslationValue<'url'>;
+
+  sidebarOpen: string;
+  sidebarCollapse: string;
+
+  typeTableProp: string;
+  typeTableType: string;
+  typeTableDefault: string;
+  typeTableParameters: string;
+  typeTableReturns: string;
+
+  notFoundTitle: string;
+  notFoundDescription: string;
+  notFoundLink: string;
 };
 
 interface LocaleItem {
@@ -43,6 +86,40 @@ export const defaultTranslations: Translations = {
   previousPage: 'Previous Page',
   chooseTheme: 'Theme',
   editOnGithub: 'Edit on GitHub',
+  themeLight: 'Light',
+  themeDark: 'Dark',
+  themeSystem: 'System',
+  codeBlockCopy: 'Copy Text',
+  codeBlockCopied: 'Copied Text',
+  accordionCopyAnchor: 'Copy Link',
+  headingCopyAnchor: 'Copy Anchor Link',
+  pageActionsCopyMarkdown: 'Copy Markdown',
+  pageActionsOpen: 'Open',
+  pageActionsOpenGitHub: 'Open in GitHub',
+  pageActionsViewMarkdown: 'View as Markdown',
+  pageActionsOpenScira: 'Open in Scira AI',
+  pageActionsOpenChatGPT: 'Open in ChatGPT',
+  pageActionsOpenClaude: 'Open in Claude',
+  pageActionsOpenCursor: 'Open in Cursor',
+  pageActionsOpenInLLMPrompt:
+    'Read {url}, I want to ask questions about it.' as TranslationValue<'url'>,
+  bannerClose: 'Close Banner',
+  searchOpen: 'Open Search',
+  searchClose: 'Close Search',
+  menuToggle: 'Toggle Menu',
+  themeToggle: 'Toggle Theme',
+  sidebarOpen: 'Open Sidebar',
+  sidebarCollapse: 'Collapse Sidebar',
+  tocInline: 'Table of Contents',
+  typeTableProp: 'Prop',
+  typeTableType: 'Type',
+  typeTableDefault: 'Default',
+  typeTableParameters: 'Parameters',
+  typeTableReturns: 'Returns',
+  notFoundTitle: 'Page Not Found',
+  notFoundDescription:
+    'The page you are looking for might have been removed, had its name changed, or is temporarily unavailable.',
+  notFoundLink: 'Back to Home',
 };
 
 const I18nContext = createContext<I18nContextType>({

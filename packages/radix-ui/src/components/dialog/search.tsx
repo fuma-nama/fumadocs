@@ -239,10 +239,12 @@ export function SearchDialogClose({
   ...props
 }: ComponentProps<'button'>) {
   const { onOpenChange } = useSearch();
+  const t = useTranslations();
 
   return (
     <button
       type="button"
+      aria-label={t.searchClose}
       onClick={() => onOpenChange(false)}
       className={cn(
         buttonVariants({

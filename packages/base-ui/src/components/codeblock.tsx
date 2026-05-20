@@ -13,6 +13,7 @@ import {
 import { cn } from '@/utils/cn';
 import { useCopyButton } from '@/utils/use-copy-button';
 import { buttonVariants } from '@/components/ui/button';
+import { useTranslations } from '@/contexts/i18n';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { mergeRefs } from '@/utils/merge-refs';
 
@@ -152,6 +153,7 @@ function CopyButton({
 }: ComponentProps<'button'> & {
   containerRef: RefObject<HTMLElement | null>;
 }) {
+  const t = useTranslations();
   const [checked, onClick] = useCopyButton(() => {
     const pre = containerRef.current?.getElementsByTagName('pre').item(0);
     if (!pre) return;
@@ -175,7 +177,7 @@ function CopyButton({
         }),
         className,
       )}
-      aria-label={checked ? 'Copied Text' : 'Copy Text'}
+      aria-label={checked ? t.codeBlockCopied : t.codeBlockCopy}
       onClick={onClick}
       {...props}
     >
