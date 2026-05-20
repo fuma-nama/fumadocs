@@ -1,5 +1,5 @@
 import { defaultTranslations, type I18nProviderProps, type Translations } from '@/contexts/i18n';
-import type { I18nConfig, TranslationsAPI } from 'fumadocs-core/i18n';
+import type { I18nConfig, TranslationsAPI, TranslationsAPIExtension } from 'fumadocs-core/i18n';
 
 export { defaultTranslations, type I18nProviderProps, type Translations } from '@/contexts/i18n';
 
@@ -7,13 +7,10 @@ type TranslationsConfig<Languages extends string> = {
   [K in Languages]?: Partial<Translations>;
 };
 
-export function uiTranslations(): {
-  namespace: 'ui';
-  defaultValues: Translations;
-} {
+export function uiTranslations(): TranslationsAPIExtension<'ui', Translations> {
   return {
     namespace: 'ui',
-    defaultValues: defaultTranslations,
+    defaultValue: defaultTranslations,
   };
 }
 
@@ -24,7 +21,7 @@ export function i18nProvider<
   },
 >(
   translations: TranslationsAPI<Languages, P>,
-  lang: Languages | (string & {}) = translations.config.defaultLanguage,
+  lang: NoInfer<Languages> | (string & {}) = translations.config.defaultLanguage,
 ): I18nProviderProps {
   const { ui, ...rest } =
     translations.get(lang) ?? translations.get(translations.config.defaultLanguage);
@@ -46,7 +43,7 @@ export interface I18nUIConfig<Languages extends string> extends I18nConfig<Langu
   provider: (locale?: Languages | (string & {})) => I18nProviderProps;
 }
 
-/** @deprecated use the `defineTranslations()` & `uiTranslations()` APIs instead */
+/** @deprecated use the `i18n.translations()` & `uiTranslations()` APIs instead */
 export function defineI18nUI<Languages extends string>(
   config: I18nConfig<Languages>,
   options:

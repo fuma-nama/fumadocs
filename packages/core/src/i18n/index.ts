@@ -39,14 +39,58 @@ export interface I18nConfig<Languages extends string = string> {
   fallbackLanguage?: NoInfer<Languages> | null;
 }
 
+export interface I18nAPI<Languages extends string = string> extends I18nConfig<Languages> {
+  translations: () => TranslationsAPI<Languages, {}>;
+}
+
 export function defineI18n<const Languages extends string>(
   config: I18nConfig<Languages>,
-): I18nConfig<Languages> {
-  return config;
+): I18nAPI<Languages> {
+  return {
+    ...config,
+    translations() {
+      const translations: Record<string, Record<string, TranslationObject>> = {};
+
+      for (const lang of config.languages) {
+        translations[lang] = {};
+      }
+
+      return {
+        config,
+        $inferLanguages: undefined as never,
+        $inferNamespaces: undefined as never,
+        get(lang) {
+          return translations[lang];
+        },
+        add(namespace, overrides) {
+          for (const [lang, values] of Object.entries(overrides)) {
+            Object.assign(translations[lang][namespace], values);
+          }
+
+          return this as never;
+        },
+        extend({ namespace, defaultValue }) {
+          for (const lang of config.languages) {
+            translations[lang][namespace] = { ...defaultValue };
+          }
+
+          return this as never;
+        },
+      };
+    },
+  };
 }
 
 export type TranslationObject = Record<string, TranslationValue>;
 export type TranslationValue<Params extends string = string> = string & { _params?: Params };
+
+export interface TranslationsAPIExtension<
+  Namespace extends string = string,
+  Obj extends TranslationObject = TranslationObject,
+> {
+  namespace: Namespace;
+  defaultValue: Obj;
+}
 
 export interface TranslationsAPI<
   Languages extends string = string,
@@ -63,51 +107,15 @@ export interface TranslationsAPI<
     (lang: Languages): Namespaces;
     (lang: string): Namespaces | undefined;
   };
-  extend: <N extends string, Obj extends TranslationObject>(input: {
-    namespace: N;
-    defaultValue: Obj;
-  }) => TranslationsAPI<Languages, Namespaces & { [K in N]: Obj }>;
+  extend: <N extends string, Obj extends TranslationObject>(
+    extension: TranslationsAPIExtension<N, Obj>,
+  ) => TranslationsAPI<Languages, Namespaces & { [K in N]: Obj }>;
   add: <N extends keyof Namespaces>(
     namespace: N,
     overrides: {
       [Lang in Languages]?: Partial<Namespaces[N]>;
     },
   ) => TranslationsAPI<Languages, Namespaces>;
-}
-
-export function defineTranslations<Languages extends string>(
-  config: I18nConfig<Languages>,
-): TranslationsAPI<Languages, {}> {
-  const translations: Record<string, Record<string, TranslationObject>> = {};
-
-  for (const lang of config.languages) {
-    translations[lang] = {};
-  }
-
-  const api: TranslationsAPI = {
-    config,
-    $inferLanguages: undefined as never,
-    $inferNamespaces: undefined as never,
-    get(lang) {
-      return translations[lang];
-    },
-    add(namespace, overrides) {
-      for (const [lang, values] of Object.entries(overrides)) {
-        Object.assign(translations[lang][namespace], values);
-      }
-
-      return this as never;
-    },
-    extend({ namespace, defaultValue }: { namespace: string; defaultValue: TranslationObject }) {
-      for (const lang of config.languages) {
-        translations[lang][namespace] = { ...defaultValue };
-      }
-
-      return this as never;
-    },
-  };
-
-  return api as never;
 }
 
 export function renderTranslation(v: TranslationValue<never>): string;
@@ -122,7 +130,7 @@ export function renderTranslation(
 ): string {
   if (params) {
     for (const k in params) {
-      label = label.replaceAll(`$${k}`, params[k]);
+      label = label.replaceAll(`{${k}}`, params[k]);
     }
   }
 

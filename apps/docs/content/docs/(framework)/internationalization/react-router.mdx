@@ -67,19 +67,22 @@ You can also add `locale` parameter to `baseOptions()` for localized layout opti
 
 ```tsx title="lib/layout.shared.tsx"
 import { i18n } from '@/lib/i18n';
-import { defineI18nUI } from 'fumadocs-ui/i18n';
+import { uiTranslations } from 'fumadocs-ui/i18n';
 import type { BaseLayoutProps } from 'fumadocs-ui/layouts/shared';
 
-// [!code ++:9]
-export const i18nUI = defineI18nUI(i18n, {
-  en: {
-    displayName: 'English',
-  },
-  cn: {
-    displayName: 'Chinese',
-    search: '搜尋文檔',
-  },
-});
+// [!code ++:12]
+export const translations = i18n
+  .translations()
+  .extend(uiTranslations())
+  .add('ui', {
+    en: {
+      displayName: 'English',
+    },
+    cn: {
+      displayName: 'Chinese',
+      search: '搜尋文檔',
+    },
+  });
 
 // [!code highlight]
 export function baseOptions(locale: string): BaseLayoutProps {
@@ -96,7 +99,8 @@ Pass translations to `<RootProvider />`:
 ```tsx title="app/root.tsx"
 import { Links, Meta, Scripts, ScrollRestoration, useParams } from 'react-router';
 import { RootProvider } from 'fumadocs-ui/provider/react-router';
-import { i18nUI } from '@/lib/layout.shared';
+import { translations } from '@/lib/layout.shared';
+import { i18nProvider } from 'fumadocs-ui/i18n';
 import './app.css';
 
 export function Layout({ children }: { children: React.ReactNode }) {
@@ -113,7 +117,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
       <body className="flex flex-col min-h-screen">
         <RootProvider
           // [!code ++]
-          i18n={i18nUI.provider(lang)}
+          i18n={i18nProvider(translations, lang)}
         >
           {children}
         </RootProvider>

@@ -1,6 +1,5 @@
+import { TranslationsAPIExtension, TranslationValue } from 'fumadocs-core/i18n';
 import type { I18nUIConfig } from 'fumadocs-ui/i18n';
-import { deepmerge } from '@fastify/deepmerge';
-import type { TranslationsOption } from 'fumadocs-ui/contexts/i18n';
 
 export const defaultTranslations = {
   // General
@@ -42,7 +41,7 @@ export const defaultTranslations = {
 
   // TypeScript panel
   typeScriptDefinitions: 'TypeScript Definitions',
-  useTypeInTypeScript: 'Use the {name} type in TypeScript.',
+  useTypeInTypeScript: 'Use the {name} type in TypeScript.' as TranslationValue<'name'>,
 
   // Schema info tags
   schemaDefault: 'Default',
@@ -57,7 +56,7 @@ export const defaultTranslations = {
   schemaExample: 'Example',
 
   // Response tabs
-  responseTabName: 'Example {key}',
+  responseTabName: 'Example {key}' as TranslationValue<'key'>,
   responseTabNameDefault: 'Example',
 
   // Playground
@@ -77,7 +76,7 @@ export const defaultTranslations = {
   statusSuccessful: 'Successful',
   statusError: 'Error',
   statusClientError: 'Client Error',
-  statusBinaryBody: 'Binary response body, {length} bytes',
+  statusBinaryBody: 'Binary response body, {length} bytes' as TranslationValue<'length'>,
 
   // OAuth dialog
   obtainAccessToken: 'Obtain the access token for API.',
@@ -125,11 +124,18 @@ export const defaultTranslations = {
 
 export type Translations = typeof defaultTranslations;
 
+export function openapiTranslations(): TranslationsAPIExtension<'openapi', Translations> {
+  return {
+    namespace: 'openapi',
+    defaultValue: defaultTranslations,
+  };
+}
+
+/** @deprecated use `i18n.translations()` & `openapiTranslations()` instead */
 export function defineI18nOpenAPI<Languages extends string>(
   config: I18nUIConfig<Languages>,
   translations: Partial<Record<NoInfer<Languages>, Partial<Translations>>>,
 ): I18nUIConfig<Languages> {
-  const dm = deepmerge();
   return {
     ...config,
     provider(locale = config.defaultLanguage) {
@@ -137,7 +143,7 @@ export function defineI18nOpenAPI<Languages extends string>(
       const data = translations[locale as Languages];
       if (data) {
         out.translations ??= {};
-        out.translations.openapi = dm(defaultTranslations, data) as TranslationsOption;
+        out.translations.openapi = { ...defaultTranslations, ...data };
       }
       return out;
     },

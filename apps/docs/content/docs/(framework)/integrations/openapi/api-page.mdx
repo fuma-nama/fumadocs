@@ -110,23 +110,28 @@ Assuming you have configured [Internationalization](/docs/internationalization) 
 
 ```tsx title="layout.shared.tsx"
 import { defineI18n } from 'fumadocs-core/i18n';
-import { defineI18nUI } from 'fumadocs-ui/i18n';
-import { defineI18nOpenAPI } from 'fumadocs-openapi/i18n';
+import { uiTranslations } from 'fumadocs-ui/i18n';
+import { openapiTranslations } from 'fumadocs-openapi/i18n';
 
 const i18n = defineI18n({
   languages: ['en', 'cn'],
   defaultLanguage: 'en',
 });
 
-export let i18nUI = defineI18nUI(i18n, {
-  cn: { displayName: 'Chinese' },
-});
-
-i18nUI = defineI18nOpenAPI(i18nUI, {
-  cn: {
-    titleRequestBody: '請求正文',
-  },
-});
+export const translations = i18n
+  .translations()
+  .extend(uiTranslations())
+  // [!code ++]
+  .extend(openapiTranslations())
+  .add('ui', {
+    cn: { displayName: 'Chinese' },
+  })
+  // [!code ++:5]
+  .add('openapi', {
+    cn: {
+      titleRequestBody: '請求正文',
+    },
+  });
 ```
 
 ## Media Adapters

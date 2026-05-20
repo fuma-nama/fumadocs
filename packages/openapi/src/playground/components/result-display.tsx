@@ -6,10 +6,11 @@ import { useStatusInfo } from '../status-info';
 import { buttonVariants } from 'fumadocs-ui/components/ui/button';
 import { cn } from '@/utils/cn';
 import { ClientCodeBlock } from '@/ui/components/codeblock';
-import { useTranslations, withReplacements } from '@/ui/client/i18n';
+import { useTranslations } from '@/ui/client/i18n';
 import { safeParse } from 'fast-content-type-parse';
 import { cva } from 'class-variance-authority';
 import type { BuiltinLanguage, SpecialLanguage } from 'shiki';
+import { renderTranslation } from 'fumadocs-core/i18n';
 
 export interface ResultDisplayProps extends ComponentProps<'div'> {
   data: FetchResult;
@@ -95,7 +96,7 @@ function ResponseResult({
     } else {
       content = (
         <p className="p-2 border rounded-lg bg-fd-card text-fd-card-foreground">
-          {withReplacements(t.statusBinaryBody, { length: String(data.body.byteLength) })}
+          {renderTranslation(t.statusBinaryBody, { length: String(data.body.byteLength) })}
         </p>
       );
     }

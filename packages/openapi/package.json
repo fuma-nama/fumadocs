@@ -86,8 +86,8 @@
   "peerDependencies": {
     "@scalar/api-client-react": "2.0.1",
     "@types/react": "*",
-    "fumadocs-core": "^16.7.15",
-    "fumadocs-ui": "^16.7.15",
+    "fumadocs-core": "^16.9.0",
+    "fumadocs-ui": "^16.9.0",
     "json-schema-typed": "*",
     "react": "^19.2.0",
     "react-dom": "^19.2.0"
@@ -105,8 +105,8 @@
   },
   "inlinedDependencies": {
     "@fastify/deepmerge": "3.2.1",
-    "@scalar/helpers": "0.6.0",
-    "@scalar/json-magic": "0.12.12",
+    "@scalar/helpers": "0.8.0",
+    "@scalar/json-magic": "0.12.14",
     "@scalar/openapi-upgrader": "0.2.7",
     "ajv": "8.20.0",
     "fast-content-type-parse": "3.0.0",
