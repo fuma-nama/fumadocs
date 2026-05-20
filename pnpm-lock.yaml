@@ -429,6 +429,9 @@ importers:
 
   examples/i18n:
     dependencies:
+      '@fumadocs/language':
+        specifier: workspace:*
+        version: link:../../packages/language
       '@orama/tokenizers':
         specifier: ^3.1.18
         version: 3.1.18
@@ -2330,6 +2333,30 @@ importers:
         specifier: ^6.0.3
         version: 6.0.3
       vfile:
+        specifier: ^6.0.3
+        version: 6.0.3
+
+  packages/language:
+    devDependencies:
+      '@fumadocs/story':
+        specifier: workspace:*
+        version: link:../story
+      fumadocs-core:
+        specifier: workspace:*
+        version: link:../core
+      fumadocs-openapi:
+        specifier: workspace:*
+        version: link:../openapi
+      fumadocs-ui:
+        specifier: workspace:*
+        version: link:../radix-ui
+      tsconfig:
+        specifier: workspace:*
+        version: link:../tsconfig
+      tsdown:
+        specifier: 0.22.0
+        version: 0.22.0(@tsdown/css@0.22.0)(oxc-resolver@11.19.1(@emnapi/core@1.10.0)(@emnapi/runtime@1.10.0))(tsx@4.22.0)(typescript@6.0.3)(unrun@0.3.0)
+      typescript:
         specifier: ^6.0.3
         version: 6.0.3
 

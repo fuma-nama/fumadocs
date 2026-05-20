@@ -1,0 +1,61 @@
+{
+  "name": "@fumadocs/language",
+  "version": "0.0.1",
+  "description": "Common language packs for Fumadocs",
+  "keywords": [
+    "documentation",
+    "fumadocs"
+  ],
+  "homepage": "https://fumadocs.dev",
+  "license": "MIT",
+  "author": "Fuma Nama",
+  "repository": "github:fuma-nama/fumadocs",
+  "files": [
+    "dist"
+  ],
+  "type": "module",
+  "exports": {
+    "./zh-cn": "./dist/zh-cn.js",
+    "./zh-tw": "./dist/zh-tw.js",
+    "./package.json": "./package.json"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "scripts": {
+    "build": "tsdown",
+    "clean": "rimraf dist",
+    "dev": "tsdown --watch --clean false",
+    "lint": "oxlint .",
+    "types:check": "tsc --noEmit"
+  },
+  "devDependencies": {
+    "@fumadocs/story": "workspace:*",
+    "fumadocs-core": "workspace:*",
+    "fumadocs-openapi": "workspace:*",
+    "fumadocs-ui": "workspace:*",
+    "tsconfig": "workspace:*",
+    "tsdown": "0.22.0",
+    "typescript": "^6.0.3"
+  },
+  "peerDependencies": {
+    "@fumadocs/story": "*",
+    "fumadocs-core": "*",
+    "fumadocs-openapi": "*",
+    "fumadocs-ui": "*"
+  },
+  "peerDependenciesMeta": {
+    "@fumadocs/story": {
+      "optional": true
+    },
+    "fumadocs-core": {
+      "optional": true
+    },
+    "fumadocs-openapi": {
+      "optional": true
+    },
+    "fumadocs-ui": {
+      "optional": true
+    }
+  }
+}

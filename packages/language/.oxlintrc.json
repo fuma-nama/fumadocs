@@ -1,0 +1,8 @@
+{
+  "$schema": "./node_modules/oxlint/configuration_schema.json",
+  "plugins": ["typescript", "import"],
+  "env": {
+    "builtin": true
+  },
+  "ignorePatterns": ["dist", "node_modules", "eslint.config.mjs", "node_modules/", "dist/"]
+}
