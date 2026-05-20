@@ -15,6 +15,7 @@ export const defaultTranslations = {
   body: 'Body',
   deprecated: 'Deprecated',
   submit: 'Submit',
+  test: 'Test',
   unsupported: 'Unsupported',
   close: 'Close',
   inputPlaceholder: 'Enter value',
@@ -79,6 +80,7 @@ export const defaultTranslations = {
   statusBinaryBody: 'Binary response body, {length} bytes' as TranslationValue<'length'>,
 
   // OAuth dialog
+  oauthFlowPlaceholder: 'Select a flow',
   obtainAccessToken: 'Obtain the access token for API.',
   resourceOwnerPassword: 'Resource Owner Password Flow',
   resourceOwnerPasswordDesc: 'Authenticate using username and password.',

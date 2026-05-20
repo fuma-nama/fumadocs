@@ -235,7 +235,7 @@ function Content({ schemeId, scopes, setToken, setOpen }: AuthDialogContentProps
     >
       <Select value={type ?? ''} onValueChange={setType as (s: string) => void}>
         <SelectTrigger>
-          <SelectValue placeholder="Select a flow" />
+          <SelectValue placeholder={t.oauthFlowPlaceholder} />
         </SelectTrigger>
         <SelectContent>
           {Object.keys(scheme.flows!).map((key) => {
