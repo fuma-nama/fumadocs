@@ -49,6 +49,7 @@ export function defineI18n<const Languages extends string>(
   return {
     ...config,
     translations() {
+      // lang -> (namespace, object)
       const translations: Record<string, Record<string, TranslationObject>> = {};
 
       for (const lang of config.languages) {
@@ -62,7 +63,27 @@ export function defineI18n<const Languages extends string>(
         get(lang) {
           return translations[lang];
         },
-        add(namespace, overrides) {
+        add(
+          ...args:
+            | [
+                string,
+                {
+                  [Lang in Languages]?: TranslationObject;
+                },
+              ]
+            | [TranslationPreset]
+        ) {
+          if (args.length === 1) {
+            const [preset] = args;
+            const t = translations[preset.language];
+            for (const [namespace, obj] of Object.entries(preset.value)) {
+              Object.assign(t[namespace], obj);
+            }
+
+            return this as never;
+          }
+
+          const [namespace, overrides] = args;
           for (const [lang, values] of Object.entries(overrides)) {
             Object.assign(translations[lang][namespace], values);
           }
@@ -83,6 +104,13 @@ export function defineI18n<const Languages extends string>(
 
 export type TranslationObject = Record<string, TranslationValue>;
 export type TranslationValue<Params extends string = string> = string & { _params?: Params };
+export type TranslationPreset<
+  Language extends string = string,
+  Namespaces extends Record<string, TranslationObject> = Record<string, TranslationObject>,
+> = {
+  language: Language;
+  value: Partial<Namespaces>;
+};
 
 export interface TranslationsAPIExtension<
   Namespace extends string = string,
@@ -94,7 +122,7 @@ export interface TranslationsAPIExtension<
 
 export interface TranslationsAPI<
   Languages extends string = string,
-  Namespaces = Record<string, TranslationObject>,
+  Namespaces extends Record<string, TranslationObject> = Record<string, TranslationObject>,
 > {
   /** for type inference only, always `undefined` in runtime */
   $inferLanguages: Languages;
@@ -110,12 +138,15 @@ export interface TranslationsAPI<
   extend: <N extends string, Obj extends TranslationObject>(
     extension: TranslationsAPIExtension<N, Obj>,
   ) => TranslationsAPI<Languages, Namespaces & { [K in N]: Obj }>;
-  add: <N extends keyof Namespaces>(
-    namespace: N,
-    overrides: {
-      [Lang in Languages]?: Partial<Namespaces[N]>;
-    },
-  ) => TranslationsAPI<Languages, Namespaces>;
+  add: {
+    <N extends keyof Namespaces>(
+      namespace: N,
+      overrides: {
+        [Lang in Languages]?: Partial<Namespaces[N]>;
+      },
+    ): TranslationsAPI<Languages, Namespaces>;
+    (preset: TranslationPreset<Languages, Namespaces>): TranslationsAPI<Languages, Namespaces>;
+  };
 }
 
 export function renderTranslation(v: TranslationValue<never>): string;
