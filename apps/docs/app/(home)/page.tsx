@@ -84,7 +84,7 @@ export default function Page() {
               Getting Started
             </Link>
             <a
-              href="https://stackblitz.com/github/fuma-nama/fumadocs/tree/main/examples/next-stackblitz"
+              href="https://stackblitz.com/github/fuma-nama/fumadocs/tree/main/examples/stackblitz"
               target="_blank"
               rel="noreferrer noopener"
               className={cn(buttonVariants({ variant: 'secondary' }), 'max-sm:text-sm')}

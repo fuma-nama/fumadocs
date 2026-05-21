@@ -14,7 +14,7 @@
     "release": "turbo run build --filter=./packages/* && changeset publish",
     "test": "vitest",
     "types:check": "turbo run types:check --continue",
-    "version": "changeset version && pnpm install --lockfile-only"
+    "version": "changeset version && node scripts/update-stackblitz-versions.mjs && pnpm install --lockfile-only"
   },
   "devDependencies": {
     "@changesets/cli": "^2.31.0",
