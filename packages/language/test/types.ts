@@ -13,13 +13,13 @@ const t1 = i18n
   .translations()
   .extend(uiTranslations())
   .extend(openapiTranslations())
-  .add(zhTW('cn'));
+  .preset('cn', zhTW());
 
 const t2 = i18n
   .translations()
   .extend(uiTranslations())
   .extend(openapiTranslations())
   .extend(storyTranslations())
-  .add(zhTW('cn'));
+  .preset('cn', zhTW());
 
 console.log(t1, t2);

@@ -199,18 +199,13 @@ const story = {
 /**
  * Traditional Chinese
  */
-export function zhTW<Language extends string>(
-  locale: Language,
-): TranslationPreset<
-  Language,
-  {
-    ui: UI.Translations;
-    openapi: OpenAPI.Translations;
-    story: Story.Translations;
-  }
-> {
+export function zhTW(): TranslationPreset<{
+  ui: UI.Translations;
+  openapi: OpenAPI.Translations;
+  story: Story.Translations;
+}> {
   return {
-    language: locale,
+    name: 'zh-TW',
     value: {
       ui,
       openapi,

@@ -6,7 +6,7 @@ import { zhTW } from '@fumadocs/language/zh-tw';
 export const translations = i18n
   .translations()
   .extend(uiTranslations())
-  .add(zhTW('cn'))
+  .preset('cn', zhTW())
   .add('ui', {
     cn: {
       displayName: 'Chinese',

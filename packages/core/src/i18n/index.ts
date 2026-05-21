@@ -63,27 +63,15 @@ export function defineI18n<const Languages extends string>(
         get(lang) {
           return translations[lang];
         },
-        add(
-          ...args:
-            | [
-                string,
-                {
-                  [Lang in Languages]?: TranslationObject;
-                },
-              ]
-            | [TranslationPreset]
-        ) {
-          if (args.length === 1) {
-            const [preset] = args;
-            const t = translations[preset.language];
-            for (const [namespace, obj] of Object.entries(preset.value)) {
-              if (t[namespace]) Object.assign(t[namespace], obj);
-            }
-
-            return this as never;
+        preset(lang, preset) {
+          const t = translations[lang];
+          for (const [namespace, obj] of Object.entries(preset.value)) {
+            if (t[namespace]) Object.assign(t[namespace], obj);
           }
 
-          const [namespace, overrides] = args;
+          return this as never;
+        },
+        add(namespace, overrides) {
           for (const [lang, values] of Object.entries(overrides)) {
             Object.assign(translations[lang][namespace], values);
           }
@@ -105,10 +93,9 @@ export function defineI18n<const Languages extends string>(
 export type TranslationObject = Record<string, TranslationValue>;
 export type TranslationValue<Params extends string = string> = string & { _params?: Params };
 export type TranslationPreset<
-  Language extends string = string,
   Namespaces extends Record<string, TranslationObject> = Record<string, TranslationObject>,
 > = {
-  language: Language;
+  name: string;
   value: Partial<Namespaces>;
 };
 
@@ -138,16 +125,68 @@ export interface TranslationsAPI<
   extend: <N extends string, Obj extends TranslationObject>(
     extension: TranslationsAPIExtension<N, Obj>,
   ) => TranslationsAPI<Languages, Namespaces & { [K in N]: Obj }>;
-  add: {
-    /** add translations */
-    <N extends keyof Namespaces>(
-      namespace: N,
-      overrides: {
-        [Lang in Languages]?: Partial<Namespaces[N]>;
-      },
-    ): TranslationsAPI<Languages, Namespaces>;
-    /** add language pack, you should call `extend()` first before adding a language preset */
-    (preset: TranslationPreset<Languages, Namespaces>): TranslationsAPI<Languages, Namespaces>;
+  /** add translations */
+  add: <N extends keyof Namespaces>(
+    namespace: N,
+    overrides: {
+      [Lang in Languages]?: Partial<Namespaces[N]>;
+    },
+  ) => TranslationsAPI<Languages, Namespaces>;
+
+  /** add language pack, you should call `extend()` first before adding a language preset */
+  preset: (
+    lang: Languages,
+    preset: TranslationPreset<Namespaces>,
+  ) => TranslationsAPI<Languages, Namespaces>;
+}
+
+export interface SingularTranslationsAPI<
+  Namespaces extends Record<string, TranslationObject> = Record<string, TranslationObject>,
+> {
+  /** for type inference only, always `undefined` in runtime */
+  $inferNamespaces: Namespaces;
+
+  get: () => Namespaces;
+  extend: <N extends string, Obj extends TranslationObject>(
+    extension: TranslationsAPIExtension<N, Obj>,
+  ) => SingularTranslationsAPI<Namespaces & { [K in N]: Obj }>;
+  /** add translations */
+  add: <N extends keyof Namespaces>(
+    namespace: N,
+    overrides: Partial<Namespaces[N]>,
+  ) => SingularTranslationsAPI<Namespaces>;
+
+  /** add language pack, you should call `extend()` first before adding a language preset */
+  preset: (preset: TranslationPreset<Namespaces>) => SingularTranslationsAPI<Namespaces>;
+}
+
+/** create translations API without i18n */
+export function defineTranslations(): SingularTranslationsAPI<Record<never, TranslationObject>> {
+  // namespace -> object
+  const translations: Record<string, TranslationObject> = {};
+
+  return {
+    $inferNamespaces: undefined as never,
+    get() {
+      return translations;
+    },
+    preset(preset) {
+      for (const [namespace, obj] of Object.entries(preset.value)) {
+        if (translations[namespace]) Object.assign(translations[namespace], obj);
+      }
+
+      return this as never;
+    },
+    add(namespace, overrides) {
+      Object.assign(translations[namespace], overrides);
+
+      return this as never;
+    },
+    extend({ namespace, defaultValue }) {
+      translations[namespace] = { ...defaultValue };
+
+      return this as never;
+    },
   };
 }
 

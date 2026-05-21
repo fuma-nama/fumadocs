@@ -199,18 +199,13 @@ const story = {
 /**
  * Simplified Chinese
  */
-export function zhCN<Language extends string>(
-  locale: Language,
-): TranslationPreset<
-  Language,
-  {
-    ui: UI.Translations;
-    openapi: OpenAPI.Translations;
-    story: Story.Translations;
-  }
-> {
+export function zhCN(): TranslationPreset<{
+  ui: UI.Translations;
+  openapi: OpenAPI.Translations;
+  story: Story.Translations;
+}> {
   return {
-    language: locale,
+    name: 'zh-CN',
     value: {
       ui,
       openapi,

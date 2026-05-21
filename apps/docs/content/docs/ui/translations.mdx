@@ -5,33 +5,218 @@ description: Adding Translations to UI
 
 ## Overview
 
-> This introduction is only for UI translations, you may be interested in the full [Internationalization](/docs/internationalization) guide instead.
+All official Fumadocs packages use English by default, you can add translations for other languages.
 
-To add translations for only one language:
+> This page mainly covers details for adding UI translations, you may be interested in the full [Internationalization](/docs/internationalization) guide instead.
+
+### Singular
+
+**Singular** refers to adding translations for only one language:
 
 ```ts title="lib/layout.shared.tsx"
-import type { Translations } from 'fumadocs-ui/i18n';
+import { defineTranslations } from 'fumadocs-core/i18n';
+import { uiTranslations } from 'fumadocs-ui/i18n';
 
-// organize your translations:
-export const translations: Partial<Translations> = {
-  search: '搜尋文檔',
-};
+export const translations = defineTranslations()
+  .extend(uiTranslations())
+  // add translations
+  .add('ui', {
+    search: '搜尋文檔',
+  });
 ```
 
-Pass the translations via `i18n.translations` to `<RootProvider />`.
+Pass the translations to `<RootProvider />`.
 
 ```tsx
 import { RootProvider } from 'fumadocs-ui/provider/<framework>';
+import { i18nProvider } from 'fumadocs-ui/i18n';
 import { translations } from '@/lib/layout.shared';
 
 export function Layout({ children }: { children: React.ReactNode }) {
   return (
     <RootProvider
       // [!code ++]
-      i18n={{ translations }}
+      i18n={i18nProvider(translations)}
     >
       {children}
     </RootProvider>
   );
 }
+```
+
+### Multilingual
+
+Define translations for multiple languages, this requires a standard [i18n](/docs/internationalization) setup.
+
+```ts title="lib/layout.shared.tsx"
+import { defineTranslations } from 'fumadocs-core/i18n';
+import { uiTranslations } from 'fumadocs-ui/i18n';
+import { i18n } from '@/lib/i18n';
+
+export const translations = i18n
+  .translations()
+  .extend(uiTranslations())
+  // add translations
+  .add('ui', {
+    // [locale code]: { translations }
+    cn: {
+      search: '搜尋文檔',
+    },
+  });
+```
+
+Pass the translations to `<RootProvider />`.
+
+```tsx
+import { RootProvider } from 'fumadocs-ui/provider/<framework>';
+import { i18nProvider } from 'fumadocs-ui/i18n';
+import { translations } from '@/lib/layout.shared';
+
+export function Layout({ locale, children }: { locale: string; children: React.ReactNode }) {
+  return (
+    <RootProvider
+      // [!code ++]
+      i18n={i18nProvider(translations, locale)}
+    >
+      {children}
+    </RootProvider>
+  );
+}
+```
+
+## Language Packs
+
+Language packs provide translations for `fumadocs-ui` and several other integrations like Fumadocs OpenAPI.
+
+```npm
+npm i @fumadocs/language
+```
+
+> If your desired language is missing in the official language packs, we welcome contributions to [our repository](https://github.com/fuma-nama/fumadocs).
+
+To use it, call `preset()` **after** all `extend()` calls:
+
+```ts tab="Singular"
+import { defineTranslations } from 'fumadocs-core/i18n';
+import { openapiTranslations } from 'fumadocs-openapi/i18n';
+import { uiTranslations } from 'fumadocs-ui/i18n';
+import { zhTW } from '@fumadocs/language/zh-tw';
+
+export const translations = defineTranslations()
+  .extend(uiTranslations())
+  // add extensions according to the integrations you configured, e.g. Fumadocs OpenAPI:
+  .extend(openapiTranslations())
+  // Traditional Chinese
+  .preset(zhTW());
+```
+
+```ts tab="Multilingual"
+import { defineTranslations } from 'fumadocs-core/i18n';
+import { openapiTranslations } from 'fumadocs-openapi/i18n';
+import { uiTranslations } from 'fumadocs-ui/i18n';
+import { zhTW } from '@fumadocs/language/zh-tw';
+import { i18n } from '@/lib/i18n';
+
+export const translations = i18n
+  .translations()
+  .extend(uiTranslations())
+  // add extensions according to the integrations you configured, e.g. Fumadocs OpenAPI:
+  .extend(openapiTranslations())
+  // add Traditional Chinese translations to the "cn" locale code
+  .preset('cn', zhTW());
+```
+
+### Custom Packs
+
+You can also create & publish your own language packs.
+
+For example, the structure of `zh-TW` language pack looks like:
+
+```ts
+import type { TranslationPreset } from 'fumadocs-core/i18n';
+import * as OpenAPI from 'fumadocs-openapi/i18n';
+import * as UI from 'fumadocs-ui/i18n';
+import * as Story from '@fumadocs/story/i18n';
+
+const ui = {
+  displayName: '繁體中文',
+  // ...
+} satisfies UI.Translations;
+
+const openapi = {
+  loading: '載入中...',
+  // ...
+} satisfies OpenAPI.Translations;
+
+const story = {
+  noVariant: '沒有變體',
+  // ...
+} satisfies Story.Translations;
+
+export function zhTW(): TranslationPreset<{
+  ui: UI.Translations;
+  openapi: OpenAPI.Translations;
+  story: Story.Translations;
+}> {
+  return {
+    name: 'zh-TW',
+    value: {
+      ui,
+      openapi,
+      story,
+    },
+  };
+}
+```
+
+## Extensions
+
+Extensions declare the available namespace & labels for translations.
+
+Extnesions must be consumed with `.extend()` **before** adding any language packs or custom translations.
+
+### Custom Extension
+
+If you are building community packages for Fumadocs, you can create extensions to register your own translations.
+
+```ts tab="i18n.ts"
+import type { TranslationsAPIExtension, TranslationValue } from 'fumadocs-core/i18n';
+
+export const defaultTranslations = {
+  labelExample: 'Hello World',
+  labelWithVariable: 'Hello {user}' as TranslationValue<'user'>,
+};
+
+export type Translations = typeof defaultTranslations;
+
+export function myTranslations(): TranslationsAPIExtension<'my-package', Translations> {
+  return {
+    namespace: 'my-package',
+    defaultValue: defaultTranslations,
+  };
+}
+```
+
+```ts tab="Reference"
+'use client';
+import { useTranslations } from 'fumadocs-ui/contexts/i18n';
+import { type Translations, defaultTranslations } from '@/i18n';
+
+export function Comp() {
+  const translations = useTranslations<Translations>('my-package') ?? defaultTranslations;
+}
+```
+
+Consumers can use your extension like:
+
+```ts
+import { defineTranslations } from 'fumadocs-core/i18n';
+import { myTranslations } from 'my-package/i18n';
+
+export const translations = defineTranslations()
+  // [!code ++]
+  .extend(myTranslations())
+  .add('my-package', {
+    labelExample: 'Hello Apple',
+  });
 ```
