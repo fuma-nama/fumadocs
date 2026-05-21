@@ -2,6 +2,7 @@ packages:
   - packages/*
   - apps/*
   - examples/*
+  - '!examples/next-stackblitz'
 allowBuilds:
   '@parcel/watcher': false
   core-js: false

@@ -9,6 +9,7 @@
   "access": "restricted",
   "baseBranch": "dev",
   "updateInternalDependencies": "patch",
+  "bumpVersionsWithWorkspaceProtocolOnly": true,
   "privatePackages": {
     "version": true,
     "tag": false
