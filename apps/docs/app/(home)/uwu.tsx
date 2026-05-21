@@ -22,7 +22,7 @@ export function UwuHero() {
           Getting Started
         </Link>
         <a
-          href="https://stackblitz.com/~/github.com/fuma-nama/fumadocs-ui-template"
+          href="https://stackblitz.com/github/fuma-nama/fumadocs/tree/main/examples/next-stackblitz"
           className={cn(
             buttonVariants({
               size: 'lg',

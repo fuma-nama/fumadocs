@@ -7,8 +7,9 @@ on:
 
 concurrency: ${{ github.workflow }}-${{ github.ref }}
 permissions:
+  contents: write
+  pull-requests: write
   id-token: write
-  contents: read
 
 jobs:
   release:
@@ -16,8 +17,6 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6
-        with:
-          token: ${{ secrets.UPDATE_TEMPLATE_SSH_KEY }}
 
       - uses: pnpm/action-setup@v4
 
@@ -36,5 +35,3 @@ jobs:
         with:
           publish: pnpm run release
           version: pnpm run version
-        env:
-          GITHUB_TOKEN: ${{ secrets.UPDATE_TEMPLATE_SSH_KEY }}

@@ -37,7 +37,6 @@
     "clean": "rimraf dist",
     "dev": "tsdown --watch",
     "lint": "oxlint .",
-    "postpublish": "echo \"Updating template repo\" && bash ./scripts/update-git-repo.sh",
     "types:check": "tsc --noEmit",
     "sync": "node ./scripts/sync.ts"
   },

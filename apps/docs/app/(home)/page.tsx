@@ -84,12 +84,12 @@ export default function Page() {
               Getting Started
             </Link>
             <a
-              href="https://codesandbox.io/p/sandbox/github/fuma-nama/fumadocs-ui-template"
+              href="https://stackblitz.com/github/fuma-nama/fumadocs/tree/main/examples/next-stackblitz"
               target="_blank"
               rel="noreferrer noopener"
               className={cn(buttonVariants({ variant: 'secondary' }), 'max-sm:text-sm')}
             >
-              Open CodeSandbox
+              Open StackBlitz
             </a>
           </div>
         </div>
