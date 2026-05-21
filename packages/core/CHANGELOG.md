@@ -1,5 +1,16 @@
 # fumadocs-core
 
+## 16.9.0
+
+### Minor Changes
+
+- 214d5b0: Introduce new translations API
+
+### Patch Changes
+
+- 818ed21: support `sort` option in page tree builder
+- 3b66725: Support `sort.by` in loader page tree option
+
 ## 16.8.12
 
 ### Patch Changes
