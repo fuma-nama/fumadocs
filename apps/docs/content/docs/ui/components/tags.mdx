@@ -93,7 +93,7 @@ const tagCounts = new Map([
 
 <TagList>
   {Array.from(tagCounts).map(([tag, count]) => (
-    <Tag key={tag} href={`/tags/${tag}`} count={count}>
+    <Tag key={tag} href={`/tags/${encodeURIComponent(tag)}`} count={count}>
       {tag}
     </Tag>
   ))}
