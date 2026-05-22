@@ -51,9 +51,11 @@ export function defineI18n<const Languages extends string>(
     translations() {
       // lang -> (namespace, object)
       const translations: Record<string, Record<string, TranslationObject>> = {};
+      const stagedTranslations: Record<string, Record<string, TranslationObject>> = {};
 
       for (const lang of config.languages) {
         translations[lang] = {};
+        stagedTranslations[lang] = {};
       }
 
       return {
@@ -65,8 +67,9 @@ export function defineI18n<const Languages extends string>(
         },
         preset(lang, preset) {
           const t = translations[lang];
+          const staged = stagedTranslations[lang];
           for (const [namespace, obj] of Object.entries(preset.value)) {
-            if (t[namespace]) Object.assign(t[namespace], obj);
+            Object.assign(t[namespace] ?? (staged[namespace] ??= {}), obj);
           }
 
           return this as never;
@@ -80,7 +83,12 @@ export function defineI18n<const Languages extends string>(
         },
         extend({ namespace, defaultValue }) {
           for (const lang of config.languages) {
-            translations[lang][namespace] = { ...defaultValue };
+            const t = translations[lang];
+            const staged = stagedTranslations[lang];
+
+            if (t[namespace]) continue;
+            t[namespace] = { ...defaultValue, ...staged[namespace] };
+            delete staged[namespace];
           }
 
           return this as never;
@@ -122,6 +130,7 @@ export interface TranslationsAPI<
     (lang: Languages): Namespaces;
     (lang: string): Namespaces | undefined;
   };
+  /** add extension, will be ignored if the same extension (namespace) has been registered */
   extend: <N extends string, Obj extends TranslationObject>(
     extension: TranslationsAPIExtension<N, Obj>,
   ) => TranslationsAPI<Languages, Namespaces & { [K in N]: Obj }>;
@@ -133,7 +142,7 @@ export interface TranslationsAPI<
     },
   ) => TranslationsAPI<Languages, Namespaces>;
 
-  /** add language pack, you should call `extend()` first before adding a language preset */
+  /** add language pack */
   preset: (
     lang: Languages,
     preset: TranslationPreset<Namespaces>,
@@ -147,6 +156,7 @@ export interface SingularTranslationsAPI<
   $inferNamespaces: Namespaces;
 
   get: () => Namespaces;
+  /** add extension, will be ignored if the same extension (namespace) has been registered */
   extend: <N extends string, Obj extends TranslationObject>(
     extension: TranslationsAPIExtension<N, Obj>,
   ) => SingularTranslationsAPI<Namespaces & { [K in N]: Obj }>;
@@ -156,7 +166,7 @@ export interface SingularTranslationsAPI<
     overrides: Partial<Namespaces[N]>,
   ) => SingularTranslationsAPI<Namespaces>;
 
-  /** add language pack, you should call `extend()` first before adding a language preset */
+  /** add language pack */
   preset: (preset: TranslationPreset<Namespaces>) => SingularTranslationsAPI<Namespaces>;
 }
 
@@ -164,6 +174,7 @@ export interface SingularTranslationsAPI<
 export function defineTranslations(): SingularTranslationsAPI<Record<never, TranslationObject>> {
   // namespace -> object
   const translations: Record<string, TranslationObject> = {};
+  const stagedTranslations: Record<string, TranslationObject> = {};
 
   return {
     $inferNamespaces: undefined as never,
@@ -172,7 +183,8 @@ export function defineTranslations(): SingularTranslationsAPI<Record<never, Tran
     },
     preset(preset) {
       for (const [namespace, obj] of Object.entries(preset.value)) {
-        if (translations[namespace]) Object.assign(translations[namespace], obj);
+        const t = translations[namespace] ?? (stagedTranslations[namespace] ??= {});
+        Object.assign(t, obj);
       }
 
       return this as never;
@@ -183,7 +195,10 @@ export function defineTranslations(): SingularTranslationsAPI<Record<never, Tran
       return this as never;
     },
     extend({ namespace, defaultValue }) {
-      translations[namespace] = { ...defaultValue };
+      if (!translations[namespace]) {
+        translations[namespace] = { ...defaultValue, ...stagedTranslations[namespace] };
+        delete stagedTranslations[namespace];
+      }
 
       return this as never;
     },

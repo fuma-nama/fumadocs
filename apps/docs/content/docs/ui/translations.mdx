@@ -19,11 +19,13 @@ import { uiTranslations } from 'fumadocs-ui/i18n';
 
 export const translations = defineTranslations()
   .extend(uiTranslations())
-  // add translations
+  // add translations to "ui" namespace
   .add('ui', {
     search: '搜尋文檔',
   });
 ```
+
+> `.add()` should only be called **after** all `.extend()` calls.
 
 Pass the translations to `<RootProvider />`.
 
@@ -56,7 +58,7 @@ import { i18n } from '@/lib/i18n';
 export const translations = i18n
   .translations()
   .extend(uiTranslations())
-  // add translations
+  // add translations to "ui" namespace
   .add('ui', {
     // [locale code]: { translations }
     cn: {
@@ -94,7 +96,7 @@ npm i @fumadocs/language
 
 > If your desired language is missing in the official language packs, we welcome contributions to [our repository](https://github.com/fuma-nama/fumadocs).
 
-To use it, call `preset()` **after** all `extend()` calls:
+Use `preset()` to consume language packs:
 
 ```ts tab="Singular"
 import { defineTranslations } from 'fumadocs-core/i18n';
@@ -171,9 +173,7 @@ export function zhTW(): TranslationPreset<{
 
 ## Extensions
 
-Extensions declare the available namespace & labels for translations.
-
-Extnesions must be consumed with `.extend()` **before** adding any language packs or custom translations.
+Extensions declare the available namespace & labels for translations, only translations in registered namespaces will be sent to client payload.
 
 ### Custom Extension
 
