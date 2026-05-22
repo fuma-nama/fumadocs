@@ -108,9 +108,14 @@ export function toVite(loader: Loader): ViteLoader {
       const [file, query = ''] = id.split('?', 2);
 
       try {
+        const parsedQuery = parse(query);
+        if ('raw' in parsedQuery) {
+          return null;
+        }
+
         const result = await loader.load({
           filePath: file,
-          query: parse(query),
+          query: parsedQuery,
           getSource() {
             return value;
           },
