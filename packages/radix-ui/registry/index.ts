@@ -265,6 +265,15 @@ export const registry: Registry = {
       ],
     },
     {
+      name: 'tags',
+      files: [
+        {
+          type: 'components',
+          path: 'components/tags.tsx',
+        },
+      ],
+    },
+    {
       name: 'tabs',
       files: [
         {

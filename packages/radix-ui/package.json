@@ -40,6 +40,7 @@
     "./components/sidebar/tabs/dropdown": "./dist/components/sidebar/tabs/dropdown.js",
     "./components/steps": "./dist/components/steps.js",
     "./components/tabs": "./dist/components/tabs.js",
+    "./components/tags": "./dist/components/tags.js",
     "./components/toc": "./dist/components/toc/index.js",
     "./components/toc/clerk": "./dist/components/toc/clerk.js",
     "./components/toc/default": "./dist/components/toc/default.js",
