@@ -4,6 +4,7 @@ import { Card } from 'fumadocs-ui/components/card';
 import { Callout } from 'fumadocs-ui/components/callout';
 import { Accordion, Accordions } from 'fumadocs-ui/components/accordion';
 import { Tab, Tabs } from 'fumadocs-ui/components/tabs';
+import { Tag, TagList } from 'fumadocs-ui/components/tags';
 import { Step, Steps } from 'fumadocs-ui/components/steps';
 import { TypeTable } from 'fumadocs-ui/components/type-table';
 import { type ReactNode } from 'react';
@@ -189,6 +190,24 @@ export function steps(): ReactNode {
             <p>Some text here</p>
           </Step>
         </Steps>
+      </div>
+    </Wrapper>
+  );
+}
+
+export function tags(): ReactNode {
+  return (
+    <Wrapper>
+      <div className="rounded-xl bg-fd-background p-4">
+        <TagList>
+          <Tag href="#" count={12}>
+            react
+          </Tag>
+          <Tag href="#" active count={8}>
+            nextjs
+          </Tag>
+          <Tag>docs</Tag>
+        </TagList>
       </div>
     </Wrapper>
   );

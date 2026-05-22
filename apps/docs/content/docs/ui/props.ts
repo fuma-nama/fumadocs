@@ -2,6 +2,7 @@ import type { Accordion, Accordions } from 'fumadocs-ui/components/accordion';
 import type { Callout } from 'fumadocs-ui/components/callout';
 import type { File, Folder } from 'fumadocs-ui/components/files';
 import type { InlineTOC } from 'fumadocs-ui/components/inline-toc';
+import type { TagProps as BaseTagProps } from 'fumadocs-ui/components/tags';
 import type { TypeTable } from 'fumadocs-ui/components/type-table';
 import type { Card } from 'fumadocs-ui/components/card';
 import type { DocsLayoutProps } from 'fumadocs-ui/layouts/docs';
@@ -43,6 +44,8 @@ export type CardProps = Omit<
   ComponentPropsWithoutRef<typeof Card>,
   keyof Omit<ComponentProps<'a'>, 'href'>
 >;
+
+export type TagProps = Omit<BaseTagProps, keyof Omit<ComponentProps<'a'>, 'href'>>;
 
 export type TypeTableProps = Omit<
   ComponentPropsWithoutRef<typeof TypeTable>,

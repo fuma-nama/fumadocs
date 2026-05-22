@@ -1,0 +1,123 @@
+---
+title: Tags
+description: Display document, blog, or archive tags
+preview: tags
+---
+
+import { Tag, TagList } from 'fumadocs-ui/components/tags';
+
+<Installation name="tags" />
+
+## Usage
+
+Use tags to display document metadata, blog categories, or archive filters.
+
+```tsx
+import { Tag, TagList } from 'fumadocs-ui/components/tags';
+
+<TagList>
+  <Tag href="/tags/react" count={8}>
+    react
+  </Tag>
+  <Tag href="/tags/nextjs" active count={4}>
+    nextjs
+  </Tag>
+  <Tag>docs</Tag>
+</TagList>;
+```
+
+<TagList>
+  <Tag href="#" count={8}>
+    react
+  </Tag>
+  <Tag href="#" active count={4}>
+    nextjs
+  </Tag>
+  <Tag>docs</Tag>
+</TagList>
+
+### Plain Tags
+
+Omit `href` to render a non-link tag.
+
+```tsx
+<TagList>
+  <Tag>react</Tag>
+  <Tag>nextjs</Tag>
+  <Tag>docs</Tag>
+</TagList>
+```
+
+### Frontmatter Tags
+
+With Fumadocs MDX, add `tags` to your frontmatter schema.
+
+```ts title="source.config.ts"
+import { defineDocs } from 'fumadocs-mdx/config';
+import { pageSchema } from 'fumadocs-core/source/schema';
+import { z } from 'zod';
+
+export const docs = defineDocs({
+  docs: {
+    schema: pageSchema.extend({
+      tags: z.array(z.string()).default([]),
+    }),
+  },
+});
+```
+
+Then render tags from the page data.
+
+```tsx title="app/docs/[[...slug]]/page.tsx"
+import { Tag, TagList } from 'fumadocs-ui/components/tags';
+
+<TagList>
+  {page.data.tags.map((tag) => (
+    <Tag key={tag} href={`/tags/${encodeURIComponent(tag)}`}>
+      {tag}
+    </Tag>
+  ))}
+</TagList>;
+```
+
+### Counts
+
+Pass a number or any React node to `count`. You can render counts from a record, `Map`,
+or array length.
+
+```tsx
+const tagCounts = new Map([
+  ['react', 8],
+  ['nextjs', 4],
+]);
+
+<TagList>
+  {Array.from(tagCounts).map(([tag, count]) => (
+    <Tag key={tag} href={`/tags/${tag}`} count={count}>
+      {tag}
+    </Tag>
+  ))}
+</TagList>;
+```
+
+### Custom Styles
+
+Use `className` to customize the list or individual tags.
+
+```tsx
+<TagList className="gap-1">
+  <Tag className="uppercase">react</Tag>
+  <Tag active>nextjs</Tag>
+</TagList>
+```
+
+## Search Tags
+
+For search result filtering, use `TagsList` from `fumadocs-ui/components/dialog/search`
+instead.
+
+## Reference
+
+### Tag
+
+<auto-type-table cwd path="content/docs/ui/props.ts" name="TagProps" />
