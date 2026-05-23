@@ -1,5 +1,11 @@
 # create-fumadocs-versions
 
+## 16.0.116
+
+### Patch Changes
+
+- 511f1b1: lower eslint version
+
 ## 16.0.115
 
 ### Patch Changes
