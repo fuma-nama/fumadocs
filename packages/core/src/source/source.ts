@@ -30,6 +30,7 @@ export interface MetaData {
   title?: string | undefined;
   root?: boolean | undefined;
   pages?: string[] | undefined;
+  pagesIndex?: string | undefined;
   defaultOpen?: boolean | undefined;
   collapsible?: boolean | undefined;
 

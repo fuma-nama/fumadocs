@@ -410,9 +410,9 @@ export function loader<I extends ResolvedInput, I18n extends I18nConfig | undefi
     },
     getNodeMeta(node, language = i18n?.defaultLanguage) {
       const ref = node.$ref;
-      if (!ref) return;
+      if (!ref?.meta) return;
 
-      return indexer.getMeta(ref, language);
+      return indexer.getMeta(ref.meta, language);
     },
     getNodePage(node, language = i18n?.defaultLanguage) {
       const ref = node.$ref;

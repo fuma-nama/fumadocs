@@ -9,9 +9,9 @@ interface ID {
 
 export interface Root extends ID {
   /**
-   * @internal meta file path
+   * @internal folder `$ref`
    */
-  $ref?: string;
+  $ref?: Folder['$ref'];
 
   type?: 'root';
   name: ReactNode;
@@ -53,9 +53,9 @@ export interface Separator extends ID {
 
 export interface Folder extends ID {
   /**
-   * @internal meta file path
+   * @internal paths of meta file & folder
    */
-  $ref?: string;
+  $ref?: { meta?: string; folder: string };
 
   type: 'folder';
   name: ReactNode;
