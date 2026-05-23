@@ -1,5 +1,14 @@
 # next-docs-mdx
 
+## 15.0.8
+
+### Patch Changes
+
+- dca5b49: Fix compatibility with `?raw` query string
+- Updated dependencies [e77b9b3]
+- Updated dependencies [334c8fd]
+  - fumadocs-core@16.9.1
+
 ## 15.0.7
 
 ### Patch Changes

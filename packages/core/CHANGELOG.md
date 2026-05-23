@@ -1,5 +1,12 @@
 # fumadocs-core
 
+## 16.9.1
+
+### Patch Changes
+
+- e77b9b3: Introduce `pagesIndex` property to explicitly define the index page for folder
+- 334c8fd: [i18n] support different orders of `preset()` calls
+
 ## 16.9.0
 
 ### Minor Changes
