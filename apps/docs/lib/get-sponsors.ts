@@ -2,6 +2,8 @@ import { Octokit } from 'octokit';
 
 export interface Sponsor extends SponsorEntity {
   tier: Tier;
+  isActive: boolean;
+  isOneTimePayment: boolean;
 }
 
 interface SponsorEntity {
@@ -34,6 +36,8 @@ export async function getSponsors(owner: string): Promise<Sponsor[]> {
       user: {
         sponsorshipsAsMaintainer: {
           nodes: Array<{
+            isActive: boolean;
+            isOneTimePayment: boolean;
             sponsorEntity: SponsorEntity;
             tier: Tier;
           }>;
@@ -42,8 +46,10 @@ export async function getSponsors(owner: string): Promise<Sponsor[]> {
     }>(`
       query {
         user(login: ${JSON.stringify(owner)}) {
-          sponsorshipsAsMaintainer(first: 100) {
+          sponsorshipsAsMaintainer(first: 100, activeOnly: false) {
             nodes {
+              isActive
+              isOneTimePayment
               sponsorEntity {
                 __typename
                 ... on User {
@@ -69,14 +75,21 @@ export async function getSponsors(owner: string): Promise<Sponsor[]> {
       }
     `);
 
-    const sponsors = response.user.sponsorshipsAsMaintainer.nodes.map((node) => ({
-      ...node.sponsorEntity,
-      name: node.sponsorEntity.name || node.sponsorEntity.login,
-      tier: node.tier,
-    }));
+    const sponsors = response.user.sponsorshipsAsMaintainer.nodes.map(
+      (node): Sponsor => ({
+        ...node.sponsorEntity,
+        isActive: node.isActive,
+        isOneTimePayment: node.isOneTimePayment,
+        name: node.sponsorEntity.name || node.sponsorEntity.login,
+        tier: node.tier,
+      }),
+    );
 
-    // Sort sponsors by tier price in descending order
-    return sponsors.sort((a, b) => b.tier.monthlyPriceInDollars - a.tier.monthlyPriceInDollars);
+    return sponsors.sort(
+      (a, b) =>
+        b.tier.monthlyPriceInDollars * (b.isOneTimePayment ? 1 : 2) -
+        a.tier.monthlyPriceInDollars * (a.isOneTimePayment ? 1 : 2),
+    );
   } catch (error) {
     console.error('Error fetching sponsors:', error);
     throw error;

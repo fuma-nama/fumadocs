@@ -1,8 +1,8 @@
-import { Fragment } from 'react';
+import { Fragment, ReactNode } from 'react';
 import Image from 'next/image';
 import { buttonVariants } from '@/components/ui/button';
 import { cn } from '@/lib/cn';
-import { getSponsors } from '@/lib/get-sponsors';
+import { getSponsors, type Sponsor } from '@/lib/get-sponsors';
 import { owner } from '@/lib/github';
 import { organizationAsUserSponsors } from '@/app/(home)/sponsors/data';
 import { HeartIcon } from 'lucide-react';
@@ -27,28 +27,28 @@ const tiers = [
 
 export const revalidate = 3600;
 
-export default async function Page() {
-  const result = await getSponsors(owner);
-
-  const sponsors = result.map((v) => {
+function mapSponsors(result: Sponsor[]): (Sponsor & { logo?: ReactNode })[] {
+  return result.map((v) => {
     const entity = organizationAsUserSponsors.find((entity) => entity.asUser === v.login);
     if (entity) {
       return {
+        ...v,
         login: entity.github,
         name: entity.label,
         websiteUrl: entity.url,
         logo: entity.logo,
         __typename: 'Organization',
-        tier: v.tier,
-        avatarUrl: undefined,
       };
     }
 
-    return {
-      logo: undefined,
-      ...v,
-    };
+    return v;
   });
+}
+
+export default async function Page() {
+  const all = await getSponsors(owner);
+  const sponsors = mapSponsors(all.filter((v) => v.isActive));
+  const pastSponsors = mapSponsors(all.filter((v) => !v.isActive));
 
   return (
     <main className="w-full max-w-page mx-auto flex flex-col items-center px-4 py-16 text-center z-2">
@@ -224,7 +224,7 @@ export default async function Page() {
               href={getSponsorHref(sponsor.login, sponsor.websiteUrl)}
               rel="noreferrer noopener"
               target="_blank"
-              className="inline-flex items-center gap-2 rounded-xl p-3 text-xs transition-colors hover:bg-fd-primary/10"
+              className="inline-flex items-center gap-2 rounded-xl p-3 text-xs font-medium transition-colors hover:bg-fd-accent hover:text-fd-accent-foreground"
             >
               <Image
                 alt="avatar"
@@ -238,6 +238,40 @@ export default async function Page() {
             </a>
           ))}
       </div>
+
+      {pastSponsors.length > 0 && (
+        <>
+          <h2 className="mt-12 font-mono text-xs mb-7">Past Sponsors</h2>
+          <div className="grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-4">
+            {pastSponsors.map((sponsor) => (
+              <a
+                key={sponsor.login}
+                href={getSponsorHref(sponsor.login, sponsor.websiteUrl)}
+                rel="noreferrer noopener"
+                target="_blank"
+                className="inline-flex items-center gap-2 rounded-xl p-3 text-xs text-start transition-colors text-fd-muted-foreground hover:bg-fd-accent hover:text-fd-accent-foreground"
+              >
+                {sponsor.logo ?? (
+                  <Image
+                    alt="avatar"
+                    src={sponsor.avatarUrl}
+                    unoptimized
+                    width="30"
+                    height="30"
+                    className="rounded-lg opacity-70"
+                  />
+                )}
+                <p>
+                  <span className="font-medium">{sponsor.name}</span>
+                  <br />
+                  <code>${sponsor.tier.monthlyPriceInDollars}</code>{' '}
+                  {sponsor.isOneTimePayment ? 'one-time' : 'monthly'}
+                </p>
+              </a>
+            ))}
+          </div>
+        </>
+      )}
     </main>
   );
 }
