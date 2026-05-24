@@ -99,7 +99,7 @@ export const organizationAsUserSponsors = [
     url: 'https://orshot.com',
     label: 'orshot',
     github: 'orshot-hq',
-    asUser: 'rishi-raj-jain',
+    asUser: 'orshot-hq',
     logo: (
       <>
         <svg className="size-9.5 rounded-full border border-fd-foreground" width="512" height="512" viewBox="0 0 512 512" fill="none" xmlns="http://www.w3.org/2000/svg">
