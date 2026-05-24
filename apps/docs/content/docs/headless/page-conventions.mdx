@@ -124,6 +124,7 @@ Customize folders by creating a `meta.json` file in the folder.
 | `defaultOpen` | Open the folder by default                   |
 | `collapsible` | Collapsible folder content (default: `true`) |
 | `pages`       | Folder items (see below)                     |
+| `pagesIndex`  | The index item (see below)                   |
 
 ### Pages
 
@@ -170,6 +171,25 @@ Duplicated page items are not allowed for the same reason.
 This is intentional, such that Fumadocs can locate the active tree item purely based on current pathname.
 
 </Callout>
+
+### Folder Index
+
+When folder owns a index item, it becomes clickable and jumps to the index item when clicked.
+
+By default, it is the `index` file under each folder. You can specify the index item of a folder, it accepts **Path** and **Link**.
+
+```json tab="meta.json (Path)"
+{
+  // assume there's a "overview.mdx" file under the folder
+  "pagesIndex": "overview"
+}
+```
+
+```json tab="meta.json (Link)"
+{
+  "pagesIndex": "[Example](https://example.com)"
+}
+```
 
 ## Icons
 
