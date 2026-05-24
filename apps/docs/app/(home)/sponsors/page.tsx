@@ -29,7 +29,11 @@ export const revalidate = 3600;
 
 function mapSponsors(result: Sponsor[]): (Sponsor & { logo?: ReactNode })[] {
   return result.map((v) => {
-    const entity = organizationAsUserSponsors.find((entity) => entity.asUser === v.login);
+    const entity = organizationAsUserSponsors.find(
+      (entity) =>
+        entity.asUser === v.login &&
+        (entity.isOneTime === undefined || entity.isOneTime === v.isOneTimePayment),
+    );
     if (entity) {
       return {
         ...v,
