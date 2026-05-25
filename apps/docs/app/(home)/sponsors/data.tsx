@@ -63,7 +63,6 @@ export const organizationAsUserSponsors = [
     label: 'launchfast',
     github: 'launchfast',
     asUser: 'rishi-raj-jain',
-    isOneTime: false,
     logo: (
       <>
         <svg
@@ -101,7 +100,6 @@ export const organizationAsUserSponsors = [
     label: 'orshot',
     github: 'orshot-hq',
     asUser: 'rishi-raj-jain',
-    isOneTime: true,
     logo: (
       <>
         <svg

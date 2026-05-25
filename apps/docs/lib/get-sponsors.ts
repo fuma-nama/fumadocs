@@ -7,11 +7,11 @@ export interface Sponsor extends SponsorEntity {
 }
 
 interface SponsorEntity {
+  __typename: 'User' | 'Organization';
   login: string;
   avatarUrl: string;
   websiteUrl: string;
   name: string;
-  __typename: string;
 }
 
 interface Tier {
