@@ -42,8 +42,8 @@ export function createMdxLoader({ getCore }: ConfigLoader): Loader {
         const cacheKey = `${collectionName ?? 'global'}_${generateCacheHash(filePath)}`;
 
         const cached = await fs
-          .readFile(path.join(cacheDir, cacheKey))
-          .then((content) => cacheEntry.parse(JSON.parse(content.toString())))
+          .readFile(path.join(cacheDir, cacheKey), 'utf-8')
+          .then((content) => cacheEntry.parse(JSON.parse(content)))
           .catch(() => null);
 
         if (cached && cached.hash === generateCacheHash(value)) return cached;

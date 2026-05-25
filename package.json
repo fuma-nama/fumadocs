@@ -7,7 +7,6 @@
     "clean": "turbo run clean",
     "dev": "turbo run dev",
     "dev:examples": "turbo run dev --filter=./examples/*",
-    "sync-ui": "bash ./scripts/mirror-ui-change.sh",
     "lint": "turbo run lint",
     "lint:format": "oxfmt --check",
     "format": "oxfmt",

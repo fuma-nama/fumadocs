@@ -60,7 +60,8 @@ export default async function mdx(
   return [
     {
       name: 'fumadocs-mdx',
-      async config() {
+      async config(config) {
+        if ('_fumadocs_skipViteConfig' in config && config._fumadocs_skipViteConfig) return;
         if (!options.updateViteConfig) return;
 
         const { getConfig } = await import('@fumadocs/vite');
