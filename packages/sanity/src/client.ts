@@ -1,4 +1,4 @@
-import type { PortableTextBlock } from 'sanity';
+import type { PortableTextBlock } from '@portabletext/react';
 import type { TOCItemType } from 'fumadocs-core/toc';
 import type { ReactNode } from 'react';
 

@@ -34,6 +34,7 @@
   },
   "devDependencies": {
     "@sanity/client": "^7.22.0",
+    "@sanity/types": "^5.26.0",
     "@types/node": "25.8.0",
     "@types/react": "^19.2.14",
     "fuma-cli": "^0.1.1",
@@ -41,20 +42,23 @@
     "fumadocs-ui": "workspace:*",
     "next-sanity": "^12.4.5",
     "react": "^19.2.6",
-    "sanity": "^5.25.1",
     "tsconfig": "workspace:*",
     "tsdown": "0.22.0",
     "typescript": "^6.0.3"
   },
   "peerDependencies": {
     "@sanity/client": "^7.22.0",
+    "@sanity/types": "*",
     "@types/react": "*",
     "fumadocs-core": "^16.8.0",
     "next-sanity": "^12.4.0",
     "react": "^19.2.0",
-    "sanity": "^5.23.0"
+    "react-dom": "^19.2.0"
   },
   "peerDependenciesMeta": {
+    "@sanity/types": {
+      "optional": true
+    },
     "@sanity/client": {
       "optional": true
     },
