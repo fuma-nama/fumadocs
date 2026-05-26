@@ -1,5 +1,11 @@
 # next-docs-mdx
 
+## 15.0.9
+
+### Patch Changes
+
+- cd04425: Support `_fumadocs_skipViteConfig` internal flag
+
 ## 15.0.8
 
 ### Patch Changes
