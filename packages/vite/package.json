@@ -28,10 +28,10 @@
     "types:check": "tsc --noEmit"
   },
   "devDependencies": {
-    "@types/node": "^25.8.0",
+    "@types/node": "^25.9.1",
     "tsconfig": "workspace:*",
     "tsdown": "0.22.0",
     "typescript": "^6.0.3",
-    "vite": "^8.0.13"
+    "vite": "^8.0.14"
   }
 }

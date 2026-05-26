@@ -49,8 +49,8 @@
   },
   "devDependencies": {
     "@types/js-yaml": "^4.0.9",
-    "@types/node": "^25.8.0",
-    "@types/react": "^19.2.14",
+    "@types/node": "^25.9.1",
+    "@types/react": "^19.2.15",
     "fumadocs-core": "workspace:*",
     "fumadocs-ui": "workspace:*",
     "tsconfig": "workspace:*",

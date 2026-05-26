@@ -14,7 +14,7 @@
     "@astrojs/mdx": "^5.0.6",
     "@astrojs/react": "^5.0.5",
     "@orama/orama": "^3.1.18",
-    "astro": "^6.3.3",
+    "astro": "^6.3.7",
     "fumadocs-core": "workspace:*",
     "fumadocs-ui": "workspace:*",
     "react": "^19.2.6",
@@ -23,7 +23,7 @@
   },
   "devDependencies": {
     "@tailwindcss/vite": "^4.3.0",
-    "@types/react": "^19.2.14",
+    "@types/react": "^19.2.15",
     "@types/react-dom": "^19.2.3",
     "tailwindcss": "^4.3.0"
   }

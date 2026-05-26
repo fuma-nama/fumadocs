@@ -37,11 +37,11 @@
     "commander": "^14.0.3",
     "fuma-cli": "^0.1.1",
     "picocolors": "^1.1.1",
-    "tinyexec": "^1.1.2",
+    "tinyexec": "^1.2.2",
     "zod": "^4.4.3"
   },
   "devDependencies": {
-    "@types/node": "25.8.0",
+    "@types/node": "25.9.1",
     "tsconfig": "workspace:*",
     "tsdown": "0.22.0"
   }

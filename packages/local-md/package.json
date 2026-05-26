@@ -51,16 +51,16 @@
     "remark-rehype": "^11.1.2",
     "tinyglobby": "^0.2.16",
     "vfile": "^6.0.3",
-    "ws": "^8.20.1"
+    "ws": "^8.21.0"
   },
   "devDependencies": {
     "@types/estree": "^1.0.9",
     "@types/estree-jsx": "^1.0.5",
     "@types/hast": "^3.0.4",
     "@types/mdx": "^2.0.13",
-    "@types/node": "25.8.0",
+    "@types/node": "25.9.1",
     "@types/picomatch": "^4.0.3",
-    "@types/react": "^19.2.14",
+    "@types/react": "^19.2.15",
     "@types/react-dom": "^19.2.3",
     "@types/unist": "^3.0.3",
     "@types/ws": "^8.18.1",
@@ -70,7 +70,7 @@
     "tsconfig": "workspace:*",
     "tsdown": "0.22.0",
     "unified": "^11.0.5",
-    "vite": "^8.0.13"
+    "vite": "^8.0.14"
   },
   "peerDependencies": {
     "@types/estree": "*",
