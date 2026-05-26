@@ -42,6 +42,7 @@
     "fumadocs-ui": "workspace:*",
     "next-sanity": "^12.4.5",
     "react": "^19.2.6",
+    "sanity": "^5.26.0",
     "tsconfig": "workspace:*",
     "tsdown": "0.22.0",
     "typescript": "^6.0.3"
