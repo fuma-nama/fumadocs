@@ -1,5 +1,11 @@
 # @fumadocs/story
 
+## 1.0.0
+
+### Major Changes
+
+- 5c5d319: New Vite plugin for non-RSC environment
+
 ## 0.1.0
 
 ### Minor Changes
