@@ -8,7 +8,6 @@ import { AlertCircle } from 'lucide-react';
 import { FC, useState, useRef, useDeferredValue, Suspense } from 'react';
 import { ErrorBoundary } from 'react-error-boundary';
 import { FieldSet } from './arg-form';
-import { VariantInfo } from '..';
 import type { TypeNode } from '@/type-tree/types';
 import { useTranslations } from './i18n';
 
@@ -19,6 +18,11 @@ export interface WithControlProps {
     controls: TypeNode;
     defaultValues?: Record<string, unknown>;
   })[];
+}
+
+export interface VariantInfo {
+  variant: string;
+  description?: string;
 }
 
 export function WithControl({ presets, displayName, Component }: WithControlProps) {

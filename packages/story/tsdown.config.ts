@@ -5,12 +5,12 @@ export default defineConfig({
   target: 'es2023',
   entry: [
     './src/index.{ts,tsx}',
-    './src/client/index.tsx',
     './src/i18n.ts',
     './src/type-tree/index.ts',
+    './src/vite.ts',
+    './src/vite/client.tsx',
   ],
   unbundle: true,
-  fixedExtension: false,
   dts: {
     sourcemap: false,
   },

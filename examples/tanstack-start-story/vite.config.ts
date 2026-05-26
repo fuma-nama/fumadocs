@@ -3,6 +3,7 @@ import { tanstackStart } from '@tanstack/react-start/plugin/vite';
 import { defineConfig } from 'vite';
 import tailwindcss from '@tailwindcss/vite';
 import mdx from 'fumadocs-mdx/vite';
+import story from '@fumadocs/story/vite';
 
 export default defineConfig({
   server: {
@@ -15,6 +16,7 @@ export default defineConfig({
   plugins: [
     mdx(),
     tailwindcss(),
+    story(),
     tanstackStart({
       prerender: {
         enabled: true,

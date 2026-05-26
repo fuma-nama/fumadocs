@@ -1,7 +1,8 @@
 import { defineStory } from '@/lib/story';
-import type { CalloutStory } from '.';
+import { CalloutStory } from './callout';
 
-export const story = defineStory<typeof CalloutStory>('src/components/callout/story.tsx', {
+export const story = defineStory({
+  Component: CalloutStory,
   displayName: 'Callout',
   args: [
     {

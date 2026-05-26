@@ -8,10 +8,6 @@ import defaultMdxComponents from 'fumadocs-ui/mdx';
 import { baseOptions } from '@/lib/layout.shared';
 import { useFumadocsLoader } from 'fumadocs-core/source/client';
 import { Suspense } from 'react';
-import { story as calloutStory } from '@/components/callout/story';
-import { storyClient as calloutStoryClient } from '@/components/callout/story-client';
-import { StoryPayloadProvider } from '@fumadocs/story/client';
-import { getStoryPayloads } from '@/lib/story';
 
 export const Route = createFileRoute('/docs/$')({
   component: Page,
@@ -23,14 +19,6 @@ export const Route = createFileRoute('/docs/$')({
   },
 });
 
-const stories = {
-  callout: calloutStory,
-};
-
-const clientStories = {
-  callout: calloutStoryClient,
-};
-
 const serverLoader = createServerFn({
   method: 'GET',
 })
@@ -41,7 +29,6 @@ const serverLoader = createServerFn({
 
     return {
       path: page.path,
-      storyPayloads: await getStoryPayloads(stories),
       pageTree: await source.serializePageTree(source.getPageTree()),
     };
   });
@@ -71,13 +58,11 @@ function Page() {
 
   return (
     <DocsLayout {...baseOptions()} tree={data.pageTree}>
-      <StoryPayloadProvider payloads={data.storyPayloads} clients={clientStories}>
-        <Suspense>
-          {clientLoader.useContent(data.path, {
-            className: '',
-          })}
-        </Suspense>
-      </StoryPayloadProvider>
+      <Suspense>
+        {clientLoader.useContent(data.path, {
+          className: '',
+        })}
+      </Suspense>
     </DocsLayout>
   );
 }

@@ -6,7 +6,7 @@ description: Configure Fumadocs Story for Vite-based frameworks.
 ## Installation
 
 ```npm
-npm i @fumadocs/story ts-morph
+npm i @fumadocs/story
 ```
 
 Add the Tailwind CSS preset.
@@ -16,16 +16,14 @@ Add the Tailwind CSS preset.
 @import '@fumadocs/story/css/preset.css';
 ```
 
-Externalize `ts-morph`:
+Add the Vite plugin:
 
 ```ts title="vite.config.ts"
 import { defineConfig } from 'vite';
+import story from '@fumadocs/story/vite';
 
 export default defineConfig({
-  resolve: {
-    // [!code ++]
-    external: ['ts-morph'],
-  },
+  plugins: [story()],
 });
 ```
 
@@ -34,46 +32,23 @@ export default defineConfig({
 Create a story factory to store your global settings:
 
 ```ts title="lib/story.ts"
-import { createFileSystemCache, defineStoryFactory } from '@fumadocs/story';
+import { defineStoryFactory } from '@fumadocs/story/vite/client';
 
-export const { defineStory, getStoryPayloads } = defineStoryFactory({
-  // for Vercel, this is required: choose a directory for cache.
-  cache: process.env.NODE_ENV === 'production' ? createFileSystemCache('.story/cache') : undefined,
-
-  tsc: {
-    // we use tsc to generate controls from types
-    // you can pass TypeScript options here
-  },
-});
+export const { defineStory } = defineStoryFactory();
 ```
 
 Now create your first story:
 
 ```tsx tab="my-component.story.tsx"
 import { defineStory } from '@/lib/story';
-import type { MyComponent } from './my-component';
-
-// must be exported as `story`
-// or set the `name` option to match export name.
-export const story = defineStory<typeof MyComponent>(
-  // the path of this file:
-  'src/components/my-component.story.tsx',
-  {
-    args: {
-      // default props (recommended)
-      initial: {},
-    },
-  },
-);
-```
-
-```tsx tab="my-component.story.client.tsx"
-import { createStoryClient } from '@fumadocs/story/client';
 import { MyComponent } from './my-component';
-import type { story } from './my-component.story';
 
-export const storyClient = createStoryClient<typeof story>({
+export const story = defineStory({
   Component: MyComponent,
+  args: {
+    // default props (recommended)
+    initial: {},
+  },
 });
 ```
 
@@ -87,62 +62,16 @@ export function MyComponent({ title }: MyComponentProps) {
 }
 ```
 
-Story clients require payloads from server to render, you can leverage the SSR functionality of your React.js framework.
+<Callout type='warn' title={<>The <code>.story</code> suffix is required</>}>
+  The Vite plugin will only transform files matching `*.story.{js,jsx,ts,tsx}`, you can also configure filters from the Vite plugin.
+</Callout>
 
-For instance, on Tanstack Start:
-
-```tsx title="docs/$.tsx"
-import { story as calloutStory } from '@/components/my-component.story';
-import { storyClient as calloutStoryClient } from '@/components/my-component.story.client';
-import { StoryPayloadProvider } from '@fumadocs/story/client';
-import { getStoryPayloads } from '@/lib/story';
-
-export const Route = createFileRoute('/docs/$')({
-  component: Page,
-  loader: async ({ params }) => {
-    // load story payloads from server [!code ++]
-    return serverStoryLoader();
-  },
-});
-
-const stories = {
-  callout: calloutStory,
-};
-
-const clientStories = {
-  callout: calloutStoryClient,
-};
-
-const serverStoryLoader = createServerFn({
-  method: 'GET',
-}).handler(async () => {
-  return {
-    // generate payloads [!code ++]
-    storyPayloads: await getStoryPayloads(stories),
-  };
-});
-
-function Page() {
-  const data = Route.useLoaderData();
-
-  return (
-    <StoryPayloadProvider payloads={data.storyPayloads} clients={clientStories}>
-      {/* children */}
-    </StoryPayloadProvider>
-  );
-}
-```
+### Render a Story
 
 Now you can render the story like:
 
-```mdx title="index.mdx" tab="From Instance"
-import { storyClient } from '@/components/my-component.story.client';
+```mdx title="index.mdx"
+import { story } from '@/components/my-component.story';
 
-<storyClient.WithControl />
-```
-
-```mdx title="index.mdx" tab="From Payload Name"
-import { StoryWithControl } from '@fumadocs/story/client';
-
-<StoryWithControl name="callout" />
+<story.WithControl />
 ```
