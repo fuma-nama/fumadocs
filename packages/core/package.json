@@ -57,6 +57,7 @@
     "./mdx-plugins/remark-steps": "./dist/mdx-plugins/remark-steps.js",
     "./mdx-plugins/remark-structure": "./dist/mdx-plugins/remark-structure.js",
     "./mdx-plugins/stringifier": "./dist/mdx-plugins/stringifier.js",
+    "./mdx-plugins/transformer-icon": "./dist/mdx-plugins/transformer-icon.js",
     "./negotiation": "./dist/negotiation/index.js",
     "./page-tree": "./dist/page-tree/index.js",
     "./search": "./dist/search/index.js",
