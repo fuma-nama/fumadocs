@@ -98,25 +98,6 @@ interface ExtractedInfo {
   })[];
 }
 
-export async function fromServer(
-  server: OpenAPIServer,
-  config: PagesBuilderConfig,
-): Promise<Record<string, OutputEntry[]>> {
-  const schemas = await server.getSchemas();
-  const generated: Record<string, OutputEntry[]> = {};
-
-  const entries = Object.entries(schemas);
-  if (entries.length === 0) {
-    throw new Error('No input files found.');
-  }
-
-  for (const [id, schema] of entries) {
-    generated[id] = fromSchema(id, schema, config);
-  }
-
-  return generated;
-}
-
 export function fromSchema(
   schemaId: string,
   processed: DereferencedDocument,

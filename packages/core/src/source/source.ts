@@ -1,6 +1,8 @@
 import type { Awaitable } from '@/types';
 import type { DynamicLoader } from './dynamic';
 import type { StructuredData } from '@/mdx-plugins';
+import z from 'zod';
+import { pageSchema } from './schema';
 
 export type SourceUnion<Config extends SourceConfig = SourceConfig> =
   | StaticSource<Config>
@@ -39,10 +41,10 @@ export interface MetaData {
 
 export interface PageData {
   icon?: string | undefined;
-  title?: string;
+  title?: string | undefined;
   description?: string | undefined;
 
-  structuredData?: StructuredData | (() => Awaitable<StructuredData>);
+  structuredData?: StructuredData | (() => Awaitable<StructuredData>) | undefined;
 }
 
 export type VirtualFile<Config extends SourceConfig = SourceConfig> =
