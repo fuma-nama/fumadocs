@@ -663,6 +663,61 @@ importers:
         specifier: ^6.0.3
         version: 6.0.3
 
+  examples/next-shadcn:
+    dependencies:
+      '@fumadocs/shadcn':
+        specifier: workspace:*
+        version: link:../../packages/shadcn
+      fumadocs-core:
+        specifier: workspace:*
+        version: link:../../packages/core
+      fumadocs-mdx:
+        specifier: workspace:*
+        version: link:../../packages/mdx
+      fumadocs-ui:
+        specifier: workspace:*
+        version: link:../../packages/radix-ui
+      lucide-react:
+        specifier: ^1.16.0
+        version: 1.16.0(react@19.2.6)
+      next:
+        specifier: 16.2.6
+        version: 16.2.6(@babel/core@7.29.0)(@opentelemetry/api@1.9.1)(babel-plugin-react-compiler@1.0.0)(react-dom@19.2.6(react@19.2.6))(react@19.2.6)
+      react:
+        specifier: ^19.2.6
+        version: 19.2.6
+      react-day-picker:
+        specifier: ^10.0.1
+        version: 10.0.1(@types/react@19.2.15)(react@19.2.6)
+      react-dom:
+        specifier: ^19.2.6
+        version: 19.2.6(react@19.2.6)
+      shadcn:
+        specifier: 4.8.0
+        version: 4.8.0(@types/node@25.9.1)(typescript@6.0.3)
+    devDependencies:
+      '@tailwindcss/postcss':
+        specifier: ^4.3.0
+        version: 4.3.0
+      '@types/mdx':
+        specifier: ^2.0.13
+        version: 2.0.13
+      '@types/react':
+        specifier: ^19.2.15
+        version: 19.2.15
+      '@types/react-dom':
+        specifier: ^19.2.3
+        version: 19.2.3(@types/react@19.2.15)
+      postcss:
+        specifier: ^8.5.15
+        version: 8.5.15
+      tailwindcss:
+        specifier: ^4.3.0
+        version: 4.3.0
+      typescript:
+        specifier: ^6.0.3
+        version: 6.0.3
+
   examples/next-static:
     dependencies:
       '@orama/orama':
@@ -1634,9 +1689,6 @@ importers:
       tailwind-merge:
         specifier: ^3.6.0
         version: 3.6.0
-      ts-morph:
-        specifier: ^28.0.0
-        version: 28.0.0
       vite:
         specifier: ^8.0.14
         version: 8.0.14(@types/node@25.9.1)(esbuild@0.28.0)(jiti@2.7.0)(terser@5.48.0)(tsx@4.22.0)(yaml@2.9.0)
@@ -3163,6 +3215,46 @@ importers:
       typescript:
         specifier: ^6.0.3
         version: 6.0.3
+
+  packages/shadcn:
+    dependencies:
+      '@shikijs/transformers':
+        specifier: ^4.1.0
+        version: 4.1.0
+      zod-3:
+        specifier: npm:zod@^3.25.76
+        version: zod@3.25.76
+    devDependencies:
+      '@types/node':
+        specifier: 25.9.1
+        version: 25.9.1
+      '@types/react':
+        specifier: ^19.2.15
+        version: 19.2.15
+      fumadocs-core:
+        specifier: workspace:*
+        version: link:../core
+      fumadocs-ui:
+        specifier: workspace:*
+        version: link:../radix-ui
+      react:
+        specifier: ^19.2.6
+        version: 19.2.6
+      react-dom:
+        specifier: ^19.2.6
+        version: 19.2.6(react@19.2.6)
+      shadcn:
+        specifier: 4.8.0
+        version: 4.8.0(@types/node@25.9.1)(typescript@6.0.3)
+      tailwindcss:
+        specifier: ^4.3.0
+        version: 4.3.0
+      tsconfig:
+        specifier: workspace:*
+        version: link:../tsconfig
+      tsdown:
+        specifier: 0.22.0
+        version: 0.22.0(@tsdown/css@0.22.0)(oxc-resolver@11.19.1(@emnapi/core@1.10.0)(@emnapi/runtime@1.10.0))(tsx@4.22.0)(typescript@6.0.3)(unrun@0.3.0)
 
   packages/shared:
     dependencies:
@@ -13435,6 +13527,16 @@ packages:
       react: 16.x || 17.x || 18.x || 19.x
       react-dom: 16.x || 17.x || 18.x || 19.x
 
+  react-day-picker@10.0.1:
+    resolution: {integrity: sha512-eNh6BlwcYInWaJtRv18mXQ06Ys/H6rdTZAnTaSdOYJuTpwP1JMCHNd1FDRadA+gbeinq+psdULN5Xnowy9mV8w==}
+    engines: {node: '>=18'}
+    peerDependencies:
+      '@types/react': '>=16.8.0'
+      react: '>=16.8.0'
+    peerDependenciesMeta:
+      '@types/react':
+        optional: true
+
   react-dom@19.2.6:
     resolution: {integrity: sha512-0prMI+hvBbPjsWnxDLxlCGyM8PN6UuWjEUCYmZhO67xIV9Xasa/r/vDnq+Xyq4Lo27g8QSbO5YzARu0D1Sps3g==}
     peerDependencies:
@@ -18225,7 +18327,7 @@ snapshots:
       is-wsl: 2.2.0
       lilconfig: 3.1.3
       minimatch: 10.2.5
-      semver: 7.8.0
+      semver: 7.8.1
       string-width: 4.2.3
       supports-color: 8.1.1
       tinyglobby: 0.2.16
@@ -24097,7 +24199,7 @@ snapshots:
       get-it: 8.7.2
       registry-auth-token: 5.1.1
       registry-url: 7.2.0
-      semver: 7.8.0
+      semver: 7.8.1
 
   get-nonce@1.0.1: {}
 
@@ -26082,7 +26184,7 @@ snapshots:
   normalize-package-data@8.0.0:
     dependencies:
       hosted-git-info: 9.0.3
-      semver: 7.8.0
+      semver: 7.8.1
       validate-npm-package-license: 3.0.4
 
   normalize-path@3.0.0: {}
@@ -26746,6 +26848,14 @@ snapshots:
       react: 19.2.6
       react-dom: 19.2.6(react@19.2.6)
       uuid: 8.3.2
+
+  react-day-picker@10.0.1(@types/react@19.2.15)(react@19.2.6):
+    dependencies:
+      '@date-fns/tz': 1.4.1
+      date-fns: 4.1.0
+      react: 19.2.6
+    optionalDependencies:
+      '@types/react': 19.2.15
 
   react-dom@19.2.6(react@19.2.6):
     dependencies:

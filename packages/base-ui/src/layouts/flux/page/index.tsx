@@ -26,7 +26,7 @@ export interface DocsPageProps extends ComponentProps<'article'> {
    *
    * @defaultValue false
    */
-  full?: boolean;
+  full?: boolean | undefined;
   slots?: Partial<DocsPageSlots>;
 
   footer?: FooterOptions;
@@ -93,7 +93,6 @@ export function DocsPage({
   children,
   ...containerProps
 }: DocsPageProps) {
-
   const slots: DocsPageSlots = {
     breadcrumb: defaultSlots.breadcrumb ?? Breadcrumb,
     footer: defaultSlots.footer ?? Footer,

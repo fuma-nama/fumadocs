@@ -33,7 +33,7 @@ export interface DocsPageProps extends ComponentProps<'article'> {
    *
    * @defaultValue false
    */
-  full?: boolean;
+  full?: boolean | undefined;
   slots?: Partial<DocsPageSlots>;
 
   footer?: FooterOptions;

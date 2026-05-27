@@ -1,0 +1,64 @@
+{
+  "name": "@fumadocs/shadcn",
+  "version": "0.0.1",
+  "description": "Shadcn UI integration for Fumadocs.",
+  "keywords": [
+    "Fumadocs"
+  ],
+  "license": "MIT",
+  "author": "Fuma Nama",
+  "repository": "github:fuma-nama/fumadocs",
+  "files": [
+    "css",
+    "dist"
+  ],
+  "type": "module",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": "./dist/index.js",
+    "./rsc": "./dist/rsc.js",
+    "./package.json": "./package.json"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "scripts": {
+    "build": "tsdown",
+    "clean": "rimraf dist",
+    "dev": "tsdown --watch",
+    "lint": "oxlint .",
+    "types:check": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@shikijs/transformers": "^4.1.0",
+    "zod-3": "npm:zod@^3.25.76"
+  },
+  "devDependencies": {
+    "@types/node": "25.9.1",
+    "@types/react": "^19.2.15",
+    "fumadocs-core": "workspace:*",
+    "fumadocs-ui": "workspace:*",
+    "react": "^19.2.6",
+    "react-dom": "^19.2.6",
+    "shadcn": "4.8.0",
+    "tailwindcss": "^4.3.0",
+    "tsconfig": "workspace:*",
+    "tsdown": "0.22.0"
+  },
+  "peerDependencies": {
+    "@types/react": "*",
+    "fumadocs-core": "^16.9.2",
+    "fumadocs-ui": "^16.9.2",
+    "react": "^19.2.0",
+    "react-dom": "^19.2.0",
+    "shadcn": "^4"
+  },
+  "peerDependenciesMeta": {
+    "shadcn": {
+      "optional": true
+    },
+    "@types/react": {
+      "optional": true
+    }
+  }
+}
