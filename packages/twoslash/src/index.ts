@@ -140,9 +140,11 @@ function renderMarkdown(this: ShikiTransformerContextCommon, md: string): Elemen
     return this.codeToHast(node.value, {
       ...this.options,
       transformers: [],
-      meta: {
-        __raw: node.meta ?? undefined,
-      },
+      meta: node.meta
+        ? {
+            __raw: node.meta,
+          }
+        : {},
       lang,
     }).children[0] as Element;
   };

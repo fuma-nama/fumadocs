@@ -35,11 +35,7 @@ declare module 'mdx/types.js' {
   }
 }
 
-function Image(
-  props: ImgHTMLAttributes<HTMLImageElement> & {
-    sizes?: string;
-  },
-) {
+function Image(props: ImgHTMLAttributes<HTMLImageElement>) {
   return (
     <FrameworkImage
       sizes="(max-width: 768px) 100vw, (max-width: 1200px) 70vw, 900px"

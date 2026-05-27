@@ -233,7 +233,7 @@
   "inlinedDependencies": {
     "@formatjs/fast-memoize": "3.1.5",
     "@formatjs/intl-localematcher": "0.8.8",
-    "@shikijs/transformers": "4.0.2",
+    "@shikijs/transformers": "4.1.0",
     "image-size": "2.0.2",
     "negotiator": "1.0.0",
     "npm-to-yarn": "3.0.1",

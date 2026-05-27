@@ -10,7 +10,7 @@ export default defineConfig({
     port: 3000,
   },
   resolve: {
-    external: ['typescript', 'ts-morph'],
+    external: ['typescript'],
     tsconfigPaths: true,
   },
   plugins: [
