@@ -69,10 +69,8 @@ interface DocsPageSlots {
   breadcrumb: FC<BreadcrumbProps>;
 }
 
-type PageSlotsProps = Pick<DocsPageProps, 'full'>;
-
 const PageContext = createContext<{
-  props: PageSlotsProps;
+  full: NonNullable<DocsPageProps['full']>;
   slots: DocsPageSlots;
 } | null>(null);
 
@@ -86,17 +84,15 @@ export function useDocsPage() {
 }
 
 export function DocsPage({
-  tableOfContent: { enabled: tocEnabled, single, ...tocProps } = {},
+  full = false,
+  tableOfContent: { enabled: tocEnabled = !full, single, ...tocProps } = {},
   breadcrumb: { enabled: breadcrumbEnabled = true, ...breadcrumb } = {},
   footer: { enabled: footerEnabled = true, ...footer } = {},
-  full = false,
   toc = [],
   slots: defaultSlots = {},
   children,
   ...containerProps
 }: DocsPageProps) {
-  tocEnabled ??= Boolean(toc.length > 0 || tocProps.header || tocProps.footer);
-
   const slots: DocsPageSlots = {
     breadcrumb: defaultSlots.breadcrumb ?? Breadcrumb,
     footer: defaultSlots.footer ?? Footer,
@@ -110,7 +106,7 @@ export function DocsPage({
   return (
     <PageContext
       value={{
-        props: { full },
+        full,
         slots,
       }}
     >

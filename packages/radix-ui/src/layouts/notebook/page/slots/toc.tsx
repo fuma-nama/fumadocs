@@ -52,6 +52,10 @@ export function TOC({ container, header, footer, style = 'normal', list }: TOCPr
   const items = Base.useTOCItems();
   const { TOCItems, TOCEmpty, TOCItem } = style === 'clerk' ? TocClerk : TocDefault;
 
+  if (items.length === 0 && !footer && !header) {
+    return <div id="nd-toc-placeholder" className="hidden xl:layout:[--fd-toc-width:268px]" />;
+  }
+
   return (
     <div
       id="nd-toc"
