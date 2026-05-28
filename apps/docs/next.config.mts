@@ -1,5 +1,6 @@
 import createBundleAnalyzer from '@next/bundle-analyzer';
 import { createMDX } from 'fumadocs-mdx/next';
+import { createNextStory } from '@fumadocs/story/next';
 import type { NextConfig } from 'next';
 
 const withAnalyzer = createBundleAnalyzer({
@@ -41,6 +42,7 @@ const config: NextConfig = {
   },
 };
 
+const withStory = createNextStory();
 const withMDX = createMDX();
 
-export default withAnalyzer(withMDX(config));
+export default withAnalyzer(withStory(withMDX(config)));

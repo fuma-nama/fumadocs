@@ -26,7 +26,7 @@ import { owner, repo } from '@/lib/github';
 import StoryImage from './story.png';
 import CLIImage from './cli.png';
 import Bg2Image from './bg-2.png';
-import { story } from '@/content/docs/(framework)/integrations/story';
+import { story } from '@/content/docs/(framework)/integrations/story/client.story';
 
 const headingVariants = cva('font-medium tracking-tight', {
   variants: {

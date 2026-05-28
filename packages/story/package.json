@@ -14,9 +14,12 @@
   "exports": {
     ".": "./dist/index.js",
     "./i18n": "./dist/i18n.js",
+    "./next": "./dist/next/index.js",
+    "./next/client": "./dist/next/client.js",
     "./type-tree": "./dist/type-tree/index.js",
-    "./vite": "./dist/vite.js",
+    "./vite": "./dist/vite/index.js",
     "./vite/client": "./dist/vite/client.js",
+    "./webpack/story": "./dist/webpack/story.js",
     "./package.json": "./package.json",
     "./css/*": "./css/*"
   },
@@ -46,24 +49,34 @@
     "@ungap/structured-clone": "^1.3.1",
     "fumadocs-core": "workspace:*",
     "fumadocs-ui": "workspace:*",
+    "next": "16.2.6",
     "react": "^19.2.6",
     "react-dom": "^19.2.6",
     "react-error-boundary": "^6.1.2",
     "tailwindcss": "^4.3.0",
     "tsconfig": "workspace:*",
     "tsdown": "0.22.0",
-    "vite": "^8.0.14"
+    "vite": "^8.0.14",
+    "webpack": "^5.107.1"
   },
   "peerDependencies": {
     "@types/react": "*",
     "fumadocs-core": "^16.9.0",
     "fumadocs-ui": "^16.9.0",
+    "next": "^15.3.0 || ^16.0.0",
     "react": "^19.2.0",
     "react-dom": "^19.2.0",
-    "vite": "^8"
+    "vite": "^8",
+    "webpack": "^5"
   },
   "peerDependenciesMeta": {
+    "next": {
+      "optional": true
+    },
     "vite": {
+      "optional": true
+    },
+    "webpack": {
       "optional": true
     },
     "@types/react": {

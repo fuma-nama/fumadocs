@@ -1,4 +1,3 @@
-import type { ReactNode } from 'react';
 import { createTypeTreeBuilder, literalEnumHandler } from '../type-tree/builder';
 import type { TypeNode } from '../type-tree/types';
 import type { Project } from 'ts-morph';
@@ -12,8 +11,10 @@ export async function createControlsProject(tsconfigPath: string): Promise<Proje
   });
 }
 
+export type Mode = '@fumadocs/story/vite/client' | '@fumadocs/story/next/client';
+
 export function generateControls(
-  mode: '@fumadocs/story' | '@fumadocs/story/vite/client',
+  mode: Mode,
   project: Project,
   filePath: string,
   exportName: string,
@@ -45,11 +46,3 @@ export function generateControls(
     declaration,
   );
 }
-
-export type ReplaceReactNode<V> = ReactNode extends V
-  ? ReplaceReactNode<Exclude<V, ReactNode>> | string
-  : V extends Record<string, unknown>
-    ? {
-        [K in keyof V]: ReplaceReactNode<V[K]>;
-      }
-    : V;
