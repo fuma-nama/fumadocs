@@ -1,5 +1,14 @@
 # @fumadocs/base-ui
 
+## 16.9.2
+
+### Patch Changes
+
+- 84ce691: consistent toc size when empty
+- Updated dependencies [5d579bd]
+- Updated dependencies [5836093]
+  - fumadocs-core@16.9.2
+
 ## 16.9.1
 
 ### Patch Changes
