@@ -15,10 +15,25 @@ import { Loader2, MessageCircleIcon, RefreshCw, SearchIcon, Send, X } from 'luci
 import { cn } from '@/lib/cn';
 import { buttonVariants } from 'fumadocs-ui/components/ui/button';
 import { useChat, type UseChatHelpers } from '@ai-sdk/react';
-import { DefaultChatTransport, type Tool, type UIToolInvocation } from 'ai';
+import {
+  DefaultChatTransport,
+  type Tool,
+  type UIMessage,
+  type UIToolInvocation,
+} from 'ai';
 import { Markdown } from '../markdown';
 import { Presence } from '@radix-ui/react-presence';
-import type { ChatUIMessage, SearchTool } from '@/lib/openrouter/route';
+
+export type ChatUIMessage = UIMessage<
+  never,
+  {
+    client: {
+      location: string;
+    };
+  }
+>;
+
+export type SearchTool = Tool<{ query: string; limit: number }, unknown[]>;
 
 const Context = createContext<{
   open: boolean;

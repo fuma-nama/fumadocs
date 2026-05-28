@@ -18,6 +18,7 @@
     "@floating-ui/react-dom": "^2.1.8",
     "@fumadocs/story": "workspace:*",
     "@mixedbread/sdk": "^0.71.0",
+    "@llmgateway/ai-sdk-provider": "^3.8.0",
     "@openrouter/ai-sdk-provider": "^2.9.0",
     "@orama/core": "^1.2.19",
     "@orama/orama": "^3.1.18",
