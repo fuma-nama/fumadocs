@@ -21,7 +21,7 @@ function getTitle(item: ManualInstallationSnippet): string | undefined {
     case 'envVars':
       return '.env.local';
     case 'tailwind':
-      return 'tailwind.config';
+      return 'tailwind.config.js';
   }
 }
 

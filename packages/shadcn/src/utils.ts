@@ -1,8 +1,8 @@
 import path from 'node:path';
-import { ShadcnRegistryOptions } from '.';
+import type { RegistryContext } from './types';
 
-export function getRegistryItemPath(registryOptions: ShadcnRegistryOptions, name: string): string {
-  return path.join(path.dirname(registryOptions.registryPath), name + '.json');
+export function getRegistryItemPath(this: RegistryContext, name: string): string {
+  return path.join(this.dir, name + '.json');
 }
 
 export type PM = 'npm' | 'pnpm' | 'yarn' | 'bun';

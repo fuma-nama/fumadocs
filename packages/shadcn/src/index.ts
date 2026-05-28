@@ -1,8 +1,6 @@
-import {
-  getManualInstallation,
-  type ManualInstallationSnippet,
-  type GetManualInstallationOptions,
-} from './manual-installation';
+import path from 'node:path';
+import { getManualInstallation } from './manual-installation';
+import type { RegistryContext } from './types';
 
 export type {
   GetManualInstallationOptions,
@@ -15,11 +13,12 @@ export interface ShadcnRegistryOptions {
 }
 
 export function createShadcnDocs(options: ShadcnRegistryOptions) {
+  const ctx: RegistryContext = {
+    registryJsonPath: options.registryPath,
+    dir: path.dirname(options.registryPath),
+  };
+
   return {
-    getManualInstallation(
-      installOptions: GetManualInstallationOptions,
-    ): Promise<ManualInstallationSnippet[]> {
-      return getManualInstallation(options, installOptions);
-    },
+    getManualInstallation: getManualInstallation.bind(ctx),
   };
 }

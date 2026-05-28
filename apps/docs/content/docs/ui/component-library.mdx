@@ -17,7 +17,10 @@ You can opt-in to use Base UI by replacing `fumadocs-ui` with the `@fumadocs/bas
 ```json title="package.json"
 {
   "dependency": {
-    "fumadocs-ui": "npm:@fumadocs/base-ui@latest"
+    // [!code ++]
+    "fumadocs-ui": "npm:@fumadocs/base-ui@latest",
+    // make sure Base UI is already installed
+    "@base-ui/react": "..."
   }
 }
 ```

@@ -1,5 +1,4 @@
-import type { ShadcnRegistryOptions } from '.';
-import type { BuiltRegistryFile, BuiltRegistryItem } from './types';
+import type { BuiltRegistryFile, BuiltRegistryItem, RegistryContext } from './types';
 import path from 'node:path';
 import fs from 'node:fs/promises';
 import {
@@ -57,11 +56,11 @@ export interface GetManualInstallationOptions {
 }
 
 export async function getManualInstallation(
-  registryOptions: ShadcnRegistryOptions,
+  this: RegistryContext,
   options: GetManualInstallationOptions,
 ): Promise<ManualInstallationSnippet[]> {
   const { name, includeRegistryDependencies = true } = options;
-  const items = await collectItems(registryOptions, name, includeRegistryDependencies);
+  const items = await collectItems.call(this, name, includeRegistryDependencies);
   if (items.length === 0) return [];
 
   const snippets: ManualInstallationSnippet[] = [];
@@ -140,12 +139,12 @@ export async function getManualInstallation(
 }
 
 async function collectItems(
-  registryOptions: ShadcnRegistryOptions,
+  this: RegistryContext,
   name: string,
   includeRegistryDependencies: boolean,
 ): Promise<BuiltRegistryItem[]> {
   const all = new Map<string, BuiltRegistryItem | null>();
-  const queue: string[] = [getRegistryItemPath(registryOptions, name)];
+  const queue: string[] = [getRegistryItemPath.call(this, name)];
 
   for (const item of queue) {
     const content = await fs.readFile(item, 'utf-8').catch(() => null);
@@ -163,7 +162,7 @@ async function collectItems(
       const { local } = resolveRegistryDependency(dep);
       if (!local) continue;
 
-      const depPath = getRegistryItemPath(registryOptions, dep);
+      const depPath = getRegistryItemPath.call(this, dep);
       if (!all.has(depPath)) queue.push(depPath);
     }
   }
@@ -240,8 +239,18 @@ function getDisplayPath(file: BuiltRegistryFile): string {
 function getLanguage(filePath: string): string {
   const base = path.basename(filePath);
   if (base.startsWith('.env')) return 'dotenv';
+  const ext = path.extname(filePath);
 
-  return path.extname(filePath).slice(1);
+  switch (ext) {
+    case '.mts':
+    case '.cts':
+      return 'ts';
+    case '.mjs':
+    case '.cjs':
+      return 'js';
+    default:
+      return ext.slice(1);
+  }
 }
 
 function hasCssVars(cssVars: NonNullable<BuiltRegistryItem['cssVars']>): boolean {
@@ -259,6 +268,7 @@ function formatCssVars(cssVars: NonNullable<BuiltRegistryItem['cssVars']>): stri
   if (Object.keys(rootVars).length > 0) {
     lines.push('  :root {');
     for (const [key, value] of Object.entries(rootVars)) {
+      lines.push(`    /* [!code ++] */`);
       lines.push(`    --${key}: ${value};`);
     }
     lines.push('  }');
@@ -267,6 +277,7 @@ function formatCssVars(cssVars: NonNullable<BuiltRegistryItem['cssVars']>): stri
   if (cssVars.dark && Object.keys(cssVars.dark).length > 0) {
     lines.push('  .dark {');
     for (const [key, value] of Object.entries(cssVars.dark)) {
+      lines.push(`    /* [!code ++] */`);
       lines.push(`    --${key}: ${value};`);
     }
     lines.push('  }');
@@ -282,11 +293,13 @@ function formatCssRules(css: Record<string, unknown>, indent = 0): string {
 
   for (const [selector, value] of Object.entries(css)) {
     if (typeof value === 'string') {
+      lines.push(`${pad}/* [!code ++] */`);
       lines.push(`${pad}${selector}: ${value};`);
       continue;
     }
 
     if (Array.isArray(value)) {
+      lines.push(`${pad}/* [!code ++] */`);
       lines.push(`${pad}${selector} ${value.join(' ')};`);
       continue;
     }
