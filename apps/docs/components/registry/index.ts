@@ -129,7 +129,7 @@ export const registry: Registry = {
       files: [
         {
           type: 'components',
-          path: 'components/openrouter/search.tsx',
+          path: 'components/ai-sdk/search.tsx',
           target: '<dir>/ai/search.tsx',
         },
         {
@@ -149,7 +149,7 @@ export const registry: Registry = {
       files: [
         {
           type: 'components',
-          path: 'components/llmgateway/search.tsx',
+          path: 'components/ai-sdk/search.tsx',
           target: '<dir>/ai/search.tsx',
         },
         {
