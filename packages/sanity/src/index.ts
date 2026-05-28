@@ -1,7 +1,7 @@
 import type { StructuredData } from 'fumadocs-core/mdx-plugins/remark-structure';
 import type { DynamicSource, MetaData } from 'fumadocs-core/source';
 import type { TOCItemType } from 'fumadocs-core/toc';
-import type { DefinedSanityFetchType } from 'next-sanity/live';
+import type { DefinedFetchType } from 'next-sanity/live';
 import type { ReactNode } from 'react';
 import type { PortableTextBlock } from '@portabletext/react';
 import type { SlugValue } from '@sanity/types';
@@ -32,7 +32,7 @@ export interface GenericSanityOptions<
 
 export interface NextSanityOptions<Doc extends BaseDoc = BaseDoc> extends BaseSanityOptions<Doc> {
   client?: SanityClient;
-  sanityFetch: DefinedSanityFetchType;
+  sanityFetch: DefinedFetchType;
 }
 
 /** your page document must align with this type */
