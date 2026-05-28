@@ -143,6 +143,26 @@ export const registry: Registry = {
       },
     },
     {
+      name: 'ai/llmgateway',
+      title: 'AI Chat (LLMGateway)',
+      description: 'Ask AI dialog for your docs, using LLMGateway',
+      files: [
+        {
+          type: 'components',
+          path: 'components/llmgateway/search.tsx',
+          target: '<dir>/ai/search.tsx',
+        },
+        {
+          type: 'route-handler',
+          route: 'api/chat',
+          path: 'lib/llmgateway/route.ts',
+        },
+      ],
+      dependencies: {
+        flexsearch: '^0.8.212',
+      },
+    },
+    {
       name: 'markdown',
       unlisted: true,
       files: [

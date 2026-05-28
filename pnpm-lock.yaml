@@ -47,6 +47,9 @@ importers:
       '@fumadocs/story':
         specifier: workspace:*
         version: link:../../packages/story
+      '@llmgateway/ai-sdk-provider':
+        specifier: ^3.8.0
+        version: 3.8.0(ai@6.0.191(zod@4.4.3))(zod@4.4.3)
       '@mixedbread/sdk':
         specifier: ^0.71.0
         version: 0.71.0
@@ -5865,6 +5868,16 @@ packages:
 
   '@lezer/yaml@1.0.4':
     resolution: {integrity: sha512-2lrrHqxalACEbxIbsjhqGpSW8kWpUKuY6RHgnSAFZa6qK62wvnPxA8hGOwOoDbwHcOFs5M4o27mjGu+P7TvBmw==}
+
+  '@llmgateway/ai-sdk-provider@3.8.0':
+    resolution: {integrity: sha512-3Yr5evl5b2QtXAPSl+kHLN0Zjni+MFAv0h0bW6nQrbqPaEmC28P4gNnRNyMkrpsGptPB7ahTl66ZXg+wi0NunA==}
+    engines: {node: '>=18'}
+    peerDependencies:
+      ai: ^6.0.0
+      zod: ^3.24.1 || ^v4
+
+  '@llmgateway/models@1.97.1':
+    resolution: {integrity: sha512-3A81z2BYgnBOtqjSFoW1AnkgUcD8niQcev2G5lTkC8PeDFb1hLIuRn5N6OjDSFcGD0f9NMd1+sbgRObkmGhc5Q==}
 
   '@manypkg/find-root@1.1.0':
     resolution: {integrity: sha512-mki5uBvhHzO8kYYix/WRy2WX8S3B5wdVSc9D6KcU5lQNglP2yt58/VfLuAK49glRXChosY8ap2oJ1qgma3GUVA==}
@@ -18093,6 +18106,14 @@ snapshots:
       '@lezer/common': 1.5.2
       '@lezer/highlight': 1.2.3
       '@lezer/lr': 1.4.10
+
+  '@llmgateway/ai-sdk-provider@3.8.0(ai@6.0.191(zod@4.4.3))(zod@4.4.3)':
+    dependencies:
+      '@llmgateway/models': 1.97.1
+      ai: 6.0.191(zod@4.4.3)
+      zod: 4.4.3
+
+  '@llmgateway/models@1.97.1': {}
 
   '@manypkg/find-root@1.1.0':
     dependencies:
