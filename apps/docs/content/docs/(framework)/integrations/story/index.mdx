@@ -3,7 +3,7 @@ title: Story
 description: Display components with controls.
 ---
 
-import { story } from './index';
+import { story } from './client.story';
 
 <story.WithControl />
 
@@ -41,7 +41,7 @@ You can provide multiple variants of the component with `args`:
 import { defineStory } from '@/lib/story';
 import { Callout } from '@/components/callout';
 
-export const story = defineStory(import.meta.url, {
+export const story = defineStory({
   Component: Callout,
   args: [
     {
@@ -69,10 +69,10 @@ export const story = defineStory(import.meta.url, {
 You can further customize on how the controls are generated:
 
 ```tsx
-import { defineStory } from '@fumadocs/story';
+import { defineStory } from '@/lib/story';
 import { GraphView } from '@/components/graph-view';
 
-export const story = defineStory(import.meta.url, {
+export const story = defineStory({
   Component: GraphView,
   args: {
     // specify the control nodes

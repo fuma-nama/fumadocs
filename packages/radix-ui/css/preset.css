@@ -3,7 +3,6 @@
 
 @plugin '../dist/tailwind/typography.js';
 
-/* TODO: remove them on next major */
 @import './generated/docs.css';
 @import './generated/home.css';
 @import './generated/notebook.css';

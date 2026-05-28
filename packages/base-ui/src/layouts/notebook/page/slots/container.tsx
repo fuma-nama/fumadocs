@@ -4,9 +4,7 @@ import { useDocsPage } from '..';
 import { cn } from '@/utils/cn';
 
 export function Container(props: ComponentProps<'article'>) {
-  const {
-    props: { full },
-  } = useDocsPage();
+  const { full } = useDocsPage();
 
   return (
     <article

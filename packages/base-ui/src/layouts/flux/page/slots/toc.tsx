@@ -68,6 +68,8 @@ export function TOC({
   const items = Base.useTOCItems();
   const { TOCItems, TOCEmpty, TOCItem } = style === 'clerk' ? TocClerk : TocDefault;
 
+  if (items.length === 0 && !header && !footer) return;
+
   return (
     <PageTOCPopover {...container}>
       <PageTOCPopoverContent {...content}>

@@ -9,11 +9,30 @@ description: Configure Fumadocs Story on Next.js.
 npm i @fumadocs/story
 ```
 
-Add the Tailwind CSS preset.
+Add the Tailwind CSS preset:
 
 ```css title="Tailwind CSS"
 /* [!code ++] */
 @import '@fumadocs/story/css/preset.css';
+```
+
+Add the Webpack/Turbopack plugin:
+
+```ts title="next.config.mts"
+import type { NextConfig } from 'next';
+// [!code ++]
+import { createNextStory } from '@fumadocs/story/next';
+
+const config: NextConfig = {
+  // ...
+};
+
+// [!code ++]
+const withStory = createNextStory();
+
+// wrap the config with `withStory()`
+// if you have other plugins like `withMDX()`, keep it like `withStory(withMDX(config))` [!code highlight]
+export default withStory(config);
 ```
 
 ### Create a Story
@@ -21,20 +40,9 @@ Add the Tailwind CSS preset.
 Create a story factory to store your global settings:
 
 ```ts title="lib/story.ts"
-import { createFileSystemCache, defineStoryFactory } from '@fumadocs/story';
+import { defineStoryFactory } from '@fumadocs/story/next/client';
 
-export const { defineStory } = defineStoryFactory({
-  // for Vercel, this is required: choose a directory for cache.
-  cache:
-    process.env.NODE_ENV === 'production'
-      ? createFileSystemCache('.next/fumadocs-story')
-      : undefined,
-
-  tsc: {
-    // we use tsc to generate controls from types
-    // you can pass TypeScript options here
-  },
-});
+export const { defineStory } = defineStoryFactory();
 ```
 
 Now create your first story:
@@ -43,7 +51,8 @@ Now create your first story:
 import { defineStory } from '@/lib/story';
 import { MyComponent } from './my-component';
 
-export const story = defineStory(import.meta.url, {
+export const story = defineStory({
+  // the passed component must be a client component
   Component: MyComponent,
   args: {
     // default props (recommended)
@@ -64,9 +73,9 @@ export function MyComponent({ title }: MyComponentProps) {
 }
 ```
 
-- The story must be defined in a server component.
-- The story must be exported as `story`, or the `name` option must be set to match the export name.
-- Fill the `Component` option with your component, the passed component must be a **client component**.
+<Callout type='warn' title={<>The <code>.story</code> suffix is required</>}>
+  The build-time plugin will only transform files matching `*.story.{js,jsx,ts,tsx}`, you can configure this from `createNextStory()`.
+</Callout>
 
 Now you can render the story like:
 

@@ -1,5 +1,5 @@
 import { SyntaxKind } from 'ts-morph';
-import { generateControls } from '../controls/generate';
+import { generateControls, Mode } from './generate';
 import type { TypeNode } from '../type-tree/types';
 import { findDefineStoryCalls, ParsedStoryCall } from './parse';
 import type { Project } from 'ts-morph';
@@ -10,7 +10,7 @@ function injectControls(parsed: ParsedStoryCall, controls: TypeNode) {
 
   if (optionsArg.getKind() !== SyntaxKind.ObjectLiteralExpression) {
     throw new Error(
-      'defineStory() options must be an object literal to inject controls from @fumadocs/story/vite.',
+      'defineStory() options must be an object literal to inject controls from @fumadocs/story.',
     );
   }
 
@@ -22,7 +22,12 @@ function injectControls(parsed: ParsedStoryCall, controls: TypeNode) {
   });
 }
 
-export function transformStoryFile(code: string, id: string, project: Project): string | undefined {
+export function transformStoryFile(
+  mode: Mode,
+  code: string,
+  id: string,
+  project: Project,
+): string | undefined {
   const sourceFile = project.createSourceFile(id, code, { overwrite: true });
   const calls = findDefineStoryCalls(sourceFile);
   if (calls.length === 0) return;
@@ -32,13 +37,7 @@ export function transformStoryFile(code: string, id: string, project: Project): 
     // invalid structure
     if (args.length !== 1) continue;
 
-    const controls = generateControls(
-      '@fumadocs/story/vite/client',
-      project,
-      id,
-      parsed.exportName,
-      code,
-    );
+    const controls = generateControls(mode, project, id, parsed.exportName, code);
     injectControls(parsed, controls);
   }
 

@@ -1,6 +1,6 @@
 {
   "name": "fumadocs-openapi",
-  "version": "10.9.0",
+  "version": "10.9.1",
   "description": "Generate MDX docs for your OpenAPI spec",
   "keywords": [
     "Docs",
@@ -107,7 +107,7 @@
     "@fastify/deepmerge": "3.2.1",
     "@scalar/helpers": "0.8.0",
     "@scalar/json-magic": "0.12.14",
-    "@scalar/openapi-upgrader": "0.2.7",
+    "@scalar/openapi-upgrader": "0.2.8",
     "ajv": "8.20.0",
     "fast-content-type-parse": "3.0.0",
     "fast-deep-equal": "3.1.3",

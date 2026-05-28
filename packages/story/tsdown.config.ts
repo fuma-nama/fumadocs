@@ -7,8 +7,9 @@ export default defineConfig({
     './src/index.{ts,tsx}',
     './src/i18n.ts',
     './src/type-tree/index.ts',
-    './src/vite.ts',
-    './src/vite/client.tsx',
+    './src/vite/*',
+    './src/next/*',
+    './src/webpack/story.ts',
   ],
   unbundle: true,
   dts: {

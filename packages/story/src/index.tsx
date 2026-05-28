@@ -6,11 +6,7 @@ import type { ComponentPropsWithoutRef, FC } from 'react';
 import { fileURLToPath } from 'node:url';
 import { createHash } from 'node:crypto';
 import { deepmerge } from '@fastify/deepmerge';
-import {
-  createControlsProject,
-  generateControls,
-  type ReplaceReactNode,
-} from './controls/generate';
+import { createControlsProject, generateControls } from './utils/generate';
 import type { VariantInfo, WithControlProps } from './client/with-control';
 
 type Awaitable<T> = T | Promise<T>;
@@ -66,11 +62,6 @@ export interface Story<C extends FC<any> = FC<any>> {
   };
 }
 
-export type GetProps<Result> =
-  Result extends Story<infer C>
-    ? ReplaceReactNode<Omit<ComponentPropsWithoutRef<C>, 'key'>>
-    : never;
-
 export interface StoryFactoryOptions {
   cache?: Cache | false;
 
@@ -84,6 +75,11 @@ export interface StoryFactory {
   defineStory: <C extends FC<any>>(urlOrPath: URL | string, options: StoryOptions<C>) => Story<C>;
 }
 
+/**
+ * Create story under RSC environment without any build-time plugins, this requires caching to work on serverless environments.
+ *
+ * You're **highly** encouraged to use build-time plugins + clients over this.
+ */
 export function defineStoryFactory(factoryOptions: StoryFactoryOptions = {}): StoryFactory {
   let _project: ReturnType<typeof createControlsProject> | undefined;
   const { cache = false } = factoryOptions;
@@ -101,7 +97,7 @@ export function defineStoryFactory(factoryOptions: StoryFactoryOptions = {}): St
 
     return cached(cache, getHash(`controls:${filePath}:${name}:${fileContent}`), async () => {
       const project = await initProject();
-      return generateControls('@fumadocs/story', project, filePath, name, fileContent);
+      return generateControls('@fumadocs/story/next/client', project, filePath, name, fileContent);
     });
   }
 
@@ -161,6 +157,6 @@ export function defineStoryFactory(factoryOptions: StoryFactoryOptions = {}): St
   };
 }
 
-export function getHash(v: string) {
+function getHash(v: string) {
   return createHash('SHA-256').update(v).digest('hex').slice(0, 32);
 }

@@ -33,7 +33,7 @@ export interface DocsPageProps extends ComponentProps<'article'> {
    *
    * @defaultValue false
    */
-  full?: boolean;
+  full?: boolean | undefined;
   slots?: Partial<DocsPageSlots>;
 
   footer?: FooterOptions;
@@ -86,10 +86,8 @@ interface DocsPageSlots {
   breadcrumb: FC<BreadcrumbProps>;
 }
 
-type PageSlotsProps = Pick<DocsPageProps, 'full'>;
-
 const PageContext = createContext<{
-  props: PageSlotsProps;
+  full: NonNullable<DocsPageProps['full']>;
   slots: DocsPageSlots;
 } | null>(null);
 
@@ -103,17 +101,16 @@ export function useDocsPage() {
 }
 
 export function DocsPage({
-  tableOfContent: { enabled: tocEnabled, single, ...tocProps } = {},
+  full = false,
+  tableOfContent: { enabled: tocEnabled = !full, single, ...tocProps } = {},
   tableOfContentPopover: { enabled: tocPopoverEnabled, ...tocPopoverProps } = {},
   breadcrumb: { enabled: breadcrumbEnabled = true, ...breadcrumb } = {},
   footer: { enabled: footerEnabled = true, ...footer } = {},
-  full = false,
   toc = [],
   slots: defaultSlots = {},
   children,
   ...containerProps
 }: DocsPageProps) {
-  tocEnabled ??= Boolean(!full && (toc.length > 0 || tocProps.footer || tocProps.header));
   tocPopoverEnabled ??= Boolean(toc.length > 0 || tocPopoverProps.header || tocPopoverProps.footer);
 
   const slots: DocsPageSlots = {
@@ -130,7 +127,7 @@ export function DocsPage({
   return (
     <PageContext
       value={{
-        props: { full },
+        full,
         slots,
       }}
     >

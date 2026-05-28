@@ -67,7 +67,7 @@ export interface OpenAPIServer {
   ) => Promise<Source<{ metaData: MetaData; pageData: OpenAPIPageData }>>;
 
   /**
-   * Generate virtual pages for Fumadocs Source API
+   * Generate virtual pages for Fumadocs Source API (note: please disable cache to allow built-in revalidation)
    */
   dynamicSource: (
     options?: OpenAPISourceOptions,
@@ -88,6 +88,7 @@ export interface OpenAPIPageData extends PageData {
   getClientAPIPageProps: () => Promise<ClientApiPageProps>;
   structuredData: StructuredData;
   toc: TOCItemType[];
+  _openapi?: InternalOpenAPIMeta;
 }
 
 export type OpenAPISourceOptions = SchemaToPagesOptions & {
@@ -117,15 +118,19 @@ export function createOpenAPI(options: OpenAPIOptions = {}): OpenAPIServer {
   async function getVirtualFiles(server: OpenAPIServer, options: OpenAPISourceOptions) {
     const { baseDir = '', meta = false } = options;
     const { createAutoPreset } = await import('@/utils/pages/preset-auto');
-    const { fromServer } = await import('@/utils/pages/builder');
+    const { fromSchema } = await import('@/utils/pages/builder');
     const files: VirtualFile<{
       pageData: OpenAPIPageData;
       metaData: MetaData;
     }>[] = [];
 
-    const entries = await fromServer(server, createAutoPreset(options));
-    for (const [schemaId, list] of Object.entries(entries)) {
-      const processed = await server.getSchema(schemaId);
+    const schemas = await server.getSchemas();
+    const builderOptions = createAutoPreset(options);
+
+    for (const [id, schema] of Object.entries(schemas)) {
+      const list = fromSchema(id, schema, builderOptions);
+
+      onEntries(list);
 
       function onEntry(entry: PageOutput | OperationOutput | WebhookOutput) {
         const props = getPageProps(entry);
@@ -141,7 +146,7 @@ export function createOpenAPI(options: OpenAPIOptions = {}): OpenAPIServer {
             async getClientAPIPageProps() {
               return {
                 payload: {
-                  bundled: processed.bundled,
+                  bundled: schema.bundled,
                   proxyUrl: server.options.proxyUrl,
                 },
                 ...props,
@@ -149,11 +154,11 @@ export function createOpenAPI(options: OpenAPIOptions = {}): OpenAPIServer {
             },
             getSchema() {
               return {
-                id: schemaId,
-                ...processed,
+                id,
+                ...schema,
               };
             },
-            ...toStaticData(props, processed.dereferenced),
+            ...toStaticData(props, schema.dereferenced),
             _openapi: {
               method:
                 entry.type === 'operation' || entry.type === 'webhook'
@@ -211,8 +216,6 @@ export function createOpenAPI(options: OpenAPIOptions = {}): OpenAPIServer {
           },
         });
       }
-
-      onEntries(list);
     }
 
     return files;
@@ -265,15 +268,6 @@ export function createCodeSample<T>(
   return options;
 }
 
-declare module 'fumadocs-core/source' {
-  export interface PageData {
-    /**
-     * Added by Fumadocs OpenAPI
-     */
-    _openapi?: InternalOpenAPIMeta;
-  }
-}
-
 export interface InternalOpenAPIMeta {
   method?: string;
   webhook?: boolean;
@@ -293,7 +287,7 @@ export function openapiPlugin(): LoaderPlugin {
         const file = this.storage.read(filePath);
         if (!file || file.format !== 'page') return node;
 
-        const openApiData = file.data._openapi;
+        const openApiData = (file.data as { _openapi?: InternalOpenAPIMeta })._openapi;
         if (!openApiData || typeof openApiData !== 'object') return node;
 
         if (openApiData.deprecated) {

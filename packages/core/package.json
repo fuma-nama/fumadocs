@@ -1,6 +1,6 @@
 {
   "name": "fumadocs-core",
-  "version": "16.9.1",
+  "version": "16.9.2",
   "description": "The React.js library for building a documentation website",
   "keywords": [
     "Docs",
@@ -57,6 +57,7 @@
     "./mdx-plugins/remark-steps": "./dist/mdx-plugins/remark-steps.js",
     "./mdx-plugins/remark-structure": "./dist/mdx-plugins/remark-structure.js",
     "./mdx-plugins/stringifier": "./dist/mdx-plugins/stringifier.js",
+    "./mdx-plugins/transformer-icon": "./dist/mdx-plugins/transformer-icon.js",
     "./negotiation": "./dist/negotiation/index.js",
     "./page-tree": "./dist/page-tree/index.js",
     "./search": "./dist/search/index.js",
@@ -233,7 +234,7 @@
   "inlinedDependencies": {
     "@formatjs/fast-memoize": "3.1.5",
     "@formatjs/intl-localematcher": "0.8.8",
-    "@shikijs/transformers": "4.0.2",
+    "@shikijs/transformers": "4.1.0",
     "image-size": "2.0.2",
     "negotiator": "1.0.0",
     "npm-to-yarn": "3.0.1",
