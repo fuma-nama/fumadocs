@@ -1,5 +1,16 @@
 # @fumadocs/story
 
+## 1.0.1
+
+### Patch Changes
+
+- c800347: Support Webpack/Turbopack plugin
+- Updated dependencies [5d579bd]
+- Updated dependencies [84ce691]
+- Updated dependencies [5836093]
+  - fumadocs-core@16.9.2
+  - fumadocs-ui@16.9.2
+
 ## 1.0.0
 
 ### Major Changes

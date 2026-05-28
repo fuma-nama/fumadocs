@@ -1,5 +1,12 @@
 # fumadocs-core
 
+## 16.9.2
+
+### Patch Changes
+
+- 5d579bd: improve loader API types
+- 5836093: Expose icon transformer
+
 ## 16.9.1
 
 ### Patch Changes

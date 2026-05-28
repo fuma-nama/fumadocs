@@ -1,5 +1,16 @@
 # @fuma-docs/openapi
 
+## 10.9.1
+
+### Patch Changes
+
+- 5d579bd: improve loader API types
+- Updated dependencies [5d579bd]
+- Updated dependencies [84ce691]
+- Updated dependencies [5836093]
+  - fumadocs-core@16.9.2
+  - fumadocs-ui@16.9.2
+
 ## 10.9.0
 
 ### Minor Changes
