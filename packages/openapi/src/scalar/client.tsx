@@ -22,8 +22,7 @@ export default function ScalarPlayground({
   const [mounted, setMounted] = useState(false);
   const client = useApiClient({
     configuration: {
-      theme: 'moon',
-      spec,
+      content: spec as never,
     },
   });
 
