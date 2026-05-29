@@ -1,12 +1,4 @@
-import {
-  type ComponentProps,
-  Fragment,
-  use,
-  useEffect,
-  useMemo,
-  useState,
-  type ReactNode,
-} from 'react';
+import { type ComponentProps, Fragment, use, useMemo, type ReactNode } from 'react';
 import type {
   CallbackObject,
   MediaTypeObject,
@@ -34,6 +26,7 @@ import { RequestTabs } from './request-tabs';
 import { cn } from '@/utils/cn';
 import { getExampleRequests } from './get-example-requests';
 import { SelectTabs, SelectTabTrigger, SelectTab } from '../components/select-tab';
+import { HashAwareSelectTabs } from './hash-tabs';
 import { Callout } from 'fumadocs-ui/components/callout';
 
 const paramTypeKeys = ['path', 'query', 'header', 'cookie'] as const;
@@ -53,43 +46,6 @@ function slugifyMediaType(type: string): string {
     .replace(/^-+|-+$/g, '');
 }
 
-/**
- * If the current URL hash points into one of the supplied prefixes
- * (`<prefix>` or `<prefix>.*`), returns its value. Used to switch a content-
- * type `SelectTabs` to whichever tab a deep link is targeting.
- */
-function useTabValueFromHash(
-  items: { value: string; prefix: string }[],
-  fallback: string,
-): [string, (value: string) => void] {
-  // Always render the fallback on first paint so server-rendered markup and
-  // hydration agree; the hash is read inside `useEffect` (client-only) and the
-  // tab is corrected after hydration if a deep link is active.
-  const [value, setValue] = useState<string>(fallback);
-
-  useEffect(() => {
-    function resolve() {
-      const next = resolveFromHash(items);
-      if (next) setValue(next);
-    }
-    resolve();
-    window.addEventListener('hashchange', resolve);
-    return () => window.removeEventListener('hashchange', resolve);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [items.map((i) => i.prefix).join('|')]);
-
-  return [value, setValue];
-}
-
-function resolveFromHash(items: { value: string; prefix: string }[]): string | undefined {
-  if (typeof window === 'undefined') return undefined;
-  const hash = decodeURIComponent(window.location.hash.slice(1));
-  if (!hash) return undefined;
-  for (const item of items) {
-    if (hash === item.prefix || hash.startsWith(`${item.prefix}.`)) return item.value;
-  }
-  return undefined;
-}
 
 export function Operation({
   type = 'operation',
@@ -419,21 +375,16 @@ function BodyContentSection({
   }));
   // When an operation has multiple body content types, namespace each one's
   // anchor prefix by its slugified media type so deep links remain unique.
-  const idPrefixes: Record<string, string> = useMemo(() => {
-    const out: Record<string, string> = {};
-    for (const [type] of contentTypes) {
-      out[type] = contentTypes.length > 1 ? `${slugifyMediaType(type)}-body` : 'body';
-    }
-    return out;
-  }, [contentTypes]);
-
-  const [tabValue, setTabValue] = useTabValueFromHash(
-    items.map((item) => ({ value: item.value, prefix: idPrefixes[item.value] })),
-    items[0].value,
-  );
+  const idPrefixes: Record<string, string> = {};
+  for (const [type] of contentTypes) {
+    idPrefixes[type] = contentTypes.length > 1 ? `${slugifyMediaType(type)}-body` : 'body';
+  }
 
   return (
-    <SelectTabs value={tabValue} onValueChange={setTabValue}>
+    <HashAwareSelectTabs
+      items={items.map((item) => ({ value: item.value, prefix: idPrefixes[item.value] }))}
+      fallback={items[0].value}
+    >
       <div className="flex gap-2 items-center justify-between mt-10">
         {ctx.renderHeading(headingLevel, <I18nLabel label="titleRequestBody" />, {
           id: 'request-body',
@@ -461,7 +412,7 @@ function BodyContentSection({
           </SelectTab>
         );
       })}
-    </SelectTabs>
+    </HashAwareSelectTabs>
   );
 }
 
@@ -522,26 +473,18 @@ function ResponseAccordion({
 
   // Anchor prefix per content type: namespace by media type only when this
   // status has more than one, so single-content-type responses keep clean URLs.
-  const idPrefixes = useMemo(() => {
-    const out: Record<string, string> = {};
-    for (const [type] of contentTypes) {
-      out[type] =
-        contentTypes.length > 1
-          ? `response-${status}-${slugifyMediaType(type)}`
-          : `response-${status}`;
-    }
-    return out;
-  }, [contentTypes, status]);
+  const idPrefixes: Record<string, string> = {};
+  for (const [type] of contentTypes) {
+    idPrefixes[type] =
+      contentTypes.length > 1
+        ? `response-${status}-${slugifyMediaType(type)}`
+        : `response-${status}`;
+  }
 
   const items = contentTypes.map(([key]) => ({
     label: <code className="text-xs">{key}</code>,
     value: key,
   }));
-
-  const [tabValue, setTabValue] = useTabValueFromHash(
-    items.map((item) => ({ value: item.value, prefix: idPrefixes[item.value] })),
-    items[0]?.value ?? '',
-  );
 
   let wrapper = (children: ReactNode) => children;
   let selectorNode: ReactNode = null;
@@ -554,9 +497,12 @@ function ResponseAccordion({
         <SelectTabTrigger items={items} />
       );
     wrapper = (children) => (
-      <SelectTabs value={tabValue} onValueChange={setTabValue}>
+      <HashAwareSelectTabs
+        items={items.map((item) => ({ value: item.value, prefix: idPrefixes[item.value] }))}
+        fallback={items[0]?.value ?? ''}
+      >
         {children}
-      </SelectTabs>
+      </HashAwareSelectTabs>
     );
   }
 
