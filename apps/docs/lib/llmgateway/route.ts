@@ -1,9 +1,10 @@
 import { createLLMGateway } from '@llmgateway/ai-sdk-provider';
-import { convertToModelMessages, stepCountIs, streamText, tool, type UIMessage } from 'ai';
+import { convertToModelMessages, stepCountIs, streamText, tool } from 'ai';
 import { z } from 'zod';
 import { source } from '@/lib/source';
 import { Document, type DocumentData } from 'flexsearch';
 import { $routeHandler } from 'fuma-cli/macros/route-handler';
+import type { ChatUIMessage, SearchTool } from '@/components/ai-sdk/search';
 
 interface CustomDocument extends DocumentData {
   url: string;
@@ -11,15 +12,6 @@ interface CustomDocument extends DocumentData {
   description: string;
   content: string;
 }
-
-export type ChatUIMessage = UIMessage<
-  never,
-  {
-    client: {
-      location: string;
-    };
-  }
->;
 
 const searchServer = createSearchServer();
 
@@ -80,9 +72,10 @@ export const handler = $routeHandler(
   },
   async (req) => {
     const reqJson = await req.json();
+    const modelId = process.env.LLM_GATEWAY_MODEL ?? 'anthropic/claude-3.5-sonnet';
 
     const result = streamText({
-      model: llmgateway.chat(process.env.LLM_GATEWAY_MODEL ?? 'anthropic/claude-3.5-sonnet'),
+      model: llmgateway.chat(modelId as never),
       stopWhen: stepCountIs(5),
       tools: {
         search: searchTool,
@@ -106,8 +99,6 @@ export const handler = $routeHandler(
   },
 );
 
-export type SearchTool = typeof searchTool;
-
 const searchTool = tool({
   description: 'Search the docs content and return raw JSON results.',
   inputSchema: z.object({
@@ -118,4 +109,4 @@ const searchTool = tool({
     const search = await searchServer;
     return await search.searchAsync(query, { limit, merge: true, enrich: true });
   },
-});
+}) satisfies SearchTool;

@@ -4,6 +4,7 @@ import { z } from 'zod';
 import { source } from '@/lib/source';
 import { Document, type DocumentData } from 'flexsearch';
 import { $routeHandler } from 'fuma-cli/macros/route-handler';
+import { ChatUIMessage, SearchTool } from '@/components/ai-sdk/search';
 
 interface CustomDocument extends DocumentData {
   url: string;
@@ -11,16 +12,6 @@ interface CustomDocument extends DocumentData {
   description: string;
   content: string;
 }
-
-export type ChatUIMessage = UIMessage<
-  never,
-  {
-    client: {
-      location: string;
-    };
-  }
->;
-
 const searchServer = createSearchServer();
 
 async function createSearchServer() {
@@ -106,8 +97,6 @@ export const handler = $routeHandler(
   },
 );
 
-export type SearchTool = typeof searchTool;
-
 const searchTool = tool({
   description: 'Search the docs content and return raw JSON results.',
   inputSchema: z.object({
@@ -118,4 +107,4 @@ const searchTool = tool({
     const search = await searchServer;
     return await search.searchAsync(query, { limit, merge: true, enrich: true });
   },
-});
+}) satisfies SearchTool;

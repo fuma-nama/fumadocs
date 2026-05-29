@@ -7,6 +7,7 @@ export default defineConfig({
     resolve: {
       tsconfigPaths: true,
       external: ['@takumi-rs/image-response'],
+      dedupe: ['waku'],
     },
 
     plugins: [tailwindcss(), mdx()],

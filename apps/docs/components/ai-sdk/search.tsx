@@ -28,7 +28,7 @@ export type ChatUIMessage = UIMessage<
   }
 >;
 
-export type SearchTool = Tool<{ query: string; limit: number }, unknown[]>;
+export type SearchTool = Tool<{ query: string; limit: number }>;
 
 const Context = createContext<{
   open: boolean;

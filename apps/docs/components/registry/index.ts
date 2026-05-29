@@ -123,15 +123,21 @@ export const registry: Registry = {
       ],
     },
     {
-      name: 'ai/openrouter',
-      title: 'AI Chat (AI SDK)',
-      description: 'Ask AI dialog for your docs, default using OpenRouter',
+      name: 'ai/shared',
+      unlisted: true,
       files: [
         {
           type: 'components',
           path: 'components/ai-sdk/search.tsx',
           target: '<dir>/ai/search.tsx',
         },
+      ],
+    },
+    {
+      name: 'ai/openrouter',
+      title: 'AI Chat (AI SDK)',
+      description: 'Ask AI dialog for your docs, default using OpenRouter',
+      files: [
         {
           type: 'route-handler',
           route: 'api/chat',
@@ -147,11 +153,6 @@ export const registry: Registry = {
       title: 'AI Chat (LLMGateway)',
       description: 'Ask AI dialog for your docs, using LLMGateway',
       files: [
-        {
-          type: 'components',
-          path: 'components/ai-sdk/search.tsx',
-          target: '<dir>/ai/search.tsx',
-        },
         {
           type: 'route-handler',
           route: 'api/chat',
