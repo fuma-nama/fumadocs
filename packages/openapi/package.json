@@ -84,7 +84,7 @@
     "xml-js": "^1.6.11"
   },
   "peerDependencies": {
-    "@scalar/api-client-react": "2.0.1",
+    "@scalar/api-client-react": "^2.0.20",
     "@types/react": "*",
     "fumadocs-core": "^16.9.0",
     "fumadocs-ui": "^16.9.0",
