@@ -56,8 +56,15 @@ function useTabValueFromHash(
 
 function resolveFromHash(items: HashTabItem[]): string | undefined {
   if (typeof window === 'undefined') return undefined;
-  const hash = decodeURIComponent(window.location.hash.slice(1));
-  if (!hash) return undefined;
+  const raw = window.location.hash.slice(1);
+  if (!raw) return undefined;
+  let hash: string;
+  try {
+    hash = decodeURIComponent(raw);
+  } catch {
+    // Malformed percent-encoding (e.g. `#body%`) — ignore.
+    return undefined;
+  }
   for (const item of items) {
     if (hash === item.prefix || hash.startsWith(`${item.prefix}.`)) return item.value;
   }

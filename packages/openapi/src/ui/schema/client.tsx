@@ -152,7 +152,15 @@ function DeepLinkProvider({
     if (!idPrefix) return;
 
     function resolve() {
-      const hash = decodeURIComponent(window.location.hash.slice(1));
+      const raw = window.location.hash.slice(1);
+      let hash: string;
+      try {
+        hash = decodeURIComponent(raw);
+      } catch {
+        // Malformed percent-encoding (e.g. `#body%`) — ignore.
+        setTarget((prev) => (prev ? null : prev));
+        return;
+      }
       if (!hash || (hash !== idPrefix && !hash.startsWith(`${idPrefix}.`))) {
         setTarget((prev) => (prev ? null : prev));
         return;
