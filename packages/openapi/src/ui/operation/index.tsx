@@ -62,7 +62,10 @@ function useTabValueFromHash(
   items: { value: string; prefix: string }[],
   fallback: string,
 ): [string, (value: string) => void] {
-  const [value, setValue] = useState<string>(() => resolveFromHash(items) ?? fallback);
+  // Always render the fallback on first paint so server-rendered markup and
+  // hydration agree; the hash is read inside `useEffect` (client-only) and the
+  // tab is corrected after hydration if a deep link is active.
+  const [value, setValue] = useState<string>(fallback);
 
   useEffect(() => {
     function resolve() {
