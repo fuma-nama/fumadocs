@@ -418,6 +418,13 @@ Add your LLMGateway API key to environment variables:
 LLM_GATEWAY_API_KEY="..."
 ```
 
+By default the route uses `anthropic/claude-3.5-sonnet`. To switch to any other model supported by LLMGateway, set the `LLM_GATEWAY_MODEL` environment variable—no code change required:
+
+```dotenv
+# any model id from https://llmgateway.io/models
+LLM_GATEWAY_MODEL="openai/gpt-4o"
+```
+
 </Tab>
 <Tab>
 
