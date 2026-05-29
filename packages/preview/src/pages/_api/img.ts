@@ -3,17 +3,18 @@ import { normalizeProjects } from '@/lib/source/config';
 import fs from 'node:fs/promises';
 import path from 'node:path';
 
-const supportedImageFormats = new Set([
-  '.jpg',
-  '.jpeg',
-  '.png',
-  '.webp',
-  '.gif',
-  '.svg',
-  '.avif',
-  '.bmp',
-  '.ico',
-]);
+// file extension -> mime type
+const supportedImageFormats: Record<string, string> = {
+  '.png': 'image/png',
+  '.jpg': 'image/jpeg',
+  '.jpeg': 'image/jpeg',
+  '.webp': 'image/webp',
+  '.gif': 'image/gif',
+  '.svg': 'image/svg+xml',
+  '.avif': 'image/avif',
+  '.bmp': 'image/bmp',
+  '.ico': 'image/x-icon',
+};
 
 export async function GET(request: Request) {
   const searchParams = new URL(request.url).searchParams;
@@ -43,17 +44,19 @@ export async function GET(request: Request) {
     possiblePaths.push(path.join(rootDir, src), path.join(rootDir, 'public', src));
   }
 
+  const disableChecks = config.content.unsafe_disableFileSystemChecks;
   for (const file of possiblePaths) {
-    if (
-      !config.content.unsafe_disableFileSystemChecks &&
-      path.relative(project.dir, file).startsWith(`..${path.sep}`)
-    )
-      continue;
+    if (!disableChecks && path.relative(project.dir, file).startsWith(`..${path.sep}`)) continue;
 
-    if (!supportedImageFormats.has(path.extname(file))) continue;
+    const mimeType = supportedImageFormats[path.extname(file)];
+    if (!mimeType) continue;
 
     try {
-      return new Response(await fs.readFile(file));
+      return new Response(await fs.readFile(file), {
+        headers: {
+          'Content-Type': mimeType,
+        },
+      });
     } catch {
       continue;
     }
