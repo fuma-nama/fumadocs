@@ -1,5 +1,14 @@
 # @fumadocs/local-md
 
+## 0.2.3
+
+### Patch Changes
+
+- 42f0255: Support `invalidate` & `revalidate` on dynamic loader
+- Updated dependencies [42f0255]
+- Updated dependencies [a807798]
+  - fumadocs-core@16.9.3
+
 ## 0.2.2
 
 ### Patch Changes
