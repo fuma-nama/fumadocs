@@ -33,16 +33,16 @@
     "@portabletext/react": "^6.2.0"
   },
   "devDependencies": {
-    "@sanity/client": "^7.22.0",
-    "@sanity/types": "^5.26.0",
+    "@sanity/client": "^7.22.1",
+    "@sanity/types": "^5.27.0",
     "@types/node": "25.9.1",
     "@types/react": "^19.2.15",
     "fuma-cli": "^0.1.1",
     "fumadocs-core": "workspace:*",
     "fumadocs-ui": "workspace:*",
-    "next-sanity": "^13.0.3",
+    "next-sanity": "^13.0.6",
     "react": "^19.2.6",
-    "sanity": "^5.26.0",
+    "sanity": "^5.27.0",
     "tsconfig": "workspace:*",
     "tsdown": "0.22.0",
     "typescript": "^6.0.3"

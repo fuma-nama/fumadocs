@@ -10,16 +10,16 @@
     "types:check": "fumadocs-mdx && tsc --noEmit"
   },
   "dependencies": {
-    "@takumi-rs/image-response": "^1.5.1",
+    "@takumi-rs/image-response": "^1.6.0",
     "fumadocs-core": "workspace:*",
     "fumadocs-mdx": "workspace:*",
     "fumadocs-ui": "workspace:*",
-    "lucide-react": "^1.16.0",
+    "lucide-react": "^1.17.0",
     "react": "^19.2.6",
     "react-dom": "^19.2.6",
     "react-server-dom-webpack": "^19.2.6",
     "tailwind-merge": "^3.6.0",
-    "waku": "1.0.0-beta.0"
+    "waku": "1.0.0-beta.1"
   },
   "devDependencies": {
     "@tailwindcss/vite": "^4.3.0",
