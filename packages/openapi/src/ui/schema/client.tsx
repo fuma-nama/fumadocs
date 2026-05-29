@@ -221,7 +221,10 @@ function walkDeepSchemaPath(
   const extra: PathItemType[] = [];
   let current = startRef;
 
-  for (const segment of segments) {
+  for (let i = 0; i < segments.length; i++) {
+    const segment = segments[i];
+    const remaining = segments.slice(i);
+
     let schema: SchemaData | undefined = refs[current];
     while (schema?.type === 'array') {
       current = schema.item.$type;
@@ -230,7 +233,10 @@ function walkDeepSchemaPath(
     if (!schema) break;
 
     if (schema.type === 'or' || schema.type === 'and') {
-      const match = findUnionPropMatch(refs, schema.items, segment);
+      // Pick the variant whose subtree contains the *entire* remaining path,
+      // not just the next token — otherwise two variants that happen to share
+      // the first prop name would race and the first one wins.
+      const match = findUnionPropMatch(refs, schema.items, remaining);
       if (!match) break;
       extra.push({ name: match.name, $ref: match.$type });
       current = match.$type;
@@ -254,21 +260,49 @@ function walkDeepSchemaPath(
 function findUnionPropMatch(
   refs: Record<string, SchemaData>,
   items: { name: string; $type: string }[],
-  segment: string,
+  segments: string[],
 ): { name: string; $type: string } | undefined {
+  if (segments.length === 0) return undefined;
+  const [first, ...rest] = segments;
   for (const variant of items) {
-    const schema = refs[variant.$type];
+    let schema = refs[variant.$type];
+    while (schema?.type === 'array') {
+      schema = refs[schema.item.$type];
+    }
     if (!schema) continue;
     if (schema.type === 'object') {
-      const prop = schema.props.find((p) => slugifyPropertyName(p.name) === segment);
-      if (prop) return prop;
+      const prop = schema.props.find((p) => slugifyPropertyName(p.name) === first);
+      if (prop && pathResolves(refs, prop.$type, rest)) return prop;
     }
     if (schema.type === 'or' || schema.type === 'and') {
-      const nested = findUnionPropMatch(refs, schema.items, segment);
+      const nested = findUnionPropMatch(refs, schema.items, segments);
       if (nested) return nested;
     }
   }
   return undefined;
+}
+
+function pathResolves(
+  refs: Record<string, SchemaData>,
+  startRef: string,
+  segments: string[],
+): boolean {
+  if (segments.length === 0) return true;
+  let schema = refs[startRef];
+  while (schema?.type === 'array') {
+    schema = refs[schema.item.$type];
+  }
+  if (!schema) return false;
+  if (schema.type === 'or' || schema.type === 'and') {
+    return Boolean(findUnionPropMatch(refs, schema.items, segments));
+  }
+  if (schema.type === 'object') {
+    const [first, ...rest] = segments;
+    const prop = schema.props.find((p) => slugifyPropertyName(p.name) === first);
+    if (!prop) return false;
+    return pathResolves(refs, prop.$type, rest);
+  }
+  return false;
 }
 
 function SchemaUIProperty({
@@ -377,7 +411,7 @@ function UnionTabs({
     if (remaining.length === 0) return undefined;
 
     for (const item of items) {
-      if (findUnionPropMatch(refs, [item], remaining[0])) return item.$type;
+      if (findUnionPropMatch(refs, [item], remaining)) return item.$type;
     }
     return undefined;
   }, [items, path, refs, target]);
@@ -618,6 +652,14 @@ function SchemaUIPopover({
   topLevelId?: string;
 }) {
   const [path, setPath] = useState(initialPath);
+
+  // Re-seed the breadcrumb if a fresh deep-link target arrives while the
+  // popover is already open (e.g. another auto-open fires for the same
+  // trigger). Reference equality is enough since `initialPath` is `useMemo`d
+  // by the parent and only changes when the deep target does.
+  useEffect(() => {
+    setPath(initialPath);
+  }, [initialPath]);
 
   useLayoutEffect(() => {
     const last = path[0];

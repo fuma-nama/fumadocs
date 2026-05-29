@@ -2,7 +2,15 @@
 
 import { cn } from '@/utils/cn';
 import { SelectTrigger, Select, SelectValue, SelectContent, SelectItem } from './select';
-import { type ReactNode, useState, useMemo, type ComponentProps, createContext, use } from 'react';
+import {
+  type ReactNode,
+  useState,
+  useMemo,
+  useCallback,
+  type ComponentProps,
+  createContext,
+  use,
+} from 'react';
 
 const Context = createContext<{
   value: string | null;
@@ -11,14 +19,30 @@ const Context = createContext<{
 
 export function SelectTabs({
   defaultValue,
+  value: controlledValue,
+  onValueChange,
   children,
 }: {
   defaultValue?: string;
+  value?: string;
+  onValueChange?: (value: string) => void;
   children: ReactNode;
 }) {
-  const [value, setValue] = useState<string | null>(defaultValue ?? null);
+  const [internalValue, setInternalValue] = useState<string | null>(defaultValue ?? null);
 
-  return <Context value={useMemo(() => ({ value, setValue }), [value])}>{children}</Context>;
+  const isControlled = controlledValue !== undefined;
+  const value = isControlled ? controlledValue : internalValue;
+  const setValue = useCallback(
+    (next: string) => {
+      if (!isControlled) setInternalValue(next);
+      onValueChange?.(next);
+    },
+    [isControlled, onValueChange],
+  );
+
+  return (
+    <Context value={useMemo(() => ({ value, setValue }), [value, setValue])}>{children}</Context>
+  );
 }
 
 export function SelectTab({

@@ -73,17 +73,21 @@ export interface SchemaUIOptions {
 }
 
 /**
- * Sanitizes a property name into a URL-safe slug that can be used as part of an anchor id.
+ * Encodes a property name into a URL-safe and collision-safe segment that can
+ * be used as part of an anchor id.
  *
- * E.g. `[key: string]` → `key-string`, `User-Agent` → `user-agent`.
+ * The encoding is intentionally **not** lossy: property names that differ only
+ * in case (`ETag` vs `etag`) or in punctuation (`foo bar` vs `foo-bar`) keep
+ * distinct anchors, and non-ASCII keys (`日本`) survive as percent-encoded
+ * sequences. `.` is additionally percent-encoded so it cannot be confused with
+ * the path separator used between segments.
+ *
+ * E.g. `[key: string]` → `%5Bkey%3A%20string%5D`, `User-Agent` → `User-Agent`,
+ * `foo.bar` → `foo%2Ebar`, `日本` → `%E6%97%A5%E6%9C%AC`.
  */
 export function slugifyPropertyName(name: string): string {
-  return (
-    name
-      .toLowerCase()
-      .replace(/[^a-z0-9]+/g, '-')
-      .replace(/^-+|-+$/g, '') || 'value'
-  );
+  if (!name) return 'value';
+  return encodeURIComponent(name).replace(/\./g, '%2E');
 }
 
 export interface SchemaUIGeneratedData {

@@ -1,4 +1,12 @@
-import { type ComponentProps, Fragment, use, useMemo, type ReactNode } from 'react';
+import {
+  type ComponentProps,
+  Fragment,
+  use,
+  useEffect,
+  useMemo,
+  useState,
+  type ReactNode,
+} from 'react';
 import type {
   CallbackObject,
   MediaTypeObject,
@@ -29,6 +37,56 @@ import { SelectTabs, SelectTabTrigger, SelectTab } from '../components/select-ta
 import { Callout } from 'fumadocs-ui/components/callout';
 
 const paramTypeKeys = ['path', 'query', 'header', 'cookie'] as const;
+
+/**
+ * Slugifies a media type for use inside anchor ids when a request or response
+ * has multiple content types — keeps a predictable, human-readable shape so
+ * writers can construct deep links by hand.
+ *
+ * `application/json` → `application-json`,
+ * `application/vnd.api+json` → `application-vnd-api-json`.
+ */
+function slugifyMediaType(type: string): string {
+  return type
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-+|-+$/g, '');
+}
+
+/**
+ * If the current URL hash points into one of the supplied prefixes
+ * (`<prefix>` or `<prefix>.*`), returns its value. Used to switch a content-
+ * type `SelectTabs` to whichever tab a deep link is targeting.
+ */
+function useTabValueFromHash(
+  items: { value: string; prefix: string }[],
+  fallback: string,
+): [string, (value: string) => void] {
+  const [value, setValue] = useState<string>(() => resolveFromHash(items) ?? fallback);
+
+  useEffect(() => {
+    function resolve() {
+      const next = resolveFromHash(items);
+      if (next) setValue(next);
+    }
+    resolve();
+    window.addEventListener('hashchange', resolve);
+    return () => window.removeEventListener('hashchange', resolve);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [items.map((i) => i.prefix).join('|')]);
+
+  return [value, setValue];
+}
+
+function resolveFromHash(items: { value: string; prefix: string }[]): string | undefined {
+  if (typeof window === 'undefined') return undefined;
+  const hash = decodeURIComponent(window.location.hash.slice(1));
+  if (!hash) return undefined;
+  for (const item of items) {
+    if (hash === item.prefix || hash.startsWith(`${item.prefix}.`)) return item.value;
+  }
+  return undefined;
+}
 
 export function Operation({
   type = 'operation',
@@ -84,37 +142,15 @@ export function Operation({
   const contentTypes = body?.content ? Object.entries(body.content) : null;
 
   if (body && contentTypes && contentTypes.length > 0) {
-    const items = contentTypes.map(([key]) => ({
-      label: <code className="text-xs">{key}</code>,
-      value: key,
-    }));
-
     bodyNode = (
-      <SelectTabs defaultValue={items[0].value}>
-        <div className="flex gap-2 items-center justify-between mt-10">
-          {ctx.renderHeading(headingLevel, <I18nLabel label="titleRequestBody" />, {
-            id: 'request-body',
-            className: 'my-0!',
-          })}
-          {contentTypes.length > 1 ? (
-            <SelectTabTrigger items={items} className="font-medium" />
-          ) : (
-            <p className="text-fd-muted-foreground not-prose">{items[0].label}</p>
-          )}
-        </div>
-        {body.description && ctx.renderMarkdown(body.description)}
-        {contentTypes.map(([type, content]) => {
-          if (!isMediaTypeSupported(type, ctx.mediaAdapters)) {
-            throw new Error(`Media type ${type} is not supported (in ${path})`);
-          }
-
-          return (
-            <SelectTab key={type} value={type}>
-              <RequestBodyContentItem content={content} method={method} ctx={ctx} />
-            </SelectTab>
-          );
-        })}
-      </SelectTabs>
+      <BodyContentSection
+        body={body}
+        contentTypes={contentTypes}
+        method={method}
+        ctx={ctx}
+        path={path}
+        headingLevel={headingLevel}
+      />
     );
   }
 
@@ -359,14 +395,83 @@ export function Operation({
   }
 }
 
+function BodyContentSection({
+  body,
+  contentTypes,
+  method,
+  ctx,
+  path,
+  headingLevel,
+}: {
+  body: NonNullable<NoReference<MethodInformation>['requestBody']>;
+  contentTypes: [string, NoReference<MediaTypeObject>][];
+  method: MethodInformation;
+  ctx: RenderContext;
+  path: string;
+  headingLevel: number;
+}) {
+  const items = contentTypes.map(([key]) => ({
+    label: <code className="text-xs">{key}</code>,
+    value: key,
+  }));
+  // When an operation has multiple body content types, namespace each one's
+  // anchor prefix by its slugified media type so deep links remain unique.
+  const idPrefixes: Record<string, string> = useMemo(() => {
+    const out: Record<string, string> = {};
+    for (const [type] of contentTypes) {
+      out[type] = contentTypes.length > 1 ? `${slugifyMediaType(type)}-body` : 'body';
+    }
+    return out;
+  }, [contentTypes]);
+
+  const [tabValue, setTabValue] = useTabValueFromHash(
+    items.map((item) => ({ value: item.value, prefix: idPrefixes[item.value] })),
+    items[0].value,
+  );
+
+  return (
+    <SelectTabs value={tabValue} onValueChange={setTabValue}>
+      <div className="flex gap-2 items-center justify-between mt-10">
+        {ctx.renderHeading(headingLevel, <I18nLabel label="titleRequestBody" />, {
+          id: 'request-body',
+          className: 'my-0!',
+        })}
+        {contentTypes.length > 1 ? (
+          <SelectTabTrigger items={items} className="font-medium" />
+        ) : (
+          <p className="text-fd-muted-foreground not-prose">{items[0].label}</p>
+        )}
+      </div>
+      {body.description && ctx.renderMarkdown(body.description)}
+      {contentTypes.map(([type, content]) => {
+        if (!isMediaTypeSupported(type, ctx.mediaAdapters)) {
+          throw new Error(`Media type ${type} is not supported (in ${path})`);
+        }
+        return (
+          <SelectTab key={type} value={type}>
+            <RequestBodyContentItem
+              content={content}
+              method={method}
+              ctx={ctx}
+              idPrefix={idPrefixes[type]}
+            />
+          </SelectTab>
+        );
+      })}
+    </SelectTabs>
+  );
+}
+
 function RequestBodyContentItem({
   content,
   method,
   ctx,
+  idPrefix,
 }: {
   content: NoReference<MediaTypeObject>;
   method: MethodInformation;
   ctx: RenderContext;
+  idPrefix: string;
 }) {
   let ts = useMemo(() => {
     if (!content.schema || !ctx.generateTypeScriptDefinitions) return;
@@ -388,7 +493,7 @@ function RequestBodyContentItem({
             name: 'body',
             as: 'body',
             required: method.requestBody?.required,
-            idPrefix: 'body',
+            idPrefix,
           }}
           root={content.schema}
           readOnly={method.method === 'get'}
@@ -411,22 +516,45 @@ function ResponseAccordion({
 }) {
   const response = operation.responses![status];
   const contentTypes = response.content ? Object.entries(response.content) : [];
+
+  // Anchor prefix per content type: namespace by media type only when this
+  // status has more than one, so single-content-type responses keep clean URLs.
+  const idPrefixes = useMemo(() => {
+    const out: Record<string, string> = {};
+    for (const [type] of contentTypes) {
+      out[type] =
+        contentTypes.length > 1
+          ? `response-${status}-${slugifyMediaType(type)}`
+          : `response-${status}`;
+    }
+    return out;
+  }, [contentTypes, status]);
+
+  const items = contentTypes.map(([key]) => ({
+    label: <code className="text-xs">{key}</code>,
+    value: key,
+  }));
+
+  const [tabValue, setTabValue] = useTabValueFromHash(
+    items.map((item) => ({ value: item.value, prefix: idPrefixes[item.value] })),
+    items[0]?.value ?? '',
+  );
+
   let wrapper = (children: ReactNode) => children;
   let selectorNode: ReactNode = null;
 
   if (contentTypes.length > 0) {
-    const items = contentTypes.map(([key]) => ({
-      label: <code className="text-xs">{key}</code>,
-      value: key,
-    }));
-
     selectorNode =
       items.length === 1 ? (
         <p className="text-fd-muted-foreground not-prose">{items[0].label}</p>
       ) : (
         <SelectTabTrigger items={items} />
       );
-    wrapper = (children) => <SelectTabs defaultValue={items[0].value}>{children}</SelectTabs>;
+    wrapper = (children) => (
+      <SelectTabs value={tabValue} onValueChange={setTabValue}>
+        {children}
+      </SelectTabs>
+    );
   }
 
   return wrapper(
@@ -447,6 +575,7 @@ function ResponseAccordion({
               item={item}
               operation={operation}
               ctx={ctx}
+              idPrefix={idPrefixes[type]}
             />
           </SelectTab>
         ))}
@@ -461,11 +590,13 @@ function RepsonseAccordionItem({
   operation,
   item: { schema },
   ctx,
+  idPrefix,
 }: {
   type: string;
   status: string;
   operation: MethodInformation;
   item: NoReference<MediaTypeObject>;
+  idPrefix: string;
   ctx: RenderContext;
 }) {
   let ts = useMemo(() => {
@@ -493,7 +624,7 @@ function RepsonseAccordionItem({
             client={{
               name: 'response',
               as: 'body',
-              idPrefix: `response-${status}`,
+              idPrefix,
             }}
             root={schema}
             readOnly
