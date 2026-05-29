@@ -4,6 +4,7 @@ import { loader, LoaderConfig, LoaderOptions, LoaderOutput } from './loader';
 import type { SourceUnion, StaticSource, DynamicSource } from './source';
 import { isStaticSource, isDynamicSource } from './source';
 import type { GenerateMeta, GeneratePage, GenerateStorage } from './types';
+import type { Awaitable } from '@/types';
 
 type Input = SourceUnion | Record<string, SourceUnion>;
 export interface DynamicLoaderConfig extends LoaderConfig {
@@ -31,7 +32,7 @@ export function dynamicLoader<I extends Input, I18n extends I18nConfig | undefin
 }> {
   let loaderCacheKey: ResolvedSource | undefined;
   let loaderCache: LoaderOutput<DynamicLoaderConfig> | undefined;
-  const sourceCache = new Map<DynamicSource, Promise<StaticSource>>();
+  const sourceCache = new Map<DynamicSource, Awaitable<StaticSource>>();
 
   function configureSources() {
     if (isStaticSource(input)) return;
@@ -59,11 +60,14 @@ export function dynamicLoader<I extends Input, I18n extends I18nConfig | undefin
     return Object.fromEntries(entries);
   }
 
-  function resolveDynamicSource(v: DynamicSource): Promise<StaticSource> {
+  function resolveDynamicSource(v: DynamicSource): Awaitable<StaticSource> {
     let resolved = sourceCache.get(v);
     if (resolved) return resolved;
 
-    resolved = Promise.resolve(v.files()).then((res) => ({ files: res }));
+    const files = v.files();
+    if ('then' in files) resolved = files.then((res) => ({ files: res }));
+    else resolved = { files };
+
     sourceCache.set(v, resolved);
     return resolved;
   }

@@ -1,8 +1,6 @@
 import type { Awaitable } from '@/types';
 import type { DynamicLoader } from './dynamic';
 import type { StructuredData } from '@/mdx-plugins';
-import z from 'zod';
-import { pageSchema } from './schema';
 
 export type SourceUnion<Config extends SourceConfig = SourceConfig> =
   | StaticSource<Config>
@@ -22,10 +20,10 @@ export interface DynamicSource<Config extends SourceConfig = SourceConfig> {
   configure?: (loader: DynamicLoader) => void;
 }
 
-export interface SourceConfig {
+type SourceConfig = {
   pageData: PageData;
   metaData: MetaData;
-}
+};
 
 export interface MetaData {
   icon?: string | undefined;
@@ -115,23 +113,23 @@ export function source<Page extends PageData, Meta extends MetaData>(config: {
   };
 }
 
-export interface _SourceUpdate_<Config extends SourceConfig> {
+interface SourceUpdater<Config extends SourceConfig> {
   files: <Page extends PageData, Meta extends MetaData>(
     fn: (files: VirtualFile<Config>[]) => (VirtualPage<Page> | VirtualMeta<Meta>)[],
-  ) => _SourceUpdate_<{
+  ) => SourceUpdater<{
     pageData: Page;
     metaData: Meta;
   }>;
   page: <V extends PageData>(
     fn: (page: VirtualPage<Config['pageData']>) => VirtualPage<V>,
-  ) => _SourceUpdate_<{
+  ) => SourceUpdater<{
     pageData: V;
     metaData: Config['metaData'];
   }>;
 
   meta: <V extends MetaData>(
     fn: (meta: VirtualMeta<Config['metaData']>) => VirtualMeta<V>,
-  ) => _SourceUpdate_<{
+  ) => SourceUpdater<{
     pageData: Config['pageData'];
     metaData: V;
   }>;
@@ -143,11 +141,11 @@ export interface _SourceUpdate_<Config extends SourceConfig> {
  */
 export function update<Config extends SourceConfig>(
   source: StaticSource<Config>,
-): _SourceUpdate_<Config> {
+): SourceUpdater<Config> {
   return {
     files(fn) {
       source.files = fn(source.files);
-      return this as _SourceUpdate_<never>;
+      return this as SourceUpdater<never>;
     },
     page(fn) {
       for (let i = 0; i < source.files.length; i++) {
@@ -155,7 +153,7 @@ export function update<Config extends SourceConfig>(
         if (file.type === 'page') source.files[i] = fn(file);
       }
 
-      return this as _SourceUpdate_<never>;
+      return this as SourceUpdater<never>;
     },
     meta(fn) {
       for (let i = 0; i < source.files.length; i++) {
@@ -163,7 +161,7 @@ export function update<Config extends SourceConfig>(
         if (file.type === 'meta') source.files[i] = fn(file);
       }
 
-      return this as _SourceUpdate_<never>;
+      return this as SourceUpdater<never>;
     },
     build() {
       return source;
