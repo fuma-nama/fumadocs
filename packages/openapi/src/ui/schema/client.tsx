@@ -30,7 +30,8 @@ import {
   CollapsibleTrigger,
 } from 'fumadocs-ui/components/ui/collapsible';
 import { buttonVariants } from 'fumadocs-ui/components/ui/button';
-import { ChevronDown, FilterIcon, LinkIcon } from 'lucide-react';
+import { Check, ChevronDown, FilterIcon, LinkIcon } from 'lucide-react';
+import { useCopyButton } from 'fumadocs-ui/utils/use-copy-button';
 import { Badge } from '@/ui/components/method-label';
 import { Popover, PopoverContent, PopoverTrigger } from 'fumadocs-ui/components/ui/popover';
 import { cn } from '@/utils/cn';
@@ -39,7 +40,31 @@ import { cva } from 'class-variance-authority';
 type DataContextType = SchemaUIGeneratedData;
 
 interface PopoverContextType {
-  renderTrigger: (props: { pathName: ReactNode; $ref: string; children: ReactNode }) => ReactNode;
+  renderTrigger: (props: {
+    pathName: ReactNode;
+    $ref: string;
+    children: ReactNode;
+    topLevelId?: string;
+  }) => ReactNode;
+}
+
+interface DeepLinkTarget {
+  /** the DOM id of the top-level Property that matched the hash */
+  topLevelId: string;
+  /** slugified schema-property segments after the top-level id */
+  segments: string[];
+  /** original hash value (without the leading `#`) */
+  fullHash: string;
+}
+
+interface DeepLinkContextValue {
+  target: DeepLinkTarget | null;
+}
+
+const DeepLinkContext = createContext<DeepLinkContextValue>({ target: null });
+
+function useDeepLink() {
+  return use(DeepLinkContext);
 }
 
 const typeVariants = cva('text-sm text-start text-fd-muted-foreground font-mono', {
@@ -94,21 +119,156 @@ export function SchemaUI({
 }: SchemaUIProps) {
   return (
     <DataContext value={generated}>
-      <SchemaUIProperty
-        name={name}
-        $type={generated.$root}
-        path={idPrefix}
-        overrides={{
-          required,
-        }}
-        variant={
-          as === 'property' || generated.refs[generated.$root].type === 'primitive'
-            ? 'default'
-            : 'expand'
-        }
-      />
+      <DeepLinkProvider idPrefix={idPrefix}>
+        <SchemaUIProperty
+          name={name}
+          $type={generated.$root}
+          path={idPrefix}
+          topLevelId={idPrefix}
+          overrides={{
+            required,
+          }}
+          variant={
+            as === 'property' || generated.refs[generated.$root].type === 'primitive'
+              ? 'default'
+              : 'expand'
+          }
+        />
+      </DeepLinkProvider>
     </DataContext>
   );
+}
+
+function DeepLinkProvider({
+  idPrefix,
+  children,
+}: {
+  idPrefix?: string;
+  children: ReactNode;
+}) {
+  const [target, setTarget] = useState<DeepLinkTarget | null>(null);
+
+  useEffect(() => {
+    if (!idPrefix) return;
+
+    function resolve() {
+      const hash = decodeURIComponent(window.location.hash.slice(1));
+      if (!hash || (hash !== idPrefix && !hash.startsWith(`${idPrefix}.`))) {
+        setTarget((prev) => (prev ? null : prev));
+        return;
+      }
+
+      // Find the longest dotted prefix that is a real DOM id; the remainder
+      // (if any) is the schema-internal path to walk.
+      const parts = hash.split('.');
+      for (let i = parts.length; i >= 1; i--) {
+        const candidate = parts.slice(0, i).join('.');
+        if (document.getElementById(candidate)) {
+          setTarget({
+            topLevelId: candidate,
+            segments: parts.slice(i),
+            fullHash: hash,
+          });
+          return;
+        }
+      }
+      setTarget(null);
+    }
+
+    resolve();
+    window.addEventListener('hashchange', resolve);
+    return () => window.removeEventListener('hashchange', resolve);
+  }, [idPrefix]);
+
+  // After a deep target is set, scroll the page to the inline anchor first so
+  // the popover (or array collapsible) appears in a sensible spot, then wait
+  // for the deep element to mount and scroll *that* into view (which the
+  // browser doesn't do for hashes whose element isn't in the DOM on load).
+  useEffect(() => {
+    if (!target) return;
+
+    const topEl = document.getElementById(target.topLevelId);
+    topEl?.scrollIntoView({ block: 'start', behavior: 'instant' as ScrollBehavior });
+
+    if (target.segments.length === 0) return;
+
+    let attempts = 0;
+    let raf: number | null = null;
+
+    function tryScroll() {
+      if (!target) return;
+      const el = document.getElementById(target.fullHash);
+      if (el && el !== topEl) {
+        el.scrollIntoView({ block: 'nearest', behavior: 'instant' as ScrollBehavior });
+        return;
+      }
+      if (attempts++ < 30) raf = requestAnimationFrame(tryScroll);
+    }
+    tryScroll();
+    return () => {
+      if (raf !== null) cancelAnimationFrame(raf);
+    };
+  }, [target]);
+
+  return <DeepLinkContext value={{ target }}>{children}</DeepLinkContext>;
+}
+
+function walkDeepSchemaPath(
+  refs: Record<string, SchemaData>,
+  startRef: string,
+  segments: string[],
+): PathItemType[] {
+  const extra: PathItemType[] = [];
+  let current = startRef;
+
+  for (const segment of segments) {
+    let schema: SchemaData | undefined = refs[current];
+    while (schema?.type === 'array') {
+      current = schema.item.$type;
+      schema = refs[current];
+    }
+    if (!schema) break;
+
+    if (schema.type === 'or' || schema.type === 'and') {
+      const match = findUnionPropMatch(refs, schema.items, segment);
+      if (!match) break;
+      extra.push({ name: match.name, $ref: match.$type });
+      current = match.$type;
+      continue;
+    }
+
+    if (schema.type === 'object') {
+      const prop = schema.props.find((p) => slugifyPropertyName(p.name) === segment);
+      if (!prop) break;
+      extra.push({ name: prop.name, $ref: prop.$type });
+      current = prop.$type;
+      continue;
+    }
+
+    break;
+  }
+
+  return extra;
+}
+
+function findUnionPropMatch(
+  refs: Record<string, SchemaData>,
+  items: { name: string; $type: string }[],
+  segment: string,
+): { name: string; $type: string } | undefined {
+  for (const variant of items) {
+    const schema = refs[variant.$type];
+    if (!schema) continue;
+    if (schema.type === 'object') {
+      const prop = schema.props.find((p) => slugifyPropertyName(p.name) === segment);
+      if (prop) return prop;
+    }
+    if (schema.type === 'or' || schema.type === 'and') {
+      const nested = findUnionPropMatch(refs, schema.items, segment);
+      if (nested) return nested;
+    }
+  }
+  return undefined;
 }
 
 function SchemaUIProperty({
@@ -116,6 +276,7 @@ function SchemaUIProperty({
   $type,
   variant = 'default',
   path,
+  topLevelId,
   overrides,
   objectSearchOverrides,
 }: {
@@ -123,6 +284,12 @@ function SchemaUIProperty({
   $type: string;
   variant?: 'default' | 'expand';
   path?: string;
+  /**
+   * The DOM id of the nearest inline Property element that contains this
+   * subtree. Threaded to popover triggers / array collapsibles so they can
+   * decide whether to auto-open in response to a deep link.
+   */
+  topLevelId?: string;
   overrides?: Partial<PropertyProps>;
   objectSearchOverrides?: Partial<ObjectSearchProps>;
 }) {
@@ -134,25 +301,13 @@ function SchemaUIProperty({
   if ((schema.type === 'or' || schema.type === 'and') && schema.items.length > 0) {
     if (variant === 'expand')
       return (
-        <Tabs defaultValue={schema.items[0].$type}>
-          <TabsList>
-            {schema.items.map((item) => (
-              <TabsTrigger key={item.$type} value={item.$type}>
-                {item.name}
-              </TabsTrigger>
-            ))}
-          </TabsList>
-          {schema.items.map((item) => (
-            <TabsContent key={item.$type} value={item.$type} className="pt-2 pb-0">
-              <SchemaUIProperty {...item} variant="expand" path={path} />
-            </TabsContent>
-          ))}
-        </Tabs>
+        <UnionTabs items={schema.items} path={path} topLevelId={topLevelId} />
       );
     type = renderRef({
       pathName: name,
       $ref: $type,
       text: schema.aliasName,
+      topLevelId: topLevelId ?? path,
     });
   } else if (schema.type === 'object' && schema.props.length > 0) {
     if (variant === 'expand')
@@ -164,14 +319,19 @@ function SchemaUIProperty({
       pathName: name,
       $ref: $type,
       text: schema.aliasName,
+      topLevelId: topLevelId ?? path,
     });
   } else if (schema.type === 'array') {
-    if (variant === 'expand') return <ArrayItemCollapsible schema={schema} parentPath={path} />;
+    if (variant === 'expand')
+      return (
+        <ArrayItemCollapsible schema={schema} parentPath={path} topLevelId={topLevelId} />
+      );
 
     type = renderRef({
       pathName: name,
       $ref: $type,
       text: schema.aliasName,
+      topLevelId: topLevelId ?? path,
     });
   }
 
@@ -195,15 +355,85 @@ function SchemaUIProperty({
   );
 }
 
+function UnionTabs({
+  items,
+  path,
+  topLevelId,
+}: {
+  items: { name: string; $type: string }[];
+  path?: string;
+  topLevelId?: string;
+}) {
+  const { refs } = useData();
+  const { target } = useDeepLink();
+
+  const targetedVariant = useMemo(() => {
+    if (!target || !path) return undefined;
+    const onRoute = target.fullHash === path || target.fullHash.startsWith(`${path}.`);
+    if (!onRoute) return undefined;
+
+    const remaining =
+      target.fullHash === path ? [] : target.fullHash.slice(path.length + 1).split('.');
+    if (remaining.length === 0) return undefined;
+
+    for (const item of items) {
+      if (findUnionPropMatch(refs, [item], remaining[0])) return item.$type;
+    }
+    return undefined;
+  }, [items, path, refs, target]);
+
+  const [value, setValue] = useState(items[0].$type);
+
+  useEffect(() => {
+    if (targetedVariant && targetedVariant !== value) setValue(targetedVariant);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [targetedVariant]);
+
+  return (
+    <Tabs value={value} onValueChange={setValue}>
+      <TabsList>
+        {items.map((item) => (
+          <TabsTrigger key={item.$type} value={item.$type}>
+            {item.name}
+          </TabsTrigger>
+        ))}
+      </TabsList>
+      {items.map((item) => (
+        <TabsContent key={item.$type} value={item.$type} className="pt-2 pb-0">
+          <SchemaUIProperty {...item} variant="expand" path={path} topLevelId={topLevelId} />
+        </TabsContent>
+      ))}
+    </Tabs>
+  );
+}
+
 function ArrayItemCollapsible({
   schema,
   parentPath,
+  topLevelId,
 }: {
   schema: Extract<SchemaData, { type: 'array' }>;
   parentPath?: string;
+  topLevelId?: string;
 }) {
   const [open, setOpen] = useState(false);
   const t = useTranslations();
+  const { target } = useDeepLink();
+
+  const [appliedDeepHash, setAppliedDeepHash] = useState<string | null>(null);
+  const isActiveTarget = Boolean(
+    parentPath &&
+      target &&
+      target.fullHash !== appliedDeepHash &&
+      (target.fullHash === parentPath || target.fullHash.startsWith(`${parentPath}.`)),
+  );
+
+  useEffect(() => {
+    if (!isActiveTarget || !target) return;
+    setOpen(true);
+    setAppliedDeepHash(target.fullHash);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isActiveTarget]);
 
   return (
     <Collapsible className="my-2" open={open} onOpenChange={setOpen}>
@@ -217,7 +447,13 @@ function ArrayItemCollapsible({
         <ChevronDown className="size-4 text-fd-muted-foreground group-data-[state=open]:rotate-180" />
       </CollapsibleTrigger>
       <CollapsibleContent className="-mt-px bg-fd-card px-3 rounded-lg rounded-tl-none border shadow-sm">
-        <SchemaUIProperty name="" $type={schema.item.$type} variant="expand" path={parentPath} />
+        <SchemaUIProperty
+          name=""
+          $type={schema.item.$type}
+          variant="expand"
+          path={parentPath}
+          topLevelId={topLevelId}
+        />
       </CollapsibleContent>
     </Collapsible>
   );
@@ -307,22 +543,28 @@ function ObjectSearchContent({
       </p>
     );
 
-  return filtered.map((prop) => (
-    <SchemaUIProperty
-      key={prop.name}
-      name={prop.name}
-      $type={prop.$type}
-      path={joinPath(parentPath, prop.name)}
-      overrides={{ required: prop.required }}
-    />
-  ));
+  return filtered.map((prop) => {
+    const childPath = joinPath(parentPath, prop.name);
+    // Each rendered top-level property's DOM id becomes the topLevelId for
+    // anything below it (popovers, nested type triggers).
+    return (
+      <SchemaUIProperty
+        key={prop.name}
+        name={prop.name}
+        $type={prop.$type}
+        path={childPath}
+        topLevelId={childPath}
+        overrides={{ required: prop.required }}
+      />
+    );
+  });
 }
 
 function joinPath(parent: string | undefined, name: string): string | undefined {
   if (!parent) return undefined;
   const slug = slugifyPropertyName(name);
   if (!slug) return parent;
-  return `${parent}-${slug}`;
+  return `${parent}.${slug}`;
 }
 
 function InfoTag({ tag }: { tag: InfoTagData }) {
@@ -369,9 +611,11 @@ interface PathItemType {
 function SchemaUIPopover({
   containerRef,
   initialPath,
+  topLevelId,
 }: {
   containerRef: RefObject<HTMLDivElement | null>;
   initialPath: PathItemType[];
+  topLevelId?: string;
 }) {
   const [path, setPath] = useState(initialPath);
 
@@ -389,6 +633,8 @@ function SchemaUIPopover({
 
   const context: PopoverContextType = useMemo(
     () => ({
+      // Inside the popover, type triggers drill into the popover instead of
+      // opening a new one; topLevelId is irrelevant here.
       renderTrigger: ({ $ref, pathName, children }) => (
         <button
           className={cn(typeVariants({ variant: 'trigger' }))}
@@ -401,7 +647,43 @@ function SchemaUIPopover({
     [],
   );
 
-  const currentRef = path.findLast((item) => item.$ref !== undefined);
+  const { refs } = useData();
+
+  // Pick the deepest non-primitive item to render expanded. If the deep-link
+  // path bottoms out on a primitive leaf (e.g. `body.creator.name` where name
+  // is a string), we render the parent (`creator`) expanded so the leaf shows
+  // up as a real Property row — otherwise the popover body would only contain
+  // the leaf's description text.
+  const expandedItemIndex = useMemo(() => {
+    let fallback = -1;
+    for (let i = path.length - 1; i >= 0; i--) {
+      const item = path[i];
+      if (!item.$ref) continue;
+      const schema = refs[item.$ref];
+      if (!schema) continue;
+      if (fallback === -1) fallback = i;
+      if (schema.type !== 'primitive') return i;
+    }
+    return fallback;
+  }, [path, refs]);
+
+  const currentRef = expandedItemIndex >= 0 ? path[expandedItemIndex] : undefined;
+
+  // Build the schema-internal path inside the popover by concatenating the
+  // breadcrumb names *up to the expanded item* (skipping the initial root,
+  // which is already represented by topLevelId). Non-string names (array
+  // bracket wrappers) are ignored.
+  const currentFullPath = useMemo(() => {
+    if (!topLevelId || expandedItemIndex < 0) return undefined;
+    const segments: string[] = [];
+    for (let i = 1; i <= expandedItemIndex; i++) {
+      const itemName = path[i].name;
+      if (typeof itemName !== 'string') continue;
+      const seg = slugifyPropertyName(itemName);
+      if (seg) segments.push(seg);
+    }
+    return segments.length === 0 ? topLevelId : `${topLevelId}.${segments.join('.')}`;
+  }, [topLevelId, path, expandedItemIndex]);
 
   return (
     <>
@@ -434,6 +716,8 @@ function SchemaUIPopover({
             name=""
             $type={currentRef.$ref}
             variant="expand"
+            path={currentFullPath}
+            topLevelId={currentFullPath}
             objectSearchOverrides={{
               container: {
                 className: 'sticky top-10',
@@ -456,10 +740,12 @@ function useRenderRef() {
     pathName,
     $ref,
     text,
+    topLevelId,
   }: {
     pathName: ReactNode;
     $ref: string;
     text: ReactNode;
+    topLevelId?: string;
   }) {
     const schema = refs[$ref];
 
@@ -474,7 +760,7 @@ function useRenderRef() {
           {schema.items.map((item, i) => (
             <Fragment key={item.$type}>
               {i > 0 && <span>{sep}</span>}
-              {renderRef({ pathName, text: item.name, $ref: item.$type })}
+              {renderRef({ pathName, text: item.name, $ref: item.$type, topLevelId })}
             </Fragment>
           ))}
         </span>
@@ -489,13 +775,14 @@ function useRenderRef() {
             pathName: <>{pathName}[]</>,
             text: refs[schema.item.$type].aliasName,
             $ref: schema.item.$type,
+            topLevelId,
           })}
           {'>'}
         </span>
       );
     }
 
-    return renderTrigger({ $ref, pathName, children: text });
+    return renderTrigger({ $ref, pathName, children: text, topLevelId });
   };
 }
 
@@ -503,12 +790,47 @@ function RootPopoverTrigger({
   $ref,
   pathName,
   children,
+  topLevelId,
 }: {
   pathName: ReactNode;
   $ref: string;
   children: ReactNode;
+  topLevelId?: string;
 }) {
   const ref = useRef<HTMLDivElement>(null);
+  const { refs } = useData();
+  const { target } = useDeepLink();
+
+  // Tracks which deep hash this trigger has already auto-applied. After a
+  // deep target is consumed, subsequent user-initiated clicks open the base
+  // view; a *different* deep hash re-arms the auto-open.
+  const [appliedDeepHash, setAppliedDeepHash] = useState<string | null>(null);
+
+  const isActiveTarget = Boolean(
+    topLevelId &&
+      target &&
+      target.fullHash !== appliedDeepHash &&
+      target.fullHash.startsWith(`${topLevelId}.`),
+  );
+
+  const [open, setOpen] = useState(false);
+
+  useEffect(() => {
+    if (!isActiveTarget || !target) return;
+    setOpen(true);
+    setAppliedDeepHash(target.fullHash);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isActiveTarget]);
+
+  const initialPath = useMemo<PathItemType[]>(() => {
+    const base: PathItemType[] = [{ name: pathName, $ref }];
+    if (!isActiveTarget || !target || !topLevelId) return base;
+    const segments = target.fullHash.slice(topLevelId.length + 1).split('.');
+    base.push(...walkDeepSchemaPath(refs, $ref, segments));
+    return base;
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [pathName, $ref, isActiveTarget, target?.fullHash, topLevelId, refs]);
+
   const refCallback = useCallback((element: HTMLDivElement | null) => {
     ref.current = element;
     if (!element || element.style.getPropertyValue('--initial-height')) return;
@@ -517,7 +839,7 @@ function RootPopoverTrigger({
   }, []);
 
   return (
-    <Popover>
+    <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger className={cn(typeVariants({ variant: 'trigger' }))}>
         {children}
       </PopoverTrigger>
@@ -534,12 +856,8 @@ function RootPopoverTrigger({
       >
         <SchemaUIPopover
           containerRef={ref}
-          initialPath={[
-            {
-              name: pathName,
-              $ref: $ref,
-            },
-          ]}
+          initialPath={initialPath}
+          topLevelId={topLevelId}
         />
       </PopoverContent>
     </Popover>
@@ -583,13 +901,10 @@ function Property({
       <div className="flex flex-wrap items-center gap-3 not-prose">
         <span className="font-medium font-mono text-fd-primary inline-flex items-center gap-1.5">
           {id && (
-            <a
-              href={`#${id}`}
-              aria-label={`Direct link to ${typeof name === 'string' ? name : 'property'}`}
-              className="text-fd-muted-foreground opacity-0 transition-opacity group-hover/property:opacity-100 focus-visible:opacity-100"
-            >
-              <LinkIcon className="size-3.5" />
-            </a>
+            <PropertyAnchorCopyButton
+              id={id}
+              label={typeof name === 'string' ? name : 'property'}
+            />
           )}
           <span>
             {name}
@@ -613,6 +928,33 @@ function Property({
       </div>
       <div className="prose-no-margin pt-2.5 empty:hidden">{props.children}</div>
     </div>
+  );
+}
+
+function PropertyAnchorCopyButton({ id, label }: { id: string; label: string }) {
+  const [isChecked, onCopy] = useCopyButton(() => {
+    const url = new URL(window.location.href);
+    url.hash = id;
+    // Update the address bar without re-triggering hashchange (which would
+    // reset the popover/collapsible state the user just navigated into).
+    history.replaceState(null, '', url.href);
+    return navigator.clipboard.writeText(url.href);
+  });
+
+  return (
+    <button
+      type="button"
+      onClick={onCopy}
+      aria-label={`Copy link to ${label}`}
+      className={cn(
+        'text-fd-muted-foreground transition-opacity focus-visible:opacity-100',
+        isChecked
+          ? 'opacity-100 text-fd-primary'
+          : 'opacity-0 group-hover/property:opacity-100',
+      )}
+    >
+      {isChecked ? <Check className="size-3.5" /> : <LinkIcon className="size-3.5" />}
+    </button>
   );
 }
 
