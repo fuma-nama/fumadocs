@@ -1,5 +1,12 @@
 # fumadocs-core
 
+## 16.9.3
+
+### Patch Changes
+
+- 42f0255: Support `invalidate` & `revalidate` on dynamic loader
+- a807798: Improve source API utils & types
+
 ## 16.9.2
 
 ### Patch Changes
