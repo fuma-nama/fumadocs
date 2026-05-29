@@ -153,31 +153,40 @@ function DeepLinkProvider({
 
     function resolve() {
       const raw = window.location.hash.slice(1);
-      let hash: string;
-      try {
-        hash = decodeURIComponent(raw);
-      } catch {
-        // Malformed percent-encoding (e.g. `#body%`) — ignore.
-        setTarget((prev) => (prev ? null : prev));
-        return;
-      }
-      if (!hash || (hash !== idPrefix && !hash.startsWith(`${idPrefix}.`))) {
+      if (!raw) {
         setTarget((prev) => (prev ? null : prev));
         return;
       }
 
-      // Find the longest dotted prefix that is a real DOM id; the remainder
-      // (if any) is the schema-internal path to walk.
-      const parts = hash.split('.');
-      for (let i = parts.length; i >= 1; i--) {
-        const candidate = parts.slice(0, i).join('.');
-        if (document.getElementById(candidate)) {
-          setTarget({
-            topLevelId: candidate,
-            segments: parts.slice(i),
-            fullHash: hash,
-          });
-          return;
+      // Try the raw fragment first because property anchors are generated via
+      // `slugifyPropertyName` which percent-encodes `.` and other reserved
+      // characters; DOM ids therefore contain the encoded form. Only fall
+      // back to a fully decoded match for hand-authored URLs that used the
+      // pre-decoded form.
+      let decoded: string | undefined;
+      try {
+        decoded = decodeURIComponent(raw);
+      } catch {
+        // Malformed percent-encoding (e.g. `#body%`).
+      }
+
+      const candidates = decoded && decoded !== raw ? [raw, decoded] : [raw];
+      for (const hash of candidates) {
+        if (hash !== idPrefix && !hash.startsWith(`${idPrefix}.`)) continue;
+
+        // Find the longest dotted prefix that is a real DOM id; the remainder
+        // (if any) is the schema-internal path to walk.
+        const parts = hash.split('.');
+        for (let i = parts.length; i >= 1; i--) {
+          const candidate = parts.slice(0, i).join('.');
+          if (document.getElementById(candidate)) {
+            setTarget({
+              topLevelId: candidate,
+              segments: parts.slice(i),
+              fullHash: hash,
+            });
+            return;
+          }
         }
       }
       setTarget(null);

@@ -58,15 +58,23 @@ function resolveFromHash(items: HashTabItem[]): string | undefined {
   if (typeof window === 'undefined') return undefined;
   const raw = window.location.hash.slice(1);
   if (!raw) return undefined;
-  let hash: string;
+
+  // Property anchors are generated via `slugifyPropertyName`, which
+  // percent-encodes reserved characters — so DOM ids and the prefixes we
+  // build from them contain the encoded form. Try the raw fragment first and
+  // fall back to the decoded form for hand-authored URLs.
+  let decoded: string | undefined;
   try {
-    hash = decodeURIComponent(raw);
+    decoded = decodeURIComponent(raw);
   } catch {
-    // Malformed percent-encoding (e.g. `#body%`) — ignore.
-    return undefined;
+    // Malformed percent-encoding (e.g. `#body%`).
   }
-  for (const item of items) {
-    if (hash === item.prefix || hash.startsWith(`${item.prefix}.`)) return item.value;
+  const candidates = decoded && decoded !== raw ? [raw, decoded] : [raw];
+
+  for (const hash of candidates) {
+    for (const item of items) {
+      if (hash === item.prefix || hash.startsWith(`${item.prefix}.`)) return item.value;
+    }
   }
   return undefined;
 }
