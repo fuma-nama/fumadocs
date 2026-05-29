@@ -23,7 +23,7 @@ export default async function mdx(
     environment: 'rolldown',
   });
   await core.init({
-    config: buildConfig(await config),
+    config: buildConfig(await config, process.cwd()),
   });
 
   const configLoader = createIntegratedConfigLoader(core);

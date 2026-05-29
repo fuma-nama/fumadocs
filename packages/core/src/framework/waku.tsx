@@ -1,7 +1,7 @@
 'use client';
 
 import { type ReactNode, useMemo, useRef } from 'react';
-import { Link, useRouter } from 'waku';
+import { Link, useRouter } from 'waku/router/client';
 import { type Framework, FrameworkProvider } from './index.js';
 
 const framework: Framework = {
@@ -9,16 +9,8 @@ const framework: Framework = {
     return useRouter().path;
   },
   useParams() {
-    const { query } = useRouter();
-    return useMemo(() => {
-      const params = new URLSearchParams(query);
-      return Object.fromEntries(
-        Array.from(params.entries()).map(([key, value]) => [
-          key,
-          Array.isArray(value) ? value[0] : value,
-        ]),
-      );
-    }, [query]);
+    console.warn('[Fumadocs] useParams() is not supported on Waku');
+    return useMemo(() => ({}), []);
   },
   useRouter() {
     const router = useRouter();

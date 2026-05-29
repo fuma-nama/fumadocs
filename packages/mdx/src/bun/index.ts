@@ -33,7 +33,7 @@ export function createMdxPlugin(options: MdxPluginOptions = {}): BunPlugin {
       });
 
       await core.init({
-        config: buildConfig(await import(importPath)),
+        config: buildConfig(await import(importPath), process.cwd()),
       });
 
       const configLoader = createIntegratedConfigLoader(core);

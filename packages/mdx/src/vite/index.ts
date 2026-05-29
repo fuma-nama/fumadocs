@@ -3,10 +3,11 @@ import { buildConfig } from '@/config/build';
 import { createMdxLoader } from '@/loaders/mdx';
 import { toVite } from '@/loaders/adapter';
 import type { FSWatcher } from 'chokidar';
-import { _Defaults, createCore } from '@/core';
+import { _Defaults, Core, createCore } from '@/core';
 import { createIntegratedConfigLoader } from '@/loaders/config';
 import { createMetaLoader } from '@/loaders/meta';
 import indexFile, { IndexFilePluginOptions } from '@/plugins/index-file';
+import path from 'node:path';
 
 export interface PluginOptions {
   /**
@@ -40,32 +41,60 @@ export default async function mdx(
   _config?: Record<string, unknown> | Promise<Record<string, unknown>>,
   pluginOptions: PluginOptions = {},
 ): Promise<Plugin[]> {
-  const options = applyDefaults(pluginOptions);
-  const core = createViteCore(options);
-  const config =
-    (await _config) ?? (await runnerImport<Record<string, unknown>>(options.configPath)).module;
-  await core.init({
-    config: buildConfig(config),
-  });
-
-  const configLoader = createIntegratedConfigLoader(core);
-  const mdxLoader = toVite(createMdxLoader(configLoader));
-  const metaLoader = toVite(
-    createMetaLoader(configLoader, {
-      // vite has built-in plugin for JSON files
-      json: 'json',
-    }),
-  );
+  let core: Core;
+  const metaPlugin: Plugin = {
+    name: 'fumadocs-mdx:meta',
+  };
+  const mdxPlugin: Plugin = {
+    name: 'fumadocs-mdx:mdx',
+  };
 
   return [
     {
       name: 'fumadocs-mdx',
       async config(config) {
+        const root = config.root ?? process.cwd();
+        const options = applyDefaults(root, pluginOptions);
+        core = createViteCore(options);
+        await core.init({
+          config: buildConfig(
+            (await _config) ??
+              (await runnerImport<Record<string, unknown>>(options.configPath)).module,
+            root,
+          ),
+        });
+
+        const configLoader = createIntegratedConfigLoader(core);
+        const mdxLoader = toVite(createMdxLoader(configLoader));
+        const metaLoader = toVite(
+          createMetaLoader(configLoader, {
+            // vite has built-in plugin for JSON files
+            json: 'json',
+          }),
+        );
+
+        mdxPlugin.transform = {
+          filter: mdxLoader.filter,
+          order: 'pre',
+          async handler(code, id) {
+            // Vite RSC will pass the compiled MDX file's client module with ID `virtual:vite-rsc/client-references/group/facade:xxx.mdx`.
+            // The format of `value` becomes JavaScript, which will break the MDX compiler.
+            // We have to ignore them.
+            if (id.includes('virtual:vite-rsc')) return null;
+            return await mdxLoader.transform.call(this, code, id);
+          },
+        };
+        metaPlugin.transform = {
+          filter: metaLoader.filter,
+          order: 'pre',
+          handler: metaLoader.transform,
+        };
+
         if ('_fumadocs_skipViteConfig' in config && config._fumadocs_skipViteConfig) return;
         if (!options.updateViteConfig) return;
 
         const { getConfig } = await import('@fumadocs/vite');
-        return getConfig({ root: process.cwd() });
+        return getConfig({ root });
       },
       async buildStart() {
         await core.emit({ write: true });
@@ -76,34 +105,14 @@ export default async function mdx(
         });
       },
     },
-    {
-      name: 'fumadocs-mdx:mdx',
-      enforce: 'pre',
-      transform: {
-        filter: mdxLoader.filter,
-        async handler(code, id) {
-          // Vite RSC will pass the compiled MDX file's client module with ID `virtual:vite-rsc/client-references/group/facade:xxx.mdx`.
-          // The format of `value` becomes JavaScript, which will break the MDX compiler.
-          // We have to ignore them.
-          if (id.includes('virtual:vite-rsc')) return null;
-          return await mdxLoader.transform.call(this, code, id);
-        },
-      },
-    },
-    {
-      name: 'fumadocs-mdx:meta',
-      enforce: 'pre',
-      transform: {
-        filter: metaLoader.filter,
-        handler: metaLoader.transform,
-      },
-    },
+    mdxPlugin,
+    metaPlugin,
   ];
 }
 
 export async function postInstall(pluginOptions: PluginOptions = {}) {
   const { loadConfig } = await import('@/config/load-from-file');
-  const core = createViteCore(applyDefaults(pluginOptions));
+  const core = createViteCore(applyDefaults(process.cwd(), pluginOptions));
   await core.init({
     config: loadConfig(core, true),
   });
@@ -127,11 +136,11 @@ function createViteCore({ index, configPath, outDir }: Required<PluginOptions>) 
   });
 }
 
-function applyDefaults(options: PluginOptions): Required<PluginOptions> {
+function applyDefaults(root: string, options: PluginOptions): Required<PluginOptions> {
   return {
     updateViteConfig: options.updateViteConfig ?? true,
     index: options.index ?? true,
-    configPath: options.configPath ?? _Defaults.configPath,
-    outDir: options.outDir ?? _Defaults.outDir,
+    configPath: path.resolve(root, options.configPath ?? _Defaults.configPath),
+    outDir: path.resolve(root, options.outDir ?? _Defaults.outDir),
   };
 }

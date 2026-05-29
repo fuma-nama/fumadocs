@@ -115,7 +115,7 @@ function buildPrimitiveCollection(
   };
 }
 
-export function buildConfig(config: Record<string, unknown>, cwd = process.cwd()): LoadedConfig {
+export function buildConfig(config: Record<string, unknown>, cwd: string): LoadedConfig {
   const collections = new Map<string, CollectionItem>();
   const loaded: GlobalConfig = {};
 
