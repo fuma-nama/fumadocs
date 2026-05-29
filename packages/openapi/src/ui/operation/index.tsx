@@ -9,7 +9,7 @@ import type {
 } from '@/types';
 import { createMethod, methodKeys, type NoReference } from '@/utils/schema';
 import { idToTitle } from '@/utils/id-to-title';
-import { Schema } from '../schema';
+import { Schema, slugifyPropertyName } from '../schema';
 import { UsageTabs } from '@/ui/operation/usage-tabs';
 import { Badge, MethodLabel } from '@/ui/components/method-label';
 import { CopyTypeScriptPanel, OperationProvider } from './client';
@@ -154,6 +154,7 @@ export function Operation({
                   client={{
                     name: param.name!,
                     required: param.required,
+                    idPrefix: `parameters-${type}-${slugifyPropertyName(param.name!)}`,
                   }}
                   root={
                     typeof param.schema === 'object'
@@ -387,6 +388,7 @@ function RequestBodyContentItem({
             name: 'body',
             as: 'body',
             required: method.requestBody?.required,
+            idPrefix: 'body',
           }}
           root={content.schema}
           readOnly={method.method === 'get'}
@@ -491,6 +493,7 @@ function RepsonseAccordionItem({
             client={{
               name: 'response',
               as: 'body',
+              idPrefix: `response-${status}`,
             }}
             root={schema}
             readOnly

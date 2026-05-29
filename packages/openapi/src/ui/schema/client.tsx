@@ -18,18 +18,19 @@ import {
 import { Tabs, TabsContent, TabsList, TabsTrigger } from 'fumadocs-ui/components/tabs';
 import { useTranslations } from '@/ui/client/i18n';
 import type {
-  InfoTag,
+  InfoTag as InfoTagData,
   SchemaData,
   SchemaDataObjectProperty,
   SchemaUIGeneratedData,
 } from '@/ui/schema';
+import { slugifyPropertyName } from '@/ui/schema';
 import {
   Collapsible,
   CollapsibleContent,
   CollapsibleTrigger,
 } from 'fumadocs-ui/components/ui/collapsible';
 import { buttonVariants } from 'fumadocs-ui/components/ui/button';
-import { ChevronDown, FilterIcon } from 'lucide-react';
+import { ChevronDown, FilterIcon, LinkIcon } from 'lucide-react';
 import { Badge } from '@/ui/components/method-label';
 import { Popover, PopoverContent, PopoverTrigger } from 'fumadocs-ui/components/ui/popover';
 import { cn } from '@/utils/cn';
@@ -69,15 +70,34 @@ export interface SchemaUIProps {
   required?: boolean;
   as?: 'property' | 'body';
 
+  /**
+   * Anchor id prefix for inline-rendered properties. When provided, every
+   * property visible inline gets an `id` and a hover-revealed link icon that
+   * resolves to `#${idPrefix}-${slug(propPath)}`, allowing writers to deep-link
+   * to a specific property of a request / response / parameter from prose.
+   *
+   * If the root schema renders as a single property (e.g. a primitive
+   * parameter), its id is `idPrefix`; for object roots, the prefix is treated
+   * as the path *to* the root, so its top-level props become `${idPrefix}-${propName}`.
+   */
+  idPrefix?: string;
+
   generated: SchemaUIGeneratedData;
 }
 
-export function SchemaUI({ name, required = false, as = 'property', generated }: SchemaUIProps) {
+export function SchemaUI({
+  name,
+  required = false,
+  as = 'property',
+  idPrefix,
+  generated,
+}: SchemaUIProps) {
   return (
     <DataContext value={generated}>
       <SchemaUIProperty
         name={name}
         $type={generated.$root}
+        path={idPrefix}
         overrides={{
           required,
         }}
@@ -95,12 +115,14 @@ function SchemaUIProperty({
   name,
   $type,
   variant = 'default',
+  path,
   overrides,
   objectSearchOverrides,
 }: {
   name: ReactNode;
   $type: string;
   variant?: 'default' | 'expand';
+  path?: string;
   overrides?: Partial<PropertyProps>;
   objectSearchOverrides?: Partial<ObjectSearchProps>;
 }) {
@@ -122,7 +144,7 @@ function SchemaUIProperty({
           </TabsList>
           {schema.items.map((item) => (
             <TabsContent key={item.$type} value={item.$type} className="pt-2 pb-0">
-              <SchemaUIProperty {...item} variant="expand" />
+              <SchemaUIProperty {...item} variant="expand" path={path} />
             </TabsContent>
           ))}
         </Tabs>
@@ -134,7 +156,9 @@ function SchemaUIProperty({
     });
   } else if (schema.type === 'object' && schema.props.length > 0) {
     if (variant === 'expand')
-      return <ObjectSearch properties={schema.props} {...objectSearchOverrides} />;
+      return (
+        <ObjectSearch properties={schema.props} parentPath={path} {...objectSearchOverrides} />
+      );
 
     type = renderRef({
       pathName: name,
@@ -142,7 +166,7 @@ function SchemaUIProperty({
       text: schema.aliasName,
     });
   } else if (schema.type === 'array') {
-    if (variant === 'expand') return <ArrayItemCollapsible schema={schema} />;
+    if (variant === 'expand') return <ArrayItemCollapsible schema={schema} parentPath={path} />;
 
     type = renderRef({
       pathName: name,
@@ -165,13 +189,19 @@ function SchemaUIProperty({
   );
   if (variant === 'expand') return child;
   return (
-    <Property name={name} type={type} deprecated={schema.deprecated} {...overrides}>
+    <Property id={path} name={name} type={type} deprecated={schema.deprecated} {...overrides}>
       {child}
     </Property>
   );
 }
 
-function ArrayItemCollapsible({ schema }: { schema: Extract<SchemaData, { type: 'array' }> }) {
+function ArrayItemCollapsible({
+  schema,
+  parentPath,
+}: {
+  schema: Extract<SchemaData, { type: 'array' }>;
+  parentPath?: string;
+}) {
   const [open, setOpen] = useState(false);
   const t = useTranslations();
 
@@ -187,7 +217,7 @@ function ArrayItemCollapsible({ schema }: { schema: Extract<SchemaData, { type: 
         <ChevronDown className="size-4 text-fd-muted-foreground group-data-[state=open]:rotate-180" />
       </CollapsibleTrigger>
       <CollapsibleContent className="-mt-px bg-fd-card px-3 rounded-lg rounded-tl-none border shadow-sm">
-        <SchemaUIProperty name="" $type={schema.item.$type} variant="expand" />
+        <SchemaUIProperty name="" $type={schema.item.$type} variant="expand" path={parentPath} />
       </CollapsibleContent>
     </Collapsible>
   );
@@ -197,9 +227,10 @@ interface ObjectSearchProps {
   properties: SchemaDataObjectProperty[];
   container?: ComponentProps<'div'>;
   open?: (item: SchemaDataObjectProperty) => void;
+  parentPath?: string;
 }
 
-function ObjectSearch({ properties, container, open }: ObjectSearchProps) {
+function ObjectSearch({ properties, container, open, parentPath }: ObjectSearchProps) {
   const [search, setSearch] = useState('');
   const deferredValue = useDeferredValue(search);
   const firstItemRef = useRef<SchemaDataObjectProperty>(null);
@@ -239,6 +270,7 @@ function ObjectSearch({ properties, container, open }: ObjectSearchProps) {
         <ObjectSearchContent
           search={deferredValue}
           properties={properties}
+          parentPath={parentPath}
           firstItemRef={firstItemRef}
         />
       </Suspense>
@@ -250,10 +282,12 @@ function ObjectSearchContent({
   search: rawSearch,
   firstItemRef,
   properties,
+  parentPath,
 }: {
   search: string;
   firstItemRef: RefObject<SchemaDataObjectProperty | null>;
   properties: SchemaDataObjectProperty[];
+  parentPath?: string;
 }) {
   const t = useTranslations();
   const filtered = useMemo(() => {
@@ -278,12 +312,20 @@ function ObjectSearchContent({
       key={prop.name}
       name={prop.name}
       $type={prop.$type}
+      path={joinPath(parentPath, prop.name)}
       overrides={{ required: prop.required }}
     />
   ));
 }
 
-function InfoTag({ tag }: { tag: InfoTag }) {
+function joinPath(parent: string | undefined, name: string): string | undefined {
+  if (!parent) return undefined;
+  const slug = slugifyPropertyName(name);
+  if (!slug) return parent;
+  return `${parent}-${slug}`;
+}
+
+function InfoTag({ tag }: { tag: InfoTagData }) {
   const ref = useRef<HTMLElement>(null);
   const [isTruncated, setTruncated] = useState(false);
   const [open, setOpen] = useState(false);
@@ -507,6 +549,7 @@ function RootPopoverTrigger({
 interface PropertyProps {
   name: ReactNode;
   type: ReactNode;
+  id?: string;
   required?: boolean;
   deprecated?: boolean;
   nested?: boolean;
@@ -518,6 +561,7 @@ interface PropertyProps {
 function Property({
   name,
   type,
+  id,
   required,
   deprecated,
   nested = false,
@@ -527,8 +571,9 @@ function Property({
   const t = useTranslations();
   return (
     <div
+      id={id}
       className={cn(
-        'text-sm border-t',
+        'group/property text-sm border-t scroll-mt-20',
         nested
           ? 'p-3 border-x bg-fd-card last:rounded-b-xl first:rounded-tr-xl last:border-b'
           : 'py-4 first:border-t-0',
@@ -536,13 +581,24 @@ function Property({
       )}
     >
       <div className="flex flex-wrap items-center gap-3 not-prose">
-        <span className="font-medium font-mono text-fd-primary">
-          {name}
-          {required ? (
-            <span className="text-red-400">*</span>
-          ) : (
-            <span className="text-fd-muted-foreground">?</span>
+        <span className="font-medium font-mono text-fd-primary inline-flex items-center gap-1.5">
+          {id && (
+            <a
+              href={`#${id}`}
+              aria-label={`Direct link to ${typeof name === 'string' ? name : 'property'}`}
+              className="text-fd-muted-foreground opacity-0 transition-opacity group-hover/property:opacity-100 focus-visible:opacity-100"
+            >
+              <LinkIcon className="size-3.5" />
+            </a>
           )}
+          <span>
+            {name}
+            {required ? (
+              <span className="text-red-400">*</span>
+            ) : (
+              <span className="text-fd-muted-foreground">?</span>
+            )}
+          </span>
         </span>
         {typeof type === 'string' ? (
           <span className="text-sm font-mono text-fd-muted-foreground">{type}</span>

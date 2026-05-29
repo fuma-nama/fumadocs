@@ -72,6 +72,20 @@ export interface SchemaUIOptions {
   writeOnly?: boolean;
 }
 
+/**
+ * Sanitizes a property name into a URL-safe slug that can be used as part of an anchor id.
+ *
+ * E.g. `[key: string]` → `key-string`, `User-Agent` → `user-agent`.
+ */
+export function slugifyPropertyName(name: string): string {
+  return (
+    name
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, '-')
+      .replace(/^-+|-+$/g, '') || 'value'
+  );
+}
+
 export interface SchemaUIGeneratedData {
   $root: string;
   refs: Record<string, SchemaData>;
