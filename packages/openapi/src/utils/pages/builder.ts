@@ -1,5 +1,4 @@
 import type { DereferencedDocument } from '@/utils/document/dereference';
-import type { OpenAPIServer } from '@/server';
 import type { ApiPageProps, OperationItem, WebhookItem } from '@/ui/api-page';
 import type { OperationObject, PathItemObject, TagObject } from '@/types';
 import { getTagDisplayName, methodKeys, type NoReference } from '@/utils/schema';

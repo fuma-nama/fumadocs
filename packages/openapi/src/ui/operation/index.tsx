@@ -250,7 +250,7 @@ export function Operation({
           )}
         </div>
         {callbacks.map(([name, callback]) => (
-          <SelectTab key={name} value={name}>
+          <SelectTab key={name} value={name} anchorSegments={['webhook', name]}>
             <WebhookCallback callback={callback} ctx={ctx} headingLevel={headingLevel} />
           </SelectTab>
         ))}
