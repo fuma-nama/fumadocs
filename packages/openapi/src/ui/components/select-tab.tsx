@@ -6,11 +6,13 @@ import {
   type ReactNode,
   useState,
   useMemo,
-  useCallback,
   type ComponentProps,
   createContext,
   use,
+  useEffect,
 } from 'react';
+import { anchorIdStartsWith } from '@/utils/auto-anchor';
+import { AnchorSection, useAnchorId } from '@/utils/auto-anchor.client';
 
 const Context = createContext<{
   value: string | null;
@@ -19,42 +21,38 @@ const Context = createContext<{
 
 export function SelectTabs({
   defaultValue,
-  value: controlledValue,
-  onValueChange,
   children,
 }: {
   defaultValue?: string;
-  value?: string;
-  onValueChange?: (value: string) => void;
   children: ReactNode;
 }) {
-  const [internalValue, setInternalValue] = useState<string | null>(defaultValue ?? null);
+  const [value, setValue] = useState<string | null>(defaultValue ?? null);
 
-  const isControlled = controlledValue !== undefined;
-  const value = isControlled ? controlledValue : internalValue;
-  const setValue = useCallback(
-    (next: string) => {
-      if (!isControlled) setInternalValue(next);
-      onValueChange?.(next);
-    },
-    [isControlled, onValueChange],
-  );
-
-  return (
-    <Context value={useMemo(() => ({ value, setValue }), [value, setValue])}>{children}</Context>
-  );
+  return <Context value={useMemo(() => ({ value, setValue }), [value])}>{children}</Context>;
 }
 
 export function SelectTab({
   value,
+  anchorSegments: segments,
   ...props
 }: ComponentProps<'div'> & {
   value: string;
+  /** define the tab as an anchor section */
+  anchorSegments?: string[];
 }) {
-  const ctx = use(Context);
-  if (value !== ctx?.value) return;
+  const { value: currentValue, setValue } = use(Context)!;
+  const id = useAnchorId(...(segments ?? []));
 
-  return <div {...props}>{props.children}</div>;
+  useEffect(() => {
+    const hash = window.location.hash.slice(1);
+    if (!hash || !segments) return;
+
+    if (anchorIdStartsWith(hash, id)) setValue(value);
+  }, [id, segments, value, setValue]);
+
+  if (value !== currentValue) return;
+  const content = <div {...props} />;
+  return segments ? <AnchorSection segments={segments}>{content}</AnchorSection> : content;
 }
 
 export function SelectTabTrigger({

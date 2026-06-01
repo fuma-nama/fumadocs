@@ -10,61 +10,55 @@ import {
   useCallback,
   useDeferredValue,
   useEffect,
-  useLayoutEffect,
   useMemo,
   useRef,
   useState,
 } from 'react';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from 'fumadocs-ui/components/tabs';
 import { useTranslations } from '@/ui/client/i18n';
 import type {
-  InfoTag as InfoTagData,
+  InfoTag,
   SchemaData,
   SchemaDataObjectProperty,
   SchemaUIGeneratedData,
 } from '@/ui/schema';
-import { slugifyPropertyName } from '@/ui/schema';
-import {
-  Collapsible,
-  CollapsibleContent,
-  CollapsibleTrigger,
-} from 'fumadocs-ui/components/ui/collapsible';
 import { buttonVariants } from 'fumadocs-ui/components/ui/button';
-import { Check, ChevronDown, FilterIcon, LinkIcon } from 'lucide-react';
-import { useCopyButton } from 'fumadocs-ui/utils/use-copy-button';
+import { CheckIcon, ChevronDown, FilterIcon, LinkIcon } from 'lucide-react';
 import { Badge } from '@/ui/components/method-label';
 import { Popover, PopoverContent, PopoverTrigger } from 'fumadocs-ui/components/ui/popover';
 import { cn } from '@/utils/cn';
 import { cva } from 'class-variance-authority';
+import { useAnchorId } from '@/utils/auto-anchor.client';
+import { useCopyButton } from 'fumadocs-ui/utils/use-copy-button';
+import { mergeRefs } from '@/utils/merge-refs';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '../components/select';
 
-type DataContextType = SchemaUIGeneratedData;
+interface PathItemType {
+  name: string;
+  $ref: string;
+  scrollTop?: number;
+  /** property name of highlighted field, only applicable for objects */
+  highlighted?: string;
+  tabValues?: string[];
+  closed?: true;
+}
 
-interface PopoverContextType {
-  renderTrigger: (props: {
-    pathName: ReactNode;
+interface StateContextType {
+  rootId: string;
+  /** the first tiem will always be the root item */
+  path: PathItemType[];
+  setPath: (path: PathItemType[]) => void;
+  generated: SchemaUIGeneratedData;
+  renderTypeInfoTrigger: (props: {
+    pathName: string;
     $ref: string;
     children: ReactNode;
-    topLevelId?: string;
   }) => ReactNode;
-}
-
-interface DeepLinkTarget {
-  /** the DOM id of the top-level Property that matched the hash */
-  topLevelId: string;
-  /** slugified schema-property segments after the top-level id */
-  segments: string[];
-  /** original hash value (without the leading `#`) */
-  fullHash: string;
-}
-
-interface DeepLinkContextValue {
-  target: DeepLinkTarget | null;
-}
-
-const DeepLinkContext = createContext<DeepLinkContextValue>({ target: null });
-
-function useDeepLink() {
-  return use(DeepLinkContext);
 }
 
 const typeVariants = cva('text-sm text-start text-fd-muted-foreground font-mono', {
@@ -76,18 +70,10 @@ const typeVariants = cva('text-sm text-start text-fd-muted-foreground font-mono'
   },
 });
 
-const PopoverContext = createContext<PopoverContextType>({
-  renderTrigger: (props) => <RootPopoverTrigger {...props} />,
-});
+const Context = createContext<StateContextType | null>(null);
 
-const DataContext = createContext<DataContextType | null>(null);
-
-function useData() {
-  return use(DataContext)!;
-}
-
-function usePopover() {
-  return use(PopoverContext);
+function useStates() {
+  return use(Context)!;
 }
 
 export interface SchemaUIProps {
@@ -95,429 +81,301 @@ export interface SchemaUIProps {
   required?: boolean;
   as?: 'property' | 'body';
 
-  /**
-   * Anchor id prefix for inline-rendered properties. When provided, every
-   * property visible inline gets an `id` and a hover-revealed link icon that
-   * resolves to `#${idPrefix}-${slug(propPath)}`, allowing writers to deep-link
-   * to a specific property of a request / response / parameter from prose.
-   *
-   * If the root schema renders as a single property (e.g. a primitive
-   * parameter), its id is `idPrefix`; for object roots, the prefix is treated
-   * as the path *to* the root, so its top-level props become `${idPrefix}-${propName}`.
-   */
-  idPrefix?: string;
-
   generated: SchemaUIGeneratedData;
 }
 
-export function SchemaUI({
-  name,
-  required = false,
-  as = 'property',
-  idPrefix,
-  generated,
-}: SchemaUIProps) {
+export function SchemaUI({ name, required = false, as = 'property', generated }: SchemaUIProps) {
+  const rootId = useAnchorId(name);
+  const [path, _setPath] = useState<PathItemType[]>(() => [{ $ref: generated.$root, name }]);
+  const ref = useRef<HTMLDivElement>(null);
+  const popoverRef = useRef<HTMLDivElement>(null);
+  const setPath = useCallback((v: PathItemType[]) => {
+    for (const item of v) delete item.highlighted;
+    _setPath((current) => {
+      if (popoverRef.current && current.length > 0) {
+        current[current.length - 1].scrollTop = popoverRef.current.scrollTop;
+      }
+
+      return v;
+    });
+  }, []);
+
+  // ensure popover scroll top & height is stable
+  useEffect(() => {
+    const element = popoverRef.current;
+    if (!element) return;
+
+    element.scrollTop = path.at(-1)!.scrollTop ?? 0;
+    const current = parseFloat(element.style.getPropertyValue('--min-height') || '0');
+    element.style.setProperty('--min-height', Math.max(element.clientHeight + 2, current) + 'px');
+  }, [path]);
+
+  useEffect(() => {
+    const url = new URL(window.location.href);
+    const param = url.searchParams.get('path');
+    if (url.hash !== `#${rootId}` || !param) return;
+
+    const decoded = decodePath(param, url.searchParams.get('s-highlight'));
+    if (!decoded || decoded.length === 0 || decoded.some((item) => !generated.refs[item.$ref]))
+      return;
+
+    _setPath(decoded);
+    if (!decoded.at(-1)!.highlighted) {
+      ref.current?.scrollIntoView({ behavior: 'smooth' });
+    }
+  }, [rootId]);
+
   return (
-    <DataContext value={generated}>
-      <DeepLinkProvider idPrefix={idPrefix}>
-        <SchemaUIProperty
+    <Context
+      value={useMemo(
+        () => ({
+          rootId,
+          path,
+          generated,
+          setPath,
+          renderTypeInfoTrigger: ({ $ref, children, pathName }) => (
+            <Popover
+              open={
+                path[1] &&
+                path[1].$ref === $ref &&
+                path[1].name === pathName &&
+                !path.at(-1)!.closed
+              }
+              onOpenChange={(v) => {
+                if (v) {
+                  setPath([path[0], { name: pathName, $ref }]);
+                } else {
+                  const next = [...path];
+                  next.at(-1)!.closed = true;
+                  setPath(next);
+                }
+              }}
+            >
+              <PopoverTrigger className={cn(typeVariants({ variant: 'trigger' }))}>
+                {children}
+              </PopoverTrigger>
+              <PopoverContent
+                ref={popoverRef}
+                className="w-[600px] min-h-(--min-height,0) max-h-[460px] px-2 pt-0"
+                onOpenAutoFocus={(e) => {
+                  const element = e.target as HTMLElement;
+                  const input = element.querySelector('input[data-object-search-input]');
+                  if (!(input instanceof HTMLInputElement)) return;
+                  input.focus({ preventScroll: true });
+                  e.preventDefault();
+                }}
+              >
+                <SchemaUIPopover />
+              </PopoverContent>
+            </Popover>
+          ),
+        }),
+        [generated, path, rootId, setPath],
+      )}
+    >
+      {as === 'property' || generated.refs[generated.$root].type === 'primitive' ? (
+        <ObjectProperty
+          ref={ref}
+          id={rootId}
           name={name}
           $type={generated.$root}
-          path={idPrefix}
-          topLevelId={idPrefix}
-          overrides={{
-            required,
-          }}
-          variant={
-            as === 'property' || generated.refs[generated.$root].type === 'primitive'
-              ? 'default'
-              : 'expand'
-          }
+          required={required}
         />
-      </DeepLinkProvider>
-    </DataContext>
+      ) : (
+        <div id={rootId} ref={ref}>
+          <PathItemBody pathIndex={0} />
+        </div>
+      )}
+    </Context>
   );
 }
 
-function DeepLinkProvider({
-  idPrefix,
-  children,
-}: {
-  idPrefix?: string;
-  children: ReactNode;
-}) {
-  const [target, setTarget] = useState<DeepLinkTarget | null>(null);
-
-  useEffect(() => {
-    if (!idPrefix) return;
-
-    function resolve() {
-      const raw = window.location.hash.slice(1);
-      if (!raw) {
-        setTarget((prev) => (prev ? null : prev));
-        return;
-      }
-
-      // Try the raw fragment first because property anchors are generated via
-      // `slugifyPropertyName` which percent-encodes `.` and other reserved
-      // characters; DOM ids therefore contain the encoded form. Only fall
-      // back to a fully decoded match for hand-authored URLs that used the
-      // pre-decoded form.
-      let decoded: string | undefined;
-      try {
-        decoded = decodeURIComponent(raw);
-      } catch {
-        // Malformed percent-encoding (e.g. `#body%`).
-      }
-
-      const candidates = decoded && decoded !== raw ? [raw, decoded] : [raw];
-      for (const hash of candidates) {
-        if (hash !== idPrefix && !hash.startsWith(`${idPrefix}.`)) continue;
-
-        // Find the longest dotted prefix that is a real DOM id; the remainder
-        // (if any) is the schema-internal path to walk.
-        const parts = hash.split('.');
-        for (let i = parts.length; i >= 1; i--) {
-          const candidate = parts.slice(0, i).join('.');
-          if (document.getElementById(candidate)) {
-            setTarget({
-              topLevelId: candidate,
-              segments: parts.slice(i),
-              fullHash: hash,
-            });
-            return;
-          }
-        }
-      }
-      setTarget(null);
-    }
-
-    resolve();
-    window.addEventListener('hashchange', resolve);
-    return () => window.removeEventListener('hashchange', resolve);
-  }, [idPrefix]);
-
-  // After a deep target is set, scroll the page to the inline anchor first so
-  // the popover (or array collapsible) appears in a sensible spot, then wait
-  // for the deep element to mount and scroll *that* into view (which the
-  // browser doesn't do for hashes whose element isn't in the DOM on load).
-  useEffect(() => {
-    if (!target) return;
-
-    const topEl = document.getElementById(target.topLevelId);
-    topEl?.scrollIntoView({ block: 'start', behavior: 'instant' as ScrollBehavior });
-
-    if (target.segments.length === 0) return;
-
-    let attempts = 0;
-    let raf: number | null = null;
-
-    function tryScroll() {
-      if (!target) return;
-      const el = document.getElementById(target.fullHash);
-      if (el && el !== topEl) {
-        el.scrollIntoView({ block: 'nearest', behavior: 'instant' as ScrollBehavior });
-        return;
-      }
-      if (attempts++ < 30) raf = requestAnimationFrame(tryScroll);
-    }
-    tryScroll();
-    return () => {
-      if (raf !== null) cancelAnimationFrame(raf);
-    };
-  }, [target]);
-
-  return <DeepLinkContext value={{ target }}>{children}</DeepLinkContext>;
-}
-
-function walkDeepSchemaPath(
-  refs: Record<string, SchemaData>,
-  startRef: string,
-  segments: string[],
-): PathItemType[] {
-  const extra: PathItemType[] = [];
-  let current = startRef;
-
-  for (let i = 0; i < segments.length; i++) {
-    const segment = segments[i];
-    const remaining = segments.slice(i);
-
-    let schema: SchemaData | undefined = refs[current];
-    while (schema?.type === 'array') {
-      current = schema.item.$type;
-      schema = refs[current];
-    }
-    if (!schema) break;
-
-    if (schema.type === 'or' || schema.type === 'and') {
-      // Pick the variant whose subtree contains the *entire* remaining path,
-      // not just the next token — otherwise two variants that happen to share
-      // the first prop name would race and the first one wins.
-      const match = findUnionPropMatch(refs, schema.items, remaining);
-      if (!match) break;
-      extra.push({ name: match.name, $ref: match.$type });
-      current = match.$type;
-      continue;
-    }
-
-    if (schema.type === 'object') {
-      const prop = schema.props.find((p) => slugifyPropertyName(p.name) === segment);
-      if (!prop) break;
-      extra.push({ name: prop.name, $ref: prop.$type });
-      current = prop.$type;
-      continue;
-    }
-
-    break;
-  }
-
-  return extra;
-}
-
-function findUnionPropMatch(
-  refs: Record<string, SchemaData>,
-  items: { name: string; $type: string }[],
-  segments: string[],
-): { name: string; $type: string } | undefined {
-  if (segments.length === 0) return undefined;
-  const [first, ...rest] = segments;
-  for (const variant of items) {
-    let schema = refs[variant.$type];
-    while (schema?.type === 'array') {
-      schema = refs[schema.item.$type];
-    }
-    if (!schema) continue;
-    if (schema.type === 'object') {
-      const prop = schema.props.find((p) => slugifyPropertyName(p.name) === first);
-      if (prop && pathResolves(refs, prop.$type, rest)) return prop;
-    }
-    if (schema.type === 'or' || schema.type === 'and') {
-      const nested = findUnionPropMatch(refs, schema.items, segments);
-      if (nested) return nested;
-    }
-  }
-  return undefined;
-}
-
-function pathResolves(
-  refs: Record<string, SchemaData>,
-  startRef: string,
-  segments: string[],
-): boolean {
-  if (segments.length === 0) return true;
-  let schema = refs[startRef];
-  while (schema?.type === 'array') {
-    schema = refs[schema.item.$type];
-  }
-  if (!schema) return false;
-  if (schema.type === 'or' || schema.type === 'and') {
-    return Boolean(findUnionPropMatch(refs, schema.items, segments));
-  }
-  if (schema.type === 'object') {
-    const [first, ...rest] = segments;
-    const prop = schema.props.find((p) => slugifyPropertyName(p.name) === first);
-    if (!prop) return false;
-    return pathResolves(refs, prop.$type, rest);
-  }
-  return false;
-}
-
-function SchemaUIProperty({
-  name,
-  $type,
-  variant = 'default',
-  path,
-  topLevelId,
-  overrides,
-  objectSearchOverrides,
-}: {
-  name: ReactNode;
-  $type: string;
-  variant?: 'default' | 'expand';
-  path?: string;
-  /**
-   * The DOM id of the nearest inline Property element that contains this
-   * subtree. Threaded to popover triggers / array collapsibles so they can
-   * decide whether to auto-open in response to a deep link.
-   */
-  topLevelId?: string;
-  overrides?: Partial<PropertyProps>;
-  objectSearchOverrides?: Partial<ObjectSearchProps>;
-}) {
-  const { refs } = useData();
-  const schema = refs[$type];
-  const renderRef = useRenderRef();
-  let type: ReactNode = schema.aliasName;
-
-  if ((schema.type === 'or' || schema.type === 'and') && schema.items.length > 0) {
-    if (variant === 'expand')
-      return (
-        <UnionTabs items={schema.items} path={path} topLevelId={topLevelId} />
-      );
-    type = renderRef({
-      pathName: name,
-      $ref: $type,
-      text: schema.aliasName,
-      topLevelId: topLevelId ?? path,
-    });
-  } else if (schema.type === 'object' && schema.props.length > 0) {
-    if (variant === 'expand')
-      return (
-        <ObjectSearch properties={schema.props} parentPath={path} {...objectSearchOverrides} />
-      );
-
-    type = renderRef({
-      pathName: name,
-      $ref: $type,
-      text: schema.aliasName,
-      topLevelId: topLevelId ?? path,
-    });
-  } else if (schema.type === 'array') {
-    if (variant === 'expand')
-      return (
-        <ArrayItemCollapsible schema={schema} parentPath={path} topLevelId={topLevelId} />
-      );
-
-    type = renderRef({
-      pathName: name,
-      $ref: $type,
-      text: schema.aliasName,
-      topLevelId: topLevelId ?? path,
-    });
-  }
-
-  const child = (
-    <>
+function SchemaDescription({ schema, ...props }: ComponentProps<'div'> & { schema: SchemaData }) {
+  return (
+    <div {...props} className={cn('prose-no-margin py-2.5 empty:hidden', props.className)}>
       {schema.description}
       {schema.infoTags && schema.infoTags.length > 0 && (
-        <div className="flex flex-row gap-2 flex-wrap my-2 not-prose empty:hidden">
+        <div className="flex flex-row gap-2 flex-wrap mt-2 not-prose empty:hidden">
           {schema.infoTags.map((tag, i) => (
             <InfoTag key={i} tag={tag} />
           ))}
         </div>
       )}
-    </>
-  );
-  if (variant === 'expand') return child;
-  return (
-    <Property id={path} name={name} type={type} deprecated={schema.deprecated} {...overrides}>
-      {child}
-    </Property>
+    </div>
   );
 }
 
-function UnionTabs({
-  items,
-  path,
-  topLevelId,
-}: {
-  items: { name: string; $type: string }[];
-  path?: string;
-  topLevelId?: string;
+function ObjectProperty({
+  name,
+  $type,
+  required,
+  ...props
+}: ComponentProps<'div'> & {
+  name: string;
+  $type: string;
+  required?: boolean;
 }) {
-  const { refs } = useData();
-  const { target } = useDeepLink();
-
-  const targetedVariant = useMemo(() => {
-    if (!target || !path) return undefined;
-    const onRoute = target.fullHash === path || target.fullHash.startsWith(`${path}.`);
-    if (!onRoute) return undefined;
-
-    const remaining =
-      target.fullHash === path ? [] : target.fullHash.slice(path.length + 1).split('.');
-    if (remaining.length === 0) return undefined;
-
-    for (const item of items) {
-      if (findUnionPropMatch(refs, [item], remaining)) return item.$type;
-    }
-    return undefined;
-  }, [items, path, refs, target]);
-
-  const [value, setValue] = useState(items[0].$type);
-
-  useEffect(() => {
-    if (targetedVariant && targetedVariant !== value) setValue(targetedVariant);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [targetedVariant]);
-
-  return (
-    <Tabs value={value} onValueChange={setValue}>
-      <TabsList>
-        {items.map((item) => (
-          <TabsTrigger key={item.$type} value={item.$type}>
-            {item.name}
-          </TabsTrigger>
-        ))}
-      </TabsList>
-      {items.map((item) => (
-        <TabsContent key={item.$type} value={item.$type} className="pt-2 pb-0">
-          <SchemaUIProperty {...item} variant="expand" path={path} topLevelId={topLevelId} />
-        </TabsContent>
-      ))}
-    </Tabs>
-  );
-}
-
-function ArrayItemCollapsible({
-  schema,
-  parentPath,
-  topLevelId,
-}: {
-  schema: Extract<SchemaData, { type: 'array' }>;
-  parentPath?: string;
-  topLevelId?: string;
-}) {
-  const [open, setOpen] = useState(false);
   const t = useTranslations();
-  const { target } = useDeepLink();
-
-  const [appliedDeepHash, setAppliedDeepHash] = useState<string | null>(null);
-  const isActiveTarget = Boolean(
-    parentPath &&
-      target &&
-      target.fullHash !== appliedDeepHash &&
-      (target.fullHash === parentPath || target.fullHash.startsWith(`${parentPath}.`)),
-  );
-
-  useEffect(() => {
-    if (!isActiveTarget || !target) return;
-    setOpen(true);
-    setAppliedDeepHash(target.fullHash);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isActiveTarget]);
+  const {
+    path,
+    generated: { refs },
+    rootId,
+  } = useStates();
+  const schema = refs[$type];
+  const highlighted = path.at(-1)!.highlighted === name;
+  const [isChecked, onClick] = useCopyButton(() => {
+    const url = new URL(window.location.href);
+    url.hash = `#${rootId}`;
+    url.searchParams.set('s-highlight', name);
+    url.searchParams.set('path', encodePath(path));
+    return navigator.clipboard.writeText(url.href);
+  });
 
   return (
-    <Collapsible className="my-2" open={open} onOpenChange={setOpen}>
-      <CollapsibleTrigger
-        className={cn(
-          buttonVariants({ color: 'secondary', size: 'sm' }),
-          'group px-3 py-2 data-[state=open]:rounded-b-none',
+    <div
+      {...props}
+      ref={mergeRefs(
+        props.ref,
+        useCallback(
+          (element: HTMLDivElement | null) => {
+            if (element && highlighted) element.scrollIntoView();
+          },
+          [highlighted],
+        ),
+      )}
+      className={cn('text-sm border-t py-4 first:border-t-0', props.className)}
+    >
+      <div className="flex flex-wrap items-center gap-3 not-prose">
+        <span className="font-medium font-mono">
+          <span
+            className={cn(
+              highlighted
+                ? 'bg-fd-primary text-fd-primary-foreground rounded-sm'
+                : 'text-fd-primary',
+              schema.deprecated && 'line-through opacity-80',
+            )}
+          >
+            {name}
+          </span>
+          {required ? (
+            <span className="text-red-400">*</span>
+          ) : (
+            <span className="text-fd-muted-foreground">?</span>
+          )}
+        </span>
+        {schema.type === 'primitive' ? (
+          <span className={cn(typeVariants())}>{schema.aliasName}</span>
+        ) : (
+          <TypeInfoTrigger pathName={name} $ref={$type}>
+            {schema.aliasName}
+          </TypeInfoTrigger>
         )}
-      >
-        {open ? t.schemaHideArray : t.schemaShowArray}
-        <ChevronDown className="size-4 text-fd-muted-foreground group-data-[state=open]:rotate-180" />
-      </CollapsibleTrigger>
-      <CollapsibleContent className="-mt-px bg-fd-card px-3 rounded-lg rounded-tl-none border shadow-sm">
-        <SchemaUIProperty
-          name=""
-          $type={schema.item.$type}
-          variant="expand"
-          path={parentPath}
-          topLevelId={topLevelId}
-        />
-      </CollapsibleContent>
-    </Collapsible>
+
+        <div className="flex-1" />
+        {schema.deprecated && (
+          <Badge color="yellow" className="text-xs">
+            {t.deprecated}
+          </Badge>
+        )}
+        <button
+          className={cn(
+            buttonVariants({ size: 'icon-xs', variant: 'ghost' }),
+            'text-fd-muted-foreground',
+          )}
+          onClick={onClick}
+        >
+          {isChecked ? <CheckIcon /> : <LinkIcon />}
+        </button>
+      </div>
+      <SchemaDescription schema={schema} className="pb-0" />
+    </div>
   );
+}
+
+function PathItemBody({
+  pathIndex,
+  asSchema,
+  tabDepth = 0,
+  objectSearchOverrides,
+}: {
+  pathIndex: number;
+  asSchema?: SchemaData;
+  tabDepth?: number;
+  objectSearchOverrides?: Partial<ObjectSearchProps>;
+}) {
+  const {
+    path,
+    setPath,
+    generated: { refs },
+  } = useStates();
+  const schema = asSchema ?? refs[path[pathIndex].$ref];
+
+  if ((schema.type === 'or' || schema.type === 'and') && schema.items.length > 0) {
+    const value = path[pathIndex].tabValues?.[tabDepth] ?? schema.items[0].$type;
+    const items = schema.items.map((item) => ({
+      label: <code className="text-xs font-medium">{item.name}</code>,
+      value: item.$type,
+    }));
+    return (
+      <Select
+        value={value}
+        onValueChange={(v) => {
+          const next = [...path];
+          (next[pathIndex].tabValues ??= []).splice(tabDepth, 1, v);
+          setPath(next);
+        }}
+      >
+        <div className="flex flex-row my-2 gap-2 items-center">
+          <SchemaDescription schema={schema} className="flex-1 py-0" />
+
+          <SelectTrigger className="not-prose w-fit min-w-0 mb-auto *:min-w-0">
+            <SelectValue>{value && items.find((item) => item.value === value)?.label}</SelectValue>
+          </SelectTrigger>
+          <SelectContent>
+            {items.map(({ label, value }) => (
+              <SelectItem key={value} value={value}>
+                {label}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </div>
+        <PathItemBody asSchema={refs[value]} pathIndex={pathIndex} tabDepth={tabDepth + 1} />
+      </Select>
+    );
+  }
+  if (schema.type === 'object' && schema.props.length > 0) {
+    return (
+      <ObjectSearch properties={schema.props} {...objectSearchOverrides}>
+        <SchemaDescription schema={schema} />
+      </ObjectSearch>
+    );
+  }
+  if (schema.type === 'array') {
+    return (
+      <>
+        <SchemaDescription schema={schema} />
+        <ObjectProperty name="[index: integer]" $type={schema.item.$type} />
+      </>
+    );
+  }
+
+  return <SchemaDescription schema={schema} />;
 }
 
 interface ObjectSearchProps {
+  variant?: 'ghost' | 'secondary';
   properties: SchemaDataObjectProperty[];
-  container?: ComponentProps<'div'>;
-  open?: (item: SchemaDataObjectProperty) => void;
-  parentPath?: string;
+  inputContainer?: ComponentProps<'div'>;
+  children?: ReactNode;
 }
 
-function ObjectSearch({ properties, container, open, parentPath }: ObjectSearchProps) {
+function ObjectSearch({
+  variant = 'secondary',
+  properties,
+  inputContainer,
+  children,
+}: ObjectSearchProps) {
+  const { path, setPath } = useStates();
   const [search, setSearch] = useState('');
   const deferredValue = useDeferredValue(search);
   const firstItemRef = useRef<SchemaDataObjectProperty>(null);
@@ -532,32 +390,36 @@ function ObjectSearch({ properties, container, open, parentPath }: ObjectSearchP
   return (
     <>
       <div
-        {...container}
+        {...inputContainer}
         className={cn(
-          'flex items-center border my-2 rounded-md bg-fd-secondary text-fd-secondary-foreground transition-colors shadow-sm focus-within:ring-2 focus-within:ring-fd-ring',
-          container?.className,
+          'flex items-center bg-fd-secondary text-fd-secondary-foreground transition-colors',
+          variant === 'ghost' && 'border-b focus-within:[&_svg]:text-fd-primary',
+          variant === 'secondary' &&
+            'border bg-fd-secondary rounded-md shadow-sm focus-within:ring-2 focus-within:ring-fd-ring',
+          inputContainer?.className,
         )}
       >
-        <FilterIcon className="text-fd-muted-foreground ms-2 size-3.5" />
+        <FilterIcon className="text-fd-muted-foreground ms-2 size-3.5 transition-colors" />
         <input
           value={search}
           data-object-search-input=""
           onChange={(e) => setSearch(e.target.value)}
           placeholder={t.schemaFilterPropertiesPlaceholder}
-          className="text-sm ps-2 py-2 flex-1 outline-none placeholder:text-fd-muted-foreground"
+          className="peer text-sm ps-2 py-2 flex-1 outline-none placeholder:text-fd-muted-foreground"
           onKeyDown={(e) => {
-            if (e.key === 'Enter' && open) {
-              if (firstItemRef.current) open(firstItemRef.current);
+            if (e.key === 'Enter') {
+              const item = firstItemRef.current;
+              if (item) setPath([...path, { name: item.name, $ref: item.$type }]);
               e.preventDefault();
             }
           }}
         />
       </div>
+      {children}
       <Suspense>
         <ObjectSearchContent
           search={deferredValue}
           properties={properties}
-          parentPath={parentPath}
           firstItemRef={firstItemRef}
         />
       </Suspense>
@@ -569,12 +431,10 @@ function ObjectSearchContent({
   search: rawSearch,
   firstItemRef,
   properties,
-  parentPath,
 }: {
   search: string;
   firstItemRef: RefObject<SchemaDataObjectProperty | null>;
   properties: SchemaDataObjectProperty[];
-  parentPath?: string;
 }) {
   const t = useTranslations();
   const filtered = useMemo(() => {
@@ -584,41 +444,22 @@ function ObjectSearchContent({
       : properties;
   }, [properties, rawSearch]);
 
-  firstItemRef.current = filtered.length > 0 ? filtered[0] : null;
+  firstItemRef.current = filtered[0] ?? null;
 
   if (filtered.length === 0)
     return (
-      <p className="text-fd-muted-foreground text-sm px-2">
+      <p className="text-fd-muted-foreground text-sm">
         {t.schemaFilterPropertiesEmpty}{' '}
         <span className="text-fd-foreground font-medium">{`"${rawSearch}"`}</span>
       </p>
     );
 
-  return filtered.map((prop) => {
-    const childPath = joinPath(parentPath, prop.name);
-    // Each rendered top-level property's DOM id becomes the topLevelId for
-    // anything below it (popovers, nested type triggers).
-    return (
-      <SchemaUIProperty
-        key={prop.name}
-        name={prop.name}
-        $type={prop.$type}
-        path={childPath}
-        topLevelId={childPath}
-        overrides={{ required: prop.required }}
-      />
-    );
-  });
+  return filtered.map((prop) => (
+    <ObjectProperty key={prop.name} name={prop.name} $type={prop.$type} required={prop.required} />
+  ));
 }
 
-function joinPath(parent: string | undefined, name: string): string | undefined {
-  if (!parent) return undefined;
-  const slug = slugifyPropertyName(name);
-  if (!slug) return parent;
-  return `${parent}.${slug}`;
-}
-
-function InfoTag({ tag }: { tag: InfoTagData }) {
+function InfoTag({ tag }: { tag: InfoTag }) {
   const ref = useRef<HTMLElement>(null);
   const [isTruncated, setTruncated] = useState(false);
   const [open, setOpen] = useState(false);
@@ -653,371 +494,137 @@ function InfoTag({ tag }: { tag: InfoTagData }) {
   );
 }
 
-interface PathItemType {
-  name: ReactNode;
-  $ref?: string;
-  scrollTop?: number;
-}
-
-function SchemaUIPopover({
-  containerRef,
-  initialPath,
-  topLevelId,
-}: {
-  containerRef: RefObject<HTMLDivElement | null>;
-  initialPath: PathItemType[];
-  topLevelId?: string;
-}) {
-  const [path, setPath] = useState(initialPath);
-
-  // Re-seed the breadcrumb if a fresh deep-link target arrives while the
-  // popover is already open (e.g. another auto-open fires for the same
-  // trigger). Reference equality is enough since `initialPath` is `useMemo`d
-  // by the parent and only changes when the deep target does.
-  useEffect(() => {
-    setPath(initialPath);
-  }, [initialPath]);
-
-  useLayoutEffect(() => {
-    const last = path[0];
-    const element = containerRef.current;
-    if (!element || !last || !element.parentElement) return;
-
-    // recover scroll
-    element.parentElement.scrollTop = last.scrollTop ?? 0;
-    return () => {
-      if (element.parentElement) last.scrollTop = element.parentElement.scrollTop;
-    };
-  }, [containerRef, path]);
-
-  const context: PopoverContextType = useMemo(
-    () => ({
-      // Inside the popover, type triggers drill into the popover instead of
-      // opening a new one; topLevelId is irrelevant here.
-      renderTrigger: ({ $ref, pathName, children }) => (
-        <button
-          className={cn(typeVariants({ variant: 'trigger' }))}
-          onClick={() => setPath((path) => [...path, { name: pathName, $ref }])}
-        >
-          {children}
-        </button>
-      ),
-    }),
-    [],
-  );
-
-  const { refs } = useData();
-
-  // Pick the deepest non-primitive item to render expanded. If the deep-link
-  // path bottoms out on a primitive leaf (e.g. `body.creator.name` where name
-  // is a string), we render the parent (`creator`) expanded so the leaf shows
-  // up as a real Property row — otherwise the popover body would only contain
-  // the leaf's description text.
-  const expandedItemIndex = useMemo(() => {
-    let fallback = -1;
-    for (let i = path.length - 1; i >= 0; i--) {
-      const item = path[i];
-      if (!item.$ref) continue;
-      const schema = refs[item.$ref];
-      if (!schema) continue;
-      if (fallback === -1) fallback = i;
-      if (schema.type !== 'primitive') return i;
-    }
-    return fallback;
-  }, [path, refs]);
-
-  const currentRef = expandedItemIndex >= 0 ? path[expandedItemIndex] : undefined;
-
-  // Build the schema-internal path inside the popover by concatenating the
-  // breadcrumb names *up to the expanded item* (skipping the initial root,
-  // which is already represented by topLevelId). Non-string names (array
-  // bracket wrappers) are ignored.
-  const currentFullPath = useMemo(() => {
-    if (!topLevelId || expandedItemIndex < 0) return undefined;
-    const segments: string[] = [];
-    for (let i = 1; i <= expandedItemIndex; i++) {
-      const itemName = path[i].name;
-      if (typeof itemName !== 'string') continue;
-      const seg = slugifyPropertyName(itemName);
-      if (seg) segments.push(seg);
-    }
-    return segments.length === 0 ? topLevelId : `${topLevelId}.${segments.join('.')}`;
-  }, [topLevelId, path, expandedItemIndex]);
+function SchemaUIPopover() {
+  const states = useStates();
+  const { path, setPath } = states;
 
   return (
-    <>
-      <div className="sticky top-0 -mx-2 flex flex-row flex-wrap items-center text-sm font-medium font-mono bg-fd-popover px-2 h-8 border-b">
-        {path.map((item, i) => {
-          const isDuplicated = path.some((other, j) => j < i && other.$ref === item.$ref);
-          const className = cn(
-            isDuplicated && 'text-orange-400',
-            item.$ref && 'hover:underline hover:text-fd-accent-foreground',
-          );
-          const node = item.$ref ? (
-            <button onClick={() => setPath((path) => path.slice(0, i + 1))} className={className}>
-              {item.name}
+    <Context
+      value={useMemo(
+        () => ({
+          ...states,
+          renderTypeInfoTrigger: ({ $ref, pathName, children }) => (
+            <button
+              className={cn(typeVariants({ variant: 'trigger' }))}
+              onClick={() => setPath([...path, { name: pathName, $ref }])}
+            >
+              {children}
             </button>
-          ) : (
-            <span className={className}>{item.name}</span>
-          );
+          ),
+        }),
+        [states],
+      )}
+    >
+      <div className="sticky top-0 -mx-2 flex flex-row overflow-x-auto overflow-y-hidden items-center text-sm font-medium font-mono bg-fd-popover px-2 h-10 border-b z-20">
+        {path.map((item, i) => {
+          // ignore root
+          if (i === 0) return;
+          const isDuplicated = path.some((other, j) => j !== i && other.$ref === item.$ref);
+
+          let text: string;
+          const indexItemMatch = /^\[(\w+): (\w+)]$/.exec(item.name);
+          if (indexItemMatch) {
+            text = `[${indexItemMatch[1]}]`;
+          } else if (i > 1) {
+            text = `.${item.name}`;
+          } else {
+            text = item.name;
+          }
 
           return (
-            <Fragment key={i}>
-              {i > 0 && '.'}
-              {node}
-            </Fragment>
+            <button
+              key={i}
+              onClick={() => setPath(path.slice(0, i + 1))}
+              className={cn(
+                'hover:underline hover:text-fd-accent-foreground',
+                isDuplicated && 'text-orange-400',
+              )}
+            >
+              {text}
+            </button>
           );
         })}
       </div>
-      <PopoverContext value={context}>
-        {currentRef?.$ref && (
-          <SchemaUIProperty
-            name=""
-            $type={currentRef.$ref}
-            variant="expand"
-            path={currentFullPath}
-            topLevelId={currentFullPath}
-            objectSearchOverrides={{
-              container: {
-                className: 'sticky top-10',
-              },
-              open(item) {
-                setPath((path) => [...path, { name: item.name, $ref: item.$type }]);
-              },
-            }}
-          />
-        )}
-      </PopoverContext>
-    </>
+      <PathItemBody
+        pathIndex={path.length - 1}
+        objectSearchOverrides={{
+          variant: 'ghost',
+          inputContainer: {
+            className: 'sticky top-10 -mx-2',
+          },
+        }}
+      />
+    </Context>
   );
 }
 
-function useRenderRef() {
-  const { refs } = useData();
-  const { renderTrigger } = usePopover();
-  return function renderRef({
-    pathName,
-    $ref,
-    text,
-    topLevelId,
-  }: {
-    pathName: ReactNode;
-    $ref: string;
-    text: ReactNode;
-    topLevelId?: string;
-  }) {
-    const schema = refs[$ref];
-
-    if (!isExpandable(schema)) {
-      return <span className={cn(typeVariants())}>{text}</span>;
-    }
-
-    if (schema.type === 'and' || schema.type === 'or') {
-      const sep = schema.type === 'and' ? '&' : '|';
-      return (
-        <span className={cn(typeVariants(), 'flex flex-row gap-2 items-center flex-wrap')}>
-          {schema.items.map((item, i) => (
-            <Fragment key={item.$type}>
-              {i > 0 && <span>{sep}</span>}
-              {renderRef({ pathName, text: item.name, $ref: item.$type, topLevelId })}
-            </Fragment>
-          ))}
-        </span>
-      );
-    }
-
-    if (schema.type === 'array') {
-      return (
-        <span className={cn(typeVariants(), 'flex flex-row items-center flex-wrap')}>
-          {'array<'}
-          {renderRef({
-            pathName: <>{pathName}[]</>,
-            text: refs[schema.item.$type].aliasName,
-            $ref: schema.item.$type,
-            topLevelId,
-          })}
-          {'>'}
-        </span>
-      );
-    }
-
-    return renderTrigger({ $ref, pathName, children: text, topLevelId });
-  };
-}
-
-function RootPopoverTrigger({
-  $ref,
+function TypeInfoTrigger({
   pathName,
+  $ref,
   children,
-  topLevelId,
 }: {
-  pathName: ReactNode;
+  pathName: string;
   $ref: string;
   children: ReactNode;
-  topLevelId?: string;
 }) {
-  const ref = useRef<HTMLDivElement>(null);
-  const { refs } = useData();
-  const { target } = useDeepLink();
+  const {
+    generated: { refs },
+    renderTypeInfoTrigger,
+  } = useStates();
+  const schema = refs[$ref];
 
-  // Tracks which deep hash this trigger has already auto-applied. After a
-  // deep target is consumed, subsequent user-initiated clicks open the base
-  // view; a *different* deep hash re-arms the auto-open.
-  const [appliedDeepHash, setAppliedDeepHash] = useState<string | null>(null);
+  if (
+    schema.type === 'primitive' &&
+    !schema.description &&
+    (!schema.infoTags || schema.infoTags.length === 0)
+  ) {
+    return <span className={cn(typeVariants())}>{children}</span>;
+  }
 
-  const isActiveTarget = Boolean(
-    topLevelId &&
-      target &&
-      target.fullHash !== appliedDeepHash &&
-      target.fullHash.startsWith(`${topLevelId}.`),
-  );
+  if (schema.type === 'and' || schema.type === 'or') {
+    const sep = schema.type === 'and' ? '&' : '|';
+    return (
+      <span className={cn(typeVariants(), 'flex flex-row gap-2 items-center flex-wrap')}>
+        {schema.items.map((item, i) => (
+          <Fragment key={item.$type}>
+            {i > 0 && <span>{sep}</span>}
+            <TypeInfoTrigger pathName={pathName} $ref={item.$type}>
+              {item.name}
+            </TypeInfoTrigger>
+          </Fragment>
+        ))}
+      </span>
+    );
+  }
 
-  const [open, setOpen] = useState(false);
+  if (schema.type === 'array') {
+    return (
+      <span className={cn(typeVariants(), 'flex flex-row items-center flex-wrap')}>
+        {'array<'}
+        <TypeInfoTrigger pathName={`${pathName}[]`} $ref={schema.item.$type}>
+          {refs[schema.item.$type].aliasName}
+        </TypeInfoTrigger>
+        {'>'}
+      </span>
+    );
+  }
 
-  useEffect(() => {
-    if (!isActiveTarget || !target) return;
-    setOpen(true);
-    setAppliedDeepHash(target.fullHash);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isActiveTarget]);
-
-  const initialPath = useMemo<PathItemType[]>(() => {
-    const base: PathItemType[] = [{ name: pathName, $ref }];
-    if (!isActiveTarget || !target || !topLevelId) return base;
-    const segments = target.fullHash.slice(topLevelId.length + 1).split('.');
-    base.push(...walkDeepSchemaPath(refs, $ref, segments));
-    return base;
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [pathName, $ref, isActiveTarget, target?.fullHash, topLevelId, refs]);
-
-  const refCallback = useCallback((element: HTMLDivElement | null) => {
-    ref.current = element;
-    if (!element || element.style.getPropertyValue('--initial-height')) return;
-
-    element.style.setProperty('--initial-height', `${element.clientHeight + 2}px`);
-  }, []);
-
-  return (
-    <Popover open={open} onOpenChange={setOpen}>
-      <PopoverTrigger className={cn(typeVariants({ variant: 'trigger' }))}>
-        {children}
-      </PopoverTrigger>
-      <PopoverContent
-        ref={refCallback}
-        onOpenAutoFocus={(e) => {
-          if (!ref.current) return;
-          const input = ref.current.querySelector('input[data-object-search-input]');
-          if (!(input instanceof HTMLInputElement)) return;
-          input.focus({ preventScroll: true });
-          e.preventDefault();
-        }}
-        className="w-[600px] min-h-(--initial-height,0) max-h-[460px] px-2 py-0"
-      >
-        <SchemaUIPopover
-          containerRef={ref}
-          initialPath={initialPath}
-          topLevelId={topLevelId}
-        />
-      </PopoverContent>
-    </Popover>
-  );
+  return renderTypeInfoTrigger({ $ref, pathName, children });
 }
 
-interface PropertyProps {
-  name: ReactNode;
-  type: ReactNode;
-  id?: string;
-  required?: boolean;
-  deprecated?: boolean;
-  nested?: boolean;
-
-  children?: ReactNode;
-  className?: string;
+function encodePath(path: PathItemType[]): string {
+  return path
+    .map((item) => [item.name, item.$ref, ...(item.tabValues ?? [])].join('\0').replaceAll('|', ''))
+    .join('|');
 }
 
-function Property({
-  name,
-  type,
-  id,
-  required,
-  deprecated,
-  nested = false,
-  className,
-  ...props
-}: PropertyProps) {
-  const t = useTranslations();
-  return (
-    <div
-      id={id}
-      className={cn(
-        'group/property text-sm border-t scroll-mt-20',
-        nested
-          ? 'p-3 border-x bg-fd-card last:rounded-b-xl first:rounded-tr-xl last:border-b'
-          : 'py-4 first:border-t-0',
-        className,
-      )}
-    >
-      <div className="flex flex-wrap items-center gap-3 not-prose">
-        <span className="font-medium font-mono text-fd-primary inline-flex items-center gap-1.5">
-          {id && (
-            <PropertyAnchorCopyButton
-              id={id}
-              label={typeof name === 'string' ? name : 'property'}
-            />
-          )}
-          <span>
-            {name}
-            {required ? (
-              <span className="text-red-400">*</span>
-            ) : (
-              <span className="text-fd-muted-foreground">?</span>
-            )}
-          </span>
-        </span>
-        {typeof type === 'string' ? (
-          <span className="text-sm font-mono text-fd-muted-foreground">{type}</span>
-        ) : (
-          type
-        )}
-        {deprecated && (
-          <Badge color="yellow" className="ms-auto text-xs">
-            {t.deprecated}
-          </Badge>
-        )}
-      </div>
-      <div className="prose-no-margin pt-2.5 empty:hidden">{props.children}</div>
-    </div>
-  );
-}
+function decodePath(path: string, highlighted: string | null): PathItemType[] | null {
+  const out: PathItemType[] = [];
+  for (const part of path.split('|')) {
+    const [name, $ref, ...tabValues] = part.split('\0');
+    out.push({ name, $ref, tabValues });
+  }
 
-function PropertyAnchorCopyButton({ id, label }: { id: string; label: string }) {
-  const [isChecked, onCopy] = useCopyButton(() => {
-    const url = new URL(window.location.href);
-    url.hash = id;
-    // Update the address bar without re-triggering hashchange (which would
-    // reset the popover/collapsible state the user just navigated into).
-    history.replaceState(null, '', url.href);
-    return navigator.clipboard.writeText(url.href);
-  });
-
-  return (
-    <button
-      type="button"
-      onClick={onCopy}
-      aria-label={`Copy link to ${label}`}
-      className={cn(
-        'text-fd-muted-foreground transition-opacity focus-visible:opacity-100',
-        isChecked
-          ? 'opacity-100 text-fd-primary'
-          : 'opacity-0 group-hover/property:opacity-100',
-      )}
-    >
-      {isChecked ? <Check className="size-3.5" /> : <LinkIcon className="size-3.5" />}
-    </button>
-  );
-}
-
-function isExpandable(data: SchemaData): boolean {
-  if (data.type !== 'primitive') return true;
-  return Boolean(data.description || (data.infoTags && data.infoTags.length > 0));
+  if (highlighted && out.length > 0) out[out.length - 1].highlighted = highlighted;
+  return out;
 }

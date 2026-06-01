@@ -9,7 +9,7 @@ import type {
 } from '@/types';
 import { createMethod, methodKeys, type NoReference } from '@/utils/schema';
 import { idToTitle } from '@/utils/id-to-title';
-import { Schema, slugifyPropertyName } from '../schema';
+import { Schema } from '../schema';
 import { UsageTabs } from '@/ui/operation/usage-tabs';
 import { Badge, MethodLabel } from '@/ui/components/method-label';
 import { CopyTypeScriptPanel, OperationProvider } from './client';
@@ -26,26 +26,10 @@ import { RequestTabs } from './request-tabs';
 import { cn } from '@/utils/cn';
 import { getExampleRequests } from './get-example-requests';
 import { SelectTabs, SelectTabTrigger, SelectTab } from '../components/select-tab';
-import { HashAwareSelectTabs } from './hash-tabs';
 import { Callout } from 'fumadocs-ui/components/callout';
+import { AnchorSection } from '@/utils/auto-anchor.client';
 
 const paramTypeKeys = ['path', 'query', 'header', 'cookie'] as const;
-
-/**
- * Slugifies a media type for use inside anchor ids when a request or response
- * has multiple content types — keeps a predictable, human-readable shape so
- * writers can construct deep links by hand.
- *
- * `application/json` → `application-json`,
- * `application/vnd.api+json` → `application-vnd-api-json`.
- */
-function slugifyMediaType(type: string): string {
-  return type
-    .toLowerCase()
-    .replace(/[^a-z0-9]+/g, '-')
-    .replace(/^-+|-+$/g, '');
-}
-
 
 export function Operation({
   type = 'operation',
@@ -99,17 +83,38 @@ export function Operation({
   }
 
   const contentTypes = body?.content ? Object.entries(body.content) : null;
+  if (contentTypes && contentTypes.length > 0) {
+    const items = contentTypes.map(([type]) => ({
+      label: <code className="text-xs">{type}</code>,
+      value: type,
+    }));
 
-  if (body && contentTypes && contentTypes.length > 0) {
     bodyNode = (
-      <BodyContentSection
-        body={body}
-        contentTypes={contentTypes}
-        method={method}
-        ctx={ctx}
-        path={path}
-        headingLevel={headingLevel}
-      />
+      <SelectTabs defaultValue={items[0].value}>
+        <div className="flex gap-2 items-center justify-between mt-10">
+          {ctx.renderHeading(headingLevel, <I18nLabel label="titleRequestBody" />, {
+            id: 'request-body',
+            className: 'my-0!',
+          })}
+          {contentTypes.length > 1 ? (
+            <SelectTabTrigger items={items} className="font-medium" />
+          ) : (
+            <p className="text-fd-muted-foreground not-prose">{items[0].label}</p>
+          )}
+        </div>
+        {body!.description && ctx.renderMarkdown(body!.description)}
+        {contentTypes.map(([type, content]) => {
+          if (!isMediaTypeSupported(type, ctx.mediaAdapters)) {
+            throw new Error(`Media type ${type} is not supported (in ${path})`);
+          }
+
+          return (
+            <SelectTab key={type} anchorSegments={['request-body', type]} value={type}>
+              <RequestBodyContentItem content={content} method={method} ctx={ctx} />
+            </SelectTab>
+          );
+        })}
+      </SelectTabs>
     );
   }
 
@@ -140,34 +145,35 @@ export function Operation({
         {ctx.renderHeading(headingLevel, <I18nLabel label={`${type}Parameters`} />, {
           id: `parameters-${type}`,
         })}
-        <div className="flex flex-col">
-          {params.map(
-            (param) =>
-              param.schema != null && (
-                <Schema
-                  key={param.name}
-                  client={{
-                    name: param.name!,
-                    required: param.required,
-                    idPrefix: `parameters-${type}-${slugifyPropertyName(param.name!)}`,
-                  }}
-                  root={
-                    typeof param.schema === 'object'
-                      ? {
-                          ...param.schema,
-                          description: param.description ?? param.schema?.description,
-                          deprecated:
-                            (param.deprecated ?? false) || (param.schema?.deprecated ?? false),
-                        }
-                      : param.schema
-                  }
-                  readOnly={method.method === 'get'}
-                  writeOnly={method.method !== 'get'}
-                  ctx={ctx}
-                />
-              ),
-          )}
-        </div>
+        <AnchorSection segments={['parameters', type]}>
+          <div className="flex flex-col">
+            {params.map(
+              (param) =>
+                param.schema != null && (
+                  <Schema
+                    key={param.name}
+                    client={{
+                      name: param.name!,
+                      required: param.required,
+                    }}
+                    root={
+                      typeof param.schema === 'object'
+                        ? {
+                            ...param.schema,
+                            description: param.description ?? param.schema?.description,
+                            deprecated:
+                              (param.deprecated ?? false) || (param.schema?.deprecated ?? false),
+                          }
+                        : param.schema
+                    }
+                    readOnly={method.method === 'get'}
+                    writeOnly={method.method !== 'get'}
+                    ctx={ctx}
+                  />
+                ),
+            )}
+          </div>
+        </AnchorSection>
       </Fragment>
     );
   });
@@ -354,78 +360,14 @@ export function Operation({
   }
 }
 
-function BodyContentSection({
-  body,
-  contentTypes,
-  method,
-  ctx,
-  path,
-  headingLevel,
-}: {
-  body: NonNullable<NoReference<MethodInformation>['requestBody']>;
-  contentTypes: [string, NoReference<MediaTypeObject>][];
-  method: MethodInformation;
-  ctx: RenderContext;
-  path: string;
-  headingLevel: number;
-}) {
-  const items = contentTypes.map(([key]) => ({
-    label: <code className="text-xs">{key}</code>,
-    value: key,
-  }));
-  // When an operation has multiple body content types, namespace each one's
-  // anchor prefix by its slugified media type so deep links remain unique.
-  const idPrefixes: Record<string, string> = {};
-  for (const [type] of contentTypes) {
-    idPrefixes[type] = contentTypes.length > 1 ? `${slugifyMediaType(type)}-body` : 'body';
-  }
-
-  return (
-    <HashAwareSelectTabs
-      items={items.map((item) => ({ value: item.value, prefix: idPrefixes[item.value] }))}
-      fallback={items[0].value}
-    >
-      <div className="flex gap-2 items-center justify-between mt-10">
-        {ctx.renderHeading(headingLevel, <I18nLabel label="titleRequestBody" />, {
-          id: 'request-body',
-          className: 'my-0!',
-        })}
-        {contentTypes.length > 1 ? (
-          <SelectTabTrigger items={items} className="font-medium" />
-        ) : (
-          <p className="text-fd-muted-foreground not-prose">{items[0].label}</p>
-        )}
-      </div>
-      {body.description && ctx.renderMarkdown(body.description)}
-      {contentTypes.map(([type, content]) => {
-        if (!isMediaTypeSupported(type, ctx.mediaAdapters)) {
-          throw new Error(`Media type ${type} is not supported (in ${path})`);
-        }
-        return (
-          <SelectTab key={type} value={type}>
-            <RequestBodyContentItem
-              content={content}
-              method={method}
-              ctx={ctx}
-              idPrefix={idPrefixes[type]}
-            />
-          </SelectTab>
-        );
-      })}
-    </HashAwareSelectTabs>
-  );
-}
-
 function RequestBodyContentItem({
   content,
   method,
   ctx,
-  idPrefix,
 }: {
   content: NoReference<MediaTypeObject>;
   method: MethodInformation;
   ctx: RenderContext;
-  idPrefix: string;
 }) {
   let ts = useMemo(() => {
     if (!content.schema || !ctx.generateTypeScriptDefinitions) return;
@@ -447,7 +389,6 @@ function RequestBodyContentItem({
             name: 'body',
             as: 'body',
             required: method.requestBody?.required,
-            idPrefix,
           }}
           root={content.schema}
           readOnly={method.method === 'get'}
@@ -471,16 +412,6 @@ function ResponseAccordion({
   const response = operation.responses![status];
   const contentTypes = response.content ? Object.entries(response.content) : [];
 
-  // Anchor prefix per content type: namespace by media type only when this
-  // status has more than one, so single-content-type responses keep clean URLs.
-  const idPrefixes: Record<string, string> = {};
-  for (const [type] of contentTypes) {
-    idPrefixes[type] =
-      contentTypes.length > 1
-        ? `response-${status}-${slugifyMediaType(type)}`
-        : `response-${status}`;
-  }
-
   const items = contentTypes.map(([key]) => ({
     label: <code className="text-xs">{key}</code>,
     value: key,
@@ -496,14 +427,7 @@ function ResponseAccordion({
       ) : (
         <SelectTabTrigger items={items} />
       );
-    wrapper = (children) => (
-      <HashAwareSelectTabs
-        items={items.map((item) => ({ value: item.value, prefix: idPrefixes[item.value] }))}
-        fallback={items[0]?.value ?? ''}
-      >
-        {children}
-      </HashAwareSelectTabs>
-    );
+    wrapper = (children) => <SelectTabs defaultValue={items[0].value}>{children}</SelectTabs>;
   }
 
   return wrapper(
@@ -517,14 +441,18 @@ function ResponseAccordion({
           <div className="prose-no-margin mb-2">{ctx.renderMarkdown(response.description)}</div>
         )}
         {contentTypes.map(([type, item]) => (
-          <SelectTab key={type} value={type} className="mb-2">
+          <SelectTab
+            key={type}
+            value={type}
+            className="mb-2"
+            anchorSegments={['response', status, type]}
+          >
             <RepsonseAccordionItem
               type={type}
               status={status}
               item={item}
               operation={operation}
               ctx={ctx}
-              idPrefix={idPrefixes[type]}
             />
           </SelectTab>
         ))}
@@ -539,13 +467,11 @@ function RepsonseAccordionItem({
   operation,
   item: { schema },
   ctx,
-  idPrefix,
 }: {
   type: string;
   status: string;
   operation: MethodInformation;
   item: NoReference<MediaTypeObject>;
-  idPrefix: string;
   ctx: RenderContext;
 }) {
   let ts = useMemo(() => {
@@ -568,12 +494,11 @@ function RepsonseAccordionItem({
     <>
       {ts && <CopyTypeScriptPanel name="response body" code={ts} />}
       {schema && (
-        <div className="border px-3 py-2 rounded-lg">
+        <div className="border p-3 pb-2 rounded-lg">
           <Schema
             client={{
               name: 'response',
               as: 'body',
-              idPrefix,
             }}
             root={schema}
             readOnly

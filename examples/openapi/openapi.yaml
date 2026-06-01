@@ -76,6 +76,8 @@ security:
   - basicAuth: []
   - apiKeyQuery: []
   - apiKeyHeader: []
+  - apiKeyHeader: []
+    apiKeyQuery: []
   - apiKeyCookie: []
   - oAuth2: []
   - openIdConnect: []
@@ -103,8 +105,7 @@ paths:
       description: It's easy to say you know them all, but do you really? Retrieve all
         the planets and check whether you missed one.
       operationId: getAllData
-      security:
-        - {}
+      security: []
       parameters:
         - $ref: '#/components/parameters/limit'
         - $ref: '#/components/parameters/offset'
@@ -171,6 +172,7 @@ paths:
         planetCreated:
           '{$request.body#/successCallbackUrl}':
             post:
+              security: []
               requestBody:
                 description: Information about the newly created planet
                 content:
@@ -186,6 +188,7 @@ paths:
         planetCreationFailed:
           '{$request.body#/failureCallbackUrl}':
             post:
+              security: []
               requestBody:
                 description: Information about which fields failed to validate
                 content:
@@ -198,6 +201,7 @@ paths:
         planetExploded:
           '{$request.body#/successCallbackUrl}':
             post:
+              security: []
               requestBody:
                 description: Information about the newly exploded planet
                 content:
@@ -259,8 +263,7 @@ paths:
       description: You'll better learn a little bit more about the planets. It might
         come in handy once space travel is available for everyone.
       operationId: getPlanet
-      security:
-        - {}
+      security: []
       parameters:
         - $ref: '#/components/parameters/planetId'
       responses:
@@ -351,7 +354,6 @@ paths:
         - Planets
       summary: Delete a planet
       operationId: deletePlanet
-      deprecated: true
       description: This endpoint was used to delete planets. Unfortunately, that
         caused a lot of trouble for planets with life. So, this endpoint is now
         deprecated and should not be used anymore.
@@ -454,8 +456,7 @@ paths:
       summary: Create a user
       description: Time to create a user account, eh?
       operationId: createUser
-      security:
-        - {}
+      security: []
       requestBody:
         description: User to create
         content:
@@ -550,8 +551,7 @@ paths:
       description: Yeah, this is the boring security stuff. Just get your super secret
         token and move on.
       operationId: getToken
-      security:
-        - {}
+      security: []
       requestBody:
         description: Body for credentials to authenticate a user
         content:
@@ -616,6 +616,8 @@ paths:
         - bearerAuth: []
         - apiKeyHeader: []
         - apiKeyQuery: []
+        - apiKeyHeader: []
+          apiKeyQuery: []
       responses:
         '200':
           description: Authenticated user information retrieved successfully
@@ -658,6 +660,7 @@ webhooks:
     post:
       tags:
         - Planets
+      security: []
       requestBody:
         description: Information about a new planet
         content:
