@@ -2,7 +2,17 @@
 
 import { cn } from '@/utils/cn';
 import { SelectTrigger, Select, SelectValue, SelectContent, SelectItem } from './select';
-import { type ReactNode, useState, useMemo, type ComponentProps, createContext, use } from 'react';
+import {
+  type ReactNode,
+  useState,
+  useMemo,
+  type ComponentProps,
+  createContext,
+  use,
+  useEffect,
+} from 'react';
+import { anchorIdStartsWith } from '@/utils/auto-anchor';
+import { AnchorSection, useAnchorId } from '@/utils/auto-anchor.client';
 
 const Context = createContext<{
   value: string | null;
@@ -23,14 +33,26 @@ export function SelectTabs({
 
 export function SelectTab({
   value,
+  anchorSegments: segments,
   ...props
 }: ComponentProps<'div'> & {
   value: string;
+  /** define the tab as an anchor section */
+  anchorSegments?: string[];
 }) {
-  const ctx = use(Context);
-  if (value !== ctx?.value) return;
+  const { value: currentValue, setValue } = use(Context)!;
+  const id = useAnchorId(...(segments ?? []));
 
-  return <div {...props}>{props.children}</div>;
+  useEffect(() => {
+    const hash = window.location.hash.slice(1);
+    if (!hash || !segments) return;
+
+    if (anchorIdStartsWith(hash, id)) setValue(value);
+  }, [id, segments, value, setValue]);
+
+  if (value !== currentValue) return;
+  const content = <div {...props} />;
+  return segments ? <AnchorSection segments={segments}>{content}</AnchorSection> : content;
 }
 
 export function SelectTabTrigger({

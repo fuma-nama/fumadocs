@@ -27,6 +27,7 @@ import { cn } from '@/utils/cn';
 import { getExampleRequests } from './get-example-requests';
 import { SelectTabs, SelectTabTrigger, SelectTab } from '../components/select-tab';
 import { Callout } from 'fumadocs-ui/components/callout';
+import { AnchorSection } from '@/utils/auto-anchor.client';
 
 const paramTypeKeys = ['path', 'query', 'header', 'cookie'] as const;
 
@@ -82,11 +83,10 @@ export function Operation({
   }
 
   const contentTypes = body?.content ? Object.entries(body.content) : null;
-
-  if (body && contentTypes && contentTypes.length > 0) {
-    const items = contentTypes.map(([key]) => ({
-      label: <code className="text-xs">{key}</code>,
-      value: key,
+  if (contentTypes && contentTypes.length > 0) {
+    const items = contentTypes.map(([type]) => ({
+      label: <code className="text-xs">{type}</code>,
+      value: type,
     }));
 
     bodyNode = (
@@ -102,14 +102,14 @@ export function Operation({
             <p className="text-fd-muted-foreground not-prose">{items[0].label}</p>
           )}
         </div>
-        {body.description && ctx.renderMarkdown(body.description)}
+        {body!.description && ctx.renderMarkdown(body!.description)}
         {contentTypes.map(([type, content]) => {
           if (!isMediaTypeSupported(type, ctx.mediaAdapters)) {
             throw new Error(`Media type ${type} is not supported (in ${path})`);
           }
 
           return (
-            <SelectTab key={type} value={type}>
+            <SelectTab key={type} anchorSegments={['request-body', type]} value={type}>
               <RequestBodyContentItem content={content} method={method} ctx={ctx} />
             </SelectTab>
           );
@@ -145,33 +145,35 @@ export function Operation({
         {ctx.renderHeading(headingLevel, <I18nLabel label={`${type}Parameters`} />, {
           id: `parameters-${type}`,
         })}
-        <div className="flex flex-col">
-          {params.map(
-            (param) =>
-              param.schema != null && (
-                <Schema
-                  key={param.name}
-                  client={{
-                    name: param.name!,
-                    required: param.required,
-                  }}
-                  root={
-                    typeof param.schema === 'object'
-                      ? {
-                          ...param.schema,
-                          description: param.description ?? param.schema?.description,
-                          deprecated:
-                            (param.deprecated ?? false) || (param.schema?.deprecated ?? false),
-                        }
-                      : param.schema
-                  }
-                  readOnly={method.method === 'get'}
-                  writeOnly={method.method !== 'get'}
-                  ctx={ctx}
-                />
-              ),
-          )}
-        </div>
+        <AnchorSection segments={['parameters', type]}>
+          <div className="flex flex-col">
+            {params.map(
+              (param) =>
+                param.schema != null && (
+                  <Schema
+                    key={param.name}
+                    client={{
+                      name: param.name!,
+                      required: param.required,
+                    }}
+                    root={
+                      typeof param.schema === 'object'
+                        ? {
+                            ...param.schema,
+                            description: param.description ?? param.schema?.description,
+                            deprecated:
+                              (param.deprecated ?? false) || (param.schema?.deprecated ?? false),
+                          }
+                        : param.schema
+                    }
+                    readOnly={method.method === 'get'}
+                    writeOnly={method.method !== 'get'}
+                    ctx={ctx}
+                  />
+                ),
+            )}
+          </div>
+        </AnchorSection>
       </Fragment>
     );
   });
@@ -248,7 +250,7 @@ export function Operation({
           )}
         </div>
         {callbacks.map(([name, callback]) => (
-          <SelectTab key={name} value={name}>
+          <SelectTab key={name} value={name} anchorSegments={['webhook', name]}>
             <WebhookCallback callback={callback} ctx={ctx} headingLevel={headingLevel} />
           </SelectTab>
         ))}
@@ -409,15 +411,16 @@ function ResponseAccordion({
 }) {
   const response = operation.responses![status];
   const contentTypes = response.content ? Object.entries(response.content) : [];
+
+  const items = contentTypes.map(([key]) => ({
+    label: <code className="text-xs">{key}</code>,
+    value: key,
+  }));
+
   let wrapper = (children: ReactNode) => children;
   let selectorNode: ReactNode = null;
 
   if (contentTypes.length > 0) {
-    const items = contentTypes.map(([key]) => ({
-      label: <code className="text-xs">{key}</code>,
-      value: key,
-    }));
-
     selectorNode =
       items.length === 1 ? (
         <p className="text-fd-muted-foreground not-prose">{items[0].label}</p>
@@ -438,7 +441,12 @@ function ResponseAccordion({
           <div className="prose-no-margin mb-2">{ctx.renderMarkdown(response.description)}</div>
         )}
         {contentTypes.map(([type, item]) => (
-          <SelectTab key={type} value={type} className="mb-2">
+          <SelectTab
+            key={type}
+            value={type}
+            className="mb-2"
+            anchorSegments={['response', status, type]}
+          >
             <RepsonseAccordionItem
               type={type}
               status={status}
@@ -486,7 +494,7 @@ function RepsonseAccordionItem({
     <>
       {ts && <CopyTypeScriptPanel name="response body" code={ts} />}
       {schema && (
-        <div className="border px-3 py-2 rounded-lg">
+        <div className="border p-3 pb-2 rounded-lg">
           <Schema
             client={{
               name: 'response',
