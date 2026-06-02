@@ -40,5 +40,5 @@ export async function loadConfig(core: Core, build = false): Promise<LoadedConfi
   url.searchParams.set('hash', Date.now().toString());
 
   const loaded = await import(url.href);
-  return buildConfig(loaded as Record<string, unknown>);
+  return buildConfig(loaded as Record<string, unknown>, process.cwd());
 }

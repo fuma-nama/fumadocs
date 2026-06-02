@@ -1,5 +1,12 @@
 # fumadocs-preview
 
+## 0.1.3
+
+### Patch Changes
+
+- 783c048: Fix invalid content type in `/img` endpoint
+  - fumadocs-ui@16.9.3
+
 ## 0.1.2
 
 ### Patch Changes

@@ -110,7 +110,7 @@ export function createMySource(): DynamicSource<{
     configure(loader) {
       // you can revalidate the loader from source, e.g.
       onMyEvent(() => {
-        loader.revalidate();
+        void loader.revalidate();
       });
     },
   };

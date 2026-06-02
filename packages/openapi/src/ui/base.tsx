@@ -208,6 +208,7 @@ export interface CreateAPIPageOptions {
     render?: (props: APIPlaygroundProps) => ReactNode;
   };
 
+  /** @deprecated no longer used */
   renderHeading?: (props: HTMLAttributes<HTMLHeadingElement>, depth: number) => ReactNode;
   renderCodeBlock?: (props: { lang: string; code: string }) => ReactNode;
 
@@ -299,20 +300,6 @@ export function createAPIPage(
         ...options.playground,
         provider: options.playground?.provider ?? renderPlaygroundProviderDefault,
         render: options.playground?.render ?? renderPlaygroundDefault,
-      },
-      renderHeading(depth, text, props) {
-        const id = typeof text === 'string' ? slugger.slug(text) : props?.id;
-        if (!id) throw new Error("missing 'id' for non-string children");
-
-        if (options.renderHeading) {
-          return options.renderHeading({ id, children: text, ...props }, depth);
-        }
-
-        return (
-          <Heading id={id} key={id} as={`h${depth}` as `h1`} {...props}>
-            {text}
-          </Heading>
-        );
       },
       generateTypeScriptDefinitions:
         options.generateTypeScriptDefinitions ??

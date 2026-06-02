@@ -1,6 +1,6 @@
 {
   "name": "fumadocs-openapi",
-  "version": "10.9.1",
+  "version": "10.10.0",
   "description": "Generate MDX docs for your OpenAPI spec",
   "keywords": [
     "Docs",
@@ -58,7 +58,7 @@
     "github-slugger": "^2.0.0",
     "hast-util-to-jsx-runtime": "^2.3.6",
     "js-yaml": "^4.1.1",
-    "lucide-react": "^1.16.0",
+    "lucide-react": "^1.17.0",
     "remark": "^15.0.1",
     "remark-rehype": "^11.1.2",
     "shiki": "^4.1.0",
@@ -84,7 +84,7 @@
     "xml-js": "^1.6.11"
   },
   "peerDependencies": {
-    "@scalar/api-client-react": "2.0.1",
+    "@scalar/api-client-react": "^2.0.20",
     "@types/react": "*",
     "fumadocs-core": "^16.9.0",
     "fumadocs-ui": "^16.9.0",

@@ -1,6 +1,6 @@
 {
   "name": "fumadocs-core",
-  "version": "16.9.2",
+  "version": "16.9.3",
   "description": "The React.js library for building a documentation website",
   "keywords": [
     "Docs",
@@ -122,9 +122,9 @@
     "vfile": "^6.0.3"
   },
   "devDependencies": {
-    "@formatjs/intl-localematcher": "^0.8.8",
+    "@formatjs/intl-localematcher": "^0.8.9",
     "@mdx-js/mdx": "^3.1.1",
-    "@mixedbread/sdk": "0.71.0",
+    "@mixedbread/sdk": "0.72.0",
     "@orama/core": "^1.2.19",
     "@oramacloud/client": "^2.1.4",
     "@shikijs/transformers": "^4.1.0",
@@ -140,7 +140,7 @@
     "algoliasearch": "5.52.1",
     "flexsearch": "^0.8.212",
     "image-size": "^2.0.2",
-    "lucide-react": "^1.16.0",
+    "lucide-react": "^1.17.0",
     "negotiator": "^1.0.0",
     "next": "16.2.6",
     "npm-to-yarn": "^3.0.1",
@@ -152,8 +152,8 @@
     "tsconfig": "workspace:*",
     "tsdown": "0.22.0",
     "typescript": "^6.0.3",
-    "waku": "1.0.0-beta.0",
-    "zod": "^4.4.3"
+    "waku": "1.0.0-beta.1",
+    "zod": "4.4.3"
   },
   "peerDependencies": {
     "@mdx-js/mdx": "*",
@@ -233,7 +233,7 @@
   },
   "inlinedDependencies": {
     "@formatjs/fast-memoize": "3.1.5",
-    "@formatjs/intl-localematcher": "0.8.8",
+    "@formatjs/intl-localematcher": "0.8.9",
     "@shikijs/transformers": "4.1.0",
     "image-size": "2.0.2",
     "negotiator": "1.0.0",

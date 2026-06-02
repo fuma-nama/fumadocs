@@ -6,5 +6,5 @@
     },
     "types": ["@types/node", "fumadocs-core/mdx-plugins/rehype-code.core"]
   },
-  "exclude": ["node_modules", "dist", "eslint.config.mjs"]
+  "exclude": ["node_modules", "dist"]
 }

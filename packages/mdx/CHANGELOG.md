@@ -1,5 +1,14 @@
 # next-docs-mdx
 
+## 15.0.10
+
+### Patch Changes
+
+- d35d0d6: Respect `root` in Vite config
+- Updated dependencies [42f0255]
+- Updated dependencies [a807798]
+  - fumadocs-core@16.9.3
+
 ## 15.0.9
 
 ### Patch Changes

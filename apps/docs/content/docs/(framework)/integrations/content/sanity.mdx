@@ -91,7 +91,7 @@ const source = dynamicLoader(
 export async function getSource() {
   const { isEnabled } = await draftMode();
 
-  if (isEnabled) source.revalidate();
+  if (isEnabled) source.invalidate();
   return source.get();
 }
 ```

@@ -242,14 +242,18 @@ const page = docs.getPage(['...']);
 
 Dynamic sources are cached by the loader.
 
-If your source changes over time, call `revalidate()` to clear the cache:
+If your source changes over time, call `invalidate()` to clear the cache, or `revalidate()` to update the cache:
 
 ```ts
-source.revalidate();
+source.invalidate();
+
+await source.revalidate();
 ```
 
-For [multi-source](/docs/headless/source-api/source#multiple-sources) setups, you can revalidate a specific source:
+For [multi-source](/docs/headless/source-api/source#multiple-sources) setups, you can invalidate/revalidate a specific source:
 
 ```ts
-source.revalidate('docs');
+source.invalidate('docs');
+
+await source.revalidate('docs');
 ```

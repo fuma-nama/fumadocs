@@ -4,6 +4,7 @@ import { loader, LoaderConfig, LoaderOptions, LoaderOutput } from './loader';
 import type { SourceUnion, StaticSource, DynamicSource } from './source';
 import { isStaticSource, isDynamicSource } from './source';
 import type { GenerateMeta, GeneratePage, GenerateStorage } from './types';
+import type { Awaitable } from '@/types';
 
 type Input = SourceUnion | Record<string, SourceUnion>;
 export interface DynamicLoaderConfig extends LoaderConfig {
@@ -12,7 +13,10 @@ export interface DynamicLoaderConfig extends LoaderConfig {
 
 export interface DynamicLoader<Config extends DynamicLoaderConfig = DynamicLoaderConfig> {
   get: () => Promise<LoaderOutput<Config>>;
-  revalidate: (source?: Config['source']) => void;
+  /** update & re-compute dynamic sources */
+  revalidate: (source?: Config['source']) => Promise<void>;
+  /** remove computed cache of dynamic sources */
+  invalidate: (source?: Config['source']) => void;
 
   get $inferPage(): Config['page'];
   get $inferMeta(): Config['meta'];
@@ -31,7 +35,7 @@ export function dynamicLoader<I extends Input, I18n extends I18nConfig | undefin
 }> {
   let loaderCacheKey: ResolvedSource | undefined;
   let loaderCache: LoaderOutput<DynamicLoaderConfig> | undefined;
-  const sourceCache = new Map<DynamicSource, Promise<StaticSource>>();
+  const sourceCache = new Map<DynamicSource, Awaitable<StaticSource>>();
 
   function configureSources() {
     if (isStaticSource(input)) return;
@@ -45,25 +49,31 @@ export function dynamicLoader<I extends Input, I18n extends I18nConfig | undefin
     }
   }
 
-  async function resolveSources(): Promise<ResolvedSource> {
-    if (isStaticSource(input)) return input;
-    if (isDynamicSource(input)) return resolveDynamicSource(input);
+  async function resolveSources(skipCache = false): Promise<ResolvedSource> {
+    if (isStaticSource(input) || isDynamicSource(input)) {
+      return resolveSource(input, skipCache);
+    }
 
     const entries = await Promise.all(
-      Object.entries(input).map(async ([k, v]): Promise<[string, StaticSource]> => {
-        if (isStaticSource(v)) return [k, v];
-        return [k, await resolveDynamicSource(v)];
-      }),
+      Object.entries(input).map(async ([k, v]) => [k, await resolveSource(v, skipCache)]),
     );
 
     return Object.fromEntries(entries);
   }
 
-  function resolveDynamicSource(v: DynamicSource): Promise<StaticSource> {
-    let resolved = sourceCache.get(v);
+  function resolveSource(
+    v: StaticSource | DynamicSource,
+    skipCache = false,
+  ): Awaitable<StaticSource> {
+    if (isStaticSource(v)) return v;
+
+    let resolved = skipCache ? undefined : sourceCache.get(v);
     if (resolved) return resolved;
 
-    resolved = Promise.resolve(v.files()).then((res) => ({ files: res }));
+    const files = v.files();
+    if ('then' in files) resolved = files.then((res) => ({ files: res }));
+    else resolved = { files };
+
     sourceCache.set(v, resolved);
     return resolved;
   }
@@ -85,7 +95,15 @@ export function dynamicLoader<I extends Input, I18n extends I18nConfig | undefin
     }),
     $inferPage: undefined as never,
     $inferMeta: undefined as never,
-    revalidate(name) {
+    async revalidate(name) {
+      // rewrite cache, wait until next `get()` to compute `loader()`
+      if (name === undefined) {
+        await resolveSources(true);
+      } else if (!isStaticSource(input) && !isDynamicSource(input)) {
+        await resolveSource(input[name], true);
+      }
+    },
+    invalidate(name) {
       if (name === undefined) {
         sourceCache.clear();
       } else if (!isStaticSource(input) && !isDynamicSource(input)) {

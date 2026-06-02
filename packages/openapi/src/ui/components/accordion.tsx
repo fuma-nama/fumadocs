@@ -2,18 +2,60 @@
 
 import * as Primitive from '@radix-ui/react-accordion';
 import { ChevronRight } from 'lucide-react';
-import type { ComponentProps } from 'react';
+import { createContext, use, useEffect, useMemo, useState, type ComponentProps } from 'react';
 import { cn } from '@/utils/cn';
+import { anchorIdStartsWith } from '@/utils/auto-anchor';
+import { AnchorSection, useAnchorId } from '@/utils/auto-anchor.client';
 
-export function Accordions(props: ComponentProps<typeof Primitive.Root>) {
-  return <Primitive.Root {...props} className={cn('divide-y divide-fd-border', props.className)} />;
+const Context = createContext<{
+  type: 'single' | 'multiple';
+  setValue: (v: string | string[]) => void;
+} | null>(null);
+
+export function Accordions({
+  type,
+  defaultValue,
+  ...props
+}: Omit<ComponentProps<typeof Primitive.Root>, 'value' | 'onValueChange'>) {
+  const [value, setValue] = useState<string | string[]>(() =>
+    type === 'multiple' ? (defaultValue ?? []) : (defaultValue ?? ''),
+  );
+
+  return (
+    <Context value={useMemo(() => ({ type, setValue }), [type])}>
+      <Primitive.Root type={type} value={value as never} onValueChange={setValue} {...props} />
+    </Context>
+  );
 }
 
-export function AccordionItem(props: ComponentProps<typeof Primitive.Item>) {
-  return (
-    <Primitive.Item {...props} className={cn('scroll-m-20', props.className)}>
-      {props.children}
-    </Primitive.Item>
+export function AccordionItem({
+  value,
+  className,
+  anchorSegments,
+  ...props
+}: ComponentProps<typeof Primitive.Item> & {
+  /** define the accordion as an anchor section */
+  anchorSegments?: string[];
+}) {
+  const ctx = use(Context)!;
+  const id = useAnchorId(anchorSegments ?? false);
+
+  useEffect(() => {
+    if (id && anchorIdStartsWith(window.location.hash.slice(1), id))
+      ctx.setValue(ctx.type === 'single' ? value : [value]);
+  }, [value, id, ctx]);
+
+  const content = (
+    <Primitive.Item
+      value={value}
+      className={cn('scroll-m-20 border-b last:border-b-0', className)}
+      {...props}
+    />
+  );
+  return anchorSegments ? (
+    <AnchorSection segments={anchorSegments}>{content}</AnchorSection>
+  ) : (
+    content
   );
 }
 
@@ -25,9 +67,7 @@ export function AccordionContent(props: ComponentProps<typeof Primitive.Content>
         'overflow-hidden data-[state=closed]:animate-fd-accordion-up data-[state=open]:animate-fd-accordion-down',
         props.className,
       )}
-    >
-      {props.children}
-    </Primitive.Content>
+    />
   );
 }
 

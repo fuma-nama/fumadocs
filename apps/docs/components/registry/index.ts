@@ -123,19 +123,40 @@ export const registry: Registry = {
       ],
     },
     {
+      name: 'ai/shared',
+      unlisted: true,
+      files: [
+        {
+          type: 'components',
+          path: 'components/ai-sdk/search.tsx',
+          target: '<dir>/ai/search.tsx',
+        },
+      ],
+    },
+    {
       name: 'ai/openrouter',
       title: 'AI Chat (AI SDK)',
       description: 'Ask AI dialog for your docs, default using OpenRouter',
       files: [
         {
-          type: 'components',
-          path: 'components/openrouter/search.tsx',
-          target: '<dir>/ai/search.tsx',
-        },
-        {
           type: 'route-handler',
           route: 'api/chat',
           path: 'lib/openrouter/route.ts',
+        },
+      ],
+      dependencies: {
+        flexsearch: '^0.8.212',
+      },
+    },
+    {
+      name: 'ai/llmgateway',
+      title: 'AI Chat (LLMGateway)',
+      description: 'Ask AI dialog for your docs, using LLMGateway',
+      files: [
+        {
+          type: 'route-handler',
+          route: 'api/chat',
+          path: 'lib/llmgateway/route.ts',
         },
       ],
       dependencies: {

@@ -37,7 +37,7 @@
     "@fumari/stf": "workspace:*",
     "@radix-ui/react-select": "^2.2.6",
     "class-variance-authority": "^0.7.1",
-    "lucide-react": "^1.16.0",
+    "lucide-react": "^1.17.0",
     "tailwind-merge": "^3.6.0",
     "ts-morph": "^28.0.0"
   },
@@ -57,7 +57,7 @@
     "tsconfig": "workspace:*",
     "tsdown": "0.22.0",
     "vite": "^8.0.14",
-    "webpack": "^5.107.1"
+    "webpack": "^5.107.2"
   },
   "peerDependencies": {
     "@types/react": "*",

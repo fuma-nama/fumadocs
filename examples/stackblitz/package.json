@@ -11,15 +11,15 @@
   },
   "dependencies": {
     "@takumi-rs/image-response": "^1.2.1",
-    "fumadocs-core": "16.9.2",
-    "fumadocs-mdx": "15.0.9",
-    "fumadocs-ui": "16.9.2",
+    "fumadocs-core": "16.9.3",
+    "fumadocs-mdx": "15.0.10",
+    "fumadocs-ui": "16.9.3",
     "lucide-react": "^1.16.0",
     "react": "^19.2.6",
     "react-dom": "^19.2.6",
     "react-server-dom-webpack": "^19.2.6",
     "tailwind-merge": "^3.6.0",
-    "waku": "1.0.0-beta.0"
+    "waku": "1.0.0-beta.1"
   },
   "devDependencies": {
     "@tailwindcss/vite": "^4.3.0",

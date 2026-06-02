@@ -51,7 +51,7 @@ export async function dynamic<Config, TC extends InternalTypeConfig>(
 ) {
   const core = createCore(coreOptions);
   await core.init({
-    config: buildConfig(configExports as Record<string, unknown>),
+    config: buildConfig(configExports as Record<string, unknown>, process.cwd()),
   });
 
   const create = server<Config, TC>(serverOptions);

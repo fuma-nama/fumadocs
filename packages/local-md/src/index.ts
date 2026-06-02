@@ -169,7 +169,7 @@ export function localMd<
       const absolutePath = path.resolve(file);
       cachedStaticSource = null;
       storage.invalidateCache(absolutePath);
-      for (const v of registeredLoaders) v.revalidate();
+      for (const v of registeredLoaders) v.invalidate();
     },
     async devServer(url = getDevServerUrlFromEnv()) {
       if (!url) {

@@ -7,7 +7,13 @@ import { FumadocsComponentInstaller } from '@fumadocs/cli/registry/installer';
 import { HttpRegistryConnector } from 'fuma-cli/registry/connector';
 import { getDefaultConfig } from '@fumadocs/cli/config';
 
-export function ai(provider: 'openrouter' | 'inkeep'): TemplatePlugin {
+const envKey: Record<'openrouter' | 'llmgateway' | 'inkeep', string> = {
+  openrouter: 'OPENROUTER_API_KEY',
+  llmgateway: 'LLM_GATEWAY_API_KEY',
+  inkeep: 'INKEEP_API_KEY',
+};
+
+export function ai(provider: 'openrouter' | 'llmgateway' | 'inkeep'): TemplatePlugin {
   return {
     async afterWrite() {
       const config = await getDefaultConfig(this.dest);
@@ -22,10 +28,7 @@ export function ai(provider: 'openrouter' | 'inkeep'): TemplatePlugin {
         if (deps.hasRequired()) await deps.writeRequired();
 
         await addAIChat(this);
-        await fs.writeFile(
-          path.join(this.dest, '.env.local'),
-          provider === 'openrouter' ? 'OPENROUTER_API_KEY=' : 'INKEEP_API_KEY=',
-        );
+        await fs.writeFile(path.join(this.dest, '.env.local'), `${envKey[provider]}=`);
       } catch (e) {
         console.error(e);
       }

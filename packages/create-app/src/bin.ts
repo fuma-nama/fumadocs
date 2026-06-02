@@ -35,7 +35,13 @@ const command = program
   .addOption(
     new Option('--og-image <name>', 'configure OG image generation').choices(['next-og', 'takumi']),
   )
-  .addOption(new Option('--ai-chat <name>', 'configure AI chat').choices(['openrouter', 'inkeep']))
+  .addOption(
+    new Option('--ai-chat <name>', 'configure AI chat').choices([
+      'openrouter',
+      'llmgateway',
+      'inkeep',
+    ]),
+  )
   .addOption(
     new Option('--template <name>', 'choose a template').choices(
       templates.map((item) => item.value),
@@ -175,7 +181,7 @@ async function main(): Promise<void> {
         )
           return false;
 
-        return select<false | 'openrouter' | 'inkeep'>({
+        return select<false | 'openrouter' | 'llmgateway' | 'inkeep'>({
           message: 'Configure AI Chat?',
           options: [
             {
@@ -186,6 +192,11 @@ async function main(): Promise<void> {
               value: 'openrouter',
               label: 'AI SDK',
               hint: 'default to OpenRouter',
+            },
+            {
+              value: 'llmgateway',
+              label: 'LLMGateway',
+              hint: 'open-source LLM gateway, API key required',
             },
             {
               value: 'inkeep',

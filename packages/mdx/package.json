@@ -1,6 +1,6 @@
 {
   "name": "fumadocs-mdx",
-  "version": "15.0.9",
+  "version": "15.0.10",
   "description": "The built-in source for Fumadocs",
   "keywords": [
     "Docs",
@@ -84,11 +84,11 @@
     "remark": "^15.0.1",
     "remark-directive": "^4.0.0",
     "remark-mdx": "^3.1.1",
-    "rolldown": "^1.0.2",
+    "rolldown": "^1.0.3",
     "tsconfig": "workspace:*",
     "tsdown": "0.22.0",
     "vite": "^8.0.14",
-    "webpack": "^5.107.1"
+    "webpack": "^5.107.2"
   },
   "peerDependencies": {
     "@types/mdast": "*",
