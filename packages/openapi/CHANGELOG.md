@@ -1,5 +1,15 @@
 # @fuma-docs/openapi
 
+## 10.10.0
+
+### Minor Changes
+
+- 2305581: Support anchor link for schema UI properties
+
+### Patch Changes
+
+- c5d1619: Deprecate `renderHeading` option
+
 ## 10.9.1
 
 ### Patch Changes
