@@ -108,7 +108,7 @@ export function CopyTypeScriptPanel({
   return (
     <div
       className={cn(
-        'flex items-start justify-between gap-2 bg-fd-card text-fd-card-foreground border rounded-xl p-3 not-prose mb-4 last:mb-0',
+        'flex items-start justify-between gap-2 bg-fd-card text-fd-card-foreground border rounded-xl p-3 not-prose',
         className,
       )}
     >

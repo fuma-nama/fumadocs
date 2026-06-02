@@ -125,20 +125,6 @@ export function createClientAPIPage({
           provider: options.playground?.provider ?? renderPlaygroundProviderDefault,
           render: options.playground?.render ?? renderPlaygroundDefault,
         },
-        renderHeading(depth, text, props) {
-          const id = typeof text === 'string' ? slug(text) : props?.id;
-          if (!id) throw new Error("missing 'id' for non-string children");
-
-          if (options.renderHeading) {
-            return options.renderHeading({ id, children: text, ...props }, depth);
-          }
-
-          return (
-            <Heading id={id} key={id} as={`h${depth}` as `h1`} {...props}>
-              {text}
-            </Heading>
-          );
-        },
         renderMarkdown(text) {
           if (options.renderMarkdown) return options.renderMarkdown(text);
           processor ??= createMarkdownProcessor();

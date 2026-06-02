@@ -33,7 +33,7 @@ export function SelectTabs({
 
 export function SelectTab({
   value,
-  anchorSegments: segments,
+  anchorSegments,
   ...props
 }: ComponentProps<'div'> & {
   value: string;
@@ -41,25 +41,28 @@ export function SelectTab({
   anchorSegments?: string[];
 }) {
   const { value: currentValue, setValue } = use(Context)!;
-  const id = useAnchorId(...(segments ?? []));
+  const id = useAnchorId(anchorSegments ?? false);
 
   useEffect(() => {
-    const hash = window.location.hash.slice(1);
-    if (!hash || !segments) return;
-
-    if (anchorIdStartsWith(hash, id)) setValue(value);
-  }, [id, segments, value, setValue]);
+    if (id && anchorIdStartsWith(window.location.hash.slice(1), id)) setValue(value);
+  }, [id, value, setValue]);
 
   if (value !== currentValue) return;
   const content = <div {...props} />;
-  return segments ? <AnchorSection segments={segments}>{content}</AnchorSection> : content;
+  return anchorSegments ? (
+    <AnchorSection segments={anchorSegments}>{content}</AnchorSection>
+  ) : (
+    content
+  );
 }
 
 export function SelectTabTrigger({
   items,
   className,
+  placeholder,
   ...props
 }: ComponentProps<typeof SelectTrigger> & {
+  placeholder?: ReactNode;
   items: {
     label: ReactNode;
     value: string;
@@ -70,7 +73,9 @@ export function SelectTabTrigger({
   return (
     <Select value={value ?? ''} onValueChange={setValue}>
       <SelectTrigger className={cn('not-prose w-fit min-w-0 *:min-w-0', className)} {...props}>
-        <SelectValue>{value && items.find((item) => item.value === value)?.label}</SelectValue>
+        <SelectValue placeholder={placeholder}>
+          {value && items.find((item) => item.value === value)?.label}
+        </SelectValue>
       </SelectTrigger>
       <SelectContent>
         {items.map(({ label, value }) => (

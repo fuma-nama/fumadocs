@@ -16,9 +16,6 @@ export async function renderContextFrom(input: string): Promise<RenderContext> {
     renderCodeBlock(_lang, code) {
       return code;
     },
-    renderHeading(_depth, text) {
-      return text;
-    },
     clientBoundary: ClientBoundary,
     renderMarkdown(text) {
       return text;

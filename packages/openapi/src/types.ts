@@ -48,11 +48,6 @@ export interface RenderContext
 
   mediaAdapters: Record<string, MediaAdapter>;
 
-  renderHeading: (
-    depth: number,
-    text: string | ReactNode,
-    props?: HTMLAttributes<HTMLHeadingElement> & { id?: string },
-  ) => ReactNode;
   renderCodeBlock: (lang: string, code: string) => ReactNode;
 }
 

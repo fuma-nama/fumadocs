@@ -22,7 +22,7 @@ import type {
   SchemaUIGeneratedData,
 } from '@/ui/schema';
 import { buttonVariants } from 'fumadocs-ui/components/ui/button';
-import { CheckIcon, ChevronDown, FilterIcon, LinkIcon } from 'lucide-react';
+import { CheckIcon, FilterIcon, LinkIcon } from 'lucide-react';
 import { Badge } from '@/ui/components/method-label';
 import { Popover, PopoverContent, PopoverTrigger } from 'fumadocs-ui/components/ui/popover';
 import { cn } from '@/utils/cn';
@@ -85,7 +85,7 @@ export interface SchemaUIProps {
 }
 
 export function SchemaUI({ name, required = false, as = 'property', generated }: SchemaUIProps) {
-  const rootId = useAnchorId(name);
+  const rootId = useAnchorId([name]);
   const [path, _setPath] = useState<PathItemType[]>(() => [{ $ref: generated.$root, name }]);
   const ref = useRef<HTMLDivElement>(null);
   const popoverRef = useRef<HTMLDivElement>(null);
@@ -192,7 +192,7 @@ export function SchemaUI({ name, required = false, as = 'property', generated }:
 
 function SchemaDescription({ schema, ...props }: ComponentProps<'div'> & { schema: SchemaData }) {
   return (
-    <div {...props} className={cn('prose-no-margin py-2.5 empty:hidden', props.className)}>
+    <div {...props} className={cn('prose-no-margin py-4 empty:hidden', props.className)}>
       {schema.description}
       {schema.infoTags && schema.infoTags.length > 0 && (
         <div className="flex flex-row gap-2 flex-wrap mt-2 not-prose empty:hidden">
@@ -243,7 +243,7 @@ function ObjectProperty({
           [highlighted],
         ),
       )}
-      className={cn('text-sm border-t py-4 first:border-t-0', props.className)}
+      className={cn('group/property text-sm border-t py-4 first:border-t-0', props.className)}
     >
       <div className="flex flex-wrap items-center gap-3 not-prose">
         <span className="font-medium font-mono">
@@ -329,7 +329,7 @@ function PathItemBody({
           <SchemaDescription schema={schema} className="flex-1 py-0" />
 
           <SelectTrigger className="not-prose w-fit min-w-0 mb-auto *:min-w-0">
-            <SelectValue>{value && items.find((item) => item.value === value)?.label}</SelectValue>
+            <SelectValue>{items.find((item) => item.value === value)?.label}</SelectValue>
           </SelectTrigger>
           <SelectContent>
             {items.map(({ label, value }) => (
@@ -461,17 +461,13 @@ function ObjectSearchContent({
 
 function InfoTag({ tag }: { tag: InfoTag }) {
   const ref = useRef<HTMLElement>(null);
-  const [isTruncated, setTruncated] = useState(false);
   const [open, setOpen] = useState(false);
-  useEffect(() => {
-    const element = ref.current;
-    if (!element) return;
-    // assume the tag width will never change
-    setTruncated(element.scrollWidth !== element.offsetWidth);
-  }, []);
 
   return (
-    <div className="flex flex-row items-start gap-2 bg-fd-secondary border rounded-lg text-xs p-1.5 shadow-md max-w-full">
+    <button
+      className="inline-flex text-start items-start gap-2 bg-fd-secondary border rounded-lg text-xs p-1.5 shadow-md max-w-full"
+      onClick={() => setOpen((prev) => !prev)}
+    >
       <span className="font-medium">{tag.label}</span>
       <code
         ref={ref}
@@ -482,15 +478,7 @@ function InfoTag({ tag }: { tag: InfoTag }) {
       >
         {tag.value}
       </code>
-      {isTruncated && (
-        <button
-          className={cn(buttonVariants({ size: 'icon-xs', variant: 'ghost' }))}
-          onClick={() => setOpen((prev) => !prev)}
-        >
-          <ChevronDown />
-        </button>
-      )}
-    </div>
+    </button>
   );
 }
 

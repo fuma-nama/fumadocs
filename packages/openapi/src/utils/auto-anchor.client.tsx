@@ -15,6 +15,11 @@ export function AnchorSection({ segments, children }: { segments: string[]; chil
   );
 }
 
-export function useAnchorId(...segments: string[]) {
+export function useAnchorId(segments: false): null;
+export function useAnchorId(segments: string[]): string;
+export function useAnchorId(segments: string[] | false): string | null;
+
+export function useAnchorId(segments: string[] | false): string | null {
+  if (!segments) return null;
   return anchorSegments(...use(AnchorContext), ...segments);
 }
