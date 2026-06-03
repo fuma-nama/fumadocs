@@ -31,10 +31,7 @@ export default defineConfig({
       'fast-content-type-parse',
       '@fastify/deepmerge',
 
-      '@scalar/json-magic',
-      'pathe',
-      'yaml',
-      '@scalar/helpers',
+      '@apidevtools/json-schema-ref-parser',
       '@scalar/openapi-upgrader',
 
       // for Vite RSC compatibility
@@ -44,7 +41,7 @@ export default defineConfig({
       'json-schema-traverse',
       'fast-uri',
     ],
-    neverBundle: [/^node:/, /ajv(.+)\.d\.ts/],
+    neverBundle: [/^node:/, 'fs', /ajv(.+)\.d\.ts/],
   },
   exports: {
     enabled: true,

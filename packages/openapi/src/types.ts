@@ -1,7 +1,6 @@
 import type { OpenAPIV3_2, OpenAPIV3 } from './_openapi/types';
 import type { NoReference } from '@/utils/schema';
 import type { DereferencedDocument } from '@/utils/document/dereference';
-import type { MediaAdapter } from '@/requests/media/adapter';
 import type { OpenAPIOptions } from '@/server';
 import type { CreateAPIPageOptions } from './ui/base';
 import type { InlineCodeUsageGenerator } from './requests/generators';
