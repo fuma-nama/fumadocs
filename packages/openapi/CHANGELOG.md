@@ -1,5 +1,11 @@
 # @fuma-docs/openapi
 
+## 10.10.2
+
+### Patch Changes
+
+- 2771e34: Reduce package size
+
 ## 10.10.1
 
 ### Patch Changes
