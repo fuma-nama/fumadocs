@@ -1,5 +1,11 @@
 # @fuma-docs/openapi
 
+## 10.10.1
+
+### Patch Changes
+
+- 8eb7782: Support `components.Heading` in client config
+
 ## 10.10.0
 
 ### Minor Changes
