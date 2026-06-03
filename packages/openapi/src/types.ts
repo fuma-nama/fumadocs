@@ -38,7 +38,11 @@ export interface RenderContext
     Omit<
       RequireKeys<
         CreateAPIPageOptions,
-        'renderMarkdown' | 'generateTypeScriptDefinitions' | 'renderCodeBlock'
+        | 'renderMarkdown'
+        | 'generateTypeScriptDefinitions'
+        | 'renderCodeBlock'
+        | 'mediaAdapters'
+        | 'codeUsages'
       >,
       'renderHeading' | 'generateTypeScriptSchema'
     > {
@@ -47,8 +51,6 @@ export interface RenderContext
    */
   schema: DereferencedDocument;
   clientBoundary: typeof import('@/ui/client/boundary');
-
-  mediaAdapters: Record<string, MediaAdapter>;
 }
 
 export type DistributiveOmit<T, K extends PropertyKey> = T extends unknown ? Omit<T, K> : never;

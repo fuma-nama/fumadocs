@@ -25,7 +25,9 @@ import * as ClientBoundary from '@/ui/client/boundary';
 import { dereferenceDocument } from '@/utils/document/dereference';
 import { parseSecurities } from '@/utils/schema';
 import { AuthProvider } from '@/playground/auth';
-import { APIPageClientOptions } from './client';
+import type { APIPageClientOptions } from './client';
+import { registerDefault } from '@/requests/generators/all';
+import { createCodeUsageGeneratorRegistry } from '@/requests/generators';
 
 export interface ClientApiPageProps extends Omit<ApiPageProps, 'document'> {
   payload: ClientApiPagePayload;
@@ -117,6 +119,7 @@ export function createClientAPIPage({
         clientBoundary: ClientBoundary,
         client: options,
         ...options,
+        codeUsages: options.codeUsages ?? registerDefault(createCodeUsageGeneratorRegistry()),
         mediaAdapters: {
           ...defaultAdapters,
           ...options.mediaAdapters,

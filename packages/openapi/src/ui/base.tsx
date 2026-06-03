@@ -17,7 +17,11 @@ import { CodeBlock, Pre } from 'fumadocs-ui/components/codeblock';
 import type { SchemaUIOptions } from './schema';
 import type { ResponseTab } from './operation/response-tabs';
 import { APIPage, type ApiPageProps, type OperationItem, type WebhookItem } from './api-page';
-import type { CodeUsageGeneratorRegistry, InlineCodeUsageGenerator } from '@/requests/generators';
+import {
+  createCodeUsageGeneratorRegistry,
+  type CodeUsageGeneratorRegistry,
+  type InlineCodeUsageGenerator,
+} from '@/requests/generators';
 import type { JSONSchema } from 'json-schema-typed';
 import type { BundledTheme, CodeOptionsThemes, CodeToHastOptionsCommon } from 'shiki';
 import { highlightHast, type ShikiFactory } from 'fumadocs-core/highlight/shiki';
@@ -27,6 +31,7 @@ import { pickSchema } from '@/utils/schema/pick';
 import { encodeInternalRef } from '@/utils/schema/ref';
 import type { RequestTabsRenderContext } from './operation/request-tabs';
 import { PlaygroundAuthProvider } from '@/ui/client/boundary.lazy';
+import { registerDefault } from '@/requests/generators/all';
 
 export interface GenerateTypeScriptDefinitionsContext extends RenderContext {
   operation: NoReference<MethodInformation>;
@@ -289,6 +294,7 @@ export function createAPIPage(
         UsageTabsSelector,
       },
       ...options,
+      codeUsages: options.codeUsages ?? registerDefault(createCodeUsageGeneratorRegistry()),
       mediaAdapters: {
         ...defaultAdapters,
         ...options.mediaAdapters,

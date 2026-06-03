@@ -1,8 +1,5 @@
 import type { MethodInformation, RenderContext } from '@/types';
-import {
-  type CodeUsageGeneratorRegistry,
-  createCodeUsageGeneratorRegistry,
-} from '@/requests/generators';
+import { createCodeUsageGeneratorRegistry } from '@/requests/generators';
 import {
   CodeBlockTab,
   CodeBlockTabs,
@@ -10,7 +7,6 @@ import {
   CodeBlockTabsTrigger,
 } from 'fumadocs-ui/components/codeblock';
 import { ResponseTabs } from '../response-tabs';
-import { registerDefault } from '@/requests/generators/all';
 import { useMemo } from 'react';
 
 export function UsageTabs({ method, ctx }: { method: MethodInformation; ctx: RenderContext }) {
@@ -49,17 +45,12 @@ export function UsageTabs({ method, ctx }: { method: MethodInformation; ctx: Ren
   };
 
   const registry = useMemo(() => {
-    let registry: CodeUsageGeneratorRegistry;
+    const registry = createCodeUsageGeneratorRegistry(ctx.codeUsages);
 
-    if (ctx.codeUsages) {
-      registry = createCodeUsageGeneratorRegistry(ctx.codeUsages);
-    } else {
-      registry = createCodeUsageGeneratorRegistry();
-      registerDefault(registry);
-    }
-
-    for (const gen of ctx.generateCodeSamples?.(method) ?? []) {
-      registry.addInline(gen);
+    if (ctx.generateCodeSamples) {
+      for (const gen of ctx.generateCodeSamples(method)) {
+        registry.addInline(gen);
+      }
     }
 
     if (method['x-codeSamples']) {

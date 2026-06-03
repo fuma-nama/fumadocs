@@ -13,4 +13,5 @@ export function registerDefault(registry: CodeUsageGeneratorRegistry) {
   registry.add('python', python);
   registry.add('java', java);
   registry.add('csharp', csharp);
+  return registry;
 }
