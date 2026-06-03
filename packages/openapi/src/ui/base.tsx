@@ -1,5 +1,4 @@
 /* eslint-disable @typescript-eslint/no-explicit-any -- rehype-react without types */
-import Slugger from 'github-slugger';
 import type { Awaitable, MethodInformation, RenderContext } from '@/types';
 import { parseSecurities, type NoReference } from '@/utils/schema';
 import type { DereferencedDocument } from '@/utils/document/dereference';
@@ -7,7 +6,6 @@ import { defaultAdapters, MediaAdapter } from '@/requests/media/adapter';
 import type { FC, HTMLAttributes, ReactNode } from 'react';
 import type { OpenAPIServer } from '@/server';
 import type { APIPageClientOptions } from './client';
-import { Heading } from 'fumadocs-ui/components/heading';
 import { createRehypeCode } from 'fumadocs-core/mdx-plugins/rehype-code.core';
 import { remarkGfm } from 'fumadocs-core/mdx-plugins/remark-gfm';
 import defaultMdxComponents from 'fumadocs-ui/mdx';
@@ -203,7 +201,7 @@ export interface CreateAPIPageOptions {
      */
     provider?: (props: { children: ReactNode }) => ReactNode;
     /**
-     * replace the server-side renderer
+     * replace the renderer
      */
     render?: (props: APIPlaygroundProps) => ReactNode;
   };
@@ -276,7 +274,6 @@ export function createAPIPage(
       processed = document;
     }
 
-    const slugger = new Slugger();
     const { ApiProvider, PlaygroundClient, SchemaUI, ServerProvider, UsageTab, UsageTabsSelector } =
       await import('@/ui/client/boundary.lazy');
 
@@ -331,7 +328,7 @@ export function createAPIPage(
 
         return out.result as ReactNode;
       },
-      async renderCodeBlock(lang, code) {
+      async renderCodeBlock({ lang, code }) {
         if (options.renderCodeBlock) {
           return options.renderCodeBlock({ lang, code });
         }

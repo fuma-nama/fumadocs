@@ -1,13 +1,24 @@
 'use client';
 import type { PlaygroundClientOptions } from '@/playground/client';
 import type { MediaAdapter } from '@/requests/media/adapter';
-import type { FC } from 'react';
+import type { ComponentProps, FC } from 'react';
 import type { CodeUsageGeneratorRegistry } from '@/requests/generators';
 import type { ExampleRequestItem } from '../operation/get-example-requests';
 
 export interface APIPageClientOptions {
   playground?: PlaygroundClientOptions;
-  operation?: OperationClientOptions;
+  operation?: {
+    APIExampleSelector?: FC<{
+      items: ExampleRequestItem[];
+
+      value: string | undefined;
+      onValueChange: (id: string) => void;
+    }>;
+  };
+
+  components?: {
+    Heading?: FC<ComponentProps<'h1'> & { id: string; depth: number }>;
+  };
 
   /**
    * Set a prefix for `localStorage` keys.
@@ -27,15 +38,6 @@ export interface APIPageClientOptions {
    * generate code usage examples
    */
   codeUsages?: CodeUsageGeneratorRegistry;
-}
-
-export interface OperationClientOptions {
-  APIExampleSelector?: FC<{
-    items: ExampleRequestItem[];
-
-    value: string | undefined;
-    onValueChange: (id: string) => void;
-  }>;
 }
 
 export function defineClientConfig(options: APIPageClientOptions = {}): APIPageClientOptions {

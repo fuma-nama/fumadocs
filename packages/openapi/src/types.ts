@@ -4,7 +4,6 @@ import type { DereferencedDocument } from '@/utils/document/dereference';
 import type { MediaAdapter } from '@/requests/media/adapter';
 import type { OpenAPIOptions } from '@/server';
 import type { CreateAPIPageOptions } from './ui/base';
-import type { HTMLAttributes, ReactNode } from 'react';
 import type { InlineCodeUsageGenerator } from './requests/generators';
 
 export type Document = OpenAPIV3_2.Document;
@@ -37,8 +36,11 @@ export interface RenderContext
   extends
     Pick<OpenAPIOptions, 'proxyUrl'>,
     Omit<
-      RequireKeys<CreateAPIPageOptions, 'renderMarkdown' | 'generateTypeScriptDefinitions'>,
-      'renderCodeBlock' | 'renderHeading' | 'generateTypeScriptSchema'
+      RequireKeys<
+        CreateAPIPageOptions,
+        'renderMarkdown' | 'generateTypeScriptDefinitions' | 'renderCodeBlock'
+      >,
+      'renderHeading' | 'generateTypeScriptSchema'
     > {
   /**
    * dereferenced schema
@@ -47,8 +49,6 @@ export interface RenderContext
   clientBoundary: typeof import('@/ui/client/boundary');
 
   mediaAdapters: Record<string, MediaAdapter>;
-
-  renderCodeBlock: (lang: string, code: string) => ReactNode;
 }
 
 export type DistributiveOmit<T, K extends PropertyKey> = T extends unknown ? Omit<T, K> : never;

@@ -13,7 +13,7 @@ export async function renderContextFrom(input: string): Promise<RenderContext> {
     },
     shiki: defaultShikiFactory,
     shikiOptions: { theme: 'github-light' },
-    renderCodeBlock(_lang, code) {
+    renderCodeBlock({ code }) {
       return code;
     },
     clientBoundary: ClientBoundary,

@@ -1,3 +1,4 @@
+'use client';
 /* eslint-disable @typescript-eslint/no-explicit-any -- rehype-react without types */
 import type { Document, RenderContext } from '@/types';
 import { defaultAdapters } from '@/requests/media/adapter';
@@ -9,7 +10,6 @@ import {
   type FC,
   type ReactNode,
 } from 'react';
-import { Heading } from 'fumadocs-ui/components/heading';
 import { remarkGfm } from 'fumadocs-core/mdx-plugins/remark-gfm';
 import defaultMdxComponents from 'fumadocs-ui/mdx';
 import { remark } from 'remark';
@@ -21,11 +21,11 @@ import type { APIPlaygroundProps, CreateAPIPageOptions } from './base';
 import { defaultShikiFactory } from 'fumadocs-core/highlight/shiki/full';
 import { compile } from '@fumari/json-schema-ts';
 import { ClientCodeBlock, ClientCodeBlockProvider } from './components/codeblock';
-import { slug } from 'github-slugger';
 import * as ClientBoundary from '@/ui/client/boundary';
 import { dereferenceDocument } from '@/utils/document/dereference';
 import { parseSecurities } from '@/utils/schema';
 import { AuthProvider } from '@/playground/auth';
+import { APIPageClientOptions } from './client';
 
 export interface ClientApiPageProps extends Omit<ApiPageProps, 'document'> {
   payload: ClientApiPagePayload;
@@ -36,9 +36,9 @@ export interface ClientApiPagePayload {
   proxyUrl?: string;
 }
 
-export type CreateClientAPIPageOptions = Omit<
-  Partial<CreateAPIPageOptions>,
-  'generateTypeScriptSchema'
+export type CreateClientAPIPageOptions = Partial<
+  Omit<CreateAPIPageOptions, 'generateTypeScriptSchema' | 'client'> &
+    Omit<APIPageClientOptions, 'mediaAdapters' | 'codeUsages'>
 >;
 
 /**
@@ -115,6 +115,7 @@ export function createClientAPIPage({
         shikiOptions,
         generateTypeScriptDefinitions,
         clientBoundary: ClientBoundary,
+        client: options,
         ...options,
         mediaAdapters: {
           ...defaultAdapters,
@@ -133,12 +134,12 @@ export function createClientAPIPage({
             value: text,
           }).result as ReactNode;
         },
-        renderCodeBlock(lang, code) {
+        renderCodeBlock(props) {
           if (options.renderCodeBlock) {
-            return options.renderCodeBlock({ lang, code });
+            return options.renderCodeBlock(props);
           }
 
-          return <ClientCodeBlock lang={lang} code={code} />;
+          return <ClientCodeBlock {...props} />;
         },
       }),
       [payload.proxyUrl, processed],
