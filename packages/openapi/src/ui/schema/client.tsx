@@ -45,7 +45,8 @@ interface PathItemType {
   /** property name of highlighted field, only applicable for objects */
   highlighted?: string;
   tabValues?: string[];
-  closed?: true;
+  /** popover state, only applicable for root */
+  closed?: boolean;
 }
 
 interface StateContextType {
@@ -86,29 +87,17 @@ export interface SchemaUIProps {
 
 export function SchemaUI({ name, required = false, as = 'property', generated }: SchemaUIProps) {
   const rootId = useAnchorId([name]);
-  const [path, _setPath] = useState<PathItemType[]>(() => [{ $ref: generated.$root, name }]);
+  const [path, setPath] = useState<PathItemType[]>(() => [{ $ref: generated.$root, name }]);
   const ref = useRef<HTMLDivElement>(null);
-  const popoverRef = useRef<HTMLDivElement>(null);
-  const setPath = useCallback((v: PathItemType[]) => {
-    for (const item of v) delete item.highlighted;
-    _setPath((current) => {
-      if (popoverRef.current && current.length > 0) {
-        current[current.length - 1].scrollTop = popoverRef.current.scrollTop;
-      }
-
-      return v;
-    });
-  }, []);
-
-  // ensure popover scroll top & height is stable
-  useEffect(() => {
-    const element = popoverRef.current;
-    if (!element) return;
-
-    element.scrollTop = path.at(-1)!.scrollTop ?? 0;
-    const current = parseFloat(element.style.getPropertyValue('--min-height') || '0');
-    element.style.setProperty('--min-height', Math.max(element.clientHeight + 2, current) + 'px');
-  }, [path]);
+  const popoverRef = useCallback(
+    (element: HTMLDivElement | null) => {
+      if (!element) return;
+      element.scrollTop = path.at(-1)!.scrollTop ?? 0;
+      const current = parseFloat(element.style.getPropertyValue('--min-height') || '200px');
+      element.style.setProperty('--min-height', Math.max(element.clientHeight + 2, current) + 'px');
+    },
+    [path],
+  );
 
   useEffect(() => {
     const url = new URL(window.location.href);
@@ -119,7 +108,7 @@ export function SchemaUI({ name, required = false, as = 'property', generated }:
     if (!decoded || decoded.length === 0 || decoded.some((item) => !generated.refs[item.$ref]))
       return;
 
-    _setPath(decoded);
+    setPath(decoded);
     if (!decoded.at(-1)!.highlighted) {
       ref.current?.scrollIntoView({ behavior: 'smooth' });
     }
@@ -136,18 +125,19 @@ export function SchemaUI({ name, required = false, as = 'property', generated }:
           renderTypeInfoTrigger: ({ $ref, children, pathName }) => (
             <Popover
               open={
-                path[1] &&
+                path.length > 1 &&
                 path[1].$ref === $ref &&
                 path[1].name === pathName &&
-                !path.at(-1)!.closed
+                !path[0].closed
               }
               onOpenChange={(v) => {
                 if (v) {
-                  setPath([path[0], { name: pathName, $ref }]);
+                  setPath([
+                    { ...path[0], closed: false },
+                    { name: pathName, $ref },
+                  ]);
                 } else {
-                  const next = [...path];
-                  next.at(-1)!.closed = true;
-                  setPath(next);
+                  setPath(path.map((item, i) => (i === 0 ? { ...item, closed: true } : item)));
                 }
               }}
             >
@@ -156,7 +146,12 @@ export function SchemaUI({ name, required = false, as = 'property', generated }:
               </PopoverTrigger>
               <PopoverContent
                 ref={popoverRef}
-                className="w-[600px] min-h-(--min-height,0) max-h-[460px] px-2 pt-0"
+                collisionPadding={10}
+                className="w-[600px] max-w-(--radix-popover-content-available-width) min-h-(--min-height,200px) fd-scroll-container max-h-[460px] px-3 pt-0"
+                onScrollEnd={(e) => {
+                  // ensure popover scroll top is stable
+                  path.at(-1)!.scrollTop = (e.target as HTMLElement).scrollTop;
+                }}
                 onOpenAutoFocus={(e) => {
                   const element = e.target as HTMLElement;
                   const input = element.querySelector('input[data-object-search-input]');
@@ -170,7 +165,7 @@ export function SchemaUI({ name, required = false, as = 'property', generated }:
             </Popover>
           ),
         }),
-        [generated, path, rootId, setPath],
+        [generated, path, rootId, popoverRef],
       )}
     >
       {as === 'property' || generated.refs[generated.$root].type === 'primitive' ? (
@@ -179,6 +174,7 @@ export function SchemaUI({ name, required = false, as = 'property', generated }:
           id={rootId}
           name={name}
           $type={generated.$root}
+          parentPathIndex={0}
           required={required}
         />
       ) : (
@@ -209,10 +205,12 @@ function ObjectProperty({
   name,
   $type,
   required,
+  parentPathIndex,
   ...props
 }: ComponentProps<'div'> & {
   name: string;
   $type: string;
+  parentPathIndex: number;
   required?: boolean;
 }) {
   const t = useTranslations();
@@ -222,7 +220,21 @@ function ObjectProperty({
     rootId,
   } = useStates();
   const schema = refs[$type];
-  const highlighted = path.at(-1)!.highlighted === name;
+  const parentItem = path[parentPathIndex];
+  const ref = useCallback(
+    (element: HTMLDivElement | null) => {
+      if (!element || parentItem.highlighted !== name) return;
+
+      window.setTimeout(() => {
+        element.scrollIntoView({
+          behavior: 'smooth',
+          block: 'end',
+        });
+        delete parentItem.highlighted;
+      }, 300);
+    },
+    [parentItem, name],
+  );
   const [isChecked, onClick] = useCopyButton(() => {
     const url = new URL(window.location.href);
     url.hash = `#${rootId}`;
@@ -234,22 +246,14 @@ function ObjectProperty({
   return (
     <div
       {...props}
-      ref={mergeRefs(
-        props.ref,
-        useCallback(
-          (element: HTMLDivElement | null) => {
-            if (element && highlighted) element.scrollIntoView();
-          },
-          [highlighted],
-        ),
-      )}
-      className={cn('group/property text-sm border-t py-4 first:border-t-0', props.className)}
+      ref={mergeRefs(props.ref, ref)}
+      className={cn('text-sm border-t py-4 scroll-m-20 first:border-t-0', props.className)}
     >
-      <div className="flex flex-wrap items-center gap-3 not-prose">
+      <div className="flex flex-wrap items-center gap-2 not-prose">
         <span className="font-medium font-mono">
           <span
             className={cn(
-              highlighted
+              parentItem.highlighted === name
                 ? 'bg-fd-primary text-fd-primary-foreground rounded-sm'
                 : 'text-fd-primary',
               schema.deprecated && 'line-through opacity-80',
@@ -280,7 +284,7 @@ function ObjectProperty({
         <button
           className={cn(
             buttonVariants({ size: 'icon-xs', variant: 'ghost' }),
-            'text-fd-muted-foreground',
+            'text-fd-muted-foreground [&_svg]:size-3.5',
           )}
           onClick={onClick}
         >
@@ -345,7 +349,7 @@ function PathItemBody({
   }
   if (schema.type === 'object' && schema.props.length > 0) {
     return (
-      <ObjectSearch properties={schema.props} {...objectSearchOverrides}>
+      <ObjectSearch pathIndex={pathIndex} schema={schema} {...objectSearchOverrides}>
         <SchemaDescription schema={schema} />
       </ObjectSearch>
     );
@@ -354,7 +358,11 @@ function PathItemBody({
     return (
       <>
         <SchemaDescription schema={schema} />
-        <ObjectProperty name="[index: integer]" $type={schema.item.$type} />
+        <ObjectProperty
+          name="[index: integer]"
+          $type={schema.item.$type}
+          parentPathIndex={pathIndex}
+        />
       </>
     );
   }
@@ -363,49 +371,37 @@ function PathItemBody({
 }
 
 interface ObjectSearchProps {
-  variant?: 'ghost' | 'secondary';
-  properties: SchemaDataObjectProperty[];
-  inputContainer?: ComponentProps<'div'>;
+  variant?: 'default' | 'in-popover';
+  pathIndex: number;
+  schema: Extract<SchemaData, { type: 'object' }>;
   children?: ReactNode;
 }
 
-function ObjectSearch({
-  variant = 'secondary',
-  properties,
-  inputContainer,
-  children,
-}: ObjectSearchProps) {
+function ObjectSearch({ variant = 'default', schema, pathIndex, children }: ObjectSearchProps) {
   const { path, setPath } = useStates();
   const [search, setSearch] = useState('');
   const deferredValue = useDeferredValue(search);
   const firstItemRef = useRef<SchemaDataObjectProperty>(null);
-  const prevProperties = useRef(properties);
   const t = useTranslations();
-
-  if (prevProperties.current !== properties) {
-    prevProperties.current = properties;
-    setSearch('');
-  }
 
   return (
     <>
       <div
-        {...inputContainer}
         className={cn(
           'flex items-center bg-fd-secondary text-fd-secondary-foreground transition-colors',
-          variant === 'ghost' && 'border-b focus-within:[&_svg]:text-fd-primary',
-          variant === 'secondary' &&
-            'border bg-fd-secondary rounded-md shadow-sm focus-within:ring-2 focus-within:ring-fd-ring',
-          inputContainer?.className,
+          variant === 'in-popover' &&
+            'sticky top-10 -mx-3 ps-3 border-b focus-within:[&_svg]:text-fd-primary',
+          variant === 'default' &&
+            'border rounded-md ps-2 shadow-sm focus-within:ring-2 focus-within:ring-fd-ring',
         )}
       >
-        <FilterIcon className="text-fd-muted-foreground ms-2 size-3.5 transition-colors" />
+        <FilterIcon className="text-fd-muted-foreground size-3.5 transition-colors" />
         <input
           value={search}
           data-object-search-input=""
           onChange={(e) => setSearch(e.target.value)}
           placeholder={t.schemaFilterPropertiesPlaceholder}
-          className="peer text-sm ps-2 py-2 flex-1 outline-none placeholder:text-fd-muted-foreground"
+          className="text-sm ps-2 py-2 flex-1 outline-none placeholder:text-fd-muted-foreground"
           onKeyDown={(e) => {
             if (e.key === 'Enter') {
               const item = firstItemRef.current;
@@ -419,8 +415,23 @@ function ObjectSearch({
       <Suspense>
         <ObjectSearchContent
           search={deferredValue}
-          properties={properties}
+          properties={schema.props}
           firstItemRef={firstItemRef}
+          empty={() => (
+            <p className="text-fd-muted-foreground text-sm mt-2! mb-0!">
+              {t.schemaFilterPropertiesEmpty}{' '}
+              <span className="text-fd-foreground font-medium">{`"${deferredValue}"`}</span>
+            </p>
+          )}
+          render={(item) => (
+            <ObjectProperty
+              key={item.name}
+              name={item.name}
+              $type={item.$type}
+              required={item.required}
+              parentPathIndex={pathIndex}
+            />
+          )}
         />
       </Suspense>
     </>
@@ -431,12 +442,15 @@ function ObjectSearchContent({
   search: rawSearch,
   firstItemRef,
   properties,
+  empty,
+  render,
 }: {
   search: string;
   firstItemRef: RefObject<SchemaDataObjectProperty | null>;
   properties: SchemaDataObjectProperty[];
+  render: (item: SchemaDataObjectProperty) => ReactNode;
+  empty: () => ReactNode;
 }) {
-  const t = useTranslations();
   const filtered = useMemo(() => {
     const search = rawSearch.trim().toLowerCase();
     return search.length > 0
@@ -446,17 +460,8 @@ function ObjectSearchContent({
 
   firstItemRef.current = filtered[0] ?? null;
 
-  if (filtered.length === 0)
-    return (
-      <p className="text-fd-muted-foreground text-sm">
-        {t.schemaFilterPropertiesEmpty}{' '}
-        <span className="text-fd-foreground font-medium">{`"${rawSearch}"`}</span>
-      </p>
-    );
-
-  return filtered.map((prop) => (
-    <ObjectProperty key={prop.name} name={prop.name} $type={prop.$type} required={prop.required} />
-  ));
+  if (filtered.length === 0) return empty();
+  return filtered.map(render);
 }
 
 function InfoTag({ tag }: { tag: InfoTag }) {
@@ -503,7 +508,7 @@ function SchemaUIPopover() {
         [states],
       )}
     >
-      <div className="sticky top-0 -mx-2 flex flex-row overflow-x-auto overflow-y-hidden items-center text-sm font-medium font-mono bg-fd-popover px-2 h-10 border-b z-20">
+      <div className="sticky top-0 -mx-3 flex overflow-x-auto overflow-y-hidden items-center text-sm font-medium font-mono bg-fd-secondary text-fd-secondary-foreground px-3 h-10 border-b z-20">
         {path.map((item, i) => {
           // ignore root
           if (i === 0) return;
@@ -536,10 +541,7 @@ function SchemaUIPopover() {
       <PathItemBody
         pathIndex={path.length - 1}
         objectSearchOverrides={{
-          variant: 'ghost',
-          inputContainer: {
-            className: 'sticky top-10 -mx-2',
-          },
+          variant: 'in-popover',
         }}
       />
     </Context>
@@ -601,9 +603,7 @@ function TypeInfoTrigger({
 }
 
 function encodePath(path: PathItemType[]): string {
-  return path
-    .map((item) => [item.name, item.$ref, ...(item.tabValues ?? [])].join('\0').replaceAll('|', ''))
-    .join('|');
+  return path.map((item) => [item.name, item.$ref, ...(item.tabValues ?? [])].join('\0')).join('|');
 }
 
 function decodePath(path: string, highlighted: string | null): PathItemType[] | null {
