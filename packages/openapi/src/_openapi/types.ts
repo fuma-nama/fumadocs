@@ -1,14 +1,4 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
-/* eslint-disable @typescript-eslint/no-empty-object-type */
-/**
- * These types are copied from openapi-types, with two modifications:
- *
- * - all attributes are optional, you can't rely on the specification for user input
- * - extensions (basically any attributes, not only prefixed with an `x-`) are allowed
- *
- * We deal with user input and can't assume they really stick to any official specification.
- */
-/** any other attribute, for example x-* extensions */
+/** Original copy: https://github.com/scalar/scalar/blob/main/packages/openapi-types/src/openapi-types.ts */
 export declare namespace OpenAPI {
   type Document<T = {}> =
     | OpenAPIV2.Document<T>
@@ -289,7 +279,6 @@ export declare namespace OpenAPIV3_2 {
     parent?: string;
     kind?: string;
   };
-  export {};
 }
 export declare namespace OpenAPIV3_1 {
   type Modify<T, R> = Omit<T, keyof R> & R;
@@ -508,7 +497,6 @@ export declare namespace OpenAPIV3_1 {
   export type OAuth2SecurityScheme = OpenAPIV3.OAuth2SecurityScheme;
   export type OpenIdSecurityScheme = OpenAPIV3.OpenIdSecurityScheme;
   export type TagObject = OpenAPIV3.TagObject;
-  export {};
 }
 export declare namespace OpenAPIV3 {
   export type Document<T = {}> = {
@@ -827,7 +815,6 @@ export declare namespace OpenAPIV3 {
     description?: string;
     externalDocs?: ExternalDocumentationObject;
   };
-  export {};
 }
 export declare namespace OpenAPIV2 {
   type Document<T = {}> = {
@@ -1087,5 +1074,3 @@ export type IJsonSchema = {
   not?: IJsonSchema;
   $ref?: string;
 };
-export {};
-//# sourceMappingURL=openapi-types.d.ts.map
