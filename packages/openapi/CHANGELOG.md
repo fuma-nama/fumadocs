@@ -1,5 +1,11 @@
 # @fuma-docs/openapi
 
+## 10.10.3
+
+### Patch Changes
+
+- 4f22826: Improve micro-interaction
+
 ## 10.10.2
 
 ### Patch Changes
