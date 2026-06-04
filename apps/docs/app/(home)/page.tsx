@@ -8,6 +8,7 @@ import {
   FileTextIcon,
   Heart,
   SearchIcon,
+  SettingsIcon,
   TerminalIcon,
   TimerIcon,
 } from 'lucide-react';
@@ -139,9 +140,83 @@ export default function Page() {
         <AnybodyCanWrite />
 
         <ForEngineers />
+        <ForNonEnginners />
         <OpenSource />
       </div>
     </main>
+  );
+}
+
+function ForNonEnginners() {
+  return (
+    <>
+      <h2
+        className={cn(
+          headingVariants({
+            variant: 'h2',
+            className: 'mt-8 text-brand text-center mb-4 col-span-full',
+          }),
+        )}
+      >
+        Not Just Engineers.
+      </h2>
+
+      <div className={cn(cardVariants({ className: 'flex flex-col' }))}>
+        <SettingsIcon className="text-brand mb-4" />
+        <h3
+          className={cn(
+            headingVariants({
+              variant: 'h3',
+              className: 'mb-6',
+            }),
+          )}
+        >
+          Meet Fumapress.
+        </h3>
+        <p className="mb-8">
+          Want to use Fumadocs without the complexity of configurations & prior knowledge?
+          <br />
+          <br />
+          Fumapress is a React.js framework for Fumadocs, every feature needs only a plugin –
+          embracing simplicity fully for those who just want a working docs.
+        </p>
+        <div className="flex flex-row items-center gap-2">
+          <a
+            href="https://press.fumadocs.dev"
+            rel="noreferrer noopener"
+            target="_blank"
+            className={cn(buttonVariants({ variant: 'primary' }))}
+          >
+            Learn More
+          </a>
+          <a
+            href="https://press.fumadocs.dev/blog/introducing-fumapress"
+            rel="noreferrer noopener"
+            target="_blank"
+            className={cn(buttonVariants({ variant: 'secondary' }))}
+          >
+            Why?
+          </a>
+        </div>
+      </div>
+      <ServerCodeBlock
+        lang="ts"
+        codeblock={{ title: 'press.config.tsx' }}
+        code={`import { defineConfig } from "fumapress";
+import { fumadocsMdx } from "fumapress/adapters/mdx";
+import { flexsearchPlugin } from "fumapress/plugins/flexsearch";
+import { llmsPlugin } from "fumapress/plugins/llms.txt";
+import { docs } from "./.source/server";
+
+export default defineConfig({
+  content: {
+    docs: docs.toFumadocsSource(),
+  },
+})
+  .plugins(flexsearchPlugin(), llmsPlugin())
+  .adapters(fumadocsMdx());`}
+      />
+    </>
   );
 }
 
@@ -438,7 +513,7 @@ function ForEngineers() {
           }),
         )}
       >
-        Docs For Engineers.
+        Docs for Engineers.
       </h2>
       <Story />
 
@@ -714,7 +789,7 @@ function OpenSource() {
           }),
         )}
       >
-        A Framework of Dream.
+        Open Source Forever.
       </h2>
 
       <div className={cn(cardVariants({ className: 'flex flex-col' }))}>

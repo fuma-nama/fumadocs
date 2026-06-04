@@ -1,5 +1,11 @@
 # @fumadocs/story
 
+## 1.0.2
+
+### Patch Changes
+
+- 4f22826: Improve micro-interaction
+
 ## 1.0.1
 
 ### Patch Changes

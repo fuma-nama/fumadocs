@@ -107,7 +107,7 @@ export interface PlaygroundClientOptions {
    * for updating values, use:
    * - the `Custom.useController()` from `fumadocs-openapi/playground/client`.
    *
-   * Recommended types packages: `json-schema-typed`, `openapi-types`.
+   * Recommended types packages: `json-schema-typed`.
    */
   renderParameterField?: (fieldName: FieldKey, param: ParameterObject) => ReactNode;
 

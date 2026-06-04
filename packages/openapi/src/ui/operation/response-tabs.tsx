@@ -98,7 +98,10 @@ function renderResponseTabsDefault(tabs: ResponseTab[], ctx: RenderContext): Rea
     return (
       <>
         {example.description && ctx.renderMarkdown(example.description)}
-        {ctx.renderCodeBlock('json', JSON.stringify(example.sample, null, 2))}
+        {ctx.renderCodeBlock({
+          lang: 'json',
+          code: JSON.stringify(example.sample, null, 2),
+        })}
       </>
     );
   }

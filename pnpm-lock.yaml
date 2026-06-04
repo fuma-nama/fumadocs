@@ -2757,9 +2757,6 @@ importers:
       '@radix-ui/react-select':
         specifier: ^2.2.6
         version: 2.2.6(@types/react-dom@19.2.3(@types/react@19.2.15))(@types/react@19.2.15)(react-dom@19.2.6(react@19.2.6))(react@19.2.6)
-      '@radix-ui/react-slot':
-        specifier: ^1.2.4
-        version: 1.2.4(@types/react@19.2.15)(react@19.2.6)
       chokidar:
         specifier: ^5.0.0
         version: 5.0.0
@@ -2797,15 +2794,15 @@ importers:
         specifier: ^3.6.0
         version: 3.6.0
     devDependencies:
+      '@apidevtools/json-schema-ref-parser':
+        specifier: ^15.3.5
+        version: 15.3.5(@types/json-schema@7.0.15)
       '@fastify/deepmerge':
         specifier: ^3.2.1
         version: 3.2.1
       '@scalar/api-client-react':
         specifier: 2.0.20
         version: 2.0.20(axios@1.16.0)(react@19.2.6)(tailwindcss@4.3.0)(typescript@6.0.3)
-      '@scalar/json-magic':
-        specifier: ^0.12.14
-        version: 0.12.14
       '@scalar/openapi-upgrader':
         specifier: ^0.2.8
         version: 0.2.8
@@ -3703,6 +3700,12 @@ packages:
 
   '@antfu/install-pkg@1.1.0':
     resolution: {integrity: sha512-MGQsmw10ZyI+EJo45CdSER4zEb+p31LpDAFp2Z3gkSd1yqVZGi0Ebx++YTEMonJy4oChEMLsxZ64j8FH6sSqtQ==}
+
+  '@apidevtools/json-schema-ref-parser@15.3.5':
+    resolution: {integrity: sha512-orNOYXw3hYXxxisXMldjzjBzqqTLBPbwOtHg7ovBPvfBHDue1qM9YJENZ3W2BQuS+7z4ThogMbEzEsov57Itkg==}
+    engines: {node: '>=20'}
+    peerDependencies:
+      '@types/json-schema': ^7.0.15
 
   '@architect/asap@7.0.10':
     resolution: {integrity: sha512-oJjYDranGTCkp21bziF/fIxJfLTucitqg/ar5mmLPHyroNG3XF3SUIMvuNd1GNIe4oy40wvGEXvTToKYvUeOLA==}
@@ -15708,6 +15711,11 @@ snapshots:
     dependencies:
       package-manager-detector: 1.6.0
       tinyexec: 1.2.2
+
+  '@apidevtools/json-schema-ref-parser@15.3.5(@types/json-schema@7.0.15)':
+    dependencies:
+      '@types/json-schema': 7.0.15
+      js-yaml: 4.1.1
 
   '@architect/asap@7.0.10':
     dependencies:

@@ -122,7 +122,10 @@ function RequestTabsItem({
                 <AccordionTrigger>{v}</AccordionTrigger>
               </AccordionHeader>
               <AccordionContent className="prose-no-margin">
-                {ctx.renderCodeBlock('json', JSON.stringify(data, null, 2))}
+                {ctx.renderCodeBlock({
+                  lang: 'json',
+                  code: JSON.stringify(data, null, 2),
+                })}
               </AccordionContent>
             </AccordionItem>
           );

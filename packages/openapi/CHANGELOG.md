@@ -1,5 +1,23 @@
 # @fuma-docs/openapi
 
+## 10.10.3
+
+### Patch Changes
+
+- 4f22826: Improve micro-interaction
+
+## 10.10.2
+
+### Patch Changes
+
+- 2771e34: Reduce package size
+
+## 10.10.1
+
+### Patch Changes
+
+- 8eb7782: Support `components.Heading` in client config
+
 ## 10.10.0
 
 ### Minor Changes

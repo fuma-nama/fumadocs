@@ -1,5 +1,4 @@
 /* eslint-disable @typescript-eslint/no-explicit-any -- rehype-react without types */
-import Slugger from 'github-slugger';
 import type { Awaitable, MethodInformation, RenderContext } from '@/types';
 import { parseSecurities, type NoReference } from '@/utils/schema';
 import type { DereferencedDocument } from '@/utils/document/dereference';
@@ -7,7 +6,6 @@ import { defaultAdapters, MediaAdapter } from '@/requests/media/adapter';
 import type { FC, HTMLAttributes, ReactNode } from 'react';
 import type { OpenAPIServer } from '@/server';
 import type { APIPageClientOptions } from './client';
-import { Heading } from 'fumadocs-ui/components/heading';
 import { createRehypeCode } from 'fumadocs-core/mdx-plugins/rehype-code.core';
 import { remarkGfm } from 'fumadocs-core/mdx-plugins/remark-gfm';
 import defaultMdxComponents from 'fumadocs-ui/mdx';
@@ -19,7 +17,11 @@ import { CodeBlock, Pre } from 'fumadocs-ui/components/codeblock';
 import type { SchemaUIOptions } from './schema';
 import type { ResponseTab } from './operation/response-tabs';
 import { APIPage, type ApiPageProps, type OperationItem, type WebhookItem } from './api-page';
-import type { CodeUsageGeneratorRegistry, InlineCodeUsageGenerator } from '@/requests/generators';
+import {
+  createCodeUsageGeneratorRegistry,
+  type CodeUsageGeneratorRegistry,
+  type InlineCodeUsageGenerator,
+} from '@/requests/generators';
 import type { JSONSchema } from 'json-schema-typed';
 import type { BundledTheme, CodeOptionsThemes, CodeToHastOptionsCommon } from 'shiki';
 import { highlightHast, type ShikiFactory } from 'fumadocs-core/highlight/shiki';
@@ -29,6 +31,7 @@ import { pickSchema } from '@/utils/schema/pick';
 import { encodeInternalRef } from '@/utils/schema/ref';
 import type { RequestTabsRenderContext } from './operation/request-tabs';
 import { PlaygroundAuthProvider } from '@/ui/client/boundary.lazy';
+import { registerDefault } from '@/requests/generators/all';
 
 export interface GenerateTypeScriptDefinitionsContext extends RenderContext {
   operation: NoReference<MethodInformation>;
@@ -203,7 +206,7 @@ export interface CreateAPIPageOptions {
      */
     provider?: (props: { children: ReactNode }) => ReactNode;
     /**
-     * replace the server-side renderer
+     * replace the renderer
      */
     render?: (props: APIPlaygroundProps) => ReactNode;
   };
@@ -276,7 +279,6 @@ export function createAPIPage(
       processed = document;
     }
 
-    const slugger = new Slugger();
     const { ApiProvider, PlaygroundClient, SchemaUI, ServerProvider, UsageTab, UsageTabsSelector } =
       await import('@/ui/client/boundary.lazy');
 
@@ -292,6 +294,7 @@ export function createAPIPage(
         UsageTabsSelector,
       },
       ...options,
+      codeUsages: options.codeUsages ?? registerDefault(createCodeUsageGeneratorRegistry()),
       mediaAdapters: {
         ...defaultAdapters,
         ...options.mediaAdapters,
@@ -331,7 +334,7 @@ export function createAPIPage(
 
         return out.result as ReactNode;
       },
-      async renderCodeBlock(lang, code) {
+      async renderCodeBlock({ lang, code }) {
         if (options.renderCodeBlock) {
           return options.renderCodeBlock({ lang, code });
         }

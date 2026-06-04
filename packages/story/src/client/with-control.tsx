@@ -69,7 +69,6 @@ export function WithControl({ presets, displayName, Component }: WithControlProp
         <StoryComponent Component={Component} />
         {preset && (
           <FieldSet
-            key={variant}
             field={preset.controls}
             fieldName={[]}
             name={t.props}

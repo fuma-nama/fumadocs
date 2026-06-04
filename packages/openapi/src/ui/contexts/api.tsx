@@ -63,18 +63,10 @@ export function ApiProvider({
   return (
     <ApiContext
       value={useMemo(() => {
-        let codeUsages: CodeUsageGeneratorRegistry;
-        if (client.codeUsages) {
-          codeUsages = createCodeUsageGeneratorRegistry(client.codeUsages);
-        } else {
-          codeUsages = createCodeUsageGeneratorRegistry();
-          registerDefault(codeUsages);
-        }
-
         return {
           shikiOptions,
           client,
-          codeUsages,
+          codeUsages: client.codeUsages ?? registerDefault(createCodeUsageGeneratorRegistry()),
           schemes,
           mediaAdapters: {
             ...defaultAdapters,
