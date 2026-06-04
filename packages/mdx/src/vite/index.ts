@@ -38,10 +38,12 @@ export interface PluginOptions {
 }
 
 export default async function mdx(
-  _config?: Record<string, unknown> | Promise<Record<string, unknown>>,
+  forcedConfig?: Record<string, unknown> | Promise<Record<string, unknown>> | undefined,
   pluginOptions: PluginOptions = {},
 ): Promise<Plugin[]> {
+  let root: string;
   let core: Core;
+  let options: Required<PluginOptions>;
   const metaPlugin: Plugin = {
     name: 'fumadocs-mdx:meta',
   };
@@ -53,13 +55,14 @@ export default async function mdx(
     {
       name: 'fumadocs-mdx',
       async config(config) {
-        const root = config.root ?? process.cwd();
-        const options = applyDefaults(root, pluginOptions);
+        root = config.root ?? process.cwd();
+        options = applyDefaults(root, pluginOptions);
         core = createViteCore(options);
         await core.init({
           config: buildConfig(
-            (await _config) ??
-              (await runnerImport<Record<string, unknown>>(options.configPath)).module,
+            forcedConfig
+              ? await forcedConfig
+              : (await runnerImport<Record<string, unknown>>(options.configPath)).module,
             root,
           ),
         });
@@ -76,18 +79,22 @@ export default async function mdx(
         mdxPlugin.transform = {
           filter: mdxLoader.filter,
           order: 'pre',
-          async handler(code, id) {
+          handler(code, id) {
             // Vite RSC will pass the compiled MDX file's client module with ID `virtual:vite-rsc/client-references/group/facade:xxx.mdx`.
             // The format of `value` becomes JavaScript, which will break the MDX compiler.
             // We have to ignore them.
             if (id.includes('virtual:vite-rsc')) return null;
-            return await mdxLoader.transform.call(this, code, id);
+            if (!forcedConfig) this.addWatchFile(options.configPath);
+            return mdxLoader.transform.call(this, code, id);
           },
         };
         metaPlugin.transform = {
           filter: metaLoader.filter,
           order: 'pre',
-          handler: metaLoader.transform,
+          handler(code, id) {
+            if (!forcedConfig) this.addWatchFile(options.configPath);
+            return metaLoader.transform.call(this, code, id);
+          },
         };
 
         if ('_fumadocs_skipViteConfig' in config && config._fumadocs_skipViteConfig) return;
@@ -103,6 +110,21 @@ export default async function mdx(
         await core.initServer({
           watcher: server.watcher as unknown as FSWatcher,
         });
+
+        if (!forcedConfig) {
+          server.watcher.on('change', async (file) => {
+            if (path.resolve(file) === options.configPath) {
+              await core.init({
+                config: buildConfig(
+                  (await runnerImport<Record<string, unknown>>(options.configPath)).module,
+                  root,
+                ),
+              });
+
+              await core.emit({ write: true });
+            }
+          });
+        }
       },
     },
     mdxPlugin,
