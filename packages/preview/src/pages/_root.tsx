@@ -18,6 +18,6 @@ export default async function RootElement({ children }: { children: ReactNode })
 
 export async function getConfig() {
   return {
-    render: 'static',
+    render: 'dynamic',
   } as const;
 }
