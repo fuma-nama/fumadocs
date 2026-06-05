@@ -36,9 +36,9 @@
     "@types/node": "^25.9.1",
     "fuma-content": "^1.4.0",
     "fumadocs-core": "workspace:*",
-    "react-dom": "^19.2.6",
+    "react-dom": "^19.2.7",
     "tsconfig": "workspace:*",
-    "tsdown": "0.22.0"
+    "tsdown": "0.22.1"
   },
   "peerDependencies": {
     "fuma-content": "^1.2.3",

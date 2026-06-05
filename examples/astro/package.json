@@ -11,19 +11,19 @@
     "astro": "astro"
   },
   "dependencies": {
-    "@astrojs/mdx": "^6.0.0",
-    "@astrojs/react": "^5.0.6",
+    "@astrojs/mdx": "^6.0.2",
+    "@astrojs/react": "^5.0.7",
     "@orama/orama": "^3.1.18",
-    "astro": "^6.4.0",
+    "astro": "^6.4.4",
     "fumadocs-core": "workspace:*",
     "fumadocs-ui": "workspace:*",
-    "react": "^19.2.6",
-    "react-dom": "^19.2.6",
+    "react": "^19.2.7",
+    "react-dom": "^19.2.7",
     "sharp": "^0.34.5"
   },
   "devDependencies": {
     "@tailwindcss/vite": "^4.3.0",
-    "@types/react": "^19.2.15",
+    "@types/react": "^19.2.16",
     "@types/react-dom": "^19.2.3",
     "tailwindcss": "^4.3.0"
   }

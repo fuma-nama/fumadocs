@@ -27,7 +27,7 @@ const command = program
     new Option(
       '--linter <name>',
       'configure a linter/formatter, ESLint is currently Next.js only.',
-    ).choices(['eslint', 'biome']),
+    ).choices(['eslint', 'oxlint', 'biome']),
   )
   .addOption(
     new Option('--search <name>', 'configure a search solution').choices(['orama', 'orama-cloud']),

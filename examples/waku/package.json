@@ -10,25 +10,25 @@
     "types:check": "fumadocs-mdx && tsc --noEmit"
   },
   "dependencies": {
-    "@takumi-rs/image-response": "^1.6.0",
+    "@takumi-rs/image-response": "^1.7.0",
     "fumadocs-core": "workspace:*",
     "fumadocs-mdx": "workspace:*",
     "fumadocs-ui": "workspace:*",
     "lucide-react": "^1.17.0",
-    "react": "^19.2.6",
-    "react-dom": "^19.2.6",
-    "react-server-dom-webpack": "^19.2.6",
+    "react": "^19.2.7",
+    "react-dom": "^19.2.7",
+    "react-server-dom-webpack": "^19.2.7",
     "tailwind-merge": "^3.6.0",
-    "waku": "1.0.0-beta.1"
+    "waku": "1.0.0-beta.2"
   },
   "devDependencies": {
     "@tailwindcss/vite": "^4.3.0",
     "@types/mdx": "^2.0.13",
     "@types/node": "^25.9.1",
-    "@types/react": "^19.2.15",
+    "@types/react": "^19.2.16",
     "@types/react-dom": "^19.2.3",
     "tailwindcss": "^4.3.0",
     "typescript": "^6.0.3",
-    "vite": "^8.0.14"
+    "vite": "^8.0.16"
   }
 }

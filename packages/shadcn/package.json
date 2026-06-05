@@ -30,20 +30,20 @@
     "types:check": "tsc --noEmit"
   },
   "dependencies": {
-    "@shikijs/transformers": "^4.1.0",
+    "@shikijs/transformers": "^4.2.0",
     "zod-3": "npm:zod@^3.25.76"
   },
   "devDependencies": {
     "@types/node": "25.9.1",
-    "@types/react": "^19.2.15",
+    "@types/react": "^19.2.16",
     "fumadocs-core": "workspace:*",
     "fumadocs-ui": "workspace:*",
-    "react": "^19.2.6",
-    "react-dom": "^19.2.6",
-    "shadcn": "^4.8.2",
+    "react": "^19.2.7",
+    "react-dom": "^19.2.7",
+    "shadcn": "^4.10.0",
     "tailwindcss": "^4.3.0",
     "tsconfig": "workspace:*",
-    "tsdown": "0.22.0"
+    "tsdown": "0.22.1"
   },
   "peerDependencies": {
     "@types/react": "*",
