@@ -1,5 +1,11 @@
 # fumadocs-preview
 
+## 0.1.4
+
+### Patch Changes
+
+- 6dc8812: Use Waku beta 2
+
 ## 0.1.3
 
 ### Patch Changes
