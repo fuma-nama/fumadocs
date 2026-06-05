@@ -112,7 +112,7 @@ export function SchemaUI({ name, required = false, as = 'property', generated }:
     if (!decoded.at(-1)!.highlighted) {
       ref.current?.scrollIntoView({ behavior: 'smooth' });
     }
-  }, [rootId]);
+  }, [rootId, generated.refs]);
 
   return (
     <Context
@@ -505,7 +505,7 @@ function SchemaUIPopover() {
             </button>
           ),
         }),
-        [states],
+        [states, setPath, path],
       )}
     >
       <div className="sticky top-0 -mx-3 flex overflow-x-auto overflow-y-hidden items-center text-sm font-medium font-mono bg-fd-secondary text-fd-secondary-foreground px-3 h-10 border-b z-20">

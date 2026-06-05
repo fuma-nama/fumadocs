@@ -1,7 +1,6 @@
 import { TemplatePlugin } from '@/index';
-import { pick, writeFile } from '@/utils';
+import { writeFile } from '@/utils';
 import path from 'node:path';
-import { depVersions } from '@/constants';
 
 const config = `import { defineConfig, globalIgnores } from 'eslint/config';
 import nextVitals from 'eslint-config-next/core-web-vitals';
@@ -32,8 +31,8 @@ export function eslint(): TemplatePlugin {
         },
         devDependencies: {
           ...packageJson.devDependencies,
+          eslint: '^9.39.4',
           'eslint-config-next': packageJson.dependencies!.next,
-          ...pick(depVersions, ['eslint']),
         },
       };
     },

@@ -34,17 +34,17 @@
   },
   "devDependencies": {
     "@sanity/client": "^7.22.1",
-    "@sanity/types": "^5.27.0",
+    "@sanity/types": "^5.30.0",
     "@types/node": "25.9.1",
-    "@types/react": "^19.2.15",
+    "@types/react": "^19.2.16",
     "fuma-cli": "^0.1.1",
     "fumadocs-core": "workspace:*",
     "fumadocs-ui": "workspace:*",
-    "next-sanity": "^13.0.6",
-    "react": "^19.2.6",
-    "sanity": "^5.27.0",
+    "next-sanity": "^13.0.11",
+    "react": "^19.2.7",
+    "sanity": "^5.30.0",
     "tsconfig": "workspace:*",
-    "tsdown": "0.22.0",
+    "tsdown": "0.22.1",
     "typescript": "^6.0.3"
   },
   "peerDependencies": {

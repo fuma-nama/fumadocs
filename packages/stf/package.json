@@ -27,9 +27,9 @@
   },
   "devDependencies": {
     "@types/node": "25.9.1",
-    "@types/react": "^19.2.15",
+    "@types/react": "^19.2.16",
     "tsconfig": "workspace:*",
-    "tsdown": "0.22.0"
+    "tsdown": "0.22.1"
   },
   "peerDependencies": {
     "@types/react": "*",
