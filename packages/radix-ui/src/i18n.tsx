@@ -120,33 +120,33 @@ export function uiTranslations(): TranslationsAPIExtension<'ui', Translations> {
   };
 }
 
-export function i18nProvider<P extends { ui: Translations }>(
-  Translations: SingularTranslationsAPI<P>,
-): I18nProviderProps;
-export function i18nProvider<Languages extends string, P extends { ui: Translations }>(
-  Translations: TranslationsAPI<Languages, P>,
+export function i18nProvider(translations: SingularTranslationsAPI): I18nProviderProps;
+export function i18nProvider<Languages extends string>(
+  translations: TranslationsAPI<Languages>,
   lang?: NoInfer<Languages> | (string & {}),
 ): I18nProviderProps;
 
 export function i18nProvider(
-  translations: SingularTranslationsAPI | TranslationsAPI,
+  _translations: SingularTranslationsAPI | TranslationsAPI,
   lang?: string,
 ): I18nProviderProps {
-  if ('config' in translations) {
-    const { defaultLanguage, languages } = translations.config;
-    const { ui, ...rest } =
-      translations.get(lang ?? defaultLanguage) ?? translations.get(defaultLanguage);
+  // ensure default labels/presets are applied
+  const t = _translations.extend(uiTranslations());
+
+  if ('config' in t) {
+    const { defaultLanguage, languages } = t.config;
+    const { ui, ...rest } = t.get(lang ?? defaultLanguage) ?? t.get(defaultLanguage);
     return {
       locale: lang,
       translations: { ...ui, ...rest },
       locales: languages.map((locale) => ({
         locale,
-        name: translations.get(locale).ui.displayName ?? locale,
+        name: t.get(locale).ui.displayName ?? locale,
       })),
     };
   }
 
-  const { ui, ...rest } = translations.get();
+  const { ui, ...rest } = t.get();
   return {
     translations: { ...ui, ...rest },
   };
