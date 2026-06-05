@@ -1,5 +1,11 @@
 # next-docs-mdx
 
+## 15.0.11
+
+### Patch Changes
+
+- 2d65ceb: Support hot reload in `source.config.ts` with Vite plugin
+
 ## 15.0.10
 
 ### Patch Changes
