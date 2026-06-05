@@ -1,5 +1,5 @@
 import { TemplatePlugin } from '@/index';
-import { pick, writeFile } from '@/utils';
+import { writeFile } from '@/utils';
 import path from 'node:path';
 
 const config = `import { defineConfig, globalIgnores } from 'eslint/config';
