@@ -1,4 +1,4 @@
-import type { OpenAPIV3_2, OpenAPIV3 } from './_openapi/types';
+import type { OpenAPIV3_2, OpenAPIV3 } from './types/openapi';
 import type { NoReference } from '@/utils/schema';
 import type { DereferencedDocument } from '@/utils/document/dereference';
 import type { OpenAPIOptions } from '@/server';

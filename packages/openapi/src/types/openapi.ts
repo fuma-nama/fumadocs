@@ -1,4 +1,6 @@
-/** Original copy: https://github.com/scalar/scalar/blob/main/packages/openapi-types/src/openapi-types.ts */
+/** Original copy: https://github.com/scalar/scalar/blob/main/packages/openapi-types/src/openapi-types.ts
+ * - Removed Record<string, unknown> fallbacks
+ */
 export declare namespace OpenAPI {
   type Document<T = {}> =
     | OpenAPIV2.Document<T>
