@@ -46,7 +46,7 @@
   "dependencies": {
     "@fumadocs/api-docs": "workspace:*",
     "@fumari/json-schema-ts": "^0.0.2",
-    "@fumari/stf": "^1.0.5",
+    "@fumari/stf": "workspace:*",
     "chokidar": "^5.0.0",
     "class-variance-authority": "^0.7.1",
     "github-slugger": "^2.0.0",

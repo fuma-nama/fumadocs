@@ -2843,8 +2843,8 @@ importers:
         specifier: ^0.0.2
         version: 0.0.2(json-schema-typed@8.0.2)
       '@fumari/stf':
-        specifier: ^1.0.5
-        version: 1.0.5(@types/react@19.2.16)(react-dom@19.2.7(react@19.2.7))(react@19.2.7)
+        specifier: workspace:*
+        version: link:../stf
       chokidar:
         specifier: ^5.0.0
         version: 5.0.0
@@ -5369,16 +5369,6 @@ packages:
       json-schema-typed: ^8.0.2
     peerDependenciesMeta:
       json-schema-typed:
-        optional: true
-
-  '@fumari/stf@1.0.5':
-    resolution: {integrity: sha512-O9UQIbV15ePV5vUgceCcaMDuBRYfrSuogDEY5E//CmrbIiWJ1Ji5VgGHHH0L0HQuRr5riUJuAEr9lYIvJl9OyQ==}
-    peerDependencies:
-      '@types/react': '*'
-      react: ^19.2.0
-      react-dom: ^19.2.0
-    peerDependenciesMeta:
-      '@types/react':
         optional: true
 
   '@headlessui/tailwindcss@0.2.2':
@@ -17387,13 +17377,6 @@ snapshots:
       esrap: 2.2.3
     optionalDependencies:
       json-schema-typed: 8.0.2
-
-  '@fumari/stf@1.0.5(@types/react@19.2.16)(react-dom@19.2.7(react@19.2.7))(react@19.2.7)':
-    dependencies:
-      react: 19.2.7
-      react-dom: 19.2.7(react@19.2.7)
-    optionalDependencies:
-      '@types/react': 19.2.16
 
   '@headlessui/tailwindcss@0.2.2(tailwindcss@4.3.0)':
     dependencies:
