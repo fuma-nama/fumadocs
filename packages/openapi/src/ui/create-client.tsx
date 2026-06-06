@@ -1,7 +1,7 @@
 'use client';
 /* eslint-disable @typescript-eslint/no-explicit-any -- rehype-react without types */
-import type { Document, RenderContext } from '@/types';
-import { defaultAdapters } from '@/requests/media/adapter';
+import type { Awaitable, Document, MethodInformation, RenderContext } from '@/types';
+import { defaultAdapters, MediaAdapter } from '@/requests/media/adapter';
 import {
   Children,
   type ComponentProps,
@@ -16,37 +16,222 @@ import { remark } from 'remark';
 import remarkRehype from 'remark-rehype';
 import { toJsxRuntime } from 'hast-util-to-jsx-runtime';
 import * as JsxRuntime from 'react/jsx-runtime';
-import { APIPage, type ApiPageProps } from './api-page';
-import type { APIPlaygroundProps, CreateAPIPageOptions } from './base';
+import { APIPage, OperationItem, WebhookItem, type ApiPageProps } from './api-page';
 import { defaultShikiFactory } from 'fumadocs-core/highlight/shiki/full';
 import { compile } from '@fumari/json-schema-ts';
 import { ClientCodeBlock, ClientCodeBlockProvider } from './components/codeblock';
 import * as ClientBoundary from '@/ui/client/boundary';
-import { dereferenceDocument } from '@/utils/document/dereference';
-import { parseSecurities } from '@/utils/schema';
+import { dereferenceOpenApiDocument } from '@/utils/document/dereference';
+import { type NoReference, parseSecurities } from '@/utils/schema';
 import { AuthProvider } from '@/playground/auth';
-import type { APIPageClientOptions } from './client';
 import { registerDefault } from '@/requests/generators/all';
-import { createCodeUsageGeneratorRegistry } from '@/requests/generators';
+import {
+  type CodeUsageGeneratorRegistry,
+  createCodeUsageGeneratorRegistry,
+  type InlineCodeUsageGenerator,
+} from '@/requests/generators';
+import type { ShikiFactory } from 'fumadocs-core/highlight/shiki';
+import type { JSONSchema } from 'json-schema-typed';
+import type { CodeToHastOptionsCommon, CodeOptionsThemes, BundledTheme } from 'shiki';
+import type { ExampleRequestItem } from './operation/get-example-requests';
+import type { RequestTabsRenderOptions } from './operation/request-tabs';
+import type { ResponseTabsRenderOptions } from './operation/response-tabs';
+import type { SchemaUIOptions } from './schema';
+import type { PlaygroundClientOptions } from '@/playground/client';
 
 export interface ClientApiPageProps extends Omit<ApiPageProps, 'document'> {
-  payload: ClientApiPagePayload;
+  payload: OpenAPIPagePayload;
 }
 
-export interface ClientApiPagePayload {
+export interface GenerateTypeScriptDefinitionsContext {
+  operation: NoReference<MethodInformation>;
+  readOnly: boolean;
+  writeOnly: boolean;
+  ctx: RenderContext;
+}
+
+export interface APIPlaygroundProps {
+  path: string;
+  method: MethodInformation;
+  ctx: RenderContext;
+}
+
+export interface CreateOpenAPIPageOptions {
+  /**
+   * Generate TypeScript definitions from JSON schema.
+   *
+   * Pass `false` to disable it.
+   */
+  generateTypeScriptDefinitions?:
+    | ((
+        schema: JSONSchema,
+        ctx: GenerateTypeScriptDefinitionsContext,
+      ) => Awaitable<string | undefined>)
+    | false;
+
+  /**
+   * Generate example code usage for all endpoints.
+   */
+  codeUsages?: CodeUsageGeneratorRegistry;
+
+  /**
+   * Generate example code usage for each endpoint.
+   */
+  generateCodeSamples?: (method: MethodInformation) => InlineCodeUsageGenerator[];
+
+  shiki?: ShikiFactory;
+  shikiOptions?: Omit<CodeToHastOptionsCommon, 'lang'> & CodeOptionsThemes<BundledTheme>;
+
+  /**
+   * Show full response schema instead of only example response & Typescript definitions.
+   *
+   * @default true
+   */
+  showResponseSchema?: boolean;
+
+  /**
+   * Support other media types.
+   */
+  mediaAdapters?: Record<string, MediaAdapter>;
+
+  /**
+   * Customize page content
+   */
+  content?: {
+    renderResponseTabs?: (options: ResponseTabsRenderOptions, ctx: RenderContext) => ReactNode;
+
+    renderRequestTabs?: (options: RequestTabsRenderOptions, ctx: RenderContext) => ReactNode;
+
+    renderAPIExampleLayout?: (
+      slots: {
+        selector: ReactNode;
+        usageTabs: ReactNode;
+        responseTabs: ReactNode;
+      },
+      ctx: RenderContext,
+    ) => ReactNode;
+
+    /**
+     * @param generators - codegens for API example usages
+     */
+    renderAPIExampleUsageTabs?: (
+      generators: CodeUsageGeneratorRegistry,
+      ctx: RenderContext,
+    ) => ReactNode;
+
+    /**
+     * renderer of the entire page's layout (containing all operations & webhooks UI)
+     */
+    renderPageLayout?: (
+      slots: {
+        operations?: {
+          item: OperationItem;
+          children: ReactNode;
+        }[];
+        webhooks?: {
+          item: WebhookItem;
+          children: ReactNode;
+        }[];
+      },
+      ctx: RenderContext,
+    ) => ReactNode;
+
+    renderOperationLayout?: (
+      slots: {
+        header: ReactNode;
+        description: ReactNode;
+        apiExample: ReactNode;
+        apiPlayground: ReactNode;
+
+        authSchemes: ReactNode;
+        parameters: ReactNode;
+        body: ReactNode;
+        responses: ReactNode;
+        callbacks: ReactNode;
+      },
+      ctx: RenderContext,
+      method: NoReference<MethodInformation>,
+    ) => ReactNode;
+
+    renderWebhookLayout?: (slots: {
+      header: ReactNode;
+      description: ReactNode;
+      authSchemes: ReactNode;
+      parameters: ReactNode;
+      body: ReactNode;
+      requests: ReactNode;
+      responses: ReactNode;
+      callbacks: ReactNode;
+    }) => ReactNode;
+  };
+
+  /**
+   * Info UI for JSON schemas
+   */
+  schemaUI?: {
+    render?: (options: SchemaUIOptions, ctx: RenderContext) => ReactNode;
+
+    /**
+     * Show examples under the generated content of JSON schemas.
+     *
+     * @defaultValue false
+     */
+    showExample?: boolean;
+  };
+
+  /**
+   * Customize API playground
+   */
+  playground?: PlaygroundClientOptions & {
+    /**
+     * @defaultValue true
+     */
+    enabled?: boolean;
+
+    /**
+     * render a page-level provider (useful for handling auth)
+     */
+    provider?: (props: { children: ReactNode }) => ReactNode;
+    /**
+     * replace the renderer
+     */
+    render?: (props: APIPlaygroundProps) => ReactNode;
+  };
+
+  operation?: {
+    APIExampleSelector?: FC<{
+      items: ExampleRequestItem[];
+
+      value: string | undefined;
+      onValueChange: (id: string) => void;
+    }>;
+  };
+
+  components?: {
+    Heading?: FC<ComponentProps<'h1'> & { id: string; depth: number }>;
+    CodeBlock?: FC<{ lang: string; code: string }>;
+    Markdown?: FC<{ md: string }>;
+  };
+
+  /**
+   * Set a prefix for `localStorage` keys.
+   *
+   * Useful when using multiple OpenAPI instances to prevent state conflicts.
+   *
+   * @defaultValue `fumadocs-openapi-`
+   */
+  storageKeyPrefix?: string;
+}
+
+export interface OpenAPIPagePayload {
   bundled: Document;
   proxyUrl?: string;
 }
 
-export type CreateClientAPIPageOptions = Partial<
-  Omit<CreateAPIPageOptions, 'generateTypeScriptSchema' | 'client'> &
-    Omit<APIPageClientOptions, 'mediaAdapters' | 'codeUsages'>
->;
-
 /**
- * Create `<APIPage />` for non-RSC environment, note that this may be unstable, and doesn't support the full set of features.
+ * Create `<APIPage />` (a client component).
  */
-export function createClientAPIPage({
+export function createOpenAPIPage({
   shiki = defaultShikiFactory,
   shikiOptions = { themes: { light: 'github-light', dark: 'github-dark' } },
   generateTypeScriptDefinitions = (schema, ctx) => {
@@ -57,43 +242,21 @@ export function createClientAPIPage({
         name: 'Response',
         readOnly: ctx.readOnly,
         writeOnly: ctx.writeOnly,
-        getSchemaId: ctx.schema.getRawRef,
+        getSchemaId: ctx.ctx.schema.getRawRef,
       });
     } catch (e) {
       console.warn('Failed to generate typescript schema:', e);
     }
   },
   ...options
-}: CreateClientAPIPageOptions = {}): FC<ClientApiPageProps> {
+}: CreateOpenAPIPageOptions = {}): FC<ClientApiPageProps> {
   let processor: ReturnType<typeof createMarkdownProcessor>;
-  const mdxComponents = {
-    ...defaultMdxComponents,
-    img: undefined,
-    pre: MarkdownPre,
-  };
-
-  function createMarkdownProcessor() {
-    function rehypeReact(this: any) {
-      this.compiler = (tree: any, file: any) => {
-        return toJsxRuntime(tree, {
-          development: false,
-          filePath: file.path,
-          ...JsxRuntime,
-          components: mdxComponents,
-        });
-      };
-    }
-
-    return remark().use(remarkGfm).use(remarkRehype).use(rehypeReact);
-  }
-
   function renderPlaygroundDefault({ method, path, ctx }: APIPlaygroundProps) {
     return (
       <ctx.clientBoundary.PlaygroundClient
         route={path}
         securities={parseSecurities(method, ctx.schema.dereferenced)}
         method={method.method}
-        doc={ctx.schema.bundled}
         proxyUrl={ctx.proxyUrl}
         writeOnly
         readOnly={false}
@@ -107,7 +270,7 @@ export function createClientAPIPage({
   }
 
   return function ClientAPIPage({ payload, ...props }) {
-    const processed = useMemo(() => dereferenceDocument(payload.bundled), [payload.bundled]);
+    const processed = useMemo(() => dereferenceOpenApiDocument(payload.bundled), [payload.bundled]);
 
     const ctx: RenderContext = useMemo(
       () => ({
@@ -120,6 +283,9 @@ export function createClientAPIPage({
         client: options,
         ...options,
         codeUsages: options.codeUsages ?? registerDefault(createCodeUsageGeneratorRegistry()),
+        _getMarkdownProcessor() {
+          return (processor ??= createMarkdownProcessor());
+        },
         mediaAdapters: {
           ...defaultAdapters,
           ...options.mediaAdapters,
@@ -128,21 +294,6 @@ export function createClientAPIPage({
           ...options.playground,
           provider: options.playground?.provider ?? renderPlaygroundProviderDefault,
           render: options.playground?.render ?? renderPlaygroundDefault,
-        },
-        renderMarkdown(text) {
-          if (options.renderMarkdown) return options.renderMarkdown(text);
-          processor ??= createMarkdownProcessor();
-
-          return processor.processSync({
-            value: text,
-          }).result as ReactNode;
-        },
-        renderCodeBlock(props) {
-          if (options.renderCodeBlock) {
-            return options.renderCodeBlock(props);
-          }
-
-          return <ClientCodeBlock {...props} />;
         },
       }),
       [payload.proxyUrl, processed],
@@ -154,6 +305,27 @@ export function createClientAPIPage({
       </ClientCodeBlockProvider>
     );
   };
+}
+
+const mdxComponents = {
+  ...defaultMdxComponents,
+  img: undefined,
+  pre: MarkdownPre,
+};
+
+export function createMarkdownProcessor() {
+  function rehypeReact(this: any) {
+    this.compiler = (tree: any, file: any) => {
+      return toJsxRuntime(tree, {
+        development: false,
+        filePath: file.path,
+        ...JsxRuntime,
+        components: mdxComponents,
+      });
+    };
+  }
+
+  return remark().use(remarkGfm).use(remarkRehype).use(rehypeReact);
 }
 
 function MarkdownPre(props: ComponentProps<'pre'>) {

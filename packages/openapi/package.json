@@ -30,9 +30,10 @@
     "./scalar": "./dist/scalar/index.js",
     "./server": "./dist/server/index.js",
     "./ui": "./dist/ui/index.js",
+    "./ui/asyncapi": "./dist/ui/asyncapi/index.js",
+    "./ui/asyncapi-base": "./dist/ui/asyncapi-base.js",
     "./ui/base": "./dist/ui/base.js",
     "./ui/client": "./dist/ui/client/index.js",
-    "./ui/create-client": "./dist/ui/create-client.js",
     "./package.json": "./package.json",
     "./css/*": "./css/*"
   },
@@ -105,7 +106,7 @@
   "inlinedDependencies": {
     "@apidevtools/json-schema-ref-parser": "15.3.5",
     "@fastify/deepmerge": "3.2.1",
-    "@scalar/openapi-upgrader": "0.2.8",
+    "@scalar/openapi-upgrader": "0.2.9",
     "ajv": "8.20.0",
     "fast-content-type-parse": "3.0.0",
     "fast-deep-equal": "3.1.3",

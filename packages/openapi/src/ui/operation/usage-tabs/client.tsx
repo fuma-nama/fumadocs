@@ -1,5 +1,5 @@
 'use client';
-import { useApiContext, useServerContext } from '@/ui/contexts/api';
+import { useRenderContext, useServerContext } from '@/ui/contexts/api';
 import { joinURL, withBase, resolveServerUrl, resolveRequestData } from '@/utils/url';
 import {
   Select,
@@ -16,7 +16,7 @@ import type { ExampleRequestItem } from '../get-example-requests';
 
 export function UsageTabsSelector() {
   const { example: key, setExample: setKey, examples } = useOperationContext();
-  const { APIExampleSelector: Override } = useApiContext().client.operation ?? {};
+  const { APIExampleSelector: Override } = useRenderContext().operation ?? {};
 
   if (Override) {
     return <Override items={examples} value={key} onValueChange={setKey} />;
@@ -54,7 +54,7 @@ export function UsageTab({
   lang,
   _client,
 }: Pick<CodeUsageGenerator, 'lang' | '_client'> & { id: string }) {
-  const { mediaAdapters, codeUsages } = useApiContext();
+  const { mediaAdapters, codeUsages } = useRenderContext();
   const {
     examples,
     example: selectedExampleId,

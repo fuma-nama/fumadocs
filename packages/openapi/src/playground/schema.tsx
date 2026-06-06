@@ -6,12 +6,10 @@ import { FieldKey, useDataEngine, useFieldValue, useNamespace } from '@fumari/st
 import { stringifyFieldKey } from '@fumari/stf/lib/utils';
 import { sample } from '@/utils/schema/sample';
 import { FormatFlags, schemaToString } from '@/utils/schema/to-string';
-import { dereferenceSwallow } from '@/utils/schema/dereference';
-import type { Document } from '@/types';
+import { dereferenceShallow } from '@/utils/schema/dereference';
+import { useRenderContext } from '@/ui/contexts/api';
 
 interface SchemaContextType extends SchemaScope {
-  /** (not dereferenced) */
-  doc: Document;
   ajv: Ajv2020;
 }
 
@@ -47,7 +45,6 @@ export const anyFields = {
 } satisfies ParsedSchema;
 
 export function SchemaProvider({
-  doc,
   readOnly,
   writeOnly,
   children,
@@ -64,14 +61,14 @@ export function SchemaProvider({
 
   return (
     <SchemaContext.Provider
-      value={useMemo(() => ({ doc, ajv, readOnly, writeOnly }), [doc, ajv, readOnly, writeOnly])}
+      value={useMemo(() => ({ ajv, readOnly, writeOnly }), [ajv, readOnly, writeOnly])}
     >
       {children}
     </SchemaContext.Provider>
   );
 }
 
-export function useSchemaScope(): SchemaScope {
+export function useSchemaContext() {
   return use(SchemaContext)!;
 }
 
@@ -91,7 +88,8 @@ export function useFieldInfo(
   schema: Exclude<ParsedSchema, boolean>;
   updateInfo: (value: Partial<FieldInfo>) => void;
 } {
-  const { ajv, doc } = use(SchemaContext)!;
+  const { ajv } = useSchemaContext();
+  const doc = useRenderContext().schema.bundled;
   const engine = useDataEngine();
   const { generateDefault } = useSchemaUtils();
   const fieldData = useNamespace({
@@ -155,7 +153,8 @@ export function useFieldInfo(
 }
 
 export function useSchemaUtils() {
-  const { doc, readOnly } = use(SchemaContext)!;
+  const doc = useRenderContext().schema.bundled;
+  const { readOnly } = useSchemaContext();
 
   return {
     generateDefault(schema: ParsedSchema): unknown {
@@ -174,7 +173,7 @@ export function useSchemaUtils() {
         value,
         (raw) => ({
           raw,
-          dereferenced: dereferenceSwallow(raw, doc),
+          dereferenced: dereferenceShallow(raw, doc),
         }),
         flags,
       );
@@ -186,14 +185,14 @@ export function useSchemaUtils() {
  * dereference & merge `allOf`.
  */
 export function useResolvedSchema(raw: ParsedSchema): Exclude<ParsedSchema, boolean> {
-  const { doc } = use(SchemaContext)!;
+  const doc = useRenderContext().schema.bundled;
   return useMemo(() => {
-    let out = dereferenceSwallow(raw, doc);
+    let out = dereferenceShallow(raw, doc);
 
     if (typeof out === 'object' && out.allOf) {
       out = mergeAllOf(out, {
         dereference(schema) {
-          return dereferenceSwallow(schema, doc);
+          return dereferenceShallow(schema, doc);
         },
       });
     }

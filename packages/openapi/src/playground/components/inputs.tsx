@@ -17,7 +17,7 @@ import {
   anyFields,
   useFieldInfo,
   useSchemaUtils,
-  useSchemaScope,
+  useSchemaContext,
   useResolvedSchema,
 } from '@/playground/schema';
 import type { ParsedSchema } from '@/utils/schema';
@@ -307,7 +307,7 @@ export function FieldSet({
   toolbar?: ReactNode;
   collapsible?: boolean;
 }) {
-  const { readOnly, writeOnly } = useSchemaScope();
+  const { readOnly, writeOnly } = useSchemaContext();
   const { generateDefault, schemaToString } = useSchemaUtils();
   const field = useResolvedSchema(_field);
   const [show, setShow] = useState(!collapsible);

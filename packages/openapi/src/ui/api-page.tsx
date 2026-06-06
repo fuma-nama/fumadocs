@@ -116,11 +116,7 @@ export function APIPage({
   }
 
   return (
-    <ctx.clientBoundary.ApiProvider
-      schemes={dereferenced.components?.securitySchemes ?? {}}
-      shikiOptions={ctx.shikiOptions}
-      client={ctx.client ?? {}}
-    >
+    <ctx.clientBoundary.ApiProvider ctx={ctx}>
       <ctx.clientBoundary.ServerProvider servers={dereferenced.servers as ServerObject[]}>
         {content}
       </ctx.clientBoundary.ServerProvider>

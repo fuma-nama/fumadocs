@@ -21,7 +21,7 @@ import {
 import type { OAuth2SecurityScheme } from '@/types';
 import { useTranslations } from '@/ui/client/i18n';
 import { useAuth } from '../auth';
-import { useApiContext } from '@/ui/contexts/api';
+import { useRenderContext } from '@/ui/contexts/api';
 
 type FlowType = keyof NonNullable<OAuth2SecurityScheme['flows']>;
 
@@ -78,9 +78,9 @@ export function OAuthDialogContent(props: AuthDialogContentProps) {
 }
 
 function Content({ schemeId, scopes, setToken, setOpen }: AuthDialogContentProps) {
-  const { schemes } = useApiContext();
+  const schemes = useRenderContext().schema.dereferenced.components?.securitySchemes;
   const tokenInfo = useAuth().store[schemeId];
-  const scheme = schemes[schemeId];
+  const scheme = schemes?.[schemeId];
   if (!scheme || scheme.type !== 'oauth2')
     throw new Error('unexpected schemaId: must be type oauth2');
 
