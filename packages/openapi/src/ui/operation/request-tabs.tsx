@@ -1,4 +1,4 @@
-import type { MethodInformation, RenderContext } from '@/types';
+import type { MethodInformation } from '@/types';
 import type { NoReference } from '@/utils/schema';
 import { I18nLabel } from '@/ui/client/i18n';
 import {
@@ -14,9 +14,13 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from 'fumadocs-ui/components
 import { resolveRequestData } from '@/utils/url';
 import { MethodLabel } from '../components/method-label';
 import type { ExampleRequestItem } from './get-example-requests';
+import { Markdown } from '../components/markdown';
+import { ClientCodeBlock } from '../components/codeblock';
+import { useRenderContext } from '../contexts/api';
 
-export interface RequestTabsRenderContext extends RenderContext {
+export interface RequestTabsRenderOptions {
   route: string;
+  items: ExampleRequestItem[];
   operation: NoReference<MethodInformation>;
 }
 
@@ -24,25 +28,29 @@ export function RequestTabs({
   path,
   operation,
   examples,
-  ctx,
 }: {
   path: string;
   examples: ExampleRequestItem[];
   operation: NoReference<MethodInformation>;
-  ctx: RenderContext;
 }) {
+  const ctx = useRenderContext();
   if (!operation.requestBody) return null;
   const { renderRequestTabs = renderRequestTabsDefault } = ctx.content ?? {};
 
-  return renderRequestTabs(examples, {
-    ...ctx,
-    route: path,
-    operation,
-  });
+  return renderRequestTabs(
+    {
+      items: examples,
+      route: path,
+      operation,
+    },
+    ctx,
+  );
 }
 
-function renderRequestTabsDefault(items: ExampleRequestItem[], ctx: RequestTabsRenderContext) {
+function renderRequestTabsDefault(options: RequestTabsRenderOptions) {
+  const { items } = options;
   let children: ReactNode;
+
   if (items.length > 1) {
     children = (
       <Tabs defaultValue={items[0].id}>
@@ -55,13 +63,13 @@ function renderRequestTabsDefault(items: ExampleRequestItem[], ctx: RequestTabsR
         </TabsList>
         {items.map((item) => (
           <TabsContent key={item.id} value={item.id}>
-            <RequestTabsItem item={item} ctx={ctx} />
+            <RequestTabsItem item={item} options={options} />
           </TabsContent>
         ))}
       </Tabs>
     );
   } else if (items.length === 1) {
-    children = <RequestTabsItem item={items[0]} ctx={ctx} />;
+    children = <RequestTabsItem item={items[0]} options={options} />;
   } else {
     children = (
       <p className="text-fd-muted-foreground text-xs">
@@ -82,10 +90,10 @@ function renderRequestTabsDefault(items: ExampleRequestItem[], ctx: RequestTabsR
 
 function RequestTabsItem({
   item,
-  ctx,
+  options,
 }: {
   item: ExampleRequestItem;
-  ctx: RequestTabsRenderContext;
+  options: RequestTabsRenderOptions;
 }) {
   const requestData = item.data;
   const displayNames: Partial<Record<keyof RawRequestData, ReactNode>> = {
@@ -105,10 +113,10 @@ function RequestTabsItem({
 
   return (
     <>
-      {item.description && ctx.renderMarkdown(item.description)}
+      {item.description && <Markdown md={item.description} />}
       <div className="flex flex-row gap-2 items-center justify-between">
         <MethodLabel>{requestData.method}</MethodLabel>
-        <code>{resolveRequestData(ctx.route, item.encoded)}</code>
+        <code>{resolveRequestData(options.route, item.encoded)}</code>
       </div>
 
       <Accordions type="multiple" className="mt-2">
@@ -122,10 +130,7 @@ function RequestTabsItem({
                 <AccordionTrigger>{v}</AccordionTrigger>
               </AccordionHeader>
               <AccordionContent className="prose-no-margin">
-                {ctx.renderCodeBlock({
-                  lang: 'json',
-                  code: JSON.stringify(data, null, 2),
-                })}
+                <ClientCodeBlock lang="json" code={JSON.stringify(data, null, 2)} />
               </AccordionContent>
             </AccordionItem>
           );

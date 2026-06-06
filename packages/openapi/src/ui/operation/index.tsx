@@ -31,6 +31,8 @@ import { SelectTabs, SelectTabTrigger, SelectTab } from '../components/select-ta
 import { Callout } from 'fumadocs-ui/components/callout';
 import { AnchorSection } from '@/utils/auto-anchor.client';
 import { Heading } from '@/ui/components/heading';
+import { Markdown } from '../components/markdown';
+import { useRenderContext } from '../contexts/api';
 
 const paramTypeKeys = ['path', 'query', 'header', 'cookie'] as const;
 
@@ -57,8 +59,9 @@ export function Operation({
   } = ctx;
   const body = method.requestBody;
   let headNode: ReactNode = null;
-  const descriptionNode =
-    showDescription && method.description && ctx.renderMarkdown(method.description);
+  const descriptionNode = showDescription && method.description && (
+    <Markdown md={method.description} />
+  );
   let bodyNode: ReactNode = null;
   let authNode: ReactNode = null;
   let responseNode: ReactNode = null;
@@ -104,7 +107,7 @@ export function Operation({
             <p className="text-fd-muted-foreground not-prose">{items[0].label}</p>
           )}
         </div>
-        {body!.description && ctx.renderMarkdown(body!.description)}
+        {body?.description && <Markdown md={body.description} />}
         {contentTypes.map(([type, content]) => {
           if (!isMediaTypeSupported(type, ctx.mediaAdapters)) {
             throw new Error(`Media type ${type} is not supported (in ${path})`);
@@ -112,7 +115,7 @@ export function Operation({
 
           return (
             <SelectTab key={type} anchorSegments={['request-body', type]} value={type}>
-              <RequestBodyContentItem content={content} method={method} ctx={ctx} />
+              <RequestBodyContentItem content={content} method={method} />
             </SelectTab>
           );
         })}
@@ -130,7 +133,7 @@ export function Operation({
         </Heading>
         <Accordions type="multiple">
           {statuses.map((status) => (
-            <ResponseAccordion key={status} status={status} operation={method} ctx={ctx} />
+            <ResponseAccordion key={status} status={status} operation={method} />
           ))}
         </Accordions>
       </>
@@ -169,7 +172,6 @@ export function Operation({
                     }
                     readOnly={method.method === 'get'}
                     writeOnly={method.method !== 'get'}
-                    ctx={ctx}
                   />
                 ),
             )}
@@ -380,7 +382,7 @@ export function Operation({
       callbacks: callbacksNode,
       parameters: parameterNode,
       responses: responseNode,
-      requests: <RequestTabs examples={exampleRequests} path={path} operation={method} ctx={ctx} />,
+      requests: <RequestTabs examples={exampleRequests} path={path} operation={method} />,
     });
   }
 }
@@ -388,19 +390,18 @@ export function Operation({
 function RequestBodyContentItem({
   content,
   method,
-  ctx,
 }: {
   content: NoReference<MediaTypeObject>;
   method: MethodInformation;
-  ctx: RenderContext;
 }) {
+  const ctx = useRenderContext();
   let ts = useMemo(() => {
     if (!content.schema || !ctx.generateTypeScriptDefinitions) return;
     return ctx.generateTypeScriptDefinitions(content.schema, {
       operation: method,
       readOnly: false,
       writeOnly: true,
-      ...ctx,
+      ctx,
     });
   }, [content.schema, ctx, method]);
   if (ts instanceof Promise) ts = use(ts);
@@ -418,7 +419,6 @@ function RequestBodyContentItem({
           root={content.schema}
           readOnly={method.method === 'get'}
           writeOnly={method.method !== 'get'}
-          ctx={ctx}
         />
       )}
     </>
@@ -428,11 +428,9 @@ function RequestBodyContentItem({
 function ResponseAccordion({
   status,
   operation,
-  ctx,
 }: {
   status: string;
   operation: MethodInformation;
-  ctx: RenderContext;
 }) {
   const response = operation.responses![status];
   const contentTypes = response.content ? Object.entries(response.content) : [];
@@ -459,18 +457,12 @@ function ResponseAccordion({
         <AccordionContent className="ps-4.5 pe-3 border rounded-xl">
           {response.description && (
             <div className="prose-no-margin mt-3 mb-2">
-              {ctx.renderMarkdown(response.description)}
+              <Markdown md={response.description} />
             </div>
           )}
           {contentTypes.map(([type, item]) => (
             <SelectTab key={type} value={type} anchorSegments={[type]}>
-              <RepsonseAccordionItem
-                type={type}
-                status={status}
-                item={item}
-                operation={operation}
-                ctx={ctx}
-              />
+              <RepsonseAccordionItem item={item} operation={operation} />
             </SelectTab>
           ))}
         </AccordionContent>
@@ -480,31 +472,22 @@ function ResponseAccordion({
 }
 
 function RepsonseAccordionItem({
-  type,
-  status,
   operation,
   item: { schema },
-  ctx,
 }: {
-  type: string;
-  status: string;
   operation: MethodInformation;
   item: NoReference<MediaTypeObject>;
-  ctx: RenderContext;
 }) {
+  const ctx = useRenderContext();
   let ts = useMemo(() => {
     if (!schema || !ctx.generateTypeScriptDefinitions) return;
     return ctx.generateTypeScriptDefinitions(schema, {
       readOnly: true,
       writeOnly: false,
+      ctx,
       operation,
-      _internal_legacy: {
-        statusCode: status,
-        contentType: type,
-      },
-      ...ctx,
     });
-  }, [ctx, operation, schema, status, type]);
+  }, [ctx, operation, schema]);
   // assume it is on server component when returned async
   if (ts instanceof Promise) ts = use(ts);
 
@@ -519,7 +502,6 @@ function RepsonseAccordionItem({
           }}
           root={schema}
           readOnly
-          ctx={ctx}
         />
       )}
     </>
@@ -549,7 +531,7 @@ function AuthScheme({
         deprecated={scheme.deprecated}
         scopes={scopes}
       >
-        {scheme.description && ctx.renderMarkdown(scheme.description)}
+        {scheme.description && <Markdown md={scheme.description} />}
         <p>
           <I18nLabel label="authTokenIn" />: <code>header</code>
         </p>
@@ -565,7 +547,7 @@ function AuthScheme({
         deprecated={scheme.deprecated}
         scopes={scopes}
       >
-        {scheme.description && ctx.renderMarkdown(scheme.description)}
+        {scheme.description && <Markdown md={scheme.description} />}
         <p>
           <I18nLabel label="authTokenIn" />: <code>{scheme.in}</code>
         </p>
@@ -581,7 +563,7 @@ function AuthScheme({
         deprecated={scheme.deprecated}
         scopes={scopes}
       >
-        {scheme.description && ctx.renderMarkdown(scheme.description)}
+        {scheme.description && <Markdown md={scheme.description} />}
       </AuthProperty>
     );
   }

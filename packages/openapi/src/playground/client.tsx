@@ -9,7 +9,7 @@ import {
   type ComponentProps,
   useRef,
 } from 'react';
-import { useApiContext, useServerContext } from '@/ui/contexts/api';
+import { useRenderContext, useServerContext } from '@/ui/contexts/api';
 import type { BrowserFetcherOptions } from '@/playground/fetcher';
 import { DefaultResultDisplay, type ResultDisplayProps } from './components/result-display';
 import { joinURL, resolveRequestData, resolveServerUrl, withBase } from '@/utils/url';
@@ -47,11 +47,11 @@ import {
 } from '@fumari/stf';
 import { arrayStartsWith, objectGet, objectSet, stringifyFieldKey } from '@fumari/stf/lib/utils';
 import { FieldInput, FieldSet, JsonInput, ObjectInput } from './components/inputs';
-import type { Document, HttpMethods, ParameterObject } from '@/types';
+import type { HttpMethods, ParameterObject } from '@/types';
 import { useTranslations } from '@/ui/client/i18n';
 import { useOperationContext } from '@/ui/operation/client';
 import { OAuthDialog, OAuthDialogContent, OAuthDialogTrigger } from './components/oauth-dialog';
-import { dereferenceSwallow } from '@/utils/schema/dereference';
+import { dereferenceShallow } from '@/utils/schema/dereference';
 import { useAuth } from './auth';
 import { useOnChange } from 'fumadocs-core/utils/use-on-change';
 import { Spinner } from './components/spinner';
@@ -68,8 +68,6 @@ export interface PlaygroundClientProps extends ComponentProps<'form'>, SchemaSco
   route: string;
   method: HttpMethods;
   securities: SecurityEntry[][];
-  /** the OpenAPI document (not dereferenced) */
-  doc: Document;
   proxyUrl?: string;
   deprecated?: boolean;
 }
@@ -128,7 +126,6 @@ export default function PlaygroundClient({
   route,
   method,
   securities,
-  doc,
   proxyUrl,
   writeOnly,
   readOnly,
@@ -136,20 +133,22 @@ export default function PlaygroundClient({
   ...rest
 }: PlaygroundClientProps) {
   const t = useTranslations();
+  const ctx = useRenderContext();
+  const doc = ctx.schema.bundled;
   const { parameters, body } = useMemo(() => {
     const operation = doc.paths![route]![method]!;
     const parameters: ParameterObject[] =
-      operation.parameters?.map((param) => dereferenceSwallow(param, doc)) ?? [];
+      operation.parameters?.map((param) => dereferenceShallow(param, doc)) ?? [];
     let body: RequestBodyInfo | undefined;
 
     if (operation.requestBody) {
-      const content = dereferenceSwallow(operation.requestBody, doc).content;
+      const content = dereferenceShallow(operation.requestBody, doc).content;
       const mediaType = content ? getPreferredType(content) : undefined;
 
       if (content && mediaType) {
         body = {
           mediaType,
-          schema: dereferenceSwallow(content[mediaType], doc).schema ?? true,
+          schema: dereferenceShallow(content[mediaType], doc).schema ?? true,
         };
       }
     }
@@ -164,18 +163,16 @@ export default function PlaygroundClient({
   const { server } = useServerContext();
   const {
     mediaAdapters,
-    client: {
-      playground: {
-        components: {
-          ResultDisplay = DefaultResultDisplay,
-          CollapsiblePanel = DefaultCollapsiblePanel,
-        } = {},
-        requestTimeout,
-        fetchOptions = { requestTimeout },
-        renderBodyField,
+    playground: {
+      components: {
+        ResultDisplay = DefaultResultDisplay,
+        CollapsiblePanel = DefaultCollapsiblePanel,
       } = {},
-    },
-  } = useApiContext();
+      requestTimeout,
+      fetchOptions = { requestTimeout },
+      renderBodyField,
+    } = {},
+  } = useRenderContext();
 
   const defaultValues: FormValues = useMemo(() => {
     const requestData = examples.find((example) => example.id === exampleId)?.data;
@@ -266,7 +263,7 @@ export default function PlaygroundClient({
 
   return (
     <StfProvider value={stf}>
-      <SchemaProvider doc={doc} writeOnly={writeOnly} readOnly={readOnly}>
+      <SchemaProvider writeOnly={writeOnly} readOnly={readOnly}>
         <form
           {...rest}
           className={cn(
@@ -331,7 +328,7 @@ function SecurityRequirements({
   const defaultOpen = isLoading || error != null;
   const [open, setOpen] = useState(defaultOpen);
   const { CollapsiblePanel = DefaultCollapsiblePanel } =
-    useApiContext().client.playground?.components ?? {};
+    useRenderContext().playground?.components ?? {};
 
   useOnChange(defaultOpen, () => {
     if (defaultOpen) setOpen(true);
@@ -379,12 +376,13 @@ function SecurityRequirements({
 }
 
 function SecurityRequirement({ requirement }: { requirement: SecurityEntry[] }) {
-  const { schemes } = useApiContext();
+  const schemes = useRenderContext().schema.dereferenced.components?.securitySchemes;
 
   return (
     <div className="flex flex-col gap-2 max-w-[600px]">
       {requirement.map((item) => {
-        const scheme = schemes[item.id];
+        const scheme = schemes?.[item.id];
+        if (!scheme) return;
 
         return (
           <div key={item.id}>
@@ -408,7 +406,7 @@ const ParamTypes = ['path', 'header', 'cookie', 'query'] as const;
 type ParamType = (typeof ParamTypes)[number];
 
 function ParameterItem({ type, parameters }: { type: ParamType; parameters: ParameterObject[] }) {
-  const { renderParameterField } = useApiContext().client.playground ?? {};
+  const { renderParameterField } = useRenderContext().playground ?? {};
 
   return parameters.map((field) => {
     const fieldName: FieldKey = [type, field.name!];
@@ -436,7 +434,7 @@ function ParameterItem({ type, parameters }: { type: ParamType; parameters: Para
 
 function ParametersForm({ parameters }: { parameters: ParameterObject[] }) {
   const { components: { CollapsiblePanel = DefaultCollapsiblePanel } = {} } =
-    useApiContext().client.playground ?? {};
+    useRenderContext().playground ?? {};
   const t = useTranslations();
   const displayNames = {
     header: t.header,
@@ -523,12 +521,12 @@ function useAuthInputs(engine: DataEngine, requirements: SecurityEntry[][]) {
   const authCtx = useAuth();
   const storageKeys = useStorageKey();
   const t = useTranslations();
-  const {
-    schemes,
-    client: { playground: { transformAuthInputs } = {} },
-  } = useApiContext();
+  const ctx = useRenderContext();
+  const schemes = ctx.schema.dereferenced.components?.securitySchemes;
+  const { transformAuthInputs } = ctx.playground ?? {};
+
   const [requirementId, setRequirementId] = useState(() => {
-    if (requirements.length === 0) return -1;
+    if (!schemes || requirements.length === 0) return -1;
 
     const idx = requirements.findIndex((s) => s.every((item) => !schemes[item.id].deprecated));
     return idx !== -1 ? idx : 0;
@@ -536,11 +534,10 @@ function useAuthInputs(engine: DataEngine, requirements: SecurityEntry[][]) {
   const requirement = requirementId === -1 ? null : requirements[requirementId];
 
   let inputs = useMemo<AuthField[]>(() => {
-    if (!requirement) return [];
+    if (!requirement || !schemes) return [];
 
     return requirement.map((item) => {
-      const scheme = schemes[item.id];
-
+      const scheme = schemes?.[item.id];
       if (scheme.type === 'http' && scheme.scheme === 'basic') {
         const fieldName: FieldKey = ['header', 'Authorization'];
         return {

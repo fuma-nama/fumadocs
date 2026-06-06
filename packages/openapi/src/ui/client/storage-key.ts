@@ -1,10 +1,10 @@
-import { useApiContext } from '../contexts/api';
+import { useRenderContext } from '../contexts/api';
 import { useMemo } from 'react';
 
 type KeyName = 'server-url' | `auth-${string}`;
 
 export function useStorageKey() {
-  const { storageKeyPrefix } = useApiContext().client;
+  const { storageKeyPrefix } = useRenderContext();
 
   return useMemo(
     () => ({

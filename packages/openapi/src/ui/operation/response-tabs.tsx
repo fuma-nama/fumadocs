@@ -11,6 +11,8 @@ import { Tab, Tabs } from 'fumadocs-ui/components/tabs';
 import { sample } from '@/utils/schema/sample';
 import { useMemo, type ReactNode } from 'react';
 import { I18nLabel } from '@/ui/client/i18n';
+import { Markdown } from '../components/markdown';
+import { ClientCodeBlock } from '../components/codeblock';
 
 export interface ResponseTab {
   /**
@@ -39,6 +41,10 @@ interface ResponseExample {
    * description (in Markdown)
    */
   description?: string;
+}
+
+export interface ResponseTabsRenderOptions {
+  tabs: ResponseTab[];
 }
 
 export function ResponseTabs({
@@ -90,18 +96,15 @@ export function ResponseTabs({
 
   const { renderResponseTabs = renderResponseTabsDefault } = ctx.content ?? {};
 
-  return renderResponseTabs(tabs, ctx);
+  return renderResponseTabs({ tabs }, ctx);
 }
 
-function renderResponseTabsDefault(tabs: ResponseTab[], ctx: RenderContext): ReactNode {
+function renderResponseTabsDefault({ tabs }: ResponseTabsRenderOptions): ReactNode {
   function renderExampleContent(example: ResponseExample) {
     return (
       <>
-        {example.description && ctx.renderMarkdown(example.description)}
-        {ctx.renderCodeBlock({
-          lang: 'json',
-          code: JSON.stringify(example.sample, null, 2),
-        })}
+        {example.description && <Markdown md={example.description} />}
+        <ClientCodeBlock lang="json" code={JSON.stringify(example.sample, null, 2)} />
       </>
     );
   }

@@ -1,3 +1,4 @@
+'use client';
 import { useMemo, type ReactNode } from 'react';
 import type { ParsedSchema } from '@/utils/schema';
 import type { RenderContext } from '@/types';
@@ -5,6 +6,8 @@ import { FormatFlags, schemaToString } from '@/utils/schema/to-string';
 import { mergeAllOf } from '@/utils/schema/merge';
 import type { SchemaUIProps } from '@/ui/schema/client';
 import { I18nLabel } from '../client/i18n';
+import { useRenderContext } from '../contexts/api';
+import { Markdown } from '../components/markdown';
 
 export interface FieldBase {
   description?: ReactNode;
@@ -77,15 +80,8 @@ export interface SchemaUIGeneratedData {
   refs: Record<string, SchemaData>;
 }
 
-export function Schema({
-  ctx,
-  client,
-  root,
-  readOnly,
-  writeOnly,
-}: SchemaUIOptions & {
-  ctx: RenderContext;
-}) {
+export function Schema({ client, root, readOnly, writeOnly }: SchemaUIOptions) {
+  const ctx = useRenderContext();
   const generated = useMemo(
     () => generateSchemaUI(root, readOnly, writeOnly, ctx),
     [root, readOnly, writeOnly, ctx],
@@ -207,7 +203,7 @@ export function generateSchemaUI(
     }
 
     return {
-      description: schema.description ? ctx.renderMarkdown(schema.description) : undefined,
+      description: schema.description ? <Markdown md={schema.description} /> : undefined,
       infoTags: generateInfoTags(schema),
       typeName: schemaToString(schema, ctx.schema),
       aliasName: schemaToString(schema, ctx.schema, FormatFlags.UseAlias),

@@ -21,6 +21,14 @@ export function encodeInternalRef(segments: readonly string[]): string {
 }
 
 /**
+ * Append a segment to an in-document JSON Pointer (e.g. `#` + `components` → `#/components`).
+ */
+export function appendInternalRefPath(base: string, segment: string | number): string {
+  const encoded = encodeSegment(String(segment));
+  if (base === '#') return `#/${encoded}`;
+  return `${base}/${encoded}`;
+}
+/**
  * Parse an in-document `$ref` (`#/…`) into decoded path segments for walking the root document.
  */
 export function decodeInternalRef(ref: string): string[] {
