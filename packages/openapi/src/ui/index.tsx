@@ -324,7 +324,7 @@ export function createOpenAPIPage({
         ...options,
         codeUsages: options.codeUsages ?? registerDefault(createCodeUsageGeneratorRegistry()),
         _default_processMarkdown(md) {
-          return (processor ??= createMarkdownProcessor()).processSync(md) as unknown as ReactNode;
+          return (processor ??= createMarkdownProcessor()).processSync(md).value as ReactNode;
         },
         mediaAdapters: {
           ...defaultAdapters,

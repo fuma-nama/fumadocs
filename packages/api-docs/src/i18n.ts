@@ -1,3 +1,4 @@
+// TODO: better way?
 export const defaultTranslations = {
   deprecated: 'Deprecated',
   schemaDefault: 'Default',

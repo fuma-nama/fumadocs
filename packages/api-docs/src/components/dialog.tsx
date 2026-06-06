@@ -5,7 +5,6 @@ import { X } from 'lucide-react';
 import type { ComponentProps } from 'react';
 import { cn } from '@/utils/cn';
 import { buttonVariants } from 'fumadocs-ui/components/ui/button';
-import { useTranslations } from '@/i18n/client';
 
 export const Dialog = DialogPrimitive.Root;
 
@@ -38,7 +37,6 @@ export function DialogContent({
   ref,
   ...props
 }: ComponentProps<typeof DialogPrimitive.Content>) {
-  const t = useTranslations();
   return (
     <DialogPortal>
       <DialogOverlay />
