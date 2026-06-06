@@ -23,8 +23,7 @@ import {
 import { toStaticData } from '@/utils/pages/to-static-data';
 import path from 'node:path';
 import type { DereferencedDocument } from '@/utils/document/dereference';
-import type { ApiPageProps } from '@/ui/api-page';
-import type { ClientApiPageProps } from '@/ui/create-client';
+import type { OpenAPIPageProps } from '@/ui';
 import type { StructuredData } from 'fumadocs-core/mdx-plugins/remark-structure';
 import type { TOCItemType } from 'fumadocs-core/toc';
 import type { SchemaToPagesOptions } from '@/utils/pages/preset-auto';
@@ -83,12 +82,11 @@ export interface OpenAPIServer {
 }
 
 export interface OpenAPIPageData extends PageData {
-  getAPIPageProps: () => ApiPageProps;
+  getOpenAPIPageProps: () => OpenAPIPageProps;
   getSchema: () => { id: string } & DereferencedDocument;
-  getClientAPIPageProps: () => Promise<ClientApiPageProps>;
   structuredData: StructuredData;
   toc: TOCItemType[];
-  _openapi?: InternalOpenAPIMeta;
+  _openapi: InternalOpenAPIMeta;
 }
 
 export type OpenAPISourceOptions = SchemaToPagesOptions & {
@@ -140,10 +138,7 @@ export function createOpenAPI(options: OpenAPIOptions = {}): OpenAPIServer {
           path: `${baseDir}/${entry.path}`,
           data: {
             ...entry.info,
-            getAPIPageProps() {
-              return props;
-            },
-            async getClientAPIPageProps() {
+            getOpenAPIPageProps() {
               return {
                 payload: {
                   bundled: schema.bundled,

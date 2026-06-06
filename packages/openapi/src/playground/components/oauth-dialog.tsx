@@ -5,8 +5,8 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from '@/ui/components/dialog';
-import { Input, labelVariants } from '@/ui/components/input';
+} from '@fumadocs/api-docs/components/dialog';
+import { Input, labelVariants } from '@fumadocs/api-docs/components/input';
 import { useQuery } from '@/utils/use-query';
 import { type ReactNode, useMemo, useState } from 'react';
 import { cn } from '@/utils/cn';
@@ -17,7 +17,7 @@ import {
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@/ui/components/select';
+} from '@fumadocs/api-docs/components/select';
 import type { OAuth2SecurityScheme } from '@/types';
 import { useTranslations } from '@/ui/client/i18n';
 import { useAuth } from '../auth';

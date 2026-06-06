@@ -1,18 +1,18 @@
 'use client';
 import { useRenderContext, useServerContext } from '@/ui/contexts/api';
-import { joinURL, withBase, resolveServerUrl, resolveRequestData } from '@/utils/url';
+import { pathnameFromRequest } from '@/requests/generators';
 import {
   Select,
   SelectTrigger,
   SelectValue,
   SelectContent,
   SelectItem,
-} from '@/ui/components/select';
+} from '@fumadocs/api-docs/components/select';
 import { useState, useEffect, useMemo } from 'react';
-import type { CodeUsageGenerator } from '@/requests/generators';
 import { ClientCodeBlock } from '@/ui/components/codeblock';
 import { type ExampleUpdateListener, useOperationContext } from '../client';
 import type { ExampleRequestItem } from '../get-example-requests';
+import { joinURL, resolveServerUrl } from '@fumadocs/api-docs/utils/url';
 
 export function UsageTabsSelector() {
   const { example: key, setExample: setKey, examples } = useOperationContext();
@@ -49,11 +49,7 @@ export function UsageTabsSelector() {
   );
 }
 
-export function UsageTab({
-  id,
-  lang,
-  _client,
-}: Pick<CodeUsageGenerator, 'lang' | '_client'> & { id: string }) {
+export function UsageTab({ id, lang }: { id: string; lang: string }) {
   const { mediaAdapters, codeUsages } = useRenderContext();
   const {
     examples,
@@ -83,26 +79,20 @@ export function UsageTab({
     if (!data) return;
     const url = joinURL(
       server && mounted
-        ? withBase(resolveServerUrl(server.url, server.variables), window.location.origin)
+        ? new URL(resolveServerUrl(server.url, server.variables), window.location.origin).href
         : 'https://example.com',
-      resolveRequestData(route, data),
+      pathnameFromRequest(route, data),
     );
 
-    if (_client) {
-      const { generate, serverContext } = _client;
-      if (typeof generate === 'string') return generate;
-      return generate(url, data, {
-        mediaAdapters,
-        server: serverContext,
-      });
-    }
-
     if (!codegen) return;
-    return codegen.generate(url, data, {
-      mediaAdapters,
-      server: null,
-    });
-  }, [data, server, route, mounted, _client, codegen, mediaAdapters]);
+    return codegen.generate(
+      { ...data, url },
+      {
+        mediaAdapters,
+        custom: null,
+      },
+    );
+  }, [data, server, route, mounted, codegen, mediaAdapters]);
 
   if (!code) return null;
 

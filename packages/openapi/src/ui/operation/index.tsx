@@ -5,13 +5,12 @@ import type {
   MethodInformation,
   OperationObject,
   PathItemObject,
-  RenderContext,
   SecuritySchemeObject,
   ServerObject,
 } from '@/types';
-import { createMethod, methodKeys, type NoReference } from '@/utils/schema';
-import { idToTitle } from '@/utils/id-to-title';
-import { Schema } from '../schema';
+import { createMethod, methodKeys } from '@/utils/schema';
+import { idToTitle } from '@fumadocs/api-docs/utils/id-to-title';
+import { Schema } from '@fumadocs/api-docs/components/schema';
 import { UsageTabs } from '@/ui/operation/usage-tabs';
 import { Badge, MethodLabel } from '@/ui/components/method-label';
 import { CopyTypeScriptPanel, OperationProvider } from './client';
@@ -22,17 +21,18 @@ import {
   AccordionItem,
   Accordions,
   AccordionTrigger,
-} from '@/ui/components/accordion';
+} from '@fumadocs/api-docs/components/accordion';
 import { isMediaTypeSupported } from '@/requests/media/adapter';
 import { RequestTabs } from './request-tabs';
 import { cn } from '@/utils/cn';
 import { getExampleRequests } from './get-example-requests';
-import { SelectTabs, SelectTabTrigger, SelectTab } from '../components/select-tab';
+import { SelectTabs, SelectTabTrigger, SelectTab } from '@fumadocs/api-docs/components/select-tab';
 import { Callout } from 'fumadocs-ui/components/callout';
-import { AnchorSection } from '@/utils/auto-anchor.client';
+import { AnchorSection } from '@fumadocs/api-docs/auto-anchor/client';
 import { Heading } from '@/ui/components/heading';
 import { Markdown } from '../components/markdown';
 import { useRenderContext } from '../contexts/api';
+import type { NoReference } from '@fumadocs/api-docs/schema';
 
 const paramTypeKeys = ['path', 'query', 'header', 'cookie'] as const;
 
@@ -40,7 +40,6 @@ export function Operation({
   type = 'operation',
   path,
   method,
-  ctx,
   showTitle,
   showDescription,
   headingLevel = 2,
@@ -48,12 +47,12 @@ export function Operation({
   type?: 'webhook' | 'operation';
   path: string;
   method: MethodInformation;
-  ctx: RenderContext;
 
   showTitle?: boolean;
   showDescription?: boolean;
   headingLevel?: number;
 }) {
+  const ctx = useRenderContext();
   const {
     schema: { dereferenced },
   } = ctx;
@@ -156,6 +155,7 @@ export function Operation({
                 param.schema != null && (
                   <Schema
                     key={param.name}
+                    {...ctx._schemaUIProps}
                     client={{
                       name: param.name!,
                       required: param.required,
@@ -223,7 +223,7 @@ export function Operation({
               const scheme = securitySchemes?.[key];
               if (!scheme) return;
 
-              return <AuthScheme key={key} scheme={scheme} scopes={scopes} ctx={ctx} />;
+              return <AuthScheme key={key} scheme={scheme} scopes={scopes} />;
             })}
           </SelectTab>
         ))}
@@ -274,7 +274,6 @@ export function Operation({
                     path={path}
                     headingLevel={headingLevel + 1}
                     method={createMethod(item.method, item.callback, item.operation)}
-                    ctx={ctx}
                   />
                 </div>
               </AccordionContent>
@@ -411,6 +410,7 @@ function RequestBodyContentItem({
       {ts && <CopyTypeScriptPanel name="request body" code={ts} className="my-4 last:mb-0" />}
       {content.schema && (
         <Schema
+          {...ctx._schemaUIProps}
           client={{
             name: 'body',
             as: 'body',
@@ -496,6 +496,7 @@ function RepsonseAccordionItem({
       {ts && <CopyTypeScriptPanel name="response body" code={ts} className="mb-2" />}
       {schema && (
         <Schema
+          {...ctx._schemaUIProps}
           client={{
             name: 'response',
             as: 'body',
@@ -508,15 +509,7 @@ function RepsonseAccordionItem({
   );
 }
 
-function AuthScheme({
-  scheme,
-  scopes,
-  ctx,
-}: {
-  scheme: SecuritySchemeObject;
-  scopes: string[];
-  ctx: RenderContext;
-}) {
+function AuthScheme({ scheme, scopes }: { scheme: SecuritySchemeObject; scopes: string[] }) {
   if (scheme.type === 'http' || scheme.type === 'oauth2') {
     return (
       <AuthProperty

@@ -45,3 +45,5 @@ next-env.d.ts
 packages/radix-ui/css/generated/*.css
 packages/base-ui/css/generated/*.css
 packages/openapi/css/generated/*.css
+packages/api-docs/css/generated/*.css
+packages/asyncapi/css/generated/*.css

@@ -4,9 +4,9 @@ import type { CodeUsageGenerator } from '@/requests/generators';
 export const curl: CodeUsageGenerator = {
   label: 'cURL',
   lang: 'bash',
-  generate(url, data) {
+  generate(data) {
     const s: string[] = [];
-    s.push(`curl -X ${data.method.toUpperCase()} "${url}"`);
+    s.push(`curl -X ${data.method.toUpperCase()} "${data.url}"`);
 
     for (const header in data.header) {
       const value = `${header}: ${data.header[header].value}`;

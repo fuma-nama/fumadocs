@@ -5,7 +5,7 @@ import { resolveMediaAdapter } from '@/requests/media/adapter';
 export const javascript: CodeUsageGenerator = {
   label: 'JavaScript',
   lang: 'js',
-  generate(url, data, { mediaAdapters }) {
+  generate(data, { mediaAdapters }) {
     const s: string[] = [];
     const options = new Map<string, string>();
     const headers: Record<string, string> = {};
@@ -44,7 +44,7 @@ export const javascript: CodeUsageGenerator = {
       options.set('body', 'body');
     }
 
-    const params = [doubleQuote(url)];
+    const params = [doubleQuote(data.url)];
     if (options.size > 0) {
       const str = Array.from(options.entries())
         .map(([k, v]) => indent(k === v ? k : `${k}: ${v}`))

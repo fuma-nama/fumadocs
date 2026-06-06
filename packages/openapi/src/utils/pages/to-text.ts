@@ -1,17 +1,19 @@
-import type { ApiPageProps, OperationItem, WebhookItem } from '@/ui/api-page';
 import type { DereferencedDocument } from '@/utils/document/dereference';
 import type { TagObject } from '@/types';
 import { dump } from 'js-yaml';
-import { removeUndefined } from '@/utils/remove-undefined';
 import {
+  type GeneratedPageProps,
   getPageProps,
+  type OperationItem,
   type OperationOutput,
   type PageOutput,
+  type WebhookItem,
   type WebhookOutput,
 } from '@/utils/pages/builder';
 import type { InternalOpenAPIMeta } from '@/server';
 import { toStaticData } from '@/utils/pages/to-static-data';
 import { doubleQuote } from '@/requests/string-utils';
+import { removeUndefined } from '../remove-undefined';
 
 export interface PagesToTextOptions {
   /**
@@ -155,7 +157,7 @@ function pageContent({
   document,
   webhooks,
   operations,
-}: ApiPageProps): string {
+}: GeneratedPageProps): string {
   const propStrs: string[] = [`document={${doubleQuote(document)}}`];
 
   // filter extra properties in props

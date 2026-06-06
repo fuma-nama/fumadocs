@@ -1,5 +1,4 @@
 import type { MethodInformation } from '@/types';
-import type { NoReference } from '@/utils/schema';
 import { I18nLabel } from '@/ui/client/i18n';
 import {
   AccordionContent,
@@ -7,16 +6,17 @@ import {
   AccordionItem,
   Accordions,
   AccordionTrigger,
-} from '@/ui/components/accordion';
+} from '@fumadocs/api-docs/components/accordion';
 import type { ReactNode } from 'react';
 import type { RawRequestData } from '@/requests/types';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from 'fumadocs-ui/components/tabs';
-import { resolveRequestData } from '@/utils/url';
-import { MethodLabel } from '../components/method-label';
+import { pathnameFromRequest } from '@/requests/generators';
+import { MethodLabel } from '@/ui/components/method-label';
 import type { ExampleRequestItem } from './get-example-requests';
 import { Markdown } from '../components/markdown';
 import { ClientCodeBlock } from '../components/codeblock';
 import { useRenderContext } from '../contexts/api';
+import type { NoReference } from '@fumadocs/api-docs/schema';
 
 export interface RequestTabsRenderOptions {
   route: string;
@@ -116,7 +116,7 @@ function RequestTabsItem({
       {item.description && <Markdown md={item.description} />}
       <div className="flex flex-row gap-2 items-center justify-between">
         <MethodLabel>{requestData.method}</MethodLabel>
-        <code>{resolveRequestData(options.route, item.encoded)}</code>
+        <code>{pathnameFromRequest(options.route, item.encoded)}</code>
       </div>
 
       <Accordions type="multiple" className="mt-2">

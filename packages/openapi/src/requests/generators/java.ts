@@ -5,7 +5,7 @@ import { resolveMediaAdapter } from '@/requests/media/adapter';
 export const java: CodeUsageGenerator = {
   label: 'Java',
   lang: 'java',
-  generate(url, data, { mediaAdapters }) {
+  generate(data, { mediaAdapters }) {
     const s: string[] = [];
     const headers = { ...data.header };
     const imports = new Set<string>([
@@ -46,7 +46,7 @@ export const java: CodeUsageGenerator = {
 
     // Build request
     s.push('HttpRequest.Builder requestBuilder = HttpRequest.newBuilder()');
-    s.push(indent(`.uri(URI.create(${doubleQuote(url)}))`));
+    s.push(indent(`.uri(URI.create(${doubleQuote(data.url)}))`));
 
     // Add headers
     for (const [key, param] of Object.entries(headers)) {

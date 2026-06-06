@@ -1,8 +1,8 @@
 import type { DereferencedDocument } from '@/utils/document/dereference';
-import type { ApiPageProps, OperationItem, WebhookItem } from '@/ui/api-page';
-import type { OperationObject, PathItemObject, TagObject } from '@/types';
-import { getTagDisplayName, methodKeys, type NoReference } from '@/utils/schema';
-import { idToTitle } from '@/utils/id-to-title';
+import type { HttpMethods, OperationObject, PathItemObject, TagObject } from '@/types';
+import { getTagDisplayName, methodKeys } from '@/utils/schema';
+import { idToTitle } from '@fumadocs/api-docs/utils/id-to-title';
+import type { NoReference } from '@fumadocs/api-docs/schema';
 
 interface BaseEntry {
   path: string;
@@ -37,6 +37,25 @@ export interface OutputGroup extends BaseEntry {
   entries: OutputEntry[];
   /** tag info if the group is generated from a tag. */
   tag?: TagObject;
+}
+
+export interface WebhookItem {
+  /**
+   * webhook name in `webhooks`
+   */
+  name: string;
+  method: HttpMethods;
+}
+
+export interface OperationItem {
+  /**
+   * the path of operation in `paths`
+   */
+  path: string;
+  /**
+   * the HTTP method of operation
+   */
+  method: HttpMethods;
 }
 
 export type OutputEntry = PageOutput | OperationOutput | WebhookOutput | OutputGroup;
@@ -208,7 +227,23 @@ export function fromSchema(
   return files;
 }
 
-export function getPageProps(entry: PageOutput | OperationOutput | WebhookOutput): ApiPageProps {
+export interface GeneratedPageProps {
+  /** schema ID */
+  document: string;
+  showTitle?: boolean;
+  showDescription?: boolean;
+
+  /**
+   * An array of operations
+   */
+  operations?: OperationItem[];
+
+  webhooks?: WebhookItem[];
+}
+
+export function getPageProps(
+  entry: PageOutput | OperationOutput | WebhookOutput,
+): GeneratedPageProps {
   if (entry.type === 'operation')
     return {
       document: entry.schemaId,
