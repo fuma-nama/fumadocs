@@ -5,7 +5,7 @@ import { doubleQuote } from '../string-utils';
 export const csharp: CodeUsageGenerator = {
   label: 'C#',
   lang: 'csharp',
-  generate(url, data, { mediaAdapters }) {
+  generate(data, { mediaAdapters }) {
     const s: string[] = [];
     const imports = new Set<string>(['System', 'System.Net.Http', 'System.Text']);
     const headers = { ...data.header };
@@ -57,9 +57,9 @@ export const csharp: CodeUsageGenerator = {
     const method = data.method[0].toUpperCase() + data.method.slice(1).toLowerCase() + 'Async';
 
     if (body) {
-      s.push(`var response = await client.${method}("${url}", body);`);
+      s.push(`var response = await client.${method}("${data.url}", body);`);
     } else {
-      s.push(`var response = await client.${method}("${url}");`);
+      s.push(`var response = await client.${method}("${data.url}");`);
     }
 
     // Add response handling

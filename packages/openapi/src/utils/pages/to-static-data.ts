@@ -1,13 +1,13 @@
-import type { NoReference } from '@/utils/schema';
 import type { Document, OperationObject } from '@/types';
 import Slugger from 'github-slugger';
-import { idToTitle } from '@/utils/id-to-title';
 import type { TOCItemType } from 'fumadocs-core/toc';
 import type { StructuredData } from 'fumadocs-core/mdx-plugins';
-import type { ApiPageProps } from '@/ui';
+import type { GeneratedPageProps } from './builder';
+import { idToTitle } from '@fumadocs/api-docs/utils/id-to-title';
+import type { NoReference } from '@fumadocs/api-docs/schema';
 
 export function toStaticData(
-  page: ApiPageProps,
+  page: GeneratedPageProps,
   dereferenced: NoReference<Document>,
 ): {
   toc: TOCItemType[];

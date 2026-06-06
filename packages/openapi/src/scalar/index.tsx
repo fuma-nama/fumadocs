@@ -1,5 +1,5 @@
 import type { MethodInformation, RenderContext } from '@/types';
-import type { CreateAPIPageOptions } from '@/ui';
+import type { CreateOpenAPIPageOptions } from '@/ui';
 import { lazy } from 'react';
 
 const Client = lazy(() => import('./client'));
@@ -21,11 +21,14 @@ function APIPlayground({
  *
  * Requires `@scalar/api-client-react` to be installed, it imports the styles automatically.
  */
-export function withScalar(options: CreateAPIPageOptions = {}): CreateAPIPageOptions {
+export function withScalar(options: CreateOpenAPIPageOptions = {}): CreateOpenAPIPageOptions {
   return {
     ...options,
     playground: {
       ...options.playground,
+      provider(props) {
+        return props.children;
+      },
       render(props) {
         return <APIPlayground {...props} />;
       },

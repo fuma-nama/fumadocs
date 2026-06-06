@@ -4,11 +4,9 @@ import { defaultShikiFactory } from 'fumadocs-core/highlight/shiki/full';
 import * as ClientBoundary from '@/ui/client/boundary';
 import { createCodeUsageGeneratorRegistry } from '@/requests/generators';
 import { registerDefault } from '@/requests/generators/all';
-import { createMarkdownProcessor } from '@/ui/create-client';
 
 export async function renderContextFrom(input: string): Promise<RenderContext> {
   const schema = await processDocument(input);
-  const processor = createMarkdownProcessor();
 
   return {
     mediaAdapters: {},
@@ -16,11 +14,17 @@ export async function renderContextFrom(input: string): Promise<RenderContext> {
     generateTypeScriptDefinitions() {
       return '';
     },
+    _schemaUIProps: {
+      renderMarkdown(md) {
+        return md;
+      },
+      resolver: (v) => ({ dereferenced: v }),
+    },
     shiki: defaultShikiFactory,
     shikiOptions: { theme: 'github-light' },
     clientBoundary: ClientBoundary,
-    _getMarkdownProcessor() {
-      return processor;
+    _default_processMarkdown(md) {
+      return md;
     },
     schema,
   };

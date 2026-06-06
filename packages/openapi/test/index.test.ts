@@ -1,17 +1,8 @@
 import { fileURLToPath } from 'node:url';
 import { afterEach, describe, expect, test, vi } from 'vitest';
-import { idToTitle } from '@/utils/id-to-title';
 import { generateFilesOnly, type OutputFile } from '@/generate-file';
 import { createOpenAPI } from '@/server';
 import path from 'node:path';
-
-describe('Utilities', () => {
-  test('Operation ID to Title', () => {
-    expect(idToTitle('getKey')).toBe('Get Key');
-    expect(idToTitle('requestId30')).toBe('Request Id30');
-    expect(idToTitle('requestId-30')).toBe('Request Id 30');
-  });
-});
 
 const cwd = fileURLToPath(new URL('./', import.meta.url));
 

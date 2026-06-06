@@ -1,48 +1,16 @@
 import { Operation } from '@/ui/operation';
-import type { HttpMethods, RenderContext, ServerObject } from '@/types';
+import type { ServerObject } from '@/types';
 import { createMethod } from '@/utils/schema';
+import type { GeneratedPageProps } from '@/utils/pages/builder';
+import { useRenderContext } from './contexts/api';
 
-export interface ApiPageProps {
-  document: string;
-  showTitle?: boolean;
-  showDescription?: boolean;
-
-  /**
-   * An array of operations
-   */
-  operations?: OperationItem[];
-
-  webhooks?: WebhookItem[];
-}
-
-export interface WebhookItem {
-  /**
-   * webhook name in `webhooks`
-   */
-  name: string;
-  method: HttpMethods;
-}
-
-export interface OperationItem {
-  /**
-   * the path of operation in `paths`
-   */
-  path: string;
-  /**
-   * the HTTP method of operation
-   */
-  method: HttpMethods;
-}
-
-export function APIPage({
+export function PageContent({
   showTitle: hasHead = false,
   showDescription,
   operations,
   webhooks,
-  ctx,
-}: Omit<ApiPageProps, 'document'> & {
-  ctx: RenderContext;
-}) {
+}: Omit<GeneratedPageProps, 'document'>) {
+  const ctx = useRenderContext();
   const { dereferenced } = ctx.schema;
   let { renderPageLayout } = ctx.content ?? {};
   renderPageLayout ??= (slots) => (
@@ -74,7 +42,6 @@ export function APIPage({
               key={`${item.path}:${item.method}`}
               method={method}
               path={item.path}
-              ctx={ctx}
               showTitle={hasHead}
               showDescription={showDescription}
             />
@@ -99,7 +66,6 @@ export function APIPage({
               type="webhook"
               key={`${item.name}:${item.method}`}
               method={createMethod(item.method, webhook, hook)}
-              ctx={ctx}
               path={`/${item.name}`}
               showTitle={hasHead}
               showDescription={showDescription}
@@ -116,10 +82,8 @@ export function APIPage({
   }
 
   return (
-    <ctx.clientBoundary.ApiProvider ctx={ctx}>
-      <ctx.clientBoundary.ServerProvider servers={dereferenced.servers as ServerObject[]}>
-        {content}
-      </ctx.clientBoundary.ServerProvider>
-    </ctx.clientBoundary.ApiProvider>
+    <ctx.clientBoundary.ServerProvider servers={dereferenced.servers as ServerObject[]}>
+      {content}
+    </ctx.clientBoundary.ServerProvider>
   );
 }

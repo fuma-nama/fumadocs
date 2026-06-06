@@ -37,7 +37,7 @@ export function UsageTabs({ method, ctx }: { method: MethodInformation; ctx: Ren
         </CodeBlockTabsList>
         {map.map(([id, item]) => (
           <CodeBlockTab key={id} value={id}>
-            <ctx.clientBoundary.UsageTab id={id} lang={item.lang} _client={item._client} />
+            <ctx.clientBoundary.UsageTab id={id} lang={item.lang} />
           </CodeBlockTab>
         ))}
       </CodeBlockTabs>

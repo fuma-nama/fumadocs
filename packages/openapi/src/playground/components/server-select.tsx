@@ -6,8 +6,8 @@ import {
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@/ui/components/select';
-import { Input, labelVariants } from '@/ui/components/input';
+} from '@fumadocs/api-docs/components/select';
+import { Input, labelVariants } from '@fumadocs/api-docs/components/input';
 import { useEffect, useState, useRef, type ComponentProps } from 'react';
 import { cn } from '@/utils/cn';
 import {
@@ -17,13 +17,13 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from '@/ui/components/dialog';
-import { resolveServerUrl, withBase } from '@/utils/url';
+} from '@fumadocs/api-docs/components/dialog';
 import type { ServerVariableObject } from '@/types';
-import type { NoReference } from '@/utils/schema';
 import { StfProvider, useFieldValue, useListener, useStf } from '@fumari/stf';
 import { EditIcon } from 'lucide-react';
 import { useTranslations } from '@/ui/client/i18n';
+import type { NoReference } from '@fumadocs/api-docs/schema';
+import { resolveServerUrl } from '@fumadocs/api-docs/utils/url';
 
 export default function ServerSelect(props: ComponentProps<typeof DialogTrigger>) {
   const { servers, server, setServer, setServerVariables } = useServerContext();
@@ -52,10 +52,10 @@ export default function ServerSelect(props: ComponentProps<typeof DialogTrigger>
         </span>
         <code className="truncate min-w-0 flex-1">
           {isMounted
-            ? withBase(
+            ? new URL(
                 server ? resolveServerUrl(server.url, server.variables) : '/',
                 window.location.origin,
-              )
+              ).href
             : t.loading}
         </code>
         <EditIcon className="size-4" />

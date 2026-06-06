@@ -75,5 +75,5 @@ async function compileInline() {
 }
 
 function namesToFile(names: string[]) {
-  return names.map((name) => `@source inline(${JSON.stringify(name)});`).join('\n');
+  return `@source inline(${JSON.stringify(names.join(' '))});`;
 }

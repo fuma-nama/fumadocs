@@ -1,7 +1,9 @@
 import type { TranslationsAPIExtension, TranslationValue } from 'fumadocs-core/i18n';
-import type { I18nUIConfig } from 'fumadocs-ui/i18n';
+import { defaultTranslations as apiDocsTranslations } from '@fumadocs/api-docs/i18n';
 
 export const defaultTranslations = {
+  ...apiDocsTranslations,
+
   // General
   loading: 'loading...',
   empty: 'Empty',
@@ -43,18 +45,6 @@ export const defaultTranslations = {
   // TypeScript panel
   typeScriptDefinitions: 'TypeScript Definitions',
   useTypeInTypeScript: 'Use the {name} type in TypeScript.' as TranslationValue<'name'>,
-
-  // Schema info tags
-  schemaDefault: 'Default',
-  schemaMatch: 'Match',
-  schemaFormat: 'Format',
-  schemaMultipleOf: 'Multiple Of',
-  schemaRange: 'Range',
-  schemaLength: 'Length',
-  schemaProperties: 'Properties',
-  schemaItems: 'Items',
-  schemaValueIn: 'Value in',
-  schemaExample: 'Example',
 
   // Response tabs
   responseTabName: 'Example {key}' as TranslationValue<'key'>,
@@ -105,23 +95,6 @@ export const defaultTranslations = {
   serverUrl: 'Server URL',
   serverUrlDescription: 'The base URL of your API endpoint.',
   serverUrlFieldPlaceholder: 'Enter Value',
-
-  // Schema UI
-  schemaShowArray: 'Array Item',
-  schemaHideArray: 'Array Item',
-  schemaFilterPropertiesPlaceholder: 'Filter Properties',
-  schemaFilterPropertiesEmpty: 'No property matching',
-
-  // Inputs (playground)
-  playgroundShowProperty: 'Show Property',
-  playgroundPropertyPlaceholder: 'Enter Property Name',
-  playgroundNewProperty: 'New',
-  playgroundNewItem: 'New Item',
-  playgroundRemoveItem: 'Remove Item',
-  playgroundSelectPlaceholder: 'Select',
-  playgroundSelected: 'Selected',
-  playgroundInputUpload: 'Upload',
-  playgroundInputUnset: 'Unset',
 };
 
 export type Translations = typeof defaultTranslations;
@@ -130,24 +103,5 @@ export function openapiTranslations(): TranslationsAPIExtension<'openapi', Trans
   return {
     namespace: 'openapi',
     defaultValue: defaultTranslations,
-  };
-}
-
-/** @deprecated use `i18n.translations()` & `openapiTranslations()` instead */
-export function defineI18nOpenAPI<Languages extends string>(
-  config: I18nUIConfig<Languages>,
-  translations: Partial<Record<NoInfer<Languages>, Partial<Translations>>>,
-): I18nUIConfig<Languages> {
-  return {
-    ...config,
-    provider(locale = config.defaultLanguage) {
-      const out = config.provider(locale);
-      const data = translations[locale as Languages];
-      if (data) {
-        out.translations ??= {};
-        out.translations.openapi = { ...defaultTranslations, ...data };
-      }
-      return out;
-    },
   };
 }

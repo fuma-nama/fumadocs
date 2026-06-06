@@ -1,8 +1,9 @@
 import { encodeRequestData } from '@/requests/media/encode';
 import type { RawRequestData, RequestData } from '@/requests/types';
 import type { MethodInformation, RenderContext } from '@/types';
-import { type NoReference, getPreferredType, pickExample } from '@/utils/schema';
-import { sample } from '@/utils/schema/sample';
+import { getPreferredType, pickExample } from '@/utils/schema';
+import type { NoReference } from '@fumadocs/api-docs/schema';
+import { sample } from '@fumadocs/api-docs/schema/sample';
 
 export interface ExampleRequestItem {
   id: string;

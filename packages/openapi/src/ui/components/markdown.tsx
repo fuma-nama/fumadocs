@@ -1,8 +1,8 @@
-import { type ReactNode, useMemo } from 'react';
+import { useMemo } from 'react';
 import { useRenderContext } from '../contexts/api';
 
 export function Markdown({ md }: { md: string }) {
-  const processor = useRenderContext()._getMarkdownProcessor();
+  const { _default_processMarkdown: processMarkdown } = useRenderContext();
 
-  return useMemo(() => processor.processSync(md) as unknown as ReactNode, [processor, md]);
+  return useMemo(() => processMarkdown(md), [processMarkdown, md]);
 }

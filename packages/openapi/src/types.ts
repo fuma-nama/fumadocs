@@ -1,9 +1,10 @@
 import type { OpenAPIV3_2, OpenAPIV3 } from './types/openapi';
-import type { NoReference } from '@/utils/schema';
 import type { DereferencedDocument } from '@/utils/document/dereference';
 import type { OpenAPIOptions } from '@/server';
 import type { InlineCodeUsageGenerator } from './requests/generators';
-import type { CreateOpenAPIPageOptions, createMarkdownProcessor } from './ui/create-client';
+import type { CreateOpenAPIPageOptions } from './ui';
+import type { ReactNode } from 'react';
+import type { NoReference, SchemaResolver } from '@fumadocs/api-docs/schema';
 
 export type Document = OpenAPIV3_2.Document;
 export type OperationObject = OpenAPIV3_2.OperationObject;
@@ -42,7 +43,9 @@ export interface RenderContext
    * dereferenced schema
    */
   schema: DereferencedDocument;
-  _getMarkdownProcessor: () => ReturnType<typeof createMarkdownProcessor>;
+  _default_processMarkdown: (md: string) => ReactNode;
+  _schemaUIProps: { resolver: SchemaResolver; renderMarkdown: (md: string) => ReactNode };
+
   clientBoundary: typeof import('@/ui/client/boundary');
 }
 

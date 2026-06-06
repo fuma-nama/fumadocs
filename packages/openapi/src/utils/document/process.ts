@@ -1,7 +1,7 @@
 import type { Document } from '@/types';
 import { upgrade } from '@scalar/openapi-upgrader';
-import { bundle } from '@apidevtools/json-schema-ref-parser';
 import { dereferenceOpenApiDocument, type DereferencedDocument } from './dereference';
+import { bundle } from '@fumadocs/api-docs/schema/bundle';
 
 export type ProcessedDocument = DereferencedDocument;
 

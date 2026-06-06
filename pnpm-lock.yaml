@@ -1831,6 +1831,103 @@ importers:
         specifier: ^8.0.16
         version: 8.0.16(@types/node@25.9.1)(esbuild@0.28.0)(jiti@2.7.0)(terser@5.48.0)(tsx@4.22.4)(yaml@2.9.0)
 
+  packages/api-docs:
+    dependencies:
+      '@fumari/json-schema-ts':
+        specifier: ^0.0.2
+        version: 0.0.2(json-schema-typed@8.0.2)
+      '@fumari/stf':
+        specifier: workspace:*
+        version: link:../stf
+      '@radix-ui/react-accordion':
+        specifier: ^1.2.12
+        version: 1.2.12(@types/react-dom@19.2.3(@types/react@19.2.16))(@types/react@19.2.16)(react-dom@19.2.7(react@19.2.7))(react@19.2.7)
+      '@radix-ui/react-dialog':
+        specifier: ^1.1.15
+        version: 1.1.15(@types/react-dom@19.2.3(@types/react@19.2.16))(@types/react@19.2.16)(react-dom@19.2.7(react@19.2.7))(react@19.2.7)
+      '@radix-ui/react-select':
+        specifier: ^2.2.6
+        version: 2.2.6(@types/react-dom@19.2.3(@types/react@19.2.16))(@types/react@19.2.16)(react-dom@19.2.7(react@19.2.7))(react@19.2.7)
+      chokidar:
+        specifier: ^5.0.0
+        version: 5.0.0
+      class-variance-authority:
+        specifier: ^0.7.1
+        version: 0.7.1
+      github-slugger:
+        specifier: ^2.0.0
+        version: 2.0.0
+      hast-util-to-jsx-runtime:
+        specifier: ^2.3.6
+        version: 2.3.6
+      js-yaml:
+        specifier: ^4.2.0
+        version: 4.2.0
+      lucide-react:
+        specifier: ^1.17.0
+        version: 1.17.0(react@19.2.7)
+      react:
+        specifier: ^19.2.0
+        version: 19.2.7
+      react-dom:
+        specifier: ^19.2.0
+        version: 19.2.7(react@19.2.7)
+      remark:
+        specifier: ^15.0.1
+        version: 15.0.1
+      remark-rehype:
+        specifier: ^11.1.2
+        version: 11.1.2
+      shiki:
+        specifier: ^4.2.0
+        version: 4.2.0
+      tailwind-merge:
+        specifier: ^3.6.0
+        version: 3.6.0
+    devDependencies:
+      '@apidevtools/json-schema-ref-parser':
+        specifier: ^15.3.5
+        version: 15.3.5(@types/json-schema@7.0.15)
+      '@fastify/deepmerge':
+        specifier: ^3.2.1
+        version: 3.2.1
+      '@scalar/api-client-react':
+        specifier: ^2.0.21
+        version: 2.0.21(axios@1.17.0)(react@19.2.7)(tailwindcss@4.3.0)(typescript@6.0.3)
+      '@tailwindcss/oxide':
+        specifier: ^4.3.0
+        version: 4.3.0
+      '@types/js-yaml':
+        specifier: ^4.0.9
+        version: 4.0.9
+      '@types/node':
+        specifier: 25.9.1
+        version: 25.9.1
+      '@types/react':
+        specifier: ^19.2.16
+        version: 19.2.16
+      ajv:
+        specifier: ^8.20.0
+        version: 8.20.0
+      fumadocs-core:
+        specifier: workspace:*
+        version: link:../core
+      fumadocs-ui:
+        specifier: workspace:*
+        version: link:../radix-ui
+      json-schema-typed:
+        specifier: ^8.0.2
+        version: 8.0.2
+      tailwindcss:
+        specifier: ^4.3.0
+        version: 4.3.0
+      tsconfig:
+        specifier: workspace:*
+        version: link:../tsconfig
+      tsdown:
+        specifier: 0.22.1
+        version: 0.22.1(@tsdown/css@0.22.1)(oxc-resolver@11.19.1(@emnapi/core@1.10.0)(@emnapi/runtime@1.10.0))(tsx@4.22.4)(typescript@6.0.3)(unrun@0.3.0)
+
   packages/base-ui:
     dependencies:
       '@base-ui/react':
@@ -2739,21 +2836,15 @@ importers:
 
   packages/openapi:
     dependencies:
+      '@fumadocs/api-docs':
+        specifier: workspace:*
+        version: link:../api-docs
       '@fumari/json-schema-ts':
         specifier: ^0.0.2
         version: 0.0.2(json-schema-typed@8.0.2)
       '@fumari/stf':
-        specifier: workspace:*
-        version: link:../stf
-      '@radix-ui/react-accordion':
-        specifier: ^1.2.12
-        version: 1.2.12(@types/react-dom@19.2.3(@types/react@19.2.16))(@types/react@19.2.16)(react-dom@19.2.7(react@19.2.7))(react@19.2.7)
-      '@radix-ui/react-dialog':
-        specifier: ^1.1.15
-        version: 1.1.15(@types/react-dom@19.2.3(@types/react@19.2.16))(@types/react@19.2.16)(react-dom@19.2.7(react@19.2.7))(react@19.2.7)
-      '@radix-ui/react-select':
-        specifier: ^2.2.6
-        version: 2.2.6(@types/react-dom@19.2.3(@types/react@19.2.16))(@types/react@19.2.16)(react-dom@19.2.7(react@19.2.7))(react@19.2.7)
+        specifier: ^1.0.5
+        version: 1.0.5(@types/react@19.2.16)(react-dom@19.2.7(react@19.2.7))(react@19.2.7)
       chokidar:
         specifier: ^5.0.0
         version: 5.0.0
@@ -2791,12 +2882,6 @@ importers:
         specifier: ^3.6.0
         version: 3.6.0
     devDependencies:
-      '@apidevtools/json-schema-ref-parser':
-        specifier: ^15.3.5
-        version: 15.3.5(@types/json-schema@7.0.15)
-      '@fastify/deepmerge':
-        specifier: ^3.2.1
-        version: 3.2.1
       '@scalar/api-client-react':
         specifier: ^2.0.21
         version: 2.0.21(axios@1.17.0)(react@19.2.7)(tailwindcss@4.3.0)(typescript@6.0.3)
@@ -2815,9 +2900,6 @@ importers:
       '@types/react':
         specifier: ^19.2.16
         version: 19.2.16
-      ajv:
-        specifier: ^8.20.0
-        version: 8.20.0
       fast-content-type-parse:
         specifier: ^3.0.0
         version: 3.0.0
@@ -5287,6 +5369,16 @@ packages:
       json-schema-typed: ^8.0.2
     peerDependenciesMeta:
       json-schema-typed:
+        optional: true
+
+  '@fumari/stf@1.0.5':
+    resolution: {integrity: sha512-O9UQIbV15ePV5vUgceCcaMDuBRYfrSuogDEY5E//CmrbIiWJ1Ji5VgGHHH0L0HQuRr5riUJuAEr9lYIvJl9OyQ==}
+    peerDependencies:
+      '@types/react': '*'
+      react: ^19.2.0
+      react-dom: ^19.2.0
+    peerDependenciesMeta:
+      '@types/react':
         optional: true
 
   '@headlessui/tailwindcss@0.2.2':
@@ -17295,6 +17387,13 @@ snapshots:
       esrap: 2.2.3
     optionalDependencies:
       json-schema-typed: 8.0.2
+
+  '@fumari/stf@1.0.5(@types/react@19.2.16)(react-dom@19.2.7(react@19.2.7))(react@19.2.7)':
+    dependencies:
+      react: 19.2.7
+      react-dom: 19.2.7(react@19.2.7)
+    optionalDependencies:
+      '@types/react': 19.2.16
 
   '@headlessui/tailwindcss@0.2.2(tailwindcss@4.3.0)':
     dependencies:

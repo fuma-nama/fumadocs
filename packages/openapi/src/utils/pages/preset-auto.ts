@@ -9,7 +9,6 @@ import type {
   PagesBuilderConfig,
   WebhookOutput,
 } from '@/utils/pages/builder';
-import { isUrl } from '@/utils/url';
 import type { DistributiveOmit } from '@/types';
 
 interface OperationConfig extends BaseConfig {
@@ -122,7 +121,9 @@ export function createAutoPreset(options: SchemaToPagesOptions): PagesBuilderCon
         if (result.tag) return slugify(result.tag.name!);
         const schemaId = result.schemaId;
 
-        return isUrl(schemaId) ? 'index' : path.basename(schemaId, path.extname(schemaId));
+        return schemaId.startsWith('http://') || schemaId.startsWith('https://')
+          ? 'index'
+          : path.basename(schemaId, path.extname(schemaId));
       }
 
       if (result.type === 'operation') {

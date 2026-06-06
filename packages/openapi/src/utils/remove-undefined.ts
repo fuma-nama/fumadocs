@@ -1,25 +1,36 @@
-import { isPlainObject } from './is-plain-object';
-
 export function removeUndefined<T extends object>(value: T, deep = false): T {
-  if (!isPlainObject(value)) return value;
+  const obj = value as Record<string, unknown>;
 
-  for (const key in value) {
-    const prop = value[key];
-    if (prop === undefined) {
-      delete value[key];
+  for (const key in obj) {
+    if (obj[key] === undefined) delete obj[key];
+    if (!deep) continue;
+
+    const entry = obj[key];
+
+    if (isPlainObject(entry)) {
+      removeUndefined(entry, deep);
       continue;
     }
 
-    if (deep) {
-      if (Array.isArray(prop)) {
-        for (const item of prop) removeUndefined(item, deep);
-      }
-
-      if (isPlainObject(prop)) {
-        removeUndefined(prop, deep);
+    if (Array.isArray(entry)) {
+      for (const item of entry) {
+        if (isPlainObject(item)) removeUndefined(item, deep);
       }
     }
   }
 
   return value;
+}
+
+function isPlainObject(value: unknown): value is Record<string, unknown> {
+  if (typeof value !== 'object' || value === null) {
+    return false;
+  }
+
+  const prototype = Object.getPrototypeOf(value);
+  return (
+    prototype === null ||
+    prototype === Object.prototype ||
+    Object.getPrototypeOf(prototype) === null
+  );
 }

@@ -1,0 +1,117 @@
+{
+  "name": "@fumadocs/api-docs",
+  "version": "0.0.1",
+  "description": "Shared utils for API docs generation",
+  "keywords": [
+    "Docs",
+    "Fumadocs"
+  ],
+  "homepage": "https://fumadocs.dev",
+  "license": "MIT",
+  "author": "Fuma Nama",
+  "repository": "github:fuma-nama/fumadocs",
+  "files": [
+    "css",
+    "dist"
+  ],
+  "type": "module",
+  "exports": {
+    "./auto-anchor": "./dist/auto-anchor/index.js",
+    "./auto-anchor/client": "./dist/auto-anchor/client.js",
+    "./codegen": "./dist/codegen.js",
+    "./components/accordion": "./dist/components/accordion.js",
+    "./components/dialog": "./dist/components/dialog.js",
+    "./components/input": "./dist/components/input.js",
+    "./components/playground/inputs": "./dist/components/playground/inputs.js",
+    "./components/playground/schema": "./dist/components/playground/schema.js",
+    "./components/schema": "./dist/components/schema/index.js",
+    "./components/schema/client": "./dist/components/schema/client.js",
+    "./components/select": "./dist/components/select.js",
+    "./components/select-tab": "./dist/components/select-tab.js",
+    "./components/spinner": "./dist/components/spinner.js",
+    "./i18n": "./dist/i18n.js",
+    "./schema": "./dist/schema/index.js",
+    "./schema/bundle": "./dist/schema/bundle.js",
+    "./schema/dereference": "./dist/schema/dereference.js",
+    "./schema/merge": "./dist/schema/merge.js",
+    "./schema/ref": "./dist/schema/ref.js",
+    "./schema/resolve-ref": "./dist/schema/resolve-ref.js",
+    "./schema/sample": "./dist/schema/sample.js",
+    "./schema/to-string": "./dist/schema/to-string.js",
+    "./utils/id-to-title": "./dist/utils/id-to-title.js",
+    "./utils/url": "./dist/utils/url.js",
+    "./package.json": "./package.json",
+    "./css/*": "./css/*"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "scripts": {
+    "build": "tsdown",
+    "clean": "rimraf dist",
+    "dev": "tsdown --watch --clean false",
+    "lint": "oxlint .",
+    "types:check": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@fumari/json-schema-ts": "^0.0.2",
+    "@fumari/stf": "workspace:*",
+    "@radix-ui/react-accordion": "^1.2.12",
+    "@radix-ui/react-dialog": "^1.1.15",
+    "@radix-ui/react-select": "^2.2.6",
+    "chokidar": "^5.0.0",
+    "class-variance-authority": "^0.7.1",
+    "github-slugger": "^2.0.0",
+    "hast-util-to-jsx-runtime": "^2.3.6",
+    "js-yaml": "^4.2.0",
+    "lucide-react": "^1.17.0",
+    "remark": "^15.0.1",
+    "remark-rehype": "^11.1.2",
+    "shiki": "^4.2.0",
+    "tailwind-merge": "^3.6.0"
+  },
+  "devDependencies": {
+    "@apidevtools/json-schema-ref-parser": "^15.3.5",
+    "@fastify/deepmerge": "^3.2.1",
+    "@scalar/api-client-react": "^2.0.21",
+    "@tailwindcss/oxide": "^4.3.0",
+    "@types/js-yaml": "^4.0.9",
+    "@types/node": "25.9.1",
+    "@types/react": "^19.2.16",
+    "ajv": "^8.20.0",
+    "fumadocs-core": "workspace:*",
+    "fumadocs-ui": "workspace:*",
+    "json-schema-typed": "^8.0.2",
+    "tailwindcss": "^4.3.0",
+    "tsconfig": "workspace:*",
+    "tsdown": "0.22.1"
+  },
+  "peerDependencies": {
+    "@scalar/api-client-react": "^2.0.20",
+    "@types/react": "*",
+    "fumadocs-core": "^16.9.0",
+    "fumadocs-ui": "^16.9.0",
+    "json-schema-typed": "*",
+    "react": "^19.2.0",
+    "react-dom": "^19.2.0"
+  },
+  "peerDependenciesMeta": {
+    "json-schema-typed": {
+      "optional": true
+    },
+    "@types/react": {
+      "optional": true
+    },
+    "@scalar/api-client-react": {
+      "optional": true
+    }
+  },
+  "inlinedDependencies": {
+    "@apidevtools/json-schema-ref-parser": "15.3.5",
+    "@fastify/deepmerge": "3.2.1",
+    "ajv": "8.20.0",
+    "fast-deep-equal": "3.1.3",
+    "fast-uri": "3.1.0",
+    "json-schema-traverse": "1.0.0"
+  }
+}

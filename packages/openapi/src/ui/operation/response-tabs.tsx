@@ -1,18 +1,19 @@
 import type { MethodInformation, RenderContext, ResponseObject } from '@/types';
-import { getPreferredType, type NoReference } from '@/utils/schema';
+import { getPreferredType } from '@/utils/schema';
 import {
   AccordionContent,
   AccordionHeader,
   AccordionItem,
   Accordions,
   AccordionTrigger,
-} from '@/ui/components/accordion';
+} from '@fumadocs/api-docs/components/accordion';
 import { Tab, Tabs } from 'fumadocs-ui/components/tabs';
-import { sample } from '@/utils/schema/sample';
+import { sample } from '@fumadocs/api-docs/schema/sample';
 import { useMemo, type ReactNode } from 'react';
 import { I18nLabel } from '@/ui/client/i18n';
 import { Markdown } from '../components/markdown';
 import { ClientCodeBlock } from '../components/codeblock';
+import type { NoReference } from '@fumadocs/api-docs/schema';
 
 export interface ResponseTab {
   /**

@@ -12,7 +12,7 @@ import {
 import { useRenderContext, useServerContext } from '@/ui/contexts/api';
 import type { BrowserFetcherOptions } from '@/playground/fetcher';
 import { DefaultResultDisplay, type ResultDisplayProps } from './components/result-display';
-import { joinURL, resolveRequestData, resolveServerUrl, withBase } from '@/utils/url';
+import { pathnameFromRequest } from '@/requests/generators';
 import { MethodLabel } from '@/ui/components/method-label';
 import { useQuery } from '@/utils/use-query';
 import {
@@ -24,16 +24,20 @@ import { ChevronDown, LoaderCircle } from 'lucide-react';
 import { encodeRequestData } from '@/requests/media/encode';
 import { buttonVariants } from 'fumadocs-ui/components/ui/button';
 import { cn } from '@/utils/cn';
-import { anyFields, SchemaProvider, SchemaScope, useResolvedSchema } from '@/playground/schema';
+import {
+  anyFields,
+  SchemaProvider,
+  useResolvedSchema,
+} from '@fumadocs/api-docs/components/playground/schema';
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@/ui/components/select';
-import { labelVariants } from '@/ui/components/input';
-import { getPreferredType, type SecurityEntry, type ParsedSchema } from '@/utils/schema';
+} from '@fumadocs/api-docs/components/select';
+import { labelVariants } from '@fumadocs/api-docs/components/input';
+import { getPreferredType, type ParsedSchema } from '@/utils/schema';
 import ServerSelect from './components/server-select';
 import { useStorageKey } from '@/ui/client/storage-key';
 import {
@@ -46,15 +50,21 @@ import {
   useStf,
 } from '@fumari/stf';
 import { arrayStartsWith, objectGet, objectSet, stringifyFieldKey } from '@fumari/stf/lib/utils';
-import { FieldInput, FieldSet, JsonInput, ObjectInput } from './components/inputs';
-import type { HttpMethods, ParameterObject } from '@/types';
+import {
+  FieldInput,
+  FieldSet,
+  JsonInput,
+  ObjectInput,
+} from '@fumadocs/api-docs/components/playground/inputs';
+import type { MethodInformation, ParameterObject } from '@/types';
 import { useTranslations } from '@/ui/client/i18n';
 import { useOperationContext } from '@/ui/operation/client';
 import { OAuthDialog, OAuthDialogContent, OAuthDialogTrigger } from './components/oauth-dialog';
-import { dereferenceShallow } from '@/utils/schema/dereference';
+import { dereferenceShallow } from '@fumadocs/api-docs/schema/dereference';
 import { useAuth } from './auth';
 import { useOnChange } from 'fumadocs-core/utils/use-on-change';
-import { Spinner } from './components/spinner';
+import { Spinner } from '@fumadocs/api-docs/components/spinner';
+import { joinURL, resolveServerUrl } from '@fumadocs/api-docs/utils/url';
 
 export interface FormValues extends Record<string, unknown> {
   path: Record<string, unknown>;
@@ -64,12 +74,16 @@ export interface FormValues extends Record<string, unknown> {
   body: unknown;
 }
 
-export interface PlaygroundClientProps extends ComponentProps<'form'>, SchemaScope {
+export interface PlaygroundClientProps extends Omit<ComponentProps<'form'>, 'method'> {
   route: string;
-  method: HttpMethods;
-  securities: SecurityEntry[][];
-  proxyUrl?: string;
-  deprecated?: boolean;
+  method: MethodInformation;
+  writeOnly: boolean;
+  readOnly: boolean;
+}
+
+interface SecurityEntry {
+  scopes: string[];
+  id: string;
 }
 
 export type { ResultDisplayProps };
@@ -125,30 +139,26 @@ interface RequestBodyInfo {
 export default function PlaygroundClient({
   route,
   method,
-  securities,
-  proxyUrl,
   writeOnly,
   readOnly,
-  deprecated,
   ...rest
 }: PlaygroundClientProps) {
   const t = useTranslations();
   const ctx = useRenderContext();
-  const doc = ctx.schema.bundled;
+  const { bundled, dereferenced } = ctx.schema;
   const { parameters, body } = useMemo(() => {
-    const operation = doc.paths![route]![method]!;
     const parameters: ParameterObject[] =
-      operation.parameters?.map((param) => dereferenceShallow(param, doc)) ?? [];
+      method.parameters?.map((param) => dereferenceShallow(param, bundled)) ?? [];
     let body: RequestBodyInfo | undefined;
 
-    if (operation.requestBody) {
-      const content = dereferenceShallow(operation.requestBody, doc).content;
+    if (method.requestBody) {
+      const content = dereferenceShallow(method.requestBody, bundled).content;
       const mediaType = content ? getPreferredType(content) : undefined;
 
       if (content && mediaType) {
         body = {
           mediaType,
-          schema: dereferenceShallow(content[mediaType], doc).schema ?? true,
+          schema: dereferenceShallow(content[mediaType], bundled).schema ?? true,
         };
       }
     }
@@ -157,7 +167,27 @@ export default function PlaygroundClient({
       body,
       parameters,
     };
-  }, [doc, route, method]);
+  }, [bundled, method]);
+  const securityEntries = useMemo(() => {
+    const result: SecurityEntry[][] = [];
+    const security = method.security ?? dereferenced.security ?? [];
+    if (security.length === 0) return result;
+
+    for (const map of security) {
+      const list: SecurityEntry[] = [];
+
+      for (const [key, scopes] of Object.entries(map)) {
+        list.push({
+          id: key,
+          scopes,
+        });
+      }
+
+      if (list.length > 0) result.push(list);
+    }
+
+    return result;
+  }, [dereferenced, method.security]);
 
   const { example: exampleId, examples, setExampleData } = useOperationContext();
   const { server } = useServerContext();
@@ -194,26 +224,26 @@ export default function PlaygroundClient({
 
   const { inputs, requirementId, setRequirementId, mapInputs, initAuthInputs } = useAuthInputs(
     stf.dataEngine,
-    securities,
+    securityEntries,
   );
 
   const testQuery = useQuery(async (input: FormValues) => {
     const fetcher = await import('./fetcher').then((mod) =>
-      mod.createBrowserFetcher(mediaAdapters, { proxyUrl, ...fetchOptions }),
+      mod.createBrowserFetcher(mediaAdapters, { proxyUrl: ctx.proxyUrl, ...fetchOptions }),
     );
 
     const encoded = encodeRequestData(
-      { ...mapInputs(input), method, bodyMediaType: body?.mediaType },
+      { ...mapInputs(input), method: method.method, bodyMediaType: body?.mediaType },
       mediaAdapters,
       parameters,
     );
     return fetcher.fetch(
       joinURL(
-        withBase(
+        new URL(
           server ? resolveServerUrl(server.url, server.variables) : '/',
           window.location.origin,
-        ),
-        resolveRequestData(route, encoded),
+        ).href,
+        pathnameFromRequest(route, encoded),
       ),
       encoded,
     );
@@ -224,7 +254,7 @@ export default function PlaygroundClient({
   function triggerExampleUpdate() {
     const data = {
       ...mapInputs(stf.dataEngine.getData() as FormValues),
-      method,
+      method: method.method,
       bodyMediaType: body?.mediaType,
     };
     setExampleData(data, encodeRequestData(data, mediaAdapters, parameters));
@@ -263,7 +293,7 @@ export default function PlaygroundClient({
 
   return (
     <StfProvider value={stf}>
-      <SchemaProvider writeOnly={writeOnly} readOnly={readOnly}>
+      <SchemaProvider docRoot={bundled as never} writeOnly={writeOnly} readOnly={readOnly}>
         <form
           {...rest}
           className={cn(
@@ -277,8 +307,8 @@ export default function PlaygroundClient({
         >
           <ServerSelect className="border-b" />
           <div className="flex flex-row items-center gap-2 text-sm p-3 not-last:pb-0">
-            <MethodLabel>{method}</MethodLabel>
-            <Route route={route} className={cn('flex-1', deprecated && 'line-through')} />
+            <MethodLabel>{method.method}</MethodLabel>
+            <Route route={route} className={cn('flex-1', method.deprecated && 'line-through')} />
             <button
               type="submit"
               className={cn(buttonVariants({ color: 'primary', size: 'sm' }), 'w-14 py-1.5')}
@@ -289,9 +319,9 @@ export default function PlaygroundClient({
           </div>
           {testQuery.data ? <ResultDisplay data={testQuery.data} reset={testQuery.reset} /> : null}
 
-          {securities.length > 0 && (
+          {securityEntries.length > 0 && (
             <SecurityRequirements
-              securities={securities}
+              securities={securityEntries}
               securityId={requirementId}
               setSecurityId={setRequirementId}
             >
