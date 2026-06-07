@@ -175,7 +175,11 @@ export function FieldInput({
               {member.label}
             </SelectItem>
           ))}
-          {!isRequired && <SelectItem value="-1">{t('Unset')}</SelectItem>}
+          {!isRequired && (
+            <SelectItem value="-1">
+              <span className="text-fd-muted-foreground">{t('Unset')}</span>
+            </SelectItem>
+          )}
         </SelectContent>
       </Select>
     );
@@ -193,7 +197,11 @@ export function FieldInput({
         <SelectContent>
           <SelectItem value="true">{t('True')}</SelectItem>
           <SelectItem value="false">{t('False')}</SelectItem>
-          {!isRequired && <SelectItem value="undefined">{t('Unset')}</SelectItem>}
+          {!isRequired && (
+            <SelectItem value="undefined">
+              <span className="text-fd-muted-foreground">{t('Unset')}</span>
+            </SelectItem>
+          )}
         </SelectContent>
       </Select>
     );

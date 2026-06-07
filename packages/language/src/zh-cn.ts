@@ -80,7 +80,7 @@ const translations = {
   'Select(playground)': '选择',
   'Selected(playground)': '已选取',
   'Show Property(playground)': '显示属性',
-  'Unset(playground)': '取消设置',
+  'Unset(playground)': '无',
   'Upload(playground)': '上传',
   'Value in(schema UI)': '值于',
 
@@ -189,7 +189,7 @@ const translations = {
   'Remove Item(arg form)(aria-label)': '移除项目',
   'Reset(story error boundary)': '重置',
   'True(arg form)': '是',
-  'Unset(arg form)': '取消设置',
+  'Unset(arg form)': '无',
 } satisfies Translations;
 
 /**

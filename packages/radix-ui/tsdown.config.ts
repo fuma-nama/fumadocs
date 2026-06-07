@@ -20,6 +20,7 @@ export default defineConfig({
   ],
   fixedExtension: false,
   unbundle: true,
+  ignoreWatch: ['src/.translations/**'],
   dts: {
     sourcemap: false,
   },
