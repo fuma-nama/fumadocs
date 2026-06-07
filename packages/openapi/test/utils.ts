@@ -1,11 +1,13 @@
-import { RenderContext } from '@/types';
-import { processDocument } from '@/utils/document/process';
+import type { RenderContext } from '@/types';
 import { defaultShikiFactory } from 'fumadocs-core/highlight/shiki/full';
 import { createCodeUsageGeneratorRegistry } from '@/requests/generators';
 import { registerDefault } from '@/requests/generators/all';
+import { dereferenceBundledDocument } from '@/utils/document/dereference';
+import { loadDocument } from '@/utils/document/load';
 
 export async function renderContextFrom(input: string): Promise<RenderContext> {
-  const schema = await processDocument(input);
+  const { bundled } = await loadDocument(input);
+  const schema = dereferenceBundledDocument(bundled);
 
   return {
     mediaAdapters: {},

@@ -17,7 +17,7 @@ export interface DereferencedDocument {
   bundled: Document;
 }
 
-export function dereferenceOpenApiDocument(bundled: Document): DereferencedDocument {
+export function dereferenceBundledDocument(bundled: Document): DereferencedDocument {
   const dereferenceMap = new Map<object, string>();
 
   return {

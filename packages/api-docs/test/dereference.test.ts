@@ -1,8 +1,8 @@
-import { processDocument } from '@/utils/document/process';
+import { dereferenceSync } from '@/schema/dereference';
 import { expect, test } from 'vitest';
 
 test('merges $ref target into local schema for sibling keywords', async () => {
-  const result = await processDocument({
+  const dereferenced = dereferenceSync({
     openapi: '3.2.0',
     info: {
       title: 'Test',
@@ -24,10 +24,10 @@ test('merges $ref target into local schema for sibling keywords', async () => {
           description: 'local description',
         },
       },
-    } as object,
-  });
+    },
+  } as object);
 
-  const derived = result.dereferenced.components?.schemas?.Derived as Record<string, unknown>;
+  const derived = (dereferenced as any).components?.schemas?.Derived;
   expect(derived).toMatchObject({
     type: 'object',
     description: 'local description',
@@ -37,5 +37,4 @@ test('merges $ref target into local schema for sibling keywords', async () => {
     required: ['id'],
   });
   expect(derived).not.toHaveProperty('$ref');
-  expect(result.getRawRef(derived)).toBe('#/components/schemas/Base');
 });

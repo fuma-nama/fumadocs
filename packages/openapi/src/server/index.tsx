@@ -1,13 +1,11 @@
 import { createProxy } from '@/server/proxy';
-import { processDocument, type ProcessedDocument } from '@/utils/document/process';
+import { loadDocument } from '@/utils/document/load';
 import type { Document } from '@/types';
-import type { InlineCodeUsageGenerator } from '@/requests/generators';
 import fs from 'node:fs';
 import {
   type DynamicSource,
   type LoaderPlugin,
   type PageData,
-  type PageTreeTransformer,
   PathUtils,
   type MetaData,
   type Source,
@@ -22,27 +20,29 @@ import {
 } from '@/utils/pages/builder';
 import { toStaticData } from '@/utils/pages/to-static-data';
 import path from 'node:path';
-import type { DereferencedDocument } from '@/utils/document/dereference';
 import type { OpenAPIPageProps } from '@/ui';
 import type { StructuredData } from 'fumadocs-core/mdx-plugins/remark-structure';
 import type { TOCItemType } from 'fumadocs-core/toc';
 import type { SchemaToPagesOptions } from '@/utils/pages/preset-auto';
 import { MethodLabel } from '@/ui/components/method-label';
+import type { Awaitable } from 'shiki';
 
 /**
- * schema id -> file path, URL, or downloaded schema object
+ * schema ID -> file path, URL, downloaded schema object, or a function returning them
  */
-type SchemaMap = Record<string, string | Document>;
-type ProcessedSchemaMap = Record<string, ProcessedDocument>;
+type SchemaRecord = Record<string, string | Document | (() => Awaitable<string | Document>)>;
+interface LoadedDocument {
+  bundled: Document;
+}
 
 export interface OpenAPIOptions {
   /**
    * Schema files, can be:
    * - URL
    * - file path
-   * - a function returning records of downloaded schemas.
+   * - a schema record object
    */
-  input?: string[] | (() => SchemaMap | Promise<SchemaMap>);
+  input?: string[] | SchemaRecord;
 
   disableCache?: boolean;
 
@@ -54,8 +54,8 @@ export interface OpenAPIOptions {
 
 export interface OpenAPIServer {
   createProxy: typeof createProxy;
-  getSchemas: () => Promise<ProcessedSchemaMap>;
-  getSchema: (document: string) => Promise<ProcessedDocument>;
+  getSchemas: () => Promise<Record<string, LoadedDocument>>;
+  getSchema: (document: string) => Promise<LoadedDocument>;
   readonly options: OpenAPIOptions;
 
   /**
@@ -83,7 +83,7 @@ export interface OpenAPIServer {
 
 export interface OpenAPIPageData extends PageData {
   getOpenAPIPageProps: () => OpenAPIPageProps;
-  getSchema: () => { id: string } & DereferencedDocument;
+  getSchema: () => { id: string; bundled: Document };
   structuredData: StructuredData;
   toc: TOCItemType[];
   _openapi: InternalOpenAPIMeta;
@@ -96,21 +96,41 @@ export type OpenAPISourceOptions = SchemaToPagesOptions & {
 };
 
 export function createOpenAPI(options: OpenAPIOptions = {}): OpenAPIServer {
-  const { input = [], disableCache = false } = options;
-  let schemas: Promise<ProcessedSchemaMap> | undefined;
+  const { disableCache = false } = options;
+  const schemaMap = new Map<string, Promise<LoadedDocument>>();
 
-  async function getSchemas(): Promise<ProcessedSchemaMap> {
-    if (Array.isArray(input)) {
-      const entries = await Promise.all(
-        input.map(async (item) => [item, await processDocument(item)]),
+  let resolvedInput: SchemaRecord = {};
+  if (Array.isArray(options.input)) {
+    for (const item of options.input) resolvedInput[item] = item;
+  } else if (options.input) {
+    resolvedInput = options.input;
+  }
+
+  function getSchema(schemaId: string): Promise<LoadedDocument> {
+    if (!(schemaId in resolvedInput)) {
+      console.warn(
+        `[Fumadocs OpenAPI] the document "${schemaId}" is not listed in the input array, this may be unexpected and won't be cached properly.`,
       );
-      return Object.fromEntries(entries);
-    } else {
-      const entries = await Promise.all(
-        Object.entries(await input()).map(async ([k, v]) => [k, await processDocument(v)]),
-      );
-      return Object.fromEntries(entries);
+      // do not cache unlisted documents
+      return loadDocument(schemaId);
     }
+
+    if (!disableCache) {
+      const cached = schemaMap.get(schemaId);
+      if (cached) return cached;
+    }
+
+    const raw = resolvedInput[schemaId];
+    const output = Promise.resolve(typeof raw === 'function' ? raw() : raw).then(loadDocument);
+    if (!disableCache) schemaMap.set(schemaId, output);
+    return output;
+  }
+
+  async function getSchemas(): Promise<Record<string, LoadedDocument>> {
+    const entries = await Promise.all(
+      Object.keys(resolvedInput).map(async (k) => [k, await getSchema(k)]),
+    );
+    return Object.fromEntries(entries);
   }
 
   async function getVirtualFiles(server: OpenAPIServer, options: OpenAPISourceOptions) {
@@ -126,7 +146,7 @@ export function createOpenAPI(options: OpenAPIOptions = {}): OpenAPIServer {
     const builderOptions = createAutoPreset(options);
 
     for (const [id, schema] of Object.entries(schemas)) {
-      const list = fromSchema(id, schema, builderOptions);
+      const list = fromSchema(id, schema.bundled, builderOptions);
 
       onEntries(list);
 
@@ -150,10 +170,10 @@ export function createOpenAPI(options: OpenAPIOptions = {}): OpenAPIServer {
             getSchema() {
               return {
                 id,
-                ...schema,
+                bundled: schema.bundled,
               };
             },
-            ...toStaticData(props, schema.dereferenced),
+            ...toStaticData(props, schema.bundled),
             _openapi: {
               method:
                 entry.type === 'operation' || entry.type === 'webhook'
@@ -220,24 +240,10 @@ export function createOpenAPI(options: OpenAPIOptions = {}): OpenAPIServer {
     options,
     createProxy,
     _getWatchPaths() {
-      const keys = Array.isArray(input) ? input : Object.keys(input);
-      return keys.filter((key) => !URL.canParse(key) && fs.existsSync(key));
+      return Object.keys(resolvedInput).filter((key) => !URL.canParse(key) && fs.existsSync(key));
     },
-    async getSchema(document) {
-      const schemas = await this.getSchemas();
-      if (document in schemas) return schemas[document];
-
-      console.warn(
-        `[Fumadocs OpenAPI] the document "${document}" is not listed in the input array, this may not be expected.`,
-      );
-      // do not cache unlisted documents
-      return processDocument(document);
-    },
-    async getSchemas() {
-      if (disableCache) return getSchemas();
-
-      return (schemas ??= getSchemas());
-    },
+    getSchema,
+    getSchemas,
     async staticSource(options = {}) {
       return {
         files: await getVirtualFiles(this, options),
@@ -252,15 +258,6 @@ export function createOpenAPI(options: OpenAPIOptions = {}): OpenAPIServer {
       return openapiPlugin();
     },
   };
-}
-
-/**
- * @deprecated
- */
-export function createCodeSample<T>(
-  options: InlineCodeUsageGenerator<T>,
-): InlineCodeUsageGenerator<T> {
-  return options;
 }
 
 export interface InternalOpenAPIMeta {
@@ -320,13 +317,6 @@ export function openapiPlugin(): LoaderPlugin {
  */
 export async function openapiSource(server: OpenAPIServer, options: OpenAPISourceOptions = {}) {
   return server.staticSource(options);
-}
-
-/**
- * @deprecated use `openapiPlugin()`
- */
-export function transformerOpenAPI(): PageTreeTransformer {
-  return openapiPlugin().transformPageTree!;
 }
 
 export type { CreateProxyOptions, Proxy } from './proxy';
