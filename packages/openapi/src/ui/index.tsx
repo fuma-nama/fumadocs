@@ -247,14 +247,19 @@ export interface CreateOpenAPIPageOptions {
   storageKeyPrefix?: string;
 }
 
-export interface OpenAPIPagePayload {
-  bundled: Document;
-  proxyUrl?: string;
-}
-
-export interface OpenAPIPageProps extends Omit<GeneratedPageProps, 'document'> {
-  payload: OpenAPIPagePayload;
-}
+export type OpenAPIPageProps =
+  | (Omit<GeneratedPageProps, 'document'> & {
+      payload: {
+        bundled: Document;
+        proxyUrl?: string;
+      };
+    })
+  | (GeneratedPageProps & {
+      preloaded: {
+        docs: Record<string, Document>;
+        proxyUrl?: string;
+      };
+    });
 
 /**
  * Create `<APIPage />` (a client component).
@@ -319,8 +324,22 @@ export function createOpenAPIPage({
     return remark().use(remarkGfm).use(remarkRehype).use(rehypeReact);
   }
 
-  return function ClientAPIPage({ payload, ...props }) {
-    const processed = useMemo(() => dereferenceBundledDocument(payload.bundled), [payload.bundled]);
+  return function OpenAPIPage(props) {
+    let doc: Document;
+    let proxyUrl: string | undefined;
+    if ('document' in props && 'preloaded' in props) {
+      doc = props.preloaded.docs[props.document];
+      if (!doc)
+        throw new Error(
+          `[Fumadocs OpenAPI] the document ${props.document} is not preloaded, make sure to pass the "preloaded" prop to <OpenAPIPage />`,
+        );
+      proxyUrl = props.preloaded.proxyUrl;
+    } else {
+      doc = props.payload.bundled;
+      proxyUrl = props.payload.proxyUrl;
+    }
+
+    const processed = useMemo(() => dereferenceBundledDocument(doc), [doc]);
 
     const ctx: RenderContext = useMemo(() => {
       function renderMarkdown(md: string) {
@@ -336,7 +355,7 @@ export function createOpenAPIPage({
 
       return {
         schema: processed,
-        proxyUrl: payload.proxyUrl,
+        proxyUrl,
         shiki,
         shikiOptions,
         generateTypeScriptDefinitions,
@@ -355,7 +374,8 @@ export function createOpenAPIPage({
         ...options,
         codeUsages: options.codeUsages ?? registerDefault(createCodeUsageGeneratorRegistry()),
         _default_processMarkdown(md) {
-          return (processor ??= createMarkdownProcessor()).processSync(md).value as ReactNode;
+          processor ??= createMarkdownProcessor();
+          return processor.processSync(md).result as ReactNode;
         },
         mediaAdapters: {
           ...defaultAdapters,
@@ -367,7 +387,7 @@ export function createOpenAPIPage({
           render: options.playground?.render ?? renderPlaygroundDefault,
         },
       };
-    }, [payload.proxyUrl, processed]);
+    }, [proxyUrl, processed]);
 
     return (
       <TranslationsProvider namespace="openapi">
