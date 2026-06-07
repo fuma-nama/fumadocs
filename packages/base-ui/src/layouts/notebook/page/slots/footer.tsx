@@ -8,7 +8,7 @@ import type * as PageTree from 'fumadocs-core/page-tree';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import Link from 'fumadocs-core/link';
 import { type ComponentProps, useMemo } from 'react';
-import { useTranslations } from '@/contexts/i18n';
+import { useTranslations } from '@fuma-translate/react';
 
 type Item = Pick<PageTree.Item, 'name' | 'description' | 'url'>;
 
@@ -56,7 +56,7 @@ export function Footer({ items, children, className, ...props }: FooterProps) {
 }
 
 function FooterItem({ item, index }: { item: Item; index: 0 | 1 }) {
-  const t = useTranslations();
+  const t = useTranslations({ note: 'pagination' });
   const Icon = index === 0 ? ChevronLeft : ChevronRight;
 
   return (
@@ -77,7 +77,7 @@ function FooterItem({ item, index }: { item: Item; index: 0 | 1 }) {
         <p>{item.name}</p>
       </div>
       <p className="text-fd-muted-foreground truncate">
-        {item.description ?? (index === 0 ? t.previousPage : t.nextPage)}
+        {item.description ?? (index === 0 ? t('Previous Page') : t('Next Page'))}
       </p>
     </Link>
   );

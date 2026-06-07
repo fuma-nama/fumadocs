@@ -17,7 +17,7 @@ import {
 import type { ParsedSchema } from '@/schema';
 import { stringifyFieldKey } from '@fumari/stf/lib/utils';
 import { cva } from 'class-variance-authority';
-import { useTranslations } from '@/i18n/client';
+import { useTranslations } from '@fuma-translate/react';
 
 const fieldLabelVariants = cva('w-full inline-flex items-center gap-0.5');
 
@@ -57,7 +57,7 @@ export function ObjectInput({
   });
 
   const hiddenProperties = isLazy ? schemaPropKeys.filter((key) => !_objectKeys.includes(key)) : [];
-  const t = useTranslations();
+  const t = useTranslations({ note: 'playground' });
 
   return (
     <div
@@ -70,7 +70,7 @@ export function ObjectInput({
       {isLazy && hiddenProperties.length > 0 && (
         <Select value="" onValueChange={onAppend}>
           <SelectTrigger className="col-span-full">
-            <SelectValue placeholder={t.playgroundShowProperty} />
+            <SelectValue placeholder={t('Show Property')} />
           </SelectTrigger>
           <SelectContent>
             {hiddenProperties.map((key) => (
@@ -88,7 +88,7 @@ export function ObjectInput({
           toolbar = (
             <button
               type="button"
-              aria-label={t.playgroundRemoveItem}
+              aria-label={t('Remove Item', { note: 'aria-label' })}
               className={cn(
                 buttonVariants({
                   color: 'outline',
@@ -119,7 +119,7 @@ export function ObjectInput({
         <div className="flex gap-2 order-last col-span-full">
           <Input
             value={nextName}
-            placeholder={t.playgroundPropertyPlaceholder}
+            placeholder={t('Enter Property Name')}
             onChange={(e) => setNextName(e.target.value)}
             onKeyDown={(e) => {
               if (e.key === 'Enter') {
@@ -137,7 +137,7 @@ export function ObjectInput({
               setNextName('');
             }}
           >
-            {t.playgroundNewProperty}
+            {t('New')}
           </button>
         </div>
       )}
@@ -182,7 +182,7 @@ export function FieldInput({
 }) {
   const [value, setValue] = useFieldValue(fieldName);
   const id = stringifyFieldKey(fieldName);
-  const t = useTranslations();
+  const t = useTranslations({ note: 'playground' });
   if (field.type === 'null') return;
 
   if (field.type === 'string' && field.format === 'binary') {
@@ -199,11 +199,11 @@ export function FieldInput({
         >
           {value instanceof File ? (
             <>
-              <span className="text-fd-muted-foreground text-xs">{t.playgroundSelected}</span>
+              <span className="text-fd-muted-foreground text-xs">{t('Selected')}</span>
               <span className="truncate w-0 flex-1 text-end">{value.name}</span>
             </>
           ) : (
-            <span className="text-fd-muted-foreground">{t.playgroundInputUpload}</span>
+            <span className="text-fd-muted-foreground">{t('Upload')}</span>
           )}
         </label>
         <input
@@ -229,7 +229,7 @@ export function FieldInput({
         onValueChange={(v) => setValue(field.enum![Number(v)])}
       >
         <SelectTrigger id={id} {...props}>
-          <SelectValue placeholder={t.playgroundSelectPlaceholder} />
+          <SelectValue placeholder={t('Select')} />
         </SelectTrigger>
         <SelectContent>
           {field.enum.map((item, i) => (
@@ -237,7 +237,7 @@ export function FieldInput({
               {typeof item === 'string' ? item : JSON.stringify(item, null, 2)}
             </SelectItem>
           ))}
-          {!isRequired && <SelectItem value="-1">{t.playgroundInputUnset}</SelectItem>}
+          {!isRequired && <SelectItem value="-1">{t('Unset')}</SelectItem>}
         </SelectContent>
       </Select>
     );
@@ -255,7 +255,7 @@ export function FieldInput({
         <SelectContent>
           <SelectItem value="true">True</SelectItem>
           <SelectItem value="false">False</SelectItem>
-          {!isRequired && <SelectItem value="undefined">{t.playgroundInputUnset}</SelectItem>}
+          {!isRequired && <SelectItem value="undefined">{t('Unset')}</SelectItem>}
         </SelectContent>
       </Select>
     );
@@ -265,7 +265,7 @@ export function FieldInput({
   return (
     <Input
       id={id}
-      placeholder={t.playgroundInputPlaceholder}
+      placeholder={t('Enter value')}
       type={isNumber ? 'number' : 'text'}
       step={field.type === 'integer' ? 1 : undefined}
       value={String(value ?? '')}
@@ -518,7 +518,7 @@ function ArrayInput({
   const name = fieldName.at(-1) ?? '';
   const { generateDefault } = useSchemaUtils();
   const { items, insertItem, removeItem } = useArray(fieldName);
-  const t = useTranslations();
+  const t = useTranslations({ note: 'playground' });
 
   return (
     <div {...props} className={cn('flex flex-col gap-2', props.className)}>
@@ -536,7 +536,7 @@ function ArrayInput({
           toolbar={
             <button
               type="button"
-              aria-label={t.playgroundRemoveItem}
+              aria-label={t('Remove Item', { note: 'aria-label' })}
               className={cn(
                 buttonVariants({
                   color: 'outline',
@@ -564,7 +564,7 @@ function ArrayInput({
         }}
       >
         <Plus className="size-4" />
-        {t.playgroundNewItem}
+        {t('New Item')}
       </button>
     </div>
   );

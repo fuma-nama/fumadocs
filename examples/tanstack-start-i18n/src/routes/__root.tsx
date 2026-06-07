@@ -2,7 +2,7 @@ import { createRootRoute, HeadContent, Outlet, Scripts, useParams } from '@tanst
 import * as React from 'react';
 import appCss from '@/styles/app.css?url';
 import { RootProvider } from 'fumadocs-ui/provider/tanstack';
-import { i18nProvider, uiTranslations } from 'fumadocs-ui/i18n';
+import { i18nProvider } from 'fumadocs-ui/i18n';
 import { i18n } from '@/lib/i18n';
 
 export const Route = createRootRoute({
@@ -32,18 +32,24 @@ function RootComponent() {
   );
 }
 
-const translations = i18n
-  .translations()
-  .extend(uiTranslations())
-  .add('ui', {
-    cn: {
-      displayName: 'Chinese',
-      search: 'Translated Content',
-    },
-    en: {
-      displayName: 'English',
-    },
-  });
+function i18nProps(locale: string) {
+  const locales = i18n.languages.map((code) => ({
+    locale: code,
+    name: code === 'cn' ? 'Chinese' : 'English',
+  }));
+
+  if (locale === 'cn') {
+    return {
+      locale,
+      locales,
+      translations: {
+        'Search(search dialog input placeholder)': 'Translated Content',
+      },
+    };
+  }
+
+  return { locale, locales };
+}
 
 function RootDocument({ children }: { children: React.ReactNode }) {
   const { lang = i18n.defaultLanguage } = useParams({ strict: false });
@@ -54,7 +60,7 @@ function RootDocument({ children }: { children: React.ReactNode }) {
         <HeadContent />
       </head>
       <body className="flex flex-col min-h-screen">
-        <RootProvider i18n={i18nProvider(translations, lang)}>{children}</RootProvider>
+        <RootProvider i18n={i18nProvider(i18nProps(lang))}>{children}</RootProvider>
         <Scripts />
       </body>
     </html>

@@ -54,6 +54,7 @@
     "types:check": "tsc --noEmit"
   },
   "dependencies": {
+    "@fuma-translate/react": "^0.0.3",
     "@fumari/stf": "workspace:*",
     "@radix-ui/react-accordion": "^1.2.12",
     "@radix-ui/react-dialog": "^1.1.15",

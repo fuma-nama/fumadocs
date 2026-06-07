@@ -1,3 +1,4 @@
+'use client';
 import { type ComponentProps, Fragment, useMemo, type ReactNode } from 'react';
 import type {
   ChannelObject,
@@ -11,7 +12,7 @@ import type {
 } from '@/types';
 import { UsageTabs } from '@/ui/operation/usage-tabs';
 import { ActionLabel } from '@/ui/components/method-label';
-import { I18nLabel } from '@/ui/client/i18n';
+import { useTranslations } from '@fuma-translate/react';
 import {
   AccordionContent,
   AccordionHeader,
@@ -52,6 +53,7 @@ export function Operation({
   showDescription?: boolean;
   headingLevel?: number;
 }) {
+  const t = useTranslations({ note: 'operation page' });
   const ctx = useRenderContext();
   const {
     schema: { dereferenced },
@@ -100,7 +102,7 @@ export function Operation({
         bindings={channel.bindings}
         id="channel-bindings"
         headingLevel={headingLevel}
-        title={<I18nLabel label="titleChannel" />}
+        title={t('Channel')}
       />
     </>
   );
@@ -129,7 +131,7 @@ export function Operation({
       <SelectTabs defaultValue={items[0].value}>
         <div className="flex items-start justify-between gap-2 mt-10">
           <Heading id="authorization" depth={headingLevel} className="my-0!">
-            <I18nLabel label="authorization" />
+            {t('Authorization')}
           </Heading>
           {items.length > 1 ? (
             <SelectTabTrigger items={items} />
@@ -180,9 +182,7 @@ export function Operation({
       reply: replyNode,
       traits: traitsNode,
       bindings: bindingsNode,
-      messageExamples: (
-        <UsageTabs examples={exampleMessages} />
-      ),
+      messageExamples: <UsageTabs examples={exampleMessages} />,
     },
     {
       operation,
@@ -207,20 +207,21 @@ function ChannelSection({
   channel: NoReference<ChannelObject>;
   headingLevel: number;
 }) {
+  const t = useTranslations({ note: 'operation page' });
   const address = getChannelAddress(channel);
   if (!address && !channel.summary && !channel.title) return null;
 
   return (
     <>
       <Heading id="channel" depth={headingLevel} className="mt-10">
-        <I18nLabel label="titleChannel" />
+        {t('Channel')}
       </Heading>
       <div className="not-prose text-sm border rounded-xl p-3 flex flex-col gap-2">
         {channel.title && <p className="font-medium">{channel.title}</p>}
         {channel.summary && <p className="text-fd-muted-foreground">{channel.summary}</p>}
         {address && (
           <p>
-            <I18nLabel label="channelAddress" />: <code>{address}</code>
+            {t('Address')}: <code>{address}</code>
           </p>
         )}
       </div>
@@ -235,6 +236,7 @@ function ParametersSection({
   parameters: Record<string, NoReference<ParameterObject>>;
   headingLevel: number;
 }) {
+  const t = useTranslations({ note: 'operation page' });
   const ctx = useRenderContext();
   const entries = Object.entries(parameters);
   if (entries.length === 0) return null;
@@ -242,7 +244,7 @@ function ParametersSection({
   return (
     <>
       <Heading id="parameters" depth={headingLevel} className="mt-10">
-        <I18nLabel label="titleParameters" />
+        {t('Parameters')}
       </Heading>
       <AnchorSection segments={['parameters']}>
         <div className="flex flex-col">
@@ -274,13 +276,14 @@ function MessagesSection({
   messages: NoReference<MessageObject>[];
   headingLevel: number;
 }) {
+  const t = useTranslations({ note: 'operation page' });
   const ctx = useRenderContext();
   if (messages.length === 0) return null;
 
   return (
     <>
       <Heading id="messages" depth={headingLevel} className="mt-10">
-        <I18nLabel label="titleMessages" />
+        {t('Messages')}
       </Heading>
       <Accordions type="multiple">
         {messages.map((message, index) => {
@@ -304,7 +307,7 @@ function MessagesSection({
                 {headers && (
                   <>
                     <Heading id={`${name}-headers`} depth={headingLevel + 1}>
-                      <I18nLabel label="titleHeaders" />
+                      {t('Headers')}
                     </Heading>
                     <ctx.SchemaUI client={{ name: 'headers' }} root={headers as never} />
                   </>
@@ -312,7 +315,7 @@ function MessagesSection({
                 {payload && (
                   <>
                     <Heading id={`${name}-payload`} depth={headingLevel + 1}>
-                      <I18nLabel label="titlePayload" />
+                      {t('Payload')}
                     </Heading>
                     <ctx.SchemaUI
                       client={{ name: 'payload', as: 'body' }}
@@ -344,12 +347,13 @@ function ReplySection({
   reply: NoReference<OperationReplyObject>;
   headingLevel: number;
 }) {
+  const t = useTranslations({ note: 'operation page' });
   const ctx = useRenderContext();
 
   return (
     <>
       <Heading id="reply" depth={headingLevel} className="mt-10">
-        <I18nLabel label="titleReply" />
+        {t('Reply')}
       </Heading>
       <div className="border rounded-xl p-3 not-prose text-sm flex flex-col gap-3">
         {reply.address && (
@@ -385,10 +389,12 @@ function TraitsSection({
   traits: NoReference<import('@/types/asyncapi-3').OperationTraitObject>[];
   headingLevel: number;
 }) {
+  const t = useTranslations({ note: 'operation page' });
+
   return (
     <>
       <Heading id="traits" depth={headingLevel} className="mt-10">
-        <I18nLabel label="titleTraits" />
+        {t('Traits')}
       </Heading>
       <Accordions type="multiple">
         {traits.map((trait, index) => (
@@ -424,6 +430,7 @@ function BindingsSection({
   headingLevel: number;
   title?: ReactNode;
 }) {
+  const t = useTranslations({ note: 'operation page' });
   if (!bindings) return null;
   const entries = Object.entries(bindings).filter(([, value]) => value);
   if (entries.length === 0) return null;
@@ -431,7 +438,7 @@ function BindingsSection({
   return (
     <>
       <Heading id={id} depth={headingLevel}>
-        {title ?? <I18nLabel label="titleBindings" />}
+        {title ?? t('Bindings')}
       </Heading>
       <Accordions type="multiple">
         {entries.map(([protocol, binding]) => (
@@ -454,11 +461,11 @@ function CorrelationIdSection({
 }: {
   correlationId: NoReference<import('@/types/asyncapi-3').CorrelationIDObject>;
 }) {
+  const t = useTranslations({ note: 'operation page' });
+
   return (
     <div className="text-sm not-prose mt-3">
-      <p className="font-medium">
-        <I18nLabel label="titleCorrelationId" />
-      </p>
+      <p className="font-medium">{t('Correlation ID')}</p>
       <p>
         Location: <code>{correlationId.location}</code>
       </p>
@@ -470,16 +477,16 @@ function CorrelationIdSection({
 }
 
 function AuthScheme({ scheme, scopes }: { scheme: SecuritySchemeObject; scopes: string[] }) {
+  const t = useTranslations({ note: 'security scheme' });
+
   if (scheme.type === 'http' || scheme.type === 'oauth2') {
     return (
       <AuthProperty
-        name={<I18nLabel label="authorization" />}
+        name={t('Authorization')}
         type={
-          scheme.type === 'http' && scheme.scheme === 'basic' ? (
-            <I18nLabel label="authBasicTokenExample" />
-          ) : (
-            <I18nLabel label="authBearerTokenExample" />
-          )
+          scheme.type === 'http' && scheme.scheme === 'basic'
+            ? t('Basic <token>')
+            : t('Bearer <token>')
         }
         scopes={scopes}
       >
@@ -494,7 +501,7 @@ function AuthScheme({ scheme, scopes }: { scheme: SecuritySchemeObject; scopes: 
         {scheme.description && <Markdown md={scheme.description} />}
         {scheme.in && (
           <p>
-            <I18nLabel label="authTokenIn" />: <code>{scheme.in}</code>
+            {t('In')}: <code>{scheme.in}</code>
           </p>
         )}
       </AuthProperty>
@@ -503,7 +510,7 @@ function AuthScheme({ scheme, scopes }: { scheme: SecuritySchemeObject; scopes: 
 
   if (scheme.type === 'openIdConnect') {
     return (
-      <AuthProperty name={<I18nLabel label="openIdConnect" />} type="<token>" scopes={scopes}>
+      <AuthProperty name={t('OpenID Connect')} type="<token>" scopes={scopes}>
         {scheme.description && <Markdown md={scheme.description} />}
       </AuthProperty>
     );
@@ -527,6 +534,8 @@ function AuthProperty({
   type: ReactNode;
   scopes?: string[];
 }) {
+  const t = useTranslations({ note: 'security scheme' });
+
   return (
     <div className={cn('text-sm border-t my-4 first:border-t-0', className)}>
       <div className="flex flex-wrap items-center gap-3 not-prose">
@@ -537,7 +546,7 @@ function AuthProperty({
         {props.children}
         {scopes.length > 0 && (
           <p>
-            <I18nLabel label="authScope" />: <code>{scopes.join(', ')}</code>
+            {t('Scope')}: <code>{scopes.join(', ')}</code>
           </p>
         )}
       </div>

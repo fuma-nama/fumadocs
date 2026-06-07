@@ -1,21 +1,25 @@
+'use client';
+
 import { buttonVariants } from '@/components/ui/button';
 import { cn } from '@/utils/cn';
 import Link from 'fumadocs-core/link';
 import { HomeIcon } from 'lucide-react';
-import { I18nLabel } from '@/contexts/i18n';
+import { useTranslations } from '@fuma-translate/react';
 
 /**
  * the default not found page content, please make your own if you want to customize it.
  */
 export function DefaultNotFound() {
+  const t = useTranslations({ note: '404 page' });
+
   return (
     <div className="flex flex-col px-8 justify-center flex-1 text-center items-center gap-4">
       <h1 className="text-6xl font-bold text-fd-muted-foreground">404</h1>
-      <h2 className="text-2xl font-semibold">
-        <I18nLabel label="notFoundTitle" />
-      </h2>
+      <h2 className="text-2xl font-semibold">{t('Page Not Found')}</h2>
       <p className="text-fd-muted-foreground max-w-md">
-        <I18nLabel label="notFoundDescription" />
+        {t(
+          'The page you are looking for might have been removed, had its name changed, or is temporarily unavailable.',
+        )}
       </p>
       <Link
         href="/"
@@ -27,7 +31,7 @@ export function DefaultNotFound() {
         )}
       >
         <HomeIcon className="size-4" />
-        <I18nLabel label="notFoundLink" />
+        {t('Back to Home')}
       </Link>
     </div>
   );

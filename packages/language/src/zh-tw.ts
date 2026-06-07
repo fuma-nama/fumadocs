@@ -1,215 +1,202 @@
 import type { TranslationPreset } from 'fumadocs-core/i18n';
-import * as OpenAPI from 'fumadocs-openapi/i18n';
-import * as UI from 'fumadocs-ui/i18n';
-import * as Story from '@fumadocs/story/i18n';
+import type { Translations as UITranslations } from 'fumadocs-ui/i18n';
+import type { Translations as OpenAPITranslations } from 'fumadocs-openapi/i18n';
+import type { Translations as AsyncAPITranslations } from '@fumadocs/asyncapi/i18n';
+import type { Translations as StoryTranslations } from '@fumadocs/story/i18n';
+import type { Translations as APIDocsTranslations } from '@fumadocs/api-docs/i18n';
 
-const ui = {
-  displayName: '繁體中文',
-  search: '搜尋',
-  searchNoResult: '找不到結果',
-  searchOpen: '開啟搜尋',
-  searchClose: '關閉搜尋',
+type Translations = UITranslations &
+  OpenAPITranslations &
+  AsyncAPITranslations &
+  StoryTranslations &
+  APIDocsTranslations;
 
-  toc: '本頁目錄',
-  tocNoHeadings: '沒有標題',
-  tocInline: '目錄',
+const translations = {
+  // fumadocs-ui
+  'Back to Home(404 page)': '返回首頁',
+  'Choose a language(language switcher)': '選擇語言',
+  'Choose a language(language switcher)(aria-label)': '選擇語言',
+  'Close Banner(banner)(aria-label)': '關閉橫幅',
+  'Close Search(search dialog)(aria-label)': '關閉搜尋',
+  'Collapse Sidebar(sidebar)(aria-label)': '收合側邊欄',
+  'Copied Text(code block)(aria-label)': '已複製文字',
+  'Copy Anchor Link(heading anchor)(aria-label)': '複製錨點連結',
+  'Copy Link(accordion)(aria-label)': '複製連結',
+  'Copy Markdown(page actions)': '複製 Markdown',
+  'Copy Text(code block)(aria-label)': '複製文字',
+  'Dark(theme switcher)(aria-label)': '深色',
+  'Default(type table)': '預設值',
+  'Edit on GitHub(edit page)': '在 GitHub 上編輯',
+  'Last updated on(page footer)': '最後更新於',
+  'Light(theme switcher)(aria-label)': '淺色',
+  'Next Page(pagination)': '下一頁',
+  'No Headings(table of contents)': '沒有標題',
+  'No results found(search dialog)': '找不到結果',
+  'On this page(table of contents)': '本頁目錄',
+  'Open Search(search trigger)(aria-label)': '開啟搜尋',
+  'Open Sidebar(sidebar)(aria-label)': '開啟側邊欄',
+  'Open in ChatGPT(page actions)': '在 ChatGPT 中開啟',
+  'Open in Claude(page actions)': '在 Claude 中開啟',
+  'Open in Cursor(page actions)': '在 Cursor 中開啟',
+  'Open in GitHub(page actions)': '在 GitHub 中開啟',
+  'Open in Scira AI(page actions)': '在 Scira AI 中開啟',
+  'Open(page actions)': '開啟',
+  'Page Not Found(404 page)': '找不到頁面',
+  'Parameters(type table)': '參數',
+  'Previous Page(pagination)': '上一頁',
+  'Prop(type table)': '屬性',
+  'Read {url}, I want to ask questions about it.(page actions)': '閱讀 {url}，我想詢問相關問題。',
+  'Returns(type table)': '回傳值',
+  'Search(search dialog)': '搜尋',
+  'Search(search trigger)': '搜尋',
+  'System(theme switcher)(aria-label)': '系統',
+  'Table of Contents(inline table of contents)': '目錄',
+  'The page you are looking for might have been removed, had its name changed, or is temporarily unavailable.(404 page)':
+    '你要尋找的頁面可能已被移除、名稱已變更，或暫時無法使用。',
+  'Toggle Menu(mobile menu)(aria-label)': '切換選單',
+  'Toggle Theme(theme switcher)(aria-label)': '切換主題',
+  'Type(type table)': '型別',
+  'View as Markdown(page actions)': '以 Markdown 檢視',
 
-  lastUpdate: '最後更新於',
-  chooseLanguage: '選擇語言',
-  nextPage: '下一頁',
-  previousPage: '上一頁',
-  chooseTheme: '主題',
-  editOnGithub: '在 GitHub 上編輯',
+  // @fumadocs/api-docs
+  'Default(schema UI)': '預設',
+  'Deprecated(schema UI)': '已棄用',
+  'Enter Property Name(playground)': '輸入屬性名稱',
+  'Enter value(playground)': '輸入值',
+  'Example(schema UI)': '範例',
+  'Filter Properties(schema UI)': '篩選屬性',
+  'Format(schema UI)': '格式',
+  'Items(schema UI)': '項目',
+  'Length(schema UI)': '長度',
+  'Match(schema UI)': '符合',
+  'Multiple Of(schema UI)': '倍數',
+  'New Item(playground)': '新增項目',
+  'New(playground)': '新增',
+  'No property matching(schema UI)': '沒有符合的屬性',
+  'Properties(schema UI)': '屬性',
+  'Range(schema UI)': '範圍',
+  'Remove Item(playground)(aria-label)': '移除項目',
+  'Select(playground)': '選擇',
+  'Selected(playground)': '已選取',
+  'Show Property(playground)': '顯示屬性',
+  'Unset(playground)': '取消設定',
+  'Upload(playground)': '上傳',
+  'Value in(schema UI)': '值於',
 
-  themeToggle: '切換主題',
-  themeLight: '淺色',
-  themeDark: '深色',
-  themeSystem: '系統',
+  // fumadocs-openapi
+  'Access Token(playground)': '存取權杖',
+  'Authenticate using username and password.(OAuth dialog)': '使用使用者名稱和密碼進行驗證。',
+  'Authenticate with 3rd party services(OAuth dialog)': '透過第三方服務進行驗證',
+  'Authenticate with device.(OAuth dialog)': '使用裝置進行驗證。',
+  'Authorization code(OAuth dialog)': '授權碼',
+  'Authorization(OAuth dialog)': '授權',
+  'Authorization(operation page)': '授權',
+  'Authorization(playground)': '授權',
+  'Authorization(security scheme)': '授權',
+  'Authorize(playground)': '授權',
+  'Bad Request(playground status info)': '錯誤的請求',
+  'Basic <token>(security scheme)': 'Basic <token>',
+  'Bearer <token>(security scheme)': 'Bearer <token>',
+  'Binary response body, {length} bytes(playground result display)':
+    '二進位回應主體，{length} 位元組',
+  'Body(playground)': '主體',
+  'Callbacks(operation page)': '回呼',
+  'Client Credentials(OAuth dialog)': '用戶端憑證',
+  'Client Error(playground result display)': '用戶端錯誤',
+  'Client ID(OAuth dialog)': '用戶端 ID',
+  'Client Secret(OAuth dialog)': '用戶端密鑰',
+  'Close JSON Editor(playground)': '關閉 JSON 編輯器',
+  'Close(playground result display)': '關閉',
+  'Cookie Parameters(operation page)': 'Cookie 參數',
+  'Cookies(playground)': 'Cookie',
+  'Copy(TypeScript definitions)': '複製',
+  'Default(operation page)': '預設',
+  'Deprecated(operation page)': '已棄用',
+  'Deprecated(security scheme)': '已棄用',
+  'Device Authorization(OAuth dialog)': '裝置授權',
+  'Empty(operation page)': '空白',
+  'Enter Value(playground server select)': '輸入值',
+  'Enter value(OAuth dialog)': '輸入值',
+  'Error(playground status info)': '錯誤',
+  'Example Requests(operation page)': '範例請求',
+  'Example {key}(operation page)': '範例 {key}',
+  'Example(operation page)': '範例',
+  'Failed to fetch token(playground)': '無法取得權杖',
+  'Fetching token...(playground)': '正在取得權杖...',
+  'Forbidden(playground status info)': '禁止存取',
+  'Header Parameters(operation page)': '標頭參數',
+  'Header(playground)': '標頭',
+  'Implicit(OAuth dialog)': '隱含式',
+  'In(security scheme)': '位置',
+  'Intended for the server-to-server authentication.(OAuth dialog)': '適用於伺服器對伺服器驗證。',
+  'Internal Server Error(playground status info)': '內部伺服器錯誤',
+  'Not Found(playground status info)': '找不到',
+  'Obtain the access token for API.(OAuth dialog)': '取得 API 的存取權杖。',
+  'Open JSON Editor(playground)': '開啟 JSON 編輯器',
+  'OpenID Connect is not supported at the moment, you can still set an access token here.(playground)':
+    '目前不支援 OpenID Connect，你仍可在此設定存取權杖。',
+  'OpenID Connect(security scheme)': 'OpenID Connect',
+  'Password(OAuth dialog)': '密碼',
+  'Path Parameters(operation page)': '路徑參數',
+  'Path(playground)': '路徑',
+  'Query Parameters(operation page)': '查詢參數',
+  'Query(playground)': '查詢',
+  'Request Body(operation page)': '請求主體',
+  'Resource Owner Password Flow(OAuth dialog)': '資源擁有者密碼流程',
+  'Response Body(operation page)': '回應主體',
+  'Retrieve the access token directly.(OAuth dialog)': '直接取得存取權杖。',
+  'Scope(security scheme)': '範圍',
+  'Select a flow(OAuth dialog)': '選擇流程',
+  'Send(playground)': '傳送',
+  'Server URL(playground server select)': '伺服器 URL',
+  'Submit(OAuth dialog)': '送出',
+  'Successful(playground status info)': '成功',
+  'Test(scalar API client)': '測試',
+  'The base URL of your API endpoint.(playground server select)': '你的 API 端點基礎 URL。',
+  'The client ID of your OAuth application.(OAuth dialog)': '你的 OAuth 應用程式用戶端 ID。',
+  'The client secret of your OAuth application.(OAuth dialog)': '你的 OAuth 應用程式用戶端密鑰。',
+  'TypeScript Definitions(TypeScript definitions)': 'TypeScript 定義',
+  'Unauthorized(playground status info)': '未授權',
+  'Unsupported(OAuth dialog)': '不支援',
+  'Use the {name} type in TypeScript.(TypeScript definitions)':
+    '在 TypeScript 中使用 {name} 型別。',
+  'Username(OAuth dialog)': '使用者名稱',
+  'loading...(playground server select)': '載入中...',
 
-  codeBlockCopy: '複製文字',
-  codeBlockCopied: '已複製文字',
+  // @fumadocs/asyncapi
+  'Address(operation page)': '位址',
+  'Bindings(operation page)': '繫結',
+  'Channel(operation page)': '通道',
+  'Correlation ID(operation page)': '關聯 ID',
+  'Headers(operation page)': '標頭',
+  'Messages(operation page)': '訊息',
+  'Parameters(operation page)': '參數',
+  'Payload(operation page)': '承載內容',
+  'Reply(operation page)': '回覆',
+  'Traits(operation page)': '特徵',
 
-  accordionCopyAnchor: '複製連結',
-  headingCopyAnchor: '複製錨點連結',
-  bannerClose: '關閉橫幅',
-  menuToggle: '切換選單',
-
-  pageActionsCopyMarkdown: '複製 Markdown',
-  pageActionsOpen: '開啟',
-  pageActionsOpenGitHub: '在 GitHub 中開啟',
-  pageActionsViewMarkdown: '以 Markdown 檢視',
-  pageActionsOpenScira: '在 Scira AI 中開啟',
-  pageActionsOpenChatGPT: '在 ChatGPT 中開啟',
-  pageActionsOpenClaude: '在 Claude 中開啟',
-  pageActionsOpenCursor: '在 Cursor 中開啟',
-  pageActionsOpenInLLMPrompt: '閱讀 {url}，我想詢問相關問題。',
-
-  sidebarOpen: '開啟側邊欄',
-  sidebarCollapse: '收合側邊欄',
-
-  typeTableProp: '屬性',
-  typeTableType: '型別',
-  typeTableDefault: '預設值',
-  typeTableParameters: '參數',
-  typeTableReturns: '回傳值',
-
-  notFoundTitle: '找不到頁面',
-  notFoundDescription: '你要尋找的頁面可能已被移除、名稱已變更，或暫時無法使用。',
-  notFoundLink: '返回首頁',
-} satisfies UI.Translations;
-
-const openapi = {
-  // General
-  loading: '載入中...',
-  empty: '空白',
-  copy: '複製',
-  send: '傳送',
-  authorization: '授權',
-  cookies: 'Cookie',
-  query: '查詢',
-  path: '路徑',
-  header: '標頭',
-  body: '主體',
-  deprecated: '已棄用',
-  submit: '送出',
-  test: '測試',
-  unsupported: '不支援',
-  close: '關閉',
-  inputPlaceholder: '輸入值',
-
-  // Request tabs
-  titleRequestTabs: '範例請求',
-  requestTabNameDefault: '預設',
-  queryParameters: '查詢參數',
-  pathParameters: '路徑參數',
-  headerParameters: '標頭參數',
-  cookieParameters: 'Cookie 參數',
-
-  // Operation sections
-  titleRequestBody: '請求主體',
-  titleResponseBody: '回應主體',
-  titleCallbacks: '回呼',
-
-  // Auth scheme
-  authBasicTokenExample: 'Basic <token>',
-  authBearerTokenExample: 'Bearer <token>',
-  openIdConnect: 'OpenID Connect',
-  authTokenIn: '位置',
-  authScope: '範圍',
-
-  // TypeScript panel
-  typeScriptDefinitions: 'TypeScript 定義',
-  useTypeInTypeScript: '在 TypeScript 中使用 {name} 型別。',
-
-  // Schema info tags
-  schemaDefault: '預設',
-  schemaMatch: '符合',
-  schemaFormat: '格式',
-  schemaMultipleOf: '倍數',
-  schemaRange: '範圍',
-  schemaLength: '長度',
-  schemaProperties: '屬性',
-  schemaItems: '項目',
-  schemaValueIn: '值位於',
-  schemaExample: '範例',
-
-  // Response tabs
-  responseTabName: '範例 {key}',
-  responseTabNameDefault: '範例',
-
-  // Playground
-  closeJsonEditor: '關閉 JSON 編輯器',
-  openJsonEditor: '開啟 JSON 編輯器',
-  accessToken: '存取權杖',
-  authorize: '授權',
-  openIdUnsupported: '目前不支援 OpenID Connect，你仍可在此設定存取權杖。',
-
-  // Status info
-  statusBadRequest: '錯誤的請求',
-  statusUnauthorized: '未授權',
-  statusForbidden: '禁止存取',
-  statusNotFound: '找不到',
-  statusInternalServerError: '內部伺服器錯誤',
-  statusSuccessful: '成功',
-  statusError: '錯誤',
-  statusClientError: '用戶端錯誤',
-  statusBinaryBody: '二進位回應主體，{length} 位元組',
-
-  // OAuth dialog
-  oauthFlowPlaceholder: '選擇流程',
-  obtainAccessToken: '取得 API 的存取權杖。',
-  resourceOwnerPassword: '資源擁有者密碼流程',
-  resourceOwnerPasswordDesc: '使用使用者名稱和密碼進行驗證。',
-  clientCredentials: '用戶端憑證',
-  clientCredentialsDesc: '適用於伺服器對伺服器驗證。',
-  authorizationCode: '授權碼',
-  authorizationCodeDesc: '透過第三方服務進行驗證',
-  implicit: '隱含式',
-  implicitDesc: '直接取得存取權杖。',
-  deviceAuthorization: '裝置授權',
-  deviceAuthorizationDesc: '使用裝置進行驗證。',
-  clientId: '用戶端 ID',
-  clientIdHint: '你的 OAuth 應用程式用戶端 ID。',
-  clientSecret: '用戶端密鑰',
-  clientSecretHint: '你的 OAuth 應用程式用戶端密鑰。',
-  usernameField: '使用者名稱',
-  passwordField: '密碼',
-  fetchingToken: '正在取得權杖...',
-  fetchTokenError: '無法取得權杖',
-
-  // Server select
-  serverUrl: '伺服器 URL',
-  serverUrlDescription: '你的 API 端點基礎 URL。',
-  serverUrlFieldPlaceholder: '輸入值',
-
-  // Schema UI
-  schemaShowArray: '陣列項目',
-  schemaHideArray: '陣列項目',
-  schemaFilterPropertiesPlaceholder: '篩選屬性',
-  schemaFilterPropertiesEmpty: '沒有符合的屬性',
-
-  // Inputs (playground)
-  playgroundShowProperty: '顯示屬性',
-  playgroundPropertyPlaceholder: '輸入屬性名稱',
-  playgroundNewProperty: '新增',
-  playgroundNewItem: '新增項目',
-  playgroundRemoveItem: '移除項目',
-  playgroundSelectPlaceholder: '選擇',
-  playgroundSelected: '已選取',
-  playgroundInputUpload: '上傳',
-  playgroundInputUnset: '取消設定',
-} satisfies OpenAPI.Translations;
-
-const story = {
-  noVariant: '沒有變體',
-  props: '屬性',
-  renderError: '渲染元件時發生錯誤。',
-  reset: '重設',
-  unset: '取消設定',
-  booleanTrue: '是',
-  booleanFalse: '否',
-  dateInputPlaceholder: '輸入日期',
-  numberInputPlaceholder: '輸入數字',
-  bigintInputPlaceholder: '輸入 bigint',
-  textInputPlaceholder: '輸入文字',
-  arrayInputRemoveItem: '移除項目',
-  arrayInputAddItem: '新增項目',
-} satisfies Story.Translations;
+  // @fumadocs/story
+  'Encountered error when rendering the component.(story error boundary)': '渲染元件時發生錯誤。',
+  'Enter bigint(arg form)': '輸入 bigint',
+  'Enter date(arg form)': '輸入日期',
+  'Enter number(arg form)': '輸入數字',
+  'Enter text(arg form)': '輸入文字',
+  'False(arg form)': '否',
+  'New Item(arg form)': '新增項目',
+  'No Variant(story controls)': '沒有變體',
+  'Props(story controls)': '屬性',
+  'Remove Item(arg form)(aria-label)': '移除項目',
+  'Reset(story error boundary)': '重設',
+  'True(arg form)': '是',
+  'Unset(arg form)': '取消設定',
+} satisfies Translations;
 
 /**
  * Traditional Chinese
  */
-export function zhTW(): TranslationPreset<{
-  ui: UI.Translations;
-  openapi: OpenAPI.Translations;
-  story: Story.Translations;
-}> {
+export function zhTW(): TranslationPreset<keyof Translations> {
   return {
     name: 'zh-TW',
-    value: {
-      ui,
-      openapi,
-      story,
-    },
+    value: translations,
   };
 }

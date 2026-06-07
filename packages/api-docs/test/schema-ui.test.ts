@@ -6,6 +6,19 @@ import path from 'node:path';
 
 const cwd = fileURLToPath(new URL('./', import.meta.url));
 
+const labels = {
+  default: 'Default',
+  match: 'Match',
+  format: 'Format',
+  multipleOf: 'Multiple Of',
+  range: 'Range',
+  length: 'Length',
+  properties: 'Properties',
+  items: 'Items',
+  valueIn: 'Value in',
+  example: 'Example',
+};
+
 test('double-oneOf in allOf does not crash', async () => {
   const parsed = await fromSchema(path.join(cwd, './fixtures/double-oneof.yaml'));
 
@@ -18,6 +31,7 @@ test('double-oneOf in allOf does not crash', async () => {
       dereferenced: s,
       $ref: typeof s === 'object' ? parsed.getRawRef(s) : undefined,
     }),
+    labels,
   });
 
   // Should produce a cross-product of 4 oneOf variants, not crash
@@ -37,6 +51,7 @@ test('test', async () => {
       dereferenced: s,
       $ref: typeof s === 'object' ? parsed.getRawRef(s) : undefined,
     }),
+    labels,
   });
 
   expect(out).toMatchInlineSnapshot(`
@@ -151,9 +166,7 @@ test('test', async () => {
     ",
           "infoTags": [
             {
-              "label": <I18nLabel
-                label="schemaValueIn"
-              />,
+              "label": "Value in",
               "value": ""NOT_FOUND" | "FORBIDDEN" | "USAGE_EXCEEDED" | "RATE_LIMITED" | "UNAUTHORIZED" | "DISABLED" | "INSUFFICIENT_PERMISSIONS"",
             },
           ],

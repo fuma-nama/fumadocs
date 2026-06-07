@@ -2,6 +2,7 @@ import { defineConfig } from 'tsdown';
 import { mkdir, writeFile } from 'node:fs/promises';
 import path from 'node:path';
 import { Scanner } from '@tailwindcss/oxide';
+import { compilePackageTranslations } from '../shared/compile-package-translations.ts';
 
 export default defineConfig({
   format: 'esm',
@@ -16,6 +17,16 @@ export default defineConfig({
     sourcemap: false,
   },
   sourcemap: false,
+  plugins: [
+    {
+      name: 'generate-translations',
+      async buildStart() {
+        await compilePackageTranslations({
+          input: ['src/**/*.{ts,tsx}'],
+        });
+      },
+    },
+  ],
   async onSuccess() {
     await compileInline();
   },

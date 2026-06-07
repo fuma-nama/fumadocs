@@ -12,6 +12,9 @@ node_modules
 # testing
 /coverage
 
+# generated translation types
+**/.translations/
+
 # outputs
 .turbo
 .next
@@ -47,3 +50,4 @@ packages/base-ui/css/generated/*.css
 packages/openapi/css/generated/*.css
 packages/api-docs/css/generated/*.css
 packages/asyncapi/css/generated/*.css
+.pnpm-store

@@ -6,7 +6,7 @@ import { MethodLabel } from '@/ui/components/method-label';
 import { useTheme } from 'fumadocs-ui/provider/base';
 import { useEffect, useState } from 'react';
 import type { HttpMethods } from '@/types';
-import { I18nLabel } from '@/ui/client/i18n';
+import { useTranslations } from '@fuma-translate/react';
 import '@scalar/api-client-react/style.css';
 
 export default function ScalarPlayground({
@@ -19,6 +19,7 @@ export default function ScalarPlayground({
   method: HttpMethods;
 }) {
   const { resolvedTheme } = useTheme();
+  const t = useTranslations({ note: 'scalar API client' });
   const [mounted, setMounted] = useState(false);
   const client = useApiClient({
     configuration: {
@@ -46,7 +47,7 @@ export default function ScalarPlayground({
         className={cn(buttonVariants({ color: 'primary', size: 'sm' }), 'px-3 py-1.5')}
         onClick={() => client?.open({ path, method: method as never })}
       >
-        <I18nLabel label="test" />
+        {t('Test')}
       </button>
     </div>
   );

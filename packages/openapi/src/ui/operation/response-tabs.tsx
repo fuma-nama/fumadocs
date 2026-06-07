@@ -1,3 +1,4 @@
+'use client';
 import type { HttpMethods, OperationObject, PathItemObject, ResponseObject } from '@/types';
 import { getPreferredType } from '@/utils/schema';
 import {
@@ -10,7 +11,7 @@ import {
 import { Tab, Tabs } from 'fumadocs-ui/components/tabs';
 import { sample } from '@fumadocs/api-docs/schema/sample';
 import { useMemo, type ReactNode } from 'react';
-import { I18nLabel } from '@/ui/client/i18n';
+import { useTranslations } from '@fuma-translate/react';
 import { Markdown } from '../components/markdown';
 import { ClientCodeBlock } from '../components/codeblock';
 import type { NoReference } from '@fumadocs/api-docs/schema';
@@ -57,6 +58,7 @@ export function ResponseTabs({
   pathItem: NoReference<PathItemObject>;
 }) {
   const ctx = useRenderContext();
+  const t = useTranslations({ note: 'operation page' });
   const tabs = useMemo(() => {
     const tabs: ResponseTab[] = [];
     if (!operation.responses) return tabs;
@@ -76,7 +78,11 @@ export function ResponseTabs({
 
         for (const [key, sample] of Object.entries(responseOfType.examples)) {
           tab.examples.push({
-            label: sample?.summary ?? <I18nLabel label="responseTabName" replacements={{ key }} />,
+            label:
+              sample?.summary ??
+              t('Example {key}', {
+                variables: { key },
+              }),
             sample: sample.value,
             description: sample?.description,
           });
@@ -84,7 +90,7 @@ export function ResponseTabs({
       } else if (responseOfType?.example || responseOfType?.schema) {
         tab.examples ??= [];
         tab.examples.push({
-          label: <I18nLabel label="responseTabNameDefault" />,
+          label: t('Example'),
           sample: responseOfType.example ?? sample(responseOfType.schema as object),
         });
       }
@@ -93,7 +99,7 @@ export function ResponseTabs({
     }
 
     return tabs;
-  }, [operation.responses]);
+  }, [operation.responses, t]);
 
   if (tabs.length === 0) return null;
 
@@ -103,6 +109,12 @@ export function ResponseTabs({
 }
 
 function renderResponseTabsDefault({ tabs }: ResponseTabsRenderOptions): ReactNode {
+  return <ResponseTabsDefaultContent tabs={tabs} />;
+}
+
+function ResponseTabsDefaultContent({ tabs }: { tabs: ResponseTab[] }) {
+  const t = useTranslations({ note: 'operation page' });
+
   function renderExampleContent(example: ResponseExample) {
     return (
       <>
@@ -117,7 +129,7 @@ function renderResponseTabsDefault({ tabs }: ResponseTabsRenderOptions): ReactNo
       {tabs.map((tab) => {
         const { examples = [] } = tab;
 
-        let slot: ReactNode = <I18nLabel label="empty" />;
+        let slot: ReactNode = t('Empty');
         if (examples.length > 1) {
           slot = (
             <Accordions type="single" className="pt-2" defaultValue="0">

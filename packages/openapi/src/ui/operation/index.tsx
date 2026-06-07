@@ -1,3 +1,4 @@
+'use client';
 import { type ComponentProps, Fragment, use, useMemo, type ReactNode } from 'react';
 import type {
   HttpMethods,
@@ -12,7 +13,7 @@ import { idToTitle } from '@fumadocs/api-docs/utils/id-to-title';
 import { UsageTabs } from '@/ui/operation/usage-tabs';
 import { Badge, MethodLabel } from '@/ui/components/method-label';
 import { OperationProvider } from './context';
-import { I18nLabel, useTranslations } from '@/ui/client/i18n';
+import { useTranslations } from '@fuma-translate/react';
 import {
   AccordionContent,
   AccordionHeader,
@@ -57,6 +58,7 @@ export function Operation({
   showDescription?: boolean;
   headingLevel?: number;
 }) {
+  const t = useTranslations({ note: 'operation page' });
   const ctx = useRenderContext();
   const {
     schema: { dereferenced },
@@ -89,14 +91,14 @@ export function Operation({
         </Heading>
         {operation.deprecated && (
           <Badge color="yellow" className="text-xs not-prose">
-            <I18nLabel label="deprecated" />
+            {t('Deprecated')}
           </Badge>
         )}
       </div>
     );
     headingLevel++;
   } else if (operation.deprecated) {
-    headNode = <Callout type="warn" title={<I18nLabel label="deprecated" />} className="mt-0!" />;
+    headNode = <Callout type="warn" title={t('Deprecated')} className="mt-0!" />;
   }
 
   const contentTypes = body?.content ? Object.entries(body.content) : null;
@@ -110,7 +112,7 @@ export function Operation({
       <SelectTabs defaultValue={items[0].value}>
         <div className="flex gap-2 items-center justify-between mt-10">
           <Heading id="request-body" depth={headingLevel} className="my-0!">
-            <I18nLabel label="titleRequestBody" />
+            {t('Request Body')}
           </Heading>
           {contentTypes.length > 1 ? (
             <SelectTabTrigger items={items} className="font-medium" />
@@ -140,7 +142,7 @@ export function Operation({
     responseNode = (
       <>
         <Heading id="response-body" depth={headingLevel}>
-          <I18nLabel label="titleResponseBody" />
+          {t('Response Body')}
         </Heading>
         <Accordions type="multiple">
           {statuses.map((status) => (
@@ -156,10 +158,19 @@ export function Operation({
     const params = parameters.filter((param) => param.in === type);
     if (!params || params.length === 0) return;
 
+    const parameterLabel =
+      type === 'path'
+        ? t('Path Parameters')
+        : type === 'query'
+          ? t('Query Parameters')
+          : type === 'header'
+            ? t('Header Parameters')
+            : t('Cookie Parameters');
+
     return (
       <Fragment key={type}>
         <Heading id={`parameters-${type}`} depth={headingLevel}>
-          <I18nLabel label={`${type}Parameters`} />
+          {parameterLabel}
         </Heading>
         <AnchorSection segments={['parameters', type]}>
           <div className="flex flex-col">
@@ -221,7 +232,7 @@ export function Operation({
       <SelectTabs defaultValue={items[0].value}>
         <div className="flex items-start justify-between gap-2 mt-10">
           <Heading id="authorization" depth={headingLevel} className="my-0!">
-            <I18nLabel label="authorization" />
+            {t('Authorization')}
           </Heading>
           {items.length > 1 ? (
             <SelectTabTrigger items={items} />
@@ -263,7 +274,7 @@ export function Operation({
     callbacksNode = (
       <>
         <Heading id="callbacks" depth={headingLevel}>
-          <I18nLabel label="titleCallbacks" />
+          {t('Callbacks')}
         </Heading>
         <Accordions type="multiple">
           {webhookCallbacks.map((item, i) => (
@@ -528,23 +539,23 @@ function RepsonseAccordionItem({ item: { schema } }: { item: NoReference<MediaTy
 }
 
 function AuthScheme({ scheme, scopes }: { scheme: SecuritySchemeObject; scopes: string[] }) {
+  const t = useTranslations({ note: 'security scheme' });
+
   if (scheme.type === 'http' || scheme.type === 'oauth2') {
     return (
       <AuthProperty
-        name={<I18nLabel label="authorization" />}
+        name={t('Authorization')}
         type={
-          scheme.type === 'http' && scheme.scheme === 'basic' ? (
-            <I18nLabel label="authBasicTokenExample" />
-          ) : (
-            <I18nLabel label="authBearerTokenExample" />
-          )
+          scheme.type === 'http' && scheme.scheme === 'basic'
+            ? t('Basic <token>')
+            : t('Bearer <token>')
         }
         deprecated={scheme.deprecated}
         scopes={scopes}
       >
         {scheme.description && <Markdown md={scheme.description} />}
         <p>
-          <I18nLabel label="authTokenIn" />: <code>header</code>
+          {t('In')}: <code>header</code>
         </p>
       </AuthProperty>
     );
@@ -560,7 +571,7 @@ function AuthScheme({ scheme, scopes }: { scheme: SecuritySchemeObject; scopes: 
       >
         {scheme.description && <Markdown md={scheme.description} />}
         <p>
-          <I18nLabel label="authTokenIn" />: <code>{scheme.in}</code>
+          {t('In')}: <code>{scheme.in}</code>
         </p>
       </AuthProperty>
     );
@@ -569,7 +580,7 @@ function AuthScheme({ scheme, scopes }: { scheme: SecuritySchemeObject; scopes: 
   if (scheme.type === 'openIdConnect') {
     return (
       <AuthProperty
-        name={<I18nLabel label="openIdConnect" />}
+        name={t('OpenID Connect')}
         type="<token>"
         deprecated={scheme.deprecated}
         scopes={scopes}
@@ -593,6 +604,8 @@ function AuthProperty({
   deprecated?: boolean;
   scopes?: string[];
 }) {
+  const t = useTranslations({ note: 'security scheme' });
+
   return (
     <div className={cn('text-sm border-t my-4 first:border-t-0', className)}>
       <div className="flex flex-wrap items-center gap-3 not-prose">
@@ -600,7 +613,7 @@ function AuthProperty({
         <span className="text-sm font-mono text-fd-muted-foreground">{type}</span>
         {deprecated && (
           <Badge color="red" className="text-xs">
-            <I18nLabel label="deprecated" />
+            {t('Deprecated')}
           </Badge>
         )}
       </div>
@@ -608,7 +621,7 @@ function AuthProperty({
         {props.children}
         {scopes.length > 0 && (
           <p>
-            <I18nLabel label="authScope" />: <code>{scopes.join(', ')}</code>
+            {t('Scope')}: <code>{scopes.join(', ')}</code>
           </p>
         )}
       </div>
@@ -628,9 +641,7 @@ function CopyTypeScriptPanel({
   const [isChecked, onCopy] = useCopyButton(() => {
     void navigator.clipboard.writeText(code);
   });
-  const t = useTranslations();
-  const useTypeText = t.useTypeInTypeScript.replace('{name}', name);
-
+  const t = useTranslations({ note: 'TypeScript definitions' });
   return (
     <div
       className={cn(
@@ -639,8 +650,14 @@ function CopyTypeScriptPanel({
       )}
     >
       <div>
-        <p className="font-medium text-sm mb-2">{t.typeScriptDefinitions}</p>
-        <p className="text-xs text-fd-muted-foreground">{useTypeText}</p>
+        <p className="font-medium text-sm mb-2">{t('TypeScript Definitions')}</p>
+        <p className="text-xs text-fd-muted-foreground">
+          {t('Use the {name} type in TypeScript.', {
+            variables: {
+              name,
+            },
+          })}
+        </p>
       </div>
       <button
         onClick={onCopy}
@@ -653,7 +670,7 @@ function CopyTypeScriptPanel({
         )}
       >
         {isChecked ? <Check className="size-3.5" /> : <Copy className="size-3.5" />}
-        {t.copy}
+        {t('Copy')}
       </button>
     </div>
   );

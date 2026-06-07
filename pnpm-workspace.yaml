@@ -3,6 +3,9 @@ packages:
   - apps/*
   - examples/*
   - '!examples/stackblitz'
+minimumReleaseAgeExclude:
+  - 'fuma-translate'
+  - '@fuma-translate/*'
 allowBuilds:
   '@parcel/watcher': false
   core-js: false

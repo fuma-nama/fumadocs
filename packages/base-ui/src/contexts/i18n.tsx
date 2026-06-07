@@ -1,68 +1,30 @@
 'use client';
 import { createContext, type ReactNode, use, useMemo, useRef } from 'react';
 import { usePathname, useRouter } from 'fumadocs-core/framework';
-import { renderTranslation, TranslationValue, type TranslationObject } from 'fumadocs-core/i18n';
-import { defaultTranslations, type Translations } from '@/i18n';
+import { TranslationProvider } from '@fuma-translate/react';
 
 interface LocaleItem {
   name: string;
   locale: string;
 }
 
-interface I18nContextType {
-  text: Translations & Record<string, string | Record<string, string>>;
+interface LocaleContextType {
   locale?: string;
   onChange?: (v: string) => void;
   locales?: LocaleItem[];
 }
 
-const I18nContext = createContext<I18nContextType>({
-  text: defaultTranslations,
-});
+const LocaleContext = createContext<LocaleContextType>({});
 
-export function I18nLabel<K extends keyof Translations = keyof Translations>({
-  label,
-  params,
-}: {
-  label: K;
-  params?: Translations[K] extends TranslationValue<infer Params> ? Record<Params, string> : never;
-}): string {
-  const t = useTranslations();
-  return renderTranslation(t[label], params!);
-}
-
-export function useI18n(): I18nContextType {
-  return use(I18nContext);
-}
-
-export function useTranslations(): Translations;
-export function useTranslations<Obj extends TranslationObject>(namespace: string): Obj | undefined;
-
-export function useTranslations(namespace?: string) {
-  return namespace ? use(I18nContext).text[namespace] : use(I18nContext).text;
+export function useI18n(): LocaleContextType {
+  return use(LocaleContext);
 }
 
 export interface I18nProviderProps {
-  /**
-   * Current locale
-   */
   locale?: string;
-
-  /**
-   * Handle changes to the locale, redirect user when not specified.
-   */
   onLocaleChange?: (v: string) => void;
-
-  /**
-   * Translations of current locale
-   */
-  translations?: Partial<I18nContextType['text']>;
-
-  /**
-   * Available languages
-   */
+  translations?: Partial<Record<string, string>>;
   locales?: LocaleItem[];
-
   children?: ReactNode;
 }
 
@@ -81,7 +43,6 @@ export function I18nProvider({
     }
     const segments = pathname.split('/').filter((v) => v.length > 0);
 
-    // If locale prefix hidden
     if (segments.length === 0 || segments[0] !== locale) {
       segments.unshift(value);
     } else {
@@ -94,21 +55,19 @@ export function I18nProvider({
   onChangeRef.current = onChange;
 
   return (
-    <I18nContext
+    <LocaleContext
       value={useMemo(
         () => ({
           locale,
           locales,
-          text: {
-            ...defaultTranslations,
-            ...translations,
-          },
           onChange: (v) => onChangeRef.current(v),
         }),
-        [locale, locales, translations],
+        [locale, locales],
       )}
     >
-      {children}
-    </I18nContext>
+      <TranslationProvider translations={(translations ?? {}) as Record<string, string>}>
+        {children}
+      </TranslationProvider>
+    </LocaleContext>
   );
 }

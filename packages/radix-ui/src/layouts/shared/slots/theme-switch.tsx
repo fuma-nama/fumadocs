@@ -4,7 +4,7 @@ import { Airplay, Moon, Sun } from 'lucide-react';
 import { useTheme } from 'next-themes';
 import { type ComponentProps, useEffect, useState } from 'react';
 import { cn } from '@/utils/cn';
-import { useTranslations } from '@/contexts/i18n';
+import { useTranslations } from '@fuma-translate/react';
 
 const itemVariants = cva('size-6.5 p-1.5 text-fd-muted-foreground', {
   variants: {
@@ -15,11 +15,7 @@ const itemVariants = cva('size-6.5 p-1.5 text-fd-muted-foreground', {
   },
 });
 
-const full = [
-  ['light', Sun, 'themeLight'] as const,
-  ['dark', Moon, 'themeDark'] as const,
-  ['system', Airplay, 'themeSystem'] as const,
-];
+const full = [['light', Sun] as const, ['dark', Moon] as const, ['system', Airplay] as const];
 
 export interface ThemeSwitchProps extends ComponentProps<'div'> {
   mode?: 'light-dark' | 'light-dark-system';
@@ -28,7 +24,12 @@ export interface ThemeSwitchProps extends ComponentProps<'div'> {
 export function ThemeSwitch({ className, mode = 'light-dark', ...props }: ThemeSwitchProps) {
   const { setTheme, theme, resolvedTheme } = useTheme();
   const [mounted, setMounted] = useState(false);
-  const t = useTranslations();
+  const t = useTranslations({ note: 'theme switcher' });
+  const themeAriaLabels = {
+    light: t('Light', { note: 'aria-label' }),
+    dark: t('Dark', { note: 'aria-label' }),
+    system: t('System', { note: 'aria-label' }),
+  };
 
   useEffect(() => {
     setMounted(true);
@@ -45,7 +46,7 @@ export function ThemeSwitch({ className, mode = 'light-dark', ...props }: ThemeS
     return (
       <button
         className={container}
-        aria-label={t.themeToggle}
+        aria-label={t('Toggle Theme', { note: 'aria-label' })}
         onClick={() => setTheme(value === 'light' ? 'dark' : 'light')}
         data-theme-toggle=""
       >
@@ -68,10 +69,10 @@ export function ThemeSwitch({ className, mode = 'light-dark', ...props }: ThemeS
 
   return (
     <div className={container} data-theme-toggle="" {...props}>
-      {full.map(([key, Icon, label]) => (
+      {full.map(([key, Icon]) => (
         <button
           key={key}
-          aria-label={t[label]}
+          aria-label={themeAriaLabels[key]}
           className={cn(itemVariants({ active: value === key }))}
           onClick={() => setTheme(key)}
         >

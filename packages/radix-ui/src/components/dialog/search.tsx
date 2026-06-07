@@ -14,7 +14,7 @@ import {
   useRef,
   useState,
 } from 'react';
-import { I18nLabel, useTranslations } from '@/contexts/i18n';
+import { useTranslations } from '@fuma-translate/react';
 import { cn } from '@/utils/cn';
 import { Dialog, DialogContent, DialogOverlay, DialogTitle } from '@radix-ui/react-dialog';
 import type { HighlightedText, ReactSortedResult as BaseResultType } from 'fumadocs-core/search';
@@ -219,7 +219,7 @@ export function SearchDialogHeader(props: ComponentProps<'div'>) {
 }
 
 export function SearchDialogInput(props: ComponentProps<'input'>) {
-  const t = useTranslations();
+  const t = useTranslations({ note: 'search dialog' });
   const { search, onSearchChange } = useSearch();
 
   return (
@@ -227,7 +227,7 @@ export function SearchDialogInput(props: ComponentProps<'input'>) {
       {...props}
       value={search}
       onChange={(e) => onSearchChange(e.target.value)}
-      placeholder={t.search}
+      placeholder={t('Search')}
       className="w-0 flex-1 bg-transparent text-lg placeholder:text-fd-muted-foreground focus-visible:outline-none"
     />
   );
@@ -239,12 +239,12 @@ export function SearchDialogClose({
   ...props
 }: ComponentProps<'button'>) {
   const { onOpenChange } = useSearch();
-  const t = useTranslations();
+  const t = useTranslations({ note: 'search dialog' });
 
   return (
     <button
       type="button"
-      aria-label={t.searchClose}
+      aria-label={t('Close Search', { note: 'aria-label' })}
       onClick={() => onOpenChange(false)}
       className={cn(
         buttonVariants({
@@ -278,7 +278,7 @@ export function SearchDialogOverlay(props: ComponentProps<typeof DialogOverlay>)
 }
 
 export function SearchDialogContent({ children, ...props }: ComponentProps<typeof DialogContent>) {
-  const t = useTranslations();
+  const t = useTranslations({ note: 'search dialog' });
 
   return (
     <DialogContent
@@ -290,19 +290,25 @@ export function SearchDialogContent({ children, ...props }: ComponentProps<typeo
         props.className,
       )}
     >
-      <DialogTitle className="hidden">{t.search}</DialogTitle>
+      <DialogTitle className="hidden">{t('Search')}</DialogTitle>
       {children}
     </DialogContent>
   );
 }
 
+function SearchDialogListEmpty() {
+  const t = useTranslations({ note: 'search dialog' });
+
+  return (
+    <div className="py-12 text-center text-sm text-fd-muted-foreground">
+      {t('No results found')}
+    </div>
+  );
+}
+
 export function SearchDialogList({
   items = null,
-  Empty = () => (
-    <div className="py-12 text-center text-sm text-fd-muted-foreground">
-      <I18nLabel label="searchNoResult" />
-    </div>
-  ),
+  Empty = SearchDialogListEmpty,
   Item = (props) => <SearchDialogListItem {...props} />,
   ...props
 }: Omit<ComponentProps<'div'>, 'children'> & {

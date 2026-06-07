@@ -27,9 +27,11 @@
     "clean": "rimraf dist",
     "dev": "tsdown --watch --clean false",
     "lint": "oxlint .",
-    "types:check": "tsc --noEmit"
+    "types:check": "node --experimental-strip-types ../../scripts/merge-translation-keys.ts && tsc --noEmit"
   },
   "devDependencies": {
+    "@fumadocs/api-docs": "workspace:*",
+    "@fumadocs/asyncapi": "workspace:*",
     "@fumadocs/story": "workspace:*",
     "fumadocs-core": "workspace:*",
     "fumadocs-openapi": "workspace:*",
@@ -39,12 +41,20 @@
     "typescript": "^6.0.3"
   },
   "peerDependencies": {
+    "@fumadocs/api-docs": "*",
+    "@fumadocs/asyncapi": "*",
     "@fumadocs/story": "*",
     "fumadocs-core": "*",
     "fumadocs-openapi": "*",
     "fumadocs-ui": "*"
   },
   "peerDependenciesMeta": {
+    "@fumadocs/api-docs": {
+      "optional": true
+    },
+    "@fumadocs/asyncapi": {
+      "optional": true
+    },
     "@fumadocs/story": {
       "optional": true
     },
