@@ -3,11 +3,15 @@ import type { DereferencedDocument } from '@/utils/document/dereference';
 import type { OpenAPIOptions } from '@/server';
 import type { InlineCodeUsageGenerator } from './requests/generators';
 import type { CreateOpenAPIPageOptions } from './ui';
-import type { ReactNode } from 'react';
-import type { NoReference, SchemaResolver } from '@fumadocs/api-docs/schema';
+import type { FC, ReactNode } from 'react';
+import type { SchemaUIOptions } from '@fumadocs/api-docs/components/schema';
 
 export type Document = OpenAPIV3_2.Document;
-export type OperationObject = OpenAPIV3_2.OperationObject;
+export type OperationObject = OpenAPIV3_2.OperationObject & {
+  'x-codeSamples'?: InlineCodeUsageGenerator[];
+  'x-selectedCodeSample'?: string;
+  'x-exclusiveCodeSample'?: string;
+};
 export type ParameterObject = OpenAPIV3_2.ParameterObject;
 export type SecuritySchemeObject = OpenAPIV3_2.SecuritySchemeObject;
 export type ReferenceObject = OpenAPIV3_2.ReferenceObject;
@@ -23,30 +27,24 @@ export type ExampleObject = OpenAPIV3_2.ExampleObject;
 export type MediaTypeObject = OpenAPIV3_2.MediaTypeObject;
 export type RequestBodyObject = OpenAPIV3_2.RequestBodyObject;
 
-export type MethodInformation = NoReference<OperationObject> & {
-  method: HttpMethods;
-  'x-codeSamples'?: InlineCodeUsageGenerator[];
-  'x-selectedCodeSample'?: string;
-  'x-exclusiveCodeSample'?: string;
-};
-
 type RequireKeys<T, K extends keyof T> = Omit<T, K> & Required<Pick<T, K>>;
 
 export interface RenderContext
   extends
     Pick<OpenAPIOptions, 'proxyUrl'>,
-    RequireKeys<
-      CreateOpenAPIPageOptions,
-      'generateTypeScriptDefinitions' | 'mediaAdapters' | 'codeUsages' | 'shikiOptions' | 'shiki'
+    Omit<
+      RequireKeys<
+        CreateOpenAPIPageOptions,
+        'generateTypeScriptDefinitions' | 'mediaAdapters' | 'codeUsages' | 'shikiOptions' | 'shiki'
+      >,
+      'schemaUI'
     > {
   /**
    * dereferenced schema
    */
   schema: DereferencedDocument;
   _default_processMarkdown: (md: string) => ReactNode;
-  _schemaUIProps: { resolver: SchemaResolver; renderMarkdown: (md: string) => ReactNode };
-
-  clientBoundary: typeof import('@/ui/client/boundary');
+  SchemaUI: FC<Omit<SchemaUIOptions, 'resolver' | 'renderMarkdown'>>;
 }
 
 export type DistributiveOmit<T, K extends PropertyKey> = T extends unknown ? Omit<T, K> : never;

@@ -1,6 +1,19 @@
 'use client';
+import type { HttpMethods, OperationObject, PathItemObject } from '@/types';
+import {
+  createCodeUsageGeneratorRegistry,
+  type InlineCodeUsageGenerator,
+  pathnameFromRequest,
+} from '@/requests/generators';
+import {
+  CodeBlockTab,
+  CodeBlockTabs,
+  CodeBlockTabsList,
+  CodeBlockTabsTrigger,
+} from 'fumadocs-ui/components/codeblock';
+import { ResponseTabs } from './response-tabs';
+import { NoReference } from '@fumadocs/api-docs/schema';
 import { useRenderContext, useServerContext } from '@/ui/contexts/api';
-import { pathnameFromRequest } from '@/requests/generators';
 import {
   Select,
   SelectTrigger,
@@ -10,11 +23,83 @@ import {
 } from '@fumadocs/api-docs/components/select';
 import { useState, useEffect, useMemo } from 'react';
 import { ClientCodeBlock } from '@/ui/components/codeblock';
-import { type ExampleUpdateListener, useOperationContext } from '../client';
-import type { ExampleRequestItem } from '../get-example-requests';
+import { type ExampleUpdateListener, useOperationContext } from './context';
+import type { ExampleRequestItem } from '@/utils/get-example-requests';
 import { joinURL, resolveServerUrl } from '@fumadocs/api-docs/utils/url';
 
-export function UsageTabsSelector() {
+export function UsageTabs({
+  method,
+  operation,
+  pathItem,
+}: {
+  method: HttpMethods;
+  operation: NoReference<OperationObject>;
+  pathItem: NoReference<PathItemObject>;
+}) {
+  const ctx = useRenderContext();
+  let { renderAPIExampleUsageTabs, renderAPIExampleLayout } = ctx.content ?? {};
+
+  renderAPIExampleLayout ??= (slots) => {
+    return (
+      <div className="prose-no-margin">
+        {slots.selector}
+        {slots.usageTabs}
+        {slots.responseTabs}
+      </div>
+    );
+  };
+
+  renderAPIExampleUsageTabs ??= (registry) => {
+    const map = Array.from(registry.map().entries());
+    if (map.length === 0) return null;
+
+    return (
+      <CodeBlockTabs groupId="fumadocs_openapi_requests" defaultValue={map[0][0]}>
+        <CodeBlockTabsList>
+          {map.map(([id, item]) => (
+            <CodeBlockTabsTrigger key={id} value={id}>
+              {item.label ?? item.lang}
+            </CodeBlockTabsTrigger>
+          ))}
+        </CodeBlockTabsList>
+        {map.map(([id, item]) => (
+          <CodeBlockTab key={id} value={id}>
+            <UsageTab id={id} lang={item.lang} />
+          </CodeBlockTab>
+        ))}
+      </CodeBlockTabs>
+    );
+  };
+
+  const registry = useMemo(() => {
+    const registry = createCodeUsageGeneratorRegistry(ctx.codeUsages);
+
+    if (ctx.generateCodeSamples) {
+      for (const gen of ctx.generateCodeSamples({ operation, method, pathItem })) {
+        registry.addInline(gen);
+      }
+    }
+
+    if (operation['x-codeSamples']) {
+      for (const sample of operation['x-codeSamples']) {
+        registry.addInline(sample as InlineCodeUsageGenerator);
+      }
+    }
+
+    return registry;
+  }, [ctx, operation, method, pathItem]);
+
+  return renderAPIExampleLayout(
+    {
+      selector: operation['x-exclusiveCodeSample'] ? null : <UsageTabsSelector />,
+      usageTabs: renderAPIExampleUsageTabs(registry, ctx),
+      responseTabs: <ResponseTabs operation={operation} method={method} pathItem={pathItem} />,
+    },
+    ctx,
+  );
+}
+
+function UsageTabsSelector() {
   const { example: key, setExample: setKey, examples } = useOperationContext();
   const { APIExampleSelector: Override } = useRenderContext().operation ?? {};
 
@@ -49,7 +134,7 @@ export function UsageTabsSelector() {
   );
 }
 
-export function UsageTab({ id, lang }: { id: string; lang: string }) {
+function UsageTab({ id, lang }: { id: string; lang: string }) {
   const { mediaAdapters, codeUsages } = useRenderContext();
   const {
     examples,

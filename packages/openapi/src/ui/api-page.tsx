@@ -1,8 +1,7 @@
 import { Operation } from '@/ui/operation';
 import type { ServerObject } from '@/types';
-import { createMethod } from '@/utils/schema';
 import type { GeneratedPageProps } from '@/utils/pages/builder';
-import { useRenderContext } from './contexts/api';
+import { ServerProvider, useRenderContext } from './contexts/api';
 
 export function PageContent({
   showTitle: hasHead = false,
@@ -33,14 +32,14 @@ export function PageContent({
             `[Fumadocs OpenAPI] Method ${item.method} not found in operation: ${item.path}`,
           );
 
-        const method = createMethod(item.method, pathItem, operation);
-
         return {
           item,
           children: (
             <Operation
               key={`${item.path}:${item.method}`}
-              method={method}
+              method={item.method}
+              pathItem={pathItem}
+              operation={operation}
               path={item.path}
               showTitle={hasHead}
               showDescription={showDescription}
@@ -65,7 +64,9 @@ export function PageContent({
             <Operation
               type="webhook"
               key={`${item.name}:${item.method}`}
-              method={createMethod(item.method, webhook, hook)}
+              method={item.method}
+              pathItem={webhook}
+              operation={hook}
               path={`/${item.name}`}
               showTitle={hasHead}
               showDescription={showDescription}
@@ -82,8 +83,6 @@ export function PageContent({
   }
 
   return (
-    <ctx.clientBoundary.ServerProvider servers={dereferenced.servers as ServerObject[]}>
-      {content}
-    </ctx.clientBoundary.ServerProvider>
+    <ServerProvider servers={dereferenced.servers as ServerObject[]}>{content}</ServerProvider>
   );
 }

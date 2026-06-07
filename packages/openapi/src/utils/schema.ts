@@ -1,14 +1,5 @@
-import type {
-  ExampleObject,
-  HttpMethods,
-  MediaTypeObject,
-  MethodInformation,
-  OperationObject,
-  PathItemObject,
-  TagObject,
-} from '@/types';
+import type { ExampleObject, MediaTypeObject, TagObject } from '@/types';
 import { idToTitle } from '@fumadocs/api-docs/utils/id-to-title';
-import type { NoReference } from '@fumadocs/api-docs/schema';
 
 export const methodKeys = ['get', 'post', 'patch', 'delete', 'head', 'put'] as const;
 
@@ -26,24 +17,6 @@ export function getTagDisplayName(tag: TagObject): string {
 
   if (tag.summary) return tag.summary;
   return idToTitle(tag.name!);
-}
-
-/**
- * Summarize method endpoint information
- */
-export function createMethod(
-  method: HttpMethods,
-  path: NoReference<PathItemObject>,
-  operation: NoReference<OperationObject>,
-): MethodInformation {
-  return {
-    description: path.description,
-    summary: path.summary,
-    ...operation,
-    servers: operation.servers ?? path.servers,
-    parameters: [...(operation.parameters ?? []), ...(path.parameters ?? [])],
-    method,
-  };
 }
 
 interface ExampleLike {

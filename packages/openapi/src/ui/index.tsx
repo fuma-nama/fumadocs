@@ -1,6 +1,13 @@
 'use client';
 /* eslint-disable @typescript-eslint/no-explicit-any -- rehype-react without types */
-import type { Awaitable, Document, MethodInformation, RenderContext } from '@/types';
+import type {
+  Awaitable,
+  Document,
+  HttpMethods,
+  OperationObject,
+  PathItemObject,
+  RenderContext,
+} from '@/types';
 import { defaultAdapters, MediaAdapter } from '@/requests/media/adapter';
 import {
   Children,
@@ -20,7 +27,6 @@ import { PageContent } from './api-page';
 import { defaultShikiFactory } from 'fumadocs-core/highlight/shiki/full';
 import { compile } from '@fumari/json-schema-ts';
 import { ClientCodeBlock, ClientCodeBlockProvider } from './components/codeblock';
-import * as ClientBoundary from '@/ui/client/boundary';
 import { dereferenceOpenApiDocument } from '@/utils/document/dereference';
 import { AuthProvider } from '@/playground/auth';
 import { registerDefault } from '@/requests/generators/all';
@@ -32,7 +38,7 @@ import {
 import type { ShikiFactory } from 'fumadocs-core/highlight/shiki';
 import type { JSONSchema } from 'json-schema-typed';
 import type { CodeToHastOptionsCommon, CodeOptionsThemes, BundledTheme } from 'shiki';
-import type { ExampleRequestItem } from './operation/get-example-requests';
+import type { ExampleRequestItem } from '../utils/get-example-requests';
 import type { RequestTabsRenderOptions } from './operation/request-tabs';
 import type { ResponseTabsRenderOptions } from './operation/response-tabs';
 import type { PlaygroundClientOptions } from '@/playground/client';
@@ -41,9 +47,11 @@ import type { NoReference } from '@fumadocs/api-docs/schema';
 import { ParsedSchema } from '@/utils/schema';
 import { Markdown } from './components/markdown';
 import { TranslationsProvider } from '@fumadocs/api-docs/i18n';
+import PlaygroundClient from '@/playground/client';
+import { Schema } from '@fumadocs/api-docs/components/schema';
+import { RenderContextProvider } from './contexts/api';
 
 export interface GenerateTypeScriptDefinitionsContext {
-  operation: NoReference<MethodInformation>;
   readOnly: boolean;
   writeOnly: boolean;
   ctx: RenderContext;
@@ -51,7 +59,9 @@ export interface GenerateTypeScriptDefinitionsContext {
 
 interface APIPlaygroundProps {
   path: string;
-  method: MethodInformation;
+  method: HttpMethods;
+  operation: NoReference<OperationObject>;
+  pathItem: NoReference<PathItemObject>;
   ctx: RenderContext;
 }
 
@@ -76,7 +86,11 @@ export interface CreateOpenAPIPageOptions {
   /**
    * Generate example code usage for each endpoint.
    */
-  generateCodeSamples?: (method: MethodInformation) => InlineCodeUsageGenerator[];
+  generateCodeSamples?: (options: {
+    operation: NoReference<OperationObject>;
+    method: HttpMethods;
+    pathItem: NoReference<PathItemObject>;
+  }) => InlineCodeUsageGenerator[];
 
   shiki?: ShikiFactory;
   shikiOptions?: Omit<CodeToHastOptionsCommon, 'lang'> & CodeOptionsThemes<BundledTheme>;
@@ -148,8 +162,12 @@ export interface CreateOpenAPIPageOptions {
         responses: ReactNode;
         callbacks: ReactNode;
       },
-      ctx: RenderContext,
-      method: NoReference<MethodInformation>,
+      context: {
+        operation: NoReference<OperationObject>;
+        method: HttpMethods;
+        pathItem: NoReference<PathItemObject>;
+        ctx: RenderContext;
+      },
     ) => ReactNode;
 
     renderWebhookLayout?: (slots: {
@@ -168,10 +186,11 @@ export interface CreateOpenAPIPageOptions {
    * Info UI for JSON schemas
    */
   schemaUI?: {
-    // TODO: implement
     render?: (
       options: {
         root: ParsedSchema;
+        readOnly?: boolean;
+        writeOnly?: boolean;
       },
       ctx: RenderContext,
     ) => ReactNode;
@@ -243,6 +262,7 @@ export interface OpenAPIPageProps extends Omit<GeneratedPageProps, 'document'> {
 export function createOpenAPIPage({
   shiki = defaultShikiFactory,
   shikiOptions = { themes: { light: 'github-light', dark: 'github-dark' } },
+  schemaUI: schemaUIOptions,
   generateTypeScriptDefinitions = (schema, ctx) => {
     if (typeof schema !== 'object') return;
 
@@ -261,9 +281,11 @@ export function createOpenAPIPage({
 }: CreateOpenAPIPageOptions = {}): FC<OpenAPIPageProps> {
   let processor: ReturnType<typeof createMarkdownProcessor>;
 
-  function renderPlaygroundDefault({ method, path, ctx }: APIPlaygroundProps) {
+  function renderPlaygroundDefault({ method, operation, path, pathItem }: APIPlaygroundProps) {
     return (
-      <ctx.clientBoundary.PlaygroundClient
+      <PlaygroundClient
+        operation={operation}
+        pathItem={pathItem}
         route={path}
         method={method}
         writeOnly
@@ -300,25 +322,34 @@ export function createOpenAPIPage({
   return function ClientAPIPage({ payload, ...props }) {
     const processed = useMemo(() => dereferenceOpenApiDocument(payload.bundled), [payload.bundled]);
 
-    const ctx: RenderContext = useMemo(
-      () => ({
+    const ctx: RenderContext = useMemo(() => {
+      function renderMarkdown(md: string) {
+        return <Markdown md={md} />;
+      }
+      function resolver(v: ParsedSchema) {
+        // we will only pass dereferenced schema to schema UI
+        return {
+          dereferenced: v,
+          $ref: typeof v === 'object' ? processed.getRawRef(v) : undefined,
+        };
+      }
+
+      return {
         schema: processed,
         proxyUrl: payload.proxyUrl,
         shiki,
         shikiOptions,
         generateTypeScriptDefinitions,
-        clientBoundary: ClientBoundary,
-        _schemaUIProps: {
-          renderMarkdown(md) {
-            return <Markdown md={md} />;
-          },
-          resolver(v) {
-            // we will only pass dereferenced schema to schema UI
-            return {
-              dereferenced: v,
-              $ref: typeof v === 'object' ? processed.getRawRef(v) : undefined,
-            };
-          },
+        SchemaUI(props) {
+          if (schemaUIOptions?.render) return schemaUIOptions.render(props, ctx);
+          return (
+            <Schema
+              {...props}
+              showExample={props.showExample ?? schemaUIOptions?.showExample}
+              resolver={resolver}
+              renderMarkdown={renderMarkdown}
+            />
+          );
         },
         client: options,
         ...options,
@@ -335,16 +366,15 @@ export function createOpenAPIPage({
           provider: options.playground?.provider ?? renderPlaygroundProviderDefault,
           render: options.playground?.render ?? renderPlaygroundDefault,
         },
-      }),
-      [payload.proxyUrl, processed],
-    );
+      };
+    }, [payload.proxyUrl, processed]);
 
     return (
       <TranslationsProvider namespace="openapi">
         <ClientCodeBlockProvider factory={shiki}>
-          <ctx.clientBoundary.RenderContextProvider ctx={ctx}>
+          <RenderContextProvider ctx={ctx}>
             <PageContent {...props} />
-          </ctx.clientBoundary.RenderContextProvider>
+          </RenderContextProvider>
         </ClientCodeBlockProvider>
       </TranslationsProvider>
     );
