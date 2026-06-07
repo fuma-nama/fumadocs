@@ -1,5 +1,4 @@
-import type { DereferencedDocument } from '@/utils/document/dereference';
-import type { TagObject } from '@/types';
+import type { Document, TagObject } from '@/types';
 import { dump } from 'js-yaml';
 import {
   type GeneratedPageProps,
@@ -57,7 +56,7 @@ export interface PagesToTextOptions {
 
 export function toText(
   entry: PageOutput | OperationOutput | WebhookOutput,
-  processed: DereferencedDocument,
+  doc: Document,
   options: PagesToTextOptions = {},
 ) {
   const { frontmatter, includeDescription = false } = options;
@@ -86,7 +85,7 @@ export function toText(
     };
   }
 
-  const data = toStaticData(pageProps, processed.dereferenced);
+  const data = toStaticData(pageProps, doc);
 
   return generateDocument(
     {

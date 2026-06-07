@@ -27,7 +27,7 @@ import { PageContent } from './api-page';
 import { defaultShikiFactory } from 'fumadocs-core/highlight/shiki/full';
 import { compile } from '@fumari/json-schema-ts';
 import { ClientCodeBlock, ClientCodeBlockProvider } from './components/codeblock';
-import { dereferenceOpenApiDocument } from '@/utils/document/dereference';
+import { dereferenceBundledDocument } from '@/utils/document/dereference';
 import { AuthProvider } from '@/playground/auth';
 import { registerDefault } from '@/requests/generators/all';
 import {
@@ -320,7 +320,7 @@ export function createOpenAPIPage({
   }
 
   return function ClientAPIPage({ payload, ...props }) {
-    const processed = useMemo(() => dereferenceOpenApiDocument(payload.bundled), [payload.bundled]);
+    const processed = useMemo(() => dereferenceBundledDocument(payload.bundled), [payload.bundled]);
 
     const ctx: RenderContext = useMemo(() => {
       function renderMarkdown(md: string) {
