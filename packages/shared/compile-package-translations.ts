@@ -20,6 +20,8 @@ export interface CompilePackageTranslationsOptions {
    * @default 'src/.translations/keys.json'
    */
   jsonOutput?: string;
+
+  extraKeys?: string[];
 }
 
 export async function compilePackageTranslations(
@@ -32,6 +34,7 @@ export async function compilePackageTranslations(
   const output = await compile({
     input: options.input.map((pattern) => path.join(cwd, pattern)),
   });
+  if (options.extraKeys) output.translationKeys.push(...options.extraKeys);
 
   await mkdir(path.dirname(typesOutput), { recursive: true });
   await writeFile(typesOutput, typegen(output), 'utf8');

@@ -12,6 +12,7 @@ type Translations = UITranslations &
   APIDocsTranslations;
 
 const translations = {
+  displayName: '简体中文',
   // fumadocs-ui
   'Back to Home(404 page)': '返回首页',
   'Choose a language(language switcher)': '选择语言',
@@ -45,8 +46,7 @@ const translations = {
   'Parameters(type table)': '参数',
   'Previous Page(pagination)': '上一页',
   'Prop(type table)': '属性',
-  'Read {url}, I want to ask questions about it.(page actions)':
-    '阅读 {url}，我想询问相关问题。',
+  'Read {url}, I want to ask questions about it.(page actions)': '阅读 {url}，我想询问相关问题。',
   'Returns(type table)': '返回值',
   'Search(search dialog)': '搜索',
   'Search(search trigger)': '搜索',
@@ -129,8 +129,7 @@ const translations = {
   'Header(playground)': '标头',
   'Implicit(OAuth dialog)': '隐式',
   'In(security scheme)': '位置',
-  'Intended for the server-to-server authentication.(OAuth dialog)':
-    '适用于服务器对服务器验证。',
+  'Intended for the server-to-server authentication.(OAuth dialog)': '适用于服务器对服务器验证。',
   'Internal Server Error(playground status info)': '内部服务器错误',
   'Not Found(playground status info)': '找不到',
   'Obtain the access token for API.(OAuth dialog)': '获取 API 的访问令牌。',
@@ -154,12 +153,9 @@ const translations = {
   'Submit(OAuth dialog)': '提交',
   'Successful(playground status info)': '成功',
   'Test(scalar API client)': '测试',
-  'The base URL of your API endpoint.(playground server select)':
-    '你的 API 端点基础 URL。',
-  'The client ID of your OAuth application.(OAuth dialog)':
-    '你的 OAuth 应用程序客户端 ID。',
-  'The client secret of your OAuth application.(OAuth dialog)':
-    '你的 OAuth 应用程序客户端密钥。',
+  'The base URL of your API endpoint.(playground server select)': '你的 API 端点基础 URL。',
+  'The client ID of your OAuth application.(OAuth dialog)': '你的 OAuth 应用程序客户端 ID。',
+  'The client secret of your OAuth application.(OAuth dialog)': '你的 OAuth 应用程序客户端密钥。',
   'TypeScript Definitions(TypeScript definitions)': 'TypeScript 定义',
   'Unauthorized(playground status info)': '未授权',
   'Unsupported(OAuth dialog)': '不支持',
@@ -181,8 +177,7 @@ const translations = {
   'Traits(operation page)': '特征',
 
   // @fumadocs/story
-  'Encountered error when rendering the component.(story error boundary)':
-    '渲染组件时发生错误。',
+  'Encountered error when rendering the component.(story error boundary)': '渲染组件时发生错误。',
   'Enter bigint(arg form)': '输入 bigint',
   'Enter date(arg form)': '输入日期',
   'Enter number(arg form)': '输入数字',

@@ -12,6 +12,7 @@ type Translations = UITranslations &
   APIDocsTranslations;
 
 const translations = {
+  displayName: '繁體中文',
   // fumadocs-ui
   'Back to Home(404 page)': '返回首頁',
   'Choose a language(language switcher)': '選擇語言',

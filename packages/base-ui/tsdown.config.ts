@@ -31,6 +31,7 @@ export default defineConfig({
       async buildStart() {
         await compilePackageTranslations({
           input: ['src/**/*.{ts,tsx}'],
+          extraKeys: ['displayName'],
         });
       },
     },

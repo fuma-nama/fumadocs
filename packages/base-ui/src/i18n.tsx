@@ -35,7 +35,7 @@ export function i18nProvider(
       translations: values,
       locales: languages.map((code) => ({
         locale: code,
-        name: code,
+        name: values.displayName ?? code,
       })),
     };
   }
