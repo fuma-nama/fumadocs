@@ -2,6 +2,7 @@ import type { Document, HttpMethods, OperationObject, PathItemObject, TagObject 
 import { getTagDisplayName, methodKeys } from '@/utils/schema';
 import { idToTitle } from '@fumadocs/api-docs/utils/id-to-title';
 import { dereferenceShallow } from '@fumadocs/api-docs/schema/dereference';
+import type { NoReferenceSwallow } from '@fumadocs/api-docs/schema';
 
 interface BaseEntry {
   path: string;
@@ -70,6 +71,7 @@ export interface PagesBuilder {
   id: string;
   /** bundled OpenAPI document (not dereferenced) */
   document: Document;
+  dereferenceShallow: <T>(schema: T) => NoReferenceSwallow<T>;
   /**
    * add output entry.
    */
@@ -127,6 +129,7 @@ export function fromSchema(
   toPages({
     id: schemaId,
     document: bundled,
+    dereferenceShallow: (s) => dereferenceShallow(s, bundled),
     create(entry) {
       files.push(entry);
     },

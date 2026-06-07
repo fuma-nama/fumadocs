@@ -16,7 +16,7 @@ import { gitConfig } from '@/lib/shared';
 import { useFumadocsLoader } from 'fumadocs-core/source/client';
 import { Suspense, type ReactNode } from 'react';
 import { useMDXComponents } from '@/components/mdx';
-import { ClientAPIPage } from '@/components/api-page';
+import { OpenAPIPage } from '@/components/api-page';
 
 export const Route = createFileRoute('/docs/$')({
   component: Page,
@@ -46,7 +46,7 @@ const serverLoader = createServerFn({
         title: page.data.title,
         description: page.data.description,
         pageTree,
-        props: await page.data.getClientAPIPageProps(),
+        props: page.data.getOpenAPIPageProps(),
       };
     }
 
@@ -99,7 +99,7 @@ function Page() {
         <DocsTitle>{page.title}</DocsTitle>
         <DocsDescription>{page.description}</DocsDescription>
         <DocsBody>
-          <ClientAPIPage {...page.props} />
+          <OpenAPIPage {...page.props} />
         </DocsBody>
       </DocsPage>
     );

@@ -8,7 +8,7 @@ import type {
   PagesBuilderConfig,
   WebhookOutput,
 } from '@/utils/pages/builder';
-import type { DistributiveOmit, Document } from '@/types';
+import type { DistributiveOmit } from '@/types';
 import { dereferenceShallow } from '@fumadocs/api-docs/schema/dereference';
 
 interface OperationConfig extends BaseConfig {
@@ -75,7 +75,7 @@ type NameFn<
     | OperationOutput
     | WebhookOutput
     | PageOutput,
-> = (this: PagesBuilder, output: DistributiveOmit<Entry, 'path'>, document: Document) => string;
+> = (this: PagesBuilder, output: DistributiveOmit<Entry, 'path'>) => string;
 
 interface NameFnOptions {
   /**
@@ -112,7 +112,7 @@ export function createAutoPreset(options: SchemaToPagesOptions): PagesBuilderCon
   } else {
     const { algorithm = 'v2' } = options.name ?? {};
 
-    nameFn = function (result, document) {
+    nameFn = function (result) {
       if (result.type === 'page') {
         if (result.tag) return slugify(result.tag.name!);
         const schemaId = result.schemaId;
@@ -123,7 +123,7 @@ export function createAutoPreset(options: SchemaToPagesOptions): PagesBuilderCon
       }
 
       if (result.type === 'operation') {
-        const operation = document.paths![result.item.path]![result.item.method]!;
+        const operation = this.document.paths![result.item.path]![result.item.method]!;
 
         if (algorithm === 'v2' && operation.operationId) {
           return operation.operationId;
@@ -135,7 +135,7 @@ export function createAutoPreset(options: SchemaToPagesOptions): PagesBuilderCon
         );
       }
 
-      const hook = dereferenceShallow(document.webhooks![result.item.name], this.document)[
+      const hook = dereferenceShallow(this.document.webhooks![result.item.name], this.document)[
         result.item.method
       ]!;
 
@@ -215,14 +215,14 @@ export function createAutoPreset(options: SchemaToPagesOptions): PagesBuilderCon
 
             group.entries.push({
               ...entry,
-              path: path.join(groupName, `${nameFn.call(builder, entry, doc)}.mdx`),
+              path: path.join(groupName, `${nameFn.call(builder, entry)}.mdx`),
             });
           }
 
           break;
         }
         default: {
-          const fileName = `${nameFn.call(builder, entry, doc)}.mdx`;
+          const fileName = `${nameFn.call(builder, entry)}.mdx`;
 
           if (typeof groupBy === 'function') {
             const groupDisplayName = groupBy(entry);
@@ -275,7 +275,7 @@ export function createAutoPreset(options: SchemaToPagesOptions): PagesBuilderCon
           },
           ...items,
         };
-        entry.path = `${nameFn.call(builder, entry, doc)}.mdx`;
+        entry.path = `${nameFn.call(builder, entry)}.mdx`;
         builder.create(entry);
         return;
       }
@@ -298,7 +298,7 @@ export function createAutoPreset(options: SchemaToPagesOptions): PagesBuilderCon
             tag,
           };
 
-          entry.path = `${nameFn.call(builder, entry, doc)}.mdx`;
+          entry.path = `${nameFn.call(builder, entry)}.mdx`;
           builder.create(entry);
         }
 
