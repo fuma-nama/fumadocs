@@ -56,15 +56,16 @@ import {
   JsonInput,
   ObjectInput,
 } from '@fumadocs/api-docs/components/playground/inputs';
-import type { MethodInformation, ParameterObject } from '@/types';
+import type { HttpMethods, OperationObject, ParameterObject, PathItemObject } from '@/types';
 import { useTranslations } from '@/ui/client/i18n';
-import { useOperationContext } from '@/ui/operation/client';
+import { useOperationContext } from '@/ui/operation/context';
 import { OAuthDialog, OAuthDialogContent, OAuthDialogTrigger } from './components/oauth-dialog';
 import { dereferenceShallow } from '@fumadocs/api-docs/schema/dereference';
 import { useAuth } from './auth';
 import { useOnChange } from 'fumadocs-core/utils/use-on-change';
 import { Spinner } from '@fumadocs/api-docs/components/spinner';
 import { joinURL, resolveServerUrl } from '@fumadocs/api-docs/utils/url';
+import { NoReference } from '@fumadocs/api-docs/schema';
 
 export interface FormValues extends Record<string, unknown> {
   path: Record<string, unknown>;
@@ -76,7 +77,9 @@ export interface FormValues extends Record<string, unknown> {
 
 export interface PlaygroundClientProps extends Omit<ComponentProps<'form'>, 'method'> {
   route: string;
-  method: MethodInformation;
+  method: HttpMethods;
+  operation: NoReference<OperationObject>;
+  pathItem: NoReference<PathItemObject>;
   writeOnly: boolean;
   readOnly: boolean;
 }
@@ -139,6 +142,8 @@ interface RequestBodyInfo {
 export default function PlaygroundClient({
   route,
   method,
+  operation,
+  pathItem,
   writeOnly,
   readOnly,
   ...rest
@@ -147,12 +152,15 @@ export default function PlaygroundClient({
   const ctx = useRenderContext();
   const { bundled, dereferenced } = ctx.schema;
   const { parameters, body } = useMemo(() => {
-    const parameters: ParameterObject[] =
-      method.parameters?.map((param) => dereferenceShallow(param, bundled)) ?? [];
+    const parameters: ParameterObject[] = [];
+    if (operation.parameters)
+      for (const p of operation.parameters) parameters.push(dereferenceShallow(p, bundled));
+    if (pathItem.parameters)
+      for (const p of pathItem.parameters) parameters.push(dereferenceShallow(p, bundled));
     let body: RequestBodyInfo | undefined;
 
-    if (method.requestBody) {
-      const content = dereferenceShallow(method.requestBody, bundled).content;
+    if (operation.requestBody) {
+      const content = dereferenceShallow(operation.requestBody, bundled).content;
       const mediaType = content ? getPreferredType(content) : undefined;
 
       if (content && mediaType) {
@@ -167,10 +175,10 @@ export default function PlaygroundClient({
       body,
       parameters,
     };
-  }, [bundled, method]);
+  }, [bundled, operation, pathItem]);
   const securityEntries = useMemo(() => {
     const result: SecurityEntry[][] = [];
-    const security = method.security ?? dereferenced.security ?? [];
+    const security = operation.security ?? dereferenced.security ?? [];
     if (security.length === 0) return result;
 
     for (const map of security) {
@@ -187,7 +195,7 @@ export default function PlaygroundClient({
     }
 
     return result;
-  }, [dereferenced, method.security]);
+  }, [dereferenced, operation.security]);
 
   const { example: exampleId, examples, setExampleData } = useOperationContext();
   const { server } = useServerContext();
@@ -233,7 +241,7 @@ export default function PlaygroundClient({
     );
 
     const encoded = encodeRequestData(
-      { ...mapInputs(input), method: method.method, bodyMediaType: body?.mediaType },
+      { ...mapInputs(input), method, bodyMediaType: body?.mediaType },
       mediaAdapters,
       parameters,
     );
@@ -254,7 +262,7 @@ export default function PlaygroundClient({
   function triggerExampleUpdate() {
     const data = {
       ...mapInputs(stf.dataEngine.getData() as FormValues),
-      method: method.method,
+      method,
       bodyMediaType: body?.mediaType,
     };
     setExampleData(data, encodeRequestData(data, mediaAdapters, parameters));
@@ -307,8 +315,8 @@ export default function PlaygroundClient({
         >
           <ServerSelect className="border-b" />
           <div className="flex flex-row items-center gap-2 text-sm p-3 not-last:pb-0">
-            <MethodLabel>{method.method}</MethodLabel>
-            <Route route={route} className={cn('flex-1', method.deprecated && 'line-through')} />
+            <MethodLabel>{method}</MethodLabel>
+            <Route route={route} className={cn('flex-1', operation.deprecated && 'line-through')} />
             <button
               type="submit"
               className={cn(buttonVariants({ color: 'primary', size: 'sm' }), 'w-14 py-1.5')}

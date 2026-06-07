@@ -1,6 +1,13 @@
 import { encodeRequestData } from '@/requests/media/encode';
 import type { RawRequestData, RequestData } from '@/requests/types';
-import type { MethodInformation, RenderContext } from '@/types';
+import type {
+  HttpMethods,
+  OperationObject,
+  ParameterObject,
+  PathItemObject,
+  RenderContext,
+  RequestBodyObject,
+} from '@/types';
 import { getPreferredType, pickExample } from '@/utils/schema';
 import type { NoReference } from '@fumadocs/api-docs/schema';
 import { sample } from '@fumadocs/api-docs/schema/sample';
@@ -13,34 +20,49 @@ export interface ExampleRequestItem {
   encoded: RequestData;
 }
 
-export function getExampleRequests(
-  path: string,
-  operation: NoReference<MethodInformation>,
-  ctx: RenderContext,
-): ExampleRequestItem[] {
+export function getExampleRequests({
+  path,
+  method,
+  ctx,
+  operation,
+  pathItem,
+}: {
+  path: string;
+  pathItem: NoReference<PathItemObject>;
+  method: HttpMethods;
+  operation: NoReference<OperationObject>;
+  ctx: RenderContext;
+}): ExampleRequestItem[] {
   const requestBody = operation.requestBody;
   const media = requestBody?.content ? getPreferredType(requestBody.content) : null;
   const bodyOfType = media ? requestBody!.content![media] : null;
+  const parameters = [...(operation.parameters ?? []), ...(pathItem.parameters ?? [])];
 
   if (bodyOfType?.examples) {
     const result: ExampleRequestItem[] = [];
 
     for (const [key, value] of Object.entries(bodyOfType.examples)) {
-      const data = getRequestData(path, operation, key, ctx);
+      const data = getRequestData({
+        path,
+        body: operation.requestBody,
+        parameters,
+        sampleKey: key,
+        method,
+      });
 
       result.push({
         id: key,
         name: value.summary || key,
         description: value.description,
         data,
-        encoded: encodeRequestData(data, ctx.mediaAdapters, operation.parameters ?? []),
+        encoded: encodeRequestData(data, ctx.mediaAdapters, parameters),
       });
     }
 
     if (result.length > 0) return result;
   }
 
-  const data = getRequestData(path, operation, null, ctx);
+  const data = getRequestData({ path, body: operation.requestBody, method, parameters });
   return [
     {
       id: '_default',
@@ -48,26 +70,33 @@ export function getExampleRequests(
       description:
         typeof bodyOfType?.schema === 'object' ? bodyOfType.schema.description : undefined,
       data,
-      encoded: encodeRequestData(data, ctx.mediaAdapters, operation.parameters ?? []),
+      encoded: encodeRequestData(data, ctx.mediaAdapters, parameters),
     },
   ];
 }
 
-function getRequestData(
-  path: string,
-  method: NoReference<MethodInformation>,
-  sampleKey: string | null,
-  _ctx: RenderContext,
-): RawRequestData {
+function getRequestData({
+  method,
+  path,
+  parameters,
+  sampleKey,
+  body,
+}: {
+  path: string;
+  sampleKey?: string;
+  method: HttpMethods;
+  parameters: NoReference<ParameterObject>[];
+  body?: NoReference<RequestBodyObject>;
+}): RawRequestData {
   const result: RawRequestData = {
     path: {},
     cookie: {},
     header: {},
     query: {},
-    method: method.method,
+    method: method,
   };
 
-  for (const param of method.parameters ?? []) {
+  for (const param of parameters) {
     let value = pickExample(param as never);
 
     if (value === undefined && param.required) {
@@ -78,7 +107,7 @@ function getRequestData(
         const content = type ? param.content[type] : undefined;
         if (!content || !content.schema)
           throw new Error(
-            `Cannot find "${param.name}" parameter info for media type "${type}" in ${path} ${method.method}`,
+            `Cannot find "${param.name}" parameter info for media type "${type}" in ${path} ${method}`,
           );
 
         value = sample(content.schema as object);
@@ -100,13 +129,11 @@ function getRequestData(
     }
   }
 
-  if (method.requestBody?.content) {
-    const body = method.requestBody.content;
-    const type = getPreferredType(body);
-    if (!type)
-      throw new Error(`Cannot find body schema for ${path} ${method.method}: missing media type`);
+  if (body?.content) {
+    const type = getPreferredType(body.content);
+    if (!type) throw new Error(`Cannot find body schema for ${path} ${method}: missing media type`);
     result.bodyMediaType = type as RawRequestData['bodyMediaType'];
-    const bodyOfType = body[type];
+    const bodyOfType = body.content[type];
 
     if (bodyOfType.examples && sampleKey) {
       result.body = bodyOfType.examples[sampleKey].value;
@@ -114,8 +141,8 @@ function getRequestData(
       result.body = bodyOfType.example;
     } else {
       result.body = sample((bodyOfType?.schema ?? {}) as object, {
-        skipReadOnly: method.method !== 'get',
-        skipWriteOnly: method.method === 'get',
+        skipReadOnly: method !== 'get',
+        skipWriteOnly: method === 'get',
         skipNonRequired: true,
       });
     }

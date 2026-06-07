@@ -1,4 +1,4 @@
-import type { MethodInformation, RenderContext, ResponseObject } from '@/types';
+import type { HttpMethods, OperationObject, PathItemObject, ResponseObject } from '@/types';
 import { getPreferredType } from '@/utils/schema';
 import {
   AccordionContent,
@@ -14,6 +14,7 @@ import { I18nLabel } from '@/ui/client/i18n';
 import { Markdown } from '../components/markdown';
 import { ClientCodeBlock } from '../components/codeblock';
 import type { NoReference } from '@fumadocs/api-docs/schema';
+import { useRenderContext } from '../contexts/api';
 
 export interface ResponseTab {
   /**
@@ -50,11 +51,12 @@ export interface ResponseTabsRenderOptions {
 
 export function ResponseTabs({
   operation,
-  ctx,
 }: {
-  operation: NoReference<MethodInformation>;
-  ctx: RenderContext;
+  operation: NoReference<OperationObject>;
+  method: HttpMethods;
+  pathItem: NoReference<PathItemObject>;
 }) {
+  const ctx = useRenderContext();
   const tabs = useMemo(() => {
     const tabs: ResponseTab[] = [];
     if (!operation.responses) return tabs;

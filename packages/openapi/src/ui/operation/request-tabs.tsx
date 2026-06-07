@@ -1,4 +1,3 @@
-import type { MethodInformation } from '@/types';
 import { I18nLabel } from '@/ui/client/i18n';
 import {
   AccordionContent,
@@ -12,26 +11,33 @@ import type { RawRequestData } from '@/requests/types';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from 'fumadocs-ui/components/tabs';
 import { pathnameFromRequest } from '@/requests/generators';
 import { MethodLabel } from '@/ui/components/method-label';
-import type { ExampleRequestItem } from './get-example-requests';
+import type { ExampleRequestItem } from '../../utils/get-example-requests';
 import { Markdown } from '../components/markdown';
 import { ClientCodeBlock } from '../components/codeblock';
 import { useRenderContext } from '../contexts/api';
 import type { NoReference } from '@fumadocs/api-docs/schema';
+import { HttpMethods, OperationObject, PathItemObject } from '@/types';
 
 export interface RequestTabsRenderOptions {
   route: string;
   items: ExampleRequestItem[];
-  operation: NoReference<MethodInformation>;
+  method: HttpMethods;
+  pathItem: NoReference<PathItemObject>;
+  operation: NoReference<OperationObject>;
 }
 
 export function RequestTabs({
   path,
   operation,
+  method,
+  pathItem,
   examples,
 }: {
   path: string;
   examples: ExampleRequestItem[];
-  operation: NoReference<MethodInformation>;
+  method: HttpMethods;
+  pathItem: NoReference<PathItemObject>;
+  operation: NoReference<OperationObject>;
 }) {
   const ctx = useRenderContext();
   if (!operation.requestBody) return null;
@@ -41,6 +47,8 @@ export function RequestTabs({
     {
       items: examples,
       route: path,
+      method,
+      pathItem,
       operation,
     },
     ctx,
