@@ -1,10 +1,10 @@
 {
-  "name": "fumadocs-openapi",
-  "version": "10.10.3",
-  "description": "Generate MDX docs for your OpenAPI spec",
+  "name": "@fumadocs/asyncapi",
+  "version": "0.0.0",
+  "description": "Generate docs for your AsyncAPI spec",
   "keywords": [
     "Docs",
-    "NextJs"
+    "Fumadocs"
   ],
   "homepage": "https://fumadocs.dev",
   "license": "MIT",
@@ -15,24 +15,6 @@
     "dist"
   ],
   "type": "module",
-  "exports": {
-    ".": "./dist/index.js",
-    "./i18n": "./dist/i18n.js",
-    "./playground/client": "./dist/playground/client.js",
-    "./requests/generators": "./dist/requests/generators/index.js",
-    "./requests/generators/all": "./dist/requests/generators/all.js",
-    "./requests/generators/csharp": "./dist/requests/generators/csharp.js",
-    "./requests/generators/curl": "./dist/requests/generators/curl.js",
-    "./requests/generators/go": "./dist/requests/generators/go.js",
-    "./requests/generators/java": "./dist/requests/generators/java.js",
-    "./requests/generators/javascript": "./dist/requests/generators/javascript.js",
-    "./requests/generators/python": "./dist/requests/generators/python.js",
-    "./scalar": "./dist/scalar/index.js",
-    "./server": "./dist/server/index.js",
-    "./ui": "./dist/ui/index.js",
-    "./package.json": "./package.json",
-    "./css/*": "./css/*"
-  },
   "publishConfig": {
     "access": "public"
   },
@@ -69,6 +51,7 @@
     "fumadocs-core": "workspace:*",
     "fumadocs-ui": "workspace:*",
     "json-schema-typed": "^8.0.2",
+    "tailwindcss": "^4.3.0",
     "tsconfig": "workspace:*",
     "tsdown": "0.22.1",
     "xml-js": "^1.6.11"

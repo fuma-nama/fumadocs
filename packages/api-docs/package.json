@@ -54,40 +54,30 @@
     "types:check": "tsc --noEmit"
   },
   "dependencies": {
-    "@fumari/json-schema-ts": "^0.0.2",
     "@fumari/stf": "workspace:*",
     "@radix-ui/react-accordion": "^1.2.12",
     "@radix-ui/react-dialog": "^1.1.15",
     "@radix-ui/react-select": "^2.2.6",
-    "chokidar": "^5.0.0",
     "class-variance-authority": "^0.7.1",
     "github-slugger": "^2.0.0",
-    "hast-util-to-jsx-runtime": "^2.3.6",
     "js-yaml": "^4.2.0",
     "lucide-react": "^1.17.0",
-    "remark": "^15.0.1",
-    "remark-rehype": "^11.1.2",
-    "shiki": "^4.2.0",
     "tailwind-merge": "^3.6.0"
   },
   "devDependencies": {
     "@apidevtools/json-schema-ref-parser": "^15.3.5",
     "@fastify/deepmerge": "^3.2.1",
-    "@scalar/api-client-react": "^2.0.21",
     "@tailwindcss/oxide": "^4.3.0",
-    "@types/js-yaml": "^4.0.9",
     "@types/node": "25.9.1",
     "@types/react": "^19.2.16",
     "ajv": "^8.20.0",
     "fumadocs-core": "workspace:*",
     "fumadocs-ui": "workspace:*",
     "json-schema-typed": "^8.0.2",
-    "tailwindcss": "^4.3.0",
     "tsconfig": "workspace:*",
     "tsdown": "0.22.1"
   },
   "peerDependencies": {
-    "@scalar/api-client-react": "^2.0.20",
     "@types/react": "*",
     "fumadocs-core": "^16.9.0",
     "fumadocs-ui": "^16.9.0",
@@ -100,9 +90,6 @@
       "optional": true
     },
     "@types/react": {
-      "optional": true
-    },
-    "@scalar/api-client-react": {
       "optional": true
     }
   },
