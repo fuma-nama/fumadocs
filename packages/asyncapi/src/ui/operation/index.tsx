@@ -181,7 +181,7 @@ export function Operation({
       traits: traitsNode,
       bindings: bindingsNode,
       messageExamples: (
-        <UsageTabs operation={operation} messages={messages} examples={exampleMessages} />
+        <UsageTabs examples={exampleMessages} />
       ),
     },
     {

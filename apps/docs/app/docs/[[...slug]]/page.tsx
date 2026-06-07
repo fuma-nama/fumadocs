@@ -28,7 +28,7 @@ import {
 import { NotFound } from '@/components/layouts/not-found';
 import { getSuggestions } from './suggestions';
 import { PathUtils } from 'fumadocs-core/source';
-import dynamic from 'next/dynamic';
+import { OpenAPIPageLazy } from './lazy';
 
 function PreviewRenderer({ preview }: { preview: string }): ReactNode {
   if (preview && preview in Preview) {
@@ -40,7 +40,6 @@ function PreviewRenderer({ preview }: { preview: string }): ReactNode {
 }
 
 export const revalidate = false;
-const OpenAPIPage = dynamic(() => import('@/components/api-page').then((mod) => mod.OpenAPIPage));
 
 export default async function Page(props: PageProps<'/docs/[[...slug]]'>) {
   const params = await props.params;
@@ -59,7 +58,7 @@ export default async function Page(props: PageProps<'/docs/[[...slug]]'>) {
         <h1 className="text-[1.75em] font-semibold">{page.data.title}</h1>
 
         <DocsBody>
-          <OpenAPIPage {...page.data.getOpenAPIPageProps()} />
+          <OpenAPIPageLazy {...page.data.getOpenAPIPageProps()} />
         </DocsBody>
       </DocsPage>
     );

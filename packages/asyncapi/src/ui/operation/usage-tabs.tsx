@@ -1,12 +1,11 @@
 'use client';
-import type { MessageObject, OperationObject } from '@/types';
 import {
-  CodeBlockTab,
-  CodeBlockTabs,
-  CodeBlockTabsList,
-  CodeBlockTabsTrigger,
-} from 'fumadocs-ui/components/codeblock';
-import { NoReference } from '@fumadocs/api-docs/schema';
+  AccordionContent,
+  AccordionHeader,
+  AccordionItem,
+  Accordions,
+  AccordionTrigger,
+} from '@fumadocs/api-docs/components/accordion';
 import { useRenderContext } from '@/ui/contexts/api';
 import { useMemo } from 'react';
 import { ClientCodeBlock } from '@/ui/components/codeblock';
@@ -14,15 +13,7 @@ import type { ExampleMessageItem } from '@/utils/get-example-messages';
 import { I18nLabel } from '@/ui/client/i18n';
 import { Heading } from '@/ui/components/heading';
 
-export function UsageTabs({
-  operation,
-  messages,
-  examples,
-}: {
-  operation: NoReference<OperationObject>;
-  messages: NoReference<MessageObject>[];
-  examples: ExampleMessageItem[];
-}) {
+export function UsageTabs({ examples }: { examples: ExampleMessageItem[] }) {
   const ctx = useRenderContext();
   let { renderAPIExampleUsageTabs, renderAPIExampleLayout } = ctx.content ?? {};
 
@@ -34,20 +25,18 @@ export function UsageTabs({
     if (items.length === 0) return null;
 
     return (
-      <CodeBlockTabs groupId="fumadocs_asyncapi_messages" defaultValue={items[0].id}>
-        <CodeBlockTabsList>
-          {items.map((item) => (
-            <CodeBlockTabsTrigger key={item.id} value={item.id}>
-              {item.name}
-            </CodeBlockTabsTrigger>
-          ))}
-        </CodeBlockTabsList>
+      <Accordions type="multiple">
         {items.map((item) => (
-          <CodeBlockTab key={item.id} value={item.id}>
-            <MessageExampleContent item={item} />
-          </CodeBlockTab>
+          <AccordionItem key={item.id} value={item.id}>
+            <AccordionHeader>
+              <AccordionTrigger>{item.name}</AccordionTrigger>
+            </AccordionHeader>
+            <AccordionContent className="ps-4.5 pe-3 border rounded-xl">
+              <MessageExampleContent item={item} />
+            </AccordionContent>
+          </AccordionItem>
         ))}
-      </CodeBlockTabs>
+      </Accordions>
     );
   };
 
@@ -68,7 +57,6 @@ export function UsageTabs({
       <Heading id="message-examples" depth={3} className="my-0!">
         <I18nLabel label="titleMessages" />
       </Heading>
-      {operation.description && messages.length > 0 ? null : null}
       {content}
     </>
   );

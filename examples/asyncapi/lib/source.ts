@@ -12,7 +12,6 @@ export const source = loader(
     docs: docs.toFumadocsSource(),
     asyncapi: await asyncapi.staticSource({
       baseDir: 'asyncapi',
-      groupBy: 'tag',
     }),
   },
   {
