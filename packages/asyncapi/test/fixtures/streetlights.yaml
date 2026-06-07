@@ -1,0 +1,59 @@
+asyncapi: 3.0.0
+info:
+  title: Streetlights Kafka API
+  version: 1.0.0
+  description: The Smartylighting Streetlights API allows you to manage streetlights.
+  license:
+    name: Apache 2.0
+    url: https://www.apache.org/licenses/LICENSE-2.0
+  tags:
+    - name: lighting
+      description: Operations related to streetlights
+defaultContentType: application/json
+servers:
+  production:
+    host: test.mykafkacluster.org:8092
+    protocol: kafka
+    description: Production Kafka broker
+channels:
+  lightMeasured:
+    address: light/measured
+    messages:
+      lightMeasuredMessage:
+        name: lightMeasured
+        title: Light measured
+        summary: Inform about environmental lighting conditions
+        payload:
+          type: object
+          properties:
+            lumens:
+              type: integer
+              description: Light intensity in lumens
+            sentAt:
+              type: string
+              format: date-time
+              description: Date and time when the event was sent
+        examples:
+          - name: default
+            payload:
+              lumens: 5
+              sentAt: '2020-08-31T13:00:00.000Z'
+operations:
+  receiveLightMeasurement:
+    action: receive
+    channel:
+      $ref: '#/channels/lightMeasured'
+    summary: Receive light measurement
+    tags:
+      - name: lighting
+    messages:
+      - $ref: '#/channels/lightMeasured/messages/lightMeasuredMessage'
+  sendLightMeasurement:
+    action: send
+    channel:
+      $ref: '#/channels/lightMeasured'
+    summary: Send light measurement
+    tags:
+      - name: lighting
+    messages:
+      - $ref: '#/channels/lightMeasured/messages/lightMeasuredMessage'

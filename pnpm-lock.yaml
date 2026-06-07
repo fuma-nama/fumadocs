@@ -335,6 +335,58 @@ importers:
         specifier: ^4.3.0
         version: 4.3.0
 
+  examples/asyncapi:
+    dependencies:
+      '@fumadocs/asyncapi':
+        specifier: workspace:*
+        version: link:../../packages/asyncapi
+      fumadocs-core:
+        specifier: workspace:*
+        version: link:../../packages/core
+      fumadocs-mdx:
+        specifier: workspace:*
+        version: link:../../packages/mdx
+      fumadocs-ui:
+        specifier: workspace:*
+        version: link:../../packages/radix-ui
+      next:
+        specifier: 16.2.7
+        version: 16.2.7(@babel/core@7.29.7)(@opentelemetry/api@1.9.1)(react-dom@19.2.7(react@19.2.7))(react@19.2.7)
+      react:
+        specifier: ^19.2.7
+        version: 19.2.7
+      react-dom:
+        specifier: ^19.2.7
+        version: 19.2.7(react@19.2.7)
+      shiki:
+        specifier: ^4.2.0
+        version: 4.2.0
+    devDependencies:
+      '@tailwindcss/postcss':
+        specifier: ^4.3.0
+        version: 4.3.0
+      '@types/mdx':
+        specifier: ^2.0.13
+        version: 2.0.13
+      '@types/react':
+        specifier: ^19.2.16
+        version: 19.2.16
+      '@types/react-dom':
+        specifier: ^19.2.3
+        version: 19.2.3(@types/react@19.2.16)
+      postcss:
+        specifier: ^8.5.15
+        version: 8.5.15
+      rimraf:
+        specifier: ^6.1.3
+        version: 6.1.3
+      tailwindcss:
+        specifier: ^4.3.0
+        version: 4.3.0
+      typescript:
+        specifier: ^6.0.3
+        version: 6.0.3
+
   examples/base-ui:
     dependencies:
       '@fumadocs/base-ui':
@@ -1949,12 +2001,6 @@ importers:
         specifier: ^3.6.0
         version: 3.6.0
     devDependencies:
-      '@scalar/api-client-react':
-        specifier: ^2.0.21
-        version: 2.0.21(axios@1.17.0)(react@19.2.7)(tailwindcss@4.3.0)(typescript@6.0.3)
-      '@scalar/openapi-upgrader':
-        specifier: ^0.2.9
-        version: 0.2.9
       '@tailwindcss/oxide':
         specifier: ^4.3.0
         version: 4.3.0
@@ -1967,9 +2013,6 @@ importers:
       '@types/react':
         specifier: ^19.2.16
         version: 19.2.16
-      fast-content-type-parse:
-        specifier: ^3.0.0
-        version: 3.0.0
       fumadocs-core:
         specifier: workspace:*
         version: link:../core
@@ -1988,9 +2031,6 @@ importers:
       tsdown:
         specifier: 0.22.1
         version: 0.22.1(@tsdown/css@0.22.1)(oxc-resolver@11.19.1(@emnapi/core@1.10.0)(@emnapi/runtime@1.10.0))(tsx@4.22.4)(typescript@6.0.3)(unrun@0.3.0)
-      xml-js:
-        specifier: ^1.6.11
-        version: 1.6.11
 
   packages/base-ui:
     dependencies:
