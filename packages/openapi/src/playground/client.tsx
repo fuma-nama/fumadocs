@@ -57,7 +57,7 @@ import {
   ObjectInput,
 } from '@fumadocs/api-docs/components/playground/inputs';
 import type { HttpMethods, OperationObject, ParameterObject, PathItemObject } from '@/types';
-import { useTranslations } from '@/ui/client/i18n';
+import { useTranslations } from '@fuma-translate/react';
 import { useOperationContext } from '@/ui/operation/context';
 import { OAuthDialog, OAuthDialogContent, OAuthDialogTrigger } from './components/oauth-dialog';
 import { dereferenceShallow } from '@fumadocs/api-docs/schema/dereference';
@@ -148,7 +148,7 @@ export default function PlaygroundClient({
   readOnly,
   ...rest
 }: PlaygroundClientProps) {
-  const t = useTranslations();
+  const t = useTranslations({ note: 'playground' });
   const ctx = useRenderContext();
   const { bundled, dereferenced } = ctx.schema;
   const { parameters, body } = useMemo(() => {
@@ -322,7 +322,7 @@ export default function PlaygroundClient({
               className={cn(buttonVariants({ color: 'primary', size: 'sm' }), 'w-14 py-1.5')}
               disabled={testQuery.isLoading}
             >
-              {testQuery.isLoading ? <LoaderCircle className="size-4 animate-spin" /> : t.send}
+              {testQuery.isLoading ? <LoaderCircle className="size-4 animate-spin" /> : t('Send')}
             </button>
           </div>
           {testQuery.data ? <ResultDisplay data={testQuery.data} reset={testQuery.reset} /> : null}
@@ -340,7 +340,7 @@ export default function PlaygroundClient({
           )}
           <ParametersForm parameters={parameters} />
           {body && (
-            <CollapsiblePanel data-type="body" title={t.body}>
+            <CollapsiblePanel data-type="body" title={t('Body')}>
               {renderBodyField ? renderBodyField('body', body) : <BodyInput field={body.schema} />}
             </CollapsiblePanel>
           )}
@@ -361,7 +361,7 @@ function SecurityRequirements({
   setSecurityId: (value: number) => void;
   children: ReactNode;
 }) {
-  const t = useTranslations();
+  const t = useTranslations({ note: 'playground' });
   const { isLoading, error } = useAuth();
   const defaultOpen = isLoading || error != null;
   const [open, setOpen] = useState(defaultOpen);
@@ -376,10 +376,10 @@ function SecurityRequirements({
     <CollapsiblePanel
       title={
         <>
-          {t.authorization}
+          {t('Authorization')}
           {isLoading && (
             <span className="border-s ps-2 inline-flex items-center gap-1.5 text-fd-muted-foreground text-xs font-mono">
-              <Spinner /> {t.fetchingToken}
+              <Spinner /> {t('Fetching token...')}
             </span>
           )}
         </>
@@ -390,7 +390,7 @@ function SecurityRequirements({
     >
       {error != null && (
         <div className="p-2 border rounded-lg bg-fd-secondary">
-          <p className="text-fd-muted-foreground font-medium mb-1">{t.fetchTokenError}</p>
+          <p className="text-fd-muted-foreground font-medium mb-1">{t('Failed to fetch token')}</p>
           <p>{String(error)}</p>
         </div>
       )}
@@ -473,12 +473,12 @@ function ParameterItem({ type, parameters }: { type: ParamType; parameters: Para
 function ParametersForm({ parameters }: { parameters: ParameterObject[] }) {
   const { components: { CollapsiblePanel = DefaultCollapsiblePanel } = {} } =
     useRenderContext().playground ?? {};
-  const t = useTranslations();
+  const t = useTranslations({ note: 'playground' });
   const displayNames = {
-    header: t.header,
-    cookie: t.cookies,
-    query: t.query,
-    path: t.path,
+    header: t('Header'),
+    cookie: t('Cookies'),
+    query: t('Query'),
+    path: t('Path'),
   };
 
   return ParamTypes.map((type) => {
@@ -496,7 +496,7 @@ function ParametersForm({ parameters }: { parameters: ParameterObject[] }) {
 function BodyInput({ field: _field }: { field: ParsedSchema }) {
   const field = useResolvedSchema(_field);
   const [isJson, setIsJson] = useState(false);
-  const t = useTranslations();
+  const t = useTranslations({ note: 'playground' });
 
   if (field.format === 'binary') return <FieldSet field={field} fieldName={['body']} isRequired />;
 
@@ -514,7 +514,7 @@ function BodyInput({ field: _field }: { field: ParsedSchema }) {
           onClick={() => setIsJson(false)}
           type="button"
         >
-          {t.closeJsonEditor}
+          {t('Close JSON Editor')}
         </button>
         <JsonInput fieldName={['body']} />
       </>
@@ -538,7 +538,7 @@ function BodyInput({ field: _field }: { field: ParsedSchema }) {
           )}
           onClick={() => setIsJson(true)}
         >
-          {t.openJsonEditor}
+          {t('Open JSON Editor')}
         </button>
       }
     />
@@ -558,7 +558,7 @@ export interface AuthField {
 function useAuthInputs(engine: DataEngine, requirements: SecurityEntry[][]) {
   const authCtx = useAuth();
   const storageKeys = useStorageKey();
-  const t = useTranslations();
+  const t = useTranslations({ note: 'playground' });
   const ctx = useRenderContext();
   const schemes = ctx.schema.dereferenced.components?.securitySchemes;
   const { transformAuthInputs } = ctx.playground ?? {};
@@ -630,7 +630,7 @@ function useAuthInputs(engine: DataEngine, requirements: SecurityEntry[][]) {
           defaultValue: 'Bearer ',
           children: (
             <FieldSet
-              name={`${t.authorization} (${t.header})`}
+              name={`${t('Authorization')} (${t('Header')})`}
               fieldName={fieldName}
               field={{
                 type: 'string',
@@ -667,13 +667,17 @@ function useAuthInputs(engine: DataEngine, requirements: SecurityEntry[][]) {
         children: (
           <>
             <FieldSet
-              name={`${t.authorization} (${t.header})`}
+              name={`${t('Authorization')} (${t('Header')})`}
               fieldName={fieldName}
               field={{
                 type: 'string',
               }}
             />
-            <p className="text-fd-muted-foreground text-xs">{t.openIdUnsupported}</p>
+            <p className="text-fd-muted-foreground text-xs">
+              {t(
+                'OpenID Connect is not supported at the moment, you can still set an access token here.',
+              )}
+            </p>
           </>
         ),
       };
@@ -759,12 +763,12 @@ function useAuthInputs(engine: DataEngine, requirements: SecurityEntry[][]) {
 function OAuth2Input({ fieldName, security }: { fieldName: FieldKey; security: SecurityEntry }) {
   const [open, setOpen] = useState(false);
   const engine = useDataEngine();
-  const t = useTranslations();
+  const t = useTranslations({ note: 'playground' });
 
   return (
     <fieldset className="flex flex-col gap-2">
       <label htmlFor={stringifyFieldKey(fieldName)} className={cn(labelVariants())}>
-        {t.accessToken}
+        {t('Access Token')}
       </label>
       <div className="flex gap-2">
         <FieldInput
@@ -785,7 +789,7 @@ function OAuth2Input({ fieldName, security }: { fieldName: FieldKey; security: S
               }),
             )}
           >
-            {t.authorize}
+            {t('Authorize')}
           </OAuthDialogTrigger>
           <OAuthDialogContent
             setOpen={setOpen}

@@ -12,7 +12,7 @@ import {
 import { cn } from '@/utils/cn';
 import { useTOCItems } from '.';
 import { mergeRefs } from '@/utils/merge-refs';
-import { useTranslations } from '@/contexts/i18n';
+import { useTranslations } from '@fuma-translate/react';
 
 interface ComputedSVG {
   width: number;
@@ -143,11 +143,11 @@ export function TOCItems({ ref, className, thumbBox = true, children, ...props }
 }
 
 export function TOCEmpty() {
-  const t = useTranslations();
+  const t = useTranslations({ note: 'table of contents' });
 
   return (
     <div className="rounded-lg border bg-fd-card p-3 text-xs text-fd-muted-foreground">
-      {t.tocNoHeadings}
+      {t('No Headings')}
     </div>
   );
 }

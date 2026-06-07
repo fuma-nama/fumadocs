@@ -1,5 +1,5 @@
 'use client';
-import { useTranslations } from '@/contexts/i18n';
+import { useTranslations } from '@fuma-translate/react';
 import { cn } from '@/utils/cn';
 import { type ComponentProps, useCallback, useEffect, useRef, useState } from 'react';
 import { mergeRefs } from '@/utils/merge-refs';
@@ -102,11 +102,11 @@ function TocThumb({ computed }: { computed: ComputedData }) {
 }
 
 export function TOCEmpty() {
-  const t = useTranslations();
+  const t = useTranslations({ note: 'table of contents' });
 
   return (
     <div className="rounded-lg border bg-fd-card p-3 text-xs text-fd-muted-foreground">
-      {t.tocNoHeadings}
+      {t('No Headings')}
     </div>
   );
 }

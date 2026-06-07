@@ -14,7 +14,7 @@ import {
   useRef,
   useState,
 } from 'react';
-import { useTranslations } from '@/i18n/client';
+import { useTranslations } from '@fuma-translate/react';
 import type {
   InfoTag,
   SchemaData,
@@ -206,7 +206,7 @@ function ObjectProperty({
   parentPathIndex: number;
   required?: boolean;
 }) {
-  const t = useTranslations();
+  const t = useTranslations({ note: 'schema UI' });
   const {
     path,
     generated: { refs },
@@ -271,7 +271,7 @@ function ObjectProperty({
         <div className="flex-1" />
         {schema.deprecated && (
           <span className="text-xs font-mono text-yellow-600 dark:text-yellow-400">
-            {t.deprecated}
+            {t('Deprecated')}
           </span>
         )}
         <button
@@ -375,7 +375,7 @@ function ObjectSearch({ variant = 'default', schema, pathIndex, children }: Obje
   const [search, setSearch] = useState('');
   const deferredValue = useDeferredValue(search);
   const firstItemRef = useRef<SchemaDataObjectProperty>(null);
-  const t = useTranslations();
+  const t = useTranslations({ note: 'schema UI' });
 
   return (
     <>
@@ -393,7 +393,7 @@ function ObjectSearch({ variant = 'default', schema, pathIndex, children }: Obje
           value={search}
           data-object-search-input=""
           onChange={(e) => setSearch(e.target.value)}
-          placeholder={t.schemaFilterPropertiesPlaceholder}
+          placeholder={t('Filter Properties')}
           className="text-sm ps-2 py-2 flex-1 outline-none placeholder:text-fd-muted-foreground"
           onKeyDown={(e) => {
             if (e.key === 'Enter') {
@@ -412,7 +412,7 @@ function ObjectSearch({ variant = 'default', schema, pathIndex, children }: Obje
           firstItemRef={firstItemRef}
           empty={() => (
             <p className="text-fd-muted-foreground text-sm mt-2! mb-0!">
-              {t.schemaFilterPropertiesEmpty}{' '}
+              {t('No property matching')}{' '}
               <span className="text-fd-foreground font-medium">{`"${deferredValue}"`}</span>
             </p>
           )}

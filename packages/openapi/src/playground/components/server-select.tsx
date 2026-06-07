@@ -21,7 +21,7 @@ import {
 import type { ServerVariableObject } from '@/types';
 import { StfProvider, useFieldValue, useListener, useStf } from '@fumari/stf';
 import { EditIcon } from 'lucide-react';
-import { useTranslations } from '@/ui/client/i18n';
+import { useTranslations } from '@fuma-translate/react';
 import type { NoReference } from '@fumadocs/api-docs/schema';
 import { resolveServerUrl } from '@fumadocs/api-docs/utils/url';
 
@@ -29,7 +29,7 @@ export default function ServerSelect(props: ComponentProps<typeof DialogTrigger>
   const { servers, server, setServer, setServerVariables } = useServerContext();
   const [open, setOpen] = useState(false);
   const [isMounted, setIsMounted] = useState(false);
-  const t = useTranslations();
+  const t = useTranslations({ note: 'playground server select' });
 
   useEffect(() => {
     setIsMounted(true);
@@ -48,7 +48,7 @@ export default function ServerSelect(props: ComponentProps<typeof DialogTrigger>
         )}
       >
         <span className="px-2 py-0.5 -ms-2 font-medium rounded-lg border bg-fd-secondary text-fd-secondary-foreground shadow-sm">
-          {server?.name ?? t.serverUrl}
+          {server?.name ?? t('Server URL')}
         </span>
         <code className="truncate min-w-0 flex-1">
           {isMounted
@@ -56,14 +56,14 @@ export default function ServerSelect(props: ComponentProps<typeof DialogTrigger>
                 server ? resolveServerUrl(server.url, server.variables) : '/',
                 window.location.origin,
               ).href
-            : t.loading}
+            : t('loading...')}
         </code>
         <EditIcon className="size-4" />
       </DialogTrigger>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>{t.serverUrl}</DialogTitle>
-          <DialogDescription>{t.serverUrlDescription}</DialogDescription>
+          <DialogTitle>{t('Server URL')}</DialogTitle>
+          <DialogDescription>{t('The base URL of your API endpoint.')}</DialogDescription>
         </DialogHeader>
         <Select value={server?.url} onValueChange={setServer}>
           <SelectTrigger>
@@ -144,7 +144,7 @@ function Field({
   variable: NoReference<ServerVariableObject>;
   fieldName: string;
 }) {
-  const t = useTranslations();
+  const t = useTranslations({ note: 'playground server select' });
   const [value, setValue] = useFieldValue([fieldName], {
     compute(currentValue) {
       return typeof currentValue === 'string' ? currentValue : undefined;
@@ -173,7 +173,7 @@ function Field({
       id={fieldName}
       value={value}
       onChange={(e) => setValue(e.target.value)}
-      placeholder={t.serverUrlFieldPlaceholder}
+      placeholder={t('Enter Value')}
     />
   );
 }

@@ -9,7 +9,7 @@ import { FC, useState, useRef, useDeferredValue, Suspense } from 'react';
 import { ErrorBoundary } from 'react-error-boundary';
 import { FieldSet } from './arg-form';
 import type { TypeNode } from '@/type-tree/types';
-import { useTranslations } from './i18n';
+import { useTranslations } from '@fuma-translate/react';
 
 export interface WithControlProps {
   displayName?: string;
@@ -26,7 +26,7 @@ export interface VariantInfo {
 }
 
 export function WithControl({ presets, displayName, Component }: WithControlProps) {
-  const t = useTranslations();
+  const t = useTranslations({ note: 'story controls' });
   const [variant, setVariant] = useState(presets[0].variant);
   const preset = presets.find((preset) => preset.variant === variant);
   const stf = useStf({
@@ -53,7 +53,7 @@ export function WithControl({ presets, displayName, Component }: WithControlProp
                 variant="ghost"
                 className="w-fit ms-auto text-fd-muted-foreground text-xs font-medium"
               >
-                <SelectValue placeholder={t.noVariant}>{preset?.variant}</SelectValue>
+                <SelectValue placeholder={t('No Variant')}>{preset?.variant}</SelectValue>
               </SelectTrigger>
               <SelectContent>
                 {presets.map((item) => (
@@ -71,7 +71,7 @@ export function WithControl({ presets, displayName, Component }: WithControlProp
           <FieldSet
             field={preset.controls}
             fieldName={[]}
-            name={t.props}
+            name={t('Props')}
             className="max-h-[600px] overflow-auto"
           />
         )}
@@ -81,7 +81,7 @@ export function WithControl({ presets, displayName, Component }: WithControlProp
 }
 
 function StoryComponent({ Component }: { Component: FC }) {
-  const t = useTranslations();
+  const t = useTranslations({ note: 'story error boundary' });
   const engine = useDataEngine();
   const timerRef = useRef(0);
   const [args, setArgs] = useState(() => engine.getData());
@@ -99,14 +99,14 @@ function StoryComponent({ Component }: { Component: FC }) {
         <div className="p-3 border rounded-lg bg-fd-card text-fd-card-foreground text-sm">
           <p className="inline-flex items-center gap-2 font-medium mb-2">
             <AlertCircle className="text-fd-error size-4" />
-            {t.renderError}
+            {t('Encountered error when rendering the component.')}
           </p>
           <p className="text-fd-muted-foreground mb-2">{String(error)}</p>
           <button
             className={cn(buttonVariants({ variant: 'primary', size: 'sm' }))}
             onClick={() => resetErrorBoundary()}
           >
-            {t.reset}
+            {t('Reset')}
           </button>
         </div>
       )}

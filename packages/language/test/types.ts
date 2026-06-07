@@ -1,3 +1,4 @@
+import { asyncapiTranslations } from '@fumadocs/asyncapi/i18n';
 import { storyTranslations } from '@fumadocs/story/i18n';
 import { defineI18n } from 'fumadocs-core/i18n';
 import { openapiTranslations } from 'fumadocs-openapi/i18n';
@@ -19,6 +20,7 @@ const t2 = i18n
   .translations()
   .extend(uiTranslations())
   .extend(openapiTranslations())
+  .extend(asyncapiTranslations())
   .extend(storyTranslations())
   .preset('cn', zhTW());
 

@@ -46,7 +46,6 @@ import type { GeneratedPageProps, WebhookItem, OperationItem } from '@/utils/pag
 import type { NoReference } from '@fumadocs/api-docs/schema';
 import { ParsedSchema } from '@/utils/schema';
 import { Markdown } from './components/markdown';
-import { TranslationsProvider } from '@fumadocs/api-docs/i18n';
 import PlaygroundClient from '@/playground/client';
 import { Schema } from '@fumadocs/api-docs/components/schema';
 import { RenderContextProvider } from './contexts/api';
@@ -392,13 +391,11 @@ export function createOpenAPIPage({
     }, [proxyUrl, processed]);
 
     return (
-      <TranslationsProvider namespace="openapi">
-        <ClientCodeBlockProvider factory={shiki}>
-          <RenderContextProvider ctx={ctx}>
-            <PageContent {...props} />
-          </RenderContextProvider>
-        </ClientCodeBlockProvider>
-      </TranslationsProvider>
+      <ClientCodeBlockProvider factory={shiki}>
+        <RenderContextProvider ctx={ctx}>
+          <PageContent {...props} />
+        </RenderContextProvider>
+      </ClientCodeBlockProvider>
     );
   };
 }

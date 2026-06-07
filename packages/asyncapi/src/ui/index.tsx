@@ -32,7 +32,6 @@ import type { CodeToHastOptionsCommon, CodeOptionsThemes, BundledTheme } from 's
 import type { GeneratedPageProps, OperationItem } from '@/utils/pages/builder';
 import { ParsedSchema } from '@/utils/schema';
 import { Markdown } from './components/markdown';
-import { TranslationsProvider } from '@fumadocs/api-docs/i18n';
 import { Schema } from '@fumadocs/api-docs/components/schema';
 import { RenderContextProvider } from './contexts/api';
 import type { NoReference } from '@fumadocs/api-docs/schema';
@@ -228,13 +227,11 @@ export function createAsyncAPIPage({
     }, [proxyUrl, processed]);
 
     return (
-      <TranslationsProvider namespace="asyncapi">
-        <ClientCodeBlockProvider factory={shiki}>
-          <RenderContextProvider ctx={ctx}>
-            <PageContent {...props} />
-          </RenderContextProvider>
-        </ClientCodeBlockProvider>
-      </TranslationsProvider>
+      <ClientCodeBlockProvider factory={shiki}>
+        <RenderContextProvider ctx={ctx}>
+          <PageContent {...props} />
+        </RenderContextProvider>
+      </ClientCodeBlockProvider>
     );
   };
 }

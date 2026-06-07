@@ -1,4 +1,5 @@
-import { I18nLabel } from '@/ui/client/i18n';
+'use client';
+import { useTranslations } from '@fuma-translate/react';
 import {
   AccordionContent,
   AccordionHeader,
@@ -56,6 +57,11 @@ export function RequestTabs({
 }
 
 function renderRequestTabsDefault(options: RequestTabsRenderOptions) {
+  return <RequestTabsDefaultContent options={options} />;
+}
+
+function RequestTabsDefaultContent({ options }: { options: RequestTabsRenderOptions }) {
+  const t = useTranslations({ note: 'operation page' });
   const { items } = options;
   let children: ReactNode;
 
@@ -65,7 +71,7 @@ function renderRequestTabsDefault(options: RequestTabsRenderOptions) {
         <TabsList>
           {items.map((item) => (
             <TabsTrigger key={item.id} value={item.id}>
-              {item.id === '_default' ? <I18nLabel label="requestTabNameDefault" /> : item.name}
+              {item.id === '_default' ? t('Default') : item.name}
             </TabsTrigger>
           ))}
         </TabsList>
@@ -79,18 +85,12 @@ function renderRequestTabsDefault(options: RequestTabsRenderOptions) {
   } else if (items.length === 1) {
     children = <RequestTabsItem item={items[0]} options={options} />;
   } else {
-    children = (
-      <p className="text-fd-muted-foreground text-xs">
-        <I18nLabel label="empty" />
-      </p>
-    );
+    children = <p className="text-fd-muted-foreground text-xs">{t('Empty')}</p>;
   }
 
   return (
     <div className="p-3 rounded-xl border prose-no-margin bg-fd-card text-fd-card-foreground shadow-md">
-      <p className="font-semibold border-b pb-2">
-        <I18nLabel label="titleRequestTabs" />
-      </p>
+      <p className="font-semibold border-b pb-2">{t('Example Requests')}</p>
       {children}
     </div>
   );
@@ -103,20 +103,21 @@ function RequestTabsItem({
   item: ExampleRequestItem;
   options: RequestTabsRenderOptions;
 }) {
+  const t = useTranslations({ note: 'operation page' });
   const requestData = item.data;
   const displayNames: Partial<Record<keyof RawRequestData, ReactNode>> = {
     body: (
       <>
-        <I18nLabel label="titleRequestBody" />
+        {t('Request Body')}
         <code className="text-xs text-fd-muted-foreground ms-auto">
           {requestData.bodyMediaType}
         </code>
       </>
     ),
-    cookie: <I18nLabel label="cookieParameters" />,
-    header: <I18nLabel label="headerParameters" />,
-    query: <I18nLabel label="queryParameters" />,
-    path: <I18nLabel label="pathParameters" />,
+    cookie: t('Cookie Parameters'),
+    header: t('Header Parameters'),
+    query: t('Query Parameters'),
+    path: t('Path Parameters'),
   };
 
   return (

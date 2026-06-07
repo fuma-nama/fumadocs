@@ -129,6 +129,7 @@
     "types:check": "tsc --noEmit"
   },
   "dependencies": {
+    "@fuma-translate/react": "^0.0.3",
     "@fumadocs/tailwind": "workspace:*",
     "@radix-ui/react-accordion": "^1.2.12",
     "@radix-ui/react-collapsible": "^1.1.12",
@@ -193,6 +194,6 @@
     }
   },
   "inlinedDependencies": {
-    "react-medium-image-zoom": "5.4.5"
+    "react-medium-image-zoom": "5.4.6"
   }
 }

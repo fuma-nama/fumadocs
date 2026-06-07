@@ -1,7 +1,7 @@
 'use client';
 
 import * as Base from '@/components/toc';
-import { useTranslations } from '@/contexts/i18n';
+import { useTranslations } from '@fuma-translate/react';
 import { useTreePath } from '@/contexts/tree';
 import { cn } from '@/utils/cn';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
@@ -152,7 +152,7 @@ function PageTOCPopoverPhysical({ className, children, ...rest }: ComponentProps
 }
 
 function PageTOCPopoverTrigger({ className, ...props }: ComponentProps<'button'>) {
-  const t = useTranslations();
+  const t = useTranslations({ note: 'table of contents' });
   const { open } = use(TocPopoverContext)!;
   const items = Base.useItems();
   const selectedIdx = items.findIndex((item) => item.active);
@@ -201,7 +201,7 @@ function PageTOCPopoverTrigger({ className, ...props }: ComponentProps<'button'>
           </motion.span>
         ) : (
           <motion.span key=":toc" {...spanProps}>
-            {t.toc}
+            {t('On this page')}
           </motion.span>
         )}
       </AnimatePresence>

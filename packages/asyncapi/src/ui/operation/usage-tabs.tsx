@@ -10,10 +10,11 @@ import { useRenderContext } from '@/ui/contexts/api';
 import { useMemo } from 'react';
 import { ClientCodeBlock } from '@/ui/components/codeblock';
 import type { ExampleMessageItem } from '@/utils/get-example-messages';
-import { I18nLabel } from '@/ui/client/i18n';
+import { useTranslations } from '@fuma-translate/react';
 import { Heading } from '@/ui/components/heading';
 
 export function UsageTabs({ examples }: { examples: ExampleMessageItem[] }) {
+  const t = useTranslations({ note: 'operation page' });
   const ctx = useRenderContext();
   let { renderAPIExampleUsageTabs, renderAPIExampleLayout } = ctx.content ?? {};
 
@@ -55,7 +56,7 @@ export function UsageTabs({ examples }: { examples: ExampleMessageItem[] }) {
   return (
     <>
       <Heading id="message-examples" depth={3} className="my-0!">
-        <I18nLabel label="titleMessages" />
+        {t('Messages')}
       </Heading>
       {content}
     </>
@@ -63,6 +64,7 @@ export function UsageTabs({ examples }: { examples: ExampleMessageItem[] }) {
 }
 
 function MessageExampleContent({ item }: { item: ExampleMessageItem }) {
+  const t = useTranslations({ note: 'operation page' });
   const payload = useMemo(() => {
     if (item.payload === undefined) return;
     return JSON.stringify(item.payload, null, 2);
@@ -78,17 +80,13 @@ function MessageExampleContent({ item }: { item: ExampleMessageItem }) {
       {item.description && <p className="text-sm text-fd-muted-foreground">{item.description}</p>}
       {headers && (
         <div>
-          <p className="text-xs font-medium mb-1">
-            <I18nLabel label="titleHeaders" />
-          </p>
+          <p className="text-xs font-medium mb-1">{t('Headers')}</p>
           <ClientCodeBlock lang="json" code={headers} />
         </div>
       )}
       {payload && (
         <div>
-          <p className="text-xs font-medium mb-1">
-            <I18nLabel label="titlePayload" />
-          </p>
+          <p className="text-xs font-medium mb-1">{t('Payload')}</p>
           <ClientCodeBlock lang="json" code={payload} />
         </div>
       )}

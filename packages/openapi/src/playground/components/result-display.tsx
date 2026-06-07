@@ -6,11 +6,10 @@ import { useStatusInfo } from '../status-info';
 import { buttonVariants } from 'fumadocs-ui/components/ui/button';
 import { cn } from '@/utils/cn';
 import { ClientCodeBlock } from '@/ui/components/codeblock';
-import { useTranslations } from '@/ui/client/i18n';
+import { useTranslations } from '@fuma-translate/react';
 import { safeParse } from 'fast-content-type-parse';
 import { cva } from 'class-variance-authority';
 import type { BuiltinLanguage, SpecialLanguage } from 'shiki';
-import { renderTranslation } from 'fumadocs-core/i18n';
 
 export interface ResultDisplayProps extends ComponentProps<'div'> {
   data: FetchResult;
@@ -22,20 +21,20 @@ const panelVariants = cva(
 );
 
 export function DefaultResultDisplay({ data, reset, ...rest }: ResultDisplayProps) {
-  const t = useTranslations();
+  const t = useTranslations({ note: 'playground result display' });
 
   if (data.type === 'client_error') {
     return (
       <div {...rest} className={cn(panelVariants(), rest.className)}>
         <div className="flex gap-1.5 items-center">
           <CircleX className="size-4 text-red-500" />
-          <p className="text-sm font-medium me-auto">{t.statusClientError}</p>
+          <p className="text-sm font-medium me-auto">{t('Client Error')}</p>
           <button
             type="button"
             className={cn(buttonVariants({ size: 'sm', variant: 'outline' }))}
             onClick={() => reset()}
           >
-            {t.close}
+            {t('Close')}
           </button>
         </div>
         <p>{data.message}</p>
@@ -78,7 +77,7 @@ function ResponseResult({
   data: FetchResponseResult;
   reset: () => void;
 }) {
-  const t = useTranslations();
+  const t = useTranslations({ note: 'playground result display' });
   const statusInfo = useStatusInfo(data.status);
   const { parameters, type } = useMemo(
     () => safeParse(data.headers.get('Content-Type') ?? 'text/plain'),
@@ -96,7 +95,11 @@ function ResponseResult({
     } else {
       content = (
         <p className="p-2 border rounded-lg bg-fd-card text-fd-card-foreground">
-          {renderTranslation(t.statusBinaryBody, { length: String(data.body.byteLength) })}
+          {t('Binary response body, {length} bytes', {
+            variables: {
+              length: String(data.body.byteLength),
+            },
+          })}
         </p>
       );
     }
@@ -116,7 +119,7 @@ function ResponseResult({
           className={cn(buttonVariants({ size: 'sm', variant: 'outline' }))}
           onClick={() => reset()}
         >
-          {t.close}
+          {t('Close')}
         </button>
       </div>
       {content}

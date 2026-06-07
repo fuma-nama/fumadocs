@@ -1,215 +1,208 @@
 import type { TranslationPreset } from 'fumadocs-core/i18n';
-import * as OpenAPI from 'fumadocs-openapi/i18n';
-import * as UI from 'fumadocs-ui/i18n';
-import * as Story from '@fumadocs/story/i18n';
+import type { Translations as UITranslations } from 'fumadocs-ui/i18n';
+import type { Translations as OpenAPITranslations } from 'fumadocs-openapi/i18n';
+import type { Translations as AsyncAPITranslations } from '@fumadocs/asyncapi/i18n';
+import type { Translations as StoryTranslations } from '@fumadocs/story/i18n';
+import type { Translations as APIDocsTranslations } from '@fumadocs/api-docs/i18n';
 
-const ui = {
-  displayName: '简体中文',
-  search: '搜索',
-  searchNoResult: '找不到结果',
-  searchOpen: '打开搜索',
-  searchClose: '关闭搜索',
+type Translations = UITranslations &
+  OpenAPITranslations &
+  AsyncAPITranslations &
+  StoryTranslations &
+  APIDocsTranslations;
 
-  toc: '本页目录',
-  tocNoHeadings: '没有标题',
-  tocInline: '目录',
+const translations = {
+  // fumadocs-ui
+  'Back to Home(404 page)': '返回首页',
+  'Choose a language(language switcher)': '选择语言',
+  'Choose a language(language switcher)(aria-label)': '选择语言',
+  'Close Banner(banner)(aria-label)': '关闭横幅',
+  'Close Search(search dialog)(aria-label)': '关闭搜索',
+  'Collapse Sidebar(sidebar)(aria-label)': '收起侧边栏',
+  'Copied Text(code block)(aria-label)': '已复制文字',
+  'Copy Anchor Link(heading anchor)(aria-label)': '复制锚点链接',
+  'Copy Link(accordion)(aria-label)': '复制链接',
+  'Copy Markdown(page actions)': '复制 Markdown',
+  'Copy Text(code block)(aria-label)': '复制文字',
+  'Dark(theme switcher)(aria-label)': '深色',
+  'Default(type table)': '默认值',
+  'Edit on GitHub(edit page)': '在 GitHub 上编辑',
+  'Last updated on(page footer)': '最后更新于',
+  'Light(theme switcher)(aria-label)': '浅色',
+  'Next Page(pagination)': '下一页',
+  'No Headings(table of contents)': '没有标题',
+  'No results found(search dialog)': '找不到结果',
+  'On this page(table of contents)': '本页目录',
+  'Open Search(search trigger)(aria-label)': '开启搜索',
+  'Open Sidebar(sidebar)(aria-label)': '开启侧边栏',
+  'Open in ChatGPT(page actions)': '在 ChatGPT 中打开',
+  'Open in Claude(page actions)': '在 Claude 中打开',
+  'Open in Cursor(page actions)': '在 Cursor 中打开',
+  'Open in GitHub(page actions)': '在 GitHub 中打开',
+  'Open in Scira AI(page actions)': '在 Scira AI 中打开',
+  'Open(page actions)': '打开',
+  'Page Not Found(404 page)': '找不到页面',
+  'Parameters(type table)': '参数',
+  'Previous Page(pagination)': '上一页',
+  'Prop(type table)': '属性',
+  'Read {url}, I want to ask questions about it.(page actions)':
+    '阅读 {url}，我想询问相关问题。',
+  'Returns(type table)': '返回值',
+  'Search(search dialog)': '搜索',
+  'Search(search trigger)': '搜索',
+  'System(theme switcher)(aria-label)': '系统',
+  'Table of Contents(inline table of contents)': '目录',
+  'The page you are looking for might have been removed, had its name changed, or is temporarily unavailable.(404 page)':
+    '你要查找的页面可能已被移除、名称已变更，或暂时无法使用。',
+  'Toggle Menu(mobile menu)(aria-label)': '切换菜单',
+  'Toggle Theme(theme switcher)(aria-label)': '切换主题',
+  'Type(type table)': '类型',
+  'View as Markdown(page actions)': '以 Markdown 查看',
 
-  lastUpdate: '最后更新于',
-  chooseLanguage: '选择语言',
-  nextPage: '下一页',
-  previousPage: '上一页',
-  chooseTheme: '主题',
-  editOnGithub: '在 GitHub 上编辑',
+  // @fumadocs/api-docs
+  'Default(schema UI)': '默认',
+  'Deprecated(schema UI)': '已弃用',
+  'Enter Property Name(playground)': '输入属性名称',
+  'Enter value(playground)': '输入值',
+  'Example(schema UI)': '示例',
+  'Filter Properties(schema UI)': '筛选属性',
+  'Format(schema UI)': '格式',
+  'Items(schema UI)': '项目',
+  'Length(schema UI)': '长度',
+  'Match(schema UI)': '匹配',
+  'Multiple Of(schema UI)': '倍数',
+  'New Item(playground)': '新增项目',
+  'New(playground)': '新增',
+  'No property matching(schema UI)': '没有匹配的属性',
+  'Properties(schema UI)': '属性',
+  'Range(schema UI)': '范围',
+  'Remove Item(playground)(aria-label)': '移除项目',
+  'Select(playground)': '选择',
+  'Selected(playground)': '已选取',
+  'Show Property(playground)': '显示属性',
+  'Unset(playground)': '取消设置',
+  'Upload(playground)': '上传',
+  'Value in(schema UI)': '值于',
 
-  themeToggle: '切换主题',
-  themeLight: '浅色',
-  themeDark: '深色',
-  themeSystem: '系统',
+  // fumadocs-openapi
+  'Access Token(playground)': '访问令牌',
+  'Authenticate using username and password.(OAuth dialog)': '使用用户名和密码进行验证。',
+  'Authenticate with 3rd party services(OAuth dialog)': '通过第三方服务进行验证',
+  'Authenticate with device.(OAuth dialog)': '使用设备进行验证。',
+  'Authorization code(OAuth dialog)': '授权码',
+  'Authorization(OAuth dialog)': '授权',
+  'Authorization(operation page)': '授权',
+  'Authorization(playground)': '授权',
+  'Authorization(security scheme)': '授权',
+  'Authorize(playground)': '授权',
+  'Bad Request(playground status info)': '错误的请求',
+  'Basic <token>(security scheme)': 'Basic <token>',
+  'Bearer <token>(security scheme)': 'Bearer <token>',
+  'Binary response body, {length} bytes(playground result display)':
+    '二进制响应主体，{length} 字节',
+  'Body(playground)': '主体',
+  'Callbacks(operation page)': '回调',
+  'Client Credentials(OAuth dialog)': '客户端凭证',
+  'Client Error(playground result display)': '客户端错误',
+  'Client ID(OAuth dialog)': '客户端 ID',
+  'Client Secret(OAuth dialog)': '客户端密钥',
+  'Close JSON Editor(playground)': '关闭 JSON 编辑器',
+  'Close(playground result display)': '关闭',
+  'Cookie Parameters(operation page)': 'Cookie 参数',
+  'Cookies(playground)': 'Cookie',
+  'Copy(TypeScript definitions)': '复制',
+  'Default(operation page)': '默认',
+  'Deprecated(operation page)': '已弃用',
+  'Deprecated(security scheme)': '已弃用',
+  'Device Authorization(OAuth dialog)': '设备授权',
+  'Empty(operation page)': '空白',
+  'Enter Value(playground server select)': '输入值',
+  'Enter value(OAuth dialog)': '输入值',
+  'Error(playground status info)': '错误',
+  'Example Requests(operation page)': '示例请求',
+  'Example {key}(operation page)': '示例 {key}',
+  'Example(operation page)': '示例',
+  'Failed to fetch token(playground)': '无法获取令牌',
+  'Fetching token...(playground)': '正在获取令牌...',
+  'Forbidden(playground status info)': '禁止访问',
+  'Header Parameters(operation page)': '标头参数',
+  'Header(playground)': '标头',
+  'Implicit(OAuth dialog)': '隐式',
+  'In(security scheme)': '位置',
+  'Intended for the server-to-server authentication.(OAuth dialog)':
+    '适用于服务器对服务器验证。',
+  'Internal Server Error(playground status info)': '内部服务器错误',
+  'Not Found(playground status info)': '找不到',
+  'Obtain the access token for API.(OAuth dialog)': '获取 API 的访问令牌。',
+  'Open JSON Editor(playground)': '打开 JSON 编辑器',
+  'OpenID Connect is not supported at the moment, you can still set an access token here.(playground)':
+    '目前不支持 OpenID Connect，你仍可在此设置访问令牌。',
+  'OpenID Connect(security scheme)': 'OpenID Connect',
+  'Password(OAuth dialog)': '密码',
+  'Path Parameters(operation page)': '路径参数',
+  'Path(playground)': '路径',
+  'Query Parameters(operation page)': '查询参数',
+  'Query(playground)': '查询',
+  'Request Body(operation page)': '请求主体',
+  'Resource Owner Password Flow(OAuth dialog)': '资源所有者密码流程',
+  'Response Body(operation page)': '响应主体',
+  'Retrieve the access token directly.(OAuth dialog)': '直接获取访问令牌。',
+  'Scope(security scheme)': '范围',
+  'Select a flow(OAuth dialog)': '选择流程',
+  'Send(playground)': '发送',
+  'Server URL(playground server select)': '服务器 URL',
+  'Submit(OAuth dialog)': '提交',
+  'Successful(playground status info)': '成功',
+  'Test(scalar API client)': '测试',
+  'The base URL of your API endpoint.(playground server select)':
+    '你的 API 端点基础 URL。',
+  'The client ID of your OAuth application.(OAuth dialog)':
+    '你的 OAuth 应用程序客户端 ID。',
+  'The client secret of your OAuth application.(OAuth dialog)':
+    '你的 OAuth 应用程序客户端密钥。',
+  'TypeScript Definitions(TypeScript definitions)': 'TypeScript 定义',
+  'Unauthorized(playground status info)': '未授权',
+  'Unsupported(OAuth dialog)': '不支持',
+  'Use the {name} type in TypeScript.(TypeScript definitions)':
+    '在 TypeScript 中使用 {name} 类型。',
+  'Username(OAuth dialog)': '用户名',
+  'loading...(playground server select)': '加载中...',
 
-  codeBlockCopy: '复制文本',
-  codeBlockCopied: '已复制文本',
+  // @fumadocs/asyncapi
+  'Address(operation page)': '地址',
+  'Bindings(operation page)': '绑定',
+  'Channel(operation page)': '通道',
+  'Correlation ID(operation page)': '关联 ID',
+  'Headers(operation page)': '标头',
+  'Messages(operation page)': '消息',
+  'Parameters(operation page)': '参数',
+  'Payload(operation page)': '有效载荷',
+  'Reply(operation page)': '回复',
+  'Traits(operation page)': '特征',
 
-  accordionCopyAnchor: '复制链接',
-  headingCopyAnchor: '复制锚点链接',
-  bannerClose: '关闭横幅',
-  menuToggle: '切换菜单',
-
-  pageActionsCopyMarkdown: '复制 Markdown',
-  pageActionsOpen: '打开',
-  pageActionsOpenGitHub: '在 GitHub 中打开',
-  pageActionsViewMarkdown: '以 Markdown 查看',
-  pageActionsOpenScira: '在 Scira AI 中打开',
-  pageActionsOpenChatGPT: '在 ChatGPT 中打开',
-  pageActionsOpenClaude: '在 Claude 中打开',
-  pageActionsOpenCursor: '在 Cursor 中打开',
-  pageActionsOpenInLLMPrompt: '阅读 {url}，我想询问相关问题。',
-
-  sidebarOpen: '打开侧边栏',
-  sidebarCollapse: '收起侧边栏',
-
-  typeTableProp: '属性',
-  typeTableType: '类型',
-  typeTableDefault: '默认值',
-  typeTableParameters: '参数',
-  typeTableReturns: '返回值',
-
-  notFoundTitle: '找不到页面',
-  notFoundDescription: '你要查找的页面可能已被移除、名称已更改，或暂时无法使用。',
-  notFoundLink: '返回首页',
-} satisfies UI.Translations;
-
-const openapi = {
-  // General
-  loading: '加载中...',
-  empty: '空',
-  copy: '复制',
-  send: '发送',
-  authorization: '授权',
-  cookies: 'Cookie',
-  query: '查询',
-  path: '路径',
-  header: '标头',
-  body: '主体',
-  deprecated: '已弃用',
-  submit: '提交',
-  test: '测试',
-  unsupported: '不支持',
-  close: '关闭',
-  inputPlaceholder: '输入值',
-
-  // Request tabs
-  titleRequestTabs: '示例请求',
-  requestTabNameDefault: '默认',
-  queryParameters: '查询参数',
-  pathParameters: '路径参数',
-  headerParameters: '标头参数',
-  cookieParameters: 'Cookie 参数',
-
-  // Operation sections
-  titleRequestBody: '请求主体',
-  titleResponseBody: '响应主体',
-  titleCallbacks: '回调',
-
-  // Auth scheme
-  authBasicTokenExample: 'Basic <token>',
-  authBearerTokenExample: 'Bearer <token>',
-  openIdConnect: 'OpenID Connect',
-  authTokenIn: '位置',
-  authScope: '范围',
-
-  // TypeScript panel
-  typeScriptDefinitions: 'TypeScript 定义',
-  useTypeInTypeScript: '在 TypeScript 中使用 {name} 类型。',
-
-  // Schema info tags
-  schemaDefault: '默认',
-  schemaMatch: '匹配',
-  schemaFormat: '格式',
-  schemaMultipleOf: '倍数',
-  schemaRange: '范围',
-  schemaLength: '长度',
-  schemaProperties: '属性',
-  schemaItems: '项目',
-  schemaValueIn: '值位于',
-  schemaExample: '示例',
-
-  // Response tabs
-  responseTabName: '示例 {key}',
-  responseTabNameDefault: '示例',
-
-  // Playground
-  closeJsonEditor: '关闭 JSON 编辑器',
-  openJsonEditor: '打开 JSON 编辑器',
-  accessToken: '访问令牌',
-  authorize: '授权',
-  openIdUnsupported: '目前不支持 OpenID Connect，你仍可在此设置访问令牌。',
-
-  // Status info
-  statusBadRequest: '错误的请求',
-  statusUnauthorized: '未授权',
-  statusForbidden: '禁止访问',
-  statusNotFound: '找不到',
-  statusInternalServerError: '内部服务器错误',
-  statusSuccessful: '成功',
-  statusError: '错误',
-  statusClientError: '客户端错误',
-  statusBinaryBody: '二进制响应主体，{length} 字节',
-
-  // OAuth dialog
-  oauthFlowPlaceholder: '选择流程',
-  obtainAccessToken: '获取 API 的访问令牌。',
-  resourceOwnerPassword: '资源所有者密码流程',
-  resourceOwnerPasswordDesc: '使用用户名和密码进行验证。',
-  clientCredentials: '客户端凭据',
-  clientCredentialsDesc: '适用于服务器到服务器验证。',
-  authorizationCode: '授权码',
-  authorizationCodeDesc: '通过第三方服务进行验证',
-  implicit: '隐式',
-  implicitDesc: '直接获取访问令牌。',
-  deviceAuthorization: '设备授权',
-  deviceAuthorizationDesc: '使用设备进行验证。',
-  clientId: '客户端 ID',
-  clientIdHint: '你的 OAuth 应用程序客户端 ID。',
-  clientSecret: '客户端密钥',
-  clientSecretHint: '你的 OAuth 应用程序客户端密钥。',
-  usernameField: '用户名',
-  passwordField: '密码',
-  fetchingToken: '正在获取令牌...',
-  fetchTokenError: '无法获取令牌',
-
-  // Server select
-  serverUrl: '服务器 URL',
-  serverUrlDescription: '你的 API 端点基础 URL。',
-  serverUrlFieldPlaceholder: '输入值',
-
-  // Schema UI
-  schemaShowArray: '数组项目',
-  schemaHideArray: '数组项目',
-  schemaFilterPropertiesPlaceholder: '筛选属性',
-  schemaFilterPropertiesEmpty: '没有匹配的属性',
-
-  // Inputs (playground)
-  playgroundShowProperty: '显示属性',
-  playgroundPropertyPlaceholder: '输入属性名称',
-  playgroundNewProperty: '新增',
-  playgroundNewItem: '新增项目',
-  playgroundRemoveItem: '移除项目',
-  playgroundSelectPlaceholder: '选择',
-  playgroundSelected: '已选择',
-  playgroundInputUpload: '上传',
-  playgroundInputUnset: '取消设置',
-} satisfies OpenAPI.Translations;
-
-const story = {
-  noVariant: '没有变体',
-  props: '属性',
-  renderError: '渲染组件时发生错误。',
-  reset: '重置',
-  unset: '取消设置',
-  booleanTrue: '是',
-  booleanFalse: '否',
-  dateInputPlaceholder: '输入日期',
-  numberInputPlaceholder: '输入数字',
-  bigintInputPlaceholder: '输入 bigint',
-  textInputPlaceholder: '输入文本',
-  arrayInputRemoveItem: '移除项目',
-  arrayInputAddItem: '新增项目',
-} satisfies Story.Translations;
+  // @fumadocs/story
+  'Encountered error when rendering the component.(story error boundary)':
+    '渲染组件时发生错误。',
+  'Enter bigint(arg form)': '输入 bigint',
+  'Enter date(arg form)': '输入日期',
+  'Enter number(arg form)': '输入数字',
+  'Enter text(arg form)': '输入文字',
+  'False(arg form)': '否',
+  'New Item(arg form)': '新增项目',
+  'No Variant(story controls)': '没有变体',
+  'Props(story controls)': '属性',
+  'Remove Item(arg form)(aria-label)': '移除项目',
+  'Reset(story error boundary)': '重置',
+  'True(arg form)': '是',
+  'Unset(arg form)': '取消设置',
+} satisfies Translations;
 
 /**
  * Simplified Chinese
  */
-export function zhCN(): TranslationPreset<{
-  ui: UI.Translations;
-  openapi: OpenAPI.Translations;
-  story: Story.Translations;
-}> {
+export function zhCN(): TranslationPreset<keyof Translations> {
   return {
     name: 'zh-CN',
-    value: {
-      ui,
-      openapi,
-      story,
-    },
+    value: translations,
   };
 }
