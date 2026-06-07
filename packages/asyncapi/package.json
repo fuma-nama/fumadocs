@@ -15,6 +15,14 @@
     "dist"
   ],
   "type": "module",
+  "exports": {
+    ".": "./dist/index.js",
+    "./i18n": "./dist/i18n.js",
+    "./server": "./dist/server/index.js",
+    "./ui": "./dist/ui/index.js",
+    "./package.json": "./package.json",
+    "./css/*": "./css/*"
+  },
   "publishConfig": {
     "access": "public"
   },
@@ -41,23 +49,18 @@
     "tailwind-merge": "^3.6.0"
   },
   "devDependencies": {
-    "@scalar/api-client-react": "^2.0.21",
-    "@scalar/openapi-upgrader": "^0.2.9",
     "@tailwindcss/oxide": "^4.3.0",
     "@types/js-yaml": "^4.0.9",
     "@types/node": "25.9.1",
     "@types/react": "^19.2.16",
-    "fast-content-type-parse": "^3.0.0",
     "fumadocs-core": "workspace:*",
     "fumadocs-ui": "workspace:*",
     "json-schema-typed": "^8.0.2",
     "tailwindcss": "^4.3.0",
     "tsconfig": "workspace:*",
-    "tsdown": "0.22.1",
-    "xml-js": "^1.6.11"
+    "tsdown": "0.22.1"
   },
   "peerDependencies": {
-    "@scalar/api-client-react": "^2.0.20",
     "@types/react": "*",
     "fumadocs-core": "^16.9.0",
     "fumadocs-ui": "^16.9.0",
@@ -71,14 +74,6 @@
     },
     "@types/react": {
       "optional": true
-    },
-    "@scalar/api-client-react": {
-      "optional": true
     }
-  },
-  "inlinedDependencies": {
-    "@scalar/openapi-upgrader": "0.2.9",
-    "fast-content-type-parse": "3.0.0",
-    "xml-js": "1.6.11"
   }
 }

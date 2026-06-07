@@ -1,0 +1,250 @@
+---
+title: generateFiles()
+description: Generate pages from AsyncAPI schema.
+---
+
+The `generateFiles()` function generates MDX files for API documentation.
+
+Note that the page content is still rendered by the `<AsyncAPIPage />` component, the docs generator only arranges the operations to render for each page.
+
+## Usage
+
+It takes an AsyncAPI instance.
+
+```ts
+import { generateFiles } from '@fumadocs/asyncapi';
+import { asyncapi } from '@/lib/asyncapi';
+
+void generateFiles({
+  input: asyncapi,
+  // The output directory.
+  output: '/content/docs',
+});
+```
+
+### `per`
+
+Customize the content of pages, default to `operation`.
+
+<Callout>
+  Operation refers to an AsyncAPI operation with a specific action like
+  `receiveLightMeasurement:receive`.
+</Callout>
+
+| mode      | content                        | file path           |
+| --------- | ------------------------------ | ------------------- |
+| tag       | operations with same tag       | `{tag_name}.mdx`    |
+| file      | operations in same schema file | `{file_name}.mdx`   |
+| operation | each operation                 | `{operationId}.mdx` |
+| custom    | see below                      | N/A                 |
+
+```ts
+import { generateFiles } from '@fumadocs/asyncapi';
+
+void generateFiles({
+  per: 'tag',
+});
+```
+
+When set to `custom`, you can pass a function to fully customize the generation process:
+
+```ts title="Example"
+import { generateFiles, OperationOutput } from '@fumadocs/asyncapi';
+
+void generateFiles({
+  per: 'custom',
+  toPages(builder) {
+    const items = builder.extract();
+
+    for (const op of items.operations) {
+      const { operation, channel, displayName } = builder.fromExtractedOperation(op)!;
+
+      const entry: OperationOutput = {
+        type: 'operation',
+        schemaId: builder.id,
+        item: op,
+        path: '...',
+        info: {
+          title: displayName,
+          description: operation.description ?? channel.description,
+        },
+      };
+
+      builder.create(entry);
+    }
+  },
+});
+```
+
+When set to `tag`, adding `x-displayName` to the tag definition can control the title of each page.
+
+```yaml title="asyncapi.yaml"
+tags:
+  - name: lighting
+    description: Operations related to streetlights.
+    x-displayName: Lighting
+```
+
+### `groupBy`
+
+In `operation` mode, you can group output files with folders.
+
+| value          | output                                |
+| -------------- | ------------------------------------- |
+| tag            | `{tag}/{operationId}.mdx`             |
+| channel        | `{channel_address}/{operationId}.mdx` |
+| none (default) | `{operationId}.mdx`                   |
+
+```ts
+import { generateFiles } from '@fumadocs/asyncapi';
+
+void generateFiles({
+  per: 'operation',
+  groupBy: 'tag',
+});
+```
+
+### `index`
+
+Generate index files with cards linking to generated pages.
+
+```ts
+import { generateFiles } from '@fumadocs/asyncapi';
+
+void generateFiles({
+  index: {
+    // for generating `href`
+    url: {
+      baseUrl: '/docs',
+      contentDir: './content/docs',
+    },
+    items: [
+      {
+        // output path
+        path: 'index.mdx',
+        // optional: restrict the input files (identical to the `input` field in server)
+        only: ['streetlights.yaml'],
+        // optional: set frontmatter
+        description: 'All available pages',
+      },
+    ],
+  },
+});
+```
+
+### `meta`
+
+Generate [`meta.json`](/docs/page-conventions#meta) files automatically.
+
+You can always define the `meta.json` files manually for maximal flexibility.
+
+```ts
+import { generateFiles } from '@fumadocs/asyncapi';
+
+void generateFiles({
+  meta: true,
+
+  // or customize how folders are represented:
+  meta: {
+    folderStyle: 'separator',
+  },
+});
+```
+
+### `imports`
+
+Add custom imports to generated MDX files. This is useful for including components, utilities, or other dependencies in your generated documentation.
+
+```ts
+import { generateFiles } from '@fumadocs/asyncapi';
+
+void generateFiles({
+  imports: [
+    {
+      names: ['API_BASE_URL'],
+      from: '@/constants',
+    },
+  ],
+});
+```
+
+This will add the following imports to all generated MDX files:
+
+```ts
+import { API_BASE_URL } from '@/constants';
+```
+
+### `name`
+
+A function that controls the output file name of MDX pages.
+
+```ts
+import { generateFiles } from '@fumadocs/asyncapi';
+
+void generateFiles({
+  name(output) {
+    if (output.type === 'operation') {
+      const { operation } = this.fromExtractedOperation(output.item)!;
+      console.log(operation);
+
+      return `my-dir/${output.item.id}`;
+    }
+
+    return 'my-dir/filename';
+  },
+});
+```
+
+You can also use the `algorithm` option:
+
+```ts
+import { generateFiles } from '@fumadocs/asyncapi';
+
+void generateFiles({
+  // v2 (default): use operation id
+  // v1: use `{operationId}/{action}`
+  name: { algorithm: 'v1' },
+});
+```
+
+### `frontmatter`
+
+Customize the frontmatter of MDX files.
+
+By default, it includes:
+
+| property      | description                        |
+| ------------- | ---------------------------------- |
+| `title`       | Page title                         |
+| `description` | Page description                   |
+| `full`        | Always true, added for Fumadocs UI |
+| `_asyncapi`   | Internal Properties                |
+
+```ts
+import { generateFiles } from '@fumadocs/asyncapi';
+
+void generateFiles({
+  frontmatter: (title, description) => ({
+    myProperty: 'hello',
+  }),
+});
+```
+
+### `addGeneratedComment`
+
+Add a comment to the top of generated files indicating they are auto-generated.
+
+```ts
+import { generateFiles } from '@fumadocs/asyncapi';
+
+void generateFiles({
+  // Add default comment
+  addGeneratedComment: true,
+
+  // Or provide a custom comment
+  addGeneratedComment: 'Custom auto-generated comment',
+
+  // Or disable comments
+  addGeneratedComment: false,
+});
+```

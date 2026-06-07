@@ -1,0 +1,134 @@
+---
+title: createAsyncAPIPage()
+description: The component for rendering AsyncAPI docs content
+---
+
+## Overview
+
+Fumadocs AsyncAPI uses a `<AsyncAPIPage />` component to render page contents, it should be a client component.
+
+```tsx title="components/api-page.tsx"
+'use client';
+import { createAsyncAPIPage } from '@fumadocs/asyncapi/ui';
+
+export const AsyncAPIPage = createAsyncAPIPage({
+  // config
+});
+```
+
+### Custom Layout
+
+You can customize how operations and message examples are laid out.
+
+```tsx title="components/api-page.tsx"
+'use client';
+import { createAsyncAPIPage } from '@fumadocs/asyncapi/ui';
+
+export const AsyncAPIPage = createAsyncAPIPage({
+  content: {
+    renderOperationLayout(slots) {
+      return (
+        <div className="flex flex-col gap-6">
+          {slots.header}
+          {slots.description}
+          {slots.channel}
+          {slots.messages}
+          {slots.messageExamples}
+        </div>
+      );
+    },
+  },
+});
+```
+
+### Schema UI
+
+Customize how JSON schemas are rendered, or disable schema examples.
+
+```tsx title="components/api-page.tsx"
+'use client';
+import { createAsyncAPIPage } from '@fumadocs/asyncapi/ui';
+
+export const AsyncAPIPage = createAsyncAPIPage({
+  schemaUI: {
+    showExample: true,
+    render(options, ctx) {
+      // fully custom schema renderer
+      return ctx.SchemaUI(options);
+    },
+  },
+});
+```
+
+### Internationalization
+
+Assuming you have configured [Internationalization](/docs/internationalization) at UI level:
+
+```tsx title="layout.shared.tsx"
+import { defineI18n } from 'fumadocs-core/i18n';
+import { uiTranslations } from 'fumadocs-ui/i18n';
+import { asyncapiTranslations } from '@fumadocs/asyncapi/i18n';
+
+const i18n = defineI18n({
+  languages: ['en', 'cn'],
+  defaultLanguage: 'en',
+});
+
+export const translations = i18n
+  .translations()
+  .extend(uiTranslations())
+  // [!code ++]
+  .extend(asyncapiTranslations())
+  .add('ui', {
+    cn: { displayName: 'Chinese' },
+  })
+  // [!code ++:5]
+  .add('asyncapi', {
+    cn: {
+      titleMessages: '消息',
+    },
+  });
+```
+
+See [Translations](/docs/ui/translations) for more details.
+
+### Syntax Highlighting
+
+AsyncAPI pages use Shiki for code blocks. You can customize the highlighter and themes.
+
+```tsx title="components/api-page.tsx"
+'use client';
+import { createAsyncAPIPage } from '@fumadocs/asyncapi/ui';
+import { defaultShikiFactory } from 'fumadocs-core/highlight/shiki/full';
+
+export const AsyncAPIPage = createAsyncAPIPage({
+  shiki: defaultShikiFactory,
+  shikiOptions: {
+    themes: {
+      light: 'github-light',
+      dark: 'github-dark',
+    },
+  },
+});
+```
+
+### Custom Components
+
+Override the default heading and code block components.
+
+```tsx title="components/api-page.tsx"
+'use client';
+import { createAsyncAPIPage } from '@fumadocs/asyncapi/ui';
+
+export const AsyncAPIPage = createAsyncAPIPage({
+  components: {
+    Heading({ id, depth, ...props }) {
+      const Tag = `h${depth}` as const;
+      return <Tag id={id} {...props} />;
+    },
+    CodeBlock({ lang, code }) {
+      return <pre data-lang={lang}>{code}</pre>;
+    },
+  },
+});
+```

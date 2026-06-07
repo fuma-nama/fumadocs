@@ -1,0 +1,347 @@
+---
+title: AsyncAPI
+description: Generating docs for AsyncAPI schema.
+---
+
+## Setup
+
+Install the required packages.
+
+```npm
+npm i @fumadocs/asyncapi shiki
+```
+
+### Generate Styles
+
+Add the following line:
+
+```css title="Tailwind CSS"
+@import 'tailwindcss';
+@import 'fumadocs-ui/css/neutral.css';
+@import 'fumadocs-ui/css/preset.css';
+/* [!code ++] */
+@import '@fumadocs/asyncapi/css/preset.css';
+```
+
+### Configure Plugin
+
+Create the AsyncAPI server instance & `<AsyncAPIPage />` component.
+
+```ts tab="lib/asyncapi.ts"
+import { createAsyncAPI } from '@fumadocs/asyncapi/server';
+
+// note: this is a server-side API
+export const asyncapi = createAsyncAPI({
+  // the AsyncAPI schema, you can also give it an external URL.
+  input: ['./asyncapi.yaml'],
+});
+```
+
+```tsx tab="components/api-page.tsx"
+'use client';
+import { createAsyncAPIPage } from '@fumadocs/asyncapi/ui';
+
+export const AsyncAPIPage = createAsyncAPIPage();
+```
+
+```ts tab="lib/source.ts"
+import { asyncapiPlugin } from '@fumadocs/asyncapi/server';
+import { loader } from 'fumadocs-core/source';
+
+export const source = loader({
+  // [!code ++] optional: adds a send/receive badge to each page item in page tree
+  plugins: [asyncapiPlugin()],
+});
+```
+
+See [`createAsyncAPI()`](/docs/integrations/asyncapi/server) & [`createAsyncAPIPage()`](/docs/integrations/asyncapi/api-page) for available options.
+
+### Generate Pages
+
+<Tabs items={["MDX Files", "Virtual Files"]}>
+<Tab>
+
+You can generate MDX files directly from your AsyncAPI schema.
+
+Create a script:
+
+```js title="scripts/generate-docs.ts"
+import { generateFiles } from '@fumadocs/asyncapi';
+import { asyncapi } from '@/lib/asyncapi';
+
+void generateFiles({
+  input: asyncapi,
+  output: './content/docs',
+  // we recommend to enable it
+  // make sure your operation description doesn't break MDX syntax.
+  includeDescription: true,
+});
+```
+
+Generate docs with the script:
+
+```bash
+bun ./scripts/generate-docs.ts
+```
+
+Add the `AsyncAPIPage` component to your MDX components. Generated files use the `<APIPage />` tag.
+
+```tsx tab="Server Components" title="app/docs/[[...slug]]/page.tsx"
+import { source } from '@/lib/source';
+import { asyncapi } from '@/lib/asyncapi';
+import { AsyncAPIPage } from '@/components/api-page';
+import { getMDXComponents } from '@/components/mdx';
+
+// e.g. in your page renderer
+export default function Page({ slug }) {
+  const page = source.getPage(slug);
+  const MdxContent = page.data.body;
+
+  return (
+    <MdxContent
+      components={getMDXComponents({
+        // [!code ++:3] add the MDX component
+        APIPage: async (props) => (
+          <AsyncAPIPage {...await asyncapi.preloadAsyncAPIPage(page)} {...props} />
+        ),
+      })}
+    />
+  );
+}
+```
+
+```tsx tab="Without Server Components" title="docs/[...slug]"
+import { source } from '@/lib/source';
+import { asyncapi } from '@/lib/asyncapi';
+import { AsyncAPIPage } from '@/components/api-page';
+import { getMDXComponents } from '@/components/mdx';
+
+// e.g. where you return server payload to client
+export function loader({ slug }) {
+  const page = source.getPage(slug);
+
+  return {
+    // [!code ++]
+    asyncapiData: await asyncapi.preloadAsyncAPIPage(page),
+    // ...
+  };
+}
+
+// e.g. in your page renderer
+export default function Page() {
+  // consume loader data
+  const { asyncapiData } = useLoaderData();
+
+  return (
+    <MdxContent
+      components={getMDXComponents({
+        // [!code ++] add the MDX component
+        APIPage: (props) => <AsyncAPIPage {...asyncapiData} {...props} />,
+      })}
+    />
+  );
+}
+```
+
+</Tab>
+<Tab>
+
+You can also use it without generating real files by integrating into [Loader API](/docs/headless/source-api/source).
+
+```ts title="lib/source.ts"
+import { loader } from 'fumadocs-core/source';
+import { docs } from 'collections/server';
+import { asyncapi } from '@/lib/asyncapi';
+
+export const source = loader(
+  // [!code ++:6]
+  {
+    docs: docs.toFumadocsSource(),
+    asyncapi: await asyncapi.staticSource({
+      baseDir: 'asyncapi',
+    }),
+  },
+  {
+    baseUrl: '/docs',
+    plugins: [asyncapi.loaderPlugin()],
+    // ...
+  },
+);
+```
+
+`staticSource()` is a server-side API that generates pages directly to your `loader()`, hence it allows dynamic content generation, such as re-generating page tree as schema changes.
+
+**It will change the type of your pages**, make sure to update all references to your `source`.
+
+For example, where you return text for LLM:
+
+```ts
+import { source } from '@/lib/source';
+
+export async function getLLMText(page: (typeof source)['$inferPage']) {
+  // [!code ++:4]
+  if (page.type === 'asyncapi') {
+    // e.g. return the stringified AsyncAPI schema
+    return JSON.stringify(page.data.getSchema().bundled, null, 2);
+  }
+
+  // your original flow below...
+}
+```
+
+And update your page renderer:
+
+<Tabs items={["Server Components", "Without Server Components"]}>
+
+<Tab>
+
+```tsx title="docs/[[...slug]]/page.tsx"
+import { AsyncAPIPage } from '@/components/api-page';
+
+export default function Page({ slug }) {
+  const page = source.getPage(slug);
+
+  // for AsyncAPI pages
+  if (page.type === 'asyncapi') {
+    return (
+      <DocsPage full>
+        <h1 className="text-[1.75em] font-semibold">{page.data.title}</h1>
+        <DocsBody>
+          <AsyncAPIPage {...page.data.getAsyncAPIPageProps()} />
+        </DocsBody>
+      </DocsPage>
+    );
+  }
+
+  // your original flow below...
+}
+```
+
+</Tab>
+
+<Tab>
+
+Pass a client payload from server, then render the page using the `<AsyncAPIPage />` component you created above.
+
+For example, in Tanstack Start:
+
+```tsx title="routes/docs/$.tsx"
+import { createFileRoute, notFound } from '@tanstack/react-router';
+import { DocsLayout } from 'fumadocs-ui/layouts/docs';
+import { createServerFn } from '@tanstack/react-start';
+import { source } from '@/lib/source';
+import browserCollections from 'collections/browser';
+import { DocsBody, DocsDescription, DocsPage, DocsTitle } from 'fumadocs-ui/layouts/docs/page';
+import { useFumadocsLoader } from 'fumadocs-core/source/client';
+import { type ReactNode, Suspense } from 'react';
+import { AsyncAPIPage } from '@/components/api-page';
+
+export const Route = createFileRoute('/docs/$')({
+  component: Page,
+  loader: async ({ params }) => {
+    const slugs = params._splat?.split('/') ?? [];
+    const data = await serverLoader({ data: slugs });
+
+    // Fumadocs MDX: only preload content for normal pages [!code highlight:3]
+    if (data.type === 'docs') {
+      await clientLoader.preload(data.path);
+    }
+    return data;
+  },
+});
+
+const serverLoader = createServerFn({
+  method: 'GET',
+})
+  .inputValidator((slugs: string[]) => slugs)
+  .handler(async ({ data: slugs }) => {
+    const page = source.getPage(slugs);
+    if (!page) throw notFound();
+
+    const pageTree = await source.serializePageTree(source.getPageTree());
+    // different result for AsyncAPI pages [!code ++:9]
+    if (page.type === 'asyncapi') {
+      return {
+        type: 'asyncapi',
+        title: page.data.title,
+        description: page.data.description,
+        pageTree,
+        props: page.data.getAsyncAPIPageProps(),
+      };
+    }
+
+    return {
+      type: 'docs',
+      path: page.path,
+      pageTree,
+      // ...
+    };
+  });
+
+const clientLoader = browserCollections.docs.createClientLoader({
+  component(pageData, props) {
+    // ...
+  },
+});
+
+function Page() {
+  const page = useFumadocsLoader(Route.useLoaderData());
+  let content: ReactNode;
+
+  // render AsyncAPI page content [!code ++:11]
+  if (page.type === 'asyncapi') {
+    content = (
+      <DocsPage full>
+        <DocsTitle>{page.title}</DocsTitle>
+        <DocsDescription>{page.description}</DocsDescription>
+        <DocsBody>
+          {/* pass the payload data */}
+          <AsyncAPIPage {...page.props} />
+        </DocsBody>
+      </DocsPage>
+    );
+  } else {
+    content = clientLoader.useContent(page.path, page);
+  }
+
+  return (
+    <DocsLayout tree={page.pageTree}>
+      <Suspense>{content}</Suspense>
+    </DocsLayout>
+  );
+}
+```
+
+You can see the full [AsyncAPI example](https://github.com/fuma-nama/fumadocs/blob/dev/examples/asyncapi).
+
+</Tab>
+
+</Tabs>
+
+<Callout type='warn' title="Ensure the migration is complete!">
+
+Run a type check to verify before continuing, e.g.
+
+```npm
+npm run types:check
+```
+
+</Callout>
+
+</Tab>
+</Tabs>
+
+## Features
+
+The official AsyncAPI integration supports:
+
+- Basic operation information (send/receive)
+- Channel, message, and reply documentation
+- Message payload & header schemas
+- Security schemes
+- Message examples (from schema examples or generated samples)
+- Bindings and traits
+
+### Demo
+
+See the [AsyncAPI example](https://github.com/fuma-nama/fumadocs/blob/dev/examples/asyncapi).
