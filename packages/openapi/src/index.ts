@@ -11,6 +11,7 @@ export type {
   WebhookOutput,
   OperationItem,
   WebhookItem,
+  GeneratedPageProps,
 } from './utils/pages/builder';
 export type { SchemaToPagesOptions } from './utils/pages/preset-auto';
 export type { OpenAPIV3_2, OpenAPIV3_1, OpenAPIV3, OpenAPIV2, OpenAPI } from '@/types/openapi';

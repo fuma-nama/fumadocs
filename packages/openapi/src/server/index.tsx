@@ -1,6 +1,6 @@
 import { createProxy } from '@/server/proxy';
 import { loadDocument } from '@/utils/document/load';
-import type { Document } from '@/types';
+import type { Document, Awaitable } from '@/types';
 import fs from 'node:fs';
 import {
   type DynamicSource,
@@ -21,12 +21,11 @@ import {
 } from '@/utils/pages/builder';
 import { toStaticData } from '@/utils/pages/to-static-data';
 import path from 'node:path';
-import type { OpenAPIPageProps } from '@/ui';
+import type { OpenAPIPageProps_Preloaded, OpenAPIPageProps_Spec } from '@/ui';
 import type { StructuredData } from 'fumadocs-core/mdx-plugins/remark-structure';
 import type { TOCItemType } from 'fumadocs-core/toc';
 import type { SchemaToPagesOptions } from '@/utils/pages/preset-auto';
 import { MethodLabel } from '@/ui/components/method-label';
-import type { Awaitable } from 'shiki';
 
 /**
  * schema ID -> file path, URL, downloaded schema object, or a function returning them
@@ -53,6 +52,10 @@ export interface OpenAPIOptions {
   proxyUrl?: string;
 }
 
+// avoid "cannot be named without reference" error in TypeScript.
+// Even if we exported it, if TypeScript didn't scan the file, it fails.
+export type { OpenAPIPageProps_Spec, OpenAPIPageProps_Preloaded };
+
 export interface OpenAPIServer {
   createProxy: typeof createProxy;
   getSchemas: () => Promise<Record<string, LoadedDocument>>;
@@ -75,7 +78,7 @@ export interface OpenAPIServer {
 
   preloadOpenAPIPage: <Type extends string | undefined, Data extends PageData>(
     page: Page<Type, Data>,
-  ) => Promise<Pick<Extract<OpenAPIPageProps, { preloaded: unknown }>, 'preloaded'>>;
+  ) => Promise<Pick<OpenAPIPageProps_Preloaded, 'preloaded'>>;
 
   /**
    * Fumadocs Source API integration, pass this to `plugins` array in `loader()`.
@@ -87,7 +90,7 @@ export interface OpenAPIServer {
 }
 
 export interface OpenAPIPageData extends PageData {
-  getOpenAPIPageProps: () => Extract<OpenAPIPageProps, { payload: unknown }>;
+  getOpenAPIPageProps: () => OpenAPIPageProps_Spec;
   getSchema: () => { id: string; bundled: Document };
   structuredData: StructuredData;
   toc: TOCItemType[];
@@ -248,7 +251,7 @@ export function createOpenAPI(options: OpenAPIOptions = {}): OpenAPIServer {
       return Object.keys(resolvedInput).filter((key) => !URL.canParse(key) && fs.existsSync(key));
     },
     async preloadOpenAPIPage(page) {
-      const out: Extract<OpenAPIPageProps, { preloaded: unknown }>['preloaded'] = {
+      const out: OpenAPIPageProps_Preloaded['preloaded'] = {
         docs: {},
         proxyUrl: options.proxyUrl,
       };

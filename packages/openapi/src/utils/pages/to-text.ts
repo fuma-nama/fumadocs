@@ -193,5 +193,5 @@ function pageContent({
     propStrs.push(`showDescription`);
   }
 
-  return `<APIPage ${propStrs.join(' ')} />`;
+  return `<OpenAPIPage ${propStrs.join(' ')} />`;
 }

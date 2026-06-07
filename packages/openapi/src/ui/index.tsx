@@ -57,7 +57,7 @@ export interface GenerateTypeScriptDefinitionsContext {
   ctx: RenderContext;
 }
 
-interface APIPlaygroundProps {
+export interface APIPlaygroundProps {
   path: string;
   method: HttpMethods;
   operation: NoReference<OperationObject>;
@@ -247,22 +247,24 @@ export interface CreateOpenAPIPageOptions {
   storageKeyPrefix?: string;
 }
 
-export type OpenAPIPageProps =
-  | (Omit<GeneratedPageProps, 'document'> & {
-      payload: {
-        bundled: Document;
-        proxyUrl?: string;
-      };
-    })
-  | (GeneratedPageProps & {
-      preloaded: {
-        docs: Record<string, Document>;
-        proxyUrl?: string;
-      };
-    });
+export type OpenAPIPageProps = OpenAPIPageProps_Spec | OpenAPIPageProps_Preloaded;
+
+export type OpenAPIPageProps_Spec = Omit<GeneratedPageProps, 'document'> & {
+  payload: {
+    bundled: Document;
+    proxyUrl?: string;
+  };
+};
+
+export type OpenAPIPageProps_Preloaded = GeneratedPageProps & {
+  preloaded: {
+    docs: Record<string, Document>;
+    proxyUrl?: string;
+  };
+};
 
 /**
- * Create `<APIPage />` (a client component).
+ * Create `<OpenAPIPage />` (a client component).
  */
 export function createOpenAPIPage({
   shiki = defaultShikiFactory,
@@ -327,7 +329,7 @@ export function createOpenAPIPage({
   return function OpenAPIPage(props) {
     let doc: Document;
     let proxyUrl: string | undefined;
-    if ('document' in props && 'preloaded' in props) {
+    if ('preloaded' in props) {
       doc = props.preloaded.docs[props.document];
       if (!doc)
         throw new Error(

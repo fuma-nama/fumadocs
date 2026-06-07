@@ -16,7 +16,7 @@ export function ClientCodeBlock(props: Omit<DynamicCodeblockProps, 'highlighter'
   const ctx = use(CodeBlockContext);
   if (!ctx)
     throw new Error(
-      'Missing Shiki context, please wrap your <APIPage /> component under <ClientCodeBlockProvider />',
+      'Missing Shiki context, please wrap your <OpenAPIPage /> component under <ClientCodeBlockProvider />',
     );
 
   return <DynamicCodeBlock highlighter={() => ctx.getOrInit()} options={shikiOptions} {...props} />;
