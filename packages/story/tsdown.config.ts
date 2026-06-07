@@ -13,6 +13,7 @@ export default defineConfig({
     './src/webpack/story.ts',
   ],
   unbundle: true,
+  ignoreWatch: ['src/.translations/**'],
   dts: {
     sourcemap: false,
   },

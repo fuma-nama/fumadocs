@@ -20,6 +20,7 @@ export default defineConfig({
     './src/requests/generators/*.ts',
   ],
   unbundle: true,
+  ignoreWatch: ['src/.translations/**'],
   dts: {
     sourcemap: false,
   },

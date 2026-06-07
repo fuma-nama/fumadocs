@@ -13,6 +13,7 @@ export default defineConfig({
     './src/utils/{id-to-title,url}.ts',
   ],
   unbundle: true,
+  ignoreWatch: ['src/.translations/**'],
   dts: {
     sourcemap: false,
   },

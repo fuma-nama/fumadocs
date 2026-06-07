@@ -9,6 +9,7 @@ export default defineConfig({
   target: 'es2023',
   entry: ['./src/{index,i18n}.ts', './src/ui/index.tsx', './src/server/index.tsx'],
   unbundle: true,
+  ignoreWatch: ['src/.translations/**'],
   dts: {
     sourcemap: false,
   },
