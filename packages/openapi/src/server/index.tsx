@@ -10,6 +10,7 @@ import {
   type MetaData,
   type Source,
   type VirtualFile,
+  type Page,
 } from 'fumadocs-core/source';
 import {
   getPageProps,
@@ -72,6 +73,10 @@ export interface OpenAPIServer {
     options?: OpenAPISourceOptions,
   ) => DynamicSource<{ metaData: MetaData; pageData: OpenAPIPageData }>;
 
+  preloadOpenAPIPage: <Type extends string | undefined, Data extends PageData>(
+    page: Page<Type, Data>,
+  ) => Promise<Pick<Extract<OpenAPIPageProps, { preloaded: unknown }>, 'preloaded'>>;
+
   /**
    * Fumadocs Source API integration, pass this to `plugins` array in `loader()`.
    */
@@ -82,7 +87,7 @@ export interface OpenAPIServer {
 }
 
 export interface OpenAPIPageData extends PageData {
-  getOpenAPIPageProps: () => OpenAPIPageProps;
+  getOpenAPIPageProps: () => Extract<OpenAPIPageProps, { payload: unknown }>;
   getSchema: () => { id: string; bundled: Document };
   structuredData: StructuredData;
   toc: TOCItemType[];
@@ -242,6 +247,22 @@ export function createOpenAPI(options: OpenAPIOptions = {}): OpenAPIServer {
     _getWatchPaths() {
       return Object.keys(resolvedInput).filter((key) => !URL.canParse(key) && fs.existsSync(key));
     },
+    async preloadOpenAPIPage(page) {
+      const out: Extract<OpenAPIPageProps, { preloaded: unknown }>['preloaded'] = {
+        docs: {},
+        proxyUrl: options.proxyUrl,
+      };
+      const openapiMeta = (page.data as { _openapi?: InternalOpenAPIMeta })._openapi;
+      if (openapiMeta?.preload) {
+        out.docs = Object.fromEntries(
+          await Promise.all(
+            openapiMeta.preload.map(async (k) => [k, (await getSchema(k)).bundled]),
+          ),
+        );
+      }
+
+      return { preloaded: out };
+    },
     getSchema,
     getSchemas,
     async staticSource(options = {}) {
@@ -264,6 +285,7 @@ export interface InternalOpenAPIMeta {
   method?: string;
   webhook?: boolean;
   deprecated?: boolean;
+  preload?: string[];
 }
 
 /**

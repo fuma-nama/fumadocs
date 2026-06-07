@@ -74,15 +74,15 @@ export function toText(
     pageProps.showDescription = false;
   }
 
-  let meta: InternalOpenAPIMeta | undefined;
+  let meta: InternalOpenAPIMeta = {
+    preload: [entry.schemaId],
+  };
   if (entry.type === 'operation' || entry.type === 'webhook') {
     const operation = entry.item;
 
-    meta = {
-      method: operation.method.toUpperCase(),
-      webhook: entry.type === 'webhook',
-      deprecated: entry.info.deprecated,
-    };
+    meta.method = operation.method.toUpperCase();
+    meta.webhook = entry.type === 'webhook';
+    meta.deprecated = entry.info.deprecated;
   }
 
   const data = toStaticData(pageProps, doc);
