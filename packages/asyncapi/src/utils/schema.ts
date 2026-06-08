@@ -1,4 +1,5 @@
-import type { MessageExampleObject, TagObject } from '@/types';
+import type { MessageExampleObject, MessageObject, RenderContext, TagObject } from '@/types';
+import type { NoReference } from '@fumadocs/api-docs/schema';
 import { idToTitle } from '@fumadocs/api-docs/utils/id-to-title';
 
 export type { ParsedSchema } from '@fumadocs/api-docs/schema';
@@ -32,4 +33,18 @@ export function pickExample(value: {
     const first = value.examples[0];
     return first.payload ?? first.headers;
   }
+}
+
+export function getMessageDisplayName(
+  message: NoReference<MessageObject>,
+  ctx: RenderContext,
+  idx?: number,
+) {
+  let v = message.title || message.name;
+  if (v) return v;
+
+  v = ctx.schema.getRawRef(message)?.split('/').at(-1);
+  if (v) return v;
+
+  return typeof idx === 'number' ? `Unknown Message ${idx + 1}` : 'Unknown Message';
 }

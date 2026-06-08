@@ -283,15 +283,20 @@ export function Operation({
               value={`${item.name}\0${item.path}\0${item.method}`}
               anchorSegments={['callbacks', item.name, item.path, item.method]}
             >
-              <AccordionHeader className="flex-col gap-3">
-                <AccordionTrigger className="font-mono">{item.name}</AccordionTrigger>
-                <div className="flex items-center gap-2 text-xs ps-4.5">
-                  <MethodLabel>{item.method}</MethodLabel>
-                  <code className="text-fd-muted-foreground">{item.path}</code>
-                </div>
+              <AccordionHeader>
+                <AccordionTrigger className="gap-3">
+                  <div>
+                    <p className="font-mono mb-2">{item.name}</p>
+
+                    <div className="flex items-center gap-2 text-xs">
+                      <MethodLabel>{item.method}</MethodLabel>
+                      <code className="text-fd-muted-foreground">{item.path}</code>
+                    </div>
+                  </div>
+                </AccordionTrigger>
               </AccordionHeader>
               <AccordionContent>
-                <div className="border p-3 ps-4.5 mb-2 @container prose-no-margin rounded-xl">
+                <div className="border p-3 mb-2 @container prose-no-margin rounded-2xl">
                   <Operation
                     type="webhook"
                     path={path}
@@ -486,9 +491,9 @@ function ResponseAccordion({
         <AccordionHeader>
           <AccordionTrigger className="font-mono">{status}</AccordionTrigger>
           {items.length === 1 ? (
-            <p className="text-fd-muted-foreground not-prose">{items[0].label}</p>
+            <p className="text-fd-muted-foreground not-prose py-2">{items[0].label}</p>
           ) : (
-            items.length > 0 && <SelectTabTrigger items={items} />
+            items.length > 0 && <SelectTabTrigger items={items} className="my-1.5 py-1" />
           )}
         </AccordionHeader>
         <AccordionContent className="ps-4.5 pe-3 border rounded-xl">

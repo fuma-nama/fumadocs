@@ -75,7 +75,7 @@ export function AccordionHeader(props: ComponentProps<typeof Primitive.Header>) 
   return (
     <Primitive.Header
       {...props}
-      className={cn('not-prose flex py-2 text-fd-foreground font-medium', props.className)}
+      className={cn('not-prose flex text-fd-foreground font-medium', props.className)}
     >
       {props.children}
     </Primitive.Header>
@@ -87,11 +87,11 @@ export function AccordionTrigger(props: ComponentProps<typeof Primitive.Trigger>
     <Primitive.Trigger
       {...props}
       className={cn(
-        'flex flex-1 items-center gap-1 text-start group/accordion focus-visible:outline-none',
+        'flex flex-1 items-center gap-1 text-start group/accordion py-2 focus-visible:outline-none',
         props.className,
       )}
     >
-      <ChevronRight className="size-3.5 text-fd-muted-foreground shrink-0 transition-transform group-focus-visible/accordion:text-fd-primary group-data-[state=open]/accordion:rotate-90" />
+      <ChevronRight className="size-3.5 text-fd-muted-foreground shrink-0 transition-transform group-data-[state=open]/accordion:rotate-90" />
       {props.children}
     </Primitive.Trigger>
   );

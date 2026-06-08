@@ -181,7 +181,7 @@ export function SchemaUI({ name, required = false, as = 'property', generated }:
 
 function SchemaDescription({ schema, ...props }: ComponentProps<'div'> & { schema: SchemaData }) {
   return (
-    <div {...props} className={cn('prose-no-margin py-4 empty:hidden', props.className)}>
+    <div {...props} className={cn('prose-no-margin py-2 empty:hidden', props.className)}>
       {schema.description}
       {schema.infoTags && schema.infoTags.length > 0 && (
         <div className="flex flex-row gap-2 flex-wrap mt-2 not-prose empty:hidden">
@@ -411,7 +411,7 @@ function ObjectSearch({ variant = 'default', schema, pathIndex, children }: Obje
           properties={schema.props}
           firstItemRef={firstItemRef}
           empty={() => (
-            <p className="text-fd-muted-foreground text-sm mt-2! mb-0!">
+            <p className="text-fd-muted-foreground text-sm my-2!">
               {t('No property matching')}{' '}
               <span className="text-fd-foreground font-medium">{`"${deferredValue}"`}</span>
             </p>

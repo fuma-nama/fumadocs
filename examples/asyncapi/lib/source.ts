@@ -4,7 +4,7 @@ import { createAsyncAPI } from '@fumadocs/asyncapi/server';
 
 export const asyncapi = createAsyncAPI({
   // input files
-  input: ['./scalar.yaml'],
+  input: ['./slack-rtm.yaml', './scalar.yaml'],
 });
 
 export const source = loader(

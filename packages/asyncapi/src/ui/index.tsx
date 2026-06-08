@@ -72,7 +72,6 @@ export interface CreateAsyncAPIPageOptions {
         reply: ReactNode;
         traits: ReactNode;
         bindings: ReactNode;
-        messageExamples: ReactNode;
       },
       context: {
         operation: NoReference<OperationObject>;

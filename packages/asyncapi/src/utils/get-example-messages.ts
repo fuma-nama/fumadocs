@@ -13,53 +13,40 @@ export interface ExampleMessageItem {
 }
 
 export function getExampleMessages({
-  messages,
+  message,
 }: {
-  messages: NoReference<MessageObject>[];
+  message: NoReference<MessageObject>;
 }): ExampleMessageItem[] {
-  const result: ExampleMessageItem[] = [];
+  if (message.examples && message.examples.length > 0) {
+    return message.examples.map((example, exampleIndex) => {
+      const picked = pickMessageExample(example);
 
-  for (const message of messages) {
-    const messageName = message.name || message.title || 'message';
+      return {
+        id: example.name || String(exampleIndex),
+        name: example.name || example.summary || `Example ${exampleIndex + 1}`,
+        description: example.summary || message.description,
+        headers: picked.headers,
+        payload: picked.payload,
+      };
+    });
+  }
 
-    if (message.examples && message.examples.length > 0) {
-      for (const [index, example] of message.examples.entries()) {
-        const picked = pickMessageExample(example);
-        result.push({
-          id: `${messageName}-${example.name || index}`,
-          name: example.name || example.summary || `${messageName} ${index + 1}`,
-          description: example.summary || message.description,
-          headers: picked.headers,
-          payload: picked.payload,
-        });
-      }
-      continue;
-    }
+  const headersSchema = resolveSchema(message.headers as MultiFormatSchemaObject);
+  const payload = message.payload ?? resolveSchema(message.payload as MultiFormatSchemaObject);
 
-    const headersSchema = resolveSchema(message.headers as MultiFormatSchemaObject);
-    const payload = message.payload ?? resolveSchema(message.payload as MultiFormatSchemaObject);
-
-    result.push({
-      id: messageName,
-      name: message.title || messageName,
+  return [
+    {
+      id: 'default',
+      name: 'Example',
       description: message.description,
       headers:
         headersSchema && typeof headersSchema === 'object'
-          ? sample(headersSchema as object, { skipNonRequired: true })
+          ? sample(headersSchema as object)
           : pickExample(message as never),
       payload:
         payload && typeof payload === 'object'
-          ? sample(payload as object, { skipNonRequired: true })
+          ? sample(payload as object)
           : pickExample(message as never),
-    });
-  }
-
-  if (result.length === 0) {
-    result.push({
-      id: '_default',
-      name: 'Default',
-    });
-  }
-
-  return result;
+    },
+  ];
 }

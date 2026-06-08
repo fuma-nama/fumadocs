@@ -1,5 +1,5 @@
 'use client';
-import { type ComponentProps, Fragment, useMemo, type ReactNode } from 'react';
+import { type ComponentProps, Fragment, type ReactNode } from 'react';
 import type {
   ChannelObject,
   MessageObject,
@@ -10,7 +10,7 @@ import type {
   SecuritySchemeObject,
   ServerObject,
 } from '@/types';
-import { UsageTabs } from '@/ui/operation/usage-tabs';
+import { MessageExamples } from '@/ui/operation/message-examples';
 import { ActionLabel } from '@/ui/components/method-label';
 import { useTranslations } from '@fuma-translate/react';
 import {
@@ -21,7 +21,6 @@ import {
   AccordionTrigger,
 } from '@fumadocs/api-docs/components/accordion';
 import { cn } from '@/utils/cn';
-import { getExampleMessages } from '../../utils/get-example-messages';
 import { SelectTabs, SelectTabTrigger, SelectTab } from '@fumadocs/api-docs/components/select-tab';
 import { AnchorSection } from '@fumadocs/api-docs/auto-anchor/client';
 import { Heading } from '@/ui/components/heading';
@@ -31,6 +30,8 @@ import type { NoReference } from '@fumadocs/api-docs/schema';
 import { getChannelAddress, getOperationDisplayName, resolveSchema } from '@/utils/operation';
 import { ClientCodeBlock } from '../components/codeblock';
 import { dereferenceShallow } from '@fumadocs/api-docs/schema/dereference';
+import { getMessageDisplayName } from '@/utils/schema';
+import { MailIcon, PlugIcon } from 'lucide-react';
 
 export function Operation({
   id,
@@ -59,12 +60,9 @@ export function Operation({
     schema: { dereferenced },
   } = ctx;
 
-  const operationDescription = operation.description ?? channel.description;
-  const descriptionNode = showDescription && operationDescription && (
-    <Markdown md={operationDescription} />
+  const descriptionNode = showDescription && operation.description && (
+    <Markdown md={operation.description} />
   );
-
-  const exampleMessages = useMemo(() => getExampleMessages({ messages }), [messages]);
 
   let headNode: ReactNode = null;
   if (showTitle) {
@@ -91,19 +89,12 @@ export function Operation({
 
   const replyNode = reply ? <ReplySection reply={reply} headingLevel={headingLevel} /> : null;
 
-  const bindingsNode = (
+  const bindingsNode = operation.bindings && (
     <>
-      <BindingsSection
-        bindings={operation.bindings}
-        id="operation-bindings"
-        headingLevel={headingLevel}
-      />
-      <BindingsSection
-        bindings={channel.bindings}
-        id="channel-bindings"
-        headingLevel={headingLevel}
-        title={t('Channel')}
-      />
+      <Heading id="binding" depth={headingLevel}>
+        {t('Bindings')}
+      </Heading>
+      <BindingsSection bindings={operation.bindings} />
     </>
   );
 
@@ -152,21 +143,16 @@ export function Operation({
 
   renderOperationLayout ??= (slots) => {
     return (
-      <div className="flex flex-col gap-x-6 gap-y-4 @4xl:flex-row @4xl:items-start">
-        <div className="min-w-0 flex-1">
-          {slots.header}
-          {slots.description}
-          {slots.channel}
-          {slots.authSchemes}
-          {slots.parameters}
-          {slots.messages}
-          {slots.reply}
-          {slots.traits}
-          {slots.bindings}
-        </div>
-        <div className="@4xl:sticky @4xl:top-[calc(var(--fd-docs-row-1,2rem)+1rem)] @4xl:w-[400px]">
-          {slots.messageExamples}
-        </div>
+      <div>
+        {slots.header}
+        {slots.description}
+        {slots.channel}
+        {slots.authSchemes}
+        {slots.parameters}
+        {slots.messages}
+        {slots.reply}
+        {slots.traits}
+        {slots.bindings}
       </div>
     );
   };
@@ -182,7 +168,6 @@ export function Operation({
       reply: replyNode,
       traits: traitsNode,
       bindings: bindingsNode,
-      messageExamples: <UsageTabs examples={exampleMessages} />,
     },
     {
       operation,
@@ -213,17 +198,19 @@ function ChannelSection({
 
   return (
     <>
-      <Heading id="channel" depth={headingLevel} className="mt-10">
+      <Heading id="channel" depth={headingLevel}>
         {t('Channel')}
       </Heading>
-      <div className="not-prose text-sm border rounded-xl p-3 flex flex-col gap-2">
+      <div className="not-prose text-sm border rounded-xl bg-fd-card text-fd-card-foreground p-3 flex flex-col gap-2">
         {channel.title && <p className="font-medium">{channel.title}</p>}
         {channel.summary && <p className="text-fd-muted-foreground">{channel.summary}</p>}
         {address && (
-          <p>
-            {t('Address')}: <code>{address}</code>
-          </p>
+          <div className="inline-flex items-center gap-3 p-2 bg-fd-secondary text-xs text-fd-secondary-foreground rounded-lg border shadow-md">
+            <p className="font-medium text-fd-muted-foreground">{t('Address')}</p>
+            <code>{address}</code>
+          </div>
         )}
+        <BindingsSection bindings={channel.bindings} className="-my-2" />
       </div>
     </>
   );
@@ -287,50 +274,58 @@ function MessagesSection({
       </Heading>
       <Accordions type="multiple">
         {messages.map((message, index) => {
-          const name = message.name || message.title || `message-${index + 1}`;
+          const id = message.name ?? `message-${index}`;
           const headers = resolveSchema(message.headers as MultiFormatSchemaObject);
           const payload =
             message.payload ?? resolveSchema(message.payload as MultiFormatSchemaObject);
 
           return (
-            <AccordionItem key={name} value={name} anchorSegments={['messages', name]}>
+            <AccordionItem key={id} value={id} anchorSegments={['messages', id]}>
               <AccordionHeader>
-                <AccordionTrigger>{message.title || name}</AccordionTrigger>
+                <AccordionTrigger className="inline-flex items-center gap-2 font-mono">
+                  <MailIcon className="text-fd-muted-foreground size-3.5" />
+                  {getMessageDisplayName(message, ctx, index)}
+                </AccordionTrigger>
               </AccordionHeader>
-              <AccordionContent className="ps-4.5 pe-3 border rounded-xl">
-                {message.description && <Markdown md={message.description} />}
-                {message.contentType && (
-                  <p className="text-xs text-fd-muted-foreground not-prose">
-                    Content-Type: <code>{message.contentType}</code>
-                  </p>
-                )}
-                {headers && (
-                  <>
-                    <Heading id={`${name}-headers`} depth={headingLevel + 1}>
-                      {t('Headers')}
-                    </Heading>
-                    <ctx.SchemaUI client={{ name: 'headers' }} root={headers as never} />
-                  </>
-                )}
-                {payload && (
-                  <>
-                    <Heading id={`${name}-payload`} depth={headingLevel + 1}>
-                      {t('Payload')}
-                    </Heading>
-                    <ctx.SchemaUI
-                      client={{ name: 'payload', as: 'body' }}
-                      root={payload as never}
-                    />
-                  </>
-                )}
-                {message.correlationId && (
-                  <CorrelationIdSection correlationId={message.correlationId} />
-                )}
-                <BindingsSection
-                  bindings={message.bindings}
-                  id={`${name}-bindings`}
-                  headingLevel={headingLevel + 1}
-                />
+              <AccordionContent className="grid grid-cols-2 gap-2">
+                <div className="bg-fd-card text-fd-card-foreground border rounded-xl px-5 py-4 mb-2 prose-no-margin shadow-sm">
+                  {message.description && <Markdown md={message.description} />}
+                  {message.contentType && (
+                    <p className="text-xs text-fd-muted-foreground not-prose">
+                      Content-Type: <code>{message.contentType}</code>
+                    </p>
+                  )}
+                  {headers && (
+                    <>
+                      <Heading id={`${id}-headers`} depth={headingLevel + 1}>
+                        {t('Headers')}
+                      </Heading>
+                      <ctx.SchemaUI client={{ name: 'headers' }} root={headers as never} />
+                    </>
+                  )}
+                  {payload && (
+                    <>
+                      <Heading id={`${id}-payload`} depth={headingLevel + 1}>
+                        {t('Payload')}
+                      </Heading>
+                      <ctx.SchemaUI client={{ name: 'payload', as: 'body' }} root={payload} />
+                    </>
+                  )}
+                  {message.correlationId && (
+                    <CorrelationIdSection correlationId={message.correlationId} />
+                  )}
+                  {message.bindings && (
+                    <>
+                      <Heading id="binding" depth={headingLevel + 1}>
+                        {t('Bindings')}
+                      </Heading>
+                      <BindingsSection bindings={message.bindings} />
+                    </>
+                  )}
+                </div>
+                <div className="mb-2">
+                  <MessageExamples message={message} />
+                </div>
               </AccordionContent>
             </AccordionItem>
           );
@@ -393,12 +388,16 @@ function TraitsSection({
 
   return (
     <>
-      <Heading id="traits" depth={headingLevel} className="mt-10">
+      <Heading id="traits" depth={headingLevel}>
         {t('Traits')}
       </Heading>
       <Accordions type="multiple">
         {traits.map((trait, index) => (
-          <AccordionItem key={index} value={String(index)}>
+          <AccordionItem
+            key={index}
+            value={String(index)}
+            anchorSegments={['traits', String(index)]}
+          >
             <AccordionHeader>
               <AccordionTrigger>
                 {trait.title || trait.summary || `Trait ${index + 1}`}
@@ -406,11 +405,14 @@ function TraitsSection({
             </AccordionHeader>
             <AccordionContent>
               {trait.description && <Markdown md={trait.description} />}
-              <BindingsSection
-                bindings={trait.bindings}
-                id={`trait-${index}-bindings`}
-                headingLevel={headingLevel + 1}
-              />
+              {trait.bindings && (
+                <>
+                  <Heading id="binding" depth={headingLevel + 1}>
+                    {t('Bindings')}
+                  </Heading>
+                  <BindingsSection bindings={trait.bindings} />
+                </>
+              )}
             </AccordionContent>
           </AccordionItem>
         ))}
@@ -421,38 +423,31 @@ function TraitsSection({
 
 function BindingsSection({
   bindings,
-  id,
-  headingLevel,
-  title,
+  className,
 }: {
   bindings?: Record<string, unknown>;
-  id: string;
-  headingLevel: number;
-  title?: ReactNode;
+  className?: string;
 }) {
-  const t = useTranslations({ note: 'operation page' });
   if (!bindings) return null;
   const entries = Object.entries(bindings).filter(([, value]) => value);
   if (entries.length === 0) return null;
 
   return (
-    <>
-      <Heading id={id} depth={headingLevel}>
-        {title ?? t('Bindings')}
-      </Heading>
-      <Accordions type="multiple">
-        {entries.map(([protocol, binding]) => (
-          <AccordionItem key={protocol} value={protocol}>
-            <AccordionHeader>
-              <AccordionTrigger>{protocol}</AccordionTrigger>
-            </AccordionHeader>
-            <AccordionContent>
-              <ClientCodeBlock lang="json" code={JSON.stringify(binding, null, 2)} />
-            </AccordionContent>
-          </AccordionItem>
-        ))}
-      </Accordions>
-    </>
+    <Accordions type="multiple" className={className}>
+      {entries.map(([protocol, binding]) => (
+        <AccordionItem key={protocol} value={protocol}>
+          <AccordionHeader>
+            <AccordionTrigger className="gap-1.5 font-mono">
+              <PlugIcon className="text-fd-muted-foreground size-4" />
+              {protocol}
+            </AccordionTrigger>
+          </AccordionHeader>
+          <AccordionContent>
+            <ClientCodeBlock lang="json" code={JSON.stringify(binding, null, 2)} />
+          </AccordionContent>
+        </AccordionItem>
+      ))}
+    </Accordions>
   );
 }
 
