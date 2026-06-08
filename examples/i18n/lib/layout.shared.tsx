@@ -1,27 +1,9 @@
 import type { BaseLayoutProps } from 'fumadocs-ui/layouts/shared';
-import type { I18nProviderProps } from 'fumadocs-ui/contexts/i18n';
 import { i18n } from '@/lib/i18n';
-import { translations as zhTW } from '@fumadocs/language/zh-tw';
+import { zhTW } from '@fumadocs/language/zh-tw';
+import { uiTranslations } from 'fumadocs-ui/i18n';
 
-export function i18nProps(locale: string): I18nProviderProps {
-  const locales = i18n.languages.map((code) => ({
-    locale: code,
-    name: code === 'cn' ? 'Chinese' : 'English',
-  }));
-
-  if (locale === 'cn') {
-    return {
-      locale,
-      locales,
-      translations: {
-        ...zhTW,
-        'Search(search dialog input placeholder)': 'Translated Content',
-      },
-    };
-  }
-
-  return { locale, locales };
-}
+export const translations = i18n.translations().extend(uiTranslations()).preset('cn', zhTW());
 
 export function baseOptions(locale: string): BaseLayoutProps {
   return {

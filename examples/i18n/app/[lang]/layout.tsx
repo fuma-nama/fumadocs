@@ -1,7 +1,7 @@
 import 'fumadocs-ui/style.css';
 import { RootProvider } from 'fumadocs-ui/provider/next';
 import { Inter } from 'next/font/google';
-import { i18nProps } from '@/lib/layout.shared';
+import { translations } from '@/lib/layout.shared';
 import { i18nProvider } from 'fumadocs-ui/i18n';
 
 const inter = Inter({
@@ -19,7 +19,7 @@ export default async function Layout({ params, children }: LayoutProps<'/[lang]'
           minHeight: '100vh',
         }}
       >
-        <RootProvider i18n={i18nProvider(i18nProps(lang))}>{children}</RootProvider>
+        <RootProvider i18n={i18nProvider(translations, lang)}>{children}</RootProvider>
       </body>
     </html>
   );

@@ -48,7 +48,7 @@ export interface TranslationPreset<Keys extends string = string> {
   value: Partial<Record<Keys, string>>;
 }
 
-export interface TranslationsAPI<Languages extends string = string, Keys extends string = never> {
+export interface TranslationsAPI<Languages extends string = string, Keys extends string = string> {
   /** for type inference only, always `undefined` in runtime */
   $inferLanguages: Languages;
   /** for type inference only, always `undefined` in runtime */
@@ -63,7 +63,7 @@ export interface TranslationsAPI<Languages extends string = string, Keys extends
   /** register allowed translation keys */
   extend<const NewKeys extends string>(
     extension: TranslationExtension<NewKeys>,
-  ): TranslationsAPI<Languages, Keys | NewKeys[number]>;
+  ): TranslationsAPI<Languages, Keys | NewKeys>;
   /** add translations */
   add: (overrides: {
     [Lang in Languages]?: Partial<Record<Keys, string>>;
