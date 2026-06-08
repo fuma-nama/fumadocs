@@ -39,8 +39,8 @@ export interface I18nConfig<Languages extends string = string> {
   fallbackLanguage?: NoInfer<Languages> | null;
 }
 
-export interface TranslationExtension<Keys extends string> {
-  keys: Keys[];
+export interface TranslationExtension<Keys extends string = string> {
+  keys: readonly Keys[];
 }
 
 export interface TranslationPreset<Keys extends string = string> {

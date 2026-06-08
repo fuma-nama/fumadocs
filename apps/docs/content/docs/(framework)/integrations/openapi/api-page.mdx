@@ -85,13 +85,11 @@ export const translations = i18n
   .extend(uiTranslations())
   // [!code ++]
   .extend(openapiTranslations())
-  .add('ui', {
-    cn: { displayName: 'Chinese' },
-  })
-  // [!code ++:5]
-  .add('openapi', {
+  .add({
     cn: {
-      titleRequestBody: '請求正文',
+      displayName: 'Chinese',
+      // [!code ++]
+      'Body(playground)': '請求正文',
     },
   });
 ```

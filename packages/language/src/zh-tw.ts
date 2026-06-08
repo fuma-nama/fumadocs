@@ -178,18 +178,18 @@ const translations = {
 
   // @fumadocs/story
   'Encountered error when rendering the component.(story error boundary)': '渲染元件時發生錯誤。',
-  'Enter bigint(arg form)': '輸入 bigint',
-  'Enter date(arg form)': '輸入日期',
-  'Enter number(arg form)': '輸入數字',
-  'Enter text(arg form)': '輸入文字',
-  'False(arg form)': '否',
-  'New Item(arg form)': '新增項目',
+  'Enter bigint(story arguments form)': '輸入 bigint',
+  'Enter date(story arguments form)': '輸入日期',
+  'Enter number(story arguments form)': '輸入數字',
+  'Enter text(story arguments form)': '輸入文字',
+  'False(story arguments form)': '否',
+  'New Item(story arguments form)': '新增項目',
   'No Variant(story controls)': '沒有變體',
   'Props(story controls)': '屬性',
-  'Remove Item(arg form)(aria-label)': '移除項目',
+  'Remove Item(story arguments form)(aria-label)': '移除項目',
   'Reset(story error boundary)': '重設',
-  'True(arg form)': '是',
-  'Unset(arg form)': '無',
+  'True(story arguments form)': '是',
+  'Unset(story arguments form)': '無',
 } satisfies Translations;
 
 /**
