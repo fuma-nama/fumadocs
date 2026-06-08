@@ -79,15 +79,13 @@ export const translations = i18n
   .extend(uiTranslations())
   // [!code ++]
   .extend(asyncapiTranslations())
-  .add('ui', {
-    cn: { displayName: 'Chinese' },
-  })
-  // [!code ++:5]
-  .add('asyncapi', {
+  .add({
     cn: {
-      titleMessages: '消息',
-    },
-  });
+      displayName: 'Chinese'
+      // [!code ++]
+      'Messages(operation page)': '消息',
+      },
+  })
 ```
 
 See [Translations](/docs/ui/translations) for more details.

@@ -17,12 +17,10 @@ All official Fumadocs packages use English by default, you can add translations 
 import { defineTranslations } from 'fumadocs-core/i18n';
 import { uiTranslations } from 'fumadocs-ui/i18n';
 
-export const translations = defineTranslations()
-  .extend(uiTranslations())
-  // add translations to "ui" namespace
-  .add('ui', {
-    search: '搜尋文檔',
-  });
+export const translations = defineTranslations().extend(uiTranslations()).add({
+  // [label]: [translation]
+  'Search(search trigger)': '搜尋文檔',
+});
 ```
 
 > `.add()` should only be called **after** all `.extend()` calls.
@@ -58,11 +56,11 @@ import { i18n } from '@/lib/i18n';
 export const translations = i18n
   .translations()
   .extend(uiTranslations())
-  // add translations to "ui" namespace
-  .add('ui', {
-    // [locale code]: { translations }
+  .add({
+    // [locale code]: [translations]
     cn: {
-      search: '搜尋文檔',
+      // [label]: [translation]
+      'Search(search trigger)': '搜尋文檔',
     },
   });
 ```
@@ -134,78 +132,75 @@ You can also create & publish your own language packs.
 
 For example, the structure of `zh-TW` language pack looks like:
 
-```ts
+```ts twoslash
 import type { TranslationPreset } from 'fumadocs-core/i18n';
 import * as OpenAPI from 'fumadocs-openapi/i18n';
 import * as UI from 'fumadocs-ui/i18n';
 import * as Story from '@fumadocs/story/i18n';
 
-const ui = {
+const translations = {
   displayName: '繁體中文',
+  'loading...(playground server select)': '載入中...',
+  'No Variant(story controls)': '沒有變體',
   // ...
-} satisfies UI.Translations;
+} satisfies Partial<UI.Translations & OpenAPI.Translations & Story.Translations>;
 
-const openapi = {
-  loading: '載入中...',
-  // ...
-} satisfies OpenAPI.Translations;
-
-const story = {
-  noVariant: '沒有變體',
-  // ...
-} satisfies Story.Translations;
-
-export function zhTW(): TranslationPreset<{
-  ui: UI.Translations;
-  openapi: OpenAPI.Translations;
-  story: Story.Translations;
-}> {
+export function zhTW(): TranslationPreset<keyof typeof translations> {
   return {
     name: 'zh-TW',
-    value: {
-      ui,
-      openapi,
-      story,
-    },
+    value: translations,
   };
 }
 ```
 
 ## Extensions
 
-Extensions declare the available namespace & labels for translations, only translations in registered namespaces will be sent to client payload.
+Extensions declare the available labels for translations, only registered labels will be sent to client payload.
 
 ### Custom Extension
 
 If you are building community packages for Fumadocs, you can create extensions to register your own translations.
 
-```ts tab="i18n.ts"
-import type { TranslationsAPIExtension, TranslationValue } from 'fumadocs-core/i18n';
+To begin, install the translations toolkit Fumadocs use:
 
-export const defaultTranslations = {
-  labelExample: 'Hello World',
-  labelWithVariable: 'Hello {user}' as TranslationValue<'user'>,
-};
+```npm
+npm i @fuma-translate/react
+```
 
-export type Translations = typeof defaultTranslations;
+```ts tab="i18n.ts" twoslash
+import type { TranslationExtension } from 'fumadocs-core/i18n';
 
-export function myTranslations(): TranslationsAPIExtension<'my-package', Translations> {
-  return {
-    namespace: 'my-package',
-    defaultValue: defaultTranslations,
-  };
+const keys = [
+  // key format: "your label(additional context)"
+  'Hello {user}(welcome screen)',
+] as const;
+
+export function myTranslations(): TranslationExtension<(typeof keys)[number]> {
+  return { keys };
 }
 ```
 
-```ts tab="Reference"
+```tsx tab="Reference"
 'use client';
-import { useTranslations } from 'fumadocs-ui/contexts/i18n';
-import { type Translations, defaultTranslations } from '@/i18n';
+import { useTranslations } from '@fuma-translate/react';
 
 export function Comp() {
-  const translations = useTranslations<Translations>('my-package') ?? defaultTranslations;
+  const t = useTranslations();
+
+  return (
+    <div>
+      {t('Hello {user}', {
+        note: 'welcome screen',
+        variables: {
+          user: '...',
+        },
+      })}
+    </div>
+  );
 }
 ```
+
+> While skipped for simplicity, you can see the docs of [Fuma Translate](https://fuma-translate.vercel.app) to learn how to compile translation keys & types, rather than hardcoding it.
 
 Consumers can use your extension like:
 
@@ -216,7 +211,7 @@ import { myTranslations } from 'my-package/i18n';
 export const translations = defineTranslations()
   // [!code ++]
   .extend(myTranslations())
-  .add('my-package', {
-    labelExample: 'Hello Apple',
+  .add({
+    'Hello {user}(welcome screen)': '你好 {user}',
   });
 ```

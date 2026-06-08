@@ -120,7 +120,7 @@ export function FieldInput({
   fieldName: FieldKey;
 }) {
   const engine = useDataEngine();
-  const t = useTranslations({ note: 'arg form' });
+  const t = useTranslations({ note: 'story arguments form' });
   const [value, setValue] = useFieldValue(fieldName);
   const id = stringifyFieldKey(fieldName);
 
@@ -420,7 +420,7 @@ function ArrayInput({
   fieldName: FieldKey;
   items: TypeNode;
 } & ComponentProps<'div'>) {
-  const t = useTranslations({ note: 'arg form' });
+  const t = useTranslations({ note: 'story arguments form' });
   const name = fieldName.at(-1) ?? '';
   const { items, insertItem, removeItem } = useArray(fieldName, {
     defaultValue: [],
