@@ -27,7 +27,7 @@
     "clean": "rimraf dist",
     "dev": "tsdown --watch --clean false",
     "lint": "oxlint .",
-    "types:check": "node --experimental-strip-types ../../scripts/merge-translation-keys.ts && tsc --noEmit"
+    "types:check": "tsc --noEmit"
   },
   "devDependencies": {
     "@fumadocs/api-docs": "workspace:*",
