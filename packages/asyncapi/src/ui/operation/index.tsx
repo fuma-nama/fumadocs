@@ -2,13 +2,15 @@
 import { type ComponentProps, Fragment, type ReactNode, useMemo } from 'react';
 import type {
   ChannelObject,
+  CorrelationIDObject,
   MessageObject,
   OperationReplyObject,
   ParameterObject,
   SecuritySchemeObject,
+  ServerObject,
 } from '@/types';
 import { MessageExamples } from '@/ui/operation/message-examples';
-import { ActionLabel } from '@/ui/components/method-label';
+import { ActionLabel } from '@/ui/components/badge';
 import { useTranslations } from '@fuma-translate/react';
 import {
   AccordionContent,
@@ -22,7 +24,7 @@ import { SelectTabs, SelectTabTrigger, SelectTab } from '@fumadocs/api-docs/comp
 import { AnchorSection } from '@fumadocs/api-docs/auto-anchor/client';
 import { Heading } from '@/ui/components/heading';
 import { Markdown } from '../components/markdown';
-import { ServerProvider, useRenderContext } from '../contexts/api';
+import { ServerProvider, useRenderContext, useServerContext } from '../contexts/api';
 import type { NoReference } from '@fumadocs/api-docs/schema';
 import {
   getMessageDisplayName,
@@ -33,6 +35,7 @@ import {
 import { MailIcon } from 'lucide-react';
 import { applyMessageTraits, applyOperationTraits } from '@/utils/traits';
 import { AccordionBindings } from '../bindings/accordion-bindings';
+import { ServerSelect } from '../components/server-select';
 
 export function Operation({
   id,
@@ -111,10 +114,9 @@ export function Operation({
     </>
   );
 
-  const replyNode = operation.reply ? (
+  const replyNode = operation.reply && (
     <ReplySection reply={operation.reply} headingLevel={headingLevel} />
-  ) : null;
-
+  );
   const bindingsNode = operation.bindings && (
     <>
       <Heading id="binding" depth={headingLevel}>
@@ -124,7 +126,9 @@ export function Operation({
     </>
   );
 
-  const securitySchemes = operation.security ?? [];
+  const { server, servers } = useServerContext();
+  const serverSchema = server ? servers[server.id] : undefined;
+  const securitySchemes = operation.security ?? serverSchema?.security ?? [];
   let authNode: ReactNode = null;
 
   if (securitySchemes.length > 0) {
@@ -189,8 +193,15 @@ export function Operation({
     },
   );
 
-  if (operation.channel.servers && operation.channel.servers.length > 0) {
-    content = <ServerProvider servers={operation.channel.servers}>{content}</ServerProvider>;
+  if (operation.channel.servers) {
+    const servers = operation.channel.servers;
+    const filteredServers: Record<string, NoReference<ServerObject>> = {};
+
+    for (const [k, v] of Object.entries(dereferenced.servers ?? {})) {
+      if (servers.includes(v)) filteredServers[k] = v;
+    }
+
+    content = <ServerProvider servers={filteredServers}>{content}</ServerProvider>;
   }
 
   return content;
@@ -204,25 +215,34 @@ function ChannelSection({
   headingLevel: number;
 }) {
   const t = useTranslations({ note: 'operation page' });
-  if (!channel.address && !channel.summary && !channel.title) return null;
+  const { servers } = useServerContext();
+  const hasServers = Object.keys(servers).length > 0;
+  const hasChannelInfo = Boolean(
+    channel.address || channel.summary || channel.title || channel.bindings,
+  );
+
+  if (!hasChannelInfo && !hasServers) return null;
 
   return (
     <>
       <Heading id="channel" depth={headingLevel}>
         {t('Channel')}
       </Heading>
-      <div className="not-prose text-sm border rounded-xl bg-fd-card text-fd-card-foreground p-3 flex flex-col gap-2">
-        {channel.title && <p className="font-medium">{channel.title}</p>}
-        {channel.summary && <p className="text-fd-muted-foreground">{channel.summary}</p>}
-        {channel.address && (
-          <div className="inline-flex items-center gap-3 p-2 bg-fd-secondary text-xs text-fd-secondary-foreground rounded-lg border shadow-md">
-            <p className="font-medium text-fd-muted-foreground">{t('Address')}</p>
-            <code>{channel.address}</code>
-          </div>
-        )}
-        {channel.bindings && (
-          <AccordionBindings bindings={channel.bindings} level="channel" variant="sm" />
-        )}
+      <div className="not-prose text-sm border rounded-xl bg-fd-card text-fd-card-foreground overflow-hidden flex flex-col">
+        {hasServers && <ServerSelect className="border-b" />}
+        <div className="p-3 flex flex-col gap-2">
+          {channel.title && <p className="font-medium">{channel.title}</p>}
+          {channel.summary && <p className="text-fd-muted-foreground">{channel.summary}</p>}
+          {channel.address && (
+            <div className="inline-flex items-center gap-3 p-2 bg-fd-secondary text-xs text-fd-secondary-foreground rounded-lg border shadow-md">
+              <p className="font-medium text-fd-muted-foreground">{t('Address')}</p>
+              <code>{channel.address}</code>
+            </div>
+          )}
+          {channel.bindings && (
+            <AccordionBindings bindings={channel.bindings} level="channel" variant="sm" />
+          )}
+        </div>
       </div>
     </>
   );
@@ -366,7 +386,7 @@ function ReplySection({
 function CorrelationIdSection({
   correlationId,
 }: {
-  correlationId: NoReference<import('@/types/asyncapi-3').CorrelationIDObject>;
+  correlationId: NoReference<CorrelationIDObject>;
 }) {
   const t = useTranslations({ note: 'operation page' });
 

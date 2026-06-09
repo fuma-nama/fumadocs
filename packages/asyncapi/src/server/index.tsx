@@ -24,7 +24,7 @@ import type { AsyncAPIPageProps_Preloaded, AsyncAPIPageProps_Spec } from '@/ui';
 import type { StructuredData } from 'fumadocs-core/mdx-plugins/remark-structure';
 import type { TOCItemType } from 'fumadocs-core/toc';
 import type { SchemaToPagesOptions } from '@/utils/pages/preset-auto';
-import { ActionLabel } from '@/ui/components/method-label';
+import { ActionLabel } from '@/ui/components/badge';
 
 type SchemaRecord = Record<
   string,

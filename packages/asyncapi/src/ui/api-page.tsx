@@ -34,10 +34,5 @@ export function PageContent({
     ctx,
   );
 
-  const servers = Object.values(dereferenced.servers ?? {});
-  if (servers.length > 0) {
-    content = <ServerProvider servers={servers}>{content}</ServerProvider>;
-  }
-
-  return content;
+  return <ServerProvider servers={dereferenced.servers ?? {}}>{content}</ServerProvider>;
 }

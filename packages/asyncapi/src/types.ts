@@ -1,22 +1,3 @@
-export type {
-  AsyncAPIObject,
-  ChannelObject,
-  MessageObject,
-  MessageExampleObject,
-  OperationObject,
-  SecuritySchemeObject,
-  ServerObject,
-  TagObject,
-  ReferenceObject,
-  ParameterObject,
-  AsyncAPISchemaObject,
-  MultiFormatSchemaObject,
-  OperationReplyObject,
-  KafkaChannelBinding,
-  KafkaOperationBinding,
-  KafkaMessageBinding,
-  KafkaServerBinding,
-} from './types/asyncapi-3';
 import type { DereferencedDocument } from '@/utils/document/dereference';
 import type { AsyncAPIOptions } from '@/server';
 import type { CreateAsyncAPIPageOptions } from './ui';
@@ -42,3 +23,4 @@ export interface RenderContext
 
 export type DistributiveOmit<T, K extends PropertyKey> = T extends unknown ? Omit<T, K> : never;
 export type Awaitable<T> = T | Promise<T>;
+export type * from './types/asyncapi-3';

@@ -3,17 +3,18 @@ import { createContext, type ReactNode, use, useEffect, useMemo, useState } from
 import type { RenderContext, ServerObject } from '@/types';
 import type { NoReference } from '@fumadocs/api-docs/schema';
 import { useStorageKey } from '../client/storage-key';
+import { getDefaultValues } from '@/utils/server-url';
+import { isPlainObject } from '@/utils/is-plain-object';
 
 interface ServerContextType {
-  servers?: NoReference<ServerObject>[];
+  servers: Record<string, NoReference<ServerObject>>;
   server: SelectedServer | null;
-  setServer: (value: string) => void;
+  setServer: (serverId: string) => void;
   setServerVariables: (value: Record<string, string>) => void;
 }
 
 interface SelectedServer {
-  url: string;
-  name?: string;
+  id: string;
   variables: Record<string, string>;
 }
 
@@ -24,6 +25,12 @@ export function useRenderContext(): RenderContext {
   const ctx = use(Context);
   if (!ctx) throw new Error('Component must be used under <ApiProvider />');
 
+  return ctx;
+}
+
+export function useServerContext() {
+  const ctx = use(ServerContext);
+  if (!ctx) throw new Error('Component must be used under <ServerProvider />');
   return ctx;
 }
 
@@ -41,19 +48,17 @@ export function ServerProvider({
   servers,
   children,
 }: {
-  servers?: NoReference<ServerObject>[];
+  servers: Record<string, NoReference<ServerObject>>;
   children: ReactNode;
 }) {
   const storageKey = useStorageKey().of('server-url');
   const [server, setServer] = useState<SelectedServer | null>(() => {
-    if (!servers || servers.length === 0) return null;
-    const defaultItem = servers[0];
-    const variables = getDefaultValues(defaultItem);
+    const ids = Object.keys(servers);
+    if (ids.length === 0) return null;
 
     return {
-      name: defaultItem.description,
-      url: resolveServerUrl(defaultItem as NoReference<ServerObject>, variables),
-      variables,
+      id: ids[0],
+      variables: getDefaultValues(servers[ids[0]]),
     };
   });
 
@@ -64,20 +69,18 @@ export function ServerProvider({
     try {
       const obj: unknown = JSON.parse(cached);
       if (
-        typeof obj === 'object' &&
-        obj !== null &&
-        'url' in obj &&
-        typeof obj.url === 'string' &&
-        'variables' in obj &&
-        typeof obj.variables === 'object' &&
-        obj.variables !== null
+        isPlainObject(obj) &&
+        isPlainObject(obj.variables) &&
+        typeof obj.id === 'string' &&
+        obj.id in servers
       ) {
-        setServer(obj as SelectedServer);
+        setServer(obj as unknown as SelectedServer);
       }
     } catch {
       // ignore
     }
-  }, [storageKey]);
+    // oxlint-disable-next-line react-hooks/exhaustive-deps -- only at mount
+  }, []);
 
   return (
     <ServerContext
@@ -87,32 +90,25 @@ export function ServerProvider({
           server,
           setServerVariables(variables) {
             setServer((prev) => {
-              if (!prev || !servers) return null;
+              if (!prev) return null;
+              const selected = servers[prev.id];
+              if (!selected) return prev;
 
-              const selected = servers.find(
-                (item) =>
-                  resolveServerUrl(item as NoReference<ServerObject>, variables) === prev.url,
-              );
-              const target = selected ?? servers[0];
-              const updated = {
+              const updated: SelectedServer = {
                 ...prev,
                 variables,
-                url: resolveServerUrl(target as NoReference<ServerObject>, variables),
               };
               localStorage.setItem(storageKey, JSON.stringify(updated));
               return updated;
             });
           },
-          setServer(value) {
-            const obj = servers?.find(
-              (item) => resolveServerUrl(item as NoReference<ServerObject>) === value,
-            );
-            if (!obj) return;
+          setServer(serverId) {
+            const schema = servers[serverId];
+            if (!schema) return;
 
             const result: SelectedServer = {
-              name: obj.description,
-              url: value,
-              variables: getDefaultValues(obj),
+              id: serverId,
+              variables: getDefaultValues(schema),
             };
 
             localStorage.setItem(storageKey, JSON.stringify(result));
@@ -125,34 +121,4 @@ export function ServerProvider({
       {children}
     </ServerContext>
   );
-}
-
-function getDefaultValues(server: NoReference<ServerObject>): Record<string, string> {
-  const out: Record<string, string> = {};
-  if (!server.variables) return out;
-
-  for (const [k, v] of Object.entries(server.variables)) {
-    if (typeof v === 'object' && v !== null && 'default' in v && v.default !== undefined) {
-      out[k] = String(v.default);
-    }
-  }
-
-  return out;
-}
-
-function resolveServerUrl(
-  server: NoReference<ServerObject>,
-  variables: Record<string, string> = {},
-): string {
-  let host = server.host;
-  let pathname = server.pathname ?? '';
-
-  for (const [key, value] of Object.entries(variables)) {
-    const token = `{${key}}`;
-    host = host.replaceAll(token, value);
-    pathname = pathname.replaceAll(token, value);
-  }
-
-  if (pathname && !pathname.startsWith('/')) pathname = `/${pathname}`;
-  return `${server.protocol}://${host}${pathname}`;
 }

@@ -1,12 +1,6 @@
 'use client';
 /* eslint-disable @typescript-eslint/no-explicit-any -- rehype-react without types */
-import type {
-  AsyncAPIObject,
-  Awaitable,
-  ChannelObject,
-  OperationObject,
-  RenderContext,
-} from '@/types';
+import type { AsyncAPIObject, Awaitable, OperationObject, RenderContext } from '@/types';
 import {
   Children,
   type ComponentProps,
@@ -35,6 +29,7 @@ import { Markdown } from './components/markdown';
 import { Schema } from '@fumadocs/api-docs/components/schema';
 import { RenderContextProvider } from './contexts/api';
 import type { NoReference } from '@fumadocs/api-docs/schema';
+import type { ExampleMessageItem } from '@/utils/get-example-messages';
 
 export interface GenerateTypeScriptDefinitionsContext {
   readOnly: boolean;
@@ -86,10 +81,7 @@ export interface CreateAsyncAPIPageOptions {
       },
       ctx: RenderContext,
     ) => ReactNode;
-    renderAPIExampleUsageTabs?: (
-      items: import('@/utils/get-example-messages').ExampleMessageItem[],
-      ctx: RenderContext,
-    ) => ReactNode;
+    renderAPIExampleUsageTabs?: (items: ExampleMessageItem[], ctx: RenderContext) => ReactNode;
   };
   schemaUI?: {
     render?: (
