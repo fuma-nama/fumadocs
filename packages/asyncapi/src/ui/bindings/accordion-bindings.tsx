@@ -9,19 +9,25 @@ import {
   Accordions,
 } from '@fumadocs/api-docs/components/accordion';
 import { getBindingEntries, getProtocolBinding, type BindingEntry } from './protocols';
-import { useMemo } from 'react';
+import { ComponentProps, useMemo } from 'react';
 import { useTranslations } from '@fuma-translate/react';
 import { BindingFieldRow } from './shared';
 import { ClientCodeBlock } from '../components/codeblock';
 
 interface SharedProps {
   variant: 'sm' | 'default';
-  level: 'operation' | 'message' | 'channel';
+  level: 'operation' | 'message' | 'channel' | 'server';
 }
 
 function AccordionBindingItem({ entry, variant, level }: SharedProps & { entry: BindingEntry }) {
   const definition = getProtocolBinding(entry.protocol);
   const { Content, summary } = useMemo(() => {
+    if (level === 'server') {
+      return {
+        summary: definition.getServerSummary?.(entry.binding),
+        Content: definition.Server,
+      };
+    }
     if (level === 'channel') {
       return {
         summary: definition.getChannelSummary?.(entry.binding),
@@ -47,7 +53,7 @@ function AccordionBindingItem({ entry, variant, level }: SharedProps & { entry: 
         <AccordionTrigger
           className={cn(
             'inline-flex w-full items-center gap-2 font-medium',
-            variant === 'sm' && 'px-3 py-2 text-xs bg-fd-secondary text-fd-secondary-foreground',
+            variant === 'sm' && 'p-2 text-xs bg-fd-secondary text-fd-secondary-foreground',
             variant === 'default' && 'px-4 py-3',
           )}
         >
@@ -69,7 +75,7 @@ function AccordionBindingItem({ entry, variant, level }: SharedProps & { entry: 
         </AccordionTrigger>
       </AccordionHeader>
       <AccordionContent
-        className={cn('border-t', variant === 'sm' && 'px-3', variant === 'default' && 'px-4')}
+        className={cn('border-t', variant === 'sm' && 'px-2', variant === 'default' && 'px-4')}
       >
         <Content binding={entry.binding} />
       </AccordionContent>
@@ -79,60 +85,54 @@ function AccordionBindingItem({ entry, variant, level }: SharedProps & { entry: 
 
 export function AccordionBindings({
   bindings,
-  className,
   level,
   variant,
+  accordionsProps,
 }: SharedProps & {
   bindings: Record<string, unknown>;
-  className?: string;
+  accordionsProps?: Partial<ComponentProps<typeof Accordions>>;
 }) {
   const t = useTranslations({ note: 'bindings' });
   const { protocols, extensions } = getBindingEntries(bindings);
   if (protocols.length === 0 && extensions.length === 0) return null;
 
   return (
-    <div className={cn('not-prose', className)}>
-      {protocols.length > 0 && (
-        <Accordions
-          type="multiple"
-          className={cn(
-            'border overflow-hidden shadow-md',
-            variant === 'sm' && 'rounded-lg',
-            variant === 'default' && 'bg-fd-card rounded-xl',
-          )}
-        >
-          {protocols.map((entry) => (
-            <AccordionBindingItem
-              key={entry.protocol}
-              entry={entry}
-              level={level}
-              variant={variant}
-            />
-          ))}
-        </Accordions>
+    <Accordions
+      type="multiple"
+      {...accordionsProps}
+      className={cn(
+        'border overflow-hidden not-prose',
+        variant === 'sm' && 'rounded-lg',
+        variant === 'default' && 'bg-fd-card rounded-xl shadow-md',
+        accordionsProps?.className,
       )}
-      {extensions.length > 0 && (
-        <div className="mt-2 border-t pt-2">
-          <p className="mb-2 text-xs font-medium text-fd-muted-foreground">{t('Extensions')}</p>
-          <dl className="not-prose">
-            {extensions.map((entry) => (
-              <BindingFieldRow
-                key={entry.protocol}
-                label={<code className="text-xs">{entry.protocol}</code>}
-                value={<BindingExtensionValue {...entry} />}
-              />
-            ))}
-          </dl>
-        </div>
-      )}
-    </div>
+    >
+      {protocols.map((entry) => (
+        <AccordionBindingItem key={entry.protocol} entry={entry} level={level} variant={variant} />
+      ))}
+      {extensions.map((entry) => (
+        <AccordionItem key={entry.protocol} value={entry.protocol}>
+          <AccordionHeader>
+            <AccordionTrigger className="text-xs font-mono">{entry.protocol}</AccordionTrigger>
+          </AccordionHeader>
+          <AccordionContent>
+            <ExtensionContent {...entry} />
+          </AccordionContent>
+        </AccordionItem>
+      ))}
+    </Accordions>
   );
 }
 
-function BindingExtensionValue({ binding }: BindingEntry) {
+function ExtensionContent({ binding, protocol }: BindingEntry) {
   const code = useMemo(() => {
     return JSON.stringify(binding, null, 2);
   }, [binding]);
 
-  return <ClientCodeBlock lang="json" code={code} />;
+  return (
+    <BindingFieldRow
+      label={<code className="text-xs">{protocol}</code>}
+      value={<ClientCodeBlock lang="json" code={code} />}
+    />
+  );
 }

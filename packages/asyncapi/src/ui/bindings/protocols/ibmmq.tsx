@@ -1,5 +1,9 @@
 'use client';
-import type { IbmmqChannelBinding, IbmmqMessageBinding } from '@/types/asyncapi-3';
+import type {
+  IbmmqChannelBinding,
+  IbmmqMessageBinding,
+  IbmmqServerBinding,
+} from '@/types/asyncapi-3';
 import type { NoReference } from '@fumadocs/api-docs/schema';
 import {
   createBinding,
@@ -12,6 +16,10 @@ import {
   joinBindingSummary,
 } from '../shared';
 
+function getIbmmqServerSummary(binding: NoReference<IbmmqServerBinding>): string | undefined {
+  return joinBindingSummary(binding.groupId, binding.ccdtQueueManagerName);
+}
+
 function getIbmmqChannelSummary(binding: NoReference<IbmmqChannelBinding>): string | undefined {
   return joinBindingSummary(
     binding.destinationType,
@@ -22,6 +30,45 @@ function getIbmmqChannelSummary(binding: NoReference<IbmmqChannelBinding>): stri
 
 function getIbmmqMessageSummary(binding: NoReference<IbmmqMessageBinding>): string | undefined {
   return binding.type;
+}
+
+function IbmmqServerBinding({ binding }: { binding: NoReference<IbmmqServerBinding> }) {
+  if (!hasBindingFields(binding)) return <BindingEmpty />;
+
+  return (
+    <BindingFields>
+      {binding.groupId && (
+        <BindingFieldRow
+          label="Group ID"
+          value={<code className="text-xs">{binding.groupId}</code>}
+        />
+      )}
+      {binding.ccdtQueueManagerName && (
+        <BindingFieldRow
+          label="CCDT Queue Manager Name"
+          value={<code className="text-xs">{binding.ccdtQueueManagerName}</code>}
+        />
+      )}
+      {binding.cipherSpec && (
+        <BindingFieldRow
+          label="Cipher Spec"
+          value={<code className="text-xs">{binding.cipherSpec}</code>}
+        />
+      )}
+      {binding.multiEndpointServer !== undefined && (
+        <BindingFieldRow
+          label="Multi Endpoint Server"
+          value={<BindingScalarValue value={binding.multiEndpointServer} />}
+        />
+      )}
+      {binding.heartBeatInterval !== undefined && (
+        <BindingFieldRow
+          label="Heartbeat Interval"
+          value={<BindingScalarValue value={binding.heartBeatInterval} />}
+        />
+      )}
+    </BindingFields>
+  );
 }
 
 function IbmmqChannelBinding({ binding }: { binding: NoReference<IbmmqChannelBinding> }) {
@@ -137,8 +184,10 @@ function IbmmqMessageBinding({ binding }: { binding: NoReference<IbmmqMessageBin
 }
 export const ibmmqBinding = createBinding({
   label: 'IBM MQ',
+  Server: IbmmqServerBinding,
   Channel: IbmmqChannelBinding,
   Message: IbmmqMessageBinding,
+  getServerSummary: getIbmmqServerSummary,
   getChannelSummary: getIbmmqChannelSummary,
   getMessageSummary: getIbmmqMessageSummary,
 });

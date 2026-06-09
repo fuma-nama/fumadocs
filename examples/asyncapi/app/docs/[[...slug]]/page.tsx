@@ -19,7 +19,7 @@ export default async function Page(props: { params: Promise<{ slug?: string[] }>
         <DocsTitle>{page.data.title}</DocsTitle>
         <DocsDescription>{page.data.description}</DocsDescription>
         <DocsBody>
-          <AsyncAPIPage {...page.data.getAsyncAPIPageProps()} />
+          <AsyncAPIPage {...page.data.getAsyncAPIPageProps()} showDescription={false} />
         </DocsBody>
       </DocsPage>
     );

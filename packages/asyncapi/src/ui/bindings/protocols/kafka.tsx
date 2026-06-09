@@ -4,6 +4,7 @@ import type {
   KafkaChannelBinding,
   KafkaMessageBinding,
   KafkaOperationBinding,
+  KafkaServerBinding,
 } from '@/types/asyncapi-3';
 import type { NoReference } from '@fumadocs/api-docs/schema';
 import {
@@ -16,7 +17,12 @@ import {
   BindingScalarValue,
   BindingSchema,
   formatBindingScalar,
+  joinBindingSummary,
 } from '../shared';
+
+function getKafkaServerSummary(binding: NoReference<KafkaServerBinding>): string | undefined {
+  return joinBindingSummary(binding.schemaRegistryUrl, binding.schemaRegistryVendor);
+}
 
 function getKafkaChannelSummary(binding: NoReference<KafkaChannelBinding>): string | undefined {
   const parts: string[] = [];
@@ -64,6 +70,27 @@ function getBindingSchemaSummary(
 function getKafkaMessageSummary(binding: NoReference<KafkaMessageBinding>): string | undefined {
   const key = getBindingSchemaSummary(binding.key);
   return key ? `key: ${key}` : undefined;
+}
+
+function KafkaServerBinding({ binding }: { binding: NoReference<KafkaServerBinding> }) {
+  if (!hasBindingFields(binding)) return <BindingEmpty />;
+
+  return (
+    <BindingFields>
+      {binding.schemaRegistryUrl && (
+        <BindingFieldRow
+          label="Schema Registry URL"
+          value={<code className="text-xs">{binding.schemaRegistryUrl}</code>}
+        />
+      )}
+      {binding.schemaRegistryVendor && (
+        <BindingFieldRow
+          label="Schema Registry Vendor"
+          value={<code className="text-xs">{binding.schemaRegistryVendor}</code>}
+        />
+      )}
+    </BindingFields>
+  );
 }
 
 function KafkaChannelBinding({ binding }: { binding: NoReference<KafkaChannelBinding> }) {
@@ -161,9 +188,11 @@ function KafkaMessageBinding({ binding }: { binding: NoReference<KafkaMessageBin
 
 export const kafkaBinding = createBinding({
   label: 'Kafka',
+  Server: KafkaServerBinding,
   Channel: KafkaChannelBinding,
   Operation: KafkaOperationBinding,
   Message: KafkaMessageBinding,
+  getServerSummary: getKafkaServerSummary,
   getChannelSummary: getKafkaChannelSummary,
   getOperationSummary: getKafkaOperationSummary,
   getMessageSummary: getKafkaMessageSummary,

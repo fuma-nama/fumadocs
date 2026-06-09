@@ -81,7 +81,7 @@ export function Operation({
     headingLevel++;
   }
 
-  const channelNode = <ChannelSection channel={operation.channel} headingLevel={headingLevel} />;
+  const channelNode = <ChannelSection channel={operation.channel} />;
   const parametersNode = operation.channel.parameters ? (
     <ParametersSection parameters={operation.channel.parameters} headingLevel={headingLevel} />
   ) : null;
@@ -128,10 +128,10 @@ export function Operation({
 
   const { server, servers } = useServerContext();
   const serverSchema = server ? servers[server.id] : undefined;
-  const securitySchemes = operation.security ?? serverSchema?.security ?? [];
+  const securitySchemes = operation.security ?? serverSchema?.security;
   let authNode: ReactNode = null;
 
-  if (securitySchemes.length > 0) {
+  if (securitySchemes && securitySchemes.length > 0) {
     const items = securitySchemes.map((scheme, i) => ({
       value: String(i),
       label: <code className="text-xs truncate">{scheme.name || scheme.type}</code>,
@@ -207,44 +207,64 @@ export function Operation({
   return content;
 }
 
-function ChannelSection({
-  channel,
-  headingLevel,
-}: {
-  channel: NoReference<ChannelObject>;
-  headingLevel: number;
-}) {
-  const t = useTranslations({ note: 'operation page' });
-  const { servers } = useServerContext();
+function ChannelSection({ channel }: { channel: NoReference<ChannelObject> }) {
+  const t = useTranslations({ note: 'asyncapi channel section' });
+  const { servers, server } = useServerContext();
+  const serverSchema = server ? servers[server.id] : undefined;
   const hasServers = Object.keys(servers).length > 0;
   const hasChannelInfo = Boolean(
     channel.address || channel.summary || channel.title || channel.bindings,
   );
+  const hasServerBindings = Boolean(serverSchema?.bindings);
 
-  if (!hasChannelInfo && !hasServers) return null;
+  if (!hasChannelInfo && !hasServers && !hasServerBindings) return null;
 
   return (
-    <>
-      <Heading id="channel" depth={headingLevel}>
-        {t('Channel')}
-      </Heading>
-      <div className="not-prose text-sm border rounded-xl bg-fd-card text-fd-card-foreground overflow-hidden flex flex-col">
-        {hasServers && <ServerSelect className="border-b" />}
-        <div className="p-3 flex flex-col gap-2">
-          {channel.title && <p className="font-medium">{channel.title}</p>}
-          {channel.summary && <p className="text-fd-muted-foreground">{channel.summary}</p>}
-          {channel.address && (
-            <div className="inline-flex items-center gap-3 p-2 bg-fd-secondary text-xs text-fd-secondary-foreground rounded-lg border shadow-md">
-              <p className="font-medium text-fd-muted-foreground">{t('Address')}</p>
-              <code>{channel.address}</code>
-            </div>
-          )}
-          {channel.bindings && (
-            <AccordionBindings bindings={channel.bindings} level="channel" variant="sm" />
+    <div className="not-prose text-sm border rounded-xl overflow-hidden flex flex-col p-1 gap-3 shadow-md">
+      {hasServers && (
+        <div className="rounded-lg border bg-fd-card text-fd-card-foreground overflow-hidden shadow-sm">
+          <ServerSelect className="w-full border-b" />
+          {serverSchema?.bindings && (
+            <AccordionBindings
+              bindings={serverSchema.bindings}
+              level="server"
+              variant="sm"
+              accordionsProps={{ className: 'rounded-none border-none' }}
+            />
           )}
         </div>
+      )}
+      <div className="grid grid-cols-[auto_1fr] gap-x-3 gap-y-2 p-2 bg-fd-card text-xs text-fd-card-foreground rounded-lg border shadow-sm">
+        {channel.title && (
+          <>
+            <p className="font-medium text-fd-muted-foreground">{t('Channel')}</p>
+            <p className="font-medium">{channel.title}</p>
+          </>
+        )}
+        {channel.address && (
+          <>
+            <p className="font-medium text-fd-muted-foreground">{t('Address')}</p>
+            <code>{channel.address}</code>
+          </>
+        )}
+        {channel.summary && (
+          <>
+            <p className="font-medium text-fd-muted-foreground">{t('Description')}</p>
+            <p>{channel.summary}</p>
+          </>
+        )}
+        {channel.bindings && (
+          <AccordionBindings
+            bindings={channel.bindings}
+            level="channel"
+            variant="sm"
+            accordionsProps={{
+              className: 'col-span-2 -mx-2 -mb-2 border-none',
+            }}
+          />
+        )}
       </div>
-    </>
+    </div>
   );
 }
 

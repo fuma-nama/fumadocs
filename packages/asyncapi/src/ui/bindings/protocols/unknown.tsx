@@ -10,6 +10,7 @@ function UnknownBindingContent({ binding }: { binding: Record<string, unknown> }
 
 export const unknownBinding = createBinding({
   label: 'Unknown',
+  Server: UnknownBindingContent,
   Channel: UnknownBindingContent,
   Operation: UnknownBindingContent,
   Message: UnknownBindingContent,

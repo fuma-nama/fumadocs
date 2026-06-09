@@ -1,11 +1,16 @@
 'use client';
-import type { MqttMessageBinding, MqttOperationBinding } from '@/types/asyncapi-3';
+import type {
+  MqttMessageBinding,
+  MqttOperationBinding,
+  MqttServerBinding,
+} from '@/types/asyncapi-3';
 import type { NoReference } from '@fumadocs/api-docs/schema';
 import {
   createBinding,
   hasBindingFields,
   BindingFields,
   BindingEmpty,
+  BindingGroup,
   BindingFieldRow,
   BindingScalarValue,
   BindingSchema,
@@ -25,6 +30,10 @@ function formatPayloadFormatIndicator(value: number): string {
   return String(value);
 }
 
+function getMqttServerSummary(binding: NoReference<MqttServerBinding>): string | undefined {
+  return joinBindingSummary(binding.clientId, binding.lastWill?.topic);
+}
+
 function getMqttOperationSummary(binding: NoReference<MqttOperationBinding>): string | undefined {
   return joinBindingSummary(
     binding.qos !== undefined && formatQos(binding.qos),
@@ -34,6 +43,92 @@ function getMqttOperationSummary(binding: NoReference<MqttOperationBinding>): st
 
 function getMqttMessageSummary(binding: NoReference<MqttMessageBinding>): string | undefined {
   return binding.contentType;
+}
+
+function MqttServerBinding({ binding }: { binding: NoReference<MqttServerBinding> }) {
+  if (!hasBindingFields(binding)) return <BindingEmpty />;
+
+  return (
+    <BindingFields>
+      {binding.clientId && (
+        <BindingFieldRow
+          label="Client ID"
+          value={<code className="text-xs">{binding.clientId}</code>}
+        />
+      )}
+      {binding.cleanSession !== undefined && (
+        <BindingFieldRow
+          label="Clean Session"
+          value={<BindingScalarValue value={binding.cleanSession} />}
+        />
+      )}
+      {binding.keepAlive !== undefined && (
+        <BindingFieldRow
+          label="Keep Alive"
+          value={<BindingScalarValue value={binding.keepAlive} />}
+        />
+      )}
+      {binding.sessionExpiryInterval !== undefined && (
+        <BindingFieldRow
+          label="Session Expiry Interval"
+          value={
+            typeof binding.sessionExpiryInterval === 'object' ? (
+              <BindingSchema name="sessionExpiryInterval" schema={binding.sessionExpiryInterval} />
+            ) : (
+              <BindingScalarValue value={binding.sessionExpiryInterval} />
+            )
+          }
+        />
+      )}
+      {binding.maximumPacketSize !== undefined && (
+        <BindingFieldRow
+          label="Maximum Packet Size"
+          value={
+            typeof binding.maximumPacketSize === 'object' ? (
+              <BindingSchema name="maximumPacketSize" schema={binding.maximumPacketSize} />
+            ) : (
+              <BindingScalarValue value={binding.maximumPacketSize} />
+            )
+          }
+        />
+      )}
+      {binding.lastWill && (
+        <BindingFieldRow
+          label="Last Will"
+          value={
+            <BindingGroup>
+              <BindingFields>
+                {binding.lastWill.topic && (
+                  <BindingFieldRow
+                    label="Topic"
+                    value={<code className="text-xs">{binding.lastWill.topic}</code>}
+                  />
+                )}
+                {binding.lastWill.qos !== undefined && (
+                  <BindingFieldRow
+                    label="Quality of Service"
+                    value={<code className="text-xs">{formatQos(binding.lastWill.qos)}</code>}
+                  />
+                )}
+                {binding.lastWill.message && (
+                  <BindingFieldRow
+                    label="Message"
+                    value={<code className="text-xs">{binding.lastWill.message}</code>}
+                  />
+                )}
+                {binding.lastWill.retain !== undefined && (
+                  <BindingFieldRow
+                    label="Retain"
+                    value={<BindingScalarValue value={binding.lastWill.retain} />}
+                  />
+                )}
+              </BindingFields>
+            </BindingGroup>
+          }
+        />
+      )}
+    </BindingFields>
+  );
 }
 
 function MqttOperationBinding({ binding }: { binding: NoReference<MqttOperationBinding> }) {
@@ -113,8 +208,10 @@ function MqttMessageBinding({ binding }: { binding: NoReference<MqttMessageBindi
 }
 export const mqttBinding = createBinding({
   label: 'MQTT',
+  Server: MqttServerBinding,
   Operation: MqttOperationBinding,
   Message: MqttMessageBinding,
+  getServerSummary: getMqttServerSummary,
   getOperationSummary: getMqttOperationSummary,
   getMessageSummary: getMqttMessageSummary,
 });

@@ -11,9 +11,11 @@ export type BindingSummaryFn = (binding: Record<string, unknown>) => string | un
 
 export interface ProtocolBindingDefinition {
   label: string;
+  Server: BindingComponent;
   Channel: BindingComponent;
   Operation: BindingComponent;
   Message: BindingComponent;
+  getServerSummary?: BindingSummaryFn;
   getChannelSummary?: BindingSummaryFn;
   getOperationSummary?: BindingSummaryFn;
   getMessageSummary?: BindingSummaryFn;
@@ -67,10 +69,10 @@ export function BindingEmpty() {
   );
 }
 
-export function BindingGroup({ title, children }: { title: ReactNode; children: ReactNode }) {
+export function BindingGroup({ title, children }: { title?: ReactNode; children: ReactNode }) {
   return (
     <div className="rounded-lg border bg-fd-secondary/40 divide-y divide-fd-border/40">
-      <p className="px-3 py-2 text-xs font-medium text-fd-muted-foreground">{title}</p>
+      {title && <p className="px-3 py-2 text-xs font-medium text-fd-muted-foreground">{title}</p>}
       <div className="px-3 pb-1">{children}</div>
     </div>
   );
@@ -178,18 +180,22 @@ function VersionOnlyBinding({ binding }: { binding: { bindingVersion?: string | 
 
 export function createBinding({
   label,
+  Server = VersionOnlyBinding,
   Channel = VersionOnlyBinding,
   Operation = VersionOnlyBinding,
   Message = VersionOnlyBinding,
+  getServerSummary,
   getChannelSummary,
   getOperationSummary,
   getMessageSummary,
 }: Partial<ProtocolBindingDefinition> & { label: string }): ProtocolBindingDefinition {
   return {
     label,
+    Server,
     Channel,
     Operation,
     Message,
+    getServerSummary,
     getChannelSummary,
     getOperationSummary,
     getMessageSummary,

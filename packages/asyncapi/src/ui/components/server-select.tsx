@@ -37,7 +37,7 @@ export function ServerSelect(props: ComponentProps<typeof DialogTrigger>) {
       <DialogTrigger
         {...props}
         className={cn(
-          'flex items-center gap-2 text-sm text-start px-3 py-2 bg-fd-muted text-fd-muted-foreground transition-colors hover:bg-fd-accent hover:text-fd-accent-foreground',
+          'flex items-center gap-2 text-sm text-start p-2 transition-colors hover:bg-fd-accent hover:text-fd-accent-foreground',
           props.className,
         )}
       >
@@ -47,7 +47,7 @@ export function ServerSelect(props: ComponentProps<typeof DialogTrigger>) {
         <code className="truncate min-w-0 flex-1">
           {serverSchema && resolveServerUrl(serverSchema, server?.variables ?? {})}
         </code>
-        <EditIcon className="size-4 shrink-0" />
+        <EditIcon className="size-4 text-fd-muted-foreground shrink-0" />
       </DialogTrigger>
       <DialogContent>
         <DialogHeader>
@@ -62,8 +62,12 @@ export function ServerSelect(props: ComponentProps<typeof DialogTrigger>) {
             {Object.entries(servers).map(([id, item]) => {
               return (
                 <SelectItem key={id} value={id}>
-                  <code className="text-[0.8125rem]">{resolveServerUrl(item, {})}</code>
-                  <p className="text-fd-muted-foreground">{item.description}</p>
+                  <div className="flex flex-col gap-2">
+                    <code className="font-medium">{resolveServerUrl(item, {})}</code>
+                    {item.description && (
+                      <p className="text-fd-muted-foreground">{item.description}</p>
+                    )}
+                  </div>
                 </SelectItem>
               );
             })}

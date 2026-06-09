@@ -50,6 +50,9 @@ servers:
     tags:
       - name: production
         description: Production environment
+    bindings:
+      ws:
+        bindingVersion: '0.1.0'
   development:
     host: localhost:8080
     protocol: ws
@@ -58,6 +61,33 @@ servers:
     tags:
       - name: development
         description: Development environment
+    bindings:
+      ws:
+        bindingVersion: '0.1.0'
+  eventBus:
+    host: kafka.galaxy.scalar.com:9092
+    protocol: kafka
+    description: Kafka event backbone for durable event streaming and replay
+    bindings:
+      kafka:
+        schemaRegistryUrl: https://schema-registry.galaxy.scalar.com
+        schemaRegistryVendor: confluent
+        bindingVersion: '0.5.0'
+  mqttBridge:
+    host: mqtt.galaxy.scalar.com:1883
+    protocol: mqtt
+    description: MQTT bridge for IoT sensor integrations and edge devices
+    bindings:
+      mqtt:
+        clientId: scalar-galaxy-events
+        cleanSession: true
+        keepAlive: 60
+        lastWill:
+          topic: galaxy/system/status
+          qos: 1
+          message: offline
+          retain: true
+        bindingVersion: '0.2.0'
 defaultContentType: application/json
 channels:
   planetEvents:

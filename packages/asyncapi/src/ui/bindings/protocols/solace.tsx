@@ -1,5 +1,5 @@
 'use client';
-import type { SolaceOperationBinding } from '@/types/asyncapi-3';
+import type { SolaceOperationBinding, SolaceServerBinding } from '@/types/asyncapi-3';
 import type { NoReference } from '@fumadocs/api-docs/schema';
 import {
   createBinding,
@@ -10,12 +10,38 @@ import {
   BindingFieldRow,
   BindingScalarValue,
   BindingSchema,
+  joinBindingSummary,
 } from '../shared';
 
 function formatDeliveryMode(value: string): string {
   if (value === 'direct') return 'Direct';
   if (value === 'persistent') return 'Persistent';
   return value;
+}
+
+function getSolaceServerSummary(binding: NoReference<SolaceServerBinding>): string | undefined {
+  return joinBindingSummary(binding.msgVpn, binding.clientName);
+}
+
+function SolaceServerBinding({ binding }: { binding: NoReference<SolaceServerBinding> }) {
+  if (!hasBindingFields(binding)) return <BindingEmpty />;
+
+  return (
+    <BindingFields>
+      {binding.msgVpn && (
+        <BindingFieldRow
+          label="Message VPN"
+          value={<code className="text-xs">{binding.msgVpn}</code>}
+        />
+      )}
+      {binding.clientName && (
+        <BindingFieldRow
+          label="Client Name"
+          value={<code className="text-xs">{binding.clientName}</code>}
+        />
+      )}
+    </BindingFields>
+  );
 }
 
 function getSolaceOperationSummary(
@@ -113,6 +139,8 @@ function SolaceOperationBinding({ binding }: { binding: NoReference<SolaceOperat
 
 export const solaceBinding = createBinding({
   label: 'Solace',
+  Server: SolaceServerBinding,
   Operation: SolaceOperationBinding,
+  getServerSummary: getSolaceServerSummary,
   getOperationSummary: getSolaceOperationSummary,
 });
