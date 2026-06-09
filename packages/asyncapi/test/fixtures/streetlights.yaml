@@ -10,14 +10,41 @@ info:
     - name: lighting
       description: Operations related to streetlights
 defaultContentType: application/json
+components:
+  operationTraits:
+    kafkaConsumer:
+      bindings:
+        kafka:
+          clientId:
+            type: string
+            enum: ['streetlights-consumer']
+          bindingVersion: '0.5.0'
+  messageTraits:
+    commonHeaders:
+      headers:
+        type: object
+        properties:
+          content-type:
+            type: string
 servers:
   production:
     host: test.mykafkacluster.org:8092
     protocol: kafka
     description: Production Kafka broker
+    bindings:
+      kafka:
+        schemaRegistryUrl: https://schema-registry.example.com
+        schemaRegistryVendor: confluent
+        bindingVersion: '0.5.0'
 channels:
   lightMeasured:
     address: light/measured
+    bindings:
+      kafka:
+        topic: light.measured
+        partitions: 3
+        replicas: 1
+        bindingVersion: '0.5.0'
     messages:
       lightMeasuredMessage:
         name: lightMeasured
@@ -33,6 +60,14 @@ channels:
               type: string
               format: date-time
               description: Date and time when the event was sent
+        bindings:
+          kafka:
+            key:
+              type: string
+              enum: ['lightMeasured']
+            bindingVersion: '0.5.0'
+        traits:
+          - $ref: '#/components/messageTraits/commonHeaders'
         examples:
           - name: default
             payload:
@@ -43,6 +78,14 @@ operations:
     action: receive
     channel:
       $ref: '#/channels/lightMeasured'
+    bindings:
+      kafka:
+        groupId:
+          type: string
+          enum: ['streetlights']
+        bindingVersion: '0.5.0'
+    traits:
+      - $ref: '#/components/operationTraits/kafkaConsumer'
     summary: Receive light measurement
     tags:
       - name: lighting

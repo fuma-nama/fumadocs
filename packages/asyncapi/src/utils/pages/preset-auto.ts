@@ -1,5 +1,6 @@
 import * as path from 'node:path';
 import type {
+  OperationItem,
   OperationOutput,
   OutputEntry,
   OutputGroup,
@@ -7,9 +8,9 @@ import type {
   PagesBuilder,
   PagesBuilderConfig,
 } from '@/utils/pages/builder';
-import type { DistributiveOmit } from '@/types';
+import type { DistributiveOmit, TagObject } from '@/types';
 import { dereferenceShallow } from '@fumadocs/api-docs/schema/dereference';
-import { getOperationTags } from '@/utils/operation';
+import { getOperationDisplayName, getTagDisplayName } from '../schema';
 
 interface OperationConfig extends BaseConfig {
   per?: 'operation';
@@ -122,39 +123,34 @@ export function createAutoPreset(options: SchemaToPagesOptions): PagesBuilderCon
           break;
         }
         case 'tag': {
-          const operation = dereferenceShallow(doc.operations?.[entry.item.id], doc) as
-            | import('@/types').OperationObject
-            | undefined;
-          let tags = operation ? getOperationTags(operation, doc) : [];
+          const operation = dereferenceShallow(doc.operations?.[entry.item.id], doc)!;
+          let tags = operation.tags?.map((t) => dereferenceShallow(t, doc));
 
           if (!tags || tags.length === 0) {
             console.warn(
               'When `groupBy` is set to `tag`, make sure a `tags` is defined for every operation schema.',
             );
-            tags = ['unknown'];
+            tags = [{ name: 'unknown' }];
           }
 
           for (const tag of tags) {
-            const res = builder.fromTagName(tag);
-            if (!res) continue;
-
-            const groupName = slugify(tag);
-            let group = groups.get(groupName);
+            const groupId = slugify(tag.name);
+            let group = groups.get(groupId);
             if (!group) {
               group = {
                 type: 'group',
-                info: { title: res.displayName, description: res.info.description },
-                tag: res.info,
+                info: { title: getTagDisplayName(tag), description: tag.description },
+                tag,
                 entries: [],
                 schemaId: builder.id,
-                path: groupName,
+                path: groupId,
               };
-              groups.set(groupName, group);
+              groups.set(groupId, group);
             }
 
             group.entries.push({
               ...entry,
-              path: path.join(groupName, `${nameFn.call(builder, entry)}.mdx`),
+              path: path.join(groupId, `${nameFn.call(builder, entry)}.mdx`),
             });
           }
 
@@ -201,7 +197,6 @@ export function createAutoPreset(options: SchemaToPagesOptions): PagesBuilderCon
   return {
     toPages(builder) {
       const doc = builder.document;
-      const items = builder.extract();
 
       if (options.per === 'file') {
         const entry: PageOutput = {
@@ -212,7 +207,10 @@ export function createAutoPreset(options: SchemaToPagesOptions): PagesBuilderCon
             title: doc.info.title ?? 'Unknown',
             description: doc.info.description,
           },
-          operations: items.operations,
+          operations: Object.entries(doc.operations ?? {}).map(([id, operation]) => ({
+            id,
+            action: dereferenceShallow(operation, doc).action,
+          })),
         };
         entry.path = `${nameFn.call(builder, entry)}.mdx`;
         builder.create(entry);
@@ -220,32 +218,35 @@ export function createAutoPreset(options: SchemaToPagesOptions): PagesBuilderCon
       }
 
       if (options.per === 'tag') {
-        const tags = builder.document.info.tags
-          ? builder.document.info.tags
-              .map((tag) => dereferenceShallow(tag, doc))
-              .filter((tag): tag is NonNullable<typeof tag> => Boolean(tag))
-          : [];
+        const uniqueTags = new Map<string, TagObject>();
+        for (const _op of Object.values(doc.operations ?? {})) {
+          const operation = dereferenceShallow(_op, doc);
 
-        const uniqueTags = new Map<string, (typeof tags)[number]>();
-        for (const tag of tags) uniqueTags.set(tag.name, tag);
-        for (const op of items.operations) {
-          for (const tagName of op.tags ?? []) {
-            const res = builder.fromTagName(tagName);
-            if (res) uniqueTags.set(tagName, res.info);
+          if (!operation.tags) continue;
+          for (const _tag of operation.tags) {
+            const tag = dereferenceShallow(_tag, doc);
+            uniqueTags.set(tag.name, tag);
           }
         }
 
         for (const tag of uniqueTags.values()) {
-          const { displayName } = builder.fromTag(tag);
+          const operations: OperationItem[] = [];
+          for (const [id, _op] of Object.entries(doc.operations ?? {})) {
+            const operation = dereferenceShallow(_op, doc);
+            if (operation.tags && operation.tags.includes(tag)) {
+              operations.push({ id, action: operation.action });
+            }
+          }
+
           const entry: PageOutput = {
             type: 'page',
             path: '',
             schemaId: builder.id,
             info: {
-              title: displayName,
+              title: getTagDisplayName(tag),
               description: tag.description,
             },
-            operations: items.operations.filter((op) => op.tags?.includes(tag.name)),
+            operations,
             tag,
           };
 
@@ -257,16 +258,16 @@ export function createAutoPreset(options: SchemaToPagesOptions): PagesBuilderCon
       }
 
       const entries: DistributiveOmit<OperationOutput, 'path'>[] = [];
-      for (const op of items.operations) {
-        const { channel, operation, displayName } = builder.fromExtractedOperation(op)!;
+      for (const [id, _op] of Object.entries(doc.operations ?? {})) {
+        const operation = dereferenceShallow(_op, doc);
 
         entries.push({
           type: 'operation',
           schemaId: builder.id,
-          item: op,
+          item: { id, action: operation.action },
           info: {
-            title: displayName,
-            description: operation.description ?? channel.description,
+            title: getOperationDisplayName(id, operation),
+            description: operation.description,
           },
         });
       }

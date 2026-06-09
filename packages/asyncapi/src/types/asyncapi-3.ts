@@ -1,7 +1,7 @@
 /** From https://github.com/asyncapi/parser-js/blob/master/packages/parser/src/spec-types/v3.ts
  * - Switched from `json-schema` to `json-schema-typed`
  */
-import type { JSONSchema, $schema, TypeName } from 'json-schema-typed/draft-07';
+import type { JSONSchema } from 'json-schema-typed/draft-07';
 
 export type AsyncAPIVersion = string;
 export type Identifier = string;
@@ -62,26 +62,6 @@ export interface ServerVariableObject extends SpecificationExtensions {
   examples?: Array<string>;
 }
 
-export interface ServerBindingsObject extends SpecificationExtensions {
-  http?: Binding;
-  ws?: Binding;
-  kafka?: Binding;
-  anypointmq?: Binding;
-  amqp?: Binding;
-  amqp1?: Binding;
-  mqtt?: Binding;
-  mqtt5?: Binding;
-  nats?: Binding;
-  jms?: Binding;
-  sns?: Binding;
-  sqs?: Binding;
-  stomp?: Binding;
-  redis?: Binding;
-  mercure?: Binding;
-  ibmmq?: Binding;
-  googlepubsub?: Binding;
-}
-
 export type ChannelsObject = Record<string, ChannelObject | ReferenceObject>;
 
 export interface ChannelObject extends SpecificationExtensions {
@@ -95,26 +75,6 @@ export interface ChannelObject extends SpecificationExtensions {
   tags?: TagsObject;
   externalDocs?: ExternalDocumentationObject | ReferenceObject;
   bindings?: ChannelBindingsObject | ReferenceObject;
-}
-
-export interface ChannelBindingsObject extends SpecificationExtensions {
-  http?: Binding;
-  ws?: Binding;
-  kafka?: Binding;
-  anypointmq?: Binding;
-  amqp?: Binding;
-  amqp1?: Binding;
-  mqtt?: Binding;
-  mqtt5?: Binding;
-  nats?: Binding;
-  jms?: Binding;
-  sns?: Binding;
-  sqs?: Binding;
-  stomp?: Binding;
-  redis?: Binding;
-  mercure?: Binding;
-  ibmmq?: Binding;
-  googlepubsub?: Binding;
 }
 
 export type OperationsObject = Record<string, OperationObject | ReferenceObject>;
@@ -155,30 +115,11 @@ export interface OperationReplyAddressObject extends SpecificationExtensions {
   description?: string;
 }
 
-export interface OperationBindingsObject extends SpecificationExtensions {
-  http?: Binding;
-  ws?: Binding;
-  kafka?: Binding;
-  anypointmq?: Binding;
-  amqp?: Binding;
-  amqp1?: Binding;
-  mqtt?: Binding;
-  mqtt5?: Binding;
-  nats?: Binding;
-  jms?: Binding;
-  sns?: Binding;
-  sqs?: Binding;
-  stomp?: Binding;
-  redis?: Binding;
-  mercure?: Binding;
-  ibmmq?: Binding;
-  googlepubsub?: Binding;
-}
-
 export type MessagesObject = Record<string, MessageObject | ReferenceObject>;
 
 export interface MessageObject extends MessageTraitObject, SpecificationExtensions {
-  payload?: any;
+  /** JSON Schema (or multi-format wrapper) describing the message body — same shape as `headers`. */
+  payload?: MultiFormatSchemaObject;
   traits?: Array<MessageTraitObject | ReferenceObject>;
 }
 
@@ -199,28 +140,10 @@ export interface MessageTraitObject extends SpecificationExtensions {
 export interface MessageExampleObject extends SpecificationExtensions {
   name?: string;
   summary?: string;
-  headers?: Record<string, any>;
-  payload?: any;
-}
-
-export interface MessageBindingsObject extends SpecificationExtensions {
-  http?: Binding;
-  ws?: Binding;
-  kafka?: Binding;
-  anypointmq?: Binding;
-  amqp?: Binding;
-  amqp1?: Binding;
-  mqtt?: Binding;
-  mqtt5?: Binding;
-  nats?: Binding;
-  jms?: Binding;
-  sns?: Binding;
-  sqs?: Binding;
-  stomp?: Binding;
-  redis?: Binding;
-  mercure?: Binding;
-  ibmmq?: Binding;
-  googlepubsub?: Binding;
+  /** Concrete header values for this example (not a schema). */
+  headers?: Record<string, unknown>;
+  /** Concrete payload value for this example (not a schema). */
+  payload?: unknown;
 }
 
 export type ParametersObject = Record<string, ParameterObject | ReferenceObject>;
@@ -411,91 +334,540 @@ export interface OAuthFlowObjectAuthorizationCode
 }
 
 export type SchemaObject = AsyncAPISchemaObject | ReferenceObject;
-export type AsyncAPISchemaObject = AsyncAPISchemaDefinition | boolean;
+export type AsyncAPISchemaObject =
+  | (Exclude<JSONSchema, boolean> & {
+      discriminator?: string;
+      externalDocs?: ExternalDocumentationObject;
+    })
+  | boolean;
 export type MultiFormatObject = { schema: AsyncAPISchemaObject; schemaFormat: string | undefined };
 export type MultiFormatSchemaObject = AsyncAPISchemaObject | MultiFormatObject;
 
-export interface AsyncAPISchemaDefinition extends SpecificationExtensions {
-  $id?: string;
-  $schema?: typeof $schema;
-  $comment?: string;
+// ---------------------------------------------------------------------------
+// Protocol bindings — https://github.com/asyncapi/bindings
+// ---------------------------------------------------------------------------
 
-  type?: TypeName | TypeName[];
-  enum?: JSONSchema[];
-  const?: JSONSchema;
+type SchemaOrRef = AsyncAPISchemaObject | ReferenceObject;
 
-  multipleOf?: number;
-  maximum?: number;
-  exclusiveMaximum?: number;
-  minimum?: number;
-  exclusiveMinimum?: number;
-
-  maxLength?: number;
-  minLength?: number;
-  pattern?: string;
-
-  items?: AsyncAPISchemaObject | AsyncAPISchemaObject[];
-  additionalItems?: AsyncAPISchemaObject;
-  maxItems?: number;
-  minItems?: number;
-  uniqueItems?: boolean;
-  contains?: AsyncAPISchemaObject;
-
-  maxProperties?: number;
-  minProperties?: number;
-  required?: string[];
-  properties?: {
-    [key: string]: AsyncAPISchemaObject;
-  };
-  patternProperties?: {
-    [key: string]: AsyncAPISchemaObject;
-  };
-  additionalProperties?: AsyncAPISchemaObject;
-  dependencies?: {
-    [key: string]: AsyncAPISchemaObject | string[];
-  };
-  propertyNames?: AsyncAPISchemaObject;
-
-  if?: AsyncAPISchemaObject;
-  then?: AsyncAPISchemaObject;
-  else?: AsyncAPISchemaObject;
-
-  allOf?: AsyncAPISchemaObject[];
-  anyOf?: AsyncAPISchemaObject[];
-  oneOf?: AsyncAPISchemaObject[];
-  not?: AsyncAPISchemaObject;
-
-  format?: string;
-
-  contentMediaType?: string;
-  contentEncoding?: string;
-
-  definitions?: {
-    [key: string]: AsyncAPISchemaObject;
-  };
-
-  title?: string;
-  description?: string;
-  default?: JSONSchema;
-  readOnly?: boolean;
-  writeOnly?: boolean;
-  examples?: JSONSchema[];
-
-  discriminator?: string;
-  externalDocs?: ExternalDocumentationObject;
-  deprecated?: boolean;
-  [keyword: string]: any;
-}
-
-export interface Binding {
+interface BindingBase extends SpecificationExtensions {
   bindingVersion?: string;
 }
 
-export interface SpecificationExtensions {
-  [extension: `x-${string}`]: SpecificationExtension;
+export interface KafkaServerBinding extends BindingBase {
+  schemaRegistryUrl?: string;
+  schemaRegistryVendor?: string;
 }
 
-export type SpecificationExtension<T = any> = T;
+export interface KafkaChannelBinding extends BindingBase {
+  topic?: string;
+  partitions?: number;
+  replicas?: number;
+  topicConfiguration?: {
+    'cleanup.policy'?: Array<'delete' | 'compact'>;
+    'retention.ms'?: number;
+    'retention.bytes'?: number;
+    'delete.retention.ms'?: number;
+    'max.message.bytes'?: number;
+    'confluent.key.schema.validation'?: boolean;
+    'confluent.key.subject.name.strategy'?: string;
+    'confluent.value.schema.validation'?: boolean;
+    'confluent.value.subject.name.strategy'?: string;
+    [key: string]: unknown;
+  };
+}
+
+export interface KafkaOperationBinding extends BindingBase {
+  groupId?: SchemaOrRef;
+  clientId?: SchemaOrRef;
+}
+
+export interface KafkaMessageBinding extends BindingBase {
+  key?: SchemaOrRef | Record<string, unknown>;
+  schemaIdLocation?: 'header' | 'payload';
+  schemaIdPayloadEncoding?: string;
+  schemaLookupStrategy?: string;
+}
+
+export type AmqpServerBinding = BindingBase;
+
+export interface AmqpChannelBinding extends BindingBase {
+  is?: 'queue' | 'routingKey';
+  exchange?: {
+    name?: string;
+    type?: 'topic' | 'direct' | 'fanout' | 'default' | 'headers';
+    durable?: boolean;
+    autoDelete?: boolean;
+    vhost?: string;
+  };
+  queue?: {
+    name?: string;
+    durable?: boolean;
+    exclusive?: boolean;
+    autoDelete?: boolean;
+    vhost?: string;
+  };
+}
+
+export interface AmqpOperationBinding extends BindingBase {
+  expiration?: number;
+  userId?: string;
+  cc?: string[];
+  priority?: number;
+  deliveryMode?: 1 | 2;
+  mandatory?: boolean;
+  bcc?: string[];
+  timestamp?: boolean;
+  ack?: boolean;
+}
+
+export interface AmqpMessageBinding extends BindingBase {
+  contentEncoding?: string;
+  messageType?: string;
+}
+
+export type Amqp1ServerBinding = BindingBase;
+export type Amqp1ChannelBinding = BindingBase;
+export type Amqp1OperationBinding = BindingBase;
+export type Amqp1MessageBinding = BindingBase;
+
+export type HttpServerBinding = BindingBase;
+export type HttpChannelBinding = BindingBase;
+
+export interface HttpOperationBinding extends BindingBase {
+  method?: 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE' | 'HEAD' | 'OPTIONS' | 'CONNECT' | 'TRACE';
+  query?: SchemaOrRef;
+}
+
+export interface HttpMessageBinding extends BindingBase {
+  headers?: SchemaOrRef;
+  statusCode?: number;
+}
+
+export interface MqttServerBinding extends BindingBase {
+  clientId?: string;
+  cleanSession?: boolean;
+  lastWill?: {
+    topic?: string;
+    qos?: 0 | 1 | 2;
+    message?: string;
+    retain?: boolean;
+  };
+  keepAlive?: number;
+  sessionExpiryInterval?: number | SchemaOrRef;
+  maximumPacketSize?: number | SchemaOrRef;
+}
+
+export interface MqttOperationBinding extends BindingBase {
+  qos?: 0 | 1 | 2;
+  retain?: boolean;
+  messageExpiryInterval?: number | SchemaOrRef;
+}
+
+export interface MqttMessageBinding extends BindingBase {
+  payloadFormatIndicator?: 0 | 1;
+  correlationData?: SchemaOrRef;
+  contentType?: string;
+  responseTopic?: string | SchemaOrRef;
+}
+
+export interface Mqtt5ServerBinding extends BindingBase {
+  sessionExpiryInterval?: number | SchemaOrRef;
+}
+
+export type MqttChannelBinding = BindingBase;
+export type Mqtt5ChannelBinding = BindingBase;
+export type Mqtt5OperationBinding = BindingBase;
+export type Mqtt5MessageBinding = BindingBase;
+
+export type WsServerBinding = BindingBase;
+
+export interface WsChannelBinding extends BindingBase {
+  method?: 'GET' | 'POST';
+  query?: SchemaOrRef;
+  headers?: SchemaOrRef;
+}
+
+export type WsOperationBinding = BindingBase;
+export type WsMessageBinding = BindingBase;
+
+export type NatsServerBinding = BindingBase;
+export type NatsChannelBinding = BindingBase;
+
+export interface NatsOperationBinding extends BindingBase {
+  queue?: string;
+}
+
+export type NatsMessageBinding = BindingBase;
+
+export type AnypointmqServerBinding = BindingBase;
+
+export interface AnypointmqChannelBinding extends BindingBase {
+  destination?: string;
+  destinationType?: 'exchange' | 'queue' | 'fifo-queue';
+}
+
+export type AnypointmqOperationBinding = BindingBase;
+
+export interface AnypointmqMessageBinding extends BindingBase {
+  headers?: SchemaOrRef;
+}
+
+export type GooglepubsubServerBinding = BindingBase;
+
+export interface GooglepubsubChannelBinding extends BindingBase {
+  labels?: Record<string, string>;
+  messageRetentionDuration?: string;
+  messageStoragePolicy?: {
+    allowedPersistenceRegions?: string[];
+  };
+  schemaSettings?: {
+    encoding?: string;
+    firstRevisionId?: string;
+    lastRevisionId?: string;
+    name?: string;
+  };
+}
+
+export type GooglepubsubOperationBinding = BindingBase;
+
+export interface GooglepubsubMessageBinding extends BindingBase {
+  attributes?: Record<string, string>;
+  orderingKey?: string;
+  schema?: {
+    name?: string;
+  };
+}
+
+export interface IbmmqServerBinding extends BindingBase {
+  groupId?: string;
+  ccdtQueueManagerName?: string;
+  cipherSpec?: string;
+  multiEndpointServer?: boolean;
+  heartBeatInterval?: number;
+}
+
+export interface IbmmqChannelBinding extends BindingBase {
+  destinationType?: 'queue' | 'topic';
+  queue?: {
+    objectName?: string;
+    isPartitioned?: boolean;
+    exclusive?: boolean;
+  };
+  topic?: {
+    string?: string;
+    objectName?: string;
+    durablePermitted?: boolean;
+    lastMsgRetained?: boolean;
+  };
+  maxMsgLength?: number;
+}
+
+export type IbmmqOperationBinding = BindingBase;
+
+export interface IbmmqMessageBinding extends BindingBase {
+  type?: 'string' | 'jms' | 'binary';
+  headers?: string;
+  description?: string;
+  expiry?: number;
+}
+
+export interface JmsServerBinding extends BindingBase {
+  jmsConnectionFactory?: string;
+  properties?: Array<{
+    name?: string;
+    value?: unknown;
+  }>;
+  clientID?: string;
+}
+
+export interface JmsChannelBinding extends BindingBase {
+  destination?: string;
+  destinationType?: 'queue' | 'fifo-queue';
+}
+
+export type JmsOperationBinding = BindingBase;
+
+export interface JmsMessageBinding extends BindingBase {
+  headers?: SchemaOrRef;
+}
+
+export type SnsServerBinding = BindingBase;
+
+export interface SnsChannelBinding extends BindingBase {
+  name?: string;
+  ordering?: {
+    type?: 'standard' | 'FIFO';
+    contentBasedDeduplication?: boolean;
+  };
+  policy?: {
+    statements?: Array<{
+      effect?: string;
+      principal?: string | Record<string, unknown>;
+      action?: string | string[];
+      resource?: string | string[];
+      condition?: Record<string, unknown> | Record<string, unknown>[];
+    }>;
+  };
+  tags?: Record<string, string>;
+}
+
+interface SnsIdentifier {
+  url?: string;
+  email?: string;
+  phone?: string;
+  arn?: string;
+  name?: string;
+}
+
+interface SnsDeliveryPolicy {
+  minDelayTarget?: number;
+  maxDelayTarget?: number;
+  numRetries?: number;
+  numNoDelayRetries?: number;
+  numMinDelayRetries?: number;
+  numMaxDelayRetries?: number;
+  backoffFunction?: 'arithmetic' | 'exponential' | 'geometric' | 'linear' | string;
+  maxReceivesPerSecond?: number;
+}
+
+export interface SnsOperationBinding extends BindingBase {
+  topic?: SnsIdentifier;
+  consumers?: Array<{
+    protocol?: string;
+    endpoint?: SnsIdentifier;
+    filterPolicy?: Record<string, unknown>;
+    filterPolicyScope?: string;
+    rawMessageDelivery?: boolean;
+    redrivePolicy?: {
+      deadLetterQueue?: SnsIdentifier;
+      maxReceiveCount?: number;
+    };
+    deliveryPolicy?: SnsDeliveryPolicy;
+    displayName?: string;
+  }>;
+  deliveryPolicy?: SnsDeliveryPolicy;
+}
+
+export type SnsMessageBinding = BindingBase;
+
+export type SqsServerBinding = BindingBase;
+
+interface SqsRedrivePolicy {
+  deadLetterQueue?: {
+    arn?: string;
+    name?: string;
+  };
+  maxReceiveCount?: number;
+}
+
+interface SqsPolicy {
+  statements?: Array<{
+    effect?: string;
+    principal?: string | Record<string, unknown>;
+    action?: string | string[];
+    resource?: string | string[];
+    condition?: Record<string, unknown> | Record<string, unknown>[];
+  }>;
+}
+
+interface SqsChannelQueue {
+  name?: string;
+  fifoQueue?: boolean;
+  deduplicationScope?: 'messageGroup' | 'queue' | string;
+  fifoThroughputLimit?: 'perQueue' | 'perMessageGroupId' | string;
+  deliveryDelay?: number;
+  visibilityTimeout?: number;
+  receiveMessageWaitTime?: number;
+  messageRetentionPeriod?: number;
+  redrivePolicy?: SqsRedrivePolicy;
+  policy?: SqsPolicy;
+  tags?: Record<string, string>;
+}
+
+export interface SqsChannelBinding extends BindingBase {
+  queue?: SqsChannelQueue;
+  deadLetterQueue?: SqsChannelQueue;
+}
+
+export interface SqsOperationBinding extends BindingBase {
+  queues?: Array<{
+    name?: string;
+    fifoQueue?: boolean;
+    deduplicationScope?: 'messageGroup' | 'queue' | string;
+    fifoThroughputLimit?: 'perQueue' | 'perMessageGroupId' | string;
+    deliveryDelay?: number;
+    visibilityTimeout?: number;
+    receiveMessageWaitTime?: number;
+    messageRetentionPeriod?: number;
+    redrivePolicy?: SqsRedrivePolicy;
+    policy?: SqsPolicy;
+    tags?: Record<string, string>;
+  }>;
+}
+
+export type SqsMessageBinding = BindingBase;
+
+export interface SolaceServerBinding extends BindingBase {
+  msgVpn?: string;
+  clientName?: string;
+}
+
+export type SolaceChannelBinding = BindingBase;
+
+export interface SolaceOperationBinding extends BindingBase {
+  destinations?: Array<{
+    bindingVersion?: string;
+    destinationType?: 'queue' | 'topic';
+    deliveryMode?: 'direct' | 'persistent';
+    queue?: {
+      name?: string;
+      topicSubscriptions?: string[];
+      accessType?: 'exclusive' | 'nonexclusive';
+      maxMsgSpoolSize?: string;
+      maxTtl?: string;
+    };
+    topic?: {
+      topicSubscriptions?: string[];
+    };
+  }>;
+  timeToLive?: number | SchemaOrRef;
+  priority?: number | SchemaOrRef;
+  dmqEligible?: boolean;
+}
+
+export type SolaceMessageBinding = BindingBase;
+
+export interface PulsarServerBinding extends BindingBase {
+  tenant?: string;
+}
+
+export interface PulsarChannelBinding extends BindingBase {
+  namespace?: string;
+  persistence?: 'persistent' | 'non-persistent';
+  compaction?: number;
+  'geo-replication'?: string[];
+  retention?: {
+    time?: number;
+    size?: number;
+  };
+  ttl?: number;
+  deduplication?: boolean;
+}
+
+export type PulsarOperationBinding = BindingBase;
+export type PulsarMessageBinding = BindingBase;
+
+export type StompServerBinding = BindingBase;
+export type StompChannelBinding = BindingBase;
+export type StompOperationBinding = BindingBase;
+export type StompMessageBinding = BindingBase;
+
+export type RedisServerBinding = BindingBase;
+export type RedisChannelBinding = BindingBase;
+export type RedisOperationBinding = BindingBase;
+export type RedisMessageBinding = BindingBase;
+
+export type MercureServerBinding = BindingBase;
+export type MercureChannelBinding = BindingBase;
+export type MercureOperationBinding = BindingBase;
+export type MercureMessageBinding = BindingBase;
+
+export interface ServerBindingsObject extends SpecificationExtensions {
+  http?: HttpServerBinding;
+  ws?: WsServerBinding;
+  kafka?: KafkaServerBinding;
+  anypointmq?: AnypointmqServerBinding;
+  amqp?: AmqpServerBinding;
+  amqp1?: Amqp1ServerBinding;
+  mqtt?: MqttServerBinding;
+  mqtt5?: Mqtt5ServerBinding;
+  nats?: NatsServerBinding;
+  jms?: JmsServerBinding;
+  sns?: SnsServerBinding;
+  solace?: SolaceServerBinding;
+  sqs?: SqsServerBinding;
+  stomp?: StompServerBinding;
+  redis?: RedisServerBinding;
+  mercure?: MercureServerBinding;
+  ibmmq?: IbmmqServerBinding;
+  googlepubsub?: GooglepubsubServerBinding;
+  pulsar?: PulsarServerBinding;
+}
+
+export interface ChannelBindingsObject extends SpecificationExtensions {
+  http?: HttpChannelBinding;
+  ws?: WsChannelBinding;
+  kafka?: KafkaChannelBinding;
+  anypointmq?: AnypointmqChannelBinding;
+  amqp?: AmqpChannelBinding;
+  amqp1?: Amqp1ChannelBinding;
+  mqtt?: MqttChannelBinding;
+  mqtt5?: Mqtt5ChannelBinding;
+  nats?: NatsChannelBinding;
+  jms?: JmsChannelBinding;
+  sns?: SnsChannelBinding;
+  solace?: SolaceChannelBinding;
+  sqs?: SqsChannelBinding;
+  stomp?: StompChannelBinding;
+  redis?: RedisChannelBinding;
+  mercure?: MercureChannelBinding;
+  ibmmq?: IbmmqChannelBinding;
+  googlepubsub?: GooglepubsubChannelBinding;
+  pulsar?: PulsarChannelBinding;
+}
+
+export interface OperationBindingsObject extends SpecificationExtensions {
+  http?: HttpOperationBinding;
+  ws?: WsOperationBinding;
+  kafka?: KafkaOperationBinding;
+  anypointmq?: AnypointmqOperationBinding;
+  amqp?: AmqpOperationBinding;
+  amqp1?: Amqp1OperationBinding;
+  mqtt?: MqttOperationBinding;
+  mqtt5?: Mqtt5OperationBinding;
+  nats?: NatsOperationBinding;
+  jms?: JmsOperationBinding;
+  sns?: SnsOperationBinding;
+  solace?: SolaceOperationBinding;
+  sqs?: SqsOperationBinding;
+  stomp?: StompOperationBinding;
+  redis?: RedisOperationBinding;
+  mercure?: MercureOperationBinding;
+  ibmmq?: IbmmqOperationBinding;
+  googlepubsub?: GooglepubsubOperationBinding;
+  pulsar?: PulsarOperationBinding;
+}
+
+export interface MessageBindingsObject extends SpecificationExtensions {
+  http?: HttpMessageBinding;
+  ws?: WsMessageBinding;
+  kafka?: KafkaMessageBinding;
+  anypointmq?: AnypointmqMessageBinding;
+  amqp?: AmqpMessageBinding;
+  amqp1?: Amqp1MessageBinding;
+  mqtt?: MqttMessageBinding;
+  mqtt5?: Mqtt5MessageBinding;
+  nats?: NatsMessageBinding;
+  jms?: JmsMessageBinding;
+  sns?: SnsMessageBinding;
+  solace?: SolaceMessageBinding;
+  sqs?: SqsMessageBinding;
+  stomp?: StompMessageBinding;
+  redis?: RedisMessageBinding;
+  mercure?: MercureMessageBinding;
+  ibmmq?: IbmmqMessageBinding;
+  googlepubsub?: GooglepubsubMessageBinding;
+  pulsar?: PulsarMessageBinding;
+}
+
+export type BindingProtocol = keyof Omit<
+  ServerBindingsObject,
+  keyof SpecificationExtensions | number | symbol
+>;
+
+export interface SpecificationExtensions {
+  [extension: `x-${string}`]: unknown;
+}
 
 export interface ReferenceObject {
   $ref: string;

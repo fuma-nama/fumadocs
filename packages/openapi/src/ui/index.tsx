@@ -414,3 +414,6 @@ function MarkdownPre(props: ComponentProps<'pre'>) {
 
   return <ClientCodeBlock lang={lang} code={content.trimEnd()} />;
 }
+
+// kept for backward compatibility
+export type { OperationItem, WebhookItem } from '@/utils/pages/builder';

@@ -1,13 +1,5 @@
-import type { AsyncAPIObject, ChannelObject, OperationObject, TagObject } from '@/types';
-import type { NoReference } from '@fumadocs/api-docs/schema';
-import { getTagDisplayName } from '@/utils/schema';
+import type { AsyncAPIObject, TagObject } from '@/types';
 import { dereferenceShallow } from '@fumadocs/api-docs/schema/dereference';
-import {
-  collectDocumentTags,
-  getOperationDisplayName,
-  getOperationTags,
-  resolveOperation,
-} from '@/utils/operation';
 import type { NoReferenceSwallow } from '@fumadocs/api-docs/schema';
 
 interface BaseEntry {
@@ -60,30 +52,6 @@ export interface PagesBuilder {
   dereferenceShallow: <T>(schema: T) => NoReferenceSwallow<T>;
   create: (entry: OutputEntry) => void;
   routePathToFilePath: (path: string) => string;
-  extract: () => ExtractedInfo;
-  fromExtractedOperation: (item: OperationItem) =>
-    | {
-        get displayName(): string;
-        channel: NoReference<ChannelObject>;
-        operation: NoReference<OperationObject>;
-      }
-    | undefined;
-  fromTag: (tag: TagObject) => {
-    get displayName(): string;
-  };
-  fromTagName: (tag: string) =>
-    | {
-        info: TagObject;
-        get displayName(): string;
-      }
-    | undefined;
-}
-
-interface ExtractedInfo {
-  operations: (OperationItem & {
-    tags?: string[];
-    channelAddress?: string;
-  })[];
 }
 
 export function fromSchema(
@@ -101,24 +69,6 @@ export function fromSchema(
     create(entry) {
       files.push(entry);
     },
-    extract() {
-      const result: ExtractedInfo = { operations: [] };
-
-      for (const [id, operationRef] of Object.entries(bundled.operations ?? {})) {
-        const operation = dereferenceShallow(operationRef, bundled);
-        if (!operation) continue;
-
-        const channel = dereferenceShallow(operation.channel, bundled);
-        result.operations.push({
-          id,
-          action: operation.action,
-          tags: getOperationTags(operation, bundled),
-          channelAddress: channel?.address ?? undefined,
-        });
-      }
-
-      return result;
-    },
     routePathToFilePath(path) {
       return path
         .toLowerCase()
@@ -130,34 +80,6 @@ export function fromSchema(
           return v;
         })
         .join('/');
-    },
-    fromExtractedOperation(item) {
-      const resolved = resolveOperation(item.id, bundled);
-      if (!resolved) return;
-
-      return {
-        channel: resolved.channel,
-        operation: resolved.operation,
-        get displayName() {
-          return getOperationDisplayName(item.id, resolved.operation, resolved.channel);
-        },
-      };
-    },
-    fromTag(tag) {
-      return {
-        get displayName() {
-          return getTagDisplayName(tag);
-        },
-      };
-    },
-    fromTagName(name) {
-      const tag = collectDocumentTags(bundled).find((item) => item.name === name);
-      if (!tag) return;
-
-      return {
-        info: tag,
-        ...this.fromTag(tag),
-      };
     },
   });
 

@@ -1,3 +1,5 @@
+import { isPlainObject } from './is-plain-object';
+
 export function removeUndefined<T extends object>(value: T, deep = false): T {
   const obj = value as Record<string, unknown>;
 
@@ -20,17 +22,4 @@ export function removeUndefined<T extends object>(value: T, deep = false): T {
   }
 
   return value;
-}
-
-function isPlainObject(value: unknown): value is Record<string, unknown> {
-  if (typeof value !== 'object' || value === null) {
-    return false;
-  }
-
-  const prototype = Object.getPrototypeOf(value);
-  return (
-    prototype === null ||
-    prototype === Object.prototype ||
-    Object.getPrototypeOf(prototype) === null
-  );
 }

@@ -12,6 +12,10 @@ export type {
   AsyncAPISchemaObject,
   MultiFormatSchemaObject,
   OperationReplyObject,
+  KafkaChannelBinding,
+  KafkaOperationBinding,
+  KafkaMessageBinding,
+  KafkaServerBinding,
 } from './types/asyncapi-3';
 import type { DereferencedDocument } from '@/utils/document/dereference';
 import type { AsyncAPIOptions } from '@/server';

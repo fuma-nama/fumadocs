@@ -3,7 +3,8 @@ import Slugger from 'github-slugger';
 import type { TOCItemType } from 'fumadocs-core/toc';
 import type { StructuredData } from 'fumadocs-core/mdx-plugins';
 import type { GeneratedPageProps } from './builder';
-import { resolveOperation } from '@/utils/operation';
+import { dereferenceShallow } from '@fumadocs/api-docs/schema/dereference';
+import { getOperationDisplayName } from '../schema';
 
 export function toStaticData(
   page: GeneratedPageProps,
@@ -17,11 +18,11 @@ export function toStaticData(
   const structuredData: StructuredData = { headings: [], contents: [] };
 
   for (const item of page.operations ?? []) {
-    const resolved = resolveOperation(item.id, doc);
-    if (!resolved) continue;
+    const operation = dereferenceShallow(doc.operations?.[item.id], doc);
+    if (!operation) continue;
 
     if (page.showTitle) {
-      const title = resolved.operation.title || resolved.operation.summary || item.id;
+      const title = getOperationDisplayName(item.id, operation);
       const id = slugger.slug(title);
 
       toc.push({
@@ -35,9 +36,9 @@ export function toStaticData(
       });
     }
 
-    if (resolved.operation.description) {
+    if (operation.description) {
       structuredData.contents.push({
-        content: resolved.operation.description,
+        content: operation.description,
         heading: structuredData.headings.at(-1)?.id,
       });
     }

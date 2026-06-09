@@ -1,14 +1,11 @@
 'use client';
-import { type ComponentProps, Fragment, type ReactNode } from 'react';
+import { type ComponentProps, Fragment, type ReactNode, useMemo } from 'react';
 import type {
   ChannelObject,
   MessageObject,
-  OperationObject,
-  MultiFormatSchemaObject,
   OperationReplyObject,
   ParameterObject,
   SecuritySchemeObject,
-  ServerObject,
 } from '@/types';
 import { MessageExamples } from '@/ui/operation/message-examples';
 import { ActionLabel } from '@/ui/components/method-label';
@@ -27,29 +24,25 @@ import { Heading } from '@/ui/components/heading';
 import { Markdown } from '../components/markdown';
 import { ServerProvider, useRenderContext } from '../contexts/api';
 import type { NoReference } from '@fumadocs/api-docs/schema';
-import { getChannelAddress, getOperationDisplayName, resolveSchema } from '@/utils/operation';
-import { ClientCodeBlock } from '../components/codeblock';
-import { dereferenceShallow } from '@fumadocs/api-docs/schema/dereference';
-import { getMessageDisplayName } from '@/utils/schema';
-import { MailIcon, PlugIcon } from 'lucide-react';
+import {
+  getMessageDisplayName,
+  getOperationDisplayName,
+  getOperationMessages,
+  resolveMultiFormatSchema,
+} from '@/utils/schema';
+import { MailIcon } from 'lucide-react';
+import { applyMessageTraits, applyOperationTraits } from '@/utils/traits';
+import { AccordionBindings } from '../bindings/accordion-bindings';
 
 export function Operation({
   id,
   action,
-  operation,
-  channel,
-  messages,
-  reply,
   showTitle,
   showDescription,
   headingLevel = 2,
 }: {
   id: string;
   action: 'send' | 'receive';
-  operation: NoReference<OperationObject>;
-  channel: NoReference<ChannelObject>;
-  messages: NoReference<MessageObject>[];
-  reply?: NoReference<OperationReplyObject>;
   showTitle?: boolean;
   showDescription?: boolean;
   headingLevel?: number;
@@ -59,6 +52,12 @@ export function Operation({
   const {
     schema: { dereferenced },
   } = ctx;
+  const operation = useMemo(() => {
+    const operation = dereferenced.operations?.[id];
+    if (!operation) throw new Error(`[Fumadocs AsyncAPI] Operation not found in schema: ${id}`);
+
+    return applyOperationTraits(operation);
+  }, [dereferenced, id]);
 
   const descriptionNode = showDescription && operation.description && (
     <Markdown md={operation.description} />
@@ -66,7 +65,7 @@ export function Operation({
 
   let headNode: ReactNode = null;
   if (showTitle) {
-    const title = getOperationDisplayName(id, operation, channel);
+    const title = getOperationDisplayName(id, operation);
 
     headNode = (
       <div className="flex gap-2 items-center justify-between">
@@ -79,37 +78,53 @@ export function Operation({
     headingLevel++;
   }
 
-  const channelNode = <ChannelSection channel={channel} headingLevel={headingLevel} />;
-
-  const parametersNode = channel.parameters ? (
-    <ParametersSection parameters={channel.parameters} headingLevel={headingLevel} />
+  const channelNode = <ChannelSection channel={operation.channel} headingLevel={headingLevel} />;
+  const parametersNode = operation.channel.parameters ? (
+    <ParametersSection parameters={operation.channel.parameters} headingLevel={headingLevel} />
   ) : null;
 
-  const messagesNode = <MessagesSection messages={messages} headingLevel={headingLevel} />;
+  const messages = getOperationMessages(operation);
+  const messagesNode = messages.length > 0 && (
+    <>
+      <Heading id="messages" depth={headingLevel} className="mt-10">
+        {t('Messages')}
+      </Heading>
+      <Accordions type="multiple">
+        {messages.map((message, index) => {
+          const id = message.name ?? `message-${index}`;
 
-  const replyNode = reply ? <ReplySection reply={reply} headingLevel={headingLevel} /> : null;
+          return (
+            <AccordionItem key={id} value={id} anchorSegments={['messages', id]}>
+              <AccordionHeader>
+                <AccordionTrigger className="inline-flex items-center gap-2 font-mono">
+                  <MailIcon className="text-fd-muted-foreground size-3.5" />
+                  {getMessageDisplayName(message, ctx, index)}
+                </AccordionTrigger>
+              </AccordionHeader>
+              <AccordionContent className="grid grid-cols-1 gap-2 @xl:grid-cols-2">
+                <MessageSection message={message} headingLevel={headingLevel + 1} />
+              </AccordionContent>
+            </AccordionItem>
+          );
+        })}
+      </Accordions>
+    </>
+  );
+
+  const replyNode = operation.reply ? (
+    <ReplySection reply={operation.reply} headingLevel={headingLevel} />
+  ) : null;
 
   const bindingsNode = operation.bindings && (
     <>
       <Heading id="binding" depth={headingLevel}>
         {t('Bindings')}
       </Heading>
-      <BindingsSection bindings={operation.bindings} />
+      <AccordionBindings bindings={operation.bindings} level="operation" variant="default" />
     </>
   );
 
-  const traits =
-    operation.traits
-      ?.map((trait) => dereferenceShallow(trait, dereferenced))
-      .filter((trait): trait is NoReference<import('@/types/asyncapi-3').OperationTraitObject> =>
-        Boolean(trait),
-      ) ?? [];
-  const traitsNode =
-    traits.length > 0 ? <TraitsSection traits={traits} headingLevel={headingLevel} /> : null;
-
-  const securitySchemes = (operation.security ?? [])
-    .map((scheme) => dereferenceShallow(scheme, dereferenced))
-    .filter((scheme): scheme is SecuritySchemeObject => Boolean(scheme));
+  const securitySchemes = operation.security ?? [];
   let authNode: ReactNode = null;
 
   if (securitySchemes.length > 0) {
@@ -151,7 +166,6 @@ export function Operation({
         {slots.parameters}
         {slots.messages}
         {slots.reply}
-        {slots.traits}
         {slots.bindings}
       </div>
     );
@@ -166,20 +180,17 @@ export function Operation({
       parameters: parametersNode,
       messages: messagesNode,
       reply: replyNode,
-      traits: traitsNode,
       bindings: bindingsNode,
     },
     {
       operation,
       action,
-      channel,
       ctx,
     },
   );
 
-  const servers = (operation as { servers?: ServerObject[] }).servers ?? channel.servers;
-  if (servers && servers.length > 0) {
-    content = <ServerProvider servers={servers as ServerObject[]}>{content}</ServerProvider>;
+  if (operation.channel.servers && operation.channel.servers.length > 0) {
+    content = <ServerProvider servers={operation.channel.servers}>{content}</ServerProvider>;
   }
 
   return content;
@@ -193,8 +204,7 @@ function ChannelSection({
   headingLevel: number;
 }) {
   const t = useTranslations({ note: 'operation page' });
-  const address = getChannelAddress(channel);
-  if (!address && !channel.summary && !channel.title) return null;
+  if (!channel.address && !channel.summary && !channel.title) return null;
 
   return (
     <>
@@ -204,13 +214,15 @@ function ChannelSection({
       <div className="not-prose text-sm border rounded-xl bg-fd-card text-fd-card-foreground p-3 flex flex-col gap-2">
         {channel.title && <p className="font-medium">{channel.title}</p>}
         {channel.summary && <p className="text-fd-muted-foreground">{channel.summary}</p>}
-        {address && (
+        {channel.address && (
           <div className="inline-flex items-center gap-3 p-2 bg-fd-secondary text-xs text-fd-secondary-foreground rounded-lg border shadow-md">
             <p className="font-medium text-fd-muted-foreground">{t('Address')}</p>
-            <code>{address}</code>
+            <code>{channel.address}</code>
           </div>
         )}
-        <BindingsSection bindings={channel.bindings} className="-my-2" />
+        {channel.bindings && (
+          <AccordionBindings bindings={channel.bindings} level="channel" variant="sm" />
+        )}
       </div>
     </>
   );
@@ -256,81 +268,57 @@ function ParametersSection({
   );
 }
 
-function MessagesSection({
-  messages,
+function MessageSection({
+  message: _message,
   headingLevel,
 }: {
-  messages: NoReference<MessageObject>[];
+  message: NoReference<MessageObject>;
   headingLevel: number;
 }) {
-  const t = useTranslations({ note: 'operation page' });
+  const t = useTranslations();
   const ctx = useRenderContext();
-  if (messages.length === 0) return null;
+  const message = useMemo(() => applyMessageTraits(_message), [_message]);
+  const headers = resolveMultiFormatSchema(message.headers);
+  const payload = resolveMultiFormatSchema(message.payload);
 
   return (
     <>
-      <Heading id="messages" depth={headingLevel} className="mt-10">
-        {t('Messages')}
-      </Heading>
-      <Accordions type="multiple">
-        {messages.map((message, index) => {
-          const id = message.name ?? `message-${index}`;
-          const headers = resolveSchema(message.headers as MultiFormatSchemaObject);
-          const payload =
-            message.payload ?? resolveSchema(message.payload as MultiFormatSchemaObject);
-
-          return (
-            <AccordionItem key={id} value={id} anchorSegments={['messages', id]}>
-              <AccordionHeader>
-                <AccordionTrigger className="inline-flex items-center gap-2 font-mono">
-                  <MailIcon className="text-fd-muted-foreground size-3.5" />
-                  {getMessageDisplayName(message, ctx, index)}
-                </AccordionTrigger>
-              </AccordionHeader>
-              <AccordionContent className="grid grid-cols-2 gap-2">
-                <div className="bg-fd-card text-fd-card-foreground border rounded-xl px-5 py-4 mb-2 prose-no-margin shadow-sm">
-                  {message.description && <Markdown md={message.description} />}
-                  {message.contentType && (
-                    <p className="text-xs text-fd-muted-foreground not-prose">
-                      Content-Type: <code>{message.contentType}</code>
-                    </p>
-                  )}
-                  {headers && (
-                    <>
-                      <Heading id={`${id}-headers`} depth={headingLevel + 1}>
-                        {t('Headers')}
-                      </Heading>
-                      <ctx.SchemaUI client={{ name: 'headers' }} root={headers as never} />
-                    </>
-                  )}
-                  {payload && (
-                    <>
-                      <Heading id={`${id}-payload`} depth={headingLevel + 1}>
-                        {t('Payload')}
-                      </Heading>
-                      <ctx.SchemaUI client={{ name: 'payload', as: 'body' }} root={payload} />
-                    </>
-                  )}
-                  {message.correlationId && (
-                    <CorrelationIdSection correlationId={message.correlationId} />
-                  )}
-                  {message.bindings && (
-                    <>
-                      <Heading id="binding" depth={headingLevel + 1}>
-                        {t('Bindings')}
-                      </Heading>
-                      <BindingsSection bindings={message.bindings} />
-                    </>
-                  )}
-                </div>
-                <div className="mb-2">
-                  <MessageExamples message={message} />
-                </div>
-              </AccordionContent>
-            </AccordionItem>
-          );
-        })}
-      </Accordions>
+      <div className="bg-fd-card text-fd-card-foreground border rounded-xl px-5 py-4 mb-2 prose-no-margin shadow-sm">
+        {message.description && <Markdown md={message.description} />}
+        {message.contentType && (
+          <p className="text-xs text-fd-muted-foreground not-prose">
+            Content-Type: <code>{message.contentType}</code>
+          </p>
+        )}
+        {headers && (
+          <>
+            <Heading id="headers" depth={headingLevel}>
+              {t('Headers')}
+            </Heading>
+            <ctx.SchemaUI client={{ name: 'headers' }} root={headers as never} />
+          </>
+        )}
+        {payload && (
+          <>
+            <Heading id="payload" depth={headingLevel}>
+              {t('Payload')}
+            </Heading>
+            <ctx.SchemaUI client={{ name: 'payload', as: 'body' }} root={payload as never} />
+          </>
+        )}
+        {message.correlationId && <CorrelationIdSection correlationId={message.correlationId} />}
+        {message.bindings && (
+          <>
+            <Heading id="binding" depth={headingLevel}>
+              {t('Bindings')}
+            </Heading>
+            <AccordionBindings bindings={message.bindings} level="message" variant="sm" />
+          </>
+        )}
+      </div>
+      <div className="mb-2">
+        <MessageExamples message={message} />
+      </div>
     </>
   );
 }
@@ -359,10 +347,8 @@ function ReplySection({
             )}
           </p>
         )}
-        {reply.messages?.map((messageRef, index) => {
-          const message = dereferenceShallow(messageRef, ctx.schema.dereferenced);
-          if (!message) return null;
-          const payload = message.payload ?? resolveSchema(message.payload as never);
+        {reply.messages?.map((message, index) => {
+          const payload = resolveMultiFormatSchema(message.payload);
           return (
             <Fragment key={index}>
               <p className="font-medium">{message.title || message.name || `Reply ${index + 1}`}</p>
@@ -374,80 +360,6 @@ function ReplySection({
         })}
       </div>
     </>
-  );
-}
-
-function TraitsSection({
-  traits,
-  headingLevel,
-}: {
-  traits: NoReference<import('@/types/asyncapi-3').OperationTraitObject>[];
-  headingLevel: number;
-}) {
-  const t = useTranslations({ note: 'operation page' });
-
-  return (
-    <>
-      <Heading id="traits" depth={headingLevel}>
-        {t('Traits')}
-      </Heading>
-      <Accordions type="multiple">
-        {traits.map((trait, index) => (
-          <AccordionItem
-            key={index}
-            value={String(index)}
-            anchorSegments={['traits', String(index)]}
-          >
-            <AccordionHeader>
-              <AccordionTrigger>
-                {trait.title || trait.summary || `Trait ${index + 1}`}
-              </AccordionTrigger>
-            </AccordionHeader>
-            <AccordionContent>
-              {trait.description && <Markdown md={trait.description} />}
-              {trait.bindings && (
-                <>
-                  <Heading id="binding" depth={headingLevel + 1}>
-                    {t('Bindings')}
-                  </Heading>
-                  <BindingsSection bindings={trait.bindings} />
-                </>
-              )}
-            </AccordionContent>
-          </AccordionItem>
-        ))}
-      </Accordions>
-    </>
-  );
-}
-
-function BindingsSection({
-  bindings,
-  className,
-}: {
-  bindings?: Record<string, unknown>;
-  className?: string;
-}) {
-  if (!bindings) return null;
-  const entries = Object.entries(bindings).filter(([, value]) => value);
-  if (entries.length === 0) return null;
-
-  return (
-    <Accordions type="multiple" className={className}>
-      {entries.map(([protocol, binding]) => (
-        <AccordionItem key={protocol} value={protocol}>
-          <AccordionHeader>
-            <AccordionTrigger className="gap-1.5 font-mono">
-              <PlugIcon className="text-fd-muted-foreground size-4" />
-              {protocol}
-            </AccordionTrigger>
-          </AccordionHeader>
-          <AccordionContent>
-            <ClientCodeBlock lang="json" code={JSON.stringify(binding, null, 2)} />
-          </AccordionContent>
-        </AccordionItem>
-      ))}
-    </Accordions>
   );
 }
 

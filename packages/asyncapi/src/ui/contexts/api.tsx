@@ -3,10 +3,9 @@ import { createContext, type ReactNode, use, useEffect, useMemo, useState } from
 import type { RenderContext, ServerObject } from '@/types';
 import type { NoReference } from '@fumadocs/api-docs/schema';
 import { useStorageKey } from '../client/storage-key';
-import { resolveServerUrl } from '@/utils/operation';
 
 interface ServerContextType {
-  servers?: ServerObject[];
+  servers?: NoReference<ServerObject>[];
   server: SelectedServer | null;
   setServer: (value: string) => void;
   setServerVariables: (value: Record<string, string>) => void;
@@ -42,7 +41,7 @@ export function ServerProvider({
   servers,
   children,
 }: {
-  servers?: ServerObject[];
+  servers?: NoReference<ServerObject>[];
   children: ReactNode;
 }) {
   const storageKey = useStorageKey().of('server-url');
@@ -128,7 +127,7 @@ export function ServerProvider({
   );
 }
 
-function getDefaultValues(server: ServerObject): Record<string, string> {
+function getDefaultValues(server: NoReference<ServerObject>): Record<string, string> {
   const out: Record<string, string> = {};
   if (!server.variables) return out;
 
@@ -139,4 +138,21 @@ function getDefaultValues(server: ServerObject): Record<string, string> {
   }
 
   return out;
+}
+
+function resolveServerUrl(
+  server: NoReference<ServerObject>,
+  variables: Record<string, string> = {},
+): string {
+  let host = server.host;
+  let pathname = server.pathname ?? '';
+
+  for (const [key, value] of Object.entries(variables)) {
+    const token = `{${key}}`;
+    host = host.replaceAll(token, value);
+    pathname = pathname.replaceAll(token, value);
+  }
+
+  if (pathname && !pathname.startsWith('/')) pathname = `/${pathname}`;
+  return `${server.protocol}://${host}${pathname}`;
 }

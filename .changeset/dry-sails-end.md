@@ -4,10 +4,10 @@
 
 **Unify RSC & client APIs**
 
-- `createAPIPage()` & `createClientAPIPage()` unify into `createOpenAPIPage()`, it is client component only. It no longer accepts an `OpenAPIServer`.
+- `createAPIPage()` & `createClientAPIPage()` unify into `createOpenAPIPage()`, no longer accepts an `OpenAPIServer` & `client` option.
 - MDX component `<APIpage />` renames to `<OpenAPIPage />`, server should pass props to it using `page.data.getOpenAPIPageProps()` (virtual files) or `openapi.preloadOpenAPIPage()` (pre-generated files).
-- Remove subpath exports: `ui/base`, `ui/client` (`defineClientConfig`), `ui/create-client`.
-- Rename types: `CreateAPIPageOptions` → `CreateOpenAPIPageOptions`, `ApiPageProps` / `ServerApiPageProps` / `ClientApiPageProps` → `OpenAPIPageProps` / `OpenAPIPageProps_Spec` / `OpenAPIPageProps_Preloaded`. `OperationItem` & `WebhookItem` are exported from the root entry only.
+- Remove subpath exports: `ui/base`, `ui/client`, `ui/create-client`.
+- Rename types: `CreateAPIPageOptions` → `CreateOpenAPIPageOptions`, `ApiPageProps` → `OpenAPIPageProps`.
 
 **Server & loader**
 
@@ -17,16 +17,18 @@
 
 **Customization callbacks**
 
-- `generateCodeSamples`: `(method: MethodInformation)` → `({ operation, method, pathItem })`. `MethodInformation` is removed.
-- `generateTypeScriptDefinitions`: context is now `{ readOnly, writeOnly, ctx }` instead of extending `RenderContext` with `operation`.
+- `generateCodeSamples`: `(method: MethodInformation)` → `({ operation, method, pathItem })`, more context is available.
+- `generateTypeScriptDefinitions`: context is now `{ readOnly, writeOnly, ctx }`, operation object is no longer available.
 - `renderOperationLayout`: `(slots, ctx, method)` → `(slots, { operation, method, pathItem, ctx })`.
-- `APIPlaygroundProps` (for `playground.render`): `method: MethodInformation` → separate `method`, `operation`, `pathItem`.
+- `playground.render`: `method: MethodInformation` → separate `method`, `operation`, `pathItem`.
 - Rename options: `renderHeading`, `renderMarkdown`, `renderCodeBlock` → `components.Heading`, `components.Markdown`, `components.CodeBlock`.
-- Remove options: `client`, `generateTypeScriptSchema` (deprecated).
 
 **Drop deprecated APIs**
 
-- `transformerOpenAPI()` (use `openapiPlugin()`), `createCodeSample()`, `defineI18nOpenAPI()`, `defineClientConfig()`.
+- `transformerOpenAPI()`: use `openapiPlugin()` instead.
+- `createCodeSample()`: use `CodeUsageGenerator` API instead.
+- `generateTypeScriptSchema()`: use `generateTypeScriptDefinitions()` instead.
+- `defineI18nOpenAPI()`: use new translations API instead.
 
 **Other**
 

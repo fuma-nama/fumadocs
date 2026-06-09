@@ -1,8 +1,7 @@
-import type { MessageObject, MultiFormatSchemaObject } from '@/types';
-import { pickExample, pickMessageExample } from '@/utils/schema';
+import type { MessageObject } from '@/types';
+import { pickExample, pickMessageExample, resolveMultiFormatSchema } from '@/utils/schema';
 import type { NoReference } from '@fumadocs/api-docs/schema';
 import { sample } from '@fumadocs/api-docs/schema/sample';
-import { resolveSchema } from '@/utils/operation';
 
 export interface ExampleMessageItem {
   id: string;
@@ -31,8 +30,8 @@ export function getExampleMessages({
     });
   }
 
-  const headersSchema = resolveSchema(message.headers as MultiFormatSchemaObject);
-  const payload = message.payload ?? resolveSchema(message.payload as MultiFormatSchemaObject);
+  const headersSchema = resolveMultiFormatSchema(message.headers);
+  const payload = resolveMultiFormatSchema(message.payload);
 
   return [
     {
@@ -42,11 +41,9 @@ export function getExampleMessages({
       headers:
         headersSchema && typeof headersSchema === 'object'
           ? sample(headersSchema as object)
-          : pickExample(message as never),
+          : pickExample(message),
       payload:
-        payload && typeof payload === 'object'
-          ? sample(payload as object)
-          : pickExample(message as never),
+        payload && typeof payload === 'object' ? sample(payload as object) : pickExample(message),
     },
   ];
 }

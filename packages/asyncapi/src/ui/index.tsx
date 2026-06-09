@@ -70,13 +70,11 @@ export interface CreateAsyncAPIPageOptions {
         parameters: ReactNode;
         messages: ReactNode;
         reply: ReactNode;
-        traits: ReactNode;
         bindings: ReactNode;
       },
       context: {
         operation: NoReference<OperationObject>;
         action: 'send' | 'receive';
-        channel: NoReference<ChannelObject>;
         ctx: RenderContext;
       },
     ) => ReactNode;
