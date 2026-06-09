@@ -60,6 +60,7 @@ export interface CreateAsyncAPIPageOptions {
       slots: {
         header: ReactNode;
         description: ReactNode;
+        server: ReactNode;
         channel: ReactNode;
         authSchemes: ReactNode;
         parameters: ReactNode;

@@ -1,6 +1,6 @@
 'use client';
 import { useRenderContext } from '@/ui/contexts/api';
-import { useMemo } from 'react';
+import { ReactNode, useMemo } from 'react';
 import { ClientCodeBlock } from '@/ui/components/codeblock';
 import { getExampleMessages, type ExampleMessageItem } from '@/utils/get-example-messages';
 import { useTranslations } from '@fuma-translate/react';
@@ -8,9 +8,23 @@ import { NoReference } from '@fumadocs/api-docs/schema';
 import { MessageObject } from '@/types';
 import { SelectTab, SelectTabs, SelectTabTrigger } from '@fumadocs/api-docs/components/select-tab';
 import { Markdown } from '../components/markdown';
+import { Heading } from '../components/heading';
+import {
+  CodeBlockTab,
+  CodeBlockTabs,
+  CodeBlockTabsList,
+  CodeBlockTabsTrigger,
+} from 'fumadocs-ui/components/codeblock';
 
-export function MessageExamples({ message }: { message: NoReference<MessageObject> }) {
+export function MessageExamples({
+  message,
+  headingLevel,
+}: {
+  message: NoReference<MessageObject>;
+  headingLevel: number;
+}) {
   const ctx = useRenderContext();
+  const t = useTranslations({ note: 'asyncapi message example' });
   const items = useMemo(
     () =>
       getExampleMessages({ message }).filter(
@@ -25,21 +39,33 @@ export function MessageExamples({ message }: { message: NoReference<MessageObjec
   renderAPIExampleUsageTabs ??= (examples) => {
     if (examples.length === 0) return null;
 
-    if (examples.length === 1) {
-      return <MessageExampleContent item={examples[0]} />;
-    }
-
     return (
-      <SelectTabs defaultValue={examples[0]?.id}>
-        <SelectTabTrigger
-          items={examples.map((item) => ({ label: <code>{item.name}</code>, value: item.id }))}
-        />
-        {examples.map((item) => (
-          <SelectTab key={item.id} value={item.id}>
-            <MessageExampleContent item={item} />
-          </SelectTab>
-        ))}
-      </SelectTabs>
+      <div className="p-1 pt-4 border rounded-xl bg-fd-card text-fd-card-foreground prose-no-margin">
+        <Heading id="example" depth={headingLevel} className="px-4">
+          {t('Message Example')}
+        </Heading>
+        <SelectTabs defaultValue={examples[0]?.id}>
+          <SelectTabTrigger
+            className="w-full mb-2 px-4"
+            items={examples.map((item) => ({
+              label: (
+                <div>
+                  <p className="font-medium">{item.name}</p>
+                  <div className="text-sm text-fd-muted-foreground">
+                    {item.description && <Markdown md={item.description} />}
+                  </div>
+                </div>
+              ),
+              value: item.id,
+            }))}
+          />
+          {examples.map((item) => (
+            <SelectTab key={item.id} value={item.id} className="prose-no-margin">
+              <MessageExampleContent item={item} />
+            </SelectTab>
+          ))}
+        </SelectTabs>
+      </div>
     );
   };
 
@@ -58,19 +84,35 @@ function MessageExampleContent({ item }: { item: ExampleMessageItem }) {
     return JSON.stringify(item.headers, null, 2);
   }, [item.headers]);
 
+  const items: { label: string; value: string; content: ReactNode }[] = [];
+  if (headers)
+    items.push({
+      label: t('Headers'),
+      value: 'headers',
+      content: <ClientCodeBlock lang="json" code={headers} />,
+    });
+  if (payload)
+    items.push({
+      label: t('Payload'),
+      value: 'payload',
+      content: <ClientCodeBlock lang="json" code={payload} />,
+    });
+
+  if (items.length === 0) return null;
   return (
-    <div className="flex flex-col gap-2 not-prose">
-      {item.description && (
-        <div className="text-sm p-4 bg-fd-card text-fd-card-foreground border rounded-xl">
-          <Markdown md={item.description} />
-        </div>
-      )}
-      {headers && (
-        <ClientCodeBlock lang="json" code={headers} codeblock={{ title: t('Headers') }} />
-      )}
-      {payload && (
-        <ClientCodeBlock lang="json" code={payload} codeblock={{ title: t('Payload') }} />
-      )}
-    </div>
+    <CodeBlockTabs defaultValue={items[0].value}>
+      <CodeBlockTabsList>
+        {items.map((item) => (
+          <CodeBlockTabsTrigger key={item.value} value={item.value}>
+            {item.label}
+          </CodeBlockTabsTrigger>
+        ))}
+      </CodeBlockTabsList>
+      {items.map((item) => (
+        <CodeBlockTab key={item.value} value={item.value}>
+          {item.content}
+        </CodeBlockTab>
+      ))}
+    </CodeBlockTabs>
   );
 }

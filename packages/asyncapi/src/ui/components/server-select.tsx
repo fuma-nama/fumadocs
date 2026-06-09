@@ -37,7 +37,7 @@ export function ServerSelect(props: ComponentProps<typeof DialogTrigger>) {
       <DialogTrigger
         {...props}
         className={cn(
-          'flex items-center gap-2 text-sm text-start p-2 transition-colors hover:bg-fd-accent hover:text-fd-accent-foreground',
+          'flex items-center gap-2 text-sm text-start px-3 py-2 transition-colors hover:bg-fd-accent hover:text-fd-accent-foreground',
           props.className,
         )}
       >

@@ -102,6 +102,11 @@ export function Operation({
                 <AccordionTrigger className="inline-flex items-center gap-2 font-mono">
                   <MailIcon className="text-fd-muted-foreground size-3.5" />
                   {getMessageDisplayName(message, ctx, index)}
+                  {message.contentType && (
+                    <span className="ms-auto text-fd-muted-foreground font-normal text-xs">
+                      {message.contentType}
+                    </span>
+                  )}
                 </AccordionTrigger>
               </AccordionHeader>
               <AccordionContent className="grid grid-cols-1 gap-2 @xl:grid-cols-2">
@@ -165,6 +170,7 @@ export function Operation({
       <div>
         {slots.header}
         {slots.description}
+        {slots.server}
         {slots.channel}
         {slots.authSchemes}
         {slots.parameters}
@@ -179,6 +185,7 @@ export function Operation({
     {
       header: headNode,
       description: descriptionNode,
+      server: <ServerSection />,
       channel: channelNode,
       authSchemes: authNode,
       parameters: parametersNode,
@@ -207,50 +214,49 @@ export function Operation({
   return content;
 }
 
-function ChannelSection({ channel }: { channel: NoReference<ChannelObject> }) {
-  const t = useTranslations({ note: 'asyncapi channel section' });
+function ServerSection() {
   const { servers, server } = useServerContext();
   const serverSchema = server ? servers[server.id] : undefined;
   const hasServers = Object.keys(servers).length > 0;
-  const hasChannelInfo = Boolean(
-    channel.address || channel.summary || channel.title || channel.bindings,
-  );
-  const hasServerBindings = Boolean(serverSchema?.bindings);
 
-  if (!hasChannelInfo && !hasServers && !hasServerBindings) return null;
+  if (!hasServers && !serverSchema?.bindings) return;
 
   return (
-    <div className="not-prose text-sm border rounded-xl overflow-hidden flex flex-col p-1 gap-3 shadow-md">
-      {hasServers && (
-        <div className="rounded-lg border bg-fd-card text-fd-card-foreground overflow-hidden shadow-sm">
-          <ServerSelect className="w-full border-b" />
-          {serverSchema?.bindings && (
-            <AccordionBindings
-              bindings={serverSchema.bindings}
-              level="server"
-              variant="sm"
-              accordionsProps={{ className: 'rounded-none border-none' }}
-            />
-          )}
-        </div>
+    <div className="rounded-lg border bg-fd-card text-sm text-fd-card-foreground overflow-hidden shadow-sm not-prose mb-4">
+      <ServerSelect className="w-full border-b" />
+      {serverSchema?.bindings && (
+        <AccordionBindings
+          bindings={serverSchema.bindings}
+          level="server"
+          variant="sm"
+          accordionsProps={{ className: 'rounded-none border-none' }}
+        />
       )}
-      <div className="grid grid-cols-[auto_1fr] gap-x-3 gap-y-2 p-2 bg-fd-card text-xs text-fd-card-foreground rounded-lg border shadow-sm">
-        {channel.title && (
-          <>
-            <p className="font-medium text-fd-muted-foreground">{t('Channel')}</p>
-            <p className="font-medium">{channel.title}</p>
-          </>
-        )}
+    </div>
+  );
+}
+
+function ChannelSection({ channel }: { channel: NoReference<ChannelObject> }) {
+  const t = useTranslations({ note: 'asyncapi channel section' });
+
+  if (!channel.address && !channel.summary && !channel.title && !channel.bindings) return;
+
+  return (
+    <>
+      <div className="grid grid-cols-[auto_1fr] gap-x-3 gap-y-2 px-3 py-2 bg-fd-card text-sm text-fd-card-foreground rounded-lg border shadow-sm not-prose">
+        {channel.title && <p className="font-medium col-span-2">{channel.title}</p>}
         {channel.address && (
           <>
-            <p className="font-medium text-fd-muted-foreground">{t('Address')}</p>
-            <code>{channel.address}</code>
+            <p className="font-medium text-xs my-auto text-fd-muted-foreground">{t('Address')}</p>
+            <code className="text-xs">{channel.address}</code>
           </>
         )}
         {channel.summary && (
           <>
-            <p className="font-medium text-fd-muted-foreground">{t('Description')}</p>
-            <p>{channel.summary}</p>
+            <p className="font-medium text-xs my-auto text-fd-muted-foreground">
+              {t('Description')}
+            </p>
+            <p className="text-xs">{channel.summary}</p>
           </>
         )}
         {channel.bindings && (
@@ -259,12 +265,12 @@ function ChannelSection({ channel }: { channel: NoReference<ChannelObject> }) {
             level="channel"
             variant="sm"
             accordionsProps={{
-              className: 'col-span-2 -mx-2 -mb-2 border-none',
+              className: 'col-span-2 -mx-3 -mb-2 border-b-0 border-x-0 rounded-t-none',
             }}
           />
         )}
       </div>
-    </div>
+    </>
   );
 }
 
@@ -325,11 +331,6 @@ function MessageSection({
     <>
       <div className="bg-fd-card text-fd-card-foreground border rounded-xl px-5 py-4 mb-2 prose-no-margin shadow-sm">
         {message.description && <Markdown md={message.description} />}
-        {message.contentType && (
-          <p className="text-xs text-fd-muted-foreground not-prose">
-            Content-Type: <code>{message.contentType}</code>
-          </p>
-        )}
         {headers && (
           <>
             <Heading id="headers" depth={headingLevel}>
@@ -357,7 +358,7 @@ function MessageSection({
         )}
       </div>
       <div className="mb-2">
-        <MessageExamples message={message} />
+        <MessageExamples message={message} headingLevel={headingLevel} />
       </div>
     </>
   );

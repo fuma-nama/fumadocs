@@ -22,7 +22,7 @@ interface SharedProps {
 const triggerVariants = cva('inline-flex w-full items-center gap-2 font-medium', {
   variants: {
     variant: {
-      sm: 'p-2 text-xs bg-fd-secondary text-fd-secondary-foreground',
+      sm: 'px-3 py-2 text-xs bg-fd-secondary text-fd-secondary-foreground',
       default: 'px-4 py-3',
     },
   },
@@ -31,7 +31,7 @@ const triggerVariants = cva('inline-flex w-full items-center gap-2 font-medium',
 const contentVariants = cva('border-t', {
   variants: {
     variant: {
-      sm: 'px-2',
+      sm: 'px-3',
       default: 'px-4',
     },
   },
