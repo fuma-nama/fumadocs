@@ -1,6 +1,6 @@
 'use client';
 import { cn } from '@/utils/cn';
-import { PlugIcon } from 'lucide-react';
+import { PlugIcon, PlugZapIcon } from 'lucide-react';
 import {
   AccordionContent,
   AccordionHeader,
@@ -10,14 +10,32 @@ import {
 } from '@fumadocs/api-docs/components/accordion';
 import { getBindingEntries, getProtocolBinding, type BindingEntry } from './protocols';
 import { ComponentProps, useMemo } from 'react';
-import { useTranslations } from '@fuma-translate/react';
 import { BindingFieldRow } from './shared';
 import { ClientCodeBlock } from '../components/codeblock';
+import { cva } from 'class-variance-authority';
 
 interface SharedProps {
   variant: 'sm' | 'default';
   level: 'operation' | 'message' | 'channel' | 'server';
 }
+
+const triggerVariants = cva('inline-flex w-full items-center gap-2 font-medium', {
+  variants: {
+    variant: {
+      sm: 'p-2 text-xs bg-fd-secondary text-fd-secondary-foreground',
+      default: 'px-4 py-3',
+    },
+  },
+});
+
+const contentVariants = cva('border-t', {
+  variants: {
+    variant: {
+      sm: 'px-2',
+      default: 'px-4',
+    },
+  },
+});
 
 function AccordionBindingItem({ entry, variant, level }: SharedProps & { entry: BindingEntry }) {
   const definition = getProtocolBinding(entry.protocol);
@@ -50,20 +68,14 @@ function AccordionBindingItem({ entry, variant, level }: SharedProps & { entry: 
   return (
     <AccordionItem value={entry.protocol}>
       <AccordionHeader>
-        <AccordionTrigger
-          className={cn(
-            'inline-flex w-full items-center gap-2 font-medium',
-            variant === 'sm' && 'p-2 text-xs bg-fd-secondary text-fd-secondary-foreground',
-            variant === 'default' && 'px-4 py-3',
-          )}
-        >
+        <AccordionTrigger className={cn(triggerVariants({ variant }))}>
           <PlugIcon
             className={cn(
               'size-4 shrink-0 text-fd-muted-foreground',
               variant === 'sm' && 'size-3.5',
             )}
           />
-          <span>{definition.label}</span>
+          {definition.label}
           {typeof version === 'string' && (
             <span className="rounded-md border bg-fd-muted px-1.5 py-0.5 text-[10px] font-medium text-fd-muted-foreground">
               v{version}
@@ -74,9 +86,7 @@ function AccordionBindingItem({ entry, variant, level }: SharedProps & { entry: 
           )}
         </AccordionTrigger>
       </AccordionHeader>
-      <AccordionContent
-        className={cn('border-t', variant === 'sm' && 'px-2', variant === 'default' && 'px-4')}
-      >
+      <AccordionContent className={cn(contentVariants({ variant }))}>
         <Content binding={entry.binding} />
       </AccordionContent>
     </AccordionItem>
@@ -92,7 +102,6 @@ export function AccordionBindings({
   bindings: Record<string, unknown>;
   accordionsProps?: Partial<ComponentProps<typeof Accordions>>;
 }) {
-  const t = useTranslations({ note: 'bindings' });
   const { protocols, extensions } = getBindingEntries(bindings);
   if (protocols.length === 0 && extensions.length === 0) return null;
 
@@ -113,9 +122,17 @@ export function AccordionBindings({
       {extensions.map((entry) => (
         <AccordionItem key={entry.protocol} value={entry.protocol}>
           <AccordionHeader>
-            <AccordionTrigger className="text-xs font-mono">{entry.protocol}</AccordionTrigger>
+            <AccordionTrigger className={cn(triggerVariants({ variant }), 'font-mono')}>
+              <PlugZapIcon
+                className={cn(
+                  'size-4 shrink-0 text-fd-muted-foreground',
+                  variant === 'sm' && 'size-3.5',
+                )}
+              />
+              {entry.protocol}
+            </AccordionTrigger>
           </AccordionHeader>
-          <AccordionContent>
+          <AccordionContent className={cn(contentVariants({ variant }))}>
             <ExtensionContent {...entry} />
           </AccordionContent>
         </AccordionItem>

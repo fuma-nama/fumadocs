@@ -73,6 +73,10 @@ servers:
         schemaRegistryUrl: https://schema-registry.galaxy.scalar.com
         schemaRegistryVendor: confluent
         bindingVersion: '0.5.0'
+      x-kafka-ext:
+        saslMechanism: SCRAM-SHA-512
+        sslEnabled: true
+        connectionTimeout: 30000
   mqttBridge:
     host: mqtt.galaxy.scalar.com:1883
     protocol: mqtt
@@ -136,6 +140,10 @@ channels:
               items:
                 type: string
               description: Filter by specific event types
+      x-scalar:
+        reconnectInterval: 5000
+        maxRetries: 10
+        heartbeatInterval: 30000
   userEvents:
     address: 'users/{userId}/events'
     title: User Events
@@ -258,6 +266,10 @@ operations:
       ws:
         bindingVersion: 0.1.0
         method: GET
+      x-rate-limit:
+        maxConnections: 100
+        windowSeconds: 60
+        burstAllowance: 20
   subscribeToCelestialBodyEvents:
     action: receive
     channel:
