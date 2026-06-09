@@ -78,6 +78,8 @@ export interface SchemaUIProps {
   generated: SchemaUIGeneratedData;
 }
 
+const ExcludedFromAutoAnchor = new Set<string>();
+
 export function SchemaUI({ name, required = false, as = 'property', generated }: SchemaUIProps) {
   const rootId = useAnchorId([name]);
   const [path, setPath] = useState<PathItemType[]>(() => [{ $ref: generated.$root, name }]);
@@ -93,6 +95,7 @@ export function SchemaUI({ name, required = false, as = 'property', generated }:
   );
 
   useEffect(() => {
+    if (ExcludedFromAutoAnchor.has(rootId)) return;
     const url = new URL(window.location.href);
     const param = url.searchParams.get('path');
     if (url.hash !== `#${rootId}` || !param) return;
@@ -102,6 +105,8 @@ export function SchemaUI({ name, required = false, as = 'property', generated }:
       return;
 
     setPath(decoded);
+    // avoid re-triggering it again
+    ExcludedFromAutoAnchor.add(rootId);
     if (!decoded.at(-1)!.highlighted) {
       ref.current?.scrollIntoView({ behavior: 'smooth' });
     }
