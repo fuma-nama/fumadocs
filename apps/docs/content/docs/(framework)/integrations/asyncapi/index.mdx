@@ -101,7 +101,7 @@ export default function Page({ slug }) {
     <MdxContent
       components={getMDXComponents({
         // [!code ++:3] add the MDX component
-        APIPage: async (props) => (
+        AsyncAPIPage: async (props) => (
           <AsyncAPIPage {...await asyncapi.preloadAsyncAPIPage(page)} {...props} />
         ),
       })}
@@ -136,7 +136,7 @@ export default function Page() {
     <MdxContent
       components={getMDXComponents({
         // [!code ++] add the MDX component
-        APIPage: (props) => <AsyncAPIPage {...asyncapiData} {...props} />,
+        AsyncAPIPage: (props) => <AsyncAPIPage {...asyncapiData} {...props} />,
       })}
     />
   );

@@ -2,13 +2,12 @@ import type * as PageTree from '@/page-tree/definitions';
 import type { I18nConfig } from '@/i18n';
 import { createContentStorageBuilder, type ContentStorage } from './storage/content';
 import { createPageTreeBuilder, type PageTreeOptions } from '@/source/page-tree/builder';
-import { joinPath } from './path';
+import { dirname, joinPath } from './path';
 import { normalizeUrl } from '@/utils/normalize-url';
 import { SlugFn, slugsPlugin } from '@/source/plugins/slugs';
 import { iconPlugin, type IconResolver } from '@/source/plugins/icon';
 import type { MetaData, PageData, StaticSource } from './source';
 import { visit } from '@/page-tree/utils';
-import path from 'node:path';
 import type { PageTreeTransformer } from '@/source/page-tree/builder';
 import type { SerializedPageTree } from './client';
 import { FileSystem } from './storage/file-system';
@@ -373,7 +372,7 @@ export function loader<I extends ResolvedInput, I18n extends I18nConfig | undefi
     resolveHref(href, parent) {
       if (href.startsWith('./') || href.startsWith('../')) {
         const target = this.getPageByHref(href, {
-          dir: path.dirname(parent.path),
+          dir: dirname(parent.path),
           language: parent.locale,
         });
 

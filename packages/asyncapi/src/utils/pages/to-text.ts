@@ -125,7 +125,7 @@ function pageContent({
   document,
   operations,
 }: GeneratedPageProps): string {
-  const propStrs: string[] = [`document={${doubleQuote(document)}}`];
+  const propStrs: string[] = [`document=${doubleQuote(document)}`];
 
   if (operations) {
     propStrs.push(
@@ -147,5 +147,5 @@ function pageContent({
     propStrs.push(`showDescription`);
   }
 
-  return `<APIPage ${propStrs.join(' ')} />`;
+  return `<AsyncAPIPage ${propStrs.join(' ')} />`;
 }

@@ -4,7 +4,9 @@
 
 **Unify RSC & client APIs**
 
-- `createAPIPage()` & `createClientAPIPage()` unify into `createOpenAPIPage()`, no longer accepts an `OpenAPIServer` & `client` option.
+- `createAPIPage()` & `createClientAPIPage()` unify into `createOpenAPIPage()`:
+  - no longer accepts an `OpenAPIServer` & `client` option.
+  - requires `api-page.tsx` to be a client component.
 - MDX component `<APIpage />` renames to `<OpenAPIPage />`, server should pass props to it using `page.data.getOpenAPIPageProps()` (virtual files) or `openapi.preloadOpenAPIPage()` (pre-generated files).
 - Remove subpath exports: `ui/base`, `ui/client`, `ui/create-client`.
 - Rename types: `CreateAPIPageOptions` → `CreateOpenAPIPageOptions`, `ApiPageProps` → `OpenAPIPageProps`.

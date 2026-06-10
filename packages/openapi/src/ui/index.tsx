@@ -23,7 +23,8 @@ import { remark } from 'remark';
 import remarkRehype from 'remark-rehype';
 import { toJsxRuntime } from 'hast-util-to-jsx-runtime';
 import * as JsxRuntime from 'react/jsx-runtime';
-import { PageContent } from './api-page';
+import { Operation } from '@/ui/operation';
+import { ServerProvider, useRenderContext } from './contexts/api';
 import { defaultShikiFactory } from 'fumadocs-core/highlight/shiki/full';
 import { compile } from '@fumari/json-schema-ts';
 import { ClientCodeBlock, ClientCodeBlockProvider } from './components/codeblock';
@@ -398,6 +399,88 @@ export function createOpenAPIPage({
       </ClientCodeBlockProvider>
     );
   };
+}
+
+function PageContent({
+  showTitle: hasHead = false,
+  showDescription,
+  operations,
+  webhooks,
+}: Omit<GeneratedPageProps, 'document'>) {
+  const ctx = useRenderContext();
+  const { dereferenced } = ctx.schema;
+  let { renderPageLayout } = ctx.content ?? {};
+  renderPageLayout ??= (slots) => (
+    <div className="flex flex-col gap-24 text-sm @container">
+      {slots.operations?.map((op) => op.children)}
+      {slots.webhooks?.map((op) => op.children)}
+    </div>
+  );
+
+  let content = renderPageLayout(
+    {
+      operations: operations?.map((item) => {
+        const pathItem = dereferenced.paths?.[item.path];
+        if (!pathItem)
+          throw new Error(`[Fumadocs OpenAPI] Path not found in OpenAPI schema: ${item.path}`);
+
+        const operation = pathItem[item.method];
+        if (!operation)
+          throw new Error(
+            `[Fumadocs OpenAPI] Method ${item.method} not found in operation: ${item.path}`,
+          );
+
+        return {
+          item,
+          children: (
+            <Operation
+              key={`${item.path}:${item.method}`}
+              method={item.method}
+              pathItem={pathItem}
+              operation={operation}
+              path={item.path}
+              showTitle={hasHead}
+              showDescription={showDescription}
+            />
+          ),
+        };
+      }),
+      webhooks: webhooks?.map((item) => {
+        const webhook = dereferenced.webhooks?.[item.name];
+        if (!webhook)
+          throw new Error(`[Fumadocs OpenAPI] Webhook not found in OpenAPI schema: ${item.name}`);
+
+        const hook = webhook[item.method];
+        if (!hook)
+          throw new Error(
+            `[Fumadocs OpenAPI] Method ${item.method} not found in webhook: ${item.name}`,
+          );
+
+        return {
+          item,
+          children: (
+            <Operation
+              type="webhook"
+              key={`${item.name}:${item.method}`}
+              method={item.method}
+              pathItem={webhook}
+              operation={hook}
+              path={`/${item.name}`}
+              showTitle={hasHead}
+              showDescription={showDescription}
+            />
+          ),
+        };
+      }),
+    },
+    ctx,
+  );
+
+  if (ctx.playground?.enabled !== false && ctx.playground?.provider) {
+    content = ctx.playground.provider({ children: content });
+  }
+
+  return <ServerProvider servers={dereferenced.servers}>{content}</ServerProvider>;
 }
 
 function MarkdownPre(props: ComponentProps<'pre'>) {

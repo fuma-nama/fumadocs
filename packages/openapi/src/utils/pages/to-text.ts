@@ -157,7 +157,7 @@ function pageContent({
   webhooks,
   operations,
 }: GeneratedPageProps): string {
-  const propStrs: string[] = [`document={${doubleQuote(document)}}`];
+  const propStrs: string[] = [`document=${doubleQuote(document)}`];
 
   // filter extra properties in props
   if (webhooks) {
@@ -193,5 +193,15 @@ function pageContent({
     propStrs.push(`showDescription`);
   }
 
-  return `<OpenAPIPage ${propStrs.join(' ')} />`;
+  return `export default function Layout(props) {
+  const { APIPage, OpenAPIPage } = props.components ?? {};
+  // "APIPage" is the old name from v10, this allows both for backward compatibility
+  const Comp = OpenAPIPage ?? APIPage;
+  return (
+    <>
+      {props.children}
+      <Comp ${propStrs.join(' ')} />
+    </>
+  );
+}`;
 }

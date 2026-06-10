@@ -242,35 +242,31 @@ function ChannelSection({ channel }: { channel: NoReference<ChannelObject> }) {
   if (!channel.address && !channel.summary && !channel.title && !channel.bindings) return;
 
   return (
-    <>
-      <div className="grid grid-cols-[auto_1fr] gap-x-3 gap-y-2 px-3 py-2 bg-fd-card text-sm text-fd-card-foreground rounded-lg border shadow-sm not-prose">
-        {channel.title && <p className="font-medium col-span-2">{channel.title}</p>}
-        {channel.address && (
-          <>
-            <p className="font-medium text-xs my-auto text-fd-muted-foreground">{t('Address')}</p>
-            <code className="text-xs">{channel.address}</code>
-          </>
-        )}
-        {channel.summary && (
-          <>
-            <p className="font-medium text-xs my-auto text-fd-muted-foreground">
-              {t('Description')}
-            </p>
-            <p className="text-xs">{channel.summary}</p>
-          </>
-        )}
-        {channel.bindings && (
-          <AccordionBindings
-            bindings={channel.bindings}
-            level="channel"
-            variant="sm"
-            accordionsProps={{
-              className: 'col-span-2 -mx-3 -mb-2 border-b-0 border-x-0 rounded-t-none',
-            }}
-          />
-        )}
-      </div>
-    </>
+    <div className="grid grid-cols-[auto_1fr] gap-x-3 gap-y-2 px-3 py-2 bg-fd-card text-sm text-fd-card-foreground rounded-lg border shadow-sm not-prose">
+      {channel.title && <p className="font-medium col-span-2">{channel.title}</p>}
+      {channel.address && (
+        <>
+          <p className="font-medium text-fd-muted-foreground">{t('Address')}</p>
+          <code>{channel.address}</code>
+        </>
+      )}
+      {channel.summary && (
+        <>
+          <p className="font-medium text-fd-muted-foreground">{t('Description')}</p>
+          <p>{channel.summary}</p>
+        </>
+      )}
+      {channel.bindings && (
+        <AccordionBindings
+          bindings={channel.bindings}
+          level="channel"
+          variant="sm"
+          accordionsProps={{
+            className: 'col-span-2 mt-1 -mx-3 -mb-2 border-b-0 border-x-0 rounded-t-none',
+          }}
+        />
+      )}
+    </div>
   );
 }
 
