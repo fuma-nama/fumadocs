@@ -7,23 +7,21 @@
 - `createAPIPage()` & `createClientAPIPage()` unify into `createOpenAPIPage()`:
   - no longer accepts an `OpenAPIServer` & `client` option.
   - requires `api-page.tsx` to be a client component.
-- MDX component `<APIpage />` renames to `<OpenAPIPage />`, server should pass props to it using `page.data.getOpenAPIPageProps()` (virtual files) or `openapi.preloadOpenAPIPage()` (pre-generated files).
-- Remove subpath exports: `ui/base`, `ui/client`, `ui/create-client`.
-- Rename types: `CreateAPIPageOptions` → `CreateOpenAPIPageOptions`, `ApiPageProps` → `OpenAPIPageProps`.
+  - server should pass page props using `page.data.getOpenAPIPageProps()` (virtual files) or `openapi.preloadOpenAPIPage()` (pre-generated files).
+- Remove subpath exports: `ui/client`.
 
 **Server & loader**
 
-- `page.data.getAPIPageProps()` / `getClientAPIPageProps()` → `getOpenAPIPageProps()` (sync).
-- `getSchema()` now returns `{ id, bundled }` instead of a dereferenced document. Dereferencing happens at render time.
+- `getSchema()` no longer includes the dereferenced document.
 - `input`: drop the whole-map factory `() => SchemaMap`. Use a record instead: `[k: string]: string | Document | (() => Awaitable<string | Document>)`.
 
 **Customization callbacks**
 
-- `generateCodeSamples`: `(method: MethodInformation)` → `({ operation, method, pathItem })`, more context is available.
-- `generateTypeScriptDefinitions`: context is now `{ readOnly, writeOnly, ctx }`, operation object is no longer available.
+More context will be available to callbacks:
+
+- `generateCodeSamples`: `(method: MethodInformation)` → `({ operation, method, pathItem })`.
 - `renderOperationLayout`: `(slots, ctx, method)` → `(slots, { operation, method, pathItem, ctx })`.
-- `playground.render`: `method: MethodInformation` → separate `method`, `operation`, `pathItem`.
-- Rename options: `renderHeading`, `renderMarkdown`, `renderCodeBlock` → `components.Heading`, `components.Markdown`, `components.CodeBlock`.
+- `playground.render`: `method: MethodInformation` → `({ operation, method, pathItem })`.
 
 **Drop deprecated APIs**
 

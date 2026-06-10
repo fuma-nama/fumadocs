@@ -53,7 +53,7 @@ export interface OpenAPIOptions {
 }
 
 // avoid "cannot be named without reference" error in TypeScript.
-// Even if we exported it, if TypeScript didn't scan the file, it fails.
+// Even if we exported it elsewhere, if TypeScript didn't scan the file, it fails.
 export type { OpenAPIPageProps_Spec, OpenAPIPageProps_Preloaded };
 
 export interface OpenAPIServer {
@@ -95,6 +95,11 @@ export interface OpenAPIPageData extends PageData {
   structuredData: StructuredData;
   toc: TOCItemType[];
   _openapi: InternalOpenAPIMeta;
+
+  /** @deprecated use `getOpenAPIPageProps()` instead */
+  getAPIPageProps: () => OpenAPIPageProps_Spec;
+  /** @deprecated use `getOpenAPIPageProps()` instead */
+  getClientAPIPageProps: () => OpenAPIPageProps_Spec;
 }
 
 export type OpenAPISourceOptions = SchemaToPagesOptions & {
@@ -166,6 +171,12 @@ export function createOpenAPI(options: OpenAPIOptions = {}): OpenAPIServer {
           path: `${baseDir}/${entry.path}`,
           data: {
             ...entry.info,
+            getAPIPageProps() {
+              return this.getOpenAPIPageProps();
+            },
+            getClientAPIPageProps() {
+              return this.getOpenAPIPageProps();
+            },
             getOpenAPIPageProps() {
               return {
                 payload: {

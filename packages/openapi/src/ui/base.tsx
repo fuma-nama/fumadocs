@@ -1,6 +1,7 @@
 'use client';
 /* eslint-disable @typescript-eslint/no-explicit-any -- rehype-react without types */
-import type { AsyncAPIObject, Awaitable, OperationObject, RenderContext } from '@/types';
+import type { Document, RenderContext } from '@/types';
+import { defaultAdapters } from '@/requests/media/adapter';
 import {
   Children,
   type ComponentProps,
@@ -15,120 +16,36 @@ import { remark } from 'remark';
 import remarkRehype from 'remark-rehype';
 import { toJsxRuntime } from 'hast-util-to-jsx-runtime';
 import * as JsxRuntime from 'react/jsx-runtime';
-import { PageContent } from './api-page';
-import { defaultShikiFactory } from 'fumadocs-core/highlight/shiki/full';
+import { Operation } from '@/ui/operation';
+import { ServerProvider, useRenderContext } from './contexts/api';
 import { compile } from '@fumari/json-schema-ts';
 import { ClientCodeBlock } from './components/codeblock';
 import { dereferenceBundledDocument } from '@/utils/document/dereference';
+import { AuthProvider } from '@/playground/auth';
+import { registerDefault } from '@/requests/generators/all';
+import { createCodeUsageGeneratorRegistry } from '@/requests/generators';
 import type { ShikiFactory } from 'fumadocs-core/highlight/shiki';
-import type { JSONSchema } from 'json-schema-typed';
-import type { CodeToHastOptionsCommon, CodeOptionsThemes, BundledTheme } from 'shiki';
-import type { GeneratedPageProps, OperationItem } from '@/utils/pages/builder';
-import { ParsedSchema } from '@/utils/schema';
+import type { GeneratedPageProps } from '@/utils/pages/builder';
+import type { ParsedSchema } from '@/utils/schema';
 import { Markdown } from './components/markdown';
 import { Schema } from '@fumadocs/api-docs/components/schema';
 import { RenderContextProvider } from './contexts/api';
-import type { NoReference } from '@fumadocs/api-docs/schema';
-import type { ExampleMessageItem } from '@/utils/get-example-messages';
+import type { CreateOpenAPIPageOptions, OpenAPIPageProps } from '.';
 
-export interface GenerateTypeScriptDefinitionsContext {
-  readOnly: boolean;
-  writeOnly: boolean;
-  ctx: RenderContext;
-}
-
-export interface CreateAsyncAPIPageOptions {
-  generateTypeScriptDefinitions?:
-    | ((
-        schema: JSONSchema,
-        ctx: GenerateTypeScriptDefinitionsContext,
-      ) => Awaitable<string | undefined>)
-    | false;
-  shiki?: ShikiFactory;
-  shikiOptions?: Omit<CodeToHastOptionsCommon, 'lang'> & CodeOptionsThemes<BundledTheme>;
-  content?: {
-    renderPageLayout?: (
-      slots: {
-        operations?: {
-          item: OperationItem;
-          children: ReactNode;
-        }[];
-      },
-      ctx: RenderContext,
-    ) => ReactNode;
-    renderOperationLayout?: (
-      slots: {
-        header: ReactNode;
-        description: ReactNode;
-        server: ReactNode;
-        channel: ReactNode;
-        authSchemes: ReactNode;
-        parameters: ReactNode;
-        messages: ReactNode;
-        reply: ReactNode;
-        bindings: ReactNode;
-      },
-      context: {
-        operation: NoReference<OperationObject>;
-        action: 'send' | 'receive';
-        ctx: RenderContext;
-      },
-    ) => ReactNode;
-    renderAPIExampleLayout?: (
-      slots: {
-        selector: ReactNode;
-        usageTabs: ReactNode;
-        responseTabs: ReactNode;
-      },
-      ctx: RenderContext,
-    ) => ReactNode;
-    renderAPIExampleUsageTabs?: (items: ExampleMessageItem[], ctx: RenderContext) => ReactNode;
-  };
-  schemaUI?: {
-    render?: (
-      options: {
-        root: ParsedSchema;
-        readOnly?: boolean;
-        writeOnly?: boolean;
-      },
-      ctx: RenderContext,
-    ) => ReactNode;
-    showExample?: boolean;
-  };
-  components?: {
-    Heading?: FC<ComponentProps<'h1'> & { id: string; depth: number }>;
-    CodeBlock?: FC<{ lang: string; code: string }>;
-    Markdown?: FC<{ md: string }>;
-  };
-  storageKeyPrefix?: string;
-}
-
-export type AsyncAPIPageProps = AsyncAPIPageProps_Spec | AsyncAPIPageProps_Preloaded;
-
-export type AsyncAPIPageProps_Spec = Omit<GeneratedPageProps, 'document'> & {
-  payload: {
-    bundled: AsyncAPIObject;
-    proxyUrl?: string;
-  };
-};
-
-export type AsyncAPIPageProps_Preloaded = GeneratedPageProps & {
-  preloaded: {
-    docs: Record<string, AsyncAPIObject>;
-    proxyUrl?: string;
-  };
-};
-
-export function createAsyncAPIPage({
-  shiki = defaultShikiFactory,
+/**
+ * Create `<OpenAPIPage />` (a client component) without the full Shiki bundle.
+ */
+export function createOpenAPIPageBase({
+  shiki,
   shikiOptions = { themes: { light: 'github-light', dark: 'github-dark' } },
   schemaUI: schemaUIOptions,
+  codeUsages = registerDefault(createCodeUsageGeneratorRegistry()),
   generateTypeScriptDefinitions = (schema, ctx) => {
     if (typeof schema !== 'object') return;
 
     try {
       return compile(schema, {
-        name: 'Message',
+        name: 'Response',
         readOnly: ctx.readOnly,
         writeOnly: ctx.writeOnly,
         getSchemaId: ctx.ctx.schema.getRawRef,
@@ -138,7 +55,7 @@ export function createAsyncAPIPage({
     }
   },
   ...options
-}: CreateAsyncAPIPageOptions = {}): FC<AsyncAPIPageProps> {
+}: CreateOpenAPIPageOptions & { shiki: ShikiFactory }): FC<OpenAPIPageProps> {
   let processor: ReturnType<typeof createMarkdownProcessor>;
 
   function createMarkdownProcessor() {
@@ -162,14 +79,14 @@ export function createAsyncAPIPage({
     return remark().use(remarkGfm).use(remarkRehype).use(rehypeReact);
   }
 
-  return function AsyncAPIPage(props) {
-    let doc: AsyncAPIObject;
+  return function OpenAPIPage(props) {
+    let doc: Document;
     let proxyUrl: string | undefined;
     if ('preloaded' in props) {
       doc = props.preloaded.docs[props.document];
       if (!doc)
         throw new Error(
-          `[Fumadocs AsyncAPI] the document ${props.document} is not preloaded, make sure to pass the "preloaded" prop to <AsyncAPIPage />`,
+          `[Fumadocs OpenAPI] the document ${props.document} is not preloaded, make sure to pass the "preloaded" prop to <OpenAPIPage />`,
         );
       proxyUrl = props.preloaded.proxyUrl;
     } else {
@@ -184,6 +101,7 @@ export function createAsyncAPIPage({
         return <Markdown md={md} />;
       }
       function resolver(v: ParsedSchema) {
+        // we will only pass dereferenced schema to schema UI
         return {
           dereferenced: v,
           $ref: typeof v === 'object' ? processed.getRawRef(v) : undefined,
@@ -196,6 +114,7 @@ export function createAsyncAPIPage({
         shiki,
         shikiOptions,
         generateTypeScriptDefinitions,
+        codeUsages,
         SchemaUI(props) {
           if (schemaUIOptions?.render) return schemaUIOptions.render(props, ctx);
           return (
@@ -212,7 +131,10 @@ export function createAsyncAPIPage({
           processor ??= createMarkdownProcessor();
           return processor.processSync(md).result as ReactNode;
         },
-        storageKeyPrefix: options.storageKeyPrefix ?? 'fumadocs-asyncapi-',
+        mediaAdapters: {
+          ...defaultAdapters,
+          ...options.mediaAdapters,
+        },
       };
     }, [proxyUrl, processed]);
 
@@ -222,6 +144,92 @@ export function createAsyncAPIPage({
       </RenderContextProvider>
     );
   };
+}
+
+function PageContent({
+  showTitle: hasHead = false,
+  showDescription,
+  operations,
+  webhooks,
+}: Omit<GeneratedPageProps, 'document'>) {
+  const ctx = useRenderContext();
+  const { dereferenced } = ctx.schema;
+  let { renderPageLayout } = ctx.content ?? {};
+  renderPageLayout ??= (slots) => (
+    <div className="flex flex-col gap-24 text-sm @container">
+      {slots.operations?.map((op) => op.children)}
+      {slots.webhooks?.map((op) => op.children)}
+    </div>
+  );
+
+  let content = renderPageLayout(
+    {
+      operations: operations?.map((item) => {
+        const pathItem = dereferenced.paths?.[item.path];
+        if (!pathItem)
+          throw new Error(`[Fumadocs OpenAPI] Path not found in OpenAPI schema: ${item.path}`);
+
+        const operation = pathItem[item.method];
+        if (!operation)
+          throw new Error(
+            `[Fumadocs OpenAPI] Method ${item.method} not found in operation: ${item.path}`,
+          );
+
+        return {
+          item,
+          children: (
+            <Operation
+              key={`${item.path}:${item.method}`}
+              method={item.method}
+              pathItem={pathItem}
+              operation={operation}
+              path={item.path}
+              showTitle={hasHead}
+              showDescription={showDescription}
+            />
+          ),
+        };
+      }),
+      webhooks: webhooks?.map((item) => {
+        const webhook = dereferenced.webhooks?.[item.name];
+        if (!webhook)
+          throw new Error(`[Fumadocs OpenAPI] Webhook not found in OpenAPI schema: ${item.name}`);
+
+        const hook = webhook[item.method];
+        if (!hook)
+          throw new Error(
+            `[Fumadocs OpenAPI] Method ${item.method} not found in webhook: ${item.name}`,
+          );
+
+        return {
+          item,
+          children: (
+            <Operation
+              type="webhook"
+              key={`${item.name}:${item.method}`}
+              method={item.method}
+              pathItem={webhook}
+              operation={hook}
+              path={`/${item.name}`}
+              showTitle={hasHead}
+              showDescription={showDescription}
+            />
+          ),
+        };
+      }),
+    },
+    ctx,
+  );
+
+  if (ctx.playground?.enabled !== false) {
+    content = ctx.playground?.provider ? (
+      ctx.playground.provider({ children: content })
+    ) : (
+      <AuthProvider>{content}</AuthProvider>
+    );
+  }
+
+  return <ServerProvider servers={dereferenced.servers}>{content}</ServerProvider>;
 }
 
 function MarkdownPre(props: ComponentProps<'pre'>) {

@@ -1,7 +1,7 @@
 'use client';
 import { createContext, type ReactNode, use, useEffect, useMemo, useState } from 'react';
 import type { RenderContext, ServerObject } from '@/types';
-import { useStorageKey } from '../client/storage-key';
+import { useStorageKey } from '@/utils/storage-key';
 import { NoReference } from '@fumadocs/api-docs/schema';
 
 interface ServerContextType {

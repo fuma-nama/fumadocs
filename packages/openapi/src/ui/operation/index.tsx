@@ -35,6 +35,7 @@ import type { NoReference } from '@fumadocs/api-docs/schema';
 import { useCopyButton } from 'fumadocs-ui/utils/use-copy-button';
 import { buttonVariants } from 'fumadocs-ui/components/ui/button';
 import { Check, Copy } from 'lucide-react';
+import PlaygroundClient from '@/playground/client';
 
 const paramTypeKeys = ['path', 'query', 'header', 'cookie'] as const;
 
@@ -337,7 +338,36 @@ export function Operation({
       );
     };
 
-    const playgroundEnabled = ctx.playground?.enabled ?? true;
+    let apiPlayground: ReactNode;
+    if (ctx.playground?.enabled ?? true) {
+      apiPlayground = ctx.playground?.render ? (
+        ctx.playground.render({ path, method, operation, pathItem, ctx })
+      ) : (
+        <PlaygroundClient
+          operation={operation}
+          pathItem={pathItem}
+          route={path}
+          method={method}
+          writeOnly
+          readOnly={false}
+        />
+      );
+    } else {
+      apiPlayground = (
+        <div className="flex flex-row items-center gap-2.5 p-3 rounded-xl border bg-fd-card text-fd-card-foreground not-prose">
+          <MethodLabel className="text-xs">{method}</MethodLabel>
+          <code
+            className={cn(
+              'flex-1 overflow-auto text-nowrap text-[0.8125rem] text-fd-muted-foreground',
+              operation.deprecated && 'line-through',
+            )}
+          >
+            {path}
+          </code>
+        </div>
+      );
+    }
+
     let content = renderOperationLayout(
       {
         header: headNode,
@@ -347,21 +377,7 @@ export function Operation({
         callbacks: callbacksNode,
         parameters: parameterNode,
         responses: responseNode,
-        apiPlayground: playgroundEnabled ? (
-          ctx.playground?.render?.({ path, method, operation, pathItem, ctx })
-        ) : (
-          <div className="flex flex-row items-center gap-2.5 p-3 rounded-xl border bg-fd-card text-fd-card-foreground not-prose">
-            <MethodLabel className="text-xs">{method}</MethodLabel>
-            <code
-              className={cn(
-                'flex-1 overflow-auto text-nowrap text-[0.8125rem] text-fd-muted-foreground',
-                operation.deprecated && 'line-through',
-              )}
-            >
-              {path}
-            </code>
-          </div>
-        ),
+        apiPlayground,
         apiExample: <UsageTabs method={method} operation={operation} pathItem={pathItem} />,
       },
       {

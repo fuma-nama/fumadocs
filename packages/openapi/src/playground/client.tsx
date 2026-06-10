@@ -39,7 +39,7 @@ import {
 import { labelVariants } from '@fumadocs/api-docs/components/input';
 import { getPreferredType, type ParsedSchema } from '@/utils/schema';
 import ServerSelect from './components/server-select';
-import { useStorageKey } from '@/ui/client/storage-key';
+import { useStorageKey } from '@/utils/storage-key';
 import {
   type DataEngine,
   FieldKey,
