@@ -1,7 +1,7 @@
 import type { JSONSchema } from 'json-schema-typed/draft-2020-12';
-import type { NoReference } from '../schema';
-import { dereferenceSync } from '../schema/dereference';
 import type { Document } from '@/types';
+import { dereferenceSync } from '@fumadocs/api-docs/schema/dereference';
+import type { NoReference } from '@fumadocs/api-docs/schema';
 
 export interface DereferencedDocument {
   /**
@@ -17,16 +17,15 @@ export interface DereferencedDocument {
   bundled: Document;
 }
 
-export function dereferenceDocument(bundled: Document): DereferencedDocument {
-  /**
-   * Dereferenced value and its original `$ref` value
-   */
+export function dereferenceBundledDocument(bundled: Document): DereferencedDocument {
   const dereferenceMap = new Map<object, string>();
 
   return {
     bundled,
-    dereferenced: dereferenceSync(bundled as JSONSchema, (schema, ref) => {
-      dereferenceMap.set(schema as object, ref);
+    dereferenced: dereferenceSync(bundled as JSONSchema, {
+      setOriginalRef(schema, ref) {
+        dereferenceMap.set(schema as object, ref);
+      },
     }) as NoReference<Document>,
     getRawRef(obj: object) {
       return dereferenceMap.get(obj);

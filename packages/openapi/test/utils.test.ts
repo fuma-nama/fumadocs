@@ -1,421 +1,8 @@
 import { describe, expect, test } from 'vitest';
-import { mergeAllOf } from '@/utils/schema/merge';
-import { pickSchema } from '@/utils/schema/pick';
-import { joinURL, resolveRequestData, resolveServerUrl, withBase } from '@/utils/url';
+import { pathnameFromRequest } from '@/requests/generators';
 import type { RequestData } from '@/requests/types';
 
-describe('Merge object schemas', () => {
-  test('Merge single object', () => {
-    const result = mergeAllOf({
-      allOf: [
-        {
-          type: 'object',
-          properties: {
-            test: {
-              type: 'string',
-              enum: ['one', 'two'],
-            },
-          },
-        },
-      ],
-    });
-
-    expect(result).toMatchInlineSnapshot(`
-      {
-        "properties": {
-          "test": {
-            "enum": [
-              "one",
-              "two",
-            ],
-            "type": "string",
-          },
-        },
-        "type": "object",
-      }
-    `);
-  });
-
-  test('Merge multiple objects', () => {
-    const result = mergeAllOf({
-      allOf: [
-        {
-          type: 'object',
-          properties: {
-            test: {
-              type: 'string',
-              enum: ['one', 'two'],
-            },
-          },
-        },
-        {
-          type: 'object',
-          properties: {
-            hello: {
-              type: 'number',
-            },
-          },
-        },
-      ],
-    });
-
-    expect(result).toMatchInlineSnapshot(`
-      {
-        "properties": {
-          "hello": {
-            "type": "number",
-          },
-          "test": {
-            "enum": [
-              "one",
-              "two",
-            ],
-            "type": "string",
-          },
-        },
-        "type": "object",
-      }
-    `);
-  });
-
-  test('Merge multiple objects: required', () => {
-    const result = mergeAllOf({
-      allOf: [
-        {
-          type: 'object',
-          properties: {
-            test: {
-              type: 'string',
-              enum: ['one', 'two'],
-            },
-          },
-        },
-        {
-          type: 'object',
-          properties: {
-            hello: {
-              type: 'number',
-            },
-          },
-          required: ['hello'],
-        },
-      ],
-    });
-
-    expect(result).toMatchInlineSnapshot(`
-      {
-        "properties": {
-          "hello": {
-            "type": "number",
-          },
-          "test": {
-            "enum": [
-              "one",
-              "two",
-            ],
-            "type": "string",
-          },
-        },
-        "required": [
-          "hello",
-        ],
-        "type": "object",
-      }
-    `);
-  });
-
-  test('Merge multiple objects: additional properties', () => {
-    const result = mergeAllOf({
-      allOf: [
-        {
-          type: 'object',
-          properties: {
-            test: {
-              type: 'string',
-              enum: ['one', 'two'],
-            },
-          },
-          additionalProperties: true,
-        },
-        {
-          type: 'object',
-          additionalProperties: {
-            type: 'string',
-          },
-        },
-      ],
-    });
-
-    expect(result).toMatchInlineSnapshot(`
-      {
-        "additionalProperties": true,
-        "properties": {
-          "test": {
-            "enum": [
-              "one",
-              "two",
-            ],
-            "type": "string",
-          },
-        },
-        "type": "object",
-      }
-    `);
-  });
-
-  test('Merge multiple objects: `allOf`', () => {
-    const result = mergeAllOf({
-      allOf: [
-        {
-          type: 'object',
-          properties: {
-            test: {
-              type: 'string',
-              enum: ['one', 'two'],
-            },
-          },
-        },
-        {
-          allOf: [
-            {
-              type: 'object',
-              properties: {
-                hello: {
-                  type: 'number',
-                },
-              },
-            },
-            {
-              type: 'object',
-              properties: {
-                world: {
-                  type: 'number',
-                },
-              },
-            },
-          ],
-        },
-      ],
-    });
-
-    expect(result).toMatchInlineSnapshot(`
-      {
-        "properties": {
-          "hello": {
-            "type": "number",
-          },
-          "test": {
-            "enum": [
-              "one",
-              "two",
-            ],
-            "type": "string",
-          },
-          "world": {
-            "type": "number",
-          },
-        },
-        "type": "object",
-      }
-    `);
-  });
-
-  test('Production: `allOf` with multiple `oneOf`', () => {
-    const result = mergeAllOf({
-      type: 'object',
-      allOf: [
-        {
-          oneOf: [
-            {
-              type: 'object',
-              title: 'optionA',
-              properties: { a: { type: 'string' } },
-              required: ['a'],
-            },
-            {
-              type: 'object',
-              title: 'optionB',
-              properties: { b: { type: 'string' } },
-              required: ['b'],
-            },
-          ],
-        },
-        {
-          oneOf: [
-            {
-              type: 'object',
-              title: 'optionX',
-              properties: { x: { type: 'number' } },
-              required: ['x'],
-            },
-            {
-              type: 'object',
-              title: 'optionY',
-              properties: { y: { type: 'number' } },
-              required: ['y'],
-            },
-          ],
-        },
-      ],
-    });
-    // Should produce cross-product: A&X, A&Y, B&X, B&Y
-    expect(typeof result !== 'boolean' && result.oneOf).toHaveLength(4);
-  });
-
-  test('Production: `allOf`', () => {
-    const result = mergeAllOf({
-      type: 'object',
-      allOf: [
-        {
-          properties: {
-            name: { type: 'string' },
-          },
-        },
-        {
-          oneOf: [
-            {
-              type: 'object',
-              title: 'human',
-              required: ['human'],
-              properties: {
-                human: {
-                  type: 'object',
-                  properties: {
-                    givenName: { type: 'string' },
-                    familyName: { type: 'string' },
-                  },
-                },
-              },
-            },
-            {
-              type: 'object',
-              title: 'machine',
-              required: ['machine'],
-              properties: {
-                machine: {
-                  type: 'object',
-                  properties: {
-                    serialNumber: { type: 'string' },
-                  },
-                },
-              },
-            },
-          ],
-        },
-      ],
-    });
-
-    expect(result).toMatchInlineSnapshot(`
-      {
-        "oneOf": [
-          {
-            "properties": {
-              "human": {
-                "properties": {
-                  "familyName": {
-                    "type": "string",
-                  },
-                  "givenName": {
-                    "type": "string",
-                  },
-                },
-                "type": "object",
-              },
-              "name": {
-                "type": "string",
-              },
-            },
-            "required": [
-              "human",
-            ],
-            "title": "human",
-            "type": "object",
-          },
-          {
-            "properties": {
-              "machine": {
-                "properties": {
-                  "serialNumber": {
-                    "type": "string",
-                  },
-                },
-                "type": "object",
-              },
-              "name": {
-                "type": "string",
-              },
-            },
-            "required": [
-              "machine",
-            ],
-            "title": "machine",
-            "type": "object",
-          },
-        ],
-      }
-    `);
-  });
-});
-
 describe('URL utilities', () => {
-  describe('joinURL', () => {
-    test('joins base URL with pathname', () => {
-      expect(joinURL('https://api.example.com', 'users')).toBe('https://api.example.com/users');
-    });
-
-    test('handles trailing slash in base', () => {
-      expect(joinURL('https://api.example.com/', 'users')).toBe('https://api.example.com/users');
-    });
-
-    test('handles leading slash in pathname', () => {
-      expect(joinURL('https://api.example.com', '/users')).toBe('https://api.example.com/users');
-    });
-
-    test('handles both trailing and leading slashes', () => {
-      expect(joinURL('https://api.example.com/', '/users')).toBe('https://api.example.com/users');
-    });
-
-    test('handles empty pathname', () => {
-      expect(joinURL('https://api.example.com', '')).toBe('https://api.example.com');
-    });
-  });
-
-  describe('withBase', () => {
-    test('returns absolute URL unchanged', () => {
-      expect(withBase('https://other.com/api', 'https://base.com')).toBe('https://other.com/api');
-    });
-
-    test('joins relative URL with base', () => {
-      expect(withBase('/api/users', 'https://base.com')).toBe('https://base.com/api/users');
-    });
-
-    test('joins relative URL without leading slash', () => {
-      expect(withBase('api/users', 'https://base.com')).toBe('https://base.com/api/users');
-    });
-  });
-
-  describe('resolveServerUrl', () => {
-    test('replaces single variable', () => {
-      expect(resolveServerUrl('https://{host}/api', { host: 'api.example.com' })).toBe(
-        'https://api.example.com/api',
-      );
-    });
-
-    test('replaces multiple variables', () => {
-      expect(
-        resolveServerUrl('https://{host}:{port}/api/{version}', {
-          host: 'api.example.com',
-          port: '8080',
-          version: 'v1',
-        }),
-      ).toBe('https://api.example.com:8080/api/v1');
-    });
-
-    test('handles no variables', () => {
-      expect(resolveServerUrl('https://api.example.com', {})).toBe('https://api.example.com');
-    });
-  });
-
   describe('resolveRequestData', () => {
     test('basic path parameter substitution', () => {
       const requestData: RequestData = {
@@ -428,7 +15,7 @@ describe('URL utilities', () => {
         cookie: {},
       };
 
-      expect(resolveRequestData('/api/users/{id}', requestData)).toBe('/api/users/123');
+      expect(pathnameFromRequest('/api/users/{id}', requestData)).toBe('/api/users/123');
     });
 
     test('multiple path parameters', () => {
@@ -443,7 +30,7 @@ describe('URL utilities', () => {
         cookie: {},
       };
 
-      expect(resolveRequestData('/api/users/{userId}/posts/{postId}', requestData)).toBe(
+      expect(pathnameFromRequest('/api/users/{userId}/posts/{postId}', requestData)).toBe(
         '/api/users/123/posts/456',
       );
     });
@@ -459,7 +46,7 @@ describe('URL utilities', () => {
         cookie: {},
       };
 
-      expect(resolveRequestData('/{segments}', requestData)).toBe('/api/v1/users');
+      expect(pathnameFromRequest('/{segments}', requestData)).toBe('/api/v1/users');
     });
 
     test('adds query parameters to clean path', () => {
@@ -474,7 +61,7 @@ describe('URL utilities', () => {
         cookie: {},
       };
 
-      expect(resolveRequestData('/api/users', requestData)).toBe('/api/users?limit=10&offset=20');
+      expect(pathnameFromRequest('/api/users', requestData)).toBe('/api/users?limit=10&offset=20');
     });
 
     test('handles array query parameters', () => {
@@ -488,7 +75,7 @@ describe('URL utilities', () => {
         cookie: {},
       };
 
-      expect(resolveRequestData('/api/posts', requestData)).toBe(
+      expect(pathnameFromRequest('/api/posts', requestData)).toBe(
         '/api/posts?tags=javascript&tags=typescript',
       );
     });
@@ -505,7 +92,7 @@ describe('URL utilities', () => {
         cookie: {},
       };
 
-      expect(resolveRequestData('/api/foo/bar?verbose=true', requestData)).toBe(
+      expect(pathnameFromRequest('/api/foo/bar?verbose=true', requestData)).toBe(
         '/api/foo/bar?verbose=true&limit=5',
       );
     });
@@ -522,7 +109,7 @@ describe('URL utilities', () => {
         cookie: {},
       };
 
-      expect(resolveRequestData('/api/location/search?name=foo', requestData)).toBe(
+      expect(pathnameFromRequest('/api/location/search?name=foo', requestData)).toBe(
         '/api/location/search?name=foo&limit=10&sort=date',
       );
     });
@@ -540,7 +127,7 @@ describe('URL utilities', () => {
         cookie: {},
       };
 
-      expect(resolveRequestData('/api/users/{userId}/posts?published=true', requestData)).toBe(
+      expect(pathnameFromRequest('/api/users/{userId}/posts?published=true', requestData)).toBe(
         '/api/users/123/posts?published=true&include=profile',
       );
     });
@@ -556,7 +143,7 @@ describe('URL utilities', () => {
         cookie: {},
       };
 
-      expect(resolveRequestData('/api/foo/bar?verbose=true', requestData)).toBe(
+      expect(pathnameFromRequest('/api/foo/bar?verbose=true', requestData)).toBe(
         '/api/foo/bar?verbose=false',
       );
     });
@@ -572,7 +159,7 @@ describe('URL utilities', () => {
         cookie: {},
       };
 
-      expect(resolveRequestData('/api/search?q=test&type=user&active=true', requestData)).toBe(
+      expect(pathnameFromRequest('/api/search?q=test&type=user&active=true', requestData)).toBe(
         '/api/search?q=test&type=user&active=true&newParam=value',
       );
     });
@@ -588,7 +175,7 @@ describe('URL utilities', () => {
         cookie: {},
       };
 
-      expect(resolveRequestData('/api/articles?featured=true', requestData)).toBe(
+      expect(pathnameFromRequest('/api/articles?featured=true', requestData)).toBe(
         '/api/articles?featured=true&categories=tech&categories=science',
       );
     });
@@ -604,7 +191,7 @@ describe('URL utilities', () => {
         cookie: {},
       };
 
-      expect(resolveRequestData('/api/posts?tags=old&tags=legacy', requestData)).toBe(
+      expect(pathnameFromRequest('/api/posts?tags=old&tags=legacy', requestData)).toBe(
         '/api/posts?tags=new&tags=updated',
       );
     });
@@ -618,7 +205,7 @@ describe('URL utilities', () => {
         cookie: {},
       };
 
-      expect(resolveRequestData('/api/foo/bar?verbose=true', requestData)).toBe(
+      expect(pathnameFromRequest('/api/foo/bar?verbose=true', requestData)).toBe(
         '/api/foo/bar?verbose=true',
       );
     });
@@ -639,7 +226,7 @@ describe('URL utilities', () => {
         cookie: {},
       };
 
-      const result = resolveRequestData(
+      const result = pathnameFromRequest(
         '/api/orgs/{orgId}/projects/{projectId}?version=latest&archived=false',
         requestData,
       );
@@ -647,85 +234,5 @@ describe('URL utilities', () => {
         '/api/orgs/acme/projects/web-app?version=latest&archived=false&include=members&include=settings&format=json&debug=true',
       );
     });
-  });
-});
-
-describe('pickSchema', () => {
-  test('places resolved schema at JSON Pointer path', () => {
-    const pet = {
-      type: 'object',
-      properties: { name: { type: 'string' } },
-    };
-    const root = {
-      components: {
-        schemas: {
-          Pet: pet,
-        },
-      },
-    };
-
-    expect(pickSchema(root, '#/components/schemas/Pet')).toEqual({
-      components: {
-        schemas: {
-          Pet: pet,
-        },
-      },
-    });
-  });
-
-  test('follows nested $ref and includes referenced definitions', () => {
-    const address = {
-      type: 'object',
-      properties: { street: { type: 'string' } },
-    };
-    const person = {
-      type: 'object',
-      properties: {
-        home: { $ref: '#/components/schemas/Address' },
-      },
-    };
-    const root = {
-      components: {
-        schemas: {
-          Address: address,
-          Person: person,
-        },
-      },
-    };
-
-    expect(pickSchema(root, '#/components/schemas/Person')).toEqual({
-      components: {
-        schemas: {
-          Address: address,
-          Person: person,
-        },
-      },
-    });
-  });
-
-  test('does not revisit the same $ref', () => {
-    const shared = { type: 'string' };
-    const root = {
-      components: {
-        schemas: {
-          Shared: shared,
-          A: { $ref: '#/components/schemas/Shared' },
-          B: { $ref: '#/components/schemas/Shared' },
-        },
-      },
-    };
-
-    expect(pickSchema(root, '#/components/schemas/A')).toEqual({
-      components: {
-        schemas: {
-          Shared: shared,
-          A: { $ref: '#/components/schemas/Shared' },
-        },
-      },
-    });
-  });
-
-  test('rejects external $ref', () => {
-    expect(() => pickSchema({}, 'https://example.com/schema.json#/Foo')).toThrow();
   });
 });

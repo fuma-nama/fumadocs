@@ -1,16 +1,21 @@
-import type { MethodInformation, RenderContext, ResponseObject } from '@/types';
-import { getPreferredType, type NoReference } from '@/utils/schema';
+'use client';
+import type { HttpMethods, OperationObject, PathItemObject, ResponseObject } from '@/types';
+import { getPreferredType } from '@/utils/schema';
 import {
   AccordionContent,
   AccordionHeader,
   AccordionItem,
   Accordions,
   AccordionTrigger,
-} from '@/ui/components/accordion';
+} from '@fumadocs/api-docs/components/accordion';
 import { Tab, Tabs } from 'fumadocs-ui/components/tabs';
-import { sample } from '@/utils/schema/sample';
+import { sample } from '@fumadocs/api-docs/schema/sample';
 import { useMemo, type ReactNode } from 'react';
-import { I18nLabel } from '@/ui/client/i18n';
+import { useTranslations } from '@fuma-translate/react';
+import { Markdown } from '../components/markdown';
+import { ClientCodeBlock } from '../components/codeblock';
+import type { NoReference } from '@fumadocs/api-docs/schema';
+import { useRenderContext } from '../contexts/api';
 
 export interface ResponseTab {
   /**
@@ -41,13 +46,19 @@ interface ResponseExample {
   description?: string;
 }
 
+export interface ResponseTabsRenderOptions {
+  tabs: ResponseTab[];
+}
+
 export function ResponseTabs({
   operation,
-  ctx,
 }: {
-  operation: NoReference<MethodInformation>;
-  ctx: RenderContext;
+  operation: NoReference<OperationObject>;
+  method: HttpMethods;
+  pathItem: NoReference<PathItemObject>;
 }) {
+  const ctx = useRenderContext();
+  const t = useTranslations({ note: 'operation page' });
   const tabs = useMemo(() => {
     const tabs: ResponseTab[] = [];
     if (!operation.responses) return tabs;
@@ -67,7 +78,11 @@ export function ResponseTabs({
 
         for (const [key, sample] of Object.entries(responseOfType.examples)) {
           tab.examples.push({
-            label: sample?.summary ?? <I18nLabel label="responseTabName" replacements={{ key }} />,
+            label:
+              sample?.summary ??
+              t('Example {key}', {
+                variables: { key },
+              }),
             sample: sample.value,
             description: sample?.description,
           });
@@ -75,7 +90,7 @@ export function ResponseTabs({
       } else if (responseOfType?.example || responseOfType?.schema) {
         tab.examples ??= [];
         tab.examples.push({
-          label: <I18nLabel label="responseTabNameDefault" />,
+          label: t('Example'),
           sample: responseOfType.example ?? sample(responseOfType.schema as object),
         });
       }
@@ -84,24 +99,27 @@ export function ResponseTabs({
     }
 
     return tabs;
-  }, [operation.responses]);
+  }, [operation.responses, t]);
 
   if (tabs.length === 0) return null;
 
   const { renderResponseTabs = renderResponseTabsDefault } = ctx.content ?? {};
 
-  return renderResponseTabs(tabs, ctx);
+  return renderResponseTabs({ tabs }, ctx);
 }
 
-function renderResponseTabsDefault(tabs: ResponseTab[], ctx: RenderContext): ReactNode {
+function renderResponseTabsDefault({ tabs }: ResponseTabsRenderOptions): ReactNode {
+  return <ResponseTabsDefaultContent tabs={tabs} />;
+}
+
+function ResponseTabsDefaultContent({ tabs }: { tabs: ResponseTab[] }) {
+  const t = useTranslations({ note: 'operation page' });
+
   function renderExampleContent(example: ResponseExample) {
     return (
       <>
-        {example.description && ctx.renderMarkdown(example.description)}
-        {ctx.renderCodeBlock({
-          lang: 'json',
-          code: JSON.stringify(example.sample, null, 2),
-        })}
+        {example.description && <Markdown md={example.description} />}
+        <ClientCodeBlock lang="json" code={JSON.stringify(example.sample, null, 2)} />
       </>
     );
   }
@@ -111,7 +129,7 @@ function renderResponseTabsDefault(tabs: ResponseTab[], ctx: RenderContext): Rea
       {tabs.map((tab) => {
         const { examples = [] } = tab;
 
-        let slot: ReactNode = <I18nLabel label="empty" />;
+        let slot: ReactNode = t('Empty');
         if (examples.length > 1) {
           slot = (
             <Accordions type="single" className="pt-2" defaultValue="0">

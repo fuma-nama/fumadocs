@@ -1,7 +1,6 @@
 import { mkdir, writeFile } from 'node:fs/promises';
 import * as path from 'node:path';
 import { generateDocument, type PagesToTextOptions, toText } from './utils/pages/to-text';
-import type { DereferencedDocument } from '@/utils/document/dereference';
 import type { OpenAPIServer } from '@/server';
 import { createGetUrl, getSlugs, PathUtils } from 'fumadocs-core/source';
 import { createAutoPreset, type SchemaToPagesOptions } from '@/utils/pages/preset-auto';
@@ -75,8 +74,6 @@ interface GenerateFilesConfig extends PagesToTextOptions {
 }
 
 interface MetaOptions {
-  /** @deprecated use `folderStyle` instead */
-  groupStyle?: 'folder' | 'separator';
   folderStyle?: 'folder' | 'separator';
 }
 
@@ -93,7 +90,6 @@ export type Config = SchemaToPagesOptions &
 interface BeforeWriteContext {
   readonly generated: Record<string, OutputFile[]>;
   readonly generatedEntries: Record<string, OutputEntry[]>;
-  readonly documents: Record<string, DereferencedDocument>;
 }
 
 export async function generateFiles(options: Config): Promise<void> {
@@ -138,7 +134,7 @@ export async function generateFilesOnly(
   }
   const preset = createAutoPreset(options);
   for (const [id, schema] of entries) {
-    const entries = fromSchema(id, schema, preset);
+    const entries = fromSchema(id, schema.bundled, preset);
     const schemaFiles: OutputFile[] = [];
 
     generatedEntries[id] = entries;
@@ -150,7 +146,7 @@ export async function generateFilesOnly(
 
       schemaFiles.push({
         path: entry.path,
-        content: toText(entry, schema, options),
+        content: toText(entry, schema.bundled, options),
       });
     }
 
@@ -162,7 +158,6 @@ export async function generateFilesOnly(
   const context: BeforeWriteContext = {
     generated,
     generatedEntries,
-    documents: schemas,
   };
 
   if (options.index) {
@@ -179,7 +174,7 @@ export async function generateFilesOnly(
 
 function generateMeta(context: BeforeWriteContext, options: MetaOptions): OutputFile[] {
   const files: OutputFile[] = [];
-  const folderStyle = options.folderStyle ?? options.groupStyle ?? 'folder';
+  const folderStyle = options.folderStyle ?? 'folder';
 
   function scan(entries: OutputEntry[], parent?: OutputGroup) {
     const pages: string[] = [];

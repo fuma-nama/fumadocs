@@ -1,5 +1,13 @@
 # next-docs-mdx
 
+## 15.0.12
+
+### Patch Changes
+
+- 9b9545f: Add package issue tracker metadata.
+- Updated dependencies [9b9545f]
+  - fumadocs-core@16.10.0
+
 ## 15.0.11
 
 ### Patch Changes

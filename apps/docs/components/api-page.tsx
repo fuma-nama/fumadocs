@@ -1,7 +1,7 @@
-import { openapi } from '@/lib/openapi';
+'use client';
 import { defaultShikiOptions } from '@/lib/shiki';
-import { createAPIPage } from 'fumadocs-openapi/ui';
+import { createOpenAPIPage } from 'fumadocs-openapi/ui';
 
-export const APIPage = createAPIPage(openapi, {
+export const OpenAPIPage = createOpenAPIPage({
   shikiOptions: defaultShikiOptions,
 });

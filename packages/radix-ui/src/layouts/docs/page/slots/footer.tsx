@@ -1,6 +1,6 @@
 'use client';
 
-import { useTranslations } from '@/contexts/i18n';
+import { useTranslations } from '@fuma-translate/react';
 import { cn } from '@/utils/cn';
 import { isActive } from '@/utils/urls';
 import { useFooterItems } from '@/utils/use-footer-items';
@@ -56,7 +56,7 @@ export function Footer({ items, children, className, ...props }: FooterProps) {
 }
 
 function FooterItem({ item, index }: { item: Item; index: 0 | 1 }) {
-  const t = useTranslations();
+  const t = useTranslations({ note: 'pagination' });
   const Icon = index === 0 ? ChevronLeft : ChevronRight;
 
   return (
@@ -77,7 +77,7 @@ function FooterItem({ item, index }: { item: Item; index: 0 | 1 }) {
         <p>{item.name}</p>
       </div>
       <p className="text-fd-muted-foreground truncate">
-        {item.description ?? (index === 0 ? t.previousPage : t.nextPage)}
+        {item.description ?? (index === 0 ? t('Previous Page') : t('Next Page'))}
       </p>
     </Link>
   );

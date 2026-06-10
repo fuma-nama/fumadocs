@@ -2,6 +2,7 @@ import { defineConfig } from 'tsdown';
 import { Scanner } from '@tailwindcss/oxide';
 import { mkdir, writeFile } from 'node:fs/promises';
 import path from 'node:path';
+import { compilePackageTranslations } from '../shared/compile-package-translations.ts';
 
 export default defineConfig({
   format: 'esm',
@@ -18,12 +19,24 @@ export default defineConfig({
   ],
   fixedExtension: false,
   unbundle: true,
+  ignoreWatch: ['src/.translations/**'],
   dts: {
     sourcemap: false,
   },
   css: {
     inject: true,
   },
+  plugins: [
+    {
+      name: 'generate-translations',
+      async buildStart() {
+        await compilePackageTranslations({
+          input: ['src/**/*.{ts,tsx}'],
+          extraKeys: ['displayName'],
+        });
+      },
+    },
+  ],
   async onSuccess() {
     await compileInline();
   },
@@ -93,5 +106,5 @@ export async function compileInline() {
 }
 
 function namesToFile(names: string[]) {
-  return names.map((name) => `@source inline(${JSON.stringify(name)});`).join('\n');
+  return `@source inline(${JSON.stringify(names.join(' '))});`;
 }

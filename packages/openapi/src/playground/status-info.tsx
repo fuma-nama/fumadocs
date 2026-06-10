@@ -1,6 +1,5 @@
 import { CircleCheck, CircleX } from 'lucide-react';
-import type { Translations } from '@/i18n';
-import { useTranslations } from '@/ui/client/i18n';
+import { useTranslations } from '@fuma-translate/react';
 import { useMemo } from 'react';
 
 interface StatusInfo {
@@ -9,36 +8,57 @@ interface StatusInfo {
   icon: React.ElementType;
 }
 
-const statusKeys: Record<
-  number,
-  { key: keyof Translations; color: string; icon: React.ElementType }
-> = {
-  400: { key: 'statusBadRequest', color: 'text-red-500', icon: CircleX },
-  401: { key: 'statusUnauthorized', color: 'text-red-500', icon: CircleX },
-  403: { key: 'statusForbidden', color: 'text-red-500', icon: CircleX },
-  404: { key: 'statusNotFound', color: 'text-fd-muted-foreground', icon: CircleX },
-  500: { key: 'statusInternalServerError', color: 'text-red-500', icon: CircleX },
-};
-
 export function useStatusInfo(status: number): StatusInfo {
-  const t = useTranslations();
+  const t = useTranslations({ note: 'playground status info' });
 
   return useMemo(() => {
-    if (status in statusKeys) {
-      const { key, color, icon } = statusKeys[status];
-      return { description: t[key], color, icon };
+    switch (status) {
+      case 400:
+        return {
+          description: t('Bad Request'),
+          color: 'text-red-500',
+          icon: CircleX,
+        };
+      case 401:
+        return {
+          description: t('Unauthorized'),
+          color: 'text-red-500',
+          icon: CircleX,
+        };
+      case 403:
+        return {
+          description: t('Forbidden'),
+          color: 'text-red-500',
+          icon: CircleX,
+        };
+      case 404:
+        return {
+          description: t('Not Found'),
+          color: 'text-fd-muted-foreground',
+          icon: CircleX,
+        };
+      case 500:
+        return {
+          description: t('Internal Server Error'),
+          color: 'text-red-500',
+          icon: CircleX,
+        };
     }
 
     if (status >= 200 && status < 300) {
       return {
-        description: t.statusSuccessful,
+        description: t('Successful'),
         color: 'text-green-500',
         icon: CircleCheck,
       };
     }
 
     if (status >= 400) {
-      return { description: t.statusError, color: 'text-red-500', icon: CircleX };
+      return {
+        description: t('Error'),
+        color: 'text-red-500',
+        icon: CircleX,
+      };
     }
 
     return {

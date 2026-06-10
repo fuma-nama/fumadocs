@@ -28,6 +28,7 @@ import {
 import { NotFound } from '@/components/layouts/not-found';
 import { getSuggestions } from './suggestions';
 import { PathUtils } from 'fumadocs-core/source';
+import { OpenAPIPageLazy } from './lazy';
 
 function PreviewRenderer({ preview }: { preview: string }): ReactNode {
   if (preview && preview in Preview) {
@@ -52,13 +53,12 @@ export default async function Page(props: PageProps<'/docs/[[...slug]]'>) {
     );
 
   if (page.type === 'openapi') {
-    const { APIPage } = await import('@/components/api-page');
     return (
       <DocsPage full>
         <h1 className="text-[1.75em] font-semibold">{page.data.title}</h1>
 
         <DocsBody>
-          <APIPage {...page.data.getAPIPageProps()} />
+          <OpenAPIPageLazy {...page.data.getOpenAPIPageProps()} />
         </DocsBody>
       </DocsPage>
     );

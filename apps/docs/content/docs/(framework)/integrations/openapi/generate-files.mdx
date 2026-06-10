@@ -51,7 +51,6 @@ import { generateFiles, OperationOutput } from 'fumadocs-openapi';
 void generateFiles({
   per: 'custom',
   toPages(builder) {
-    const { dereferenced } = builder.document;
     const items = builder.extract();
 
     for (const op of items.operations) {
@@ -180,16 +179,17 @@ A function that controls the output file name of MDX pages.
 import { generateFiles } from 'fumadocs-openapi';
 
 void generateFiles({
-  name: (output, document) => {
+  name(output) {
+    const doc = this.document;
     if (output.type === 'operation') {
-      const operation = document.paths![output.item.path]![output.item.method]!;
+      const operation = doc.paths![output.item.path]![output.item.method]!;
       // operation object
       console.log(operation);
 
       return 'my-dir/filename';
     }
 
-    const hook = document.webhooks![output.item.name][output.item.method]!;
+    const hook = this.dereferenceShallow(doc.webhooks![output.item.name])[output.item.method]!;
     // webhook object
     console.log(hook);
     return 'my-dir/filename';

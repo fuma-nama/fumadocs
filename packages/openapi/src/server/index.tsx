@@ -1,17 +1,16 @@
 import { createProxy } from '@/server/proxy';
-import { processDocument, type ProcessedDocument } from '@/utils/document/process';
-import type { Document } from '@/types';
-import type { InlineCodeUsageGenerator } from '@/requests/generators';
+import { loadDocument } from '@/utils/document/load';
+import type { Document, Awaitable } from '@/types';
 import fs from 'node:fs';
 import {
   type DynamicSource,
   type LoaderPlugin,
   type PageData,
-  type PageTreeTransformer,
   PathUtils,
   type MetaData,
   type Source,
   type VirtualFile,
+  type Page,
 } from 'fumadocs-core/source';
 import {
   getPageProps,
@@ -22,28 +21,28 @@ import {
 } from '@/utils/pages/builder';
 import { toStaticData } from '@/utils/pages/to-static-data';
 import path from 'node:path';
-import type { DereferencedDocument } from '@/utils/document/dereference';
-import type { ApiPageProps } from '@/ui/api-page';
-import type { ClientApiPageProps } from '@/ui/create-client';
+import type { OpenAPIPageProps_Preloaded, OpenAPIPageProps_Spec } from '@/ui';
 import type { StructuredData } from 'fumadocs-core/mdx-plugins/remark-structure';
 import type { TOCItemType } from 'fumadocs-core/toc';
 import type { SchemaToPagesOptions } from '@/utils/pages/preset-auto';
 import { MethodLabel } from '@/ui/components/method-label';
 
 /**
- * schema id -> file path, URL, or downloaded schema object
+ * schema ID -> file path, URL, downloaded schema object, or a function returning them
  */
-type SchemaMap = Record<string, string | Document>;
-type ProcessedSchemaMap = Record<string, ProcessedDocument>;
+type SchemaRecord = Record<string, string | Document | (() => Awaitable<string | Document>)>;
+interface LoadedDocument {
+  bundled: Document;
+}
 
 export interface OpenAPIOptions {
   /**
    * Schema files, can be:
    * - URL
    * - file path
-   * - a function returning records of downloaded schemas.
+   * - a schema record object
    */
-  input?: string[] | (() => SchemaMap | Promise<SchemaMap>);
+  input?: string[] | SchemaRecord;
 
   disableCache?: boolean;
 
@@ -53,10 +52,14 @@ export interface OpenAPIOptions {
   proxyUrl?: string;
 }
 
+// avoid "cannot be named without reference" error in TypeScript.
+// Even if we exported it elsewhere, if TypeScript didn't scan the file, it fails.
+export type { OpenAPIPageProps_Spec, OpenAPIPageProps_Preloaded };
+
 export interface OpenAPIServer {
   createProxy: typeof createProxy;
-  getSchemas: () => Promise<ProcessedSchemaMap>;
-  getSchema: (document: string) => Promise<ProcessedDocument>;
+  getSchemas: () => Promise<Record<string, LoadedDocument>>;
+  getSchema: (document: string) => Promise<LoadedDocument>;
   readonly options: OpenAPIOptions;
 
   /**
@@ -73,6 +76,10 @@ export interface OpenAPIServer {
     options?: OpenAPISourceOptions,
   ) => DynamicSource<{ metaData: MetaData; pageData: OpenAPIPageData }>;
 
+  preloadOpenAPIPage: <Type extends string | undefined, Data extends PageData>(
+    page: Page<Type, Data>,
+  ) => Promise<Pick<OpenAPIPageProps_Preloaded, 'preloaded'>>;
+
   /**
    * Fumadocs Source API integration, pass this to `plugins` array in `loader()`.
    */
@@ -83,12 +90,16 @@ export interface OpenAPIServer {
 }
 
 export interface OpenAPIPageData extends PageData {
-  getAPIPageProps: () => ApiPageProps;
-  getSchema: () => { id: string } & DereferencedDocument;
-  getClientAPIPageProps: () => Promise<ClientApiPageProps>;
+  getOpenAPIPageProps: () => OpenAPIPageProps_Spec;
+  getSchema: () => { id: string; bundled: Document };
   structuredData: StructuredData;
   toc: TOCItemType[];
-  _openapi?: InternalOpenAPIMeta;
+  _openapi: InternalOpenAPIMeta;
+
+  /** @deprecated use `getOpenAPIPageProps()` instead */
+  getAPIPageProps: () => OpenAPIPageProps_Spec;
+  /** @deprecated use `getOpenAPIPageProps()` instead */
+  getClientAPIPageProps: () => OpenAPIPageProps_Spec;
 }
 
 export type OpenAPISourceOptions = SchemaToPagesOptions & {
@@ -98,21 +109,41 @@ export type OpenAPISourceOptions = SchemaToPagesOptions & {
 };
 
 export function createOpenAPI(options: OpenAPIOptions = {}): OpenAPIServer {
-  const { input = [], disableCache = false } = options;
-  let schemas: Promise<ProcessedSchemaMap> | undefined;
+  const { disableCache = false } = options;
+  const schemaMap = new Map<string, Promise<LoadedDocument>>();
 
-  async function getSchemas(): Promise<ProcessedSchemaMap> {
-    if (Array.isArray(input)) {
-      const entries = await Promise.all(
-        input.map(async (item) => [item, await processDocument(item)]),
+  let resolvedInput: SchemaRecord = {};
+  if (Array.isArray(options.input)) {
+    for (const item of options.input) resolvedInput[item] = item;
+  } else if (options.input) {
+    resolvedInput = options.input;
+  }
+
+  function getSchema(schemaId: string): Promise<LoadedDocument> {
+    if (!(schemaId in resolvedInput)) {
+      console.warn(
+        `[Fumadocs OpenAPI] the document "${schemaId}" is not listed in the input array, this may be unexpected and won't be cached properly.`,
       );
-      return Object.fromEntries(entries);
-    } else {
-      const entries = await Promise.all(
-        Object.entries(await input()).map(async ([k, v]) => [k, await processDocument(v)]),
-      );
-      return Object.fromEntries(entries);
+      // do not cache unlisted documents
+      return loadDocument(schemaId);
     }
+
+    if (!disableCache) {
+      const cached = schemaMap.get(schemaId);
+      if (cached) return cached;
+    }
+
+    const raw = resolvedInput[schemaId];
+    const output = Promise.resolve(typeof raw === 'function' ? raw() : raw).then(loadDocument);
+    if (!disableCache) schemaMap.set(schemaId, output);
+    return output;
+  }
+
+  async function getSchemas(): Promise<Record<string, LoadedDocument>> {
+    const entries = await Promise.all(
+      Object.keys(resolvedInput).map(async (k) => [k, await getSchema(k)]),
+    );
+    return Object.fromEntries(entries);
   }
 
   async function getVirtualFiles(server: OpenAPIServer, options: OpenAPISourceOptions) {
@@ -128,7 +159,7 @@ export function createOpenAPI(options: OpenAPIOptions = {}): OpenAPIServer {
     const builderOptions = createAutoPreset(options);
 
     for (const [id, schema] of Object.entries(schemas)) {
-      const list = fromSchema(id, schema, builderOptions);
+      const list = fromSchema(id, schema.bundled, builderOptions);
 
       onEntries(list);
 
@@ -141,9 +172,12 @@ export function createOpenAPI(options: OpenAPIOptions = {}): OpenAPIServer {
           data: {
             ...entry.info,
             getAPIPageProps() {
-              return props;
+              return this.getOpenAPIPageProps();
             },
-            async getClientAPIPageProps() {
+            getClientAPIPageProps() {
+              return this.getOpenAPIPageProps();
+            },
+            getOpenAPIPageProps() {
               return {
                 payload: {
                   bundled: schema.bundled,
@@ -155,10 +189,10 @@ export function createOpenAPI(options: OpenAPIOptions = {}): OpenAPIServer {
             getSchema() {
               return {
                 id,
-                ...schema,
+                bundled: schema.bundled,
               };
             },
-            ...toStaticData(props, schema.dereferenced),
+            ...toStaticData(props, schema.bundled),
             _openapi: {
               method:
                 entry.type === 'operation' || entry.type === 'webhook'
@@ -225,24 +259,26 @@ export function createOpenAPI(options: OpenAPIOptions = {}): OpenAPIServer {
     options,
     createProxy,
     _getWatchPaths() {
-      const keys = Array.isArray(input) ? input : Object.keys(input);
-      return keys.filter((key) => !URL.canParse(key) && fs.existsSync(key));
+      return Object.keys(resolvedInput).filter((key) => !URL.canParse(key) && fs.existsSync(key));
     },
-    async getSchema(document) {
-      const schemas = await this.getSchemas();
-      if (document in schemas) return schemas[document];
+    async preloadOpenAPIPage(page) {
+      const out: OpenAPIPageProps_Preloaded['preloaded'] = {
+        docs: {},
+        proxyUrl: options.proxyUrl,
+      };
+      const openapiMeta = (page.data as { _openapi?: InternalOpenAPIMeta })._openapi;
+      if (openapiMeta?.preload) {
+        out.docs = Object.fromEntries(
+          await Promise.all(
+            openapiMeta.preload.map(async (k) => [k, (await getSchema(k)).bundled]),
+          ),
+        );
+      }
 
-      console.warn(
-        `[Fumadocs OpenAPI] the document "${document}" is not listed in the input array, this may not be expected.`,
-      );
-      // do not cache unlisted documents
-      return processDocument(document);
+      return { preloaded: out };
     },
-    async getSchemas() {
-      if (disableCache) return getSchemas();
-
-      return (schemas ??= getSchemas());
-    },
+    getSchema,
+    getSchemas,
     async staticSource(options = {}) {
       return {
         files: await getVirtualFiles(this, options),
@@ -259,19 +295,11 @@ export function createOpenAPI(options: OpenAPIOptions = {}): OpenAPIServer {
   };
 }
 
-/**
- * @deprecated
- */
-export function createCodeSample<T>(
-  options: InlineCodeUsageGenerator<T>,
-): InlineCodeUsageGenerator<T> {
-  return options;
-}
-
 export interface InternalOpenAPIMeta {
   method?: string;
   webhook?: boolean;
   deprecated?: boolean;
+  preload?: string[];
 }
 
 /**
@@ -325,13 +353,6 @@ export function openapiPlugin(): LoaderPlugin {
  */
 export async function openapiSource(server: OpenAPIServer, options: OpenAPISourceOptions = {}) {
   return server.staticSource(options);
-}
-
-/**
- * @deprecated use `openapiPlugin()`
- */
-export function transformerOpenAPI(): PageTreeTransformer {
-  return openapiPlugin().transformPageTree!;
 }
 
 export type { CreateProxyOptions, Proxy } from './proxy';

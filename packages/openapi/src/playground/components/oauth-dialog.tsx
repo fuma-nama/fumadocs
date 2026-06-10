@@ -5,8 +5,8 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from '@/ui/components/dialog';
-import { Input, labelVariants } from '@/ui/components/input';
+} from '@fumadocs/api-docs/components/dialog';
+import { Input, labelVariants } from '@fumadocs/api-docs/components/input';
 import { useQuery } from '@/utils/use-query';
 import { type ReactNode, useMemo, useState } from 'react';
 import { cn } from '@/utils/cn';
@@ -17,11 +17,11 @@ import {
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@/ui/components/select';
+} from '@fumadocs/api-docs/components/select';
 import type { OAuth2SecurityScheme } from '@/types';
-import { useTranslations } from '@/ui/client/i18n';
+import { useTranslations } from '@fuma-translate/react';
 import { useAuth } from '../auth';
-import { useApiContext } from '@/ui/contexts/api';
+import { useRenderContext } from '@/ui/contexts/api';
 
 type FlowType = keyof NonNullable<OAuth2SecurityScheme['flows']>;
 
@@ -64,13 +64,13 @@ interface FlowInfo {
 export const OAuthDialog = Dialog;
 
 export function OAuthDialogContent(props: AuthDialogContentProps) {
-  const t = useTranslations();
+  const t = useTranslations({ note: 'OAuth dialog' });
 
   return (
     <DialogContent>
       <DialogHeader>
-        <DialogTitle>{t.authorization}</DialogTitle>
-        <DialogDescription>{t.obtainAccessToken}</DialogDescription>
+        <DialogTitle>{t('Authorization')}</DialogTitle>
+        <DialogDescription>{t('Obtain the access token for API.')}</DialogDescription>
       </DialogHeader>
       <Content {...props} />
     </DialogContent>
@@ -78,9 +78,9 @@ export function OAuthDialogContent(props: AuthDialogContentProps) {
 }
 
 function Content({ schemeId, scopes, setToken, setOpen }: AuthDialogContentProps) {
-  const { schemes } = useApiContext();
+  const schemes = useRenderContext().schema.dereferenced.components?.securitySchemes;
   const tokenInfo = useAuth().store[schemeId];
-  const scheme = schemes[schemeId];
+  const scheme = schemes?.[schemeId];
   if (!scheme || scheme.type !== 'oauth2')
     throw new Error('unexpected schemaId: must be type oauth2');
 
@@ -88,32 +88,32 @@ function Content({ schemeId, scopes, setToken, setOpen }: AuthDialogContentProps
     return Object.keys(scheme.flows!)[0] as FlowType;
   });
 
-  const t = useTranslations();
+  const t = useTranslations({ note: 'OAuth dialog' });
   const allFlows: Record<FlowType, FlowInfo> = useMemo(
     () => ({
       password: {
-        name: t.resourceOwnerPassword,
-        description: t.resourceOwnerPasswordDesc,
+        name: t('Resource Owner Password Flow'),
+        description: t('Authenticate using username and password.'),
         supported: true,
       },
       clientCredentials: {
-        name: t.clientCredentials,
-        description: t.clientCredentialsDesc,
+        name: t('Client Credentials'),
+        description: t('Intended for the server-to-server authentication.'),
         supported: true,
       },
       authorizationCode: {
-        name: t.authorizationCode,
-        description: t.authorizationCodeDesc,
+        name: t('Authorization code'),
+        description: t('Authenticate with 3rd party services'),
         supported: true,
       },
       implicit: {
-        name: t.implicit,
-        description: t.implicitDesc,
+        name: t('Implicit'),
+        description: t('Retrieve the access token directly.'),
         supported: true,
       },
       deviceAuthorization: {
-        name: t.deviceAuthorization,
-        description: t.deviceAuthorizationDesc,
+        name: t('Device Authorization'),
+        description: t('Authenticate with device.'),
         supported: false,
       },
     }),
@@ -235,7 +235,7 @@ function Content({ schemeId, scopes, setToken, setOpen }: AuthDialogContentProps
     >
       <Select value={type ?? ''} onValueChange={setType as (s: string) => void}>
         <SelectTrigger>
-          <SelectValue placeholder={t.oauthFlowPlaceholder} />
+          <SelectValue placeholder={t('Select a flow')} />
         </SelectTrigger>
         <SelectContent>
           {Object.keys(scheme.flows!).map((key) => {
@@ -254,13 +254,15 @@ function Content({ schemeId, scopes, setToken, setOpen }: AuthDialogContentProps
       {(type === 'authorizationCode' || type === 'clientCredentials' || type === 'implicit') && (
         <fieldset className="flex flex-col gap-1.5">
           <label htmlFor="client_id" className={cn(labelVariants())}>
-            {t.clientId}
+            {t('Client ID')}
           </label>
-          <p className="text-fd-muted-foreground text-sm">{t.clientIdHint}</p>
+          <p className="text-fd-muted-foreground text-sm">
+            {t('The client ID of your OAuth application.')}
+          </p>
           <Input
             id="client_id"
             name="clientId"
-            placeholder={t.inputPlaceholder}
+            placeholder={t('Enter value')}
             type="text"
             autoComplete="off"
             disabled={isLoading}
@@ -272,13 +274,15 @@ function Content({ schemeId, scopes, setToken, setOpen }: AuthDialogContentProps
       {(type === 'authorizationCode' || type === 'clientCredentials') && (
         <fieldset className="flex flex-col gap-1.5">
           <label htmlFor="client_secret" className={cn(labelVariants())}>
-            {t.clientSecret}
+            {t('Client Secret')}
           </label>
-          <p className="text-fd-muted-foreground text-sm">{t.clientSecretHint}</p>
+          <p className="text-fd-muted-foreground text-sm">
+            {t('The client secret of your OAuth application.')}
+          </p>
           <Input
             id="client_secret"
             name="clientSecret"
-            placeholder={t.inputPlaceholder}
+            placeholder={t('Enter value')}
             type="password"
             autoComplete="off"
             disabled={isLoading}
@@ -291,12 +295,12 @@ function Content({ schemeId, scopes, setToken, setOpen }: AuthDialogContentProps
         <>
           <fieldset className="flex flex-col gap-1.5">
             <label htmlFor="username" className={cn(labelVariants())}>
-              {t.usernameField}
+              {t('Username')}
             </label>
             <Input
               id="username"
               name="username"
-              placeholder={t.inputPlaceholder}
+              placeholder={t('Enter value')}
               type="text"
               autoComplete="off"
               disabled={isLoading}
@@ -306,12 +310,12 @@ function Content({ schemeId, scopes, setToken, setOpen }: AuthDialogContentProps
           </fieldset>
           <fieldset className="flex flex-col gap-1.5">
             <label htmlFor="password" className={cn(labelVariants())}>
-              {t.clientSecret}
+              {t('Password')}
             </label>
             <Input
               id="password"
               name="password"
-              placeholder={t.inputPlaceholder}
+              placeholder={t('Enter value')}
               type="password"
               autoComplete="off"
               disabled={isLoading}
@@ -334,12 +338,12 @@ function Content({ schemeId, scopes, setToken, setOpen }: AuthDialogContentProps
               }),
             )}
           >
-            {t.submit}
+            {t('Submit')}
           </button>
         </>
       ) : (
         <p className="text-fd-muted-foreground bg-fd-muted p-2 rounded-lg border">
-          {t.unsupported}
+          {t('Unsupported')}
         </p>
       )}
     </form>

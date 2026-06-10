@@ -1,52 +1,35 @@
 ---
-title: <APIPage />
+title: createOpenAPIPage()
 description: The component for rendering OpenAPI docs content
 ---
 
 ## Overview
 
-Fumadocs OpenAPI uses a `<APIPage />` component to render page contents.
+Fumadocs OpenAPI uses a `<OpenAPIPage />` component to render page contents, it should be a client component.
 
-When customising it, the options are split into server/client configs.
-
-```tsx tab="components/api-page.tsx"
-import { openapi } from '@/lib/openapi';
-import { createAPIPage } from 'fumadocs-openapi/ui';
-import client from './api-page.client';
-
-export const APIPage = createAPIPage(openapi, {
-  client,
-  // server config
-});
-```
-
-```tsx tab="components/api-page.client.tsx"
+```tsx title="components/api-page.tsx"
 'use client';
-import { defineClientConfig } from 'fumadocs-openapi/ui/client';
+import { createOpenAPIPage } from 'fumadocs-openapi/ui';
 
-export default defineClientConfig({
-  // client config
+export const OpenAPIPage = createOpenAPIPage({
+  // config
 });
 ```
-
-<Callout title="For non-RSC environment">
-
-You do not need to create a separate `api-page.client.tsx` file for client options, it is only required under RSC environment.
-
-</Callout>
 
 ### Generate Code Usages
 
 Generate code usage examples for each API endpoint.
 
-```ts title="lib/openapi/code-usage.ts" twoslash
+```tsx title="components/api-page.tsx" twoslash
+'use client';
+import { createOpenAPIPage } from 'fumadocs-openapi/ui';
 import {
   createCodeUsageGeneratorRegistry,
   type CodeUsageGenerator,
 } from 'fumadocs-openapi/requests/generators';
 import { registerDefault } from 'fumadocs-openapi/requests/generators/all';
 
-export const codeUsages = createCodeUsageGeneratorRegistry();
+const codeUsages = createCodeUsageGeneratorRegistry();
 
 // include defaults
 registerDefault(codeUsages);
@@ -55,36 +38,15 @@ registerDefault(codeUsages);
 codeUsages.add('custom-id', {
   label: 'My Example',
   lang: 'js',
-  generate(url, data, { mediaAdapters }) {
+  generate(data, { mediaAdapters }) {
     // request data
-    console.log(url, data);
+    console.log(data);
 
     return 'const response = "hello world";';
   },
 });
-```
 
-Pass the registry to both client & server configs:
-
-```tsx tab="components/api-page.tsx"
-import { openapi } from '@/lib/openapi';
-import { createAPIPage } from 'fumadocs-openapi/ui';
-import { codeUsages } from '@/lib/openapi/code-usage';
-import client from './api-page.client';
-
-export const APIPage = createAPIPage(openapi, {
-  client,
-  // [!code ++]
-  codeUsages,
-});
-```
-
-```tsx tab="components/api-page.client.tsx"
-'use client';
-import { defineClientConfig } from 'fumadocs-openapi/ui/client';
-import { codeUsages } from '@/lib/openapi/code-usage';
-
-export default defineClientConfig({
+export const OpenAPIPage = createOpenAPIPage({
   // [!code ++]
   codeUsages,
 });
@@ -123,13 +85,11 @@ export const translations = i18n
   .extend(uiTranslations())
   // [!code ++]
   .extend(openapiTranslations())
-  .add('ui', {
-    cn: { displayName: 'Chinese' },
-  })
-  // [!code ++:5]
-  .add('openapi', {
+  .add({
     cn: {
-      titleRequestBody: '請求正文',
+      displayName: 'Chinese',
+      // [!code ++]
+      'Body(playground)': '請求正文',
     },
   });
 ```
@@ -143,12 +103,12 @@ You can create a media adapter to support other media types in API pages, a medi
 - Converting value into `fetch()` body compatible with corresponding media type.
 - Generate code example based on different programming language/tool.
 
-Put your media adapters in a separate file.
-
-```ts title="lib/openapi/media.ts" twoslash
+```tsx title="components/api-page.tsx" twoslash
+'use client';
+import { createOpenAPIPage } from 'fumadocs-openapi/ui';
 import type { MediaAdapter } from 'fumadocs-openapi';
 
-export const mediaAdapters: Record<string, MediaAdapter> = {
+const mediaAdapters: Record<string, MediaAdapter> = {
   // example: custom `application/json
   'application/json': {
     encode(data) {
@@ -172,29 +132,8 @@ export const mediaAdapters: Record<string, MediaAdapter> = {
     },
   },
 };
-```
 
-Pass the adapter to both client & server configs.
-
-```tsx tab="components/api-page.tsx"
-import { openapi } from '@/lib/openapi';
-import { createAPIPage } from 'fumadocs-openapi/ui';
-import { mediaAdapters } from '@/lib/openapi/media';
-import client from './api-page.client';
-
-export const APIPage = createAPIPage(openapi, {
-  client,
-  // [!code ++]
-  mediaAdapters,
-});
-```
-
-```tsx tab="components/api-page.client.tsx"
-'use client';
-import { defineClientConfig } from 'fumadocs-openapi/ui/client';
-import { mediaAdapters } from '@/lib/openapi/media';
-
-export default defineClientConfig({
+export const OpenAPIPage = createOpenAPIPage({
   // [!code ++]
   mediaAdapters,
 });

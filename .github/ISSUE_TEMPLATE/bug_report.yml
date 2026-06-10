@@ -16,7 +16,7 @@ body:
       label: To Reproduce
       description: A step-by-step description of how to reproduce the issue, or a link to the reproducible repository.
       placeholder: |
-        1. Start the application in development (next dev)
+        1. Start the dev server (e.g. `npm run dev`)
         2. Click X
         3. Y will happen
     validations:
@@ -28,29 +28,40 @@ body:
       placeholder: 'Following the steps from the previous section, I expected A to happen, but I observed B instead'
     validations:
       required: true
+  - type: dropdown
+    attributes:
+      label: Framework
+      description: Which React framework are you using?
+      options:
+        - Next.js
+        - Tanstack Start
+        - React Router
+        - Waku
+        - Other
+    validations:
+      required: true
   - type: textarea
     attributes:
       label: Provide environment information
-      description: Please run `next info` in the root directory of your project and paste the results.
+      description: |
+        Include your framework, runtime, and relevant package versions.
+        For Next.js projects, you can also run `next info` and paste the results.
       render: bash
       placeholder: |
+        Framework: Next.js 16
         Operating System:
           Platform: darwin
           Arch: arm64
-          Version: Darwin Kernel Version 22.5.0
         Binaries:
-          Node: 18.17.1
-          npm: 9.5.1
-          Yarn: 1.22.19
-          pnpm: N/A
+          Node: 22.0.0
+          npm: 10.0.0
         Relevant Packages:
-          next: 13.4.20
-          eslint-config-next: 13.4.20
-          react: 18.2.0
-          react-dom: 18.2.0
-          typescript: 5.2.2
-        Next.js Config:
-          output: N/A
+          fumadocs-core: 16.0.0
+          fumadocs-ui: 16.0.0
+          fumadocs-mdx: 14.0.0
+          react: 19.2.0
+          react-dom: 19.2.0
+          typescript: 5.9.0
     validations:
       required: true
   - type: dropdown

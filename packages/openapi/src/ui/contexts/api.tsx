@@ -1,28 +1,14 @@
 'use client';
 import { createContext, type ReactNode, use, useEffect, useMemo, useState } from 'react';
-import type { RenderContext, SecuritySchemeObject, ServerObject } from '@/types';
-import { defaultAdapters, type MediaAdapter } from '@/requests/media/adapter';
-import { useStorageKey } from '../client/storage-key';
-import type { APIPageClientOptions } from '../client';
-import {
-  type CodeUsageGeneratorRegistry,
-  createCodeUsageGeneratorRegistry,
-} from '@/requests/generators';
-import { registerDefault } from '@/requests/generators/all';
-
-interface InheritFromContext extends Pick<RenderContext, 'shikiOptions'> {
-  client: APIPageClientOptions;
-}
+import type { RenderContext, ServerObject } from '@/types';
+import { useStorageKey } from '@/utils/storage-key';
+import { NoReference } from '@fumadocs/api-docs/schema';
 
 interface ServerContextType {
-  servers?: ServerObject[];
+  servers?: NoReference<ServerObject>[];
   server: SelectedServer | null;
   setServer: (value: string) => void;
   setServerVariables: (value: Record<string, string>) => void;
-}
-
-export interface ApiProviderProps extends InheritFromContext {
-  schemes: Record<string, SecuritySchemeObject>;
 }
 
 export interface SelectedServer {
@@ -31,17 +17,11 @@ export interface SelectedServer {
   variables: Record<string, string>;
 }
 
-interface ApiContextType extends InheritFromContext {
-  mediaAdapters: Record<string, MediaAdapter>;
-  codeUsages: CodeUsageGeneratorRegistry;
-  schemes: Record<string, SecuritySchemeObject>;
-}
-
-const ApiContext = createContext<ApiContextType | null>(null);
+const Context = createContext<RenderContext | null>(null);
 const ServerContext = createContext<ServerContextType | null>(null);
 
-export function useApiContext(): ApiContextType {
-  const ctx = use(ApiContext);
+export function useRenderContext(): RenderContext {
+  const ctx = use(Context);
   if (!ctx) throw new Error('Component must be used under <ApiProvider />');
 
   return ctx;
@@ -54,37 +34,21 @@ export function useServerContext() {
   return ctx;
 }
 
-export function ApiProvider({
+export function RenderContextProvider({
   children,
-  shikiOptions,
-  client,
-  schemes,
-}: ApiProviderProps & { children: ReactNode }) {
-  return (
-    <ApiContext
-      value={useMemo(() => {
-        return {
-          shikiOptions,
-          client,
-          codeUsages: client.codeUsages ?? registerDefault(createCodeUsageGeneratorRegistry()),
-          schemes,
-          mediaAdapters: {
-            ...defaultAdapters,
-            ...client.mediaAdapters,
-          },
-        };
-      }, [client, schemes, shikiOptions])}
-    >
-      {children}
-    </ApiContext>
-  );
+  ctx,
+}: {
+  ctx: RenderContext;
+  children: ReactNode;
+}) {
+  return <Context value={ctx}>{children}</Context>;
 }
 
 export function ServerProvider({
   servers,
   children,
 }: {
-  servers?: ServerObject[];
+  servers?: NoReference<ServerObject>[];
   children: ReactNode;
 }) {
   const storageKey = useStorageKey().of('server-url');
@@ -158,7 +122,7 @@ export function ServerProvider({
   );
 }
 
-function getDefaultValues(server: ServerObject): Record<string, string> {
+function getDefaultValues(server: NoReference<ServerObject>): Record<string, string> {
   const out: Record<string, string> = {};
   if (!server.variables) return out;
 

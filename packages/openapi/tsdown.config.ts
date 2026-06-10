@@ -2,6 +2,7 @@ import { defineConfig } from 'tsdown';
 import { mkdir, writeFile } from 'node:fs/promises';
 import path from 'node:path';
 import { Scanner } from '@tailwindcss/oxide';
+import { compilePackageTranslations } from '../shared/compile-package-translations.ts';
 
 export default defineConfig({
   format: 'esm',
@@ -10,7 +11,8 @@ export default defineConfig({
     './src/{index,i18n}.ts',
     './src/ui/index.tsx',
     './src/ui/base.tsx',
-    './src/ui/create-client.tsx',
+    './src/ui/asyncapi/index.tsx',
+    './src/ui/asyncapi-base.tsx',
     './src/ui/client/index.tsx',
     './src/playground/client.tsx',
     './src/scalar/index.tsx',
@@ -18,10 +20,21 @@ export default defineConfig({
     './src/requests/generators/*.ts',
   ],
   unbundle: true,
+  ignoreWatch: ['src/.translations/**'],
   dts: {
     sourcemap: false,
   },
   sourcemap: false,
+  plugins: [
+    {
+      name: 'generate-translations',
+      async buildStart() {
+        await compilePackageTranslations({
+          input: ['src/**/*.{ts,tsx}'],
+        });
+      },
+    },
+  ],
   async onSuccess() {
     await compileInline();
   },
@@ -74,5 +87,5 @@ async function compileInline() {
 }
 
 function namesToFile(names: string[]) {
-  return names.map((name) => `@source inline(${JSON.stringify(name)});`).join('\n');
+  return `@source inline(${JSON.stringify(names.join(' '))});`;
 }

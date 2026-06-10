@@ -6,7 +6,7 @@ import { cn } from '@/utils/cn';
 import { useCopyButton } from '@/utils/use-copy-button';
 import { buttonVariants } from '@/components/ui/button';
 import { mergeRefs } from '@/utils/merge-refs';
-import { useTranslations } from '@/contexts/i18n';
+import { useTranslations } from '@fuma-translate/react';
 import {
   Accordion as Root,
   AccordionContent,
@@ -79,7 +79,7 @@ export function Accordion({
 }
 
 function CopyButton({ id }: { id: string }) {
-  const t = useTranslations();
+  const t = useTranslations({ note: 'accordion' });
   const [checked, onClick] = useCopyButton(() => {
     const url = new URL(window.location.href);
     url.hash = id;
@@ -90,7 +90,7 @@ function CopyButton({ id }: { id: string }) {
   return (
     <button
       type="button"
-      aria-label={t.accordionCopyAnchor}
+      aria-label={t('Copy Link', { note: 'aria-label' })}
       className={cn(
         buttonVariants({
           color: 'ghost',

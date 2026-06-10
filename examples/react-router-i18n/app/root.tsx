@@ -1,3 +1,4 @@
+import { zhTW } from '@fumadocs/language/zh-tw';
 import {
   isRouteErrorResponse,
   Links,
@@ -10,8 +11,8 @@ import {
 import { RootProvider } from 'fumadocs-ui/provider/react-router';
 import type { Route } from './+types/root';
 import './app.css';
-import type { Translations } from 'fumadocs-ui/i18n';
-import { i18n } from '#/lib/i18n.ts';
+import { i18nProvider, uiTranslations } from 'fumadocs-ui/i18n';
+import { i18n } from '@/lib/i18n';
 import NotFound from './routes/not-found';
 
 export const links: Route.LinksFunction = () => [
@@ -27,20 +28,7 @@ export const links: Route.LinksFunction = () => [
   },
 ];
 
-const cn: Partial<Translations> = {
-  search: 'Translated Content',
-};
-
-const locales = [
-  {
-    name: 'English',
-    locale: 'en',
-  },
-  {
-    name: 'Chinese',
-    locale: 'cn',
-  },
-];
+const translations = i18n.translations().extend(uiTranslations()).preset('cn', zhTW());
 
 export function Layout({ children }: { children: React.ReactNode }) {
   const { lang = i18n.defaultLanguage } = useParams();
@@ -54,15 +42,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
         <Links />
       </head>
       <body className="flex flex-col min-h-screen">
-        <RootProvider
-          i18n={{
-            locale: lang,
-            locales,
-            translations: { cn }[lang],
-          }}
-        >
-          {children}
-        </RootProvider>
+        <RootProvider i18n={i18nProvider(translations, lang)}>{children}</RootProvider>
         <ScrollRestoration />
         <Scripts />
       </body>

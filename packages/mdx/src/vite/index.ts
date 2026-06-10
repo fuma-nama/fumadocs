@@ -37,10 +37,10 @@ export interface PluginOptions {
   outDir?: string;
 }
 
-export default async function mdx(
+export default function mdx(
   forcedConfig?: Record<string, unknown> | Promise<Record<string, unknown>> | undefined,
   pluginOptions: PluginOptions = {},
-): Promise<Plugin[]> {
+): Plugin[] {
   let root: string;
   let core: Core;
   let options: Required<PluginOptions>;

@@ -9,7 +9,7 @@ import {
   useState,
 } from 'react';
 import { cn } from '@/utils/cn';
-import { I18nLabel, useTranslations } from '@/contexts/i18n';
+import { useTranslations } from '@fuma-translate/react';
 import { TOC, TOCProvider, type TOCProviderProps, type TOCProps } from './slots/toc';
 import { Footer, type FooterProps } from './slots/footer';
 import { Breadcrumb, type BreadcrumbProps } from './slots/breadcrumb';
@@ -123,6 +123,8 @@ export function DocsPage({
 }
 
 export function EditOnGitHub(props: ComponentProps<'a'>) {
+  const t = useTranslations({ note: 'edit page' });
+
   return (
     <a
       target="_blank"
@@ -140,7 +142,7 @@ export function EditOnGitHub(props: ComponentProps<'a'>) {
       {props.children ?? (
         <>
           <Edit className="size-3.5" />
-          <I18nLabel label="editOnGithub" />
+          {t('Edit on GitHub')}
         </>
       )}
     </a>
@@ -181,7 +183,7 @@ export function PageLastUpdate({
   date: value,
   ...props
 }: Omit<ComponentProps<'p'>, 'children'> & { date: Date }) {
-  const t = useTranslations();
+  const t = useTranslations({ note: 'page footer' });
   const [date, setDate] = useState('');
 
   useEffect(() => {
@@ -191,7 +193,7 @@ export function PageLastUpdate({
 
   return (
     <p {...props} className={cn('text-sm text-fd-muted-foreground', props.className)}>
-      {t.lastUpdate} {date}
+      {t('Last updated on')} {date}
     </p>
   );
 }

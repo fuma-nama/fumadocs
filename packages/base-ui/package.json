@@ -1,6 +1,6 @@
 {
   "name": "@fumadocs/base-ui",
-  "version": "16.9.3",
+  "version": "16.10.0",
   "description": "The Base UI version of Fumadocs UI",
   "keywords": [
     "Docs",
@@ -126,6 +126,7 @@
   },
   "dependencies": {
     "@base-ui/react": "^1.5.0",
+    "@fuma-translate/react": "^0.0.3",
     "@fumadocs/tailwind": "workspace:*",
     "class-variance-authority": "^0.7.1",
     "lucide-react": "^1.17.0",
@@ -180,6 +181,6 @@
     }
   },
   "inlinedDependencies": {
-    "react-medium-image-zoom": "5.4.5"
+    "react-medium-image-zoom": "5.4.6"
   }
 }

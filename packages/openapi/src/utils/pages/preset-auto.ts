@@ -1,5 +1,4 @@
 import * as path from 'node:path';
-import type { DereferencedDocument } from '@/utils/document/dereference';
 import type {
   OperationOutput,
   OutputEntry,
@@ -9,8 +8,8 @@ import type {
   PagesBuilderConfig,
   WebhookOutput,
 } from '@/utils/pages/builder';
-import { isUrl } from '@/utils/url';
 import type { DistributiveOmit } from '@/types';
+import { dereferenceShallow } from '@fumadocs/api-docs/schema/dereference';
 
 interface OperationConfig extends BaseConfig {
   /**
@@ -76,11 +75,7 @@ type NameFn<
     | OperationOutput
     | WebhookOutput
     | PageOutput,
-> = (
-  this: PagesBuilder,
-  output: DistributiveOmit<Entry, 'path'>,
-  document: DereferencedDocument['dereferenced'],
-) => string;
+> = (this: PagesBuilder, output: DistributiveOmit<Entry, 'path'>) => string;
 
 interface NameFnOptions {
   /**
@@ -117,16 +112,18 @@ export function createAutoPreset(options: SchemaToPagesOptions): PagesBuilderCon
   } else {
     const { algorithm = 'v2' } = options.name ?? {};
 
-    nameFn = function (result, document) {
+    nameFn = function (result) {
       if (result.type === 'page') {
         if (result.tag) return slugify(result.tag.name!);
         const schemaId = result.schemaId;
 
-        return isUrl(schemaId) ? 'index' : path.basename(schemaId, path.extname(schemaId));
+        return schemaId.startsWith('http://') || schemaId.startsWith('https://')
+          ? 'index'
+          : path.basename(schemaId, path.extname(schemaId));
       }
 
       if (result.type === 'operation') {
-        const operation = document.paths![result.item.path]![result.item.method]!;
+        const operation = this.document.paths![result.item.path]![result.item.method]!;
 
         if (algorithm === 'v2' && operation.operationId) {
           return operation.operationId;
@@ -138,7 +135,9 @@ export function createAutoPreset(options: SchemaToPagesOptions): PagesBuilderCon
         );
       }
 
-      const hook = document.webhooks![result.item.name][result.item.method]!;
+      const hook = dereferenceShallow(this.document.webhooks![result.item.name], this.document)[
+        result.item.method
+      ]!;
 
       if (algorithm === 'v2' && hook.operationId) {
         return hook.operationId;
@@ -154,7 +153,7 @@ export function createAutoPreset(options: SchemaToPagesOptions): PagesBuilderCon
   ): OutputEntry[] {
     const groups = new Map<string, OutputGroup>();
     const rest: OutputEntry[] = [];
-    const { dereferenced } = builder.document;
+    const doc = builder.document;
     const { groupBy = 'none' } = options as OperationConfig;
 
     for (const entry of entries) {
@@ -185,8 +184,8 @@ export function createAutoPreset(options: SchemaToPagesOptions): PagesBuilderCon
         case 'tag': {
           let tags =
             entry.type === 'operation'
-              ? dereferenced.paths![entry.item.path]![entry.item.method]!.tags
-              : dereferenced.webhooks![entry.item.name][entry.item.method]!.tags;
+              ? dereferenceShallow(doc.paths?.[entry.item.path], doc)?.[entry.item.method]?.tags
+              : dereferenceShallow(doc.webhooks?.[entry.item.name], doc)?.[entry.item.method]?.tags;
 
           if (!tags || tags.length === 0) {
             console.warn(
@@ -216,14 +215,14 @@ export function createAutoPreset(options: SchemaToPagesOptions): PagesBuilderCon
 
             group.entries.push({
               ...entry,
-              path: path.join(groupName, `${nameFn.call(builder, entry, dereferenced)}.mdx`),
+              path: path.join(groupName, `${nameFn.call(builder, entry)}.mdx`),
             });
           }
 
           break;
         }
         default: {
-          const fileName = `${nameFn.call(builder, entry, dereferenced)}.mdx`;
+          const fileName = `${nameFn.call(builder, entry)}.mdx`;
 
           if (typeof groupBy === 'function') {
             const groupDisplayName = groupBy(entry);
@@ -262,7 +261,7 @@ export function createAutoPreset(options: SchemaToPagesOptions): PagesBuilderCon
 
   return {
     toPages(builder) {
-      const { dereferenced } = builder.document;
+      const doc = builder.document;
       const items = builder.extract();
 
       if (options.per === 'file') {
@@ -271,18 +270,18 @@ export function createAutoPreset(options: SchemaToPagesOptions): PagesBuilderCon
           schemaId: builder.id,
           path: '',
           info: {
-            title: dereferenced.info?.title ?? 'Unknown',
-            description: dereferenced.info?.description,
+            title: doc.info?.title ?? 'Unknown',
+            description: doc.info?.description,
           },
           ...items,
         };
-        entry.path = `${nameFn.call(builder, entry, dereferenced)}.mdx`;
+        entry.path = `${nameFn.call(builder, entry)}.mdx`;
         builder.create(entry);
         return;
       }
 
       if (options.per === 'tag') {
-        const tags = dereferenced.tags ?? [];
+        const tags = doc.tags ?? [];
 
         for (const tag of tags) {
           const { displayName } = builder.fromTag(tag);
@@ -299,7 +298,7 @@ export function createAutoPreset(options: SchemaToPagesOptions): PagesBuilderCon
             tag,
           };
 
-          entry.path = `${nameFn.call(builder, entry, dereferenced)}.mdx`;
+          entry.path = `${nameFn.call(builder, entry)}.mdx`;
           builder.create(entry);
         }
 

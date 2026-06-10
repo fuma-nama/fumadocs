@@ -1,5 +1,5 @@
 'use client';
-import { useApiContext } from '@/ui/contexts/api';
+import { useRenderContext } from '@/ui/contexts/api';
 import { useQuery } from '@/utils/use-query';
 import { createContext, type ReactNode, use, useEffect, useMemo, useState } from 'react';
 import type { AuthCodeState, ImplicitState } from './components/oauth-dialog';
@@ -36,11 +36,11 @@ export function useAuth() {
 }
 
 export function AuthProvider({ children }: { children: ReactNode }) {
-  const { schemes } = useApiContext();
+  const schemes = useRenderContext().schema.dereferenced.components?.securitySchemes;
   const [store, setStore] = useState<TokenStore>({});
 
   const authCodeQuery = useQuery(async (code: string, state: AuthCodeState) => {
-    const scheme = schemes[state.scheme];
+    const scheme = schemes?.[state.scheme];
     if (!scheme || scheme.type !== 'oauth2') return;
     const value = scheme.flows?.authorizationCode;
     if (!value) return;
@@ -98,7 +98,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       if (!state || !token) return;
 
       const parsedState = JSON.parse(state) as ImplicitState;
-      const scheme = schemes[parsedState.scheme];
+      const scheme = schemes?.[parsedState.scheme];
       if (!scheme || scheme.type !== 'oauth2' || !scheme.flows?.implicit) return;
 
       const info: TokenInfo = {

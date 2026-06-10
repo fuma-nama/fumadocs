@@ -1,7 +1,7 @@
 import { describe, expect, test } from 'vitest';
 import type { RequestData } from '@/requests/types';
 import { defaultAdapters } from '@/requests/media/adapter';
-import { resolveRequestData } from '@/utils/url';
+import { pathnameFromRequest } from '@/requests/generators';
 import { go } from '@/requests/generators/go';
 import { curl } from '@/requests/generators/curl';
 import { python } from '@/requests/generators/python';
@@ -9,7 +9,7 @@ import { javascript } from '@/requests/generators/javascript';
 import { csharp } from '@/requests/generators/csharp';
 
 describe('Code Sample Generators', () => {
-  const data: RequestData = {
+  const _data: RequestData = {
     path: {
       test: { value: 'hello_world' },
     },
@@ -28,30 +28,31 @@ describe('Code Sample Generators', () => {
       search: { values: ['ai'] },
     },
   };
-  const url = resolveRequestData('http://localhost:8080/{test}', data);
+
+  const data = { ..._data, url: pathnameFromRequest('http://localhost:8080/{test}', _data) };
 
   const context = {
     mediaAdapters: defaultAdapters,
-    server: null,
+    custom: null,
   };
 
   test(`Go`, async () => {
-    await expect(go.generate(url, data, context)).toMatchFileSnapshot(`./out/samples/1.go`);
+    await expect(go.generate(data, context)).toMatchFileSnapshot(`./out/samples/1.go`);
   });
 
   test(`Curl`, async () => {
-    await expect(curl.generate(url, data, context)).toMatchFileSnapshot(`./out/samples/1.bash`);
+    await expect(curl.generate(data, context)).toMatchFileSnapshot(`./out/samples/1.bash`);
   });
 
   test(`Python`, async () => {
-    await expect(python.generate(url, data, context)).toMatchFileSnapshot(`./out/samples/1.py`);
+    await expect(python.generate(data, context)).toMatchFileSnapshot(`./out/samples/1.py`);
   });
 
   test(`JavaScript`, async () => {
-    await expect(javascript.generate(url, data, context)).toMatchFileSnapshot(`./out/samples/1.js`);
+    await expect(javascript.generate(data, context)).toMatchFileSnapshot(`./out/samples/1.js`);
   });
 
   test(`C#`, async () => {
-    await expect(csharp.generate(url, data, context)).toMatchFileSnapshot(`./out/samples/1.cs`);
+    await expect(csharp.generate(data, context)).toMatchFileSnapshot(`./out/samples/1.cs`);
   });
 });

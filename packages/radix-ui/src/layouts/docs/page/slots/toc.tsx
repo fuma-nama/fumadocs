@@ -2,7 +2,7 @@
 import * as TocDefault from '@/components/toc/default';
 import * as TocClerk from '@/components/toc/clerk';
 import * as Base from '@/components/toc';
-import { I18nLabel, useTranslations } from '@/contexts/i18n';
+import { useTranslations } from '@fuma-translate/react';
 import { cn } from '@/utils/cn';
 import { ChevronDown, Text } from 'lucide-react';
 import {
@@ -50,6 +50,7 @@ export type TOCProps = {
 
 export function TOC({ container, header, footer, style = 'normal', list }: TOCProps) {
   const items = Base.useTOCItems();
+  const t = useTranslations({ note: 'table of contents' });
   const { TOCItems, TOCEmpty, TOCItem } = style === 'clerk' ? TocClerk : TocDefault;
 
   if (items.length === 0 && !header && !footer) {
@@ -71,7 +72,7 @@ export function TOC({ container, header, footer, style = 'normal', list }: TOCPr
         className="inline-flex items-center gap-1.5 text-sm text-fd-muted-foreground"
       >
         <Text className="size-4" />
-        <I18nLabel label="toc" />
+        {t('On this page')}
       </h3>
       <Base.TOCScrollArea>
         <TOCItems {...list}>
@@ -197,7 +198,7 @@ export function TOCPopover({
 }
 
 function PageTOCPopoverTrigger({ className, ...props }: ComponentProps<'button'>) {
-  const t = useTranslations();
+  const t = useTranslations({ note: 'table of contents' });
   const { open } = use(TocPopoverContext)!;
   const items = Base.useItems();
   const selectedIdx = items.findIndex((item) => item.active);
@@ -226,7 +227,7 @@ function PageTOCPopoverTrigger({ className, ...props }: ComponentProps<'button'>
             showItem && 'opacity-0 -translate-y-full pointer-events-none',
           )}
         >
-          {path?.name ?? t.toc}
+          {path?.name ?? t('On this page')}
         </span>
         <span
           className={cn(

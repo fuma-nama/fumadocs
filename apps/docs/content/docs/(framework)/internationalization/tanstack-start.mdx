@@ -29,17 +29,16 @@ import { i18n } from '@/lib/i18n';
 import { uiTranslations } from 'fumadocs-ui/i18n';
 import type { BaseLayoutProps } from 'fumadocs-ui/layouts/shared';
 
-// [!code ++:12]
+// [!code ++:11]
 export const translations = i18n
   .translations()
   .extend(uiTranslations())
-  .add('ui', {
+  .add({
     en: {
       displayName: 'English',
     },
     cn: {
       displayName: 'Chinese',
-      search: '搜尋文檔',
     },
   });
 

@@ -1,362 +1,248 @@
+'use client';
 /* eslint-disable @typescript-eslint/no-explicit-any -- rehype-react without types */
-import type { Awaitable, MethodInformation, RenderContext } from '@/types';
-import { parseSecurities, type NoReference } from '@/utils/schema';
-import type { DereferencedDocument } from '@/utils/document/dereference';
-import { defaultAdapters, MediaAdapter } from '@/requests/media/adapter';
-import type { FC, HTMLAttributes, ReactNode } from 'react';
-import type { OpenAPIServer } from '@/server';
-import type { APIPageClientOptions } from './client';
-import { createRehypeCode } from 'fumadocs-core/mdx-plugins/rehype-code.core';
+import type { Document, RenderContext } from '@/types';
+import { defaultAdapters } from '@/requests/media/adapter';
+import {
+  Children,
+  type ComponentProps,
+  type ReactElement,
+  useMemo,
+  type FC,
+  type ReactNode,
+} from 'react';
 import { remarkGfm } from 'fumadocs-core/mdx-plugins/remark-gfm';
 import defaultMdxComponents from 'fumadocs-ui/mdx';
 import { remark } from 'remark';
 import remarkRehype from 'remark-rehype';
 import { toJsxRuntime } from 'hast-util-to-jsx-runtime';
 import * as JsxRuntime from 'react/jsx-runtime';
-import { CodeBlock, Pre } from 'fumadocs-ui/components/codeblock';
-import type { SchemaUIOptions } from './schema';
-import type { ResponseTab } from './operation/response-tabs';
-import { APIPage, type ApiPageProps, type OperationItem, type WebhookItem } from './api-page';
-import {
-  createCodeUsageGeneratorRegistry,
-  type CodeUsageGeneratorRegistry,
-  type InlineCodeUsageGenerator,
-} from '@/requests/generators';
-import type { JSONSchema } from 'json-schema-typed';
-import type { BundledTheme, CodeOptionsThemes, CodeToHastOptionsCommon } from 'shiki';
-import { highlightHast, type ShikiFactory } from 'fumadocs-core/highlight/shiki';
-import type { ExampleRequestItem } from './operation/get-example-requests';
+import { Operation } from '@/ui/operation';
+import { ServerProvider, useRenderContext } from './contexts/api';
 import { compile } from '@fumari/json-schema-ts';
-import { pickSchema } from '@/utils/schema/pick';
-import { encodeInternalRef } from '@/utils/schema/ref';
-import type { RequestTabsRenderContext } from './operation/request-tabs';
-import { PlaygroundAuthProvider } from '@/ui/client/boundary.lazy';
+import { ClientCodeBlock } from './components/codeblock';
+import { dereferenceBundledDocument } from '@/utils/document/dereference';
+import { AuthProvider } from '@/playground/auth';
 import { registerDefault } from '@/requests/generators/all';
+import { createCodeUsageGeneratorRegistry } from '@/requests/generators';
+import type { ShikiFactory } from 'fumadocs-core/highlight/shiki';
+import type { GeneratedPageProps } from '@/utils/pages/builder';
+import type { ParsedSchema } from '@/utils/schema';
+import { Markdown } from './components/markdown';
+import { Schema } from '@fumadocs/api-docs/components/schema';
+import { RenderContextProvider } from './contexts/api';
+import type { CreateOpenAPIPageOptions, OpenAPIPageProps } from '.';
 
-export interface GenerateTypeScriptDefinitionsContext extends RenderContext {
-  operation: NoReference<MethodInformation>;
-  readOnly: boolean;
-  writeOnly: boolean;
-  /** @deprecated */
-  _internal_legacy?: {
-    statusCode: string;
-    contentType: string;
-  };
-}
+/**
+ * Create `<OpenAPIPage />` (a client component) without the full Shiki bundle.
+ */
+export function createOpenAPIPageBase({
+  shiki,
+  shikiOptions = { themes: { light: 'github-light', dark: 'github-dark' } },
+  schemaUI: schemaUIOptions,
+  codeUsages = registerDefault(createCodeUsageGeneratorRegistry()),
+  generateTypeScriptDefinitions = (schema, ctx) => {
+    if (typeof schema !== 'object') return;
 
-export interface APIPlaygroundProps {
-  path: string;
-  method: MethodInformation;
-  ctx: RenderContext;
-}
-
-export interface CreateAPIPageOptions {
-  /**
-   * Generate TypeScript definitions from response schema.
-   *
-   * Pass `false` to disable it.
-   *
-   * @param method - the operation object
-   * @param statusCode - status code
-   * @deprecated use `generateTypeScriptDefinitions` instead.
-   */
-  generateTypeScriptSchema?:
-    | ((
-        method: NoReference<MethodInformation>,
-        statusCode: string,
-        contentType: string,
-        ctx: RenderContext,
-      ) => Awaitable<string | undefined>)
-    | false;
-
-  /**
-   * Generate TypeScript definitions from JSON schema.
-   *
-   * Pass `false` to disable it.
-   */
-  generateTypeScriptDefinitions?:
-    | ((
-        schema: JSONSchema,
-        ctx: GenerateTypeScriptDefinitionsContext,
-      ) => Awaitable<string | undefined>)
-    | false;
-
-  /**
-   * Generate example code usage for all endpoints.
-   */
-  codeUsages?: CodeUsageGeneratorRegistry;
-
-  /**
-   * Generate example code usage for each endpoint.
-   */
-  generateCodeSamples?: (method: MethodInformation) => InlineCodeUsageGenerator[];
-
-  shiki: ShikiFactory;
-  renderMarkdown?: (md: string) => ReactNode;
-  shikiOptions: Omit<CodeToHastOptionsCommon, 'lang'> & CodeOptionsThemes<BundledTheme>;
-
-  /**
-   * Show full response schema instead of only example response & Typescript definitions.
-   *
-   * @default true
-   */
-  showResponseSchema?: boolean;
-
-  /**
-   * Support other media types (for server-side generation).
-   */
-  mediaAdapters?: Record<string, MediaAdapter>;
-
-  /**
-   * Customize page content
-   */
-  content?: {
-    renderResponseTabs?: (tabs: ResponseTab[], ctx: RenderContext) => ReactNode;
-
-    renderRequestTabs?: (items: ExampleRequestItem[], ctx: RequestTabsRenderContext) => ReactNode;
-
-    renderAPIExampleLayout?: (
-      slots: {
-        selector: ReactNode;
-        usageTabs: ReactNode;
-        responseTabs: ReactNode;
-      },
-      ctx: RenderContext,
-    ) => ReactNode;
-
-    /**
-     * @param generators - codegens for API example usages
-     */
-    renderAPIExampleUsageTabs?: (
-      generators: CodeUsageGeneratorRegistry,
-      ctx: RenderContext,
-    ) => ReactNode;
-
-    /**
-     * renderer of the entire page's layout (containing all operations & webhooks UI)
-     */
-    renderPageLayout?: (
-      slots: {
-        operations?: {
-          item: OperationItem;
-          children: ReactNode;
-        }[];
-        webhooks?: {
-          item: WebhookItem;
-          children: ReactNode;
-        }[];
-      },
-      ctx: RenderContext,
-    ) => ReactNode;
-
-    renderOperationLayout?: (
-      slots: {
-        header: ReactNode;
-        description: ReactNode;
-        apiExample: ReactNode;
-        apiPlayground: ReactNode;
-
-        authSchemes: ReactNode;
-        parameters: ReactNode;
-        body: ReactNode;
-        responses: ReactNode;
-        callbacks: ReactNode;
-      },
-      ctx: RenderContext,
-      method: NoReference<MethodInformation>,
-    ) => ReactNode;
-
-    renderWebhookLayout?: (slots: {
-      header: ReactNode;
-      description: ReactNode;
-      authSchemes: ReactNode;
-      parameters: ReactNode;
-      body: ReactNode;
-      requests: ReactNode;
-      responses: ReactNode;
-      callbacks: ReactNode;
-    }) => ReactNode;
-  };
-
-  /**
-   * Info UI for JSON schemas
-   */
-  schemaUI?: {
-    render?: (options: SchemaUIOptions, ctx: RenderContext) => ReactNode;
-
-    /**
-     * Show examples under the generated content of JSON schemas.
-     *
-     * @defaultValue false
-     */
-    showExample?: boolean;
-  };
-
-  /**
-   * Customize API playground
-   */
-  playground?: {
-    /**
-     * @defaultValue true
-     */
-    enabled?: boolean;
-
-    /**
-     * render a page-level provider (useful for handling auth)
-     */
-    provider?: (props: { children: ReactNode }) => ReactNode;
-    /**
-     * replace the renderer
-     */
-    render?: (props: APIPlaygroundProps) => ReactNode;
-  };
-
-  /** @deprecated no longer used */
-  renderHeading?: (props: HTMLAttributes<HTMLHeadingElement>, depth: number) => ReactNode;
-  renderCodeBlock?: (props: { lang: string; code: string }) => ReactNode;
-
-  client?: APIPageClientOptions;
-}
-
-export interface ServerApiPageProps extends Omit<ApiPageProps, 'document'> {
-  document: string | DereferencedDocument;
-}
-
-export function createAPIPage(
-  server: OpenAPIServer,
-  options: CreateAPIPageOptions,
-): FC<ServerApiPageProps> {
+    try {
+      return compile(schema, {
+        name: 'Response',
+        readOnly: ctx.readOnly,
+        writeOnly: ctx.writeOnly,
+        getSchemaId: ctx.ctx.schema.getRawRef,
+      });
+    } catch (e) {
+      console.warn('Failed to generate typescript schema:', e);
+    }
+  },
+  ...options
+}: CreateOpenAPIPageOptions & { shiki: ShikiFactory }): FC<OpenAPIPageProps> {
   let processor: ReturnType<typeof createMarkdownProcessor>;
 
   function createMarkdownProcessor() {
+    const mdxComponents = {
+      ...defaultMdxComponents,
+      img: undefined,
+      pre: MarkdownPre,
+    };
+
     function rehypeReact(this: any) {
       this.compiler = (tree: any, file: any) => {
         return toJsxRuntime(tree, {
           development: false,
           filePath: file.path,
           ...JsxRuntime,
-          components: defaultMdxComponents,
+          components: mdxComponents,
         });
       };
     }
 
-    return remark()
-      .use(remarkGfm)
-      .use(remarkRehype)
-      .use(createRehypeCode(options.shiki), {
-        langs: [],
-        lazy: true,
-        defaultColor: false,
-        ...options.shikiOptions,
-      })
-      .use(rehypeReact);
+    return remark().use(remarkGfm).use(remarkRehype).use(rehypeReact);
   }
 
-  function renderPlaygroundProviderDefault({ children }: { children: ReactNode }) {
-    return <PlaygroundAuthProvider>{children}</PlaygroundAuthProvider>;
-  }
-
-  function renderPlaygroundDefault({ path, method, ctx }: APIPlaygroundProps) {
-    return (
-      <ctx.clientBoundary.PlaygroundClient
-        route={path}
-        securities={parseSecurities(method, ctx.schema.dereferenced)}
-        method={method.method}
-        doc={pickSchema(ctx.schema.bundled, encodeInternalRef(['paths', path, method.method]))}
-        proxyUrl={ctx.proxyUrl}
-        writeOnly
-        readOnly={false}
-        deprecated={method.deprecated}
-      />
-    );
-  }
-
-  return async function APIPageWrapper({ document, ...props }) {
-    let processed: DereferencedDocument;
-    if (typeof document === 'string') {
-      processed = await server.getSchema(document);
+  return function OpenAPIPage(props) {
+    let doc: Document;
+    let proxyUrl: string | undefined;
+    if ('preloaded' in props) {
+      doc = props.preloaded.docs[props.document];
+      if (!doc)
+        throw new Error(
+          `[Fumadocs OpenAPI] the document ${props.document} is not preloaded, make sure to pass the "preloaded" prop to <OpenAPIPage />`,
+        );
+      proxyUrl = props.preloaded.proxyUrl;
     } else {
-      processed = document;
+      doc = props.payload.bundled;
+      proxyUrl = props.payload.proxyUrl;
     }
 
-    const { ApiProvider, PlaygroundClient, SchemaUI, ServerProvider, UsageTab, UsageTabsSelector } =
-      await import('@/ui/client/boundary.lazy');
+    const processed = useMemo(() => dereferenceBundledDocument(doc), [doc]);
 
-    const ctx: RenderContext = {
-      schema: processed,
-      proxyUrl: server.options.proxyUrl,
-      clientBoundary: {
-        ApiProvider,
-        PlaygroundClient,
-        SchemaUI,
-        ServerProvider,
-        UsageTab,
-        UsageTabsSelector,
-      },
-      ...options,
-      codeUsages: options.codeUsages ?? registerDefault(createCodeUsageGeneratorRegistry()),
-      mediaAdapters: {
-        ...defaultAdapters,
-        ...options.mediaAdapters,
-      },
-      playground: {
-        ...options.playground,
-        provider: options.playground?.provider ?? renderPlaygroundProviderDefault,
-        render: options.playground?.render ?? renderPlaygroundDefault,
-      },
-      generateTypeScriptDefinitions:
-        options.generateTypeScriptDefinitions ??
-        ((schema, ctx) => {
-          if (options.generateTypeScriptSchema && ctx._internal_legacy) {
-            const { statusCode, contentType } = ctx._internal_legacy;
-            return options.generateTypeScriptSchema(ctx.operation, statusCode, contentType, ctx);
-          }
+    const ctx: RenderContext = useMemo(() => {
+      function renderMarkdown(md: string) {
+        return <Markdown md={md} />;
+      }
+      function resolver(v: ParsedSchema) {
+        // we will only pass dereferenced schema to schema UI
+        return {
+          dereferenced: v,
+          $ref: typeof v === 'object' ? processed.getRawRef(v) : undefined,
+        };
+      }
 
-          if (typeof schema !== 'object') return;
-          try {
-            return compile(schema, {
-              name: 'Response',
-              readOnly: ctx.readOnly,
-              writeOnly: ctx.writeOnly,
-              getSchemaId: ctx.schema.getRawRef,
-            });
-          } catch (e) {
-            console.warn('Failed to generate typescript schema:', e);
-          }
-        }),
-      async renderMarkdown(text) {
-        if (options.renderMarkdown) return options.renderMarkdown(text);
-        processor ??= createMarkdownProcessor();
+      return {
+        schema: processed,
+        proxyUrl,
+        shiki,
+        shikiOptions,
+        generateTypeScriptDefinitions,
+        codeUsages,
+        SchemaUI(props) {
+          if (schemaUIOptions?.render) return schemaUIOptions.render(props, ctx);
+          return (
+            <Schema
+              {...props}
+              showExample={props.showExample ?? schemaUIOptions?.showExample}
+              resolver={resolver}
+              renderMarkdown={renderMarkdown}
+            />
+          );
+        },
+        ...options,
+        _default_processMarkdown(md) {
+          processor ??= createMarkdownProcessor();
+          return processor.processSync(md).result as ReactNode;
+        },
+        mediaAdapters: {
+          ...defaultAdapters,
+          ...options.mediaAdapters,
+        },
+      };
+    }, [proxyUrl, processed]);
 
-        const out = await processor.process({
-          value: text,
-        });
-
-        return out.result as ReactNode;
-      },
-      async renderCodeBlock({ lang, code }) {
-        if (options.renderCodeBlock) {
-          return options.renderCodeBlock({ lang, code });
-        }
-
-        const hast = await highlightHast(await options.shiki.getOrInit(), code, {
-          lang,
-          defaultColor: false,
-          ...options.shikiOptions,
-        });
-        const rendered = toJsxRuntime(hast, {
-          ...JsxRuntime,
-          components: {
-            pre: Pre,
-          },
-        });
-
-        return <CodeBlock className="my-0">{rendered}</CodeBlock>;
-      },
-    };
-
-    return <APIPage {...props} ctx={ctx} />;
+    return (
+      <RenderContextProvider ctx={ctx}>
+        <PageContent {...props} />
+      </RenderContextProvider>
+    );
   };
 }
 
-export { ClientCodeBlockProvider } from './components/codeblock';
+function PageContent({
+  showTitle: hasHead = false,
+  showDescription,
+  operations,
+  webhooks,
+}: Omit<GeneratedPageProps, 'document'>) {
+  const ctx = useRenderContext();
+  const { dereferenced } = ctx.schema;
+  let { renderPageLayout } = ctx.content ?? {};
+  renderPageLayout ??= (slots) => (
+    <div className="flex flex-col gap-24 text-sm @container">
+      {slots.operations?.map((op) => op.children)}
+      {slots.webhooks?.map((op) => op.children)}
+    </div>
+  );
+
+  let content = renderPageLayout(
+    {
+      operations: operations?.map((item) => {
+        const pathItem = dereferenced.paths?.[item.path];
+        if (!pathItem)
+          throw new Error(`[Fumadocs OpenAPI] Path not found in OpenAPI schema: ${item.path}`);
+
+        const operation = pathItem[item.method];
+        if (!operation)
+          throw new Error(
+            `[Fumadocs OpenAPI] Method ${item.method} not found in operation: ${item.path}`,
+          );
+
+        return {
+          item,
+          children: (
+            <Operation
+              key={`${item.path}:${item.method}`}
+              method={item.method}
+              pathItem={pathItem}
+              operation={operation}
+              path={item.path}
+              showTitle={hasHead}
+              showDescription={showDescription}
+            />
+          ),
+        };
+      }),
+      webhooks: webhooks?.map((item) => {
+        const webhook = dereferenced.webhooks?.[item.name];
+        if (!webhook)
+          throw new Error(`[Fumadocs OpenAPI] Webhook not found in OpenAPI schema: ${item.name}`);
+
+        const hook = webhook[item.method];
+        if (!hook)
+          throw new Error(
+            `[Fumadocs OpenAPI] Method ${item.method} not found in webhook: ${item.name}`,
+          );
+
+        return {
+          item,
+          children: (
+            <Operation
+              type="webhook"
+              key={`${item.name}:${item.method}`}
+              method={item.method}
+              pathItem={webhook}
+              operation={hook}
+              path={`/${item.name}`}
+              showTitle={hasHead}
+              showDescription={showDescription}
+            />
+          ),
+        };
+      }),
+    },
+    ctx,
+  );
+
+  if (ctx.playground?.enabled !== false) {
+    content = ctx.playground?.provider ? (
+      ctx.playground.provider({ children: content })
+    ) : (
+      <AuthProvider>{content}</AuthProvider>
+    );
+  }
+
+  return <ServerProvider servers={dereferenced.servers}>{content}</ServerProvider>;
+}
+
+function MarkdownPre(props: ComponentProps<'pre'>) {
+  const code = Children.only(props.children) as ReactElement;
+  const codeProps = code.props as ComponentProps<'code'>;
+  const content = codeProps.children;
+  if (typeof content !== 'string') return null;
+
+  const lang =
+    codeProps.className
+      ?.split(' ')
+      .find((v) => v.startsWith('language-'))
+      ?.slice('language-'.length) ?? 'text';
+
+  return <ClientCodeBlock lang={lang} code={content.trimEnd()} />;
+}

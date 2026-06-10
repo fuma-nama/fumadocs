@@ -1,5 +1,19 @@
 # @fumadocs/base-ui
 
+## 16.10.0
+
+### Minor Changes
+
+- 779efff: **Introduce new translations API**
+
+  It is now powered by `fuma-translate`. Be careful: while the API surface is same, some translation keys are changed, unused labels will be ignored.
+
+### Patch Changes
+
+- 0cc1fac: Make `uiTranslations()` optional for translations API
+- Updated dependencies [9b9545f]
+  - fumadocs-core@16.10.0
+
 ## 16.9.3
 
 ### Patch Changes

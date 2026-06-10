@@ -1,17 +1,8 @@
 import { fileURLToPath } from 'node:url';
 import { afterEach, describe, expect, test, vi } from 'vitest';
-import { idToTitle } from '@/utils/id-to-title';
 import { generateFilesOnly, type OutputFile } from '@/generate-file';
 import { createOpenAPI } from '@/server';
 import path from 'node:path';
-
-describe('Utilities', () => {
-  test('Operation ID to Title', () => {
-    expect(idToTitle('getKey')).toBe('Get Key');
-    expect(idToTitle('requestId30')).toBe('Request Id30');
-    expect(idToTitle('requestId-30')).toBe('Request Id 30');
-  });
-});
 
 const cwd = fileURLToPath(new URL('./', import.meta.url));
 
@@ -23,9 +14,9 @@ describe('Generate documents', () => {
   test('Pet Store (Per Operation)', async () => {
     const out = await generateFilesOnly({
       input: createOpenAPI({
-        input: () => ({
+        input: {
           petstore: path.join(cwd, './fixtures/petstore.yaml'),
-        }),
+        },
       }),
       per: 'operation',
     });
@@ -36,9 +27,9 @@ describe('Generate documents', () => {
   test('Museum (Per Tag)', async () => {
     const out = await generateFilesOnly({
       input: createOpenAPI({
-        input: () => ({
+        input: {
           museum: path.join(cwd, './fixtures/museum.yaml'),
-        }),
+        },
       }),
       per: 'tag',
     });
@@ -49,9 +40,9 @@ describe('Generate documents', () => {
   test('Unkey (Per File)', async () => {
     const out = await generateFilesOnly({
       input: createOpenAPI({
-        input: () => ({
+        input: {
           unkey: path.join(cwd, './fixtures/unkey.json'),
-        }),
+        },
       }),
       per: 'file',
     });
@@ -62,10 +53,10 @@ describe('Generate documents', () => {
   test('Generate Files', async () => {
     const out = await generateFilesOnly({
       input: createOpenAPI({
-        input: () => ({
+        input: {
           museum: path.join(cwd, './fixtures/museum.yaml'),
           petstore: path.join(cwd, './fixtures/petstore.yaml'),
-        }),
+        },
       }),
       per: 'file',
     });
@@ -87,9 +78,9 @@ describe('Generate documents', () => {
   test('Generate Files - groupBy tag per operation', async () => {
     const out = await generateFilesOnly({
       input: createOpenAPI({
-        input: () => ({
+        input: {
           products: path.join(cwd, './fixtures/products.yaml'),
-        }),
+        },
       }),
       per: 'operation',
       groupBy: 'tag',
@@ -104,9 +95,9 @@ describe('Generate documents', () => {
   test('Generate Files - with index', async () => {
     const out = await generateFilesOnly({
       input: createOpenAPI({
-        input: () => ({
+        input: {
           products: path.join(cwd, './fixtures/products.yaml'),
-        }),
+        },
       }),
       per: 'operation',
       name: {
@@ -133,9 +124,9 @@ describe('Generate documents', () => {
   test('Generate Files - with meta', async () => {
     const out = await generateFilesOnly({
       input: createOpenAPI({
-        input: () => ({
+        input: {
           products: path.join(cwd, './fixtures/products.yaml'),
-        }),
+        },
       }),
       per: 'operation',
       meta: true,
@@ -147,9 +138,9 @@ describe('Generate documents', () => {
   test('Generate Files - with meta + groupBy', async () => {
     const out = await generateFilesOnly({
       input: createOpenAPI({
-        input: () => ({
+        input: {
           products: path.join(cwd, './fixtures/products.yaml'),
-        }),
+        },
       }),
       per: 'operation',
       groupBy: 'tag',

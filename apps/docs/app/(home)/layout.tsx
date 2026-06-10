@@ -90,7 +90,7 @@ export default function Layout({ children }: LayoutProps<'/'>) {
                   <PlusIcon className="bg-fd-primary text-fd-primary-foreground p-1 mb-2 rounded-md" />
                   <p className="font-medium">Manual Installation</p>
                   <p className="text-fd-muted-foreground text-sm">
-                    Setup Fumadocs for your existing Next.js app.
+                    Setup Fumadocs for your existing React.js app.
                   </p>
                 </NavbarMenuLink>
               </NavbarMenuContent>

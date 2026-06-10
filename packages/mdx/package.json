@@ -1,15 +1,18 @@
 {
   "name": "fumadocs-mdx",
-  "version": "15.0.11",
+  "version": "15.0.12",
   "description": "The built-in source for Fumadocs",
   "keywords": [
     "Docs",
-    "NextJs"
+    "fumadocs"
   ],
   "homepage": "https://fumadocs.dev",
   "license": "MIT",
   "author": "Fuma Nama",
   "repository": "github:fuma-nama/fumadocs",
+  "bugs": {
+    "url": "https://github.com/fuma-nama/fumadocs/issues"
+  },
   "bin": {
     "fumadocs-mdx": "./bin.js"
   },

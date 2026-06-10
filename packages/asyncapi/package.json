@@ -1,0 +1,80 @@
+{
+  "name": "@fumadocs/asyncapi",
+  "version": "0.0.1",
+  "description": "Generate docs for your AsyncAPI spec",
+  "keywords": [
+    "Docs",
+    "Fumadocs"
+  ],
+  "homepage": "https://fumadocs.dev",
+  "license": "MIT",
+  "author": "Fuma Nama",
+  "repository": "github:fuma-nama/fumadocs",
+  "files": [
+    "css",
+    "dist"
+  ],
+  "type": "module",
+  "exports": {
+    ".": "./dist/index.js",
+    "./i18n": "./dist/i18n.js",
+    "./server": "./dist/server/index.js",
+    "./ui": "./dist/ui/index.js",
+    "./package.json": "./package.json",
+    "./css/*": "./css/*"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "scripts": {
+    "build": "tsdown",
+    "clean": "rimraf dist",
+    "dev": "tsdown --watch --clean false",
+    "lint": "oxlint .",
+    "types:check": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@fuma-translate/react": "^0.0.3",
+    "@fumadocs/api-docs": "workspace:*",
+    "@fumari/json-schema-ts": "^0.0.2",
+    "@fumari/stf": "workspace:*",
+    "chokidar": "^5.0.0",
+    "class-variance-authority": "^0.7.1",
+    "github-slugger": "^2.0.0",
+    "hast-util-to-jsx-runtime": "^2.3.6",
+    "js-yaml": "^4.2.0",
+    "lucide-react": "^1.17.0",
+    "remark": "^15.0.1",
+    "remark-rehype": "^11.1.2",
+    "shiki": "^4.2.0",
+    "tailwind-merge": "^3.6.0"
+  },
+  "devDependencies": {
+    "@tailwindcss/oxide": "^4.3.0",
+    "@types/js-yaml": "^4.0.9",
+    "@types/node": "25.9.1",
+    "@types/react": "^19.2.16",
+    "fumadocs-core": "workspace:*",
+    "fumadocs-ui": "workspace:*",
+    "json-schema-typed": "^8.0.2",
+    "tailwindcss": "^4.3.0",
+    "tsconfig": "workspace:*",
+    "tsdown": "0.22.1"
+  },
+  "peerDependencies": {
+    "@types/react": "*",
+    "fumadocs-core": "^16.9.0",
+    "fumadocs-ui": "^16.9.0",
+    "json-schema-typed": "*",
+    "react": "^19.2.0",
+    "react-dom": "^19.2.0"
+  },
+  "peerDependenciesMeta": {
+    "json-schema-typed": {
+      "optional": true
+    },
+    "@types/react": {
+      "optional": true
+    }
+  }
+}

@@ -110,13 +110,11 @@ export const translations = i18n
   .extend(uiTranslations())
   // [!code ++]
   .extend(storyTranslations())
-  .add('ui', {
-    cn: { displayName: 'Chinese' },
-  })
-  // [!code ++:5]
-  .add('story', {
+  .add({
     cn: {
-      // ...
+      displayName: 'Chinese',
+      // [!code ++]
+      'New Item(story arguments form)': '新增項目',
     },
   });
 ```

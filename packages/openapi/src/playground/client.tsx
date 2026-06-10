@@ -9,10 +9,10 @@ import {
   type ComponentProps,
   useRef,
 } from 'react';
-import { useApiContext, useServerContext } from '@/ui/contexts/api';
+import { useRenderContext, useServerContext } from '@/ui/contexts/api';
 import type { BrowserFetcherOptions } from '@/playground/fetcher';
 import { DefaultResultDisplay, type ResultDisplayProps } from './components/result-display';
-import { joinURL, resolveRequestData, resolveServerUrl, withBase } from '@/utils/url';
+import { pathnameFromRequest } from '@/requests/generators';
 import { MethodLabel } from '@/ui/components/method-label';
 import { useQuery } from '@/utils/use-query';
 import {
@@ -24,18 +24,22 @@ import { ChevronDown, LoaderCircle } from 'lucide-react';
 import { encodeRequestData } from '@/requests/media/encode';
 import { buttonVariants } from 'fumadocs-ui/components/ui/button';
 import { cn } from '@/utils/cn';
-import { anyFields, SchemaProvider, SchemaScope, useResolvedSchema } from '@/playground/schema';
+import {
+  anyFields,
+  SchemaProvider,
+  useResolvedSchema,
+} from '@fumadocs/api-docs/components/playground/schema';
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@/ui/components/select';
-import { labelVariants } from '@/ui/components/input';
-import { getPreferredType, type SecurityEntry, type ParsedSchema } from '@/utils/schema';
+} from '@fumadocs/api-docs/components/select';
+import { labelVariants } from '@fumadocs/api-docs/components/input';
+import { getPreferredType, type ParsedSchema } from '@/utils/schema';
 import ServerSelect from './components/server-select';
-import { useStorageKey } from '@/ui/client/storage-key';
+import { useStorageKey } from '@/utils/storage-key';
 import {
   type DataEngine,
   FieldKey,
@@ -46,15 +50,22 @@ import {
   useStf,
 } from '@fumari/stf';
 import { arrayStartsWith, objectGet, objectSet, stringifyFieldKey } from '@fumari/stf/lib/utils';
-import { FieldInput, FieldSet, JsonInput, ObjectInput } from './components/inputs';
-import type { Document, HttpMethods, ParameterObject } from '@/types';
-import { useTranslations } from '@/ui/client/i18n';
-import { useOperationContext } from '@/ui/operation/client';
+import {
+  FieldInput,
+  FieldSet,
+  JsonInput,
+  ObjectInput,
+} from '@fumadocs/api-docs/components/playground/inputs';
+import type { HttpMethods, OperationObject, ParameterObject, PathItemObject } from '@/types';
+import { useTranslations } from '@fuma-translate/react';
+import { useOperationContext } from '@/ui/operation/context';
 import { OAuthDialog, OAuthDialogContent, OAuthDialogTrigger } from './components/oauth-dialog';
-import { dereferenceSwallow } from '@/utils/schema/dereference';
+import { dereferenceShallow } from '@fumadocs/api-docs/schema/dereference';
 import { useAuth } from './auth';
 import { useOnChange } from 'fumadocs-core/utils/use-on-change';
-import { Spinner } from './components/spinner';
+import { Spinner } from '@fumadocs/api-docs/components/spinner';
+import { joinURL, resolveServerUrl } from '@fumadocs/api-docs/utils/url';
+import { NoReference } from '@fumadocs/api-docs/schema';
 
 export interface FormValues extends Record<string, unknown> {
   path: Record<string, unknown>;
@@ -64,14 +75,18 @@ export interface FormValues extends Record<string, unknown> {
   body: unknown;
 }
 
-export interface PlaygroundClientProps extends ComponentProps<'form'>, SchemaScope {
+export interface PlaygroundClientProps extends Omit<ComponentProps<'form'>, 'method'> {
   route: string;
   method: HttpMethods;
-  securities: SecurityEntry[][];
-  /** the OpenAPI document (not dereferenced) */
-  doc: Document;
-  proxyUrl?: string;
-  deprecated?: boolean;
+  operation: NoReference<OperationObject>;
+  pathItem: NoReference<PathItemObject>;
+  writeOnly: boolean;
+  readOnly: boolean;
+}
+
+interface SecurityEntry {
+  scopes: string[];
+  id: string;
 }
 
 export type { ResultDisplayProps };
@@ -89,12 +104,6 @@ export interface PlaygroundClientOptions {
   transformAuthInputs?: (fields: AuthField[]) => AuthField[];
 
   fetchOptions?: BrowserFetcherOptions;
-
-  /**
-   * Request timeout in seconds (default: 10s)
-   * @deprecated use `fetchOptions.requestTimeout` instead.
-   */
-  requestTimeout?: number;
 
   components?: {
     ResultDisplay?: FC<ResultDisplayProps>;
@@ -127,29 +136,31 @@ interface RequestBodyInfo {
 export default function PlaygroundClient({
   route,
   method,
-  securities,
-  doc,
-  proxyUrl,
+  operation,
+  pathItem,
   writeOnly,
   readOnly,
-  deprecated,
   ...rest
 }: PlaygroundClientProps) {
-  const t = useTranslations();
+  const t = useTranslations({ note: 'playground' });
+  const ctx = useRenderContext();
+  const { bundled, dereferenced } = ctx.schema;
   const { parameters, body } = useMemo(() => {
-    const operation = doc.paths![route]![method]!;
-    const parameters: ParameterObject[] =
-      operation.parameters?.map((param) => dereferenceSwallow(param, doc)) ?? [];
+    const parameters: ParameterObject[] = [];
+    if (operation.parameters)
+      for (const p of operation.parameters) parameters.push(dereferenceShallow(p, bundled));
+    if (pathItem.parameters)
+      for (const p of pathItem.parameters) parameters.push(dereferenceShallow(p, bundled));
     let body: RequestBodyInfo | undefined;
 
     if (operation.requestBody) {
-      const content = dereferenceSwallow(operation.requestBody, doc).content;
+      const content = dereferenceShallow(operation.requestBody, bundled).content;
       const mediaType = content ? getPreferredType(content) : undefined;
 
       if (content && mediaType) {
         body = {
           mediaType,
-          schema: dereferenceSwallow(content[mediaType], doc).schema ?? true,
+          schema: dereferenceShallow(content[mediaType], bundled).schema ?? true,
         };
       }
     }
@@ -158,24 +169,41 @@ export default function PlaygroundClient({
       body,
       parameters,
     };
-  }, [doc, route, method]);
+  }, [bundled, operation, pathItem]);
+  const securityEntries = useMemo(() => {
+    const result: SecurityEntry[][] = [];
+    const security = operation.security ?? dereferenced.security ?? [];
+    if (security.length === 0) return result;
+
+    for (const map of security) {
+      const list: SecurityEntry[] = [];
+
+      for (const [key, scopes] of Object.entries(map)) {
+        list.push({
+          id: key,
+          scopes,
+        });
+      }
+
+      if (list.length > 0) result.push(list);
+    }
+
+    return result;
+  }, [dereferenced, operation.security]);
 
   const { example: exampleId, examples, setExampleData } = useOperationContext();
   const { server } = useServerContext();
   const {
     mediaAdapters,
-    client: {
-      playground: {
-        components: {
-          ResultDisplay = DefaultResultDisplay,
-          CollapsiblePanel = DefaultCollapsiblePanel,
-        } = {},
-        requestTimeout,
-        fetchOptions = { requestTimeout },
-        renderBodyField,
+    playground: {
+      components: {
+        ResultDisplay = DefaultResultDisplay,
+        CollapsiblePanel = DefaultCollapsiblePanel,
       } = {},
-    },
-  } = useApiContext();
+      fetchOptions,
+      renderBodyField,
+    } = {},
+  } = useRenderContext();
 
   const defaultValues: FormValues = useMemo(() => {
     const requestData = examples.find((example) => example.id === exampleId)?.data;
@@ -197,12 +225,12 @@ export default function PlaygroundClient({
 
   const { inputs, requirementId, setRequirementId, mapInputs, initAuthInputs } = useAuthInputs(
     stf.dataEngine,
-    securities,
+    securityEntries,
   );
 
   const testQuery = useQuery(async (input: FormValues) => {
     const fetcher = await import('./fetcher').then((mod) =>
-      mod.createBrowserFetcher(mediaAdapters, { proxyUrl, ...fetchOptions }),
+      mod.createBrowserFetcher(mediaAdapters, { proxyUrl: ctx.proxyUrl, ...fetchOptions }),
     );
 
     const encoded = encodeRequestData(
@@ -212,11 +240,11 @@ export default function PlaygroundClient({
     );
     return fetcher.fetch(
       joinURL(
-        withBase(
+        new URL(
           server ? resolveServerUrl(server.url, server.variables) : '/',
           window.location.origin,
-        ),
-        resolveRequestData(route, encoded),
+        ).href,
+        pathnameFromRequest(route, encoded),
       ),
       encoded,
     );
@@ -266,7 +294,7 @@ export default function PlaygroundClient({
 
   return (
     <StfProvider value={stf}>
-      <SchemaProvider doc={doc} writeOnly={writeOnly} readOnly={readOnly}>
+      <SchemaProvider docRoot={bundled as never} writeOnly={writeOnly} readOnly={readOnly}>
         <form
           {...rest}
           className={cn(
@@ -281,20 +309,20 @@ export default function PlaygroundClient({
           <ServerSelect className="border-b" />
           <div className="flex flex-row items-center gap-2 text-sm p-3 not-last:pb-0">
             <MethodLabel>{method}</MethodLabel>
-            <Route route={route} className={cn('flex-1', deprecated && 'line-through')} />
+            <Route route={route} className={cn('flex-1', operation.deprecated && 'line-through')} />
             <button
               type="submit"
               className={cn(buttonVariants({ color: 'primary', size: 'sm' }), 'w-14 py-1.5')}
               disabled={testQuery.isLoading}
             >
-              {testQuery.isLoading ? <LoaderCircle className="size-4 animate-spin" /> : t.send}
+              {testQuery.isLoading ? <LoaderCircle className="size-4 animate-spin" /> : t('Send')}
             </button>
           </div>
           {testQuery.data ? <ResultDisplay data={testQuery.data} reset={testQuery.reset} /> : null}
 
-          {securities.length > 0 && (
+          {securityEntries.length > 0 && (
             <SecurityRequirements
-              securities={securities}
+              securities={securityEntries}
               securityId={requirementId}
               setSecurityId={setRequirementId}
             >
@@ -305,7 +333,7 @@ export default function PlaygroundClient({
           )}
           <ParametersForm parameters={parameters} />
           {body && (
-            <CollapsiblePanel data-type="body" title={t.body}>
+            <CollapsiblePanel data-type="body" title={t('Body')}>
               {renderBodyField ? renderBodyField('body', body) : <BodyInput field={body.schema} />}
             </CollapsiblePanel>
           )}
@@ -326,12 +354,12 @@ function SecurityRequirements({
   setSecurityId: (value: number) => void;
   children: ReactNode;
 }) {
-  const t = useTranslations();
+  const t = useTranslations({ note: 'playground' });
   const { isLoading, error } = useAuth();
   const defaultOpen = isLoading || error != null;
   const [open, setOpen] = useState(defaultOpen);
   const { CollapsiblePanel = DefaultCollapsiblePanel } =
-    useApiContext().client.playground?.components ?? {};
+    useRenderContext().playground?.components ?? {};
 
   useOnChange(defaultOpen, () => {
     if (defaultOpen) setOpen(true);
@@ -341,10 +369,10 @@ function SecurityRequirements({
     <CollapsiblePanel
       title={
         <>
-          {t.authorization}
+          {t('Authorization')}
           {isLoading && (
             <span className="border-s ps-2 inline-flex items-center gap-1.5 text-fd-muted-foreground text-xs font-mono">
-              <Spinner /> {t.fetchingToken}
+              <Spinner /> {t('Fetching token...')}
             </span>
           )}
         </>
@@ -355,7 +383,7 @@ function SecurityRequirements({
     >
       {error != null && (
         <div className="p-2 border rounded-lg bg-fd-secondary">
-          <p className="text-fd-muted-foreground font-medium mb-1">{t.fetchTokenError}</p>
+          <p className="text-fd-muted-foreground font-medium mb-1">{t('Failed to fetch token')}</p>
           <p>{String(error)}</p>
         </div>
       )}
@@ -379,12 +407,13 @@ function SecurityRequirements({
 }
 
 function SecurityRequirement({ requirement }: { requirement: SecurityEntry[] }) {
-  const { schemes } = useApiContext();
+  const schemes = useRenderContext().schema.dereferenced.components?.securitySchemes;
 
   return (
     <div className="flex flex-col gap-2 max-w-[600px]">
       {requirement.map((item) => {
-        const scheme = schemes[item.id];
+        const scheme = schemes?.[item.id];
+        if (!scheme) return;
 
         return (
           <div key={item.id}>
@@ -408,7 +437,7 @@ const ParamTypes = ['path', 'header', 'cookie', 'query'] as const;
 type ParamType = (typeof ParamTypes)[number];
 
 function ParameterItem({ type, parameters }: { type: ParamType; parameters: ParameterObject[] }) {
-  const { renderParameterField } = useApiContext().client.playground ?? {};
+  const { renderParameterField } = useRenderContext().playground ?? {};
 
   return parameters.map((field) => {
     const fieldName: FieldKey = [type, field.name!];
@@ -436,13 +465,13 @@ function ParameterItem({ type, parameters }: { type: ParamType; parameters: Para
 
 function ParametersForm({ parameters }: { parameters: ParameterObject[] }) {
   const { components: { CollapsiblePanel = DefaultCollapsiblePanel } = {} } =
-    useApiContext().client.playground ?? {};
-  const t = useTranslations();
+    useRenderContext().playground ?? {};
+  const t = useTranslations({ note: 'playground' });
   const displayNames = {
-    header: t.header,
-    cookie: t.cookies,
-    query: t.query,
-    path: t.path,
+    header: t('Header'),
+    cookie: t('Cookies'),
+    query: t('Query'),
+    path: t('Path'),
   };
 
   return ParamTypes.map((type) => {
@@ -460,7 +489,7 @@ function ParametersForm({ parameters }: { parameters: ParameterObject[] }) {
 function BodyInput({ field: _field }: { field: ParsedSchema }) {
   const field = useResolvedSchema(_field);
   const [isJson, setIsJson] = useState(false);
-  const t = useTranslations();
+  const t = useTranslations({ note: 'playground' });
 
   if (field.format === 'binary') return <FieldSet field={field} fieldName={['body']} isRequired />;
 
@@ -478,7 +507,7 @@ function BodyInput({ field: _field }: { field: ParsedSchema }) {
           onClick={() => setIsJson(false)}
           type="button"
         >
-          {t.closeJsonEditor}
+          {t('Close JSON Editor')}
         </button>
         <JsonInput fieldName={['body']} />
       </>
@@ -502,7 +531,7 @@ function BodyInput({ field: _field }: { field: ParsedSchema }) {
           )}
           onClick={() => setIsJson(true)}
         >
-          {t.openJsonEditor}
+          {t('Open JSON Editor')}
         </button>
       }
     />
@@ -522,13 +551,13 @@ export interface AuthField {
 function useAuthInputs(engine: DataEngine, requirements: SecurityEntry[][]) {
   const authCtx = useAuth();
   const storageKeys = useStorageKey();
-  const t = useTranslations();
-  const {
-    schemes,
-    client: { playground: { transformAuthInputs } = {} },
-  } = useApiContext();
+  const t = useTranslations({ note: 'playground' });
+  const ctx = useRenderContext();
+  const schemes = ctx.schema.dereferenced.components?.securitySchemes;
+  const { transformAuthInputs } = ctx.playground ?? {};
+
   const [requirementId, setRequirementId] = useState(() => {
-    if (requirements.length === 0) return -1;
+    if (!schemes || requirements.length === 0) return -1;
 
     const idx = requirements.findIndex((s) => s.every((item) => !schemes[item.id].deprecated));
     return idx !== -1 ? idx : 0;
@@ -536,11 +565,10 @@ function useAuthInputs(engine: DataEngine, requirements: SecurityEntry[][]) {
   const requirement = requirementId === -1 ? null : requirements[requirementId];
 
   let inputs = useMemo<AuthField[]>(() => {
-    if (!requirement) return [];
+    if (!requirement || !schemes) return [];
 
     return requirement.map((item) => {
-      const scheme = schemes[item.id];
-
+      const scheme = schemes?.[item.id];
       if (scheme.type === 'http' && scheme.scheme === 'basic') {
         const fieldName: FieldKey = ['header', 'Authorization'];
         return {
@@ -595,7 +623,7 @@ function useAuthInputs(engine: DataEngine, requirements: SecurityEntry[][]) {
           defaultValue: 'Bearer ',
           children: (
             <FieldSet
-              name={`${t.authorization} (${t.header})`}
+              name={`${t('Authorization')} (${t('Header')})`}
               fieldName={fieldName}
               field={{
                 type: 'string',
@@ -632,13 +660,17 @@ function useAuthInputs(engine: DataEngine, requirements: SecurityEntry[][]) {
         children: (
           <>
             <FieldSet
-              name={`${t.authorization} (${t.header})`}
+              name={`${t('Authorization')} (${t('Header')})`}
               fieldName={fieldName}
               field={{
                 type: 'string',
               }}
             />
-            <p className="text-fd-muted-foreground text-xs">{t.openIdUnsupported}</p>
+            <p className="text-fd-muted-foreground text-xs">
+              {t(
+                'OpenID Connect is not supported at the moment, you can still set an access token here.',
+              )}
+            </p>
           </>
         ),
       };
@@ -724,12 +756,12 @@ function useAuthInputs(engine: DataEngine, requirements: SecurityEntry[][]) {
 function OAuth2Input({ fieldName, security }: { fieldName: FieldKey; security: SecurityEntry }) {
   const [open, setOpen] = useState(false);
   const engine = useDataEngine();
-  const t = useTranslations();
+  const t = useTranslations({ note: 'playground' });
 
   return (
     <fieldset className="flex flex-col gap-2">
       <label htmlFor={stringifyFieldKey(fieldName)} className={cn(labelVariants())}>
-        {t.accessToken}
+        {t('Access Token')}
       </label>
       <div className="flex gap-2">
         <FieldInput
@@ -750,7 +782,7 @@ function OAuth2Input({ fieldName, security }: { fieldName: FieldKey; security: S
               }),
             )}
           >
-            {t.authorize}
+            {t('Authorize')}
           </OAuthDialogTrigger>
           <OAuthDialogContent
             setOpen={setOpen}

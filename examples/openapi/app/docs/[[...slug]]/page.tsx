@@ -3,7 +3,7 @@ import { DocsBody, DocsDescription, DocsPage, DocsTitle } from 'fumadocs-ui/layo
 import { notFound } from 'next/navigation';
 import { getMDXComponents } from '@/components/mdx';
 import type { Metadata } from 'next';
-import { APIPage } from '@/components/api-page';
+import { OpenAPIPage } from '@/components/api-page';
 
 export default async function Page(props: { params: Promise<{ slug?: string[] }> }) {
   const params = await props.params;
@@ -19,7 +19,7 @@ export default async function Page(props: { params: Promise<{ slug?: string[] }>
         <DocsTitle>{page.data.title}</DocsTitle>
         <DocsDescription>{page.data.description}</DocsDescription>
         <DocsBody>
-          <APIPage {...page.data.getAPIPageProps()} />
+          <OpenAPIPage {...page.data.getOpenAPIPageProps()} />
         </DocsBody>
       </DocsPage>
     );

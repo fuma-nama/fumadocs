@@ -1,88 +1,105 @@
+'use client';
 import { type ComponentProps, Fragment, use, useMemo, type ReactNode } from 'react';
 import type {
   HttpMethods,
   MediaTypeObject,
-  MethodInformation,
   OperationObject,
   PathItemObject,
-  RenderContext,
   SecuritySchemeObject,
   ServerObject,
 } from '@/types';
-import { createMethod, methodKeys, type NoReference } from '@/utils/schema';
-import { idToTitle } from '@/utils/id-to-title';
-import { Schema } from '../schema';
+import { methodKeys } from '@/utils/schema';
+import { idToTitle } from '@fumadocs/api-docs/utils/id-to-title';
 import { UsageTabs } from '@/ui/operation/usage-tabs';
 import { Badge, MethodLabel } from '@/ui/components/method-label';
-import { CopyTypeScriptPanel, OperationProvider } from './client';
-import { I18nLabel } from '@/ui/client/i18n';
+import { OperationProvider } from './context';
+import { useTranslations } from '@fuma-translate/react';
 import {
   AccordionContent,
   AccordionHeader,
   AccordionItem,
   Accordions,
   AccordionTrigger,
-} from '@/ui/components/accordion';
+} from '@fumadocs/api-docs/components/accordion';
 import { isMediaTypeSupported } from '@/requests/media/adapter';
 import { RequestTabs } from './request-tabs';
 import { cn } from '@/utils/cn';
-import { getExampleRequests } from './get-example-requests';
-import { SelectTabs, SelectTabTrigger, SelectTab } from '../components/select-tab';
+import { getExampleRequests } from '../../utils/get-example-requests';
+import { SelectTabs, SelectTabTrigger, SelectTab } from '@fumadocs/api-docs/components/select-tab';
 import { Callout } from 'fumadocs-ui/components/callout';
-import { AnchorSection } from '@/utils/auto-anchor.client';
+import { AnchorSection } from '@fumadocs/api-docs/auto-anchor/client';
 import { Heading } from '@/ui/components/heading';
+import { Markdown } from '../components/markdown';
+import { ServerProvider, useRenderContext } from '../contexts/api';
+import type { NoReference } from '@fumadocs/api-docs/schema';
+import { useCopyButton } from 'fumadocs-ui/utils/use-copy-button';
+import { buttonVariants } from 'fumadocs-ui/components/ui/button';
+import { Check, Copy } from 'lucide-react';
+import PlaygroundClient from '@/playground/client';
 
 const paramTypeKeys = ['path', 'query', 'header', 'cookie'] as const;
 
 export function Operation({
   type = 'operation',
   path,
+  operation,
+  pathItem,
   method,
-  ctx,
   showTitle,
   showDescription,
   headingLevel = 2,
 }: {
   type?: 'webhook' | 'operation';
   path: string;
-  method: MethodInformation;
-  ctx: RenderContext;
+  method: HttpMethods;
+  operation: NoReference<OperationObject>;
+  pathItem: NoReference<PathItemObject>;
 
   showTitle?: boolean;
   showDescription?: boolean;
   headingLevel?: number;
 }) {
+  const t = useTranslations({ note: 'operation page' });
+  const ctx = useRenderContext();
   const {
     schema: { dereferenced },
   } = ctx;
-  const body = method.requestBody;
+  const body = operation.requestBody;
   let headNode: ReactNode = null;
-  const descriptionNode =
-    showDescription && method.description && ctx.renderMarkdown(method.description);
+  const operationDescription = operation.description ?? pathItem.description;
+  const descriptionNode = showDescription && operationDescription && (
+    <Markdown md={operationDescription} />
+  );
   let bodyNode: ReactNode = null;
   let authNode: ReactNode = null;
   let responseNode: ReactNode = null;
   let callbacksNode: ReactNode = null;
-  const exampleRequests = useMemo(() => getExampleRequests(path, method, ctx), [ctx, method, path]);
+  const exampleRequests = useMemo(
+    () => getExampleRequests({ path, operation, method, pathItem, ctx }),
+    [ctx, operation, method, pathItem, path],
+  );
 
   if (showTitle) {
-    const title = method.summary || (method.operationId ? idToTitle(method.operationId) : path);
+    const title =
+      operation.summary ||
+      pathItem.summary ||
+      (operation.operationId ? idToTitle(operation.operationId) : path);
 
     headNode = (
       <div className="flex gap-2 items-center justify-between">
         <Heading id={title} depth={headingLevel} className="my-0!">
           {title}
         </Heading>
-        {method.deprecated && (
+        {operation.deprecated && (
           <Badge color="yellow" className="text-xs not-prose">
-            <I18nLabel label="deprecated" />
+            {t('Deprecated')}
           </Badge>
         )}
       </div>
     );
     headingLevel++;
-  } else if (method.deprecated) {
-    headNode = <Callout type="warn" title={<I18nLabel label="deprecated" />} className="mt-0!" />;
+  } else if (operation.deprecated) {
+    headNode = <Callout type="warn" title={t('Deprecated')} className="mt-0!" />;
   }
 
   const contentTypes = body?.content ? Object.entries(body.content) : null;
@@ -96,7 +113,7 @@ export function Operation({
       <SelectTabs defaultValue={items[0].value}>
         <div className="flex gap-2 items-center justify-between mt-10">
           <Heading id="request-body" depth={headingLevel} className="my-0!">
-            <I18nLabel label="titleRequestBody" />
+            {t('Request Body')}
           </Heading>
           {contentTypes.length > 1 ? (
             <SelectTabTrigger items={items} className="font-medium" />
@@ -104,7 +121,7 @@ export function Operation({
             <p className="text-fd-muted-foreground not-prose">{items[0].label}</p>
           )}
         </div>
-        {body!.description && ctx.renderMarkdown(body!.description)}
+        {body?.description && <Markdown md={body.description} />}
         {contentTypes.map(([type, content]) => {
           if (!isMediaTypeSupported(type, ctx.mediaAdapters)) {
             throw new Error(`Media type ${type} is not supported (in ${path})`);
@@ -112,7 +129,7 @@ export function Operation({
 
           return (
             <SelectTab key={type} anchorSegments={['request-body', type]} value={type}>
-              <RequestBodyContentItem content={content} method={method} ctx={ctx} />
+              <RequestBodyContentItem content={content} operation={operation} method={method} />
             </SelectTab>
           );
         })}
@@ -120,38 +137,48 @@ export function Operation({
     );
   }
 
-  if (method.responses && ctx.showResponseSchema !== false) {
-    const statuses = Object.keys(method.responses);
+  if (operation.responses && ctx.showResponseSchema !== false) {
+    const statuses = Object.keys(operation.responses);
 
     responseNode = (
       <>
         <Heading id="response-body" depth={headingLevel}>
-          <I18nLabel label="titleResponseBody" />
+          {t('Response Body')}
         </Heading>
         <Accordions type="multiple">
           {statuses.map((status) => (
-            <ResponseAccordion key={status} status={status} operation={method} ctx={ctx} />
+            <ResponseAccordion key={status} status={status} operation={operation} />
           ))}
         </Accordions>
       </>
     );
   }
 
+  const parameters = [...(operation.parameters ?? []), ...(pathItem.parameters ?? [])];
   const parameterNode = paramTypeKeys.map((type) => {
-    const params = method.parameters?.filter((param) => param.in === type);
+    const params = parameters.filter((param) => param.in === type);
     if (!params || params.length === 0) return;
+
+    const parameterLabel =
+      type === 'path'
+        ? t('Path Parameters')
+        : type === 'query'
+          ? t('Query Parameters')
+          : type === 'header'
+            ? t('Header Parameters')
+            : t('Cookie Parameters');
 
     return (
       <Fragment key={type}>
         <Heading id={`parameters-${type}`} depth={headingLevel}>
-          <I18nLabel label={`${type}Parameters`} />
+          {parameterLabel}
         </Heading>
         <AnchorSection segments={['parameters', type]}>
           <div className="flex flex-col">
             {params.map(
               (param) =>
                 param.schema != null && (
-                  <Schema
+                  <ctx.SchemaUI
                     key={param.name}
                     client={{
                       name: param.name!,
@@ -167,9 +194,8 @@ export function Operation({
                           }
                         : param.schema
                     }
-                    readOnly={method.method === 'get'}
-                    writeOnly={method.method !== 'get'}
-                    ctx={ctx}
+                    readOnly={method === 'get'}
+                    writeOnly={method !== 'get'}
                   />
                 ),
             )}
@@ -179,7 +205,7 @@ export function Operation({
     );
   });
 
-  const securities = (method.security ?? dereferenced.security ?? []).filter(
+  const securities = (operation.security ?? dereferenced.security ?? []).filter(
     (v) => Object.keys(v).length > 0,
   );
 
@@ -207,7 +233,7 @@ export function Operation({
       <SelectTabs defaultValue={items[0].value}>
         <div className="flex items-start justify-between gap-2 mt-10">
           <Heading id="authorization" depth={headingLevel} className="my-0!">
-            <I18nLabel label="authorization" />
+            {t('Authorization')}
           </Heading>
           {items.length > 1 ? (
             <SelectTabTrigger items={items} />
@@ -221,7 +247,7 @@ export function Operation({
               const scheme = securitySchemes?.[key];
               if (!scheme) return;
 
-              return <AuthScheme key={key} scheme={scheme} scopes={scopes} ctx={ctx} />;
+              return <AuthScheme key={key} scheme={scheme} scopes={scopes} />;
             })}
           </SelectTab>
         ))}
@@ -236,7 +262,7 @@ export function Operation({
     callback: NoReference<PathItemObject>;
     operation: NoReference<OperationObject>;
   }[] = [];
-  for (const [name, callbacks] of Object.entries(method.callbacks ?? {})) {
+  for (const [name, callbacks] of Object.entries(operation.callbacks ?? {})) {
     for (const [path, callback] of Object.entries(callbacks)) {
       for (const method of methodKeys) {
         if (!callback[method]) continue;
@@ -249,7 +275,7 @@ export function Operation({
     callbacksNode = (
       <>
         <Heading id="callbacks" depth={headingLevel}>
-          <I18nLabel label="titleCallbacks" />
+          {t('Callbacks')}
         </Heading>
         <Accordions type="multiple">
           {webhookCallbacks.map((item, i) => (
@@ -258,21 +284,27 @@ export function Operation({
               value={`${item.name}\0${item.path}\0${item.method}`}
               anchorSegments={['callbacks', item.name, item.path, item.method]}
             >
-              <AccordionHeader className="flex-col gap-3">
-                <AccordionTrigger className="font-mono">{item.name}</AccordionTrigger>
-                <div className="flex items-center gap-2 text-xs ps-4.5">
-                  <MethodLabel>{item.method}</MethodLabel>
-                  <code className="text-fd-muted-foreground">{item.path}</code>
-                </div>
+              <AccordionHeader>
+                <AccordionTrigger className="gap-3">
+                  <div>
+                    <p className="font-mono mb-2">{item.name}</p>
+
+                    <div className="flex items-center gap-2 text-xs">
+                      <MethodLabel>{item.method}</MethodLabel>
+                      <code className="text-fd-muted-foreground">{item.path}</code>
+                    </div>
+                  </div>
+                </AccordionTrigger>
               </AccordionHeader>
               <AccordionContent>
-                <div className="border p-3 ps-4.5 mb-2 @container prose-no-margin rounded-xl">
+                <div className="border p-3 mb-2 @container prose-no-margin rounded-2xl">
                   <Operation
                     type="webhook"
                     path={path}
                     headingLevel={headingLevel + 1}
-                    method={createMethod(item.method, item.callback, item.operation)}
-                    ctx={ctx}
+                    method={item.method}
+                    pathItem={item.callback}
+                    operation={item.operation}
                   />
                 </div>
               </AccordionContent>
@@ -306,7 +338,36 @@ export function Operation({
       );
     };
 
-    const playgroundEnabled = ctx.playground?.enabled ?? true;
+    let apiPlayground: ReactNode;
+    if (ctx.playground?.enabled ?? true) {
+      apiPlayground = ctx.playground?.render ? (
+        ctx.playground.render({ path, method, operation, pathItem, ctx })
+      ) : (
+        <PlaygroundClient
+          operation={operation}
+          pathItem={pathItem}
+          route={path}
+          method={method}
+          writeOnly
+          readOnly={false}
+        />
+      );
+    } else {
+      apiPlayground = (
+        <div className="flex flex-row items-center gap-2.5 p-3 rounded-xl border bg-fd-card text-fd-card-foreground not-prose">
+          <MethodLabel className="text-xs">{method}</MethodLabel>
+          <code
+            className={cn(
+              'flex-1 overflow-auto text-nowrap text-[0.8125rem] text-fd-muted-foreground',
+              operation.deprecated && 'line-through',
+            )}
+          >
+            {path}
+          </code>
+        </div>
+      );
+    }
+
     let content = renderOperationLayout(
       {
         header: headNode,
@@ -316,41 +377,31 @@ export function Operation({
         callbacks: callbacksNode,
         parameters: parameterNode,
         responses: responseNode,
-        apiPlayground: playgroundEnabled ? (
-          ctx.playground?.render?.({ path, method, ctx })
-        ) : (
-          <div className="flex flex-row items-center gap-2.5 p-3 rounded-xl border bg-fd-card text-fd-card-foreground not-prose">
-            <MethodLabel className="text-xs">{method.method}</MethodLabel>
-            <code
-              className={cn(
-                'flex-1 overflow-auto text-nowrap text-[0.8125rem] text-fd-muted-foreground',
-                method.deprecated && 'line-through',
-              )}
-            >
-              {path}
-            </code>
-          </div>
-        ),
-        apiExample: <UsageTabs method={method} ctx={ctx} />,
+        apiPlayground,
+        apiExample: <UsageTabs method={method} operation={operation} pathItem={pathItem} />,
       },
-      ctx,
-      method,
+      {
+        operation,
+        method,
+        pathItem,
+        ctx,
+      },
     );
 
     content = (
       <OperationProvider
-        defaultExampleId={method['x-exclusiveCodeSample'] ?? method['x-selectedCodeSample']}
+        defaultExampleId={operation['x-exclusiveCodeSample'] ?? operation['x-selectedCodeSample']}
         route={path}
         examples={exampleRequests}
       >
         {content}
       </OperationProvider>
     );
-    if (method.servers) {
+    if (operation.servers || pathItem.servers) {
       content = (
-        <ctx.clientBoundary.ServerProvider servers={method.servers as ServerObject[]}>
+        <ServerProvider servers={(operation.servers ?? pathItem.servers) as ServerObject[]}>
           {content}
-        </ctx.clientBoundary.ServerProvider>
+        </ServerProvider>
       );
     }
 
@@ -380,7 +431,15 @@ export function Operation({
       callbacks: callbacksNode,
       parameters: parameterNode,
       responses: responseNode,
-      requests: <RequestTabs examples={exampleRequests} path={path} operation={method} ctx={ctx} />,
+      requests: (
+        <RequestTabs
+          examples={exampleRequests}
+          path={path}
+          method={method}
+          pathItem={pathItem}
+          operation={operation}
+        />
+      ),
     });
   }
 }
@@ -388,37 +447,36 @@ export function Operation({
 function RequestBodyContentItem({
   content,
   method,
-  ctx,
+  operation,
 }: {
+  method: HttpMethods;
   content: NoReference<MediaTypeObject>;
-  method: MethodInformation;
-  ctx: RenderContext;
+  operation: NoReference<OperationObject>;
 }) {
+  const ctx = useRenderContext();
   let ts = useMemo(() => {
     if (!content.schema || !ctx.generateTypeScriptDefinitions) return;
     return ctx.generateTypeScriptDefinitions(content.schema, {
-      operation: method,
       readOnly: false,
       writeOnly: true,
-      ...ctx,
+      ctx,
     });
-  }, [content.schema, ctx, method]);
+  }, [content.schema, ctx]);
   if (ts instanceof Promise) ts = use(ts);
 
   return (
     <>
       {ts && <CopyTypeScriptPanel name="request body" code={ts} className="my-4 last:mb-0" />}
       {content.schema && (
-        <Schema
+        <ctx.SchemaUI
           client={{
             name: 'body',
             as: 'body',
-            required: method.requestBody?.required,
+            required: operation.requestBody?.required,
           }}
           root={content.schema}
-          readOnly={method.method === 'get'}
-          writeOnly={method.method !== 'get'}
-          ctx={ctx}
+          readOnly={method === 'get'}
+          writeOnly={method !== 'get'}
         />
       )}
     </>
@@ -428,11 +486,9 @@ function RequestBodyContentItem({
 function ResponseAccordion({
   status,
   operation,
-  ctx,
 }: {
   status: string;
-  operation: MethodInformation;
-  ctx: RenderContext;
+  operation: NoReference<OperationObject>;
 }) {
   const response = operation.responses![status];
   const contentTypes = response.content ? Object.entries(response.content) : [];
@@ -451,26 +507,20 @@ function ResponseAccordion({
         <AccordionHeader>
           <AccordionTrigger className="font-mono">{status}</AccordionTrigger>
           {items.length === 1 ? (
-            <p className="text-fd-muted-foreground not-prose">{items[0].label}</p>
+            <p className="text-fd-muted-foreground not-prose py-2">{items[0].label}</p>
           ) : (
-            items.length > 0 && <SelectTabTrigger items={items} />
+            items.length > 0 && <SelectTabTrigger items={items} className="my-1.5 py-1" />
           )}
         </AccordionHeader>
         <AccordionContent className="ps-4.5 pe-3 border rounded-xl">
           {response.description && (
             <div className="prose-no-margin mt-3 mb-2">
-              {ctx.renderMarkdown(response.description)}
+              <Markdown md={response.description} />
             </div>
           )}
           {contentTypes.map(([type, item]) => (
             <SelectTab key={type} value={type} anchorSegments={[type]}>
-              <RepsonseAccordionItem
-                type={type}
-                status={status}
-                item={item}
-                operation={operation}
-                ctx={ctx}
-              />
+              <RepsonseAccordionItem item={item} />
             </SelectTab>
           ))}
         </AccordionContent>
@@ -479,32 +529,16 @@ function ResponseAccordion({
   );
 }
 
-function RepsonseAccordionItem({
-  type,
-  status,
-  operation,
-  item: { schema },
-  ctx,
-}: {
-  type: string;
-  status: string;
-  operation: MethodInformation;
-  item: NoReference<MediaTypeObject>;
-  ctx: RenderContext;
-}) {
+function RepsonseAccordionItem({ item: { schema } }: { item: NoReference<MediaTypeObject> }) {
+  const ctx = useRenderContext();
   let ts = useMemo(() => {
     if (!schema || !ctx.generateTypeScriptDefinitions) return;
     return ctx.generateTypeScriptDefinitions(schema, {
       readOnly: true,
       writeOnly: false,
-      operation,
-      _internal_legacy: {
-        statusCode: status,
-        contentType: type,
-      },
-      ...ctx,
+      ctx,
     });
-  }, [ctx, operation, schema, status, type]);
+  }, [ctx, schema]);
   // assume it is on server component when returned async
   if (ts instanceof Promise) ts = use(ts);
 
@@ -512,46 +546,37 @@ function RepsonseAccordionItem({
     <>
       {ts && <CopyTypeScriptPanel name="response body" code={ts} className="mb-2" />}
       {schema && (
-        <Schema
+        <ctx.SchemaUI
           client={{
             name: 'response',
             as: 'body',
           }}
           root={schema}
           readOnly
-          ctx={ctx}
         />
       )}
     </>
   );
 }
 
-function AuthScheme({
-  scheme,
-  scopes,
-  ctx,
-}: {
-  scheme: SecuritySchemeObject;
-  scopes: string[];
-  ctx: RenderContext;
-}) {
+function AuthScheme({ scheme, scopes }: { scheme: SecuritySchemeObject; scopes: string[] }) {
+  const t = useTranslations({ note: 'security scheme' });
+
   if (scheme.type === 'http' || scheme.type === 'oauth2') {
     return (
       <AuthProperty
-        name={<I18nLabel label="authorization" />}
+        name={t('Authorization')}
         type={
-          scheme.type === 'http' && scheme.scheme === 'basic' ? (
-            <I18nLabel label="authBasicTokenExample" />
-          ) : (
-            <I18nLabel label="authBearerTokenExample" />
-          )
+          scheme.type === 'http' && scheme.scheme === 'basic'
+            ? t('Basic <token>')
+            : t('Bearer <token>')
         }
         deprecated={scheme.deprecated}
         scopes={scopes}
       >
-        {scheme.description && ctx.renderMarkdown(scheme.description)}
+        {scheme.description && <Markdown md={scheme.description} />}
         <p>
-          <I18nLabel label="authTokenIn" />: <code>header</code>
+          {t('In')}: <code>header</code>
         </p>
       </AuthProperty>
     );
@@ -565,9 +590,9 @@ function AuthScheme({
         deprecated={scheme.deprecated}
         scopes={scopes}
       >
-        {scheme.description && ctx.renderMarkdown(scheme.description)}
+        {scheme.description && <Markdown md={scheme.description} />}
         <p>
-          <I18nLabel label="authTokenIn" />: <code>{scheme.in}</code>
+          {t('In')}: <code>{scheme.in}</code>
         </p>
       </AuthProperty>
     );
@@ -576,12 +601,12 @@ function AuthScheme({
   if (scheme.type === 'openIdConnect') {
     return (
       <AuthProperty
-        name={<I18nLabel label="openIdConnect" />}
+        name={t('OpenID Connect')}
         type="<token>"
         deprecated={scheme.deprecated}
         scopes={scopes}
       >
-        {scheme.description && ctx.renderMarkdown(scheme.description)}
+        {scheme.description && <Markdown md={scheme.description} />}
       </AuthProperty>
     );
   }
@@ -600,6 +625,8 @@ function AuthProperty({
   deprecated?: boolean;
   scopes?: string[];
 }) {
+  const t = useTranslations({ note: 'security scheme' });
+
   return (
     <div className={cn('text-sm border-t my-4 first:border-t-0', className)}>
       <div className="flex flex-wrap items-center gap-3 not-prose">
@@ -607,7 +634,7 @@ function AuthProperty({
         <span className="text-sm font-mono text-fd-muted-foreground">{type}</span>
         {deprecated && (
           <Badge color="red" className="text-xs">
-            <I18nLabel label="deprecated" />
+            {t('Deprecated')}
           </Badge>
         )}
       </div>
@@ -615,10 +642,57 @@ function AuthProperty({
         {props.children}
         {scopes.length > 0 && (
           <p>
-            <I18nLabel label="authScope" />: <code>{scopes.join(', ')}</code>
+            {t('Scope')}: <code>{scopes.join(', ')}</code>
           </p>
         )}
       </div>
+    </div>
+  );
+}
+
+function CopyTypeScriptPanel({
+  name,
+  code,
+  className,
+}: {
+  code: string;
+  name: 'response body' | 'request body';
+  className?: string;
+}) {
+  const [isChecked, onCopy] = useCopyButton(() => {
+    void navigator.clipboard.writeText(code);
+  });
+  const t = useTranslations({ note: 'TypeScript definitions' });
+  return (
+    <div
+      className={cn(
+        'flex items-start justify-between gap-2 bg-fd-card text-fd-card-foreground border rounded-xl p-3 not-prose',
+        className,
+      )}
+    >
+      <div>
+        <p className="font-medium text-sm mb-2">{t('TypeScript Definitions')}</p>
+        <p className="text-xs text-fd-muted-foreground">
+          {t('Use the {name} type in TypeScript.', {
+            variables: {
+              name,
+            },
+          })}
+        </p>
+      </div>
+      <button
+        onClick={onCopy}
+        className={cn(
+          buttonVariants({
+            color: 'secondary',
+            className: 'p-2 gap-2',
+            size: 'sm',
+          }),
+        )}
+      >
+        {isChecked ? <Check className="size-3.5" /> : <Copy className="size-3.5" />}
+        {t('Copy')}
+      </button>
     </div>
   );
 }

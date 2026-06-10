@@ -1,6 +1,6 @@
 {
   "name": "fumadocs-core",
-  "version": "16.9.3",
+  "version": "16.10.0",
   "description": "The React.js library for building a documentation website",
   "keywords": [
     "Docs",
@@ -10,6 +10,9 @@
   "license": "MIT",
   "author": "Fuma Nama",
   "repository": "github:fuma-nama/fumadocs",
+  "bugs": {
+    "url": "https://github.com/fuma-nama/fumadocs/issues"
+  },
   "files": [
     "dist"
   ],
@@ -103,6 +106,7 @@
     "types:check": "tsc --noEmit"
   },
   "dependencies": {
+    "@fuma-translate/react": "^0.0.3",
     "@orama/orama": "^3.1.18",
     "estree-util-value-to-estree": "^3.5.0",
     "github-slugger": "^2.0.0",
@@ -234,7 +238,7 @@
   "inlinedDependencies": {
     "@formatjs/fast-memoize": "3.1.5",
     "@formatjs/intl-localematcher": "0.8.9",
-    "@shikijs/transformers": "4.1.0",
+    "@shikijs/transformers": "4.2.0",
     "image-size": "2.0.2",
     "negotiator": "1.0.0",
     "npm-to-yarn": "3.0.1",
