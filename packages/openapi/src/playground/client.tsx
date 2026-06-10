@@ -105,12 +105,6 @@ export interface PlaygroundClientOptions {
 
   fetchOptions?: BrowserFetcherOptions;
 
-  /**
-   * Request timeout in seconds (default: 10s)
-   * @deprecated use `fetchOptions.requestTimeout` instead.
-   */
-  requestTimeout?: number;
-
   components?: {
     ResultDisplay?: FC<ResultDisplayProps>;
     CollapsiblePanel?: FC<CollapsiblePanelProps>;
@@ -206,8 +200,7 @@ export default function PlaygroundClient({
         ResultDisplay = DefaultResultDisplay,
         CollapsiblePanel = DefaultCollapsiblePanel,
       } = {},
-      requestTimeout,
-      fetchOptions = { requestTimeout },
+      fetchOptions,
       renderBodyField,
     } = {},
   } = useRenderContext();

@@ -20,10 +20,10 @@ export function i18nProvider<Languages extends string>(
 ): I18nProviderProps;
 
 export function i18nProvider(
-  _translations: SingularTranslationsAPI | TranslationsAPI,
+  translations: SingularTranslationsAPI | TranslationsAPI,
   lang?: string,
 ): I18nProviderProps {
-  const t = _translations.extend(uiTranslations());
+  const t = translations.extend(uiTranslations());
 
   if ('config' in t) {
     const { defaultLanguage, languages } = t.config;

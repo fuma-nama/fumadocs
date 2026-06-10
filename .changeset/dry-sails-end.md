@@ -28,7 +28,10 @@ More context will be available to callbacks:
 - `transformerOpenAPI()`: use `openapiPlugin()` instead.
 - `createCodeSample()`: use `CodeUsageGenerator` API instead.
 - `generateTypeScriptSchema()`: use `generateTypeScriptDefinitions()` instead.
-- `defineI18nOpenAPI()`: use new translations API instead.
+- `defineI18nOpenAPI()`: use the new translations API instead.
+- `playground.requestTimeout` option: use `fetchOptions.requestTimeout` instead.
+- `allowedUrls` option: use `allowedOrigins` or `filterRequest` instead.
+- `groupStyle` option: use `folderStyle` instead.
 
 **Other**
 

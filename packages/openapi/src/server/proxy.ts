@@ -9,13 +9,6 @@ export interface Proxy extends Record<(typeof methods)[number], Handler> {
 
 export interface CreateProxyOptions {
   /**
-   * Filter by prefixes of request url
-   *
-   * @deprecated Use `allowedOrigins` for filtering origins, or `filterRequest` for more detailed rules.
-   */
-  allowedUrls?: string[];
-
-  /**
    * List of allowed origins to proxy to.
    */
   allowedOrigins?: string[];
@@ -37,14 +30,7 @@ export interface CreateProxyOptions {
 }
 
 export function createProxy(options: CreateProxyOptions = {}): Proxy {
-  const {
-    allowedOrigins,
-    allowedUrls,
-    filterRequest = (req) => {
-      return !allowedUrls || allowedUrls.some((item) => req.url.startsWith(item));
-    },
-    overrides,
-  } = options;
+  const { allowedOrigins, filterRequest, overrides } = options;
   const handlers: Partial<Proxy> = {
     handle: handler,
   };
@@ -72,7 +58,7 @@ export function createProxy(options: CreateProxyOptions = {}): Proxy {
 
     const proxied = await rewriteRequest(req, targetUrl, searchParams.get('cookie'));
 
-    if (!filterRequest(proxied)) {
+    if (filterRequest && !filterRequest(proxied)) {
       return Response.json('[Proxy] The proxied request is not allowed', {
         status: 403,
       });

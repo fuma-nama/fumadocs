@@ -74,8 +74,6 @@ interface GenerateFilesConfig extends PagesToTextOptions {
 }
 
 interface MetaOptions {
-  /** @deprecated use `folderStyle` instead */
-  groupStyle?: 'folder' | 'separator';
   folderStyle?: 'folder' | 'separator';
 }
 
@@ -176,7 +174,7 @@ export async function generateFilesOnly(
 
 function generateMeta(context: BeforeWriteContext, options: MetaOptions): OutputFile[] {
   const files: OutputFile[] = [];
-  const folderStyle = options.folderStyle ?? options.groupStyle ?? 'folder';
+  const folderStyle = options.folderStyle ?? 'folder';
 
   function scan(entries: OutputEntry[], parent?: OutputGroup) {
     const pages: string[] = [];

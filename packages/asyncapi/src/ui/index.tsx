@@ -108,7 +108,6 @@ export type AsyncAPIPageProps = AsyncAPIPageProps_Spec | AsyncAPIPageProps_Prelo
 export type AsyncAPIPageProps_Spec = Omit<GeneratedPageProps, 'document'> & {
   payload: {
     bundled: AsyncAPIObject;
-    proxyUrl?: string;
   };
 };
 
@@ -164,17 +163,14 @@ export function createAsyncAPIPage({
 
   return function AsyncAPIPage(props) {
     let doc: AsyncAPIObject;
-    let proxyUrl: string | undefined;
     if ('preloaded' in props) {
       doc = props.preloaded.docs[props.document];
       if (!doc)
         throw new Error(
           `[Fumadocs AsyncAPI] the document ${props.document} is not preloaded, make sure to pass the "preloaded" prop to <AsyncAPIPage />`,
         );
-      proxyUrl = props.preloaded.proxyUrl;
     } else {
       doc = props.payload.bundled;
-      proxyUrl = props.payload.proxyUrl;
     }
 
     const processed = useMemo(() => dereferenceBundledDocument(doc), [doc]);
@@ -192,7 +188,6 @@ export function createAsyncAPIPage({
 
       return {
         schema: processed,
-        proxyUrl,
         shiki,
         shikiOptions,
         generateTypeScriptDefinitions,
@@ -214,7 +209,7 @@ export function createAsyncAPIPage({
         },
         storageKeyPrefix: options.storageKeyPrefix ?? 'fumadocs-asyncapi-',
       };
-    }, [proxyUrl, processed]);
+    }, [processed]);
 
     return (
       <RenderContextProvider ctx={ctx}>

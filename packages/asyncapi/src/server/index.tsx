@@ -1,4 +1,3 @@
-import { createProxy } from '@/server/proxy';
 import { loadDocument } from '@/utils/document/load';
 import type { AsyncAPIObject, Awaitable } from '@/types';
 import fs from 'node:fs';
@@ -37,13 +36,11 @@ interface LoadedDocument {
 export interface AsyncAPIOptions {
   input?: string[] | SchemaRecord;
   disableCache?: boolean;
-  proxyUrl?: string;
 }
 
 export type { AsyncAPIPageProps_Spec, AsyncAPIPageProps_Preloaded };
 
 export interface AsyncAPIServer {
-  createProxy: typeof createProxy;
   getSchemas: () => Promise<Record<string, LoadedDocument>>;
   getSchema: (document: string) => Promise<LoadedDocument>;
   readonly options: AsyncAPIOptions;
@@ -139,7 +136,6 @@ export function createAsyncAPI(options: AsyncAPIOptions = {}): AsyncAPIServer {
               return {
                 payload: {
                   bundled: schema.bundled,
-                  proxyUrl: server.options.proxyUrl,
                 },
                 ...props,
               };
@@ -211,14 +207,12 @@ export function createAsyncAPI(options: AsyncAPIOptions = {}): AsyncAPIServer {
 
   return {
     options,
-    createProxy,
     _getWatchPaths() {
       return Object.keys(resolvedInput).filter((key) => !URL.canParse(key) && fs.existsSync(key));
     },
     async preloadAsyncAPIPage(page) {
       const out: AsyncAPIPageProps_Preloaded['preloaded'] = {
         docs: {},
-        proxyUrl: options.proxyUrl,
       };
       const asyncapiMeta = (page.data as { _asyncapi?: InternalAsyncAPIMeta })._asyncapi;
       if (asyncapiMeta?.preload) {
@@ -288,5 +282,3 @@ export function asyncapiPlugin(): LoaderPlugin {
     },
   };
 }
-
-export type { CreateProxyOptions, Proxy } from './proxy';

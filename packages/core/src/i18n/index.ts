@@ -72,12 +72,10 @@ export interface TranslationsAPI<Languages extends string = string, Keys extends
   add(
     unused: string,
     overrides: {
-      [Lang in Languages]?: Partial<
-        Record<Keys, string> & {
-          /** @deprecated the label is no longer used */
-          [key: string]: string;
-        }
-      >;
+      [Lang in Languages]?: Partial<Record<Keys, string>> & {
+        /** @deprecated the label is no longer used */
+        [key: string]: string;
+      };
     },
   ): TranslationsAPI<Languages, Keys>;
   /** add language pack */
@@ -102,12 +100,10 @@ export interface SingularTranslationsAPI<Keys extends string = string> {
   /** @deprecated the namespace parameter is now unnecessary  */
   add(
     unused: string,
-    overrides: Partial<
-      Record<Keys, string> & {
-        /** @deprecated the label is no longer used */
-        [key: string]: string;
-      }
-    >,
+    overrides: Partial<Record<Keys, string>> & {
+      /** @deprecated the label is no longer used */
+      [key: string]: string;
+    },
   ): SingularTranslationsAPI<Keys>;
   /** add language pack */
   preset: (preset: TranslationPreset<Keys>) => SingularTranslationsAPI<Keys>;
