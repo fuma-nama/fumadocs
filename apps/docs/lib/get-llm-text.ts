@@ -2,7 +2,7 @@ import { type Page } from '@/lib/source';
 import { getSection } from './source/navigation';
 
 export async function getLLMText(page: Page) {
-  if (page.type === 'openapi') return '';
+  if (page.type !== 'docs') return '';
 
   const section = getSection(page.slugs[0]);
   const category =

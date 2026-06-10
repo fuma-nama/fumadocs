@@ -4,6 +4,7 @@
 @import 'fumadocs-twoslash/twoslash.css';
 @import 'fumadocs-openapi/css/preset.css';
 @import '@fumadocs/story/css/preset.css';
+@import '@fumadocs/asyncapi/css/preset.css';
 @plugin 'tailwindcss-animate';
 
 @theme {

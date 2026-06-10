@@ -44,6 +44,9 @@ importers:
       '@floating-ui/react-dom':
         specifier: ^2.1.8
         version: 2.1.8(react-dom@19.2.7(react@19.2.7))(react@19.2.7)
+      '@fumadocs/asyncapi':
+        specifier: workspace:*
+        version: link:../../packages/asyncapi
       '@fumadocs/story':
         specifier: workspace:*
         version: link:../../packages/story

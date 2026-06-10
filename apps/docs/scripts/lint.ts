@@ -44,7 +44,7 @@ async function checkLinks() {
 }
 
 async function getHeadings(page: AnySource['$inferPage']): Promise<string[]> {
-  if ('type' in page && page.type === 'openapi') return [];
+  if (page.type !== 'docs') return [];
   const { _exports, toc } = await page.data.load();
   const headings = toc.map((item) => item.url.slice(1));
   const elementIds = _exports?.elementIds;
@@ -58,7 +58,7 @@ async function getHeadings(page: AnySource['$inferPage']): Promise<string[]> {
 async function getFiles(source: AnySource) {
   const files: FileObject[] = [];
   for (const page of source.getPages()) {
-    if (page.type === 'openapi') continue;
+    if (page.type !== 'docs') continue;
 
     files.push({
       data: page.data,
