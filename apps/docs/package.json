@@ -16,6 +16,7 @@
     "@ai-sdk/openai-compatible": "^2.0.48",
     "@ai-sdk/react": "^3.0.198",
     "@floating-ui/react-dom": "^2.1.8",
+    "@fumadocs/asyncapi": "workspace:*",
     "@fumadocs/story": "workspace:*",
     "@llmgateway/ai-sdk-provider": "^3.8.0",
     "@mixedbread/sdk": "^0.73.0",

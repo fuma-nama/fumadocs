@@ -3,6 +3,7 @@ import { blog as blogPosts, docs } from 'collections/server';
 import { toFumadocsSource } from 'fumadocs-mdx/runtime/server';
 import { lucideIconsPlugin } from 'fumadocs-core/source/lucide-icons';
 import { openapi } from '@/lib/openapi';
+import { asyncapi } from '../asyncapi';
 
 export const source = loader(
   {
@@ -14,10 +15,22 @@ export const source = loader(
       },
       groupBy: 'tag',
     }),
+    asyncapi: await asyncapi.staticSource({
+      baseDir: 'asyncapi/(generated)',
+      meta: {
+        folderStyle: 'separator',
+      },
+      groupBy: 'tag',
+    }),
   },
   {
     baseUrl: '/docs',
-    plugins: [pageTreeCodeTitles(), lucideIconsPlugin(), openapi.loaderPlugin()],
+    plugins: [
+      pageTreeCodeTitles(),
+      lucideIconsPlugin(),
+      openapi.loaderPlugin(),
+      asyncapi.loaderPlugin(),
+    ],
   },
 );
 

@@ -3,5 +3,9 @@
 import dynamic from 'next/dynamic';
 
 export const OpenAPIPageLazy = dynamic(() =>
-  import('@/components/api-page').then((mod) => mod.OpenAPIPage),
+  import('@/components/openapi-page').then((mod) => mod.OpenAPIPage),
+);
+
+export const AsyncAPIPageLazy = dynamic(() =>
+  import('@/components/asyncapi-page').then((mod) => mod.AsyncAPIPage),
 );
