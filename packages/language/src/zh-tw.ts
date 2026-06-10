@@ -166,17 +166,17 @@ const translations = {
 
   // @fumadocs/asyncapi
   'Address(asyncapi channel section)': '位址',
-  'Bindings': '繫結',
+  Bindings: '繫結',
   'Bindings(operation page)': '繫結',
   'Correlation ID(operation page)': '關聯 ID',
   'Description(asyncapi channel section)': '描述',
-  'Headers': '標頭',
+  Headers: '標頭',
   'Headers(operation page)': '標頭',
   'Message Example(asyncapi message example)': '訊息範例',
   'Messages(operation page)': '訊息',
   'No additional configuration for this binding.(bindings)': '此繫結沒有額外設定。',
   'Parameters(operation page)': '參數',
-  'Payload': '承載內容',
+  Payload: '承載內容',
   'Payload(operation page)': '承載內容',
   'Reply(operation page)': '回覆',
 

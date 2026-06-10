@@ -1,0 +1,399 @@
+---
+title: Fumadocs OpenAPI v11
+description: Upgrade guide for Fumadocs OpenAPI v11.
+author: Fuma Nama
+date: 2026-06-11
+---
+
+We are pleased to announce the release of Fumadocs OpenAPI v11.
+This major release unifies the RSC and client APIs, removes deprecated options accumulated since v10, and simplifies the server surface.
+
+This release requires attention during upgrades. Run a type check after migrating:
+
+```npm
+npm run types:check
+```
+
+<Callout type="warn" title="Upgrading from v10?">
+
+If you haven't migrated to v10 yet, read the [Fumadocs OpenAPI v10](/blog/openapi-v10) announcement first.
+
+</Callout>
+
+## Unify RSC & Client APIs
+
+`createAPIPage()` and `createClientAPIPage()` are replaced by a single `createOpenAPIPage()` API. The component no longer accepts an `OpenAPIServer` instance or a separate `client` config, all options live in one client component.
+
+The `fumadocs-openapi/ui/client` subpath export is removed. Merge any `defineClientConfig()` options into `createOpenAPIPage()` directly.
+
+```tsx tab="Before" title="components/api-page.tsx"
+import { openapi } from '@/lib/openapi';
+import { createAPIPage } from 'fumadocs-openapi/ui';
+import client from './api-page.client';
+
+export const APIPage = createAPIPage(openapi, {
+  client,
+  mediaAdapters: {
+    /* ... */
+  },
+});
+```
+
+```tsx tab="Before" title="components/api-page.client.tsx"
+'use client';
+import { defineClientConfig } from 'fumadocs-openapi/ui/client';
+
+export default defineClientConfig({
+  playground: {
+    transformAuthInputs: (inputs) => inputs,
+  },
+  storageKeyPrefix: 'my-openapi-',
+});
+```
+
+```tsx tab="After" title="components/api-page.tsx"
+'use client';
+import { createOpenAPIPage } from 'fumadocs-openapi/ui';
+
+export const OpenAPIPage = createOpenAPIPage({
+  mediaAdapters: {
+    /* ... */
+  },
+  playground: {
+    transformAuthInputs: (inputs) => inputs,
+  },
+  storageKeyPrefix: 'my-openapi-',
+});
+```
+
+`api-page.tsx` must be a client component. Note that for existing non-RSC usages, old APIs are only deprecated, migrating to the new `createOpenAPIPage()` is optional, and API surface is identical.
+
+### Pass Page Props from Server
+
+The server is responsible for passing OpenAPI data to `<OpenAPIPage />`.
+
+<Tabs items={['Virtual Files', 'MDX Files']}>
+
+<Tab>
+
+Use `page.data.getOpenAPIPageProps()` when rendering OpenAPI pages from [virtual files](/docs/integrations/openapi):
+
+```tsx title="docs/[[...slug]]/page.tsx"
+import { OpenAPIPage } from '@/components/api-page';
+
+export default function Page({ slug }) {
+  const page = source.getPage(slug);
+
+  if (page.type === 'openapi') {
+    return (
+      <DocsPage full>
+        <DocsTitle>{page.data.title}</DocsTitle>
+        <DocsBody>
+          <OpenAPIPage {...page.data.getOpenAPIPageProps()} />
+        </DocsBody>
+      </DocsPage>
+    );
+  }
+
+  // ...
+}
+```
+
+</Tab>
+
+<Tab>
+
+Use `openapi.preloadOpenAPIPage()` when rendering [generated MDX files](/docs/integrations/openapi):
+
+```tsx title="app/docs/[[...slug]]/page.tsx"
+import { openapi } from '@/lib/openapi';
+import { OpenAPIPage } from '@/components/api-page';
+
+export default async function Page({ slug }) {
+  const page = source.getPage(slug);
+
+  return (
+    <MdxContent
+      components={getMDXComponents({
+        OpenAPIPage: async (props) => (
+          <OpenAPIPage {...await openapi.preloadOpenAPIPage(page)} {...props} />
+        ),
+      })}
+    />
+  );
+}
+```
+
+</Tab>
+
+</Tabs>
+
+## Server & Loader
+
+### `getSchema()` Return Value
+
+`getSchema()` on virtual pages and the OpenAPI server no longer includes a dereferenced document. It now returns the bundled schema only.
+
+```ts tab="Before"
+const schema = page.data.getSchema();
+
+// dereferenced paths, components, etc.
+schema.dereferenced.paths;
+```
+
+```ts tab="After"
+const schema = page.data.getSchema();
+
+// bundled (non-dereferenced) document
+schema.bundled;
+```
+
+Dereferencing happens at render time inside `<OpenAPIPage />` for better performance.
+
+### `input` Option
+
+The whole-map factory form of `input` is removed. Use a record instead: each value can be a file path, URL, inline document, or a per-entry async function.
+
+```ts tab="Before" title="lib/openapi.ts"
+import { createOpenAPI } from 'fumadocs-openapi/server';
+
+export const openapi = createOpenAPI({
+  input: async () => {
+    const res = await fetch('https://example.com/openapi.json');
+    return {
+      my_api: await res.json(),
+    };
+  },
+});
+```
+
+```ts tab="After" title="lib/openapi.ts"
+import { createOpenAPI } from 'fumadocs-openapi/server';
+
+export const openapi = createOpenAPI({
+  input: {
+    my_api: async () => {
+      const res = await fetch('https://example.com/openapi.json');
+      return res.json();
+    },
+  },
+});
+```
+
+## Customization Callbacks
+
+Several callbacks now receive richer context about the current operation.
+
+### `generateCodeSamples`
+
+```tsx tab="Before"
+import { createCodeSample } from 'fumadocs-openapi/server';
+
+export const OpenAPIPage = createOpenAPIPage({
+  generateCodeSamples: (method) => [
+    createCodeSample({
+      label: 'Custom',
+      lang: 'js',
+      generate(data) {
+        return `fetch('${data.url}')`;
+      },
+    }),
+  ],
+});
+```
+
+```tsx tab="After"
+export const OpenAPIPage = createOpenAPIPage({
+  generateCodeSamples: ({ operation, method, pathItem }) => [
+    {
+      label: 'Custom',
+      lang: 'js',
+      generate(data) {
+        return `fetch('${data.url}')`;
+      },
+    },
+  ],
+});
+```
+
+### `renderOperationLayout`
+
+```tsx tab="Before"
+export const OpenAPIPage = createOpenAPIPage({
+  content: {
+    renderOperationLayout: (slots, ctx, method) => <div>{slots.header}</div>,
+  },
+});
+```
+
+```tsx tab="After"
+export const OpenAPIPage = createOpenAPIPage({
+  content: {
+    renderOperationLayout: (slots, { operation, method, pathItem, ctx }) => (
+      <div>{slots.header}</div>
+    ),
+  },
+});
+```
+
+### `playground.render`
+
+```tsx tab="Before"
+export const OpenAPIPage = createOpenAPIPage({
+  playground: {
+    render: (method) => <MyPlayground method={method} />,
+  },
+});
+```
+
+```tsx tab="After"
+export const OpenAPIPage = createOpenAPIPage({
+  playground: {
+    render: ({ operation, method, pathItem, path, ctx }) => (
+      <MyPlayground operation={operation} method={method} path={path} />
+    ),
+  },
+});
+```
+
+## Dropped Deprecated APIs
+
+The following APIs are removed in v11. Use the replacements listed below.
+
+| Removed                                         | Replacement                              |
+| ----------------------------------------------- | ---------------------------------------- |
+| `transformerOpenAPI()`                          | `openapiPlugin()`                        |
+| `generateTypeScriptSchema()`                    | `generateTypeScriptDefinitions()`        |
+| `playground.requestTimeout`                     | `playground.fetchOptions.requestTimeout` |
+| `allowedUrls` (proxy)                           | `allowedOrigins` or `filterRequest`      |
+| `groupStyle` (`generateFiles` / `staticSource`) | `folderStyle`                            |
+
+### Loader Plugin
+
+```ts tab="Before" title="lib/source.ts"
+import { transformerOpenAPI } from 'fumadocs-openapi/server';
+
+export const source = loader({
+  pageTree: {
+    transformers: [transformerOpenAPI()],
+  },
+});
+```
+
+```ts tab="After" title="lib/source.ts"
+import { openapiPlugin } from 'fumadocs-openapi/server';
+
+export const source = loader({
+  plugins: [openapiPlugin()],
+});
+```
+
+### Proxy Server
+
+```ts tab="Before"
+export const { GET, POST } = openapi.createProxy({
+  allowedUrls: ['https://example.com'],
+});
+```
+
+```ts tab="After"
+export const { GET, POST } = openapi.createProxy({
+  allowedOrigins: ['https://example.com'],
+});
+```
+
+### Playground Request Timeout
+
+```tsx tab="Before"
+export const OpenAPIPage = createOpenAPIPage({
+  playground: {
+    requestTimeout: 30,
+  },
+});
+```
+
+```tsx tab="After"
+export const OpenAPIPage = createOpenAPIPage({
+  playground: {
+    fetchOptions: {
+      requestTimeout: 30,
+    },
+  },
+});
+```
+
+### TypeScript Definitions
+
+```tsx tab="Before"
+export const OpenAPIPage = createOpenAPIPage({
+  generateTypeScriptSchema: async (method, statusCode, contentType, ctx) => {
+    // ...
+  },
+});
+```
+
+```tsx tab="After"
+export const OpenAPIPage = createOpenAPIPage({
+  generateTypeScriptDefinitions: async (schema, ctx) => {
+    // ...
+  },
+});
+```
+
+### `generateFiles()` Context
+
+The `documents` field is removed from the `beforeWrite` and `index.items` callback context. Access schemas from the OpenAPI server instead.
+
+```ts tab="Before" title="scripts/generate-docs.ts"
+void generateFiles({
+  input: openapi,
+  output: './content/docs',
+  beforeWrite(files) {
+    const doc = this.documents['petstore.yaml'];
+    // ...
+  },
+});
+```
+
+```ts tab="After" title="scripts/generate-docs.ts"
+void generateFiles({
+  input: openapi,
+  output: './content/docs',
+  async beforeWrite(files) {
+    const schemas = await openapi.getSchemas();
+    const doc = schemas['petstore.yaml'];
+    // ...
+  },
+});
+```
+
+Similarly, rename `groupStyle` to `folderStyle` when generating `meta.json` files:
+
+```ts tab="Before"
+void generateFiles({
+  meta: {
+    groupStyle: 'separator',
+  },
+});
+```
+
+```ts tab="After"
+void generateFiles({
+  meta: {
+    folderStyle: 'separator',
+  },
+});
+```
+
+## Deprecated APIs
+
+The following APIs are deprecated but still available in v11, migration is recommended.
+
+### Virtual Files
+
+The data methods on `page.data` are unified into `getOpenAPIPageProps()`.
+
+| Before                    | After                   |
+| ------------------------- | ----------------------- |
+| `getAPIPageProps()`       | `getOpenAPIPageProps()` |
+| `getClientAPIPageProps()` | `getOpenAPIPageProps()` |

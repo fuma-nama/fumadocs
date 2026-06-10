@@ -11,7 +11,7 @@ export interface LinkProps extends AnchorHTMLAttributes<HTMLAnchorElement> {
   external?: boolean;
 
   /**
-   * Prefetch links, supported on Next.js
+   * Prefetch links
    */
   prefetch?: boolean;
 }

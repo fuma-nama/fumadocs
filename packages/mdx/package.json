@@ -4,7 +4,7 @@
   "description": "The built-in source for Fumadocs",
   "keywords": [
     "Docs",
-    "NextJs"
+    "fumadocs"
   ],
   "homepage": "https://fumadocs.dev",
   "license": "MIT",

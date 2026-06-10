@@ -4,7 +4,7 @@
   "description": "Generate MDX docs for your OpenAPI spec",
   "keywords": [
     "Docs",
-    "NextJs"
+    "fumadocs"
   ],
   "homepage": "https://fumadocs.dev",
   "license": "MIT",
@@ -78,8 +78,8 @@
   "peerDependencies": {
     "@scalar/api-client-react": "^2.0.20",
     "@types/react": "*",
-    "fumadocs-core": "^16.9.0",
-    "fumadocs-ui": "^16.9.0",
+    "fumadocs-core": "^16.10.0",
+    "fumadocs-ui": "^16.10.0",
     "json-schema-typed": "*",
     "react": "^19.2.0",
     "react-dom": "^19.2.0"
