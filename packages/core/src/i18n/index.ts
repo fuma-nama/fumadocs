@@ -65,9 +65,21 @@ export interface TranslationsAPI<Languages extends string = string, Keys extends
     extension: TranslationExtension<NewKeys>,
   ): TranslationsAPI<Languages, Keys | NewKeys>;
   /** add translations */
-  add: (overrides: {
+  add(overrides: {
     [Lang in Languages]?: Partial<Record<Keys, string>>;
-  }) => TranslationsAPI<Languages, Keys>;
+  }): TranslationsAPI<Languages, Keys>;
+  /** @deprecated the namespace parameter is now unnecessary  */
+  add(
+    unused: string,
+    overrides: {
+      [Lang in Languages]?: Partial<
+        Record<Keys, string> & {
+          /** @deprecated the label is no longer used */
+          [key: string]: string;
+        }
+      >;
+    },
+  ): TranslationsAPI<Languages, Keys>;
   /** add language pack */
   preset: (lang: Languages, preset: TranslationPreset<Keys>) => TranslationsAPI<Languages, Keys>;
 }
@@ -86,7 +98,17 @@ export interface SingularTranslationsAPI<Keys extends string = string> {
     extension: TranslationExtension<NewKeys>,
   ): SingularTranslationsAPI<Keys | NewKeys>;
   /** add translations */
-  add: (overrides: Partial<Record<Keys, string>>) => SingularTranslationsAPI<Keys>;
+  add(overrides: Partial<Record<Keys, string>>): SingularTranslationsAPI<Keys>;
+  /** @deprecated the namespace parameter is now unnecessary  */
+  add(
+    unused: string,
+    overrides: Partial<
+      Record<Keys, string> & {
+        /** @deprecated the label is no longer used */
+        [key: string]: string;
+      }
+    >,
+  ): SingularTranslationsAPI<Keys>;
   /** add language pack */
   preset: (preset: TranslationPreset<Keys>) => SingularTranslationsAPI<Keys>;
 }
@@ -124,7 +146,13 @@ export function defineI18n<const Languages extends string>(
           for (const key of extension.keys) registeredKeys.add(key);
           return this as never;
         },
-        add(overrides) {
+        add(
+          ...args:
+            | [string, Record<string, Record<string, string>>]
+            | [Record<string, Record<string, string>>]
+        ) {
+          const overrides = args.length === 2 ? args[1] : args[0];
+
           for (const [lang, values] of Object.entries(overrides)) {
             Object.assign((translations[lang] ??= {}), values);
           }
@@ -135,7 +163,7 @@ export function defineI18n<const Languages extends string>(
           Object.assign(translations[lang], preset.value);
           return this as never;
         },
-      };
+      } as TranslationsAPI<string> as never;
     },
   };
 }
@@ -154,13 +182,13 @@ export function defineTranslations(): SingularTranslationsAPI<never> {
       for (const key of extension.keys) registeredKeys.add(key);
       return this as never;
     },
-    add(overrides) {
-      Object.assign(translations, overrides);
+    add(...args: [string, Record<string, string>] | [Record<string, string>]) {
+      Object.assign(translations, args.length === 2 ? args[1] : args[0]);
       return this as never;
     },
     preset(preset) {
       Object.assign(translations, preset.value);
       return this as never;
     },
-  };
+  } as SingularTranslationsAPI<never>;
 }

@@ -165,16 +165,20 @@ const translations = {
   'loading...(playground server select)': '加载中...',
 
   // @fumadocs/asyncapi
-  'Address(operation page)': '地址',
+  'Address(asyncapi channel section)': '地址',
+  'Bindings': '绑定',
   'Bindings(operation page)': '绑定',
-  'Channel(operation page)': '通道',
   'Correlation ID(operation page)': '关联 ID',
+  'Description(asyncapi channel section)': '描述',
+  'Headers': '标头',
   'Headers(operation page)': '标头',
+  'Message Example(asyncapi message example)': '消息示例',
   'Messages(operation page)': '消息',
+  'No additional configuration for this binding.(bindings)': '此绑定没有额外配置。',
   'Parameters(operation page)': '参数',
+  'Payload': '有效载荷',
   'Payload(operation page)': '有效载荷',
   'Reply(operation page)': '回复',
-  'Traits(operation page)': '特征',
 
   // @fumadocs/story
   'Encountered error when rendering the component.(story error boundary)': '渲染组件时发生错误。',

@@ -30,6 +30,7 @@
     "./scalar": "./dist/scalar/index.js",
     "./server": "./dist/server/index.js",
     "./ui": "./dist/ui/index.js",
+    "./ui/base": "./dist/ui/base.js",
     "./package.json": "./package.json",
     "./css/*": "./css/*"
   },
