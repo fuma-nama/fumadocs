@@ -1,5 +1,0 @@
----
-'@fumadocs/asyncapi': patch
----
-
-Implement
