@@ -1,5 +1,13 @@
 # @fumadocs/base-ui
 
+## 16.10.1
+
+### Patch Changes
+
+- 5017289: Use stable `fuma-translate`
+- 7a77722: fix display name of languages
+  - fumadocs-core@16.10.1
+
 ## 16.10.0
 
 ### Minor Changes
