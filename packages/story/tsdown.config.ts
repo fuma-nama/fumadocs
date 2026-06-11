@@ -1,5 +1,5 @@
 import { defineConfig } from 'tsdown';
-import { compilePackageTranslations } from '../shared/compile-package-translations.ts';
+import { packageTranslationsPlugin } from '../shared/compile-package-translations.ts';
 
 export default defineConfig({
   format: 'esm',
@@ -18,16 +18,7 @@ export default defineConfig({
     sourcemap: false,
   },
   platform: 'browser',
-  plugins: [
-    {
-      name: 'generate-translations',
-      async buildStart() {
-        await compilePackageTranslations({
-          input: ['src/**/*.{ts,tsx}'],
-        });
-      },
-    },
-  ],
+  plugins: [packageTranslationsPlugin()],
   exports: {
     customExports(v) {
       v['./css/*'] = './css/*';

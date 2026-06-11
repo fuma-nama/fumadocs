@@ -14,13 +14,13 @@
     "fumadocs-core": "workspace:*",
     "fumadocs-mdx": "workspace:*",
     "fumadocs-ui": "workspace:*",
-    "next": "16.2.7",
+    "next": "16.2.9",
     "react": "^19.2.7",
     "react-dom": "^19.2.7"
   },
   "devDependencies": {
-    "@types/mdx": "^2.0.13",
-    "@types/react": "^19.2.16",
+    "@types/mdx": "^2.0.14",
+    "@types/react": "^19.2.17",
     "@types/react-dom": "^19.2.3",
     "typescript": "^6.0.3"
   }

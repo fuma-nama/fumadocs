@@ -9,22 +9,22 @@
     "types:check": "react-router typegen && fumadocs-mdx && tsc --noEmit"
   },
   "dependencies": {
-    "@react-router/node": "^7.16.0",
-    "@react-router/serve": "^7.16.0",
+    "@react-router/node": "^7.17.0",
+    "@react-router/serve": "^7.17.0",
     "fumadocs-core": "workspace:*",
     "fumadocs-mdx": "workspace:*",
     "fumadocs-ui": "workspace:*",
-    "isbot": "^5.1.40",
+    "isbot": "^5.1.42",
     "react": "^19.2.7",
     "react-dom": "^19.2.7",
-    "react-router": "^7.16.0"
+    "react-router": "^7.17.0"
   },
   "devDependencies": {
-    "@react-router/dev": "^7.16.0",
+    "@react-router/dev": "^7.17.0",
     "@tailwindcss/vite": "^4.3.0",
-    "@types/mdx": "^2.0.13",
-    "@types/node": "^25.9.1",
-    "@types/react": "^19.2.16",
+    "@types/mdx": "^2.0.14",
+    "@types/node": "^25.9.2",
+    "@types/react": "^19.2.17",
     "@types/react-dom": "^19.2.3",
     "@vitejs/plugin-rsc": "^0.5.27",
     "react-router-devtools": "^6.2.1",
