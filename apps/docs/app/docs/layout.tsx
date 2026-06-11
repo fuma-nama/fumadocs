@@ -7,6 +7,7 @@ import { MessageCircleIcon } from 'lucide-react';
 import { cn } from '@/lib/cn';
 import { buttonVariants } from 'fumadocs-ui/components/ui/button';
 import 'katex/dist/katex.min.css';
+import type { CSSProperties } from 'react';
 
 export default function Layout({ children }: LayoutProps<'/docs'>) {
   const base = baseOptions();
@@ -40,7 +41,7 @@ export default function Layout({ children }: LayoutProps<'/docs'>) {
                 style={
                   {
                     '--tab-color': color,
-                  } as object
+                  } as CSSProperties
                 }
               >
                 {node.icon}
