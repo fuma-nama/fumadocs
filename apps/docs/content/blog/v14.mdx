@@ -63,9 +63,10 @@ This includes Algolia, Orama (static and dynamic with route handlers).
 
 ```ts
 import { useDocsSearch } from 'fumadocs-core/search/client';
+import { oramaStaticClient } from 'fumadocs-core/search/client/orama-static';
 
 const client = useDocsSearch({
-  type: 'static',
+  client: oramaStaticClient(),
 });
 ```
 

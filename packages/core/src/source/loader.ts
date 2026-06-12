@@ -87,6 +87,11 @@ export interface Meta<
 }
 
 export interface LoaderOutput<Config extends LoaderConfig = LoaderConfig> {
+  // infer types, `undefined` in runtime
+  readonly $inferPage: Config['page'];
+  readonly $inferMeta: Config['meta'];
+  readonly $infer: Config;
+
   pageTree: Config['i18n'] extends I18nConfig ? Record<string, PageTree.Root> : PageTree.Root;
 
   getPageTree: (locale?: string) => PageTree.Root;
@@ -168,9 +173,6 @@ export interface LoaderOutput<Config extends LoaderConfig = LoaderConfig> {
    * serialize page tree for non-RSC environments
    */
   serializePageTree: (tree: PageTree.Root) => Promise<SerializedPageTree>;
-
-  get $inferPage(): Config['page'];
-  get $inferMeta(): Config['meta'];
 }
 
 function createPageIndexer({ url }: ResolvedLoaderConfig) {

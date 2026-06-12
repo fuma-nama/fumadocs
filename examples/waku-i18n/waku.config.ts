@@ -7,6 +7,7 @@ export default defineConfig({
   vite: {
     resolve: {
       tsconfigPaths: true,
+      dedupe: ['waku'],
     },
     plugins: [tailwindcss(), mdx()],
   } satisfies UserConfig as Config['vite'],

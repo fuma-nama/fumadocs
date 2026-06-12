@@ -28,14 +28,14 @@ export function i18nProvider(
   if ('config' in t) {
     const { defaultLanguage, languages } = t.config;
     const locale = lang ?? defaultLanguage;
-    const values = t.get(locale) ?? t.get(defaultLanguage);
 
     return {
       locale: lang,
-      translations: values,
+      translations: t.get(locale) ?? t.get(defaultLanguage),
       locales: languages.map((code) => ({
         locale: code,
-        name: values.displayName ?? code,
+        // default language is English
+        name: t.get(code).displayName ?? 'English',
       })),
     };
   }

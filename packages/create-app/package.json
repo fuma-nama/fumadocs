@@ -1,6 +1,6 @@
 {
   "name": "create-fumadocs-app",
-  "version": "16.0.121",
+  "version": "16.0.123",
   "description": "Create a new documentation site with Fumadocs",
   "keywords": [
     "Docs",
@@ -52,10 +52,10 @@
   },
   "devDependencies": {
     "@types/cross-spawn": "^6.0.6",
-    "@types/node": "25.9.1",
+    "@types/node": "25.9.2",
     "tinyglobby": "^0.2.17",
     "tsconfig": "workspace:*",
-    "tsdown": "0.22.1",
+    "tsdown": "0.22.2",
     "typescript": "^6.0.3"
   },
   "engines": {

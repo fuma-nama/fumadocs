@@ -31,11 +31,11 @@
   },
   "devDependencies": {
     "@fastify/deepmerge": "^3.2.1",
-    "@types/node": "^25.9.1",
-    "postcss-selector-parser": "^7.1.1",
+    "@types/node": "^25.9.2",
+    "postcss-selector-parser": "^7.1.2",
     "tailwindcss": "^4.3.0",
     "tsconfig": "workspace:*",
-    "tsdown": "0.22.1"
+    "tsdown": "0.22.2"
   },
   "peerDependencies": {
     "tailwindcss": "^4.0.0"
@@ -48,7 +48,7 @@
   "inlinedDependencies": {
     "@fastify/deepmerge": "3.2.1",
     "cssesc": "3.0.0",
-    "postcss-selector-parser": "7.1.1",
+    "postcss-selector-parser": "7.1.2",
     "util-deprecate": "1.0.2"
   }
 }

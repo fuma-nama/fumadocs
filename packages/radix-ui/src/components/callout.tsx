@@ -1,5 +1,5 @@
 import { CircleCheck, CircleX, Info, Lightbulb, TriangleAlert } from 'lucide-react';
-import type { ComponentProps, ReactNode } from 'react';
+import type { ComponentProps, CSSProperties, ReactNode } from 'react';
 import { cn } from '@/utils/cn';
 
 export type CalloutType = 'info' | 'warn' | 'error' | 'success' | 'warning' | 'idea';
@@ -57,7 +57,7 @@ export function CalloutContainer({
         {
           '--callout-color': `var(--color-fd-${type}, var(--color-fd-muted))`,
           ...style,
-        } as object
+        } as CSSProperties
       }
       {...props}
     >

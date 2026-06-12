@@ -1,7 +1,7 @@
 import { baseOptions, linkItems, logo } from '@/components/layouts/shared';
 import { source } from '@/lib/source';
 import { getSection } from '@/lib/source/navigation';
-import type { ReactNode } from 'react';
+import type { CSSProperties, ReactNode } from 'react';
 import { LayoutClient } from './client';
 import { getLayoutTabs } from 'fumadocs-ui/layouts/shared';
 
@@ -38,7 +38,7 @@ export function FluxLayout({ children }: { children: ReactNode }) {
                   style={
                     {
                       '--tab-color': color,
-                    } as object
+                    } as CSSProperties
                   }
                 >
                   {node.icon}

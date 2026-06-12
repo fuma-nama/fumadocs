@@ -63,7 +63,7 @@ function extractHeadingTitle(text: string): string {
 /**
  * @deprecated Use `createMixedbreadSearchAPI` from `fumadocs-core/search/mixedbread` instead.
  * This client-side approach exposes your API key in the browser.
- * The server-side approach keeps the key secure and uses `type: 'fetch'` on the client.
+ * The server-side approach keeps the key secure and uses `client: fetchClient(...)` on the client.
  */
 export function mixedbreadClient(options: MixedbreadOptions): SearchClient {
   const { client, storeIdentifier, tag } = options;

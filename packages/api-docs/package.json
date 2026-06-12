@@ -1,6 +1,6 @@
 {
   "name": "@fumadocs/api-docs",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "Shared utils for API docs generation",
   "keywords": [
     "Docs",
@@ -54,11 +54,11 @@
     "types:check": "tsc --noEmit"
   },
   "dependencies": {
-    "@fuma-translate/react": "^0.0.3",
+    "@fuma-translate/react": "^1.0.2",
     "@fumari/stf": "workspace:*",
-    "@radix-ui/react-accordion": "^1.2.12",
-    "@radix-ui/react-dialog": "^1.1.15",
-    "@radix-ui/react-select": "^2.2.6",
+    "@radix-ui/react-accordion": "^1.2.13",
+    "@radix-ui/react-dialog": "^1.1.16",
+    "@radix-ui/react-select": "^2.3.0",
     "class-variance-authority": "^0.7.1",
     "github-slugger": "^2.0.0",
     "js-yaml": "^4.2.0",
@@ -69,14 +69,14 @@
     "@apidevtools/json-schema-ref-parser": "^15.3.5",
     "@fastify/deepmerge": "^3.2.1",
     "@tailwindcss/oxide": "^4.3.0",
-    "@types/node": "25.9.1",
-    "@types/react": "^19.2.16",
+    "@types/node": "25.9.2",
+    "@types/react": "^19.2.17",
     "ajv": "^8.20.0",
     "fumadocs-core": "workspace:*",
     "fumadocs-ui": "workspace:*",
     "json-schema-typed": "^8.0.2",
     "tsconfig": "workspace:*",
-    "tsdown": "0.22.1"
+    "tsdown": "0.22.2"
   },
   "peerDependencies": {
     "@types/react": "*",

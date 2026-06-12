@@ -1,5 +1,15 @@
 # fumadocs-core
 
+## 16.10.2
+
+### Patch Changes
+
+- 7e9548b: Fix infinite re-render where (1) a React transition is triggered, (2) the search dialog is inside `<Suspense />`. This causes the `loading` state to be `false` even after `setLoading(true)`, as transition will freeze state updates, and break the render-time state checks of `useDocsSearch()`.
+- 0997dd6: Deprecate `type: "xxx"` usage of `useDocsSearch()`, pass the `client` object instead. The allows a smaller bundle size with improved performance.
+- 71d58b8: Add `$infer` to content loader instance for easier type inference.
+
+## 16.10.1
+
 ## 16.10.0
 
 ### Patch Changes

@@ -1,6 +1,7 @@
 'use client';
 
 import { useDocsSearch } from 'fumadocs-core/search/client';
+import { fetchClient } from 'fumadocs-core/search/client/fetch';
 import { type ReactNode, useMemo, useState } from 'react';
 import { useOnChange } from 'fumadocs-core/utils/use-on-change';
 import { useI18n } from '@/contexts/i18n';
@@ -23,12 +24,6 @@ import type { SearchLink, TagItem } from '@/contexts/search';
 
 export interface DefaultSearchDialogProps extends SharedProps {
   links?: SearchLink[];
-
-  /**
-   * @defaultValue 'fetch'
-   */
-  type?: 'fetch' | 'static';
-
   defaultTag?: string;
   tags?: TagItem[];
 
@@ -57,7 +52,6 @@ export default function DefaultSearchDialog({
   tags = [],
   api,
   delayMs,
-  type = 'fetch',
   allowClear = false,
   links = [],
   footer,
@@ -65,23 +59,14 @@ export default function DefaultSearchDialog({
 }: DefaultSearchDialogProps) {
   const { locale } = useI18n();
   const [tag, setTag] = useState(defaultTag);
-  const { search, setSearch, query } = useDocsSearch(
-    type === 'fetch'
-      ? {
-          type: 'fetch',
-          api,
-          locale,
-          tag,
-          delayMs,
-        }
-      : {
-          type: 'static',
-          from: api,
-          locale,
-          tag,
-          delayMs,
-        },
-  );
+  const { search, setSearch, query } = useDocsSearch({
+    client: fetchClient({
+      api,
+      locale,
+      tag,
+    }),
+    delayMs,
+  });
   const defaultItems = useMemo<SortedResult[] | null>(() => {
     if (links.length === 0) return null;
     return links.map(([name, link]) => ({

@@ -14,6 +14,7 @@ import {
   type SharedProps,
 } from 'fumadocs-ui/components/dialog/search';
 import { useDocsSearch } from 'fumadocs-core/search/client';
+import { fetchClient } from 'fumadocs-core/search/client/fetch';
 import { useMemo, useState } from 'react';
 import { Popover, PopoverContent, PopoverTrigger } from 'fumadocs-ui/components/ui/popover';
 import { ArrowRight, ChevronDown } from 'lucide-react';
@@ -59,8 +60,9 @@ export default function CustomSearchDialog(props: SharedProps) {
   const [open, setOpen] = useState(false);
   const [tag, setTag] = useState<string | undefined>();
   const { search, setSearch, query } = useDocsSearch({
-    type: 'fetch',
-    tag,
+    client: fetchClient({
+      tag,
+    }),
   });
   const { full } = useTreeContext();
   const router = useRouter();

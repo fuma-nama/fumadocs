@@ -43,14 +43,14 @@
     "vfile": "^6.0.3"
   },
   "devDependencies": {
-    "@types/mdx": "^2.0.13",
-    "@types/node": "25.9.1",
-    "@types/react": "^19.2.16",
+    "@types/mdx": "^2.0.14",
+    "@types/node": "25.9.2",
+    "@types/react": "^19.2.17",
     "fumadocs-core": "workspace:*",
     "react": "^19.2.7",
     "tinyglobby": "^0.2.17",
     "tsconfig": "workspace:*",
-    "tsdown": "0.22.1"
+    "tsdown": "0.22.2"
   },
   "peerDependencies": {
     "@types/mdx": "*",

@@ -1,6 +1,7 @@
 'use client';
 
 import { type OramaCloudOptions, useDocsSearch } from 'fumadocs-core/search/client';
+import { oramaCloudClient } from 'fumadocs-core/search/client/orama-cloud';
 import { type ReactNode, useMemo, useState } from 'react';
 import { useOnChange } from 'fumadocs-core/utils/use-on-change';
 import {
@@ -65,12 +66,13 @@ export default function OramaSearchDialog({
   const { locale } = useI18n();
   const [tag, setTag] = useState(defaultTag);
   const { search, setSearch, query } = useDocsSearch({
-    type: 'orama-cloud',
-    client,
-    index,
-    params: searchOptions,
-    locale,
-    tag,
+    client: oramaCloudClient({
+      client,
+      index,
+      params: searchOptions,
+      locale,
+      tag,
+    }),
   });
 
   const defaultItems = useMemo<SortedResult[] | null>(() => {

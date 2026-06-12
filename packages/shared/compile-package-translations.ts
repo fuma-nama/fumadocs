@@ -9,7 +9,7 @@ export interface CompilePackageTranslationsOptions {
    */
   cwd?: string;
   /** Glob patterns relative to `cwd`. */
-  input: string[];
+  input?: string[];
   /**
    * Output path for generated types.
    * @default 'src/.translations/index.ts'
@@ -24,15 +24,16 @@ export interface CompilePackageTranslationsOptions {
   extraKeys?: string[];
 }
 
-export async function compilePackageTranslations(
+async function compilePackageTranslations(
   options: CompilePackageTranslationsOptions,
 ): Promise<void> {
+  const start = performance.now();
   const cwd = options.cwd ?? process.cwd();
   const typesOutput = path.resolve(cwd, options.typesOutput ?? 'src/.translations/index.ts');
   const jsonOutput = path.resolve(cwd, options.jsonOutput ?? 'src/.translations/keys.json');
 
   const output = await compile({
-    input: options.input.map((pattern) => path.join(cwd, pattern)),
+    input: options.input ?? ['src/**/*.ts', 'src/**/*.tsx'],
   });
   if (options.extraKeys) output.translationKeys.push(...options.extraKeys);
 
@@ -42,5 +43,15 @@ export async function compilePackageTranslations(
   await mkdir(path.dirname(jsonOutput), { recursive: true });
   await writeFile(jsonOutput, `${JSON.stringify(output.translationKeys, null, 2)}\n`, 'utf8');
 
-  console.log(`compiled ${output.translationKeys.length} translation keys`);
+  const elapsed = Math.round(performance.now() - start);
+  console.log(`compiled ${output.translationKeys.length} translation keys in ${elapsed}ms`);
+}
+
+export function packageTranslationsPlugin(options: CompilePackageTranslationsOptions = {}) {
+  return {
+    name: 'generate-translations',
+    async buildStart() {
+      await compilePackageTranslations(options);
+    },
+  };
 }

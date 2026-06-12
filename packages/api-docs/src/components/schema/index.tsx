@@ -4,7 +4,7 @@ import type { ParsedSchema, SchemaResolver } from '@/schema';
 import { FormatFlags, schemaToString } from '@/schema/to-string';
 import { mergeAllOf } from '@/schema/merge';
 import { SchemaUI, type SchemaUIProps } from '@/components/schema/client';
-import { useTranslations } from '@fuma-translate/react';
+import { fromTranslations, useTranslations } from '@fuma-translate/react';
 
 export interface FieldBase {
   description?: ReactNode;
@@ -86,19 +86,6 @@ export interface SchemaUIGeneratedData {
   refs: Record<string, SchemaData>;
 }
 
-interface SchemaUILabels {
-  default: string;
-  match: string;
-  format: string;
-  multipleOf: string;
-  range: string;
-  length: string;
-  properties: string;
-  items: string;
-  valueIn: string;
-  example: string;
-}
-
 export function Schema({
   client,
   root,
@@ -108,21 +95,8 @@ export function Schema({
   showExample,
   renderMarkdown,
 }: SchemaUIOptions) {
-  const t = useTranslations({ note: 'schema UI' });
+  const translations = useTranslations().translations;
   const generated = useMemo(() => {
-    const labels: SchemaUILabels = {
-      default: t('Default'),
-      match: t('Match'),
-      format: t('Format'),
-      multipleOf: t('Multiple Of'),
-      range: t('Range'),
-      length: t('Length'),
-      properties: t('Properties'),
-      items: t('Items'),
-      valueIn: t('Value in'),
-      example: t('Example'),
-    };
-
     return generateSchemaUI({
       root,
       resolver,
@@ -130,9 +104,9 @@ export function Schema({
       writeOnly,
       showExample,
       renderMarkdown,
-      labels,
+      translations,
     });
-  }, [root, readOnly, writeOnly, resolver, showExample, renderMarkdown, t]);
+  }, [root, readOnly, writeOnly, resolver, showExample, renderMarkdown, translations]);
 
   return <SchemaUI {...client} generated={generated} />;
 }
@@ -144,10 +118,11 @@ export function generateSchemaUI({
   readOnly = false,
   writeOnly = false,
   showExample = false,
-  labels,
+  translations = {},
 }: Omit<SchemaUIOptions, 'client'> & {
-  labels: SchemaUILabels;
+  translations?: Partial<Record<string, string>>;
 }): SchemaUIGeneratedData {
+  const t = fromTranslations(translations, { note: 'schema UI' });
   const refs: Record<string, SchemaData> = {};
 
   function generateInfoTags(schema: Exclude<ParsedSchema, boolean>) {
@@ -155,28 +130,28 @@ export function generateSchemaUI({
 
     if (schema.default !== undefined) {
       fields.push({
-        label: labels.default,
+        label: t('Default'),
         value: JSON.stringify(schema.default),
       });
     }
 
     if (schema.pattern) {
       fields.push({
-        label: labels.match,
+        label: t('Match'),
         value: schema.pattern,
       });
     }
 
     if (schema.format) {
       fields.push({
-        label: labels.format,
+        label: t('Format'),
         value: schema.format,
       });
     }
 
     if (schema.multipleOf) {
       fields.push({
-        label: labels.multipleOf,
+        label: t('Multiple Of'),
         value: schema.multipleOf.toString(),
       });
     }
@@ -190,7 +165,7 @@ export function generateSchemaUI({
     );
     if (range) {
       fields.push({
-        label: labels.range,
+        label: t('Range'),
         value: range,
       });
     }
@@ -198,7 +173,7 @@ export function generateSchemaUI({
     range = formatRange('length', schema.minLength, undefined, schema.maxLength, undefined);
     if (range) {
       fields.push({
-        label: labels.length,
+        label: t('Length'),
         value: range,
       });
     }
@@ -212,7 +187,7 @@ export function generateSchemaUI({
     );
     if (range) {
       fields.push({
-        label: labels.properties,
+        label: t('Properties'),
         value: range,
       });
     }
@@ -220,14 +195,14 @@ export function generateSchemaUI({
     range = formatRange('items', schema.minItems, undefined, schema.maxItems, undefined);
     if (range) {
       fields.push({
-        label: labels.items,
+        label: t('Items'),
         value: range,
       });
     }
 
     if (schema.enum) {
       fields.push({
-        label: labels.valueIn,
+        label: t('Value in'),
         value: schema.enum.map((value) => JSON.stringify(value)).join(' | '),
       });
     }
@@ -235,7 +210,7 @@ export function generateSchemaUI({
     if (showExample && schema.examples) {
       for (const example of schema.examples) {
         fields.push({
-          label: labels.example,
+          label: t('Example'),
           value: JSON.stringify(example, null, 2),
         });
       }

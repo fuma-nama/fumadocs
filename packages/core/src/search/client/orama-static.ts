@@ -92,7 +92,7 @@ function getDBCached(options: StaticOptions) {
   return result;
 }
 
-export function oramaStaticClient(options: StaticOptions): SearchClient {
+export function oramaStaticClient(options: StaticOptions = {}): SearchClient {
   const { tag, locale, search } = options;
 
   return {
