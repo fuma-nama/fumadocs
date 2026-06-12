@@ -44,12 +44,14 @@ export interface I18nProviderProps {
   children?: ReactNode;
 }
 
+const Empty = {};
+
 export function I18nProvider({
   locales = [],
   locale,
   onLocaleChange,
   children,
-  translations,
+  translations = Empty,
 }: I18nProviderProps) {
   const router = useRouter();
   const pathname = usePathname();
@@ -82,9 +84,7 @@ export function I18nProvider({
         [locale, locales],
       )}
     >
-      <TranslationProvider translations={(translations ?? {}) as Record<string, string>}>
-        {children}
-      </TranslationProvider>
+      <TranslationProvider translations={translations}>{children}</TranslationProvider>
     </LocaleContext>
   );
 }

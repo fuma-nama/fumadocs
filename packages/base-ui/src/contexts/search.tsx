@@ -2,6 +2,7 @@
 import {
   type ComponentType,
   createContext,
+  lazy,
   type ReactNode,
   Suspense,
   use,
@@ -55,9 +56,9 @@ export interface SearchProviderProps {
   /**
    * Replace default search dialog, allowing you to use other solutions such as Algolia Search
    *
-   * It receives the `open` and `onOpenChange` prop, can be lazy loaded with `next/dynamic`
+   * It receives the `open` and `onOpenChange` prop, can be lazy loaded with `React.lazy()`
    */
-  SearchDialog: ComponentType<SharedProps>;
+  SearchDialog?: ComponentType<SharedProps>;
 
   /**
    * Additional props to the dialog
@@ -95,21 +96,25 @@ function MetaOrControl() {
   return key;
 }
 
+const DEFAULT_HOT_KEYS: HotKey[] = [
+  {
+    key: (e) => e.metaKey || e.ctrlKey,
+    display: <MetaOrControl />,
+  },
+  {
+    key: 'k',
+    display: 'K',
+  },
+];
+
+const DefaultSearchDialog = lazy(() => import('@/components/dialog/search-default'));
+
 export function SearchProvider({
-  SearchDialog,
+  SearchDialog = DefaultSearchDialog,
   children,
   preload = true,
   options,
-  hotKey = [
-    {
-      key: (e) => e.metaKey || e.ctrlKey,
-      display: <MetaOrControl />,
-    },
-    {
-      key: 'k',
-      display: 'K',
-    },
-  ],
+  hotKey = DEFAULT_HOT_KEYS,
   links,
 }: SearchProviderProps) {
   const [isOpen, setIsOpen] = useState(preload ? false : undefined);
@@ -125,7 +130,7 @@ export function SearchProvider({
     return () => {
       window.removeEventListener('keydown', onKeyDown);
     };
-  }, [hotKey]);
+  }, []);
 
   return (
     <SearchContext
@@ -139,8 +144,8 @@ export function SearchProvider({
         [isOpen, hotKey],
       )}
     >
-      {isOpen !== undefined && (
-        <Suspense fallback={null}>
+      <Suspense fallback={null}>
+        {isOpen !== undefined && (
           <SearchDialog
             open={isOpen}
             onOpenChange={setIsOpen}
@@ -148,8 +153,8 @@ export function SearchProvider({
             links={links}
             {...options}
           />
-        </Suspense>
-      )}
+        )}
+      </Suspense>
 
       {children}
     </SearchContext>

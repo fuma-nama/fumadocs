@@ -46,7 +46,7 @@
     "types:check": "tsc --noEmit"
   },
   "dependencies": {
-    "@fuma-translate/react": "^1.0.1",
+    "@fuma-translate/react": "^1.0.2",
     "@fumadocs/api-docs": "workspace:*",
     "@fumari/json-schema-ts": "^0.0.2",
     "@fumari/stf": "workspace:*",

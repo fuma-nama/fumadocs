@@ -14,7 +14,7 @@ import {
   useRef,
   useState,
 } from 'react';
-import { useTranslations } from '@fuma-translate/react';
+import { useTranslations, T } from '@fuma-translate/react';
 import { cn } from '@/utils/cn';
 import { Dialog, DialogContent, DialogOverlay, DialogTitle } from '@radix-ui/react-dialog';
 import type { HighlightedText, ReactSortedResult as BaseResultType } from 'fumadocs-core/search';
@@ -296,19 +296,13 @@ export function SearchDialogContent({ children, ...props }: ComponentProps<typeo
   );
 }
 
-function SearchDialogListEmpty() {
-  const t = useTranslations({ note: 'search dialog' });
-
-  return (
-    <div className="py-12 text-center text-sm text-fd-muted-foreground">
-      {t('No results found')}
-    </div>
-  );
-}
-
 export function SearchDialogList({
   items = null,
-  Empty = SearchDialogListEmpty,
+  Empty = () => (
+    <div className="py-12 text-center text-sm text-fd-muted-foreground">
+      <T text="No results found" note="search dialog" />
+    </div>
+  ),
   Item = (props) => <SearchDialogListItem {...props} />,
   ...props
 }: Omit<ComponentProps<'div'>, 'children'> & {

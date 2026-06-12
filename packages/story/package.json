@@ -34,7 +34,7 @@
     "types:check": "tsc --noEmit"
   },
   "dependencies": {
-    "@fuma-translate/react": "^1.0.1",
+    "@fuma-translate/react": "^1.0.2",
     "@fumari/stf": "workspace:*",
     "@radix-ui/react-select": "^2.3.0",
     "class-variance-authority": "^0.7.1",

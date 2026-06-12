@@ -1898,8 +1898,8 @@ importers:
   packages/api-docs:
     dependencies:
       '@fuma-translate/react':
-        specifier: ^1.0.1
-        version: 1.0.1(@types/react@19.2.17)(react-dom@19.2.7(react@19.2.7))(react@19.2.7)
+        specifier: ^1.0.2
+        version: 1.0.2(@types/react@19.2.17)(react-dom@19.2.7(react@19.2.7))(react@19.2.7)
       '@fumari/stf':
         specifier: workspace:*
         version: link:../stf
@@ -1971,8 +1971,8 @@ importers:
   packages/asyncapi:
     dependencies:
       '@fuma-translate/react':
-        specifier: ^1.0.1
-        version: 1.0.1(@types/react@19.2.17)(react-dom@19.2.7(react@19.2.7))(react@19.2.7)
+        specifier: ^1.0.2
+        version: 1.0.2(@types/react@19.2.17)(react-dom@19.2.7(react@19.2.7))(react@19.2.7)
       '@fumadocs/api-docs':
         specifier: workspace:*
         version: link:../api-docs
@@ -2056,8 +2056,8 @@ importers:
         specifier: ^1.5.0
         version: 1.5.0(@date-fns/tz@1.5.0)(@types/react@19.2.17)(date-fns@4.4.0)(react-dom@19.2.7(react@19.2.7))(react@19.2.7)
       '@fuma-translate/react':
-        specifier: ^1.0.1
-        version: 1.0.1(@types/react@19.2.17)(react-dom@19.2.7(react@19.2.7))(react@19.2.7)
+        specifier: ^1.0.2
+        version: 1.0.2(@types/react@19.2.17)(react-dom@19.2.7(react@19.2.7))(react@19.2.7)
       '@fumadocs/tailwind':
         specifier: workspace:*
         version: link:../tailwind
@@ -2273,8 +2273,8 @@ importers:
   packages/core:
     dependencies:
       '@fuma-translate/react':
-        specifier: ^1.0.1
-        version: 1.0.1(@types/react@19.2.17)(react-dom@19.2.7(react@19.2.7))(react@19.2.7)
+        specifier: ^1.0.2
+        version: 1.0.2(@types/react@19.2.17)(react-dom@19.2.7(react@19.2.7))(react@19.2.7)
       '@orama/orama':
         specifier: ^3.1.18
         version: 3.1.18
@@ -2971,8 +2971,8 @@ importers:
   packages/openapi:
     dependencies:
       '@fuma-translate/react':
-        specifier: ^1.0.1
-        version: 1.0.1(@types/react@19.2.17)(react-dom@19.2.7(react@19.2.7))(react@19.2.7)
+        specifier: ^1.0.2
+        version: 1.0.2(@types/react@19.2.17)(react-dom@19.2.7(react@19.2.7))(react@19.2.7)
       '@fumadocs/api-docs':
         specifier: workspace:*
         version: link:../api-docs
@@ -3256,8 +3256,8 @@ importers:
   packages/radix-ui:
     dependencies:
       '@fuma-translate/react':
-        specifier: ^1.0.1
-        version: 1.0.1(@types/react@19.2.17)(react-dom@19.2.7(react@19.2.7))(react@19.2.7)
+        specifier: ^1.0.2
+        version: 1.0.2(@types/react@19.2.17)(react-dom@19.2.7(react@19.2.7))(react@19.2.7)
       '@fumadocs/tailwind':
         specifier: workspace:*
         version: link:../tailwind
@@ -3488,8 +3488,8 @@ importers:
         specifier: ^25.9.2
         version: 25.9.2
       fuma-translate:
-        specifier: ^1.0.1
-        version: 1.0.1
+        specifier: ^1.0.2
+        version: 1.0.2
       tsconfig:
         specifier: workspace:*
         version: link:../tsconfig
@@ -3519,8 +3519,8 @@ importers:
   packages/story:
     dependencies:
       '@fuma-translate/react':
-        specifier: ^1.0.1
-        version: 1.0.1(@types/react@19.2.17)(react-dom@19.2.7(react@19.2.7))(react@19.2.7)
+        specifier: ^1.0.2
+        version: 1.0.2(@types/react@19.2.17)(react-dom@19.2.7(react@19.2.7))(react@19.2.7)
       '@fumari/stf':
         specifier: workspace:*
         version: link:../stf
@@ -5514,65 +5514,65 @@ packages:
   '@formatjs/intl-localematcher@0.8.10':
     resolution: {integrity: sha512-P/IC3qws3jH+1fEs+o0RIFgXKRaQlFehjS5W0FPAqdo6hgzawLl+eD0q0JjheQ3XtoOe5n8WSYfX06KQZI/QJA==}
 
-  '@fuma-translate/binding-darwin-arm64@1.0.1':
-    resolution: {integrity: sha512-l81cenKKp2yLx2OkqUsEQEqEgVnNDXgjeMCTmvcPO3fsQAIhSSrGroiUHn9Yx/BvPwvsaDQZLuSIxyH+wz5GBw==}
+  '@fuma-translate/binding-darwin-arm64@1.0.2':
+    resolution: {integrity: sha512-SDM90GlvwwFmsj+dVjkTxJVyV3oFucv+Fow4V6lcjqxAeTYNMr3ICWA3nXzfBsMlr2398BH/W0W894SoE7TM6Q==}
     engines: {node: '>=22'}
     cpu: [arm64]
     os: [darwin]
 
-  '@fuma-translate/binding-darwin-x64@1.0.1':
-    resolution: {integrity: sha512-ofe3eoVrmbMhx94I+hOI88oKFxxthmVS4J8rRWK2uiGG8zh0QXG3zsBhQCjyV54GuUlsc5bSm61boQMSKgsuAQ==}
+  '@fuma-translate/binding-darwin-x64@1.0.2':
+    resolution: {integrity: sha512-jliaMstV81HfhM6HkalhPZJKbzlVnLgDF1Sd+9YqyX1ll0ItKgI7aIVfm0iWskch37qVbTOdVu4yJ+YLpIS1XQ==}
     engines: {node: '>=22'}
     cpu: [x64]
     os: [darwin]
 
-  '@fuma-translate/binding-linux-arm64-gnu@1.0.1':
-    resolution: {integrity: sha512-5Sg1qhur1lsQWUeaks32Xbmc8VMzlgxraGCfhiLUj+JguL2HTw5JzJ1xbNb4cqkzO5YTyADuWRgCyUoPYLJ3bw==}
+  '@fuma-translate/binding-linux-arm64-gnu@1.0.2':
+    resolution: {integrity: sha512-jUdg14XE658UXJWp97Ti6IiX+SLKIbYZ2CYx3ZGoalcS6SUHZQyBvirDlv2wFNTJtF/rRM2ovoWuz4298m6xWA==}
     engines: {node: '>=22'}
     cpu: [arm64]
     os: [linux]
     libc: [glibc]
 
-  '@fuma-translate/binding-linux-arm64-musl@1.0.1':
-    resolution: {integrity: sha512-FDDdCTRnA78CS8ZBp6o5mEC0e0ghPKQCdOkMA1hkE63kosN+ulHlijsx8nh1SuyazeM9EgZv1pdY71tH7e3m9g==}
+  '@fuma-translate/binding-linux-arm64-musl@1.0.2':
+    resolution: {integrity: sha512-tlP3TCjqkMPvHVGl1KWQO7jjj3sa253FF1R+NKid/LjBUHU32oVg4TJGnzYWHk+MrANCmhbTQuTkJci9EV++Ug==}
     engines: {node: '>=22'}
     cpu: [arm64]
     os: [linux]
     libc: [musl]
 
-  '@fuma-translate/binding-linux-x64-gnu@1.0.1':
-    resolution: {integrity: sha512-t+uS+Bexyo6x6gYEoIZJ8DQvSalB9xdonj8kvhmSPbEtUyF8tbU/naSDyFTTlq67jhSMpmXTwJAfErUjqubM9g==}
+  '@fuma-translate/binding-linux-x64-gnu@1.0.2':
+    resolution: {integrity: sha512-TOYQhcuRxxYvyGczy65ioa320WhdPKTBwRTjHniicd2Sk6Jqq2Bpe3IOtzQwScEmr/8/eeBo+p+KkFo0+izRnw==}
     engines: {node: '>=22'}
     cpu: [x64]
     os: [linux]
     libc: [glibc]
 
-  '@fuma-translate/binding-linux-x64-musl@1.0.1':
-    resolution: {integrity: sha512-TcYiDQOBfhUyGtFJnMEfeiZO6ltqky+sAr8TS+tiAMOeNy6IofLYOWCThrqH2EPJNqhZo1mvM4DhkpJSV5l7lg==}
+  '@fuma-translate/binding-linux-x64-musl@1.0.2':
+    resolution: {integrity: sha512-RQ5xgmIoUl7lb5qUta+SGXmCQc8tfGU18ARnkFEpqnNzusPf1EIeML1jiczcQW8mWKOpOR49dodXvRGkXDHS8A==}
     engines: {node: '>=22'}
     cpu: [x64]
     os: [linux]
     libc: [musl]
 
-  '@fuma-translate/binding-wasm32-wasi@1.0.1':
-    resolution: {integrity: sha512-gcYCInSuqNf+qhvHI5RkNMKkB+EvQsT2i120h/phqSPMXgS17qf4Xvf/i0+xLQoac7q0/U72BYQtj8MnQNeCWw==}
+  '@fuma-translate/binding-wasm32-wasi@1.0.2':
+    resolution: {integrity: sha512-q0B0svbegfY1LF827qKAhA3n4O9RuaouszUdHL/D0j2hgvKjFPDXSpt3Gfje01isHRtimoUt1GJDz8eSzJV9KQ==}
     engines: {node: '>=22'}
     cpu: [wasm32]
 
-  '@fuma-translate/binding-win32-arm64-msvc@1.0.1':
-    resolution: {integrity: sha512-mohNFnDbmZOXTOh4WntcHHIW0rS3Hu67ZKVSv5HO7NFtRCl/s1DxyfcvWx/awN6mhTUpDnURlRAVQaixlunYlw==}
+  '@fuma-translate/binding-win32-arm64-msvc@1.0.2':
+    resolution: {integrity: sha512-daB7znYkjvJwuL8tIOcHArkQSO6QZxmYDwk2Isw2NV0B1tSKrDb3giPnFD1vjc0wTLWBYnrzVFJH+MdP5YxAPQ==}
     engines: {node: '>=22'}
     cpu: [arm64]
     os: [win32]
 
-  '@fuma-translate/binding-win32-x64-msvc@1.0.1':
-    resolution: {integrity: sha512-ka1iHhLnE/A4WCKbycZp0nLnyikfTwYlDLikCDp+t/ipfsRoifdiOP6TgyQqYWCqAvM92dw6+3XDEieKTcf95A==}
+  '@fuma-translate/binding-win32-x64-msvc@1.0.2':
+    resolution: {integrity: sha512-cbctpFgBVd93xibGRnnXB8xVS+BYFN3fL5BUVhVz5aUhQUkJyitD1Y11x/rb5NtNfYEthOiaQDE/QMj7c9k7+Q==}
     engines: {node: '>=22'}
     cpu: [x64]
     os: [win32]
 
-  '@fuma-translate/react@1.0.1':
-    resolution: {integrity: sha512-jYNEoTHzOqYsVqnPawGq/zbGhc+xMV69YPENDccZ5gFla2uafEEl82Jxic/PxAGmkZzv8U65etDkvaJXzc0DjQ==}
+  '@fuma-translate/react@1.0.2':
+    resolution: {integrity: sha512-uOiOtBx3nRXR8Nu1GzBf1tApgF1FErDBTHxRIAQeyQdyOoZbrNRN6H4kDCWObY4qyGeGbHydG0DHzgeUgFDMIw==}
     peerDependencies:
       '@types/react': '*'
       react: ^19.2.0
@@ -11537,8 +11537,8 @@ packages:
       vue:
         optional: true
 
-  fuma-translate@1.0.1:
-    resolution: {integrity: sha512-EQWPUBven8Dbx9rhitkAtiQakaDfTBywmiE1sxmxF2wd674A8z5+FwTkUG8b2iN9sGTihB2+153pklHFiBvJAw==}
+  fuma-translate@1.0.2:
+    resolution: {integrity: sha512-2JTiR0F4ZWYwPj6RPX7C4qb63yCFfQsrEYUuRYtDJboKZyhCGBNUd891ONKzK3OJXDAnddM5Fl/j67PwRix1wQ==}
     engines: {node: '>=22'}
     hasBin: true
 
@@ -17699,38 +17699,38 @@ snapshots:
     dependencies:
       '@formatjs/fast-memoize': 3.1.6
 
-  '@fuma-translate/binding-darwin-arm64@1.0.1':
+  '@fuma-translate/binding-darwin-arm64@1.0.2':
     optional: true
 
-  '@fuma-translate/binding-darwin-x64@1.0.1':
+  '@fuma-translate/binding-darwin-x64@1.0.2':
     optional: true
 
-  '@fuma-translate/binding-linux-arm64-gnu@1.0.1':
+  '@fuma-translate/binding-linux-arm64-gnu@1.0.2':
     optional: true
 
-  '@fuma-translate/binding-linux-arm64-musl@1.0.1':
+  '@fuma-translate/binding-linux-arm64-musl@1.0.2':
     optional: true
 
-  '@fuma-translate/binding-linux-x64-gnu@1.0.1':
+  '@fuma-translate/binding-linux-x64-gnu@1.0.2':
     optional: true
 
-  '@fuma-translate/binding-linux-x64-musl@1.0.1':
+  '@fuma-translate/binding-linux-x64-musl@1.0.2':
     optional: true
 
-  '@fuma-translate/binding-wasm32-wasi@1.0.1':
+  '@fuma-translate/binding-wasm32-wasi@1.0.2':
     dependencies:
       '@emnapi/core': 1.11.0
       '@emnapi/runtime': 1.11.0
       '@napi-rs/wasm-runtime': 1.1.5(@emnapi/core@1.11.0)(@emnapi/runtime@1.11.0)
     optional: true
 
-  '@fuma-translate/binding-win32-arm64-msvc@1.0.1':
+  '@fuma-translate/binding-win32-arm64-msvc@1.0.2':
     optional: true
 
-  '@fuma-translate/binding-win32-x64-msvc@1.0.1':
+  '@fuma-translate/binding-win32-x64-msvc@1.0.2':
     optional: true
 
-  '@fuma-translate/react@1.0.1(@types/react@19.2.17)(react-dom@19.2.7(react@19.2.7))(react@19.2.7)':
+  '@fuma-translate/react@1.0.2(@types/react@19.2.17)(react-dom@19.2.7(react@19.2.7))(react@19.2.7)':
     dependencies:
       react: 19.2.7
       react-dom: 19.2.7(react@19.2.7)
@@ -24174,19 +24174,19 @@ snapshots:
       - shiki
       - supports-color
 
-  fuma-translate@1.0.1:
+  fuma-translate@1.0.2:
     dependencies:
       chokidar: 5.0.0
     optionalDependencies:
-      '@fuma-translate/binding-darwin-arm64': 1.0.1
-      '@fuma-translate/binding-darwin-x64': 1.0.1
-      '@fuma-translate/binding-linux-arm64-gnu': 1.0.1
-      '@fuma-translate/binding-linux-arm64-musl': 1.0.1
-      '@fuma-translate/binding-linux-x64-gnu': 1.0.1
-      '@fuma-translate/binding-linux-x64-musl': 1.0.1
-      '@fuma-translate/binding-wasm32-wasi': 1.0.1
-      '@fuma-translate/binding-win32-arm64-msvc': 1.0.1
-      '@fuma-translate/binding-win32-x64-msvc': 1.0.1
+      '@fuma-translate/binding-darwin-arm64': 1.0.2
+      '@fuma-translate/binding-darwin-x64': 1.0.2
+      '@fuma-translate/binding-linux-arm64-gnu': 1.0.2
+      '@fuma-translate/binding-linux-arm64-musl': 1.0.2
+      '@fuma-translate/binding-linux-x64-gnu': 1.0.2
+      '@fuma-translate/binding-linux-x64-musl': 1.0.2
+      '@fuma-translate/binding-wasm32-wasi': 1.0.2
+      '@fuma-translate/binding-win32-arm64-msvc': 1.0.2
+      '@fuma-translate/binding-win32-x64-msvc': 1.0.2
 
   function-bind@1.1.2: {}
 

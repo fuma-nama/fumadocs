@@ -106,7 +106,7 @@
     "types:check": "tsc --noEmit"
   },
   "dependencies": {
-    "@fuma-translate/react": "^1.0.1",
+    "@fuma-translate/react": "^1.0.2",
     "@orama/orama": "^3.1.18",
     "estree-util-value-to-estree": "^3.5.0",
     "github-slugger": "^2.0.0",

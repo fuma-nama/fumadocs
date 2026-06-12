@@ -1,6 +1,6 @@
 'use client';
 
-import { lazy, type ReactNode } from 'react';
+import type { ReactNode } from 'react';
 import { DirectionProvider } from '@base-ui/react/direction-provider';
 import type { DefaultSearchDialogProps } from '@/components/dialog/search-default';
 import { ThemeProvider, type ThemeProviderProps } from 'next-themes';
@@ -48,8 +48,6 @@ export interface RootProviderProps {
   children?: ReactNode;
 }
 
-const DefaultSearchDialog = lazy(() => import('@/components/dialog/search-default'));
-
 export function RootProvider({
   children,
   dir = 'ltr',
@@ -59,14 +57,11 @@ export function RootProvider({
 }: RootProviderProps) {
   let body = children;
 
-  if (search?.enabled !== false)
-    body = (
-      <SearchProvider SearchDialog={DefaultSearchDialog} {...search}>
-        {body}
-      </SearchProvider>
-    );
+  if (search?.enabled !== false) {
+    body = <SearchProvider {...search}>{body}</SearchProvider>;
+  }
 
-  if (theme?.enabled !== false)
+  if (theme?.enabled !== false) {
     body = (
       <ThemeProvider
         attribute="class"
@@ -78,6 +73,7 @@ export function RootProvider({
         {body}
       </ThemeProvider>
     );
+  }
 
   if (i18n) {
     body = <I18nProvider {...i18n}>{body}</I18nProvider>;
