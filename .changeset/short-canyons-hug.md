@@ -1,7 +1,5 @@
 ---
-'fumadocs-ui': patch
-'@fumadocs/base-ui': patch
 'fumadocs-core': patch
 ---
 
-fix types
+Add `$infer` to content loader instance for easier type inference.

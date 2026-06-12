@@ -1,4 +1,4 @@
-import { type DependencyList, use, useRef, useState } from 'react';
+import { type DependencyList, use, useMemo, useRef, useState } from 'react';
 import { useDebounce } from '@/utils/use-debounce';
 import { type FetchOptions } from '@/search/client/fetch';
 import { useOnChange } from '@/utils/use-on-change';
@@ -23,28 +23,46 @@ interface UseDocsSearch {
 
 export type ClientPreset =
   | ({
+      /**
+       * @deprecated Pass `client: fetchClient(...)` instead.
+       */
       type: 'fetch';
     } & FetchOptions)
   | ({
+      /**
+       * @deprecated Pass `client: oramaStaticClient(...)` instead.
+       */
       type: 'static';
     } & StaticOptions)
   | ({
+      /**
+       * @deprecated Pass `client: algoliaClient(...)` instead.
+       */
       type: 'algolia';
     } & AlgoliaOptions)
   | ({
+      /**
+       * @deprecated Pass `client: oramaCloudClient(...)` instead.
+       */
       type: 'orama-cloud';
     } & OramaCloudOptions)
   | ({
+      /**
+       * @deprecated Pass `client: oramaCloudLegacyClient(...)` instead.
+       */
       type: 'orama-cloud-legacy';
     } & OramaCloudLegacyOptions)
   | ({
+      /**
+       * @deprecated Pass `client: flexsearchStaticClient(...)` instead.
+       */
       type: 'flexsearch-static';
     } & FlexsearchStaticOptions)
   | ({
       /**
        * @deprecated Use `createMixedbreadSearchAPI` from `fumadocs-core/search/mixedbread` instead.
        * This client-side approach exposes your API key in the browser.
-       * The server-side approach keeps the key secure and uses `type: 'fetch'` on the client.
+       * The server-side approach keeps the key secure and uses `client: fetchClient(...)` on the client.
        */
       type: 'mixedbread';
     } & MixedbreadOptions)
@@ -175,14 +193,21 @@ export function useDocsSearch(
         setResults(res);
       })
       .catch((err: Error) => {
+        if (interrupt) return;
+
         setError(err);
       })
       .finally(() => {
+        if (interrupt) return;
+
         setIsLoading(false);
       });
   });
 
-  return { search, setSearch, query: { isLoading, data: results, error } };
+  return useMemo(
+    () => ({ search, setSearch, query: { isLoading, data: results, error } }),
+    [search, isLoading, results, error],
+  );
 }
 
 // TODO: remove this on next major

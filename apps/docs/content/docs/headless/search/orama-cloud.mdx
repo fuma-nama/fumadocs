@@ -92,19 +92,21 @@ To search documents on the client side, consider:
 
   ```ts
   import { useDocsSearch } from 'fumadocs-core/search/client';
+  import { oramaCloudClient } from 'fumadocs-core/search/client/orama-cloud';
   import { OramaCloud } from '@orama/core';
 
-  const client = new OramaCloud({
+  const orama = new OramaCloud({
     projectId: process.env.NEXT_PUBLIC_ORAMA_PROJECT_ID,
     apiKey: process.env.NEXT_PUBLIC_ORAMA_API_KEY,
   });
 
   const { search, setSearch, query } = useDocsSearch({
-    type: 'orama-cloud',
-    client,
-    params: {
-      // optional search params
-    },
+    client: oramaCloudClient({
+      client: orama,
+      params: {
+        // optional search params
+      },
+    }),
   });
   ```
 
@@ -121,20 +123,22 @@ Same as REST API integration, but make sure to set `index` to `crawler`.
 
 ```ts
 import { useDocsSearch } from 'fumadocs-core/search/client';
+import { oramaCloudClient } from 'fumadocs-core/search/client/orama-cloud';
 import { OramaCloud } from '@orama/core';
 
-const client = new OramaCloud({
+const orama = new OramaCloud({
   projectId: '<project id>',
   apiKey: '<read only api key>',
 });
 
 const { search, setSearch, query } = useDocsSearch({
-  type: 'orama-cloud',
-  index: 'crawler',
-  client,
-  params: {
-    // optional search params
-  },
+  client: oramaCloudClient({
+    index: 'crawler',
+    client: orama,
+    params: {
+      // optional search params
+    },
+  }),
 });
 ```
 

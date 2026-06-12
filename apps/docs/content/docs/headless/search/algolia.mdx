@@ -95,13 +95,15 @@ You can consider different options for implementing the UI:
   ```ts twoslash
   import { liteClient } from 'algoliasearch/lite';
   import { useDocsSearch } from 'fumadocs-core/search/client';
+  import { algoliaClient } from 'fumadocs-core/search/client/algolia';
 
-  const client = liteClient('id', 'key');
+  const algolia = liteClient('id', 'key');
 
   const { search, setSearch, query } = useDocsSearch({
-    type: 'algolia',
-    indexName: 'document',
-    client,
+    client: algoliaClient({
+      indexName: 'document',
+      client: algolia,
+    }),
   });
   ```
 
@@ -143,10 +145,13 @@ And update your search client:
 
   ```ts
   import { useDocsSearch } from 'fumadocs-core/search/client';
+  import { algoliaClient } from 'fumadocs-core/search/client/algolia';
 
   const { search, setSearch, query } = useDocsSearch({
-    tag: '<your tag value>',
-    // ...
+    client: algoliaClient({
+      tag: '<your tag value>',
+      // ...
+    }),
   });
   ```
 

@@ -1,6 +1,8 @@
 'use client';
 
 import { useDocsSearch } from 'fumadocs-core/search/client';
+import { fetchClient } from 'fumadocs-core/search/client/fetch';
+import { oramaStaticClient } from 'fumadocs-core/search/client/orama-static';
 import { type ReactNode, useMemo, useState } from 'react';
 import { useOnChange } from 'fumadocs-core/utils/use-on-change';
 import { useI18n } from '@/contexts/i18n';
@@ -68,17 +70,19 @@ export default function DefaultSearchDialog({
   const { search, setSearch, query } = useDocsSearch(
     type === 'fetch'
       ? {
-          type: 'fetch',
-          api,
-          locale,
-          tag,
+          client: fetchClient({
+            api,
+            locale,
+            tag,
+          }),
           delayMs,
         }
       : {
-          type: 'static',
-          from: api,
-          locale,
-          tag,
+          client: oramaStaticClient({
+            from: api,
+            locale,
+            tag,
+          }),
           delayMs,
         },
   );

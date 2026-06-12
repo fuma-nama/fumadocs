@@ -54,13 +54,14 @@ You can search documents using:
 
 ```ts twoslash
 import { useDocsSearch } from 'fumadocs-core/search/client';
+import { fetchClient } from 'fumadocs-core/search/client/fetch';
 
 const client = useDocsSearch({
-  type: 'fetch',
+  client: fetchClient(),
 });
 ```
 
-<auto-type-table type='Extract<import("fumadocs-core/search/client").ClientPreset, { type: "fetch" }>' />
+<auto-type-table type='import("fumadocs-core/search/client/fetch").FetchOptions' />
 
 ## Configurations
 
@@ -90,14 +91,16 @@ const server = flexsearchFromSource(source, {
 and update your search client:
 
 - **Fumadocs UI**: Configure [Tag Filter](/docs/search/flexsearch#tag-filter) on Search UI.
-- **Search Client**: pass a tag to the hook.
+- **Search Client**: pass a tag to `fetchClient`.
 
 ```ts
 import { useDocsSearch } from 'fumadocs-core/search/client';
+import { fetchClient } from 'fumadocs-core/search/client/fetch';
 
 const client = useDocsSearch({
-  type: 'fetch',
-  tag: '<value>', // [!code ++]
+  client: fetchClient({
+    tag: '<value>', // [!code ++]
+  }),
 });
 ```
 

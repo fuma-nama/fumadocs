@@ -34,7 +34,8 @@ export function i18nProvider(
       translations: t.get(locale) ?? t.get(defaultLanguage),
       locales: languages.map((code) => ({
         locale: code,
-        name: t.get(code).displayName ?? code,
+        // default language is English
+        name: t.get(code).displayName ?? 'English',
       })),
     };
   }
