@@ -1,5 +1,11 @@
 # @fuma-docs/openapi
 
+## 11.0.2
+
+### Patch Changes
+
+- 2b79077: fix missing legacy export
+
 ## 11.0.1
 
 ### Patch Changes
