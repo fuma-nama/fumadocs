@@ -1,5 +1,19 @@
 # @fumadocs/base-ui
 
+## 16.10.2
+
+### Patch Changes
+
+- e977acf: **Change the TOC variants**
+
+  The "clerk" TOC variant will revert to the original Clerk-like style, the redesigned TOC (the one you see on official docs) will be the new default.
+
+- 0997dd6: Deprecate `type: "xxx"` usage of `useDocsSearch()`, pass the `client` object instead. The allows a smaller bundle size with improved performance.
+- Updated dependencies [7e9548b]
+- Updated dependencies [0997dd6]
+- Updated dependencies [71d58b8]
+  - fumadocs-core@16.10.2
+
 ## 16.10.1
 
 ### Patch Changes
