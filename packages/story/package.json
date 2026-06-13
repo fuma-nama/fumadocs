@@ -44,7 +44,7 @@
   },
   "devDependencies": {
     "@fastify/deepmerge": "^3.2.1",
-    "@types/node": "25.9.2",
+    "@types/node": "25.9.3",
     "@types/react": "^19.2.17",
     "@types/ungap__structured-clone": "^1.2.0",
     "@ungap/structured-clone": "^1.3.1",

@@ -8,7 +8,7 @@
   },
   "devDependencies": {
     "@fumadocs/cli": "workspace:*",
-    "@types/node": "^25.9.2",
+    "@types/node": "^25.9.3",
     "fuma-translate": "^1.0.2",
     "tsconfig": "workspace:*"
   }

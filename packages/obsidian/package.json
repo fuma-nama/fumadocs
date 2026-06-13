@@ -59,7 +59,7 @@
     "@types/estree": "^1.0.9",
     "@types/js-yaml": "^4.0.9",
     "@types/mdast": "^4.0.4",
-    "@types/node": "25.9.2",
+    "@types/node": "25.9.3",
     "@types/react": "^19.2.17",
     "@types/react-dom": "^19.2.3",
     "fumadocs-core": "workspace:*",

@@ -106,7 +106,6 @@
     "types:check": "tsc --noEmit"
   },
   "dependencies": {
-    "@fuma-translate/react": "^1.0.2",
     "@orama/orama": "^3.1.18",
     "estree-util-value-to-estree": "^3.5.0",
     "github-slugger": "^2.0.0",
@@ -138,10 +137,10 @@
     "@types/js-yaml": "^4.0.9",
     "@types/mdast": "^4.0.4",
     "@types/negotiator": "^0.6.4",
-    "@types/node": "25.9.2",
+    "@types/node": "25.9.3",
     "@types/react": "^19.2.17",
     "@types/react-dom": "^19.2.3",
-    "algoliasearch": "5.53.0",
+    "algoliasearch": "5.54.0",
     "flexsearch": "^0.8.212",
     "image-size": "^2.0.2",
     "lucide-react": "^1.17.0",
