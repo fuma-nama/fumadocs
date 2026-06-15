@@ -1,5 +1,12 @@
 # @fumadocs/base-ui
 
+## 16.10.3
+
+### Patch Changes
+
+- 5499f59: type-safe provider props
+  - fumadocs-core@16.10.3
+
 ## 16.10.2
 
 ### Patch Changes
