@@ -23,6 +23,9 @@ importers:
       rimraf:
         specifier: ^6.1.3
         version: 6.1.3
+      tegami:
+        specifier: 0.1.0-beta.0
+        version: 0.1.0-beta.0
       turbo:
         specifier: 2.9.18
         version: 2.9.18
@@ -14648,6 +14651,9 @@ packages:
   teex@1.0.1:
     resolution: {integrity: sha512-eYE6iEI62Ni1H8oIa7KlDU6uQBtqr4Eajni3wX7rpfXD8ysFx8z0+dri+KWEPWpBsxXfxu58x/0jvTVT1ekOSg==}
 
+  tegami@0.1.0-beta.0:
+    resolution: {integrity: sha512-A0mJfmuWvAvy9w6CXj36Gza+xac8YLwHo5YIKMnWKdiOu81CN5GEYgGJidcinznhaaCqyMtpsKX541ijcwTuKQ==}
+
   term-size@2.2.1:
     resolution: {integrity: sha512-wK0Ri4fOGjv/XPy8SBHZChl8CM7uMc5VML7SqiQ0zG7+J5Vr+RMQDoHa2CNT6KHUnTGIXH34UDMkPzAUyapBZg==}
     engines: {node: '>=8'}
@@ -28343,6 +28349,22 @@ snapshots:
     transitivePeerDependencies:
       - bare-abort-controller
       - react-native-b4a
+
+  tegami@0.1.0-beta.0:
+    dependencies:
+      '@clack/prompts': 1.5.1
+      commander: 15.0.0
+      js-yaml: 4.2.0
+      mdast-util-from-markdown: 2.0.3
+      mdast-util-to-markdown: 2.1.2
+      package-manager-detector: 1.6.0
+      semver: 7.8.4
+      smol-toml: 1.6.1
+      tinyexec: 1.2.4
+      tinyglobby: 0.2.17
+      zod: 4.4.3
+    transitivePeerDependencies:
+      - supports-color
 
   term-size@2.2.1: {}
 

@@ -6,6 +6,7 @@ packages:
 minimumReleaseAgeExclude:
   - 'fuma-translate'
   - '@fuma-translate/*'
+  - tegami@0.1.0-beta.0
 allowBuilds:
   '@parcel/watcher': false
   core-js: false
