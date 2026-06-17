@@ -1,11 +1,15 @@
 import { tegami } from 'tegami';
 import { createCli } from 'tegami/cli';
 import { github } from 'tegami/plugins/github';
+import { x } from 'tinyexec';
 import { join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { readFileSync, writeFileSync } from 'node:fs';
 
 const paper = tegami({
+  npm: {
+    updateLockFile: true,
+  },
   plugins: [
     github({
       repo: 'fuma-nama/fumadocs',
@@ -21,6 +25,12 @@ const paper = tegami({
         publishPlanApplied() {
           updateStackblitzVersions();
         },
+      },
+      async willPublish({ pkg }) {
+        console.log(`building ${pkg.name}`);
+        await x('pnpm', ['turbo', 'run', 'build', `--filter=${pkg.name}`], {
+          throwOnError: true,
+        });
       },
     },
   ],

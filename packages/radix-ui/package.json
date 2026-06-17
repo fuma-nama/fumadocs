@@ -7,12 +7,12 @@
     "Fumadocs"
   ],
   "homepage": "https://fumadocs.dev",
-  "license": "MIT",
-  "author": "Fuma Nama",
-  "repository": "github:fuma-nama/fumadocs",
   "bugs": {
     "url": "https://github.com/fuma-nama/fumadocs/issues"
   },
+  "license": "MIT",
+  "author": "Fuma Nama",
+  "repository": "github:fuma-nama/fumadocs",
   "files": [
     "css",
     "dist"
