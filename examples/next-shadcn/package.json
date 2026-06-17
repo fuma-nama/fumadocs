@@ -13,7 +13,7 @@
     "fumadocs-core": "workspace:*",
     "fumadocs-mdx": "workspace:*",
     "fumadocs-ui": "workspace:*",
-    "lucide-react": "^1.17.0",
+    "lucide-react": "^1.18.0",
     "next": "16.2.9",
     "react": "^19.2.7",
     "react-day-picker": "^10.0.1",
@@ -21,12 +21,12 @@
     "shadcn": "4.11.0"
   },
   "devDependencies": {
-    "@tailwindcss/postcss": "^4.3.0",
+    "@tailwindcss/postcss": "^4.3.1",
     "@types/mdx": "^2.0.14",
     "@types/react": "^19.2.17",
     "@types/react-dom": "^19.2.3",
     "postcss": "^8.5.15",
-    "tailwindcss": "^4.3.0",
+    "tailwindcss": "^4.3.1",
     "typescript": "^6.0.3"
   }
 }

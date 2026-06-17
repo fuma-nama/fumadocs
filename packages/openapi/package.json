@@ -55,7 +55,7 @@
     "github-slugger": "^2.0.0",
     "hast-util-to-jsx-runtime": "^2.3.6",
     "js-yaml": "^4.2.0",
-    "lucide-react": "^1.17.0",
+    "lucide-react": "^1.18.0",
     "remark": "^15.0.1",
     "remark-rehype": "^11.1.2",
     "shiki": "^4.2.0",
@@ -64,7 +64,7 @@
   "devDependencies": {
     "@scalar/api-client-react": "^2.0.25",
     "@scalar/openapi-upgrader": "^0.2.9",
-    "@tailwindcss/oxide": "^4.3.0",
+    "@tailwindcss/oxide": "^4.3.1",
     "@types/js-yaml": "^4.0.9",
     "@types/node": "25.9.3",
     "@types/react": "^19.2.17",

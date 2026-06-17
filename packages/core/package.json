@@ -127,7 +127,7 @@
   "devDependencies": {
     "@formatjs/intl-localematcher": "^0.8.10",
     "@mdx-js/mdx": "^3.1.1",
-    "@mixedbread/sdk": "0.73.1",
+    "@mixedbread/sdk": "0.74.0",
     "@orama/core": "^1.2.19",
     "@oramacloud/client": "^2.1.4",
     "@shikijs/transformers": "^4.2.0",
@@ -140,10 +140,10 @@
     "@types/node": "25.9.3",
     "@types/react": "^19.2.17",
     "@types/react-dom": "^19.2.3",
-    "algoliasearch": "5.54.0",
+    "algoliasearch": "5.54.1",
     "flexsearch": "^0.8.212",
     "image-size": "^2.0.2",
-    "lucide-react": "^1.17.0",
+    "lucide-react": "^1.18.0",
     "negotiator": "^1.0.0",
     "next": "16.2.9",
     "npm-to-yarn": "^3.0.1",
@@ -155,7 +155,7 @@
     "tsconfig": "workspace:*",
     "tsdown": "0.22.2",
     "typescript": "^6.0.3",
-    "waku": "1.0.0-beta.2",
+    "waku": "1.0.0-beta.3",
     "zod": "4.4.3"
   },
   "peerDependencies": {

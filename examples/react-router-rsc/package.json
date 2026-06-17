@@ -14,21 +14,21 @@
     "fumadocs-core": "workspace:*",
     "fumadocs-mdx": "workspace:*",
     "fumadocs-ui": "workspace:*",
-    "isbot": "^5.1.42",
+    "isbot": "^5.1.43",
     "react": "^19.2.7",
     "react-dom": "^19.2.7",
     "react-router": "^7.17.0"
   },
   "devDependencies": {
     "@react-router/dev": "^7.17.0",
-    "@tailwindcss/vite": "^4.3.0",
+    "@tailwindcss/vite": "^4.3.1",
     "@types/mdx": "^2.0.14",
     "@types/node": "^25.9.3",
     "@types/react": "^19.2.17",
     "@types/react-dom": "^19.2.3",
     "@vitejs/plugin-rsc": "^0.5.27",
     "react-router-devtools": "^6.2.1",
-    "tailwindcss": "^4.3.0",
+    "tailwindcss": "^4.3.1",
     "typescript": "^6.0.3",
     "vite": "^8.0.16"
   }
