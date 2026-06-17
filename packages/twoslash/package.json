@@ -60,7 +60,7 @@
     "fumadocs-ui": "workspace:*",
     "shiki": "4.2.0",
     "tsconfig": "workspace:*",
-    "tsdown": "0.22.2",
+    "tsdown": "0.22.3",
     "typescript": "^6.0.3"
   },
   "peerDependencies": {

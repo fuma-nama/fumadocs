@@ -14,7 +14,7 @@
     "fumadocs-core": "workspace:*",
     "fumadocs-mdx": "workspace:*",
     "fumadocs-ui": "workspace:*",
-    "lucide-react": "^1.18.0",
+    "lucide-react": "^1.20.0",
     "react": "^19.2.7",
     "react-dom": "^19.2.7",
     "react-server-dom-webpack": "^19.2.7",

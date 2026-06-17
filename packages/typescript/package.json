@@ -59,7 +59,7 @@
     "fumadocs-ui": "workspace:*",
     "mdast-util-mdx": "^3.0.0",
     "tsconfig": "workspace:*",
-    "tsdown": "0.22.2",
+    "tsdown": "0.22.3",
     "typescript": "^6.0.3",
     "vfile": "^6.0.3"
   },

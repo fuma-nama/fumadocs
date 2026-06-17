@@ -68,7 +68,7 @@
     "react": "^19.2.7",
     "react-dom": "^19.2.7",
     "tsconfig": "workspace:*",
-    "tsdown": "0.22.2",
+    "tsdown": "0.22.3",
     "unified": "^11.0.5",
     "vite": "^8.0.16"
   },

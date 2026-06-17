@@ -7,9 +7,6 @@ const getUrl = createGetUrl('/docs');
 
 export default {
   ssr: true,
-  future: {
-    v8_middleware: true,
-  },
   async prerender({ getStaticPaths }) {
     const paths: string[] = [];
     const excluded: string[] = ['/api/search'];

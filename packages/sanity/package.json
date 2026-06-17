@@ -34,7 +34,7 @@
   },
   "devDependencies": {
     "@sanity/client": "^7.22.1",
-    "@sanity/types": "^6.0.0",
+    "@sanity/types": "^6.1.0",
     "@types/node": "25.9.3",
     "@types/react": "^19.2.17",
     "fuma-cli": "^0.1.1",
@@ -42,9 +42,9 @@
     "fumadocs-ui": "workspace:*",
     "next-sanity": "^13.1.0",
     "react": "^19.2.7",
-    "sanity": "^6.0.0",
+    "sanity": "^6.1.0",
     "tsconfig": "workspace:*",
-    "tsdown": "0.22.2",
+    "tsdown": "0.22.3",
     "typescript": "^6.0.3"
   },
   "peerDependencies": {

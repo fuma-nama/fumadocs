@@ -18,7 +18,7 @@
     "fumadocs-mdx": "workspace:*",
     "fumadocs-openapi": "workspace:*",
     "fumadocs-ui": "workspace:*",
-    "lucide-react": "^1.18.0",
+    "lucide-react": "^1.20.0",
     "react": "^19.2.7",
     "react-dom": "^19.2.7",
     "shiki": "^4.2.0",

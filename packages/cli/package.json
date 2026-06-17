@@ -43,6 +43,6 @@
   "devDependencies": {
     "@types/node": "25.9.3",
     "tsconfig": "workspace:*",
-    "tsdown": "0.22.2"
+    "tsdown": "0.22.3"
   }
 }

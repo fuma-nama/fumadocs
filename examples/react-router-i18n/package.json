@@ -15,18 +15,18 @@
   "dependencies": {
     "@fumadocs/language": "workspace:*",
     "@orama/tokenizers": "^3.1.18",
-    "@react-router/node": "^7.17.0",
-    "@react-router/serve": "^7.17.0",
+    "@react-router/node": "^8.0.0",
+    "@react-router/serve": "^8.0.0",
     "fumadocs-core": "workspace:*",
     "fumadocs-mdx": "workspace:*",
     "fumadocs-ui": "workspace:*",
     "isbot": "^5.1.43",
     "react": "^19.2.7",
     "react-dom": "^19.2.7",
-    "react-router": "^7.17.0"
+    "react-router": "^8.0.0"
   },
   "devDependencies": {
-    "@react-router/dev": "^7.17.0",
+    "@react-router/dev": "^8.0.0",
     "@tailwindcss/vite": "^4.3.1",
     "@types/mdx": "^2.0.14",
     "@types/node": "^25.9.3",

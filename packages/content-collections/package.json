@@ -47,7 +47,7 @@
     "@types/node": "25.9.3",
     "fumadocs-core": "workspace:*",
     "tsconfig": "workspace:*",
-    "tsdown": "0.22.2"
+    "tsdown": "0.22.3"
   },
   "peerDependencies": {
     "@content-collections/core": "0.x.x",

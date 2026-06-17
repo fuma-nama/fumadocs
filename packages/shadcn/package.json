@@ -43,7 +43,7 @@
     "shadcn": "^4.11.0",
     "tailwindcss": "^4.3.1",
     "tsconfig": "workspace:*",
-    "tsdown": "0.22.2"
+    "tsdown": "0.22.3"
   },
   "peerDependencies": {
     "@types/react": "*",

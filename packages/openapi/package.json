@@ -55,7 +55,7 @@
     "github-slugger": "^2.0.0",
     "hast-util-to-jsx-runtime": "^2.3.6",
     "js-yaml": "^4.2.0",
-    "lucide-react": "^1.18.0",
+    "lucide-react": "^1.20.0",
     "remark": "^15.0.1",
     "remark-rehype": "^11.1.2",
     "shiki": "^4.2.0",
@@ -73,7 +73,7 @@
     "fumadocs-ui": "workspace:*",
     "json-schema-typed": "^8.0.2",
     "tsconfig": "workspace:*",
-    "tsdown": "0.22.2",
+    "tsdown": "0.22.3",
     "xml-js": "^1.6.11"
   },
   "peerDependencies": {
