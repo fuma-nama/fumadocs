@@ -11,14 +11,13 @@
     "lint": "turbo run lint",
     "lint:format": "oxfmt --check",
     "format": "oxfmt",
-    "release": "turbo run build --filter=./packages/* && changeset publish",
+    "release": "turbo run build --filter=./packages/* && pnpm tegami publish",
     "test": "vitest",
     "tegami": "node tegami.ts",
     "types:check": "turbo run types:check --continue",
-    "version": "changeset version && node scripts/update-stackblitz-versions.mjs && pnpm install --lockfile-only"
+    "version": "pnpm tegami version && pnpm install --lockfile-only"
   },
   "devDependencies": {
-    "@changesets/cli": "^2.31.0",
     "concurrently": "^10.0.3",
     "oxfmt": "^0.55.0",
     "oxlint": "^1.70.0",

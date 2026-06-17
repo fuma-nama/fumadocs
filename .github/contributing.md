@@ -8,6 +8,8 @@ Before submitting a pull request, there are some guidelines you should notice.
 This project is a monorepo using Turborepo, pnpm and
 [Changesets](https://github.com/changesets/changesets).
 
+<!-- TODO: update this, will be using Tegami instead -->
+
 #### Before Submitting
 
 - Check if there's other similar PRs.

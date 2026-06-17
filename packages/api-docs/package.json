@@ -95,7 +95,7 @@
     }
   },
   "inlinedDependencies": {
-    "@apidevtools/json-schema-ref-parser": "15.3.5",
+    "@apidevtools/json-schema-ref-parser": "15.3.6",
     "@fastify/deepmerge": "3.2.1",
     "ajv": "8.20.0",
     "fast-deep-equal": "3.1.3",

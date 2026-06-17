@@ -48,7 +48,7 @@
   "inlinedDependencies": {
     "@fastify/deepmerge": "3.2.1",
     "cssesc": "3.0.0",
-    "postcss-selector-parser": "7.1.2",
+    "postcss-selector-parser": "7.1.4",
     "util-deprecate": "1.0.2"
   }
 }
