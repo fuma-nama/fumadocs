@@ -1,3 +1,9 @@
+## fumadocs-core@16.10.4
+
+### React Router v8 support
+
+The peer dependencies now include v8, note that previous versions can also work with v8 seamlessly, this is only updating the peer dependency range.
+
 # fumadocs-core
 
 ## 16.10.3
