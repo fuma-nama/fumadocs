@@ -172,8 +172,8 @@ export function ViewOptionsPopover({
       {
         title: t('Open in ChatGPT'),
         href: `https://chatgpt.com/?${new URLSearchParams({
+          prompt: q,
           hints: 'search',
-          q,
         })}`,
         icon: (
           <svg
