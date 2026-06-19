@@ -62,7 +62,7 @@ void createCli(paper).parseAsync();
  */
 function updateStackblitzVersions() {
   console.log('updating StackBlitz versions');
-  const root = join(dirname(fileURLToPath(import.meta.url)), '..');
+  const root = dirname(fileURLToPath(import.meta.url));
 
   const packageDirs = {
     'fumadocs-core': 'packages/core',
