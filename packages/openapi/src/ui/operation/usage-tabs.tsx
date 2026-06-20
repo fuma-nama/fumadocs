@@ -110,8 +110,8 @@ function UsageTabsSelector() {
   function renderItem(item: ExampleRequestItem) {
     return (
       <div>
-        <span className="font-medium text-sm">{item.name}</span>
-        <span className="text-fd-muted-foreground">{item.description}</span>
+        <p className="font-medium text-sm">{item.name}</p>
+        <p className="text-fd-muted-foreground">{item.description}</p>
       </div>
     );
   }
@@ -121,7 +121,7 @@ function UsageTabsSelector() {
   return (
     <Select value={key} onValueChange={setKey}>
       <SelectTrigger className="not-prose mb-2">
-        {selected && <SelectValue asChild>{renderItem(selected)}</SelectValue>}
+        {selected && <SelectValue>{renderItem(selected)}</SelectValue>}
       </SelectTrigger>
       <SelectContent>
         {examples.map((item) => (
