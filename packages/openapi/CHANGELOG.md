@@ -1,3 +1,13 @@
+## fumadocs-openapi@11.0.3
+
+### Fix style warning in usage tabs
+
+
+
+### Fix TypeScript definitions name
+
+The type name now reflect on the actual meaning.
+
 # @fuma-docs/openapi
 
 ## 11.0.2
