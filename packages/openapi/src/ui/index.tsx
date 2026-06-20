@@ -23,6 +23,7 @@ import type { ParsedSchema } from '@/utils/schema';
 import { createOpenAPIPageBase } from './base';
 
 export interface GenerateTypeScriptDefinitionsContext {
+  name: string;
   readOnly: boolean;
   writeOnly: boolean;
   ctx: RenderContext;

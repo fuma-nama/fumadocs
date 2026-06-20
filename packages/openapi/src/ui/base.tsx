@@ -45,7 +45,7 @@ export function createOpenAPIPageBase({
 
     try {
       return compile(schema, {
-        name: 'Response',
+        name: ctx.name,
         readOnly: ctx.readOnly,
         writeOnly: ctx.writeOnly,
         getSchemaId: ctx.ctx.schema.getRawRef,

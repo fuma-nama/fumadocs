@@ -457,6 +457,7 @@ function RequestBodyContentItem({
   let ts = useMemo(() => {
     if (!content.schema || !ctx.generateTypeScriptDefinitions) return;
     return ctx.generateTypeScriptDefinitions(content.schema, {
+      name: 'RequestBody',
       readOnly: false,
       writeOnly: true,
       ctx,
@@ -534,6 +535,7 @@ function RepsonseAccordionItem({ item: { schema } }: { item: NoReference<MediaTy
   let ts = useMemo(() => {
     if (!schema || !ctx.generateTypeScriptDefinitions) return;
     return ctx.generateTypeScriptDefinitions(schema, {
+      name: 'ResponseBody',
       readOnly: true,
       writeOnly: false,
       ctx,
