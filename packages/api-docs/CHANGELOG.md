@@ -1,3 +1,9 @@
+## @fumadocs/api-docs@0.0.3
+
+### Improve Schema UI tag rendering
+
+Change behaviour for multi-line value in schema tags.
+
 # @fumadocs/api-docs
 
 ## 0.0.2

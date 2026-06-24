@@ -1,3 +1,9 @@
+## fumadocs-openapi@11.0.4
+
+### Improve Schema UI tag rendering
+
+Change behaviour for multi-line value in schema tags.
+
 ## fumadocs-openapi@11.0.3
 
 ### Fix style warning in usage tabs
