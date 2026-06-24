@@ -16,7 +16,6 @@ import {
 } from 'react';
 import { useTranslations } from '@fuma-translate/react';
 import type {
-  InfoTag,
   SchemaData,
   SchemaDataObjectProperty,
   SchemaUIGeneratedData,
@@ -191,7 +190,7 @@ function SchemaDescription({ schema, ...props }: ComponentProps<'div'> & { schem
       {schema.infoTags && schema.infoTags.length > 0 && (
         <div className="flex flex-row gap-2 flex-wrap mt-2 not-prose empty:hidden">
           {schema.infoTags.map((tag, i) => (
-            <InfoTag key={i} tag={tag} />
+            <Fragment key={i}>{tag.node}</Fragment>
           ))}
         </div>
       )}
@@ -462,26 +461,21 @@ function ObjectSearchContent({
   return filtered.map(render);
 }
 
-function InfoTag({ tag }: { tag: InfoTag }) {
-  const ref = useRef<HTMLElement>(null);
-  const [open, setOpen] = useState(false);
-
+export function InlineTag({ label, children }: { label: ReactNode; children: ReactNode }) {
   return (
-    <button
-      className="inline-flex text-start items-start gap-2 bg-fd-secondary border rounded-lg text-xs p-1.5 shadow-md max-w-full"
-      onClick={() => setOpen((prev) => !prev)}
-    >
-      <span className="font-medium">{tag.label}</span>
-      <code
-        ref={ref}
-        className={cn(
-          'min-w-0 flex-1 text-fd-muted-foreground',
-          open ? 'wrap-break-word' : 'truncate',
-        )}
-      >
-        {tag.value}
-      </code>
-    </button>
+    <div className="inline-flex gap-2 bg-fd-secondary border rounded-lg text-xs p-1.5 shadow-md max-w-full">
+      <span className="font-medium">{label}</span>
+      <code className="min-w-0 flex-1 text-fd-muted-foreground wrap-break-word">{children}</code>
+    </div>
+  );
+}
+
+export function BlockTag({ label, children }: { label: ReactNode; children: ReactNode }) {
+  return (
+    <div className="flex flex-col w-full gap-2 bg-fd-secondary border rounded-lg p-1.5 shadow-md">
+      <p className="font-medium text-xs">{label}</p>
+      {children}
+    </div>
   );
 }
 

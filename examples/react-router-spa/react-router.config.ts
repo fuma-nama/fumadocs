@@ -6,9 +6,6 @@ const getUrl = createGetUrl('/docs');
 
 export default {
   ssr: false,
-  future: {
-    v8_middleware: true,
-  },
   async prerender({ getStaticPaths }) {
     const paths: string[] = [];
     const excluded: string[] = [];

@@ -1,6 +1,6 @@
 {
   "name": "fumadocs-core",
-  "version": "16.10.2",
+  "version": "16.10.5",
   "description": "The React.js library for building a documentation website",
   "keywords": [
     "Docs",
@@ -106,7 +106,6 @@
     "types:check": "tsc --noEmit"
   },
   "dependencies": {
-    "@fuma-translate/react": "^1.0.2",
     "@orama/orama": "^3.1.18",
     "estree-util-value-to-estree": "^3.5.0",
     "github-slugger": "^2.0.0",
@@ -128,7 +127,7 @@
   "devDependencies": {
     "@formatjs/intl-localematcher": "^0.8.10",
     "@mdx-js/mdx": "^3.1.1",
-    "@mixedbread/sdk": "0.73.1",
+    "@mixedbread/sdk": "0.74.0",
     "@orama/core": "^1.2.19",
     "@oramacloud/client": "^2.1.4",
     "@shikijs/transformers": "^4.2.0",
@@ -138,25 +137,25 @@
     "@types/js-yaml": "^4.0.9",
     "@types/mdast": "^4.0.4",
     "@types/negotiator": "^0.6.4",
-    "@types/node": "25.9.2",
+    "@types/node": "25.9.3",
     "@types/react": "^19.2.17",
     "@types/react-dom": "^19.2.3",
-    "algoliasearch": "5.53.0",
+    "algoliasearch": "5.55.0",
     "flexsearch": "^0.8.212",
     "image-size": "^2.0.2",
-    "lucide-react": "^1.17.0",
+    "lucide-react": "^1.20.0",
     "negotiator": "^1.0.0",
     "next": "16.2.9",
     "npm-to-yarn": "^3.0.1",
     "path-to-regexp": "^8.4.2",
-    "react-router": "7.17.0",
+    "react-router": "8.0.0",
     "remark-directive": "^4.0.0",
     "remark-mdx": "^3.1.1",
     "remove-markdown": "^0.6.4",
     "tsconfig": "workspace:*",
-    "tsdown": "0.22.2",
+    "tsdown": "0.22.3",
     "typescript": "^6.0.3",
-    "waku": "1.0.0-beta.2",
+    "waku": "1.0.0-beta.3",
     "zod": "4.4.3"
   },
   "peerDependencies": {
@@ -175,7 +174,7 @@
     "next": "16.x.x",
     "react": "^19.2.0",
     "react-dom": "^19.2.0",
-    "react-router": "7.x.x",
+    "react-router": "7.x.x || 8.x.x",
     "waku": "*",
     "zod": "4.x.x"
   },

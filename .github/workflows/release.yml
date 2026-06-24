@@ -29,9 +29,7 @@ jobs:
       - name: Install Dependencies
         run: pnpm i --frozen-lockfile
 
-      - name: Create Release Pull Request or Publish to npm
-        id: changesets
-        uses: changesets/action@v1
-        with:
-          publish: pnpm run release
-          version: pnpm run version
+      - name: Version & Publish Packages
+        run: pnpm tegami ci
+        env:
+          GITHUB_TOKEN: ${{ github.token }}

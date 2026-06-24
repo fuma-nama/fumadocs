@@ -1,8 +1,8 @@
 'use client';
 
-import { useDocsSearch } from 'fumadocs-core/search/client';
+import { SearchClient, useDocsSearch } from 'fumadocs-core/search/client';
 import { fetchClient } from 'fumadocs-core/search/client/fetch';
-import { type ReactNode, useMemo, useState } from 'react';
+import { type ReactNode, use, useMemo, useState } from 'react';
 import { useOnChange } from 'fumadocs-core/utils/use-on-change';
 import { useI18n } from '@/contexts/i18n';
 import {
@@ -23,6 +23,9 @@ import type { SortedResult } from 'fumadocs-core/search';
 import type { SearchLink, TagItem } from '@/contexts/search';
 
 export interface DefaultSearchDialogProps extends SharedProps {
+  /** @deprecated re-create the dialog instead for other clients, see https://fumadocs.dev/docs/search/orama */
+  type?: 'static';
+
   links?: SearchLink[];
 
   defaultTag?: string;
@@ -48,7 +51,10 @@ export interface DefaultSearchDialogProps extends SharedProps {
   allowClear?: boolean;
 }
 
+let STATIC: Promise<typeof import('fumadocs-core/search/client/orama-static')> | undefined;
+
 export default function DefaultSearchDialog({
+  type,
   defaultTag,
   tags = [],
   api,
@@ -60,14 +66,27 @@ export default function DefaultSearchDialog({
 }: DefaultSearchDialogProps) {
   const { locale } = useI18n();
   const [tag, setTag] = useState(defaultTag);
-  const { search, setSearch, query } = useDocsSearch({
-    client: fetchClient({
+  let client: SearchClient;
+
+  if (type === 'static') {
+    // TODO: must remove it on next major, currently, this will bundle the Orama client unnecessarily
+
+    client = use((STATIC ??= import('fumadocs-core/search/client/orama-static'))).oramaStaticClient(
+      {
+        from: api,
+        locale,
+        tag,
+      },
+    );
+  } else {
+    client = fetchClient({
       api,
       locale,
       tag,
-    }),
-    delayMs,
-  });
+    });
+  }
+
+  const { search, setSearch, query } = useDocsSearch({ client, delayMs });
   const defaultItems = useMemo<SortedResult[] | null>(() => {
     if (links.length === 0) return null;
     return links.map(([name, link]) => ({

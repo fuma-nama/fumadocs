@@ -1,4 +1,5 @@
 'use client';
+import type { DefaultSearchDialogProps } from '@/components/dialog/search-default';
 import {
   type ComponentType,
   createContext,
@@ -33,7 +34,7 @@ export interface TagItem {
   value: string;
 }
 
-export interface SearchProviderProps {
+export interface SearchProviderProps<DialogProps extends SharedProps = DefaultSearchDialogProps> {
   /**
    * Preload search dialog before opening it
    *
@@ -58,12 +59,12 @@ export interface SearchProviderProps {
    *
    * It receives the `open` and `onOpenChange` prop, can be lazy loaded with `React.lazy()`
    */
-  SearchDialog?: ComponentType<SharedProps>;
+  SearchDialog?: ComponentType<DialogProps>;
 
   /**
    * Additional props to the dialog
    */
-  options?: Partial<SharedProps & Record<string, unknown>>;
+  options?: Partial<DialogProps>;
 
   children?: ReactNode;
 }
@@ -109,14 +110,14 @@ const DEFAULT_HOT_KEYS: HotKey[] = [
 
 const DefaultSearchDialog = lazy(() => import('@/components/dialog/search-default'));
 
-export function SearchProvider({
+export function SearchProvider<DialogProps extends SharedProps = DefaultSearchDialogProps>({
   SearchDialog = DefaultSearchDialog,
   children,
   preload = true,
   options,
   hotKey = DEFAULT_HOT_KEYS,
   links,
-}: SearchProviderProps) {
+}: SearchProviderProps<DialogProps>) {
   const [isOpen, setIsOpen] = useState(preload ? false : undefined);
   const onKeyDown = useEffectEvent((e: KeyboardEvent) => {
     if (hotKey.every((v) => (typeof v.key === 'string' ? e.key === v.key : v.key(e)))) {
@@ -146,13 +147,8 @@ export function SearchProvider({
     >
       <Suspense fallback={null}>
         {isOpen !== undefined && (
-          <SearchDialog
-            open={isOpen}
-            onOpenChange={setIsOpen}
-            // @ts-expect-error -- insert prop for official UIs
-            links={links}
-            {...options}
-          />
+          // @ts-expect-error -- assume all required props are filled
+          <SearchDialog open={isOpen} onOpenChange={setIsOpen} links={links} {...options} />
         )}
       </Suspense>
 

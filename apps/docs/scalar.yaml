@@ -1296,7 +1296,8 @@ components:
         type:
           type: string
           examples:
-            - https://example.com/errors/bad-request
+            - en: { title: 'Hello', body: 'Welcome aboard' }
+              fr: { title: 'Bonjour', body: 'Bienvenue à bord' }
         title:
           type: string
           examples:

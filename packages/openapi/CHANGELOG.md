@@ -1,3 +1,19 @@
+## fumadocs-openapi@11.0.4
+
+### Improve Schema UI tag rendering
+
+Change behaviour for multi-line value in schema tags.
+
+## fumadocs-openapi@11.0.3
+
+### Fix style warning in usage tabs
+
+
+
+### Fix TypeScript definitions name
+
+The type name now reflect on the actual meaning.
+
 # @fuma-docs/openapi
 
 ## 11.0.2

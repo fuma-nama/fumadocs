@@ -75,7 +75,7 @@ export const Route = createFileRoute('/api/proxy')({
   server: {
     handlers: {
       // Handles all methods by default, or specify individual methods (GET, POST, etc.)
-      '*': async ({ request }) => {
+      ANY: async ({ request }) => {
         return proxy.handle(request);
       },
     },

@@ -1,4 +1,17 @@
+## @fumadocs/base-ui@16.10.5
+
+### Fix "Open in ChatGPT" page action URL
+
+ChatGPT now uses the `prompt` query parameter (it redirects `q` to `prompt`), so the page action link is built as `https://chatgpt.com/?prompt=...&hints=search` to open reliably.
+
 # @fumadocs/base-ui
+
+## 16.10.3
+
+### Patch Changes
+
+- 5499f59: type-safe provider props
+  - fumadocs-core@16.10.3
 
 ## 16.10.2
 

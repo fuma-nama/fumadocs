@@ -36,6 +36,16 @@ export function schemaToString(
     if (schema === true) return 'any';
     else if (schema === false) return 'never';
 
+    if (schema.enum?.length === 1) {
+      switch (typeof schema.enum[0]) {
+        case 'bigint':
+        case 'boolean':
+        case 'number':
+        case 'string':
+          return JSON.stringify(schema.enum[0]);
+      }
+    }
+
     if ((flags & FormatFlags.UseAlias) === FormatFlags.UseAlias) {
       if (schema.title) return schema.title;
 

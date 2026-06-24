@@ -2,14 +2,11 @@
 
 import type { ReactNode } from 'react';
 import { DirectionProvider } from '@base-ui/react/direction-provider';
-import type { DefaultSearchDialogProps } from '@/components/dialog/search-default';
 import { ThemeProvider, type ThemeProviderProps } from 'next-themes';
 import { I18nProvider, type I18nProviderProps } from '@/contexts/i18n';
 import { SearchProvider, type SearchProviderProps } from '@/contexts/search';
 
 interface SearchOptions extends Omit<SearchProviderProps, 'children'> {
-  options?: Partial<DefaultSearchDialogProps>;
-
   /**
    * Enable search functionality
    *
