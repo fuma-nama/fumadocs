@@ -14,6 +14,9 @@ test('double-oneOf in allOf does not crash', async () => {
     renderMarkdown(md) {
       return md;
     },
+    renderCodeblock() {
+      return null;
+    },
     resolver: (s) => ({
       dereferenced: s,
       $ref: typeof s === 'object' ? parsed.getRawRef(s) : undefined,
@@ -32,6 +35,9 @@ test('test', async () => {
     root: (parsed.dereferenced as any).components!.schemas!.V1KeysVerifyKeyResponse,
     renderMarkdown(md) {
       return md;
+    },
+    renderCodeblock() {
+      return null;
     },
     resolver: (s) => ({
       dereferenced: s,

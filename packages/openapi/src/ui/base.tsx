@@ -28,7 +28,7 @@ import type { ShikiFactory } from 'fumadocs-core/highlight/shiki';
 import type { GeneratedPageProps } from '@/utils/pages/builder';
 import type { ParsedSchema } from '@/utils/schema';
 import { Markdown } from './components/markdown';
-import { Schema } from '@fumadocs/api-docs/components/schema';
+import { Schema, type SchemaUIOptions } from '@fumadocs/api-docs/components/schema';
 import { RenderContextProvider } from './contexts/api';
 import type { CreateOpenAPIPageOptions, OpenAPIPageProps } from '.';
 
@@ -97,16 +97,21 @@ export function createOpenAPIPageBase({
     const processed = useMemo(() => dereferenceBundledDocument(doc), [doc]);
 
     const ctx: RenderContext = useMemo(() => {
-      function renderMarkdown(md: string) {
-        return <Markdown md={md} />;
-      }
-      function resolver(v: ParsedSchema) {
-        // we will only pass dereferenced schema to schema UI
-        return {
-          dereferenced: v,
-          $ref: typeof v === 'object' ? processed.getRawRef(v) : undefined,
-        };
-      }
+      const schemaUIShared = {
+        renderCodeblock(opts) {
+          return <ClientCodeBlock {...opts} />;
+        },
+        renderMarkdown(md) {
+          return <Markdown md={md} />;
+        },
+        resolver(v: ParsedSchema) {
+          // we will only pass dereferenced schema to schema UI
+          return {
+            dereferenced: v,
+            $ref: typeof v === 'object' ? processed.getRawRef(v) : undefined,
+          };
+        },
+      } satisfies Partial<SchemaUIOptions>;
 
       return {
         schema: processed,
@@ -119,10 +124,9 @@ export function createOpenAPIPageBase({
           if (schemaUIOptions?.render) return schemaUIOptions.render(props, ctx);
           return (
             <Schema
+              {...schemaUIShared}
               {...props}
               showExample={props.showExample ?? schemaUIOptions?.showExample}
-              resolver={resolver}
-              renderMarkdown={renderMarkdown}
             />
           );
         },

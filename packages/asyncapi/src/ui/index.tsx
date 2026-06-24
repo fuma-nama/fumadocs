@@ -26,7 +26,7 @@ import type { CodeToHastOptionsCommon, CodeOptionsThemes, BundledTheme } from 's
 import type { GeneratedPageProps, OperationItem } from '@/utils/pages/builder';
 import { ParsedSchema } from '@/utils/schema';
 import { Markdown } from './components/markdown';
-import { Schema } from '@fumadocs/api-docs/components/schema';
+import { Schema, type SchemaUIOptions } from '@fumadocs/api-docs/components/schema';
 import { RenderContextProvider } from './contexts/api';
 import type { NoReference } from '@fumadocs/api-docs/schema';
 import type { ExampleMessageItem } from '@/utils/get-example-messages';
@@ -176,15 +176,20 @@ export function createAsyncAPIPage({
     const processed = useMemo(() => dereferenceBundledDocument(doc), [doc]);
 
     const ctx: RenderContext = useMemo(() => {
-      function renderMarkdown(md: string) {
-        return <Markdown md={md} />;
-      }
-      function resolver(v: ParsedSchema) {
-        return {
-          dereferenced: v,
-          $ref: typeof v === 'object' ? processed.getRawRef(v) : undefined,
-        };
-      }
+      const schemaUIShared = {
+        resolver(v: ParsedSchema) {
+          return {
+            dereferenced: v,
+            $ref: typeof v === 'object' ? processed.getRawRef(v) : undefined,
+          };
+        },
+        renderMarkdown(md: string) {
+          return <Markdown md={md} />;
+        },
+        renderCodeblock(opts) {
+          return <ClientCodeBlock {...opts} />;
+        },
+      } satisfies Partial<SchemaUIOptions>;
 
       return {
         schema: processed,
@@ -195,10 +200,9 @@ export function createAsyncAPIPage({
           if (schemaUIOptions?.render) return schemaUIOptions.render(props, ctx);
           return (
             <Schema
+              {...schemaUIShared}
               {...props}
               showExample={props.showExample ?? schemaUIOptions?.showExample}
-              resolver={resolver}
-              renderMarkdown={renderMarkdown}
             />
           );
         },

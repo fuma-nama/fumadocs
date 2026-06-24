@@ -44,7 +44,7 @@ export interface RenderContext
    */
   schema: DereferencedDocument;
   _default_processMarkdown: (md: string) => ReactNode;
-  SchemaUI: FC<Omit<SchemaUIOptions, 'resolver' | 'renderMarkdown'>>;
+  SchemaUI: FC<Omit<SchemaUIOptions, 'resolver' | 'renderMarkdown' | 'renderCodeblock'>>;
 }
 
 export type DistributiveOmit<T, K extends PropertyKey> = T extends unknown ? Omit<T, K> : never;

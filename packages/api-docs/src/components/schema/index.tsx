@@ -3,8 +3,12 @@ import { useMemo, type ReactNode } from 'react';
 import type { ParsedSchema, SchemaResolver } from '@/schema';
 import { FormatFlags, schemaToString } from '@/schema/to-string';
 import { mergeAllOf } from '@/schema/merge';
-import { SchemaUI, type SchemaUIProps } from '@/components/schema/client';
+import { BlockTag, InlineTag, SchemaUI, type SchemaUIProps } from '@/components/schema/client';
 import { fromTranslations, useTranslations } from '@fuma-translate/react';
+
+interface InfoTag {
+  node: ReactNode;
+}
 
 export interface FieldBase {
   description?: ReactNode;
@@ -14,11 +18,6 @@ export interface FieldBase {
   aliasName: string;
 
   deprecated?: boolean;
-}
-
-export interface InfoTag {
-  label: ReactNode;
-  value: string;
 }
 
 export interface SchemaDataObjectProperty {
@@ -63,6 +62,7 @@ export interface SchemaUIOptions {
   client: Omit<SchemaUIProps, 'generated'>;
   resolver: SchemaResolver;
   renderMarkdown: (md: string) => ReactNode;
+  renderCodeblock: (opts: { lang: string; code: string }) => ReactNode;
 
   /**
    * include read only props
@@ -94,6 +94,7 @@ export function Schema({
   resolver,
   showExample,
   renderMarkdown,
+  renderCodeblock,
 }: SchemaUIOptions) {
   const translations = useTranslations().translations;
   const generated = useMemo(() => {
@@ -104,9 +105,19 @@ export function Schema({
       writeOnly,
       showExample,
       renderMarkdown,
+      renderCodeblock,
       translations,
     });
-  }, [root, readOnly, writeOnly, resolver, showExample, renderMarkdown, translations]);
+  }, [
+    root,
+    readOnly,
+    writeOnly,
+    resolver,
+    showExample,
+    renderMarkdown,
+    renderCodeblock,
+    translations,
+  ]);
 
   return <SchemaUI {...client} generated={generated} />;
 }
@@ -115,6 +126,7 @@ export function generateSchemaUI({
   root,
   resolver,
   renderMarkdown,
+  renderCodeblock,
   readOnly = false,
   writeOnly = false,
   showExample = false,
@@ -126,33 +138,24 @@ export function generateSchemaUI({
   const refs: Record<string, SchemaData> = {};
 
   function generateInfoTags(schema: Exclude<ParsedSchema, boolean>) {
-    const fields: InfoTag[] = [];
-
-    if (schema.default !== undefined) {
-      fields.push({
-        label: t('Default'),
-        value: JSON.stringify(schema.default),
-      });
-    }
+    const inlines: InfoTag[] = [];
+    const blocks: InfoTag[] = [];
 
     if (schema.pattern) {
-      fields.push({
-        label: t('Match'),
-        value: schema.pattern,
+      inlines.push({
+        node: <InlineTag label={t('Match')}>{schema.pattern}</InlineTag>,
       });
     }
 
     if (schema.format) {
-      fields.push({
-        label: t('Format'),
-        value: schema.format,
+      inlines.push({
+        node: <InlineTag label={t('Format')}>{schema.format}</InlineTag>,
       });
     }
 
     if (schema.multipleOf) {
-      fields.push({
-        label: t('Multiple Of'),
-        value: schema.multipleOf.toString(),
+      inlines.push({
+        node: <InlineTag label={t('Multiple Of')}>{schema.multipleOf}</InlineTag>,
       });
     }
 
@@ -164,17 +167,15 @@ export function generateSchemaUI({
       schema.exclusiveMaximum,
     );
     if (range) {
-      fields.push({
-        label: t('Range'),
-        value: range,
+      inlines.push({
+        node: <InlineTag label={t('Range')}>{range}</InlineTag>,
       });
     }
 
     range = formatRange('length', schema.minLength, undefined, schema.maxLength, undefined);
     if (range) {
-      fields.push({
-        label: t('Length'),
-        value: range,
+      inlines.push({
+        node: <InlineTag label={t('Length')}>{range}</InlineTag>,
       });
     }
 
@@ -186,37 +187,77 @@ export function generateSchemaUI({
       undefined,
     );
     if (range) {
-      fields.push({
-        label: t('Properties'),
-        value: range,
+      inlines.push({
+        node: <InlineTag label={t('Properties')}>{range}</InlineTag>,
       });
     }
 
     range = formatRange('items', schema.minItems, undefined, schema.maxItems, undefined);
     if (range) {
-      fields.push({
-        label: t('Items'),
-        value: range,
+      inlines.push({
+        node: <InlineTag label={t('Items')}>{range}</InlineTag>,
       });
     }
 
-    if (schema.enum) {
-      fields.push({
-        label: t('Value in'),
-        value: schema.enum.map((value) => JSON.stringify(value)).join(' | '),
+    if (schema.enum && schema.enum.length > 0) {
+      const members = schema.enum.map((value) => JSON.stringify(value, null, 2));
+
+      blocks.push({
+        node: (
+          <BlockTag label={t('Value in')}>
+            <ul>
+              {members.map((m, i) => (
+                <li
+                  key={i}
+                  className="font-mono list-disc list-inside ps-1 marker:text-fd-muted-foreground"
+                >
+                  {m}
+                </li>
+              ))}
+            </ul>
+          </BlockTag>
+        ),
       });
     }
 
-    if (showExample && schema.examples) {
-      for (const example of schema.examples) {
-        fields.push({
-          label: t('Example'),
-          value: JSON.stringify(example, null, 2),
+    if (schema.default !== undefined) {
+      const defaultCode = JSON.stringify(schema.default, null, 2);
+      if (defaultCode.includes('\n')) {
+        blocks.push({
+          node: (
+            <BlockTag label={t('Default')}>
+              {renderCodeblock({ lang: 'json', code: defaultCode })}
+            </BlockTag>
+          ),
+        });
+      } else {
+        inlines.push({
+          node: <InlineTag label={t('Default')}>{defaultCode}</InlineTag>,
         });
       }
     }
 
-    return fields;
+    if (showExample && schema.examples) {
+      for (const example of schema.examples) {
+        const code = JSON.stringify(example, null, 2);
+
+        if (code.includes('\n')) {
+          blocks.push({
+            node: (
+              <BlockTag label={t('Example')}>{renderCodeblock({ lang: 'json', code })}</BlockTag>
+            ),
+          });
+
+          continue;
+        }
+
+        inlines.push({
+          node: <InlineTag label={t('Example')}>{code}</InlineTag>,
+        });
+      }
+    }
+
+    return [...inlines, ...blocks];
   }
 
   let _counter = 0;

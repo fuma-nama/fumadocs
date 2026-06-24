@@ -21,8 +21,8 @@ importers:
         specifier: ^6.1.3
         version: 6.1.3
       tegami:
-        specifier: 0.1.0-beta.2
-        version: 0.1.0-beta.2
+        specifier: ^0.1.4
+        version: 0.1.4
       tinyexec:
         specifier: ^1.2.4
         version: 1.2.4
@@ -7797,6 +7797,9 @@ packages:
   '@radix-ui/rect@1.1.2':
     resolution: {integrity: sha512-xnXE7wG13PI+cxieVssYXlQJuYVRhH9NBoxt3KNwzghDIA69GMm7d4wXRouHIYjE+KvS6U/MsMO73NdS2MH9ZA==}
 
+  '@rainbowatcher/toml-edit-js@0.6.5':
+    resolution: {integrity: sha512-EdALJyTDcp2yOxeVw1OJevOF7NZrlWAbVEnOnQBV7YqycVCI0OcpDy6oLUa8vqSvv2F1RmXW7kz1kgYv2A5h/w==}
+
   '@react-router/dev@7.17.0':
     resolution: {integrity: sha512-+ITMmv/1xUB+QF6ehCCOIVBNBDuKIEE+3JKCt+kTBvxDTk1s49qHbtCA4TzJYge41pNRGtFIiy5VAksLSVJheg==}
     engines: {node: '>=20.0.0'}
@@ -14572,8 +14575,8 @@ packages:
   teex@1.0.1:
     resolution: {integrity: sha512-eYE6iEI62Ni1H8oIa7KlDU6uQBtqr4Eajni3wX7rpfXD8ysFx8z0+dri+KWEPWpBsxXfxu58x/0jvTVT1ekOSg==}
 
-  tegami@0.1.0-beta.2:
-    resolution: {integrity: sha512-mGFB4tBxrIw4dA/2iQ85n9sCB1dMTGPxRGScKnYlG9uMtV0QcOleqQ1qaBMepfgz+86W93BeV1+YJrASvAYHnQ==}
+  tegami@0.1.4:
+    resolution: {integrity: sha512-OQ/VG/qTiNmd0eQ5Qz2E2rHZrccttZ+ttpOdh5o6Dj3XJARjXVBeJ7BiNeehVgNXkYx/tXKaUFqK1hdnfteETA==}
 
   terser-webpack-plugin@5.6.1:
     resolution: {integrity: sha512-201R5j+sJpK8nFWwKVyNfZot8FaJbLZDq5evriVzbV1wDtSXDjRUDRfJzHpAaxFDMEhsZL1QkeqM61wgsS3KaQ==}
@@ -19499,6 +19502,8 @@ snapshots:
       '@types/react-dom': 19.2.3(@types/react@19.2.17)
 
   '@radix-ui/rect@1.1.2': {}
+
+  '@rainbowatcher/toml-edit-js@0.6.5': {}
 
   '@react-router/dev@7.17.0(@react-router/serve@7.17.0(react-router@7.17.0(react-dom@19.2.7(react@19.2.7))(react@19.2.7))(typescript@6.0.3))(@types/node@25.9.3)(@vitejs/plugin-rsc@0.5.27(react-dom@19.2.7(react@19.2.7))(react-server-dom-webpack@19.2.7(react-dom@19.2.7(react@19.2.7))(react@19.2.7)(webpack@5.107.2(esbuild@0.28.1)(lightningcss@1.32.0)(postcss@8.5.15)))(react@19.2.7)(vite@8.0.16(@types/node@25.9.3)(esbuild@0.28.1)(jiti@2.7.0)(terser@5.48.0)(tsx@4.22.4)(yaml@2.9.0)))(jiti@2.7.0)(lightningcss@1.32.0)(react-router@7.17.0(react-dom@19.2.7(react@19.2.7))(react@19.2.7))(react-server-dom-webpack@19.2.7(react-dom@19.2.7(react@19.2.7))(react@19.2.7)(webpack@5.107.2(esbuild@0.28.1)(lightningcss@1.32.0)(postcss@8.5.15)))(terser@5.48.0)(tsx@4.22.4)(typescript@6.0.3)(vite@8.0.16(@types/node@25.9.3)(esbuild@0.28.1)(jiti@2.7.0)(terser@5.48.0)(tsx@4.22.4)(yaml@2.9.0))(yaml@2.9.0)':
     dependencies:
@@ -28061,16 +28066,16 @@ snapshots:
       - bare-abort-controller
       - react-native-b4a
 
-  tegami@0.1.0-beta.2:
+  tegami@0.1.4:
     dependencies:
       '@clack/prompts': 1.5.1
+      '@rainbowatcher/toml-edit-js': 0.6.5
       commander: 15.0.0
       js-yaml: 4.2.0
       mdast-util-from-markdown: 2.0.3
       mdast-util-to-markdown: 2.1.2
       package-manager-detector: 1.6.0
       semver: 7.8.4
-      smol-toml: 1.6.1
       tinyexec: 1.2.4
       tinyglobby: 0.2.17
       zod: 4.4.3

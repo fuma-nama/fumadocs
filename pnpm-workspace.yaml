@@ -6,9 +6,9 @@ packages:
 minimumReleaseAgeExclude:
   - 'fuma-translate'
   - '@fuma-translate/*'
-  - tegami@0.1.0-beta.2
   - react-router
   - '@react-router/*'
+  - tegami@0.1.4
 allowBuilds:
   '@parcel/watcher': false
   core-js: false
