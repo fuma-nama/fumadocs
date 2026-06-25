@@ -1,25 +1,25 @@
-import { createNodeWebSocket, NodeWebSocket } from '@hono/node-ws';
 import adapter from 'waku/adapters/node';
 import { fsRouter } from 'waku/router/server';
 import { startWatcher } from './lib/source/watcher';
 import { getConfigRuntime } from './config/load-runtime';
 import { encodeEvent, WebSocketEvent } from './lib/waku/hot-reload';
 import { filesCache } from './lib/source/storage';
-import { serve } from '@hono/node-server';
 import { getSource } from './lib/source';
+import { WebSocketServer } from 'ws';
+import { serve, upgradeWebSocket } from '@hono/node-server';
 
 const modules = import.meta.glob('./pages/**/*.{ts,tsx,js,jsx}', {
   base: '/src',
 });
 
 const pages = fsRouter(modules);
-let nodeWs: NodeWebSocket | undefined;
+let nodeWs: WebSocketServer | undefined;
 
 const v = adapter(pages, {
   middlewareFns: [
     ({ app }) => {
       if (process.env.HOT_RELOAD === '1') {
-        nodeWs = createNodeWebSocket({ app });
+        nodeWs = new WebSocketServer({ noServer: true });
 
         void initHotReload().catch((e) => {
           console.error(e);
@@ -28,7 +28,7 @@ const v = adapter(pages, {
 
         app.get(
           '/_ws',
-          nodeWs.upgradeWebSocket(() => ({})),
+          upgradeWebSocket(() => ({})),
         );
       }
 
@@ -38,9 +38,18 @@ const v = adapter(pages, {
 });
 
 if ('serve' in v) {
-  v.serve = ((...args) => {
-    const server = serve(...args);
-    nodeWs?.injectWebSocket(server);
+  v.serve = ((opts, listener) => {
+    const server = serve(
+      {
+        ...opts,
+        websocket: nodeWs
+          ? {
+              server: nodeWs,
+            }
+          : undefined,
+      },
+      listener,
+    );
 
     for (const signal of ['SIGTERM', 'SIGINT'])
       process.once(signal, () => {
@@ -54,7 +63,7 @@ if ('serve' in v) {
 export default v;
 
 async function initHotReload() {
-  const wss = nodeWs!.wss;
+  const wss = nodeWs!;
   const watcher = await startWatcher(await getConfigRuntime());
 
   function send(event: WebSocketEvent) {
