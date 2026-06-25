@@ -45,10 +45,10 @@
   "dependencies": {
     "@radix-ui/react-popover": "^1.1.17",
     "@shikijs/twoslash": "^4.2.0",
+    "cnfast": "^0.0.8",
     "mdast-util-from-markdown": "^2.0.3",
     "mdast-util-gfm": "^3.1.0",
     "mdast-util-to-hast": "^13.2.1",
-    "tailwind-merge": "^3.6.0",
     "twoslash": "^0.3.9"
   },
   "devDependencies": {

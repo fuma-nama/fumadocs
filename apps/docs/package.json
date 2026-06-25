@@ -32,6 +32,7 @@
     "@takumi-rs/image-response": "^1.8.7",
     "ai": "^6.0.209",
     "class-variance-authority": "^0.7.1",
+    "cnfast": "^0.0.8",
     "d3-force": "^3.0.0",
     "estree-util-build-jsx": "^3.0.1",
     "estree-util-to-js": "^2.0.0",
@@ -66,7 +67,6 @@
     "remark-mdx": "^3.1.1",
     "remark-rehype": "^11.1.2",
     "shiki": "^4.2.0",
-    "tailwind-merge": "^3.6.0",
     "twoslash": "^0.3.9",
     "unist-util-visit": "^5.1.0",
     "zod": "^4.4.3"

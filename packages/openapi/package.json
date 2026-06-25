@@ -52,14 +52,14 @@
     "@fumari/stf": "workspace:*",
     "chokidar": "^5.0.0",
     "class-variance-authority": "^0.7.1",
+    "cnfast": "^0.0.8",
     "github-slugger": "^2.0.0",
     "hast-util-to-jsx-runtime": "^2.3.6",
     "js-yaml": "^5.1.0",
     "lucide-react": "^1.21.0",
     "remark": "^15.0.1",
     "remark-rehype": "^11.1.2",
-    "shiki": "^4.2.0",
-    "tailwind-merge": "^3.6.0"
+    "shiki": "^4.2.0"
   },
   "devDependencies": {
     "@scalar/api-client-react": "^2.0.27",

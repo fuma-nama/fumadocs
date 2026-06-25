@@ -12,6 +12,7 @@
     "@react-router/node": "^8.0.1",
     "@react-router/serve": "^8.0.1",
     "@takumi-rs/image-response": "^1.8.7",
+    "cnfast": "^0.0.8",
     "fumadocs-core": "workspace:*",
     "fumadocs-mdx": "workspace:*",
     "fumadocs-ui": "workspace:*",
@@ -19,8 +20,7 @@
     "lucide-react": "^1.21.0",
     "react": "^19.2.7",
     "react-dom": "^19.2.7",
-    "react-router": "^8.0.1",
-    "tailwind-merge": "^3.6.0"
+    "react-router": "^8.0.1"
   },
   "devDependencies": {
     "@react-router/dev": "^8.0.1",
