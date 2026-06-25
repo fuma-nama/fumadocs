@@ -31,7 +31,7 @@ export const Route = createFileRoute('/docs/$')({
 const loader = createServerFn({
   method: 'GET',
 })
-  .inputValidator((slugs: string[]) => slugs)
+  .validator((slugs: string[]) => slugs)
   .middleware([staticFunctionMiddleware])
   .handler(async ({ data: slugs }) => {
     const page = source.getPage(slugs);

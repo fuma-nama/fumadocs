@@ -22,7 +22,7 @@ export const Route = createFileRoute('/docs/$')({
 const serverLoader = createServerFn({
   method: 'GET',
 })
-  .inputValidator((slugs: string[]) => slugs)
+  .validator((slugs: string[]) => slugs)
   .handler(async ({ data: slugs }) => {
     const page = source.getPage(slugs);
     if (!page) throw notFound();
