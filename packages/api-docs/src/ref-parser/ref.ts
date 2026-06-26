@@ -314,11 +314,7 @@ class $Ref<S extends object = JSONSchema, O extends ParserOptions<S> = ParserOpt
         } else {
           // TODO: this behavior should be configurable from options on the CLI
           // Key is already in merged, so we should merge them if both are objects
-          if (
-            mergeKeys &&
-            isPlainObject(merged[key]) &&
-            isPlainObject(resolvedValue[key])
-          ) {
+          if (mergeKeys && isPlainObject(merged[key]) && isPlainObject(resolvedValue[key])) {
             merged[key] = mergeDeep(resolvedValue[key], merged[key]) as (typeof merged)[keyof S];
           }
         }

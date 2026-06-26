@@ -134,12 +134,7 @@ export async function bundle<
 export async function bundle<
   S extends object = JSONSchema,
   O extends ParserOptions<S> = ParserOptions<S>,
->(
-  path: string,
-  schema: S | string,
-  options: O,
-  callback: SchemaCallback<S>,
-): Promise<void>;
+>(path: string, schema: S | string, options: O, callback: SchemaCallback<S>): Promise<void>;
 export async function bundle(): Promise<unknown> {
   const args = normalizeArgs(arguments);
   const parser = new $RefParser();
