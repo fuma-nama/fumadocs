@@ -13,10 +13,8 @@ const paper = tegami({
   plugins: [
     github({
       repo: 'fuma-nama/fumadocs',
-      cli: {
-        versionPr: {
-          base: 'dev',
-        },
+      versionPr: {
+        base: 'dev',
       },
     }),
     {
