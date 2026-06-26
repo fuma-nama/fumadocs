@@ -27,8 +27,6 @@ export default defineConfig({
     onlyBundle: [
       '@fastify/deepmerge',
 
-      '@apidevtools/json-schema-ref-parser',
-
       // for Vite RSC compatibility
       'ajv',
       'fast-deep-equal',
