@@ -20,7 +20,7 @@ const paper = tegami({
     {
       name: 'custom',
       cli: {
-        publishPlanApplied() {
+        draftApplied() {
           updateStackblitzVersions();
         },
       },
