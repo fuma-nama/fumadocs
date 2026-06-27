@@ -2,7 +2,6 @@ import type { Loader, LoaderInput } from '@/loaders/adapter';
 import type { ConfigLoader } from '@/loaders/config';
 import { load } from 'js-yaml';
 import { z } from 'zod';
-import { metaLoaderGlob } from '.';
 import type { MetaCollectionItem } from '@/config/build';
 
 const querySchema = z.looseObject({
@@ -71,7 +70,6 @@ export function createMetaLoader(
   }
 
   return {
-    test: metaLoaderGlob,
     async load(input) {
       const result = onMeta(await input.getSource(), input);
       if (result === null) return null;

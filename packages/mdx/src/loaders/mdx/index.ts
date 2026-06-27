@@ -6,7 +6,6 @@ import fs from 'node:fs/promises';
 import path from 'node:path';
 import { createHash } from 'node:crypto';
 import type { ConfigLoader } from '@/loaders/config';
-import { mdxLoaderGlob } from '..';
 
 const querySchema = z.looseObject({
   only: z.literal(['frontmatter', 'all']).default('all'),
@@ -24,7 +23,6 @@ type CacheEntry = z.infer<typeof cacheEntry>;
 
 export function createMdxLoader({ getCore }: ConfigLoader): Loader {
   return {
-    test: mdxLoaderGlob,
     async load({ getSource, development: isDevelopment, query, compiler, filePath }) {
       let core = await getCore();
       const value = await getSource();

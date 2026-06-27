@@ -5,7 +5,7 @@ import type { TurbopackLoaderOptions, TurbopackOptions } from 'next/dist/server/
 import * as path from 'node:path';
 import { loadConfig } from '@/config/load-from-file';
 import { _Defaults, type Core, createCore } from '@/core';
-import { mdxLoaderGlob, metaLoaderGlob } from '@/loaders';
+import { mdxLoaderGlob, metaLoaderFileGlob, metaLoaderQueryGlob } from '@/loaders';
 import type { IndexFilePluginOptions } from '@/plugins/index-file';
 import indexFile from '@/plugins/index-file';
 
@@ -60,6 +60,9 @@ export function createMDX(createOptions: CreateMDXOptions = {}) {
           as: '*.js',
         },
         '*.json': {
+          condition: {
+            query: metaLoaderQueryGlob,
+          },
           loaders: [
             {
               loader: 'fumadocs-mdx/webpack/meta',
@@ -69,6 +72,9 @@ export function createMDX(createOptions: CreateMDXOptions = {}) {
           as: '*.json',
         },
         '*.yaml': {
+          condition: {
+            query: metaLoaderQueryGlob,
+          },
           loaders: [
             {
               loader: 'fumadocs-mdx/webpack/meta',
@@ -102,7 +108,8 @@ export function createMDX(createOptions: CreateMDXOptions = {}) {
             ],
           },
           {
-            test: metaLoaderGlob,
+            test: metaLoaderFileGlob,
+            resourceQuery: metaLoaderQueryGlob,
             enforce: 'pre',
             use: [
               {

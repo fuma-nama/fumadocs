@@ -5,6 +5,7 @@ import { createStandaloneConfigLoader } from '@/loaders/config';
 import { toNode } from '@/loaders/adapter';
 import { createMdxLoader } from '@/loaders/mdx';
 import { createMetaLoader } from '@/loaders/meta';
+import { mdxLoaderGlob, metaLoaderGlob } from '@/loaders';
 
 let cachedLoaders: LoadHook[] | undefined;
 
@@ -22,9 +23,9 @@ export const initialize: InitializeHook<NodeLoaderOptions> = (options) => {
     mode: 'production',
   });
 
-  cachedLoaders = [toNode(createMdxLoader(configLoader))];
+  cachedLoaders = [toNode(mdxLoaderGlob, createMdxLoader(configLoader))];
   if (!options.disableMetaFile) {
-    cachedLoaders.push(toNode(createMetaLoader(configLoader)));
+    cachedLoaders.push(toNode(metaLoaderGlob, createMetaLoader(configLoader)));
   }
 };
 

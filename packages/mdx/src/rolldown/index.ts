@@ -52,14 +52,14 @@ export default async function mdx(
     {
       name: 'fumadocs-mdx:mdx',
       transform: {
-        filter: mdxLoader.filter,
+        filter: { id: mdxLoaderGlob },
         handler: mdxLoader.transform,
       },
     },
     {
       name: 'fumadocs-mdx:meta',
       transform: {
-        filter: metaLoader.filter,
+        filter: { id: metaLoaderGlob },
         handler: metaLoader.transform,
       },
     },
