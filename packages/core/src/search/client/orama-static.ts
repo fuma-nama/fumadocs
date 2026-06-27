@@ -4,6 +4,7 @@ import { searchAdvanced } from '@/search/orama/search/advanced';
 import type { advancedSchema, simpleSchema } from '@/search/orama/create-db';
 import type { ExportedData } from '@/search/server';
 import type { SearchClient } from '../client';
+import { BASE_PATH } from '@/utils/url';
 
 export interface StaticOptions {
   /**
@@ -81,8 +82,7 @@ async function loadDB(
   return dbs;
 }
 
-function getDBCached(options: StaticOptions) {
-  const { from = '/api/search', initOrama } = options;
+function getDBCached({ from = `${BASE_PATH}api/search`, initOrama }: StaticOptions) {
   const cacheKey = from;
   const cached = cache.get(cacheKey);
   if (cached) return cached;

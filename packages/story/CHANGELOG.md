@@ -1,3 +1,9 @@
+## @fumadocs/story@1.1.2
+
+### Migrate to `cnfast`
+
+Drop `tailwind-merge`.
+
 # @fumadocs/story
 
 ## 1.1.1

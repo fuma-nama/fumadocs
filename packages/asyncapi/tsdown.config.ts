@@ -22,7 +22,6 @@ export default defineConfig({
   deps: {
     onlyBundle: [
       '@fastify/deepmerge',
-      '@apidevtools/json-schema-ref-parser',
       'ajv',
       'fast-deep-equal',
       'json-schema-traverse',

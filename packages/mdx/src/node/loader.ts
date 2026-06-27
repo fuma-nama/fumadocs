@@ -4,6 +4,7 @@ import { toNode } from '@/loaders/adapter';
 import { createStandaloneConfigLoader } from '@/loaders/config';
 import type { LoadHook } from 'node:module';
 import { createMetaLoader } from '@/loaders/meta';
+import { mdxLoaderGlob, metaLoaderGlob } from '@/loaders';
 
 const core = createCore({
   environment: 'node',
@@ -17,8 +18,8 @@ const configLoader = createStandaloneConfigLoader({
   mode: 'production',
 });
 
-const mdxLoader = toNode(createMdxLoader(configLoader));
-const metaLoader = toNode(createMetaLoader(configLoader));
+const mdxLoader = toNode(mdxLoaderGlob, createMdxLoader(configLoader));
+const metaLoader = toNode(metaLoaderGlob, createMetaLoader(configLoader));
 
 /**
  * @deprecated use the `register()` function from `fumadocs-mdx/node` instead.

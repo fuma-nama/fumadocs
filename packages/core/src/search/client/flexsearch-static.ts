@@ -2,6 +2,7 @@ import type { SearchClient } from '../client';
 import type { ExportedData } from '../flexsearch';
 import type { Document } from 'flexsearch';
 import { createDocument, search, type Doc } from '../flexsearch/utils';
+import { BASE_PATH } from '@/utils/url';
 
 export interface FlexsearchStaticOptions {
   /**
@@ -21,7 +22,7 @@ function initDocument(data: Record<string, string>) {
 const cacheMap = new Map<string, Promise<Map<string, Document<Doc>>>>();
 
 export function flexsearchStaticClient(options: FlexsearchStaticOptions = {}): SearchClient {
-  const { from = '/api/search', locale = '', tag } = options;
+  const { from = `${BASE_PATH}api/search`, locale = '', tag } = options;
 
   let dbs = cacheMap.get(from);
   if (!dbs && typeof window !== 'undefined') {

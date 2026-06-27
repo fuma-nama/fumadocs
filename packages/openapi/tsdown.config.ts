@@ -34,7 +34,6 @@ export default defineConfig({
       'fast-content-type-parse',
       '@fastify/deepmerge',
 
-      '@apidevtools/json-schema-ref-parser',
       '@scalar/openapi-upgrader',
 
       // for Vite RSC compatibility

@@ -1,22 +1,9 @@
 /**
  * inspired by https://github.com/Redocly/openapi-sampler (MIT)
  */
-import { deepmerge } from '@fastify/deepmerge';
+import { mergeDeep } from '../utils/deep-merge';
 import { isPlainObject } from '../utils/is-plain-object';
 import { resolveRefSync } from './resolve-ref';
-
-const mergeDeep = deepmerge({
-  all: true,
-  isMergeableObject(value: unknown): boolean {
-    return (
-      typeof value === 'object' &&
-      value !== null &&
-      !Array.isArray(value) &&
-      !(value instanceof RegExp) &&
-      !(value instanceof Date)
-    );
-  },
-});
 
 export interface JsonSchemaSampleOptions {
   readonly skipNonRequired?: boolean;

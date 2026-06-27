@@ -26,7 +26,6 @@ program
     setDevServerUrlInEnv(handle.url);
     const child = spawn(command[0], command.slice(1), {
       stdio: 'inherit',
-      shell: true,
       env: process.env,
     });
 

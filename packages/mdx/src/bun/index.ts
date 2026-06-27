@@ -6,6 +6,7 @@ import { _Defaults, type CoreOptions, createCore } from '@/core';
 import { createIntegratedConfigLoader } from '@/loaders/config';
 import { createMetaLoader } from '@/loaders/meta';
 import { toBun } from '@/loaders/adapter';
+import { mdxLoaderGlob, metaLoaderGlob } from '@/loaders';
 
 export interface MdxPluginOptions extends Partial<CoreOptions> {
   /**
@@ -37,8 +38,8 @@ export function createMdxPlugin(options: MdxPluginOptions = {}): BunPlugin {
       });
 
       const configLoader = createIntegratedConfigLoader(core);
-      toBun(createMdxLoader(configLoader))(build);
-      if (!disableMetaFile) toBun(createMetaLoader(configLoader))(build);
+      toBun(mdxLoaderGlob, createMdxLoader(configLoader))(build);
+      if (!disableMetaFile) toBun(metaLoaderGlob, createMetaLoader(configLoader))(build);
     },
   };
 }

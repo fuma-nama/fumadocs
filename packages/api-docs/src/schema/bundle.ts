@@ -1,1 +1,1 @@
-export { bundle } from '@apidevtools/json-schema-ref-parser';
+export { bundle } from '../ref-parser/bundle.js';

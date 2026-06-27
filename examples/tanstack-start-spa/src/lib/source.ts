@@ -32,20 +32,6 @@ export function slugsToMarkdownPath(slugs: string[]) {
   };
 }
 
-export function getPageMarkdownUrl(slugs: string[]) {
-  const segments = [...slugs];
-  if (segments.length === 0) {
-    segments.push('index.md');
-  } else {
-    segments[segments.length - 1] += '.md';
-  }
-
-  return {
-    segments,
-    url: `${docsRoute}/${segments.join('/')}`,
-  };
-}
-
 export async function getLLMText(page: (typeof source)['$inferPage']) {
   const processed = await page.data.getText('processed');
 

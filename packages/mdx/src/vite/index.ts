@@ -8,6 +8,7 @@ import { createIntegratedConfigLoader } from '@/loaders/config';
 import { createMetaLoader } from '@/loaders/meta';
 import indexFile, { IndexFilePluginOptions } from '@/plugins/index-file';
 import path from 'node:path';
+import { mdxLoaderGlob, metaLoaderGlob } from '@/loaders';
 
 export interface PluginOptions {
   /**
@@ -77,7 +78,7 @@ export default function mdx(
         );
 
         mdxPlugin.transform = {
-          filter: mdxLoader.filter,
+          filter: { id: mdxLoaderGlob },
           order: 'pre',
           handler(code, id) {
             // Vite RSC will pass the compiled MDX file's client module with ID `virtual:vite-rsc/client-references/group/facade:xxx.mdx`.
@@ -89,7 +90,7 @@ export default function mdx(
           },
         };
         metaPlugin.transform = {
-          filter: metaLoader.filter,
+          filter: { id: metaLoaderGlob },
           order: 'pre',
           handler(code, id) {
             if (!forcedConfig) this.addWatchFile(options.configPath);

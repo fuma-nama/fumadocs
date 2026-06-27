@@ -1,6 +1,6 @@
 import { NoReference, ParsedSchema } from '@/schema';
 import { dereferenceSync } from '@/schema/dereference';
-import { bundle } from '@apidevtools/json-schema-ref-parser';
+import { bundle } from '@/schema/bundle';
 
 export async function fromSchema(input: string) {
   const bundled: ParsedSchema = await bundle(input);

@@ -1,3 +1,9 @@
+## fumadocs-openapi@11.0.6
+
+### Migrate to `cnfast`
+
+Drop `tailwind-merge`.
+
 ## fumadocs-openapi@11.0.4
 
 ### Improve Schema UI tag rendering

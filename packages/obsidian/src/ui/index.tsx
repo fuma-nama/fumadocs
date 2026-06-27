@@ -1,6 +1,6 @@
 import { CircleCheck, CircleX, Info, TriangleAlert } from './icons';
 import type { ComponentProps } from 'react';
-import { twMerge as cn } from 'tailwind-merge';
+import { cn } from 'cnfast';
 
 interface CalloutProps extends ComponentProps<'div'> {
   /**

@@ -4,11 +4,11 @@
  * @see https://datatracker.ietf.org/doc/html/rfc6901
  */
 
-function encodeSegment(segment: string): string {
+export function encodeSegment(segment: string): string {
   return segment.replace(/~/g, '~0').replace(/\//g, '~1');
 }
 
-function decodeSegment(segment: string): string {
+export function decodeSegment(segment: string): string {
   return segment.replace(/~1/g, '/').replace(/~0/g, '~');
 }
 
