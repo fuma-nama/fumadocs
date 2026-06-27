@@ -1,30 +1,14 @@
 core:changelogs:
-  - content: "---\npackages:\n  npm:@fumadocs/local-md:\n    type: patch\n---\n\n## Fix deprecation warnings\n\nAddress https://github.com/fuma-nama/fumadocs/issues/3380.\n"
-    filename: 2026-06-26-mquwczmn.md
-    v: 0.0.0
-  - content: "---\npackages:\n  npm:@fumadocs/api-docs:\n    type: patch\n  npm:@fumadocs/asyncapi:\n    type: patch\n  npm:@fumadocs/base-ui:\n    type: patch\n  npm:fumadocs-core:\n    type: patch\n  npm:fumadocs-openapi:\n    type: patch\n  npm:fumadocs-ui:\n    type: patch\n  npm:@fumadocs/story:\n    type: patch\n  npm:fumadocs-twoslash:\n    type: patch\n  npm:fumadocs-typescript:\n    type: patch\n  npm:fumadocs-preview:\n    type: patch\n---\n\n## Migrate to `cnfast`\n\nDrop `tailwind-merge`.\n"
-    filename: 2026-06-26-mqux5vge.md
-    v: 0.0.0
-  - content: "---\npackages:\n  npm:@fumadocs/api-docs:\n    type: patch\n---\n\n## Inline ref parser dependency\n"
-    filename: 2026-06-26-mqux7goj.md
-    v: 0.0.0
-  - content: "---\npackages:\n  npm:fumadocs-core:\n    type: patch\n---\n\n## Handle Vite `BASE_URL` for default values\n\nThe default search URL endpoint will auto include the base path.\n"
-    filename: 2026-06-26-mquxdf8q.md
+  - content: "---\npackages:\n  npm:fumadocs-mdx:\n    type: patch\n---\n\n## Require `collection` query param at regex matching\n\nInstead of passing through all JSON/YAML files, the meta loader now requires `collection` query param to be triggered.\n"
+    filename: 2026-06-27-mqwhk5kn.md
     v: 0.0.0
 core:packages:
-  - changelogIds:
-      - 2026-06-26-mqux5vge.md
-      - 2026-06-26-mqux7goj.md
-    id: npm:@fumadocs/api-docs
-    updated: true
-  - changelogIds:
-      - 2026-06-26-mqux5vge.md
-    id: npm:@fumadocs/asyncapi
-    updated: true
-  - changelogIds:
-      - 2026-06-26-mqux5vge.md
-    id: npm:@fumadocs/base-ui
-    updated: true
+  - id: npm:@fumadocs/api-docs
+    updated: false
+  - id: npm:@fumadocs/asyncapi
+    updated: false
+  - id: npm:@fumadocs/base-ui
+    updated: false
   - id: npm:@fumadocs/basehub
     updated: false
   - id: npm:@fumadocs/cli
@@ -33,11 +17,8 @@ core:packages:
     updated: false
   - id: npm:@fumadocs/content-collections
     updated: false
-  - changelogIds:
-      - 2026-06-26-mqux5vge.md
-      - 2026-06-26-mquxdf8q.md
-    id: npm:fumadocs-core
-    updated: true
+  - id: npm:fumadocs-core
+    updated: false
   - id: npm:create-fumadocs-app
     updated: true
   - id: npm:create-fumadocs-versions
@@ -48,49 +29,37 @@ core:packages:
     updated: false
   - id: npm:@fumadocs/language
     updated: false
-  - changelogIds:
-      - 2026-06-26-mquwczmn.md
-    id: npm:@fumadocs/local-md
-    updated: true
-  - id: npm:fumadocs-mdx
+  - id: npm:@fumadocs/local-md
     updated: false
+  - changelogIds:
+      - 2026-06-27-mqwhk5kn.md
+    id: npm:fumadocs-mdx
+    updated: true
   - id: npm:@fumadocs/mdx-remote
     updated: false
   - id: npm:fumadocs-obsidian
     updated: false
-  - changelogIds:
-      - 2026-06-26-mqux5vge.md
-    id: npm:fumadocs-openapi
-    updated: true
-  - changelogIds:
-      - 2026-06-26-mqux5vge.md
-    id: npm:fumadocs-preview
-    updated: true
+  - id: npm:fumadocs-openapi
+    updated: false
+  - id: npm:fumadocs-preview
+    updated: false
   - id: npm:fumadocs-python
     updated: false
-  - changelogIds:
-      - 2026-06-26-mqux5vge.md
-    id: npm:fumadocs-ui
-    updated: true
+  - id: npm:fumadocs-ui
+    updated: false
   - id: npm:@fumadocs/sanity
     updated: false
   - id: npm:@fumadocs/shadcn
     updated: false
   - id: npm:@fumari/stf
     updated: false
-  - changelogIds:
-      - 2026-06-26-mqux5vge.md
-    id: npm:@fumadocs/story
-    updated: true
+  - id: npm:@fumadocs/story
+    updated: false
   - id: npm:@fumadocs/tailwind
     updated: false
-  - changelogIds:
-      - 2026-06-26-mqux5vge.md
-    id: npm:fumadocs-twoslash
-    updated: true
-  - changelogIds:
-      - 2026-06-26-mqux5vge.md
-    id: npm:fumadocs-typescript
-    updated: true
+  - id: npm:fumadocs-twoslash
+    updated: false
+  - id: npm:fumadocs-typescript
+    updated: false
   - id: npm:@fumadocs/vite
     updated: false

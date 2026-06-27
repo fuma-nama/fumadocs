@@ -1,3 +1,9 @@
+## fumadocs-mdx@15.0.13
+
+### Require `collection` query param at regex matching
+
+Instead of passing through all JSON/YAML files, the meta loader now requires `collection` query param to be triggered.
+
 # next-docs-mdx
 
 ## 15.0.12
