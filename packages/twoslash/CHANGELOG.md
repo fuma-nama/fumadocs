@@ -1,3 +1,9 @@
+## fumadocs-twoslash@3.2.1
+
+### Migrate to `cnfast`
+
+Drop `tailwind-merge`.
+
 # fumadocs-twoslash
 
 ## 3.2.0

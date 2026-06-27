@@ -1,3 +1,9 @@
+## @fumadocs/base-ui@16.10.6
+
+### Migrate to `cnfast`
+
+Drop `tailwind-merge`.
+
 ## @fumadocs/base-ui@16.10.5
 
 ### Fix "Open in ChatGPT" page action URL
