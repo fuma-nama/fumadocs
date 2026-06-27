@@ -1,3 +1,9 @@
+## fumadocs-typescript@5.2.7
+
+### Migrate to `cnfast`
+
+Drop `tailwind-merge`.
+
 # fumadocs-typescript
 
 ## 5.2.6

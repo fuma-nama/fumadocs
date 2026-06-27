@@ -1,3 +1,13 @@
+## fumadocs-core@16.10.6
+
+### Migrate to `cnfast`
+
+Drop `tailwind-merge`.
+
+### Handle Vite `BASE_URL` for default values
+
+The default search URL endpoint will auto include the base path.
+
 ## fumadocs-core@16.10.4
 
 ### React Router v8 support

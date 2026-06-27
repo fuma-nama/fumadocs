@@ -1,3 +1,9 @@
+## @fumadocs/asyncapi@0.0.4
+
+### Migrate to `cnfast`
+
+Drop `tailwind-merge`.
+
 # @fumadocs/asyncapi
 
 ## 0.0.2

@@ -1,3 +1,9 @@
+## @fumadocs/local-md@0.2.4
+
+### Fix deprecation warnings
+
+Address https://github.com/fuma-nama/fumadocs/issues/3380.
+
 # @fumadocs/local-md
 
 ## 0.2.3

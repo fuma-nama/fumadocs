@@ -1,6 +1,6 @@
 {
   "name": "@fumadocs/api-docs",
-  "version": "0.0.3",
+  "version": "0.0.4",
   "description": "Shared utils for API docs generation",
   "keywords": [
     "Docs",

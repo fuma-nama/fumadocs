@@ -1,3 +1,9 @@
+## fumadocs-preview@0.1.5
+
+### Migrate to `cnfast`
+
+Drop `tailwind-merge`.
+
 # fumadocs-preview
 
 ## 0.1.4

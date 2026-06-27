@@ -1,3 +1,11 @@
+## @fumadocs/api-docs@0.0.4
+
+### Migrate to `cnfast`
+
+Drop `tailwind-merge`.
+
+### Inline ref parser dependency
+
 ## @fumadocs/api-docs@0.0.3
 
 ### Improve Schema UI tag rendering
