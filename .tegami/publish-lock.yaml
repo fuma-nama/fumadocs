@@ -1,14 +1,16 @@
 core:changelogs:
-  - content: "---\npackages:\n  npm:fumadocs-mdx:\n    type: patch\n---\n\n## Require `collection` query param at regex matching\n\nInstead of passing through all JSON/YAML files, the meta loader now requires `collection` query param to be triggered.\n"
-    filename: 2026-06-27-mqwhk5kn.md
+  - content: "---\npackages:\n  npm:@fumadocs/base-ui:\n    type: patch\n  npm:fumadocs-ui:\n    type: patch\n---\n\n## Fix Page Actions base path handling\n\nThe `<PageActions />` component will handle base path for passed `markdownUrl`.\n"
+    filename: 2026-06-29-mqzak93i.md
     v: 0.0.0
 core:packages:
   - id: npm:@fumadocs/api-docs
     updated: false
   - id: npm:@fumadocs/asyncapi
     updated: false
-  - id: npm:@fumadocs/base-ui
-    updated: false
+  - changelogIds:
+      - 2026-06-29-mqzak93i.md
+    id: npm:@fumadocs/base-ui
+    updated: true
   - id: npm:@fumadocs/basehub
     updated: false
   - id: npm:@fumadocs/cli
@@ -18,7 +20,7 @@ core:packages:
   - id: npm:@fumadocs/content-collections
     updated: false
   - id: npm:fumadocs-core
-    updated: false
+    updated: true
   - id: npm:create-fumadocs-app
     updated: true
   - id: npm:create-fumadocs-versions
@@ -31,10 +33,8 @@ core:packages:
     updated: false
   - id: npm:@fumadocs/local-md
     updated: false
-  - changelogIds:
-      - 2026-06-27-mqwhk5kn.md
-    id: npm:fumadocs-mdx
-    updated: true
+  - id: npm:fumadocs-mdx
+    updated: false
   - id: npm:@fumadocs/mdx-remote
     updated: false
   - id: npm:fumadocs-obsidian
@@ -45,8 +45,10 @@ core:packages:
     updated: false
   - id: npm:fumadocs-python
     updated: false
-  - id: npm:fumadocs-ui
-    updated: false
+  - changelogIds:
+      - 2026-06-29-mqzak93i.md
+    id: npm:fumadocs-ui
+    updated: true
   - id: npm:@fumadocs/sanity
     updated: false
   - id: npm:@fumadocs/shadcn
