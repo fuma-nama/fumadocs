@@ -1,3 +1,9 @@
+## fumadocs-ui@16.10.7
+
+### Fix Page Actions base path handling
+
+The `<PageActions />` component will handle base path for passed `markdownUrl`.
+
 ## fumadocs-ui@16.10.6
 
 ### Migrate to `cnfast`
