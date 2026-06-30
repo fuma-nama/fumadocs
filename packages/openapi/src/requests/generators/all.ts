@@ -5,6 +5,7 @@ import { go } from './go';
 import { java } from './java';
 import { javascript } from './javascript';
 import { python } from './python';
+import { rust } from './rust';
 
 export function registerDefault(registry: CodeUsageGeneratorRegistry) {
   registry.add('curl', curl);
@@ -13,5 +14,6 @@ export function registerDefault(registry: CodeUsageGeneratorRegistry) {
   registry.add('python', python);
   registry.add('java', java);
   registry.add('csharp', csharp);
+  registry.add('rust', rust);
   return registry;
 }

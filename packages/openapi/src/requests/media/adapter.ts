@@ -255,4 +255,8 @@ function str(
 
     return `var body = new StringContent(${tripleDoubleQuote(input)}, Encoding.UTF8, "${mediaType}");`;
   }
+
+  if (ctx.lang === 'rust') {
+    return `let body = r#"${inputToString(init, mediaType)}"#;`;
+  }
 }
