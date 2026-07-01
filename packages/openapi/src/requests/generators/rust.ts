@@ -45,7 +45,7 @@ ${
           .map(([key, value]) => `  .header("${key}", ${value})`)
           .join('\n'),
       ) + '\n'
-}    .send()
+}${body ? '    .body(body)\n' : ''}    .send()
     .await?
     .text()
     .await?;
