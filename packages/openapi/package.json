@@ -27,6 +27,7 @@
     "./requests/generators/java": "./dist/requests/generators/java.js",
     "./requests/generators/javascript": "./dist/requests/generators/javascript.js",
     "./requests/generators/python": "./dist/requests/generators/python.js",
+    "./requests/generators/rust": "./dist/requests/generators/rust.js",
     "./scalar": "./dist/scalar/index.js",
     "./server": "./dist/server/index.js",
     "./ui": "./dist/ui/index.js",
