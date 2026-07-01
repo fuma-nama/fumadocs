@@ -2,7 +2,9 @@
   "extends": "tsconfig/base.json",
   "compilerOptions": {
     "paths": {
-      "@/*": ["./src/*"]
+      "@/*": ["./src/*"],
+      "@fumadocs/satteri": ["../satteri/dist/index.d.ts"],
+      "@fumadocs/satteri/*": ["../satteri/dist/*"]
     },
     "types": ["@types/node", "@types/mdx"],
     "jsx": "react-jsx",

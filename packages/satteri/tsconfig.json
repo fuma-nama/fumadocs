@@ -1,0 +1,16 @@
+{
+  "extends": "tsconfig/base.json",
+  "compilerOptions": {
+    "paths": {
+      "@/*": ["./src/*"],
+      "fumadocs-core/*": ["../core/dist/*"]
+    },
+    "types": ["@types/node", "@types/mdast", "@types/hast"],
+    "jsx": "react-jsx",
+    "noEmit": true,
+    "lib": ["ESNext"],
+    "module": "ESNext",
+    "target": "ES2023"
+  },
+  "exclude": ["node_modules", "dist"]
+}

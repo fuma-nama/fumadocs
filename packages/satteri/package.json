@@ -1,0 +1,83 @@
+{
+  "name": "@fumadocs/satteri",
+  "version": "0.1.0",
+  "description": "Fumadocs plugins and presets for Sätteri",
+  "keywords": [
+    "Docs",
+    "fumadocs",
+    "satteri",
+    "mdx"
+  ],
+  "homepage": "https://fumadocs.dev",
+  "license": "MIT",
+  "author": "Fuma Nama",
+  "repository": "github:fuma-nama/fumadocs",
+  "files": [
+    "dist"
+  ],
+  "type": "module",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    },
+    "./preset": {
+      "types": "./dist/preset.d.ts",
+      "import": "./dist/preset.js"
+    },
+    "./compile": {
+      "types": "./dist/compile.d.ts",
+      "import": "./dist/compile.js"
+    },
+    "./package.json": "./package.json"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "scripts": {
+    "build": "tsdown",
+    "clean": "rimraf dist",
+    "dev": "tsdown --watch",
+    "lint": "oxlint .",
+    "test": "vitest run",
+    "types:check": "tsc --noEmit"
+  },
+  "dependencies": {
+    "estree-util-to-js": "^2.0.0",
+    "estree-util-value-to-estree": "^3.5.0",
+    "fumadocs-core": "workspace:*",
+    "github-slugger": "^2.0.0",
+    "hast-util-to-estree": "^3.1.3",
+    "image-size": "^2.0.2",
+    "npm-to-yarn": "^3.0.1",
+    "satteri": "^0.9.4",
+    "unified": "^11.0.5",
+    "vfile": "^6.0.3"
+  },
+  "devDependencies": {
+    "@types/estree": "^1.0.9",
+    "@types/estree-jsx": "^1.0.5",
+    "@types/hast": "^3.0.4",
+    "@types/mdast": "^4.0.4",
+    "@types/node": "26.0.0",
+    "mdast-util-mdx": "^3.0.0",
+    "shiki": "^3.0.0",
+    "tsconfig": "workspace:*",
+    "tsdown": "0.22.3",
+    "typescript": "^6.0.3",
+    "vitest": "^4.1.9"
+  },
+  "peerDependencies": {
+    "@types/hast": "*",
+    "@types/mdast": "*",
+    "fumadocs-core": "^16.0.0"
+  },
+  "peerDependenciesMeta": {
+    "@types/hast": {
+      "optional": true
+    },
+    "@types/mdast": {
+      "optional": true
+    }
+  }
+}
