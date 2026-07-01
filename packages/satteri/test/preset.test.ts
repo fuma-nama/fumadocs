@@ -13,6 +13,6 @@ describe('@fumadocs/satteri', () => {
 
     expect(code).toContain('export default');
     expect(code).toContain('export const frontmatter');
-    expect(data.structuredData).toBeDefined();
+    expect(data?.structuredData).toBeDefined();
   });
 });

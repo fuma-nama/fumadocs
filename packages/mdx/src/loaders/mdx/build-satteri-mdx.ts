@@ -7,6 +7,7 @@ import type { Core } from '@/core';
 import type { DocCollectionItem } from '@/config/build';
 import type { CompilerOptions } from '@/loaders/mdx/build-mdx';
 import type { PostprocessOptions } from '@/loaders/mdx/remark-postprocess';
+import { getSatteriOptions } from '@/config/build-satteri';
 import { compileMdx, queueDataExport, flattenNode } from '@fumadocs/satteri';
 import { defineMdastPlugin } from 'satteri';
 import { remarkIncludeSatteri } from '@/loaders/mdx/remark-include-satteri';
@@ -41,7 +42,7 @@ export async function buildSatteriMDX(
     isDevelopment,
   }: BuildSatteriMDXOptions,
 ): Promise<{ value: string }> {
-  const satteriOptions = await core.getConfig().getSatteriOptions(collection, environment);
+  const satteriOptions = await getSatteriOptions(core.getConfig(), collection, environment);
   const postprocess: PostprocessOptions = {
     _format: filePath.endsWith('.mdx') ? 'mdx' : 'md',
     ...collection?.postprocess,

@@ -2724,9 +2724,6 @@ importers:
 
   packages/mdx:
     dependencies:
-      '@fumadocs/satteri':
-        specifier: workspace:*
-        version: link:../satteri
       '@mdx-js/mdx':
         specifier: ^3.1.1
         version: 3.1.1
@@ -2776,6 +2773,9 @@ importers:
         specifier: ^4.4.3
         version: 4.4.3
     devDependencies:
+      '@fumadocs/satteri':
+        specifier: workspace:*
+        version: link:../satteri
       '@fumadocs/vite':
         specifier: workspace:*
         version: link:../vite
@@ -3440,12 +3440,6 @@ importers:
       satteri:
         specifier: ^0.9.4
         version: 0.9.4
-      unified:
-        specifier: ^11.0.5
-        version: 11.0.5
-      vfile:
-        specifier: ^6.0.3
-        version: 6.0.3
     devDependencies:
       '@types/estree':
         specifier: ^1.0.9

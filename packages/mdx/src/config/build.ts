@@ -1,4 +1,3 @@
-import type { ProcessorOptions } from '@mdx-js/mdx';
 import type {
   AnyCollection,
   DocCollection,
@@ -6,12 +5,10 @@ import type {
   GlobalConfig,
   MetaCollection,
 } from '@/config/define';
-import type { MdxCompileOptions } from 'satteri';
-import type { SatteriPresetOptions } from '@fumadocs/satteri';
-import { applySatteriPreset } from '@fumadocs/satteri';
 import picomatch from 'picomatch';
 import { applyMdxPreset } from '@/config/preset';
 import path from 'node:path';
+import type { ProcessorOptions } from '@mdx-js/mdx';
 
 export type BuildEnvironment = 'bundler' | 'runtime';
 
@@ -22,10 +19,6 @@ export interface LoadedConfig {
     collection?: DocCollectionItem,
     environment?: BuildEnvironment,
   ): ProcessorOptions | Promise<ProcessorOptions>;
-  getSatteriOptions(
-    collection?: DocCollectionItem,
-    environment?: BuildEnvironment,
-  ): MdxCompileOptions | Promise<MdxCompileOptions>;
   workspaces: Record<
     string,
     {
@@ -149,7 +142,6 @@ export function buildConfig(config: Record<string, unknown>, cwd: string): Loade
   }
 
   const mdxOptionsCache = new Map<string, ProcessorOptions | Promise<ProcessorOptions>>();
-  const satteriOptionsCache = new Map<string, MdxCompileOptions | Promise<MdxCompileOptions>>();
   return {
     global: loaded,
     collections,
@@ -189,44 +181,6 @@ export function buildConfig(config: Record<string, unknown>, cwd: string): Loade
       }
 
       mdxOptionsCache.set(key, result);
-      return result;
-    },
-    getSatteriOptions(collection, environment = 'bundler') {
-      const key = collection ? `${environment}:${collection.name}` : environment;
-      const cached = satteriOptionsCache.get(key);
-      if (cached) return cached;
-      let result: MdxCompileOptions | Promise<MdxCompileOptions>;
-
-      if (collection?.compiler === 'satteri') {
-        const opts = collection.satteriOptions;
-        if (typeof opts === 'function') {
-          result = opts(environment).then((options: SatteriPresetOptions) =>
-            applySatteriPreset(options)(environment),
-          );
-        } else if (opts) {
-          result = applySatteriPreset(opts)(environment);
-        } else {
-          result = (async () => {
-            const optionsFn = this.global.satteriOptions;
-            const options = typeof optionsFn === 'function' ? await optionsFn() : optionsFn;
-            return applySatteriPreset(options)(environment);
-          })();
-        }
-      } else if (collection) {
-        throw new Error(
-          collection
-            ? `Collection "${collection.name}" uses the default MDX compiler. Use getMDXOptions() instead of getSatteriOptions().`
-            : 'getSatteriOptions() requires a collection with compiler: "satteri".',
-        );
-      } else {
-        result = (async () => {
-          const optionsFn = this.global.satteriOptions;
-          const options = typeof optionsFn === 'function' ? await optionsFn() : optionsFn;
-          return applySatteriPreset(options)(environment);
-        })();
-      }
-
-      satteriOptionsCache.set(key, result);
       return result;
     },
   };

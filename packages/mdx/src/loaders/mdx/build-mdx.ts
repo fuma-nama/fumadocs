@@ -77,7 +77,7 @@ export async function buildMDX(
   options: BuildMDXOptions,
 ): Promise<VFile> {
   if (collection?.compiler === 'satteri') {
-    const { buildSatteriMDX } = await import('@/loaders/mdx/build-satteri-mdx');
+    const { buildSatteriMDX } = await import('@/satteri/index');
     const compiled = await buildSatteriMDX(core, collection, options);
     return new VFile({ value: compiled.value, path: options.filePath });
   }

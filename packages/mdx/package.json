@@ -26,6 +26,7 @@
     "./bin": "./dist/bin.js",
     "./bun": "./dist/bun/index.js",
     "./config": "./dist/config/index.js",
+    "./config/satteri": "./dist/config/satteri/index.js",
     "./next": "./dist/next/index.js",
     "./node": "./dist/node/index.js",
     "./node/_loader": "./dist/node/_loader.js",
@@ -38,6 +39,7 @@
     "./runtime/dynamic": "./dist/runtime/dynamic.js",
     "./runtime/server": "./dist/runtime/server.js",
     "./runtime/types": "./dist/runtime/types.js",
+    "./satteri": "./dist/satteri/index.js",
     "./vite": "./dist/vite/index.js",
     "./webpack/mdx": "./dist/webpack/mdx.js",
     "./webpack/meta": "./dist/webpack/meta.js",
@@ -54,7 +56,6 @@
     "types:check": "tsc --noEmit"
   },
   "dependencies": {
-    "@fumadocs/satteri": "workspace:*",
     "@mdx-js/mdx": "^3.1.1",
     "@standard-schema/spec": "^1.1.0",
     "chokidar": "^5.0.0",
@@ -81,6 +82,7 @@
     "@types/picomatch": "^4.0.3",
     "@types/react": "^19.2.17",
     "fumadocs-core": "workspace:*",
+    "@fumadocs/satteri": "workspace:*",
     "mdast-util-directive": "^3.1.0",
     "next": "^16.2.9",
     "react": "^19.2.7",
@@ -95,6 +97,7 @@
     "webpack": "^5.107.2"
   },
   "peerDependencies": {
+    "@fumadocs/satteri": "^0.1.0",
     "@types/mdast": "*",
     "@types/mdx": "*",
     "@types/react": "*",
@@ -103,9 +106,16 @@
     "next": "^15.3.0 || ^16.0.0",
     "react": "^19.2.0",
     "rolldown": "*",
+    "satteri": "^0.9.4",
     "vite": "7.x.x || 8.x.x"
   },
   "peerDependenciesMeta": {
+    "@fumadocs/satteri": {
+      "optional": true
+    },
+    "satteri": {
+      "optional": true
+    },
     "rolldown": {
       "optional": true
     },

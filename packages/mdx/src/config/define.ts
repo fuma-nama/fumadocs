@@ -1,11 +1,15 @@
 import type { StandardSchemaV1 } from '@standard-schema/spec';
 import type { MDXPresetOptions } from '@/config/preset';
 import type { ProcessorOptions } from '@mdx-js/mdx';
-import type { SatteriPresetOptions } from '@fumadocs/satteri';
 import { metaSchema, pageSchema } from 'fumadocs-core/source/schema';
 import type { PostprocessOptions } from '@/loaders/mdx/remark-postprocess';
 import type { PluginOption } from '@/core';
 import type { BuildEnvironment } from './build';
+
+/** @see `fumadocs-mdx/config/satteri` for typed Sätteri preset options */
+export type SatteriPresetConfig =
+  | Record<string, unknown>
+  | ((environment: BuildEnvironment) => Promise<Record<string, unknown>>);
 
 export type CollectionSchema<Schema extends StandardSchemaV1, Context> =
   | Schema
@@ -25,7 +29,7 @@ export interface MetaCollection<
   schema?: CollectionSchema<Schema, { path: string; source: string }>;
 }
 
-interface DocCollectionBase<Schema extends StandardSchemaV1 = StandardSchemaV1>
+export interface DocCollectionBase<Schema extends StandardSchemaV1 = StandardSchemaV1>
   extends BaseCollection {
   postprocess?: Partial<PostprocessOptions>;
   async?: boolean;
@@ -56,8 +60,8 @@ export interface DocCollectionSatteri<
    * Sätteri compile options. When omitted, the global `satteriOptions` preset is used.
    */
   satteriOptions?:
-    | SatteriPresetOptions
-    | ((environment: BuildEnvironment) => Promise<SatteriPresetOptions>);
+    | SatteriPresetConfig
+    | ((environment: BuildEnvironment) => Promise<SatteriPresetConfig>);
 
   mdxOptions?: never;
 }
@@ -87,7 +91,7 @@ export interface GlobalConfig {
   /**
    * Configure global Sätteri options, used by `doc` collections with `compiler: "satteri"`.
    */
-  satteriOptions?: SatteriPresetOptions | (() => Promise<SatteriPresetOptions>);
+  satteriOptions?: SatteriPresetConfig | (() => Promise<SatteriPresetConfig>);
 
   workspaces?: Record<
     string,
