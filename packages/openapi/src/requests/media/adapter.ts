@@ -1,4 +1,9 @@
-import { backtickQuote, inputToString, tripleDoubleQuote } from '@/requests/string-utils';
+import {
+  backtickQuote,
+  inputToString,
+  rustRawStringLiteral,
+  tripleDoubleQuote,
+} from '@/requests/string-utils';
 export { resolveMediaAdapter, isMediaTypeSupported } from './resolve-adapter';
 // @ts-expect-error -- untyped
 import js2xml from 'xml-js/lib/js2xml';
@@ -257,6 +262,6 @@ function str(
   }
 
   if (ctx.lang === 'rust') {
-    return `let body = r#"${inputToString(init, mediaType)}"#;`;
+    return `let body = ${rustRawStringLiteral(inputToString(init, mediaType))};`;
   }
 }
