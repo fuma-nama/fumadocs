@@ -1,4 +1,4 @@
-import { defineMdastPlugin } from 'satteri';
+import { defineMdastPlugin, type MdastVisitorContext } from 'satteri';
 import type { Nodes } from 'mdast';
 import { gfmToMarkdown } from 'mdast-util-gfm';
 import type { StructuredData } from 'fumadocs-core/mdx-plugins/remark-structure';
@@ -12,15 +12,8 @@ import { flattenNode } from '@/utils';
 export interface StructureOptions {
   types?: string[] | ((node: Nodes) => boolean);
   mdxTypes?: (node: Nodes) => boolean;
-  stringify?: Stringifier<StringifierContext> | StringifyOptions<StringifierContext>;
+  stringify?: Stringifier | StringifyOptions;
   exportAs?: string | boolean;
-}
-
-declare module 'satteri' {
-  interface DataMap {
-    structuredData?: StructuredData;
-    frontmatter?: Record<string, unknown>;
-  }
 }
 
 interface StringifierContext {
@@ -28,11 +21,12 @@ interface StringifierContext {
 }
 
 function wrapStringifier(
-  stringifyOptions?: StringifyOptions<StringifierContext> | Stringifier<StringifierContext>,
-): Stringifier<StringifierContext> | null {
+  stringifyOptions?: StringifyOptions | Stringifier,
+): Stringifier | null {
   if (!stringifyOptions) return null;
   if (typeof stringifyOptions === 'function') {
-    return (node, ctx) => stringifyOptions(structuredClone(node), ctx);
+    const fn = stringifyOptions as (node: Nodes, ctx: StringifierContext) => string;
+    return (node, ctx) => fn(structuredClone(node), ctx);
   }
 
   const base = structureDefaultStringifier({
@@ -48,7 +42,8 @@ function wrapStringifier(
       ...stringifyOptions.handlers,
     },
   });
-  return (node, ctx) => base(structuredClone(node), ctx);
+  const baseFn = base as (node: Nodes, ctx: StringifierContext) => string;
+  return (node, ctx) => baseFn(structuredClone(node), ctx);
 }
 
 export function remarkStructure({
@@ -74,11 +69,11 @@ export function remarkStructure({
       },
     };
 
-    function finish(ctx: { data: Record<string, unknown> }) {
+    function finish(ctx: MdastVisitorContext) {
       ctx.data.structuredData = data;
     }
 
-    function visit(node: Nodes, ctx: { data: Record<string, unknown> }) {
+    function visit(node: Nodes, ctx: MdastVisitorContext) {
       if (!matchType(node)) return;
       if (node.type === 'mdxJsxFlowElement' || node.type === 'mdxJsxTextElement') {
         if (!mdxTypes(node)) return;

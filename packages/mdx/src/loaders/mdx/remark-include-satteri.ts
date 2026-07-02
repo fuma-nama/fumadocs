@@ -2,13 +2,13 @@ import { fileURLToPath } from 'node:url';
 import * as path from 'node:path';
 import Slugger from 'github-slugger';
 import { defineMdastPlugin, mdxToMdast, markdownToMdast } from 'satteri';
-import type { MdastVisitorContext } from 'satteri';
+import type { MdastContent, MdastVisitorContext } from 'satteri';
+import '@/loaders/mdx/satteri-data-map';
 import { frontmatter } from 'fumadocs-core/content/md/frontmatter';
 import { flattenNode } from '@fumadocs/satteri';
 import type { Code, RootContent } from 'mdast';
 import type { Directives } from 'mdast-util-directive';
 import type { MdxJsxFlowElement, MdxJsxTextElement } from 'mdast-util-mdx';
-import type { CompilerOptions } from '@/loaders/mdx/build-mdx';
 
 type IncludeNode = RootContent | MdxJsxFlowElement | MdxJsxTextElement | Directives;
 
@@ -50,7 +50,7 @@ async function replaceInclude(
   node: IncludeNode,
   ctx: MdastVisitorContext,
   cwd?: string,
-): Promise<{ raw: string } | Code | void> {
+): Promise<MdastContent | void> {
   const specifier = flattenNode(node).trim();
   if (!specifier) return;
 
@@ -64,7 +64,7 @@ async function replaceInclude(
         : (cwd ?? process.cwd());
   const targetPath = path.resolve(baseDir, relativePath);
 
-  const compiler = ctx.data._compiler as CompilerOptions | undefined;
+  const compiler = ctx.data._compiler;
   compiler?.addDependency(targetPath);
 
   const ext = path.extname(targetPath);

@@ -57,6 +57,7 @@
     "@types/react-dom": "^19.2.3",
     "fumadocs-core": "workspace:*",
     "fumadocs-ui": "workspace:*",
+    "@fumadocs/satteri": "workspace:*",
     "mdast-util-mdx": "^3.0.0",
     "satteri": "^0.9.4",
     "tsconfig": "workspace:*",

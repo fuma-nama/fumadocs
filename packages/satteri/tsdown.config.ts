@@ -7,7 +7,7 @@ export default defineConfig({
   fixedExtension: false,
   target: 'es2023',
   format: 'esm',
-  entry: ['src/index.ts', 'src/preset.ts', 'src/compile.ts'],
+  entry: ['src/index.ts', 'src/preset.ts', 'src/compile.ts', 'src/data-map.ts'],
   deps: {
     onlyBundle: [],
     neverBundle: ['fumadocs-core', 'satteri', 'unified', 'vfile', 'mdast-util-mdx', /^@types\//],

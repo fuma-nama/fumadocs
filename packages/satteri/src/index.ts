@@ -1,3 +1,5 @@
+import '@/data-map';
+
 export {
   defineMdastPlugin,
   defineHastPlugin,
@@ -18,6 +20,11 @@ export type {
   Frontmatter,
   MarkdownToHtmlResult,
   MdxToJsResult,
+  Data,
+  MdastNode,
+  MdastContent,
+  MdastVisitorContext,
+  HastVisitorContext,
 } from 'satteri';
 
 export { applySatteriPreset } from '@/preset';
@@ -47,3 +54,4 @@ export { remarkLlms, type LLMsOptions } from '@/remark-llms';
 
 export { flattenNode, handleTag } from '@/utils';
 export { appendExports, queueDataExport, queueTocJsxExport } from '@/inject-exports';
+export type { TocJsxExportItem } from '@/data-map';

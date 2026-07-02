@@ -1,4 +1,4 @@
-import { defineHastPlugin } from 'satteri';
+import { defineHastPlugin, type HastVisitorContext } from 'satteri';
 import type { Element, Root, RootContent } from 'hast';
 import {
   rehypeCode as createRehypeCodeTransformer,
@@ -15,10 +15,7 @@ function unwrapReplacement(node: RootContent | Root): RootContent | RootContent[
 function replaceHighlightedNode(
   element: Element,
   next: RootContent | Root | undefined,
-  ctx: {
-    replaceNode: (node: Element, newNode: RootContent) => void;
-    insertAfter: (node: RootContent, newNode: RootContent | RootContent[]) => void;
-  },
+  ctx: Pick<HastVisitorContext, 'replaceNode' | 'insertAfter'>,
 ) {
   if (!next) return;
 

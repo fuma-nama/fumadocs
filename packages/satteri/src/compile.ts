@@ -1,6 +1,7 @@
+import '@/data-map';
 import { mdxToJs, type MdxCompileOptions, type MdastPluginInput, type HastPluginInput, type Frontmatter } from 'satteri';
 import { pathToFileURL } from 'node:url';
-import { appendExports, queueDataExport, queueTocJsxExport, type TocJsxExportItem } from '@/inject-exports';
+import { appendExports, queueDataExport, queueTocJsxExport } from '@/inject-exports';
 
 export interface CompileMdxOptions {
   source: string;
@@ -77,14 +78,14 @@ export async function compileMdx({
       }
     }
   }
-  const tocExport = outData._tocEsmExport as { name: string; items: TocJsxExportItem[] } | undefined;
+  const tocExport = outData._tocEsmExport;
   if (tocExport) {
     queueTocJsxExport(outData, tocExport.name, tocExport.items);
   }
 
   let code = appendExports(result.code, outData);
 
-  const imports = outData._imageImports as { type: string }[] | undefined;
+  const imports = outData._imageImports;
   if (imports?.length) {
     const importCode = imports
       .map((node) => {

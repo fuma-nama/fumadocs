@@ -1,12 +1,9 @@
-import type { Element, RootContent } from 'hast';
+import '@/data-map';
+import type { RootContent } from 'hast';
 import type { Data } from 'satteri';
+import type { TocJsxExportItem } from '@/data-map';
 
-export interface TocJsxExportItem {
-  title: Element;
-  url: string;
-  depth: number;
-  _step?: number;
-}
+export type { TocJsxExportItem } from '@/data-map';
 
 function flattenHast(node: RootContent): string {
   if (node.type === 'text') return node.value;
@@ -30,23 +27,14 @@ export function serializeTocJsxExport(name: string, items: TocJsxExportItem[]): 
   );
 }
 
-export function appendExports(
-  code: string,
-  data: Data & {
-    _exports?: string[];
-  },
-): string {
+export function appendExports(code: string, data: Data): string {
   const lines = data._exports ?? [];
   if (lines.length === 0) return code;
 
   return `${code.trimEnd()}\n${lines.join('\n')}\n`;
 }
 
-export function queueDataExport(
-  data: Data & { _exports?: string[] },
-  name: string,
-  value: unknown,
-): void {
+export function queueDataExport(data: Data, name: string, value: unknown): void {
   data._exports ??= [];
   const line = serializeValueExport(name, value);
   const idx = data._exports.findIndex((entry) => entry.startsWith(`export const ${name} =`));
@@ -54,11 +42,7 @@ export function queueDataExport(
   else data._exports[idx] = line;
 }
 
-export function queueTocJsxExport(
-  data: Data & { _exports?: string[] },
-  name: string,
-  items: TocJsxExportItem[],
-): void {
+export function queueTocJsxExport(data: Data, name: string, items: TocJsxExportItem[]): void {
   data._exports ??= [];
   const line = serializeTocJsxExport(name, items);
   const idx = data._exports.findIndex((entry) => entry.startsWith(`export const ${name} =`));

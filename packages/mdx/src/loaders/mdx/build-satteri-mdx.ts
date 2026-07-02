@@ -9,7 +9,9 @@ import type { CompilerOptions } from '@/loaders/mdx/build-mdx';
 import type { PostprocessOptions } from '@/loaders/mdx/remark-postprocess';
 import { getSatteriOptions } from '@/config/build-satteri';
 import { compileMdx, flattenNode, remarkLlms } from '@fumadocs/satteri';
-import { defineMdastPlugin } from 'satteri';
+import { defineMdastPlugin, type Data, type MdastPluginInput } from 'satteri';
+import '@fumadocs/satteri/data-map';
+import '@/loaders/mdx/satteri-data-map';
 import { remarkIncludeSatteri } from '@/loaders/mdx/remark-include-satteri';
 
 interface BuildSatteriMDXOptions {
@@ -48,23 +50,23 @@ export async function buildSatteriMDX(
     ...collection?.postprocess,
   };
 
-  const data: Record<string, unknown> = {
+  const data: Data = {
     frontmatter,
     _compiler,
     _cwd: collection?.cwd,
     _valueToExport: collection?.postprocess?.valueToExport,
   };
 
-  const postprocessPlugins = [
-    postprocess.includeProcessedMarkdown
-      ? remarkLlms(
-          typeof postprocess.includeProcessedMarkdown === 'object'
-            ? postprocess.includeProcessedMarkdown
-            : undefined,
-        )
-      : false,
-    postprocessPlugin(postprocess),
-  ].filter(Boolean);
+  const postprocessPlugins: MdastPluginInput[] = [postprocessPlugin(postprocess)];
+  if (postprocess.includeProcessedMarkdown) {
+    postprocessPlugins.unshift(
+      remarkLlms(
+        typeof postprocess.includeProcessedMarkdown === 'object'
+          ? postprocess.includeProcessedMarkdown
+          : undefined,
+      ),
+    );
+  }
 
   const result = await compileMdx({
     source,
@@ -91,14 +93,14 @@ function postprocessPlugin(options: PostprocessOptions) {
   return defineMdastPlugin({
     name: 'remark-postprocess',
     heading(node, ctx) {
-      const frontmatter = (ctx.data.frontmatter ??= {}) as Record<string, unknown>;
+      const frontmatter = (ctx.data.frontmatter ??= {});
       if (!frontmatter.title && node.depth === 1) {
         frontmatter.title = flattenNode(node);
       }
     },
     link(node, ctx) {
       if (!options.extractLinkReferences) return;
-      const refs = (ctx.data.extractedReferences ??= []) as { href: string }[];
+      const refs = (ctx.data.extractedReferences ??= []);
       refs.push({ href: node.url });
     },
   });

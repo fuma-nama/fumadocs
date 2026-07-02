@@ -13,6 +13,7 @@ import type { MdxJsxAttribute, MdxJsxExpressionAttribute, MdxJsxFlowElement } fr
 import type { VFile } from 'vfile';
 import { defineMdastPlugin } from 'satteri';
 import type { MdastNode } from 'satteri';
+import '@fumadocs/satteri/data-map';
 import { fileURLToPath } from 'node:url';
 import path from 'node:path';
 
@@ -406,7 +407,7 @@ export function remarkAutoTypeTableSatteri(config: RemarkAutoTypeTableOptions = 
         filePath,
         props,
         attributes,
-        ctx.data._cwd as string | undefined,
+        ctx.data._cwd,
       );
       if (children.length === 0) {
         ctx.removeNode(node);

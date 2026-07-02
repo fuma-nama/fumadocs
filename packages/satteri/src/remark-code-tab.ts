@@ -1,5 +1,5 @@
-import { defineMdastPlugin, type MdastVisitorContext } from 'satteri';
-import type { BlockContent, Code, MdastNode } from 'mdast';
+import { defineMdastPlugin, type MdastNode, type MdastVisitorContext } from 'satteri';
+import type { BlockContent, Code } from 'mdast';
 import type { MdxJsxFlowElement } from 'mdast-util-mdx';
 import {
   generateCodeBlockTabs,
@@ -154,7 +154,9 @@ function isInsideCodeBlockTabs(node: Code, ctx: MdastVisitorContext) {
     ) {
       return true;
     }
-    parent = ctx.parent(parent as MdastNode);
+    const next = ctx.parent(parent as MdastNode);
+    if (!next) break;
+    parent = next;
   }
   return false;
 }
@@ -207,7 +209,8 @@ export function remarkCodeTab({ parseMdx = false, Tabs = 'CodeBlockTabs' }: Rema
       }
 
       const replacement = buildTabs(processTabValue(group), Tabs, parseMdx, true)[0]!;
-      (replacement.data ??= {})._code_tab_visited = true;
+      const tabMeta = (replacement.data ??= {}) as { _code_tab_visited?: true };
+      tabMeta._code_tab_visited = true;
       ctx.replaceNode(node, replacement);
       for (let i = end - 1; i > start; i--) {
         ctx.removeChildAt(parent, i);

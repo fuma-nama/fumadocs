@@ -1,7 +1,7 @@
 import { defineHastPlugin, type HastPluginDefinition } from 'satteri';
 import type { Element } from 'hast';
 import { handleTag } from '@/utils';
-import type { TocJsxExportItem } from '@/inject-exports';
+import type { TocJsxExportItem } from '@/data-map';
 
 export interface RehypeTocOptions {
   exportToc?:
@@ -77,4 +77,4 @@ export function rehypeToc({ exportToc = true }: RehypeTocOptions = {}): HastPlug
   };
 }
 
-export type { TocJsxExportItem as RehypeTOCItemType } from '@/inject-exports';
+export type { TocJsxExportItem as RehypeTOCItemType } from '@/data-map';

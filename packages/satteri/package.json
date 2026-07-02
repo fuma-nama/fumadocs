@@ -29,6 +29,10 @@
       "types": "./dist/compile.d.ts",
       "import": "./dist/compile.js"
     },
+    "./data-map": {
+      "types": "./dist/data-map.d.ts",
+      "import": "./dist/data-map.js"
+    },
     "./package.json": "./package.json"
   },
   "publishConfig": {

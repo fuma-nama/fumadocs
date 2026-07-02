@@ -20,12 +20,6 @@ export interface RemarkImageOptions {
 
 type Source = { type: 'url'; url: URL } | { type: 'file'; file: string };
 
-declare module 'satteri' {
-  interface DataMap {
-    _imageImports?: MdxjsEsm[];
-  }
-}
-
 export function remarkImage({
   placeholder = 'none',
   external = true,
@@ -81,7 +75,7 @@ export function remarkImage({
 async function updateImage(
   src: Source,
   node: Image,
-  ctx: {
+  options: {
     placeholder: 'blur' | 'none';
     useImport: boolean;
     external: ExternalImageOptions;
@@ -89,16 +83,16 @@ async function updateImage(
     imports: MdxjsEsm[];
   },
 ): Promise<RootContent | undefined> {
-  if (src.type === 'file' && ctx.useImport) {
-    if (!ctx.dir) {
+  if (src.type === 'file' && options.useImport) {
+    if (!options.dir) {
       throw new Error(
         'When `useImport` is enabled, pass `fileURL` to the compiler so image paths can be resolved.',
       );
     }
 
-    const variableName = `__img${ctx.imports.length}`;
-    const importPath = getImportPath(src.file, ctx.dir);
-    ctx.imports.push({
+    const variableName = `__img${options.imports.length}`;
+    const importPath = getImportPath(src.file, options.dir);
+    options.imports.push({
       type: 'mdxjsEsm',
       value: '',
       data: {
@@ -151,14 +145,14 @@ async function updateImage(
       ],
     };
 
-    if (ctx.placeholder === 'blur' && VALID_BLUR_EXT.some((ext) => src.file.endsWith(ext))) {
+    if (options.placeholder === 'blur' && VALID_BLUR_EXT.some((ext) => src.file.endsWith(ext))) {
       out.attributes.push({ type: 'mdxJsxAttribute', name: 'placeholder', value: 'blur' });
     }
 
     return out;
   }
 
-  const size = await getImageSize(src, ctx.external);
+  const size = await getImageSize(src, options.external);
   if (!size) return;
 
   node.data ??= {};

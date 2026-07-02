@@ -1,4 +1,5 @@
-import { defineMdastPlugin, type MdastPluginInput } from 'satteri';
+import '@/data-map';
+import { defineMdastPlugin, type Data, type MdastPluginInput, type MdastVisitorContext } from 'satteri';
 import type {
   HastPluginInput,
   MdxCompileOptions,
@@ -135,9 +136,9 @@ export function applySatteriPreset(
 function valueExportPlugin(names: string[]): MdastPluginInput {
   return () => {
     let scheduled = false;
-    let dataRef: Parameters<typeof queueDataExport>[0] | undefined;
+    let dataRef: Data | undefined;
 
-    function schedule(ctx: { data: Parameters<typeof queueDataExport>[0] }) {
+    function schedule(ctx: MdastVisitorContext) {
       dataRef = ctx.data;
       if (scheduled) return;
       scheduled = true;

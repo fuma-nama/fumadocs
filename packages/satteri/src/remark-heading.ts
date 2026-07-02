@@ -1,7 +1,6 @@
 import Slugger from 'github-slugger';
 import { defineMdastPlugin } from 'satteri';
 import type { Heading } from 'mdast';
-import type { TOCItemType } from 'fumadocs-core/toc';
 import { flattenNode } from '@/utils';
 
 const regex = /\s*\[#(?<slug>[^]+?)]\s*$/;
@@ -10,12 +9,6 @@ export interface RemarkHeadingOptions {
   slug?: (heading: Heading, text: string) => string;
   customId?: boolean;
   generateToc?: boolean;
-}
-
-declare module 'satteri' {
-  interface DataMap {
-    toc?: TOCItemType[];
-  }
 }
 
 export function remarkHeading({
