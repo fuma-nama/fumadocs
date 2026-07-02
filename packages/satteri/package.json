@@ -5,8 +5,8 @@
   "keywords": [
     "Docs",
     "fumadocs",
-    "satteri",
-    "mdx"
+    "mdx",
+    "satteri"
   ],
   "homepage": "https://fumadocs.dev",
   "license": "MIT",
@@ -43,8 +43,6 @@
     "types:check": "tsc --noEmit"
   },
   "dependencies": {
-    "estree-util-to-js": "^2.0.0",
-    "estree-util-value-to-estree": "^3.5.0",
     "fumadocs-core": "workspace:*",
     "github-slugger": "^2.0.0",
     "hast-util-to-estree": "^3.1.3",
