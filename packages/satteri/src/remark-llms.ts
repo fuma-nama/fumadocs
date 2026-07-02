@@ -1,6 +1,6 @@
 import { defineMdastPlugin } from 'satteri';
 import type { MdastNode, MdastVisitorContext } from 'satteri';
-import type { Root } from 'mdast';
+import type { Parents, Root } from 'mdast';
 import { gfmToMarkdown } from 'mdast-util-gfm';
 import type { LLMsOptions } from 'fumadocs-core/mdx-plugins/remark-llms';
 import { defaultStringifier } from 'fumadocs-core/mdx-plugins/stringifier';
@@ -29,9 +29,18 @@ const ROOT_VISITORS = [
   'inlineMath',
 ] as const;
 
+const ROOT_VISITOR_TYPES = new Set<string>(ROOT_VISITORS);
+
 function isRootChild(node: MdastNode, ctx: MdastVisitorContext) {
-  const parent = ctx.parent(node);
-  return parent?.type === 'root';
+  return ctx.parent(node)?.type === 'root';
+}
+
+function countRootTargets(parent: Parents) {
+  let count = 0;
+  for (const child of parent.children) {
+    if (ROOT_VISITOR_TYPES.has(child.type)) count++;
+  }
+  return count;
 }
 
 export function remarkLlms({
@@ -41,6 +50,8 @@ export function remarkLlms({
 }: LLMsOptions = {}) {
   return () => {
     const rootChildren: MdastNode[] = [];
+    let expected = 0;
+    let collected = 0;
 
     const stringifier = defaultStringifier({
       ...rest,
@@ -70,10 +81,27 @@ export function remarkLlms({
       stringify: rest.stringify,
     });
 
-    function track(node: MdastNode, ctx: MdastVisitorContext) {
-      if (isRootChild(node, ctx)) rootChildren.push(structuredClone(node));
+    function finalize(ctx: MdastVisitorContext) {
       const tree = { type: 'root', children: rootChildren } as Root;
       ctx.data[as] = stringifier.call(undefined as never, tree, undefined);
+    }
+
+    function track(node: MdastNode, ctx: MdastVisitorContext) {
+      if (!isRootChild(node, ctx)) return;
+
+      const parent = ctx.parent(node)!;
+      if (!expected) {
+        expected = countRootTargets(parent);
+        if (!expected) {
+          ctx.data[as] = '';
+          return;
+        }
+      }
+
+      rootChildren.push(structuredClone(node));
+      collected++;
+
+      if (collected === expected) finalize(ctx);
     }
 
     return defineMdastPlugin({

@@ -8,7 +8,8 @@ import type { RemarkAutoTypeTableOptions } from 'fumadocs-typescript';
 import { defaultShikiOptions } from './lib/shiki.ts';
 import { metaSchema, pageSchema } from 'fumadocs-core/source/schema';
 import { applySatteriPreset } from '@fumadocs/satteri';
-import { remarkBlockId, remarkElementIds, remarkSteps } from '@fumadocs/satteri';
+import { remarkBlockId, remarkSteps } from '@fumadocs/satteri';
+import { remarkElementIds } from './lib/remark-element-ids.ts';
 import type { Nodes } from 'mdast';
 
 const isLint = process.env.LINT === '1';

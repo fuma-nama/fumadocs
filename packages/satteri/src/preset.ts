@@ -1,5 +1,4 @@
 import '@/data-map';
-import { defineMdastPlugin, type Data, type MdastPluginInput, type MdastVisitorContext } from 'satteri';
 import type {
   HastPluginInput,
   MdxCompileOptions,
@@ -13,7 +12,7 @@ import { remarkNpm, type RemarkNpmOptions } from '@/remark-npm';
 import { remarkStructure, type StructureOptions } from '@/remark-structure';
 import { rehypeCode, type RehypeCodeOptions } from '@/rehype-code';
 import { rehypeToc } from '@/rehype-toc';
-import { queueDataExport } from '@/inject-exports';
+import type { MdastPluginInput } from 'satteri';
 
 type ResolvePlugins<T> = T[] | ((plugins: T[]) => T[]);
 
@@ -83,6 +82,7 @@ export function applySatteriPreset(
       mdastPlugins,
       hastPlugins,
       features,
+      data,
       ...rest
     } = options;
 
@@ -101,7 +101,6 @@ export function applySatteriPreset(
             exportAs: 'structuredData',
             ...remarkStructureOptions,
           }),
-        valueToExport.length > 0 && valueExportPlugin(valueToExport),
       ],
       mdastPlugins,
     );
@@ -121,6 +120,10 @@ export function applySatteriPreset(
 
     return {
       ...rest,
+      data: {
+        ...data,
+        ...(valueToExport.length > 0 ? { _valueToExport: valueToExport } : {}),
+      },
       outputFormat: environment === 'runtime' ? 'function-body' : rest.outputFormat,
       features: {
         gfm: true,
@@ -130,33 +133,5 @@ export function applySatteriPreset(
       mdastPlugins: resolvedMdast,
       hastPlugins: resolvedHast,
     };
-  };
-}
-
-function valueExportPlugin(names: string[]): MdastPluginInput {
-  return () => {
-    let scheduled = false;
-    let dataRef: Data | undefined;
-
-    function schedule(ctx: MdastVisitorContext) {
-      dataRef = ctx.data;
-      if (scheduled) return;
-      scheduled = true;
-      queueMicrotask(() => {
-        if (!dataRef) return;
-        for (const name of names) {
-          if (name in dataRef) {
-            queueDataExport(dataRef, name, dataRef[name]);
-          }
-        }
-      });
-    }
-
-    return defineMdastPlugin({
-      name: 'value-to-export',
-      paragraph(_node, ctx) {
-        schedule(ctx);
-      },
-    });
   };
 }

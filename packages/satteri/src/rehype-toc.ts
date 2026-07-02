@@ -55,7 +55,7 @@ export function rehypeToc({ exportToc = true }: RehypeTocOptions = {}): HastPlug
           }
 
           items.push({
-            title: element,
+            title: ctx.textContent(element),
             depth: Number(element.tagName[1]),
             url: `#${id}`,
             _step:

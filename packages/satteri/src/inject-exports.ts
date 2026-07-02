@@ -1,30 +1,15 @@
 import '@/data-map';
-import type { RootContent } from 'hast';
 import type { Data } from 'satteri';
 import type { TocJsxExportItem } from '@/data-map';
 
 export type { TocJsxExportItem } from '@/data-map';
-
-function flattenHast(node: RootContent): string {
-  if (node.type === 'text') return node.value;
-  if ('children' in node) return node.children.map(flattenHast).join('');
-  return '';
-}
 
 export function serializeValueExport(name: string, value: unknown): string {
   return `export const ${name} = ${JSON.stringify(value)};`;
 }
 
 export function serializeTocJsxExport(name: string, items: TocJsxExportItem[]): string {
-  return serializeValueExport(
-    name,
-    items.map((item) => ({
-      depth: item.depth,
-      url: item.url,
-      title: flattenHast(item.title),
-      ...(typeof item._step === 'number' ? { _step: item._step } : {}),
-    })),
-  );
+  return serializeValueExport(name, items);
 }
 
 export function appendExports(code: string, data: Data): string {

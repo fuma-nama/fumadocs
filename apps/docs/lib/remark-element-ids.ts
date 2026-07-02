@@ -1,5 +1,12 @@
 import { defineMdastPlugin } from 'satteri';
 
+declare module 'satteri' {
+  interface DataMap {
+    elementIds?: string[];
+  }
+}
+
+/** Docs lint only — collects JSX `id` attributes for link validation. */
 export function remarkElementIds() {
   return defineMdastPlugin({
     name: 'remark-element-ids',
@@ -11,7 +18,7 @@ export function remarkElementIds() {
       );
       if (!idAttr || typeof idAttr.value !== 'string') return;
 
-      const ids = (ctx.data.elementIds ??= []) as string[];
+      const ids = (ctx.data.elementIds ??= []);
       ids.push(idAttr.value);
     },
   });

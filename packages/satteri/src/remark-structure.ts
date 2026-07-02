@@ -69,7 +69,11 @@ export function remarkStructure({
       },
     };
 
-    function finish(ctx: MdastVisitorContext) {
+    let structuredDataAttached = false;
+
+    function attachStructuredData(ctx: MdastVisitorContext) {
+      if (structuredDataAttached) return;
+      structuredDataAttached = true;
       ctx.data.structuredData = data;
     }
 
@@ -116,23 +120,23 @@ export function remarkStructure({
       name: 'remark-structure',
       heading(node, ctx) {
         visit(node, ctx);
-        finish(ctx);
+        attachStructuredData(ctx);
       },
       paragraph(node, ctx) {
         visit(node, ctx);
-        finish(ctx);
+        attachStructuredData(ctx);
       },
       blockquote(node, ctx) {
         visit(node, ctx);
-        finish(ctx);
+        attachStructuredData(ctx);
       },
       tableCell(node, ctx) {
         visit(node, ctx);
-        finish(ctx);
+        attachStructuredData(ctx);
       },
       mdxJsxFlowElement(node, ctx) {
         visit(node, ctx);
-        finish(ctx);
+        attachStructuredData(ctx);
       },
     });
   };
