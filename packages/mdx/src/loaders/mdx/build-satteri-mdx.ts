@@ -8,7 +8,7 @@ import type { DocCollectionItem } from '@/config/build';
 import type { CompilerOptions } from '@/loaders/mdx/build-mdx';
 import type { PostprocessOptions } from '@/loaders/mdx/remark-postprocess';
 import { getSatteriOptions } from '@/config/build-satteri';
-import { compileMdx, queueDataExport, flattenNode } from '@fumadocs/satteri';
+import { compileMdx, queueDataExport, flattenNode, remarkLlms } from '@fumadocs/satteri';
 import { defineMdastPlugin } from 'satteri';
 import { remarkIncludeSatteri } from '@/loaders/mdx/remark-include-satteri';
 
@@ -53,6 +53,17 @@ export async function buildSatteriMDX(
     _compiler,
   };
 
+  const postprocessPlugins = [
+    postprocess.includeProcessedMarkdown
+      ? remarkLlms(
+          typeof postprocess.includeProcessedMarkdown === 'object'
+            ? postprocess.includeProcessedMarkdown
+            : undefined,
+        )
+      : false,
+    postprocessPlugin(postprocess),
+  ].filter(Boolean);
+
   const result = await compileMdx({
     source,
     filePath,
@@ -66,7 +77,7 @@ export async function buildSatteriMDX(
       mdastPlugins: [
         remarkIncludeSatteri({ cwd: collection?.cwd }),
         ...(satteriOptions.mdastPlugins ?? []),
-        postprocessPlugin(postprocess),
+        ...postprocessPlugins,
       ],
     },
   });
@@ -75,14 +86,32 @@ export async function buildSatteriMDX(
 }
 
 function postprocessPlugin(options: PostprocessOptions) {
-  return () =>
-    defineMdastPlugin({
+  return () => {
+    let scheduled = false;
+
+    function schedule(ctx: { data: Record<string, unknown> }) {
+      if (scheduled) return;
+      scheduled = true;
+      queueMicrotask(() => {
+        for (const name of options.valueToExport ?? []) {
+          if (name in ctx.data) {
+            queueDataExport(ctx.data, name, ctx.data[name]);
+          }
+        }
+      });
+    }
+
+    return defineMdastPlugin({
       name: 'remark-postprocess',
       heading(node, ctx) {
         const frontmatter = (ctx.data.frontmatter ??= {}) as Record<string, unknown>;
         if (!frontmatter.title && node.depth === 1) {
           frontmatter.title = flattenNode(node);
         }
+        schedule(ctx);
+      },
+      paragraph(_node, ctx) {
+        schedule(ctx);
       },
       link(node, ctx) {
         if (!options.extractLinkReferences) return;
@@ -91,4 +120,5 @@ function postprocessPlugin(options: PostprocessOptions) {
         queueDataExport(ctx.data, 'extractedReferences', refs);
       },
     });
+  };
 }

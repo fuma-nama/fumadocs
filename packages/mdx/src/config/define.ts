@@ -9,7 +9,8 @@ import type { BuildEnvironment } from './build';
 /** @see `fumadocs-mdx/config/satteri` for typed Sätteri preset options */
 export type SatteriPresetConfig =
   | Record<string, unknown>
-  | ((environment: BuildEnvironment) => Promise<Record<string, unknown>>);
+  | object
+  | ((environment: BuildEnvironment) => Promise<Record<string, unknown> | object>);
 
 export type CollectionSchema<Schema extends StandardSchemaV1, Context> =
   | Schema

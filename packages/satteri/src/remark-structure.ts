@@ -1,12 +1,18 @@
 import { defineMdastPlugin } from 'satteri';
 import type { Nodes } from 'mdast';
 import type { StructuredData } from 'fumadocs-core/mdx-plugins/remark-structure';
+import {
+  defaultStringifier,
+  type Stringifier,
+  type StringifyOptions,
+} from 'fumadocs-core/mdx-plugins/stringifier';
 import { flattenNode } from '@/utils';
 import { queueDataExport } from '@/inject-exports';
 
 export interface StructureOptions {
   types?: string[] | ((node: Nodes) => boolean);
   mdxTypes?: (node: Nodes) => boolean;
+  stringify?: Stringifier<StringifierContext> | StringifyOptions<StringifierContext>;
   exportAs?: string | boolean;
 }
 
@@ -17,19 +23,45 @@ declare module 'satteri' {
   }
 }
 
+interface StringifierContext {
+  addContent: (...content: StructuredData['contents']) => void;
+}
+
 export function remarkStructure({
   types = ['heading', 'paragraph', 'blockquote', 'tableCell', 'mdxJsxFlowElement'],
   mdxTypes = (node) => !('children' in node) || node.children.length === 0,
+  stringify: stringifyOptions,
   exportAs = false,
 }: StructureOptions = {}) {
   const matchType =
     typeof types === 'function' ? types : (node: Nodes) => types.includes(node.type);
+  const stringify =
+    typeof stringifyOptions === 'function'
+      ? stringifyOptions
+      : stringifyOptions
+        ? defaultStringifier<StringifierContext>({
+            ...stringifyOptions,
+            stringify(node, parent, state, info, ctx) {
+              const structured = node.data?.structuredData;
+              if (structured) ctx.addContent(...structured.contents);
+              return stringifyOptions.stringify?.(node, parent, state, info, ctx);
+            },
+          })
+        : null;
 
-    return () => {
+  return () => {
     const data: StructuredData = { contents: [], headings: [] };
     let lastHeading: string | undefined;
     let seeded = false;
     let exported = false;
+
+    const stringifierCtx: StringifierContext = {
+      addContent(...content) {
+        for (const item of content) {
+          data.contents.push({ ...item, heading: item.heading ?? lastHeading });
+        }
+      },
+    };
 
     function finish(ctx: { data: Record<string, unknown> }) {
       ctx.data.structuredData = data;
@@ -66,13 +98,17 @@ export function remarkStructure({
         const id = headingData.hProperties?.id;
         if (!id) return;
 
-        const content = flattenNode(node).trim();
+        const content = (
+          stringify ? stringify.call(undefined as never, node, stringifierCtx) : flattenNode(node)
+        ).trim();
         if (content.length > 0) data.headings.push({ id, content });
         lastHeading = id;
         return;
       }
 
-      const content = flattenNode(node).trim();
+      const content = (
+        stringify ? stringify.call(undefined as never, node, stringifierCtx) : flattenNode(node)
+      ).trim();
       if (content.length > 0) {
         data.contents.push({ heading: lastHeading, content });
       }

@@ -11,6 +11,10 @@ import { toEstree } from 'hast-util-to-estree';
 import { type ParameterTag, parseTags } from '@/lib/parse-tags';
 import type { MdxJsxAttribute, MdxJsxExpressionAttribute, MdxJsxFlowElement } from 'mdast-util-mdx';
 import type { VFile } from 'vfile';
+import { defineMdastPlugin } from 'satteri';
+import type { MdastNode } from 'satteri';
+import { fileURLToPath } from 'node:url';
+import path from 'node:path';
 
 function objectBuilder() {
   const out: ObjectExpression = {
@@ -285,4 +289,122 @@ export function remarkAutoTypeTable(
 
     await Promise.all(queue);
   };
+}
+
+export function remarkAutoTypeTableSatteri(config: RemarkAutoTypeTableOptions = {}) {
+  const {
+    name = 'auto-type-table',
+    renderMarkdown,
+    renderType,
+    shiki,
+    generator = createGenerator(),
+  } = config;
+
+  let renderer: MarkdownRenderer;
+  if (renderMarkdown && renderType) {
+    renderer = { renderMarkdownToHast: renderMarkdown, renderTypeToHast: renderType };
+  } else {
+    renderer = markdownRenderer(shiki);
+    if (renderMarkdown) renderer.renderMarkdownToHast = renderMarkdown;
+    if (renderType) renderer.renderTypeToHast = renderType;
+  }
+
+  async function generateTables(
+    filePath: string | undefined,
+    props: TypeTableProps,
+    attributes: (MdxJsxAttribute | MdxJsxExpressionAttribute)[],
+  ) {
+    const {
+      outputName = 'TypeTable',
+      options: generateOptions = {},
+      remarkStringify = true,
+    } = config;
+
+    let basePath = props.cwd && filePath ? path.dirname(filePath) : generateOptions.basePath;
+    if (filePath) basePath ??= path.dirname(filePath);
+
+    const output = await generator.generateTypeTable(props, {
+      ...generateOptions,
+      basePath,
+    });
+    const rendered: MdxJsxFlowElement[] = [];
+
+    for (const doc of output) {
+      rendered.push({
+        type: 'mdxJsxFlowElement',
+        name: outputName,
+        attributes: [
+          {
+            type: 'mdxJsxAttribute',
+            name: 'id',
+            value: `type-table-${doc.id}`,
+          },
+          {
+            type: 'mdxJsxAttribute',
+            name: 'type',
+            value: {
+              type: 'mdxJsxAttributeValueExpression',
+              value: remarkStringify ? JSON.stringify(doc, null, 2) : '',
+              data: {
+                estree: {
+                  type: 'Program',
+                  sourceType: 'module',
+                  body: [
+                    {
+                      type: 'ExpressionStatement',
+                      expression: await buildTypeProp(doc.entries, renderer),
+                    },
+                  ],
+                },
+              },
+            },
+          },
+          ...attributes,
+        ],
+        children: [],
+      });
+    }
+
+    return rendered;
+  }
+
+  return defineMdastPlugin({
+    name: 'remark-auto-type-table',
+    async mdxJsxFlowElement(node, ctx) {
+      if (node.name !== name) return;
+
+      const props: TypeTableProps = {};
+      const attributes: (MdxJsxAttribute | MdxJsxExpressionAttribute)[] = [];
+      const filePath = ctx.fileURL ? fileURLToPath(ctx.fileURL) : undefined;
+
+      for (const attr of node.attributes) {
+        if (attr.type !== 'mdxJsxAttribute') {
+          attributes.push(attr);
+          continue;
+        }
+
+        switch (attr.name) {
+          case 'cwd':
+            props.cwd = true;
+            break;
+          case 'path':
+          case 'name':
+          case 'type':
+            if (typeof attr.value === 'string') props[attr.name] = attr.value;
+            break;
+          default:
+            attributes.push(attr);
+        }
+      }
+
+      const parent = ctx.parent(node);
+      const index = ctx.indexOf(node);
+      if (!parent || index === undefined) return;
+
+      const children = await generateTables(filePath, props, attributes);
+      const next = [...parent.children];
+      next.splice(index, 1, ...(children as MdastNode[]));
+      ctx.setProperty(parent, 'children', next);
+    },
+  });
 }

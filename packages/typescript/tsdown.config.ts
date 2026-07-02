@@ -10,6 +10,6 @@ export default defineConfig({
   entry: ['src/index.ts', 'src/ui/index.ts'],
   deps: {
     onlyBundle: [],
-    neverBundle: ['server-only'],
+    neverBundle: ['server-only', 'satteri'],
   },
 });

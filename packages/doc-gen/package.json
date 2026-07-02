@@ -57,6 +57,7 @@
     "fumadocs-core": "workspace:*",
     "mdast-util-mdx": "^3.0.0",
     "remark": "^15.0.1",
+    "satteri": "^0.9.4",
     "tsconfig": "workspace:*",
     "tsdown": "0.22.3",
     "typescript": "^6.0.3"
@@ -66,9 +67,13 @@
     "@types/hast": "*",
     "@types/mdast": "*",
     "fumadocs-core": "^15.7.2 || ^16.0.0",
-    "mdast-util-mdx": "*"
+    "mdast-util-mdx": "*",
+    "satteri": "^0.9.4"
   },
   "peerDependenciesMeta": {
+    "satteri": {
+      "optional": true
+    },
     "mdast-util-mdx": {
       "optional": true
     },

@@ -8,5 +8,6 @@ export default defineConfig({
   entry: ['src/index.ts', 'src/remark-ts2js.ts'],
   deps: {
     onlyBundle: [],
+    neverBundle: ['satteri'],
   },
 });
