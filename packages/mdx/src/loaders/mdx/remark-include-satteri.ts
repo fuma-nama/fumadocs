@@ -1,11 +1,36 @@
 import { fileURLToPath } from 'node:url';
 import * as path from 'node:path';
+import Slugger from 'github-slugger';
 import { defineMdastPlugin, mdxToMdast, markdownToMdast } from 'satteri';
 import type { MdastVisitorContext } from 'satteri';
 import { frontmatter } from 'fumadocs-core/content/md/frontmatter';
 import { flattenNode } from '@fumadocs/satteri';
 import type { Code, RootContent } from 'mdast';
+import type { Directives } from 'mdast-util-directive';
+import type { MdxJsxFlowElement, MdxJsxTextElement } from 'mdast-util-mdx';
 import type { CompilerOptions } from '@/loaders/mdx/build-mdx';
+
+type IncludeNode = RootContent | MdxJsxFlowElement | MdxJsxTextElement | Directives;
+
+function parseElementAttributes(
+  element: IncludeNode,
+): Record<string, string | null | undefined> {
+  if (!('attributes' in element)) return {};
+  if (Array.isArray(element.attributes)) {
+    const attributes: Record<string, string | null> = {};
+    for (const attr of element.attributes) {
+      if (
+        attr.type === 'mdxJsxAttribute' &&
+        (typeof attr.value === 'string' || attr.value === null)
+      ) {
+        attributes[attr.name] = attr.value;
+      }
+    }
+    return attributes;
+  }
+
+  return element.attributes ?? {};
+}
 
 export function remarkIncludeSatteri({ cwd }: { cwd?: string } = {}) {
   return defineMdastPlugin({
@@ -21,7 +46,7 @@ export function remarkIncludeSatteri({ cwd }: { cwd?: string } = {}) {
   });
 }
 
-async function replaceInclude(node: RootContent, ctx: MdastVisitorContext, cwd?: string) {
+async function replaceInclude(node: IncludeNode, ctx: MdastVisitorContext, cwd?: string) {
   const specifier = flattenNode(node).trim();
   if (!specifier) return;
 
@@ -29,8 +54,14 @@ async function replaceInclude(node: RootContent, ctx: MdastVisitorContext, cwd?:
   const index = ctx.indexOf(node);
   if (!parent || index === undefined) return;
 
+  const attributes = parseElementAttributes(node);
   const { file: relativePath, section } = parseSpecifier(specifier);
-  const baseDir = ctx.fileURL ? path.dirname(fileURLToPath(ctx.fileURL)) : cwd ?? process.cwd();
+  const baseDir =
+    'cwd' in attributes
+      ? (cwd ?? process.cwd())
+      : ctx.fileURL
+        ? path.dirname(fileURLToPath(ctx.fileURL))
+        : (cwd ?? process.cwd());
   const targetPath = path.resolve(baseDir, relativePath);
 
   const compiler = ctx.data._compiler as CompilerOptions | undefined;
@@ -43,7 +74,8 @@ async function replaceInclude(node: RootContent, ctx: MdastVisitorContext, cwd?:
     const content = await fsRead(targetPath);
     replacement = {
       type: 'code',
-      lang: ext.slice(1),
+      lang: attributes.lang ?? ext.slice(1),
+      meta: attributes.meta ?? undefined,
       value: content,
     } satisfies Code;
   } else {
@@ -66,9 +98,12 @@ async function replaceInclude(node: RootContent, ctx: MdastVisitorContext, cwd?:
   }
 
   if (Array.isArray(replacement)) {
-    const children = [...parent.children];
-    children.splice(index, 1, ...replacement);
-    ctx.setProperty(parent, 'children', children);
+    if (replacement.length === 0) {
+      ctx.removeNode(node);
+    } else {
+      ctx.replaceNode(node, replacement[0]!);
+      if (replacement.length > 1) ctx.insertAfter(replacement[0]!, replacement.slice(1));
+    }
   } else {
     ctx.replaceNode(node, replacement);
   }
@@ -86,17 +121,29 @@ function parseSpecifier(specifier: string) {
 }
 
 function extractSection(children: RootContent[], section: string): RootContent[] | undefined {
+  const slugger = new Slugger();
   let nodes: RootContent[] | undefined;
   let capturing = false;
 
   for (const node of children) {
     if (node.type === 'heading') {
       if (capturing) break;
-      const id = (node.data as { hProperties?: { id?: string } } | undefined)?.hProperties?.id;
+      const id =
+        (node.data as { hProperties?: { id?: string } } | undefined)?.hProperties?.id ??
+        slugger.slug(flattenNode(node));
       if (id === section) {
         capturing = true;
         nodes = [node];
       }
+      continue;
+    }
+
+    if (
+      (node.type === 'mdxJsxFlowElement' || node.type === 'containerDirective') &&
+      node.name === 'section'
+    ) {
+      const id = parseElementAttributes(node).id;
+      if (id === section) return node.children as RootContent[];
       continue;
     }
 

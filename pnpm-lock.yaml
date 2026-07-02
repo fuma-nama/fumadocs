@@ -182,6 +182,15 @@ importers:
       react-remove-scroll:
         specifier: ^2.7.2
         version: 2.7.2(@types/react@19.2.17)(react@19.2.7)
+      remark:
+        specifier: ^15.0.1
+        version: 15.0.1
+      remark-gfm:
+        specifier: ^4.0.1
+        version: 4.0.1
+      remark-rehype:
+        specifier: ^11.1.2
+        version: 11.1.2
       satteri:
         specifier: ^0.9.4
         version: 0.9.4
@@ -191,6 +200,9 @@ importers:
       twoslash:
         specifier: ^0.3.9
         version: 0.3.9(typescript@6.0.3)
+      unist-util-visit:
+        specifier: ^5.1.0
+        version: 5.1.0
       zod:
         specifier: ^4.4.3
         version: 4.4.3
@@ -2724,6 +2736,9 @@ importers:
       estree-util-value-to-estree:
         specifier: ^3.5.0
         version: 3.5.0
+      github-slugger:
+        specifier: ^2.0.0
+        version: 2.0.0
       js-yaml:
         specifier: ^5.1.0
         version: 5.1.0
@@ -3419,6 +3434,9 @@ importers:
       image-size:
         specifier: ^2.0.2
         version: 2.0.2
+      mdast-util-gfm:
+        specifier: ^3.1.0
+        version: 3.1.0
       npm-to-yarn:
         specifier: ^3.0.1
         version: 3.0.1

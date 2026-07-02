@@ -1,6 +1,7 @@
 import { defineMdastPlugin } from 'satteri';
 import type { MdastNode, MdastVisitorContext } from 'satteri';
 import type { Root } from 'mdast';
+import { gfmToMarkdown } from 'mdast-util-gfm';
 import type { LLMsOptions } from 'fumadocs-core/mdx-plugins/remark-llms';
 import { defaultStringifier } from 'fumadocs-core/mdx-plugins/stringifier';
 import { queueDataExport } from '@/inject-exports';
@@ -26,6 +27,7 @@ const ROOT_VISITORS = [
   'containerDirective',
   'leafDirective',
   'math',
+  'inlineMath',
 ] as const;
 
 function isRootChild(node: MdastNode, ctx: MdastVisitorContext) {
@@ -45,6 +47,7 @@ export function remarkLlms({
 
     const stringifier = defaultStringifier({
       ...rest,
+      ...gfmToMarkdown(),
       filterElement(node) {
         switch (node.type) {
           case 'mdxjsEsm':
@@ -54,6 +57,12 @@ export function remarkLlms({
         }
       },
       handlers: {
+        inlineMath(node: { value: string }) {
+          return `$${node.value}$`;
+        },
+        math(node: { value: string }) {
+          return `$$\n${node.value}\n$$`;
+        },
         heading(node, _parent, state, info) {
           const id = node.data?.hProperties?.id;
           const value = state.containerPhrasing(node, info);
@@ -66,7 +75,7 @@ export function remarkLlms({
 
     function track(node: MdastNode, ctx: MdastVisitorContext) {
       ctxRef = ctx;
-      if (isRootChild(node, ctx)) rootChildren.push(node);
+      if (isRootChild(node, ctx)) rootChildren.push(structuredClone(node));
       if (scheduled) return;
       scheduled = true;
       queueMicrotask(() => {

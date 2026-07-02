@@ -1,11 +1,12 @@
 import { defineMdastPlugin } from 'satteri';
 import type { Nodes } from 'mdast';
+import { gfmToMarkdown } from 'mdast-util-gfm';
 import type { StructuredData } from 'fumadocs-core/mdx-plugins/remark-structure';
 import {
-  defaultStringifier,
+  defaultStringifier as structureDefaultStringifier,
   type Stringifier,
   type StringifyOptions,
-} from 'fumadocs-core/mdx-plugins/stringifier';
+} from 'fumadocs-core/mdx-plugins/remark-structure';
 import { flattenNode } from '@/utils';
 import { queueDataExport } from '@/inject-exports';
 
@@ -27,6 +28,30 @@ interface StringifierContext {
   addContent: (...content: StructuredData['contents']) => void;
 }
 
+function wrapStringifier(
+  stringifyOptions?: StringifyOptions<StringifierContext> | Stringifier<StringifierContext>,
+): Stringifier<StringifierContext> | null {
+  if (!stringifyOptions) return null;
+  if (typeof stringifyOptions === 'function') {
+    return (node, ctx) => stringifyOptions(structuredClone(node), ctx);
+  }
+
+  const base = structureDefaultStringifier({
+    ...stringifyOptions,
+    ...gfmToMarkdown(),
+    handlers: {
+      inlineMath(node: { value: string }) {
+        return `$${node.value}$`;
+      },
+      math(node: { value: string }) {
+        return `$$\n${node.value}\n$$`;
+      },
+      ...stringifyOptions.handlers,
+    },
+  });
+  return (node, ctx) => base(structuredClone(node), ctx);
+}
+
 export function remarkStructure({
   types = ['heading', 'paragraph', 'blockquote', 'tableCell', 'mdxJsxFlowElement'],
   mdxTypes = (node) => !('children' in node) || node.children.length === 0,
@@ -35,19 +60,7 @@ export function remarkStructure({
 }: StructureOptions = {}) {
   const matchType =
     typeof types === 'function' ? types : (node: Nodes) => types.includes(node.type);
-  const stringify =
-    typeof stringifyOptions === 'function'
-      ? stringifyOptions
-      : stringifyOptions
-        ? defaultStringifier<StringifierContext>({
-            ...stringifyOptions,
-            stringify(node, parent, state, info, ctx) {
-              const structured = node.data?.structuredData;
-              if (structured) ctx.addContent(...structured.contents);
-              return stringifyOptions.stringify?.(node, parent, state, info, ctx);
-            },
-          })
-        : null;
+  const stringify = wrapStringifier(stringifyOptions);
 
   return () => {
     const data: StructuredData = { contents: [], headings: [] };

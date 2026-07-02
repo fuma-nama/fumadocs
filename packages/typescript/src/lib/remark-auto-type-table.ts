@@ -313,6 +313,7 @@ export function remarkAutoTypeTableSatteri(config: RemarkAutoTypeTableOptions = 
     filePath: string | undefined,
     props: TypeTableProps,
     attributes: (MdxJsxAttribute | MdxJsxExpressionAttribute)[],
+    projectCwd?: string,
   ) {
     const {
       outputName = 'TypeTable',
@@ -320,7 +321,7 @@ export function remarkAutoTypeTableSatteri(config: RemarkAutoTypeTableOptions = 
       remarkStringify = true,
     } = config;
 
-    let basePath = props.cwd && filePath ? path.dirname(filePath) : generateOptions.basePath;
+    let basePath = props.cwd ? projectCwd : generateOptions.basePath;
     if (filePath) basePath ??= path.dirname(filePath);
 
     const output = await generator.generateTypeTable(props, {
@@ -401,10 +402,18 @@ export function remarkAutoTypeTableSatteri(config: RemarkAutoTypeTableOptions = 
       const index = ctx.indexOf(node);
       if (!parent || index === undefined) return;
 
-      const children = await generateTables(filePath, props, attributes);
-      const next = [...parent.children];
-      next.splice(index, 1, ...(children as MdastNode[]));
-      ctx.setProperty(parent, 'children', next);
+      const children = await generateTables(
+        filePath,
+        props,
+        attributes,
+        ctx.data._cwd as string | undefined,
+      );
+      if (children.length === 0) {
+        ctx.removeNode(node);
+      } else {
+        ctx.replaceNode(node, children[0]!);
+        if (children.length > 1) ctx.insertAfter(children[0]!, children.slice(1));
+      }
     },
   });
 }

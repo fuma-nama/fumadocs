@@ -61,9 +61,13 @@
     "react-dom": "^19.2.7",
     "react-force-graph-2d": "^1.29.1",
     "react-remove-scroll": "^2.7.2",
+    "remark": "^15.0.1",
+    "remark-gfm": "^4.0.1",
+    "remark-rehype": "^11.1.2",
     "satteri": "^0.9.4",
     "shiki": "^4.2.0",
     "twoslash": "^0.3.9",
+    "unist-util-visit": "^5.1.0",
     "zod": "^4.4.3"
   },
   "devDependencies": {

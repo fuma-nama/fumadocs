@@ -51,6 +51,7 @@ export async function buildSatteriMDX(
   const data: Record<string, unknown> = {
     frontmatter,
     _compiler,
+    _cwd: collection?.cwd,
   };
 
   const postprocessPlugins = [
