@@ -7,7 +7,6 @@ import {
   type Stringifier,
   type StringifyOptions,
 } from 'fumadocs-core/mdx-plugins/remark-structure';
-import { flattenNode } from '@/utils';
 
 export interface StructureOptions {
   types?: string[] | ((node: Nodes) => boolean);
@@ -19,6 +18,14 @@ export interface StructureOptions {
 interface StringifierContext {
   addContent: (...content: StructuredData['contents']) => void;
 }
+
+const STRUCTURE_VISITORS = [
+  'heading',
+  'paragraph',
+  'blockquote',
+  'tableCell',
+  'mdxJsxFlowElement',
+] as const;
 
 function wrapStringifier(
   stringifyOptions?: StringifyOptions | Stringifier,
@@ -46,6 +53,17 @@ function wrapStringifier(
   return (node, ctx) => baseFn(structuredClone(node), ctx);
 }
 
+function nodeContent(
+  node: Nodes,
+  ctx: MdastVisitorContext,
+  stringify: Stringifier | null,
+  stringifierCtx: StringifierContext,
+) {
+  return stringify
+    ? stringify.call(undefined as never, node, stringifierCtx).trim()
+    : ctx.textContent(node).trim();
+}
+
 export function remarkStructure({
   types = ['heading', 'paragraph', 'blockquote', 'tableCell', 'mdxJsxFlowElement'],
   mdxTypes = (node) => !('children' in node) || node.children.length === 0,
@@ -69,15 +87,9 @@ export function remarkStructure({
       },
     };
 
-    let structuredDataAttached = false;
-
-    function attachStructuredData(ctx: MdastVisitorContext) {
-      if (structuredDataAttached) return;
-      structuredDataAttached = true;
-      ctx.data.structuredData = data;
-    }
-
     function visit(node: Nodes, ctx: MdastVisitorContext) {
+      if (!ctx.data.structuredData) ctx.data.structuredData = data;
+
       if (!matchType(node)) return;
       if (node.type === 'mdxJsxFlowElement' || node.type === 'mdxJsxTextElement') {
         if (!mdxTypes(node)) return;
@@ -100,17 +112,13 @@ export function remarkStructure({
         const id = headingData.hProperties?.id;
         if (!id) return;
 
-        const content = (
-          stringify ? stringify.call(undefined as never, node, stringifierCtx) : flattenNode(node)
-        ).trim();
+        const content = nodeContent(node, ctx, stringify, stringifierCtx);
         if (content.length > 0) data.headings.push({ id, content });
         lastHeading = id;
         return;
       }
 
-      const content = (
-        stringify ? stringify.call(undefined as never, node, stringifierCtx) : flattenNode(node)
-      ).trim();
+      const content = nodeContent(node, ctx, stringify, stringifierCtx);
       if (content.length > 0) {
         data.contents.push({ heading: lastHeading, content });
       }
@@ -118,26 +126,7 @@ export function remarkStructure({
 
     return defineMdastPlugin({
       name: 'remark-structure',
-      heading(node, ctx) {
-        visit(node, ctx);
-        attachStructuredData(ctx);
-      },
-      paragraph(node, ctx) {
-        visit(node, ctx);
-        attachStructuredData(ctx);
-      },
-      blockquote(node, ctx) {
-        visit(node, ctx);
-        attachStructuredData(ctx);
-      },
-      tableCell(node, ctx) {
-        visit(node, ctx);
-        attachStructuredData(ctx);
-      },
-      mdxJsxFlowElement(node, ctx) {
-        visit(node, ctx);
-        attachStructuredData(ctx);
-      },
+      ...Object.fromEntries(STRUCTURE_VISITORS.map((key) => [key, visit])),
     });
   };
 }

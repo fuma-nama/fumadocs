@@ -26,6 +26,8 @@ export function rehypeToc({ exportToc = true }: RehypeTocOptions = {}): HastPlug
 
   return () => {
     const items: TocJsxExportItem[] = [];
+    const tocExport =
+      resolved.as === 'esm' ? { name: resolved.name, items } : undefined;
 
     return defineHastPlugin({
       name: 'rehype-toc',
@@ -66,9 +68,9 @@ export function rehypeToc({ exportToc = true }: RehypeTocOptions = {}): HastPlug
 
           if (isTocOnly) ctx.removeNode(element);
 
-          if (resolved.as === 'esm') {
-            ctx.data._tocEsmExport = { name: resolved.name, items };
-          } else {
+          if (tocExport) {
+            if (!ctx.data._tocEsmExport) ctx.data._tocEsmExport = tocExport;
+          } else if (!ctx.data.rehypeToc) {
             ctx.data.rehypeToc = items;
           }
         },

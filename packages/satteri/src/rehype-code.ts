@@ -37,6 +37,13 @@ function elementClasses(element: Element) {
   return [];
 }
 
+function isHighlighted(element: Element) {
+  const className = element.properties.className;
+  if (typeof className === 'string') return className.includes('shiki');
+  if (Array.isArray(className)) return className.some((c) => String(c).includes('shiki'));
+  return false;
+}
+
 function shouldSkipHighlight(element: Element) {
   const skipLangs = new Set(['math']);
   const skipClasses = new Set(['language-math', 'math-inline', 'math-display']);
@@ -73,7 +80,7 @@ export function rehypeCode(options?: Partial<RehypeCodeOptions>) {
         filter: ['pre', 'code'],
         async visit(node, ctx) {
           const element = node as Element;
-          if (shouldSkipHighlight(element)) return;
+          if (isHighlighted(element) || shouldSkipHighlight(element)) return;
           if (element.tagName !== 'pre' && !(element.tagName === 'code' && inline)) {
             return;
           }

@@ -8,8 +8,8 @@ import type { DocCollectionItem } from '@/config/build';
 import type { CompilerOptions } from '@/loaders/mdx/build-mdx';
 import type { PostprocessOptions } from '@/loaders/mdx/remark-postprocess';
 import { getSatteriOptions } from '@/config/build-satteri';
-import { compileMdx, flattenNode, remarkLlms } from '@fumadocs/satteri';
-import { defineMdastPlugin, type Data, type MdastPluginInput } from 'satteri';
+import { compileMdx, remarkLlms } from '@fumadocs/satteri';
+import { defineMdastPlugin, type Data, type MdastPluginInput, type MdastVisitorContext } from 'satteri';
 import '@fumadocs/satteri/data-map';
 import '@/loaders/mdx/satteri-data-map';
 import { remarkIncludeSatteri } from '@/loaders/mdx/remark-include-satteri';
@@ -92,10 +92,10 @@ export async function buildSatteriMDX(
 function postprocessPlugin(options: PostprocessOptions) {
   return defineMdastPlugin({
     name: 'remark-postprocess',
-    heading(node, ctx) {
+    heading(node, ctx: MdastVisitorContext) {
       const frontmatter = (ctx.data.frontmatter ??= {});
       if (!frontmatter.title && node.depth === 1) {
-        frontmatter.title = flattenNode(node);
+        frontmatter.title = ctx.textContent(node);
       }
     },
     link(node, ctx) {

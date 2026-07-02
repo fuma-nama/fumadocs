@@ -1,7 +1,6 @@
 import Slugger from 'github-slugger';
-import { defineMdastPlugin } from 'satteri';
+import { defineMdastPlugin, type MdastVisitorContext } from 'satteri';
 import type { Heading } from 'mdast';
-import { flattenNode } from '@/utils';
 
 const regex = /\s*\[#(?<slug>[^]+?)]\s*$/;
 
@@ -24,7 +23,7 @@ export function remarkHeading({
 
     return defineMdastPlugin({
       name: 'remark-heading',
-      heading(node, ctx) {
+      heading(node, ctx: MdastVisitorContext) {
         if (!sluggerReady) {
           slugger?.reset();
           sluggerReady = true;
@@ -42,10 +41,10 @@ export function remarkHeading({
           }
         }
 
-        let flattened: string | null = null;
+        let title: string | null = null;
         if (!hProperties.id) {
-          flattened = flattenNode(node);
-          hProperties.id = resolveSlug(node, flattened);
+          title = ctx.textContent(node);
+          hProperties.id = resolveSlug(node, title);
         }
 
         ctx.setProperty(node, 'data', data as typeof node.data);
@@ -53,7 +52,7 @@ export function remarkHeading({
         if (generateToc) {
           const toc = (ctx.data.toc ??= []);
           toc.push({
-            title: flattened ?? flattenNode(node),
+            title: title ?? ctx.textContent(node),
             url: `#${hProperties.id}`,
             depth: node.depth,
           });

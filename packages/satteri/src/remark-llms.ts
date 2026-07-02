@@ -49,9 +49,9 @@ export function remarkLlms({
   ...rest
 }: LLMsOptions = {}) {
   return () => {
-    const rootChildren: MdastNode[] = [];
+    let rootParent: Parents | undefined;
+    const rootIndices: number[] = [];
     let expected = 0;
-    let collected = 0;
 
     const stringifier = defaultStringifier({
       ...rest,
@@ -82,7 +82,9 @@ export function remarkLlms({
     });
 
     function finalize(ctx: MdastVisitorContext) {
-      const tree = { type: 'root', children: rootChildren } as Root;
+      const parent = rootParent!;
+      const children = rootIndices.map((index) => structuredClone(parent.children[index]!));
+      const tree = { type: 'root', children } as Root;
       ctx.data[as] = stringifier.call(undefined as never, tree, undefined);
     }
 
@@ -90,6 +92,8 @@ export function remarkLlms({
       if (!isRootChild(node, ctx)) return;
 
       const parent = ctx.parent(node)!;
+      rootParent ??= parent;
+
       if (!expected) {
         expected = countRootTargets(parent);
         if (!expected) {
@@ -98,10 +102,9 @@ export function remarkLlms({
         }
       }
 
-      rootChildren.push(structuredClone(node));
-      collected++;
+      rootIndices.push(ctx.indexOf(node)!);
 
-      if (collected === expected) finalize(ctx);
+      if (rootIndices.length === expected) finalize(ctx);
     }
 
     return defineMdastPlugin({
