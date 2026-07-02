@@ -3,6 +3,7 @@ import { cva } from 'class-variance-authority';
 import { Airplay, Moon, Sun } from 'lucide-react';
 import { useTheme } from 'next-themes';
 import { type ComponentProps, useEffect, useState } from 'react';
+import { flushSync } from 'react-dom';
 import { cn } from '@/utils/cn';
 import { useTranslations } from '@fuma-translate/react';
 
@@ -31,6 +32,14 @@ export function ThemeSwitch({ className, mode = 'light-dark', ...props }: ThemeS
     system: t('System', { note: 'aria-label' }),
   };
 
+  const handleThemeChange = (newTheme: string) => {
+    if (document?.startViewTransition) {
+      document.startViewTransition(() => flushSync(() => setTheme(newTheme)));
+    } else {
+      setTheme(newTheme);
+    }
+  };
+
   useEffect(() => {
     setMounted(true);
   }, []);
@@ -47,7 +56,7 @@ export function ThemeSwitch({ className, mode = 'light-dark', ...props }: ThemeS
       <button
         className={container}
         aria-label={t('Toggle Theme', { note: 'aria-label' })}
-        onClick={() => setTheme(value === 'light' ? 'dark' : 'light')}
+        onClick={() => handleThemeChange(value === 'light' ? 'dark' : 'light')}
         data-theme-toggle=""
       >
         {themes.map(([key, Icon]) => {
@@ -72,21 +81,21 @@ export function ThemeSwitch({ className, mode = 'light-dark', ...props }: ThemeS
       <button
         aria-label={themeAriaLabels.light}
         className={cn(itemVariants({ active: value === 'light' }))}
-        onClick={() => setTheme('light')}
+        onClick={() => handleThemeChange('light')}
       >
         <Sun className="size-full" fill="currentColor" />
       </button>
       <button
         aria-label={themeAriaLabels.dark}
         className={cn(itemVariants({ active: value === 'dark' }))}
-        onClick={() => setTheme('dark')}
+        onClick={() => handleThemeChange('dark')}
       >
         <Moon className="size-full" fill="currentColor" />
       </button>
       <button
         aria-label={themeAriaLabels.system}
         className={cn(itemVariants({ active: value === 'system' }))}
-        onClick={() => setTheme('system')}
+        onClick={() => handleThemeChange('system')}
       >
         <Airplay className="size-full" fill="currentColor" />
       </button>
