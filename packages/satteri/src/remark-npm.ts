@@ -2,7 +2,6 @@ import { defineMdastPlugin } from 'satteri';
 import convert from 'npm-to-yarn';
 import { generateCodeBlockTabs } from 'fumadocs-core/mdx-plugins/codeblock-utils';
 import type { CodeBlockTabsOptions } from 'fumadocs-core/mdx-plugins/codeblock-utils';
-import { replaceChildAt } from '@/utils';
 
 interface PackageManager {
   name: string;
@@ -34,10 +33,6 @@ export function remarkNpm({
   return defineMdastPlugin({
     name: 'remark-npm',
     code(node, ctx) {
-      const parent = ctx.parent(node);
-      const index = ctx.indexOf(node);
-      if (!parent || index === undefined) return;
-
       let code: string;
       switch (node.lang) {
         case 'package-install':
@@ -82,11 +77,7 @@ export function remarkNpm({
         });
       }
 
-      ctx.setProperty(
-        parent,
-        'children',
-        replaceChildAt(parent.children, index, generateCodeBlockTabs(options)),
-      );
+      ctx.replaceNode(node, generateCodeBlockTabs(options));
     },
   });
 }

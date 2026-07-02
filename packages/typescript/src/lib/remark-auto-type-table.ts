@@ -410,9 +410,12 @@ export function remarkAutoTypeTableSatteri(config: RemarkAutoTypeTableOptions = 
       );
       if (children.length === 0) {
         ctx.removeNode(node);
-      } else {
+      } else if (children.length === 1) {
         ctx.replaceNode(node, children[0]!);
-        if (children.length > 1) ctx.insertAfter(children[0]!, children.slice(1));
+      } else {
+        const index = ctx.indexOf(node)!;
+        ctx.replaceNode(node, children[0]!);
+        ctx.insertChildAt(parent, index + 1, children.slice(1));
       }
     },
   });

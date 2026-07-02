@@ -8,7 +8,7 @@ import type { DocCollectionItem } from '@/config/build';
 import type { CompilerOptions } from '@/loaders/mdx/build-mdx';
 import type { PostprocessOptions } from '@/loaders/mdx/remark-postprocess';
 import { getSatteriOptions } from '@/config/build-satteri';
-import { compileMdx, queueDataExport, flattenNode, remarkLlms } from '@fumadocs/satteri';
+import { compileMdx, flattenNode, remarkLlms } from '@fumadocs/satteri';
 import { defineMdastPlugin } from 'satteri';
 import { remarkIncludeSatteri } from '@/loaders/mdx/remark-include-satteri';
 
@@ -52,6 +52,7 @@ export async function buildSatteriMDX(
     frontmatter,
     _compiler,
     _cwd: collection?.cwd,
+    _valueToExport: collection?.postprocess?.valueToExport,
   };
 
   const postprocessPlugins = [
@@ -87,39 +88,18 @@ export async function buildSatteriMDX(
 }
 
 function postprocessPlugin(options: PostprocessOptions) {
-  return () => {
-    let scheduled = false;
-
-    function schedule(ctx: { data: Record<string, unknown> }) {
-      if (scheduled) return;
-      scheduled = true;
-      queueMicrotask(() => {
-        for (const name of options.valueToExport ?? []) {
-          if (name in ctx.data) {
-            queueDataExport(ctx.data, name, ctx.data[name]);
-          }
-        }
-      });
-    }
-
-    return defineMdastPlugin({
-      name: 'remark-postprocess',
-      heading(node, ctx) {
-        const frontmatter = (ctx.data.frontmatter ??= {}) as Record<string, unknown>;
-        if (!frontmatter.title && node.depth === 1) {
-          frontmatter.title = flattenNode(node);
-        }
-        schedule(ctx);
-      },
-      paragraph(_node, ctx) {
-        schedule(ctx);
-      },
-      link(node, ctx) {
-        if (!options.extractLinkReferences) return;
-        const refs = (ctx.data.extractedReferences ??= []) as { href: string }[];
-        refs.push({ href: node.url });
-        queueDataExport(ctx.data, 'extractedReferences', refs);
-      },
-    });
-  };
+  return defineMdastPlugin({
+    name: 'remark-postprocess',
+    heading(node, ctx) {
+      const frontmatter = (ctx.data.frontmatter ??= {}) as Record<string, unknown>;
+      if (!frontmatter.title && node.depth === 1) {
+        frontmatter.title = flattenNode(node);
+      }
+    },
+    link(node, ctx) {
+      if (!options.extractLinkReferences) return;
+      const refs = (ctx.data.extractedReferences ??= []) as { href: string }[];
+      refs.push({ href: node.url });
+    },
+  });
 }

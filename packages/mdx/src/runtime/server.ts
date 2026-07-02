@@ -294,11 +294,14 @@ function createDocMethods(
       }
 
       const data = await load();
-      if (typeof data._markdown !== 'string')
+      const markdown =
+        data._markdown ??
+        (data._exports as { _markdown?: string } | undefined)?._markdown;
+      if (typeof markdown !== 'string')
         throw new Error(
           "getText('processed') requires `includeProcessedMarkdown` to be enabled in your collection config.",
         );
-      return data._markdown;
+      return markdown;
     },
     async getMDAST() {
       const data = await load();

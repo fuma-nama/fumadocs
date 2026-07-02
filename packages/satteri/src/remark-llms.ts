@@ -4,7 +4,6 @@ import type { Root } from 'mdast';
 import { gfmToMarkdown } from 'mdast-util-gfm';
 import type { LLMsOptions } from 'fumadocs-core/mdx-plugins/remark-llms';
 import { defaultStringifier } from 'fumadocs-core/mdx-plugins/stringifier';
-import { queueDataExport } from '@/inject-exports';
 
 export type { LLMsOptions } from 'fumadocs-core/mdx-plugins/remark-llms';
 
@@ -42,8 +41,6 @@ export function remarkLlms({
 }: LLMsOptions = {}) {
   return () => {
     const rootChildren: MdastNode[] = [];
-    let ctxRef: MdastVisitorContext | undefined;
-    let scheduled = false;
 
     const stringifier = defaultStringifier({
       ...rest,
@@ -74,16 +71,9 @@ export function remarkLlms({
     });
 
     function track(node: MdastNode, ctx: MdastVisitorContext) {
-      ctxRef = ctx;
       if (isRootChild(node, ctx)) rootChildren.push(structuredClone(node));
-      if (scheduled) return;
-      scheduled = true;
-      queueMicrotask(() => {
-        if (!ctxRef) return;
-        const tree = { type: 'root', children: rootChildren } as Root;
-        const markdown = stringifier.call(undefined as never, tree, undefined);
-        queueDataExport(ctxRef.data, as, markdown);
-      });
+      const tree = { type: 'root', children: rootChildren } as Root;
+      ctx.data[as] = stringifier.call(undefined as never, tree, undefined);
     }
 
     return defineMdastPlugin({

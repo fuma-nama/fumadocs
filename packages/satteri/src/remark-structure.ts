@@ -8,7 +8,6 @@ import {
   type StringifyOptions,
 } from 'fumadocs-core/mdx-plugins/remark-structure';
 import { flattenNode } from '@/utils';
-import { queueDataExport } from '@/inject-exports';
 
 export interface StructureOptions {
   types?: string[] | ((node: Nodes) => boolean);
@@ -66,7 +65,6 @@ export function remarkStructure({
     const data: StructuredData = { contents: [], headings: [] };
     let lastHeading: string | undefined;
     let seeded = false;
-    let exported = false;
 
     const stringifierCtx: StringifierContext = {
       addContent(...content) {
@@ -78,14 +76,6 @@ export function remarkStructure({
 
     function finish(ctx: { data: Record<string, unknown> }) {
       ctx.data.structuredData = data;
-      if (exportAs && !exported) {
-        exported = true;
-        queueDataExport(
-          ctx.data,
-          typeof exportAs === 'string' ? exportAs : 'structuredData',
-          data,
-        );
-      }
     }
 
     function visit(node: Nodes, ctx: { data: Record<string, unknown> }) {

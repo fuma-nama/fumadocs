@@ -1,7 +1,7 @@
 import { defineHastPlugin, type HastPluginDefinition } from 'satteri';
 import type { Element } from 'hast';
 import { handleTag } from '@/utils';
-import { queueTocJsxExport, type TocJsxExportItem } from '@/inject-exports';
+import type { TocJsxExportItem } from '@/inject-exports';
 
 export interface RehypeTocOptions {
   exportToc?:
@@ -67,7 +67,7 @@ export function rehypeToc({ exportToc = true }: RehypeTocOptions = {}): HastPlug
           if (isTocOnly) ctx.removeNode(element);
 
           if (resolved.as === 'esm') {
-            queueTocJsxExport(ctx.data, resolved.name, items);
+            ctx.data._tocEsmExport = { name: resolved.name, items };
           } else {
             ctx.data.rehypeToc = items;
           }

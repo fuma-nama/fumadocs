@@ -15,7 +15,10 @@ function unwrapReplacement(node: RootContent | Root): RootContent | RootContent[
 function replaceHighlightedNode(
   element: Element,
   next: RootContent | Root | undefined,
-  ctx: { replaceNode: (node: Element, newNode: RootContent) => void; insertAfter: (node: RootContent, newNode: RootContent | RootContent[]) => void },
+  ctx: {
+    replaceNode: (node: Element, newNode: RootContent) => void;
+    insertAfter: (node: RootContent, newNode: RootContent | RootContent[]) => void;
+  },
 ) {
   if (!next) return;
 
@@ -23,11 +26,42 @@ function replaceHighlightedNode(
   if (Array.isArray(replacement)) {
     if (replacement.length === 0) return;
     ctx.replaceNode(element, replacement[0]);
-    if (replacement.length > 1) ctx.insertAfter(replacement[0], replacement.slice(1));
+    if (replacement.length > 1) ctx.insertAfter(element, replacement.slice(1));
     return;
   }
 
   ctx.replaceNode(element, replacement);
+}
+
+function elementClasses(element: Element) {
+  const className = element.properties.className;
+  if (Array.isArray(className)) return className.map(String);
+  if (typeof className === 'string') return className.split(/\s+/);
+  return [];
+}
+
+function shouldSkipHighlight(element: Element) {
+  const skipLangs = new Set(['math']);
+  const skipClasses = new Set(['language-math', 'math-inline', 'math-display']);
+  const targets =
+    element.tagName === 'pre'
+      ? [
+          element,
+          ...element.children.filter(
+            (child): child is Element => child.type === 'element' && child.tagName === 'code',
+          ),
+        ]
+      : [element];
+
+  for (const target of targets) {
+    const classes = elementClasses(target);
+    if (classes.some((c) => skipClasses.has(c))) return true;
+
+    const lang = classes.find((c) => c.startsWith('language-'))?.slice('language-'.length);
+    if (lang && skipLangs.has(lang)) return true;
+  }
+
+  return false;
 }
 
 export function rehypeCode(options?: Partial<RehypeCodeOptions>) {
@@ -42,6 +76,7 @@ export function rehypeCode(options?: Partial<RehypeCodeOptions>) {
         filter: ['pre', 'code'],
         async visit(node, ctx) {
           const element = node as Element;
+          if (shouldSkipHighlight(element)) return;
           if (element.tagName !== 'pre' && !(element.tagName === 'code' && inline)) {
             return;
           }

@@ -1,5 +1,5 @@
-import { defineMdastPlugin, mdxToMdast } from 'satteri';
-import type { BlockContent, Code } from 'mdast';
+import { defineMdastPlugin, type MdastVisitorContext } from 'satteri';
+import type { BlockContent, Code, MdastNode } from 'mdast';
 import type { MdxJsxFlowElement } from 'mdast-util-mdx';
 import {
   generateCodeBlockTabs,
@@ -12,6 +12,11 @@ type TabType = 'CodeBlockTabs' | 'Tabs';
 export interface RemarkCodeTabOptions {
   Tabs?: TabType;
   parseMdx?: boolean;
+}
+
+function stripTabMeta(meta: string | null | undefined) {
+  if (!meta) return meta ?? undefined;
+  return parseCodeBlockAttributes(meta, ['tab', 'tab-group']).rest;
 }
 
 function processTabValue(nodes: Code[]) {
@@ -27,11 +32,7 @@ function processTabValue(nodes: Code[]) {
 }
 
 function mdxToAst(name: string): BlockContent[] {
-  const tree = mdxToMdast(name, { features: { gfm: true } }) as { children: BlockContent[] };
-  return tree.children.flatMap((child) => {
-    if (child.type === 'paragraph') return child.children as BlockContent[];
-    return child as BlockContent;
-  });
+  return [{ type: 'paragraph', children: [{ type: 'text', value: name }] }];
 }
 
 function buildTabs(
@@ -52,9 +53,9 @@ function buildTabs(
       }
       options.triggers.push({
         value,
-        children: withMdx ? (mdxToAst(value) as BlockContent[]) : [{ type: 'text', value }],
+        children: withMdx ? mdxToAst(value) : [{ type: 'text', value }],
       });
-      options.tabs.push({ value, children: list });
+      options.tabs.push({ value, children: list.map((code) => ({ ...code, meta: stripTabMeta(code.meta) })) });
     }
     const node = generateCodeBlockTabs(options);
     return (withParent ? [node] : node.children) as BlockContent[];
@@ -142,18 +143,34 @@ function buildTabs(
     : children;
 }
 
+function isInsideCodeBlockTabs(node: Code, ctx: MdastVisitorContext) {
+  let parent = ctx.parent(node);
+  while (parent) {
+    if (
+      parent.type === 'mdxJsxFlowElement' &&
+      ['CodeBlockTabs', 'CodeBlockTab', 'CodeBlockTabsList', 'CodeBlockTabsTrigger'].includes(
+        parent.name ?? '',
+      )
+    ) {
+      return true;
+    }
+    parent = ctx.parent(parent as MdastNode);
+  }
+  return false;
+}
+
 export function remarkCodeTab({ parseMdx = false, Tabs = 'CodeBlockTabs' }: RemarkCodeTabOptions = {}) {
   return defineMdastPlugin({
     name: 'remark-code-tab',
     code(node, ctx) {
-      if (!node.meta) return;
+      if (!node.meta || isInsideCodeBlockTabs(node, ctx)) return;
       const parent = ctx.parent(node);
       if (!parent || !('children' in parent)) return;
 
       const meta = parseCodeBlockAttributes(node.meta, ['tab', 'tab-group']);
       if (!meta.attributes.tab) return;
 
-      const children = [...parent.children] as Code[];
+      const children = parent.children as Code[];
       const index = ctx.indexOf(node);
       if (index === undefined) return;
 
@@ -165,6 +182,8 @@ export function remarkCodeTab({ parseMdx = false, Tabs = 'CodeBlockTabs' }: Rema
         if (!prevMeta.attributes.tab) break;
         start--;
       }
+
+      if (index !== start) return;
 
       let end = index + 1;
       while (end < children.length) {
@@ -180,18 +199,19 @@ export function remarkCodeTab({ parseMdx = false, Tabs = 'CodeBlockTabs' }: Rema
         const parsed = parseCodeBlockAttributes(item.meta!, ['tab', 'tab-group']);
         item.meta = parsed.rest;
         item.data ??= {};
-        (item.data as { tab?: string }).tab = parsed.attributes.tab ?? undefined;
+        (item.data as { tab?: string; tabGroup?: string; _code_tab_visited?: true }).tab =
+          parsed.attributes.tab ?? undefined;
         if (parsed.attributes['tab-group']) {
           (item.data as { tabGroup?: string }).tabGroup = parsed.attributes['tab-group'];
         }
       }
 
       const replacement = buildTabs(processTabValue(group), Tabs, parseMdx, true)[0]!;
-      const nextChildren = [...parent.children];
-      nextChildren.splice(start, end - start, replacement);
-      ctx.setProperty(parent, 'children', nextChildren);
+      (replacement.data ??= {})._code_tab_visited = true;
+      ctx.replaceNode(node, replacement);
+      for (let i = end - 1; i > start; i--) {
+        ctx.removeChildAt(parent, i);
+      }
     },
   });
 }
-
-// ponytail: groups adjacent tabbed code blocks when any code node in the group is visited

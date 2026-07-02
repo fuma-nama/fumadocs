@@ -1,6 +1,6 @@
 import { mdxToJs, type MdxCompileOptions, type MdastPluginInput, type HastPluginInput, type Frontmatter } from 'satteri';
 import { pathToFileURL } from 'node:url';
-import { appendExports, queueDataExport } from '@/inject-exports';
+import { appendExports, queueDataExport, queueTocJsxExport, type TocJsxExportItem } from '@/inject-exports';
 
 export interface CompileMdxOptions {
   source: string;
@@ -60,6 +60,26 @@ export async function compileMdx({
   const outData = result.data as typeof data;
   if (outData.frontmatter) {
     queueDataExport(outData, 'frontmatter', outData.frontmatter);
+  }
+  if (outData.structuredData) {
+    queueDataExport(outData, 'structuredData', outData.structuredData);
+  }
+  if (typeof outData._markdown === 'string') {
+    queueDataExport(outData, '_markdown', outData._markdown);
+  }
+  if (outData.extractedReferences) {
+    queueDataExport(outData, 'extractedReferences', outData.extractedReferences);
+  }
+  if (Array.isArray(outData._valueToExport)) {
+    for (const name of outData._valueToExport) {
+      if (typeof name === 'string' && name in outData) {
+        queueDataExport(outData, name, outData[name]);
+      }
+    }
+  }
+  const tocExport = outData._tocEsmExport as { name: string; items: TocJsxExportItem[] } | undefined;
+  if (tocExport) {
+    queueTocJsxExport(outData, tocExport.name, tocExport.items);
   }
 
   let code = appendExports(result.code, outData);

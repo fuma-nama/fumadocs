@@ -37,22 +37,22 @@ export function remarkIncludeSatteri({ cwd }: { cwd?: string } = {}) {
     name: 'remark-include',
     async mdxJsxFlowElement(node, ctx) {
       if (node.name !== 'include') return;
-      await replaceInclude(node, ctx, cwd);
+      return replaceInclude(node, ctx, cwd);
     },
     async containerDirective(node, ctx) {
       if (node.name !== 'include') return;
-      await replaceInclude(node, ctx, cwd);
+      return replaceInclude(node, ctx, cwd);
     },
   });
 }
 
-async function replaceInclude(node: IncludeNode, ctx: MdastVisitorContext, cwd?: string) {
+async function replaceInclude(
+  node: IncludeNode,
+  ctx: MdastVisitorContext,
+  cwd?: string,
+): Promise<{ raw: string } | Code | void> {
   const specifier = flattenNode(node).trim();
   if (!specifier) return;
-
-  const parent = ctx.parent(node);
-  const index = ctx.indexOf(node);
-  if (!parent || index === undefined) return;
 
   const attributes = parseElementAttributes(node);
   const { file: relativePath, section } = parseSpecifier(specifier);
@@ -68,45 +68,38 @@ async function replaceInclude(node: IncludeNode, ctx: MdastVisitorContext, cwd?:
   compiler?.addDependency(targetPath);
 
   const ext = path.extname(targetPath);
-  let replacement: RootContent | RootContent[];
+  const content = await fsRead(targetPath);
 
   if (ext !== '.md' && ext !== '.mdx') {
-    const content = await fsRead(targetPath);
-    replacement = {
+    let value = content;
+    if (section) value = extractCodeRegion(content, section.trim());
+
+    return {
       type: 'code',
       lang: attributes.lang ?? ext.slice(1),
       meta: attributes.meta ?? undefined,
-      value: content,
+      value,
     } satisfies Code;
-  } else {
-    const content = await fsRead(targetPath);
-    const parsed = frontmatter(content);
-    const parse = ext === '.mdx' ? mdxToMdast : markdownToMdast;
-    const tree = parse(parsed.content, {
-      features: { gfm: true, directive: true, headingAttributes: true },
-    }) as { children: RootContent[] };
-
-    if (section) {
-      const extracted = extractSection(tree.children, section);
-      if (!extracted) {
-        throw new Error(`Cannot find section ${section} in ${targetPath}`);
-      }
-      replacement = extracted;
-    } else {
-      replacement = tree.children;
-    }
   }
 
-  if (Array.isArray(replacement)) {
-    if (replacement.length === 0) {
-      ctx.removeNode(node);
-    } else {
-      ctx.replaceNode(node, replacement[0]!);
-      if (replacement.length > 1) ctx.insertAfter(replacement[0]!, replacement.slice(1));
-    }
-  } else {
-    ctx.replaceNode(node, replacement);
+  const parsed = frontmatter(content);
+  const body = parsed.content;
+  const parse = ext === '.mdx' ? mdxToMdast : markdownToMdast;
+  const tree = parse(body, {
+    features: { gfm: true, directive: true, headingAttributes: true },
+  }) as { children: RootContent[] };
+
+  const raw = section
+    ? extractSectionRaw(tree.children, section, body)
+    : body.trimEnd();
+
+  if (section && raw === undefined) {
+    throw new Error(
+      `Cannot find section ${section} in ${targetPath}, make sure you have encapsulated the section in a <section id="${section}"> tag, or a :::section directive with remark-directive configured.`,
+    );
   }
+
+  return { raw: raw ?? '' };
 }
 
 async function fsRead(file: string) {
@@ -120,10 +113,20 @@ function parseSpecifier(specifier: string) {
   return { file: specifier.slice(0, idx), section: specifier.slice(idx + 1) };
 }
 
-function extractSection(children: RootContent[], section: string): RootContent[] | undefined {
+function sliceByPosition(source: string, start?: number, end?: number) {
+  if (start === undefined || end === undefined) return undefined;
+  return source.slice(start, end);
+}
+
+function extractSectionRaw(
+  children: RootContent[],
+  section: string,
+  source: string,
+): string | undefined {
   const slugger = new Slugger();
-  let nodes: RootContent[] | undefined;
   let capturing = false;
+  let start: number | undefined;
+  let end: number | undefined;
 
   for (const node of children) {
     if (node.type === 'heading') {
@@ -133,7 +136,7 @@ function extractSection(children: RootContent[], section: string): RootContent[]
         slugger.slug(flattenNode(node));
       if (id === section) {
         capturing = true;
-        nodes = [node];
+        start = node.position?.start.offset;
       }
       continue;
     }
@@ -143,12 +146,101 @@ function extractSection(children: RootContent[], section: string): RootContent[]
       node.name === 'section'
     ) {
       const id = parseElementAttributes(node).id;
-      if (id === section) return node.children as RootContent[];
-      continue;
+      if (id !== section) continue;
+
+      const kids = node.children as RootContent[];
+      if (kids.length === 0) return '';
+      return sliceByPosition(
+        source,
+        kids[0]?.position?.start.offset,
+        kids[kids.length - 1]?.position?.end.offset,
+      );
     }
 
-    if (capturing) nodes?.push(node);
+    if (capturing) end = node.position?.end.offset;
   }
 
-  return nodes;
+  return sliceByPosition(source, start, end);
+}
+
+// VS Code–style region extraction (from remark-include.ts)
+const REGION_MARKERS = [
+  {
+    start: /^\s*\/\/\s*#?region\b\s*(.*?)\s*$/,
+    end: /^\s*\/\/\s*#?endregion\b\s*(.*?)\s*$/,
+  },
+  {
+    start: /^\s*<!--\s*#?region\b\s*(.*?)\s*-->/,
+    end: /^\s*<!--\s*#?endregion\b\s*(.*?)\s*-->/,
+  },
+  {
+    start: /^\s*\/\*\s*#region\b\s*(.*?)\s*\*\//,
+    end: /^\s*\/\*\s*#endregion\b\s*(.*?)\s*\*\//,
+  },
+  {
+    start: /^\s*#[rR]egion\b\s*(.*?)\s*$/,
+    end: /^\s*#[eE]nd ?[rR]egion\b\s*(.*?)\s*$/,
+  },
+  {
+    start: /^\s*#\s*#?region\b\s*(.*?)\s*$/,
+    end: /^\s*#\s*#?endregion\b\s*(.*?)\s*$/,
+  },
+  {
+    start: /^\s*(?:--|::|@?REM)\s*#region\b\s*(.*?)\s*$/,
+    end: /^\s*(?:--|::|@?REM)\s*#endregion\b\s*(.*?)\s*$/,
+  },
+  {
+    start: /^\s*#pragma\s+region\b\s*(.*?)\s*$/,
+    end: /^\s*#pragma\s+endregion\b\s*(.*?)\s*$/,
+  },
+  {
+    start: /^\s*\(\*\s*#region\b\s*(.*?)\s*\*\)/,
+    end: /^\s*\(\*\s*#endregion\b\s*(.*?)\s*\*\)/,
+  },
+];
+
+function dedent(lines: string[]) {
+  const minIndent = lines.reduce((min, line) => {
+    const match = line.match(/^(\s*)\S/);
+    return match ? Math.min(min, match[1].length) : min;
+  }, Infinity);
+
+  return minIndent === Infinity
+    ? lines.join('\n')
+    : lines.map((l) => l.slice(minIndent)).join('\n');
+}
+
+function extractCodeRegion(content: string, regionName: string) {
+  const lines = content.split('\n');
+
+  for (let i = 0; i < lines.length; i++) {
+    for (const re of REGION_MARKERS) {
+      let match = re.start.exec(lines[i]);
+      if (match?.[1] !== regionName) continue;
+
+      let depth = 1;
+      const extractedLines: string[] = [];
+      for (let j = i + 1; j < lines.length; j++) {
+        match = re.start.exec(lines[j]);
+        if (match) {
+          depth++;
+          continue;
+        }
+
+        match = re.end.exec(lines[j]);
+        if (match) {
+          if (match[1] === regionName) depth = 0;
+          else if (match[1] === '') depth--;
+          else continue;
+
+          if (depth > 0) continue;
+          return dedent(extractedLines);
+        }
+
+        extractedLines.push(lines[j]);
+      }
+    }
+  }
+
+  throw new Error(`Region "${regionName}" not found`);
 }

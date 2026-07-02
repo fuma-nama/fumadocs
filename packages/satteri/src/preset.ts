@@ -107,7 +107,11 @@ export function applySatteriPreset(
 
     const resolvedHast = pluginOption<HastPluginInput>(
       (plugins) => [
-        rehypeCodeOptions !== false && wrapHastFactory(rehypeCode, rehypeCodeOptions),
+        rehypeCodeOptions !== false &&
+          wrapHastFactory(rehypeCode, {
+            tab: false,
+            ...rehypeCodeOptions,
+          }),
         ...plugins,
         wrapHastFactory(rehypeToc),
       ],
@@ -129,15 +133,29 @@ export function applySatteriPreset(
 }
 
 function valueExportPlugin(names: string[]): MdastPluginInput {
-  return () =>
-    defineMdastPlugin({
-      name: 'value-to-export',
-      paragraph(_node, ctx) {
+  return () => {
+    let scheduled = false;
+    let dataRef: Parameters<typeof queueDataExport>[0] | undefined;
+
+    function schedule(ctx: { data: Parameters<typeof queueDataExport>[0] }) {
+      dataRef = ctx.data;
+      if (scheduled) return;
+      scheduled = true;
+      queueMicrotask(() => {
+        if (!dataRef) return;
         for (const name of names) {
-          if (name in ctx.data) {
-            queueDataExport(ctx.data, name, ctx.data[name]);
+          if (name in dataRef) {
+            queueDataExport(dataRef, name, dataRef[name]);
           }
         }
+      });
+    }
+
+    return defineMdastPlugin({
+      name: 'value-to-export',
+      paragraph(_node, ctx) {
+        schedule(ctx);
       },
     });
+  };
 }
