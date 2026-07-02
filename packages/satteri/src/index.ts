@@ -42,7 +42,6 @@ export { remarkMdxMermaid, type RemarkMdxMermaidOptions } from '@/remark-mdx-mer
 export { remarkFeedbackBlock, type RemarkFeedbackBlockOptions } from '@/remark-feedback-block';
 export { rehypeToc, type RehypeTocOptions } from '@/rehype-toc';
 export { rehypeCode, type RehypeCodeOptions } from '@/rehype-code';
-export { rehypeKatex, type RehypeKatexOptions } from '@/rehype-katex';
 export { remarkElementIds } from '@/remark-element-ids';
 export { remarkLlms, type LLMsOptions } from '@/remark-llms';
 
