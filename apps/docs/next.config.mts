@@ -20,7 +20,7 @@ const config: NextConfig = {
     'oxc-transform',
     'twoslash',
     'shiki',
-    '@takumi-rs/image-response',
+    '@takumi-rs/core',
   ],
   images: {
     remotePatterns: [
