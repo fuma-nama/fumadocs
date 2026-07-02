@@ -158,7 +158,7 @@
     "unified": "^11.0.5"
   },
   "peerDependencies": {
-    "@takumi-rs/image-response": "*",
+    "takumi-js": "*",
     "@types/mdx": "*",
     "@types/react": "*",
     "fumadocs-core": "workspace:*",
@@ -170,7 +170,7 @@
     "next": {
       "optional": true
     },
-    "@takumi-rs/image-response": {
+    "takumi-js": {
       "optional": true
     },
     "@types/mdx": {

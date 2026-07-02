@@ -12,7 +12,7 @@ export function nextUseTakumi(): TemplatePlugin {
           ...packageJson,
           dependencies: {
             ...packageJson.dependencies,
-            ...pick(depVersions, ['@takumi-rs/image-response']),
+            ...pick(depVersions, ['takumi-js']),
           },
         };
       }
@@ -32,7 +32,7 @@ async function replaceImports(context: TemplatePluginContext) {
   const path = join(context.appDir, 'app/og/docs/[...slug]/route.tsx');
   const content = await readFile(path, 'utf-8');
   const replaced = content
-    .replaceAll('next/og', '@takumi-rs/image-response')
+    .replaceAll('next/og', 'takumi-js/response')
     .replaceAll('fumadocs-ui/og', 'fumadocs-ui/og/takumi')
     .replace('height: 630,', "height: 630,\n      format: 'webp',");
 
@@ -54,7 +54,7 @@ async function nextConfigExternal(context: TemplatePluginContext) {
   const replaced = content.replace(
     'const config = {',
     `const config = {
-  serverExternalPackages: ['@takumi-rs/image-response'],`,
+  serverExternalPackages: ['@takumi-rs/core'],`,
   );
 
   await writeFile(path, replaced);

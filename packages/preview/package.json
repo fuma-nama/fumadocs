@@ -43,7 +43,7 @@
     "@hono/node-server": "^2.0.8",
     "@openrouter/ai-sdk-provider": "^2.10.0",
     "@tailwindcss/vite": "^4.3.2",
-    "@takumi-rs/image-response": "^1.8.7",
+    "takumi-js": "2.0.0",
     "@types/hast": "^3.0.4",
     "@types/mdast": "^4.0.4",
     "@types/mdx": "^2.0.14",

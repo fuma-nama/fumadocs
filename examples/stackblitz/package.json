@@ -10,7 +10,7 @@
     "types:check": "fumadocs-mdx && tsc --noEmit"
   },
   "dependencies": {
-    "@takumi-rs/image-response": "^1.2.1",
+    "takumi-js": "2.0.0-rc.4",
     "cnfast": "^0.0.8",
     "fumadocs-core": "16.11.0",
     "fumadocs-mdx": "15.1.0",
