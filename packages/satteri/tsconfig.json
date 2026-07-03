@@ -3,14 +3,14 @@
   "compilerOptions": {
     "paths": {
       "@/*": ["./src/*"],
-      "@fumadocs/satteri/*": ["../satteri/dist/*"]
+      "fumadocs-core/*": ["../core/dist/*"]
     },
-    "types": ["@types/node", "@types/mdx"],
+    "types": ["@types/node", "@types/mdast", "@types/hast"],
     "jsx": "react-jsx",
     "noEmit": true,
     "lib": ["ESNext"],
     "module": "ESNext",
-    "target": "ES2020"
+    "target": "ES2023"
   },
-  "exclude": ["node_modules", "eslint.config.mjs", "dist"]
+  "exclude": ["node_modules", "dist"]
 }

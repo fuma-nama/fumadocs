@@ -2,7 +2,7 @@ import { type Page } from '@/lib/source';
 import { getSection } from './source/navigation';
 
 export async function getLLMText(page: Page) {
-  if (page.type !== 'docs') return '';
+  if (page.type !== 'docs' || !('getText' in page.data)) return '';
 
   const section = getSection(page.slugs[0]);
   const category =
@@ -14,7 +14,12 @@ export async function getLLMText(page: Page) {
       cli: 'Fumadocs CLI (the CLI tool for automating Fumadocs apps)',
     }[section] ?? section;
 
-  const processed = await page.data.getText('processed');
+  let processed: string;
+  try {
+    processed = await page.data.getText('processed');
+  } catch {
+    return '';
+  }
 
   return `# ${category}: ${page.data.title}
 URL: ${page.url}

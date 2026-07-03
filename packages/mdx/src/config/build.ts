@@ -1,4 +1,3 @@
-import type { ProcessorOptions } from '@mdx-js/mdx';
 import type {
   AnyCollection,
   DocCollection,
@@ -9,6 +8,7 @@ import type {
 import picomatch from 'picomatch';
 import { applyMdxPreset } from '@/config/preset';
 import path from 'node:path';
+import type { ProcessorOptions } from '@mdx-js/mdx';
 
 export type BuildEnvironment = 'bundler' | 'runtime';
 
@@ -161,6 +161,12 @@ export function buildConfig(config: Record<string, unknown>, cwd: string): Loade
       const cached = mdxOptionsCache.get(key);
       if (cached) return cached;
       let result: ProcessorOptions | Promise<ProcessorOptions>;
+
+      if (collection?.compiler === 'satteri') {
+        throw new Error(
+          `Collection "${collection.name}" uses compiler: "satteri". Use getSatteriOptions() instead of getMDXOptions().`,
+        );
+      }
 
       if (collection?.mdxOptions) {
         const optionsFn = collection.mdxOptions;

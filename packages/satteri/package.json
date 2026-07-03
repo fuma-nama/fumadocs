@@ -1,0 +1,155 @@
+{
+  "name": "@fumadocs/satteri",
+  "version": "0.1.0",
+  "description": "Fumadocs plugins and presets for Sätteri",
+  "keywords": [
+    "Docs",
+    "fumadocs",
+    "mdx",
+    "satteri"
+  ],
+  "homepage": "https://fumadocs.dev",
+  "license": "MIT",
+  "author": "Fuma Nama",
+  "repository": "github:fuma-nama/fumadocs",
+  "files": [
+    "dist"
+  ],
+  "type": "module",
+  "exports": {
+    "./preset": {
+      "types": "./dist/preset.d.ts",
+      "import": "./dist/preset.js"
+    },
+    "./compile": {
+      "types": "./dist/compile.d.ts",
+      "import": "./dist/compile.js"
+    },
+    "./data-map": {
+      "types": "./dist/data-map.d.ts",
+      "import": "./dist/data-map.js"
+    },
+    "./inject-exports": {
+      "types": "./dist/inject-exports.d.ts",
+      "import": "./dist/inject-exports.js"
+    },
+    "./utils": {
+      "types": "./dist/utils.d.ts",
+      "import": "./dist/utils.js"
+    },
+    "./remark-heading": {
+      "types": "./dist/remark-heading.d.ts",
+      "import": "./dist/remark-heading.js"
+    },
+    "./remark-structure": {
+      "types": "./dist/remark-structure.d.ts",
+      "import": "./dist/remark-structure.js"
+    },
+    "./remark-image": {
+      "types": "./dist/remark-image.d.ts",
+      "import": "./dist/remark-image.js"
+    },
+    "./remark-code-tab": {
+      "types": "./dist/remark-code-tab.d.ts",
+      "import": "./dist/remark-code-tab.js"
+    },
+    "./remark-npm": {
+      "types": "./dist/remark-npm.d.ts",
+      "import": "./dist/remark-npm.js"
+    },
+    "./remark-ts2js": {
+      "types": "./dist/remark-ts2js.d.ts",
+      "import": "./dist/remark-ts2js.js"
+    },
+    "./remark-auto-type-table": {
+      "types": "./dist/remark-auto-type-table.d.ts",
+      "import": "./dist/remark-auto-type-table.js"
+    },
+    "./remark-block-id": {
+      "types": "./dist/remark-block-id.d.ts",
+      "import": "./dist/remark-block-id.js"
+    },
+    "./remark-admonition": {
+      "types": "./dist/remark-admonition.d.ts",
+      "import": "./dist/remark-admonition.js"
+    },
+    "./remark-directive-admonition": {
+      "types": "./dist/remark-directive-admonition.d.ts",
+      "import": "./dist/remark-directive-admonition.js"
+    },
+    "./remark-steps": {
+      "types": "./dist/remark-steps.d.ts",
+      "import": "./dist/remark-steps.js"
+    },
+    "./remark-mdx-mermaid": {
+      "types": "./dist/remark-mdx-mermaid.d.ts",
+      "import": "./dist/remark-mdx-mermaid.js"
+    },
+    "./remark-feedback-block": {
+      "types": "./dist/remark-feedback-block.d.ts",
+      "import": "./dist/remark-feedback-block.js"
+    },
+    "./rehype-toc": {
+      "types": "./dist/rehype-toc.d.ts",
+      "import": "./dist/rehype-toc.js"
+    },
+    "./rehype-code": {
+      "types": "./dist/rehype-code.d.ts",
+      "import": "./dist/rehype-code.js"
+    },
+    "./remark-llms": {
+      "types": "./dist/remark-llms.d.ts",
+      "import": "./dist/remark-llms.js"
+    },
+    "./package.json": "./package.json"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "scripts": {
+    "build": "tsdown",
+    "clean": "rimraf dist",
+    "dev": "tsdown --watch",
+    "lint": "oxlint .",
+    "test": "vitest run",
+    "types:check": "tsc --noEmit"
+  },
+  "dependencies": {
+    "estree-util-value-to-estree": "^3.5.0",
+    "fumadocs-core": "workspace:*",
+    "fumadocs-typescript": "workspace:*",
+    "github-slugger": "^2.0.0",
+    "hast-util-to-estree": "^3.1.3",
+    "image-size": "^2.0.2",
+    "mdast-util-gfm": "^3.1.0",
+    "npm-to-yarn": "^3.0.1",
+    "oxc-transform": "^0.137.0",
+    "satteri": "^0.9.4"
+  },
+  "devDependencies": {
+    "@types/estree": "^1.0.9",
+    "@types/estree-jsx": "^1.0.5",
+    "@types/hast": "^3.0.4",
+    "@types/mdast": "^4.0.4",
+    "@types/node": "26.0.0",
+    "mdast-util-mdx": "^3.0.0",
+    "shiki": "^3.0.0",
+    "tsconfig": "workspace:*",
+    "tsdown": "0.22.3",
+    "typescript": "^6.0.3",
+    "vitest": "^4.1.9"
+  },
+  "peerDependencies": {
+    "@types/hast": "*",
+    "@types/mdast": "*",
+    "fumadocs-core": "^16.0.0"
+  },
+  "peerDependenciesMeta": {
+    "@types/hast": {
+      "optional": true
+    },
+    "@types/mdast": {
+      "optional": true
+    }
+  }
+}

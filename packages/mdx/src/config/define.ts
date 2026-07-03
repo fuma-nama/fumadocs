@@ -6,6 +6,12 @@ import type { PostprocessOptions } from '@/loaders/mdx/remark-postprocess';
 import type { PluginOption } from '@/core';
 import type { BuildEnvironment } from './build';
 
+/** @see `fumadocs-mdx/config/satteri` for typed Sätteri preset options */
+export type SatteriPresetConfig = Record<string, unknown> | object;
+export type SatteriPresetConfigFactory = (
+  environment: BuildEnvironment,
+) => SatteriPresetConfig | Promise<SatteriPresetConfig>;
+
 export type CollectionSchema<Schema extends StandardSchemaV1, Context> =
   | Schema
   | ((ctx: Context) => Schema);
@@ -13,16 +19,7 @@ export type CollectionSchema<Schema extends StandardSchemaV1, Context> =
 export type AnyCollection = DocsCollection | DocCollection | MetaCollection;
 
 export interface BaseCollection {
-  /**
-   * Directory to scan
-   */
   dir: string;
-
-  /**
-   * what files to include/exclude (glob patterns)
-   *
-   * Include all files if not specified
-   */
   files?: string[];
 }
 
@@ -30,36 +27,48 @@ export interface MetaCollection<
   Schema extends StandardSchemaV1 = StandardSchemaV1,
 > extends BaseCollection {
   type: 'meta';
-
   schema?: CollectionSchema<Schema, { path: string; source: string }>;
 }
 
-export interface DocCollection<
+export interface DocCollectionBase<
   Schema extends StandardSchemaV1 = StandardSchemaV1,
 > extends BaseCollection {
-  type: 'doc';
-
   postprocess?: Partial<PostprocessOptions>;
+  async?: boolean;
+  dynamic?: boolean;
+  schema?: CollectionSchema<Schema, { path: string; source: string }>;
+}
+
+export interface DocCollectionMdx<
+  Schema extends StandardSchemaV1 = StandardSchemaV1,
+> extends DocCollectionBase<Schema> {
+  type: 'doc';
+  compiler?: 'mdx';
 
   /**
    * By defining a collection-level MDX options, **the default options & plugins will be removed**.
-   *
-   * See [`mdxOptions`](https://fumadocs.dev/docs/mdx/collections#mdxoptions) for details.
    */
   mdxOptions?: ProcessorOptions | ((environment: BuildEnvironment) => Promise<ProcessorOptions>);
-
-  /**
-   * Load files with async
-   */
-  async?: boolean;
-
-  /**
-   * Compile files on-demand
-   */
-  dynamic?: boolean;
-
-  schema?: CollectionSchema<Schema, { path: string; source: string }>;
+  satteriOptions?: never;
 }
+
+export interface DocCollectionSatteri<
+  Schema extends StandardSchemaV1 = StandardSchemaV1,
+> extends DocCollectionBase<Schema> {
+  type: 'doc';
+  compiler: 'satteri';
+
+  /**
+   * Sätteri compile options. When omitted, the global `satteriOptions` preset is used.
+   */
+  satteriOptions?: SatteriPresetConfig | SatteriPresetConfigFactory;
+
+  mdxOptions?: never;
+}
+
+export type DocCollection<Schema extends StandardSchemaV1 = StandardSchemaV1> =
+  | DocCollectionMdx<Schema>
+  | DocCollectionSatteri<Schema>;
 
 export interface DocsCollection<
   DocSchema extends StandardSchemaV1 = StandardSchemaV1,
@@ -67,7 +76,6 @@ export interface DocsCollection<
 > {
   type: 'docs';
   dir: string;
-
   docs: DocCollection<DocSchema>;
   meta: MetaCollection<MetaSchema>;
 }
@@ -76,9 +84,23 @@ export interface GlobalConfig {
   plugins?: PluginOption[];
 
   /**
-   * Configure global MDX options, will be used by all `doc` collections unless collection-level `mdxOptions` is specified.
+   * The compiler for files compiled without a collection (e.g. `page.mdx` routes).
+   *
+   * Collections choose their own compiler via the collection-level `compiler` option.
+   *
+   * @defaultValue 'mdx'
+   */
+  compiler?: 'mdx' | 'satteri';
+
+  /**
+   * Configure global MDX options, used by `doc` collections with the default MDX compiler.
    */
   mdxOptions?: MDXPresetOptions | (() => Promise<MDXPresetOptions>);
+
+  /**
+   * Configure global Sätteri options, used by `doc` collections with `compiler: "satteri"`.
+   */
+  satteriOptions?: SatteriPresetConfig | SatteriPresetConfigFactory;
 
   workspaces?: Record<
     string,
@@ -88,11 +110,6 @@ export interface GlobalConfig {
     }
   >;
 
-  /**
-   * specify a directory to access & store cache (disabled during development mode).
-   *
-   * The cache will never be updated, delete the cache folder to clean.
-   */
   experimentalBuildCache?: string;
 }
 
@@ -106,20 +123,14 @@ export function defineCollections<Schema extends StandardSchemaV1 = StandardSche
 export function defineCollections(
   options: DocCollection | MetaCollection,
 ): DocCollection | MetaCollection {
-  return options as any;
+  return options as DocCollection | MetaCollection;
 }
 
 export function defineDocs<
   DocSchema extends StandardSchemaV1 = typeof pageSchema,
   MetaSchema extends StandardSchemaV1 = typeof metaSchema,
 >(options: {
-  /**
-   * The content directory to scan files
-   *
-   *  @defaultValue 'content/docs'
-   */
   dir?: string;
-
   docs?: Omit<DocCollection<DocSchema>, 'dir' | 'type'>;
   meta?: Omit<MetaCollection<MetaSchema>, 'dir' | 'type'>;
 }): DocsCollection<DocSchema, MetaSchema> {
@@ -133,13 +144,13 @@ export function defineDocs<
       dir,
       schema: pageSchema as any,
       ...options?.docs,
-    }),
+    } as DocCollection<DocSchema>),
     meta: defineCollections({
       type: 'meta',
       dir,
       schema: metaSchema as any,
       ...options?.meta,
-    }),
+    } as MetaCollection<MetaSchema>),
   };
 }
 
