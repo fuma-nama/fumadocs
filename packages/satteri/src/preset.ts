@@ -1,4 +1,4 @@
-import { defineMdastPlugin, type MdastPluginInput } from 'satteri';
+import '@/data-map';
 import type {
   HastPluginInput,
   MdxCompileOptions,
@@ -12,7 +12,7 @@ import { remarkNpm, type RemarkNpmOptions } from '@/remark-npm';
 import { remarkStructure, type StructureOptions } from '@/remark-structure';
 import { rehypeCode, type RehypeCodeOptions } from '@/rehype-code';
 import { rehypeToc } from '@/rehype-toc';
-import { queueDataExport } from '@/inject-exports';
+import type { MdastPluginInput } from 'satteri';
 
 type ResolvePlugins<T> = T[] | ((plugins: T[]) => T[]);
 
@@ -88,6 +88,7 @@ export function applySatteriPreset(
       mdastPlugins,
       hastPlugins,
       features,
+      data,
       ...rest
     } = options;
 
@@ -106,14 +107,17 @@ export function applySatteriPreset(
             exportAs: 'structuredData',
             ...remarkStructureOptions,
           }),
-        valueToExport.length > 0 && valueExportPlugin(valueToExport),
       ],
       mdastPlugins,
     );
 
     const resolvedHast = pluginOption<HastPluginInput>(
       (plugins) => [
-        rehypeCodeOptions !== false && wrapHastFactory(rehypeCode, rehypeCodeOptions),
+        rehypeCodeOptions !== false &&
+          wrapHastFactory(rehypeCode, {
+            tab: false,
+            ...rehypeCodeOptions,
+          }),
         ...plugins,
         wrapHastFactory(rehypeToc),
       ],
@@ -122,6 +126,10 @@ export function applySatteriPreset(
 
     return {
       ...rest,
+      data: {
+        ...data,
+        ...(valueToExport.length > 0 ? { _valueToExport: valueToExport } : {}),
+      },
       outputFormat: environment === 'runtime' ? 'function-body' : rest.outputFormat,
       features: {
         gfm: true,
@@ -132,18 +140,4 @@ export function applySatteriPreset(
       hastPlugins: resolvedHast,
     };
   };
-}
-
-function valueExportPlugin(names: string[]): MdastPluginInput {
-  return () =>
-    defineMdastPlugin({
-      name: 'value-to-export',
-      paragraph(_node, ctx) {
-        for (const name of names) {
-          if (name in ctx.data) {
-            queueDataExport(ctx.data, name, ctx.data[name]);
-          }
-        }
-      },
-    });
 }

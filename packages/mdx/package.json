@@ -61,6 +61,7 @@
     "chokidar": "^5.0.0",
     "esbuild": "^0.28.1",
     "estree-util-value-to-estree": "^3.5.0",
+    "github-slugger": "^2.0.0",
     "js-yaml": "^5.1.0",
     "mdast-util-mdx": "^3.0.0",
     "picocolors": "^1.1.1",

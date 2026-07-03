@@ -1,6 +1,5 @@
 import type { MdxCompileOptions } from 'satteri';
-import type { SatteriPresetOptions } from '@fumadocs/satteri';
-import { applySatteriPreset } from '@fumadocs/satteri';
+import { applySatteriPreset, type SatteriPresetOptions } from '@fumadocs/satteri/preset';
 import type { BuildEnvironment, DocCollectionItem, LoadedConfig } from '@/config/build';
 
 const satteriOptionsCache = new WeakMap<

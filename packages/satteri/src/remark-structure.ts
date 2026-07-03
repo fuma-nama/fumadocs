@@ -1,49 +1,95 @@
-import { defineMdastPlugin } from 'satteri';
+import { defineMdastPlugin, type MdastVisitorContext } from 'satteri';
 import type { Nodes } from 'mdast';
+import { gfmToMarkdown } from 'mdast-util-gfm';
 import type { StructuredData } from 'fumadocs-core/mdx-plugins/remark-structure';
-import { flattenNode } from '@/utils';
-import { queueDataExport } from '@/inject-exports';
+import {
+  defaultStringifier as structureDefaultStringifier,
+  type Stringifier,
+  type StringifyOptions,
+} from 'fumadocs-core/mdx-plugins/remark-structure';
 
 export interface StructureOptions {
   types?: string[] | ((node: Nodes) => boolean);
   mdxTypes?: (node: Nodes) => boolean;
+  stringify?: Stringifier | StringifyOptions;
   exportAs?: string | boolean;
 }
 
-declare module 'satteri' {
-  interface DataMap {
-    structuredData?: StructuredData;
-    frontmatter?: Record<string, unknown>;
+interface StringifierContext {
+  addContent: (...content: StructuredData['contents']) => void;
+}
+
+const STRUCTURE_VISITORS = [
+  'heading',
+  'paragraph',
+  'blockquote',
+  'tableCell',
+  'mdxJsxFlowElement',
+] as const;
+
+function wrapStringifier(
+  stringifyOptions?: StringifyOptions | Stringifier,
+): Stringifier | null {
+  if (!stringifyOptions) return null;
+  if (typeof stringifyOptions === 'function') {
+    const fn = stringifyOptions as (node: Nodes, ctx: StringifierContext) => string;
+    return (node, ctx) => fn(structuredClone(node), ctx);
   }
+
+  const base = structureDefaultStringifier({
+    ...stringifyOptions,
+    ...gfmToMarkdown(),
+    handlers: {
+      inlineMath(node: { value: string }) {
+        return `$${node.value}$`;
+      },
+      math(node: { value: string }) {
+        return `$$\n${node.value}\n$$`;
+      },
+      ...stringifyOptions.handlers,
+    },
+  });
+  const baseFn = base as (node: Nodes, ctx: StringifierContext) => string;
+  return (node, ctx) => baseFn(structuredClone(node), ctx);
+}
+
+function nodeContent(
+  node: Nodes,
+  ctx: MdastVisitorContext,
+  stringify: Stringifier | null,
+  stringifierCtx: StringifierContext,
+) {
+  return stringify
+    ? stringify.call(undefined as never, node, stringifierCtx).trim()
+    : ctx.textContent(node).trim();
 }
 
 export function remarkStructure({
   types = ['heading', 'paragraph', 'blockquote', 'tableCell', 'mdxJsxFlowElement'],
   mdxTypes = (node) => !('children' in node) || node.children.length === 0,
+  stringify: stringifyOptions,
   exportAs = false,
 }: StructureOptions = {}) {
   const matchType =
     typeof types === 'function' ? types : (node: Nodes) => types.includes(node.type);
+  const stringify = wrapStringifier(stringifyOptions);
 
   return () => {
     const data: StructuredData = { contents: [], headings: [] };
     let lastHeading: string | undefined;
     let seeded = false;
-    let exported = false;
 
-    function finish(ctx: { data: Record<string, unknown> }) {
-      ctx.data.structuredData = data;
-      if (exportAs && !exported) {
-        exported = true;
-        queueDataExport(
-          ctx.data,
-          typeof exportAs === 'string' ? exportAs : 'structuredData',
-          data,
-        );
-      }
-    }
+    const stringifierCtx: StringifierContext = {
+      addContent(...content) {
+        for (const item of content) {
+          data.contents.push({ ...item, heading: item.heading ?? lastHeading });
+        }
+      },
+    };
 
-    function visit(node: Nodes, ctx: { data: Record<string, unknown> }) {
+    function visit(node: Nodes, ctx: MdastVisitorContext) {
+      if (!ctx.data.structuredData) ctx.data.structuredData = data;
+
       if (!matchType(node)) return;
       if (node.type === 'mdxJsxFlowElement' || node.type === 'mdxJsxTextElement') {
         if (!mdxTypes(node)) return;
@@ -66,13 +112,13 @@ export function remarkStructure({
         const id = headingData.hProperties?.id;
         if (!id) return;
 
-        const content = flattenNode(node).trim();
+        const content = nodeContent(node, ctx, stringify, stringifierCtx);
         if (content.length > 0) data.headings.push({ id, content });
         lastHeading = id;
         return;
       }
 
-      const content = flattenNode(node).trim();
+      const content = nodeContent(node, ctx, stringify, stringifierCtx);
       if (content.length > 0) {
         data.contents.push({ heading: lastHeading, content });
       }
@@ -80,26 +126,7 @@ export function remarkStructure({
 
     return defineMdastPlugin({
       name: 'remark-structure',
-      heading(node, ctx) {
-        visit(node, ctx);
-        finish(ctx);
-      },
-      paragraph(node, ctx) {
-        visit(node, ctx);
-        finish(ctx);
-      },
-      blockquote(node, ctx) {
-        visit(node, ctx);
-        finish(ctx);
-      },
-      tableCell(node, ctx) {
-        visit(node, ctx);
-        finish(ctx);
-      },
-      mdxJsxFlowElement(node, ctx) {
-        visit(node, ctx);
-        finish(ctx);
-      },
+      ...Object.fromEntries(STRUCTURE_VISITORS.map((key) => [key, visit])),
     });
   };
 }

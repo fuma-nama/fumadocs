@@ -7,7 +7,7 @@ import type { PluginOption } from '@/core';
 import type { BuildEnvironment } from './build';
 
 /** @see `fumadocs-mdx/config/satteri` for typed Sätteri preset options */
-export type SatteriPresetConfig = Record<string, unknown>;
+export type SatteriPresetConfig = Record<string, unknown> | object;
 export type SatteriPresetConfigFactory = (
   environment: BuildEnvironment,
 ) => SatteriPresetConfig | Promise<SatteriPresetConfig>;

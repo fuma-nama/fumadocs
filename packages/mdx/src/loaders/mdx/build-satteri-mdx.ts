@@ -8,8 +8,11 @@ import type { DocCollectionItem } from '@/config/build';
 import type { CompilerOptions } from '@/loaders/mdx/build-mdx';
 import type { PostprocessOptions } from '@/loaders/mdx/remark-postprocess';
 import { getSatteriOptions } from '@/config/build-satteri';
-import { compileMdx, queueDataExport, flattenNode } from '@fumadocs/satteri';
-import { defineMdastPlugin } from 'satteri';
+import { compileMdx } from '@fumadocs/satteri/compile';
+import { remarkLlms } from '@fumadocs/satteri/remark-llms';
+import { defineMdastPlugin, type Data, type MdastPluginInput, type MdastVisitorContext } from 'satteri';
+import '@fumadocs/satteri/data-map';
+import '@/loaders/mdx/satteri-data-map';
 import { remarkIncludeSatteri } from '@/loaders/mdx/remark-include-satteri';
 
 interface BuildSatteriMDXOptions {
@@ -48,10 +51,23 @@ export async function buildSatteriMDX(
     ...collection?.postprocess,
   };
 
-  const data: Record<string, unknown> = {
+  const data: Data = {
     frontmatter,
     _compiler,
+    _cwd: collection?.cwd,
+    _valueToExport: collection?.postprocess?.valueToExport,
   };
+
+  const postprocessPlugins: MdastPluginInput[] = [postprocessPlugin(postprocess)];
+  if (postprocess.includeProcessedMarkdown) {
+    postprocessPlugins.unshift(
+      remarkLlms(
+        typeof postprocess.includeProcessedMarkdown === 'object'
+          ? postprocess.includeProcessedMarkdown
+          : undefined,
+      ),
+    );
+  }
 
   const result = await compileMdx({
     source,
@@ -66,7 +82,7 @@ export async function buildSatteriMDX(
       mdastPlugins: [
         remarkIncludeSatteri({ cwd: collection?.cwd }),
         ...(satteriOptions.mdastPlugins ?? []),
-        postprocessPlugin(postprocess),
+        ...postprocessPlugins,
       ],
     },
   });
@@ -75,20 +91,18 @@ export async function buildSatteriMDX(
 }
 
 function postprocessPlugin(options: PostprocessOptions) {
-  return () =>
-    defineMdastPlugin({
-      name: 'remark-postprocess',
-      heading(node, ctx) {
-        const frontmatter = (ctx.data.frontmatter ??= {}) as Record<string, unknown>;
-        if (!frontmatter.title && node.depth === 1) {
-          frontmatter.title = flattenNode(node);
-        }
-      },
-      link(node, ctx) {
-        if (!options.extractLinkReferences) return;
-        const refs = (ctx.data.extractedReferences ??= []) as { href: string }[];
-        refs.push({ href: node.url });
-        queueDataExport(ctx.data, 'extractedReferences', refs);
-      },
-    });
+  return defineMdastPlugin({
+    name: 'remark-postprocess',
+    heading(node, ctx: MdastVisitorContext) {
+      const frontmatter = (ctx.data.frontmatter ??= {});
+      if (!frontmatter.title && node.depth === 1) {
+        frontmatter.title = ctx.textContent(node);
+      }
+    },
+    link(node, ctx) {
+      if (!options.extractLinkReferences) return;
+      const refs = (ctx.data.extractedReferences ??= []);
+      refs.push({ href: node.url });
+    },
+  });
 }

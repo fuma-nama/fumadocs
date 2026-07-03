@@ -40,6 +40,21 @@ export default defineConfig({
 });
 ```
 
+```ts title="source.config.ts" tab="Satteri"
+import { remarkTs2js } from '@fumadocs/satteri/remark-ts2js';
+
+export default defineConfig({
+  docs: {
+    compiler: 'satteri',
+    async satteriOptions() {
+      return {
+        mdastPlugins: [remarkTs2js()],
+      };
+    },
+  },
+});
+```
+
 ```ts tab="MDX Compiler"
 import { remarkTypeScriptToJavaScript } from 'fumadocs-docgen/remark-ts2js';
 import { compile } from '@mdx-js/mdx';

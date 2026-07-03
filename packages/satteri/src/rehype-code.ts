@@ -1,4 +1,4 @@
-import { defineHastPlugin } from 'satteri';
+import { defineHastPlugin, type HastVisitorContext } from 'satteri';
 import type { Element, Root, RootContent } from 'hast';
 import {
   rehypeCode as createRehypeCodeTransformer,
@@ -15,10 +15,7 @@ function unwrapReplacement(node: RootContent | Root): RootContent | RootContent[
 function replaceHighlightedNode(
   element: Element,
   next: RootContent | Root | undefined,
-  ctx: {
-    replaceNode: (node: Element, newNode: RootContent) => void;
-    insertAfter: (node: RootContent, newNode: RootContent | RootContent[]) => void;
-  },
+  ctx: Pick<HastVisitorContext, 'replaceNode' | 'insertAfter'>,
 ) {
   if (!next) return;
 
@@ -26,11 +23,49 @@ function replaceHighlightedNode(
   if (Array.isArray(replacement)) {
     if (replacement.length === 0) return;
     ctx.replaceNode(element, replacement[0]);
-    if (replacement.length > 1) ctx.insertAfter(replacement[0], replacement.slice(1));
+    if (replacement.length > 1) ctx.insertAfter(element, replacement.slice(1));
     return;
   }
 
   ctx.replaceNode(element, replacement);
+}
+
+function elementClasses(element: Element) {
+  const className = element.properties.className;
+  if (Array.isArray(className)) return className.map(String);
+  if (typeof className === 'string') return className.split(/\s+/);
+  return [];
+}
+
+function isHighlighted(element: Element) {
+  const className = element.properties.className;
+  if (typeof className === 'string') return className.includes('shiki');
+  if (Array.isArray(className)) return className.some((c) => String(c).includes('shiki'));
+  return false;
+}
+
+function shouldSkipHighlight(element: Element) {
+  const skipLangs = new Set(['math']);
+  const skipClasses = new Set(['language-math', 'math-inline', 'math-display']);
+  const targets =
+    element.tagName === 'pre'
+      ? [
+          element,
+          ...element.children.filter(
+            (child): child is Element => child.type === 'element' && child.tagName === 'code',
+          ),
+        ]
+      : [element];
+
+  for (const target of targets) {
+    const classes = elementClasses(target);
+    if (classes.some((c) => skipClasses.has(c))) return true;
+
+    const lang = classes.find((c) => c.startsWith('language-'))?.slice('language-'.length);
+    if (lang && skipLangs.has(lang)) return true;
+  }
+
+  return false;
 }
 
 function toTextElement(element: Element, code: string): Element {
@@ -43,7 +78,12 @@ function toTextElement(element: Element, code: string): Element {
   };
 }
 
-function createCodeTree(element: Element, ctx: { textContent: (node: Element) => string }): Root {
+/**
+ * Build a minimal copy of the code block for the highlighter: it only reads
+ * the text content, so flatten children into a single text node instead of
+ * deep-cloning the subtree.
+ */
+function createCodeTree(element: Element, ctx: Pick<HastVisitorContext, 'textContent'>): Root {
   if (element.tagName === 'pre') {
     const head = element.children[0];
     if (!head || head.type !== 'element' || head.tagName !== 'code') {
@@ -80,6 +120,7 @@ export function rehypeCode(options?: Partial<RehypeCodeOptions>) {
         filter: ['pre', 'code'],
         async visit(node, ctx) {
           const element = node as Element;
+          if (isHighlighted(element) || shouldSkipHighlight(element)) return;
           if (element.tagName !== 'pre' && !(element.tagName === 'code' && inline)) {
             return;
           }

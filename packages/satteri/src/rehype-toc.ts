@@ -1,7 +1,7 @@
 import { defineHastPlugin, type HastPluginDefinition } from 'satteri';
 import type { Element } from 'hast';
 import { handleTag } from '@/utils';
-import { queueTocJsxExport, type TocJsxExportItem } from '@/inject-exports';
+import type { TocJsxExportItem } from '@/data-map';
 
 export interface RehypeTocOptions {
   exportToc?:
@@ -26,6 +26,8 @@ export function rehypeToc({ exportToc = true }: RehypeTocOptions = {}): HastPlug
 
   return () => {
     const items: TocJsxExportItem[] = [];
+    const tocExport =
+      resolved.as === 'esm' ? { name: resolved.name, items } : undefined;
 
     return defineHastPlugin({
       name: 'rehype-toc',
@@ -55,7 +57,7 @@ export function rehypeToc({ exportToc = true }: RehypeTocOptions = {}): HastPlug
           }
 
           items.push({
-            title: element,
+            title: ctx.textContent(element),
             depth: Number(element.tagName[1]),
             url: `#${id}`,
             _step:
@@ -66,9 +68,9 @@ export function rehypeToc({ exportToc = true }: RehypeTocOptions = {}): HastPlug
 
           if (isTocOnly) ctx.removeNode(element);
 
-          if (resolved.as === 'esm') {
-            queueTocJsxExport(ctx.data, resolved.name, items);
-          } else {
+          if (tocExport) {
+            if (!ctx.data._tocEsmExport) ctx.data._tocEsmExport = tocExport;
+          } else if (!ctx.data.rehypeToc) {
             ctx.data.rehypeToc = items;
           }
         },
@@ -77,4 +79,4 @@ export function rehypeToc({ exportToc = true }: RehypeTocOptions = {}): HastPlug
   };
 }
 
-export type { TocJsxExportItem as RehypeTOCItemType } from '@/inject-exports';
+export type { TocJsxExportItem as RehypeTOCItemType } from '@/data-map';

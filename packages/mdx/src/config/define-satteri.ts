@@ -1,4 +1,4 @@
-import type { SatteriPresetOptions } from '@fumadocs/satteri';
+import type { SatteriPresetOptions } from '@fumadocs/satteri/preset';
 import type { BuildEnvironment } from '@/config/build';
 import type { DocCollectionBase, GlobalConfig } from '@/config/define';
 

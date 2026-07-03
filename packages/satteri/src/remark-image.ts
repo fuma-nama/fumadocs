@@ -21,12 +21,6 @@ export interface RemarkImageOptions {
 
 type Source = { type: 'url'; url: URL } | { type: 'file'; file: string };
 
-declare module 'satteri' {
-  interface DataMap {
-    _imageImports?: MdxjsEsm[];
-  }
-}
-
 export function remarkImage({
   placeholder = 'none',
   external = true,
@@ -34,9 +28,11 @@ export function remarkImage({
   onError = 'error',
   publicDir = path.join(process.cwd(), 'public'),
 }: RemarkImageOptions = {}) {
+  // image sizes don't change within a build, share the cache across files
+  const sizeCache = new Map<string, Promise<ImageSize | undefined>>();
+
   return () => {
     const imports: MdxjsEsm[] = [];
-    const sizeCache = new Map<string, Promise<ImageSize | undefined>>();
 
     return defineMdastPlugin({
       name: 'remark-image',
@@ -84,7 +80,7 @@ export function remarkImage({
 async function updateImage(
   src: Source,
   node: Image,
-  ctx: {
+  options: {
     placeholder: 'blur' | 'none';
     useImport: boolean;
     external: ExternalImageOptions;
@@ -93,16 +89,16 @@ async function updateImage(
     sizeCache: Map<string, Promise<ImageSize | undefined>>;
   },
 ): Promise<RootContent | undefined> {
-  if (src.type === 'file' && ctx.useImport) {
-    if (!ctx.dir) {
+  if (src.type === 'file' && options.useImport) {
+    if (!options.dir) {
       throw new Error(
         'When `useImport` is enabled, pass `fileURL` to the compiler so image paths can be resolved.',
       );
     }
 
-    const variableName = `__img${ctx.imports.length}`;
-    const importPath = getImportPath(src.file, ctx.dir);
-    ctx.imports.push({
+    const variableName = `__img${options.imports.length}`;
+    const importPath = getImportPath(src.file, options.dir);
+    options.imports.push({
       type: 'mdxjsEsm',
       value: '',
       data: {
@@ -159,14 +155,14 @@ async function updateImage(
       out.attributes.push({ type: 'mdxJsxAttribute', name: 'title', value: node.title });
     }
 
-    if (ctx.placeholder === 'blur' && VALID_BLUR_EXT.some((ext) => src.file.endsWith(ext))) {
+    if (options.placeholder === 'blur' && VALID_BLUR_EXT.some((ext) => src.file.endsWith(ext))) {
       out.attributes.push({ type: 'mdxJsxAttribute', name: 'placeholder', value: 'blur' });
     }
 
     return out;
   }
 
-  const size = await getImageSize(src, ctx.external, ctx.sizeCache);
+  const size = await getImageSize(src, options.external, options.sizeCache);
   if (!size) return;
 
   node.data ??= {};
@@ -210,8 +206,10 @@ function getSizeCacheKey(src: Source, onExternal: ExternalImageOptions): string 
 async function getImageSize(
   src: Source,
   onExternal: ExternalImageOptions,
-  cache: Map<string, Promise<ImageSize | undefined>>,
-) {
+  cache?: Map<string, Promise<ImageSize | undefined>>,
+): Promise<ImageSize | undefined> {
+  if (!cache) return loadImageSize(src, onExternal);
+
   const key = getSizeCacheKey(src, onExternal);
   const cached = cache.get(key);
   if (cached) return cached;
@@ -221,7 +219,10 @@ async function getImageSize(
   return result;
 }
 
-async function loadImageSize(src: Source, onExternal: ExternalImageOptions) {
+async function loadImageSize(
+  src: Source,
+  onExternal: ExternalImageOptions,
+): Promise<ImageSize | undefined> {
   if (src.type === 'file') {
     const { imageSizeFromFile } = await import('image-size/fromFile');
     return imageSizeFromFile(src.file);

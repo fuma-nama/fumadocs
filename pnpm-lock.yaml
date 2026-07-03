@@ -50,6 +50,9 @@ importers:
       '@fumadocs/asyncapi':
         specifier: workspace:*
         version: link:../../packages/asyncapi
+      '@fumadocs/satteri':
+        specifier: workspace:*
+        version: link:../../packages/satteri
       '@fumadocs/story':
         specifier: workspace:*
         version: link:../../packages/story
@@ -179,24 +182,18 @@ importers:
       react-remove-scroll:
         specifier: ^2.7.2
         version: 2.7.2(@types/react@19.2.17)(react@19.2.7)
-      rehype-katex:
-        specifier: ^7.0.1
-        version: 7.0.1
       remark:
         specifier: ^15.0.1
         version: 15.0.1
       remark-gfm:
         specifier: ^4.0.1
         version: 4.0.1
-      remark-math:
-        specifier: ^6.0.0
-        version: 6.0.0
-      remark-mdx:
-        specifier: ^3.1.1
-        version: 3.1.1
       remark-rehype:
         specifier: ^11.1.2
         version: 11.1.2
+      satteri:
+        specifier: ^0.9.4
+        version: 0.9.4
       shiki:
         specifier: ^4.2.0
         version: 4.2.0
@@ -291,9 +288,6 @@ importers:
       typescript:
         specifier: ^6.0.3
         version: 6.0.3
-      unified:
-        specifier: ^11.0.5
-        version: 11.0.5
       unrun:
         specifier: ^0.3.1
         version: 0.3.1
@@ -2739,6 +2733,9 @@ importers:
       estree-util-value-to-estree:
         specifier: ^3.5.0
         version: 3.5.0
+      github-slugger:
+        specifier: ^2.0.0
+        version: 2.0.0
       js-yaml:
         specifier: ^5.1.0
         version: 5.1.0
@@ -3419,6 +3416,9 @@ importers:
       fumadocs-core:
         specifier: workspace:*
         version: link:../core
+      fumadocs-typescript:
+        specifier: workspace:*
+        version: link:../typescript
       github-slugger:
         specifier: ^2.0.0
         version: 2.0.0
@@ -3428,9 +3428,15 @@ importers:
       image-size:
         specifier: ^2.0.2
         version: 2.0.2
+      mdast-util-gfm:
+        specifier: ^3.1.0
+        version: 3.1.0
       npm-to-yarn:
         specifier: ^3.0.1
         version: 3.0.1
+      oxc-transform:
+        specifier: ^0.137.0
+        version: 0.137.0
       satteri:
         specifier: ^0.9.4
         version: 0.9.4
@@ -18948,7 +18954,7 @@ snapshots:
     dependencies:
       '@emnapi/core': 1.11.1
       '@emnapi/runtime': 1.11.1
-      '@napi-rs/wasm-runtime': 1.1.5(@emnapi/core@1.11.1)(@emnapi/runtime@1.11.1)
+      '@napi-rs/wasm-runtime': 1.1.6(@emnapi/core@1.11.1)(@emnapi/runtime@1.11.1)
     optional: true
 
   '@oxc-transform/binding-win32-arm64-msvc@0.137.0':
