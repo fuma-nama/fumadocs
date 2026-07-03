@@ -37,7 +37,7 @@ export const docs = defineDocs({
       const { createFileSystemTypesCache } = await import('fumadocs-twoslash/cache-fs');
       const { remarkAutoTypeTableSatteri, createGenerator, createFileSystemGeneratorCache } =
         await import('fumadocs-typescript');
-      const { remarkTypeScriptToJavaScriptSatteri } = await import('fumadocs-docgen/remark-ts2js');
+      const { remarkTs2js } = await import('@fumadocs/satteri');
 
       const typeTableOptions: RemarkAutoTypeTableOptions = {
         generator: createGenerator({
@@ -108,7 +108,7 @@ export const docs = defineDocs({
                 remarkSteps,
                 remarkBlockId({ addDataAttribute: 'feedback' }),
                 remarkAutoTypeTableSatteri(typeTableOptions),
-                remarkTypeScriptToJavaScriptSatteri(),
+                remarkTs2js(),
                 ...plugins,
               ],
       })(environment);

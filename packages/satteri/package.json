@@ -55,6 +55,7 @@
     "image-size": "^2.0.2",
     "mdast-util-gfm": "^3.1.0",
     "npm-to-yarn": "^3.0.1",
+    "oxc-transform": "^0.137.0",
     "satteri": "^0.9.4"
   },
   "devDependencies": {
