@@ -149,6 +149,11 @@ const showcases: ShowcaseObject[] = [
     url: 'https://animate-ui.com',
   },
   {
+    image: '/showcases/sora-ui.png',
+    name: 'Sora UI',
+    url: 'https://ui.soralabs.io.vn',
+  },
+  {
     image: '/showcases/kibo-ui.jpg',
     name: 'Kibo UI',
     url: 'https://kibo-ui.com',
