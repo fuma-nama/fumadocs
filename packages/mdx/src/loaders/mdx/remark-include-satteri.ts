@@ -5,7 +5,7 @@ import { defineMdastPlugin, mdxToMdast, markdownToMdast } from 'satteri';
 import type { MdastContent, MdastVisitorContext } from 'satteri';
 import '@/loaders/mdx/satteri-data-map';
 import { frontmatter } from 'fumadocs-core/content/md/frontmatter';
-import { flattenNode } from '@fumadocs/satteri';
+import { flattenNode } from '@fumadocs/satteri/utils';
 import type { Code, RootContent } from 'mdast';
 import type { Directives } from 'mdast-util-directive';
 import type { MdxJsxFlowElement, MdxJsxTextElement } from 'mdast-util-mdx';

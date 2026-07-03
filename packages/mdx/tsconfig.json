@@ -3,7 +3,6 @@
   "compilerOptions": {
     "paths": {
       "@/*": ["./src/*"],
-      "@fumadocs/satteri": ["../satteri/dist/index.d.ts"],
       "@fumadocs/satteri/*": ["../satteri/dist/*"]
     },
     "types": ["@types/node", "@types/mdx"],

@@ -5,7 +5,7 @@ import { defineCollections } from '@/config';
 import { buildConfig } from '@/config/build';
 import { createCore } from '@/core';
 import { buildMDX } from '@/loaders/mdx/build-mdx';
-import { applySatteriPreset } from '@fumadocs/satteri';
+import { applySatteriPreset } from '@fumadocs/satteri/preset';
 import { rehypeCodeDefaultOptions } from 'fumadocs-core/mdx-plugins/rehype-code';
 
 const baseDir = path.dirname(fileURLToPath(import.meta.url));

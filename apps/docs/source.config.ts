@@ -7,8 +7,9 @@ import type { ShikiTransformer } from 'shiki';
 import type { RemarkAutoTypeTableOptions } from 'fumadocs-typescript';
 import { defaultShikiOptions } from './lib/shiki.ts';
 import { metaSchema, pageSchema } from 'fumadocs-core/source/schema';
-import { applySatteriPreset } from '@fumadocs/satteri';
-import { remarkBlockId, remarkSteps } from '@fumadocs/satteri';
+import { applySatteriPreset } from '@fumadocs/satteri/preset';
+import { remarkBlockId } from '@fumadocs/satteri/remark-block-id';
+import { remarkSteps } from '@fumadocs/satteri/remark-steps';
 import { remarkElementIds } from './lib/remark-element-ids.ts';
 import type { Nodes } from 'mdast';
 
@@ -37,8 +38,8 @@ export const docs = defineDocs({
       const { createFileSystemTypesCache } = await import('fumadocs-twoslash/cache-fs');
       const { createGenerator, createFileSystemGeneratorCache } =
         await import('fumadocs-typescript');
-      const { remarkAutoTypeTable } = await import('@fumadocs/satteri');
-      const { remarkTs2js } = await import('@fumadocs/satteri');
+      const { remarkAutoTypeTable } = await import('@fumadocs/satteri/remark-auto-type-table');
+      const { remarkTs2js } = await import('@fumadocs/satteri/remark-ts2js');
 
       const typeTableOptions: RemarkAutoTypeTableOptions = {
         generator: createGenerator({
