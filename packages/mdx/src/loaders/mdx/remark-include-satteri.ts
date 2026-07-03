@@ -2,7 +2,7 @@ import { fileURLToPath } from 'node:url';
 import * as path from 'node:path';
 import Slugger from 'github-slugger';
 import { defineMdastPlugin, mdxToMdast, markdownToMdast } from 'satteri';
-import type { MdastContent, MdastVisitorContext } from 'satteri';
+import type { MdastContent, MdastPluginDefinition, MdastVisitorContext } from 'satteri';
 import '@/loaders/mdx/satteri-data-map';
 import { frontmatter } from 'fumadocs-core/content/md/frontmatter';
 import { flattenNode } from '@fumadocs/satteri/utils';
@@ -12,9 +12,7 @@ import type { MdxJsxFlowElement, MdxJsxTextElement } from 'mdast-util-mdx';
 
 type IncludeNode = RootContent | MdxJsxFlowElement | MdxJsxTextElement | Directives;
 
-function parseElementAttributes(
-  element: IncludeNode,
-): Record<string, string | null | undefined> {
+function parseElementAttributes(element: IncludeNode): Record<string, string | null | undefined> {
   if (!('attributes' in element)) return {};
   if (Array.isArray(element.attributes)) {
     const attributes: Record<string, string | null> = {};
@@ -32,7 +30,7 @@ function parseElementAttributes(
   return element.attributes ?? {};
 }
 
-export function remarkIncludeSatteri({ cwd }: { cwd?: string } = {}) {
+export function remarkIncludeSatteri({ cwd }: { cwd?: string } = {}): MdastPluginDefinition {
   return defineMdastPlugin({
     name: 'remark-include',
     async mdxJsxFlowElement(node, ctx) {
@@ -89,9 +87,7 @@ async function replaceInclude(
     features: { gfm: true, directive: true, headingAttributes: true },
   }) as { children: RootContent[] };
 
-  const raw = section
-    ? extractSectionRaw(tree.children, section, body)
-    : body.trimEnd();
+  const raw = section ? extractSectionRaw(tree.children, section, body) : body.trimEnd();
 
   if (section && raw === undefined) {
     throw new Error(

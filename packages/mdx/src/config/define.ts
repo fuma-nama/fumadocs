@@ -30,8 +30,9 @@ export interface MetaCollection<
   schema?: CollectionSchema<Schema, { path: string; source: string }>;
 }
 
-export interface DocCollectionBase<Schema extends StandardSchemaV1 = StandardSchemaV1>
-  extends BaseCollection {
+export interface DocCollectionBase<
+  Schema extends StandardSchemaV1 = StandardSchemaV1,
+> extends BaseCollection {
   postprocess?: Partial<PostprocessOptions>;
   async?: boolean;
   dynamic?: boolean;
@@ -60,9 +61,7 @@ export interface DocCollectionSatteri<
   /**
    * Sätteri compile options. When omitted, the global `satteriOptions` preset is used.
    */
-  satteriOptions?:
-    | SatteriPresetConfig
-    | SatteriPresetConfigFactory;
+  satteriOptions?: SatteriPresetConfig | SatteriPresetConfigFactory;
 
   mdxOptions?: never;
 }
@@ -83,6 +82,15 @@ export interface DocsCollection<
 
 export interface GlobalConfig {
   plugins?: PluginOption[];
+
+  /**
+   * The compiler for files compiled without a collection (e.g. `page.mdx` routes).
+   *
+   * Collections choose their own compiler via the collection-level `compiler` option.
+   *
+   * @defaultValue 'mdx'
+   */
+  compiler?: 'mdx' | 'satteri';
 
   /**
    * Configure global MDX options, used by `doc` collections with the default MDX compiler.

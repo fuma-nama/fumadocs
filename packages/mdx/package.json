@@ -75,6 +75,7 @@
     "zod": "^4.4.3"
   },
   "devDependencies": {
+    "@fumadocs/satteri": "workspace:*",
     "@fumadocs/vite": "workspace:*",
     "@types/bun": "^1.3.14",
     "@types/mdast": "^4.0.4",
@@ -83,7 +84,6 @@
     "@types/picomatch": "^4.0.3",
     "@types/react": "^19.2.17",
     "fumadocs-core": "workspace:*",
-    "@fumadocs/satteri": "workspace:*",
     "mdast-util-directive": "^3.1.0",
     "next": "^16.2.9",
     "react": "^19.2.7",

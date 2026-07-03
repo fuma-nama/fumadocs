@@ -1,7 +1,7 @@
 import { defineMdastPlugin } from 'satteri';
 import type { BlockContent } from 'mdast';
 import type { MdastNode, MdastVisitorContext } from 'satteri';
-import { flattenNode, handleTag } from '@/utils';
+import { flattenNode } from '@/utils';
 import { createHash } from 'node:crypto';
 
 export interface RemarkFeedbackBlockOptions {
@@ -47,9 +47,7 @@ export function remarkFeedbackBlock({
       if (count > 0) id = `${id}-${count}`;
       counts.set(id, count + 1);
 
-      const attributes = [
-        { type: 'mdxJsxAttribute' as const, name: 'id', value: id },
-      ];
+      const attributes = [{ type: 'mdxJsxAttribute' as const, name: 'id', value: id }];
       if (generateBody) {
         attributes.push({ type: 'mdxJsxAttribute', name: 'body', value: text });
       }

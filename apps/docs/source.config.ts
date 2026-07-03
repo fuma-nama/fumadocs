@@ -182,6 +182,8 @@ function transformerEscape(): ShikiTransformer {
 }
 
 export default defineConfig({
+  // `page.mdx` routes (compiled without a collection) also go through Sätteri
+  compiler: 'satteri',
   plugins: [
     jsonSchema({
       insert: true,

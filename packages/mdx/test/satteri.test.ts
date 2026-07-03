@@ -27,7 +27,10 @@ test('satteri compiler resolves preset options', async () => {
     process.cwd(),
   );
 
-  const options = await getSatteriOptions(config, config.collections.get('docs') as DocCollectionItem);
+  const options = await getSatteriOptions(
+    config,
+    config.collections.get('docs') as DocCollectionItem,
+  );
   expect(options.features?.gfm).toBe(true);
   expect(options.mdastPlugins?.length).toBeGreaterThan(0);
 });

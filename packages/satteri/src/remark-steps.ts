@@ -59,11 +59,7 @@ export function remarkSteps({ steps = 'fd-steps', step = 'fd-step' }: RemarkStep
     return false;
   }
 
-  function processChildren(
-    children: MdastNode[],
-    ctx: MdastVisitorContext,
-    parent: MdastNode,
-  ) {
+  function processChildren(children: MdastNode[], ctx: MdastVisitorContext, parent: MdastNode) {
     let startIdx = -1;
     let i = 0;
     let currentStep = 1;

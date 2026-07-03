@@ -55,7 +55,11 @@ export function remarkImage({
             sizeCache,
           });
           if (replacement) {
-            ctx.setProperty(parent, 'children', replaceChildAt(parent.children, index, replacement));
+            ctx.setProperty(
+              parent,
+              'children',
+              replaceChildAt(parent.children, index, replacement),
+            );
           }
         } catch (error) {
           if (onError === 'hide') {

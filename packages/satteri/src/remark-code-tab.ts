@@ -55,7 +55,10 @@ function buildTabs(
         value,
         children: withMdx ? mdxToAst(value) : [{ type: 'text', value }],
       });
-      options.tabs.push({ value, children: list.map((code) => ({ ...code, meta: stripTabMeta(code.meta) })) });
+      options.tabs.push({
+        value,
+        children: list.map((code) => ({ ...code, meta: stripTabMeta(code.meta) })),
+      });
     }
     const node = generateCodeBlockTabs(options);
     return (withParent ? [node] : node.children) as BlockContent[];
@@ -161,7 +164,10 @@ function isInsideCodeBlockTabs(node: Code, ctx: MdastVisitorContext) {
   return false;
 }
 
-export function remarkCodeTab({ parseMdx = false, Tabs = 'CodeBlockTabs' }: RemarkCodeTabOptions = {}) {
+export function remarkCodeTab({
+  parseMdx = false,
+  Tabs = 'CodeBlockTabs',
+}: RemarkCodeTabOptions = {}) {
   return defineMdastPlugin({
     name: 'remark-code-tab',
     code(node, ctx) {

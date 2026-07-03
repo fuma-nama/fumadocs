@@ -1,9 +1,5 @@
 import '@/data-map';
-import type {
-  HastPluginInput,
-  MdxCompileOptions,
-  MdxOnlyOptions,
-} from 'satteri';
+import type { HastPluginInput, MdxCompileOptions, MdxOnlyOptions } from 'satteri';
 import type { BuildEnvironment } from '@/types';
 import { remarkHeading, type RemarkHeadingOptions } from '@/remark-heading';
 import { remarkImage, type RemarkImageOptions } from '@/remark-image';
@@ -48,19 +44,28 @@ function wrapMdastFactory<T>(
   factory: (options?: T) => MdastPluginInput | (() => MdastPluginInput),
   options?: T,
 ): MdastPluginInput {
-  const plugin = factory(options);
-  return typeof plugin === 'function' ? plugin : plugin;
+  return factory(options);
 }
 
 function wrapHastFactory<T>(
   factory: (
     options?: T,
-  ) => HastPluginInput | Promise<HastPluginInput> | (() => HastPluginInput | Promise<HastPluginInput>),
+  ) =>
+    | HastPluginInput
+    | Promise<HastPluginInput>
+    | (() => HastPluginInput | Promise<HastPluginInput>),
   options?: T,
 ): HastPluginInput {
+  // the factory may perform expensive init (e.g. creating a syntax highlighter),
+  // call it once and reuse across compiles. Per-compile state stays in the
+  // resolved function-form plugin, which is still invoked per file.
+  let cached:
+    | Promise<HastPluginInput | (() => HastPluginInput | Promise<HastPluginInput>)>
+    | undefined;
+
   return async () => {
-    const plugin = factory(options);
-    const resolved = plugin instanceof Promise ? await plugin : plugin;
+    cached ??= Promise.resolve(factory(options));
+    const resolved = await cached;
     return typeof resolved === 'function' ? await resolved() : resolved;
   };
 }

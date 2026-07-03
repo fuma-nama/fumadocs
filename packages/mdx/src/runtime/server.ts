@@ -294,9 +294,9 @@ function createDocMethods(
       }
 
       const data = await load();
+      // the dynamic runtime nests extra exports under `_exports`
       const markdown =
-        data._markdown ??
-        (data._exports as { _markdown?: string } | undefined)?._markdown;
+        data._markdown ?? (data as { _exports?: { _markdown?: string } })._exports?._markdown;
       if (typeof markdown !== 'string')
         throw new Error(
           "getText('processed') requires `includeProcessedMarkdown` to be enabled in your collection config.",

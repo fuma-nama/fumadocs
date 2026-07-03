@@ -9,7 +9,8 @@ type SatteriOptionsFactory = (
 ) => SatteriPresetOptions | Promise<SatteriPresetOptions>;
 
 export interface DocCollectionSatteriTyped<
-  Schema extends import('@standard-schema/spec').StandardSchemaV1 = import('@standard-schema/spec').StandardSchemaV1,
+  Schema extends import('@standard-schema/spec').StandardSchemaV1 =
+    import('@standard-schema/spec').StandardSchemaV1,
 > extends DocCollectionBase<Schema> {
   type: 'doc';
   compiler: 'satteri';
@@ -26,7 +27,8 @@ export function defineSatteriConfig(config: SatteriGlobalConfig = {}): SatteriGl
 }
 
 export function defineSatteriCollections<
-  Schema extends import('@standard-schema/spec').StandardSchemaV1 = import('@standard-schema/spec').StandardSchemaV1,
+  Schema extends import('@standard-schema/spec').StandardSchemaV1 =
+    import('@standard-schema/spec').StandardSchemaV1,
 >(options: DocCollectionSatteriTyped<Schema>): DocCollectionSatteriTyped<Schema> {
   return options;
 }

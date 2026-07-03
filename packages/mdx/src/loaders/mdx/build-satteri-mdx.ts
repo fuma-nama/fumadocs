@@ -10,7 +10,12 @@ import type { PostprocessOptions } from '@/loaders/mdx/remark-postprocess';
 import { getSatteriOptions } from '@/config/build-satteri';
 import { compileMdx } from '@fumadocs/satteri/compile';
 import { remarkLlms } from '@fumadocs/satteri/remark-llms';
-import { defineMdastPlugin, type Data, type MdastPluginInput, type MdastVisitorContext } from 'satteri';
+import {
+  defineMdastPlugin,
+  type Data,
+  type MdastPluginInput,
+  type MdastVisitorContext,
+} from 'satteri';
 import '@fumadocs/satteri/data-map';
 import '@/loaders/mdx/satteri-data-map';
 import { remarkIncludeSatteri } from '@/loaders/mdx/remark-include-satteri';
@@ -36,14 +41,7 @@ export interface CompiledSatteriMDXProperties<Frontmatter = Record<string, unkno
 export async function buildSatteriMDX(
   core: Core,
   collection: DocCollectionItem | undefined,
-  {
-    filePath,
-    frontmatter,
-    source,
-    _compiler,
-    environment,
-    isDevelopment,
-  }: BuildSatteriMDXOptions,
+  { filePath, frontmatter, source, _compiler, environment, isDevelopment }: BuildSatteriMDXOptions,
 ): Promise<{ value: string }> {
   const satteriOptions = await getSatteriOptions(core.getConfig(), collection, environment);
   const postprocess: PostprocessOptions = {

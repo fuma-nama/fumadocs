@@ -125,6 +125,13 @@ export function rehypeCode(options?: Partial<RehypeCodeOptions>) {
             return;
           }
 
+          // `code` inside `pre` is handled by the `pre` visit; highlighting it
+          // separately queues transforms on a replaced node, which get dropped
+          if (element.tagName === 'code') {
+            const parent = ctx.parent(element);
+            if (parent?.type === 'element' && parent.tagName === 'pre') return;
+          }
+
           const tree = createCodeTree(element, ctx);
           await runBlock(tree, {} as never, () => undefined);
           replaceHighlightedNode(element, tree.children[0], ctx);

@@ -76,7 +76,10 @@ export async function buildMDX(
   collection: DocCollectionItem | undefined,
   options: BuildMDXOptions,
 ): Promise<VFile> {
-  if (collection?.compiler === 'satteri') {
+  // files compiled without a collection (e.g. `page.mdx` routes) follow the global compiler
+  const compiler = collection ? collection.compiler : core.getConfig().global.compiler;
+
+  if (compiler === 'satteri') {
     const { buildSatteriMDX } = await import('@/satteri/index');
     const compiled = await buildSatteriMDX(core, collection, options);
     return new VFile({ value: compiled.value, path: options.filePath });

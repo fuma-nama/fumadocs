@@ -43,11 +43,7 @@ function countRootTargets(parent: Parents) {
   return count;
 }
 
-export function remarkLlms({
-  as = '_markdown',
-  headingIds = true,
-  ...rest
-}: LLMsOptions = {}) {
+export function remarkLlms({ as = '_markdown', headingIds = true, ...rest }: LLMsOptions = {}) {
   return () => {
     let rootParent: Parents | undefined;
     const rootIndices: number[] = [];

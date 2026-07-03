@@ -27,9 +27,7 @@ const STRUCTURE_VISITORS = [
   'mdxJsxFlowElement',
 ] as const;
 
-function wrapStringifier(
-  stringifyOptions?: StringifyOptions | Stringifier,
-): Stringifier | null {
+function wrapStringifier(stringifyOptions?: StringifyOptions | Stringifier): Stringifier | null {
   if (!stringifyOptions) return null;
   if (typeof stringifyOptions === 'function') {
     const fn = stringifyOptions as (node: Nodes, ctx: StringifierContext) => string;
@@ -68,7 +66,6 @@ export function remarkStructure({
   types = ['heading', 'paragraph', 'blockquote', 'tableCell', 'mdxJsxFlowElement'],
   mdxTypes = (node) => !('children' in node) || node.children.length === 0,
   stringify: stringifyOptions,
-  exportAs = false,
 }: StructureOptions = {}) {
   const matchType =
     typeof types === 'function' ? types : (node: Nodes) => types.includes(node.type);

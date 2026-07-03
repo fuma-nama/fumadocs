@@ -34,6 +34,14 @@ export default defineConfig({
   entry: entries,
   deps: {
     onlyBundle: [],
-    neverBundle: ['fumadocs-core', 'fumadocs-typescript', 'satteri', 'unified', 'vfile', 'mdast-util-mdx', /^@types\//],
+    neverBundle: [
+      'fumadocs-core',
+      'fumadocs-typescript',
+      'satteri',
+      'unified',
+      'vfile',
+      'mdast-util-mdx',
+      /^@types\//,
+    ],
   },
 });

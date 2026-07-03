@@ -24,7 +24,9 @@ export interface CompileMdxResult {
   frontmatter: Frontmatter | null;
 }
 
-function resolvePlugins<T extends MdastPluginInput | HastPluginInput>(plugins: T[] | undefined): T[] {
+function resolvePlugins<T extends MdastPluginInput | HastPluginInput>(
+  plugins: T[] | undefined,
+): T[] {
   if (!plugins) return [];
   return plugins.map((plugin) => (typeof plugin === 'function' ? (plugin() as T) : plugin));
 }
