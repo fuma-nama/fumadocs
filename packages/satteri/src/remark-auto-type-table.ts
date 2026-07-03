@@ -1,10 +1,10 @@
 import { defineMdastPlugin } from 'satteri';
 import { fileURLToPath } from 'node:url';
+import type { RemarkAutoTypeTableOptions } from 'fumadocs-typescript';
 import {
   createAutoTypeTableGenerator,
   parseAutoTypeTableProps,
-  type RemarkAutoTypeTableOptions,
-} from 'fumadocs-typescript';
+} from '@/auto-type-table-generate';
 
 export type { RemarkAutoTypeTableOptions } from 'fumadocs-typescript';
 

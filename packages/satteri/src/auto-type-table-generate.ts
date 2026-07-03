@@ -4,10 +4,15 @@ import path from 'node:path';
 import { toEstree } from 'hast-util-to-estree';
 import { valueToEstree } from 'estree-util-value-to-estree';
 import type { MdxJsxAttribute, MdxJsxExpressionAttribute, MdxJsxFlowElement } from 'mdast-util-mdx';
-import { createGenerator, type DocEntry, type Generator } from '@/lib/base';
-import { type MarkdownRenderer, markdownRenderer, type ShikiOptions } from '@/markdown';
+import {
+  createGenerator,
+  type DocEntry,
+  type Generator,
+  type RemarkAutoTypeTableOptions,
+  type TypeTableProps,
+} from 'fumadocs-typescript';
+import { type MarkdownRenderer, markdownRenderer } from '@/lib/markdown-renderer';
 import { type ParameterTag, parseTags } from '@/lib/parse-tags';
-import { type BaseTypeTableProps, type GenerateTypeTableOptions } from '@/lib/type-table';
 
 function objectBuilder() {
   const out: ObjectExpression = {
@@ -102,41 +107,6 @@ async function buildTypeProp(
   }
 
   return prop.build();
-}
-
-export interface RemarkAutoTypeTableOptions {
-  /**
-   * @defaultValue 'auto-type-table'
-   */
-  name?: string;
-
-  /**
-   * @defaultValue 'TypeTable'
-   */
-  outputName?: string;
-
-  /**
-   * config for Shiki when using default `renderMarkdown` & `renderType`.
-   */
-  shiki?: ShikiOptions;
-  renderMarkdown?: MarkdownRenderer['renderMarkdownToHast'];
-  renderType?: MarkdownRenderer['renderTypeToHast'];
-
-  /**
-   * Customize type table generation
-   */
-  options?: GenerateTypeTableOptions;
-
-  /**
-   * generate the stringified form of props (useful for `remark-stringify` etc).
-   */
-  remarkStringify?: boolean;
-
-  generator?: Generator;
-}
-
-export interface TypeTableProps extends BaseTypeTableProps {
-  cwd?: true;
 }
 
 export function parseAutoTypeTableProps(node: MdxJsxFlowElement) {
