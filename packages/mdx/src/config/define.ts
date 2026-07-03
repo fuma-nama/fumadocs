@@ -4,6 +4,7 @@ import type { ProcessorOptions } from '@mdx-js/mdx';
 import { metaSchema, pageSchema } from 'fumadocs-core/source/schema';
 import type { PostprocessOptions } from '@/loaders/mdx/remark-postprocess';
 import type { PluginOption } from '@/core';
+import type { SatteriPresetOptions } from '@fumadocs/satteri/preset';
 import type { BuildEnvironment } from './build';
 
 /** @see `fumadocs-mdx/config/satteri` for typed Sätteri preset options */
@@ -113,6 +114,25 @@ export interface GlobalConfig {
   experimentalBuildCache?: string;
 }
 
+export type { SatteriPresetOptions };
+
+type SatteriOptionsFactory = (
+  environment: BuildEnvironment,
+) => SatteriPresetOptions | Promise<SatteriPresetOptions>;
+
+export interface DocCollectionSatteriTyped<
+  Schema extends StandardSchemaV1 = StandardSchemaV1,
+> extends DocCollectionBase<Schema> {
+  type: 'doc';
+  compiler: 'satteri';
+  satteriOptions?: SatteriPresetOptions | SatteriOptionsFactory;
+  mdxOptions?: never;
+}
+
+export interface SatteriGlobalConfig extends Omit<GlobalConfig, 'satteriOptions'> {
+  satteriOptions?: SatteriPresetOptions | SatteriOptionsFactory;
+}
+
 export function defineCollections<Schema extends StandardSchemaV1 = StandardSchemaV1>(
   options: DocCollection<Schema>,
 ): DocCollection<Schema>;
@@ -156,4 +176,14 @@ export function defineDocs<
 
 export function defineConfig(config: GlobalConfig = {}): GlobalConfig {
   return config;
+}
+
+export function defineSatteriConfig(config: SatteriGlobalConfig = {}): SatteriGlobalConfig {
+  return config;
+}
+
+export function defineSatteriCollections<Schema extends StandardSchemaV1 = StandardSchemaV1>(
+  options: DocCollectionSatteriTyped<Schema>,
+): DocCollectionSatteriTyped<Schema> {
+  return options;
 }
