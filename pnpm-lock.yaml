@@ -3422,6 +3422,9 @@ importers:
       fumadocs-core:
         specifier: workspace:*
         version: link:../core
+      fumadocs-typescript:
+        specifier: workspace:*
+        version: link:../typescript
       github-slugger:
         specifier: ^2.0.0
         version: 2.0.0
@@ -3755,9 +3758,6 @@ importers:
         specifier: ^5.1.0
         version: 5.1.0
     devDependencies:
-      '@fumadocs/satteri':
-        specifier: workspace:*
-        version: link:../satteri
       '@mdx-js/mdx':
         specifier: ^3.1.1
         version: 3.1.1
@@ -3788,9 +3788,6 @@ importers:
       mdast-util-mdx:
         specifier: ^3.0.0
         version: 3.0.0
-      satteri:
-        specifier: ^0.9.4
-        version: 0.9.4
       tsconfig:
         specifier: workspace:*
         version: link:../tsconfig

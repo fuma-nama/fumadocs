@@ -57,9 +57,7 @@
     "@types/react-dom": "^19.2.3",
     "fumadocs-core": "workspace:*",
     "fumadocs-ui": "workspace:*",
-    "@fumadocs/satteri": "workspace:*",
     "mdast-util-mdx": "^3.0.0",
-    "satteri": "^0.9.4",
     "tsconfig": "workspace:*",
     "tsdown": "0.22.3",
     "typescript": "^6.0.3",
@@ -73,8 +71,7 @@
     "fumadocs-core": "^16.7.0",
     "fumadocs-ui": "^16.7.0",
     "react": "^19.2.0",
-    "react-dom": "^19.2.0",
-    "satteri": "^0.9.4"
+    "react-dom": "^19.2.0"
   },
   "peerDependenciesMeta": {
     "@types/estree": {
@@ -90,9 +87,6 @@
       "optional": true
     },
     "@types/react": {
-      "optional": true
-    },
-    "satteri": {
       "optional": true
     }
   }

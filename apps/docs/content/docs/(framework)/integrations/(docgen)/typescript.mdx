@@ -55,6 +55,29 @@ await compile('...', {
 });
 ```
 
+```ts tab="Satteri"
+import {
+  createGenerator,
+  createFileSystemGeneratorCache,
+} from 'fumadocs-typescript';
+import { remarkAutoTypeTable } from '@fumadocs/satteri';
+
+const generator = createGenerator({
+  cache: createFileSystemGeneratorCache('.next/fumadocs-typescript'),
+});
+
+export default defineConfig({
+  docs: {
+    compiler: 'satteri',
+    async satteriOptions() {
+      return {
+        mdastPlugins: [remarkAutoTypeTable({ generator })],
+      };
+    },
+  },
+});
+```
+
 It gives you a `auto-type-table` component.
 
 You can use it like [Auto Type Table](/docs/ui/components/auto-type-table), but with additional rules:

@@ -35,8 +35,9 @@ export const docs = defineDocs({
       const { rehypeCodeDefaultOptions } = await import('fumadocs-core/mdx-plugins/rehype-code');
       const { transformerTwoslash } = await import('fumadocs-twoslash');
       const { createFileSystemTypesCache } = await import('fumadocs-twoslash/cache-fs');
-      const { remarkAutoTypeTableSatteri, createGenerator, createFileSystemGeneratorCache } =
+      const { createGenerator, createFileSystemGeneratorCache } =
         await import('fumadocs-typescript');
+      const { remarkAutoTypeTable } = await import('@fumadocs/satteri');
       const { remarkTs2js } = await import('@fumadocs/satteri');
 
       const typeTableOptions: RemarkAutoTypeTableOptions = {
@@ -107,7 +108,7 @@ export const docs = defineDocs({
             : [
                 remarkSteps,
                 remarkBlockId({ addDataAttribute: 'feedback' }),
-                remarkAutoTypeTableSatteri(typeTableOptions),
+                remarkAutoTypeTable(typeTableOptions),
                 remarkTs2js(),
                 ...plugins,
               ],

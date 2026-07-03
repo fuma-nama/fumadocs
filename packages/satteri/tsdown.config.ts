@@ -10,6 +10,6 @@ export default defineConfig({
   entry: ['src/index.ts', 'src/preset.ts', 'src/compile.ts', 'src/data-map.ts'],
   deps: {
     onlyBundle: [],
-    neverBundle: ['fumadocs-core', 'satteri', 'unified', 'vfile', 'mdast-util-mdx', /^@types\//],
+    neverBundle: ['fumadocs-core', 'fumadocs-typescript', 'satteri', 'unified', 'vfile', 'mdast-util-mdx', /^@types\//],
   },
 });

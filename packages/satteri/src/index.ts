@@ -39,6 +39,7 @@ export { remarkImage, type RemarkImageOptions } from '@/remark-image';
 export { remarkCodeTab, type RemarkCodeTabOptions } from '@/remark-code-tab';
 export { remarkNpm, type RemarkNpmOptions } from '@/remark-npm';
 export { remarkTs2js, type RemarkTs2jsOptions } from '@/remark-ts2js';
+export { remarkAutoTypeTable, type RemarkAutoTypeTableOptions } from '@/remark-auto-type-table';
 export { remarkBlockId, type RemarkBlockIdOptions } from '@/remark-block-id';
 export { remarkAdmonition, type RemarkAdmonitionOptions } from '@/remark-admonition';
 export {
