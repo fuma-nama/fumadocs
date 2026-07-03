@@ -69,7 +69,13 @@ export function applySatteriPreset(
   options: SatteriPresetOptions = {},
 ): (environment: BuildEnvironment) => Promise<MdxCompileOptions> {
   return async (environment = 'bundler') => {
-    if (options.preset === 'minimal') return options;
+    if (options.preset === 'minimal') {
+      const { preset: _preset, ...rest } = options;
+      return {
+        ...rest,
+        outputFormat: environment === 'runtime' ? 'function-body' : rest.outputFormat,
+      };
+    }
 
     const {
       valueToExport = [],

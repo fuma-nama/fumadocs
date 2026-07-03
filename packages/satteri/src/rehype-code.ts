@@ -15,7 +15,10 @@ function unwrapReplacement(node: RootContent | Root): RootContent | RootContent[
 function replaceHighlightedNode(
   element: Element,
   next: RootContent | Root | undefined,
-  ctx: { replaceNode: (node: Element, newNode: RootContent) => void; insertAfter: (node: RootContent, newNode: RootContent | RootContent[]) => void },
+  ctx: {
+    replaceNode: (node: Element, newNode: RootContent) => void;
+    insertAfter: (node: RootContent, newNode: RootContent | RootContent[]) => void;
+  },
 ) {
   if (!next) return;
 
@@ -28,6 +31,41 @@ function replaceHighlightedNode(
   }
 
   ctx.replaceNode(element, replacement);
+}
+
+function toTextElement(element: Element, code: string): Element {
+  return {
+    type: 'element',
+    tagName: element.tagName,
+    properties: { ...element.properties },
+    data: element.data ? { ...element.data } : undefined,
+    children: [{ type: 'text', value: code }],
+  };
+}
+
+function createCodeTree(element: Element, ctx: { textContent: (node: Element) => string }): Root {
+  if (element.tagName === 'pre') {
+    const head = element.children[0];
+    if (!head || head.type !== 'element' || head.tagName !== 'code') {
+      return { type: 'root', children: [element] };
+    }
+
+    const code = toTextElement(head, ctx.textContent(head));
+    return {
+      type: 'root',
+      children: [
+        {
+          type: 'element',
+          tagName: 'pre',
+          properties: { ...element.properties },
+          data: element.data ? { ...element.data } : undefined,
+          children: [code],
+        },
+      ],
+    };
+  }
+
+  return { type: 'root', children: [toTextElement(element, ctx.textContent(element))] };
 }
 
 export function rehypeCode(options?: Partial<RehypeCodeOptions>) {
@@ -46,7 +84,7 @@ export function rehypeCode(options?: Partial<RehypeCodeOptions>) {
             return;
           }
 
-          const tree: Root = { type: 'root', children: [structuredClone(element)] };
+          const tree = createCodeTree(element, ctx);
           await runBlock(tree, {} as never, () => undefined);
           replaceHighlightedNode(element, tree.children[0], ctx);
         },

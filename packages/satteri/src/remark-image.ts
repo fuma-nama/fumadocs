@@ -9,6 +9,7 @@ const VALID_BLUR_EXT = ['.jpeg', '.png', '.webp', '.avif', '.jpg'];
 const EXTERNAL_URL_REGEX = /^https?:\/\//;
 
 type ExternalImageOptions = { timeout?: number } | boolean;
+type ImageSize = { width: number; height: number };
 
 export interface RemarkImageOptions {
   publicDir?: string;
@@ -35,6 +36,7 @@ export function remarkImage({
 }: RemarkImageOptions = {}) {
   return () => {
     const imports: MdxjsEsm[] = [];
+    const sizeCache = new Map<string, Promise<ImageSize | undefined>>();
 
     return defineMdastPlugin({
       name: 'remark-image',
@@ -54,6 +56,7 @@ export function remarkImage({
             external,
             dir,
             imports,
+            sizeCache,
           });
           if (replacement) {
             ctx.setProperty(parent, 'children', replaceChildAt(parent.children, index, replacement));
@@ -87,6 +90,7 @@ async function updateImage(
     external: ExternalImageOptions;
     dir?: string;
     imports: MdxjsEsm[];
+    sizeCache: Map<string, Promise<ImageSize | undefined>>;
   },
 ): Promise<RootContent | undefined> {
   if (src.type === 'file' && ctx.useImport) {
@@ -151,6 +155,10 @@ async function updateImage(
       ],
     };
 
+    if (node.title) {
+      out.attributes.push({ type: 'mdxJsxAttribute', name: 'title', value: node.title });
+    }
+
     if (ctx.placeholder === 'blur' && VALID_BLUR_EXT.some((ext) => src.file.endsWith(ext))) {
       out.attributes.push({ type: 'mdxJsxAttribute', name: 'placeholder', value: 'blur' });
     }
@@ -158,7 +166,7 @@ async function updateImage(
     return out;
   }
 
-  const size = await getImageSize(src, ctx.external);
+  const size = await getImageSize(src, ctx.external, ctx.sizeCache);
   if (!size) return;
 
   node.data ??= {};
@@ -192,7 +200,28 @@ function parseSrc(src: string, publicDir: string, dir?: string): Source | undefi
   return { type: 'file', file: path.join(dir, src) };
 }
 
-async function getImageSize(src: Source, onExternal: ExternalImageOptions) {
+function getSizeCacheKey(src: Source, onExternal: ExternalImageOptions): string {
+  if (src.type === 'file') return `file:${src.file}`;
+
+  const timeout = typeof onExternal === 'object' ? onExternal.timeout : undefined;
+  return `url:${timeout ?? ''}:${src.url.href}`;
+}
+
+async function getImageSize(
+  src: Source,
+  onExternal: ExternalImageOptions,
+  cache: Map<string, Promise<ImageSize | undefined>>,
+) {
+  const key = getSizeCacheKey(src, onExternal);
+  const cached = cache.get(key);
+  if (cached) return cached;
+
+  const result = loadImageSize(src, onExternal);
+  cache.set(key, result);
+  return result;
+}
+
+async function loadImageSize(src: Source, onExternal: ExternalImageOptions) {
   if (src.type === 'file') {
     const { imageSizeFromFile } = await import('image-size/fromFile');
     return imageSizeFromFile(src.file);

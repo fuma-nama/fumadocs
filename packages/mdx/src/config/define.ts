@@ -7,9 +7,10 @@ import type { PluginOption } from '@/core';
 import type { BuildEnvironment } from './build';
 
 /** @see `fumadocs-mdx/config/satteri` for typed Sätteri preset options */
-export type SatteriPresetConfig =
-  | Record<string, unknown>
-  | ((environment: BuildEnvironment) => Promise<Record<string, unknown>>);
+export type SatteriPresetConfig = Record<string, unknown>;
+export type SatteriPresetConfigFactory = (
+  environment: BuildEnvironment,
+) => SatteriPresetConfig | Promise<SatteriPresetConfig>;
 
 export type CollectionSchema<Schema extends StandardSchemaV1, Context> =
   | Schema
@@ -61,7 +62,7 @@ export interface DocCollectionSatteri<
    */
   satteriOptions?:
     | SatteriPresetConfig
-    | ((environment: BuildEnvironment) => Promise<SatteriPresetConfig>);
+    | SatteriPresetConfigFactory;
 
   mdxOptions?: never;
 }
@@ -91,7 +92,7 @@ export interface GlobalConfig {
   /**
    * Configure global Sätteri options, used by `doc` collections with `compiler: "satteri"`.
    */
-  satteriOptions?: SatteriPresetConfig | (() => Promise<SatteriPresetConfig>);
+  satteriOptions?: SatteriPresetConfig | SatteriPresetConfigFactory;
 
   workspaces?: Record<
     string,

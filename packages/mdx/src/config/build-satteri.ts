@@ -8,6 +8,19 @@ const satteriOptionsCache = new WeakMap<
   Map<string, MdxCompileOptions | Promise<MdxCompileOptions>>
 >();
 
+type SatteriOptionsInput =
+  | SatteriPresetOptions
+  | ((environment: BuildEnvironment) => SatteriPresetOptions | Promise<SatteriPresetOptions>)
+  | undefined;
+
+async function resolvePresetOptions(
+  input: SatteriOptionsInput,
+  environment: BuildEnvironment,
+): Promise<MdxCompileOptions> {
+  const options = typeof input === 'function' ? await input(environment) : input;
+  return applySatteriPreset(options)(environment);
+}
+
 export function getSatteriOptions(
   config: LoadedConfig,
   collection?: DocCollectionItem,
@@ -26,36 +39,16 @@ export function getSatteriOptions(
   let result: MdxCompileOptions | Promise<MdxCompileOptions>;
 
   if (collection?.compiler === 'satteri') {
-    const opts = collection.satteriOptions;
-    if (typeof opts === 'function') {
-      result = (opts as (env: BuildEnvironment) => Promise<SatteriPresetOptions>)(environment).then(
-        (options) => applySatteriPreset(options)(environment),
-      );
-    } else if (opts) {
-      result = applySatteriPreset(opts as SatteriPresetOptions)(environment);
-    } else {
-      result = (async () => {
-        const optionsFn = config.global.satteriOptions;
-        const options =
-          typeof optionsFn === 'function'
-            ? await (optionsFn as () => Promise<SatteriPresetOptions>)()
-            : (optionsFn as SatteriPresetOptions | undefined);
-        return applySatteriPreset(options)(environment);
-      })();
-    }
+    result = resolvePresetOptions(
+      (collection.satteriOptions ?? config.global.satteriOptions) as SatteriOptionsInput,
+      environment,
+    );
   } else if (collection) {
     throw new Error(
       `Collection "${collection.name}" uses the default MDX compiler. Use getMDXOptions() instead of getSatteriOptions().`,
     );
   } else {
-    result = (async () => {
-      const optionsFn = config.global.satteriOptions;
-      const options =
-        typeof optionsFn === 'function'
-          ? await (optionsFn as () => Promise<SatteriPresetOptions>)()
-          : (optionsFn as SatteriPresetOptions | undefined);
-      return applySatteriPreset(options)(environment);
-    })();
+    result = resolvePresetOptions(config.global.satteriOptions as SatteriOptionsInput, environment);
   }
 
   cache.set(key, result);

@@ -1,4 +1,10 @@
-import { mdxToJs, type MdxCompileOptions, type MdastPluginInput, type HastPluginInput, type Frontmatter } from 'satteri';
+import {
+  mdxToJs,
+  type MdxCompileOptions,
+  type MdastPluginInput,
+  type HastPluginInput,
+  type Frontmatter,
+} from 'satteri';
 import { pathToFileURL } from 'node:url';
 import { appendExports, queueDataExport } from '@/inject-exports';
 
@@ -30,7 +36,7 @@ export async function compileMdx({
   environment = 'bundler',
   options,
 }: CompileMdxOptions): Promise<CompileMdxResult> {
-  const data = options.data ?? {};
+  const data: NonNullable<MdxCompileOptions['data']> = { ...options.data };
   if (frontmatter) data.frontmatter = frontmatter;
 
   const mdastPlugins = resolvePlugins(options.mdastPlugins as MdastPluginInput[] | undefined);
@@ -76,7 +82,9 @@ export async function compileMdx({
           specifiers: { local: { name: string } }[];
         };
         if (decl.type !== 'ImportDeclaration') return '';
-        return `import ${decl.specifiers[0]!.local.name} from ${JSON.stringify(decl.source.value)};`;
+        const specifier = decl.specifiers[0];
+        if (!specifier) return '';
+        return `import ${specifier.local.name} from ${JSON.stringify(decl.source.value)};`;
       })
       .filter(Boolean)
       .join('\n');

@@ -25,7 +25,7 @@ export function remarkStructure({
   const matchType =
     typeof types === 'function' ? types : (node: Nodes) => types.includes(node.type);
 
-    return () => {
+  return () => {
     const data: StructuredData = { contents: [], headings: [] };
     let lastHeading: string | undefined;
     let seeded = false;

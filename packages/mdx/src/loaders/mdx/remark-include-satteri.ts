@@ -1,27 +1,34 @@
 import { fileURLToPath } from 'node:url';
 import * as path from 'node:path';
 import { defineMdastPlugin, mdxToMdast, markdownToMdast } from 'satteri';
-import type { MdastVisitorContext } from 'satteri';
+import type { MdastPluginDefinition, MdastVisitorContext } from 'satteri';
 import { frontmatter } from 'fumadocs-core/content/md/frontmatter';
 import { flattenNode } from '@fumadocs/satteri';
 import type { Code, RootContent } from 'mdast';
 import type { CompilerOptions } from '@/loaders/mdx/build-mdx';
 
-export function remarkIncludeSatteri({ cwd }: { cwd?: string } = {}) {
+export function remarkIncludeSatteri({ cwd }: { cwd?: string } = {}): MdastPluginDefinition {
+  const cache = new Map<string, Promise<RootContent | RootContent[]>>();
+
   return defineMdastPlugin({
     name: 'remark-include',
     async mdxJsxFlowElement(node, ctx) {
       if (node.name !== 'include') return;
-      await replaceInclude(node, ctx, cwd);
+      await replaceInclude(node, ctx, cwd, cache);
     },
     async containerDirective(node, ctx) {
       if (node.name !== 'include') return;
-      await replaceInclude(node, ctx, cwd);
+      await replaceInclude(node, ctx, cwd, cache);
     },
   });
 }
 
-async function replaceInclude(node: RootContent, ctx: MdastVisitorContext, cwd?: string) {
+async function replaceInclude(
+  node: RootContent,
+  ctx: MdastVisitorContext,
+  cwd: string | undefined,
+  cache: Map<string, Promise<RootContent | RootContent[]>>,
+) {
   const specifier = flattenNode(node).trim();
   if (!specifier) return;
 
@@ -36,42 +43,51 @@ async function replaceInclude(node: RootContent, ctx: MdastVisitorContext, cwd?:
   const compiler = ctx.data._compiler as CompilerOptions | undefined;
   compiler?.addDependency(targetPath);
 
+  const key = `${targetPath}#${section ?? ''}`;
+  let replacement = cache.get(key);
+  if (!replacement) {
+    replacement = loadReplacement(targetPath, section);
+    cache.set(key, replacement);
+  }
+
+  const resolved = await replacement;
+  if (Array.isArray(resolved)) {
+    const children = [...parent.children];
+    children.splice(index, 1, ...resolved);
+    ctx.setProperty(parent, 'children', children);
+  } else {
+    ctx.replaceNode(node, resolved);
+  }
+}
+
+async function loadReplacement(targetPath: string, section?: string) {
   const ext = path.extname(targetPath);
-  let replacement: RootContent | RootContent[];
 
   if (ext !== '.md' && ext !== '.mdx') {
     const content = await fsRead(targetPath);
-    replacement = {
+    return {
       type: 'code',
       lang: ext.slice(1),
       value: content,
     } satisfies Code;
-  } else {
-    const content = await fsRead(targetPath);
-    const parsed = frontmatter(content);
-    const parse = ext === '.mdx' ? mdxToMdast : markdownToMdast;
-    const tree = parse(parsed.content, {
-      features: { gfm: true, directive: true, headingAttributes: true },
-    }) as { children: RootContent[] };
+  }
 
-    if (section) {
-      const extracted = extractSection(tree.children, section);
-      if (!extracted) {
-        throw new Error(`Cannot find section ${section} in ${targetPath}`);
-      }
-      replacement = extracted;
-    } else {
-      replacement = tree.children;
+  const content = await fsRead(targetPath);
+  const parsed = frontmatter(content);
+  const parse = ext === '.mdx' ? mdxToMdast : markdownToMdast;
+  const tree = parse(parsed.content, {
+    features: { gfm: true, directive: true, headingAttributes: true },
+  }) as { children: RootContent[] };
+
+  if (section) {
+    const extracted = extractSection(tree.children, section);
+    if (!extracted) {
+      throw new Error(`Cannot find section ${section} in ${targetPath}`);
     }
+    return extracted;
   }
 
-  if (Array.isArray(replacement)) {
-    const children = [...parent.children];
-    children.splice(index, 1, ...replacement);
-    ctx.setProperty(parent, 'children', children);
-  } else {
-    ctx.replaceNode(node, replacement);
-  }
+  return tree.children;
 }
 
 async function fsRead(file: string) {

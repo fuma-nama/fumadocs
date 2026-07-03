@@ -42,26 +42,65 @@ export function appendExports(
     _exports?: string[];
   },
 ): string {
-  const lines = data._exports ?? [];
+  const lines = dedupeNamedExports(data._exports ?? []);
   if (lines.length === 0) return code;
 
   return `${code.trimEnd()}\n${lines.join('\n')}\n`;
 }
 
+function dedupeNamedExports(lines: string[]): string[] {
+  const out: string[] = [];
+  const indexes = new Map<string, number>();
+
+  for (const line of lines) {
+    const name = /^export const ([A-Za-z_$][\w$]*) =/.exec(line)?.[1];
+    if (!name) {
+      out.push(line);
+      continue;
+    }
+
+    const index = indexes.get(name);
+    if (index === undefined) {
+      indexes.set(name, out.length);
+      out.push(line);
+    } else {
+      out[index] = line;
+    }
+  }
+
+  return out;
+}
+
+function queueExport(
+  data: Data & { _exports?: string[]; _exportIndexes?: Map<string, number> },
+  name: string,
+  line: string,
+): void {
+  data._exports ??= [];
+  data._exportIndexes ??= new Map();
+
+  const index = data._exportIndexes.get(name);
+  if (index !== undefined) {
+    data._exports[index] = line;
+    return;
+  }
+
+  data._exportIndexes.set(name, data._exports.length);
+  data._exports.push(line);
+}
+
 export function queueDataExport(
-  data: Data & { _exports?: string[] },
+  data: Data & { _exports?: string[]; _exportIndexes?: Map<string, number> },
   name: string,
   value: unknown,
 ): void {
-  data._exports ??= [];
-  data._exports.push(serializeValueExport(name, value));
+  queueExport(data, name, serializeValueExport(name, value));
 }
 
 export function queueTocJsxExport(
-  data: Data & { _exports?: string[] },
+  data: Data & { _exports?: string[]; _exportIndexes?: Map<string, number> },
   name: string,
   items: TocJsxExportItem[],
 ): void {
-  data._exports ??= [];
-  data._exports.push(serializeTocJsxExport(name, items));
+  queueExport(data, name, serializeTocJsxExport(name, items));
 }
