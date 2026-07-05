@@ -1,6 +1,6 @@
 @import 'tailwindcss';
-@import '@fumadocs/base-ui/css/neutral.css';
-@import '@fumadocs/base-ui/css/preset.css';
+@import 'fumadocs-ui/css/neutral.css';
+@import 'fumadocs-ui/css/preset.css';
 
 html {
   scrollbar-gutter: stable;

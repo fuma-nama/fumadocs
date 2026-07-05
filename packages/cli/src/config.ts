@@ -40,7 +40,7 @@ export async function createConfigSchema(cwd = process.cwd()) {
       if (existsSync(path.resolve(cwd, 'src'))) return 'src';
       return '';
     }),
-    uiLibrary: z.enum(['radix-ui', 'base-ui']).default('radix-ui'),
+    uiLibrary: z.enum(['radix-ui', 'base-ui']).default('base-ui'),
     framework: z.literal(frameworks).default(framework),
 
     commands: z

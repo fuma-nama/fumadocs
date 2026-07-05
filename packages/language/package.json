@@ -35,7 +35,7 @@
     "@fumadocs/story": "workspace:*",
     "fumadocs-core": "workspace:*",
     "fumadocs-openapi": "workspace:*",
-    "fumadocs-ui": "workspace:*",
+    "fumadocs-ui": "npm:@fumadocs/base-ui@16.10.7",
     "tsconfig": "workspace:*",
     "tsdown": "0.22.3",
     "typescript": "^6.0.3"

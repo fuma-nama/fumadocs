@@ -68,7 +68,7 @@ export function ObjectInput({
       )}
     >
       {isLazy && hiddenProperties.length > 0 && (
-        <Select value="" onValueChange={onAppend}>
+        <Select value="" onValueChange={(v) => v !== null && onAppend(v)}>
           <SelectTrigger className="col-span-full">
             <SelectValue placeholder={t('Show Property')} />
           </SelectTrigger>
@@ -222,9 +222,19 @@ export function FieldInput({
 
   if (field.enum && field.enum.length > 0) {
     const idx = field.enum.indexOf(value);
+    const items = [
+      ...field.enum.map((item, i) => ({
+        value: String(i),
+        label: typeof item === 'string' ? item : JSON.stringify(item, null, 2),
+      })),
+      ...(!isRequired
+        ? [{ value: '-1', label: <span className="text-fd-muted-foreground">{t('Unset')}</span> }]
+        : []),
+    ];
 
     return (
       <Select
+        items={items}
         value={idx === -1 && isRequired ? '' : String(idx)}
         onValueChange={(v) => setValue(field.enum![Number(v)])}
       >
@@ -232,38 +242,45 @@ export function FieldInput({
           <SelectValue placeholder={t('Select')} />
         </SelectTrigger>
         <SelectContent>
-          {field.enum.map((item, i) => (
-            <SelectItem key={i} value={String(i)}>
-              {typeof item === 'string' ? item : JSON.stringify(item, null, 2)}
+          {items.map((item) => (
+            <SelectItem key={item.value} value={item.value}>
+              {item.label}
             </SelectItem>
           ))}
-          {!isRequired && (
-            <SelectItem value="-1">
-              {<span className="text-fd-muted-foreground">{t('Unset')}</span>}
-            </SelectItem>
-          )}
         </SelectContent>
       </Select>
     );
   }
 
   if (field.type === 'boolean') {
+    const items = [
+      { value: 'true', label: 'True' },
+      { value: 'false', label: 'False' },
+      ...(!isRequired
+        ? [
+            {
+              value: 'undefined',
+              label: <span className="text-fd-muted-foreground">{t('Unset')}</span>,
+            },
+          ]
+        : []),
+    ];
+
     return (
       <Select
-        value={String(value)}
+        items={items}
+        value={value === undefined && isRequired ? '' : String(value)}
         onValueChange={(value) => setValue(value === 'undefined' ? undefined : value === 'true')}
       >
         <SelectTrigger id={id} {...props}>
           <SelectValue />
         </SelectTrigger>
         <SelectContent>
-          <SelectItem value="true">True</SelectItem>
-          <SelectItem value="false">False</SelectItem>
-          {!isRequired && (
-            <SelectItem value="undefined">
-              <span className="text-fd-muted-foreground">{t('Unset')}</span>
+          {items.map((item) => (
+            <SelectItem key={item.value} value={item.value}>
+              {item.label}
             </SelectItem>
-          )}
+          ))}
         </SelectContent>
       </Select>
     );

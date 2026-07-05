@@ -123,7 +123,7 @@
     "image-size": "^2.0.2",
     "mdast-util-gfm": "^3.1.0",
     "npm-to-yarn": "^3.0.1",
-    "oxc-transform": "^0.137.0",
+    "oxc-transform": "^0.138.0",
     "satteri": "^0.9.4"
   },
   "devDependencies": {
@@ -131,9 +131,9 @@
     "@types/estree-jsx": "^1.0.5",
     "@types/hast": "^3.0.4",
     "@types/mdast": "^4.0.4",
-    "@types/node": "26.0.0",
+    "@types/node": "26.1.0",
     "mdast-util-mdx": "^3.0.0",
-    "shiki": "^3.0.0",
+    "shiki": "^4.3.1",
     "tsconfig": "workspace:*",
     "tsdown": "0.22.3",
     "typescript": "^6.0.3",

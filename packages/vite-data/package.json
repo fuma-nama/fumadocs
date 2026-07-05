@@ -3,7 +3,6 @@
   "version": "0.0.2",
   "private": true,
   "dependencies": {
-    "@fumadocs/base-ui": "workspace:*",
     "@fumadocs/basehub": "workspace:*",
     "@fumadocs/local-md": "workspace:*",
     "@fumadocs/mdx-remote": "workspace:*",
@@ -13,6 +12,6 @@
     "fumadocs-mdx": "workspace:*",
     "fumadocs-twoslash": "workspace:*",
     "fumadocs-typescript": "workspace:*",
-    "fumadocs-ui": "workspace:*"
+    "fumadocs-ui": "npm:@fumadocs/base-ui@16.10.7"
   }
 }

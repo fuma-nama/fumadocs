@@ -234,7 +234,7 @@ export function ViewOptionsPopover({
               color: 'secondary',
               size: 'sm',
             }),
-            'gap-2 data-[state=open]:bg-fd-accent data-[state=open]:text-fd-accent-foreground',
+            'gap-2 data-[popup-open]:bg-fd-accent data-[popup-open]:text-fd-accent-foreground',
             typeof props.className === 'function' ? props.className(state) : props.className,
           )
         }

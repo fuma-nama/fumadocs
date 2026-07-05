@@ -14,7 +14,7 @@ type Translations = UITranslations &
 const translations = {
   displayName: '繁體中文',
   // fumadocs-ui
-  'Back to Home(404 page)': '返回首頁',
+  'Back to Home(404 not found page)': '返回首頁',
   'Choose a language(language switcher)': '選擇語言',
   'Choose a language(language switcher)(aria-label)': '選擇語言',
   'Close Banner(banner)(aria-label)': '關閉橫幅',
@@ -42,7 +42,7 @@ const translations = {
   'Open in GitHub(page actions)': '在 GitHub 中開啟',
   'Open in Scira AI(page actions)': '在 Scira AI 中開啟',
   'Open(page actions)': '開啟',
-  'Page Not Found(404 page)': '找不到頁面',
+  'Page Not Found(404 not found page)': '找不到頁面',
   'Parameters(type table)': '參數',
   'Previous Page(pagination)': '上一頁',
   'Prop(type table)': '屬性',
@@ -52,9 +52,9 @@ const translations = {
   'Search(search trigger)': '搜尋',
   'System(theme switcher)(aria-label)': '系統',
   'Table of Contents(inline table of contents)': '目錄',
-  'The page you are looking for might have been removed, had its name changed, or is temporarily unavailable.(404 page)':
+  'The page you are looking for might have been removed, had its name changed, or is temporarily unavailable.(404 not found page)':
     '你要尋找的頁面可能已被移除、名稱已變更，或暫時無法使用。',
-  'Toggle Menu(mobile menu)(aria-label)': '切換選單',
+  'Toggle Menu(home layout header)(aria-label)': '切換選單',
   'Toggle Theme(theme switcher)(aria-label)': '切換主題',
   'Type(type table)': '型別',
   'View as Markdown(page actions)': '以 Markdown 檢視',

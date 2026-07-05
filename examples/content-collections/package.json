@@ -10,8 +10,8 @@
   "dependencies": {
     "@fumadocs/content-collections": "workspace:*",
     "fumadocs-core": "workspace:*",
-    "fumadocs-ui": "workspace:*",
-    "next": "16.2.9",
+    "fumadocs-ui": "npm:@fumadocs/base-ui@16.10.7",
+    "next": "16.2.10",
     "react": "^19.2.7",
     "react-dom": "^19.2.7"
   },

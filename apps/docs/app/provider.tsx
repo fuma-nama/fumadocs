@@ -3,7 +3,7 @@
 import { RootProvider } from 'fumadocs-ui/provider/base';
 import dynamic from 'next/dynamic';
 import type { ReactNode } from 'react';
-import { TooltipProvider } from '@radix-ui/react-tooltip';
+import { Tooltip } from '@base-ui/react/tooltip';
 
 const SearchDialog = dynamic(() => import('@/components/layouts/search'), {
   ssr: false,
@@ -31,10 +31,10 @@ export function Provider({ children }: { children: ReactNode }) {
         SearchDialog,
       }}
     >
-      <TooltipProvider>
+      <Tooltip.Provider>
         <script suppressHydrationWarning dangerouslySetInnerHTML={{ __html: inject }} />
         {children}
-      </TooltipProvider>
+      </Tooltip.Provider>
     </RootProvider>
   );
 }

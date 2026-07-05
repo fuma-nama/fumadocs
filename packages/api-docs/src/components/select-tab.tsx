@@ -16,7 +16,7 @@ import { AnchorSection, useAnchorId } from '@/auto-anchor/client';
 
 const Context = createContext<{
   value: string | null;
-  setValue: (type: string) => void;
+  setValue: (type: string | null) => void;
 } | null>(null);
 
 export function SelectTabs({
@@ -71,11 +71,9 @@ export function SelectTabTrigger({
   const { value, setValue } = use(Context)!;
 
   return (
-    <Select value={value ?? ''} onValueChange={setValue}>
+    <Select items={items} value={value} onValueChange={setValue}>
       <SelectTrigger className={cn('not-prose w-fit min-w-0 *:min-w-0', className)} {...props}>
-        <SelectValue placeholder={placeholder}>
-          {value && items.find((item) => item.value === value)?.label}
-        </SelectValue>
+        <SelectValue placeholder={placeholder} />
       </SelectTrigger>
       <SelectContent>
         {items.map(({ label, value }) => (

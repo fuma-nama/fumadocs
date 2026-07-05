@@ -65,7 +65,7 @@ export default function ServerSelect(props: ComponentProps<typeof DialogTrigger>
           <DialogTitle>{t('Server URL')}</DialogTitle>
           <DialogDescription>{t('The base URL of your API endpoint.')}</DialogDescription>
         </DialogHeader>
-        <Select value={server?.url} onValueChange={setServer}>
+        <Select value={server?.url ?? null} onValueChange={(v) => v !== null && setServer(v)}>
           <SelectTrigger>
             <SelectValue />
           </SelectTrigger>

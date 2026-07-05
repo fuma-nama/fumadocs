@@ -233,7 +233,13 @@ function Content({ schemeId, scopes, setToken, setOpen }: AuthDialogContentProps
         e.stopPropagation();
       }}
     >
-      <Select value={type ?? ''} onValueChange={setType as (s: string) => void}>
+      <Select
+        items={Object.fromEntries(
+          Object.keys(scheme.flows!).map((key) => [key, allFlows[key as FlowType].name]),
+        )}
+        value={type}
+        onValueChange={setType}
+      >
         <SelectTrigger>
           <SelectValue placeholder={t('Select a flow')} />
         </SelectTrigger>

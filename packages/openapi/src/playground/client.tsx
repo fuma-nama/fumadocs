@@ -19,7 +19,7 @@ import {
   Collapsible,
   CollapsibleContent,
   CollapsibleTrigger,
-} from 'fumadocs-ui/components/ui/collapsible';
+} from '@fumadocs/api-docs/components/collapsible';
 import { ChevronDown, LoaderCircle } from 'lucide-react';
 import { encodeRequestData } from '@/requests/media/encode';
 import { buttonVariants } from 'fumadocs-ui/components/ui/button';
@@ -387,11 +387,16 @@ function SecurityRequirements({
           <p>{String(error)}</p>
         </div>
       )}
-      <Select value={securityId.toString()} onValueChange={(v) => setSecurityId(Number(v))}>
+      <Select
+        items={securities.map((security, i) => ({
+          value: i.toString(),
+          label: <SecurityRequirement requirement={security} />,
+        }))}
+        value={securityId.toString()}
+        onValueChange={(v) => setSecurityId(Number(v))}
+      >
         <SelectTrigger>
-          <SelectValue>
-            <SecurityRequirement requirement={securities[securityId]} />
-          </SelectValue>
+          <SelectValue />
         </SelectTrigger>
         <SelectContent>
           {securities.map((security, i) => (
@@ -824,7 +829,7 @@ export function DefaultCollapsiblePanel({ title, children, ...props }: Collapsib
     <Collapsible {...props} className={cn('border-b last:border-b-0', props.className)}>
       <CollapsibleTrigger className="group w-full flex items-center gap-2 p-3 text-sm font-medium">
         {title}
-        <ChevronDown className="ms-auto size-3.5 text-fd-muted-foreground group-data-[state=open]:rotate-180" />
+        <ChevronDown className="ms-auto size-3.5 text-fd-muted-foreground group-data-[panel-open]:rotate-180" />
       </CollapsibleTrigger>
       <CollapsibleContent>
         <div className="flex flex-col gap-3 p-3 pt-1">{children}</div>

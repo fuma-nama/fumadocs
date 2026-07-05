@@ -41,16 +41,17 @@
     "types:check": "tsc --noEmit"
   },
   "dependencies": {
+    "@base-ui/react": "^1.6.0",
     "class-variance-authority": "^0.7.1",
     "cnfast": "^0.0.8",
-    "js-yaml": "^5.1.0",
-    "lucide-react": "^1.21.0"
+    "js-yaml": "^5.2.1",
+    "lucide-react": "^1.23.0"
   },
   "devDependencies": {
-    "@types/node": "^26.0.0",
+    "@types/node": "^26.1.0",
     "@types/react": "^19.2.17",
     "fumadocs-core": "workspace:*",
-    "fumadocs-ui": "workspace:*",
+    "fumadocs-ui": "npm:@fumadocs/base-ui@16.10.7",
     "tsconfig": "workspace:*",
     "tsdown": "0.22.3"
   },
