@@ -1,9 +1,6 @@
 import {
   ComponentProps,
-  type ComponentPropsWithoutRef,
-  type ComponentRef,
   createContext,
-  forwardRef,
   type ReactNode,
   useContext,
   useMemo,
@@ -83,14 +80,15 @@ function PopupTrigger({ children, ...props }: ComponentProps<typeof PopoverPrimi
   );
 }
 
-const PopupContent = forwardRef<
-  ComponentRef<typeof PopoverPrimitive.Popup>,
-  ComponentPropsWithoutRef<typeof PopoverPrimitive.Popup> &
-    Pick<
-      ComponentPropsWithoutRef<typeof PopoverPrimitive.Positioner>,
-      'align' | 'side' | 'sideOffset'
-    >
->(({ className, side = 'bottom', align = 'center', sideOffset = 4, ...props }, ref) => {
+function PopupContent({
+  className,
+  side = 'bottom',
+  align = 'center',
+  sideOffset = 4,
+  ref,
+  ...props
+}: React.ComponentProps<typeof PopoverPrimitive.Popup> &
+  Pick<React.ComponentProps<typeof PopoverPrimitive.Positioner>, 'align' | 'side' | 'sideOffset'>) {
   const ctx = useContext(PopupContext);
   if (!ctx) throw new Error('Missing Popup Context');
 
@@ -109,8 +107,6 @@ const PopupContent = forwardRef<
       </PopoverPrimitive.Positioner>
     </PopoverPrimitive.Portal>
   );
-});
-
-PopupContent.displayName = 'PopupContent';
+}
 
 export { Popup, PopupTrigger, PopupContent };

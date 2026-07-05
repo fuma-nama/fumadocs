@@ -1,8 +1,8 @@
 'use client';
-import { type AnchorHTMLAttributes, forwardRef } from 'react';
+import { type ComponentProps } from 'react';
 import { Link as Base } from '@/framework';
 
-export interface LinkProps extends AnchorHTMLAttributes<HTMLAnchorElement> {
+export interface LinkProps extends ComponentProps<'a'> {
   /**
    * If the href is an external URL
    *
@@ -16,36 +16,32 @@ export interface LinkProps extends AnchorHTMLAttributes<HTMLAnchorElement> {
   prefetch?: boolean;
 }
 
-const Link = forwardRef<HTMLAnchorElement, LinkProps>(
-  (
-    {
-      href = '#',
-      // any protocol
-      external = href.match(/^\w+:/) ||
-        // protocol relative URL
-        href.startsWith('//'),
-      prefetch,
-      children,
-      ...props
-    },
-    ref,
-  ) => {
-    if (external) {
-      return (
-        <a ref={ref} href={href} rel="noreferrer noopener" target="_blank" {...props}>
-          {children}
-        </a>
-      );
-    }
-
+export function Link({
+  ref,
+  href = '#',
+  // any protocol
+  external = !!(
+    href.match(/^\w+:/) ||
+    // protocol relative URL
+    href.startsWith('//')
+  ),
+  prefetch,
+  children,
+  ...props
+}: LinkProps) {
+  if (external) {
     return (
-      <Base ref={ref} href={href} prefetch={prefetch} {...props}>
+      <a ref={ref} href={href} rel="noreferrer noopener" target="_blank" {...props}>
         {children}
-      </Base>
+      </a>
     );
-  },
-);
+  }
 
-Link.displayName = 'Link';
+  return (
+    <Base ref={ref} href={href} prefetch={prefetch} {...props}>
+      {children}
+    </Base>
+  );
+}
 
 export { Link as default };

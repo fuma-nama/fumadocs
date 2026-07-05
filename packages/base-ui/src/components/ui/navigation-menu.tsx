@@ -13,7 +13,7 @@ export function NavigationMenuItem({
   className,
   children,
   ...props
-}: React.ComponentPropsWithRef<typeof Primitive.Item>) {
+}: React.ComponentProps<typeof Primitive.Item>) {
   return (
     <Primitive.Item
       className={(s) => cn('list-none', typeof className === 'function' ? className(s) : className)}
@@ -27,14 +27,14 @@ export function NavigationMenuItem({
 export function NavigationMenuTrigger({
   children,
   ...props
-}: React.ComponentPropsWithRef<typeof Primitive.Trigger>) {
+}: React.ComponentProps<typeof Primitive.Trigger>) {
   return <Primitive.Trigger {...props}>{children}</Primitive.Trigger>;
 }
 
 export function NavigationMenuContent({
   className,
   ...props
-}: React.ComponentPropsWithRef<typeof Primitive.Content>) {
+}: React.ComponentProps<typeof Primitive.Content>) {
   return (
     <Primitive.Content
       className={(s) =>
@@ -57,7 +57,7 @@ export function NavigationMenuContent({
 export function NavigationMenuLink({
   children,
   ...props
-}: React.ComponentPropsWithRef<typeof Primitive.Link>) {
+}: React.ComponentProps<typeof Primitive.Link>) {
   return <Primitive.Link {...props}>{children}</Primitive.Link>;
 }
 
