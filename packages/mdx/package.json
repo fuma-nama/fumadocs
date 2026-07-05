@@ -26,7 +26,6 @@
     "./bin": "./dist/bin.js",
     "./bun": "./dist/bun/index.js",
     "./config": "./dist/config/index.js",
-    "./config/satteri": "./dist/config/satteri/index.js",
     "./next": "./dist/next/index.js",
     "./node": "./dist/node/index.js",
     "./node/_loader": "./dist/node/_loader.js",

@@ -7,7 +7,7 @@ const satteriOptionsCache = new WeakMap<
   Map<string, MdxCompileOptions | Promise<MdxCompileOptions>>
 >();
 
-type SatteriOptionsInput =
+export type SatteriOptionsInput =
   | SatteriPresetOptions
   | ((environment: BuildEnvironment) => SatteriPresetOptions | Promise<SatteriPresetOptions>)
   | undefined;
@@ -39,7 +39,7 @@ export function getSatteriOptions(
 
   if (collection?.compiler === 'satteri') {
     result = resolvePresetOptions(
-      (collection.satteriOptions ?? config.global.satteriOptions) as SatteriOptionsInput,
+      collection.satteriOptions ?? config.global.satteriOptions,
       environment,
     );
   } else if (collection) {

@@ -6,12 +6,7 @@ import type { PostprocessOptions } from '@/loaders/mdx/remark-postprocess';
 import type { PluginOption } from '@/core';
 import type { SatteriPresetOptions } from '@fumadocs/satteri/preset';
 import type { BuildEnvironment } from './build';
-
-/** @see `fumadocs-mdx/config/satteri` for typed Sätteri preset options */
-export type SatteriPresetConfig = Record<string, unknown> | object;
-export type SatteriPresetConfigFactory = (
-  environment: BuildEnvironment,
-) => SatteriPresetConfig | Promise<SatteriPresetConfig>;
+import type { SatteriOptionsInput } from './build-satteri';
 
 export type CollectionSchema<Schema extends StandardSchemaV1, Context> =
   | Schema
@@ -62,7 +57,7 @@ export interface DocCollectionSatteri<
   /**
    * Sätteri compile options. When omitted, the global `satteriOptions` preset is used.
    */
-  satteriOptions?: SatteriPresetConfig | SatteriPresetConfigFactory;
+  satteriOptions?: SatteriOptionsInput;
 
   mdxOptions?: never;
 }
@@ -101,7 +96,7 @@ export interface GlobalConfig {
   /**
    * Configure global Sätteri options, used by `doc` collections with `compiler: "satteri"`.
    */
-  satteriOptions?: SatteriPresetConfig | SatteriPresetConfigFactory;
+  satteriOptions?: SatteriOptionsInput;
 
   workspaces?: Record<
     string,
