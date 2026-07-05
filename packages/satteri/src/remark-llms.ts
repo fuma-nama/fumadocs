@@ -43,6 +43,7 @@ function countRootTargets(parent: Parents) {
   return count;
 }
 
+// TODO: explore ways to reuse ctx.textContent()
 export function remarkLlms({ as = '_markdown', headingIds = true, ...rest }: LLMsOptions = {}) {
   return () => {
     let rootParent: Parents | undefined;

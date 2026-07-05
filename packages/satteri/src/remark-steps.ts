@@ -12,7 +12,7 @@ const StepRegex = /^(\d+)\.\s(.+)$/;
 const StepTag = '[step]';
 
 export function remarkSteps({ steps = 'fd-steps', step = 'fd-step' }: RemarkStepsOptions = {}) {
-  function convertToSteps(nodes: MdastNode[]) {
+  function convertToSteps(nodes: MdastNode[]): MdastNode {
     const depth = (nodes[0] as Heading).depth;
     const children: MdastNode[] = [];
 
@@ -37,13 +37,16 @@ export function remarkSteps({ steps = 'fd-steps', step = 'fd-step' }: RemarkStep
     } as MdastNode;
   }
 
-  function handleHeadingStep(node: Heading): boolean {
+  // Returns a new heading node with the step prefix/tag stripped, or `false`
+  // when the heading is not a step
+  function handleHeadingStep(node: Heading): Heading | false {
     const head = node.children[0];
     if (head?.type === 'text') {
       const match = StepRegex.exec(head.value);
       if (match) {
-        head.value = match[2]!;
-        return true;
+        const newChildren = [...node.children];
+        newChildren[0] = { ...head, value: match[2]! };
+        return { ...node, children: newChildren };
       }
     }
 
@@ -51,8 +54,9 @@ export function remarkSteps({ steps = 'fd-steps', step = 'fd-step' }: RemarkStep
     if (tail?.type === 'text') {
       const stepValue = handleTag(tail.value, StepTag);
       if (stepValue !== false) {
-        tail.value = stepValue;
-        return true;
+        const newChildren = [...node.children];
+        newChildren[newChildren.length - 1] = { ...tail, value: stepValue };
+        return { ...node, children: newChildren };
       }
     }
 
@@ -60,58 +64,78 @@ export function remarkSteps({ steps = 'fd-steps', step = 'fd-step' }: RemarkStep
   }
 
   function processChildren(children: MdastNode[], ctx: MdastVisitorContext, parent: MdastNode) {
+    const output = [...children];
     let startIdx = -1;
     let i = 0;
     let currentStep = 1;
+    let changed = false;
 
     const onEnd = () => {
       if (startIdx === -1) return;
-      const nodes = children.splice(startIdx, i - startIdx);
-      children.splice(startIdx, 0, convertToSteps(nodes));
+      const nodes = output.splice(startIdx, i - startIdx);
+      output.splice(startIdx, 0, convertToSteps(nodes));
+      changed = true;
       i = startIdx + 1;
       startIdx = -1;
       currentStep = 1;
     };
 
-    for (; i < children.length; i++) {
-      const node = children[i]!;
+    for (; i < output.length; i++) {
+      const node = output[i]!;
       if (node.type !== 'heading') continue;
 
       const data = (node.data ?? {}) as { hProperties?: Record<string, unknown> };
       if (data.hProperties?.['data-fd-step'] !== undefined) continue;
 
       if (startIdx !== -1) {
-        const startDepth = (children[startIdx] as Heading).depth;
+        const startDepth = (output[startIdx] as Heading).depth;
         if (node.depth !== startDepth) {
           if (node.depth < startDepth) onEnd();
           continue;
         }
       }
 
-      if (!handleHeadingStep(node)) {
+      const stepped = handleHeadingStep(node);
+      if (!stepped) {
         onEnd();
         continue;
       }
 
-      data.hProperties ??= {};
-      data.hProperties['data-fd-step'] = currentStep++;
-      ctx.setProperty(node, 'data', data);
+      const steppedData = (stepped.data ?? {}) as { hProperties?: Record<string, unknown> };
+      output[i] = {
+        ...stepped,
+        data: {
+          ...steppedData,
+          hProperties: {
+            ...steppedData.hProperties,
+            'data-fd-step': currentStep++,
+          },
+        },
+      } as MdastNode;
       if (startIdx === -1) startIdx = i;
     }
 
     onEnd();
-    ctx.setProperty(parent, 'children', children);
+    if (changed) ctx.setProperty(parent, 'children', output);
   }
 
-  function visitContainer(node: MdastNode, ctx: MdastVisitorContext) {
-    if (!('children' in node)) return;
-    processChildren([...node.children] as MdastNode[], ctx, node);
-  }
+  // Satteri has no `root` visitor and materializes nodes per-visit, so we can't
+  // walk containers directly. Instead visit every heading, resolve its parent
+  // (root, a list item, a `<div>`, a blockquote…), and process that parent's
+  // children once — parent identity is stable within a pass, so a WeakSet
+  // dedupes sibling-heading visits.
+  return () => {
+    const processed = new WeakSet<object>();
 
-  return defineMdastPlugin({
-    name: 'remark-steps',
-    blockquote: visitContainer,
-    list: visitContainer,
-    mdxJsxFlowElement: visitContainer,
-  });
+    return defineMdastPlugin({
+      name: 'remark-steps',
+      heading(node, ctx) {
+        const parent = ctx.parent(node) as MdastNode | undefined;
+        if (!parent || !('children' in parent)) return;
+        if (processed.has(parent)) return;
+        processed.add(parent);
+        processChildren([...(parent.children as MdastNode[])], ctx, parent);
+      },
+    });
+  };
 }

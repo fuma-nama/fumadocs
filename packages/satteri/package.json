@@ -17,90 +17,27 @@
   ],
   "type": "module",
   "exports": {
-    "./preset": {
-      "types": "./dist/preset.d.ts",
-      "import": "./dist/preset.js"
-    },
-    "./compile": {
-      "types": "./dist/compile.d.ts",
-      "import": "./dist/compile.js"
-    },
-    "./data-map": {
-      "types": "./dist/data-map.d.ts",
-      "import": "./dist/data-map.js"
-    },
-    "./inject-exports": {
-      "types": "./dist/inject-exports.d.ts",
-      "import": "./dist/inject-exports.js"
-    },
-    "./utils": {
-      "types": "./dist/utils.d.ts",
-      "import": "./dist/utils.js"
-    },
-    "./remark-heading": {
-      "types": "./dist/remark-heading.d.ts",
-      "import": "./dist/remark-heading.js"
-    },
-    "./remark-structure": {
-      "types": "./dist/remark-structure.d.ts",
-      "import": "./dist/remark-structure.js"
-    },
-    "./remark-image": {
-      "types": "./dist/remark-image.d.ts",
-      "import": "./dist/remark-image.js"
-    },
-    "./remark-code-tab": {
-      "types": "./dist/remark-code-tab.d.ts",
-      "import": "./dist/remark-code-tab.js"
-    },
-    "./remark-npm": {
-      "types": "./dist/remark-npm.d.ts",
-      "import": "./dist/remark-npm.js"
-    },
-    "./remark-ts2js": {
-      "types": "./dist/remark-ts2js.d.ts",
-      "import": "./dist/remark-ts2js.js"
-    },
-    "./remark-auto-type-table": {
-      "types": "./dist/remark-auto-type-table.d.ts",
-      "import": "./dist/remark-auto-type-table.js"
-    },
-    "./remark-block-id": {
-      "types": "./dist/remark-block-id.d.ts",
-      "import": "./dist/remark-block-id.js"
-    },
-    "./remark-admonition": {
-      "types": "./dist/remark-admonition.d.ts",
-      "import": "./dist/remark-admonition.js"
-    },
-    "./remark-directive-admonition": {
-      "types": "./dist/remark-directive-admonition.d.ts",
-      "import": "./dist/remark-directive-admonition.js"
-    },
-    "./remark-steps": {
-      "types": "./dist/remark-steps.d.ts",
-      "import": "./dist/remark-steps.js"
-    },
-    "./remark-mdx-mermaid": {
-      "types": "./dist/remark-mdx-mermaid.d.ts",
-      "import": "./dist/remark-mdx-mermaid.js"
-    },
-    "./remark-feedback-block": {
-      "types": "./dist/remark-feedback-block.d.ts",
-      "import": "./dist/remark-feedback-block.js"
-    },
-    "./rehype-toc": {
-      "types": "./dist/rehype-toc.d.ts",
-      "import": "./dist/rehype-toc.js"
-    },
-    "./rehype-code": {
-      "types": "./dist/rehype-code.d.ts",
-      "import": "./dist/rehype-code.js"
-    },
-    "./remark-llms": {
-      "types": "./dist/remark-llms.d.ts",
-      "import": "./dist/remark-llms.js"
-    },
+    "./compile": "./dist/compile.js",
+    "./data-map": "./dist/data-map.js",
+    "./inject-exports": "./dist/inject-exports.js",
+    "./preset": "./dist/preset.js",
+    "./rehype-code": "./dist/rehype-code.js",
+    "./rehype-toc": "./dist/rehype-toc.js",
+    "./remark-admonition": "./dist/remark-admonition.js",
+    "./remark-auto-type-table": "./dist/remark-auto-type-table.js",
+    "./remark-block-id": "./dist/remark-block-id.js",
+    "./remark-code-tab": "./dist/remark-code-tab.js",
+    "./remark-directive-admonition": "./dist/remark-directive-admonition.js",
+    "./remark-feedback-block": "./dist/remark-feedback-block.js",
+    "./remark-heading": "./dist/remark-heading.js",
+    "./remark-image": "./dist/remark-image.js",
+    "./remark-llms": "./dist/remark-llms.js",
+    "./remark-mdx-mermaid": "./dist/remark-mdx-mermaid.js",
+    "./remark-npm": "./dist/remark-npm.js",
+    "./remark-steps": "./dist/remark-steps.js",
+    "./remark-structure": "./dist/remark-structure.js",
+    "./remark-ts2js": "./dist/remark-ts2js.js",
+    "./utils": "./dist/utils.js",
     "./package.json": "./package.json"
   },
   "publishConfig": {
@@ -115,6 +52,7 @@
     "types:check": "tsc --noEmit"
   },
   "dependencies": {
+    "estree-util-to-js": "^2.0.0",
     "estree-util-value-to-estree": "^3.5.0",
     "fumadocs-core": "workspace:*",
     "fumadocs-typescript": "workspace:*",

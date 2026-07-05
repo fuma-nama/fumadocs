@@ -72,6 +72,11 @@ export async function compileMdx({
   }
   if (outData.structuredData) {
     queueDataExport(outData, 'structuredData', outData.structuredData);
+  } else if (mdastPlugins.some((plugin) => plugin.name === 'remark-structure')) {
+    // remark-structure only assigns `structuredData` from node visitors, so a
+    // page without any matching nodes would otherwise miss the export and
+    // break consumers that expect it on every page (e.g. search indexing)
+    queueDataExport(outData, 'structuredData', { contents: [], headings: [] });
   }
   if (typeof outData._markdown === 'string') {
     queueDataExport(outData, '_markdown', outData._markdown);

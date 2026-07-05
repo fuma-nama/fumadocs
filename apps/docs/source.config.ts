@@ -11,7 +11,6 @@ import {
 } from 'fumadocs-typescript';
 import { defaultShikiOptions } from './lib/shiki.ts';
 import { metaSchema, pageSchema } from 'fumadocs-core/source/schema';
-import { applySatteriPreset } from '@fumadocs/satteri/preset';
 import { remarkBlockId } from '@fumadocs/satteri/remark-block-id';
 import { remarkSteps } from '@fumadocs/satteri/remark-steps';
 import { remarkElementIds } from './lib/remark-element-ids.ts';
@@ -40,7 +39,7 @@ export const docs = defineDocs({
       valueToExport: ['elementIds'],
     },
     async: true,
-    async satteriOptions(environment) {
+    async satteriOptions() {
       const { rehypeCodeDefaultOptions } = await import('fumadocs-core/mdx-plugins/rehype-code');
       const { transformerTwoslash } = await import('fumadocs-twoslash');
       const { createFileSystemTypesCache } = await import('fumadocs-twoslash/cache-fs');
@@ -52,7 +51,7 @@ export const docs = defineDocs({
         shiki: defaultShikiOptions,
       };
 
-      return applySatteriPreset({
+      return {
         features: {
           math: true,
         },
@@ -117,7 +116,7 @@ export const docs = defineDocs({
                 remarkTs2js(),
                 ...plugins,
               ],
-      })(environment);
+      };
     },
   },
   meta: {
@@ -136,10 +135,10 @@ export const blog = defineCollections({
     date: z.iso.date().or(z.date()),
   }),
   async: true,
-  async satteriOptions(environment) {
+  async satteriOptions() {
     const { rehypeCodeDefaultOptions } = await import('fumadocs-core/mdx-plugins/rehype-code');
 
-    return applySatteriPreset({
+    return {
       rehypeCodeOptions: isLint
         ? false
         : {
@@ -161,7 +160,7 @@ export const blog = defineCollections({
       },
       mdastPlugins: (plugins) =>
         isLint ? [remarkElementIds(), ...plugins] : [remarkSteps, ...plugins],
-    })(environment);
+    };
   },
 });
 

@@ -4,6 +4,7 @@ import type { Expression, ExpressionStatement, ObjectExpression } from 'estree';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { toEstree } from 'hast-util-to-estree';
+import { toJs, jsx } from 'estree-util-to-js';
 import { valueToEstree } from 'estree-util-value-to-estree';
 import type { MdxJsxAttribute, MdxJsxExpressionAttribute, MdxJsxFlowElement } from 'mdast-util-mdx';
 import { highlightHast, type HighlightHastOptions } from 'fumadocs-core/highlight';
@@ -18,6 +19,24 @@ import {
 export type { RemarkAutoTypeTableOptions } from 'fumadocs-typescript';
 
 type RenderHast = (value: string) => Nodes | Promise<Nodes>;
+
+// Satteri parses the `value` source of an `mdxJsxAttributeValueExpression` and
+// ignores any pre-built `data.estree` (unlike the classic MDX pipeline). So we
+// serialize the JSX-bearing estree back to source ourselves; satteri then
+// re-parses and compiles the embedded JSX. `estree-util-to-js`'s `jsx` handlers
+// keep the JSX element nodes intact.
+// TODO: find a better way to avoid round-trip
+function serializeExpression(expression: Expression): string {
+  const source = toJs(
+    {
+      type: 'Program',
+      sourceType: 'module',
+      body: [{ type: 'ExpressionStatement', expression }],
+    },
+    { handlers: jsx },
+  ).value.trim();
+  return source.endsWith(';') ? source.slice(0, -1) : source;
+}
 
 function sanitizeHast(node: Nodes): Nodes {
   if (node.type === 'raw') return { type: 'text', value: node.value };
@@ -143,7 +162,6 @@ export function remarkAutoTypeTable(config: RemarkAutoTypeTableOptions = {}) {
     name = 'auto-type-table',
     outputName = 'TypeTable',
     options: generateOptions = {},
-    remarkStringify = true,
     generator = createGenerator(),
     renderMarkdown: renderMarkdownOption,
     renderType: renderTypeOption,
@@ -232,19 +250,9 @@ export function remarkAutoTypeTable(config: RemarkAutoTypeTableOptions = {}) {
               name: 'type',
               value: {
                 type: 'mdxJsxAttributeValueExpression',
-                value: remarkStringify ? JSON.stringify(doc, null, 2) : '',
-                data: {
-                  estree: {
-                    type: 'Program',
-                    sourceType: 'module',
-                    body: [
-                      {
-                        type: 'ExpressionStatement',
-                        expression: await buildTypeProp(doc.entries, renderType, renderMarkdown),
-                      },
-                    ],
-                  },
-                },
+                value: serializeExpression(
+                  await buildTypeProp(doc.entries, renderType, renderMarkdown),
+                ),
               },
             },
             ...attributes,

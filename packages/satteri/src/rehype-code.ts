@@ -12,6 +12,32 @@ function unwrapReplacement(node: RootContent | Root): RootContent | RootContent[
   return node;
 }
 
+// Shiki writes literal HTML attribute names into hast `properties`. The
+// classic pipeline normalizes them via hast-util-to-estree, but satteri emits
+// property keys verbatim, so React would receive `class`/`tabindex` props and
+// render them over the component's own `className` (hydration mismatch).
+const ATTRIBUTE_TO_PROP: Record<string, string> = {
+  class: 'className',
+  tabindex: 'tabIndex',
+  readonly: 'readOnly',
+  contenteditable: 'contentEditable',
+};
+
+function normalizeProperties(node: RootContent | Root) {
+  if (node.type === 'element' && node.properties) {
+    for (const [attribute, prop] of Object.entries(ATTRIBUTE_TO_PROP)) {
+      if (attribute in node.properties) {
+        node.properties[prop] ??= node.properties[attribute];
+        delete node.properties[attribute];
+      }
+    }
+  }
+
+  if ('children' in node) {
+    for (const child of node.children) normalizeProperties(child);
+  }
+}
+
 function replaceHighlightedNode(
   element: Element,
   next: RootContent | Root | undefined,
@@ -134,6 +160,7 @@ export function rehypeCode(options?: Partial<RehypeCodeOptions>) {
 
           const tree = createCodeTree(element, ctx);
           await runBlock(tree, {} as never, () => undefined);
+          normalizeProperties(tree);
           replaceHighlightedNode(element, tree.children[0], ctx);
         },
       },

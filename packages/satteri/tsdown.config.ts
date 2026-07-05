@@ -32,16 +32,8 @@ export default defineConfig({
   target: 'es2023',
   format: 'esm',
   entry: entries,
+  exports: true,
   deps: {
     onlyBundle: [],
-    neverBundle: [
-      'fumadocs-core',
-      'fumadocs-typescript',
-      'satteri',
-      'unified',
-      'vfile',
-      'mdast-util-mdx',
-      /^@types\//,
-    ],
   },
 });

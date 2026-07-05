@@ -8,6 +8,7 @@ import { remarkNpm, type RemarkNpmOptions } from '@/remark-npm';
 import { remarkStructure, type StructureOptions } from '@/remark-structure';
 import { rehypeCode, type RehypeCodeOptions } from '@/rehype-code';
 import { rehypeToc } from '@/rehype-toc';
+import { rehypeTable } from '@/rehype-table';
 import type { MdastPluginInput } from 'satteri';
 
 type ResolvePlugins<T> = T[] | ((plugins: T[]) => T[]);
@@ -70,16 +71,29 @@ function wrapHastFactory<T>(
   };
 }
 
+const RESOLVED_PRESET = Symbol.for('fumadocs.satteri.resolved-preset');
+
 export function applySatteriPreset(
   options: SatteriPresetOptions = {},
 ): (environment: BuildEnvironment) => Promise<MdxCompileOptions> {
   return async (environment = 'bundler') => {
+    // already-resolved options (e.g. a config that applied the preset itself):
+    // applying the preset again would duplicate the default plugins, so
+    // double-highlighting code blocks and double-wrapping code tabs
+    if (RESOLVED_PRESET in options) {
+      const resolved = options as MdxCompileOptions;
+      return {
+        ...resolved,
+        outputFormat: environment === 'runtime' ? 'function-body' : resolved.outputFormat,
+      };
+    }
+
     if (options.preset === 'minimal') {
       const { preset: _preset, ...rest } = options;
-      return {
+      return markResolved({
         ...rest,
         outputFormat: environment === 'runtime' ? 'function-body' : rest.outputFormat,
-      };
+      });
     }
 
     const {
@@ -124,12 +138,13 @@ export function applySatteriPreset(
             ...rehypeCodeOptions,
           }),
         ...plugins,
+        wrapHastFactory(rehypeTable),
         wrapHastFactory(rehypeToc),
       ],
       hastPlugins,
     );
 
-    return {
+    return markResolved({
       ...rest,
       data: {
         ...data,
@@ -143,6 +158,11 @@ export function applySatteriPreset(
       },
       mdastPlugins: resolvedMdast,
       hastPlugins: resolvedHast,
-    };
+    });
   };
+}
+
+function markResolved(options: MdxCompileOptions): MdxCompileOptions {
+  Object.defineProperty(options, RESOLVED_PRESET, { value: true });
+  return options;
 }
