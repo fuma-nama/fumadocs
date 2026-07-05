@@ -189,7 +189,10 @@ export function remarkCodeTab({
         for (let i = start; i < end; i++) {
           const item = children[i] as Code;
           const parsed = parseTabAttributes(item)!;
-          const name = parsed.attributes.tab ?? `Tab ${i - start + 1}`;
+          const name =
+            typeof parsed.attributes.tab === 'string'
+              ? parsed.attributes.tab
+              : `Tab ${i - start + 1}`;
           const copy: Code = { ...item, meta: parsed.rest || undefined };
 
           const existing = entries.find((entry) => entry.name === name);
@@ -198,7 +201,10 @@ export function remarkCodeTab({
           } else {
             entries.push({
               name,
-              tabGroup: parsed.attributes['tab-group'] ?? undefined,
+              tabGroup:
+                typeof parsed.attributes['tab-group'] === 'string'
+                  ? parsed.attributes['tab-group']
+                  : undefined,
               codes: [copy],
             });
           }

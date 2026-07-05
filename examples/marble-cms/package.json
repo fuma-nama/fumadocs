@@ -9,7 +9,7 @@
   },
   "dependencies": {
     "fumadocs-core": "workspace:*",
-    "fumadocs-ui": "npm:@fumadocs/base-ui@16.10.7",
+    "fumadocs-ui": "workspace:@fumadocs/base-ui@*",
     "github-slugger": "^2.0.0",
     "html-react-parser": "^6.1.4",
     "next": "16.2.10",

@@ -60,7 +60,7 @@
     "cnfast": "^0.0.8",
     "flexsearch": "^0.8.212",
     "fumadocs-core": "workspace:*",
-    "fumadocs-ui": "npm:@fumadocs/base-ui@16.10.7",
+    "fumadocs-ui": "workspace:@fumadocs/base-ui@*",
     "hast-util-to-jsx-runtime": "^2.3.6",
     "hono": "^4.12.27",
     "ignore": "^7.0.5",

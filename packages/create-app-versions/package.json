@@ -9,7 +9,7 @@
     "@takumi-rs/image-response": "^1.8.7",
     "fumadocs-core": "workspace:*",
     "fumadocs-mdx": "workspace:*",
-    "fumadocs-ui": "npm:@fumadocs/base-ui@16.10.7",
+    "fumadocs-ui": "workspace:*",
     "oxlint": "^1.72.0",
     "react": "^19.2.7"
   }

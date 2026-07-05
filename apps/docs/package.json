@@ -44,7 +44,7 @@
     "fumadocs-openapi": "workspace:^",
     "fumadocs-twoslash": "workspace:^",
     "fumadocs-typescript": "workspace:^",
-    "fumadocs-ui": "npm:@fumadocs/base-ui@16.10.7",
+    "fumadocs-ui": "workspace:@fumadocs/base-ui@*",
     "hast-util-to-jsx-runtime": "^2.3.6",
     "katex": "0.17.0",
     "lucide-react": "^1.23.0",

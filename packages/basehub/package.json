@@ -34,7 +34,7 @@
     "basehub": "9.6.0",
     "fuma-cli": "^0.1.1",
     "fumadocs-core": "workspace:*",
-    "fumadocs-ui": "npm:@fumadocs/base-ui@16.10.7",
+    "fumadocs-ui": "workspace:@fumadocs/base-ui@*",
     "react": "^19.2.7",
     "tsconfig": "workspace:*",
     "tsdown": "0.22.3",

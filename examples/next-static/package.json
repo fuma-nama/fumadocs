@@ -13,7 +13,7 @@
     "cnfast": "^0.0.8",
     "fumadocs-core": "workspace:*",
     "fumadocs-mdx": "workspace:*",
-    "fumadocs-ui": "npm:@fumadocs/base-ui@16.10.7",
+    "fumadocs-ui": "workspace:@fumadocs/base-ui@*",
     "lucide-react": "^1.23.0",
     "next": "16.2.10",
     "react": "^19.2.7",

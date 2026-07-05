@@ -12,6 +12,6 @@
     "fumadocs-mdx": "workspace:*",
     "fumadocs-twoslash": "workspace:*",
     "fumadocs-typescript": "workspace:*",
-    "fumadocs-ui": "npm:@fumadocs/base-ui@16.10.7"
+    "fumadocs-ui": "workspace:*"
   }
 }

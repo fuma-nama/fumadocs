@@ -56,7 +56,7 @@
     "@types/react": "^19.2.17",
     "@types/react-dom": "^19.2.3",
     "fumadocs-core": "workspace:*",
-    "fumadocs-ui": "npm:@fumadocs/base-ui@16.10.7",
+    "fumadocs-ui": "workspace:@fumadocs/base-ui@*",
     "mdast-util-mdx": "^3.0.0",
     "tsconfig": "workspace:*",
     "tsdown": "0.22.3",
