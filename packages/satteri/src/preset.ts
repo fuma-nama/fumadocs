@@ -41,36 +41,6 @@ function pluginOption<T>(
   return list;
 }
 
-function wrapMdastFactory<T>(
-  factory: (options?: T) => MdastPluginInput | (() => MdastPluginInput),
-  options?: T,
-): MdastPluginInput {
-  return factory(options);
-}
-
-function wrapHastFactory<T>(
-  factory: (
-    options?: T,
-  ) =>
-    | HastPluginInput
-    | Promise<HastPluginInput>
-    | (() => HastPluginInput | Promise<HastPluginInput>),
-  options?: T,
-): HastPluginInput {
-  // the factory may perform expensive init (e.g. creating a syntax highlighter),
-  // call it once and reuse across compiles. Per-compile state stays in the
-  // resolved function-form plugin, which is still invoked per file.
-  let cached:
-    | Promise<HastPluginInput | (() => HastPluginInput | Promise<HastPluginInput>)>
-    | undefined;
-
-  return async () => {
-    cached ??= Promise.resolve(factory(options));
-    const resolved = await cached;
-    return typeof resolved === 'function' ? await resolved() : resolved;
-  };
-}
-
 const RESOLVED_PRESET = Symbol.for('fumadocs.satteri.resolved-preset');
 
 export function applySatteriPreset(
@@ -113,16 +83,16 @@ export function applySatteriPreset(
 
     const resolvedMdast = pluginOption<MdastPluginInput>(
       (plugins) => [
-        wrapMdastFactory(remarkHeading, {
+        remarkHeading({
           generateToc: false,
           ...remarkHeadingOptions,
         }),
-        remarkImageOptions !== false && wrapMdastFactory(remarkImage, remarkImageOptions),
-        remarkCodeTabOptions !== false && wrapMdastFactory(remarkCodeTab, remarkCodeTabOptions),
-        remarkNpmOptions !== false && wrapMdastFactory(remarkNpm, remarkNpmOptions),
+        remarkImageOptions !== false && remarkImage(remarkImageOptions),
+        remarkCodeTabOptions !== false && remarkCodeTab(remarkCodeTabOptions),
+        remarkNpmOptions !== false && remarkNpm(remarkNpmOptions),
         ...plugins,
         remarkStructureOptions !== false &&
-          wrapMdastFactory(remarkStructure, {
+          remarkStructure({
             exportAs: 'structuredData',
             ...remarkStructureOptions,
           }),
@@ -133,13 +103,13 @@ export function applySatteriPreset(
     const resolvedHast = pluginOption<HastPluginInput>(
       (plugins) => [
         rehypeCodeOptions !== false &&
-          wrapHastFactory(rehypeCode, {
+          rehypeCode({
             tab: false,
             ...rehypeCodeOptions,
           }),
         ...plugins,
-        wrapHastFactory(rehypeTable),
-        wrapHastFactory(rehypeToc),
+        rehypeTable(),
+        rehypeToc(),
       ],
       hastPlugins,
     );

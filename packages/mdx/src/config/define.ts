@@ -6,7 +6,7 @@ import type { PostprocessOptions } from '@/loaders/mdx/remark-postprocess';
 import type { PluginOption } from '@/core';
 import type { SatteriPresetOptions } from '@fumadocs/satteri/preset';
 import type { BuildEnvironment } from './build';
-import type { SatteriOptionsInput } from './build-satteri';
+import type { SatteriOptionsInput } from '@/loaders/mdx/build-satteri';
 
 export type CollectionSchema<Schema extends StandardSchemaV1, Context> =
   | Schema

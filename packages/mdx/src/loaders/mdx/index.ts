@@ -83,7 +83,7 @@ export function createMdxLoader({ getCore }: ConfigLoader): Loader {
         };
       }
 
-      const { buildMDX } = await import('@/loaders/mdx/build-mdx');
+      const { buildMDX } = await import('@/loaders/mdx/build');
       const compiled = await buildMDX(core, docCollection, {
         isDevelopment,
         // ensure the line number is correct in errors
@@ -95,7 +95,7 @@ export function createMdxLoader({ getCore }: ConfigLoader): Loader {
       });
 
       const out: LoaderOutput = {
-        code: String(compiled.value),
+        code: compiled.code,
         moduleType: 'js',
         map: compiled.map,
       };

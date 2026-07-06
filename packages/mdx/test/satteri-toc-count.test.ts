@@ -4,7 +4,7 @@ import { expect, test } from 'vitest';
 import { defineCollections } from '@/config';
 import { buildConfig, type LoadedConfig } from '@/config/build';
 import { createCore } from '@/core';
-import { buildMDX } from '@/loaders/mdx/build-mdx';
+import { buildMDX } from '@/loaders/mdx/build';
 import { applySatteriPreset } from '@fumadocs/satteri/preset';
 import { rehypeCodeDefaultOptions } from 'fumadocs-core/mdx-plugins/rehype-code';
 
@@ -51,7 +51,7 @@ test('satteri exports toc once', async () => {
     isDevelopment: false,
   });
 
-  expect(String(compiled.value).match(/export const toc/g)).toHaveLength(1);
+  expect(compiled.code.match(/export const toc/g)).toHaveLength(1);
 });
 
 test('tabbed code blocks become CodeBlockTabs', async () => {
@@ -86,8 +86,8 @@ test('tabbed code blocks become CodeBlockTabs', async () => {
     isDevelopment: false,
   });
 
-  expect(String(compiled.value)).toContain('CodeBlockTabs');
-  expect(String(compiled.value)).not.toMatch(/_jsx\(Tab,/);
+  expect(compiled.code).toContain('CodeBlockTabs');
+  expect(compiled.code).not.toMatch(/_jsx\(Tab,/);
 });
 
 test('includeProcessedMarkdown exports _markdown', async () => {
@@ -120,5 +120,5 @@ test('includeProcessedMarkdown exports _markdown', async () => {
     isDevelopment: false,
   });
 
-  expect(String(compiled.value)).toContain('export const _markdown');
+  expect(compiled.code).toContain('export const _markdown');
 });

@@ -2,7 +2,7 @@ import { type MetaData, type PageData, type Source, type VirtualFile } from 'fum
 import * as path from 'node:path';
 import type { DocCollection, DocsCollection, MetaCollection } from '@/config';
 import type { StandardSchemaV1 } from '@standard-schema/spec';
-import type { CompiledMDXProperties } from '@/loaders/mdx/build-mdx';
+import type { CompiledMDXProperties } from '@/loaders/mdx/build';
 import type { InternalTypeConfig, DocData, DocMethods, FileInfo, MetaMethods } from './types';
 import type { StructuredData } from 'fumadocs-core/mdx-plugins/remark-structure';
 

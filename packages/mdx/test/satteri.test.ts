@@ -3,11 +3,11 @@ import * as fs from 'node:fs/promises';
 import * as path from 'node:path';
 import { expect, test } from 'vitest';
 import { rehypeCodeDefaultOptions } from 'fumadocs-core/mdx-plugins/rehype-code';
+import { applySatteriPreset } from '@fumadocs/satteri/preset';
 import { defineCollections, defineConfig } from '@/config';
 import { buildConfig, type DocCollectionItem } from '@/config/build';
-import { getSatteriOptions } from '@/config/build-satteri';
 import { createCore } from '@/core';
-import { buildMDX } from '@/loaders/mdx/build-mdx';
+import { buildMDX } from '@/loaders/mdx/build';
 
 const baseDir = path.dirname(fileURLToPath(import.meta.url));
 
@@ -28,10 +28,9 @@ test('satteri compiler resolves preset options', async () => {
     process.cwd(),
   );
 
-  const options = await getSatteriOptions(
-    config,
-    config.collections.get('docs') as DocCollectionItem,
-  );
+  const input = config.global.satteriOptions;
+  const preset = typeof input === 'function' ? await input('bundler') : input;
+  const options = await applySatteriPreset(preset)('bundler');
   expect(options.features?.gfm).toBe(true);
   expect(options.mdastPlugins?.length).toBeGreaterThan(0);
 });
@@ -81,27 +80,48 @@ export const x = 1
     isDevelopment: false,
   });
 
-  expect(compiled.value).toContain('export const frontmatter');
-  expect(compiled.value).toContain('export const structuredData');
-  expect(compiled.value).toContain('export const toc');
-  expect(compiled.value).toContain('shiki');
-  expect(compiled.value).toContain('Hello Satteri');
+  expect(compiled.code).toContain('export const frontmatter');
+  expect(compiled.code).toContain('export const structuredData');
+  expect(compiled.code).toContain('export const toc');
+  expect(compiled.code).toContain('shiki');
+  expect(compiled.code).toContain('Hello Satteri');
 });
 
-test('getMDXOptions rejects satteri collections', async () => {
+test('buildMDX with default mdx compiler', async () => {
+  const core = createCore({
+    configPath: 'source.config.ts',
+    environment: 'test',
+    outDir: '.source',
+  });
+
   const config = buildConfig(
     {
       docs: defineCollections({
         type: 'doc',
-        compiler: 'satteri',
         dir: baseDir,
       }),
     },
     process.cwd(),
   );
 
+  await core.init({ config });
+
   const collection = config.collections.get('docs') as DocCollectionItem;
-  expect(() => config.getMDXOptions(collection)).toThrow(/getSatteriOptions/);
+  const compiled = await buildMDX(core, collection, {
+    filePath: path.join(baseDir, 'mdx-fixture.mdx'),
+    source: `---
+title: MDX test
+---
+
+# Hello MDX
+`,
+    frontmatter: { title: 'MDX test' },
+    environment: 'bundler',
+    isDevelopment: false,
+  });
+
+  expect(compiled.code).toMatch(/export (const|let) frontmatter/);
+  expect(compiled.code).toContain('Hello MDX');
 });
 
 test('buildMDX with satteri compiler resolves includes', async () => {
@@ -140,13 +160,13 @@ test('buildMDX with satteri compiler resolves includes', async () => {
   });
 
   // full include + section by heading id
-  expect(compiled.value).toContain('Hey there!');
+  expect(compiled.code).toContain('Hey there!');
   // section inside a JSX <section> tag
-  expect(compiled.value).toContain('This is My Test.');
+  expect(compiled.code).toContain('This is My Test.');
   // section inside a :::section directive
-  expect(compiled.value).toContain('some content inside.');
+  expect(compiled.code).toContain('some content inside.');
   // code include with region extraction
-  expect(compiled.value).toContain('language-ts');
+  expect(compiled.code).toContain('language-ts');
   expect(dependencies).toContain(path.join(baseDir, 'fixtures/remark-include/test.mdx'));
   expect(dependencies).toContain(path.join(baseDir, 'fixtures/remark-include/code.ts'));
 });

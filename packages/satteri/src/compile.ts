@@ -1,11 +1,5 @@
 import '@/data-map';
-import {
-  mdxToJs,
-  type MdxCompileOptions,
-  type MdastPluginInput,
-  type HastPluginInput,
-  type Frontmatter,
-} from 'satteri';
+import { mdxToJs, type MdxCompileOptions, MdxToJsResult } from 'satteri';
 import { pathToFileURL } from 'node:url';
 import { appendExports, queueDataExport, queueTocJsxExport } from '@/inject-exports';
 
@@ -18,18 +12,7 @@ export interface CompileMdxOptions {
   options: MdxCompileOptions;
 }
 
-export interface CompileMdxResult {
-  code: string;
-  data: MdxCompileOptions['data'];
-  frontmatter: Frontmatter | null;
-}
-
-function resolvePlugins<T extends MdastPluginInput | HastPluginInput>(
-  plugins: T[] | undefined,
-): T[] {
-  if (!plugins) return [];
-  return plugins.map((plugin) => (typeof plugin === 'function' ? (plugin() as T) : plugin));
-}
+export type CompileMdxResult = MdxToJsResult;
 
 export async function compileMdx({
   source,
@@ -42,22 +25,14 @@ export async function compileMdx({
   const data: NonNullable<MdxCompileOptions['data']> = { ...options.data };
   if (frontmatter) data.frontmatter = frontmatter;
 
-  const mdastPlugins = resolvePlugins(options.mdastPlugins as MdastPluginInput[] | undefined);
-  const hastPlugins = await Promise.all(
-    (options.hastPlugins ?? []).map(async (plugin) => {
-      const resolved = typeof plugin === 'function' ? plugin() : plugin;
-      return resolved instanceof Promise ? await resolved : resolved;
-    }),
-  );
-
   const result = await mdxToJs(source, {
     ...options,
+    // force the result type to be async
+    mdastPlugins: options.mdastPlugins ?? [],
     development: isDevelopment,
     outputFormat: environment === 'runtime' ? 'function-body' : options.outputFormat,
     fileURL: options.fileURL ?? pathToFileURL(filePath),
     data,
-    mdastPlugins,
-    hastPlugins,
     features: {
       gfm: true,
       frontmatter: false,
@@ -72,7 +47,7 @@ export async function compileMdx({
   }
   if (outData.structuredData) {
     queueDataExport(outData, 'structuredData', outData.structuredData);
-  } else if (mdastPlugins.some((plugin) => plugin.name === 'remark-structure')) {
+  } else {
     // remark-structure only assigns `structuredData` from node visitors, so a
     // page without any matching nodes would otherwise miss the export and
     // break consumers that expect it on every page (e.g. search indexing)

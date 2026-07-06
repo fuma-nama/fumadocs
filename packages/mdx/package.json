@@ -38,7 +38,6 @@
     "./runtime/dynamic": "./dist/runtime/dynamic.js",
     "./runtime/server": "./dist/runtime/server.js",
     "./runtime/types": "./dist/runtime/types.js",
-    "./satteri": "./dist/satteri/index.js",
     "./vite": "./dist/vite/index.js",
     "./webpack/mdx": "./dist/webpack/mdx.js",
     "./webpack/meta": "./dist/webpack/meta.js",
@@ -97,7 +96,7 @@
     "webpack": "^5.108.3"
   },
   "peerDependencies": {
-    "@fumadocs/satteri": "^0.1.0",
+    "@fumadocs/satteri": "0.x.x",
     "@types/mdast": "*",
     "@types/mdx": "*",
     "@types/react": "*",
