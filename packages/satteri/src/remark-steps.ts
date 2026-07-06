@@ -63,8 +63,11 @@ export function remarkSteps({ steps = 'fd-steps', step = 'fd-step' }: RemarkStep
     return false;
   }
 
-  function processChildren(children: MdastNode[], ctx: MdastVisitorContext, parent: MdastNode) {
-    const output = [...children];
+  function processChildren(
+    parent: Extract<MdastNode, { children: MdastNode[] }>,
+    ctx: MdastVisitorContext,
+  ) {
+    const output: MdastNode[] = [...parent.children];
     let startIdx = -1;
     let i = 0;
     let currentStep = 1;
@@ -134,7 +137,7 @@ export function remarkSteps({ steps = 'fd-steps', step = 'fd-step' }: RemarkStep
         if (!parent || !('children' in parent)) return;
         if (processed.has(parent)) return;
         processed.add(parent);
-        processChildren([...(parent.children as MdastNode[])], ctx, parent);
+        processChildren(parent, ctx);
       },
     });
   };

@@ -16,19 +16,15 @@ export function remarkHeading({
   generateToc = true,
 }: RemarkHeadingOptions = {}) {
   return () => {
-    const slugger = slug ? undefined : new Slugger();
-    const resolveSlug = slug ?? ((_heading, text) => slugger!.slug(text));
-
-    let sluggerReady = false;
+    let resolveSlug = slug;
+    if (!resolveSlug) {
+      const slugger = new Slugger();
+      resolveSlug = (_, v) => slugger.slug(v);
+    }
 
     return defineMdastPlugin({
       name: 'remark-heading',
       heading(node, ctx: MdastVisitorContext) {
-        if (!sluggerReady) {
-          slugger?.reset();
-          sluggerReady = true;
-        }
-
         const data = (node.data ?? {}) as { hProperties?: Record<string, unknown> };
         const hProperties = (data.hProperties ??= {});
 

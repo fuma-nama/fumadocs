@@ -44,38 +44,38 @@ function countRootTargets(parent: Parents) {
 }
 
 export function remarkLlms({ as = '_markdown', headingIds = true, ...rest }: LLMsOptions = {}) {
+  const stringifier = defaultStringifier({
+    ...rest,
+    ...gfmToMarkdown(),
+    filterElement(node) {
+      switch (node.type) {
+        case 'mdxjsEsm':
+          return false;
+        default:
+          return true;
+      }
+    },
+    handlers: {
+      inlineMath(node: { value: string }) {
+        return `$${node.value}$`;
+      },
+      math(node: { value: string }) {
+        return `$$\n${node.value}\n$$`;
+      },
+      heading(node, _parent, state, info) {
+        const id = node.data?.hProperties?.id;
+        const value = state.containerPhrasing(node, info);
+        return headingIds && typeof id === 'string' ? `${value} [#${id}]` : value;
+      },
+      ...rest.handlers,
+    },
+    stringify: rest.stringify,
+  });
+
   return () => {
     let rootParent: Parents | undefined;
     const rootIndices: number[] = [];
     let expected = 0;
-
-    const stringifier = defaultStringifier({
-      ...rest,
-      ...gfmToMarkdown(),
-      filterElement(node) {
-        switch (node.type) {
-          case 'mdxjsEsm':
-            return false;
-          default:
-            return true;
-        }
-      },
-      handlers: {
-        inlineMath(node: { value: string }) {
-          return `$${node.value}$`;
-        },
-        math(node: { value: string }) {
-          return `$$\n${node.value}\n$$`;
-        },
-        heading(node, _parent, state, info) {
-          const id = node.data?.hProperties?.id;
-          const value = state.containerPhrasing(node, info);
-          return headingIds && typeof id === 'string' ? `${value} [#${id}]` : value;
-        },
-        ...rest.handlers,
-      },
-      stringify: rest.stringify,
-    });
 
     function finalize(ctx: MdastVisitorContext) {
       const parent = rootParent!;

@@ -15,7 +15,7 @@ export interface RehypeTocOptions {
 
 const TocOnlyTag = '[toc]';
 const NoTocTag = '[!toc]';
-const HeadingTags = new Set(['h1', 'h2', 'h3', 'h4', 'h5', 'h6']);
+const HeadingTags = ['h1', 'h2', 'h3', 'h4', 'h5', 'h6'];
 
 export function rehypeToc({ exportToc = true }: RehypeTocOptions = {}):
   | HastPluginDefinition
@@ -33,7 +33,7 @@ export function rehypeToc({ exportToc = true }: RehypeTocOptions = {}):
     return defineHastPlugin({
       name: 'rehype-toc',
       element: {
-        filter: [...HeadingTags],
+        filter: HeadingTags,
         visit(node, ctx) {
           const element = node as Element;
           if (element.children.length === 0) return;
@@ -75,9 +75,9 @@ export function rehypeToc({ exportToc = true }: RehypeTocOptions = {}):
           if (isTocOnly) ctx.removeNode(element);
 
           if (tocExport) {
-            if (!ctx.data._tocEsmExport) ctx.data._tocEsmExport = tocExport;
-          } else if (!ctx.data.rehypeToc) {
-            ctx.data.rehypeToc = items;
+            ctx.data._tocEsmExport ??= tocExport;
+          } else {
+            ctx.data.rehypeToc ??= items;
           }
         },
       },

@@ -9,6 +9,7 @@ export interface RemarkFeedbackBlockOptions {
   generateBody?: boolean;
 }
 
+// TODO: allow to define visitors from options
 export function remarkFeedbackBlock({
   generateHash = ({ body }) => createHash('md5').update(body).digest('hex').substring(0, 16),
   tagName = 'FeedbackBlock',
@@ -33,7 +34,6 @@ export function remarkFeedbackBlock({
       const resolved = resolve(node);
       if (resolved === false || resolved === 'skip') return;
 
-      // matches `flattenNode` semantics but walks the subtree in Rust
       const text = ctx.textContent(node, { includeImageAlt: false }).trim();
       if (text.length === 0) return;
 
@@ -55,7 +55,7 @@ export function remarkFeedbackBlock({
         attributes,
         data: { _stringify: 'children-only' },
         children: [],
-      } as never);
+      });
     }
 
     return defineMdastPlugin({
