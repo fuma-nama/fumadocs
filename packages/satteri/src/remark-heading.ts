@@ -32,18 +32,22 @@ export function remarkHeading({
         const data = (node.data ?? {}) as { hProperties?: Record<string, unknown> };
         const hProperties = (data.hProperties ??= {});
 
+        // `setProperty` is applied after the pass, so strip the custom id
+        // marker from the flattened text manually — `ctx.textContent` would
+        // still see the original value.
+        let title = ctx.textContent(node);
         const lastNode = node.children.at(-1);
         if (lastNode?.type === 'text' && customId) {
           const match = regex.exec(lastNode.value);
           if (match?.[1]) {
             hProperties.id = match[1];
-            ctx.setProperty(lastNode, 'value', lastNode.value.slice(0, match.index!));
+            const stripped = lastNode.value.slice(0, match.index!);
+            title = title.slice(0, title.length - lastNode.value.length) + stripped;
+            ctx.setProperty(lastNode, 'value', stripped);
           }
         }
 
-        let title: string | null = null;
         if (!hProperties.id) {
-          title = ctx.textContent(node);
           hProperties.id = resolveSlug(node, title);
         }
 
@@ -52,7 +56,7 @@ export function remarkHeading({
         if (generateToc) {
           const toc = (ctx.data.toc ??= []);
           toc.push({
-            title: title ?? ctx.textContent(node),
+            title,
             url: `#${hProperties.id}`,
             depth: node.depth,
           });

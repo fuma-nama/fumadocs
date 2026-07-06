@@ -1,5 +1,5 @@
 import { defineMdastPlugin, mdxToMdast, type MdastNode, type MdastVisitorContext } from 'satteri';
-import type { BlockContent, Code, Parents } from 'mdast';
+import type { BlockContent, Code, Parents, Root, Text } from 'mdast';
 import type { MdxJsxFlowElement } from 'mdast-util-mdx';
 import {
   generateCodeBlockTabs,
@@ -27,6 +27,16 @@ function parseTabAttributes(node: MdastNode | undefined) {
   return parsed;
 }
 
+// The parsed tree is backed by its own arena with lazy getters, so
+// it must be cloned into plain nodes before insertion into another document.
+// Otherwise, its node ids resolve against the target arena and pull in
+// unrelated content.
+function parseTabName(name: string): (BlockContent | Text)[] {
+  const head = (structuredClone(mdxToMdast(name)) as Root).children?.[0];
+  if (head && 'children' in head) return head.children as (BlockContent | Text)[];
+  return [{ type: 'text', value: name }];
+}
+
 function buildTabs(
   _ctx: MdastVisitorContext,
   entries: TabEntry[],
@@ -44,8 +54,7 @@ function buildTabs(
     for (const { name, codes } of entries) {
       options.triggers.push({
         value: name,
-        // @ts-expect-error -- get nodes inside <p>, must clone the output because it outputs a getter, which becomes something else when it is actually returned to satteri itself
-        children: structuredClone(mdxToMdast(name)).children[0].children,
+        children: withMdx ? parseTabName(name) : [{ type: 'text', value: name }],
       });
       options.tabs.push({ value: name, children: codes });
     }
@@ -62,25 +71,9 @@ function buildTabs(
           name: 'items',
           value: {
             type: 'mdxJsxAttributeValueExpression',
-            value: entries.map(({ name }) => name).join(', '),
-            data: {
-              estree: {
-                type: 'Program',
-                sourceType: 'module',
-                body: [
-                  {
-                    type: 'ExpressionStatement',
-                    expression: {
-                      type: 'ArrayExpression',
-                      elements: entries.map(({ name }) => ({
-                        type: 'Literal',
-                        value: name,
-                      })),
-                    },
-                  },
-                ],
-              },
-            },
+            // satteri compiles the expression from its `value` source and
+            // ignores `data.estree`, so this must be valid JavaScript
+            value: JSON.stringify(entries.map(({ name }) => name)),
           },
         },
       ],
@@ -105,9 +98,7 @@ function buildTabs(
         type: 'mdxJsxFlowElement',
         name: 'TabsTrigger',
         attributes: [{ type: 'mdxJsxAttribute', name: 'value', value: name }],
-        children: withMdx
-          ? [mdxToMdast(name) as never]
-          : [{ type: 'paragraph', children: [{ type: 'text', value: name }] }],
+        children: parseTabName(name) as never[],
       })),
     },
   ];

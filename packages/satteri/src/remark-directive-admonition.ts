@@ -1,6 +1,5 @@
 import { defineMdastPlugin, type MdastPluginDefinition } from 'satteri';
 import type { BlockContent, DefinitionContent, PhrasingContent } from 'mdast';
-import { replaceChildAt } from '@/utils';
 
 export interface RemarkDirectiveAdmonitionOptions {
   tags?: {
@@ -81,20 +80,12 @@ export function remarkDirectiveAdmonition(
         });
       }
 
-      const parent = ctx.parent(node);
-      const index = ctx.indexOf(node);
-      if (!parent || index === undefined) return;
-
-      ctx.setProperty(
-        parent,
-        'children',
-        replaceChildAt(parent.children, index, {
-          type: 'mdxJsxFlowElement',
-          attributes,
-          name: CalloutContainer,
-          children,
-        }),
-      );
+      ctx.replaceNode(node, {
+        type: 'mdxJsxFlowElement',
+        attributes,
+        name: CalloutContainer,
+        children,
+      });
     },
   });
 }

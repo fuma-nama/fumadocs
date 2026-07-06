@@ -1,5 +1,4 @@
 import { defineMdastPlugin } from 'satteri';
-import { flattenNode } from '@/utils';
 import Slugger from 'github-slugger';
 import { createHash } from 'node:crypto';
 import type { MdastNode, MdastVisitorContext } from 'satteri';
@@ -38,7 +37,8 @@ export function remarkBlockId({
       const resolved = shouldGenerate(node);
       if (resolved === false || resolved === 'skip') return;
 
-      const text = flattenNode(node).trim();
+      // matches `flattenNode` semantics but walks the subtree in Rust
+      const text = ctx.textContent(node, { includeImageAlt: false }).trim();
       if (text.length === 0) return;
 
       const id = generateId

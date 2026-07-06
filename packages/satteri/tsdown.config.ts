@@ -9,6 +9,7 @@ const entries = [
   'src/remark-heading.ts',
   'src/remark-structure.ts',
   'src/remark-image.ts',
+  'src/remark-include.ts',
   'src/remark-code-tab.ts',
   'src/remark-npm.ts',
   'src/remark-ts2js.ts',

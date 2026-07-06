@@ -31,6 +31,7 @@
     "./remark-feedback-block": "./dist/remark-feedback-block.js",
     "./remark-heading": "./dist/remark-heading.js",
     "./remark-image": "./dist/remark-image.js",
+    "./remark-include": "./dist/remark-include.js",
     "./remark-llms": "./dist/remark-llms.js",
     "./remark-mdx-mermaid": "./dist/remark-mdx-mermaid.js",
     "./remark-npm": "./dist/remark-npm.js",
@@ -53,7 +54,6 @@
   },
   "dependencies": {
     "estree-util-to-js": "^2.0.0",
-    "estree-util-value-to-estree": "^3.5.0",
     "fumadocs-core": "workspace:*",
     "fumadocs-typescript": "workspace:*",
     "github-slugger": "^2.0.0",

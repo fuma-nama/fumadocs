@@ -76,7 +76,8 @@ export async function compileMdx({
     // remark-structure only assigns `structuredData` from node visitors, so a
     // page without any matching nodes would otherwise miss the export and
     // break consumers that expect it on every page (e.g. search indexing)
-    queueDataExport(outData, 'structuredData', { contents: [], headings: [] });
+    outData.structuredData = { contents: [], headings: [] };
+    queueDataExport(outData, 'structuredData', outData.structuredData);
   }
   if (typeof outData._markdown === 'string') {
     queueDataExport(outData, '_markdown', outData._markdown);

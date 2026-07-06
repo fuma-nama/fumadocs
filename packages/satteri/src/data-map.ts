@@ -9,6 +9,11 @@ export interface TocJsxExportItem {
   _step?: number;
 }
 
+/** host compiler hooks (e.g. a bundler loader), used for watch-mode dependency tracking */
+export interface CompilerHooks {
+  addDependency: (file: string) => void;
+}
+
 declare module 'satteri' {
   interface DataMap {
     frontmatter?: Record<string, unknown>;
@@ -21,6 +26,7 @@ declare module 'satteri' {
     _valueToExport?: string[];
     _markdown?: string;
     _cwd?: string;
+    _compiler?: CompilerHooks;
     extractedReferences?: { href: string }[];
   }
 }

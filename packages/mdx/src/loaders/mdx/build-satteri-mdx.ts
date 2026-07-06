@@ -17,8 +17,7 @@ import {
   type MdastVisitorContext,
 } from 'satteri';
 import '@fumadocs/satteri/data-map';
-import '@/loaders/mdx/satteri-data-map';
-import { remarkIncludeSatteri } from '@/loaders/mdx/remark-include-satteri';
+import { remarkInclude } from '@fumadocs/satteri/remark-include';
 
 interface BuildSatteriMDXOptions {
   filePath: string;
@@ -78,7 +77,7 @@ export async function buildSatteriMDX(
       fileURL: pathToFileURL(filePath),
       data,
       mdastPlugins: [
-        remarkIncludeSatteri({ cwd: collection?.cwd }),
+        remarkInclude({ cwd: collection?.cwd }),
         ...(satteriOptions.mdastPlugins ?? []),
         ...postprocessPlugins,
       ],

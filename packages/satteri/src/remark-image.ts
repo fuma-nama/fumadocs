@@ -1,9 +1,8 @@
 import * as path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { defineMdastPlugin } from 'satteri';
-import type { Image, RootContent } from 'mdast';
+import { defineMdastPlugin, type MdastVisitorContext } from 'satteri';
+import type { Image } from 'mdast';
 import type { MdxJsxFlowElement, MdxjsEsm } from 'mdast-util-mdx';
-import { replaceChildAt } from '@/utils';
 
 const VALID_BLUR_EXT = ['.jpeg', '.png', '.webp', '.avif', '.jpg'];
 const EXTERNAL_URL_REGEX = /^https?:\/\//;
@@ -37,16 +36,14 @@ export function remarkImage({
     return defineMdastPlugin({
       name: 'remark-image',
       async image(node, ctx) {
-        const parent = ctx.parent(node);
-        const index = ctx.indexOf(node);
-        if (!parent || index === undefined) return;
-
         const dir = ctx.fileURL ? path.dirname(fileURLToPath(ctx.fileURL)) : undefined;
         const src = parseSrc(decodeURI(node.url), publicDir, dir);
         if (!src) return;
 
         try {
-          const replacement = await updateImage(src, node, {
+          // mutations are recorded per-node inside `updateImage`; replacing
+          // the parent's children instead would clobber sibling image patches
+          await updateImage(src, node, ctx, {
             placeholder,
             useImport,
             external,
@@ -54,18 +51,12 @@ export function remarkImage({
             imports,
             sizeCache,
           });
-          if (replacement) {
-            ctx.setProperty(
-              parent,
-              'children',
-              replaceChildAt(parent.children, index, replacement),
-            );
-          }
         } catch (error) {
-          if (onError === 'hide') {
-            ctx.removeNode(node);
-          } else if (onError === 'ignore' || node.url.endsWith('.svg')) {
+          // svg sizes often can't be determined, always keep the node untouched
+          if (onError === 'ignore' || node.url.endsWith('.svg')) {
             return;
+          } else if (onError === 'hide') {
+            ctx.removeNode(node);
           } else if (typeof onError === 'function') {
             onError(error as Error);
           } else {
@@ -84,6 +75,7 @@ export function remarkImage({
 async function updateImage(
   src: Source,
   node: Image,
+  ctx: MdastVisitorContext,
   options: {
     placeholder: 'blur' | 'none';
     useImport: boolean;
@@ -92,7 +84,7 @@ async function updateImage(
     imports: MdxjsEsm[];
     sizeCache: Map<string, Promise<ImageSize | undefined>>;
   },
-): Promise<RootContent | undefined> {
+): Promise<void> {
   if (src.type === 'file' && options.useImport) {
     if (!options.dir) {
       throw new Error(
@@ -163,18 +155,22 @@ async function updateImage(
       out.attributes.push({ type: 'mdxJsxAttribute', name: 'placeholder', value: 'blur' });
     }
 
-    return out;
+    ctx.replaceNode(node, out);
+    return;
   }
 
   const size = await getImageSize(src, options.external, options.sizeCache);
   if (!size) return;
 
-  node.data ??= {};
-  const props = ((node.data as { hProperties?: Record<string, string> }).hProperties ??= {});
+  // record via `setProperty` — in-place JS mutations to the visited node are
+  // not written back to the tree
+  const data = { ...(node.data as Record<string, unknown> | undefined) };
+  const props = { ...(data.hProperties as Record<string, string> | undefined) };
   props.src = src.type === 'url' ? src.url.href : node.url;
   props.width = size.width.toString();
   props.height = size.height.toString();
-  return node;
+  data.hProperties = props;
+  ctx.setProperty(node, 'data', data);
 }
 
 function getImportPath(file: string, dir: string): string {

@@ -1,11 +1,9 @@
 import { defineMdastPlugin, markdownToHast } from 'satteri';
 import type { ElementContent, Nodes } from 'hast';
-import type { Expression, ExpressionStatement, ObjectExpression } from 'estree';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { toEstree } from 'hast-util-to-estree';
 import { toJs, jsx } from 'estree-util-to-js';
-import { valueToEstree } from 'estree-util-value-to-estree';
 import type { MdxJsxAttribute, MdxJsxExpressionAttribute, MdxJsxFlowElement } from 'mdast-util-mdx';
 import { highlightHast, type HighlightHastOptions } from 'fumadocs-core/highlight';
 import {
@@ -20,21 +18,10 @@ export type { RemarkAutoTypeTableOptions } from 'fumadocs-typescript';
 
 type RenderHast = (value: string) => Nodes | Promise<Nodes>;
 
-// Satteri parses the `value` source of an `mdxJsxAttributeValueExpression` and
-// ignores any pre-built `data.estree` (unlike the classic MDX pipeline). So we
-// serialize the JSX-bearing estree back to source ourselves; satteri then
-// re-parses and compiles the embedded JSX. `estree-util-to-js`'s `jsx` handlers
-// keep the JSX element nodes intact.
-// TODO: find a better way to avoid round-trip
-function serializeExpression(expression: Expression): string {
-  const source = toJs(
-    {
-      type: 'Program',
-      sourceType: 'module',
-      body: [{ type: 'ExpressionStatement', expression }],
-    },
-    { handlers: jsx },
-  ).value.trim();
+function jsxToSource(hast: Nodes): string {
+  const source = toJs(toEstree(hast, { elementAttributeNameCase: 'react' }) as never, {
+    handlers: jsx,
+  }).value.trim();
   return source.endsWith(';') ? source.slice(0, -1) : source;
 }
 
@@ -47,36 +34,6 @@ function sanitizeHast(node: Nodes): Nodes {
     } as Nodes;
   }
   return node;
-}
-
-function objectBuilder() {
-  const out: ObjectExpression = {
-    type: 'ObjectExpression',
-    properties: [],
-  };
-
-  return {
-    addExpressionNode(key: string, expression: Expression) {
-      out.properties.push({
-        type: 'Property',
-        method: false,
-        shorthand: false,
-        computed: false,
-        key: { type: 'Literal', value: key },
-        kind: 'init',
-        value: expression,
-      });
-    },
-    addJsxProperty(key: string, hast: Nodes) {
-      const estree = toEstree(hast, {
-        elementAttributeNameCase: 'react',
-      }).body[0] as ExpressionStatement;
-      this.addExpressionNode(key, estree.expression);
-    },
-    build() {
-      return out;
-    },
-  };
 }
 
 function parseTags(tags: RawTag[]) {
@@ -112,49 +69,47 @@ async function buildTypeProp(
   entries: DocEntry[],
   renderType: RenderHast,
   renderMarkdown: RenderHast,
-): Promise<ObjectExpression> {
-  async function onParam(param: { name: string; description?: string }) {
-    const node = objectBuilder();
-    node.addExpressionNode('name', valueToEstree(param.name));
-    if (param.description) {
-      node.addJsxProperty('description', await renderMarkdown(param.description));
-    }
-    return node.build();
-  }
-
+): Promise<string> {
   async function onItem(entry: DocEntry) {
-    const node = objectBuilder();
+    let node = '{';
     const tags = parseTags(entry.tags);
-    node.addJsxProperty('type', await renderType(entry.simplifiedType));
-    node.addJsxProperty('typeDescription', await renderType(entry.type));
-    node.addExpressionNode('required', valueToEstree(entry.required));
+    node += `type: ${jsxToSource(await renderType(entry.simplifiedType))},`;
+    node += `typeDescription: ${jsxToSource(await renderType(entry.type))},`;
+    node += `required: ${JSON.stringify(entry.required)},`;
 
     if (entry.typeHref) {
-      node.addExpressionNode('typeDescriptionLink', valueToEstree(entry.typeHref));
+      node += `typeDescriptionLink: ${JSON.stringify(entry.typeHref)},`;
     }
-    if (tags.default) node.addJsxProperty('default', await renderType(tags.default));
-    if (tags.returns) node.addJsxProperty('returns', await renderMarkdown(tags.returns));
+    if (tags.default) node += `default: ${jsxToSource(await renderType(tags.default))},`;
+    if (tags.returns) node += `returns: ${jsxToSource(await renderMarkdown(tags.returns))},`;
     if (tags.params) {
-      node.addExpressionNode('parameters', {
-        type: 'ArrayExpression',
-        elements: await Promise.all(tags.params.map(onParam)),
-      });
+      const params = await Promise.all(
+        tags.params.map(async ({ name, description }) => {
+          let param = '{';
+          param += `name: ${JSON.stringify(name)},`;
+          if (description) {
+            param += `description: ${jsxToSource(await renderMarkdown(description))},`;
+          }
+          param += '}';
+          return param;
+        }),
+      );
+      node += `parameters: [${params.join(', ')}],`;
     }
-    if (entry.description) {
-      node.addJsxProperty('description', await renderMarkdown(entry.description));
-    }
-    if (entry.deprecated) {
-      node.addExpressionNode('deprecated', valueToEstree(true));
-    }
+    if (entry.description)
+      node += `description: ${jsxToSource(await renderMarkdown(entry.description))},`;
+    if (entry.deprecated) node += `deprecated: true,`;
 
-    return node.build();
+    node += '}';
+    return node;
   }
 
-  const prop = objectBuilder();
+  let prop = '{';
   for (const entry of entries) {
-    prop.addExpressionNode(entry.name, await onItem(entry));
+    prop += `${JSON.stringify(entry.name)}: ${await onItem(entry)},`;
   }
-  return prop.build();
+  prop += '}';
+  return prop;
 }
 
 export function remarkAutoTypeTable(config: RemarkAutoTypeTableOptions = {}) {
@@ -250,9 +205,7 @@ export function remarkAutoTypeTable(config: RemarkAutoTypeTableOptions = {}) {
               name: 'type',
               value: {
                 type: 'mdxJsxAttributeValueExpression',
-                value: serializeExpression(
-                  await buildTypeProp(doc.entries, renderType, renderMarkdown),
-                ),
+                value: await buildTypeProp(doc.entries, renderType, renderMarkdown),
               },
             },
             ...attributes,

@@ -42,6 +42,10 @@ export function rehypeToc({ exportToc = true }: RehypeTocOptions = {}):
           if (typeof id !== 'string') return;
 
           let isTocOnly = false;
+          // `setProperty` is applied after the pass, so strip the tag from the
+          // flattened title manually — `ctx.textContent` would still see the
+          // original value.
+          let title = ctx.textContent(element);
           const last = element.children[element.children.length - 1];
           if (last?.type === 'text') {
             const noToc = handleTag(last.value, NoTocTag);
@@ -53,12 +57,13 @@ export function rehypeToc({ exportToc = true }: RehypeTocOptions = {}):
             const tocOnly = handleTag(last.value, TocOnlyTag);
             if (tocOnly !== false) {
               isTocOnly = true;
+              title = title.slice(0, title.length - last.value.length) + tocOnly;
               ctx.setProperty(last, 'value', tocOnly);
             }
           }
 
           items.push({
-            title: ctx.textContent(element),
+            title,
             depth: Number(element.tagName[1]),
             url: `#${id}`,
             _step:

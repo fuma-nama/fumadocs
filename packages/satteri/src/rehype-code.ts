@@ -70,9 +70,10 @@ function isHighlighted(element: Element) {
   return false;
 }
 
+const skipLangs = new Set(['math']);
+const skipClasses = new Set(['language-math', 'math-inline', 'math-display']);
+
 function shouldSkipHighlight(element: Element) {
-  const skipLangs = new Set(['math']);
-  const skipClasses = new Set(['language-math', 'math-inline', 'math-display']);
   const targets =
     element.tagName === 'pre'
       ? [

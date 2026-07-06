@@ -1,4 +1,5 @@
 import { fileURLToPath } from 'node:url';
+import * as fs from 'node:fs/promises';
 import * as path from 'node:path';
 import { expect, test } from 'vitest';
 import { rehypeCodeDefaultOptions } from 'fumadocs-core/mdx-plugins/rehype-code';
@@ -101,4 +102,51 @@ test('getMDXOptions rejects satteri collections', async () => {
 
   const collection = config.collections.get('docs') as DocCollectionItem;
   expect(() => config.getMDXOptions(collection)).toThrow(/getSatteriOptions/);
+});
+
+test('buildMDX with satteri compiler resolves includes', async () => {
+  const core = createCore({
+    configPath: 'source.config.ts',
+    environment: 'test',
+    outDir: '.source',
+  });
+
+  const config = buildConfig(
+    {
+      docs: defineCollections({
+        type: 'doc',
+        compiler: 'satteri',
+        dir: baseDir,
+        satteriOptions: {
+          rehypeCodeOptions: false,
+        },
+      }),
+    },
+    process.cwd(),
+  );
+
+  await core.init({ config });
+
+  const fixture = path.join(baseDir, 'fixtures/remark-include/index.mdx');
+  const collection = config.collections.get('docs') as DocCollectionItem;
+  const dependencies: string[] = [];
+  const compiled = await buildMDX(core, collection, {
+    filePath: fixture,
+    source: await fs.readFile(fixture, 'utf-8'),
+    frontmatter: {},
+    environment: 'bundler',
+    isDevelopment: false,
+    _compiler: { addDependency: (file) => dependencies.push(file) },
+  });
+
+  // full include + section by heading id
+  expect(compiled.value).toContain('Hey there!');
+  // section inside a JSX <section> tag
+  expect(compiled.value).toContain('This is My Test.');
+  // section inside a :::section directive
+  expect(compiled.value).toContain('some content inside.');
+  // code include with region extraction
+  expect(compiled.value).toContain('language-ts');
+  expect(dependencies).toContain(path.join(baseDir, 'fixtures/remark-include/test.mdx'));
+  expect(dependencies).toContain(path.join(baseDir, 'fixtures/remark-include/code.ts'));
 });
