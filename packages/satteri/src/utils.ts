@@ -1,3 +1,6 @@
+import { jsx, toJs } from 'estree-util-to-js';
+import type { Nodes } from 'hast';
+import { toEstree } from 'hast-util-to-estree';
 import type { MdastNode } from 'satteri';
 
 /**
@@ -25,4 +28,11 @@ export function handleTag(value: string, tag: string): string | false {
   }
 
   return false;
+}
+
+export function jsxToSource(hast: Nodes): string {
+  const source = toJs(toEstree(hast, { elementAttributeNameCase: 'react' }), {
+    handlers: jsx,
+  }).value.trim();
+  return source.endsWith(';') ? source.slice(0, -1) : source;
 }

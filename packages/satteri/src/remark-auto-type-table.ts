@@ -2,8 +2,6 @@ import { defineMdastPlugin, markdownToHast } from 'satteri';
 import type { ElementContent, Nodes } from 'hast';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { toEstree } from 'hast-util-to-estree';
-import { toJs, jsx } from 'estree-util-to-js';
 import type { MdxJsxAttribute, MdxJsxExpressionAttribute, MdxJsxFlowElement } from 'mdast-util-mdx';
 import { highlightHast, type HighlightHastOptions } from 'fumadocs-core/highlight';
 import {
@@ -13,17 +11,11 @@ import {
   type RemarkAutoTypeTableOptions,
   type TypeTableProps,
 } from 'fumadocs-typescript';
+import { jsxToSource } from './utils';
 
 export type { RemarkAutoTypeTableOptions } from 'fumadocs-typescript';
 
 type RenderHast = (value: string) => Nodes | Promise<Nodes>;
-
-function jsxToSource(hast: Nodes): string {
-  const source = toJs(toEstree(hast, { elementAttributeNameCase: 'react' }) as never, {
-    handlers: jsx,
-  }).value.trim();
-  return source.endsWith(';') ? source.slice(0, -1) : source;
-}
 
 function sanitizeHast(node: Nodes): Nodes {
   if (node.type === 'raw') return { type: 'text', value: node.value };

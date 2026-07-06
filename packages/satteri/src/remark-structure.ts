@@ -1,4 +1,4 @@
-import { defineMdastPlugin, type MdastVisitorContext } from 'satteri';
+import type { MdastPluginDefinition, MdastVisitorContext } from 'satteri';
 import type { Nodes } from 'mdast';
 import { gfmToMarkdown } from 'mdast-util-gfm';
 import type { StructuredData } from 'fumadocs-core/mdx-plugins/remark-structure';
@@ -7,6 +7,7 @@ import {
   type Stringifier,
   type StringifyOptions,
 } from 'fumadocs-core/mdx-plugins/remark-structure';
+import type { ExtraPluginHooks } from './compile';
 
 export interface StructureOptions {
   types?: string[] | ((node: Nodes) => boolean);
@@ -71,7 +72,7 @@ export function remarkStructure({
     typeof types === 'function' ? types : (node: Nodes) => types.includes(node.type);
   const stringify = wrapStringifier(stringifyOptions);
 
-  return () => {
+  const plugin: ExtraPluginHooks & { (): MdastPluginDefinition } = () => {
     const data: StructuredData = { contents: [], headings: [] };
     let lastHeading: string | undefined;
     let seeded = false;
@@ -121,11 +122,15 @@ export function remarkStructure({
       }
     }
 
-    return defineMdastPlugin({
+    return {
       name: 'remark-structure',
       ...Object.fromEntries(STRUCTURE_VISITORS.map((key) => [key, visit])),
-    });
+    };
   };
+  plugin.afterToJs = ({ result }) => {
+    result.data.structuredData ??= { headings: [], contents: [] };
+  };
+  return plugin;
 }
 
 export type { StructuredData } from 'fumadocs-core/mdx-plugins/remark-structure';

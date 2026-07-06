@@ -2,7 +2,7 @@ import * as path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { defineMdastPlugin, type MdastVisitorContext } from 'satteri';
 import type { Image } from 'mdast';
-import type { MdxJsxFlowElement, MdxjsEsm } from 'mdast-util-mdx';
+import type { MdxJsxFlowElement } from 'mdast-util-mdx';
 
 const VALID_BLUR_EXT = ['.jpeg', '.png', '.webp', '.avif', '.jpg'];
 const EXTERNAL_URL_REGEX = /^https?:\/\//;
@@ -31,7 +31,7 @@ export function remarkImage({
   const sizeCache = new Map<string, Promise<ImageSize | undefined>>();
 
   return () => {
-    const imports: MdxjsEsm[] = [];
+    const imports: string[] = [];
 
     return defineMdastPlugin({
       name: 'remark-image',
@@ -81,7 +81,7 @@ async function updateImage(
     useImport: boolean;
     external: ExternalImageOptions;
     dir?: string;
-    imports: MdxjsEsm[];
+    imports: string[];
     sizeCache: Map<string, Promise<ImageSize | undefined>>;
   },
 ): Promise<void> {
@@ -94,29 +94,7 @@ async function updateImage(
 
     const variableName = `__img${options.imports.length}`;
     const importPath = getImportPath(src.file, options.dir);
-    options.imports.push({
-      type: 'mdxjsEsm',
-      value: '',
-      data: {
-        estree: {
-          type: 'Program',
-          sourceType: 'module',
-          body: [
-            {
-              type: 'ImportDeclaration',
-              attributes: [],
-              source: { type: 'Literal', value: importPath },
-              specifiers: [
-                {
-                  type: 'ImportDefaultSpecifier',
-                  local: { type: 'Identifier', name: variableName },
-                },
-              ],
-            },
-          ],
-        },
-      },
-    });
+    options.imports.push(`import ${variableName} from ${JSON.stringify(importPath)};`);
 
     const out: MdxJsxFlowElement = {
       type: 'mdxJsxFlowElement',

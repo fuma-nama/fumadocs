@@ -1,7 +1,7 @@
 import '@/data-map';
-import { mdxToJs, type MdxCompileOptions, MdxToJsResult } from 'satteri';
+import { mdxToJs, type MdxCompileOptions, type MdxToJsResult, type Data } from 'satteri';
 import { pathToFileURL } from 'node:url';
-import { appendExports, queueDataExport, queueTocJsxExport } from '@/inject-exports';
+import { jsxToSource } from './utils';
 
 export interface CompileMdxOptions {
   source: string;
@@ -14,87 +14,98 @@ export interface CompileMdxOptions {
 
 export type CompileMdxResult = MdxToJsResult;
 
+export interface ExtraPluginHooks {
+  beforeToJs?: (opts: { data: Data }) => void;
+  afterToJs?: (opts: { result: MdxToJsResult }) => void;
+}
+
 export async function compileMdx({
   source,
   filePath,
   frontmatter,
   isDevelopment = false,
   environment = 'bundler',
-  options,
+  options: { mdastPlugins = [], hastPlugins = [], ...satteriOptions },
 }: CompileMdxOptions): Promise<CompileMdxResult> {
-  const data: NonNullable<MdxCompileOptions['data']> = { ...options.data };
+  const data: Data = { ...satteriOptions.data };
   if (frontmatter) data.frontmatter = frontmatter;
+  const plugins = [...mdastPlugins, ...hastPlugins] as ExtraPluginHooks[];
+
+  for (const plugin of plugins) {
+    plugin.beforeToJs?.({ data });
+  }
 
   const result = await mdxToJs(source, {
-    ...options,
-    // force the result type to be async
-    mdastPlugins: options.mdastPlugins ?? [],
+    ...satteriOptions,
+    mdastPlugins,
+    hastPlugins,
     development: isDevelopment,
-    outputFormat: environment === 'runtime' ? 'function-body' : options.outputFormat,
-    fileURL: options.fileURL ?? pathToFileURL(filePath),
+    outputFormat: environment === 'runtime' ? 'function-body' : satteriOptions.outputFormat,
+    fileURL: satteriOptions.fileURL ?? pathToFileURL(filePath),
     data,
     features: {
       gfm: true,
       frontmatter: false,
       directive: true,
-      ...options.features,
+      ...satteriOptions.features,
     },
   });
 
-  const outData = result.data as typeof data;
+  for (const plugin of plugins) {
+    plugin.afterToJs?.({ result });
+  }
+
+  // var name -> code line
+  const injectedExports = new Map<string, string>();
+  function queueDataExport(name: string, code: string): void {
+    injectedExports.set(name, `export const ${name} = ${code};`);
+  }
+
+  const outData = result.data;
   if (outData.frontmatter) {
-    queueDataExport(outData, 'frontmatter', outData.frontmatter);
+    queueDataExport('frontmatter', JSON.stringify(outData.frontmatter));
   }
   if (outData.structuredData) {
-    queueDataExport(outData, 'structuredData', outData.structuredData);
-  } else {
-    // remark-structure only assigns `structuredData` from node visitors, so a
-    // page without any matching nodes would otherwise miss the export and
-    // break consumers that expect it on every page (e.g. search indexing)
-    outData.structuredData = { contents: [], headings: [] };
-    queueDataExport(outData, 'structuredData', outData.structuredData);
+    queueDataExport('structuredData', JSON.stringify(outData.structuredData));
   }
   if (typeof outData._markdown === 'string') {
-    queueDataExport(outData, '_markdown', outData._markdown);
+    queueDataExport('_markdown', JSON.stringify(outData._markdown));
   }
   if (outData.extractedReferences) {
-    queueDataExport(outData, 'extractedReferences', outData.extractedReferences);
+    queueDataExport('extractedReferences', JSON.stringify(outData.extractedReferences));
   }
   if (Array.isArray(outData._valueToExport)) {
     for (const name of outData._valueToExport) {
       if (typeof name === 'string' && name in outData) {
-        queueDataExport(outData, name, outData[name]);
+        queueDataExport(name, JSON.stringify(outData[name]));
       }
     }
   }
   const tocExport = outData._tocEsmExport;
   if (tocExport) {
-    queueTocJsxExport(outData, tocExport.name, tocExport.items);
+    queueDataExport(
+      tocExport.name,
+      `[${tocExport.items
+        .map((item) => {
+          let obj = '{';
+          obj += `title: ${jsxToSource(item.title)},`;
+          obj += `url: ${JSON.stringify(item.url)},`;
+          obj += `depth: ${JSON.stringify(item.depth)},`;
+          if (item._step !== undefined) obj += `_step: ${JSON.stringify(item._step)},`;
+          obj += '}';
+          return obj;
+        })
+        .join(',')}]`,
+    );
   }
 
-  let code = appendExports(result.code, outData);
-
-  const imports = outData._imageImports;
-  if (imports?.length) {
-    const importCode = imports
-      .map((node) => {
-        const estree = (node as { data?: { estree?: { body: unknown[] } } }).data?.estree;
-        if (!estree) return '';
-        const decl = estree.body[0] as {
-          type: string;
-          source: { value: string };
-          specifiers: { local: { name: string } }[];
-        };
-        if (decl.type !== 'ImportDeclaration') return '';
-        const specifier = decl.specifiers[0];
-        if (!specifier) return '';
-        return `import ${specifier.local.name} from ${JSON.stringify(decl.source.value)};`;
-      })
-      .filter(Boolean)
-      .join('\n');
-    code = `${importCode}\n${code}`;
+  let code = `${result.code.trimEnd()}\n${Array.from(injectedExports.values()).join('\n')}\n`;
+  if (injectedExports.size > 0) {
+    code = `${code}\n${Array.from(injectedExports.values()).join('\n')}`;
   }
-
+  if (outData._imageImports?.length) {
+    code = `${outData._imageImports.join('\n')}\n${code}`;
+  }
   return {
     code,
     data: outData,
