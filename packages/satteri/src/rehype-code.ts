@@ -99,7 +99,7 @@ export function rehypeCode(options?: Partial<RehypeCodeOptions>) {
           if (parent?.type === 'element' && parent.tagName === 'pre') return;
         }
 
-        const tree: Root = { type: 'root', children: [structuredClone(element)] };
+        const tree: Root = { type: 'root', children: [element] };
         await runBlock(tree, null as never, () => undefined);
         normalizeProperties(tree);
         replaceHighlightedNode(element, tree.children[0], ctx);

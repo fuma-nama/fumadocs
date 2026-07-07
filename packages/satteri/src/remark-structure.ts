@@ -37,7 +37,7 @@ function wrapStringifier(stringifyOptions?: StringifyOptions | Stringifier): Str
   if (!stringifyOptions) return null;
   if (typeof stringifyOptions === 'function') {
     const fn = stringifyOptions as (node: Nodes, ctx: StringifierContext) => string;
-    return (node, ctx) => fn(structuredClone(node), ctx);
+    return (node, ctx) => fn(node, ctx);
   }
 
   const base = structureDefaultStringifier({
@@ -54,7 +54,7 @@ function wrapStringifier(stringifyOptions?: StringifyOptions | Stringifier): Str
     },
   });
   const baseFn = base as (node: Nodes, ctx: StringifierContext) => string;
-  return (node, ctx) => baseFn(structuredClone(node), ctx);
+  return (node, ctx) => baseFn(node, ctx);
 }
 
 function nodeContent(
