@@ -1,7 +1,13 @@
 import { ProvideLinksToolSchema } from '@/lib/inkeep/inkeep-qa-schema';
 import { createOpenAICompatible } from '@ai-sdk/openai-compatible';
 import { $routeHandler } from 'fuma-cli/macros/route-handler';
-import { convertToModelMessages, streamText, type UIMessage } from 'ai';
+import {
+  convertToModelMessages,
+  createUIMessageStreamResponse,
+  streamText,
+  toUIMessageStream,
+  type UIMessage,
+} from 'ai';
 
 export type InkeepUIMessage = UIMessage<
   never,
@@ -27,7 +33,7 @@ export const handler = $routeHandler(
     const reqJson = await req.json();
 
     const result = streamText({
-      model: openai('inkeep-qa-sonnet-4'),
+      model: openai('inkeep-qa-expert'),
       tools: {
         provideLinks: {
           inputSchema: ProvideLinksToolSchema,
@@ -46,6 +52,8 @@ export const handler = $routeHandler(
       toolChoice: 'auto',
     });
 
-    return result.toUIMessageStreamResponse();
+    return createUIMessageStreamResponse({
+      stream: toUIMessageStream({ stream: result.stream }),
+    });
   },
 );
