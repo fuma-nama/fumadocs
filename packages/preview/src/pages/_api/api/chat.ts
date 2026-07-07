@@ -1,6 +1,8 @@
 import {
   convertToModelMessages,
   LanguageModel,
+  createUIMessageStreamResponse,
+  toUIMessageStream,
   stepCountIs,
   streamText,
   tool,
@@ -137,7 +139,9 @@ export async function POST(req: Request) {
     toolChoice: 'auto',
   });
 
-  return result.toUIMessageStreamResponse();
+  return createUIMessageStreamResponse({
+    stream: toUIMessageStream({ stream: result.stream }),
+  });
 }
 
 const searchTool = tool({
