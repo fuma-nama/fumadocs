@@ -55,12 +55,10 @@ export function ServerSelect(props: ComponentProps<typeof DialogTrigger>) {
           <DialogDescription>{t('The base URL of your API endpoint.')}</DialogDescription>
         </DialogHeader>
         <Select
-          items={Object.fromEntries(
-            Object.entries(servers).map(([id, item]) => [
-              id,
-              <code className="font-medium">{resolveServerUrl(item, {})}</code>,
-            ]),
-          )}
+          items={Object.entries(servers).map(([id, item]) => ({
+            label: <code className="font-medium">{resolveServerUrl(item, {})}</code>,
+            value: id,
+          }))}
           value={server?.id ?? null}
           onValueChange={(v) => v !== null && setServer(v)}
         >

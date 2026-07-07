@@ -65,7 +65,14 @@ export default function ServerSelect(props: ComponentProps<typeof DialogTrigger>
           <DialogTitle>{t('Server URL')}</DialogTitle>
           <DialogDescription>{t('The base URL of your API endpoint.')}</DialogDescription>
         </DialogHeader>
-        <Select value={server?.url ?? null} onValueChange={(v) => v !== null && setServer(v)}>
+        <Select
+          items={servers.map((server) => ({
+            value: server.url!,
+            label: <code className="text-[0.8125rem]">{server.url}</code>,
+          }))}
+          value={server?.url ?? null}
+          onValueChange={(v) => v !== null && setServer(v)}
+        >
           <SelectTrigger>
             <SelectValue />
           </SelectTrigger>
@@ -159,7 +166,7 @@ function Field({
         </SelectTrigger>
         <SelectContent>
           {variable.enum.map((value) => (
-            <SelectItem key={value} value={String(value)}>
+            <SelectItem key={value} value={value}>
               {value}
             </SelectItem>
           ))}
