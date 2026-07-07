@@ -1,3 +1,9 @@
+## @fumadocs/cli@1.4.0
+
+### Default to Base UI
+
+Internal packages & templates now use Base UI rather than Radix UI.
+
 # fumadocs
 
 ## 1.3.10

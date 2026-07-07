@@ -1,3 +1,9 @@
+## fumadocs-twoslash@3.3.0
+
+### Default to Base UI
+
+Internal packages & templates now use Base UI rather than Radix UI.
+
 ## fumadocs-twoslash@3.2.1
 
 ### Migrate to `cnfast`

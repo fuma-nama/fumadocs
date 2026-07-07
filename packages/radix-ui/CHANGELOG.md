@@ -1,3 +1,17 @@
+## fumadocs-ui@16.11.0
+
+### Updated the theme switch to use `document.startViewTransition()` for smoother theme transitions with graceful fallback.
+
+
+
+### Default to Base UI
+
+Internal packages & templates now use Base UI rather than Radix UI.
+
+### Support `noCopy` attribute for codeblocks
+
+Use `noCopy` to remove copy button from codeblocks.
+
 ## fumadocs-ui@16.10.7
 
 ### Fix Page Actions base path handling

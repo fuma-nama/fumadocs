@@ -1,3 +1,9 @@
+## @fumadocs/local-md@0.3.0
+
+### Default to Base UI
+
+Internal packages & templates now use Base UI rather than Radix UI.
+
 ## @fumadocs/local-md@0.2.4
 
 ### Fix deprecation warnings
