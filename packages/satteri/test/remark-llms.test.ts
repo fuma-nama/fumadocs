@@ -17,8 +17,8 @@ test('remark-llms exports processed markdown once', async () => {
     options,
   });
 
-  expect(typeof result.data?._markdown).toBe('string');
-  expect(result.data?._markdown).toContain('Title');
+  expect(typeof result.data?.markdown).toBe('string');
+  expect(result.data?.markdown).toContain('Title');
 });
 
 test('remark-llms handles many root blocks', async () => {
@@ -33,7 +33,7 @@ test('remark-llms handles many root blocks', async () => {
     options,
   });
 
-  const markdown = result.data?._markdown as string;
+  const markdown = result.data?.markdown as string;
   expect(markdown).toContain('Paragraph 0.');
   expect(markdown).toContain('Paragraph 99.');
 });

@@ -3,14 +3,9 @@ import type { Core } from '@/core';
 import type { BuildEnvironment, DocCollectionItem, LoadedConfig } from '@/config/build';
 import type { BuildMDXOptions, CompiledMDXProperties } from '@/loaders/mdx/build';
 import type { PostprocessOptions } from '@/loaders/mdx/remark-postprocess';
-import type {
-  MdxCompileOptions,
-  Data,
-  MdastPluginInput,
-  MdastVisitorContext,
-  MdastPluginDefinition,
-} from 'satteri';
+import type { MdxCompileOptions, Data, MdastPluginInput, MdastPluginDefinition } from 'satteri';
 import type { SatteriPresetOptions } from '@fumadocs/satteri/preset';
+import type { ExtraPluginHooks } from '@fumadocs/satteri/compile';
 
 export type CompiledSatteriMDXProperties<Frontmatter = Record<string, unknown>> =
   CompiledMDXProperties<Frontmatter>;
@@ -38,9 +33,10 @@ export async function buildSatteriMDX(
     _valueToExport: collection?.postprocess?.valueToExport,
   };
 
-  const postprocessPlugins: MdastPluginInput[] = [postprocessPlugin(postprocess)];
+  const mdastPlugins: MdastPluginInput[] = [remarkInclude({ cwd: collection?.cwd })];
+  if (satteriOptions.mdastPlugins) mdastPlugins.push(...satteriOptions.mdastPlugins);
   if (postprocess.includeProcessedMarkdown) {
-    postprocessPlugins.unshift(
+    mdastPlugins.push(
       remarkLlms(
         typeof postprocess.includeProcessedMarkdown === 'object'
           ? postprocess.includeProcessedMarkdown
@@ -48,6 +44,7 @@ export async function buildSatteriMDX(
       ),
     );
   }
+  mdastPlugins.push(postprocessPlugin(postprocess));
 
   const result = await compileMdx({
     source,
@@ -59,30 +56,41 @@ export async function buildSatteriMDX(
       ...satteriOptions,
       fileURL: pathToFileURL(filePath),
       data,
-      mdastPlugins: [
-        remarkInclude({ cwd: collection?.cwd }),
-        ...(satteriOptions.mdastPlugins ?? []),
-        ...postprocessPlugins,
-      ],
+      mdastPlugins,
     },
   });
 
   return { code: result.code };
 }
 
-function postprocessPlugin(options: PostprocessOptions): MdastPluginDefinition {
+declare module 'satteri' {
+  interface DataMap {
+    extractedReferences?: { href: string }[];
+  }
+}
+
+function postprocessPlugin({
+  extractLinkReferences = false,
+}: PostprocessOptions): MdastPluginDefinition & ExtraPluginHooks {
   return {
     name: 'remark-postprocess',
-    heading(node, ctx: MdastVisitorContext) {
+    heading(node, ctx) {
       const frontmatter = (ctx.data.frontmatter ??= {});
       if (!frontmatter.title && node.depth === 1) {
         frontmatter.title = ctx.textContent(node);
       }
     },
     link(node, ctx) {
-      if (!options.extractLinkReferences) return;
-      const refs = (ctx.data.extractedReferences ??= []);
-      refs.push({ href: node.url });
+      if (extractLinkReferences) {
+        const refs = (ctx.data.extractedReferences ??= []);
+        refs.push({ href: node.url });
+      }
+    },
+    afterToJs({ result }) {
+      if (extractLinkReferences) {
+        result.data.extractedReferences ??= [];
+        result.code += `\nexport const extractedReferences = ${JSON.stringify(result.data.extractedReferences)};`;
+      }
     },
   };
 }

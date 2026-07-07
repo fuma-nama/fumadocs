@@ -1,6 +1,6 @@
 import type { StructuredData } from 'fumadocs-core/mdx-plugins/remark-structure';
 import type { TOCItemType } from 'fumadocs-core/toc';
-import type { RehypeTocESMItemType, RehypeTocItemType } from './rehype-toc';
+import type { RehypeTocItemType } from './rehype-toc';
 
 /** host compiler hooks (e.g. a bundler loader), used for watch-mode dependency tracking */
 export interface CompilerHooks {
@@ -9,17 +9,22 @@ export interface CompilerHooks {
 
 declare module 'satteri' {
   interface DataMap {
-    frontmatter?: Record<string, unknown>;
+    /** `remark-structure` */
     structuredData?: StructuredData;
+    /** `remark-heading` */
     toc?: TOCItemType[];
+    /** `rehype-toc` */
     rehypeToc?: RehypeTocItemType[];
-    _exports?: string[];
-    _tocEsmExport?: { name: string; items: RehypeTocESMItemType[] };
+    /** `remark-llms` */
+    markdown?: string;
+    /** `remark-image` */
     _imageImports?: string[];
-    _valueToExport?: string[];
-    _markdown?: string;
+
     _cwd?: string;
     _compiler?: CompilerHooks;
-    extractedReferences?: { href: string }[];
+    _valueToExport?: string[];
+    frontmatter?: Record<string, unknown>;
   }
 }
+
+export type BuildEnvironment = 'bundler' | 'runtime';

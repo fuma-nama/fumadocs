@@ -1,7 +1,5 @@
-import '@/data-map';
 import { mdxToJs, type MdxCompileOptions, type MdxToJsResult, type Data } from 'satteri';
 import { pathToFileURL } from 'node:url';
-import { jsxToSource } from './utils';
 
 export interface CompileMdxOptions {
   source: string;
@@ -65,46 +63,16 @@ export async function compileMdx({
   if (outData.frontmatter) {
     queueDataExport('frontmatter', JSON.stringify(outData.frontmatter));
   }
-  if (outData.structuredData) {
-    queueDataExport('structuredData', JSON.stringify(outData.structuredData));
-  }
-  if (typeof outData._markdown === 'string') {
-    queueDataExport('_markdown', JSON.stringify(outData._markdown));
-  }
-  if (outData.extractedReferences) {
-    queueDataExport('extractedReferences', JSON.stringify(outData.extractedReferences));
-  }
   if (Array.isArray(outData._valueToExport)) {
     for (const name of outData._valueToExport) {
-      if (typeof name === 'string' && name in outData) {
-        queueDataExport(name, JSON.stringify(outData[name]));
-      }
+      if (!(name in outData)) continue;
+      queueDataExport(name, JSON.stringify(outData[name]));
     }
   }
-  const tocExport = outData._tocEsmExport;
-  if (tocExport) {
-    queueDataExport(
-      tocExport.name,
-      `[${tocExport.items
-        .map((item) => {
-          let obj = '{';
-          obj += `title: ${jsxToSource(item.title)},`;
-          obj += `url: ${JSON.stringify(item.url)},`;
-          obj += `depth: ${JSON.stringify(item.depth)},`;
-          if (item._step !== undefined) obj += `_step: ${JSON.stringify(item._step)},`;
-          obj += '}';
-          return obj;
-        })
-        .join(',')}]`,
-    );
-  }
 
-  let code = `${result.code.trimEnd()}\n${Array.from(injectedExports.values()).join('\n')}\n`;
+  let code = result.code;
   if (injectedExports.size > 0) {
     code = `${code}\n${Array.from(injectedExports.values()).join('\n')}`;
-  }
-  if (outData._imageImports?.length) {
-    code = `${outData._imageImports.join('\n')}\n${code}`;
   }
   return {
     code,

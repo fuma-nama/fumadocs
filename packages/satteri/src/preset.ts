@@ -1,6 +1,5 @@
-import '@/data-map';
 import type { HastPluginInput, MdxCompileOptions, MdxOnlyOptions } from 'satteri';
-import type { BuildEnvironment } from '@/types';
+import type { BuildEnvironment } from '@/index';
 import { remarkHeading, type RemarkHeadingOptions } from '@/remark-heading';
 import { remarkImage, type RemarkImageOptions } from '@/remark-image';
 import { remarkCodeTab, type RemarkCodeTabOptions } from '@/remark-code-tab';

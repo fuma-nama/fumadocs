@@ -17,9 +17,8 @@
   ],
   "type": "module",
   "exports": {
+    ".": "./dist/index.js",
     "./compile": "./dist/compile.js",
-    "./data-map": "./dist/data-map.js",
-    "./inject-exports": "./dist/inject-exports.js",
     "./preset": "./dist/preset.js",
     "./rehype-code": "./dist/rehype-code.js",
     "./rehype-toc": "./dist/rehype-toc.js",
@@ -38,7 +37,6 @@
     "./remark-steps": "./dist/remark-steps.js",
     "./remark-structure": "./dist/remark-structure.js",
     "./remark-ts2js": "./dist/remark-ts2js.js",
-    "./utils": "./dist/utils.js",
     "./package.json": "./package.json"
   },
   "publishConfig": {

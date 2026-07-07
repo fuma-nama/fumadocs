@@ -7,7 +7,6 @@ import type { MdastContent, MdastNode, MdastPluginDefinition, MdastVisitorContex
 import { frontmatter } from 'fumadocs-core/content/md/frontmatter';
 import { flattenNode } from '@/utils';
 import type { Code, Heading, RootContent } from 'mdast';
-import '@/data-map';
 
 export interface RemarkIncludeOptions {
   /**

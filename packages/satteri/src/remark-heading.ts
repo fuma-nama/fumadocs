@@ -1,6 +1,7 @@
 import Slugger from 'github-slugger';
-import { defineMdastPlugin, type MdastVisitorContext } from 'satteri';
+import { defineMdastPlugin, type MdastPluginDefinition, type MdastVisitorContext } from 'satteri';
 import type { Heading } from 'mdast';
+import { ExtraPluginHooks } from './compile';
 
 const regex = /\s*\[#(?<slug>[^]+?)]\s*$/;
 
@@ -15,7 +16,7 @@ export function remarkHeading({
   customId = true,
   generateToc = true,
 }: RemarkHeadingOptions = {}) {
-  return () => {
+  const plugin: ExtraPluginHooks & { (): MdastPluginDefinition } = () => {
     let resolveSlug = slug;
     if (!resolveSlug) {
       const slugger = new Slugger();
@@ -47,17 +48,21 @@ export function remarkHeading({
           hProperties.id = resolveSlug(node, title);
         }
 
-        ctx.setProperty(node, 'data', data as typeof node.data);
-
-        if (generateToc) {
-          const toc = (ctx.data.toc ??= []);
-          toc.push({
-            title,
-            url: `#${hProperties.id}`,
-            depth: node.depth,
-          });
-        }
+        ctx.setProperty(node, 'data', data);
+        ctx.data.toc?.push({
+          title,
+          url: `#${hProperties.id}`,
+          depth: node.depth,
+        });
       },
     });
   };
+
+  if (generateToc) {
+    plugin.beforeToJs = ({ data }) => {
+      data.toc ??= [];
+    };
+  }
+
+  return plugin;
 }

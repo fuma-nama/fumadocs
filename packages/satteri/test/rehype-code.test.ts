@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { rehypeCodeDefaultOptions } from 'fumadocs-core/mdx-plugins/rehype-code';
-import { compileMdx } from '@fumadocs/satteri/compile';
-import { applySatteriPreset } from '@fumadocs/satteri/preset';
+import { compileMdx } from '@/compile';
+import { applySatteriPreset } from '@/preset';
 
 describe('rehype-code', () => {
   it('highlights fenced code blocks', async () => {

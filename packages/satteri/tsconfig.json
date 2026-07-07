@@ -2,8 +2,7 @@
   "extends": "tsconfig/base.json",
   "compilerOptions": {
     "paths": {
-      "@/*": ["./src/*"],
-      "fumadocs-core/*": ["../core/dist/*"]
+      "@/*": ["./src/*"]
     },
     "types": ["@types/node", "@types/mdast", "@types/hast"],
     "jsx": "react-jsx",

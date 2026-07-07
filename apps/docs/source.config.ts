@@ -110,7 +110,7 @@ export const docs = defineDocs({
           isLint
             ? [remarkElementIds(), ...plugins]
             : [
-                remarkSteps,
+                remarkSteps(),
                 remarkBlockId({ addDataAttribute: 'feedback' }),
                 remarkAutoTypeTable(typeTableOptions),
                 remarkTs2js(),
@@ -159,7 +159,7 @@ export const blog = defineCollections({
         },
       },
       mdastPlugins: (plugins) =>
-        isLint ? [remarkElementIds(), ...plugins] : [remarkSteps, ...plugins],
+        isLint ? [remarkElementIds(), ...plugins] : [remarkSteps(), ...plugins],
     };
   },
 });

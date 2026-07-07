@@ -1,8 +1,9 @@
 import * as path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { defineMdastPlugin, type MdastVisitorContext } from 'satteri';
+import type { MdastPluginDefinition, MdastVisitorContext } from 'satteri';
 import type { Image } from 'mdast';
 import type { MdxJsxFlowElement } from 'mdast-util-mdx';
+import type { ExtraPluginHooks } from './compile';
 
 const VALID_BLUR_EXT = ['.jpeg', '.png', '.webp', '.avif', '.jpg'];
 const EXTERNAL_URL_REGEX = /^https?:\/\//;
@@ -26,49 +27,45 @@ export function remarkImage({
   useImport = true,
   onError = 'error',
   publicDir = path.join(process.cwd(), 'public'),
-}: RemarkImageOptions = {}) {
+}: RemarkImageOptions = {}): MdastPluginDefinition & ExtraPluginHooks {
   // image sizes don't change within a build, share the cache across files
   const sizeCache = new Map<string, Promise<ImageSize | undefined>>();
 
-  return () => {
-    const imports: string[] = [];
+  return {
+    name: 'remark-image',
+    afterToJs({ result }) {
+      if (result.data._imageImports) {
+        result.code += `\n${result.data._imageImports.join('\n')}`;
+      }
+    },
+    async image(node, ctx) {
+      const dir = ctx.fileURL ? path.dirname(fileURLToPath(ctx.fileURL)) : undefined;
+      const src = parseSrc(decodeURI(node.url), publicDir, dir);
+      if (!src) return;
 
-    return defineMdastPlugin({
-      name: 'remark-image',
-      async image(node, ctx) {
-        const dir = ctx.fileURL ? path.dirname(fileURLToPath(ctx.fileURL)) : undefined;
-        const src = parseSrc(decodeURI(node.url), publicDir, dir);
-        if (!src) return;
-
-        try {
-          // mutations are recorded per-node inside `updateImage`; replacing
-          // the parent's children instead would clobber sibling image patches
-          await updateImage(src, node, ctx, {
-            placeholder,
-            useImport,
-            external,
-            dir,
-            imports,
-            sizeCache,
-          });
-        } catch (error) {
-          // svg sizes often can't be determined, always keep the node untouched
-          if (onError === 'ignore' || node.url.endsWith('.svg')) {
-            return;
-          } else if (onError === 'hide') {
-            ctx.removeNode(node);
-          } else if (typeof onError === 'function') {
-            onError(error as Error);
-          } else {
-            throw error;
-          }
+      try {
+        // mutations are recorded per-node inside `updateImage`; replacing
+        // the parent's children instead would clobber sibling image patches
+        await updateImage(src, node, ctx, {
+          placeholder,
+          useImport,
+          external,
+          dir,
+          sizeCache,
+        });
+      } catch (error) {
+        // svg sizes often can't be determined, always keep the node untouched
+        if (onError === 'ignore' || node.url.endsWith('.svg')) {
+          return;
+        } else if (onError === 'hide') {
+          ctx.removeNode(node);
+        } else if (typeof onError === 'function') {
+          onError(error as Error);
+        } else {
+          throw error;
         }
-
-        if (imports.length > 0) {
-          ctx.data._imageImports = imports;
-        }
-      },
-    });
+      }
+    },
   };
 }
 
@@ -81,7 +78,6 @@ async function updateImage(
     useImport: boolean;
     external: ExternalImageOptions;
     dir?: string;
-    imports: string[];
     sizeCache: Map<string, Promise<ImageSize | undefined>>;
   },
 ): Promise<void> {
@@ -92,9 +88,10 @@ async function updateImage(
       );
     }
 
-    const variableName = `__img${options.imports.length}`;
+    const imports = (ctx.data._imageImports ??= []);
+    const variableName = `__img${imports.length}`;
     const importPath = getImportPath(src.file, options.dir);
-    options.imports.push(`import ${variableName} from ${JSON.stringify(importPath)};`);
+    imports.push(`import ${variableName} from ${JSON.stringify(importPath)};`);
 
     const out: MdxJsxFlowElement = {
       type: 'mdxJsxFlowElement',

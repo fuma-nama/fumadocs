@@ -5,7 +5,7 @@
       "@/*": ["./src/*"],
       "@fumadocs/satteri/*": ["../satteri/dist/*"]
     },
-    "types": ["@types/node", "@types/mdx", "@fumadocs/satteri/data-map"],
+    "types": ["@types/node", "@types/mdx", "@fumadocs/satteri"],
     "jsx": "react-jsx",
     "noEmit": true,
     "lib": ["ESNext"],

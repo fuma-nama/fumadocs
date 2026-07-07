@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
-import { compileMdx } from '@fumadocs/satteri/compile';
-import { applySatteriPreset } from '@fumadocs/satteri/preset';
+import { compileMdx } from '@/compile';
+import { applySatteriPreset } from '@/preset';
 
 describe('@fumadocs/satteri', () => {
   it('compiles mdx with fumadocs preset', async () => {

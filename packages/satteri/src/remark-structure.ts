@@ -13,6 +13,11 @@ export interface StructureOptions {
   types?: string[] | ((node: Nodes) => boolean);
   mdxTypes?: (node: Nodes) => boolean;
   stringify?: Stringifier | StringifyOptions;
+  /**
+   * export as `structuredData` (if true) or specified variable name.
+   *
+   * @default true
+   */
   exportAs?: string | boolean;
 }
 
@@ -67,6 +72,7 @@ export function remarkStructure({
   types = ['heading', 'paragraph', 'blockquote', 'tableCell', 'mdxJsxFlowElement'],
   mdxTypes = (node) => !('children' in node) || node.children.length === 0,
   stringify: stringifyOptions,
+  exportAs = true,
 }: StructureOptions = {}) {
   const matchType =
     typeof types === 'function' ? types : (node: Nodes) => types.includes(node.type);
@@ -86,7 +92,7 @@ export function remarkStructure({
     };
 
     function visit(node: Nodes, ctx: MdastVisitorContext) {
-      if (!ctx.data.structuredData) ctx.data.structuredData = data;
+      ctx.data.structuredData ??= data;
 
       if (!matchType(node)) return;
       if (node.type === 'mdxJsxFlowElement' || node.type === 'mdxJsxTextElement') {
@@ -128,7 +134,11 @@ export function remarkStructure({
     };
   };
   plugin.afterToJs = ({ result }) => {
-    result.data.structuredData ??= { headings: [], contents: [] };
+    const data = (result.data.structuredData ??= { headings: [], contents: [] });
+
+    if (exportAs) {
+      result.code += `\nexport const ${typeof exportAs === 'string' ? exportAs : 'structuredData'} = ${JSON.stringify(data)};`;
+    }
   };
   return plugin;
 }

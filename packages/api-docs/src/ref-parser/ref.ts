@@ -294,7 +294,7 @@ class $Ref<S extends object = JSONSchema, O extends ParserOptions<S> = ParserOpt
   static dereference<S extends object = JSONSchema, O extends ParserOptions<S> = ParserOptions<S>>(
     $ref: $Ref<S, O>,
     resolvedValue: S,
-    options?: O,
+    _options?: O,
   ): S {
     if (resolvedValue && typeof resolvedValue === 'object' && $Ref.isExtended$Ref($ref)) {
       const merged = {} as Partial<S>;
