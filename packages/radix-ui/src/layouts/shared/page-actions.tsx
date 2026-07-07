@@ -260,21 +260,15 @@ export function ViewOptionsPopover({
   );
 }
 
-declare global {
-  interface ImportMeta {
-    env?: {
-      BASE_URL?: unknown;
-    };
-  }
-}
-
 function withBasePath(href: string) {
   // ignore external
   if (href.match(/^\w+:/) || href.startsWith('//')) return href;
 
   const basePath =
+    // @ts-expect-error -- vite env
     typeof import.meta.env !== 'undefined' && typeof import.meta.env.BASE_URL === 'string'
-      ? import.meta.env.BASE_URL.replace(/\/$/, '')
+      ? // @ts-expect-error -- vite env
+        import.meta.env.BASE_URL.replace(/\/$/, '')
       : '';
   return basePath + href;
 }
