@@ -1,5 +1,5 @@
-import { defineHastPlugin, type HastPluginInput } from 'satteri';
-import type { Element } from 'hast';
+import { defineHastPlugin, HastVisitorContext, type HastPluginInput } from 'satteri';
+import type { Element, Parents } from 'hast';
 import { handleTag, jsxToSource } from '@/utils';
 import type { ExtraPluginHooks } from './compile';
 
@@ -31,6 +31,12 @@ const TocOnlyTag = '[toc]';
 const NoTocTag = '[!toc]';
 const HeadingTags = ['h1', 'h2', 'h3', 'h4', 'h5', 'h6'];
 
+declare module 'satteri' {
+  interface DataMap {
+    _rehypeTocEsmInjected?: boolean;
+  }
+}
+
 export function rehypeToc({ exportToc = true }: RehypeTocOptions = {}): HastPluginInput &
   ExtraPluginHooks {
   if (exportToc === false) {
@@ -39,11 +45,11 @@ export function rehypeToc({ exportToc = true }: RehypeTocOptions = {}): HastPlug
 
   const resolved = exportToc === true ? { as: 'esm' as const, name: 'toc' } : exportToc;
   const plugin: HastPluginInput & ExtraPluginHooks = () => {
+    let root: Readonly<Parents> | undefined;
     const items: string[] = [];
 
     return {
       name: 'rehype-toc',
-
       element: {
         filter: HeadingTags,
         visit(node, ctx) {
@@ -80,12 +86,7 @@ export function rehypeToc({ exportToc = true }: RehypeTocOptions = {}): HastPlug
               ? element.properties['data-fd-step']
               : undefined;
           if (resolved.as === 'esm') {
-            let root = ctx.parent(node);
-            while (root) {
-              const next = ctx.parent(root);
-              if (!next) break;
-              root = next;
-            }
+            root ??= getRoot(node, ctx);
             if (!root) return;
 
             let obj = '{';
@@ -99,6 +100,7 @@ export function rehypeToc({ exportToc = true }: RehypeTocOptions = {}): HastPlug
             obj += '}';
 
             items.push(obj);
+            ctx.data._rehypeTocEsmInjected = true;
             ctx.setProperty(root, 'children', [
               {
                 type: 'mdxjsEsm',
@@ -109,7 +111,7 @@ export function rehypeToc({ exportToc = true }: RehypeTocOptions = {}): HastPlug
             return;
           }
 
-          ctx.data.rehypeToc?.push({
+          (ctx.data.rehypeToc ??= []).push({
             title,
             depth: Number(element.tagName[1]),
             url: `#${id}`,
@@ -119,10 +121,23 @@ export function rehypeToc({ exportToc = true }: RehypeTocOptions = {}): HastPlug
       },
     };
   };
-  if (resolved.as === 'data') {
-    plugin.beforeToJs = ({ data }) => {
-      data.rehypeToc ??= [];
-    };
-  }
+  plugin.afterToJs = ({ result }) => {
+    if (resolved.as === 'esm' && !result.data._rehypeTocEsmInjected) {
+      result.code += `\nexport const ${resolved.name} = [];`;
+    }
+    if (resolved.as === 'data') {
+      result.data.rehypeToc ??= [];
+    }
+  };
   return plugin;
+}
+
+function getRoot(node: Element, ctx: HastVisitorContext): Parents | undefined {
+  let root = ctx.parent(node);
+  while (root) {
+    const next = ctx.parent(root);
+    if (!next) break;
+    root = next;
+  }
+  return root;
 }

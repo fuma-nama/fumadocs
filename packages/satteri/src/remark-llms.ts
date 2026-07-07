@@ -1,6 +1,4 @@
-import { defineMdastPlugin } from 'satteri';
 import type { MdastNode, MdastPluginInput, MdastVisitorContext } from 'satteri';
-import type { Parents } from 'mdast';
 import { gfmToMarkdown } from 'mdast-util-gfm';
 import type { LLMsOptions as RawLLMsOptions } from 'fumadocs-core/mdx-plugins/remark-llms';
 import { defaultStringifier } from 'fumadocs-core/mdx-plugins/stringifier';
@@ -29,20 +27,6 @@ const ROOT_VISITORS = [
   'math',
   'inlineMath',
 ] as const;
-
-const ROOT_VISITOR_TYPES = new Set<string>(ROOT_VISITORS);
-
-function isRootChild(node: MdastNode, ctx: MdastVisitorContext) {
-  return ctx.parent(node)?.type === 'root';
-}
-
-function countRootTargets(parent: Parents) {
-  let count = 0;
-  for (const child of parent.children) {
-    if (ROOT_VISITOR_TYPES.has(child.type)) count++;
-  }
-  return count;
-}
 
 export function remarkLlms({ as = '_markdown', headingIds = true, ...rest }: LLMsOptions = {}) {
   const stringifier = defaultStringifier({
@@ -73,45 +57,24 @@ export function remarkLlms({ as = '_markdown', headingIds = true, ...rest }: LLM
     stringify: rest.stringify,
   });
 
-  const plugin: MdastPluginInput & ExtraPluginHooks = () => {
-    let rootParent: Parents | undefined;
-    const rootIndices: number[] = [];
-    let expected = 0;
+  function track(node: MdastNode, ctx: MdastVisitorContext) {
+    if (ctx.data.markdown !== undefined) return;
 
-    function finalize(ctx: MdastVisitorContext) {
-      const parent = rootParent!;
-      const children = rootIndices.map((index) => structuredClone(parent.children[index]!));
-      ctx.data.markdown = stringifier.call(
-        undefined as never,
-        { type: 'root', children },
-        undefined,
-      );
+    const parent = ctx.parent(node);
+    if (parent && parent.type === 'root') {
+      ctx.data.markdown = stringifier.call(undefined as never, parent, undefined);
     }
+  }
 
-    function track(node: MdastNode, ctx: MdastVisitorContext) {
-      if (!isRootChild(node, ctx)) return;
-
-      const parent = ctx.parent(node)!;
-      rootParent ??= parent;
-
-      if (expected === 0) expected = countRootTargets(parent);
-      if (expected === 0) return;
-
-      rootIndices.push(ctx.indexOf(node)!);
-
-      if (rootIndices.length === expected) finalize(ctx);
-    }
-
-    return defineMdastPlugin({
-      name: 'remark-llms',
-      ...Object.fromEntries(ROOT_VISITORS.map((key) => [key, track])),
-    });
-  };
-  plugin.afterToJs = ({ result }) => {
-    if (as) {
-      const markdown = (result.data.markdown ??= '');
-      result.code += `\nexport const ${as} = ${JSON.stringify(markdown)};`;
-    }
+  const plugin: MdastPluginInput & ExtraPluginHooks = {
+    name: 'remark-llms',
+    afterToJs({ result }) {
+      if (as) {
+        const markdown = (result.data.markdown ??= '');
+        result.code += `\nexport const ${as} = ${JSON.stringify(markdown)};`;
+      }
+    },
+    ...Object.fromEntries(ROOT_VISITORS.map((key) => [key, track])),
   };
   return plugin;
 }
