@@ -1,3 +1,13 @@
+## fumadocs-openapi@11.1.0
+
+### Add Rust codegen for OpenAPI examples
+
+
+
+### Default to Base UI
+
+Internal packages & templates now use Base UI rather than Radix UI.
+
 ## fumadocs-openapi@11.0.6
 
 ### Migrate to `cnfast`

@@ -1,3 +1,13 @@
+## fumadocs-core@16.11.0
+
+### Default to Base UI
+
+Internal packages & templates now use Base UI rather than Radix UI.
+
+### Support `noCopy` attribute for codeblocks
+
+Use `noCopy` to remove copy button from codeblocks.
+
 ## fumadocs-core@16.10.6
 
 ### Migrate to `cnfast`

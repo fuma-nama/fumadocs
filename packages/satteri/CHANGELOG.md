@@ -1,9 +1,5 @@
-## @fumadocs/vite@0.1.0
+## @fumadocs/satteri@0.2.0
 
 ### Default to Base UI
 
 Internal packages & templates now use Base UI rather than Radix UI.
-
-# @fumadocs/vite
-
-## 0.0.2

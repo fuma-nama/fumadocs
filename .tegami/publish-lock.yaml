@@ -1,67 +1,201 @@
 core:changelogs:
-  - content: "---\npackages:\n  npm:@fumadocs/base-ui:\n    type: patch\n  npm:fumadocs-ui:\n    type: patch\n---\n\n## Fix Page Actions base path handling\n\nThe `<PageActions />` component will handle base path for passed `markdownUrl`.\n"
-    filename: 2026-06-29-mqzak93i.md
+  - content: "---\npackages:\n  npm:@fumadocs/api-docs:\n    type: minor\n  npm:@fumadocs/asyncapi:\n    type: minor\n  npm:@fumadocs/base-ui:\n    type: minor\n  npm:@fumadocs/basehub:\n    type: minor\n  npm:@fumadocs/cli:\n    type: minor\n  npm:@fumadocs/content:\n    type: minor\n  npm:@fumadocs/content-collections:\n    type: minor\n  npm:fumadocs-core:\n    type: minor\n  npm:create-fumadocs-app:\n    type: minor\n  npm:create-fumadocs-versions:\n    type: minor\n  npm:fumadocs-docgen:\n    type: minor\n  npm:@fumadocs/language:\n    type: minor\n  npm:fumadocs-epub:\n    type: minor\n  npm:@fumadocs/local-md:\n    type: minor\n  npm:fumadocs-mdx:\n    type: minor\n  npm:@fumadocs/mdx-remote:\n    type: minor\n  npm:fumadocs-obsidian:\n    type: minor\n  npm:fumadocs-openapi:\n    type: minor\n  npm:fumadocs-preview:\n    type: minor\n  npm:fumadocs-python:\n    type: minor\n  npm:fumadocs-ui:\n    type: minor\n  npm:@fumadocs/sanity:\n    type: minor\n  npm:@fumadocs/satteri:\n    type: minor\n  npm:@fumadocs/shadcn:\n    type: minor\n  npm:@fumari/stf:\n    type: minor\n  npm:@fumadocs/story:\n    type: minor\n  npm:@fumadocs/tailwind:\n    type: minor\n  npm:fumadocs-twoslash:\n    type: minor\n  npm:fumadocs-typescript:\n    type: minor\n  npm:@fumadocs/vite:\n    type: minor\n---\n\n## Default to Base UI\n\nInternal packages & templates now use Base UI rather than Radix UI.\n"
+    filename: 2026-07-05-mr6or9jd.md
+    v: 0.0.0
+  - content: "---\npackages:\n  npm:@fumadocs/base-ui:\n    type: patch\n  npm:fumadocs-ui:\n    type: patch\n---\n\n## Updated the theme switch to use `document.startViewTransition()` for smoother theme transitions with graceful fallback.\n"
+    filename: 2026-07-02-mr2nfni8.md
+    v: 0.0.0
+  - content: "---\npackages:\n  group:fumadocs:\n    type: patch\n---\n\n## Support `noCopy` attribute for codeblocks\n\nUse `noCopy` to remove copy button from codeblocks.\n"
+    filename: 2026-07-06-mr83xhfa.md
+    v: 0.0.0
+  - content: "---\npackages:\n  fumadocs-openapi:\n    type: patch\n---\n\n## Add Rust codegen for OpenAPI examples\n"
+    filename: 2026-06-30-mr0tjxke.md
     v: 0.0.0
 core:packages:
-  - id: npm:@fumadocs/api-docs
-    updated: false
-  - id: npm:@fumadocs/asyncapi
-    updated: false
   - changelogIds:
-      - 2026-06-29-mqzak93i.md
+      - 2026-07-05-mr6or9jd.md
+    id: npm:@fumadocs/api-docs
+    updated: true
+  - changelogIds:
+      - 2026-07-05-mr6or9jd.md
+    id: npm:@fumadocs/asyncapi
+    updated: true
+  - changelogIds:
+      - 2026-07-02-mr2nfni8.md
+      - 2026-07-05-mr6or9jd.md
+      - 2026-07-06-mr83xhfa.md
     id: npm:@fumadocs/base-ui
     updated: true
-  - id: npm:@fumadocs/basehub
-    updated: false
-  - id: npm:@fumadocs/cli
-    updated: false
-  - id: npm:@fumadocs/content
-    updated: false
-  - id: npm:@fumadocs/content-collections
-    updated: false
-  - id: npm:fumadocs-core
-    updated: true
-  - id: npm:create-fumadocs-app
-    updated: true
-  - id: npm:create-fumadocs-versions
-    updated: true
-  - id: npm:fumadocs-docgen
-    updated: false
-  - id: npm:fumadocs-epub
-    updated: false
-  - id: npm:@fumadocs/language
-    updated: false
-  - id: npm:@fumadocs/local-md
-    updated: false
-  - id: npm:fumadocs-mdx
-    updated: false
-  - id: npm:@fumadocs/mdx-remote
-    updated: false
-  - id: npm:fumadocs-obsidian
-    updated: false
-  - id: npm:fumadocs-openapi
-    updated: false
-  - id: npm:fumadocs-preview
-    updated: false
-  - id: npm:fumadocs-python
-    updated: false
   - changelogIds:
-      - 2026-06-29-mqzak93i.md
+      - 2026-07-05-mr6or9jd.md
+    id: npm:@fumadocs/basehub
+    updated: true
+  - changelogIds:
+      - 2026-07-05-mr6or9jd.md
+    id: npm:@fumadocs/cli
+    updated: true
+  - changelogIds:
+      - 2026-07-05-mr6or9jd.md
+    id: npm:@fumadocs/content
+    updated: true
+  - changelogIds:
+      - 2026-07-05-mr6or9jd.md
+    id: npm:@fumadocs/content-collections
+    updated: true
+  - changelogIds:
+      - 2026-07-05-mr6or9jd.md
+    id: npm:create-fumadocs-app
+    updated: true
+  - changelogIds:
+      - 2026-07-05-mr6or9jd.md
+    id: npm:create-fumadocs-versions
+    updated: true
+  - changelogIds:
+      - 2026-07-05-mr6or9jd.md
+      - 2026-07-06-mr83xhfa.md
+    id: npm:fumadocs-core
+    updated: true
+  - changelogIds:
+      - 2026-07-05-mr6or9jd.md
+    id: npm:fumadocs-docgen
+    updated: true
+  - changelogIds:
+      - 2026-07-05-mr6or9jd.md
+    id: npm:fumadocs-epub
+    updated: true
+  - changelogIds:
+      - 2026-07-05-mr6or9jd.md
+    id: npm:@fumadocs/language
+    updated: true
+  - changelogIds:
+      - 2026-07-05-mr6or9jd.md
+    id: npm:@fumadocs/local-md
+    updated: true
+  - changelogIds:
+      - 2026-07-05-mr6or9jd.md
+    id: npm:fumadocs-mdx
+    updated: true
+  - changelogIds:
+      - 2026-07-05-mr6or9jd.md
+    id: npm:@fumadocs/mdx-remote
+    updated: true
+  - changelogIds:
+      - 2026-07-05-mr6or9jd.md
+    id: npm:fumadocs-obsidian
+    updated: true
+  - changelogIds:
+      - 2026-06-30-mr0tjxke.md
+      - 2026-07-05-mr6or9jd.md
+    id: npm:fumadocs-openapi
+    updated: true
+  - changelogIds:
+      - 2026-07-05-mr6or9jd.md
+    id: npm:fumadocs-preview
+    updated: true
+  - changelogIds:
+      - 2026-07-05-mr6or9jd.md
+    id: npm:fumadocs-python
+    updated: true
+  - changelogIds:
+      - 2026-07-02-mr2nfni8.md
+      - 2026-07-05-mr6or9jd.md
+      - 2026-07-06-mr83xhfa.md
     id: npm:fumadocs-ui
     updated: true
+  - changelogIds:
+      - 2026-07-05-mr6or9jd.md
+    id: npm:@fumadocs/sanity
+    updated: true
+  - changelogIds:
+      - 2026-07-05-mr6or9jd.md
+    id: npm:@fumadocs/satteri
+    updated: true
+  - changelogIds:
+      - 2026-07-05-mr6or9jd.md
+    id: npm:@fumadocs/shadcn
+    updated: true
+  - changelogIds:
+      - 2026-07-05-mr6or9jd.md
+    id: npm:@fumari/stf
+    updated: true
+  - changelogIds:
+      - 2026-07-05-mr6or9jd.md
+    id: npm:@fumadocs/story
+    updated: true
+  - changelogIds:
+      - 2026-07-05-mr6or9jd.md
+    id: npm:@fumadocs/tailwind
+    updated: true
+  - changelogIds:
+      - 2026-07-05-mr6or9jd.md
+    id: npm:fumadocs-twoslash
+    updated: true
+  - changelogIds:
+      - 2026-07-05-mr6or9jd.md
+    id: npm:fumadocs-typescript
+    updated: true
+  - changelogIds:
+      - 2026-07-05-mr6or9jd.md
+    id: npm:@fumadocs/vite
+    updated: true
+npm:packages:
+  - id: npm:@fumadocs/api-docs
+  - id: npm:@fumadocs/asyncapi
+  - id: npm:@fumadocs/base-ui
+  - id: npm:@fumadocs/basehub
+  - id: npm:@fumadocs/cli
+  - id: npm:@fumadocs/content
+  - id: npm:@fumadocs/content-collections
+  - id: npm:create-fumadocs-app
+  - id: npm:create-fumadocs-versions
+  - id: npm:fumadocs-core
+  - id: npm:fumadocs-docgen
+  - id: npm:fumadocs-epub
+  - id: npm:@fumadocs/language
+  - id: npm:@fumadocs/local-md
+  - id: npm:fumadocs-mdx
+  - id: npm:@fumadocs/mdx-remote
+  - id: npm:fumadocs-obsidian
+  - id: npm:fumadocs-openapi
+  - id: npm:fumadocs-preview
+  - id: npm:fumadocs-python
+  - id: npm:fumadocs-ui
   - id: npm:@fumadocs/sanity
-    updated: false
+  - id: npm:@fumadocs/satteri
   - id: npm:@fumadocs/shadcn
-    updated: false
   - id: npm:@fumari/stf
-    updated: false
   - id: npm:@fumadocs/story
-    updated: false
   - id: npm:@fumadocs/tailwind
-    updated: false
   - id: npm:fumadocs-twoslash
-    updated: false
   - id: npm:fumadocs-typescript
-    updated: false
   - id: npm:@fumadocs/vite
-    updated: false
+  - id: npm:example-openapi
+  - id: npm:example-tanstack-start-openapi
+  - id: npm:vite-data
+  - id: npm:docs
+  - id: npm:example-astro
+  - id: npm:example-asyncapi
+  - id: npm:example-base-ui
+  - id: npm:example-content-collections
+  - id: npm:example-i18n
+  - id: npm:example-marble-cms
+  - id: npm:example-next
+  - id: npm:example-next-local-md
+  - id: npm:example-next-min
+  - id: npm:example-next-shadcn
+  - id: npm:example-next-static
+  - id: npm:example-obsidian
+  - id: npm:example-python
+  - id: npm:example-react-router
+  - id: npm:example-react-router-i18n
+  - id: npm:example-react-router-min
+  - id: npm:example-react-router-spa
+  - id: npm:example-react-router-rsc
+  - id: npm:example-tanstack-start
+  - id: npm:example-tanstack-start-i18n
+  - id: npm:example-tanstack-start-local-md
+  - id: npm:example-tanstack-start-min
+  - id: npm:example-tanstack-start-spa
+  - id: npm:example-tanstack-start-story
+  - id: npm:example-waku
+  - id: npm:example-waku-i18n
