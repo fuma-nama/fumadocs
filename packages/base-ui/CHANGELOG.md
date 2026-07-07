@@ -1,3 +1,9 @@
+## @fumadocs/base-ui@16.11.1
+
+### Fix minor UI inconsistencies
+
+More aligned with original styles.
+
 ## @fumadocs/base-ui@16.11.0
 
 ### Updated the theme switch to use `document.startViewTransition()` for smoother theme transitions with graceful fallback.
