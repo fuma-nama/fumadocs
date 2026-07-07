@@ -1,3 +1,9 @@
+## fumadocs-openapi@11.1.1
+
+### Fix minor UI inconsistencies
+
+More aligned with original styles.
+
 ## fumadocs-openapi@11.1.0
 
 ### Add Rust codegen for OpenAPI examples

@@ -1,3 +1,9 @@
+## @fumadocs/asyncapi@0.1.1
+
+### Fix minor UI inconsistencies
+
+More aligned with original styles.
+
 ## @fumadocs/asyncapi@0.1.0
 
 ### Default to Base UI
