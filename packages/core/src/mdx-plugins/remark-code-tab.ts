@@ -253,7 +253,7 @@ export function remarkCodeTab(
         }
 
         const meta = parseCodeBlockAttributes(child.meta, ['tab', 'tab-group']);
-        if (!meta.attributes.tab) {
+        if (typeof meta.attributes.tab !== 'string') {
           close();
           continue;
         }
@@ -262,7 +262,7 @@ export function remarkCodeTab(
         child.meta = meta.rest;
         child.data ??= {};
         child.data.tab = meta.attributes.tab;
-        if (meta.attributes['tab-group']) {
+        if (typeof meta.attributes['tab-group'] === 'string') {
           child.data.tabGroup = meta.attributes['tab-group'];
         }
       }

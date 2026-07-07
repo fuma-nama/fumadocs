@@ -1,6 +1,6 @@
 'use client';
 
-import * as DialogPrimitive from '@radix-ui/react-dialog';
+import { Dialog as DialogPrimitive } from '@base-ui/react/dialog';
 import { X } from 'lucide-react';
 import type { ComponentProps } from 'react';
 import { cn } from '@/utils/cn';
@@ -18,12 +18,12 @@ export function DialogOverlay({
   className,
   ref,
   ...props
-}: ComponentProps<typeof DialogPrimitive.Overlay>) {
+}: ComponentProps<typeof DialogPrimitive.Backdrop>) {
   return (
-    <DialogPrimitive.Overlay
+    <DialogPrimitive.Backdrop
       ref={ref}
       className={cn(
-        'fixed inset-0 z-50 bg-black/30 backdrop-blur-sm data-[state=open]:animate-fd-fade-in data-[state=closed]:animate-fd-fade-out',
+        'fixed inset-0 z-50 bg-black/30 backdrop-blur-sm data-open:animate-fd-fade-in data-closed:animate-fd-fade-out',
         className,
       )}
       {...props}
@@ -36,14 +36,14 @@ export function DialogContent({
   children,
   ref,
   ...props
-}: ComponentProps<typeof DialogPrimitive.Content>) {
+}: ComponentProps<typeof DialogPrimitive.Popup>) {
   return (
     <DialogPortal>
       <DialogOverlay />
-      <DialogPrimitive.Content
+      <DialogPrimitive.Popup
         ref={ref}
         className={cn(
-          'fixed left-1/2 top-1/2 z-50 flex flex-col gap-4 w-full max-w-lg -translate-x-1/2 -translate-y-1/2 border bg-fd-popover p-4 shadow-lg rounded-xl duration-200 data-[state=open]:animate-fd-dialog-in data-[state=closed]:animate-fd-dialog-out focus-visible:outline-none',
+          'fixed left-1/2 top-1/2 z-50 flex flex-col gap-4 w-full max-w-lg -translate-x-1/2 -translate-y-1/2 border bg-fd-popover p-4 shadow-lg rounded-xl duration-200 data-open:animate-fd-dialog-in data-closed:animate-fd-dialog-out focus-visible:outline-none',
           className,
         )}
         {...props}
@@ -58,7 +58,7 @@ export function DialogContent({
         >
           <X />
         </DialogPrimitive.Close>
-      </DialogPrimitive.Content>
+      </DialogPrimitive.Popup>
     </DialogPortal>
   );
 }

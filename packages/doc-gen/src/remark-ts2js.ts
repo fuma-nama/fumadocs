@@ -94,7 +94,8 @@ export function remarkTypeScriptToJavaScript({
                   {
                     type: 'code',
                     lang: lang === 'tsx' ? 'jsx' : 'js',
-                    meta: meta.attributes.ts2js ?? meta.rest,
+                    meta:
+                      typeof meta.attributes.ts2js === 'string' ? meta.attributes.ts2js : meta.rest,
                     value: result.code,
                   },
                 ],

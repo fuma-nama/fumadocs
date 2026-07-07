@@ -3,7 +3,9 @@ import { x } from 'tinyexec';
 import type { Plugin } from '@/core';
 import { ident } from '@/utils/codegen';
 
-const cache = new Map<string, Promise<Date | null>>();
+// one batched `git log` pass per cwd: per-file `git log -1` walks the history
+// for every document, which dominates build time on large repos.
+const cache = new Map<string, Promise<Map<string, Date>>>();
 type VersionControlFn = (filePath: string) => Promise<Date | null | undefined>;
 
 export interface LastModifiedPluginOptions {
@@ -93,21 +95,44 @@ export default function lastModified(options: LastModifiedPluginOptions = {}): P
 }
 
 async function getGitTimestamp(file: string, cwd: string): Promise<Date | null> {
-  const cached = cache.get(file);
+  const timestamps = await getGitTimestamps(cwd);
+  return timestamps.get(path.resolve(cwd, file)) ?? null;
+}
+
+function getGitTimestamps(cwd: string): Promise<Map<string, Date>> {
+  const cached = cache.get(cwd);
   if (cached) return cached;
 
-  const timePromise = (async () => {
-    const out = await x('git', ['log', '-1', '--pretty="%ai"', path.relative(cwd, file)], {
-      nodeOptions: {
-        cwd,
-      },
-    });
+  const promise = (async () => {
+    const timestamps = new Map<string, Date>();
+    // `--name-only` paths are relative to the repository root, not `cwd`
+    const root = await x('git', ['rev-parse', '--show-toplevel'], { nodeOptions: { cwd } });
+    if (root.exitCode !== 0) return timestamps;
 
-    if (out.exitCode !== 0) return null;
-    const date = new Date(out.stdout);
-    return isNaN(date.getTime()) ? null : date;
+    const out = await x(
+      'git',
+      ['-c', 'core.quotepath=off', 'log', '--format=commit:%aI', '--name-only'],
+      {
+        nodeOptions: { cwd },
+      },
+    );
+    if (out.exitCode !== 0) return timestamps;
+
+    // newest first: keep the first date seen for each file
+    let date: Date | undefined;
+    for (const line of out.stdout.split('\n')) {
+      if (line.startsWith('commit:')) {
+        const parsed = new Date(line.slice('commit:'.length));
+        date = isNaN(parsed.getTime()) ? undefined : parsed;
+      } else if (line.length > 0 && date) {
+        const file = path.join(root.stdout.trim(), line);
+        if (!timestamps.has(file)) timestamps.set(file, date);
+      }
+    }
+
+    return timestamps;
   })();
 
-  cache.set(file, timePromise);
-  return timePromise;
+  cache.set(cwd, promise);
+  return promise;
 }

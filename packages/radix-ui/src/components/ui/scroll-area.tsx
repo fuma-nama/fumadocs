@@ -6,7 +6,7 @@ export function ScrollArea({
   className,
   children,
   ...props
-}: React.ComponentPropsWithRef<typeof Primitive.Root>) {
+}: React.ComponentProps<typeof Primitive.Root>) {
   return (
     <Primitive.Root type="scroll" className={cn('overflow-hidden', className)} {...props}>
       {children}
@@ -20,7 +20,7 @@ export function ScrollViewport({
   className,
   children,
   ...props
-}: React.ComponentPropsWithRef<typeof Primitive.Viewport>) {
+}: React.ComponentProps<typeof Primitive.Viewport>) {
   return (
     <Primitive.Viewport className={cn('size-full rounded-[inherit]', className)} {...props}>
       {children}
@@ -32,7 +32,7 @@ export function ScrollBar({
   className,
   orientation = 'vertical',
   ...props
-}: React.ComponentPropsWithRef<typeof Primitive.Scrollbar>) {
+}: React.ComponentProps<typeof Primitive.Scrollbar>) {
   return (
     <Primitive.Scrollbar
       orientation={orientation}

@@ -22,7 +22,7 @@ import type {
 } from '@/components/schema';
 import { buttonVariants } from 'fumadocs-ui/components/ui/button';
 import { CheckIcon, FilterIcon, LinkIcon } from 'lucide-react';
-import { Popover, PopoverContent, PopoverTrigger } from 'fumadocs-ui/components/ui/popover';
+import { Popover, PopoverContent, PopoverTrigger } from '../popover';
 import { cn } from '@/utils/cn';
 import { cva } from 'class-variance-authority';
 import { useAnchorId } from '@/auto-anchor/client';
@@ -58,7 +58,7 @@ const typeVariants = cva('text-sm text-start text-fd-muted-foreground font-mono'
   variants: {
     variant: {
       trigger:
-        'underline hover:text-fd-accent-foreground data-[state=open]:text-fd-accent-foreground',
+        'underline hover:text-fd-accent-foreground data-[popup-open]:text-fd-accent-foreground',
     },
   },
 });
@@ -143,18 +143,10 @@ export function SchemaUI({ name, required = false, as = 'property', generated }:
               </PopoverTrigger>
               <PopoverContent
                 ref={popoverRef}
-                collisionPadding={10}
-                className="w-[600px] max-w-(--radix-popover-content-available-width) min-h-(--min-height,200px) fd-scroll-container max-h-[460px] px-3 pt-0"
+                className="w-[600px] max-w-(--available-width) min-h-(--min-height,200px) fd-scroll-container max-h-[460px] px-3 pt-0"
                 onScrollEnd={(e) => {
                   // ensure popover scroll top is stable
                   path.at(-1)!.scrollTop = (e.target as HTMLElement).scrollTop;
-                }}
-                onOpenAutoFocus={(e) => {
-                  const element = e.target as HTMLElement;
-                  const input = element.querySelector('input[data-object-search-input]');
-                  if (!(input instanceof HTMLInputElement)) return;
-                  input.focus({ preventScroll: true });
-                  e.preventDefault();
                 }}
               >
                 <SchemaUIPopover />
@@ -319,8 +311,10 @@ function PathItemBody({
     }));
     return (
       <Select
+        items={items}
         value={value}
         onValueChange={(v) => {
+          if (!v) return;
           const next = [...path];
           (next[pathIndex].tabValues ??= []).splice(tabDepth, 1, v);
           setPath(next);
@@ -330,7 +324,7 @@ function PathItemBody({
           <SchemaDescription schema={schema} className="flex-1 py-0" />
 
           <SelectTrigger className="not-prose w-fit min-w-0 mb-auto *:min-w-0">
-            <SelectValue>{items.find((item) => item.value === value)?.label}</SelectValue>
+            <SelectValue />
           </SelectTrigger>
           <SelectContent>
             {items.map(({ label, value }) => (
@@ -482,6 +476,13 @@ export function BlockTag({ label, children }: { label: ReactNode; children: Reac
 function SchemaUIPopover() {
   const states = useStates();
   const { path, setPath } = states;
+  const ref = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    ref.current
+      ?.querySelector<HTMLInputElement>('input[data-object-search-input]')
+      ?.focus({ preventScroll: true });
+  }, [path]);
 
   return (
     <Context
@@ -500,42 +501,44 @@ function SchemaUIPopover() {
         [states, setPath, path],
       )}
     >
-      <div className="sticky top-0 -mx-3 flex overflow-x-auto overflow-y-hidden items-center text-sm font-medium font-mono bg-fd-secondary text-fd-secondary-foreground px-3 h-10 border-b z-20">
-        {path.map((item, i) => {
-          // ignore root
-          if (i === 0) return;
-          const isDuplicated = path.some((other, j) => j !== i && other.$ref === item.$ref);
+      <div ref={ref}>
+        <div className="sticky top-0 -mx-3 flex overflow-x-auto overflow-y-hidden items-center text-sm font-medium font-mono bg-fd-secondary text-fd-secondary-foreground px-3 h-10 border-b z-20">
+          {path.map((item, i) => {
+            // ignore root
+            if (i === 0) return;
+            const isDuplicated = path.some((other, j) => j !== i && other.$ref === item.$ref);
 
-          let text: string;
-          const indexItemMatch = /^\[(\w+): (\w+)]$/.exec(item.name);
-          if (indexItemMatch) {
-            text = `[${indexItemMatch[1]}]`;
-          } else if (i > 1) {
-            text = `.${item.name}`;
-          } else {
-            text = item.name;
-          }
+            let text: string;
+            const indexItemMatch = /^\[(\w+): (\w+)]$/.exec(item.name);
+            if (indexItemMatch) {
+              text = `[${indexItemMatch[1]}]`;
+            } else if (i > 1) {
+              text = `.${item.name}`;
+            } else {
+              text = item.name;
+            }
 
-          return (
-            <button
-              key={i}
-              onClick={() => setPath(path.slice(0, i + 1))}
-              className={cn(
-                'hover:underline hover:text-fd-accent-foreground',
-                isDuplicated && 'text-orange-400',
-              )}
-            >
-              {text}
-            </button>
-          );
-        })}
+            return (
+              <button
+                key={i}
+                onClick={() => setPath(path.slice(0, i + 1))}
+                className={cn(
+                  'hover:underline hover:text-fd-accent-foreground',
+                  isDuplicated && 'text-orange-400',
+                )}
+              >
+                {text}
+              </button>
+            );
+          })}
+        </div>
+        <PathItemBody
+          pathIndex={path.length - 1}
+          objectSearchOverrides={{
+            variant: 'in-popover',
+          }}
+        />
       </div>
-      <PathItemBody
-        pathIndex={path.length - 1}
-        objectSearchOverrides={{
-          variant: 'in-popover',
-        }}
-      />
     </Context>
   );
 }

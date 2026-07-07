@@ -14,7 +14,7 @@ type Translations = UITranslations &
 const translations = {
   displayName: '简体中文',
   // fumadocs-ui
-  'Back to Home(404 page)': '返回首页',
+  'Back to Home(404 not found page)': '返回首页',
   'Choose a language(language switcher)': '选择语言',
   'Choose a language(language switcher)(aria-label)': '选择语言',
   'Close Banner(banner)(aria-label)': '关闭横幅',
@@ -42,7 +42,7 @@ const translations = {
   'Open in GitHub(page actions)': '在 GitHub 中打开',
   'Open in Scira AI(page actions)': '在 Scira AI 中打开',
   'Open(page actions)': '打开',
-  'Page Not Found(404 page)': '找不到页面',
+  'Page Not Found(404 not found page)': '找不到页面',
   'Parameters(type table)': '参数',
   'Previous Page(pagination)': '上一页',
   'Prop(type table)': '属性',
@@ -52,9 +52,9 @@ const translations = {
   'Search(search trigger)': '搜索',
   'System(theme switcher)(aria-label)': '系统',
   'Table of Contents(inline table of contents)': '目录',
-  'The page you are looking for might have been removed, had its name changed, or is temporarily unavailable.(404 page)':
+  'The page you are looking for might have been removed, had its name changed, or is temporarily unavailable.(404 not found page)':
     '你要查找的页面可能已被移除、名称已变更，或暂时无法使用。',
-  'Toggle Menu(mobile menu)(aria-label)': '切换菜单',
+  'Toggle Menu(home layout header)(aria-label)': '切换菜单',
   'Toggle Theme(theme switcher)(aria-label)': '切换主题',
   'Type(type table)': '类型',
   'View as Markdown(page actions)': '以 Markdown 查看',

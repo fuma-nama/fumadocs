@@ -2,10 +2,7 @@ import { ScrollArea as Primitive } from '@base-ui/react/scroll-area';
 import * as React from 'react';
 import { cn } from '@/utils/cn';
 
-export function ScrollArea({
-  children,
-  ...props
-}: React.ComponentPropsWithRef<typeof Primitive.Root>) {
+export function ScrollArea({ children, ...props }: React.ComponentProps<typeof Primitive.Root>) {
   return (
     <Primitive.Root {...props}>
       {children}
@@ -19,7 +16,7 @@ export function ScrollViewport({
   className,
   children,
   ...props
-}: React.ComponentPropsWithRef<typeof Primitive.Viewport>) {
+}: React.ComponentProps<typeof Primitive.Viewport>) {
   return (
     <Primitive.Viewport
       className={(s) =>
@@ -39,7 +36,7 @@ export function ScrollBar({
   className,
   orientation = 'vertical',
   ...props
-}: React.ComponentPropsWithRef<typeof Primitive.Scrollbar>) {
+}: React.ComponentProps<typeof Primitive.Scrollbar>) {
   return (
     <Primitive.Scrollbar
       orientation={orientation}

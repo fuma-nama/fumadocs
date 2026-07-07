@@ -263,7 +263,7 @@ function NavbarLinkItemMenu({
     >
       <PopoverTrigger
         className={cn(
-          'inline-flex items-center gap-1.5 p-1 text-sm text-fd-muted-foreground transition-colors has-data-[active=true]:text-fd-primary data-[state=open]:text-fd-accent-foreground focus-visible:outline-none',
+          'inline-flex items-center gap-1.5 p-1 text-sm text-fd-muted-foreground transition-colors has-data-[active=true]:text-fd-primary data-[popup-open]:text-fd-accent-foreground focus-visible:outline-none',
           className,
         )}
         onPointerEnter={onPointerEnter}

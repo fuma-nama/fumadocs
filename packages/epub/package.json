@@ -1,6 +1,6 @@
 {
   "name": "fumadocs-epub",
-  "version": "1.1.0",
+  "version": "1.2.0",
   "description": "EPUB export for Fumadocs documentation",
   "keywords": [
     "documentation",
@@ -45,7 +45,7 @@
   },
   "devDependencies": {
     "@types/mdast": "^4.0.4",
-    "@types/node": "26.0.0",
+    "@types/node": "26.1.0",
     "fumadocs-core": "workspace:*",
     "rimraf": "^6.0.0",
     "tsconfig": "workspace:*",

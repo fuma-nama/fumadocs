@@ -1,6 +1,6 @@
 {
   "name": "@fumadocs/language",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Common language packs for Fumadocs",
   "keywords": [
     "documentation",
@@ -35,7 +35,7 @@
     "@fumadocs/story": "workspace:*",
     "fumadocs-core": "workspace:*",
     "fumadocs-openapi": "workspace:*",
-    "fumadocs-ui": "workspace:*",
+    "fumadocs-ui": "workspace:@fumadocs/base-ui@*",
     "tsconfig": "workspace:*",
     "tsdown": "0.22.3",
     "typescript": "^6.0.3"

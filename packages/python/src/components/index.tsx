@@ -1,11 +1,7 @@
 import type { ComponentProps, ReactNode } from 'react';
 import { cva } from 'class-variance-authority';
 import { cn } from 'cnfast';
-import {
-  Collapsible,
-  CollapsibleContent,
-  CollapsibleTrigger,
-} from 'fumadocs-ui/components/ui/collapsible';
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from './collapsible';
 import { buttonVariants } from 'fumadocs-ui/components/ui/button';
 import { ChevronRight } from 'lucide-react';
 import { highlight } from 'fumadocs-core/highlight';
@@ -113,7 +109,7 @@ export function PySourceCode({ children }: { children: ReactNode }) {
         )}
       >
         Source Code
-        <ChevronRight className="size-3.5 text-fd-muted-foreground group-data-[state=open]:rotate-90" />
+        <ChevronRight className="size-3.5 text-fd-muted-foreground group-data-[panel-open]:rotate-90" />
       </CollapsibleTrigger>
       <CollapsibleContent className="prose-no-margin">{children}</CollapsibleContent>
     </Collapsible>

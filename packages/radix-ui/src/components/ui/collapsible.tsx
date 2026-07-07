@@ -11,7 +11,7 @@ export const CollapsibleTrigger = Primitive.CollapsibleTrigger;
 export function CollapsibleContent({
   children,
   ...props
-}: React.ComponentPropsWithRef<typeof Primitive.CollapsibleContent>) {
+}: React.ComponentProps<typeof Primitive.CollapsibleContent>) {
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {

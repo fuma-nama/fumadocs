@@ -1,6 +1,6 @@
-import * as SelectPrimitive from '@radix-ui/react-select';
+import { Select as SelectPrimitive } from '@base-ui/react/select';
 import { Check, ChevronDown, ChevronUp } from 'lucide-react';
-import React, { forwardRef } from 'react';
+import React from 'react';
 import { cn } from '@/utils/cn';
 import { cva, type VariantProps } from 'class-variance-authority';
 
@@ -26,117 +26,139 @@ const triggerVariants = cva(
   },
 );
 
-const SelectTrigger = forwardRef<
-  React.ComponentRef<typeof SelectPrimitive.Trigger>,
-  React.ComponentPropsWithoutRef<typeof SelectPrimitive.Trigger> &
-    VariantProps<typeof triggerVariants>
->(({ className, variant, children, ...props }, ref) => (
-  <SelectPrimitive.Trigger
-    ref={ref}
-    className={cn(triggerVariants({ variant }), className)}
-    {...props}
-  >
-    {children}
-    <SelectPrimitive.Icon asChild>
-      <ChevronDown className="ms-auto size-3.5 text-fd-muted-foreground shrink-0" />
-    </SelectPrimitive.Icon>
-  </SelectPrimitive.Trigger>
-));
-SelectTrigger.displayName = SelectPrimitive.Trigger.displayName;
-
-const SelectScrollUpButton = forwardRef<
-  React.ComponentRef<typeof SelectPrimitive.ScrollUpButton>,
-  React.ComponentPropsWithoutRef<typeof SelectPrimitive.ScrollUpButton>
->(({ className, ...props }, ref) => (
-  <SelectPrimitive.ScrollUpButton
-    ref={ref}
-    className={cn('flex items-center justify-center py-1', className)}
-    {...props}
-  >
-    <ChevronUp className="size-4" />
-  </SelectPrimitive.ScrollUpButton>
-));
-SelectScrollUpButton.displayName = SelectPrimitive.ScrollUpButton.displayName;
-
-const SelectScrollDownButton = forwardRef<
-  React.ComponentRef<typeof SelectPrimitive.ScrollDownButton>,
-  React.ComponentPropsWithoutRef<typeof SelectPrimitive.ScrollDownButton>
->(({ className, ...props }, ref) => (
-  <SelectPrimitive.ScrollDownButton
-    ref={ref}
-    className={cn('flex items-center justify-center py-1', className)}
-    {...props}
-  >
-    <ChevronDown className="size-4" />
-  </SelectPrimitive.ScrollDownButton>
-));
-SelectScrollDownButton.displayName = SelectPrimitive.ScrollDownButton.displayName;
-
-const SelectContent = forwardRef<
-  React.ComponentRef<typeof SelectPrimitive.Content>,
-  React.ComponentPropsWithoutRef<typeof SelectPrimitive.Content>
->(({ className, children, position, ...props }, ref) => (
-  <SelectPrimitive.Portal>
-    <SelectPrimitive.Content
+function SelectTrigger({
+  className,
+  variant,
+  children,
+  ref,
+  ...props
+}: React.ComponentProps<typeof SelectPrimitive.Trigger> & VariantProps<typeof triggerVariants>) {
+  return (
+    <SelectPrimitive.Trigger
       ref={ref}
-      className={cn(
-        'z-50 overflow-hidden rounded-lg border bg-fd-popover text-fd-popover-foreground shadow-md',
-        className,
-      )}
-      position={position}
+      className={cn(triggerVariants({ variant }), className)}
       {...props}
     >
-      <SelectScrollUpButton />
-      <SelectPrimitive.Viewport className="p-1">{children}</SelectPrimitive.Viewport>
-      <SelectScrollDownButton />
-    </SelectPrimitive.Content>
-  </SelectPrimitive.Portal>
-));
-SelectContent.displayName = SelectPrimitive.Content.displayName;
+      {children}
+      <SelectPrimitive.Icon className="ms-auto text-fd-muted-foreground shrink-0">
+        <ChevronDown className="size-3.5" />
+      </SelectPrimitive.Icon>
+    </SelectPrimitive.Trigger>
+  );
+}
 
-const SelectLabel = forwardRef<
-  React.ComponentRef<typeof SelectPrimitive.Label>,
-  React.ComponentPropsWithoutRef<typeof SelectPrimitive.Label>
->(({ className, ...props }, ref) => (
-  <SelectPrimitive.Label
-    ref={ref}
-    className={cn('py-1.5 pe-2 ps-6 text-sm font-semibold', className)}
-    {...props}
-  />
-));
-SelectLabel.displayName = SelectPrimitive.Label.displayName;
+function SelectScrollUpButton({
+  className,
+  ref,
+  ...props
+}: React.ComponentProps<typeof SelectPrimitive.ScrollUpArrow>) {
+  return (
+    <SelectPrimitive.ScrollUpArrow
+      ref={ref}
+      className={cn('flex items-center justify-center py-1', className)}
+      {...props}
+    >
+      <ChevronUp className="size-4" />
+    </SelectPrimitive.ScrollUpArrow>
+  );
+}
 
-const SelectItem = forwardRef<
-  React.ComponentRef<typeof SelectPrimitive.Item>,
-  React.ComponentPropsWithoutRef<typeof SelectPrimitive.Item>
->(({ className, children, ...props }, ref) => (
-  <SelectPrimitive.Item
-    ref={ref}
-    className={cn(
-      'flex select-none flex-row items-center rounded-md gap-2 py-1.5 px-2 text-sm outline-none focus:bg-fd-accent focus:text-fd-accent-foreground data-[disabled]:pointer-events-none data-[disabled]:opacity-50',
-      className,
-    )}
-    {...props}
-  >
-    <SelectPrimitive.ItemText>{children}</SelectPrimitive.ItemText>
-    <SelectPrimitive.ItemIndicator className="ms-auto">
-      <Check className="size-3.5 text-fd-primary" />
-    </SelectPrimitive.ItemIndicator>
-  </SelectPrimitive.Item>
-));
-SelectItem.displayName = SelectPrimitive.Item.displayName;
+function SelectScrollDownButton({
+  className,
+  ref,
+  ...props
+}: React.ComponentProps<typeof SelectPrimitive.ScrollDownArrow>) {
+  return (
+    <SelectPrimitive.ScrollDownArrow
+      ref={ref}
+      className={cn('flex items-center justify-center py-1', className)}
+      {...props}
+    >
+      <ChevronDown className="size-4" />
+    </SelectPrimitive.ScrollDownArrow>
+  );
+}
 
-const SelectSeparator = forwardRef<
-  React.ComponentRef<typeof SelectPrimitive.Separator>,
-  React.ComponentPropsWithoutRef<typeof SelectPrimitive.Separator>
->(({ className, ...props }, ref) => (
-  <SelectPrimitive.Separator
-    ref={ref}
-    className={cn('my-1 h-px bg-fd-muted', className)}
-    {...props}
-  />
-));
-SelectSeparator.displayName = SelectPrimitive.Separator.displayName;
+function SelectContent({
+  className,
+  children,
+  align = 'start',
+  side = 'bottom',
+  sideOffset = 4,
+  ref,
+  ...props
+}: React.ComponentProps<typeof SelectPrimitive.Popup> &
+  Pick<React.ComponentProps<typeof SelectPrimitive.Positioner>, 'align' | 'side' | 'sideOffset'>) {
+  return (
+    <SelectPrimitive.Portal>
+      <SelectPrimitive.Positioner
+        align={align}
+        side={side}
+        sideOffset={sideOffset}
+        className="z-50"
+      >
+        <SelectPrimitive.Popup
+          ref={ref}
+          className={cn(
+            'z-50 min-w-(--anchor-width) overflow-hidden rounded-lg border bg-fd-popover text-fd-popover-foreground shadow-md',
+            className,
+          )}
+          {...props}
+        >
+          <SelectScrollUpButton />
+          <SelectPrimitive.List className="p-1">{children}</SelectPrimitive.List>
+          <SelectScrollDownButton />
+        </SelectPrimitive.Popup>
+      </SelectPrimitive.Positioner>
+    </SelectPrimitive.Portal>
+  );
+}
+
+function SelectLabel({
+  className,
+  ref,
+  ...props
+}: React.ComponentProps<typeof SelectPrimitive.GroupLabel>) {
+  return (
+    <SelectPrimitive.GroupLabel
+      ref={ref}
+      className={cn('py-1.5 pe-2 ps-6 text-sm font-semibold', className)}
+      {...props}
+    />
+  );
+}
+
+function SelectItem({
+  className,
+  children,
+  ref,
+  ...props
+}: React.ComponentProps<typeof SelectPrimitive.Item>) {
+  return (
+    <SelectPrimitive.Item
+      ref={ref}
+      className={cn(
+        'flex select-none flex-row items-center rounded-md gap-2 py-1.5 px-2 text-sm outline-none data-[highlighted]:bg-fd-accent data-[highlighted]:text-fd-accent-foreground data-[disabled]:pointer-events-none data-[disabled]:opacity-50',
+        className,
+      )}
+      {...props}
+    >
+      <SelectPrimitive.ItemText>{children}</SelectPrimitive.ItemText>
+      <SelectPrimitive.ItemIndicator className="ms-auto">
+        <Check className="size-3.5 text-fd-primary" />
+      </SelectPrimitive.ItemIndicator>
+    </SelectPrimitive.Item>
+  );
+}
+
+function SelectSeparator({
+  className,
+  ...props
+}: React.ComponentProps<typeof SelectPrimitive.Separator>) {
+  return (
+    <SelectPrimitive.Separator className={cn('my-1 h-px bg-fd-muted', className)} {...props} />
+  );
+}
 
 export {
   Select,

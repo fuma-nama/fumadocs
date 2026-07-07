@@ -2,9 +2,10 @@
   "extends": "tsconfig/base.json",
   "compilerOptions": {
     "paths": {
-      "@/*": ["./src/*"]
+      "@/*": ["./src/*"],
+      "@fumadocs/satteri/*": ["../satteri/dist/*"]
     },
-    "types": ["@types/node", "@types/mdx"],
+    "types": ["@types/node", "@types/mdx", "@fumadocs/satteri"],
     "jsx": "react-jsx",
     "noEmit": true,
     "lib": ["ESNext"],

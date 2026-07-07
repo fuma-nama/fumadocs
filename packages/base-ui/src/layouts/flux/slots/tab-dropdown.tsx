@@ -39,7 +39,7 @@ export function TabDropdown({ tabs, placeholder, className, ...props }: TabDropd
       {item && (
         <PopoverTrigger
           className={cn(
-            'flex items-center gap-2 rounded-xl overflow-hidden p-1.5 border shadow-sm text-sm text-start transition-colors hover:bg-fd-accent hover:text-fd-accent-foreground data-[state=open]:bg-fd-accent data-[state=open]:text-fd-accent-foreground',
+            'flex items-center gap-2 rounded-xl overflow-hidden p-1.5 border shadow-sm text-sm text-start transition-colors hover:bg-fd-accent hover:text-fd-accent-foreground data-[popup-open]:bg-fd-accent data-[popup-open]:text-fd-accent-foreground',
             className,
           )}
           {...props}

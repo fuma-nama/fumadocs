@@ -1,6 +1,6 @@
 {
   "name": "@fumadocs/shadcn",
-  "version": "0.0.1",
+  "version": "0.1.0",
   "description": "Shadcn UI integration for Fumadocs.",
   "keywords": [
     "Fumadocs"
@@ -30,18 +30,18 @@
     "types:check": "tsc --noEmit"
   },
   "dependencies": {
-    "@shikijs/transformers": "^4.2.0",
+    "@shikijs/transformers": "^4.3.1",
     "zod-3": "npm:zod@^3.25.76"
   },
   "devDependencies": {
-    "@types/node": "26.0.0",
+    "@types/node": "26.1.0",
     "@types/react": "^19.2.17",
     "fumadocs-core": "workspace:*",
-    "fumadocs-ui": "workspace:*",
+    "fumadocs-ui": "workspace:@fumadocs/base-ui@*",
     "react": "^19.2.7",
     "react-dom": "^19.2.7",
-    "shadcn": "^4.11.0",
-    "tailwindcss": "^4.3.1",
+    "shadcn": "^4.13.0",
+    "tailwindcss": "^4.3.2",
     "tsconfig": "workspace:*",
     "tsdown": "0.22.3"
   },

@@ -1,20 +1,30 @@
-import { applyMdxPreset, defineCollections, defineConfig, defineDocs } from 'fumadocs-mdx/config';
+import { defineCollections, defineConfig, defineDocs } from 'fumadocs-mdx/config';
 import { z } from 'zod';
 import type { ElementContent } from 'hast';
 import jsonSchema from 'fumadocs-mdx/plugins/json-schema';
 import lastModified from 'fumadocs-mdx/plugins/last-modified';
 import type { ShikiTransformer } from 'shiki';
-import type { RemarkAutoTypeTableOptions } from 'fumadocs-typescript';
+import {
+  createFileSystemGeneratorCache,
+  createGenerator,
+  type RemarkAutoTypeTableOptions,
+} from 'fumadocs-typescript';
 import { defaultShikiOptions } from './lib/shiki.ts';
 import { metaSchema, pageSchema } from 'fumadocs-core/source/schema';
-import { visit } from 'unist-util-visit';
-import type { Transformer } from 'unified';
-import type { Root } from 'mdast';
+import { remarkBlockId } from '@fumadocs/satteri/remark-block-id';
+import { remarkSteps } from '@fumadocs/satteri/remark-steps';
+import { remarkElementIds } from './lib/remark-element-ids.ts';
+import type { Nodes } from 'mdast';
 
 const isLint = process.env.LINT === '1';
 
+const typeTableGenerator = createGenerator({
+  cache: createFileSystemGeneratorCache('.next/cache/fumadocs-typescript'),
+});
+
 export const docs = defineDocs({
   docs: {
+    compiler: 'satteri',
     schema: pageSchema.extend({
       preview: z.string().optional(),
       index: z.boolean().default(false),
@@ -29,25 +39,22 @@ export const docs = defineDocs({
       valueToExport: ['elementIds'],
     },
     async: true,
-    async mdxOptions(environment) {
+    async satteriOptions() {
       const { rehypeCodeDefaultOptions } = await import('fumadocs-core/mdx-plugins/rehype-code');
-      const { remarkSteps } = await import('fumadocs-core/mdx-plugins/remark-steps');
-      const { remarkBlockId } = await import('fumadocs-core/mdx-plugins/remark-block-id');
       const { transformerTwoslash } = await import('fumadocs-twoslash');
       const { createFileSystemTypesCache } = await import('fumadocs-twoslash/cache-fs');
-      const { default: remarkMath } = await import('remark-math');
-      const { remarkTypeScriptToJavaScript } = await import('fumadocs-docgen/remark-ts2js');
-      const { default: rehypeKatex } = await import('rehype-katex');
-      const { remarkAutoTypeTable, createGenerator, createFileSystemGeneratorCache } =
-        await import('fumadocs-typescript');
+      const { remarkAutoTypeTable } = await import('@fumadocs/satteri/remark-auto-type-table');
+      const { remarkTs2js } = await import('@fumadocs/satteri/remark-ts2js');
 
       const typeTableOptions: RemarkAutoTypeTableOptions = {
-        generator: createGenerator({
-          cache: createFileSystemGeneratorCache('.next/fumadocs-typescript'),
-        }),
+        generator: typeTableGenerator,
         shiki: defaultShikiOptions,
       };
-      return applyMdxPreset({
+
+      return {
+        features: {
+          math: true,
+        },
         rehypeCodeOptions: isLint
           ? false
           : {
@@ -74,7 +81,7 @@ export const docs = defineDocs({
         },
         remarkStructureOptions: {
           stringify: {
-            filterElement(node) {
+            filterElement(node: Nodes) {
               switch (node.type) {
                 case 'mdxJsxFlowElement':
                 case 'mdxJsxTextElement':
@@ -99,17 +106,17 @@ export const docs = defineDocs({
             id: 'package-manager',
           },
         },
-        remarkPlugins: isLint
-          ? [remarkElementIds]
-          : [
-              remarkSteps,
-              remarkMath,
-              [remarkBlockId, { addDataAttribute: 'feedback' }],
-              [remarkAutoTypeTable, typeTableOptions],
-              remarkTypeScriptToJavaScript,
-            ],
-        rehypePlugins: (v) => [rehypeKatex, ...v],
-      })(environment);
+        mdastPlugins: (plugins) =>
+          isLint
+            ? [remarkElementIds(), ...plugins]
+            : [
+                remarkSteps(),
+                remarkBlockId({ addDataAttribute: 'feedback' }),
+                remarkAutoTypeTable(typeTableOptions),
+                remarkTs2js(),
+                ...plugins,
+              ],
+      };
     },
   },
   meta: {
@@ -121,17 +128,17 @@ export const docs = defineDocs({
 
 export const blog = defineCollections({
   type: 'doc',
+  compiler: 'satteri',
   dir: 'content/blog',
   schema: pageSchema.extend({
     author: z.string(),
     date: z.iso.date().or(z.date()),
   }),
   async: true,
-  async mdxOptions(environment) {
+  async satteriOptions() {
     const { rehypeCodeDefaultOptions } = await import('fumadocs-core/mdx-plugins/rehype-code');
-    const { remarkSteps } = await import('fumadocs-core/mdx-plugins/remark-steps');
 
-    return applyMdxPreset({
+    return {
       rehypeCodeOptions: isLint
         ? false
         : {
@@ -151,8 +158,9 @@ export const blog = defineCollections({
           id: 'package-manager',
         },
       },
-      remarkPlugins: isLint ? [remarkElementIds] : [remarkSteps],
-    })(environment);
+      mdastPlugins: (plugins) =>
+        isLint ? [remarkElementIds(), ...plugins] : [remarkSteps(), ...plugins],
+    };
   },
 });
 
@@ -176,26 +184,9 @@ function transformerEscape(): ShikiTransformer {
   };
 }
 
-function remarkElementIds(): Transformer<Root, Root> {
-  return (tree, file) => {
-    file.data ??= {};
-    file.data.elementIds ??= [];
-
-    visit(tree, 'mdxJsxFlowElement', (element) => {
-      if (!element.name || !element.attributes) return;
-
-      const idAttr = element.attributes.find(
-        (attr) => attr.type === 'mdxJsxAttribute' && attr.name === 'id',
-      );
-
-      if (idAttr && typeof idAttr.value === 'string') {
-        (file.data.elementIds as string[]).push(idAttr.value);
-      }
-    });
-  };
-}
-
 export default defineConfig({
+  // `page.mdx` routes (compiled without a collection) also go through Sätteri
+  compiler: 'satteri',
   plugins: [
     jsonSchema({
       insert: true,

@@ -1,6 +1,6 @@
 {
   "name": "@fumadocs/content",
-  "version": "0.0.3",
+  "version": "0.1.0",
   "description": "The Fuma Content adapter for Fumadocs",
   "keywords": [
     "Docs",
@@ -33,7 +33,7 @@
     "@standard-schema/spec": "^1.1.0"
   },
   "devDependencies": {
-    "@types/node": "^26.0.0",
+    "@types/node": "^26.1.0",
     "fuma-content": "^1.4.0",
     "fumadocs-core": "workspace:*",
     "react-dom": "^19.2.7",

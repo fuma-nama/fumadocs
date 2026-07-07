@@ -183,7 +183,11 @@ export function Header(props: ComponentProps<'header'>) {
                 </div>
               </div>
             </CollapsibleContent>
-            <NavigationMenuViewport side="bottom" anchor={listRef} />
+            <NavigationMenuViewport
+              side="bottom"
+              anchor={listRef}
+              collisionPadding={{ top: 5, bottom: 5 }}
+            />
           </NavigationMenu>
         </header>
       }

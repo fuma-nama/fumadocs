@@ -1,6 +1,6 @@
 'use client';
 
-import { forwardRef, useMemo } from 'react';
+import { useMemo } from 'react';
 import Link, { type LinkProps } from './link';
 import { useParams } from '@/framework';
 
@@ -12,17 +12,13 @@ export type DynamicLinkProps = LinkProps;
  * It supports dynamic hrefs, which means you can use `/[lang]/my-page` with `dynamicHrefs` enabled
  */
 
-export const DynamicLink = forwardRef<HTMLAnchorElement, DynamicLinkProps>(
-  ({ href, ...props }, ref) => {
-    const params = useParams();
+export function DynamicLink({ href, ref, ...props }: DynamicLinkProps) {
+  const params = useParams();
 
-    const url = useMemo(() => (href ? updateHref(href, params) : href), [params, href]);
+  const url = useMemo(() => (href ? updateHref(href, params) : href), [params, href]);
 
-    return <Link ref={ref} href={url} {...props} />;
-  },
-);
-
-DynamicLink.displayName = 'DynamicLink';
+  return <Link ref={ref} href={url} {...props} />;
+}
 
 export function updateHref(href: string, params: Record<string, string | string[]>) {
   return href.replace(/\[(.*)]\/?/, (match, key) => {

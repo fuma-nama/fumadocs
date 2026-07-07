@@ -209,14 +209,14 @@
   font-size: var(--text-sm);
   color: var(--color-fd-popover-foreground);
   box-shadow: var(--shadow-md);
-  transform-origin: var(--radix-popover-content-transform-origin);
+  transform-origin: var(--transform-origin);
 }
 
-.fd-twoslash-popover[data-state='open'] {
+.fd-twoslash-popover[data-open] {
   animation: var(--animate-fd-popover-in);
 }
 
-.fd-twoslash-popover[data-state='closed'] {
+.fd-twoslash-popover[data-closed] {
   animation: var(--animate-fd-popover-out);
 }
 

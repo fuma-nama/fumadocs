@@ -1,15 +1,13 @@
 import {
-  type ComponentPropsWithoutRef,
-  type ComponentRef,
+  ComponentProps,
   createContext,
-  forwardRef,
   type ReactNode,
   useContext,
   useMemo,
   useRef,
   useState,
 } from 'react';
-import { Popover, PopoverContent, PopoverPortal, PopoverTrigger } from '@radix-ui/react-popover';
+import { Popover as PopoverPrimitive } from '@base-ui/react/popover';
 import { cn } from '@/ui/cn';
 
 interface PopupContextObject {
@@ -28,7 +26,7 @@ function Popup({ delay = 300, children }: { delay?: number; children: ReactNode 
   const closeTimeoutRef = useRef<number>(undefined);
 
   return (
-    <Popover open={open} onOpenChange={setOpen}>
+    <PopoverPrimitive.Root open={open} onOpenChange={setOpen}>
       <PopupContext.Provider
         value={useMemo(
           () => ({
@@ -56,63 +54,59 @@ function Popup({ delay = 300, children }: { delay?: number; children: ReactNode 
       >
         {children}
       </PopupContext.Provider>
-    </Popover>
+    </PopoverPrimitive.Root>
   );
 }
 
-const PopupTrigger = forwardRef<
-  ComponentRef<typeof PopoverTrigger>,
-  ComponentPropsWithoutRef<typeof PopoverTrigger>
->(({ children, ...props }, ref) => {
+function PopupTrigger({ children, ...props }: ComponentProps<typeof PopoverPrimitive.Trigger>) {
   const ctx = useContext(PopupContext);
   if (!ctx) throw new Error('Missing Popup Context');
 
   return (
-    <PopoverTrigger
-      ref={ref}
+    <PopoverPrimitive.Trigger
       onPointerEnter={ctx.handleOpen}
       onPointerLeave={ctx.handleClose}
-      asChild
+      render={(triggerProps) => (
+        <button
+          {...triggerProps}
+          type="button"
+          className={cn('twoslash-hover', triggerProps.className)}
+        >
+          {children}
+        </button>
+      )}
       {...props}
-    >
-      <button type="button" className="twoslash-hover">
-        {children}
-      </button>
-    </PopoverTrigger>
+    />
   );
-});
+}
 
-PopupTrigger.displayName = 'PopupTrigger';
-
-const PopupContent = forwardRef<
-  ComponentRef<typeof PopoverContent>,
-  ComponentPropsWithoutRef<typeof PopoverContent>
->(({ className, side = 'bottom', align = 'center', sideOffset = 4, ...props }, ref) => {
+function PopupContent({
+  className,
+  side = 'bottom',
+  align = 'center',
+  sideOffset = 4,
+  ref,
+  ...props
+}: React.ComponentProps<typeof PopoverPrimitive.Popup> &
+  Pick<React.ComponentProps<typeof PopoverPrimitive.Positioner>, 'align' | 'side' | 'sideOffset'>) {
   const ctx = useContext(PopupContext);
   if (!ctx) throw new Error('Missing Popup Context');
 
   return (
-    <PopoverPortal>
-      <PopoverContent
-        ref={ref}
-        side={side}
-        align={align}
-        sideOffset={sideOffset}
-        className={cn('fd-twoslash-popover', className)}
-        onPointerEnter={ctx.handleOpen}
-        onPointerLeave={ctx.handleClose}
-        onOpenAutoFocus={(e) => {
-          e.preventDefault();
-        }}
-        onCloseAutoFocus={(e) => {
-          e.preventDefault();
-        }}
-        {...props}
-      />
-    </PopoverPortal>
+    <PopoverPrimitive.Portal>
+      <PopoverPrimitive.Positioner side={side} align={align} sideOffset={sideOffset}>
+        <PopoverPrimitive.Popup
+          ref={ref}
+          className={cn('fd-twoslash-popover', className)}
+          onPointerEnter={ctx.handleOpen}
+          onPointerLeave={ctx.handleClose}
+          initialFocus={false}
+          finalFocus={false}
+          {...props}
+        />
+      </PopoverPrimitive.Positioner>
+    </PopoverPrimitive.Portal>
   );
-});
-
-PopupContent.displayName = 'PopupContent';
+}
 
 export { Popup, PopupTrigger, PopupContent };

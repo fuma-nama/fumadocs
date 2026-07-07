@@ -6,18 +6,17 @@ icon: Library
 
 ## Overview
 
-Fumadocs UI maintains support for both [Base UI](https://base-ui.com) and [Radix UI](https://radix-ui.com/primitives), while it uses Radix UI by default.
+Fumadocs UI maintains support for both [Base UI](https://base-ui.com) and [Radix UI](https://radix-ui.com/primitives), while it uses Base UI by default.
 
 The configuration may be different if you use Fumadocs CLI for customising components.
 
 ### Base UI
 
-You can opt-in to use Base UI by replacing `fumadocs-ui` with the `@fumadocs/base-ui` package:
+Base UI is the default component library. If you install manually, alias `fumadocs-ui` to the `@fumadocs/base-ui` package:
 
 ```json title="package.json"
 {
-  "dependency": {
-    // [!code ++]
+  "dependencies": {
     "fumadocs-ui": "npm:@fumadocs/base-ui@latest",
     // make sure Base UI is already installed
     "@base-ui/react": "..."
@@ -25,10 +24,30 @@ You can opt-in to use Base UI by replacing `fumadocs-ui` with the `@fumadocs/bas
 }
 ```
 
-For Fumadocs CLI, also configure it in your `cli.json` config:
+For Fumadocs CLI, this is the default `uiLibrary` value:
 
 ```json title="cli.json"
 {
   "uiLibrary": "base-ui"
+}
+```
+
+### Radix UI
+
+You can opt-in to use Radix UI by installing the `fumadocs-ui` package directly:
+
+```json title="package.json"
+{
+  "dependencies": {
+    "fumadocs-ui": "latest"
+  }
+}
+```
+
+For Fumadocs CLI, configure it in your `cli.json` config:
+
+```json title="cli.json"
+{
+  "uiLibrary": "radix-ui"
 }
 ```

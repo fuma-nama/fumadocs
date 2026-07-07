@@ -1,5 +1,5 @@
 import { buildConfig, type DocCollectionItem } from '@/config/build';
-import { buildMDX, type CompiledMDXProperties } from '@/loaders/mdx/build-mdx';
+import { buildMDX, type CompiledMDXProperties } from '@/loaders/mdx/build';
 import { pathToFileURL } from 'node:url';
 import { frontmatter } from 'fumadocs-core/content/md/frontmatter';
 import fs from 'node:fs/promises';
@@ -80,7 +80,7 @@ export async function dynamic<Config, TC extends InternalTypeConfig>(
         environment: 'runtime',
       });
 
-      return (await executeMdx(String(compiled.value), {
+      return (await executeMdx(compiled.code, {
         baseUrl: pathToFileURL(info.fullPath),
       })) as CompiledMDXProperties;
     }

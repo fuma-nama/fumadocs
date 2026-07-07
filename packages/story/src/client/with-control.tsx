@@ -42,6 +42,7 @@ export function WithControl({ presets, displayName, Component }: WithControlProp
             <Select
               value={variant}
               onValueChange={(value) => {
+                if (value === null) return;
                 const preset = presets.find((preset) => preset.variant === value);
                 if (preset) {
                   setVariant(value);
@@ -53,7 +54,7 @@ export function WithControl({ presets, displayName, Component }: WithControlProp
                 variant="ghost"
                 className="w-fit ms-auto text-fd-muted-foreground text-xs font-medium"
               >
-                <SelectValue placeholder={t('No Variant')}>{preset?.variant}</SelectValue>
+                <SelectValue placeholder={t('No Variant')} />
               </SelectTrigger>
               <SelectContent>
                 {presets.map((item) => (

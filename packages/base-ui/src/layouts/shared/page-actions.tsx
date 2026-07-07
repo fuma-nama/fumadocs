@@ -31,7 +31,7 @@ export function MarkdownCopyButton({
     setLoading(true);
 
     try {
-      const promise = fetch(markdownUrl).then((res) => res.text());
+      const promise = fetch(withBasePath(markdownUrl)).then((res) => res.text());
       cache.set(markdownUrl, promise);
       await navigator.clipboard.write([
         new ClipboardItem({
@@ -102,7 +102,7 @@ export function ViewOptionsPopover({
       },
       markdownUrl && {
         title: t('View as Markdown'),
-        href: markdownUrl,
+        href: withBasePath(markdownUrl),
         icon: <TextIcon />,
       },
       {
@@ -234,7 +234,7 @@ export function ViewOptionsPopover({
               color: 'secondary',
               size: 'sm',
             }),
-            'gap-2 data-[state=open]:bg-fd-accent data-[state=open]:text-fd-accent-foreground',
+            'gap-2 data-[popup-open]:bg-fd-accent data-[popup-open]:text-fd-accent-foreground',
             typeof props.className === 'function' ? props.className(state) : props.className,
           )
         }
@@ -259,4 +259,23 @@ export function ViewOptionsPopover({
       </PopoverContent>
     </Popover>
   );
+}
+
+declare global {
+  interface ImportMeta {
+    env?: {
+      BASE_URL?: unknown;
+    };
+  }
+}
+
+function withBasePath(href: string) {
+  // ignore external
+  if (href.match(/^\w+:/) || href.startsWith('//')) return href;
+
+  const basePath =
+    typeof import.meta.env !== 'undefined' && typeof import.meta.env.BASE_URL === 'string'
+      ? import.meta.env.BASE_URL.replace(/\/$/, '')
+      : '';
+  return basePath + href;
 }

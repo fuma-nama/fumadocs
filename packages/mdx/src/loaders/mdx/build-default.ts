@@ -1,48 +1,13 @@
-import { createProcessor } from '@mdx-js/mdx';
-import { VFile } from 'vfile';
-import { remarkInclude } from '@/loaders/mdx/remark-include';
-import type { StructuredData } from 'fumadocs-core/mdx-plugins';
-import type { TOCItemType } from 'fumadocs-core/toc';
-import type { FC } from 'react';
-import type { MDXProps } from 'mdx/types';
-import { type PostprocessOptions, remarkPostprocess } from '@/loaders/mdx/remark-postprocess';
+import { applyMdxPreset } from '@/config/preset';
+import type { BuildEnvironment, DocCollectionItem, LoadedConfig } from '@/config/build';
 import type { Core } from '@/core';
-import type { DocCollectionItem } from '@/config/build';
+import { createProcessor, type ProcessorOptions } from '@mdx-js/mdx';
+import { VFile } from 'vfile';
+import { remarkInclude } from './remark-include';
+import { type PostprocessOptions, remarkPostprocess } from './remark-postprocess';
+import type { BuildMDXOptions, CompilerOptions } from './build';
 
 type Processor = ReturnType<typeof createProcessor>;
-
-interface BuildMDXOptions {
-  /**
-   * Specify a file path for source
-   */
-  filePath: string;
-  source: string;
-  frontmatter?: Record<string, unknown>;
-
-  environment: 'bundler' | 'runtime';
-  isDevelopment: boolean;
-  _compiler?: CompilerOptions;
-}
-
-export interface CompilerOptions {
-  addDependency: (file: string) => void;
-}
-
-export interface CompiledMDXProperties<Frontmatter = Record<string, unknown>> {
-  frontmatter: Frontmatter;
-  structuredData: StructuredData;
-  toc: TOCItemType[];
-  default: FC<MDXProps>;
-
-  /**
-   * Enable from `postprocess` option.
-   */
-  _markdown?: string;
-  /**
-   * Enable from `postprocess` option.
-   */
-  _mdast?: string;
-}
 
 export interface FumadocsDataMap {
   /**
@@ -71,12 +36,12 @@ declare module 'vfile' {
   interface DataMap extends FumadocsDataMap {}
 }
 
-export async function buildMDX(
+export async function buildJSMDX(
   core: Core,
   collection: DocCollectionItem | undefined,
   { filePath, frontmatter, source, _compiler, environment, isDevelopment }: BuildMDXOptions,
-): Promise<VFile> {
-  const mdxOptions = await core.getConfig().getMDXOptions(collection, environment);
+) {
+  const mdxOptions = await getMDXOptions(core.getConfig(), collection, environment);
 
   function getProcessor(format: 'md' | 'mdx') {
     const cache = core.cache as Map<string, Processor>;
@@ -118,5 +83,42 @@ export async function buildMDX(
     vfile = await core.transformVFile({ collection, filePath, source }, vfile);
   }
 
-  return getProcessor(filePath.endsWith('.mdx') ? 'mdx' : 'md').process(vfile);
+  const out = await getProcessor(filePath.endsWith('.mdx') ? 'mdx' : 'md').process(vfile);
+  return { code: String(out.value), map: out.map };
+}
+
+const mdxOptionsCache = new WeakMap<
+  LoadedConfig,
+  Map<string, ProcessorOptions | Promise<ProcessorOptions>>
+>();
+
+function getMDXOptions(
+  config: LoadedConfig,
+  collection?: DocCollectionItem,
+  environment: BuildEnvironment = 'bundler',
+) {
+  let cacheMap = mdxOptionsCache.get(config);
+  if (!cacheMap) {
+    cacheMap = new Map();
+    mdxOptionsCache.set(config, cacheMap);
+  }
+  const key = collection ? `${environment}:${collection.name}` : environment;
+  const cached = cacheMap.get(key);
+  if (cached) return cached;
+  let result: ProcessorOptions | Promise<ProcessorOptions>;
+
+  if (collection?.mdxOptions) {
+    const optionsFn = collection.mdxOptions;
+    result = typeof optionsFn === 'function' ? optionsFn(environment) : optionsFn;
+  } else {
+    result = (async () => {
+      const optionsFn = config.global.mdxOptions;
+      const options = typeof optionsFn === 'function' ? await optionsFn() : optionsFn;
+
+      return applyMdxPreset(options)(environment);
+    })();
+  }
+
+  cacheMap.set(key, result);
+  return result;
 }

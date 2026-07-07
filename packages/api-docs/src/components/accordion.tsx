@@ -1,6 +1,6 @@
 'use client';
 
-import * as Primitive from '@radix-ui/react-accordion';
+import { Accordion as Primitive } from '@base-ui/react/accordion';
 import { ChevronRight } from 'lucide-react';
 import { createContext, use, useEffect, useMemo, useState, type ComponentProps } from 'react';
 import { cn } from '@/utils/cn';
@@ -9,21 +9,31 @@ import { AnchorSection, useAnchorId } from '@/auto-anchor/client';
 
 const Context = createContext<{
   type: 'single' | 'multiple';
-  setValue: (v: string | string[]) => void;
+  setValue: (v: string[]) => void;
 } | null>(null);
 
 export function Accordions({
-  type,
+  type = 'single',
   defaultValue,
   ...props
-}: Omit<ComponentProps<typeof Primitive.Root>, 'value' | 'onValueChange'>) {
-  const [value, setValue] = useState<string | string[]>(() =>
-    type === 'multiple' ? (defaultValue ?? []) : (defaultValue ?? ''),
-  );
+}: Omit<ComponentProps<typeof Primitive.Root>, 'value' | 'defaultValue' | 'onValueChange'> & {
+  type?: 'single' | 'multiple';
+  defaultValue?: string | string[];
+}) {
+  const [value, setValue] = useState<string[]>(() => {
+    if (Array.isArray(defaultValue)) return defaultValue;
+    if (defaultValue) return [defaultValue];
+    return [];
+  });
 
   return (
     <Context value={useMemo(() => ({ type, setValue }), [type])}>
-      <Primitive.Root type={type} value={value as never} onValueChange={setValue} {...props} />
+      <Primitive.Root
+        multiple={type === 'multiple'}
+        value={value}
+        onValueChange={setValue}
+        {...props}
+      />
     </Context>
   );
 }
@@ -41,8 +51,7 @@ export function AccordionItem({
   const id = useAnchorId(anchorSegments ?? false);
 
   useEffect(() => {
-    if (id && anchorIdStartsWith(window.location.hash.slice(1), id))
-      ctx.setValue(ctx.type === 'single' ? value : [value]);
+    if (id && anchorIdStartsWith(window.location.hash.slice(1), id)) ctx.setValue([value]);
   }, [value, id, ctx]);
 
   const content = (
@@ -59,12 +68,12 @@ export function AccordionItem({
   );
 }
 
-export function AccordionContent(props: ComponentProps<typeof Primitive.Content>) {
+export function AccordionContent(props: ComponentProps<typeof Primitive.Panel>) {
   return (
-    <Primitive.Content
+    <Primitive.Panel
       {...props}
       className={cn(
-        'overflow-hidden data-[state=closed]:animate-fd-accordion-up data-[state=open]:animate-fd-accordion-down',
+        'overflow-hidden data-[ending-style]:animate-fd-accordion-up data-[starting-style]:animate-fd-accordion-down',
         props.className,
       )}
     />
@@ -91,7 +100,7 @@ export function AccordionTrigger(props: ComponentProps<typeof Primitive.Trigger>
         props.className,
       )}
     >
-      <ChevronRight className="size-3.5 text-fd-muted-foreground shrink-0 transition-transform group-data-[state=open]/accordion:rotate-90" />
+      <ChevronRight className="size-3.5 text-fd-muted-foreground shrink-0 transition-transform group-data-[panel-open]/accordion:rotate-90" />
       {props.children}
     </Primitive.Trigger>
   );

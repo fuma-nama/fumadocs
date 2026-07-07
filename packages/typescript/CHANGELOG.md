@@ -1,3 +1,9 @@
+## fumadocs-typescript@5.3.0
+
+### Default to Base UI
+
+Internal packages & templates now use Base UI rather than Radix UI.
+
 ## fumadocs-typescript@5.2.7
 
 ### Migrate to `cnfast`

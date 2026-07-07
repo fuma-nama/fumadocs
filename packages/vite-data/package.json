@@ -1,9 +1,8 @@
 {
   "name": "vite-data",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "private": true,
   "dependencies": {
-    "@fumadocs/base-ui": "workspace:*",
     "@fumadocs/basehub": "workspace:*",
     "@fumadocs/local-md": "workspace:*",
     "@fumadocs/mdx-remote": "workspace:*",

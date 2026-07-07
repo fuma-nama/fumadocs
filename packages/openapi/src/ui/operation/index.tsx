@@ -502,7 +502,7 @@ function ResponseAccordion({
     <AccordionItem
       value={status}
       anchorSegments={['response', status]}
-      className="data-[state=open]:border-b-0"
+      className="data-[open]:border-b-0"
     >
       <SelectTabs defaultValue={items[0]?.value}>
         <AccordionHeader>

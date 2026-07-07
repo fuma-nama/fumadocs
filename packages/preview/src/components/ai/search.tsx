@@ -11,13 +11,13 @@ import {
   useRef,
   useState,
 } from 'react';
+import { flushSync } from 'react-dom';
 import { Loader2, MessageCircleIcon, RefreshCw, SearchIcon, Send, X } from 'lucide-react';
 import { cn } from '../../lib/cn';
 import { buttonVariants } from 'fumadocs-ui/components/ui/button';
 import { type UIMessage, useChat, type UseChatHelpers } from '@ai-sdk/react';
 import { DefaultChatTransport, type Tool, type UIToolInvocation } from 'ai';
 import { Markdown } from '../markdown';
-import { Presence } from '@radix-ui/react-presence';
 import type { SearchTool } from '@/pages/_api/api/chat';
 
 const Context = createContext<{
@@ -330,7 +330,10 @@ export function AISearchTrigger({
 
 export function AISearchPanel() {
   const { open, setOpen } = useAISearchContext();
+  const [actualOpen, setActualOpen] = useState(open);
   useHotKey();
+
+  if (open && !actualOpen) setActualOpen(open);
 
   return (
     <>
@@ -353,14 +356,17 @@ export function AISearchPanel() {
           }
         }`}
       </style>
-      <Presence present={open}>
+      {actualOpen && (
         <div
           data-state={open ? 'open' : 'closed'}
           className="fixed inset-0 z-30 backdrop-blur-xs bg-fd-overlay data-[state=open]:animate-fd-fade-in data-[state=closed]:animate-fd-fade-out lg:hidden"
           onClick={() => setOpen(false)}
+          onAnimationEnd={() => {
+            if (!open) flushSync(() => setActualOpen(false));
+          }}
         />
-      </Presence>
-      <Presence present={open}>
+      )}
+      {actualOpen && (
         <div
           className={cn(
             'overflow-hidden z-30 bg-fd-card text-fd-card-foreground [--ai-chat-width:400px] 2xl:[--ai-chat-width:460px]',
@@ -370,6 +376,9 @@ export function AISearchPanel() {
               ? 'animate-fd-dialog-in lg:animate-[ask-ai-open_200ms]'
               : 'animate-fd-dialog-out lg:animate-[ask-ai-close_200ms]',
           )}
+          onAnimationEnd={() => {
+            if (!open) flushSync(() => setActualOpen(false));
+          }}
         >
           <div className="flex flex-col size-full p-2 max-lg:max-h-[80dvh] lg:p-3 lg:w-(--ai-chat-width)">
             <AISearchPanelHeader />
@@ -382,7 +391,7 @@ export function AISearchPanel() {
             </div>
           </div>
         </div>
-      </Presence>
+      )}
     </>
   );
 }

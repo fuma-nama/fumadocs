@@ -1,6 +1,6 @@
 {
   "name": "fumadocs-mdx",
-  "version": "15.0.13",
+  "version": "15.1.0",
   "description": "The built-in source for Fumadocs",
   "keywords": [
     "Docs",
@@ -59,10 +59,11 @@
     "chokidar": "^5.0.0",
     "esbuild": "^0.28.1",
     "estree-util-value-to-estree": "^3.5.0",
-    "js-yaml": "^5.1.0",
+    "github-slugger": "^2.0.0",
+    "js-yaml": "^5.2.1",
     "mdast-util-mdx": "^3.0.0",
     "picocolors": "^1.1.1",
-    "picomatch": "^4.0.4",
+    "picomatch": "^4.0.5",
     "tinyexec": "^1.2.4",
     "tinyglobby": "^0.2.17",
     "unified": "^11.0.5",
@@ -72,27 +73,30 @@
     "zod": "^4.4.3"
   },
   "devDependencies": {
+    "@fumadocs/satteri": "workspace:*",
     "@fumadocs/vite": "workspace:*",
     "@types/bun": "^1.3.14",
     "@types/mdast": "^4.0.4",
     "@types/mdx": "^2.0.14",
-    "@types/node": "^26.0.0",
+    "@types/node": "^26.1.0",
     "@types/picomatch": "^4.0.3",
     "@types/react": "^19.2.17",
     "fumadocs-core": "workspace:*",
     "mdast-util-directive": "^3.1.0",
-    "next": "^16.2.9",
+    "next": "^16.2.10",
     "react": "^19.2.7",
     "remark": "^15.0.1",
     "remark-directive": "^4.0.0",
     "remark-mdx": "^3.1.1",
-    "rolldown": "^1.1.2",
+    "rolldown": "^1.1.4",
+    "satteri": "^0.9.4",
     "tsconfig": "workspace:*",
     "tsdown": "0.22.3",
-    "vite": "^8.1.0",
-    "webpack": "^5.107.2"
+    "vite": "^8.1.3",
+    "webpack": "^5.108.3"
   },
   "peerDependencies": {
+    "@fumadocs/satteri": "0.x.x",
     "@types/mdast": "*",
     "@types/mdx": "*",
     "@types/react": "*",
@@ -101,9 +105,16 @@
     "next": "^15.3.0 || ^16.0.0",
     "react": "^19.2.0",
     "rolldown": "*",
+    "satteri": "^0.9.4",
     "vite": "7.x.x || 8.x.x"
   },
   "peerDependenciesMeta": {
+    "@fumadocs/satteri": {
+      "optional": true
+    },
+    "satteri": {
+      "optional": true
+    },
     "rolldown": {
       "optional": true
     },

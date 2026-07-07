@@ -49,10 +49,7 @@ function useTabContext() {
   return ctx;
 }
 
-export function TabsList({
-  className,
-  ...props
-}: React.ComponentPropsWithRef<typeof Unstyled.TabsList>) {
+export function TabsList({ className, ...props }: React.ComponentProps<typeof Unstyled.TabsList>) {
   return (
     <Unstyled.TabsList
       {...props}
@@ -69,7 +66,7 @@ export function TabsList({
 export function TabsTrigger({
   className,
   ...props
-}: React.ComponentPropsWithRef<typeof Unstyled.TabsTrigger>) {
+}: React.ComponentProps<typeof Unstyled.TabsTrigger>) {
   return (
     <Unstyled.TabsTrigger
       {...props}

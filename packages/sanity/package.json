@@ -1,6 +1,6 @@
 {
   "name": "@fumadocs/sanity",
-  "version": "0.0.5",
+  "version": "0.1.0",
   "description": "The official Sanity integration for Fumadocs",
   "keywords": [
     "Docs",
@@ -34,15 +34,15 @@
   },
   "devDependencies": {
     "@sanity/client": "^7.23.0",
-    "@sanity/types": "^6.1.0",
-    "@types/node": "26.0.0",
+    "@sanity/types": "^6.3.0",
+    "@types/node": "26.1.0",
     "@types/react": "^19.2.17",
     "fuma-cli": "^0.1.1",
     "fumadocs-core": "workspace:*",
-    "fumadocs-ui": "workspace:*",
+    "fumadocs-ui": "workspace:@fumadocs/base-ui@*",
     "next-sanity": "^13.1.1",
     "react": "^19.2.7",
-    "sanity": "^6.1.0",
+    "sanity": "^6.3.0",
     "tsconfig": "workspace:*",
     "tsdown": "0.22.3",
     "typescript": "^6.0.3"

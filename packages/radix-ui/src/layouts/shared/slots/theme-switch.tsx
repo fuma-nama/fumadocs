@@ -3,6 +3,7 @@ import { cva } from 'class-variance-authority';
 import { Airplay, Moon, Sun } from 'lucide-react';
 import { useTheme } from 'next-themes';
 import { type ComponentProps, useEffect, useState } from 'react';
+import { flushSync } from 'react-dom';
 import { cn } from '@/utils/cn';
 import { useTranslations } from '@fuma-translate/react';
 
@@ -31,6 +32,14 @@ export function ThemeSwitch({ className, mode = 'light-dark', ...props }: ThemeS
     system: t('System', { note: 'aria-label' }),
   };
 
+  const handleThemeChange = (newTheme: string) => {
+    if (document?.startViewTransition) {
+      document.startViewTransition(() => flushSync(() => setTheme(newTheme)));
+    } else {
+      setTheme(newTheme);
+    }
+  };
+
   useEffect(() => {
     setMounted(true);
   }, []);
@@ -47,7 +56,7 @@ export function ThemeSwitch({ className, mode = 'light-dark', ...props }: ThemeS
       <button
         className={container}
         aria-label={t('Toggle Theme', { note: 'aria-label' })}
-        onClick={() => setTheme(value === 'light' ? 'dark' : 'light')}
+        onClick={() => handleThemeChange(value === 'light' ? 'dark' : 'light')}
         data-theme-toggle=""
       >
         {full.map(([key, Icon]) => {
@@ -74,7 +83,7 @@ export function ThemeSwitch({ className, mode = 'light-dark', ...props }: ThemeS
           key={key}
           aria-label={themeAriaLabels[key]}
           className={cn(itemVariants({ active: value === key }))}
-          onClick={() => setTheme(key)}
+          onClick={() => handleThemeChange(key)}
         >
           <Icon className="size-full" fill="currentColor" />
         </button>
