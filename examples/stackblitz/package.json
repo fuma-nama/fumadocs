@@ -10,7 +10,6 @@
     "types:check": "fumadocs-mdx && tsc --noEmit"
   },
   "dependencies": {
-    "takumi-js": "2.0.0-rc.5",
     "cnfast": "^0.0.8",
     "fumadocs-core": "16.11.0",
     "fumadocs-mdx": "15.1.0",
@@ -19,6 +18,7 @@
     "react": "^19.2.6",
     "react-dom": "^19.2.6",
     "react-server-dom-webpack": "^19.2.6",
+    "takumi-js": "^2.0.0",
     "waku": "1.0.0-beta.1"
   },
   "devDependencies": {

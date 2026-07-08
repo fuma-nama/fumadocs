@@ -6,11 +6,11 @@
   "dependencies": {
     "@biomejs/biome": "^2.5.2",
     "@orama/core": "^1.2.19",
-    "takumi-js": "2.0.0-rc.5",
     "fumadocs-core": "workspace:*",
     "fumadocs-mdx": "workspace:*",
     "fumadocs-ui": "workspace:*",
     "oxlint": "^1.72.0",
-    "react": "^19.2.7"
+    "react": "^19.2.7",
+    "takumi-js": "^2.0.0"
   }
 }
