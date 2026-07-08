@@ -1,0 +1,14 @@
+---
+title: Setup
+description: How this example works
+---
+
+## Content Source
+
+The content lives in `content/docs` as MDX files, managed by TinaCMS. The `docs` collection is defined in `tina/config.ts`.
+
+`lib/source.ts` creates a [dynamic source](https://fumadocs.dev/docs/headless/source-api/dynamic) with `createTinaCMSSource()`, which queries the Tina GraphQL content API.
+
+## Folders
+
+This page is inside the `guide` folder, folders are reflected in the sidebar and page slugs.

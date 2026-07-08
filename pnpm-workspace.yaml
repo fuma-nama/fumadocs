@@ -11,6 +11,7 @@ minimumReleaseAgeExclude:
   - tegami@1.2.2
 allowBuilds:
   '@parcel/watcher': false
+  better-sqlite3: false
   core-js: false
   esbuild: false
   msw: false

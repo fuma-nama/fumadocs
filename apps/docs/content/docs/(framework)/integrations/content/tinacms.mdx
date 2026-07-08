@@ -1,0 +1,193 @@
+---
+title: TinaCMS
+description: Official integration for TinaCMS.
+---
+
+## Overview
+
+Fumadocs provide an official integration to simplify setup for TinaCMS, including visual editing support through Tina's GraphQL content API.
+
+> You can see our [TinaCMS Example](https://github.com/fuma-nama/fumadocs/tree/dev/examples/tinacms) on GitHub.
+
+## Setup
+
+Assume you already have [TinaCMS](https://tina.io/docs/setup-overview) configured according to their docs.
+
+### Collection [step]
+
+Define a collection for your docs pages, with a rich-text body field:
+
+```ts title="tina/config.ts"
+import { defineConfig } from 'tinacms';
+
+export default defineConfig({
+  // ...
+  schema: {
+    collections: [
+      {
+        name: 'docs',
+        label: 'Docs',
+        path: 'content/docs',
+        format: 'mdx',
+        fields: [
+          {
+            type: 'string',
+            name: 'title',
+            label: 'Title',
+            isTitle: true,
+            required: true,
+          },
+          {
+            type: 'string',
+            name: 'description',
+            label: 'Description',
+          },
+          {
+            type: 'rich-text',
+            name: 'body',
+            label: 'Body',
+            isBody: true,
+          },
+        ],
+      },
+    ],
+  },
+});
+```
+
+### Content Loader [step]
+
+Install the integration:
+
+```npm
+npm i @fumadocs/tinacms
+```
+
+```ts title="lib/source.ts" tab="Tina Client"
+import { dynamicLoader } from 'fumadocs-core/source/dynamic';
+import { createTinaCMSSource } from '@fumadocs/tinacms';
+// the generated client
+import { client } from '@/tina/__generated__/client';
+// the generated types
+import type { Docs } from '@/tina/__generated__/types';
+
+const source = dynamicLoader(
+  createTinaCMSSource<Docs>({
+    client,
+    collection: 'docs',
+  }),
+  {
+    baseUrl: '/docs',
+  },
+);
+
+export async function getSource() {
+  return source.get();
+}
+```
+
+```ts title="lib/source.ts" tab="Custom Fetch"
+import { dynamicLoader } from 'fumadocs-core/source/dynamic';
+import { createTinaCMSSource } from '@fumadocs/tinacms';
+import type { Docs } from '@/tina/__generated__/types';
+
+const source = dynamicLoader(
+  createTinaCMSSource<Docs>({
+    // query the Tina GraphQL content API yourself, e.g. for self-hosted setups
+    async tinaFetch(query, variables) {
+      const res = await fetch('http://localhost:4001/graphql', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ query, variables }),
+      });
+
+      const { data } = await res.json();
+      return data;
+    },
+    collection: 'docs',
+  }),
+  {
+    baseUrl: '/docs',
+  },
+);
+
+export async function getSource() {
+  return source.get();
+}
+```
+
+Now update references to your `source` with the `getSource()` function like:
+
+```tsx
+import { getSource } from '@/lib/source';
+import { TinaMarkdown } from 'tinacms/dist/rich-text';
+import { createHeadingComponents } from '@fumadocs/tinacms/client';
+import { DocsPage, DocsBody, DocsDescription, DocsTitle } from 'fumadocs-ui/layouts/docs/page';
+
+// [!code highlight]
+const source = await getSource();
+
+const page = source.getPage(['...']);
+
+// basic info
+console.log(page.data.title, page.data.description);
+
+// [!code highlight] load full info
+const { renderToc, body } = await page.data.load();
+
+// to render docs page content:
+return (
+  // `renderToc()` to render TOC items on server
+  <DocsPage toc={renderToc({ render: (node) => <TinaMarkdown content={node} /> })}>
+    <DocsTitle>{page.data.title}</DocsTitle>
+    <DocsDescription>{page.data.description}</DocsDescription>
+    <DocsBody>
+      <TinaMarkdown
+        content={body}
+        // add heading anchors, so that TOC items can link to them
+        components={{ ...createHeadingComponents() }}
+      />
+    </DocsBody>
+  </DocsPage>
+);
+```
+
+If you are not using React Server Components, `renderToc` can be imported separately:
+
+```tsx
+import { getSource } from '@/lib/source';
+import { renderToc, createHeadingComponents } from '@fumadocs/tinacms/client';
+import { TinaMarkdown } from 'tinacms/dist/rich-text';
+import { DocsPage, DocsBody, DocsDescription, DocsTitle } from 'fumadocs-ui/layouts/docs/page';
+
+// where you return server payload
+export async function serverPayload(slugs: string[]) {
+  const source = await getSource();
+  const page = source.getPage(slugs);
+  if (!page) throw new Error('not found');
+
+  const { title, description, _toc, body } = await page.data.load();
+  return { title, description, toc: _toc, body };
+}
+
+export function Page() {
+  // receive server payload
+  const { toc, body, title, description } = useLoaderData();
+
+  return (
+    <DocsPage toc={renderToc({ toc, render: (node) => <TinaMarkdown content={node} /> })}>
+      <DocsTitle>{title}</DocsTitle>
+      <DocsDescription>{description}</DocsDescription>
+      <DocsBody>
+        <TinaMarkdown content={body} components={{ ...createHeadingComponents() }} />
+      </DocsBody>
+    </DocsPage>
+  );
+}
+```
+
+### Done [step]
+
+Create documents under the `docs` collection in your Tina editor, new content will be displayed in the docs route.
+
+When editing with the local backend (`tinacms dev`), content updates are reflected on next revalidation — call `source.invalidate()` to always serve fresh content during development.

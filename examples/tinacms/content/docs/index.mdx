@@ -1,0 +1,26 @@
+---
+title: Hello World
+description: Fumadocs on TinaCMS
+---
+
+## Introduction
+
+This docs site is powered by [TinaCMS](https://tina.io) with the `@fumadocs/tinacms` adapter, content is fetched from Tina's GraphQL content API and rendered with `<TinaMarkdown />`.
+
+<Callout type="info" title="Good to know">
+  This callout is a TinaCMS rich-text template, rendered with the Fumadocs UI callout component.
+</Callout>
+
+## Code Blocks
+
+Code blocks are rendered with the Fumadocs UI code block, highlighted by Shiki:
+
+```ts
+import { createTinaCMSSource } from '@fumadocs/tinacms';
+
+console.log('Hello from TinaCMS');
+```
+
+## Editing
+
+Run the app with `pnpm dev` and open [/admin/index.html](/admin/index.html) to edit this page visually.
