@@ -1,4 +1,4 @@
-import { ImageResponse } from '@takumi-rs/image-response';
+import { ImageResponse } from 'takumi-js/response';
 import type { Route } from './+types/og.docs';
 import { generate as DefaultImage } from 'fumadocs-ui/og/takumi';
 import { source } from '@/lib/source';

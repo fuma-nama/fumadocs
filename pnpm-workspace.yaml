@@ -9,6 +9,8 @@ minimumReleaseAgeExclude:
   - react-router
   - '@react-router/*'
   - tegami@1.2.2
+  - takumi-js@2.0.0
+  - '@takumi-rs/*'
 allowBuilds:
   '@parcel/watcher': false
   core-js: false

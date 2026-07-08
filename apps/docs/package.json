@@ -27,7 +27,6 @@
     "@orama/orama": "^3.1.18",
     "@paper-design/shaders-react": "^0.0.77",
     "@shikijs/transformers": "^4.3.1",
-    "@takumi-rs/image-response": "^1.8.7",
     "ai": "^7.0.14",
     "class-variance-authority": "^0.7.1",
     "cnfast": "^0.0.8",
@@ -63,6 +62,7 @@
     "remark-rehype": "^11.1.2",
     "satteri": "^0.9.4",
     "shiki": "^4.3.1",
+    "takumi-js": "^2.0.0",
     "twoslash": "^0.3.9",
     "unist-util-visit": "^5.1.0",
     "zod": "^4.4.3"
