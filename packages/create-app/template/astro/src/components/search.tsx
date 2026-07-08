@@ -15,11 +15,50 @@ import { oramaStaticClient } from 'fumadocs-core/search/client/orama-static';
 import { create } from '@orama/orama';
 import { useI18n } from 'fumadocs-ui/contexts/i18n';
 
+const oramaLanguageByLocale: Record<string, string | undefined> = {
+  ar: 'arabic',
+  am: 'armenian',
+  bg: 'bulgarian',
+  cz: 'czech',
+  dk: 'danish',
+  nl: 'dutch',
+  en: 'english',
+  fi: 'finnish',
+  fr: 'french',
+  de: 'german',
+  gr: 'greek',
+  hu: 'hungarian',
+  in: 'indian',
+  id: 'indonesian',
+  ie: 'irish',
+  it: 'italian',
+  lt: 'lithuanian',
+  np: 'nepali',
+  no: 'norwegian',
+  pt: 'portuguese',
+  ro: 'romanian',
+  ru: 'russian',
+  rs: 'serbian',
+  es: 'spanish',
+  se: 'swedish',
+  ta: 'tamil',
+  tr: 'turkish',
+  uk: 'ukrainian',
+  vi: 'vietnamese',
+  sk: 'sanskrit',
+};
+
+function getOramaLanguage(locale?: string) {
+  const code = locale?.toLowerCase().split(/[-_]/)[0];
+
+  return code ? (oramaLanguageByLocale[code] ?? 'english') : 'english';
+}
+
 function initOrama(locale?: string) {
   return create({
     schema: { _: 'string' },
     // https://docs.orama.com/docs/orama-js/supported-languages
-    language: locale ?? 'english',
+    language: getOramaLanguage(locale),
   });
 }
 
