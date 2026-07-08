@@ -31,6 +31,7 @@ export default defineConfig({
   integrations: [
     react(),
     mdx({
+      extendMarkdownConfig: true,
       syntaxHighlight: false,
     }),
   ],
