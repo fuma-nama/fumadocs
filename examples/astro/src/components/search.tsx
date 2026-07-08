@@ -15,11 +15,11 @@ import { oramaStaticClient } from 'fumadocs-core/search/client/orama-static';
 import { create } from '@orama/orama';
 import { useI18n } from 'fumadocs-ui/contexts/i18n';
 
-function initOrama() {
+function initOrama(locale?: string) {
   return create({
     schema: { _: 'string' },
     // https://docs.orama.com/docs/orama-js/supported-languages
-    language: 'english',
+    language: locale ?? 'english',
   });
 }
 

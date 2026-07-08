@@ -12,23 +12,25 @@ import {
   remarkStructure,
 } from 'fumadocs-core/mdx-plugins';
 
+const remarkPlugins = [
+  remarkHeading,
+  remarkCodeTab,
+  remarkNpm,
+  [remarkStructure, { exportAs: 'structuredData' }],
+];
+const rehypePlugins = [rehypeCode];
+
 export default defineConfig({
   markdown: {
     processor: unified({
       syntaxHighlight: false,
-      remarkPlugins: [
-        remarkHeading,
-        remarkCodeTab,
-        remarkNpm,
-        [remarkStructure, { exportAs: 'structuredData' }],
-      ],
-      rehypePlugins: [rehypeCode],
+      remarkPlugins,
+      rehypePlugins,
     }),
   },
   integrations: [
     react(),
     mdx({
-      extendMarkdownConfig: false,
       syntaxHighlight: false,
     }),
   ],
