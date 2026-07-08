@@ -26,6 +26,7 @@ async function readPackageJson(cwd: string): Promise<PackageJson | null> {
 /** Path of pre-rendered EPUB, choose one according to your React framework. Next.js fetches from the running server instead. */
 const EPUB_BUILD_PATHS: Record<string, string> = {
   next: '', // Fetched from /export/epub at runtime; route handlers don't produce static files
+  astro: 'dist/export/epub',
   'tanstack-start': '.output/public/export/epub',
   'tanstack-start-spa': 'dist/client/export/epub',
   'react-router': 'build/client/export/epub',

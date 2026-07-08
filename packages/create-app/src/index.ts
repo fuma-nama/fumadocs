@@ -140,15 +140,19 @@ async function initPackageJson(
   }
 
   const packageJson: PackageJsonType = JSON.parse(await fs.readFile(packageJsonPath, 'utf-8'));
+  const dependencies = replaceWorkspaceDeps(packageJson.dependencies);
+  const devDependencies = replaceWorkspaceDeps(packageJson.devDependencies);
+  const scripts = { ...packageJson.scripts };
+
+  if (dependencies['fumadocs-mdx'] || devDependencies['fumadocs-mdx']) {
+    scripts.postinstall = 'fumadocs-mdx';
+  }
 
   return {
     ...packageJson,
     name: projectName,
-    scripts: {
-      ...packageJson.scripts,
-      postinstall: 'fumadocs-mdx',
-    },
-    dependencies: replaceWorkspaceDeps(packageJson.dependencies),
-    devDependencies: replaceWorkspaceDeps(packageJson.devDependencies),
+    scripts,
+    dependencies,
+    devDependencies,
   };
 }

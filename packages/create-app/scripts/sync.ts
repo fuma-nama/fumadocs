@@ -9,6 +9,7 @@ const examplesDir = path.join('../../examples');
 const templateDir = path.join(dir, '../template');
 
 const templates = [
+  'astro',
   'react-router',
   'tanstack-start',
   'tanstack-start-spa',

@@ -104,6 +104,7 @@
     "./og": "./dist/og.js",
     "./og/takumi": "./dist/og/takumi.js",
     "./page": "./dist/page.js",
+    "./provider/astro": "./dist/provider/astro.js",
     "./provider/base": "./dist/provider/base.js",
     "./provider/next": "./dist/provider/next.js",
     "./provider/react-router": "./dist/provider/react-router.js",

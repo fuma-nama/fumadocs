@@ -1,10 +1,11 @@
 ![banner](./apps/docs/public/banner.png)
 
-The framework for building documentation websites in any React.js frameworks.
+The framework for building documentation websites in React.js frameworks and Astro.
 
 **Officially Supported:**
 
 - Next.js
+- Astro (with React)
 - Vite: Tanstack Start, Waku, React Router
 
 📘 Learn More: [Documentation](https://fumadocs.dev).

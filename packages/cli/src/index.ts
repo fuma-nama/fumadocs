@@ -57,7 +57,10 @@ const exportCmd = program.command('export').description('export documentation to
 exportCmd
   .command('epub')
   .description('export documentation to EPUB format (run after production build)')
-  .requiredOption('--framework <name>', 'React framework: next, tanstack-start, react-router, waku')
+  .requiredOption(
+    '--framework <name>',
+    'framework: next, astro, tanstack-start, react-router, waku',
+  )
   .option('--output <path>', 'output file path', 'docs.epub')
   .option('--scaffold-only', 'only scaffold the EPUB route, do not copy')
   .action(async (options: { output?: string; framework: string; scaffoldOnly?: boolean }) => {
