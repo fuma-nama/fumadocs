@@ -4,7 +4,7 @@ import { existsSync } from 'node:fs';
 import path from 'node:path';
 import { detectFramework } from 'fuma-cli/detect';
 
-const frameworks = ['next', 'waku', 'react-router', 'tanstack-start'] as const;
+const frameworks = ['next', 'astro', 'waku', 'react-router', 'tanstack-start'] as const;
 export type Framework = (typeof frameworks)[number];
 
 function isSupportedFramework(v: string): v is Framework {

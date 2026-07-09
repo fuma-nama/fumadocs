@@ -27,6 +27,7 @@
     "./content/toc": "./dist/content/toc.js",
     "./dynamic-link": "./dist/dynamic-link.js",
     "./framework": "./dist/framework/index.js",
+    "./framework/astro": "./dist/framework/astro.js",
     "./framework/next": "./dist/framework/next.js",
     "./framework/react-router": "./dist/framework/react-router.js",
     "./framework/tanstack": "./dist/framework/tanstack.js",

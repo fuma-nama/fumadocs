@@ -57,6 +57,12 @@ See https://fumadocs.dev/docs/headless/search/orama-cloud for integrating Orama 
           fs.unlink(path.join(appDir, 'app/api/search/route.ts')).catch(() => null),
           writeFile(path.join(appDir, 'app/static.json/route.ts'), route.next),
         ]);
+      } else if (template.value === 'astro') {
+        await Promise.all([
+          fs.unlink(path.join(appDir, 'pages/api/search.ts')).catch(() => null),
+          writeFile(path.join(appDir, 'pages/static.json.ts'), route.astro),
+          writeFile(path.join(appDir, 'lib/export-static-indexes.ts'), astroExportSearchIndexes),
+        ]);
       } else {
         await Promise.all([
           fs.unlink(path.join(appDir, 'pages/_api/api/search.ts')).catch(() => null),
@@ -71,6 +77,7 @@ See https://fumadocs.dev/docs/headless/search/orama-cloud for integrating Orama 
         'tanstack-start-spa': 'dist/client/static.json',
         'react-router': 'build/client/static.json',
         'react-router-spa': 'build/client/static.json',
+        astro: 'dist/static.json',
         waku: 'dist/public/static.json',
       }[template.value];
 
@@ -138,4 +145,26 @@ export async function GET() {
 export const getConfig = () => ({
   render: 'static',
 });`,
+  astro: `import type { APIRoute } from 'astro';
+import { exportSearchIndexes } from '@/lib/export-static-indexes';
+
+export const GET: APIRoute = async () => {
+  return Response.json(await exportSearchIndexes());
+};`,
 };
+
+const astroExportSearchIndexes = `import { getStructuredData, source } from '@/lib/source';
+import type { OramaDocument } from 'fumadocs-core/search/orama-cloud';
+
+export async function exportSearchIndexes() {
+  return source.getPages().map((page) => {
+    return {
+      id: page.url,
+      structured: getStructuredData(page.data._raw),
+      url: page.url,
+      title: page.data.title,
+      description: page.data.description,
+    } satisfies OramaDocument;
+  });
+}
+`;
