@@ -9,24 +9,24 @@
     "types:check": "react-router typegen && fumadocs-mdx && tsc --noEmit"
   },
   "dependencies": {
-    "@react-router/node": "^8.1.0",
-    "@react-router/serve": "^8.1.0",
+    "@react-router/node": "^8.2.0",
+    "@react-router/serve": "^8.2.0",
     "cnfast": "^0.0.8",
     "fumadocs-core": "workspace:*",
     "fumadocs-mdx": "workspace:*",
     "fumadocs-ui": "workspace:@fumadocs/base-ui@*",
-    "isbot": "^5.1.44",
+    "isbot": "^5.2.0",
     "lucide-react": "^1.23.0",
     "react": "^19.2.7",
     "react-dom": "^19.2.7",
-    "react-router": "^8.1.0",
-    "takumi-js": "^2.0.0"
+    "react-router": "^8.2.0",
+    "takumi-js": "^2.0.1"
   },
   "devDependencies": {
-    "@react-router/dev": "^8.1.0",
+    "@react-router/dev": "^8.2.0",
     "@tailwindcss/vite": "^4.3.2",
     "@types/mdx": "^2.0.14",
-    "@types/node": "^26.1.0",
+    "@types/node": "^26.1.1",
     "@types/react": "^19.2.17",
     "@types/react-dom": "^19.2.3",
     "react-router-devtools": "^6.2.1",

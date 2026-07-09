@@ -24,12 +24,12 @@
   "devDependencies": {
     "@tailwindcss/vite": "^4.3.2",
     "@types/mdx": "^2.0.14",
-    "@types/node": "^26.1.0",
+    "@types/node": "^26.1.1",
     "@types/react": "^19.2.17",
     "@types/react-dom": "^19.2.3",
     "@vitejs/plugin-react": "^6.0.3",
     "nitro": "3.0.260610-beta",
-    "srvx": "^0.11.20",
+    "srvx": "^0.11.21",
     "tailwindcss": "^4.3.2",
     "typescript": "^6.0.3",
     "vite": "^8.1.3"

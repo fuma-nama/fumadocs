@@ -44,10 +44,10 @@
   "devDependencies": {
     "@content-collections/core": "0.15.2",
     "@content-collections/mdx": "^0.2.2",
-    "@types/node": "26.1.0",
+    "@types/node": "26.1.1",
     "fumadocs-core": "workspace:*",
     "tsconfig": "workspace:*",
-    "tsdown": "0.22.3"
+    "tsdown": "0.22.4"
   },
   "peerDependencies": {
     "@content-collections/core": "0.x.x",

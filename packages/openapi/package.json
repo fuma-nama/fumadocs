@@ -63,17 +63,17 @@
     "shiki": "^4.3.1"
   },
   "devDependencies": {
-    "@scalar/api-client-react": "^2.0.31",
+    "@scalar/api-client-react": "^2.0.32",
     "@scalar/openapi-upgrader": "^0.2.9",
     "@tailwindcss/oxide": "^4.3.2",
-    "@types/node": "26.1.0",
+    "@types/node": "26.1.1",
     "@types/react": "^19.2.17",
     "fast-content-type-parse": "^3.0.0",
     "fumadocs-core": "workspace:*",
     "fumadocs-ui": "workspace:@fumadocs/base-ui@*",
     "json-schema-typed": "^8.0.2",
     "tsconfig": "workspace:*",
-    "tsdown": "0.22.3",
+    "tsdown": "0.22.4",
     "xml-js": "^1.6.11"
   },
   "peerDependencies": {

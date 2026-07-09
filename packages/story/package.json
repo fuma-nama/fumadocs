@@ -44,7 +44,7 @@
   },
   "devDependencies": {
     "@fastify/deepmerge": "^3.2.1",
-    "@types/node": "26.1.0",
+    "@types/node": "26.1.1",
     "@types/react": "^19.2.17",
     "@types/ungap__structured-clone": "^1.2.0",
     "@ungap/structured-clone": "^1.3.2",
@@ -56,9 +56,9 @@
     "react-error-boundary": "^6.1.2",
     "tailwindcss": "^4.3.2",
     "tsconfig": "workspace:*",
-    "tsdown": "0.22.3",
+    "tsdown": "0.22.4",
     "vite": "^8.1.3",
-    "webpack": "^5.108.3"
+    "webpack": "^5.108.4"
   },
   "peerDependencies": {
     "@types/react": "*",
