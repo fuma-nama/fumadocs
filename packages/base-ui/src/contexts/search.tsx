@@ -1,5 +1,6 @@
 'use client';
 import type { DefaultSearchDialogProps } from '@/components/dialog/search-default';
+import { Dialog } from '@base-ui/react/dialog';
 import {
   type ComponentType,
   createContext,
@@ -22,9 +23,13 @@ interface HotKey {
   key: string | ((e: KeyboardEvent) => boolean);
 }
 
+/** built-in Base UI Dialog handle */
+const dialogHandle = Dialog.createHandle();
+
 export interface SharedProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  dialogHandle: Dialog.Handle<unknown>;
 }
 
 export type SearchLink = [name: string, href: string];
@@ -39,6 +44,7 @@ export interface SearchProviderProps<DialogProps extends SharedProps = DefaultSe
    * Preload search dialog before opening it
    *
    * @defaultValue `true`
+   * @deprecated Ignored, it must be preloaded for Base UI dialog to work
    */
   preload?: boolean;
 
@@ -74,6 +80,7 @@ interface SearchContextType {
   open: boolean;
   hotKey: HotKey[];
   setOpenSearch: (value: boolean) => void;
+  dialogHandle: Dialog.Handle<unknown>;
 }
 
 const SearchContext = createContext<SearchContextType>({
@@ -81,6 +88,7 @@ const SearchContext = createContext<SearchContextType>({
   open: false,
   hotKey: [],
   setOpenSearch: () => undefined,
+  dialogHandle,
 });
 
 export function useSearchContext(): SearchContextType {
@@ -113,12 +121,11 @@ const DefaultSearchDialog = lazy(() => import('@/components/dialog/search-defaul
 export function SearchProvider<DialogProps extends SharedProps = DefaultSearchDialogProps>({
   SearchDialog = DefaultSearchDialog,
   children,
-  preload = true,
   options,
   hotKey = DEFAULT_HOT_KEYS,
   links,
 }: SearchProviderProps<DialogProps>) {
-  const [isOpen, setIsOpen] = useState(preload ? false : undefined);
+  const [isOpen, setIsOpen] = useState(false);
   const onKeyDown = useEffectEvent((e: KeyboardEvent) => {
     if (hotKey.every((v) => (typeof v.key === 'string' ? e.key === v.key : v.key(e)))) {
       setIsOpen((open) => !open);
@@ -138,18 +145,23 @@ export function SearchProvider<DialogProps extends SharedProps = DefaultSearchDi
       value={useMemo(
         () => ({
           enabled: true,
-          open: isOpen ?? false,
+          open: isOpen,
           hotKey,
+          dialogHandle,
           setOpenSearch: setIsOpen,
         }),
         [isOpen, hotKey],
       )}
     >
       <Suspense fallback={null}>
-        {isOpen !== undefined && (
-          // @ts-expect-error -- assume all required props are filled
-          <SearchDialog open={isOpen} onOpenChange={setIsOpen} links={links} {...options} />
-        )}
+        {/* @ts-expect-error -- assume all required props are filled */}
+        <SearchDialog
+          open={isOpen}
+          onOpenChange={setIsOpen}
+          links={links}
+          dialogHandle={dialogHandle}
+          {...options}
+        />
       </Suspense>
 
       {children}

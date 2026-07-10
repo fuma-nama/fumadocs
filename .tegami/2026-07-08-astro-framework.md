@@ -1,15 +1,15 @@
 ---
 packages:
   npm:fumadocs-core:
-    type: minor
+    type: patch
   npm:@fumadocs/base-ui:
-    type: minor
+    type: patch
   npm:fumadocs-ui:
-    type: minor
+    type: patch
   npm:@fumadocs/cli:
-    type: minor
+    type: patch
   npm:create-fumadocs-app:
-    type: minor
+    type: patch
 ---
 
 ## Add Astro framework support

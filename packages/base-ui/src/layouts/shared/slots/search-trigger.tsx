@@ -5,6 +5,7 @@ import { useSearchContext } from '@/contexts/search';
 import { useTranslations } from '@fuma-translate/react';
 import { cn } from '@/utils/cn';
 import { type ButtonProps, buttonVariants } from '@/components/ui/button';
+import { Dialog } from '@base-ui/react/dialog';
 
 export interface SearchTriggerProps extends Omit<ComponentProps<'button'>, 'color'>, ButtonProps {
   hideIfDisabled?: boolean;
@@ -16,12 +17,13 @@ export function SearchTrigger({
   color = 'ghost',
   ...props
 }: SearchTriggerProps) {
-  const { setOpenSearch, enabled } = useSearchContext();
+  const { enabled, dialogHandle } = useSearchContext();
   const t = useTranslations({ note: 'search trigger' });
   if (hideIfDisabled && !enabled) return null;
 
   return (
-    <button
+    <Dialog.Trigger
+      handle={dialogHandle}
       type="button"
       className={cn(
         buttonVariants({
@@ -32,12 +34,9 @@ export function SearchTrigger({
       )}
       data-search=""
       aria-label={t('Open Search', { note: 'aria-label' })}
-      onClick={() => {
-        setOpenSearch(true);
-      }}
     >
       <Search />
-    </button>
+    </Dialog.Trigger>
   );
 }
 
@@ -46,12 +45,13 @@ export interface FullSearchTriggerProps extends ComponentProps<'button'> {
 }
 
 export function FullSearchTrigger({ hideIfDisabled, ...props }: FullSearchTriggerProps) {
-  const { enabled, hotKey, setOpenSearch } = useSearchContext();
+  const { enabled, hotKey, dialogHandle } = useSearchContext();
   const t = useTranslations({ note: 'search trigger' });
   if (hideIfDisabled && !enabled) return null;
 
   return (
-    <button
+    <Dialog.Trigger
+      handle={dialogHandle}
       type="button"
       data-search-full=""
       {...props}
@@ -59,9 +59,6 @@ export function FullSearchTrigger({ hideIfDisabled, ...props }: FullSearchTrigge
         'inline-flex items-center gap-2 rounded-lg border bg-fd-secondary/50 p-1.5 ps-2 text-sm text-fd-muted-foreground transition-colors hover:bg-fd-accent hover:text-fd-accent-foreground',
         props.className,
       )}
-      onClick={() => {
-        setOpenSearch(true);
-      }}
     >
       <Search className="size-4" />
       {t('Search')}
@@ -72,6 +69,6 @@ export function FullSearchTrigger({ hideIfDisabled, ...props }: FullSearchTrigge
           </kbd>
         ))}
       </div>
-    </button>
+    </Dialog.Trigger>
   );
 }
