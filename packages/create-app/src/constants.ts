@@ -11,6 +11,7 @@ export const isCI = Boolean(process.env.CI);
 export interface TemplateInfo {
   value:
     | '+next+fuma-docs-mdx'
+    | 'astro'
     | 'waku'
     | 'react-router'
     | 'react-router-spa'
@@ -37,6 +38,13 @@ export const templates: TemplateInfo[] = [
     hint: 'recommended',
     appDir: '',
     rootProviderPath: 'app/layout.tsx',
+  },
+  {
+    value: 'astro',
+    label: 'Astro: React Islands',
+    hint: 'uses Astro Content Collections and Fumadocs UI as a React island',
+    appDir: 'src',
+    rootProviderPath: 'components/docs.tsx',
   },
   {
     value: '+next+fuma-docs-mdx+static',

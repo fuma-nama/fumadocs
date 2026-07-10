@@ -1,6 +1,6 @@
 {
   "name": "@fumadocs/base-ui",
-  "version": "16.11.1",
+  "version": "16.11.2",
   "description": "The Base UI version of Fumadocs UI",
   "keywords": [
     "Docs",
@@ -47,7 +47,6 @@
     "./components/ui/accordion": "./dist/components/ui/accordion.js",
     "./components/ui/button": "./dist/components/ui/button.js",
     "./components/ui/collapsible": "./dist/components/ui/collapsible.js",
-    "./components/ui/navigation-menu": "./dist/components/ui/navigation-menu.js",
     "./components/ui/popover": "./dist/components/ui/popover.js",
     "./components/ui/scroll-area": "./dist/components/ui/scroll-area.js",
     "./components/ui/tabs": "./dist/components/ui/tabs.js",
@@ -99,6 +98,7 @@
     "./og": "./dist/og.js",
     "./og/takumi": "./dist/og/takumi.js",
     "./page": "./dist/page.js",
+    "./provider/astro": "./dist/provider/astro.js",
     "./provider/base": "./dist/provider/base.js",
     "./provider/next": "./dist/provider/next.js",
     "./provider/react-router": "./dist/provider/react-router.js",
@@ -143,10 +143,10 @@
     "@fumadocs/cli": "workspace:*",
     "@tailwindcss/cli": "^4.3.2",
     "@tailwindcss/oxide": "^4.3.2",
-    "@tsdown/css": "^0.22.3",
+    "@tsdown/css": "^0.22.4",
     "@types/hast": "^3.0.4",
     "@types/mdx": "^2.0.14",
-    "@types/node": "^26.1.0",
+    "@types/node": "^26.1.1",
     "@types/react": "^19.2.17",
     "@types/react-dom": "^19.2.3",
     "fuma-cli": "^0.1.1",
@@ -154,23 +154,23 @@
     "react-medium-image-zoom": "^5.4.8",
     "tailwindcss": "^4.3.2",
     "tsconfig": "workspace:*",
-    "tsdown": "0.22.3",
+    "tsdown": "0.22.4",
     "unified": "^11.0.5"
   },
   "peerDependencies": {
-    "@takumi-rs/image-response": "*",
     "@types/mdx": "*",
     "@types/react": "*",
     "fumadocs-core": "workspace:*",
     "next": "16.x.x",
     "react": "^19.2.0",
-    "react-dom": "^19.2.0"
+    "react-dom": "^19.2.0",
+    "takumi-js": "*"
   },
   "peerDependenciesMeta": {
     "next": {
       "optional": true
     },
-    "@takumi-rs/image-response": {
+    "takumi-js": {
       "optional": true
     },
     "@types/mdx": {

@@ -33,9 +33,7 @@ import client from './api-page.client';
 
 export const APIPage = createAPIPage(openapi, {
   client,
-  mediaAdapters: {
-    /* ... */
-  },
+  mediaAdapters: {/* ... */},
 });
 ```
 
@@ -56,9 +54,7 @@ export default defineClientConfig({
 import { createOpenAPIPage } from 'fumadocs-openapi/ui';
 
 export const OpenAPIPage = createOpenAPIPage({
-  mediaAdapters: {
-    /* ... */
-  },
+  mediaAdapters: {/* ... */},
   playground: {
     transformAuthInputs: (inputs) => inputs,
   },

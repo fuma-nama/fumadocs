@@ -1,0 +1,95 @@
+---
+title: Astro
+description: Setup Fumadocs on Astro with React islands.
+---
+
+## Getting Started
+
+Before continuing, make sure to configure:
+
+- Astro with `@astrojs/react`.
+- Tailwind CSS 4.
+
+Fumadocs UI is a React library. On Astro, render it inside a React island and pass the current route information from your `.astro` page.
+
+### Installation
+
+```npm
+npm i fumadocs-core fumadocs-ui @astrojs/react @astrojs/mdx @astrojs/markdown-remark react react-dom @orama/orama takumi-js sharp
+```
+
+### Configuration
+
+Configure Astro, MDX, React, and Tailwind CSS:
+
+<include cwd meta='title="astro.config.mjs"'>
+  ../../examples/astro/astro.config.mjs
+</include>
+
+Add the following to your Tailwind CSS file:
+
+```css title="src/styles/global.css"
+@import 'tailwindcss';
+/* [!code ++:2] */
+@import 'fumadocs-ui/css/neutral.css';
+@import 'fumadocs-ui/css/preset.css';
+```
+
+### Content Collections
+
+Create content collections for docs and meta files:
+
+<include cwd meta='title="src/content.config.ts"'>
+  ../../examples/astro/src/content.config.ts
+</include>
+
+Create a Fumadocs source from Astro content collections:
+
+<include cwd meta='title="src/lib/source.ts"'>
+  ../../examples/astro/src/lib/source.ts
+</include>
+
+### Create Pages
+
+Create the shared Astro document layout:
+
+<include cwd meta='tab="src/components/layout.astro"'>
+  ../../examples/astro/src/components/layout.astro
+</include>
+
+Create the React island that renders Fumadocs UI:
+
+<include cwd meta='tab="src/components/docs.tsx"'>
+  ../../examples/astro/src/components/docs.tsx
+</include>
+
+Create a search dialog:
+
+<include cwd meta='tab="src/components/search.tsx"'>
+  ../../examples/astro/src/components/search.tsx
+</include>
+
+Create the docs route, search endpoint, and metadata image endpoint:
+
+<include cwd meta='tab="src/pages/[...slug].astro"'>
+  ../../examples/astro/src/pages/[...slug].astro
+</include>
+<include cwd meta='tab="src/pages/api/search.ts"'>
+  ../../examples/astro/src/pages/api/search.ts
+</include>
+<include cwd meta='tab="src/pages/og/docs/[...slug]/image.webp.ts"'>
+  ../../examples/astro/src/pages/og/docs/[...slug]/image.webp.ts
+</include>
+
+### Done
+
+You can start writing documents at `content/docs`:
+
+```mdx title="content/docs/index.mdx"
+---
+title: Hello World
+description: Your first document
+---
+
+I love Fumadocs.
+```

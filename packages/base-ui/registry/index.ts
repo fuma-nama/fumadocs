@@ -148,10 +148,6 @@ export const registry: Registry = {
             preserveAs: 'layouts/home',
           },
         },
-        {
-          type: 'ui',
-          path: 'components/ui/navigation-menu.tsx',
-        },
       ],
       unlisted: true,
     },

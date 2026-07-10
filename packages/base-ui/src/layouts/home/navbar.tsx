@@ -1,56 +1,73 @@
 'use client';
+import type { ComponentProps } from 'react';
 import Link, { type LinkProps } from 'fumadocs-core/link';
+import { NavigationMenu as Primitive } from '@base-ui/react/navigation-menu';
 import { cn } from '@/utils/cn';
-import {
-  NavigationMenuContent,
-  type NavigationMenuContentProps,
-  NavigationMenuItem,
-  NavigationMenuLink,
-  NavigationMenuTrigger,
-  type NavigationMenuTriggerProps,
-} from '@/components/ui/navigation-menu';
 import { navItemVariants } from './slots/header';
 
-export const NavbarMenu = NavigationMenuItem;
-
-export function NavbarMenuContent(props: NavigationMenuContentProps) {
-  const { className, ...rest } = props;
+export function NavbarMenu({
+  className,
+  children,
+  ...props
+}: ComponentProps<typeof Primitive.Item>) {
   return (
-    <NavigationMenuContent
-      {...rest}
-      className={(state) =>
-        cn(
-          'grid grid-cols-1 gap-2 md:grid-cols-2 lg:grid-cols-3',
-          typeof className === 'function' ? className(state) : className,
-        )
-      }
+    <Primitive.Item
+      className={(s) => cn('list-none', typeof className === 'function' ? className(s) : className)}
+      {...props}
     >
-      {props.children}
-    </NavigationMenuContent>
+      {children}
+    </Primitive.Item>
   );
 }
 
-export function NavbarMenuTrigger(props: NavigationMenuTriggerProps) {
-  const { className, ...rest } = props;
+export function NavbarMenuContent({
+  className,
+  ...props
+}: ComponentProps<typeof Primitive.Content>) {
   return (
-    <NavigationMenuTrigger
-      {...rest}
-      className={(state) =>
+    <Primitive.Content
+      {...props}
+      className={(s) =>
+        cn(
+          'h-full w-(--anchor-width) max-w-(--available-width) p-3',
+          'transition-[opacity,transform,translate] duration-(--duration) ease-(--easing)',
+          'data-starting-style:opacity-0 data-ending-style:opacity-0',
+          'data-starting-style:data-[activation-direction=left]:-translate-x-1/2',
+          'data-starting-style:data-[activation-direction=right]:translate-x-1/2',
+          'data-ending-style:data-[activation-direction=left]:translate-x-1/2',
+          'data-ending-style:data-[activation-direction=right]:-translate-x-1/2',
+          'grid grid-cols-1 gap-2 md:grid-cols-2 lg:grid-cols-3',
+          typeof className === 'function' ? className(s) : className,
+        )
+      }
+    />
+  );
+}
+
+export function NavbarMenuTrigger({
+  className,
+  children,
+  ...props
+}: ComponentProps<typeof Primitive.Trigger>) {
+  return (
+    <Primitive.Trigger
+      {...props}
+      className={(s) =>
         cn(
           navItemVariants(),
           'text-sm rounded-md',
-          typeof className === 'function' ? className(state) : className,
+          typeof className === 'function' ? className(s) : className,
         )
       }
     >
-      {props.children}
-    </NavigationMenuTrigger>
+      {children}
+    </Primitive.Trigger>
   );
 }
 
 export function NavbarMenuLink(props: LinkProps) {
   return (
-    <NavigationMenuLink
+    <Primitive.Link
       render={
         <Link
           {...props}

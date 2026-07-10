@@ -33,12 +33,12 @@
     "@standard-schema/spec": "^1.1.0"
   },
   "devDependencies": {
-    "@types/node": "^26.1.0",
+    "@types/node": "^26.1.1",
     "fuma-content": "^1.4.0",
     "fumadocs-core": "workspace:*",
     "react-dom": "^19.2.7",
     "tsconfig": "workspace:*",
-    "tsdown": "0.22.3"
+    "tsdown": "0.22.4"
   },
   "peerDependencies": {
     "fuma-content": "^1.2.3",

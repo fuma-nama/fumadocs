@@ -74,6 +74,19 @@ export default function Layout({ children }) {
 }
 ```
 
+```jsx tab="Astro"
+import { navigate } from 'astro:transitions/client';
+import { RootProvider } from 'fumadocs-ui/provider/astro';
+
+export function DocsIsland({ children, pathname, params }) {
+  return (
+    <RootProvider pathname={pathname} params={params} navigate={navigate}>
+      {children}
+    </RootProvider>
+  );
+}
+```
+
 ### Search Dialog
 
 Customize or disable the search dialog with `search` option.

@@ -29,6 +29,7 @@ import rehypeRaw from 'rehype-raw';
 import { visit } from 'unist-util-visit';
 import type { Transformer } from 'unified';
 import type { Root } from 'hast';
+import { mergeRefs } from '@/utils/merge-refs';
 
 export type SearchItemType =
   | (ReactSortedResult & {
@@ -41,7 +42,7 @@ export type SearchItemType =
       onSelect: () => void;
     };
 
-// needed for backward compatible since some previous guides referenced it
+/** @deprecated needed for backward compatibility since some previous guides referenced it */
 export type { SharedProps };
 
 export interface SearchDialogProps extends SharedProps {
@@ -172,6 +173,7 @@ export function SearchDialog({
   isLoading = false,
   onSelect: onSelectProp,
   children,
+  dialogHandle,
 }: SearchDialogProps) {
   const router = useRouter();
   const onOpenChangeCallback = useRef(onOpenChange);
@@ -194,7 +196,7 @@ export function SearchDialog({
   onSelectCallback.current = onSelect;
 
   return (
-    <Dialog.Root open={open} onOpenChange={onOpenChange}>
+    <Dialog.Root open={open} onOpenChange={onOpenChange} handle={dialogHandle}>
       <RootContext
         value={useMemo(
           () => ({
@@ -224,11 +226,15 @@ export function SearchDialogInput(props: ComponentProps<'input'>) {
 
   return (
     <input
-      {...props}
+      data-fd-search-dialog-input=""
       value={search}
       onChange={(e) => onSearchChange(e.target.value)}
       placeholder={t('Search')}
-      className="w-0 flex-1 bg-transparent text-lg placeholder:text-fd-muted-foreground focus-visible:outline-none"
+      {...props}
+      className={cn(
+        'w-0 flex-1 bg-transparent text-lg placeholder:text-fd-muted-foreground focus-visible:outline-none',
+        props.className,
+      )}
     />
   );
 }
@@ -283,18 +289,30 @@ export function SearchDialogOverlay({
 }
 
 export function SearchDialogContent({
+  ref,
   children,
   className,
   ...props
 }: ComponentProps<typeof Dialog.Popup>) {
   const t = useTranslations({ note: 'search dialog' });
+  const localRef = useRef<HTMLDivElement>(null);
 
   return (
     <Dialog.Portal>
       <Dialog.Popup
         id="fd-search-dialog-content"
+        ref={mergeRefs(ref, localRef)}
         aria-describedby={undefined}
-        {...props}
+        initialFocus={(s) => {
+          const input = localRef.current?.querySelector<HTMLInputElement>(
+            'input[data-fd-search-dialog-input]',
+          );
+          if (s === 'touch') {
+            input?.focus({ preventScroll: true });
+            return false;
+          }
+          return input;
+        }}
         className={(s) =>
           cn(
             'fixed left-1/2 top-4 md:top-[calc(50%-250px)] z-50 w-[calc(100%-1rem)] max-w-screen-sm -translate-x-1/2 rounded-xl border bg-fd-popover text-fd-popover-foreground shadow-2xl overflow-hidden data-closed:animate-fd-dialog-out data-open:animate-fd-dialog-in focus-visible:outline-none',
@@ -302,6 +320,7 @@ export function SearchDialogContent({
             typeof className === 'function' ? className(s) : className,
           )
         }
+        {...props}
       >
         <Dialog.Title className="hidden">{t('Search')}</Dialog.Title>
         {children}
@@ -498,6 +517,7 @@ export function SearchDialogListItem({
     </button>
   );
 }
+
 export function SearchDialogIcon(props: ComponentProps<'svg'>) {
   const { isLoading } = useSearch();
 

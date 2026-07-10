@@ -1,3 +1,13 @@
+## @fumadocs/base-ui@16.11.2
+
+### Add Astro framework support
+
+Add Astro as a supported framework with React islands, including framework providers, an example app, create-app template support, search integration, OG image generation, and documentation.
+
+### Fix interaction problems
+
+Ensure search dialog input to be focused even on touch devices.
+
 ## @fumadocs/base-ui@16.11.1
 
 ### Fix minor UI inconsistencies

@@ -176,6 +176,7 @@ async function main(): Promise<void> {
         if (config.aiChat !== undefined) return config.aiChat;
         if (
           isCI ||
+          results.template === 'astro' ||
           results.template === '+next+fuma-docs-mdx+static' ||
           results.template!.endsWith('-spa')
         )
@@ -224,6 +225,11 @@ async function main(): Promise<void> {
   );
 
   const projectName = options.name.toLowerCase().replace(/\s/, '-');
+  if (options.template === 'astro' && options.aiChat) {
+    console.warn(pc.yellow('AI Chat is not supported by the Astro template yet, skipping it.'));
+    options.aiChat = false;
+  }
+
   if (!isCI) await checkDir(projectName);
 
   const info = spinner();
