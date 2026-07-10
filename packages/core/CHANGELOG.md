@@ -1,3 +1,9 @@
+## fumadocs-core@16.11.2
+
+### Add Astro framework support
+
+Add Astro as a supported framework with React islands, including framework providers, an example app, create-app template support, search integration, OG image generation, and documentation.
+
 ## fumadocs-core@16.11.0
 
 ### Default to Base UI
