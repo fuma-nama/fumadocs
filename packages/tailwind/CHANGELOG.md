@@ -1,3 +1,9 @@
+## @fumadocs/tailwind@0.1.1
+
+### Support scalable prose typography
+
+Scale prose typography with the unitless `--tw-prose-size` variable and add a `prose-sm` modifier for optically adjusted small text.
+
 ## @fumadocs/tailwind@0.1.0
 
 ### Default to Base UI

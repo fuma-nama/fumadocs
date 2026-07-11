@@ -207,6 +207,12 @@ The plugin adds a `prose` class and variants to customize it.
 </div>
 ```
 
+Use `prose-sm` alongside `prose` for smaller typography with an optically adjusted font weight:
+
+```tsx
+<div className="prose prose-sm">...</div>
+```
+
 > The plugin is supposed to work with Fumadocs UI's MDX components, it may conflict with `@tailwindcss/typography`.
 >
 > If you need to use `@tailwindcss/typography` over the default plugin, [set a `className` option](https://github.com/tailwindlabs/tailwindcss-typography/blob/main/README.md#changing-the-default-class-name) to avoid conflicts.

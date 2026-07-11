@@ -24,11 +24,13 @@ import {
   PageLastUpdate,
   MarkdownCopyButton,
   ViewOptionsPopover,
+  DocsPageProps,
 } from 'fumadocs-ui/layouts/docs/page';
 import { NotFound } from '@/components/layouts/not-found';
 import { getSuggestions } from './suggestions';
 import { PathUtils } from 'fumadocs-core/source';
 import { AsyncAPIPageLazy, OpenAPIPageLazy } from './lazy';
+import { SponsorsMarquee } from '@/components/sponsors-marquee';
 
 function PreviewRenderer({ preview }: { preview: string }): ReactNode {
   if (preview && preview in Preview) {
@@ -52,9 +54,15 @@ export default async function Page(props: PageProps<'/docs/[[...slug]]'>) {
       />
     );
 
+  const pageProps = {
+    tableOfContent: {
+      footer: <SponsorsMarquee />,
+    },
+  } satisfies Partial<DocsPageProps>;
+
   if (page.type === 'openapi') {
     return (
-      <DocsPage full>
+      <DocsPage full {...pageProps}>
         <h1 className="text-[1.75em] font-semibold">{page.data.title}</h1>
 
         <DocsBody>
@@ -66,7 +74,7 @@ export default async function Page(props: PageProps<'/docs/[[...slug]]'>) {
 
   if (page.type === 'asyncapi') {
     return (
-      <DocsPage full>
+      <DocsPage full {...pageProps}>
         <h1 className="text-[1.75em] font-semibold">{page.data.title}</h1>
 
         <DocsBody>
@@ -79,7 +87,7 @@ export default async function Page(props: PageProps<'/docs/[[...slug]]'>) {
   const { body: Mdx, toc, lastModified } = await page.data.load();
 
   return (
-    <DocsPage toc={toc}>
+    <DocsPage toc={toc} {...pageProps}>
       <h1 className="text-[1.75em] font-semibold">{page.data.title}</h1>
       <p className="text-lg text-fd-muted-foreground mb-2">{page.data.description}</p>
       <div className="flex flex-row flex-wrap gap-2 items-center border-b pb-6">

@@ -806,9 +806,13 @@ function OpenSource() {
         </h3>
         <p className="mb-8">Fumadocs is 100% powered by passion and open source community.</p>
         <div className="mb-8 flex flex-row items-center gap-2">
-          <Link href="/sponsors" className={cn(buttonVariants({ variant: 'primary' }))}>
+          <a
+            href="https://fuma-nama.dev/sponsors"
+            rel="noreferrer noopener"
+            className={cn(buttonVariants({ variant: 'primary' }))}
+          >
             Sponsors
-          </Link>
+          </a>
           <a
             href="https://github.com/fuma-nama/fumadocs/graphs/contributors"
             rel="noreferrer noopener"

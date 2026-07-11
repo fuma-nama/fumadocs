@@ -179,6 +179,11 @@ export const typography: ReturnType<typeof plugin.withOptions<Options>> =
             prefix,
           },
         ),
+        [`.${className}-sm`]: configToCss(styles.SMALL, {
+          className,
+          modifier: 'sm',
+          prefix,
+        }),
       });
     };
   });

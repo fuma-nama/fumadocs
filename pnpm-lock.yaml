@@ -3408,10 +3408,10 @@ importers:
         specifier: ^2.0.0
         version: 2.0.0
       fumadocs-core:
-        specifier: workspace:*
+        specifier: workspace:^
         version: link:../core
       fumadocs-typescript:
-        specifier: workspace:*
+        specifier: workspace:^
         version: link:../typescript
       github-slugger:
         specifier: ^2.0.0

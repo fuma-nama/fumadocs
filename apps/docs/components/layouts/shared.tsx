@@ -19,7 +19,8 @@ export const linkItems: LinkItemType[] = [
   },
   {
     text: 'Sponsors',
-    url: '/sponsors',
+    url: 'https://fuma-nama.dev/sponsors',
+    external: true,
     icon: <Heart />,
   },
   {
