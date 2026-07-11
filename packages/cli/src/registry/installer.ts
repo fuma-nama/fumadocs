@@ -15,7 +15,7 @@ export class FumadocsComponentInstaller extends ComponentInstaller {
   constructor(connector: RegistryConnector, config: LoadedConfig, cwd?: string) {
     super(connector, {
       cwd,
-      framework: config.framework,
+      framework: config.framework === 'astro' ? 'none' : config.framework,
       outDir: {
         base: config.baseDir,
         components: config.aliases.componentsDir,
