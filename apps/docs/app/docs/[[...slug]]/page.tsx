@@ -30,7 +30,7 @@ import { NotFound } from '@/components/layouts/not-found';
 import { getSuggestions } from './suggestions';
 import { PathUtils } from 'fumadocs-core/source';
 import { AsyncAPIPageLazy, OpenAPIPageLazy } from './lazy';
-import { SponsorsMarquee } from '@/components/sponsors-marquee';
+import { SponsorsMarquee } from '@fumari/sponsors';
 
 function PreviewRenderer({ preview }: { preview: string }): ReactNode {
   if (preview && preview in Preview) {

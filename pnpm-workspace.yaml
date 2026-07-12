@@ -4,6 +4,7 @@ packages:
   - examples/*
   - '!examples/stackblitz'
 minimumReleaseAgeExclude:
+  - '@fumari/sponsors@0.1.0'
   - 'fuma-translate'
   - '@fuma-translate/*'
   - react-router

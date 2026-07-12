@@ -59,6 +59,9 @@ importers:
       '@fumadocs/story':
         specifier: workspace:*
         version: link:../../packages/story
+      '@fumari/sponsors':
+        specifier: 0.1.0
+        version: 0.1.0(react@19.2.7)
       '@llmgateway/ai-sdk-provider':
         specifier: ^3.8.1
         version: 3.8.1(ai@7.0.17(zod@4.4.3))(zod@4.4.3)
@@ -5483,6 +5486,11 @@ packages:
     peerDependenciesMeta:
       json-schema-typed:
         optional: true
+
+  '@fumari/sponsors@0.1.0':
+    resolution: {integrity: sha512-qc7G3atDZiaDYwWnQldYv/jIS1oKH1oe3LH/BxzGCw3+vJ4vktnUt22xzvQ878jCSbgDEakxFVAfj5zxWTHXxw==}
+    peerDependencies:
+      react: ^19.0.0
 
   '@headlessui/tailwindcss@0.2.2':
     resolution: {integrity: sha512-xNe42KjdyA4kfUKLLPGzME9zkH7Q3rOZ5huFihWNWOQFxnItxPB3/67yBI8/qBfY8nwBRx5GHn4VprsoluVMGw==}
@@ -11203,8 +11211,13 @@ packages:
     resolution: {integrity: sha512-ca9pw9fomFcKPvFLXhBKUK90ZvGibiGOvRJNbjljY7s7uq/5YO4BOzcYtJqExdx99rF6aAcnRxHmcUHcz6sQsg==}
     engines: {node: '>=0.10'}
 
-  esrap@2.2.3:
-    resolution: {integrity: sha512-8fOS+GIGCQZl/ZIlhl59htOlms6U8NvX6ZYgYHpRU/b6tVSh3uHkOHZikl3D4cMbYM0JlpBe+p/BkZEi8J9XIQ==}
+  esrap@2.2.13:
+    resolution: {integrity: sha512-m8jH5hZgJE2RRUK/jjkGPcJEDAV+dYnZYFkosQaPTcE+Yw4xynXHOo6FUdwaWBtdR3b1MMa7wEDTSHeR2VWsGA==}
+    peerDependencies:
+      '@typescript-eslint/types': ^8.2.0
+    peerDependenciesMeta:
+      '@typescript-eslint/types':
+        optional: true
 
   esrecurse@4.3.0:
     resolution: {integrity: sha512-KmfKL3b6G+RXvP8N1vr3Tq1kL/oCFgn2NYXEtqP8/L3pKapUA4G8cFVaoF3SU323CD4XypR/ffioHmkti6/Tag==}
@@ -17561,9 +17574,15 @@ snapshots:
 
   '@fumari/json-schema-ts@0.0.2(json-schema-typed@8.0.2)':
     dependencies:
-      esrap: 2.2.3
+      esrap: 2.2.13
     optionalDependencies:
       json-schema-typed: 8.0.2
+    transitivePeerDependencies:
+      - '@typescript-eslint/types'
+
+  '@fumari/sponsors@0.1.0(react@19.2.7)':
+    dependencies:
+      react: 19.2.7
 
   '@headlessui/tailwindcss@0.2.2(tailwindcss@4.3.2)':
     dependencies:
@@ -23647,7 +23666,7 @@ snapshots:
     dependencies:
       estraverse: 5.3.0
 
-  esrap@2.2.3:
+  esrap@2.2.13:
     dependencies:
       '@jridgewell/sourcemap-codec': 1.5.5
 

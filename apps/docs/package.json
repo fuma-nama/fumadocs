@@ -20,6 +20,7 @@
     "@fumadocs/asyncapi": "workspace:*",
     "@fumadocs/satteri": "workspace:*",
     "@fumadocs/story": "workspace:*",
+    "@fumari/sponsors": "0.1.0",
     "@llmgateway/ai-sdk-provider": "^3.8.1",
     "@mixedbread/sdk": "^0.77.0",
     "@openrouter/ai-sdk-provider": "^3.0.0",
