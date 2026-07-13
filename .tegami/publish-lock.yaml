@@ -1,12 +1,21 @@
 core:changelogs:
-  - content: "---\npackages:\n  npm:@fumadocs/tailwind:\n    type: patch\n---\n\n## Support scalable prose typography\n\nScale prose typography with the unitless `--tw-prose-size` variable and add a `prose-sm` modifier for optically adjusted small text.\n"
-    filename: 2026-07-11-prose-size.md
+  - content: "---\npackages:\n  npm:@fumadocs/api-docs:\n    type: minor\n  npm:@fumadocs/asyncapi:\n    type: minor\n  npm:fumadocs-openapi:\n    type: minor\n---\n\n## Use `@scalar/json-magic` for dereferencing\n\nThis will affect all raw access to OpenAPI/AsyncAPI documents, ensure to use `dereferenceShallow()` public API.\n"
+    filename: 2026-07-13-mriza6dz.md
+    v: 0.0.0
+  - content: "---\npackages:\n  npm:fumadocs-python:\n    type: patch\n  npm:fumadocs-obsidian:\n    type: patch\n  npm:@fumadocs/mdx-remote:\n    type: patch\n  npm:fumadocs-mdx:\n    type: patch\n  npm:@fumadocs/asyncapi:\n    type: patch\n  npm:@fumadocs/api-docs:\n    type: patch\n  npm:fumadocs-openapi:\n    type: patch\n  npm:fumadocs-core:\n    type: patch\n---\n\n## Migrate from `js-yaml` to `yaml`\n"
+    filename: 2026-07-13-mrj040gl.md
     v: 0.0.0
 core:packages:
-  - id: npm:@fumadocs/api-docs
-    updated: false
-  - id: npm:@fumadocs/asyncapi
-    updated: false
+  - changelogIds:
+      - 2026-07-13-mriza6dz.md
+      - 2026-07-13-mrj040gl.md
+    id: npm:@fumadocs/api-docs
+    updated: true
+  - changelogIds:
+      - 2026-07-13-mriza6dz.md
+      - 2026-07-13-mrj040gl.md
+    id: npm:@fumadocs/asyncapi
+    updated: true
   - id: npm:@fumadocs/base-ui
     updated: true
   - id: npm:@fumadocs/basehub
@@ -17,32 +26,45 @@ core:packages:
     updated: false
   - id: npm:@fumadocs/content-collections
     updated: false
-  - id: npm:create-fumadocs-app
+  - changelogIds:
+      - 2026-07-13-mrj040gl.md
+    id: npm:fumadocs-core
     updated: true
-  - id: npm:fumadocs-core
+  - id: npm:create-fumadocs-app
     updated: true
   - id: npm:create-fumadocs-versions
     updated: true
-  - id: npm:fumadocs-docgen
-    updated: false
   - id: npm:fumadocs-epub
+    updated: false
+  - id: npm:fumadocs-docgen
     updated: false
   - id: npm:@fumadocs/language
     updated: false
-  - id: npm:fumadocs-mdx
-    updated: false
   - id: npm:@fumadocs/local-md
     updated: false
-  - id: npm:fumadocs-obsidian
-    updated: false
-  - id: npm:fumadocs-openapi
-    updated: false
-  - id: npm:@fumadocs/mdx-remote
-    updated: false
+  - changelogIds:
+      - 2026-07-13-mrj040gl.md
+    id: npm:fumadocs-mdx
+    updated: true
+  - changelogIds:
+      - 2026-07-13-mrj040gl.md
+    id: npm:@fumadocs/mdx-remote
+    updated: true
+  - changelogIds:
+      - 2026-07-13-mrj040gl.md
+    id: npm:fumadocs-obsidian
+    updated: true
+  - changelogIds:
+      - 2026-07-13-mriza6dz.md
+      - 2026-07-13-mrj040gl.md
+    id: npm:fumadocs-openapi
+    updated: true
   - id: npm:fumadocs-preview
     updated: false
-  - id: npm:fumadocs-python
-    updated: false
+  - changelogIds:
+      - 2026-07-13-mrj040gl.md
+    id: npm:fumadocs-python
+    updated: true
   - id: npm:fumadocs-ui
     updated: true
   - id: npm:@fumadocs/sanity
@@ -55,10 +77,8 @@ core:packages:
     updated: false
   - id: npm:@fumadocs/story
     updated: false
-  - changelogIds:
-      - 2026-07-11-prose-size.md
-    id: npm:@fumadocs/tailwind
-    updated: true
+  - id: npm:@fumadocs/tailwind
+    updated: false
   - id: npm:fumadocs-twoslash
     updated: false
   - id: npm:@fumadocs/vite
@@ -73,17 +93,17 @@ npm:packages:
   - id: npm:@fumadocs/cli
   - id: npm:@fumadocs/content
   - id: npm:@fumadocs/content-collections
-  - id: npm:create-fumadocs-app
   - id: npm:fumadocs-core
+  - id: npm:create-fumadocs-app
   - id: npm:create-fumadocs-versions
-  - id: npm:fumadocs-docgen
   - id: npm:fumadocs-epub
+  - id: npm:fumadocs-docgen
   - id: npm:@fumadocs/language
-  - id: npm:fumadocs-mdx
   - id: npm:@fumadocs/local-md
+  - id: npm:fumadocs-mdx
+  - id: npm:@fumadocs/mdx-remote
   - id: npm:fumadocs-obsidian
   - id: npm:fumadocs-openapi
-  - id: npm:@fumadocs/mdx-remote
   - id: npm:fumadocs-preview
   - id: npm:fumadocs-python
   - id: npm:fumadocs-ui
@@ -96,33 +116,33 @@ npm:packages:
   - id: npm:fumadocs-twoslash
   - id: npm:@fumadocs/vite
   - id: npm:fumadocs-typescript
-  - id: npm:vite-data
   - id: npm:docs
-  - id: npm:example-astro
   - id: npm:example-asyncapi
-  - id: npm:example-base-ui
-  - id: npm:example-content-collections
-  - id: npm:example-i18n
-  - id: npm:example-marble-cms
-  - id: npm:example-next
-  - id: npm:example-next-local-md
-  - id: npm:example-next-min
-  - id: npm:example-next-shadcn
-  - id: npm:example-next-static
   - id: npm:example-openapi
-  - id: npm:example-obsidian
+  - id: npm:example-tanstack-start-openapi
   - id: npm:example-python
-  - id: npm:example-react-router-i18n
+  - id: npm:example-obsidian
+  - id: npm:vite-data
+  - id: npm:example-base-ui
+  - id: npm:example-i18n
+  - id: npm:example-next
+  - id: npm:example-next-shadcn
+  - id: npm:example-next-min
+  - id: npm:example-next-static
   - id: npm:example-react-router
-  - id: npm:example-react-router-rsc
   - id: npm:example-react-router-min
+  - id: npm:example-react-router-i18n
+  - id: npm:example-react-router-rsc
   - id: npm:example-react-router-spa
   - id: npm:example-tanstack-start
-  - id: npm:example-tanstack-start-local-md
-  - id: npm:example-tanstack-start-i18n
   - id: npm:example-tanstack-start-min
-  - id: npm:example-tanstack-start-openapi
+  - id: npm:example-tanstack-start-i18n
   - id: npm:example-tanstack-start-spa
-  - id: npm:example-tanstack-start-story
   - id: npm:example-waku
+  - id: npm:example-tanstack-start-story
   - id: npm:example-waku-i18n
+  - id: npm:example-astro
+  - id: npm:example-content-collections
+  - id: npm:example-marble-cms
+  - id: npm:example-next-local-md
+  - id: npm:example-tanstack-start-local-md

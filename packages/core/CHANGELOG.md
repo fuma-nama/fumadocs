@@ -1,3 +1,7 @@
+## fumadocs-core@16.11.4
+
+### Migrate from `js-yaml` to `yaml`
+
 ## fumadocs-core@16.11.2
 
 ### Add Astro framework support
