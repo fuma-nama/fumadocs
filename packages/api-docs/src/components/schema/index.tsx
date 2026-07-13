@@ -276,6 +276,7 @@ export function generateSchemaUI({
   }
 
   function isVisible(schema: ParsedSchema): boolean {
+    schema = resolver(schema).dereferenced;
     if (typeof schema === 'boolean') return true;
     if (schema.writeOnly) return writeOnly;
     if (schema.readOnly) return readOnly;
@@ -302,6 +303,8 @@ export function generateSchemaUI({
 
   function scanRefs(id: string, schema: ParsedSchema) {
     if (id in refs) return;
+    // schemas may contain Reference Objects, always resolve them shallowly before reading
+    schema = resolver(schema).dereferenced;
     if (typeof schema === 'boolean') {
       refs[id] = {
         type: 'primitive',
@@ -361,9 +364,11 @@ export function generateSchemaUI({
       };
       refs[id] = out;
 
-      for (const item of union) {
-        if (!item || typeof item !== 'object' || !isVisible(item)) continue;
-        const itemId = getSchemaId(item);
+      for (const rawItem of union) {
+        if (!rawItem || typeof rawItem !== 'object' || !isVisible(rawItem)) continue;
+        const itemId = getSchemaId(rawItem);
+        const item = resolver(rawItem).dereferenced;
+        if (typeof item !== 'object') continue;
         const key = `${id}_extends:${itemId}`;
 
         scanRefs(key, {
@@ -385,7 +390,12 @@ export function generateSchemaUI({
     }
 
     if (schema.allOf) {
-      scanRefs(id, mergeAllOf(schema));
+      scanRefs(
+        id,
+        mergeAllOf(schema, {
+          dereference: (s) => resolver(s).dereferenced,
+        }),
+      );
       return;
     }
 

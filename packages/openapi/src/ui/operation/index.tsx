@@ -31,7 +31,6 @@ import { AnchorSection } from '@fumadocs/api-docs/auto-anchor/client';
 import { Heading } from '@/ui/components/heading';
 import { Markdown } from '../components/markdown';
 import { ServerProvider, useRenderContext } from '../contexts/api';
-import type { NoReference } from '@fumadocs/api-docs/schema';
 import { useCopyButton } from 'fumadocs-ui/utils/use-copy-button';
 import { buttonVariants } from 'fumadocs-ui/components/ui/button';
 import { Check, Copy } from 'lucide-react';
@@ -52,8 +51,8 @@ export function Operation({
   type?: 'webhook' | 'operation';
   path: string;
   method: HttpMethods;
-  operation: NoReference<OperationObject>;
-  pathItem: NoReference<PathItemObject>;
+  operation: OperationObject;
+  pathItem: PathItemObject;
 
   showTitle?: boolean;
   showDescription?: boolean;
@@ -62,9 +61,9 @@ export function Operation({
   const t = useTranslations({ note: 'operation page' });
   const ctx = useRenderContext();
   const {
-    schema: { dereferenced },
+    schema: { dereferenced, resolve },
   } = ctx;
-  const body = operation.requestBody;
+  const body = resolve(operation.requestBody);
   let headNode: ReactNode = null;
   const operationDescription = operation.description ?? pathItem.description;
   const descriptionNode = showDescription && operationDescription && (
@@ -129,7 +128,11 @@ export function Operation({
 
           return (
             <SelectTab key={type} anchorSegments={['request-body', type]} value={type}>
-              <RequestBodyContentItem content={content} operation={operation} method={method} />
+              <RequestBodyContentItem
+                content={resolve(content)}
+                operation={operation}
+                method={method}
+              />
             </SelectTab>
           );
         })}
@@ -154,7 +157,9 @@ export function Operation({
     );
   }
 
-  const parameters = [...(operation.parameters ?? []), ...(pathItem.parameters ?? [])];
+  const parameters = [...(operation.parameters ?? []), ...(pathItem.parameters ?? [])].map(
+    (param) => resolve(param),
+  );
   const parameterNode = paramTypeKeys.map((type) => {
     const params = parameters.filter((param) => param.in === type);
     if (!params || params.length === 0) return;
@@ -175,30 +180,31 @@ export function Operation({
         </Heading>
         <AnchorSection segments={['parameters', type]}>
           <div className="flex flex-col">
-            {params.map(
-              (param) =>
-                param.schema != null && (
-                  <ctx.SchemaUI
-                    key={param.name}
-                    client={{
-                      name: param.name!,
-                      required: param.required,
-                    }}
-                    root={
-                      typeof param.schema === 'object'
-                        ? {
-                            ...param.schema,
-                            description: param.description ?? param.schema?.description,
-                            deprecated:
-                              (param.deprecated ?? false) || (param.schema?.deprecated ?? false),
-                          }
-                        : param.schema
-                    }
-                    readOnly={method === 'get'}
-                    writeOnly={method !== 'get'}
-                  />
-                ),
-            )}
+            {params.map((param) => {
+              if (param.schema == null) return;
+              const schema = resolve(param.schema);
+
+              return (
+                <ctx.SchemaUI
+                  key={param.name}
+                  client={{
+                    name: param.name!,
+                    required: param.required,
+                  }}
+                  root={
+                    typeof schema === 'object'
+                      ? {
+                          ...schema,
+                          description: param.description ?? schema.description,
+                          deprecated: (param.deprecated ?? false) || (schema.deprecated ?? false),
+                        }
+                      : schema
+                  }
+                  readOnly={method === 'get'}
+                  writeOnly={method !== 'get'}
+                />
+              );
+            })}
           </div>
         </AnchorSection>
       </Fragment>
@@ -244,7 +250,7 @@ export function Operation({
         {securities.map((security, i) => (
           <SelectTab key={i} value={items[i].value}>
             {Object.entries(security).map(([key, scopes]) => {
-              const scheme = securitySchemes?.[key];
+              const scheme = resolve(securitySchemes?.[key]);
               if (!scheme) return;
 
               return <AuthScheme key={key} scheme={scheme} scopes={scopes} />;
@@ -259,11 +265,15 @@ export function Operation({
     name: string;
     path: string;
     method: HttpMethods;
-    callback: NoReference<PathItemObject>;
-    operation: NoReference<OperationObject>;
+    callback: PathItemObject;
+    operation: OperationObject;
   }[] = [];
-  for (const [name, callbacks] of Object.entries(operation.callbacks ?? {})) {
-    for (const [path, callback] of Object.entries(callbacks)) {
+  for (const [name, item] of Object.entries(operation.callbacks ?? {})) {
+    const callbacks = resolve(item);
+
+    for (const [path, pathItem] of Object.entries(callbacks)) {
+      const callback = resolve(pathItem);
+
       for (const method of methodKeys) {
         if (!callback[method]) continue;
         webhookCallbacks.push({ name, path, method, callback, operation: callback[method] });
@@ -450,8 +460,8 @@ function RequestBodyContentItem({
   operation,
 }: {
   method: HttpMethods;
-  content: NoReference<MediaTypeObject>;
-  operation: NoReference<OperationObject>;
+  content: MediaTypeObject;
+  operation: OperationObject;
 }) {
   const ctx = useRenderContext();
   let ts = useMemo(() => {
@@ -473,7 +483,7 @@ function RequestBodyContentItem({
           client={{
             name: 'body',
             as: 'body',
-            required: operation.requestBody?.required,
+            required: ctx.schema.resolve(operation.requestBody)?.required,
           }}
           root={content.schema}
           readOnly={method === 'get'}
@@ -484,14 +494,9 @@ function RequestBodyContentItem({
   );
 }
 
-function ResponseAccordion({
-  status,
-  operation,
-}: {
-  status: string;
-  operation: NoReference<OperationObject>;
-}) {
-  const response = operation.responses![status];
+function ResponseAccordion({ status, operation }: { status: string; operation: OperationObject }) {
+  const { schema } = useRenderContext();
+  const response = schema.resolve(operation.responses![status]);
   const contentTypes = response.content ? Object.entries(response.content) : [];
   const items = contentTypes.map(([key]) => ({
     label: <code className="text-xs">{key}</code>,
@@ -521,7 +526,7 @@ function ResponseAccordion({
           )}
           {contentTypes.map(([type, item]) => (
             <SelectTab key={type} value={type} anchorSegments={[type]}>
-              <RepsonseAccordionItem item={item} />
+              <RepsonseAccordionItem item={schema.resolve(item)} />
             </SelectTab>
           ))}
         </AccordionContent>
@@ -530,7 +535,7 @@ function ResponseAccordion({
   );
 }
 
-function RepsonseAccordionItem({ item: { schema } }: { item: NoReference<MediaTypeObject> }) {
+function RepsonseAccordionItem({ item: { schema } }: { item: MediaTypeObject }) {
   const ctx = useRenderContext();
   let ts = useMemo(() => {
     if (!schema || !ctx.generateTypeScriptDefinitions) return;

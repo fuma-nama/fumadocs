@@ -1,6 +1,5 @@
 'use client';
 import type { GooglepubsubChannelBinding, GooglepubsubMessageBinding } from '@/types/asyncapi-3';
-import type { NoReference } from '@fumadocs/api-docs/schema';
 import {
   createBinding,
   hasBindingFields,
@@ -12,23 +11,15 @@ import {
   BindingTagList,
 } from '../shared';
 
-function getGooglepubsubChannelSummary(
-  binding: NoReference<GooglepubsubChannelBinding>,
-): string | undefined {
+function getGooglepubsubChannelSummary(binding: GooglepubsubChannelBinding): string | undefined {
   return binding.schemaSettings?.name;
 }
 
-function getGooglepubsubMessageSummary(
-  binding: NoReference<GooglepubsubMessageBinding>,
-): string | undefined {
+function getGooglepubsubMessageSummary(binding: GooglepubsubMessageBinding): string | undefined {
   return binding.orderingKey;
 }
 
-function GooglepubsubChannelBinding({
-  binding,
-}: {
-  binding: NoReference<GooglepubsubChannelBinding>;
-}) {
+function GooglepubsubChannelBinding({ binding }: { binding: GooglepubsubChannelBinding }) {
   if (!hasBindingFields(binding)) return <BindingEmpty />;
 
   return (
@@ -91,11 +82,7 @@ function GooglepubsubChannelBinding({
   );
 }
 
-function GooglepubsubMessageBinding({
-  binding,
-}: {
-  binding: NoReference<GooglepubsubMessageBinding>;
-}) {
+function GooglepubsubMessageBinding({ binding }: { binding: GooglepubsubMessageBinding }) {
   if (!hasBindingFields(binding)) return <BindingEmpty />;
 
   return (

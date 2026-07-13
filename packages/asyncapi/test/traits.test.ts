@@ -1,6 +1,6 @@
 import { describe, expect, test } from 'vitest';
 import { applyMessageTraits, applyOperationTraits, mergeTraits } from '@/utils/traits';
-import type { NoReference } from '@fumadocs/api-docs/schema';
+import { dereferenceShallow } from '@fumadocs/api-docs/schema/dereference';
 import type { MessageObject, OperationObject } from '@/types/asyncapi-3';
 
 describe('mergeTraits', () => {
@@ -51,24 +51,27 @@ describe('mergeTraits', () => {
 
 describe('applyOperationTraits', () => {
   test('merges operation traits', () => {
-    const operation = applyOperationTraits({
-      action: 'receive',
-      channel: { address: 'test' },
-      bindings: {
-        kafka: {
-          groupId: { type: 'string', enum: ['my-group'] },
-        },
-      },
-      traits: [
-        {
-          bindings: {
-            kafka: {
-              clientId: { type: 'string', enum: ['shared-client'] },
-            },
+    const operation = applyOperationTraits(
+      {
+        action: 'receive',
+        channel: { address: 'test' },
+        bindings: {
+          kafka: {
+            groupId: { type: 'string', enum: ['my-group'] },
           },
         },
-      ],
-    } as NoReference<OperationObject>);
+        traits: [
+          {
+            bindings: {
+              kafka: {
+                clientId: { type: 'string', enum: ['shared-client'] },
+              },
+            },
+          },
+        ],
+      } as OperationObject,
+      dereferenceShallow,
+    );
 
     expect(operation.traits).toBeUndefined();
     expect(operation.bindings).toEqual({
@@ -82,25 +85,28 @@ describe('applyOperationTraits', () => {
 
 describe('applyMessageTraits', () => {
   test('merges message traits into existing headers', () => {
-    const message = applyMessageTraits({
-      name: 'lightMeasured',
-      headers: {
-        type: 'object',
-        properties: {
-          correlationId: { type: 'string' },
-        },
-      },
-      traits: [
-        {
-          headers: {
-            type: 'object',
-            properties: {
-              'content-type': { type: 'string' },
-            },
+    const message = applyMessageTraits(
+      {
+        name: 'lightMeasured',
+        headers: {
+          type: 'object',
+          properties: {
+            correlationId: { type: 'string' },
           },
         },
-      ],
-    } as NoReference<MessageObject>);
+        traits: [
+          {
+            headers: {
+              type: 'object',
+              properties: {
+                'content-type': { type: 'string' },
+              },
+            },
+          },
+        ],
+      } as MessageObject,
+      dereferenceShallow,
+    );
 
     expect(message.traits).toBeUndefined();
     expect(message.headers).toEqual({
@@ -113,19 +119,22 @@ describe('applyMessageTraits', () => {
   });
 
   test('applies trait headers when message has none', () => {
-    const message = applyMessageTraits({
-      name: 'lightMeasured',
-      traits: [
-        {
-          headers: {
-            type: 'object',
-            properties: {
-              'content-type': { type: 'string' },
+    const message = applyMessageTraits(
+      {
+        name: 'lightMeasured',
+        traits: [
+          {
+            headers: {
+              type: 'object',
+              properties: {
+                'content-type': { type: 'string' },
+              },
             },
           },
-        },
-      ],
-    } as NoReference<MessageObject>);
+        ],
+      } as MessageObject,
+      dereferenceShallow,
+    );
 
     expect(message.headers).toEqual({
       type: 'object',

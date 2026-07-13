@@ -3,7 +3,7 @@
  */
 import { mergeDeep } from '../utils/deep-merge';
 import { isPlainObject } from '../utils/is-plain-object';
-import { resolveRefSync } from './resolve-ref';
+import { getRaw } from '@scalar/json-magic/magic-proxy';
 
 export interface JsonSchemaSampleOptions {
   readonly skipNonRequired?: boolean;
@@ -207,7 +207,6 @@ function patternSample(pattern: string): string {
 function sampleString(
   schema: SchemaDoc,
   options: ResolvedOptions,
-  _spec: unknown,
   context: TraverseContext | undefined,
 ): string {
   const format = (schema.format as string | undefined) || 'default';
@@ -258,7 +257,6 @@ function sampleString(
 function sampleArray(
   schema: SchemaDoc,
   options: ResolvedOptions,
-  spec: unknown,
   context: TraverseContext | undefined,
 ): unknown[] {
   const depth = context?.depth ?? 1;
@@ -284,7 +282,7 @@ function sampleArray(
 
   for (let i = 0; i < arrayLength; i++) {
     const itemSchema = itemSchemaGetter(i);
-    const { value } = traverse(itemSchema, options, spec, {
+    const { value } = traverse(itemSchema, options, {
       depth: depth + 1,
       propertyName: context?.propertyName,
     });
@@ -296,7 +294,6 @@ function sampleArray(
 function sampleObject(
   schema: SchemaDoc,
   options: ResolvedOptions,
-  spec: unknown,
   context: TraverseContext | undefined,
 ): Record<string, unknown> {
   let res: Record<string, unknown> = {};
@@ -310,7 +307,7 @@ function sampleObject(
       if (options.skipNonRequired && !requiredSet.has(propertyName)) continue;
 
       const propSchema = (schema.properties as Record<string, SchemaDoc>)[propertyName]!;
-      const sample = traverse(propSchema, options, spec, {
+      const sample = traverse(propSchema, options, {
         propertyName,
         depth: depth + 1,
       });
@@ -331,10 +328,10 @@ function sampleObject(
   if (schema.additionalProperties && typeof schema.additionalProperties === 'object') {
     const ap = schema.additionalProperties as SchemaDoc;
     const baseName = (ap['x-additionalPropertiesName'] as string | undefined) || 'property';
-    res[`${String(baseName)}1`] = traverse(ap, options, spec, {
+    res[`${String(baseName)}1`] = traverse(ap, options, {
       depth: depth + 1,
     }).value;
-    res[`${String(baseName)}2`] = traverse(ap, options, spec, {
+    res[`${String(baseName)}2`] = traverse(ap, options, {
       depth: depth + 1,
     }).value;
   }
@@ -383,14 +380,15 @@ interface TraverseContext {
 type ResolvedOptions = typeof defaultOptions & JsonSchemaSampleOptions;
 
 function inferExample(schema: SchemaDoc): unknown | undefined {
-  if (schema.const !== undefined) return schema.const;
+  // `getRaw` unwraps values of magic proxies, output values must be plain objects
+  if (schema.const !== undefined) return getRaw(schema.const);
   if (Array.isArray(schema.examples) && schema.examples.length > 0) {
-    return schema.examples[0];
+    return getRaw(schema.examples[0]);
   }
   if (Array.isArray(schema.enum) && schema.enum!.length > 0) {
-    return schema.enum![0];
+    return getRaw(schema.enum![0]);
   }
-  if (schema.default !== undefined) return schema.default;
+  if (schema.default !== undefined) return getRaw(schema.default);
   return undefined;
 }
 
@@ -411,17 +409,15 @@ function allOfSample(
   into: SchemaDoc,
   children: SchemaDoc[],
   options: ResolvedOptions,
-  spec: unknown,
   context: TraverseContext | undefined,
 ): TraverseResult {
-  const res = traverse(into, options, spec);
+  const res = traverse(into, options);
   const subSamples: unknown[] = [];
 
   for (const subSchema of children) {
     const { type, readOnly, writeOnly, value } = traverse(
       { type: res.type, ...subSchema },
       options,
-      spec,
       {
         ...context,
         depth: context?.depth ?? 1,
@@ -462,12 +458,7 @@ function allOfSample(
 
 const typeSamplers: Record<
   string,
-  (
-    schema: SchemaDoc,
-    options: ResolvedOptions,
-    spec: unknown,
-    context: TraverseContext | undefined,
-  ) => unknown
+  (schema: SchemaDoc, options: ResolvedOptions, context: TraverseContext | undefined) => unknown
 > = {
   array: sampleArray,
   boolean: sampleBoolean,
@@ -481,7 +472,6 @@ function traverseOneOrAnyOf(
   parent: SchemaDoc,
   selectedSubSchema: SchemaDoc,
   options: ResolvedOptions,
-  spec: unknown,
   context: TraverseContext | undefined,
 ): TraverseResult {
   const inferred = tryInferExample(parent);
@@ -490,10 +480,9 @@ function traverseOneOrAnyOf(
   const localExample = traverse(
     { ...parent, oneOf: undefined, anyOf: undefined },
     options,
-    spec,
     context,
   );
-  const subExample = traverse(selectedSubSchema, options, spec, context);
+  const subExample = traverse(selectedSubSchema, options, context);
 
   if (
     typeof localExample.value === 'object' &&
@@ -514,7 +503,6 @@ function traverseOneOrAnyOf(
 function traverse(
   schema: unknown,
   options: ResolvedOptions,
-  spec: unknown,
   context?: TraverseContext,
 ): TraverseResult {
   if (context) {
@@ -537,33 +525,38 @@ function traverse(
   const s = schema as SchemaDoc;
 
   if (typeof s.$ref === 'string') {
-    if (spec == null) {
-      throw new Error(
-        'Your schema contains $ref. You must provide full specification in the third parameter.',
-      );
-    }
     const ref = decodeURIComponent(s.$ref);
-    if (!ref.startsWith('#')) {
-      throw new Error(
-        'Your schema contains $ref. Only in-document references (`#/…`) are supported.',
-      );
+    // `$ref-value` is the resolved value of `$ref` on magic proxies of `@scalar/json-magic`
+    function resolveRef(): unknown {
+      return (s as Record<string, unknown>)['$ref-value'];
     }
 
     if (refResolving[ref]) {
-      const referenced = resolveRefSync(ref, spec) as SchemaDoc | undefined;
+      const referenced = resolveRef() as SchemaDoc | undefined;
       const referencedType = inferType(referenced ?? {});
       popStack(context);
       return { value: getCircularPlaceholder(referencedType), type: null };
     }
 
     refResolving[ref] = true;
-    const referenced = resolveRefSync(ref, spec);
+    const referenced = resolveRef();
     if (referenced === undefined) {
       refResolving[ref] = false;
       popStack(context);
-      throw new Error(`Could not resolve $ref: ${s.$ref}`);
+      throw new Error(
+        `Could not resolve $ref: ${s.$ref}, the schema must be a node of magic proxy ("@scalar/json-magic").`,
+      );
     }
-    const result = traverse(referenced, options, spec, context);
+
+    // sibling keywords take precedence over the $ref target
+    const { $ref: _, '$ref-value': _refValue, ...siblings } = s as Record<string, unknown>;
+    const result = traverse(
+      Object.keys(siblings).length > 0 && isPlainObject(referenced)
+        ? { ...referenced, ...siblings }
+        : referenced,
+      options,
+      context,
+    );
     refResolving[ref] = false;
     popStack(context);
     return result;
@@ -572,7 +565,7 @@ function traverse(
   if (s.example !== undefined) {
     popStack(context);
     return {
-      value: s.example,
+      value: getRaw(s.example),
       readOnly: s.readOnly as boolean | undefined,
       writeOnly: s.writeOnly as boolean | undefined,
       type: s.type as string | null,
@@ -583,7 +576,7 @@ function traverse(
     popStack(context);
     return (
       tryInferExample(s) ??
-      allOfSample({ ...s, allOf: undefined }, s.allOf as SchemaDoc[], options, spec, context)
+      allOfSample({ ...s, allOf: undefined }, s.allOf as SchemaDoc[], options, context)
     );
   }
 
@@ -599,7 +592,7 @@ function traverse(
       },
       s.oneOf[0] as SchemaDoc,
     );
-    return traverseOneOrAnyOf(s, firstOneOf, options, spec, context);
+    return traverseOneOrAnyOf(s, firstOneOf, options, context);
   }
 
   if (s.anyOf && Array.isArray(s.anyOf) && s.anyOf.length > 0) {
@@ -611,18 +604,13 @@ function traverse(
       },
       s.anyOf[0] as SchemaDoc,
     );
-    return traverseOneOrAnyOf(s, firstAnyOf, options, spec, context);
+    return traverseOneOrAnyOf(s, firstAnyOf, options, context);
   }
 
   if (s.if && s.then) {
     popStack(context);
     const { if: ifSchema, then, ...rest } = s;
-    return traverse(
-      mergeDeep(rest, ifSchema as SchemaDoc, then as SchemaDoc),
-      options,
-      spec,
-      context,
-    );
+    return traverse(mergeDeep(rest, ifSchema as SchemaDoc, then as SchemaDoc), options, context);
   }
 
   let example = inferExample(s);
@@ -636,7 +624,7 @@ function traverse(
 
     const sampler = type ? typeSamplers[type] : undefined;
     if (sampler) {
-      example = sampler(s, options, spec, context);
+      example = sampler(s, options, context);
     }
   }
 
@@ -649,12 +637,12 @@ function traverse(
   };
 }
 
-export function sample(schema: object, options?: JsonSchemaSampleOptions, spec?: object): unknown {
+export function sample(schema: object, options?: JsonSchemaSampleOptions): unknown {
   const opts: ResolvedOptions = {
     ...defaultOptions,
     ...options,
   };
 
   clearCaches();
-  return traverse(schema, opts, spec).value;
+  return traverse(schema, opts).value;
 }

@@ -16,15 +16,14 @@ import type { ExampleRequestItem } from '../../utils/get-example-requests';
 import { Markdown } from '../components/markdown';
 import { ClientCodeBlock } from '../components/codeblock';
 import { useRenderContext } from '../contexts/api';
-import type { NoReference } from '@fumadocs/api-docs/schema';
 import { HttpMethods, OperationObject, PathItemObject } from '@/types';
 
 export interface RequestTabsRenderOptions {
   route: string;
   items: ExampleRequestItem[];
   method: HttpMethods;
-  pathItem: NoReference<PathItemObject>;
-  operation: NoReference<OperationObject>;
+  pathItem: PathItemObject;
+  operation: OperationObject;
 }
 
 export function RequestTabs({
@@ -37,8 +36,8 @@ export function RequestTabs({
   path: string;
   examples: ExampleRequestItem[];
   method: HttpMethods;
-  pathItem: NoReference<PathItemObject>;
-  operation: NoReference<OperationObject>;
+  pathItem: PathItemObject;
+  operation: OperationObject;
 }) {
   const ctx = useRenderContext();
   if (!operation.requestBody) return null;

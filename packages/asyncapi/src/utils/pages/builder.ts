@@ -1,5 +1,6 @@
 import type { AsyncAPIObject, TagObject } from '@/types';
 import { dereferenceShallow } from '@fumadocs/api-docs/schema/dereference';
+import { createMagicProxy } from '@scalar/json-magic/magic-proxy';
 import type { NoReferenceSwallow } from '@fumadocs/api-docs/schema';
 
 interface BaseEntry {
@@ -61,11 +62,13 @@ export function fromSchema(
 ): OutputEntry[] {
   const files: OutputEntry[] = [];
   const { toPages } = config;
+  // wrap in a magic proxy so that `dereferenceShallow` can resolve refs lazily
+  const document = createMagicProxy(bundled as never) as AsyncAPIObject;
 
   toPages({
     id: schemaId,
-    document: bundled,
-    dereferenceShallow: (s) => dereferenceShallow(s, bundled),
+    document,
+    dereferenceShallow: (s) => dereferenceShallow(s),
     create(entry) {
       files.push(entry);
     },

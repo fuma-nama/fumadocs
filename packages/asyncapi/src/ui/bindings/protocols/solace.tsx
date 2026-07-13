@@ -1,6 +1,5 @@
 'use client';
 import type { SolaceOperationBinding, SolaceServerBinding } from '@/types/asyncapi-3';
-import type { NoReference } from '@fumadocs/api-docs/schema';
 import {
   createBinding,
   hasBindingFields,
@@ -19,11 +18,11 @@ function formatDeliveryMode(value: string): string {
   return value;
 }
 
-function getSolaceServerSummary(binding: NoReference<SolaceServerBinding>): string | undefined {
+function getSolaceServerSummary(binding: SolaceServerBinding): string | undefined {
   return joinBindingSummary(binding.msgVpn, binding.clientName);
 }
 
-function SolaceServerBinding({ binding }: { binding: NoReference<SolaceServerBinding> }) {
+function SolaceServerBinding({ binding }: { binding: SolaceServerBinding }) {
   if (!hasBindingFields(binding)) return <BindingEmpty />;
 
   return (
@@ -44,15 +43,13 @@ function SolaceServerBinding({ binding }: { binding: NoReference<SolaceServerBin
   );
 }
 
-function getSolaceOperationSummary(
-  binding: NoReference<SolaceOperationBinding>,
-): string | undefined {
+function getSolaceOperationSummary(binding: SolaceOperationBinding): string | undefined {
   const count = binding.destinations?.length ?? 0;
   if (count === 0) return undefined;
   return `${count} destination${count > 1 ? 's' : ''}`;
 }
 
-function SolaceOperationBinding({ binding }: { binding: NoReference<SolaceOperationBinding> }) {
+function SolaceOperationBinding({ binding }: { binding: SolaceOperationBinding }) {
   if (!hasBindingFields(binding)) return <BindingEmpty />;
 
   return (

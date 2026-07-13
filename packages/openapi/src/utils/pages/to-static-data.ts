@@ -5,6 +5,7 @@ import type { StructuredData } from 'fumadocs-core/mdx-plugins';
 import type { GeneratedPageProps } from './builder';
 import { idToTitle } from '@fumadocs/api-docs/utils/id-to-title';
 import { dereferenceShallow } from '@fumadocs/api-docs/schema/dereference';
+import { createMagicProxy } from '@scalar/json-magic/magic-proxy';
 
 export function toStaticData(
   page: GeneratedPageProps,
@@ -13,6 +14,7 @@ export function toStaticData(
   toc: TOCItemType[];
   structuredData: StructuredData;
 } {
+  const proxied = createMagicProxy(doc as Record<string, unknown>) as Document;
   const slugger = new Slugger();
   const toc: TOCItemType[] = [];
   const structuredData: StructuredData = { headings: [], contents: [] };
@@ -41,14 +43,14 @@ export function toStaticData(
   }
 
   for (const item of page.operations ?? []) {
-    const operation = dereferenceShallow(doc.paths?.[item.path], doc)?.[item.method];
+    const operation = dereferenceShallow(proxied.paths?.[item.path])?.[item.method];
     if (!operation) continue;
 
     pathItem(operation, item.path);
   }
 
   for (const item of page.webhooks ?? []) {
-    const webhook = dereferenceShallow(doc.webhooks?.[item.name], doc)?.[item.method];
+    const webhook = dereferenceShallow(proxied.webhooks?.[item.name])?.[item.method];
     if (!webhook) continue;
 
     pathItem(webhook, item.name);

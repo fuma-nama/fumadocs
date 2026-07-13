@@ -1,6 +1,5 @@
 'use client';
 import type { NatsOperationBinding } from '@/types/asyncapi-3';
-import type { NoReference } from '@fumadocs/api-docs/schema';
 import {
   createBinding,
   hasBindingFields,
@@ -9,11 +8,11 @@ import {
   BindingFieldRow,
 } from '../shared';
 
-function getNatsOperationSummary(binding: NoReference<NatsOperationBinding>): string | undefined {
+function getNatsOperationSummary(binding: NatsOperationBinding): string | undefined {
   return binding.queue;
 }
 
-function NatsOperationBinding({ binding }: { binding: NoReference<NatsOperationBinding> }) {
+function NatsOperationBinding({ binding }: { binding: NatsOperationBinding }) {
   if (!hasBindingFields(binding)) return <BindingEmpty />;
 
   return (

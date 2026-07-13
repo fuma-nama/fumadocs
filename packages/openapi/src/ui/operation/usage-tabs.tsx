@@ -12,7 +12,6 @@ import {
   CodeBlockTabsTrigger,
 } from 'fumadocs-ui/components/codeblock';
 import { ResponseTabs } from './response-tabs';
-import { NoReference } from '@fumadocs/api-docs/schema';
 import { useRenderContext, useServerContext } from '@/ui/contexts/api';
 import {
   Select,
@@ -33,8 +32,8 @@ export function UsageTabs({
   pathItem,
 }: {
   method: HttpMethods;
-  operation: NoReference<OperationObject>;
-  pathItem: NoReference<PathItemObject>;
+  operation: OperationObject;
+  pathItem: PathItemObject;
 }) {
   const ctx = useRenderContext();
   let { renderAPIExampleUsageTabs, renderAPIExampleLayout } = ctx.content ?? {};

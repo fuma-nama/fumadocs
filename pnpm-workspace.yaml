@@ -12,6 +12,7 @@ minimumReleaseAgeExclude:
   - tegami@1.2.2
   - takumi-js@2.0.0
   - '@takumi-rs/*'
+  - '@fumari/json-schema-ts@1.0.2'
 allowBuilds:
   '@parcel/watcher': false
   core-js: false

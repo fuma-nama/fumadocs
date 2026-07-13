@@ -18,7 +18,6 @@ import type { RequestTabsRenderOptions } from './operation/request-tabs';
 import type { ResponseTabsRenderOptions } from './operation/response-tabs';
 import type { PlaygroundClientOptions } from '@/playground/client';
 import type { GeneratedPageProps, WebhookItem, OperationItem } from '@/utils/pages/builder';
-import type { NoReference } from '@fumadocs/api-docs/schema';
 import type { ParsedSchema } from '@/utils/schema';
 import { createOpenAPIPageBase } from './base';
 
@@ -32,8 +31,8 @@ export interface GenerateTypeScriptDefinitionsContext {
 export interface APIPlaygroundProps {
   path: string;
   method: HttpMethods;
-  operation: NoReference<OperationObject>;
-  pathItem: NoReference<PathItemObject>;
+  operation: OperationObject;
+  pathItem: PathItemObject;
   ctx: RenderContext;
 }
 
@@ -59,9 +58,9 @@ export interface CreateOpenAPIPageOptions {
    * Generate example code usage for each endpoint.
    */
   generateCodeSamples?: (options: {
-    operation: NoReference<OperationObject>;
+    operation: OperationObject;
     method: HttpMethods;
-    pathItem: NoReference<PathItemObject>;
+    pathItem: PathItemObject;
   }) => InlineCodeUsageGenerator[];
 
   shiki?: ShikiFactory;
@@ -135,9 +134,9 @@ export interface CreateOpenAPIPageOptions {
         callbacks: ReactNode;
       },
       context: {
-        operation: NoReference<OperationObject>;
+        operation: OperationObject;
         method: HttpMethods;
-        pathItem: NoReference<PathItemObject>;
+        pathItem: PathItemObject;
         ctx: RenderContext;
       },
     ) => ReactNode;

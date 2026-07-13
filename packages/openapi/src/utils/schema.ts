@@ -1,5 +1,7 @@
 import type { ExampleObject, MediaTypeObject, TagObject } from '@/types';
 import { idToTitle } from '@fumadocs/api-docs/utils/id-to-title';
+import { dereferenceShallow } from '@fumadocs/api-docs/schema/dereference';
+import { getRaw } from '@scalar/json-magic/magic-proxy';
 
 export const methodKeys = ['get', 'post', 'patch', 'delete', 'head', 'put'] as const;
 
@@ -30,22 +32,26 @@ interface ExampleLike {
 }
 
 export function pickExample(value: ExampleLike): unknown | undefined {
+  // `getRaw` unwraps magic proxies, example values must be plain objects
   if (value.example !== undefined) {
-    return value.example;
+    return getRaw(value.example);
   }
 
   if (value.content) {
     const type = getPreferredType(value.content);
-    const content = type ? value.content[type] : undefined;
+    const content = type ? dereferenceShallow(value.content[type]) : undefined;
 
     if (type && content) {
-      const out = value.examples?.[type].value ?? pickExample(content);
+      const example = value.examples?.[type];
+      const out =
+        (example !== undefined ? getRaw(dereferenceShallow(example).value) : undefined) ??
+        pickExample(content);
       if (out !== undefined) return out;
     }
   }
 
   if (value.examples) {
     const examples = Object.values(value.examples);
-    if (examples.length > 0) return examples[0].value;
+    if (examples.length > 0) return getRaw(dereferenceShallow(examples[0]).value);
   }
 }

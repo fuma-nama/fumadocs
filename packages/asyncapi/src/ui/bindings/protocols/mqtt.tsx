@@ -4,7 +4,6 @@ import type {
   MqttOperationBinding,
   MqttServerBinding,
 } from '@/types/asyncapi-3';
-import type { NoReference } from '@fumadocs/api-docs/schema';
 import {
   createBinding,
   hasBindingFields,
@@ -30,22 +29,22 @@ function formatPayloadFormatIndicator(value: number): string {
   return String(value);
 }
 
-function getMqttServerSummary(binding: NoReference<MqttServerBinding>): string | undefined {
+function getMqttServerSummary(binding: MqttServerBinding): string | undefined {
   return joinBindingSummary(binding.clientId, binding.lastWill?.topic);
 }
 
-function getMqttOperationSummary(binding: NoReference<MqttOperationBinding>): string | undefined {
+function getMqttOperationSummary(binding: MqttOperationBinding): string | undefined {
   return joinBindingSummary(
     binding.qos !== undefined && formatQos(binding.qos),
     binding.retain && 'retain',
   );
 }
 
-function getMqttMessageSummary(binding: NoReference<MqttMessageBinding>): string | undefined {
+function getMqttMessageSummary(binding: MqttMessageBinding): string | undefined {
   return binding.contentType;
 }
 
-function MqttServerBinding({ binding }: { binding: NoReference<MqttServerBinding> }) {
+function MqttServerBinding({ binding }: { binding: MqttServerBinding }) {
   if (!hasBindingFields(binding)) return <BindingEmpty />;
 
   return (
@@ -131,7 +130,7 @@ function MqttServerBinding({ binding }: { binding: NoReference<MqttServerBinding
   );
 }
 
-function MqttOperationBinding({ binding }: { binding: NoReference<MqttOperationBinding> }) {
+function MqttOperationBinding({ binding }: { binding: MqttOperationBinding }) {
   if (!hasBindingFields(binding)) return <BindingEmpty />;
 
   return (
@@ -164,7 +163,7 @@ function MqttOperationBinding({ binding }: { binding: NoReference<MqttOperationB
   );
 }
 
-function MqttMessageBinding({ binding }: { binding: NoReference<MqttMessageBinding> }) {
+function MqttMessageBinding({ binding }: { binding: MqttMessageBinding }) {
   if (!hasBindingFields(binding)) return <BindingEmpty />;
 
   return (

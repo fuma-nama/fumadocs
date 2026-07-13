@@ -36,8 +36,6 @@
     "./schema/bundle": "./dist/schema/bundle.js",
     "./schema/dereference": "./dist/schema/dereference.js",
     "./schema/merge": "./dist/schema/merge.js",
-    "./schema/ref": "./dist/schema/ref.js",
-    "./schema/resolve-ref": "./dist/schema/resolve-ref.js",
     "./schema/sample": "./dist/schema/sample.js",
     "./schema/to-string": "./dist/schema/to-string.js",
     "./utils/id-to-title": "./dist/utils/id-to-title.js",
@@ -57,12 +55,13 @@
   },
   "dependencies": {
     "@base-ui/react": "^1.6.0",
+    "@cfworker/json-schema": "^4.1.1",
     "@fuma-translate/react": "^1.0.2",
     "@fumari/stf": "workspace:*",
+    "@scalar/json-magic": "^0.12.17",
     "class-variance-authority": "^0.7.1",
     "cnfast": "^0.0.8",
     "github-slugger": "^2.0.0",
-    "js-yaml": "^5.2.1",
     "lucide-react": "^1.23.0"
   },
   "devDependencies": {
@@ -70,7 +69,6 @@
     "@tailwindcss/oxide": "^4.3.2",
     "@types/node": "26.1.1",
     "@types/react": "^19.2.17",
-    "ajv": "^8.20.0",
     "fumadocs-core": "workspace:*",
     "fumadocs-ui": "workspace:@fumadocs/base-ui@*",
     "json-schema-typed": "^8.0.2",
@@ -94,10 +92,6 @@
     }
   },
   "inlinedDependencies": {
-    "@fastify/deepmerge": "3.2.1",
-    "ajv": "8.20.0",
-    "fast-deep-equal": "3.1.3",
-    "fast-uri": "3.1.0",
-    "json-schema-traverse": "1.0.0"
+    "@fastify/deepmerge": "3.2.1"
   }
 }

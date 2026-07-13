@@ -36,8 +36,9 @@
   "dependencies": {
     "@fuma-translate/react": "^1.0.2",
     "@fumadocs/api-docs": "workspace:*",
-    "@fumari/json-schema-ts": "^0.0.2",
+    "@fumari/json-schema-ts": "^1.0.2",
     "@fumari/stf": "workspace:*",
+    "@scalar/json-magic": "^0.12.17",
     "chokidar": "^5.0.0",
     "class-variance-authority": "^0.7.1",
     "cnfast": "^0.0.8",

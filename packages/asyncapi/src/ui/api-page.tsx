@@ -1,3 +1,4 @@
+import type { ServerObject } from '@/types';
 import { Operation } from '@/ui/operation';
 import type { GeneratedPageProps } from '@/utils/pages/builder';
 import { ServerProvider, useRenderContext } from './contexts/api';
@@ -8,7 +9,11 @@ export function PageContent({
   operations,
 }: Omit<GeneratedPageProps, 'document'>) {
   const ctx = useRenderContext();
-  const { dereferenced } = ctx.schema;
+  const { dereferenced, resolve } = ctx.schema;
+  const servers: Record<string, ServerObject> = {};
+  for (const [k, v] of Object.entries(dereferenced.servers ?? {})) {
+    servers[k] = resolve(v);
+  }
   let { renderPageLayout } = ctx.content ?? {};
   renderPageLayout ??= (slots) => (
     <div className="flex flex-col gap-24 text-sm @container">
@@ -34,5 +39,5 @@ export function PageContent({
     ctx,
   );
 
-  return <ServerProvider servers={dereferenced.servers ?? {}}>{content}</ServerProvider>;
+  return <ServerProvider servers={servers}>{content}</ServerProvider>;
 }

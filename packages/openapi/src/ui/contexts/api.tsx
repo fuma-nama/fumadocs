@@ -2,10 +2,9 @@
 import { createContext, type ReactNode, use, useEffect, useMemo, useState } from 'react';
 import type { RenderContext, ServerObject } from '@/types';
 import { useStorageKey } from '@/utils/storage-key';
-import { NoReference } from '@fumadocs/api-docs/schema';
 
 interface ServerContextType {
-  servers?: NoReference<ServerObject>[];
+  servers?: ServerObject[];
   server: SelectedServer | null;
   setServer: (value: string) => void;
   setServerVariables: (value: Record<string, string>) => void;
@@ -48,7 +47,7 @@ export function ServerProvider({
   servers,
   children,
 }: {
-  servers?: NoReference<ServerObject>[];
+  servers?: ServerObject[];
   children: ReactNode;
 }) {
   const storageKey = useStorageKey().of('server-url');
@@ -122,7 +121,7 @@ export function ServerProvider({
   );
 }
 
-function getDefaultValues(server: NoReference<ServerObject>): Record<string, string> {
+function getDefaultValues(server: ServerObject): Record<string, string> {
   const out: Record<string, string> = {};
   if (!server.variables) return out;
 

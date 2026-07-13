@@ -1,34 +1,32 @@
-import type { JSONSchema } from 'json-schema-typed/draft-2020-12';
 import type { Document } from '@/types';
-import { dereferenceSync } from '@fumadocs/api-docs/schema/dereference';
-import type { NoReference } from '@fumadocs/api-docs/schema';
+import { createMagicProxy } from '@scalar/json-magic/magic-proxy';
+import { dereferenceShallow } from '@fumadocs/api-docs/schema/dereference';
+import type { NoReferenceSwallow } from '@fumadocs/api-docs/schema';
 
 export interface DereferencedDocument {
   /**
-   * dereferenced document
+   * document wrapped in a magic proxy (`@scalar/json-magic`).
+   *
+   * Reference Objects remain in the document — resolve them lazily with {@link resolve}.
    */
-  dereferenced: NoReference<Document>;
+  dereferenced: Document;
 
   /**
-   * Get raw $ref from dereferenced object
+   * Shallowly resolve a Reference Object from the document, merging sibling keywords.
+   *
+   * Non-reference values are returned as-is.
    */
-  getRawRef: (obj: object) => string | undefined;
+  resolve: <T>(node: T) => NoReferenceSwallow<T>;
 
   bundled: Document;
 }
 
 export function dereferenceBundledDocument(bundled: Document): DereferencedDocument {
-  const dereferenceMap = new Map<object, string>();
-
   return {
     bundled,
-    dereferenced: dereferenceSync(bundled as JSONSchema, {
-      setOriginalRef(schema, ref) {
-        dereferenceMap.set(schema as object, ref);
-      },
-    }) as NoReference<Document>,
-    getRawRef(obj: object) {
-      return dereferenceMap.get(obj);
+    dereferenced: createMagicProxy(bundled as Record<string, unknown>) as Document,
+    resolve(node) {
+      return dereferenceShallow(node);
     },
   };
 }

@@ -1,6 +1,5 @@
 'use client';
 import type { PulsarChannelBinding, PulsarServerBinding } from '@/types/asyncapi-3';
-import type { NoReference } from '@fumadocs/api-docs/schema';
 import {
   createBinding,
   hasBindingFields,
@@ -18,11 +17,11 @@ function formatPersistence(value: string): string {
   return value;
 }
 
-function getPulsarServerSummary(binding: NoReference<PulsarServerBinding>): string | undefined {
+function getPulsarServerSummary(binding: PulsarServerBinding): string | undefined {
   return binding.tenant;
 }
 
-function PulsarServerBinding({ binding }: { binding: NoReference<PulsarServerBinding> }) {
+function PulsarServerBinding({ binding }: { binding: PulsarServerBinding }) {
   if (!hasBindingFields(binding)) return <BindingEmpty />;
 
   return (
@@ -34,14 +33,14 @@ function PulsarServerBinding({ binding }: { binding: NoReference<PulsarServerBin
   );
 }
 
-function getPulsarChannelSummary(binding: NoReference<PulsarChannelBinding>): string | undefined {
+function getPulsarChannelSummary(binding: PulsarChannelBinding): string | undefined {
   return joinBindingSummary(
     binding.namespace,
     binding.persistence ? formatPersistence(binding.persistence) : undefined,
   );
 }
 
-function PulsarChannelBinding({ binding }: { binding: NoReference<PulsarChannelBinding> }) {
+function PulsarChannelBinding({ binding }: { binding: PulsarChannelBinding }) {
   if (!hasBindingFields(binding)) return <BindingEmpty />;
 
   return (

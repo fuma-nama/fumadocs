@@ -1,13 +1,12 @@
 'use client';
 import { createContext, type ReactNode, use, useEffect, useMemo, useState } from 'react';
 import type { RenderContext, ServerObject } from '@/types';
-import type { NoReference } from '@fumadocs/api-docs/schema';
 import { useStorageKey } from '../client/storage-key';
 import { getDefaultValues } from '@/utils/server-url';
 import { isPlainObject } from '@/utils/is-plain-object';
 
 interface ServerContextType {
-  servers: Record<string, NoReference<ServerObject>>;
+  servers: Record<string, ServerObject>;
   server: SelectedServer | null;
   setServer: (serverId: string) => void;
   setServerVariables: (value: Record<string, string>) => void;
@@ -48,7 +47,7 @@ export function ServerProvider({
   servers,
   children,
 }: {
-  servers: Record<string, NoReference<ServerObject>>;
+  servers: Record<string, ServerObject>;
   children: ReactNode;
 }) {
   const storageKey = useStorageKey().of('server-url');

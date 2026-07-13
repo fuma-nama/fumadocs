@@ -4,7 +4,6 @@ import { ReactNode, useMemo } from 'react';
 import { ClientCodeBlock } from '@/ui/components/codeblock';
 import { getExampleMessages, type ExampleMessageItem } from '@/utils/get-example-messages';
 import { useTranslations } from '@fuma-translate/react';
-import { NoReference } from '@fumadocs/api-docs/schema';
 import { MessageObject } from '@/types';
 import { SelectTab, SelectTabs, SelectTabTrigger } from '@fumadocs/api-docs/components/select-tab';
 import { Markdown } from '../components/markdown';
@@ -20,7 +19,7 @@ export function MessageExamples({
   message,
   headingLevel,
 }: {
-  message: NoReference<MessageObject>;
+  message: MessageObject;
   headingLevel: number;
 }) {
   const ctx = useRenderContext();

@@ -1,6 +1,5 @@
 'use client';
 import type { Mqtt5ServerBinding } from '@/types/asyncapi-3';
-import type { NoReference } from '@fumadocs/api-docs/schema';
 import {
   createBinding,
   hasBindingFields,
@@ -11,7 +10,7 @@ import {
   BindingSchema,
 } from '../shared';
 
-function Mqtt5ServerBinding({ binding }: { binding: NoReference<Mqtt5ServerBinding> }) {
+function Mqtt5ServerBinding({ binding }: { binding: Mqtt5ServerBinding }) {
   if (!hasBindingFields(binding)) return <BindingEmpty />;
 
   return (

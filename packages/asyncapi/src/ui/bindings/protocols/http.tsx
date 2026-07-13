@@ -1,6 +1,5 @@
 'use client';
 import type { HttpMessageBinding, HttpOperationBinding } from '@/types/asyncapi-3';
-import type { NoReference } from '@fumadocs/api-docs/schema';
 import {
   createBinding,
   hasBindingFields,
@@ -11,15 +10,15 @@ import {
   BindingSchema,
 } from '../shared';
 
-function getHttpOperationSummary(binding: NoReference<HttpOperationBinding>): string | undefined {
+function getHttpOperationSummary(binding: HttpOperationBinding): string | undefined {
   return binding.method;
 }
 
-function getHttpMessageSummary(binding: NoReference<HttpMessageBinding>): string | undefined {
+function getHttpMessageSummary(binding: HttpMessageBinding): string | undefined {
   return typeof binding.statusCode === 'number' ? String(binding.statusCode) : undefined;
 }
 
-function HttpOperationBinding({ binding }: { binding: NoReference<HttpOperationBinding> }) {
+function HttpOperationBinding({ binding }: { binding: HttpOperationBinding }) {
   if (!hasBindingFields(binding)) return <BindingEmpty />;
 
   return (
@@ -40,7 +39,7 @@ function HttpOperationBinding({ binding }: { binding: NoReference<HttpOperationB
   );
 }
 
-function HttpMessageBinding({ binding }: { binding: NoReference<HttpMessageBinding> }) {
+function HttpMessageBinding({ binding }: { binding: HttpMessageBinding }) {
   if (!hasBindingFields(binding)) return <BindingEmpty />;
 
   return (
