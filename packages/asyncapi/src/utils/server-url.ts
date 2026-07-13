@@ -1,21 +1,19 @@
 import type { ServerObject } from '@/types';
-import type { NoReference } from '@fumadocs/api-docs/schema';
+import { dereferenceShallow } from '@fumadocs/api-docs/schema/dereference';
 
-export function getDefaultValues(server: NoReference<ServerObject>): Record<string, string> {
+export function getDefaultValues(server: ServerObject): Record<string, string> {
   const out: Record<string, string> = {};
   if (!server.variables) return out;
 
   for (const [k, v] of Object.entries(server.variables)) {
-    if (v.default) out[k] = v.default;
+    const variable = dereferenceShallow(v);
+    if (variable.default) out[k] = variable.default;
   }
 
   return out;
 }
 
-export function resolveServerUrl(
-  server: NoReference<ServerObject>,
-  variables: Record<string, string>,
-): string {
+export function resolveServerUrl(server: ServerObject, variables: Record<string, string>): string {
   let host = server.host;
   let pathname = server.pathname ?? '';
 

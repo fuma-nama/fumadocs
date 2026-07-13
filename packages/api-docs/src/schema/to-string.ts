@@ -1,15 +1,12 @@
-import type { ParsedSchema, SchemaResolver } from '@/schema';
+import type { ParsedSchema } from '@/schema';
+import { dereferenceShallow } from './dereference';
 
 export enum FormatFlags {
   None = 0,
   UseAlias = 1 << 0,
 }
 
-export function schemaToString(
-  value: ParsedSchema,
-  resolver?: SchemaResolver,
-  flags: FormatFlags = FormatFlags.None,
-): string {
+export function schemaToString(value: ParsedSchema, flags: FormatFlags = FormatFlags.None): string {
   function union(union: readonly ParsedSchema[], sep: string, flags: FormatFlags): string {
     const members = new Set();
     const out: string[] = [];
@@ -31,7 +28,9 @@ export function schemaToString(
   }
 
   function run(input: ParsedSchema, flags: FormatFlags): string {
-    const { dereferenced: schema, $ref: rawRef } = resolver?.(input) ?? { dereferenced: input };
+    const rawRef =
+      typeof input === 'object' && typeof input.$ref === 'string' ? input.$ref : undefined;
+    const schema = dereferenceShallow(input);
 
     if (schema === true) return 'any';
     else if (schema === false) return 'never';

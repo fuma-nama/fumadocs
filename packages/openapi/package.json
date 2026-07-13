@@ -1,6 +1,6 @@
 {
   "name": "fumadocs-openapi",
-  "version": "11.1.1",
+  "version": "11.2.0",
   "description": "Generate MDX docs for your OpenAPI spec",
   "keywords": [
     "Docs",
@@ -49,18 +49,19 @@
   "dependencies": {
     "@fuma-translate/react": "^1.0.2",
     "@fumadocs/api-docs": "workspace:*",
-    "@fumari/json-schema-ts": "^0.0.2",
+    "@fumari/json-schema-ts": "^1.0.2",
     "@fumari/stf": "workspace:*",
+    "@scalar/json-magic": "^0.12.17",
     "chokidar": "^5.0.0",
     "class-variance-authority": "^0.7.1",
     "cnfast": "^0.0.8",
     "github-slugger": "^2.0.0",
     "hast-util-to-jsx-runtime": "^2.3.6",
-    "js-yaml": "^5.2.1",
-    "lucide-react": "^1.23.0",
+    "lucide-react": "^1.24.0",
     "remark": "^15.0.1",
     "remark-rehype": "^11.1.2",
-    "shiki": "^4.3.1"
+    "shiki": "^4.3.1",
+    "yaml": "^2.9.0"
   },
   "devDependencies": {
     "@scalar/api-client-react": "^2.0.32",
@@ -73,7 +74,7 @@
     "fumadocs-ui": "workspace:@fumadocs/base-ui@*",
     "json-schema-typed": "^8.0.2",
     "tsconfig": "workspace:*",
-    "tsdown": "0.22.4",
+    "tsdown": "0.22.5",
     "xml-js": "^1.6.11"
   },
   "peerDependencies": {

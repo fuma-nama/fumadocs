@@ -73,7 +73,7 @@ export function AccordionContent(props: ComponentProps<typeof Primitive.Panel>) 
     <Primitive.Panel
       {...props}
       className={cn(
-        'overflow-hidden data-[ending-style]:animate-fd-accordion-up data-[starting-style]:animate-fd-accordion-down',
+        'h-(--accordion-panel-height) overflow-hidden transition-[height] ease-out data-ending-style:h-0 data-starting-style:h-0',
         props.className,
       )}
     />

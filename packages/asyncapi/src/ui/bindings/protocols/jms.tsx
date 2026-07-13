@@ -1,6 +1,5 @@
 'use client';
 import type { JmsChannelBinding, JmsMessageBinding, JmsServerBinding } from '@/types/asyncapi-3';
-import type { NoReference } from '@fumadocs/api-docs/schema';
 import {
   createBinding,
   DestinationChannelBinding,
@@ -13,11 +12,11 @@ import {
   joinBindingSummary,
 } from '../shared';
 
-function getJmsServerSummary(binding: NoReference<JmsServerBinding>): string | undefined {
+function getJmsServerSummary(binding: JmsServerBinding): string | undefined {
   return joinBindingSummary(binding.jmsConnectionFactory, binding.clientID);
 }
 
-function JmsServerBinding({ binding }: { binding: NoReference<JmsServerBinding> }) {
+function JmsServerBinding({ binding }: { binding: JmsServerBinding }) {
   if (!hasBindingFields(binding)) return <BindingEmpty />;
 
   return (
@@ -48,13 +47,13 @@ function JmsServerBinding({ binding }: { binding: NoReference<JmsServerBinding> 
 export const jmsBinding = createBinding({
   label: 'JMS',
   Server: JmsServerBinding,
-  Channel: ({ binding }: { binding: NoReference<JmsChannelBinding> }) => (
+  Channel: ({ binding }: { binding: JmsChannelBinding }) => (
     <DestinationChannelBinding binding={binding} />
   ),
-  Message: ({ binding }: { binding: NoReference<JmsMessageBinding> }) => (
+  Message: ({ binding }: { binding: JmsMessageBinding }) => (
     <HeadersMessageBinding binding={binding} />
   ),
   getServerSummary: getJmsServerSummary,
-  getChannelSummary: (binding: NoReference<JmsChannelBinding>) =>
+  getChannelSummary: (binding: JmsChannelBinding) =>
     joinBindingSummary(binding.destination, binding.destinationType),
 });

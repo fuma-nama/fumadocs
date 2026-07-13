@@ -4,13 +4,15 @@ packages:
   - examples/*
   - '!examples/stackblitz'
 minimumReleaseAgeExclude:
+  - '@fumari/sponsors@0.1.0'
   - 'fuma-translate'
   - '@fuma-translate/*'
   - react-router
   - '@react-router/*'
   - tegami@1.2.2
-  - takumi-js@2.0.0
   - '@takumi-rs/*'
+  - '@fumari/json-schema-ts@1.0.2'
+  - takumi-js@2.1.1
 allowBuilds:
   '@parcel/watcher': false
   core-js: false

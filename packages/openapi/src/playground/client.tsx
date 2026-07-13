@@ -20,7 +20,7 @@ import {
   CollapsibleContent,
   CollapsibleTrigger,
 } from '@fumadocs/api-docs/components/collapsible';
-import { ChevronDown, LoaderCircle } from 'lucide-react';
+import { ChevronDown, LoaderCircle, PlusIcon } from 'lucide-react';
 import { encodeRequestData } from '@/requests/media/encode';
 import { buttonVariants } from 'fumadocs-ui/components/ui/button';
 import { cn } from '@/utils/cn';
@@ -65,7 +65,6 @@ import { useAuth } from './auth';
 import { useOnChange } from 'fumadocs-core/utils/use-on-change';
 import { Spinner } from '@fumadocs/api-docs/components/spinner';
 import { joinURL, resolveServerUrl } from '@fumadocs/api-docs/utils/url';
-import { NoReference } from '@fumadocs/api-docs/schema';
 
 export interface FormValues extends Record<string, unknown> {
   path: Record<string, unknown>;
@@ -78,8 +77,8 @@ export interface FormValues extends Record<string, unknown> {
 export interface PlaygroundClientProps extends Omit<ComponentProps<'form'>, 'method'> {
   route: string;
   method: HttpMethods;
-  operation: NoReference<OperationObject>;
-  pathItem: NoReference<PathItemObject>;
+  operation: OperationObject;
+  pathItem: PathItemObject;
   writeOnly: boolean;
   readOnly: boolean;
 }
@@ -144,23 +143,23 @@ export default function PlaygroundClient({
 }: PlaygroundClientProps) {
   const t = useTranslations({ note: 'playground' });
   const ctx = useRenderContext();
-  const { bundled, dereferenced } = ctx.schema;
+  const { dereferenced } = ctx.schema;
   const { parameters, body } = useMemo(() => {
     const parameters: ParameterObject[] = [];
     if (operation.parameters)
-      for (const p of operation.parameters) parameters.push(dereferenceShallow(p, bundled));
+      for (const p of operation.parameters) parameters.push(dereferenceShallow(p));
     if (pathItem.parameters)
-      for (const p of pathItem.parameters) parameters.push(dereferenceShallow(p, bundled));
+      for (const p of pathItem.parameters) parameters.push(dereferenceShallow(p));
     let body: RequestBodyInfo | undefined;
 
     if (operation.requestBody) {
-      const content = dereferenceShallow(operation.requestBody, bundled).content;
+      const content = dereferenceShallow(operation.requestBody).content;
       const mediaType = content ? getPreferredType(content) : undefined;
 
       if (content && mediaType) {
         body = {
           mediaType,
-          schema: dereferenceShallow(content[mediaType], bundled).schema ?? true,
+          schema: dereferenceShallow(content[mediaType]).schema ?? true,
         };
       }
     }
@@ -169,7 +168,7 @@ export default function PlaygroundClient({
       body,
       parameters,
     };
-  }, [bundled, operation, pathItem]);
+  }, [operation, pathItem]);
   const securityEntries = useMemo(() => {
     const result: SecurityEntry[][] = [];
     const security = operation.security ?? dereferenced.security ?? [];
@@ -230,7 +229,10 @@ export default function PlaygroundClient({
 
   const testQuery = useQuery(async (input: FormValues) => {
     const fetcher = await import('./fetcher').then((mod) =>
-      mod.createBrowserFetcher(mediaAdapters, { proxyUrl: ctx.proxyUrl, ...fetchOptions }),
+      mod.createBrowserFetcher(mediaAdapters, {
+        proxyUrl: ctx.proxyUrl,
+        ...fetchOptions,
+      }),
     );
 
     const encoded = encodeRequestData(
@@ -294,7 +296,7 @@ export default function PlaygroundClient({
 
   return (
     <StfProvider value={stf}>
-      <SchemaProvider docRoot={bundled as never} writeOnly={writeOnly} readOnly={readOnly}>
+      <SchemaProvider docRoot={dereferenced as never} writeOnly={writeOnly} readOnly={readOnly}>
         <form
           {...rest}
           className={cn(
@@ -358,11 +360,67 @@ function SecurityRequirements({
   const { isLoading, error } = useAuth();
   const defaultOpen = isLoading || error != null;
   const [open, setOpen] = useState(defaultOpen);
-  const { CollapsiblePanel = DefaultCollapsiblePanel } =
-    useRenderContext().playground?.components ?? {};
+  const {
+    schema: { dereferenced, resolve },
+    playground: { components: { CollapsiblePanel = DefaultCollapsiblePanel } = {} } = {},
+  } = useRenderContext();
+  const schemes = dereferenced.components?.securitySchemes;
 
   useOnChange(defaultOpen, () => {
     if (defaultOpen) setOpen(true);
+  });
+
+  const items = securities.map((requirement, i) => {
+    if (requirement.length === 1) {
+      const scheme = resolve(schemes?.[requirement[0].id]);
+
+      return {
+        value: i,
+        label: (
+          <div>
+            <p
+              className={cn(
+                'font-mono font-medium',
+                scheme?.deprecated && 'text-fd-muted-foreground line-through',
+              )}
+            >
+              {requirement[0].id}
+            </p>
+            <p className="text-fd-muted-foreground whitespace-pre-wrap">{scheme?.description}</p>
+          </div>
+        ),
+      };
+    }
+
+    return {
+      value: i,
+      label: (
+        <div>
+          <p className="inline-flex items-center gap-1 font-mono font-medium">
+            {requirement.map((item, i) => (
+              <Fragment key={i}>
+                {i > 0 && <PlusIcon className="text-fd-muted-foreground size-3.5" />}
+                <span
+                  className={cn(
+                    resolve(schemes?.[item.id])?.deprecated &&
+                      'text-fd-muted-foreground line-through',
+                  )}
+                >
+                  {item.id}
+                </span>
+              </Fragment>
+            ))}
+          </p>
+          <ul className="text-fd-muted-foreground whitespace-pre-wrap list-disc list-inside">
+            {requirement.map((item, i) => (
+              <li key={i} className="empty:hidden">
+                {resolve(schemes?.[item.id])?.description}
+              </li>
+            ))}
+          </ul>
+        </div>
+      ),
+    };
   });
 
   return (
@@ -388,53 +446,23 @@ function SecurityRequirements({
         </div>
       )}
       <Select
-        items={securities.map((security, i) => ({
-          value: i.toString(),
-          label: <SecurityRequirement requirement={security} />,
-        }))}
-        value={securityId.toString()}
-        onValueChange={(v) => setSecurityId(Number(v))}
+        items={items}
+        value={securityId}
+        onValueChange={(v) => v !== null && setSecurityId(v)}
       >
         <SelectTrigger>
           <SelectValue />
         </SelectTrigger>
         <SelectContent>
-          {securities.map((security, i) => (
-            <SelectItem key={i} value={i.toString()}>
-              <SecurityRequirement requirement={security} />
+          {items.map(({ value, label }) => (
+            <SelectItem key={value} value={value}>
+              {label}
             </SelectItem>
           ))}
         </SelectContent>
       </Select>
       {children}
     </CollapsiblePanel>
-  );
-}
-
-function SecurityRequirement({ requirement }: { requirement: SecurityEntry[] }) {
-  const schemes = useRenderContext().schema.dereferenced.components?.securitySchemes;
-
-  return (
-    <div className="flex flex-col gap-2 max-w-[600px]">
-      {requirement.map((item) => {
-        const scheme = schemes?.[item.id];
-        if (!scheme) return;
-
-        return (
-          <div key={item.id}>
-            <p
-              className={cn(
-                'font-mono font-medium',
-                scheme.deprecated && 'text-fd-muted-foreground line-through',
-              )}
-            >
-              {item.id}
-            </p>
-            <p className="text-fd-muted-foreground whitespace-pre-wrap">{scheme.description}</p>
-          </div>
-        );
-      })}
-    </div>
   );
 }
 
@@ -558,13 +586,16 @@ function useAuthInputs(engine: DataEngine, requirements: SecurityEntry[][]) {
   const storageKeys = useStorageKey();
   const t = useTranslations({ note: 'playground' });
   const ctx = useRenderContext();
+  const { resolve } = ctx.schema;
   const schemes = ctx.schema.dereferenced.components?.securitySchemes;
   const { transformAuthInputs } = ctx.playground ?? {};
 
   const [requirementId, setRequirementId] = useState(() => {
     if (!schemes || requirements.length === 0) return -1;
 
-    const idx = requirements.findIndex((s) => s.every((item) => !schemes[item.id].deprecated));
+    const idx = requirements.findIndex((s) =>
+      s.every((item) => !resolve(schemes[item.id]).deprecated),
+    );
     return idx !== -1 ? idx : 0;
   });
   const requirement = requirementId === -1 ? null : requirements[requirementId];
@@ -573,7 +604,7 @@ function useAuthInputs(engine: DataEngine, requirements: SecurityEntry[][]) {
     if (!requirement || !schemes) return [];
 
     return requirement.map((item) => {
-      const scheme = schemes?.[item.id];
+      const scheme = resolve(schemes?.[item.id]);
       if (scheme.type === 'http' && scheme.scheme === 'basic') {
         const fieldName: FieldKey = ['header', 'Authorization'];
         return {
@@ -680,7 +711,7 @@ function useAuthInputs(engine: DataEngine, requirements: SecurityEntry[][]) {
         ),
       };
     });
-  }, [requirement, storageKeys, schemes, t]);
+  }, [requirement, storageKeys, schemes, resolve, t]);
   if (transformAuthInputs) inputs = transformAuthInputs(inputs);
 
   useListener({

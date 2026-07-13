@@ -1,5 +1,5 @@
 import type { AsyncAPIObject, TagObject } from '@/types';
-import { dump } from 'js-yaml';
+import { stringify } from 'yaml';
 import {
   type GeneratedPageProps,
   getPageProps,
@@ -10,7 +10,6 @@ import {
 import type { InternalAsyncAPIMeta } from '@/server';
 import { toStaticData } from '@/utils/pages/to-static-data';
 import { doubleQuote } from '@/utils/string-utils';
-import { removeUndefined } from '../remove-undefined';
 
 export interface PagesToTextOptions {
   imports?: {
@@ -80,7 +79,10 @@ export function generateDocument(
 ): string {
   const { addGeneratedComment = true, imports } = options;
   const out: string[] = [];
-  const banner = dump(removeUndefined(frontmatter as object)).trimEnd();
+  const banner = stringify(frontmatter, {
+    compat: 'yaml-1.1',
+    singleQuote: true,
+  }).trimEnd();
   if (banner.length > 0) out.push(`---\n${banner}\n---`);
 
   if (addGeneratedComment) {

@@ -1,20 +1,17 @@
-import { NoReference, ParsedSchema } from '@/schema';
-import { dereferenceSync } from '@/schema/dereference';
+import { ParsedSchema } from '@/schema';
+import { dereferenceShallow } from '@/schema/dereference';
 import { bundle } from '@/schema/bundle';
+import { createMagicProxy } from '@scalar/json-magic/magic-proxy';
 
 export async function fromSchema(input: string) {
   const bundled: ParsedSchema = await bundle(input);
-  const dereferenceMap = new Map<object, string>();
+  const dereferenced = createMagicProxy(bundled as Record<string, unknown>) as ParsedSchema;
 
   return {
     bundled,
-    dereferenced: dereferenceSync(bundled, {
-      setOriginalRef(schema, ref) {
-        dereferenceMap.set(schema as object, ref);
-      },
-    }) as NoReference<ParsedSchema>,
-    getRawRef(obj: object) {
-      return dereferenceMap.get(obj);
+    dereferenced,
+    resolve<T>(node: T) {
+      return dereferenceShallow(node);
     },
   };
 }

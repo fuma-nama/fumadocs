@@ -1,3 +1,7 @@
+## fumadocs-obsidian@0.2.1
+
+### Migrate from `js-yaml` to `yaml`
+
 ## fumadocs-obsidian@0.2.0
 
 ### Default to Base UI

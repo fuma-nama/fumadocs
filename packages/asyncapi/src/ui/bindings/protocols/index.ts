@@ -59,7 +59,7 @@ export interface BindingEntry {
   binding: Record<string, unknown>;
 }
 
-export function getBindingEntries(bindings: Record<string, unknown> | undefined): {
+export function getBindingEntries(bindings: object | undefined): {
   protocols: BindingEntry[];
   extensions: BindingEntry[];
 } {

@@ -2,6 +2,7 @@ import type { Document, HttpMethods, OperationObject, PathItemObject, TagObject 
 import { getTagDisplayName, methodKeys } from '@/utils/schema';
 import { idToTitle } from '@fumadocs/api-docs/utils/id-to-title';
 import { dereferenceShallow } from '@fumadocs/api-docs/schema/dereference';
+import { createMagicProxy } from '@scalar/json-magic/magic-proxy';
 import type { NoReferenceSwallow } from '@fumadocs/api-docs/schema';
 
 interface BaseEntry {
@@ -125,18 +126,20 @@ export function fromSchema(
 ): OutputEntry[] {
   const files: OutputEntry[] = [];
   const { toPages } = config;
+  // wrap in a magic proxy so that `dereferenceShallow` can resolve refs lazily
+  const document = createMagicProxy(bundled as Record<string, unknown>) as Document;
 
   toPages({
     id: schemaId,
-    document: bundled,
-    dereferenceShallow: (s) => dereferenceShallow(s, bundled),
+    document,
+    dereferenceShallow: (s) => dereferenceShallow(s),
     create(entry) {
       files.push(entry);
     },
     extract() {
       const result: ExtractedInfo = { webhooks: [], operations: [] };
 
-      for (const [path, pathItem] of Object.entries(bundled.paths ?? {})) {
+      for (const [path, pathItem] of Object.entries(document.paths ?? {})) {
         if (!pathItem) continue;
 
         for (const methodKey of methodKeys) {
@@ -150,8 +153,8 @@ export function fromSchema(
         }
       }
 
-      for (const [name, _pathItem] of Object.entries(bundled.webhooks ?? {})) {
-        const pathItem = dereferenceShallow(_pathItem, bundled);
+      for (const [name, _pathItem] of Object.entries(document.webhooks ?? {})) {
+        const pathItem = dereferenceShallow(_pathItem);
         if (!pathItem) continue;
 
         for (const methodKey of methodKeys) {
@@ -180,7 +183,7 @@ export function fromSchema(
         .join('/');
     },
     fromExtractedWebhook(item) {
-      const pathItem = dereferenceShallow(bundled.webhooks?.[item.name], bundled);
+      const pathItem = dereferenceShallow(document.webhooks?.[item.name]);
       if (!pathItem) return;
       const operation = pathItem?.[item.method];
       if (!operation) return;
@@ -193,7 +196,7 @@ export function fromSchema(
       };
     },
     fromExtractedOperation(item) {
-      const pathItem = dereferenceShallow(bundled.paths?.[item.path], bundled);
+      const pathItem = dereferenceShallow(document.paths?.[item.path]);
       if (!pathItem) return;
       const operation = pathItem?.[item.method];
       if (!operation) return;
@@ -217,7 +220,7 @@ export function fromSchema(
       };
     },
     fromTagName(name) {
-      const tag = bundled.tags?.find((item) => item.name === name);
+      const tag = document.tags?.find((item) => item.name === name);
       if (!tag) return;
 
       return {

@@ -58,7 +58,7 @@ export function AccordionTrigger({
       }
       {...props}
     >
-      <ChevronRight className="size-4 shrink-0 text-fd-muted-foreground transition-transform duration-200 group-data-[panel-open]:rotate-90" />
+      <ChevronRight className="size-4 shrink-0 text-fd-muted-foreground transition-transform duration-200 group-data-panel-open:rotate-90" />
       {children}
     </Primitive.Trigger>
   );
@@ -73,7 +73,7 @@ export function AccordionContent({
     <Primitive.Panel
       className={(s) =>
         cn(
-          'h-(--accordion-panel-height) overflow-hidden transition-[height] ease-out data-[ending-style]:h-0 data-[starting-style]:h-0',
+          'h-(--accordion-panel-height) overflow-hidden transition-[height] ease-out data-ending-style:h-0 data-starting-style:h-0',
           typeof className === 'function' ? className(s) : className,
         )
       }

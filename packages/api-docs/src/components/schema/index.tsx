@@ -1,10 +1,11 @@
 'use client';
 import { useMemo, type ReactNode } from 'react';
-import type { ParsedSchema, SchemaResolver } from '@/schema';
+import type { ParsedSchema } from '@/schema';
 import { FormatFlags, schemaToString } from '@/schema/to-string';
 import { mergeAllOf } from '@/schema/merge';
 import { BlockTag, InlineTag, SchemaUI, type SchemaUIProps } from '@/components/schema/client';
 import { fromTranslations, useTranslations } from '@fuma-translate/react';
+import { dereferenceShallow } from '@/schema/dereference';
 
 interface InfoTag {
   node: ReactNode;
@@ -60,7 +61,6 @@ export type SchemaData = FieldBase &
 export interface SchemaUIOptions {
   root: ParsedSchema;
   client: Omit<SchemaUIProps, 'generated'>;
-  resolver: SchemaResolver;
   renderMarkdown: (md: string) => ReactNode;
   renderCodeblock: (opts: { lang: string; code: string }) => ReactNode;
 
@@ -91,7 +91,6 @@ export function Schema({
   root,
   readOnly,
   writeOnly,
-  resolver,
   showExample,
   renderMarkdown,
   renderCodeblock,
@@ -100,7 +99,6 @@ export function Schema({
   const generated = useMemo(() => {
     return generateSchemaUI({
       root,
-      resolver,
       readOnly,
       writeOnly,
       showExample,
@@ -108,23 +106,13 @@ export function Schema({
       renderCodeblock,
       translations,
     });
-  }, [
-    root,
-    readOnly,
-    writeOnly,
-    resolver,
-    showExample,
-    renderMarkdown,
-    renderCodeblock,
-    translations,
-  ]);
+  }, [root, readOnly, writeOnly, showExample, renderMarkdown, renderCodeblock, translations]);
 
   return <SchemaUI {...client} generated={generated} />;
 }
 
 export function generateSchemaUI({
   root,
-  resolver,
   renderMarkdown,
   renderCodeblock,
   readOnly = false,
@@ -264,7 +252,7 @@ export function generateSchemaUI({
   const autoIds = new WeakMap<Exclude<ParsedSchema, boolean>, string>();
   function getSchemaId(schema: ParsedSchema): string {
     if (typeof schema === 'boolean') return String(schema);
-    const rawRef = resolver(schema).$ref;
+    const rawRef = typeof schema.$ref === 'string' ? schema.$ref : undefined;
     if (rawRef) return rawRef;
 
     const prev = autoIds.get(schema);
@@ -275,14 +263,16 @@ export function generateSchemaUI({
     return generated;
   }
 
-  function isVisible(schema: ParsedSchema): boolean {
+  function isVisible(raw: ParsedSchema): boolean {
+    const schema = dereferenceShallow(raw);
     if (typeof schema === 'boolean') return true;
     if (schema.writeOnly) return writeOnly;
     if (schema.readOnly) return readOnly;
     return true;
   }
 
-  function base(schema: ParsedSchema): FieldBase {
+  function base(raw: ParsedSchema): FieldBase {
+    const schema = dereferenceShallow(raw);
     if (typeof schema === 'boolean') {
       const name = schema ? 'any' : 'never';
       return {
@@ -294,18 +284,19 @@ export function generateSchemaUI({
     return {
       description: schema.description ? renderMarkdown(schema.description) : undefined,
       infoTags: generateInfoTags(schema),
-      typeName: schemaToString(schema, resolver),
-      aliasName: schemaToString(schema, resolver, FormatFlags.UseAlias),
+      typeName: schemaToString(raw),
+      aliasName: schemaToString(raw, FormatFlags.UseAlias),
       deprecated: schema.deprecated,
     };
   }
 
-  function scanRefs(id: string, schema: ParsedSchema) {
+  function scanRefs(id: string, raw: ParsedSchema) {
     if (id in refs) return;
+    const schema = dereferenceShallow(raw);
     if (typeof schema === 'boolean') {
       refs[id] = {
         type: 'primitive',
-        ...base(schema),
+        ...base(raw),
       };
       return;
     }
@@ -314,7 +305,7 @@ export function generateSchemaUI({
       const out: SchemaData = {
         type: 'or',
         items: [],
-        ...base(schema),
+        ...base(raw),
       };
       refs[id] = out;
 
@@ -336,7 +327,7 @@ export function generateSchemaUI({
       const out: SchemaData = {
         type: 'and',
         items: [],
-        ...base(schema),
+        ...base(raw),
       };
       refs[id] = out;
       for (const omit of ['anyOf', 'oneOf'] as const) {
@@ -357,13 +348,15 @@ export function generateSchemaUI({
       const out: SchemaData = {
         type: 'or',
         items: [],
-        ...base(schema),
+        ...base(raw),
       };
       refs[id] = out;
 
-      for (const item of union) {
-        if (!item || typeof item !== 'object' || !isVisible(item)) continue;
-        const itemId = getSchemaId(item);
+      for (const rawItem of union) {
+        if (!rawItem || typeof rawItem !== 'object' || !isVisible(rawItem)) continue;
+        const itemId = getSchemaId(rawItem);
+        const item = dereferenceShallow(rawItem);
+        if (typeof item !== 'object') continue;
         const key = `${id}_extends:${itemId}`;
 
         scanRefs(key, {
@@ -378,7 +371,7 @@ export function generateSchemaUI({
         });
         out.items.push({
           $type: key,
-          name: refs[itemId]?.aliasName ?? schemaToString(item, resolver, FormatFlags.UseAlias),
+          name: refs[itemId]?.aliasName ?? schemaToString(rawItem, FormatFlags.UseAlias),
         });
       }
       return;
@@ -393,7 +386,7 @@ export function generateSchemaUI({
       const out: SchemaData = {
         type: 'object',
         props: [],
-        ...base(schema),
+        ...base(raw),
       };
       refs[id] = out;
 
@@ -434,7 +427,7 @@ export function generateSchemaUI({
         item: {
           $type,
         },
-        ...base(schema),
+        ...base(raw),
       };
       scanRefs($type, items);
       return;
@@ -442,7 +435,7 @@ export function generateSchemaUI({
 
     refs[id] = {
       type: 'primitive',
-      ...base(schema),
+      ...base(raw),
     };
   }
 

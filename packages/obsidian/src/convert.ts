@@ -3,7 +3,7 @@ import { type PluggableList, unified } from 'unified';
 import remarkStringify from 'remark-stringify';
 import remarkMdx from 'remark-mdx';
 import { VFile } from 'vfile';
-import { dump } from 'js-yaml';
+import { stringify } from 'yaml';
 import {
   buildStorage,
   type ParsedContentFile,
@@ -110,7 +110,10 @@ export async function convertVaultFiles(
     output.push({
       type: 'content',
       path: file.outPath,
-      content: `---\n${dump(frontmatter).trim()}\n---\n${string}`,
+      content: `---\n${stringify(frontmatter, {
+        compat: 'yaml-1.1',
+        singleQuote: true,
+      }).trim()}\n---\n${string}`,
     });
   }
 

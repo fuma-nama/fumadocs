@@ -1,6 +1,5 @@
 'use client';
 import type { AnypointmqChannelBinding, AnypointmqMessageBinding } from '@/types/asyncapi-3';
-import type { NoReference } from '@fumadocs/api-docs/schema';
 import {
   createBinding,
   DestinationChannelBinding,
@@ -10,12 +9,12 @@ import {
 
 export const anypointmqBinding = createBinding({
   label: 'Anypoint MQ',
-  Channel: ({ binding }: { binding: NoReference<AnypointmqChannelBinding> }) => (
+  Channel: ({ binding }: { binding: AnypointmqChannelBinding }) => (
     <DestinationChannelBinding binding={binding} />
   ),
-  Message: ({ binding }: { binding: NoReference<AnypointmqMessageBinding> }) => (
+  Message: ({ binding }: { binding: AnypointmqMessageBinding }) => (
     <HeadersMessageBinding binding={binding} />
   ),
-  getChannelSummary: (binding: NoReference<AnypointmqChannelBinding>) =>
+  getChannelSummary: (binding: AnypointmqChannelBinding) =>
     joinBindingSummary(binding.destination, binding.destinationType),
 });

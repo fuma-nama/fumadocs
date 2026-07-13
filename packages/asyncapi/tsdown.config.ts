@@ -20,14 +20,8 @@ export default defineConfig({
   },
   platform: 'browser',
   deps: {
-    onlyBundle: [
-      '@fastify/deepmerge',
-      'ajv',
-      'fast-deep-equal',
-      'json-schema-traverse',
-      'fast-uri',
-    ],
-    neverBundle: [/^node:/, 'fs', /ajv(.+)\.d\.ts/],
+    onlyBundle: ['@fastify/deepmerge'],
+    neverBundle: [/^node:/, 'fs'],
   },
   exports: {
     enabled: true,

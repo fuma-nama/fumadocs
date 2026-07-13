@@ -44,7 +44,7 @@
     "react": "^19.2.7",
     "sanity": "^6.4.0",
     "tsconfig": "workspace:*",
-    "tsdown": "0.22.4",
+    "tsdown": "0.22.5",
     "typescript": "^6.0.3"
   },
   "peerDependencies": {

@@ -1,6 +1,5 @@
 'use client';
 import type { SqsChannelBinding, SqsOperationBinding } from '@/types/asyncapi-3';
-import type { NoReference } from '@fumadocs/api-docs/schema';
 import {
   createBinding,
   hasBindingFields,
@@ -47,11 +46,11 @@ function SqsQueueFields({ queue, title }: { queue: SqsQueue; title: string }) {
   );
 }
 
-function getSqsChannelSummary(binding: NoReference<SqsChannelBinding>): string | undefined {
+function getSqsChannelSummary(binding: SqsChannelBinding): string | undefined {
   return binding.queue?.name;
 }
 
-function getSqsOperationSummary(binding: NoReference<SqsOperationBinding>): string | undefined {
+function getSqsOperationSummary(binding: SqsOperationBinding): string | undefined {
   const queues = binding.queues;
   if (!queues || queues.length === 0) return undefined;
   const first = queues[0];
@@ -59,7 +58,7 @@ function getSqsOperationSummary(binding: NoReference<SqsOperationBinding>): stri
   return queues.length > 1 ? `${first.name} +${queues.length - 1}` : first.name;
 }
 
-function SqsChannelBinding({ binding }: { binding: NoReference<SqsChannelBinding> }) {
+function SqsChannelBinding({ binding }: { binding: SqsChannelBinding }) {
   if (!hasBindingFields(binding)) return <BindingEmpty />;
 
   return (
@@ -80,7 +79,7 @@ function SqsChannelBinding({ binding }: { binding: NoReference<SqsChannelBinding
   );
 }
 
-function SqsOperationBinding({ binding }: { binding: NoReference<SqsOperationBinding> }) {
+function SqsOperationBinding({ binding }: { binding: SqsOperationBinding }) {
   if (!hasBindingFields(binding)) return <BindingEmpty />;
 
   return (

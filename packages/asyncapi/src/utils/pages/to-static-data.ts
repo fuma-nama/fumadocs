@@ -4,6 +4,7 @@ import type { TOCItemType } from 'fumadocs-core/toc';
 import type { StructuredData } from 'fumadocs-core/mdx-plugins';
 import type { GeneratedPageProps } from './builder';
 import { dereferenceShallow } from '@fumadocs/api-docs/schema/dereference';
+import { createMagicProxy } from '@scalar/json-magic/magic-proxy';
 import { getOperationDisplayName } from '../schema';
 
 export function toStaticData(
@@ -13,12 +14,14 @@ export function toStaticData(
   toc: TOCItemType[];
   structuredData: StructuredData;
 } {
+  // wrap in a magic proxy so that `dereferenceShallow` can resolve refs lazily
+  const proxied = createMagicProxy(doc as never) as AsyncAPIObject;
   const slugger = new Slugger();
   const toc: TOCItemType[] = [];
   const structuredData: StructuredData = { headings: [], contents: [] };
 
   for (const item of page.operations ?? []) {
-    const operation = dereferenceShallow(doc.operations?.[item.id], doc);
+    const operation = dereferenceShallow(proxied.operations?.[item.id]);
     if (!operation) continue;
 
     if (page.showTitle) {

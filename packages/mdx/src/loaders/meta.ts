@@ -1,6 +1,6 @@
 import type { Loader, LoaderInput } from '@/loaders/adapter';
 import type { ConfigLoader } from '@/loaders/config';
-import { load } from 'js-yaml';
+import { parse as parseYaml } from 'yaml';
 import { z } from 'zod';
 import type { MetaCollectionItem } from '@/config/build';
 
@@ -24,7 +24,7 @@ export function createMetaLoader(
   function parse(filePath: string, source: string) {
     try {
       if (filePath.endsWith('.json')) return JSON.parse(source);
-      if (filePath.endsWith('.yaml')) return load(source);
+      if (filePath.endsWith('.yaml')) return parseYaml(source);
     } catch (e) {
       throw new Error(`invalid data in ${filePath}`, { cause: e });
     }

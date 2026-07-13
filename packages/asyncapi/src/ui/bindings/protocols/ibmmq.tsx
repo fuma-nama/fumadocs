@@ -4,7 +4,6 @@ import type {
   IbmmqMessageBinding,
   IbmmqServerBinding,
 } from '@/types/asyncapi-3';
-import type { NoReference } from '@fumadocs/api-docs/schema';
 import {
   createBinding,
   hasBindingFields,
@@ -16,11 +15,11 @@ import {
   joinBindingSummary,
 } from '../shared';
 
-function getIbmmqServerSummary(binding: NoReference<IbmmqServerBinding>): string | undefined {
+function getIbmmqServerSummary(binding: IbmmqServerBinding): string | undefined {
   return joinBindingSummary(binding.groupId, binding.ccdtQueueManagerName);
 }
 
-function getIbmmqChannelSummary(binding: NoReference<IbmmqChannelBinding>): string | undefined {
+function getIbmmqChannelSummary(binding: IbmmqChannelBinding): string | undefined {
   return joinBindingSummary(
     binding.destinationType,
     binding.queue?.objectName,
@@ -28,11 +27,11 @@ function getIbmmqChannelSummary(binding: NoReference<IbmmqChannelBinding>): stri
   );
 }
 
-function getIbmmqMessageSummary(binding: NoReference<IbmmqMessageBinding>): string | undefined {
+function getIbmmqMessageSummary(binding: IbmmqMessageBinding): string | undefined {
   return binding.type;
 }
 
-function IbmmqServerBinding({ binding }: { binding: NoReference<IbmmqServerBinding> }) {
+function IbmmqServerBinding({ binding }: { binding: IbmmqServerBinding }) {
   if (!hasBindingFields(binding)) return <BindingEmpty />;
 
   return (
@@ -71,7 +70,7 @@ function IbmmqServerBinding({ binding }: { binding: NoReference<IbmmqServerBindi
   );
 }
 
-function IbmmqChannelBinding({ binding }: { binding: NoReference<IbmmqChannelBinding> }) {
+function IbmmqChannelBinding({ binding }: { binding: IbmmqChannelBinding }) {
   if (!hasBindingFields(binding)) return <BindingEmpty />;
 
   return (
@@ -156,7 +155,7 @@ function IbmmqChannelBinding({ binding }: { binding: NoReference<IbmmqChannelBin
   );
 }
 
-function IbmmqMessageBinding({ binding }: { binding: NoReference<IbmmqMessageBinding> }) {
+function IbmmqMessageBinding({ binding }: { binding: IbmmqMessageBinding }) {
   if (!hasBindingFields(binding)) return <BindingEmpty />;
 
   return (

@@ -5,7 +5,6 @@ import type {
   CorrelationIDObject,
   MessageObject,
   OperationReplyObject,
-  ParameterObject,
   SecuritySchemeObject,
   ServerObject,
 } from '@/types';
@@ -25,7 +24,6 @@ import { AnchorSection } from '@fumadocs/api-docs/auto-anchor/client';
 import { Heading } from '@/ui/components/heading';
 import { Markdown } from '../components/markdown';
 import { ServerProvider, useRenderContext, useServerContext } from '../contexts/api';
-import type { NoReference } from '@fumadocs/api-docs/schema';
 import {
   getMessageDisplayName,
   getOperationDisplayName,
@@ -53,14 +51,15 @@ export function Operation({
   const t = useTranslations({ note: 'operation page' });
   const ctx = useRenderContext();
   const {
-    schema: { dereferenced },
+    schema: { dereferenced, resolve },
   } = ctx;
   const operation = useMemo(() => {
-    const operation = dereferenced.operations?.[id];
+    const operation = resolve(dereferenced.operations?.[id]);
     if (!operation) throw new Error(`[Fumadocs AsyncAPI] Operation not found in schema: ${id}`);
 
-    return applyOperationTraits(operation);
-  }, [dereferenced, id]);
+    return applyOperationTraits(operation, resolve);
+  }, [dereferenced, resolve, id]);
+  const channel = resolve(operation.channel);
 
   const descriptionNode = showDescription && operation.description && (
     <Markdown md={operation.description} />
@@ -81,19 +80,20 @@ export function Operation({
     headingLevel++;
   }
 
-  const channelNode = <ChannelSection channel={operation.channel} />;
-  const parametersNode = operation.channel.parameters ? (
-    <ParametersSection parameters={operation.channel.parameters} headingLevel={headingLevel} />
+  const channelNode = <ChannelSection channel={channel} />;
+  const parametersNode = channel.parameters ? (
+    <ParametersSection parameters={channel.parameters} headingLevel={headingLevel} />
   ) : null;
 
-  const messages = getOperationMessages(operation);
+  const messages = getOperationMessages(operation, resolve);
   const messagesNode = messages.length > 0 && (
     <>
       <Heading id="messages" depth={headingLevel} className="mt-10">
         {t('Messages')}
       </Heading>
       <Accordions type="multiple">
-        {messages.map((message, index) => {
+        {messages.map((item, index) => {
+          const message = resolve(item);
           const id = message.name ?? `message-${index}`;
 
           return (
@@ -101,7 +101,7 @@ export function Operation({
               <AccordionHeader>
                 <AccordionTrigger className="inline-flex items-center gap-2 font-mono">
                   <MailIcon className="text-fd-muted-foreground size-3.5" />
-                  {getMessageDisplayName(message, ctx, index)}
+                  {getMessageDisplayName(item, ctx, index)}
                   {message.contentType && (
                     <span className="ms-auto text-fd-muted-foreground font-normal text-xs">
                       {message.contentType}
@@ -120,14 +120,18 @@ export function Operation({
   );
 
   const replyNode = operation.reply && (
-    <ReplySection reply={operation.reply} headingLevel={headingLevel} />
+    <ReplySection reply={resolve(operation.reply)} headingLevel={headingLevel} />
   );
   const bindingsNode = operation.bindings && (
     <>
       <Heading id="binding" depth={headingLevel}>
         {t('Bindings')}
       </Heading>
-      <AccordionBindings bindings={operation.bindings} level="operation" variant="default" />
+      <AccordionBindings
+        bindings={resolve(operation.bindings)}
+        level="operation"
+        variant="default"
+      />
     </>
   );
 
@@ -137,10 +141,13 @@ export function Operation({
   let authNode: ReactNode = null;
 
   if (securitySchemes && securitySchemes.length > 0) {
-    const items = securitySchemes.map((scheme, i) => ({
-      value: String(i),
-      label: <code className="text-xs truncate">{scheme.name || scheme.type}</code>,
-    }));
+    const items = securitySchemes.map((item, i) => {
+      const scheme = resolve(item);
+      return {
+        value: String(i),
+        label: <code className="text-xs truncate">{scheme.name || scheme.type}</code>,
+      };
+    });
 
     authNode = (
       <SelectTabs defaultValue={items[0].value}>
@@ -154,11 +161,14 @@ export function Operation({
             <div className="not-prose">{items[0].label}</div>
           )}
         </div>
-        {securitySchemes.map((scheme, i) => (
-          <SelectTab key={i} value={items[i].value}>
-            <AuthScheme scheme={scheme} scopes={scheme.scopes ?? []} />
-          </SelectTab>
-        ))}
+        {securitySchemes.map((item, i) => {
+          const scheme = resolve(item);
+          return (
+            <SelectTab key={i} value={items[i].value}>
+              <AuthScheme scheme={scheme} scopes={scheme.scopes ?? []} />
+            </SelectTab>
+          );
+        })}
       </SelectTabs>
     );
   }
@@ -200,12 +210,14 @@ export function Operation({
     },
   );
 
-  if (operation.channel.servers) {
-    const servers = operation.channel.servers;
-    const filteredServers: Record<string, NoReference<ServerObject>> = {};
+  if (channel.servers) {
+    // `servers` of channels are Reference Objects, resolved values are referentially
+    // stable in the magic proxy, we can match them against `servers` of document
+    const servers = channel.servers.map((server) => resolve(server));
+    const filteredServers: Record<string, ServerObject> = {};
 
     for (const [k, v] of Object.entries(dereferenced.servers ?? {})) {
-      if (servers.includes(v)) filteredServers[k] = v;
+      if (servers.includes(resolve(v))) filteredServers[k] = resolve(v);
     }
 
     content = <ServerProvider servers={filteredServers}>{content}</ServerProvider>;
@@ -215,6 +227,7 @@ export function Operation({
 }
 
 function ServerSection() {
+  const { resolve } = useRenderContext().schema;
   const { servers, server } = useServerContext();
   const serverSchema = server ? servers[server.id] : undefined;
   const hasServers = Object.keys(servers).length > 0;
@@ -226,7 +239,7 @@ function ServerSection() {
       <ServerSelect className="w-full border-b" />
       {serverSchema?.bindings && (
         <AccordionBindings
-          bindings={serverSchema.bindings}
+          bindings={resolve(serverSchema.bindings)}
           level="server"
           variant="sm"
           accordionsProps={{ className: 'rounded-none border-none' }}
@@ -236,8 +249,9 @@ function ServerSection() {
   );
 }
 
-function ChannelSection({ channel }: { channel: NoReference<ChannelObject> }) {
+function ChannelSection({ channel }: { channel: ChannelObject }) {
   const t = useTranslations({ note: 'asyncapi channel section' });
+  const { resolve } = useRenderContext().schema;
 
   if (!channel.address && !channel.summary && !channel.title && !channel.bindings) return;
 
@@ -258,7 +272,7 @@ function ChannelSection({ channel }: { channel: NoReference<ChannelObject> }) {
       )}
       {channel.bindings && (
         <AccordionBindings
-          bindings={channel.bindings}
+          bindings={resolve(channel.bindings)}
           level="channel"
           variant="sm"
           accordionsProps={{
@@ -274,7 +288,7 @@ function ParametersSection({
   parameters,
   headingLevel,
 }: {
-  parameters: Record<string, NoReference<ParameterObject>>;
+  parameters: NonNullable<ChannelObject['parameters']>;
   headingLevel: number;
 }) {
   const t = useTranslations({ note: 'operation page' });
@@ -289,21 +303,25 @@ function ParametersSection({
       </Heading>
       <AnchorSection segments={['parameters']}>
         <div className="flex flex-col">
-          {entries.map(([name, param]) => (
-            <ctx.SchemaUI
-              key={name}
-              client={{
-                name,
-                required: false,
-              }}
-              root={{
-                type: 'string',
-                description: param.description,
-                enum: param.enum,
-                default: param.default,
-              }}
-            />
-          ))}
+          {entries.map(([name, item]) => {
+            const param = ctx.schema.resolve(item);
+
+            return (
+              <ctx.SchemaUI
+                key={name}
+                client={{
+                  name,
+                  required: false,
+                }}
+                root={{
+                  type: 'string',
+                  description: param.description,
+                  enum: param.enum,
+                  default: param.default,
+                }}
+              />
+            );
+          })}
         </div>
       </AnchorSection>
     </>
@@ -314,14 +332,15 @@ function MessageSection({
   message: _message,
   headingLevel,
 }: {
-  message: NoReference<MessageObject>;
+  message: MessageObject;
   headingLevel: number;
 }) {
   const t = useTranslations();
   const ctx = useRenderContext();
-  const message = useMemo(() => applyMessageTraits(_message), [_message]);
-  const headers = resolveMultiFormatSchema(message.headers);
-  const payload = resolveMultiFormatSchema(message.payload);
+  const { resolve } = ctx.schema;
+  const message = useMemo(() => applyMessageTraits(_message, resolve), [_message, resolve]);
+  const headers = resolveMultiFormatSchema(resolve(message.headers));
+  const payload = resolveMultiFormatSchema(resolve(message.payload));
 
   return (
     <>
@@ -343,13 +362,15 @@ function MessageSection({
             <ctx.SchemaUI client={{ name: 'payload', as: 'body' }} root={payload as never} />
           </>
         )}
-        {message.correlationId && <CorrelationIdSection correlationId={message.correlationId} />}
+        {message.correlationId && (
+          <CorrelationIdSection correlationId={resolve(message.correlationId)} />
+        )}
         {message.bindings && (
           <>
             <Heading id="binding" depth={headingLevel}>
               {t('Bindings')}
             </Heading>
-            <AccordionBindings bindings={message.bindings} level="message" variant="sm" />
+            <AccordionBindings bindings={resolve(message.bindings)} level="message" variant="sm" />
           </>
         )}
       </div>
@@ -364,11 +385,13 @@ function ReplySection({
   reply,
   headingLevel,
 }: {
-  reply: NoReference<OperationReplyObject>;
+  reply: OperationReplyObject;
   headingLevel: number;
 }) {
   const t = useTranslations({ note: 'operation page' });
   const ctx = useRenderContext();
+  const { resolve } = ctx.schema;
+  const address = resolve(reply.address);
 
   return (
     <>
@@ -376,16 +399,17 @@ function ReplySection({
         {t('Reply')}
       </Heading>
       <div className="border rounded-xl p-3 not-prose text-sm flex flex-col gap-3">
-        {reply.address && (
+        {address && (
           <p>
-            Address: <code>{reply.address.location}</code>
-            {reply.address.description && (
-              <span className="text-fd-muted-foreground"> — {reply.address.description}</span>
+            Address: <code>{address.location}</code>
+            {address.description && (
+              <span className="text-fd-muted-foreground"> — {address.description}</span>
             )}
           </p>
         )}
-        {reply.messages?.map((message, index) => {
-          const payload = resolveMultiFormatSchema(message.payload);
+        {reply.messages?.map((item, index) => {
+          const message = resolve(item);
+          const payload = resolveMultiFormatSchema(resolve(message.payload));
           return (
             <Fragment key={index}>
               <p className="font-medium">{message.title || message.name || `Reply ${index + 1}`}</p>
@@ -400,11 +424,7 @@ function ReplySection({
   );
 }
 
-function CorrelationIdSection({
-  correlationId,
-}: {
-  correlationId: NoReference<CorrelationIDObject>;
-}) {
+function CorrelationIdSection({ correlationId }: { correlationId: CorrelationIDObject }) {
   const t = useTranslations({ note: 'operation page' });
 
   return (

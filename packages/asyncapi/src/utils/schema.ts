@@ -1,13 +1,12 @@
 import type {
   AsyncAPISchemaObject,
-  MessageExampleObject,
   MessageObject,
   MultiFormatSchemaObject,
   OperationObject,
+  ReferenceObject,
   RenderContext,
   TagObject,
 } from '@/types';
-import type { NoReference } from '@fumadocs/api-docs/schema';
 import { idToTitle } from '@fumadocs/api-docs/utils/id-to-title';
 
 export type { ParsedSchema } from '@fumadocs/api-docs/schema';
@@ -20,35 +19,38 @@ export function getTagDisplayName(tag: TagObject): string {
 }
 
 export function getMessageDisplayName(
-  message: NoReference<MessageObject>,
+  message: MessageObject | ReferenceObject,
   ctx: RenderContext,
   idx?: number,
 ) {
-  let v = message.title || message.name;
+  const resolved = ctx.schema.resolve(message);
+  let v = resolved.title || resolved.name;
   if (v) return v;
 
-  v = ctx.schema.getRawRef(message)?.split('/').at(-1);
-  if (v) return v;
+  // derive the name from the `$ref` of Reference Objects (e.g. `#/components/messages/MyMessage`)
+  if ('$ref' in message && typeof message.$ref === 'string') {
+    v = message.$ref.split('/').at(-1);
+    if (v) return v;
+  }
 
   return typeof idx === 'number' ? `Unknown Message ${idx + 1}` : 'Unknown Message';
 }
 
-export function getOperationDisplayName(
-  id: string,
-  operation: OperationObject | NoReference<OperationObject>,
-): string {
+export function getOperationDisplayName(id: string, operation: OperationObject): string {
   return operation.title || operation.summary || idToTitle(id);
 }
 
 export function getOperationMessages(
-  operation: NoReference<OperationObject>,
-): NoReference<MessageObject>[] {
+  operation: OperationObject,
+  resolve: RenderContext['schema']['resolve'],
+): (MessageObject | ReferenceObject)[] {
   if (operation.messages) return operation.messages;
 
-  const out: NoReference<MessageObject>[] = [];
-  if (operation.channel.messages) {
-    for (const [id, message] of Object.entries(operation.channel.messages)) {
-      message.name ??= id;
+  const out: (MessageObject | ReferenceObject)[] = [];
+  const channel = resolve(operation.channel);
+  if (channel.messages) {
+    for (const [id, message] of Object.entries(channel.messages)) {
+      resolve(message).name ??= id;
       out.push(message);
     }
   }
@@ -56,8 +58,8 @@ export function getOperationMessages(
 }
 
 export function resolveMultiFormatSchema(
-  schema?: NoReference<MultiFormatSchemaObject>,
-): NoReference<AsyncAPISchemaObject> | undefined {
+  schema?: MultiFormatSchemaObject,
+): AsyncAPISchemaObject | undefined {
   if (!schema) return;
   if (typeof schema === 'object' && schema !== null && 'schema' in schema) {
     return schema.schema;

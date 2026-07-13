@@ -10,11 +10,11 @@ import {
 } from '@fumadocs/api-docs/components/accordion';
 import { Tab, Tabs } from 'fumadocs-ui/components/tabs';
 import { sample } from '@fumadocs/api-docs/schema/sample';
+import { getRaw } from '@scalar/json-magic/magic-proxy';
 import { useMemo, type ReactNode } from 'react';
 import { useTranslations } from '@fuma-translate/react';
 import { Markdown } from '../components/markdown';
 import { ClientCodeBlock } from '../components/codeblock';
-import type { NoReference } from '@fumadocs/api-docs/schema';
 import { useRenderContext } from '../contexts/api';
 
 export interface ResponseTab {
@@ -23,7 +23,7 @@ export interface ResponseTab {
    */
   code: string;
 
-  response: NoReference<ResponseObject>;
+  response: ResponseObject;
   /**
    * media type of response
    */
@@ -53,19 +53,21 @@ export interface ResponseTabsRenderOptions {
 export function ResponseTabs({
   operation,
 }: {
-  operation: NoReference<OperationObject>;
+  operation: OperationObject;
   method: HttpMethods;
-  pathItem: NoReference<PathItemObject>;
+  pathItem: PathItemObject;
 }) {
   const ctx = useRenderContext();
+  const { resolve } = ctx.schema;
   const t = useTranslations({ note: 'operation page' });
   const tabs = useMemo(() => {
     const tabs: ResponseTab[] = [];
     if (!operation.responses) return tabs;
 
-    for (const [code, response] of Object.entries(operation.responses)) {
+    for (const [code, item] of Object.entries(operation.responses)) {
+      const response = resolve(item);
       const media = response.content ? getPreferredType(response.content) : null;
-      const responseOfType = media ? response.content?.[media] : null;
+      const responseOfType = media ? resolve(response.content?.[media]) : null;
 
       const tab: ResponseTab = {
         code,
@@ -76,22 +78,24 @@ export function ResponseTabs({
       if (responseOfType?.examples) {
         tab.examples ??= [];
 
-        for (const [key, sample] of Object.entries(responseOfType.examples)) {
+        for (const [key, item] of Object.entries(responseOfType.examples)) {
+          const example = resolve(item);
+
           tab.examples.push({
             label:
-              sample?.summary ??
+              example?.summary ??
               t('Example {key}', {
                 variables: { key },
               }),
-            sample: sample.value,
-            description: sample?.description,
+            sample: getRaw(example.value),
+            description: example?.description,
           });
         }
       } else if (responseOfType?.example || responseOfType?.schema) {
         tab.examples ??= [];
         tab.examples.push({
           label: t('Example'),
-          sample: responseOfType.example ?? sample(responseOfType.schema as object),
+          sample: getRaw(responseOfType.example) ?? sample(responseOfType.schema as object),
         });
       }
 
@@ -99,7 +103,7 @@ export function ResponseTabs({
     }
 
     return tabs;
-  }, [operation.responses, t]);
+  }, [operation.responses, resolve, t]);
 
   if (tabs.length === 0) return null;
 

@@ -6,7 +6,6 @@ import type {
   KafkaOperationBinding,
   KafkaServerBinding,
 } from '@/types/asyncapi-3';
-import type { NoReference } from '@fumadocs/api-docs/schema';
 import {
   createBinding,
   hasBindingFields,
@@ -20,11 +19,11 @@ import {
   joinBindingSummary,
 } from '../shared';
 
-function getKafkaServerSummary(binding: NoReference<KafkaServerBinding>): string | undefined {
+function getKafkaServerSummary(binding: KafkaServerBinding): string | undefined {
   return joinBindingSummary(binding.schemaRegistryUrl, binding.schemaRegistryVendor);
 }
 
-function getKafkaChannelSummary(binding: NoReference<KafkaChannelBinding>): string | undefined {
+function getKafkaChannelSummary(binding: KafkaChannelBinding): string | undefined {
   const parts: string[] = [];
   if (binding.topic) parts.push(binding.topic);
   if (typeof binding.partitions === 'number') {
@@ -36,7 +35,7 @@ function getKafkaChannelSummary(binding: NoReference<KafkaChannelBinding>): stri
   return parts.length > 0 ? parts.join(' · ') : undefined;
 }
 
-function getKafkaOperationSummary(binding: NoReference<KafkaOperationBinding>): string | undefined {
+function getKafkaOperationSummary(binding: KafkaOperationBinding): string | undefined {
   const parts: string[] = [];
   const groupId = getBindingSchemaSummary(binding.groupId);
   const clientId = getBindingSchemaSummary(binding.clientId);
@@ -45,9 +44,7 @@ function getKafkaOperationSummary(binding: NoReference<KafkaOperationBinding>): 
   return parts.length > 0 ? parts.join(' · ') : undefined;
 }
 
-function getBindingSchemaSummary(
-  schema: NoReference<AsyncAPISchemaObject> | undefined,
-): string | undefined {
+function getBindingSchemaSummary(schema: AsyncAPISchemaObject | undefined): string | undefined {
   if (typeof schema !== 'object') return;
 
   if (Array.isArray(schema.enum) && schema.enum.length > 0) {
@@ -67,12 +64,12 @@ function getBindingSchemaSummary(
   }
 }
 
-function getKafkaMessageSummary(binding: NoReference<KafkaMessageBinding>): string | undefined {
+function getKafkaMessageSummary(binding: KafkaMessageBinding): string | undefined {
   const key = getBindingSchemaSummary(binding.key);
   return key ? `key: ${key}` : undefined;
 }
 
-function KafkaServerBinding({ binding }: { binding: NoReference<KafkaServerBinding> }) {
+function KafkaServerBinding({ binding }: { binding: KafkaServerBinding }) {
   if (!hasBindingFields(binding)) return <BindingEmpty />;
 
   return (
@@ -93,7 +90,7 @@ function KafkaServerBinding({ binding }: { binding: NoReference<KafkaServerBindi
   );
 }
 
-function KafkaChannelBinding({ binding }: { binding: NoReference<KafkaChannelBinding> }) {
+function KafkaChannelBinding({ binding }: { binding: KafkaChannelBinding }) {
   if (!hasBindingFields(binding)) return <BindingEmpty />;
 
   return (
@@ -132,7 +129,7 @@ function KafkaChannelBinding({ binding }: { binding: NoReference<KafkaChannelBin
   );
 }
 
-function KafkaOperationBinding({ binding }: { binding: NoReference<KafkaOperationBinding> }) {
+function KafkaOperationBinding({ binding }: { binding: KafkaOperationBinding }) {
   if (!hasBindingFields(binding)) return <BindingEmpty />;
 
   return (
@@ -153,7 +150,7 @@ function KafkaOperationBinding({ binding }: { binding: NoReference<KafkaOperatio
   );
 }
 
-function KafkaMessageBinding({ binding }: { binding: NoReference<KafkaMessageBinding> }) {
+function KafkaMessageBinding({ binding }: { binding: KafkaMessageBinding }) {
   if (!hasBindingFields(binding)) return <BindingEmpty />;
 
   return (

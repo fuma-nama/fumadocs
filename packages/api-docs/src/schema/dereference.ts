@@ -1,79 +1,32 @@
-import type { JSONSchema } from 'json-schema-typed/draft-2020-12';
-import { appendInternalRefPath } from './ref';
-import { resolveRefSync } from './resolve-ref';
 import type { NoReferenceSwallow as NoReferenceShallow } from '.';
 import { isPlainObject } from '../utils/is-plain-object';
 
-export interface DereferenceOptions {
-  /**
-   * Return `true` to keep the Reference Object at `pointer` without inlining.
-   */
-  preserveRef?: (pointer: string) => boolean;
-  setOriginalRef?: (schema: JSONSchema, ref: string) => void;
-}
+const cacheMap = new WeakMap<object, unknown>();
 
 /**
- * Resolves all $ref pointers in a schema and returns a new schema without any $ref pointers,
- * except at locations where `preserveRef` returns `true`.
+ * Resolve the `$ref` of a Reference Object (shallowly), merging sibling keywords into the target (sibling keywords take precedence).
+ *
+ * The input must be a node of a magic proxy (`@scalar/json-magic`), Reference Objects are resolved
+ * with the virtual `$ref-value` property of the proxy.
+ *
+ * Returns non-reference values as-is.
  */
-export function dereferenceSync(schema: JSONSchema, options: DereferenceOptions = {}): JSONSchema {
-  const { preserveRef, setOriginalRef = () => {} } = options;
-  if (typeof schema === 'boolean') return schema;
-  const visitedNodes = new Set<unknown>();
-  const cloned = structuredClone(schema);
+export function dereferenceShallow<T>(schema: T): NoReferenceShallow<T> {
+  if (!isPlainObject(schema)) return schema as never;
 
-  function resolve(current: unknown, pointer: string): JSONSchema {
-    // make sure we don't visit the same node twice
-    if (visitedNodes.has(current)) {
-      return current as never;
-    }
-    visitedNodes.add(current);
+  if (typeof schema.$ref !== 'string') return schema as never;
+  const cached = cacheMap.get(schema);
+  if (cached) return cached as never;
 
-    if (Array.isArray(current)) {
-      for (let index = 0; index < current.length; index++) {
-        current[index] = resolve(current[index], appendInternalRefPath(pointer, index));
-      }
-    } else if (isPlainObject(current)) {
-      if (typeof current.$ref === 'string') {
-        if (preserveRef?.(pointer)) {
-          return current as JSONSchema;
-        }
+  // `$ref-value` is a virtual property added by the magic proxy, exclude it from sibling keywords
+  const { $ref: _, '$ref-value': refValue, ...rest } = schema as Record<string, unknown>;
+  const resolved = dereferenceShallow(refValue);
+  let result: unknown = rest;
 
-        const ref = current['$ref'];
-        delete current['$ref'];
-        const resolved = resolve(resolveRefSync(ref, cloned) as JSONSchema, pointer);
-        setOriginalRef(resolved, ref);
-        setOriginalRef(current as JSONSchema, ref);
-
-        if (typeof resolved === 'boolean') throw new Error('invalid schema');
-        for (const k in resolved) {
-          if (!(k in current)) {
-            current[k] = resolved[k as never];
-          }
-        }
-      }
-
-      for (const key in current) {
-        current[key] = resolve(current[key], appendInternalRefPath(pointer, key));
-      }
-    }
-
-    return current as JSONSchema;
+  if (typeof resolved === 'object' && resolved !== null) {
+    if (Object.keys(rest).length === 0) result = resolved;
+    else result = { ...resolved, ...rest };
   }
-
-  return resolve(cloned, '#');
-}
-
-export function dereferenceShallow<T>(schema: T, full: unknown): NoReferenceShallow<T> {
-  if (isPlainObject(schema)) {
-    if (typeof schema.$ref !== 'string') return schema as never;
-
-    const { $ref, ...rest } = schema;
-    const resolved = dereferenceShallow(resolveRefSync($ref, full), full);
-
-    if (typeof resolved !== 'object') throw new Error(`invalid schema referenced via "${$ref}"`);
-    return { ...resolved, ...rest } as never;
-  }
-
-  return schema as never;
+  cacheMap.set(schema, result);
+  return result as never;
 }

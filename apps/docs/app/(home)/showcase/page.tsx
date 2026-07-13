@@ -329,7 +329,7 @@ const vercel = [
 
 export default function Showcase() {
   return (
-    <main className="px-4 py-12 z-2 w-full max-w-[1400px] mx-auto **:border-neutral-400 dark:**:border-neutral-700">
+    <main className="px-4 py-12 z-2 w-full max-w-350 mx-auto **:border-neutral-400 dark:**:border-neutral-700">
       <div className="relative overflow-hidden border border-dashed p-6">
         <h1 className="mb-4 text-xl font-medium">The docs framework designed with care.</h1>
         <p className="text-fd-muted-foreground">
@@ -357,7 +357,7 @@ export default function Showcase() {
           src={Design}
           alt="preview"
           priority
-          className="ml-auto w-[600px] min-w-[600px] -mt-12 -mb-18 pointer-events-none select-none"
+          className="ml-auto w-150 min-w-150 -mt-12 -mb-18 pointer-events-none select-none"
         />
       </div>
 
@@ -398,7 +398,7 @@ export default function Showcase() {
         {showcases.map((showcase) => (
           <ShowcaseItem key={showcase.url} {...showcase} />
         ))}
-        <div className="absolute text-center bottom-0 inset-x-0 pt-4 bg-gradient-to-t from-fd-background">
+        <div className="absolute text-center bottom-0 inset-x-0 pt-4 bg-linear-to-t from-fd-background">
           <Link
             href="https://github.com/fuma-nama/fumadocs/discussions/30"
             className={cn(

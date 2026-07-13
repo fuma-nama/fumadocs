@@ -4,7 +4,6 @@ import { useTranslations } from '@fuma-translate/react';
 import { useRenderContext } from '@/ui/contexts/api';
 import { cn } from '@/utils/cn';
 import { AsyncAPISchemaObject } from '@/types';
-import { NoReference } from '@fumadocs/api-docs/schema';
 
 export type BindingComponent = FC<{ binding: Record<string, unknown> }>;
 export type BindingSummaryFn = (binding: Record<string, unknown>) => string | undefined;
@@ -33,12 +32,12 @@ export function formatBindingScalar(value: unknown): string {
   return JSON.stringify(value);
 }
 
-export function hasBindingFields(
-  binding: Record<string, unknown>,
-  ignore: string[] = ['bindingVersion'],
-): boolean {
+export function hasBindingFields(binding: object, ignore: string[] = ['bindingVersion']): boolean {
   return Object.keys(binding).some(
-    (key) => !ignore.includes(key) && !key.startsWith('x-') && binding[key] !== undefined,
+    (key) =>
+      !ignore.includes(key) &&
+      !key.startsWith('x-') &&
+      (binding as Record<string, unknown>)[key] !== undefined,
   );
 }
 
@@ -144,13 +143,7 @@ export function BindingTagList({ value }: { value: Record<string, string> }) {
   );
 }
 
-export function BindingSchema({
-  name,
-  schema,
-}: {
-  name: string;
-  schema: NoReference<AsyncAPISchemaObject>;
-}) {
+export function BindingSchema({ name, schema }: { name: string; schema: AsyncAPISchemaObject }) {
   const ctx = useRenderContext();
 
   return (

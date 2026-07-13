@@ -1,6 +1,6 @@
 {
   "name": "fumadocs-obsidian",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "description": "Obsidian Integration for Fumadocs",
   "keywords": [
     "Docs",
@@ -44,7 +44,6 @@
   "dependencies": {
     "cnfast": "^0.0.8",
     "github-slugger": "^2.0.0",
-    "js-yaml": "^5.2.1",
     "remark-math": "^6.0.0",
     "remark-mdx": "^3.1.1",
     "remark-parse": "^11.0.0",
@@ -53,6 +52,7 @@
     "unified": "^11.0.5",
     "unist-util-visit": "^5.1.0",
     "vfile": "^6.0.3",
+    "yaml": "^2.9.0",
     "zod": "^4.4.3"
   },
   "devDependencies": {
@@ -64,7 +64,7 @@
     "fumadocs-core": "workspace:*",
     "mdast-util-mdx": "^3.0.0",
     "tsconfig": "workspace:*",
-    "tsdown": "0.22.4",
+    "tsdown": "0.22.5",
     "typescript": "^6.0.3"
   },
   "peerDependencies": {

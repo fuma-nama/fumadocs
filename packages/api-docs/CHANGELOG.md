@@ -1,3 +1,11 @@
+## @fumadocs/api-docs@0.2.0
+
+### Use `@scalar/json-magic` for dereferencing
+
+This will affect all raw access to OpenAPI/AsyncAPI documents, ensure to use `dereferenceShallow()` public API.
+
+### Migrate from `js-yaml` to `yaml`
+
 ## @fumadocs/api-docs@0.1.0
 
 ### Default to Base UI

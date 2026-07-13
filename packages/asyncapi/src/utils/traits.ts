@@ -1,18 +1,16 @@
-import type { MessageObject, OperationObject } from '@/types';
-import type { NoReference } from '@fumadocs/api-docs/schema';
+import type { MessageObject, OperationObject, RenderContext } from '@/types';
 import { isPlainObject } from './is-plain-object';
+
+type Resolve = RenderContext['schema']['resolve'];
 
 /**
  * Merge traits into a target object per the AsyncAPI traits merge mechanism.
  * @see https://github.com/asyncapi/spec/blob/v3.0.0/spec/asyncapi.md#traitsMergeMechanism
  */
-export function mergeTraits<T extends Record<string, unknown>>(
-  target: T,
-  traits: Record<string, unknown>[],
-): T {
-  let result: Record<string, unknown> = { ...target };
+export function mergeTraits<T extends object>(target: T, traits: object[]): T {
+  let result: Record<string, unknown> = { ...target } as Record<string, unknown>;
   for (const trait of traits) {
-    result = mergeTraitLayer(result, trait);
+    result = mergeTraitLayer(result, trait as Record<string, unknown>);
   }
   return result as T;
 }
@@ -38,21 +36,26 @@ function mergeTraitLayer(
 }
 
 export function applyOperationTraits(
-  operation: NoReference<OperationObject>,
-): NoReference<OperationObject> {
+  operation: OperationObject,
+  resolve: Resolve,
+): OperationObject {
   const traits = operation.traits;
   if (!traits || traits.length === 0) return operation;
 
   const { traits: _, ...base } = operation;
-  return mergeTraits(base, traits);
+  return mergeTraits(
+    base,
+    traits.map((trait) => resolve(trait)),
+  ) as OperationObject;
 }
 
-export function applyMessageTraits(
-  message: NoReference<MessageObject>,
-): NoReference<MessageObject> {
+export function applyMessageTraits(message: MessageObject, resolve: Resolve): MessageObject {
   const traits = message.traits;
   if (!traits || traits.length === 0) return message;
 
   const { traits: _, ...base } = message;
-  return mergeTraits(base, traits);
+  return mergeTraits(
+    base,
+    traits.map((trait) => resolve(trait)),
+  ) as MessageObject;
 }

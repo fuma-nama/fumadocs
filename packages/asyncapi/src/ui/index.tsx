@@ -17,9 +17,10 @@ import { toJsxRuntime } from 'hast-util-to-jsx-runtime';
 import * as JsxRuntime from 'react/jsx-runtime';
 import { PageContent } from './api-page';
 import { defaultShikiFactory } from 'fumadocs-core/highlight/shiki/full';
-import { compile } from '@fumari/json-schema-ts';
+import { generate } from '@fumari/json-schema-ts';
 import { ClientCodeBlock } from './components/codeblock';
 import { dereferenceBundledDocument } from '@/utils/document/dereference';
+import { getRaw } from '@scalar/json-magic/magic-proxy';
 import type { ShikiFactory } from 'fumadocs-core/highlight/shiki';
 import type { JSONSchema } from 'json-schema-typed';
 import type { CodeToHastOptionsCommon, CodeOptionsThemes, BundledTheme } from 'shiki';
@@ -28,7 +29,6 @@ import { ParsedSchema } from '@/utils/schema';
 import { Markdown } from './components/markdown';
 import { Schema, type SchemaUIOptions } from '@fumadocs/api-docs/components/schema';
 import { RenderContextProvider } from './contexts/api';
-import type { NoReference } from '@fumadocs/api-docs/schema';
 import type { ExampleMessageItem } from '@/utils/get-example-messages';
 
 export interface GenerateTypeScriptDefinitionsContext {
@@ -69,7 +69,7 @@ export interface CreateAsyncAPIPageOptions {
         bindings: ReactNode;
       },
       context: {
-        operation: NoReference<OperationObject>;
+        operation: OperationObject;
         action: 'send' | 'receive';
         ctx: RenderContext;
       },
@@ -126,12 +126,19 @@ export function createAsyncAPIPage({
     if (typeof schema !== 'object') return;
 
     try {
-      return compile(schema, {
-        name: 'Message',
-        readOnly: ctx.readOnly,
-        writeOnly: ctx.writeOnly,
-        getSchemaId: ctx.ctx.schema.getRawRef,
-      });
+      // `generate` resolves `$ref`s against the schema root itself,
+      // spread the bundled document into the root so in-document refs are resolvable
+      return generate(
+        {
+          ...(ctx.ctx.schema.bundled as object),
+          ...(getRaw(schema) as object),
+        },
+        {
+          name: 'Message',
+          readOnly: ctx.readOnly,
+          writeOnly: ctx.writeOnly,
+        },
+      );
     } catch (e) {
       console.warn('Failed to generate typescript schema:', e);
     }
@@ -177,12 +184,6 @@ export function createAsyncAPIPage({
 
     const ctx: RenderContext = useMemo(() => {
       const schemaUIShared = {
-        resolver(v: ParsedSchema) {
-          return {
-            dereferenced: v,
-            $ref: typeof v === 'object' ? processed.getRawRef(v) : undefined,
-          };
-        },
         renderMarkdown(md: string) {
           return <Markdown md={md} />;
         },

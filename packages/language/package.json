@@ -37,7 +37,7 @@
     "fumadocs-openapi": "workspace:*",
     "fumadocs-ui": "workspace:@fumadocs/base-ui@*",
     "tsconfig": "workspace:*",
-    "tsdown": "0.22.4",
+    "tsdown": "0.22.5",
     "typescript": "^6.0.3"
   },
   "peerDependencies": {

@@ -1,6 +1,5 @@
 'use client';
 import type { SnsChannelBinding, SnsOperationBinding } from '@/types/asyncapi-3';
-import type { NoReference } from '@fumadocs/api-docs/schema';
 import {
   createBinding,
   hasBindingFields,
@@ -57,15 +56,15 @@ function SnsIdentifierFields({
   );
 }
 
-function getSnsChannelSummary(binding: NoReference<SnsChannelBinding>): string | undefined {
+function getSnsChannelSummary(binding: SnsChannelBinding): string | undefined {
   return binding.name;
 }
 
-function getSnsOperationSummary(binding: NoReference<SnsOperationBinding>): string | undefined {
+function getSnsOperationSummary(binding: SnsOperationBinding): string | undefined {
   return binding.topic?.name ?? binding.topic?.arn;
 }
 
-function SnsChannelBinding({ binding }: { binding: NoReference<SnsChannelBinding> }) {
+function SnsChannelBinding({ binding }: { binding: SnsChannelBinding }) {
   if (!hasBindingFields(binding)) return <BindingEmpty />;
 
   return (
@@ -105,7 +104,7 @@ function SnsChannelBinding({ binding }: { binding: NoReference<SnsChannelBinding
   );
 }
 
-function SnsOperationBinding({ binding }: { binding: NoReference<SnsOperationBinding> }) {
+function SnsOperationBinding({ binding }: { binding: SnsOperationBinding }) {
   if (!hasBindingFields(binding)) return <BindingEmpty />;
 
   return (

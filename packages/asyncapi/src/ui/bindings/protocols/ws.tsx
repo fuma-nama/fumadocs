@@ -1,6 +1,5 @@
 'use client';
 import type { WsChannelBinding } from '@/types/asyncapi-3';
-import type { NoReference } from '@fumadocs/api-docs/schema';
 import {
   createBinding,
   hasBindingFields,
@@ -11,11 +10,11 @@ import {
   BindingSchema,
 } from '../shared';
 
-function getWsChannelSummary(binding: NoReference<WsChannelBinding>): string | undefined {
+function getWsChannelSummary(binding: WsChannelBinding): string | undefined {
   return binding.method;
 }
 
-function WsChannelBinding({ binding }: { binding: NoReference<WsChannelBinding> }) {
+function WsChannelBinding({ binding }: { binding: WsChannelBinding }) {
   if (!hasBindingFields(binding)) return <BindingEmpty />;
 
   return (

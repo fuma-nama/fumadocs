@@ -99,7 +99,7 @@ export function AccordionBindings({
   variant,
   accordionsProps,
 }: SharedProps & {
-  bindings: Record<string, unknown>;
+  bindings: object;
   accordionsProps?: Partial<ComponentProps<typeof Accordions>>;
 }) {
   const { protocols, extensions } = getBindingEntries(bindings);

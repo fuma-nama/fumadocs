@@ -4,7 +4,6 @@ import type {
   AmqpMessageBinding,
   AmqpOperationBinding,
 } from '@/types/asyncapi-3';
-import type { NoReference } from '@fumadocs/api-docs/schema';
 import {
   createBinding,
   hasBindingFields,
@@ -28,7 +27,7 @@ function formatAmqpDeliveryMode(value: number): string {
   return String(value);
 }
 
-function getAmqpChannelSummary(binding: NoReference<AmqpChannelBinding>): string | undefined {
+function getAmqpChannelSummary(binding: AmqpChannelBinding): string | undefined {
   return joinBindingSummary(
     binding.is ? formatAmqpIs(binding.is) : undefined,
     binding.exchange?.name ? `exchange: ${binding.exchange.name}` : undefined,
@@ -36,7 +35,7 @@ function getAmqpChannelSummary(binding: NoReference<AmqpChannelBinding>): string
   );
 }
 
-function getAmqpMessageSummary(binding: NoReference<AmqpMessageBinding>): string | undefined {
+function getAmqpMessageSummary(binding: AmqpMessageBinding): string | undefined {
   const parts: string[] = [];
   if (binding.contentEncoding) parts.push(binding.contentEncoding);
   if (binding.messageType) parts.push(binding.messageType);
@@ -103,7 +102,7 @@ function AmqpQueueFields({ queue }: { queue: NonNullable<AmqpChannelBinding['que
   );
 }
 
-function AmqpChannelBinding({ binding }: { binding: NoReference<AmqpChannelBinding> }) {
+function AmqpChannelBinding({ binding }: { binding: AmqpChannelBinding }) {
   if (!hasBindingFields(binding)) return <BindingEmpty />;
 
   return (
@@ -138,7 +137,7 @@ function AmqpChannelBinding({ binding }: { binding: NoReference<AmqpChannelBindi
   );
 }
 
-function AmqpOperationBinding({ binding }: { binding: NoReference<AmqpOperationBinding> }) {
+function AmqpOperationBinding({ binding }: { binding: AmqpOperationBinding }) {
   if (!hasBindingFields(binding)) return <BindingEmpty />;
 
   return (
@@ -192,7 +191,7 @@ function AmqpOperationBinding({ binding }: { binding: NoReference<AmqpOperationB
   );
 }
 
-function AmqpMessageBinding({ binding }: { binding: NoReference<AmqpMessageBinding> }) {
+function AmqpMessageBinding({ binding }: { binding: AmqpMessageBinding }) {
   if (!hasBindingFields(binding)) return <BindingEmpty />;
 
   return (

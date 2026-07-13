@@ -135,7 +135,7 @@ export function createAutoPreset(options: SchemaToPagesOptions): PagesBuilderCon
         );
       }
 
-      const hook = dereferenceShallow(this.document.webhooks![result.item.name], this.document)[
+      const hook = dereferenceShallow(this.document.webhooks![result.item.name])[
         result.item.method
       ]!;
 
@@ -184,8 +184,8 @@ export function createAutoPreset(options: SchemaToPagesOptions): PagesBuilderCon
         case 'tag': {
           let tags =
             entry.type === 'operation'
-              ? dereferenceShallow(doc.paths?.[entry.item.path], doc)?.[entry.item.method]?.tags
-              : dereferenceShallow(doc.webhooks?.[entry.item.name], doc)?.[entry.item.method]?.tags;
+              ? dereferenceShallow(doc.paths?.[entry.item.path])?.[entry.item.method]?.tags
+              : dereferenceShallow(doc.webhooks?.[entry.item.name])?.[entry.item.method]?.tags;
 
           if (!tags || tags.length === 0) {
             console.warn(

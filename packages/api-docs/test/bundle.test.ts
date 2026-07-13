@@ -3,6 +3,8 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { describe, expect, test } from 'vitest';
 import { bundle } from '@/schema/bundle';
+import { dereferenceShallow } from '@/schema/dereference';
+import { createMagicProxy } from '@scalar/json-magic/magic-proxy';
 
 const cwd = fileURLToPath(new URL('./', import.meta.url));
 const externalDir = path.join(cwd, './fixtures/external');
@@ -15,6 +17,16 @@ async function writeExternalFixtures(files: Record<string, string>): Promise<{ r
   }
 
   return { rootFile: path.join(externalDir, 'root.yaml') };
+}
+
+/** resolve the `$ref` of node (at `path` of `doc`) with a magic proxy */
+function followRef(doc: object, path: string[]): unknown {
+  let node: unknown = createMagicProxy(doc as Record<string, unknown>);
+  for (const seg of path) node = (node as Record<string, unknown>)[seg];
+
+  expect(node).toHaveProperty('$ref');
+  expect((node as { $ref: string }).$ref).toMatch(/^#\/x-ext\//);
+  return (node as Record<string, unknown>)['$ref-value'];
 }
 
 describe('bundle', () => {
@@ -41,7 +53,7 @@ describe('bundle', () => {
     });
   });
 
-  test('bundles external file refs into the root document', async () => {
+  test('embeds external file refs into `x-ext`', async () => {
     const { rootFile } = await writeExternalFixtures({
       'pet.yaml': `type: object
 properties:
@@ -66,21 +78,20 @@ components:
     const result = await bundle<{
       components: {
         schemas: {
-          Pet: { type: string; properties: { name: { type: string } } };
+          Pet: { $ref: string };
           PetList: { type: string; items: { $ref: string } };
         };
       };
     }>(rootFile);
 
-    expect(result.components.schemas.Pet).toEqual({
+    expect(followRef(result, ['components', 'schemas', 'Pet'])).toEqual({
       type: 'object',
       properties: {
         name: { type: 'string' },
       },
     });
-    expect(result.components.schemas.PetList.items).toEqual({
-      $ref: '#/components/schemas/Pet',
-    });
+    // both use sites point to the same embedded document
+    expect(result.components.schemas.PetList.items.$ref).toBe(result.components.schemas.Pet.$ref);
   });
 
   test('bundles chained external refs', async () => {
@@ -111,17 +122,21 @@ components:
     const result = await bundle<{
       components: {
         schemas: {
-          Pet: {
-            allOf: [
-              { type: string; properties: { name: { type: string } } },
-              { type: string; properties: { owner: { type: string } } },
-            ];
-          };
+          Pet: { $ref: string };
         };
       };
     }>(rootFile);
 
-    expect(result.components.schemas.Pet.allOf[1]).toEqual({
+    const pet = followRef(result, ['components', 'schemas', 'Pet']) as {
+      allOf: [unknown, { $ref: string }];
+    };
+    expect(pet.allOf[0]).toEqual({
+      type: 'object',
+      properties: {
+        name: { type: 'string' },
+      },
+    });
+    expect(dereferenceShallow(pet.allOf[1])).toEqual({
       type: 'object',
       properties: {
         owner: { type: 'string' },
@@ -129,7 +144,7 @@ components:
     });
   });
 
-  test('remaps sub-path refs under an inlined parent fragment', async () => {
+  test('rewrites sub-path refs into the embedded document', async () => {
     const { rootFile } = await writeExternalFixtures({
       'shared.yaml': `components:
   schemas:
@@ -167,7 +182,7 @@ components:
               '200': {
                 content: {
                   'application/json': {
-                    schema: { type: string; properties: { name: { type: string } } };
+                    schema: { $ref: string };
                   };
                 };
               };
@@ -182,10 +197,11 @@ components:
       };
     }>(rootFile);
 
-    expect(result.paths['/pets'].get.responses['200'].content['application/json'].schema).toEqual({
-      $ref: '#/components/schemas/PetRef',
-    });
-    expect(result.components.schemas.PetRef).toEqual({
+    const schema = result.paths['/pets'].get.responses['200'].content['application/json'].schema;
+    expect(schema.$ref).toMatch(/^#\/x-ext\/.+\/components\/schemas\/Pet$/);
+    expect(schema.$ref).toBe(result.components.schemas.PetRef.$ref);
+
+    expect(followRef(result, ['components', 'schemas', 'PetRef'])).toEqual({
       type: 'object',
       properties: {
         name: { type: 'string' },
@@ -215,16 +231,15 @@ components:
     const result = await bundle<{
       components: {
         schemas: {
-          Pet: {
-            type: string;
-            description: string;
-            properties: { name: { type: string } };
-          };
+          Pet: { $ref: string; description: string };
         };
       };
     }>(rootFile);
 
-    expect(result.components.schemas.Pet).toEqual({
+    // bundle keeps the Reference Object, sibling keywords are merged when dereferencing
+    expect(result.components.schemas.Pet.description).toBe('A pet');
+    const proxied = createMagicProxy(result as unknown as Record<string, unknown>) as typeof result;
+    expect(dereferenceShallow(proxied.components.schemas.Pet)).toMatchObject({
       type: 'object',
       properties: {
         name: { type: 'string' },
@@ -233,7 +248,7 @@ components:
     });
   });
 
-  test('fixes refs that traverse through another ref', async () => {
+  test('keeps internal refs that traverse through another ref resolvable', async () => {
     const result = await bundle({
       openapi: '3.1.0',
       components: {
@@ -249,18 +264,25 @@ components:
       },
     });
 
-    expect(
-      (
-        result as {
-          components: {
-            schemas: {
-              Wrapper: { properties: { value: { $ref: string } } };
-            };
+    const value = (
+      result as {
+        components: {
+          schemas: {
+            Wrapper: { properties: { value: { $ref: string } } };
           };
-        }
-      ).components.schemas.Wrapper.properties.value,
-    ).toEqual({
-      $ref: '#/components/schemas/Name',
+        };
+      }
+    ).components.schemas.Wrapper.properties.value;
+
+    // internal refs are untouched, chained refs are resolved by the dereference layer
+    expect(value).toEqual({
+      $ref: '#/components/schemas/Alias',
+    });
+    const proxied = createMagicProxy(result as Record<string, unknown>) as never as {
+      components: { schemas: { Wrapper: { properties: { value: unknown } } } };
+    };
+    expect(dereferenceShallow(proxied.components.schemas.Wrapper.properties.value)).toEqual({
+      type: 'string',
     });
   });
 });

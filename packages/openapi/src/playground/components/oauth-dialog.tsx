@@ -78,9 +78,10 @@ export function OAuthDialogContent(props: AuthDialogContentProps) {
 }
 
 function Content({ schemeId, scopes, setToken, setOpen }: AuthDialogContentProps) {
-  const schemes = useRenderContext().schema.dereferenced.components?.securitySchemes;
+  const { dereferenced, resolve } = useRenderContext().schema;
+  const schemes = dereferenced.components?.securitySchemes;
   const tokenInfo = useAuth().store[schemeId];
-  const scheme = schemes?.[schemeId];
+  const scheme = resolve(schemes?.[schemeId]);
   if (!scheme || scheme.type !== 'oauth2')
     throw new Error('unexpected schemaId: must be type oauth2');
 

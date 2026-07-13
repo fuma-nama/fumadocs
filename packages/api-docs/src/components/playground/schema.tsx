@@ -1,4 +1,4 @@
-import { Ajv2020 } from 'ajv/dist/2020';
+import { validate, type Schema } from '@cfworker/json-schema';
 import { createContext, ReactNode, use, useMemo } from 'react';
 import type { ParsedSchema } from '@/schema';
 import { mergeAllOf } from '@/schema/merge';
@@ -7,10 +7,16 @@ import { stringifyFieldKey } from '@fumari/stf/lib/utils';
 import { sample } from '@/schema/sample';
 import { FormatFlags, schemaToString } from '@/schema/to-string';
 import { dereferenceShallow } from '@/schema/dereference';
+import { getRaw } from '@scalar/json-magic/magic-proxy';
+import { isPlainObject } from '@/utils/is-plain-object';
 
 interface SchemaContextType extends SchemaScope {
-  ajv: Ajv2020;
   docRoot: Exclude<ParsedSchema, boolean>;
+}
+
+function matchesSchema(schema: object, value: unknown): boolean {
+  if (value === undefined) return false;
+  return validate(value, schema as Schema, '2020-12').valid;
 }
 
 export interface SchemaScope {
@@ -38,6 +44,28 @@ export interface FieldInfo {
 }
 
 const SchemaContext = createContext<SchemaContextType | undefined>(undefined);
+
+/**
+ * Deeply unwrap magic proxies (`@scalar/json-magic`) into raw values.
+ *
+ * Merged outputs of `dereferenceShallow` are plain objects mixing proxy children at any depth,
+ * `getRaw` alone only unwraps proxies themselves.
+ */
+function toRawSchema(value: unknown): unknown {
+  const raw = getRaw(value);
+  // raw values never contain proxies, no need to go deeper
+  if (raw !== value) return raw;
+
+  if (Array.isArray(value)) return value.map(toRawSchema);
+  if (isPlainObject(value)) {
+    const out: Record<string, unknown> = {};
+    for (const key in value) out[key] = toRawSchema(value[key]);
+    return out;
+  }
+
+  return value;
+}
+
 export const anyFields = {
   type: ['string', 'number', 'boolean', 'array', 'object'],
   items: true,
@@ -49,23 +77,10 @@ export function SchemaProvider({
   writeOnly,
   docRoot,
   children,
-}: Omit<SchemaContextType, 'ajv'> & { children: ReactNode }) {
-  const ajv = useMemo(
-    () =>
-      new Ajv2020({
-        strict: false,
-        validateSchema: false,
-        validateFormats: false,
-      }),
-    [],
-  );
-
+}: SchemaContextType & { children: ReactNode }) {
   return (
     <SchemaContext.Provider
-      value={useMemo(
-        () => ({ ajv, readOnly, writeOnly, docRoot }),
-        [docRoot, ajv, readOnly, writeOnly],
-      )}
+      value={useMemo(() => ({ readOnly, writeOnly, docRoot }), [docRoot, readOnly, writeOnly])}
     >
       {children}
     </SchemaContext.Provider>
@@ -92,7 +107,7 @@ export function useFieldInfo(
   schema: Exclude<ParsedSchema, boolean>;
   updateInfo: (value: Partial<FieldInfo>) => void;
 } {
-  const { docRoot: doc, ajv } = useSchemaContext();
+  const { docRoot: doc } = useSchemaContext();
   const engine = useDataEngine();
   const { generateDefault } = useSchemaUtils();
   const fieldData = useNamespace({
@@ -102,12 +117,17 @@ export function useFieldInfo(
       const out: FieldInfo = {
         oneOf: -1,
       };
+      // Validators walk every property (including the virtual `$ref-value` of magic proxies,
+      // which recurses infinitely on circular refs), always give them raw schemas.
+      const rawDoc = getRaw(doc);
       const union = getUnion(schema);
       if (union) {
         const [members, field] = union;
 
         out.oneOf = members.findIndex(
-          (item) => typeof item === 'object' && ajv.validate({ ...doc, ...item }, value),
+          (item) =>
+            typeof item === 'object' &&
+            matchesSchema({ ...rawDoc, ...(toRawSchema(item) as object) }, value),
         );
         if (out.oneOf === -1) out.oneOf = 0;
         out.unionField = field;
@@ -118,7 +138,7 @@ export function useFieldInfo(
 
         out.selectedType =
           types.find((type) => {
-            return ajv.validate({ ...doc, ...schema, type }, value);
+            return matchesSchema({ ...rawDoc, ...(toRawSchema(schema) as object), type }, value);
           }) ?? types[0];
       }
 
@@ -147,7 +167,11 @@ export function useFieldInfo(
         valueSchema = schema[updated.unionField]![updated.oneOf];
       } else if (updated.selectedType) {
         // must remove to `examples` to avoid invalid default values
-        valueSchema = { ...schema, type: updated.selectedType, examples: undefined };
+        valueSchema = {
+          ...schema,
+          type: updated.selectedType,
+          examples: undefined,
+        };
       }
 
       engine.update(fieldName, generateDefault(valueSchema));
@@ -156,29 +180,18 @@ export function useFieldInfo(
 }
 
 export function useSchemaUtils() {
-  const { readOnly, docRoot: doc } = useSchemaContext();
+  const { readOnly } = useSchemaContext();
 
   return {
     generateDefault(schema: ParsedSchema): unknown {
-      return sample(
-        schema as never,
-        {
-          skipNonRequired: true,
-          skipReadOnly: !readOnly,
-          quiet: true,
-        },
-        doc,
-      );
+      return sample(schema as never, {
+        skipNonRequired: true,
+        skipReadOnly: !readOnly,
+        quiet: true,
+      });
     },
     schemaToString(value: ParsedSchema, flags?: FormatFlags) {
-      return schemaToString(
-        value,
-        (raw) => ({
-          raw,
-          dereferenced: dereferenceShallow(raw, doc),
-        }),
-        flags,
-      );
+      return schemaToString(value, flags);
     },
   };
 }
@@ -187,20 +200,15 @@ export function useSchemaUtils() {
  * dereference & merge `allOf`.
  */
 export function useResolvedSchema(raw: ParsedSchema): Exclude<ParsedSchema, boolean> {
-  const { docRoot: doc } = useSchemaContext();
   return useMemo(() => {
-    let out = dereferenceShallow(raw, doc);
+    let out = dereferenceShallow(raw);
 
     if (typeof out === 'object' && out.allOf) {
-      out = mergeAllOf(out, {
-        dereference(schema) {
-          return dereferenceShallow(schema, doc);
-        },
-      });
+      out = mergeAllOf(out);
     }
 
     return typeof out === 'boolean' ? anyFields : out;
-  }, [doc, raw]);
+  }, [raw]);
 }
 
 function getUnion(
