@@ -63,7 +63,7 @@
     "remark-rehype": "^11.1.2",
     "satteri": "^0.9.5",
     "shiki": "^4.3.1",
-    "takumi-js": "^2.1.0",
+    "takumi-js": "^2.1.1",
     "twoslash": "^0.3.9",
     "unist-util-visit": "^5.1.0",
     "zod": "^4.4.3"
