@@ -1,3 +1,7 @@
+## fumadocs-mdx@15.1.1
+
+### Migrate from `js-yaml` to `yaml`
+
 ## fumadocs-mdx@15.1.0
 
 ### Default to Base UI

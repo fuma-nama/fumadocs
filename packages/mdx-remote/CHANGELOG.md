@@ -1,3 +1,7 @@
+## @fumadocs/mdx-remote@1.5.1
+
+### Migrate from `js-yaml` to `yaml`
+
 ## @fumadocs/mdx-remote@1.5.0
 
 ### Default to Base UI

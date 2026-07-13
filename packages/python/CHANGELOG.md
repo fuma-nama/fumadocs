@@ -1,3 +1,7 @@
+## fumadocs-python@0.1.1
+
+### Migrate from `js-yaml` to `yaml`
+
 ## fumadocs-python@0.1.0
 
 ### Default to Base UI
