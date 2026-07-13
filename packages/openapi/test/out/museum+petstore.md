@@ -1,9 +1,8 @@
 ```mdx title="museum.mdx"
 ---
 title: Redocly Museum API
-description: >-
-  An imaginary, but delightful Museum API for interacting with museum services
-  and information. Built with love by Redocly.
+description: An imaginary, but delightful Museum API for interacting with museum
+  services and information. Built with love by Redocly.
 full: true
 _openapi:
   preload:
@@ -62,14 +61,12 @@ _openapi:
         heading: get-special-event
       - content: Update the details of a special event
         heading: update-special-event
-      - content: >-
-          Delete a special event from the collection. Allows museum to cancel
+      - content: Delete a special event from the collection. Allows museum to cancel
           planned events.
         heading: delete-special-event
       - content: Purchase museum tickets for general entry or special events.
         heading: buy-museum-tickets
-      - content: >-
-          Return an image of your ticket with scannable QR code. Used for event
+      - content: Return an image of your ticket with scannable QR code. Used for event
           entry.
         heading: get-ticket-qr-code
 ---

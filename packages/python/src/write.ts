@@ -1,6 +1,6 @@
 import type { OutputFile } from './convert';
 import * as fs from 'node:fs/promises';
-import { dump } from 'js-yaml';
+import { stringify } from 'yaml';
 import * as path from 'node:path';
 
 interface WriteOptions {
@@ -28,5 +28,5 @@ export async function write(output: OutputFile[], options: WriteOptions = {}) {
 }
 
 export function frontmatter(obj: unknown) {
-  return `---\n${dump(obj).trim()}\n---`;
+  return `---\n${stringify(obj, { compat: 'yaml-1.1', singleQuote: true }).trim()}\n---`;
 }

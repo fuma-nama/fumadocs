@@ -62,7 +62,7 @@
     "class-variance-authority": "^0.7.1",
     "cnfast": "^0.0.8",
     "github-slugger": "^2.0.0",
-    "lucide-react": "^1.23.0"
+    "lucide-react": "^1.24.0"
   },
   "devDependencies": {
     "@fastify/deepmerge": "^3.2.1",
@@ -73,7 +73,7 @@
     "fumadocs-ui": "workspace:@fumadocs/base-ui@*",
     "json-schema-typed": "^8.0.2",
     "tsconfig": "workspace:*",
-    "tsdown": "0.22.4"
+    "tsdown": "0.22.5"
   },
   "peerDependencies": {
     "@types/react": "*",

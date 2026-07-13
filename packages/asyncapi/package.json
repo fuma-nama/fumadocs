@@ -44,11 +44,11 @@
     "cnfast": "^0.0.8",
     "github-slugger": "^2.0.0",
     "hast-util-to-jsx-runtime": "^2.3.6",
-    "js-yaml": "^5.2.1",
-    "lucide-react": "^1.23.0",
+    "lucide-react": "^1.24.0",
     "remark": "^15.0.1",
     "remark-rehype": "^11.1.2",
-    "shiki": "^4.3.1"
+    "shiki": "^4.3.1",
+    "yaml": "^2.9.0"
   },
   "devDependencies": {
     "@tailwindcss/oxide": "^4.3.2",
@@ -59,7 +59,7 @@
     "json-schema-typed": "^8.0.2",
     "tailwindcss": "^4.3.2",
     "tsconfig": "workspace:*",
-    "tsdown": "0.22.4"
+    "tsdown": "0.22.5"
   },
   "peerDependencies": {
     "@types/react": "*",

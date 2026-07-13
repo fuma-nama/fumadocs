@@ -1,7 +1,7 @@
 /**
  * Inspired by https://github.com/jonschlinkert/gray-matter
  */
-import { load } from 'js-yaml';
+import { parse } from 'yaml';
 
 interface Output {
   /**
@@ -28,7 +28,7 @@ export function frontmatter(input: string): Output {
   output.matter = match[0];
   output.content = input.slice(match[0].length);
 
-  const loaded = load(match[1]);
+  const loaded = parse(match[1]);
   output.data = loaded ?? {};
 
   return output;

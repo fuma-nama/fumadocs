@@ -14,11 +14,11 @@
     "fumadocs-core": "workspace:*",
     "fumadocs-mdx": "workspace:*",
     "fumadocs-ui": "workspace:@fumadocs/base-ui@*",
-    "lucide-react": "^1.23.0",
+    "lucide-react": "^1.24.0",
     "react": "^19.2.7",
     "react-dom": "^19.2.7",
     "react-server-dom-webpack": "^19.2.7",
-    "takumi-js": "^2.0.1",
+    "takumi-js": "^2.1.0",
     "waku": "1.0.0-beta.6"
   },
   "devDependencies": {
@@ -29,6 +29,6 @@
     "@types/react-dom": "^19.2.3",
     "tailwindcss": "^4.3.2",
     "typescript": "^6.0.3",
-    "vite": "^8.1.3"
+    "vite": "^8.1.4"
   }
 }
