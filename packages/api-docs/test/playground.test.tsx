@@ -41,10 +41,15 @@ test('renders playground fields of circular schemas', () => {
 
     return h(
       StfProvider,
-      { value: stf },
+      { value: stf, children: null },
       h(
         SchemaProvider,
-        { docRoot: doc as never, writeOnly: true, readOnly: false },
+        {
+          docRoot: doc as never,
+          writeOnly: true,
+          readOnly: false,
+          children: null,
+        },
         h(FieldSet, {
           field: doc.components.schemas.Planet as never,
           fieldName: ['body'],

@@ -54,6 +54,9 @@ async function addAIChat({ template, appDir }: TemplatePluginContext) {
     case 'tanstack-start-spa':
       filePath = path.join(appDir, 'routes/docs/$.tsx');
       break;
+    case 'astro':
+      filePath = path.join(appDir, 'components/docs.tsx');
+      break;
   }
 
   const file = await createSourceFile(filePath);

@@ -1,6 +1,8 @@
 import type { NoReferenceSwallow as NoReferenceShallow } from '.';
 import { isPlainObject } from '../utils/is-plain-object';
 
+const cacheMap = new WeakMap<object, unknown>();
+
 /**
  * Resolve the `$ref` of a Reference Object (shallowly), merging sibling keywords into the target (sibling keywords take precedence).
  *
@@ -10,20 +12,21 @@ import { isPlainObject } from '../utils/is-plain-object';
  * Returns non-reference values as-is.
  */
 export function dereferenceShallow<T>(schema: T): NoReferenceShallow<T> {
-  if (isPlainObject(schema)) {
-    if (typeof schema.$ref !== 'string') return schema as never;
+  if (!isPlainObject(schema)) return schema as never;
 
-    // `$ref-value` is a virtual property added by the magic proxy, exclude it from sibling keywords
-    const { $ref, '$ref-value': refValue, ...rest } = schema as Record<string, unknown>;
-    const resolved = dereferenceShallow(refValue);
+  if (typeof schema.$ref !== 'string') return schema as never;
+  const cached = cacheMap.get(schema);
+  if (cached) return cached as never;
 
-    if (typeof resolved !== 'object' || resolved === null)
-      throw new Error(
-        `Failed to resolve "${$ref}": the schema must be a node of magic proxy ("@scalar/json-magic").`,
-      );
-    if (Object.keys(rest).length === 0) return resolved as never;
-    return { ...resolved, ...rest } as never;
+  // `$ref-value` is a virtual property added by the magic proxy, exclude it from sibling keywords
+  const { $ref: _, '$ref-value': refValue, ...rest } = schema as Record<string, unknown>;
+  const resolved = dereferenceShallow(refValue);
+  let result: unknown = rest;
+
+  if (typeof resolved === 'object' && resolved !== null) {
+    if (Object.keys(rest).length === 0) result = resolved;
+    else result = { ...resolved, ...rest };
   }
-
-  return schema as never;
+  cacheMap.set(schema, result);
+  return result as never;
 }

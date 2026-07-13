@@ -65,7 +65,6 @@ import { useAuth } from './auth';
 import { useOnChange } from 'fumadocs-core/utils/use-on-change';
 import { Spinner } from '@fumadocs/api-docs/components/spinner';
 import { joinURL, resolveServerUrl } from '@fumadocs/api-docs/utils/url';
-import { s } from '../../../core/dist/index-DZN5OrTa';
 
 export interface FormValues extends Record<string, unknown> {
   path: Record<string, unknown>;

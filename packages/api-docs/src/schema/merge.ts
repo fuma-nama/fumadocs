@@ -1,34 +1,25 @@
 import { type ParsedSchema } from '@/schema';
 import { deepEqual } from '../utils/deep-equal';
-
-interface Options {
-  dereference?: (schema: ParsedSchema) => ParsedSchema | undefined;
-}
+import { dereferenceShallow } from './dereference';
 
 /**
  * Merge `allOf` object schema
  */
-export function mergeAllOf(schema: ParsedSchema, options: Options = {}): ParsedSchema {
-  if (typeof schema === 'boolean') return schema;
-
-  const { dereference } = options;
-  if (dereference && '$ref' in schema && typeof schema.$ref === 'string') {
-    schema = dereference(schema) ?? schema;
-  }
-
+export function mergeAllOf(schema: ParsedSchema): ParsedSchema {
+  schema = dereferenceShallow(schema);
   if (typeof schema === 'boolean' || !schema.allOf) return schema;
 
   const { allOf, ...rest } = schema;
   let result: ParsedSchema = rest;
   for (const item of allOf) {
-    result = intersection(result, item, options);
+    result = intersection(result, item);
   }
   return result;
 }
 
-function intersection(a: ParsedSchema, b: ParsedSchema, options: Options): ParsedSchema {
-  a = mergeAllOf(a, options);
-  b = mergeAllOf(b, options);
+function intersection(a: ParsedSchema, b: ParsedSchema): ParsedSchema {
+  a = mergeAllOf(a);
+  b = mergeAllOf(b);
   if (typeof a === 'boolean' && typeof b === 'boolean') return a && b;
   if (typeof a === 'boolean') return a;
   if (typeof b === 'boolean') return b;
@@ -37,13 +28,13 @@ function intersection(a: ParsedSchema, b: ParsedSchema, options: Options): Parse
     if (a[unionField] === undefined && b[unionField] !== undefined) {
       return {
         ...b,
-        [unionField]: b[unionField].map((item) => intersection(item, a, options)),
+        [unionField]: b[unionField].map((item) => intersection(item, a)),
       };
     }
     if (a[unionField] !== undefined && b[unionField] === undefined) {
       return {
         ...a,
-        [unionField]: a[unionField].map((item) => intersection(item, b, options)),
+        [unionField]: a[unionField].map((item) => intersection(item, b)),
       };
     }
   }
@@ -109,7 +100,7 @@ function intersection(a: ParsedSchema, b: ParsedSchema, options: Options): Parse
           const product: ParsedSchema[] = [];
           for (const aItem of result[key]) {
             for (const bItem of value) {
-              const merged = intersection(aItem, bItem, options);
+              const merged = intersection(aItem, bItem);
               if (merged !== false) product.push(merged);
             }
           }
@@ -158,7 +149,7 @@ function intersection(a: ParsedSchema, b: ParsedSchema, options: Options): Parse
           } else if (bProp === undefined) {
             out[prop] = aProp;
           } else {
-            out[prop] = intersection(aProp, bProp, options);
+            out[prop] = intersection(aProp, bProp);
           }
         }
 
@@ -172,7 +163,7 @@ function intersection(a: ParsedSchema, b: ParsedSchema, options: Options): Parse
         const value = b[key];
         if (value === undefined) break;
 
-        result[key] = result[key] === undefined ? value : intersection(result[key], value, options);
+        result[key] = result[key] === undefined ? value : intersection(result[key], value);
         break;
       }
       case 'not': {

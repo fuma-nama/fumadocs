@@ -191,14 +191,7 @@ export function useSchemaUtils() {
       });
     },
     schemaToString(value: ParsedSchema, flags?: FormatFlags) {
-      return schemaToString(
-        value,
-        (raw) => ({
-          dereferenced: dereferenceShallow(raw),
-          $ref: typeof raw === 'object' && typeof raw.$ref === 'string' ? raw.$ref : undefined,
-        }),
-        flags,
-      );
+      return schemaToString(value, flags);
     },
   };
 }
@@ -211,11 +204,7 @@ export function useResolvedSchema(raw: ParsedSchema): Exclude<ParsedSchema, bool
     let out = dereferenceShallow(raw);
 
     if (typeof out === 'object' && out.allOf) {
-      out = mergeAllOf(out, {
-        dereference(schema) {
-          return dereferenceShallow(schema);
-        },
-      });
+      out = mergeAllOf(out);
     }
 
     return typeof out === 'boolean' ? anyFields : out;

@@ -73,7 +73,7 @@ interface MdPresetComponents {
     | typeof import('fumadocs-ui/layouts/flux/page');
 }
 
-export default async function DocPage({ slugs }: PageProps<'/docs/[...slugs]'>) {
+export default async function DocPage({ slugs }: PageProps<'/[...slugs]'>) {
   const config = await getConfigRuntime();
   const source = await getSource(config);
   const page = source.getPage(slugs);

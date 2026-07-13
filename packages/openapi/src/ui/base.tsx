@@ -109,12 +109,6 @@ export function createOpenAPIPageBase({
         renderMarkdown(md) {
           return <Markdown md={md} />;
         },
-        resolver(v: ParsedSchema) {
-          return {
-            dereferenced: processed.resolve(v),
-            $ref: typeof v === 'object' && typeof v.$ref === 'string' ? v.$ref : undefined,
-          };
-        },
       } satisfies Partial<SchemaUIOptions>;
 
       return {

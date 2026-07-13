@@ -23,10 +23,3 @@ export type ParsedSchema =
       };
     })
   | boolean;
-
-export type SchemaResolver = (schema: ParsedSchema) => {
-  /** shallowly dereferenced schema */
-  dereferenced: ParsedSchema;
-  /** the ref value (if dereferenced) */
-  $ref?: string;
-};

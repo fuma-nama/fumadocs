@@ -57,7 +57,7 @@ function replaceHighlightedNode(
 }
 
 function elementClasses(element: Element): string[] {
-  const className = element.properties.className;
+  const className = element.properties.className as string[] | string;
   if (Array.isArray(className)) return className.map(String);
   if (typeof className === 'string') return className.split(/\s+/);
   return [];

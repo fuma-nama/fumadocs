@@ -129,7 +129,10 @@ export function createAsyncAPIPage({
       // `generate` resolves `$ref`s against the schema root itself,
       // spread the bundled document into the root so in-document refs are resolvable
       return generate(
-        { ...(ctx.ctx.schema.bundled as object), ...(getRaw(schema) as object) },
+        {
+          ...(ctx.ctx.schema.bundled as object),
+          ...(getRaw(schema) as object),
+        },
         {
           name: 'Message',
           readOnly: ctx.readOnly,
@@ -181,12 +184,6 @@ export function createAsyncAPIPage({
 
     const ctx: RenderContext = useMemo(() => {
       const schemaUIShared = {
-        resolver(v: ParsedSchema) {
-          return {
-            dereferenced: processed.resolve(v),
-            $ref: typeof v === 'object' && typeof v.$ref === 'string' ? v.$ref : undefined,
-          };
-        },
         renderMarkdown(md: string) {
           return <Markdown md={md} />;
         },

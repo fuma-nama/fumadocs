@@ -17,10 +17,6 @@ test('double-oneOf in allOf does not crash', async () => {
     renderCodeblock() {
       return null;
     },
-    resolver: (s) => ({
-      dereferenced: parsed.resolve(s),
-      $ref: typeof s === 'object' && typeof s.$ref === 'string' ? s.$ref : undefined,
-    }),
   });
 
   // Should produce a cross-product of 4 oneOf variants, not crash
@@ -39,10 +35,6 @@ test('test', async () => {
     renderCodeblock() {
       return null;
     },
-    resolver: (s) => ({
-      dereferenced: parsed.resolve(s),
-      $ref: typeof s === 'object' && typeof s.$ref === 'string' ? s.$ref : undefined,
-    }),
   });
 
   expect(out).toMatchInlineSnapshot(`
