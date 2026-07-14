@@ -2,7 +2,7 @@ import { LoaderDefinitionFunction } from 'webpack';
 import { toWebpack, type WebpackLoader } from '@/loaders/adapter';
 import { createStandaloneConfigLoader } from '@/loaders/config';
 import { createMetaLoader } from '@/loaders/meta';
-import { getCore, type WebpackLoaderOptions } from '@/webpack';
+import { getCore, getMacroContext, type WebpackLoaderOptions } from '@/webpack';
 
 let instance: WebpackLoader | undefined;
 
@@ -24,6 +24,7 @@ const loader: LoaderDefinitionFunction<WebpackLoaderOptions> = function (source)
           json: 'json',
           yaml: 'js',
         },
+        getMacroContext(options),
       ),
     );
   }

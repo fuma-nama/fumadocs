@@ -2,7 +2,7 @@ import type { LoaderDefinitionFunction } from 'webpack';
 import { createMdxLoader } from '@/loaders/mdx';
 import { toWebpack, type WebpackLoader } from '@/loaders/adapter';
 import { createStandaloneConfigLoader } from '@/loaders/config';
-import { getCore, type WebpackLoaderOptions } from '@/webpack';
+import { getCore, getMacroContext, type WebpackLoaderOptions } from '@/webpack';
 
 let instance: WebpackLoader | undefined;
 
@@ -20,6 +20,7 @@ const loader: LoaderDefinitionFunction<WebpackLoaderOptions> = function loader(s
           buildConfig: false,
           mode: options.isDev ? 'dev' : 'production',
         }),
+        getMacroContext(options),
       ),
     );
   }

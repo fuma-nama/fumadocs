@@ -3,8 +3,8 @@ import { defineConfig } from 'tsdown';
 export default defineConfig({
   entry: [
     './src/{index,bin}.ts',
-    './src/{config,next,vite,bun,rolldown}/index.ts',
-    './src/webpack/{mdx,meta}.ts',
+    './src/{config,next,vite,bun,rolldown,macro}/index.ts',
+    './src/webpack/{mdx,meta,macro}.ts',
     './src/node/{index,_loader,loader}.ts',
     './src/runtime/*.{ts,tsx}',
     './src/plugins/*.ts',

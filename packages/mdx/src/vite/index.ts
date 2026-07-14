@@ -8,9 +8,46 @@ import { createIntegratedConfigLoader } from '@/loaders/config';
 import { createMetaLoader } from '@/loaders/meta';
 import indexFile, { IndexFilePluginOptions } from '@/plugins/index-file';
 import path from 'node:path';
+import fs from 'node:fs/promises';
 import { mdxLoaderGlob, metaLoaderGlob } from '@/loaders';
+import type { MacroContext, MacroEvaluator } from '@/macro/eval';
+
+/** @internal do not use this */
+export function createMacroEvaluator(root: string): MacroEvaluator {
+  return async ({ entry, transform }) => {
+    const { dependencies } = await runnerImport(entry, {
+      root,
+      plugins: [
+        {
+          name: 'fumadocs-mdx:macro-config',
+          transform: {
+            order: 'pre',
+            async handler(code, id) {
+              const [file] = id.split('?', 2);
+              const result = await transform(code, file);
+              if (result === null) return;
+
+              return { code: result };
+            },
+          },
+        },
+      ],
+    });
+
+    return {
+      inputs: [entry, ...dependencies.map((file) => path.resolve(root, file))],
+    };
+  };
+}
 
 export interface PluginOptions {
+  /**
+   * Enable the macro API (`fumadocs-mdx/macro`) for matching modules.
+   *
+   * Passed to the [`id` filter](https://vite.dev/guide/api-plugin#hook-filters) of the transform hook directly.
+   */
+  include?: string | RegExp | (string | RegExp)[];
+
   /**
    * Generate index files for accessing content.
    *
@@ -44,37 +81,61 @@ export default function mdx(
 ): Plugin[] {
   let root: string;
   let core: Core;
-  let options: Required<PluginOptions>;
+  let options: ResolvedPluginOptions;
+  let macro: MacroContext | undefined;
   const metaPlugin: Plugin = {
     name: 'fumadocs-mdx:meta',
   };
   const mdxPlugin: Plugin = {
     name: 'fumadocs-mdx:mdx',
   };
+  const macroPlugin: Plugin = {
+    name: 'fumadocs-mdx:macro',
+  };
+
+  async function importConfig(): Promise<Record<string, unknown>> {
+    try {
+      return (await runnerImport<Record<string, unknown>>(options.configPath)).module;
+    } catch (error) {
+      // the config file is optional
+      const missing = !(await fs.stat(options.configPath).catch(() => null));
+      if (!missing) throw error;
+
+      return {};
+    }
+  }
 
   return [
     {
       name: 'fumadocs-mdx',
-      async config(config) {
+      async config(config, env) {
         root = config.root ?? process.cwd();
         options = applyDefaults(root, pluginOptions);
+        macro = options.include
+          ? {
+              root,
+              outDir: options.outDir,
+              isDev: env.command === 'serve',
+              evaluator: createMacroEvaluator(root),
+            }
+          : undefined;
         core = createViteCore(options);
+
         await core.init({
-          config: buildConfig(
-            forcedConfig
-              ? await forcedConfig
-              : (await runnerImport<Record<string, unknown>>(options.configPath)).module,
-            root,
-          ),
+          config: buildConfig(forcedConfig ? await forcedConfig : await importConfig(), root),
         });
 
         const configLoader = createIntegratedConfigLoader(core);
-        const mdxLoader = toVite(createMdxLoader(configLoader));
+        const mdxLoader = toVite(createMdxLoader(configLoader, macro));
         const metaLoader = toVite(
-          createMetaLoader(configLoader, {
-            // vite has built-in plugin for JSON files
-            json: 'json',
-          }),
+          createMetaLoader(
+            configLoader,
+            {
+              // vite has built-in plugin for JSON files
+              json: 'json',
+            },
+            macro,
+          ),
         );
 
         mdxPlugin.transform = {
@@ -98,6 +159,37 @@ export default function mdx(
           },
         };
 
+        if (macro) {
+          const ctx = macro;
+          const { MacroModuleId, transformMacroModule } = await import('@/macro/transform');
+
+          macroPlugin.transform = {
+            order: 'pre',
+            filter: {
+              id: {
+                include: options.include,
+                exclude: ['**/node_modules/**'],
+              },
+              code: MacroModuleId,
+            },
+            async handler(code, id) {
+              const [file] = id.split('?', 2);
+              const result = await transformMacroModule({
+                code,
+                file,
+                root: ctx.root,
+                target: 'vite',
+              });
+              if (!result) return;
+
+              return {
+                code: result.code,
+                map: result.map as never,
+              };
+            },
+          };
+        }
+
         if ('_fumadocs_skipViteConfig' in config && config._fumadocs_skipViteConfig) return;
         if (!options.updateViteConfig) return;
 
@@ -116,10 +208,7 @@ export default function mdx(
           server.watcher.on('change', async (file) => {
             if (path.resolve(file) === options.configPath) {
               await core.init({
-                config: buildConfig(
-                  (await runnerImport<Record<string, unknown>>(options.configPath)).module,
-                  root,
-                ),
+                config: buildConfig(await importConfig(), root),
               });
 
               await core.emit({ write: true });
@@ -128,6 +217,7 @@ export default function mdx(
         }
       },
     },
+    macroPlugin,
     mdxPlugin,
     metaPlugin,
   ];
@@ -135,14 +225,17 @@ export default function mdx(
 
 export async function postInstall(pluginOptions: PluginOptions = {}) {
   const { loadConfig } = await import('@/config/load-from-file');
-  const core = createViteCore(applyDefaults(process.cwd(), pluginOptions));
-  await core.init({
-    config: loadConfig(core, true),
-  });
+  const options = applyDefaults(process.cwd(), pluginOptions);
+  const core = createViteCore(options);
+
+  await core.init({ config: loadConfig(core, true) });
   await core.emit({ write: true });
 }
 
-function createViteCore({ index, configPath, outDir }: Required<PluginOptions>) {
+type ResolvedPluginOptions = Omit<Required<PluginOptions>, 'include'> &
+  Pick<PluginOptions, 'include'>;
+
+function createViteCore({ index, configPath, outDir }: ResolvedPluginOptions) {
   if (index === true) index = {};
 
   return createCore({
@@ -159,11 +252,12 @@ function createViteCore({ index, configPath, outDir }: Required<PluginOptions>) 
   });
 }
 
-function applyDefaults(root: string, options: PluginOptions): Required<PluginOptions> {
+function applyDefaults(root: string, options: PluginOptions): ResolvedPluginOptions {
   return {
     updateViteConfig: options.updateViteConfig ?? true,
     index: options.index ?? true,
     configPath: path.resolve(root, options.configPath ?? _Defaults.configPath),
     outDir: path.resolve(root, options.outDir ?? _Defaults.outDir),
+    include: options.include,
   };
 }

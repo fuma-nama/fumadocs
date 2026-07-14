@@ -3,6 +3,7 @@
   "compilerOptions": {
     "paths": {
       "@/*": ["./src/*"],
+      "fumadocs-mdx/macro": ["./src/macro/index.ts"],
       "@fumadocs/satteri/*": ["../satteri/dist/*"]
     },
     "types": ["@types/node", "@types/mdx", "@fumadocs/satteri"],
@@ -12,5 +13,5 @@
     "module": "ESNext",
     "target": "ES2020"
   },
-  "exclude": ["node_modules", "eslint.config.mjs", "dist"]
+  "exclude": ["node_modules", "eslint.config.mjs", "dist", "test/fixtures/**/*.output.ts"]
 }

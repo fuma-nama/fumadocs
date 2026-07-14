@@ -6,11 +6,14 @@ import fs from 'node:fs/promises';
 import path from 'node:path';
 import { createHash } from 'node:crypto';
 import type { ConfigLoader } from '@/loaders/config';
+import { resolveMacroCollection, type MacroContext } from '@/macro/eval';
 
 const querySchema = z.looseObject({
   only: z.literal(['frontmatter', 'all']).default('all'),
   collection: z.string().optional(),
   workspace: z.string().optional(),
+  cfg: z.string().optional(),
+  id: z.coerce.number().optional(),
 });
 
 const cacheEntry = z.object({
@@ -21,13 +24,13 @@ const cacheEntry = z.object({
 
 type CacheEntry = z.infer<typeof cacheEntry>;
 
-export function createMdxLoader({ getCore }: ConfigLoader): Loader {
+export function createMdxLoader({ getCore }: ConfigLoader, macro?: MacroContext): Loader {
   return {
     async load({ getSource, development: isDevelopment, query, compiler, filePath }) {
       let core = await getCore();
       const value = await getSource();
       const matter = frontmatter(value);
-      const { collection: collectionName, workspace, only } = querySchema.parse(query);
+      const { collection: collectionName, workspace, only, cfg, id } = querySchema.parse(query);
       if (workspace) {
         core = core.getWorkspaces().get(workspace) ?? core;
       }
@@ -57,16 +60,25 @@ export function createMdxLoader({ getCore }: ConfigLoader): Loader {
         };
       }
 
-      const collection = collectionName ? core.getCollection(collectionName) : undefined;
-
       let docCollection: DocCollectionItem | undefined;
-      switch (collection?.type) {
-        case 'doc':
-          docCollection = collection;
-          break;
-        case 'docs':
-          docCollection = collection.docs;
-          break;
+      if (macro && cfg !== undefined && id !== undefined) {
+        const resolved = await resolveMacroCollection(macro, cfg, id);
+        for (const input of resolved.inputs) compiler.addDependency(input);
+
+        const item = resolved.collection;
+        if (item.type === 'docs') docCollection = item.docs;
+        else if (item.type === 'doc') docCollection = item;
+      } else {
+        const collection = collectionName ? core.getCollection(collectionName) : undefined;
+
+        switch (collection?.type) {
+          case 'doc':
+            docCollection = collection;
+            break;
+          case 'docs':
+            docCollection = collection.docs;
+            break;
+        }
       }
 
       if (docCollection) {

@@ -3,10 +3,13 @@ import type { ConfigLoader } from '@/loaders/config';
 import { parse as parseYaml } from 'yaml';
 import { z } from 'zod';
 import type { MetaCollectionItem } from '@/config/build';
+import { resolveMacroCollection, type MacroContext } from '@/macro/eval';
 
 const querySchema = z.looseObject({
   collection: z.string().optional(),
   workspace: z.string().optional(),
+  cfg: z.string().optional(),
+  id: z.coerce.number().optional(),
 });
 
 /**
@@ -18,6 +21,7 @@ export function createMetaLoader(
     json?: 'json' | 'js';
     yaml?: 'js';
   } = {},
+  macro?: MacroContext,
 ): Loader {
   const { json: resolveJson = 'js' } = resolve;
 
@@ -32,10 +36,10 @@ export function createMetaLoader(
     throw new Error('Unknown file type ' + filePath);
   }
 
-  function onMeta(source: string, { filePath, query }: LoaderInput) {
+  function onMeta(source: string, { filePath, query, compiler }: LoaderInput) {
     const parsed = querySchema.safeParse(query);
     if (!parsed.success || !parsed.data.collection) return null;
-    const { collection: collectionName, workspace } = parsed.data;
+    const { collection: collectionName, workspace, cfg, id } = parsed.data;
 
     return async (): Promise<unknown> => {
       let core = await getCore();
@@ -43,16 +47,25 @@ export function createMetaLoader(
         core = core.getWorkspaces().get(workspace) ?? core;
       }
 
-      const collection = core.getCollection(collectionName);
       let metaCollection: MetaCollectionItem | undefined;
+      if (macro && cfg !== undefined && id !== undefined) {
+        const resolved = await resolveMacroCollection(macro, cfg, id);
+        for (const input of resolved.inputs) compiler.addDependency(input);
 
-      switch (collection?.type) {
-        case 'meta':
-          metaCollection = collection;
-          break;
-        case 'docs':
-          metaCollection = collection.meta;
-          break;
+        const item = resolved.collection;
+        if (item.type === 'docs') metaCollection = item.meta;
+        else if (item.type === 'meta') metaCollection = item;
+      } else {
+        const collection = core.getCollection(collectionName);
+
+        switch (collection?.type) {
+          case 'meta':
+            metaCollection = collection;
+            break;
+          case 'docs':
+            metaCollection = collection.meta;
+            break;
+        }
       }
 
       const data = parse(filePath, source);
