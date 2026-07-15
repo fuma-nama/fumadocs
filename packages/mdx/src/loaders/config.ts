@@ -34,7 +34,7 @@ export function createStandaloneConfigLoader({
   async function getConfigHash(): Promise<Hash> {
     if (mode === 'production') return 'static';
 
-    const stats = await fs.stat(core.getOptions().configPath).catch(() => undefined);
+    const stats = await fs.stat(core.configPath).catch(() => undefined);
     return stats ? stats.mtime.getTime() : 'missing';
   }
 

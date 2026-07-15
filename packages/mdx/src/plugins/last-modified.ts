@@ -66,7 +66,7 @@ export default function lastModified(options: LastModifiedPluginOptions = {}): P
       },
     },
     config() {
-      const { workspace } = this.core.getOptions();
+      const workspace = this.core.workspace;
       const cwd = workspace ? path.resolve(workspace.dir) : process.cwd();
 
       switch (versionControl) {

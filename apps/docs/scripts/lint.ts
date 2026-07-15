@@ -1,13 +1,13 @@
 import { type FileObject, printErrors, scanURLs, validateFiles } from 'next-validate-link';
-import { blog, source } from '@/lib/source';
+import { blogLoader, source } from '@/lib/source';
 
-type AnySource = typeof blog | typeof source;
+type AnySource = typeof blogLoader | typeof source;
 
 async function checkLinks() {
   const scanned = await scanURLs({
     populate: {
       '(home)/blog/[slug]': await Promise.all(
-        blog.getPages().map(async (page) => ({
+        blogLoader.getPages().map(async (page) => ({
           value: {
             slug: page.slugs[0],
           },
@@ -30,7 +30,7 @@ async function checkLinks() {
   console.log(`collected ${scanned.urls.size} URLs, ${scanned.fallbackUrls.length} fallbacks`);
 
   printErrors(
-    await validateFiles([...(await getFiles(source)), ...(await getFiles(blog))], {
+    await validateFiles([...(await getFiles(source)), ...(await getFiles(blogLoader))], {
       scanned,
       markdown: {
         components: {

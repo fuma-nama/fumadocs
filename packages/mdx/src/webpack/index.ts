@@ -1,5 +1,5 @@
 import { type Core, createCore } from '@/core';
-import type { MacroContext } from '@/macro/eval';
+import { createNodeEvaluator, MacroCollector } from '@/macro/eval';
 
 export interface WebpackLoaderOptions {
   absoluteCompiledConfigPath: string;
@@ -11,24 +11,34 @@ export interface WebpackLoaderOptions {
    * whether the macro API (`fumadocs-mdx/macro`) is enabled
    */
   macro?: boolean;
+
+  /** @internal output format for JSON meta files */
+  metaJsonOutput?: 'json' | 'js';
 }
 
 let core: Core;
 
+/**
+ * the mdx & meta loaders are separate modules, they share this instance (and hence one macro
+ * collector) so that macro modules aren't evaluated twice.
+ */
 export function getCore(options: WebpackLoaderOptions) {
-  return (core ??= createCore({
+  if (core) return core;
+  core = createCore({
     environment: 'webpack',
     outDir: options.outDir,
     configPath: options.configPath,
-  }));
-}
+  });
 
-export function getMacroContext(options: WebpackLoaderOptions): MacroContext | undefined {
-  if (!options.macro) return;
+  if (options.macro) {
+    core.macro = new MacroCollector({
+      root: core.root,
+      outDir: core.outDir,
+      isDev: options.isDev,
+      // webpack/turbopack loaders run on Node.js, which cannot evaluate TypeScript natively
+      evaluator: createNodeEvaluator({ outDir: core.outDir, root: core.root }),
+    });
+  }
 
-  return {
-    root: process.cwd(),
-    outDir: options.outDir,
-    isDev: options.isDev,
-  };
+  return core;
 }

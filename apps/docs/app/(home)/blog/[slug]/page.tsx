@@ -2,7 +2,7 @@ import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import Link from 'next/link';
 import { InlineTOC } from 'fumadocs-ui/components/inline-toc';
-import { blog } from '@/lib/source';
+import { blogLoader } from '@/lib/source';
 import { createMetadata } from '@/lib/metadata';
 import { buttonVariants } from '@/components/ui/button';
 import { ShareButton } from '@/app/(home)/blog/[slug]/page.client';
@@ -12,7 +12,7 @@ import { cn } from '@/lib/cn';
 
 export default async function Page(props: PageProps<'/blog/[slug]'>) {
   const params = await props.params;
-  const page = blog.getPage([params.slug]);
+  const page = blogLoader.getPage([params.slug]);
   const components = getMDXComponents();
 
   if (!page) notFound();
@@ -63,7 +63,7 @@ export default async function Page(props: PageProps<'/blog/[slug]'>) {
 
 export async function generateMetadata(props: PageProps<'/blog/[slug]'>): Promise<Metadata> {
   const params = await props.params;
-  const page = blog.getPage([params.slug]);
+  const page = blogLoader.getPage([params.slug]);
 
   if (!page) notFound();
 
@@ -74,7 +74,7 @@ export async function generateMetadata(props: PageProps<'/blog/[slug]'>): Promis
 }
 
 export function generateStaticParams(): { slug: string }[] {
-  return blog.getPages().map((page) => ({
+  return blogLoader.getPages().map((page) => ({
     slug: page.slugs[0],
   }));
 }

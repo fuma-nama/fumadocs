@@ -1,45 +1,40 @@
 import type { NextConfig } from 'next';
 import type { Configuration } from 'webpack';
 import type { WebpackLoaderOptions } from '@/webpack';
-import type { TurbopackLoaderOptions, TurbopackOptions } from 'next/dist/server/config-shared';
+import type {
+  TurbopackLoaderOptions,
+  TurbopackOptions,
+  TurbopackRuleConfigItem,
+} from 'next/dist/server/config-shared';
 import * as path from 'node:path';
 import picomatch from 'picomatch';
 import { loadConfig } from '@/config/load-from-file';
-import { _Defaults, type Core, createCore } from '@/core';
+import { type Core, CoreOptions, createCore } from '@/core';
 import { mdxLoaderGlob, metaLoaderFileGlob, metaLoaderQueryGlob } from '@/loaders';
 import type { IndexFilePluginOptions } from '@/plugins/index-file';
 import indexFile from '@/plugins/index-file';
 
-export interface CreateMDXOptions {
+export interface CreateMDXOptions extends Pick<CoreOptions, 'configPath' | 'outDir'> {
   /**
    * Enable the macro API (`fumadocs-mdx/macro`) for matching modules.
    *
    * A list of glob patterns.
    */
   include?: string | string[];
-
-  /**
-   * Path to source configuration file
-   */
-  configPath?: string;
-
-  /**
-   * Directory for output files
-   *
-   * @defaultValue '.source'
-   */
-  outDir?: string;
-
   index?: IndexFilePluginOptions | false;
 }
 
 const defaultPageExtensions = ['mdx', 'md', 'jsx', 'js', 'tsx', 'ts'];
 
-export function createMDX(createOptions: CreateMDXOptions = {}) {
-  const options = applyDefaults(createOptions);
+export function createMDX(options: CreateMDXOptions = {}) {
   const core = createNextCore(options);
   const isDev = process.env.NODE_ENV === 'development';
-  const macro = options.macro;
+  let macro: { include: string[] } | undefined;
+  if (Array.isArray(options.include) && options.include.length > 0) {
+    macro = { include: options.include };
+  } else if (typeof options.include === 'string') {
+    macro = { include: [options.include] };
+  }
 
   if (process.env._FUMADOCS_MDX !== '1') {
     process.env._FUMADOCS_MDX = '1';
@@ -48,13 +43,16 @@ export function createMDX(createOptions: CreateMDXOptions = {}) {
   }
 
   return (nextConfig: NextConfig = {}): NextConfig => {
-    const { configPath, outDir } = core.getOptions();
     const loaderOptions: WebpackLoaderOptions = {
-      configPath,
-      outDir,
+      configPath: core.configPath,
+      outDir: core.outDir,
       absoluteCompiledConfigPath: path.resolve(core.getCompiledConfigPath()),
       isDev,
       macro: macro !== undefined,
+    };
+    const turbopackMetaLoaderOptions: WebpackLoaderOptions = {
+      ...loaderOptions,
+      metaJsonOutput: 'js',
     };
 
     const turbopack: TurbopackOptions = {
@@ -77,7 +75,7 @@ export function createMDX(createOptions: CreateMDXOptions = {}) {
                       options: loaderOptions as unknown as TurbopackLoaderOptions,
                     },
                   ],
-                },
+                } satisfies TurbopackRuleConfigItem,
               ]),
             )
           : undefined),
@@ -97,10 +95,11 @@ export function createMDX(createOptions: CreateMDXOptions = {}) {
           loaders: [
             {
               loader: 'fumadocs-mdx/webpack/meta',
-              options: loaderOptions as unknown as TurbopackLoaderOptions,
+              options: turbopackMetaLoaderOptions as unknown as TurbopackLoaderOptions,
             },
           ],
-          as: '*.json',
+          // TODO: output json directly when Turbopack supports output format other than JavaScript.
+          as: '*.js',
         },
         '*.yaml': {
           condition: {
@@ -109,7 +108,7 @@ export function createMDX(createOptions: CreateMDXOptions = {}) {
           loaders: [
             {
               loader: 'fumadocs-mdx/webpack/meta',
-              options: loaderOptions as unknown as TurbopackLoaderOptions,
+              options: turbopackMetaLoaderOptions as unknown as TurbopackLoaderOptions,
             },
           ],
           as: '*.js',
@@ -191,14 +190,13 @@ async function init(dev: boolean, core: Core): Promise<void> {
 
   async function devServer() {
     const { FSWatcher } = await import('chokidar');
-    const { configPath, outDir } = core.getOptions();
     const watcher = new FSWatcher({
       ignoreInitial: true,
       persistent: true,
-      ignored: [outDir],
+      ignored: [core.outDir],
     });
 
-    watcher.add(configPath);
+    watcher.add(core.configPath);
     for (const collection of core.getCollections()) {
       watcher.add(collection.dir);
     }
@@ -212,9 +210,8 @@ async function init(dev: boolean, core: Core): Promise<void> {
       console.log('[MDX] started dev server');
     });
 
-    const absoluteConfigPath = path.resolve(configPath);
     watcher.on('all', async (_event, file) => {
-      if (path.resolve(file) === absoluteConfigPath) {
+      if (path.resolve(file) === core.configPath) {
         // skip plugin listeners
         watcher.removeAllListeners();
 
@@ -242,39 +239,18 @@ async function init(dev: boolean, core: Core): Promise<void> {
 }
 
 export async function postInstall(options: CreateMDXOptions = {}) {
-  const resolved = applyDefaults(options);
-  const core = createNextCore(resolved);
+  const core = createNextCore(options);
   await core.init({
     config: loadConfig(core, true),
   });
   await core.emit({ write: true });
 }
 
-interface ResolvedCreateMDXOptions {
-  index: IndexFilePluginOptions | false;
-  outDir: string;
-  configPath: string;
-  macro?: {
-    include: string[];
-  };
-}
-
-function applyDefaults(options: CreateMDXOptions): ResolvedCreateMDXOptions {
-  const include = typeof options.include === 'string' ? [options.include] : options.include;
-
-  return {
-    index: options.index ?? {},
-    outDir: options.outDir ?? _Defaults.outDir,
-    configPath: options.configPath ?? _Defaults.configPath,
-    macro: include && include.length > 0 ? { include } : undefined,
-  };
-}
-
-function createNextCore(options: ResolvedCreateMDXOptions): Core {
+function createNextCore({ outDir, configPath, index = {} }: CreateMDXOptions): Core {
   return createCore({
     environment: 'next',
-    outDir: options.outDir,
-    configPath: options.configPath,
-    plugins: [options.index && indexFile(options.index)],
+    outDir,
+    configPath,
+    plugins: [index && indexFile(index)],
   });
 }

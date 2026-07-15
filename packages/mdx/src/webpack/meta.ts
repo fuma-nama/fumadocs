@@ -2,9 +2,9 @@ import { LoaderDefinitionFunction } from 'webpack';
 import { toWebpack, type WebpackLoader } from '@/loaders/adapter';
 import { createStandaloneConfigLoader } from '@/loaders/config';
 import { createMetaLoader } from '@/loaders/meta';
-import { getCore, getMacroContext, type WebpackLoaderOptions } from '@/webpack';
+import { getCore, type WebpackLoaderOptions } from '@/webpack';
 
-let instance: WebpackLoader | undefined;
+const instances = new Map<'json' | 'js', WebpackLoader>();
 
 const loader: LoaderDefinitionFunction<WebpackLoaderOptions> = function (source) {
   const callback = this.async();
@@ -12,6 +12,8 @@ const loader: LoaderDefinitionFunction<WebpackLoaderOptions> = function (source)
   this.cacheable(true);
   this.addDependency(options.absoluteCompiledConfigPath);
 
+  const jsonOutput = options.metaJsonOutput ?? 'json';
+  let instance = instances.get(jsonOutput);
   if (!instance) {
     instance = toWebpack(
       createMetaLoader(
@@ -21,12 +23,12 @@ const loader: LoaderDefinitionFunction<WebpackLoaderOptions> = function (source)
           mode: options.isDev ? 'dev' : 'production',
         }),
         {
-          json: 'json',
+          json: jsonOutput,
           yaml: 'js',
         },
-        getMacroContext(options),
       ),
     );
+    instances.set(jsonOutput, instance);
   }
 
   void instance.call(this, source, callback);

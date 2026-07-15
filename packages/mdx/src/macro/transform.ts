@@ -1,6 +1,14 @@
 import path from 'node:path';
 import MagicString from 'magic-string';
+import type {
+  Module as YukuModule,
+  Symbol as YukuSymbol,
+  NodeOfType,
+  NodeType,
+} from 'yuku-analyzer';
 import { createCodegen, slash } from '@/utils/codegen';
+
+type YukuNode = NodeOfType<NodeType>;
 
 export const MacroModuleId = 'fumadocs-mdx/macro';
 
@@ -19,13 +27,17 @@ interface Node {
 }
 
 interface MacroCall {
-  id: number;
+  /**
+   * name of the top-level variable the macro is assigned to
+   */
+  name: string;
   fn: MacroFn;
   node: Node;
   options: Node | undefined;
 }
 
 interface ParsedMacroModule {
+  module: YukuModule;
   program: Node;
   imports: Node[];
   calls: MacroCall[];
@@ -74,46 +86,46 @@ function position(code: string, offset: number) {
   return { line, column: offset - lineStart + 1 };
 }
 
-export function macroCollectionName(cfg: string, id: number): string {
-  return `${cfg.replace(/[^a-zA-Z0-9_-]/g, '_')}_${id}`;
+/**
+ * The identity of a macro collection: the module that declares it (relative to root) + the
+ * name of its top-level variable.
+ *
+ * `#` cannot appear in a JS identifier, so the name is always the segment after the last one.
+ */
+export function macroId(cfg: string, name: string): string {
+  return `${cfg}#${name}`;
 }
 
-async function parseModule(code: string, file: string): Promise<Node | null> {
-  const { parse, langFromPath } = await import('yuku-parser');
-  const lang = langFromPath(file) ?? 'ts';
-  const result = parse(code, { lang, source_type: 'module' } as never) as {
-    program: unknown;
-    diagnostics: { message?: string; span?: { start: number } }[];
-  };
+export function parseMacroId(id: string): { cfg: string; name: string } | undefined {
+  const at = id.lastIndexOf('#');
+  if (at === -1) return;
 
-  const errors = result.diagnostics;
+  const cfg = id.slice(0, at);
+  const name = id.slice(at + 1);
+  if (!cfg || !name) return;
+
+  return { cfg, name };
+}
+
+async function analyzeModule(code: string, file: string): Promise<YukuModule> {
+  const { Analyzer } = await import('yuku-analyzer');
+  const module = new Analyzer().addFile(file, code, { sourceType: 'module' });
+  const errors = module.diagnostics.filter((diagnostic) => diagnostic.severity === 'error');
   if (errors.length > 0) {
     const first = errors[0];
     throw new MacroTransformError(
       file,
       code,
-      first.span?.start ?? 0,
-      `failed to parse module: ${first.message ?? 'syntax error'}`,
+      first.start,
+      `failed to parse module: ${first.message}`,
     );
   }
 
-  return result.program as Node;
+  return module;
 }
 
 function isNode(value: unknown): value is Node {
   return typeof value === 'object' && value !== null && typeof (value as Node).type === 'string';
-}
-
-function* children(node: Node): Generator<Node> {
-  for (const value of Object.values(node)) {
-    if (Array.isArray(value)) {
-      for (const item of value) {
-        if (isNode(item)) yield item;
-      }
-    } else if (isNode(value)) {
-      yield value;
-    }
-  }
 }
 
 /**
@@ -205,10 +217,10 @@ const isStringArray = (value: unknown): value is string[] =>
   Array.isArray(value) && value.every(isString);
 
 async function parseMacroModule(code: string, file: string): Promise<ParsedMacroModule | null> {
-  const program = await parseModule(code, file);
-  if (!program) return null;
+  const module = await analyzeModule(code, file);
+  const program = module.ast as unknown as Node;
 
-  const locals = new Map<string, MacroFn>();
+  const macroSymbols = new Map<YukuSymbol, MacroFn>();
   const imports: Node[] = [];
 
   for (const statement of program.body as Node[]) {
@@ -249,92 +261,143 @@ async function parseMacroModule(code: string, file: string): Promise<ParsedMacro
         imported.type === 'Identifier' ? (imported.name as string) : (imported.value as string);
       if (name !== 'defineDocs' && name !== 'defineCollections') continue;
 
-      locals.set((spec.local as Node).name as string, name);
+      const symbol = module.symbolOf(spec.local as unknown as YukuNode);
+      if (symbol) macroSymbols.set(symbol, name);
     }
 
     imports.push(statement);
   }
 
-  if (locals.size === 0) return imports.length > 0 ? { program, imports, calls: [] } : null;
+  if (macroSymbols.size === 0) {
+    return imports.length > 0 ? { module, program, imports, calls: [] } : null;
+  }
 
-  // macro calls allowed at top-level positions only
+  // a macro collection is identified by its variable name, so it must be the initializer of a
+  // top-level `const` declaration with a plain identifier binding.
   const calls: MacroCall[] = [];
   const allowedCallees = new Set<Node>();
 
-  function onPossibleCall(node: Node | null | undefined) {
-    if (!node || node.type !== 'CallExpression') return;
-    const callee = node.callee as Node;
-    if (callee.type !== 'Identifier') return;
-    const fn = locals.get(callee.name as string);
-    if (fn === undefined) return;
-
-    const args = node.arguments as Node[];
-    if (args.length > 1 || (args.length === 1 && args[0].type === 'SpreadElement')) {
-      throw new MacroTransformError(
-        file,
-        code,
-        node.start,
-        `macro calls only accept an inline options object.`,
-      );
-    }
-
-    allowedCallees.add(callee);
-    calls.push({
-      id: calls.length,
-      fn,
-      node,
-      options: args[0],
-    });
-  }
-
   for (const statement of program.body as Node[]) {
-    let target: Node = statement;
-    if (statement.type === 'ExportNamedDeclaration' && isNode(statement.declaration)) {
-      target = statement.declaration;
-    }
+    const target =
+      statement.type === 'ExportNamedDeclaration' && isNode(statement.declaration)
+        ? statement.declaration
+        : statement;
+    if (target.type !== 'VariableDeclaration') continue;
 
-    if (target.type === 'VariableDeclaration') {
-      for (const declarator of target.declarations as Node[]) {
-        onPossibleCall(declarator.init as Node | null);
+    for (const declarator of target.declarations as Node[]) {
+      const init = declarator.init as Node | null;
+      if (!init || init.type !== 'CallExpression') continue;
+
+      const callee = init.callee as Node;
+      if (callee.type !== 'Identifier') continue;
+      const symbol = module.symbolOf(callee as unknown as YukuNode);
+      const fn = symbol ? macroSymbols.get(symbol) : undefined;
+      if (fn === undefined) continue;
+
+      const id = declarator.id as Node;
+      if (id.type !== 'Identifier') {
+        throw new MacroTransformError(
+          file,
+          code,
+          id.start,
+          `a macro collection must be assigned to a plain variable (e.g. \`const docs = ${fn}({ ... })\`), destructuring is not supported because the variable name identifies the collection.`,
+        );
       }
-    } else if (statement.type === 'ExportDefaultDeclaration' && isNode(statement.declaration)) {
-      onPossibleCall(statement.declaration);
-    } else if (target.type === 'ExpressionStatement') {
-      onPossibleCall(target.expression as Node);
+
+      if (target.kind !== 'const') {
+        throw new MacroTransformError(
+          file,
+          code,
+          target.start,
+          `a macro collection must be declared with \`const\`, since \`${target.kind}\` bindings can be reassigned.`,
+        );
+      }
+
+      const args = init.arguments as Node[];
+      if (args.length > 1 || (args.length === 1 && args[0].type === 'SpreadElement')) {
+        throw new MacroTransformError(
+          file,
+          code,
+          init.start,
+          `macro calls only accept an inline options object.`,
+        );
+      }
+
+      allowedCallees.add(callee);
+      calls.push({
+        name: id.name as string,
+        fn,
+        node: init,
+        options: args[0],
+      });
     }
   }
 
   // reject other references to macro functions (e.g. nested calls, aliasing)
-  const importSpans = imports.map((node) => [node.start, node.end] as const);
-
-  function walk(node: Node) {
-    if (node.type.startsWith('TS')) return;
-
-    if (
-      node.type === 'Identifier' &&
-      locals.has(node.name as string) &&
-      !allowedCallees.has(node) &&
-      !importSpans.some(([start, end]) => node.start >= start && node.end <= end)
-    ) {
-      throw new MacroTransformError(
-        file,
-        code,
-        node.start,
-        `macros from ${MacroModuleId} can only be called directly at the top level of the module.`,
-      );
-    }
-
-    for (const child of children(node)) {
-      // skip non-computed keys/properties, they are not references
-      if (node.type === 'Property' && !node.computed && child === node.key) continue;
-      if (node.type === 'MemberExpression' && !node.computed && child === node.property) continue;
-      walk(child);
+  for (const symbol of macroSymbols.keys()) {
+    for (const reference of symbol.references) {
+      if (!allowedCallees.has(reference.node as unknown as Node)) {
+        throw new MacroTransformError(
+          file,
+          code,
+          reference.node.start,
+          `macros from ${MacroModuleId} can only be called as the initializer of a top-level \`const\` declaration, like \`const docs = defineDocs({ ... })\`.`,
+        );
+      }
     }
   }
 
-  walk(program);
+  return { module, program, imports, calls };
+}
 
-  return { program, imports, calls };
+function topLevelStatement(module: YukuModule, node: Node): Node | undefined {
+  let current = node;
+  for (
+    let parent = module.parentOf(current as unknown as YukuNode);
+    parent;
+    parent = module.parentOf(current as unknown as YukuNode)
+  ) {
+    if (parent === module.ast) return current;
+    current = parent as Node;
+  }
+}
+
+function retainMacroDependencies(parsed: ParsedMacroModule): Set<Node> {
+  const dependencies = new Map<Node, Set<Node>>();
+
+  for (const reference of parsed.module.references) {
+    if (reference.inTypePosition || !reference.symbol) continue;
+    const statement = topLevelStatement(parsed.module, reference.node as unknown as Node);
+    if (!statement) continue;
+
+    let refs = dependencies.get(statement);
+    if (!refs) dependencies.set(statement, (refs = new Set()));
+    for (const declaration of reference.symbol.declarations) {
+      const dependency = topLevelStatement(parsed.module, declaration as Node);
+      if (dependency && dependency !== statement) refs.add(dependency);
+    }
+  }
+
+  const retained = new Set<Node>();
+  const pending: Node[] = [];
+  for (const call of parsed.calls) {
+    const statement = topLevelStatement(parsed.module, call.node);
+    if (statement && !retained.has(statement)) {
+      retained.add(statement);
+      pending.push(statement);
+    }
+  }
+
+  for (let statement = pending.pop(); statement; statement = pending.pop()) {
+    for (const dependency of dependencies.get(statement) ?? []) {
+      if (!retained.has(dependency)) {
+        retained.add(dependency);
+        pending.push(dependency);
+      }
+    }
+  }
+
+  return retained;
 }
 
 /**
@@ -371,8 +434,7 @@ export async function transformMacroModule({
   }
 
   for (const call of parsed.calls) {
-    const name = macroCollectionName(cfg, call.id);
-    const query = { collection: name, cfg, id: String(call.id) };
+    const query = { macro_id: macroId(cfg, call.name) };
     const options = call.options;
 
     if (getProperty(options, 'dynamic') ?? getProperty(getProperty(options, 'docs'), 'dynamic')) {
@@ -543,8 +605,8 @@ export interface MacroConfigTransformOptions {
 /**
  * Transform a module using the macro API (config mode), for evaluation in the build process.
  *
- * Macro calls are replaced with global registration calls, such that evaluating the module
- * collects the raw (non-serializable) collection options.
+ * Macro calls are replaced with global registration calls keyed by macro id, such that evaluating
+ * the module collects the raw (non-serializable) collection options.
  *
  * @returns `null` when the module doesn't use the macro API.
  */
@@ -558,6 +620,13 @@ export async function transformMacroConfigModule({
   if (!parsed) return null;
 
   const s = new MagicString(code);
+  if (parsed.calls.length > 0) {
+    const retained = retainMacroDependencies(parsed);
+    for (const statement of parsed.program.body as Node[]) {
+      if (!retained.has(statement)) s.remove(statement.start, statement.end);
+    }
+  }
+
   for (const node of parsed.imports) {
     s.remove(node.start, node.end);
   }
@@ -570,7 +639,7 @@ export async function transformMacroConfigModule({
       `(globalThis[Symbol.for(${JSON.stringify(registerKey)})])`,
     );
 
-    const prefix = `${JSON.stringify(cfg)}, ${JSON.stringify(call.fn)}, `;
+    const prefix = `${JSON.stringify(macroId(cfg, call.name))}, ${JSON.stringify(call.fn)}, `;
     if (call.options) {
       s.appendLeft(call.options.start, prefix);
     } else {

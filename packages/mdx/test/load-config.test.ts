@@ -33,3 +33,15 @@ test('load existing config file', async () => {
   expect(config).toBeDefined();
   expect(config?.global.compiler).toBe('mdx');
 });
+
+test('fallback to empty config when file is missing', async () => {
+  const core = createCore({
+    environment: 'test',
+    configPath: path.join(dir, 'missing.config.ts'),
+    outDir: path.join(dir, '.out-missing'),
+  });
+
+  const config = await loadConfig(core, true);
+  expect(config.collections.size).toBe(0);
+  expect(config.global.compiler).toBeUndefined();
+});

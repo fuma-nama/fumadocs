@@ -1,9 +1,15 @@
 import { fileURLToPath } from 'node:url';
 import * as path from 'node:path';
 import * as fs from 'node:fs/promises';
+import { randomUUID } from 'node:crypto';
 import { afterAll, describe, expect, expectTypeOf, test } from 'vitest';
-import { transformMacroModule, MacroTransformError } from '@/macro/transform';
-import { resolveMacroCollection, type MacroContext } from '@/macro/eval';
+import {
+  transformMacroConfigModule,
+  transformMacroModule,
+  MacroTransformError,
+  MacroModuleId,
+} from '@/macro/transform';
+import { createNodeEvaluator, MacroCollector } from '@/macro/eval';
 import { docs as macroDocs } from '@/runtime/macro';
 import { createMdxLoader } from '@/loaders/mdx';
 import { buildConfig } from '@/config/build';
@@ -14,6 +20,7 @@ import type { ExtractedReference } from '@/loaders/mdx/remark-postprocess';
 const baseDir = path.dirname(fileURLToPath(import.meta.url));
 const root = path.join(baseDir, '..');
 const sourceFile = path.join(baseDir, 'fixtures/macro/source.ts');
+const consumerFile = path.join(baseDir, 'fixtures/macro/consumer.ts');
 const outDir = path.join(baseDir, 'fixtures/macro/.out');
 
 afterAll(async () => {
@@ -48,6 +55,38 @@ describe('transform', () => {
 
     expect(result).not.toBeNull();
     await expect(result!.code).toMatchFileSnapshot('./fixtures/macro-import.output.ts');
+  });
+
+  test('config target retains only macro dependencies', async () => {
+    const result = await transformMacroConfigModule({
+      code: await fs.readFile(consumerFile, 'utf-8'),
+      file: consumerFile,
+      cfg: path.relative(root, consumerFile),
+      registerKey: 'fumadocs-mdx:test',
+    });
+
+    expect(result).toContain('function createOptions(');
+    expect(result).not.toContain('docs.toFumadocsSource()');
+    expect(result).not.toContain('must not run during config evaluation');
+    expect(result).not.toContain('fumadocs-mdx/macro');
+  });
+
+  test('config target follows resolved symbols through shadowing', async () => {
+    const result = await transformMacroConfigModule({
+      code: `import { defineDocs } from 'fumadocs-mdx/macro';
+function createOptions(defineDocs: () => unknown) {
+  defineDocs();
+  return {};
+}
+export const docs = defineDocs({
+  docs: { mdxOptions: () => createOptions(() => undefined) },
+});`,
+      file: sourceFile,
+      cfg: path.relative(root, sourceFile),
+      registerKey: 'fumadocs-mdx:test',
+    });
+
+    expect(result).toContain('function createOptions(');
   });
 
   test('ignore modules without macros', async () => {
@@ -87,14 +126,59 @@ export function create() {
       }),
     ).rejects.toThrowError(MacroTransformError);
   });
+
+  test('reject calls not assigned to a top-level variable', async () => {
+    for (const code of [
+      `defineDocs({ dir: 'content/docs' });`,
+      `export default defineDocs({ dir: 'content/docs' });`,
+    ]) {
+      await expect(() =>
+        transformMacroModule({
+          code: `import { defineDocs } from 'fumadocs-mdx/macro';\n${code}`,
+          file: sourceFile,
+          root,
+          target: 'vite',
+        }),
+      ).rejects.toThrowError(MacroTransformError);
+    }
+  });
+
+  test('reject non-const declarations', async () => {
+    await expect(() =>
+      transformMacroModule({
+        code: `import { defineDocs } from 'fumadocs-mdx/macro';
+export let docs = defineDocs({ dir: 'content/docs' });`,
+        file: sourceFile,
+        root,
+        target: 'vite',
+      }),
+    ).rejects.toThrowError(/must be declared with `const`/);
+  });
+
+  test('reject destructured collections', async () => {
+    await expect(() =>
+      transformMacroModule({
+        code: `import { defineDocs } from 'fumadocs-mdx/macro';
+export const { docs } = defineDocs({ dir: 'content/docs' });`,
+        file: sourceFile,
+        root,
+        target: 'vite',
+      }),
+    ).rejects.toThrowError(/must be assigned to a plain variable/);
+  });
 });
 
 describe('config evaluation', () => {
-  const ctx: MacroContext = { root, outDir, isDev: false };
+  const collector = new MacroCollector({
+    root,
+    outDir,
+    isDev: false,
+    evaluator: createNodeEvaluator({ root, outDir }),
+  });
   const cfg = 'test/fixtures/macro/source.ts';
 
   test('defineDocs collection', async () => {
-    const { collection, inputs } = await resolveMacroCollection(ctx, cfg, 0);
+    const { collection, inputs } = await collector.resolve(`${cfg}#docs`);
 
     expect(inputs).toContain(sourceFile);
     expect(collection.type).toBe('docs');
@@ -106,7 +190,7 @@ describe('config evaluation', () => {
   });
 
   test('defineCollections (doc)', async () => {
-    const { collection } = await resolveMacroCollection(ctx, cfg, 1);
+    const { collection } = await collector.resolve(`${cfg}#blog`);
 
     expect(collection.type).toBe('doc');
     if (collection.type !== 'doc') return;
@@ -116,29 +200,133 @@ describe('config evaluation', () => {
   });
 
   test('defineCollections (meta)', async () => {
-    const { collection } = await resolveMacroCollection(ctx, cfg, 2);
+    const { collection } = await collector.resolve(`${cfg}#metaOnly`);
 
     expect(collection.type).toBe('meta');
   });
 
+  test('does not evaluate consumers of macro results', async () => {
+    const { collection } = await collector.resolve('test/fixtures/macro/consumer.ts#docs');
+
+    expect(collection.type).toBe('docs');
+    if (collection.type !== 'docs' || typeof collection.docs.mdxOptions !== 'function') return;
+
+    await expect(collection.docs.mdxOptions('bundler')).resolves.toEqual({ rehypePlugins: [] });
+  });
+
+  test('isolates parallel Node.js evaluations', async () => {
+    const evaluator = createNodeEvaluator({ root, outDir });
+
+    const counts = await Promise.all(
+      Array.from({ length: 8 }, async () => {
+        const registerKey = `fumadocs-mdx:test:${randomUUID()}`;
+        const key = Symbol.for(registerKey);
+        let count = 0;
+
+        (globalThis as Record<symbol, unknown>)[key] = (
+          _cfg: string,
+          _fn: string,
+          _options: unknown,
+        ) => {
+          count++;
+          return {};
+        };
+
+        try {
+          await evaluator({
+            entry: consumerFile,
+            async transform(code, file) {
+              if (!code.includes(MacroModuleId)) return null;
+
+              return transformMacroConfigModule({
+                code,
+                file,
+                cfg: path.relative(root, file),
+                registerKey,
+              });
+            },
+          });
+        } finally {
+          delete (globalThis as Record<symbol, unknown>)[key];
+        }
+
+        return count;
+      }),
+    );
+
+    expect(counts).toEqual(Array(8).fill(1));
+  });
+
+  test('evaluates a module once for concurrent resolves, and once per change', async () => {
+    const name = `.cache-${randomUUID()}.ts`;
+    const file = path.join(baseDir, 'fixtures/macro', name);
+    const cfg = `test/fixtures/macro/${name}`;
+    const write = (dir: string) =>
+      fs.writeFile(
+        file,
+        `import { defineDocs } from 'fumadocs-mdx/macro';
+export const docs = defineDocs({ dir: '${dir}' });
+export const other = defineDocs({ dir: '${dir}' });`,
+      );
+
+    await write('test/fixtures/generate-index-docs');
+    let evaluations = 0;
+    const inner = createNodeEvaluator({ root, outDir });
+    const dev = new MacroCollector({
+      root,
+      outDir,
+      isDev: true,
+      evaluator: (options) => {
+        evaluations++;
+        return inner(options);
+      },
+    });
+
+    const resolveAll = () =>
+      Promise.all([
+        dev.resolve(`${cfg}#docs`),
+        dev.resolve(`${cfg}#other`),
+        dev.resolve(`${cfg}#docs`),
+        dev.resolve(`${cfg}#other`),
+      ]);
+
+    try {
+      const first = await resolveAll();
+      expect(evaluations).toBe(1);
+      expect(first[0].collection.dir).toBe(path.join(root, 'test/fixtures/generate-index-docs'));
+
+      // cached: an unchanged module is not re-evaluated
+      await resolveAll();
+      expect(evaluations).toBe(1);
+
+      await write('test/fixtures/generate-index');
+      // guarantee a distinct mtime regardless of filesystem timestamp granularity
+      const future = new Date(Date.now() + 10_000);
+      await fs.utimes(file, future, future);
+
+      // stale: re-evaluated exactly once, not once per concurrent resolve
+      const second = await resolveAll();
+      expect(evaluations).toBe(2);
+      expect(second[0].collection.dir).toBe(path.join(root, 'test/fixtures/generate-index'));
+    } finally {
+      await fs.rm(file, { force: true });
+    }
+  });
+
   test('reject module paths outside of root', async () => {
-    await expect(() => resolveMacroCollection(ctx, '../outside/source.ts', 0)).rejects.toThrowError(
-      /invalid macro module path/,
+    await expect(() => collector.resolve('../outside/source.ts#docs')).rejects.toThrowError(
+      /points outside of the project root/,
     );
   });
 
-  test('with the native Vite evaluator', async () => {
-    const { createMacroEvaluator } = await import('@/vite');
-    const viteCtx: MacroContext = { ...ctx, evaluator: createMacroEvaluator(root) };
-    const viteCfg = 'test/fixtures/macro/vite.ts';
+  test('reject ids without a collection name', async () => {
+    await expect(() => collector.resolve(cfg)).rejects.toThrowError(/invalid macro id/);
+  });
 
-    const { collection, inputs } = await resolveMacroCollection(viteCtx, viteCfg, 0);
-
-    expect(inputs).toContain(path.join(root, viteCfg));
-    expect(collection.type).toBe('doc');
-    if (collection.type !== 'doc') return;
-
-    expect(collection.postprocess?.extractLinkReferences).toBe(true);
+  test('reject unknown collection names', async () => {
+    await expect(() => collector.resolve(`${cfg}#missing`)).rejects.toThrowError(
+      /cannot find macro collection `missing`/,
+    );
   });
 
   test('compile mdx with macro collection options', async () => {
@@ -148,14 +336,15 @@ describe('config evaluation', () => {
       outDir,
     });
     await core.init({ config: buildConfig({}, root) });
+    core.macro = collector;
 
-    const loader = createMdxLoader({ getCore: async () => core }, ctx);
+    const loader = createMdxLoader({ getCore: async () => core });
     const filePath = path.join(root, 'test/fixtures/generate-index-docs/index.mdx');
     const dependencies: string[] = [];
 
     const result = await loader.load({
       filePath,
-      query: { cfg, id: '0', collection: 'docs', only: 'frontmatter' },
+      query: { macro_id: `${cfg}#docs`, only: 'frontmatter' },
       getSource: () => fs.readFile(filePath, 'utf-8'),
       development: false,
       compiler: {
@@ -180,7 +369,7 @@ describe('types', () => {
     expectTypeOf<typeof fixture.blog>().not.toBeNever();
     const entry = {} as NonNullable<ReturnType<typeof fixture.blog.get>>;
     expectTypeOf(entry.load).returns.resolves.toMatchTypeOf<{
-      extractedReferences: ExtractedReference[];
+      extractedReferences?: ExtractedReference[];
     }>();
 
     expectTypeOf<typeof fixture.metaOnly>().not.toBeNever();

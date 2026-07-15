@@ -74,7 +74,7 @@
     "unist-util-visit": "^5.1.0",
     "vfile": "^6.0.3",
     "yaml": "^2.9.0",
-    "yuku-parser": "^0.6.1",
+    "yuku-analyzer": "^0.6.3",
     "zod": "^4.4.3"
   },
   "devDependencies": {

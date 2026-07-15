@@ -1,4 +1,4 @@
-import type { StandardSchemaV1 } from '@standard-schema/spec';
+import type { StandardJSONSchemaV1, StandardSchemaV1 } from '@standard-schema/spec';
 import type { ProcessorOptions } from '@mdx-js/mdx';
 import type { MetaData, PageData } from 'fumadocs-core/source';
 import type { metaSchema, pageSchema } from 'fumadocs-core/source/schema';
@@ -19,7 +19,10 @@ export interface MacroSchemaContext {
   source: string;
 }
 
-export interface DocMacroOptions<Schema extends StandardSchemaV1 = StandardSchemaV1> {
+export interface DocMacroOptions<
+  Schema extends StandardSchemaV1 = StandardSchemaV1,
+  Async extends boolean = boolean,
+> {
   /**
    * Patterns of content files (relative to `dir`).
    *
@@ -32,7 +35,7 @@ export interface DocMacroOptions<Schema extends StandardSchemaV1 = StandardSchem
    *
    * Must be statically analyzable (boolean literal).
    */
-  async?: boolean;
+  async?: Async;
 
   /**
    * The compiler for content files.
@@ -65,7 +68,11 @@ export interface MetaMacroOptions<Schema extends StandardSchemaV1 = StandardSche
   schema?: CollectionSchema<Schema, MacroSchemaContext>;
 }
 
-export interface DefineDocsOptions {
+export interface DefineDocsOptions<
+  DocsSchema extends StandardSchemaV1 = StandardSchemaV1,
+  MetaSchema extends StandardSchemaV1 = StandardSchemaV1,
+  Async extends boolean = boolean,
+> {
   /**
    * Directory of content files, relative to project root.
    *
@@ -75,74 +82,34 @@ export interface DefineDocsOptions {
    */
   dir?: string;
 
-  docs?: DocMacroOptions;
-  meta?: MetaMacroOptions;
+  docs?: DocMacroOptions<DocsSchema, Async>;
+  meta?: MetaMacroOptions<MetaSchema>;
 }
 
-export type DefineCollectionsOptions =
-  | ({
-      type: 'doc';
-      /**
-       * Directory of content files, relative to project root.
-       *
-       * Must be statically analyzable (string literal).
-       */
-      dir: string;
-    } & DocMacroOptions)
-  | ({
-      type: 'meta';
-      /**
-       * Directory of meta files, relative to project root.
-       *
-       * Must be statically analyzable (string literal).
-       */
-      dir: string;
-    } & MetaMacroOptions);
+export interface DefineDocCollectionsOptions<
+  DocsSchema extends StandardSchemaV1 = StandardSchemaV1,
+  Async extends boolean = boolean,
+> extends DocMacroOptions<DocsSchema, Async> {
+  type: 'doc';
+  /**
+   * Directory of content files, relative to project root.
+   *
+   * Must be statically analyzable (string literal).
+   */
+  dir: string;
+}
 
-type Out<S extends StandardSchemaV1> = StandardSchemaV1.InferOutput<S>;
-
-type InferSchema<S, Default extends StandardSchemaV1> = S extends StandardSchemaV1
-  ? S
-  : S extends (ctx: never) => infer R
-    ? R extends StandardSchemaV1
-      ? R
-      : Default
-    : Default;
-
-type SchemaOf<O, Default extends StandardSchemaV1> = O extends { schema: infer S }
-  ? InferSchema<S, Default>
-  : Default;
-
-type DocExtraOf<O> = O extends { postprocess: { extractLinkReferences: true } }
-  ? { extractedReferences: ExtractedReference[] }
-  : unknown;
-
-export type DefineDocsResult<O extends DefineDocsOptions> =
-  Out<SchemaOf<O['docs'], typeof pageSchema>> extends infer Doc
-    ? Out<SchemaOf<O['meta'], typeof metaSchema>> extends infer Meta
-      ? Doc extends PageData
-        ? Meta extends MetaData
-          ? O['docs'] extends { async: true }
-            ? MacroAsyncDocsCollection<Doc, Meta, DocExtraOf<O['docs']>>
-            : MacroDocsCollection<Doc, Meta, DocExtraOf<O['docs']>>
-          : never
-        : never
-      : never
-    : never;
-
-export type DefineCollectionsResult<O extends DefineCollectionsOptions> = O extends {
+export interface DefineMetaCollectionsOptions<
+  MetaSchema extends StandardSchemaV1 = StandardSchemaV1,
+> extends MetaMacroOptions<MetaSchema> {
   type: 'meta';
+  /**
+   * Directory of meta files, relative to project root.
+   *
+   * Must be statically analyzable (string literal).
+   */
+  dir: string;
 }
-  ? MacroMetaCollection<O extends { schema: infer S } ? Out<InferSchema<S, never>> : unknown>
-  : O extends { async: true }
-    ? MacroAsyncDocCollection<
-        O extends { schema: infer S } ? Out<InferSchema<S, never>> : unknown,
-        DocExtraOf<O>
-      >
-    : MacroDocCollection<
-        O extends { schema: infer S } ? Out<InferSchema<S, never>> : unknown,
-        DocExtraOf<O>
-      >;
 
 function macroError(): Error {
   return new Error(
@@ -150,34 +117,61 @@ function macroError(): Error {
   );
 }
 
+// TODO: infer from collection options
+// exported because it appears in the inferred return types of the macros below
+export interface Temp {
+  extractedReferences?: ExtractedReference[];
+  lastModified?: Date;
+}
+
 /**
  * Define a docs collection (doc + meta), compiled by the bundler plugin.
  *
  * Requires the `include` option on your bundler plugin.
  */
-export function defineDocs<const Options extends DefineDocsOptions = Record<never, never>>(
+export function defineDocs<
+  DocsSchema extends StandardSchemaV1 = typeof pageSchema,
+  MetaSchema extends StandardSchemaV1 = typeof metaSchema,
+  const Async extends boolean = false,
+>(
   // eslint-disable-next-line @typescript-eslint/no-unused-vars -- compiled away by the bundler plugin
-  options?: Options,
-): DefineDocsResult<Options> {
+  options?: DefineDocsOptions<DocsSchema, MetaSchema, Async>,
+): StandardSchemaV1.InferOutput<DocsSchema> extends PageData
+  ? StandardSchemaV1.InferOutput<MetaSchema> extends MetaData
+    ? Async extends true
+      ? MacroAsyncDocsCollection<
+          StandardSchemaV1.InferOutput<DocsSchema>,
+          StandardSchemaV1.InferOutput<MetaSchema>,
+          Temp
+        >
+      : MacroDocsCollection<
+          StandardSchemaV1.InferOutput<DocsSchema>,
+          StandardSchemaV1.InferOutput<MetaSchema>,
+          Temp
+        >
+    : never
+  : never {
   throw macroError();
 }
+
+export function defineCollections<MetaSchema extends StandardSchemaV1 = StandardSchemaV1>(
+  options: DefineMetaCollectionsOptions<MetaSchema>,
+): MacroMetaCollection<StandardJSONSchemaV1.InferOutput<MetaSchema>>;
+
+export function defineCollections<
+  DocSchema extends StandardSchemaV1 = StandardSchemaV1,
+  const Async extends boolean = false,
+>(
+  options: DefineDocCollectionsOptions<DocSchema, Async>,
+): Async extends true
+  ? MacroAsyncDocCollection<StandardJSONSchemaV1.InferOutput<DocSchema>, Temp>
+  : MacroDocCollection<StandardJSONSchemaV1.InferOutput<DocSchema>, Temp>;
 
 /**
  * Define a doc/meta collection, compiled by the bundler plugin.
  *
  * Requires the `include` option on your bundler plugin.
  */
-export function defineCollections<const Options extends DefineCollectionsOptions>(
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars -- compiled away by the bundler plugin
-  options: Options,
-): DefineCollectionsResult<Options> {
+export function defineCollections(): never {
   throw macroError();
 }
-
-export type {
-  MacroAsyncDocCollection,
-  MacroAsyncDocsCollection,
-  MacroDocCollection,
-  MacroDocsCollection,
-  MacroMetaCollection,
-};

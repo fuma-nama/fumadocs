@@ -3,13 +3,11 @@ import type { ConfigLoader } from '@/loaders/config';
 import { parse as parseYaml } from 'yaml';
 import { z } from 'zod';
 import type { MetaCollectionItem } from '@/config/build';
-import { resolveMacroCollection, type MacroContext } from '@/macro/eval';
 
 const querySchema = z.looseObject({
   collection: z.string().optional(),
   workspace: z.string().optional(),
-  cfg: z.string().optional(),
-  id: z.coerce.number().optional(),
+  macro_id: z.string().optional(),
 });
 
 /**
@@ -21,7 +19,6 @@ export function createMetaLoader(
     json?: 'json' | 'js';
     yaml?: 'js';
   } = {},
-  macro?: MacroContext,
 ): Loader {
   const { json: resolveJson = 'js' } = resolve;
 
@@ -38,24 +35,28 @@ export function createMetaLoader(
 
   function onMeta(source: string, { filePath, query, compiler }: LoaderInput) {
     const parsed = querySchema.safeParse(query);
-    if (!parsed.success || !parsed.data.collection) return null;
-    const { collection: collectionName, workspace, cfg, id } = parsed.data;
+    if (!parsed.success) return null;
+    const { collection: collectionName, workspace, macro_id: macroId } = parsed.data;
+    // a meta file belongs to either a config collection or a macro collection
+    if (!collectionName && macroId === undefined) return null;
 
     return async (): Promise<unknown> => {
       let core = await getCore();
+      // macro collections live on the root core, read it before switching to a workspace
+      const macro = core.macro;
       if (workspace) {
         core = core.getWorkspaces().get(workspace) ?? core;
       }
 
       let metaCollection: MetaCollectionItem | undefined;
-      if (macro && cfg !== undefined && id !== undefined) {
-        const resolved = await resolveMacroCollection(macro, cfg, id);
+      if (macro && macroId !== undefined) {
+        const resolved = await macro.resolve(macroId);
         for (const input of resolved.inputs) compiler.addDependency(input);
 
         const item = resolved.collection;
         if (item.type === 'docs') metaCollection = item.meta;
         else if (item.type === 'meta') metaCollection = item;
-      } else {
+      } else if (collectionName) {
         const collection = core.getCollection(collectionName);
 
         switch (collection?.type) {

@@ -25,7 +25,7 @@ export default function jsonSchema({ insert = false }: JSONSchemaOptions = {}): 
 
   return {
     configureServer(server) {
-      const { outDir } = this.core.getOptions();
+      const outDir = this.core.outDir;
       if (!server.watcher || !insert) return;
 
       server.watcher.on('add', async (file) => {

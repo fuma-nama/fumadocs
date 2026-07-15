@@ -120,7 +120,7 @@ export default function indexFile(options: IndexFilePluginOptions = {}): Plugin 
     },
     async emit() {
       const globCache = new Map<string, Promise<string[]>>();
-      const { workspace, outDir } = this.core.getOptions();
+      const { workspace, outDir } = this.core;
       const { serverOptions, tc } = generateConfigs(this.core);
       const toEmitEntry = async (
         path: string,
@@ -160,7 +160,7 @@ async function generateServerIndexFile(ctx: FileGenContext) {
   const { core, codegen, serverOptions, tc } = ctx;
   codegen.lines.push(
     `import { server } from 'fumadocs-mdx/runtime/server';`,
-    `import type * as Config from '${codegen.formatImportPath(core.getOptions().configPath)}';`,
+    `import type * as Config from '${codegen.formatImportPath(core.configPath)}';`,
     '',
     `const create = server<typeof Config, ${tc}>(${JSON.stringify(serverOptions)});`,
   );
@@ -227,24 +227,28 @@ async function generateServerIndexFile(ctx: FileGenContext) {
 
 async function generateDynamicIndexFile(ctx: FileGenContext) {
   const { core, codegen, serverOptions, tc } = ctx;
-  const { configPath, environment, outDir } = core.getOptions();
+  // non-absolute paths are generally safer for serverless platforms to scan requested files to include into bundle
+  function normalizePath(p: string) {
+    return path.relative(process.cwd(), p);
+  }
   // serializable config options
   const partialOptions: CoreOptions = {
-    configPath,
-    environment,
-    outDir,
+    environment: 'dynamic',
+    root: normalizePath(core.root),
+    configPath: normalizePath(core.configPath),
+    outDir: normalizePath(core.outDir),
   };
   async function generateCollectionObjectEntry(
     collection: DocCollectionItem,
     absolutePath: string,
   ) {
-    const fullPath = path.relative(process.cwd(), absolutePath);
+    const fullPath = normalizePath(absolutePath);
     const content = await indexFileCache.read(fullPath).catch(() => '');
     const parsed = frontmatter(content);
     const data = await core.transformFrontmatter(
       {
         collection,
-        filePath: fullPath,
+        filePath: absolutePath,
         source: content,
       },
       parsed.data as Record<string, unknown>,
@@ -308,7 +312,7 @@ async function generateDynamicIndexFile(ctx: FileGenContext) {
   codegen.lines.push(
     `import { dynamic } from 'fumadocs-mdx/runtime/dynamic';`,
     ...(hasDynamicCollection ? [`import path from 'node:path';`] : []),
-    `import * as Config from '${codegen.formatImportPath(configPath)}';`,
+    `import * as Config from '${codegen.formatImportPath(core.configPath)}';`,
     '',
     `const create = await dynamic<typeof Config, ${tc}>(Config, ${JSON.stringify(partialOptions)}, ${JSON.stringify(serverOptions)});`,
   );
@@ -320,7 +324,7 @@ async function generateBrowserIndexFile(ctx: FileGenContext) {
   const { core, codegen, tc } = ctx;
   codegen.lines.push(
     `import { browser } from 'fumadocs-mdx/runtime/browser';`,
-    `import type * as Config from '${codegen.formatImportPath(core.getOptions().configPath)}';`,
+    `import type * as Config from '${codegen.formatImportPath(core.configPath)}';`,
     '',
     `const create = browser<typeof Config, ${tc}>();`,
   );

@@ -6,14 +6,12 @@ import fs from 'node:fs/promises';
 import path from 'node:path';
 import { createHash } from 'node:crypto';
 import type { ConfigLoader } from '@/loaders/config';
-import { resolveMacroCollection, type MacroContext } from '@/macro/eval';
 
 const querySchema = z.looseObject({
   only: z.literal(['frontmatter', 'all']).default('all'),
   collection: z.string().optional(),
   workspace: z.string().optional(),
-  cfg: z.string().optional(),
-  id: z.coerce.number().optional(),
+  macro_id: z.string().optional(),
 });
 
 const cacheEntry = z.object({
@@ -24,13 +22,20 @@ const cacheEntry = z.object({
 
 type CacheEntry = z.infer<typeof cacheEntry>;
 
-export function createMdxLoader({ getCore }: ConfigLoader, macro?: MacroContext): Loader {
+export function createMdxLoader({ getCore }: ConfigLoader): Loader {
   return {
     async load({ getSource, development: isDevelopment, query, compiler, filePath }) {
       let core = await getCore();
+      // macro collections live on the root core, read it before switching to a workspace
+      const macro = core.macro;
       const value = await getSource();
       const matter = frontmatter(value);
-      const { collection: collectionName, workspace, only, cfg, id } = querySchema.parse(query);
+      const {
+        collection: collectionName,
+        workspace,
+        only,
+        macro_id: macroId,
+      } = querySchema.parse(query);
       if (workspace) {
         core = core.getWorkspaces().get(workspace) ?? core;
       }
@@ -40,7 +45,9 @@ export function createMdxLoader({ getCore }: ConfigLoader, macro?: MacroContext)
       const { experimentalBuildCache = false } = core.getConfig().global;
       if (!isDevelopment && experimentalBuildCache) {
         const cacheDir = experimentalBuildCache;
-        const cacheKey = `${collectionName ?? 'global'}_${generateCacheHash(filePath)}`;
+        // macro ids contain path separators, keep the key a valid file name
+        const scope = (macroId ?? collectionName ?? 'global').replace(/[^a-zA-Z0-9_-]/g, '_');
+        const cacheKey = `${scope}_${generateCacheHash(filePath)}`;
 
         const cached = await fs
           .readFile(path.join(cacheDir, cacheKey), 'utf-8')
@@ -61,8 +68,8 @@ export function createMdxLoader({ getCore }: ConfigLoader, macro?: MacroContext)
       }
 
       let docCollection: DocCollectionItem | undefined;
-      if (macro && cfg !== undefined && id !== undefined) {
-        const resolved = await resolveMacroCollection(macro, cfg, id);
+      if (macro && macroId !== undefined) {
+        const resolved = await macro.resolve(macroId);
         for (const input of resolved.inputs) compiler.addDependency(input);
 
         const item = resolved.collection;

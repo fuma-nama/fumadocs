@@ -6,18 +6,14 @@ export const docs = await __fdm.docs({ base: "test/fixtures/generate-index-docs"
   "base": "./../generate-index-docs",
   "eager": true,
   "query": {
-    "collection": "test_fixtures_macro_source_ts_0",
-    "cfg": "test/fixtures/macro/source.ts",
-    "id": "0"
+    "macro_id": "test/fixtures/macro/source.ts#docs"
   }
 }), meta: import.meta.glob(["./**/*.{json,yaml}"], {
   "base": "./../generate-index-docs",
   "eager": true,
   "import": "default",
   "query": {
-    "collection": "test_fixtures_macro_source_ts_0",
-    "cfg": "test/fixtures/macro/source.ts",
-    "id": "0"
+    "macro_id": "test/fixtures/macro/source.ts#docs"
   }
 }) });
 
@@ -26,17 +22,13 @@ export const blog = await __fdm.docAsync({ base: "test/fixtures/generate-index",
   "eager": true,
   "import": "frontmatter",
   "query": {
-    "collection": "test_fixtures_macro_source_ts_1",
-    "cfg": "test/fixtures/macro/source.ts",
-    "id": "1",
+    "macro_id": "test/fixtures/macro/source.ts#blog",
     "only": "frontmatter"
   }
 }), body: import.meta.glob(["./**/*.{mdx,md}"], {
   "base": "./../generate-index",
   "query": {
-    "collection": "test_fixtures_macro_source_ts_1",
-    "cfg": "test/fixtures/macro/source.ts",
-    "id": "1"
+    "macro_id": "test/fixtures/macro/source.ts#blog"
   }
 }) });
 
@@ -45,8 +37,6 @@ export const metaOnly = await __fdm.meta({ base: "test/fixtures/generate-index",
   "eager": true,
   "import": "default",
   "query": {
-    "collection": "test_fixtures_macro_source_ts_2",
-    "cfg": "test/fixtures/macro/source.ts",
-    "id": "2"
+    "macro_id": "test/fixtures/macro/source.ts#metaOnly"
   }
 }) });

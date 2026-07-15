@@ -16,24 +16,40 @@ export type MacroAsyncDocEntry<Frontmatter = unknown, Extra = unknown> = {
 
 export type MacroMetaEntry<Data = unknown> = MetaMethods & Data;
 
-interface EntriesAccessor<Entry> {
-  entries: Entry[];
+export interface MacroDocCollection<Frontmatter = unknown, Extra = unknown> {
+  entries: MacroDocEntry<Frontmatter, Extra>[];
 
   /**
    * get an entry by its file path (relative to collection directory)
    */
-  get: (path: string) => Entry | undefined;
+  get: (path: string) => MacroDocEntry<Frontmatter, Extra> | undefined;
+  toFumadocsSource: (options?: ToFumadocsSourceOptions) => Source<{
+    pageData: MacroDocEntry<Frontmatter, Extra>;
+    metaData: MetaData;
+  }>;
 }
 
-export type MacroDocCollection<Frontmatter = unknown, Extra = unknown> = EntriesAccessor<
-  MacroDocEntry<Frontmatter, Extra>
->;
+export interface MacroAsyncDocCollection<Frontmatter = unknown, Extra = unknown> {
+  entries: MacroAsyncDocEntry<Frontmatter, Extra>[];
 
-export type MacroAsyncDocCollection<Frontmatter = unknown, Extra = unknown> = EntriesAccessor<
-  MacroAsyncDocEntry<Frontmatter, Extra>
->;
+  /**
+   * get an entry by its file path (relative to collection directory)
+   */
+  get: (path: string) => MacroAsyncDocEntry<Frontmatter, Extra> | undefined;
+  toFumadocsSource: (options?: ToFumadocsSourceOptions) => Source<{
+    pageData: MacroAsyncDocEntry<Frontmatter, Extra>;
+    metaData: MetaData;
+  }>;
+}
 
-export type MacroMetaCollection<Data = unknown> = EntriesAccessor<MacroMetaEntry<Data>>;
+export interface MacroMetaCollection<Data = unknown> {
+  entries: MacroMetaEntry<Data>[];
+
+  /**
+   * get an entry by its file path (relative to collection directory)
+   */
+  get: (path: string) => MacroMetaEntry<Data> | undefined;
+}
 
 interface ToFumadocsSourceOptions {
   /** base directory for virtual file paths */
@@ -97,12 +113,10 @@ function normalize(file: string): string {
   return file.startsWith('./') ? file.slice(2) : file;
 }
 
-function accessor<Entry extends { info: { path: string } }>(
-  entries: Entry[],
-): EntriesAccessor<Entry> {
+function accessor<Entry extends { info: { path: string } }>(entries: Entry[]) {
   return {
     entries,
-    get(path) {
+    get(path: string): Entry | undefined {
       path = normalize(path);
       return entries.find((entry) => entry.info.path === path);
     },
@@ -115,7 +129,12 @@ export async function doc(args: BaseArgs & { entries: GlobEntries }): Promise<Ma
     unknown
   >[];
 
-  return accessor(entries as (MacroDocEntry & { info: { path: string } })[]);
+  return {
+    ...accessor(entries),
+    toFumadocsSource(options) {
+      return toFumadocsSource(entries, [], options);
+    },
+  };
 }
 
 export async function docAsync(
@@ -128,7 +147,12 @@ export async function docAsync(
     args.body,
   )) as MacroAsyncDocEntry[];
 
-  return accessor(entries as (MacroAsyncDocEntry & { info: { path: string } })[]);
+  return {
+    ...accessor(entries),
+    toFumadocsSource(options) {
+      return toFumadocsSource(entries, [], options);
+    },
+  };
 }
 
 export async function meta(
@@ -136,7 +160,7 @@ export async function meta(
 ): Promise<MacroMetaCollection> {
   const entries = (await create(args).meta('meta', args.base, args.entries)) as MacroMetaEntry[];
 
-  return accessor(entries as (MacroMetaEntry & { info: { path: string } })[]);
+  return accessor(entries);
 }
 
 export async function docs(
@@ -147,10 +171,8 @@ export async function docs(
     instance.doc('doc', args.base, args.entries) as Promise<MacroDocEntry<PageData>[]>,
     instance.meta('meta', args.base, args.meta) as Promise<MacroMetaEntry<MetaData>[]>,
   ]);
-  const getDoc = accessor(docEntries as (MacroDocEntry<PageData> & { info: { path: string } })[]);
-  const getMeta = accessor(
-    metaEntries as (MacroMetaEntry<MetaData> & { info: { path: string } })[],
-  );
+  const getDoc = accessor(docEntries);
+  const getMeta = accessor(metaEntries);
 
   return {
     docs: docEntries,
@@ -158,11 +180,7 @@ export async function docs(
     getPage: getDoc.get,
     getMeta: getMeta.get,
     toFumadocsSource(options) {
-      return toFumadocsSource(
-        docEntries as (MacroDocEntry<PageData> & DocMethods & PageData)[],
-        metaEntries as (MacroMetaEntry<MetaData> & MetaMethods & MetaData)[],
-        options,
-      );
+      return toFumadocsSource(docEntries, metaEntries, options);
     },
   };
 }
@@ -177,12 +195,8 @@ export async function docsAsync(
     >,
     instance.meta('meta', args.base, args.meta) as Promise<MacroMetaEntry<MetaData>[]>,
   ]);
-  const getDoc = accessor(
-    docEntries as (MacroAsyncDocEntry<PageData> & { info: { path: string } })[],
-  );
-  const getMeta = accessor(
-    metaEntries as (MacroMetaEntry<MetaData> & { info: { path: string } })[],
-  );
+  const getDoc = accessor(docEntries);
+  const getMeta = accessor(metaEntries);
 
   return {
     docs: docEntries,
@@ -190,11 +204,7 @@ export async function docsAsync(
     getPage: getDoc.get,
     getMeta: getMeta.get,
     toFumadocsSource(options) {
-      return toFumadocsSource(
-        docEntries as (MacroAsyncDocEntry<PageData> & DocMethods & PageData)[],
-        metaEntries as (MacroMetaEntry<MetaData> & MetaMethods & MetaData)[],
-        options,
-      );
+      return toFumadocsSource(docEntries, metaEntries, options);
     },
   };
 }

@@ -43,6 +43,8 @@ const config: NextConfig = {
 };
 
 const withStory = createNextStory();
-const withMDX = createMDX();
+const withMDX = createMDX({
+  include: ['**/source/index.tsx'],
+});
 
 export default withAnalyzer(withStory(withMDX(config)));
