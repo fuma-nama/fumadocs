@@ -9,6 +9,11 @@ export default defineConfig({
       tsconfigPaths: true,
       dedupe: ['waku'],
     },
-    plugins: [tailwindcss(), mdx()],
+    plugins: [
+      tailwindcss(),
+      mdx(undefined, {
+        include: 'src/lib/source.ts',
+      }),
+    ],
   } satisfies UserConfig as Config['vite'],
 });
