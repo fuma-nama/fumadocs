@@ -8,9 +8,10 @@ import type {
   RenderContext,
   RequestBodyObject,
 } from '@/types';
-import { getPreferredType, pickExample } from '@/utils/schema';
+import { getPreferredType, type ParsedSchema, pickExample } from '@/utils/schema';
 import { sample } from '@fumadocs/api-docs/schema/sample';
-import type { DereferencedDocument } from '@/utils/document/dereference';
+import { dereferenceShallow } from '@fumadocs/api-docs/schema/dereference';
+import { getRaw } from '@scalar/json-magic/magic-proxy';
 
 export interface ExampleRequestItem {
   id: string;
@@ -33,32 +34,30 @@ export function getExampleRequests({
   operation: OperationObject;
   ctx: RenderContext;
 }): ExampleRequestItem[] {
-  const { resolve } = ctx.schema;
-  const requestBody = resolve(operation.requestBody);
+  const requestBody = dereferenceShallow(operation.requestBody);
   const media = requestBody?.content ? getPreferredType(requestBody.content) : null;
-  const bodyOfType = media ? resolve(requestBody!.content![media]) : null;
+  const bodyOfType = media ? dereferenceShallow(requestBody!.content![media]) : null;
   const parameters = [...(operation.parameters ?? []), ...(pathItem.parameters ?? [])].map(
-    (param) => resolve(param),
+    dereferenceShallow,
   );
 
   if (bodyOfType?.examples) {
     const result: ExampleRequestItem[] = [];
 
     for (const [key, item] of Object.entries(bodyOfType.examples)) {
-      const value = resolve(item);
+      const { summary, description } = dereferenceShallow(item);
       const data = getRequestData({
         path,
         body: requestBody,
         parameters,
         sampleKey: key,
         method,
-        resolve,
       });
 
       result.push({
         id: key,
-        name: value.summary || key,
-        description: value.description,
+        name: summary || key,
+        description,
         data,
         encoded: encodeRequestData(data, ctx.mediaAdapters, parameters),
       });
@@ -67,8 +66,8 @@ export function getExampleRequests({
     if (result.length > 0) return result;
   }
 
-  const data = getRequestData({ path, body: requestBody, method, parameters, resolve });
-  const schema = bodyOfType ? resolve(bodyOfType.schema) : undefined;
+  const data = getRequestData({ path, body: requestBody, method, parameters });
+  const schema = dereferenceShallow(bodyOfType?.schema);
   return [
     {
       id: '_default',
@@ -86,14 +85,12 @@ function getRequestData({
   parameters,
   sampleKey,
   body,
-  resolve,
 }: {
   path: string;
   sampleKey?: string;
   method: HttpMethods;
   parameters: ParameterObject[];
   body?: RequestBodyObject;
-  resolve: DereferencedDocument['resolve'];
 }): RawRequestData {
   const result: RawRequestData = {
     path: {},
@@ -108,16 +105,16 @@ function getRequestData({
 
     if (value === undefined && param.required) {
       if (param.schema) {
-        value = sample(param.schema as object);
+        value = sample(param.schema);
       } else if (param.content) {
         const type = getPreferredType(param.content);
-        const content = type ? resolve(param.content[type]) : undefined;
+        const content = type ? dereferenceShallow(param.content[type]) : undefined;
         if (!content || !content.schema)
           throw new Error(
             `Cannot find "${param.name}" parameter info for media type "${type}" in ${path} ${method}`,
           );
 
-        value = sample(content.schema as object);
+        value = sample(content.schema as ParsedSchema);
       }
     }
 
@@ -140,14 +137,14 @@ function getRequestData({
     const type = getPreferredType(body.content);
     if (!type) throw new Error(`Cannot find body schema for ${path} ${method}: missing media type`);
     result.bodyMediaType = type as RawRequestData['bodyMediaType'];
-    const bodyOfType = resolve(body.content[type]);
+    const bodyOfType = dereferenceShallow(body.content[type]);
 
     if (bodyOfType.examples && sampleKey) {
-      result.body = resolve(bodyOfType.examples[sampleKey]).value;
+      result.body = getRaw(dereferenceShallow(bodyOfType.examples[sampleKey]).value);
     } else if (bodyOfType.example) {
-      result.body = bodyOfType.example;
+      result.body = getRaw(bodyOfType.example);
     } else {
-      result.body = sample((resolve(bodyOfType?.schema) ?? {}) as object, {
+      result.body = sample(bodyOfType?.schema ?? {}, {
         skipReadOnly: method !== 'get',
         skipWriteOnly: method === 'get',
         skipNonRequired: true,
