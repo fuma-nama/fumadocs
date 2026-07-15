@@ -6,6 +6,7 @@ export const docs = defineDocs({
   docs: {
     schema: z.object({ title: z.string().default('Hello World') }),
     mdxOptions: { rehypePlugins: [] },
+    lastModified: true,
   },
 });
 
@@ -14,6 +15,7 @@ export const blog = defineCollections({
   dir: 'test/fixtures/generate-index',
   async: true,
   postprocess: { extractLinkReferences: true },
+  lastModified: true,
 });
 
 export const metaOnly = defineCollections({

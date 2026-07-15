@@ -19,10 +19,19 @@ export interface MacroSchemaContext {
   source: string;
 }
 
-export interface DocMacroOptions<
-  Schema extends StandardSchemaV1 = StandardSchemaV1,
-  Async extends boolean = boolean,
-> {
+type DocMacroFlags = {
+  schema: StandardSchemaV1;
+  async: boolean;
+  lastModified: boolean;
+};
+
+type GetExtras<T extends DocMacroFlags> = (T['lastModified'] extends true
+  ? { lastModified?: Date | undefined }
+  : unknown) & {
+  extractedReferences?: ExtractedReference[];
+};
+
+export interface DocMacroOptions<T extends DocMacroFlags = DocMacroFlags> {
   /**
    * Patterns of content files (relative to `dir`).
    *
@@ -35,7 +44,7 @@ export interface DocMacroOptions<
    *
    * Must be statically analyzable (boolean literal).
    */
-  async?: Async;
+  async?: T['async'];
 
   /**
    * The compiler for content files.
@@ -54,7 +63,10 @@ export interface DocMacroOptions<
 
   postprocess?: Partial<PostprocessOptions>;
 
-  schema?: CollectionSchema<Schema, MacroSchemaContext>;
+  schema?: CollectionSchema<T['schema'], MacroSchemaContext>;
+
+  /** include last modified date in collection entries */
+  lastModified?: T['lastModified'];
 }
 
 export interface MetaMacroOptions<Schema extends StandardSchemaV1 = StandardSchemaV1> {
@@ -69,9 +81,8 @@ export interface MetaMacroOptions<Schema extends StandardSchemaV1 = StandardSche
 }
 
 export interface DefineDocsOptions<
-  DocsSchema extends StandardSchemaV1 = StandardSchemaV1,
+  T extends DocMacroFlags = DocMacroFlags,
   MetaSchema extends StandardSchemaV1 = StandardSchemaV1,
-  Async extends boolean = boolean,
 > {
   /**
    * Directory of content files, relative to project root.
@@ -82,14 +93,13 @@ export interface DefineDocsOptions<
    */
   dir?: string;
 
-  docs?: DocMacroOptions<DocsSchema, Async>;
+  docs?: DocMacroOptions<T>;
   meta?: MetaMacroOptions<MetaSchema>;
 }
 
 export interface DefineDocCollectionsOptions<
-  DocsSchema extends StandardSchemaV1 = StandardSchemaV1,
-  Async extends boolean = boolean,
-> extends DocMacroOptions<DocsSchema, Async> {
+  T extends DocMacroFlags = DocMacroFlags,
+> extends DocMacroOptions<T> {
   type: 'doc';
   /**
    * Directory of content files, relative to project root.
@@ -117,37 +127,46 @@ function macroError(): Error {
   );
 }
 
-// TODO: infer from collection options
-// exported because it appears in the inferred return types of the macros below
-export interface Temp {
-  extractedReferences?: ExtractedReference[];
-  lastModified?: Date;
-}
-
 /**
  * Define a docs collection (doc + meta), compiled by the bundler plugin.
  *
  * Requires the `include` option on your bundler plugin.
  */
 export function defineDocs<
-  DocsSchema extends StandardSchemaV1 = typeof pageSchema,
+  DocSchema extends StandardSchemaV1 = typeof pageSchema,
   MetaSchema extends StandardSchemaV1 = typeof metaSchema,
   const Async extends boolean = false,
+  const LastModified extends boolean = false,
 >(
   // eslint-disable-next-line @typescript-eslint/no-unused-vars -- compiled away by the bundler plugin
-  options?: DefineDocsOptions<DocsSchema, MetaSchema, Async>,
-): StandardSchemaV1.InferOutput<DocsSchema> extends PageData
+  options?: DefineDocsOptions<
+    {
+      schema: DocSchema;
+      async: Async;
+      lastModified: LastModified;
+    },
+    MetaSchema
+  >,
+): StandardSchemaV1.InferOutput<DocSchema> extends PageData
   ? StandardSchemaV1.InferOutput<MetaSchema> extends MetaData
     ? Async extends true
       ? MacroAsyncDocsCollection<
-          StandardSchemaV1.InferOutput<DocsSchema>,
+          StandardSchemaV1.InferOutput<DocSchema>,
           StandardSchemaV1.InferOutput<MetaSchema>,
-          Temp
+          GetExtras<{
+            schema: DocSchema;
+            async: Async;
+            lastModified: LastModified;
+          }>
         >
       : MacroDocsCollection<
-          StandardSchemaV1.InferOutput<DocsSchema>,
+          StandardSchemaV1.InferOutput<DocSchema>,
           StandardSchemaV1.InferOutput<MetaSchema>,
-          Temp
+          GetExtras<{
+            schema: DocSchema;
+            async: Async;
+            lastModified: LastModified;
+          }>
         >
     : never
   : never {
@@ -161,11 +180,30 @@ export function defineCollections<MetaSchema extends StandardSchemaV1 = Standard
 export function defineCollections<
   DocSchema extends StandardSchemaV1 = StandardSchemaV1,
   const Async extends boolean = false,
+  const LastModified extends boolean = false,
 >(
-  options: DefineDocCollectionsOptions<DocSchema, Async>,
+  options: DefineDocCollectionsOptions<{
+    schema: DocSchema;
+    async: Async;
+    lastModified: LastModified;
+  }>,
 ): Async extends true
-  ? MacroAsyncDocCollection<StandardJSONSchemaV1.InferOutput<DocSchema>, Temp>
-  : MacroDocCollection<StandardJSONSchemaV1.InferOutput<DocSchema>, Temp>;
+  ? MacroAsyncDocCollection<
+      StandardJSONSchemaV1.InferOutput<DocSchema>,
+      GetExtras<{
+        schema: DocSchema;
+        async: Async;
+        lastModified: LastModified;
+      }>
+    >
+  : MacroDocCollection<
+      StandardJSONSchemaV1.InferOutput<DocSchema>,
+      GetExtras<{
+        schema: DocSchema;
+        async: Async;
+        lastModified: LastModified;
+      }>
+    >;
 
 /**
  * Define a doc/meta collection, compiled by the bundler plugin.

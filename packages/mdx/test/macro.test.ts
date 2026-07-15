@@ -101,6 +101,37 @@ export const docs = defineDocs({
     ).resolves.toBeNull();
   });
 
+  test('lastModified adds a passthrough', async () => {
+    const result = await transformMacroModule({
+      code: `import { defineDocs } from 'fumadocs-mdx/macro';
+export const docs = defineDocs({
+  dir: 'test/fixtures/generate-index-docs',
+  docs: { lastModified: true },
+});
+export const plain = defineDocs({ dir: 'test/fixtures/generate-index-docs' });`,
+      file: sourceFile,
+      root,
+      target: 'import',
+    });
+
+    expect(result!.code).toContain('passthroughs: ["lastModified"]');
+    // only the collection that opted in
+    expect(result!.code.match(/passthroughs/g)).toHaveLength(1);
+  });
+
+  test('reject non-static lastModified', async () => {
+    await expect(() =>
+      transformMacroModule({
+        code: `import { defineDocs } from 'fumadocs-mdx/macro';
+const enabled = process.env.CI === '1';
+export const docs = defineDocs({ docs: { lastModified: enabled } });`,
+        file: sourceFile,
+        root,
+        target: 'vite',
+      }),
+    ).rejects.toThrowError(/`lastModified` option of a macro must be a boolean literal/);
+  });
+
   test('reject non-static options', async () => {
     await expect(() =>
       transformMacroModule({
@@ -265,6 +296,8 @@ describe('config evaluation', () => {
     expect(collection.dir).toBe(path.join(root, 'test/fixtures/generate-index-docs'));
     expect(collection.docs.mdxOptions).toBeDefined();
     expect(collection.docs.schema).toHaveProperty('~standard');
+    // the option survives evaluation, the compiler reads it off the collection
+    expect(collection.docs.lastModified).toBe(true);
   });
 
   test('defineCollections (doc)', async () => {
@@ -434,7 +467,90 @@ export const other = defineDocs({ dir: '${dir}' });`,
     expect(result?.code).toContain('Hello World');
     expect(dependencies).toContain(sourceFile);
   });
+
+  test('exports the git last modified date when the collection opts in', async () => {
+    const core = createCore({
+      environment: 'vite',
+      configPath: path.join(root, 'source.config.ts'),
+      outDir,
+    });
+    await core.init({ config: buildConfig({}, root) });
+    core.macro = collector;
+
+    const loader = createMdxLoader({ getCore: async () => core });
+    const filePath = path.join(root, 'test/fixtures/generate-index-docs/index.mdx');
+
+    const result = await loader.load({
+      filePath,
+      query: { macro_id: `${cfg}#docs` },
+      getSource: () => fs.readFile(filePath, 'utf-8'),
+      development: false,
+      compiler: { addDependency: () => undefined },
+    });
+
+    const match = result?.code.match(/export let lastModified = new Date\((\d+)\)/);
+    expect(match, 'compiled output should export lastModified').not.toBeNull();
+
+    // the real commit date of the fixture, not a placeholder
+    const expected = await gitTimestamp(filePath);
+    expect(Number(match![1])).toBe(expected.getTime());
+  });
 });
+
+describe('lastModified collection option', () => {
+  const filePath = path.join(root, 'test/fixtures/generate-index-docs/index.mdx');
+
+  async function compile(collection: Record<string, unknown>, plugins?: unknown[]) {
+    const core = createCore({
+      environment: 'vite',
+      configPath: path.join(root, 'source.config.ts'),
+      outDir,
+    });
+    await core.init({
+      config: buildConfig(
+        {
+          docs: { type: 'doc', dir: 'test/fixtures/generate-index-docs', ...collection },
+          default: { plugins },
+        },
+        root,
+      ),
+    });
+
+    const result = await createMdxLoader({ getCore: async () => core }).load({
+      filePath,
+      query: { collection: 'docs' },
+      getSource: () => fs.readFile(filePath, 'utf-8'),
+      development: false,
+      compiler: { addDependency: () => undefined },
+    });
+
+    return result?.code ?? '';
+  }
+
+  test('is opt-in', async () => {
+    expect(await compile({})).not.toContain('lastModified');
+  });
+
+  test('exports the date for config collections too', async () => {
+    expect(await compile({ lastModified: true })).toContain('export let lastModified = new Date(');
+  });
+
+  test('does not double-export alongside the lastModified plugin', async () => {
+    const { default: lastModifiedPlugin } = await import('@/plugins/last-modified');
+    const code = await compile({ lastModified: true }, [lastModifiedPlugin()]);
+
+    // two `export let lastModified` would be a syntax error
+    expect(code.match(/export let lastModified\b/g)).toHaveLength(1);
+  });
+});
+
+async function gitTimestamp(file: string): Promise<Date> {
+  const { x } = await import('tinyexec');
+  const out = await x('git', ['log', '-1', '--format=%aI', '--', file], {
+    nodeOptions: { cwd: root },
+  });
+  return new Date(out.stdout.trim());
+}
 
 describe('types', () => {
   test('macro results are typed', () => {

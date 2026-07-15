@@ -6,10 +6,10 @@
     "build": "pnpm build:pre && next build && pnpm build:post",
     "build:pre": "node ./scripts/pre-build.ts",
     "build:post": "node ./scripts/post-build.ts",
-    "types:check": "fumadocs-mdx && next typegen && tsc --noEmit",
+    "types:check": "next typegen && tsc --noEmit",
     "clean": "rimraf .next",
     "dev": "next dev",
-    "lint": "fumadocs-mdx && node ./scripts/lint.entry.ts",
+    "lint": "node ./scripts/lint.entry.ts",
     "start": "next start"
   },
   "dependencies": {

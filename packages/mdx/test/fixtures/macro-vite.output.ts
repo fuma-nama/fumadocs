@@ -2,7 +2,7 @@ import * as __fdm from "fumadocs-mdx/runtime/macro";
 
 import { z } from 'zod';
 
-export const docs = await __fdm.docs({ base: "test/fixtures/generate-index-docs", entries: import.meta.glob(["./**/*.{mdx,md}"], {
+export const docs = await __fdm.docs({ base: "test/fixtures/generate-index-docs", passthroughs: ["lastModified"], entries: import.meta.glob(["./**/*.{mdx,md}"], {
   "base": "./../generate-index-docs",
   "eager": true,
   "query": {
@@ -17,7 +17,7 @@ export const docs = await __fdm.docs({ base: "test/fixtures/generate-index-docs"
   }
 }) });
 
-export const blog = await __fdm.docAsync({ base: "test/fixtures/generate-index", passthroughs: ["extractedReferences"], head: import.meta.glob(["./**/*.{mdx,md}"], {
+export const blog = await __fdm.docAsync({ base: "test/fixtures/generate-index", passthroughs: ["extractedReferences","lastModified"], head: import.meta.glob(["./**/*.{mdx,md}"], {
   "base": "./../generate-index",
   "eager": true,
   "import": "frontmatter",

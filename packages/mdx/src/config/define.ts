@@ -33,6 +33,16 @@ export interface DocCollectionBase<
   async?: boolean;
   dynamic?: boolean;
   schema?: CollectionSchema<Schema, { path: string; source: string }>;
+
+  /**
+   * Expose the last modified date of each document, obtained from Git.
+   *
+   * Requires `git` to be installed. If you are using Vercel, please set the `VERCEL_DEEP_CLONE`
+   * environment variable to `true`.
+   *
+   * In macros, this must be statically analyzable (a boolean literal).
+   */
+  lastModified?: boolean;
 }
 
 export interface DocCollectionMdx<

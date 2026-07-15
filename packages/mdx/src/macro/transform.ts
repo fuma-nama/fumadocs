@@ -475,16 +475,28 @@ export async function transformMacroModule({
           isBoolean,
           'a boolean literal',
         ) ?? false;
+      const lastModified =
+        requireStatic(
+          ctx,
+          getProperty(docOptions, 'lastModified'),
+          'lastModified',
+          isBoolean,
+          'a boolean literal',
+        ) ?? false;
 
-      return { files, isAsync, extractLinkReferences };
+      return { files, isAsync, extractLinkReferences, lastModified };
     }
 
     async function generateDocArgs(docOptions: Node | undefined): Promise<string[]> {
-      const { files, isAsync, extractLinkReferences } = docGlobs(docOptions);
+      const { files, isAsync, extractLinkReferences, lastModified } = docGlobs(docOptions);
       const args: string[] = [];
 
-      if (extractLinkReferences) {
-        args.push(`passthroughs: ["extractedReferences"]`);
+      // properties of the compiled document to expose on entries
+      const passthroughs: string[] = [];
+      if (extractLinkReferences) passthroughs.push('extractedReferences');
+      if (lastModified) passthroughs.push('lastModified');
+      if (passthroughs.length > 0) {
+        args.push(`passthroughs: ${JSON.stringify(passthroughs)}`);
       }
 
       if (isAsync) {

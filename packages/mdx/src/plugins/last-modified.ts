@@ -80,6 +80,8 @@ export default function lastModified(options: LastModifiedPluginOptions = {}): P
     doc: {
       async vfile(file) {
         if (!filter(this.collection.name)) return;
+        // the collection opted in through its own `lastModified` option, which already exports it
+        if (this.collection.lastModified) return;
 
         const timestamp = await fn(this.filePath);
         if (timestamp) {
@@ -94,7 +96,10 @@ export default function lastModified(options: LastModifiedPluginOptions = {}): P
   };
 }
 
-async function getGitTimestamp(file: string, cwd: string): Promise<Date | null> {
+/**
+ * @internal also used by the built-in `lastModified` collection option, sharing the batched cache
+ */
+export async function getGitTimestamp(file: string, cwd: string): Promise<Date | null> {
   const timestamps = await getGitTimestamps(cwd);
   return timestamps.get(path.resolve(cwd, file)) ?? null;
 }

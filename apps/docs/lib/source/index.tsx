@@ -70,6 +70,7 @@ const docs = defineDocs({
       valueToExport: ['elementIds'],
     },
     async: true,
+    lastModified: true,
     satteriOptions() {
       const typeTableOptions: RemarkAutoTypeTableOptions = {
         generator: typeTableGenerator,

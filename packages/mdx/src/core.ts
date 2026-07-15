@@ -10,7 +10,6 @@ import type { FSWatcher } from 'chokidar';
 import { validate } from './utils/validation';
 import type { VFile } from 'vfile';
 import type { IndexFilePlugin } from './plugins/index-file';
-import type { PostprocessOptions } from './config';
 import { ident } from './utils/codegen';
 // type-only: `@/macro/eval` pulls in build-time deps, and core also runs in the app runtime
 import type { MacroCollector } from './macro/eval';
@@ -376,12 +375,31 @@ export function createCore(options: CoreOptions) {
   };
 }
 
+/**
+ * @returns the doc collection of a `doc`/`docs` collection, `undefined` for `meta`
+ */
+function docCollectionOf(collection: CollectionItem): DocCollectionItem | undefined {
+  switch (collection.type) {
+    case 'doc':
+      return collection;
+    case 'docs':
+      return collection.docs;
+  }
+}
+
 function postprocessPlugin(): Plugin {
   const LinkReferenceTypes = `{
   /**
    * extracted references (e.g. hrefs, paths), useful for analyzing relationships between pages.
    */
   extractedReferences: import("fumadocs-mdx").ExtractedReference[];
+}`;
+
+  const LastModifiedTypes = `{
+  /**
+   * Last modified date of document file, obtained from version control.
+   */
+  lastModified?: Date;
 }`;
 
   return {
@@ -391,19 +409,15 @@ function postprocessPlugin(): Plugin {
         lines.push('{');
         lines.push('  DocData: {');
         for (const collection of this.core.getCollections()) {
-          let postprocessOptions: Partial<PostprocessOptions> | undefined;
-          switch (collection.type) {
-            case 'doc':
-              postprocessOptions = collection.postprocess;
-              break;
-            case 'docs':
-              postprocessOptions = collection.docs.postprocess;
-              break;
-          }
+          const docs = docCollectionOf(collection);
+          if (!docs) continue;
 
-          if (postprocessOptions?.extractLinkReferences) {
-            lines.push(ident(`${collection.name}: ${LinkReferenceTypes},`, 2));
-          }
+          const extras: string[] = [];
+          if (docs.postprocess?.extractLinkReferences) extras.push(LinkReferenceTypes);
+          if (docs.lastModified) extras.push(LastModifiedTypes);
+          if (extras.length === 0) continue;
+
+          lines.push(ident(`${collection.name}: ${extras.join(' & ')},`, 2));
         }
         lines.push('  }');
         lines.push('}');
@@ -413,6 +427,29 @@ function postprocessPlugin(): Plugin {
         options.doc ??= {};
         options.doc.passthroughs ??= [];
         options.doc.passthroughs.push('extractedReferences');
+
+        if (
+          this.core
+            .getCollections()
+            .some((collection) => docCollectionOf(collection)?.lastModified === true)
+        ) {
+          options.doc.passthroughs.push('lastModified');
+        }
+      },
+    },
+    doc: {
+      async vfile(file) {
+        if (!this.collection.lastModified) return;
+
+        const { getGitTimestamp } = await import('./plugins/last-modified');
+        const timestamp = await getGitTimestamp(this.filePath, this.collection.cwd);
+        if (!timestamp) return;
+
+        file.data['mdx-export'] ??= [];
+        file.data['mdx-export'].push({
+          name: 'lastModified',
+          value: timestamp,
+        });
       },
     },
   };

@@ -8,8 +8,8 @@ import * as __fd_glob_0 from "../generate-index-docs/index.mdx?macro_id=test%2Ff
 
 import { z } from 'zod';
 
-export const docs = await __fdm.docs({ base: "test/fixtures/generate-index-docs", entries: {"index.mdx": __fd_glob_0, "folder/test.mdx": __fd_glob_1, }, meta: {"meta.json": __fd_glob_2, } });
+export const docs = await __fdm.docs({ base: "test/fixtures/generate-index-docs", passthroughs: ["lastModified"], entries: {"index.mdx": __fd_glob_0, "folder/test.mdx": __fd_glob_1, }, meta: {"meta.json": __fd_glob_2, } });
 
-export const blog = await __fdm.docAsync({ base: "test/fixtures/generate-index", passthroughs: ["extractedReferences"], head: {"index.mdx": __fd_glob_3, "folder/test.mdx": __fd_glob_4, }, body: {"index.mdx": () => import("../generate-index/index.mdx?macro_id=test%2Ffixtures%2Fmacro%2Fsource.ts%23blog"), "folder/test.mdx": () => import("../generate-index/folder/test.mdx?macro_id=test%2Ffixtures%2Fmacro%2Fsource.ts%23blog"), } });
+export const blog = await __fdm.docAsync({ base: "test/fixtures/generate-index", passthroughs: ["extractedReferences","lastModified"], head: {"index.mdx": __fd_glob_3, "folder/test.mdx": __fd_glob_4, }, body: {"index.mdx": () => import("../generate-index/index.mdx?macro_id=test%2Ffixtures%2Fmacro%2Fsource.ts%23blog"), "folder/test.mdx": () => import("../generate-index/folder/test.mdx?macro_id=test%2Ffixtures%2Fmacro%2Fsource.ts%23blog"), } });
 
 export const metaOnly = await __fdm.meta({ base: "test/fixtures/generate-index", meta: {"meta.json": __fd_glob_5, } });
