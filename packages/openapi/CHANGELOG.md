@@ -1,3 +1,9 @@
+## fumadocs-openapi@11.2.1
+
+### Fix invalid data in generated request examples
+
+Remove invalid data from generated request body example.
+
 ## fumadocs-openapi@11.2.0
 
 ### Use `@scalar/json-magic` for dereferencing
