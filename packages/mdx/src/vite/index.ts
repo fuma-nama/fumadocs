@@ -199,7 +199,7 @@ export default function mdx(
 }
 
 async function importConfigFile(configPath: string): Promise<Record<string, unknown>> {
-  const exists = fs.access(configPath).then(
+  const exists = await fs.access(configPath).then(
     () => true,
     () => false,
   );
