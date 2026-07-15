@@ -12,8 +12,7 @@ import fs from 'node:fs/promises';
 import { mdxLoaderGlob, metaLoaderGlob } from '@/loaders';
 import type { MacroEvaluator } from '@/macro/eval';
 
-/** @internal do not use this */
-export function createMacroEvaluator(root: string): MacroEvaluator {
+function createMacroEvaluator(root: string): MacroEvaluator {
   return async ({ entry, transform }) => {
     const inputs = new Set<string>();
     inputs.add(entry);

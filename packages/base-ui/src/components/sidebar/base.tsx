@@ -368,12 +368,19 @@ export function SidebarFolderContent(props: CollapsibleContentProps) {
 }
 
 export function SidebarTrigger({ children, ...props }: ComponentProps<'button'>) {
-  const { setOpen } = useSidebar();
+  const { open, setOpen } = useSidebar();
   const t = useTranslations({ note: 'sidebar' });
 
   return (
     <button
-      aria-label={t('Open Sidebar', { note: 'aria-label' })}
+      type="button"
+      aria-label={
+        open
+          ? t('Close Sidebar', { note: 'aria-label' })
+          : t('Open Sidebar', { note: 'aria-label' })
+      }
+      aria-expanded={open}
+      aria-controls="nd-sidebar-mobile"
       onClick={() => setOpen((prev) => !prev)}
       {...props}
     >
