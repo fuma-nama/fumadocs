@@ -7,9 +7,10 @@ import {
   transformMacroConfigModule,
   transformMacroModule,
   MacroTransformError,
-  MacroModuleId,
 } from '@/macro/transform';
 import { createNodeEvaluator, MacroCollector } from '@/macro/eval';
+import { createMacroMatcher, MacroModuleId, resolveMacroOptions } from '@/macro/options';
+import { macroFilter } from '@/bun';
 import { docs as macroDocs } from '@/runtime/macro';
 import { createMdxLoader } from '@/loaders/mdx';
 import { buildConfig } from '@/config/build';
@@ -165,6 +166,83 @@ export const { docs } = defineDocs({ dir: 'content/docs' });`,
         target: 'vite',
       }),
     ).rejects.toThrowError(/must be assigned to a plain variable/);
+  });
+});
+
+describe('options', () => {
+  test('enabled by default, covering all JS/TS files but not node_modules', () => {
+    const resolved = resolveMacroOptions(undefined);
+
+    expect(resolved).toBeDefined();
+    expect(resolved!.include).toEqual([
+      '**/*.js',
+      '**/*.jsx',
+      '**/*.mjs',
+      '**/*.ts',
+      '**/*.tsx',
+      '**/*.mts',
+    ]);
+    expect(resolved!.exclude).toEqual(['**/node_modules/**']);
+    // brace-free: not every glob engine these reach expands `{a,b}`
+    for (const pattern of resolved!.include) expect(pattern).not.toContain('{');
+  });
+
+  test('`macro: false` disables, a string include is normalised', () => {
+    expect(resolveMacroOptions(false)).toBeUndefined();
+    expect(resolveMacroOptions({})!.include).toHaveLength(6);
+    expect(resolveMacroOptions({ include: '**/source.ts' })!.include).toEqual(['**/source.ts']);
+  });
+
+  test('webpack/node matcher covers project files but never node_modules', () => {
+    const matcher = createMacroMatcher(resolveMacroOptions(undefined)!);
+
+    for (const file of ['lib/source/index.tsx', 'a.js', 'deep/nested/mod.mts']) {
+      expect(matcher(file), file).toBe(true);
+    }
+
+    // regression: `basename: true` must not reach the exclude patterns, or
+    // `**/node_modules/**` stops matching and every dependency is transformed
+    for (const file of [
+      'node_modules/foo/index.js',
+      'packages/a/node_modules/b/index.ts',
+      'readme.md',
+    ]) {
+      expect(matcher(file), file).toBe(false);
+    }
+  });
+
+  test('slash-less include patterns still match at any depth', () => {
+    const matcher = createMacroMatcher(resolveMacroOptions({ include: '*.source.ts' })!);
+
+    expect(matcher('lib/deep/x.source.ts')).toBe(true);
+    expect(matcher('node_modules/foo/x.source.ts')).toBe(false);
+    expect(matcher('lib/other.ts')).toBe(false);
+  });
+
+  test('bun filter matches project files by default and never node_modules', () => {
+    const root = '/app';
+    const filter = macroFilter(root, resolveMacroOptions(undefined)!);
+
+    for (const file of [
+      '/app/lib/source.ts',
+      '/app/a.tsx',
+      '/app/deep/nested/mod.mjs',
+      '/app/src/x.js',
+      // the import query used by the bun evaluator must still match
+      '/app/lib/source.ts?fd-macro-eval=token',
+    ]) {
+      expect(filter.test(file), file).toBe(true);
+    }
+
+    for (const file of [
+      '/app/node_modules/foo/dist/index.js',
+      '/app/packages/x/node_modules/foo/index.ts',
+      '/app/readme.md',
+      '/app/styles.css',
+      '/other/lib/source.ts',
+    ]) {
+      expect(filter.test(file), file).toBe(false);
+    }
   });
 });
 

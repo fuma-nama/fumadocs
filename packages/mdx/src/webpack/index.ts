@@ -2,8 +2,12 @@ import { type Core, createCore } from '@/core';
 import { createNodeEvaluator, MacroCollector } from '@/macro/eval';
 
 export interface WebpackLoaderOptions {
-  absoluteCompiledConfigPath: string;
+  type: 'webpack' | 'turbopack';
+  /** absolute path */
+  compiledConfigPath: string;
+  /** absolute path */
   configPath: string;
+  /** absolute path */
   outDir: string;
   isDev: boolean;
 
@@ -11,9 +15,6 @@ export interface WebpackLoaderOptions {
    * whether the macro API (`fumadocs-mdx/macro`) is enabled
    */
   macro?: boolean;
-
-  /** @internal output format for JSON meta files */
-  metaJsonOutput?: 'json' | 'js';
 }
 
 let core: Core;

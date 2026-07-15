@@ -1,13 +1,14 @@
 import * as module from 'node:module';
 import type { CoreOptions } from '@/core';
+import type { MacroPluginOption } from '@/macro/options';
 
 export interface NodeLoaderOptions extends Pick<CoreOptions, 'configPath' | 'outDir' | 'plugins'> {
   /**
-   * Enable the macro API (`fumadocs-mdx/macro`) for matching modules.
+   * Configure the macro API (`fumadocs-mdx/macro`), or `false` to disable it.
    *
-   * Patterns are matched with picomatch against paths relative to cwd.
+   * `macro.include` patterns are matched with picomatch against paths relative to cwd.
    */
-  include?: string | string[];
+  macro?: MacroPluginOption;
 
   /**
    * Skip meta file transformation step

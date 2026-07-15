@@ -2,7 +2,7 @@ import path from 'node:path';
 import fs from 'node:fs/promises';
 import { randomUUID } from 'node:crypto';
 import { pathToFileURL } from 'node:url';
-import { MacroModuleId, parseMacroId, transformMacroConfigModule } from './transform';
+import { parseMacroId, transformMacroConfigModule } from './transform';
 import { buildCollection, type CollectionItem } from '@/config/build';
 import { defineDocs, type AnyCollection } from '@/config/define';
 import { slash } from '@/utils/codegen';
@@ -193,13 +193,9 @@ export class MacroCollector {
       const prev = await cached.catch(() => undefined);
       if (prev && (await this.stamp(abs, prev.inputs)) === prev.stamp) return prev;
 
-      // stale. another resolve may have replaced the entry while we awaited above — reuse its
-      // evaluation instead of starting a second one.
       if (this.modules.get(abs) !== cached) return await this.load(abs);
     }
 
-    // the cache is replaced synchronously below, so concurrent resolves that saw the same stale
-    // entry observe this evaluation rather than each starting their own.
     const result = this.evaluate(abs);
     this.modules.set(abs, result);
     result.catch(() => {
@@ -258,8 +254,6 @@ export class MacroCollector {
         await this.evaluator({
           entry: abs,
           transform: async (code, file) => {
-            if (!code.includes(MacroModuleId)) return null;
-
             return transformMacroConfigModule({
               code,
               file,

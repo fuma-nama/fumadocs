@@ -12,15 +12,19 @@ import { createMetaLoader } from '@/loaders/meta';
 import { toBun } from '@/loaders/adapter';
 import { mdxLoaderGlob, metaLoaderGlob } from '@/loaders';
 import type { MacroEvaluatorOptions } from '@/macro/eval';
+import {
+  MacroModuleId,
+  resolveMacroOptions,
+  type MacroPluginOption,
+  type ResolvedMacroOptions,
+} from '@/macro/options';
 import { slash } from '@/utils/codegen';
 
 export interface MdxPluginOptions extends Pick<CoreOptions, 'configPath' | 'outDir' | 'plugins'> {
   /**
-   * Enable the macro API (`fumadocs-mdx/macro`) for matching modules.
-   *
-   * Patterns (relative to cwd) are converted into a RegExp for the `onLoad` filter of Bun plugin.
+   * Configure the macro API (`fumadocs-mdx/macro`), or `false` to disable it.
    */
-  include?: string | string[];
+  macro?: MacroPluginOption;
 
   /**
    * Skip meta file transformation step
@@ -29,6 +33,23 @@ export interface MdxPluginOptions extends Pick<CoreOptions, 'configPath' | 'outD
 }
 
 const EvalQueryKey = 'fd-macro-eval';
+
+/**
+ * @internal
+ */
+export function macroFilter(root: string, { include, exclude }: ResolvedMacroOptions): RegExp {
+  const toSource = (pattern: string) =>
+    picomatch.makeRe(slash(path.resolve(root, pattern)), { dot: true }).source;
+
+  // tolerate an import query (`?foo=bar`) after the path
+  const included = include
+    .map((pattern) => `(?:${toSource(pattern).replace(/\$$/, String.raw`(?:\?.*)?$`)})`)
+    .join('|');
+  const excluded = exclude.map((pattern) => `(?:${toSource(pattern)})`).join('|');
+
+  // the lookahead is zero-width, so the anchors of the included sources still apply at index 0
+  return new RegExp(`^(?!${excluded})(?:${included})`);
+}
 
 function bunLoader(file: string) {
   if (file.endsWith('.tsx')) return 'tsx' as const;
@@ -39,7 +60,7 @@ function bunLoader(file: string) {
 
 export function createMdxPlugin(options: MdxPluginOptions = {}): BunPlugin {
   const { disableMetaFile = false } = options;
-  const include = typeof options.include === 'string' ? [options.include] : (options.include ?? []);
+  const macroOptions = resolveMacroOptions(options.macro);
 
   return {
     name: 'bun-plugin-fumadocs-mdx',
@@ -62,9 +83,8 @@ export function createMdxPlugin(options: MdxPluginOptions = {}): BunPlugin {
         config: buildConfig(configExports, process.cwd()),
       });
 
-      if (include.length > 0) {
+      if (macroOptions) {
         const root = process.cwd();
-        const { MacroModuleId, transformMacroModule } = await import('@/macro/transform');
         const { MacroCollector } = await import('@/macro/eval');
         const pendingEvals = new Map<string, MacroEvaluatorOptions['transform']>();
 
@@ -86,18 +106,7 @@ export function createMdxPlugin(options: MdxPluginOptions = {}): BunPlugin {
           },
         });
 
-        // `include` patterns, converted into a RegExp anchored at cwd, with optional import query
-        const filter = new RegExp(
-          include
-            .map((pattern) => {
-              const source = picomatch.makeRe(slash(path.resolve(root, pattern)), {
-                dot: true,
-              }).source;
-
-              return `(?:${source.replace(/\$$/, String.raw`(?:\?.*)?$`)})`;
-            })
-            .join('|'),
-        );
+        const filter = macroFilter(root, macroOptions);
 
         build.onLoad({ filter }, async (args) => {
           const [file, query = ''] = args.path.split('?', 2);
@@ -114,6 +123,7 @@ export function createMdxPlugin(options: MdxPluginOptions = {}): BunPlugin {
             };
           }
 
+          const { transformMacroModule } = await import('@/macro/transform');
           const result = await transformMacroModule({
             code: source,
             file,

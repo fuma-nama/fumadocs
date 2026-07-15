@@ -10,9 +10,10 @@ const loader: LoaderDefinitionFunction<WebpackLoaderOptions> = function (source)
   const callback = this.async();
   const options = this.getOptions();
   this.cacheable(true);
-  this.addDependency(options.absoluteCompiledConfigPath);
+  this.addDependency(options.compiledConfigPath);
 
-  const jsonOutput = options.metaJsonOutput ?? 'json';
+  // TODO: output json directly when Turbopack supports output format other than JavaScript.
+  const jsonOutput = options.type === 'turbopack' ? 'js' : 'json';
   let instance = instances.get(jsonOutput);
   if (!instance) {
     instance = toWebpack(

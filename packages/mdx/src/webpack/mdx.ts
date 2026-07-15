@@ -10,7 +10,7 @@ const loader: LoaderDefinitionFunction<WebpackLoaderOptions> = function loader(s
   const callback = this.async();
   const options = this.getOptions();
   this.cacheable(true);
-  this.addDependency(options.absoluteCompiledConfigPath);
+  this.addDependency(options.compiledConfigPath);
 
   if (!instance) {
     instance = toWebpack(

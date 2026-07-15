@@ -11,6 +11,7 @@ import path from 'node:path';
 import fs from 'node:fs/promises';
 import { mdxLoaderGlob, metaLoaderGlob } from '@/loaders';
 import type { MacroEvaluator } from '@/macro/eval';
+import { MacroModuleId, resolveMacroOptions, type MacroPluginOption } from '@/macro/options';
 
 function createMacroEvaluator(root: string): MacroEvaluator {
   return async ({ entry, transform }) => {
@@ -46,11 +47,12 @@ function createMacroEvaluator(root: string): MacroEvaluator {
 
 export interface PluginOptions extends Pick<CoreOptions, 'configPath' | 'outDir' | 'plugins'> {
   /**
-   * Enable the macro API (`fumadocs-mdx/macro`) for matching modules.
+   * Configure the macro API (`fumadocs-mdx/macro`), or `false` to disable it.
    *
-   * Passed to the [`id` filter](https://vite.dev/guide/api-plugin#hook-filters) of the transform hook directly.
+   * `macro.include` is passed to the
+   * [`id` filter](https://vite.dev/guide/api-plugin#hook-filters) of the transform hook.
    */
-  include?: string | RegExp | (string | RegExp)[];
+  macro?: MacroPluginOption;
 
   /**
    * Generate index files for accessing content.
@@ -88,7 +90,8 @@ export default function mdx(
       name: 'fumadocs-mdx',
       async config(config, env) {
         core = createViteCore(config.root ?? process.cwd(), pluginOptions);
-        if (pluginOptions.include) {
+        const macroOptions = resolveMacroOptions(pluginOptions.macro);
+        if (macroOptions) {
           const { MacroCollector } = await import('@/macro/eval');
 
           core.macro = new MacroCollector({
@@ -136,18 +139,18 @@ export default function mdx(
           },
         };
 
-        if (core.macro) {
+        if (macroOptions) {
           const root = core.root;
-          const { MacroModuleId, transformMacroModule } = await import('@/macro/transform');
 
           macroPlugin.transform = {
             order: 'pre',
             filter: {
-              id: pluginOptions.include,
+              id: { include: macroOptions.include, exclude: macroOptions.exclude },
               code: MacroModuleId,
             },
             async handler(code, id) {
               const [file] = id.split('?', 2);
+              const { transformMacroModule } = await import('@/macro/transform');
               const result = await transformMacroModule({
                 code,
                 file,

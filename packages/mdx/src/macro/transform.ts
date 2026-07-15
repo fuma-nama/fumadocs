@@ -7,10 +7,9 @@ import type {
   NodeType,
 } from 'yuku-analyzer';
 import { createCodegen, slash } from '@/utils/codegen';
+import { MacroModuleId } from './options';
 
 type YukuNode = NodeOfType<NodeType>;
-
-export const MacroModuleId = 'fumadocs-mdx/macro';
 
 const SupportedPatterns = {
   doc: '**/*.{mdx,md}',

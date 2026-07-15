@@ -6,6 +6,7 @@ import { createIntegratedConfigLoader } from '@/loaders/config';
 import { createMdxLoader } from '@/loaders/mdx';
 import { createMetaLoader } from '@/loaders/meta';
 import { createNodeEvaluator, MacroCollector } from '@/macro/eval';
+import { MacroModuleId, resolveMacroOptions, type MacroPluginOption } from '@/macro/options';
 import { slash } from '@/utils/codegen';
 import fs from 'node:fs/promises';
 import path from 'node:path';
@@ -13,11 +14,11 @@ import type { RolldownPlugin } from 'rolldown';
 
 export interface PluginOptions extends Pick<CoreOptions, 'configPath' | 'outDir' | 'plugins'> {
   /**
-   * Enable the macro API (`fumadocs-mdx/macro`) for matching modules.
+   * Configure the macro API (`fumadocs-mdx/macro`), or `false` to disable it.
    *
-   * Patterns (relative to cwd) are passed to the `id` filter of the transform hook directly.
+   * `macro.include` (relative to cwd) is passed to the `id` filter of the transform hook.
    */
-  include?: string | string[];
+  macro?: MacroPluginOption;
 
   /**
    * Re-evaluate macro modules when they're updated, for long-running processes like watch mode.
@@ -30,8 +31,7 @@ export default async function mdx(
   options?: PluginOptions,
 ): Promise<RolldownPlugin[]> {
   const root = process.cwd();
-  const include =
-    typeof options?.include === 'string' ? [options.include] : (options?.include ?? []);
+  const macroOptions = resolveMacroOptions(options?.macro);
   const core = createCore({
     configPath: options?.configPath,
     outDir: options?.outDir,
@@ -44,7 +44,7 @@ export default async function mdx(
 
   const plugins: RolldownPlugin[] = [];
 
-  if (include.length > 0) {
+  if (macroOptions) {
     core.macro = new MacroCollector({
       root,
       outDir: core.outDir,
@@ -52,20 +52,20 @@ export default async function mdx(
       // Rolldown plugins run on Node.js, which cannot evaluate TypeScript natively
       evaluator: createNodeEvaluator({ root, outDir: core.outDir }),
     });
-    const { MacroModuleId, transformMacroModule } = await import('@/macro/transform');
 
     plugins.push({
       name: 'fumadocs-mdx:macro',
       transform: {
         filter: {
           id: {
-            include: include.map((pattern) => slash(path.resolve(root, pattern))),
-            exclude: ['**/node_modules/**'],
+            include: macroOptions.include.map((pattern) => slash(path.resolve(root, pattern))),
+            exclude: macroOptions.exclude,
           },
           code: MacroModuleId,
         },
         async handler(code, id) {
           const [file] = id.split('?', 2);
+          const { transformMacroModule } = await import('@/macro/transform');
           const result = await transformMacroModule({
             code,
             file,

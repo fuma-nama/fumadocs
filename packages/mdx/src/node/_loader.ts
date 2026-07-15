@@ -3,23 +3,24 @@ import type { NodeLoaderOptions } from '.';
 import type { InitializeHook, LoadFnOutput, LoadHook, LoadHookContext } from 'node:module';
 import { fileURLToPath } from 'node:url';
 import path from 'node:path';
-import picomatch from 'picomatch';
 import { createStandaloneConfigLoader } from '@/loaders/config';
 import { toNode } from '@/loaders/adapter';
 import { createMdxLoader } from '@/loaders/mdx';
 import { createMetaLoader } from '@/loaders/meta';
 import { mdxLoaderGlob, metaLoaderGlob } from '@/loaders';
 import { createNodeEvaluator, MacroCollector } from '@/macro/eval';
+import {
+  createMacroMatcher,
+  MacroModuleId,
+  resolveMacroOptions,
+  type ResolvedMacroOptions,
+} from '@/macro/options';
 import { slash } from '@/utils/codegen';
 
 let cachedLoaders: LoadHook[] | undefined;
 
-function toNodeMacro(include: string[], root: string): LoadHook {
-  // align slash-less patterns with the glob semantics of other bundlers
-  const matcher = picomatch(include, {
-    ignore: ['**/node_modules/**'],
-    basename: true,
-  });
+function toNodeMacro(options: ResolvedMacroOptions, root: string): LoadHook {
+  const matcher = createMacroMatcher(options);
 
   return async (url, context, nextLoad) => {
     if (!url.startsWith('file:///')) return nextLoad(url, context);
@@ -31,9 +32,9 @@ function toNodeMacro(include: string[], root: string): LoadHook {
     const loaded = await nextLoad(url, context);
     const code = loaded.source?.toString();
 
-    const { MacroModuleId, transformMacroModule } = await import('@/macro/transform');
     if (!code || !code.includes(MacroModuleId)) return loaded;
 
+    const { transformMacroModule } = await import('@/macro/transform');
     const result = await transformMacroModule({
       code,
       file,
@@ -63,10 +64,10 @@ export const initialize: InitializeHook<NodeLoaderOptions> = (options) => {
     mode: 'production',
   });
 
-  const include = typeof options.include === 'string' ? [options.include] : (options.include ?? []);
+  const macroOptions = resolveMacroOptions(options.macro);
   cachedLoaders = [];
 
-  if (include.length > 0) {
+  if (macroOptions) {
     const root = process.cwd();
     core.macro = new MacroCollector({
       root,
@@ -76,7 +77,7 @@ export const initialize: InitializeHook<NodeLoaderOptions> = (options) => {
       evaluator: createNodeEvaluator({ root, outDir: core.outDir }),
     });
 
-    cachedLoaders.push(toNodeMacro(include, root));
+    cachedLoaders.push(toNodeMacro(macroOptions, root));
   }
 
   cachedLoaders.push(toNode(mdxLoaderGlob, createMdxLoader(configLoader)));

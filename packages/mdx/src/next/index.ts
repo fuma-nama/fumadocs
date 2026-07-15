@@ -7,20 +7,20 @@ import type {
   TurbopackRuleConfigItem,
 } from 'next/dist/server/config-shared';
 import * as path from 'node:path';
-import picomatch from 'picomatch';
 import { loadConfig } from '@/config/load-from-file';
 import { type Core, CoreOptions, createCore } from '@/core';
 import { mdxLoaderGlob, metaLoaderFileGlob, metaLoaderQueryGlob } from '@/loaders';
 import type { IndexFilePluginOptions } from '@/plugins/index-file';
 import indexFile from '@/plugins/index-file';
+import { createMacroMatcher, resolveMacroOptions, type MacroPluginOption } from '@/macro/options';
 
 export interface CreateMDXOptions extends Pick<CoreOptions, 'configPath' | 'outDir'> {
   /**
-   * Enable the macro API (`fumadocs-mdx/macro`) for matching modules.
+   * Configure the macro API (`fumadocs-mdx/macro`), or `false` to disable it.
    *
-   * A list of glob patterns.
+   * `macro.include` is a list of glob patterns.
    */
-  include?: string | string[];
+  macro?: MacroPluginOption;
   index?: IndexFilePluginOptions | false;
 }
 
@@ -29,12 +29,7 @@ const defaultPageExtensions = ['mdx', 'md', 'jsx', 'js', 'tsx', 'ts'];
 export function createMDX(options: CreateMDXOptions = {}) {
   const core = createNextCore(options);
   const isDev = process.env.NODE_ENV === 'development';
-  let macro: { include: string[] } | undefined;
-  if (Array.isArray(options.include) && options.include.length > 0) {
-    macro = { include: options.include };
-  } else if (typeof options.include === 'string') {
-    macro = { include: [options.include] };
-  }
+  const macro = resolveMacroOptions(options.macro);
 
   if (process.env._FUMADOCS_MDX !== '1') {
     process.env._FUMADOCS_MDX = '1';
@@ -42,25 +37,24 @@ export function createMDX(options: CreateMDXOptions = {}) {
     void init(isDev, core);
   }
 
-  return (nextConfig: NextConfig = {}): NextConfig => {
-    const loaderOptions: WebpackLoaderOptions = {
+  function onLoaderOptions(type: WebpackLoaderOptions['type']): WebpackLoaderOptions {
+    return {
+      type,
       configPath: core.configPath,
       outDir: core.outDir,
-      absoluteCompiledConfigPath: path.resolve(core.getCompiledConfigPath()),
+      compiledConfigPath: core.getCompiledConfigPath(),
       isDev,
       macro: macro !== undefined,
     };
-    const turbopackMetaLoaderOptions: WebpackLoaderOptions = {
-      ...loaderOptions,
-      metaJsonOutput: 'js',
-    };
+  }
+
+  return (nextConfig: NextConfig = {}): NextConfig => {
+    const turbopackLoaderOptions = onLoaderOptions('turbopack');
 
     const turbopack: TurbopackOptions = {
       ...nextConfig.turbopack,
       rules: {
         ...nextConfig.turbopack?.rules,
-        // `include` patterns are used as rule globs directly,
-        // with a content condition to skip modules not using the macro API.
         ...(macro
           ? Object.fromEntries(
               macro.include.map((pattern) => [
@@ -72,7 +66,7 @@ export function createMDX(options: CreateMDXOptions = {}) {
                   loaders: [
                     {
                       loader: 'fumadocs-mdx/webpack/macro',
-                      options: loaderOptions as unknown as TurbopackLoaderOptions,
+                      options: turbopackLoaderOptions as unknown as TurbopackLoaderOptions,
                     },
                   ],
                 } satisfies TurbopackRuleConfigItem,
@@ -83,7 +77,7 @@ export function createMDX(options: CreateMDXOptions = {}) {
           loaders: [
             {
               loader: 'fumadocs-mdx/webpack/mdx',
-              options: loaderOptions as unknown as TurbopackLoaderOptions,
+              options: turbopackLoaderOptions as unknown as TurbopackLoaderOptions,
             },
           ],
           as: '*.js',
@@ -95,7 +89,7 @@ export function createMDX(options: CreateMDXOptions = {}) {
           loaders: [
             {
               loader: 'fumadocs-mdx/webpack/meta',
-              options: turbopackMetaLoaderOptions as unknown as TurbopackLoaderOptions,
+              options: turbopackLoaderOptions as unknown as TurbopackLoaderOptions,
             },
           ],
           // TODO: output json directly when Turbopack supports output format other than JavaScript.
@@ -108,7 +102,7 @@ export function createMDX(options: CreateMDXOptions = {}) {
           loaders: [
             {
               loader: 'fumadocs-mdx/webpack/meta',
-              options: turbopackMetaLoaderOptions as unknown as TurbopackLoaderOptions,
+              options: turbopackLoaderOptions as unknown as TurbopackLoaderOptions,
             },
           ],
           as: '*.js',
@@ -122,19 +116,12 @@ export function createMDX(options: CreateMDXOptions = {}) {
       pageExtensions: nextConfig.pageExtensions ?? defaultPageExtensions,
       webpack: (config: Configuration, options) => {
         config.resolve ||= {};
-
         config.module ||= {};
         config.module.rules ||= [];
+        const loaderOptions = onLoaderOptions('webpack');
 
         if (macro) {
-          const matcher = picomatch(macro.include, {
-            ignore: ['**/node_modules/**'],
-            // aligns slash-less patterns (e.g. `*.source.ts`)
-            // with the glob semantics of Turbopack rule keys
-            basename: true,
-            // support backslashes
-            windows: true,
-          });
+          const matcher = createMacroMatcher(macro);
 
           config.module.rules.push({
             test: (resource) => matcher(path.relative(process.cwd(), resource)),
