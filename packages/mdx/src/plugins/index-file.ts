@@ -8,7 +8,6 @@ import { createHash } from 'node:crypto';
 import type { LazyEntry } from '@/runtime/dynamic';
 import type { EmitEntry } from '@/core';
 import { frontmatter } from 'fumadocs-core/content/md/frontmatter';
-import type { ServerOptions } from '@/runtime/server';
 
 export interface IndexFilePluginOptions {
   target?: 'default' | 'vite';
@@ -34,7 +33,6 @@ export interface IndexFilePluginOptions {
 export interface IndexFilePlugin {
   ['index-file']?: {
     generateTypeConfig?: (this: PluginContext) => string | void;
-    serverOptions?: (this: PluginContext, options: ServerOptions) => void;
   };
 }
 
@@ -42,7 +40,6 @@ interface FileGenContext {
   core: Core;
   workspace?: string;
   codegen: CodeGen;
-  serverOptions: ServerOptions;
   tc: string;
 }
 
@@ -59,27 +56,16 @@ export default function indexFile(options: IndexFilePluginOptions = {}): Plugin 
     );
   }
 
-  function generateConfigs(core: Core): {
-    serverOptions: ServerOptions;
-    tc: string;
-  } {
-    const serverOptions: ServerOptions = {};
+  function generateTypeConfig(core: Core): string {
     const typeConfigs: string[] = ['import("fumadocs-mdx/runtime/types").InternalTypeConfig'];
     const ctx = core.getPluginContext();
 
     for (const plugin of core.getPlugins()) {
-      const indexFilePlugin = plugin['index-file'];
-      if (!indexFilePlugin) continue;
-
-      indexFilePlugin.serverOptions?.call(ctx, serverOptions);
-      const config = indexFilePlugin.generateTypeConfig?.call(ctx);
+      const config = plugin['index-file']?.generateTypeConfig?.call(ctx);
       if (config) typeConfigs.push(config);
     }
 
-    return {
-      serverOptions,
-      tc: typeConfigs.join(' & '),
-    };
+    return typeConfigs.join(' & ');
   }
 
   return {
@@ -121,7 +107,7 @@ export default function indexFile(options: IndexFilePluginOptions = {}): Plugin 
     async emit() {
       const globCache = new Map<string, Promise<string[]>>();
       const { workspace, outDir } = this.core;
-      const { serverOptions, tc } = generateConfigs(this.core);
+      const tc = generateTypeConfig(this.core);
       const toEmitEntry = async (
         path: string,
         content: (ctx: FileGenContext) => Promise<void>,
@@ -135,7 +121,6 @@ export default function indexFile(options: IndexFilePluginOptions = {}): Plugin 
         await content({
           core: this.core,
           codegen,
-          serverOptions,
           tc,
           workspace: workspace?.name,
         });
@@ -157,12 +142,12 @@ export default function indexFile(options: IndexFilePluginOptions = {}): Plugin 
 }
 
 async function generateServerIndexFile(ctx: FileGenContext) {
-  const { core, codegen, serverOptions, tc } = ctx;
+  const { core, codegen, tc } = ctx;
   codegen.lines.push(
     `import { server } from 'fumadocs-mdx/runtime/server';`,
     `import type * as Config from '${codegen.formatImportPath(core.configPath)}';`,
     '',
-    `const create = server<typeof Config, ${tc}>(${JSON.stringify(serverOptions)});`,
+    `const create = server<typeof Config, ${tc}>();`,
   );
 
   async function generateCollectionObject(collection: CollectionItem): Promise<string | undefined> {
@@ -226,7 +211,7 @@ async function generateServerIndexFile(ctx: FileGenContext) {
 }
 
 async function generateDynamicIndexFile(ctx: FileGenContext) {
-  const { core, codegen, serverOptions, tc } = ctx;
+  const { core, codegen, tc } = ctx;
   // non-absolute paths are generally safer for serverless platforms to scan requested files to include into bundle
   function normalizePath(p: string) {
     return path.relative(process.cwd(), p);
@@ -314,7 +299,7 @@ async function generateDynamicIndexFile(ctx: FileGenContext) {
     ...(hasDynamicCollection ? [`import path from 'node:path';`] : []),
     `import * as Config from '${codegen.formatImportPath(core.configPath)}';`,
     '',
-    `const create = await dynamic<typeof Config, ${tc}>(Config, ${JSON.stringify(partialOptions)}, ${JSON.stringify(serverOptions)});`,
+    `const create = await dynamic<typeof Config, ${tc}>(Config, ${JSON.stringify(partialOptions)});`,
   );
 
   codegen.lines.push(...objects.filter((obj): obj is string => obj !== undefined));

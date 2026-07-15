@@ -423,34 +423,6 @@ function postprocessPlugin(): Plugin {
         lines.push('}');
         return lines.join('\n');
       },
-      serverOptions(options) {
-        options.doc ??= {};
-        options.doc.passthroughs ??= [];
-        options.doc.passthroughs.push('extractedReferences');
-
-        if (
-          this.core
-            .getCollections()
-            .some((collection) => docCollectionOf(collection)?.lastModified === true)
-        ) {
-          options.doc.passthroughs.push('lastModified');
-        }
-      },
-    },
-    doc: {
-      async vfile(file) {
-        if (!this.collection.lastModified) return;
-
-        const { getGitTimestamp } = await import('./plugins/last-modified');
-        const timestamp = await getGitTimestamp(this.filePath, this.collection.cwd);
-        if (!timestamp) return;
-
-        file.data['mdx-export'] ??= [];
-        file.data['mdx-export'].push({
-          name: 'lastModified',
-          value: timestamp,
-        });
-      },
     },
   };
 }

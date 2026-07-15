@@ -16,7 +16,7 @@ const create = server<typeof Config, import("fumadocs-mdx/runtime/types").Intern
       extractedReferences: import("fumadocs-mdx").ExtractedReference[];
     },
   }
-}>({"doc":{"passthroughs":["extractedReferences"]}});
+}>();
 
 export const docs = await create.docLazy("docs", "packages/mdx/test/fixtures/generate-index", {"index.mdx": __fd_glob_0, "folder/test.mdx": __fd_glob_1, }, {"index.mdx": () => import("./generate-index/index.mdx?collection=docs"), "folder/test.mdx": () => import("./generate-index/folder/test.mdx?collection=docs"), });
 
@@ -37,7 +37,7 @@ const create = await dynamic<typeof Config, import("fumadocs-mdx/runtime/types")
       extractedReferences: import("fumadocs-mdx").ExtractedReference[];
     },
   }
-}>(Config, {"environment":"dynamic","root":"","configPath":"packages/mdx/test/fixtures/config.ts","outDir":"packages/mdx/test/fixtures"}, {"doc":{"passthroughs":["extractedReferences"]}});
+}>(Config, {"environment":"dynamic","root":"","configPath":"packages/mdx/test/fixtures/config.ts","outDir":"packages/mdx/test/fixtures"});
 ```
 
 ```ts title="browser.ts"

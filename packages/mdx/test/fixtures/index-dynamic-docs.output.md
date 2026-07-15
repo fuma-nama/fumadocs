@@ -6,7 +6,7 @@ import type * as Config from './config';
 const create = server<typeof Config, import("fumadocs-mdx/runtime/types").InternalTypeConfig & {
   DocData: {
   }
-}>({"doc":{"passthroughs":["extractedReferences"]}});
+}>();
 ```
 
 ```ts title="dynamic.ts"
@@ -19,7 +19,7 @@ import * as Config from './config';
 const create = await dynamic<typeof Config, import("fumadocs-mdx/runtime/types").InternalTypeConfig & {
   DocData: {
   }
-}>(Config, {"environment":"dynamic","root":"","configPath":"packages/mdx/test/fixtures/config.ts","outDir":"packages/mdx/test/fixtures"}, {"doc":{"passthroughs":["extractedReferences"]}});
+}>(Config, {"environment":"dynamic","root":"","configPath":"packages/mdx/test/fixtures/config.ts","outDir":"packages/mdx/test/fixtures"});
 
 export const docs = await create.docs("docs", "packages/mdx/test/fixtures/generate-index-docs", {"meta.json": __fd_glob_0, }, [{ absolutePath: path.resolve("packages/mdx/test/fixtures/generate-index-docs/index.mdx"), info: {"fullPath":"packages/mdx/test/fixtures/generate-index-docs/index.mdx","path":"index.mdx"}, data: {"title":"Hello World"}, hash: "ff5bb77e7944dd47e09718d8190c76b3" }, { absolutePath: path.resolve("packages/mdx/test/fixtures/generate-index-docs/folder/test.mdx"), info: {"fullPath":"packages/mdx/test/fixtures/generate-index-docs/folder/test.mdx","path":"folder/test.mdx"}, data: {"title":"Folder Test"}, hash: "f003f596f68747454370ba42599464fc" }]);
 ```

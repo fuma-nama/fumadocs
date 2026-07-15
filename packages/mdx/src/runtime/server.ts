@@ -63,15 +63,7 @@ export type ServerCreate<Config, TC extends InternalTypeConfig = InternalTypeCon
   typeof server<Config, TC>
 >;
 
-export interface ServerOptions {
-  doc?: {
-    passthroughs?: string[];
-  };
-}
-
-export function server<Config, TC extends InternalTypeConfig>(options: ServerOptions = {}) {
-  const { doc: { passthroughs: docPassthroughs = [] } = {} } = options;
-
+export function server<Config, TC extends InternalTypeConfig>() {
   function fileInfo(file: string, base: string): FileInfo {
     if (file.startsWith('./')) {
       file = file.slice(2);
@@ -91,7 +83,7 @@ export function server<Config, TC extends InternalTypeConfig>(options: ServerOpt
       _exports: entry as unknown as Record<string, unknown>,
     };
 
-    for (const key of docPassthroughs) {
+    for (const key of ['lastModified', 'extractedReferences']) {
       // @ts-expect-error -- handle passthrough properties
       data[key] = entry[key];
     }

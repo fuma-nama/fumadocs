@@ -95,17 +95,10 @@ type LazyGlobEntries = Record<string, () => Promise<unknown>>;
 
 interface BaseArgs {
   base: string;
-
-  /**
-   * properties of compiled documents to expose on entries, statically derived from `postprocess` options
-   */
-  passthroughs?: string[];
 }
 
-function create({ passthroughs }: BaseArgs) {
-  return server<Record<string, never>, { DocData: Record<string, never> }>({
-    doc: { passthroughs },
-  });
+function create() {
+  return server<Record<string, never>, { DocData: Record<string, never> }>();
 }
 
 function normalize(file: string): string {
@@ -124,7 +117,7 @@ function accessor<Entry extends { info: { path: string } }>(entries: Entry[]) {
 }
 
 export async function doc(args: BaseArgs & { entries: GlobEntries }): Promise<MacroDocCollection> {
-  const entries = (await create(args).doc('doc', args.base, args.entries)) as MacroDocEntry<
+  const entries = (await create().doc('doc', args.base, args.entries)) as MacroDocEntry<
     unknown,
     unknown
   >[];
@@ -140,7 +133,7 @@ export async function doc(args: BaseArgs & { entries: GlobEntries }): Promise<Ma
 export async function docAsync(
   args: BaseArgs & { head: GlobEntries; body: LazyGlobEntries },
 ): Promise<MacroAsyncDocCollection> {
-  const entries = (await create(args).docLazy(
+  const entries = (await create().docLazy(
     'doc',
     args.base,
     args.head,
@@ -158,7 +151,7 @@ export async function docAsync(
 export async function meta(
   args: BaseArgs & { entries: GlobEntries },
 ): Promise<MacroMetaCollection> {
-  const entries = (await create(args).meta('meta', args.base, args.entries)) as MacroMetaEntry[];
+  const entries = (await create().meta('meta', args.base, args.entries)) as MacroMetaEntry[];
 
   return accessor(entries);
 }
@@ -166,7 +159,7 @@ export async function meta(
 export async function docs(
   args: BaseArgs & { entries: GlobEntries; meta: GlobEntries },
 ): Promise<MacroDocsCollection> {
-  const instance = create(args);
+  const instance = create();
   const [docEntries, metaEntries] = await Promise.all([
     instance.doc('doc', args.base, args.entries) as Promise<MacroDocEntry<PageData>[]>,
     instance.meta('meta', args.base, args.meta) as Promise<MacroMetaEntry<MetaData>[]>,
@@ -188,7 +181,7 @@ export async function docs(
 export async function docsAsync(
   args: BaseArgs & { head: GlobEntries; body: LazyGlobEntries; meta: GlobEntries },
 ): Promise<MacroAsyncDocsCollection> {
-  const instance = create(args);
+  const instance = create();
   const [docEntries, metaEntries] = await Promise.all([
     instance.docLazy('doc', args.base, args.head, args.body) as Promise<
       MacroAsyncDocEntry<PageData>[]

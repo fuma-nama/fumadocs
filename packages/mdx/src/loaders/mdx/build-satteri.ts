@@ -3,6 +3,7 @@ import type { Core } from '@/core';
 import type { BuildEnvironment, DocCollectionItem, LoadedConfig } from '@/config/build';
 import type { BuildMDXOptions, CompiledMDXProperties } from '@/loaders/mdx/build';
 import type { PostprocessOptions } from '@/loaders/mdx/remark-postprocess';
+import { resolveLastModified } from '@/loaders/mdx/last-modified';
 import type { MdxCompileOptions, Data, MdastPluginInput, MdastPluginDefinition } from 'satteri';
 import type { SatteriPresetOptions } from '@fumadocs/satteri/preset';
 import type { ExtraPluginHooks } from '@fumadocs/satteri/compile';
@@ -44,7 +45,9 @@ export async function buildSatteriMDX(
       ),
     );
   }
-  mdastPlugins.push(postprocessPlugin(postprocess));
+  mdastPlugins.push(
+    postprocessPlugin(postprocess, await resolveLastModified(collection, filePath)),
+  );
 
   const result = await compileMdx({
     source,
@@ -69,9 +72,10 @@ declare module 'satteri' {
   }
 }
 
-function postprocessPlugin({
-  extractLinkReferences = false,
-}: PostprocessOptions): MdastPluginDefinition & ExtraPluginHooks {
+function postprocessPlugin(
+  { extractLinkReferences = false }: PostprocessOptions,
+  lastModified: Date | undefined,
+): MdastPluginDefinition & ExtraPluginHooks {
   return {
     name: 'remark-postprocess',
     heading(node, ctx) {
@@ -90,6 +94,10 @@ function postprocessPlugin({
       if (extractLinkReferences) {
         result.data.extractedReferences ??= [];
         result.code += `\nexport const extractedReferences = ${JSON.stringify(result.data.extractedReferences)};`;
+      }
+
+      if (lastModified) {
+        result.code += `\nexport const lastModified = new Date(${lastModified.getTime()});`;
       }
     },
   };

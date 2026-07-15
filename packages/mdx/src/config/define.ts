@@ -3,6 +3,7 @@ import type { MDXPresetOptions } from '@/config/preset';
 import type { ProcessorOptions } from '@mdx-js/mdx';
 import { metaSchema, pageSchema } from 'fumadocs-core/source/schema';
 import type { PostprocessOptions } from '@/loaders/mdx/remark-postprocess';
+import type { LastModifiedFn } from '@/loaders/mdx/last-modified';
 import type { PluginOption } from '@/core';
 import type { SatteriPresetOptions } from '@fumadocs/satteri/preset';
 import type { BuildEnvironment } from './build';
@@ -35,14 +36,13 @@ export interface DocCollectionBase<
   schema?: CollectionSchema<Schema, { path: string; source: string }>;
 
   /**
-   * Expose the last modified date of each document, obtained from Git.
+   * Expose the last modified date of each document.
    *
-   * Requires `git` to be installed. If you are using Vercel, please set the `VERCEL_DEEP_CLONE`
-   * environment variable to `true`.
-   *
-   * In macros, this must be statically analyzable (a boolean literal).
+   * - `true`: obtained from Git. Requires `git` to be installed. If you are using Vercel, please
+   *   set the `VERCEL_DEEP_CLONE` environment variable to `true`.
+   * - A function: return the last modified time for a given file path.
    */
-  lastModified?: boolean;
+  lastModified?: boolean | LastModifiedFn;
 }
 
 export interface DocCollectionMdx<

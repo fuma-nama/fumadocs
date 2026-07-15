@@ -101,35 +101,21 @@ export const docs = defineDocs({
     ).resolves.toBeNull();
   });
 
-  test('lastModified adds a passthrough', async () => {
+  test('options that do not shape the emitted imports may be dynamic', async () => {
     const result = await transformMacroModule({
       code: `import { defineDocs } from 'fumadocs-mdx/macro';
+const enabled = process.env.CI === '1';
 export const docs = defineDocs({
   dir: 'test/fixtures/generate-index-docs',
-  docs: { lastModified: true },
-});
-export const plain = defineDocs({ dir: 'test/fixtures/generate-index-docs' });`,
+  docs: { lastModified: enabled, postprocess: { extractLinkReferences: enabled } },
+});`,
       file: sourceFile,
       root,
       target: 'import',
     });
 
-    expect(result!.code).toContain('passthroughs: ["lastModified"]');
-    // only the collection that opted in
-    expect(result!.code.match(/passthroughs/g)).toHaveLength(1);
-  });
-
-  test('reject non-static lastModified', async () => {
-    await expect(() =>
-      transformMacroModule({
-        code: `import { defineDocs } from 'fumadocs-mdx/macro';
-const enabled = process.env.CI === '1';
-export const docs = defineDocs({ docs: { lastModified: enabled } });`,
-        file: sourceFile,
-        root,
-        target: 'vite',
-      }),
-    ).rejects.toThrowError(/`lastModified` option of a macro must be a boolean literal/);
+    // they are read off the collection at compile time, not baked into the emitted call
+    expect(result!.code).not.toContain('passthroughs');
   });
 
   test('reject non-static options', async () => {
@@ -559,7 +545,7 @@ describe('types', () => {
       { title: string } | undefined
     >();
 
-    // async doc collection exposes lazy entries, with `postprocess` passthroughs typed
+    // async doc collection exposes lazy entries, with the extra exports typed
     expectTypeOf<typeof fixture.blog>().not.toBeNever();
     const entry = {} as NonNullable<ReturnType<typeof fixture.blog.get>>;
     expectTypeOf(entry.load).returns.resolves.toMatchTypeOf<{
