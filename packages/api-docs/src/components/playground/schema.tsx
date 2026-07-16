@@ -1,4 +1,3 @@
-import { validate, type Schema } from '@cfworker/json-schema';
 import { createContext, ReactNode, use, useMemo } from 'react';
 import type { ParsedSchema } from '@/schema';
 import { mergeAllOf } from '@/schema/merge';
@@ -7,16 +6,10 @@ import { stringifyFieldKey } from '@fumari/stf/lib/utils';
 import { sample } from '@/schema/sample';
 import { FormatFlags, schemaToString } from '@/schema/to-string';
 import { dereferenceShallow } from '@/schema/dereference';
-import { getRaw } from '@scalar/json-magic/magic-proxy';
-import { isPlainObject } from '@/utils/is-plain-object';
+import { matchesSchema, typeMatches } from '@/schema/match';
 
 interface SchemaContextType extends SchemaScope {
   docRoot: Exclude<ParsedSchema, boolean>;
-}
-
-function matchesSchema(schema: object, value: unknown): boolean {
-  if (value === undefined) return false;
-  return validate(value, schema as Schema, '2020-12').valid;
 }
 
 export interface SchemaScope {
@@ -44,27 +37,6 @@ export interface FieldInfo {
 }
 
 const SchemaContext = createContext<SchemaContextType | undefined>(undefined);
-
-/**
- * Deeply unwrap magic proxies (`@scalar/json-magic`) into raw values.
- *
- * Merged outputs of `dereferenceShallow` are plain objects mixing proxy children at any depth,
- * `getRaw` alone only unwraps proxies themselves.
- */
-function toRawSchema(value: unknown): unknown {
-  const raw = getRaw(value);
-  // raw values never contain proxies, no need to go deeper
-  if (raw !== value) return raw;
-
-  if (Array.isArray(value)) return value.map(toRawSchema);
-  if (isPlainObject(value)) {
-    const out: Record<string, unknown> = {};
-    for (const key in value) out[key] = toRawSchema(value[key]);
-    return out;
-  }
-
-  return value;
-}
 
 export const anyFields = {
   type: ['string', 'number', 'boolean', 'array', 'object'],
@@ -107,7 +79,6 @@ export function useFieldInfo(
   schema: Exclude<ParsedSchema, boolean>;
   updateInfo: (value: Partial<FieldInfo>) => void;
 } {
-  const { docRoot: doc } = useSchemaContext();
   const engine = useDataEngine();
   const { generateDefault } = useSchemaUtils();
   const fieldData = useNamespace({
@@ -117,17 +88,12 @@ export function useFieldInfo(
       const out: FieldInfo = {
         oneOf: -1,
       };
-      // Validators walk every property (including the virtual `$ref-value` of magic proxies,
-      // which recurses infinitely on circular refs), always give them raw schemas.
-      const rawDoc = getRaw(doc);
       const union = getUnion(schema);
       if (union) {
         const [members, field] = union;
 
         out.oneOf = members.findIndex(
-          (item) =>
-            typeof item === 'object' &&
-            matchesSchema({ ...rawDoc, ...(toRawSchema(item) as object) }, value),
+          (item) => typeof item === 'object' && matchesSchema(item, value),
         );
         if (out.oneOf === -1) out.oneOf = 0;
         out.unionField = field;
@@ -136,10 +102,7 @@ export function useFieldInfo(
       if (Array.isArray(schema.type)) {
         const types = schema.type;
 
-        out.selectedType =
-          types.find((type) => {
-            return matchesSchema({ ...rawDoc, ...(toRawSchema(schema) as object), type }, value);
-          }) ?? types[0];
+        out.selectedType = types.find((type) => typeMatches(value, type)) ?? types[0];
       }
 
       return out;

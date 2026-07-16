@@ -1,10 +1,13 @@
 import { loadConfig } from '@/config/load-from-file';
+import { buildConfig as buildEmptyConfig } from '@/config/build';
 import type { Core } from '@/core';
 import fs from 'node:fs/promises';
 
 export interface ConfigLoader {
   getCore(): Promise<Core>;
 }
+
+type Hash = 'static' | 'missing' | number;
 
 export function createStandaloneConfigLoader({
   core,
@@ -23,19 +26,23 @@ export function createStandaloneConfigLoader({
 }): ConfigLoader {
   let prev:
     | {
-        hash: string;
+        hash: Hash;
         init: Promise<void>;
       }
     | undefined;
 
-  async function getConfigHash(): Promise<string> {
+  async function getConfigHash(): Promise<Hash> {
     if (mode === 'production') return 'static';
 
-    const stats = await fs.stat(core.getOptions().configPath).catch(() => {
-      throw new Error('Cannot find config file');
-    });
+    const stats = await fs.stat(core.configPath).catch(() => undefined);
+    return stats ? stats.mtime.getTime() : 'missing';
+  }
 
-    return stats.mtime.getTime().toString();
+  async function load(hash: Hash) {
+    // the config file is optional
+    if (hash === 'missing') return buildEmptyConfig({}, process.cwd());
+
+    return await loadConfig(core, buildConfig);
   }
 
   return {
@@ -45,7 +52,7 @@ export function createStandaloneConfigLoader({
         prev = {
           hash,
           init: core.init({
-            config: loadConfig(core, buildConfig),
+            config: load(hash),
           }),
         };
       }

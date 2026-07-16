@@ -5,6 +5,7 @@ import { createProcessor, type ProcessorOptions } from '@mdx-js/mdx';
 import { VFile } from 'vfile';
 import { remarkInclude } from './remark-include';
 import { type PostprocessOptions, remarkPostprocess } from './remark-postprocess';
+import { resolveLastModified } from './last-modified';
 import type { BuildMDXOptions, CompilerOptions } from './build';
 
 type Processor = ReturnType<typeof createProcessor>;
@@ -81,6 +82,14 @@ export async function buildJSMDX(
 
   if (collection) {
     vfile = await core.transformVFile({ collection, filePath, source }, vfile);
+  }
+
+  // the processor is cached per collection, so this per-file value rides the vfile instead.
+  // set after `transformVFile`, which may return a different vfile.
+  const lastModified = await resolveLastModified(collection, filePath);
+  if (lastModified) {
+    vfile.data['mdx-export'] ??= [];
+    vfile.data['mdx-export'].push({ name: 'lastModified', value: lastModified });
   }
 
   const out = await getProcessor(filePath.endsWith('.mdx') ? 'mdx' : 'md').process(vfile);

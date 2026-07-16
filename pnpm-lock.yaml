@@ -1888,9 +1888,6 @@ importers:
       '@base-ui/react':
         specifier: ^1.6.0
         version: 1.6.0(@date-fns/tz@1.5.0)(@types/react@19.2.17)(date-fns@4.4.0)(react-dom@19.2.7(react@19.2.7))(react@19.2.7)
-      '@cfworker/json-schema':
-        specifier: ^4.1.1
-        version: 4.1.1
       '@fuma-translate/react':
         specifier: ^1.0.2
         version: 1.0.2(@types/react@19.2.17)(react-dom@19.2.7(react@19.2.7))(react@19.2.7)
@@ -2733,6 +2730,9 @@ importers:
       github-slugger:
         specifier: ^2.0.0
         version: 2.0.0
+      magic-string:
+        specifier: ^0.30.21
+        version: 0.30.21
       mdast-util-mdx:
         specifier: ^3.0.0
         version: 3.0.0
@@ -2763,6 +2763,9 @@ importers:
       yaml:
         specifier: ^2.9.0
         version: 2.9.0
+      yuku-analyzer:
+        specifier: ^0.6.3
+        version: 0.6.3
       zod:
         specifier: ^4.4.3
         version: 4.4.3
@@ -9683,6 +9686,67 @@ packages:
   '@xtuc/long@4.2.2':
     resolution: {integrity: sha512-NuHqBY1PB/D8xU6s/thBgOAiAP7HOYDQ32+BFZILJ8ivkUkAHQnWfn6WhL79Owj1qmUnoN/YPhktdIoucipkAQ==}
 
+  '@yuku-analyzer/binding-darwin-arm64@0.6.3':
+    resolution: {integrity: sha512-1PI1tdfk0ozQ0tbEi740fYMz/3axKn+jR2nK2qBXdYZiyQKsPYW7lDockNbUY9Z5E3+nwEFjX6Pp19X4VIgrkQ==}
+    cpu: [arm64]
+    os: [darwin]
+
+  '@yuku-analyzer/binding-darwin-x64@0.6.3':
+    resolution: {integrity: sha512-VyC+KH0gwPzXjtysXbuBop+Qn107800pQhp8YzDElnBciu/X88Uw3xEJrCJtcyoV85sPpq+g1zvAgHWHwE8PlQ==}
+    cpu: [x64]
+    os: [darwin]
+
+  '@yuku-analyzer/binding-freebsd-x64@0.6.3':
+    resolution: {integrity: sha512-T5HRWQiy0e5bHaI01xn3cguopn0YCvNV4rast6p+o4ZjORLguCwM7i3GujOUXMzwQbQ/GFxI/ToDwYfI2IFFgg==}
+    cpu: [x64]
+    os: [freebsd]
+
+  '@yuku-analyzer/binding-linux-arm-gnu@0.6.3':
+    resolution: {integrity: sha512-QVMkLA7vqtADSl9sKpX0oDO9X9BmVO6rzlxwU2mJ8vNoYOucOfxOVj1NLW4I3p6m4TW2lIX6zW7kT81HVRmQtw==}
+    cpu: [arm]
+    os: [linux]
+    libc: [glibc]
+
+  '@yuku-analyzer/binding-linux-arm-musl@0.6.3':
+    resolution: {integrity: sha512-MdgimxnvfC4uAMDs0UsQW8wGWi6im+cptlcdQi3l+FS5ouf0tmdIo6O5HoteM6zazUtc+vBEr9g1A4J5eFFKNw==}
+    cpu: [arm]
+    os: [linux]
+    libc: [musl]
+
+  '@yuku-analyzer/binding-linux-arm64-gnu@0.6.3':
+    resolution: {integrity: sha512-dRYQU8024UvbDnfU3yNDl4NAjLptjkog+Fbd7TsFvQKc9P7rMocC0CLWvsbp6GVu6mo1yATb7GQuSA0V/MBk7g==}
+    cpu: [arm64]
+    os: [linux]
+    libc: [glibc]
+
+  '@yuku-analyzer/binding-linux-arm64-musl@0.6.3':
+    resolution: {integrity: sha512-RNj/MBlBYVamdO+Zexxj+tYQiRBPHUMHOLNpCXJ2sraVvKc+aT+HzgWwanG1TDL7RR1hfaDxpsmJpLgtDw65nQ==}
+    cpu: [arm64]
+    os: [linux]
+    libc: [musl]
+
+  '@yuku-analyzer/binding-linux-x64-gnu@0.6.3':
+    resolution: {integrity: sha512-gUHi0GkcJOfGc+RHkqyTSpjyLRNIm0cZUSEOVdH309iXDEMqD9E0Fz3kUoxepIrBwkHDAjF3xYrp0hEGogfkUw==}
+    cpu: [x64]
+    os: [linux]
+    libc: [glibc]
+
+  '@yuku-analyzer/binding-linux-x64-musl@0.6.3':
+    resolution: {integrity: sha512-7xIqcdYwyf6mSCJid9C0ZMxd6KdN3S72Ywnws55Wz3O7XWvVscZj+51DHAeqKklsD0gXey4evLQkaDtKxd8jBQ==}
+    cpu: [x64]
+    os: [linux]
+    libc: [musl]
+
+  '@yuku-analyzer/binding-win32-arm64@0.6.3':
+    resolution: {integrity: sha512-tyU9RPF0reQ4Lu2JKDhsSZZIqSHJZdO3QD7vfcJQDhZAU2JBvfubpVejvf3uvAS+/2c0Ajfgj/K1JpDyAqVbQA==}
+    cpu: [arm64]
+    os: [win32]
+
+  '@yuku-analyzer/binding-win32-x64@0.6.3':
+    resolution: {integrity: sha512-84vgw5+SNDYhTJYFkLkgobYM++1IbN8fPY4QIRVSBuLZftHvuaKQnrjQTQkXvmPc0fiebY8ITnxNjHydDrItDA==}
+    cpu: [x64]
+    os: [win32]
+
   '@yuku-codegen/binding-darwin-arm64@0.5.48':
     resolution: {integrity: sha512-yo96Oef12WzqnphInfz/eexVse3+kWgfGS5g2S3rFS3dcGn1ENW9xLFDZUP9rh+yP76DOq38wBoFi1+I9+6qBg==}
     cpu: [arm64]
@@ -15714,6 +15778,9 @@ packages:
     resolution: {integrity: sha512-CzhO+pFNo8ajLM2d2IW/R93ipy99LWjtwblvC1RsoSUMZgyLbYFr221TnSNT7GjGdYui6P459mw9JH/g/zW2ug==}
     engines: {node: '>=18'}
 
+  yuku-analyzer@0.6.3:
+    resolution: {integrity: sha512-RQ02dPtOa5d2AA3Np45EWD3EJUwZDruCrMMulPwUT/9GK1P7aKAhjaxG4Jv/1qqzMUIt0RUe3Dn2RR6d7+qTrA==}
+
   yuku-ast@0.1.7:
     resolution: {integrity: sha512-2RiMEWv500TixY5rJy6OZd4fSy9WYZKWh6gGbIJ7y7vAGcuCugWOWwOLGaQcRZrXcPUfqtLtvpaJ3SdXtWlhKA==}
 
@@ -17024,7 +17091,8 @@ snapshots:
     dependencies:
       fontkitten: 1.0.3
 
-  '@cfworker/json-schema@4.1.1': {}
+  '@cfworker/json-schema@4.1.1':
+    optional: true
 
   '@chevrotain/types@11.1.2': {}
 
@@ -22094,6 +22162,39 @@ snapshots:
   '@xtuc/ieee754@1.2.0': {}
 
   '@xtuc/long@4.2.2': {}
+
+  '@yuku-analyzer/binding-darwin-arm64@0.6.3':
+    optional: true
+
+  '@yuku-analyzer/binding-darwin-x64@0.6.3':
+    optional: true
+
+  '@yuku-analyzer/binding-freebsd-x64@0.6.3':
+    optional: true
+
+  '@yuku-analyzer/binding-linux-arm-gnu@0.6.3':
+    optional: true
+
+  '@yuku-analyzer/binding-linux-arm-musl@0.6.3':
+    optional: true
+
+  '@yuku-analyzer/binding-linux-arm64-gnu@0.6.3':
+    optional: true
+
+  '@yuku-analyzer/binding-linux-arm64-musl@0.6.3':
+    optional: true
+
+  '@yuku-analyzer/binding-linux-x64-gnu@0.6.3':
+    optional: true
+
+  '@yuku-analyzer/binding-linux-x64-musl@0.6.3':
+    optional: true
+
+  '@yuku-analyzer/binding-win32-arm64@0.6.3':
+    optional: true
+
+  '@yuku-analyzer/binding-win32-x64@0.6.3':
+    optional: true
 
   '@yuku-codegen/binding-darwin-arm64@0.5.48':
     optional: true
@@ -29198,6 +29299,22 @@ snapshots:
   yoctocolors-cjs@2.1.3: {}
 
   yoctocolors@2.1.2: {}
+
+  yuku-analyzer@0.6.3:
+    dependencies:
+      '@yuku-toolchain/types': 0.5.43
+    optionalDependencies:
+      '@yuku-analyzer/binding-darwin-arm64': 0.6.3
+      '@yuku-analyzer/binding-darwin-x64': 0.6.3
+      '@yuku-analyzer/binding-freebsd-x64': 0.6.3
+      '@yuku-analyzer/binding-linux-arm-gnu': 0.6.3
+      '@yuku-analyzer/binding-linux-arm-musl': 0.6.3
+      '@yuku-analyzer/binding-linux-arm64-gnu': 0.6.3
+      '@yuku-analyzer/binding-linux-arm64-musl': 0.6.3
+      '@yuku-analyzer/binding-linux-x64-gnu': 0.6.3
+      '@yuku-analyzer/binding-linux-x64-musl': 0.6.3
+      '@yuku-analyzer/binding-win32-arm64': 0.6.3
+      '@yuku-analyzer/binding-win32-x64': 0.6.3
 
   yuku-ast@0.1.7:
     dependencies:

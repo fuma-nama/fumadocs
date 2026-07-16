@@ -21,6 +21,7 @@ import { AnimatePresence, motion } from 'motion/react';
 import { RemoveScroll } from 'react-remove-scroll';
 import { useFluxLayout } from '..';
 import { XIcon, SidebarIcon } from 'lucide-react';
+import { useTranslations } from '@fuma-translate/react';
 
 const MotionSidebarItem = motion.create(Base.SidebarItem);
 const MotionSidebarFolderTrigger = motion.create(Base.SidebarFolderTrigger);
@@ -88,8 +89,21 @@ export function Sidebar({ footer, banner, components, ...rest }: SidebarProps) {
 
 export function SidebarTrigger(props: ComponentProps<'button'>) {
   const { open, setOpen } = useSidebar();
+  const t = useTranslations({ note: 'sidebar' });
+
   return (
-    <button onClick={() => setOpen((prev) => !prev)} {...props}>
+    <button
+      type="button"
+      aria-label={
+        open
+          ? t('Close Sidebar', { note: 'aria-label' })
+          : t('Open Sidebar', { note: 'aria-label' })
+      }
+      aria-expanded={open}
+      aria-controls="nd-sidebar"
+      onClick={() => setOpen((prev) => !prev)}
+      {...props}
+    >
       <AnimatePresence mode="wait">
         <motion.span
           key={open ? 'open' : 'closed'}

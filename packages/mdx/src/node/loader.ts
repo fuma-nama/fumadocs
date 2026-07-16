@@ -1,4 +1,4 @@
-import { _Defaults, createCore } from '@/core';
+import { createCore } from '@/core';
 import { createMdxLoader } from '@/loaders/mdx';
 import { toNode } from '@/loaders/adapter';
 import { createStandaloneConfigLoader } from '@/loaders/config';
@@ -8,8 +8,6 @@ import { mdxLoaderGlob, metaLoaderGlob } from '@/loaders';
 
 const core = createCore({
   environment: 'node',
-  configPath: _Defaults.configPath,
-  outDir: _Defaults.outDir,
 });
 
 const configLoader = createStandaloneConfigLoader({

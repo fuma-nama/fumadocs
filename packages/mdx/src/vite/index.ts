@@ -3,14 +3,57 @@ import { buildConfig } from '@/config/build';
 import { createMdxLoader } from '@/loaders/mdx';
 import { toVite } from '@/loaders/adapter';
 import type { FSWatcher } from 'chokidar';
-import { _Defaults, Core, createCore } from '@/core';
+import { Core, CoreOptions, createCore } from '@/core';
 import { createIntegratedConfigLoader } from '@/loaders/config';
 import { createMetaLoader } from '@/loaders/meta';
 import indexFile, { IndexFilePluginOptions } from '@/plugins/index-file';
 import path from 'node:path';
+import fs from 'node:fs/promises';
 import { mdxLoaderGlob, metaLoaderGlob } from '@/loaders';
+import type { MacroEvaluator } from '@/macro/eval';
+import { MacroModuleId, resolveMacroOptions, type MacroPluginOption } from '@/macro/options';
 
-export interface PluginOptions {
+function createMacroEvaluator(root: string): MacroEvaluator {
+  return async ({ entry, transform }) => {
+    const inputs = new Set<string>();
+    inputs.add(entry);
+
+    const { dependencies } = await runnerImport(entry, {
+      root,
+      plugins: [
+        {
+          name: 'fumadocs-mdx:macro-config',
+          transform: {
+            order: 'pre',
+            async handler(code, id) {
+              const [file] = id.split('?', 2);
+              inputs.add(file);
+              const result = await transform(code, file);
+              if (result === null) return;
+
+              return { code: result };
+            },
+          },
+        },
+      ],
+    });
+    for (const file of dependencies) inputs.add(path.resolve(root, file));
+
+    return {
+      inputs: Array.from(inputs),
+    };
+  };
+}
+
+export interface PluginOptions extends Pick<CoreOptions, 'configPath' | 'outDir' | 'plugins'> {
+  /**
+   * Configure the macro API (`fumadocs-mdx/macro`), or `false` to disable it.
+   *
+   * `macro.include` is passed to the
+   * [`id` filter](https://vite.dev/guide/api-plugin#hook-filters) of the transform hook.
+   */
+  macro?: MacroPluginOption;
+
   /**
    * Generate index files for accessing content.
    *
@@ -19,52 +62,50 @@ export interface PluginOptions {
   index?: boolean | IndexFilePluginOptions;
 
   /**
-   * @defaultValue source.config.ts
-   */
-  configPath?: string;
-
-  /**
    * Update Vite config to fix module resolution of Fumadocs
    *
    * @defaultValue true
    */
   updateViteConfig?: boolean;
-
-  /**
-   * Output directory of generated files
-   *
-   * @defaultValue '.source'
-   */
-  outDir?: string;
 }
 
 export default function mdx(
   forcedConfig?: Record<string, unknown> | Promise<Record<string, unknown>> | undefined,
   pluginOptions: PluginOptions = {},
 ): Plugin[] {
-  let root: string;
+  const { updateViteConfig = true } = pluginOptions;
   let core: Core;
-  let options: Required<PluginOptions>;
   const metaPlugin: Plugin = {
     name: 'fumadocs-mdx:meta',
   };
   const mdxPlugin: Plugin = {
     name: 'fumadocs-mdx:mdx',
   };
+  const macroPlugin: Plugin = {
+    name: 'fumadocs-mdx:macro',
+  };
 
   return [
     {
       name: 'fumadocs-mdx',
-      async config(config) {
-        root = config.root ?? process.cwd();
-        options = applyDefaults(root, pluginOptions);
-        core = createViteCore(options);
+      async config(config, env) {
+        core = createViteCore(config.root ?? process.cwd(), pluginOptions);
+        const macroOptions = resolveMacroOptions(pluginOptions.macro);
+        if (macroOptions) {
+          const { MacroCollector } = await import('@/macro/eval');
+
+          core.macro = new MacroCollector({
+            root: core.root,
+            outDir: core.outDir,
+            isDev: env.command === 'serve',
+            evaluator: createMacroEvaluator(core.root),
+          });
+        }
+
         await core.init({
           config: buildConfig(
-            forcedConfig
-              ? await forcedConfig
-              : (await runnerImport<Record<string, unknown>>(options.configPath)).module,
-            root,
+            forcedConfig ? await forcedConfig : await importConfigFile(core.configPath),
+            core.root,
           ),
         });
 
@@ -85,7 +126,7 @@ export default function mdx(
             // The format of `value` becomes JavaScript, which will break the MDX compiler.
             // We have to ignore them.
             if (id.includes('virtual:vite-rsc')) return null;
-            if (!forcedConfig) this.addWatchFile(options.configPath);
+            if (!forcedConfig) this.addWatchFile(core.configPath);
             return mdxLoader.transform.call(this, code, id);
           },
         };
@@ -93,16 +134,44 @@ export default function mdx(
           filter: { id: metaLoaderGlob },
           order: 'pre',
           handler(code, id) {
-            if (!forcedConfig) this.addWatchFile(options.configPath);
+            if (!forcedConfig) this.addWatchFile(core.configPath);
             return metaLoader.transform.call(this, code, id);
           },
         };
 
+        if (macroOptions) {
+          const root = core.root;
+
+          macroPlugin.transform = {
+            order: 'pre',
+            filter: {
+              id: { include: macroOptions.include, exclude: macroOptions.exclude },
+              code: MacroModuleId,
+            },
+            async handler(code, id) {
+              const [file] = id.split('?', 2);
+              const { transformMacroModule } = await import('@/macro/transform');
+              const result = await transformMacroModule({
+                code,
+                file,
+                root,
+                target: 'vite',
+              });
+              if (!result) return;
+
+              return {
+                code: result.code,
+                map: result.map as never,
+              };
+            },
+          };
+        }
+
         if ('_fumadocs_skipViteConfig' in config && config._fumadocs_skipViteConfig) return;
-        if (!options.updateViteConfig) return;
+        if (!updateViteConfig) return;
 
         const { getConfig } = await import('@fumadocs/vite');
-        return getConfig({ root });
+        return getConfig({ root: core.root });
       },
       async buildStart() {
         await core.emit({ write: true });
@@ -114,12 +183,9 @@ export default function mdx(
 
         if (!forcedConfig) {
           server.watcher.on('change', async (file) => {
-            if (path.resolve(file) === options.configPath) {
+            if (path.resolve(file) === core.configPath) {
               await core.init({
-                config: buildConfig(
-                  (await runnerImport<Record<string, unknown>>(options.configPath)).module,
-                  root,
-                ),
+                config: buildConfig(await importConfigFile(core.configPath), core.root),
               });
 
               await core.emit({ write: true });
@@ -128,25 +194,35 @@ export default function mdx(
         }
       },
     },
+    macroPlugin,
     mdxPlugin,
     metaPlugin,
   ];
 }
 
+async function importConfigFile(configPath: string): Promise<Record<string, unknown>> {
+  const exists = await fs.access(configPath).then(
+    () => true,
+    () => false,
+  );
+  if (!exists) return {};
+  return (await runnerImport<Record<string, unknown>>(configPath)).module;
+}
+
 export async function postInstall(pluginOptions: PluginOptions = {}) {
-  const { loadConfig } = await import('@/config/load-from-file');
-  const core = createViteCore(applyDefaults(process.cwd(), pluginOptions));
+  const core = createViteCore(process.cwd(), pluginOptions);
   await core.init({
-    config: loadConfig(core, true),
+    config: buildConfig(await importConfigFile(core.configPath), process.cwd()),
   });
   await core.emit({ write: true });
 }
 
-function createViteCore({ index, configPath, outDir }: Required<PluginOptions>) {
+function createViteCore(root: string, { index = true, configPath, outDir }: PluginOptions) {
   if (index === true) index = {};
 
   return createCore({
     environment: 'vite',
+    root,
     configPath,
     outDir,
     plugins: [
@@ -157,13 +233,4 @@ function createViteCore({ index, configPath, outDir }: Required<PluginOptions>) 
         }),
     ],
   });
-}
-
-function applyDefaults(root: string, options: PluginOptions): Required<PluginOptions> {
-  return {
-    updateViteConfig: options.updateViteConfig ?? true,
-    index: options.index ?? true,
-    configPath: path.resolve(root, options.configPath ?? _Defaults.configPath),
-    outDir: path.resolve(root, options.outDir ?? _Defaults.outDir),
-  };
 }

@@ -137,15 +137,22 @@ function TextResult({
   charset?: string;
 }) {
   const code = useMemo(() => {
+    let out: string;
     if (charset) {
       try {
-        return new TextDecoder(charset).decode(data.body);
-      } catch {
-        /* invalid label — fall through */
-      }
+        out = new TextDecoder(charset).decode(data.body);
+      } catch {}
     }
-    return new TextDecoder('utf-8').decode(data.body);
-  }, [charset, data.body]);
+
+    out ??= new TextDecoder('utf-8').decode(data.body);
+    if (lang === 'json') {
+      try {
+        out = JSON.stringify(JSON.parse(out), null, 2);
+      } catch {}
+    }
+
+    return out;
+  }, [lang, charset, data.body]);
 
   return <ClientCodeBlock lang={code.length > 5000 ? 'text' : lang} code={code} />;
 }

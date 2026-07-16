@@ -17,7 +17,9 @@ import { useTranslations } from '@fuma-translate/react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { mergeRefs } from '@/utils/merge-refs';
 
-export interface CodeBlockProps extends ComponentProps<'figure'> {
+export interface CodeBlockProps extends Omit<ComponentProps<'figure'>, 'title'> {
+  title?: ReactNode;
+
   /**
    * Icon of code block
    *

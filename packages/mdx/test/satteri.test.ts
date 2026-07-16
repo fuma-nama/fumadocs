@@ -170,3 +170,37 @@ test('buildMDX with satteri compiler resolves includes', async () => {
   expect(dependencies).toContain(path.join(baseDir, 'fixtures/remark-include/test.mdx'));
   expect(dependencies).toContain(path.join(baseDir, 'fixtures/remark-include/code.ts'));
 });
+
+test('satteri compiler exports lastModified', async () => {
+  const core = createCore({
+    configPath: 'source.config.ts',
+    environment: 'test',
+    outDir: '.source',
+  });
+
+  const config = buildConfig(
+    {
+      docs: defineCollections({
+        type: 'doc',
+        compiler: 'satteri',
+        dir: baseDir,
+        // a custom resolver keeps the test independent of git history
+        lastModified: async () => new Date('2025-11-18T00:00:00.000Z'),
+      }),
+    },
+    process.cwd(),
+  );
+  await core.init({ config });
+
+  const compiled = await buildMDX(core, config.collections.get('docs') as DocCollectionItem, {
+    filePath: path.join(baseDir, 'satteri-fixture.mdx'),
+    source: '# Hello',
+    frontmatter: {},
+    environment: 'bundler',
+    isDevelopment: false,
+  });
+
+  expect(compiled.code).toContain(
+    `export const lastModified = new Date(${new Date('2025-11-18T00:00:00.000Z').getTime()});`,
+  );
+});

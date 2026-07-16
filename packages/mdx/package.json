@@ -1,6 +1,6 @@
 {
   "name": "fumadocs-mdx",
-  "version": "15.1.1",
+  "version": "15.2.0",
   "description": "The built-in source for Fumadocs",
   "keywords": [
     "Docs",
@@ -26,6 +26,7 @@
     "./bin": "./dist/bin.js",
     "./bun": "./dist/bun/index.js",
     "./config": "./dist/config/index.js",
+    "./macro": "./dist/macro/index.js",
     "./next": "./dist/next/index.js",
     "./node": "./dist/node/index.js",
     "./node/_loader": "./dist/node/_loader.js",
@@ -36,9 +37,11 @@
     "./rolldown": "./dist/rolldown/index.js",
     "./runtime/browser": "./dist/runtime/browser.js",
     "./runtime/dynamic": "./dist/runtime/dynamic.js",
+    "./runtime/macro": "./dist/runtime/macro.js",
     "./runtime/server": "./dist/runtime/server.js",
     "./runtime/types": "./dist/runtime/types.js",
     "./vite": "./dist/vite/index.js",
+    "./webpack/macro": "./dist/webpack/macro.js",
     "./webpack/mdx": "./dist/webpack/mdx.js",
     "./webpack/meta": "./dist/webpack/meta.js",
     "./package.json": "./package.json"
@@ -60,6 +63,7 @@
     "esbuild": "^0.28.1",
     "estree-util-value-to-estree": "^3.5.0",
     "github-slugger": "^2.0.0",
+    "magic-string": "^0.30.21",
     "mdast-util-mdx": "^3.0.0",
     "picocolors": "^1.1.1",
     "picomatch": "^4.0.5",
@@ -70,6 +74,7 @@
     "unist-util-visit": "^5.1.0",
     "vfile": "^6.0.3",
     "yaml": "^2.9.0",
+    "yuku-analyzer": "^0.6.3",
     "zod": "^4.4.3"
   },
   "devDependencies": {

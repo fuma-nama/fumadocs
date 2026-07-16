@@ -3,7 +3,7 @@ import { buildMDX, type CompiledMDXProperties } from '@/loaders/mdx/build';
 import { pathToFileURL } from 'node:url';
 import { frontmatter } from 'fumadocs-core/content/md/frontmatter';
 import fs from 'node:fs/promises';
-import { server, type ServerOptions } from './server';
+import { server } from './server';
 import { type CoreOptions, createCore } from '@/core';
 import type { FileInfo, InternalTypeConfig } from './types';
 import jsxRuntimeDefault from 'react/jsx-runtime';
@@ -47,14 +47,13 @@ async function executeMdx(compiled: string, options: ExecuteOptions = {}) {
 export async function dynamic<Config, TC extends InternalTypeConfig>(
   configExports: Config,
   coreOptions: CoreOptions,
-  serverOptions?: ServerOptions,
 ) {
   const core = createCore(coreOptions);
   await core.init({
     config: buildConfig(configExports as Record<string, unknown>, process.cwd()),
   });
 
-  const create = server<Config, TC>(serverOptions);
+  const create = server<Config, TC>();
 
   function getDocCollection(name: string): DocCollectionItem | undefined {
     const collection = core.getCollection(name);

@@ -19,6 +19,7 @@ const translations = {
   'Choose a language(language switcher)(aria-label)': '选择语言',
   'Close Banner(banner)(aria-label)': '关闭横幅',
   'Close Search(search dialog)(aria-label)': '关闭搜索',
+  'Close Sidebar(sidebar)(aria-label)': '关闭侧边栏',
   'Collapse Sidebar(sidebar)(aria-label)': '收起侧边栏',
   'Copied Text(code block)(aria-label)': '已复制文字',
   'Copy Anchor Link(heading anchor)(aria-label)': '复制锚点链接',

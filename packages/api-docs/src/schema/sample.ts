@@ -1,6 +1,7 @@
 /**
  * inspired by https://github.com/Redocly/openapi-sampler (MIT)
  */
+import type { ParsedSchema } from '.';
 import { mergeDeep } from '../utils/deep-merge';
 import { isPlainObject } from '../utils/is-plain-object';
 import { getRaw } from '@scalar/json-magic/magic-proxy';
@@ -14,9 +15,9 @@ export interface JsonSchemaSampleOptions {
   readonly maxSampleDepth?: number;
 }
 
-type SchemaDoc = Record<string, unknown>;
-
 const SKIP = Symbol('skip');
+
+type TypeName = 'array' | 'boolean' | 'integer' | 'null' | 'number' | 'object' | 'string';
 
 const defaultOptions: Required<Pick<JsonSchemaSampleOptions, 'skipReadOnly' | 'maxSampleDepth'>> = {
   skipReadOnly: false,
@@ -35,13 +36,15 @@ function popStack(context: TraverseContext | undefined): void {
   if (context) seenObjectStack.pop();
 }
 
-function inferType(schema: SchemaDoc): string | null {
+function inferType(schema: ParsedSchema): TypeName | undefined {
+  if (typeof schema === 'boolean') return;
   if (schema.type !== undefined) {
     const t = schema.type;
-    return Array.isArray(t) ? (t.length === 0 ? null : String(t[0])) : String(t);
+    if (Array.isArray(t)) return t[0];
+    return t as TypeName;
   }
 
-  const keywordTypes: Record<string, string> = {
+  const keywordTypes = {
     multipleOf: 'number',
     maximum: 'number',
     exclusiveMaximum: 'number',
@@ -62,18 +65,16 @@ function inferType(schema: SchemaDoc): string | null {
     properties: 'object',
     patternProperties: 'object',
     dependencies: 'object',
-  };
+  } as const;
 
   for (const [kw, ty] of Object.entries(keywordTypes)) {
-    if (schema[kw] !== undefined) return ty;
+    if (schema[kw as keyof typeof keywordTypes] !== undefined) return ty;
   }
-  return null;
 }
 
-function getCircularPlaceholder(type: string | null): unknown {
+function getCircularPlaceholder(type: TypeName | undefined): unknown {
   if (type === 'object') return {};
   if (type === 'array') return [];
-  return undefined;
 }
 
 function hashCode(str: string): number {
@@ -135,48 +136,22 @@ function sampleBoolean(): boolean {
   return true;
 }
 
-function sampleNumber(schema: SchemaDoc): number {
+function sampleNumber(schema: ParsedSchema): number {
   let res = 0;
+  if (typeof schema === 'boolean') return res;
   if (schema.type === 'number' && (schema.format === 'float' || schema.format === 'double')) {
     res = 0.1;
   }
-
-  const exMinB = typeof schema.exclusiveMinimum === 'boolean';
-  const exMaxB = typeof schema.exclusiveMaximum === 'boolean';
-
-  if (exMinB || exMaxB) {
-    if (schema.maximum != null && schema.minimum != null) {
-      const min = schema.minimum as number;
-      const max = schema.maximum as number;
-      res = schema.exclusiveMinimum ? Math.floor(min) + 1 : min;
-      if ((schema.exclusiveMaximum && res >= max) || (!schema.exclusiveMaximum && res > max)) {
-        res = (max + min) / 2;
-      }
-      return res;
+  if (typeof schema.minimum === 'number') return schema.minimum;
+  if (typeof schema.exclusiveMinimum === 'number') {
+    res = Math.floor(schema.exclusiveMinimum) + 1;
+    if (res === schema.exclusiveMaximum) {
+      res = (res + Math.floor(schema.exclusiveMaximum) - 1) / 2;
     }
-    if (schema.minimum != null) {
-      const min = schema.minimum as number;
-      return schema.exclusiveMinimum ? Math.floor(min) + 1 : min;
-    }
-    if (schema.maximum != null) {
-      const max = schema.maximum as number;
-      if (schema.exclusiveMaximum) {
-        return max > 0 ? 0 : Math.floor(max) - 1;
-      }
-      return max > 0 ? 0 : max;
-    }
-  } else {
-    if (schema.minimum != null) return schema.minimum as number;
-    if (schema.exclusiveMinimum != null) {
-      res = Math.floor(schema.exclusiveMinimum as number) + 1;
-      if (res === schema.exclusiveMaximum) {
-        res = (res + Math.floor(schema.exclusiveMaximum as number) - 1) / 2;
-      }
-    } else if (schema.exclusiveMaximum != null) {
-      res = Math.floor(schema.exclusiveMaximum as number) - 1;
-    } else if (schema.maximum != null) {
-      res = schema.maximum as number;
-    }
+  } else if (typeof schema.exclusiveMaximum === 'number') {
+    res = Math.floor(schema.exclusiveMaximum) - 1;
+  } else if (typeof schema.maximum === 'number') {
+    res = schema.maximum;
   }
 
   return res;
@@ -205,23 +180,21 @@ function patternSample(pattern: string): string {
 }
 
 function sampleString(
-  schema: SchemaDoc,
+  schema: ParsedSchema,
   options: ResolvedOptions,
   context: TraverseContext | undefined,
 ): string {
-  const format = (schema.format as string | undefined) || 'default';
-  const propertyName = context?.propertyName;
-  const min = (schema.minLength as number | undefined) ?? 0;
-  const max = schema.maxLength as number | undefined;
-  const pattern = schema.pattern as string | undefined;
-
+  if (typeof schema === 'boolean') return '';
   const fixed = new Date('2019-08-24T14:15:22.123Z');
 
-  const formats: Record<string, () => string> = {
-    email: () => 'user@example.com',
-    'idn-email': () => 'пошта@укр.нет',
-    password: () => {
+  switch (schema.format) {
+    case 'email':
+      return 'user@example.com';
+    case 'idn-email':
+      return 'пошта@укр.нет';
+    case 'password': {
       let res = 'pa$$word';
+      const min = schema.minLength ?? 0;
       if (min > res.length) {
         res += '_';
         res += ensureMinLength('qwerty!@#$%^123456', min - res.length).substring(
@@ -230,51 +203,72 @@ function sampleString(
         );
       }
       return res;
-    },
-    'date-time': () => toRFCDateTime(fixed, false, false, false),
-    date: () => toRFCDateTime(fixed, true, false, false),
-    time: () => toRFCDateTime(fixed, false, true, false).slice(1),
-    ipv4: () => '192.168.0.1',
-    ipv6: () => '2001:0db8:85a3:0000:0000:8a2e:0370:7334',
-    hostname: () => 'example.com',
-    'idn-hostname': () => 'приклад.укр',
-    uri: () => 'http://example.com',
-    'uri-reference': () => '../dictionary',
-    'uri-template': () => 'http://example.com/{endpoint}',
-    iri: () => 'http://example.com/entity/1',
-    'iri-reference': () => '/entity/1',
-    uuid: () => uuidFromSeed(propertyName || 'id'),
-    'json-pointer': () => '/json/pointer',
-    'relative-json-pointer': () => '1/relative/json/pointer',
-    regex: () => '/regex/',
-    default: () => defaultStringSample(min, max, pattern, options.enablePatterns),
-  };
-
-  const fn = formats[format] ?? formats.default;
-  return fn();
+    }
+    case 'date-time':
+      return toRFCDateTime(fixed, false, false, false);
+    case 'date':
+      return toRFCDateTime(fixed, true, false, false);
+    case 'time':
+      return toRFCDateTime(fixed, false, true, false).slice(1);
+    case 'ipv4':
+      return '192.168.0.1';
+    case 'ipv6':
+      return '2001:0db8:85a3:0000:0000:8a2e:0370:7334';
+    case 'hostname':
+      return 'example.com';
+    case 'idn-hostname':
+      return 'приклад.укр';
+    case 'uri':
+      return 'http://example.com';
+    case 'uri-reference':
+      return '../dictionary';
+    case 'uri-template':
+      return 'http://example.com/{endpoint}';
+    case 'iri':
+      return 'http://example.com/entity/1';
+    case 'iri-reference':
+      return '/entity/1';
+    case 'uuid':
+      return uuidFromSeed(context?.propertyName || 'id');
+    case 'json-pointer':
+      return '/json/pointer';
+    case 'relative-json-pointer':
+      return '1/relative/json/pointer';
+    case 'regex':
+      return '/regex/';
+    default:
+      return defaultStringSample(
+        schema.minLength ?? 0,
+        schema.maxLength,
+        schema.pattern,
+        options.enablePatterns,
+      );
+  }
 }
 
 function sampleArray(
-  schema: SchemaDoc,
+  schema: ParsedSchema,
   options: ResolvedOptions,
   context: TraverseContext | undefined,
 ): unknown[] {
+  if (typeof schema === 'boolean') return [];
   const depth = context?.depth ?? 1;
-  let arrayLength = Math.min(
-    schema.maxItems != null ? (schema.maxItems as number) : Number.POSITIVE_INFINITY,
-    (schema.minItems as number | undefined) ?? 1,
-  );
+  let arrayLength = Math.min(schema.maxItems ?? Number.POSITIVE_INFINITY, schema.minItems ?? 1);
 
-  const items = schema.prefixItems ?? schema.items ?? schema.contains;
+  const items = (schema.prefixItems ?? schema.items ?? schema.contains) as
+    | ParsedSchema
+    | ParsedSchema[]
+    | undefined;
   if (Array.isArray(items)) {
     arrayLength = Math.max(arrayLength, items.length);
   }
 
-  const itemSchemaGetter = (i: number): SchemaDoc => {
+  const itemSchemaGetter = (i: number): ParsedSchema => {
     if (Array.isArray(items)) {
-      return (items[i] as SchemaDoc) ?? {};
+      return items[i] ?? {};
+    } else {
+      return items ?? {};
     }
-    return (items as SchemaDoc) ?? {};
   };
 
   const res: unknown[] = [];
@@ -292,21 +286,22 @@ function sampleArray(
 }
 
 function sampleObject(
-  schema: SchemaDoc,
+  schema: ParsedSchema,
   options: ResolvedOptions,
   context: TraverseContext | undefined,
 ): Record<string, unknown> {
   let res: Record<string, unknown> = {};
+  if (typeof schema === 'boolean') return res;
   const depth = context?.depth ?? 1;
 
-  if (schema.properties && typeof schema.properties === 'object') {
+  if (schema.properties) {
     const required = Array.isArray(schema.required) ? schema.required : [];
     const requiredSet = new Set(required);
 
-    for (const propertyName of Object.keys(schema.properties as object)) {
+    for (const propertyName of Object.keys(schema.properties)) {
       if (options.skipNonRequired && !requiredSet.has(propertyName)) continue;
 
-      const propSchema = (schema.properties as Record<string, SchemaDoc>)[propertyName]!;
+      const propSchema = schema.properties[propertyName];
       const sample = traverse(propSchema, options, {
         propertyName,
         depth: depth + 1,
@@ -325,21 +320,21 @@ function sampleObject(
     }
   }
 
-  if (schema.additionalProperties && typeof schema.additionalProperties === 'object') {
-    const ap = schema.additionalProperties as SchemaDoc;
-    const baseName = (ap['x-additionalPropertiesName'] as string | undefined) || 'property';
-    res[`${String(baseName)}1`] = traverse(ap, options, {
+  if (typeof schema.additionalProperties === 'object') {
+    const ap = schema.additionalProperties;
+    // @ts-expect-error -- custom property
+    const baseName = ap['x-additionalPropertiesName'] || 'property';
+    res[`${baseName}1`] = traverse(ap, options, {
       depth: depth + 1,
     }).value;
-    res[`${String(baseName)}2`] = traverse(ap, options, {
+    res[`${baseName}2`] = traverse(ap, options, {
       depth: depth + 1,
     }).value;
   }
 
   if (
     schema.properties &&
-    typeof schema.properties === 'object' &&
-    typeof schema.maxProperties === 'number' &&
+    schema.maxProperties !== undefined &&
     Object.keys(res).length > schema.maxProperties
   ) {
     const filtered: Record<string, unknown> = {};
@@ -352,7 +347,7 @@ function sampleObject(
       }
     }
     for (const name of Object.keys(res)) {
-      if (added < (schema.maxProperties as number) && !(name in filtered)) {
+      if (added < schema.maxProperties && !(name in filtered)) {
         filtered[name] = res[name];
         added++;
       }
@@ -367,7 +362,7 @@ interface TraverseResult {
   value: unknown;
   readOnly?: boolean;
   writeOnly?: boolean;
-  type: string | null;
+  type?: TypeName | undefined;
 }
 
 interface TraverseContext {
@@ -379,7 +374,7 @@ interface TraverseContext {
 
 type ResolvedOptions = typeof defaultOptions & JsonSchemaSampleOptions;
 
-function inferExample(schema: SchemaDoc): unknown | undefined {
+function inferExample(schema: Exclude<ParsedSchema, boolean>): unknown | undefined {
   // `getRaw` unwraps values of magic proxies, output values must be plain objects
   if (schema.const !== undefined) return getRaw(schema.const);
   if (Array.isArray(schema.examples) && schema.examples.length > 0) {
@@ -389,25 +384,23 @@ function inferExample(schema: SchemaDoc): unknown | undefined {
     return getRaw(schema.enum![0]);
   }
   if (schema.default !== undefined) return getRaw(schema.default);
-  return undefined;
 }
 
-function tryInferExample(schema: SchemaDoc): TraverseResult | undefined {
+function tryInferExample(schema: ParsedSchema): TraverseResult | undefined {
+  if (typeof schema === 'boolean') return;
   const example = inferExample(schema);
   if (example !== undefined) {
     return {
       value: example,
-      readOnly: schema.readOnly as boolean | undefined,
-      writeOnly: schema.writeOnly as boolean | undefined,
-      type: null,
+      readOnly: schema.readOnly,
+      writeOnly: schema.writeOnly,
     };
   }
-  return undefined;
 }
 
 function allOfSample(
-  into: SchemaDoc,
-  children: SchemaDoc[],
+  into: Exclude<ParsedSchema, boolean>,
+  children: readonly ParsedSchema[],
   options: ResolvedOptions,
   context: TraverseContext | undefined,
 ): TraverseResult {
@@ -416,7 +409,7 @@ function allOfSample(
 
   for (const subSchema of children) {
     const { type, readOnly, writeOnly, value } = traverse(
-      { type: res.type, ...subSchema },
+      typeof subSchema === 'object' ? { type: res.type, ...subSchema } : subSchema,
       options,
       {
         ...context,
@@ -438,7 +431,7 @@ function allOfSample(
 
   if (res.type === 'object') {
     const merged = mergeDeep(
-      (res.value as Record<string, unknown>) || {},
+      (res.value || {}) as Record<string, unknown>,
       ...subSamples.filter((s) => typeof s === 'object' && s !== null),
     );
     for (const key of Object.keys(merged)) {
@@ -458,7 +451,7 @@ function allOfSample(
 
 const typeSamplers: Record<
   string,
-  (schema: SchemaDoc, options: ResolvedOptions, context: TraverseContext | undefined) => unknown
+  (schema: ParsedSchema, options: ResolvedOptions, context: TraverseContext | undefined) => unknown
 > = {
   array: sampleArray,
   boolean: sampleBoolean,
@@ -469,8 +462,8 @@ const typeSamplers: Record<
 };
 
 function traverseOneOrAnyOf(
-  parent: SchemaDoc,
-  selectedSubSchema: SchemaDoc,
+  parent: Exclude<ParsedSchema, boolean>,
+  selectedSubSchema: ParsedSchema,
   options: ResolvedOptions,
   context: TraverseContext | undefined,
 ): TraverseResult {
@@ -490,10 +483,7 @@ function traverseOneOrAnyOf(
     typeof subExample.value === 'object' &&
     subExample.value !== null
   ) {
-    const mergedExample = mergeDeep(
-      localExample.value as Record<string, unknown>,
-      subExample.value as Record<string, unknown>,
-    );
+    const mergedExample = mergeDeep(localExample.value, subExample.value);
     return { ...subExample, value: mergedExample };
   }
 
@@ -501,55 +491,49 @@ function traverseOneOrAnyOf(
 }
 
 function traverse(
-  schema: unknown,
+  schema: ParsedSchema,
   options: ResolvedOptions,
   context?: TraverseContext,
 ): TraverseResult {
   if (context) {
     if (seenObjectStack.includes(schema as object)) {
-      return { value: getCircularPlaceholder(inferType(schema as SchemaDoc)), type: null };
+      return { value: getCircularPlaceholder(inferType(schema)) };
     }
     seenObjectStack.push(schema as object);
   }
 
   if (context && (context.depth ?? 1) > options.maxSampleDepth) {
     popStack(context);
-    return { value: getCircularPlaceholder(inferType(schema as SchemaDoc)), type: null };
+    return { value: getCircularPlaceholder(inferType(schema)) };
   }
 
   if (!isPlainObject(schema)) {
     popStack(context);
-    return { value: schema, type: null };
+    return { value: schema };
   }
 
-  const s = schema as SchemaDoc;
-
-  if (typeof s.$ref === 'string') {
-    const ref = decodeURIComponent(s.$ref);
+  if (typeof schema.$ref === 'string') {
+    const ref = decodeURIComponent(schema.$ref);
     // `$ref-value` is the resolved value of `$ref` on magic proxies of `@scalar/json-magic`
-    function resolveRef(): unknown {
-      return (s as Record<string, unknown>)['$ref-value'];
-    }
+    const referenced = (schema as { '$ref-value': ParsedSchema | undefined })['$ref-value'];
 
     if (refResolving[ref]) {
-      const referenced = resolveRef() as SchemaDoc | undefined;
       const referencedType = inferType(referenced ?? {});
       popStack(context);
-      return { value: getCircularPlaceholder(referencedType), type: null };
+      return { value: getCircularPlaceholder(referencedType) };
     }
 
     refResolving[ref] = true;
-    const referenced = resolveRef();
     if (referenced === undefined) {
       refResolving[ref] = false;
       popStack(context);
       throw new Error(
-        `Could not resolve $ref: ${s.$ref}, the schema must be a node of magic proxy ("@scalar/json-magic").`,
+        `Could not resolve $ref: ${schema.$ref}, the schema must be a node of magic proxy ("@scalar/json-magic").`,
       );
     }
 
     // sibling keywords take precedence over the $ref target
-    const { $ref: _, '$ref-value': _refValue, ...siblings } = s as Record<string, unknown>;
+    const { $ref: _, '$ref-value': _refValue, ...siblings } = schema as Record<string, unknown>;
     const result = traverse(
       Object.keys(siblings).length > 0 && isPlainObject(referenced)
         ? { ...referenced, ...siblings }
@@ -562,82 +546,70 @@ function traverse(
     return result;
   }
 
-  if (s.example !== undefined) {
-    popStack(context);
-    return {
-      value: getRaw(s.example),
-      readOnly: s.readOnly as boolean | undefined,
-      writeOnly: s.writeOnly as boolean | undefined,
-      type: s.type as string | null,
-    };
-  }
-
-  if (s.allOf !== undefined) {
+  if (schema.allOf !== undefined) {
     popStack(context);
     return (
-      tryInferExample(s) ??
-      allOfSample({ ...s, allOf: undefined }, s.allOf as SchemaDoc[], options, context)
+      tryInferExample(schema) ??
+      allOfSample({ ...schema, allOf: undefined }, schema.allOf, options, context)
     );
   }
 
-  if (s.oneOf && Array.isArray(s.oneOf) && s.oneOf.length > 0) {
-    if (s.anyOf && !options.quiet) {
+  if (Array.isArray(schema.oneOf) && schema.oneOf.length > 0) {
+    if (schema.anyOf && !options.quiet) {
       console.warn('oneOf and anyOf are not supported on the same level. Skipping anyOf');
     }
     popStack(context);
     const firstOneOf = Object.assign(
       {
-        readOnly: s.readOnly,
-        writeOnly: s.writeOnly,
+        readOnly: schema.readOnly,
+        writeOnly: schema.writeOnly,
       },
-      s.oneOf[0] as SchemaDoc,
+      schema.oneOf[0],
     );
-    return traverseOneOrAnyOf(s, firstOneOf, options, context);
+    return traverseOneOrAnyOf(schema, firstOneOf, options, context);
   }
 
-  if (s.anyOf && Array.isArray(s.anyOf) && s.anyOf.length > 0) {
+  if (Array.isArray(schema.anyOf) && schema.anyOf.length > 0) {
     popStack(context);
     const firstAnyOf = Object.assign(
       {
-        readOnly: s.readOnly,
-        writeOnly: s.writeOnly,
+        readOnly: schema.readOnly,
+        writeOnly: schema.writeOnly,
       },
-      s.anyOf[0] as SchemaDoc,
+      schema.anyOf[0],
     );
-    return traverseOneOrAnyOf(s, firstAnyOf, options, context);
+    return traverseOneOrAnyOf(schema, firstAnyOf, options, context);
   }
 
-  if (s.if && s.then) {
+  if (schema.if && schema.then) {
     popStack(context);
-    const { if: ifSchema, then, ...rest } = s;
-    return traverse(mergeDeep(rest, ifSchema as SchemaDoc, then as SchemaDoc), options, context);
+    const { if: ifSchema, then, ...rest } = schema;
+    return traverse(mergeDeep(rest, ifSchema, then), options, context);
   }
 
-  let example = inferExample(s);
-  let type: string | null = null;
+  let example = inferExample(schema);
+  let type: TypeName | undefined = undefined;
 
   if (example === undefined) {
     example = null;
-    type = s.type as string | null;
-    if (Array.isArray(type) && type.length > 0) type = type[0] as string;
-    if (!type) type = inferType(s);
+    type = inferType(schema);
 
     const sampler = type ? typeSamplers[type] : undefined;
     if (sampler) {
-      example = sampler(s, options, context);
+      example = sampler(schema, options, context);
     }
   }
 
   popStack(context);
   return {
     value: example,
-    readOnly: s.readOnly as boolean | undefined,
-    writeOnly: s.writeOnly as boolean | undefined,
+    readOnly: schema.readOnly,
+    writeOnly: schema.writeOnly,
     type,
   };
 }
 
-export function sample(schema: object, options?: JsonSchemaSampleOptions): unknown {
+export function sample(schema: ParsedSchema, options?: JsonSchemaSampleOptions): unknown {
   const opts: ResolvedOptions = {
     ...defaultOptions,
     ...options,

@@ -1,3 +1,17 @@
+## @fumadocs/base-ui@16.11.5
+
+### Correct codeblock props
+
+The type of `title` is now `ReactNode` instead of string.
+
+### Expose sidebar trigger state to assistive technology
+
+`SidebarTrigger` now sets `aria-expanded` and `aria-controls`, and its label changes between `Open Sidebar` and `Close Sidebar` depending on the state.
+
+Previously, both the button opening the mobile sidebar and the one closing it were named `Open Sidebar`, and neither conveyed whether the sidebar was open.
+
+A new `Close Sidebar` translation key is available for customisation.
+
 ## @fumadocs/base-ui@16.11.2
 
 ### Add Astro framework support
