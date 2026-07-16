@@ -190,6 +190,12 @@ export function createProxy(options: CreateProxyOptions = {}): Proxy {
     }
 
     const headers = new Headers(response.headers);
+    // `fetch()` already decoded the body, so the upstream content-encoding and
+    // content-length no longer describe the bytes we forward. Leaving them makes
+    // the browser try to decode plain data again (ERR_CONTENT_DECODING_FAILED).
+    headers.delete('content-encoding');
+    headers.delete('content-length');
+
     headers.forEach((_value, originalKey) => {
       const key = originalKey.toLowerCase();
 
