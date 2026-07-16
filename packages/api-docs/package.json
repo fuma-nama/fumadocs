@@ -35,6 +35,7 @@
     "./schema": "./dist/schema/index.js",
     "./schema/bundle": "./dist/schema/bundle.js",
     "./schema/dereference": "./dist/schema/dereference.js",
+    "./schema/match": "./dist/schema/match.js",
     "./schema/merge": "./dist/schema/merge.js",
     "./schema/sample": "./dist/schema/sample.js",
     "./schema/to-string": "./dist/schema/to-string.js",
