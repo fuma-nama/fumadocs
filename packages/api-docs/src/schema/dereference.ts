@@ -12,9 +12,7 @@ const cacheMap = new WeakMap<object, unknown>();
  * Returns non-reference values as-is.
  */
 export function dereferenceShallow<T>(schema: T): NoReferenceShallow<T> {
-  if (!isPlainObject(schema)) return schema as never;
-
-  if (typeof schema.$ref !== 'string') return schema as never;
+  if (!isPlainObject(schema) || typeof schema.$ref !== 'string') return schema as never;
   const cached = cacheMap.get(schema);
   if (cached) return cached as never;
 
@@ -23,7 +21,7 @@ export function dereferenceShallow<T>(schema: T): NoReferenceShallow<T> {
   const resolved = dereferenceShallow(refValue);
   let result: unknown = rest;
 
-  if (typeof resolved === 'object' && resolved !== null) {
+  if (isPlainObject(resolved)) {
     if (Object.keys(rest).length === 0) result = resolved;
     else result = { ...resolved, ...rest };
   }
