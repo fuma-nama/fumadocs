@@ -42,10 +42,11 @@
     "estree-util-to-js": "^2.0.0",
     "estree-util-value-to-estree": "^3.5.0",
     "npm-to-yarn": "^3.0.1",
-    "oxc-transform": "^0.139.0",
     "unified": "^11.0.5",
     "unist-util-visit": "^5.1.0",
     "vfile": "^6.0.3",
+    "yuku-codegen": "^0.6.4",
+    "yuku-parser": "^0.6.4",
     "zod": "^4.4.3"
   },
   "devDependencies": {
@@ -58,7 +59,7 @@
     "mdast-util-mdx": "^3.0.0",
     "remark": "^15.0.1",
     "tsconfig": "workspace:*",
-    "tsdown": "0.22.5",
+    "tsdown": "0.22.8",
     "typescript": "^6.0.3"
   },
   "peerDependencies": {

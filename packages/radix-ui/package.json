@@ -160,7 +160,7 @@
     "@fumadocs/cli": "workspace:*",
     "@tailwindcss/cli": "^4.3.2",
     "@tailwindcss/oxide": "^4.3.2",
-    "@tsdown/css": "^0.22.5",
+    "@tsdown/css": "^0.22.8",
     "@types/hast": "^3.0.5",
     "@types/mdx": "^2.0.14",
     "@types/node": "^26.1.1",
@@ -171,7 +171,7 @@
     "react-medium-image-zoom": "^5.4.8",
     "tailwindcss": "^4.3.2",
     "tsconfig": "workspace:*",
-    "tsdown": "0.22.5",
+    "tsdown": "0.22.8",
     "unified": "^11.0.5"
   },
   "peerDependencies": {

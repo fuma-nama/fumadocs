@@ -64,7 +64,7 @@
     "yaml": "^2.9.0"
   },
   "devDependencies": {
-    "@scalar/api-client-react": "^2.0.32",
+    "@scalar/api-client-react": "^2.0.33",
     "@scalar/openapi-upgrader": "^0.2.9",
     "@tailwindcss/oxide": "^4.3.2",
     "@types/node": "26.1.1",
@@ -74,7 +74,7 @@
     "fumadocs-ui": "workspace:@fumadocs/base-ui@*",
     "json-schema-typed": "^8.0.2",
     "tsconfig": "workspace:*",
-    "tsdown": "0.22.5",
+    "tsdown": "0.22.8",
     "xml-js": "^1.6.11"
   },
   "peerDependencies": {

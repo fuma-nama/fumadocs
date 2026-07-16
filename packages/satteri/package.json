@@ -59,8 +59,9 @@
     "image-size": "^2.0.2",
     "mdast-util-gfm": "^3.1.0",
     "npm-to-yarn": "^3.0.1",
-    "oxc-transform": "^0.139.0",
-    "satteri": "^0.9.5"
+    "satteri": "^0.9.5",
+    "yuku-codegen": "^0.6.4",
+    "yuku-parser": "^0.6.4"
   },
   "devDependencies": {
     "@types/estree": "^1.0.9",
@@ -71,7 +72,7 @@
     "mdast-util-mdx": "^3.0.0",
     "shiki": "^4.3.1",
     "tsconfig": "workspace:*",
-    "tsdown": "0.22.5",
+    "tsdown": "0.22.8",
     "typescript": "^6.0.3",
     "vitest": "^4.1.10"
   },

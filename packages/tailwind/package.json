@@ -35,7 +35,7 @@
     "postcss-selector-parser": "^7.1.4",
     "tailwindcss": "^4.3.2",
     "tsconfig": "workspace:*",
-    "tsdown": "0.22.5"
+    "tsdown": "0.22.8"
   },
   "peerDependencies": {
     "tailwindcss": "^4.0.0"

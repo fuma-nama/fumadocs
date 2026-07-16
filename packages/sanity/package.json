@@ -33,18 +33,18 @@
     "@portabletext/react": "^6.2.0"
   },
   "devDependencies": {
-    "@sanity/client": "^7.23.0",
-    "@sanity/types": "^6.4.0",
+    "@sanity/client": "^7.23.2",
+    "@sanity/types": "^6.5.0",
     "@types/node": "26.1.1",
     "@types/react": "^19.2.17",
     "fuma-cli": "^0.1.1",
     "fumadocs-core": "workspace:*",
     "fumadocs-ui": "workspace:@fumadocs/base-ui@*",
-    "next-sanity": "^13.1.1",
+    "next-sanity": "^13.1.3",
     "react": "^19.2.7",
-    "sanity": "^6.4.0",
+    "sanity": "^6.5.0",
     "tsconfig": "workspace:*",
-    "tsdown": "0.22.5",
+    "tsdown": "0.22.8",
     "typescript": "^6.0.3"
   },
   "peerDependencies": {

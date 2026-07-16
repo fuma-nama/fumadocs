@@ -59,7 +59,7 @@
     "json-schema-typed": "^8.0.2",
     "tailwindcss": "^4.3.2",
     "tsconfig": "workspace:*",
-    "tsdown": "0.22.5"
+    "tsdown": "0.22.8"
   },
   "peerDependencies": {
     "@types/react": "*",

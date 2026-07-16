@@ -45,8 +45,11 @@ export function remarkTypeScriptToJavaScript({
   defaultValue = 'ts',
   disableTrigger = false,
 }: TypeScriptToJavaScriptOptions = {}): Transformer<Root> {
-  return async (tree, file) => {
-    const oxc = await import('oxc-transform');
+  return async (tree) => {
+    const [{ parse }, { strip }] = await Promise.all([
+      import('yuku-parser'),
+      import('yuku-codegen'),
+    ]);
     const tasks: Promise<void>[] = [];
 
     visit(tree, 'code', (node) => {
@@ -58,10 +61,8 @@ export function remarkTypeScriptToJavaScript({
 
       tasks.push(
         (async () => {
-          const result = await oxc.transform(`${file.path ?? 'test'}.${lang}`, node.value, {
-            sourcemap: false,
-            jsx: 'preserve',
-          });
+          const { program } = parse(node.value, { lang });
+          const result = strip(program);
 
           const replacement = generateCodeBlockTabs({
             persist,

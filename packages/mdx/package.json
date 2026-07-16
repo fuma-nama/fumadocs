@@ -93,10 +93,10 @@
     "remark": "^15.0.1",
     "remark-directive": "^4.0.0",
     "remark-mdx": "^3.1.1",
-    "rolldown": "^1.1.5",
+    "rolldown": "^1.2.0",
     "satteri": "^0.9.5",
     "tsconfig": "workspace:*",
-    "tsdown": "0.22.5",
+    "tsdown": "0.22.8",
     "vite": "^8.1.4",
     "webpack": "^5.108.4"
   },

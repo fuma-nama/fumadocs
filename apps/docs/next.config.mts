@@ -14,14 +14,7 @@ const config: NextConfig = {
       fullUrl: true,
     },
   },
-  serverExternalPackages: [
-    'ts-morph',
-    'typescript',
-    'oxc-transform',
-    'twoslash',
-    'shiki',
-    '@takumi-rs/core',
-  ],
+  serverExternalPackages: ['ts-morph', 'typescript', 'twoslash', 'shiki', '@takumi-rs/core'],
   images: {
     remotePatterns: [
       {

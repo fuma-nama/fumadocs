@@ -56,7 +56,7 @@
     "react-error-boundary": "^6.1.2",
     "tailwindcss": "^4.3.2",
     "tsconfig": "workspace:*",
-    "tsdown": "0.22.5",
+    "tsdown": "0.22.8",
     "vite": "^8.1.4",
     "webpack": "^5.108.4"
   },
