@@ -1,3 +1,9 @@
+## @fumadocs/api-docs@0.2.1
+
+### Rewrite union detector
+
+Use a simplified JSON schema validator to identify the active tab of an union field in playground UI.
+
 ## @fumadocs/api-docs@0.2.0
 
 ### Use `@scalar/json-magic` for dereferencing

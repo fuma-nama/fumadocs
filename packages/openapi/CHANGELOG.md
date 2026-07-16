@@ -1,3 +1,18 @@
+## fumadocs-openapi@11.2.2
+
+### Harden `createProxy()` against SSRF
+
+- `allowedOrigins` now defaults to the proxy route's own origin, so an unconfigured proxy is same-origin only instead of an open proxy. A warning is logged when neither `allowedOrigins` nor `filterRequest` is set.
+- The allowlist is now enforced on redirects: an allowed upstream can no longer redirect the proxy to a disallowed origin.
+
+### `allowedOrigins` regex support
+
+`allowedOrigins` entries can now be a `RegExp` in addition to an exact origin string.
+
+### Fix proxy decoding
+
+Fix `ERR_CONTENT_DECODING_FAILED` for compressed upstream responses: the stale `content-encoding`/`content-length` headers are now dropped, since `fetch()` already decodes the body before it is proxied back.
+
 ## fumadocs-openapi@11.2.1
 
 ### Fix invalid data in generated request examples
