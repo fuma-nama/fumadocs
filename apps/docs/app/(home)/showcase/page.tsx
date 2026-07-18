@@ -290,6 +290,11 @@ const showcases: ShowcaseObject[] = [
     name: 'Yeecord',
     url: 'https://yeecord.com',
   },
+  {
+    image: '/showcases/arkenv.png',
+    name: 'ArkEnv',
+    url: 'https://arkenv.js.org',
+  },
 ];
 
 const blogs: ShowcaseObject[] = [
