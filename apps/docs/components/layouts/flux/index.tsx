@@ -4,8 +4,9 @@ import { getSection } from '@/lib/source/navigation';
 import type { CSSProperties, ReactNode } from 'react';
 import { LayoutClient } from './client';
 import { getLayoutTabs } from 'fumadocs-ui/layouts/shared';
+import 'katex/dist/katex.min.css';
 
-export function FluxLayout({ children }: { children: ReactNode }) {
+export function Flux({ children }: { children: ReactNode }) {
   const base = baseOptions();
 
   return (

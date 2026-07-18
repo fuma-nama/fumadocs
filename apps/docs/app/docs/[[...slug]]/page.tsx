@@ -25,12 +25,11 @@ import {
   MarkdownCopyButton,
   ViewOptionsPopover,
   DocsPageProps,
-} from 'fumadocs-ui/layouts/docs/page';
+} from 'fumadocs-ui/layouts/pointer/page';
 import { NotFound } from '@/components/layouts/not-found';
 import { getSuggestions } from './suggestions';
 import { PathUtils } from 'fumadocs-core/source';
 import { AsyncAPIPageLazy, OpenAPIPageLazy } from './lazy';
-import { SponsorsMarquee } from '@fumari/sponsors';
 
 function PreviewRenderer({ preview }: { preview: string }): ReactNode {
   if (preview && preview in Preview) {
@@ -55,9 +54,9 @@ export default async function Page(props: PageProps<'/docs/[[...slug]]'>) {
     );
 
   const pageProps = {
-    tableOfContent: {
-      footer: <SponsorsMarquee />,
-    },
+    // tableOfContent: {
+    //   footer: <SponsorsMarquee />,
+    // },
   } satisfies Partial<DocsPageProps>;
 
   if (page.type === 'openapi') {

@@ -32,6 +32,7 @@
 }
 
 @theme inline {
+  --default-font-family: var(--font-sans);
   --default-mono-font-family: var(--font-mono);
   --animate-marquee: marquee var(--duration) infinite linear;
   --animate-marquee-vertical: marquee-vertical var(--duration) linear infinite;

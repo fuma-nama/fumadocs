@@ -86,6 +86,8 @@
     "./layouts/notebook/slots/container": "./dist/layouts/notebook/slots/container.js",
     "./layouts/notebook/slots/header": "./dist/layouts/notebook/slots/header.js",
     "./layouts/notebook/slots/sidebar": "./dist/layouts/notebook/slots/sidebar.js",
+    "./layouts/pointer": "./dist/layouts/pointer/index.js",
+    "./layouts/pointer/page": "./dist/layouts/pointer/page/index.js",
     "./layouts/shared": "./dist/layouts/shared/index.js",
     "./layouts/shared/slots/language-select": "./dist/layouts/shared/slots/language-select.js",
     "./layouts/shared/slots/search-trigger": "./dist/layouts/shared/slots/search-trigger.js",

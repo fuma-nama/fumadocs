@@ -158,7 +158,8 @@
   #nd-docs-layout:has(&),
   #nd-notebook-layout:has(&),
   #nd-home-layout:has(&),
-  #nd-flux-layout:has(&) {
+  #nd-flux-layout:has(&),
+  #fd-pointer-layout:has(&) {
     @slot;
   }
 }

@@ -119,20 +119,18 @@ export function TOCItem({ ref, onActiveChange = () => null, ...props }: TOCItemP
     }
   }
 
-  useTOCListener((items) => {
-    const itemData = id ? items.find((item) => item.id === id) : null;
+  useTOCListener(
+    (items) => {
+      const itemData = id ? items.find((item) => item.id === id) : null;
 
-    if (itemData && itemData.active !== active) {
-      setActive(itemData.active);
-      onActiveChange(itemData.active);
-      autoScroll(items);
-    }
-  });
-
-  useEffect(() => {
-    autoScroll(observer.items, true);
-    // oxlint-disable-next-line eslint-plugin-react-hooks/exhaustive-deps -- initial only
-  }, [observer]);
+      if (itemData && itemData.active !== active) {
+        setActive(itemData.active);
+        onActiveChange(itemData.active);
+        autoScroll(items);
+      }
+    },
+    { initial: true },
+  );
 
   return <a ref={mergeRefs(anchorRef, ref)} data-active={active} {...props} />;
 }
@@ -159,14 +157,16 @@ export function useTOC() {
   );
 }
 
-export function useTOCListener(listener: ChangeListener) {
+export function useTOCListener(listener: ChangeListener, options: { initial?: boolean } = {}) {
+  const { initial = false } = options;
   const observer = useObserver();
   const callback = useEffectEvent(listener);
 
   useEffect(() => {
+    if (initial) callback(observer.items);
     observer.listen(callback);
     return () => observer.unlisten(callback);
-  }, [observer]);
+  }, [observer, initial]);
 }
 
 export function useTOCSelector<T>(
