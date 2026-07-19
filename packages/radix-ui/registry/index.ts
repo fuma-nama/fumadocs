@@ -138,6 +138,28 @@ export const registry: Registry = {
       unlisted: true,
     },
     {
+      name: 'layouts/glass',
+      files: [
+        {
+          type: 'layout',
+          path: 'layouts/glass/index.tsx',
+          target: '<dir>/glass/index.tsx',
+          meta: {
+            preserveAs: 'layouts/glass',
+          },
+        },
+        {
+          type: 'layout',
+          path: 'layouts/glass/page/index.tsx',
+          target: '<dir>/glass/page/index.tsx',
+          meta: {
+            preserveAs: 'layouts/glass/page',
+          },
+        },
+      ],
+      unlisted: true,
+    },
+    {
       name: 'layouts/home',
       files: [
         {

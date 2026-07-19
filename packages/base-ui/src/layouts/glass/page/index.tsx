@@ -30,7 +30,7 @@ export function useDocsPage() {
   const context = use(PageContext);
   if (!context)
     throw new Error(
-      'Please use page components under <DocsPage /> (`fumadocs-ui/layouts/docs/page`).',
+      'Please use page components under <DocsPage /> (`fumadocs-ui/layouts/glass/page`).',
     );
   return context;
 }

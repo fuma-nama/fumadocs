@@ -1,1 +1,1 @@
-export { Pointer as default } from '@/components/layouts/pointer';
+export { Glass as default } from '@/components/layouts/glass';

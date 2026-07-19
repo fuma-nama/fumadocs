@@ -4,10 +4,10 @@ import { AISearch, AISearchPanel } from '@/components/inkeep/search';
 import { getSection } from '@/lib/source/navigation';
 import type { CSSProperties, ReactNode } from 'react';
 import { getLayoutTabs } from 'fumadocs-ui/layouts/shared';
-import { ClientPointerLayout } from './client';
+import { ClientGlassLayout } from './client';
 import 'katex/dist/katex.min.css';
 
-export function Pointer({ children }: { children: ReactNode }) {
+export function Glass({ children }: { children: ReactNode }) {
   const base = baseOptions();
   const tabs = getLayoutTabs(source.getPageTree(), {
     transform(option, node) {
@@ -36,7 +36,7 @@ export function Pointer({ children }: { children: ReactNode }) {
 
   return (
     <AISearch>
-      <ClientPointerLayout
+      <ClientGlassLayout
         {...base}
         tree={source.getPageTree()}
         // just icon items
@@ -54,7 +54,7 @@ export function Pointer({ children }: { children: ReactNode }) {
       >
         <AISearchPanel />
         {children}
-      </ClientPointerLayout>
+      </ClientGlassLayout>
     </AISearch>
   );
 }

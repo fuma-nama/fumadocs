@@ -1,13 +1,13 @@
 'use client';
 
 import { useAISearchContext } from '@/components/inkeep/search';
-import { PointerLayout, PointerLayoutProps } from 'fumadocs-ui/layouts/pointer';
+import { GlassLayout, GlassLayoutProps } from 'fumadocs-ui/layouts/glass';
 
-export function ClientPointerLayout(props: PointerLayoutProps) {
+export function ClientGlassLayout(props: GlassLayoutProps) {
   const { open, setOpen } = useAISearchContext();
 
   return (
-    <PointerLayout
+    <GlassLayout
       {...props}
       aiChat={{
         open,

@@ -27,7 +27,6 @@ import { registerDefault } from '@/requests/generators/all';
 import { createCodeUsageGeneratorRegistry } from '@/requests/generators';
 import type { ShikiFactory } from 'fumadocs-core/highlight/shiki';
 import type { GeneratedPageProps } from '@/utils/pages/builder';
-import type { ParsedSchema } from '@/utils/schema';
 import { Markdown } from './components/markdown';
 import { Schema, type SchemaUIOptions } from '@fumadocs/api-docs/components/schema';
 import { RenderContextProvider } from './contexts/api';

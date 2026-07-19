@@ -1,0 +1,113 @@
+---
+title: Glass Layout
+description: A docs layout with a floating, translucent sidebar and header
+---
+
+A docs layout built around floating, translucent (glass-like) panels: the sidebar and header sit on top of the content as rounded, blurred surfaces rather than fixed columns.
+
+<Customization />
+
+## Usage
+
+Enable the Glass layout with `fumadocs-ui/layouts/glass`.
+
+```tsx title="layout.tsx"
+import { GlassLayout } from 'fumadocs-ui/layouts/glass'; // [!code highlight]
+import { baseOptions } from '@/lib/layout.shared';
+import { source } from '@/lib/source';
+import type { ReactNode } from 'react';
+
+export default function Layout({ children }: { children: ReactNode }) {
+  return (
+    <GlassLayout {...baseOptions()} tree={source.getPageTree()}>
+      {children}
+    </GlassLayout>
+  );
+}
+```
+
+Make sure to update your page import too:
+
+```tsx title="page.tsx"
+import { ... } from 'fumadocs-ui/layouts/docs/page'; // [!code --]
+import { ... } from 'fumadocs-ui/layouts/glass/page'; // [!code ++]
+```
+
+<Callout title="Important to know">
+
+- Glass layout is a **client component**, you cannot pass unserializable props from a server component.
+- It is opinionated: the sidebar and header are more fixed than the default layout, use Fumadocs CLI or the `slots` option for customization.
+
+</Callout>
+
+## Configurations
+
+The options are inherited from [Docs Layout](/docs/ui/layouts/docs), with minor differences:
+
+- there is no `sidebar` option, Glass layout is more opinionated than the default one.
+- additional options (see below).
+
+### Layout Tabs
+
+Configure [Layout Tabs](/docs/ui/layouts/docs#layout-tabs) with the `tabs` prop, see the linked docs for how to add them. Tabs are shown as a dropdown in the floating header.
+
+```tsx title="layout.tsx"
+import { GlassLayout } from 'fumadocs-ui/layouts/glass';
+import { baseOptions } from '@/lib/layout.shared';
+import { source } from '@/lib/source';
+import type { ReactNode } from 'react';
+
+export default function Layout({ children }: { children: ReactNode }) {
+  return (
+    <GlassLayout
+      {...baseOptions()}
+      tabs={
+        {
+          // customize tabs
+        }
+      }
+      tree={source.getPageTree()}
+    >
+      {children}
+    </GlassLayout>
+  );
+}
+```
+
+### AI Chat
+
+The floating header can render an **Ask AI** button. Pass an `aiChat` object with the open state and a change handler to control your AI search dialog.
+
+```tsx title="layout.tsx"
+'use client';
+import { GlassLayout } from 'fumadocs-ui/layouts/glass';
+import { useState } from 'react';
+
+export function Layout({ children }) {
+  const [open, setOpen] = useState(false);
+
+  return (
+    <GlassLayout
+      aiChat={{ open, onOpenChange: setOpen }} // [!code ++]
+      // ...
+    >
+      {children}
+    </GlassLayout>
+  );
+}
+```
+
+### Slots
+
+Like other layouts, Glass layout exposes a `slots` option to override the built-in `header`, `sidebar`, and `sidebarDrawer` (mobile) components, in addition to the shared slots (`navTitle`, `themeSwitch`, `searchTrigger`, `languageSelect`).
+
+```tsx title="layout.tsx"
+import { GlassLayout } from 'fumadocs-ui/layouts/glass';
+
+<GlassLayout
+  slots={{
+    header: MyHeader, // [!code ++]
+  }}
+  // ...
+/>;
+```
