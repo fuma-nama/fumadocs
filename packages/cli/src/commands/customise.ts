@@ -17,6 +17,7 @@ interface SlotPrintInfo {
   layoutId: string;
   name: string;
   isPage: boolean;
+  uiLibrary: LoadedConfig['uiLibrary'];
 }
 
 export async function customise(config: LoadedConfig, connector: RegistryConnector) {
@@ -147,6 +148,7 @@ export async function customise(config: LoadedConfig, connector: RegistryConnect
                         layoutId: selected.id,
                         name,
                         isPage: true,
+                        uiLibrary: config.uiLibrary,
                       });
                     },
                   } as TargetInfo,
@@ -165,6 +167,7 @@ export async function customise(config: LoadedConfig, connector: RegistryConnect
                       layoutId: selected.id,
                       name,
                       isPage: false,
+                      uiLibrary: config.uiLibrary,
                     });
                   },
                 } as TargetInfo,
@@ -205,12 +208,12 @@ function printLayout(...maps: [from: string, to: string][]) {
   );
 }
 
-function printSlot({ at, layoutId, name, isPage }: SlotPrintInfo) {
+function printSlot({ at, layoutId, name, isPage, uiLibrary }: SlotPrintInfo) {
   intro(picocolors.bold('What is Next?'));
 
   log.info(`You can check the installed layout slot in "${at}".`);
 
-  const code = getSlotCode({ at, layoutId, name, isPage });
+  const code = getSlotCode({ at, layoutId, name, isPage, uiLibrary });
 
   if (code) {
     const layoutComponent = layoutId === 'glass' ? '<GlassLayout />' : '<DocsLayout />';
@@ -227,7 +230,7 @@ function printSlot({ at, layoutId, name, isPage }: SlotPrintInfo) {
   }
 }
 
-function getSlotCode({ at, layoutId, name, isPage }: SlotPrintInfo): string | undefined {
+function getSlotCode({ at, layoutId, name, isPage, uiLibrary }: SlotPrintInfo): string | undefined {
   if (layoutId === 'glass') {
     // Glass layout wires its page slots directly, only layout-level slots are swappable.
     if (isPage) return;
@@ -245,20 +248,29 @@ return (
     ...
   </GlassLayout>
 );`;
-      case 'sidebar':
-        // `sidebar` slot file exports both the desktop sidebar and the mobile drawer.
-        return `import { Sidebar, SidebarDrawer } from '${at}';
+      case 'sidebar': {
+        // `sidebar` slot file holds the whole sidebar system (desktop, mobile drawer, provider).
+        // Base UI additionally exposes a `drawerHandle` for its swipeable drawer.
+        const imports = ['Sidebar', 'SidebarDrawer', 'SidebarProvider', 'useSidebar'];
+        if (uiLibrary === 'base-ui') imports.push('drawerHandle');
+
+        return `import { ${imports.join(', ')} } from '${at}';
 
 return (
   <GlassLayout
     slots={{
-      sidebar: Sidebar,
-      sidebarDrawer: SidebarDrawer,
+      sidebar: {
+        main: Sidebar,
+        provider: SidebarProvider,
+        use: useSidebar,
+        drawer: SidebarDrawer,${uiLibrary === 'base-ui' ? '\n        drawerHandle,' : ''}
+      },
     }}
   >
     ...
   </GlassLayout>
 );`;
+      }
       default:
         return;
     }

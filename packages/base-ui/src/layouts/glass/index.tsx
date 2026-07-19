@@ -13,13 +13,28 @@ import {
 } from '@/layouts/shared';
 import { TreeContextProvider } from '@/contexts/tree';
 import { createContext, type FC, use, useMemo } from 'react';
-import { Sidebar, SidebarDrawer, type SidebarProps } from './slots/sidebar';
+import {
+  drawerHandle,
+  Sidebar,
+  SidebarDrawer,
+  SidebarProvider,
+  useSidebar,
+  type SidebarProps,
+  type SidebarProviderProps,
+  type SidebarDrawerProps,
+} from './slots/sidebar';
 import { Header, type HeaderProps } from './slots/header';
+import type { Drawer } from '@base-ui/react';
 
 export interface GlassSlots extends BaseSlots {
   header: FC<HeaderProps>;
-  sidebar: FC<SidebarProps>;
-  sidebarDrawer: FC<SidebarProps>;
+  sidebar: {
+    main: FC<SidebarProps>;
+    provider: FC<SidebarProviderProps>;
+    use: typeof useSidebar;
+    drawer: FC<SidebarDrawerProps>;
+    drawerHandle: Drawer.Handle<unknown>;
+  };
 }
 
 export interface GlassLayoutProps extends BaseLayoutProps {
@@ -30,6 +45,7 @@ export interface GlassLayoutProps extends BaseLayoutProps {
     onOpenChange: (v: boolean) => void;
   };
   slots?: Partial<GlassSlots>;
+  sidebar?: Omit<SidebarProviderProps, 'children'>;
 }
 
 interface SlotsProps extends BaseSlotsProps<GlassLayoutProps> {
@@ -53,7 +69,7 @@ export function useGlassLayout() {
   return context;
 }
 
-const { useProvider } = baseSlots({
+const { useBaseSlots } = baseSlots({
   useProps() {
     return useGlassLayout().props;
   },
@@ -62,7 +78,7 @@ const { useProvider } = baseSlots({
 export function GlassLayout(props: GlassLayoutProps) {
   const { tree, tabs: defaultTabs, aiChat, children, slots: defaultSlots = {} } = props;
   const linkItems = useLinkItems(props);
-  const { baseSlots, baseProps } = useProvider(props);
+  const { baseSlots, baseProps } = useBaseSlots(props);
 
   const tabs = useMemo(() => {
     if (Array.isArray(defaultTabs)) {
@@ -80,8 +96,13 @@ export function GlassLayout(props: GlassLayoutProps) {
   const slots: GlassSlots = {
     ...baseSlots,
     header: defaultSlots.header ?? Header,
-    sidebar: defaultSlots.sidebar ?? Sidebar,
-    sidebarDrawer: defaultSlots.sidebarDrawer ?? SidebarDrawer,
+    sidebar: defaultSlots.sidebar ?? {
+      drawer: SidebarDrawer,
+      drawerHandle,
+      main: Sidebar,
+      provider: SidebarProvider,
+      use: useSidebar,
+    },
   };
 
   return (
@@ -96,20 +117,22 @@ export function GlassLayout(props: GlassLayoutProps) {
         ...linkItems,
       }}
     >
-      <TreeContextProvider tree={tree}>
-        <div
-          id="fd-glass-layout"
-          className="grid overflow-x-clip min-h-dvh [--page-col:900px] [--fd-left-width:0px] [--fd-right-width:0px] has-data-[fd-full=true]:[--page-col:1200px] md:[--fd-left-width:280px]"
-          style={{
-            gridTemplate: `"left left-margin main right-margin right" 1fr / var(--fd-left-width) minmax(0,1fr) minmax(0px, var(--page-col)) minmax(0,1fr) var(--fd-right-width)`,
-          }}
-        >
-          <slots.sidebarDrawer />
-          <slots.sidebar />
-          <slots.header />
-          {children}
-        </div>
-      </TreeContextProvider>
+      <slots.sidebar.provider {...props.sidebar}>
+        <TreeContextProvider tree={tree}>
+          <div
+            id="fd-glass-layout"
+            className="grid overflow-x-clip min-h-dvh [--page-col:900px] [--fd-left-width:0px] [--fd-right-width:0px] has-data-[fd-full=true]:[--page-col:1200px]"
+            style={{
+              gridTemplate: `"left left-margin main right-margin right" 1fr / var(--fd-left-width) minmax(0,1fr) minmax(0px, var(--page-col)) minmax(0,1fr) var(--fd-right-width)`,
+            }}
+          >
+            <slots.sidebar.drawer />
+            <slots.sidebar.main />
+            <slots.header />
+            {children}
+          </div>
+        </TreeContextProvider>
+      </slots.sidebar.provider>
     </LayoutContext>
   );
 }

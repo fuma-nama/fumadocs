@@ -21,7 +21,7 @@ import { useGlassLayout } from '..';
 export type HeaderProps = ComponentProps<'div'>;
 
 const baseVariants =
-  'rounded-full bg-fd-popover/80 text-fd-popover-foreground border backdrop-blur-sm shadow-md';
+  'rounded-full bg-fd-popover/80 text-fd-popover-foreground border backdrop-blur-sm shadow-sm';
 
 export function Header({ className, ...props }: HeaderProps) {
   const {
@@ -29,6 +29,7 @@ export function Header({ className, ...props }: HeaderProps) {
     slots,
   } = useGlassLayout();
   const t = useTranslations();
+  const sidebar = slots.sidebar.use();
 
   return (
     <div
@@ -38,6 +39,19 @@ export function Header({ className, ...props }: HeaderProps) {
       )}
       {...props}
     >
+      {sidebar.collapsible && sidebar.collapsed && (
+        <button
+          aria-label={t('Show Sidebar', { note: 'sidebar' })}
+          className={cn(
+            buttonVariants({ size: 'icon-sm', variant: 'secondary' }),
+            baseVariants,
+            'size-10 shrink-0 max-md:hidden',
+          )}
+          onClick={() => sidebar.setCollapsed(false)}
+        >
+          <SidebarIcon />
+        </button>
+      )}
       <Popover>
         <PopoverTrigger
           className={cn(
@@ -111,6 +125,9 @@ export function Header({ className, ...props }: HeaderProps) {
           <MessageCircleIcon className="size-4" />
           {t('Ask AI', { note: 'AI chat button' })}
         </button>
+      )}
+      {slots.themeSwitch && (
+        <slots.themeSwitch className={cn(baseVariants, 'shrink-0 px-1.5 max-md:hidden')} />
       )}
       <SidebarTrigger
         className={cn(

@@ -38,7 +38,7 @@ export function useHomeLayout() {
   return context;
 }
 
-const { useProvider } = baseSlots({
+const { useBaseSlots } = baseSlots({
   useProps() {
     return useHomeLayout().props;
   },
@@ -56,7 +56,7 @@ export function HomeLayout(props: HomeLayoutProps) {
     searchToggle: _searchToggle,
     ...rest
   } = props;
-  const { baseSlots, baseProps } = useProvider(props);
+  const { baseSlots, baseProps } = useBaseSlots(props);
   const linkItems = useLinkItems(props);
   const slots: HomeSlots = {
     ...baseSlots,

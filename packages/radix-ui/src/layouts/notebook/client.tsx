@@ -35,7 +35,7 @@ export interface DocsSlots extends BaseSlots {
   };
 }
 
-const { useProvider } = baseSlots({
+const { useBaseSlots } = baseSlots({
   useProps() {
     return useNotebookLayout().props;
   },
@@ -81,7 +81,7 @@ export function LayoutBody(
   } = props;
   const isTop = useIsScrollTop({ enabled: navTransparentMode === 'top' }) ?? true;
   const isNavTransparent = navTransparentMode === 'top' ? isTop : navTransparentMode === 'always';
-  const { baseSlots, baseProps } = useProvider(props);
+  const { baseSlots, baseProps } = useBaseSlots(props);
   const linkItems = useLinkItems(props);
   const slots: DocsSlots = {
     ...baseSlots,
