@@ -75,6 +75,20 @@ export async function customise(config: LoadedConfig, connector: RegistryConnect
               hint: 'the experimental variant of docs layout',
             },
             {
+              label: 'Glass Layout',
+              value: {
+                id: 'glass',
+                targets: [{ subRegistry, name: 'layouts/glass' }],
+                print() {
+                  printLayout(
+                    ['fumadocs-ui/layouts/glass', '@/layouts/glass'],
+                    ['fumadocs-ui/layouts/glass/page', '@/layouts/glass/page'],
+                  );
+                },
+              },
+              hint: 'a docs layout with floating, translucent panels',
+            },
+            {
               label: 'Home Layout',
               value: {
                 id: 'home',
@@ -199,19 +213,57 @@ function printSlot({ at, layoutId, name, isPage }: SlotPrintInfo) {
   const code = getSlotCode({ at, layoutId, name, isPage });
 
   if (code) {
+    const layoutComponent = layoutId === 'glass' ? '<GlassLayout />' : '<DocsLayout />';
+
     if (isPage) {
       log.info(
         `${picocolors.bold('At your <DocsPage /> component, update your "slots" prop:')}\n\n${code}`,
       );
     } else {
       log.info(
-        `${picocolors.bold('At your <DocsLayout /> component, update your "slots" prop:')}\n\n${code}`,
+        `${picocolors.bold(`At your ${layoutComponent} component, update your "slots" prop:`)}\n\n${code}`,
       );
     }
   }
 }
 
 function getSlotCode({ at, layoutId, name, isPage }: SlotPrintInfo): string | undefined {
+  if (layoutId === 'glass') {
+    // Glass layout wires its page slots directly, only layout-level slots are swappable.
+    if (isPage) return;
+
+    switch (name) {
+      case 'header':
+        return `import { Header } from '${at}';
+
+return (
+  <GlassLayout
+    slots={{
+      header: Header,
+    }}
+  >
+    ...
+  </GlassLayout>
+);`;
+      case 'sidebar':
+        // `sidebar` slot file exports both the desktop sidebar and the mobile drawer.
+        return `import { Sidebar, SidebarDrawer } from '${at}';
+
+return (
+  <GlassLayout
+    slots={{
+      sidebar: Sidebar,
+      sidebarDrawer: SidebarDrawer,
+    }}
+  >
+    ...
+  </GlassLayout>
+);`;
+      default:
+        return;
+    }
+  }
+
   if (isPage) {
     switch (name) {
       case 'toc':
