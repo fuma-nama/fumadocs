@@ -67,7 +67,7 @@ export function TOC({ container, header, footer }: TOCProps) {
     <Context value={ctx}>
       <div
         className={cn(
-          'fixed inset-0 z-30 backdrop-blur-sm transition-opacity duration-300 [mask-image:radial-gradient(circle_at_center_right,white,white_200px,transparent_500px)] xl:hidden',
+          'fixed inset-0 z-10 backdrop-blur-sm transition-opacity duration-300 [mask-image:radial-gradient(circle_at_center_right,white,white_200px,transparent_500px)] xl:hidden',
           !open && 'opacity-0 pointer-events-none',
         )}
         onClick={() => setMobileOpen(false)}
@@ -76,8 +76,10 @@ export function TOC({ container, header, footer }: TOCProps) {
         id="nd-toc"
         {...container}
         className={cn(
-          'z-30 flex flex-col transition-[width,padding] [grid-area:right] layout:[--fd-right-width:0px] max-xl:fixed max-xl:top-1/2 max-xl:-translate-y-1/2 max-xl:end-px max-xl:bg-fd-popover max-xl:text-fd-popover-foreground max-xl:border max-xl:rounded-xl max-xl:shadow-lg max-xl:mask-none max-xl:p-1.5 xl:sticky xl:top-0 xl:h-dvh xl:layout:[--fd-right-width:240px]',
-          open ? 'max-xl:w-[240px] max-xl:p-3' : 'max-xl:w-7 max-xl:ps-[calc(--spacing(3)-1px)]',
+          'z-10 flex flex-col transition-[width,padding] duration-300 [grid-area:right] layout:[--fd-right-width:0px] max-xl:fixed max-xl:top-1/2 max-xl:-translate-y-1/2 max-xl:end-1 max-xl:bg-fd-popover max-xl:text-fd-popover-foreground max-xl:border max-xl:rounded-xl max-xl:shadow-lg max-xl:mask-none xl:sticky xl:top-10 xl:h-[calc(100dvh---spacing(10))] xl:layout:[--fd-right-width:240px]',
+          open
+            ? 'max-xl:w-[240px] max-xl:p-3'
+            : 'max-md:w-4 max-md:ps-[calc(--spacing(1.5)-1px)] max-xl:w-6 max-xl:ps-[calc(--spacing(2.5)-1px)]',
           container?.className,
         )}
         onPointerDown={(e) => {
@@ -105,7 +107,7 @@ export function TOC({ container, header, footer }: TOCProps) {
           }
         }}
       >
-        <div className="flex flex-col my-auto">
+        <div className="flex flex-col my-auto max-xl:min-w-[calc(240px---spacing(6))] xl:items-end xl:text-end xl:pe-4">
           {header}
           <h3
             id="nd-toc-title"
@@ -138,10 +140,11 @@ function TOCPanel({ className, ...props }: ComponentProps<'div'>) {
           key={item.url}
           href={item.url}
           className={cn(
-            'group h-6 prose prose-sm inline-flex items-center gap-2 text-xs text-fd-muted-foreground transition-[color,height] data-[active=true]:text-fd-primary data-[active=false]:hover:text-fd-accent-foreground',
+            'group h-6 prose prose-sm inline-flex items-center gap-2 text-xs text-fd-muted-foreground transition-[color,height] data-[active=true]:text-fd-primary data-[active=false]:hover:text-fd-accent-foreground xl:flex-row-reverse',
             !open && 'h-3 xl:[@media(hover:none)]:h-6',
           )}
           onClick={() => setMobileOpen(false)}
+          autoScroll={open}
         >
           <div
             className={cn(

@@ -143,13 +143,11 @@ export function getLayoutTabs(
   return results;
 }
 
-export function isLayoutTabActive(tab: LayoutTab, pathname: string) {
+export function isLayoutTabActive(tab: LayoutTab, path: PageTree.Node[], pathname: string) {
   if (tab.$folder) {
-    return (
-      PageTree.findPath(
-        tab.$folder.children,
-        (node) => node.type === 'page' && isActive(node.url, pathname),
-      ) !== null
+    const folder = tab.$folder;
+    return path.some(
+      (node) => node.type === 'folder' && (node.$id === folder.$id || node === folder),
     );
   }
 
@@ -276,7 +274,16 @@ export function resolveLinkItems({
   return result;
 }
 
-export function useLinkItems({ githubUrl, links }: Pick<BaseLayoutProps, 'links' | 'githubUrl'>) {
+export interface GroupedLinkItems {
+  all: LinkItemType[];
+  navItems: LinkItemType[];
+  menuItems: LinkItemType[];
+}
+
+export function useLinkItems({
+  githubUrl,
+  links,
+}: Pick<BaseLayoutProps, 'links' | 'githubUrl'>): GroupedLinkItems {
   return useMemo(() => {
     const all = resolveLinkItems({ links, githubUrl });
     const navItems: LinkItemType[] = [];

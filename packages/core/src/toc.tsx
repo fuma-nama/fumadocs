@@ -83,10 +83,16 @@ export function AnchorProvider({ toc, single = false, children }: AnchorProvider
 }
 
 export interface TOCItemProps extends ComponentProps<'a'> {
+  autoScroll?: boolean;
   onActiveChange?: (v: boolean) => void;
 }
 
-export function TOCItem({ ref, onActiveChange = () => null, ...props }: TOCItemProps) {
+export function TOCItem({
+  ref,
+  onActiveChange = () => null,
+  autoScroll = true,
+  ...props
+}: TOCItemProps) {
   const id = props.href ? getItemId(props.href) : null;
   const containerRef = use(ScrollContext);
   const anchorRef = useRef<HTMLAnchorElement>(null);
@@ -95,38 +101,35 @@ export function TOCItem({ ref, onActiveChange = () => null, ...props }: TOCItemP
     observer.items.some((item) => item.id === id && item.active),
   );
 
-  function autoScroll(items: TOCItemInfo[], instant = false) {
-    const anchor = anchorRef.current;
-    const container = containerRef?.current;
-    if (!id || !anchor || !container) return;
-
-    let lastActive: TOCItemInfo | undefined;
-    for (const item of items) {
-      if (!item.active) continue;
-      if (!lastActive || lastActive.t < item.t) {
-        lastActive = item;
-      }
-    }
-
-    if (lastActive?.id === id) {
-      scrollIntoView(anchor, {
-        behavior: instant ? 'instant' : 'smooth',
-        block: 'center',
-        inline: 'center',
-        scrollMode: 'always',
-        boundary: container,
-      });
-    }
-  }
-
   useTOCListener(
-    (items) => {
+    (items, { initial }) => {
       const itemData = id ? items.find((item) => item.id === id) : null;
 
       if (itemData && itemData.active !== active) {
         setActive(itemData.active);
         onActiveChange(itemData.active);
-        autoScroll(items);
+        const anchor = anchorRef.current;
+        const container = containerRef?.current;
+
+        if (autoScroll && id && anchor && container) {
+          let lastActive: TOCItemInfo | undefined;
+          for (const item of items) {
+            if (!item.active) continue;
+            if (!lastActive || lastActive.t < item.t) {
+              lastActive = item;
+            }
+          }
+
+          if (lastActive?.id === id) {
+            scrollIntoView(anchor, {
+              behavior: initial ? 'instant' : 'smooth',
+              block: 'center',
+              inline: 'center',
+              scrollMode: 'always',
+              boundary: container,
+            });
+          }
+        }
       }
     },
     { initial: true },
@@ -163,7 +166,7 @@ export function useTOCListener(listener: ChangeListener, options: { initial?: bo
   const callback = useEffectEvent(listener);
 
   useEffect(() => {
-    if (initial) callback(observer.items);
+    if (initial) callback(observer.items, { initial: true });
     observer.listen(callback);
     return () => observer.unlisten(callback);
   }, [observer, initial]);
@@ -223,7 +226,7 @@ function getItemId(url: string) {
   return null;
 }
 
-type ChangeListener = (items: TOCItemInfo[]) => void;
+type ChangeListener = (items: TOCItemInfo[], opts: { initial: boolean }) => void;
 
 class Observer {
   items: TOCItemInfo[] = [];
@@ -341,6 +344,6 @@ class Observer {
 
   private update(next: TOCItemInfo[]) {
     this.items = next;
-    for (const listener of this.listeners) listener(next);
+    for (const listener of this.listeners) listener(next, { initial: false });
   }
 }

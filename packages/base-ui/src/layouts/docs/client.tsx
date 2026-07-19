@@ -23,7 +23,7 @@ import {
   type BaseSlots,
   type BaseSlotsProps,
 } from '../shared';
-import { TreeContextProvider } from '@/contexts/tree';
+import { TreeContextProvider, useTreePath } from '@/contexts/tree';
 import { Header } from './slots/header';
 import { Container } from './slots/container';
 
@@ -140,9 +140,10 @@ function LayoutTabs({
   tabs: LayoutTab[];
 }) {
   const pathname = usePathname();
+  const path = useTreePath();
   const selected = useMemo(() => {
-    return tabs.findLast((option) => isLayoutTabActive(option, pathname));
-  }, [tabs, pathname]);
+    return tabs.findLast((option) => isLayoutTabActive(option, path, pathname));
+  }, [tabs, path, pathname]);
 
   return (
     <div

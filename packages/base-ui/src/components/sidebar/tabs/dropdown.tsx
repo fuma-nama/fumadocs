@@ -7,6 +7,7 @@ import { cn } from '@/utils/cn';
 import { useSidebar } from '@/components/sidebar/base';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { isLayoutTabActive, type LayoutTab } from '@/layouts/shared';
+import { useTreePath } from '@/contexts/tree';
 
 export type SidebarTabWithProps = LayoutTab;
 
@@ -21,10 +22,11 @@ export function SidebarTabsDropdown({
   const [open, setOpen] = useState(false);
   const { closeOnRedirect } = useSidebar();
   const pathname = usePathname();
+  const path = useTreePath();
 
   const selected = useMemo(() => {
-    return options.findLast((item) => isTabActive(item, pathname));
-  }, [options, pathname]);
+    return options.findLast((item) => isLayoutTabActive(item, path, pathname));
+  }, [options, path, pathname]);
 
   const onClick = () => {
     closeOnRedirect.current = false;
@@ -96,5 +98,3 @@ export function SidebarTabsDropdown({
     </Popover>
   );
 }
-
-export const isTabActive = isLayoutTabActive;
