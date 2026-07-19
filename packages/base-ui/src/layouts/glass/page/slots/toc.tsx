@@ -6,6 +6,7 @@ import { Text } from 'lucide-react';
 import {
   createContext,
   use,
+  useEffect,
   useMemo,
   useRef,
   useState,
@@ -86,6 +87,7 @@ export function TOC({ container, header, footer }: TOCProps) {
           if (!mobileOpen && (e.pointerType === 'touch' || e.pointerType === 'pen')) {
             setMobileOpen(true);
             e.stopPropagation();
+            e.preventDefault();
           }
         }}
         onPointerEnter={(e) => {
@@ -132,6 +134,15 @@ export function TOC({ container, header, footer }: TOCProps) {
 function TOCPanel({ className, ...props }: ComponentProps<'div'>) {
   const items = useTOCItems();
   const { open, setMobileOpen } = useContext();
+  const [delayedOpen, setDelayedOpen] = useState(open);
+
+  // ensure it is after open animation
+  useEffect(() => {
+    const timer = window.setTimeout(() => {
+      setDelayedOpen(open);
+    }, 200);
+    return () => window.clearTimeout(timer);
+  }, [open]);
 
   return (
     <div className={cn('flex flex-col', className)} {...props}>
@@ -143,8 +154,8 @@ function TOCPanel({ className, ...props }: ComponentProps<'div'>) {
             'group h-6 prose prose-sm inline-flex items-center gap-2 text-xs text-fd-muted-foreground transition-[color,height] data-[active=true]:text-fd-primary data-[active=false]:hover:text-fd-accent-foreground xl:flex-row-reverse',
             !open && 'h-3 xl:[@media(hover:none)]:h-6',
           )}
-          onClick={() => setMobileOpen(false)}
-          autoScroll={open}
+          onClick={() => open && delayedOpen && setMobileOpen(false)}
+          autoScroll={open && delayedOpen}
         >
           <div
             className={cn(
