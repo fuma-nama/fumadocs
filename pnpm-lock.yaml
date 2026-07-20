@@ -3416,6 +3416,9 @@ importers:
 
   packages/satteri:
     dependencies:
+      '@standard-schema/spec':
+        specifier: ^1.1.0
+        version: 1.1.0
       estree-util-to-js:
         specifier: ^2.0.0
         version: 2.0.0
@@ -3443,6 +3446,12 @@ importers:
       satteri:
         specifier: ^0.9.5
         version: 0.9.5
+      tinyglobby:
+        specifier: ^0.2.17
+        version: 0.2.17
+      ws:
+        specifier: ^8.21.1
+        version: 8.21.1
       yuku-codegen:
         specifier: ^0.6.4
         version: 0.6.4
@@ -3462,12 +3471,30 @@ importers:
       '@types/mdast':
         specifier: ^4.0.4
         version: 4.0.4
+      '@types/mdx':
+        specifier: ^2.0.14
+        version: 2.0.14
       '@types/node':
         specifier: 26.1.1
         version: 26.1.1
+      '@types/react':
+        specifier: ^19.2.17
+        version: 19.2.17
+      '@types/react-dom':
+        specifier: ^19.2.3
+        version: 19.2.3(@types/react@19.2.17)
+      '@types/ws':
+        specifier: ^8.18.1
+        version: 8.18.1
       mdast-util-mdx:
         specifier: ^3.0.0
         version: 3.0.0
+      react:
+        specifier: ^19.2.7
+        version: 19.2.7
+      react-dom:
+        specifier: ^19.2.7
+        version: 19.2.7(react@19.2.7)
       shiki:
         specifier: ^4.3.1
         version: 4.3.1

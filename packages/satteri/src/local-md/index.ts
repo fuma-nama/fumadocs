@@ -1,0 +1,191 @@
+import {
+  type DynamicSource,
+  type MetaData,
+  type PageData,
+  type StaticSource,
+  type VirtualFile,
+} from 'fumadocs-core/source';
+import type { StandardSchemaV1 } from '@standard-schema/spec';
+import path from 'node:path';
+import { pathToFileURL } from 'node:url';
+import { createStorage, defaultInclude, type RawPage, type StorageConfig } from './storage';
+import { fromJS, type MarkdownRenderer } from './renderer';
+import { getDevServerUrlFromEnv } from './dev/shared';
+import type * as defaultSchemas from 'fumadocs-core/source/schema';
+import type { DynamicLoader } from 'fumadocs-core/source/dynamic';
+import {
+  createMarkdownCompiler,
+  type CompileResult,
+  type MarkdownCompilerOptions,
+} from './compiler';
+
+export interface SatteriLocalMarkdownConfig<
+  FrontmatterSchema extends StandardSchemaV1,
+  MetaSchema extends StandardSchemaV1,
+>
+  extends StorageConfig<FrontmatterSchema, MetaSchema>, MarkdownCompilerOptions {}
+
+export interface SatteriLocalMarkdown<
+  FrontmatterSchema extends StandardSchemaV1,
+  MetaSchema extends StandardSchemaV1,
+> {
+  /** connect to dev server, required for hot reload */
+  devServer: (url?: string) => Promise<void>;
+  staticSource: <ModuleExports = Record<string, unknown>>(
+    options?: SourceOptions,
+  ) => Promise<
+    StaticSource<{
+      pageData: LocalMarkdownPage<StandardSchemaV1.InferOutput<FrontmatterSchema>, ModuleExports>;
+      metaData: StandardSchemaV1.InferOutput<MetaSchema> & MetaData;
+    }>
+  >;
+  dynamicSource: <ModuleExports = Record<string, unknown>>(
+    options?: SourceOptions,
+  ) => DynamicSource<{
+    pageData: LocalMarkdownPage<StandardSchemaV1.InferOutput<FrontmatterSchema>, ModuleExports>;
+    metaData: StandardSchemaV1.InferOutput<MetaSchema> & MetaData;
+  }>;
+
+  invalidateFile: (file: string) => void;
+}
+
+export interface LocalMarkdownPage<
+  Frontmatter = Record<string, unknown>,
+  ModuleExports = Record<string, unknown>,
+> {
+  title: string;
+  description?: string;
+  icon?: string;
+  content: string;
+  frontmatter: Frontmatter;
+
+  load: () => Promise<MarkdownRenderer<ModuleExports>>;
+}
+
+interface SourceOptions {
+  /** base directory for virtual file paths */
+  baseDir?: string;
+}
+
+export function localMd<
+  FrontmatterSchema extends StandardSchemaV1 = typeof defaultSchemas.pageSchema,
+  MetaSchema extends StandardSchemaV1 = typeof defaultSchemas.metaSchema,
+>(
+  config: SatteriLocalMarkdownConfig<FrontmatterSchema, MetaSchema>,
+): SatteriLocalMarkdown<FrontmatterSchema, MetaSchema> {
+  const storage = createStorage(config);
+  const compiler = createMarkdownCompiler(config);
+  const compilerCache = new WeakMap<RawPage<unknown>, Promise<CompileResult>>();
+  const registeredLoaders = new Set<DynamicLoader>();
+  let cachedStaticSource: Promise<
+    StaticSource<{
+      pageData: LocalMarkdownPage<StandardSchemaV1.InferOutput<FrontmatterSchema>, never>;
+      metaData: StandardSchemaV1.InferOutput<MetaSchema> & MetaData;
+    }>
+  > | null = null;
+
+  async function createFiles(options?: SourceOptions) {
+    const { metas, pages } = await storage.getPages();
+    const baseDir = options?.baseDir;
+    const files: VirtualFile<{
+      pageData: LocalMarkdownPage<StandardSchemaV1.InferOutput<FrontmatterSchema>, never>;
+      metaData: StandardSchemaV1.InferOutput<MetaSchema> & MetaData;
+    }>[] = [];
+
+    for (const page of pages) {
+      const frontmatter = page.frontmatter as PageData & { _openapi?: unknown };
+
+      files.push({
+        type: 'page',
+        path: baseDir ? path.join(baseDir, page.path) : page.path,
+        absolutePath: page.absolutePath,
+        data: {
+          title: frontmatter.title ?? path.basename(page.path, path.extname(page.path)),
+          description: frontmatter.description,
+          icon: frontmatter.icon,
+          // for Fumadocs OpenAPI
+          ['_openapi' as never]: frontmatter._openapi,
+
+          content: page.content,
+          frontmatter: page.frontmatter,
+          async load() {
+            let promise = compilerCache.get(page);
+            if (!promise) {
+              promise = compiler.compile({
+                path: page.absolutePath,
+                value: page.content,
+                data: { frontmatter: frontmatter as Record<string, unknown> },
+              });
+              compilerCache.set(page, promise);
+            }
+
+            const res = await promise;
+            return fromJS({
+              code: res.code,
+              filePath: res.filePath,
+              baseUrl: pathToFileURL(res.filePath).href,
+              structuredData: res.structuredData,
+            });
+          },
+        },
+      });
+    }
+
+    for (const meta of metas) {
+      files.push({
+        type: 'meta',
+        path: baseDir ? path.join(baseDir, meta.path) : meta.path,
+        absolutePath: meta.absolutePath,
+        data: meta.data!,
+      });
+    }
+
+    return files;
+  }
+
+  return {
+    invalidateFile(file) {
+      const absolutePath = path.resolve(file);
+      cachedStaticSource = null;
+      storage.invalidateCache(absolutePath);
+      for (const v of registeredLoaders) v.invalidate();
+    },
+    async devServer(url = getDevServerUrlFromEnv()) {
+      if (!url) {
+        console.warn(
+          `[@fumadocs/satteri/local-md] dev server URL could not be found, try passing the URL to devServer() explicitly instead`,
+        );
+        return;
+      }
+
+      const { connectDevServer } = await import('./dev/node-client');
+      const conn = connectDevServer(url);
+      conn.send({
+        type: 'watch-dir',
+        dir: path.resolve(config.dir),
+        includes: config.include ?? defaultInclude,
+      });
+
+      conn.subscribe((event) => {
+        if (event.type === 'change') {
+          this.invalidateFile(event.absolutePath);
+        }
+      });
+    },
+    dynamicSource(opts) {
+      return {
+        files: () => createFiles(opts),
+        configure(loader) {
+          registeredLoaders.add(loader);
+        },
+      };
+    },
+    staticSource(opts) {
+      return (cachedStaticSource ??= createFiles(opts).then((files) => ({ files })));
+    },
+  };
+}
+
+export { createMarkdownCompiler } from './compiler';
+export type { MarkdownCompiler, MarkdownCompilerOptions, CompileResult } from './compiler';
+export type { MarkdownRenderer } from './renderer';

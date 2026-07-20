@@ -11,6 +11,8 @@ export default defineConfig({
     'src/index.ts',
     'src/preset.ts',
     'src/compile.ts',
+    'src/local-md/index.ts',
+    'src/local-md/client.ts',
     'src/remark-heading.ts',
     'src/remark-structure.ts',
     'src/remark-image.ts',

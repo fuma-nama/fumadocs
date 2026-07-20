@@ -1,0 +1,98 @@
+import { WebSocket, type RawData } from 'ws';
+import {
+  decodeDevEvent,
+  encodeDevClientEvent,
+  type DevClientEvent,
+  type DevServerEvent,
+} from './shared';
+
+const store = new Map<string, DevServerConnection>();
+
+/** Connect to a content dev server, reusing an existing connection per URL. */
+export function connectDevServer(url: string): DevServerConnection {
+  let connection = store.get(url);
+
+  if (!connection) {
+    connection = new DevServerConnection(url);
+    store.set(url, connection);
+  }
+
+  return connection;
+}
+
+export class DevServerConnection {
+  private readonly listeners = new Set<(event: DevServerEvent) => void>();
+  private pendingEvents: DevClientEvent[] = [];
+  private socket?: WebSocket;
+  readonly url: string;
+
+  constructor(url: string) {
+    this.url = url;
+    this.connect();
+  }
+
+  subscribe(listener: (event: DevServerEvent) => void) {
+    this.listeners.add(listener);
+
+    return () => {
+      this.listeners.delete(listener);
+    };
+  }
+
+  close() {
+    this.socket?.close();
+    this.listeners.clear();
+    store.delete(this.url);
+  }
+
+  private connect() {
+    if (this.socket) return;
+    const socket = new WebSocket(this.url);
+    this.socket = socket;
+
+    socket.on('open', () => {
+      console.log(`[@fumadocs/satteri] connected to dev server at ${this.url}`);
+      for (const event of this.pendingEvents) {
+        this.send(event);
+      }
+      this.pendingEvents = [];
+    });
+
+    socket.on('message', (data) => {
+      const decoded = decodeDevEvent(rawDataToString(data));
+      if (decoded) this.emit(decoded);
+    });
+
+    socket.on('close', () => {
+      this.socket = undefined;
+      console.log(`[@fumadocs/satteri] disconnected from dev server at ${this.url}`);
+    });
+
+    socket.on('error', (e) => {
+      console.error(e);
+    });
+  }
+
+  private emit(event: DevServerEvent) {
+    for (const listener of this.listeners) {
+      listener(event);
+    }
+  }
+
+  send(message: DevClientEvent) {
+    if (this.socket?.readyState !== WebSocket.OPEN) {
+      this.pendingEvents.push(message);
+      return;
+    }
+
+    this.socket.send(encodeDevClientEvent(message));
+  }
+}
+
+function rawDataToString(data: RawData): string {
+  if (typeof data === 'string') return data;
+  if (data instanceof ArrayBuffer) return Buffer.from(data).toString('utf8');
+  if (Array.isArray(data)) return Buffer.concat(data).toString('utf8');
+
+  return data.toString('utf8');
+}

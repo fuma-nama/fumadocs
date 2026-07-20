@@ -19,6 +19,8 @@
   "exports": {
     ".": "./dist/index.js",
     "./compile": "./dist/compile.js",
+    "./local-md": "./dist/local-md/index.js",
+    "./local-md/client": "./dist/local-md/client.js",
     "./preset": "./dist/preset.js",
     "./rehype-code": "./dist/rehype-code.js",
     "./rehype-toc": "./dist/rehype-toc.js",
@@ -51,6 +53,7 @@
     "types:check": "tsc --noEmit"
   },
   "dependencies": {
+    "@standard-schema/spec": "^1.1.0",
     "estree-util-to-js": "^2.0.0",
     "fumadocs-core": "workspace:^",
     "fumadocs-typescript": "workspace:^",
@@ -60,6 +63,8 @@
     "mdast-util-gfm": "^3.1.0",
     "npm-to-yarn": "^3.0.1",
     "satteri": "^0.9.5",
+    "tinyglobby": "^0.2.17",
+    "ws": "^8.21.1",
     "yuku-codegen": "^0.6.4",
     "yuku-parser": "^0.6.4"
   },
@@ -68,8 +73,14 @@
     "@types/estree-jsx": "^1.0.5",
     "@types/hast": "^3.0.5",
     "@types/mdast": "^4.0.4",
+    "@types/mdx": "^2.0.14",
     "@types/node": "26.1.1",
+    "@types/react": "^19.2.17",
+    "@types/react-dom": "^19.2.3",
+    "@types/ws": "^8.18.1",
     "mdast-util-mdx": "^3.0.0",
+    "react": "^19.2.7",
+    "react-dom": "^19.2.7",
     "shiki": "^4.3.1",
     "tsconfig": "workspace:*",
     "tsdown": "0.22.8",
@@ -79,13 +90,29 @@
   "peerDependencies": {
     "@types/hast": "*",
     "@types/mdast": "*",
-    "fumadocs-core": "^16.0.0"
+    "@types/mdx": "*",
+    "@types/react": "*",
+    "fumadocs-core": "^16.0.0",
+    "react": "^19.2.0",
+    "react-dom": "^19.2.0"
   },
   "peerDependenciesMeta": {
     "@types/hast": {
       "optional": true
     },
     "@types/mdast": {
+      "optional": true
+    },
+    "@types/mdx": {
+      "optional": true
+    },
+    "@types/react": {
+      "optional": true
+    },
+    "react": {
+      "optional": true
+    },
+    "react-dom": {
       "optional": true
     }
   }
