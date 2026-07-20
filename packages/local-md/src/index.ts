@@ -130,6 +130,7 @@ export function localMd<
                 value: page.content,
                 data: { frontmatter: page.frontmatter },
               });
+              compilerCache.set(page, promise);
             }
 
             const res = await promise;

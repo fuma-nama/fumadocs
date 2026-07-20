@@ -135,16 +135,28 @@ export function fromJS<M>(options: MarkdownRendererJSOptions): MarkdownRenderer<
     baseUrl,
   } = options;
 
+  /**
+   * `function-body` output reads its runtime from `arguments[0]`, so `opts`
+   * must be the first key: spreading `context` first would shift it out of
+   * that position and break rendering for any non-empty context.
+   */
+  function createScope(context?: Record<string, unknown>) {
+    // a caller-supplied `opts` is dropped rather than allowed to shadow the runtime
+    const { opts: _opts, ...rest } = context ?? {};
+
+    return {
+      opts: {
+        ...JsxRuntime,
+        baseUrl,
+      },
+      ...rest,
+    };
+  }
+
   return {
     structuredData,
     async render(components, context) {
-      const fullScope = {
-        ...context,
-        opts: {
-          ...JsxRuntime,
-          baseUrl,
-        },
-      };
+      const fullScope = createScope(context);
 
       const hydrateFn = new AsyncFunction(...Object.keys(fullScope), code);
       const out = (await hydrateFn.apply(hydrateFn, Object.values(fullScope))) as {
@@ -159,13 +171,7 @@ export function fromJS<M>(options: MarkdownRendererJSOptions): MarkdownRenderer<
       };
     },
     renderSync(components, context) {
-      const fullScope = {
-        ...context,
-        opts: {
-          ...JsxRuntime,
-          baseUrl,
-        },
-      };
+      const fullScope = createScope(context);
 
       const hydrateFn = new Function(...Object.keys(fullScope), code);
       const out = hydrateFn.apply(hydrateFn, Object.values(fullScope)) as {
