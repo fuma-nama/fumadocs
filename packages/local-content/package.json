@@ -1,0 +1,73 @@
+{
+  "name": "@fumadocs/local-content",
+  "version": "0.1.0",
+  "description": "Shared building blocks for local content sources in Fumadocs",
+  "keywords": [
+    "Docs",
+    "fumadocs"
+  ],
+  "homepage": "https://fumadocs.dev",
+  "license": "MIT",
+  "author": "Fuma Nama",
+  "repository": "github:fuma-nama/fumadocs",
+  "bin": {
+    "local-content": "./dist/bin.js"
+  },
+  "files": [
+    "dist"
+  ],
+  "type": "module",
+  "exports": {
+    ".": "./dist/index.js",
+    "./cli": "./dist/cli.js",
+    "./dev/node-client": "./dist/dev/node-client.js",
+    "./dev/node-server": "./dist/dev/node-server.js",
+    "./dev/react-client": "./dist/dev/react-client.js",
+    "./dev/shared": "./dist/dev/shared.js",
+    "./package.json": "./package.json"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "scripts": {
+    "build": "tsdown",
+    "clean": "rimraf dist",
+    "dev": "tsdown --watch",
+    "lint": "oxlint .",
+    "test": "vitest run",
+    "types:check": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@standard-schema/spec": "^1.1.0",
+    "chokidar": "^5.0.0",
+    "commander": "^15.0.0",
+    "picomatch": "^4.0.5",
+    "tinyglobby": "^0.2.17",
+    "ws": "^8.21.1"
+  },
+  "devDependencies": {
+    "@types/node": "26.1.1",
+    "@types/picomatch": "^4.0.3",
+    "@types/react": "^19.2.17",
+    "@types/ws": "^8.18.1",
+    "fumadocs-core": "workspace:*",
+    "react": "^19.2.7",
+    "tsconfig": "workspace:*",
+    "tsdown": "0.22.8",
+    "vite": "^8.1.4",
+    "vitest": "^4.1.10"
+  },
+  "peerDependencies": {
+    "@types/react": "*",
+    "fumadocs-core": "^16.8.0",
+    "react": "^19.2.0"
+  },
+  "peerDependenciesMeta": {
+    "@types/react": {
+      "optional": true
+    },
+    "react": {
+      "optional": true
+    }
+  }
+}

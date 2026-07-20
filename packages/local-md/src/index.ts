@@ -1,13 +1,11 @@
-import {
-  type DynamicSource,
-  type MetaData,
-  type PageData,
-  type StaticSource,
-  type VirtualFile,
-} from 'fumadocs-core/source';
+import type { MetaData, DynamicSource, StaticSource } from 'fumadocs-core/source';
 import type { StandardSchemaV1 } from '@standard-schema/spec';
-import path from 'node:path';
-import { createStorage, RawPage } from './storage';
+import {
+  createLocalSource,
+  type LocalPage,
+  type SourceOptions,
+  type StorageConfig,
+} from '@fumadocs/local-content';
 import type * as defaultSchemas from 'fumadocs-core/source/schema';
 import {
   type MarkdownRenderer,
@@ -15,28 +13,15 @@ import {
   fromAst,
   fromJS,
 } from './md/renderer';
-import { CompileResult, createMarkdownCompiler, MarkdownCompilerOptions } from './md/compiler';
-import { getDevServerUrlFromEnv } from './dev/shared';
-import type { DynamicLoader } from 'fumadocs-core/source/dynamic';
-import { defaultInclude } from './shared';
+import { createMarkdownCompiler, MarkdownCompilerOptions } from './md/compiler';
 import { pathToFileURL } from 'node:url';
 
 export interface LocalMarkdownConfig<
   FrontmatterSchema extends StandardSchemaV1,
   MetaSchema extends StandardSchemaV1,
-> extends MarkdownCompilerOptions {
-  /**
-   * root directory for content files.
-   */
-  dir: string;
-  /**
-   * a list of glob patterns, customize the content files to be scanned.
-   */
-  include?: string[];
+>
+  extends MarkdownCompilerOptions, StorageConfig<FrontmatterSchema, MetaSchema> {
   rendererOptions?: Pick<MarkdownRendererASTOptions, 'executor'>;
-
-  frontmatterSchema?: FrontmatterSchema;
-  metaSchema?: MetaSchema;
 }
 
 export interface LocalMarkdown<
@@ -63,23 +48,10 @@ export interface LocalMarkdown<
   invalidateFile: (file: string) => void;
 }
 
-export interface LocalMarkdownPage<
+export type LocalMarkdownPage<
   Frontmatter = Record<string, unknown>,
   ModuleExports = Record<string, unknown>,
-> {
-  title: string;
-  description?: string;
-  icon?: string;
-  content: string;
-  frontmatter: Frontmatter;
-
-  load: () => Promise<MarkdownRenderer<ModuleExports>>;
-}
-
-interface SourceOptions {
-  /** base directory for virtual file paths */
-  baseDir?: string;
-}
+> = LocalPage<Frontmatter, MarkdownRenderer<ModuleExports>>;
 
 export function localMd<
   FrontmatterSchema extends StandardSchemaV1 = typeof defaultSchemas.pageSchema,
@@ -87,128 +59,40 @@ export function localMd<
 >(
   config: LocalMarkdownConfig<FrontmatterSchema, MetaSchema>,
 ): LocalMarkdown<FrontmatterSchema, MetaSchema> {
-  const storage = createStorage(config);
   const compiler = createMarkdownCompiler(config);
-  const compilerCache = new WeakMap<RawPage<unknown>, Promise<CompileResult>>();
-  const registeredLoaders = new Set<DynamicLoader>();
-  let cachedStaticSource: Promise<
-    StaticSource<{
-      pageData: LocalMarkdownPage<StandardSchemaV1.InferOutput<FrontmatterSchema>, never>;
-      metaData: StandardSchemaV1.InferOutput<MetaSchema> & MetaData;
-    }>
-  > | null = null;
 
-  async function createFiles(options?: SourceOptions) {
-    const { metas, pages } = await storage.getPages();
-    const baseDir = options?.baseDir;
-    const files: VirtualFile<{
-      pageData: LocalMarkdownPage<StandardSchemaV1.InferOutput<FrontmatterSchema>, never>;
-      metaData: StandardSchemaV1.InferOutput<MetaSchema> & MetaData;
-    }>[] = [];
-
-    for (const page of pages) {
-      const frontmatter = page.frontmatter as PageData & { _openapi?: unknown };
-
-      files.push({
-        type: 'page',
-        path: baseDir ? path.join(baseDir, page.path) : page.path,
-        absolutePath: page.absolutePath,
-        data: {
-          title: frontmatter.title ?? path.basename(page.path, path.extname(page.path)),
-          description: frontmatter.description,
-          icon: frontmatter.icon,
-          // for Fumadocs OpenAPI
-          ['_openapi' as never]: frontmatter._openapi,
-
-          content: page.content,
-          frontmatter: page.frontmatter,
-          async load() {
-            let promise = compilerCache.get(page);
-            if (!promise) {
-              promise = compiler.compile({
-                path: page.absolutePath,
-                value: page.content,
-                data: { frontmatter: page.frontmatter },
-              });
-              compilerCache.set(page, promise);
-            }
-
-            const res = await promise;
-            return res.type === 'ast'
-              ? fromAst({
-                  tree: res.tree,
-                  filePath: res.file.path,
-                  rehypeToc: res.file.data.rehypeToc,
-                  structuredData: res.file.data.structuredData,
-                  ...config.rendererOptions,
-                })
-              : fromJS({
-                  code: res.code,
-                  filePath: res.file.path,
-                  baseUrl: pathToFileURL(res.file.path).href,
-                  structuredData: res.file.data.structuredData,
-                });
-          },
-        },
-      });
-    }
-
-    for (const meta of metas) {
-      files.push({
-        type: 'meta',
-        path: baseDir ? path.join(baseDir, meta.path) : meta.path,
-        absolutePath: meta.absolutePath,
-        data: meta.data!,
-      });
-    }
-
-    return files;
-  }
-
-  return {
-    invalidateFile(file) {
-      const absolutePath = path.resolve(file);
-      cachedStaticSource = null;
-      storage.invalidateCache(absolutePath);
-      for (const v of registeredLoaders) v.invalidate();
-    },
-    async devServer(url = getDevServerUrlFromEnv()) {
-      if (!url) {
-        console.warn(
-          `[@fumadocs/local-md] dev server URL could not be found, try passing the URL to devServer() explicitly instead`,
-        );
-        return;
-      }
-
-      const { connectDevServer } = await import('@/dev/node-client');
-      const conn = connectDevServer(url);
-      conn.send({
-        type: 'watch-dir',
-        dir: path.resolve(config.dir),
-        includes: config.include ?? defaultInclude,
+  const source = createLocalSource<FrontmatterSchema, MetaSchema, MarkdownRenderer<never>>({
+    ...config,
+    async load(page) {
+      const res = await compiler.compile({
+        path: page.absolutePath,
+        value: page.content,
+        data: { frontmatter: page.frontmatter },
       });
 
-      conn.subscribe((event) => {
-        if (event.type === 'change') {
-          this.invalidateFile(event.absolutePath);
-        }
-      });
+      return res.type === 'ast'
+        ? fromAst({
+            tree: res.tree,
+            filePath: res.file.path,
+            rehypeToc: res.file.data.rehypeToc,
+            structuredData: res.file.data.structuredData,
+            ...config.rendererOptions,
+          })
+        : fromJS({
+            code: res.code,
+            filePath: res.file.path,
+            baseUrl: pathToFileURL(res.file.path).href,
+            structuredData: res.file.data.structuredData,
+          });
     },
-    dynamicSource(opts) {
-      return {
-        files: () => createFiles(opts),
-        configure(loader) {
-          registeredLoaders.add(loader);
-        },
-      };
-    },
-    staticSource(opts) {
-      return (cachedStaticSource ??= createFiles(opts).then((files) => ({ files })));
-    },
-  };
+  });
+
+  // the module exports of a page are only known by its caller, so the generic
+  // is declared per `staticSource()`/`dynamicSource()` call rather than here
+  return source as unknown as LocalMarkdown<FrontmatterSchema, MetaSchema>;
 }
 
-export type { RawMeta, RawPage } from './storage';
+export type { RawMeta, RawPage } from '@fumadocs/local-content';
 export type {
   MDXProcessorOptions,
   CompileResult,

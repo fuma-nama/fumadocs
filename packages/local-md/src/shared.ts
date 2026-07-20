@@ -1,1 +1,1 @@
-export const defaultInclude = ['**/*.{md,mdx,json}'];
+export { defaultInclude } from '@fumadocs/local-content';

@@ -1,14 +1,13 @@
-import { WebSocket, type RawData } from 'ws';
 import {
   decodeDevEvent,
   encodeDevClientEvent,
   type DevClientEvent,
   type DevServerEvent,
 } from './shared';
+import { WebSocket, type RawData } from 'ws';
 
 const store = new Map<string, DevServerConnection>();
 
-/** Connect to a content dev server, reusing an existing connection per URL. */
 export function connectDevServer(url: string): DevServerConnection {
   let connection = store.get(url);
 
@@ -51,7 +50,7 @@ export class DevServerConnection {
     this.socket = socket;
 
     socket.on('open', () => {
-      console.log(`[@fumadocs/satteri] connected to dev server at ${this.url}`);
+      console.log(`[@fumadocs/local-content] connected to dev server at ${this.url}`);
       for (const event of this.pendingEvents) {
         this.send(event);
       }
@@ -65,7 +64,7 @@ export class DevServerConnection {
 
     socket.on('close', () => {
       this.socket = undefined;
-      console.log(`[@fumadocs/satteri] disconnected from dev server at ${this.url}`);
+      console.log(`[@fumadocs/local-content] disconnected from dev server at ${this.url}`);
     });
 
     socket.on('error', (e) => {

@@ -1,0 +1,182 @@
+---
+title: Local Content
+description: Shared building blocks for local file-system content sources.
+---
+
+## Introduction
+
+`@fumadocs/local-content` contains the parts every local content source needs, regardless of how its files are compiled:
+
+- **Storage** — scanning a directory, parsing frontmatter, validating `meta.json` against a schema.
+- **A source factory** — turning scanned files into Fumadocs [virtual files](/docs/headless/source-api), with per-page caching and invalidation.
+- **A dev server** — a file watcher and websocket client for hot reload, plus a CLI to run it.
+
+It is the foundation [`@fumadocs/local-md`](/docs/integrations/content/local-md) is built on. Use it directly when you want the same file handling but a different compiler — for example a different Markdown engine, or a format that isn't Markdown at all.
+
+<Callout title="Already using Markdown?">
+  If you just want local Markdown/MDX files, use
+  [`@fumadocs/local-md`](/docs/integrations/content/local-md) instead. It wires this package to a
+  Markdown compiler for you.
+</Callout>
+
+## Setup
+
+```package-install
+@fumadocs/local-content
+```
+
+### Create a Source
+
+`createLocalSource` scans a directory and hands each page to your `load` function. Whatever `load` returns becomes the value of `page.data.load()`:
+
+```ts title="lib/source.ts"
+import { createLocalSource } from '@fumadocs/local-content';
+import { dynamicLoader } from 'fumadocs-core/source/dynamic';
+
+const docs = createLocalSource({
+  dir: 'content/docs',
+  async load(page) {
+    // `page` has `path`, `absolutePath`, `content` and validated `frontmatter`
+    return compileHowEverYouLike(page.content);
+  },
+});
+
+const docsLoader = dynamicLoader(docs.dynamicSource(), {
+  baseUrl: '/docs',
+});
+
+export async function getSource() {
+  return docsLoader.get();
+}
+```
+
+`load` is called **at most once per page**. The result is cached until that file is invalidated, so `page.data.load()` is cheap to call repeatedly — from a page, its metadata, and its table of contents alike.
+
+### Scanning
+
+By default the source scans `**/*.{md,mdx,json}`. `.json` files are treated as `meta.json` navigation files, everything else as pages.
+
+```ts
+const docs = createLocalSource({
+  dir: 'content/docs',
+  include: ['**/*.md', '**/*.json'],
+  // ...
+});
+```
+
+### Schema
+
+Pass `frontmatterSchema` and `metaSchema` to customise validation. Any [Standard Schema](https://standardschema.dev) implementation works (Zod, Valibot, ArkType…):
+
+```ts title="lib/source.ts"
+import { createLocalSource } from '@fumadocs/local-content';
+import { pageSchema, metaSchema } from 'fumadocs-core/source/schema';
+
+const docs = createLocalSource({
+  dir: 'content/docs',
+  frontmatterSchema: pageSchema.extend({
+    // ...
+  }),
+  metaSchema: metaSchema.extend({
+    // ...
+  }),
+  // ...
+});
+```
+
+A file that fails validation throws with the offending path and the schema issues.
+
+## Usage
+
+### Static vs Dynamic
+
+`dynamicSource()` re-reads files on demand and is the right choice with `dynamicLoader()`.
+
+`staticSource()` takes a one-time snapshot, so it works with a plain `loader()`:
+
+```ts title="lib/source.ts"
+import { loader } from 'fumadocs-core/source';
+
+export const source = loader({
+  source: await docs.staticSource(),
+  baseUrl: '/docs',
+});
+```
+
+Both accept a `baseDir` to prefix the virtual file paths:
+
+```ts
+await docs.staticSource({ baseDir: 'docs' });
+```
+
+### Invalidation
+
+`invalidateFile()` drops the caches for one file — its parsed frontmatter, its `load()` result, and the cached `staticSource()` snapshot. Registered dynamic loaders are notified so the next read picks up the change:
+
+```ts
+docs.invalidateFile('content/docs/index.mdx');
+```
+
+Other pages keep their cached results, so invalidating one file does not re-compile the whole directory.
+
+### Hot Reload
+
+The source runs entirely at runtime, so nothing watches your files by default. During development, run the dev server and connect to it.
+
+Start it with `local-content dev --`, wrapping whatever command you normally run:
+
+```json title="package.json"
+{
+  "scripts": {
+    "dev": "local-content dev -- next dev"
+  }
+}
+```
+
+Then connect from your source:
+
+```ts title="lib/source.ts"
+// change it if you use a different framework (e.g. import.meta.env.DEV)
+if (process.env.NODE_ENV === 'development') {
+  void docs.devServer();
+}
+```
+
+The CLI passes its URL through an environment variable, so `devServer()` finds it with no configuration. Pass a URL explicitly if you run the server yourself:
+
+```ts
+void docs.devServer('ws://127.0.0.1:8000/_fumadocs_local_md');
+```
+
+Use `-p` to change the port:
+
+```json
+{
+  "scripts": {
+    "dev": "local-content dev -p 8123 -- next dev"
+  }
+}
+```
+
+The watcher lives in a single process and broadcasts to every connected client, which is what makes it work when your framework runs several workers.
+
+## Building a Content Source
+
+To ship your own package on top of this one, keep `createLocalSource` internal and expose your own typed wrapper:
+
+```ts
+import { createLocalSource, type LocalPage } from '@fumadocs/local-content';
+
+export type MyPage<Frontmatter> = LocalPage<Frontmatter, MyRenderer>;
+
+export function mySource(config: MyConfig) {
+  const compiler = createCompiler(config);
+
+  return createLocalSource({
+    ...config,
+    load: (page) => compiler.compile(page.absolutePath, page.content),
+  });
+}
+```
+
+This is exactly how [`@fumadocs/local-md`](/docs/integrations/content/local-md) and the Sätteri content source are written — they differ only in the compiler they pass to `load`.

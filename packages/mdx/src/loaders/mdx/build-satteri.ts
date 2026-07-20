@@ -90,15 +90,17 @@ function postprocessPlugin(
         refs.push({ href: node.url });
       }
     },
-    afterToJs({ result }) {
+    collectExports({ data, addExport }) {
       if (extractLinkReferences) {
-        result.data.extractedReferences ??= [];
-        result.code += `\nexport const extractedReferences = ${JSON.stringify(result.data.extractedReferences)};`;
+        addExport('extractedReferences', JSON.stringify((data.extractedReferences ??= [])));
       }
 
       if (lastModified) {
-        result.code += `\nexport const lastModified = new Date(${lastModified.getTime()});`;
+        addExport('lastModified', `new Date(${lastModified.getTime()})`);
       }
+    },
+    afterToJs({ result }) {
+      if (extractLinkReferences) result.data.extractedReferences ??= [];
     },
   };
 }

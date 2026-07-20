@@ -1,11 +1,10 @@
 import fs from 'node:fs/promises';
-import path from 'node:path';
 import { glob } from 'tinyglobby';
+import path from 'node:path';
 import { frontmatter as parseFrontmatter } from 'fumadocs-core/content/md/frontmatter';
 import type { StandardSchemaV1 } from '@standard-schema/spec';
 import * as defaultSchemas from 'fumadocs-core/source/schema';
-
-export const defaultInclude = ['**/*.{md,mdx,json}'];
+import { defaultInclude } from './shared';
 
 export interface RawPage<Frontmatter = Record<string, unknown>> {
   path: string;
@@ -38,12 +37,6 @@ export interface StorageConfig<
 }
 
 const CHUNK_SIZE = 100;
-
-function formatIssues(issues: readonly StandardSchemaV1.Issue[]): string {
-  return issues
-    .map((issue) => (issue.path ? `${issue.path}: ${issue.message}` : issue.message))
-    .join('\n');
-}
 
 export function createStorage<
   FrontmatterSchema extends StandardSchemaV1 = typeof defaultSchemas.pageSchema,
@@ -92,24 +85,31 @@ export function createStorage<
     const content = await fs.readFile(absolutePath, 'utf-8');
     const parsed = parseFrontmatter(content);
 
-    const result = await frontmatterSchema['~standard'].validate(parsed.data);
-    if (result.issues) {
-      throw new Error(`invalid frontmatter in "${absolutePath}": ${formatIssues(result.issues)}`);
+    const frontmatterResult = await frontmatterSchema['~standard'].validate(parsed.data);
+    if (frontmatterResult.issues) {
+      const message = frontmatterResult.issues
+        .map((issue) => (issue.path ? `${issue.path}: ${issue.message}` : issue.message))
+        .join('\n');
+      throw new Error(`invalid frontmatter in "${absolutePath}": ${message}`);
     }
 
     return {
       path: file,
       absolutePath,
       content: parsed.content,
-      frontmatter: result.value,
+      frontmatter: frontmatterResult.value,
     };
   }
 
-  async function json(absolutePath: string, file: string): Promise<$Meta> {
+  async function json(absolutePath: string, file: string): Promise<$Meta | undefined> {
     const content = await fs.readFile(absolutePath, 'utf-8');
-    const result = await metaSchema['~standard'].validate(JSON.parse(content));
+    const parsed = JSON.parse(content);
+    const result = await metaSchema['~standard'].validate(parsed);
     if (result.issues) {
-      throw new Error(`invalid data in "${absolutePath}": ${formatIssues(result.issues)}`);
+      const message = result.issues
+        .map((issue) => (issue.path ? `${issue.path}: ${issue.message}` : issue.message))
+        .join('\n');
+      throw new Error(`invalid data in "${absolutePath}": ${message}`);
     }
 
     return {
@@ -124,7 +124,9 @@ export function createStorage<
       filesCache.delete(absolutePath);
     },
     async getPages() {
-      const files = await glob(include, { cwd: dir });
+      const files = await glob(include, {
+        cwd: dir,
+      });
       const chunks: Promise<($Page | $Meta | undefined)[]>[] = [];
 
       for (let i = 0; i < files.length; i += CHUNK_SIZE) {

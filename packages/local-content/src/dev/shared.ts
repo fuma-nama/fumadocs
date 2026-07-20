@@ -1,20 +1,19 @@
 /**
- * Wire protocol for the content dev server.
- *
- * Kept byte-compatible with `@fumadocs/local-md`'s dev server, so the
- * `local-md` CLI can act as the watcher process for a Sätteri content source.
+ * The websocket path and the env var names below are a wire contract with
+ * already-published `@fumadocs/local-md` setups, so their *values* stay as they
+ * are even though this package is no longer Markdown-specific.
  */
-export const LOCAL_MD_DEV_PATH = '/_fumadocs_local_md';
+export const DEV_SERVER_PATH = '/_fumadocs_local_md';
 
 export type DevWatchEvent = 'add' | 'addDir' | 'change' | 'unlink' | 'unlinkDir';
+
+export interface DevClientEvent extends WatchDirOptions {
+  type: 'watch-dir';
+}
 
 export interface WatchDirOptions {
   dir: string;
   includes: string[];
-}
-
-export interface DevClientEvent extends WatchDirOptions {
-  type: 'watch-dir';
 }
 
 export type DevServerEvent =
@@ -54,6 +53,12 @@ export function decodeDevEvent(value: string): DevServerEvent | undefined {
   }
 }
 
+const publicEnvNames = [
+  'FD_LOCAL_MD_DEV_SERVER_URL',
+  'NEXT_PUBLIC_FD_LOCAL_MD_DEV_SERVER_URL',
+  'VITE_FD_LOCAL_MD_DEV_SERVER_URL',
+];
+
 export function getDevServerUrlFromEnv(): string | undefined {
   // must hardcode to allow bundlers to inline env variables
   if (typeof process === 'object' && 'env' in process) {
@@ -64,17 +69,17 @@ export function getDevServerUrlFromEnv(): string | undefined {
     );
   }
 
-  // typed locally rather than augmenting `ImportMeta` globally, which would
-  // leak into (and can conflict with) consumers' type environments
-  const { env } = import.meta as ImportMeta & {
-    env?: Record<string, string | undefined>;
-  };
-
-  if (env) {
+  if (import.meta.env) {
     return (
-      env.FD_LOCAL_MD_DEV_SERVER_URL ??
-      env.NEXT_PUBLIC_FD_LOCAL_MD_DEV_SERVER_URL ??
-      env.VITE_FD_LOCAL_MD_DEV_SERVER_URL
+      import.meta.env.FD_LOCAL_MD_DEV_SERVER_URL ??
+      import.meta.env.NEXT_PUBLIC_FD_LOCAL_MD_DEV_SERVER_URL ??
+      import.meta.env.VITE_FD_LOCAL_MD_DEV_SERVER_URL
     );
+  }
+}
+
+export function setDevServerUrlInEnv(url: string) {
+  for (const name of publicEnvNames) {
+    process.env[name] = url;
   }
 }

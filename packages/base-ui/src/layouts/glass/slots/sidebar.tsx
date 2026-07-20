@@ -106,7 +106,7 @@ export function SidebarDrawer({ contentProps }: SidebarDrawerProps) {
           >
             <Drawer.Content
               {...contentProps}
-              className={cn('flex flex-col size-full px-3', contentProps?.className)}
+              className={cn('flex flex-col min-h-full px-3', contentProps?.className)}
             >
               <div className="sticky flex flex-col gap-2 top-0 py-2 bg-fd-background shadow-lg shadow-fd-background">
                 <div className="flex items-center gap-1.5 ps-2.5">
