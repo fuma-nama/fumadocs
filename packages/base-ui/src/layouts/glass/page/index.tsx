@@ -47,7 +47,7 @@ export function DocsPage({ full = false, toc = Empty, tableOfContent, children }
       <TOCProvider toc={toc}>
         <div
           data-fd-full={full}
-          className="flex flex-col gap-2 p-6 pb-16 min-w-0 [grid-area:main] md:px-8 md:pt-16 md:pb-8"
+          className="flex flex-col gap-2 p-6 pb-16 min-w-0 [grid-area:main] md:pt-16 md:pb-8"
         >
           <Breadcrumb />
           {children}

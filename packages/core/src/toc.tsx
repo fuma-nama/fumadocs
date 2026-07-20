@@ -96,44 +96,55 @@ export function TOCItem({
   const id = props.href ? getItemId(props.href) : null;
   const containerRef = use(ScrollContext);
   const anchorRef = useRef<HTMLAnchorElement>(null);
+  const isInitialRef = useRef(true);
   const observer = useObserver();
   const [active, setActive] = useState(() =>
     observer.items.some((item) => item.id === id && item.active),
   );
 
-  useTOCListener(
-    (items, { initial }) => {
-      const itemData = id ? items.find((item) => item.id === id) : null;
+  const onUpdate = useEffectEvent((items: TOCItemInfo[], initial: boolean) => {
+    const itemData = id ? items.find((item) => item.id === id) : null;
+    if (!itemData) return;
+    const isChanged = itemData.active !== active;
 
-      if (itemData && itemData.active !== active) {
-        setActive(itemData.active);
-        onActiveChange(itemData.active);
-        const anchor = anchorRef.current;
-        const container = containerRef?.current;
+    if (isChanged) {
+      setActive(itemData.active);
+      onActiveChange(itemData.active);
+    }
 
-        if (autoScroll && id && anchor && container) {
-          let lastActive: TOCItemInfo | undefined;
-          for (const item of items) {
-            if (!item.active) continue;
-            if (!lastActive || lastActive.t < item.t) {
-              lastActive = item;
-            }
-          }
+    const anchor = anchorRef.current;
+    const container = containerRef?.current;
+    if (!autoScroll || !anchor || !container) return;
 
-          if (lastActive?.id === id) {
-            scrollIntoView(anchor, {
-              behavior: initial ? 'instant' : 'smooth',
-              block: 'center',
-              inline: 'center',
-              scrollMode: 'always',
-              boundary: container,
-            });
-          }
-        }
+    let lastActive: TOCItemInfo | undefined;
+    for (const item of items) {
+      if (!item.active) continue;
+      if (!lastActive || lastActive.t < item.t) {
+        lastActive = item;
       }
-    },
-    { initial: true },
-  );
+    }
+
+    if (lastActive?.id === id) {
+      scrollIntoView(anchor, {
+        behavior: initial ? 'instant' : 'smooth',
+        block: 'center',
+        inline: 'center',
+        scrollMode: 'always',
+        boundary: container,
+      });
+    }
+  });
+
+  useEffect(() => {
+    if (autoScroll) onUpdate(observer.items, isInitialRef.current);
+    isInitialRef.current = false;
+  }, [observer, autoScroll]);
+
+  useEffect(() => {
+    const listener: ChangeListener = (items) => onUpdate(items, false);
+    observer.listen(listener);
+    return () => observer.unlisten(listener);
+  }, [observer]);
 
   return <a ref={mergeRefs(anchorRef, ref)} data-active={active} {...props} />;
 }
@@ -160,16 +171,14 @@ export function useTOC() {
   );
 }
 
-export function useTOCListener(listener: ChangeListener, options: { initial?: boolean } = {}) {
-  const { initial = false } = options;
+export function useTOCListener(listener: ChangeListener) {
   const observer = useObserver();
   const callback = useEffectEvent(listener);
 
   useEffect(() => {
-    if (initial) callback(observer.items, { initial: true });
     observer.listen(callback);
     return () => observer.unlisten(callback);
-  }, [observer, initial]);
+  }, [observer]);
 }
 
 export function useTOCSelector<T>(
@@ -226,7 +235,7 @@ function getItemId(url: string) {
   return null;
 }
 
-type ChangeListener = (items: TOCItemInfo[], opts: { initial: boolean }) => void;
+type ChangeListener = (items: TOCItemInfo[]) => void;
 
 class Observer {
   items: TOCItemInfo[] = [];
@@ -344,6 +353,6 @@ class Observer {
 
   private update(next: TOCItemInfo[]) {
     this.items = next;
-    for (const listener of this.listeners) listener(next, { initial: false });
+    for (const listener of this.listeners) listener(next);
   }
 }

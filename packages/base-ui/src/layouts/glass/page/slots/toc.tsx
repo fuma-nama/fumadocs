@@ -6,7 +6,6 @@ import { Text } from 'lucide-react';
 import {
   createContext,
   use,
-  useEffect,
   useMemo,
   useRef,
   useState,
@@ -15,11 +14,13 @@ import {
 } from 'react';
 import { TOCScrollArea, useTOCItems } from '@/components/toc';
 import { TOCItem } from 'fumadocs-core/toc';
+import { useOnChange } from 'fumadocs-core/utils/use-on-change';
 
 export type TOCProviderProps = Base.TOCProviderProps;
 
 const Context = createContext<{
   open: boolean;
+  inAnimation: boolean;
   setMobileOpen: (v: boolean) => void;
 } | null>(null);
 
@@ -49,15 +50,27 @@ export function TOC({ container, header, footer }: TOCProps) {
   const items = Base.useTOCItems();
   const [hover, setHover] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [inAnimation, setInAnimation] = useState(false);
   const exitTimerRef = useRef<number>(null);
+  const transitionTimerRef = useRef<number>(null);
   const open = hover || mobileOpen;
+
+  useOnChange(open, () => {
+    setInAnimation(true);
+
+    if (transitionTimerRef.current) window.clearTimeout(transitionTimerRef.current);
+    transitionTimerRef.current = window.setTimeout(() => {
+      setInAnimation(false);
+    }, 300);
+  });
 
   const ctx = useMemo(
     () => ({
       open,
       setMobileOpen,
+      inAnimation,
     }),
-    [open],
+    [open, inAnimation],
   );
 
   if (items.length === 0 && !footer && !header) {
@@ -77,27 +90,28 @@ export function TOC({ container, header, footer }: TOCProps) {
         id="nd-toc"
         {...container}
         className={cn(
-          'z-10 flex flex-col transition-[width,padding] duration-300 [grid-area:right] layout:[--fd-right-width:0px] max-xl:fixed max-xl:top-1/2 max-xl:-translate-y-1/2 max-xl:end-1 max-xl:bg-fd-popover max-xl:text-fd-popover-foreground max-xl:border max-xl:rounded-xl max-xl:shadow-lg max-xl:mask-none xl:sticky xl:top-10 xl:h-[calc(100dvh---spacing(10))] xl:layout:[--fd-right-width:240px]',
+          'z-10 grid transition-[width,padding] duration-300 [grid-area:right]',
+          'xl:sticky xl:top-10 xl:h-[calc(100dvh---spacing(10))] md:layout:[--fd-right-width:12px] xl:layout:[--fd-right-width:240px] xl:items-center xl:pe-4',
+          'max-xl:fixed max-xl:top-1/2 max-xl:-translate-y-1/2 max-xl:end-1 max-xl:bg-fd-popover max-xl:text-fd-popover-foreground max-xl:border max-xl:rounded-xl max-xl:shadow-md max-xl:mask-none max-xl:max-h-[calc(100dvh---spacing(32))] max-xl:grid-cols-[calc(240px---spacing(6))]',
+          inAnimation && 'overflow-y-hidden',
           open
             ? 'max-xl:w-[240px] max-xl:p-3'
-            : 'max-md:w-4 max-md:ps-[calc(--spacing(1.5)-1px)] max-xl:w-6 max-xl:ps-[calc(--spacing(2.5)-1px)]',
+            : 'max-md:w-4 max-md:ps-[calc(--spacing(1.5)-1px)] max-xl:w-6 max-xl:ps-[calc(--spacing(2.5)-1px)] max-xl:overflow-clip',
           container?.className,
         )}
         onPointerDown={(e) => {
           if (!mobileOpen && (e.pointerType === 'touch' || e.pointerType === 'pen')) {
             setMobileOpen(true);
-            e.stopPropagation();
-            e.preventDefault();
           }
         }}
         onPointerEnter={(e) => {
           if (e.pointerType === 'mouse') {
             if (exitTimerRef.current) window.clearTimeout(exitTimerRef.current);
-            setHover(true);
+            if (!hover) setHover(true);
           }
         }}
         onPointerLeave={(e) => {
-          if (e.pointerType === 'mouse') {
+          if (hover && e.pointerType === 'mouse') {
             if (exitTimerRef.current) window.clearTimeout(exitTimerRef.current);
             exitTimerRef.current = window.setTimeout(
               () => {
@@ -109,7 +123,7 @@ export function TOC({ container, header, footer }: TOCProps) {
           }
         }}
       >
-        <div className="flex flex-col my-auto max-xl:min-w-[calc(240px---spacing(6))] xl:items-end xl:text-end xl:pe-4">
+        <div className="flex flex-col xl:items-end xl:text-end">
           {header}
           <h3
             id="nd-toc-title"
@@ -131,38 +145,40 @@ export function TOC({ container, header, footer }: TOCProps) {
   );
 }
 
-function TOCPanel({ className, ...props }: ComponentProps<'div'>) {
+function TOCPanel({ className, style, ...props }: ComponentProps<'div'>) {
   const items = useTOCItems();
-  const { open, setMobileOpen } = useContext();
-  const [delayedOpen, setDelayedOpen] = useState(open);
-
-  // ensure it is after open animation
-  useEffect(() => {
-    const timer = window.setTimeout(() => {
-      setDelayedOpen(open);
-    }, 200);
-    return () => window.clearTimeout(timer);
-  }, [open]);
+  const { open, inAnimation, setMobileOpen } = useContext();
 
   return (
-    <div className={cn('flex flex-col', className)} {...props}>
+    <div
+      className={cn(
+        'grid grid-cols-1 transition-[grid-template-rows]',
+        open
+          ? '[--row:calc(6*var(--spacing))]'
+          : '[--row:calc(3*var(--spacing))] xl:[@media(hover:none)]:[--row:calc(6*var(--spacing))]',
+        (!open || inAnimation) && 'pointer-events-none xl:[@media(hover:none)]:pointer-events-auto',
+        className,
+      )}
+      style={{
+        ...style,
+        gridTemplateRows: `repeat(${items.length}, var(--row))`,
+      }}
+      {...props}
+    >
       {items.map((item) => (
         <TOCItem
           key={item.url}
           href={item.url}
-          className={cn(
-            'group h-6 prose prose-sm inline-flex items-center gap-2 text-xs text-fd-muted-foreground transition-[color,height] data-[active=true]:text-fd-primary data-[active=false]:hover:text-fd-accent-foreground xl:flex-row-reverse',
-            !open && 'h-3 xl:[@media(hover:none)]:h-6',
-          )}
-          onClick={() => open && delayedOpen && setMobileOpen(false)}
-          autoScroll={open && delayedOpen}
+          className="group prose prose-sm flex items-center gap-2 text-xs text-fd-muted-foreground transition-colors data-[active=true]:text-fd-primary data-[active=false]:hover:text-fd-accent-foreground xl:flex-row-reverse"
+          onClick={() => setMobileOpen(false)}
+          autoScroll={open && !inAnimation}
         >
           <div
             className={cn(
               'shrink-0 bg-fd-muted-foreground/50 rounded-full size-1 transition-[background-color,width,height] group-data-[active=true]:bg-fd-primary',
               open
                 ? 'w-(--width) h-px'
-                : 'xl:[@media(hover:none)]:w-(--width) xl:[@media(hover:none)]:h-px',
+                : 'transition-[width,height] duration-300 xl:[@media(hover:none)]:w-(--width) xl:[@media(hover:none)]:h-px',
             )}
             style={
               {

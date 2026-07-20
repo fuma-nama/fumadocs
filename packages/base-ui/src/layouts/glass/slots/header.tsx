@@ -1,29 +1,12 @@
 'use client';
 import { Drawer } from '@base-ui/react/drawer';
-import { isLayoutTabActive, type LayoutTab } from '@/layouts/shared';
-import { useTreePath } from '@/contexts/tree';
-import Link from 'fumadocs-core/link';
-import { type ComponentProps, useState } from 'react';
-import {
-  ChevronDown,
-  ChevronsUpDown,
-  LanguagesIcon,
-  MessageCircleIcon,
-  MoreHorizontalIcon,
-  SidebarIcon,
-} from 'lucide-react';
+import { type ComponentProps } from 'react';
+import { ChevronsUpDown, LanguagesIcon, MessageCircleIcon, SidebarIcon } from 'lucide-react';
 import { cn } from '@/utils/cn';
-import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { buttonVariants } from '@/components/ui/button';
 import { useTranslations } from '@fuma-translate/react';
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
-import { usePathname } from 'fumadocs-core/framework';
 import { useGlassLayout } from '..';
+import { LayoutTabsDropdown } from '../layout-tabs';
 
 export type HeaderProps = ComponentProps<'div'>;
 
@@ -41,7 +24,7 @@ export function Header({ className, ...props }: HeaderProps) {
   return (
     <div
       className={cn(
-        'sticky flex flex-row gap-2 [grid-area:left-margin/left-margin/right/right] z-20 px-4 md:top-0 md:pt-2 md:px-2 md:h-12 md:bg-linear-to-b md:from-fd-background max-md:bottom-0 max-md:mt-auto max-md:h-14 max-md:pb-4 max-md:bg-linear-to-t max-md:from-fd-background',
+        'sticky flex flex-row justify-end gap-2 [grid-area:left-margin/left-margin/right/right] z-20 px-4 md:top-0 md:pt-2 md:px-2 md:h-12 md:bg-linear-to-b md:from-fd-background max-md:bottom-0 max-md:mt-auto max-md:h-16 max-md:pb-4 max-md:bg-linear-to-t max-md:from-fd-background',
         className,
       )}
       {...props}
@@ -52,69 +35,33 @@ export function Header({ className, ...props }: HeaderProps) {
           className={cn(
             buttonVariants({ size: 'icon-sm', variant: 'secondary' }),
             baseVariants,
-            'size-10 shrink-0 max-md:hidden',
+            'size-10 me-auto shrink-0 max-md:hidden',
           )}
           onClick={() => sidebar.setCollapsed(false)}
         >
           <SidebarIcon />
         </button>
       )}
-      <DropdownMenu>
-        <DropdownMenuTrigger
-          className={cn(
-            buttonVariants({
-              variant: 'secondary',
-              size: 'icon-sm',
-            }),
-            baseVariants,
-            'size-10 shrink-0 data-popup-open:bg-fd-accent md:hidden',
-          )}
-        >
-          <MoreHorizontalIcon />
-        </DropdownMenuTrigger>
-        <DropdownMenuContent className="min-w-48">
-          {aiChat && (
-            <DropdownMenuItem onClick={() => aiChat.onOpenChange(!aiChat.open)}>
-              <MessageCircleIcon className="size-4 text-fd-muted-foreground" />
-              {t('Ask AI', { note: 'AI chat button' })}
-            </DropdownMenuItem>
-          )}
-          {(slots.languageSelect || slots.themeSwitch) && (
-            <div className="flex items-center justify-between border-t mt-2 pt-2 p-1 gap-2 first:border-t-0 first:mt-0">
-              {slots.languageSelect && (
-                <slots.languageSelect.root className="flex-1">
-                  <slots.languageSelect.text />
-                  <ChevronsUpDown className="ms-auto size-3.5 text-fd-muted-foreground shrink-0" />
-                </slots.languageSelect.root>
-              )}
-              {slots.themeSwitch && <slots.themeSwitch className="p-0" />}
-            </div>
-          )}
-        </DropdownMenuContent>
-      </DropdownMenu>
-      {tabs.length > 0 && (
-        <LayoutTabs tabs={tabs} className={cn(baseVariants, 'min-w-0 max-sm:flex-1')} />
+      {slots.searchTrigger && (
+        <slots.searchTrigger.sm
+          color="secondary"
+          size="icon"
+          className={cn(baseVariants, 'size-12 shrink-0 md:hidden')}
+        />
       )}
-      {slots.languageSelect && (
-        <slots.languageSelect.root className={cn(baseVariants, 'px-3 rounded-full max-md:hidden')}>
-          <LanguagesIcon className="size-4 text-fd-muted-foreground shrink-0" />
-          <slots.languageSelect.text />
-          <ChevronsUpDown className="size-3.5 text-fd-muted-foreground shrink-0" />
-        </slots.languageSelect.root>
+      {tabs.length > 0 && (
+        <LayoutTabsDropdown
+          tabs={tabs}
+          size="lg"
+          className={cn(baseVariants, 'min-w-0 ps-4 pe-3 flex-1 [&_svg]:size-5 md:hidden')}
+        />
       )}
       {slots.searchTrigger && (
-        <>
-          <slots.searchTrigger.sm
-            color="secondary"
-            className={cn(baseVariants, 'ms-auto size-10 shrink-0 lg:hidden')}
-          />
+        <div className="@container flex justify-end flex-1 max-md:hidden">
           <slots.searchTrigger.full
-            className={cn(
-              baseVariants,
-              'ms-auto max-w-[280px] flex-1 text-fd-muted-foreground ps-3 pe-2.5 max-lg:hidden',
-            )}
+            className={cn(baseVariants, 'text-fd-muted-foreground ps-3 w-full @sm:max-w-[200px]')}
           />
-        </>
+        </div>
       )}
       {aiChat && !aiChat.open && (
         <button
@@ -129,6 +76,13 @@ export function Header({ className, ...props }: HeaderProps) {
           {t('Ask AI', { note: 'AI chat button' })}
         </button>
       )}
+      {slots.languageSelect && (
+        <slots.languageSelect.root className={cn(baseVariants, 'px-3 rounded-full max-md:hidden')}>
+          <LanguagesIcon className="size-4 text-fd-muted-foreground shrink-0" />
+          <slots.languageSelect.text />
+          <ChevronsUpDown className="size-3.5 text-fd-muted-foreground shrink-0" />
+        </slots.languageSelect.root>
+      )}
       {slots.themeSwitch && (
         <slots.themeSwitch className={cn(baseVariants, 'shrink-0 px-1.5 max-md:hidden')} />
       )}
@@ -138,9 +92,9 @@ export function Header({ className, ...props }: HeaderProps) {
           <button
             {...props}
             className={cn(
-              buttonVariants({ variant: 'secondary', size: 'icon-sm' }),
+              buttonVariants({ variant: 'secondary', size: 'icon' }),
               baseVariants,
-              'shrink-0 size-10 md:hidden',
+              'shrink-0 size-12 md:hidden',
             )}
             aria-label={
               open
@@ -153,72 +107,5 @@ export function Header({ className, ...props }: HeaderProps) {
         )}
       />
     </div>
-  );
-}
-
-function LayoutTabs({
-  tabs,
-  className,
-  ...props
-}: { tabs: LayoutTab[] } & ComponentProps<typeof PopoverTrigger>) {
-  const path = useTreePath();
-  const pathname = usePathname();
-  const t = useTranslations();
-  const selected = tabs.findLast((t) => isLayoutTabActive(t, path, pathname));
-  const [open, setOpen] = useState(false);
-
-  return (
-    <Popover open={open} onOpenChange={setOpen}>
-      <PopoverTrigger
-        className={cn(
-          'inline-flex items-center gap-2 text-sm px-3 py-1 font-medium rounded-full transition-colors [&_svg]:size-4 hover:bg-fd-accent data-popup-open:bg-fd-accent',
-          className,
-        )}
-        {...props}
-      >
-        {selected ? (
-          <>
-            {selected.icon}
-            <span className="truncate">{selected.title}</span>
-          </>
-        ) : (
-          <span className="text-fd-muted-foreground truncate">
-            {t('Layout Tab', { note: 'layout tab trigger' })}
-          </span>
-        )}
-        <ChevronDown className="ms-auto shrink-0 text-fd-muted-foreground size-3.5!" />
-      </PopoverTrigger>
-      <PopoverContent className="flex flex-col p-1 w-(--anchor-width)" align="start">
-        {tabs.map((t, i) => {
-          if (t.unlisted && t !== selected) return;
-          return (
-            <Link
-              key={i}
-              href={t.url}
-              className={cn(
-                'text-sm px-2 py-1.5 rounded-lg',
-                selected === t
-                  ? 'bg-fd-primary/10 text-fd-primary'
-                  : 'hover:bg-fd-accent hover:text-fd-accent-foreground',
-              )}
-              onClick={() => setOpen(false)}
-            >
-              <div className="font-medium inline-flex items-center gap-2 [&_svg]:size-4">
-                {t.icon}
-                {t.title}
-              </div>
-              <p
-                className={cn(
-                  'mt-1 text-xs text-fd-muted-foreground empty:hidden',
-                  selected === t && 'text-fd-primary/80',
-                )}
-              >
-                {t.description}
-              </p>
-            </Link>
-          );
-        })}
-      </PopoverContent>
-    </Popover>
   );
 }

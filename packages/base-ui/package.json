@@ -47,7 +47,6 @@
     "./components/ui/accordion": "./dist/components/ui/accordion.js",
     "./components/ui/button": "./dist/components/ui/button.js",
     "./components/ui/collapsible": "./dist/components/ui/collapsible.js",
-    "./components/ui/dropdown-menu": "./dist/components/ui/dropdown-menu.js",
     "./components/ui/popover": "./dist/components/ui/popover.js",
     "./components/ui/scroll-area": "./dist/components/ui/scroll-area.js",
     "./components/ui/tabs": "./dist/components/ui/tabs.js",
