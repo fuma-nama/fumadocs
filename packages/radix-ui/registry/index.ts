@@ -160,6 +160,20 @@ export const registry: Registry = {
       unlisted: true,
     },
     {
+      name: 'layouts/glass/layout-tabs',
+      unlisted: true,
+      files: [
+        {
+          type: 'layout',
+          path: 'layouts/glass/layout-tabs.tsx',
+          target: '<dir>/glass/layout-tabs.tsx',
+          meta: {
+            preserveAs: 'layouts/glass',
+          },
+        },
+      ],
+    },
+    {
       name: 'layouts/home',
       files: [
         {

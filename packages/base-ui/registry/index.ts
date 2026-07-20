@@ -160,6 +160,20 @@ export const registry: Registry = {
       unlisted: true,
     },
     {
+      name: 'layouts/glass/layout-tabs',
+      unlisted: true,
+      files: [
+        {
+          type: 'layout',
+          path: 'layouts/glass/layout-tabs.tsx',
+          target: '<dir>/glass/layout-tabs.tsx',
+          meta: {
+            preserveAs: 'layouts/glass',
+          },
+        },
+      ],
+    },
+    {
       name: 'layouts/home',
       files: [
         {
@@ -321,16 +335,6 @@ export const registry: Registry = {
         {
           type: 'ui',
           path: 'components/ui/popover.tsx',
-        },
-      ],
-    },
-    {
-      name: 'dropdown-menu',
-      unlisted: true,
-      files: [
-        {
-          type: 'ui',
-          path: 'components/ui/dropdown-menu.tsx',
         },
       ],
     },

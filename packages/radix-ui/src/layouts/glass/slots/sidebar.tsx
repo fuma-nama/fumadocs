@@ -13,7 +13,14 @@ import {
   useState,
 } from 'react';
 import { cva } from 'class-variance-authority';
-import { ChevronDown, SidebarIcon, XIcon } from 'lucide-react';
+import {
+  ChevronDown,
+  ChevronsUpDown,
+  LanguagesIcon,
+  MessageCircleIcon,
+  SidebarIcon,
+  XIcon,
+} from 'lucide-react';
 import { useOnChange } from 'fumadocs-core/utils/use-on-change';
 import { cn } from '@/utils/cn';
 import { ScrollArea, ScrollViewport } from '@/components/ui/scroll-area';
@@ -27,6 +34,7 @@ import {
   useSidebar as useBaseSidebar,
 } from '@/components/sidebar/base';
 import { useGlassLayout } from '..';
+import { LayoutTabsDropdown } from '../layout-tabs';
 
 const itemTriggerVariants = cva(
   'inline-flex text-sm items-center gap-2 rounded-lg px-2.5 py-2 md:py-1.5 [&_svg]:size-4 outline-none focus-visible:ring-2 focus-visible:ring-fd-ring',
@@ -69,7 +77,11 @@ export interface SidebarDrawerProps {
 }
 
 export function SidebarDrawer({ contentProps }: SidebarDrawerProps) {
-  const { menuItems, slots } = useGlassLayout();
+  const {
+    menuItems,
+    props: { aiChat },
+    slots,
+  } = useGlassLayout();
   const { root } = useTreeContext();
   const { setOpen } = useBaseSidebar();
   const t = useTranslations();
@@ -85,22 +97,44 @@ export function SidebarDrawer({ contentProps }: SidebarDrawerProps) {
             contentProps?.className,
           )}
         >
-          <div className="sticky flex items-center top-0 py-2 bg-fd-background shadow-lg shadow-fd-background">
-            <div className="px-2.5 flex-1">
-              <slots.navTitle className="inline-flex items-center font-semibold gap-2" />
-            </div>
-
-            <button
-              type="button"
-              aria-label={t('Close Sidebar', { note: 'aria-label' })}
-              onClick={() => setOpen(false)}
-              className={cn(
-                buttonVariants({ variant: 'secondary', size: 'icon-sm' }),
-                'rounded-full',
+          <div className="sticky flex flex-col gap-2 top-0 py-2 bg-fd-background shadow-lg shadow-fd-background">
+            <div className="flex items-center gap-1.5 ps-2.5">
+              <slots.navTitle className="flex text-sm items-center font-semibold gap-2 flex-1" />
+              {aiChat && (
+                <button
+                  type="button"
+                  className={cn(
+                    buttonVariants({ variant: 'secondary', size: 'sm' }),
+                    'rounded-full h-8 gap-1.5',
+                  )}
+                  onClick={() => {
+                    aiChat.onOpenChange(!aiChat.open);
+                    setOpen(false);
+                  }}
+                >
+                  <MessageCircleIcon className="size-4 text-fd-muted-foreground" />
+                  {t('Ask AI', { note: 'AI chat button' })}
+                </button>
               )}
-            >
-              <XIcon />
-            </button>
+              <button
+                type="button"
+                aria-label={t('Close Sidebar', { note: 'aria-label' })}
+                onClick={() => setOpen(false)}
+                className={cn(
+                  buttonVariants({ variant: 'secondary', size: 'icon-sm' }),
+                  'rounded-full',
+                )}
+              >
+                <XIcon />
+              </button>
+            </div>
+            {slots.languageSelect && (
+              <slots.languageSelect.root variant="secondary" className="px-2.5 gap-2 rounded-lg">
+                <LanguagesIcon className="size-4 text-fd-muted-foreground shrink-0" />
+                <slots.languageSelect.text />
+                <ChevronsUpDown className="ms-auto size-3.5 text-fd-muted-foreground shrink-0" />
+              </slots.languageSelect.root>
+            )}
           </div>
           <div className="flex flex-col py-2 flex-1">
             {menuItems.map(
@@ -112,6 +146,7 @@ export function SidebarDrawer({ contentProps }: SidebarDrawerProps) {
             {menuItems.map(
               (item, i) => item.type === 'icon' && <SidebarIconLinkItem key={i} item={item} />,
             )}
+            {slots.themeSwitch && <slots.themeSwitch className="p-0 ms-auto" />}
           </div>
         </div>
       </SidebarDrawerContent>
@@ -122,7 +157,11 @@ export function SidebarDrawer({ contentProps }: SidebarDrawerProps) {
 export type SidebarProps = ComponentProps<'aside'>;
 
 export function Sidebar({ className, children, ...props }: SidebarProps) {
-  const { menuItems, slots } = useGlassLayout();
+  const {
+    menuItems,
+    props: { tabs },
+    slots,
+  } = useGlassLayout();
   const { root } = useTreeContext();
   const { collapsible, collapsed, setCollapsed } = useSidebar();
   const t = useTranslations({ note: 'sidebar' });
@@ -138,21 +177,32 @@ export function Sidebar({ className, children, ...props }: SidebarProps) {
       )}
       {...props}
     >
-      <div className="flex items-start px-4 py-3.5 border-b border-fd-foreground/10">
-        <slots.navTitle className={cn('inline-flex text-sm items-start font-semibold gap-2')} />
-        {collapsible && (
-          <button
-            aria-label={collapsed ? t('Show Sidebar') : t('Hide Sidebar')}
-            className={cn(
-              buttonVariants({ variant: 'ghost', size: 'icon-sm' }),
-              '-m-1.5 ms-auto text-fd-muted-foreground',
-            )}
-            onClick={() => setCollapsed(!collapsed)}
-          >
-            <SidebarIcon />
-          </button>
-        )}
+      <div className="flex items-start gap-1 pt-4 px-3.5 empty:hidden">
+        <slots.navTitle className="flex text-sm items-center font-semibold gap-2 me-auto" />
+        <div className="flex -mt-1.5 -me-1.5 empty:hidden">
+          {menuItems.map(
+            (item, i) => item.type === 'icon' && <SidebarIconLinkItem key={i} item={item} />,
+          )}
+          {collapsible && (
+            <button
+              aria-label={collapsed ? t('Show Sidebar') : t('Hide Sidebar')}
+              className={cn(
+                buttonVariants({ variant: 'ghost', size: 'icon-sm' }),
+                'text-fd-muted-foreground',
+              )}
+              onClick={() => setCollapsed(!collapsed)}
+            >
+              <SidebarIcon />
+            </button>
+          )}
+        </div>
       </div>
+      {tabs.length > 0 && (
+        <LayoutTabsDropdown
+          tabs={tabs}
+          className="min-w-0 bg-fd-secondary text-fd-secondary-foreground rounded-xl px-2.5 py-2 [&_svg]:size-4 border rounded-xl shadow-sm mx-2 mt-2.5 empty:hidden"
+        />
+      )}
       <ScrollArea className="min-h-0 flex-1">
         <ScrollViewport className="flex flex-col p-2 [mask-image:linear-gradient(to_bottom,transparent,white_16px,white_calc(100%-16px),transparent))]">
           {menuItems.map(
@@ -161,11 +211,6 @@ export function Sidebar({ className, children, ...props }: SidebarProps) {
           {root.children.map((item, i) => cloneElement(renderNode(item), { key: i }))}
         </ScrollViewport>
       </ScrollArea>
-      <div className="flex items-center px-2.5 py-2 border-t empty:hidden">
-        {menuItems.map(
-          (item, i) => item.type === 'icon' && <SidebarIconLinkItem key={i} item={item} />,
-        )}
-      </div>
       {children}
     </aside>
   );
@@ -321,7 +366,7 @@ function SidebarFolder({ folder }: { folder: PageTree.Folder }) {
             {folder.name}
           </Link>
         ) : (
-          <div className="w-full text-sm px-2.5 py-1.5 font-medium inline-flex items-center gap-2 [&_svg]:size-4 mt-4 first:mt-0">
+          <div className="w-full text-sm px-3 py-1.5 font-medium inline-flex items-center gap-2 [&_svg]:size-4 mt-4 first:mt-0">
             {folder.icon}
             {folder.name}
           </div>
