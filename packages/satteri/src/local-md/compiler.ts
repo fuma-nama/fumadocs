@@ -1,5 +1,5 @@
-import { mdxToJs, type Data, type MdxCompileOptions } from 'satteri';
-import { pathToFileURL } from 'node:url';
+import type { MdxCompileOptions } from 'satteri';
+import { compileMdx } from '@/compile';
 import { applySatteriPreset, type SatteriPresetOptions } from '@/preset';
 import type { StructuredData } from '@/remark-structure';
 
@@ -51,28 +51,20 @@ export function createMarkdownCompiler(config: MarkdownCompilerOptions = {}): Ma
       resolved ??= resolveOptions(config.satteriOptions);
       const options = await resolved;
 
-      const data: Data = { ...options.data };
-      // seed frontmatter so plugins (e.g. remark-structure openapi seeding)
-      // can read it; it is *not* re-exported into the compiled code.
-      if (input.data?.frontmatter) data.frontmatter = input.data.frontmatter;
-
-      // Call `mdxToJs` directly instead of `@fumadocs/satteri/compile`'s
-      // `compileMdx`: the latter appends `export const frontmatter/structuredData`
-      // statements after the function body, which is invalid in `function-body`
-      // output. The plugin visitors still run here, populating
-      // `result.data.structuredData` and injecting the `toc` ESM node into the
-      // tree, so we read structured data from `data` and let `toc` default to
-      // `[]` when the document has no headings.
-      const result = await mdxToJs(input.value, {
-        ...options,
-        outputFormat: 'function-body',
-        fileURL: options.fileURL ?? pathToFileURL(input.path),
-        data,
+      const result = await compileMdx({
+        source: input.value,
+        filePath: input.path,
+        frontmatter: input.data?.frontmatter,
+        environment: 'runtime',
+        // `data` is mutated in place per compile, so it must not be shared
+        options: { ...options, data: { ...options.data } },
       });
 
       return {
         code: result.code,
         filePath: input.path,
+        // in `function-body` output plugin values arrive on `data` rather than
+        // as ESM exports, which is where `toc` (injected into the tree) differs
         structuredData: result.data.structuredData,
       };
     },

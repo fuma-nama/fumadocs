@@ -53,6 +53,7 @@
     "types:check": "tsc --noEmit"
   },
   "dependencies": {
+    "@fumadocs/local-content": "workspace:*",
     "@standard-schema/spec": "^1.1.0",
     "estree-util-to-js": "^2.0.0",
     "fumadocs-core": "workspace:^",
@@ -63,8 +64,6 @@
     "mdast-util-gfm": "^3.1.0",
     "npm-to-yarn": "^3.0.1",
     "satteri": "^0.9.5",
-    "tinyglobby": "^0.2.17",
-    "ws": "^8.21.1",
     "yuku-codegen": "^0.6.4",
     "yuku-parser": "^0.6.4"
   },
@@ -77,7 +76,6 @@
     "@types/node": "26.1.1",
     "@types/react": "^19.2.17",
     "@types/react-dom": "^19.2.3",
-    "@types/ws": "^8.18.1",
     "mdast-util-mdx": "^3.0.0",
     "react": "^19.2.7",
     "react-dom": "^19.2.7",

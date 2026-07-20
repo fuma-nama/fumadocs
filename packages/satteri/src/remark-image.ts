@@ -33,8 +33,10 @@ export function remarkImage({
 
   return {
     name: 'remark-image',
-    afterToJs({ result }) {
-      if (result.data._imageImports) {
+    afterToJs({ result, outputFormat }) {
+      // these are `import` statements, so they only belong in an ES module;
+      // `useImport: false` is the way to get images working at runtime
+      if (outputFormat === 'program' && result.data._imageImports) {
         result.code += `\n${result.data._imageImports.join('\n')}`;
       }
     },

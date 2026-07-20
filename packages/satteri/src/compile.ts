@@ -1,5 +1,31 @@
-import { mdxToJs, type MdxCompileOptions, type MdxToJsResult, type Data } from 'satteri';
+import {
+  mdxToJs,
+  type HastPluginInput,
+  type MdxCompileOptions,
+  type MdxToJsResult,
+  type Data,
+} from 'satteri';
 import { pathToFileURL } from 'node:url';
+
+/**
+ * Marker appended to every compiled document, giving plugins a node that is
+ * guaranteed to exist and to be visited last.
+ *
+ * An MDX comment expression is used rather than a JSX element because the
+ * compiler emits nothing for it, so it cannot show up in the output if a plugin
+ * ever leaves it in place.
+ */
+export const EXPORT_ANCHOR_ID = 'fd-exports-anchor';
+const EXPORT_ANCHOR = `{/*${EXPORT_ANCHOR_ID}*/}`;
+
+/** whether an mdast/hast node is the anchor appended by {@link compileMdx} */
+export function isExportAnchor(node: { type: string; value?: unknown }): boolean {
+  return (
+    (node.type === 'mdxFlowExpression' || node.type === 'mdxTextExpression') &&
+    typeof node.value === 'string' &&
+    node.value.includes(EXPORT_ANCHOR_ID)
+  );
+}
 
 export interface CompileMdxOptions {
   source: string;
@@ -12,9 +38,86 @@ export interface CompileMdxOptions {
 
 export type CompileMdxResult = MdxToJsResult;
 
+export type OutputFormat = 'program' | 'function-body';
+
+export interface AfterToJsContext {
+  result: MdxToJsResult;
+  outputFormat: OutputFormat;
+}
+
+export interface CollectExportsContext {
+  data: Data;
+  /** declare `export const <name> = <valueCode>`; a repeated name replaces the earlier one */
+  addExport: (name: string, valueCode: string) => void;
+}
+
 export interface ExtraPluginHooks {
   beforeToJs?: (opts: { data: Data }) => void;
-  afterToJs?: (opts: { result: MdxToJsResult }) => void;
+  /**
+   * Declare the module exports this plugin contributes.
+   *
+   * Runs once per compile, at the anchor appended to the end of the document,
+   * so every visitor has already seen the content and anything accumulated on
+   * `data` is final. The exports are injected into the tree as a single ESM
+   * node, which means the compiler emits them the right way for whichever
+   * output format is in use — as real `export const` statements for
+   * `'program'`, and as members of the returned object for `'function-body'`.
+   */
+  collectExports?: (opts: CollectExportsContext) => void;
+  /** post-process the generated code; use {@link collectExports} for exports */
+  afterToJs?: (opts: AfterToJsContext) => void;
+}
+
+/**
+ * Built-in hast plugin that turns the anchor into the document's ESM exports.
+ *
+ * It is registered last so the other plugins have been constructed, and the
+ * anchor sits at the end of the document so it is visited after their content.
+ */
+function exportAnchorPlugin(plugins: ExtraPluginHooks[]): HastPluginInput {
+  return () => ({
+    name: 'fd-export-anchor',
+    mdxFlowExpression(node, ctx) {
+      if (!isExportAnchor(node)) return;
+
+      // name -> statement, so a later export of the same name replaces an earlier one
+      const statements = new Map<string, string>();
+      const addExport = (name: string, valueCode: string) => {
+        statements.set(name, `export const ${name} = ${valueCode};`);
+      };
+
+      for (const plugin of plugins) {
+        plugin.collectExports?.({ data: ctx.data, addExport });
+      }
+
+      const { frontmatter, _valueToExport } = ctx.data;
+      if (frontmatter) addExport('frontmatter', JSON.stringify(frontmatter));
+      if (Array.isArray(_valueToExport)) {
+        for (const name of _valueToExport) {
+          if (!(name in ctx.data)) continue;
+          addExport(name, JSON.stringify(ctx.data[name as keyof Data]));
+        }
+      }
+
+      if (statements.size > 0) {
+        let root = ctx.parent(node);
+        while (root) {
+          const next = ctx.parent(root);
+          if (!next) break;
+          root = next;
+        }
+
+        if (root) {
+          ctx.prependChild(root, {
+            type: 'mdxjsEsm',
+            value: Array.from(statements.values()).join('\n'),
+          });
+        }
+      }
+
+      ctx.removeNode(node);
+    },
+  });
 }
 
 export async function compileMdx({
@@ -33,12 +136,16 @@ export async function compileMdx({
     plugin.beforeToJs?.({ data });
   }
 
-  const result = await mdxToJs(source, {
+  const outputFormat: OutputFormat =
+    environment === 'runtime' ? 'function-body' : (satteriOptions.outputFormat ?? 'program');
+
+  const result = await mdxToJs(`${source}\n\n${EXPORT_ANCHOR}\n`, {
     ...satteriOptions,
     mdastPlugins,
-    hastPlugins,
+    // appended last so it runs after the plugins whose exports it collects
+    hastPlugins: [...hastPlugins, exportAnchorPlugin(plugins)],
     development: isDevelopment,
-    outputFormat: environment === 'runtime' ? 'function-body' : satteriOptions.outputFormat,
+    outputFormat,
     fileURL: satteriOptions.fileURL ?? pathToFileURL(filePath),
     data,
     features: {
@@ -50,30 +157,11 @@ export async function compileMdx({
   });
 
   for (const plugin of plugins) {
-    plugin.afterToJs?.({ result });
-  }
-
-  // var name -> code line
-  const injectedExports = new Map<string, string>();
-  function queueDataExport(name: string, code: string): void {
-    injectedExports.set(name, `export const ${name} = ${code};`);
+    plugin.afterToJs?.({ result, outputFormat });
   }
 
   const outData = result.data;
-  if (outData.frontmatter) {
-    queueDataExport('frontmatter', JSON.stringify(outData.frontmatter));
-  }
-  if (Array.isArray(outData._valueToExport)) {
-    for (const name of outData._valueToExport) {
-      if (!(name in outData)) continue;
-      queueDataExport(name, JSON.stringify(outData[name]));
-    }
-  }
-
-  let code = result.code;
-  if (injectedExports.size > 0) {
-    code = `${code}\n${Array.from(injectedExports.values()).join('\n')}`;
-  }
+  const code = result.code;
   return {
     code,
     data: outData,
