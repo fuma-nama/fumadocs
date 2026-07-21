@@ -117,9 +117,9 @@ export function GlassLayout(props: GlassLayoutProps) {
         <TreeContextProvider tree={tree}>
           <div
             id="fd-glass-layout"
-            className="grid overflow-x-clip min-h-dvh [--page-col:900px] [--fd-left-width:0px] [--fd-right-width:0px] has-data-[fd-full=true]:[--page-col:1200px]"
+            className="grid overflow-x-clip min-h-dvh [--fd-main-width:900px] [--fd-left-width:0px] [--fd-right-width:0px]"
             style={{
-              gridTemplate: `"left left-margin main right-margin right" 1fr / var(--fd-left-width) minmax(0,1fr) minmax(0px, var(--page-col)) minmax(0,1fr) var(--fd-right-width)`,
+              gridTemplate: `"left left-margin main right-margin right" 1fr / var(--fd-left-width) calc(50% - var(--fd-main-width)/2 - var(--fd-left-width)) 1fr calc(50% - var(--fd-main-width)/2 - var(--fd-right-width)) var(--fd-right-width)`,
             }}
           >
             <slots.sidebar.drawer />
