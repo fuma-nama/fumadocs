@@ -1,31 +1,20 @@
-import {
-  mdxToJs,
-  type HastPluginInput,
-  type MdxCompileOptions,
-  type MdxToJsResult,
-  type Data,
-} from 'satteri';
+import { mdxToJs, type MdxCompileOptions, type MdxToJsResult, type Data } from 'satteri';
 import { pathToFileURL } from 'node:url';
+import { createExportAnchor, type DocumentFormat } from './export-anchor';
+import { markdownToJs, rehypeDropRawHtml } from './markdown-to-js';
 
-/**
- * Appended to every document so plugins have a node that always exists and is
- * always visited last. An MDX comment, not a JSX element, so it emits nothing
- * even if a plugin leaves it in place.
- */
-export const EXPORT_ANCHOR_ID = 'fd-exports-anchor';
-const EXPORT_ANCHOR = `{/*${EXPORT_ANCHOR_ID}*/}`;
-
-export function isExportAnchor(node: { type: string; value?: unknown }): boolean {
-  return (
-    (node.type === 'mdxFlowExpression' || node.type === 'mdxTextExpression') &&
-    typeof node.value === 'string' &&
-    node.value.includes(EXPORT_ANCHOR_ID)
-  );
-}
+export type { DocumentFormat } from './export-anchor';
 
 export interface CompileMdxOptions {
   source: string;
   filePath: string;
+  /**
+   * Which parser to use.
+   *
+   * Defaults to the `filePath` extension, so a `.md` file is not silently given
+   * MDX semantics.
+   */
+  format?: DocumentFormat;
   frontmatter?: Record<string, unknown>;
   isDevelopment?: boolean;
   environment?: 'bundler' | 'runtime';
@@ -59,55 +48,10 @@ export interface ExtraPluginHooks {
   afterToJs?: (opts: AfterToJsContext) => void;
 }
 
-function exportAnchorPlugin(plugins: ExtraPluginHooks[]): HastPluginInput {
-  return () => ({
-    name: 'fd-export-anchor',
-    mdxFlowExpression(node, ctx) {
-      if (!isExportAnchor(node)) return;
-
-      // name -> statement, so a later export of the same name replaces an earlier one
-      const statements = new Map<string, string>();
-      const addExport = (name: string, valueCode: string) => {
-        statements.set(name, `export const ${name} = ${valueCode};`);
-      };
-
-      for (const plugin of plugins) {
-        plugin.collectExports?.({ data: ctx.data, addExport });
-      }
-
-      const { frontmatter, _valueToExport } = ctx.data;
-      if (frontmatter) addExport('frontmatter', JSON.stringify(frontmatter));
-      if (Array.isArray(_valueToExport)) {
-        for (const name of _valueToExport) {
-          if (!(name in ctx.data)) continue;
-          addExport(name, JSON.stringify(ctx.data[name as keyof Data]));
-        }
-      }
-
-      if (statements.size > 0) {
-        let root = ctx.parent(node);
-        while (root) {
-          const next = ctx.parent(root);
-          if (!next) break;
-          root = next;
-        }
-
-        if (root) {
-          ctx.prependChild(root, {
-            type: 'mdxjsEsm',
-            value: Array.from(statements.values()).join('\n'),
-          });
-        }
-      }
-
-      ctx.removeNode(node);
-    },
-  });
-}
-
 export async function compileMdx({
   source,
   filePath,
+  format = filePath.endsWith('.mdx') ? 'mdx' : 'md',
   frontmatter,
   isDevelopment = false,
   environment = 'bundler',
@@ -124,11 +68,17 @@ export async function compileMdx({
   const outputFormat: OutputFormat =
     environment === 'runtime' ? 'function-body' : (satteriOptions.outputFormat ?? 'program');
 
-  const result = await mdxToJs(`${source}\n\n${EXPORT_ANCHOR}\n`, {
+  const anchor = createExportAnchor(format);
+  const compileOptions: MdxCompileOptions = {
     ...satteriOptions,
     mdastPlugins,
-    // appended last so it runs after the plugins whose exports it collects
-    hastPlugins: [...hastPlugins, exportAnchorPlugin(plugins)],
+    // ordered last so the anchor runs after the plugins whose exports it
+    // collects, and the raw drop after the anchor node is gone
+    hastPlugins: [
+      ...hastPlugins,
+      anchor.plugin(plugins),
+      ...(format === 'md' ? [rehypeDropRawHtml()] : []),
+    ],
     development: isDevelopment,
     outputFormat,
     fileURL: satteriOptions.fileURL ?? pathToFileURL(filePath),
@@ -139,7 +89,12 @@ export async function compileMdx({
       directive: true,
       ...satteriOptions.features,
     },
-  });
+  };
+
+  const withAnchor = anchor.append(source);
+  const result = await (format === 'md'
+    ? markdownToJs(withAnchor, compileOptions)
+    : mdxToJs(withAnchor, compileOptions));
 
   for (const plugin of plugins) {
     plugin.afterToJs?.({ result, outputFormat });

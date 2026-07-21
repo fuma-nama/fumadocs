@@ -48,6 +48,7 @@ export function createMarkdownCompiler(config: MarkdownCompilerOptions = {}): Ma
       const result = await compileMdx({
         source: input.value,
         filePath: input.path,
+        format: input.path.endsWith('.mdx') ? 'mdx' : 'md',
         frontmatter: input.data?.frontmatter,
         environment: 'runtime',
         // `data` is mutated in place per compile, so it must not be shared

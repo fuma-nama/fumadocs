@@ -2,7 +2,8 @@ import type { MdastNode, MdastPluginInput, MdastVisitorContext } from 'satteri';
 import { gfmToMarkdown } from 'mdast-util-gfm';
 import type { LLMsOptions as RawLLMsOptions } from 'fumadocs-core/mdx-plugins/remark-llms';
 import { defaultStringifier } from 'fumadocs-core/mdx-plugins/stringifier';
-import { ExtraPluginHooks, isExportAnchor } from './compile';
+import type { ExtraPluginHooks } from './compile';
+import { isExportAnchor } from './export-anchor';
 
 export type LLMsOptions = Omit<RawLLMsOptions, '_data'>;
 
