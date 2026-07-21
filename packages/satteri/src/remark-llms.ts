@@ -33,7 +33,7 @@ export function remarkLlms({ as = '_markdown', headingIds = true, ...rest }: LLM
     ...rest,
     ...gfmToMarkdown(),
     filterElement(node) {
-      // the anchor `compileMdx` appends is not part of the document
+      // the anchor is appended by `compileMdx`, not part of the document
       if (isExportAnchor(node)) return false;
 
       switch (node.type) {

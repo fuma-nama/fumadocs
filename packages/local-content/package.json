@@ -10,20 +10,16 @@
   "license": "MIT",
   "author": "Fuma Nama",
   "repository": "github:fuma-nama/fumadocs",
-  "bin": {
-    "local-content": "./dist/bin.js"
-  },
   "files": [
     "dist"
   ],
   "type": "module",
   "exports": {
     ".": "./dist/index.js",
-    "./cli": "./dist/cli.js",
-    "./dev/node-client": "./dist/dev/node-client.js",
-    "./dev/node-server": "./dist/dev/node-server.js",
-    "./dev/react-client": "./dist/dev/react-client.js",
-    "./dev/shared": "./dist/dev/shared.js",
+    "./dev/vite": "./dist/dev/vite/index.js",
+    "./dev/ws": "./dist/dev/ws/index.js",
+    "./dev/ws/react": "./dist/dev/ws/react.js",
+    "./dev/ws/server": "./dist/dev/ws/server.js",
     "./package.json": "./package.json"
   },
   "publishConfig": {
@@ -38,9 +34,7 @@
     "types:check": "tsc --noEmit"
   },
   "dependencies": {
-    "@standard-schema/spec": "^1.1.0",
     "chokidar": "^5.0.0",
-    "commander": "^15.0.0",
     "picomatch": "^4.0.5",
     "tinyglobby": "^0.2.17",
     "ws": "^8.21.1"
@@ -60,13 +54,17 @@
   "peerDependencies": {
     "@types/react": "*",
     "fumadocs-core": "^16.8.0",
-    "react": "^19.2.0"
+    "react": "^19.2.0",
+    "vite": "^7.0.0 || ^8.0.0"
   },
   "peerDependenciesMeta": {
     "@types/react": {
       "optional": true
     },
     "react": {
+      "optional": true
+    },
+    "vite": {
       "optional": true
     }
   }

@@ -8,7 +8,7 @@ export default defineConfig({
     './src/{index,client}.ts',
     './src/bin.ts',
     './src/js/*',
-    './src/dev/{node-server,node-client,react-client}.ts',
+    './src/dev/{react-client,vite,ws}.ts',
   ],
   format: 'esm',
   exports: {

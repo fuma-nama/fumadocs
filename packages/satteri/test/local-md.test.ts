@@ -18,7 +18,7 @@ async function readFixture(name: string) {
   return { filePath, content };
 }
 
-/** trailing newline keeps the snapshot files stable under the repo formatter */
+/** trailing newline keeps snapshots stable under the formatter */
 function snapshot(value: unknown) {
   return `${JSON.stringify(value, null, 2)}\n`;
 }

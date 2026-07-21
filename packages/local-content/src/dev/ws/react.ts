@@ -1,7 +1,7 @@
 'use client';
 import { useRouter } from 'fumadocs-core/framework';
 import { useEffect, useEffectEvent, type ReactNode } from 'react';
-import { decodeDevEvent, type DevServerEvent, getDevServerUrlFromEnv } from './shared';
+import { decodeDevEvent, type DevServerEvent, getDevServerUrlFromEnv } from './protocol';
 
 export function DevClient(): ReactNode {
   const router = useRouter();

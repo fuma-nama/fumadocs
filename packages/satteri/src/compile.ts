@@ -8,17 +8,13 @@ import {
 import { pathToFileURL } from 'node:url';
 
 /**
- * Marker appended to every compiled document, giving plugins a node that is
- * guaranteed to exist and to be visited last.
- *
- * An MDX comment expression is used rather than a JSX element because the
- * compiler emits nothing for it, so it cannot show up in the output if a plugin
- * ever leaves it in place.
+ * Appended to every document so plugins have a node that always exists and is
+ * always visited last. An MDX comment, not a JSX element, so it emits nothing
+ * even if a plugin leaves it in place.
  */
 export const EXPORT_ANCHOR_ID = 'fd-exports-anchor';
 const EXPORT_ANCHOR = `{/*${EXPORT_ANCHOR_ID}*/}`;
 
-/** whether an mdast/hast node is the anchor appended by {@link compileMdx} */
 export function isExportAnchor(node: { type: string; value?: unknown }): boolean {
   return (
     (node.type === 'mdxFlowExpression' || node.type === 'mdxTextExpression') &&
@@ -47,33 +43,22 @@ export interface AfterToJsContext {
 
 export interface CollectExportsContext {
   data: Data;
-  /** declare `export const <name> = <valueCode>`; a repeated name replaces the earlier one */
+  /** declare `export const <name> = <valueCode>`, a repeated name replaces the earlier one */
   addExport: (name: string, valueCode: string) => void;
 }
 
 export interface ExtraPluginHooks {
   beforeToJs?: (opts: { data: Data }) => void;
   /**
-   * Declare the module exports this plugin contributes.
-   *
-   * Runs once per compile, at the anchor appended to the end of the document,
-   * so every visitor has already seen the content and anything accumulated on
-   * `data` is final. The exports are injected into the tree as a single ESM
-   * node, which means the compiler emits them the right way for whichever
-   * output format is in use — as real `export const` statements for
-   * `'program'`, and as members of the returned object for `'function-body'`.
+   * Declare module exports. Runs at the anchor, after every visitor has seen
+   * the document, so `data` is final. Exports go into the tree as an ESM node,
+   * so the compiler emits them correctly for either output format.
    */
   collectExports?: (opts: CollectExportsContext) => void;
-  /** post-process the generated code; use {@link collectExports} for exports */
+  /** post-process the generated code, use {@link collectExports} for exports */
   afterToJs?: (opts: AfterToJsContext) => void;
 }
 
-/**
- * Built-in hast plugin that turns the anchor into the document's ESM exports.
- *
- * It is registered last so the other plugins have been constructed, and the
- * anchor sits at the end of the document so it is visited after their content.
- */
 function exportAnchorPlugin(plugins: ExtraPluginHooks[]): HastPluginInput {
   return () => ({
     name: 'fd-export-anchor',

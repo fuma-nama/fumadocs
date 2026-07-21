@@ -135,13 +135,9 @@ export function fromJS<M>(options: MarkdownRendererJSOptions): MarkdownRenderer<
     baseUrl,
   } = options;
 
-  /**
-   * `function-body` output reads its runtime from `arguments[0]`, so `opts`
-   * must be the first key: spreading `context` first would shift it out of
-   * that position and break rendering for any non-empty context.
-   */
+  // output reads its runtime from `arguments[0]`, so `opts` must stay the first
+  // key, and a caller-supplied `opts` is dropped rather than shadowing it
   function createScope(context?: Record<string, unknown>) {
-    // a caller-supplied `opts` is dropped rather than allowed to shadow the runtime
     const { opts: _opts, ...rest } = context ?? {};
 
     return {

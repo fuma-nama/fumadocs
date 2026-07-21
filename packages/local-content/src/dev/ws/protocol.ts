@@ -1,8 +1,5 @@
-/**
- * The websocket path and the env var names below are a wire contract with
- * already-published `@fumadocs/local-md` setups, so their *values* stay as they
- * are even though this package is no longer Markdown-specific.
- */
+// this path and the env var names below are a wire contract with published
+// `@fumadocs/local-md` setups, so their values keep the old naming
 export const DEV_SERVER_PATH = '/_fumadocs_local_md';
 
 export type DevWatchEvent = 'add' | 'addDir' | 'change' | 'unlink' | 'unlinkDir';

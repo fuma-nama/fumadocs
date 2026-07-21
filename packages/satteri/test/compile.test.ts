@@ -39,8 +39,7 @@ describe('output-format aware exports', () => {
   test('function-body output carries the same values on the returned object', async () => {
     const { code, data } = await compile('runtime');
 
-    // an `export`/`import` statement after the trailing `return` is both
-    // unreachable and a syntax error — none may be appended
+    // an `export`/`import` after the trailing `return` is a syntax error
     expect(code).not.toMatch(/^\s*export /m);
     expect(code).not.toMatch(/^\s*import /m);
 

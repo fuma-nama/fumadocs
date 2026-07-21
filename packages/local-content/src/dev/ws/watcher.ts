@@ -6,7 +6,7 @@ import {
   type WatchDirOptions,
   type DevServerEvent,
   type DevWatchEvent,
-} from './shared';
+} from './protocol';
 import { WebSocket, WebSocketServer, type RawData } from 'ws';
 import path from 'node:path';
 import picomatch, { type Matcher } from 'picomatch';

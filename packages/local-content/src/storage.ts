@@ -1,156 +1,61 @@
-import fs from 'node:fs/promises';
-import { glob } from 'tinyglobby';
 import path from 'node:path';
-import { frontmatter as parseFrontmatter } from 'fumadocs-core/content/md/frontmatter';
-import type { StandardSchemaV1 } from '@standard-schema/spec';
-import * as defaultSchemas from 'fumadocs-core/source/schema';
-import { defaultInclude } from './shared';
-
-export interface RawPage<Frontmatter = Record<string, unknown>> {
-  path: string;
-  absolutePath: string;
-  content: string;
-  frontmatter: Frontmatter;
-}
-
-export interface RawMeta<Data = Record<string, unknown>> {
-  path: string;
-  absolutePath: string;
-  data: Data;
-}
-
-export interface StorageConfig<
-  FrontmatterSchema extends StandardSchemaV1,
-  MetaSchema extends StandardSchemaV1,
-> {
-  /**
-   * root directory for content files.
-   */
-  dir: string;
-  /**
-   * a list of glob patterns, customize the content files to be scanned.
-   */
-  include?: string[];
-
-  frontmatterSchema?: FrontmatterSchema;
-  metaSchema?: MetaSchema;
-}
+import { glob } from 'tinyglobby';
+import { createSourceFile, type ContentIntegration, type ParsedFile } from './integration';
 
 const CHUNK_SIZE = 100;
 
-export function createStorage<
-  FrontmatterSchema extends StandardSchemaV1 = typeof defaultSchemas.pageSchema,
-  MetaSchema extends StandardSchemaV1 = typeof defaultSchemas.metaSchema,
->(config: StorageConfig<FrontmatterSchema, MetaSchema>) {
-  type $Page = RawPage<StandardSchemaV1.InferOutput<FrontmatterSchema>>;
-  type $Meta = RawMeta<StandardSchemaV1.InferOutput<MetaSchema>>;
-  const filesCache = new Map<string, $Page | $Meta>();
-  const {
-    include = defaultInclude,
-    dir,
-    frontmatterSchema = defaultSchemas.pageSchema,
-    metaSchema = defaultSchemas.metaSchema,
-  } = config;
+export interface StorageConfig<Page, Meta> {
+  /** root directory for content files */
+  dir: string;
+  /** overrides the integration's patterns */
+  include?: string[];
+  integration: ContentIntegration<Page, Meta>;
+}
 
-  async function buildFile(file: string): Promise<$Page | $Meta | undefined> {
+export function createStorage<Page, Meta>(config: StorageConfig<Page, Meta>) {
+  const { dir, integration, include = integration.include } = config;
+  const cache = new Map<string, ParsedFile<Page, Meta>>();
+
+  async function parseFile(file: string): Promise<ParsedFile<Page, Meta> | undefined> {
     const absolutePath = path.resolve(dir, file);
-    const cached = filesCache.get(absolutePath);
+    const cached = cache.get(absolutePath);
     if (cached) return cached;
 
-    const ext = path.extname(file);
-
     try {
-      let out: $Page | $Meta | undefined;
-      switch (ext) {
-        case '.json':
-          out = await json(absolutePath, file);
-          break;
-        case '.mdx':
-        case '.md':
-          out = await md(absolutePath, file);
-          break;
-      }
+      const parsed = await integration.parse(createSourceFile(file, absolutePath));
+      if (parsed) cache.set(absolutePath, parsed);
+      else cache.delete(absolutePath);
 
-      if (out === undefined) filesCache.delete(absolutePath);
-      else filesCache.set(absolutePath, out);
-
-      return out;
+      return parsed;
     } catch (e) {
       console.error(`error when parsing ${file}`, e);
-      filesCache.delete(absolutePath);
+      cache.delete(absolutePath);
     }
-  }
-
-  async function md(absolutePath: string, file: string): Promise<$Page> {
-    const content = await fs.readFile(absolutePath, 'utf-8');
-    const parsed = parseFrontmatter(content);
-
-    const frontmatterResult = await frontmatterSchema['~standard'].validate(parsed.data);
-    if (frontmatterResult.issues) {
-      const message = frontmatterResult.issues
-        .map((issue) => (issue.path ? `${issue.path}: ${issue.message}` : issue.message))
-        .join('\n');
-      throw new Error(`invalid frontmatter in "${absolutePath}": ${message}`);
-    }
-
-    return {
-      path: file,
-      absolutePath,
-      content: parsed.content,
-      frontmatter: frontmatterResult.value,
-    };
-  }
-
-  async function json(absolutePath: string, file: string): Promise<$Meta | undefined> {
-    const content = await fs.readFile(absolutePath, 'utf-8');
-    const parsed = JSON.parse(content);
-    const result = await metaSchema['~standard'].validate(parsed);
-    if (result.issues) {
-      const message = result.issues
-        .map((issue) => (issue.path ? `${issue.path}: ${issue.message}` : issue.message))
-        .join('\n');
-      throw new Error(`invalid data in "${absolutePath}": ${message}`);
-    }
-
-    return {
-      path: file,
-      absolutePath,
-      data: result.value,
-    };
   }
 
   return {
     invalidateCache(absolutePath: string) {
-      filesCache.delete(absolutePath);
+      cache.delete(absolutePath);
     },
-    async getPages() {
-      const files = await glob(include, {
-        cwd: dir,
-      });
-      const chunks: Promise<($Page | $Meta | undefined)[]>[] = [];
+    async getFiles() {
+      const files = await glob(include, { cwd: dir });
+      const chunks: Promise<(ParsedFile<Page, Meta> | undefined)[]>[] = [];
 
       for (let i = 0; i < files.length; i += CHUNK_SIZE) {
-        const promises: Promise<$Page | $Meta | undefined>[] = [];
-        const L = Math.min(files.length, i + CHUNK_SIZE);
-
-        for (let j = i; j < L; j++) {
-          promises.push(buildFile(files[j]));
-        }
-
-        chunks.push(Promise.all(promises));
+        const chunk = files.slice(i, i + CHUNK_SIZE).map(parseFile);
+        chunks.push(Promise.all(chunk));
       }
 
-      const pages: $Page[] = [];
-      const metas: $Meta[] = [];
+      const out: { file: string; parsed: ParsedFile<Page, Meta> }[] = [];
+      let index = 0;
       for await (const chunk of chunks) {
-        for (const item of chunk) {
-          if (!item) continue;
-          if ('frontmatter' in item) pages.push(item);
-          else metas.push(item);
+        for (const parsed of chunk) {
+          const file = files[index++];
+          if (parsed) out.push({ file, parsed });
         }
       }
 
-      return { pages, metas };
+      return out;
     },
   };
 }

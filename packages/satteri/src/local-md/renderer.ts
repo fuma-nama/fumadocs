@@ -14,10 +14,7 @@ export interface MarkdownRenderer<M = Record<string, unknown>> {
     components?: MDXComponents,
     context?: Record<string, unknown>,
   ) => MarkdownRendererResult<M>;
-  /**
-   * a JSON-serializable description of this renderer, so a server can hand a
-   * compiled page to the client and rebuild it with {@link fromSerialized}.
-   */
+  /** JSON-serializable, rebuild it on the client with {@link fromSerialized} */
   serialize: () => MarkdownRendererSerializedOptions;
 }
 
@@ -57,8 +54,7 @@ export function fromJS<M>(options: MarkdownRendererJSOptions): MarkdownRenderer<
     baseUrl,
   } = options;
 
-  // `function-body` output reads its runtime from `arguments[0]`, so `opts`
-  // must stay the first parameter no matter what the caller passes as context.
+  // output reads its runtime from `arguments[0]`, so `opts` must stay first
   function createScope(context?: Record<string, unknown>) {
     const { opts, ...rest } = context ?? {};
 

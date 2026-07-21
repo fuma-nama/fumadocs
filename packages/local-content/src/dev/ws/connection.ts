@@ -3,7 +3,7 @@ import {
   encodeDevClientEvent,
   type DevClientEvent,
   type DevServerEvent,
-} from './shared';
+} from './protocol';
 import { WebSocket, type RawData } from 'ws';
 
 const store = new Map<string, DevServerConnection>();

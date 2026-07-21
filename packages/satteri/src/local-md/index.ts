@@ -2,25 +2,35 @@ import type { MetaData, DynamicSource, StaticSource } from 'fumadocs-core/source
 import type { StandardSchemaV1 } from '@standard-schema/spec';
 import {
   createLocalSource,
-  type LocalPage,
   type SourceOptions,
-  type StorageConfig,
+  type WatchableSource,
 } from '@fumadocs/local-content';
+import { markdownIntegration, type MarkdownPage } from './integration';
 import type * as defaultSchemas from 'fumadocs-core/source/schema';
 import { pathToFileURL } from 'node:url';
 import { fromJS, type MarkdownRenderer } from './renderer';
 import { createMarkdownCompiler, type MarkdownCompilerOptions } from './compiler';
 
-export type SatteriLocalMarkdownConfig<
+export interface SatteriLocalMarkdownConfig<
   FrontmatterSchema extends StandardSchemaV1,
   MetaSchema extends StandardSchemaV1,
-> = StorageConfig<FrontmatterSchema, MetaSchema> & MarkdownCompilerOptions;
+> extends MarkdownCompilerOptions {
+  /** root directory for content files */
+  dir: string;
+  /** a list of glob patterns, customize the content files to be scanned */
+  include?: string[];
+  frontmatterSchema?: FrontmatterSchema;
+  metaSchema?: MetaSchema;
+}
 
 export interface SatteriLocalMarkdown<
   FrontmatterSchema extends StandardSchemaV1,
   MetaSchema extends StandardSchemaV1,
-> {
-  /** connect to dev server, required for hot reload */
+> extends WatchableSource {
+  /**
+   * Connect to the standalone dev server for hot reload. On Vite, prefer
+   * `watchWithVite()` from `@fumadocs/local-content/dev/vite`.
+   */
   devServer: (url?: string) => Promise<void>;
   staticSource: <ModuleExports = Record<string, unknown>>(
     options?: SourceOptions,
@@ -43,7 +53,7 @@ export interface SatteriLocalMarkdown<
 export type LocalMarkdownPage<
   Frontmatter = Record<string, unknown>,
   ModuleExports = Record<string, unknown>,
-> = LocalPage<Frontmatter, MarkdownRenderer<ModuleExports>>;
+> = MarkdownPage<Frontmatter, MarkdownRenderer<ModuleExports>>;
 
 export function localMd<
   FrontmatterSchema extends StandardSchemaV1 = typeof defaultSchemas.pageSchema,
@@ -53,24 +63,32 @@ export function localMd<
 ): SatteriLocalMarkdown<FrontmatterSchema, MetaSchema> {
   const compiler = createMarkdownCompiler(config);
 
-  const source = createLocalSource<FrontmatterSchema, MetaSchema, MarkdownRenderer<never>>({
-    ...config,
-    async load(page) {
-      const res = await compiler.compile({
-        path: page.absolutePath,
-        value: page.content,
-        data: { frontmatter: page.frontmatter as Record<string, unknown> },
-      });
+  const source = createLocalSource({
+    dir: config.dir,
+    include: config.include,
+    integration: markdownIntegration({
+      include: config.include,
+      frontmatterSchema: config.frontmatterSchema,
+      metaSchema: config.metaSchema,
+      async load(page) {
+        const res = await compiler.compile({
+          path: page.absolutePath,
+          value: page.content,
+          data: { frontmatter: page.frontmatter as Record<string, unknown> },
+        });
 
-      return fromJS({
-        code: res.code,
-        filePath: res.filePath,
-        baseUrl: pathToFileURL(res.filePath).href,
-        structuredData: res.structuredData,
-      });
-    },
+        return fromJS({
+          code: res.code,
+          filePath: res.filePath,
+          baseUrl: pathToFileURL(res.filePath).href,
+          structuredData: res.structuredData,
+        });
+      },
+    }),
   });
 
+  // module exports are only known by the caller, so the generic is declared
+  // per `staticSource()`/`dynamicSource()` call rather than here
   return source as unknown as SatteriLocalMarkdown<FrontmatterSchema, MetaSchema>;
 }
 

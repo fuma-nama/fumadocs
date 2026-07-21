@@ -4,19 +4,9 @@ export default defineConfig({
   dts: true,
   fixedExtension: false,
   target: 'es2023',
-  entry: [
-    './src/index.ts',
-    './src/cli.ts',
-    './src/bin.ts',
-    './src/dev/{shared,node-server,node-client,react-client}.ts',
-  ],
+  entry: ['./src/index.ts', './src/dev/vite/index.ts', './src/dev/ws/{index,server,react}.ts'],
   format: 'esm',
-  exports: {
-    bin: {
-      'local-content': './src/bin.ts',
-    },
-    exclude: ['bin'],
-  },
+  exports: true,
   deps: {
     onlyBundle: [],
     neverBundle: [],

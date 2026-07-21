@@ -33,7 +33,7 @@ const HeadingTags = ['h1', 'h2', 'h3', 'h4', 'h5', 'h6'];
 
 declare module 'satteri' {
   interface DataMap {
-    /** serialized `rehype-toc` items, collected into an export at the anchor */
+    /** serialized items, exported at the anchor */
     _rehypeTocItems?: string[];
   }
 }
