@@ -45,11 +45,6 @@ Unlike other layouts, Glass layout styles are **not** bundled into the CSS prese
 @import 'fumadocs-ui/css/preset.css';
 ```
 
-<Callout type="warn" title="Order matters">
-  Import it **before** `fumadocs-ui/css/preset.css`. The preset contains a `@plugin` directive, and
-  any `@source` rules imported after it are ignored — the layout would silently render unstyled.
-</Callout>
-
 <Callout title="Important to know">
 
 - Glass layout is a **client component**, you cannot pass unserializable props from a server component.
@@ -66,7 +61,7 @@ The options are inherited from [Docs Layout](/docs/ui/layouts/docs), with minor 
 
 ### Layout Tabs
 
-Configure [Layout Tabs](/docs/ui/layouts/docs#layout-tabs) with the `tabs` prop, see the linked docs for how to add them. Tabs are shown as a dropdown in the floating header.
+Configure [Layout Tabs](/docs/ui/layouts/docs#layout-tabs) with the `tabs` prop, see the linked docs for how to add them. Tabs are shown as a dropdown in the sidebar.
 
 ```tsx title="layout.tsx"
 import { GlassLayout } from 'fumadocs-ui/layouts/glass';
