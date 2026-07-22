@@ -1,3 +1,23 @@
+## @fumadocs/base-ui@16.12.0
+
+### Fix invalid list semantics in Home layout navbar
+
+`NavigationMenu.List` in the Home layout header defaults to a `<ul>`, but its direct children (nav title link, link groups, control clusters) are not `<li>` elements, which is an accessibility violation (axe `list`, serious) on every page using `HomeLayout`. Render it as a `<div>` instead — the same intent as the Radix UI variant, which already renders its list as a non-`<ul>` element via `asChild`.
+
+### Introduce Glass Layout
+
+A new layout for docs, a smooth, beautiful variant built around floating, translucent panels.
+
+### Don't force-mount inactive tab content by default
+
+Styled `Tabs` previously kept every tab panel mounted in the DOM (hidden with `display: none`). Inactive panels are now unmounted by default, following the underlying primitive.
+
+You can still opt back into keeping panels mounted per tab with `forceMount` (`fumadocs-ui`) or `keepMounted` (`@fumadocs/base-ui`) on `Tab` / `TabsContent`.
+
+### Open the tab containing a linked heading
+
+When a tab's content stays mounted (`forceMount` / `keepMounted`), navigating to a URL hash that points to an element inside a tab — such as a Table of Contents link to a heading — now opens the tab it belongs to and scrolls to the target. This runs on both initial load and `hashchange`.
+
 ## @fumadocs/base-ui@16.11.5
 
 ### Correct codeblock props
