@@ -20,6 +20,7 @@ export default defineConfig({
     'src/remark-structure.ts',
     'src/remark-image.ts',
     'src/remark-include.ts',
+    'src/rehype-katex.ts',
     'src/remark-code-tab.ts',
     'src/remark-npm.ts',
     'src/remark-ts2js.ts',
