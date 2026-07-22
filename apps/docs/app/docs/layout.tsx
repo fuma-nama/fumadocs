@@ -1,1 +1,1 @@
-export { Glass as default } from '@/components/layouts/glass';
+export { DefaultLayout as default } from '@/components/layouts/default';
