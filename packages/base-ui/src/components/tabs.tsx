@@ -158,7 +158,6 @@ export function TabsContent({
   return (
     <Unstyled.TabsContent
       value={value}
-      keepMounted
       className={(s) =>
         cn(
           'p-4 text-[0.9375rem] bg-fd-background rounded-xl outline-none prose-no-margin data-[inactive]:hidden [&>figure:only-child]:-m-4 [&>figure:only-child]:border-none',
