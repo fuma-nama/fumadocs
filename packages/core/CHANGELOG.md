@@ -1,3 +1,9 @@
+## fumadocs-core@16.12.0
+
+### Introduce Glass Layout
+
+A new layout for docs, a smooth, beautiful variant built around floating, translucent panels.
+
 ## fumadocs-core@16.11.4
 
 ### Migrate from `js-yaml` to `yaml`

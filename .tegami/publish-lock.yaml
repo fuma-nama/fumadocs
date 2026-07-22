@@ -1,18 +1,42 @@
 core:changelogs:
-  - content: "---\npackages:\n  npm:@fumadocs/api-docs:\n    type: patch\n---\n\n## Rewrite union detector\n\nUse a simplified JSON schema validator to identify the active tab of an union field in playground UI.\n"
-    filename: 2026-07-16-mrne565q.md
+  - content: "---\npackages:\n  npm:@fumadocs/base-ui:\n    type: patch\n---\n\n## Fix invalid list semantics in Home layout navbar\n\n`NavigationMenu.List` in the Home layout header defaults to a `<ul>`, but its direct children (nav title link, link groups, control clusters) are not `<li>` elements, which is an accessibility violation (axe `list`, serious) on every page using `HomeLayout`. Render it as a `<div>` instead — the same intent as the Radix UI variant, which already renders its list as a non-`<ul>` element via `asChild`.\n"
+    filename: 2026-07-17-navlist-a11y.md
     v: 0.0.0
-  - content: "---\npackages:\n  npm:fumadocs-openapi:\n    type: patch\n---\n\n## Harden `createProxy()` against SSRF\n\n- `allowedOrigins` now defaults to the proxy route's own origin, so an unconfigured proxy is same-origin only instead of an open proxy. A warning is logged when neither `allowedOrigins` nor `filterRequest` is set.\n- The allowlist is now enforced on redirects: an allowed upstream can no longer redirect the proxy to a disallowed origin.\n\n## `allowedOrigins` regex support\n\n`allowedOrigins` entries can now be a `RegExp` in addition to an exact origin string.\n\n## Fix proxy decoding\n\nFix `ERR_CONTENT_DECODING_FAILED` for compressed upstream responses: the stale `content-encoding`/`content-length` headers are now dropped, since `fetch()` already decodes the body before it is proxied back.\n"
-    filename: 2026-07-16-proxy-ssrf.md
+  - content: "---\npackages:\n  npm:@fumadocs/base-ui:\n    type: minor\n  npm:fumadocs-ui:\n    type: minor\n  npm:fumadocs-core:\n    type: patch\n---\n\n## Introduce Glass Layout\n\nA new layout for docs, a smooth, beautiful variant built around floating, translucent panels.\n"
+    filename: 2026-07-19-mrqsx7tb.md
+    v: 0.0.0
+  - content: "---\npackages:\n  npm:fumadocs-ui:\n    type: minor\n  npm:@fumadocs/base-ui:\n    type: minor\n---\n\n## Don't force-mount inactive tab content by default\n\nStyled `Tabs` previously kept every tab panel mounted in the DOM (hidden with `display: none`). Inactive panels are now unmounted by default, following the underlying primitive.\n\nYou can still opt back into keeping panels mounted per tab with `forceMount` (`fumadocs-ui`) or `keepMounted` (`@fumadocs/base-ui`) on `Tab` / `TabsContent`.\n"
+    filename: 2026-07-23-tabs-no-force-mount.md
+    v: 0.0.0
+  - content: "---\npackages:\n  npm:fumadocs-ui:\n    type: patch\n  npm:@fumadocs/base-ui:\n    type: patch\n---\n\n## Open the tab containing a linked heading\n\nWhen a tab's content stays mounted (`forceMount` / `keepMounted`), navigating to a URL hash that points to an element inside a tab — such as a Table of Contents link to a heading — now opens the tab it belongs to and scrolls to the target. This runs on both initial load and `hashchange`.\n"
+    filename: 2026-07-23-tabs-open-from-hash.md
+    v: 0.0.0
+  - content: "---\npackages:\n  npm:@fumadocs/language:\n    type: patch\n---\n\n## Add new translation keys\n"
+    filename: 2026-07-21-mruqeivn.md
+    v: 0.0.0
+  - content: "---\npackages:\n  npm:@fumadocs/satteri:\n    type: patch\n  npm:@fumadocs/local-md:\n    type: patch\n  npm:@fumadocs/local-content:\n    type: patch\n---\n\n## Extract shared local content source logic to `@fumadocs/local-content`\n"
+    filename: 2026-07-21-mrtm8k08.md
+    v: 0.0.0
+  - content: "---\npackages:\n  npm:@fumadocs/local-md:\n    type: patch\n---\n\n## Improve performance\n\nFixed cache misses and edge cases.\n"
+    filename: 2026-07-21-mrthfgvy.md
+    v: 0.0.0
+  - content: "---\npackages:\n  npm:@fumadocs/satteri:\n    type: minor\n---\n\n## Support local file-system content source via Satteri\n\nUse Satteri to load local MD/MDX files as content sources.\n"
+    filename: 2026-07-21-mrthegor.md
+    v: 0.0.0
+  - content: "---\npackages:\n  npm:@fumadocs/satteri:\n    type: patch\n---\n\n## Fix math rendering\n\nUse `katex` to render math by default.\n"
+    filename: 2026-07-23-mrwf8l69.md
     v: 0.0.0
 core:packages:
+  - id: npm:@fumadocs/api-docs
+    updated: false
   - id: npm:@fumadocs/asyncapi
-    updated: true
-  - id: npm:@fumadocs/base-ui
     updated: false
   - changelogIds:
-      - 2026-07-16-mrne565q.md
-    id: npm:@fumadocs/api-docs
+      - 2026-07-17-navlist-a11y.md
+      - 2026-07-19-mrqsx7tb.md
+      - 2026-07-23-tabs-no-force-mount.md
+      - 2026-07-23-tabs-open-from-hash.md
+    id: npm:@fumadocs/base-ui
     updated: true
   - id: npm:@fumadocs/basehub
     updated: false
@@ -22,40 +46,57 @@ core:packages:
     updated: false
   - id: npm:@fumadocs/content-collections
     updated: false
-  - id: npm:fumadocs-core
-    updated: false
+  - changelogIds:
+      - 2026-07-19-mrqsx7tb.md
+    id: npm:fumadocs-core
+    updated: true
   - id: npm:create-fumadocs-app
-    updated: false
+    updated: true
   - id: npm:create-fumadocs-versions
-    updated: false
+    updated: true
   - id: npm:fumadocs-docgen
     updated: false
   - id: npm:fumadocs-epub
     updated: false
-  - id: npm:@fumadocs/language
-    updated: false
-  - id: npm:@fumadocs/local-md
-    updated: false
+  - changelogIds:
+      - 2026-07-21-mruqeivn.md
+    id: npm:@fumadocs/language
+    updated: true
+  - changelogIds:
+      - 2026-07-21-mrtm8k08.md
+    id: npm:@fumadocs/local-content
+    updated: true
+  - changelogIds:
+      - 2026-07-21-mrthfgvy.md
+      - 2026-07-21-mrtm8k08.md
+    id: npm:@fumadocs/local-md
+    updated: true
   - id: npm:fumadocs-mdx
     updated: false
   - id: npm:@fumadocs/mdx-remote
     updated: false
   - id: npm:fumadocs-obsidian
     updated: false
-  - changelogIds:
-      - 2026-07-16-proxy-ssrf.md
-    id: npm:fumadocs-openapi
-    updated: true
+  - id: npm:fumadocs-openapi
+    updated: false
   - id: npm:fumadocs-preview
     updated: false
   - id: npm:fumadocs-python
     updated: false
-  - id: npm:fumadocs-ui
-    updated: false
+  - changelogIds:
+      - 2026-07-19-mrqsx7tb.md
+      - 2026-07-23-tabs-no-force-mount.md
+      - 2026-07-23-tabs-open-from-hash.md
+    id: npm:fumadocs-ui
+    updated: true
   - id: npm:@fumadocs/sanity
     updated: false
-  - id: npm:@fumadocs/satteri
-    updated: false
+  - changelogIds:
+      - 2026-07-21-mrthegor.md
+      - 2026-07-21-mrtm8k08.md
+      - 2026-07-23-mrwf8l69.md
+    id: npm:@fumadocs/satteri
+    updated: true
   - id: npm:@fumadocs/shadcn
     updated: false
   - id: npm:@fumari/stf
@@ -70,10 +111,12 @@ core:packages:
     updated: false
   - id: npm:@fumadocs/vite
     updated: false
+npm:mark-latest:
+  - id: npm:@fumadocs/local-content
 npm:packages:
+  - id: npm:@fumadocs/api-docs
   - id: npm:@fumadocs/asyncapi
   - id: npm:@fumadocs/base-ui
-  - id: npm:@fumadocs/api-docs
   - id: npm:@fumadocs/basehub
   - id: npm:@fumadocs/cli
   - id: npm:@fumadocs/content
@@ -84,6 +127,7 @@ npm:packages:
   - id: npm:fumadocs-docgen
   - id: npm:fumadocs-epub
   - id: npm:@fumadocs/language
+  - id: npm:@fumadocs/local-content
   - id: npm:@fumadocs/local-md
   - id: npm:fumadocs-mdx
   - id: npm:@fumadocs/mdx-remote
@@ -101,7 +145,33 @@ npm:packages:
   - id: npm:fumadocs-twoslash
   - id: npm:fumadocs-typescript
   - id: npm:@fumadocs/vite
+  - id: npm:vite-data
   - id: npm:docs
+  - id: npm:example-astro
   - id: npm:example-asyncapi
+  - id: npm:example-base-ui
+  - id: npm:example-content-collections
+  - id: npm:example-i18n
+  - id: npm:example-marble-cms
+  - id: npm:example-next
+  - id: npm:example-next-local-md
+  - id: npm:example-next-min
+  - id: npm:example-next-shadcn
+  - id: npm:example-next-static
+  - id: npm:example-obsidian
   - id: npm:example-openapi
+  - id: npm:example-python
+  - id: npm:example-react-router-i18n
+  - id: npm:example-react-router
+  - id: npm:example-react-router-rsc
+  - id: npm:example-react-router-min
+  - id: npm:example-tanstack-start
+  - id: npm:example-tanstack-start-i18n
+  - id: npm:example-react-router-spa
+  - id: npm:example-tanstack-start-local-md
+  - id: npm:example-tanstack-start-min
   - id: npm:example-tanstack-start-openapi
+  - id: npm:example-tanstack-start-spa
+  - id: npm:example-tanstack-start-story
+  - id: npm:example-waku
+  - id: npm:example-waku-i18n
