@@ -7,6 +7,7 @@ export function pluginPreserveLayouts(): InstallerPlugin {
   const layoutNames = [
     'layouts/home',
     'layouts/flux',
+    'layouts/glass',
     'layouts/notebook',
     'layouts/docs',
     'layouts/shared',
@@ -27,6 +28,8 @@ export function pluginPreserveLayouts(): InstallerPlugin {
     'local:<dir>/flux/index.tsx': 'layouts/flux',
     'local:<dir>/flux/page/index.tsx': 'layouts/flux/page',
     'local:<dir>/flux/page/client.tsx': 'layouts/flux/page',
+    'local:<dir>/glass/index.tsx': 'layouts/glass',
+    'local:<dir>/glass/page/index.tsx': 'layouts/glass/page',
   };
   const layoutNameSet = new Set(layoutNames);
 

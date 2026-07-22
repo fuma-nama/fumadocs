@@ -1,3 +1,7 @@
+## @fumadocs/language@0.2.2
+
+### Add new translation keys
+
 ## @fumadocs/language@0.2.1
 
 ### Expose sidebar trigger state to assistive technology

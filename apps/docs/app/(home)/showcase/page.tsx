@@ -79,6 +79,11 @@ const showcases: ShowcaseObject[] = [
     url: 'https://sim.ai',
   },
   {
+    image: '/showcases/agentskit.png',
+    name: 'AgentsKit',
+    url: 'https://www.agentskit.io',
+  },
+  {
     image: '/showcases/comfydeploy.png',
     name: 'ComfyDeploy',
     url: 'https://comfydeploy.com',
@@ -289,6 +294,11 @@ const showcases: ShowcaseObject[] = [
   {
     name: 'Yeecord',
     url: 'https://yeecord.com',
+  },
+  {
+    image: '/showcases/arkenv.png',
+    name: 'ArkEnv',
+    url: 'https://arkenv.js.org',
   },
 ];
 

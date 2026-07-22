@@ -74,7 +74,7 @@ export function TOC({
     <PageTOCPopover {...container}>
       <PageTOCPopoverContent {...content}>
         {header}
-        <Base.TOCScrollArea>
+        <Base.TOCScrollArea className="ms-px">
           <TOCItems {...list}>
             {items.length === 0 && <TOCEmpty />}
             {items.map((item) => (

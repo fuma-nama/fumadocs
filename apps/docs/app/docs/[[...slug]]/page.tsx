@@ -30,7 +30,6 @@ import { NotFound } from '@/components/layouts/not-found';
 import { getSuggestions } from './suggestions';
 import { PathUtils } from 'fumadocs-core/source';
 import { AsyncAPIPageLazy, OpenAPIPageLazy } from './lazy';
-import { SponsorsMarquee } from '@fumari/sponsors';
 
 function PreviewRenderer({ preview }: { preview: string }): ReactNode {
   if (preview && preview in Preview) {
@@ -55,9 +54,9 @@ export default async function Page(props: PageProps<'/docs/[[...slug]]'>) {
     );
 
   const pageProps = {
-    tableOfContent: {
-      footer: <SponsorsMarquee />,
-    },
+    // tableOfContent: {
+    //   footer: <SponsorsMarquee />,
+    // },
   } satisfies Partial<DocsPageProps>;
 
   if (page.type === 'openapi') {
@@ -90,7 +89,7 @@ export default async function Page(props: PageProps<'/docs/[[...slug]]'>) {
     <DocsPage toc={toc} {...pageProps}>
       <h1 className="text-[1.75em] font-semibold">{page.data.title}</h1>
       <p className="text-lg text-fd-muted-foreground mb-2">{page.data.description}</p>
-      <div className="flex flex-row flex-wrap gap-2 items-center border-b pb-6">
+      <div className="flex flex-row flex-wrap gap-2 items-center border-b pb-6 mb-4">
         <MarkdownCopyButton markdownUrl={`${page.url}.mdx`} />
         <ViewOptionsPopover
           markdownUrl={`${page.url}.mdx`}

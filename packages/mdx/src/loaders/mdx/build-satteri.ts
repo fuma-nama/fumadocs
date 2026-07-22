@@ -17,8 +17,9 @@ export async function buildSatteriMDX(
   { filePath, frontmatter, source, _compiler, environment, isDevelopment }: BuildMDXOptions,
 ): Promise<{ code: string }> {
   const satteriOptions = await getSatteriOptions(core.getConfig(), collection, environment);
+  const format = filePath.endsWith('.mdx') ? 'mdx' : 'md';
   const postprocess: PostprocessOptions = {
-    _format: filePath.endsWith('.mdx') ? 'mdx' : 'md',
+    _format: format,
     ...collection?.postprocess,
   };
   const [{ compileMdx }, { remarkLlms }, { remarkInclude }] = await Promise.all([
@@ -52,6 +53,7 @@ export async function buildSatteriMDX(
   const result = await compileMdx({
     source,
     filePath,
+    format,
     frontmatter,
     isDevelopment,
     environment,
@@ -90,15 +92,17 @@ function postprocessPlugin(
         refs.push({ href: node.url });
       }
     },
-    afterToJs({ result }) {
+    collectExports({ data, addExport }) {
       if (extractLinkReferences) {
-        result.data.extractedReferences ??= [];
-        result.code += `\nexport const extractedReferences = ${JSON.stringify(result.data.extractedReferences)};`;
+        addExport('extractedReferences', JSON.stringify((data.extractedReferences ??= [])));
       }
 
       if (lastModified) {
-        result.code += `\nexport const lastModified = new Date(${lastModified.getTime()});`;
+        addExport('lastModified', `new Date(${lastModified.getTime()})`);
       }
+    },
+    afterToJs({ result }) {
+      if (extractLinkReferences) result.data.extractedReferences ??= [];
     },
   };
 }

@@ -74,7 +74,7 @@ export function TOC({ container, header, footer, style = 'normal', list }: TOCPr
         <Text className="size-4" />
         {t('On this page')}
       </h3>
-      <Base.TOCScrollArea>
+      <Base.TOCScrollArea className="ms-px">
         <TOCItems {...list}>
           {items.length === 0 && <TOCEmpty />}
           {items.map((item) => (
@@ -181,7 +181,7 @@ export function TOCPopover({
           <PageTOCPopoverTrigger {...trigger} />
           <PageTOCPopoverContent {...content}>
             {header}
-            <Base.TOCScrollArea>
+            <Base.TOCScrollArea className="ms-px">
               <TOCItems {...list}>
                 {items.length === 0 && <TOCEmpty />}
                 {items.map((item) => (

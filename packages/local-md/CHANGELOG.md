@@ -1,3 +1,11 @@
+## @fumadocs/local-md@0.3.1
+
+### Improve performance
+
+Fixed cache misses and edge cases.
+
+### Extract shared local content source logic to `@fumadocs/local-content`
+
 ## @fumadocs/local-md@0.3.0
 
 ### Default to Base UI

@@ -23,7 +23,7 @@ import {
   type BaseSlots,
   type BaseSlotsProps,
 } from '../shared';
-import { TreeContextProvider } from '@/contexts/tree';
+import { TreeContextProvider, useTreePath } from '@/contexts/tree';
 import { Header } from './slots/header';
 import { Container } from './slots/container';
 
@@ -38,7 +38,7 @@ export interface DocsSlots extends BaseSlots {
   };
 }
 
-const { useProvider } = baseSlots({
+const { useBaseSlots } = baseSlots({
   useProps() {
     return useDocsLayout().props;
   },
@@ -87,7 +87,7 @@ export function LayoutBody(
   } = props;
   const isTop = useIsScrollTop({ enabled: navTransparentMode === 'top' }) ?? true;
   const isNavTransparent = navTransparentMode === 'top' ? isTop : navTransparentMode === 'always';
-  const { baseSlots, baseProps } = useProvider(props);
+  const { baseSlots, baseProps } = useBaseSlots(props);
   const linkItems = useLinkItems(props);
   const slots: DocsSlots = {
     ...baseSlots,
@@ -140,9 +140,10 @@ function LayoutTabs({
   tabs: LayoutTab[];
 }) {
   const pathname = usePathname();
+  const path = useTreePath();
   const selected = useMemo(() => {
-    return tabs.findLast((option) => isLayoutTabActive(option, pathname));
-  }, [tabs, pathname]);
+    return tabs.findLast((option) => isLayoutTabActive(option, path, pathname));
+  }, [tabs, path, pathname]);
 
   return (
     <div

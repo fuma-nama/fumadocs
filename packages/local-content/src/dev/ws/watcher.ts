@@ -2,11 +2,11 @@ import { type ChokidarOptions, type FSWatcher, watch } from 'chokidar';
 import {
   decodeDevClientEvent,
   encodeDevEvent,
-  LOCAL_MD_DEV_PATH,
+  DEV_SERVER_PATH,
   type WatchDirOptions,
   type DevServerEvent,
   type DevWatchEvent,
-} from './shared';
+} from './protocol';
 import { WebSocket, WebSocketServer, type RawData } from 'ws';
 import path from 'node:path';
 import picomatch, { type Matcher } from 'picomatch';
@@ -32,7 +32,7 @@ export interface DevServerHandle {
 
 export async function startDevServer(options: DevServerOptions): Promise<DevServerHandle> {
   const { host = '127.0.0.1', port } = options;
-  const url = `ws://${host}:${port}${LOCAL_MD_DEV_PATH}`;
+  const url = `ws://${host}:${port}${DEV_SERVER_PATH}`;
 
   let watchOptions: ChokidarOptions = {
     ignoreInitial: true,
@@ -56,7 +56,7 @@ export async function startDevServer(options: DevServerOptions): Promise<DevServ
   const watcher = watch([], watchOptions);
   const clients = new Set<Client>();
   const wss = new WebSocketServer({
-    path: LOCAL_MD_DEV_PATH,
+    path: DEV_SERVER_PATH,
     port,
     host,
   });
@@ -100,7 +100,7 @@ export async function startDevServer(options: DevServerOptions): Promise<DevServ
 
   watcher.on('all', (event, filePath) => {
     if (!WATCH_EVENTS.has(event as DevWatchEvent)) return;
-    console.log(`[@fumadocs/local-md] ${event} at "${filePath}"`);
+    console.log(`[@fumadocs/local-content] ${event} at "${filePath}"`);
 
     broadcast({
       type: 'change',
@@ -122,7 +122,7 @@ export async function startDevServer(options: DevServerOptions): Promise<DevServ
     wss.once('error', reject);
     wss.on('listening', () => {
       wss.off('error', reject);
-      console.log(`[@fumadocs/local-md] dev server is ready at ${url}`);
+      console.log(`[@fumadocs/local-content] dev server is ready at ${url}`);
       resolve();
     });
   });

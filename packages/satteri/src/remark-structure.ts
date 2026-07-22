@@ -133,12 +133,18 @@ export function remarkStructure({
       ...Object.fromEntries(STRUCTURE_VISITORS.map((key) => [key, visit])),
     };
   };
-  plugin.afterToJs = ({ result }) => {
-    const data = (result.data.structuredData ??= { headings: [], contents: [] });
+  plugin.collectExports = ({ data, addExport }) => {
+    const structured = (data.structuredData ??= { headings: [], contents: [] });
 
     if (exportAs) {
-      result.code += `\nexport const ${typeof exportAs === 'string' ? exportAs : 'structuredData'} = ${JSON.stringify(data)};`;
+      addExport(
+        typeof exportAs === 'string' ? exportAs : 'structuredData',
+        JSON.stringify(structured),
+      );
     }
+  };
+  plugin.afterToJs = ({ result }) => {
+    result.data.structuredData ??= { headings: [], contents: [] };
   };
   return plugin;
 }

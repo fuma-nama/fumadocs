@@ -17,6 +17,7 @@ interface SlotPrintInfo {
   layoutId: string;
   name: string;
   isPage: boolean;
+  uiLibrary: LoadedConfig['uiLibrary'];
 }
 
 export async function customise(config: LoadedConfig, connector: RegistryConnector) {
@@ -73,6 +74,20 @@ export async function customise(config: LoadedConfig, connector: RegistryConnect
                 },
               },
               hint: 'the experimental variant of docs layout',
+            },
+            {
+              label: 'Glass Layout',
+              value: {
+                id: 'glass',
+                targets: [{ subRegistry, name: 'layouts/glass' }],
+                print() {
+                  printLayout(
+                    ['fumadocs-ui/layouts/glass', '@/layouts/glass'],
+                    ['fumadocs-ui/layouts/glass/page', '@/layouts/glass/page'],
+                  );
+                },
+              },
+              hint: 'a docs layout with floating, translucent panels',
             },
             {
               label: 'Home Layout',
@@ -133,6 +148,7 @@ export async function customise(config: LoadedConfig, connector: RegistryConnect
                         layoutId: selected.id,
                         name,
                         isPage: true,
+                        uiLibrary: config.uiLibrary,
                       });
                     },
                   } as TargetInfo,
@@ -151,6 +167,7 @@ export async function customise(config: LoadedConfig, connector: RegistryConnect
                       layoutId: selected.id,
                       name,
                       isPage: false,
+                      uiLibrary: config.uiLibrary,
                     });
                   },
                 } as TargetInfo,
@@ -191,27 +208,74 @@ function printLayout(...maps: [from: string, to: string][]) {
   );
 }
 
-function printSlot({ at, layoutId, name, isPage }: SlotPrintInfo) {
+function printSlot({ at, layoutId, name, isPage, uiLibrary }: SlotPrintInfo) {
   intro(picocolors.bold('What is Next?'));
 
   log.info(`You can check the installed layout slot in "${at}".`);
 
-  const code = getSlotCode({ at, layoutId, name, isPage });
+  const code = getSlotCode({ at, layoutId, name, isPage, uiLibrary });
 
   if (code) {
+    const layoutComponent = layoutId === 'glass' ? '<GlassLayout />' : '<DocsLayout />';
+
     if (isPage) {
       log.info(
         `${picocolors.bold('At your <DocsPage /> component, update your "slots" prop:')}\n\n${code}`,
       );
     } else {
       log.info(
-        `${picocolors.bold('At your <DocsLayout /> component, update your "slots" prop:')}\n\n${code}`,
+        `${picocolors.bold(`At your ${layoutComponent} component, update your "slots" prop:`)}\n\n${code}`,
       );
     }
   }
 }
 
-function getSlotCode({ at, layoutId, name, isPage }: SlotPrintInfo): string | undefined {
+function getSlotCode({ at, layoutId, name, isPage, uiLibrary }: SlotPrintInfo): string | undefined {
+  if (layoutId === 'glass') {
+    // Glass layout wires its page slots directly, only layout-level slots are swappable.
+    if (isPage) return;
+
+    switch (name) {
+      case 'header':
+        return `import { Header } from '${at}';
+
+return (
+  <GlassLayout
+    slots={{
+      header: Header,
+    }}
+  >
+    ...
+  </GlassLayout>
+);`;
+      case 'sidebar': {
+        // `sidebar` slot file holds the whole sidebar system (desktop, mobile drawer, provider).
+        // Base UI additionally exposes a `drawerHandle` for its swipeable drawer.
+        const imports = ['Sidebar', 'SidebarDrawer', 'SidebarProvider', 'useSidebar'];
+        if (uiLibrary === 'base-ui') imports.push('drawerHandle');
+
+        return `import { ${imports.join(', ')} } from '${at}';
+
+return (
+  <GlassLayout
+    slots={{
+      sidebar: {
+        main: Sidebar,
+        provider: SidebarProvider,
+        use: useSidebar,
+        drawer: SidebarDrawer,${uiLibrary === 'base-ui' ? '\n        drawerHandle,' : ''}
+      },
+    }}
+  >
+    ...
+  </GlassLayout>
+);`;
+      }
+      default:
+        return;
+    }
+  }
+
   if (isPage) {
     switch (name) {
       case 'toc':

@@ -90,34 +90,58 @@ The returned source from `docsLoader.get()` is a normal [content loader](/docs/h
 
 ### Hot Reload
 
-`local-md` works at runtime, but during development you can connect to its dev server for file watching.
+`local-md` works at runtime, so nothing watches your files by default. During development, pick one of the two watchers.
 
-Start the dev server with `local-md dev -- xxx` like:
+#### Vite
+
+Vite already watches your project, so its watcher can invalidate the source in the same process. No extra process or port.
+
+```ts title="vite.config.ts"
+import { localContentPlugin } from '@fumadocs/local-md/dev/vite';
+
+export default defineConfig({
+  plugins: [localContentPlugin()],
+});
+```
+
+```ts title="lib/source.ts"
+import { watchWithVite } from '@fumadocs/local-md/dev/vite';
+
+if (import.meta.env.DEV) {
+  watchWithVite(docs);
+}
+```
+
+The plugin adds your content directory to Vite's watcher, since it usually sits outside the module graph. Content is read at runtime rather than imported, so there is no module to invalidate and the browser is reloaded instead. Pass `localContentPlugin({ reload: false })` to handle that yourself.
+
+#### Dev Server
+
+For everything else, run the bundled dev server alongside your app. The watcher lives in one process and broadcasts over a websocket, so it works when your framework runs several workers.
 
 ```json title="package.json"
 {
   "scripts": {
-    "dev": "local-md dev -- npm next dev"
+    "dev": "local-md dev -- next dev"
   }
 }
 ```
 
-And connect to it:
-
 ```ts title="lib/source.ts"
-import { localMd } from '@fumadocs/local-md';
-
-const docs = localMd({
-  dir: 'content/docs',
-});
+import { watchWithDevServer } from '@fumadocs/local-md/dev/ws';
 
 // change it if you use a different framework (e.g. import.meta.env.DEV)
 if (process.env.NODE_ENV === 'development') {
-  void docs.devServer();
+  void watchWithDevServer(docs);
 }
 ```
 
-This keeps the loader in sync when local Markdown or MDX files change.
+The command publishes its URL through an environment variable, so no configuration is needed. Pass one explicitly if you run the server yourself, and use `-p` to change the port:
+
+```ts
+void watchWithDevServer(docs, { url: 'ws://127.0.0.1:8000/_fumadocs_local_md' });
+```
+
+Both keep the loader in sync when local Markdown or MDX files change. To wire up your own watcher instead, call `docs.invalidateFile(path)` when a file changes.
 
 ### JavaScript Engine
 
@@ -178,6 +202,7 @@ With `@fumadocs/local-md`, you can replace that setup with:
 
 ```ts title="lib/source.ts"
 import { dynamicLoader } from 'fumadocs-core/source/dynamic';
+import { watchWithDevServer } from '@fumadocs/local-md/dev/ws';
 import { localMd } from '@fumadocs/local-md';
 
 const docs = localMd({
@@ -185,7 +210,7 @@ const docs = localMd({
 });
 
 if (process.env.NODE_ENV === 'development') {
-  void docs.devServer();
+  void watchWithDevServer(docs);
 }
 
 const docsLoader = dynamicLoader(docs.dynamicSource(), {

@@ -1,0 +1,33 @@
+{
+  "code": "\"use strict\";\nconst { Fragment: _Fragment, jsx: _jsx, jsxs: _jsxs } = arguments[0];\nconst structuredData = {\n    \"contents\": [\n        {\n            \"heading\": \"title\",\n            \"content\": \"Intro paragraph with emphasis.\"\n        },\n        {\n            \"heading\": \"list\",\n            \"content\": \"first\"\n        },\n        {\n            \"heading\": \"list\",\n            \"content\": \"second\"\n        }\n    ],\n    \"headings\": [\n        {\n            \"id\": \"title\",\n            \"content\": \"Title\"\n        },\n        {\n            \"id\": \"code-sample\",\n            \"content\": \"Code sample\"\n        },\n        {\n            \"id\": \"list\",\n            \"content\": \"List\"\n        }\n    ]\n};\nconst toc = [\n    {\n        title: _jsx(_Fragment, { children: \"Title\" }),\n        url: \"#title\",\n        depth: 1\n    },\n    {\n        title: _jsx(_Fragment, { children: \"Code sample\" }),\n        url: \"#code-sample\",\n        depth: 2\n    },\n    {\n        title: _jsx(_Fragment, { children: \"List\" }),\n        url: \"#list\",\n        depth: 2\n    }\n];\nfunction _createMdxContent(props) {\n    const _components = Object.assign({\n        code: \"code\",\n        h1: \"h1\",\n        h2: \"h2\",\n        li: \"li\",\n        p: \"p\",\n        pre: \"pre\",\n        span: \"span\",\n        strong: \"strong\",\n        ul: \"ul\"\n    }, props.components);\n    return _jsxs(_Fragment, { children: [\n        _jsx(_components.h1, {\n            id: \"title\",\n            children: \"Title\"\n        }),\n        \"\\n\",\n        _jsxs(_components.p, { children: [\n            \"Intro paragraph with \",\n            _jsx(_components.strong, { children: \"emphasis\" }),\n            \".\"\n        ] }),\n        \"\\n\",\n        _jsx(_components.h2, {\n            id: \"code-sample\",\n            children: \"Code sample\"\n        }),\n        \"\\n\",\n        _jsx(_components.pre, {\n            style: {\n                \"--shiki-light\": \"#24292e\",\n                \"--shiki-dark\": \"#e1e4e8\",\n                \"--shiki-light-bg\": \"#fff\",\n                \"--shiki-dark-bg\": \"#24292e\"\n            },\n            icon: \"<svg viewBox=\\\"0 0 24 24\\\"><path d=\\\"M0 0h24v24H0V0zm22.034 18.276c-.175-1.095-.888-2.015-3.003-2.873-.736-.345-1.554-.585-1.797-1.14-.091-.33-.105-.51-.046-.705.15-.646.915-.84 1.515-.66.39.12.75.42.976.9 1.034-.676 1.034-.676 1.755-1.125-.27-.42-.404-.601-.586-.78-.63-.705-1.469-1.065-2.834-1.034l-.705.089c-.676.165-1.32.525-1.71 1.005-1.14 1.291-.811 3.541.569 4.471 1.365 1.02 3.361 1.244 3.616 2.205.24 1.17-.87 1.545-1.966 1.41-.811-.18-1.26-.586-1.755-1.336l-1.83 1.051c.21.48.45.689.81 1.109 1.74 1.756 6.09 1.666 6.871-1.004.029-.09.24-.705.074-1.65l.046.067zm-8.983-7.245h-2.248c0 1.938-.009 3.864-.009 5.805 0 1.232.063 2.363-.138 2.711-.33.689-1.18.601-1.566.48-.396-.196-.597-.466-.83-.855-.063-.105-.11-.196-.127-.196l-1.825 1.125c.305.63.75 1.172 1.324 1.517.855.51 2.004.675 3.207.405.783-.226 1.458-.691 1.811-1.411.51-.93.402-2.07.397-3.346.012-2.054 0-4.109 0-6.179l.004-.056z\\\" fill=\\\"currentColor\\\" /></svg>\",\n            className: \"shiki shiki-themes github-light github-dark\",\n            tabIndex: \"0\",\n            children: _jsx(_components.code, { children: _jsxs(_components.span, {\n                className: \"line\",\n                children: [\n                    _jsx(_components.span, {\n                        style: {\n                            \"--shiki-light\": \"#24292E\",\n                            \"--shiki-dark\": \"#E1E4E8\"\n                        },\n                        children: \"console.\"\n                    }),\n                    _jsx(_components.span, {\n                        style: {\n                            \"--shiki-light\": \"#6F42C1\",\n                            \"--shiki-dark\": \"#B392F0\"\n                        },\n                        children: \"log\"\n                    }),\n                    _jsx(_components.span, {\n                        style: {\n                            \"--shiki-light\": \"#24292E\",\n                            \"--shiki-dark\": \"#E1E4E8\"\n                        },\n                        children: \"(\"\n                    }),\n                    _jsx(_components.span, {\n                        style: {\n                            \"--shiki-light\": \"#005CC5\",\n                            \"--shiki-dark\": \"#79B8FF\"\n                        },\n                        children: \"1\"\n                    }),\n                    _jsx(_components.span, {\n                        style: {\n                            \"--shiki-light\": \"#24292E\",\n                            \"--shiki-dark\": \"#E1E4E8\"\n                        },\n                        children: \");\"\n                    })\n                ]\n            }) })\n        }),\n        \"\\n\",\n        _jsx(_components.h2, {\n            id: \"list\",\n            children: \"List\"\n        }),\n        \"\\n\",\n        _jsxs(_components.ul, { children: [\n            \"\\n\",\n            _jsx(_components.li, { children: \"first\" }),\n            \"\\n\",\n            _jsx(_components.li, { children: \"second\" }),\n            \"\\n\"\n        ] })\n    ] });\n}\nfunction MDXContent(props = {}) {\n    const { wrapper: MDXLayout } = props.components || {};\n    return MDXLayout ? _jsx(MDXLayout, Object.assign({}, props, { children: _jsx(_createMdxContent, props) })) : _createMdxContent(props);\n}\nreturn {\n    structuredData,\n    toc,\n    default: MDXContent\n};\n",
+  "structuredData": {
+    "contents": [
+      {
+        "heading": "title",
+        "content": "Intro paragraph with emphasis."
+      },
+      {
+        "heading": "list",
+        "content": "first"
+      },
+      {
+        "heading": "list",
+        "content": "second"
+      }
+    ],
+    "headings": [
+      {
+        "id": "title",
+        "content": "Title"
+      },
+      {
+        "id": "code-sample",
+        "content": "Code sample"
+      },
+      {
+        "id": "list",
+        "content": "List"
+      }
+    ]
+  }
+}

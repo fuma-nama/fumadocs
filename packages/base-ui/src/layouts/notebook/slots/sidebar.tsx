@@ -26,6 +26,7 @@ import { isLayoutTabActive, type LayoutTab } from '@/layouts/shared';
 import { Popover, PopoverTrigger, PopoverContent } from '@/components/ui/popover';
 import { usePathname } from 'fumadocs-core/framework';
 import Link from 'fumadocs-core/link';
+import { useTreePath } from '@/contexts/tree';
 
 const itemVariants = cva(
   'relative flex flex-row items-center gap-2 rounded-lg p-2 text-start text-fd-muted-foreground wrap-anywhere [&_svg]:size-4 [&_svg]:shrink-0',
@@ -460,10 +461,11 @@ export function SidebarTabsDropdown({
   const [open, setOpen] = useState(false);
   const { closeOnRedirect } = useSidebar();
   const pathname = usePathname();
+  const path = useTreePath();
 
   const selected = useMemo(() => {
-    return options.findLast((item) => isLayoutTabActive(item, pathname));
-  }, [options, pathname]);
+    return options.findLast((item) => isLayoutTabActive(item, path, pathname));
+  }, [options, path, pathname]);
 
   const onClick = () => {
     closeOnRedirect.current = false;

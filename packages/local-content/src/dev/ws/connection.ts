@@ -3,7 +3,7 @@ import {
   encodeDevClientEvent,
   type DevClientEvent,
   type DevServerEvent,
-} from './shared';
+} from './protocol';
 import { WebSocket, type RawData } from 'ws';
 
 const store = new Map<string, DevServerConnection>();
@@ -50,7 +50,7 @@ export class DevServerConnection {
     this.socket = socket;
 
     socket.on('open', () => {
-      console.log(`[@fumadocs/local-md] connected to dev server at ${this.url}`);
+      console.log(`[@fumadocs/local-content] connected to dev server at ${this.url}`);
       for (const event of this.pendingEvents) {
         this.send(event);
       }
@@ -64,7 +64,7 @@ export class DevServerConnection {
 
     socket.on('close', () => {
       this.socket = undefined;
-      console.log(`[@fumadocs/local-md] disconnected from dev server at ${this.url}`);
+      console.log(`[@fumadocs/local-content] disconnected from dev server at ${this.url}`);
     });
 
     socket.on('error', (e) => {

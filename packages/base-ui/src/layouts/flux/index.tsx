@@ -75,7 +75,7 @@ export function useFluxLayout() {
   return context;
 }
 
-const { useProvider } = baseSlots({
+const { useBaseSlots } = baseSlots({
   useProps() {
     return useFluxLayout().props;
   },
@@ -99,7 +99,7 @@ export function DocsLayout(props: DocsLayoutProps) {
     slots: defaultSlots = {},
   } = props;
   const linkItems = useLinkItems(props);
-  const { baseSlots, baseProps } = useProvider(props);
+  const { baseSlots, baseProps } = useBaseSlots(props);
 
   const tabs = useMemo(() => {
     if (Array.isArray(defaultTabs)) {

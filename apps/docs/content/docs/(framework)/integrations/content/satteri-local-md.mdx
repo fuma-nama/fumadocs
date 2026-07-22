@@ -1,0 +1,177 @@
+---
+title: Local Markdown (Sätteri)
+description: Content source for local Markdown content, compiled with Sätteri.
+---
+
+## Introduction
+
+`@fumadocs/satteri/local-md` is a content source for local Markdown/MDX files, compiled with [Sätteri](https://github.com/bruits/satteri) instead of the unified/remark pipeline.
+
+It has the same API shape as [`@fumadocs/local-md`](/docs/integrations/content/local-md) and is also bundleless, so it works fully at runtime with no type-gen or bundler step.
+
+Reach for it when you want Sätteri's compiler and its plugin model, and to reuse the Fumadocs Sätteri plugins and preset.
+
+### Differences
+
+- Compilation always produces JavaScript, so there is no virtual JavaScript engine option. Rendering uses the native engine.
+- Plugins are Sätteri plugins, configured through `satteriOptions`, not remark/rehype plugins.
+
+## Setup
+
+```package-install
+@fumadocs/satteri shiki
+```
+
+> `shiki` is installed because it has to be externalized by the bundler.
+
+Create a `localMd` instance and connect it to Fumadocs:
+
+```ts title="lib/source.ts"
+import { dynamicLoader } from 'fumadocs-core/source/dynamic';
+import { localMd } from '@fumadocs/satteri/local-md';
+
+const docs = localMd({
+  dir: 'content/docs',
+});
+
+const docsLoader = dynamicLoader(docs.dynamicSource(), {
+  baseUrl: '/docs',
+});
+
+export async function getSource() {
+  return docsLoader.get();
+}
+```
+
+### Schema
+
+Pass `frontmatterSchema` and `metaSchema` to customize the validation schemas:
+
+```ts title="lib/source.ts"
+import { localMd } from '@fumadocs/satteri/local-md';
+import { pageSchema, metaSchema } from 'fumadocs-core/source/schema';
+
+const docs = localMd({
+  dir: 'content/docs',
+  frontmatterSchema: pageSchema.extend({
+    // ...
+  }),
+  metaSchema: metaSchema.extend({
+    // ...
+  }),
+});
+```
+
+### Compiler Options
+
+`satteriOptions` is passed through the Fumadocs Sätteri preset, so plugins and their options are configured the same way as in Fumadocs MDX:
+
+```ts title="lib/source.ts"
+const docs = localMd({
+  dir: 'content/docs',
+  satteriOptions: {
+    rehypeCodeOptions: {
+      themes: { light: 'github-light', dark: 'github-dark' },
+    },
+    mdastPlugins: [myPlugin()],
+  },
+});
+```
+
+Pass a function to build the options lazily.
+
+## Usage
+
+Read the source in your route or layout and render it with Fumadocs UI, exactly as with `@fumadocs/local-md`:
+
+```tsx title="app/docs/layout.tsx"
+import { getSource } from '@/lib/source';
+import { DocsLayout } from 'fumadocs-ui/layouts/docs';
+
+export default async function Layout({ children }: LayoutProps<'/docs'>) {
+  const docs = await getSource();
+
+  return <DocsLayout tree={docs.getPageTree()}>{children}</DocsLayout>;
+}
+```
+
+Each page exposes `load()`, which compiles it once and returns a renderer:
+
+```tsx
+const page = source.getPage(params.slug);
+const { body, toc } = await (await page.data.load()).render();
+```
+
+The renderer also exposes `structuredData` for search indexing, and `exports` for anything the document or its plugins exported, such as `frontmatter`, `toc` and `structuredData`.
+
+### Client Rendering
+
+`serialize()` returns a JSON-safe payload, so a server can hand a compiled page to the client:
+
+```tsx title="app/page.tsx"
+const serialized = (await page.data.load()).serialize();
+```
+
+```tsx title="components/content.tsx"
+'use client';
+import { rendererFromSerialized } from '@fumadocs/satteri/local-md/client';
+
+export function Content({ serialized }) {
+  return rendererFromSerialized(serialized).renderSync().body;
+}
+```
+
+### Hot Reload
+
+The source works at runtime, so nothing watches your files by default.
+
+On Vite, use its own watcher:
+
+```ts title="vite.config.ts"
+import { localContentPlugin } from '@fumadocs/satteri/local-md/dev/vite';
+
+export default defineConfig({
+  plugins: [localContentPlugin()],
+});
+```
+
+```ts title="lib/source.ts"
+import { watchWithVite } from '@fumadocs/satteri/local-md/dev/vite';
+
+if (import.meta.env.DEV) {
+  watchWithVite(docs);
+}
+```
+
+Otherwise run the dev server from `@fumadocs/local-md` alongside your app, and connect to it:
+
+```json title="package.json"
+{
+  "scripts": {
+    "dev": "local-md dev -- next dev"
+  }
+}
+```
+
+```ts title="lib/source.ts"
+import { watchWithDevServer } from '@fumadocs/satteri/local-md/dev/ws';
+
+// change it if you use a different framework (e.g. import.meta.env.DEV)
+if (process.env.NODE_ENV === 'development') {
+  void watchWithDevServer(docs);
+}
+```
+
+To wire up your own watcher instead, call `docs.invalidateFile(path)` when a file changes.
+
+### Disable Revalidation
+
+Use `staticSource()` when you only need a one-time snapshot, so a normal `loader()` works:
+
+```ts title="lib/source.ts"
+import { loader } from 'fumadocs-core/source';
+
+export const source = loader(await docs.staticSource(), {
+  baseUrl: '/docs',
+});
+```

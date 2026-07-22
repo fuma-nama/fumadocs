@@ -81,6 +81,9 @@ export function Header(props: ComponentProps<'header'>) {
   const list = (
     <Primitive.List
       ref={listRef}
+      // defaults to <ul>, but its children (nav title, link groups, controls) are not <li> —
+      // render a <div> for valid list semantics, like the Radix UI variant does with `asChild`
+      render={<div />}
       className="flex h-14 w-full mx-auto max-w-(--fd-layout-width) items-center px-4"
     >
       {slots.navTitle && (

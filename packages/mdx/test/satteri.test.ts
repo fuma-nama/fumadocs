@@ -200,7 +200,9 @@ test('satteri compiler exports lastModified', async () => {
     isDevelopment: false,
   });
 
-  expect(compiled.code).toContain(
-    `export const lastModified = new Date(${new Date('2025-11-18T00:00:00.000Z').getTime()});`,
-  );
+  // the value goes through the compiler, which may normalise the numeric
+  // literal (`1763424e6`), so match on the parsed timestamp rather than source
+  const match = /export const lastModified = new Date\(([^)]+)\)/.exec(compiled.code);
+  expect(match).not.toBeNull();
+  expect(Number(match![1])).toBe(new Date('2025-11-18T00:00:00.000Z').getTime());
 });

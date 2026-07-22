@@ -2,7 +2,8 @@ import type { MdastNode, MdastPluginInput, MdastVisitorContext } from 'satteri';
 import { gfmToMarkdown } from 'mdast-util-gfm';
 import type { LLMsOptions as RawLLMsOptions } from 'fumadocs-core/mdx-plugins/remark-llms';
 import { defaultStringifier } from 'fumadocs-core/mdx-plugins/stringifier';
-import { ExtraPluginHooks } from './compile';
+import type { ExtraPluginHooks } from './compile';
+import { isExportAnchor } from './export-anchor';
 
 export type LLMsOptions = Omit<RawLLMsOptions, '_data'>;
 
@@ -33,6 +34,9 @@ export function remarkLlms({ as = '_markdown', headingIds = true, ...rest }: LLM
     ...rest,
     ...gfmToMarkdown(),
     filterElement(node) {
+      // the anchor is appended by `compileMdx`, not part of the document
+      if (isExportAnchor(node)) return false;
+
       switch (node.type) {
         case 'mdxjsEsm':
           return false;
@@ -68,11 +72,13 @@ export function remarkLlms({ as = '_markdown', headingIds = true, ...rest }: LLM
 
   const plugin: MdastPluginInput & ExtraPluginHooks = {
     name: 'remark-llms',
-    afterToJs({ result }) {
+    collectExports({ data, addExport }) {
       if (as) {
-        const markdown = (result.data.markdown ??= '');
-        result.code += `\nexport const ${as} = ${JSON.stringify(markdown)};`;
+        addExport(as, JSON.stringify(data.markdown ?? ''));
       }
+    },
+    afterToJs({ result }) {
+      result.data.markdown ??= '';
     },
     ...Object.fromEntries(ROOT_VISITORS.map((key) => [key, track])),
   };

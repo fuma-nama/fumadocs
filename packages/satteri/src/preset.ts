@@ -8,6 +8,7 @@ import { remarkStructure, type StructureOptions } from '@/remark-structure';
 import { rehypeCode, type RehypeCodeOptions } from '@/rehype-code';
 import { rehypeToc } from '@/rehype-toc';
 import { rehypeTable } from '@/rehype-table';
+import { rehypeKatex, type RehypeKatexOptions } from '@/rehype-katex';
 import type { MdastPluginInput } from 'satteri';
 
 type ResolvePlugins<T> = T[] | ((plugins: T[]) => T[]);
@@ -22,6 +23,11 @@ export type DefaultSatteriOptions = Omit<MdxCompileOptions, 'mdastPlugins' | 'ha
   remarkCodeTabOptions?: RemarkCodeTabOptions | false;
   remarkNpmOptions?: RemarkNpmOptions | false;
   rehypeCodeOptions?: RehypeCodeOptions | false;
+  /**
+   * KaTeX rendering, applied only when the `math` feature is enabled. Pass
+   * options to customize it, or `false` to keep math unrendered.
+   */
+  rehypeKatexOptions?: RehypeKatexOptions | false;
 };
 
 export type SatteriPresetOptions =
@@ -73,6 +79,7 @@ export function applySatteriPreset(
       remarkStructureOptions,
       remarkCodeTabOptions,
       remarkNpmOptions,
+      rehypeKatexOptions,
       mdastPlugins,
       hastPlugins,
       features,
@@ -101,6 +108,8 @@ export function applySatteriPreset(
 
     const resolvedHast = pluginOption<HastPluginInput>(
       (plugins) => [
+        // before rehype-code so the raw TeX never reaches the highlighter
+        Boolean(features?.math) && rehypeKatexOptions !== false && rehypeKatex(rehypeKatexOptions),
         rehypeCodeOptions !== false &&
           rehypeCode({
             tab: false,

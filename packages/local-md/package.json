@@ -1,6 +1,6 @@
 {
   "name": "@fumadocs/local-md",
-  "version": "0.3.0",
+  "version": "0.3.1",
   "description": "The local Markdown files content source for Fumadocs",
   "keywords": [
     "Docs",
@@ -20,9 +20,9 @@
   "exports": {
     ".": "./dist/index.js",
     "./client": "./dist/client.js",
-    "./dev/node-client": "./dist/dev/node-client.js",
-    "./dev/node-server": "./dist/dev/node-server.js",
     "./dev/react-client": "./dist/dev/react-client.js",
+    "./dev/vite": "./dist/dev/vite.js",
+    "./dev/ws": "./dist/dev/ws.js",
     "./js/executor": "./dist/js/executor.js",
     "./js/executor-native": "./dist/js/executor-native.js",
     "./js/executor-virtual": "./dist/js/executor-virtual.js",
@@ -39,19 +39,15 @@
     "types:check": "tsc --noEmit"
   },
   "dependencies": {
+    "@fumadocs/local-content": "workspace:*",
     "@mdx-js/mdx": "^3.1.1",
     "@standard-schema/spec": "^1.1.0",
-    "chokidar": "^5.0.0",
-    "commander": "^15.0.0",
     "estree-util-build-jsx": "^3.0.1",
     "estree-util-to-js": "^2.0.0",
     "hast-util-to-jsx-runtime": "^2.3.6",
-    "picomatch": "^4.0.5",
     "remark": "^15.0.1",
     "remark-rehype": "^11.1.2",
-    "tinyglobby": "^0.2.17",
-    "vfile": "^6.0.3",
-    "ws": "^8.21.0"
+    "vfile": "^6.0.3"
   },
   "devDependencies": {
     "@types/estree": "^1.0.9",
@@ -59,18 +55,16 @@
     "@types/hast": "^3.0.5",
     "@types/mdx": "^2.0.14",
     "@types/node": "26.1.1",
-    "@types/picomatch": "^4.0.3",
     "@types/react": "^19.2.17",
     "@types/react-dom": "^19.2.3",
     "@types/unist": "^3.0.3",
-    "@types/ws": "^8.18.1",
     "fumadocs-core": "workspace:*",
-    "react": "^19.2.7",
-    "react-dom": "^19.2.7",
+    "react": "^19.2.8",
+    "react-dom": "^19.2.8",
     "tsconfig": "workspace:*",
-    "tsdown": "0.22.5",
+    "tsdown": "0.22.13",
     "unified": "^11.0.5",
-    "vite": "^8.1.4"
+    "vite": "^8.1.5"
   },
   "peerDependencies": {
     "@types/estree": "*",

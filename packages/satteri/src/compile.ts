@@ -1,9 +1,20 @@
 import { mdxToJs, type MdxCompileOptions, type MdxToJsResult, type Data } from 'satteri';
 import { pathToFileURL } from 'node:url';
+import { createExportAnchor, type DocumentFormat } from './export-anchor';
+import { markdownToJs, rehypeDropRawHtml } from './markdown-to-js';
+
+export type { DocumentFormat } from './export-anchor';
 
 export interface CompileMdxOptions {
   source: string;
   filePath: string;
+  /**
+   * Which parser to use.
+   *
+   * Defaults to the `filePath` extension, so a `.md` file is not silently given
+   * MDX semantics.
+   */
+  format?: DocumentFormat;
   frontmatter?: Record<string, unknown>;
   isDevelopment?: boolean;
   environment?: 'bundler' | 'runtime';
@@ -12,14 +23,35 @@ export interface CompileMdxOptions {
 
 export type CompileMdxResult = MdxToJsResult;
 
+export type OutputFormat = 'program' | 'function-body';
+
+export interface AfterToJsContext {
+  result: MdxToJsResult;
+  outputFormat: OutputFormat;
+}
+
+export interface CollectExportsContext {
+  data: Data;
+  /** declare `export const <name> = <valueCode>`, a repeated name replaces the earlier one */
+  addExport: (name: string, valueCode: string) => void;
+}
+
 export interface ExtraPluginHooks {
   beforeToJs?: (opts: { data: Data }) => void;
-  afterToJs?: (opts: { result: MdxToJsResult }) => void;
+  /**
+   * Declare module exports. Runs at the anchor, after every visitor has seen
+   * the document, so `data` is final. Exports go into the tree as an ESM node,
+   * so the compiler emits them correctly for either output format.
+   */
+  collectExports?: (opts: CollectExportsContext) => void;
+  /** post-process the generated code, use {@link collectExports} for exports */
+  afterToJs?: (opts: AfterToJsContext) => void;
 }
 
 export async function compileMdx({
   source,
   filePath,
+  format = filePath.endsWith('.mdx') ? 'mdx' : 'md',
   frontmatter,
   isDevelopment = false,
   environment = 'bundler',
@@ -33,12 +65,22 @@ export async function compileMdx({
     plugin.beforeToJs?.({ data });
   }
 
-  const result = await mdxToJs(source, {
+  const outputFormat: OutputFormat =
+    environment === 'runtime' ? 'function-body' : (satteriOptions.outputFormat ?? 'program');
+
+  const anchor = createExportAnchor(format);
+  const compileOptions: MdxCompileOptions = {
     ...satteriOptions,
     mdastPlugins,
-    hastPlugins,
+    // ordered last so the anchor runs after the plugins whose exports it
+    // collects, and the raw drop after the anchor node is gone
+    hastPlugins: [
+      ...hastPlugins,
+      anchor.plugin(plugins),
+      ...(format === 'md' ? [rehypeDropRawHtml()] : []),
+    ],
     development: isDevelopment,
-    outputFormat: environment === 'runtime' ? 'function-body' : satteriOptions.outputFormat,
+    outputFormat,
     fileURL: satteriOptions.fileURL ?? pathToFileURL(filePath),
     data,
     features: {
@@ -47,33 +89,19 @@ export async function compileMdx({
       directive: true,
       ...satteriOptions.features,
     },
-  });
+  };
+
+  const withAnchor = anchor.append(source);
+  const result = await (format === 'md'
+    ? markdownToJs(withAnchor, compileOptions)
+    : mdxToJs(withAnchor, compileOptions));
 
   for (const plugin of plugins) {
-    plugin.afterToJs?.({ result });
-  }
-
-  // var name -> code line
-  const injectedExports = new Map<string, string>();
-  function queueDataExport(name: string, code: string): void {
-    injectedExports.set(name, `export const ${name} = ${code};`);
+    plugin.afterToJs?.({ result, outputFormat });
   }
 
   const outData = result.data;
-  if (outData.frontmatter) {
-    queueDataExport('frontmatter', JSON.stringify(outData.frontmatter));
-  }
-  if (Array.isArray(outData._valueToExport)) {
-    for (const name of outData._valueToExport) {
-      if (!(name in outData)) continue;
-      queueDataExport(name, JSON.stringify(outData[name]));
-    }
-  }
-
-  let code = result.code;
-  if (injectedExports.size > 0) {
-    code = `${code}\n${Array.from(injectedExports.values()).join('\n')}`;
-  }
+  const code = result.code;
   return {
     code,
     data: outData,

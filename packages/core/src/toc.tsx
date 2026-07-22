@@ -83,22 +83,38 @@ export function AnchorProvider({ toc, single = false, children }: AnchorProvider
 }
 
 export interface TOCItemProps extends ComponentProps<'a'> {
+  autoScroll?: boolean;
   onActiveChange?: (v: boolean) => void;
 }
 
-export function TOCItem({ ref, onActiveChange = () => null, ...props }: TOCItemProps) {
+export function TOCItem({
+  ref,
+  onActiveChange = () => null,
+  autoScroll = true,
+  ...props
+}: TOCItemProps) {
   const id = props.href ? getItemId(props.href) : null;
   const containerRef = use(ScrollContext);
   const anchorRef = useRef<HTMLAnchorElement>(null);
+  const isInitialRef = useRef(true);
   const observer = useObserver();
   const [active, setActive] = useState(() =>
     observer.items.some((item) => item.id === id && item.active),
   );
 
-  function autoScroll(items: TOCItemInfo[], instant = false) {
+  const onUpdate = useEffectEvent((items: TOCItemInfo[], initial: boolean) => {
+    const itemData = id ? items.find((item) => item.id === id) : null;
+    if (!itemData) return;
+    const isChanged = itemData.active !== active;
+
+    if (isChanged) {
+      setActive(itemData.active);
+      onActiveChange(itemData.active);
+    }
+
     const anchor = anchorRef.current;
     const container = containerRef?.current;
-    if (!id || !anchor || !container) return;
+    if (!autoScroll || !anchor || !container) return;
 
     let lastActive: TOCItemInfo | undefined;
     for (const item of items) {
@@ -110,28 +126,24 @@ export function TOCItem({ ref, onActiveChange = () => null, ...props }: TOCItemP
 
     if (lastActive?.id === id) {
       scrollIntoView(anchor, {
-        behavior: instant ? 'instant' : 'smooth',
+        behavior: initial ? 'instant' : 'smooth',
         block: 'center',
         inline: 'center',
         scrollMode: 'always',
         boundary: container,
       });
     }
-  }
-
-  useTOCListener((items) => {
-    const itemData = id ? items.find((item) => item.id === id) : null;
-
-    if (itemData && itemData.active !== active) {
-      setActive(itemData.active);
-      onActiveChange(itemData.active);
-      autoScroll(items);
-    }
   });
 
   useEffect(() => {
-    autoScroll(observer.items, true);
-    // oxlint-disable-next-line eslint-plugin-react-hooks/exhaustive-deps -- initial only
+    if (autoScroll) onUpdate(observer.items, isInitialRef.current);
+    isInitialRef.current = false;
+  }, [observer, autoScroll]);
+
+  useEffect(() => {
+    const listener: ChangeListener = (items) => onUpdate(items, false);
+    observer.listen(listener);
+    return () => observer.unlisten(listener);
   }, [observer]);
 
   return <a ref={mergeRefs(anchorRef, ref)} data-active={active} {...props} />;
