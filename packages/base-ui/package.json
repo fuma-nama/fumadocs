@@ -137,7 +137,7 @@
     "@fumadocs/tailwind": "workspace:*",
     "class-variance-authority": "^0.7.1",
     "cnfast": "^0.0.8",
-    "lucide-react": "^1.24.0",
+    "lucide-react": "^1.25.0",
     "motion": "^12.42.2",
     "next-themes": "^0.4.6",
     "react-remove-scroll": "^2.7.2",
@@ -148,9 +148,9 @@
   },
   "devDependencies": {
     "@fumadocs/cli": "workspace:*",
-    "@tailwindcss/cli": "^4.3.2",
-    "@tailwindcss/oxide": "^4.3.2",
-    "@tsdown/css": "^0.22.8",
+    "@tailwindcss/cli": "^4.3.3",
+    "@tailwindcss/oxide": "^4.3.3",
+    "@tsdown/css": "^0.22.13",
     "@types/hast": "^3.0.5",
     "@types/mdx": "^2.0.14",
     "@types/node": "^26.1.1",
@@ -159,9 +159,9 @@
     "fuma-cli": "^0.1.1",
     "fumadocs-core": "workspace:*",
     "react-medium-image-zoom": "^5.4.8",
-    "tailwindcss": "^4.3.2",
+    "tailwindcss": "^4.3.3",
     "tsconfig": "workspace:*",
-    "tsdown": "0.22.8",
+    "tsdown": "0.22.13",
     "unified": "^11.0.5"
   },
   "peerDependencies": {

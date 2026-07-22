@@ -45,10 +45,10 @@
     "@types/react": "^19.2.17",
     "@types/ws": "^8.18.1",
     "fumadocs-core": "workspace:*",
-    "react": "^19.2.7",
+    "react": "^19.2.8",
     "tsconfig": "workspace:*",
-    "tsdown": "0.22.8",
-    "vite": "^8.1.4",
+    "tsdown": "0.22.13",
+    "vite": "^8.1.5",
     "vitest": "^4.1.10"
   },
   "peerDependencies": {

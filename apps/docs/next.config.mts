@@ -14,6 +14,7 @@ const config: NextConfig = {
       fullUrl: true,
     },
   },
+  allowedDevOrigins: ['192.168.52.84'],
   serverExternalPackages: ['ts-morph', 'typescript', 'twoslash', 'shiki', '@takumi-rs/core'],
   images: {
     remotePatterns: [

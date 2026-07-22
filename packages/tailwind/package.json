@@ -33,9 +33,9 @@
     "@fastify/deepmerge": "^3.2.1",
     "@types/node": "^26.1.1",
     "postcss-selector-parser": "^7.1.4",
-    "tailwindcss": "^4.3.2",
+    "tailwindcss": "^4.3.3",
     "tsconfig": "workspace:*",
-    "tsdown": "0.22.8"
+    "tsdown": "0.22.13"
   },
   "peerDependencies": {
     "tailwindcss": "^4.0.0"

@@ -59,12 +59,12 @@
     "@types/react-dom": "^19.2.3",
     "@types/unist": "^3.0.3",
     "fumadocs-core": "workspace:*",
-    "react": "^19.2.7",
-    "react-dom": "^19.2.7",
+    "react": "^19.2.8",
+    "react-dom": "^19.2.8",
     "tsconfig": "workspace:*",
-    "tsdown": "0.22.8",
+    "tsdown": "0.22.13",
     "unified": "^11.0.5",
-    "vite": "^8.1.4"
+    "vite": "^8.1.5"
   },
   "peerDependencies": {
     "@types/estree": "*",

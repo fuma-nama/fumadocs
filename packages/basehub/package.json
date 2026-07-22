@@ -35,9 +35,9 @@
     "fuma-cli": "^0.1.1",
     "fumadocs-core": "workspace:*",
     "fumadocs-ui": "workspace:@fumadocs/base-ui@*",
-    "react": "^19.2.7",
+    "react": "^19.2.8",
     "tsconfig": "workspace:*",
-    "tsdown": "0.22.8",
+    "tsdown": "0.22.13",
     "typescript": "^6.0.3"
   },
   "peerDependencies": {

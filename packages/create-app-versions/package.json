@@ -4,13 +4,13 @@
   "private": true,
   "description": "Used to track dependency versions in create-fumadocs-app",
   "dependencies": {
-    "@biomejs/biome": "^2.5.4",
+    "@biomejs/biome": "^2.5.5",
     "@orama/core": "^1.2.19",
     "fumadocs-core": "workspace:*",
     "fumadocs-mdx": "workspace:*",
     "fumadocs-ui": "workspace:*",
     "oxlint": "^1.74.0",
-    "react": "^19.2.7",
-    "takumi-js": "^2.2.0"
+    "react": "^19.2.8",
+    "takumi-js": "^2.4.0"
   }
 }

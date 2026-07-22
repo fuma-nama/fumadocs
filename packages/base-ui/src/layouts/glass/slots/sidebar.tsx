@@ -35,7 +35,7 @@ import { LayoutTabsDropdown } from '../layout-tabs';
 export const drawerHandle = Drawer.createHandle();
 
 const itemTriggerVariants = cva(
-  'inline-flex text-sm items-center gap-2 rounded-lg px-2.5 py-2 md:py-1.5 [&_svg]:size-4 outline-none focus-visible:ring-2 focus-visible:ring-fd-ring',
+  'inline-flex items-center gap-2 rounded-lg px-2.5 py-2 md:py-1.5 [&_svg]:size-4 outline-none focus-visible:ring-2 focus-visible:ring-fd-ring',
   {
     variants: {
       active: {
@@ -97,7 +97,7 @@ export function SidebarDrawer({ contentProps }: SidebarDrawerProps) {
           <Drawer.Popup
             id="nd-mobile-sidebar"
             className={cn(
-              'relative [--bleed:3rem] supports-[-webkit-touch-callout:none]:[--bleed:0px] w-[360px] h-full max-w-[calc(100vw-3rem+var(--bleed))] pr-(--bleed) -mr-(--bleed) border-l bg-fd-background text-fd-foreground outline-none shadow-md touch-auto [transform:translateX(var(--drawer-swipe-movement-x))] transition-transform duration-450 ease-[cubic-bezier(0.32,0.72,0,1)] data-swiping:select-none data-ending-style:[transform:translateX(calc(100%-var(--bleed)+var(--viewport-padding)+2px))] data-starting-style:[transform:translateX(calc(100%-var(--bleed)+var(--viewport-padding)+2px))] data-ending-style:duration-[calc(var(--drawer-swipe-strength)*400ms)] supports-[-webkit-touch-callout:none]:border supports-[-webkit-touch-callout:none]:rounded-xl',
+              'relative [--bleed:3rem] supports-[-webkit-touch-callout:none]:[--bleed:0px] w-[360px] h-full max-w-[calc(100vw-3rem+var(--bleed))] pr-(--bleed) -mr-(--bleed) border-l bg-fd-background text-fd-foreground text-[0.9375rem] outline-none shadow-md touch-auto [transform:translateX(var(--drawer-swipe-movement-x))] transition-transform duration-450 ease-[cubic-bezier(0.32,0.72,0,1)] data-swiping:select-none data-ending-style:[transform:translateX(calc(100%-var(--bleed)+var(--viewport-padding)+2px))] data-starting-style:[transform:translateX(calc(100%-var(--bleed)+var(--viewport-padding)+2px))] supports-[-webkit-touch-callout:none]:border supports-[-webkit-touch-callout:none]:rounded-xl',
 
               // this could be a bug or deliberate, but scrolling in drawer content will somehow get interrupted on IOS, the reason is unknown but this is the simplest workaround
               // scrollbar-width should be zero because the scrollbar is in fact behind the viewport: | content | bleed | scroll bar |, it will push the content to left if not
@@ -108,11 +108,11 @@ export function SidebarDrawer({ contentProps }: SidebarDrawerProps) {
               {...contentProps}
               className={cn('flex flex-col min-h-full px-3', contentProps?.className)}
             >
-              <div className="sticky flex flex-col gap-2 top-0 py-2 bg-fd-background shadow-lg shadow-fd-background">
+              <div className="sticky flex flex-col gap-2 top-0 pt-4 pb-2 bg-fd-background shadow-lg shadow-fd-background">
                 <div className="flex items-center gap-1.5 ps-2.5">
                   <Drawer.Title
                     render={
-                      <slots.navTitle className="flex text-sm items-center font-semibold gap-2 flex-1" />
+                      <slots.navTitle className="flex items-center font-semibold gap-2 flex-1" />
                     }
                   />
                   {aiChat && (
@@ -187,7 +187,7 @@ export function Sidebar({ className, children, ...props }: SidebarProps) {
     <aside
       id="nd-sidebar"
       className={cn(
-        'sticky flex flex-col transition-transform [grid-area:left] my-2 ms-2 z-30 top-2 border rounded-2xl bg-fd-popover/80 text-fd-popover-foreground backdrop-blur-sm shadow-sm h-[calc(100dvh---spacing(4))] max-md:hidden md:layout:[--fd-left-width:280px]',
+        'sticky flex flex-col transition-transform [grid-area:left] my-2 ms-2 z-30 top-2 border rounded-2xl bg-fd-popover/80 text-fd-popover-foreground text-sm backdrop-blur-sm shadow-sm h-[calc(100dvh---spacing(4))] max-md:hidden md:layout:[--fd-left-width:280px]',
         collapsed &&
           'w-[calc(280px---spacing(2))] -translate-x-[280px] md:layout:[--fd-left-width:0px]',
         className,
@@ -283,7 +283,7 @@ function SidebarLinkItem({
           className={cn('mt-4 first:mt-0', className)}
         >
           {item.url ? (
-            <div className="flex w-full text-sm px-2.5 py-1.5 font-medium">
+            <div className="flex w-full px-2.5 py-1.5 font-medium">
               <Link
                 href={item.url}
                 external={item.external}
@@ -303,7 +303,7 @@ function SidebarLinkItem({
               <CollapsibleTrigger className="flex-1">{rightIcon}</CollapsibleTrigger>
             </div>
           ) : (
-            <CollapsibleTrigger className="w-full text-sm px-2.5 py-1.5 font-medium inline-flex items-center gap-2 [&_svg]:size-4">
+            <CollapsibleTrigger className="w-full px-2.5 py-1.5 font-medium inline-flex items-center gap-2 [&_svg]:size-4">
               {item.icon}
               {item.text}
               {rightIcon}
@@ -345,7 +345,7 @@ function renderNode(node: PageTree.Node) {
   if (node.type === 'folder') return <SidebarFolder folder={node} />;
 
   return (
-    <p className="mt-4 w-full text-sm px-2.5 py-1.5 font-medium inline-flex items-center gap-2 [&_svg]:size-4 empty:hidden first:mt-0">
+    <p className="mt-4 w-full px-2.5 py-1.5 font-medium inline-flex items-center gap-2 [&_svg]:size-4 empty:hidden first:mt-0">
       {node.icon}
       {node.name}
     </p>
@@ -385,7 +385,7 @@ function SidebarFolder({ folder }: { folder: PageTree.Folder }) {
             href={folder.index.url}
             external={folder.index.external}
             className={cn(
-              'inline-flex text-sm px-2.5 py-1.5 font-medium items-center gap-2 [&_svg]:size-4 mt-4 first:mt-0',
+              'inline-flex px-2.5 py-1.5 font-medium items-center gap-2 [&_svg]:size-4 mt-4 first:mt-0',
               isNodeInPath(folder.index, path)
                 ? 'text-fd-primary'
                 : 'hover:underline hover:decoration-fd-muted-foreground hover:underline-offset-4 hover:decoration-dashed hover:text-fd-accent-foreground',
@@ -398,7 +398,7 @@ function SidebarFolder({ folder }: { folder: PageTree.Folder }) {
             {folder.name}
           </Link>
         ) : (
-          <div className="w-full text-sm px-3 py-1.5 font-medium inline-flex items-center gap-2 [&_svg]:size-4 mt-4 first:mt-0">
+          <div className="w-full px-3 py-1.5 font-medium inline-flex items-center gap-2 [&_svg]:size-4 mt-4 first:mt-0">
             {folder.icon}
             {folder.name}
           </div>
@@ -420,7 +420,7 @@ function SidebarFolder({ folder }: { folder: PageTree.Folder }) {
   return (
     <Collapsible open={open} onOpenChange={setOpen} className="mt-4 first:mt-0">
       {folder.index ? (
-        <div className="flex w-full text-sm px-2.5 py-1.5 font-medium">
+        <div className="flex w-full px-2.5 py-1.5 font-medium">
           <Link
             href={folder.index.url}
             external={folder.index.external}
@@ -440,7 +440,7 @@ function SidebarFolder({ folder }: { folder: PageTree.Folder }) {
           <CollapsibleTrigger className="flex-1">{rightIcon}</CollapsibleTrigger>
         </div>
       ) : (
-        <CollapsibleTrigger className="w-full text-sm px-2.5 py-1.5 font-medium inline-flex items-center gap-2 [&_svg]:size-4">
+        <CollapsibleTrigger className="w-full px-2.5 py-1.5 font-medium inline-flex items-center gap-2 [&_svg]:size-4">
           {folder.icon}
           {folder.name}
           {rightIcon}
