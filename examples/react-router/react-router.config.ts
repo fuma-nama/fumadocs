@@ -1,7 +1,7 @@
 import type { Config } from '@react-router/dev/config';
 import { glob } from 'node:fs/promises';
 import { createGetUrl, getSlugs } from 'fumadocs-core/source';
-import { getPageImagePath } from '@/lib/shared';
+import { getPageImagePath } from './app/lib/shared';
 
 const getUrl = createGetUrl('/docs');
 
