@@ -139,58 +139,58 @@ export function DocsLayout(props: DocsLayoutProps) {
             {sidebarEnabled && <slots.sidebar.root {...sidebarProps} />}
             {children}
           </slots.container>
+          {renderNavigationPanel({
+            head: (
+              <>
+                {slots.navTitle && (
+                  <slots.navTitle className="inline-flex items-center gap-2.5 text-sm font-semibold" />
+                )}
+                {nav.children}
+              </>
+            ),
+            tabDropdown: slots.tabDropdown && tabs.length > 0 && (
+              <slots.tabDropdown className="flex-1" tabs={tabs} />
+            ),
+            tool: (
+              <>
+                {slots.languageSelect && (
+                  <slots.languageSelect.root>
+                    <Languages className="size-4.5" />
+                  </slots.languageSelect.root>
+                )}
+                {slots.searchTrigger && (
+                  <slots.searchTrigger.sm hideIfDisabled className="rounded-lg" />
+                )}
+                {slots.sidebar && (
+                  <slots.sidebar.trigger
+                    className={cn(
+                      buttonVariants({
+                        variant: 'ghost',
+                        size: 'icon-sm',
+                        className: 'overflow-hidden',
+                      }),
+                    )}
+                  />
+                )}
+                {slots.themeSwitch && (
+                  <slots.themeSwitch className="p-1 h-full ms-1 rounded-xl bg-fd-muted *:rounded-lg" />
+                )}
+              </>
+            ),
+            link: linkItems.menuItems
+              .filter((item) => item.type === 'icon')
+              .map((item, i) => (
+                <LinkItem
+                  key={i}
+                  item={item}
+                  className={cn(buttonVariants({ size: 'icon-sm', color: 'ghost' }))}
+                  aria-label={item.label}
+                >
+                  {item.icon}
+                </LinkItem>
+              )),
+          })}
         </slots.sidebar.provider>
-        {renderNavigationPanel({
-          head: (
-            <>
-              {slots.navTitle && (
-                <slots.navTitle className="inline-flex items-center gap-2.5 text-sm font-semibold" />
-              )}
-              {nav.children}
-            </>
-          ),
-          tabDropdown: slots.tabDropdown && tabs.length > 0 && (
-            <slots.tabDropdown className="flex-1" tabs={tabs} />
-          ),
-          tool: (
-            <>
-              {slots.languageSelect && (
-                <slots.languageSelect.root>
-                  <Languages className="size-4.5" />
-                </slots.languageSelect.root>
-              )}
-              {slots.searchTrigger && (
-                <slots.searchTrigger.sm hideIfDisabled className="rounded-lg" />
-              )}
-              {slots.sidebar && (
-                <slots.sidebar.trigger
-                  className={cn(
-                    buttonVariants({
-                      variant: 'ghost',
-                      size: 'icon-sm',
-                      className: 'overflow-hidden',
-                    }),
-                  )}
-                />
-              )}
-              {slots.themeSwitch && (
-                <slots.themeSwitch className="p-1 h-full ms-1 rounded-xl bg-fd-muted *:rounded-lg" />
-              )}
-            </>
-          ),
-          link: linkItems.menuItems
-            .filter((item) => item.type === 'icon')
-            .map((item, i) => (
-              <LinkItem
-                key={i}
-                item={item}
-                className={cn(buttonVariants({ size: 'icon-sm', color: 'ghost' }))}
-                aria-label={item.label}
-              >
-                {item.icon}
-              </LinkItem>
-            )),
-        })}
       </TreeContextProvider>
     </LayoutContext>
   );

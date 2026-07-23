@@ -68,20 +68,14 @@ export function Sidebar({ footer, banner, components, ...rest }: SidebarProps) {
   return (
     <SidebarContent {...rest}>
       <div className="flex flex-col gap-3 p-4 pb-2 empty:hidden">{banner}</div>
-      <Base.SidebarViewport>
-        <div className="flex flex-col">
-          {menuItems
-            .filter((v) => v.type !== 'icon')
-            .map((item, i, list) => (
-              <SidebarLinkItem
-                key={i}
-                item={item}
-                className={cn(i === list.length - 1 && 'mb-4')}
-              />
-            ))}
-          <SidebarPageTree {...components} />
-        </div>
-      </Base.SidebarViewport>
+      <div className="flex flex-col p-4">
+        {menuItems
+          .filter((v) => v.type !== 'icon')
+          .map((item, i, list) => (
+            <SidebarLinkItem key={i} item={item} className={cn(i === list.length - 1 && 'mb-4')} />
+          ))}
+        <SidebarPageTree {...components} />
+      </div>
       {footer}
     </SidebarContent>
   );
