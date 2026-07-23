@@ -1,3 +1,9 @@
+## create-fumadocs-app@16.1.7
+
+### Improve hints for create app CLI
+
+Show details for pros & cons of each framework.
+
 ## create-fumadocs-app@16.1.2
 
 ### Add Astro framework support

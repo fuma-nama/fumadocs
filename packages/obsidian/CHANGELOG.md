@@ -1,3 +1,11 @@
+## fumadocs-obsidian@1.0.0
+
+### Obsidian content source v1
+
+Render Obsidian vaults directly through static or dynamic Fumadocs sources, with lazy in-memory compilation and local content hot reload. Remove the old generated-file and remark-plugin integrations.
+
+Resolve URL-encoded relative file links against their decoded source paths.
+
 ## fumadocs-obsidian@0.2.1
 
 ### Migrate from `js-yaml` to `yaml`
