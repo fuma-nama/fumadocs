@@ -5,7 +5,13 @@ export default defineConfig({
   target: 'es2023',
   format: 'esm',
   dts: true,
-  entry: ['src/index.ts', 'src/ui/index.tsx', 'src/mdx/index.ts'],
+  entry: ['src/{index,client}.ts', 'src/bin.ts', 'src/dev/{vite,ws}.ts', 'src/ui/index.tsx'],
+  exports: {
+    bin: {
+      'fumadocs-obsidian': './src/bin.ts',
+    },
+    exclude: ['bin'],
+  },
   deps: {
     onlyBundle: [],
   },

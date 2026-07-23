@@ -358,7 +358,13 @@ export function loader<I extends ResolvedInput, I18n extends I18nConfig | undefi
       let target;
 
       if (value.startsWith('./') || value.startsWith('../')) {
-        const path = joinPath(dir, value);
+        let decoded = value;
+        try {
+          decoded = decodeURI(value);
+        } catch {
+          // keep malformed hrefs untouched so custom resolvers can still handle them
+        }
+        const path = joinPath(dir, decoded);
 
         target = indexer.getPage(path, language);
       } else {

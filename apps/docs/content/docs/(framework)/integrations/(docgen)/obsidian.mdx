@@ -1,66 +1,171 @@
 ---
 title: Obsidian
-description: Render your Obsidian vaults in Fumadocs.
+description: Render an Obsidian vault directly with Fumadocs.
 ---
 
 <Callout type="warn" title="Experimental">
-  Might have bugs or breaking changes, use it at your own risk.
+  This integration may have bugs or breaking changes.
 </Callout>
+
+`fumadocs-obsidian` exposes a runtime content source. It reads and compiles the vault directly, so it does not generate intermediate MDX files or need a Fumadocs MDX remark plugin.
+
+Supported Obsidian syntax includes:
+
+- Wikilinks and embeds.
+- Callouts.
+- Block IDs.
+- Comments.
 
 ## Setup
 
-```npm
-npm i fumadocs-obsidian
+Install the package:
+
+```package-install
+fumadocs-obsidian shiki
 ```
 
-You can copy your vault folder to the project (e.g. root directory):
+Create an Obsidian source and pass it to `dynamicLoader()`:
 
-<Files>
-  <Folder name="Obsidian Vault" defaultOpen>
-    <File name="Introduction.md" />
-    <File name="Folder/Hello World.md" />
-  </Folder>
-  <File name="package.json" />
-</Files>
+```ts title="lib/source.ts"
+import { dynamicLoader } from 'fumadocs-core/source/dynamic';
+import { obsidian } from 'fumadocs-obsidian';
 
-Create a script to generate docs & assets:
-
-```ts title="scripts/generate.ts"
-import { fromVault } from 'fumadocs-obsidian';
-
-await fromVault({
-  dir: 'Obsidian Vault',
-  out: {
-    // you can specify the locations of `/public` & `/content/docs` folder
-  },
+const vault = obsidian({
+  dir: 'public/vault',
+  // map vault attachments to their public URLs
+  url: (path) => `/vault/${path}`,
 });
-```
 
-Run the script to generate docs:
+if (process.env.NODE_ENV === 'development') {
+  void vault.devServer();
+}
 
-```bash
-bun scripts/generate.ts
-```
+const vaultLoader = dynamicLoader(vault.dynamicSource(), {
+  baseUrl: '/docs',
+});
 
-Finally, include necessary MDX components:
-
-```tsx title="components/mdx.tsx"
-import defaultMdxComponents from 'fumadocs-ui/mdx';
-import * as ObsidianComponents from 'fumadocs-obsidian/ui';
-import type { MDXComponents } from 'mdx/types';
-
-export function getMDXComponents(components?: MDXComponents) {
-  return {
-    ...defaultMdxComponents,
-    ...ObsidianComponents,
-    ...components,
-  } satisfies MDXComponents;
+export function getSource() {
+  return vaultLoader.get();
 }
 ```
 
+The example keeps its vault in `public/vault`, allowing Next.js to serve attachments at the URLs returned by `url`. You can keep the vault elsewhere when your app serves or uploads its attachments separately.
+
+Then load and render a page:
+
+```tsx title="app/docs/[[...slug]]/page.tsx"
+import { getSource } from '@/lib/source';
+import { notFound } from 'next/navigation';
+import defaultMdxComponents, { createRelativeLink } from 'fumadocs-ui/mdx';
+import * as ObsidianComponents from 'fumadocs-obsidian/ui';
+import { DocsBody, DocsPage } from 'fumadocs-ui/layouts/docs/page';
+
+export default async function Page({ params }: PageProps<'/docs/[[...slug]]'>) {
+  const source = await getSource();
+  const page = source.getPage((await params).slug);
+  if (!page) notFound();
+
+  const { body, toc } = await (
+    await page.data.load()
+  ).render({
+    ...defaultMdxComponents,
+    ...ObsidianComponents,
+    a: createRelativeLink(source, page),
+  });
+
+  return (
+    <DocsPage toc={toc}>
+      <DocsBody>{body}</DocsBody>
+    </DocsPage>
+  );
+}
+```
+
+`page.data.load()` compiles each page at most once per vault snapshot. Vault content is compiled as plain Markdown: rendering only maps it to JSX and resolves component names, JavaScript in content is never evaluated. Media files are referenced by URL and never read into memory.
+
+## Hot Reload
+
+Run the included content watcher alongside your framework:
+
+```json title="package.json"
+{
+  "scripts": {
+    "dev": "fumadocs-obsidian dev -- next dev"
+  }
+}
+```
+
+The `vault.devServer()` call shown above receives changes from that watcher. Since wikilinks and aliases can create cross-file dependencies, a change invalidates the whole source snapshot — only the changed files are re-read from disk though.
+
+For Vite, use the in-process adapter instead:
+
+```ts title="vite.config.ts"
+import { localContentPlugin } from 'fumadocs-obsidian/dev/vite';
+
+export default defineConfig({
+  plugins: [localContentPlugin()],
+});
+```
+
+```ts title="lib/source.ts"
+import { watchWithVite } from 'fumadocs-obsidian/dev/vite';
+
+if (import.meta.env.DEV) watchWithVite(vault);
+```
+
+## Static Source
+
+Use `staticSource()` when the vault only needs to be read once:
+
+```ts title="lib/source.ts"
+import { loader } from 'fumadocs-core/source';
+import { obsidian } from 'fumadocs-obsidian';
+
+const vault = obsidian({
+  dir: 'public/vault',
+  url: (path) => `/vault/${path}`,
+});
+
+export const source = loader(await vault.staticSource(), {
+  baseUrl: '/docs',
+});
+```
+
+## Schema
+
+Use Standard Schema-compatible validators to customize page frontmatter and `meta.json` files:
+
+```ts title="lib/source.ts"
+import { frontmatterSchema, obsidian } from 'fumadocs-obsidian';
+import { metaSchema } from 'fumadocs-core/source/schema';
+import { z } from 'zod';
+
+const vault = obsidian({
+  dir: 'public/vault',
+  frontmatterSchema: frontmatterSchema.extend({
+    tags: z.array(z.string()).optional(),
+  }),
+  metaSchema,
+});
+```
+
+The default `frontmatterSchema` is forgiving about loosely structured vaults: scalar titles like `title: 2024` are coerced to strings, and `aliases` accepts both a single name and a list. A note failing validation is reported and skipped without affecting the rest of the vault.
+
 ### Additions
 
-Some syntax features need to be enabled separately:
+Pass remark/rehype plugins to enable syntax features separately:
 
 - [Mermaid](/docs/markdown/mermaid).
 - [Math](/docs/markdown/math).
+
+```ts title="lib/source.ts"
+import { obsidian } from 'fumadocs-obsidian';
+import remarkMath from 'remark-math';
+import rehypeKatex from 'rehype-katex';
+
+const vault = obsidian({
+  dir: 'public/vault',
+  remarkPlugins: [remarkMath],
+  rehypePlugins: [rehypeKatex],
+});
+```

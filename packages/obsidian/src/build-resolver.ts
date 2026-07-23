@@ -41,8 +41,8 @@ export function buildResolver(storage: VaultStorage): VaultResolver {
     pathToFile.set(file.path, file);
 
     // support aliases specified in frontmatter
-    if (file.format === 'content' && file.frontmatter?.aliases) {
-      for (const alias of file.frontmatter.aliases) {
+    if (file.format === 'content') {
+      for (const alias of getAliases(file.frontmatter.aliases)) {
         nameToFile.set(alias, file);
       }
     }
@@ -66,6 +66,13 @@ export function buildResolver(storage: VaultStorage): VaultResolver {
       return this.resolvePath(name) ?? this.resolveName(name);
     },
   };
+}
+
+/** Obsidian accepts both `aliases: name` and the list form */
+function getAliases(value: unknown): string[] {
+  if (typeof value === 'string') return [value];
+  if (Array.isArray(value)) return value.filter((alias) => typeof alias === 'string');
+  return [];
 }
 
 export function resolveInternalHref(

@@ -38,6 +38,8 @@ export interface LocalSource<Page extends PageData, Meta extends MetaData> exten
     options?: SourceOptions,
   ) => Promise<StaticSource<{ pageData: Page; metaData: Meta }>>;
   dynamicSource: (options?: SourceOptions) => DynamicSource<{ pageData: Page; metaData: Meta }>;
+  /** drop every parsed file and source cache */
+  invalidateAll: () => void;
   /**
    * @deprecated import `watchWithDevServer` from `@fumadocs/local-content/dev/ws`,
    * or `watchWithVite` from `@fumadocs/local-content/dev/vite`, instead.
@@ -53,6 +55,11 @@ export function createLocalSource<Page extends PageData, Meta extends MetaData>(
   const storage = createStorage(config);
   const registeredLoaders = new Set<DynamicLoader>();
   let cachedStaticSource: Promise<StaticSource<{ pageData: Page; metaData: Meta }>> | null = null;
+
+  function invalidate() {
+    cachedStaticSource = null;
+    for (const loader of registeredLoaders) loader.invalidate();
+  }
 
   async function createFiles(options?: SourceOptions): Promise<$Files> {
     const baseDir = options?.baseDir;
@@ -73,10 +80,13 @@ export function createLocalSource<Page extends PageData, Meta extends MetaData>(
   return {
     dir: path.resolve(config.dir),
     include: config.include ?? config.integration.include,
+    invalidateAll() {
+      storage.clearCache();
+      invalidate();
+    },
     invalidateFile(file) {
-      cachedStaticSource = null;
       storage.invalidateCache(path.resolve(file));
-      for (const loader of registeredLoaders) loader.invalidate();
+      invalidate();
     },
     dynamicSource(options) {
       return {

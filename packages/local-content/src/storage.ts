@@ -34,6 +34,9 @@ export function createStorage<Page, Meta>(config: StorageConfig<Page, Meta>) {
   }
 
   return {
+    clearCache() {
+      cache.clear();
+    },
     invalidateCache(absolutePath: string) {
       cache.delete(absolutePath);
     },

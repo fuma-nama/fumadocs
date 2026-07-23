@@ -57,7 +57,7 @@ export function remarkWikilinks({ resolver }: RemarkWikilinksOptions): Transform
         }
 
         if ('children' in cur && Array.isArray(cur.children)) {
-          parents.unshift(cur);
+          parents.unshift(cur as Parent);
           for (const child of cur.children) {
             traverse(child);
           }

@@ -11,25 +11,21 @@
   "license": "MIT",
   "author": "Fuma Nama",
   "repository": "github:fuma-nama/fumadocs",
+  "bin": {
+    "fumadocs-obsidian": "./dist/bin.js"
+  },
   "files": [
     "dist"
   ],
   "type": "module",
-  "module": "./dist/index.js",
   "types": "./dist/index.d.ts",
   "exports": {
-    ".": {
-      "types": "./dist/index.d.ts",
-      "import": "./dist/index.js"
-    },
-    "./ui": {
-      "types": "./dist/ui/index.d.ts",
-      "import": "./dist/ui/index.js"
-    },
-    "./mdx": {
-      "types": "./dist/mdx/index.d.ts",
-      "import": "./dist/mdx/index.js"
-    }
+    ".": "./dist/index.js",
+    "./client": "./dist/client.js",
+    "./dev/vite": "./dist/dev/vite.js",
+    "./dev/ws": "./dist/dev/ws.js",
+    "./ui": "./dist/ui/index.js",
+    "./package.json": "./package.json"
   },
   "publishConfig": {
     "access": "public"
@@ -39,41 +35,54 @@
     "clean": "rimraf dist",
     "dev": "tsdown --watch",
     "lint": "oxlint .",
+    "test": "vitest run",
     "types:check": "tsc --noEmit"
   },
   "dependencies": {
+    "@fumadocs/local-content": "workspace:*",
+    "@standard-schema/spec": "^1.1.0",
     "cnfast": "^0.0.8",
     "github-slugger": "^2.0.0",
-    "remark-math": "^6.0.0",
-    "remark-mdx": "^3.1.1",
+    "hast-util-to-jsx-runtime": "^2.3.6",
     "remark-parse": "^11.0.0",
-    "remark-stringify": "^11.0.0",
+    "remark-rehype": "^11.1.2",
     "tinyglobby": "^0.2.17",
     "unified": "^11.0.5",
     "unist-util-visit": "^5.1.0",
     "vfile": "^6.0.3",
-    "yaml": "^2.9.0",
     "zod": "^4.4.3"
   },
   "devDependencies": {
-    "@types/estree": "^1.0.9",
+    "@types/hast": "^3.0.5",
     "@types/mdast": "^4.0.4",
+    "@types/mdx": "^2.0.14",
     "@types/node": "26.1.1",
     "@types/react": "^19.2.17",
     "@types/react-dom": "^19.2.3",
     "fumadocs-core": "workspace:*",
     "mdast-util-mdx": "^3.0.0",
+    "react": "^19.2.8",
+    "react-dom": "^19.2.8",
     "tsconfig": "workspace:*",
     "tsdown": "0.22.13",
-    "typescript": "^6.0.3"
+    "typescript": "^6.0.3",
+    "vitest": "^4.1.10"
   },
   "peerDependencies": {
+    "@types/hast": "*",
+    "@types/mdx": "*",
     "@types/react": "*",
     "fumadocs-core": "^16.8.0",
     "react": "^19.2.0",
     "react-dom": "^19.2.0"
   },
   "peerDependenciesMeta": {
+    "@types/hast": {
+      "optional": true
+    },
+    "@types/mdx": {
+      "optional": true
+    },
     "@types/react": {
       "optional": true
     }

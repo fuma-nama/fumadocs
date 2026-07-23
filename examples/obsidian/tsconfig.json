@@ -15,8 +15,7 @@
     "jsx": "react-jsx",
     "incremental": true,
     "paths": {
-      "@/*": ["./*"],
-      "collections/*": ["./.source/*"]
+      "@/*": ["./*"]
     },
     "plugins": [
       {
