@@ -1311,7 +1311,7 @@ importers:
         version: 1.167.0(@tanstack/react-router@1.170.18(react-dom@19.2.8(react@19.2.8))(react@19.2.8))(@tanstack/router-core@1.171.15)(csstype@3.2.3)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
       '@tanstack/react-start':
         specifier: 1.168.32
-        version: 1.168.32(@vitejs/plugin-rsc@0.5.28(react-dom@19.2.8(react@19.2.8))(react-server-dom-webpack@19.2.8(react-dom@19.2.8(react@19.2.8))(react@19.2.8)(webpack@5.108.4(esbuild@0.28.1)))(react@19.2.8)(vite@8.1.5(@types/node@26.1.1)(esbuild@0.28.1)(jiti@2.7.0)(terser@5.48.0)(tsx@4.23.1)(yaml@2.9.0)))(crossws@0.4.6(srvx@0.12.1))(esbuild@0.28.1)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)(rolldown@1.2.0)(rollup@4.62.2)(vite@8.1.5(@types/node@26.1.1)(esbuild@0.28.1)(jiti@2.7.0)(terser@5.48.0)(tsx@4.23.1)(yaml@2.9.0))(webpack@5.108.4(esbuild@0.28.1))
+        version: 1.168.32(@vitejs/plugin-rsc@0.5.28(react-dom@19.2.8(react@19.2.8))(react-server-dom-webpack@19.2.8(react-dom@19.2.8(react@19.2.8))(react@19.2.8)(webpack@5.108.4(esbuild@0.28.1)))(react@19.2.8)(vite@8.1.5(@types/node@26.1.1)(esbuild@0.28.1)(jiti@2.7.0)(terser@5.48.0)(tsx@4.23.1)(yaml@2.9.0)))(crossws@0.4.6(srvx@0.11.22))(esbuild@0.28.1)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)(rolldown@1.2.0)(rollup@4.62.2)(vite@8.1.5(@types/node@26.1.1)(esbuild@0.28.1)(jiti@2.7.0)(terser@5.48.0)(tsx@4.23.1)(yaml@2.9.0))(webpack@5.108.4(esbuild@0.28.1))
       cnfast:
         specifier: ^0.0.8
         version: 0.0.8
@@ -1442,7 +1442,7 @@ importers:
         version: 1.167.0(@tanstack/react-router@1.170.18(react-dom@19.2.8(react@19.2.8))(react@19.2.8))(@tanstack/router-core@1.171.15)(csstype@3.2.3)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
       '@tanstack/react-start':
         specifier: 1.168.32
-        version: 1.168.32(@vitejs/plugin-rsc@0.5.28(react-dom@19.2.8(react@19.2.8))(react-server-dom-webpack@19.2.8(react-dom@19.2.8(react@19.2.8))(react@19.2.8)(webpack@5.108.4(esbuild@0.28.1)))(react@19.2.8)(vite@8.1.5(@types/node@26.1.1)(esbuild@0.28.1)(jiti@2.7.0)(terser@5.48.0)(tsx@4.23.1)(yaml@2.9.0)))(crossws@0.4.6(srvx@0.11.22))(esbuild@0.28.1)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)(rolldown@1.2.0)(rollup@4.62.2)(vite@8.1.5(@types/node@26.1.1)(esbuild@0.28.1)(jiti@2.7.0)(terser@5.48.0)(tsx@4.23.1)(yaml@2.9.0))(webpack@5.108.4(esbuild@0.28.1))
+        version: 1.168.32(@vitejs/plugin-rsc@0.5.28(react-dom@19.2.8(react@19.2.8))(react-server-dom-webpack@19.2.8(react-dom@19.2.8(react@19.2.8))(react@19.2.8)(webpack@5.108.4(esbuild@0.28.1)))(react@19.2.8)(vite@8.1.5(@types/node@26.1.1)(esbuild@0.28.1)(jiti@2.7.0)(terser@5.48.0)(tsx@4.23.1)(yaml@2.9.0)))(crossws@0.4.6(srvx@0.12.1))(esbuild@0.28.1)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)(rolldown@1.2.0)(rollup@4.62.2)(vite@8.1.5(@types/node@26.1.1)(esbuild@0.28.1)(jiti@2.7.0)(terser@5.48.0)(tsx@4.23.1)(yaml@2.9.0))(webpack@5.108.4(esbuild@0.28.1))
       cnfast:
         specifier: ^0.0.8
         version: 0.0.8
@@ -3534,7 +3534,7 @@ importers:
         version: link:../tsconfig
       tsdown:
         specifier: 0.22.13
-        version: 0.22.13(@tsdown/css@0.22.13)(oxc-resolver@11.19.1(@emnapi/core@1.11.1)(@emnapi/runtime@1.11.1))(tsx@4.23.1)(typescript@6.0.3)(unrun@0.3.1)
+        version: 0.22.13(@tsdown/css@0.22.13)(oxc-resolver@11.19.1(@emnapi/core@1.11.2)(@emnapi/runtime@1.11.2))(tsx@4.23.1)(typescript@6.0.3)(unrun@0.3.1)
       typescript:
         specifier: ^6.0.3
         version: 6.0.3
@@ -3872,7 +3872,7 @@ importers:
         version: link:../tsconfig
       tsdown:
         specifier: 0.22.13
-        version: 0.22.13(@tsdown/css@0.22.13)(oxc-resolver@11.19.1(@emnapi/core@1.11.1)(@emnapi/runtime@1.11.1))(tsx@4.23.1)(typescript@6.0.3)(unrun@0.3.1)
+        version: 0.22.13(@tsdown/css@0.22.13)(oxc-resolver@11.19.1(@emnapi/core@1.11.2)(@emnapi/runtime@1.11.2))(tsx@4.23.1)(typescript@6.0.3)(unrun@0.3.1)
       typescript:
         specifier: ^6.0.3
         version: 6.0.3
@@ -18887,14 +18887,6 @@ snapshots:
   '@oxc-resolver/binding-openharmony-arm64@11.19.1':
     optional: true
 
-  '@oxc-resolver/binding-wasm32-wasi@11.19.1(@emnapi/core@1.11.1)(@emnapi/runtime@1.11.1)':
-    dependencies:
-      '@napi-rs/wasm-runtime': 1.1.6(@emnapi/core@1.11.1)(@emnapi/runtime@1.11.1)
-    transitivePeerDependencies:
-      - '@emnapi/core'
-      - '@emnapi/runtime'
-    optional: true
-
   '@oxc-resolver/binding-wasm32-wasi@11.19.1(@emnapi/core@1.11.2)(@emnapi/runtime@1.11.2)':
     dependencies:
       '@napi-rs/wasm-runtime': 1.1.6(@emnapi/core@1.11.2)(@emnapi/runtime@1.11.2)
@@ -23707,10 +23699,6 @@ snapshots:
 
   dset@3.1.4: {}
 
-  dts-resolver@3.0.0(oxc-resolver@11.19.1(@emnapi/core@1.11.1)(@emnapi/runtime@1.11.1)):
-    optionalDependencies:
-      oxc-resolver: 11.19.1(@emnapi/core@1.11.1)(@emnapi/runtime@1.11.1)
-
   dts-resolver@3.0.0(oxc-resolver@11.19.1(@emnapi/core@1.11.2)(@emnapi/runtime@1.11.2)):
     optionalDependencies:
       oxc-resolver: 11.19.1(@emnapi/core@1.11.2)(@emnapi/runtime@1.11.2)
@@ -26519,33 +26507,6 @@ snapshots:
       '@oxc-parser/binding-win32-ia32-msvc': 0.128.0
       '@oxc-parser/binding-win32-x64-msvc': 0.128.0
 
-  oxc-resolver@11.19.1(@emnapi/core@1.11.1)(@emnapi/runtime@1.11.1):
-    optionalDependencies:
-      '@oxc-resolver/binding-android-arm-eabi': 11.19.1
-      '@oxc-resolver/binding-android-arm64': 11.19.1
-      '@oxc-resolver/binding-darwin-arm64': 11.19.1
-      '@oxc-resolver/binding-darwin-x64': 11.19.1
-      '@oxc-resolver/binding-freebsd-x64': 11.19.1
-      '@oxc-resolver/binding-linux-arm-gnueabihf': 11.19.1
-      '@oxc-resolver/binding-linux-arm-musleabihf': 11.19.1
-      '@oxc-resolver/binding-linux-arm64-gnu': 11.19.1
-      '@oxc-resolver/binding-linux-arm64-musl': 11.19.1
-      '@oxc-resolver/binding-linux-ppc64-gnu': 11.19.1
-      '@oxc-resolver/binding-linux-riscv64-gnu': 11.19.1
-      '@oxc-resolver/binding-linux-riscv64-musl': 11.19.1
-      '@oxc-resolver/binding-linux-s390x-gnu': 11.19.1
-      '@oxc-resolver/binding-linux-x64-gnu': 11.19.1
-      '@oxc-resolver/binding-linux-x64-musl': 11.19.1
-      '@oxc-resolver/binding-openharmony-arm64': 11.19.1
-      '@oxc-resolver/binding-wasm32-wasi': 11.19.1(@emnapi/core@1.11.1)(@emnapi/runtime@1.11.1)
-      '@oxc-resolver/binding-win32-arm64-msvc': 11.19.1
-      '@oxc-resolver/binding-win32-ia32-msvc': 11.19.1
-      '@oxc-resolver/binding-win32-x64-msvc': 11.19.1
-    transitivePeerDependencies:
-      - '@emnapi/core'
-      - '@emnapi/runtime'
-    optional: true
-
   oxc-resolver@11.19.1(@emnapi/core@1.11.2)(@emnapi/runtime@1.11.2):
     optionalDependencies:
       '@oxc-resolver/binding-android-arm-eabi': 11.19.1
@@ -27524,20 +27485,6 @@ snapshots:
       package-json-from-dist: 1.0.1
 
   robust-predicates@3.0.3: {}
-
-  rolldown-plugin-dts@0.27.12(oxc-resolver@11.19.1(@emnapi/core@1.11.1)(@emnapi/runtime@1.11.1))(rolldown@1.2.0)(typescript@6.0.3):
-    dependencies:
-      dts-resolver: 3.0.0(oxc-resolver@11.19.1(@emnapi/core@1.11.1)(@emnapi/runtime@1.11.1))
-      get-tsconfig: 5.0.0-beta.5
-      obug: 2.1.4
-      rolldown: 1.2.0
-      yuku-ast: 0.7.3
-      yuku-codegen: 0.7.3
-      yuku-parser: 0.7.3
-    optionalDependencies:
-      typescript: 6.0.3
-    transitivePeerDependencies:
-      - oxc-resolver
 
   rolldown-plugin-dts@0.27.12(oxc-resolver@11.19.1(@emnapi/core@1.11.2)(@emnapi/runtime@1.11.2))(rolldown@1.2.0)(typescript@6.0.3):
     dependencies:
@@ -28555,34 +28502,6 @@ snapshots:
       json5: 2.2.3
       minimist: 1.2.8
       strip-bom: 3.0.0
-
-  tsdown@0.22.13(@tsdown/css@0.22.13)(oxc-resolver@11.19.1(@emnapi/core@1.11.1)(@emnapi/runtime@1.11.1))(tsx@4.23.1)(typescript@6.0.3)(unrun@0.3.1):
-    dependencies:
-      ansis: 4.3.1
-      cac: 7.0.0
-      defu: 6.1.7
-      empathic: 2.0.1
-      hookable: 6.1.1
-      import-without-cache: 0.4.0
-      obug: 2.1.4
-      picomatch: 4.0.5
-      rolldown: 1.2.0
-      rolldown-plugin-dts: 0.27.12(oxc-resolver@11.19.1(@emnapi/core@1.11.1)(@emnapi/runtime@1.11.1))(rolldown@1.2.0)(typescript@6.0.3)
-      tinyexec: 1.2.4
-      tinyglobby: 0.2.17
-      tree-kill: 1.2.2
-      unconfig-core: 7.5.0
-      verkit: 0.1.2
-    optionalDependencies:
-      '@tsdown/css': 0.22.13(jiti@2.7.0)(postcss@8.5.21)(tsdown@0.22.13)(tsx@4.23.1)(yaml@2.9.0)
-      tsx: 4.23.1
-      typescript: 6.0.3
-      unrun: 0.3.1
-    transitivePeerDependencies:
-      - '@typescript/native-preview'
-      - '@volar/typescript'
-      - oxc-resolver
-      - vue-tsc
 
   tsdown@0.22.13(@tsdown/css@0.22.13)(oxc-resolver@11.19.1(@emnapi/core@1.11.2)(@emnapi/runtime@1.11.2))(tsx@4.23.1)(typescript@6.0.3)(unrun@0.3.1):
     dependencies:
