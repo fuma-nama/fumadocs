@@ -331,6 +331,49 @@ export const Route = createFileRoute('/docs/{$}.md')({
 });
 ```
 
+```ts tab="Waku" title="pages/_api/llms.mdx/docs/[...slugs]/content.md.ts"
+import { getLLMText } from '@/lib/get-llm-text';
+import { source } from '@/lib/source';
+import { ApiContext } from 'waku/router';
+import { unstable_notFound } from 'waku/router/server';
+
+export async function GET(
+  _: Request,
+  { params }: ApiContext<'/llms.mdx/docs/[...slugs]/content.md'>,
+) {
+  const page = source.getPage(params.slugs);
+  if (!page) unstable_notFound();
+
+  return new Response(await getLLMText(page), {
+    headers: {
+      'Content-Type': 'text/markdown',
+    },
+  });
+}
+
+export async function getConfig() {
+  const pages = source.generateParams().map((item) => item.slug);
+
+  return {
+    render: 'static' as const,
+    staticPaths: pages,
+  } as const;
+}
+```
+
+```ts tab="Waku" title="lib/source.ts"
+// create a util for Markdown URLs (append /content.md):
+
+export function getPageMarkdownUrl(page: { slugs: string[] }) {
+  const segments = [...page.slugs, 'content.md'];
+
+  return {
+    segments,
+    url: `/llms.mdx/docs/${segments.join('/')}`,
+  };
+}
+```
+
 #### `Accept`
 
 To serve the Markdown content instead for AI agents, you can leverage the `Accept` header.
@@ -369,6 +412,7 @@ Use it in your docs page like:
 ```tsx title="app/docs/[[...slug]]/page.tsx"
 // URL to fetch Markdown content, only need to append .mdx to URL if you have `*.mdx` configured.
 // Use .md instead for the Tanstack Start example above.
+// Use getPageMarkdownUrl(page).url for the Waku example above.
 const markdownUrl = `${page.url}.mdx`
 
 <div className="flex flex-row gap-2 items-center border-b pt-2 pb-6">

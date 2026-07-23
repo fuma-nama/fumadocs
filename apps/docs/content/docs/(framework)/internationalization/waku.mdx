@@ -1,0 +1,206 @@
+---
+title: Waku
+description: Support i18n routing on your Waku + Fumadocs app.
+---
+
+## Setup
+
+Define the i18n configurations in a file, we will import it with `@/lib/i18n` in this guide.
+
+```ts title="src/lib/i18n.ts"
+import { defineI18n } from 'fumadocs-core/i18n';
+
+export const i18n = defineI18n({
+  defaultLanguage: 'en',
+  languages: ['cn', 'en'],
+});
+```
+
+> See [available options](/docs/headless/internationalization/config) for i18n config.
+
+### Routing
+
+Add a `[lang]` prefix to all your pages.
+
+<Files>
+  <Folder name="src/pages" defaultOpen>
+    <Folder name="[lang]" defaultOpen>
+      <File name="index.tsx" />
+      <File name="docs/[...slugs].tsx" />
+    </Folder>
+    <Folder name="_api" defaultOpen>
+      <File name="api/search.ts" />
+    </Folder>
+  </Folder>
+</Files>
+
+### Translations
+
+Define your translations in `lib/layout.shared.tsx`, see [Translations](/docs/ui/translations) for more details (including official language packs).
+
+You can also add `locale` parameter to `baseOptions()` for localized layout options:
+
+```tsx title="lib/layout.shared.tsx"
+import { i18n } from '@/lib/i18n';
+import { uiTranslations } from 'fumadocs-ui/i18n';
+import type { BaseLayoutProps } from 'fumadocs-ui/layouts/shared';
+
+// [!code ++:11]
+export const translations = i18n
+  .translations()
+  .extend(uiTranslations())
+  .add({
+    en: {
+      displayName: 'English',
+    },
+    cn: {
+      displayName: 'Chinese',
+    },
+  });
+
+// [!code highlight]
+export function baseOptions(locale: string): BaseLayoutProps {
+  return {
+    // different props based on `locale`
+    nav: {
+      title: 'My App',
+      url: `/${locale}`,
+    },
+  };
+}
+```
+
+### Pages
+
+Waku does not expose route segment params from `useRouter()`. Extract the locale from the path, then pass translations to `<RootProvider />`:
+
+```tsx title="src/components/provider.tsx"
+'use client';
+import type { ReactNode } from 'react';
+import { RootProvider } from 'fumadocs-ui/provider/waku';
+import { i18nProvider } from 'fumadocs-ui/i18n';
+import { useRouter } from 'waku/router/client';
+import { i18n } from '@/lib/i18n';
+import { translations } from '@/lib/layout.shared';
+
+export function Provider({ children }: { children: ReactNode }) {
+  const router = useRouter();
+  // [!code highlight]
+  const lang = router.path.split('/')[1] ?? i18n.defaultLanguage;
+
+  return (
+    <RootProvider
+      // [!code ++]
+      i18n={i18nProvider(translations, lang)}
+    >
+      {children}
+    </RootProvider>
+  );
+}
+```
+
+### Pass Locale
+
+Pass the locale to Fumadocs in your pages and layouts.
+
+```ts tab="src/lib/source.ts"
+import { i18n } from '@/lib/i18n';
+import { loader } from 'fumadocs-core/source';
+
+export const source = loader({
+  i18n, // [!code ++]
+  // other options
+});
+```
+
+```tsx tab="Home Page" title="src/pages/[lang]/index.tsx"
+import { i18n } from '@/lib/i18n';
+import { HomeLayout } from 'fumadocs-ui/layouts/home';
+import { baseOptions } from '@/lib/layout.shared';
+import type { PageProps } from 'waku/router';
+
+export default function Home({ lang }: PageProps<'/[lang]'>) {
+  // [!code highlight]
+  return <HomeLayout {...baseOptions(lang)}></HomeLayout>;
+}
+
+export const getConfig = async () => {
+  return {
+    render: 'static' as const,
+    staticPaths: i18n.languages.map((lang) => [lang]),
+  } as const;
+};
+```
+
+```tsx tab="Docs Page" title="src/pages/[lang]/docs/[...slugs].tsx"
+import { source } from '@/lib/source';
+import type { PageProps } from 'waku/router';
+import { DocsLayout } from 'fumadocs-ui/layouts/docs';
+import { baseOptions } from '@/lib/layout.shared';
+
+export default function DocPage({ slugs, lang }: PageProps<'/[lang]/docs/[...slugs]'>) {
+  // [!code --]
+  const page = source.getPage(slugs);
+  // [!code ++]
+  const page = source.getPage(slugs, lang);
+  if (!page) return <div>Not Found</div>;
+
+  return (
+    <DocsLayout
+      // [!code highlight]
+      {...baseOptions(lang)}
+      // [!code --]
+      tree={source.getPageTree()}
+      // [!code ++]
+      tree={source.getPageTree(lang)}
+    >
+      {/* ... */}
+    </DocsLayout>
+  );
+}
+
+export async function getConfig() {
+  const pages = source
+    .generateParams()
+    .map((item) => (item.lang ? [item.lang, ...item.slug] : item.slug));
+
+  return {
+    render: 'static' as const,
+    staticPaths: pages,
+  } as const;
+}
+```
+
+### Search
+
+Configure i18n on your search solution.
+
+- **Built-in Search (Orama):** See [Internationalization](/docs/headless/search/orama#internationalization).
+- **Cloud Solutions (e.g. Algolia):** They usually have official support for multilingual.
+
+## Writing Documents
+
+See [i18n routing](/docs/page-conventions#i18n-routing) to learn how to create pages for specific locales.
+
+### Navigation
+
+Fumadocs only handles navigation for its own layouts (e.g. sidebar).
+For other places, extract the locale from the path and prepend it to links.
+
+```tsx
+import { Link, useRouter } from 'waku/router/client';
+
+const router = useRouter();
+const lang = router.path.split('/')[1];
+
+<Link to={`/${lang}/about`}>About Us</Link>;
+```
+
+In addition, the [`fumadocs-core/dynamic-link`](/docs/headless/components/link#dynamic-hrefs) component supports dynamic hrefs, you can use it to attend the locale prefix.
+It is useful for Markdown/MDX content.
+
+```mdx title="content.mdx"
+import { DynamicLink } from 'fumadocs-core/dynamic-link';
+
+<DynamicLink href="/[lang]/another-page">This is a link</DynamicLink>
+```
