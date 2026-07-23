@@ -3,10 +3,6 @@ title: Obsidian
 description: Render an Obsidian vault directly with Fumadocs.
 ---
 
-<Callout type="warn" title="Experimental">
-  This integration may have bugs or breaking changes.
-</Callout>
-
 `fumadocs-obsidian` exposes a runtime content source. It reads and compiles the vault directly, so it does not generate intermediate MDX files or need a Fumadocs MDX remark plugin.
 
 Supported Obsidian syntax includes:
@@ -15,6 +11,8 @@ Supported Obsidian syntax includes:
 - Callouts.
 - Block IDs.
 - Comments.
+
+Ambiguous wikilink names resolve like Obsidian: notes take precedence over attachments, then the shortest path wins. Code fences in unknown languages (e.g. `dataview`) render as plain text.
 
 ## Setup
 

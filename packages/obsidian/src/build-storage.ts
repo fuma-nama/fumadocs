@@ -5,10 +5,8 @@ import { slash } from '@/utils/slash';
 export interface VaultFile {
   /** path relative to the vault directory */
   path: string;
-  _raw: {
-    /** absolute file-system path */
-    path: string;
-  };
+  /** absolute file-system path */
+  absolutePath: string;
   /** file content, omitted for media files so they are never read into memory */
   content?: string | Buffer<ArrayBufferLike>;
 }
@@ -59,7 +57,7 @@ const ContentExtensions = new Set(['.md', '.mdx']);
 const DataExtensions = new Set(['.json', '.yaml', '.yml', '.toml']);
 
 export function getFileFormat(filePath: string): ParsedFile['format'] {
-  const ext = path.extname(filePath);
+  const ext = path.extname(filePath).toLowerCase();
 
   if (DataExtensions.has(ext)) return 'data';
   if (ContentExtensions.has(ext)) return 'content';
@@ -87,7 +85,7 @@ export function buildStorage(
       parsed = {
         format,
         path: normalizedPath,
-        _raw: rawFile._raw,
+        absolutePath: rawFile.absolutePath,
         content: rawFile.content ?? '',
       };
     } else if (format === 'content') {
@@ -95,7 +93,7 @@ export function buildStorage(
 
       parsed = {
         format,
-        _raw: rawFile._raw,
+        absolutePath: rawFile.absolutePath,
         path: normalizedPath,
         frontmatter: toRawFrontmatter(data),
         content,
@@ -104,7 +102,7 @@ export function buildStorage(
       const media: ParsedMediaFile = {
         format,
         path: normalizedPath,
-        _raw: rawFile._raw,
+        absolutePath: rawFile.absolutePath,
       };
       media.url = url(normalizedPath, media);
       parsed = media;

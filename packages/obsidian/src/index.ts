@@ -6,4 +6,5 @@ export type {
   ObsidianSource,
 } from './source';
 export type { ObsidianRenderer, ObsidianRendererResult } from './renderer';
+export type { ParsedMediaFile, VaultStorageOptions } from './build-storage';
 export { frontmatterSchema } from './utils/schema';

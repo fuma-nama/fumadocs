@@ -1,1 +1,1 @@
-export { Flux as default } from '@/components/layouts/flux';
+export { DefaultLayout as default } from '@/components/layouts/default';

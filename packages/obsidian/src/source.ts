@@ -118,18 +118,37 @@ export function obsidian<
   const vaultFiles = new Map<string, VaultFile>();
   /** absolute paths waiting to be re-read on the next snapshot */
   const invalidated = new Set<string>();
+  /** drop every cached file on the next snapshot */
+  let flush = false;
   let vault: Promise<VaultContext> | undefined;
+  // snapshot builds mutate the shared `vaultFiles`, run them one at a time
+  let buildQueue: Promise<unknown> = Promise.resolve();
 
   function getVault(): Promise<VaultContext> {
-    // drop failed snapshots, otherwise a transient error would stick until the next invalidation
-    return (vault ??= createVault().catch((error: unknown) => {
-      vault = undefined;
-      throw error;
-    }));
+    if (vault) return vault;
+
+    const current: Promise<VaultContext> = buildQueue.then(createVault, createVault).then(
+      (context) => context,
+      (error: unknown) => {
+        // drop the failed snapshot so a transient error does not stick, keep newer ones intact
+        if (vault === current) vault = undefined;
+        throw error;
+      },
+    );
+    buildQueue = current.catch(() => undefined);
+    vault = current;
+    return current;
   }
 
   async function createVault(): Promise<VaultContext> {
+    if (flush) {
+      flush = false;
+      vaultFiles.clear();
+    }
+
     const paths = await glob(include, { cwd: config.dir, onlyFiles: true });
+    // deterministic name resolution regardless of file system scan order
+    paths.sort();
     const pending = new Set(invalidated);
     const scanned = new Set<string>();
     const toRead: VaultFile[] = [];
@@ -142,10 +161,10 @@ export function obsidian<
       if (getFileFormat(vaultPath) === 'media') {
         // media files resolve to URLs, their content is never read into memory
         if (!vaultFiles.has(vaultPath)) {
-          vaultFiles.set(vaultPath, { path: vaultPath, _raw: { path: absolutePath } });
+          vaultFiles.set(vaultPath, { path: vaultPath, absolutePath });
         }
       } else if (!vaultFiles.has(vaultPath) || pending.has(absolutePath)) {
-        toRead.push({ path: vaultPath, _raw: { path: absolutePath } });
+        toRead.push({ path: vaultPath, absolutePath });
       }
     }
 
@@ -157,8 +176,14 @@ export function obsidian<
     for (let i = 0; i < toRead.length; i += ReadChunkSize) {
       await Promise.all(
         toRead.slice(i, i + ReadChunkSize).map(async (file) => {
-          file.content = await fs.readFile(file._raw.path);
-          vaultFiles.set(file.path, file);
+          try {
+            file.content = await fs.readFile(file.absolutePath);
+            vaultFiles.set(file.path, file);
+          } catch (error) {
+            // e.g. deleted between scan and read, skip it instead of failing the vault
+            vaultFiles.delete(file.path);
+            console.error(`[fumadocs-obsidian] failed to read ${file.absolutePath}`, error);
+          }
         }),
       );
     }
@@ -220,7 +245,9 @@ export function obsidian<
   return {
     ...source,
     invalidateAll() {
-      vaultFiles.clear();
+      // deferred to the next snapshot build, an in-flight build may still be
+      // writing into `vaultFiles`
+      flush = true;
       invalidated.clear();
       vault = undefined;
       source.invalidateAll();
@@ -274,7 +301,12 @@ function createProcessor(options: ObsidianCompilerOptions, resolver: VaultResolv
       })
       .use(
         plugins(
-          rehypeCodeOptions !== false && [rehypeCode, rehypeCodeOptions],
+          rehypeCodeOptions !== false && [
+            rehypeCode,
+            // vaults often carry plugin-specific code fences (dataview, tasks),
+            // render them as plain text instead of failing the page
+            { fallbackLanguage: 'plaintext', ...rehypeCodeOptions },
+          ],
           ...rehypePlugins,
           rehypeTocOptions !== false && [
             rehypeToc,
@@ -295,7 +327,7 @@ async function compilePage(
   frontmatter: unknown,
 ): Promise<ObsidianRenderer> {
   const file = new VFile({
-    path: page._raw.path,
+    path: page.absolutePath,
     value: page.content,
     data: { frontmatter, source: page },
   });
@@ -304,7 +336,7 @@ async function compilePage(
 
   return createRenderer({
     tree,
-    filePath: page._raw.path,
+    filePath: page.absolutePath,
     structuredData: file.data.structuredData,
     rehypeToc: file.data.rehypeToc,
   });

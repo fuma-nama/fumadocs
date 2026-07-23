@@ -46,8 +46,12 @@ export function createRenderer(options: ObsidianRendererOptions): ObsidianRender
     // from the passed components, arbitrary JavaScript is never evaluated
     const evaluater: Evaluater = {
       evaluateExpression(expression) {
-        if (expression.type === 'Identifier' && components && expression.name in components) {
-          return components[expression.name];
+        if (expression.type === 'Identifier') {
+          if (components && expression.name in components) return components[expression.name];
+
+          throw new Error(
+            `Component "${expression.name}" in ${filePath} is missing, pass it to render().`,
+          );
         }
 
         throw new Error(`cannot evaluate expressions in Markdown content: ${filePath}`);

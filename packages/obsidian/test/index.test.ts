@@ -172,6 +172,42 @@ describe('obsidian source', () => {
     expect(html).toContain('height="1"');
   });
 
+  test('resolves ambiguous names like Obsidian', async () => {
+    const dir = await createTempDir();
+    await fs.mkdir(path.join(dir, 'sub'), { recursive: true });
+    await fs.writeFile(path.join(dir, 'note.md'), '# Root');
+    await fs.writeFile(path.join(dir, 'sub', 'note.md'), '# Nested');
+    // an attachment sharing the name of a note
+    await fs.writeFile(path.join(dir, 'pic.png'), 'not a real image');
+    await fs.writeFile(path.join(dir, 'pic.md'), '# Pic Note');
+    await fs.writeFile(path.join(dir, 'page.md'), '[[note]] [[pic]]');
+
+    const source = await obsidian({ dir }).staticSource();
+    const page = source.files.find((file) => file.path === 'page.md');
+    if (page?.type !== 'page') throw new Error('expected page.md');
+
+    const html = renderToStaticMarkup((await (await page.data.load()).render()).body);
+    // shortest path wins, notes win over attachments
+    expect(html).toContain('href="./note.md"');
+    expect(html).toContain('href="./pic.md"');
+  });
+
+  test('renders unknown code fence languages as plain text', async () => {
+    const dir = await createTempDir();
+    await fs.writeFile(
+      path.join(dir, 'page.md'),
+      '```dataview\nLIST FROM #tag\n```\n\n```ts\nconsole.log(1);\n```\n',
+    );
+
+    const source = await obsidian({ dir }).staticSource();
+    const page = source.files.find((file) => file.path === 'page.md');
+    if (page?.type !== 'page') throw new Error('expected page.md');
+
+    const html = renderToStaticMarkup((await (await page.data.load()).render()).body);
+    expect(html).toContain('LIST FROM #tag');
+    expect(html).toContain('console');
+  });
+
   test('never reads media files into memory', async () => {
     const mediaFiles: unknown[] = [];
     await obsidian({
