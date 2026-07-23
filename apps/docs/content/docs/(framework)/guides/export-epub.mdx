@@ -36,9 +36,9 @@ export const docs = defineDocs({
 
 ### Create Export Route
 
-Create a route handler to serve the EPUB. For Next.js:
+Create a route handler to serve the EPUB:
 
-```ts title="app/export/epub/route.ts"
+```ts tab="Next.js" title="app/export/epub/route.ts"
 import { source } from '@/lib/source';
 import { exportEpub } from 'fumadocs-epub';
 
@@ -61,6 +61,91 @@ export async function GET(): Promise<Response> {
 }
 ```
 
+```ts tab="React Router" title="app/routes/export.epub.ts"
+import { source } from '@/lib/source';
+import { exportEpub } from 'fumadocs-epub';
+
+export async function loader() {
+  const buffer = await exportEpub({
+    source,
+    title: 'My Documentation',
+    author: 'My Team',
+    description: 'Documentation for my project',
+    cover: '/cover.png',
+  });
+  return new Response(new Uint8Array(buffer), {
+    headers: {
+      'Content-Type': 'application/epub+zip',
+      'Content-Disposition': 'attachment; filename="docs.epub"',
+    },
+  });
+}
+```
+
+```ts tab="React Router" title="app/routes.ts"
+import { route, type RouteConfig } from '@react-router/dev/routes';
+
+export default [
+  // [!code ++]
+  route('export/epub', 'routes/export.epub.ts'),
+] satisfies RouteConfig;
+```
+
+```ts tab="Tanstack Start" title="src/routes/export/epub.ts"
+import { createFileRoute } from '@tanstack/react-router';
+import { source } from '@/lib/source';
+import { exportEpub } from 'fumadocs-epub';
+
+export const Route = createFileRoute('/export/epub')({
+  server: {
+    handlers: {
+      GET: async () => {
+        const buffer = await exportEpub({
+          source,
+          title: 'My Documentation',
+          author: 'My Team',
+          description: 'Documentation for my project',
+          cover: '/cover.png',
+        });
+        return new Response(new Uint8Array(buffer), {
+          headers: {
+            'Content-Type': 'application/epub+zip',
+            'Content-Disposition': 'attachment; filename="docs.epub"',
+          },
+        });
+      },
+    },
+  },
+});
+```
+
+```ts tab="Waku" title="pages/_api/export/epub.ts"
+import { source } from '@/lib/source';
+import { exportEpub } from 'fumadocs-epub';
+
+export async function GET(): Promise<Response> {
+  const buffer = await exportEpub({
+    source,
+    title: 'My Documentation',
+    author: 'My Team',
+    description: 'Documentation for my project',
+    cover: '/cover.png',
+  });
+  return new Response(new Uint8Array(buffer), {
+    headers: {
+      'Content-Type': 'application/epub+zip',
+      'Content-Disposition': 'attachment; filename="docs.epub"',
+    },
+  });
+}
+
+export async function getConfig() {
+  return {
+    render: 'static' as const,
+  } as const;
+}
+```
+
 <Callout type="warning" title="Protect the endpoint">
 
 Consider protecting `/export/epub` in production. For example, require an `Authorization: Bearer <secret>` header and set `EXPORT_SECRET` in your environment. The Fumadocs CLI scaffolds a route with this protection when you run `fumadocs export epub --scaffold-only`.
@@ -73,6 +158,7 @@ You can also export EPUB via the Fumadocs CLI:
 
 ```bash
 fumadocs export epub --framework next
+# or: astro | tanstack-start | react-router | waku
 ```
 
 This fetches from your running server (Next.js) or copies from the build output (other frameworks). Run a production build first for non-Next.js frameworks.

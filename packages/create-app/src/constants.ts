@@ -35,27 +35,21 @@ export const templates: TemplateInfo[] = [
   {
     value: '+next+fuma-docs-mdx',
     label: 'Next.js: Fumadocs MDX',
-    hint: 'recommended',
+    hint: 'recommended: powerful and mature',
     appDir: '',
     rootProviderPath: 'app/layout.tsx',
   },
   {
-    value: 'astro',
-    label: 'Astro: React Islands',
-    hint: 'uses Astro Content Collections and Fumadocs UI as a React island',
+    value: 'waku',
+    label: 'Waku: Fumadocs MDX',
+    hint: 'recommended: fast and simple',
     appDir: 'src',
-    rootProviderPath: 'components/docs.tsx',
+    rootProviderPath: 'components/provider.tsx',
   },
   {
     value: '+next+fuma-docs-mdx+static',
     label: 'Next.js Static: Fumadocs MDX',
     appDir: '',
-    rootProviderPath: 'components/provider.tsx',
-  },
-  {
-    value: 'waku',
-    label: 'Waku: Fumadocs MDX',
-    appDir: 'src',
     rootProviderPath: 'components/provider.tsx',
   },
   {
@@ -83,6 +77,13 @@ export const templates: TemplateInfo[] = [
     hint: 'SPA mode allows you to host the site statically, compatible with a CDN.',
     appDir: 'src',
     rootProviderPath: 'routes/__root.tsx',
+  },
+  {
+    value: 'astro',
+    label: 'Astro: React Islands',
+    hint: 'partial support only, uses Astro Content Collections.',
+    appDir: 'src',
+    rootProviderPath: 'components/docs.tsx',
   },
 ];
 

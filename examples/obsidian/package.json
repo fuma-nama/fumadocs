@@ -1,16 +1,15 @@
 {
   "name": "example-obsidian",
-  "version": "0.0.7",
+  "version": "0.0.8",
   "private": true,
   "scripts": {
     "build": "next build",
-    "dev": "next dev",
+    "dev": "fumadocs-obsidian dev -- next dev",
     "start": "next start",
-    "types:check": "fumadocs-mdx && next typegen && tsc --noEmit"
+    "types:check": "next typegen && tsc --noEmit"
   },
   "dependencies": {
     "fumadocs-core": "workspace:*",
-    "fumadocs-mdx": "workspace:*",
     "fumadocs-obsidian": "workspace:*",
     "fumadocs-ui": "workspace:@fumadocs/base-ui@*",
     "next": "16.2.11",

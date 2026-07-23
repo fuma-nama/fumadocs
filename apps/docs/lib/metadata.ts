@@ -34,12 +34,12 @@ export function createMetadata(override: Metadata): Metadata {
   };
 }
 
-export function getPageImage(page: Page) {
+export function getPageImageUrl(page: Page) {
   const segments = [...page.slugs, 'image.webp'];
 
   return {
     segments,
-    url: `/og/${segments.join('/')}`,
+    url: '/' + [page.locale, 'og', ...segments].filter(Boolean).join('/'),
   };
 }
 

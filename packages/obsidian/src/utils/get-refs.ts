@@ -6,8 +6,8 @@ import { slug } from 'github-slugger';
 export function getFileHref(ref: ParsedFile, sourceFile: ParsedFile, heading?: string) {
   if (ref.format === 'media' && ref.url) return ref.url;
 
-  const dir = path.dirname(sourceFile.outPath);
-  let url = slash(path.relative(dir, ref.outPath));
+  const dir = path.dirname(sourceFile.path);
+  let url = slash(path.relative(dir, ref.path));
   if (!url.startsWith('../')) url = `./${url}`;
   if (heading) url += `#${getHeadingHash(heading)}`;
 

@@ -1,4 +1,4 @@
-import { getPageImage, getPageMarkdownUrl, source } from '@/lib/source';
+import { getPageImageUrl, getPageMarkdownUrl, source } from '@/lib/source';
 import { PageProps } from 'waku/router';
 import { createRelativeLink } from 'fumadocs-ui/mdx';
 import {
@@ -21,7 +21,7 @@ export default function Page({ slugs }: PageProps<'/docs/[...slugs]'>) {
   const markdownUrl = getPageMarkdownUrl(page).url;
   return (
     <DocsPage toc={page.data.toc}>
-      <meta property="og:image" content={getPageImage(slugs).url} />
+      <meta property="og:image" content={getPageImageUrl(page)} />
       <DocsTitle>{page.data.title}</DocsTitle>
       <DocsDescription className="mb-0">{page.data.description}</DocsDescription>
       <div className="flex flex-row gap-2 items-center border-b pt-2 pb-6">

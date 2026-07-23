@@ -96,6 +96,18 @@ describe('createLocalSource', () => {
     expect(parsed).toEqual(['guide.md']);
   });
 
+  test('invalidateAll reparses every file', async () => {
+    const parsed: string[] = [];
+    const source = createLocalSource({ dir, integration: integration((p) => parsed.push(p)) });
+
+    await source.staticSource();
+    parsed.length = 0;
+    source.invalidateAll();
+    await source.staticSource();
+
+    expect(parsed.sort()).toEqual(['guide.md', 'index.md', 'meta.json']);
+  });
+
   test('dynamicSource notifies registered loaders', async () => {
     const source = createLocalSource({ dir, integration: integration() });
     const dynamic = source.dynamicSource();

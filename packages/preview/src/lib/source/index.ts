@@ -17,11 +17,8 @@ export const getSource = revalidable({
 export type Source = Awaited<ReturnType<typeof getSource>>;
 export type SourcePage = Source['$inferPage'];
 
-export function getPageImage(slugs: string[]) {
-  const segments = [...slugs, 'image.webp'];
+export function getPageImageUrl(page: SourcePage) {
+  const segments = [...page.slugs, 'image.webp'];
 
-  return {
-    segments,
-    url: `/og/${segments.join('/')}`,
-  };
+  return '/' + [page.locale, 'og', ...segments].filter(Boolean).join('/');
 }

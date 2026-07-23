@@ -1,3 +1,7 @@
+## @fumadocs/base-ui@16.12.1
+
+### Fix bugs in Flux layout
+
 ## @fumadocs/base-ui@16.12.0
 
 ### Fix invalid list semantics in Home layout navbar

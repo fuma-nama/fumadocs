@@ -9,3 +9,9 @@ export const gitConfig = {
   repo: 'fumadocs',
   branch: 'main',
 };
+
+export function getPageImagePath(slugs: string[], locale?: string) {
+  return (
+    '/' + [locale, ...docsImageRoute.split('/'), ...slugs, 'image.webp'].filter(Boolean).join('/')
+  );
+}

@@ -1,6 +1,6 @@
 import type { PageProps } from 'waku/router';
 import defaultMdxComponents from 'fumadocs-ui/mdx';
-import { getPageImage, getSource, type SourcePage } from '@/lib/source';
+import { getPageImageUrl, getSource, type SourcePage } from '@/lib/source';
 import { layoutConfig } from '@/layouts/config';
 import { getConfigRuntime } from '@/config/load-runtime';
 import { Card, Cards } from 'fumadocs-ui/components/card';
@@ -211,7 +211,7 @@ async function MdContent({
   return renderContainer(
     <DocsPage toc={toc}>
       <title>{page.data.title}</title>
-      <meta property="og:image" content={getPageImage(slugs).url} />
+      <meta property="og:image" content={getPageImageUrl(page)} />
       <meta property="og:description" content={page.data.description} />
       <DocsTitle>{page.data.title}</DocsTitle>
       <DocsDescription>{page.data.description}</DocsDescription>

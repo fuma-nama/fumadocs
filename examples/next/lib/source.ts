@@ -10,12 +10,12 @@ export const source = loader({
   plugins: [lucideIconsPlugin()],
 });
 
-export function getPageImage(page: (typeof source)['$inferPage']) {
+export function getPageImageUrl(page: (typeof source)['$inferPage']) {
   const segments = [...page.slugs, 'image.png'];
 
   return {
     segments,
-    url: `${docsImageRoute}/${segments.join('/')}`,
+    url: '/' + [page.locale, ...docsImageRoute.split('/'), ...segments].filter(Boolean).join('/'),
   };
 }
 
@@ -24,7 +24,7 @@ export function getPageMarkdownUrl(page: (typeof source)['$inferPage']) {
 
   return {
     segments,
-    url: `${docsContentRoute}/${segments.join('/')}`,
+    url: '/' + [page.locale, ...docsContentRoute.split('/'), ...segments].filter(Boolean).join('/'),
   };
 }
 

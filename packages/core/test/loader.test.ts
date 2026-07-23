@@ -154,6 +154,22 @@ test('Loader: Simple', async () => {
   expect(result.getPage(['test'])).toBeDefined();
 });
 
+test('Loader: resolve encoded relative file paths', () => {
+  const result = loader({
+    baseUrl: '/docs',
+    source: {
+      files: [
+        { type: 'page', path: 'guide/current.md', data: { title: 'Current' } },
+        { type: 'page', path: 'guide/hello world.md', data: { title: 'Hello' } },
+      ],
+    },
+  });
+  const current = result.getPage(['guide', 'current']);
+  if (!current) throw new Error('expected current page');
+
+  expect(result.resolveHref('./hello%20world.md', current)).toBe('/docs/guide/hello%20world');
+});
+
 test('Nested Directories', async () => {
   const result = loader({
     baseUrl: '/',

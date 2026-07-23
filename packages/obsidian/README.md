@@ -1,8 +1,11 @@
 # Fumadocs Obsidian
 
-Obsidian integration for Fumadocs.
+Runtime content source for rendering an Obsidian vault with Fumadocs.
 
-- Wikilinks, Embeds.
-- Callout.
+- Wikilinks and embeds.
+- Callouts.
 - Block IDs.
 - Comments.
+- Static and dynamically revalidated Fumadocs sources.
+
+See the [Obsidian integration guide](https://fumadocs.dev/docs/integrations/obsidian) for setup and usage.

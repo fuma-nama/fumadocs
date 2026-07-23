@@ -11,9 +11,8 @@ import {
 import { getPageMarkdownUrl, source } from '@/lib/source';
 import browserCollections from 'collections/browser';
 import { baseOptions } from '@/lib/layout.shared';
-import { gitConfig } from '@/lib/shared';
+import { gitConfig, getPageImagePath } from '@/lib/shared';
 import { useFumadocsLoader } from 'fumadocs-core/source/client';
-import { getPageImagePath } from '@/lib/og';
 import { useMDXComponents } from '@/components/mdx';
 
 export async function loader({ params }: Route.LoaderArgs) {
@@ -25,7 +24,7 @@ export async function loader({ params }: Route.LoaderArgs) {
     path: page.path,
     markdownUrl: getPageMarkdownUrl(page).url,
     pageTree: await source.serializePageTree(source.getPageTree()),
-    imagePath: getPageImagePath(slugs),
+    imagePath: getPageImagePath(page.slugs, page.locale),
   };
 }
 

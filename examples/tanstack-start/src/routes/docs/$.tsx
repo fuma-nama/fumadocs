@@ -1,7 +1,7 @@
 import { createFileRoute, notFound } from '@tanstack/react-router';
 import { DocsLayout } from 'fumadocs-ui/layouts/docs';
 import { createServerFn } from '@tanstack/react-start';
-import { slugsToMarkdownPath, source } from '@/lib/source';
+import { source } from '@/lib/source';
 import browserCollections from 'collections/browser';
 import {
   DocsBody,
@@ -12,7 +12,7 @@ import {
   ViewOptionsPopover,
 } from 'fumadocs-ui/layouts/docs/page';
 import { baseOptions } from '@/lib/layout.shared';
-import { gitConfig } from '@/lib/shared';
+import { encodeMarkdownUrl, gitConfig } from '@/lib/shared';
 import { useFumadocsLoader } from 'fumadocs-core/source/client';
 import { Suspense } from 'react';
 import { useMDXComponents } from '@/components/mdx';
@@ -37,7 +37,7 @@ const serverLoader = createServerFn({
 
     return {
       path: page.path,
-      markdownUrl: slugsToMarkdownPath(page.slugs).url,
+      markdownUrl: encodeMarkdownUrl(page.slugs, page.locale),
       pageTree: await source.serializePageTree(source.getPageTree()),
     };
   });

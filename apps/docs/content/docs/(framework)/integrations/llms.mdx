@@ -280,19 +280,12 @@ export default {
 } satisfies Config;
 ```
 
-```ts tab="Tanstack Start" title="lib/source.ts"
+```ts tab="Tanstack Start" title="lib/shared.ts"
 // create the following utils:
 
-export function markdownPathToSlugs(segs: string[]) {
-  if (segs.length === 0) return [];
+export const docsRoute = '/docs';
 
-  const out = [...segs];
-  out[out.length - 1] = out[out.length - 1].replace(/\.md$/, '');
-  if (out.length === 1 && out[0] === 'index') out.pop();
-  return out;
-}
-
-export function slugsToMarkdownPath(slugs: string[]) {
+export function encodeMarkdownUrl(slugs: string[], locale?: string) {
   const segments = [...slugs];
   if (segments.length === 0) {
     segments.push('index.md');
@@ -300,23 +293,31 @@ export function slugsToMarkdownPath(slugs: string[]) {
     segments[segments.length - 1] += '.md';
   }
 
-  return {
-    segments,
-    url: `/docs/${segments.join('/')}`,
-  };
+  return '/' + [locale, ...docsRoute.split('/'), ...segments].filter(Boolean).join('/');
+}
+
+/** @returns page slugs */
+export function decodeMarkdownUrl(segments: string[]) {
+  if (segments.length === 0) return [];
+
+  const out = [...segments];
+  out[out.length - 1] = out[out.length - 1].replace(/\.md$/, '');
+  if (out.length === 1 && out[0] === 'index') out.pop();
+  return out;
 }
 ```
 
 ```ts tab="Tanstack Start" title="src/routes/docs/{$}[.]md.ts"
 import { createFileRoute, notFound } from '@tanstack/react-router';
-import { source, markdownPathToSlugs } from '@/lib/source';
+import { source } from '@/lib/source';
+import { decodeMarkdownUrl } from '@/lib/shared';
 import { getLLMText } from '@/lib/get-llm-text';
 
 export const Route = createFileRoute('/docs/{$}.md')({
   server: {
     handlers: {
       GET: async ({ params }) => {
-        const slugs = markdownPathToSlugs(params._splat?.split('/') ?? []);
+        const slugs = decodeMarkdownUrl(params._splat?.split('/') ?? []);
         const page = source.getPage(slugs);
         if (!page) throw notFound();
 
@@ -329,6 +330,49 @@ export const Route = createFileRoute('/docs/{$}.md')({
     },
   },
 });
+```
+
+```ts tab="Waku" title="pages/_api/llms.mdx/docs/[...slugs]/content.md.ts"
+import { getLLMText } from '@/lib/get-llm-text';
+import { source } from '@/lib/source';
+import { ApiContext } from 'waku/router';
+import { unstable_notFound } from 'waku/router/server';
+
+export async function GET(
+  _: Request,
+  { params }: ApiContext<'/llms.mdx/docs/[...slugs]/content.md'>,
+) {
+  const page = source.getPage(params.slugs);
+  if (!page) unstable_notFound();
+
+  return new Response(await getLLMText(page), {
+    headers: {
+      'Content-Type': 'text/markdown',
+    },
+  });
+}
+
+export async function getConfig() {
+  const pages = source.generateParams().map((item) => item.slug);
+
+  return {
+    render: 'static' as const,
+    staticPaths: pages,
+  } as const;
+}
+```
+
+```ts tab="Waku" title="lib/source.ts"
+// create a util for Markdown URLs (append /content.md):
+
+export function getPageMarkdownUrl(page: { slugs: string[]; locale?: string }) {
+  const segments = [...page.slugs, 'content.md'];
+
+  return {
+    segments,
+    url: '/' + [page.locale, 'llms.mdx', 'docs', ...segments].filter(Boolean).join('/'),
+  };
+}
 ```
 
 #### `Accept`
@@ -369,6 +413,7 @@ Use it in your docs page like:
 ```tsx title="app/docs/[[...slug]]/page.tsx"
 // URL to fetch Markdown content, only need to append .mdx to URL if you have `*.mdx` configured.
 // Use .md instead for the Tanstack Start example above.
+// Use getPageMarkdownUrl(page).url for the Waku example above.
 const markdownUrl = `${page.url}.mdx`
 
 <div className="flex flex-row gap-2 items-center border-b pt-2 pb-6">

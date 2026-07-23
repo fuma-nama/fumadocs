@@ -1,32 +1,21 @@
 import path from 'node:path';
 import { frontmatter } from 'fumadocs-core/content/md/frontmatter';
-import { type Frontmatter, frontmatterSchema } from '@/utils/schema';
 import { slash } from '@/utils/slash';
-import type { VaultFile } from '@/read-vaults';
-import { slug } from 'github-slugger';
 
-type RenameOutputFn = (originalOutputPath: string, file: VaultFile) => string;
-type RenameOutputPreset = 'ignore' | 'simple';
+export interface VaultFile {
+  /** path relative to the vault directory */
+  path: string;
+  /** absolute file-system path */
+  absolutePath: string;
+  /** file content, omitted for media files so they are never read into memory */
+  content?: string | Buffer<ArrayBufferLike>;
+}
 
 export interface VaultStorageOptions {
   /**
-   * rename output path
-   *
-   * @defaultValue 'simple'
+   * Generate a URL for a media file. Defaults to a root-relative vault path.
    */
-  outputPath?: RenameOutputFn | RenameOutputPreset;
-
-  /**
-   * generate URL from media file, default to original file path (normalized)
-   */
-  url?: (outputPath: string, mediaFile: VaultFile) => string | undefined;
-
-  /**
-   * enforce all Markdown documents to be MDX
-   *
-   * @defaultValue true
-   */
-  enforceMdx?: boolean;
+  url?: (vaultPath: string, mediaFile: ParsedMediaFile) => string | undefined;
 }
 
 /**
@@ -38,97 +27,85 @@ export interface VaultStorage {
 
 export type ParsedFile = ParsedContentFile | ParsedMediaFile | ParsedDataFile;
 
+/**
+ * Frontmatter as written in the vault. Kept unvalidated here so a single
+ * malformed note cannot break the whole vault, the configurable schema
+ * validates it per-page instead.
+ */
+export type RawFrontmatter = Record<string, unknown>;
+
 export interface ParsedContentFile extends Omit<VaultFile, 'content'> {
   format: 'content';
-  frontmatter: Frontmatter;
-
-  /**
-   * output path (relative to content directory)
-   */
-  outPath: string;
+  frontmatter: RawFrontmatter;
   content: string;
 }
 
-export interface ParsedMediaFile extends VaultFile {
+export interface ParsedMediaFile extends Omit<VaultFile, 'content'> {
   format: 'media';
-
-  /**
-   * output path (relative to asset directory)
-   */
-  outPath: string;
   /**
    * The output URL. When undefined, it means the file is only accessible via paths.
    */
   url?: string;
 }
 
-export interface ParsedDataFile extends VaultFile {
+export interface ParsedDataFile extends Omit<VaultFile, 'content'> {
   format: 'data';
-  outPath: string;
+  content: string | Buffer<ArrayBufferLike>;
+}
+
+const ContentExtensions = new Set(['.md', '.mdx']);
+const DataExtensions = new Set(['.json', '.yaml', '.yml', '.toml']);
+
+export function getFileFormat(filePath: string): ParsedFile['format'] {
+  const ext = path.extname(filePath).toLowerCase();
+
+  if (DataExtensions.has(ext)) return 'data';
+  if (ContentExtensions.has(ext)) return 'content';
+  return 'media';
 }
 
 /**
  * Build virtual storage containing all files in the vault
  */
 export function buildStorage(
-  rawFiles: VaultFile[],
+  rawFiles: Iterable<VaultFile>,
   options: VaultStorageOptions = {},
 ): VaultStorage {
-  const {
-    url = (file) => {
-      const segs = normalize(file)
-        .split('/')
-        .filter((v) => v.length > 0);
-      return `/${segs.join('/')}`;
-    },
-    outputPath: outputPathOption = 'simple',
-    enforceMdx = true,
-  } = options;
-  const getOutputPath =
-    typeof outputPathOption === 'function'
-      ? outputPathOption
-      : createRenameOutput(outputPathOption);
+  const { url = (file) => `/${file}` } = options;
 
   const storage = new Map<string, ParsedFile>();
 
   for (const rawFile of rawFiles) {
     const normalizedPath = normalize(rawFile.path);
-    let outPath = getOutputPath(normalizedPath, rawFile);
     let parsed: ParsedFile;
 
-    const ext = path.extname(normalizedPath);
+    const format = getFileFormat(normalizedPath);
 
-    if (['.json', '.yaml', '.yml', '.toml'].includes(ext)) {
+    if (format === 'data') {
       parsed = {
-        format: 'data',
+        format,
         path: normalizedPath,
-        _raw: rawFile._raw,
-        outPath,
-        content: rawFile.content,
+        absolutePath: rawFile.absolutePath,
+        content: rawFile.content ?? '',
       };
-    } else if (['.md', '.mdx'].includes(ext)) {
-      const { data, content } = frontmatter(String(rawFile.content));
-      if (enforceMdx) {
-        outPath = outPath.slice(0, -path.extname(outPath).length) + '.mdx';
-      }
+    } else if (format === 'content') {
+      const { data, content } = frontmatter(String(rawFile.content ?? ''));
 
       parsed = {
-        format: 'content',
-        _raw: rawFile._raw,
+        format,
+        absolutePath: rawFile.absolutePath,
         path: normalizedPath,
-        outPath,
-        frontmatter: frontmatterSchema.parse(data),
+        frontmatter: toRawFrontmatter(data),
         content,
       };
     } else {
-      parsed = {
-        format: 'media',
+      const media: ParsedMediaFile = {
+        format,
         path: normalizedPath,
-        _raw: rawFile._raw,
-        outPath,
-        content: rawFile.content,
-        url: url(outPath, rawFile),
+        absolutePath: rawFile.absolutePath,
       };
+      media.url = url(normalizedPath, media);
+      parsed = media;
     }
 
     storage.set(normalizedPath, parsed);
@@ -137,24 +114,12 @@ export function buildStorage(
   return { files: storage };
 }
 
-function createRenameOutput(preset: RenameOutputPreset): RenameOutputFn {
-  if (preset === 'ignore') return (file) => file;
+function toRawFrontmatter(data: unknown): RawFrontmatter {
+  if (typeof data === 'object' && data !== null && !Array.isArray(data)) {
+    return data as RawFrontmatter;
+  }
 
-  const occurrences = new Map<string, number>();
-  return (file) => {
-    const ext = path.extname(file);
-    const segs = file.slice(0, -ext.length).split('/');
-    for (let i = 0; i < segs.length; i++) {
-      // preserve separators
-      segs[i] = slug(segs[i]);
-    }
-    // we only count occurrences by the full path
-    let out = segs.join('/');
-    const o = occurrences.get(out) ?? 0;
-    occurrences.set(out, o + 1);
-    if (o > 0) out += `-${o}`;
-    return out + ext;
-  };
+  return {};
 }
 
 function normalize(filePath: string): string {

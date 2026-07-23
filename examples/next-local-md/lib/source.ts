@@ -21,12 +21,12 @@ export async function getSource() {
   return docsLoader.get();
 }
 
-export function getPageImage(page: (typeof docsLoader)['$inferPage']) {
+export function getPageImageUrl(page: (typeof docsLoader)['$inferPage']) {
   const segments = [...page.slugs, 'image.png'];
 
   return {
     segments,
-    url: `${docsImageRoute}/${segments.join('/')}`,
+    url: '/' + [page.locale, ...docsImageRoute.split('/'), ...segments].filter(Boolean).join('/'),
   };
 }
 
@@ -35,7 +35,7 @@ export function getPageMarkdownUrl(page: (typeof docsLoader)['$inferPage']) {
 
   return {
     segments,
-    url: `${docsContentRoute}/${segments.join('/')}`,
+    url: '/' + [page.locale, ...docsContentRoute.split('/'), ...segments].filter(Boolean).join('/'),
   };
 }
 

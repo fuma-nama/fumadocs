@@ -4,7 +4,7 @@ import * as Twoslash from 'fumadocs-twoslash/ui';
 import { Callout } from 'fumadocs-ui/components/callout';
 import { TypeTable } from 'fumadocs-ui/components/type-table';
 import * as Preview from '@/components/preview';
-import { createMetadata, getPageImage } from '@/lib/metadata';
+import { createMetadata, getPageImageUrl } from '@/lib/metadata';
 import { source } from '@/lib/source';
 import { Wrapper } from '@/components/preview/wrapper';
 import { Mermaid } from '@/components/mdx/mermaid';
@@ -176,7 +176,7 @@ export async function generateMetadata(props: PageProps<'/docs/[[...slug]]'>): P
   const description = page.data.description ?? 'The library for building documentation sites';
 
   const image = {
-    url: getPageImage(page).url,
+    url: getPageImageUrl(page).url,
     width: 1200,
     height: 630,
   };

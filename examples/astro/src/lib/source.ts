@@ -13,13 +13,10 @@ export function getStructuredData(entry: CollectionEntry<'docs'>): StructuredDat
   return structure(entry.body);
 }
 
-export function getPageImage(slugs: string[]) {
-  const segments = [...slugs, 'image.webp'];
+export function getPageImageUrl(page: (typeof source)['$inferPage']) {
+  const segments = [...page.slugs, 'image.webp'];
 
-  return {
-    segments,
-    url: `/og/docs/${segments.join('/')}`,
-  };
+  return '/' + [page.locale, 'og', 'docs', ...segments].filter(Boolean).join('/');
 }
 
 async function createMySource() {

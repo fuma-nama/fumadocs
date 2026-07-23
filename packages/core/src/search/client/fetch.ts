@@ -1,6 +1,6 @@
 import type { SortedResult } from '@/search';
 import type { SearchClient } from '../client';
-import { BASE_PATH } from '@/utils/url';
+import { BASE_PATH, join } from '@/utils/url';
 
 export interface FetchOptions {
   /**
@@ -26,7 +26,7 @@ export interface FetchOptions {
 const globalCache = new Map();
 
 export function fetchClient({
-  api = `${BASE_PATH}api/search`,
+  api = join(BASE_PATH, '/api/search'),
   locale,
   tag,
   cache = globalCache,

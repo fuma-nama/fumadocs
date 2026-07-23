@@ -1,11 +1,22 @@
 /**
- * The base path (Vite), always ends with `/`.
+ * The base path (Vite)
  */
-export let BASE_PATH: string =
+export const BASE_PATH: string =
   typeof import.meta.env !== 'undefined' && typeof import.meta.env.BASE_URL === 'string'
     ? import.meta.env.BASE_URL
     : '/';
-if (!BASE_PATH.endsWith('/')) BASE_PATH += '/';
+
+export function join(...paths: string[]) {
+  let out = '';
+  for (let p of paths) {
+    if (out.length > 0) {
+      if (p.startsWith('/')) p = p.slice(1);
+      if (!out.endsWith('/')) out += '/';
+    }
+    out += p;
+  }
+  return out;
+}
 
 /**
  * normalize URL into the Fumadocs standard form (`/slug-1/slug-2`).
