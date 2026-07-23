@@ -30,19 +30,19 @@ Add the following under your loader, and define image metadata for pages:
 
 ```ts tab="Next.js" title="lib/source.ts"
 // [!code ++:8]
-export function getPageImage(page: (typeof source)['$inferPage']) {
+export function getPageImageUrl(page: (typeof source)['$inferPage']) {
   const segments = [...page.slugs, 'image.webp'];
 
   return {
     segments,
-    url: `/og/docs/${segments.join('/')}`,
+    url: '/' + [page.locale, 'og', 'docs', ...segments].filter(Boolean).join('/'),
   };
 }
 ```
 
 ```tsx tab="Next.js" title="app/docs/[[...slug]]/page.tsx"
 import { notFound } from 'next/navigation';
-import { source, getPageImage } from '@/lib/source';
+import { source, getPageImageUrl } from '@/lib/source';
 import type { Metadata } from 'next';
 
 export async function generateMetadata(props: PageProps<'/docs/[[...slug]]'>): Promise<Metadata> {
@@ -55,57 +55,60 @@ export async function generateMetadata(props: PageProps<'/docs/[[...slug]]'>): P
     description: page.data.description,
     openGraph: {
       // [!code ++]
-      images: getPageImage(page).url,
+      images: getPageImageUrl(page).url,
     },
   };
 }
 ```
 
-```tsx tab="React Router" title="app/lib/og.ts"
-export function getPageImage(slugs: string[]) {
-  const segments = [...slugs, 'image.webp'];
+```tsx tab="React Router" title="app/lib/shared.ts"
+export const docsImageRoute = '/og/docs';
 
-  return {
-    segments,
-    url: `/og/docs/${segments.join('/')}`,
-  };
+// [!code ++:5]
+export function getPageImagePath(slugs: string[], locale?: string) {
+  return (
+    '/' + [locale, ...docsImageRoute.split('/'), ...slugs, 'image.webp'].filter(Boolean).join('/')
+  );
 }
 ```
 
 ```tsx tab="React Router" title="app/routes/docs.tsx"
 // [!code ++]
-import { getPageImage } from '@/lib/og';
+import { getPageImagePath } from '@/lib/shared';
+
+// Somewhere in your loader
+return {
+  // [!code ++]
+  imagePath: getPageImagePath(page.slugs, page.locale),
+};
 
 // Somewhere in your component or client loader
 return (
   <>
     {/* [!code ++] */}
-    <meta property="og:image" content={getPageImage(page.slugs).url} />
+    <meta property="og:image" content={imagePath} />
   </>
 );
 ```
 
 ```tsx tab="Vite Based Framework" title="app/lib/source.ts"
-// [!code ++:8]
-export function getPageImage(slugs: string[]) {
-  const segments = [...slugs, 'image.webp'];
+// [!code ++:5]
+export function getPageImageUrl(page: (typeof source)['$inferPage']) {
+  const segments = [...page.slugs, 'image.webp'];
 
-  return {
-    segments,
-    url: `/og/docs/${segments.join('/')}`,
-  };
+  return '/' + [page.locale, 'og', 'docs', ...segments].filter(Boolean).join('/');
 }
 ```
 
 ```tsx tab="Vite Based Framework" title="app/routes/docs.tsx"
 // [!code ++]
-import { getPageImage } from '@/lib/source';
+import { getPageImageUrl } from '@/lib/source';
 
 // Somewhere in your component or client loader
 return (
   <>
     {/* [!code ++] */}
-    <meta property="og:image" content={getPageImage(page.slugs).url} />
+    <meta property="og:image" content={getPageImageUrl(page)} />
   </>
 );
 ```
@@ -115,7 +118,7 @@ return (
 Finally, create a route handler to generate images at build time:
 
 ```tsx tab="Next.js" title="app/og/docs/[...slug]/route.tsx"
-import { getPageImage, source } from '@/lib/source';
+import { getPageImageUrl, source } from '@/lib/source';
 import { notFound } from 'next/navigation';
 import { ImageResponse } from 'takumi-js/response';
 import { generate as DefaultImage } from 'fumadocs-ui/og/takumi';
@@ -140,7 +143,7 @@ export async function GET(_req: Request, { params }: RouteContext<'/og/docs/[...
 export function generateStaticParams() {
   return source.getPages().map((page) => ({
     lang: page.locale,
-    slug: getPageImage(page).segments,
+    slug: getPageImageUrl(page).segments,
   }));
 }
 ```
@@ -217,6 +220,7 @@ export default [
 import type { Config } from '@react-router/dev/config';
 import { glob } from 'node:fs/promises';
 import { createGetUrl, getSlugs } from 'fumadocs-core/source';
+import { getPageImagePath } from '@/lib/shared';
 
 const getUrl = createGetUrl('/docs');
 
@@ -233,7 +237,7 @@ export default {
       const slugs = getSlugs(entry);
 
       paths.push(getUrl(slugs));
-      paths.push(`/og/docs/${[...slugs, 'image.webp'].join('/')}`);
+      paths.push(getPageImagePath(slugs));
     }
 
     return paths;

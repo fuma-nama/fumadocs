@@ -280,19 +280,12 @@ export default {
 } satisfies Config;
 ```
 
-```ts tab="Tanstack Start" title="lib/source.ts"
+```ts tab="Tanstack Start" title="lib/shared.ts"
 // create the following utils:
 
-export function markdownPathToSlugs(segs: string[]) {
-  if (segs.length === 0) return [];
+export const docsRoute = '/docs';
 
-  const out = [...segs];
-  out[out.length - 1] = out[out.length - 1].replace(/\.md$/, '');
-  if (out.length === 1 && out[0] === 'index') out.pop();
-  return out;
-}
-
-export function slugsToMarkdownPath(slugs: string[]) {
+export function encodeMarkdownUrl(slugs: string[], locale?: string) {
   const segments = [...slugs];
   if (segments.length === 0) {
     segments.push('index.md');
@@ -300,23 +293,31 @@ export function slugsToMarkdownPath(slugs: string[]) {
     segments[segments.length - 1] += '.md';
   }
 
-  return {
-    segments,
-    url: `/docs/${segments.join('/')}`,
-  };
+  return '/' + [locale, ...docsRoute.split('/'), ...segments].filter(Boolean).join('/');
+}
+
+/** @returns page slugs */
+export function decodeMarkdownUrl(segments: string[]) {
+  if (segments.length === 0) return [];
+
+  const out = [...segments];
+  out[out.length - 1] = out[out.length - 1].replace(/\.md$/, '');
+  if (out.length === 1 && out[0] === 'index') out.pop();
+  return out;
 }
 ```
 
 ```ts tab="Tanstack Start" title="src/routes/docs/{$}[.]md.ts"
 import { createFileRoute, notFound } from '@tanstack/react-router';
-import { source, markdownPathToSlugs } from '@/lib/source';
+import { source } from '@/lib/source';
+import { decodeMarkdownUrl } from '@/lib/shared';
 import { getLLMText } from '@/lib/get-llm-text';
 
 export const Route = createFileRoute('/docs/{$}.md')({
   server: {
     handlers: {
       GET: async ({ params }) => {
-        const slugs = markdownPathToSlugs(params._splat?.split('/') ?? []);
+        const slugs = decodeMarkdownUrl(params._splat?.split('/') ?? []);
         const page = source.getPage(slugs);
         if (!page) throw notFound();
 
@@ -364,12 +365,12 @@ export async function getConfig() {
 ```ts tab="Waku" title="lib/source.ts"
 // create a util for Markdown URLs (append /content.md):
 
-export function getPageMarkdownUrl(page: { slugs: string[] }) {
+export function getPageMarkdownUrl(page: { slugs: string[]; locale?: string }) {
   const segments = [...page.slugs, 'content.md'];
 
   return {
     segments,
-    url: `/llms.mdx/docs/${segments.join('/')}`,
+    url: '/' + [page.locale, 'llms.mdx', 'docs', ...segments].filter(Boolean).join('/'),
   };
 }
 ```

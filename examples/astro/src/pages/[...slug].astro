@@ -3,7 +3,7 @@ import { render, type CollectionEntry } from "astro:content";
 import { Docs } from "@/components/docs";
 import defaultMdxComponents from "fumadocs-ui/mdx";
 import "@/styles/global.css";
-import { getPageImage, source } from "@/lib/source";
+import { getPageImageUrl, source } from "@/lib/source";
 import Layout from "@/components/layout.astro";
 import type { TOCItemType } from "fumadocs-core/toc";
 
@@ -21,7 +21,8 @@ export async function getStaticPaths() {
 const { page } = Astro.props;
 const { Content, headings } = await render(page);
 const slugs = typeof Astro.params.slug === "string" ? Astro.params.slug.split("/") : [];
-const image = getPageImage(slugs).url;
+const docsPage = source.getPage(slugs)!;
+const image = getPageImageUrl(docsPage);
 
 const toc: TOCItemType[] = headings.map((heading) => ({
   depth: heading.depth,

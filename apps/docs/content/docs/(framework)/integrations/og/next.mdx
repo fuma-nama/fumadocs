@@ -13,19 +13,19 @@ Add the following under your loader, and define image metadata for pages:
 
 ```ts tab="lib/source.ts"
 // [!code ++:8]
-export function getPageImage(page: (typeof source)['$inferPage']) {
+export function getPageImageUrl(page: (typeof source)['$inferPage']) {
   const segments = [...page.slugs, 'image.png'];
 
   return {
     segments,
-    url: `/og/docs/${segments.join('/')}`,
+    url: '/' + [page.locale, 'og', 'docs', ...segments].filter(Boolean).join('/'),
   };
 }
 ```
 
 ```tsx tab="app/docs/[[...slug]]/page.tsx"
 import { notFound } from 'next/navigation';
-import { source, getPageImage } from '@/lib/source';
+import { source, getPageImageUrl } from '@/lib/source';
 import type { Metadata } from 'next';
 
 export async function generateMetadata(props: PageProps<'/docs/[[...slug]]'>): Promise<Metadata> {
@@ -38,7 +38,7 @@ export async function generateMetadata(props: PageProps<'/docs/[[...slug]]'>): P
     description: page.data.description,
     openGraph: {
       // [!code ++]
-      images: getPageImage(page).url,
+      images: getPageImageUrl(page).url,
     },
   };
 }
