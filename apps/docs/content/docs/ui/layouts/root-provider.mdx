@@ -119,3 +119,32 @@ Customize or disable it with `theme` option.
 ```
 
 You can also install & reference `next-themes` in your code for managing themes.
+
+#### Hotkey
+
+Pressing <kbd>D</kbd> toggles between light and dark mode.
+It is ignored while you are typing in an editable element (such as `<input />`), or when a dialog like the search dialog is opened.
+
+Pass another key to `theme.hotKey`, or `false` to disable it.
+
+```jsx
+<RootProvider
+  theme={{
+    hotKey: false,
+  }}
+>
+  {children}
+</RootProvider>
+```
+
+A function is also accepted for full control over the matched key combination.
+
+```jsx
+<RootProvider
+  theme={{
+    hotKey: (e) => e.shiftKey && e.key === 'D',
+  }}
+>
+  {children}
+</RootProvider>
+```
