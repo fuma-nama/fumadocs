@@ -1,0 +1,86 @@
+{
+  "name": "@fumadocs/notion",
+  "version": "0.1.0",
+  "description": "The official Notion integration for Fumadocs",
+  "keywords": [
+    "Docs",
+    "Fumadocs",
+    "Notion"
+  ],
+  "homepage": "https://fumadocs.dev",
+  "license": "MIT",
+  "author": "Fuma Nama",
+  "repository": "github:fuma-nama/fumadocs",
+  "files": [
+    "css",
+    "dist"
+  ],
+  "type": "module",
+  "sideEffects": [
+    "./css/**/*.css"
+  ],
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    },
+    "./source": {
+      "types": "./dist/source.d.ts",
+      "import": "./dist/source.js"
+    },
+    "./renderer": {
+      "types": "./dist/renderer.d.ts",
+      "import": "./dist/renderer.js"
+    },
+    "./file": {
+      "types": "./dist/file.d.ts",
+      "import": "./dist/file.js"
+    },
+    "./css/*": "./css/*",
+    "./package.json": "./package.json"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "scripts": {
+    "build": "tsdown",
+    "clean": "rimraf dist",
+    "dev": "tsdown --watch",
+    "lint": "oxlint .",
+    "test": "vitest run",
+    "types:check": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@base-ui/react": "^1.6.0",
+    "cnfast": "^0.0.8",
+    "lucide-react": "^1.25.0"
+  },
+  "devDependencies": {
+    "@notionhq/client": "^5.23.1",
+    "@tailwindcss/oxide": "^4.3.3",
+    "@types/node": "26.1.1",
+    "@types/react": "^19.2.17",
+    "@types/react-dom": "^19.2.3",
+    "fumadocs-core": "workspace:*",
+    "fumadocs-ui": "workspace:@fumadocs/base-ui@*",
+    "react": "^19.2.8",
+    "react-dom": "^19.2.8",
+    "tsconfig": "workspace:*",
+    "tsdown": "0.22.13",
+    "typescript": "^6.0.3",
+    "vitest": "^4.1.10"
+  },
+  "peerDependencies": {
+    "@notionhq/client": "^5.23.0",
+    "@types/react": "*",
+    "fumadocs-core": "^16.8.0",
+    "fumadocs-ui": "^16.8.0",
+    "react": "^19.2.0",
+    "react-dom": "^19.2.0"
+  },
+  "peerDependenciesMeta": {
+    "@types/react": {
+      "optional": true
+    }
+  }
+}
