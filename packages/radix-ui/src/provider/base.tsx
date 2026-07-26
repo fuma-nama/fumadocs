@@ -1,11 +1,23 @@
 'use client';
 
 import { type ReactNode, useEffect, useEffectEvent } from 'react';
+import { flushSync } from 'react-dom';
 import { DirectionProvider } from '@radix-ui/react-direction';
 import { ThemeProvider, type ThemeProviderProps, useTheme } from 'next-themes';
 import { I18nProvider, type I18nProviderProps } from '@/contexts/i18n';
 import { SearchProvider, type SearchProviderProps } from '@/contexts/search';
-import { changeTheme, isTypingTarget } from '@/utils/theme';
+
+/**
+ * Whether the event should be ignored because the user is interacting with an editable element,
+ * or an opened dialog (e.g. the search dialog).
+ */
+function isTypingTarget(target: EventTarget | null): boolean {
+  if (!(target instanceof HTMLElement)) return false;
+  if (target.isContentEditable) return true;
+  if (['INPUT', 'TEXTAREA', 'SELECT'].includes(target.tagName)) return true;
+
+  return target.closest('[role="dialog"]') !== null;
+}
 
 interface SearchOptions extends Omit<SearchProviderProps, 'children'> {
   /**
@@ -73,7 +85,12 @@ function ThemeHotKey({ hotKey }: { hotKey: Exclude<ThemeOptions['hotKey'], false
     if (!matched) return;
 
     e.preventDefault();
-    changeTheme(setTheme, resolvedTheme === 'dark' ? 'light' : 'dark');
+    const next = resolvedTheme === 'dark' ? 'light' : 'dark';
+    if (document?.startViewTransition) {
+      document.startViewTransition(() => flushSync(() => setTheme(next)));
+    } else {
+      setTheme(next);
+    }
   });
 
   useEffect(() => {
