@@ -1,28 +1,39 @@
 core:changelogs:
-  - content: "---\npackages:\n  npm:create-fumadocs-app:\n    type: patch\n---\n\n## Fix React Router template\n"
-    filename: 2026-07-23-mrxk2q4o.md
+  - content: "---\npackages:\n  npm:fumadocs-ui:\n    type: minor\n  npm:@fumadocs/base-ui:\n    type: minor\n---\n\n## Add hotkey for toggling light/dark mode\n\nPress <kbd>D</kbd> to toggle between light and dark mode. It is ignored while typing in an editable element or when a dialog (e.g. search) is opened.\n\nCustomise it with the `theme.hotKey` option of `<RootProvider />`, or pass `false` to disable.\n"
+    filename: 2026-07-25-theme-hotkey.md
+    v: 0.0.0
+  - content: "---\npackages:\n  npm:fumadocs-core:\n    type: patch\n---\n\n## Respect quality values in `isMarkdownPreferred`\n\n`isMarkdownPreferred()` previously returned `true` whenever a Markdown media type appeared anywhere\nin `Accept`, ignoring how the client ranked it. A request for `Accept: text/html;q=0.9, text/markdown;q=0.1`\nwas served Markdown even though it clearly preferred HTML.\n\nIt now compares the client's highest quality value for a Markdown type against its highest value for\nHTML, and only prefers Markdown when Markdown ranks at least as high. Wildcards (`*/*`, `text/*`)\ncount towards HTML, so `Accept: */*` keeps receiving HTML.\n\nA tie still prefers Markdown, so agents sending `Accept: text/html,text/markdown,text/plain,*/*;q=0.5`\nare unaffected.\n\nThe negotiation examples and templates now also set `Vary: Accept` on the negotiated Markdown\nresponse, so shared caches key on the header the representation was selected by.\n"
+    filename: 2026-07-26-vary-accept.md
+    v: 0.0.0
+  - content: "---\npackages:\n  npm:@fumadocs/notion:\n    type: minor\n---\n\n## Support Notion integration\n\nUse Notion as content source.\n"
+    filename: 2026-07-25-mrzwnvpp.md
+    v: 0.0.0
+  - content: "---\npackages:\n  npm:fumadocs-obsidian:\n    type: patch\n---\n\n## Support CSS preset\n\nInclude required css classes by importing the preset.\n"
+    filename: 2026-07-25-mrzwd27f.md
     v: 0.0.0
 core:packages:
   - id: npm:@fumadocs/api-docs
     updated: false
   - id: npm:@fumadocs/asyncapi
     updated: false
-  - id: npm:@fumadocs/base-ui
-    updated: false
+  - changelogIds:
+      - 2026-07-25-theme-hotkey.md
+    id: npm:@fumadocs/base-ui
+    updated: true
   - id: npm:@fumadocs/basehub
-    updated: false
-  - id: npm:@fumadocs/cli
     updated: false
   - id: npm:@fumadocs/content
     updated: false
   - id: npm:@fumadocs/content-collections
     updated: false
-  - changelogIds:
-      - 2026-07-23-mrxk2q4o.md
-    id: npm:create-fumadocs-app
-    updated: true
-  - id: npm:fumadocs-core
+  - id: npm:@fumadocs/cli
     updated: false
+  - changelogIds:
+      - 2026-07-26-vary-accept.md
+    id: npm:fumadocs-core
+    updated: true
+  - id: npm:create-fumadocs-app
+    updated: true
   - id: npm:create-fumadocs-versions
     updated: true
   - id: npm:fumadocs-docgen
@@ -39,17 +50,25 @@ core:packages:
     updated: false
   - id: npm:@fumadocs/mdx-remote
     updated: false
-  - id: npm:fumadocs-obsidian
-    updated: false
+  - changelogIds:
+      - 2026-07-25-mrzwnvpp.md
+    id: npm:@fumadocs/notion
+    updated: true
+  - changelogIds:
+      - 2026-07-25-mrzwd27f.md
+    id: npm:fumadocs-obsidian
+    updated: true
   - id: npm:fumadocs-openapi
     updated: false
   - id: npm:fumadocs-preview
     updated: false
   - id: npm:fumadocs-python
     updated: false
+  - changelogIds:
+      - 2026-07-25-theme-hotkey.md
+    id: npm:fumadocs-ui
+    updated: true
   - id: npm:@fumadocs/sanity
-    updated: false
-  - id: npm:fumadocs-ui
     updated: false
   - id: npm:@fumadocs/satteri
     updated: false
@@ -67,16 +86,18 @@ core:packages:
     updated: false
   - id: npm:@fumadocs/vite
     updated: false
+npm:mark-latest:
+  - id: npm:@fumadocs/notion
 npm:packages:
   - id: npm:@fumadocs/api-docs
   - id: npm:@fumadocs/asyncapi
   - id: npm:@fumadocs/base-ui
   - id: npm:@fumadocs/basehub
-  - id: npm:@fumadocs/cli
   - id: npm:@fumadocs/content
   - id: npm:@fumadocs/content-collections
-  - id: npm:create-fumadocs-app
+  - id: npm:@fumadocs/cli
   - id: npm:fumadocs-core
+  - id: npm:create-fumadocs-app
   - id: npm:create-fumadocs-versions
   - id: npm:fumadocs-docgen
   - id: npm:fumadocs-epub
@@ -85,12 +106,13 @@ npm:packages:
   - id: npm:@fumadocs/local-md
   - id: npm:fumadocs-mdx
   - id: npm:@fumadocs/mdx-remote
+  - id: npm:@fumadocs/notion
   - id: npm:fumadocs-obsidian
   - id: npm:fumadocs-openapi
   - id: npm:fumadocs-preview
   - id: npm:fumadocs-python
-  - id: npm:@fumadocs/sanity
   - id: npm:fumadocs-ui
+  - id: npm:@fumadocs/sanity
   - id: npm:@fumadocs/satteri
   - id: npm:@fumadocs/shadcn
   - id: npm:@fumari/stf
@@ -99,3 +121,33 @@ npm:packages:
   - id: npm:fumadocs-twoslash
   - id: npm:fumadocs-typescript
   - id: npm:@fumadocs/vite
+  - id: npm:example-obsidian
+  - id: npm:docs
+  - id: npm:example-astro
+  - id: npm:example-asyncapi
+  - id: npm:example-base-ui
+  - id: npm:example-content-collections
+  - id: npm:example-i18n
+  - id: npm:example-marble-cms
+  - id: npm:example-next
+  - id: npm:example-next-local-md
+  - id: npm:example-next-min
+  - id: npm:example-next-shadcn
+  - id: npm:example-next-static
+  - id: npm:example-openapi
+  - id: npm:example-python
+  - id: npm:example-react-router
+  - id: npm:example-react-router-i18n
+  - id: npm:example-react-router-min
+  - id: npm:example-react-router-rsc
+  - id: npm:example-react-router-spa
+  - id: npm:example-tanstack-start
+  - id: npm:example-tanstack-start-i18n
+  - id: npm:example-tanstack-start-local-md
+  - id: npm:example-tanstack-start-min
+  - id: npm:example-tanstack-start-openapi
+  - id: npm:example-tanstack-start-spa
+  - id: npm:example-tanstack-start-story
+  - id: npm:example-waku
+  - id: npm:example-waku-i18n
+  - id: npm:vite-data
