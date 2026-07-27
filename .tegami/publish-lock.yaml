@@ -86,6 +86,8 @@ core:packages:
     updated: false
   - id: npm:@fumadocs/vite
     updated: false
+npm:mark-latest:
+  - id: npm:@fumadocs/notion
 npm:packages:
   - id: npm:@fumadocs/api-docs
   - id: npm:@fumadocs/asyncapi
