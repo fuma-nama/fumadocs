@@ -14,7 +14,10 @@ export default function proxy(request: NextRequest) {
     const result = rewriteLLM(request.nextUrl.pathname);
 
     if (result) {
-      return NextResponse.rewrite(new URL(result, request.nextUrl));
+      return NextResponse.rewrite(new URL(result, request.nextUrl), {
+        // this URL has two representations, selected by `Accept`
+        headers: { Vary: 'Accept' },
+      });
     }
   }
 
