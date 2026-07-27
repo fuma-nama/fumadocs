@@ -390,13 +390,25 @@ export default function proxy(request: NextRequest) {
     const result = rewriteLLM(request.nextUrl.pathname);
 
     if (result) {
-      return NextResponse.rewrite(new URL(result, request.nextUrl));
+      return NextResponse.rewrite(new URL(result, request.nextUrl), {
+        headers: { Vary: 'Accept' }, // [!code highlight]
+      });
     }
   }
 
   return NextResponse.next();
 }
 ```
+
+Because the same URL now has two representations, the response needs `Vary: Accept` so shared
+caches key on the header they were selected by, rather than serving Markdown to a browser (or the
+other way round).
+
+<Callout title="Next.js">
+  Next.js discards `Vary` on App Router **page** responses, so the HTML side of the branch above
+  can't carry the header from inside the app — set it at your CDN if you serve documentation through
+  a shared cache.
+</Callout>
 
 ### Page Actions
 

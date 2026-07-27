@@ -22,6 +22,20 @@ Install the package:
 fumadocs-obsidian shiki
 ```
 
+### Generate Styles
+
+The components from `fumadocs-obsidian/ui` are styled with Tailwind CSS. Add the following line so their classes are generated:
+
+```css title="Tailwind CSS"
+@import 'tailwindcss';
+@import 'fumadocs-ui/css/neutral.css';
+@import 'fumadocs-ui/css/preset.css';
+/* [!code ++] */
+@import 'fumadocs-obsidian/css/preset.css';
+```
+
+### Configure Source
+
 Create an Obsidian source and pass it to `dynamicLoader()`:
 
 ```ts title="lib/source.ts"

@@ -2899,6 +2899,58 @@ importers:
         specifier: 0.22.13
         version: 0.22.13(@tsdown/css@0.22.13)(oxc-resolver@11.19.1(@emnapi/core@1.11.2)(@emnapi/runtime@1.11.2))(tsx@4.23.1)(typescript@6.0.3)(unrun@0.3.1)
 
+  packages/notion:
+    dependencies:
+      '@base-ui/react':
+        specifier: ^1.6.0
+        version: 1.6.0(@date-fns/tz@1.5.0)(@types/react@19.2.17)(date-fns@4.4.0)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
+      cnfast:
+        specifier: ^0.0.8
+        version: 0.0.8
+      lucide-react:
+        specifier: ^1.25.0
+        version: 1.25.0(react@19.2.8)
+    devDependencies:
+      '@notionhq/client':
+        specifier: ^5.23.1
+        version: 5.23.2
+      '@tailwindcss/oxide':
+        specifier: ^4.3.3
+        version: 4.3.3
+      '@types/node':
+        specifier: 26.1.1
+        version: 26.1.1
+      '@types/react':
+        specifier: ^19.2.17
+        version: 19.2.17
+      '@types/react-dom':
+        specifier: ^19.2.3
+        version: 19.2.3(@types/react@19.2.17)
+      fumadocs-core:
+        specifier: workspace:*
+        version: link:../core
+      fumadocs-ui:
+        specifier: workspace:@fumadocs/base-ui@*
+        version: link:../base-ui
+      react:
+        specifier: ^19.2.8
+        version: 19.2.8
+      react-dom:
+        specifier: ^19.2.8
+        version: 19.2.8(react@19.2.8)
+      tsconfig:
+        specifier: workspace:*
+        version: link:../tsconfig
+      tsdown:
+        specifier: 0.22.13
+        version: 0.22.13(@tsdown/css@0.22.13)(oxc-resolver@11.19.1(@emnapi/core@1.11.2)(@emnapi/runtime@1.11.2))(tsx@4.23.1)(typescript@6.0.3)(unrun@0.3.1)
+      typescript:
+        specifier: ^6.0.3
+        version: 6.0.3
+      vitest:
+        specifier: ^4.1.10
+        version: 4.1.10(@opentelemetry/api@1.9.1)(@types/node@26.1.1)(jsdom@29.1.1(@noble/hashes@2.2.0))(vite@8.1.5(@types/node@26.1.1)(esbuild@0.28.1)(jiti@2.7.0)(terser@5.48.0)(tsx@4.23.1)(yaml@2.9.0))
+
   packages/obsidian:
     dependencies:
       '@fumadocs/local-content':
@@ -2938,6 +2990,9 @@ importers:
         specifier: ^4.4.3
         version: 4.4.3
     devDependencies:
+      '@tailwindcss/oxide':
+        specifier: ^4.3.3
+        version: 4.3.3
       '@types/hast':
         specifier: ^3.0.5
         version: 3.0.5
@@ -6444,6 +6499,10 @@ packages:
   '@nodelib/fs.walk@1.2.8':
     resolution: {integrity: sha512-oGB+UxlgWcgQkgwo8GcEGwemoTFt3FIO9ababBmaGwXIoBKZ+GTy0pP185beGg7Llih/NSHSV2XAs1lnznocSg==}
     engines: {node: '>= 8'}
+
+  '@notionhq/client@5.23.2':
+    resolution: {integrity: sha512-iyD5VU9MoNxCR0GespotyrMlBpO4kLG+BaZK2JpZW1yfFqrmOYmZGb3wl4xqfq3n1Z9eekFwNcZD6t63SaESig==}
+    engines: {node: '>=18'}
 
   '@oclif/core@4.11.14':
     resolution: {integrity: sha512-cZ5Ktd+rT0PO+o7KBH4vRFTgg+xMLf8F41WK39p8MkXEViZA/Qqe+4lzZT6102zgUxMORET1HtF9t5w8CB3tnQ==}
@@ -18536,6 +18595,8 @@ snapshots:
     dependencies:
       '@nodelib/fs.scandir': 2.1.5
       fastq: 1.20.1
+
+  '@notionhq/client@5.23.2': {}
 
   '@oclif/core@4.11.14':
     dependencies:

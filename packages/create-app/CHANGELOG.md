@@ -1,3 +1,7 @@
+## create-fumadocs-app@16.1.8
+
+### Fix React Router template
+
 ## create-fumadocs-app@16.1.7
 
 ### Improve hints for create app CLI

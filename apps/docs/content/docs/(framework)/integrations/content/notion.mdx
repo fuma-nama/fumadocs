@@ -1,0 +1,253 @@
+---
+title: Notion
+description: Pull pages from Notion and render them with Fumadocs.
+---
+
+## Introduction
+
+`@fumadocs/notion` turns a Notion database into a Fumadocs content source. It provides a dynamic [content source](/docs/headless/source-api) that pulls pages over the official Notion API, and a server renderer that renders Notion blocks with Fumadocs UI.
+
+It does not ship a client-side renderer or convert content to MDX, blocks are rendered on the server, so there is no bundler or type-gen step.
+
+## Setup
+
+Install the integration and the official Notion client:
+
+```package-install
+@fumadocs/notion @notionhq/client
+```
+
+Import the renderer's Tailwind CSS source after the Fumadocs UI styles:
+
+```css title="app/global.css"
+@import 'fumadocs-ui/css/neutral.css';
+@import 'fumadocs-ui/css/preset.css';
+/* [!code ++] */
+@import '@fumadocs/notion/css/preset.css';
+```
+
+### Notion Database [step]
+
+1. [Create a Notion integration](https://developers.notion.com/docs/getting-started) with permission to read content.
+2. Connect the database that contains your pages to the integration.
+3. Store the integration token and the database's **data source ID** in server-only environment variables.
+
+```ini title=".env.local"
+NOTION_TOKEN=ntn_...
+NOTION_DATA_SOURCE_ID=...
+```
+
+<Callout type="info">
+  Use a data source ID, not the database ID shown in the database URL. In the current Notion API, a
+  database is a container and each query targets one of its data sources. See Notion's [data source
+  upgrade guide](https://developers.notion.com/guides/get-started/upgrade-guide-2025-09-03).
+</Callout>
+
+### Notion Integration [step]
+
+Create the integration once and share it between the content source and the file route.
+
+```ts title="lib/notion.ts"
+import { Client } from '@notionhq/client';
+import { createNotion } from '@fumadocs/notion';
+
+export const notion = createNotion({
+  client: new Client({ auth: process.env.NOTION_TOKEN }),
+  dataSourceId: process.env.NOTION_DATA_SOURCE_ID!,
+});
+```
+
+### Content Loader [step]
+
+Pass `notion.dynamicSource()` to `dynamicLoader()` and expose the loader through `getSource()`:
+
+```ts title="lib/source.ts"
+import { dynamicLoader } from 'fumadocs-core/source/dynamic';
+import { notion } from '@/lib/notion';
+
+const source = dynamicLoader(
+  notion.dynamicSource({
+    // map Notion properties to page fields
+    properties: {
+      title: 'Name',
+      slug: 'Slug',
+      description: 'Description',
+    },
+    // filter, sort, or otherwise customize the query
+    query: {
+      filter: {
+        property: 'Published',
+        checkbox: { equals: true },
+      },
+    },
+  }),
+  {
+    baseUrl: '/docs',
+  },
+);
+
+export async function getSource() {
+  return source.get();
+}
+```
+
+The source paginates through every matching data-source row and lazily pulls each page's nested blocks. Calls to load the same page body are deduplicated until the loader is invalidated.
+
+### Render Pages [step]
+
+Use the loader in your layout to build the page tree:
+
+```tsx title="app/docs/layout.tsx"
+import { getSource } from '@/lib/source';
+import { DocsLayout } from 'fumadocs-ui/layouts/docs';
+
+export default async function Layout({ children }: LayoutProps<'/docs'>) {
+  const source = await getSource();
+
+  return <DocsLayout tree={source.getPageTree()}>{children}</DocsLayout>;
+}
+```
+
+Load a page's blocks and render them with `NotionRenderer`. `blocksToTableOfContents()` produces the table of contents:
+
+```tsx title="app/docs/[[...slug]]/page.tsx"
+import { notFound } from 'next/navigation';
+import { getSource } from '@/lib/source';
+import {
+  NotionRenderer,
+  blocksToTableOfContents,
+  createNotionFileUrlResolver,
+} from '@fumadocs/notion';
+import { DocsPage, DocsBody, DocsDescription, DocsTitle } from 'fumadocs-ui/layouts/docs/page';
+
+export default async function Page({ params }: PageProps<'/docs/[[...slug]]'>) {
+  const { slug = [] } = await params;
+  const source = await getSource();
+
+  const page = source.getPage(slug);
+  if (!page) notFound();
+
+  // [!code highlight] load the page body
+  const { blocks } = await page.data.load();
+
+  return (
+    <DocsPage toc={blocksToTableOfContents(blocks)}>
+      <DocsTitle>{page.data.title}</DocsTitle>
+      <DocsDescription>{page.data.description}</DocsDescription>
+      <DocsBody>
+        <NotionRenderer
+          blocks={blocks}
+          getFileUrl={createNotionFileUrlResolver({ pageId: page.data.id })}
+        />
+      </DocsBody>
+    </DocsPage>
+  );
+}
+```
+
+### Notion Files [step]
+
+Notion-hosted file URLs (images, videos, PDFs) expire after about an hour, so they can't be embedded directly on a page that is cached or statically served.
+
+`createNotionFileUrlResolver()` routes those internal assets through a file handler that fetches a fresh signed URL on demand. Mount the handler with `createNotionFileHandler()`, it verifies that the requested block belongs to a page in your data source before redirecting:
+
+```ts title="app/api/notion/file/route.ts"
+import { createNotionFileHandler } from '@fumadocs/notion';
+import { notion } from '@/lib/notion';
+
+export const GET = createNotionFileHandler(notion);
+```
+
+The default route is `/api/notion/file`. To mount it elsewhere, pass a matching `path` to both functions:
+
+```ts
+createNotionFileUrlResolver({ pageId: page.data.id, path: '/notion/file' });
+```
+
+<Callout type="info">
+  For a static export, use durable external URLs for your assets and omit `getFileUrl`, the renderer
+  then links Notion's URLs directly. The file handler needs a dynamic runtime.
+</Callout>
+
+### Done [step]
+
+Add pages to your database, mark them published, and they appear under the docs route.
+
+## Revalidation
+
+The loader caches pages until you invalidate it. To reflect Notion edits, call `revalidate()` from a trusted webhook or revalidation route:
+
+```ts title="lib/source.ts"
+export function revalidateNotion() {
+  return source.revalidate();
+}
+```
+
+For a preview-style setup where every request reflects the latest content, invalidate before reading:
+
+```ts title="lib/source.ts"
+export async function getSource() {
+  source.invalidate(); // [!code ++]
+  return source.get();
+}
+```
+
+## Page Properties
+
+`properties` maps Notion properties to page fields. When omitted, the source:
+
+- uses the first Notion `title` property as the page title,
+- uses a property named `Slug` for the URL, falling back to a slug generated from the title,
+- uses a property named `Description` when present.
+
+A slug can contain `/` to create nested routes. Duplicate or unsafe virtual paths fail with a descriptive error instead of silently replacing a page.
+
+## Query and Paths
+
+Pass Notion filters and sorts through `query`. Use `baseDir` to place the virtual pages under a directory, or `generatePath` for full control over the virtual file path:
+
+```ts
+notion.dynamicSource({
+  baseDir: 'docs',
+  query: {
+    sorts: [{ timestamp: 'last_edited_time', direction: 'descending' }],
+  },
+  generatePath(page, info) {
+    return info.slugs.length > 0 ? `${info.slugs.join('/')}.mdx` : `${page.id}.mdx`;
+  },
+});
+```
+
+## Customize Rendering
+
+`NotionRenderer` ships renderers for common block types. Pass `components` to add or override them, each override is typed against its block:
+
+```tsx
+import { NotionRenderer } from '@fumadocs/notion';
+
+<NotionRenderer
+  blocks={blocks}
+  components={{
+    callout({ block, children, renderRichText }) {
+      return (
+        <aside className="rounded-lg bg-fd-muted p-4">
+          {renderRichText(block.callout.rich_text)}
+          {children}
+        </aside>
+      );
+    },
+  }}
+/>;
+```
+
+Code blocks are highlighted on the server with Shiki by default. Pass `highlightCode={false}` to render plain code, or a function to plug in your own highlighter.
+
+## Source-only Import
+
+Code that only pulls Notion pages, such as a search indexer or `llms.txt` route, can import from `@fumadocs/notion/source` to skip the React renderer entry:
+
+```ts
+import { createNotion } from '@fumadocs/notion/source';
+```
+
+This entry keeps the Notion SDK external and contains no React imports. `blocksToPlainText()`, `blocksToStructuredData()`, and `blocksToTableOfContents()` are available here too.

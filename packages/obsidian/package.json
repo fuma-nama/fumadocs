@@ -1,6 +1,6 @@
 {
   "name": "fumadocs-obsidian",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Obsidian Integration for Fumadocs",
   "keywords": [
     "Docs",
@@ -15,6 +15,7 @@
     "fumadocs-obsidian": "./dist/bin.js"
   },
   "files": [
+    "css",
     "dist"
   ],
   "type": "module",
@@ -25,7 +26,8 @@
     "./dev/vite": "./dist/dev/vite.js",
     "./dev/ws": "./dist/dev/ws.js",
     "./ui": "./dist/ui/index.js",
-    "./package.json": "./package.json"
+    "./package.json": "./package.json",
+    "./css/*": "./css/*"
   },
   "publishConfig": {
     "access": "public"
@@ -53,6 +55,7 @@
     "zod": "^4.4.3"
   },
   "devDependencies": {
+    "@tailwindcss/oxide": "^4.3.3",
     "@types/hast": "^3.0.5",
     "@types/mdast": "^4.0.4",
     "@types/mdx": "^2.0.14",
