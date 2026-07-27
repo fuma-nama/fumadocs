@@ -1,3 +1,9 @@
+## fumadocs-obsidian@1.0.1
+
+### Support CSS preset
+
+Include required css classes by importing the preset.
+
 ## fumadocs-obsidian@1.0.0
 
 ### Obsidian content source v1
