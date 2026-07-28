@@ -14,7 +14,6 @@
   },
   "dependencies": {
     "@fumadocs/language": "workspace:*",
-    "@orama/tokenizers": "^3.1.18",
     "@react-router/node": "^8.3.0",
     "@react-router/serve": "^8.3.0",
     "fumadocs-core": "workspace:*",

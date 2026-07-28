@@ -1,7 +1,7 @@
-import { type AnyOrama, create, load, type Orama, type SearchParams } from '@orama/orama';
-import { searchSimple } from '@/search/orama/search/simple';
-import { searchAdvanced } from '@/search/orama/search/advanced';
-import type { advancedSchema, simpleSchema } from '@/search/orama/create-db';
+import { create, load, type AnyZBSearch, type SearchParams, type ZBSearch } from 'zbsearch';
+import { searchSimple } from '@/search/zbsearch/search/simple';
+import { searchAdvanced } from '@/search/zbsearch/search/advanced';
+import type { advancedSchema, simpleSchema } from '@/search/zbsearch/create-db';
 import type { ExportedData } from '@/search/server';
 import type { SearchClient } from '../client';
 import { BASE_PATH, join } from '@/utils/url';
@@ -14,7 +14,17 @@ export interface StaticOptions {
    */
   from?: string;
 
-  initOrama?: (locale?: string) => AnyOrama | Promise<AnyOrama>;
+  /**
+   * Customize how the search database is initialized (advanced).
+   *
+   * For legacy per-locale exports, it is called once per locale.
+   */
+  initDB?: (locale?: string) => AnyZBSearch | Promise<AnyZBSearch>;
+
+  /**
+   * @deprecated Renamed to `initDB`, note that the search engine is now ZBSearch.
+   */
+  initOrama?: (locale?: string) => AnyZBSearch | Promise<AnyZBSearch>;
 
   /**
    * Filter results with specific tag(s).
@@ -22,31 +32,37 @@ export interface StaticOptions {
   tag?: string | string[];
 
   /**
-   * Filter by locale (unsupported at the moment)
+   * Filter by locale (for i18n)
    */
   locale?: string;
 
   /**
    * extra options for search
    */
-  search?: Partial<SearchParams<Orama<unknown>>>;
+  search?: Partial<SearchParams<AnyZBSearch>>;
 }
 
 const cache = new Map<string, Promise<Database>>();
 
-// locale -> db
-type Database = Map<
-  string,
-  {
-    type: 'simple' | 'advanced';
-    db: AnyOrama;
-  }
->;
+interface LoadedDB {
+  type: 'simple' | 'advanced';
+  db: AnyZBSearch;
+}
+
+interface Database {
+  // locale -> db (legacy per-locale exports, empty key otherwise)
+  map: Map<string, LoadedDB>;
+
+  /**
+   * a single database is shared by all locales, results can be filtered by their `locale` property.
+   */
+  unified: boolean;
+  i18n: boolean;
+}
 
 async function loadDB(
   from: string,
-  initOrama: StaticOptions['initOrama'] = (locale) =>
-    create({ schema: { _: 'string' }, language: locale }),
+  initDB: NonNullable<StaticOptions['initDB']> = () => create({ schema: { _: 'string' } }),
 ): Promise<Database> {
   const res = await fetch(from);
 
@@ -56,63 +72,93 @@ async function loadDB(
     );
 
   const data = (await res.json()) as ExportedData;
-  const dbs: Database = new Map();
+  const map = new Map<string, LoadedDB>();
 
   if (data.type === 'i18n') {
     await Promise.all(
       Object.entries(data.data).map(async ([k, v]) => {
-        const db = await initOrama(k);
+        const db = await initDB(k);
 
         load(db, v);
-        dbs.set(k, {
+        map.set(k, {
           type: v.type,
           db,
         });
       }),
     );
-  } else {
-    const db = await initOrama();
-    load(db, data);
-    dbs.set('', {
-      type: data.type,
-      db,
-    });
+
+    return { map, unified: false, i18n: true };
   }
 
-  return dbs;
+  const db = await initDB();
+  load(db, data);
+  map.set('', {
+    type: data.type,
+    db,
+  });
+
+  return { map, unified: true, i18n: data.i18n === true };
 }
 
-function getDBCached({ from = join(BASE_PATH, '/api/search'), initOrama }: StaticOptions) {
+function getDBCached({
+  from = join(BASE_PATH, '/api/search'),
+  initDB,
+  initOrama,
+}: StaticOptions): Promise<Database> {
   const cacheKey = from;
   const cached = cache.get(cacheKey);
   if (cached) return cached;
 
-  const result = loadDB(from, initOrama);
+  const result = loadDB(from, initDB ?? initOrama);
   cache.set(cacheKey, result);
   return result;
 }
 
-export function oramaStaticClient(options: StaticOptions = {}): SearchClient {
+export function staticClient(options: StaticOptions = {}): SearchClient {
   const { tag, locale, search } = options;
 
   return {
     deps: [tag, locale],
     async search(query) {
-      const dbs = await getDBCached(options);
-      let db = dbs.get(locale ?? '');
+      const { map, unified, i18n } = await getDBCached(options);
+      let db: LoadedDB | undefined;
+      let filterLocale: string | undefined;
 
-      if (!db) {
-        console.warn(
-          `failed to find search data for "${locale}", available: ${Array.from(dbs.keys())}.`,
-        );
-        db = dbs.values().next().value;
+      if (unified) {
+        db = map.get('');
+        if (i18n) filterLocale = locale;
+      } else {
+        db = map.get(locale ?? '');
+
+        if (!db) {
+          console.warn(
+            `failed to find search data for "${locale}", available: ${Array.from(map.keys())}.`,
+          );
+          db = map.values().next().value;
+        }
       }
 
       if (!db) return [];
       if (db.type === 'simple')
-        return searchSimple(db as unknown as Orama<typeof simpleSchema>, query, search as never);
+        return searchSimple(
+          db.db as ZBSearch<typeof simpleSchema>,
+          query,
+          search as never,
+          filterLocale,
+        );
 
-      return searchAdvanced(db.db as Orama<typeof advancedSchema>, query, tag, search as never);
+      return searchAdvanced(
+        db.db as ZBSearch<typeof advancedSchema>,
+        query,
+        tag,
+        search as never,
+        filterLocale,
+      );
     },
   };
 }
+
+/**
+ * @deprecated Renamed to `staticClient`, note that the search engine is now ZBSearch.
+ */
+export const oramaStaticClient = staticClient;

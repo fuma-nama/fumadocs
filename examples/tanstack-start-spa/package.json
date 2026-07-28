@@ -11,7 +11,6 @@
     "types:check": "fumadocs-mdx && tsc --noEmit"
   },
   "dependencies": {
-    "@orama/orama": "^3.1.18",
     "@tanstack/react-router": "1.170.18",
     "@tanstack/react-router-devtools": "1.167.0",
     "@tanstack/react-start": "1.168.32",

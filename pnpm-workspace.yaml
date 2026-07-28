@@ -49,6 +49,7 @@ minimumReleaseAgeExclude:
   - '@yuku-parser/binding-win32-x64@0.6.4'
   - yuku-codegen@0.6.4
   - yuku-parser@0.6.4
+  - zbsearch@3.3.4
 allowBuilds:
   '@parcel/watcher': false
   core-js: false

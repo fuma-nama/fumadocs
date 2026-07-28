@@ -141,7 +141,7 @@ async function main(): Promise<void> {
             {
               value: 'orama',
               label: 'Default',
-              hint: 'local search powered by Orama, recommended',
+              hint: 'local search powered by ZBSearch, recommended',
             },
             {
               value: 'orama-cloud',

@@ -1,14 +1,14 @@
 import {
   create,
   insertMultiple,
-  type Orama,
   type PartialSchemaDeep,
   type TypedDocument,
-} from '@orama/orama';
+  type ZBSearch,
+} from 'zbsearch';
 import { type AdvancedOptions, type SimpleOptions } from '@/search/server';
 import { buildDocuments } from '../server/build-doc';
 
-export type SimpleDocument = TypedDocument<Orama<typeof simpleSchema>>;
+export type SimpleDocument = TypedDocument<ZBSearch<typeof simpleSchema>>;
 export const simpleSchema = {
   url: 'string',
   title: 'string',
@@ -16,9 +16,10 @@ export const simpleSchema = {
   description: 'string',
   content: 'string',
   keywords: 'string',
+  locale: 'enum',
 } as const;
 
-export type AdvancedDocument = TypedDocument<Orama<typeof advancedSchema>>;
+export type AdvancedDocument = TypedDocument<ZBSearch<typeof advancedSchema>>;
 export const advancedSchema = {
   content: 'string',
   page_id: 'string',
@@ -26,25 +27,29 @@ export const advancedSchema = {
   breadcrumbs: 'string[]',
   tags: 'enum[]',
   url: 'string',
+  locale: 'enum',
   embeddings: 'vector[512]',
 } as const;
 
 export async function createDB({
   indexes,
   tokenizer,
+  language = 'multilingual',
   search: _,
+  localeFilter: __,
   ...rest
-}: AdvancedOptions): Promise<Orama<typeof advancedSchema>> {
+}: AdvancedOptions): Promise<ZBSearch<typeof advancedSchema>> {
   const items = typeof indexes === 'function' ? await indexes() : indexes;
 
   const db = create({
     schema: advancedSchema,
+    language,
     ...rest,
     components: {
       ...rest.components,
       tokenizer: tokenizer ?? rest.components?.tokenizer,
     },
-  }) as Orama<typeof advancedSchema>;
+  }) as ZBSearch<typeof advancedSchema>;
 
   const mapTo: PartialSchemaDeep<AdvancedDocument>[] = buildDocuments(items);
   await insertMultiple(db, mapTo);
@@ -54,17 +59,21 @@ export async function createDB({
 export async function createDBSimple({
   indexes,
   tokenizer,
+  language = 'multilingual',
+  search: _,
+  localeFilter: __,
   ...rest
-}: SimpleOptions): Promise<Orama<typeof simpleSchema>> {
+}: SimpleOptions): Promise<ZBSearch<typeof simpleSchema>> {
   const items = typeof indexes === 'function' ? await indexes() : indexes;
   const db = create({
     schema: simpleSchema,
+    language,
     ...rest,
     components: {
       ...rest.components,
       tokenizer: tokenizer ?? rest.components?.tokenizer,
     },
-  }) as Orama<typeof simpleSchema>;
+  }) as ZBSearch<typeof simpleSchema>;
 
   await insertMultiple(
     db,
@@ -75,6 +84,7 @@ export async function createDBSimple({
       url: page.url,
       content: page.content,
       keywords: page.keywords,
+      locale: page.locale,
     })),
   );
 

@@ -9,7 +9,6 @@
     "types:check": "fumadocs-mdx && next typegen && tsc --noEmit"
   },
   "dependencies": {
-    "@orama/orama": "^3.1.18",
     "cnfast": "^0.0.8",
     "fumadocs-core": "workspace:*",
     "fumadocs-mdx": "workspace:*",

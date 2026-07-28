@@ -10,6 +10,11 @@ export interface SharedIndex {
   breadcrumbs?: string[];
 
   /**
+   * Locale of content (for i18n)
+   */
+  locale?: string;
+
+  /**
    * Required if tag filter is enabled
    */
   tag?: string | string[];
