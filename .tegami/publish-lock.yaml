@@ -1,15 +1,12 @@
 core:changelogs:
-  - content: "---\npackages:\n  npm:fumadocs-ui:\n    type: minor\n  npm:@fumadocs/base-ui:\n    type: minor\n---\n\n## Add hotkey for toggling light/dark mode\n\nPress <kbd>D</kbd> to toggle between light and dark mode. It is ignored while typing in an editable element or when a dialog (e.g. search) is opened.\n\nCustomise it with the `theme.hotKey` option of `<RootProvider />`, or pass `false` to disable.\n"
-    filename: 2026-07-25-theme-hotkey.md
+  - content: "---\npackages:\n  npm:fumadocs-core:\n    type: minor\n  npm:fumadocs-ui:\n    type: patch\n  npm:@fumadocs/base-ui:\n    type: patch\n  npm:create-fumadocs-app:\n    type: patch\n---\n\n## Replace Orama with ZBSearch, zero-config i18n search\n\nThe built-in search engine moved from `@orama/orama` to [ZBSearch](https://www.zbsearch.dev), a near drop-in successor. All module paths and APIs are unchanged, and search now works with **every language out of the box**: the new default `multilingual` mode uses Unicode word segmentation, so i18n search needs zero config.\n\n```ts\nimport { createFromSource } from 'fumadocs-core/search/server';\n\n// no `localeMap`, no `@orama/tokenizers`, CJK included\nexport const { GET } = createFromSource(source);\n```\n\nAll locales now share a single search database — results are filtered by the locale of your pages at query time. Same for static mode:\n\n```ts\nimport { staticClient } from 'fumadocs-core/search/client/orama-static';\n\nconst client = staticClient({ locale });\n```\n\n### Renames\n\n- `oramaStaticClient` → `staticClient` (old name kept as deprecated alias)\n- `initOrama` → `initDB`, it now creates a ZBSearch instance and is optional — the exported data restores the tokenizer on load\n\n### Deprecated\n\n- `localeMap` is no longer needed. It still works for language-specific stemming/stop-words and keeps the legacy per-locale databases when specified.\n\n### Notes for advanced usage\n\n- `language`, `components`, `plugins` and `search` options are now typed against ZBSearch instead of `@orama/orama` — custom tokenizers or plugins written for Orama must be swapped to their ZBSearch equivalents.\n- The exported static search data is now a ZBSearch database (i18n exports became a single unified database), so server and client should be on the same fumadocs-core version.\n- `@orama/orama` and `@orama/tokenizers` can be removed from your dependencies unless you use them directly. Orama **Cloud** integrations (`fumadocs-core/search/orama-cloud`) are unaffected.\n"
+    filename: 2026-07-28-zbsearch.md
     v: 0.0.0
-  - content: "---\npackages:\n  npm:fumadocs-core:\n    type: patch\n---\n\n## Respect quality values in `isMarkdownPreferred`\n\n`isMarkdownPreferred()` previously returned `true` whenever a Markdown media type appeared anywhere\nin `Accept`, ignoring how the client ranked it. A request for `Accept: text/html;q=0.9, text/markdown;q=0.1`\nwas served Markdown even though it clearly preferred HTML.\n\nIt now compares the client's highest quality value for a Markdown type against its highest value for\nHTML, and only prefers Markdown when Markdown ranks at least as high. Wildcards (`*/*`, `text/*`)\ncount towards HTML, so `Accept: */*` keeps receiving HTML.\n\nA tie still prefers Markdown, so agents sending `Accept: text/html,text/markdown,text/plain,*/*;q=0.5`\nare unaffected.\n\nThe negotiation examples and templates now also set `Vary: Accept` on the negotiated Markdown\nresponse, so shared caches key on the header the representation was selected by.\n"
-    filename: 2026-07-26-vary-accept.md
+  - content: "---\npackages:\n  npm:fumadocs-mdx:\n    type: patch\n---\n\n## Support simpler `fumadocsMdx` vite plugin usage\n\nUse the `fumadocsMdx` method instead for better syntax around macro usage.\n"
+    filename: 2026-07-30-ms7lj7h0.md
     v: 0.0.0
-  - content: "---\npackages:\n  npm:@fumadocs/notion:\n    type: minor\n---\n\n## Support Notion integration\n\nUse Notion as content source.\n"
-    filename: 2026-07-25-mrzwnvpp.md
-    v: 0.0.0
-  - content: "---\npackages:\n  npm:fumadocs-obsidian:\n    type: patch\n---\n\n## Support CSS preset\n\nInclude required css classes by importing the preset.\n"
-    filename: 2026-07-25-mrzwd27f.md
+  - content: "---\npackages:\n  npm:fumadocs-mdx:\n    type: patch\n---\n\n## Support browser helpers for Macro API\n\nUse preload & lazy body renderer on non-rsc environment.\n"
+    filename: 2026-07-31-ms7qdfei.md
     v: 0.0.0
 core:packages:
   - id: npm:@fumadocs/api-docs
@@ -17,22 +14,24 @@ core:packages:
   - id: npm:@fumadocs/asyncapi
     updated: false
   - changelogIds:
-      - 2026-07-25-theme-hotkey.md
+      - 2026-07-28-zbsearch.md
     id: npm:@fumadocs/base-ui
     updated: true
   - id: npm:@fumadocs/basehub
+    updated: false
+  - id: npm:@fumadocs/cli
     updated: false
   - id: npm:@fumadocs/content
     updated: false
   - id: npm:@fumadocs/content-collections
     updated: false
-  - id: npm:@fumadocs/cli
-    updated: false
   - changelogIds:
-      - 2026-07-26-vary-accept.md
+      - 2026-07-28-zbsearch.md
     id: npm:fumadocs-core
     updated: true
-  - id: npm:create-fumadocs-app
+  - changelogIds:
+      - 2026-07-28-zbsearch.md
+    id: npm:create-fumadocs-app
     updated: true
   - id: npm:create-fumadocs-versions
     updated: true
@@ -46,18 +45,17 @@ core:packages:
     updated: false
   - id: npm:@fumadocs/local-md
     updated: false
-  - id: npm:fumadocs-mdx
-    updated: false
+  - changelogIds:
+      - 2026-07-30-ms7lj7h0.md
+      - 2026-07-31-ms7qdfei.md
+    id: npm:fumadocs-mdx
+    updated: true
   - id: npm:@fumadocs/mdx-remote
     updated: false
-  - changelogIds:
-      - 2026-07-25-mrzwnvpp.md
-    id: npm:@fumadocs/notion
-    updated: true
-  - changelogIds:
-      - 2026-07-25-mrzwd27f.md
-    id: npm:fumadocs-obsidian
-    updated: true
+  - id: npm:@fumadocs/notion
+    updated: false
+  - id: npm:fumadocs-obsidian
+    updated: false
   - id: npm:fumadocs-openapi
     updated: false
   - id: npm:fumadocs-preview
@@ -65,7 +63,7 @@ core:packages:
   - id: npm:fumadocs-python
     updated: false
   - changelogIds:
-      - 2026-07-25-theme-hotkey.md
+      - 2026-07-28-zbsearch.md
     id: npm:fumadocs-ui
     updated: true
   - id: npm:@fumadocs/sanity
@@ -86,16 +84,14 @@ core:packages:
     updated: false
   - id: npm:@fumadocs/vite
     updated: false
-npm:mark-latest:
-  - id: npm:@fumadocs/notion
 npm:packages:
   - id: npm:@fumadocs/api-docs
   - id: npm:@fumadocs/asyncapi
   - id: npm:@fumadocs/base-ui
   - id: npm:@fumadocs/basehub
+  - id: npm:@fumadocs/cli
   - id: npm:@fumadocs/content
   - id: npm:@fumadocs/content-collections
-  - id: npm:@fumadocs/cli
   - id: npm:fumadocs-core
   - id: npm:create-fumadocs-app
   - id: npm:create-fumadocs-versions
@@ -121,19 +117,20 @@ npm:packages:
   - id: npm:fumadocs-twoslash
   - id: npm:fumadocs-typescript
   - id: npm:@fumadocs/vite
-  - id: npm:example-obsidian
+  - id: npm:vite-data
   - id: npm:docs
   - id: npm:example-astro
   - id: npm:example-asyncapi
   - id: npm:example-base-ui
   - id: npm:example-content-collections
-  - id: npm:example-i18n
   - id: npm:example-marble-cms
   - id: npm:example-next
+  - id: npm:example-i18n
   - id: npm:example-next-local-md
   - id: npm:example-next-min
   - id: npm:example-next-shadcn
   - id: npm:example-next-static
+  - id: npm:example-obsidian
   - id: npm:example-openapi
   - id: npm:example-python
   - id: npm:example-react-router
@@ -142,12 +139,11 @@ npm:packages:
   - id: npm:example-react-router-rsc
   - id: npm:example-react-router-spa
   - id: npm:example-tanstack-start
-  - id: npm:example-tanstack-start-i18n
   - id: npm:example-tanstack-start-local-md
+  - id: npm:example-tanstack-start-i18n
   - id: npm:example-tanstack-start-min
   - id: npm:example-tanstack-start-openapi
   - id: npm:example-tanstack-start-spa
   - id: npm:example-tanstack-start-story
   - id: npm:example-waku
   - id: npm:example-waku-i18n
-  - id: npm:vite-data
