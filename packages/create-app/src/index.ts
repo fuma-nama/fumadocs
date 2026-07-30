@@ -144,10 +144,6 @@ async function initPackageJson(
   const devDependencies = replaceWorkspaceDeps(packageJson.devDependencies);
   const scripts = { ...packageJson.scripts };
 
-  if (dependencies['fumadocs-mdx'] || devDependencies['fumadocs-mdx']) {
-    scripts.postinstall = 'fumadocs-mdx';
-  }
-
   return {
     ...packageJson,
     name: projectName,

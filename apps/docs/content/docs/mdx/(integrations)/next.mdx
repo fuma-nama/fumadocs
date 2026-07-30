@@ -16,18 +16,6 @@ Set up Fumadocs MDX for your Next.js application.
 npm i fumadocs-mdx fumadocs-core @types/mdx
 ```
 
-Create the configuration file:
-
-```ts title="source.config.ts"
-import { defineDocs, defineConfig } from 'fumadocs-mdx/config';
-
-export const docs = defineDocs({
-  dir: 'content/docs',
-});
-
-export default defineConfig();
-```
-
 Add the plugin to Next.js config:
 
 ```js title="next.config.mjs"
@@ -39,10 +27,7 @@ const config = {
 };
 
 // [!code ++:4]
-const withMDX = createMDX({
-  // customize the config file path
-  // configPath: "source.config.ts"
-});
+const withMDX = createMDX();
 
 // [!code highlight]
 export default withMDX(config);
@@ -56,23 +41,23 @@ For TypeScript config file, it requires Native Node.js TypeScript Resolver, you 
 
 </Callout>
 
-<include>.shared.mdx</include>
-
 ### Integrate with Fumadocs
 
-You can create a `lib/source.ts` file and obtain Fumadocs source from the `docs` collection output.
+Create a `lib/source.ts` file:
 
 ```ts title="lib/source.ts"
-import { docs } from 'collections/server';
+import { defineDocs } from 'fumadocs-mdx/macro';
 import { loader } from 'fumadocs-core/source';
+
+const docs = defineDocs({
+  dir: 'content/docs',
+});
 
 export const source = loader({
   baseUrl: '/docs',
   source: docs.toFumadocsSource(),
 });
 ```
-
-The `.source` folder will be generated when you run `next dev` or `next build`.
 
 ### Done
 
@@ -84,11 +69,11 @@ You can now write content in `content/docs` folder.
 ## What is Next?
 
 <Cards>
-  <Card title="Accessing Collections" href="/docs/mdx/entry">
-    Learn how to access collection outputs.
-  </Card>
   <Card title="Macro API" href="/docs/mdx/macro">
     Define collections in your app modules with `fumadocs-mdx/macro`.
+  </Card>
+  <Card title="Config API" href="/docs/mdx/collections">
+    Define collections in `source.config.ts` with generated entry files.
   </Card>
   <Card title="Lazy Loading" href="/docs/mdx/async">
     Hit performance bottleneck? You can try lazy loading.

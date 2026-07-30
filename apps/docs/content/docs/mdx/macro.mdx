@@ -5,9 +5,9 @@ description: Define collections in your app with fumadocs-mdx/macro.
 
 ## Overview
 
-Besides defining collections in `source.config.ts`, you can use the **Macro API** to declare collections directly in your application modules.
+Declare collections directly in your application modules with `fumadocs-mdx/macro`.
 
-The bundler (or runtime loader) compiles `defineDocs` / `defineCollections` from `fumadocs-mdx/macro` into imports of content files.
+The bundler (or runtime loader) compiles `defineDocs` / `defineCollections` into imports of content files.
 
 - No codegen needed.
 - No `source.config.ts` needed.
@@ -18,7 +18,7 @@ The bundler (or runtime loader) compiles `defineDocs` / `defineCollections` from
 import { defineDocs } from 'fumadocs-mdx/macro';
 import { loader } from 'fumadocs-core/source';
 
-const docs = defineDocs({
+export const docs = defineDocs({
   dir: 'content/docs',
 });
 
@@ -47,9 +47,46 @@ Collection options are largely the same as the [config API](/docs/mdx/collection
 
 You can still keep a `source.config.ts` for [global options](/docs/mdx/global) and plugins while defining collections with macros.
 
+### Browser
+
+On the client, import the same collection and use `getPage`:
+
+```tsx
+import { docs } from '@/lib/source';
+
+export default function Page({ path }: { path: string }) {
+  const page = docs.getPage(path);
+  if (!page) return <div>Not Found</div>;
+
+  const MDX = page.body;
+
+  return (
+    <div className="prose">
+      <h1>{page.title}</h1>
+      <MDX />
+    </div>
+  );
+}
+```
+
+For [`async`](/docs/mdx/async) collections, call `page.load()` (for example with `use()`):
+
+```tsx
+import { use } from 'react';
+import { docs } from '@/lib/source';
+
+export default function Page({ path }: { path: string }) {
+  const page = docs.getPage(path);
+  if (!page) return <div>Not Found</div>;
+
+  const { body: MDX } = use(page.load());
+  return <MDX />;
+}
+```
+
 ## Configuration
 
-The Macro API is **enabled by default** on bundler plugins and runtime loaders. Pass `macro` to configure which modules may use it, or `false` to disable it.
+The Macro API is enabled by default. Pass `macro` to limit which modules may use it, or `false` to disable it.
 
 ```js tab="Next.js" title="next.config.mjs"
 import { createMDX } from 'fumadocs-mdx/next';
@@ -65,11 +102,11 @@ const withMDX = createMDX({
 ```
 
 ```ts tab="Vite" title="vite.config.ts"
-import mdx from 'fumadocs-mdx/vite';
+import { fumadocsMdx } from 'fumadocs-mdx/vite';
 
 export default {
   plugins: [
-    mdx(undefined, {
+    fumadocsMdx({
       macro: {
         include: ['src/**/*.ts', 'src/**/*.tsx'],
       },

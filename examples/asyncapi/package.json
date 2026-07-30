@@ -6,7 +6,7 @@
     "build": "next build",
     "dev": "next dev",
     "start": "next start",
-    "types:check": "fumadocs-mdx && tsc --noEmit"
+    "types:check": "tsc --noEmit"
   },
   "dependencies": {
     "@fumadocs/asyncapi": "workspace:*",

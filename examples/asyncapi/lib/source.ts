@@ -1,6 +1,10 @@
 import { loader } from 'fumadocs-core/source';
-import { docs } from 'collections/server';
 import { createAsyncAPI } from '@fumadocs/asyncapi/server';
+import { defineDocs } from 'fumadocs-mdx/macro';
+
+const docs = defineDocs({
+  dir: 'content/docs',
+});
 
 export const asyncapi = createAsyncAPI({
   // input files

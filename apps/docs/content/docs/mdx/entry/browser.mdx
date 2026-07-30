@@ -5,7 +5,7 @@ description: Access collections from browser/client environment.
 
 ## Usage
 
-The generated outputs are optimized using async imports to optimize for browser environments.
+The generated outputs are optimized using async imports for browser environments.
 
 Only doc/docs collections are accessible on browser.
 
@@ -53,9 +53,11 @@ function Page() {
 }
 ```
 
+Using the [Macro API](/docs/mdx/macro) instead? Import the collection on the client and render with `getPage` / `body` (see [Macro API](/docs/mdx/macro#browser)).
+
 ## Examples
 
-The examples are for non-RSC usage, we recommend using RSC whenever possible for best client-side performance (avoiding hydration).
+The examples are for non-RSC usage. Prefer RSC when possible for better client performance.
 
 ### Tanstack Start
 

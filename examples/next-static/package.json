@@ -6,7 +6,7 @@
     "build": "next build",
     "dev": "next dev",
     "start": "serve out",
-    "types:check": "fumadocs-mdx && next typegen && tsc --noEmit"
+    "types:check": "next typegen && tsc --noEmit"
   },
   "dependencies": {
     "cnfast": "^0.1.0",
