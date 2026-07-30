@@ -12,6 +12,7 @@ import fs from 'node:fs/promises';
 import { mdxLoaderGlob, metaLoaderGlob } from '@/loaders';
 import type { MacroEvaluator } from '@/macro/eval';
 import { MacroModuleId, resolveMacroOptions, type MacroPluginOption } from '@/macro/options';
+import type { GlobalConfig } from '@/config';
 
 function createMacroEvaluator(root: string): MacroEvaluator {
   return async ({ entry, transform }) => {
@@ -67,6 +68,18 @@ export interface PluginOptions extends Pick<CoreOptions, 'configPath' | 'outDir'
    * @defaultValue true
    */
   updateViteConfig?: boolean;
+
+  /** extra global options, will be shallow-merged if another global config is specified in the main config file. */
+  globalOptions?: GlobalConfig;
+}
+
+export interface FumadocsMdxOptions extends PluginOptions {
+  /** force a config module object instead of importing from config path. */
+  forcedConfig?: Record<string, unknown> | Promise<Record<string, unknown>>;
+}
+
+export function fumadocsMdx(options?: FumadocsMdxOptions) {
+  return mdx(options?.forcedConfig, options);
 }
 
 export default function mdx(
@@ -103,10 +116,7 @@ export default function mdx(
         }
 
         await core.init({
-          config: buildConfig(
-            forcedConfig ? await forcedConfig : await importConfigFile(core.configPath),
-            core.root,
-          ),
+          config: await loadCoreConfig(core, forcedConfig, pluginOptions),
         });
 
         const configLoader = createIntegratedConfigLoader(core);
@@ -185,7 +195,7 @@ export default function mdx(
           server.watcher.on('change', async (file) => {
             if (path.resolve(file) === core.configPath) {
               await core.init({
-                config: buildConfig(await importConfigFile(core.configPath), core.root),
+                config: await loadCoreConfig(core, forcedConfig, pluginOptions),
               });
 
               await core.emit({ write: true });
@@ -200,19 +210,40 @@ export default function mdx(
   ];
 }
 
-async function importConfigFile(configPath: string): Promise<Record<string, unknown>> {
-  const exists = await fs.access(configPath).then(
-    () => true,
-    () => false,
+async function loadCoreConfig(
+  core: Core,
+  forcedConfig?: Record<string, unknown> | Promise<Record<string, unknown>>,
+  { globalOptions }: PluginOptions = {},
+) {
+  let v: Record<string, unknown>;
+  if (forcedConfig) {
+    v = await forcedConfig;
+  } else {
+    const exists = await fs.access(core.configPath).then(
+      () => true,
+      () => false,
+    );
+    v = exists ? (await runnerImport<Record<string, unknown>>(core.configPath)).module : {};
+  }
+
+  return buildConfig(
+    globalOptions
+      ? {
+          ...v,
+          default: {
+            ...(typeof v.default === 'object' ? v.default : undefined),
+            ...globalOptions,
+          },
+        }
+      : v,
+    core.root,
   );
-  if (!exists) return {};
-  return (await runnerImport<Record<string, unknown>>(configPath)).module;
 }
 
 export async function postInstall(pluginOptions: PluginOptions = {}) {
   const core = createViteCore(process.cwd(), pluginOptions);
   await core.init({
-    config: buildConfig(await importConfigFile(core.configPath), process.cwd()),
+    config: await loadCoreConfig(core, undefined, pluginOptions),
   });
   await core.emit({ write: true });
 }
