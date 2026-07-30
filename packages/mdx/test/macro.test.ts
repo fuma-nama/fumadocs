@@ -11,12 +11,14 @@ import {
 import { createNodeEvaluator, MacroCollector } from '@/macro/eval';
 import { createMacroMatcher, MacroModuleId, resolveMacroOptions } from '@/macro/options';
 import { macroFilter } from '@/bun';
-import { docs as macroDocs } from '@/runtime/macro';
+import { docs as macroDocs, docsAsync as macroDocsAsync } from '@/runtime/macro';
 import { createMdxLoader } from '@/loaders/mdx';
 import { buildConfig } from '@/config/build';
 import { createCore } from '@/core';
 import type * as fixture from './fixtures/macro/source';
 import type { ExtractedReference } from '@/loaders/mdx/remark-postprocess';
+import type { ReactElement } from 'react';
+import type { MDXContent } from 'mdx/types';
 
 const baseDir = path.dirname(fileURLToPath(import.meta.url));
 const root = path.join(baseDir, '..');
@@ -551,6 +553,9 @@ describe('types', () => {
     expectTypeOf(entry.load).returns.resolves.toMatchTypeOf<{
       extractedReferences?: ExtractedReference[];
     }>();
+    // browser-specific APIs
+    expectTypeOf(entry.preload).returns.resolves.toBeVoid();
+    expectTypeOf(entry.body).toMatchTypeOf<MDXContent>();
 
     expectTypeOf<typeof fixture.metaOnly>().not.toBeNever();
     expectTypeOf<ReturnType<typeof fixture.metaOnly.get>>().toMatchTypeOf<
@@ -581,7 +586,48 @@ describe('runtime', () => {
     expect(collection.getPage('missing.mdx')).toBeUndefined();
     expect(collection.getMeta('meta.json')).toMatchObject({ pages: ['index'] });
 
+    // eagerly loaded entries offer `preload()` as a no-op, for compatibility with async collections
+    await expect(collection.getPage('index.mdx')!.preload()).resolves.toBeUndefined();
+
     const source = collection.toFumadocsSource();
     expect(source.files).toHaveLength(2);
+  });
+
+  test('async docs collection handle', async () => {
+    let loads = 0;
+    const compiled = {
+      default: () => null,
+      toc: [],
+      structuredData: { headings: [], contents: [] },
+      frontmatter: { title: 'Hello' },
+    };
+
+    const collection = await macroDocsAsync({
+      base: 'content/docs',
+      head: {
+        './index.mdx': { title: 'Hello' },
+      },
+      body: {
+        './index.mdx': async () => {
+          loads++;
+          return compiled;
+        },
+      },
+      meta: {},
+    });
+
+    const page = collection.getPage('index.mdx')!;
+    expect(page).toMatchObject({ title: 'Hello' });
+
+    // memoized, so it can be consumed like `use(page.load())` in render
+    expect(page.load()).toBe(page.load());
+
+    await page.preload();
+    const element = page.body({}) as ReactElement;
+    expect(element.type).toBe(compiled.default);
+
+    const loaded = await page.load();
+    expect(loaded.body).toBe(compiled.default);
+    expect(loads).toBe(1);
   });
 });

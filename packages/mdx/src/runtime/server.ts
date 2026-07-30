@@ -1,5 +1,10 @@
-import { type MetaData, type PageData, type Source, type VirtualFile } from 'fumadocs-core/source';
-import * as path from 'node:path';
+import {
+  type MetaData,
+  type PageData,
+  PathUtils,
+  type Source,
+  type VirtualFile,
+} from 'fumadocs-core/source';
 import type { DocCollection, DocsCollection, MetaCollection } from '@/config';
 import type { StandardSchemaV1 } from '@standard-schema/spec';
 import type { CompiledMDXProperties } from '@/loaders/mdx/build';
@@ -71,7 +76,7 @@ export function server<Config, TC extends InternalTypeConfig>() {
 
     return {
       path: file,
-      fullPath: path.join(base, file),
+      fullPath: PathUtils.joinPath(base, file),
     };
   }
 
@@ -252,7 +257,7 @@ export function toFumadocsSource<
   for (const entry of pages) {
     files.push({
       type: 'page',
-      path: baseDir ? path.join(baseDir, entry.info.path) : entry.info.path,
+      path: baseDir ? PathUtils.joinPath(baseDir, entry.info.path) : entry.info.path,
       absolutePath: entry.info.fullPath,
       data: entry,
     });
@@ -261,7 +266,7 @@ export function toFumadocsSource<
   for (const entry of metas) {
     files.push({
       type: 'meta',
-      path: baseDir ? path.join(baseDir, entry.info.path) : entry.info.path,
+      path: baseDir ? PathUtils.joinPath(baseDir, entry.info.path) : entry.info.path,
       absolutePath: entry.info.fullPath,
       data: entry,
     });

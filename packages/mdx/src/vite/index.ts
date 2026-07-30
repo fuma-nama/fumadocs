@@ -87,7 +87,7 @@ export default function mdx(
   pluginOptions: PluginOptions = {},
 ): Plugin[] {
   const { updateViteConfig = true } = pluginOptions;
-  let core: Core;
+  let managed: ManagedCore;
   const metaPlugin: Plugin = {
     name: 'fumadocs-mdx:meta',
   };
@@ -102,7 +102,8 @@ export default function mdx(
     {
       name: 'fumadocs-mdx',
       async config(config, env) {
-        core = createViteCore(config.root ?? process.cwd(), pluginOptions);
+        managed = createManagedCore(config.root ?? process.cwd(), forcedConfig, pluginOptions);
+        const core = managed.core;
         const macroOptions = resolveMacroOptions(pluginOptions.macro);
         if (macroOptions) {
           const { MacroCollector } = await import('@/macro/eval');
@@ -115,9 +116,7 @@ export default function mdx(
           });
         }
 
-        await core.init({
-          config: await loadCoreConfig(core, forcedConfig, pluginOptions),
-        });
+        await managed.reload();
 
         const configLoader = createIntegratedConfigLoader(core);
         const mdxLoader = toVite(createMdxLoader(configLoader));
@@ -136,7 +135,7 @@ export default function mdx(
             // The format of `value` becomes JavaScript, which will break the MDX compiler.
             // We have to ignore them.
             if (id.includes('virtual:vite-rsc')) return null;
-            if (!forcedConfig) this.addWatchFile(core.configPath);
+            if (managed.watchConfig) this.addWatchFile(core.configPath);
             return mdxLoader.transform.call(this, code, id);
           },
         };
@@ -144,7 +143,7 @@ export default function mdx(
           filter: { id: metaLoaderGlob },
           order: 'pre',
           handler(code, id) {
-            if (!forcedConfig) this.addWatchFile(core.configPath);
+            if (managed.watchConfig) this.addWatchFile(core.configPath);
             return metaLoader.transform.call(this, code, id);
           },
         };
@@ -184,24 +183,26 @@ export default function mdx(
         return getConfig({ root: core.root });
       },
       async buildStart() {
-        await core.emit({ write: true });
+        await managed.core.emit({ write: true });
       },
       async configureServer(server) {
+        const core = managed.core;
         await core.initServer({
           watcher: server.watcher as unknown as FSWatcher,
         });
 
-        if (!forcedConfig) {
-          server.watcher.on('change', async (file) => {
-            if (path.resolve(file) === core.configPath) {
-              await core.init({
-                config: await loadCoreConfig(core, forcedConfig, pluginOptions),
-              });
+        if (forcedConfig) return;
 
-              await core.emit({ write: true });
-            }
-          });
-        }
+        // also handle `add`, the config file is optional and may be created later
+        const onChange = async (file: string) => {
+          if (path.resolve(file) !== core.configPath) return;
+
+          await managed.reload();
+          await core.emit({ write: true });
+        };
+
+        server.watcher.on('change', onChange);
+        server.watcher.on('add', onChange);
       },
     },
     macroPlugin,
@@ -210,12 +211,44 @@ export default function mdx(
   ];
 }
 
+/**
+ * A core with its config file, reloadable when the file changes.
+ *
+ * `source.config.ts` is optional, so the config file may not exist. Vite fails to resolve watched
+ * files that aren't on disk, hence `watchConfig` to tell whether it can be referenced.
+ */
+interface ManagedCore {
+  core: Core;
+  watchConfig: boolean;
+  reload: () => Promise<void>;
+}
+
+function createManagedCore(
+  root: string,
+  forcedConfig: Record<string, unknown> | Promise<Record<string, unknown>> | undefined,
+  pluginOptions: PluginOptions,
+): ManagedCore {
+  const managed: ManagedCore = {
+    core: createViteCore(root, pluginOptions),
+    watchConfig: false,
+    async reload() {
+      const { config, fromFile } = await loadCoreConfig(managed.core, forcedConfig, pluginOptions);
+      managed.watchConfig = fromFile;
+      await managed.core.init({ config });
+    },
+  };
+
+  return managed;
+}
+
 async function loadCoreConfig(
   core: Core,
   forcedConfig?: Record<string, unknown> | Promise<Record<string, unknown>>,
   { globalOptions }: PluginOptions = {},
-) {
+): Promise<{ config: Awaited<ReturnType<typeof buildConfig>>; fromFile: boolean }> {
   let v: Record<string, unknown>;
+  let fromFile = false;
+
   if (forcedConfig) {
     v = await forcedConfig;
   } else {
@@ -224,9 +257,10 @@ async function loadCoreConfig(
       () => false,
     );
     v = exists ? (await runnerImport<Record<string, unknown>>(core.configPath)).module : {};
+    fromFile = exists;
   }
 
-  return buildConfig(
+  const config = await buildConfig(
     globalOptions
       ? {
           ...v,
@@ -238,14 +272,14 @@ async function loadCoreConfig(
       : v,
     core.root,
   );
+
+  return { config, fromFile };
 }
 
 export async function postInstall(pluginOptions: PluginOptions = {}) {
-  const core = createViteCore(process.cwd(), pluginOptions);
-  await core.init({
-    config: await loadCoreConfig(core, undefined, pluginOptions),
-  });
-  await core.emit({ write: true });
+  const managed = createManagedCore(process.cwd(), undefined, pluginOptions);
+  await managed.reload();
+  await managed.core.emit({ write: true });
 }
 
 function createViteCore(root: string, { index = true, configPath, outDir }: PluginOptions) {
