@@ -2,6 +2,7 @@ import { defineConfig } from 'tsdown';
 import { Scanner } from '@tailwindcss/oxide';
 import { mkdir, writeFile } from 'node:fs/promises';
 import path from 'node:path';
+import { x } from 'tinyexec';
 import { packageTranslationsPlugin } from '../shared/compile-package-translations.ts';
 
 export default defineConfig({
@@ -29,6 +30,9 @@ export default defineConfig({
   plugins: [packageTranslationsPlugin({ extraKeys: ['displayName'] })],
   async onSuccess() {
     await compileInline();
+    await x('tailwindcss', ['-i', 'css/style.css', '-o', './dist/style.css'], {
+      nodeOptions: { stdio: 'inherit' },
+    });
   },
   deps: {
     onlyBundle: ['react-medium-image-zoom'],

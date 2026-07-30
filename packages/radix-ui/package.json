@@ -131,11 +131,9 @@
     "access": "public"
   },
   "scripts": {
-    "build": "pnpm build:layout && pnpm build:tailwind",
-    "build:layout": "tsdown",
-    "build:tailwind": "tailwindcss -i css/style.css -o ./dist/style.css",
+    "build": "tsdown",
     "clean": "rimraf dist",
-    "dev": "concurrently \"tsdown --watch --clean false\" \"tailwindcss -i css/style.css -o ./dist/style.css -w\"",
+    "dev": "tsdown --watch --clean false",
     "lint": "oxlint .",
     "types:check": "tsc --noEmit"
   },
