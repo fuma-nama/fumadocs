@@ -229,8 +229,7 @@ For example, in Tanstack Start:
 import { createFileRoute, notFound } from '@tanstack/react-router';
 import { DocsLayout } from 'fumadocs-ui/layouts/docs';
 import { createServerFn } from '@tanstack/react-start';
-import { source } from '@/lib/source';
-import browserCollections from 'collections/browser';
+import { docs, source } from '@/lib/source';
 import { DocsBody, DocsDescription, DocsPage, DocsTitle } from 'fumadocs-ui/layouts/docs/page';
 import { useFumadocsLoader } from 'fumadocs-core/source/client';
 import { type ReactNode, Suspense } from 'react';
@@ -244,7 +243,7 @@ export const Route = createFileRoute('/docs/$')({
 
     // Fumadocs MDX: only preload content for normal pages [!code highlight:3]
     if (data.type === 'docs') {
-      await clientLoader.preload(data.path);
+      await docs.getPage(data.path)?.preload();
     }
     return data;
   },
@@ -278,11 +277,10 @@ const serverLoader = createServerFn({
     };
   });
 
-const clientLoader = browserCollections.docs.createClientLoader({
-  component(pageData, props) {
-    // ...
-  },
-});
+// renders a page of your `docs` collection
+function Content({ path }: { path: string }) {
+  // ...
+}
 
 function Page() {
   const page = useFumadocsLoader(Route.useLoaderData());
@@ -301,7 +299,7 @@ function Page() {
       </DocsPage>
     );
   } else {
-    content = clientLoader.useContent(page.path, page);
+    content = <Content path={page.path} />;
   }
 
   return (

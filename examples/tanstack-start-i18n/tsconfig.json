@@ -15,8 +15,7 @@
     "forceConsistentCasingInFileNames": true,
     "types": ["vite/client"],
     "paths": {
-      "@/*": ["./src/*"],
-      "collections/*": ["./.source/*"]
+      "@/*": ["./src/*"]
     },
     "noEmit": true
   }

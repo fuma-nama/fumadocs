@@ -8,7 +8,7 @@
     "build": "vite build",
     "start": "vite preview",
     "preview": "vite preview",
-    "types:check": "fumadocs-mdx && tsc --noEmit"
+    "types:check": "tsc --noEmit"
   },
   "dependencies": {
     "@tanstack/react-router": "1.170.18",

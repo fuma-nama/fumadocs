@@ -3,6 +3,12 @@ title: Browser Entry
 description: Access collections from browser/client environment.
 ---
 
+<Callout title="Using the Macro API?">
+
+Macro collections can be imported on the client directly, without a client loader. See [Macro API](/docs/mdx/macro#browser) for the equivalent usage.
+
+</Callout>
+
 ## Usage
 
 The generated outputs are optimized using async imports for browser environments.
@@ -53,11 +59,11 @@ function Page() {
 }
 ```
 
-Using the [Macro API](/docs/mdx/macro) instead? Import the collection on the client and render with `getPage` / `body` (see [Macro API](/docs/mdx/macro#browser)).
-
 ## Examples
 
-The examples are for non-RSC usage. Prefer RSC when possible for better client performance.
+The examples below are for non-RSC usage. Prefer RSC when possible for better client performance.
+
+The example apps in our repository use the [Macro API](/docs/mdx/macro) for this instead, they are a good reference for a complete setup.
 
 ### Tanstack Start
 
