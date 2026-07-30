@@ -13,26 +13,16 @@ description: Use Fumadocs MDX with Vite
 npm i fumadocs-mdx fumadocs-core @types/mdx
 ```
 
-Create the configuration file:
-
-```ts title="source.config.ts"
-import { defineDocs } from 'fumadocs-mdx/config';
-
-export const docs = defineDocs({
-  dir: 'content/docs',
-});
-```
-
 Add the Vite plugin:
 
 ```ts tab="Vite" title="vite.config.ts"
 import { defineConfig } from 'vite';
-import mdx from 'fumadocs-mdx/vite';
+import { fumadocsMdx } from 'fumadocs-mdx/vite';
 
 export default defineConfig({
   plugins: [
     // [!code ++]
-    mdx(),
+    fumadocsMdx(),
     // ...
   ],
 });
@@ -40,14 +30,14 @@ export default defineConfig({
 
 ```ts tab="Waku" title="waku.config.ts"
 import { type Config, defineConfig } from 'waku/config';
-import mdx from 'fumadocs-mdx/vite';
+import { fumadocsMdx } from 'fumadocs-mdx/vite';
 import type { UserConfig } from 'vite';
 
 export default defineConfig({
   vite: {
     plugins: [
       // [!code ++]
-      mdx(),
+      fumadocsMdx(),
     ],
     resolve: {
       tsconfigPaths: true,
@@ -56,23 +46,23 @@ export default defineConfig({
 });
 ```
 
-<include>./.shared.mdx</include>
-
 ### Integrate with Fumadocs
 
-To integrate with Fumadocs, make a `lib/source.ts` file:
+Create a `lib/source.ts` file:
 
 ```ts title="app/lib/source.ts"
-import { docs } from 'collections/server';
+import { defineDocs } from 'fumadocs-mdx/macro';
 import { loader } from 'fumadocs-core/source';
+
+const docs = defineDocs({
+  dir: 'content/docs',
+});
 
 export const source = loader({
   baseUrl: '/docs',
   source: docs.toFumadocsSource(),
 });
 ```
-
-The `.source` folder will be generated when you run development server or production build.
 
 ### Done
 
@@ -83,8 +73,11 @@ You can now write content in `content/docs` folder.
 ## What is Next?
 
 <Cards>
-  <Card title="Accessing Collections" href="/docs/mdx/entry">
-    Learn how to access collection outputs.
+  <Card title="Macro API" href="/docs/mdx/macro">
+    Define collections in your app modules with `fumadocs-mdx/macro`.
+  </Card>
+  <Card title="Config API" href="/docs/mdx/collections">
+    Define collections in `source.config.ts` with generated entry files.
   </Card>
   <Card title="Lazy Loading" href="/docs/mdx/async">
     Hit performance bottleneck? You can try lazy loading.

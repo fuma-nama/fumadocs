@@ -1,30 +1,30 @@
 {
   "name": "example-next",
-  "version": "0.0.9",
+  "version": "0.0.10",
   "private": true,
   "scripts": {
     "build": "next build",
     "dev": "next dev",
     "start": "next start",
-    "types:check": "fumadocs-mdx && next typegen && tsc --noEmit"
+    "types:check": "next typegen && tsc --noEmit"
   },
   "dependencies": {
-    "cnfast": "^0.0.8",
+    "cnfast": "^0.1.0",
     "fumadocs-core": "workspace:*",
     "fumadocs-mdx": "workspace:*",
     "fumadocs-ui": "workspace:@fumadocs/base-ui@*",
-    "lucide-react": "^1.25.0",
-    "next": "16.2.11",
+    "lucide-react": "^1.27.0",
+    "next": "16.2.12",
     "react": "^19.2.8",
     "react-dom": "^19.2.8"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4.3.3",
     "@types/mdx": "^2.0.14",
-    "@types/node": "^26.1.1",
+    "@types/node": "^26.1.2",
     "@types/react": "^19.2.17",
     "@types/react-dom": "^19.2.3",
-    "postcss": "^8.5.21",
+    "postcss": "^8.5.24",
     "tailwindcss": "^4.3.3",
     "typescript": "^6.0.3"
   }

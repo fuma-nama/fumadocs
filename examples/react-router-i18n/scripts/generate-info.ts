@@ -1,14 +1,7 @@
 import { register } from 'fumadocs-mdx/node';
-import { postInstall } from 'fumadocs-mdx/vite';
 import { writeFile } from 'node:fs/promises';
 
 register();
-
-await postInstall({
-  index: {
-    target: 'default',
-  },
-});
 
 export interface Info {
   prerender: string[];

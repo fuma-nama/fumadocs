@@ -40,14 +40,14 @@
     "ws": "^8.21.1"
   },
   "devDependencies": {
-    "@types/node": "26.1.1",
+    "@types/node": "26.1.2",
     "@types/picomatch": "^4.0.3",
     "@types/react": "^19.2.17",
     "@types/ws": "^8.18.1",
     "fumadocs-core": "workspace:*",
     "react": "^19.2.8",
     "tsconfig": "workspace:*",
-    "tsdown": "0.22.13",
+    "tsdown": "0.22.14",
     "vite": "^8.1.5",
     "vitest": "^4.1.10"
   },

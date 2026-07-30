@@ -1,3 +1,13 @@
+## fumadocs-mdx@15.2.1
+
+### Support simpler `fumadocsMdx` vite plugin usage
+
+Use the `fumadocsMdx` method instead for better syntax around macro usage.
+
+### Support browser helpers for Macro API
+
+Use preload & lazy body renderer on non-rsc environment.
+
 ## fumadocs-mdx@15.2.0
 
 ### Support Macro API

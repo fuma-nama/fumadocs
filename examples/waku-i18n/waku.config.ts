@@ -1,5 +1,5 @@
 import { defineConfig, type Config } from 'waku/config';
-import mdx from 'fumadocs-mdx/vite';
+import { fumadocsMdx } from 'fumadocs-mdx/vite';
 import tailwindcss from '@tailwindcss/vite';
 import type { UserConfig } from 'vite';
 
@@ -9,6 +9,6 @@ export default defineConfig({
       tsconfigPaths: true,
       dedupe: ['waku'],
     },
-    plugins: [tailwindcss(), mdx()],
+    plugins: [tailwindcss(), fumadocsMdx()],
   } satisfies UserConfig as Config['vite'],
 });

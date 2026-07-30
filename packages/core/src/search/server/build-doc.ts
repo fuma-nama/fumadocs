@@ -8,6 +8,7 @@ export interface SharedDocument {
   breadcrumbs?: string[];
   tags: string[];
   url: string;
+  locale?: string;
 }
 
 export function buildDocuments(indexes: SharedIndex[]) {
@@ -27,6 +28,7 @@ export function buildDocuments(indexes: SharedIndex[]) {
       breadcrumbs: page.breadcrumbs,
       tags,
       url: page.url,
+      locale: page.locale,
     });
 
     const nextId = () => `${page.id}-${id++}`;
@@ -39,6 +41,7 @@ export function buildDocuments(indexes: SharedIndex[]) {
         type: 'text',
         url: page.url,
         content: page.description,
+        locale: page.locale,
       });
     }
 
@@ -50,6 +53,7 @@ export function buildDocuments(indexes: SharedIndex[]) {
         tags,
         url: `${page.url}#${heading.id}`,
         content: heading.content,
+        locale: page.locale,
       });
     }
 
@@ -61,6 +65,7 @@ export function buildDocuments(indexes: SharedIndex[]) {
         type: 'text',
         url: content.heading ? `${page.url}#${content.heading}` : page.url,
         content: content.content,
+        locale: page.locale,
       });
     }
   }

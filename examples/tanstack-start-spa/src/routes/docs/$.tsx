@@ -1,8 +1,7 @@
 import { createFileRoute, Link, notFound } from '@tanstack/react-router';
 import { DocsLayout } from 'fumadocs-ui/layouts/docs';
 import { createServerFn } from '@tanstack/react-start';
-import { source } from '@/lib/source';
-import browserCollections from 'collections/browser';
+import { docs, source } from '@/lib/source';
 import {
   DocsBody,
   DocsDescription,
@@ -15,7 +14,7 @@ import { baseOptions } from '@/lib/layout.shared';
 import { encodeMarkdownUrl, gitConfig } from '@/lib/shared';
 import { staticFunctionMiddleware } from '@tanstack/start-static-server-functions';
 import { useFumadocsLoader } from 'fumadocs-core/source/client';
-import { Suspense } from 'react';
+import { Suspense, use } from 'react';
 import { useMDXComponents } from '@/components/mdx';
 
 export const Route = createFileRoute('/docs/$')({
@@ -23,7 +22,7 @@ export const Route = createFileRoute('/docs/$')({
   loader: async ({ params }) => {
     const slugs = params._splat?.split('/') ?? [];
     const data = await loader({ data: slugs });
-    await clientLoader.preload(data.path);
+    await docs.getPage(data.path)?.preload();
     return data;
   },
 });
@@ -44,36 +43,30 @@ const loader = createServerFn({
     };
   });
 
-const clientLoader = browserCollections.docs.createClientLoader({
-  component(
-    { toc, frontmatter, default: MDX },
-    // you can define props for the component
-    {
-      markdownUrl,
-      path,
-    }: {
-      markdownUrl: string;
-      path: string;
-    },
-  ) {
-    return (
-      <DocsPage toc={toc}>
-        <DocsTitle>{frontmatter.title}</DocsTitle>
-        <DocsDescription>{frontmatter.description}</DocsDescription>
-        <div className="flex flex-row gap-2 items-center border-b -mt-4 pb-6">
-          <MarkdownCopyButton markdownUrl={markdownUrl} />
-          <ViewOptionsPopover
-            markdownUrl={markdownUrl}
-            githubUrl={`https://github.com/${gitConfig.user}/${gitConfig.repo}/blob/${gitConfig.branch}/content/docs/${path}`}
-          />
-        </div>
-        <DocsBody>
-          <MDX components={useMDXComponents()} />
-        </DocsBody>
-      </DocsPage>
-    );
-  },
-});
+function Content({ path, markdownUrl }: { path: string; markdownUrl: string }) {
+  const page = docs.getPage(path);
+  if (!page) throw new Error(`unknown page: ${path}`);
+
+  const { toc } = use(page.load());
+  const MDX = page.body;
+
+  return (
+    <DocsPage toc={toc}>
+      <DocsTitle>{page.title}</DocsTitle>
+      <DocsDescription>{page.description}</DocsDescription>
+      <div className="flex flex-row gap-2 items-center border-b -mt-4 pb-6">
+        <MarkdownCopyButton markdownUrl={markdownUrl} />
+        <ViewOptionsPopover
+          markdownUrl={markdownUrl}
+          githubUrl={`https://github.com/${gitConfig.user}/${gitConfig.repo}/blob/${gitConfig.branch}/content/docs/${path}`}
+        />
+      </div>
+      <DocsBody>
+        <MDX components={useMDXComponents()} />
+      </DocsBody>
+    </DocsPage>
+  );
+}
 
 function Page() {
   const { pageTree, path, markdownUrl } = useFumadocsLoader(Route.useLoaderData());
@@ -81,7 +74,9 @@ function Page() {
   return (
     <DocsLayout {...baseOptions()} tree={pageTree}>
       <Link to={markdownUrl} hidden />
-      <Suspense>{clientLoader.useContent(path, { markdownUrl, path })}</Suspense>
+      <Suspense>
+        <Content path={path} markdownUrl={markdownUrl} />
+      </Suspense>
     </DocsLayout>
   );
 }

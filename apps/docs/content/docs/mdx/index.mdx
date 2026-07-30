@@ -12,18 +12,32 @@ It is not a full CMS but rather a content processing layer for React frameworks,
 
 ### What is a Collection?
 
-**Collection** refers to a collection containing a certain type of files. You can define collections in the config file (`source.config.ts`).
+**Collection** refers to a collection containing a certain type of files. You can define them with the [Macro API](/docs/mdx/macro) in your app:
 
-Fumadocs MDX transforms collections into type-safe data, accessible in your app. Available collections:
+```ts title="lib/source.ts"
+import { defineDocs } from 'fumadocs-mdx/macro';
+import { loader } from 'fumadocs-core/source';
+
+const docs = defineDocs({
+  dir: 'content/docs',
+});
+
+export const source = loader({
+  baseUrl: '/docs',
+  source: docs.toFumadocsSource(),
+});
+```
+
+Available collections:
 
 <Tabs items={["doc", "meta", 'docs']}>
 
     <Tab value='doc'>
 
-Compile Markdown & MDX files into a React Server Component, with useful properties like **Table of Contents**.
+Compile Markdown & MDX files into a React component, with useful properties like **Table of Contents**.
 
-```ts title="source.config.ts"
-import { defineCollections } from 'fumadocs-mdx/config';
+```ts
+import { defineCollections } from 'fumadocs-mdx/macro';
 
 export const test = defineCollections({
   type: 'doc',
@@ -37,8 +51,8 @@ export const test = defineCollections({
 
 Transform YAML/JSON files into an array of data.
 
-```ts title="source.config.ts"
-import { defineCollections } from 'fumadocs-mdx/config';
+```ts
+import { defineCollections } from 'fumadocs-mdx/macro';
 
 export const test = defineCollections({
   type: 'meta',
@@ -47,12 +61,13 @@ export const test = defineCollections({
 ```
 
     </Tab>
+
     <Tab value='docs'>
 
 Combination of `meta` and `doc` collections, which is needed for Fumadocs.
 
-```ts title="source.config.ts"
-import { defineDocs } from 'fumadocs-mdx/config';
+```ts
+import { defineDocs } from 'fumadocs-mdx/macro';
 
 export const docs = defineDocs({
   dir: 'content/docs',
@@ -80,7 +95,7 @@ For example, a `doc` collection will transform the `.md` and `.mdx` files:
   <File name="meta.json" className="opacity-50 cursor-not-allowed" aria-disabled />
 </Files>
 
-We will cover in [Accessing Collections](/docs/mdx/entry) later on how to access collection outputs.
+You can also define collections in `source.config.ts` with the [Config API](/docs/mdx/collections), which generates entry files under `.source`.
 
 ## Installation
 

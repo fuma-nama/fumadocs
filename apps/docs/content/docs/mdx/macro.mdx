@@ -1,0 +1,172 @@
+---
+title: Macro API
+description: Define collections in your app with fumadocs-mdx/macro.
+---
+
+## Overview
+
+Declare collections directly in your application modules with `fumadocs-mdx/macro`.
+
+The bundler (or runtime loader) compiles `defineDocs` / `defineCollections` into imports of content files.
+
+- No codegen needed.
+- No `source.config.ts` needed.
+
+## Usage
+
+```ts tab="lib/source.ts"
+import { defineDocs } from 'fumadocs-mdx/macro';
+import { loader } from 'fumadocs-core/source';
+
+export const docs = defineDocs({
+  dir: 'content/docs',
+});
+
+export const source = loader({
+  baseUrl: '/docs',
+  source: docs.toFumadocsSource(),
+});
+```
+
+```ts tab="lib/blog.ts"
+import { defineCollections } from 'fumadocs-mdx/macro';
+import { loader } from 'fumadocs-core/source';
+
+const blog = defineCollections({
+  type: 'doc',
+  dir: 'content/blog',
+});
+
+export const blogSource = loader({
+  baseUrl: '/blog',
+  source: blog.toFumadocsSource(),
+});
+```
+
+Collection options are largely the same as the [config API](/docs/mdx/collections).
+
+You can still keep a `source.config.ts` for [global options](/docs/mdx/global) and plugins while defining collections with macros.
+
+### Browser
+
+Macro collections work in the browser too. Import the collection in a client component and render an entry with `body`, no [client loader](/docs/mdx/entry/browser) needed.
+
+```tsx
+import { docs } from '@/lib/source';
+
+export default function Page({ path }: { path: string }) {
+  const page = docs.getPage(path);
+  if (!page) return <div>Not Found</div>;
+
+  const MDX = page.body;
+
+  return (
+    <div className="prose">
+      <h1>{page.title}</h1>
+      <MDX />
+    </div>
+  );
+}
+```
+
+#### Async collections
+
+With [`async`](/docs/mdx/async) enabled, only the frontmatter is bundled upfront and the content is fetched on demand.
+
+`body` works the same way, except it suspends until the content is available. Two extra methods control that:
+
+- `preload()` loads the content ahead of rendering, so `body` renders without suspending. Call it in your route loader.
+- `load()` returns the loaded content, such as `toc`. Its promise is cached, so you can call it during render.
+
+```tsx
+import { use } from 'react';
+import { docs } from '@/lib/source';
+
+// in your route loader (React Router, Tanstack Start)
+export async function loader({ path }: { path: string }) {
+  await docs.getPage(path)?.preload();
+  return { path };
+}
+
+export default function Page({ path }: { path: string }) {
+  const page = docs.getPage(path);
+  if (!page) return <div>Not Found</div>;
+
+  const { toc } = use(page.load());
+  const MDX = page.body;
+
+  return (
+    <div className="prose">
+      <h1>{page.title}</h1>
+      <MDX />
+    </div>
+  );
+}
+```
+
+Since the content is loaded lazily, wrap the page in a `<Suspense>` boundary unless you preloaded it.
+
+## Configuration
+
+The Macro API is enabled by default. Pass `macro` to limit which modules may use it, or `false` to disable it.
+
+```js tab="Next.js" title="next.config.mjs"
+import { createMDX } from 'fumadocs-mdx/next';
+
+const withMDX = createMDX({
+  macro: {
+    // glob patterns relative to the project root
+    include: ['lib/**/*.ts', 'lib/**/*.tsx'],
+  },
+  // or disable entirely:
+  // macro: false,
+});
+```
+
+```ts tab="Vite" title="vite.config.ts"
+import { fumadocsMdx } from 'fumadocs-mdx/vite';
+
+export default {
+  plugins: [
+    fumadocsMdx({
+      macro: {
+        include: ['src/**/*.ts', 'src/**/*.tsx'],
+      },
+    }),
+  ],
+};
+```
+
+```js tab="Node.js"
+import { register } from 'fumadocs-mdx/node';
+
+register({
+  macro: {
+    include: ['lib/**/*.ts'],
+  },
+});
+```
+
+By default, all JS/TS modules are eligible (`node_modules` is always excluded). Narrow `include` if you want the transform to run only on specific paths.
+
+### Constraints
+
+Macro calls are compiled statically. Keep these rules in mind:
+
+- Assign each call to a top-level `const` (the variable name identifies the collection):
+
+  ```ts
+  // ✓
+  const docs = defineDocs({ dir: 'content/docs' });
+
+  // ✗ not supported
+  export function create() {
+    return defineDocs({ dir: 'content/docs' });
+  }
+  ```
+
+- Options that shape how content is bundled (`dir`, `files`, `async`) must be statically analyzable (string / boolean literals). Put dynamic logic in options like `schema` or `mdxOptions` instead.
+
+- [`dynamic`](/docs/mdx/async#dynamic-mode) collections are not supported by the Macro API yet. Prefer [`async`](/docs/mdx/async) for lazy loading.
+
+- Re-exporting from `fumadocs-mdx/macro` is not supported.

@@ -1,6 +1,16 @@
 import { loader } from 'fumadocs-core/source';
-import { docs } from 'collections/server';
+import { defineDocs } from 'fumadocs-mdx/macro';
 import { docsContentRoute, docsRoute } from './shared';
+
+export const docs = defineDocs({
+  dir: 'content/docs',
+  docs: {
+    async: true,
+    postprocess: {
+      includeProcessedMarkdown: true,
+    },
+  },
+});
 
 export const source = loader({
   source: docs.toFumadocsSource(),

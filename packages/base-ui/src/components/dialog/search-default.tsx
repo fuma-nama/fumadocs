@@ -69,15 +69,13 @@ export default function DefaultSearchDialog({
   let client: SearchClient;
 
   if (type === 'static') {
-    // TODO: must remove it on next major, currently, this will bundle the Orama client unnecessarily
+    // TODO: must remove it on next major, currently, this will bundle the static search client unnecessarily
 
-    client = use((STATIC ??= import('fumadocs-core/search/client/orama-static'))).oramaStaticClient(
-      {
-        from: api,
-        locale,
-        tag,
-      },
-    );
+    client = use((STATIC ??= import('fumadocs-core/search/client/orama-static'))).staticClient({
+      from: api,
+      locale,
+      tag,
+    });
   } else {
     client = fetchClient({
       api,

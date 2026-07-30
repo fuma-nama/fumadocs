@@ -8,12 +8,12 @@ import {
   MarkdownCopyButton,
   ViewOptionsPopover,
 } from 'fumadocs-ui/layouts/docs/page';
-import { getPageMarkdownUrl, source } from '@/lib/source';
-import browserCollections from 'collections/browser';
+import { docs, getPageMarkdownUrl, source } from '@/lib/source';
 import { baseOptions } from '@/lib/layout.shared';
 import { gitConfig, getPageImagePath } from '@/lib/shared';
 import { useFumadocsLoader } from 'fumadocs-core/source/client';
 import { useMDXComponents } from '@/components/mdx';
+import { use } from 'react';
 
 export async function loader({ params }: Route.LoaderArgs) {
   const slugs = params['*'].split('/').filter((v) => v.length > 0);
@@ -28,48 +28,49 @@ export async function loader({ params }: Route.LoaderArgs) {
   };
 }
 
-const clientLoader = browserCollections.docs.createClientLoader({
-  component(
-    { toc, frontmatter, default: Mdx },
-    // you can define props for the `<Content />` component
-    {
-      markdownUrl,
-      path,
-      imagePath,
-    }: {
-      markdownUrl: string;
-      path: string;
-      imagePath: string;
-    },
-  ) {
-    return (
-      <DocsPage toc={toc}>
-        <title>{frontmatter.title}</title>
-        <meta name="description" content={frontmatter.description} />
-        <meta property="og:image" content={imagePath} />
-        <DocsTitle>{frontmatter.title}</DocsTitle>
-        <DocsDescription>{frontmatter.description}</DocsDescription>
-        <div className="flex flex-row gap-2 items-center border-b -mt-4 pb-6">
-          <MarkdownCopyButton markdownUrl={markdownUrl} />
-          <ViewOptionsPopover
-            markdownUrl={markdownUrl}
-            githubUrl={`https://github.com/${gitConfig.user}/${gitConfig.repo}/blob/${gitConfig.branch}/content/docs/${path}`}
-          />
-        </div>
-        <DocsBody>
-          <Mdx components={useMDXComponents()} />
-        </DocsBody>
-      </DocsPage>
-    );
-  },
-});
+function Content({
+  path,
+  markdownUrl,
+  imagePath,
+}: {
+  path: string;
+  markdownUrl: string;
+  imagePath: string;
+}) {
+  const page = docs.getPage(path);
+  if (!page) throw new Error(`unknown page: ${path}`);
+
+  // content is loaded lazily, call `page.preload()` in your loader to avoid suspending
+  const { toc } = use(page.load());
+  const Mdx = page.body;
+
+  return (
+    <DocsPage toc={toc}>
+      <title>{page.title}</title>
+      <meta name="description" content={page.description} />
+      <meta property="og:image" content={imagePath} />
+      <DocsTitle>{page.title}</DocsTitle>
+      <DocsDescription>{page.description}</DocsDescription>
+      <div className="flex flex-row gap-2 items-center border-b -mt-4 pb-6">
+        <MarkdownCopyButton markdownUrl={markdownUrl} />
+        <ViewOptionsPopover
+          markdownUrl={markdownUrl}
+          githubUrl={`https://github.com/${gitConfig.user}/${gitConfig.repo}/blob/${gitConfig.branch}/content/docs/${path}`}
+        />
+      </div>
+      <DocsBody>
+        <Mdx components={useMDXComponents()} />
+      </DocsBody>
+    </DocsPage>
+  );
+}
 
 export default function Page({ loaderData }: Route.ComponentProps) {
   const { path, pageTree, imagePath, markdownUrl } = useFumadocsLoader(loaderData);
 
   return (
     <DocsLayout {...baseOptions()} tree={pageTree}>
-      {clientLoader.useContent(path, { markdownUrl, path, imagePath })}
+      <Content path={path} markdownUrl={markdownUrl} imagePath={imagePath} />
     </DocsLayout>
   );
 }

@@ -1,16 +1,17 @@
-import { getByID, type Orama, search, type SearchParams } from '@orama/orama';
-import { type AdvancedDocument, type advancedSchema } from '@/search/orama/create-db';
+import { getByID, search, type SearchParams, type ZBSearch } from 'zbsearch';
+import { type AdvancedDocument, type advancedSchema } from '@/search/zbsearch/create-db';
 import { removeUndefined } from '@/utils/remove-undefined';
 import { createContentHighlighter, type SortedResult } from '@/search';
 
 export async function searchAdvanced(
-  db: Orama<typeof advancedSchema>,
+  db: ZBSearch<typeof advancedSchema>,
   query: string,
   tag: string | string[] = [],
   {
     mode = 'fulltext',
     ...override
-  }: Partial<SearchParams<Orama<typeof advancedSchema>, AdvancedDocument>> = {},
+  }: Partial<SearchParams<ZBSearch<typeof advancedSchema>, AdvancedDocument>> = {},
+  locale?: string,
 ): Promise<SortedResult[]> {
   if (typeof tag === 'string') tag = [tag];
 
@@ -25,6 +26,7 @@ export async function searchAdvanced(
               containsAll: tag,
             }
           : undefined,
+      locale: locale ? { eq: locale } : undefined,
       ...override.where,
     }),
     groupBy: {

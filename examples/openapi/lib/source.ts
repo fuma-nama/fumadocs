@@ -1,6 +1,10 @@
 import { loader } from 'fumadocs-core/source';
-import { docs } from 'collections/server';
 import { openapi } from './openapi';
+import { defineDocs } from 'fumadocs-mdx/macro';
+
+const docs = defineDocs({
+  dir: 'content/docs',
+});
 
 export const source = loader(
   {

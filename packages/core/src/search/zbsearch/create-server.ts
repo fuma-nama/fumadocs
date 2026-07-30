@@ -1,15 +1,13 @@
 import {
   create,
-  Orama,
-  RawData,
   save,
-  SearchParams,
   type Language,
-  type Tokenizer,
-} from '@orama/orama';
+  type RawData,
+  type SearchParams,
+  type ZBSearch,
+} from 'zbsearch';
 import type { QueryOptions, SearchAPI, SearchServer } from '@/search/server';
 import type { I18nConfig } from '@/i18n';
-import { STEMMERS } from '@/search/orama/_stemmers';
 import { createEndpoint, defaultReadOptions } from '../server/endpoint';
 import {
   AdvancedDocument,
@@ -25,14 +23,26 @@ import { buildBreadcrumbs, buildIndexDefault, type SharedIndex } from '../server
 import type { LoaderConfig, LoaderOutput } from '@/source/loader';
 import type { Awaitable } from '@/types';
 
-type OramaInput = Parameters<typeof create>[0];
+type CreateInput = Parameters<typeof create>[0];
 
-interface SharedOptions extends Pick<OramaInput, 'sort' | 'components' | 'plugins'> {
+interface SharedOptions extends Pick<CreateInput, 'sort' | 'components' | 'plugins'> {
+  /**
+   * Tokenizer language.
+   *
+   * @defaultValue 'multilingual' - works with every language, zero config needed.
+   */
   language?: string;
-  tokenizer?: Required<OramaInput>['components']['tokenizer'];
+  tokenizer?: Required<CreateInput>['components']['tokenizer'];
+
+  /**
+   * Filter search results by the `locale` query option, requires indexes to include a `locale` property.
+   *
+   * Enabled automatically by i18n search servers.
+   */
+  localeFilter?: boolean;
 }
 
-interface OramaQueryOptions extends QueryOptions {
+interface EngineQueryOptions extends QueryOptions {
   mode?: 'full' | 'vector';
 }
 
@@ -47,7 +57,7 @@ export interface SimpleOptions extends SharedOptions {
   /**
    * Customize search options on server
    */
-  search?: Partial<SearchParams<Orama<typeof simpleSchema>, SimpleDocument>>;
+  search?: Partial<SearchParams<ZBSearch<typeof simpleSchema>, SimpleDocument>>;
 }
 
 export interface AdvancedOptions extends SharedOptions {
@@ -56,7 +66,7 @@ export interface AdvancedOptions extends SharedOptions {
   /**
    * Customize search options on server
    */
-  search?: Partial<SearchParams<Orama<typeof advancedSchema>, AdvancedDocument>>;
+  search?: Partial<SearchParams<ZBSearch<typeof advancedSchema>, AdvancedDocument>>;
 }
 
 export interface Index {
@@ -66,61 +76,75 @@ export interface Index {
   content: string;
   url: string;
   keywords?: string;
+  locale?: string;
 }
 
 export type ExportedData =
-  | (RawData & { type: 'simple' | 'advanced' })
+  | (RawData & { type: 'simple' | 'advanced'; i18n?: boolean })
   | {
       type: 'i18n';
       data: Record<string, RawData & { type: 'simple' | 'advanced' }>;
     };
 
-export function initSimpleSearch(options: SimpleOptions): SearchServer<OramaQueryOptions> {
+export function initSimpleSearch(options: SimpleOptions): SearchServer<EngineQueryOptions> {
   const doc = createDBSimple(options);
 
   return {
     async export() {
       return {
         type: 'simple',
+        ...(options.localeFilter ? { i18n: true } : null),
         ...save(await doc),
       };
     },
     async search(query, searchOptions = {}) {
       const db = await doc;
-      const { limit } = searchOptions;
+      const { limit, locale } = searchOptions;
 
-      return searchSimple(db, query, {
-        limit,
-        ...options.search,
-      });
+      return searchSimple(
+        db,
+        query,
+        {
+          limit,
+          ...options.search,
+        },
+        options.localeFilter && locale ? locale : undefined,
+      );
     },
   };
 }
 
 export type AdvancedIndex = SharedIndex;
 
-export function initAdvancedSearch(options: AdvancedOptions): SearchServer<OramaQueryOptions> {
+export function initAdvancedSearch(options: AdvancedOptions): SearchServer<EngineQueryOptions> {
   const get = createDB(options);
 
   return {
     async export() {
       return {
         type: 'advanced',
+        ...(options.localeFilter ? { i18n: true } : null),
         ...save(await get),
       };
     },
     async search(query, searchOptions = {}) {
       const db = await get;
-      const { limit, tag, mode } = searchOptions;
+      const { limit, tag, mode, locale } = searchOptions;
 
-      return searchAdvanced(db, query, tag, {
-        ...options.search,
-        limit,
-        mode: mode === 'vector' ? 'vector' : 'fulltext',
-      }).catch((err) => {
+      return searchAdvanced(
+        db,
+        query,
+        tag,
+        {
+          ...options.search,
+          limit,
+          mode: mode === 'vector' ? 'vector' : 'fulltext',
+        },
+        options.localeFilter && locale ? locale : undefined,
+      ).catch((err) => {
         if (mode === 'vector') {
           throw new Error(
-            'failed to search, make sure you have installed `@orama/plugin-embeddings` according to their docs.',
+            'failed to search, make sure your indexes include `embeddings` and a plugin/proxy is configured to vectorize search terms.',
             {
               cause: err,
             },
@@ -136,15 +160,15 @@ export function initAdvancedSearch(options: AdvancedOptions): SearchServer<Orama
 export function createSearchAPI(
   type: 'simple',
   options: SimpleOptions,
-): SearchAPI<OramaQueryOptions>;
+): SearchAPI<EngineQueryOptions>;
 export function createSearchAPI(
   type: 'advanced',
   options: AdvancedOptions,
-): SearchAPI<OramaQueryOptions>;
+): SearchAPI<EngineQueryOptions>;
 
 export function createSearchAPI(
   ...args: ['simple', SimpleOptions] | ['advanced', AdvancedOptions]
-): SearchAPI<OramaQueryOptions> {
+): SearchAPI<EngineQueryOptions> {
   return toAPI(args[0] === 'simple' ? initSimpleSearch(args[1]) : initAdvancedSearch(args[1]));
 }
 
@@ -155,7 +179,10 @@ type I18nOptions<O extends SimpleOptions | AdvancedOptions, Idx> = Omit<
   i18n: I18nConfig;
 
   /**
-   * Map locale name from i18n config to Orama compatible `language` or options
+   * Map locale name from i18n config to a compatible `language` or options.
+   *
+   * @deprecated No longer needed - the default `multilingual` tokenizer supports every language with zero config.
+   * When specified, a separate database is created for each locale (legacy behaviour).
    */
   localeMap?: Record<string, Language | Partial<O> | undefined>;
 
@@ -169,26 +196,52 @@ type WithLocale<T> = T & {
   locale: string;
 };
 
-function getTokenizer(locale: string): { language: string } | { tokenizer: Tokenizer } {
-  return {
-    language: Object.keys(STEMMERS).find((lang) => STEMMERS[lang] === locale) ?? locale,
-  };
-}
-
 export function createI18nSearchAPI(
   type: 'simple',
   options: I18nSimpleOptions,
-): SearchAPI<OramaQueryOptions>;
+): SearchAPI<EngineQueryOptions>;
 export function createI18nSearchAPI(
   type: 'advanced',
   options: I18nAdvancedOptions,
-): SearchAPI<OramaQueryOptions>;
+): SearchAPI<EngineQueryOptions>;
 
 export function createI18nSearchAPI(
   ...[type, options]: ['simple', I18nSimpleOptions] | ['advanced', I18nAdvancedOptions]
-): SearchAPI<OramaQueryOptions> {
+): SearchAPI<EngineQueryOptions> {
+  if (options.localeMap) return createI18nSearchAPILegacy(type, options);
+
+  // zero-config: a single multilingual database for all locales,
+  // results are filtered with the `locale` property at query time.
+  const server =
+    type === 'simple'
+      ? initSimpleSearch({
+          ...options,
+          language: 'multilingual',
+          localeFilter: true,
+        } as SimpleOptions)
+      : initAdvancedSearch({
+          ...options,
+          language: 'multilingual',
+          localeFilter: true,
+        } as AdvancedOptions);
+
+  return toAPI({
+    export: server.export,
+    async search(query, searchOptions) {
+      return server.search(query, {
+        ...searchOptions,
+        locale: searchOptions?.locale ?? options.i18n.defaultLanguage,
+      });
+    },
+  });
+}
+
+function createI18nSearchAPILegacy(
+  type: 'simple' | 'advanced',
+  options: I18nSimpleOptions | I18nAdvancedOptions,
+): SearchAPI<EngineQueryOptions> {
   async function initSearchServers() {
-    const map = new Map<string, SearchServer>();
+    const map = new Map<string, SearchServer<EngineQueryOptions>>();
     if (options.i18n.languages.length === 0) {
       return map;
     }
@@ -198,7 +251,7 @@ export function createI18nSearchAPI(
 
     for (const locale of options.i18n.languages) {
       const localeIndexes = indexes.filter((index) => index.locale === locale);
-      const mapped = options.localeMap?.[locale] ?? getTokenizer(locale);
+      const mapped = options.localeMap?.[locale] ?? 'multilingual';
 
       if (type === 'simple') {
         map.set(
@@ -259,6 +312,9 @@ export function createI18nSearchAPI(
 }
 
 interface Options<C extends LoaderConfig> extends Omit<AdvancedOptions, 'indexes'> {
+  /**
+   * @deprecated No longer needed - the default `multilingual` tokenizer supports every language with zero config.
+   */
   localeMap?: {
     [K in C['i18n'] extends I18nConfig<infer Languages> ? Languages : string]?:
       | Partial<AdvancedOptions>
@@ -273,9 +329,9 @@ interface Options<C extends LoaderConfig> extends Omit<AdvancedOptions, 'indexes
 export function createFromSource<C extends LoaderConfig = LoaderConfig>(
   loader: LoaderOutput<C> | (() => Awaitable<LoaderOutput<C>>),
   options: Options<C> = {},
-): SearchAPI<OramaQueryOptions> {
+): SearchAPI<EngineQueryOptions> {
   const { buildIndex = buildIndexDefault } = options;
-  const cache = new WeakMap<LoaderOutput<C>, Promise<SearchServer<OramaQueryOptions>>>();
+  const cache = new WeakMap<LoaderOutput<C>, Promise<SearchServer<EngineQueryOptions>>>();
 
   async function initServer(loader: LoaderOutput<C>) {
     const indexes = await Promise.all(
@@ -323,7 +379,7 @@ export function createFromSource<C extends LoaderConfig = LoaderConfig>(
   });
 }
 
-function toAPI(server: SearchServer<OramaQueryOptions>): SearchAPI<OramaQueryOptions> {
+function toAPI(server: SearchServer<EngineQueryOptions>): SearchAPI<EngineQueryOptions> {
   return createEndpoint(server, {
     readOptions(url) {
       return {

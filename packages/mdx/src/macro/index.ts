@@ -5,6 +5,9 @@ import type { metaSchema, pageSchema } from 'fumadocs-core/source/schema';
 import type { CollectionSchema } from '@/config/define';
 import type { BuildEnvironment } from '@/config/build';
 import type { ExtractedReference, PostprocessOptions } from '@/loaders/mdx/remark-postprocess';
+
+// referenced by entry types, re-exported so declaration emit in consumer projects can name it
+export type { ExtractedReference } from '@/loaders/mdx/remark-postprocess';
 import type { SatteriOptionsInput } from '@/loaders/mdx/build-satteri';
 import type {
   MacroAsyncDocCollection,

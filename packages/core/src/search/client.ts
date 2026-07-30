@@ -30,7 +30,7 @@ export type ClientPreset =
     } & FetchOptions)
   | ({
       /**
-       * @deprecated Pass `client: oramaStaticClient(...)` instead.
+       * @deprecated Pass `client: staticClient(...)` instead.
        */
       type: 'static';
     } & StaticOptions)
@@ -132,7 +132,7 @@ export function useDocsSearch(
         break;
       }
       case 'static': {
-        client = import('./client/orama-static').then((mod) => mod.oramaStaticClient(clientRest));
+        client = import('./client/orama-static').then((mod) => mod.staticClient(clientRest));
         break;
       }
       default:

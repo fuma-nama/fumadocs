@@ -41,12 +41,12 @@
   "dependencies": {
     "estree-util-to-js": "^2.0.0",
     "estree-util-value-to-estree": "^3.5.0",
-    "npm-to-yarn": "^3.1.0",
+    "npm-to-yarn": "^3.2.0",
     "unified": "^11.0.5",
     "unist-util-visit": "^5.1.0",
     "vfile": "^6.0.3",
-    "yuku-codegen": "^0.7.3",
-    "yuku-parser": "^0.7.3",
+    "yuku-codegen": "^0.8.1",
+    "yuku-parser": "^0.8.1",
     "zod": "^4.4.3"
   },
   "devDependencies": {
@@ -54,12 +54,12 @@
     "@types/estree": "^1.0.9",
     "@types/hast": "^3.0.5",
     "@types/mdast": "^4.0.4",
-    "@types/node": "26.1.1",
+    "@types/node": "26.1.2",
     "fumadocs-core": "workspace:*",
     "mdast-util-mdx": "^3.0.0",
     "remark": "^15.0.1",
     "tsconfig": "workspace:*",
-    "tsdown": "0.22.13",
+    "tsdown": "0.22.14",
     "typescript": "^6.0.3"
   },
   "peerDependencies": {
