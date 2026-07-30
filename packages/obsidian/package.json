@@ -43,7 +43,7 @@
   "dependencies": {
     "@fumadocs/local-content": "workspace:*",
     "@standard-schema/spec": "^1.1.0",
-    "cnfast": "^0.0.8",
+    "cnfast": "^0.1.0",
     "github-slugger": "^2.0.0",
     "hast-util-to-jsx-runtime": "^2.3.6",
     "remark-parse": "^11.0.0",
@@ -59,7 +59,7 @@
     "@types/hast": "^3.0.5",
     "@types/mdast": "^4.0.4",
     "@types/mdx": "^2.0.14",
-    "@types/node": "26.1.1",
+    "@types/node": "26.1.2",
     "@types/react": "^19.2.17",
     "@types/react-dom": "^19.2.3",
     "fumadocs-core": "workspace:*",
@@ -67,7 +67,7 @@
     "react": "^19.2.8",
     "react-dom": "^19.2.8",
     "tsconfig": "workspace:*",
-    "tsdown": "0.22.13",
+    "tsdown": "0.22.14",
     "typescript": "^6.0.3",
     "vitest": "^4.1.10"
   },
