@@ -1,0 +1,113 @@
+---
+title: Macro API
+description: Define collections in your app with fumadocs-mdx/macro.
+---
+
+## Overview
+
+Besides defining collections in `source.config.ts`, you can use the **Macro API** to declare collections directly in your application modules.
+
+The bundler (or runtime loader) compiles `defineDocs` / `defineCollections` from `fumadocs-mdx/macro` into imports of content files.
+
+- No codegen needed.
+- No `source.config.ts` needed.
+
+## Usage
+
+```ts tab="lib/source.ts"
+import { defineDocs } from 'fumadocs-mdx/macro';
+import { loader } from 'fumadocs-core/source';
+
+const docs = defineDocs({
+  dir: 'content/docs',
+});
+
+export const source = loader({
+  baseUrl: '/docs',
+  source: docs.toFumadocsSource(),
+});
+```
+
+```ts tab="lib/blog.ts"
+import { defineCollections } from 'fumadocs-mdx/macro';
+import { loader } from 'fumadocs-core/source';
+
+const blog = defineCollections({
+  type: 'doc',
+  dir: 'content/blog',
+});
+
+export const blogSource = loader({
+  baseUrl: '/blog',
+  source: blog.toFumadocsSource(),
+});
+```
+
+Collection options are largely the same as the [config API](/docs/mdx/collections).
+
+You can still keep a `source.config.ts` for [global options](/docs/mdx/global) and plugins while defining collections with macros.
+
+## Configuration
+
+The Macro API is **enabled by default** on bundler plugins and runtime loaders. Pass `macro` to configure which modules may use it, or `false` to disable it.
+
+```js tab="Next.js" title="next.config.mjs"
+import { createMDX } from 'fumadocs-mdx/next';
+
+const withMDX = createMDX({
+  macro: {
+    // glob patterns relative to the project root
+    include: ['lib/**/*.ts', 'lib/**/*.tsx'],
+  },
+  // or disable entirely:
+  // macro: false,
+});
+```
+
+```ts tab="Vite" title="vite.config.ts"
+import mdx from 'fumadocs-mdx/vite';
+
+export default {
+  plugins: [
+    mdx(undefined, {
+      macro: {
+        include: ['src/**/*.ts', 'src/**/*.tsx'],
+      },
+    }),
+  ],
+};
+```
+
+```js tab="Node.js"
+import { register } from 'fumadocs-mdx/node';
+
+register({
+  macro: {
+    include: ['lib/**/*.ts'],
+  },
+});
+```
+
+By default, all JS/TS modules are eligible (`node_modules` is always excluded). Narrow `include` if you want the transform to run only on specific paths.
+
+### Constraints
+
+Macro calls are compiled statically. Keep these rules in mind:
+
+- Assign each call to a top-level `const` (the variable name identifies the collection):
+
+  ```ts
+  // ✓
+  const docs = defineDocs({ dir: 'content/docs' });
+
+  // ✗ not supported
+  export function create() {
+    return defineDocs({ dir: 'content/docs' });
+  }
+  ```
+
+- Options that shape how content is bundled (`dir`, `files`, `async`) must be statically analyzable (string / boolean literals). Put dynamic logic in options like `schema` or `mdxOptions` instead.
+
+- [`dynamic`](/docs/mdx/async#dynamic-mode) collections are not supported by the Macro API yet. Prefer [`async`](/docs/mdx/async) for lazy loading.
+
+- Re-exporting from `fumadocs-mdx/macro` is not supported.
