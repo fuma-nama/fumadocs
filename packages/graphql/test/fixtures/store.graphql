@@ -1,0 +1,101 @@
+"""
+Requires specific access scopes.
+"""
+directive @auth(requires: Role = ADMIN) on FIELD_DEFINITION | OBJECT
+
+"Roles for access control."
+enum Role {
+  "Full access."
+  ADMIN
+  "Read-only access."
+  USER
+}
+
+"An ISO-8601 encoded date time string."
+scalar DateTime @specifiedBy(url: "https://scalars.graphql.org/andimarek/date-time")
+
+"An object with a globally unique ID."
+interface Node {
+  "A globally unique identifier."
+  id: ID!
+}
+
+"The status of an order."
+enum OrderStatus {
+  PENDING
+  "The order is on its way."
+  SHIPPED
+  DELIVERED
+  CANCELLED @deprecated(reason: "Use `REFUNDED` instead.")
+  REFUNDED
+}
+
+"A registered customer."
+type Customer implements Node {
+  id: ID!
+  "The customer's full name."
+  name: String!
+  "The customer's email address."
+  email: String @deprecated(reason: "Use `contact` instead.")
+  "Contact information of the customer."
+  contact: ContactInfo
+  "Orders placed by this customer."
+  orders(
+    "Include only orders with the given status."
+    status: OrderStatus
+    first: Int = 10
+  ): [Order!]!
+}
+
+"Contact information."
+type ContactInfo {
+  email: String!
+  phone: String
+}
+
+"A customer's order."
+type Order implements Node @auth(requires: USER) {
+  id: ID!
+  status: OrderStatus!
+  "Time at which the order was created."
+  createdAt: DateTime!
+  total: Float!
+  customer: Customer!
+}
+
+union SearchResult = Customer | Order
+
+"Filters for the `orders` query."
+input OrderFilter {
+  "Match orders created after this time."
+  after: DateTime
+  status: OrderStatus = PENDING
+}
+
+input OrderCreateInput {
+  customerId: ID!
+  "Total amount of the order."
+  total: Float!
+}
+
+type Query {
+  "Look up a customer by its ID."
+  customer(id: ID!): Customer
+  "List all orders."
+  orders(filter: OrderFilter): [Order!]! @auth(requires: ADMIN)
+  "Search for customers and orders."
+  search(term: String!): [SearchResult!]!
+  "Fetch any node by ID."
+  node(id: ID!): Node
+}
+
+type Mutation {
+  "Create a new order."
+  createOrder(input: OrderCreateInput!): Order!
+  legacyCreateOrder(customerId: ID!): Order @deprecated(reason: "Use `createOrder` instead.")
+}
+
+type Subscription {
+  "Subscribe to status changes of an order."
+  orderUpdated(id: ID!): Order!
+}
