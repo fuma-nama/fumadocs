@@ -42,7 +42,7 @@ export function createStandaloneConfigLoader({
     // the config file is optional
     if (hash === 'missing') return buildEmptyConfig({}, process.cwd());
 
-    return await loadConfig(core, buildConfig);
+    return (await loadConfig(core, buildConfig)).config;
   }
 
   return {
