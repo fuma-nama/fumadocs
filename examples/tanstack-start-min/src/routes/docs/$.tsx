@@ -36,7 +36,7 @@ function Content({ path }: { path: string }) {
   const page = docs.getPage(path);
   if (!page) throw new Error(`unknown page: ${path}`);
 
-  const { toc } = use(page.load());
+  const toc = page.toc;
   const MDX = page.body;
 
   return (
