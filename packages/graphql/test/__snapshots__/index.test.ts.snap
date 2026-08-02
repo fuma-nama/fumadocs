@@ -1,0 +1,290 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`GraphQL source > per item with meta files 1`] = `
+[
+  {
+    "data": {
+      "description": undefined,
+      "pages": [
+        "customer",
+        "orders",
+        "search",
+        "node",
+      ],
+      "title": "Queries",
+    },
+    "path": "queries/meta.json",
+    "type": "meta",
+  },
+  {
+    "data": {
+      "description": undefined,
+      "pages": [
+        "createOrder",
+        "legacyCreateOrder",
+      ],
+      "title": "Mutations",
+    },
+    "path": "mutations/meta.json",
+    "type": "meta",
+  },
+  {
+    "data": {
+      "description": undefined,
+      "pages": [
+        "orderUpdated",
+      ],
+      "title": "Subscriptions",
+    },
+    "path": "subscriptions/meta.json",
+    "type": "meta",
+  },
+  {
+    "data": {
+      "description": undefined,
+      "pages": [
+        "Customer",
+        "ContactInfo",
+        "Order",
+      ],
+      "title": "Objects",
+    },
+    "path": "objects/meta.json",
+    "type": "meta",
+  },
+  {
+    "data": {
+      "description": undefined,
+      "pages": [
+        "Node",
+      ],
+      "title": "Interfaces",
+    },
+    "path": "interfaces/meta.json",
+    "type": "meta",
+  },
+  {
+    "data": {
+      "description": undefined,
+      "pages": [
+        "SearchResult",
+      ],
+      "title": "Unions",
+    },
+    "path": "unions/meta.json",
+    "type": "meta",
+  },
+  {
+    "data": {
+      "description": undefined,
+      "pages": [
+        "Role",
+        "OrderStatus",
+      ],
+      "title": "Enums",
+    },
+    "path": "enums/meta.json",
+    "type": "meta",
+  },
+  {
+    "data": {
+      "description": undefined,
+      "pages": [
+        "OrderFilter",
+        "OrderCreateInput",
+      ],
+      "title": "Input Objects",
+    },
+    "path": "inputs/meta.json",
+    "type": "meta",
+  },
+  {
+    "data": {
+      "description": undefined,
+      "pages": [
+        "DateTime",
+      ],
+      "title": "Scalars",
+    },
+    "path": "scalars/meta.json",
+    "type": "meta",
+  },
+  {
+    "data": {
+      "description": undefined,
+      "pages": [
+        "queries",
+        "mutations",
+        "subscriptions",
+        "objects",
+        "interfaces",
+        "unions",
+        "enums",
+        "inputs",
+        "scalars",
+      ],
+      "title": undefined,
+    },
+    "path": "meta.json",
+    "type": "meta",
+  },
+]
+`;
+
+exports[`GraphQL source > per item, grouped by kind 1`] = `
+[
+  {
+    "_graphql": {
+      "deprecated": undefined,
+      "kind": "query",
+    },
+    "deprecated": undefined,
+    "path": "/queries/customer.mdx",
+    "title": "Customer",
+  },
+  {
+    "_graphql": {
+      "deprecated": undefined,
+      "kind": "query",
+    },
+    "deprecated": undefined,
+    "path": "/queries/orders.mdx",
+    "title": "Orders",
+  },
+  {
+    "_graphql": {
+      "deprecated": undefined,
+      "kind": "query",
+    },
+    "deprecated": undefined,
+    "path": "/queries/search.mdx",
+    "title": "Search",
+  },
+  {
+    "_graphql": {
+      "deprecated": undefined,
+      "kind": "query",
+    },
+    "deprecated": undefined,
+    "path": "/queries/node.mdx",
+    "title": "Node",
+  },
+  {
+    "_graphql": {
+      "deprecated": undefined,
+      "kind": "mutation",
+    },
+    "deprecated": undefined,
+    "path": "/mutations/createOrder.mdx",
+    "title": "Create Order",
+  },
+  {
+    "_graphql": {
+      "deprecated": true,
+      "kind": "mutation",
+    },
+    "deprecated": true,
+    "path": "/mutations/legacyCreateOrder.mdx",
+    "title": "Legacy Create Order",
+  },
+  {
+    "_graphql": {
+      "deprecated": undefined,
+      "kind": "subscription",
+    },
+    "deprecated": undefined,
+    "path": "/subscriptions/orderUpdated.mdx",
+    "title": "Order Updated",
+  },
+  {
+    "_graphql": {
+      "deprecated": undefined,
+      "kind": "object",
+    },
+    "deprecated": undefined,
+    "path": "/objects/Customer.mdx",
+    "title": "Customer",
+  },
+  {
+    "_graphql": {
+      "deprecated": undefined,
+      "kind": "object",
+    },
+    "deprecated": undefined,
+    "path": "/objects/ContactInfo.mdx",
+    "title": "ContactInfo",
+  },
+  {
+    "_graphql": {
+      "deprecated": undefined,
+      "kind": "object",
+    },
+    "deprecated": undefined,
+    "path": "/objects/Order.mdx",
+    "title": "Order",
+  },
+  {
+    "_graphql": {
+      "deprecated": undefined,
+      "kind": "interface",
+    },
+    "deprecated": undefined,
+    "path": "/interfaces/Node.mdx",
+    "title": "Node",
+  },
+  {
+    "_graphql": {
+      "deprecated": undefined,
+      "kind": "union",
+    },
+    "deprecated": undefined,
+    "path": "/unions/SearchResult.mdx",
+    "title": "SearchResult",
+  },
+  {
+    "_graphql": {
+      "deprecated": undefined,
+      "kind": "enum",
+    },
+    "deprecated": undefined,
+    "path": "/enums/Role.mdx",
+    "title": "Role",
+  },
+  {
+    "_graphql": {
+      "deprecated": undefined,
+      "kind": "enum",
+    },
+    "deprecated": undefined,
+    "path": "/enums/OrderStatus.mdx",
+    "title": "OrderStatus",
+  },
+  {
+    "_graphql": {
+      "deprecated": undefined,
+      "kind": "input",
+    },
+    "deprecated": undefined,
+    "path": "/inputs/OrderFilter.mdx",
+    "title": "OrderFilter",
+  },
+  {
+    "_graphql": {
+      "deprecated": undefined,
+      "kind": "input",
+    },
+    "deprecated": undefined,
+    "path": "/inputs/OrderCreateInput.mdx",
+    "title": "OrderCreateInput",
+  },
+  {
+    "_graphql": {
+      "deprecated": undefined,
+      "kind": "scalar",
+    },
+    "deprecated": undefined,
+    "path": "/scalars/DateTime.mdx",
+    "title": "DateTime",
+  },
+]
+`;
