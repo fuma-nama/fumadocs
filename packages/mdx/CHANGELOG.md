@@ -1,3 +1,9 @@
+## fumadocs-mdx@15.2.2
+
+### Support thenable Next.js config
+
+Allow the promises to be awaited.
+
 ## fumadocs-mdx@15.2.1
 
 ### Support simpler `fumadocsMdx` vite plugin usage
