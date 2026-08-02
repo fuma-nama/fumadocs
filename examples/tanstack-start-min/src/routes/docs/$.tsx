@@ -21,7 +21,7 @@ export const Route = createFileRoute('/docs/$')({
 const serverLoader = createServerFn({
   method: 'GET',
 })
-  .inputValidator((slugs: string[]) => slugs)
+  .validator((slugs: string[]) => slugs)
   .handler(async ({ data: slugs }) => {
     const page = source.getPage(slugs);
     if (!page) throw notFound();
@@ -36,7 +36,7 @@ function Content({ path }: { path: string }) {
   const page = docs.getPage(path);
   if (!page) throw new Error(`unknown page: ${path}`);
 
-  const toc = page.toc;
+  const { toc } = use(page.load());
   const MDX = page.body;
 
   return (
