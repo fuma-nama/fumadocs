@@ -12,6 +12,7 @@ export const source = loader(
     graphql: await graphql.staticSource({
       // a route group, generated pages won't have a `/graphql` prefix in their URLs
       baseDir: '(graphql)',
+      baseUrl: '/docs',
       meta: true,
     }),
   },

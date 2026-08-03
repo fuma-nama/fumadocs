@@ -2,6 +2,7 @@ import { type LoaderPlugin, loader } from 'fumadocs-core/source';
 import { lucideIconsPlugin } from 'fumadocs-core/source/lucide-icons';
 import { openapi } from '@/lib/openapi';
 import { asyncapi } from '../asyncapi';
+import { graphql } from '../graphql';
 import { defineCollections, defineDocs } from 'fumadocs-mdx/macro';
 import { metaSchema, pageSchema } from 'fumadocs-core/source/schema';
 import z from 'zod';
@@ -207,6 +208,13 @@ export const source = loader(
       },
       groupBy: 'tag',
     }),
+    graphql: await graphql.staticSource({
+      baseDir: 'graphql/(generated)',
+      baseUrl: '/docs',
+      meta: {
+        folderStyle: 'separator',
+      },
+    }),
   },
   {
     baseUrl: '/docs',
@@ -215,6 +223,7 @@ export const source = loader(
       lucideIconsPlugin(),
       openapi.loaderPlugin(),
       asyncapi.loaderPlugin(),
+      graphql.loaderPlugin(),
     ],
   },
 );

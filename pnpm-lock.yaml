@@ -50,6 +50,9 @@ importers:
       '@fumadocs/asyncapi':
         specifier: workspace:*
         version: link:../../packages/asyncapi
+      '@fumadocs/graphql':
+        specifier: workspace:*
+        version: link:../../packages/graphql
       '@fumadocs/satteri':
         specifier: workspace:*
         version: link:../../packages/satteri
@@ -128,6 +131,9 @@ importers:
       fumadocs-ui:
         specifier: workspace:@fumadocs/base-ui@*
         version: link:../../packages/base-ui
+      graphql:
+        specifier: ^16.11.0
+        version: 16.14.1
       hast-util-to-jsx-runtime:
         specifier: ^2.3.6
         version: 2.3.6

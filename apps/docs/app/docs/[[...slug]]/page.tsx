@@ -29,7 +29,7 @@ import {
 import { NotFound } from '@/components/layouts/not-found';
 import { getSuggestions } from './suggestions';
 import { PathUtils } from 'fumadocs-core/source';
-import { AsyncAPIPageLazy, OpenAPIPageLazy } from './lazy';
+import { AsyncAPIPageLazy, GraphQLPageLazy, OpenAPIPageLazy } from './lazy';
 
 function PreviewRenderer({ preview }: { preview: string }): ReactNode {
   if (preview && preview in Preview) {
@@ -78,6 +78,18 @@ export default async function Page(props: PageProps<'/docs/[[...slug]]'>) {
 
         <DocsBody>
           <AsyncAPIPageLazy {...page.data.getAsyncAPIPageProps()} />
+        </DocsBody>
+      </DocsPage>
+    );
+  }
+
+  if (page.type === 'graphql') {
+    return (
+      <DocsPage full {...pageProps}>
+        <h1 className="text-[1.75em] font-semibold">{page.data.title}</h1>
+
+        <DocsBody>
+          <GraphQLPageLazy {...page.data.getGraphQLPageProps()} />
         </DocsBody>
       </DocsPage>
     );

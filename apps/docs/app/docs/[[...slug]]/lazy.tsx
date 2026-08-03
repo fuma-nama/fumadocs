@@ -9,3 +9,7 @@ export const OpenAPIPageLazy = dynamic(() =>
 export const AsyncAPIPageLazy = dynamic(() =>
   import('@/components/asyncapi-page').then((mod) => mod.AsyncAPIPage),
 );
+
+export const GraphQLPageLazy = dynamic(() =>
+  import('@/components/graphql-page').then((mod) => mod.GraphQLPage),
+);
