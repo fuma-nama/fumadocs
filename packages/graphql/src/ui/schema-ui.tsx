@@ -25,7 +25,11 @@ import {
   print,
 } from 'graphql';
 import { fromTranslations, useTranslations } from '@fuma-translate/react';
-import { SchemaUI, InlineTag, BlockTag, type SchemaUIProps } from '@fumadocs/api-docs/components/schema/client';
+import {
+  SchemaUI,
+  InlineTag,
+  type SchemaUIProps,
+} from '@fumadocs/api-docs/components/schema/client';
 import type { SchemaData, SchemaUIGeneratedData } from '@fumadocs/api-docs/components/schema';
 import { getCustomDirectives } from '@/utils/schema';
 import { useRenderContext } from './contexts/api';
@@ -202,7 +206,11 @@ export function generateGraphQLSchemaUI(
 
     if (doc.deprecationReason) {
       tags.push({
-        node: <InlineTag label={t('Deprecated')}>{doc.deprecationReason}</InlineTag>,
+        node: (
+          <InlineTag label={t('Deprecated')}>
+            <Markdown md={doc.deprecationReason} />
+          </InlineTag>
+        ),
       });
     }
 
@@ -221,22 +229,25 @@ export function generateGraphQLSchemaUI(
     if (doc.args && doc.args.length > 0) {
       tags.push({
         node: (
-          <BlockTag label={t('Arguments')}>
-            <div className="flex flex-col gap-2">
-              {doc.args.map((arg) => (
-                <div key={arg.name} className="text-xs">
-                  <code className="font-medium text-fd-primary">{arg.name}</code>{' '}
+          <div className="flex flex-col w-full bg-fd-secondary border rounded-lg shadow-md">
+            <p className="font-medium text-xs text-fd-muted-foreground rounded-t-[inherit] bg-fd-muted not-prose border-b p-2">
+              {t('Arguments')}
+            </p>
+            {doc.args.map((arg) => (
+              <div key={arg.name} className="text-xs px-2 py-1.5">
+                <div className="flex items-center not-prose gap-2">
+                  <code className="font-medium text-fd-primary">{arg.name}</code>
                   <code className="text-fd-muted-foreground">{String(arg.type)}</code>
                   {isRequiredArgument(arg) && <span className="text-red-400">*</span>}
-                  {arg.description && (
-                    <div className="prose-no-margin text-fd-muted-foreground pt-1">
-                      <Markdown md={arg.description} />
-                    </div>
-                  )}
                 </div>
-              ))}
-            </div>
-          </BlockTag>
+                {arg.description && (
+                  <div className="prose-no-margin text-fd-muted-foreground mt-1">
+                    <Markdown md={arg.description} />
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
         ),
       });
     }
@@ -250,9 +261,12 @@ export function generateGraphQLSchemaUI(
     if (isEnumType(named)) {
       tags.push({
         node: (
-          <BlockTag label={t('Values')}>
-            <EnumValueList type={named} />
-          </BlockTag>
+          <div className="flex flex-col w-full bg-fd-secondary border rounded-lg shadow-md">
+            <p className="font-medium text-xs text-fd-muted-foreground rounded-t-[inherit] bg-fd-muted not-prose border-b px-2 py-1.5">
+              {t('Values')}
+            </p>
+            <EnumValueList type={named} className="p-2" />
+          </div>
         ),
       });
     }
@@ -291,7 +305,11 @@ export function generateGraphQLSchemaUI(
     deprecationReason: root.deprecationReason,
     args: root.args,
     defaultText: root.defaultValue
-      ? printDefaultValue(root.defaultValue.value, root.type as GraphQLInputType, root.defaultValue.ast)
+      ? printDefaultValue(
+          root.defaultValue.value,
+          root.type as GraphQLInputType,
+          root.defaultValue.ast,
+        )
       : undefined,
     directives: getCustomDirectives(root.astNode),
   });

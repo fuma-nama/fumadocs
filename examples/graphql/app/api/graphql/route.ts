@@ -1,10 +1,4 @@
-import {
-  graphql as execute,
-  getNamedType,
-  isEnumType,
-  isListType,
-  isNonNullType,
-} from 'graphql';
+import { graphql as execute, getNamedType, isEnumType, isListType, isNonNullType } from 'graphql';
 import { graphql } from '@/lib/graphql';
 
 /**

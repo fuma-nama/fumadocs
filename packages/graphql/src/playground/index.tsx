@@ -241,13 +241,18 @@ export function OperationPlayground({ kind, name }: { kind: OperationKind; name:
             <button
               type="button"
               onClick={() => setHeaders((prev) => [...prev, { key: '', value: '' }])}
-              className={cn(buttonVariants({ size: 'sm', variant: 'secondary' }), 'gap-1.5 me-auto')}
+              className={cn(
+                buttonVariants({ size: 'sm', variant: 'secondary' }),
+                'gap-1.5 me-auto',
+              )}
             >
               <Plus className="size-3.5" />
               {t('Add Header')}
             </button>
           </div>
-          {testQuery.data && <ResultDisplay data={testQuery.data} reset={() => testQuery.reset()} />}
+          {testQuery.data && (
+            <ResultDisplay data={testQuery.data} reset={() => testQuery.reset()} />
+          )}
         </CollapsibleContent>
       </Collapsible>
     </form>

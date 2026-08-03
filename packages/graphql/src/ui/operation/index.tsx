@@ -82,7 +82,6 @@ export function Operation({
     ) : (
       <OperationPlayground kind={kind} name={name} />
     );
-    playgroundNode = <div className="my-4">{playgroundNode}</div>;
   }
 
   const argsNode = field.args.length > 0 && (
@@ -121,7 +120,7 @@ export function Operation({
 
   const returnsNode = (
     <>
-      <div className="flex flex-wrap gap-2 items-center justify-between mt-10">
+      <div className="flex flex-wrap gap-2 items-center justify-between mt-10 mb-4">
         <Heading id="returns" depth={headingLevel} className="my-0!">
           {t('Returns')}
         </Heading>

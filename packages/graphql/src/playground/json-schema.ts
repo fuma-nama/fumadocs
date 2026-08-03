@@ -59,7 +59,8 @@ export function inputTypeToJsonSchema(type: GraphQLInputType, depth = 0): Parsed
 
     properties[field.name] = {
       ...(typeof schema === 'object' ? schema : {}),
-      description: field.description ?? (typeof schema === 'object' ? schema.description : undefined),
+      description:
+        field.description ?? (typeof schema === 'object' ? schema.description : undefined),
       default: field.defaultValue !== undefined ? field.defaultValue : undefined,
     };
 
