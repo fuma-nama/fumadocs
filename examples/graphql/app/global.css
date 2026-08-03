@@ -1,5 +1,6 @@
 @import 'tailwindcss';
-@import 'fumadocs-ui/css/solar.css';
+@import 'fumadocs-ui/css/neutral.css';
+@import 'fumadocs-ui/css/generated/glass.css';
 @import 'fumadocs-ui/css/preset.css';
 @import '@fumadocs/graphql/css/preset.css';
 
