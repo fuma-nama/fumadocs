@@ -10,14 +10,15 @@ import {
   isScalarType,
   isUnionType,
 } from 'graphql';
-import { getCustomDirectives, getNamedTypeKind } from '@/utils/schema';
+import { getCustomDirectives, getNamedTypeKind, type OperationKind } from '@/utils/schema';
+import { getTypeUsages } from '@/utils/usage';
 import { KindLabel } from '../components/badge';
 import { Heading } from '../components/heading';
 import { Markdown } from '../components/markdown';
 import { EnumValueList } from '../components/enum-values';
-import { DirectiveList, TypeAnnotation } from '../components/type-annotation';
-import { useRenderContext } from '../contexts/api';
-import { Layers } from 'lucide-react';
+import { DirectiveList, ReferenceLink, TypeAnnotation } from '../components/type-annotation';
+import { resolveOperationLink, resolveTypeLink, useRenderContext } from '../contexts/api';
+import { Braces, CornerUpLeft, Import, Layers, Variable } from 'lucide-react';
 
 export function TypeDocs({
   name,
@@ -62,36 +63,78 @@ export function TypeDocs({
   const relations: ReactNode[] = [];
   if ((isObjectType(type) || isInterfaceType(type)) && type.getInterfaces().length > 0) {
     relations.push(
-      <TypeRelation
-        key="implements"
-        label={t('Implements')}
-        types={type.getInterfaces().map((i) => i.name)}
-      />,
+      <TypeRelation key="implements" label={t('Implements')}>
+        {type.getInterfaces().map((i) => (
+          <TypeAnnotation key={i.name} type={i} />
+        ))}
+      </TypeRelation>,
     );
   }
   if (isInterfaceType(type)) {
     const { objects } = schema.getImplementations(type);
     if (objects.length > 0) {
       relations.push(
-        <TypeRelation
-          key="implemented-by"
-          label={t('Implemented by')}
-          types={objects.map((o) => o.name)}
-        />,
+        <TypeRelation key="implemented-by" label={t('Implemented by')}>
+          {objects.map((o) => (
+            <TypeAnnotation key={o.name} type={o} />
+          ))}
+        </TypeRelation>,
       );
     }
   }
   if (isUnionType(type)) {
     relations.push(
-      <TypeRelation
-        key="possible-types"
-        label={t('Possible types')}
-        types={type.getTypes().map((o) => o.name)}
-      />,
+      <TypeRelation key="possible-types" label={t('Possible types')}>
+        {type.getTypes().map((o) => (
+          <TypeAnnotation key={o.name} type={o} />
+        ))}
+      </TypeRelation>,
     );
   }
   const relationsNode: ReactNode = relations.length > 0 && (
     <div className="flex flex-col gap-2 mt-4">{relations}</div>
+  );
+
+  const usages = useMemo(() => getTypeUsages(schema, name), [schema, name]);
+  const usageRows: ReactNode[] = [];
+  if (usages.returnedBy.length > 0) {
+    usageRows.push(
+      <TypeRelation key="returned-by" label={t('Returned by')} icon={CornerUpLeft}>
+        {usages.returnedBy.map((op) => (
+          <OperationChip key={`${op.kind}:${op.name}`} kind={op.kind} name={op.name} />
+        ))}
+      </TypeRelation>,
+    );
+  }
+  if (usages.inputFor.length > 0) {
+    usageRows.push(
+      <TypeRelation key="input-for" label={t('Input for')} icon={Import}>
+        {usages.inputFor.map((op) => (
+          <OperationChip key={`${op.kind}:${op.name}`} kind={op.kind} name={op.name} />
+        ))}
+      </TypeRelation>,
+    );
+  }
+  if (usages.memberOf.length > 0) {
+    usageRows.push(
+      <TypeRelation key="field-of" label={t('Field of')} icon={Braces}>
+        {usages.memberOf.map((ref) => (
+          <FieldChip key={`${ref.parent}.${ref.field}`} parent={ref.parent} field={ref.field} />
+        ))}
+      </TypeRelation>,
+    );
+  }
+  if (usages.argumentOf.length > 0) {
+    usageRows.push(
+      <TypeRelation key="argument-of" label={t('Argument of')} icon={Variable}>
+        {usages.argumentOf.map((ref) => (
+          <FieldChip key={`${ref.parent}.${ref.field}`} parent={ref.parent} field={ref.field} />
+        ))}
+      </TypeRelation>,
+    );
+  }
+  const usagesNode: ReactNode = usageRows.length > 0 && (
+    <div className="flex flex-col gap-2 mt-4">{usageRows}</div>
   );
 
   let fieldsNode: ReactNode = null;
@@ -174,6 +217,7 @@ export function TypeDocs({
         {slots.description}
         {slots.directives}
         {slots.relations}
+        {slots.usages}
         {slots.fields}
         {slots.values}
         {slots.scalar}
@@ -181,40 +225,70 @@ export function TypeDocs({
     );
   };
 
-  return renderTypeLayout(
-    {
-      header: headNode,
-      description: descriptionNode,
-      directives: directivesNode,
-      relations: relationsNode,
-      fields: fieldsNode,
-      values: valuesNode,
-      scalar: scalarNode,
-    },
-    {
-      type,
-      kind,
-      ctx,
-    },
-  );
+  const slots = {
+    header: headNode,
+    description: descriptionNode,
+    directives: directivesNode,
+    relations: relationsNode,
+    usages: usagesNode,
+    fields: fieldsNode,
+    values: valuesNode,
+    scalar: scalarNode,
+  };
+
+  return renderTypeLayout(slots, {
+    type,
+    kind,
+    ctx,
+  });
 }
 
-function TypeRelation({ label, types }: { label: ReactNode; types: string[] }) {
-  const { schema } = useRenderContext().schema;
-
+function TypeRelation({
+  label,
+  icon: Icon = Layers,
+  children,
+}: {
+  label: ReactNode;
+  icon?: typeof Layers;
+  children: ReactNode;
+}) {
   return (
     <div className="grid grid-cols-[auto_1fr] not-prose bg-fd-card text-sm text-fd-card-foreground rounded-lg border shadow-md overflow-hidden">
       <p className="flex items-center gap-1.5 font-medium border-e bg-fd-secondary text-fd-secondary-foreground p-2">
-        <Layers className="text-fd-primary size-3.5" />
+        <Icon className="text-fd-primary size-3.5" />
         {label}
       </p>
-      <div className="flex flex-wrap items-center gap-4 p-2">
-        {types.map((name) => {
-          const type = schema.getType(name);
-          if (type) return <TypeAnnotation key={name} type={type} />;
-          return <code key={name}>{name}</code>;
-        })}
-      </div>
+      <div className="flex flex-wrap items-center gap-4 p-2">{children}</div>
     </div>
+  );
+}
+
+function OperationChip({ kind, name }: { kind: OperationKind; name: string }) {
+  const ctx = useRenderContext();
+  const href = resolveOperationLink(ctx, kind, name);
+
+  return (
+    <span className="inline-flex items-center gap-1.5">
+      <KindLabel className="text-xs">{kind}</KindLabel>
+      {href ? (
+        <ReferenceLink href={href} className="font-mono">
+          {name}
+        </ReferenceLink>
+      ) : (
+        <code className="font-mono">{name}</code>
+      )}
+    </span>
+  );
+}
+
+function FieldChip({ parent, field }: { parent: string; field: string }) {
+  const ctx = useRenderContext();
+  const href = resolveTypeLink(ctx, parent);
+
+  return (
+    <code className="font-mono text-fd-muted-foreground">
+      {href ? <ReferenceLink href={href}>{parent}</ReferenceLink> : parent}
+      {`.${field}`}
+    </code>
   );
 }

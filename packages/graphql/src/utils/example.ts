@@ -39,26 +39,18 @@ export interface OperationExample {
   response: unknown;
 }
 
-export interface GenerateExampleOptions {
-  /**
-   * max depth of nested composite types in the selection set.
-   *
-   * @default 2
-   */
-  maxDepth?: number;
-  /**
-   * max leaf (scalar/enum) fields to select per composite type.
-   *
-   * @default 8
-   */
-  maxLeafFields?: number;
-  /**
-   * max nested composite fields to select per composite type.
-   *
-   * @default 2
-   */
-  maxCompositeFields?: number;
-}
+/**
+ * max depth of nested composite types in the selection set.
+ */
+const maxDepth = 2;
+/**
+ * max leaf (scalar/enum) fields to select per composite type.
+ */
+const maxLeafFields = 8;
+/**
+ * max nested composite fields to select per composite type.
+ */
+const maxCompositeFields = 2;
 
 /**
  * Generate a deterministic example (query, variables and response) for an operation.
@@ -66,9 +58,7 @@ export interface GenerateExampleOptions {
 export function generateOperationExample(
   schema: GraphQLSchema,
   item: OperationItem,
-  options: GenerateExampleOptions = {},
 ): OperationExample | undefined {
-  const { maxDepth = 2, maxLeafFields = 8, maxCompositeFields = 2 } = options;
   const field = getOperationField(schema, item.kind, item.name);
   if (!field) return;
 

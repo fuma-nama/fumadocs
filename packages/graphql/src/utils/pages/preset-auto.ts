@@ -100,15 +100,10 @@ export function createAutoPreset(options: SchemaToPagesOptions): PagesBuilderCon
       const { schema } = builder;
 
       if (options.per === 'file') {
-        const nameFn: NameFn<PageOutput> =
-          options.name ??
-          ((result) => {
-            const schemaId = result.schemaId;
-
-            return schemaId.startsWith('http://') || schemaId.startsWith('https://')
-              ? 'index'
-              : path.basename(schemaId, path.extname(schemaId));
-          });
+        // named after the schema file, or a generic fallback for remote inputs
+        const isRemote = builder.id.startsWith('http://') || builder.id.startsWith('https://');
+        const baseName = isRemote ? undefined : path.basename(builder.id, path.extname(builder.id));
+        const nameFn: NameFn<PageOutput> = options.name ?? (() => baseName ?? 'index');
 
         const items: GraphQLPageItem[] = [];
         for (const kind of OperationKinds) {
@@ -128,10 +123,7 @@ export function createAutoPreset(options: SchemaToPagesOptions): PagesBuilderCon
           schemaId: builder.id,
           path: '',
           info: {
-            title:
-              builder.id.startsWith('http://') || builder.id.startsWith('https://')
-                ? 'Overview'
-                : path.basename(builder.id, path.extname(builder.id)),
+            title: baseName ?? 'Overview',
           },
           items,
         };

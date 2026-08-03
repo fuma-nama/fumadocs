@@ -12,6 +12,7 @@ import {
   type OperationKind,
 } from '@/utils/schema';
 import { generateOperationExample } from '@/utils/example';
+import { generateRequestSnippets } from '@/utils/snippets';
 import { OperationPlayground } from '@/playground';
 import { KindLabel } from '../components/badge';
 import { Heading } from '../components/heading';
@@ -144,9 +145,24 @@ export function Operation({
     () => generateOperationExample(schema, { kind, name }),
     [schema, kind, name],
   );
+  const snippets = useMemo(
+    () =>
+      example
+        ? generateRequestSnippets({
+            url: playground?.url,
+            query: example.query,
+            variables: example.variables,
+          })
+        : [],
+    [example, playground?.url],
+  );
   let exampleNode: ReactNode = null;
   if (example) {
-    const items = [t('Query')];
+    const snippetLabels: Record<'curl' | 'js', string> = {
+      curl: t('cURL'),
+      js: t('JavaScript'),
+    };
+    const items = [t('Query'), ...snippets.map((snippet) => snippetLabels[snippet.id])];
     if (example.variables !== undefined) items.push(t('Variables'));
     items.push(t('Response'));
 
@@ -155,6 +171,11 @@ export function Operation({
         <Tab value={t('Query')}>
           <ClientCodeBlock lang="graphql" code={example.query} />
         </Tab>
+        {snippets.map((snippet) => (
+          <Tab key={snippet.id} value={snippetLabels[snippet.id]}>
+            <ClientCodeBlock lang={snippet.lang} code={snippet.code} />
+          </Tab>
+        ))}
         {example.variables !== undefined && (
           <Tab value={t('Variables')}>
             <ClientCodeBlock lang="json" code={JSON.stringify(example.variables, null, 2)} />

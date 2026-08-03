@@ -38,6 +38,13 @@ export interface CreateGraphQLPageOptions {
    */
   typeLinks?: (name: string, ctx: RenderContext) => string | undefined;
   /**
+   * resolve the URL of the docs page of an operation, used for cross-linking operation references
+   * (e.g. usage backlinks on type pages).
+   *
+   * return `undefined` for operations without their own page.
+   */
+  operationLinks?: (kind: OperationKind, name: string, ctx: RenderContext) => string | undefined;
+  /**
    * interactive playground, shown on operation pages when `url`, `fetcher` or `render` is provided.
    */
   playground?: {
@@ -45,6 +52,17 @@ export interface CreateGraphQLPageOptions {
      * the URL of GraphQL endpoint, operations are sent over HTTP POST.
      */
     url?: string;
+    /**
+     * allow users to edit the endpoint URL, it is rendered as plain text when disabled.
+     *
+     * @defaultValue true
+     */
+    allowUrlEdit?: boolean;
+    /**
+     * default headers of playground requests, used as the initial header rows
+     * when the user has no stored headers for the endpoint origin.
+     */
+    headers?: Record<string, string>;
     /**
      * replace the default fetcher, e.g. to proxy requests.
      */
@@ -92,6 +110,10 @@ export interface CreateGraphQLPageOptions {
         description: ReactNode;
         directives: ReactNode;
         relations: ReactNode;
+        /**
+         * usage backlinks of the type, e.g. operations returning it.
+         */
+        usages: ReactNode;
         fields: ReactNode;
         values: ReactNode;
         scalar: ReactNode;
@@ -113,8 +135,23 @@ export interface CreateGraphQLPageOptions {
   };
 }
 
+/**
+ * pre-generated links of generated pages, see `baseUrl` in source options.
+ */
+export interface GraphQLLinks {
+  /**
+   * type name -> page URL
+   */
+  types: Record<string, string>;
+  /**
+   * `${kind}:${name}` of operation -> page URL
+   */
+  operations: Record<string, string>;
+}
+
 export type GraphQLPageProps = Omit<GeneratedPageProps, 'document'> & {
   payload: {
+    links?: GraphQLLinks;
     sdl: string;
   };
 };
@@ -156,6 +193,7 @@ export function createGraphQLPage({
         schema: {
           schema,
           sdl: props.payload.sdl,
+          links: props.payload.links,
         },
         shiki,
         shikiOptions,
@@ -171,7 +209,7 @@ export function createGraphQLPage({
       };
 
       return ctx;
-    }, [schema, props.payload.sdl]);
+    }, [schema, props.payload.sdl, props.payload.links]);
 
     return (
       <RenderContextProvider ctx={ctx}>
