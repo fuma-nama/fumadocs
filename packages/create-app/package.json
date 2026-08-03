@@ -47,7 +47,7 @@
     "commander": "^15.0.0",
     "fuma-cli": "^0.1.1",
     "picocolors": "^1.1.1",
-    "tinyexec": "^1.2.4",
+    "tinyexec": "^1.3.0",
     "ts-morph": "^28.0.0"
   },
   "devDependencies": {

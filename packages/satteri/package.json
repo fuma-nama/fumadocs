@@ -69,8 +69,8 @@
     "mdast-util-gfm": "^3.1.0",
     "npm-to-yarn": "^3.2.0",
     "satteri": "^0.9.5",
-    "yuku-codegen": "^0.8.1",
-    "yuku-parser": "^0.8.1"
+    "yuku-codegen": "^0.8.3",
+    "yuku-parser": "^0.8.3"
   },
   "devDependencies": {
     "@types/estree": "^1.0.9",
@@ -79,13 +79,13 @@
     "@types/mdast": "^4.0.4",
     "@types/mdx": "^2.0.14",
     "@types/node": "26.1.2",
-    "@types/react": "^19.2.17",
-    "@types/react-dom": "^19.2.3",
+    "@types/react": "^19.2.18",
+    "@types/react-dom": "^19.2.4",
     "fumadocs-core": "workspace:*",
     "mdast-util-mdx": "^3.0.0",
     "react": "^19.2.8",
     "react-dom": "^19.2.8",
-    "shiki": "^4.3.1",
+    "shiki": "^4.4.1",
     "tsconfig": "workspace:*",
     "tsdown": "0.22.14",
     "typescript": "^6.0.3",

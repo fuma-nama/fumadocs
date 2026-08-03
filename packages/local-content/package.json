@@ -42,13 +42,13 @@
   "devDependencies": {
     "@types/node": "26.1.2",
     "@types/picomatch": "^4.0.3",
-    "@types/react": "^19.2.17",
+    "@types/react": "^19.2.18",
     "@types/ws": "^8.18.1",
     "fumadocs-core": "workspace:*",
     "react": "^19.2.8",
     "tsconfig": "workspace:*",
     "tsdown": "0.22.14",
-    "vite": "^8.1.5",
+    "vite": "^8.2.0",
     "vitest": "^4.1.10"
   },
   "peerDependencies": {
