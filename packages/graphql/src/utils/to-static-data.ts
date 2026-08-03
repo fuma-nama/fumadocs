@@ -8,7 +8,7 @@ import {
   isInterfaceType,
   isObjectType,
 } from 'graphql';
-import type { GeneratedPageProps } from './builder';
+import type { GeneratedPageProps } from '@/utils/pages';
 import { getOperationField, getOperationTitle } from '@/utils/schema';
 
 export function toStaticData(

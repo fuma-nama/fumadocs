@@ -20,7 +20,7 @@ import type { ShikiFactory } from 'fumadocs-core/highlight/shiki';
 import type { BundledTheme, CodeOptionsThemes, CodeToHastOptionsCommon } from 'shiki';
 import type { RenderContext } from '@/types';
 import type { PlaygroundRequest, PlaygroundResult } from '@/playground/fetcher';
-import type { GeneratedPageProps, GraphQLPageItem } from '@/utils/pages/builder';
+import type { GeneratedPageProps, GraphQLPageItem } from '@/utils/pages';
 import type { NamedTypeKind, OperationKind } from '@/utils/schema';
 import { buildSchemaFromSDL } from '@/utils/build-schema';
 import { PageContent } from './api-page';
@@ -110,10 +110,6 @@ export interface CreateGraphQLPageOptions {
         description: ReactNode;
         directives: ReactNode;
         relations: ReactNode;
-        /**
-         * usage backlinks of the type, e.g. operations returning it.
-         */
-        usages: ReactNode;
         fields: ReactNode;
         values: ReactNode;
         scalar: ReactNode;
@@ -149,7 +145,7 @@ export interface GraphQLLinks {
   operations: Record<string, string>;
 }
 
-export type GraphQLPageProps = Omit<GeneratedPageProps, 'document'> & {
+export type GraphQLPageProps = GeneratedPageProps & {
   payload: {
     links?: GraphQLLinks;
     sdl: string;

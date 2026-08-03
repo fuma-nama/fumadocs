@@ -6,12 +6,13 @@ import { useTranslations } from '@fuma-translate/react';
 import { AtSignIcon } from 'lucide-react';
 import { Fragment } from 'react/jsx-runtime';
 import type { ComponentProps } from 'react';
+import Link from 'fumadocs-core/link';
 
 /**
  * A link to a reference, e.g. the docs page of a type or operation.
  */
-export function ReferenceLink({ className, ...props }: ComponentProps<'a'>) {
-  return <a {...props} className={cn('underline hover:text-fd-accent-foreground', className)} />;
+export function ReferenceLink({ className, ...props }: ComponentProps<typeof Link>) {
+  return <Link {...props} className={cn('underline hover:text-fd-accent-foreground', className)} />;
 }
 
 /**

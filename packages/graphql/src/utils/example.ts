@@ -18,20 +18,14 @@ import {
   isUnionType,
   Kind,
   type OperationDefinitionNode,
-  OperationTypeNode,
+  type OperationTypeNode,
   parseType,
   print,
   type SelectionNode,
   type SelectionSetNode,
 } from 'graphql';
-import { getOperationField, type OperationKind } from '@/utils/schema';
-import type { OperationItem } from '@/utils/pages/builder';
-
-const OperationNodeTypes: Record<OperationKind, OperationTypeNode> = {
-  query: OperationTypeNode.QUERY,
-  mutation: OperationTypeNode.MUTATION,
-  subscription: OperationTypeNode.SUBSCRIPTION,
-};
+import { getOperationField } from '@/utils/schema';
+import type { OperationItem } from '@/utils/pages';
 
 export interface OperationExample {
   query: string;
@@ -67,7 +61,8 @@ export function generateOperationExample(
 
   const operation: OperationDefinitionNode = {
     kind: Kind.OPERATION_DEFINITION,
-    operation: OperationNodeTypes[item.kind],
+    // `OperationTypeNode` values are the kind names
+    operation: item.kind as OperationTypeNode,
     name: {
       kind: Kind.NAME,
       value: field.name.charAt(0).toUpperCase() + field.name.slice(1),
@@ -112,123 +107,120 @@ export function generateOperationExample(
       },
     },
   };
+}
 
-  interface Selected {
-    selectionSet?: SelectionSetNode;
-    /**
-     * a sample value of the **named** type, apply `wrapSample` to get the value of a wrapped type.
-     */
-    sample: unknown;
-  }
+interface Selected {
+  selectionSet?: SelectionSetNode;
+  /**
+   * a sample value of the **named** type, apply `wrapSample` to get the value of a wrapped type.
+   */
+  sample: unknown;
+}
 
-  function selectionForType(type: GraphQLOutputType, depth: number): Selected {
-    const named = getNamedType(type);
-    if (isLeafType(named)) return { sample: sampleLeaf(named) };
+function selectionForType(type: GraphQLOutputType, depth: number): Selected {
+  const named = getNamedType(type);
+  if (isLeafType(named)) return { sample: sampleLeaf(named) };
 
-    if (isUnionType(named)) {
-      const first = named.getTypes()[0];
-      const selections: SelectionNode[] = [
-        {
-          kind: Kind.FIELD,
-          name: { kind: Kind.NAME, value: '__typename' },
-        },
-      ];
-      let sample: Record<string, unknown> = {};
-
-      if (first && depth < maxDepth) {
-        const sub = objectSelection(first, depth + 1);
-        selections.push({
-          kind: Kind.INLINE_FRAGMENT,
-          typeCondition: {
-            kind: Kind.NAMED_TYPE,
-            name: { kind: Kind.NAME, value: first.name },
-          },
-          selectionSet: sub.selectionSet!,
-        });
-        sample = sub.sample as Record<string, unknown>;
-      }
-
-      return {
-        selectionSet: { kind: Kind.SELECTION_SET, selections },
-        sample: { __typename: first?.name, ...sample },
-      };
-    }
-
-    return objectSelection(named, depth);
-  }
-
-  function objectSelection(
-    type: GraphQLObjectType | GraphQLInterfaceType,
-    depth: number,
-  ): Selected {
-    const selections: SelectionNode[] = [];
-    const sample: Record<string, unknown> = {};
-    let leafCount = 0;
-    let compositeCount = 0;
-
-    for (const field of Object.values(type.getFields())) {
-      if (field.deprecationReason != null || field.args.some(isRequiredArgument)) continue;
-      const named = getNamedType(field.type);
-
-      if (isLeafType(named)) {
-        if (leafCount >= maxLeafFields) continue;
-        leafCount++;
-
-        selections.push({
-          kind: Kind.FIELD,
-          name: { kind: Kind.NAME, value: field.name },
-        } satisfies FieldNode);
-        sample[field.name] = wrapSample(field.type, sampleLeaf(named));
-      } else if (depth < maxDepth && compositeCount < maxCompositeFields) {
-        const sub = selectionForType(field.type, depth + 1);
-        if (!sub.selectionSet) continue;
-        compositeCount++;
-
-        selections.push({
-          kind: Kind.FIELD,
-          name: { kind: Kind.NAME, value: field.name },
-          selectionSet: sub.selectionSet,
-        } satisfies FieldNode);
-        sample[field.name] = wrapSample(field.type, sub.sample);
-      }
-    }
-
-    if (selections.length === 0) {
-      selections.push({
+  if (isUnionType(named)) {
+    const first = named.getTypes()[0];
+    const selections: SelectionNode[] = [
+      {
         kind: Kind.FIELD,
         name: { kind: Kind.NAME, value: '__typename' },
+      },
+    ];
+    let sample: Record<string, unknown> = {};
+
+    if (first && depth < maxDepth) {
+      const sub = objectSelection(first, depth + 1);
+      selections.push({
+        kind: Kind.INLINE_FRAGMENT,
+        typeCondition: {
+          kind: Kind.NAMED_TYPE,
+          name: { kind: Kind.NAME, value: first.name },
+        },
+        selectionSet: sub.selectionSet!,
       });
-      sample.__typename = type.name;
+      sample = sub.sample as Record<string, unknown>;
     }
 
     return {
       selectionSet: { kind: Kind.SELECTION_SET, selections },
-      sample,
+      sample: { __typename: first?.name, ...sample },
     };
   }
 
-  function sampleInput(type: GraphQLInputType, depth: number): unknown {
-    if (isNonNullType(type)) return sampleInput(type.ofType, depth);
-    if (isListType(type)) return [sampleInput(type.ofType, depth)];
-    if (isLeafType(type)) return sampleLeaf(type);
+  return objectSelection(named, depth);
+}
 
-    const out: Record<string, unknown> = {};
-    // input object, guard against cyclic references
-    if (depth >= 4) return out;
+function objectSelection(type: GraphQLObjectType | GraphQLInterfaceType, depth: number): Selected {
+  const selections: SelectionNode[] = [];
+  const sample: Record<string, unknown> = {};
+  let leafCount = 0;
+  let compositeCount = 0;
 
-    const fields = Object.values(type.getFields());
-    let included = fields.filter(
-      (field) => isRequiredInputField(field) || field.defaultValue !== undefined,
-    );
-    if (included.length === 0) included = fields.slice(0, 2);
+  for (const field of Object.values(type.getFields())) {
+    if (field.deprecationReason != null || field.args.some(isRequiredArgument)) continue;
+    const named = getNamedType(field.type);
 
-    for (const field of included) {
-      out[field.name] =
-        field.defaultValue !== undefined ? field.defaultValue : sampleInput(field.type, depth + 1);
+    if (isLeafType(named)) {
+      if (leafCount >= maxLeafFields) continue;
+      leafCount++;
+
+      selections.push({
+        kind: Kind.FIELD,
+        name: { kind: Kind.NAME, value: field.name },
+      } satisfies FieldNode);
+      sample[field.name] = wrapSample(field.type, sampleLeaf(named));
+    } else if (depth < maxDepth && compositeCount < maxCompositeFields) {
+      const sub = selectionForType(field.type, depth + 1);
+      if (!sub.selectionSet) continue;
+      compositeCount++;
+
+      selections.push({
+        kind: Kind.FIELD,
+        name: { kind: Kind.NAME, value: field.name },
+        selectionSet: sub.selectionSet,
+      } satisfies FieldNode);
+      sample[field.name] = wrapSample(field.type, sub.sample);
     }
-
-    return out;
   }
+
+  if (selections.length === 0) {
+    selections.push({
+      kind: Kind.FIELD,
+      name: { kind: Kind.NAME, value: '__typename' },
+    });
+    sample.__typename = type.name;
+  }
+
+  return {
+    selectionSet: { kind: Kind.SELECTION_SET, selections },
+    sample,
+  };
+}
+
+function sampleInput(type: GraphQLInputType, depth: number): unknown {
+  if (isNonNullType(type)) return sampleInput(type.ofType, depth);
+  if (isListType(type)) return [sampleInput(type.ofType, depth)];
+  if (isLeafType(type)) return sampleLeaf(type);
+
+  const out: Record<string, unknown> = {};
+  // input object, guard against cyclic references
+  if (depth >= 4) return out;
+
+  const fields = Object.values(type.getFields());
+  let included = fields.filter(
+    (field) => isRequiredInputField(field) || field.defaultValue !== undefined,
+  );
+  if (included.length === 0) included = fields.slice(0, 2);
+
+  for (const field of included) {
+    out[field.name] =
+      field.defaultValue !== undefined ? field.defaultValue : sampleInput(field.type, depth + 1);
+  }
+
+  return out;
 }
 
 function wrapSample(type: GraphQLType, sample: unknown): unknown {

@@ -19,6 +19,7 @@ import { EnumValueList } from '../components/enum-values';
 import { DirectiveList, ReferenceLink, TypeAnnotation } from '../components/type-annotation';
 import { resolveOperationLink, resolveTypeLink, useRenderContext } from '../contexts/api';
 import { Braces, CornerUpLeft, Import, Layers, Variable } from 'lucide-react';
+import Link from 'fumadocs-core/link';
 
 export function TypeDocs({
   name,
@@ -91,14 +92,9 @@ export function TypeDocs({
       </TypeRelation>,
     );
   }
-  const relationsNode: ReactNode = relations.length > 0 && (
-    <div className="flex flex-col gap-2 mt-4">{relations}</div>
-  );
-
   const usages = useMemo(() => getTypeUsages(schema, name), [schema, name]);
-  const usageRows: ReactNode[] = [];
   if (usages.returnedBy.length > 0) {
-    usageRows.push(
+    relations.push(
       <TypeRelation key="returned-by" label={t('Returned by')} icon={CornerUpLeft}>
         {usages.returnedBy.map((op) => (
           <OperationChip key={`${op.kind}:${op.name}`} kind={op.kind} name={op.name} />
@@ -107,7 +103,7 @@ export function TypeDocs({
     );
   }
   if (usages.inputFor.length > 0) {
-    usageRows.push(
+    relations.push(
       <TypeRelation key="input-for" label={t('Input for')} icon={Import}>
         {usages.inputFor.map((op) => (
           <OperationChip key={`${op.kind}:${op.name}`} kind={op.kind} name={op.name} />
@@ -116,7 +112,7 @@ export function TypeDocs({
     );
   }
   if (usages.memberOf.length > 0) {
-    usageRows.push(
+    relations.push(
       <TypeRelation key="field-of" label={t('Field of')} icon={Braces}>
         {usages.memberOf.map((ref) => (
           <FieldChip key={`${ref.parent}.${ref.field}`} parent={ref.parent} field={ref.field} />
@@ -125,7 +121,7 @@ export function TypeDocs({
     );
   }
   if (usages.argumentOf.length > 0) {
-    usageRows.push(
+    relations.push(
       <TypeRelation key="argument-of" label={t('Argument of')} icon={Variable}>
         {usages.argumentOf.map((ref) => (
           <FieldChip key={`${ref.parent}.${ref.field}`} parent={ref.parent} field={ref.field} />
@@ -133,8 +129,9 @@ export function TypeDocs({
       </TypeRelation>,
     );
   }
-  const usagesNode: ReactNode = usageRows.length > 0 && (
-    <div className="flex flex-col gap-2 mt-4">{usageRows}</div>
+
+  const relationsNode: ReactNode = relations.length > 0 && (
+    <TypeRelations>{relations}</TypeRelations>
   );
 
   let fieldsNode: ReactNode = null;
@@ -195,12 +192,12 @@ export function TypeDocs({
   let scalarNode: ReactNode = null;
   if (isScalarType(type) && type.specifiedByURL) {
     scalarNode = (
-      <p className="text-sm not-prose">
+      <p className="text-sm">
         {t('Specification')}:{' '}
         <a
           href={type.specifiedByURL}
           rel="noreferrer noopener"
-          className="underline text-fd-muted-foreground hover:text-fd-accent-foreground"
+          className="not-prose underline text-fd-muted-foreground hover:text-fd-accent-foreground"
         >
           {type.specifiedByURL}
         </a>
@@ -217,7 +214,6 @@ export function TypeDocs({
         {slots.description}
         {slots.directives}
         {slots.relations}
-        {slots.usages}
         {slots.fields}
         {slots.values}
         {slots.scalar}
@@ -230,7 +226,6 @@ export function TypeDocs({
     description: descriptionNode,
     directives: directivesNode,
     relations: relationsNode,
-    usages: usagesNode,
     fields: fieldsNode,
     values: valuesNode,
     scalar: scalarNode,
@@ -243,6 +238,14 @@ export function TypeDocs({
   });
 }
 
+function TypeRelations({ children }: { children: ReactNode }) {
+  return (
+    <div className="grid grid-cols-[auto_1fr] not-prose bg-fd-card text-sm text-fd-card-foreground rounded-lg border shadow-md overflow-hidden my-4">
+      {children}
+    </div>
+  );
+}
+
 function TypeRelation({
   label,
   icon: Icon = Layers,
@@ -253,13 +256,15 @@ function TypeRelation({
   children: ReactNode;
 }) {
   return (
-    <div className="grid grid-cols-[auto_1fr] not-prose bg-fd-card text-sm text-fd-card-foreground rounded-lg border shadow-md overflow-hidden">
-      <p className="flex items-center gap-1.5 font-medium border-e bg-fd-secondary text-fd-secondary-foreground p-2">
-        <Icon className="text-fd-primary size-3.5" />
-        {label}
-      </p>
+    <>
+      <div className="size-full font-medium border-e bg-fd-secondary text-fd-secondary-foreground p-2 border-b last:border-b-none">
+        <p className="flex items-center gap-1.5">
+          <Icon className="text-fd-primary size-3.5" />
+          {label}
+        </p>
+      </div>
       <div className="flex flex-wrap items-center gap-4 p-2">{children}</div>
-    </div>
+    </>
   );
 }
 
@@ -267,16 +272,26 @@ function OperationChip({ kind, name }: { kind: OperationKind; name: string }) {
   const ctx = useRenderContext();
   const href = resolveOperationLink(ctx, kind, name);
 
+  if (href) {
+    return (
+      <Link
+        href={href}
+        className="inline-flex items-center font-mono gap-1.5 transition-opacity hover:opacity-80"
+      >
+        <KindLabel className="text-xs p-0.5 bg-fd-secondary rounded-md border shadow-sm">
+          {kind}
+        </KindLabel>
+        {name}
+      </Link>
+    );
+  }
+
   return (
-    <span className="inline-flex items-center gap-1.5">
-      <KindLabel className="text-xs">{kind}</KindLabel>
-      {href ? (
-        <ReferenceLink href={href} className="font-mono">
-          {name}
-        </ReferenceLink>
-      ) : (
-        <code className="font-mono">{name}</code>
-      )}
+    <span className="inline-flex items-center gap-1.5 text-fd-muted-foreground font-mono">
+      <KindLabel className="text-xs p-0.5 bg-fd-secondary rounded-md border shadow-sm">
+        {kind}
+      </KindLabel>
+      {name}
     </span>
   );
 }
