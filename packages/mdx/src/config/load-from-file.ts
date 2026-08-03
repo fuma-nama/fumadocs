@@ -40,12 +40,20 @@ async function compileConfig(core: Core): Promise<boolean> {
   return true;
 }
 
+export interface LoadConfigResult {
+  config: LoadedConfig;
+  /**
+   * whether the config was loaded from a config file, `false` when the file doesn't exist (e.g. macro-only projects)
+   */
+  fromFile: boolean;
+}
+
 /**
  * Load config
  *
  * @param build - By default, it assumes the config file has been compiled. Set this `true` to compile the config first.
  */
-export async function loadConfig(core: Core, build = false): Promise<LoadedConfig> {
+export async function loadConfig(core: Core, build = false): Promise<LoadConfigResult> {
   let exists: boolean | undefined;
   if (build) {
     exists = await compileConfig(core);
@@ -56,11 +64,11 @@ export async function loadConfig(core: Core, build = false): Promise<LoadedConfi
     () => false,
   );
 
-  if (!exists) return buildConfig({}, process.cwd());
+  if (!exists) return { config: buildConfig({}, process.cwd()), fromFile: false };
 
   const url = pathToFileURL(core.getCompiledConfigPath());
   // always return a new config
   url.searchParams.set('hash', Date.now().toString());
 
-  return buildConfig(await import(url.href), process.cwd());
+  return { config: buildConfig(await import(url.href), process.cwd()), fromFile: true };
 }

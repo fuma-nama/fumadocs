@@ -31,10 +31,15 @@ export function createMDX(options: CreateMDXOptions = {}) {
   const isDev = process.env.NODE_ENV === 'development';
   const macro = resolveMacroOptions(options.macro);
 
+  let pending: Promise<void> | undefined;
   if (process.env._FUMADOCS_MDX !== '1') {
     process.env._FUMADOCS_MDX = '1';
 
-    void init(isDev, core);
+    pending = init(isDev, core);
+    // reported here in case no consumer awaits the returned config
+    pending.catch((err) => {
+      console.error('[MDX] failed to generate files:', err);
+    });
   }
 
   function onLoaderOptions(type: WebpackLoaderOptions['type']): WebpackLoaderOptions {
@@ -48,7 +53,7 @@ export function createMDX(options: CreateMDXOptions = {}) {
     };
   }
 
-  return (nextConfig: NextConfig = {}): NextConfig => {
+  return (nextConfig: NextConfig = {}): NextConfig & PromiseLike<NextConfig> => {
     const turbopackLoaderOptions = onLoaderOptions('turbopack');
 
     const turbopack: TurbopackOptions = {
@@ -110,7 +115,7 @@ export function createMDX(options: CreateMDXOptions = {}) {
       },
     };
 
-    return {
+    const out: NextConfig = {
       ...nextConfig,
       turbopack,
       pageExtensions: nextConfig.pageExtensions ?? defaultPageExtensions,
@@ -164,15 +169,38 @@ export function createMDX(options: CreateMDXOptions = {}) {
         return nextConfig.webpack?.(config, options) ?? config;
       },
     };
+
+    const ready = pending ?? Promise.resolve();
+    // `then` must be non-enumerable: object consumers (`Object.keys`, spread) should see a
+    // plain config, while consumers that `await` it (like Next) block until the initial
+    // generation is fully written to disk (#3450).
+    return Object.defineProperty(out, 'then', {
+      enumerable: false,
+      configurable: true,
+      writable: true,
+      value(
+        onFulfilled?: ((value: NextConfig) => unknown) | null,
+        onRejected?: ((reason: unknown) => unknown) | null,
+      ) {
+        return ready
+          .then(() => {
+            // object rest skips the non-enumerable `then`: the resolved value must not be
+            // thenable, or `await` would assimilate it recursively
+            const { ...clean } = out;
+            return clean;
+          })
+          .then(onFulfilled, onRejected);
+      },
+    }) as NextConfig & PromiseLike<NextConfig>;
   };
 }
 
-async function init(dev: boolean, core: Core): Promise<void> {
+function init(dev: boolean, core: Core): Promise<void> {
   async function initOrReload() {
-    await core.init({
-      config: loadConfig(core, true),
-    });
-    await core.emit({ write: true });
+    const { config, fromFile } = await loadConfig(core, true);
+    await core.init({ config });
+    // macro-only projects have no config file, index files shouldn't be emitted
+    if (fromFile) await core.emit({ write: true });
   }
 
   async function devServer() {
@@ -219,18 +247,23 @@ async function init(dev: boolean, core: Core): Promise<void> {
     await core.initServer({ watcher });
   }
 
-  await initOrReload();
+  const ready = initOrReload();
   if (dev) {
-    await devServer();
+    // config load must not block on watcher setup, only on generated files
+    void ready
+      .then(devServer, () => {})
+      .catch((err) => {
+        console.error('[MDX] failed to start dev server:', err);
+      });
   }
+  return ready;
 }
 
 export async function postInstall(options: CreateMDXOptions = {}) {
   const core = createNextCore(options);
-  await core.init({
-    config: loadConfig(core, true),
-  });
-  await core.emit({ write: true });
+  const { config, fromFile } = await loadConfig(core, true);
+  await core.init({ config });
+  if (fromFile) await core.emit({ write: true });
 }
 
 function createNextCore({ outDir, configPath, index = {} }: CreateMDXOptions): Core {

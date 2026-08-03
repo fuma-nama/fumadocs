@@ -13,6 +13,13 @@
       "runtimeArgs": ["--dir", "examples/obsidian", "dev"],
       "port": 3000,
       "autoPort": true
+    },
+    {
+      "name": "graphql-example",
+      "runtimeExecutable": "pnpm",
+      "runtimeArgs": ["--dir", "examples/graphql", "dev"],
+      "port": 3000,
+      "autoPort": true
     }
   ]
 }

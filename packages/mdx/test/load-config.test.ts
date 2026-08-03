@@ -29,8 +29,9 @@ test('load existing config file', async () => {
     outDir: path.join(dir, '.out'),
   });
 
-  const config = await loadConfig(core, true);
+  const { config, fromFile } = await loadConfig(core, true);
   expect(config).toBeDefined();
+  expect(fromFile).toBe(true);
   expect(config?.global.compiler).toBe('mdx');
 });
 
@@ -41,7 +42,8 @@ test('fallback to empty config when file is missing', async () => {
     outDir: path.join(dir, '.out-missing'),
   });
 
-  const config = await loadConfig(core, true);
+  const { config, fromFile } = await loadConfig(core, true);
+  expect(fromFile).toBe(false);
   expect(config.collections.size).toBe(0);
   expect(config.global.compiler).toBeUndefined();
 });

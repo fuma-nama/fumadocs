@@ -1,6 +1,6 @@
 {
   "name": "docs",
-  "version": "0.1.14",
+  "version": "0.1.16",
   "private": true,
   "scripts": {
     "build": "pnpm build:pre && next build && pnpm build:post",
@@ -18,6 +18,7 @@
     "@base-ui/react": "^1.6.0",
     "@floating-ui/react-dom": "^2.1.9",
     "@fumadocs/asyncapi": "workspace:*",
+    "@fumadocs/graphql": "workspace:*",
     "@fumadocs/satteri": "workspace:*",
     "@fumadocs/story": "workspace:*",
     "@fumari/sponsors": "0.1.0",
@@ -44,6 +45,7 @@
     "fumadocs-twoslash": "workspace:^",
     "fumadocs-typescript": "workspace:^",
     "fumadocs-ui": "workspace:@fumadocs/base-ui@*",
+    "graphql": "^16.11.0",
     "hast-util-to-jsx-runtime": "^2.3.6",
     "katex": "0.18.1",
     "lucide-react": "^1.27.0",

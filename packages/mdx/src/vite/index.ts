@@ -183,7 +183,8 @@ export default function mdx(
         return getConfig({ root: core.root });
       },
       async buildStart() {
-        await managed.core.emit({ write: true });
+        // macro-only projects have no config file, index files shouldn't be emitted
+        if (forcedConfig || managed.watchConfig) await managed.core.emit({ write: true });
       },
       async configureServer(server) {
         const core = managed.core;
@@ -198,7 +199,7 @@ export default function mdx(
           if (path.resolve(file) !== core.configPath) return;
 
           await managed.reload();
-          await core.emit({ write: true });
+          if (managed.watchConfig) await core.emit({ write: true });
         };
 
         server.watcher.on('change', onChange);
@@ -279,7 +280,7 @@ async function loadCoreConfig(
 export async function postInstall(pluginOptions: PluginOptions = {}) {
   const managed = createManagedCore(process.cwd(), undefined, pluginOptions);
   await managed.reload();
-  await managed.core.emit({ write: true });
+  if (managed.watchConfig) await managed.core.emit({ write: true });
 }
 
 function createViteCore(root: string, { index = true, configPath, outDir }: PluginOptions) {

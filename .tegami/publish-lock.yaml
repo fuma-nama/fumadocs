@@ -1,55 +1,46 @@
 core:changelogs:
-  - content: "---\npackages:\n  npm:fumadocs-core:\n    type: minor\n  npm:fumadocs-ui:\n    type: patch\n  npm:@fumadocs/base-ui:\n    type: patch\n  npm:create-fumadocs-app:\n    type: patch\n---\n\n## Replace Orama with ZBSearch, zero-config i18n search\n\nThe built-in search engine moved from `@orama/orama` to [ZBSearch](https://www.zbsearch.dev), a near drop-in successor. All module paths and APIs are unchanged, and search now works with **every language out of the box**: the new default `multilingual` mode uses Unicode word segmentation, so i18n search needs zero config.\n\n```ts\nimport { createFromSource } from 'fumadocs-core/search/server';\n\n// no `localeMap`, no `@orama/tokenizers`, CJK included\nexport const { GET } = createFromSource(source);\n```\n\nAll locales now share a single search database — results are filtered by the locale of your pages at query time. Same for static mode:\n\n```ts\nimport { staticClient } from 'fumadocs-core/search/client/orama-static';\n\nconst client = staticClient({ locale });\n```\n\n### Renames\n\n- `oramaStaticClient` → `staticClient` (old name kept as deprecated alias)\n- `initOrama` → `initDB`, it now creates a ZBSearch instance and is optional — the exported data restores the tokenizer on load\n\n### Deprecated\n\n- `localeMap` is no longer needed. It still works for language-specific stemming/stop-words and keeps the legacy per-locale databases when specified.\n\n### Notes for advanced usage\n\n- `language`, `components`, `plugins` and `search` options are now typed against ZBSearch instead of `@orama/orama` — custom tokenizers or plugins written for Orama must be swapped to their ZBSearch equivalents.\n- The exported static search data is now a ZBSearch database (i18n exports became a single unified database), so server and client should be on the same fumadocs-core version.\n- `@orama/orama` and `@orama/tokenizers` can be removed from your dependencies unless you use them directly. Orama **Cloud** integrations (`fumadocs-core/search/orama-cloud`) are unaffected.\n"
-    filename: 2026-07-28-zbsearch.md
-    v: 0.0.0
-  - content: "---\npackages:\n  npm:fumadocs-mdx:\n    type: patch\n---\n\n## Support simpler `fumadocsMdx` vite plugin usage\n\nUse the `fumadocsMdx` method instead for better syntax around macro usage.\n"
-    filename: 2026-07-30-ms7lj7h0.md
-    v: 0.0.0
-  - content: "---\npackages:\n  npm:fumadocs-mdx:\n    type: patch\n---\n\n## Support browser helpers for Macro API\n\nUse preload & lazy body renderer on non-rsc environment.\n"
-    filename: 2026-07-31-ms7qdfei.md
+  - content: "---\npackages:\n  npm:@fumadocs/graphql:\n    type: minor\n  npm:@fumadocs/api-docs:\n    type: patch\n---\n\n## Introduce `@fumadocs/graphql`\n\nGenerate API reference docs from your GraphQL schemas, similar to the OpenAPI/AsyncAPI integration.\n\n```ts\nimport { createGraphQL } from '@fumadocs/graphql/server';\n\nexport const graphql = createGraphQL({\n  input: ['./schema.graphql'],\n});\n```\n\nAdd the generated pages to your source:\n\n```ts\nimport { loader } from 'fumadocs-core/source';\n\nexport const source = loader(\n  {\n    docs: docs.toFumadocsSource(),\n    graphql: await graphql.staticSource({\n      baseDir: 'graphql',\n      meta: true,\n    }),\n  },\n  {\n    baseUrl: '/docs',\n    plugins: [graphql.loaderPlugin()],\n  },\n);\n```\n\nAnd render them with `createGraphQLPage` from `@fumadocs/graphql/ui`, with an optional interactive playground:\n\n```tsx\nexport const GraphQLPage = createGraphQLPage({\n  playground: {\n    url: 'https://api.example.com/graphql',\n  },\n});\n```\n\nIt accepts SDL files (including `extend type`), SDL text, introspection results, and `GraphQLSchema` instances, and generates per-operation & per-type pages with arguments/fields, deprecations, custom directive callouts, and example queries/responses.\n\nHighlights:\n\n- **Playground**: syntax-highlighted query editor with live validation, a typed variables form generated from argument types, per-endpoint header presets, and GraphQL-aware error display. Configurable via `playground.url`, `allowUrlEdit`, `headers`, `fetcher` and `render`.\n- **Usage backlinks**: type pages list where a type is returned, used as a field, or accepted as input.\n- **Cross-linking out of the box**: pass `baseUrl` (the `baseUrl` of your `loader()`) to `staticSource()` and type & operation references link to their pages automatically.\n- **Request snippets**: generated cURL & JavaScript tabs next to the example query.\n"
+    filename: 2026-08-02-graphql.md
     v: 0.0.0
 core:packages:
-  - id: npm:@fumadocs/api-docs
-    updated: false
-  - id: npm:@fumadocs/asyncapi
-    updated: false
   - changelogIds:
-      - 2026-07-28-zbsearch.md
-    id: npm:@fumadocs/base-ui
+      - 2026-08-02-graphql.md
+    id: npm:@fumadocs/api-docs
+    updated: true
+  - id: npm:@fumadocs/asyncapi
     updated: true
   - id: npm:@fumadocs/basehub
     updated: false
-  - id: npm:@fumadocs/cli
+  - id: npm:@fumadocs/base-ui
     updated: false
-  - id: npm:@fumadocs/content
+  - id: npm:@fumadocs/cli
     updated: false
   - id: npm:@fumadocs/content-collections
     updated: false
-  - changelogIds:
-      - 2026-07-28-zbsearch.md
-    id: npm:fumadocs-core
-    updated: true
-  - changelogIds:
-      - 2026-07-28-zbsearch.md
-    id: npm:create-fumadocs-app
-    updated: true
+  - id: npm:@fumadocs/content
+    updated: false
+  - id: npm:fumadocs-core
+    updated: false
+  - id: npm:create-fumadocs-app
+    updated: false
   - id: npm:create-fumadocs-versions
-    updated: true
+    updated: false
   - id: npm:fumadocs-docgen
     updated: false
   - id: npm:fumadocs-epub
     updated: false
+  - changelogIds:
+      - 2026-08-02-graphql.md
+    id: npm:@fumadocs/graphql
+    updated: true
   - id: npm:@fumadocs/language
     updated: false
   - id: npm:@fumadocs/local-content
     updated: false
   - id: npm:@fumadocs/local-md
     updated: false
-  - changelogIds:
-      - 2026-07-30-ms7lj7h0.md
-      - 2026-07-31-ms7qdfei.md
-    id: npm:fumadocs-mdx
-    updated: true
+  - id: npm:fumadocs-mdx
+    updated: false
   - id: npm:@fumadocs/mdx-remote
     updated: false
   - id: npm:@fumadocs/notion
@@ -57,15 +48,13 @@ core:packages:
   - id: npm:fumadocs-obsidian
     updated: false
   - id: npm:fumadocs-openapi
-    updated: false
+    updated: true
   - id: npm:fumadocs-preview
+    updated: false
+  - id: npm:fumadocs-ui
     updated: false
   - id: npm:fumadocs-python
     updated: false
-  - changelogIds:
-      - 2026-07-28-zbsearch.md
-    id: npm:fumadocs-ui
-    updated: true
   - id: npm:@fumadocs/sanity
     updated: false
   - id: npm:@fumadocs/satteri
@@ -84,19 +73,22 @@ core:packages:
     updated: false
   - id: npm:@fumadocs/vite
     updated: false
+npm:mark-latest:
+  - id: npm:@fumadocs/graphql
 npm:packages:
   - id: npm:@fumadocs/api-docs
   - id: npm:@fumadocs/asyncapi
-  - id: npm:@fumadocs/base-ui
   - id: npm:@fumadocs/basehub
+  - id: npm:@fumadocs/base-ui
   - id: npm:@fumadocs/cli
-  - id: npm:@fumadocs/content
   - id: npm:@fumadocs/content-collections
+  - id: npm:@fumadocs/content
   - id: npm:fumadocs-core
   - id: npm:create-fumadocs-app
   - id: npm:create-fumadocs-versions
   - id: npm:fumadocs-docgen
   - id: npm:fumadocs-epub
+  - id: npm:@fumadocs/graphql
   - id: npm:@fumadocs/language
   - id: npm:@fumadocs/local-content
   - id: npm:@fumadocs/local-md
@@ -106,8 +98,8 @@ npm:packages:
   - id: npm:fumadocs-obsidian
   - id: npm:fumadocs-openapi
   - id: npm:fumadocs-preview
-  - id: npm:fumadocs-python
   - id: npm:fumadocs-ui
+  - id: npm:fumadocs-python
   - id: npm:@fumadocs/sanity
   - id: npm:@fumadocs/satteri
   - id: npm:@fumadocs/shadcn
@@ -117,33 +109,8 @@ npm:packages:
   - id: npm:fumadocs-twoslash
   - id: npm:fumadocs-typescript
   - id: npm:@fumadocs/vite
-  - id: npm:vite-data
   - id: npm:docs
-  - id: npm:example-astro
+  - id: npm:example-graphql
   - id: npm:example-asyncapi
-  - id: npm:example-base-ui
-  - id: npm:example-content-collections
-  - id: npm:example-marble-cms
-  - id: npm:example-next
-  - id: npm:example-i18n
-  - id: npm:example-next-local-md
-  - id: npm:example-next-min
-  - id: npm:example-next-shadcn
-  - id: npm:example-next-static
-  - id: npm:example-obsidian
   - id: npm:example-openapi
-  - id: npm:example-python
-  - id: npm:example-react-router
-  - id: npm:example-react-router-i18n
-  - id: npm:example-react-router-min
-  - id: npm:example-react-router-rsc
-  - id: npm:example-react-router-spa
-  - id: npm:example-tanstack-start
-  - id: npm:example-tanstack-start-local-md
-  - id: npm:example-tanstack-start-i18n
-  - id: npm:example-tanstack-start-min
   - id: npm:example-tanstack-start-openapi
-  - id: npm:example-tanstack-start-spa
-  - id: npm:example-tanstack-start-story
-  - id: npm:example-waku
-  - id: npm:example-waku-i18n
