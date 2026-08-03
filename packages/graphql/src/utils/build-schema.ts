@@ -23,12 +23,16 @@ export function buildSchemaFromSDL(sdl: string): GraphQLSchema {
     }
   }
 
-  let schema = buildASTSchema({ kind: Kind.DOCUMENT, definitions }, { assumeValidSDL: true });
+  // skip schema validation on client, it is done on server when loading the schema.
+  let schema = buildASTSchema(
+    { kind: Kind.DOCUMENT, definitions },
+    { assumeValidSDL: true, assumeValid: true },
+  );
   if (extensions.length > 0) {
     schema = extendSchema(
       schema,
       { kind: Kind.DOCUMENT, definitions: extensions },
-      { assumeValidSDL: true },
+      { assumeValidSDL: true, assumeValid: true },
     );
   }
 

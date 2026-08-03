@@ -2,6 +2,7 @@
 import type { GraphQLEnumType } from 'graphql';
 import { useTranslations } from '@fuma-translate/react';
 import { cn } from '@/utils/cn';
+import { Badge } from './badge';
 import { Markdown } from './markdown';
 
 export function EnumValueList({ type, className }: { type: GraphQLEnumType; className?: string }) {
@@ -26,9 +27,7 @@ export function EnumValueList({ type, className }: { type: GraphQLEnumType; clas
           )}
           {value.deprecationReason != null && (
             <div className="flex flex-wrap gap-1.5 items-center pt-2 text-xs">
-              <span className="font-mono font-medium text-yellow-600 dark:text-yellow-400">
-                {t('Deprecated')}
-              </span>
+              <Badge color="yellow">{t('Deprecated')}</Badge>
               <div className="prose-no-margin text-fd-muted-foreground empty:hidden">
                 <Markdown md={value.deprecationReason} />
               </div>

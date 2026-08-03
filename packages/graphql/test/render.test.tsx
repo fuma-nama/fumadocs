@@ -36,7 +36,9 @@ describe('render <GraphQLPage />', () => {
     expect(html).toContain('Arguments');
     expect(html).toContain('Returns');
     // custom directive callout
-    expect(html).toContain('@auth(requires: ADMIN)');
+    // custom directive callout, rendered as a card with name & arguments
+    expect(html).toContain('auth');
+    expect(html).toContain('ADMIN');
     // example query codeblock
     expect(html).toContain('query Orders');
     // cross-linking of type references

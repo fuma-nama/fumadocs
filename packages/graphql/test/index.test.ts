@@ -62,9 +62,25 @@ describe('GraphQL source', () => {
 
     const typeFile = source.files.find((file) => file.path === '/objects/Order.mdx');
     expect(typeFile).toBeDefined();
-    expect((typeFile!.data as GraphQLPageData).getGraphQLPageProps().items).toEqual([
-      { type: 'type', kind: 'object', name: 'Order' },
-    ]);
+    const typeProps = (typeFile!.data as GraphQLPageData).getGraphQLPageProps();
+    expect(typeProps.items).toEqual([{ type: 'type', kind: 'object', name: 'Order' }]);
+    // links are only generated when `baseUrl` is specified
+    expect(typeProps.payload.links).toBeUndefined();
+  });
+
+  test('pre-generated links', async () => {
+    const source = await create().staticSource({
+      // route group folders are ignored in page URLs
+      baseDir: '(graphql)',
+      baseUrl: '/docs',
+    });
+    const file = source.files.find((file) => file.path === '(graphql)/queries/orders.mdx');
+    const { links } = (file!.data as GraphQLPageData).getGraphQLPageProps().payload;
+
+    expect(links?.operations['query:orders']).toBe('/docs/queries/orders');
+    expect(links?.operations['mutation:createOrder']).toBe('/docs/mutations/createOrder');
+    expect(links?.types.Order).toBe('/docs/objects/Order');
+    expect(links?.types.OrderStatus).toBe('/docs/enums/OrderStatus');
   });
 
   test('per item with meta files', async () => {

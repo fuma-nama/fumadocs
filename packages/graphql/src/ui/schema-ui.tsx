@@ -57,6 +57,10 @@ export interface SchemaViewProps {
   root: SchemaViewRoot;
 }
 
+const TagCardClass = 'flex flex-col w-full bg-fd-secondary border rounded-lg shadow-md';
+const TagCardTitleClass =
+  'font-medium text-xs text-fd-muted-foreground rounded-t-[inherit] bg-fd-muted not-prose border-b';
+
 export function GraphQLSchemaView({ client, root }: SchemaViewProps) {
   const { schema } = useRenderContext().schema;
   const translations = useTranslations().translations;
@@ -229,10 +233,8 @@ export function generateGraphQLSchemaUI(
     if (doc.args && doc.args.length > 0) {
       tags.push({
         node: (
-          <div className="flex flex-col w-full bg-fd-secondary border rounded-lg shadow-md">
-            <p className="font-medium text-xs text-fd-muted-foreground rounded-t-[inherit] bg-fd-muted not-prose border-b p-2">
-              {t('Arguments')}
-            </p>
+          <div className={TagCardClass}>
+            <p className={`${TagCardTitleClass} p-2`}>{t('Arguments')}</p>
             {doc.args.map((arg) => (
               <div key={arg.name} className="text-xs px-2 py-1.5">
                 <div className="flex items-center not-prose gap-2">
@@ -261,10 +263,8 @@ export function generateGraphQLSchemaUI(
     if (isEnumType(named)) {
       tags.push({
         node: (
-          <div className="flex flex-col w-full bg-fd-secondary border rounded-lg shadow-md">
-            <p className="font-medium text-xs text-fd-muted-foreground rounded-t-[inherit] bg-fd-muted not-prose border-b px-2 py-1.5">
-              {t('Values')}
-            </p>
+          <div className={TagCardClass}>
+            <p className={`${TagCardTitleClass} px-2 py-1.5`}>{t('Values')}</p>
             <EnumValueList type={named} className="p-2" />
           </div>
         ),

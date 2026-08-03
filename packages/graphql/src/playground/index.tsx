@@ -1,9 +1,18 @@
 'use client';
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslations } from '@fuma-translate/react';
 import { buttonVariants } from 'fumadocs-ui/components/ui/button';
-import { ChevronDown, CircleCheck, CircleX, Play, Plus, Trash2 } from 'lucide-react';
-import { isRequiredArgument } from 'graphql';
+import {
+  ChevronDown,
+  CircleCheck,
+  CircleX,
+  Play,
+  Plus,
+  RotateCcw,
+  Trash2,
+  TriangleAlert,
+} from 'lucide-react';
+import { isRequiredArgument, parse, validate } from 'graphql';
 import { StfProvider, useStf } from '@fumari/stf';
 import { stringifyFieldKey } from '@fumari/stf/lib/utils';
 import {
@@ -25,39 +34,30 @@ import { CodeEditor } from '@/ui/components/code-editor';
 import { Badge } from '@/ui/components/badge';
 import { executeGraphQL, type PlaygroundResult } from './fetcher';
 import { inputTypeToJsonSchema } from './json-schema';
+import { getEndpointOrigin, type HeaderItem, readStored, writeStored } from './storage';
 
-const StorageKey = 'fumadocs-graphql-playground';
-
-interface HeaderItem {
-  key: string;
-  value: string;
-}
-
-interface StoredState {
-  url?: string;
-  headers?: HeaderItem[];
-}
-
-function readStored(): StoredState {
-  try {
-    const raw = localStorage.getItem(StorageKey);
-    if (raw) return JSON.parse(raw) as StoredState;
-  } catch {
-    // ignore
-  }
-  return {};
-}
+/**
+ * responses larger than this (in characters) are rendered without syntax highlighting.
+ */
+const MaxHighlightSize = 100_000;
 
 export function OperationPlayground({ kind, name }: { kind: OperationKind; name: string }) {
   const t = useTranslations({ note: 'graphql playground' });
   const ctx = useRenderContext();
   const playground = ctx.playground ?? {};
   const { schema } = ctx.schema;
+  const allowUrlEdit = playground.allowUrlEdit ?? true;
+  // the default fetcher sends operations over HTTP POST, which cannot serve subscriptions
+  const runDisabled = kind === 'subscription' && !playground.fetcher;
 
   const field = useMemo(() => getOperationField(schema, kind, name), [schema, kind, name]);
   const example = useMemo(
     () => generateOperationExample(schema, { kind, name }),
     [schema, kind, name],
+  );
+  const defaultHeaders = useMemo<HeaderItem[]>(
+    () => Object.entries(playground.headers ?? {}).map(([key, value]) => ({ key, value })),
+    [playground.headers],
   );
 
   const [open, setOpen] = useState(true);
@@ -66,7 +66,10 @@ export function OperationPlayground({ kind, name }: { kind: OperationKind; name:
   );
   const [url, setUrl] = useState(playground.url ?? '');
   const [query, setQuery] = useState(example?.query ?? '');
-  const [headers, setHeaders] = useState<HeaderItem[]>([]);
+  const [headers, setHeaders] = useState<HeaderItem[]>(defaultHeaders);
+  const [queryErrors, setQueryErrors] = useState<string[]>([]);
+  const hydratedRef = useRef(false);
+  const originRef = useRef<string | undefined>(undefined);
 
   const stf = useStf({
     defaultValues: {
@@ -74,12 +77,45 @@ export function OperationPlayground({ kind, name }: { kind: OperationKind; name:
     },
   });
 
+  // restore the stored URL once, then keep headers in sync with the endpoint origin
   useEffect(() => {
     const stored = readStored();
-    if (stored.url && !playground.url) setUrl(stored.url);
-    if (Array.isArray(stored.headers)) setHeaders(stored.headers);
-    // oxlint-disable-next-line react-hooks/exhaustive-deps -- only at mount
-  }, []);
+    const isFirst = !hydratedRef.current;
+    hydratedRef.current = true;
+
+    if (isFirst && stored.url && !playground.url && stored.url !== url) {
+      // the effect re-runs with the restored URL
+      setUrl(stored.url);
+      return;
+    }
+
+    const origin = getEndpointOrigin(url);
+    if (!isFirst && origin === originRef.current) return;
+    originRef.current = origin;
+
+    const storedHeaders = origin ? stored.headers?.[origin] : undefined;
+    setHeaders(storedHeaders ?? defaultHeaders);
+    // oxlint-disable-next-line react-hooks/exhaustive-deps -- sync with storage on URL change only
+  }, [url]);
+
+  // client-side validation of the query against the schema
+  useEffect(() => {
+    const timer = window.setTimeout(() => {
+      if (query.trim().length === 0) {
+        setQueryErrors([]);
+        return;
+      }
+
+      try {
+        const errors = validate(schema, parse(query));
+        setQueryErrors(errors.map((error) => error.message));
+      } catch (e) {
+        setQueryErrors([e instanceof Error ? e.message : String(e)]);
+      }
+    }, 300);
+
+    return () => window.clearTimeout(timer);
+  }, [query, schema]);
 
   const testQuery = useQuery(async (): Promise<PlaygroundResult> => {
     const headersObject: Record<string, string> = {};
@@ -87,7 +123,12 @@ export function OperationPlayground({ kind, name }: { kind: OperationKind; name:
       if (item.key.trim().length > 0) headersObject[item.key.trim()] = item.value;
     }
 
-    localStorage.setItem(StorageKey, JSON.stringify({ url, headers } satisfies StoredState));
+    const origin = getEndpointOrigin(url);
+    const stored = readStored();
+    writeStored({
+      url,
+      headers: origin ? { ...stored.headers, [origin]: headers } : stored.headers,
+    });
 
     const data = stf.dataEngine.getData() as { variables?: Record<string, unknown> };
     // strip `undefined` values
@@ -112,6 +153,7 @@ export function OperationPlayground({ kind, name }: { kind: OperationKind; name:
     <form
       onSubmit={(e) => {
         e.preventDefault();
+        if (runDisabled) return;
         setOpen(true);
         void testQuery.start();
       }}
@@ -125,13 +167,19 @@ export function OperationPlayground({ kind, name }: { kind: OperationKind; name:
           <Badge color="blue" className="text-xs ps-1.5">
             POST
           </Badge>
-          <input
-            value={url}
-            onChange={(e) => setUrl(e.target.value)}
-            placeholder={t('GraphQL endpoint')}
-            aria-label={t('GraphQL endpoint')}
-            className="flex-1 min-w-0 bg-transparent font-mono text-[0.8125rem] text-fd-muted-foreground focus:outline-none focus:text-fd-foreground"
-          />
+          {allowUrlEdit ? (
+            <input
+              value={url}
+              onChange={(e) => setUrl(e.target.value)}
+              placeholder={t('GraphQL endpoint')}
+              aria-label={t('GraphQL endpoint')}
+              className="flex-1 min-w-0 bg-transparent font-mono text-[0.8125rem] text-fd-muted-foreground focus:outline-none focus:text-fd-foreground"
+            />
+          ) : (
+            <span className="flex-1 min-w-0 truncate font-mono text-[0.8125rem] text-fd-muted-foreground">
+              {url}
+            </span>
+          )}
           <CollapsibleTrigger
             aria-label={t('Toggle playground')}
             className={cn(
@@ -143,7 +191,7 @@ export function OperationPlayground({ kind, name }: { kind: OperationKind; name:
           </CollapsibleTrigger>
           <button
             type="submit"
-            disabled={testQuery.isLoading || url.length === 0}
+            disabled={testQuery.isLoading || url.length === 0 || runDisabled}
             className={cn(buttonVariants({ variant: 'primary', size: 'sm' }), 'gap-1.5 px-3')}
           >
             {testQuery.isLoading ? <Spinner className="size-3.5" /> : <Play className="size-3.5" />}
@@ -151,6 +199,11 @@ export function OperationPlayground({ kind, name }: { kind: OperationKind; name:
           </button>
         </div>
         <CollapsibleContent>
+          {runDisabled && (
+            <p className="border-t px-3 py-2 text-xs text-fd-muted-foreground">
+              {t('Subscriptions require a WebSocket/SSE client — Run is disabled.')}
+            </p>
+          )}
           <CodeEditor
             value={query}
             onValueChange={setQuery}
@@ -158,6 +211,15 @@ export function OperationPlayground({ kind, name }: { kind: OperationKind; name:
             aria-label={t('Query editor')}
             className="border-t"
           />
+          {queryErrors.length > 0 && (
+            <div className="flex flex-col gap-1 border-t px-3 py-2">
+              {queryErrors.slice(0, 3).map((message, i) => (
+                <p key={i} className="text-xs text-red-400">
+                  {message}
+                </p>
+              ))}
+            </div>
+          )}
           <div className="flex flex-row items-center gap-4 border-t bg-fd-secondary/50 px-3">
             {(['variables', 'headers'] as const).map((item) => (
               <button
@@ -172,6 +234,25 @@ export function OperationPlayground({ kind, name }: { kind: OperationKind; name:
                 {item === 'variables' ? t('Variables') : t('Headers')}
               </button>
             ))}
+            {example && query !== example.query && (
+              <button
+                type="button"
+                onClick={() => {
+                  // re-generate: the initial example's variables may be mutated by the form
+                  const fresh = generateOperationExample(schema, { kind, name });
+                  if (!fresh) return;
+                  setQuery(fresh.query);
+                  stf.dataEngine.reset({ variables: fresh.variables ?? {} });
+                }}
+                className={cn(
+                  buttonVariants({ size: 'sm', variant: 'ghost' }),
+                  'ms-auto my-0.5 gap-1.5 text-fd-muted-foreground',
+                )}
+              >
+                <RotateCcw className="size-3.5" />
+                {t('Reset')}
+              </button>
+            )}
           </div>
           <div className={cn('flex flex-col gap-3 p-3', tab !== 'variables' && 'hidden')}>
             {field && field.args.length > 0 ? (
@@ -282,24 +363,48 @@ function ResultDisplay({ data, reset }: { data: PlaygroundResult; reset: () => v
   }
 
   const isSuccess = data.status >= 200 && data.status < 300;
-  const Icon = isSuccess ? CircleCheck : CircleX;
   let body = data.body;
   let lang = 'text';
+  let errorCount = 0;
 
   if (data.contentType.includes('json')) {
     lang = 'json';
     try {
-      body = JSON.stringify(JSON.parse(data.body), null, 2);
+      const parsed = JSON.parse(data.body) as unknown;
+      body = JSON.stringify(parsed, null, 2);
+
+      // a 2xx GraphQL response can still contain errors
+      if (
+        typeof parsed === 'object' &&
+        parsed !== null &&
+        Array.isArray((parsed as { errors?: unknown }).errors)
+      ) {
+        errorCount = (parsed as { errors: unknown[] }).errors.length;
+      }
     } catch {
       // keep original body
     }
   }
 
+  const hasGraphQLErrors = isSuccess && errorCount > 0;
+  const Icon = !isSuccess ? CircleX : hasGraphQLErrors ? TriangleAlert : CircleCheck;
+  const isLarge = body.length > MaxHighlightSize;
+
   return (
     <div className="flex flex-col gap-2 border-t bg-fd-secondary/50 px-3 py-2.5">
       <div className="flex items-center gap-1.5">
-        <Icon className={cn('size-4 shrink-0', isSuccess ? 'text-green-500' : 'text-red-500')} />
+        <Icon
+          className={cn(
+            'size-4 shrink-0',
+            !isSuccess ? 'text-red-500' : hasGraphQLErrors ? 'text-amber-500' : 'text-green-500',
+          )}
+        />
         <p className="font-medium">{data.status}</p>
+        {hasGraphQLErrors && (
+          <p className="text-xs font-medium text-amber-500">
+            {t('{count} errors', { variables: { count: String(errorCount) } })}
+          </p>
+        )}
         <p className="text-xs text-fd-muted-foreground me-auto">
           {t('{time}ms', { variables: { time: String(Math.round(data.time)) } })}
         </p>
@@ -311,7 +416,19 @@ function ResultDisplay({ data, reset }: { data: PlaygroundResult; reset: () => v
           {t('Close')}
         </button>
       </div>
-      {body.length > 0 && <ClientCodeBlock lang={lang} code={body} />}
+      {body.length > 0 &&
+        (isLarge ? (
+          <>
+            <p className="text-xs text-fd-muted-foreground">
+              {t('large response — syntax highlighting disabled')}
+            </p>
+            <pre className="font-mono text-[0.8125rem] p-3 border rounded-lg bg-fd-card max-h-[400px] overflow-auto">
+              {body}
+            </pre>
+          </>
+        ) : (
+          <ClientCodeBlock lang={lang} code={body} />
+        ))}
     </div>
   );
 }

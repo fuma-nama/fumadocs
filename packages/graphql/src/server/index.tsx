@@ -1,7 +1,9 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import {
+  createGetUrl,
   type DynamicSource,
+  getSlugs,
   type LoaderPlugin,
   type MetaData,
   PathUtils,
@@ -27,7 +29,7 @@ import {
 } from '@/utils/pages/builder';
 import { toStaticData } from '@/utils/pages/to-static-data';
 import type { SchemaToPagesOptions } from '@/utils/pages/preset-auto';
-import type { GraphQLPageProps } from '@/ui';
+import type { GraphQLLinks, GraphQLPageProps } from '@/ui';
 import type { NamedTypeKind, OperationKind } from '@/utils/schema';
 import { KindLabel } from '@/ui/components/badge';
 
@@ -70,6 +72,13 @@ export interface GraphQLPageData extends PageData {
 
 export type GraphQLSourceOptions = SchemaToPagesOptions & {
   baseDir?: string;
+  /**
+   * the `baseUrl` of your `loader()`.
+   *
+   * when specified, links of generated pages are pre-generated and passed to the UI,
+   * for cross-linking type & operation references.
+   */
+  baseUrl?: string;
   meta?: boolean | { folderStyle?: 'folder' | 'separator' };
 };
 
@@ -111,7 +120,7 @@ export function createGraphQL(options: GraphQLOptions = {}): GraphQLServer {
   }
 
   async function getVirtualFiles(server: GraphQLServer, options: GraphQLSourceOptions) {
-    const { baseDir = '', meta = false } = options;
+    const { baseDir = '', meta = false, baseUrl } = options;
     const { createAutoPreset } = await import('@/utils/pages/preset-auto');
     const { fromSchema } = await import('@/utils/pages/builder');
     const files: VirtualFile<{
@@ -121,6 +130,10 @@ export function createGraphQL(options: GraphQLOptions = {}): GraphQLServer {
 
     const schemas = await server.getSchemas();
     const builderOptions = createAutoPreset(options);
+    // pre-generate the links of generated pages, the map is completed during the walk below,
+    // before any page props are requested.
+    const getUrl = baseUrl !== undefined ? createGetUrl(baseUrl) : undefined;
+    const links: GraphQLLinks | undefined = getUrl ? { types: {}, operations: {} } : undefined;
 
     for (const [id, schema] of Object.entries(schemas)) {
       const list = fromSchema(id, schema.schema, builderOptions);
@@ -129,16 +142,30 @@ export function createGraphQL(options: GraphQLOptions = {}): GraphQLServer {
 
       function onEntry(entry: OperationOutput | TypeOutput | PageOutput) {
         const props = getPageProps(entry);
+        const filePath = `${baseDir}/${entry.path}`;
+
+        if (links) {
+          const url = getUrl!(getSlugs(filePath));
+
+          for (const item of props.items ?? []) {
+            if (item.type === 'operation') {
+              links.operations[`${item.kind}:${item.name}`] = url;
+            } else {
+              links.types[item.name] = url;
+            }
+          }
+        }
 
         files.push({
           type: 'page',
-          path: `${baseDir}/${entry.path}`,
+          path: filePath,
           data: {
             ...entry.info,
             getGraphQLPageProps() {
               return {
                 payload: {
                   sdl: schema.sdl,
+                  links,
                 },
                 ...props,
               };

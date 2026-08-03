@@ -1,5 +1,11 @@
 import fs from 'node:fs/promises';
-import { buildClientSchema, GraphQLSchema, type IntrospectionQuery, printSchema } from 'graphql';
+import {
+  buildClientSchema,
+  GraphQLSchema,
+  type IntrospectionQuery,
+  printSchema,
+  validateSchema,
+} from 'graphql';
 import { buildSchemaFromSDL } from '@/utils/build-schema';
 
 export type GraphQLSchemaInput =
@@ -51,8 +57,16 @@ export async function loadSchema(input: GraphQLSchemaInput): Promise<LoadedSchem
         parts.map((part) => (isFilePath(part) || /^https?:\/\//.test(part) ? readSDL(part) : part)),
       );
       const sdl = sources.join('\n\n');
+      const schema = buildSchemaFromSDL(sdl);
+      // `buildSchemaFromSDL` skips validation for client-side usages, surface schema errors clearly here
+      const errors = validateSchema(schema);
+      if (errors.length > 0) {
+        throw new Error(errors.map((error) => error.message).join('\n'), {
+          cause: errors[0],
+        });
+      }
 
-      return { schema: buildSchemaFromSDL(sdl), sdl };
+      return { schema, sdl };
     }
 
     const introspection = 'data' in input ? input.data : input;
