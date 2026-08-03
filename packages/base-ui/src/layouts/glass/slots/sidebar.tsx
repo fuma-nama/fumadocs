@@ -194,7 +194,7 @@ export function Sidebar({ className, children, ...props }: SidebarProps) {
       )}
       {...props}
     >
-      <div className="flex items-start gap-1 pt-4 px-3.5 empty:hidden">
+      <div className="flex items-start gap-1 pt-4 ps-4.5 pe-3.5 empty:hidden">
         <slots.navTitle className="flex text-sm items-center font-semibold gap-2 me-auto" />
         <div className="flex -mt-1.5 -me-1.5 empty:hidden">
           {menuItems.map(
