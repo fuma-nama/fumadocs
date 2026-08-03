@@ -180,7 +180,7 @@ function SchemaDescription({ schema, ...props }: ComponentProps<'div'> & { schem
     <div {...props} className={cn('prose-no-margin py-2 empty:hidden', props.className)}>
       {schema.description}
       {schema.infoTags && schema.infoTags.length > 0 && (
-        <div className="flex flex-row gap-2 flex-wrap mt-2 not-prose empty:hidden">
+        <div className="flex flex-row gap-2 flex-wrap mt-2 empty:hidden">
           {schema.infoTags.map((tag, i) => (
             <Fragment key={i}>{tag.node}</Fragment>
           ))}
@@ -457,7 +457,7 @@ function ObjectSearchContent({
 
 export function InlineTag({ label, children }: { label: ReactNode; children: ReactNode }) {
   return (
-    <div className="inline-flex gap-2 bg-fd-secondary border rounded-lg text-xs p-1.5 shadow-md max-w-full">
+    <div className="inline-flex gap-2 bg-fd-secondary border rounded-lg text-xs p-1.5 shadow-md max-w-full not-prose">
       <span className="font-medium">{label}</span>
       <code className="min-w-0 flex-1 text-fd-muted-foreground wrap-break-word">{children}</code>
     </div>
@@ -466,7 +466,7 @@ export function InlineTag({ label, children }: { label: ReactNode; children: Rea
 
 export function BlockTag({ label, children }: { label: ReactNode; children: ReactNode }) {
   return (
-    <div className="flex flex-col w-full gap-2 bg-fd-secondary border rounded-lg p-1.5 shadow-md">
+    <div className="flex flex-col w-full gap-2 bg-fd-secondary border rounded-lg p-1.5 shadow-md not-prose">
       <p className="font-medium text-xs">{label}</p>
       {children}
     </div>

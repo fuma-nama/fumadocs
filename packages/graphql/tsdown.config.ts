@@ -37,12 +37,7 @@ async function compileInline() {
     sources: [
       {
         base: path.resolve('src'),
-        pattern: 'ui/**/*.{ts,tsx}',
-        negated: false,
-      },
-      {
-        base: path.resolve('src'),
-        pattern: 'server/**/*.tsx',
+        pattern: '**/*.{ts,tsx}',
         negated: false,
       },
     ],

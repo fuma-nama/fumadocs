@@ -167,7 +167,10 @@ export function generateOperationExample(
     return objectSelection(named, depth);
   }
 
-  function objectSelection(type: GraphQLObjectType | GraphQLInterfaceType, depth: number): Selected {
+  function objectSelection(
+    type: GraphQLObjectType | GraphQLInterfaceType,
+    depth: number,
+  ): Selected {
     const selections: SelectionNode[] = [];
     const sample: Record<string, unknown> = {};
     let leafCount = 0;
@@ -231,9 +234,7 @@ export function generateOperationExample(
 
     for (const field of included) {
       out[field.name] =
-        field.defaultValue !== undefined
-          ? field.defaultValue
-          : sampleInput(field.type, depth + 1);
+        field.defaultValue !== undefined ? field.defaultValue : sampleInput(field.type, depth + 1);
     }
 
     return out;

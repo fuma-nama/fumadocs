@@ -41,7 +41,9 @@ interface ItemConfig extends BaseConfig {
    *
    * @default true
    */
-  includeOperations?: boolean | ((kind: OperationKind, field: GraphQLField<unknown, unknown>) => boolean);
+  includeOperations?:
+    | boolean
+    | ((kind: OperationKind, field: GraphQLField<unknown, unknown>) => boolean);
   /**
    * generate pages for named types (objects, interfaces, unions, enums, inputs, scalars).
    *
@@ -126,9 +128,10 @@ export function createAutoPreset(options: SchemaToPagesOptions): PagesBuilderCon
           schemaId: builder.id,
           path: '',
           info: {
-            title: builder.id.startsWith('http://') || builder.id.startsWith('https://')
-              ? 'Overview'
-              : path.basename(builder.id, path.extname(builder.id)),
+            title:
+              builder.id.startsWith('http://') || builder.id.startsWith('https://')
+                ? 'Overview'
+                : path.basename(builder.id, path.extname(builder.id)),
           },
           items,
         };

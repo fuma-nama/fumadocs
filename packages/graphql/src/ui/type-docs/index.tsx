@@ -17,6 +17,7 @@ import { Markdown } from '../components/markdown';
 import { EnumValueList } from '../components/enum-values';
 import { DirectiveList, TypeAnnotation } from '../components/type-annotation';
 import { useRenderContext } from '../contexts/api';
+import { Layers } from 'lucide-react';
 
 export function TypeDocs({
   name,
@@ -53,9 +54,7 @@ export function TypeDocs({
     headingLevel++;
   }
 
-  const descriptionNode = showDescription && type.description && (
-    <Markdown md={type.description} />
-  );
+  const descriptionNode = showDescription && type.description && <Markdown md={type.description} />;
 
   const directives = getCustomDirectives(type.astNode);
   const directivesNode = directives.length > 0 && <DirectiveList directives={directives} />;
@@ -142,7 +141,10 @@ export function TypeDocs({
         <Heading id="values" depth={headingLevel} className="mt-10">
           {t('Values')}
         </Heading>
-        <EnumValueList type={type} />
+        <EnumValueList
+          type={type}
+          className="p-2 bg-fd-card text-fd-card-foreground border rounded-lg shadow-md"
+        />
       </>
     );
   }
@@ -167,7 +169,7 @@ export function TypeDocs({
 
   renderTypeLayout ??= (slots) => {
     return (
-      <div>
+      <div className="prose-no-margin">
         {slots.header}
         {slots.description}
         {slots.directives}
@@ -201,20 +203,18 @@ function TypeRelation({ label, types }: { label: ReactNode; types: string[] }) {
   const { schema } = useRenderContext().schema;
 
   return (
-    <div className="flex flex-row flex-wrap items-center gap-1.5 text-sm not-prose">
-      <span className="font-medium me-1">{label}</span>
-      {types.map((name) => {
-        const type = schema.getType(name);
-
-        return (
-          <span
-            key={name}
-            className="px-2.5 py-1 text-xs rounded-full border bg-fd-secondary text-fd-secondary-foreground shadow-sm"
-          >
-            {type ? <TypeAnnotation type={type} className="text-xs" /> : <code>{name}</code>}
-          </span>
-        );
-      })}
+    <div className="grid grid-cols-[auto_1fr] not-prose bg-fd-card text-sm text-fd-card-foreground rounded-lg border shadow-md overflow-hidden">
+      <p className="flex items-center gap-1.5 font-medium border-e bg-fd-secondary text-fd-secondary-foreground p-2">
+        <Layers className="text-fd-primary size-3.5" />
+        {label}
+      </p>
+      <div className="flex flex-wrap items-center gap-4 p-2">
+        {types.map((name) => {
+          const type = schema.getType(name);
+          if (type) return <TypeAnnotation key={name} type={type} />;
+          return <code key={name}>{name}</code>;
+        })}
+      </div>
     </div>
   );
 }

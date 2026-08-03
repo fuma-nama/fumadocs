@@ -1,10 +1,5 @@
 import fs from 'node:fs/promises';
-import {
-  buildClientSchema,
-  GraphQLSchema,
-  type IntrospectionQuery,
-  printSchema,
-} from 'graphql';
+import { buildClientSchema, GraphQLSchema, type IntrospectionQuery, printSchema } from 'graphql';
 import { buildSchemaFromSDL } from '@/utils/build-schema';
 
 export type GraphQLSchemaInput =
@@ -53,9 +48,7 @@ export async function loadSchema(input: GraphQLSchemaInput): Promise<LoadedSchem
     if (Array.isArray(input) || typeof input === 'string') {
       const parts = Array.isArray(input) ? input : [input];
       const sources = await Promise.all(
-        parts.map((part) =>
-          isFilePath(part) || /^https?:\/\//.test(part) ? readSDL(part) : part,
-        ),
+        parts.map((part) => (isFilePath(part) || /^https?:\/\//.test(part) ? readSDL(part) : part)),
       );
       const sdl = sources.join('\n\n');
 

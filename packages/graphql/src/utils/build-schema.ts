@@ -23,10 +23,7 @@ export function buildSchemaFromSDL(sdl: string): GraphQLSchema {
     }
   }
 
-  let schema = buildASTSchema(
-    { kind: Kind.DOCUMENT, definitions },
-    { assumeValidSDL: true },
-  );
+  let schema = buildASTSchema({ kind: Kind.DOCUMENT, definitions }, { assumeValidSDL: true });
   if (extensions.length > 0) {
     schema = extendSchema(
       schema,
