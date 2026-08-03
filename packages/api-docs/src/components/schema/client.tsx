@@ -455,7 +455,26 @@ function ObjectSearchContent({
   return filtered.map(render);
 }
 
-export function InlineTag({ label, children }: { label: ReactNode; children: ReactNode }) {
+export function InlineTag({
+  label,
+  prose = false,
+  children,
+}: {
+  label: ReactNode;
+  prose?: boolean;
+  children: ReactNode;
+}) {
+  if (prose) {
+    return (
+      <div className="inline-flex gap-2 bg-fd-secondary border rounded-lg text-xs p-1.5 shadow-md max-w-full">
+        <span className="font-medium not-prose">{label}</span>
+        <span className="min-w-0 flex-1 text-fd-muted-foreground prose-sm prose-no-margin">
+          {children}
+        </span>
+      </div>
+    );
+  }
+
   return (
     <div className="inline-flex gap-2 bg-fd-secondary border rounded-lg text-xs p-1.5 shadow-md max-w-full not-prose">
       <span className="font-medium">{label}</span>

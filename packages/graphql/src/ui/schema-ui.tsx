@@ -211,7 +211,7 @@ export function generateGraphQLSchemaUI(
     if (doc.deprecationReason) {
       tags.push({
         node: (
-          <InlineTag label={t('Deprecated')}>
+          <InlineTag label={t('Deprecated')} prose>
             <Markdown md={doc.deprecationReason} />
           </InlineTag>
         ),
