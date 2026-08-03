@@ -1,4 +1,3 @@
-import fs from 'node:fs';
 import path from 'node:path';
 import {
   createGetUrl,
@@ -13,22 +12,18 @@ import {
 } from 'fumadocs-core/source';
 import type { StructuredData } from 'fumadocs-core/mdx-plugins/remark-structure';
 import type { TOCItemType } from 'fumadocs-core/toc';
-import {
-  isFilePath,
-  loadSchema,
-  type GraphQLSchemaInput,
-  type LoadedSchema,
-} from '@/utils/document/load';
+import { loadSchema, type GraphQLSchemaInput, type LoadedSchema } from '@/utils/load-schema';
 import type { Awaitable } from '@/types';
 import {
   getPageProps,
+  schemaToPages,
   type OperationOutput,
   type OutputEntry,
   type PageOutput,
+  type SchemaToPagesOptions,
   type TypeOutput,
-} from '@/utils/pages/builder';
-import { toStaticData } from '@/utils/pages/to-static-data';
-import type { SchemaToPagesOptions } from '@/utils/pages/preset-auto';
+} from '@/utils/pages';
+import { toStaticData } from '@/utils/to-static-data';
 import type { GraphQLLinks, GraphQLPageProps } from '@/ui';
 import type { NamedTypeKind, OperationKind } from '@/utils/schema';
 import { KindLabel } from '@/ui/components/badge';
@@ -59,7 +54,6 @@ export interface GraphQLServer {
     options?: GraphQLSourceOptions,
   ) => DynamicSource<{ metaData: MetaData; pageData: GraphQLPageData }>;
   loaderPlugin: () => LoaderPlugin;
-  _getWatchPaths: () => string[];
 }
 
 export interface GraphQLPageData extends PageData {
@@ -119,26 +113,21 @@ export function createGraphQL(options: GraphQLOptions = {}): GraphQLServer {
     return Object.fromEntries(entries);
   }
 
-  async function getVirtualFiles(server: GraphQLServer, options: GraphQLSourceOptions) {
+  async function getVirtualFiles(options: GraphQLSourceOptions) {
     const { baseDir = '', meta = false, baseUrl } = options;
-    const { createAutoPreset } = await import('@/utils/pages/preset-auto');
-    const { fromSchema } = await import('@/utils/pages/builder');
     const files: VirtualFile<{
       pageData: GraphQLPageData;
       metaData: MetaData;
     }>[] = [];
 
-    const schemas = await server.getSchemas();
-    const builderOptions = createAutoPreset(options);
+    const schemas = await getSchemas();
     // pre-generate the links of generated pages, the map is completed during the walk below,
     // before any page props are requested.
     const getUrl = baseUrl !== undefined ? createGetUrl(baseUrl) : undefined;
     const links: GraphQLLinks | undefined = getUrl ? { types: {}, operations: {} } : undefined;
 
     for (const [id, schema] of Object.entries(schemas)) {
-      const list = fromSchema(id, schema.schema, builderOptions);
-
-      onEntries(list);
+      onEntries(schemaToPages(id, schema.schema, options));
 
       function onEntry(entry: OperationOutput | TypeOutput | PageOutput) {
         const props = getPageProps(entry);
@@ -237,30 +226,16 @@ export function createGraphQL(options: GraphQLOptions = {}): GraphQLServer {
 
   return {
     options,
-    _getWatchPaths() {
-      const paths: string[] = [];
-      for (const value of Object.values(resolvedInput)) {
-        const items = Array.isArray(value) ? value : [value];
-
-        for (const item of items) {
-          if (typeof item === 'string' && isFilePath(item) && fs.existsSync(item)) {
-            paths.push(item);
-          }
-        }
-      }
-
-      return paths;
-    },
     getSchema,
     getSchemas,
     async staticSource(options = {}) {
       return {
-        files: await getVirtualFiles(this, options),
+        files: await getVirtualFiles(options),
       };
     },
     dynamicSource(options = {}) {
       return {
-        files: () => getVirtualFiles(this, options),
+        files: () => getVirtualFiles(options),
       };
     },
     loaderPlugin() {

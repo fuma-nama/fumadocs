@@ -10,9 +10,8 @@ export type {
   OutputGroup,
   OutputEntry,
   PagesBuilder,
-  PagesBuilderConfig,
-} from './utils/pages/builder';
-export type { SchemaToPagesOptions } from './utils/pages/preset-auto';
+  SchemaToPagesOptions,
+} from './utils/pages';
 export { getNamedTypeKind, type NamedTypeKind, type OperationKind } from './utils/schema';
 export {
   executeGraphQL,

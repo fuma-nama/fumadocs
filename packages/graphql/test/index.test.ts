@@ -127,7 +127,6 @@ describe('GraphQL source', () => {
       toPages(builder) {
         builder.create({
           type: 'operation',
-          schemaId: builder.id,
           path: 'my-orders.mdx',
           info: { title: 'My Orders' },
           item: { kind: 'query', name: 'orders' },

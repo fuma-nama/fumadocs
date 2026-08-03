@@ -1,13 +1,9 @@
-import type { GeneratedPageProps } from '@/utils/pages/builder';
+import type { GeneratedPageProps } from '@/utils/pages';
 import { Operation } from '@/ui/operation';
 import { TypeDocs } from '@/ui/type-docs';
 import { useRenderContext } from './contexts/api';
 
-export function PageContent({
-  showTitle = false,
-  showDescription,
-  items,
-}: Omit<GeneratedPageProps, 'document'>) {
+export function PageContent({ showTitle = false, showDescription, items }: GeneratedPageProps) {
   const ctx = useRenderContext();
   let { renderPageLayout } = ctx.content ?? {};
   renderPageLayout ??= (slots) => (
