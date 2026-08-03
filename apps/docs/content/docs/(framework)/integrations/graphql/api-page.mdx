@@ -1,0 +1,238 @@
+---
+title: createGraphQLPage()
+description: The component for rendering GraphQL docs content
+---
+
+## Overview
+
+Fumadocs GraphQL uses a `<GraphQLPage />` component to render page contents, it should be a client component.
+
+```tsx title="components/api-page.tsx"
+'use client';
+import { createGraphQLPage } from '@fumadocs/graphql/ui';
+
+export const GraphQLPage = createGraphQLPage({
+  // config
+});
+```
+
+### Playground
+
+Enable the interactive playground on operation pages by configuring an endpoint, operations are sent over HTTP POST.
+
+```tsx title="components/api-page.tsx"
+'use client';
+import { createGraphQLPage } from '@fumadocs/graphql/ui';
+
+export const GraphQLPage = createGraphQLPage({
+  playground: {
+    url: 'https://api.example.com/graphql',
+    // allow users to edit the endpoint URL (default: true)
+    allowUrlEdit: false,
+    // default headers of playground requests
+    headers: {
+      Authorization: 'Bearer <token>',
+    },
+  },
+});
+```
+
+You can replace the default fetcher, e.g. to proxy requests:
+
+```tsx title="components/api-page.tsx"
+'use client';
+import { createGraphQLPage } from '@fumadocs/graphql/ui';
+
+export const GraphQLPage = createGraphQLPage({
+  playground: {
+    async fetcher(request) {
+      const res = await fetch('/api/proxy', {
+        method: 'POST',
+        headers: request.headers,
+        body: JSON.stringify({ query: request.query, variables: request.variables }),
+      });
+
+      return {
+        type: 'response',
+        status: res.status,
+        time: 0,
+        body: await res.text(),
+        contentType: res.headers.get('Content-Type') ?? '',
+      };
+    },
+  },
+});
+```
+
+Or replace the playground UI entirely with `render`:
+
+```tsx title="components/api-page.tsx"
+'use client';
+import { createGraphQLPage } from '@fumadocs/graphql/ui';
+
+export const GraphQLPage = createGraphQLPage({
+  playground: {
+    render({ kind, name, operation }) {
+      return <div>my playground</div>;
+    },
+  },
+});
+```
+
+<Callout title="Subscriptions">
+  The default fetcher sends operations over HTTP POST, which cannot serve subscriptions — the Run
+  button is disabled on subscription pages unless a custom `fetcher` is provided.
+</Callout>
+
+### Cross-linking
+
+Type & operation references are cross-linked automatically when `baseUrl` is passed to your source (see [`createGraphQL()`](/docs/integrations/graphql/server#baseurl)).
+
+You can also resolve the links yourself:
+
+```tsx title="components/api-page.tsx"
+'use client';
+import { createGraphQLPage } from '@fumadocs/graphql/ui';
+
+export const GraphQLPage = createGraphQLPage({
+  typeLinks(name) {
+    return `/docs/types/${name}`;
+  },
+  operationLinks(kind, name) {
+    return `/docs/${kind}/${name}`;
+  },
+});
+```
+
+Return `undefined` for types/operations without their own page.
+
+### Custom Layout
+
+You can customize how operation and type pages are laid out.
+
+```tsx title="components/api-page.tsx"
+'use client';
+import { createGraphQLPage } from '@fumadocs/graphql/ui';
+
+export const GraphQLPage = createGraphQLPage({
+  content: {
+    renderOperationLayout(slots) {
+      return (
+        <div className="flex flex-col gap-6">
+          {slots.header}
+          {slots.description}
+          {slots.deprecated}
+          {slots.directives}
+          {slots.playground}
+          {slots.arguments}
+          {slots.returns}
+          {slots.example}
+        </div>
+      );
+    },
+    renderTypeLayout(slots) {
+      return (
+        <div className="flex flex-col gap-6">
+          {slots.header}
+          {slots.description}
+          {slots.directives}
+          {slots.relations}
+          {slots.usages}
+          {slots.fields}
+          {slots.values}
+          {slots.scalar}
+        </div>
+      );
+    },
+  },
+});
+```
+
+### Schema UI
+
+Customize how types are rendered.
+
+```tsx title="components/api-page.tsx"
+'use client';
+import { createGraphQLPage } from '@fumadocs/graphql/ui';
+
+export const GraphQLPage = createGraphQLPage({
+  schemaUI: {
+    render(options, ctx) {
+      // fully custom schema renderer
+      return <ctx.SchemaUI {...options} />;
+    },
+  },
+});
+```
+
+### Internationalization
+
+Assuming you have configured [Internationalization](/docs/internationalization) at UI level:
+
+```tsx title="layout.shared.tsx"
+import { defineI18n } from 'fumadocs-core/i18n';
+import { uiTranslations } from 'fumadocs-ui/i18n';
+import { graphqlTranslations } from '@fumadocs/graphql/i18n';
+
+const i18n = defineI18n({
+  languages: ['en', 'cn'],
+  defaultLanguage: 'en',
+});
+
+export const translations = i18n
+  .translations()
+  .extend(uiTranslations())
+  // [!code ++]
+  .extend(graphqlTranslations())
+  .add({
+    cn: {
+      displayName: 'Chinese',
+      // [!code ++]
+      'Arguments(operation page)': '参数',
+    },
+  });
+```
+
+See [Translations](/docs/ui/translations) for more details.
+
+### Syntax Highlighting
+
+GraphQL pages use Shiki for code blocks. You can customize the highlighter and themes.
+
+```tsx title="components/api-page.tsx"
+'use client';
+import { createGraphQLPage } from '@fumadocs/graphql/ui';
+import { defaultShikiFactory } from 'fumadocs-core/highlight/shiki/full';
+
+export const GraphQLPage = createGraphQLPage({
+  shiki: defaultShikiFactory,
+  shikiOptions: {
+    themes: {
+      light: 'github-light',
+      dark: 'github-dark',
+    },
+  },
+});
+```
+
+### Custom Components
+
+Override the default heading, code block and Markdown components.
+
+```tsx title="components/api-page.tsx"
+'use client';
+import { createGraphQLPage } from '@fumadocs/graphql/ui';
+
+export const GraphQLPage = createGraphQLPage({
+  components: {
+    Heading({ id, depth, ...props }) {
+      const Tag = `h${depth}` as const;
+      return <Tag id={id} {...props} />;
+    },
+    CodeBlock({ lang, code }) {
+      return <pre data-lang={lang}>{code}</pre>;
+    },
+  },
+});
+```

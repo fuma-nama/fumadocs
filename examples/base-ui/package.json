@@ -13,7 +13,7 @@
     "fumadocs-core": "workspace:*",
     "fumadocs-mdx": "workspace:*",
     "fumadocs-ui": "workspace:@fumadocs/base-ui@*",
-    "lucide-react": "^1.27.0",
+    "lucide-react": "^1.28.0",
     "next": "16.2.12",
     "react": "^19.2.8",
     "react-dom": "^19.2.8"
@@ -22,9 +22,9 @@
     "@tailwindcss/postcss": "^4.3.3",
     "@types/mdx": "^2.0.14",
     "@types/node": "^26.1.2",
-    "@types/react": "^19.2.17",
-    "@types/react-dom": "^19.2.3",
-    "postcss": "^8.5.24",
+    "@types/react": "^19.2.18",
+    "@types/react-dom": "^19.2.4",
+    "postcss": "^8.5.25",
     "tailwindcss": "^4.3.3",
     "typescript": "^6.0.3"
   }

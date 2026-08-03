@@ -15,7 +15,7 @@
     "fumadocs-mdx": "workspace:*",
     "fumadocs-ui": "workspace:@fumadocs/base-ui@*",
     "isbot": "^5.2.1",
-    "lucide-react": "^1.27.0",
+    "lucide-react": "^1.28.0",
     "react": "^19.2.8",
     "react-dom": "^19.2.8",
     "react-router": "^8.3.0"
@@ -25,12 +25,12 @@
     "@tailwindcss/vite": "^4.3.3",
     "@types/mdx": "^2.0.14",
     "@types/node": "^26.1.2",
-    "@types/react": "^19.2.17",
-    "@types/react-dom": "^19.2.3",
+    "@types/react": "^19.2.18",
+    "@types/react-dom": "^19.2.4",
     "react-router-devtools": "^6.2.3",
     "serve": "^14.2.6",
     "tailwindcss": "^4.3.3",
     "typescript": "^6.0.3",
-    "vite": "^8.1.5"
+    "vite": "^8.2.0"
   }
 }

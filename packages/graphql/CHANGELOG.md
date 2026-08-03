@@ -1,3 +1,9 @@
+## @fumadocs/graphql@0.1.1
+
+### Bump `graphql`
+
+Use GraphQL.js v18.
+
 ## @fumadocs/graphql@0.1.0
 
 ### Introduce `@fumadocs/graphql`

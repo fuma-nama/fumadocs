@@ -1,12 +1,11 @@
 'use client';
 import { useMemo, type ReactNode } from 'react';
 import {
-  astFromValue,
-  type ConstValueNode,
   type DirectiveNode,
   type FieldDefinitionNode,
   getNamedType,
   type GraphQLArgument,
+  type GraphQLDefaultInput,
   type GraphQLInputType,
   type InputValueDefinitionNode,
   type GraphQLNamedType,
@@ -23,6 +22,7 @@ import {
   isScalarType,
   isUnionType,
   print,
+  valueToLiteral,
 } from 'graphql';
 import { fromTranslations, useTranslations } from '@fuma-translate/react';
 import {
@@ -45,10 +45,7 @@ export interface SchemaViewRoot {
   description?: string | null;
   deprecationReason?: string | null;
   args?: readonly GraphQLArgument[];
-  defaultValue?: {
-    value: unknown;
-    ast?: ConstValueNode | null;
-  };
+  default?: GraphQLDefaultInput;
   astNode?: { readonly directives?: readonly DirectiveNode[] } | null;
 }
 
@@ -105,7 +102,7 @@ export function generateGraphQLSchemaUI(
     deprecationReason?: string | null;
     type: GraphQLType;
     args?: readonly GraphQLArgument[];
-    defaultValue?: unknown;
+    default?: GraphQLDefaultInput;
     astNode?: (FieldDefinitionNode | InputValueDefinitionNode) | null;
   }
 
@@ -121,16 +118,7 @@ export function generateGraphQLSchemaUI(
         description: field.description,
         deprecationReason: field.deprecationReason,
         args: field.args,
-        defaultText:
-          'defaultValue' in field
-            ? printDefaultValue(
-                field.defaultValue,
-                field.type as GraphQLInputType,
-                field.astNode && 'defaultValue' in field.astNode
-                  ? field.astNode.defaultValue
-                  : undefined,
-              )
-            : undefined,
+        defaultText: printDefaultValue(field.default, field.type as GraphQLInputType),
         directives: getCustomDirectives(field.astNode),
       }),
     );
@@ -304,13 +292,7 @@ export function generateGraphQLSchemaUI(
     description: root.description,
     deprecationReason: root.deprecationReason,
     args: root.args,
-    defaultText: root.defaultValue
-      ? printDefaultValue(
-          root.defaultValue.value,
-          root.type as GraphQLInputType,
-          root.defaultValue.ast,
-        )
-      : undefined,
+    defaultText: printDefaultValue(root.default, root.type as GraphQLInputType),
     directives: getCustomDirectives(root.astNode),
   });
 
@@ -318,19 +300,19 @@ export function generateGraphQLSchemaUI(
 }
 
 function printDefaultValue(
-  value: unknown,
+  defaultInput: GraphQLDefaultInput | undefined,
   type: GraphQLInputType,
-  ast: ConstValueNode | null | undefined,
 ): string | undefined {
-  if (ast) return print(ast);
-  if (value === undefined) return;
+  if (!defaultInput) return;
+  if (defaultInput.literal) return print(defaultInput.literal);
+  if (defaultInput.value === undefined) return;
 
   try {
-    const node = astFromValue(value, type);
+    const node = valueToLiteral(defaultInput.value, type);
     if (node) return print(node);
   } catch {
     // fall through
   }
 
-  return JSON.stringify(value);
+  return JSON.stringify(defaultInput.value);
 }

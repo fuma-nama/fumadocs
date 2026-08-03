@@ -30,7 +30,7 @@
   },
   "devDependencies": {
     "@types/node": "26.1.2",
-    "@types/react": "^19.2.17",
+    "@types/react": "^19.2.18",
     "basehub": "9.6.0",
     "fuma-cli": "^0.1.1",
     "fumadocs-core": "workspace:*",

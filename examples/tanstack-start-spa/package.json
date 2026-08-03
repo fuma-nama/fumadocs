@@ -13,13 +13,13 @@
   "dependencies": {
     "@tanstack/react-router": "1.170.18",
     "@tanstack/react-router-devtools": "1.167.0",
-    "@tanstack/react-start": "1.168.32",
+    "@tanstack/react-start": "1.168.34",
     "@tanstack/start-static-server-functions": "1.167.19",
     "cnfast": "^0.1.0",
     "fumadocs-core": "workspace:*",
     "fumadocs-mdx": "workspace:*",
     "fumadocs-ui": "workspace:@fumadocs/base-ui@*",
-    "lucide-react": "^1.27.0",
+    "lucide-react": "^1.28.0",
     "react": "^19.2.8",
     "react-dom": "^19.2.8"
   },
@@ -27,14 +27,14 @@
     "@tailwindcss/vite": "^4.3.3",
     "@types/mdx": "^2.0.14",
     "@types/node": "^26.1.2",
-    "@types/react": "^19.2.17",
-    "@types/react-dom": "^19.2.3",
-    "@vitejs/plugin-react": "^6.0.4",
+    "@types/react": "^19.2.18",
+    "@types/react-dom": "^19.2.4",
+    "@vitejs/plugin-react": "^6.0.5",
     "nitro": "3.0.260610-beta",
     "serve": "^14.2.6",
-    "srvx": "^0.12.4",
+    "srvx": "^0.12.5",
     "tailwindcss": "^4.3.3",
     "typescript": "^6.0.3",
-    "vite": "^8.1.5"
+    "vite": "^8.2.0"
   }
 }

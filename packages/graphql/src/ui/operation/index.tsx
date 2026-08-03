@@ -103,13 +103,7 @@ export function Operation({
                 type: arg.type,
                 description: arg.description,
                 deprecationReason: arg.deprecationReason,
-                defaultValue:
-                  arg.defaultValue !== undefined
-                    ? {
-                        value: arg.defaultValue,
-                        ast: arg.astNode?.defaultValue,
-                      }
-                    : undefined,
+                default: arg.default,
                 astNode: arg.astNode,
               }}
             />

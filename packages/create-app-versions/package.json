@@ -11,6 +11,6 @@
     "fumadocs-ui": "workspace:*",
     "oxlint": "^1.76.0",
     "react": "^19.2.8",
-    "takumi-js": "^2.5.3"
+    "takumi-js": "^2.5.4"
   }
 }

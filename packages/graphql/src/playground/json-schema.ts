@@ -4,6 +4,7 @@ import {
   isListType,
   isNonNullType,
   isScalarType,
+  print,
 } from 'graphql';
 import type { ParsedSchema } from '@fumadocs/api-docs/schema';
 
@@ -61,10 +62,15 @@ export function inputTypeToJsonSchema(type: GraphQLInputType, depth = 0): Parsed
       ...(typeof schema === 'object' ? schema : {}),
       description:
         field.description ?? (typeof schema === 'object' ? schema.description : undefined),
-      default: field.defaultValue !== undefined ? field.defaultValue : undefined,
+      default:
+        field.default !== undefined
+          ? field.default.literal
+            ? print(field.default.literal)
+            : field.default.value
+          : undefined,
     };
 
-    if (isNonNullType(field.type) && field.defaultValue === undefined) {
+    if (isNonNullType(field.type) && field.default === undefined) {
       required.push(field.name);
     }
   }

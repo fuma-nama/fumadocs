@@ -45,8 +45,8 @@
     "unified": "^11.0.5",
     "unist-util-visit": "^5.1.0",
     "vfile": "^6.0.3",
-    "yuku-codegen": "^0.8.1",
-    "yuku-parser": "^0.8.1",
+    "yuku-codegen": "^0.8.3",
+    "yuku-parser": "^0.8.3",
     "zod": "^4.4.3"
   },
   "devDependencies": {

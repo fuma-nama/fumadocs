@@ -1,6 +1,8 @@
 import {
+  coerceInputLiteral,
   type FieldNode,
   getNamedType,
+  type GraphQLDefaultInput,
   type GraphQLEnumType,
   type GraphQLInputType,
   type GraphQLInterfaceType,
@@ -211,16 +213,23 @@ function sampleInput(type: GraphQLInputType, depth: number): unknown {
 
   const fields = Object.values(type.getFields());
   let included = fields.filter(
-    (field) => isRequiredInputField(field) || field.defaultValue !== undefined,
+    (field) => isRequiredInputField(field) || field.default !== undefined,
   );
   if (included.length === 0) included = fields.slice(0, 2);
 
   for (const field of included) {
     out[field.name] =
-      field.defaultValue !== undefined ? field.defaultValue : sampleInput(field.type, depth + 1);
+      field.default !== undefined
+        ? resolveDefaultValue(field.default, field.type)
+        : sampleInput(field.type, depth + 1);
   }
 
   return out;
+}
+
+function resolveDefaultValue(defaultInput: GraphQLDefaultInput, type: GraphQLInputType): unknown {
+  if (defaultInput.literal) return coerceInputLiteral(defaultInput.literal, type);
+  return defaultInput.value;
 }
 
 function wrapSample(type: GraphQLType, sample: unknown): unknown {
