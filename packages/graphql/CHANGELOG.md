@@ -1,10 +1,6 @@
----
-packages:
-  npm:@fumadocs/graphql: minor
-  npm:@fumadocs/api-docs: patch
----
+## @fumadocs/graphql@0.1.0
 
-## Introduce `@fumadocs/graphql`
+### Introduce `@fumadocs/graphql`
 
 Generate API reference docs from your GraphQL schemas, similar to the OpenAPI/AsyncAPI integration.
 
