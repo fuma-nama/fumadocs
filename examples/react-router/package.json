@@ -20,7 +20,7 @@
     "react": "^19.2.8",
     "react-dom": "^19.2.8",
     "react-router": "^8.3.0",
-    "takumi-js": "^2.5.4"
+    "takumi-js": "^2.5.6"
   },
   "devDependencies": {
     "@react-router/dev": "^8.3.0",
