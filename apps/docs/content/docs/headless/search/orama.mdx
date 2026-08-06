@@ -343,7 +343,21 @@ This also applies to **Static Mode**, pass `locale` to `staticClient` instead.
 <Callout title="Language-specific Tokenization">
 
     The `multilingual` mode doesn't apply language-specific stemming or stop-words.
-    To enable them for a language on the [supported languages](https://www.zbsearch.dev/docs/zbsearch/supported-languages) list, you can use `localeMap`:
+    Without stemming, a plural query like `recordings` won't match a page containing `recording`.
+
+    To attach a stemmer while keeping multilingual segmentation and a single database, pass a `tokenizer`:
+
+    ```ts
+    import { source } from '@/lib/source';
+    import { createFromSource } from 'fumadocs-core/search/server';
+    import { stemmer } from '@zbsearch/stemmers/english';
+
+    const server = createFromSource(source, {
+      tokenizer: { language: 'multilingual', stemming: true, stemmer }, // [!code ++]
+    });
+    ```
+
+    Alternatively, use a language on the [supported languages](https://www.zbsearch.dev/docs/zbsearch/supported-languages) list per locale with `localeMap`:
 
     ```ts
     import { source } from '@/lib/source';
@@ -358,7 +372,12 @@ This also applies to **Static Mode**, pass `locale` to `staticClient` instead.
     });
     ```
 
-    Note that a separate search database is created for each locale when it's enabled.
+    Note that a separate search database is created for each locale when `localeMap` is enabled.
+
+    <Callout type="warn" title="Static Mode">
+      A custom `tokenizer` must also be given to the client, since it needs to tokenize the query the same way.
+      Pass it via `initDB` on `staticClient`.
+    </Callout>
 
 </Callout>
 

@@ -1,3 +1,13 @@
+## @fumadocs/graphql@0.1.2
+
+### Fix dropped optional arguments in playground
+
+The playground's Variables panel exposes every argument of an operation, but the generated query only declares the required ones. Setting an optional argument used to send a variable the document never references, which servers ignore — the request looked successful but ran without it.
+
+The query's variable declarations now follow the panel: setting an argument declares it, unsetting removes it. Sending an operation declares whatever the panel has set, so a query edited by hand can no longer drop a value. Declarations and values written by hand are never rewritten.
+
+Also fixes the playground's form editing the example rendered on the page, which made **Reset** restore edited values instead of the original ones.
+
 ## @fumadocs/graphql@0.1.1
 
 ### Bump `graphql`

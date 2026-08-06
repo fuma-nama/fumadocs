@@ -98,7 +98,7 @@
     }
   },
   "inlinedDependencies": {
-    "@scalar/openapi-upgrader": "0.2.11",
+    "@scalar/openapi-upgrader": "0.2.12",
     "fast-content-type-parse": "3.0.0",
     "xml-js": "1.6.11"
   }

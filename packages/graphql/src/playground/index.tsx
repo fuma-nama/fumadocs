@@ -1,5 +1,5 @@
 'use client';
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useDeferredValue, useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslations } from '@fuma-translate/react';
 import { buttonVariants } from 'fumadocs-ui/components/ui/button';
 import {
@@ -12,9 +12,15 @@ import {
   Trash2,
   TriangleAlert,
 } from 'lucide-react';
-import { isRequiredArgument, parse, validate } from 'graphql';
-import { StfProvider, useStf } from '@fumari/stf';
-import { stringifyFieldKey } from '@fumari/stf/lib/utils';
+import {
+  type GraphQLField,
+  type GraphQLSchema,
+  isRequiredArgument,
+  parse,
+  validate,
+} from 'graphql';
+import { type FieldKey, StfProvider, useListener, useStf } from '@fumari/stf';
+import { isPlainObject, stringifyFieldKey } from '@fumari/stf/lib/utils';
 import {
   Collapsible,
   CollapsibleContent,
@@ -25,8 +31,8 @@ import { SchemaProvider } from '@fumadocs/api-docs/components/playground/schema'
 import { Input } from '@fumadocs/api-docs/components/input';
 import { Spinner } from '@fumadocs/api-docs/components/spinner';
 import { cn } from '@/utils/cn';
-import { getOperationField, type OperationKind } from '@/utils/schema';
-import { generateOperationExample } from '@/utils/example';
+import type { OperationKind } from '@/utils/schema';
+import { type OperationExample, syncOperationVariables } from '@/utils/example';
 import { useQuery } from '@/utils/use-query';
 import { useRenderContext } from '@/ui/contexts/api';
 import { ClientCodeBlock } from '@/ui/components/codeblock';
@@ -34,14 +40,54 @@ import { CodeEditor } from '@/ui/components/code-editor';
 import { Badge } from '@/ui/components/badge';
 import { executeGraphQL, type PlaygroundResult } from './fetcher';
 import { inputTypeToJsonSchema } from './json-schema';
-import { getEndpointOrigin, type HeaderItem, readStored, writeStored } from './storage';
+import {
+  getEndpointOrigin,
+  type HeaderItem,
+  readStored,
+  type StoredState,
+  writeStored,
+} from './storage';
 
 /**
  * responses larger than this (in characters) are rendered without syntax highlighting.
  */
 const MaxHighlightSize = 100_000;
 
-export function OperationPlayground({ kind, name }: { kind: OperationKind; name: string }) {
+/**
+ * the variables of the operation, each argument is stored as a child field.
+ */
+const VariablesField: FieldKey = ['variables'];
+
+function validateQuery(schema: GraphQLSchema, query: string): string[] {
+  if (query.trim().length === 0) return [];
+
+  try {
+    return validate(schema, parse(query)).map((error) => error.message);
+  } catch (e) {
+    return [e instanceof Error ? e.message : String(e)];
+  }
+}
+
+/**
+ * @returns the argument name, for the field of an argument (`variables.<name>`).
+ */
+function toArgumentName(field: FieldKey): string | undefined {
+  if (field.length !== VariablesField.length + 1) return;
+  if (VariablesField.some((segment, i) => field[i] !== segment)) return;
+
+  const name = field[field.length - 1];
+  return typeof name === 'string' ? name : undefined;
+}
+
+export function OperationPlayground({
+  kind,
+  field,
+  example,
+}: {
+  kind: OperationKind;
+  field: GraphQLField<unknown, unknown>;
+  example: OperationExample | undefined;
+}) {
   const t = useTranslations({ note: 'graphql playground' });
   const ctx = useRenderContext();
   const playground = ctx.playground ?? {};
@@ -50,11 +96,6 @@ export function OperationPlayground({ kind, name }: { kind: OperationKind; name:
   // the default fetcher sends operations over HTTP POST, which cannot serve subscriptions
   const runDisabled = kind === 'subscription' && !playground.fetcher;
 
-  const field = useMemo(() => getOperationField(schema, kind, name), [schema, kind, name]);
-  const example = useMemo(
-    () => generateOperationExample(schema, { kind, name }),
-    [schema, kind, name],
-  );
   const defaultHeaders = useMemo<HeaderItem[]>(
     () => Object.entries(playground.headers ?? {}).map(([key, value]) => ({ key, value })),
     [playground.headers],
@@ -62,60 +103,64 @@ export function OperationPlayground({ kind, name }: { kind: OperationKind; name:
 
   const [open, setOpen] = useState(true);
   const [tab, setTab] = useState<'variables' | 'headers'>(
-    field && field.args.length > 0 ? 'variables' : 'headers',
+    field.args.length > 0 ? 'variables' : 'headers',
   );
   const [url, setUrl] = useState(playground.url ?? '');
   const [query, setQuery] = useState(example?.query ?? '');
   const [headers, setHeaders] = useState<HeaderItem[]>(defaultHeaders);
-  const [queryErrors, setQueryErrors] = useState<string[]>([]);
-  const hydratedRef = useRef(false);
+  // `localStorage` is unavailable while rendering, it is read on mount instead
+  const storedRef = useRef<StoredState>({});
   const originRef = useRef<string | undefined>(undefined);
 
+  // validating is expensive, `useDeferredValue` lets React run it at a low priority instead of
+  // blocking keystrokes — the errors trail the editor by a render rather than by a fixed delay
+  const validated = useDeferredValue(query);
+  const queryErrors = useMemo(() => validateQuery(schema, validated), [schema, validated]);
+
   const stf = useStf({
-    defaultValues: {
-      variables: example?.variables ?? {},
-    },
+    // the form mutates its default values in place, and `example` is also rendered as static docs
+    defaultValues: () => ({ variables: structuredClone(example?.variables) ?? {} }),
   });
 
-  // restore the stored URL once, then keep headers in sync with the endpoint origin
-  useEffect(() => {
-    const stored = readStored();
-    const isFirst = !hydratedRef.current;
-    hydratedRef.current = true;
+  // `FieldSet` creates the field when an argument's input is expanded, and deletes it when unset
+  function isArgumentSet(argName: string) {
+    const variables = stf.dataEngine.get(VariablesField);
+    return isPlainObject(variables) && argName in variables;
+  }
 
-    if (isFirst && stored.url && !playground.url && stored.url !== url) {
-      // the effect re-runs with the restored URL
-      setUrl(stored.url);
-      return;
-    }
+  // the Variables panel exposes optional arguments the query doesn't declare, so setting one has to
+  // declare it — otherwise its value is dropped on send. Only the two events that change which
+  // arguments take part rewrite the document, editing a value leaves it alone.
+  useListener({
+    stf,
+    onInit: onArgumentToggle,
+    onDelete: onArgumentToggle,
+  });
 
-    const origin = getEndpointOrigin(url);
-    if (!isFirst && origin === originRef.current) return;
+  function onArgumentToggle(key: FieldKey) {
+    if (!toArgumentName(key)) return;
+
+    setQuery((prev) => syncOperationVariables(prev, field, isArgumentSet, { prune: true }));
+  }
+
+  // headers are stored per endpoint origin, changing the origin swaps them out
+  function onUrlChange(value: string) {
+    setUrl(value);
+
+    const origin = getEndpointOrigin(value);
+    if (origin === originRef.current) return;
     originRef.current = origin;
 
-    const storedHeaders = origin ? stored.headers?.[origin] : undefined;
-    setHeaders(storedHeaders ?? defaultHeaders);
-    // oxlint-disable-next-line react-hooks/exhaustive-deps -- sync with storage on URL change only
-  }, [url]);
+    const stored = origin ? storedRef.current.headers?.[origin] : undefined;
+    setHeaders(stored ?? defaultHeaders);
+  }
 
-  // client-side validation of the query against the schema
+  // restore what was stored for a previous visit
   useEffect(() => {
-    const timer = window.setTimeout(() => {
-      if (query.trim().length === 0) {
-        setQueryErrors([]);
-        return;
-      }
-
-      try {
-        const errors = validate(schema, parse(query));
-        setQueryErrors(errors.map((error) => error.message));
-      } catch (e) {
-        setQueryErrors([e instanceof Error ? e.message : String(e)]);
-      }
-    }, 300);
-
-    return () => window.clearTimeout(timer);
-  }, [query, schema]);
+    const stored = (storedRef.current = readStored());
+    onUrlChange(playground.url || stored.url || url);
+    // oxlint-disable-next-line react-hooks/exhaustive-deps -- reading storage is a mount-only effect
+  }, []);
 
   const testQuery = useQuery(async (): Promise<PlaygroundResult> => {
     const headersObject: Record<string, string> = {};
@@ -124,11 +169,12 @@ export function OperationPlayground({ kind, name }: { kind: OperationKind; name:
     }
 
     const origin = getEndpointOrigin(url);
-    const stored = readStored();
-    writeStored({
+    const { headers: storedHeaders } = storedRef.current;
+    storedRef.current = {
       url,
-      headers: origin ? { ...stored.headers, [origin]: headers } : stored.headers,
-    });
+      headers: origin ? { ...storedHeaders, [origin]: headers } : storedHeaders,
+    };
+    writeStored(storedRef.current);
 
     const data = stf.dataEngine.getData() as { variables?: Record<string, unknown> };
     // strip `undefined` values
@@ -137,11 +183,17 @@ export function OperationPlayground({ kind, name }: { kind: OperationKind; name:
         ? (JSON.parse(JSON.stringify(data.variables)) as Record<string, unknown>)
         : undefined;
 
+    // the document can still be out of sync: it may have been edited by hand, or unparsable at the
+    // moment an argument was set. declaring what's missing here is what guarantees the variables we
+    // send are the ones the server receives — it never prunes, hand-written values are preserved.
+    const document = syncOperationVariables(query, field, isArgumentSet);
+    if (document !== query) setQuery(document);
+
     const fetcher = playground.fetcher ?? executeGraphQL;
     return fetcher(
       {
         url,
-        query,
+        query: document,
         variables,
         headers: headersObject,
       },
@@ -170,7 +222,7 @@ export function OperationPlayground({ kind, name }: { kind: OperationKind; name:
           {allowUrlEdit ? (
             <input
               value={url}
-              onChange={(e) => setUrl(e.target.value)}
+              onChange={(e) => onUrlChange(e.target.value)}
               placeholder={t('GraphQL endpoint')}
               aria-label={t('GraphQL endpoint')}
               className="flex-1 min-w-0 bg-transparent font-mono text-[0.8125rem] text-fd-muted-foreground focus:outline-none focus:text-fd-foreground"
@@ -238,11 +290,8 @@ export function OperationPlayground({ kind, name }: { kind: OperationKind; name:
               <button
                 type="button"
                 onClick={() => {
-                  // re-generate: the initial example's variables may be mutated by the form
-                  const fresh = generateOperationExample(schema, { kind, name });
-                  if (!fresh) return;
-                  setQuery(fresh.query);
-                  stf.dataEngine.reset({ variables: fresh.variables ?? {} });
+                  setQuery(example.query);
+                  stf.dataEngine.reset({ variables: structuredClone(example.variables) ?? {} });
                 }}
                 className={cn(
                   buttonVariants({ size: 'sm', variant: 'ghost' }),
@@ -255,7 +304,7 @@ export function OperationPlayground({ kind, name }: { kind: OperationKind; name:
             )}
           </div>
           <div className={cn('flex flex-col gap-3 p-3', tab !== 'variables' && 'hidden')}>
-            {field && field.args.length > 0 ? (
+            {field.args.length > 0 ? (
               <StfProvider value={stf}>
                 <SchemaProvider docRoot={{}} readOnly={false} writeOnly>
                   {field.args.map((arg) => {

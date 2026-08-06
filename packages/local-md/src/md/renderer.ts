@@ -88,15 +88,13 @@ export function fromAst<M>(options: MarkdownRendererASTOptions): MarkdownRendere
       });
     }
 
-    const toc = rehypeToc.map(
-      (item): TOCItemType => ({
-        ...item,
-        title: render({
-          type: 'root',
-          children: item.title.children,
-        }),
+    const toc = rehypeToc.map((item): TOCItemType => ({
+      ...item,
+      title: render({
+        type: 'root',
+        children: item.title.children,
       }),
-    );
+    }));
 
     return {
       toc,

@@ -1,9 +1,13 @@
 import {
+  type ArgumentNode,
   coerceInputLiteral,
+  type DocumentNode,
   type FieldNode,
   getNamedType,
+  type GraphQLArgument,
   type GraphQLDefaultInput,
   type GraphQLEnumType,
+  type GraphQLField,
   type GraphQLInputType,
   type GraphQLInterfaceType,
   type GraphQLObjectType,
@@ -21,10 +25,12 @@ import {
   Kind,
   type OperationDefinitionNode,
   type OperationTypeNode,
+  parse,
   parseType,
   print,
   type SelectionNode,
   type SelectionSetNode,
+  type VariableDefinitionNode,
 } from 'graphql';
 import { getOperationField } from '@/utils/schema';
 import type { OperationItem } from '@/utils/pages';
@@ -69,28 +75,14 @@ export function generateOperationExample(
       kind: Kind.NAME,
       value: field.name.charAt(0).toUpperCase() + field.name.slice(1),
     },
-    variableDefinitions: args.map((arg) => ({
-      kind: Kind.VARIABLE_DEFINITION,
-      variable: {
-        kind: Kind.VARIABLE,
-        name: { kind: Kind.NAME, value: arg.name },
-      },
-      type: parseType(String(arg.type)),
-    })),
+    variableDefinitions: args.map(variableDefinitionFor),
     selectionSet: {
       kind: Kind.SELECTION_SET,
       selections: [
         {
           kind: Kind.FIELD,
           name: { kind: Kind.NAME, value: field.name },
-          arguments: args.map((arg) => ({
-            kind: Kind.ARGUMENT,
-            name: { kind: Kind.NAME, value: arg.name },
-            value: {
-              kind: Kind.VARIABLE,
-              name: { kind: Kind.NAME, value: arg.name },
-            },
-          })),
+          arguments: args.map(argumentFor),
           selectionSet: selected?.selectionSet,
         },
       ],
@@ -109,6 +101,122 @@ export function generateOperationExample(
       },
     },
   };
+}
+
+function argumentFor(arg: GraphQLArgument): ArgumentNode {
+  return {
+    kind: Kind.ARGUMENT,
+    name: { kind: Kind.NAME, value: arg.name },
+    value: {
+      kind: Kind.VARIABLE,
+      name: { kind: Kind.NAME, value: arg.name },
+    },
+  };
+}
+
+function variableDefinitionFor(arg: GraphQLArgument): VariableDefinitionNode {
+  return {
+    kind: Kind.VARIABLE_DEFINITION,
+    variable: {
+      kind: Kind.VARIABLE,
+      name: { kind: Kind.NAME, value: arg.name },
+    },
+    type: parseType(String(arg.type)),
+  };
+}
+
+/**
+ * @returns if the argument is the `name: $name` pair we generate, rather than a value written by hand.
+ */
+function isGeneratedArgument(node: ArgumentNode, name: string): boolean {
+  return node.value.kind === Kind.VARIABLE && node.value.name.value === name;
+}
+
+/**
+ * Declare the variables of an operation for the arguments that are currently set.
+ *
+ * A playground shows an input for every argument, but a query only declares the ones it uses.
+ * Setting an argument the document doesn't declare would send a variable nothing references,
+ * which servers ignore — the request silently runs without it.
+ *
+ * @param query the query document, returned unchanged when it cannot be parsed (e.g. mid-edit).
+ * @param field the operation being edited.
+ * @param isSet whether the argument is set in the form.
+ * @param prune also undeclare arguments that are no longer set. This rewrites the document on the
+ * user's behalf, only do so in response to them unsetting an argument.
+ */
+export function syncOperationVariables(
+  query: string,
+  field: GraphQLField<unknown, unknown>,
+  isSet: (name: string) => boolean,
+  { prune = false }: { prune?: boolean } = {},
+): string {
+  let document: DocumentNode;
+  try {
+    document = parse(query);
+  } catch {
+    return query;
+  }
+
+  let changed = false;
+  const definitions = document.definitions.map((definition) => {
+    if (definition.kind !== Kind.OPERATION_DEFINITION) return definition;
+    const root = definition.selectionSet.selections.find(
+      (selection): selection is FieldNode =>
+        selection.kind === Kind.FIELD && selection.name.value === field.name,
+    );
+    if (!root) return definition;
+
+    const args = [...(root.arguments ?? [])];
+    const variables = [...(definition.variableDefinitions ?? [])];
+    let updated = false;
+
+    for (const arg of field.args) {
+      const argIndex = args.findIndex((item) => item.name.value === arg.name);
+      const variableIndex = variables.findIndex((item) => item.variable.name.value === arg.name);
+      const argNode = argIndex === -1 ? undefined : args[argIndex];
+      // values written by hand are never ours to touch
+      const isOurs = !argNode || isGeneratedArgument(argNode, arg.name);
+
+      if (isSet(arg.name)) {
+        if (!isOurs) continue;
+
+        if (!argNode) {
+          args.push(argumentFor(arg));
+          updated = true;
+        }
+
+        if (variableIndex === -1) {
+          variables.push(variableDefinitionFor(arg));
+          updated = true;
+        }
+
+        continue;
+      }
+
+      if (!prune || !argNode || !isOurs) continue;
+      args.splice(argIndex, 1);
+      if (variableIndex !== -1) variables.splice(variableIndex, 1);
+      updated = true;
+    }
+
+    if (!updated) return definition;
+    changed = true;
+
+    return {
+      ...definition,
+      variableDefinitions: variables,
+      selectionSet: {
+        ...definition.selectionSet,
+        selections: definition.selectionSet.selections.map((selection) =>
+          selection === root ? { ...root, arguments: args } : selection,
+        ),
+      },
+    } satisfies OperationDefinitionNode;
+  });
+
+  if (!changed) return query;
+  return print({ kind: Kind.DOCUMENT, definitions });
 }
 
 interface Selected {

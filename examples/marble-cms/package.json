@@ -1,6 +1,6 @@
 {
   "name": "example-marble-cms",
-  "version": "0.0.10",
+  "version": "0.0.11",
   "private": true,
   "scripts": {
     "build": "next build",
@@ -12,7 +12,7 @@
     "fumadocs-ui": "workspace:@fumadocs/base-ui@*",
     "github-slugger": "^2.0.0",
     "html-react-parser": "^6.1.5",
-    "next": "16.2.12",
+    "next": "16.3.0",
     "react": "^19.2.8",
     "react-dom": "^19.2.8",
     "shiki": "^4.4.1"

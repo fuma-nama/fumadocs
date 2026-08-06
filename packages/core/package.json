@@ -1,6 +1,6 @@
 {
   "name": "fumadocs-core",
-  "version": "16.14.0",
+  "version": "16.14.1",
   "description": "The React.js library for building a documentation website",
   "keywords": [
     "Docs",
@@ -146,7 +146,7 @@
     "image-size": "^2.0.2",
     "lucide-react": "^1.28.0",
     "negotiator": "^1.0.0",
-    "next": "16.2.12",
+    "next": "16.3.0",
     "path-to-regexp": "^8.4.2",
     "react-router": "^8.3.0",
     "remark-directive": "^4.0.0",
@@ -237,7 +237,7 @@
   "inlinedDependencies": {
     "@formatjs/fast-memoize": "3.1.7",
     "@formatjs/intl-localematcher": "0.8.13",
-    "@shikijs/transformers": "4.3.1",
+    "@shikijs/transformers": "4.4.1",
     "image-size": "2.0.2",
     "negotiator": "1.0.0",
     "path-to-regexp": "8.4.2",

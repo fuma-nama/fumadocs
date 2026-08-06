@@ -75,13 +75,18 @@ export function Operation({
     <DirectiveList directives={directives} className="my-4" />
   );
 
+  const example = useMemo(
+    () => generateOperationExample(schema, { kind, name }),
+    [schema, kind, name],
+  );
+
   const playground = ctx.playground;
   let playgroundNode: ReactNode = null;
   if (playground && (playground.url != null || playground.fetcher || playground.render)) {
     playgroundNode = playground.render ? (
       playground.render({ kind, name, operation: field, ctx })
     ) : (
-      <OperationPlayground kind={kind} name={name} />
+      <OperationPlayground kind={kind} field={field} example={example} />
     );
   }
 
@@ -135,10 +140,6 @@ export function Operation({
     </>
   );
 
-  const example = useMemo(
-    () => generateOperationExample(schema, { kind, name }),
-    [schema, kind, name],
-  );
   const snippets = useMemo(
     () =>
       example

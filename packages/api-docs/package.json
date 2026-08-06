@@ -55,7 +55,7 @@
     "types:check": "tsc --noEmit"
   },
   "dependencies": {
-    "@base-ui/react": "^1.6.0",
+    "@base-ui/react": "^1.7.0",
     "@fuma-translate/react": "^1.0.2",
     "@fumari/stf": "workspace:*",
     "@scalar/json-magic": "^0.12.19",
