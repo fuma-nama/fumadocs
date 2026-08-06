@@ -73,15 +73,13 @@ export function createRenderer(options: ObsidianRendererOptions): ObsidianRender
       });
     }
 
-    const toc = rehypeToc.map(
-      (item): TOCItemType => ({
-        ...item,
-        title: render({
-          type: 'root',
-          children: item.title.children,
-        }),
+    const toc = rehypeToc.map((item): TOCItemType => ({
+      ...item,
+      title: render({
+        type: 'root',
+        children: item.title.children,
       }),
-    );
+    }));
 
     return {
       toc,

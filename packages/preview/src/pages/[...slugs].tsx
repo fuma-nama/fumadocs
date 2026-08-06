@@ -194,19 +194,17 @@ async function MdContent({
   }
 
   const mdxComponents = useMdxComponents(page);
-  const toc = compiled.file.data.rehypeToc?.map(
-    (item): TOCItemType => ({
-      ...item,
-      title: compiler.render(
-        {
-          type: 'root',
-          children: item.title.children,
-        },
-        compiled.file,
-        mdxComponents,
-      ),
-    }),
-  );
+  const toc = compiled.file.data.rehypeToc?.map((item): TOCItemType => ({
+    ...item,
+    title: compiler.render(
+      {
+        type: 'root',
+        children: item.title.children,
+      },
+      compiled.file,
+      mdxComponents,
+    ),
+  }));
 
   return renderContainer(
     <DocsPage toc={toc}>
