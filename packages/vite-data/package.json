@@ -1,6 +1,6 @@
 {
   "name": "vite-data",
-  "version": "0.0.13",
+  "version": "0.0.14",
   "private": true,
   "dependencies": {
     "@fumadocs/basehub": "workspace:*",
