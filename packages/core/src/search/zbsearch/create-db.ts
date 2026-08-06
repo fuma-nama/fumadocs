@@ -31,23 +31,26 @@ export const advancedSchema = {
   embeddings: 'vector[512]',
 } as const;
 
+const DefaultLanguage = 'multilingual';
+
 export async function createDB({
   indexes,
   tokenizer,
-  language = 'multilingual',
+  language = DefaultLanguage,
   search: _,
   localeFilter: __,
   ...rest
 }: AdvancedOptions): Promise<ZBSearch<typeof advancedSchema>> {
   const items = typeof indexes === 'function' ? await indexes() : indexes;
+  const resolvedTokenizer = tokenizer ?? rest.components?.tokenizer;
 
   const db = create({
     schema: advancedSchema,
-    language,
+    language: resolvedTokenizer ? undefined : language,
     ...rest,
     components: {
       ...rest.components,
-      tokenizer: tokenizer ?? rest.components?.tokenizer,
+      tokenizer: resolvedTokenizer,
     },
   }) as ZBSearch<typeof advancedSchema>;
 
@@ -59,19 +62,21 @@ export async function createDB({
 export async function createDBSimple({
   indexes,
   tokenizer,
-  language = 'multilingual',
+  language = DefaultLanguage,
   search: _,
   localeFilter: __,
   ...rest
 }: SimpleOptions): Promise<ZBSearch<typeof simpleSchema>> {
   const items = typeof indexes === 'function' ? await indexes() : indexes;
+  const resolvedTokenizer = tokenizer ?? rest.components?.tokenizer;
+
   const db = create({
     schema: simpleSchema,
-    language,
+    language: resolvedTokenizer ? undefined : language,
     ...rest,
     components: {
       ...rest.components,
-      tokenizer: tokenizer ?? rest.components?.tokenizer,
+      tokenizer: resolvedTokenizer,
     },
   }) as ZBSearch<typeof simpleSchema>;
 

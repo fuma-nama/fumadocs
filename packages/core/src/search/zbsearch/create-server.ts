@@ -210,18 +210,14 @@ export function createI18nSearchAPI(
 ): SearchAPI<EngineQueryOptions> {
   if (options.localeMap) return createI18nSearchAPILegacy(type, options);
 
-  // zero-config: a single multilingual database for all locales,
-  // results are filtered with the `locale` property at query time.
   const server =
     type === 'simple'
       ? initSimpleSearch({
           ...options,
-          language: 'multilingual',
           localeFilter: true,
         } as SimpleOptions)
       : initAdvancedSearch({
           ...options,
-          language: 'multilingual',
           localeFilter: true,
         } as AdvancedOptions);
 

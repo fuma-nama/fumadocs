@@ -133,6 +133,65 @@ test('Search API I18n: zero-config languages', async () => {
   expect(await api.search('框架', { locale: 'ru' })).toHaveLength(0);
 });
 
+// a stemmer that folds every form of "record" onto a marker unrelated to the indexed text,
+// so a hit can only come from the custom tokenizer being applied on both index and query.
+const stemmer = (word: string) => (word.startsWith('record') ? 'pterodactyl' : word);
+const tokenizer = { language: 'multilingual', stemming: true, stemmer } as const;
+
+const indexes = [
+  {
+    title: 'Recording',
+    content: 'Start a recording session.',
+    url: '/help/recording',
+  },
+];
+
+test('Search API: custom tokenizer', async () => {
+  expect(await createSearchAPI('simple', { indexes }).search('pterodactyl')).toHaveLength(0);
+  expect(
+    await createSearchAPI('simple', { indexes, tokenizer }).search('pterodactyl'),
+  ).toHaveLength(1);
+
+  // `components.tokenizer` routes into the same code path
+  expect(
+    await createSearchAPI('simple', { indexes, components: { tokenizer } }).search('pterodactyl'),
+  ).toHaveLength(1);
+});
+
+test('Search API I18n: custom tokenizer', async () => {
+  const api = createI18nSearchAPI('simple', {
+    i18n: {
+      languages: ['en'],
+      defaultLanguage: 'en',
+    },
+    tokenizer,
+    indexes: indexes.map((index) => ({ ...index, locale: 'en' })),
+  });
+
+  expect(await api.search('pterodactyl', { locale: 'en' })).toHaveLength(1);
+});
+
+test('Search API: language is forwarded to the engine', async () => {
+  // an unsupported language is rejected by the engine, which proves the value reaches it
+  await expect(
+    createSearchAPI('simple', { indexes, language: 'klingon' }).search('recording'),
+  ).rejects.toThrow(/not supported/);
+
+  // ...and is dropped once a tokenizer takes over, which defines its own language
+  await expect(
+    createSearchAPI('simple', { indexes, language: 'klingon', tokenizer }).search('pterodactyl'),
+  ).resolves.toHaveLength(1);
+
+  // i18n servers must not clobber it either
+  await expect(
+    createI18nSearchAPI('simple', {
+      i18n: { languages: ['en'], defaultLanguage: 'en' },
+      indexes: indexes.map((index) => ({ ...index, locale: 'en' })),
+      language: 'klingon',
+    } as never).search('recording'),
+  ).rejects.toThrow(/not supported/);
+});
+
 test('Search API I18n: legacy locale map', async () => {
   const api = createI18nSearchAPI('simple', {
     i18n: {
