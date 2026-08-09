@@ -33,7 +33,7 @@ const paper = tegami({
       },
     },
   ],
-  ignore: [/^example-/, 'docs', 'root', 'shared', 'tsconfig', 'vite-data'],
+  ignore: [/^example-/, 'docs', 'root', 'shared', 'tsconfig'],
 
   groups: {
     fumadocs: {

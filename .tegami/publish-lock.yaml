@@ -1,65 +1,67 @@
 core:changelogs:
-  - content: "---\npackages:\n  npm:fumadocs-core:\n    type: patch\n---\n\n## Fix unusable `tokenizer` search option\n\nThe search engine rejects a `language` alongside a custom `tokenizer`, since the tokenizer carries its own. Both search entry points supplied one unconditionally — `createDB`/`createDBSimple` through a destructuring default that `language: undefined` could not suppress, and `createI18nSearchAPI` by hardcoding `multilingual` after the spread — so passing `tokenizer` always threw `NO_LANGUAGE_WITH_CUSTOM_TOKENIZER` at index-build time. On i18n sources there was no call that worked at all.\n\n`language` is now omitted when a tokenizer is present (from either `tokenizer` or `components.tokenizer`), and i18n servers no longer overwrite a caller-supplied `language`. Attaching a stemmer to the default multilingual segmentation works as documented:\n\n```ts\nimport { stemmer } from '@zbsearch/stemmers/english';\n\ncreateFromSource(source, {\n  tokenizer: { language: 'multilingual', stemming: true, stemmer },\n});\n```\n"
-    filename: 2026-08-06-searchtok.md
+  - content: "---\npackages:\n  npm:@fumadocs/base-ui:\n    type: patch\n  npm:fumadocs-ui:\n    type: patch\n---\n\n## Fix TOC overscroll\n"
+    filename: 2026-08-09-msl6dctg.md
     v: 0.0.0
-  - content: "---\npackages:\n  npm:@fumadocs/graphql:\n    type: patch\n---\n\n## Fix dropped optional arguments in playground\n\nThe playground's Variables panel exposes every argument of an operation, but the generated query only declares the required ones. Setting an optional argument used to send a variable the document never references, which servers ignore — the request looked successful but ran without it.\n\nThe query's variable declarations now follow the panel: setting an argument declares it, unsetting removes it. Sending an operation declares whatever the panel has set, so a query edited by hand can no longer drop a value. Declarations and values written by hand are never rewritten.\n\nAlso fixes the playground's form editing the example rendered on the page, which made **Reset** restore edited values instead of the original ones.\n"
-    filename: 2026-08-06-gqlvars.md
+  - content: "---\npackages:\n  npm:fumadocs-mdx:\n    type: patch\n---\n\n## Fix Base UI's `use-sync-external-store` breaking Vite dev servers\n\nThe Vite config is now derived from your project's own dependencies at startup, instead of being generated ahead of time against ours.\n\nBuilds keep the alias that replaces the shim with React, which is now applied only there. Pre-bundling is a dev server feature, and on builds a bundler that leaves the shim's `require('react')` in place gives it a second React instance whose hook dispatcher is null, breaking every component with a Base UI store.\n"
+    filename: 2026-08-09-usesyncstore.md
     v: 0.0.0
 core:packages:
   - id: npm:@fumadocs/api-docs
     updated: false
   - id: npm:@fumadocs/asyncapi
     updated: false
+  - changelogIds:
+      - 2026-08-09-msl6dctg.md
+    id: npm:@fumadocs/base-ui
+    updated: true
   - id: npm:@fumadocs/basehub
     updated: false
-  - id: npm:@fumadocs/base-ui
-    updated: true
   - id: npm:@fumadocs/cli
     updated: false
   - id: npm:@fumadocs/content
     updated: false
   - id: npm:@fumadocs/content-collections
     updated: false
+  - id: npm:fumadocs-core
+    updated: true
   - id: npm:create-fumadocs-app
-    updated: true
-  - changelogIds:
-      - 2026-08-06-searchtok.md
-    id: npm:fumadocs-core
-    updated: true
-  - id: npm:create-fumadocs-versions
     updated: true
   - id: npm:fumadocs-docgen
     updated: false
+  - id: npm:create-fumadocs-versions
+    updated: true
   - id: npm:fumadocs-epub
     updated: false
-  - changelogIds:
-      - 2026-08-06-gqlvars.md
-    id: npm:@fumadocs/graphql
-    updated: true
+  - id: npm:@fumadocs/graphql
+    updated: false
   - id: npm:@fumadocs/language
     updated: false
   - id: npm:@fumadocs/local-content
     updated: false
   - id: npm:@fumadocs/local-md
     updated: false
-  - id: npm:fumadocs-mdx
+  - changelogIds:
+      - 2026-08-09-usesyncstore.md
+    id: npm:fumadocs-mdx
+    updated: true
+  - id: npm:@fumadocs/mdx-remote
     updated: false
   - id: npm:@fumadocs/notion
-    updated: false
-  - id: npm:@fumadocs/mdx-remote
     updated: false
   - id: npm:fumadocs-obsidian
     updated: false
   - id: npm:fumadocs-openapi
     updated: false
-  - id: npm:fumadocs-python
-    updated: false
   - id: npm:fumadocs-preview
     updated: false
+  - id: npm:fumadocs-python
+    updated: false
+  - changelogIds:
+      - 2026-08-09-msl6dctg.md
+    id: npm:fumadocs-ui
+    updated: true
   - id: npm:@fumadocs/sanity
     updated: false
-  - id: npm:fumadocs-ui
-    updated: true
   - id: npm:@fumadocs/satteri
     updated: false
   - id: npm:@fumadocs/shadcn
@@ -72,60 +74,58 @@ core:packages:
     updated: false
   - id: npm:fumadocs-twoslash
     updated: false
-  - id: npm:@fumadocs/vite
-    updated: false
   - id: npm:fumadocs-typescript
+    updated: false
+  - id: npm:@fumadocs/vite
     updated: false
 npm:packages:
   - id: npm:@fumadocs/api-docs
   - id: npm:@fumadocs/asyncapi
-  - id: npm:@fumadocs/basehub
   - id: npm:@fumadocs/base-ui
+  - id: npm:@fumadocs/basehub
   - id: npm:@fumadocs/cli
   - id: npm:@fumadocs/content
   - id: npm:@fumadocs/content-collections
-  - id: npm:create-fumadocs-app
   - id: npm:fumadocs-core
-  - id: npm:create-fumadocs-versions
+  - id: npm:create-fumadocs-app
   - id: npm:fumadocs-docgen
+  - id: npm:create-fumadocs-versions
   - id: npm:fumadocs-epub
   - id: npm:@fumadocs/graphql
   - id: npm:@fumadocs/language
   - id: npm:@fumadocs/local-content
   - id: npm:@fumadocs/local-md
   - id: npm:fumadocs-mdx
-  - id: npm:@fumadocs/notion
   - id: npm:@fumadocs/mdx-remote
+  - id: npm:@fumadocs/notion
   - id: npm:fumadocs-obsidian
   - id: npm:fumadocs-openapi
-  - id: npm:fumadocs-python
   - id: npm:fumadocs-preview
-  - id: npm:@fumadocs/sanity
+  - id: npm:fumadocs-python
   - id: npm:fumadocs-ui
+  - id: npm:@fumadocs/sanity
   - id: npm:@fumadocs/satteri
   - id: npm:@fumadocs/shadcn
   - id: npm:@fumari/stf
   - id: npm:@fumadocs/story
   - id: npm:@fumadocs/tailwind
   - id: npm:fumadocs-twoslash
-  - id: npm:@fumadocs/vite
   - id: npm:fumadocs-typescript
+  - id: npm:@fumadocs/vite
   - id: npm:docs
-  - id: npm:example-graphql
-  - id: npm:vite-data
-  - id: npm:example-astro
   - id: npm:example-asyncapi
   - id: npm:example-base-ui
   - id: npm:example-content-collections
-  - id: npm:example-i18n
+  - id: npm:example-graphql
   - id: npm:example-marble-cms
+  - id: npm:example-i18n
   - id: npm:example-next
-  - id: npm:example-next-min
   - id: npm:example-next-local-md
   - id: npm:example-next-shadcn
-  - id: npm:example-openapi
+  - id: npm:example-next-min
   - id: npm:example-next-static
   - id: npm:example-obsidian
+  - id: npm:example-openapi
   - id: npm:example-python
   - id: npm:example-react-router
   - id: npm:example-react-router-i18n
@@ -141,3 +141,4 @@ npm:packages:
   - id: npm:example-tanstack-start-story
   - id: npm:example-waku
   - id: npm:example-waku-i18n
+  - id: npm:example-astro

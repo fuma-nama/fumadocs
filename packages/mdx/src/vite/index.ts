@@ -180,7 +180,7 @@ export default function mdx(
         if (!updateViteConfig) return;
 
         const { getConfig } = await import('@fumadocs/vite');
-        return getConfig({ root: core.root });
+        return getConfig({ root: core.root, isBuild: env.command === 'build' });
       },
       async buildStart() {
         // macro-only projects have no config file, index files shouldn't be emitted
