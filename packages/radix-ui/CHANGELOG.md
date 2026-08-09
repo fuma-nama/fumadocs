@@ -1,3 +1,7 @@
+## fumadocs-ui@16.14.3
+
+### Fix TOC overscroll
+
 ## fumadocs-ui@16.14.2
 
 ### Fix crash in `DynamicCodeBlock` when `options` is undefined
