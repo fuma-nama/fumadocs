@@ -1,14 +1,17 @@
 core:changelogs:
-  - content: "---\npackages:\n  npm:fumadocs-ui:\n    type: patch\n  npm:@fumadocs/base-ui:\n    type: patch\n---\n\n## Fix crash in `DynamicCodeBlock` when `options` is undefined\n\n`DynamicCodeBlock` read `options.components` unconditionally while building its Shiki config, even though `options` is optional on the public wrapper component. Passing an explicit `options={undefined}` (e.g. a value forwarded from another optional prop) crashed with `Cannot read properties of undefined (reading 'components')` instead of falling back to the default `pre` renderer.\n\n`options` is now read with optional chaining, so an undefined `options` behaves the same as omitting the prop entirely.\n"
-    filename: 2026-08-06-dyncodeblock-options.md
+  - content: "---\npackages:\n  npm:@fumadocs/base-ui:\n    type: patch\n  npm:fumadocs-ui:\n    type: patch\n---\n\n## Fix TOC overscroll\n"
+    filename: 2026-08-09-msl6dctg.md
+    v: 0.0.0
+  - content: "---\npackages:\n  npm:fumadocs-mdx:\n    type: patch\n---\n\n## Fix Base UI's `use-sync-external-store` breaking Vite dev servers\n\nThe Vite config is now derived from your project's own dependencies at startup, instead of being generated ahead of time against ours.\n\nBuilds keep the alias that replaces the shim with React, which is now applied only there. Pre-bundling is a dev server feature, and on builds a bundler that leaves the shim's `require('react')` in place gives it a second React instance whose hook dispatcher is null, breaking every component with a Base UI store.\n"
+    filename: 2026-08-09-usesyncstore.md
     v: 0.0.0
 core:packages:
-  - id: npm:@fumadocs/asyncapi
-    updated: false
   - id: npm:@fumadocs/api-docs
     updated: false
+  - id: npm:@fumadocs/asyncapi
+    updated: false
   - changelogIds:
-      - 2026-08-06-dyncodeblock-options.md
+      - 2026-08-09-msl6dctg.md
     id: npm:@fumadocs/base-ui
     updated: true
   - id: npm:@fumadocs/basehub
@@ -23,36 +26,38 @@ core:packages:
     updated: true
   - id: npm:create-fumadocs-app
     updated: true
-  - id: npm:create-fumadocs-versions
-    updated: true
   - id: npm:fumadocs-docgen
     updated: false
+  - id: npm:create-fumadocs-versions
+    updated: true
   - id: npm:fumadocs-epub
     updated: false
   - id: npm:@fumadocs/graphql
+    updated: false
+  - id: npm:@fumadocs/language
     updated: false
   - id: npm:@fumadocs/local-content
     updated: false
   - id: npm:@fumadocs/local-md
     updated: false
-  - id: npm:@fumadocs/language
-    updated: false
-  - id: npm:fumadocs-mdx
-    updated: false
+  - changelogIds:
+      - 2026-08-09-usesyncstore.md
+    id: npm:fumadocs-mdx
+    updated: true
   - id: npm:@fumadocs/mdx-remote
+    updated: false
+  - id: npm:@fumadocs/notion
     updated: false
   - id: npm:fumadocs-obsidian
     updated: false
   - id: npm:fumadocs-openapi
-    updated: false
-  - id: npm:@fumadocs/notion
     updated: false
   - id: npm:fumadocs-preview
     updated: false
   - id: npm:fumadocs-python
     updated: false
   - changelogIds:
-      - 2026-08-06-dyncodeblock-options.md
+      - 2026-08-09-msl6dctg.md
     id: npm:fumadocs-ui
     updated: true
   - id: npm:@fumadocs/sanity
@@ -63,19 +68,19 @@ core:packages:
     updated: false
   - id: npm:@fumari/stf
     updated: false
-  - id: npm:@fumadocs/tailwind
-    updated: false
   - id: npm:@fumadocs/story
+    updated: false
+  - id: npm:@fumadocs/tailwind
     updated: false
   - id: npm:fumadocs-twoslash
     updated: false
-  - id: npm:@fumadocs/vite
-    updated: false
   - id: npm:fumadocs-typescript
     updated: false
+  - id: npm:@fumadocs/vite
+    updated: false
 npm:packages:
-  - id: npm:@fumadocs/asyncapi
   - id: npm:@fumadocs/api-docs
+  - id: npm:@fumadocs/asyncapi
   - id: npm:@fumadocs/base-ui
   - id: npm:@fumadocs/basehub
   - id: npm:@fumadocs/cli
@@ -83,18 +88,18 @@ npm:packages:
   - id: npm:@fumadocs/content-collections
   - id: npm:fumadocs-core
   - id: npm:create-fumadocs-app
-  - id: npm:create-fumadocs-versions
   - id: npm:fumadocs-docgen
+  - id: npm:create-fumadocs-versions
   - id: npm:fumadocs-epub
   - id: npm:@fumadocs/graphql
+  - id: npm:@fumadocs/language
   - id: npm:@fumadocs/local-content
   - id: npm:@fumadocs/local-md
-  - id: npm:@fumadocs/language
   - id: npm:fumadocs-mdx
   - id: npm:@fumadocs/mdx-remote
+  - id: npm:@fumadocs/notion
   - id: npm:fumadocs-obsidian
   - id: npm:fumadocs-openapi
-  - id: npm:@fumadocs/notion
   - id: npm:fumadocs-preview
   - id: npm:fumadocs-python
   - id: npm:fumadocs-ui
@@ -102,39 +107,38 @@ npm:packages:
   - id: npm:@fumadocs/satteri
   - id: npm:@fumadocs/shadcn
   - id: npm:@fumari/stf
-  - id: npm:@fumadocs/tailwind
   - id: npm:@fumadocs/story
+  - id: npm:@fumadocs/tailwind
   - id: npm:fumadocs-twoslash
-  - id: npm:@fumadocs/vite
   - id: npm:fumadocs-typescript
+  - id: npm:@fumadocs/vite
   - id: npm:docs
   - id: npm:example-asyncapi
   - id: npm:example-base-ui
-  - id: npm:example-astro
   - id: npm:example-content-collections
   - id: npm:example-graphql
-  - id: npm:example-i18n
   - id: npm:example-marble-cms
+  - id: npm:example-i18n
   - id: npm:example-next
   - id: npm:example-next-local-md
-  - id: npm:example-next-min
   - id: npm:example-next-shadcn
+  - id: npm:example-next-min
   - id: npm:example-next-static
   - id: npm:example-obsidian
-  - id: npm:example-python
   - id: npm:example-openapi
+  - id: npm:example-python
   - id: npm:example-react-router
   - id: npm:example-react-router-i18n
   - id: npm:example-react-router-min
   - id: npm:example-react-router-rsc
   - id: npm:example-react-router-spa
+  - id: npm:example-tanstack-start
   - id: npm:example-tanstack-start-i18n
   - id: npm:example-tanstack-start-local-md
-  - id: npm:example-tanstack-start
   - id: npm:example-tanstack-start-min
   - id: npm:example-tanstack-start-openapi
   - id: npm:example-tanstack-start-spa
   - id: npm:example-tanstack-start-story
   - id: npm:example-waku
   - id: npm:example-waku-i18n
-  - id: npm:vite-data
+  - id: npm:example-astro
