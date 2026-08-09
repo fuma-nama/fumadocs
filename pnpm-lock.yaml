@@ -4036,39 +4036,6 @@ importers:
         specifier: ^8.2.0
         version: 8.2.0(@types/node@26.1.2)(esbuild@0.28.1)(jiti@2.7.0)(terser@5.49.0)(tsx@4.23.5)(yaml@2.9.0)
 
-  packages/vite-data:
-    dependencies:
-      '@fumadocs/basehub':
-        specifier: workspace:*
-        version: link:../basehub
-      '@fumadocs/local-md':
-        specifier: workspace:*
-        version: link:../local-md
-      '@fumadocs/mdx-remote':
-        specifier: workspace:*
-        version: link:../mdx-remote
-      '@fumadocs/sanity':
-        specifier: workspace:*
-        version: link:../sanity
-      '@fumadocs/story':
-        specifier: workspace:*
-        version: link:../story
-      fumadocs-core:
-        specifier: workspace:*
-        version: link:../core
-      fumadocs-mdx:
-        specifier: workspace:*
-        version: link:../mdx
-      fumadocs-twoslash:
-        specifier: workspace:*
-        version: link:../twoslash
-      fumadocs-typescript:
-        specifier: workspace:*
-        version: link:../typescript
-      fumadocs-ui:
-        specifier: workspace:*
-        version: link:../radix-ui
-
 packages:
 
   '@acemir/cssom@0.9.31':
