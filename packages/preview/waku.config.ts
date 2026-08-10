@@ -13,8 +13,8 @@ export default defineConfig({
       tailwindcss(),
       {
         name: 'internal',
-        config() {
-          return getConfig({ root: process.cwd() });
+        config(_, env) {
+          return getConfig({ root: process.cwd(), isBuild: env.command === 'build' });
         },
       },
     ],
