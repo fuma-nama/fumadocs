@@ -112,6 +112,20 @@ test('embedding elements are dropped', async () => {
   expect(html).not.toContain('<embed');
 });
 
+test('the body fallback drops page chrome', async () => {
+  const res = processHtml(
+    parseHtml(
+      '<!doctype html><html><body><header>chrome</header><nav>links</nav><p>content</p><footer>chrome</footer></body></html>',
+    ),
+  );
+  const html = renderToStaticMarkup((await fromAst({ tree: res.tree }).render()).body);
+
+  expect(html).toContain('content');
+  expect(html).not.toContain('<header');
+  expect(html).not.toContain('<nav');
+  expect(html).not.toContain('<footer');
+});
+
 test('processHtml does not mutate the input tree', () => {
   const input = parseHtml('<h1 class="big">Title</h1><script>evil()</script>');
   const before = JSON.stringify(input);
