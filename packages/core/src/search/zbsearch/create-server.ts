@@ -23,7 +23,7 @@ import { buildBreadcrumbs, buildIndexDefault, type SharedIndex } from '../server
 import type { LoaderConfig, LoaderOutput } from '@/source/loader';
 import type { Awaitable } from '@/types';
 
-type CreateInput = Parameters<typeof create>[0];
+type CreateInput = NonNullable<Parameters<typeof create>[0]>;
 
 interface SharedOptions extends Pick<CreateInput, 'sort' | 'components' | 'plugins'> {
   /**

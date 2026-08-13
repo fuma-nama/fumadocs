@@ -199,22 +199,14 @@ async function loadImageSize(
   src: Source,
   onExternal: ExternalImageOptions,
 ): Promise<ImageSize | undefined> {
-  if (src.type === 'file') {
-    const { imageSizeFromFile } = await import('image-size/fromFile');
-    return imageSizeFromFile(src.file);
-  }
+  const { probe } = await import('@fumari/image-size');
+
+  if (src.type === 'file') return probe(src.file);
   if (onExternal === false) return;
 
+  // reading stops as soon as the image header has been parsed
   const { timeout } = typeof onExternal === 'object' ? onExternal : {};
-  const res = await fetch(src.url, {
-    signal: typeof timeout === 'number' ? AbortSignal.timeout(timeout) : undefined,
-  });
-  if (!res.ok) {
-    throw new Error(`[Remark Image] Failed to fetch ${src.url} (${res.status})`);
-  }
-
-  const { imageSize } = await import('image-size');
-  return imageSize(new Uint8Array(await res.arrayBuffer()));
+  return probe(src.url, { timeout });
 }
 
 export { parseSrc, getImageSize };

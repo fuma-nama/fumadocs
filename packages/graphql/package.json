@@ -42,14 +42,14 @@
     "cnfast": "^0.1.0",
     "github-slugger": "^2.0.0",
     "hast-util-to-jsx-runtime": "^2.3.6",
-    "lucide-react": "^1.28.0",
+    "lucide-react": "^1.31.0",
     "remark": "^15.0.1",
     "remark-rehype": "^11.1.2",
-    "shiki": "^4.4.1"
+    "shiki": "^4.4.3"
   },
   "devDependencies": {
     "@tailwindcss/oxide": "^4.3.3",
-    "@types/node": "26.1.2",
+    "@types/node": "26.2.0",
     "@types/react": "^19.2.18",
     "@types/react-dom": "^19.2.4",
     "fumadocs-core": "workspace:*",
