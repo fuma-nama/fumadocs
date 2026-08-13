@@ -1,0 +1,78 @@
+{
+  "structuredData": {
+    "headings": [
+      {
+        "id": "product-kickoff",
+        "content": "Product Kickoff"
+      },
+      {
+        "id": "goals",
+        "content": "Goals"
+      },
+      {
+        "id": "the-roadmap",
+        "content": "The Roadmap"
+      }
+    ],
+    "contents": [
+      {
+        "heading": "product-kickoff",
+        "content": "What we are building and why it matters."
+      },
+      {
+        "heading": "goals",
+        "content": "Ship the first slice by March."
+      },
+      {
+        "heading": "goals",
+        "content": "Validate demand"
+      },
+      {
+        "heading": "goals",
+        "content": "Deliver the aha-moment"
+      },
+      {
+        "heading": "the-roadmap",
+        "content": "Phase"
+      },
+      {
+        "heading": "the-roadmap",
+        "content": "Weeks"
+      },
+      {
+        "heading": "the-roadmap",
+        "content": "Now"
+      },
+      {
+        "heading": "the-roadmap",
+        "content": "4"
+      },
+      {
+        "heading": "the-roadmap",
+        "content": "Next"
+      },
+      {
+        "heading": "the-roadmap",
+        "content": "6"
+      }
+    ]
+  },
+  "bodyHtml": "\n      <h1 id=\"product-kickoff\">Product Kickoff</h1>\n      <p>What we are building and why it matters.</p>\n      <h2 id=\"goals\">Goals</h2>\n      <p>Ship the first slice by <strong>March</strong>.</p>\n      <ul>\n        <li>Validate demand</li>\n        <li>Deliver the aha-moment</li>\n      </ul>\n      <h2 id=\"the-roadmap\">The Roadmap</h2>\n      <table><thead><tr><th>Phase</th><th>Weeks</th></tr></thead><tbody><tr><td>Now</td><td>4</td></tr><tr><td>Next</td><td>6</td></tr></tbody></table>\n      \n    ",
+  "toc": [
+    {
+      "url": "#product-kickoff",
+      "depth": 1,
+      "titleHtml": "Product Kickoff"
+    },
+    {
+      "url": "#goals",
+      "depth": 2,
+      "titleHtml": "Goals"
+    },
+    {
+      "url": "#the-roadmap",
+      "depth": 2,
+      "titleHtml": "The Roadmap"
+    }
+  ]
+}

@@ -1,0 +1,141 @@
+---
+title: Local HTML
+description: Content source for local HTML files.
+---
+
+## Introduction
+
+`@fumadocs/local-html` is a content source for local HTML files. It integrates pages produced outside your docs pipeline — exported decks, reports, agent-generated deliverables, output of other tools — and adapts them to your docs theme.
+
+For each `.html` file, it:
+
+- scopes the content to `<main>`/`<article>` (falling back to `<body>`), dropping page chrome like `<header>`, `<footer>` and `<nav>`, along with `<script>` and `<style>` tags.
+- removes `class` and `style` attributes by default, so your docs theme's prose styling takes over.
+- generates ids for headings, powering the table of contents and search indexing.
+- reads the page title and description from `<title>` and `<meta>` tags.
+
+As compared to [Local Markdown](/docs/integrations/content/local-md), it is for content you receive as HTML rather than author as Markdown — the HTML is treated as data to adapt, not as a document format to write in.
+
+### Limitations
+
+- Scripts are stripped: interactive behaviour of the original page is not preserved.
+- No MDX components in content, but you can map HTML tags to custom components at render phase.
+
+## Setup
+
+Install the package:
+
+```package-install
+@fumadocs/local-html
+```
+
+Create a `localHtml` instance and connect it to Fumadocs:
+
+```ts title="lib/source.ts"
+import { dynamicLoader } from 'fumadocs-core/source/dynamic';
+import { localHtml } from '@fumadocs/local-html';
+
+const pages = localHtml({
+  dir: 'content/pages',
+  // options
+});
+
+const pagesLoader = dynamicLoader(pages.dynamicSource(), {
+  baseUrl: '/docs',
+});
+
+export async function getSource() {
+  return pagesLoader.get();
+}
+```
+
+You can use `staticSource()` with a normal `loader()` when you only need a one-time snapshot without revalidation:
+
+```ts title="lib/source.ts"
+import { loader } from 'fumadocs-core/source';
+import { localHtml } from '@fumadocs/local-html';
+
+const pages = localHtml({
+  dir: 'content/pages',
+});
+
+export const source = loader(await pages.staticSource(), {
+  baseUrl: '/docs',
+});
+```
+
+### Page Metadata
+
+The title and description of each page are read from its `<head>`:
+
+- `<title>` becomes the page title.
+- `<meta name="description">` becomes the description.
+
+You can override them (and set an icon) without touching the visible content, using `fumadocs:` metas:
+
+```html
+<meta name="fumadocs:title" content="My Page" />
+<meta name="fumadocs:description" content="A short description." />
+<meta name="fumadocs:icon" content="Album" />
+```
+
+Every `<meta name>`/`content` pair of the document is also available on `page.data.metadata`.
+
+Like other local sources, `meta.json` files customize the page tree, validated with `metaSchema`.
+
+### Content Options
+
+```ts
+import { localHtml } from '@fumadocs/local-html';
+
+const pages = localHtml({
+  dir: 'content/pages',
+  // keep the original class/style attributes instead of adapting to your theme
+  adaptStyles: false,
+  // drop additional tags from the content
+  exclude: ['iframe'],
+  // custom logic to pick the element holding the page content
+  selectContent: (root) => {
+    // return a hast element, or undefined for the default behaviour
+  },
+});
+```
+
+## Rendering
+
+`page.data.load()` returns a renderer with the processed content:
+
+```tsx title="app/docs/[[...slug]]/page.tsx"
+import { source } from '@/lib/source';
+import { DocsPage, DocsBody, DocsTitle, DocsDescription } from 'fumadocs-ui/page';
+import { notFound } from 'next/navigation';
+
+export default async function Page(props: PageProps<'/docs/[[...slug]]'>) {
+  const params = await props.params;
+  const page = source.getPage(params.slug);
+  if (!page) notFound();
+
+  const renderer = await page.data.load();
+  const { body, toc } = await renderer.render();
+
+  return (
+    <DocsPage toc={toc}>
+      <DocsTitle>{page.data.title}</DocsTitle>
+      <DocsDescription>{page.data.description}</DocsDescription>
+      <DocsBody>{body}</DocsBody>
+    </DocsPage>
+  );
+}
+```
+
+You can map HTML tags to your own components, like headings with anchors:
+
+```tsx
+import { getMDXComponents } from '@/mdx-components';
+
+const { body, toc } = await renderer.render(getMDXComponents());
+```
+
+## Search
+
+The processed content exposes `structuredData` compatible with [Search](/docs/headless/search), built from the headings and text blocks of the page — no extra work is needed to index HTML pages.
