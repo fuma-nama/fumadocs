@@ -1,6 +1,6 @@
 {
   "name": "example-next-static",
-  "version": "0.0.14",
+  "version": "0.0.15",
   "private": true,
   "scripts": {
     "build": "next build",
