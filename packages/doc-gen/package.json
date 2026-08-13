@@ -45,8 +45,8 @@
     "unified": "^11.0.5",
     "unist-util-visit": "^5.1.0",
     "vfile": "^6.0.3",
-    "yuku-codegen": "^0.8.3",
-    "yuku-parser": "^0.8.3",
+    "yuku-codegen": "^0.8.5",
+    "yuku-parser": "^0.8.5",
     "zod": "^4.4.3"
   },
   "devDependencies": {
@@ -54,7 +54,7 @@
     "@types/estree": "^1.0.9",
     "@types/hast": "^3.0.5",
     "@types/mdast": "^4.0.4",
-    "@types/node": "26.1.2",
+    "@types/node": "26.2.0",
     "fumadocs-core": "workspace:*",
     "mdast-util-mdx": "^3.0.0",
     "remark": "^15.0.1",

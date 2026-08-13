@@ -58,16 +58,16 @@
     "@base-ui/react": "^1.7.0",
     "@fuma-translate/react": "^1.0.2",
     "@fumari/stf": "workspace:*",
-    "@scalar/json-magic": "^0.12.19",
+    "@scalar/json-magic": "^0.12.20",
     "class-variance-authority": "^0.7.1",
     "cnfast": "^0.1.0",
     "github-slugger": "^2.0.0",
-    "lucide-react": "^1.28.0"
+    "lucide-react": "^1.31.0"
   },
   "devDependencies": {
     "@fastify/deepmerge": "^3.2.1",
     "@tailwindcss/oxide": "^4.3.3",
-    "@types/node": "26.1.2",
+    "@types/node": "26.2.0",
     "@types/react": "^19.2.18",
     "@types/react-dom": "^19.2.4",
     "fumadocs-core": "workspace:*",
