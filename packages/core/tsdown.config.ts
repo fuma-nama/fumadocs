@@ -33,7 +33,6 @@ export default defineConfig({
     onlyBundle: [
       'remove-markdown',
       '@formatjs/intl-localematcher',
-      'image-size',
       'path-to-regexp',
       'negotiator',
       'npm-to-yarn',
