@@ -1,6 +1,6 @@
 {
   "name": "@fumari/image-size",
-  "version": "0.0.0",
+  "version": "0.1.0",
   "description": "Read image dimensions without downloading the whole image. Zero dependencies.",
   "keywords": [
     "dimensions",

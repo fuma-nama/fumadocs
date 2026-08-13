@@ -1,11 +1,6 @@
----
-packages:
-  npm:@fumari/image-size: minor
-  npm:fumadocs-core: patch
-  npm:@fumadocs/satteri: patch
----
+## @fumari/image-size@0.1.0
 
-## Introduce `@fumari/image-size`, replacing `image-size` in `remarkImage`
+### Introduce `@fumari/image-size`, replacing `image-size` in `remarkImage`
 
 A fork of [probe-image-size](https://github.com/nodeca/probe-image-size) with no dependencies of its own.
 
