@@ -98,6 +98,52 @@ test('components map onto html tags', async () => {
   expect(renderToStaticMarkup(body)).toContain('data-custom="true"');
 });
 
+test('embedding elements are dropped', async () => {
+  const res = processHtml(
+    parseHtml(
+      '<p>safe</p><iframe src="https://evil.example"></iframe><object data="x"></object><embed src="y">',
+    ),
+  );
+  const html = renderToStaticMarkup((await fromAst({ tree: res.tree }).render()).body);
+
+  expect(html).toContain('safe');
+  expect(html).not.toContain('<iframe');
+  expect(html).not.toContain('<object');
+  expect(html).not.toContain('<embed');
+});
+
+test('processHtml does not mutate the input tree', () => {
+  const input = parseHtml('<h1 class="big">Title</h1><script>evil()</script>');
+  const before = JSON.stringify(input);
+  processHtml(input);
+
+  expect(JSON.stringify(input)).toBe(before);
+});
+
+test('generated slugs avoid pre-existing heading ids', () => {
+  const res = processHtml(parseHtml('<h2>Setup</h2><h2 id="setup">Other</h2>'));
+
+  expect(res.toc.map((item) => item.url)).toEqual(['#setup-1', '#setup']);
+});
+
+test('an empty <title> falls back to the file name', async () => {
+  const dir = await fs.mkdtemp(path.join(os.tmpdir(), 'local-html-title-'));
+
+  try {
+    await fs.writeFile(
+      path.join(dir, 'untitled.html'),
+      '<!doctype html><html><head><title>  </title></head><body><p>x</p></body></html>',
+    );
+
+    const source = await localHtml({ dir }).staticSource();
+    const page = source.files.find((file) => file.type === 'page');
+    if (page?.type !== 'page') throw new Error('expected a page');
+    expect(page.data.title).toBe('untitled');
+  } finally {
+    await fs.rm(dir, { recursive: true, force: true });
+  }
+});
+
 test('source: metadata comes from the document head', async () => {
   const source = await localHtml({ dir: fixturesDir }).staticSource();
   const pages = source.files.filter((file) => file.type === 'page');

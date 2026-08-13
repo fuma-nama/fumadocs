@@ -34,7 +34,7 @@ export interface ProcessedHtml {
   structuredData: StructuredData;
 }
 
-/** tags that never carry readable content */
+/** tags that never carry readable content, or that can embed external/executable content */
 const NonContentTags = new Set([
   'script',
   'style',
@@ -44,6 +44,9 @@ const NonContentTags = new Set([
   'meta',
   'title',
   'base',
+  'iframe',
+  'object',
+  'embed',
 ]);
 
 /** page chrome, dropped only when no `<main>`/`<article>` scopes the content */
@@ -107,13 +110,21 @@ export function processHtml(input: Root, options: ProcessHtmlOptions = {}): Proc
     content ??= findElement(input, 'body') ?? input;
   }
 
+  // the input tree may be cached and shared (e.g. `HtmlPage.tree`), never mutate it
   const tree: Root = {
     type: 'root',
-    children: content.type === 'root' ? content.children : content.children.slice(),
+    children: structuredClone(content.children),
   };
 
   const excluded = new Set(exclude);
   const slugger = new Slugger();
+
+  // seed the slugger with pre-existing heading ids, so generated ones cannot collide
+  visit(tree, 'element', (element) => {
+    if (HeadingTags.has(element.tagName) && typeof element.properties.id === 'string') {
+      slugger.slug(element.properties.id);
+    }
+  });
 
   visit(tree, 'element', (element, index, parent) => {
     if (

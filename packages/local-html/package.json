@@ -55,18 +55,13 @@
     "@types/hast": "*",
     "@types/react": "*",
     "fumadocs-core": "^16.8.0",
-    "react": "^19.2.0",
-    "react-dom": "^19.2.0",
-    "unified": "*"
+    "react": "^19.2.0"
   },
   "peerDependenciesMeta": {
     "@types/hast": {
       "optional": true
     },
     "@types/react": {
-      "optional": true
-    },
-    "unified": {
       "optional": true
     }
   }

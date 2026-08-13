@@ -46,7 +46,10 @@ function extractMetadata(tree: Root): { title?: string; metadata: Record<string,
 
   visit(tree, 'element', (element: Element) => {
     if (element.tagName === 'title') {
-      title ??= textOf(element).trim();
+      if (!title) {
+        const text = textOf(element).trim();
+        if (text.length > 0) title = text;
+      }
       return 'skip';
     }
 
@@ -85,8 +88,8 @@ export function htmlIntegration<
 
     return {
       title:
-        metadata['fumadocs:title'] ?? title ?? path.basename(file.path, path.extname(file.path)),
-      description: metadata['fumadocs:description'] ?? metadata.description,
+        metadata['fumadocs:title'] || title || path.basename(file.path, path.extname(file.path)),
+      description: metadata['fumadocs:description'] || metadata.description,
       icon: metadata['fumadocs:icon'],
 
       metadata,
@@ -96,7 +99,14 @@ export function htmlIntegration<
   }
 
   async function meta(file: SourceFile): Promise<$Meta> {
-    const result = await metaSchema['~standard'].validate(JSON.parse(await file.read()));
+    let parsed: unknown;
+    try {
+      parsed = JSON.parse(await file.read());
+    } catch (error) {
+      throw new Error(`invalid JSON in "${file.absolutePath}": ${String(error)}`);
+    }
+
+    const result = await metaSchema['~standard'].validate(parsed);
     if (result.issues) {
       throw new Error(`invalid data in "${file.absolutePath}": ${formatIssues(result.issues)}`);
     }
