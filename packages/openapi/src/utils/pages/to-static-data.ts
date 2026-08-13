@@ -7,6 +7,8 @@ import { idToTitle } from '@fumadocs/api-docs/utils/id-to-title';
 import { dereferenceShallow } from '@fumadocs/api-docs/schema/dereference';
 import { createMagicProxy } from '@scalar/json-magic/magic-proxy';
 
+const proxyCache = new WeakMap<Document, Document>();
+
 export function toStaticData(
   page: GeneratedPageProps,
   doc: Document,
@@ -14,7 +16,11 @@ export function toStaticData(
   toc: TOCItemType[];
   structuredData: StructuredData;
 } {
-  const proxied = createMagicProxy(doc as Record<string, unknown>) as Document;
+  let proxied = proxyCache.get(doc);
+  if (!proxied) {
+    proxied = createMagicProxy(doc as Record<string, unknown>) as Document;
+    proxyCache.set(doc, proxied);
+  }
   const slugger = new Slugger();
   const toc: TOCItemType[] = [];
   const structuredData: StructuredData = { headings: [], contents: [] };
