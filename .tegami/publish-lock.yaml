@@ -1,14 +1,12 @@
 core:changelogs:
-  - content: "---\npackages:\n  npm:@fumari/image-size:\n    type: minor\n  npm:fumadocs-core:\n    type: patch\n  npm:@fumadocs/satteri:\n    type: patch\n---\n\n## Introduce `@fumari/image-size`, replacing `image-size` in `remarkImage`\n\nA fork of [probe-image-size](https://github.com/nodeca/probe-image-size) with no dependencies of its own.\n\n```ts\nimport { probe, imageSize } from '@fumari/image-size';\n\nawait probe('./public/banner.png'); // { width: 1200, height: 630, type: 'png', mime: 'image/png' }\nawait probe('https://example.com/banner.png', { timeout: 5000 });\n\nimageSize(bytes); // the same result, or `null`\n```\n\n`remarkImage` now uses it in both `fumadocs-core` and `@fumadocs/satteri`. Remote images are no longer downloaded in full just to be measured, and redirects are followed. Sizes are always in pixels, so an SVG sized in `em` or `pt` is converted instead of being skipped. Remote requests also time out after 30 seconds by default.\n\nOne behaviour difference worth knowing: the supported formats are avif/heic/heif, bmp, gif, ico, jpeg, png, psd, svg, tiff and webp. Sizes for jxl, tga, pnm, dds, icns, cur, ktx and jp2 can no longer be resolved and go through `onError` instead.\n\nSequential scanning stops after 512 KB, but that never loses an image: the one format that stores its dimensions past that point — TIFF with a trailing IFD — is resolved by following the header's pointer with a targeted read, using an HTTP `Range` request for remote files (and skipping through the body when the server ignores ranges).\n"
-    filename: 2026-08-13-probe-image-size.md
+  - content: "---\npackages:\n  npm:@fumadocs/local-html:\n    type: minor\n---\n\n## New package: `@fumadocs/local-html`\n\nA content source for local HTML files. It integrates externally-produced HTML pages (exported decks, reports, agent-generated deliverables) into a Fumadocs site, adapting them to the docs theme: content is scoped to `<main>`/`<article>`, page chrome and scripts/styles are dropped, `class`/`style` attributes are removed so prose styling takes over, and headings get generated ids for TOC and search indexing.\n\nCode blocks are highlighted with Shiki, configured through `rehypeCodeOptions` like `@fumadocs/local-md` (`false` to skip it). The language comes from the block's `language-*` class, which now survives `adaptStyles`.\n\nHot reload works like `@fumadocs/local-md`: `@fumadocs/local-html/dev/vite` for Vite, or the bundled `local-html dev` server with `@fumadocs/local-html/dev/ws` for everything else.\n"
+    filename: 2026-08-13-local-html.md
     v: 0.0.0
 core:packages:
   - id: npm:@fumadocs/api-docs
     updated: false
   - id: npm:@fumadocs/asyncapi
     updated: false
-  - id: npm:@fumadocs/base-ui
-    updated: true
   - id: npm:@fumadocs/basehub
     updated: false
   - id: npm:@fumadocs/cli
@@ -17,28 +15,30 @@ core:packages:
     updated: false
   - id: npm:@fumadocs/content-collections
     updated: false
-  - changelogIds:
-      - 2026-08-13-probe-image-size.md
-    id: npm:fumadocs-core
-    updated: true
+  - id: npm:@fumadocs/base-ui
+    updated: false
+  - id: npm:fumadocs-core
+    updated: false
   - id: npm:create-fumadocs-app
-    updated: true
-  - id: npm:create-fumadocs-versions
-    updated: true
+    updated: false
   - id: npm:fumadocs-docgen
+    updated: false
+  - id: npm:create-fumadocs-versions
     updated: false
   - id: npm:fumadocs-epub
     updated: false
   - id: npm:@fumadocs/graphql
     updated: false
-  - changelogIds:
-      - 2026-08-13-probe-image-size.md
-    id: npm:@fumari/image-size
-    updated: true
   - id: npm:@fumadocs/language
+    updated: false
+  - id: npm:@fumari/image-size
     updated: false
   - id: npm:@fumadocs/local-content
     updated: false
+  - changelogIds:
+      - 2026-08-13-local-html.md
+    id: npm:@fumadocs/local-html
+    updated: true
   - id: npm:@fumadocs/local-md
     updated: false
   - id: npm:fumadocs-mdx
@@ -56,16 +56,14 @@ core:packages:
   - id: npm:fumadocs-python
     updated: false
   - id: npm:fumadocs-ui
-    updated: true
+    updated: false
   - id: npm:@fumadocs/sanity
     updated: false
-  - changelogIds:
-      - 2026-08-13-probe-image-size.md
-    id: npm:@fumadocs/satteri
-    updated: true
   - id: npm:@fumadocs/shadcn
     updated: false
   - id: npm:@fumari/stf
+    updated: false
+  - id: npm:@fumadocs/satteri
     updated: false
   - id: npm:@fumadocs/story
     updated: false
@@ -80,20 +78,21 @@ core:packages:
 npm:packages:
   - id: npm:@fumadocs/api-docs
   - id: npm:@fumadocs/asyncapi
-  - id: npm:@fumadocs/base-ui
   - id: npm:@fumadocs/basehub
   - id: npm:@fumadocs/cli
   - id: npm:@fumadocs/content
   - id: npm:@fumadocs/content-collections
+  - id: npm:@fumadocs/base-ui
   - id: npm:fumadocs-core
   - id: npm:create-fumadocs-app
-  - id: npm:create-fumadocs-versions
   - id: npm:fumadocs-docgen
+  - id: npm:create-fumadocs-versions
   - id: npm:fumadocs-epub
   - id: npm:@fumadocs/graphql
-  - id: npm:@fumari/image-size
   - id: npm:@fumadocs/language
+  - id: npm:@fumari/image-size
   - id: npm:@fumadocs/local-content
+  - id: npm:@fumadocs/local-html
   - id: npm:@fumadocs/local-md
   - id: npm:fumadocs-mdx
   - id: npm:@fumadocs/mdx-remote
@@ -104,41 +103,12 @@ npm:packages:
   - id: npm:fumadocs-python
   - id: npm:fumadocs-ui
   - id: npm:@fumadocs/sanity
-  - id: npm:@fumadocs/satteri
   - id: npm:@fumadocs/shadcn
   - id: npm:@fumari/stf
+  - id: npm:@fumadocs/satteri
   - id: npm:@fumadocs/story
   - id: npm:@fumadocs/tailwind
   - id: npm:fumadocs-twoslash
   - id: npm:fumadocs-typescript
   - id: npm:@fumadocs/vite
-  - id: npm:docs
-  - id: npm:example-astro
-  - id: npm:example-asyncapi
-  - id: npm:example-base-ui
-  - id: npm:example-content-collections
-  - id: npm:example-graphql
-  - id: npm:example-i18n
-  - id: npm:example-marble-cms
-  - id: npm:example-next
-  - id: npm:example-next-local-md
-  - id: npm:example-next-min
-  - id: npm:example-next-shadcn
-  - id: npm:example-next-static
-  - id: npm:example-obsidian
-  - id: npm:example-openapi
-  - id: npm:example-python
-  - id: npm:example-react-router
-  - id: npm:example-react-router-i18n
-  - id: npm:example-react-router-min
-  - id: npm:example-react-router-rsc
-  - id: npm:example-react-router-spa
-  - id: npm:example-tanstack-start
-  - id: npm:example-tanstack-start-i18n
-  - id: npm:example-tanstack-start-local-md
-  - id: npm:example-tanstack-start-min
-  - id: npm:example-tanstack-start-openapi
-  - id: npm:example-tanstack-start-spa
-  - id: npm:example-tanstack-start-story
-  - id: npm:example-waku
-  - id: npm:example-waku-i18n
+  - id: npm:example-next-local-html

@@ -1,3 +1,9 @@
+## fumadocs-openapi@11.2.4
+
+### Improve OpenAPI source generation performance
+
+Reuse the JSON Magic proxy while generating static data for pages from the same OpenAPI document.
+
 ## fumadocs-openapi@11.2.2
 
 ### Harden `createProxy()` against SSRF

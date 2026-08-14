@@ -1,0 +1,80 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Q3 Report</title>
+    <meta name="description" content="An exported report, adapted to the docs theme." />
+    <meta name="author" content="Docs Team" />
+    <meta name="fumadocs:title" content="Quarterly Report" />
+    <meta name="fumadocs:icon" content="ChartLine" />
+    <style>
+      body {
+        font-family: 'Helvetica Neue', sans-serif;
+      }
+      .lede {
+        font-size: 20px;
+        color: #555;
+      }
+    </style>
+  </head>
+  <body>
+    <!-- everything outside `<main>` is page chrome, and is dropped -->
+    <header class="shell">
+      <span class="wordmark">Acme</span>
+      <nav><a href="#highlights">Highlights</a> <a href="#risks">Risks</a></nav>
+    </header>
+
+    <main class="content">
+      <h1 class="display">Q3 Report</h1>
+      <p class="lede">
+        The quarter closed ahead of plan. This page keeps its markup, but its
+        <code>class</code> and <code>style</code> attributes are removed so it inherits the docs
+        theme.
+      </p>
+
+      <h2 id="highlights">Highlights</h2>
+      <p>Three things went right:</p>
+      <ul>
+        <li>Onboarding completion rose to <strong>72%</strong>.</li>
+        <li>Median time-to-first-value dropped below a day.</li>
+        <li>Support volume held flat while usage doubled.</li>
+      </ul>
+
+      <h3>By segment</h3>
+      <table class="figures">
+        <thead>
+          <tr>
+            <th>Segment</th>
+            <th class="num">Accounts</th>
+            <th class="num">Growth</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Self-serve</td>
+            <td class="num" style="text-align: right">1,240</td>
+            <td class="num">+18%</td>
+          </tr>
+          <tr>
+            <td>Teams</td>
+            <td class="num">318</td>
+            <td class="num">+31%</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <h2 id="risks">Risks</h2>
+      <blockquote>
+        The pipeline is concentrated in two regions. A slip in either would be visible in Q4.
+      </blockquote>
+      <p>Back to the <a href="./index.html">overview</a>.</p>
+
+      <script>
+        // dropped: nothing that executes survives the transform
+        console.log('inline analytics');
+      </script>
+    </main>
+
+    <footer class="shell">&copy; Acme</footer>
+  </body>
+</html>
