@@ -20,6 +20,13 @@
       "runtimeArgs": ["--dir", "examples/graphql", "dev"],
       "port": 3000,
       "autoPort": true
+    },
+    {
+      "name": "local-html-example",
+      "runtimeExecutable": "pnpm",
+      "runtimeArgs": ["--dir", "examples/next-local-html", "dev"],
+      "port": 3000,
+      "autoPort": true
     }
   ]
 }
