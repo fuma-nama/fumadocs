@@ -5,23 +5,17 @@ description: Content source for local HTML files.
 
 ## Introduction
 
-`@fumadocs/local-html` is a content source for local HTML files. It integrates pages produced outside your docs pipeline — exported decks, reports, agent-generated deliverables, output of other tools — and adapts them to your docs theme.
+`@fumadocs/local-html` is a content source for local HTML files, it is bundleless (works fully at runtime) by design.
 
-For each `.html` file, it:
+It is made for pages you receive as HTML instead of author yourself, like exported decks, reports, and the output of other tools. Each file is adapted to your docs theme rather than rendered as it came.
 
-- scopes the content to `<main>`/`<article>` when the page has exactly one of them (falling back to `<body>`, where page chrome like `<header>`, `<footer>` and `<nav>` is dropped), along with `<script>` and `<style>` tags.
-- removes `class` and `style` attributes by default, so your docs theme's prose styling takes over.
-- generates ids for headings, powering the table of contents and search indexing.
-- reads the page title and description from `<title>` and `<meta>` tags.
-- highlights `<pre><code>` blocks with Shiki, from the `language-*` class they carry.
-
-As compared to [Local Markdown](/docs/integrations/content/local-md), it is for content you receive as HTML rather than author as Markdown — the HTML is treated as data to adapt, not as a document format to write in.
+As compared to [Local Markdown](/docs/integrations/content/local-md), HTML is treated as data to adapt, not as a document format to write in.
 
 ### Limitations
 
-- Scripts are stripped: interactive behaviour of the original page is not preserved.
-- No MDX components in content, but you can map HTML tags to custom components at render phase.
-- Processing is a transform, not sanitization. Nothing that executes survives it — `<script>`, `<style>`, `<iframe>`, `<object>`, `<embed>`, `<form>`, inline event handlers and `javascript:` URLs are always dropped — but the remaining markup is rendered as-is, and the remote resources it references (images above all) are fetched by every visitor of the page. The content directory must contain files you trust, like your Markdown content.
+- Scripts are stripped, the interactive behaviour of the original page is not preserved.
+- No MDX components in content, but you can map HTML tags to components at render phase.
+- Processing is a transform, not sanitization. Nothing that executes survives it, but the remaining markup is rendered as-is, and the resources it references (images above all) are fetched by everyone who opens the page. Keep the content directory to files you trust, like your Markdown content.
 
 ## Setup
 
@@ -51,20 +45,108 @@ export async function getSource() {
 }
 ```
 
-You can use `staticSource()` with a normal `loader()` when you only need a one-time snapshot without revalidation:
+The returned source from `pagesLoader.get()` is a normal [content loader](/docs/headless/source-api) instance.
 
-```ts title="lib/source.ts"
-import { loader } from 'fumadocs-core/source';
+## Usage
+
+`page.data.load()` returns a renderer for the processed content:
+
+```tsx title="app/docs/[[...slug]]/page.tsx"
+import { getSource } from '@/lib/source';
+import { DocsPage, DocsBody, DocsTitle, DocsDescription } from 'fumadocs-ui/page';
+import { notFound } from 'next/navigation';
+
+export default async function Page(props: PageProps<'/docs/[[...slug]]'>) {
+  const params = await props.params;
+  const source = await getSource();
+  const page = source.getPage(params.slug);
+  if (!page) notFound();
+
+  const renderer = await page.data.load();
+  const { body, toc } = await renderer.render();
+
+  return (
+    <DocsPage toc={toc}>
+      <DocsTitle>{page.data.title}</DocsTitle>
+      <DocsDescription>{page.data.description}</DocsDescription>
+      <DocsBody>{body}</DocsBody>
+    </DocsPage>
+  );
+}
+```
+
+Pass components to `render()` to map HTML tags onto your own, like headings with anchors:
+
+```tsx
+import { getMDXComponents } from '@/mdx-components';
+
+const { body, toc } = await renderer.render(getMDXComponents());
+```
+
+### Page Metadata
+
+The title and description of each page are read from its `<head>`:
+
+- `<title>` becomes the page title.
+- `<meta name="description">` becomes the description.
+
+You can override them (and set an icon) without touching the visible content, using `fumadocs:` metas:
+
+```html
+<meta name="fumadocs:title" content="My Page" />
+<meta name="fumadocs:description" content="A short description." />
+<meta name="fumadocs:icon" content="Album" />
+```
+
+Every `<meta name>`/`content` pair of the document is also available on `page.data.metadata`.
+
+Like other local sources, `meta.json` files customize the page tree, validated with `metaSchema`.
+
+### Content Options
+
+A page keeps only its content element: the only `<main>`, then the only `<article>`, falling back to `<body>` with page chrome like `<header>` and `<nav>` dropped. Its `class` and `style` attributes are removed so your theme's prose styling takes over, and its headings get ids to power the table of contents and search.
+
+Each part of that is configurable:
+
+```ts
 import { localHtml } from '@fumadocs/local-html';
 
 const pages = localHtml({
   dir: 'content/pages',
-});
-
-export const source = loader(await pages.staticSource(), {
-  baseUrl: '/docs',
+  // keep the original class/style attributes instead of adapting to your theme
+  adaptStyles: false,
+  // drop additional tags from the content
+  exclude: ['aside'],
+  // custom logic to pick the element holding the page content
+  selectContent: (root) => {
+    // return a hast element, or undefined for the default behaviour
+  },
 });
 ```
+
+### Syntax Highlighting
+
+`<pre><code>` blocks are highlighted with [Shiki](https://shiki.style), using the same options as [Local Markdown](/docs/integrations/content/local-md):
+
+```ts
+const pages = localHtml({
+  dir: 'content/pages',
+  rehypeCodeOptions: {
+    themes: {
+      light: 'github-light',
+      dark: 'github-dark',
+    },
+  },
+});
+```
+
+The language is read from the `language-*` class of the block, on the `<code>` or its enclosing `<pre>`:
+
+```html
+<pre><code class="language-ts">const answer: number = 42;</code></pre>
+```
+
+A block without one falls back to plain text. Pass `rehypeCodeOptions: false` to disable syntax highlighting.
 
 ### Hot Reload
 
@@ -135,98 +217,21 @@ export function RootLayout({ children }) {
 
 Both watchers keep the loader in sync when local HTML files change. To wire up your own instead, call `pages.invalidateFile(path)` when a file changes.
 
-### Page Metadata
+### Disable Revalidation
 
-The title and description of each page are read from its `<head>`:
+You can use `staticSource()` when you only need a one-time snapshot without revalidation.
 
-- `<title>` becomes the page title.
-- `<meta name="description">` becomes the description.
+It works with a normal `loader()` instead of only `dynamicLoader()`:
 
-You can override them (and set an icon) without touching the visible content, using `fumadocs:` metas:
-
-```html
-<meta name="fumadocs:title" content="My Page" />
-<meta name="fumadocs:description" content="A short description." />
-<meta name="fumadocs:icon" content="Album" />
-```
-
-Every `<meta name>`/`content` pair of the document is also available on `page.data.metadata`.
-
-Like other local sources, `meta.json` files customize the page tree, validated with `metaSchema`.
-
-### Content Options
-
-```ts
+```ts title="lib/source.ts"
+import { loader } from 'fumadocs-core/source';
 import { localHtml } from '@fumadocs/local-html';
 
 const pages = localHtml({
   dir: 'content/pages',
-  // keep the original class/style attributes instead of adapting to your theme
-  adaptStyles: false,
-  // drop additional tags from the content
-  exclude: ['aside'],
-  // custom logic to pick the element holding the page content
-  selectContent: (root) => {
-    // return a hast element, or undefined for the default behaviour
-  },
 });
-```
 
-### Syntax Highlighting
-
-`<pre><code>` blocks are highlighted with [Shiki](https://shiki.style), using the same options as [Local Markdown](/docs/integrations/content/local-md):
-
-```ts
-const pages = localHtml({
-  dir: 'content/pages',
-  rehypeCodeOptions: {
-    themes: {
-      light: 'github-light',
-      dark: 'github-dark',
-    },
-  },
+export const source = loader(await pages.staticSource(), {
+  baseUrl: '/docs',
 });
-```
-
-The language is read from the `language-*` class of the block, which is what exporters and highlighters conventionally emit:
-
-```html
-<pre><code class="language-ts">const answer: number = 42;</code></pre>
-```
-
-Pass `rehypeCodeOptions: false` to disable syntax highlighting.
-
-## Rendering
-
-`page.data.load()` returns a renderer with the processed content:
-
-```tsx title="app/docs/[[...slug]]/page.tsx"
-import { source } from '@/lib/source';
-import { DocsPage, DocsBody, DocsTitle, DocsDescription } from 'fumadocs-ui/page';
-import { notFound } from 'next/navigation';
-
-export default async function Page(props: PageProps<'/docs/[[...slug]]'>) {
-  const params = await props.params;
-  const page = source.getPage(params.slug);
-  if (!page) notFound();
-
-  const renderer = await page.data.load();
-  const { body, toc } = await renderer.render();
-
-  return (
-    <DocsPage toc={toc}>
-      <DocsTitle>{page.data.title}</DocsTitle>
-      <DocsDescription>{page.data.description}</DocsDescription>
-      <DocsBody>{body}</DocsBody>
-    </DocsPage>
-  );
-}
-```
-
-You can map HTML tags to your own components, like headings with anchors:
-
-```tsx
-import { getMDXComponents } from '@/mdx-components';
-
-const { body, toc } = await renderer.render(getMDXComponents());
 ```
