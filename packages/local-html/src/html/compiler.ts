@@ -3,6 +3,8 @@ import { visit, SKIP } from 'unist-util-visit';
 import Slugger from 'github-slugger';
 import type { RehypeTOCItemType, StructuredData } from 'fumadocs-core/mdx-plugins';
 import type { Element, ElementContent, Properties, Root } from 'hast';
+import type { RehypeCodeOptions } from 'fumadocs-core/mdx-plugins/rehype-code';
+import { highlightCode } from './highlight';
 
 export interface ProcessHtmlOptions {
   /**
@@ -23,6 +25,11 @@ export interface ProcessHtmlOptions {
    * @defaultValue true
    */
   adaptStyles?: boolean;
+
+  /**
+   * options for Shiki syntax highlighting, `false` to leave code blocks as they are
+   */
+  rehypeCodeOptions?: RehypeCodeOptions | false;
 }
 
 export interface ProcessedHtml {
@@ -65,6 +72,9 @@ const TextBlockTags = new Set([
   'dd',
 ]);
 
+/** the class name carrying a code block's language, as `highlight.js` and Shiki both write it */
+const LanguageClass = /^language-./i;
+
 const UrlProperties = /^(href|xlinkHref|src|srcSet|action|formAction|poster|cite|ping)$/i;
 /** protocols that execute their URL, rather than resolving to a document */
 const ScriptProtocols = /^\s*(javascript|vbscript):/i;
@@ -77,6 +87,14 @@ export function parseHtml(value: string): Root {
   return fromHtml(value, {
     fragment: !/<!doctype|<html[\s>]/i.test(head),
   });
+}
+
+/** `className` is normally parsed into an array, but a hand-built tree may hold a string */
+function toClassNames(value: Properties[string]): string[] {
+  if (typeof value === 'string') return value.split(/\s+/);
+  if (Array.isArray(value)) return value.map(String);
+
+  return [];
 }
 
 export function textOf(node: Element | Root): string {
@@ -105,8 +123,11 @@ function findScope(root: Root, tagName: string): Element | undefined {
   if (found.length === 1 && found[0].children.some(hasContent)) return found[0];
 }
 
-export function processHtml(input: Root, options: ProcessHtmlOptions = {}): ProcessedHtml {
-  const { selectContent, exclude = [], adaptStyles = true } = options;
+export async function processHtml(
+  input: Root,
+  options: ProcessHtmlOptions = {},
+): Promise<ProcessedHtml> {
+  const { selectContent, exclude = [], adaptStyles = true, rehypeCodeOptions } = options;
   const scope = selectContent?.(input) ?? findScope(input, 'main') ?? findScope(input, 'article');
   const content = scope ?? findScope(input, 'body') ?? input;
   const dropped = new Set([...NonContentTags, ...exclude, ...(scope ? [] : ChromeTags)]);
@@ -126,7 +147,13 @@ export function processHtml(input: Root, options: ProcessHtmlOptions = {}): Proc
 
     for (const [key, value] of Object.entries(properties)) {
       if (EventHandlers.test(key)) continue;
-      if (adaptStyles && (key === 'className' || key === 'style')) continue;
+      if (adaptStyles && key === 'style') continue;
+      if (adaptStyles && key === 'className') {
+        // the language of a code block is a hint, not styling: a highlighter needs it
+        const languages = toClassNames(value).filter((name) => LanguageClass.test(name));
+        if (languages.length > 0) out.className = languages;
+        continue;
+      }
       if (UrlProperties.test(key) && ScriptProtocols.test(String(value))) continue;
 
       out[key] = Array.isArray(value) ? [...value] : value;
@@ -180,8 +207,12 @@ export function processHtml(input: Root, options: ProcessHtmlOptions = {}): Proc
     return element;
   }
 
+  const tree: Root = { type: 'root', children: cleanChildren(content, false) };
+
   return {
-    tree: { type: 'root', children: cleanChildren(content, false) },
+    // last, so the highlighted markup keeps the classes and colors it is given, and the code is
+    // indexed as it was written
+    tree: rehypeCodeOptions === false ? tree : await highlightCode(tree, rehypeCodeOptions),
     toc,
     structuredData,
   };

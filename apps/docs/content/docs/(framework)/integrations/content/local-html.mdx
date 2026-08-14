@@ -13,6 +13,7 @@ For each `.html` file, it:
 - removes `class` and `style` attributes by default, so your docs theme's prose styling takes over.
 - generates ids for headings, powering the table of contents and search indexing.
 - reads the page title and description from `<title>` and `<meta>` tags.
+- highlights `<pre><code>` blocks with Shiki, from the `language-*` class they carry.
 
 As compared to [Local Markdown](/docs/integrations/content/local-md), it is for content you receive as HTML rather than author as Markdown — the HTML is treated as data to adapt, not as a document format to write in.
 
@@ -65,6 +66,75 @@ export const source = loader(await pages.staticSource(), {
 });
 ```
 
+### Hot Reload
+
+`local-html` works at runtime, so nothing watches your files by default. During development, pick one of the two watchers.
+
+#### Vite
+
+Vite already watches your project, so its watcher can invalidate the source in the same process. No extra process or port.
+
+```ts tab="vite.config.ts"
+import { localContentPlugin } from '@fumadocs/local-html/dev/vite';
+
+export default defineConfig({
+  plugins: [localContentPlugin()],
+});
+```
+
+```ts tab="lib/source.ts"
+import { watchWithVite } from '@fumadocs/local-html/dev/vite';
+
+if (import.meta.env.DEV) {
+  watchWithVite(pages);
+}
+```
+
+#### Dev Server
+
+For everything else, run the bundled dev server alongside your app. The watcher lives in one process and broadcasts over a websocket, so it works when your framework runs several workers.
+
+```json tab="package.json"
+{
+  "scripts": {
+    "dev": "local-html dev -- next dev"
+  }
+}
+```
+
+```ts tab="lib/source.ts"
+import { watchWithDevServer } from '@fumadocs/local-html/dev/ws';
+
+// change it if you use a different framework (e.g. import.meta.env.DEV)
+if (process.env.NODE_ENV === 'development') {
+  void watchWithDevServer(pages);
+}
+```
+
+The command publishes its URL through an environment variable, so no configuration is needed. Pass one explicitly if you run the server yourself, and use `-p` to change the port:
+
+```ts
+void watchWithDevServer(pages, { url: 'ws://127.0.0.1:8000/_fumadocs_local_md' });
+```
+
+This invalidates the source on the server. On frameworks that cache rendered output in the browser, like Next.js, render `<DevClient />` in your root layout so the page refreshes too:
+
+```tsx title="app/layout.tsx"
+import { DevClient } from '@fumadocs/local-html/dev/react-client';
+
+export function RootLayout({ children }) {
+  return (
+    <RootProvider>
+      {/* [!code ++] */}
+      <DevClient />
+      {children}
+    </RootProvider>
+  );
+}
+```
+
+Both watchers keep the loader in sync when local HTML files change. To wire up your own instead, call `pages.invalidateFile(path)` when a file changes.
+
 ### Page Metadata
 
 The title and description of each page are read from its `<head>`:
@@ -102,6 +172,30 @@ const pages = localHtml({
 });
 ```
 
+### Syntax Highlighting
+
+`<pre><code>` blocks are highlighted with [Shiki](https://shiki.style), using the same options as [Local Markdown](/docs/integrations/content/local-md):
+
+```ts
+const pages = localHtml({
+  dir: 'content/pages',
+  rehypeCodeOptions: {
+    themes: {
+      light: 'github-light',
+      dark: 'github-dark',
+    },
+  },
+});
+```
+
+The language is read from the `language-*` class of the block, which is what exporters and highlighters conventionally emit:
+
+```html
+<pre><code class="language-ts">const answer: number = 42;</code></pre>
+```
+
+Pass `rehypeCodeOptions: false` to disable syntax highlighting.
+
 ## Rendering
 
 `page.data.load()` returns a renderer with the processed content:
@@ -136,7 +230,3 @@ import { getMDXComponents } from '@/mdx-components';
 
 const { body, toc } = await renderer.render(getMDXComponents());
 ```
-
-## Search
-
-The processed content exposes `structuredData` compatible with [Search](/docs/headless/search), built from the headings and text blocks of the page — no extra work is needed to index HTML pages.

@@ -29,7 +29,16 @@
           Reads the title and description from <code>&lt;title&gt;</code> and
           <code>&lt;meta&gt;</code> tags.
         </li>
+        <li>Highlights <code>&lt;pre&gt;&lt;code&gt;</code> blocks with Shiki:</li>
       </ul>
+
+      <pre><code class="language-ts">const pages = localHtml({
+  dir: 'content/pages',
+});</code></pre>
+      <p>
+        The language comes from the <code>language-*</code> class the block already carries. Pass
+        <code>rehypeCodeOptions: false</code> to leave code blocks untouched.
+      </p>
 
       <h2>The pages</h2>
       <p>

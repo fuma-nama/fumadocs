@@ -10,6 +10,9 @@
   "license": "MIT",
   "author": "Fuma Nama",
   "repository": "github:fuma-nama/fumadocs",
+  "bin": {
+    "local-html": "./dist/bin.js"
+  },
   "files": [
     "dist"
   ],
@@ -17,6 +20,9 @@
   "exports": {
     ".": "./dist/index.js",
     "./client": "./dist/client.js",
+    "./dev/react-client": "./dist/dev/react-client.js",
+    "./dev/vite": "./dist/dev/vite.js",
+    "./dev/ws": "./dist/dev/ws.js",
     "./package.json": "./package.json"
   },
   "publishConfig": {
@@ -36,6 +42,7 @@
     "github-slugger": "^2.0.0",
     "hast-util-from-html": "^2.0.3",
     "hast-util-to-jsx-runtime": "^2.3.6",
+    "unified": "^11.0.5",
     "unist-util-visit": "^5.1.0"
   },
   "devDependencies": {
@@ -47,7 +54,8 @@
     "react": "^19.2.8",
     "react-dom": "^19.2.8",
     "tsconfig": "workspace:*",
-    "tsdown": "0.22.14"
+    "tsdown": "0.22.14",
+    "vite": "^8.2.1"
   },
   "peerDependencies": {
     "@types/hast": "*",

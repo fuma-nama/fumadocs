@@ -5,7 +5,9 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { renderToStaticMarkup } from 'react-dom/server';
 import type { TOCItemType } from 'fumadocs-core/toc';
-import { localHtml, parseHtml, processHtml, fromAst } from '@/index';
+import { localHtml } from '@/index';
+import { parseHtml, processHtml } from '@/html/compiler';
+import { fromAst } from '@/html/renderer';
 
 const cwd = path.dirname(fileURLToPath(import.meta.url));
 const fixturesDir = path.join(cwd, 'fixtures');
@@ -33,7 +35,7 @@ const cases = [
 for (const { name, file } of cases) {
   test(`renderer: ${name}`, async () => {
     const { filePath, content } = await readFixture(file);
-    const res = processHtml(parseHtml(content));
+    const res = await processHtml(parseHtml(content));
     const renderer = fromAst({
       tree: res.tree,
       filePath,
@@ -55,7 +57,7 @@ for (const { name, file } of cases) {
 
 test('a full document adapts to the docs theme', async () => {
   const { filePath, content } = await readFixture('deliverable.html');
-  const res = processHtml(parseHtml(content));
+  const res = await processHtml(parseHtml(content));
   const renderer = fromAst({ tree: res.tree, filePath, rehypeToc: res.toc });
   const html = renderToStaticMarkup((await renderer.render()).body);
 
@@ -74,7 +76,7 @@ test('a full document adapts to the docs theme', async () => {
 
 test('headings get generated ids and drive toc + structured data', async () => {
   const { content } = await readFixture('deliverable.html');
-  const res = processHtml(parseHtml(content));
+  const res = await processHtml(parseHtml(content));
 
   expect(res.toc.map((item) => item.url)).toEqual(['#product-kickoff', '#goals', '#the-roadmap']);
   expect(res.structuredData.headings).toContainEqual({
@@ -89,7 +91,7 @@ test('headings get generated ids and drive toc + structured data', async () => {
 
 test('components map onto html tags', async () => {
   const { filePath, content } = await readFixture('fragment.html');
-  const res = processHtml(parseHtml(content));
+  const res = await processHtml(parseHtml(content));
   const renderer = fromAst({ tree: res.tree, filePath, rehypeToc: res.toc });
   const { body } = await renderer.render({
     h2: (props) => <h2 {...props} data-custom="true" />,
@@ -99,7 +101,7 @@ test('components map onto html tags', async () => {
 });
 
 test('embedding elements are dropped', async () => {
-  const res = processHtml(
+  const res = await processHtml(
     parseHtml(
       '<p>safe</p><iframe src="https://evil.example"></iframe><object data="x"></object><embed src="y">',
     ),
@@ -113,7 +115,7 @@ test('embedding elements are dropped', async () => {
 });
 
 test('forms and script-protocol urls are dropped', async () => {
-  const res = processHtml(
+  const res = await processHtml(
     parseHtml(
       '<p><a href="javascript:steal()">click</a></p><form action="https://evil.example"><input name="q" /></form>',
     ),
@@ -127,7 +129,7 @@ test('forms and script-protocol urls are dropped', async () => {
 
 test('the content is scoped only to an unambiguous, non-empty element', async () => {
   const render = async (value: string) => {
-    const res = processHtml(parseHtml(value));
+    const res = await processHtml(parseHtml(value));
     return renderToStaticMarkup((await fromAst({ tree: res.tree }).render()).body);
   };
 
@@ -140,14 +142,14 @@ test('the content is scoped only to an unambiguous, non-empty element', async ()
   ).toContain('real');
 });
 
-test('source positions are left out of the processed tree', () => {
-  const res = processHtml(parseHtml('<h1>Title</h1><p>text</p>'));
+test('source positions are left out of the processed tree', async () => {
+  const res = await processHtml(parseHtml('<h1>Title</h1><p>text</p>'));
 
   expect(JSON.stringify(res.tree)).not.toContain('position');
 });
 
 test('the body fallback drops page chrome', async () => {
-  const res = processHtml(
+  const res = await processHtml(
     parseHtml(
       '<!doctype html><html><body><header>chrome</header><nav>links</nav><p>content</p><footer>chrome</footer></body></html>',
     ),
@@ -160,22 +162,22 @@ test('the body fallback drops page chrome', async () => {
   expect(html).not.toContain('<footer');
 });
 
-test('processHtml does not mutate the input tree', () => {
+test('processHtml does not mutate the input tree', async () => {
   const input = parseHtml('<h1 class="big">Title</h1><script>evil()</script>');
   const before = JSON.stringify(input);
-  processHtml(input);
+  await processHtml(input);
 
   expect(JSON.stringify(input)).toBe(before);
 });
 
-test('generated slugs avoid pre-existing heading ids', () => {
-  const res = processHtml(parseHtml('<h2>Setup</h2><h2 id="setup">Other</h2>'));
+test('generated slugs avoid pre-existing heading ids', async () => {
+  const res = await processHtml(parseHtml('<h2>Setup</h2><h2 id="setup">Other</h2>'));
 
   expect(res.toc.map((item) => item.url)).toEqual(['#setup-1', '#setup']);
 });
 
-test('slugs ignore the markup dropped from a heading', () => {
-  const res = processHtml(
+test('slugs ignore the markup dropped from a heading', async () => {
+  const res = await processHtml(
     parseHtml('<h2><svg><title>Rocket icon</title></svg>Getting Started</h2>'),
   );
 
@@ -254,4 +256,70 @@ test('load() compiles each page only once', async () => {
   } finally {
     await fs.rm(dir, { recursive: true, force: true });
   }
+});
+
+async function loadOnly(html: string, config?: Partial<Parameters<typeof localHtml>[0]>) {
+  const dir = await fs.mkdtemp(path.join(os.tmpdir(), 'local-html-code-'));
+
+  try {
+    await fs.writeFile(path.join(dir, 'a.html'), html);
+    const source = await localHtml({ dir, ...config }).staticSource();
+    const page = source.files.find((file) => file.type === 'page');
+    if (page?.type !== 'page') throw new Error('expected a page');
+
+    const renderer = await page.data.load();
+    return {
+      html: renderToStaticMarkup((await renderer.render()).body),
+      structuredData: renderer.structuredData,
+    };
+  } finally {
+    await fs.rm(dir, { recursive: true, force: true });
+  }
+}
+
+test('code blocks are highlighted, and indexed as written', async () => {
+  const { html, structuredData } = await loadOnly(
+    '<pre><code class="language-ts">const answer: number = 42;</code></pre>',
+  );
+
+  expect(html).toContain('shiki');
+  // the tokens are split up and coloured, rather than left as one text node
+  expect(html).toContain('--shiki-light:');
+  expect(structuredData.contents).toContainEqual({
+    heading: undefined,
+    content: 'const answer: number = 42;',
+  });
+});
+
+test('code already highlighted by another tool is re-highlighted from its text', async () => {
+  const { html } = await loadOnly(
+    '<pre><code class="language-js"><span class="hljs-keyword">const</span> <span class="hljs-var">a</span> = 1;</code></pre>',
+  );
+
+  expect(html).not.toContain('hljs-keyword');
+  expect(html).toContain('shiki');
+  expect(html).toContain('const');
+});
+
+test('a code block without a language still renders', async () => {
+  const { html } = await loadOnly('<pre><code>plain text</code></pre>');
+
+  expect(html).toContain('plain text');
+});
+
+test('rehypeCodeOptions: false keeps the language hint and skips Shiki', async () => {
+  const { html } = await loadOnly(
+    '<pre><code class="language-ts">const answer = 42;</code></pre>',
+    { rehypeCodeOptions: false },
+  );
+
+  expect(html).toContain('language-ts');
+  expect(html).not.toContain('shiki');
+});
+
+test('a language written on the `<pre>` wrapper is carried down to the code', async () => {
+  const { html } = await loadOnly('<pre class="language-js"><code>const a = 1;</code></pre>');
+
+  expect(html).toContain('shiki');
+  expect(html).toContain('--shiki-light:');
 });

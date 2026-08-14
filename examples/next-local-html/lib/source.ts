@@ -1,14 +1,18 @@
 import { localHtml } from '@fumadocs/local-html';
+import { watchWithDevServer } from '@fumadocs/local-html/dev/ws';
 import { dynamicLoader } from 'fumadocs-core/source/dynamic';
 import { lucideIconsPlugin } from 'fumadocs-core/source/lucide-icons';
 
-// parsed files are cached until invalidated, so editing a `.html` file during development
-// needs a restart — call `pages.invalidateFile(path)` from your own watcher to avoid that
 const pages = localHtml({
   dir: 'content/pages',
   // an exported document repeats its title in the content, but `<DocsTitle />` already renders it
   exclude: ['h1'],
 });
+
+// keeps the loader in sync with `local-html dev`, see the `dev` script
+if (process.env.NODE_ENV === 'development') {
+  void watchWithDevServer(pages);
+}
 
 // See https://fumadocs.dev/docs/headless/source-api for more info
 export const pagesLoader = dynamicLoader(pages.dynamicSource(), {

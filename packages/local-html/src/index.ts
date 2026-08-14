@@ -50,7 +50,7 @@ export function localHtml<MetaSchema extends StandardSchemaV1 = typeof defaultSc
       include: config.include,
       metaSchema: config.metaSchema,
       async load(page) {
-        const res = processHtml(parseHtml(page.content), config);
+        const res = await processHtml(parseHtml(page.content), config);
 
         return fromAst({
           tree: res.tree,
@@ -66,12 +66,5 @@ export function localHtml<MetaSchema extends StandardSchemaV1 = typeof defaultSc
 }
 
 export type { RawHtmlPage, HtmlPage } from './integration';
-export { htmlIntegration, defaultInclude } from './integration';
-export {
-  processHtml,
-  parseHtml,
-  type ProcessHtmlOptions,
-  type ProcessedHtml,
-} from './html/compiler';
+export type { ProcessHtmlOptions, ProcessedHtml } from './html/compiler';
 export type { HtmlRenderer, HtmlRendererOptions, HtmlRendererResult } from './html/renderer';
-export { fromAst } from './html/renderer';
