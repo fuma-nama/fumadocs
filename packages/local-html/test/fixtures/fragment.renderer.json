@@ -1,0 +1,37 @@
+{
+  "structuredData": {
+    "headings": [
+      {
+        "id": "first-section",
+        "content": "First Section"
+      },
+      {
+        "id": "nested",
+        "content": "Nested"
+      }
+    ],
+    "contents": [
+      {
+        "heading": "first-section",
+        "content": "Some readable text."
+      },
+      {
+        "heading": "nested",
+        "content": "A quoted insight."
+      }
+    ]
+  },
+  "bodyHtml": "\n\n<h2 id=\"first-section\">First Section</h2>\n<p>Some readable text.</p>\n<h3 id=\"nested\">Nested</h3>\n<blockquote>A quoted insight.</blockquote>\n",
+  "toc": [
+    {
+      "url": "#first-section",
+      "depth": 2,
+      "titleHtml": "First Section"
+    },
+    {
+      "url": "#nested",
+      "depth": 3,
+      "titleHtml": "Nested"
+    }
+  ]
+}

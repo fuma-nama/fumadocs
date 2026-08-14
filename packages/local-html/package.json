@@ -1,0 +1,66 @@
+{
+  "name": "@fumadocs/local-html",
+  "version": "0.0.1",
+  "description": "The local HTML files content source for Fumadocs",
+  "keywords": [
+    "Docs",
+    "fumadocs"
+  ],
+  "homepage": "https://fumadocs.dev",
+  "license": "MIT",
+  "author": "Fuma Nama",
+  "repository": "github:fuma-nama/fumadocs",
+  "files": [
+    "dist"
+  ],
+  "type": "module",
+  "exports": {
+    ".": "./dist/index.js",
+    "./client": "./dist/client.js",
+    "./package.json": "./package.json"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "scripts": {
+    "build": "tsdown",
+    "clean": "rimraf dist",
+    "dev": "tsdown --watch",
+    "lint": "oxlint .",
+    "test": "vitest run",
+    "types:check": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@fumadocs/local-content": "workspace:*",
+    "@standard-schema/spec": "^1.1.0",
+    "github-slugger": "^2.0.0",
+    "hast-util-from-html": "^2.0.3",
+    "hast-util-to-jsx-runtime": "^2.3.6",
+    "unist-util-visit": "^5.1.0"
+  },
+  "devDependencies": {
+    "@types/hast": "^3.0.5",
+    "@types/node": "26.2.0",
+    "@types/react": "^19.2.18",
+    "@types/react-dom": "^19.2.4",
+    "fumadocs-core": "workspace:*",
+    "react": "^19.2.8",
+    "react-dom": "^19.2.8",
+    "tsconfig": "workspace:*",
+    "tsdown": "0.22.14"
+  },
+  "peerDependencies": {
+    "@types/hast": "*",
+    "@types/react": "*",
+    "fumadocs-core": "^16.8.0",
+    "react": "^19.2.0"
+  },
+  "peerDependenciesMeta": {
+    "@types/hast": {
+      "optional": true
+    },
+    "@types/react": {
+      "optional": true
+    }
+  }
+}
