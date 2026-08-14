@@ -9,7 +9,7 @@ description: Content source for local HTML files.
 
 For each `.html` file, it:
 
-- scopes the content to `<main>`/`<article>` (falling back to `<body>`), dropping page chrome like `<header>`, `<footer>` and `<nav>`, along with `<script>` and `<style>` tags.
+- scopes the content to `<main>`/`<article>` when the page has exactly one of them (falling back to `<body>`, where page chrome like `<header>`, `<footer>` and `<nav>` is dropped), along with `<script>` and `<style>` tags.
 - removes `class` and `style` attributes by default, so your docs theme's prose styling takes over.
 - generates ids for headings, powering the table of contents and search indexing.
 - reads the page title and description from `<title>` and `<meta>` tags.
@@ -20,7 +20,7 @@ As compared to [Local Markdown](/docs/integrations/content/local-md), it is for 
 
 - Scripts are stripped: interactive behaviour of the original page is not preserved.
 - No MDX components in content, but you can map HTML tags to custom components at render phase.
-- Processing is a transform, not sanitization: `<script>`, `<style>`, `<iframe>`, `<object>`, `<embed>` and inline event handlers are always dropped, but the remaining markup is rendered as-is — the content directory must contain files you trust, like your Markdown content.
+- Processing is a transform, not sanitization. Nothing that executes survives it — `<script>`, `<style>`, `<iframe>`, `<object>`, `<embed>`, `<form>`, inline event handlers and `javascript:` URLs are always dropped — but the remaining markup is rendered as-is, and the remote resources it references (images above all) are fetched by every visitor of the page. The content directory must contain files you trust, like your Markdown content.
 
 ## Setup
 

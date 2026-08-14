@@ -1,17 +1,14 @@
 import { fromHtml } from 'hast-util-from-html';
 import { visit, SKIP } from 'unist-util-visit';
 import Slugger from 'github-slugger';
-import { rehypeToc, type RehypeTOCItemType } from 'fumadocs-core/mdx-plugins/rehype-toc';
-import type { StructuredData } from 'fumadocs-core/mdx-plugins';
-import { VFile } from 'vfile';
-import type { Element, Root } from 'hast';
-import type { Processor } from 'unified';
+import type { RehypeTOCItemType, StructuredData } from 'fumadocs-core/mdx-plugins';
+import type { Element, ElementContent, Properties, Root } from 'hast';
 
 export interface ProcessHtmlOptions {
   /**
    * pick the element holding the page content.
    *
-   * by default: the first `<main>`, then `<article>`, then `<body>`, then the whole tree.
+   * by default: the only `<main>`, then the only `<article>`, then `<body>`, then the whole tree.
    */
   selectContent?: (root: Root) => Element | Root | undefined;
 
@@ -35,7 +32,7 @@ export interface ProcessedHtml {
 }
 
 /** tags that never carry readable content, or that can embed external/executable content */
-const NonContentTags = new Set([
+const NonContentTags = [
   'script',
   'style',
   'template',
@@ -47,10 +44,11 @@ const NonContentTags = new Set([
   'iframe',
   'object',
   'embed',
-]);
+  'form',
+];
 
 /** page chrome, dropped only when no `<main>`/`<article>` scopes the content */
-const ChromeTags = new Set(['header', 'footer', 'nav', 'aside']);
+const ChromeTags = ['header', 'footer', 'nav', 'aside'];
 
 const HeadingTags = new Set(['h1', 'h2', 'h3', 'h4', 'h5', 'h6']);
 
@@ -66,6 +64,12 @@ const TextBlockTags = new Set([
   'dt',
   'dd',
 ]);
+
+const UrlProperties = /^(href|xlinkHref|src|srcSet|action|formAction|poster|cite|ping)$/i;
+/** protocols that execute their URL, rather than resolving to a document */
+const ScriptProtocols = /^\s*(javascript|vbscript):/i;
+/** `property-information` camel-cases only known handlers, so match `on` + anything */
+const EventHandlers = /^on./i;
 
 export function parseHtml(value: string): Root {
   const head = value.slice(0, 1024);
@@ -85,109 +89,100 @@ export function textOf(node: Element | Root): string {
   return out;
 }
 
-function findElement(root: Root, tagName: string): Element | undefined {
-  let found: Element | undefined;
+/** the element with this tag name, only when the document has exactly one holding content */
+function findScope(root: Root, tagName: string): Element | undefined {
+  const found: Element[] = [];
 
   visit(root, 'element', (element) => {
-    if (element.tagName === tagName) {
-      found = element;
-      return false;
-    }
+    if (element.tagName !== tagName) return;
+    found.push(element);
+    return SKIP;
   });
 
-  return found;
+  const hasContent = (child: ElementContent) =>
+    child.type === 'element' || (child.type === 'text' && child.value.trim().length > 0);
+
+  if (found.length === 1 && found[0].children.some(hasContent)) return found[0];
 }
 
 export function processHtml(input: Root, options: ProcessHtmlOptions = {}): ProcessedHtml {
   const { selectContent, exclude = [], adaptStyles = true } = options;
+  const scope = selectContent?.(input) ?? findScope(input, 'main') ?? findScope(input, 'article');
+  const content = scope ?? findScope(input, 'body') ?? input;
+  const dropped = new Set([...NonContentTags, ...exclude, ...(scope ? [] : ChromeTags)]);
 
-  let content: Element | Root | undefined = selectContent?.(input);
-  let scoped = content !== undefined;
-
-  if (!content) {
-    content = findElement(input, 'main') ?? findElement(input, 'article');
-    scoped = content !== undefined;
-    content ??= findElement(input, 'body') ?? input;
-  }
-
-  // the input tree may be cached and shared (e.g. `HtmlPage.tree`), never mutate it
-  const tree: Root = {
-    type: 'root',
-    children: structuredClone(content.children),
-  };
-
-  const excluded = new Set(exclude);
   const slugger = new Slugger();
-
-  // seed the slugger with pre-existing heading ids, so generated ones cannot collide
-  visit(tree, 'element', (element) => {
-    if (HeadingTags.has(element.tagName) && typeof element.properties.id === 'string') {
-      slugger.slug(element.properties.id);
-    }
+  // seed with the ids of the document, so generated ones cannot collide
+  visit(input, 'element', (element) => {
+    if (typeof element.properties.id === 'string') slugger.slug(element.properties.id);
   });
 
-  visit(tree, 'element', (element, index, parent) => {
-    if (
-      NonContentTags.has(element.tagName) ||
-      excluded.has(element.tagName) ||
-      (!scoped && ChromeTags.has(element.tagName))
-    ) {
-      if (parent && typeof index === 'number') parent.children.splice(index, 1);
-      return [SKIP, index];
-    }
-
-    for (const key of Object.keys(element.properties)) {
-      // inline event handlers never survive the transform
-      if (/^on./i.test(key)) delete element.properties[key];
-    }
-
-    if (adaptStyles) {
-      delete element.properties.className;
-      delete element.properties.style;
-    }
-
-    if (HeadingTags.has(element.tagName) && typeof element.properties.id !== 'string') {
-      const text = textOf(element).trim();
-      if (text.length > 0) element.properties.id = slugger.slug(text);
-    }
-  });
-
-  const file = new VFile();
-  const transform = rehypeToc.call(undefined as unknown as Processor, {
-    exportToc: { as: 'data' },
-  });
-  transform(tree, file, () => undefined);
-
-  return {
-    tree,
-    toc: file.data.rehypeToc ?? [],
-    structuredData: buildStructuredData(tree),
-  };
-}
-
-function buildStructuredData(tree: Root): StructuredData {
-  const data: StructuredData = { headings: [], contents: [] };
+  const toc: RehypeTOCItemType[] = [];
+  const structuredData: StructuredData = { headings: [], contents: [] };
   let heading: string | undefined;
 
-  visit(tree, 'element', (element) => {
-    if (HeadingTags.has(element.tagName)) {
-      const id = element.properties.id;
+  function cleanProperties(properties: Properties): Properties {
+    const out: Properties = {};
 
-      if (typeof id === 'string') {
-        data.headings.push({ id, content: textOf(element).trim() });
-        heading = id;
+    for (const [key, value] of Object.entries(properties)) {
+      if (EventHandlers.test(key)) continue;
+      if (adaptStyles && (key === 'className' || key === 'style')) continue;
+      if (UrlProperties.test(key) && ScriptProtocols.test(String(value))) continue;
+
+      out[key] = Array.isArray(value) ? [...value] : value;
+    }
+
+    return out;
+  }
+
+  // copies the children of `parent` (the input may be cached and shared, so it is never
+  // mutated), dropping unwanted tags, attributes, and `position` — unused, and most of the tree
+  function cleanChildren(parent: Element | Root, inBlock: boolean): ElementContent[] {
+    const out: ElementContent[] = [];
+
+    for (const node of parent.children) {
+      if (node.type === 'text') out.push({ type: 'text', value: node.value });
+      else if (node.type === 'element' && !dropped.has(node.tagName)) {
+        out.push(cleanElement(node, inBlock));
       }
-
-      return SKIP;
     }
 
-    if (TextBlockTags.has(element.tagName)) {
-      const content = textOf(element).trim();
-      if (content.length > 0) data.contents.push({ heading, content });
+    return out;
+  }
 
-      return SKIP;
+  function cleanElement(node: Element, inBlock: boolean): Element {
+    const isHeading = HeadingTags.has(node.tagName);
+    const isBlock = !inBlock && TextBlockTags.has(node.tagName);
+    const element: Element = {
+      type: 'element',
+      tagName: node.tagName,
+      properties: cleanProperties(node.properties),
+      children: cleanChildren(node, inBlock || isBlock || isHeading),
+    };
+
+    // read from the copy: tags dropped above cannot leak into slugs and search
+    const content = isHeading || isBlock ? textOf(element).trim() : '';
+    if (content.length === 0) return element;
+
+    if (!isHeading) {
+      structuredData.contents.push({ heading, content });
+      return element;
     }
-  });
 
-  return data;
+    const id = element.properties.id;
+    heading =
+      typeof id === 'string' && id.length > 0
+        ? id
+        : (element.properties.id = slugger.slug(content));
+    structuredData.headings.push({ id: heading, content });
+    toc.push({ title: element, url: `#${heading}`, depth: Number(node.tagName[1]) });
+
+    return element;
+  }
+
+  return {
+    tree: { type: 'root', children: cleanChildren(content, false) },
+    toc,
+    structuredData,
+  };
 }

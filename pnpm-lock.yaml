@@ -2795,9 +2795,6 @@ importers:
       unist-util-visit:
         specifier: ^5.1.0
         version: 5.1.0
-      vfile:
-        specifier: ^6.0.3
-        version: 6.0.3
     devDependencies:
       '@types/hast':
         specifier: ^3.0.5
@@ -2826,9 +2823,6 @@ importers:
       tsdown:
         specifier: 0.22.14
         version: 0.22.14(@tsdown/css@0.22.14)(oxc-resolver@11.19.1(@emnapi/core@2.0.0-alpha.3)(@emnapi/runtime@2.0.0-alpha.3))(tsx@4.23.12)(typescript@6.0.3)(unrun@0.3.1)
-      unified:
-        specifier: ^11.0.5
-        version: 11.0.5
 
   packages/local-md:
     dependencies:

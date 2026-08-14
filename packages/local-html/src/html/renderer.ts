@@ -70,7 +70,3 @@ export function fromAst(options: HtmlRendererOptions): HtmlRenderer {
     },
   };
 }
-
-export function fromSerialized(options: HtmlRendererOptions): HtmlRenderer {
-  return fromAst(options);
-}

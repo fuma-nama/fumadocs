@@ -112,6 +112,40 @@ test('embedding elements are dropped', async () => {
   expect(html).not.toContain('<embed');
 });
 
+test('forms and script-protocol urls are dropped', async () => {
+  const res = processHtml(
+    parseHtml(
+      '<p><a href="javascript:steal()">click</a></p><form action="https://evil.example"><input name="q" /></form>',
+    ),
+  );
+  const html = renderToStaticMarkup((await fromAst({ tree: res.tree }).render()).body);
+
+  expect(html).toContain('click');
+  expect(html).not.toContain('javascript:');
+  expect(html).not.toContain('<form');
+});
+
+test('the content is scoped only to an unambiguous, non-empty element', async () => {
+  const render = async (value: string) => {
+    const res = processHtml(parseHtml(value));
+    return renderToStaticMarkup((await fromAst({ tree: res.tree }).render()).body);
+  };
+
+  // both articles are kept, rather than silently truncating the page to the first
+  expect(await render('<article><p>one</p></article><article><p>two</p></article>')).toContain(
+    'two',
+  );
+  expect(
+    await render('<!doctype html><html><body><main></main><p>real</p></body></html>'),
+  ).toContain('real');
+});
+
+test('source positions are left out of the processed tree', () => {
+  const res = processHtml(parseHtml('<h1>Title</h1><p>text</p>'));
+
+  expect(JSON.stringify(res.tree)).not.toContain('position');
+});
+
 test('the body fallback drops page chrome', async () => {
   const res = processHtml(
     parseHtml(
@@ -138,6 +172,17 @@ test('generated slugs avoid pre-existing heading ids', () => {
   const res = processHtml(parseHtml('<h2>Setup</h2><h2 id="setup">Other</h2>'));
 
   expect(res.toc.map((item) => item.url)).toEqual(['#setup-1', '#setup']);
+});
+
+test('slugs ignore the markup dropped from a heading', () => {
+  const res = processHtml(
+    parseHtml('<h2><svg><title>Rocket icon</title></svg>Getting Started</h2>'),
+  );
+
+  expect(res.toc.map((item) => item.url)).toEqual(['#getting-started']);
+  expect(res.structuredData.headings).toEqual([
+    { id: 'getting-started', content: 'Getting Started' },
+  ]);
 });
 
 test('an svg <title> never becomes the page title', async () => {

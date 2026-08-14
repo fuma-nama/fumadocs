@@ -8,7 +8,7 @@ import {
 import { htmlIntegration, type HtmlPage } from './integration';
 import type * as defaultSchemas from 'fumadocs-core/source/schema';
 import { fromAst, type HtmlRenderer } from './html/renderer';
-import { processHtml, type ProcessHtmlOptions } from './html/compiler';
+import { parseHtml, processHtml, type ProcessHtmlOptions } from './html/compiler';
 
 export interface LocalHtmlConfig<MetaSchema extends StandardSchemaV1> extends ProcessHtmlOptions {
   /** root directory for content files */
@@ -50,7 +50,7 @@ export function localHtml<MetaSchema extends StandardSchemaV1 = typeof defaultSc
       include: config.include,
       metaSchema: config.metaSchema,
       async load(page) {
-        const res = processHtml(page.tree, config);
+        const res = processHtml(parseHtml(page.content), config);
 
         return fromAst({
           tree: res.tree,

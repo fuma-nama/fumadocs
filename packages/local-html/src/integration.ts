@@ -12,8 +12,7 @@ export const defaultInclude = ['**/*.{html,json}'];
 export interface RawHtmlPage {
   path: string;
   absolutePath: string;
-  /** the parsed document, including `<head>` when present */
-  tree: Root;
+  content: string;
   /** every `<meta name>`/`content` pair of the document */
   metadata: Record<string, string>;
 }
@@ -23,7 +22,7 @@ export interface HtmlPage<Loaded = unknown> extends PageData {
   description?: string;
   icon?: string;
   metadata: Record<string, string>;
-  tree: Root;
+  content: string;
   load: () => Promise<Loaded>;
 }
 
@@ -77,13 +76,14 @@ export function htmlIntegration<
   type $Meta = StandardSchemaV1.InferOutput<MetaSchema> & MetaData;
 
   async function page(file: SourceFile): Promise<HtmlPage<Loaded>> {
-    const tree = parseHtml(await file.read());
-    const { title, metadata } = extractMetadata(tree);
+    const content = await file.read();
+    // the source caches every page, so only the metadata is kept: `load()` parses again, once
+    const { title, metadata } = extractMetadata(parseHtml(content));
 
     const raw: RawHtmlPage = {
       path: file.path,
       absolutePath: file.absolutePath,
-      tree,
+      content,
       metadata,
     };
     // the parsed file is cached until invalidated, so this compiles once
@@ -96,7 +96,7 @@ export function htmlIntegration<
       icon: metadata['fumadocs:icon'],
 
       metadata,
-      tree,
+      content,
       load: () => (loaded ??= load(raw)),
     };
   }
