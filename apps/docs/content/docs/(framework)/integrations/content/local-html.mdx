@@ -20,6 +20,7 @@ As compared to [Local Markdown](/docs/integrations/content/local-md), it is for 
 
 - Scripts are stripped: interactive behaviour of the original page is not preserved.
 - No MDX components in content, but you can map HTML tags to custom components at render phase.
+- Processing is a transform, not sanitization: `<script>`, `<style>`, `<iframe>`, `<object>`, `<embed>` and inline event handlers are always dropped, but the remaining markup is rendered as-is — the content directory must contain files you trust, like your Markdown content.
 
 ## Setup
 
@@ -93,7 +94,7 @@ const pages = localHtml({
   // keep the original class/style attributes instead of adapting to your theme
   adaptStyles: false,
   // drop additional tags from the content
-  exclude: ['iframe'],
+  exclude: ['aside'],
   // custom logic to pick the element holding the page content
   selectContent: (root) => {
     // return a hast element, or undefined for the default behaviour

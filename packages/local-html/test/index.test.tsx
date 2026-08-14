@@ -140,6 +140,24 @@ test('generated slugs avoid pre-existing heading ids', () => {
   expect(res.toc.map((item) => item.url)).toEqual(['#setup-1', '#setup']);
 });
 
+test('an svg <title> never becomes the page title', async () => {
+  const dir = await fs.mkdtemp(path.join(os.tmpdir(), 'local-html-svg-'));
+
+  try {
+    await fs.writeFile(
+      path.join(dir, 'chart.html'),
+      '<p>intro</p><svg><title>Chart label</title></svg>',
+    );
+
+    const source = await localHtml({ dir }).staticSource();
+    const page = source.files.find((file) => file.type === 'page');
+    if (page?.type !== 'page') throw new Error('expected a page');
+    expect(page.data.title).toBe('chart');
+  } finally {
+    await fs.rm(dir, { recursive: true, force: true });
+  }
+});
+
 test('an empty <title> falls back to the file name', async () => {
   const dir = await fs.mkdtemp(path.join(os.tmpdir(), 'local-html-title-'));
 

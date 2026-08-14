@@ -45,6 +45,9 @@ function extractMetadata(tree: Root): { title?: string; metadata: Record<string,
   let title: string | undefined;
 
   visit(tree, 'element', (element: Element) => {
+    // `<title>` also exists inside SVG; only the document title is meaningful
+    if (element.tagName === 'svg') return 'skip';
+
     if (element.tagName === 'title') {
       if (!title) {
         const text = textOf(element).trim();
