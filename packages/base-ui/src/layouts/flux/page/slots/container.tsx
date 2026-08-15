@@ -10,6 +10,7 @@ export function Container(props: ComponentProps<'article'>) {
   return (
     <article
       id="nd-page"
+      role="main"
       data-full={full}
       {...props}
       className={cn(
