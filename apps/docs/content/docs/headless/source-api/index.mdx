@@ -57,8 +57,10 @@ Define a custom function to generate slugs from page files.
 import { loader } from 'fumadocs-core/source';
 
 loader({
-  slugs(file) {
+  slugs(file, next) {
     console.log(file.path, file.data);
+    // you can build on the default slugs with `next()`
+    if (file.path.startsWith('blog/')) return ['blog', ...next()];
     // or return `undefined` to fallback to default value
     return ['my', 'slug'];
   },
