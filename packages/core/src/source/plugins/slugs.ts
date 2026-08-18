@@ -3,10 +3,15 @@ import type { ContentStorage } from '../storage/content';
 import type { LoaderPlugin } from '../loader';
 
 /**
- * a function to generate slugs, return `undefined` to fallback to default generation.
+ * a function to generate slugs, return `undefined` to generate default slugs.
+ *
+ * conflicting cases like `dir/index.mdx` vs `dir.mdx` are resolved after the function returns.
+ *
+ * @param next - generate the default slugs from file path (before conflict resolution).
  */
 export type SlugFn<S extends ContentStorage = ContentStorage> = (
   file: S['$inferPage'],
+  next: () => string[],
 ) => string[] | undefined;
 
 /**
@@ -27,14 +32,13 @@ export function slugsPlugin(slugFn?: SlugFn): LoaderPlugin {
         const file = storage.read(path);
         if (!file || file.format !== 'page' || file.slugs) continue;
 
-        const customSlugs = slugFn?.(file);
-        // for custom slugs function, don't handle conflicting cases like `dir/index.mdx` vs `dir.mdx`
-        if (customSlugs === undefined && isIndex(path)) {
+        // defer index files, so conflicting cases like `dir/index.mdx` vs `dir.mdx` can be resolved
+        if (isIndex(path)) {
           indexFiles.push(path);
           continue;
         }
 
-        file.slugs = customSlugs ?? getSlugs(path);
+        file.slugs = slugFn?.(file, () => getSlugs(path)) ?? getSlugs(path);
         const key = file.slugs.join('/');
         if (taken.has(key)) throw new Error(`Duplicated slugs: ${key}`);
         taken.add(key);
@@ -44,8 +48,12 @@ export function slugsPlugin(slugFn?: SlugFn): LoaderPlugin {
         const file = storage.read(path);
         if (file?.format !== 'page') continue;
 
-        file.slugs = getSlugs(path);
-        if (taken.has(file.slugs.join('/'))) file.slugs.push('index');
+        file.slugs = slugFn?.(file, () => getSlugs(path)) ?? getSlugs(path);
+        if (taken.has(file.slugs.join('/'))) file.slugs = [...file.slugs, 'index'];
+
+        const key = file.slugs.join('/');
+        if (taken.has(key)) throw new Error(`Duplicated slugs: ${key}`);
+        taken.add(key);
       }
     },
   };

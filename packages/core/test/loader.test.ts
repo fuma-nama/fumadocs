@@ -154,6 +154,61 @@ test('Loader: Simple', async () => {
   expect(result.getPage(['test'])).toBeDefined();
 });
 
+test('Loader: custom slugs with `next`', () => {
+  const result = loader({
+    baseUrl: '/',
+    source: {
+      files: [
+        { type: 'page', path: 'test.mdx', data: { title: 'Test' } },
+        { type: 'page', path: 'nested/page.mdx', data: { title: 'Nested' } },
+      ],
+    },
+    slugs(file, next) {
+      if (file.path === 'test.mdx') return next();
+      return ['prefix', ...next()];
+    },
+  });
+
+  expect(result.getPage(['test'])).toBeDefined();
+  expect(result.getPage(['prefix', 'nested', 'page'])).toBeDefined();
+});
+
+test('Loader: custom slugs conflict resolution', () => {
+  const result = loader({
+    baseUrl: '/',
+    source: {
+      files: [
+        { type: 'page', path: 'dir.mdx', data: { title: 'Dir' } },
+        { type: 'page', path: 'dir/index.mdx', data: { title: 'Dir Index' } },
+      ],
+    },
+    slugs(_file, next) {
+      return next();
+    },
+  });
+
+  expect(result.getPage(['dir'])?.data.title).toBe('Dir');
+  expect(result.getPage(['dir', 'index'])?.data.title).toBe('Dir Index');
+});
+
+test('Loader: custom slugs conflict resolution between index files', () => {
+  const result = loader({
+    baseUrl: '/',
+    source: {
+      files: [
+        { type: 'page', path: 'a/index.mdx', data: { title: 'A' } },
+        { type: 'page', path: 'b/index.mdx', data: { title: 'B' } },
+      ],
+    },
+    slugs() {
+      return ['same'];
+    },
+  });
+
+  expect(result.getPage(['same'])).toBeDefined();
+  expect(result.getPage(['same', 'index'])).toBeDefined();
+});
+
 test('Loader: resolve encoded relative file paths', () => {
   const result = loader({
     baseUrl: '/docs',
