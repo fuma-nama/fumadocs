@@ -4,7 +4,7 @@ import { createContentStorageBuilder, type ContentStorage } from './storage/cont
 import { createPageTreeBuilder, type PageTreeOptions } from '@/source/page-tree/builder';
 import { dirname, joinPath } from './path';
 import { normalizeUrl } from '@/utils/url';
-import { SlugFn, slugsPlugin } from '@/source/plugins/slugs';
+import { slugsPlugin, SlugsPluginOptions } from '@/source/plugins/slugs';
 import { iconPlugin, type IconResolver } from '@/source/plugins/icon';
 import type { MetaData, PageData, StaticSource } from './source';
 import { visit } from '@/page-tree/utils';
@@ -24,7 +24,7 @@ export interface LoaderConfig {
 export interface LoaderOptions<
   S extends ContentStorage = ContentStorage,
   I18n extends I18nConfig | undefined = I18nConfig | undefined,
-> {
+> extends SlugsPluginOptions<S> {
   baseUrl: string;
   i18n?: I18n;
   url?: (slugs: string[], locale?: string) => string;
@@ -40,7 +40,6 @@ export interface LoaderOptions<
         typedPlugin: (plugin: LoaderPlugin<S>) => LoaderPlugin;
       }) => LoaderPluginOption[]);
   icon?: IconResolver;
-  slugs?: SlugFn<S>;
 }
 
 export interface ResolvedLoaderConfig {
@@ -479,7 +478,7 @@ export function loader<I extends ResolvedInput, I18n extends I18nConfig | undefi
 
 function resolveConfig(
   input: ResolvedInput,
-  { slugs, icon, plugins = [], baseUrl, url, ...base }: LoaderOptions,
+  { slugs, baseSlugs, icon, plugins = [], baseUrl, url, ...base }: LoaderOptions,
 ): ResolvedLoaderConfig {
   let config: ResolvedLoaderConfig = {
     ...base,
@@ -492,7 +491,7 @@ function resolveConfig(
             typedPlugin: (plugin) => plugin as unknown as LoaderPlugin,
           })
         : plugins),
-      slugsPlugin(slugs),
+      slugsPlugin({ slugs, baseSlugs }),
     ]),
   };
 

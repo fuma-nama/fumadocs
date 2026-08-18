@@ -14,12 +14,30 @@ export type SlugFn<S extends ContentStorage = ContentStorage> = (
   next: () => string[],
 ) => string[] | undefined;
 
+export interface SlugsPluginOptions<S extends ContentStorage = ContentStorage> {
+  /** Slugs to prepend to every page. */
+  baseSlugs?: string[];
+
+  /** generate default slugs for pages */
+  slugs?: SlugFn<S>;
+}
+
 /**
- * Generate slugs for pages if missing
+ * Generate slugs for pages if missing.
  */
-export function slugsPlugin(slugFn?: SlugFn): LoaderPlugin {
-  function isIndex(file: string) {
-    return basename(file, extname(file)) === 'index';
+export function slugsPlugin(optsOrFn: SlugsPluginOptions | SlugFn = {}): LoaderPlugin {
+  const prepended = new WeakSet<ContentStorage['$inferPage']>();
+  const { baseSlugs = [], slugs: slugFn }: SlugsPluginOptions =
+    typeof optsOrFn === 'function'
+      ? {
+          slugs: optsOrFn,
+        }
+      : optsOrFn;
+
+  function generateSlugs(path: string, file: ContentStorage['$inferPage']) {
+    const out = slugFn?.(file, () => getSlugs(path)) ?? getSlugs(path);
+    prepended.add(file);
+    return baseSlugs.length > 0 ? [...baseSlugs, ...out] : out;
   }
 
   return {
@@ -30,15 +48,23 @@ export function slugsPlugin(slugFn?: SlugFn): LoaderPlugin {
 
       for (const path of storage.getFiles()) {
         const file = storage.read(path);
-        if (!file || file.format !== 'page' || file.slugs) continue;
+        if (!file || file.format !== 'page') continue;
+
+        if (file.slugs) {
+          if (baseSlugs.length > 0 && !prepended.has(file)) {
+            file.slugs = [...baseSlugs, ...file.slugs];
+            prepended.add(file);
+          }
+          continue;
+        }
 
         // defer index files, so conflicting cases like `dir/index.mdx` vs `dir.mdx` can be resolved
-        if (isIndex(path)) {
+        if (basename(path, extname(path)) === 'index') {
           indexFiles.push(path);
           continue;
         }
 
-        file.slugs = slugFn?.(file, () => getSlugs(path)) ?? getSlugs(path);
+        file.slugs = generateSlugs(path, file);
         const key = file.slugs.join('/');
         if (taken.has(key)) throw new Error(`Duplicated slugs: ${key}`);
         taken.add(key);
@@ -48,7 +74,7 @@ export function slugsPlugin(slugFn?: SlugFn): LoaderPlugin {
         const file = storage.read(path);
         if (file?.format !== 'page') continue;
 
-        file.slugs = slugFn?.(file, () => getSlugs(path)) ?? getSlugs(path);
+        file.slugs = generateSlugs(path, file);
         if (taken.has(file.slugs.join('/'))) file.slugs = [...file.slugs, 'index'];
 
         const key = file.slugs.join('/');
