@@ -63,12 +63,11 @@
     "estree-util-to-js": "^2.0.0",
     "fumadocs-typescript": "workspace:^",
     "github-slugger": "^2.0.0",
-    "hast-util-from-html": "^2.0.3",
     "hast-util-to-estree": "^3.1.3",
     "katex": "^0.18.4",
     "mdast-util-gfm": "^3.1.0",
     "npm-to-yarn": "^3.2.0",
-    "satteri": "^0.9.5",
+    "satteri": "^0.10.3",
     "yuku-codegen": "^0.8.5",
     "yuku-parser": "^0.8.5"
   },

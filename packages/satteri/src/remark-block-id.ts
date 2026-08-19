@@ -29,10 +29,8 @@ export function remarkBlockId({
     const slugger = new Slugger();
 
     function visit(node: MdastNode, ctx: MdastVisitorContext) {
-      const data = (node.data ?? {}) as {
-        hProperties?: Record<string, unknown>;
-      };
-      if (data.hProperties?.id) return;
+      const existing = node.data as { hProperties?: Record<string, unknown> } | undefined;
+      if (existing?.hProperties?.id) return;
 
       const resolved = shouldGenerate(node);
       if (resolved === false || resolved === 'skip') return;
@@ -45,12 +43,12 @@ export function remarkBlockId({
         ? slugger.slug(generateId({ node, text }))
         : slugger.slug(createHash('sha256').update(text).digest('base64url'));
 
-      data.hProperties ??= {};
-      data.hProperties.id = id;
+      // visited nodes are frozen, so mutate copies
+      const hProperties: Record<string, unknown> = { ...existing?.hProperties, id };
       if (addDataAttribute) {
-        data.hProperties['data-block'] = addDataAttribute;
+        hProperties['data-block'] = addDataAttribute;
       }
-      ctx.setProperty(node, 'data', data);
+      ctx.setProperty(node, 'data', { ...existing, hProperties });
     }
 
     return defineMdastPlugin({

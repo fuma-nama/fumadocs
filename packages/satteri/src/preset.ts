@@ -11,7 +11,7 @@ import { rehypeTable } from '@/rehype-table';
 import { rehypeKatex, type RehypeKatexOptions } from '@/rehype-katex';
 import type { MdastPluginInput } from 'satteri';
 
-type ResolvePlugins<T> = T[] | ((plugins: T[]) => T[]);
+type ResolvePlugins<T> = readonly T[] | ((plugins: T[]) => T[]);
 
 export type DefaultSatteriOptions = Omit<MdxCompileOptions, 'mdastPlugins' | 'hastPlugins'> & {
   mdastPlugins?: ResolvePlugins<MdastPluginInput>;
@@ -38,7 +38,7 @@ export type SatteriPresetOptions =
       Pick<MdxCompileOptions, 'mdastPlugins' | 'hastPlugins' | 'features' | 'data'>);
 
 function pluginOption<T>(
-  def: (plugins: T[]) => (T | false)[],
+  def: (plugins: readonly T[]) => (T | false)[],
   options: ResolvePlugins<T> = [],
 ): T[] {
   const list = def(Array.isArray(options) ? options : []).filter(Boolean) as T[];

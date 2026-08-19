@@ -81,7 +81,6 @@ export function remarkStructure({
   const plugin: ExtraPluginHooks & { (): MdastPluginDefinition } = () => {
     const data: StructuredData = { contents: [], headings: [] };
     let lastHeading: string | undefined;
-    let seeded = false;
 
     const stringifierCtx: StringifierContext = {
       addContent(...content) {
@@ -92,23 +91,9 @@ export function remarkStructure({
     };
 
     function visit(node: Nodes, ctx: MdastVisitorContext) {
-      ctx.data.structuredData ??= data;
-
       if (!matchType(node)) return;
       if (node.type === 'mdxJsxFlowElement' || node.type === 'mdxJsxTextElement') {
         if (!mdxTypes(node)) return;
-      }
-
-      if (!seeded) {
-        const frontmatter = ctx.data.frontmatter as
-          | { _openapi?: { structuredData?: StructuredData } }
-          | undefined;
-        const openapiData = frontmatter?._openapi?.structuredData;
-        if (openapiData) {
-          data.headings.push(...openapiData.headings);
-          data.contents.push(...openapiData.contents);
-        }
-        seeded = true;
       }
 
       if (node.type === 'heading') {
@@ -130,21 +115,28 @@ export function remarkStructure({
 
     return {
       name: 'remark-structure',
+      before(_root: unknown, ctx: MdastVisitorContext) {
+        ctx.data.structuredData ??= data;
+
+        const frontmatter = ctx.data.frontmatter as
+          | { _openapi?: { structuredData?: StructuredData } }
+          | undefined;
+        const openapiData = frontmatter?._openapi?.structuredData;
+        if (openapiData) {
+          data.headings.push(...openapiData.headings);
+          data.contents.push(...openapiData.contents);
+        }
+      },
       ...Object.fromEntries(STRUCTURE_VISITORS.map((key) => [key, visit])),
     };
   };
   plugin.collectExports = ({ data, addExport }) => {
-    const structured = (data.structuredData ??= { headings: [], contents: [] });
-
     if (exportAs) {
       addExport(
         typeof exportAs === 'string' ? exportAs : 'structuredData',
-        JSON.stringify(structured),
+        JSON.stringify(data.structuredData ?? { headings: [], contents: [] }),
       );
     }
-  };
-  plugin.afterToJs = ({ result }) => {
-    result.data.structuredData ??= { headings: [], contents: [] };
   };
   return plugin;
 }

@@ -103,22 +103,8 @@ async function updateImage(
         {
           type: 'mdxJsxAttribute',
           name: 'src',
-          value: {
-            type: 'mdxJsxAttributeValueExpression',
-            value: variableName,
-            data: {
-              estree: {
-                type: 'Program',
-                sourceType: 'module',
-                body: [
-                  {
-                    type: 'ExpressionStatement',
-                    expression: { type: 'Identifier', name: variableName },
-                  },
-                ],
-              },
-            },
-          },
+          // satteri compiles the expression from its `value` source
+          value: { type: 'mdxJsxAttributeValueExpression', value: variableName },
         },
       ],
     };

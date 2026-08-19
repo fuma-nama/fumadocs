@@ -3,7 +3,12 @@ import * as path from 'node:path';
 import { readFile } from 'node:fs/promises';
 import Slugger from 'github-slugger';
 import { defineMdastPlugin, markdownToMdast, mdxToMdast } from 'satteri';
-import type { MdastContent, MdastNode, MdastPluginDefinition, MdastVisitorContext } from 'satteri';
+import type {
+  MdastNode,
+  MdastPluginDefinition,
+  MdastVisitorContext,
+  RawMdastContent,
+} from 'satteri';
 import { frontmatter } from 'fumadocs-core/content/md/frontmatter';
 import { flattenNode } from '@/utils';
 import type { Code, Heading, RootContent } from 'mdast';
@@ -53,7 +58,10 @@ const PARSE_FEATURES = { gfm: true, directive: true, headingAttributes: true };
  * Nested includes are resolved recursively, relative to the file they appear in.
  */
 export function remarkInclude({ cwd }: RemarkIncludeOptions = {}): MdastPluginDefinition {
-  async function visit(node: IncludeNode, ctx: MdastVisitorContext): Promise<MdastContent | void> {
+  async function visit(
+    node: IncludeNode,
+    ctx: MdastVisitorContext,
+  ): Promise<Code | RawMdastContent | void> {
     if (node.name !== 'include') return;
     return replaceInclude(node, ctx, cwd);
   }
@@ -86,7 +94,7 @@ async function replaceInclude(
   node: IncludeNode,
   ctx: MdastVisitorContext,
   cwdOption?: string,
-): Promise<MdastContent | void> {
+): Promise<Code | RawMdastContent | void> {
   const specifier = ctx.textContent(node as never).trim();
   if (!specifier) return;
 

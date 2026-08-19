@@ -1,24 +1,22 @@
-import { defineHastPlugin, type HastPluginDefinition, type HastVisitorContext } from 'satteri';
-import type { Element, ElementContent } from 'hast';
+import {
+  defineHastPlugin,
+  htmlToHast,
+  type HastPluginDefinition,
+  type HastVisitorContext,
+} from 'satteri';
+import type { Element, ElementContent, Root } from 'hast';
 import type { KatexOptions } from 'katex';
 
 export type RehypeKatexOptions = Omit<KatexOptions, 'displayMode' | 'throwOnError'>;
 
-// Lazy-loaded so configs without math never pull katex (or an HTML parser) in,
-// and so rendering uses the consumer's own katex — the one whose stylesheet they
-// import, keeping markup and CSS in lockstep.
-let depsPromise:
-  | Promise<{
-      renderToString: typeof import('katex').default.renderToString;
-      fromHtml: typeof import('hast-util-from-html').fromHtml;
-    }>
-  | undefined;
+// Lazy-loaded so configs without math never pull katex in, and so rendering
+// uses the consumer's own katex — the one whose stylesheet they import,
+// keeping markup and CSS in lockstep.
+let katexPromise: Promise<typeof import('katex').default.renderToString> | undefined;
 
-function loadDeps() {
-  depsPromise ??= Promise.all([import('katex'), import('hast-util-from-html')]).then(
-    ([katex, hast]) => ({ renderToString: katex.default.renderToString, fromHtml: hast.fromHtml }),
-  );
-  return depsPromise;
+function loadKatex() {
+  katexPromise ??= import('katex').then((katex) => katex.default.renderToString);
+  return katexPromise;
 }
 
 function classList(node: Element): string[] {
@@ -60,14 +58,15 @@ export function rehypeKatex(options: RehypeKatexOptions = {}) {
           if (!classes.includes('language-math')) return;
 
           const displayMode = !classes.includes('math-inline');
-          const { renderToString, fromHtml } = await loadDeps();
+          const renderToString = await loadKatex();
           // render broken formulas in place instead of failing the whole compile
           const html = renderToString(ctx.textContent(node), {
             ...options,
             displayMode,
             throwOnError: false,
           });
-          const rendered = fromHtml(html, { fragment: true }).children as ElementContent[];
+          const rendered = (htmlToHast(html, { fragment: true }) as Root)
+            .children as ElementContent[];
 
           const parent = ctx.parent(node);
           const target =
