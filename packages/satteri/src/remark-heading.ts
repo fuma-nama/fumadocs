@@ -1,7 +1,6 @@
 import Slugger from 'github-slugger';
-import { defineMdastPlugin, type MdastPluginDefinition, type MdastVisitorContext } from 'satteri';
+import { defineMdastPlugin, type MdastVisitorContext } from 'satteri';
 import type { Heading } from 'mdast';
-import { ExtraPluginHooks } from './compile';
 
 const regex = /\s*\[#(?<slug>[^]+?)]\s*$/;
 
@@ -16,7 +15,7 @@ export function remarkHeading({
   customId = true,
   generateToc = true,
 }: RemarkHeadingOptions = {}) {
-  const plugin: ExtraPluginHooks & { (): MdastPluginDefinition } = () => {
+  return () => {
     let resolveSlug = slug;
     if (!resolveSlug) {
       const slugger = new Slugger();
@@ -25,9 +24,13 @@ export function remarkHeading({
 
     return defineMdastPlugin({
       name: 'remark-heading',
+      before(_root, ctx) {
+        if (generateToc) ctx.data.toc ??= [];
+      },
       heading(node, ctx: MdastVisitorContext) {
-        const data = (node.data ?? {}) as { hProperties?: Record<string, unknown> };
-        const hProperties = (data.hProperties ??= {});
+        // visited nodes are frozen, so mutate copies
+        const data = { ...node.data } as { hProperties?: Record<string, unknown> };
+        const hProperties = (data.hProperties = { ...data.hProperties });
 
         // `setProperty` is applied after the pass, so strip the custom id
         // marker from the flattened text manually — `ctx.textContent` would
@@ -57,12 +60,4 @@ export function remarkHeading({
       },
     });
   };
-
-  if (generateToc) {
-    plugin.beforeToJs = ({ data }) => {
-      data.toc ??= [];
-    };
-  }
-
-  return plugin;
 }

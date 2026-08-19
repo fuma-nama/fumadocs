@@ -1,6 +1,6 @@
 {
   "name": "docs",
-  "version": "0.1.22",
+  "version": "0.1.23",
   "private": true,
   "scripts": {
     "build": "pnpm build:pre && next build && pnpm build:post",
@@ -61,7 +61,7 @@
     "remark": "^15.0.1",
     "remark-gfm": "^4.0.1",
     "remark-rehype": "^11.1.2",
-    "satteri": "^0.9.5",
+    "satteri": "^0.10.3",
     "shiki": "^4.4.3",
     "takumi-js": "^2.7.2",
     "twoslash": "^0.3.9",

@@ -19,9 +19,10 @@ export function remarkAdmonition(options: RemarkAdmonitionOptions = {}) {
 
   const typeKeys = Object.keys(typeMap).sort((a, b) => b.length - a.length);
 
-  function replaceNodes(nodes: MdastNode[], ctx: MdastVisitorContext): MdastNode[] {
-    if (nodes.length === 0) return nodes;
-
+  // splices admonitions into `nodes` (a mutable copy, visited nodes are
+  // frozen); returns whether any were built
+  function replaceNodes(nodes: MdastNode[], ctx: MdastVisitorContext): boolean {
+    let found = false;
     let open = -1;
     let attributes: { type: 'mdxJsxAttribute'; name: string; value: string }[] = [];
     let hasIntercept = false;
@@ -60,12 +61,14 @@ export function remarkAdmonition(options: RemarkAdmonitionOptions = {}) {
 
       if (open !== -1 && text === tag) {
         const children = nodes.slice(open + 1, i);
+        if (hasIntercept) replaceNodes(children, ctx);
         nodes.splice(open, i - open + 1, {
           type: 'mdxJsxFlowElement',
           name: 'Callout',
           attributes,
-          children: hasIntercept ? replaceNodes(children, ctx) : children,
+          children,
         } as MdastNode);
+        found = true;
         // resume after the inserted Callout; nothing before it can still open
         i = open;
         open = -1;
@@ -74,28 +77,28 @@ export function remarkAdmonition(options: RemarkAdmonitionOptions = {}) {
       }
     }
 
-    return nodes;
+    return found;
   }
 
-  // a single parent is visited once per paragraph/blockquote/list child;
-  // parent identity is stable within a pass, so dedupe with a WeakSet
+  // the `paragraph` visitor only collects parents of `:::` markers (the Set
+  // dedupes sibling visits by identity), and the `after` hook rebuilds each
+  // one exactly once
   return () => {
-    const processed = new WeakSet<object>();
-
-    function visit(node: MdastNode, ctx: MdastVisitorContext) {
-      const parent = ctx.parent(node);
-      if (!parent || !('children' in parent)) return;
-      if (processed.has(parent)) return;
-      processed.add(parent);
-
-      ctx.setProperty(parent, 'children', replaceNodes(parent.children as MdastNode[], ctx));
-    }
+    const parents = new Set<Extract<MdastNode, { children: unknown[] }>>();
 
     return defineMdastPlugin({
       name: 'remark-admonition',
-      paragraph: visit,
-      blockquote: visit,
-      list: visit,
+      paragraph(node, ctx) {
+        if (!ctx.textContent(node, { includeImageAlt: false }).startsWith(tag)) return;
+        const parent = ctx.parent(node);
+        if (parent && 'children' in parent) parents.add(parent);
+      },
+      after(_root, ctx) {
+        for (const parent of parents) {
+          const copy = [...(parent.children as MdastNode[])];
+          if (replaceNodes(copy, ctx)) ctx.setProperty(parent, 'children', copy);
+        }
+      },
     });
   };
 }

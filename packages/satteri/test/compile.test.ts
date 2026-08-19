@@ -1,5 +1,6 @@
 import { describe, expect, test } from 'vitest';
-import { compileMdx } from '@/compile';
+import type { MdastPluginInput } from 'satteri';
+import { compileMdx, type ExtraPluginHooks } from '@/compile';
 import { applySatteriPreset } from '@/preset';
 import { remarkLlms } from '@/remark-llms';
 import * as JsxRuntime from 'react/jsx-runtime';
@@ -53,7 +54,7 @@ describe('output-format aware exports', () => {
     };
     expect(out.default).toBeTypeOf('function');
 
-    // the anchor injects these into the tree, so the compiler returns them
+    // `fd-exports` injects these into the tree, so the compiler returns them
     expect(out.frontmatter).toEqual({ title: 'Doc' });
     expect(out.structuredData.headings).toHaveLength(1);
     expect(out.markdown).toContain('Heading');
@@ -85,11 +86,26 @@ describe('output-format aware exports', () => {
     expect(out.toc).toEqual([]);
   });
 
-  test('the anchor never reaches the output or the markdown export', async () => {
-    for (const environment of ['bundler', 'runtime'] as const) {
-      const { code, data } = await compile(environment);
-      expect(code).not.toContain('fd-exports-anchor');
-      expect(data.markdown).not.toContain('fd-exports-anchor');
+  test('collectExports hooks contribute, a later export of the same name wins', async () => {
+    const declare = (name: string, value: string): MdastPluginInput & ExtraPluginHooks => ({
+      name,
+      collectExports: ({ addExport }) => addExport('dup', value),
+    });
+
+    for (const format of ['md', 'mdx'] as const) {
+      const { code } = await compileMdx({
+        source,
+        filePath: `/tmp/doc.${format}`,
+        environment: 'bundler',
+        options: {
+          mdastPlugins: [declare('first', '"first"'), declare('second', '"second"')],
+        },
+      });
+
+      expect(code).toContain('export const dup = "second"');
+      expect(code).not.toContain('"first"');
+      // declared once, as a single ESM node
+      expect(code.match(/const dup =/g)).toHaveLength(1);
     }
   });
 

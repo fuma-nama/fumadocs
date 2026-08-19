@@ -122,22 +122,21 @@ export function remarkSteps({ steps = 'fd-steps', step = 'fd-step' }: RemarkStep
     if (changed) ctx.setProperty(parent, 'children', output);
   }
 
-  // Satteri has no `root` visitor and materializes nodes per-visit, so we can't
-  // walk containers directly. Instead visit every heading, resolve its parent
-  // (root, a list item, a `<div>`, a blockquote…), and process that parent's
-  // children once — parent identity is stable within a pass, so a WeakSet
-  // dedupes sibling-heading visits.
+  // the `heading` visitor only collects parents (the Set dedupes sibling
+  // visits by identity), and the `after` hook processes each one exactly once
   return () => {
-    const processed = new WeakSet<object>();
+    const parents = new Set<Extract<MdastNode, { children: MdastNode[] }>>();
 
     return defineMdastPlugin({
       name: 'remark-steps',
       heading(node, ctx) {
         const parent = ctx.parent(node) as MdastNode | undefined;
-        if (!parent || !('children' in parent)) return;
-        if (processed.has(parent)) return;
-        processed.add(parent);
-        processChildren(parent, ctx);
+        if (parent && 'children' in parent) {
+          parents.add(parent as Extract<MdastNode, { children: MdastNode[] }>);
+        }
+      },
+      after(_root, ctx) {
+        for (const parent of parents) processChildren(parent, ctx);
       },
     });
   };

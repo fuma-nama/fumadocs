@@ -1,9 +1,14 @@
-import { mdxToJs, type MdxCompileOptions, type MdxToJsResult, type Data } from 'satteri';
+import {
+  markdownToJs,
+  mdxToJs,
+  type Data,
+  type HastPluginDefinition,
+  type MdxCompileOptions,
+  type MdxToJsResult,
+} from 'satteri';
 import { pathToFileURL } from 'node:url';
-import { createExportAnchor, type DocumentFormat } from './export-anchor';
-import { markdownToJs, rehypeDropRawHtml } from './markdown-to-js';
 
-export type { DocumentFormat } from './export-anchor';
+export type DocumentFormat = 'md' | 'mdx';
 
 export interface CompileMdxOptions {
   source: string;
@@ -37,11 +42,10 @@ export interface CollectExportsContext {
 }
 
 export interface ExtraPluginHooks {
-  beforeToJs?: (opts: { data: Data }) => void;
   /**
-   * Declare module exports. Runs at the anchor, after every visitor has seen
-   * the document, so `data` is final. Exports go into the tree as an ESM node,
-   * so the compiler emits them correctly for either output format.
+   * Declare module exports. Runs after every plugin has seen the document, so
+   * `data` is final. Exports go into the tree as an ESM node, so the compiler
+   * emits them correctly for either output format.
    */
   collectExports?: (opts: CollectExportsContext) => void;
   /** post-process the generated code, use {@link collectExports} for exports */
@@ -61,24 +65,14 @@ export async function compileMdx({
   if (frontmatter) data.frontmatter = frontmatter;
   const plugins = [...mdastPlugins, ...hastPlugins] as ExtraPluginHooks[];
 
-  for (const plugin of plugins) {
-    plugin.beforeToJs?.({ data });
-  }
-
   const outputFormat: OutputFormat =
     environment === 'runtime' ? 'function-body' : (satteriOptions.outputFormat ?? 'program');
 
-  const anchor = createExportAnchor(format);
   const compileOptions: MdxCompileOptions = {
     ...satteriOptions,
     mdastPlugins,
-    // ordered last so the anchor runs after the plugins whose exports it
-    // collects, and the raw drop after the anchor node is gone
-    hastPlugins: [
-      ...hastPlugins,
-      anchor.plugin(plugins),
-      ...(format === 'md' ? [rehypeDropRawHtml()] : []),
-    ],
+    // ordered last so it runs after the plugins whose exports it collects
+    hastPlugins: [...hastPlugins, exportsPlugin(plugins)],
     development: isDevelopment,
     outputFormat,
     fileURL: satteriOptions.fileURL ?? pathToFileURL(filePath),
@@ -91,20 +85,52 @@ export async function compileMdx({
     },
   };
 
-  const withAnchor = anchor.append(source);
   const result = await (format === 'md'
-    ? markdownToJs(withAnchor, compileOptions)
-    : mdxToJs(withAnchor, compileOptions));
+    ? markdownToJs(source, compileOptions)
+    : mdxToJs(source, compileOptions));
 
   for (const plugin of plugins) {
     plugin.afterToJs?.({ result, outputFormat });
   }
 
-  const outData = result.data;
-  const code = result.code;
   return {
-    code,
-    data: outData,
+    code: result.code,
+    data: result.data,
     frontmatter: result.frontmatter,
+  };
+}
+
+/** Emits the exports declared via {@link ExtraPluginHooks.collectExports} once
+ *  per document, as an ESM node prepended to the tree. */
+function exportsPlugin(hooks: ExtraPluginHooks[]): HastPluginDefinition {
+  return {
+    name: 'fd-exports',
+    after(root, ctx) {
+      // name -> statement, so a later export of the same name replaces an earlier one
+      const statements = new Map<string, string>();
+      const addExport = (name: string, valueCode: string) => {
+        statements.set(name, `export const ${name} = ${valueCode};`);
+      };
+
+      for (const hook of hooks) {
+        hook.collectExports?.({ data: ctx.data, addExport });
+      }
+
+      const { frontmatter, _valueToExport } = ctx.data;
+      if (frontmatter) addExport('frontmatter', JSON.stringify(frontmatter));
+      if (Array.isArray(_valueToExport)) {
+        for (const name of _valueToExport) {
+          if (!(name in ctx.data)) continue;
+          addExport(name, JSON.stringify(ctx.data[name as keyof Data]));
+        }
+      }
+
+      if (statements.size > 0) {
+        ctx.prependChild(root, {
+          type: 'mdxjsEsm',
+          value: Array.from(statements.values()).join('\n'),
+        });
+      }
+    },
   };
 }

@@ -80,6 +80,9 @@ function postprocessPlugin(
 ): MdastPluginDefinition & ExtraPluginHooks {
   return {
     name: 'remark-postprocess',
+    before(_root, ctx) {
+      if (extractLinkReferences) ctx.data.extractedReferences ??= [];
+    },
     heading(node, ctx) {
       const frontmatter = (ctx.data.frontmatter ??= {});
       if (!frontmatter.title && node.depth === 1) {
@@ -88,21 +91,17 @@ function postprocessPlugin(
     },
     link(node, ctx) {
       if (extractLinkReferences) {
-        const refs = (ctx.data.extractedReferences ??= []);
-        refs.push({ href: node.url });
+        ctx.data.extractedReferences!.push({ href: node.url });
       }
     },
     collectExports({ data, addExport }) {
       if (extractLinkReferences) {
-        addExport('extractedReferences', JSON.stringify((data.extractedReferences ??= [])));
+        addExport('extractedReferences', JSON.stringify(data.extractedReferences));
       }
 
       if (lastModified) {
         addExport('lastModified', `new Date(${lastModified.getTime()})`);
       }
-    },
-    afterToJs({ result }) {
-      if (extractLinkReferences) result.data.extractedReferences ??= [];
     },
   };
 }

@@ -27,22 +27,26 @@ function parseTabAttributes(node: MdastNode | undefined) {
   return parsed;
 }
 
-// The parsed tree is backed by its own arena with lazy getters, so
-// it must be cloned into plain nodes before insertion into another document.
-// Otherwise, its node ids resolve against the target arena and pull in
-// unrelated content.
+// Inserting a node carrying `data._mdxExplicitJsx` (which `mdxToMdast` sets on
+// JSX elements) makes satteri emit literal tags instead of `_components.*` for
+// the rest of the document, so strip the flag before insertion.
+function stripExplicitJsx(nodes: unknown[]) {
+  for (const node of nodes as { data?: { _mdxExplicitJsx?: boolean }; children?: unknown[] }[]) {
+    if (node.data?._mdxExplicitJsx) delete node.data._mdxExplicitJsx;
+    if (node.children) stripExplicitJsx(node.children);
+  }
+}
+
 function parseTabName(name: string): (BlockContent | Text)[] {
-  const head = (structuredClone(mdxToMdast(name)) as Root).children?.[0];
-  if (head && 'children' in head) return head.children as (BlockContent | Text)[];
+  const head = (mdxToMdast(name, { position: false }) as Root).children?.[0];
+  if (head && 'children' in head) {
+    stripExplicitJsx(head.children);
+    return head.children as (BlockContent | Text)[];
+  }
   return [{ type: 'text', value: name }];
 }
 
-function buildTabs(
-  _ctx: MdastVisitorContext,
-  entries: TabEntry[],
-  mode: TabType,
-  withMdx: boolean,
-): BlockContent {
+function buildTabs(entries: TabEntry[], mode: TabType, withMdx: boolean): BlockContent {
   if (mode === 'CodeBlockTabs') {
     const options: CodeBlockTabsOptions = {
       triggers: [],
@@ -119,20 +123,47 @@ function buildTabs(
   } as MdxJsxFlowElement as BlockContent;
 }
 
-function isInsideCodeBlockTabs(node: Code, ctx: MdastVisitorContext) {
-  let parent = ctx.parent(node);
+/** author-written tab containers whose code blocks are already grouped */
+const TAB_CONTAINERS = new Set([
+  'CodeBlockTabs',
+  'CodeBlockTab',
+  'CodeBlockTabsList',
+  'CodeBlockTabsTrigger',
+]);
+
+function collectEntries(children: MdastNode[], start: number, end: number): TabEntry[] {
+  const entries: TabEntry[] = [];
+  for (let i = start; i < end; i++) {
+    const item = children[i] as Code;
+    const parsed = parseTabAttributes(item)!;
+    const name =
+      typeof parsed.attributes.tab === 'string' ? parsed.attributes.tab : `Tab ${i - start + 1}`;
+    const copy: Code = { ...item, meta: parsed.rest || undefined };
+
+    const existing = entries.find((entry) => entry.name === name);
+    if (existing) {
+      existing.codes.push(copy);
+    } else {
+      entries.push({
+        name,
+        tabGroup:
+          typeof parsed.attributes['tab-group'] === 'string'
+            ? parsed.attributes['tab-group']
+            : undefined,
+        codes: [copy],
+      });
+    }
+  }
+  return entries;
+}
+
+function isInsideTabContainer(node: MdastNode, ctx: MdastVisitorContext) {
+  let parent = ctx.parent(node as never) as MdastNode | undefined;
   while (parent) {
-    if (
-      parent.type === 'mdxJsxFlowElement' &&
-      ['CodeBlockTabs', 'CodeBlockTab', 'CodeBlockTabsList', 'CodeBlockTabsTrigger'].includes(
-        parent.name ?? '',
-      )
-    ) {
+    if (parent.type === 'mdxJsxFlowElement' && TAB_CONTAINERS.has(parent.name ?? '')) {
       return true;
     }
-    const next = ctx.parent(parent as MdastNode);
-    if (!next) break;
-    parent = next;
+    parent = ctx.parent(parent as never) as MdastNode | undefined;
   }
   return false;
 }
@@ -141,69 +172,41 @@ export function remarkCodeTab({
   parseMdx = false,
   Tabs = 'CodeBlockTabs',
 }: RemarkCodeTabOptions = {}) {
-  // Satteri applies queued tree mutations after the pass and may hand each
-  // visit a fresh materialization of the node, so sibling visits can't observe
-  // in-place JS mutations. Track handled group members by (parent, index)
-  // instead, in per-compile state (factory form).
+  // the `code` visitor only collects parents (the Set dedupes sibling visits
+  // by identity), and the `after` hook rebuilds each one exactly once
   return () => {
-    const processed = new WeakMap<Readonly<Parents>, Set<number>>();
+    const parents = new Set<Parents>();
 
     return defineMdastPlugin({
       name: 'remark-code-tab',
       code(node, ctx) {
-        if (!node.meta || isInsideCodeBlockTabs(node, ctx)) return;
+        if (!parseTabAttributes(node) || isInsideTabContainer(node, ctx)) return;
         const parent = ctx.parent(node);
-        if (!parent || !('children' in parent)) return;
-        const index = ctx.indexOf(node);
-        if (index === undefined) return;
-        if (processed.get(parent)?.has(index)) return;
-        if (!parseTabAttributes(node)) return;
+        if (parent && 'children' in parent) parents.add(parent);
+      },
+      after(_root, ctx) {
+        for (const parent of parents) {
+          const children = parent.children as MdastNode[];
+          let rebuilt: MdastNode[] | undefined;
+          for (let i = 0; i < children.length;) {
+            const node = children[i]!;
+            if (!parseTabAttributes(node)) {
+              rebuilt?.push(node);
+              i++;
+              continue;
+            }
 
-        const children = parent.children;
-        let start = index;
-        while (start > 0 && parseTabAttributes(children[start - 1])) {
-          start--;
-        }
-        // only the first code block of a group builds the tabs
-        if (index !== start) return;
+            let end = i + 1;
+            while (end < children.length && parseTabAttributes(children[end])) {
+              end++;
+            }
 
-        let end = index + 1;
-        while (end < children.length && parseTabAttributes(children[end])) {
-          end++;
-        }
-
-        const marked = processed.get(parent) ?? new Set<number>();
-        for (let i = start; i < end; i++) marked.add(i);
-        processed.set(parent, marked);
-
-        const entries: TabEntry[] = [];
-        for (let i = start; i < end; i++) {
-          const item = children[i] as Code;
-          const parsed = parseTabAttributes(item)!;
-          const name =
-            typeof parsed.attributes.tab === 'string'
-              ? parsed.attributes.tab
-              : `Tab ${i - start + 1}`;
-          const copy: Code = { ...item, meta: parsed.rest || undefined };
-
-          const existing = entries.find((entry) => entry.name === name);
-          if (existing) {
-            existing.codes.push(copy);
-          } else {
-            entries.push({
-              name,
-              tabGroup:
-                typeof parsed.attributes['tab-group'] === 'string'
-                  ? parsed.attributes['tab-group']
-                  : undefined,
-              codes: [copy],
-            });
+            rebuilt ??= children.slice(0, i);
+            rebuilt.push(buildTabs(collectEntries(children, i, end), Tabs, parseMdx) as MdastNode);
+            i = end;
           }
-        }
 
-        ctx.replaceNode(node, buildTabs(ctx, entries, Tabs, parseMdx));
-        for (let i = end - 1; i > start; i--) {
-          ctx.removeChildAt(parent, i);
+          if (rebuilt) ctx.setProperty(parent, 'children', rebuilt);
         }
       },
     });

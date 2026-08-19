@@ -1,5 +1,5 @@
-import { defineHastPlugin, type HastPluginInput } from 'satteri';
-import type { Element } from 'hast';
+import { defineHastPlugin, type HastPluginInput, type HastVisitorContext } from 'satteri';
+import type { Element, ElementContent } from 'hast';
 import { handleTag, jsxToSource } from '@/utils';
 import type { ExtraPluginHooks } from './compile';
 
@@ -33,7 +33,7 @@ const HeadingTags = ['h1', 'h2', 'h3', 'h4', 'h5', 'h6'];
 
 declare module 'satteri' {
   interface DataMap {
-    /** serialized items, exported at the anchor */
+    /** serialized items, exported by `compileMdx` */
     _rehypeTocItems?: string[];
   }
 }
@@ -48,6 +48,9 @@ export function rehypeToc({ exportToc = true }: RehypeTocOptions = {}): HastPlug
   const plugin: HastPluginInput & ExtraPluginHooks = () => {
     return {
       name: 'rehype-toc',
+      before(_root: unknown, ctx: HastVisitorContext) {
+        if (resolved.as === 'data') ctx.data.rehypeToc ??= [];
+      },
       element: {
         filter: HeadingTags,
         visit(node, ctx) {
@@ -59,6 +62,7 @@ export function rehypeToc({ exportToc = true }: RehypeTocOptions = {}): HastPlug
 
           let isTocOnly = false;
           let title = ctx.textContent(element);
+          let titleChildren: ElementContent[] = element.children;
           const last = element.children[element.children.length - 1];
           if (last?.type === 'text') {
             const noToc = handleTag(last.value, NoTocTag);
@@ -71,9 +75,9 @@ export function rehypeToc({ exportToc = true }: RehypeTocOptions = {}): HastPlug
             if (tocOnly !== false) {
               isTocOnly = true;
               title = title.slice(0, title.length - last.value.length) + tocOnly;
-              // update the JS-view such that `jsxToSource()` below generates the right output
-              last.value = tocOnly;
-              ctx.setProperty(last, 'value', tocOnly);
+              // the element is removed below, so strip the tag in a copy for
+              // `jsxToSource()` — visited nodes are frozen anyway
+              titleChildren = [...element.children.slice(0, -1), { ...last, value: tocOnly }];
             }
           }
 
@@ -87,7 +91,7 @@ export function rehypeToc({ exportToc = true }: RehypeTocOptions = {}): HastPlug
             let obj = '{';
             obj += `title: ${jsxToSource({
               type: 'root',
-              children: element.children,
+              children: titleChildren,
             })},`;
             obj += `url: ${JSON.stringify(`#${id}`)},`;
             obj += `depth: ${JSON.stringify(Number(element.tagName[1]))},`;
@@ -111,11 +115,6 @@ export function rehypeToc({ exportToc = true }: RehypeTocOptions = {}): HastPlug
   plugin.collectExports = ({ data, addExport }) => {
     if (resolved.as === 'esm') {
       addExport(resolved.name, `[${(data._rehypeTocItems ?? []).join(',')}]`);
-    }
-  };
-  plugin.afterToJs = ({ result }) => {
-    if (resolved.as === 'data') {
-      result.data.rehypeToc ??= [];
     }
   };
   return plugin;
