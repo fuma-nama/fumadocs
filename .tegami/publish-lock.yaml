@@ -1,19 +1,14 @@
 core:changelogs:
-  - content: "---\npackages:\n  npm:fumadocs-ui:\n    type: patch\n  npm:@fumadocs/base-ui:\n    type: patch\n---\n\n## Add a `main` landmark to docs, notebook and flux pages\n\nThe page container slot now wraps `<article id=\"nd-page\">` in a `<main class=\"contents\">` in the docs, notebook and flux layouts. All props, `id=\"nd-page\"` and the layout classes stay on the `<article>`, so existing selectors and refs keep working.\n"
-    filename: 2026-08-15-docs-main-landmark.md
-    v: 0.0.0
-  - content: "---\npackages:\n  npm:fumadocs-core:\n    type: patch\n---\n\n## Loader: `next` parameter for custom `slugs` function\n\nThe `slugs` option now receives a `next` function as its second argument, which generates the default slugs from the file path. This lets custom slug functions build on the default generation instead of reimplementing it:\n\n```ts\nloader({\n  slugs(file, next) {\n    if (file.path.startsWith('blog/')) return ['blog', ...next()];\n    // return `undefined` to generate default slugs\n  },\n});\n```\n\n**Behavior change:** conflicting cases like `dir/index.mdx` vs `dir.mdx` are now resolved for custom slugs functions as well. Index files are always processed after other pages, and receive an `index` suffix when their slugs (custom or default) collide with an existing page — previously, custom slugs functions that produced such collisions threw a `Duplicated slugs` error.\n"
-    filename: 2026-08-18-slugs-next.md
+  - content: "---\npackages:\n  npm:@fumadocs/satteri:\n    type: minor\n  npm:fumadocs-mdx:\n    type: minor\n---\n\n## Sätteri 0.10\n\n`@fumadocs/satteri` now requires `satteri` ^0.10.3, and the plugins were rewritten on its new capabilities:\n\n- Exports (`frontmatter`, `toc`, `structuredData`, …) are emitted by an `after` document hook instead of an anchor marker appended to the source, so plugins no longer see (or need to skip) the anchor node.\n- `remark-steps`, `remark-admonition` and `remark-code-tab` still detect their targets through node visitors (so documents without the construct cost nothing), but process each parent exactly once in an `after` hook, replacing the per-visit dedup workarounds.\n- `remark-llms` stringifies the document root from a `before` hook instead of subscribing to 19 node types to find it.\n- Markdown documents compile through Sätteri's own `markdownToJs`; the hand-assembled pipeline is gone. Raw HTML in `.md` files is still dropped, matching the previous behavior.\n- `rehype-katex` parses KaTeX output with Sätteri's `htmlToHast`, dropping the `hast-util-from-html` dependency.\n- No plugin reads `node.position`, so Sätteri now skips source-position tracking entirely (~15% faster parse).\n\n**Breaking:** `ExtraPluginHooks.beforeToJs` was removed. Seed `ctx.data` from a Sätteri `before` hook on the plugin definition instead — it also receives the document root:\n\n```ts\nimport { defineMdastPlugin } from 'satteri';\n\ndefineMdastPlugin({\n  name: 'my-plugin',\n  before(root, ctx) {\n    ctx.data.myValue ??= [];\n  },\n});\n```\n"
+    filename: 2026-08-19-satteri-0-10.md
     v: 0.0.0
 core:packages:
   - id: npm:@fumadocs/api-docs
     updated: false
   - id: npm:@fumadocs/asyncapi
     updated: false
-  - changelogIds:
-      - 2026-08-15-docs-main-landmark.md
-    id: npm:@fumadocs/base-ui
-    updated: true
+  - id: npm:@fumadocs/base-ui
+    updated: false
   - id: npm:@fumadocs/basehub
     updated: false
   - id: npm:@fumadocs/cli
@@ -22,10 +17,8 @@ core:packages:
     updated: false
   - id: npm:@fumadocs/content-collections
     updated: false
-  - changelogIds:
-      - 2026-08-18-slugs-next.md
-    id: npm:fumadocs-core
-    updated: true
+  - id: npm:fumadocs-core
+    updated: false
   - id: npm:create-fumadocs-app
     updated: true
   - id: npm:create-fumadocs-versions
@@ -36,9 +29,9 @@ core:packages:
     updated: false
   - id: npm:@fumadocs/graphql
     updated: false
-  - id: npm:@fumari/image-size
-    updated: false
   - id: npm:@fumadocs/language
+    updated: false
+  - id: npm:@fumari/image-size
     updated: false
   - id: npm:@fumadocs/local-content
     updated: false
@@ -46,8 +39,10 @@ core:packages:
     updated: false
   - id: npm:@fumadocs/local-md
     updated: false
-  - id: npm:fumadocs-mdx
-    updated: false
+  - changelogIds:
+      - 2026-08-19-satteri-0-10.md
+    id: npm:fumadocs-mdx
+    updated: true
   - id: npm:@fumadocs/mdx-remote
     updated: false
   - id: npm:@fumadocs/notion
@@ -60,14 +55,14 @@ core:packages:
     updated: false
   - id: npm:fumadocs-python
     updated: false
-  - changelogIds:
-      - 2026-08-15-docs-main-landmark.md
-    id: npm:fumadocs-ui
-    updated: true
+  - id: npm:fumadocs-ui
+    updated: false
   - id: npm:@fumadocs/sanity
     updated: false
-  - id: npm:@fumadocs/satteri
-    updated: false
+  - changelogIds:
+      - 2026-08-19-satteri-0-10.md
+    id: npm:@fumadocs/satteri
+    updated: true
   - id: npm:@fumadocs/shadcn
     updated: false
   - id: npm:@fumari/stf
@@ -96,8 +91,8 @@ npm:packages:
   - id: npm:fumadocs-docgen
   - id: npm:fumadocs-epub
   - id: npm:@fumadocs/graphql
-  - id: npm:@fumari/image-size
   - id: npm:@fumadocs/language
+  - id: npm:@fumari/image-size
   - id: npm:@fumadocs/local-content
   - id: npm:@fumadocs/local-html
   - id: npm:@fumadocs/local-md
@@ -119,20 +114,14 @@ npm:packages:
   - id: npm:fumadocs-typescript
   - id: npm:@fumadocs/vite
   - id: npm:docs
-  - id: npm:example-astro
   - id: npm:example-asyncapi
   - id: npm:example-base-ui
-  - id: npm:example-content-collections
   - id: npm:example-graphql
   - id: npm:example-i18n
-  - id: npm:example-marble-cms
   - id: npm:example-next
-  - id: npm:example-next-local-html
-  - id: npm:example-next-local-md
-  - id: npm:example-next-shadcn
   - id: npm:example-next-min
+  - id: npm:example-next-shadcn
   - id: npm:example-next-static
-  - id: npm:example-obsidian
   - id: npm:example-openapi
   - id: npm:example-python
   - id: npm:example-react-router
@@ -142,7 +131,6 @@ npm:packages:
   - id: npm:example-react-router-spa
   - id: npm:example-tanstack-start
   - id: npm:example-tanstack-start-i18n
-  - id: npm:example-tanstack-start-local-md
   - id: npm:example-tanstack-start-min
   - id: npm:example-tanstack-start-openapi
   - id: npm:example-tanstack-start-spa

@@ -1,3 +1,29 @@
+## fumadocs-mdx@15.3.0
+
+### Sätteri 0.10
+
+`@fumadocs/satteri` now requires `satteri` ^0.10.3, and the plugins were rewritten on its new capabilities:
+
+- Exports (`frontmatter`, `toc`, `structuredData`, …) are emitted by an `after` document hook instead of an anchor marker appended to the source, so plugins no longer see (or need to skip) the anchor node.
+- `remark-steps`, `remark-admonition` and `remark-code-tab` still detect their targets through node visitors (so documents without the construct cost nothing), but process each parent exactly once in an `after` hook, replacing the per-visit dedup workarounds.
+- `remark-llms` stringifies the document root from a `before` hook instead of subscribing to 19 node types to find it.
+- Markdown documents compile through Sätteri's own `markdownToJs`; the hand-assembled pipeline is gone. Raw HTML in `.md` files is still dropped, matching the previous behavior.
+- `rehype-katex` parses KaTeX output with Sätteri's `htmlToHast`, dropping the `hast-util-from-html` dependency.
+- No plugin reads `node.position`, so Sätteri now skips source-position tracking entirely (~15% faster parse).
+
+**Breaking:** `ExtraPluginHooks.beforeToJs` was removed. Seed `ctx.data` from a Sätteri `before` hook on the plugin definition instead — it also receives the document root:
+
+```ts
+import { defineMdastPlugin } from 'satteri';
+
+defineMdastPlugin({
+  name: 'my-plugin',
+  before(root, ctx) {
+    ctx.data.myValue ??= [];
+  },
+});
+```
+
 ## fumadocs-mdx@15.2.3
 
 ### Fix Base UI's `use-sync-external-store` breaking Vite dev servers
