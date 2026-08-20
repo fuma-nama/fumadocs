@@ -15,9 +15,18 @@ export interface StaticSource<Config extends SourceConfig = SourceConfig> {
   files: VirtualFile<Config>[];
 }
 
+/** one dynamic source object can only be used by one loader */
 export interface DynamicSource<Config extends SourceConfig = SourceConfig> {
+  /**
+   * - `memory`: the dynamic loader's in-memory cache handles caching.
+   * - `custom`: the source handles caching itself. When the newer result of `files()` is (shallowly) different from the previous result, the source is considered revalidated, and all associated properties will be re-computed.
+   *
+   * @default 'memory'
+   **/
+  cache?: 'memory' | 'custom';
   files: () => Awaitable<VirtualFile<Config>[]>;
-  configure?: (loader: DynamicLoader) => void;
+  configure?: (loader: DynamicLoader) => Awaitable<void>;
+  invalidate?: () => void;
 }
 
 type SourceConfig = {

@@ -264,6 +264,7 @@ export function createGetUrl(baseUrl: string, i18n?: I18nConfig): ResolvedLoader
   };
 }
 
+/** content loader API for static content sources */
 export function loader<I extends ResolvedInput, I18n extends I18nConfig | undefined = undefined>(
   source: I,
   options: LoaderOptions<NoInfer<GenerateStorage<I>>, I18n>,
@@ -273,6 +274,7 @@ export function loader<I extends ResolvedInput, I18n extends I18nConfig | undefi
   i18n: I18n;
 }>;
 
+/** content loader API for static content sources */
 export function loader<I extends ResolvedInput, I18n extends I18nConfig | undefined = undefined>(
   options: LoaderOptions<NoInfer<GenerateStorage<I>>, I18n> & {
     source: I;
