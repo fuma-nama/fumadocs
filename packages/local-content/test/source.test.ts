@@ -74,13 +74,41 @@ describe('createLocalSource', () => {
     expect(files.every((file) => file.path.startsWith(`docs${path.sep}`))).toBe(true);
   });
 
-  test('staticSource is cached until a file is invalidated', async () => {
+  test('reuses virtual file objects until a file is invalidated', async () => {
     const source = createLocalSource({ dir, integration: integration() });
     const first = await source.staticSource();
-    expect(await source.staticSource()).toBe(first);
+    const second = await source.staticSource();
+    const firstGuide = first.files.find((file) => file.path === 'guide.md');
+    const firstIndex = first.files.find((file) => file.path === 'index.md');
+
+    expect(second.files.find((file) => file.path === 'guide.md')).toBe(firstGuide);
 
     source.invalidateFile(path.join(dir, 'guide.md'));
-    expect(await source.staticSource()).not.toBe(first);
+    const third = await source.staticSource();
+    expect(third.files.find((file) => file.path === 'guide.md')).not.toBe(firstGuide);
+    expect(third.files.find((file) => file.path === 'index.md')).toBe(firstIndex);
+  });
+
+  test('dynamicSource uses custom cache and invalidate reparses every file', async () => {
+    const parsed: string[] = [];
+    const source = createLocalSource({ dir, integration: integration((p) => parsed.push(p)) });
+    const dynamic = source.dynamicSource();
+    expect(dynamic.cache).toBe('custom');
+
+    const first = await dynamic.files();
+    expect(parsed).toHaveLength(3);
+
+    parsed.length = 0;
+    const second = await dynamic.files();
+    expect(parsed).toHaveLength(0);
+    expect(second.find((file) => file.path === 'guide.md')).toBe(
+      first.find((file) => file.path === 'guide.md'),
+    );
+
+    dynamic.invalidate?.();
+    parsed.length = 0;
+    await dynamic.files();
+    expect(parsed.sort()).toEqual(['guide.md', 'index.md', 'meta.json']);
   });
 
   test('invalidateFile reparses only the changed file', async () => {
@@ -106,17 +134,6 @@ describe('createLocalSource', () => {
     await source.staticSource();
 
     expect(parsed.sort()).toEqual(['guide.md', 'index.md', 'meta.json']);
-  });
-
-  test('dynamicSource notifies registered loaders', async () => {
-    const source = createLocalSource({ dir, integration: integration() });
-    const dynamic = source.dynamicSource();
-    let invalidated = 0;
-    dynamic.configure?.({ invalidate: () => void invalidated++ } as never);
-
-    expect(await dynamic.files()).toHaveLength(3);
-    source.invalidateFile(path.join(dir, 'guide.md'));
-    expect(invalidated).toBe(1);
   });
 
   test('include overrides the integration patterns', async () => {

@@ -13,6 +13,7 @@ import {
   type Page,
 } from 'fumadocs-core/source';
 import {
+  fromSchema,
   getPageProps,
   type OperationOutput,
   type OutputEntry,
@@ -24,7 +25,7 @@ import path from 'node:path';
 import type { OpenAPIPageProps_Preloaded, OpenAPIPageProps_Spec } from '@/ui';
 import type { StructuredData } from 'fumadocs-core/mdx-plugins/remark-structure';
 import type { TOCItemType } from 'fumadocs-core/toc';
-import type { SchemaToPagesOptions } from '@/utils/pages/preset-auto';
+import { createAutoPreset, type SchemaToPagesOptions } from '@/utils/pages/preset-auto';
 import { MethodLabel } from '@/ui/components/method-label';
 
 /**
@@ -110,7 +111,11 @@ export type OpenAPISourceOptions = SchemaToPagesOptions & {
 
 export function createOpenAPI(options: OpenAPIOptions = {}): OpenAPIServer {
   const { disableCache = false } = options;
-  const schemaMap = new Map<string, Promise<LoadedDocument>>();
+  type OpenAPIVirtualFile = VirtualFile<{
+    pageData: OpenAPIPageData;
+    metaData: MetaData;
+  }>;
+  const docCache = new Map<string, Promise<LoadedDocument>>();
 
   let resolvedInput: SchemaRecord = {};
   if (Array.isArray(options.input)) {
@@ -129,13 +134,13 @@ export function createOpenAPI(options: OpenAPIOptions = {}): OpenAPIServer {
     }
 
     if (!disableCache) {
-      const cached = schemaMap.get(schemaId);
+      const cached = docCache.get(schemaId);
       if (cached) return cached;
     }
 
     const raw = resolvedInput[schemaId];
     const output = Promise.resolve(typeof raw === 'function' ? raw() : raw).then(loadDocument);
-    if (!disableCache) schemaMap.set(schemaId, output);
+    if (!disableCache) docCache.set(schemaId, output);
     return output;
   }
 
@@ -146,27 +151,30 @@ export function createOpenAPI(options: OpenAPIOptions = {}): OpenAPIServer {
     return Object.fromEntries(entries);
   }
 
-  async function getVirtualFiles(server: OpenAPIServer, options: OpenAPISourceOptions) {
+  async function getVirtualFiles(
+    server: OpenAPIServer,
+    options: OpenAPISourceOptions,
+    docFilesCache?: WeakMap<LoadedDocument, OpenAPIVirtualFile[]>,
+  ): Promise<OpenAPIVirtualFile[]> {
     const { baseDir = '', meta = false } = options;
-    const { createAutoPreset } = await import('@/utils/pages/preset-auto');
-    const { fromSchema } = await import('@/utils/pages/builder');
-    const files: VirtualFile<{
-      pageData: OpenAPIPageData;
-      metaData: MetaData;
-    }>[] = [];
-
-    const schemas = await server.getSchemas();
+    const files: OpenAPIVirtualFile[] = [];
     const builderOptions = createAutoPreset(options);
 
-    for (const [id, schema] of Object.entries(schemas)) {
-      const list = fromSchema(id, schema.bundled, builderOptions);
+    for (const [id, schema] of Object.entries(await server.getSchemas())) {
+      const cachedDocFiles = docFilesCache?.get(schema);
+      if (cachedDocFiles) {
+        files.push(...cachedDocFiles);
+        continue;
+      }
 
-      onEntries(list);
+      const entries = onEntries(fromSchema(id, schema.bundled, builderOptions));
+      docFilesCache?.set(schema, entries);
+      files.push(...entries);
 
-      function onEntry(entry: PageOutput | OperationOutput | WebhookOutput) {
+      function onEntry(entry: PageOutput | OperationOutput | WebhookOutput): OpenAPIVirtualFile {
         const props = getPageProps(entry);
 
-        files.push({
+        return {
           type: 'page',
           path: `${baseDir}/${entry.path}`,
           data: {
@@ -202,20 +210,21 @@ export function createOpenAPI(options: OpenAPIOptions = {}): OpenAPIServer {
               deprecated: entry.info.deprecated,
             },
           },
-        });
+        };
       }
 
-      function onEntries(entries: OutputEntry[], parent?: OutputEntry) {
+      function onEntries(entries: OutputEntry[], parent?: OutputEntry): OpenAPIVirtualFile[] {
+        const out: OpenAPIVirtualFile[] = [];
+
         if (!meta) {
           for (const entry of entries) {
             if (entry.type === 'group') {
-              onEntries(entry.entries, entry);
+              out.push(...onEntries(entry.entries, entry));
             } else {
-              onEntry(entry);
+              out.push(onEntry(entry));
             }
           }
-
-          return;
+          return out;
         }
 
         const { folderStyle = 'folder' } = meta === true ? {} : meta;
@@ -227,28 +236,30 @@ export function createOpenAPI(options: OpenAPIOptions = {}): OpenAPIServer {
           );
 
           if (entry.type === 'group') {
-            onEntries(entry.entries, entry);
+            out.push(...onEntries(entry.entries, entry));
             if (folderStyle === 'folder') {
               pages.push(relativePath);
             } else {
               pages.push(`---${entry.info.title}---`, `...${relativePath}`);
             }
           } else {
-            onEntry(entry);
+            out.push(onEntry(entry));
             pages.push(relativePath.slice(0, -path.extname(entry.path).length));
           }
         }
 
-        if (pages.length === 0) return;
-        files.push({
-          type: 'meta',
-          path: path.join(baseDir, parent?.path ?? '', 'meta.json'),
-          data: {
-            title: parent?.info.title,
-            description: parent?.info.description,
-            pages,
-          },
-        });
+        if (pages.length > 0) {
+          out.push({
+            type: 'meta',
+            path: path.join(baseDir, parent?.path ?? '', 'meta.json'),
+            data: {
+              title: parent?.info.title,
+              description: parent?.info.description,
+              pages,
+            },
+          });
+        }
+        return out;
       }
     }
 
@@ -285,8 +296,13 @@ export function createOpenAPI(options: OpenAPIOptions = {}): OpenAPIServer {
       };
     },
     dynamicSource(options = {}) {
+      const docFilesCache = new WeakMap<LoadedDocument, OpenAPIVirtualFile[]>();
       return {
-        files: () => getVirtualFiles(this, options),
+        cache: 'custom',
+        files: () => getVirtualFiles(this, options, docFilesCache),
+        invalidate() {
+          docCache.clear();
+        },
       };
     },
     loaderPlugin() {

@@ -6,7 +6,7 @@ import { dirname, joinPath } from './path';
 import { normalizeUrl } from '@/utils/url';
 import { slugsPlugin, SlugsPluginOptions } from '@/source/plugins/slugs';
 import { iconPlugin, type IconResolver } from '@/source/plugins/icon';
-import type { MetaData, PageData, StaticSource } from './source';
+import { isStaticSource, type MetaData, type PageData, type StaticSource } from './source';
 import { visit } from '@/page-tree/utils';
 import type { PageTreeTransformer } from '@/source/page-tree/builder';
 import type { SerializedPageTree } from './client';
@@ -474,6 +474,14 @@ export function loader<I extends ResolvedInput, I18n extends I18nConfig | undefi
       };
     },
   };
+
+  if (isStaticSource(loaderConfig.input)) {
+    loaderConfig.input.configureStatic?.({ loader: out });
+  } else {
+    for (const [k, v] of Object.entries(loaderConfig.input)) {
+      v.configureStatic?.({ loader: out, source: k });
+    }
+  }
 
   return out as never;
 }

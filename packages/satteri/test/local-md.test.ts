@@ -198,24 +198,38 @@ describe('localMd source', () => {
     expect(compiles).toBe(1);
   });
 
-  test('invalidateFile resets the cached static source', async () => {
+  test('invalidateFile reparses only the changed file', async () => {
     const instance = localMd({ dir: contentDir });
-    const source = await instance.staticSource();
-    expect(await instance.staticSource()).toBe(source);
+    const first = await instance.staticSource();
+    const firstGuide = first.files.find((file) => file.path === 'guide.md');
+    const firstIndex = first.files.find((file) => file.path === 'index.mdx');
+
+    expect((await instance.staticSource()).files.find((file) => file.path === 'guide.md')).toBe(
+      firstGuide,
+    );
 
     instance.invalidateFile(path.join(contentDir, 'guide.md'));
-    expect(await instance.staticSource()).not.toBe(source);
+    const second = await instance.staticSource();
+    expect(second.files.find((file) => file.path === 'guide.md')).not.toBe(firstGuide);
+    expect(second.files.find((file) => file.path === 'index.mdx')).toBe(firstIndex);
   });
 
-  test('dynamicSource re-reads files and notifies loaders', async () => {
+  test('dynamicSource reuses file objects until invalidation', async () => {
     const instance = localMd({ dir: contentDir });
     const dynamic = instance.dynamicSource();
-    let invalidated = 0;
-    dynamic.configure?.({ invalidate: () => void invalidated++ } as never);
+    expect(dynamic.cache).toBe('custom');
 
-    expect((await dynamic.files()).length).toBe(3);
+    const first = await dynamic.files();
+    expect(first).toHaveLength(3);
+    expect((await dynamic.files()).find((file) => file.path === 'guide.md')).toBe(
+      first.find((file) => file.path === 'guide.md'),
+    );
+
     instance.invalidateFile(path.join(contentDir, 'guide.md'));
-    expect(invalidated).toBe(1);
-    expect((await dynamic.files()).length).toBe(3);
+    const second = await dynamic.files();
+    expect(second).toHaveLength(3);
+    expect(second.find((file) => file.path === 'guide.md')).not.toBe(
+      first.find((file) => file.path === 'guide.md'),
+    );
   });
 });

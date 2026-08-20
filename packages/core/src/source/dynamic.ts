@@ -41,21 +41,6 @@ export function dynamicLoader<
   let loaderCache: LoaderOutput<DynamicLoaderConfig> | undefined;
   const memoryCache = new Map<DynamicSource, Awaitable<StaticSource>>();
 
-  let initPromise: Promise<void> | undefined;
-  async function init() {
-    if (isStaticSource(input)) return;
-    if (isDynamicSource(input)) {
-      await input.configure?.(dynamicLoader);
-      return;
-    }
-
-    await Promise.all(
-      Object.values(input).map(async (v) => {
-        if (isDynamicSource(v)) await v.configure?.(dynamicLoader);
-      }),
-    );
-  }
-
   async function resolveSources(): Promise<ResolvedSource> {
     if (isStaticSource(input) || isDynamicSource(input)) {
       return resolveSource(input);
@@ -78,7 +63,9 @@ export function dynamicLoader<
 
     const files = v.files();
     const resolved: Awaitable<StaticSource> =
-      'then' in files ? files.then((res) => ({ files: res })) : { files };
+      'then' in files
+        ? files.then((res) => ({ files: res, configureStatic: v.configureStatic }))
+        : { files, configureStatic: v.configureStatic };
     if (cache === 'memory') {
       memoryCache.set(v, resolved);
     }
@@ -87,7 +74,6 @@ export function dynamicLoader<
 
   const dynamicLoader: DynamicLoader = {
     get: cache(async () => {
-      await (initPromise ??= init());
       const resolved = await resolveSources();
 
       if (loaderCacheKey && isEqual(loaderCacheKey, resolved)) {
@@ -104,8 +90,6 @@ export function dynamicLoader<
     $inferPage: undefined as never,
     $inferMeta: undefined as never,
     async revalidate(name) {
-      await (initPromise ??= init());
-
       dynamicLoader.invalidate(name);
 
       // rewrite cache, wait until next `get()` to compute `loader()`
@@ -138,12 +122,20 @@ export function dynamicLoader<
     },
   };
 
+  if (isDynamicSource(input)) {
+    input.configure?.(dynamicLoader, {});
+  } else if (!isStaticSource(input)) {
+    for (const [k, v] of Object.entries(input)) {
+      if (isDynamicSource(v)) v.configure?.(dynamicLoader, { source: k });
+    }
+  }
+
   return dynamicLoader as never;
 }
 
 function isEqual(a: ResolvedSource, b: ResolvedSource): boolean {
   if (isStaticSource(a) && isStaticSource(b)) {
-    return a === b;
+    return isEqualShallow(a.files, b.files);
   }
 
   if (!isStaticSource(a) && !isStaticSource(b)) {

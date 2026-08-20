@@ -1,6 +1,7 @@
 import type { Awaitable } from '@/types';
 import type { DynamicLoader } from './dynamic';
 import type { StructuredData } from '@/mdx-plugins';
+import type { LoaderOutput } from './loader';
 
 export type SourceUnion<Config extends SourceConfig = SourceConfig> =
   | StaticSource<Config>
@@ -13,9 +14,13 @@ export type Source<Config extends SourceConfig = SourceConfig> = StaticSource<Co
 
 export interface StaticSource<Config extends SourceConfig = SourceConfig> {
   files: VirtualFile<Config>[];
+  /**
+   * called when the source is attached to a new static loader, before loader output is accessible.
+   **/
+  configureStatic?: (opts: { loader: LoaderOutput; source?: string }) => void;
 }
 
-/** one dynamic source object can only be used by one loader */
+/** one dynamic source object can only be used by one dynamic loader */
 export interface DynamicSource<Config extends SourceConfig = SourceConfig> {
   /**
    * - `memory`: the dynamic loader's in-memory cache handles caching.
@@ -25,7 +30,13 @@ export interface DynamicSource<Config extends SourceConfig = SourceConfig> {
    **/
   cache?: 'memory' | 'custom';
   files: () => Awaitable<VirtualFile<Config>[]>;
-  configure?: (loader: DynamicLoader) => Awaitable<void>;
+  configure?: (loader: DynamicLoader, opts: { source?: string }) => void;
+  /**
+   * called when the source is attached to a new static loader, before loader output is accessible.
+   *
+   * it can be called multiple times, when the parent dynamic loader creates a different static loader.
+   **/
+  configureStatic?: (opts: { loader: LoaderOutput; source?: string }) => void;
   invalidate?: () => void;
 }
 

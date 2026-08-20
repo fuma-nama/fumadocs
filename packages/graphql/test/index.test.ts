@@ -64,15 +64,27 @@ describe('GraphQL source', () => {
     expect(typeFile).toBeDefined();
     const typeProps = (typeFile!.data as GraphQLPageData).getGraphQLPageProps();
     expect(typeProps.items).toEqual([{ type: 'type', kind: 'object', name: 'Order' }]);
-    // links are only generated when `baseUrl` is specified
+    // links are generated when the source is attached to a loader
     expect(typeProps.payload.links).toBeUndefined();
   });
 
-  test('pre-generated links', async () => {
+  test('generates links after attaching to a loader', async () => {
     const source = await create().staticSource({
       // route group folders are ignored in page URLs
       baseDir: '(graphql)',
-      baseUrl: '/docs',
+    });
+    source.configureStatic?.({
+      loader: {
+        getPages: () =>
+          source.files.flatMap((file) => {
+            if (file.type !== 'page') return [];
+            const slugs = file.path
+              .replace(/^\(graphql\)\//, '')
+              .replace(/\.mdx$/, '')
+              .split('/');
+            return [{ url: `/docs/${slugs.join('/')}`, data: file.data }];
+          }),
+      } as never,
     });
     const file = source.files.find((file) => file.path === '(graphql)/queries/orders.mdx');
     const { links } = (file!.data as GraphQLPageData).getGraphQLPageProps().payload;
