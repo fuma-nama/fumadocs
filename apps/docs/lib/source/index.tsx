@@ -210,7 +210,6 @@ export const source = loader(
     }),
     graphql: await graphql.staticSource({
       baseDir: 'graphql/(generated)',
-      baseUrl: '/docs',
       meta: {
         folderStyle: 'separator',
       },
