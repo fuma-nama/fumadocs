@@ -53,17 +53,20 @@ export async function highlightHast(
 ): Promise<Root> {
   const { fallbackLanguage = 'text', ...resolved } = options;
   const { isSpecialLang } = await import('shiki/core');
+  const loaded = highlighter.getLoadedLanguages();
   if (
     !isSpecialLang(resolved.lang) &&
     !(resolved.lang in highlighter.getBundledLanguages()) &&
-    !highlighter.getLoadedLanguages().includes(resolved.lang)
+    !loaded.includes(resolved.lang)
   ) {
     resolved.lang = fallbackLanguage;
   }
 
   await Promise.all([
     loadMissingTheme(highlighter, getRequiredThemes(resolved)),
-    highlighter.loadLanguage(resolved.lang as never),
+    !isSpecialLang(resolved.lang) &&
+      !loaded.includes(resolved.lang) &&
+      highlighter.loadLanguage(resolved.lang as never),
   ]);
 
   return highlighter.codeToHast(code, resolved);
