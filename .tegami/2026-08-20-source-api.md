@@ -4,6 +4,8 @@ packages:
     type: minor
   npm:@fumadocs/graphql:
     type: minor
+  npm:@fumadocs/sanity:
+    type: minor
   npm:@fumadocs/local-content:
     type: minor
   npm:fumadocs-openapi:
@@ -39,4 +41,8 @@ export function createMySource(): DynamicSource {
 - `cache: 'memory'` (default): `files()` is called once until `invalidate()`.
 - `cache: 'custom'`: the source caches itself. `dynamicLoader()` re-runs `files()` on `get()` and rebuilds only when the file list is shallowly different (by identity).
 
+## Integrations
+
 GraphQL cross-links are generated from the attached loader instead of a `baseUrl` option on `staticSource()`. Local, OpenAPI, and AsyncAPI `dynamicSource()` use `cache: 'custom'` and reuse generated files by identity until `invalidate()`.
+
+Sanity now uses `cache: 'custom'` when given a `sanityFetch` from `next-sanity/live`, calling `invalidate()` in draft mode is no longer needed.

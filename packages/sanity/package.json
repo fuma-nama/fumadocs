@@ -27,7 +27,8 @@
     "clean": "rimraf dist",
     "dev": "tsdown --watch --clean false",
     "lint": "oxlint .",
-    "types:check": "tsc --noEmit"
+    "types:check": "tsc --noEmit",
+    "test": "vitest run"
   },
   "dependencies": {
     "@portabletext/react": "^7.0.1"
@@ -45,13 +46,14 @@
     "sanity": "^6.9.2",
     "tsconfig": "workspace:*",
     "tsdown": "0.22.14",
-    "typescript": "^6.0.3"
+    "typescript": "^6.0.3",
+    "vitest": "^4.1.10"
   },
   "peerDependencies": {
     "@sanity/client": "^7.22.0",
     "@sanity/types": "*",
     "@types/react": "*",
-    "fumadocs-core": "^16.8.0",
+    "fumadocs-core": "^16.15.0",
     "next-sanity": "^12.4.0",
     "react": "^19.2.0",
     "react-dom": "^19.2.0"

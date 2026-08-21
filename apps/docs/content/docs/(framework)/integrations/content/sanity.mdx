@@ -76,7 +76,6 @@ import { createSanitySource } from '@fumadocs/sanity';
 import { sanityFetch } from '@/sanity/lib/live';
 // the generated types
 import type { Docs } from '@/sanity/types';
-import { draftMode } from 'next/headers';
 
 const source = dynamicLoader(
   createSanitySource<Docs>({
@@ -89,9 +88,6 @@ const source = dynamicLoader(
 );
 
 export async function getSource() {
-  const { isEnabled } = await draftMode();
-
-  if (isEnabled) source.invalidate();
   return source.get();
 }
 ```
@@ -118,6 +114,10 @@ export async function getSource() {
   return source.get();
 }
 ```
+
+With `sanityFetch`, queries are cached by Next.js and revalidated by `<SanityLive />` when content changes. The loader re-reads them on every render, so live updates and draft mode work without calling `invalidate()`.
+
+If you enabled [Cache Components](https://nextjs.org/docs/app/api-reference/config/next-config-js/cacheComponents), call `getSource()` inside a `'use cache'` scope (for example, a cached page) as `sanityFetch` requires one.
 
 Now update references to your `source` with the `getSource()` function like:
 
