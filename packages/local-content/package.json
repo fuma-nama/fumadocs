@@ -1,6 +1,6 @@
 {
   "name": "@fumadocs/local-content",
-  "version": "0.1.2",
+  "version": "0.2.0",
   "description": "Shared building blocks for local content sources in Fumadocs",
   "keywords": [
     "Docs",
