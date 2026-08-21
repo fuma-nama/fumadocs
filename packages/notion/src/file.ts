@@ -6,10 +6,12 @@ import {
   type BlockObjectResponse,
   type PageObjectResponse,
 } from '@notionhq/client';
-import { getNotionFileUrl, isAssetBlock, type NotionAssetBlock } from './blocks';
+import { getAsset, getNotionFileUrl, isAssetBlock, type NotionAssetBlock } from './blocks';
 import type { NotionIntegration } from './source';
 
 const DEFAULT_FILE_PATH = '/api/notion/file';
+// stop serving a remembered URL this long before Notion expires it
+const EXPIRY_MARGIN = 60_000;
 
 export interface NotionFileUrlResolverOptions {
   /** ID of the Notion page the rendered blocks belong to. */
@@ -60,6 +62,10 @@ export function createNotionFileUrlResolver({
 export function createNotionFileHandler(
   integration: NotionIntegration,
 ): (request: Request) => Promise<Response> {
+  // verified signed URLs stay valid for about an hour, every request in between
+  // would otherwise cost 2 to 34 Notion API calls against a ~3 req/s limit
+  const remembered = new Map<string, { url: string; expires: number }>();
+
   return async function handler(request) {
     const { searchParams } = new URL(request.url);
     const pageId = searchParams.get('page');
@@ -67,6 +73,10 @@ export function createNotionFileHandler(
     if (!pageId || !blockId || !isNotionId(pageId) || !isNotionId(blockId)) {
       return new Response('Invalid Notion file request', { status: 400 });
     }
+
+    const key = `${pageId}:${blockId}`;
+    const hit = remembered.get(key);
+    if (hit && hit.expires > Date.now()) return redirect(hit.url);
 
     try {
       const response = await integration.client.blocks.retrieve({ block_id: blockId });
@@ -89,13 +99,13 @@ export function createNotionFileHandler(
         return new Response('Notion file not found', { status: 404 });
       }
 
-      return new Response(null, {
-        status: 302,
-        headers: {
-          'Cache-Control': 'private, no-store',
-          Location: url,
-        },
-      });
+      if (response.type !== 'embed') {
+        const asset = getAsset(response);
+        if (asset?.type === 'file') {
+          remembered.set(key, { url, expires: Date.parse(asset.file.expiry_time) - EXPIRY_MARGIN });
+        }
+      }
+      return redirect(url);
     } catch (error) {
       if (isNotionClientError(error) && error.code === APIErrorCode.ObjectNotFound) {
         return new Response('Notion file not found', { status: 404 });
@@ -103,6 +113,16 @@ export function createNotionFileHandler(
       throw error;
     }
   };
+}
+
+function redirect(url: string): Response {
+  return new Response(null, {
+    status: 302,
+    headers: {
+      'Cache-Control': 'private, no-store',
+      Location: url,
+    },
+  });
 }
 
 async function getParentPageId(
