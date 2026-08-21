@@ -343,6 +343,32 @@ test('Internationalized Routing: Hide Prefix', async () => {
   expect(result.getPage(['test'], 'cn')?.url).toBe('/cn/test');
 });
 
+test('Internationalized Routing: locale-only pages do not leak into other locales', () => {
+  const result = loader({
+    baseUrl: '/',
+    i18n: {
+      languages: ['en', 'fr', 'cn'],
+      defaultLanguage: 'en',
+    },
+    source: {
+      files: [
+        { type: 'page', path: 'shared.mdx', data: { title: 'Shared' } },
+        { type: 'page', path: 'extra.fr.mdx', data: { title: 'Extra FR' } },
+        { type: 'page', path: 'extra.cn.mdx', data: { title: 'Extra CN' } },
+      ],
+    },
+  });
+
+  const names = (locale: string) =>
+    result
+      .getPageTree(locale)
+      .children.map((node) => node.name)
+      .sort();
+  expect(names('en')).toStrictEqual(['Shared']);
+  expect(names('fr')).toStrictEqual(['Extra FR', 'Shared']);
+  expect(names('cn')).toStrictEqual(['Extra CN', 'Shared']);
+});
+
 test('Loader: Allow duplicate pages when explicitly referenced twice', () => {
   const result = loader({
     baseUrl: '/',
