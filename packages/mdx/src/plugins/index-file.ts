@@ -75,8 +75,33 @@ export default function indexFile(options: IndexFilePluginOptions = {}): Plugin 
     },
     configureServer(server) {
       if (!server.watcher) return;
+      let running = false;
+      let pending = false;
 
-      server.watcher.on('all', async (event, file) => {
+      // events arriving during a regeneration are coalesced into one follow-up run
+      const regenerate = () => {
+        if (running) {
+          pending = true;
+          return;
+        }
+
+        running = true;
+        this.core
+          .emit({
+            filterPlugin: (plugin) => plugin.name === 'index-file',
+            filterWorkspace: () => false,
+            write: true,
+          })
+          .finally(() => {
+            running = false;
+            if (pending) {
+              pending = false;
+              regenerate();
+            }
+          });
+      };
+
+      server.watcher.on('all', (event, file) => {
         indexFileCache.delete(file);
 
         // dynamic collections always require re-generation on change
@@ -97,11 +122,7 @@ export default function indexFile(options: IndexFilePluginOptions = {}): Plugin 
           if (target === 'default' && event === 'change') return;
         }
 
-        await this.core.emit({
-          filterPlugin: (plugin) => plugin.name === 'index-file',
-          filterWorkspace: () => false,
-          write: true,
-        });
+        regenerate();
       });
     },
     async emit() {
