@@ -1,6 +1,6 @@
 {
   "name": "fumadocs-openapi",
-  "version": "11.2.4",
+  "version": "11.3.0",
   "description": "Generate MDX docs for your OpenAPI spec",
   "keywords": [
     "Docs",
@@ -80,8 +80,8 @@
   "peerDependencies": {
     "@scalar/api-client-react": "^2.0.20",
     "@types/react": "*",
-    "fumadocs-core": "^16.10.0",
-    "fumadocs-ui": "^16.10.0",
+    "fumadocs-core": "^16.15.0",
+    "fumadocs-ui": "^16.15.0",
     "json-schema-typed": "*",
     "react": "^19.2.0",
     "react-dom": "^19.2.0"
@@ -98,7 +98,7 @@
     }
   },
   "inlinedDependencies": {
-    "@scalar/openapi-upgrader": "0.2.12",
+    "@scalar/openapi-upgrader": "0.2.13",
     "fast-content-type-parse": "3.0.0",
     "xml-js": "1.6.11"
   }

@@ -94,6 +94,34 @@ describe('createNotionFileHandler', () => {
     expect(response.headers.get('Cache-Control')).toBe('private, no-store');
   });
 
+  it('reuses a verified URL until it expires instead of calling the API again', async () => {
+    const assetId = '11111111-1111-4111-8111-111111111111';
+    const asset = block({
+      id: assetId,
+      type: 'image',
+      image: {
+        type: 'file',
+        file: {
+          url: 'https://notion.example/fresh',
+          expiry_time: new Date(Date.now() + 60 * 60_000).toISOString(),
+        },
+        caption: [],
+      },
+    });
+    const client = {
+      blocks: { retrieve: vi.fn().mockResolvedValue(asset) },
+      pages: { retrieve: vi.fn().mockResolvedValue(page()) },
+    };
+    const handler = createNotionFileHandler(integrationWith(client));
+    const request = () =>
+      handler(new Request(`https://docs.test/api/notion/file?page=${pageId}&block=${assetId}`));
+
+    expect((await request()).status).toBe(302);
+    expect((await request()).headers.get('Location')).toBe('https://notion.example/fresh');
+    expect(client.blocks.retrieve).toHaveBeenCalledTimes(1);
+    expect(client.pages.retrieve).toHaveBeenCalledTimes(1);
+  });
+
   it('rejects malformed requests', async () => {
     const handler = createNotionFileHandler(integrationWith({}));
 

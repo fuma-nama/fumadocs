@@ -56,3 +56,16 @@ test('dereferenceShallow: follows chained refs', () => {
     description: 'local description',
   });
 });
+
+test('dereferenceShallow: survives a $ref cycle', () => {
+  const cyclic = createMagicProxy({
+    components: {
+      schemas: {
+        A: { $ref: '#/components/schemas/B' },
+        B: { $ref: '#/components/schemas/A' },
+      },
+    },
+  }) as any;
+
+  expect(dereferenceShallow(cyclic.components.schemas.A)).toStrictEqual({});
+});

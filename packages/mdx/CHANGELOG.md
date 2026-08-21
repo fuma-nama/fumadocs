@@ -1,3 +1,19 @@
+## fumadocs-mdx@15.3.1
+
+### Scope `lastModified` git log to the content directory
+
+`git log` is scoped to the collection's content directory instead of buffering the repository's entire history in every worker.
+
+### Fix Vite dev server crash on declaration-only dependencies
+
+The injected Vite config no longer pre-bundles packages without runtime JavaScript, such as `@types/mdx`. Pre-bundling them made esbuild parse `.d.ts` files and fail on imports that only exist in type space, crashing the dev server.
+
+### Encode `import.meta.glob` query values
+
+The Vite codegen passed the query to `import.meta.glob` as an object, letting the bundler serialize it. Rolldown inlines the values as-is, so a macro id such as `src/lib/source.ts#docs` left an unescaped `/` in the content file's module id and relative imports from that module (e.g. images from `![Banner](/logo.png)`) failed to resolve, since the importer's directory is derived from the raw id.
+
+The query is now serialized (and percent-encoded) by Fumadocs itself, matching what the Node.js codegen already did.
+
 ## fumadocs-mdx@15.3.0
 
 ### Sätteri 0.10

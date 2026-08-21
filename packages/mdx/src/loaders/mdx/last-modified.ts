@@ -9,7 +9,7 @@ import type { DocCollectionItem } from '@/config/build';
  */
 export type LastModifiedFn = (filePath: string) => Promise<Date | null | undefined>;
 
-// cwd -> file -> time
+// content dir -> file -> time
 const cache = new Map<string, Promise<Map<string, Date>>>();
 
 /**
@@ -25,12 +25,12 @@ export async function resolveLastModified(
   if (!option) return;
 
   if (typeof option === 'function') return (await option(filePath)) ?? undefined;
-  const timestamps = await getGitTimestamps(collection.cwd);
+  const timestamps = await getGitTimestamps(collection.cwd, collection.dir);
   return timestamps.get(path.resolve(collection.cwd, filePath));
 }
 
-function getGitTimestamps(cwd: string): Promise<Map<string, Date>> {
-  const cached = cache.get(cwd);
+function getGitTimestamps(cwd: string, dir: string): Promise<Map<string, Date>> {
+  const cached = cache.get(dir);
   if (cached) return cached;
 
   const promise = (async () => {
@@ -39,9 +39,11 @@ function getGitTimestamps(cwd: string): Promise<Map<string, Date>> {
     const root = await x('git', ['rev-parse', '--show-toplevel'], { nodeOptions: { cwd } });
     if (root.exitCode !== 0) return timestamps;
 
+    // scope to the content dir: only its files are looked up, and an
+    // unscoped log buffers the repo's entire history per process
     const out = await x(
       'git',
-      ['-c', 'core.quotepath=off', 'log', '--format=commit:%aI', '--name-only'],
+      ['-c', 'core.quotepath=off', 'log', '--format=commit:%aI', '--name-only', '--', dir],
       {
         nodeOptions: { cwd },
       },
@@ -63,6 +65,6 @@ function getGitTimestamps(cwd: string): Promise<Map<string, Date>> {
     return timestamps;
   })();
 
-  cache.set(cwd, promise);
+  cache.set(dir, promise);
   return promise;
 }

@@ -1,25 +1,73 @@
 core:changelogs:
-  - content: "---\npackages:\n  npm:@fumadocs/satteri:\n    type: minor\n  npm:fumadocs-mdx:\n    type: minor\n---\n\n## Sätteri 0.10\n\n`@fumadocs/satteri` now requires `satteri` ^0.10.3, and the plugins were rewritten on its new capabilities:\n\n- Exports (`frontmatter`, `toc`, `structuredData`, …) are emitted by an `after` document hook instead of an anchor marker appended to the source, so plugins no longer see (or need to skip) the anchor node.\n- `remark-steps`, `remark-admonition` and `remark-code-tab` still detect their targets through node visitors (so documents without the construct cost nothing), but process each parent exactly once in an `after` hook, replacing the per-visit dedup workarounds.\n- `remark-llms` stringifies the document root from a `before` hook instead of subscribing to 19 node types to find it.\n- Markdown documents compile through Sätteri's own `markdownToJs`; the hand-assembled pipeline is gone. Raw HTML in `.md` files is still dropped, matching the previous behavior.\n- `rehype-katex` parses KaTeX output with Sätteri's `htmlToHast`, dropping the `hast-util-from-html` dependency.\n- No plugin reads `node.position`, so Sätteri now skips source-position tracking entirely (~15% faster parse).\n\n**Breaking:** `ExtraPluginHooks.beforeToJs` was removed. Seed `ctx.data` from a Sätteri `before` hook on the plugin definition instead — it also receives the document root:\n\n```ts\nimport { defineMdastPlugin } from 'satteri';\n\ndefineMdastPlugin({\n  name: 'my-plugin',\n  before(root, ctx) {\n    ctx.data.myValue ??= [];\n  },\n});\n```\n"
-    filename: 2026-08-19-satteri-0-10.md
+  - content: "---\npackages:\n  npm:@fumadocs/api-docs:\n    type: patch\n---\n\n## Survive `$ref` cycles in `dereferenceShallow`\n\nA Reference Object whose target eventually refers back to it overflowed the stack. The schema is now marked while its target resolves, so a cycle resolves to the sibling keywords instead of recursing forever.\n"
+    filename: 2026-08-21-dereference-cycle.md
+    v: 0.0.0
+  - content: "---\npackages:\n  npm:fumadocs-core:\n    type: minor\n  npm:@fumadocs/graphql:\n    type: minor\n  npm:@fumadocs/sanity:\n    type: minor\n  npm:@fumadocs/local-content:\n    type: minor\n  npm:fumadocs-openapi:\n    type: minor\n  npm:@fumadocs/asyncapi:\n    type: minor\n---\n\n## Redesign source API\n\nContent sources can hook into the static loader they are attached to, and dynamic sources can opt out of the loader's in-memory file cache.\n\n`configureStatic` runs when a source is attached to `loader()`, and again whenever `dynamicLoader()` builds a new static loader:\n\n```ts\nexport function createMySource(): DynamicSource {\n  return {\n    cache: 'custom',\n    async files() {\n      return loadFiles();\n    },\n    configureStatic({ loader, source }) {\n      // `loader` is the created static loader\n      // `source` is the record key when using named sources\n    },\n    configure(loader, { source }) {\n      loader.invalidate();\n    },\n  };\n}\n```\n\n- `cache: 'memory'` (default): `files()` is called once until `invalidate()`.\n- `cache: 'custom'`: the source caches itself. `dynamicLoader()` re-runs `files()` on `get()` and rebuilds only when the file list is shallowly different (by identity).\n\n## Integrations\n\nGraphQL cross-links are generated from the attached loader instead of a `baseUrl` option on `staticSource()`. Local, OpenAPI, and AsyncAPI `dynamicSource()` use `cache: 'custom'` and reuse generated files by identity until `invalidate()`.\n\nSanity now uses `cache: 'custom'` when given a `sanityFetch` from `next-sanity/live`, calling `invalidate()` in draft mode is no longer needed.\n"
+    filename: 2026-08-20-source-api.md
+    v: 0.0.0
+  - content: "---\npackages:\n  npm:@fumadocs/asyncapi:\n    type: patch\n---\n\n## Cache the document proxy in `toStaticData`\n\nMatches `fumadocs-openapi`: the magic proxy is created once per document instead of once per generated page.\n"
+    filename: 2026-08-21-asyncapi-proxy-cache.md
+    v: 0.0.0
+  - content: "---\npackages:\n  npm:fumadocs-core:\n    type: patch\n---\n\n## Return heading and text results from the Algolia client\n\n`algoliaClient` grouped hits into page, heading and text results, then dropped everything except pages. All three are now returned with highlighting, matching the other search clients.\n"
+    filename: 2026-08-21-algolia-client-results.md
+    v: 0.0.0
+  - content: "---\npackages:\n  npm:fumadocs-core:\n    type: patch\n---\n\n## Fix locale-only pages leaking into other locales\n\ni18n storages no longer share folder arrays with the fallback locale. Locale-only pages previously appeared in every locale's page tree as duplicate nodes.\n"
+    filename: 2026-08-21-i18n-folder-arrays.md
+    v: 0.0.0
+  - content: "---\npackages:\n  npm:fumadocs-core:\n    type: patch\n---\n\n## Index pages by URL\n\n`getPageByHref` resolves absolute URLs through an index instead of scanning all pages on every call.\n"
+    filename: 2026-08-21-page-url-index.md
+    v: 0.0.0
+  - content: "---\npackages:\n  npm:fumadocs-core:\n    type: patch\n  npm:@fumadocs/notion:\n    type: patch\n---\n\n## Do not cache rejected promises\n\nThe dynamic loader's `files()`, Notion's page `load()`, `createFromSource`'s index build, and Shiki factory init retry on the next call after a transient failure, instead of returning the same rejection forever.\n"
+    filename: 2026-08-21-retry-failed-promises.md
+    v: 0.0.0
+  - content: "---\npackages:\n  npm:fumadocs-core:\n    type: patch\n---\n\n## Highlight only the search results within `limit`\n\n`limit` bounds the returned hits, so search now stops at that many results instead of highlighting every matched page and slicing afterwards.\n"
+    filename: 2026-08-21-search-limit-highlight.md
+    v: 0.0.0
+  - content: "---\npackages:\n  npm:@fumadocs/local-content:\n    type: patch\n---\n\n## Read files in bounded chunks during a cold scan\n\n`getFiles()` awaits each chunk before starting the next, instead of starting the entire tree concurrently.\n"
+    filename: 2026-08-21-local-content-chunked-scan.md
+    v: 0.0.0
+  - content: "---\npackages:\n  npm:fumadocs-mdx:\n    type: patch\n---\n\n## Scope `lastModified` git log to the content directory\n\n`git log` is scoped to the collection's content directory instead of buffering the repository's entire history in every worker.\n"
+    filename: 2026-08-21-mdx-scoped-git-log.md
+    v: 0.0.0
+  - content: "---\npackages:\n  npm:fumadocs-mdx:\n    type: patch\n---\n\n## Fix Vite dev server crash on declaration-only dependencies\n\nThe injected Vite config no longer pre-bundles packages without runtime JavaScript, such as `@types/mdx`. Pre-bundling them made esbuild parse `.d.ts` files and fail on imports that only exist in type space, crashing the dev server.\n"
+    filename: 2026-08-21-vite-types-only-deps.md
+    v: 0.0.0
+  - content: "---\npackages:\n  npm:fumadocs-mdx:\n    type: patch\n---\n\n## Encode `import.meta.glob` query values\n\nThe Vite codegen passed the query to `import.meta.glob` as an object, letting the bundler serialize it. Rolldown inlines the values as-is, so a macro id such as `src/lib/source.ts#docs` left an unescaped `/` in the content file's module id and relative imports from that module (e.g. images from `![Banner](/logo.png)`) failed to resolve, since the importer's directory is derived from the raw id.\n\nThe query is now serialized (and percent-encoded) by Fumadocs itself, matching what the Node.js codegen already did.\n"
+    filename: 2026-08-22-mdx-glob-query-encoding.md
+    v: 0.0.0
+  - content: "---\npackages:\n  npm:@fumadocs/notion:\n    type: patch\n---\n\n## Remember verified file URLs in the Notion file handler\n\nEvery asset request cost between 2 and 34 Notion API calls, so a page with a handful of images tripped the rate limit with two concurrent visitors. The handler now remembers a verified signed URL per block until shortly before Notion's `expiry_time`.\n"
+    filename: 2026-08-21-notion-file-handler-cache.md
     v: 0.0.0
 core:packages:
-  - id: npm:@fumadocs/api-docs
-    updated: false
-  - id: npm:@fumadocs/asyncapi
-    updated: false
-  - id: npm:@fumadocs/base-ui
-    updated: false
+  - changelogIds:
+      - 2026-08-21-dereference-cycle.md
+    id: npm:@fumadocs/api-docs
+    updated: true
+  - changelogIds:
+      - 2026-08-20-source-api.md
+      - 2026-08-21-asyncapi-proxy-cache.md
+    id: npm:@fumadocs/asyncapi
+    updated: true
   - id: npm:@fumadocs/basehub
     updated: false
-  - id: npm:@fumadocs/cli
-    updated: false
+  - id: npm:@fumadocs/base-ui
+    updated: true
   - id: npm:@fumadocs/content
     updated: false
   - id: npm:@fumadocs/content-collections
     updated: false
-  - id: npm:fumadocs-core
+  - id: npm:@fumadocs/cli
     updated: false
   - id: npm:create-fumadocs-app
+    updated: true
+  - changelogIds:
+      - 2026-08-20-source-api.md
+      - 2026-08-21-algolia-client-results.md
+      - 2026-08-21-i18n-folder-arrays.md
+      - 2026-08-21-page-url-index.md
+      - 2026-08-21-retry-failed-promises.md
+      - 2026-08-21-search-limit-highlight.md
+    id: npm:fumadocs-core
     updated: true
   - id: npm:create-fumadocs-versions
     updated: true
@@ -27,45 +75,57 @@ core:packages:
     updated: false
   - id: npm:fumadocs-epub
     updated: false
-  - id: npm:@fumadocs/graphql
+  - changelogIds:
+      - 2026-08-20-source-api.md
+    id: npm:@fumadocs/graphql
+    updated: true
+  - id: npm:@fumari/image-size
     updated: false
   - id: npm:@fumadocs/language
     updated: false
-  - id: npm:@fumari/image-size
-    updated: false
-  - id: npm:@fumadocs/local-content
-    updated: false
-  - id: npm:@fumadocs/local-html
-    updated: false
-  - id: npm:@fumadocs/local-md
-    updated: false
   - changelogIds:
-      - 2026-08-19-satteri-0-10.md
+      - 2026-08-20-source-api.md
+      - 2026-08-21-local-content-chunked-scan.md
+    id: npm:@fumadocs/local-content
+    updated: true
+  - id: npm:@fumadocs/local-html
+    updated: true
+  - id: npm:@fumadocs/local-md
+    updated: true
+  - changelogIds:
+      - 2026-08-21-mdx-scoped-git-log.md
+      - 2026-08-21-vite-types-only-deps.md
+      - 2026-08-22-mdx-glob-query-encoding.md
     id: npm:fumadocs-mdx
     updated: true
   - id: npm:@fumadocs/mdx-remote
     updated: false
-  - id: npm:@fumadocs/notion
-    updated: false
+  - changelogIds:
+      - 2026-08-21-notion-file-handler-cache.md
+      - 2026-08-21-retry-failed-promises.md
+    id: npm:@fumadocs/notion
+    updated: true
   - id: npm:fumadocs-obsidian
-    updated: false
-  - id: npm:fumadocs-openapi
-    updated: false
+    updated: true
+  - changelogIds:
+      - 2026-08-20-source-api.md
+    id: npm:fumadocs-openapi
+    updated: true
   - id: npm:fumadocs-preview
     updated: false
   - id: npm:fumadocs-python
     updated: false
-  - id: npm:fumadocs-ui
-    updated: false
-  - id: npm:@fumadocs/sanity
-    updated: false
   - changelogIds:
-      - 2026-08-19-satteri-0-10.md
-    id: npm:@fumadocs/satteri
+      - 2026-08-20-source-api.md
+    id: npm:@fumadocs/sanity
     updated: true
-  - id: npm:@fumadocs/shadcn
-    updated: false
+  - id: npm:@fumadocs/satteri
+    updated: true
+  - id: npm:fumadocs-ui
+    updated: true
   - id: npm:@fumari/stf
+    updated: false
+  - id: npm:@fumadocs/shadcn
     updated: false
   - id: npm:@fumadocs/story
     updated: false
@@ -80,19 +140,19 @@ core:packages:
 npm:packages:
   - id: npm:@fumadocs/api-docs
   - id: npm:@fumadocs/asyncapi
-  - id: npm:@fumadocs/base-ui
   - id: npm:@fumadocs/basehub
-  - id: npm:@fumadocs/cli
+  - id: npm:@fumadocs/base-ui
   - id: npm:@fumadocs/content
   - id: npm:@fumadocs/content-collections
-  - id: npm:fumadocs-core
+  - id: npm:@fumadocs/cli
   - id: npm:create-fumadocs-app
+  - id: npm:fumadocs-core
   - id: npm:create-fumadocs-versions
   - id: npm:fumadocs-docgen
   - id: npm:fumadocs-epub
   - id: npm:@fumadocs/graphql
-  - id: npm:@fumadocs/language
   - id: npm:@fumari/image-size
+  - id: npm:@fumadocs/language
   - id: npm:@fumadocs/local-content
   - id: npm:@fumadocs/local-html
   - id: npm:@fumadocs/local-md
@@ -103,33 +163,40 @@ npm:packages:
   - id: npm:fumadocs-openapi
   - id: npm:fumadocs-preview
   - id: npm:fumadocs-python
-  - id: npm:fumadocs-ui
   - id: npm:@fumadocs/sanity
   - id: npm:@fumadocs/satteri
-  - id: npm:@fumadocs/shadcn
+  - id: npm:fumadocs-ui
   - id: npm:@fumari/stf
+  - id: npm:@fumadocs/shadcn
   - id: npm:@fumadocs/story
   - id: npm:@fumadocs/tailwind
   - id: npm:fumadocs-twoslash
   - id: npm:fumadocs-typescript
   - id: npm:@fumadocs/vite
-  - id: npm:docs
+  - id: npm:example-astro
   - id: npm:example-asyncapi
   - id: npm:example-base-ui
+  - id: npm:docs
   - id: npm:example-graphql
+  - id: npm:example-content-collections
   - id: npm:example-i18n
+  - id: npm:example-marble-cms
   - id: npm:example-next
+  - id: npm:example-next-local-html
+  - id: npm:example-next-local-md
   - id: npm:example-next-min
   - id: npm:example-next-shadcn
   - id: npm:example-next-static
+  - id: npm:example-obsidian
   - id: npm:example-openapi
   - id: npm:example-python
-  - id: npm:example-react-router
   - id: npm:example-react-router-i18n
+  - id: npm:example-react-router
   - id: npm:example-react-router-min
   - id: npm:example-react-router-rsc
   - id: npm:example-react-router-spa
   - id: npm:example-tanstack-start
+  - id: npm:example-tanstack-start-local-md
   - id: npm:example-tanstack-start-i18n
   - id: npm:example-tanstack-start-min
   - id: npm:example-tanstack-start-openapi

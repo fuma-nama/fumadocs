@@ -136,6 +136,13 @@ exports[`GraphQL source > per item, grouped by kind 1`] = `
   {
     "_graphql": {
       "deprecated": undefined,
+      "items": [
+        {
+          "kind": "query",
+          "name": "customer",
+          "type": "operation",
+        },
+      ],
       "kind": "query",
     },
     "deprecated": undefined,
@@ -145,6 +152,13 @@ exports[`GraphQL source > per item, grouped by kind 1`] = `
   {
     "_graphql": {
       "deprecated": undefined,
+      "items": [
+        {
+          "kind": "query",
+          "name": "orders",
+          "type": "operation",
+        },
+      ],
       "kind": "query",
     },
     "deprecated": undefined,
@@ -154,6 +168,13 @@ exports[`GraphQL source > per item, grouped by kind 1`] = `
   {
     "_graphql": {
       "deprecated": undefined,
+      "items": [
+        {
+          "kind": "query",
+          "name": "search",
+          "type": "operation",
+        },
+      ],
       "kind": "query",
     },
     "deprecated": undefined,
@@ -163,6 +184,13 @@ exports[`GraphQL source > per item, grouped by kind 1`] = `
   {
     "_graphql": {
       "deprecated": undefined,
+      "items": [
+        {
+          "kind": "query",
+          "name": "node",
+          "type": "operation",
+        },
+      ],
       "kind": "query",
     },
     "deprecated": undefined,
@@ -172,6 +200,13 @@ exports[`GraphQL source > per item, grouped by kind 1`] = `
   {
     "_graphql": {
       "deprecated": undefined,
+      "items": [
+        {
+          "kind": "mutation",
+          "name": "createOrder",
+          "type": "operation",
+        },
+      ],
       "kind": "mutation",
     },
     "deprecated": undefined,
@@ -181,6 +216,13 @@ exports[`GraphQL source > per item, grouped by kind 1`] = `
   {
     "_graphql": {
       "deprecated": true,
+      "items": [
+        {
+          "kind": "mutation",
+          "name": "legacyCreateOrder",
+          "type": "operation",
+        },
+      ],
       "kind": "mutation",
     },
     "deprecated": true,
@@ -190,6 +232,13 @@ exports[`GraphQL source > per item, grouped by kind 1`] = `
   {
     "_graphql": {
       "deprecated": undefined,
+      "items": [
+        {
+          "kind": "subscription",
+          "name": "orderUpdated",
+          "type": "operation",
+        },
+      ],
       "kind": "subscription",
     },
     "deprecated": undefined,
@@ -199,6 +248,13 @@ exports[`GraphQL source > per item, grouped by kind 1`] = `
   {
     "_graphql": {
       "deprecated": undefined,
+      "items": [
+        {
+          "kind": "object",
+          "name": "Customer",
+          "type": "type",
+        },
+      ],
       "kind": "object",
     },
     "deprecated": undefined,
@@ -208,6 +264,13 @@ exports[`GraphQL source > per item, grouped by kind 1`] = `
   {
     "_graphql": {
       "deprecated": undefined,
+      "items": [
+        {
+          "kind": "object",
+          "name": "ContactInfo",
+          "type": "type",
+        },
+      ],
       "kind": "object",
     },
     "deprecated": undefined,
@@ -217,6 +280,13 @@ exports[`GraphQL source > per item, grouped by kind 1`] = `
   {
     "_graphql": {
       "deprecated": undefined,
+      "items": [
+        {
+          "kind": "object",
+          "name": "Order",
+          "type": "type",
+        },
+      ],
       "kind": "object",
     },
     "deprecated": undefined,
@@ -226,6 +296,13 @@ exports[`GraphQL source > per item, grouped by kind 1`] = `
   {
     "_graphql": {
       "deprecated": undefined,
+      "items": [
+        {
+          "kind": "interface",
+          "name": "Node",
+          "type": "type",
+        },
+      ],
       "kind": "interface",
     },
     "deprecated": undefined,
@@ -235,6 +312,13 @@ exports[`GraphQL source > per item, grouped by kind 1`] = `
   {
     "_graphql": {
       "deprecated": undefined,
+      "items": [
+        {
+          "kind": "union",
+          "name": "SearchResult",
+          "type": "type",
+        },
+      ],
       "kind": "union",
     },
     "deprecated": undefined,
@@ -244,6 +328,13 @@ exports[`GraphQL source > per item, grouped by kind 1`] = `
   {
     "_graphql": {
       "deprecated": undefined,
+      "items": [
+        {
+          "kind": "enum",
+          "name": "Role",
+          "type": "type",
+        },
+      ],
       "kind": "enum",
     },
     "deprecated": undefined,
@@ -253,6 +344,13 @@ exports[`GraphQL source > per item, grouped by kind 1`] = `
   {
     "_graphql": {
       "deprecated": undefined,
+      "items": [
+        {
+          "kind": "enum",
+          "name": "OrderStatus",
+          "type": "type",
+        },
+      ],
       "kind": "enum",
     },
     "deprecated": undefined,
@@ -262,6 +360,13 @@ exports[`GraphQL source > per item, grouped by kind 1`] = `
   {
     "_graphql": {
       "deprecated": undefined,
+      "items": [
+        {
+          "kind": "input",
+          "name": "OrderFilter",
+          "type": "type",
+        },
+      ],
       "kind": "input",
     },
     "deprecated": undefined,
@@ -271,6 +376,13 @@ exports[`GraphQL source > per item, grouped by kind 1`] = `
   {
     "_graphql": {
       "deprecated": undefined,
+      "items": [
+        {
+          "kind": "input",
+          "name": "OrderCreateInput",
+          "type": "type",
+        },
+      ],
       "kind": "input",
     },
     "deprecated": undefined,
@@ -280,6 +392,13 @@ exports[`GraphQL source > per item, grouped by kind 1`] = `
   {
     "_graphql": {
       "deprecated": undefined,
+      "items": [
+        {
+          "kind": "scalar",
+          "name": "DateTime",
+          "type": "type",
+        },
+      ],
       "kind": "scalar",
     },
     "deprecated": undefined,

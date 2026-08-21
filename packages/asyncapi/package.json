@@ -1,6 +1,6 @@
 {
   "name": "@fumadocs/asyncapi",
-  "version": "0.2.2",
+  "version": "0.3.0",
   "description": "Generate docs for your AsyncAPI spec",
   "keywords": [
     "Docs",
@@ -63,8 +63,8 @@
   },
   "peerDependencies": {
     "@types/react": "*",
-    "fumadocs-core": "^16.9.0",
-    "fumadocs-ui": "^16.9.0",
+    "fumadocs-core": "^16.15.0",
+    "fumadocs-ui": "^16.15.0",
     "json-schema-typed": "*",
     "react": "^19.2.0",
     "react-dom": "^19.2.0"

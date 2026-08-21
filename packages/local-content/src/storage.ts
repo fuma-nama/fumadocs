@@ -42,19 +42,13 @@ export function createStorage<Page, Meta>(config: StorageConfig<Page, Meta>) {
     },
     async getFiles() {
       const files = await glob(include, { cwd: dir });
-      const chunks: Promise<(ParsedFile<Page, Meta> | undefined)[]>[] = [];
+      const out: { file: string; parsed: ParsedFile<Page, Meta> }[] = [];
 
       for (let i = 0; i < files.length; i += CHUNK_SIZE) {
-        const chunk = files.slice(i, i + CHUNK_SIZE).map(parseFile);
-        chunks.push(Promise.all(chunk));
-      }
-
-      const out: { file: string; parsed: ParsedFile<Page, Meta> }[] = [];
-      let index = 0;
-      for await (const chunk of chunks) {
-        for (const parsed of chunk) {
-          const file = files[index++];
-          if (parsed) out.push({ file, parsed });
+        const chunk = await Promise.all(files.slice(i, i + CHUNK_SIZE).map(parseFile));
+        for (let j = 0; j < chunk.length; j++) {
+          const parsed = chunk[j];
+          if (parsed) out.push({ file: files[i + j], parsed });
         }
       }
 

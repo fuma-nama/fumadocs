@@ -66,13 +66,14 @@ export function createCodegen({
 
     generateViteGlobImport(
       patterns: string | string[],
-      { base, ...rest }: GlobImportOptions,
+      { base, query, ...rest }: GlobImportOptions,
     ): string {
       patterns = (typeof patterns === 'string' ? [patterns] : patterns).map(normalizeViteGlobPath);
 
       return `import.meta.glob(${JSON.stringify(patterns)}, ${JSON.stringify(
         {
           base: normalizeViteGlobPath(path.relative(outDir, base)),
+          query: query ? stringifyQuery(query) || undefined : undefined,
           ...rest,
         },
         null,
@@ -92,16 +93,11 @@ export function createCodegen({
         globCache.set(cacheKey, files);
       }
 
+      const search = stringifyQuery(query);
       let code: string = '{';
       for (const item of await files) {
         const fullPath = path.join(base, item);
-        const searchParams = new URLSearchParams();
-
-        for (const [k, v] of Object.entries(query)) {
-          if (v !== undefined) searchParams.set(k, v);
-        }
-
-        const importPath = this.formatImportPath(fullPath) + '?' + searchParams.toString();
+        const importPath = this.formatImportPath(fullPath) + search;
         if (eager) {
           const name = `__fd_glob_${eagerImportId++}`;
           this.lines.unshift(
@@ -142,6 +138,19 @@ export function createCodegen({
       return [...banner, ...this.lines].join('\n');
     },
   };
+}
+
+/**
+ * Serialize a query object into a `?`-prefixed, percent-encoded string.
+ */
+function stringifyQuery(query: GlobImportOptions['query'] = {}): string {
+  const searchParams = new URLSearchParams();
+
+  for (const [k, v] of Object.entries(query)) {
+    if (v !== undefined) searchParams.set(k, v);
+  }
+
+  return searchParams.size > 0 ? `?${searchParams}` : '';
 }
 
 /**

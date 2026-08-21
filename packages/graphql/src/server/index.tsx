@@ -1,14 +1,13 @@
 import path from 'node:path';
 import {
-  createGetUrl,
   type DynamicSource,
-  getSlugs,
   type LoaderPlugin,
   type MetaData,
   PathUtils,
   type PageData,
   type Source,
   type VirtualFile,
+  type LoaderOutput,
 } from 'fumadocs-core/source';
 import type { StructuredData } from 'fumadocs-core/mdx-plugins/remark-structure';
 import type { TOCItemType } from 'fumadocs-core/toc';
@@ -16,6 +15,7 @@ import { loadSchema, type GraphQLSchemaInput, type LoadedSchema } from '@/utils/
 import type { Awaitable } from '@/types';
 import {
   getPageProps,
+  GraphQLPageItem,
   schemaToPages,
   type OperationOutput,
   type OutputEntry,
@@ -66,19 +66,16 @@ export interface GraphQLPageData extends PageData {
 
 export type GraphQLSourceOptions = SchemaToPagesOptions & {
   baseDir?: string;
-  /**
-   * the `baseUrl` of your `loader()`.
-   *
-   * when specified, links of generated pages are pre-generated and passed to the UI,
-   * for cross-linking type & operation references.
-   */
-  baseUrl?: string;
   meta?: boolean | { folderStyle?: 'folder' | 'separator' };
 };
 
 export function createGraphQL(options: GraphQLOptions = {}): GraphQLServer {
   const { disableCache = false } = options;
-  const schemaMap = new Map<string, Promise<LoadedSchema>>();
+  const docCache = new Map<string, Promise<LoadedSchema>>();
+  type GraphQLVirtualFile = VirtualFile<{
+    pageData: GraphQLPageData;
+    metaData: MetaData;
+  }>;
 
   let resolvedInput: SchemaRecord = {};
   if (Array.isArray(options.input)) {
@@ -96,13 +93,13 @@ export function createGraphQL(options: GraphQLOptions = {}): GraphQLServer {
     }
 
     if (!disableCache) {
-      const cached = schemaMap.get(schemaId);
+      const cached = docCache.get(schemaId);
       if (cached) return cached;
     }
 
     const raw = resolvedInput[schemaId];
     const output = Promise.resolve(typeof raw === 'function' ? raw() : raw).then(loadSchema);
-    if (!disableCache) schemaMap.set(schemaId, output);
+    if (!disableCache) docCache.set(schemaId, output);
     return output;
   }
 
@@ -113,39 +110,53 @@ export function createGraphQL(options: GraphQLOptions = {}): GraphQLServer {
     return Object.fromEntries(entries);
   }
 
-  async function getVirtualFiles(options: GraphQLSourceOptions) {
-    const { baseDir = '', meta = false, baseUrl } = options;
-    const files: VirtualFile<{
-      pageData: GraphQLPageData;
-      metaData: MetaData;
-    }>[] = [];
+  function generateLinks(loader: LoaderOutput, locale?: string): GraphQLLinks {
+    const out: GraphQLLinks = { types: {}, operations: {} };
 
-    const schemas = await getSchemas();
-    // pre-generate the links of generated pages, the map is completed during the walk below,
-    // before any page props are requested.
-    const getUrl = baseUrl !== undefined ? createGetUrl(baseUrl) : undefined;
-    const links: GraphQLLinks | undefined = getUrl ? { types: {}, operations: {} } : undefined;
+    for (const page of loader.getPages(locale)) {
+      if (
+        !('_graphql' in page.data) ||
+        !page.data._graphql ||
+        typeof page.data._graphql !== 'object'
+      )
+        continue;
+      const meta = page.data._graphql as InternalGraphQLMeta;
 
-    for (const [id, schema] of Object.entries(schemas)) {
-      onEntries(schemaToPages(id, schema.schema, options));
+      for (const item of meta.items ?? []) {
+        if (item.type === 'operation') {
+          out.operations[`${item.kind}:${item.name}`] = page.url;
+        } else {
+          out.types[item.name] = page.url;
+        }
+      }
+    }
+    return out;
+  }
 
-      function onEntry(entry: OperationOutput | TypeOutput | PageOutput) {
+  async function getVirtualFiles(
+    options: GraphQLSourceOptions,
+    getLinks: () => GraphQLLinks | undefined,
+    docFilesCache?: WeakMap<LoadedSchema, GraphQLVirtualFile[]>,
+  ): Promise<GraphQLVirtualFile[]> {
+    const { baseDir = '', meta = false } = options;
+    const files: GraphQLVirtualFile[] = [];
+
+    for (const [id, schema] of Object.entries(await getSchemas())) {
+      const cached = docFilesCache?.get(schema);
+      if (cached) {
+        files.push(...cached);
+        continue;
+      }
+
+      const entries = onEntries(schemaToPages(id, schema.schema, options));
+      docFilesCache?.set(schema, entries);
+      files.push(...entries);
+
+      function onEntry(entry: OperationOutput | TypeOutput | PageOutput): GraphQLVirtualFile {
         const props = getPageProps(entry);
         const filePath = `${baseDir}/${entry.path}`;
 
-        if (links) {
-          const url = getUrl!(getSlugs(filePath));
-
-          for (const item of props.items ?? []) {
-            if (item.type === 'operation') {
-              links.operations[`${item.kind}:${item.name}`] = url;
-            } else {
-              links.types[item.name] = url;
-            }
-          }
-        }
-
-        files.push({
+        return {
           type: 'page',
           path: filePath,
           data: {
@@ -154,7 +165,7 @@ export function createGraphQL(options: GraphQLOptions = {}): GraphQLServer {
               return {
                 payload: {
                   sdl: schema.sdl,
-                  links,
+                  links: getLinks(),
                 },
                 ...props,
               };
@@ -169,22 +180,23 @@ export function createGraphQL(options: GraphQLOptions = {}): GraphQLServer {
             _graphql: {
               kind: entry.type !== 'page' ? entry.item.kind : undefined,
               deprecated: entry.info.deprecated,
+              items: props.items,
             },
           },
-        });
+        };
       }
 
-      function onEntries(entries: OutputEntry[], parent?: OutputEntry) {
+      function onEntries(entries: OutputEntry[], parent?: OutputEntry): GraphQLVirtualFile[] {
+        const out: GraphQLVirtualFile[] = [];
         if (!meta) {
           for (const entry of entries) {
             if (entry.type === 'group') {
-              onEntries(entry.entries, entry);
+              out.push(...onEntries(entry.entries, entry));
             } else {
-              onEntry(entry);
+              out.push(onEntry(entry));
             }
           }
-
-          return;
+          return out;
         }
 
         const { folderStyle = 'folder' } = meta === true ? {} : meta;
@@ -196,28 +208,30 @@ export function createGraphQL(options: GraphQLOptions = {}): GraphQLServer {
           );
 
           if (entry.type === 'group') {
-            onEntries(entry.entries, entry);
+            out.push(...onEntries(entry.entries, entry));
             if (folderStyle === 'folder') {
               pages.push(relativePath);
             } else {
               pages.push(`---${entry.info.title}---`, `...${relativePath}`);
             }
           } else {
-            onEntry(entry);
+            out.push(onEntry(entry));
             pages.push(relativePath.slice(0, -path.extname(entry.path).length));
           }
         }
 
-        if (pages.length === 0) return;
-        files.push({
-          type: 'meta',
-          path: path.join(baseDir, parent?.path ?? '', 'meta.json'),
-          data: {
-            title: parent?.info.title,
-            description: parent?.info.description,
-            pages,
-          },
-        });
+        if (pages.length > 0) {
+          out.push({
+            type: 'meta',
+            path: path.join(baseDir, parent?.path ?? '', 'meta.json'),
+            data: {
+              title: parent?.info.title,
+              description: parent?.info.description,
+              pages,
+            },
+          });
+        }
+        return out;
       }
     }
 
@@ -229,13 +243,27 @@ export function createGraphQL(options: GraphQLOptions = {}): GraphQLServer {
     getSchema,
     getSchemas,
     async staticSource(options = {}) {
+      let links: GraphQLLinks | undefined;
       return {
-        files: await getVirtualFiles(options),
+        files: await getVirtualFiles(options, () => links),
+        configureStatic({ loader }) {
+          links = generateLinks(loader);
+        },
       };
     },
     dynamicSource(options = {}) {
+      let links: GraphQLLinks | undefined;
+      const docFilesCache = new WeakMap<LoadedSchema, GraphQLVirtualFile[]>();
+
       return {
-        files: () => getVirtualFiles(options),
+        cache: 'custom',
+        files: () => getVirtualFiles(options, () => links, docFilesCache),
+        configureStatic({ loader }) {
+          links = generateLinks(loader);
+        },
+        invalidate() {
+          docCache.clear();
+        },
       };
     },
     loaderPlugin() {
@@ -247,6 +275,7 @@ export function createGraphQL(options: GraphQLOptions = {}): GraphQLServer {
 export interface InternalGraphQLMeta {
   kind?: OperationKind | NamedTypeKind;
   deprecated?: boolean;
+  items?: GraphQLPageItem[];
 }
 
 const OperationKindSet = new Set(['query', 'mutation', 'subscription']);

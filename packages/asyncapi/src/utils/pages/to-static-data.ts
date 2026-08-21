@@ -7,6 +7,8 @@ import { dereferenceShallow } from '@fumadocs/api-docs/schema/dereference';
 import { createMagicProxy } from '@scalar/json-magic/magic-proxy';
 import { getOperationDisplayName } from '../schema';
 
+const proxyCache = new WeakMap<AsyncAPIObject, AsyncAPIObject>();
+
 export function toStaticData(
   page: GeneratedPageProps,
   doc: AsyncAPIObject,
@@ -15,7 +17,11 @@ export function toStaticData(
   structuredData: StructuredData;
 } {
   // wrap in a magic proxy so that `dereferenceShallow` can resolve refs lazily
-  const proxied = createMagicProxy(doc as never) as AsyncAPIObject;
+  let proxied = proxyCache.get(doc);
+  if (!proxied) {
+    proxied = createMagicProxy(doc as never) as AsyncAPIObject;
+    proxyCache.set(doc, proxied);
+  }
   const slugger = new Slugger();
   const toc: TOCItemType[] = [];
   const structuredData: StructuredData = { headings: [], contents: [] };

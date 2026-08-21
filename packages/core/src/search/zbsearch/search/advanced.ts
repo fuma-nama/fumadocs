@@ -43,8 +43,12 @@ export async function searchAdvanced(
 
   const highlighter = createContentHighlighter(query);
   const result = await search(db, params);
+  // `limit` bounds `result.hits`, not `result.groups`: there is one group per
+  // matched page, so stop early instead of highlighting every matched page
+  const limit = typeof params.limit === 'number' ? params.limit : Infinity;
   const list: SortedResult[] = [];
   for (const item of result.groups ?? []) {
+    if (list.length >= limit) break;
     const pageId = item.values[0] as string;
 
     const page = getByID(db, pageId);
@@ -59,6 +63,7 @@ export async function searchAdvanced(
     });
 
     for (const hit of item.result) {
+      if (list.length >= limit) break;
       if (hit.document.type === 'page') continue;
 
       list.push({
@@ -69,10 +74,6 @@ export async function searchAdvanced(
         url: hit.document.url,
       });
     }
-  }
-
-  if (typeof params.limit === 'number' && list.length > params.limit) {
-    return list.slice(0, params.limit);
   }
 
   return list;

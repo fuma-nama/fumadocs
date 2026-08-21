@@ -359,8 +359,13 @@ export function createFromSource<C extends LoaderConfig = LoaderConfig>(
     const l = typeof loader === 'function' ? await loader() : loader;
     let server = cache.get(l);
     if (!server) {
-      server = initServer(l);
-      cache.set(l, server);
+      const promise = initServer(l);
+      // a failed index build (e.g. a flaky remote source) should retry on the next request
+      promise.catch(() => {
+        if (cache.get(l) === promise) cache.delete(l);
+      });
+      cache.set(l, promise);
+      server = promise;
     }
     return await server;
   }

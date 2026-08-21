@@ -250,16 +250,19 @@ describe('obsidian source', () => {
     expect(third.files.some((file) => file.path === 'b.md')).toBe(false);
   });
 
-  test('notifies dynamic loaders after invalidation', async () => {
+  test('dynamicSource re-reads files after invalidation', async () => {
     const instance = obsidian({ dir: fixturesDir });
     const dynamic = instance.dynamicSource();
-    let invalidated = 0;
-    dynamic.configure?.({ invalidate: () => void invalidated++ } as never);
+    expect(dynamic.cache).toBe('custom');
 
-    await dynamic.files();
+    const first = await dynamic.files();
+    const welcome = first.find((file) => file.path === 'Welcome.md');
+    expect(welcome).toBeDefined();
+    expect((await dynamic.files()).find((file) => file.path === 'Welcome.md')).toBe(welcome);
+
     instance.invalidateFile(path.join(fixturesDir, 'Welcome.md'));
-
-    expect(invalidated).toBe(1);
+    const second = await dynamic.files();
+    expect(second.find((file) => file.path === 'Welcome.md')).not.toBe(welcome);
   });
 });
 

@@ -18,6 +18,8 @@ export function dereferenceShallow<T>(schema: T): NoReferenceShallow<T> {
 
   // `$ref-value` is a virtual property added by the magic proxy, exclude it from sibling keywords
   const { $ref: _, '$ref-value': refValue, ...rest } = schema as Record<string, unknown>;
+  // mark as in progress so a `$ref` cycle resolves to the sibling keywords instead of recursing forever
+  cacheMap.set(schema, rest);
   const resolved = dereferenceShallow(refValue);
   let result: unknown = rest;
 

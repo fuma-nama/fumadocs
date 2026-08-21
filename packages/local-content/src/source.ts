@@ -5,10 +5,9 @@ import type {
   StaticSource,
   VirtualFile,
 } from 'fumadocs-core/source';
-import type { DynamicLoader } from 'fumadocs-core/source/dynamic';
 import path from 'node:path';
 import { createStorage } from './storage';
-import type { ContentIntegration } from './integration';
+import type { ContentIntegration, ParsedFile } from './integration';
 
 /** what a dev-time watcher needs, implemented by the adapters under `./dev` */
 export interface WatchableSource {
@@ -50,31 +49,26 @@ export interface LocalSource<Page extends PageData, Meta extends MetaData> exten
 export function createLocalSource<Page extends PageData, Meta extends MetaData>(
   config: LocalSourceConfig<Page, Meta>,
 ): LocalSource<Page, Meta> {
-  type $Files = VirtualFile<{ pageData: Page; metaData: Meta }>[];
-
+  type LocalVirtualFile = VirtualFile<{ pageData: Page; metaData: Meta }>;
+  const fileCache = new WeakMap<ParsedFile<Page, Meta>, LocalVirtualFile>();
   const storage = createStorage(config);
-  const registeredLoaders = new Set<DynamicLoader>();
-  let cachedStaticSource: Promise<StaticSource<{ pageData: Page; metaData: Meta }>> | null = null;
 
-  function invalidate() {
-    cachedStaticSource = null;
-    for (const loader of registeredLoaders) loader.invalidate();
-  }
-
-  async function createFiles(options?: SourceOptions): Promise<$Files> {
+  async function createFiles(options?: SourceOptions): Promise<LocalVirtualFile[]> {
     const baseDir = options?.baseDir;
-    const files: $Files = [];
 
-    for (const { file, parsed } of await storage.getFiles()) {
-      files.push({
-        type: parsed.type,
-        path: baseDir ? path.join(baseDir, file) : file,
-        absolutePath: path.resolve(config.dir, file),
-        data: parsed.data,
-      } as $Files[number]);
-    }
-
-    return files;
+    return (await storage.getFiles()).map(({ file, parsed }) => {
+      let v = fileCache.get(parsed);
+      if (!v) {
+        v = {
+          type: parsed.type,
+          path: baseDir ? path.join(baseDir, file) : file,
+          absolutePath: path.resolve(config.dir, file),
+          data: parsed.data,
+        } as LocalVirtualFile;
+        fileCache.set(parsed, v);
+      }
+      return v;
+    });
   }
 
   return {
@@ -82,22 +76,21 @@ export function createLocalSource<Page extends PageData, Meta extends MetaData>(
     include: config.include ?? config.integration.include,
     invalidateAll() {
       storage.clearCache();
-      invalidate();
     },
     invalidateFile(file) {
       storage.invalidateCache(path.resolve(file));
-      invalidate();
     },
     dynamicSource(options) {
       return {
+        cache: 'custom',
         files: () => createFiles(options),
-        configure(loader) {
-          registeredLoaders.add(loader);
+        invalidate() {
+          storage.clearCache();
         },
       };
     },
-    staticSource(options) {
-      return (cachedStaticSource ??= createFiles(options).then((files) => ({ files })));
+    async staticSource(options) {
+      return { files: await createFiles(options) };
     },
     async devServer(url) {
       const { watchWithDevServer } = await import('./dev/ws');

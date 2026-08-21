@@ -1,6 +1,6 @@
 {
   "name": "@fumadocs/base-ui",
-  "version": "16.14.5",
+  "version": "16.15.0",
   "description": "The Base UI version of Fumadocs UI",
   "keywords": [
     "Docs",
@@ -186,6 +186,6 @@
     }
   },
   "inlinedDependencies": {
-    "react-medium-image-zoom": "5.4.8"
+    "react-medium-image-zoom": "5.4.9"
   }
 }
