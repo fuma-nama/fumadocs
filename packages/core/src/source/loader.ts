@@ -181,6 +181,8 @@ function createPageIndexer({ url }: ResolvedLoaderConfig) {
   const pathToMeta = new Map<string, Meta>();
   // (locale.path -> meta)
   const pathToPage = new Map<string, Page>();
+  // (locale.url -> page)
+  const urlToPage = new Map<string, Page>();
 
   return {
     scan(storage: ContentStorage, lang?: string) {
@@ -210,10 +212,14 @@ function createPageIndexer({ url }: ResolvedLoaderConfig) {
         };
         pathToPage.set(path, page);
         pages.set(prefix + page.slugs.join('/'), page);
+        urlToPage.set(prefix + page.url, page);
       }
     },
     getPage(path: string, lang = '') {
       return pathToPage.get(`${lang}.${path}`);
+    },
+    getPageByUrl(url: string, lang = '') {
+      return urlToPage.get(`${lang}.${url}`);
     },
     getMeta(path: string, lang = '') {
       return pathToMeta.get(`${lang}.${path}`);
@@ -369,7 +375,7 @@ export function loader<I extends ResolvedInput, I18n extends I18nConfig | undefi
 
         target = indexer.getPage(path, language);
       } else {
-        target = this.getPages(language).find((item) => item.url === value);
+        target = indexer.getPageByUrl(value, language);
       }
 
       if (target)
