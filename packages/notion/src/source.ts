@@ -148,10 +148,16 @@ export function createNotion({
 
               let loaded: Promise<NotionPageLoaded> | undefined;
               const load = () =>
-                (loaded ??= getBlocks(page.id).then((blocks) => ({
-                  page,
-                  blocks,
-                })));
+                (loaded ??= getBlocks(page.id).then(
+                  (blocks) => ({
+                    page,
+                    blocks,
+                  }),
+                  (error) => {
+                    loaded = undefined;
+                    throw error;
+                  },
+                ));
 
               const data: NotionPageData = {
                 id: page.id,

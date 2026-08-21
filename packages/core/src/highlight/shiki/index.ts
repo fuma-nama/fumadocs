@@ -27,7 +27,12 @@ export function createShikiFactory(config: Pick<ShikiFactory, 'init'>): ShikiFac
 
   return {
     init(options) {
-      return (instance = config.init(options));
+      const created = config.init(options);
+      if (created instanceof Promise)
+        created.catch(() => {
+          if (instance === created) instance = undefined;
+        });
+      return (instance = created);
     },
     getOrInit() {
       return instance ?? this.init();

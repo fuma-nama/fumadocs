@@ -61,11 +61,12 @@ export function dynamicLoader<
       if (cached) return cached;
     }
 
-    const files = v.files();
-    const resolved: Awaitable<StaticSource> =
-      'then' in files
-        ? files.then((res) => ({ files: res, configureStatic: v.configureStatic }))
-        : { files, configureStatic: v.configureStatic };
+    const resolved: Promise<StaticSource> = Promise.resolve(v.files())
+      .then((res) => ({ files: res, configureStatic: v.configureStatic }))
+      .catch((e) => {
+        if (cache === 'memory' && memoryCache.get(v) === resolved) memoryCache.delete(v);
+        throw e;
+      });
     if (cache === 'memory') {
       memoryCache.set(v, resolved);
     }
