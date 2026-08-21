@@ -247,8 +247,11 @@ export async function pkgNeedsOptimization(
   if (pkgJson.module || pkgJson.type === 'module') return false;
 
   // an export map alone doesn't imply ESM: CJS-only packages (e.g. `use-sync-external-store`)
-  // ship one too, and still need pre-bundling for the browser
-  if (pkgJson.exports) return !exportsHasEsmEntry(pkgJson.exports);
+  // ship one too, and still need pre-bundling for the browser. Declaration-only packages
+  // (e.g. `@types/mdx`) also ship one, with no runtime JS at all — pre-bundling those makes
+  // esbuild parse `.d.ts` files and fail on type-space imports
+  if (pkgJson.exports)
+    return !exportsHasEsmEntry(pkgJson.exports) && exportsHasJsEntry(pkgJson.exports);
 
   if (pkgJson.main) {
     const entryExt = path.extname(pkgJson.main);
@@ -274,6 +277,19 @@ function exportsHasEsmEntry(exportsField: unknown): boolean {
   return false;
 }
 
+// whether any target is runtime JS, as opposed to declaration files (`.d.ts` and friends) or
+// assets like `./package.json`; the `types` condition never resolves at runtime
+function exportsHasJsEntry(exportsField: unknown): boolean {
+  if (typeof exportsField === 'string') return /\.[cm]?js$/.test(exportsField);
+  if (Array.isArray(exportsField)) return exportsField.some(exportsHasJsEntry);
+  if (exportsField && typeof exportsField === 'object') {
+    return Object.entries(exportsField).some(
+      ([key, value]) => key !== 'types' && exportsHasJsEntry(value),
+    );
+  }
+  return false;
+}
+
 // Vite only pre-bundles the entries listed in `optimizeDeps.include`, so a CJS package's
 // deep imports (e.g. `use-sync-external-store/shim`) must each become their own entry.
 // Keys with wildcards or file extensions (incl. `.native`) are skipped: they either can't be
@@ -286,8 +302,11 @@ function getExportsSubpaths(exportsField: unknown): string[] {
   const subpathKeys = Object.keys(exportsField).filter((key) => key.startsWith('.'));
   if (subpathKeys.length === 0) return ['.'];
 
-  const subpaths = subpathKeys.filter((key) => key === '.' || /^\.\/[^*.]+$/.test(key));
-  return subpaths.length > 0 ? subpaths : ['.'];
+  return subpathKeys.filter(
+    (key) =>
+      (key === '.' || /^\.\/[^*.]+$/.test(key)) &&
+      exportsHasJsEntry((exportsField as Record<string, unknown>)[key]),
+  );
 }
 
 async function findDepPkgJsonPath(
