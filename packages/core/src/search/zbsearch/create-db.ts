@@ -1,6 +1,6 @@
 import {
   create,
-  insertMultiple,
+  insertMultipleAsync,
   type PartialSchemaDeep,
   type TypedDocument,
   type ZBSearch,
@@ -55,7 +55,7 @@ export async function createDB({
   }) as ZBSearch<typeof advancedSchema>;
 
   const mapTo: PartialSchemaDeep<AdvancedDocument>[] = buildDocuments(items);
-  await insertMultiple(db, mapTo);
+  await insertMultipleAsync(db, mapTo);
   return db;
 }
 
@@ -80,7 +80,7 @@ export async function createDBSimple({
     },
   }) as ZBSearch<typeof simpleSchema>;
 
-  await insertMultiple(
+  await insertMultipleAsync(
     db,
     items.map((page) => ({
       title: page.title,
