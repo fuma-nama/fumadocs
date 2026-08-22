@@ -1,7 +1,7 @@
 import { lucideIconsPlugin } from 'fumadocs-core/source/lucide-icons';
 import { docsContentRoute, docsImageRoute, docsRoute } from './shared';
 import { localMd } from '@fumadocs/local-md';
-import { dynamicLoader } from 'fumadocs-core/source/dynamic';
+import { dynamicLoader } from 'fumadocs-core/source';
 
 const docs = localMd({
   dir: 'content/docs',
