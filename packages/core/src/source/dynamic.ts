@@ -1,7 +1,7 @@
 import type { I18nConfig } from '@/i18n';
 import { cache } from 'react';
 import { loader, LoaderConfig, LoaderOptions, LoaderOutput } from './loader';
-import type { SourceUnion, StaticSource, DynamicSource } from './source';
+import type { SourceUnion, StaticSource, DynamicSource, VirtualFile } from './source';
 import { isStaticSource, isDynamicSource } from './source';
 import type { GenerateMeta, GeneratePage, GenerateStorage } from './types';
 import type { Awaitable } from '@/types';
@@ -37,9 +37,19 @@ export function dynamicLoader<
   page: NoInfer<GeneratePage<I>>;
   source: I extends Record<infer K, SourceUnion> ? K : undefined;
 }> {
-  let loaderCacheKey: ResolvedSource | undefined;
-  let loaderCache: LoaderOutput<DynamicLoaderConfig> | undefined;
-  const memoryCache = new Map<DynamicSource, Awaitable<StaticSource>>();
+  let cachedLoader:
+    | {
+        input: ResolvedSource;
+        value: LoaderOutput<DynamicLoaderConfig>;
+      }
+    | undefined;
+  const memoryCache = new Map<
+    DynamicSource,
+    {
+      value: Awaitable<StaticSource>;
+      expires?: number;
+    }
+  >();
 
   async function resolveSources(): Promise<ResolvedSource> {
     if (isStaticSource(input) || isDynamicSource(input)) {
@@ -55,38 +65,47 @@ export function dynamicLoader<
 
   function resolveSource(v: StaticSource | DynamicSource): Awaitable<StaticSource> {
     if (isStaticSource(v)) return v;
-    const cache = v.cache ?? 'memory';
-    if (cache === 'memory') {
+    const mapFiles = (files: VirtualFile[]): StaticSource => ({
+      baseDir: v.baseDir,
+      files,
+      configureStatic: v.configureStatic,
+    });
+
+    if (!v.cache || v.cache === 'memory') {
       const cached = memoryCache.get(v);
-      if (cached) return cached;
+      if (cached && (cached.expires === undefined || Date.now() < cached.expires)) {
+        return cached.value;
+      }
+
+      const value = Promise.resolve(v.files())
+        .then(mapFiles)
+        .catch((e) => {
+          if (memoryCache.get(v)?.value === value) memoryCache.delete(v);
+          throw e;
+        });
+      memoryCache.set(v, {
+        value,
+        expires: v.staleTime !== undefined ? Date.now() + v.staleTime : undefined,
+      });
+      return value;
     }
 
-    const resolved: Promise<StaticSource> = Promise.resolve(v.files())
-      .then((res) => ({ files: res, configureStatic: v.configureStatic }))
-      .catch((e) => {
-        if (cache === 'memory' && memoryCache.get(v) === resolved) memoryCache.delete(v);
-        throw e;
-      });
-    if (cache === 'memory') {
-      memoryCache.set(v, resolved);
-    }
-    return resolved;
+    return Promise.resolve(v.files()).then(mapFiles);
   }
 
   const dynamicLoader: DynamicLoader = {
     get: cache(async () => {
       const resolved = await resolveSources();
 
-      if (loaderCacheKey && isEqual(loaderCacheKey, resolved)) {
-        return loaderCache!;
+      if (cachedLoader && isEqual(cachedLoader.input, resolved)) {
+        return cachedLoader.value;
       }
 
-      loaderCacheKey = resolved;
-      loaderCache = loader(
-        resolved,
-        options as never,
-      ) as unknown as LoaderOutput<DynamicLoaderConfig>;
-      return loaderCache;
+      cachedLoader = {
+        input: resolved,
+        value: loader(resolved, options as never) as unknown as LoaderOutput<DynamicLoaderConfig>,
+      };
+      return cachedLoader.value;
     }),
     $inferPage: undefined as never,
     $inferMeta: undefined as never,
@@ -123,10 +142,12 @@ export function dynamicLoader<
     },
   };
 
-  if (isDynamicSource(input)) {
-    input.configure?.(dynamicLoader, {});
-  } else if (!isStaticSource(input)) {
+  if (isDynamicSource(input) || isStaticSource(input)) {
+    input.configureDynamic?.({ loader: dynamicLoader });
+    if (isDynamicSource(input)) input.configure?.(dynamicLoader, {});
+  } else {
     for (const [k, v] of Object.entries(input)) {
+      v.configureDynamic?.({ loader: dynamicLoader, source: k });
       if (isDynamicSource(v)) v.configure?.(dynamicLoader, { source: k });
     }
   }

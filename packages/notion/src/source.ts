@@ -7,9 +7,10 @@ import {
   type QueryDataSourceParameters,
 } from '@notionhq/client';
 import type { StructuredData } from 'fumadocs-core/mdx-plugins';
-import type { DynamicSource, MetaData, PageData } from 'fumadocs-core/source';
+import type { DynamicSource, MetaData, PageData, VirtualFile } from 'fumadocs-core/source';
 import path from 'node:path';
 import { blocksToStructuredData, richTextToPlainText, type NotionBlock } from './blocks';
+import { cache } from 'react';
 
 export {
   blocksToPlainText,
@@ -105,6 +106,47 @@ export function createNotion({
     dataSourceId,
     getBlocks,
     dynamicSource(options = {}) {
+      async function toVirtualFile(
+        page: PageObjectResponse,
+        seenPaths: Map<string, string>,
+      ): Promise<VirtualFile<{ pageData: NotionPageData; metaData: MetaData }>> {
+        const info = getPageInfo(page, options.properties);
+        const generatedPath = options.generatePath
+          ? await options.generatePath(page, info)
+          : info.slugs.length === 0
+            ? 'index.mdx'
+            : `${info.slugs.join('/')}.mdx`;
+        const filePath = resolveVirtualPath(options.baseDir, generatedPath);
+        const duplicate = seenPaths.get(filePath);
+        if (duplicate) {
+          throw new Error(
+            `[@fumadocs/notion] Pages "${duplicate}" and "${page.id}" resolve to the same virtual path: ${filePath}`,
+          );
+        }
+        seenPaths.set(filePath, page.id);
+
+        const load = cache(async () => {
+          return { blocks: await getBlocks(page.id), page };
+        });
+
+        return {
+          type: 'page',
+          path: filePath,
+          slugs: info.slugs,
+          data: {
+            id: page.id,
+            notion: page,
+            title: info.title,
+            description: info.description,
+            icon: getPageIcon(page),
+            load,
+            async structuredData() {
+              return blocksToStructuredData((await load()).blocks);
+            },
+          },
+        };
+      }
+
       return {
         async files() {
           const pages: PageObjectResponse[] = [];
@@ -129,56 +171,7 @@ export function createNotion({
           } while (cursor);
 
           const seenPaths = new Map<string, string>();
-          return Promise.all(
-            pages.map(async (page) => {
-              const info = getPageInfo(page, options.properties);
-              const generatedPath = options.generatePath
-                ? await options.generatePath(page, info)
-                : info.slugs.length === 0
-                  ? 'index.mdx'
-                  : `${info.slugs.join('/')}.mdx`;
-              const filePath = resolveVirtualPath(options.baseDir, generatedPath);
-              const duplicate = seenPaths.get(filePath);
-              if (duplicate) {
-                throw new Error(
-                  `[@fumadocs/notion] Pages "${duplicate}" and "${page.id}" resolve to the same virtual path: ${filePath}`,
-                );
-              }
-              seenPaths.set(filePath, page.id);
-
-              let loaded: Promise<NotionPageLoaded> | undefined;
-              const load = () =>
-                (loaded ??= getBlocks(page.id).then(
-                  (blocks) => ({
-                    page,
-                    blocks,
-                  }),
-                  (error) => {
-                    loaded = undefined;
-                    throw error;
-                  },
-                ));
-
-              const data: NotionPageData = {
-                id: page.id,
-                notion: page,
-                title: info.title,
-                description: info.description,
-                icon: getPageIcon(page),
-                load,
-                async structuredData() {
-                  return blocksToStructuredData((await load()).blocks);
-                },
-              };
-
-              return {
-                type: 'page' as const,
-                path: filePath,
-                slugs: info.slugs,
-                data,
-              };
-            }),
-          );
+          return Promise.all(pages.map((page) => toVirtualFile(page, seenPaths)));
         },
       };
     },
