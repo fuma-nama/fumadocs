@@ -1,3 +1,7 @@
+## fumadocs-openapi@11.3.1
+
+### Simplify cache
+
 ## fumadocs-openapi@11.3.0
 
 ### Redesign source API
