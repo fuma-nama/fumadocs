@@ -70,6 +70,7 @@ describe('obsidian source', () => {
     expect(page.data.title).toBe('hello world');
     await page.data.load();
     await page.data.load();
+    expect((await page.data.structuredData()).contents.length).toBeGreaterThan(0);
     expect(compiles).toBe(1);
   });
 

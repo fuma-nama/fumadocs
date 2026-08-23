@@ -195,6 +195,8 @@ describe('localMd source', () => {
 
     await page.data.load();
     await page.data.load();
+    const structuredData = await page.data.structuredData();
+    expect(structuredData.headings.map((heading) => heading.content)).toEqual(['Guide', 'Details']);
     expect(compiles).toBe(1);
   });
 

@@ -17,7 +17,7 @@ export async function GET(): Promise<Response> {
 
     return {
       id: page.url,
-      structured: (await page.data.load()).structuredData,
+      structured: await page.data.structuredData(),
       tag: getSection(page.slugs[0]),
       url: page.url,
       title: page.data.title,
