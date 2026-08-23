@@ -1,3 +1,19 @@
+## fumadocs-core@16.15.1
+
+### Forward dynamic loader from `fumadocs-core/source`
+
+
+
+### Read structured data from `page.data.structuredData()`
+
+Search indexing no longer falls back to `(await page.data.load()).structuredData`. Runtime content sources expose `structuredData()` on page data instead, sharing the compile with `load()`:
+
+```ts
+const structuredData = await page.data.structuredData();
+```
+
+The renderer returned by `load()` still carries `structuredData`, existing code keeps working.
+
 ## fumadocs-core@16.15.0
 
 ### Redesign source API
