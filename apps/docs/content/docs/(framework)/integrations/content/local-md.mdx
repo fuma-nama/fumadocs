@@ -281,8 +281,8 @@ page.data.frontmatter.full;
 console.log(page.data.content);
 
 // compiled properties:
-const { structuredData, render } = await page.data.load();
-const { toc, body } = await render(mdxComponents);
+const structuredData = await page.data.structuredData();
+const { toc, body } = await (await page.data.load()).render(mdxComponents);
 
 return <div>{body}</div>;
 ```

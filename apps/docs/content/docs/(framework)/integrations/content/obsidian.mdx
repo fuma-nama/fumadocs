@@ -107,7 +107,7 @@ Run the included content watcher alongside your framework:
 }
 ```
 
-The `vault.devServer()` call shown above receives changes from that watcher. Since wikilinks and aliases can create cross-file dependencies, a change invalidates the whole source snapshot — only the changed files are re-read from disk though.
+The `vault.devServer()` call shown above receives changes from that watcher. Since wikilinks and aliases can create cross-file dependencies, a change invalidates the whole source snapshot.
 
 For Vite, use the in-process adapter instead:
 
