@@ -1,5 +1,5 @@
 import { getSource } from '@/lib/source';
-import { llms } from 'fumadocs-core/source/llms';
+import { llms } from 'fumadocs-core/source';
 
 export const revalidate = false;
 

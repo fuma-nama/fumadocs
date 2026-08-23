@@ -39,7 +39,7 @@ The components from `fumadocs-obsidian/ui` are styled with Tailwind CSS. Add the
 Create an Obsidian source and pass it to `dynamicLoader()`:
 
 ```ts title="lib/source.ts"
-import { dynamicLoader } from 'fumadocs-core/source/dynamic';
+import { dynamicLoader } from 'fumadocs-core/source';
 import { obsidian } from 'fumadocs-obsidian';
 
 const vault = obsidian({
@@ -107,7 +107,7 @@ Run the included content watcher alongside your framework:
 }
 ```
 
-The `vault.devServer()` call shown above receives changes from that watcher. Since wikilinks and aliases can create cross-file dependencies, a change invalidates the whole source snapshot — only the changed files are re-read from disk though.
+The `vault.devServer()` call shown above receives changes from that watcher. Since wikilinks and aliases can create cross-file dependencies, a change invalidates the whole source snapshot.
 
 For Vite, use the in-process adapter instead:
 

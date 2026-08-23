@@ -27,7 +27,7 @@ Reach for it when you want Sätteri's compiler and its plugin model, and to reus
 Create a `localMd` instance and connect it to Fumadocs:
 
 ```ts title="lib/source.ts"
-import { dynamicLoader } from 'fumadocs-core/source/dynamic';
+import { dynamicLoader } from 'fumadocs-core/source';
 import { localMd } from '@fumadocs/satteri/local-md';
 
 const docs = localMd({
@@ -102,7 +102,7 @@ const page = source.getPage(params.slug);
 const { body, toc } = await (await page.data.load()).render();
 ```
 
-The renderer also exposes `structuredData` for search indexing, and `exports` for anything the document or its plugins exported, such as `frontmatter`, `toc` and `structuredData`.
+The renderer also exposes `structuredData`, and `exports` for anything the document or its plugins exported.
 
 ### Client Rendering
 

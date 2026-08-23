@@ -6,7 +6,6 @@ export {
   type StaticSource,
   type VirtualFile,
   type Source,
-  source,
   update,
   multiple,
 } from './source';
@@ -27,7 +26,7 @@ export type {
   ContentStoragePageFile,
 } from './storage/content';
 
-// TODO: remove this on next major
+export { dynamicLoader, type DynamicLoader, type DynamicLoaderConfig } from './dynamic';
 export * from './llms';
 
 /** internal types, do not use it */

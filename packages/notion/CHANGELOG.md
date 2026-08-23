@@ -1,3 +1,7 @@
+## @fumadocs/notion@0.2.2
+
+### Simplify cache
+
 ## @fumadocs/notion@0.2.1
 
 ### Remember verified file URLs in the Notion file handler

@@ -25,6 +25,8 @@
     "packages/mdx-remote/test/fixtures/**/*.json",
     "packages/local-md/test/fixtures/**/*.json",
     "packages/local-html/test/fixtures/**/*.json",
+    "packages/python/test/fixtures/**/*.json",
+    "packages/python/test/__snapshots__/**/*",
     "packages/core/test/fixtures/page-trees/**/*.json",
 
     "routeTree.gen.ts",

@@ -62,7 +62,7 @@ export const notion = createNotion({
 Pass `notion.dynamicSource()` to `dynamicLoader()` and expose the loader through `getSource()`:
 
 ```ts title="lib/source.ts"
-import { dynamicLoader } from 'fumadocs-core/source/dynamic';
+import { dynamicLoader } from 'fumadocs-core/source';
 import { notion } from '@/lib/notion';
 
 const source = dynamicLoader(

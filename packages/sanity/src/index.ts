@@ -2,7 +2,7 @@ import type { StructuredData } from 'fumadocs-core/mdx-plugins/remark-structure'
 import type { DynamicSource, MetaData, VirtualFile } from 'fumadocs-core/source';
 import type { TOCItemType } from 'fumadocs-core/toc';
 import type { DefinedFetchType } from 'next-sanity/live';
-import type { ReactNode } from 'react';
+import { cache, type ReactNode } from 'react';
 import type { PortableTextBlock } from '@portabletext/react';
 import type { SlugValue } from '@sanity/types';
 import type { QueryParams, SanityClient } from '@sanity/client';
@@ -99,7 +99,7 @@ export function createSanitySource<Doc extends BaseDoc>(
       data: {
         ...file,
         title: file.title ?? file._id,
-        async load() {
+        load: cache(async () => {
           const data = await sanityFetch<Doc & { _toc?: PortableTextBlock[] }>(
             `*[_type == $docType && _id == $id][0]{
               ...,
@@ -119,8 +119,8 @@ export function createSanitySource<Doc extends BaseDoc>(
               return renderToc({ toc: data._toc, ...opts });
             },
           };
-        },
-        async structuredData() {
+        }),
+        structuredData: cache(async () => {
           const data = await sanityFetch<{ structuredBody: StructuredBlock[] } | undefined>(
             `*[_type == $docType && _id == $id][0]{
               "structuredBody": body[]{
@@ -146,7 +146,7 @@ export function createSanitySource<Doc extends BaseDoc>(
           );
 
           return getStructuredData(data?.structuredBody ?? []);
-        },
+        }),
       },
       slugs,
       path: filePath,

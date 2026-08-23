@@ -12,6 +12,7 @@ import { remarkImage, type RemarkImageOptions } from 'fumadocs-core/mdx-plugins/
 import { remarkStructure, type StructureOptions } from 'fumadocs-core/mdx-plugins/remark-structure';
 import { rehypeCode, type RehypeCodeOptions } from 'fumadocs-core/mdx-plugins/rehype-code';
 import { rehypeToc, type RehypeTocOptions } from 'fumadocs-core/mdx-plugins/rehype-toc';
+import type { StructuredData } from 'fumadocs-core/mdx-plugins';
 import type { MetaData, PageData } from 'fumadocs-core/source';
 import * as defaultSchemas from 'fumadocs-core/source/schema';
 import remarkParse from 'remark-parse';
@@ -92,6 +93,7 @@ export interface ObsidianPage<Frontmatter = Record<string, unknown>> extends Pag
   frontmatter: Frontmatter;
   /** compile the page, at most once per vault snapshot */
   load: () => Promise<ObsidianRenderer>;
+  structuredData: () => Promise<StructuredData>;
 }
 
 interface VaultContext {
@@ -212,6 +214,7 @@ export function obsidian<
         const frontmatter = result.value as $Frontmatter;
         const pageData = frontmatter as PageData & { _openapi?: unknown };
         let loaded: Promise<ObsidianRenderer> | undefined;
+        const load = () => (loaded ??= compilePage(context.processor, parsed, frontmatter));
 
         return {
           type: 'page',
@@ -222,9 +225,8 @@ export function obsidian<
             ['_openapi' as never]: pageData._openapi,
             content: parsed.content,
             frontmatter,
-            load() {
-              return (loaded ??= compilePage(context.processor, parsed, frontmatter));
-            },
+            load,
+            structuredData: async () => (await load()).structuredData,
           },
         };
       }

@@ -29,7 +29,7 @@ Install the package:
 Create a `localMd` instance and connect it to Fumadocs:
 
 ```ts title="lib/source.ts"
-import { dynamicLoader } from 'fumadocs-core/source/dynamic';
+import { dynamicLoader } from 'fumadocs-core/source';
 import { localMd } from '@fumadocs/local-md';
 
 const docs = localMd({
@@ -201,7 +201,7 @@ export const source = loader({
 With `@fumadocs/local-md`, you can replace that setup with:
 
 ```ts title="lib/source.ts"
-import { dynamicLoader } from 'fumadocs-core/source/dynamic';
+import { dynamicLoader } from 'fumadocs-core/source';
 import { watchWithDevServer } from '@fumadocs/local-md/dev/ws';
 import { localMd } from '@fumadocs/local-md';
 
@@ -281,8 +281,8 @@ page.data.frontmatter.full;
 console.log(page.data.content);
 
 // compiled properties:
-const { structuredData, render } = await page.data.load();
-const { toc, body } = await render(mdxComponents);
+const structuredData = await page.data.structuredData();
+const { toc, body } = await (await page.data.load()).render(mdxComponents);
 
 return <div>{body}</div>;
 ```

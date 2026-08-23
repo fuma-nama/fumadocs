@@ -53,9 +53,7 @@ export function createLocalSource<Page extends PageData, Meta extends MetaData>(
   const fileCache = new WeakMap<ParsedFile<Page, Meta>, LocalVirtualFile>();
   const storage = createStorage(config);
 
-  async function createFiles(options?: SourceOptions): Promise<LocalVirtualFile[]> {
-    const baseDir = options?.baseDir;
-
+  async function createFiles({ baseDir }: SourceOptions = {}): Promise<LocalVirtualFile[]> {
     return (await storage.getFiles()).map(({ file, parsed }) => {
       let v = fileCache.get(parsed);
       if (!v) {

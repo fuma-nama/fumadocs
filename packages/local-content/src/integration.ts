@@ -29,11 +29,9 @@ export interface ContentIntegration<Page, Meta> {
 }
 
 export function createSourceFile(path: string, absolutePath: string): SourceFile {
-  let content: Promise<string> | undefined;
-
   return {
     path,
     absolutePath,
-    read: () => (content ??= fs.readFile(absolutePath, 'utf-8')),
+    read: () => fs.readFile(absolutePath, 'utf-8'),
   };
 }

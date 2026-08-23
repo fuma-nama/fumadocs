@@ -158,7 +158,6 @@ export function createOpenAPI(options: OpenAPIOptions = {}): OpenAPIServer {
   ): Promise<OpenAPIVirtualFile[]> {
     const { baseDir = '', meta = false } = options;
     const files: OpenAPIVirtualFile[] = [];
-    const builderOptions = createAutoPreset(options);
 
     for (const [id, schema] of Object.entries(await server.getSchemas())) {
       const cachedDocFiles = docFilesCache?.get(schema);
@@ -167,7 +166,7 @@ export function createOpenAPI(options: OpenAPIOptions = {}): OpenAPIServer {
         continue;
       }
 
-      const entries = onEntries(fromSchema(id, schema.bundled, builderOptions));
+      const entries = onEntries(fromSchema(id, schema.bundled, createAutoPreset(options)));
       docFilesCache?.set(schema, entries);
       files.push(...entries);
 

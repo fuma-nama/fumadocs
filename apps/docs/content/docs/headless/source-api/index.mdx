@@ -220,7 +220,7 @@ function MyComponent() {
 `dynamicLoader()` provides extra revalidation functionality to content sources, you should use it with a [dynamic source](/docs/headless/source-api/source#dynamic-source).
 
 ```ts
-import { dynamicLoader } from 'fumadocs-core/source/dynamic';
+import { dynamicLoader } from 'fumadocs-core/source';
 import { createMySource } from './my-source';
 
 const source = dynamicLoader(createMySource(), {

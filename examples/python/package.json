@@ -1,18 +1,16 @@
 {
   "name": "example-python",
-  "version": "0.0.18",
+  "version": "0.0.19",
   "private": true,
   "scripts": {
-    "build": "pnpm build:docs && next build",
+    "build": "next build",
     "dev": "next dev",
     "start": "next start",
-    "build:docs": "pnpm python:generate && node ./scripts/generate-docs.mjs",
     "python:generate": "pip3 install ./node_modules/fumadocs-python && fumapy-generate httpx",
     "types:check": "next typegen && tsc --noEmit"
   },
   "dependencies": {
     "fumadocs-core": "workspace:*",
-    "fumadocs-mdx": "workspace:*",
     "fumadocs-python": "workspace:*",
     "fumadocs-ui": "workspace:@fumadocs/base-ui@*",
     "next": "16.3.0",

@@ -1,6 +1,6 @@
 import { localHtml } from '@fumadocs/local-html';
 import { watchWithDevServer } from '@fumadocs/local-html/dev/ws';
-import { dynamicLoader } from 'fumadocs-core/source/dynamic';
+import { dynamicLoader } from 'fumadocs-core/source';
 import { lucideIconsPlugin } from 'fumadocs-core/source/lucide-icons';
 
 const pages = localHtml({

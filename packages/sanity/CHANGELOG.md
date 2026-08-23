@@ -1,3 +1,7 @@
+## @fumadocs/sanity@0.2.1
+
+### Simplify cache
+
 ## @fumadocs/sanity@0.2.0
 
 ### Redesign source API

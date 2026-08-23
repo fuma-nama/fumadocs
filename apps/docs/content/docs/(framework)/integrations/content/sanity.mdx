@@ -70,7 +70,7 @@ npm i @fumadocs/sanity
 ```
 
 ```ts title="lib/source.ts" tab="Next.js (live preview)"
-import { dynamicLoader } from 'fumadocs-core/source/dynamic';
+import { dynamicLoader } from 'fumadocs-core/source';
 import { createSanitySource } from '@fumadocs/sanity';
 // the live preview client
 import { sanityFetch } from '@/sanity/lib/live';
@@ -93,7 +93,7 @@ export async function getSource() {
 ```
 
 ```ts title="lib/source.ts" tab="Others"
-import { dynamicLoader } from 'fumadocs-core/source/dynamic';
+import { dynamicLoader } from 'fumadocs-core/source';
 import { createSanitySource } from '@fumadocs/sanity';
 // the Sanity client
 import { client } from '@/sanity/lib/client';

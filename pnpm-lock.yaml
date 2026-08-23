@@ -1017,9 +1017,6 @@ importers:
       fumadocs-core:
         specifier: workspace:*
         version: link:../../packages/core
-      fumadocs-mdx:
-        specifier: workspace:*
-        version: link:../../packages/mdx
       fumadocs-python:
         specifier: workspace:*
         version: link:../../packages/python
@@ -3512,34 +3509,70 @@ importers:
       cnfast:
         specifier: ^0.1.0
         version: 0.1.0
+      hast-util-to-jsx-runtime:
+        specifier: ^2.3.6
+        version: 2.3.6
       lucide-react:
         specifier: ^1.31.0
         version: 1.31.0(react@19.2.8)
-      react:
-        specifier: 19.x.x
-        version: 19.2.8
-      yaml:
-        specifier: ^2.9.0
-        version: 2.9.0
+      mdast-util-mdx:
+        specifier: ^3.0.0
+        version: 3.0.0
+      remark:
+        specifier: ^15.0.1
+        version: 15.0.1
+      remark-rehype:
+        specifier: ^11.1.2
+        version: 11.1.2
+      unified:
+        specifier: ^11.0.5
+        version: 11.0.5
+      vfile:
+        specifier: ^6.0.3
+        version: 6.0.3
     devDependencies:
+      '@types/estree':
+        specifier: ^1.0.9
+        version: 1.0.9
+      '@types/hast':
+        specifier: ^3.0.5
+        version: 3.0.5
+      '@types/mdast':
+        specifier: ^4.0.4
+        version: 4.0.4
+      '@types/mdx':
+        specifier: ^2.0.14
+        version: 2.0.14
       '@types/node':
         specifier: ^26.2.0
         version: 26.2.0
       '@types/react':
         specifier: ^19.2.18
         version: 19.2.18
+      '@types/react-dom':
+        specifier: ^19.2.4
+        version: 19.2.4(@types/react@19.2.18)
       fumadocs-core:
         specifier: workspace:*
         version: link:../core
       fumadocs-ui:
         specifier: workspace:@fumadocs/base-ui@*
         version: link:../base-ui
+      react:
+        specifier: ^19.2.8
+        version: 19.2.8
+      react-dom:
+        specifier: ^19.2.8
+        version: 19.2.8(react@19.2.8)
       tsconfig:
         specifier: workspace:*
         version: link:../tsconfig
       tsdown:
         specifier: 0.22.14
         version: 0.22.14(@tsdown/css@0.22.14)(oxc-resolver@11.19.1(@emnapi/core@2.0.0-alpha.3)(@emnapi/runtime@2.0.0-alpha.3))(tsx@4.23.12)(typescript@6.0.3)(unrun@0.3.1)
+      vitest:
+        specifier: ^4.1.10
+        version: 4.1.10(@opentelemetry/api@1.9.1)(@types/node@26.2.0)(jsdom@29.1.1(@noble/hashes@2.3.0))(vite@8.2.1(@types/node@26.2.0)(esbuild@0.28.2)(jiti@2.7.0)(terser@5.49.0)(tsx@4.23.12)(yaml@2.9.0))
 
   packages/radix-ui:
     dependencies:

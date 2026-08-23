@@ -1,3 +1,7 @@
+## @fumadocs/local-content@0.2.1
+
+### Simplify cache
+
 ## @fumadocs/local-content@0.2.0
 
 ### Redesign source API

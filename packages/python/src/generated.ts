@@ -46,11 +46,6 @@ type DocstringSection =
       value: string;
     }
   | {
-      kind: 'code';
-      value: string;
-      title?: string;
-    }
-  | {
       kind: 'admonition';
       value: {
         annotation: string;

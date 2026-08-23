@@ -34,6 +34,7 @@ export async function buildIndexDefault(page: Page): Promise<SharedIndex> {
       typeof page.data.structuredData === 'function'
         ? await page.data.structuredData()
         : page.data.structuredData;
+    // TODO: remove on next major
   } else if ('load' in page.data && typeof page.data.load === 'function') {
     structuredData = (await page.data.load()).structuredData;
   }

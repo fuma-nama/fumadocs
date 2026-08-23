@@ -8,4 +8,4 @@ Runtime content source for rendering an Obsidian vault with Fumadocs.
 - Comments.
 - Static and dynamically revalidated Fumadocs sources.
 
-See the [Obsidian integration guide](https://fumadocs.dev/docs/integrations/obsidian) for setup and usage.
+See the [Obsidian integration guide](https://fumadocs.dev/docs/integrations/content/obsidian) for setup and usage.
