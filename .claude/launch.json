@@ -34,6 +34,13 @@
       "runtimeArgs": ["--dir", "examples/next-min", "dev"],
       "port": 3000,
       "autoPort": true
+    },
+    {
+      "name": "python-example",
+      "runtimeExecutable": "pnpm",
+      "runtimeArgs": ["--dir", "examples/python", "dev"],
+      "port": 3000,
+      "autoPort": true
     }
   ]
 }

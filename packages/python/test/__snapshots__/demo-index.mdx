@@ -1,0 +1,164 @@
+A demo package.
+
+It exercises **every** section kind of `fumapy` output, including `{braces}` and \<angles>.
+
+<PyAttributes>
+  <PyAttribute name="DEFAULT_TIMEOUT" type="float" value="5.0">
+    Seconds to wait before giving up.
+  </PyAttribute>
+</PyAttributes>
+
+<Tabs items={["Class","Functions","Modules"]}>
+  <Tab value="Class">
+    <Cards>
+      <Card title="GitInfo" href="/docs/demo/GitInfo" />
+    </Cards>
+  </Tab>
+
+  <Tab value="Functions">
+    <PyFunction name="_error_details" type="(error, objpath) -> str">
+      <Callout title="Example" type="example">
+        ```python
+        import griffe
+
+        module = griffe.load(...)
+        ```
+
+        This is a shortcut for:
+
+        ```python
+        from griffe import GriffeLoader
+
+        loader = GriffeLoader(...)
+        module = loader.load(...)
+        ```
+
+        See the documentation for the loader: \[`GriffeLoader`]\[griffe.GriffeLoader].
+      </Callout>
+
+      ```python
+      >>> foo = griffe_object["foo"]
+      >>> bar = griffe_object["path.to.bar"]
+      >>> qux = griffe_object[("path", "to", "qux")]
+      ```
+
+      <PySourceCode>
+        ```python
+        def _error_details(error: BaseException, objpath: str) -> str:
+            return f"With sys.path = {sys.path!r}, accessing {objpath!r} raises {error.__class__.__name__}: {error}"
+        ```
+      </PySourceCode>
+
+      <div>
+        <PyParameter name="error" type="BaseException" />
+
+        <PyParameter name="objpath" type="str" />
+      </div>
+
+      <PyFunctionReturn type="str" />
+    </PyFunction>
+
+    <PyFunction name="sys_path" type="(*paths) -> Iterator[None]">
+      Redefine `sys.path` temporarily.
+
+      <PySourceCode>
+        ```python
+        @contextmanager
+        def sys_path(*paths: str | Path) -> Iterator[None]:
+            """Redefine `sys.path` temporarily.
+
+            Parameters:
+                *paths: The paths to use when importing modules.
+                    If no paths are given, keep `sys.path` untouched.
+
+            Yields:
+                Nothing.
+            """
+            if not paths:
+
+            ...
+        ```
+      </PySourceCode>
+
+      <div>
+        <PyParameter name="paths" type="str | Path" value="()" />
+      </div>
+
+      <PyFunctionReturn type="collections.abc.Iterator[None]" />
+    </PyFunction>
+
+    <PyFunction name="dynamic_import" type="(import_path, import_paths=None) -> Any">
+      Dynamically import the specified object.
+
+      It can be a module, class, method, function, attribute, type alias,
+      nested arbitrarily.
+
+      It works like this:
+
+      * for a given object path `a.b.x.y`
+      * it tries to import `a.b.x.y` as a module (with `importlib.import_module`)
+      * if it fails, it tries again with `a.b.x`, storing `y`
+      * then `a.b`, storing `x.y`
+      * then `a`, storing `b.x.y`
+      * if nothing worked, it raises an error
+      * if one of the iteration worked, it moves on, and...
+      * it tries to get the remaining (stored) parts with `getattr`
+      * for example it gets `b` from `a`, then `x` from `b`, etc.
+      * if a single attribute access fails, it raises an error
+      * if everything worked, it returns the last obtained attribute
+
+      Since the function potentially tries multiple things before succeeding,
+      all errors happening along the way are recorded, and re-emitted with
+      an `ImportError` when it fails, to let users know what was tried.
+
+      IMPORTANT: The paths given through the `import_paths` parameter are used
+      to temporarily patch `sys.path`: this function is therefore not thread-safe.
+
+      IMPORTANT: The paths given as `import_paths` must be *correct*.
+      The contents of `sys.path` must be consistent to what a user of the imported code
+      would expect. Given a set of paths, if the import fails for a user, it will fail here too,
+      with potentially unintuitive errors. If we wanted to make this function more robust,
+      we could add a loop to "roll the window" of given paths, shifting them to the left
+      (for example: `("/a/a", "/a/b", "/a/c/")`, then `("/a/b", "/a/c", "/a/a/")`,
+      then `("/a/c", "/a/a", "/a/b/")`), to make sure each entry is given highest priority
+      at least once, maintaining relative order, but we deem this unnecessary for now.
+
+      <PySourceCode>
+        ```python
+        def dynamic_import(import_path: str, import_paths: Sequence[str | Path] | None = None) -> Any:
+            """Dynamically import the specified object.
+
+            It can be a module, class, method, function, attribute, type alias,
+            nested arbitrarily.
+
+            It works like this:
+
+            - for a given object path `a.b
+            ...
+        ```
+      </PySourceCode>
+
+      <div>
+        <PyParameter name="import_path" type="str">
+          The path of the object to import.
+        </PyParameter>
+
+        <PyParameter name="import_paths" type="Sequence[str | Path] | None" value="None">
+          The (sys) paths to import the object from.
+        </PyParameter>
+      </div>
+
+      <PyFunctionReturn type="typing.Any">
+        The imported object.
+      </PyFunctionReturn>
+    </PyFunction>
+  </Tab>
+
+  <Tab value="Modules">
+    <Cards>
+      <Card title="logger" href="/docs/demo/logger" />
+
+      <Card title="utils" href="/docs/demo/utils" />
+    </Cards>
+  </Tab>
+</Tabs>

@@ -1,8 +1,18 @@
 import griffe
 
 
+def signature_parameters(obj: griffe.Class | griffe.Function) -> list[griffe.Parameter]:
+    """Parameters of the signature, without the implicit `self`/`cls` of methods."""
+    parameters = list(obj.parameters)
+    if isinstance(obj, griffe.Class) or (
+        isinstance(obj.parent, griffe.Class) and "staticmethod" not in obj.labels
+    ):
+        return parameters[1:]
+    return parameters
+
+
 def build_signature(func: griffe.Function) -> str:
-    parameters: list[griffe.Parameter] = func.parameters
+    parameters = signature_parameters(func)
 
     s = "("
     positional_only = True

@@ -5,24 +5,20 @@ import { Collapsible, CollapsibleContent, CollapsibleTrigger } from './collapsib
 import { buttonVariants } from 'fumadocs-ui/components/ui/button';
 import { ChevronRight } from 'lucide-react';
 import { highlight } from 'fumadocs-core/highlight';
+import { badgeVariants } from '../badge';
 
 const cardVariants = cva('bg-fd-card rounded-lg text-sm my-6 p-3 border');
-const badgeVariants = cva('text-xs font-medium border p-1 rounded-lg not-prose', {
-  variants: {
-    color: {
-      func: 'bg-fdpy-func/10 text-fdpy-func border-fdpy-func/50',
-      attribute: 'bg-fdpy-attribute/10 text-fdpy-attribute border-fdpy-attribute/50',
-      class: 'bg-fdpy-class/10 text-fdpy-class border-fdpy-class/50',
-      primary: 'bg-fd-primary/10 text-fd-primary border-fd-primary/10',
-    },
-  },
-});
 
-export function PyFunction(props: { name: string; type: string; children?: ReactNode }) {
+export function PyFunction(props: {
+  name: string;
+  type: string;
+  kind?: 'func' | 'constructor';
+  children?: ReactNode;
+}) {
   return (
     <figure className={cn(cardVariants())}>
       <div className="flex gap-2 items-center font-mono flex-wrap mb-4">
-        <code className={cn(badgeVariants({ color: 'func' }))}>func</code>
+        <code className={cn(badgeVariants({ color: 'func' }))}>{props.kind ?? 'func'}</code>
         {props.name}
         <InlineCode
           lang="python"
@@ -35,6 +31,10 @@ export function PyFunction(props: { name: string; type: string; children?: React
   );
 }
 
+export function PyAttributes({ children }: { children?: ReactNode }) {
+  return <figure className={cn(cardVariants(), 'p-0 divide-y')}>{children}</figure>;
+}
+
 export function PyAttribute(props: {
   name: string;
   type?: string;
@@ -42,8 +42,8 @@ export function PyAttribute(props: {
   children?: ReactNode;
 }) {
   return (
-    <figure className={cn(cardVariants())}>
-      <div className="flex gap-2 items-center flex-wrap font-mono mb-4">
+    <div className="p-3">
+      <div className="flex gap-2 items-center flex-wrap font-mono">
         <code className={cn(badgeVariants({ color: 'attribute' }))}>attribute</code>
         {props.name}
         {props.type && (
@@ -54,13 +54,13 @@ export function PyAttribute(props: {
           />
         )}
       </div>
-      <div className="text-fd-muted-foreground prose-no-margin">
+      <div className="text-fd-muted-foreground prose-no-margin mt-2 empty:hidden">
         {props.value && (
           <InlineCode lang="python" className="not-prose text-xs" code={`= ${props.value}`} />
         )}
         {props.children}
       </div>
-    </figure>
+    </div>
   );
 }
 
