@@ -1,10 +1,10 @@
 ---
 packages:
-  npm:fumadocs-core: minor
-  npm:@fumadocs/local-md: minor
-  npm:@fumadocs/local-html: minor
-  npm:fumadocs-obsidian: minor
-  npm:@fumadocs/satteri: minor
+  npm:fumadocs-core: patch
+  npm:@fumadocs/local-md: patch
+  npm:@fumadocs/local-html: patch
+  npm:fumadocs-obsidian: patch
+  npm:@fumadocs/satteri: patch
 ---
 
 ## Read structured data from `page.data.structuredData()`
