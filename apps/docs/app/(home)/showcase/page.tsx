@@ -156,7 +156,7 @@ const showcases: ShowcaseObject[] = [
   {
     image: '/showcases/sora-ui.png',
     name: 'Sora UI',
-    url: 'https://ui.soralabs.io.vn',
+    url: 'https://ui.soralabs.studio',
   },
   {
     image: '/showcases/kibo-ui.jpg',
