@@ -9,7 +9,7 @@ export function pythonPlugin(): LoaderPlugin {
     name: 'fumadocs:python',
     transformPageTree: {
       file(node, filePath) {
-        // folders take their name from the index page, keep them plain
+        // folders take their name from their index page, keep them plain
         if (!filePath || filePath.endsWith('/index.mdx')) return node;
         const file = this.storage.read(filePath);
         if (file?.format !== 'page') return node;

@@ -1,3 +1,23 @@
+## fumadocs-openapi@11.3.2
+
+### Improve OAuth Password Flow
+
+Support optional Client ID and Client Secret in the OAuth password flow of API playground, they are sent along the token request when specified.
+
+### Enhance result display of API playground
+
+The response panel now gives you the full picture of a request:
+
+- the resolved request URL, including path and query parameters
+- response headers in a collapsible list
+- response body labeled with its content type
+
+Client-side errors also show the request URL, making issues like a wrong server URL easy to spot.
+
+For custom `ResultDisplay` components, `FetchResult` now carries a `url` field.
+
+`@fumadocs/language` includes translations for the new UI.
+
 ## fumadocs-openapi@11.3.1
 
 ### Simplify cache

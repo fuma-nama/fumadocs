@@ -218,6 +218,36 @@ describe('Merge object schemas', () => {
     `);
   });
 
+  test('Merge multiple objects: `description`', () => {
+    expect(
+      mergeAllOf({
+        allOf: [
+          {
+            type: 'number',
+            format: 'decimal',
+            description: 'Reusable type description',
+          },
+          {
+            description: 'Property-specific description',
+          },
+        ],
+      }),
+    ).toMatchInlineSnapshot(`
+      {
+        "description": "Property-specific description",
+        "format": "decimal",
+        "type": "number",
+      }
+    `);
+
+    expect(
+      mergeAllOf({
+        description: 'Outer',
+        allOf: [{ description: 'Reusable type' }],
+      }),
+    ).toEqual({ description: 'Outer' });
+  });
+
   test('Production: `allOf` with multiple `oneOf`', () => {
     const result = mergeAllOf({
       type: 'object',

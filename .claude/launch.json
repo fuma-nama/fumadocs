@@ -36,6 +36,13 @@
       "autoPort": true
     },
     {
+      "name": "openapi-example",
+      "runtimeExecutable": "pnpm",
+      "runtimeArgs": ["--dir", "examples/openapi", "dev"],
+      "port": 3000,
+      "autoPort": true
+    },
+    {
       "name": "python-example",
       "runtimeExecutable": "pnpm",
       "runtimeArgs": ["--dir", "examples/python", "dev"],

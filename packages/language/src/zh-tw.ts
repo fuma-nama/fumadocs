@@ -134,6 +134,7 @@ const translations = {
   'Forbidden(playground status info)': '禁止存取',
   'Header Parameters(operation page)': '標頭參數',
   'Header(playground)': '標頭',
+  'Headers(playground result display)': '標頭',
   'Implicit(OAuth dialog)': '隱含式',
   'In(security scheme)': '位置',
   'Intended for the server-to-server authentication.(OAuth dialog)': '適用於伺服器對伺服器驗證。',

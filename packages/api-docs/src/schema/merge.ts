@@ -14,6 +14,9 @@ export function mergeAllOf(schema: ParsedSchema): ParsedSchema {
   for (const item of allOf) {
     result = intersection(result, item);
   }
+  if (typeof result !== 'boolean' && rest.description !== undefined) {
+    result.description = rest.description;
+  }
   return result;
 }
 
@@ -46,13 +49,18 @@ function intersection(a: ParsedSchema, b: ParsedSchema): ParsedSchema {
     switch (key) {
       case '$id':
       case '$comment':
-      case 'description':
       case 'examples':
       case 'allOf':
       case 'writeOnly':
       case 'readOnly':
         // ignored
         break;
+      // last member wins
+      case 'description': {
+        const value = b[key];
+        if (value !== undefined) result[key] = value;
+        break;
+      }
       case 'title': {
         const value = b[key];
         if (value === undefined) break;
