@@ -7,11 +7,13 @@ export type FetchResult = FetchResponseResult | FetchErrorResult;
 
 export interface FetchErrorResult {
   type: 'client_error';
+  url: string;
   message: string;
 }
 
 export interface FetchResponseResult {
   type: 'response';
+  url: string;
   status: number;
   headers: Headers;
   body: ArrayBuffer;
@@ -84,6 +86,7 @@ export function createBrowserFetcher(
         if (!adapter)
           return {
             type: 'client_error',
+            url,
             message: `[Fumadocs] No adapter for ${data.bodyMediaType}, you need to specify one from 'createOpenAPI()'.`,
           };
 
@@ -120,6 +123,7 @@ export function createBrowserFetcher(
         .then(async (res): Promise<FetchResult> => {
           return {
             type: 'response',
+            url,
             status: res.status,
             headers: res.headers,
             body: await res.arrayBuffer(),
@@ -130,6 +134,7 @@ export function createBrowserFetcher(
 
           return {
             type: 'client_error',
+            url,
             message: `Client side error: ${message}`,
           };
         });
