@@ -1,23 +1,12 @@
 core:changelogs:
-  - content: "---\npackages:\n  npm:@fumadocs/api-docs:\n    type: patch\n---\n\n## Preserve `description` when merging `allOf` schemas\n\n`mergeAllOf()` no longer drops descriptions defined inside `allOf` members, so this common composition pattern renders its description in the Schema UI:\n\n```yaml\namount:\n  allOf:\n    - $ref: '#/components/schemas/Money'\n    - description: Property-specific description\n```\n\nThe last defined description among members wins, and a description on the outer schema keeps precedence over all of them.\n"
-    filename: 2026-08-25-allof-description.md
-    v: 0.0.0
-  - content: "---\npackages:\n  npm:fumadocs-openapi:\n    type: patch\n  npm:@fumadocs/language:\n    type: patch\n---\n\n## Enhance result display of API playground\n\nThe response panel now gives you the full picture of a request:\n\n- the resolved request URL, including path and query parameters\n- response headers in a collapsible list\n- response body labeled with its content type\n\nClient-side errors also show the request URL, making issues like a wrong server URL easy to spot.\n\nFor custom `ResultDisplay` components, `FetchResult` now carries a `url` field.\n\n`@fumadocs/language` includes translations for the new UI.\n"
-    filename: 2026-08-25-playground-result-display.md
-    v: 0.0.0
-  - content: "---\npackages:\n  npm:fumadocs-openapi:\n    type: patch\n---\n\n## Improve OAuth Password Flow\n\nSupport optional Client ID and Client Secret in the OAuth password flow of API playground, they are sent along the token request when specified.\n"
-    filename: 2026-08-25-oauth-password-client-credentials.md
-    v: 0.0.0
-  - content: "---\npackages:\n  npm:fumadocs-python:\n    type: patch\n---\n\n## `groupBy` option\n\nGenerated pages are grouped in a directory named after the root module. Set `groupBy: 'none'` to place them at the root of the source instead, the root module becomes `index.mdx`:\n\n```ts\nconst python = createPython({\n  file: './httpx.json',\n  groupBy: 'none',\n});\n```\n\n`convert()` accepts the same option.\n"
-    filename: 2026-08-24-python-root-pages.md
+  - content: "---\npackages:\n  npm:fumadocs-openapi:\n    type: patch\n---\n\n## Fix playground result URL\n"
+    filename: 2026-08-25-mt8qnwar.md
     v: 0.0.0
 core:packages:
-  - changelogIds:
-      - 2026-08-25-allof-description.md
-    id: npm:@fumadocs/api-docs
-    updated: true
+  - id: npm:@fumadocs/api-docs
+    updated: false
   - id: npm:@fumadocs/asyncapi
-    updated: true
+    updated: false
   - id: npm:@fumadocs/base-ui
     updated: false
   - id: npm:@fumadocs/basehub
@@ -26,31 +15,31 @@ core:packages:
     updated: false
   - id: npm:@fumadocs/content
     updated: false
+  - id: npm:@fumadocs/content-collections
+    updated: false
   - id: npm:fumadocs-core
     updated: false
   - id: npm:create-fumadocs-app
-    updated: false
-  - id: npm:@fumadocs/content-collections
     updated: false
   - id: npm:create-fumadocs-versions
     updated: false
   - id: npm:fumadocs-docgen
     updated: false
-  - id: npm:@fumadocs/graphql
-    updated: true
   - id: npm:fumadocs-epub
     updated: false
   - id: npm:@fumari/image-size
     updated: false
-  - changelogIds:
-      - 2026-08-25-playground-result-display.md
-    id: npm:@fumadocs/language
-    updated: true
-  - id: npm:@fumadocs/local-content
+  - id: npm:@fumadocs/graphql
+    updated: false
+  - id: npm:@fumadocs/language
     updated: false
   - id: npm:@fumadocs/local-html
     updated: false
+  - id: npm:@fumadocs/local-content
+    updated: false
   - id: npm:fumadocs-mdx
+    updated: false
+  - id: npm:@fumadocs/local-md
     updated: false
   - id: npm:@fumadocs/mdx-remote
     updated: false
@@ -59,18 +48,13 @@ core:packages:
   - id: npm:fumadocs-obsidian
     updated: false
   - changelogIds:
-      - 2026-08-25-oauth-password-client-credentials.md
-      - 2026-08-25-playground-result-display.md
+      - 2026-08-25-mt8qnwar.md
     id: npm:fumadocs-openapi
     updated: true
-  - id: npm:@fumadocs/local-md
-    updated: false
   - id: npm:fumadocs-preview
     updated: false
-  - changelogIds:
-      - 2026-08-24-python-root-pages.md
-    id: npm:fumadocs-python
-    updated: true
+  - id: npm:fumadocs-python
+    updated: false
   - id: npm:fumadocs-ui
     updated: false
   - id: npm:@fumadocs/sanity
@@ -98,23 +82,23 @@ npm:packages:
   - id: npm:@fumadocs/basehub
   - id: npm:@fumadocs/cli
   - id: npm:@fumadocs/content
+  - id: npm:@fumadocs/content-collections
   - id: npm:fumadocs-core
   - id: npm:create-fumadocs-app
-  - id: npm:@fumadocs/content-collections
   - id: npm:create-fumadocs-versions
   - id: npm:fumadocs-docgen
-  - id: npm:@fumadocs/graphql
   - id: npm:fumadocs-epub
   - id: npm:@fumari/image-size
+  - id: npm:@fumadocs/graphql
   - id: npm:@fumadocs/language
-  - id: npm:@fumadocs/local-content
   - id: npm:@fumadocs/local-html
+  - id: npm:@fumadocs/local-content
   - id: npm:fumadocs-mdx
+  - id: npm:@fumadocs/local-md
   - id: npm:@fumadocs/mdx-remote
   - id: npm:@fumadocs/notion
   - id: npm:fumadocs-obsidian
   - id: npm:fumadocs-openapi
-  - id: npm:@fumadocs/local-md
   - id: npm:fumadocs-preview
   - id: npm:fumadocs-python
   - id: npm:fumadocs-ui
@@ -127,13 +111,5 @@ npm:packages:
   - id: npm:fumadocs-twoslash
   - id: npm:fumadocs-typescript
   - id: npm:@fumadocs/vite
-  - id: npm:example-python
-  - id: npm:docs
-  - id: npm:example-asyncapi
-  - id: npm:example-graphql
   - id: npm:example-openapi
   - id: npm:example-tanstack-start-openapi
-  - id: npm:example-i18n
-  - id: npm:example-react-router-i18n
-  - id: npm:example-tanstack-start-i18n
-  - id: npm:example-waku-i18n
