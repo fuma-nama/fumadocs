@@ -6,14 +6,24 @@ import { remark } from 'remark';
 import { getSlugs } from 'fumadocs-core/source';
 import type { ModuleInterface } from './generated';
 import { buildPages, type BuiltPage } from './build';
+import type { PythonGroupBy } from './source';
 
 export interface ConvertOptions {
   /** base URL of the generated pages, used to link classes and modules from their parent module */
   baseUrl?: string;
+  /**
+   * group generated pages in a directory:
+   *
+   * - `module`: the name of the root module
+   * - `none`: place them at the root of the output directory
+   *
+   * @defaultValue 'module'
+   */
+  groupBy?: PythonGroupBy;
 }
 
 export interface OutputFile {
-  /** relative to the content directory, e.g. `httpx/_client/index.mdx` */
+  /** relative to the output directory, e.g. `httpx/_client/index.mdx` */
   path: string;
   title: string;
   /** MDX content, without frontmatter */
@@ -32,7 +42,7 @@ export function convert(mod: ModuleInterface, options: ConvertOptions = {}): Out
   const href = (target: BuiltPage) =>
     '/' + [...baseUrl.split('/'), ...getSlugs(target.path)].filter(Boolean).join('/');
 
-  return buildPages(mod).map((page) => ({
+  return buildPages(mod, options.groupBy).map((page) => ({
     path: page.path,
     title: page.title,
     content: stringifier.stringify(page.build(href)),

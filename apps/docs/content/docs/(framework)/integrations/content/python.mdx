@@ -61,6 +61,9 @@ import { createPython } from 'fumadocs-python';
 
 const python = createPython({
   file: './httpx.json',
+  // Pages are grouped in a directory named after the root module, for example `httpx._client.Client` is served at `/docs/httpx/_client/Client`.
+  // Set to "none" to place them at the root of the source instead.
+  groupBy: 'module',
 });
 
 export const source = loader(await python.staticSource(), {
@@ -69,8 +72,6 @@ export const source = loader(await python.staticSource(), {
   plugins: [python.loaderPlugin()],
 });
 ```
-
-Pages are placed under the package name, for example `httpx._client.Client` is served at `/docs/httpx/_client/Client`.
 
 Then load and render a page:
 
@@ -142,7 +143,7 @@ const python = createPython({
 
 ## Generate MDX Files
 
-You can convert the JSON into MDX files instead, and keep them next to your other content. Links between modules and classes are written into the files, so `baseUrl` must match where the content is served:
+You can convert the JSON into MDX files instead, and keep them next to your other content. Links between modules and classes are written into the files, so `baseUrl` must match where the output directory is served:
 
 ```js tab="scripts/generate-docs.mjs"
 import { rimraf } from 'rimraf';

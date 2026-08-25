@@ -60,6 +60,18 @@ describe('createPython', () => {
     ]);
   });
 
+  test('groupBy: none places pages at the root', async () => {
+    const source = await createPython({ file, groupBy: 'none' }).staticSource();
+
+    expect(source.files.map((file) => file.path)).toEqual([
+      'GitInfo.mdx',
+      'logger/Logger.mdx',
+      'logger/index.mdx',
+      'utils.mdx',
+      'index.mdx',
+    ]);
+  });
+
   test('compiles pages at most once and renders without evaluating JavaScript', async () => {
     const loader = dynamicLoader(createPython({ file }).dynamicSource(), {
       baseUrl: '/docs',

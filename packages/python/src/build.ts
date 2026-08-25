@@ -11,7 +11,7 @@ import type {
   ModuleInterface,
   ParameterInterface,
 } from './generated';
-import type { PythonPageKind } from './source';
+import type { PythonGroupBy, PythonPageKind } from './source';
 
 type Flow = BlockContent | DefinitionContent;
 
@@ -32,19 +32,51 @@ const parser = remark()
   });
 
 /** One page per module and class, a class page comes before its module. */
-export function buildPages(mod: ModuleInterface): BuiltPage[] {
+export function buildPages(root: ModuleInterface, groupBy: PythonGroupBy = 'module'): BuiltPage[] {
   const pages: BuiltPage[] = [];
+
+  /** file path of an object, without extension */
+  function file(path: string) {
+    if (groupBy === 'none') path = path === root.path ? '' : path.slice(root.path.length + 1);
+    return path.replaceAll('.', '/');
+  }
+
+  function classPage(cls: ClassInterface): BuiltPage {
+    return {
+      path: `${file(cls.path)}.mdx`,
+      title: cls.name,
+      kind: 'class',
+      build() {
+        const content = describe(cls.description, cls.docstring);
+
+        if (cls.attributes.length > 0) {
+          content.push(heading('Attributes'), attributes(cls.attributes));
+        }
+
+        // the constructor leads, it takes the place of a parameters section
+        const functions = Object.values(cls.functions).sort(
+          (a, b) => Number(isConstructor(b)) - Number(isConstructor(a)),
+        );
+        if (functions.length > 0) {
+          content.push(heading('Functions'), ...functions.map(fn));
+        }
+
+        return { type: 'root', children: content };
+      },
+    };
+  }
 
   function module(mod: ModuleInterface): BuiltPage {
     const classes = Object.values(mod.classes).map(classPage);
     pages.push(...classes);
     const modules = Object.values(mod.modules).map(module);
 
-    const dir = mod.path.replaceAll('.', '/');
+    const dir = file(mod.path);
+    // only a module with child pages needs a folder
+    const folder = classes.length > 0 || modules.length > 0;
 
     const page: BuiltPage = {
-      // only a module with child pages needs a folder
-      path: classes.length > 0 || modules.length > 0 ? `${dir}/index.mdx` : `${dir}.mdx`,
+      path: !dir ? 'index.mdx' : folder ? `${dir}/index.mdx` : `${dir}.mdx`,
       title: mod.name,
       kind: 'module',
       build(href) {
@@ -75,7 +107,7 @@ export function buildPages(mod: ModuleInterface): BuiltPage[] {
     return page;
   }
 
-  module(mod);
+  module(root);
   return pages;
 }
 
@@ -85,31 +117,6 @@ function cards(targets: BuiltPage[], href: (target: BuiltPage) => string): MdxJs
     {},
     targets.map((target) => jsx('Card', { title: target.title, href: href(target) })),
   );
-}
-
-function classPage(cls: ClassInterface): BuiltPage {
-  return {
-    path: `${cls.path.replaceAll('.', '/')}.mdx`,
-    title: cls.name,
-    kind: 'class',
-    build() {
-      const content = describe(cls.description, cls.docstring);
-
-      if (cls.attributes.length > 0) {
-        content.push(heading('Attributes'), attributes(cls.attributes));
-      }
-
-      // the constructor leads, it takes the place of a parameters section
-      const functions = Object.values(cls.functions).sort(
-        (a, b) => Number(isConstructor(b)) - Number(isConstructor(a)),
-      );
-      if (functions.length > 0) {
-        content.push(heading('Functions'), ...functions.map(fn));
-      }
-
-      return { type: 'root', children: content };
-    },
-  };
 }
 
 function fn(func: FunctionInterface): MdxJsxFlowElement {

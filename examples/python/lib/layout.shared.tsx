@@ -5,12 +5,5 @@ export function baseOptions(): BaseLayoutProps {
     nav: {
       title: 'Python Docs',
     },
-    links: [
-      {
-        text: 'Documentation',
-        url: '/docs',
-        active: 'nested-url',
-      },
-    ],
   };
 }
