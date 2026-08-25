@@ -177,17 +177,21 @@ function Content({ schemeId, scopes, setToken, setOpen }: AuthDialogContentProps
     if (type === 'password') {
       const value = scheme.flows![type]!;
 
+      const body = new URLSearchParams({
+        grant_type: 'password',
+        username: values.username,
+        password: values.password,
+        scope: scopes.join('+'),
+      });
+      if (values.clientId) body.set('client_id', values.clientId);
+      if (values.clientSecret) body.set('client_secret', values.clientSecret);
+
       res = await fetch(value.tokenUrl!, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/x-www-form-urlencoded',
         },
-        body: new URLSearchParams({
-          grant_type: 'password',
-          username: values.username,
-          password: values.password,
-          scope: scopes.join('+'),
-        }),
+        body,
       });
     }
 
@@ -258,7 +262,10 @@ function Content({ schemeId, scopes, setToken, setOpen }: AuthDialogContentProps
         </SelectContent>
       </Select>
 
-      {(type === 'authorizationCode' || type === 'clientCredentials' || type === 'implicit') && (
+      {(type === 'authorizationCode' ||
+        type === 'clientCredentials' ||
+        type === 'implicit' ||
+        type === 'password') && (
         <fieldset className="flex flex-col gap-1.5">
           <label htmlFor="client_id" className={cn(labelVariants())}>
             {t('Client ID')}
@@ -274,11 +281,11 @@ function Content({ schemeId, scopes, setToken, setOpen }: AuthDialogContentProps
             autoComplete="off"
             disabled={isLoading}
             defaultValue={defaultValues.clientId}
-            required
+            required={type !== 'password'}
           />
         </fieldset>
       )}
-      {(type === 'authorizationCode' || type === 'clientCredentials') && (
+      {(type === 'authorizationCode' || type === 'clientCredentials' || type === 'password') && (
         <fieldset className="flex flex-col gap-1.5">
           <label htmlFor="client_secret" className={cn(labelVariants())}>
             {t('Client Secret')}
@@ -294,7 +301,7 @@ function Content({ schemeId, scopes, setToken, setOpen }: AuthDialogContentProps
             autoComplete="off"
             disabled={isLoading}
             defaultValue={defaultValues.clientSecret}
-            required
+            required={type !== 'password'}
           />
         </fieldset>
       )}
