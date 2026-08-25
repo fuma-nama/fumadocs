@@ -134,6 +134,7 @@ const translations = {
   'Forbidden(playground status info)': '禁止访问',
   'Header Parameters(operation page)': '标头参数',
   'Header(playground)': '标头',
+  'Headers(playground result display)': '标头',
   'Implicit(OAuth dialog)': '隐式',
   'In(security scheme)': '位置',
   'Intended for the server-to-server authentication.(OAuth dialog)': '适用于服务器对服务器验证。',

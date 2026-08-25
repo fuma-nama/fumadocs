@@ -1,7 +1,7 @@
-import { loader } from 'fumadocs-core/source';
+import { loader, StaticSource } from 'fumadocs-core/source';
 import { revalidable } from '@/lib/revalidable';
 import { lucideIconsPlugin } from 'fumadocs-core/source/lucide-icons';
-import { getPages } from './storage';
+import { getPages, RawMeta, RawPage } from './storage';
 import type { ParsedAppConfig } from '@/config/global';
 
 export const getSource = revalidable({
@@ -10,7 +10,10 @@ export const getSource = revalidable({
     return loader({
       source: {
         files: [...out.metas, ...out.pages],
-      },
+      } as StaticSource<{
+        metaData: RawMeta['data'];
+        pageData: RawPage['data'];
+      }>,
       plugins: [lucideIconsPlugin()],
       baseUrl: '/',
     });
