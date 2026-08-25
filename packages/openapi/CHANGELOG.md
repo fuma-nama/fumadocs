@@ -1,3 +1,7 @@
+## fumadocs-openapi@11.3.3
+
+### Fix playground result URL
+
 ## fumadocs-openapi@11.3.2
 
 ### Improve OAuth Password Flow
