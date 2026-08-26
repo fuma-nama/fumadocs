@@ -33,7 +33,7 @@ export function buildDocuments(indexes: SharedIndex[]) {
 
     const nextId = () => `${page.id}-${id++}`;
 
-    if (page.description) {
+    if (page.description && !data.contents.some((item) => item.content === page.description)) {
       docs.push({
         id: nextId(),
         page_id: page.id,
