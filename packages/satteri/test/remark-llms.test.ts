@@ -97,6 +97,38 @@ test('remark-llms splices included content', async () => {
   expect(markdown).toContain('After.');
 });
 
+test('remark-llms shows generated content of replaced nodes', async () => {
+  const { remarkAutoTypeTable } = await import('@/remark-auto-type-table');
+  const options = await applySatteriPreset({
+    rehypeCodeOptions: false,
+    mdastPlugins: [
+      remarkAutoTypeTable({
+        renderType: (type) => ({ type: 'text', value: type }),
+        renderMarkdown: (md) => ({ type: 'text', value: md }),
+      }),
+      remarkLlms(),
+    ],
+  })('bundler');
+
+  const result = await compileMdx({
+    source: '## Reference\n\n<auto-type-table path="./type-table.ts" name="TestProps" />\n',
+    filePath: path.resolve(import.meta.dirname, './fixtures/page.mdx'),
+    options,
+  });
+
+  expect(result.data?.markdown).toMatchInlineSnapshot(`
+    "## Reference [#reference]
+
+    ### TestProps
+
+    | Prop | Type | Description |
+    | --- | --- | --- |
+    | \`name?\` | \`string\` | The visible name. Default: \`"hello"\` |
+    | \`enabled\` | \`union\` | Whether it is enabled |
+    "
+  `);
+});
+
 test('remark-llms jsx mode exports a component', async () => {
   const options = await applySatteriPreset({
     rehypeCodeOptions: false,

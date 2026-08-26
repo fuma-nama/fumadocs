@@ -29,6 +29,24 @@ export function offsets(node: PositionedNode): { start: number; end: number } | 
 }
 
 /**
+ * Record the Markdown form of generated content over an authored node's source range,
+ * for plugins that replace nodes (e.g. includes, generated type tables). Source-based
+ * Markdown output cannot see the replacement, it shows this text instead.
+ *
+ * `markdown` is only called when source positions are tracked, i.e. when a consumer
+ * of the recorded edits is present.
+ */
+export function replaceSource(
+  ctx: MdastVisitorContext,
+  node: PositionedNode,
+  markdown: () => string,
+): void {
+  const pos = offsets(node);
+  if (pos)
+    (ctx.data._sourceEdits ??= []).push({ start: pos.start, end: pos.end, text: markdown() });
+}
+
+/**
  * Markdown output backed by the authored source. Requires `options: { position: true }`
  * on the plugin, and inherits the `_sourceEdits` recorded by earlier plugins.
  *

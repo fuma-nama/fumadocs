@@ -10,6 +10,7 @@ import type {
   RawMdastContent,
 } from 'satteri';
 import { frontmatter } from 'fumadocs-core/content/md/frontmatter';
+import { replaceSource } from '@/stringifier';
 import { flattenNode } from '@/utils';
 import type { Code, Heading, RootContent } from 'mdast';
 
@@ -58,15 +59,6 @@ const PARSE_FEATURES = { gfm: true, directive: true, headingAttributes: true };
  * Nested includes are resolved recursively, relative to the file they appear in.
  */
 export function remarkInclude({ cwd }: RemarkIncludeOptions = {}): MdastPluginDefinition {
-  /** let `remark-llms` splice the included content over the directive's source range */
-  function recordEdit(ctx: MdastVisitorContext, target: IncludeNode, markdown: () => string) {
-    const start = target.position?.start.offset;
-    const end = target.position?.end.offset;
-    if (start === undefined || end === undefined) return;
-
-    (ctx.data._sourceEdits ??= []).push({ start, end, text: markdown() });
-  }
-
   async function visit(
     node: IncludeNode,
     ctx: MdastVisitorContext,
@@ -75,7 +67,7 @@ export function remarkInclude({ cwd }: RemarkIncludeOptions = {}): MdastPluginDe
     const result = await replaceInclude(node, ctx, cwd);
     if (!result) return;
 
-    recordEdit(ctx, node, result.markdown);
+    replaceSource(ctx, node, result.markdown);
     return result.replacement;
   }
 
@@ -87,12 +79,12 @@ export function remarkInclude({ cwd }: RemarkIncludeOptions = {}): MdastPluginDe
     // the replacement is block content: replace the wrapping paragraph
     const parent = ctx.parent(node as never);
     if (parent?.type === 'paragraph') {
-      recordEdit(ctx, parent as IncludeNode, result.markdown);
+      replaceSource(ctx, parent as IncludeNode, result.markdown);
       ctx.replaceNode(parent, result.replacement);
       return;
     }
 
-    recordEdit(ctx, node, result.markdown);
+    replaceSource(ctx, node, result.markdown);
     return result.replacement;
   }
 

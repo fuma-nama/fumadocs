@@ -11,10 +11,12 @@ import { highlightHast, type HighlightHastOptions } from 'fumadocs-core/highligh
 import {
   createGenerator,
   type DocEntry,
+  type GeneratedDoc,
   type RawTag,
   type RemarkAutoTypeTableOptions,
   type TypeTableProps,
 } from 'fumadocs-typescript';
+import { replaceSource } from './stringifier';
 import { jsxToSource } from './utils';
 
 export type { RemarkAutoTypeTableOptions } from 'fumadocs-typescript';
@@ -106,6 +108,26 @@ async function buildTypeProp(
   }
   prop += '}';
   return prop;
+}
+
+/** the generated type table as a Markdown table, for source-based Markdown output */
+function docToMarkdown(doc: GeneratedDoc): string {
+  const cell = (text: string) => text.replace(/\s*\n\s*/g, ' ').replaceAll('|', '\\|');
+  let out = `### ${doc.name}\n\n`;
+  if (doc.description) out += `${doc.description.trim()}\n\n`;
+
+  out += '| Prop | Type | Description |\n| --- | --- | --- |\n';
+  for (const entry of doc.entries) {
+    const tags = parseTags(entry.tags);
+    let description = entry.description.replace(/{@link (?<link>[^}]*)}/g, '$1').trim();
+    if (tags.default) description += `${description ? ' ' : ''}Default: \`${tags.default}\``;
+    if (entry.deprecated) description = `**Deprecated.** ${description}`;
+
+    const name = `\`${entry.name}${entry.required ? '' : '?'}\``;
+    out += `| ${name} | \`${cell(entry.simplifiedType)}\` | ${cell(description)} |\n`;
+  }
+
+  return out;
 }
 
 export function remarkAutoTypeTable(config: RemarkAutoTypeTableOptions = {}) {
@@ -213,6 +235,15 @@ export function remarkAutoTypeTable(config: RemarkAutoTypeTableOptions = {}) {
       const parent = ctx.parent(node);
       const index = ctx.indexOf(node);
       if (!parent || index === undefined) return;
+
+      replaceSource(ctx, node, () => {
+        let markdown = '';
+        for (const doc of output) {
+          if (markdown) markdown += '\n';
+          markdown += docToMarkdown(doc);
+        }
+        return markdown;
+      });
 
       if (children.length === 0) {
         ctx.removeNode(node);
