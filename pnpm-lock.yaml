@@ -3776,9 +3776,6 @@ importers:
       katex:
         specifier: ^0.18.4
         version: 0.18.4
-      mdast-util-gfm:
-        specifier: ^3.1.0
-        version: 3.1.0
       npm-to-yarn:
         specifier: ^3.2.0
         version: 3.2.0
@@ -3819,9 +3816,6 @@ importers:
       fumadocs-core:
         specifier: workspace:*
         version: link:../core
-      mdast-util-mdx:
-        specifier: ^3.0.0
-        version: 3.0.0
       react:
         specifier: ^19.2.8
         version: 19.2.8

@@ -2,7 +2,11 @@ import { defineMdastPlugin, markdownToHast } from 'satteri';
 import type { ElementContent, Nodes } from 'hast';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import type { MdxJsxAttribute, MdxJsxExpressionAttribute, MdxJsxFlowElement } from 'mdast-util-mdx';
+import type {
+  MdxJsxAttributeNode as MdxJsxAttribute,
+  MdxJsxExpressionAttributeNode as MdxJsxExpressionAttribute,
+  MdxJsxFlowElement,
+} from 'satteri';
 import { highlightHast, type HighlightHastOptions } from 'fumadocs-core/highlight';
 import {
   createGenerator,

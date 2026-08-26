@@ -58,26 +58,42 @@ const PARSE_FEATURES = { gfm: true, directive: true, headingAttributes: true };
  * Nested includes are resolved recursively, relative to the file they appear in.
  */
 export function remarkInclude({ cwd }: RemarkIncludeOptions = {}): MdastPluginDefinition {
+  /** let `remark-llms` splice the included content over the directive's source range */
+  function recordEdit(ctx: MdastVisitorContext, target: IncludeNode, markdown: () => string) {
+    const start = target.position?.start.offset;
+    const end = target.position?.end.offset;
+    if (start === undefined || end === undefined) return;
+
+    (ctx.data._sourceEdits ??= []).push({ start, end, text: markdown() });
+  }
+
   async function visit(
     node: IncludeNode,
     ctx: MdastVisitorContext,
   ): Promise<Code | RawMdastContent | void> {
     if (node.name !== 'include') return;
-    return replaceInclude(node, ctx, cwd);
+    const result = await replaceInclude(node, ctx, cwd);
+    if (!result) return;
+
+    recordEdit(ctx, node, result.markdown);
+    return result.replacement;
   }
 
   async function visitInline(node: IncludeNode, ctx: MdastVisitorContext) {
     if (node.name !== 'include') return;
-    const replacement = await replaceInclude(node, ctx, cwd);
-    if (!replacement) return;
+    const result = await replaceInclude(node, ctx, cwd);
+    if (!result) return;
 
     // the replacement is block content: replace the wrapping paragraph
     const parent = ctx.parent(node as never);
     if (parent?.type === 'paragraph') {
-      ctx.replaceNode(parent, replacement);
+      recordEdit(ctx, parent as IncludeNode, result.markdown);
+      ctx.replaceNode(parent, result.replacement);
       return;
     }
-    return replacement;
+
+    recordEdit(ctx, node, result.markdown);
+    return result.replacement;
   }
 
   return defineMdastPlugin({
@@ -90,11 +106,17 @@ export function remarkInclude({ cwd }: RemarkIncludeOptions = {}): MdastPluginDe
   }) as MdastPluginDefinition;
 }
 
+interface IncludeResult {
+  replacement: Code | RawMdastContent;
+  /** the replacement as Markdown source text, for `remark-llms` */
+  markdown: () => string;
+}
+
 async function replaceInclude(
   node: IncludeNode,
   ctx: MdastVisitorContext,
   cwdOption?: string,
-): Promise<Code | RawMdastContent | void> {
+): Promise<IncludeResult | void> {
   const specifier = ctx.textContent(node as never).trim();
   if (!specifier) return;
 
@@ -112,11 +134,35 @@ async function replaceInclude(
   };
 
   if (isCodeInclude(targetPath, attributes)) {
-    return readCodeInclude(targetPath, section, attributes, state);
+    const code = await readCodeInclude(targetPath, section, attributes, state);
+    return { replacement: code, markdown: () => toCodeFence(code) };
   }
 
   const raw = await readMarkdownInclude(targetPath, section, state);
-  return { raw };
+  return { replacement: { raw }, markdown: () => stripEsm(raw, path.extname(targetPath)) };
+}
+
+/**
+ * Drop top-level ESM nodes from included content: they stay in the compiled
+ * document, but are noise in Markdown output.
+ */
+function stripEsm(text: string, ext: string): string {
+  if (ext !== '.mdx') return text;
+
+  let out = '';
+  let cursor = 0;
+  for (const node of parseTree(text, ext).children) {
+    if (node.type !== 'mdxjsEsm') continue;
+    const start = node.position?.start.offset;
+    const end = node.position?.end.offset;
+    if (start === undefined || end === undefined) continue;
+
+    out += text.slice(cursor, start);
+    cursor = end;
+    while (text[cursor] === '\n' && (out === '' || out.endsWith('\n\n'))) cursor++;
+  }
+
+  return out + text.slice(cursor);
 }
 
 function isCodeInclude(targetPath: string, attributes: Record<string, string | null | undefined>) {

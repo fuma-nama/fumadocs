@@ -1,7 +1,7 @@
 import type { StructuredData } from 'fumadocs-core/mdx-plugins/remark-structure';
 import type { TOCItemType } from 'fumadocs-core/toc';
 import type { Root } from 'mdast';
-import type { MDXContent } from 'mdx/types';
+import type { MDXComponents, MDXContent } from 'mdx/types';
 
 export interface DocData {
   /**
@@ -37,6 +37,13 @@ export interface FileInfo {
   fullPath: string;
 }
 
+export interface GetTextOptions {
+  /**
+   * MDX components for JSX elements in the output, only available when the `jsx` option is enabled in `includeProcessedMarkdown`.
+   */
+  components?: MDXComponents;
+}
+
 export interface DocMethods {
   /**
    * file info
@@ -49,7 +56,7 @@ export interface DocMethods {
    * - `type: raw` - read the original content from file system.
    * - `type: processed` - get the processed Markdown content, only available when `includeProcessedMarkdown` is enabled on collection config.
    */
-  getText: (type: 'raw' | 'processed') => Promise<string>;
+  getText: (type: 'raw' | 'processed', options?: GetTextOptions) => Promise<string>;
 
   getMDAST: () => Promise<Root>;
 }

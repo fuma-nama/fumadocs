@@ -2,7 +2,7 @@ import * as path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import type { MdastPluginDefinition, MdastVisitorContext } from 'satteri';
 import type { Image } from 'mdast';
-import type { MdxJsxFlowElement } from 'mdast-util-mdx';
+import type { MdxJsxFlowElement } from 'satteri';
 import type { ExtraPluginHooks } from './compile';
 
 const VALID_BLUR_EXT = ['.jpeg', '.png', '.webp', '.avif', '.jpg'];
