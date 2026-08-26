@@ -34,7 +34,6 @@ export default defineConfig({
       'remove-markdown',
       '@formatjs/intl-localematcher',
       'path-to-regexp',
-      'negotiator',
       'npm-to-yarn',
       '@formatjs/fast-memoize',
       '@shikijs/transformers',

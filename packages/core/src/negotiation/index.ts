@@ -1,14 +1,4 @@
-import Negotiator from 'negotiator';
 import { compile, match } from 'path-to-regexp';
-
-export function getNegotiator(request: Request) {
-  const headers: Record<string, string> = {};
-  request.headers.forEach((value, key) => {
-    headers[key] = value;
-  });
-
-  return new Negotiator({ headers });
-}
 
 /**
  * Rewrite incoming path matching the `source` pattern into the `destination` pattern.
