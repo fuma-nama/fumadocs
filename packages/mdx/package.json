@@ -110,7 +110,7 @@
     "next": "^15.3.0 || ^16.0.0",
     "react": "^19.2.0",
     "rolldown": "*",
-    "satteri": "^0.10.0",
+    "satteri": "^0.10.5",
     "vite": "7.x.x || 8.x.x"
   },
   "peerDependenciesMeta": {

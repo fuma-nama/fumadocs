@@ -27,22 +27,15 @@ function parseTabAttributes(node: MdastNode | undefined) {
   return parsed;
 }
 
-// Inserting a node carrying `data._mdxExplicitJsx` (which `mdxToMdast` sets on
-// JSX elements) makes satteri emit literal tags instead of `_components.*` for
-// the rest of the document, so strip the flag before insertion.
-function stripExplicitJsx(nodes: unknown[]) {
-  for (const node of nodes as { data?: { _mdxExplicitJsx?: boolean }; children?: unknown[] }[]) {
-    if (node.data?._mdxExplicitJsx) delete node.data._mdxExplicitJsx;
-    if (node.children) stripExplicitJsx(node.children);
-  }
-}
-
 function parseTabName(name: string): (BlockContent | Text)[] {
-  const head = (mdxToMdast(name, { position: false }) as Root).children?.[0];
-  if (head && 'children' in head) {
-    stripExplicitJsx(head.children);
-    return head.children as (BlockContent | Text)[];
-  }
+  try {
+    // unwrap paragraphs only
+    const children = ((mdxToMdast(name, { position: false }) as Root).children ?? []).flatMap(
+      (child) => (child.type === 'paragraph' ? child.children : child),
+    );
+    if (children.length > 0) return children as (BlockContent | Text)[];
+  } catch {}
+
   return [{ type: 'text', value: name }];
 }
 
