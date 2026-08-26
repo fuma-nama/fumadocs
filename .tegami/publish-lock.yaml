@@ -1,66 +1,82 @@
 core:changelogs:
-  - content: "---\npackages:\n  npm:fumadocs-openapi:\n    type: patch\n---\n\n## Fix playground result URL\n"
-    filename: 2026-08-25-mt8qnwar.md
+  - content: "---\npackages:\n  npm:fumadocs-openapi:\n    type: patch\n  npm:@fumadocs/api-docs:\n    type: patch\n  npm:@fumadocs/language:\n    type: patch\n---\n\n## Support HTTP Basic client authentication in OAuth password flow\n\nSome OAuth servers require client credentials in an HTTP Basic `Authorization` header instead of the request body. The password flow dialog now offers a Client Authentication select to choose between the two methods, as described in [RFC 6749, section 2.3.1](https://www.rfc-editor.org/rfc/rfc6749#section-2.3.1).\n\nFix [#3506](https://github.com/fuma-nama/fumadocs/issues/3506)\n"
+    filename: 2026-08-26-oauth-basic-client-auth.md
+    v: 0.0.0
+  - content: "---\npackages:\n  npm:@fumadocs/base-ui:\n    type: patch\n  npm:fumadocs-ui:\n    type: patch\n---\n\n## Improve Vitepress theme\n\nMore contrast & aligned to Vitepress.\n"
+    filename: 2026-08-26-mt9yaf75.md
+    v: 0.0.0
+  - content: "---\npackages:\n  npm:@fumadocs/satteri:\n    type: patch\n---\n\n## Fix tab names that consist of a single JSX element\n\nWith `parseMdx` enabled, `remarkCodeTab` unwrapped a tab name that was entirely one JSX element and kept only its children, so icon-only names like `tab=\"<Home />\"` rendered an empty trigger. Only paragraphs are unwrapped now, matching the behavior of `fumadocs-core`.\n"
+    filename: 2026-08-26-code-tab-jsx-tab-names.md
     v: 0.0.0
 core:packages:
-  - id: npm:@fumadocs/api-docs
-    updated: false
+  - changelogIds:
+      - 2026-08-26-oauth-basic-client-auth.md
+    id: npm:@fumadocs/api-docs
+    updated: true
   - id: npm:@fumadocs/asyncapi
-    updated: false
-  - id: npm:@fumadocs/base-ui
-    updated: false
+    updated: true
+  - changelogIds:
+      - 2026-08-26-mt9yaf75.md
+    id: npm:@fumadocs/base-ui
+    updated: true
   - id: npm:@fumadocs/basehub
-    updated: false
-  - id: npm:@fumadocs/cli
-    updated: false
-  - id: npm:@fumadocs/content
     updated: false
   - id: npm:@fumadocs/content-collections
     updated: false
   - id: npm:fumadocs-core
+    updated: true
+  - id: npm:@fumadocs/cli
+    updated: false
+  - id: npm:@fumadocs/content
     updated: false
   - id: npm:create-fumadocs-app
-    updated: false
+    updated: true
   - id: npm:create-fumadocs-versions
-    updated: false
+    updated: true
   - id: npm:fumadocs-docgen
     updated: false
+  - id: npm:@fumadocs/graphql
+    updated: true
   - id: npm:fumadocs-epub
     updated: false
   - id: npm:@fumari/image-size
     updated: false
-  - id: npm:@fumadocs/graphql
-    updated: false
-  - id: npm:@fumadocs/language
-    updated: false
-  - id: npm:@fumadocs/local-html
-    updated: false
+  - changelogIds:
+      - 2026-08-26-oauth-basic-client-auth.md
+    id: npm:@fumadocs/language
+    updated: true
   - id: npm:@fumadocs/local-content
     updated: false
-  - id: npm:fumadocs-mdx
+  - id: npm:@fumadocs/local-html
     updated: false
   - id: npm:@fumadocs/local-md
     updated: false
   - id: npm:@fumadocs/mdx-remote
+    updated: false
+  - id: npm:fumadocs-mdx
     updated: false
   - id: npm:@fumadocs/notion
     updated: false
   - id: npm:fumadocs-obsidian
     updated: false
   - changelogIds:
-      - 2026-08-25-mt8qnwar.md
+      - 2026-08-26-oauth-basic-client-auth.md
     id: npm:fumadocs-openapi
     updated: true
   - id: npm:fumadocs-preview
     updated: false
   - id: npm:fumadocs-python
     updated: false
-  - id: npm:fumadocs-ui
-    updated: false
+  - changelogIds:
+      - 2026-08-26-mt9yaf75.md
+    id: npm:fumadocs-ui
+    updated: true
   - id: npm:@fumadocs/sanity
     updated: false
-  - id: npm:@fumadocs/satteri
-    updated: false
+  - changelogIds:
+      - 2026-08-26-code-tab-jsx-tab-names.md
+    id: npm:@fumadocs/satteri
+    updated: true
   - id: npm:@fumadocs/shadcn
     updated: false
   - id: npm:@fumari/stf
@@ -69,9 +85,9 @@ core:packages:
     updated: false
   - id: npm:@fumadocs/tailwind
     updated: false
-  - id: npm:fumadocs-twoslash
-    updated: false
   - id: npm:fumadocs-typescript
+    updated: false
+  - id: npm:fumadocs-twoslash
     updated: false
   - id: npm:@fumadocs/vite
     updated: false
@@ -80,22 +96,22 @@ npm:packages:
   - id: npm:@fumadocs/asyncapi
   - id: npm:@fumadocs/base-ui
   - id: npm:@fumadocs/basehub
-  - id: npm:@fumadocs/cli
-  - id: npm:@fumadocs/content
   - id: npm:@fumadocs/content-collections
   - id: npm:fumadocs-core
+  - id: npm:@fumadocs/cli
+  - id: npm:@fumadocs/content
   - id: npm:create-fumadocs-app
   - id: npm:create-fumadocs-versions
   - id: npm:fumadocs-docgen
+  - id: npm:@fumadocs/graphql
   - id: npm:fumadocs-epub
   - id: npm:@fumari/image-size
-  - id: npm:@fumadocs/graphql
   - id: npm:@fumadocs/language
-  - id: npm:@fumadocs/local-html
   - id: npm:@fumadocs/local-content
-  - id: npm:fumadocs-mdx
+  - id: npm:@fumadocs/local-html
   - id: npm:@fumadocs/local-md
   - id: npm:@fumadocs/mdx-remote
+  - id: npm:fumadocs-mdx
   - id: npm:@fumadocs/notion
   - id: npm:fumadocs-obsidian
   - id: npm:fumadocs-openapi
@@ -108,8 +124,37 @@ npm:packages:
   - id: npm:@fumari/stf
   - id: npm:@fumadocs/story
   - id: npm:@fumadocs/tailwind
-  - id: npm:fumadocs-twoslash
   - id: npm:fumadocs-typescript
+  - id: npm:fumadocs-twoslash
   - id: npm:@fumadocs/vite
+  - id: npm:docs
+  - id: npm:example-base-ui
+  - id: npm:example-asyncapi
+  - id: npm:example-astro
+  - id: npm:example-content-collections
+  - id: npm:example-graphql
+  - id: npm:example-i18n
+  - id: npm:example-marble-cms
+  - id: npm:example-next
+  - id: npm:example-next-local-html
+  - id: npm:example-next-local-md
+  - id: npm:example-next-shadcn
+  - id: npm:example-next-static
+  - id: npm:example-next-min
+  - id: npm:example-obsidian
   - id: npm:example-openapi
+  - id: npm:example-python
+  - id: npm:example-react-router
+  - id: npm:example-react-router-i18n
+  - id: npm:example-react-router-rsc
+  - id: npm:example-react-router-min
+  - id: npm:example-react-router-spa
+  - id: npm:example-tanstack-start
+  - id: npm:example-tanstack-start-i18n
+  - id: npm:example-tanstack-start-local-md
+  - id: npm:example-tanstack-start-min
   - id: npm:example-tanstack-start-openapi
+  - id: npm:example-tanstack-start-spa
+  - id: npm:example-tanstack-start-story
+  - id: npm:example-waku-i18n
+  - id: npm:example-waku
