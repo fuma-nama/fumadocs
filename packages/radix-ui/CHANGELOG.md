@@ -1,3 +1,9 @@
+## fumadocs-ui@16.15.2
+
+### Improve Vitepress theme
+
+More contrast & aligned to Vitepress.
+
 ## fumadocs-ui@16.14.5
 
 ### Add a `main` landmark to docs, notebook and flux pages
