@@ -11,21 +11,21 @@
     "astro": "astro"
   },
   "dependencies": {
-    "@astrojs/markdown-remark": "^7.2.2",
-    "@astrojs/mdx": "^7.0.5",
-    "@astrojs/react": "^6.0.2",
-    "astro": "^7.2.1",
+    "@astrojs/markdown-remark": "^7.2.4",
+    "@astrojs/mdx": "^7.0.8",
+    "@astrojs/react": "^6.0.4",
+    "astro": "^7.2.6",
     "fumadocs-core": "workspace:*",
     "fumadocs-ui": "workspace:@fumadocs/base-ui@*",
     "react": "^19.2.8",
     "react-dom": "^19.2.8",
     "sharp": "^0.35.3",
-    "takumi-js": "^2.7.2"
+    "takumi-js": "^2.12.0"
   },
   "devDependencies": {
     "@tailwindcss/vite": "^4.3.3",
     "@types/react": "^19.2.18",
-    "@types/react-dom": "^19.2.4",
+    "@types/react-dom": "^19.2.5",
     "tailwindcss": "^4.3.3"
   }
 }
