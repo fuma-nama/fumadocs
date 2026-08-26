@@ -109,6 +109,7 @@ const translations = {
     '二進位回應主體，{length} 位元組',
   'Body(playground)': '主體',
   'Callbacks(operation page)': '回呼',
+  'Client Authentication(OAuth dialog)': '用戶端身份驗證',
   'Client Credentials(OAuth dialog)': '用戶端憑證',
   'Client Error(playground result display)': '用戶端錯誤',
   'Client ID(OAuth dialog)': '用戶端 ID',
@@ -137,6 +138,8 @@ const translations = {
   'Headers(playground result display)': '標頭',
   'Implicit(OAuth dialog)': '隱含式',
   'In(security scheme)': '位置',
+  'Include the client ID and secret in the token request body.(OAuth dialog)':
+    '在權杖請求主體中包含用戶端 ID 和密鑰。',
   'Intended for the server-to-server authentication.(OAuth dialog)': '適用於伺服器對伺服器驗證。',
   'Internal Server Error(playground status info)': '內部伺服器錯誤',
   'Not Found(playground status info)': '找不到',
@@ -156,6 +159,10 @@ const translations = {
   'Retrieve the access token directly.(OAuth dialog)': '直接取得存取權杖。',
   'Scope(security scheme)': '範圍',
   'Select a flow(OAuth dialog)': '選擇流程',
+  'Send as Basic Auth header(OAuth dialog)': '以 Basic Auth 標頭傳送',
+  'Send client credentials in body(OAuth dialog)': '在請求主體中傳送用戶端憑證',
+  'Send the client ID and secret in the Authorization header.(OAuth dialog)':
+    '在 Authorization 標頭中傳送用戶端 ID 和密鑰。',
   'Send(playground)': '傳送',
   'Server URL(playground server select)': '伺服器 URL',
   'Submit(OAuth dialog)': '送出',

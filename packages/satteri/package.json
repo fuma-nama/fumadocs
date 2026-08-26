@@ -1,6 +1,6 @@
 {
   "name": "@fumadocs/satteri",
-  "version": "0.4.2",
+  "version": "0.4.3",
   "description": "Fumadocs plugins and presets for Sätteri",
   "keywords": [
     "Docs",
@@ -67,9 +67,9 @@
     "katex": "^0.18.4",
     "mdast-util-gfm": "^3.1.0",
     "npm-to-yarn": "^3.2.0",
-    "satteri": "^0.10.3",
-    "yuku-codegen": "^0.8.5",
-    "yuku-parser": "^0.8.5"
+    "satteri": "^0.10.5",
+    "yuku-codegen": "^0.9.1",
+    "yuku-parser": "^0.9.1"
   },
   "devDependencies": {
     "@types/estree": "^1.0.9",
@@ -77,9 +77,9 @@
     "@types/hast": "^3.0.5",
     "@types/mdast": "^4.0.4",
     "@types/mdx": "^2.0.14",
-    "@types/node": "26.2.0",
+    "@types/node": "26.3.0",
     "@types/react": "^19.2.18",
-    "@types/react-dom": "^19.2.4",
+    "@types/react-dom": "^19.2.5",
     "fumadocs-core": "workspace:*",
     "mdast-util-mdx": "^3.0.0",
     "react": "^19.2.8",
@@ -88,7 +88,7 @@
     "tsconfig": "workspace:*",
     "tsdown": "0.22.14",
     "typescript": "^6.0.3",
-    "vitest": "^4.1.10"
+    "vitest": "^4.1.11"
   },
   "peerDependencies": {
     "@types/hast": "*",

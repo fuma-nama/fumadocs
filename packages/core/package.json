@@ -1,6 +1,6 @@
 {
   "name": "fumadocs-core",
-  "version": "16.15.1",
+  "version": "16.15.2",
   "description": "The React.js library for building a documentation website",
   "keywords": [
     "Docs",
@@ -134,19 +134,17 @@
     "@orama/core": "^1.2.19",
     "@oramacloud/client": "^2.1.4",
     "@shikijs/transformers": "^4.4.3",
-    "@tanstack/react-router": "1.170.27",
+    "@tanstack/react-router": "1.170.32",
     "@types/estree-jsx": "^1.0.5",
     "@types/hast": "^3.0.5",
     "@types/mdast": "^4.0.4",
-    "@types/negotiator": "^0.6.5",
-    "@types/node": "26.2.0",
+    "@types/node": "26.3.0",
     "@types/react": "^19.2.18",
-    "@types/react-dom": "^19.2.4",
-    "algoliasearch": "5.56.0",
+    "@types/react-dom": "^19.2.5",
+    "algoliasearch": "5.57.0",
     "flexsearch": "^0.8.212",
-    "lucide-react": "^1.31.0",
-    "negotiator": "^1.0.0",
-    "next": "16.3.0",
+    "lucide-react": "^1.34.0",
+    "next": "16.3.2",
     "path-to-regexp": "^8.4.2",
     "react-router": "^8.3.0",
     "remark-directive": "^4.0.0",
@@ -155,7 +153,7 @@
     "tsconfig": "workspace:*",
     "tsdown": "0.22.14",
     "typescript": "^6.0.3",
-    "waku": "1.0.0-beta.9",
+    "waku": "1.0.0-rc.0",
     "zod": "4.4.3"
   },
   "peerDependencies": {
@@ -238,7 +236,6 @@
     "@formatjs/fast-memoize": "3.1.7",
     "@formatjs/intl-localematcher": "0.8.13",
     "@shikijs/transformers": "4.4.3",
-    "negotiator": "1.0.0",
     "path-to-regexp": "8.4.2",
     "remove-markdown": "0.6.4"
   }

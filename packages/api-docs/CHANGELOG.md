@@ -1,3 +1,11 @@
+## @fumadocs/api-docs@0.2.5
+
+### Support HTTP Basic client authentication in OAuth password flow
+
+Some OAuth servers require client credentials in an HTTP Basic `Authorization` header instead of the request body. The password flow dialog now offers a Client Authentication select to choose between the two methods, as described in [RFC 6749, section 2.3.1](https://www.rfc-editor.org/rfc/rfc6749#section-2.3.1).
+
+Fix [#3506](https://github.com/fuma-nama/fumadocs/issues/3506)
+
 ## @fumadocs/api-docs@0.2.4
 
 ### Preserve `description` when merging `allOf` schemas

@@ -46,6 +46,37 @@ describe('remark-code-tab', () => {
     expect(code).not.toContain('items:');
   });
 
+  it('does not leak literal tags into the document when a tab name contains JSX', async () => {
+    const code = await compile(
+      'hello *world*\n\n```js tab="<Home /> A"\nconst a = 1\n```\n\n```js tab="B"\nconst b = 2\n```',
+      { Tabs: 'Tabs', parseMdx: true },
+    );
+
+    expect(code).toContain('_jsx(Home, {})');
+    // markdown-derived elements elsewhere must still route through `_components`
+    expect(code).toContain('_components.p');
+    expect(code).toContain('_components.em');
+  });
+
+  it('keeps a tab name that is a single JSX element', async () => {
+    const code = await compile(
+      '```js tab="<i>A</i>"\nconst a = 1\n```\n\n```js tab="B"\nconst b = 2\n```',
+      { Tabs: 'Tabs', parseMdx: true },
+    );
+
+    expect(code).toContain('_components.i');
+    expect(code).toContain('"A"');
+  });
+
+  it('keeps an icon-only tab name', async () => {
+    const code = await compile(
+      '```js tab="<Home />"\nconst a = 1\n```\n\n```js tab="B"\nconst b = 2\n```',
+      { Tabs: 'Tabs', parseMdx: true },
+    );
+
+    expect(code).toContain('_jsx(Home, {})');
+  });
+
   it('keeps separate groups apart', async () => {
     const code = await compile(`${source}\n\nsome text\n\n${source}`);
 

@@ -31,23 +31,23 @@
     "test": "vitest run"
   },
   "dependencies": {
-    "@portabletext/react": "^7.0.1"
+    "@portabletext/react": "^8.0.1"
   },
   "devDependencies": {
-    "@sanity/client": "^7.26.2",
-    "@sanity/types": "^6.9.2",
-    "@types/node": "26.2.0",
+    "@sanity/client": "^8.2.0",
+    "@sanity/types": "^6.10.1",
+    "@types/node": "26.3.0",
     "@types/react": "^19.2.18",
     "fuma-cli": "^0.1.1",
     "fumadocs-core": "workspace:*",
     "fumadocs-ui": "workspace:@fumadocs/base-ui@*",
-    "next-sanity": "^13.3.2",
+    "next-sanity": "^13.3.3",
     "react": "^19.2.8",
-    "sanity": "^6.9.2",
+    "sanity": "^6.10.1",
     "tsconfig": "workspace:*",
     "tsdown": "0.22.14",
     "typescript": "^6.0.3",
-    "vitest": "^4.1.10"
+    "vitest": "^4.1.11"
   },
   "peerDependencies": {
     "@sanity/client": "^7.22.0",

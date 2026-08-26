@@ -109,6 +109,7 @@ const translations = {
     '二进制响应主体，{length} 字节',
   'Body(playground)': '主体',
   'Callbacks(operation page)': '回调',
+  'Client Authentication(OAuth dialog)': '客户端身份验证',
   'Client Credentials(OAuth dialog)': '客户端凭证',
   'Client Error(playground result display)': '客户端错误',
   'Client ID(OAuth dialog)': '客户端 ID',
@@ -137,6 +138,8 @@ const translations = {
   'Headers(playground result display)': '标头',
   'Implicit(OAuth dialog)': '隐式',
   'In(security scheme)': '位置',
+  'Include the client ID and secret in the token request body.(OAuth dialog)':
+    '在令牌请求体中包含客户端 ID 和密钥。',
   'Intended for the server-to-server authentication.(OAuth dialog)': '适用于服务器对服务器验证。',
   'Internal Server Error(playground status info)': '内部服务器错误',
   'Not Found(playground status info)': '找不到',
@@ -156,6 +159,10 @@ const translations = {
   'Retrieve the access token directly.(OAuth dialog)': '直接获取访问令牌。',
   'Scope(security scheme)': '范围',
   'Select a flow(OAuth dialog)': '选择流程',
+  'Send as Basic Auth header(OAuth dialog)': '以 Basic Auth 标头发送',
+  'Send client credentials in body(OAuth dialog)': '在请求体中发送客户端凭证',
+  'Send the client ID and secret in the Authorization header.(OAuth dialog)':
+    '在 Authorization 标头中发送客户端 ID 和密钥。',
   'Send(playground)': '发送',
   'Server URL(playground server select)': '服务器 URL',
   'Submit(OAuth dialog)': '提交',

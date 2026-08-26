@@ -123,7 +123,7 @@ export function createBrowserFetcher(
         .then(async (res): Promise<FetchResult> => {
           return {
             type: 'response',
-            url,
+            url: res.url,
             status: res.status,
             headers: res.headers,
             body: await res.arrayBuffer(),
