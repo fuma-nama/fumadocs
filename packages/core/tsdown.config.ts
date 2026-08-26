@@ -10,6 +10,8 @@ export default defineConfig({
   entry: [
     'src/{toc,link,breadcrumb,dynamic-link}.tsx',
     'src/page-tree/index.ts',
+    'src/server.ts',
+    'src/server.browser.ts',
     'src/{negotiation,content}/*',
     'src/content/md/*.ts',
     'src/content/mdx/preset-*.ts',
@@ -41,6 +43,10 @@ export default defineConfig({
   },
   exports: {
     customExports: {
+      './server': {
+        browser: './dist/server.browser.js',
+        import: './dist/server.js',
+      },
       './source/*': {
         types: './dist/source/plugins/*.d.ts',
         import: './dist/source/plugins/*.js',
