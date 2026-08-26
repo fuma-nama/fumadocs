@@ -1,6 +1,7 @@
 ---
 packages:
   npm:fumadocs-openapi: patch
+  npm:@fumadocs/api-docs: patch
   npm:@fumadocs/language: patch
 ---
 

@@ -85,7 +85,7 @@ function SelectContent({
         <SelectPrimitive.Popup
           ref={ref}
           className={cn(
-            'z-50 min-w-(--anchor-width) overflow-hidden rounded-lg border bg-fd-popover text-fd-popover-foreground shadow-md',
+            'z-50 min-w-[calc(var(--anchor-width)+--spacing(2))] overflow-hidden rounded-lg border bg-fd-popover text-fd-popover-foreground shadow-md',
             className,
           )}
           {...props}
@@ -129,7 +129,7 @@ function SelectItem({
       {...props}
     >
       <SelectPrimitive.ItemText>{children}</SelectPrimitive.ItemText>
-      <SelectPrimitive.ItemIndicator className="ms-auto">
+      <SelectPrimitive.ItemIndicator className="ms-auto shrink-0">
         <Check className="size-3.5 text-fd-primary" />
       </SelectPrimitive.ItemIndicator>
     </SelectPrimitive.Item>

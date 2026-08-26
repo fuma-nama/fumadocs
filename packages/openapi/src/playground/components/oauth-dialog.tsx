@@ -256,9 +256,19 @@ function Content({ schemeId, scopes, setToken, setOpen }: AuthDialogContentProps
       }}
     >
       <Select
-        items={Object.fromEntries(
-          Object.keys(scheme.flows!).map((key) => [key, allFlows[key as FlowType].name]),
-        )}
+        items={Object.keys(scheme.flows!).map((key) => {
+          const { name, description } = allFlows[key as FlowType];
+
+          return {
+            value: key,
+            label: (
+              <>
+                <p className="font-medium">{name}</p>
+                <p className="text-fd-muted-foreground">{description}</p>
+              </>
+            ),
+          };
+        })}
         value={type}
         onValueChange={setType}
       >
