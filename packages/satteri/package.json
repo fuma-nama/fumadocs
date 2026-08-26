@@ -93,7 +93,7 @@
     "@types/mdast": "*",
     "@types/mdx": "*",
     "@types/react": "*",
-    "fumadocs-core": "^16.0.0",
+    "fumadocs-core": "^16.15.3",
     "react": "^19.2.0",
     "react-dom": "^19.2.0"
   },

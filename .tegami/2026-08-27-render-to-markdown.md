@@ -1,6 +1,6 @@
 ---
 packages:
-  npm:fumadocs-core: minor
+  npm:fumadocs-core: patch
 ---
 
 ## `fumadocs-core/server`: render React trees into Markdown

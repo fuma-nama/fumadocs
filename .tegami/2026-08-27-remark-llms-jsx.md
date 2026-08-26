@@ -1,6 +1,6 @@
 ---
 packages:
-  npm:fumadocs-core: minor
+  npm:fumadocs-core: patch
   npm:@fumadocs/satteri: minor
   npm:fumadocs-mdx: minor
 ---
