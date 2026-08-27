@@ -1,0 +1,17 @@
+openapi: 3.1.0
+info:
+  title: Example API
+  version: 1.0.0
+paths:
+  /email:
+    post:
+      operationId: sendEmail
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: './nullable-email.yaml#/components/schemas/EmailAddress'
+      responses:
+        '204':
+          description: Accepted

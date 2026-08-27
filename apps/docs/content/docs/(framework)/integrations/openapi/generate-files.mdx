@@ -101,6 +101,26 @@ void generateFiles({
 });
 ```
 
+When grouping by `tag`, it follows the tag hierarchy of OpenAPI 3.2: a tag is nested into the folder of its `parent` tag, while tags with a `kind` other than `nav` are ignored.
+
+```yaml title="openapi.yaml"
+tags:
+  - name: store
+    summary: Store
+    kind: nav
+  - name: products
+    parent: store
+
+paths:
+  /products:
+    get:
+      # output: store/products/listProducts.mdx
+      operationId: listProducts
+      tags: [products]
+```
+
+Operations without tags are grouped under an `unknown` folder.
+
 ### `index`
 
 Generate index files with cards linking to generated pages.
