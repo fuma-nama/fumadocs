@@ -2,15 +2,21 @@ import { defineMdastPlugin, markdownToHast } from 'satteri';
 import type { ElementContent, Nodes } from 'hast';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import type { MdxJsxAttribute, MdxJsxExpressionAttribute, MdxJsxFlowElement } from 'mdast-util-mdx';
+import type {
+  MdxJsxAttributeNode as MdxJsxAttribute,
+  MdxJsxExpressionAttributeNode as MdxJsxExpressionAttribute,
+  MdxJsxFlowElement,
+} from 'satteri';
 import { highlightHast, type HighlightHastOptions } from 'fumadocs-core/highlight';
 import {
   createGenerator,
   type DocEntry,
+  type GeneratedDoc,
   type RawTag,
   type RemarkAutoTypeTableOptions,
   type TypeTableProps,
 } from 'fumadocs-typescript';
+import { formatTable, replaceSource } from './stringifier';
 import { jsxToSource } from './utils';
 
 export type { RemarkAutoTypeTableOptions } from 'fumadocs-typescript';
@@ -102,6 +108,27 @@ async function buildTypeProp(
   }
   prop += '}';
   return prop;
+}
+
+/** the generated type table as a Markdown table, for source-based Markdown output */
+function docToMarkdown(doc: GeneratedDoc): string {
+  const rows = [['Prop', 'Type', 'Description']];
+  for (const entry of doc.entries) {
+    const tags = parseTags(entry.tags);
+    let description = entry.description.replace(/{@link (?<link>[^}]*)}/g, '$1').trim();
+    if (tags.default) description += `${description ? ' ' : ''}Default: \`${tags.default}\``;
+    if (entry.deprecated) description = `**Deprecated.** ${description}`;
+
+    rows.push([
+      `\`${entry.name}${entry.required ? '' : '?'}\``,
+      `\`${entry.simplifiedType}\``,
+      description,
+    ]);
+  }
+
+  let out = `### ${doc.name}\n\n`;
+  if (doc.description) out += `${doc.description.trim()}\n\n`;
+  return out + formatTable(rows);
 }
 
 export function remarkAutoTypeTable(config: RemarkAutoTypeTableOptions = {}) {
@@ -209,6 +236,15 @@ export function remarkAutoTypeTable(config: RemarkAutoTypeTableOptions = {}) {
       const parent = ctx.parent(node);
       const index = ctx.indexOf(node);
       if (!parent || index === undefined) return;
+
+      replaceSource(ctx, node, () => {
+        let markdown = '';
+        for (const doc of output) {
+          if (markdown) markdown += '\n';
+          markdown += docToMarkdown(doc);
+        }
+        return markdown;
+      });
 
       if (children.length === 0) {
         ctx.removeNode(node);

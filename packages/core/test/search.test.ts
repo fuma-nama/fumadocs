@@ -1,6 +1,7 @@
 import { createI18nSearchAPI, createSearchAPI, type ExportedData } from '@/search/server';
 import { expect, test } from 'vitest';
 import { structure } from '@/mdx-plugins';
+import { buildDocuments } from '@/search/server/build-doc';
 
 test('Search API', async () => {
   const api = createSearchAPI('simple', {
@@ -72,6 +73,42 @@ something`,
       },
     ]
   `);
+});
+
+test('buildDocuments: page description duplicated in contents is indexed once', () => {
+  // OpenAPI single-operation pages emit the operation description as both the page
+  // description and a `contents` entry (#3509) — only the anchored record must survive
+  const docs = buildDocuments([
+    {
+      id: '1',
+      title: 'Past',
+      description: 'Get the carbon intensity for a zone.',
+      url: '/docs/past',
+      structuredData: {
+        headings: [{ id: 'past', content: 'Past' }],
+        contents: [{ heading: 'past', content: 'Get the carbon intensity for a zone.' }],
+      },
+    },
+  ]);
+
+  const texts = docs.filter((doc) => doc.type === 'text');
+  expect(texts).toHaveLength(1);
+  expect(texts[0].url).toBe('/docs/past#past');
+
+  // a description distinct from the body keeps its own record
+  const distinct = buildDocuments([
+    {
+      id: '1',
+      title: 'Page',
+      description: 'A frontmatter description.',
+      url: '/docs/page',
+      structuredData: {
+        headings: [],
+        contents: [{ heading: undefined, content: 'The body text.' }],
+      },
+    },
+  ]);
+  expect(distinct.filter((doc) => doc.type === 'text')).toHaveLength(2);
 });
 
 test('Search API I18n', async () => {

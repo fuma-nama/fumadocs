@@ -30,8 +30,11 @@ export interface CompiledMDXProperties<Frontmatter = Record<string, unknown>> {
 
   /**
    * Enable from `postprocess` option.
+   *
+   * A component with `output: 'function'` in `includeProcessedMarkdown`,
+   * render it with `renderToMarkdown` from `fumadocs-core/server`.
    */
-  _markdown?: string;
+  _markdown?: string | FC<MDXProps>;
   /**
    * Enable from `postprocess` option.
    */

@@ -1,6 +1,6 @@
 {
   "name": "fumadocs-core",
-  "version": "16.15.2",
+  "version": "16.15.3",
   "description": "The React.js library for building a documentation website",
   "keywords": [
     "Docs",
@@ -79,6 +79,11 @@
     "./search/orama-cloud": "./dist/search/orama-cloud.js",
     "./search/orama-cloud-legacy": "./dist/search/orama-cloud-legacy.js",
     "./search/server": "./dist/search/server.js",
+    "./server": {
+      "browser": "./dist/server.browser.js",
+      "import": "./dist/server.js"
+    },
+    "./server.browser": "./dist/server.browser.js",
     "./source": "./dist/source/index.js",
     "./source/client": "./dist/source/client/index.js",
     "./source/dynamic": "./dist/source/dynamic.js",

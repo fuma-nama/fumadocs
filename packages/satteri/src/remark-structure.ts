@@ -1,28 +1,31 @@
 import type { MdastPluginDefinition, MdastVisitorContext } from 'satteri';
 import type { Nodes } from 'mdast';
-import { gfmToMarkdown } from 'mdast-util-gfm';
 import type { StructuredData } from 'fumadocs-core/mdx-plugins/remark-structure';
-import {
-  defaultStringifier as structureDefaultStringifier,
-  type Stringifier,
-  type StringifyOptions,
-} from 'fumadocs-core/mdx-plugins/remark-structure';
+import { createStringifier, type Stringifier } from './stringifier';
 import type { ExtraPluginHooks } from './compile';
 
 export interface StructureOptions {
   types?: string[] | ((node: Nodes) => boolean);
   mdxTypes?: (node: Nodes) => boolean;
-  stringify?: Stringifier | StringifyOptions;
+
+  /**
+   * Include Markdown syntax in content records, sliced from the authored source.
+   *
+   * Links and JSX elements are flattened into their plain text, return `true` from
+   * `filterElement` to keep an element's syntax instead.
+   */
+  stringify?:
+    | boolean
+    | {
+        filterElement?: (node: Nodes & { name?: string | null }) => boolean;
+      };
+
   /**
    * export as `structuredData` (if true) or specified variable name.
    *
    * @default true
    */
   exportAs?: string | boolean;
-}
-
-interface StringifierContext {
-  addContent: (...content: StructuredData['contents']) => void;
 }
 
 const STRUCTURE_VISITORS = [
@@ -33,90 +36,59 @@ const STRUCTURE_VISITORS = [
   'mdxJsxFlowElement',
 ] as const;
 
-function wrapStringifier(stringifyOptions?: StringifyOptions | Stringifier): Stringifier | null {
-  if (!stringifyOptions) return null;
-  if (typeof stringifyOptions === 'function') {
-    const fn = stringifyOptions as (node: Nodes, ctx: StringifierContext) => string;
-    return (node, ctx) => fn(node, ctx);
-  }
-
-  const base = structureDefaultStringifier({
-    ...stringifyOptions,
-    ...gfmToMarkdown(),
-    handlers: {
-      inlineMath(node: { value: string }) {
-        return `$${node.value}$`;
-      },
-      math(node: { value: string }) {
-        return `$$\n${node.value}\n$$`;
-      },
-      ...stringifyOptions.handlers,
-    },
-  });
-  const baseFn = base as (node: Nodes, ctx: StringifierContext) => string;
-  return (node, ctx) => baseFn(node, ctx);
-}
-
-function nodeContent(
-  node: Nodes,
-  ctx: MdastVisitorContext,
-  stringify: Stringifier | null,
-  stringifierCtx: StringifierContext,
-) {
-  return stringify
-    ? stringify.call(undefined as never, node, stringifierCtx).trim()
-    : ctx.textContent(node).trim();
+interface ContentRecord {
+  node: Nodes;
+  heading: string | undefined;
+  /** set for heading records */
+  id?: string;
 }
 
 export function remarkStructure({
   types = ['heading', 'paragraph', 'blockquote', 'tableCell', 'mdxJsxFlowElement'],
   mdxTypes = (node) => !('children' in node) || node.children.length === 0,
-  stringify: stringifyOptions,
+  stringify = false,
   exportAs = true,
 }: StructureOptions = {}) {
   const matchType =
     typeof types === 'function' ? types : (node: Nodes) => types.includes(node.type);
-  const stringify = wrapStringifier(stringifyOptions);
+  const filterElement = typeof stringify === 'object' ? stringify.filterElement : undefined;
 
   const plugin: ExtraPluginHooks & { (): MdastPluginDefinition } = () => {
     const data: StructuredData = { contents: [], headings: [] };
+    const records: ContentRecord[] = [];
     let lastHeading: string | undefined;
+    let s: Stringifier;
 
-    const stringifierCtx: StringifierContext = {
-      addContent(...content) {
-        for (const item of content) {
-          data.contents.push({ ...item, heading: item.heading ?? lastHeading });
-        }
-      },
-    };
-
-    function visit(node: Nodes, ctx: MdastVisitorContext) {
-      if (!matchType(node)) return;
-      if (node.type === 'mdxJsxFlowElement' || node.type === 'mdxJsxTextElement') {
-        if (!mdxTypes(node)) return;
+    function visit(node: Nodes) {
+      if (stringify && (node.type === 'mdxJsxFlowElement' || node.type === 'mdxJsxTextElement')) {
+        // elements without a Markdown form become their text content in records
+        if (!filterElement?.(node)) s.flatten(node);
       }
+      if (!matchType(node)) return;
+      if (
+        (node.type === 'mdxJsxFlowElement' || node.type === 'mdxJsxTextElement') &&
+        !mdxTypes(node)
+      )
+        return;
 
       if (node.type === 'heading') {
-        const headingData = (node.data ?? {}) as { hProperties?: { id?: string } };
-        const id = headingData.hProperties?.id;
+        const id = (node.data as { hProperties?: { id?: string } } | undefined)?.hProperties?.id;
         if (!id) return;
 
-        const content = nodeContent(node, ctx, stringify, stringifierCtx);
-        if (content.length > 0) data.headings.push({ id, content });
+        records.push({ node, heading: undefined, id });
         lastHeading = id;
         return;
       }
 
-      const content = nodeContent(node, ctx, stringify, stringifierCtx);
-      if (content.length > 0) {
-        data.contents.push({ heading: lastHeading, content });
-      }
+      records.push({ node, heading: lastHeading });
     }
 
-    return {
+    const definition: MdastPluginDefinition = {
       name: 'remark-structure',
+      options: stringify ? { position: true } : undefined,
       before(_root: unknown, ctx: MdastVisitorContext) {
         ctx.data.structuredData ??= data;
+        s = createStringifier(ctx);
 
         const frontmatter = ctx.data.frontmatter as
           | { _openapi?: { structuredData?: StructuredData } }
@@ -127,8 +99,31 @@ export function remarkStructure({
           data.contents.push(...openapiData.contents);
         }
       },
+      after(_root: unknown, ctx: MdastVisitorContext) {
+        for (const record of records) {
+          // heading text is already plain, remark-heading stripped its markers
+          const content = (
+            stringify && !record.id ? s.stringify(record.node) : ctx.textContent(record.node)
+          ).trim();
+          if (content.length === 0) continue;
+
+          if (record.id) data.headings.push({ id: record.id, content });
+          else data.contents.push({ heading: record.heading, content });
+        }
+      },
       ...Object.fromEntries(STRUCTURE_VISITORS.map((key) => [key, visit])),
     };
+    if (stringify) {
+      // flattened in records; links & images have no position once plugins replaced them
+      Object.assign(definition, {
+        mdxJsxTextElement: visit,
+        link: (node: Nodes) => s.flatten(node),
+        linkReference: (node: Nodes) => s.flatten(node),
+        image: (node: Nodes) => s.remove(node),
+      });
+    }
+
+    return definition;
   };
   plugin.collectExports = ({ data, addExport }) => {
     if (exportAs) {

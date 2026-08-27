@@ -1,6 +1,6 @@
 import { defineMdastPlugin, mdxToMdast, type MdastNode, type MdastVisitorContext } from 'satteri';
 import type { BlockContent, Code, Parents, Root, Text } from 'mdast';
-import type { MdxJsxFlowElement } from 'mdast-util-mdx';
+import type { MdxJsxFlowElement } from 'satteri';
 import {
   generateCodeBlockTabs,
   parseCodeBlockAttributes,
