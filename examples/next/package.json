@@ -14,7 +14,7 @@
     "fumadocs-mdx": "workspace:*",
     "fumadocs-ui": "workspace:@fumadocs/base-ui@*",
     "lucide-react": "^1.34.0",
-    "next": "16.3.2",
+    "next": "16.3.3",
     "react": "^19.2.8",
     "react-dom": "^19.2.8"
   },
