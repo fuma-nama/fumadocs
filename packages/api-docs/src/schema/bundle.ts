@@ -1,5 +1,12 @@
-import { bundle as bundleDocument } from '@scalar/json-magic/bundle';
+import { bundle as bundleDocument, type LoaderPlugin } from '@scalar/json-magic/bundle';
 import { fetchUrls, parseJson, parseYaml, readFiles } from '@scalar/json-magic/bundle/plugins/node';
+
+export interface BundleOptions {
+  /**
+   * Transform each document before bundling embeds it: the input document itself, and every referenced external document.
+   */
+  transform?: (document: unknown) => unknown;
+}
 
 /**
  * Resolve all external `$ref`s (file paths & URLs) in the document, and embed them into the `x-ext` section of document.
@@ -8,11 +15,26 @@ import { fetchUrls, parseJson, parseYaml, readFiles } from '@scalar/json-magic/b
  *
  * Powered by `@scalar/json-magic`.
  */
-export async function bundle<S extends object>(input: S | string): Promise<S> {
+export async function bundle<S extends object>(
+  input: S | string,
+  { transform }: BundleOptions = {},
+): Promise<S> {
   const errors: string[] = [];
+  let plugins: LoaderPlugin[] = [readFiles(), fetchUrls(), parseJson(), parseYaml()];
+
+  if (transform) {
+    if (typeof input !== 'string') input = transform(input) as S;
+    plugins = plugins.map((plugin) => ({
+      ...plugin,
+      async exec(value) {
+        const result = await plugin.exec(value);
+        return result.ok ? { ...result, data: transform(result.data) } : result;
+      },
+    }));
+  }
 
   const result = await bundleDocument(input as Record<string, unknown> | string, {
-    plugins: [readFiles(), fetchUrls(), parseJson(), parseYaml()],
+    plugins,
     treeShake: true,
     hooks: {
       onResolveError(node) {

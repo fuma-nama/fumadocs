@@ -9,8 +9,13 @@ export async function loadDocument(input: string | Document): Promise<{
   bundled: Document;
 }> {
   try {
-    let bundled = await bundle<Document>(input);
-    bundled = upgrade(bundled, '3.2') as Document;
+    // upgrade each document before bundling
+    const bundled = await bundle<Document>(input, {
+      transform: (document) =>
+        typeof document === 'object' && document !== null
+          ? upgrade(document as Record<string, unknown>, '3.2')
+          : document,
+    });
     return { bundled };
   } catch (e) {
     throw new Error(`[OpenAPI] Failed to resolve input: ${input}`, {
