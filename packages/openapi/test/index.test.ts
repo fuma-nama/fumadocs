@@ -92,6 +92,23 @@ describe('Generate documents', () => {
     await expect(stringifyOutput(out)).toMatchFileSnapshot('./out/products-group-by-tag.md');
   });
 
+  test('Generate Files - groupBy tag with tag hierarchy', async () => {
+    const warn = vi.spyOn(console, 'warn').mockImplementation(() => {});
+    const out = await generateFilesOnly({
+      input: createOpenAPI({
+        input: {
+          store: path.join(cwd, './fixtures/tag-hierarchy.yaml'),
+        },
+      }),
+      per: 'operation',
+      groupBy: 'tag',
+      meta: true,
+    });
+
+    expect(warn).toHaveBeenCalledOnce();
+    await expect(stringifyOutput(out)).toMatchFileSnapshot('./out/tag-hierarchy.md');
+  });
+
   test('Generate Files - with index', async () => {
     const out = await generateFilesOnly({
       input: createOpenAPI({

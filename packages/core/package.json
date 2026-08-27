@@ -1,6 +1,6 @@
 {
   "name": "fumadocs-core",
-  "version": "16.15.3",
+  "version": "16.15.4",
   "description": "The React.js library for building a documentation website",
   "keywords": [
     "Docs",
@@ -149,7 +149,7 @@
     "algoliasearch": "5.57.0",
     "flexsearch": "^0.8.212",
     "lucide-react": "^1.34.0",
-    "next": "16.3.2",
+    "next": "16.3.3",
     "path-to-regexp": "^8.4.2",
     "react-router": "^8.3.0",
     "remark-directive": "^4.0.0",

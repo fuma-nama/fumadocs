@@ -8,8 +8,9 @@ import type {
   PagesBuilderConfig,
   WebhookOutput,
 } from '@/utils/pages/builder';
-import type { DistributiveOmit } from '@/types';
+import type { DistributiveOmit, TagObject } from '@/types';
 import { dereferenceShallow } from '@fumadocs/api-docs/schema/dereference';
+import { getTagDisplayName } from '@/utils/schema';
 
 interface OperationConfig extends BaseConfig {
   /**
@@ -156,6 +157,43 @@ export function createAutoPreset(options: SchemaToPagesOptions): PagesBuilderCon
     const doc = builder.document;
     const { groupBy = 'none' } = options as OperationConfig;
 
+    const docTags = new Map<string, TagObject>();
+    if (groupBy === 'tag') {
+      for (const tag of doc.tags ?? []) {
+        if (tag.name) docTags.set(tag.name, tag);
+      }
+    }
+    const tagGroups = new Map<string, OutputGroup>();
+    let warnedUntagged = false;
+
+    function tagGroup(name: string, seen?: Set<string>): OutputGroup {
+      let group = tagGroups.get(name);
+      if (group) return group;
+
+      const tag = docTags.get(name);
+      let parent: OutputGroup | undefined;
+      if (tag?.parent) {
+        // `seen` guards against cyclic `parent` references, which are invalid in OpenAPI
+        (seen ??= new Set()).add(name);
+        if (!seen.has(tag.parent)) parent = tagGroup(tag.parent, seen);
+      }
+
+      group = {
+        type: 'group',
+        info: {
+          title: getTagDisplayName(tag ?? { name }),
+          description: tag?.description,
+        },
+        tag,
+        entries: [],
+        schemaId: builder.id,
+        path: path.join(parent?.path ?? '', slugify(name)),
+      };
+      tagGroups.set(name, group);
+      (parent ? parent.entries : rest).push(group);
+      return group;
+    }
+
     for (const entry of entries) {
       switch (groupBy) {
         case 'route': {
@@ -182,40 +220,36 @@ export function createAutoPreset(options: SchemaToPagesOptions): PagesBuilderCon
           break;
         }
         case 'tag': {
-          let tags =
+          const operation =
             entry.type === 'operation'
-              ? dereferenceShallow(doc.paths?.[entry.item.path])?.[entry.item.method]?.tags
-              : dereferenceShallow(doc.webhooks?.[entry.item.name])?.[entry.item.method]?.tags;
+              ? dereferenceShallow(doc.paths?.[entry.item.path])?.[entry.item.method]
+              : dereferenceShallow(doc.webhooks?.[entry.item.name])?.[entry.item.method];
 
-          if (!tags || tags.length === 0) {
-            console.warn(
-              'When `groupBy` is set to `tag`, make sure a `tags` is defined for every operation schema.',
-            );
-
-            tags = ['unknown'];
+          const tags: string[] = [];
+          for (const name of operation?.tags ?? []) {
+            // tags with a `kind` other than `nav` aren't for navigation (OpenAPI 3.2)
+            const kind = docTags.get(name)?.kind;
+            if (!kind || kind === 'nav') tags.push(name);
           }
 
-          for (const tag of tags) {
-            const res = builder.fromTagName(tag);
-            if (!res) continue;
-
-            const groupName = slugify(tag);
-            let group = groups.get(groupName);
-            if (!group) {
-              group = {
-                type: 'group',
-                info: { title: res.displayName, description: res.info.description },
-                tag: res.info,
-                entries: [],
-                schemaId: builder.id,
-                path: groupName,
-              };
-              groups.set(groupName, group);
+          if (tags.length === 0) {
+            if (!warnedUntagged) {
+              warnedUntagged = true;
+              console.warn(
+                '[Fumadocs OpenAPI] found operations without tags, they will be grouped under "unknown".',
+              );
             }
+
+            tags.push('unknown');
+          }
+
+          const fileName = `${nameFn.call(builder, entry)}.mdx`;
+          for (const name of tags) {
+            const group = tagGroup(name);
 
             group.entries.push({
               ...entry,
-              path: path.join(groupName, `${nameFn.call(builder, entry)}.mdx`),
+              path: path.join(group.path, fileName),
             });
           }
 

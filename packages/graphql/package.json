@@ -1,6 +1,6 @@
 {
   "name": "@fumadocs/graphql",
-  "version": "0.2.2",
+  "version": "0.2.3",
   "description": "Generate docs for your GraphQL schema",
   "keywords": [
     "Docs",

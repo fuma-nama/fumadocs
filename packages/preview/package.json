@@ -61,7 +61,7 @@
     "fumadocs-core": "workspace:*",
     "fumadocs-ui": "workspace:@fumadocs/base-ui@*",
     "hast-util-to-jsx-runtime": "^2.3.6",
-    "hono": "^4.13.4",
+    "hono": "^4.13.5",
     "ignore": "^7.0.6",
     "katex": "0.18.4",
     "lucide-react": "^1.34.0",

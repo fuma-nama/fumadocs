@@ -44,7 +44,10 @@ export function Header(props: ComponentProps<'header'>) {
         props.className,
       )}
     >
-      <div data-header-body="" className="flex border-b px-4 gap-2 h-14 md:px-6">
+      <div
+        data-header-body=""
+        className={cn('flex border-b px-4 gap-2 h-14', navMode === 'top' && 'md:px-6')}
+      >
         <div
           className={cn(
             'items-center',
