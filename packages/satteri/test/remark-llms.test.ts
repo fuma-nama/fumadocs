@@ -121,18 +121,18 @@ test('remark-llms shows generated content of replaced nodes', async () => {
 
     ### TestProps
 
-    | Prop | Type | Description |
-    | --- | --- | --- |
-    | \`name?\` | \`string\` | The visible name. Default: \`"hello"\` |
-    | \`enabled\` | \`union\` | Whether it is enabled |
+    | Prop      | Type     | Description                          |
+    | --------- | -------- | ------------------------------------ |
+    | \`name?\`   | \`string\` | The visible name. Default: \`"hello"\` |
+    | \`enabled\` | \`union\`  | Whether it is enabled                |
     "
   `);
 });
 
-test('remark-llms jsx mode exports a component', async () => {
+test('remark-llms function output exports a component', async () => {
   const options = await applySatteriPreset({
     rehypeCodeOptions: false,
-    mdastPlugins: [remarkLlms({ jsx: true })],
+    mdastPlugins: [remarkLlms({ output: 'function' })],
   })('bundler');
 
   const result = await compileMdx({

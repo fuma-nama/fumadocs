@@ -39,7 +39,7 @@ export interface FileInfo {
 
 export interface GetTextOptions {
   /**
-   * MDX components for JSX elements in the output, only available when the `jsx` option is enabled in `includeProcessedMarkdown`.
+   * MDX components for JSX elements in the output, only available with `output: 'function'` in `includeProcessedMarkdown`.
    */
   components?: MDXComponents;
 }

@@ -7,7 +7,7 @@ packages:
 
 `remarkLlms` and the `stringify` mode of `remarkStructure` no longer re-stringify the document with `mdast-util-to-markdown`, they share a stringifier that slices the original source instead. On a 40 kB document with the default preset, `remarkLlms` went from 45 ms to 11 ms per compile, and structured data with `stringify` from 34 ms to 8 ms.
 
-For `remarkLlms`, the output now matches the authored document: heading IDs are appended, frontmatter and ESM nodes are dropped, `remarkInclude` splices in the included content, and package-manager tabs, images and admonitions appear as written instead of their expanded `<Tabs>` / `<img>` / `<Callout>` forms. Heading levels also no longer lose their `#` markers. Plugins whose generated content replaces the authored form register it with `replaceSource()`: `remarkAutoTypeTable` renders its type tables as Markdown tables in the output, instead of the meaningless `<auto-type-table>` tag.
+For `remarkLlms`, the output now matches the authored document: heading IDs are appended, frontmatter and ESM nodes are dropped, `remarkInclude` splices in the included content, and package-manager tabs, images and admonitions appear as written instead of their expanded `<Tabs>` / `<img>` / `<Callout>` forms. Heading levels also no longer lose their `#` markers. Where generated content replaces the authored form, the output shows the generated content: `remarkAutoTypeTable` renders its type tables as Markdown tables, instead of the meaningless `<auto-type-table>` tag.
 
 For `remarkStructure`, content records keep the authored inline syntax, while links and JSX elements are flattened into their plain text. `stringify` now takes `true` or a `filterElement` callback for the elements whose syntax should be kept:
 

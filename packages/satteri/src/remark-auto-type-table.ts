@@ -16,7 +16,7 @@ import {
   type RemarkAutoTypeTableOptions,
   type TypeTableProps,
 } from 'fumadocs-typescript';
-import { replaceSource } from './stringifier';
+import { formatTable, replaceSource } from './stringifier';
 import { jsxToSource } from './utils';
 
 export type { RemarkAutoTypeTableOptions } from 'fumadocs-typescript';
@@ -112,22 +112,23 @@ async function buildTypeProp(
 
 /** the generated type table as a Markdown table, for source-based Markdown output */
 function docToMarkdown(doc: GeneratedDoc): string {
-  const cell = (text: string) => text.replace(/\s*\n\s*/g, ' ').replaceAll('|', '\\|');
-  let out = `### ${doc.name}\n\n`;
-  if (doc.description) out += `${doc.description.trim()}\n\n`;
-
-  out += '| Prop | Type | Description |\n| --- | --- | --- |\n';
+  const rows = [['Prop', 'Type', 'Description']];
   for (const entry of doc.entries) {
     const tags = parseTags(entry.tags);
     let description = entry.description.replace(/{@link (?<link>[^}]*)}/g, '$1').trim();
     if (tags.default) description += `${description ? ' ' : ''}Default: \`${tags.default}\``;
     if (entry.deprecated) description = `**Deprecated.** ${description}`;
 
-    const name = `\`${entry.name}${entry.required ? '' : '?'}\``;
-    out += `| ${name} | \`${cell(entry.simplifiedType)}\` | ${cell(description)} |\n`;
+    rows.push([
+      `\`${entry.name}${entry.required ? '' : '?'}\``,
+      `\`${entry.simplifiedType}\``,
+      description,
+    ]);
   }
 
-  return out;
+  let out = `### ${doc.name}\n\n`;
+  if (doc.description) out += `${doc.description.trim()}\n\n`;
+  return out + formatTable(rows);
 }
 
 export function remarkAutoTypeTable(config: RemarkAutoTypeTableOptions = {}) {

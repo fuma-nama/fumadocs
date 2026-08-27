@@ -14,7 +14,7 @@ test('Remark LLMs: jsx', async () => {
   const content = await fs.readFile(file);
   const compiled = String(
     await compile(content, {
-      remarkPlugins: [[remarkLLMs, { jsx: true }]],
+      remarkPlugins: [[remarkLLMs, { output: 'function' }]],
     }),
   );
   await expect(compiled).toMatchFileSnapshot(

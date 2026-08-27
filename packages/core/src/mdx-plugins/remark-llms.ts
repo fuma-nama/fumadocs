@@ -56,21 +56,25 @@ export interface LLMsOptions extends StringifyOptions {
   /**
    * Tag names of MDX components to be stringified as `placeholder()`, you can also use `placeholder()` directly in `stringify` callback.
    *
-   * Ignored when `jsx` is enabled.
+   * Ignored with `output: 'function'`.
    */
   mdxAsPlaceholder?: string[];
 
   /**
-   * Export a component instead of a string: Markdown content is stringified at compile time,
-   * while JSX elements are kept as JSX, receiving their original props and resolving from `props.components`.
+   * Form of the export:
    *
-   * Render the component with `renderToMarkdown` from `fumadocs-core/server`, where a component
-   * can call `asMarkdown()` to define its own Markdown form.
+   * - `string`: the output Markdown.
+   * - `function`: a component: Markdown content is still stringified at compile time, while JSX
+   *   elements are kept as JSX, receiving their original props and resolving from `props.components`.
+   *   Render it with `renderToMarkdown` from `fumadocs-core/server`, where a component
+   *   can call `asMarkdown()` to define its own Markdown form.
+   *
+   * @default string
    */
-  jsx?: boolean;
+  output?: 'function' | 'string';
 
   /**
-   * @private output in file data, unavailable with `jsx`
+   * @private output in file data, unavailable with `output: 'function'`
    */
   _data?: boolean;
 }
@@ -85,10 +89,11 @@ export function remarkLLMs(
     headingIds = true,
     _data = false,
     mdxAsPlaceholder,
-    jsx = false,
+    output = 'string',
     ...rest
   }: LLMsOptions = {},
 ): Transformer<Root, Root> {
+  const jsx = output === 'function';
   const stringifier = defaultStringifier<JsxCollect | undefined>({
     ...rest,
     filterElement(node) {
@@ -169,7 +174,7 @@ interface JsxChunkElement {
 type JsxChunk = string | JsxChunkElement;
 
 /**
- * `stringify` branch for the `jsx` option: collect the element and return a marker,
+ * `stringify` branch for the `function` output: collect the element and return a marker,
  * resolved later by `toJsxChunks()`. Only components (capitalized names) are kept.
  */
 function collectJsx(

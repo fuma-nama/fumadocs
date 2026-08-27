@@ -25,13 +25,17 @@ export interface LLMsOptions {
   headingIds?: boolean;
 
   /**
-   * Export a component instead of a string: Markdown content is kept as authored source,
-   * while JSX elements stay as JSX, receiving their original props and resolving from `props.components`.
+   * Form of the export:
    *
-   * Render the component with `renderToMarkdown` from `fumadocs-core/server`, where a component
-   * can call `asMarkdown()` to define its own Markdown form.
+   * - `string`: the output Markdown.
+   * - `function`: a component: Markdown content is kept as authored source, while JSX elements
+   *   stay as JSX, receiving their original props and resolving from `props.components`.
+   *   Render it with `renderToMarkdown` from `fumadocs-core/server`, where a component
+   *   can call `asMarkdown()` to define its own Markdown form.
+   *
+   * @default string
    */
-  jsx?: boolean;
+  output?: 'function' | 'string';
 }
 
 interface JsxSpan {
@@ -49,7 +53,12 @@ const componentNameRegex = /^[A-Z][\w$]*$/;
  * Export the document as Markdown, sliced from the authored source: heading IDs are added,
  * frontmatter & ESM nodes are dropped, and includes are replaced with their content.
  */
-export function remarkLlms({ as = '_markdown', headingIds = true, jsx = false }: LLMsOptions = {}) {
+export function remarkLlms({
+  as = '_markdown',
+  headingIds = true,
+  output = 'string',
+}: LLMsOptions = {}) {
+  const jsx = output === 'function';
   const factory = () => {
     const spans: JsxSpan[] = [];
     let s: Stringifier;

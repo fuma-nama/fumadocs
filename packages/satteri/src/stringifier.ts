@@ -47,6 +47,38 @@ export function replaceSource(
 }
 
 /**
+ * Rows as an aligned Markdown table, the first row being the header.
+ * Newlines in cells are collapsed and `|` is escaped.
+ */
+export function formatTable(rows: readonly (readonly string[])[]): string {
+  const cells: string[][] = [];
+  const widths: number[] = [];
+  for (const row of rows) {
+    const escaped: string[] = [];
+    for (let i = 0; i < row.length; i++) {
+      const text = row[i].replace(/\s*\n\s*/g, ' ').replaceAll('|', '\\|');
+      widths[i] = Math.max(widths[i] ?? 0, text.length);
+      escaped.push(text);
+    }
+    cells.push(escaped);
+  }
+
+  let out = '';
+  for (let r = 0; r < cells.length; r++) {
+    let line = '|';
+    for (let i = 0; i < widths.length; i++) line += ` ${(cells[r][i] ?? '').padEnd(widths[i])} |`;
+    out += `${line}\n`;
+    if (r === 0) {
+      line = '|';
+      for (const width of widths) line += ` ${'-'.repeat(width)} |`;
+      out += `${line}\n`;
+    }
+  }
+
+  return out;
+}
+
+/**
  * Markdown output backed by the authored source. Requires `options: { position: true }`
  * on the plugin, and inherits the `_sourceEdits` recorded by earlier plugins.
  *

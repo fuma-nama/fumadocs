@@ -5,14 +5,14 @@ packages:
   npm:fumadocs-mdx: minor
 ---
 
-## Remark LLMs: export a component with the `jsx` option
+## Remark LLMs: export a component with `output: "function"`
 
-With `jsx` enabled, `_markdown` becomes a component instead of a string: Markdown content is still stringified at compile time, while JSX elements stay as JSX, receiving their original props.
+With `output: "function"`, `_markdown` becomes a component instead of a string: Markdown content is still stringified at compile time, while JSX elements stay as JSX, receiving their original props.
 
 ```ts
 // fumadocs-mdx collection config
 postprocess: {
-  includeProcessedMarkdown: { jsx: true },
+  includeProcessedMarkdown: { output: 'function' },
 },
 ```
 
