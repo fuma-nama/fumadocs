@@ -48,7 +48,57 @@ const vfile = await compile('...', {
 });
 ```
 
+## Output
+
+The `output` option controls the form of the export:
+
+- `string` (default): the stringified Markdown.
+- `function`: a component. Markdown content is still stringified at compile time, while JSX elements stay as JSX, receiving their original props.
+
+```ts
+import { type LLMsOptions } from 'fumadocs-core/mdx-plugins/remark-llms';
+
+const llmsOptions: LLMsOptions = {
+  // [!code ++]
+  output: 'function',
+};
+```
+
+With Fumadocs MDX, pass your MDX components to `getText('processed')`, it renders the component for you:
+
+```ts
+import { getMDXComponents } from '@/components/mdx';
+
+const text = await page.data.getText('processed', {
+  components: getMDXComponents(),
+});
+```
+
+Otherwise, render it with `renderToMarkdown` from `fumadocs-core/server`, elements resolve from `props.components`:
+
+```tsx
+import { renderToMarkdown } from 'fumadocs-core/server';
+
+const text = await renderToMarkdown(<Markdown components={{ Callout }} />);
+```
+
+A component defines its own Markdown form by calling `asMarkdown()` during render:
+
+```tsx
+import { asMarkdown, md } from 'fumadocs-core/server';
+
+function Callout({ title, children }) {
+  if (asMarkdown()) return md.linePrefix('> ')`**${title}**\n${children}`;
+
+  return <div className="...">...</div>;
+}
+```
+
+Components that don't opt in (including client components) are serialized as JSX syntax. See [Markdown Rendering](/docs/headless/utils/markdown) for details.
+
 ## Placeholders
+
+> Placeholders apply to the `string` output.
 
 Placeholders let you keep certain MDX components in the stringified output as special tokens instead of dropping or inlining them. That way you can:
 
