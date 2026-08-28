@@ -159,6 +159,8 @@ export function AISearchInput(props: ComponentProps<'form'>) {
           localStorage.setItem(StorageKeyInput, e.target.value);
         }}
         onKeyDown={(event) => {
+          // keyCode 229: Safari fires `compositionend` before this keydown, `isComposing` is already false
+          if (event.nativeEvent.isComposing || event.keyCode === 229) return;
           if (!event.shiftKey && event.key === 'Enter') {
             onStart(event);
           }

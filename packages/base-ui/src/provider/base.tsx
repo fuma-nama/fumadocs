@@ -74,7 +74,7 @@ function ThemeHotKey({ hotKey }: { hotKey: Exclude<ThemeOptions['hotKey'], false
   const { setTheme, resolvedTheme } = useTheme();
 
   const onKeyDown = useEffectEvent((e: KeyboardEvent) => {
-    if (e.defaultPrevented || e.isComposing) return;
+    if (e.defaultPrevented || e.isComposing || e.keyCode === 229) return;
     if (isTypingTarget(e.target)) return;
 
     // a custom function is responsible for its own modifiers
