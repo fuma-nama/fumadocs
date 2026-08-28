@@ -1,24 +1,17 @@
 core:changelogs:
-  - content: "---\npackages:\n  npm:fumadocs-openapi:\n    type: patch\n  npm:@fumadocs/api-docs:\n    type: patch\n---\n\n## Fix OpenAPI 3.0 `example` in external files crashing `OpenAPIPage`\n\nThe version upgrader ran after external documents were embedded under `x-ext`, where it can no longer classify schemas by their JSON path: a schema-level `example` from an external 3.0 file became an Example Object map instead of the JSON Schema `examples` array, crashing the schema UI with `schema.examples is not iterable`.\n\nEach document is now upgraded before bundling embeds it. This also honors the external file's own declared OpenAPI version, so a 3.0 file referenced from a 3.1 document is upgraded too (previously it was skipped entirely).\n"
-    filename: 2026-08-27-external-doc-upgrade.md
+  - content: "---\npackages:\n  npm:@fumadocs/graphql:\n    type: patch\n---\n\n## Require `graphql` v17\n\nThe peer range now correctly requires `^17.0.0`.\n"
+    filename: 2026-08-28-graphql-v17-peer.md
     v: 0.0.0
-  - content: "---\npackages:\n  npm:fumadocs-ui:\n    type: patch\n  npm:@fumadocs/base-ui:\n    type: patch\n---\n\n## Fix Next.js `<Link>` not scrolling to top under docs layouts\n\nThe page container rendered `<main style=\"display: contents\">`, which Next.js' scroll handler treats as a hidden element: `display: contents` generates no box, so its `getBoundingClientRect()` is all-zero, indistinguishable from `display: none`. The handler skips it (and the sticky TOC siblings) without ever descending into children, dropping the scroll-to-top on navigation entirely.\n\nThe `<main>` element in Docs, Notebook and Flux page containers is now a real grid item (`display: grid; grid-area: main`) wrapping the unchanged `#nd-page` article, which centers via the grid instead of `mx-auto`. Rendering is identical, but if your custom CSS has element rules on `main` that were previously inert, they now apply.\n"
-    filename: 2026-08-27-docs-layout-link-autoscroll.md
-    v: 0.0.0
-  - content: "---\npackages:\n  npm:fumadocs-openapi:\n    type: patch\n---\n\n## Support OpenAPI 3.2 tag hierarchy in `groupBy: 'tag'`\n\n`generateFiles` now follows the tag hierarchy introduced in OpenAPI 3.2: a tag with a `parent` becomes a folder nested inside its parent tag's folder (including the generated `meta.json`), and tags with a `kind` other than `nav` no longer form groups, matching their intent (e.g. `badge`).\n\nOperations referencing undeclared tags or having no tags are no longer dropped silently, which previously could produce an empty output directory. Undeclared tags now form their own group, and untagged operations are grouped under an `unknown` folder with a warning.\n"
-    filename: 2026-08-27-openapi-tag-hierarchy.md
+  - content: "---\npackages:\n  npm:@fumadocs/sanity:\n    type: patch\n---\n\n## Support `@sanity/client` v8 and `next-sanity` v13\n\nWidened the peer dependency ranges to `^7.22.0 || ^8.0.0` and `^12.4.0 || ^13.0.0` respectively.\n"
+    filename: 2026-08-28-sanity-peer-ranges.md
     v: 0.0.0
 core:packages:
-  - changelogIds:
-      - 2026-08-27-external-doc-upgrade.md
-    id: npm:@fumadocs/api-docs
-    updated: true
+  - id: npm:@fumadocs/api-docs
+    updated: false
   - id: npm:@fumadocs/asyncapi
-    updated: true
-  - changelogIds:
-      - 2026-08-27-docs-layout-link-autoscroll.md
-    id: npm:@fumadocs/base-ui
-    updated: true
+    updated: false
+  - id: npm:@fumadocs/base-ui
+    updated: false
   - id: npm:@fumadocs/basehub
     updated: false
   - id: npm:@fumadocs/cli
@@ -27,56 +20,55 @@ core:packages:
     updated: false
   - id: npm:@fumadocs/content-collections
     updated: false
-  - id: npm:create-fumadocs-app
-    updated: true
-  - id: npm:create-fumadocs-versions
-    updated: true
   - id: npm:fumadocs-core
-    updated: true
+    updated: false
+  - id: npm:create-fumadocs-app
+    updated: false
+  - id: npm:create-fumadocs-versions
+    updated: false
   - id: npm:fumadocs-docgen
     updated: false
   - id: npm:fumadocs-epub
     updated: false
-  - id: npm:@fumadocs/graphql
+  - changelogIds:
+      - 2026-08-28-graphql-v17-peer.md
+    id: npm:@fumadocs/graphql
     updated: true
   - id: npm:@fumari/image-size
     updated: false
-  - id: npm:@fumadocs/local-content
-    updated: false
   - id: npm:@fumadocs/language
+    updated: false
+  - id: npm:@fumadocs/local-content
     updated: false
   - id: npm:@fumadocs/local-html
     updated: false
-  - id: npm:@fumadocs/local-md
-    updated: false
   - id: npm:fumadocs-mdx
+    updated: false
+  - id: npm:@fumadocs/local-md
     updated: false
   - id: npm:@fumadocs/mdx-remote
     updated: false
   - id: npm:@fumadocs/notion
     updated: false
-  - changelogIds:
-      - 2026-08-27-external-doc-upgrade.md
-      - 2026-08-27-openapi-tag-hierarchy.md
-    id: npm:fumadocs-openapi
-    updated: true
   - id: npm:fumadocs-obsidian
+    updated: false
+  - id: npm:fumadocs-openapi
     updated: false
   - id: npm:fumadocs-preview
     updated: false
   - id: npm:fumadocs-python
     updated: false
-  - changelogIds:
-      - 2026-08-27-docs-layout-link-autoscroll.md
-    id: npm:fumadocs-ui
-    updated: true
-  - id: npm:@fumadocs/sanity
+  - id: npm:fumadocs-ui
     updated: false
+  - changelogIds:
+      - 2026-08-28-sanity-peer-ranges.md
+    id: npm:@fumadocs/sanity
+    updated: true
   - id: npm:@fumadocs/satteri
     updated: false
-  - id: npm:@fumari/stf
-    updated: false
   - id: npm:@fumadocs/shadcn
+    updated: false
+  - id: npm:@fumari/stf
     updated: false
   - id: npm:@fumadocs/story
     updated: false
@@ -96,62 +88,33 @@ npm:packages:
   - id: npm:@fumadocs/cli
   - id: npm:@fumadocs/content
   - id: npm:@fumadocs/content-collections
+  - id: npm:fumadocs-core
   - id: npm:create-fumadocs-app
   - id: npm:create-fumadocs-versions
-  - id: npm:fumadocs-core
   - id: npm:fumadocs-docgen
   - id: npm:fumadocs-epub
   - id: npm:@fumadocs/graphql
   - id: npm:@fumari/image-size
-  - id: npm:@fumadocs/local-content
   - id: npm:@fumadocs/language
+  - id: npm:@fumadocs/local-content
   - id: npm:@fumadocs/local-html
-  - id: npm:@fumadocs/local-md
   - id: npm:fumadocs-mdx
+  - id: npm:@fumadocs/local-md
   - id: npm:@fumadocs/mdx-remote
   - id: npm:@fumadocs/notion
-  - id: npm:fumadocs-openapi
   - id: npm:fumadocs-obsidian
+  - id: npm:fumadocs-openapi
   - id: npm:fumadocs-preview
   - id: npm:fumadocs-python
   - id: npm:fumadocs-ui
   - id: npm:@fumadocs/sanity
   - id: npm:@fumadocs/satteri
-  - id: npm:@fumari/stf
   - id: npm:@fumadocs/shadcn
+  - id: npm:@fumari/stf
   - id: npm:@fumadocs/story
   - id: npm:@fumadocs/tailwind
   - id: npm:fumadocs-twoslash
   - id: npm:fumadocs-typescript
   - id: npm:@fumadocs/vite
   - id: npm:docs
-  - id: npm:example-astro
-  - id: npm:example-asyncapi
-  - id: npm:example-base-ui
-  - id: npm:example-content-collections
   - id: npm:example-graphql
-  - id: npm:example-i18n
-  - id: npm:example-marble-cms
-  - id: npm:example-next
-  - id: npm:example-next-local-html
-  - id: npm:example-next-min
-  - id: npm:example-next-shadcn
-  - id: npm:example-next-local-md
-  - id: npm:example-next-static
-  - id: npm:example-obsidian
-  - id: npm:example-openapi
-  - id: npm:example-react-router-i18n
-  - id: npm:example-python
-  - id: npm:example-react-router
-  - id: npm:example-react-router-min
-  - id: npm:example-react-router-spa
-  - id: npm:example-react-router-rsc
-  - id: npm:example-tanstack-start
-  - id: npm:example-tanstack-start-i18n
-  - id: npm:example-tanstack-start-local-md
-  - id: npm:example-tanstack-start-min
-  - id: npm:example-tanstack-start-openapi
-  - id: npm:example-tanstack-start-spa
-  - id: npm:example-tanstack-start-story
-  - id: npm:example-waku
-  - id: npm:example-waku-i18n
