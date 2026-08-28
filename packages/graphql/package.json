@@ -63,7 +63,7 @@
     "@types/react": "*",
     "fumadocs-core": "^16.15.0",
     "fumadocs-ui": "^16.15.0",
-    "graphql": "^16.9.0",
+    "graphql": "^17.0.0",
     "react": "^19.2.0",
     "react-dom": "^19.2.0"
   },
