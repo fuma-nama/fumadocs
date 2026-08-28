@@ -171,6 +171,8 @@ export function Feedback({
               className="border rounded-lg bg-fd-secondary text-fd-secondary-foreground p-3 resize-none focus-visible:outline-none placeholder:text-fd-muted-foreground"
               placeholder="Leave your feedback..."
               onKeyDown={(e) => {
+                // keyCode 229: Safari fires `compositionend` before this keydown, `isComposing` is already false
+                if (e.nativeEvent.isComposing || e.keyCode === 229) return;
                 if (!e.shiftKey && e.key === 'Enter') {
                   submit(e);
                 }
@@ -464,6 +466,8 @@ function FeedbackTextForm({
         className="border rounded-lg bg-fd-secondary text-fd-secondary-foreground p-3 resize-none focus-visible:outline-none placeholder:text-fd-muted-foreground"
         placeholder="Leave your feedback..."
         onKeyDown={(e) => {
+          // keyCode 229: Safari fires `compositionend` before this keydown, `isComposing` is already false
+          if (e.nativeEvent.isComposing || e.keyCode === 229) return;
           if (!e.shiftKey && e.key === 'Enter') {
             submit(e);
           }

@@ -356,7 +356,7 @@ export function SearchDialogList({
   );
 
   const onKey = useEffectEvent((e: KeyboardEvent) => {
-    if (!items || e.isComposing) return;
+    if (!items || e.isComposing || e.keyCode === 229) return;
 
     if (e.key === 'ArrowDown' || e.key == 'ArrowUp') {
       let idx = items.findIndex((item) => item.id === active);
