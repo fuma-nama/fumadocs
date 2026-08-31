@@ -84,6 +84,11 @@ const showcases: ShowcaseObject[] = [
     url: 'https://www.agentskit.io',
   },
   {
+    image: '/showcases/generative-a11y.png',
+    name: 'generative-a11y',
+    url: 'https://generativea11y.com',
+  },
+  {
     image: '/showcases/comfydeploy.png',
     name: 'ComfyDeploy',
     url: 'https://comfydeploy.com',
