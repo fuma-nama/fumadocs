@@ -118,14 +118,13 @@ export function createOpenAPIPageBase({
         generateTypeScriptDefinitions,
         codeUsages,
         SchemaUI(props) {
-          if (schemaUIOptions?.render) return schemaUIOptions.render(props, ctx);
-          return (
-            <Schema
-              {...schemaUIShared}
-              {...props}
-              showExample={props.showExample ?? schemaUIOptions?.showExample}
-            />
-          );
+          const merged: SchemaUIOptions = {
+            ...schemaUIShared,
+            ...props,
+            showExample: props.showExample ?? schemaUIOptions?.showExample,
+          };
+          if (schemaUIOptions?.render) return schemaUIOptions.render(merged, ctx);
+          return <Schema {...merged} />;
         },
         ...options,
         _default_processMarkdown(md) {

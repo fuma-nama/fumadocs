@@ -19,7 +19,11 @@ import type { ResponseTabsRenderOptions } from './operation/response-tabs';
 import type { PlaygroundClientOptions } from '@/playground/client';
 import type { GeneratedPageProps, WebhookItem, OperationItem } from '@/utils/pages/builder';
 import type { ParsedSchema } from '@/utils/schema';
+import type { SchemaUIOptions } from '@fumadocs/api-docs/components/schema';
 import { createOpenAPIPageBase } from './base';
+
+export { useRenderContext, useServerContext } from '@/ui/contexts/api';
+export { useOperationContext } from '@/ui/operation/context';
 
 export interface GenerateTypeScriptDefinitionsContext {
   name: string;
@@ -157,14 +161,7 @@ export interface CreateOpenAPIPageOptions {
    * Info UI for JSON schemas.
    */
   schemaUI?: {
-    render?: (
-      options: {
-        root: ParsedSchema;
-        readOnly?: boolean;
-        writeOnly?: boolean;
-      },
-      ctx: RenderContext,
-    ) => ReactNode;
+    render?: (options: SchemaUIOptions, ctx: RenderContext) => ReactNode;
 
     /**
      * Show examples under the generated content of JSON schemas.

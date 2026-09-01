@@ -70,6 +70,7 @@
     "@types/node": "26.3.0",
     "@types/react": "^19.2.18",
     "fast-content-type-parse": "^3.0.0",
+    "fuma-cli": "^0.1.1",
     "fumadocs-core": "workspace:*",
     "fumadocs-ui": "workspace:@fumadocs/base-ui@*",
     "json-schema-typed": "^8.0.2",

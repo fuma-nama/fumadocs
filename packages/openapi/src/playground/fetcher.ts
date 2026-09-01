@@ -1,6 +1,6 @@
 import type { RequestData } from '@/requests/types';
 import type { MediaAdapter } from '@/requests/media/adapter';
-import { resolveMediaAdapter } from '@/requests/media/adapter';
+import { resolveMediaAdapter } from '@/requests/media/resolve-adapter';
 import type { Awaitable } from '@/types';
 
 export type FetchResult = FetchResponseResult | FetchErrorResult;
