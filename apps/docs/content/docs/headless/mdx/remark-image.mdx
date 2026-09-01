@@ -9,7 +9,7 @@ This plugin adds `width` and `height` attributes to your image elements, which i
 
 Add it to your Remark plugins.
 
-```ts title="MDX Compiler"
+```ts tab="MDX Compiler"
 import { compile } from '@mdx-js/mdx';
 import { remarkImage } from 'fumadocs-core/mdx-plugins';
 
@@ -18,7 +18,17 @@ await compile('...', {
 });
 ```
 
-> This plugin is included by default on Fumadocs MDX.
+```ts title="source.config.ts" tab="Fumadocs MDX"
+import { defineConfig } from 'fumadocs-mdx/config';
+
+export default defineConfig({
+  mdxOptions: {
+    remarkImageOptions: {
+      // it is enabled by default, customize it here
+    },
+  },
+});
+```
 
 Supported:
 
@@ -62,12 +72,25 @@ Where `./public/hello.png` points to the image in public directory.
 
 For Next.js, you can disable static imports on local images.
 
-```ts
+```ts tab="MDX Compiler"
+import { compile } from '@mdx-js/mdx';
 import { remarkImage } from 'fumadocs-core/mdx-plugins';
 
-export default {
+await compile('...', {
   remarkPlugins: [[remarkImage, { useImport: false }]],
-};
+});
+```
+
+```ts title="source.config.ts" tab="Fumadocs MDX"
+import { defineConfig } from 'fumadocs-mdx/config';
+
+export default defineConfig({
+  mdxOptions: {
+    remarkImageOptions: {
+      useImport: false,
+    },
+  },
+});
 ```
 
 ```mdx
@@ -98,31 +121,48 @@ For images in public directory, you can just reference them without relative pat
 
 Customize the path of public directory
 
-```ts
+```ts tab="MDX Compiler"
+import { compile } from '@mdx-js/mdx';
 import { remarkImage } from 'fumadocs-core/mdx-plugins';
 import path from 'node:path';
 
-export default {
-  remarkPlugins: [
-    remarkImage,
-    {
+await compile('...', {
+  remarkPlugins: [[remarkImage, { publicDir: path.join(process.cwd(), 'dir') }]],
+});
+```
+
+```ts title="source.config.ts" tab="Fumadocs MDX"
+import { defineConfig } from 'fumadocs-mdx/config';
+import path from 'node:path';
+
+export default defineConfig({
+  mdxOptions: {
+    remarkImageOptions: {
       publicDir: path.join(process.cwd(), 'dir'),
     },
-  ],
-};
+  },
+});
 ```
 
 You can pass a URL too.
 
-```ts
+```ts tab="MDX Compiler"
+import { compile } from '@mdx-js/mdx';
 import { remarkImage } from 'fumadocs-core/mdx-plugins';
 
-export default {
-  remarkPlugins: [
-    remarkImage,
-    {
+await compile('...', {
+  remarkPlugins: [[remarkImage, { publicDir: 'https://my-cdn.com/images' }]],
+});
+```
+
+```ts title="source.config.ts" tab="Fumadocs MDX"
+import { defineConfig } from 'fumadocs-mdx/config';
+
+export default defineConfig({
+  mdxOptions: {
+    remarkImageOptions: {
       publicDir: 'https://my-cdn.com/images',
     },
-  ],
-};
+  },
+});
 ```
