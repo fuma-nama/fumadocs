@@ -31,6 +31,11 @@ export const registry: Registry = {
           path: 'components/sidebar/link-item.tsx',
           target: '<dir>/docs-sidebar/link-item.tsx',
         },
+        {
+          type: 'components',
+          path: 'components/sidebar/tabs/dropdown.tsx',
+          target: '<dir>/docs-sidebar/tabs-dropdown.tsx',
+        },
       ],
     },
     {
