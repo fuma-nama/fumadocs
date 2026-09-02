@@ -118,13 +118,30 @@ function intersection(a: ParsedSchema, b: ParsedSchema): ParsedSchema {
       }
       // require same
       case 'format':
-      case 'const':
-      case 'type': {
+      case 'const': {
         const value = b[key];
         if (value === undefined) break;
         result[key] ??= value;
 
         if (!deepEqual(result[key], value)) return false;
+        break;
+      }
+      case 'type': {
+        const value = b[key];
+        if (value === undefined) break;
+        if (result[key] === undefined) {
+          result[key] = value;
+          break;
+        }
+
+        // `type` can be a scalar or an array (e.g. `nullable: true` becomes ['string', 'null'])
+        // intersect both sets, only genuinely disjoint types are impossible
+        const aTypes = Array.isArray(result[key]) ? result[key] : [result[key]];
+        const bTypes = Array.isArray(value) ? value : [value];
+        const shared = aTypes.filter((t) => bTypes.includes(t));
+        if (shared.length === 0) return false;
+
+        result[key] = shared.length === 1 ? shared[0] : shared;
         break;
       }
       // add
