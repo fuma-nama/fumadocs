@@ -1,0 +1,72 @@
+---
+title: Versioning
+description: Publish multiple versions of your docs.
+---
+
+## Overview
+
+It's common for developer tool related docs to version their docs, such as different docs for v1 and v2 of the same tool.
+
+| Approach                            | When                                                                    |
+| ----------------------------------- | ----------------------------------------------------------------------- |
+| [Root Type](#root-type)             | Versioning applies to part of your docs, versions live in the same site |
+| [Full Versioning](#full-versioning) | Versioning the entire website, one deployment per version               |
+
+## Root Type
+
+Create a folder for each version, and mark them as root folders of the same type in `meta.json`:
+
+<Files>
+  <Folder name="content/docs" defaultOpen>
+    <Folder name="v1" defaultOpen>
+      <File name="meta.json" />
+      <File name="index.mdx" />
+      <File name="getting-started.mdx" />
+      <File name="legacy-api.mdx" />
+    </Folder>
+    <Folder name="v2" defaultOpen>
+      <File name="meta.json" />
+      <File name="index.mdx" />
+      <File name="getting-started.mdx" />
+    </Folder>
+  </Folder>
+</Files>
+
+```json tab="v1/meta.json"
+{
+  "title": "1.0.0",
+  "root": "version"
+}
+```
+
+```json tab="v2/meta.json"
+{
+  "title": "2.0.0",
+  "root": "version"
+}
+```
+
+The sidebar only shows the content of the opened version, and docs layouts render a dropdown to switch between them, labelled by their `title`.
+Switching keeps your place, it navigates to the same page in the other version, or its index page when the page doesn't exist there:
+
+| Page                       | Switching to 2.0.0         |
+| -------------------------- | -------------------------- |
+| `/docs/v1/getting-started` | `/docs/v2/getting-started` |
+| `/docs/v1/legacy-api`      | `/docs/v2`, the index page |
+
+<Callout title="Good to Know">
+  The type name (`"version"`) can be anything, it only identifies the type: root folders of the same
+  type under the same parent are interchangeable.
+</Callout>
+
+## Full Versioning
+
+Sometimes you want to version the entire website, such as https://v14.fumadocs.dev (Fumadocs v14) and https://fumadocs.dev (Latest Fumadocs).
+
+You can create a Git branch for a version of docs (call it `v2` for example), and deploy it as a separate app on another subdomain like `v2.my-site.com`.
+
+Optionally, you can link to the other versions from your docs.
+This design allows some advantages over partial versioning:
+
+- Easy maintenance: Old docs/branches won't be affected when you iterate or upgrade dependencies.
+- Better consistency: Not just the docs itself, your landing page (and other pages) will also be versioned.
