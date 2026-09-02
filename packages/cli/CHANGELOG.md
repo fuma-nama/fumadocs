@@ -1,3 +1,14 @@
+## @fumadocs/cli@1.5.0
+
+### Add API Playground & Schema UI components
+
+Install the UI of API integrations into your codebase:
+
+```npm
+npx @fumadocs/cli add fumadocs/openapi/playground
+npx @fumadocs/cli add fumadocs/api-docs/schema
+```
+
 ## @fumadocs/cli@1.4.1
 
 ### Add Astro framework support
