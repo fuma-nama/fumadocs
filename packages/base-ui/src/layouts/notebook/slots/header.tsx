@@ -17,7 +17,8 @@ import { type LayoutTab, isLayoutTabActive } from '@/layouts/shared';
 import { Popover, PopoverTrigger, PopoverContent } from '@/components/ui/popover';
 import { usePathname } from 'fumadocs-core/framework';
 import Link from 'fumadocs-core/link';
-import { useTreePath } from '@/contexts/tree';
+import { useTabsGroups, useTreePath } from '@/contexts/tree';
+import { SidebarTabsDropdown } from '@/components/sidebar/tabs/dropdown';
 
 export function Header(props: ComponentProps<'header'>) {
   const {
@@ -29,7 +30,8 @@ export function Header(props: ComponentProps<'header'>) {
   const { open } = slots.sidebar?.useSidebar?.() ?? {};
   const navMode = nav?.mode ?? 'auto';
   const sidebarCollapsible = sidebar.collapsible ?? true;
-  const showLayoutTabs = tabMode === 'navbar' && tabs.length > 0;
+  const groups = useTabsGroups(tabs);
+  const showLayoutTabs = tabMode === 'navbar' && groups.length > 0;
 
   if (nav?.component) return nav.component;
 
@@ -163,7 +165,7 @@ export function Header(props: ComponentProps<'header'>) {
 }
 
 function LayoutHeaderTabs({
-  tabs,
+  tabs: allTabs,
   className,
   ...props
 }: ComponentProps<'div'> & {
@@ -171,13 +173,20 @@ function LayoutHeaderTabs({
 }) {
   const pathname = usePathname();
   const path = useTreePath();
+  const tabs = useTabsGroups(allTabs).findLast(
+    (group) => typeof group.active?.root !== 'string',
+  )?.options;
+  const typedTabs = useMemo(() => {
+    return allTabs.filter((tab) => typeof tab.$folder?.root === 'string');
+  }, [allTabs]);
   const selectedIdx = useMemo(() => {
-    return tabs.findLastIndex((option) => isLayoutTabActive(option, path, pathname));
+    return tabs?.findLastIndex((option) => isLayoutTabActive(option, path, pathname)) ?? -1;
   }, [tabs, path, pathname]);
 
   return (
     <div className={cn('flex flex-row items-end gap-6', className)} {...props}>
-      {tabs.map((option, i) => {
+      {typedTabs.length > 0 && <SidebarTabsDropdown options={typedTabs} className="my-auto p-1" />}
+      {tabs?.map((option, i) => {
         const { title, url, unlisted, props: { className, ...rest } = {} } = option;
         const isSelected = selectedIdx === i;
 

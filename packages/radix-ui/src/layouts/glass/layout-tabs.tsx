@@ -4,19 +4,23 @@ import { usePathname } from 'fumadocs-core/framework';
 import { ChevronsUpDown } from 'lucide-react';
 import { type ComponentProps, useState } from 'react';
 import { type LayoutTab, isLayoutTabActive } from '../shared';
+import { useTabsGroups } from '@/contexts/tree';
 import { cn } from '@/utils/cn';
 import Link from 'fumadocs-core/link';
 
 export function LayoutTabsDropdown({
-  tabs,
+  tabs: allTabs,
   className,
   size = 'default',
   ...props
 }: { tabs: LayoutTab[]; size?: 'default' | 'lg' } & ComponentProps<typeof PopoverTrigger>) {
   const pathname = usePathname();
   const t = useTranslations();
+  const groups = useTabsGroups(allTabs);
+  const tabs = groups.findLast((group) => typeof group.active?.root !== 'string')?.options ?? [];
   const selected = tabs.findLast((t) => isLayoutTabActive(t, pathname));
   const [open, setOpen] = useState(false);
+  if (tabs.length === 0) return;
 
   return (
     <Popover open={open} onOpenChange={setOpen}>

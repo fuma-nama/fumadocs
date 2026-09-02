@@ -70,7 +70,7 @@ type SourceConfig = {
 export interface MetaData {
   icon?: string | undefined;
   title?: string | undefined;
-  root?: boolean | undefined;
+  root?: boolean | string | undefined;
   pages?: string[] | undefined;
   pagesIndex?: string | undefined;
   defaultOpen?: boolean | undefined;

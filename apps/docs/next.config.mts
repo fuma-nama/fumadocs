@@ -25,15 +25,6 @@ const config: NextConfig = {
       },
     ],
   },
-  async redirects() {
-    return [
-      {
-        source: '/docs/versioning',
-        destination: '/docs/navigation',
-        permanent: false,
-      },
-    ];
-  },
 };
 
 const withStory = createNextStory();

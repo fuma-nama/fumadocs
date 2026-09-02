@@ -2,15 +2,7 @@
 
 import * as Base from '@/components/sidebar/base';
 import { cn } from '@/utils/cn';
-import {
-  type ComponentProps,
-  createElement,
-  type FC,
-  type ReactNode,
-  useMemo,
-  useRef,
-  useState,
-} from 'react';
+import { type ComponentProps, createElement, type FC, type ReactNode, useRef } from 'react';
 import { cva } from 'class-variance-authority';
 import {
   createPageTreeRenderer,
@@ -20,13 +12,11 @@ import { createLinkItemRenderer } from '@/components/sidebar/link-item';
 import { buttonVariants } from '@/components/ui/button';
 import { mergeRefs } from '@/utils/merge-refs';
 import { LinkItem } from '@/layouts/shared';
-import { Check, ChevronsUpDown, Languages, SidebarIcon, X } from 'lucide-react';
+import { Languages, SidebarIcon, X } from 'lucide-react';
 import { useNotebookLayout } from '../client';
-import { isLayoutTabActive, type LayoutTab } from '@/layouts/shared';
-import { Popover, PopoverTrigger, PopoverContent } from '@/components/ui/popover';
-import { usePathname } from 'fumadocs-core/framework';
-import Link from 'fumadocs-core/link';
-import { useTreePath } from '@/contexts/tree';
+import { SidebarTabsDropdown } from '@/components/sidebar/tabs/dropdown';
+
+export { SidebarTabsDropdown };
 
 const itemVariants = cva(
   'relative flex flex-row items-center gap-2 rounded-lg p-2 text-start text-fd-muted-foreground wrap-anywhere [&_svg]:size-4 [&_svg]:shrink-0',
@@ -447,93 +437,5 @@ export function Sidebar({ banner, footer, components, collapsible = true, ...res
         })}
       </SidebarDrawer>
     </>
-  );
-}
-
-export function SidebarTabsDropdown({
-  options,
-  placeholder,
-  ...props
-}: {
-  placeholder?: ReactNode;
-  options: LayoutTab[];
-} & ComponentProps<'button'>) {
-  const [open, setOpen] = useState(false);
-  const { closeOnRedirect } = useSidebar();
-  const pathname = usePathname();
-  const path = useTreePath();
-
-  const selected = useMemo(() => {
-    return options.findLast((item) => isLayoutTabActive(item, path, pathname));
-  }, [options, path, pathname]);
-
-  const onClick = () => {
-    closeOnRedirect.current = false;
-    setOpen(false);
-  };
-
-  const item = selected ? (
-    <>
-      <div className="size-9 shrink-0 empty:hidden md:size-5">{selected.icon}</div>
-      <div>
-        <p className="text-sm font-medium">{selected.title}</p>
-        <p className="text-sm text-fd-muted-foreground empty:hidden md:hidden">
-          {selected.description}
-        </p>
-      </div>
-    </>
-  ) : (
-    placeholder
-  );
-
-  return (
-    <Popover open={open} onOpenChange={setOpen}>
-      {item && (
-        <PopoverTrigger
-          {...props}
-          className={cn(
-            'flex items-center gap-2 rounded-lg p-2 border bg-fd-secondary/50 text-start text-fd-secondary-foreground transition-colors hover:bg-fd-accent data-[popup-open]:bg-fd-accent data-[popup-open]:text-fd-accent-foreground',
-            props.className,
-          )}
-        >
-          {item}
-          <ChevronsUpDown className="shrink-0 ms-auto size-4 text-fd-muted-foreground" />
-        </PopoverTrigger>
-      )}
-      <PopoverContent className="flex flex-col gap-1 w-(--anchor-width) p-1 fd-scroll-container">
-        {options.map((item) => {
-          const isActive = selected && item.url === selected.url;
-          if (!isActive && item.unlisted) return;
-
-          return (
-            <Link
-              key={item.url}
-              href={item.url}
-              onClick={onClick}
-              {...item.props}
-              className={cn(
-                'flex items-center gap-2 rounded-lg p-1.5 hover:bg-fd-accent hover:text-fd-accent-foreground',
-                item.props?.className,
-              )}
-            >
-              <div className="shrink-0 size-9 md:mb-auto md:size-5 empty:hidden">{item.icon}</div>
-              <div>
-                <p className="text-sm font-medium leading-none">{item.title}</p>
-                <p className="text-[0.8125rem] text-fd-muted-foreground mt-1 empty:hidden">
-                  {item.description}
-                </p>
-              </div>
-
-              <Check
-                className={cn(
-                  'shrink-0 ms-auto size-3.5 text-fd-primary',
-                  !isActive && 'invisible',
-                )}
-              />
-            </Link>
-          );
-        })}
-      </PopoverContent>
-    </Popover>
   );
 }

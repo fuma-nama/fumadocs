@@ -1,5 +1,5 @@
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { useTreePath } from '@/contexts/tree';
+import { useTabsGroups, useTreePath } from '@/contexts/tree';
 import { useTranslations } from '@fuma-translate/react';
 import { usePathname } from 'fumadocs-core/framework';
 import { ChevronsUpDown } from 'lucide-react';
@@ -9,7 +9,7 @@ import { cn } from '@/utils/cn';
 import Link from 'fumadocs-core/link';
 
 export function LayoutTabsDropdown({
-  tabs,
+  tabs: allTabs,
   className,
   size = 'default',
   ...props
@@ -17,8 +17,11 @@ export function LayoutTabsDropdown({
   const path = useTreePath();
   const pathname = usePathname();
   const t = useTranslations();
+  const groups = useTabsGroups(allTabs);
+  const tabs = groups.findLast((group) => typeof group.active?.root !== 'string')?.options ?? [];
   const selected = tabs.findLast((t) => isLayoutTabActive(t, path, pathname));
   const [open, setOpen] = useState(false);
+  if (tabs.length === 0) return;
 
   return (
     <Popover open={open} onOpenChange={setOpen}>

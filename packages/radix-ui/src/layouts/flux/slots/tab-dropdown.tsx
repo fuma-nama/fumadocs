@@ -7,18 +7,23 @@ import { cn } from '@/utils/cn';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { AnimatePresence, motion } from 'motion/react';
 import { isLayoutTabActive, type LayoutTab } from '../../shared';
+import { useTabsGroups } from '@/contexts/tree';
 
 export interface TabDropdownProps extends ComponentProps<'button'> {
   placeholder?: ReactNode;
   tabs: LayoutTab[];
 }
 
-export function TabDropdown({ tabs, placeholder, className, ...props }: TabDropdownProps) {
+export function TabDropdown({ tabs: allTabs, placeholder, className, ...props }: TabDropdownProps) {
   const [open, setOpen] = useState(false);
   const pathname = usePathname();
+  const tabs = useTabsGroups(allTabs).findLast(
+    (group) => typeof group.active?.root !== 'string',
+  )?.options;
   const selectedIdx = useMemo(() => {
-    return tabs.findLastIndex((item) => isLayoutTabActive(item, pathname));
+    return tabs?.findLastIndex((item) => isLayoutTabActive(item, pathname)) ?? -1;
   }, [tabs, pathname]);
+  if (!tabs) return;
   const selected = selectedIdx !== -1 ? tabs[selectedIdx] : undefined;
 
   const onClick = () => {

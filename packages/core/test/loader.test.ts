@@ -1,5 +1,6 @@
 import { expect, test } from 'vitest';
 import { createGetUrl, getSlugs, loader, LoaderOptions, StaticSource } from '@/source';
+import { metaSchema } from '@/source/schema';
 import type { ReactElement } from 'react';
 import { removeUndefined } from '@/utils/remove-undefined';
 import { lucideIconsPlugin } from '@/source/plugins/lucide-icons';
@@ -30,6 +31,11 @@ test('Get URL: Base', () => {
   const getUrl = createGetUrl('/docs');
   expect(getUrl(['docs', 'hello'])).toBe('/docs/docs/hello');
   expect(getUrl([''])).toBe('/docs');
+});
+
+test('meta schema: root accepts boolean and string', () => {
+  expect(metaSchema.parse({ root: true }).root).toBe(true);
+  expect(metaSchema.parse({ root: 'version' }).root).toBe('version');
 });
 
 const pageTreeTests: {
@@ -124,6 +130,11 @@ const pageTreeTests: {
     title: 'Circular Reference',
     source: (await import('./fixtures/page-trees/circular')).source,
     output: './fixtures/page-trees/circular.test.json',
+  },
+  {
+    title: 'Root Type',
+    source: (await import('./fixtures/page-trees/root-type')).source,
+    output: './fixtures/page-trees/root-type.tree.json',
   },
 ];
 
