@@ -1,3 +1,15 @@
+## @fumadocs/api-docs@0.2.7
+
+### Keep overlapping `type` sets when merging `allOf`
+
+`intersection` treated any difference in the `type` keyword as an impossible schema and returned `false`, so an `allOf` member using a type array (e.g. `['string', 'null']`, emitted for `nullable: true`) merged with a typed member (`type: 'string'`) produced `false` instead of `type: 'string'` — dropping every property of the schema in the Schema UI and the playground.
+
+Intersecting overlapping type sets now keeps the shared members, and only genuinely disjoint types (e.g. `['string']` with `['number']`) resolve to `false`.
+
+### Use the explicit title of composed schemas in Schema UI
+
+`mergeAllOf` now keeps an explicit title as the display alias of the composed schema (`ChildA | ChildB`), skips titles already covered by the other side of an intersection (`DerivedConfig`, `array<NamedItem>`), and still combines the titles of untitled intersections (`Readable & Writable`).
+
 ## @fumadocs/api-docs@0.2.6
 
 ### Fix OpenAPI 3.0 `example` in external files crashing `OpenAPIPage`

@@ -1,7 +1,7 @@
 'use client';
 import * as Base from '@/components/sidebar/base';
 import { cn } from '@/utils/cn';
-import { type ComponentProps, type ReactNode, useMemo, useRef, useState } from 'react';
+import { type ComponentProps, type ReactNode, useRef } from 'react';
 import { cva } from 'class-variance-authority';
 import {
   createPageTreeRenderer,
@@ -10,14 +10,11 @@ import {
 import { createLinkItemRenderer } from '@/components/sidebar/link-item';
 import { buttonVariants } from '@/components/ui/button';
 import { SearchTrigger } from '@/layouts/shared/slots/search-trigger';
-import { Check, ChevronDown, ChevronsUpDown, Languages, SidebarIcon } from 'lucide-react';
+import { ChevronDown, Languages, SidebarIcon } from 'lucide-react';
 import { mergeRefs } from '@/utils/merge-refs';
 import { useDocsLayout } from '../client';
 import { LinkItem } from '@/layouts/shared';
-import { isLayoutTabActive, type LayoutTab } from '@/layouts/shared';
-import { usePathname } from 'fumadocs-core/framework';
-import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import Link from 'fumadocs-core/link';
+import { SidebarTabsDropdown } from '@/components/sidebar/tabs/dropdown';
 
 const itemVariants = cva(
   'relative flex flex-row items-center gap-2 rounded-lg p-2 text-start text-fd-muted-foreground wrap-anywhere [&_svg]:size-4 [&_svg]:shrink-0',
@@ -98,7 +95,15 @@ export function Sidebar({ footer, banner, collapsible = true, components, ...res
             )}
           </div>
           {slots.searchTrigger && <slots.searchTrigger.full hideIfDisabled />}
-          {tabs.length > 0 && tabMode === 'auto' && <SidebarTabsDropdown tabs={tabs} />}
+          {tabs.length > 0 && (
+            <SidebarTabsDropdown
+              options={
+                tabMode === 'auto'
+                  ? tabs
+                  : tabs.filter((tab) => typeof tab.$folder?.root === 'string')
+              }
+            />
+          )}
           {banner}
         </div>
         {viewport}
@@ -173,7 +178,7 @@ export function Sidebar({ footer, banner, collapsible = true, components, ...res
               <SidebarIcon />
             </SidebarTrigger>
           </div>
-          {tabs.length > 0 && <SidebarTabsDropdown tabs={tabs} />}
+          {tabs.length > 0 && <SidebarTabsDropdown options={tabs} />}
           {banner}
         </div>
         {viewport}
@@ -382,93 +387,6 @@ function SidebarFolderContent({
     >
       <div className="flex flex-col gap-0.5 pt-0.5">{children}</div>
     </Base.SidebarFolderContent>
-  );
-}
-
-function SidebarTabsDropdown({
-  tabs,
-  placeholder,
-  ...props
-}: {
-  placeholder?: ReactNode;
-  tabs: LayoutTab[];
-} & ComponentProps<'button'>) {
-  const [open, setOpen] = useState(false);
-  const { closeOnRedirect } = useSidebar();
-  const pathname = usePathname();
-
-  const selected = useMemo(() => {
-    return tabs.findLast((item) => isLayoutTabActive(item, pathname));
-  }, [tabs, pathname]);
-
-  const onClick = () => {
-    closeOnRedirect.current = false;
-    setOpen(false);
-  };
-
-  const item = selected ? (
-    <>
-      <div className="size-9 shrink-0 empty:hidden md:size-5">{selected.icon}</div>
-      <div>
-        <p className="text-sm font-medium">{selected.title}</p>
-        <p className="text-sm text-fd-muted-foreground empty:hidden md:hidden">
-          {selected.description}
-        </p>
-      </div>
-    </>
-  ) : (
-    placeholder
-  );
-
-  return (
-    <Popover open={open} onOpenChange={setOpen}>
-      {item && (
-        <PopoverTrigger
-          {...props}
-          className={cn(
-            'flex items-center gap-2 rounded-lg p-2 border bg-fd-secondary/50 text-start text-fd-secondary-foreground transition-colors hover:bg-fd-accent data-[state=open]:bg-fd-accent data-[state=open]:text-fd-accent-foreground',
-            props.className,
-          )}
-        >
-          {item}
-          <ChevronsUpDown className="shrink-0 ms-auto size-4 text-fd-muted-foreground" />
-        </PopoverTrigger>
-      )}
-      <PopoverContent className="flex flex-col gap-1 w-(--radix-popover-trigger-width) p-1 fd-scroll-container">
-        {tabs.map((item) => {
-          const isActive = selected && item.url === selected.url;
-          if (!isActive && item.unlisted) return;
-
-          return (
-            <Link
-              key={item.url}
-              href={item.url}
-              onClick={onClick}
-              {...item.props}
-              className={cn(
-                'flex items-center gap-2 rounded-lg p-1.5 hover:bg-fd-accent hover:text-fd-accent-foreground',
-                item.props?.className,
-              )}
-            >
-              <div className="shrink-0 size-9 md:mb-auto md:size-5 empty:hidden">{item.icon}</div>
-              <div>
-                <p className="text-sm font-medium leading-none">{item.title}</p>
-                <p className="text-[0.8125rem] text-fd-muted-foreground mt-1 empty:hidden">
-                  {item.description}
-                </p>
-              </div>
-
-              <Check
-                className={cn(
-                  'shrink-0 ms-auto size-3.5 text-fd-primary',
-                  !isActive && 'invisible',
-                )}
-              />
-            </Link>
-          );
-        })}
-      </PopoverContent>
-    </Popover>
   );
 }
 

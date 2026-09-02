@@ -825,7 +825,7 @@ function OAuth2Input({ fieldName, security }: { fieldName: FieldKey; security: S
             schemeId={security.id}
             scopes={security.scopes}
             setToken={(token) => engine.update(['header', 'Authorization'], token)}
-          ></OAuthDialogContent>
+          />
         </OAuthDialog>
       </div>
     </fieldset>

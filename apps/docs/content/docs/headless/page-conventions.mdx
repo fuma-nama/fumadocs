@@ -104,6 +104,53 @@ Fumadocs UI renders root folders as [Layout Tabs](/docs/ui/layouts/docs#layout-t
 
 </Callout>
 
+### Root Type
+
+`root` also accepts a string, the **type** of root folder:
+root folders of the same type under the same parent scope are interchangeable, such as versions of the same docs.
+
+<Files>
+  <Folder name="v1" defaultOpen>
+    <File name="meta.json" />
+    <File name="index.mdx" />
+    <File name="guide.mdx" className="text-fd-primary! bg-fd-primary/10!" />
+  </Folder>
+  <Folder name="v2" defaultOpen>
+    <File name="meta.json" />
+    <File name="index.mdx" />
+    <File name="guide.mdx" className="text-fd-primary! bg-fd-primary/10!" />
+  </Folder>
+</Files>
+
+```json tab="v1/meta.json"
+{
+  "title": "1.0.0",
+  "root": "version"
+}
+```
+
+```json tab="v2/meta.json"
+{
+  "title": "2.0.0",
+  "root": "version"
+}
+```
+
+`root: true` is simply the default type, displayed as tabs.
+
+Switching to another root folder of the same type maps a page to its **structural projection**, the page at the same path relative to the root folder:
+
+| Page                  | Projection in `v2`                                  |
+| --------------------- | --------------------------------------------------- |
+| `v1/guide.mdx`        | `v2/guide.mdx`                                      |
+| `v1/python/guide.mdx` | `v2/python/guide.mdx`, nested root folders are kept |
+
+<Callout title='Fumadocs UI'>
+
+Fumadocs UI renders a [dropdown](/docs/ui/layouts/docs#tabs-groups) for each root folder on the current page's path to switch between root folders of its type, see [Versioning](/docs/versioning) for a complete example.
+
+</Callout>
+
 ## Meta
 
 Customize folders by creating a `meta.json` file in the folder.

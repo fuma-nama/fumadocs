@@ -23,7 +23,7 @@ import {
   type BaseSlots,
   type BaseSlotsProps,
 } from '../shared';
-import { TreeContextProvider } from '@/contexts/tree';
+import { TreeContextProvider, useTabsGroups } from '@/contexts/tree';
 import { Header } from './slots/header';
 import { Container } from './slots/container';
 
@@ -134,15 +134,17 @@ export function LayoutBody(
 }
 
 function LayoutTabs({
-  tabs,
+  tabs: allTabs,
   ...props
 }: ComponentProps<'div'> & {
   tabs: LayoutTab[];
 }) {
   const pathname = usePathname();
+  const group = useTabsGroups(allTabs).findLast((group) => typeof group.active?.root !== 'string');
   const selected = useMemo(() => {
-    return tabs.findLast((option) => isLayoutTabActive(option, pathname));
-  }, [tabs, pathname]);
+    return group?.options.findLast((option) => isLayoutTabActive(option, pathname));
+  }, [group, pathname]);
+  if (!group) return;
 
   return (
     <div
@@ -152,7 +154,7 @@ function LayoutTabs({
         props.className,
       )}
     >
-      {tabs.map((tab, i) => (
+      {group.options.map((tab, i) => (
         <Link
           key={i}
           href={tab.url}

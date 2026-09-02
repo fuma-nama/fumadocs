@@ -146,7 +146,9 @@ describe('Merge object schemas', () => {
 
     expect(result).toMatchInlineSnapshot(`
       {
-        "additionalProperties": true,
+        "additionalProperties": {
+          "type": "string",
+        },
         "properties": {
           "test": {
             "enum": [
@@ -382,6 +384,29 @@ describe('Merge object schemas', () => {
         ],
       }
     `);
+  });
+
+  test('Intersect overlapping `type` sets instead of returning `false`', () => {
+    // a nullable member (`type` array, from `nullable: true`) merged with a typed member
+    expect(
+      mergeAllOf({
+        allOf: [{ type: ['string', 'null'] }, { type: 'string' }],
+      }),
+    ).toEqual({ type: 'string' });
+
+    // two overlapping type arrays keep the shared member
+    expect(
+      mergeAllOf({
+        allOf: [{ type: ['string', 'null'] }, { type: ['string', 'number'] }],
+      }),
+    ).toEqual({ type: 'string' });
+
+    // disjoint type sets are genuinely impossible
+    expect(
+      mergeAllOf({
+        allOf: [{ type: ['string'] }, { type: ['number'] }],
+      }),
+    ).toEqual(false);
   });
 });
 

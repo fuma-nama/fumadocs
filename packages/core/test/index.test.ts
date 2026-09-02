@@ -1,7 +1,7 @@
 import { joinPath, splitPath } from '@/source/path';
 import { describe, expect, test } from 'vitest';
-import type { Root } from '@/page-tree/definitions';
-import { findNeighbour, findSiblings } from '@/page-tree/utils';
+import type { Folder, Item, Root } from '@/page-tree/definitions';
+import { findNeighbour, findProjection, findSiblings } from '@/page-tree/utils';
 import { getBreadcrumbItems } from '@/breadcrumb';
 import { DefaultFormatter } from '@/i18n/middleware';
 import { NextURL } from 'next/dist/server/web/next-url';
@@ -35,6 +35,37 @@ test('Find Neighbours', () => {
     previous: { type: 'page', name: 'world', url: '/world' },
     next: undefined,
   });
+});
+
+test('Find Projection', () => {
+  const version = (name: string, children: Folder['children']): Folder => ({
+    type: 'folder',
+    name,
+    root: 'version',
+    $ref: { folder: name },
+    children,
+  });
+  const sdk = (version: string, url: string): Folder => ({
+    type: 'folder',
+    name: 'Python',
+    root: 'sdk',
+    $ref: { folder: `${version}/python` },
+    children: [{ type: 'page', name: 'Guide', url, $ref: `${version}/python/guide.mdx` }],
+  });
+
+  const v1 = version('v1', [sdk('v1', '/docs/v1/python/guide')]);
+  const page = (v1.children[0] as Folder).children[0] as Item;
+  // custom slugs: matched by file path, through nested root folders
+  const v2 = version('v2', [sdk('v2', '/docs/v2-latest/py/guide')]);
+  expect(findProjection(v1, v2, page)?.url).toBe('/docs/v2-latest/py/guide');
+
+  // no page at the same relative path
+  expect(findProjection(v1, version('v3', []), page)).toBeUndefined();
+  // page outside of `from`
+  const shared: Item = { type: 'page', name: 'Shared', url: '/docs/v1/shared', $ref: 'shared.mdx' };
+  expect(findProjection(v1, v2, shared)).toBeUndefined();
+  // without file paths
+  expect(findProjection({ ...v1, $ref: undefined }, v2, page)).toBeUndefined();
 });
 
 describe('Path utilities', () => {

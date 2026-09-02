@@ -138,3 +138,58 @@ export const OpenAPIPage = createOpenAPIPage({
   mediaAdapters,
 });
 ```
+
+## Customise UI
+
+For customisations beyond the available options, you can install the UI into your codebase with Fumadocs CLI, and use it in place of the built-in renderers.
+
+### API Playground
+
+```npm
+npx @fumadocs/cli add fumadocs/openapi/playground
+```
+
+```tsx title="components/api-page.tsx"
+'use client';
+import { createOpenAPIPage } from 'fumadocs-openapi/ui';
+import PlaygroundClient from '@/components/api/playground';
+import { AuthProvider } from '@/components/api/playground/auth';
+
+export const OpenAPIPage = createOpenAPIPage({
+  playground: {
+    provider: ({ children }) => <AuthProvider>{children}</AuthProvider>,
+    render: ({ path, method, operation, pathItem }) => (
+      <PlaygroundClient
+        route={path}
+        method={method}
+        operation={operation}
+        pathItem={pathItem}
+        writeOnly
+        readOnly={false}
+      />
+    ),
+  },
+});
+```
+
+The installed files access the runtime of API pages from `fumadocs-openapi/ui`, such as the render context. You can also use it to build your own playground from scratch.
+
+### Schema UI
+
+The UI for rendering JSON schemas.
+
+```npm
+npx @fumadocs/cli add fumadocs/api-docs/schema
+```
+
+```tsx title="components/api-page.tsx"
+'use client';
+import { createOpenAPIPage } from 'fumadocs-openapi/ui';
+import { Schema } from '@/components/api/schema';
+
+export const OpenAPIPage = createOpenAPIPage({
+  schemaUI: {
+    render: (props) => <Schema {...props} />,
+  },
+});
+```

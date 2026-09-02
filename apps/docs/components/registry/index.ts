@@ -1,17 +1,29 @@
 import * as radixUi from '../../../../packages/radix-ui/registry/index.ts';
 import * as baseUi from '../../../../packages/base-ui/registry/index.ts';
 import * as sanity from '../../../../packages/sanity/registry/index.ts';
+import * as openapi from '../../../../packages/openapi/registry/index.ts';
+import * as apiDocs from '../../../../packages/api-docs/registry/index.ts';
 import * as path from 'node:path';
 import type { CompileOptions, Registry } from 'fuma-cli/compiler';
 
 const baseDir = path.join(import.meta.dirname, '../../');
 
+// internal modules of `fumadocs-openapi` mapped to their public exports
+const openapiExports = new Map([
+  ['ui/contexts/api.tsx', 'fumadocs-openapi/ui'],
+  ['ui/operation/context.tsx', 'fumadocs-openapi/ui'],
+  ['requests/generators/index.ts', 'fumadocs-openapi/requests/generators'],
+  // types are re-exported from the package root
+  ['requests/media/adapter.ts', 'fumadocs-openapi'],
+  ['types.ts', 'fumadocs-openapi'],
+]);
+
 export const compileOptions: Partial<CompileOptions> = {
   onUnknownFile(absolutePath) {
     const filePath = path.relative(baseDir, absolutePath);
 
-    // source object is external
-    if (filePath.startsWith('lib/source/')) return false;
+    // source object & MDX components are external
+    if (filePath.startsWith('lib/source/') || filePath === 'components/mdx.tsx') return false;
   },
   onParseReference(ref) {
     if (ref.type === 'unknown' && ref.specifier === 'hast') {
@@ -49,6 +61,40 @@ export const compileOptions: Partial<CompileOptions> = {
           specifier: `@fumadocs/base-ui/${removeExtname(file)}`,
         };
       }
+
+      file = path.relative(openapi.registry.dir, ref.file);
+      const specifier = openapiExports.get(file);
+      if (specifier) {
+        return {
+          dep: 'fumadocs-openapi',
+          type: 'dependency',
+          specifier,
+        };
+      }
+      if (file === 'utils/cn.ts') {
+        return {
+          type: 'file',
+          file: path.join(radixUi.registry.dir, 'utils/cn.ts'),
+        };
+      }
+
+      file = path.relative(apiDocs.registry.dir, ref.file);
+      // `components/schema/*` files are vendored, keep them as file references
+      if (!file.startsWith('..') && !file.startsWith('components/schema/')) {
+        if (file === 'utils/cn.ts' || file === 'utils/merge-refs.ts') {
+          return {
+            type: 'file',
+            file: path.join(radixUi.registry.dir, file),
+          };
+        }
+
+        // other internal modules mirror the package's subpath exports
+        return {
+          dep: '@fumadocs/api-docs',
+          type: 'dependency',
+          specifier: `@fumadocs/api-docs/${toSubpath(file)}`,
+        };
+      }
     }
 
     // map dep imports to actual components
@@ -70,7 +116,13 @@ export const compileOptions: Partial<CompileOptions> = {
 export const registry: Registry = {
   dir: baseDir,
   name: 'fumadocs',
-  subRegistries: [radixUi.registry, baseUi.registry, sanity.registry],
+  subRegistries: [
+    radixUi.registry,
+    baseUi.registry,
+    sanity.registry,
+    openapi.registry,
+    apiDocs.registry,
+  ],
 
   components: [
     {
@@ -225,4 +277,9 @@ export const registry: Registry = {
 
 function removeExtname(file: string) {
   return file.slice(0, -path.extname(file).length);
+}
+
+function toSubpath(file: string) {
+  const out = removeExtname(file);
+  return out.endsWith('/index') ? out.slice(0, -'/index'.length) : out;
 }

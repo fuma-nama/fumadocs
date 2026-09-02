@@ -1,4 +1,7 @@
 import { generateSchemaUI } from '@/components/schema';
+import { createMagicProxy } from '@scalar/json-magic/magic-proxy';
+import { mergeAllOf } from '@/schema/merge';
+import { FormatFlags, schemaToString } from '@/schema/to-string';
 import { expect, test } from 'vitest';
 import { fromSchema } from './utils';
 import { fileURLToPath } from 'node:url';
@@ -294,4 +297,113 @@ test('test', async () => {
       },
     }
   `);
+});
+
+test('explicit title of a composed schema is its alias (#3529)', () => {
+  const doc = createMagicProxy({
+    components: {
+      schemas: {
+        Base: { title: 'Base', type: 'object', properties: { id: { type: 'string' } } },
+        ChildA: {
+          title: 'ChildA',
+          allOf: [
+            { $ref: '#/components/schemas/Base' },
+            { type: 'object', properties: { a: { type: 'string' } } },
+          ],
+        },
+        ChildB: {
+          title: 'ChildB',
+          allOf: [
+            { $ref: '#/components/schemas/Base' },
+            { type: 'object', properties: { b: { type: 'string' } } },
+          ],
+        },
+        Payload: {
+          title: 'Payload',
+          allOf: [
+            { description: 'Event payload.' },
+            {
+              oneOf: [
+                { $ref: '#/components/schemas/ChildA' },
+                { $ref: '#/components/schemas/ChildB' },
+              ],
+            },
+          ],
+        },
+        Root: {
+          type: 'object',
+          properties: { payload: { $ref: '#/components/schemas/Payload' } },
+        },
+      },
+    },
+  }) as any;
+
+  const out = generateSchemaUI({
+    root: doc.components.schemas.Root,
+    renderMarkdown: (md) => md,
+    renderCodeblock: () => null,
+  });
+  const payload = out.refs['#/components/schemas/Payload'];
+  expect(payload.aliasName).toBe('Payload');
+  expect(payload.typeName).toBe('ChildA | ChildB');
+  expect(payload.type === 'or' && payload.items.map((item) => item.name)).toEqual([
+    'ChildA',
+    'ChildB',
+  ]);
+});
+
+test('nested property intersections dedupe titles (#3529)', () => {
+  const doc = createMagicProxy({
+    components: {
+      schemas: {
+        NamedItem: { title: 'NamedItem', type: 'object' },
+        BaseConfig: { title: 'BaseConfig', type: 'object' },
+        DerivedConfig: {
+          title: 'DerivedConfig',
+          allOf: [{ $ref: '#/components/schemas/BaseConfig' }, { type: 'object' }],
+        },
+        BaseSettings: {
+          title: 'BaseSettings',
+          type: 'object',
+          properties: {
+            config: { $ref: '#/components/schemas/BaseConfig' },
+            items: { type: 'array', items: { $ref: '#/components/schemas/NamedItem' } },
+          },
+        },
+        DerivedSettings: {
+          title: 'DerivedSettings',
+          allOf: [
+            { $ref: '#/components/schemas/BaseSettings' },
+            {
+              properties: {
+                config: { $ref: '#/components/schemas/DerivedConfig' },
+                items: { items: { $ref: '#/components/schemas/NamedItem' } },
+              },
+            },
+          ],
+        },
+      },
+    },
+  }) as any;
+
+  const out = generateSchemaUI({
+    root: doc.components.schemas.DerivedSettings,
+    renderMarkdown: (md) => md,
+    renderCodeblock: () => null,
+  });
+  const root = out.refs[out.$root];
+  expect(root.aliasName).toBe('DerivedSettings');
+  const props = root.type === 'object' ? root.props : [];
+  const labels = Object.fromEntries(props.map((p) => [p.name, out.refs[p.$type].aliasName]));
+  expect(labels).toEqual({ config: 'DerivedConfig', items: 'array<NamedItem>' });
+});
+
+test('untitled `allOf` keeps combined alias', () => {
+  const merged = mergeAllOf({
+    allOf: [
+      { title: 'Readable', type: 'object', properties: { a: { type: 'string' } } },
+      { title: 'Writable', type: 'object', properties: { b: { type: 'string' } } },
+    ],
+  });
+  expect(schemaToString(merged, FormatFlags.UseAlias)).toBe('Readable & Writable');
 });

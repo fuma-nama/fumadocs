@@ -35,14 +35,18 @@ export async function add(input: string[], connector: RegistryConnector, config:
       }));
     }
 
+    const groups = await Promise.all([
+      scan(undefined, 'common'),
+      scan('fumadocs/sanity', 'sanity'),
+      scan('fumadocs/openapi', 'openapi'),
+      scan('fumadocs/api-docs', 'api-docs'),
+      scan(subRegistry, 'ui'),
+    ]);
+
     spin.stop(picocolors.bold(picocolors.greenBright('registry fetched')));
     const value = await autocompleteMultiselect({
       message: 'Select components to install',
-      options: [
-        ...(await scan(undefined, 'common')),
-        ...(await scan('fumadocs/sanity', 'sanity')),
-        ...(await scan(subRegistry, 'ui')),
-      ].sort((a, b) => a.label.localeCompare(b.label)),
+      options: groups.flat().sort((a, b) => a.label.localeCompare(b.label)),
     });
 
     if (isCancel(value)) {

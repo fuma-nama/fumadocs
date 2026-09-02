@@ -1,6 +1,6 @@
 export * from './generate-file';
 export type { MediaAdapter } from '@/requests/media/adapter';
-export type { RenderContext } from './types';
+export type * from './types';
 export type {
   OperationOutput,
   OutputEntry,

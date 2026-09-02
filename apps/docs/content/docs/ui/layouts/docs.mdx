@@ -112,7 +112,7 @@ Layout Tabs are folders with tab-like behaviours, only the content of opened tab
 
 By default, the tab trigger will be displayed as a **Dropdown** component (hidden unless one of its items is active).
 
-You can add items by marking folders as [Root Folders](/docs/page-conventions#root-folder), create a `meta.json` file in the folder:
+Tabs are generated from the page tree, you can mark folders as [Root Folders](/docs/page-conventions#root-folder) by creating a `meta.json` file in the folder:
 
 ```json title="content/docs/my-folder/meta.json"
 {
@@ -194,6 +194,36 @@ import { DocsLayout } from 'fumadocs-ui/layouts/docs';
   }}
 />;
 ```
+
+### Tabs Groups [#tabs-groups]
+
+Tabs are grouped by [root type](/docs/page-conventions#root-type), with a dropdown for each root folder on the current page's path.
+
+<Files>
+  <Folder name="v2 (root: version)" defaultOpen>
+    <Folder name="framework (root: true)" defaultOpen>
+      <File name="quickstart.mdx" className="text-fd-primary! bg-fd-primary/10!" />
+    </Folder>
+    <Folder name="headless (root: true)">
+      <File name="quickstart.mdx" />
+    </Folder>
+  </Folder>
+  <Folder name="v1 (root: version)">
+    <Folder name="framework (root: true)">
+      <File name="quickstart.mdx" />
+    </Folder>
+  </Folder>
+</Files>
+
+On `v2/framework/quickstart.mdx`, the sidebar shows a dropdown for the version and another for the section:
+
+<div className='flex justify-center items-center *:max-w-[360px] bg-linear-to-br from-fd-primary/10 rounded-xl border'>
+
+    ![Tabs Groups](/docs/sidebar-tabs-groups.png)
+
+</div>
+
+Selecting an option navigates to the same page in that root folder, or its index page when the page doesn't exist there. See [Versioning](/docs/versioning) for a complete example.
 
 ### Sidebar Components
 

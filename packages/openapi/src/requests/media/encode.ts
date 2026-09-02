@@ -1,5 +1,5 @@
 import type { MediaAdapter } from '@/requests/media/adapter';
-import { resolveMediaAdapter } from '@/requests/media/adapter';
+import { resolveMediaAdapter } from '@/requests/media/resolve-adapter';
 import type { ParameterObject } from '@/types';
 import type { RawRequestData, RequestData } from '@/requests/types';
 

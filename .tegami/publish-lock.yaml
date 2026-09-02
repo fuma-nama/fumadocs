@@ -1,53 +1,64 @@
 core:changelogs:
-  - content: "---\npackages:\n  npm:fumadocs-openapi:\n    type: patch\n  npm:@fumadocs/api-docs:\n    type: patch\n---\n\n## Fix OpenAPI 3.0 `example` in external files crashing `OpenAPIPage`\n\nThe version upgrader ran after external documents were embedded under `x-ext`, where it can no longer classify schemas by their JSON path: a schema-level `example` from an external 3.0 file became an Example Object map instead of the JSON Schema `examples` array, crashing the schema UI with `schema.examples is not iterable`.\n\nEach document is now upgraded before bundling embeds it. This also honors the external file's own declared OpenAPI version, so a 3.0 file referenced from a 3.1 document is upgraded too (previously it was skipped entirely).\n"
-    filename: 2026-08-27-external-doc-upgrade.md
+  - content: "---\npackages:\n  npm:@fumadocs/api-docs:\n    type: patch\n---\n\n## Keep overlapping `type` sets when merging `allOf`\n\n`intersection` treated any difference in the `type` keyword as an impossible schema and returned `false`, so an `allOf` member using a type array (e.g. `['string', 'null']`, emitted for `nullable: true`) merged with a typed member (`type: 'string'`) produced `false` instead of `type: 'string'` — dropping every property of the schema in the Schema UI and the playground.\n\nIntersecting overlapping type sets now keeps the shared members, and only genuinely disjoint types (e.g. `['string']` with `['number']`) resolve to `false`.\n"
+    filename: 2026-09-01-merge-allof-type-intersection.md
     v: 0.0.0
-  - content: "---\npackages:\n  npm:fumadocs-ui:\n    type: patch\n  npm:@fumadocs/base-ui:\n    type: patch\n---\n\n## Fix Next.js `<Link>` not scrolling to top under docs layouts\n\nThe page container rendered `<main style=\"display: contents\">`, which Next.js' scroll handler treats as a hidden element: `display: contents` generates no box, so its `getBoundingClientRect()` is all-zero, indistinguishable from `display: none`. The handler skips it (and the sticky TOC siblings) without ever descending into children, dropping the scroll-to-top on navigation entirely.\n\nThe `<main>` element in Docs, Notebook and Flux page containers is now a real grid item (`display: grid; grid-area: main`) wrapping the unchanged `#nd-page` article, which centers via the grid instead of `mx-auto`. Rendering is identical, but if your custom CSS has element rules on `main` that were previously inert, they now apply.\n"
-    filename: 2026-08-27-docs-layout-link-autoscroll.md
+  - content: "---\npackages:\n  npm:@fumadocs/api-docs:\n    type: patch\n---\n\n## Use the explicit title of composed schemas in Schema UI\n\n`mergeAllOf` now keeps an explicit title as the display alias of the composed schema (`ChildA | ChildB`), skips titles already covered by the other side of an intersection (`DerivedConfig`, `array<NamedItem>`), and still combines the titles of untitled intersections (`Readable & Writable`).\n"
+    filename: 2026-09-02-schema-ui-explicit-titles.md
     v: 0.0.0
-  - content: "---\npackages:\n  npm:fumadocs-openapi:\n    type: patch\n---\n\n## Support OpenAPI 3.2 tag hierarchy in `groupBy: 'tag'`\n\n`generateFiles` now follows the tag hierarchy introduced in OpenAPI 3.2: a tag with a `parent` becomes a folder nested inside its parent tag's folder (including the generated `meta.json`), and tags with a `kind` other than `nav` no longer form groups, matching their intent (e.g. `badge`).\n\nOperations referencing undeclared tags or having no tags are no longer dropped silently, which previously could produce an empty output directory. Undeclared tags now form their own group, and untagged operations are grouped under an `unknown` folder with a warning.\n"
-    filename: 2026-08-27-openapi-tag-hierarchy.md
+  - content: "---\npackages:\n  npm:fumadocs-core:\n    type: patch\n  npm:fumadocs-ui:\n    type: patch\n  npm:@fumadocs/base-ui:\n    type: patch\n---\n\n## Root types: version your docs with `root: \"<type>\"`\n\n`root` in `meta.json` now accepts a string, the type of root folder. Root folders of the same type under the same parent are interchangeable, which is how you keep multiple versions of the same docs in one site:\n\n```json tab=\"content/docs/v1/meta.json\"\n{\n  \"title\": \"1.0.0\",\n  \"root\": \"version\"\n}\n```\n\n```json tab=\"content/docs/v2/meta.json\"\n{\n  \"title\": \"2.0.0\",\n  \"root\": \"version\"\n}\n```\n\nThe sidebar only shows the opened version, and docs layouts render a dropdown to switch between them. Switching keeps your place: it navigates to the same page in the other version (`/docs/v1/guide` to `/docs/v2/guide`), or its index page when the page doesn't exist there.\n\n`root: true` is simply the default type, displayed as tabs. See [Versioning](https://fumadocs.dev/docs/versioning) for the guide and [Root Type](https://fumadocs.dev/docs/page-conventions#root-type) for the reference.\n\n## Tabs are grouped by root folder\n\nLayout tabs are now grouped by the root folders on the current page's path, with one dropdown per group. This changes a few behaviours of the existing `root: true` tabs:\n\n- Clicking a tab navigates to the same page in the target folder when it exists, otherwise its index page as before.\n- With nested root folders, each level gets its own dropdown instead of one flat list. Tab lists (`tabMode: 'top'` on Docs layout, `tabMode: 'navbar'` on Notebook layout) show the innermost `root: true` group, and are hidden on pages outside of any root folder.\n- `getLayoutTabs()` includes typed root folders too, so a custom `transform` also decorates them. Custom `tabs` entries bound to a page tree folder are grouped the same way, other entries are appended to the `root: true` dropdown.\n- `tabs={false}` disables the dropdowns of typed root folders as well.\n\n## `findProjection()` in `fumadocs-core/page-tree`\n\nFind the structural projection of a page in another root folder, the page at the same file path relative to the root folder:\n\n```ts\nimport { findProjection } from 'fumadocs-core/page-tree';\n\nfindProjection(v1, v2, page)?.url;\n```\n"
+    filename: 2026-09-02-root-type.md
+    v: 0.0.0
+  - content: "---\npackages:\n  npm:@fumadocs/cli:\n    type: minor\n---\n\n## Add API Playground & Schema UI components\n\nInstall the UI of API integrations into your codebase:\n\n```npm\nnpx @fumadocs/cli add fumadocs/openapi/playground\nnpx @fumadocs/cli add fumadocs/api-docs/schema\n```\n"
+    filename: 2026-09-01-cli-api-components.md
+    v: 0.0.0
+  - content: "---\npackages:\n  npm:fumadocs-openapi:\n    type: minor\n---\n\n## Support installing the API playground via Fumadocs CLI\n\n```npm\nnpx @fumadocs/cli add fumadocs/openapi/playground\n```\n\nUse it with the `playground.provider` and `playground.render` options, see [Customise UI](https://fumadocs.dev/docs/integrations/openapi/api-page#customise-ui).\n\n## Pass full props to `schemaUI.render`\n\nIt now receives the same props as the built-in Schema UI (including `renderMarkdown` and `renderCodeblock`), so a customised Schema UI can act as a drop-in replacement:\n\n```tsx\nschemaUI: {\n  render: (props) => <Schema {...props} />,\n},\n```\n\n## New exports\n\n- OpenAPI schema types from `fumadocs-openapi` (e.g. `OperationObject`, `HttpMethods`).\n- `useRenderContext`, `useServerContext` and `useOperationContext` from `fumadocs-openapi/ui`.\n"
+    filename: 2026-09-01-openapi-installable-ui.md
     v: 0.0.0
 core:packages:
   - changelogIds:
-      - 2026-08-27-external-doc-upgrade.md
+      - 2026-09-01-merge-allof-type-intersection.md
+      - 2026-09-02-schema-ui-explicit-titles.md
     id: npm:@fumadocs/api-docs
     updated: true
   - id: npm:@fumadocs/asyncapi
     updated: true
   - changelogIds:
-      - 2026-08-27-docs-layout-link-autoscroll.md
+      - 2026-09-02-root-type.md
     id: npm:@fumadocs/base-ui
+    updated: true
+  - changelogIds:
+      - 2026-09-01-cli-api-components.md
+    id: npm:@fumadocs/cli
     updated: true
   - id: npm:@fumadocs/basehub
     updated: false
-  - id: npm:@fumadocs/cli
+  - id: npm:@fumadocs/content-collections
     updated: false
   - id: npm:@fumadocs/content
     updated: false
-  - id: npm:@fumadocs/content-collections
-    updated: false
+  - changelogIds:
+      - 2026-09-02-root-type.md
+    id: npm:fumadocs-core
+    updated: true
   - id: npm:create-fumadocs-app
     updated: true
   - id: npm:create-fumadocs-versions
-    updated: true
-  - id: npm:fumadocs-core
     updated: true
   - id: npm:fumadocs-docgen
     updated: false
   - id: npm:fumadocs-epub
     updated: false
+  - id: npm:@fumari/image-size
+    updated: false
   - id: npm:@fumadocs/graphql
     updated: true
-  - id: npm:@fumari/image-size
+  - id: npm:@fumadocs/language
     updated: false
   - id: npm:@fumadocs/local-content
     updated: false
-  - id: npm:@fumadocs/language
+  - id: npm:@fumadocs/local-md
     updated: false
   - id: npm:@fumadocs/local-html
-    updated: false
-  - id: npm:@fumadocs/local-md
     updated: false
   - id: npm:fumadocs-mdx
     updated: false
@@ -55,32 +66,31 @@ core:packages:
     updated: false
   - id: npm:@fumadocs/notion
     updated: false
-  - changelogIds:
-      - 2026-08-27-external-doc-upgrade.md
-      - 2026-08-27-openapi-tag-hierarchy.md
-    id: npm:fumadocs-openapi
-    updated: true
   - id: npm:fumadocs-obsidian
     updated: false
+  - changelogIds:
+      - 2026-09-01-openapi-installable-ui.md
+    id: npm:fumadocs-openapi
+    updated: true
   - id: npm:fumadocs-preview
     updated: false
   - id: npm:fumadocs-python
     updated: false
   - changelogIds:
-      - 2026-08-27-docs-layout-link-autoscroll.md
+      - 2026-09-02-root-type.md
     id: npm:fumadocs-ui
     updated: true
   - id: npm:@fumadocs/sanity
     updated: false
-  - id: npm:@fumadocs/satteri
-    updated: false
-  - id: npm:@fumari/stf
-    updated: false
   - id: npm:@fumadocs/shadcn
+    updated: false
+  - id: npm:@fumadocs/satteri
     updated: false
   - id: npm:@fumadocs/story
     updated: false
   - id: npm:@fumadocs/tailwind
+    updated: false
+  - id: npm:@fumari/stf
     updated: false
   - id: npm:fumadocs-twoslash
     updated: false
@@ -92,65 +102,65 @@ npm:packages:
   - id: npm:@fumadocs/api-docs
   - id: npm:@fumadocs/asyncapi
   - id: npm:@fumadocs/base-ui
-  - id: npm:@fumadocs/basehub
   - id: npm:@fumadocs/cli
-  - id: npm:@fumadocs/content
+  - id: npm:@fumadocs/basehub
   - id: npm:@fumadocs/content-collections
+  - id: npm:@fumadocs/content
+  - id: npm:fumadocs-core
   - id: npm:create-fumadocs-app
   - id: npm:create-fumadocs-versions
-  - id: npm:fumadocs-core
   - id: npm:fumadocs-docgen
   - id: npm:fumadocs-epub
-  - id: npm:@fumadocs/graphql
   - id: npm:@fumari/image-size
-  - id: npm:@fumadocs/local-content
+  - id: npm:@fumadocs/graphql
   - id: npm:@fumadocs/language
-  - id: npm:@fumadocs/local-html
+  - id: npm:@fumadocs/local-content
   - id: npm:@fumadocs/local-md
+  - id: npm:@fumadocs/local-html
   - id: npm:fumadocs-mdx
   - id: npm:@fumadocs/mdx-remote
   - id: npm:@fumadocs/notion
-  - id: npm:fumadocs-openapi
   - id: npm:fumadocs-obsidian
+  - id: npm:fumadocs-openapi
   - id: npm:fumadocs-preview
   - id: npm:fumadocs-python
   - id: npm:fumadocs-ui
   - id: npm:@fumadocs/sanity
-  - id: npm:@fumadocs/satteri
-  - id: npm:@fumari/stf
   - id: npm:@fumadocs/shadcn
+  - id: npm:@fumadocs/satteri
   - id: npm:@fumadocs/story
   - id: npm:@fumadocs/tailwind
+  - id: npm:@fumari/stf
   - id: npm:fumadocs-twoslash
   - id: npm:fumadocs-typescript
   - id: npm:@fumadocs/vite
   - id: npm:docs
-  - id: npm:example-astro
   - id: npm:example-asyncapi
-  - id: npm:example-base-ui
-  - id: npm:example-content-collections
   - id: npm:example-graphql
+  - id: npm:example-openapi
+  - id: npm:example-tanstack-start-openapi
+  - id: npm:example-content-collections
+  - id: npm:example-astro
+  - id: npm:example-base-ui
   - id: npm:example-i18n
   - id: npm:example-marble-cms
   - id: npm:example-next
   - id: npm:example-next-local-html
+  - id: npm:example-next-local-md
   - id: npm:example-next-min
   - id: npm:example-next-shadcn
-  - id: npm:example-next-local-md
   - id: npm:example-next-static
   - id: npm:example-obsidian
-  - id: npm:example-openapi
-  - id: npm:example-react-router-i18n
   - id: npm:example-python
   - id: npm:example-react-router
+  - id: npm:example-react-router-i18n
   - id: npm:example-react-router-min
-  - id: npm:example-react-router-spa
   - id: npm:example-react-router-rsc
+  - id: npm:example-react-router-spa
   - id: npm:example-tanstack-start
-  - id: npm:example-tanstack-start-i18n
   - id: npm:example-tanstack-start-local-md
+  - id: npm:example-tanstack-start-i18n
   - id: npm:example-tanstack-start-min
-  - id: npm:example-tanstack-start-openapi
   - id: npm:example-tanstack-start-spa
   - id: npm:example-tanstack-start-story
   - id: npm:example-waku
