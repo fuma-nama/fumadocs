@@ -146,7 +146,9 @@ describe('Merge object schemas', () => {
 
     expect(result).toMatchInlineSnapshot(`
       {
-        "additionalProperties": true,
+        "additionalProperties": {
+          "type": "string",
+        },
         "properties": {
           "test": {
             "enum": [

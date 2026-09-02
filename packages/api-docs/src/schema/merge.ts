@@ -9,23 +9,38 @@ export function mergeAllOf(schema: ParsedSchema): ParsedSchema {
   schema = dereferenceShallow(schema);
   if (typeof schema === 'boolean' || !schema.allOf) return schema;
 
-  const { allOf, ...rest } = schema;
-  let result: ParsedSchema = rest;
+  const { allOf, title, ...rest } = schema;
+  let result: ParsedSchema = true;
   for (const item of allOf) {
     result = intersection(result, item);
   }
-  if (typeof result !== 'boolean' && rest.description !== undefined) {
-    result.description = rest.description;
-  }
+  // sibling keywords of the composed schema are the most specific, they win over members
+  result = intersection(result, rest);
+  if (typeof result !== 'boolean' && title !== undefined) result.title = title;
   return result;
 }
 
-function intersection(a: ParsedSchema, b: ParsedSchema): ParsedSchema {
-  a = mergeAllOf(a);
-  b = mergeAllOf(b);
-  if (typeof a === 'boolean' && typeof b === 'boolean') return a && b;
-  if (typeof a === 'boolean') return a;
-  if (typeof b === 'boolean') return b;
+/**
+ * Whether the schema, or any schema it extends via `allOf`, has the given title
+ */
+function hasTitle(schema: ParsedSchema, title: string): boolean {
+  schema = dereferenceShallow(schema);
+  if (typeof schema === 'boolean') return false;
+  if (schema.title === title) return true;
+  if (schema.allOf) {
+    for (const item of schema.allOf) {
+      if (hasTitle(item, title)) return true;
+    }
+  }
+  return false;
+}
+
+function intersection(rawA: ParsedSchema, rawB: ParsedSchema): ParsedSchema {
+  const a = mergeAllOf(rawA);
+  const b = mergeAllOf(rawB);
+  if (a === false || b === false) return false;
+  if (a === true) return b;
+  if (b === true) return a;
 
   for (const unionField of ['anyOf', 'oneOf'] as const) {
     if (a[unionField] === undefined && b[unionField] !== undefined) {
@@ -63,12 +78,12 @@ function intersection(a: ParsedSchema, b: ParsedSchema): ParsedSchema {
       }
       case 'title': {
         const value = b[key];
-        if (value === undefined) break;
-        if (result[key]) {
-          result[key] = `${result[key]} & ${value}`;
-        } else {
-          result[key] = value;
-        }
+        // skip titles already covered by the other side (same schema, or one extends the other)
+        if (value === undefined || hasTitle(rawA, value)) break;
+        result[key] =
+          result[key] === undefined || hasTitle(rawB, result[key])
+            ? value
+            : `${result[key]} & ${value}`;
         break;
       }
       case 'minItems':
