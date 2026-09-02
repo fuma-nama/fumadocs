@@ -248,6 +248,34 @@ describe('Merge object schemas', () => {
     ).toEqual({ description: 'Outer' });
   });
 
+  test('Merge multiple objects: outer `title`', () => {
+    expect(
+      mergeAllOf({
+        title: 'Payload',
+        allOf: [
+          { description: 'Event payload.' },
+          {
+            oneOf: [
+              {
+                title: 'Child',
+                allOf: [{ title: 'Base', type: 'object' }],
+              },
+            ],
+          },
+        ],
+      }),
+    ).toEqual({
+      title: 'Payload',
+      oneOf: [{ title: 'Child', type: 'object', description: 'Event payload.' }],
+    });
+
+    expect(
+      mergeAllOf({
+        allOf: [{ title: 'Readable' }, { title: 'Writable' }],
+      }),
+    ).toEqual({ title: 'Readable & Writable' });
+  });
+
   test('Production: `allOf` with multiple `oneOf`', () => {
     const result = mergeAllOf({
       type: 'object',

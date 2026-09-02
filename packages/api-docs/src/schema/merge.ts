@@ -9,13 +9,14 @@ export function mergeAllOf(schema: ParsedSchema): ParsedSchema {
   schema = dereferenceShallow(schema);
   if (typeof schema === 'boolean' || !schema.allOf) return schema;
 
-  const { allOf, ...rest } = schema;
+  const { allOf, title, ...rest } = schema;
   let result: ParsedSchema = rest;
   for (const item of allOf) {
     result = intersection(result, item);
   }
-  if (typeof result !== 'boolean' && rest.description !== undefined) {
-    result.description = rest.description;
+  if (typeof result !== 'boolean') {
+    if (rest.description !== undefined) result.description = rest.description;
+    if (title !== undefined) result.title = title;
   }
   return result;
 }
