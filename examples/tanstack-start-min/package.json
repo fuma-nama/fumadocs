@@ -29,9 +29,9 @@
     "@types/react-dom": "^19.2.5",
     "@vitejs/plugin-react": "^6.1.1",
     "nitro": "3.0.260610-beta",
-    "srvx": "^0.12.7",
+    "srvx": "^1.0.0",
     "tailwindcss": "^4.3.3",
-    "typescript": "^6.0.3",
+    "typescript": "^7.0.2",
     "vite": "^8.2.2"
   }
 }

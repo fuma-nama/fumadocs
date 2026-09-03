@@ -157,7 +157,7 @@
     "remove-markdown": "^0.7.0",
     "tsconfig": "workspace:*",
     "tsdown": "0.22.14",
-    "typescript": "^6.0.3",
+    "typescript": "^7.0.2",
     "waku": "1.0.0-rc.0",
     "zod": "4.5.4"
   },
@@ -242,6 +242,6 @@
     "@formatjs/intl-localematcher": "0.8.13",
     "@shikijs/transformers": "4.4.3",
     "path-to-regexp": "8.4.2",
-    "remove-markdown": "0.6.4"
+    "remove-markdown": "0.7.0"
   }
 }

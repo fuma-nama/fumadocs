@@ -21,6 +21,6 @@
     "@types/mdx": "^2.0.14",
     "@types/react": "^19.2.18",
     "@types/react-dom": "^19.2.5",
-    "typescript": "^6.0.3"
+    "typescript": "^7.0.2"
   }
 }

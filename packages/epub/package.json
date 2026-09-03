@@ -50,7 +50,7 @@
     "rimraf": "^6.0.0",
     "tsconfig": "workspace:*",
     "tsdown": "0.22.14",
-    "typescript": "^6.0.3",
+    "typescript": "^7.0.2",
     "vfile": "^6.0.3"
   },
   "peerDependencies": {
