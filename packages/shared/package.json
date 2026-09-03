@@ -10,6 +10,7 @@
     "@fumadocs/cli": "workspace:*",
     "@types/node": "^26.4.1",
     "fuma-translate": "^1.0.2",
-    "tsconfig": "workspace:*"
+    "tsconfig": "workspace:*",
+    "tsdown": "0.22.14"
   }
 }

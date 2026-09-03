@@ -1,6 +1,7 @@
 import { mkdir, writeFile } from 'node:fs/promises';
 import path from 'node:path';
 import { compile, typegen } from 'fuma-translate';
+import type { TsdownPlugin } from 'tsdown';
 
 export interface CompilePackageTranslationsOptions {
   /**
@@ -47,11 +48,16 @@ async function compilePackageTranslations(
   console.log(`compiled ${output.translationKeys.length} translation keys in ${elapsed}ms`);
 }
 
-export function packageTranslationsPlugin(options: CompilePackageTranslationsOptions = {}) {
+export function packageTranslationsPlugin(
+  options: CompilePackageTranslationsOptions = {},
+): TsdownPlugin {
   return {
     name: 'generate-translations',
-    async buildStart() {
-      await compilePackageTranslations(options);
+    buildStart: {
+      order: 'pre' as const,
+      async handler() {
+        await compilePackageTranslations(options);
+      },
     },
   };
 }
