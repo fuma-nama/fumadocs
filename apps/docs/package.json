@@ -92,7 +92,6 @@
     "tailwindcss-animate": "^1.0.7",
     "tinyexec": "^1.3.0",
     "tinyglobby": "^0.2.17",
-    "ts-morph": "^28.0.0",
     "tsconfig": "workspace:*",
     "typescript": "^6.0.3",
     "unrun": "^0.3.1"
