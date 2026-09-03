@@ -14,7 +14,7 @@
     "fumadocs-mdx": "workspace:*",
     "fumadocs-ui": "workspace:@fumadocs/base-ui@*",
     "graphql": "^17.0.2",
-    "next": "16.3.3",
+    "next": "16.3.4",
     "react": "^19.2.8",
     "react-dom": "^19.2.8"
   },

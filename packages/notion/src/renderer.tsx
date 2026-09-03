@@ -1,5 +1,5 @@
 import type { RichTextItemResponse } from '@notionhq/client';
-import { cn } from 'cnfast';
+import { cn } from 'cn';
 import type { HighlightOptions } from 'fumadocs-core/highlight';
 import { CalloutContainer } from 'fumadocs-ui/components/callout';
 import { CodeBlock, Pre } from 'fumadocs-ui/components/codeblock';

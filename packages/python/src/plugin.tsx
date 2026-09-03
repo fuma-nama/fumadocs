@@ -1,4 +1,4 @@
-import { cn } from 'cnfast';
+import { cn } from 'cn';
 import type { LoaderPlugin } from 'fumadocs-core/source';
 import { badgeVariants } from './badge';
 import type { PythonPage } from './source';
