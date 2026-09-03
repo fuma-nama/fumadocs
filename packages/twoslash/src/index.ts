@@ -15,13 +15,16 @@ import {
   type TransformerTwoslashIndexOptions,
   type TwoslashTypesCache,
 } from '@shikijs/twoslash';
-import { createTwoslasher, type TwoslashInstance } from 'twoslash';
-import type { ModuleResolutionKind } from 'typescript';
+import { createTwoslasher, type TwoslashInstance } from 'twoslash/core';
+import ts from 'typescript';
+import { createRequire } from 'node:module';
+import path from 'node:path';
 
 export type { TwoslashTypesCache };
 
 export type TransformerTwoslashOptions = TransformerTwoslashIndexOptions;
 
+const require = createRequire(import.meta.url);
 let cachedInstance: TwoslashInstance | undefined;
 
 // This is highly inspired by https://github.com/shikijs/shiki/blob/main/packages/vitepress-twoslash
@@ -36,9 +39,13 @@ export function transformerTwoslash(_options: TransformerTwoslashOptions = {}): 
   function lazyInstance(): TwoslashInstance {
     function get() {
       return (cachedInstance ??= createTwoslasher({
+        vfsRoot: process.cwd(),
+        // always use our own TypeScript: Twoslash needs the JS compiler API, which TypeScript 7 no longer provides
+        tsModule: ts,
+        tsLibDirectory: path.dirname(require.resolve('typescript')),
         ...twoslashOptions,
         compilerOptions: {
-          moduleResolution: 100 satisfies ModuleResolutionKind.Bundler,
+          moduleResolution: ts.ModuleResolutionKind.Bundler,
           baseUrl: undefined,
           ...twoslashOptions.compilerOptions,
         },
