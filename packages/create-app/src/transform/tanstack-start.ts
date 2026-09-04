@@ -1,5 +1,12 @@
 import type { CallExpression } from 'oxc-parser';
-import { addElements, find, getCodeValue, getProperty, type SourceFile } from '@/transform/shared';
+import {
+  addElements,
+  find,
+  getCodeValue,
+  getDefaultExport,
+  getProperty,
+  type SourceFile,
+} from '@/transform/shared';
 
 /**
  * Add path to the `pages` array in tanstack start vite config.
@@ -32,7 +39,7 @@ export function addTanstackPrerender(file: SourceFile, paths: string[]) {
  * Find the tanstackStart call expression
  */
 function getTanstackStartCall(file: SourceFile): CallExpression | undefined {
-  const exported = file.program.body.find((node) => node.type === 'ExportDefaultDeclaration');
+  const exported = getDefaultExport(file);
   const options = exported && find(exported, 'ObjectExpression');
   const plugins = options && getProperty(options, 'plugins')?.value;
   if (plugins?.type !== 'ArrayExpression') return;

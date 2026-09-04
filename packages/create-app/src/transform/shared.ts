@@ -1,6 +1,7 @@
 import {
   parseSync,
   type ArrayExpression,
+  type ExportDefaultDeclaration,
   type JSXElement,
   type JSXOpeningElement,
   type Node,
@@ -58,22 +59,23 @@ export function* descendants(node: Node): Generator<Node> {
   }
 }
 
-export function find<T extends Node['type']>(node: Node, type: T): NodeOfType<T> | undefined {
+export function find<T extends Node['type']>(
+  node: Node,
+  type: T,
+  predicate?: (node: NodeOfType<T>) => boolean,
+): NodeOfType<T> | undefined {
   for (const child of descendants(node)) {
-    if (child.type === type) return child as NodeOfType<T>;
+    if (child.type === type && (!predicate || predicate(child as NodeOfType<T>)))
+      return child as NodeOfType<T>;
   }
 }
 
-export function findAll<T extends Node['type']>(node: Node, type: T): NodeOfType<T>[] {
-  const out: NodeOfType<T>[] = [];
-  for (const child of descendants(node)) {
-    if (child.type === type) out.push(child as NodeOfType<T>);
-  }
-  return out;
+export function getDefaultExport(file: SourceFile): ExportDefaultDeclaration | undefined {
+  return file.program.body.find((node) => node.type === 'ExportDefaultDeclaration');
 }
 
 export function findJsxElement(file: SourceFile, tagName: string): JSXElement | undefined {
-  return findAll(file.program, 'JSXElement').find(({ openingElement: { name } }) => {
+  return find(file.program, 'JSXElement', ({ openingElement: { name } }) => {
     return name.type === 'JSXIdentifier' && name.name === tagName;
   });
 }
@@ -193,19 +195,25 @@ export function filterElements<C extends Container>(
 ) {
   const { s } = file;
   const elements = getElements(container);
-  const kept = elements.filter(keep);
-  if (kept.length === elements.length) return;
-  if (kept.length === 0) {
+  const keeps = elements.map(keep);
+  let kept = 0;
+  for (const keep of keeps) if (keep) kept++;
+  if (kept === elements.length) return;
+  if (kept === 0) {
     s.remove(container.start + 1, container.end - 1);
     return;
   }
 
+  let lastKept: ElementOf<C> | undefined;
   for (let i = 0; i < elements.length; i++) {
     const element = elements[i];
-    if (kept.includes(element)) continue;
+    if (keeps[i]) {
+      lastKept = element;
+      continue;
+    }
     const next = elements[i + 1];
     // remove along with the separator: up to the next item, or from the last kept item
     if (next) s.remove(element.start, next.start);
-    else s.remove(kept.at(-1)!.end, element.end);
+    else s.remove(lastKept!.end, element.end);
   }
 }

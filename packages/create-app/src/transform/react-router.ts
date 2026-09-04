@@ -3,8 +3,8 @@ import {
   addElements,
   filterElements,
   find,
-  findAll,
   getCodeValue,
+  getDefaultExport,
   getProperty,
   type SourceFile,
 } from '@/transform/shared';
@@ -20,7 +20,9 @@ export function filterReactRouterPrerenderArray(
   const method = getPrerenderMethod(file);
   if (!method) return;
 
-  const initializer = findAll(method.value, 'VariableDeclarator').find(
+  const initializer = find(
+    method.value,
+    'VariableDeclarator',
     (item) => item.id.type === 'Identifier' && item.id.name === array,
   )?.init;
   if (initializer?.type !== 'ArrayExpression') return;
@@ -64,13 +66,10 @@ export function filterReactRouterRoute(
   });
 }
 
-export function modifyReactRouterRoutes(file: SourceFile, mod: (array: ArrayExpression) => void) {
-  const initializer = getDefaultExport(file) && find(getDefaultExport(file)!, 'ArrayExpression');
+function modifyReactRouterRoutes(file: SourceFile, mod: (array: ArrayExpression) => void) {
+  const exported = getDefaultExport(file);
+  const initializer = exported && find(exported, 'ArrayExpression');
   if (initializer) mod(initializer);
-}
-
-function getDefaultExport(file: SourceFile) {
-  return file.program.body.find((node) => node.type === 'ExportDefaultDeclaration');
 }
 
 /**
