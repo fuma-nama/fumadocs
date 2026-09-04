@@ -320,10 +320,8 @@ export function createTwoslasher(options: TwoslasherOptions = {}): Twoslasher {
 
   /** directory of the block at `index` of a batch, the block is placed in a stable slot to keep the project unchanged */
   const slot = (index: number) => `${root}${index}/`;
-  const isVirtualDir = (dir: string) =>
-    dir.startsWith(root)
-      ? !dir.includes('/', root.length)
-      : dir.length === root.length - 1 && root.startsWith(dir);
+  /** directories of the virtual files */
+  const dirs = new Set([root.slice(0, -1)]);
 
   function parse(code: string, extension: string): Block {
     const { customTags = ['annotate', 'log', 'warn', 'error'], extraFiles = {} } = options;
@@ -409,6 +407,9 @@ export function createTwoslasher(options: TwoslasherOptions = {}): Twoslasher {
       if (current === undefined) {
         created.push(file);
         rootFiles.push(file);
+        for (let i = file.lastIndexOf('/'); i >= root.length; i = file.lastIndexOf('/', i - 1)) {
+          dirs.add(file.slice(0, i));
+        }
       } else {
         changed.push(file);
       }
@@ -435,7 +436,7 @@ export function createTwoslasher(options: TwoslasherOptions = {}): Twoslasher {
         },
         directoryExists: (dir) => {
           dir = normalizePath(dir);
-          return dir.startsWith(root) || isVirtualDir(dir) ? isVirtualDir(dir) : undefined;
+          return dirs.has(dir) || (dir.startsWith(root) ? false : undefined);
         },
       },
     });
@@ -723,7 +724,7 @@ function analyze(
     if (completions.length === 0 && !handbookOptions.noErrorValidation) {
       throw new TwoslashError(
         'Invalid completion query',
-        `The request on line ${pc.indexToPos(target).line} in ${file.filename} for completions via ^| returned no completions from the compiler. (prefix: ${prefix})`,
+        `The request on line ${pc.indexToPos(target).line + 2} in ${file.filename} for completions via ^| returned no completions from the compiler. (prefix: ${prefix})`,
         'This is likely that the positioning is off.',
       );
     }

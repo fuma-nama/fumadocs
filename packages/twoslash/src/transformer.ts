@@ -143,8 +143,6 @@ const RE_TWOSLASH = /\btwoslash\b/;
 const RE_INCLUDE_MARKER = /\/\/ @include: (.*)$/gm;
 const RE_INCLUDE_META = /include\s+([\w-]+)\b.*/;
 
-let cachedInstance: Twoslasher | undefined;
-
 /**
  * Apply Twoslash to code blocks with the `twoslash` meta string.
  *
@@ -185,7 +183,8 @@ export function transformerTwoslash(options: TransformerTwoslashOptions = {}): S
   const renderer = createRenderer(options.rendererRich);
 
   // lazy load Twoslash instance so it works on serverless platforms
-  const getInstance = () => (cachedInstance ??= createTwoslasher(twoslashOptions));
+  let instance: Twoslasher | undefined;
+  const getInstance = () => (instance ??= createTwoslasher(twoslashOptions));
   const twoslasher: TwoslashFunction =
     options.twoslasher ?? ((code, lang) => getInstance()(code, lang));
   /** code blocks prepared by `_fd_prepare`, keyed by the options Shiki passes to both hooks */

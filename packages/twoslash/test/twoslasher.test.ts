@@ -304,6 +304,17 @@ console.log(value);
   `);
 });
 
+test('nested filename', () => {
+  const result = twoslasher(`
+// @filename: sub/util.ts
+export const value = 1;
+// @filename: index.ts
+import { value } from './sub/util';
+value;
+`);
+  expect(hovers(result).at(-1)?.text).toBe('(alias) const value: 1\nimport value');
+});
+
 test('completions', () => {
   const dot = 'const obj = { alpha: 1 }; obj.';
   const result = twoslasher(`// @noErrors
