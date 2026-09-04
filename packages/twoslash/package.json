@@ -47,7 +47,6 @@
     "@shikijs/twoslash": "^4.4.3",
     "cn": "^0.2.4",
     "mdast-util-from-markdown": "^2.0.3",
-    "mdast-util-gfm": "^3.1.0",
     "mdast-util-to-hast": "^13.2.1",
     "twoslash": "^0.3.9",
     "twoslash-protocol": "^0.3.9",

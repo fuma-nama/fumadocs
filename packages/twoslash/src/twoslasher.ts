@@ -291,17 +291,15 @@ export function createTwoslasher(options: TwoslasherOptions = {}): TwoslashInsta
   function open(next: Map<string, string>): Project {
     const changed: string[] = [];
     const created: string[] = [];
-    const deleted: string[] = [];
+    for (const file of files.keys()) {
+      if (!next.has(file)) next.set(file, '');
+    }
     for (const [file, content] of next) {
       const current = files.get(file);
       if (current === content) continue;
       (current === undefined ? created : changed).push(file);
+      files.set(file, content);
     }
-    for (const file of files.keys()) {
-      if (!next.has(file)) deleted.push(file);
-    }
-    files.clear();
-    for (const [file, content] of next) files.set(file, content);
 
     api ??= new API({
       cwd: root,
@@ -313,9 +311,9 @@ export function createTwoslasher(options: TwoslasherOptions = {}): TwoslashInsta
 
     if (!snapshot) {
       snapshot = api.updateSnapshot({ openProjects: [configPath] });
-    } else if (changed.length + created.length + deleted.length > 0) {
+    } else if (changed.length + created.length > 0) {
       const prev = snapshot;
-      snapshot = api.updateSnapshot({ fileChanges: { changed, created, deleted } });
+      snapshot = api.updateSnapshot({ fileChanges: { changed, created } });
       prev.dispose();
     }
 
@@ -399,12 +397,12 @@ export function createTwoslasher(options: TwoslasherOptions = {}): TwoslashInsta
         next.set(file.filepath, file.content);
       }
     }
+    const rootFiles = new Set(files.keys());
+    rootFiles.delete(configPath);
+    for (const file of next.keys()) rootFiles.add(file);
     next.set(
       configPath,
-      JSON.stringify({
-        compilerOptions: meta.compilerOptions,
-        files: Array.from(next.keys()),
-      }),
+      JSON.stringify({ compilerOptions: meta.compilerOptions, files: Array.from(rootFiles) }),
     );
 
     const project = open(next);
@@ -445,6 +443,7 @@ export function createTwoslasher(options: TwoslasherOptions = {}): TwoslashInsta
       return text;
     }
 
+    const described = new Map<string, string>();
     const symbolDocs = new Map<number, Pick<NodeHover, 'docs' | 'tags'>>();
     function getHover(
       file: VirtualFile,
@@ -472,7 +471,12 @@ export function createTwoslasher(options: TwoslasherOptions = {}): TwoslashInsta
         }
       }
 
-      let text = describeSymbol(project, target, type, node, typeToString);
+      const key = `${target.id}:${type.id}:${getCall(node) ? 1 : 0}`;
+      let text = described.get(key);
+      if (text === undefined) {
+        text = describeSymbol(project, target, type, node, typeToString);
+        described.set(key, text);
+      }
       if (symbol.flags & SymbolFlags.Alias) {
         // call sites display the resolved signature without keyword
         if (getCall(node)) text = text.replace(/^function /, '');

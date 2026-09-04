@@ -1,7 +1,6 @@
 import type { Element, ElementContent } from 'hast';
 import type { Code } from 'mdast';
 import { fromMarkdown } from 'mdast-util-from-markdown';
-import { gfmFromMarkdown } from 'mdast-util-gfm';
 import { defaultHandlers, toHast } from 'mdast-util-to-hast';
 import type {
   ShikiTransformer,
@@ -131,10 +130,8 @@ export function transformerTwoslash(_options: TransformerTwoslashOptions = {}): 
 }
 
 function renderMarkdown(this: ShikiTransformerContextCommon, md: string): ElementContent[] {
-  const mdast = fromMarkdown(
-    md.replace(/{@link (?<link>[^}]*)}/g, '$1'), // replace jsdoc links
-    { mdastExtensions: [gfmFromMarkdown()] },
-  );
+  // replace jsdoc links
+  const mdast = fromMarkdown(md.replace(/{@link (?<link>[^}]*)}/g, '$1'));
 
   const onCode = (lang: string, node: Code) => {
     return this.codeToHast(node.value, {
