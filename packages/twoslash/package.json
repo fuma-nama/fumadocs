@@ -44,12 +44,9 @@
   },
   "dependencies": {
     "@base-ui/react": "^1.7.0",
-    "@shikijs/twoslash": "^4.4.3",
     "cn": "^0.2.4",
     "mdast-util-from-markdown": "^2.0.3",
     "mdast-util-to-hast": "^13.2.1",
-    "twoslash": "^0.3.9",
-    "twoslash-protocol": "^0.3.9",
     "typescript": "~7.0.2"
   },
   "devDependencies": {
@@ -69,7 +66,7 @@
     "fumadocs-ui": "^16.7.16",
     "react": "^19.2.0",
     "react-dom": "^19.2.0",
-    "shiki": "4.x.x"
+    "shiki": "^4.4.3"
   },
   "peerDependenciesMeta": {
     "@types/react": {

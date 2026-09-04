@@ -21,11 +21,16 @@ import {
   type SourceFile,
 } from 'typescript/unstable/ast';
 import {
+  createPositionConverter,
   defaultHandbookOptions,
   findCutNotations,
   findFlagNotations,
   findQueryMarkers,
-  getObjectHash,
+  isInRange,
+  isInRanges,
+  removeCodeRanges,
+  resolveNodePositions,
+  splitFiles,
   TwoslashError,
   validateCodeForErrors,
   type HandbookOptions,
@@ -33,19 +38,11 @@ import {
   type NodeError,
   type NodeHover,
   type NodeWithoutPosition,
-  type TwoslashExecuteOptions,
-  type TwoslashInstance,
-  type TwoslashReturn,
-  type TwoslashReturnMeta,
+  type Notations,
+  type PositionConverter,
+  type TwoslashNode,
   type VirtualFile,
-} from 'twoslash/core';
-import {
-  createPositionConverter,
-  isInRange,
-  isInRanges,
-  removeCodeRanges,
-  resolveNodePositions,
-} from 'twoslash-protocol';
+} from './notations';
 import path from 'node:path';
 
 export interface TwoslasherOptions {
@@ -61,13 +58,31 @@ export interface TwoslasherOptions {
   compilerOptions?: Record<string, unknown>;
   handbookOptions?: Partial<HandbookOptions>;
   /**
-   * A set of known `// @[tags]` tags to extract and not treat as a comment
+   * `// @[tag]` notations to display as custom tags, instead of compiler flags
+   *
+   * @defaultValue ['annotate', 'log', 'warn', 'error']
    */
   customTags?: string[];
   /**
    * A custom hook to filter out hover info for certain identifiers
    */
   shouldGetHoverInfo?: (identifier: string, start: number, filename: string) => boolean;
+}
+
+export interface TwoslashReturn {
+  /** the code with notations removed */
+  code: string;
+  nodes: TwoslashNode[];
+}
+
+export interface Twoslasher {
+  (code: string, extension?: string): TwoslashReturn;
+  /**
+   * Analyze the code block together with other blocks prepared in the same tick, in one snapshot of the TypeScript project.
+   *
+   * The result is returned by the following synchronous call with the same code.
+   */
+  prepare(code: string, extension?: string): Promise<void>;
 }
 
 const defaultCompilerOptions = {
@@ -85,7 +100,7 @@ const defaultCompilerOptions = {
 const supportedExtensions = ['ts', 'tsx', 'js', 'jsx'];
 /** the time to wait for other code blocks to join a batch */
 const batchDelay = 10;
-const reFilename = /^[\t\v\f ]*\/\/\s?@filename: (.+)$/gm;
+const completionTriggers = ['.', '"', "'", '`', '/', '@', '<', '#', ' '];
 const typeFlags =
   NodeBuilderFlags.UseAliasDefinedOutsideCurrentScope |
   NodeBuilderFlags.MultilineObjectLiterals |
@@ -108,40 +123,6 @@ function normalizePath(p: string): string {
     out = out[0].toLowerCase() + out.slice(1);
   }
   return out;
-}
-
-function parseFlagValue(value: unknown): unknown {
-  if (typeof value !== 'string') return value;
-  if (value === 'true') return true;
-  if (value === 'false') return false;
-  if (value.includes(',')) return value.split(',').map((v) => v.trim());
-  const num = Number(value);
-  return Number.isNaN(num) ? value : num;
-}
-
-function splitFiles(code: string, defaultFilename: string, root: string): VirtualFile[] {
-  const files: VirtualFile[] = [];
-  let filename = defaultFilename;
-  let index = 0;
-
-  function push(end: number) {
-    if (end === index) return;
-    files.push({
-      offset: index,
-      filename,
-      filepath: root + filename,
-      content: code.slice(index, end),
-      extension: filename.slice(filename.lastIndexOf('.') + 1),
-    });
-  }
-
-  for (const match of code.matchAll(reFilename)) {
-    push(match.index);
-    filename = match[1].trimEnd();
-    index = match.index;
-  }
-  push(code.length);
-  return files;
 }
 
 function getIdentifiers(sourceFile: SourceFile): Node[] {
@@ -285,31 +266,24 @@ function describeSymbol(
   return `${head}: ${typeToString(type)}`;
 }
 
-export interface Twoslasher extends TwoslashInstance {
-  /**
-   * Analyze the code block together with other blocks prepared in the same tick, in one snapshot of the TypeScript project.
-   *
-   * The result is returned by the following synchronous call with the same code.
-   */
-  prepare(code: string, extension?: string, options?: TwoslashExecuteOptions): Promise<void>;
-}
-
 interface Block {
   key: string;
   code: string;
   /** directory of virtual files */
   dir: string;
   configPath: string;
-  meta: TwoslashReturnMeta;
-  nodes: NodeWithoutPosition[];
-  pc: ReturnType<typeof createPositionConverter>;
-  options: TwoslashExecuteOptions;
+  notations: Notations;
+  files: VirtualFile[];
+  pc: PositionConverter;
 }
 
 export function createTwoslasher(options: TwoslasherOptions = {}): Twoslasher {
+  const { customTags = ['annotate', 'log', 'warn', 'error'], shouldGetHoverInfo } = options;
   const root = `${normalizePath(options.cwd ?? process.cwd())}/.twoslash/`;
   /** virtual files, replaced on every batch */
   const files = new Map<string, string>();
+  /** config file path of each compiler options */
+  const configPaths = new Map<string, string>();
   const openedProjects = new Set<string>();
   const results = new Map<string, { value?: TwoslashReturn; error?: unknown }>();
   const pending = new Map<string, Block>();
@@ -318,72 +292,41 @@ export function createTwoslasher(options: TwoslasherOptions = {}): Twoslasher {
   let snapshot: Snapshot | undefined;
   let nextId = 0;
 
-  function parse(code: string, extension: string, executeOptions: TwoslashExecuteOptions): Block {
-    const { customTags = options.customTags ?? [] } = executeOptions;
-    const meta: TwoslashReturnMeta = {
-      extension,
-      compilerOptions: {
-        ...defaultCompilerOptions,
-        ...options.compilerOptions,
-        ...executeOptions.compilerOptions,
-      },
-      handbookOptions: {
-        ...defaultHandbookOptions,
-        ...options.handbookOptions,
-        ...executeOptions.handbookOptions,
-      },
+  function parse(code: string, extension: string): Block {
+    const notations: Notations = {
+      compilerOptions: { ...defaultCompilerOptions, ...options.compilerOptions },
+      handbookOptions: { ...defaultHandbookOptions, ...options.handbookOptions },
+      tags: [],
       removals: [],
-      flagNotations: [],
-      virtualFiles: [],
-      positionQueries: executeOptions.positionQueries ?? [],
-      positionCompletions: executeOptions.positionCompletions ?? [],
-      positionHighlights: executeOptions.positionHighlights ?? [],
+      queries: [],
+      completions: [],
+      highlights: [],
     };
-    const nodes: NodeWithoutPosition[] = [];
-
-    // without option declarations, compiler flags are parsed as "unknown" and validated by TypeScript through the config file
-    meta.flagNotations = findFlagNotations(code, customTags, []);
-    for (const flag of meta.flagNotations) {
-      switch (flag.type) {
-        case 'unknown':
-          Object.assign(meta.compilerOptions, { [flag.name]: parseFlagValue(flag.value) });
-          break;
-        case 'handbookOptions':
-          Object.assign(meta.handbookOptions, { [flag.name]: flag.value });
-          break;
-        case 'tag':
-          nodes.push({
-            type: 'tag',
-            name: flag.name,
-            start: flag.end,
-            length: 0,
-            text: flag.value,
-          });
-          break;
-      }
-      meta.removals.push([flag.start, flag.end]);
-    }
-
+    findFlagNotations(code, customTags, notations);
+    findCutNotations(code, notations.removals);
     const pc = createPositionConverter(code);
-    findCutNotations(code, meta);
-    findQueryMarkers(code, meta, pc);
+    findQueryMarkers(code, pc, notations);
+
     const dir = `${root}${nextId++}/`;
-    meta.virtualFiles = splitFiles(code, `index.${extension}`, dir);
-    for (const file of meta.virtualFiles) {
-      file.supportLsp =
-        supportedExtensions.includes(file.extension) ||
-        (file.extension === 'json' && !!meta.compilerOptions.resolveJsonModule);
+    const compilerOptions = JSON.stringify(notations.compilerOptions);
+    let configPath = configPaths.get(compilerOptions);
+    if (!configPath) {
+      configPath = `${root}tsconfig.${configPaths.size}.json`;
+      configPaths.set(compilerOptions, configPath);
     }
 
     return {
       key: getKey(code, extension),
       code,
       dir,
-      configPath: `${root}tsconfig.${getObjectHash(meta.compilerOptions)}.json`,
-      meta,
-      nodes,
+      configPath,
+      notations,
+      files: splitFiles(code, `index.${extension}`, dir).filter(
+        (file) =>
+          supportedExtensions.includes(file.extension) ||
+          (file.extension === 'json' && !!notations.compilerOptions.resolveJsonModule),
+      ),
       pc,
-      options: executeOptions,
     };
   }
 
@@ -397,11 +340,10 @@ export function createTwoslasher(options: TwoslasherOptions = {}): Twoslasher {
     for (const block of blocks) {
       let config = configs.get(block.configPath);
       if (!config) {
-        config = { compilerOptions: block.meta.compilerOptions, files: [] };
+        config = { compilerOptions: block.notations.compilerOptions, files: [] };
         configs.set(block.configPath, config);
       }
-      for (const file of block.meta.virtualFiles) {
-        if (!file.supportLsp) continue;
+      for (const file of block.files) {
         next.set(file.filepath, file.content);
         config.files.push(file.filepath);
       }
@@ -457,24 +399,20 @@ export function createTwoslasher(options: TwoslasherOptions = {}): Twoslasher {
       try {
         const project = snapshot.getProject(block.configPath);
         if (!project) {
-          throw new TwoslashError('Failed to load project', `Cannot open ${block.configPath}`, '');
+          throw new TwoslashError('Failed to load project', `Cannot open ${block.configPath}`);
         }
-        results.set(block.key, { value: analyze(block, project) });
+        results.set(block.key, { value: analyze(block, project, shouldGetHoverInfo) });
       } catch (error) {
         results.set(block.key, { error });
       }
     }
   }
 
-  function twoslasher(
-    code: string,
-    extension = 'ts',
-    executeOptions: TwoslashExecuteOptions = {},
-  ): TwoslashReturn {
+  function twoslasher(code: string, extension = 'ts'): TwoslashReturn {
     const key = getKey(code, extension);
     let result = results.get(key);
     if (!result) {
-      run([pending.get(key) ?? parse(code, extension, executeOptions)]);
+      run([pending.get(key) ?? parse(code, extension)]);
       pending.delete(key);
       result = results.get(key)!;
     }
@@ -482,17 +420,12 @@ export function createTwoslasher(options: TwoslasherOptions = {}): Twoslasher {
     throw result.error;
   }
 
-  twoslasher.getCacheMap = () => undefined;
-  twoslasher.prepare = (
-    code: string,
-    extension = 'ts',
-    executeOptions: TwoslashExecuteOptions = {},
-  ): Promise<void> => {
+  twoslasher.prepare = (code: string, extension = 'ts'): Promise<void> => {
     const key = getKey(code, extension);
     if (results.has(key)) return Promise.resolve();
     if (!pending.has(key)) {
       try {
-        pending.set(key, parse(code, extension, executeOptions));
+        pending.set(key, parse(code, extension));
       } catch (error) {
         results.set(key, { error });
         return Promise.resolve();
@@ -522,22 +455,27 @@ function getKey(code: string, extension: string): string {
   return `${extension}\0${code}`;
 }
 
-function analyze(block: Block, project: Project): TwoslashReturn {
-  const { code, meta, pc, options: executeOptions } = block;
-  const { shouldGetHoverInfo = () => true, filterNode } = executeOptions;
-  let nodes = block.nodes;
+function analyze(
+  block: Block,
+  project: Project,
+  shouldGetHoverInfo: TwoslasherOptions['shouldGetHoverInfo'] = () => true,
+): TwoslashReturn {
+  const { code, notations, pc } = block;
+  const { handbookOptions, removals } = notations;
+  let nodes: NodeWithoutPosition[] = [...notations.tags];
   const isInRemoval = (index: number) =>
-    index >= code.length || index < 0 || isInRanges(index, meta.removals, false) !== undefined;
+    index >= code.length || index < 0 || isInRanges(index, removals, false);
 
   const { checker, program } = project;
   const configErrors = program.getConfigFileParsingDiagnostics();
-  if (configErrors.length > 0 && !meta.handbookOptions.noErrorValidation) {
+  if (configErrors.length > 0 && !handbookOptions.noErrorValidation) {
     throw new TwoslashError(
       'Invalid compiler options',
       configErrors.map((d) => d.text).join('\n'),
       'Check the inline compiler flags in the code block.',
     );
   }
+
   const identifiersMap = new Map<VirtualFile, Node[]>();
   function getIdentifiersOfFile(file: VirtualFile): Node[] {
     let identifiers = identifiersMap.get(file);
@@ -549,7 +487,7 @@ function analyze(block: Block, project: Project): TwoslashReturn {
     return identifiers;
   }
   function getFileAtPosition(pos: number): VirtualFile | undefined {
-    return meta.virtualFiles.find((i) => isInRange(pos, [i.offset, i.offset + i.content.length]));
+    return block.files.find((i) => isInRange(pos, [i.offset, i.offset + i.content.length]));
   }
   function getPositionInCode(file: VirtualFile, node: Node): number {
     return node.getStart() + file.offset;
@@ -572,7 +510,7 @@ function analyze(block: Block, project: Project): TwoslashReturn {
     node: Node,
     symbol: Symbol,
     type: Type,
-  ): Omit<NodeHover, 'line' | 'character'> {
+  ): NodeWithoutPosition<NodeHover> {
     let target = symbol;
     if (symbol.flags & SymbolFlags.Alias) {
       target = checker.getAliasedSymbol(symbol);
@@ -627,7 +565,7 @@ function analyze(block: Block, project: Project): TwoslashReturn {
     const positions = identifiers.map((node) => getPositionInCode(file, node) - file.offset);
     const symbols = checker.getSymbolAtPosition(file.filepath, positions);
     const types = checker.getTypeAtLocation(identifiers);
-    const out: Omit<NodeHover, 'line' | 'character'>[] = [];
+    const out: NodeWithoutPosition<NodeHover>[] = [];
     for (let i = 0; i < identifiers.length; i++) {
       const symbol = symbols[i];
       const type = types[i];
@@ -636,16 +574,17 @@ function analyze(block: Block, project: Project): TwoslashReturn {
     return out;
   }
 
-  for (const file of meta.virtualFiles) {
-    if (!file.supportLsp || meta.handbookOptions.noStaticSemanticInfo) continue;
-    const identifiers = getIdentifiersOfFile(file).filter((node) => {
-      const start = getPositionInCode(file, node);
-      return !isInRemoval(start) && shouldGetHoverInfo(node.getText(), start, file.filename);
-    });
-    nodes.push(...getHovers(file, identifiers));
+  if (!handbookOptions.noStaticSemanticInfo) {
+    for (const file of block.files) {
+      const identifiers = getIdentifiersOfFile(file).filter((node) => {
+        const start = getPositionInCode(file, node);
+        return !isInRemoval(start) && shouldGetHoverInfo(node.getText(), start, file.filename);
+      });
+      nodes.push(...getHovers(file, identifiers));
+    }
   }
 
-  for (const query of meta.positionQueries) {
+  for (const query of notations.queries) {
     const file = getFileAtPosition(query);
     if (isInRemoval(query) || !file) {
       throw new TwoslashError(
@@ -669,11 +608,11 @@ function analyze(block: Block, project: Project): TwoslashReturn {
     nodes.push({ ...hover, type: 'query' });
   }
 
-  for (const [start, end, text] of meta.positionHighlights) {
+  for (const [start, end, text] of notations.highlights) {
     nodes.push({ type: 'highlight', start, length: end - start, text });
   }
 
-  for (const target of meta.positionCompletions) {
+  for (const target of notations.completions) {
     const file = getFileAtPosition(target);
     if (isInRemoval(target) || !file) {
       throw new TwoslashError(
@@ -684,20 +623,22 @@ function analyze(block: Block, project: Project): TwoslashReturn {
     }
 
     const position = target - file.offset;
-    let prefix = code.slice(0, target).match(/[$\w]+$/)?.[0] ?? '';
+    let prefix = /[$\w]+$/.exec(code.slice(0, target))?.[0] ?? '';
     const completions: NodeCompletion['completions'] = [];
-    const result = prefix
-      ? checker.getCompletionsAtPosition(file.filepath, position - 1)
-      : checker.getCompletionsAtPosition(file.filepath, position, {
-          triggerCharacter: (prefix = code[target - 1]),
-        });
-    if (result) {
-      for (const entry of result.entries) {
-        if (!entry.name.startsWith(prefix)) continue;
-        completions.push({ name: entry.name, kind: entry.kind && completionKinds[entry.kind] });
-      }
+    let result;
+    if (prefix) {
+      result = checker.getCompletionsAtPosition(file.filepath, position - 1);
+    } else {
+      prefix = code[target - 1];
+      result = checker.getCompletionsAtPosition(file.filepath, position, {
+        triggerCharacter: completionTriggers.includes(prefix) ? prefix : undefined,
+      });
     }
-    if (completions.length === 0 && !meta.handbookOptions.noErrorValidation) {
+    for (const entry of result?.entries ?? []) {
+      if (!entry.name.startsWith(prefix)) continue;
+      completions.push({ name: entry.name, kind: entry.kind && completionKinds[entry.kind] });
+    }
+    if (completions.length === 0 && !handbookOptions.noErrorValidation) {
       throw new TwoslashError(
         'Invalid completion query',
         `The request on line ${pc.indexToPos(target).line} in ${file.filename} for completions via ^| returned no completions from the compiler. (prefix: ${prefix})`,
@@ -713,12 +654,11 @@ function analyze(block: Block, project: Project): TwoslashReturn {
     });
   }
 
-  let errorNodes: Omit<NodeError, 'line' | 'character'>[] = [];
-  const { noErrors, noErrorsCutted } = meta.handbookOptions;
+  const errorNodes: NodeWithoutPosition<NodeError>[] = [];
+  const { noErrors } = handbookOptions;
   if (noErrors !== true) {
     const ignores = Array.isArray(noErrors) ? noErrors : [];
-    for (const file of meta.virtualFiles) {
-      if (!file.supportLsp) continue;
+    for (const file of block.files) {
       const diagnostics = [
         ...program.getSemanticDiagnostics(file.filepath),
         ...program.getSyntacticDiagnostics(file.filepath),
@@ -726,7 +666,6 @@ function analyze(block: Block, project: Project): TwoslashReturn {
       for (const diagnostic of diagnostics) {
         if (ignores.includes(diagnostic.code)) continue;
         const start = diagnostic.pos + file.offset;
-        if (noErrorsCutted && isInRemoval(start)) continue;
         const length = diagnostic.end - diagnostic.pos;
         errorNodes.push({
           type: 'error',
@@ -734,55 +673,19 @@ function analyze(block: Block, project: Project): TwoslashReturn {
           length,
           code: diagnostic.code,
           filename: file.filename,
-          id: `err-${diagnostic.code}-${start}-${length}`,
           text: flattenDiagnostic(diagnostic),
           level: (['warning', 'error', 'suggestion', 'message'] as const)[diagnostic.category],
         });
       }
     }
   }
-
-  if (filterNode) {
-    nodes = nodes.filter(filterNode);
-    errorNodes = errorNodes.filter(filterNode);
-  }
   nodes.push(...errorNodes);
-  if (!meta.handbookOptions.noErrorValidation && errorNodes.length > 0) {
-    validateCodeForErrors(errorNodes, meta.handbookOptions, block.dir);
-  }
+  if (!handbookOptions.noErrorValidation) validateCodeForErrors(errorNodes, handbookOptions);
 
   let outputCode = code;
-  if (!meta.handbookOptions.keepNotations) {
-    const removed = removeCodeRanges(code, meta.removals, nodes);
-    outputCode = removed.code;
-    nodes = removed.nodes;
-    meta.removals = removed.removals;
+  if (!handbookOptions.keepNotations) {
+    ({ code: outputCode, nodes } = removeCodeRanges(code, removals, nodes));
   }
-  const indexToPos =
-    outputCode === code ? pc.indexToPos : createPositionConverter(outputCode).indexToPos;
-  const resolved = resolveNodePositions(nodes, indexToPos);
-
-  return {
-    code: outputCode,
-    nodes: resolved,
-    meta,
-    get queries() {
-      return this.nodes.filter((i) => i.type === 'query');
-    },
-    get completions() {
-      return this.nodes.filter((i) => i.type === 'completion');
-    },
-    get errors() {
-      return this.nodes.filter((i) => i.type === 'error');
-    },
-    get highlights() {
-      return this.nodes.filter((i) => i.type === 'highlight');
-    },
-    get hovers() {
-      return this.nodes.filter((i) => i.type === 'hover');
-    },
-    get tags() {
-      return this.nodes.filter((i) => i.type === 'tag');
-    },
-  };
+  const outputPc = outputCode === code ? pc : createPositionConverter(outputCode);
+  return { code: outputCode, nodes: resolveNodePositions(nodes, outputPc) };
 }

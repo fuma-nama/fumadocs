@@ -1,6 +1,14 @@
 import { expect, test } from 'vitest';
-import { createTwoslasher } from '../src/twoslasher';
+import { createTwoslasher, type TwoslashReturn } from '../src/twoslasher';
+import type { TwoslashNode } from '../src/notations';
 import { fileURLToPath } from 'node:url';
+
+function byType<T extends TwoslashNode['type']>(result: TwoslashReturn, type: T) {
+  return result.nodes.filter(
+    (node): node is Extract<TwoslashNode, { type: T }> => node.type === type,
+  );
+}
+const hovers = (result: TwoslashReturn) => byType(result, 'hover');
 
 const twoslasher = createTwoslasher({
   cwd: fileURLToPath(new URL('./', import.meta.url)),
@@ -28,7 +36,7 @@ add(count, 2);
 readFileSync('file.txt', 'utf-8');
 `);
 
-  expect(result.hovers.map((v) => [v.target, v.text, v.docs])).toMatchInlineSnapshot(`
+  expect(hovers(result).map((v) => [v.target, v.text, v.docs])).toMatchInlineSnapshot(`
     [
       [
         "readFileSync",
@@ -236,14 +244,14 @@ player.na
     player.na
     "
   `);
-  expect(result.queries.map((v) => v.text)).toMatchInlineSnapshot(`
+  expect(byType(result, 'query').map((v) => v.text)).toMatchInlineSnapshot(`
     [
       "const player: {
         name: string;
     }",
     ]
   `);
-  expect(result.completions.map((v) => v.completions)).toMatchInlineSnapshot(`
+  expect(byType(result, 'completion').map((v) => v.completions)).toMatchInlineSnapshot(`
     [
       [
         {
@@ -261,7 +269,7 @@ test('errors', () => {
 const a: string = 1;
 `);
 
-  expect(result.errors.map((v) => [v.code, v.text])).toMatchInlineSnapshot(`
+  expect(byType(result, 'error').map((v) => [v.code, v.text])).toMatchInlineSnapshot(`
     [
       [
         2322,
@@ -286,7 +294,7 @@ console.log(value);
     "console.log(value);
     "
   `);
-  expect(result.hovers.map((v) => v.text)).toMatchInlineSnapshot(`
+  expect(hovers(result).map((v) => v.text)).toMatchInlineSnapshot(`
     [
       "var console: Console",
       "(method) Console.log(...data: any[]): void",
@@ -301,12 +309,12 @@ test('batch', async () => {
   const b = `import { readFileSync } from 'node:fs';\nreadFileSync;`;
   await Promise.all([twoslasher.prepare(a), twoslasher.prepare(b, 'tsx')]);
 
-  expect(twoslasher(a).hovers.map((v) => v.text)).toEqual([
+  expect(hovers(twoslasher(a)).map((v) => v.text)).toEqual([
     'const a: string',
     'const a: string',
     '(property) String.length: number',
   ]);
-  expect(twoslasher(b, 'tsx').hovers[1].text).toMatch(/^\(alias\) function readFileSync/);
+  expect(hovers(twoslasher(b, 'tsx'))[1].text).toMatch(/^\(alias\) function readFileSync/);
   // errors are reported by the synchronous call
   await twoslasher.prepare('const c: string = 1;');
   expect(() => twoslasher('const c: string = 1;')).toThrow();
