@@ -50,7 +50,8 @@
     "mdast-util-gfm": "^3.1.0",
     "mdast-util-to-hast": "^13.2.1",
     "twoslash": "^0.3.9",
-    "typescript": "^6.0.3"
+    "twoslash-protocol": "^0.3.9",
+    "typescript": "~7.0.2"
   },
   "devDependencies": {
     "@types/hast": "^3.0.5",

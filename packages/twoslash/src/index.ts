@@ -12,19 +12,26 @@ import { ShikiError } from 'shiki/core';
 import {
   createTransformerFactory,
   rendererRich,
-  type TransformerTwoslashIndexOptions,
+  type RendererRichOptions,
+  type TransformerTwoslashOptions as TransformerTwoslashCoreOptions,
   type TwoslashTypesCache,
-} from '@shikijs/twoslash';
-import { createTwoslasher, type TwoslashInstance } from 'twoslash/core';
-import ts from 'typescript';
-import { createRequire } from 'node:module';
-import path from 'node:path';
+} from '@shikijs/twoslash/core';
+import type { TwoslashInstance } from 'twoslash/core';
+import { createTwoslasher, type TwoslasherOptions } from './twoslasher';
 
-export type { TwoslashTypesCache };
+export type { TwoslashTypesCache, TwoslasherOptions };
 
-export type TransformerTwoslashOptions = TransformerTwoslashIndexOptions;
+export interface TransformerTwoslashOptions extends Omit<
+  TransformerTwoslashCoreOptions,
+  'twoslashOptions' | 'twoslasher'
+> {
+  twoslashOptions?: TwoslasherOptions;
+  /**
+   * Options for the rich renderer.
+   */
+  rendererRich?: RendererRichOptions;
+}
 
-const require = createRequire(import.meta.url);
 let cachedInstance: TwoslashInstance | undefined;
 
 // This is highly inspired by https://github.com/shikijs/shiki/blob/main/packages/vitepress-twoslash
@@ -33,28 +40,14 @@ let cachedInstance: TwoslashInstance | undefined;
  */
 export function transformerTwoslash(_options: TransformerTwoslashOptions = {}): ShikiTransformer {
   const ignoreClass = 'nd-copy-ignore';
-  const { twoslashOptions = {}, rendererRich: rendererOptions, ...rest } = _options;
+  const { twoslashOptions, rendererRich: rendererOptions, ...rest } = _options;
 
   // lazy load Twoslash instance so it works on serverless platforms
   function lazyInstance(): TwoslashInstance {
-    function get() {
-      return (cachedInstance ??= createTwoslasher({
-        vfsRoot: process.cwd(),
-        // always use our own TypeScript: Twoslash needs the JS compiler API, which TypeScript 7 no longer provides
-        tsModule: ts,
-        tsLibDirectory: path.dirname(require.resolve('typescript')),
-        ...twoslashOptions,
-        compilerOptions: {
-          moduleResolution: ts.ModuleResolutionKind.Bundler,
-          baseUrl: undefined,
-          ...twoslashOptions.compilerOptions,
-        },
-      }));
-    }
+    const wrapper: TwoslashInstance = (...args) =>
+      (cachedInstance ??= createTwoslasher(twoslashOptions))(...args);
 
-    const wrapper: TwoslashInstance = (...args) => get()(...args);
-
-    wrapper.getCacheMap = () => get().getCacheMap();
+    wrapper.getCacheMap = () => undefined;
     return wrapper;
   }
 
