@@ -1,5 +1,5 @@
 import { TemplatePluginContext } from '@/index';
-import { createSourceFile } from '@/transform/shared';
+import { addImport, addJsxAttribute, createSourceFile, findJsxElement } from '@/transform/shared';
 import path from 'node:path';
 import {
   addReactRouterRoute,
@@ -8,7 +8,6 @@ import {
 } from '@/transform/react-router';
 import fs from 'node:fs/promises';
 import { addTanstackPrerender } from '@/transform/tanstack-start';
-import { StructureKind, SyntaxKind } from 'ts-morph';
 
 interface RootLayoutMod {
   addSearchDialog: (specifier: string) => void;
@@ -21,34 +20,20 @@ export async function rootProvider(
   const file = await createSourceFile(path.join(appDir, template.rootProviderPath));
   fn({
     addSearchDialog(specifier) {
-      const elements = file.getDescendantsOfKind(SyntaxKind.JsxElement);
+      const provider = findJsxElement(file, 'RootProvider')?.openingElement;
+      if (!provider) return;
 
-      for (const element of elements) {
-        const provider = element.getFirstChildByKind(SyntaxKind.JsxOpeningElement);
-        if (provider?.getTagNameNode().getText() !== 'RootProvider') continue;
+      const { attributes } = provider;
+      const hasSearch = attributes.some(
+        (attr) =>
+          attr.type === 'JSXAttribute' &&
+          attr.name.type === 'JSXIdentifier' &&
+          attr.name.name === 'search',
+      );
+      if (hasSearch) return;
 
-        // Skip if search prop already exists
-        if (
-          provider
-            .getAttributes()
-            .some(
-              (attr) =>
-                attr.isKind(SyntaxKind.JsxAttribute) && attr.getNameNode().getText() === 'search',
-            )
-        )
-          continue;
-
-        provider.addAttribute({
-          kind: StructureKind.JsxAttribute,
-          name: 'search',
-          initializer: '{{ SearchDialog }}',
-        });
-        file.addImportDeclaration({
-          moduleSpecifier: specifier,
-          defaultImport: 'SearchDialog',
-        });
-        break;
-      }
+      addJsxAttribute(file, provider, 'search={{ SearchDialog }}');
+      addImport(file, { from: specifier, default: 'SearchDialog' });
     },
   });
   await file.save();

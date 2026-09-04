@@ -1,8 +1,12 @@
 import { TemplatePlugin, TemplatePluginContext } from '@/index';
-import { createSourceFile } from '@/transform/shared';
+import {
+  addImport,
+  createSourceFile,
+  findJsxElement,
+  prependJsxChildren,
+} from '@/transform/shared';
 import path from 'node:path';
 import fs from 'node:fs/promises';
-import { SyntaxKind } from 'ts-morph';
 import { FumadocsComponentInstaller } from '@fumadocs/cli/registry/installer';
 import { HttpRegistryConnector } from 'fuma-cli/registry/connector';
 import { getDefaultConfig } from '@fumadocs/cli/config';
@@ -60,7 +64,6 @@ async function addAIChat({ template, appDir }: TemplatePluginContext) {
   }
 
   const file = await createSourceFile(filePath);
-  const elements = file.getDescendantsOfKind(SyntaxKind.JsxElement);
   const code = `<AISearch>
   <AISearchPanel />
   <AISearchTrigger
@@ -77,36 +80,16 @@ async function addAIChat({ template, appDir }: TemplatePluginContext) {
   </AISearchTrigger>
 </AISearch>`;
 
-  for (const element of elements) {
-    const opening = element.getFirstChildByKind(SyntaxKind.JsxOpeningElement);
-    if (opening?.getTagNameNode().getText() !== 'DocsLayout') continue;
+  const layout = findJsxElement(file, 'DocsLayout');
+  if (layout) prependJsxChildren(file, layout, code);
 
-    const prior = element
-      .getJsxChildren()
-      .map((child) => child.print().trim())
-      .join('\n');
-    element.setBodyText(`${code}\n\n${prior}`);
-    break;
-  }
-
-  file.addImportDeclarations([
-    {
-      moduleSpecifier: '@/components/ai/search',
-      namedImports: ['AISearch', 'AISearchPanel', 'AISearchTrigger'],
-    },
-    {
-      moduleSpecifier: 'lucide-react',
-      namedImports: ['MessageCircleIcon'],
-    },
-    {
-      moduleSpecifier: '@/lib/cn',
-      namedImports: ['cn'],
-    },
-    {
-      moduleSpecifier: 'fumadocs-ui/components/ui/button',
-      namedImports: ['buttonVariants'],
-    },
-  ]);
+  addImport(file, {
+    from: '@/components/ai/search',
+    named: ['AISearch', 'AISearchPanel', 'AISearchTrigger'],
+  });
+  addImport(file, { from: 'lucide-react', named: ['MessageCircleIcon'] });
+  addImport(file, { from: '@/lib/cn', named: ['cn'] });
+  addImport(file, { from: 'fumadocs-ui/components/ui/button', named: ['buttonVariants'] });
 
   await file.save();
 }

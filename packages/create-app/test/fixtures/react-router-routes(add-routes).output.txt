@@ -5,5 +5,5 @@ export default [
   route('docs/*', 'docs/page.tsx'),
   route('api/search', 'docs/search.ts'),
   route('api/og/*', './api/og.tsx'),
-  route('/static.json', './static.ts')
+  route('/static.json', './static.ts'),
 ] satisfies RouteConfig;

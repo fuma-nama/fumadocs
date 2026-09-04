@@ -1,42 +1,45 @@
-import { ArrayLiteralExpression, MethodDeclaration, SourceFile, ts } from 'ts-morph';
-import { getCodeValue } from '@/transform/shared';
-import SyntaxKind = ts.SyntaxKind;
+import type { ArrayExpression, ObjectProperty } from 'oxc-parser';
+import {
+  addElements,
+  filterElements,
+  find,
+  findAll,
+  getCodeValue,
+  getProperty,
+  type SourceFile,
+} from '@/transform/shared';
 
 /**
  * filter items in a specific array initializer in the prerender function
  */
 export function filterReactRouterPrerenderArray(
-  sourceFile: SourceFile,
+  file: SourceFile,
   array: 'paths' | 'excluded',
   filter: (item: string) => boolean,
 ) {
-  const methodBody = getPrerenderMethod(sourceFile)?.getBody();
-  if (!methodBody) return;
+  const method = getPrerenderMethod(file);
+  if (!method) return;
 
-  const initializer = methodBody
-    .getDescendantsOfKind(SyntaxKind.VariableDeclaration)
-    .find((item) => item.getName() === array)
-    ?.getInitializerIfKind(SyntaxKind.ArrayLiteralExpression);
+  const initializer = findAll(method.value, 'VariableDeclarator').find(
+    (item) => item.id.type === 'Identifier' && item.id.name === array,
+  )?.init;
+  if (initializer?.type !== 'ArrayExpression') return;
 
-  if (!initializer) return;
-  for (const element of initializer.getElements()) {
-    if (!filter(getCodeValue(element.getText()))) {
-      initializer.removeElement(element);
-    }
-  }
+  filterElements(file, initializer, (element) =>
+    filter(getCodeValue(file.code.slice(element.start, element.end))),
+  );
 }
 
 /**
  * Add a new route to route config
  */
-export function addReactRouterRoute(
-  sourceFile: SourceFile,
-  routes: { path: string; entry: string }[],
-) {
-  modifyReactRouterRoutes(sourceFile, (arr) => {
-    for (const { path, entry } of routes) {
-      arr.addElement(`route('${path}', '${entry}')`);
-    }
+export function addReactRouterRoute(file: SourceFile, routes: { path: string; entry: string }[]) {
+  modifyReactRouterRoutes(file, (arr) => {
+    addElements(
+      file,
+      arr,
+      routes.map(({ path, entry }) => `route('${path}', '${entry}')`),
+    );
   });
 }
 
@@ -44,52 +47,38 @@ export function addReactRouterRoute(
  * Remove routes from route config (root level only)
  */
 export function filterReactRouterRoute(
-  sourceFile: SourceFile,
+  file: SourceFile,
   filter: (item: { path: string; entry: string }) => boolean,
 ) {
-  modifyReactRouterRoutes(sourceFile, (arr) => {
-    for (const element of arr.getElements()) {
-      if (
-        !element.isKind(SyntaxKind.CallExpression) ||
-        element.getFirstChildByKind(SyntaxKind.Identifier)?.getText() !== 'route'
-      )
-        continue;
-      const args = element.getArguments();
+  modifyReactRouterRoutes(file, (arr) => {
+    filterElements(file, arr, (element) => {
+      if (element.type !== 'CallExpression') return true;
+      const { callee, arguments: args } = element;
+      if (callee.type !== 'Identifier' || callee.name !== 'route') return true;
 
-      if (
-        filter({
-          path: getCodeValue(args[0].getText()),
-          entry: getCodeValue(args[1].getText()),
-        })
-      )
-        continue;
-
-      arr.removeElement(element);
-    }
+      return filter({
+        path: getCodeValue(file.code.slice(args[0].start, args[0].end)),
+        entry: getCodeValue(file.code.slice(args[1].start, args[1].end)),
+      });
+    });
   });
 }
 
-export function modifyReactRouterRoutes(
-  sourceFile: SourceFile,
-  mod: (array: ArrayLiteralExpression) => void,
-) {
-  const initializer = sourceFile
-    .getDefaultExportSymbol()
-    ?.getValueDeclaration()
-    ?.getFirstDescendantByKind(SyntaxKind.ArrayLiteralExpression);
+export function modifyReactRouterRoutes(file: SourceFile, mod: (array: ArrayExpression) => void) {
+  const initializer = getDefaultExport(file) && find(getDefaultExport(file)!, 'ArrayExpression');
   if (initializer) mod(initializer);
+}
+
+function getDefaultExport(file: SourceFile) {
+  return file.program.body.find((node) => node.type === 'ExportDefaultDeclaration');
 }
 
 /**
  * Find the prerender method from the config
  */
-function getPrerenderMethod(sourceFile: SourceFile): MethodDeclaration | null {
-  return (
-    sourceFile
-      .getDefaultExportSymbol()
-      ?.getValueDeclaration()
-      ?.getFirstDescendantByKind(SyntaxKind.ObjectLiteralExpression)
-      ?.getProperty('prerender')
-      ?.asKind(SyntaxKind.MethodDeclaration) ?? null
-  );
+function getPrerenderMethod(file: SourceFile): ObjectProperty | undefined {
+  const exported = getDefaultExport(file);
+  const options = exported && find(exported, 'ObjectExpression');
+  const property = options && getProperty(options, 'prerender');
+  if (property?.method) return property;
 }
