@@ -6,9 +6,10 @@ description: Use Typescript Twoslash in your docs
 ## Usage
 
 Thanks to the Twoslash integration of [Shiki](https://github.com/shikijs/shiki), the default code syntax highlighter, it is as simple as adding a transformer.
+Type information is resolved by the native TypeScript 7 compiler, from the working directory of your project.
 
 ```package-install
-fumadocs-twoslash twoslash
+fumadocs-twoslash
 ```
 
 For Next.js, you need to externalize the following deps:
@@ -17,7 +18,7 @@ For Next.js, you need to externalize the following deps:
 const config = {
   reactStrictMode: true,
   // [!code ++]
-  serverExternalPackages: ['typescript', 'twoslash'],
+  serverExternalPackages: ['typescript'],
 };
 ```
 
@@ -93,7 +94,7 @@ transformerTwoslash({
 
 Learn more about [Twoslash notations](https://twoslash.netlify.app/refs/notations).
 
-````ts twoslash title="Test" lineNumbers
+````ts twoslash tab="Output" lineNumbers
 type Player = {
   /**
    * The player name
@@ -106,6 +107,20 @@ type Player = {
   name: string;
 };
 
+/**
+ * A custom function.
+ *
+ * @example
+ *
+ * ```ts
+ * const str = fn("hello world")
+ * console.log(str)
+ * ```
+ */
+function fn<const T extends string>(s: T): T {
+  return s;
+}
+
 // ---cut---
 // @noErrors
 console.g;
@@ -113,7 +128,49 @@ console.g;
 
 const player: Player = { name: 'Hello World' };
 //    ^?
+
+fn('test');
 ````
+
+`````md tab="Input" lineNumbers
+````ts twoslash lineNumbers
+type Player = {
+  /**
+   * The player name
+   * ```php
+   * $a = "60"
+   * ```
+   *
+   * @default 'user'
+   */
+  name: string;
+};
+
+/**
+ * A custom function.
+ *
+ * @example
+ *
+ * ```ts
+ * const str = fn("hello world")
+ * console.log(str)
+ * ```
+ */
+function fn<const T extends string>(s: T): T {
+  return s;
+}
+
+// ---cut---
+// @noErrors
+console.g;
+//       ^|
+
+const player: Player = { name: 'Hello World' };
+//    ^?
+
+fn('test');
+````
+`````
 
 ```ts twoslash
 const a = '123';

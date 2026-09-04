@@ -1,28 +1,19 @@
 core:changelogs:
-  - content: "---\npackages:\n  npm:fumadocs-ui:\n    type: patch\n  npm:@fumadocs/base-ui:\n    type: patch\n  npm:@fumadocs/api-docs:\n    type: patch\n  npm:@fumadocs/asyncapi:\n    type: patch\n  npm:@fumadocs/graphql:\n    type: patch\n  npm:@fumadocs/notion:\n    type: patch\n  npm:@fumadocs/story:\n    type: patch\n  npm:fumadocs-obsidian:\n    type: patch\n  npm:fumadocs-openapi:\n    type: patch\n  npm:fumadocs-preview:\n    type: patch\n  npm:fumadocs-python:\n    type: patch\n  npm:fumadocs-twoslash:\n    type: patch\n  npm:create-fumadocs-app:\n    type: patch\n---\n\n## Replace `cnfast` with `cn`\n\nInternal refactor only.\n"
-    filename: 2026-09-03-cn.md
+  - content: "---\npackages:\n  npm:fumadocs-core:\n    type: patch\n---\n\n## Async `_fd_prepare` hook for Shiki transformers\n\n`rehype-code` awaits `transformer._fd_prepare(code, options)` on every transformer before highlighting a code block. Transformers can run async work (or coalesce work across the code blocks being highlighted concurrently) and serve it from the synchronous Shiki hooks afterwards.\n"
+    filename: 2026-09-04-rehype-code-prepare.md
     v: 0.0.0
-  - content: "---\npackages:\n  npm:@fumadocs/story:\n    type: minor\n---\n\n## Generate controls with the native TypeScript compiler\n\n`@fumadocs/story` no longer depends on ts-morph. Story controls are generated with the TypeScript 7 native compiler (`tsgo`), bundled as a dependency, independent of the TypeScript version of your project.\n\nTransforming a story file is about 5x faster (first file 300 ms → 30 ms, edits 20 ms → 5 ms) and uses a fraction of the memory, which mostly matters in dev where every edit regenerates controls.\n\n**Behavior changes**\n\n- Custom handlers of `@fumadocs/story/type-tree` receive TypeScript 7 API objects (`Type`, `Node`, and a `Project` exposing `project.checker`) instead of ts-morph wrappers.\n- Properties of mapped types (e.g. `Pick<Props, ...>`) and members of string literal unions may appear in a different order in the generated controls, following the native compiler.\n"
-    filename: 2026-09-03-story-native-compiler.md
+  - content: "---\npackages:\n  npm:create-fumadocs-app:\n    type: patch\n---\n\n## Replace ts-morph with oxc-parser\n\nTemplate transforms (routes, prerender config, `RootProvider` search dialog, AI chat layout) now parse files with `oxc-parser` and edit the source text in place, instead of `ts-morph` and the TypeScript 6 compiler it bundles. Edits preserve the original formatting, including trailing commas.\n"
+    filename: 2026-09-04-create-app-oxc.md
     v: 0.0.0
-  - content: "---\npackages:\n  npm:fumadocs-typescript:\n    type: minor\n---\n\n## Generate type tables with the native TypeScript compiler\n\n`fumadocs-typescript` no longer uses ts-morph. It drives the TypeScript 7 native compiler (`tsgo`) through the `typescript/unstable/sync` API, bundled as a dependency, so it works regardless of the TypeScript version of your project, including TypeScript 7 before its programmatic API is stable.\n\nOnly the documented files (and what they import) are loaded into the compiler, instead of the entire `tsconfig.json` project. On the Fumadocs docs site this makes cold generation about 5x faster (first table 500 ms → 50 ms, later tables 20 ms → 5 ms) with roughly half the memory.\n\n**Behavior changes**\n\n- `transform` and `typeSimplifier` hooks receive TypeScript 7 API objects (`Type`, `Symbol`, `Checker`, `Node`) instead of ts-morph wrappers. `this.program` is the TypeScript 7 `Project`, and `this.checker` is available.\n- The `project` option of `createGenerator()` takes the `Project` returned by `createProject()`.\n- Members of mapped types (e.g. `Pick`) and unions may be printed in a different order, following the native compiler.\n"
-    filename: 2026-09-03-typescript-native-compiler.md
-    v: 0.0.0
-  - content: "---\npackages:\n  npm:fumadocs-twoslash:\n    type: patch\n---\n\n## Bundle TypeScript for Twoslash\n\n`fumadocs-twoslash` now depends on its own TypeScript 6 and passes it to Twoslash, so the transformer keeps working in projects on TypeScript 7 (whose package no longer provides the compiler API Twoslash requires). Previously, every Twoslash code block that was not already in the types cache failed with `Cannot read properties of undefined (reading 'readFile')`.\n"
-    filename: 2026-09-03-twoslash-typescript.md
+  - content: "---\npackages:\n  npm:fumadocs-twoslash:\n    type: major\n---\n\n## Run Twoslash on TypeScript 7\n\n`fumadocs-twoslash` now runs on the native TypeScript 7 compiler (`typescript/unstable/sync`) instead of bundling its own TypeScript 6, so the types in popups come from the same compiler as your project.\n\nCode blocks of documents compiled concurrently are analyzed together in one snapshot of the TypeScript project (requires `fumadocs-core` 16.15.7 for the `_fd_prepare` hook of `rehype-code`), which removes most of the per-block cost of loading the project. Cold builds of the Fumadocs docs take 40% less time in total, with the TypeScript part 3.5x faster.\n\nThe Shiki transformer and renderer are now implemented in `fumadocs-twoslash`, `@shikijs/twoslash` and `twoslash` are no longer dependencies (nor `twoslash` a peer of TypeScript 6). The rendered HTML and the transformer options are unchanged, except that `rendererRich` only takes the options that apply to the popups of Fumadocs (`jsdoc`, `processHoverInfo`, `processHoverDocs`, `completionIcons`, `customTagIcons`); the `hast` extensions, `errorRendering`, `queryRendering`, `classExtra` and the custom `renderer` option are removed.\n\nThe `twoslashOptions` are simplified to what the native API supports:\n\n- `compilerOptions` takes `tsconfig.json` values (e.g. `moduleResolution: 'bundler'`) instead of enum values from the `typescript` package.\n- `cwd` replaces `vfsRoot`.\n- `tsModule`, `tsLibDirectory`, `fsMap`, `cache`, `customTransformers` and the per-call `positionQueries`, `positionCompletions`, `positionHighlights` are removed.\n- `@showEmit` is not supported, TypeScript 7 has no emit API yet.\n\n```ts\ntransformerTwoslash({\n  twoslashOptions: {\n    compilerOptions: {\n      types: ['node'],\n    },\n  },\n});\n```\n"
+    filename: 2026-09-04-twoslash-typescript-7.md
     v: 0.0.0
 core:packages:
-  - changelogIds:
-      - 2026-09-03-cn.md
-    id: npm:@fumadocs/api-docs
-    updated: true
-  - changelogIds:
-      - 2026-09-03-cn.md
-    id: npm:@fumadocs/asyncapi
-    updated: true
-  - changelogIds:
-      - 2026-09-03-cn.md
-    id: npm:@fumadocs/base-ui
+  - id: npm:@fumadocs/api-docs
+    updated: false
+  - id: npm:@fumadocs/asyncapi
+    updated: false
+  - id: npm:@fumadocs/base-ui
     updated: true
   - id: npm:@fumadocs/basehub
     updated: false
@@ -33,58 +24,46 @@ core:packages:
   - id: npm:@fumadocs/content-collections
     updated: false
   - changelogIds:
-      - 2026-09-03-cn.md
-    id: npm:create-fumadocs-app
+      - 2026-09-04-rehype-code-prepare.md
+    id: npm:fumadocs-core
     updated: true
-  - id: npm:fumadocs-core
+  - changelogIds:
+      - 2026-09-04-create-app-oxc.md
+    id: npm:create-fumadocs-app
     updated: true
   - id: npm:create-fumadocs-versions
     updated: true
   - id: npm:fumadocs-docgen
     updated: false
-  - changelogIds:
-      - 2026-09-03-cn.md
-    id: npm:@fumadocs/graphql
-    updated: true
   - id: npm:fumadocs-epub
+    updated: false
+  - id: npm:@fumadocs/graphql
     updated: false
   - id: npm:@fumari/image-size
     updated: false
   - id: npm:@fumadocs/language
     updated: false
-  - id: npm:@fumadocs/local-content
-    updated: false
   - id: npm:@fumadocs/local-html
+    updated: false
+  - id: npm:@fumadocs/local-content
     updated: false
   - id: npm:@fumadocs/local-md
     updated: false
-  - id: npm:fumadocs-mdx
-    updated: false
   - id: npm:@fumadocs/mdx-remote
     updated: false
-  - changelogIds:
-      - 2026-09-03-cn.md
-    id: npm:@fumadocs/notion
-    updated: true
-  - changelogIds:
-      - 2026-09-03-cn.md
-    id: npm:fumadocs-obsidian
-    updated: true
-  - changelogIds:
-      - 2026-09-03-cn.md
-    id: npm:fumadocs-openapi
-    updated: true
-  - changelogIds:
-      - 2026-09-03-cn.md
-    id: npm:fumadocs-preview
-    updated: true
-  - changelogIds:
-      - 2026-09-03-cn.md
-    id: npm:fumadocs-python
-    updated: true
-  - changelogIds:
-      - 2026-09-03-cn.md
-    id: npm:fumadocs-ui
+  - id: npm:fumadocs-mdx
+    updated: false
+  - id: npm:@fumadocs/notion
+    updated: false
+  - id: npm:fumadocs-obsidian
+    updated: false
+  - id: npm:fumadocs-openapi
+    updated: false
+  - id: npm:fumadocs-preview
+    updated: false
+  - id: npm:fumadocs-python
+    updated: false
+  - id: npm:fumadocs-ui
     updated: true
   - id: npm:@fumadocs/sanity
     updated: false
@@ -94,24 +73,18 @@ core:packages:
     updated: false
   - id: npm:@fumari/stf
     updated: false
-  - changelogIds:
-      - 2026-09-03-cn.md
-      - 2026-09-03-story-native-compiler.md
-    id: npm:@fumadocs/story
-    updated: true
+  - id: npm:@fumadocs/story
+    updated: false
   - id: npm:@fumadocs/tailwind
     updated: false
   - changelogIds:
-      - 2026-09-03-typescript-native-compiler.md
-    id: npm:fumadocs-typescript
-    updated: true
-  - id: npm:@fumadocs/vite
-    updated: false
-  - changelogIds:
-      - 2026-09-03-cn.md
-      - 2026-09-03-twoslash-typescript.md
+      - 2026-09-04-twoslash-typescript-7.md
     id: npm:fumadocs-twoslash
     updated: true
+  - id: npm:fumadocs-typescript
+    updated: false
+  - id: npm:@fumadocs/vite
+    updated: false
 npm:packages:
   - id: npm:@fumadocs/api-docs
   - id: npm:@fumadocs/asyncapi
@@ -120,19 +93,19 @@ npm:packages:
   - id: npm:@fumadocs/cli
   - id: npm:@fumadocs/content
   - id: npm:@fumadocs/content-collections
-  - id: npm:create-fumadocs-app
   - id: npm:fumadocs-core
+  - id: npm:create-fumadocs-app
   - id: npm:create-fumadocs-versions
   - id: npm:fumadocs-docgen
-  - id: npm:@fumadocs/graphql
   - id: npm:fumadocs-epub
+  - id: npm:@fumadocs/graphql
   - id: npm:@fumari/image-size
   - id: npm:@fumadocs/language
-  - id: npm:@fumadocs/local-content
   - id: npm:@fumadocs/local-html
+  - id: npm:@fumadocs/local-content
   - id: npm:@fumadocs/local-md
-  - id: npm:fumadocs-mdx
   - id: npm:@fumadocs/mdx-remote
+  - id: npm:fumadocs-mdx
   - id: npm:@fumadocs/notion
   - id: npm:fumadocs-obsidian
   - id: npm:fumadocs-openapi
@@ -145,9 +118,9 @@ npm:packages:
   - id: npm:@fumari/stf
   - id: npm:@fumadocs/story
   - id: npm:@fumadocs/tailwind
+  - id: npm:fumadocs-twoslash
   - id: npm:fumadocs-typescript
   - id: npm:@fumadocs/vite
-  - id: npm:fumadocs-twoslash
   - id: npm:docs
   - id: npm:example-astro
   - id: npm:example-asyncapi
@@ -158,8 +131,8 @@ npm:packages:
   - id: npm:example-marble-cms
   - id: npm:example-next
   - id: npm:example-next-local-html
-  - id: npm:example-next-local-md
   - id: npm:example-next-min
+  - id: npm:example-next-local-md
   - id: npm:example-next-shadcn
   - id: npm:example-next-static
   - id: npm:example-obsidian
