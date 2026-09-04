@@ -3,53 +3,72 @@ import {
   createContext,
   type ReactNode,
   useContext,
+  useId,
   useMemo,
   useRef,
-  useState,
 } from 'react';
 import { Popover as PopoverPrimitive } from '@base-ui/react/popover';
 import { cn } from '@/ui/cn';
 
 interface PopupContextObject {
-  open: boolean;
-  setOpen: (open: boolean) => void;
-
+  triggerId: string;
+  handle: PopoverPrimitive.Handle<unknown>;
   handleOpen: (e: React.PointerEvent) => void;
   handleClose: (e: React.PointerEvent) => void;
 }
 
+let opening: PopoverPrimitive.Handle<unknown> | undefined;
+
 const PopupContext = createContext<PopupContextObject | undefined>(undefined);
 
-function Popup({ delay = 300, children }: { delay?: number; children: ReactNode }) {
-  const [open, setOpen] = useState(false);
+function Popup({
+  openDelay = 200,
+  closeDelay = 100,
+  children,
+}: {
+  openDelay?: number;
+  closeDelay?: number;
+  children: ReactNode;
+}) {
+  const triggerId = useId();
+  const handle = useMemo(() => PopoverPrimitive.createHandle(), []);
   const openTimeoutRef = useRef<number>(undefined);
   const closeTimeoutRef = useRef<number>(undefined);
 
   return (
-    <PopoverPrimitive.Root open={open} onOpenChange={setOpen}>
+    <PopoverPrimitive.Root handle={handle}>
       <PopupContext.Provider
         value={useMemo(
           () => ({
-            open,
-            setOpen,
+            triggerId,
+            handle,
             handleOpen(e) {
               if (e.pointerType === 'touch') return;
               if (closeTimeoutRef.current) clearTimeout(closeTimeoutRef.current);
+              const openPopup = () => {
+                opening?.close();
+                opening = handle;
+                handle.open(triggerId);
+              };
 
-              openTimeoutRef.current = window.setTimeout(() => {
-                setOpen(true);
-              }, delay);
+              if (opening) {
+                openPopup();
+                return;
+              }
+
+              openTimeoutRef.current = window.setTimeout(openPopup, openDelay);
             },
             handleClose(e) {
               if (e.pointerType === 'touch') return;
               if (openTimeoutRef.current) clearTimeout(openTimeoutRef.current);
 
               closeTimeoutRef.current = window.setTimeout(() => {
-                setOpen(false);
-              }, delay);
+                handle.close();
+                opening = undefined;
+              }, closeDelay);
             },
           }),
-          [delay, open],
+          [openDelay, closeDelay, handle],
         )}
       >
         {children}
@@ -58,24 +77,18 @@ function Popup({ delay = 300, children }: { delay?: number; children: ReactNode 
   );
 }
 
-function PopupTrigger({ children, ...props }: ComponentProps<typeof PopoverPrimitive.Trigger>) {
+function PopupTrigger(props: ComponentProps<typeof PopoverPrimitive.Trigger>) {
   const ctx = useContext(PopupContext);
   if (!ctx) throw new Error('Missing Popup Context');
 
   return (
     <PopoverPrimitive.Trigger
+      id={ctx.triggerId}
+      handle={ctx.handle}
       onPointerEnter={ctx.handleOpen}
       onPointerLeave={ctx.handleClose}
-      render={(triggerProps) => (
-        <button
-          {...triggerProps}
-          type="button"
-          className={cn('twoslash-hover', triggerProps.className)}
-        >
-          {children}
-        </button>
-      )}
       {...props}
+      className={cn('twoslash-hover', props.className)}
     />
   );
 }
@@ -94,7 +107,12 @@ function PopupContent({
 
   return (
     <PopoverPrimitive.Portal>
-      <PopoverPrimitive.Positioner side={side} align={align} sideOffset={sideOffset}>
+      <PopoverPrimitive.Positioner
+        side={side}
+        align={align}
+        sideOffset={sideOffset}
+        className="fd-twoslash-popover-positioner"
+      >
         <PopoverPrimitive.Popup
           ref={ref}
           className={cn('fd-twoslash-popover', className)}

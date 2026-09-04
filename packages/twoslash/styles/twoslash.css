@@ -1,3 +1,5 @@
+@source inline("prose prose-sm");
+
 /* ===== Basic ===== */
 @theme {
   --color-twoslash-error-foreground: #d45656;
@@ -59,13 +61,17 @@
 }
 
 .twoslash-popup-docs-tag {
-  display: flex;
-  flex-direction: row;
+  display: grid;
+  grid-template-columns: auto 1fr;
   gap: 0.5em;
 }
 
 .twoslash-popup-docs-tag-name {
   font-weight: 600;
+}
+
+.twoslash-popup-docs-tag-value {
+  min-width: 0;
 }
 
 .twoslash-popup-code {
@@ -79,11 +85,8 @@
 
 .twoslash-popup-docs,
 .twoslash-popup-docs-tags {
-  font-size: 14px !important;
-  line-height: 20px !important;
-  margin-top: 8px !important;
+  margin-top: 8px;
 }
-
 /* ===== Hover Info ===== */
 .twoslash:hover .twoslash-hover {
   border-color: currentColor;
@@ -196,8 +199,11 @@
   }
 }
 
-.fd-twoslash-popover {
+.fd-twoslash-popover-positioner {
   z-index: 50;
+}
+
+.fd-twoslash-popover {
   min-width: 240px;
   max-width: min(450px, 96vw);
   max-height: 400px;

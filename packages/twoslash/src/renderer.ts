@@ -115,7 +115,11 @@ export function createRenderer(options: RendererOptions = {}) {
     const docs = info.docs && (processHoverDocs?.(info.docs) ?? info.docs);
     if (docs) {
       out.push(
-        element('div', { class: 'prose twoslash-popup-docs' }, renderMarkdown.call(this, docs)),
+        element(
+          'div',
+          { class: 'prose prose-sm twoslash-popup-docs' },
+          renderMarkdown.call(this, docs),
+        ),
       );
     }
     if (info.tags?.length) {
@@ -136,7 +140,11 @@ export function createRenderer(options: RendererOptions = {}) {
         children.push(element('span', { class: 'twoslash-popup-docs-tag' }, tag));
       }
       out.push(
-        element('div', { class: 'prose twoslash-popup-docs twoslash-popup-docs-tags' }, children),
+        element(
+          'div',
+          { class: 'prose prose-sm twoslash-popup-docs twoslash-popup-docs-tags' },
+          children,
+        ),
       );
     }
     return out;

@@ -94,7 +94,7 @@ transformerTwoslash({
 
 Learn more about [Twoslash notations](https://twoslash.netlify.app/refs/notations).
 
-````ts twoslash title="Test" lineNumbers
+````ts twoslash tab="Output" lineNumbers
 type Player = {
   /**
    * The player name
@@ -107,6 +107,20 @@ type Player = {
   name: string;
 };
 
+/**
+ * A custom function.
+ *
+ * @example
+ *
+ * ```ts
+ * const str = fn("hello world")
+ * console.log(str)
+ * ```
+ */
+function fn<const T extends string>(s: T): T {
+  return s;
+}
+
 // ---cut---
 // @noErrors
 console.g;
@@ -114,7 +128,49 @@ console.g;
 
 const player: Player = { name: 'Hello World' };
 //    ^?
+
+fn('test');
 ````
+
+`````md tab="Input" lineNumbers
+````ts twoslash lineNumbers
+type Player = {
+  /**
+   * The player name
+   * ```php
+   * $a = "60"
+   * ```
+   *
+   * @default 'user'
+   */
+  name: string;
+};
+
+/**
+ * A custom function.
+ *
+ * @example
+ *
+ * ```ts
+ * const str = fn("hello world")
+ * console.log(str)
+ * ```
+ */
+function fn<const T extends string>(s: T): T {
+  return s;
+}
+
+// ---cut---
+// @noErrors
+console.g;
+//       ^|
+
+const player: Player = { name: 'Hello World' };
+//    ^?
+
+fn('test');
+````
+`````
 
 ```ts twoslash
 const a = '123';
