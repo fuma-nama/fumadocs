@@ -293,6 +293,8 @@ function describeSymbol(
 
 interface Block {
   key: string;
+  /** number of calls waiting for the result */
+  refs: number;
   code: string;
   /** directory of virtual files */
   dir: string;
@@ -309,8 +311,8 @@ export function createTwoslasher(options: TwoslasherOptions = {}): Twoslasher {
   const files = new Map<string, string>();
   /** config file path of each compiler options */
   const configPaths = new Map<string, string>();
-  const openedProjects = new Set<string>();
-  const results = new Map<string, { value?: TwoslashReturn; error?: unknown }>();
+  let openedProjects = new Set<string>();
+  const results = new Map<string, { refs: number; value?: TwoslashReturn; error?: unknown }>();
   const pending = new Map<string, Block>();
   let scheduled: Promise<void> | undefined;
   let api: API | undefined;
@@ -379,6 +381,7 @@ export function createTwoslasher(options: TwoslasherOptions = {}): Twoslasher {
 
     return {
       key: getKey(code, extension),
+      refs: 1,
       code,
       dir,
       configPath,
@@ -431,8 +434,7 @@ export function createTwoslasher(options: TwoslasherOptions = {}): Twoslasher {
     for (const configPath of openedProjects) {
       if (!configs.has(configPath)) closeProjects.push(configPath);
     }
-    for (const configPath of openProjects) openedProjects.add(configPath);
-    for (const configPath of closeProjects) openedProjects.delete(configPath);
+    openedProjects = new Set(configs.keys());
 
     api ??= new API({
       cwd: root,
@@ -460,9 +462,9 @@ export function createTwoslasher(options: TwoslasherOptions = {}): Twoslasher {
         if (!project) {
           throw new TwoslashError('Failed to load project', `Cannot open ${block.configPath}`);
         }
-        results.set(block.key, { value: analyze(block, project) });
+        results.set(block.key, { refs: block.refs, value: analyze(block, project) });
       } catch (error) {
-        results.set(block.key, { error });
+        results.set(block.key, { refs: block.refs, error });
       }
     }
   }
@@ -479,6 +481,7 @@ export function createTwoslasher(options: TwoslasherOptions = {}): Twoslasher {
       pending.delete(key);
       result = results.get(key)!;
     }
+    if (--result.refs <= 0) results.delete(key);
     if (result.value) return result.value;
     throw result.error;
   }
@@ -489,12 +492,19 @@ export function createTwoslasher(options: TwoslasherOptions = {}): Twoslasher {
     executeOptions: TwoslashExecuteOptions = options,
   ): Promise<void> => {
     const key = getKey(code, extension);
-    if (results.has(key)) return Promise.resolve();
-    if (!pending.has(key)) {
+    const result = results.get(key);
+    if (result) {
+      result.refs++;
+      return Promise.resolve();
+    }
+    const block = pending.get(key);
+    if (block) {
+      block.refs++;
+    } else {
       try {
         pending.set(key, parse(code, extension, executeOptions));
       } catch (error) {
-        results.set(key, { error });
+        results.set(key, { refs: 1, error });
         return Promise.resolve();
       }
     }
@@ -561,9 +571,6 @@ function analyze(block: Block, project: Project): TwoslashReturn {
   function toFile(file: VirtualFile, position: number): number {
     return position - file.offset + (file.prepend?.length ?? 0);
   }
-  function getPositionInCode(file: VirtualFile, node: Node): number {
-    return toCode(file, node.getStart());
-  }
 
   const typeStrings = new Map<number, string>();
   function typeToString(type: Type): string {
@@ -625,7 +632,7 @@ function analyze(block: Block, project: Project): TwoslashReturn {
       symbolDocs.set(target.id, docs);
     }
 
-    const start = getPositionInCode(file, node);
+    const start = toCode(file, node.getStart());
     const name = node.getText();
     return { type: 'hover', text, ...docs, start, length: name.length, target: name };
   }
@@ -649,7 +656,7 @@ function analyze(block: Block, project: Project): TwoslashReturn {
   if (!handbookOptions.noStaticSemanticInfo) {
     for (const file of block.files) {
       const identifiers = getIdentifiersOfFile(file).filter((node) => {
-        const start = getPositionInCode(file, node);
+        const start = toCode(file, node.getStart());
         return !isInRemoval(start) && shouldGetHoverInfo(node.getText(), start, file.filename);
       });
       nodes.push(...getHovers(file, identifiers));
@@ -666,7 +673,7 @@ function analyze(block: Block, project: Project): TwoslashReturn {
       );
     }
     const node = getIdentifiersOfFile(file).find((node) => {
-      const start = getPositionInCode(file, node);
+      const start = toCode(file, node.getStart());
       return isInRange(query, [start, start + node.getText().length]);
     });
     const hover = node ? getHovers(file, [node])[0] : undefined;

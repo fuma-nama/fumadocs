@@ -247,7 +247,6 @@ export function transformerTwoslash(options: TransformerTwoslashOptions = {}): S
     return langAlias[options.lang] ?? options.lang;
   }
 
-  const results = new WeakMap<object, TwoslashReturn>();
   return {
     name: 'fumadocs:twoslash',
     // analyze the code blocks of documents compiled concurrently in one batch, see `Twoslasher.prepare`
@@ -275,7 +274,6 @@ export function transformerTwoslash(options: TransformerTwoslashOptions = {}): S
           result = twoslasher(code, lang, twoslashOptions, this.meta);
           typesCache?.write(code, result, lang, twoslashOptions, this.meta);
         }
-        results.set(this.meta, result);
         this.meta.twoslash = result;
         return result.code;
       } catch (error) {
@@ -284,7 +282,7 @@ export function transformerTwoslash(options: TransformerTwoslashOptions = {}): S
       }
     },
     tokens(tokens) {
-      const result = results.get(this.meta);
+      const result = this.meta.twoslash;
       if (!result) return;
       const breakpoints: number[] = [];
       for (const node of result.nodes) {
@@ -294,10 +292,10 @@ export function transformerTwoslash(options: TransformerTwoslashOptions = {}): S
       return splitTokens(tokens, breakpoints);
     },
     pre(pre) {
-      if (results.has(this.meta)) this.addClassToHast(pre, 'twoslash lsp');
+      if (this.meta.twoslash) this.addClassToHast(pre, 'twoslash lsp');
     },
     code(codeEl) {
-      const result = results.get(this.meta);
+      const result = this.meta.twoslash;
       if (!result) return;
       const { lines } = this;
       const shikiError = (message: string) =>

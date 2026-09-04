@@ -318,4 +318,10 @@ test('batch', async () => {
   // errors are reported by the synchronous call
   await twoslasher.prepare('const c: string = 1;');
   expect(() => twoslasher('const c: string = 1;')).toThrow();
+
+  // the same block prepared twice is analyzed once, and the result kept for both calls
+  const d = 'const d = 1;';
+  await Promise.all([twoslasher.prepare(d), twoslasher.prepare(d)]);
+  expect(twoslasher(d)).toBe(twoslasher(d));
+  expect(twoslasher(d)).not.toBe(twoslasher(d));
 });

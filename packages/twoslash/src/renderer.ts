@@ -367,13 +367,14 @@ export function rendererRich(options: RendererRichOptions = {}): TwoslashRendere
       const items = query.completions.map((item) => {
         const kind = item.kind ?? 'default';
         const matched = item.name.startsWith(prefix);
+        const icon = completionIcons && (completionIcons[kind] ?? completionIcons.property);
         return element('li', {}, [
           ...(completionIcons
             ? [
                 element(
                   'span',
                   { class: `twoslash-completions-icon completions-${kind.replaceAll(/\s/g, '-')}` },
-                  [completionIcons[kind] ?? completionIcons.property].filter(Boolean) as Element[],
+                  icon ? [icon] : [],
                 ),
               ]
             : []),
@@ -476,6 +477,7 @@ export function rendererRich(options: RendererRichOptions = {}): TwoslashRendere
       ];
     },
     lineCustomTag(tag) {
+      const icon = customTagIcons && customTagIcons[tag.name];
       return [
         element(
           'div',
@@ -486,7 +488,7 @@ export function rendererRich(options: RendererRichOptions = {}): TwoslashRendere
                   element(
                     'span',
                     { class: `twoslash-tag-icon tag-${tag.name}-icon` },
-                    [customTagIcons[tag.name]].filter(Boolean) as Element[],
+                    icon ? [icon] : [],
                   ),
                 ]
               : []),
