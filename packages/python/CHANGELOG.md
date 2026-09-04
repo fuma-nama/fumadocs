@@ -1,3 +1,9 @@
+## fumadocs-python@1.0.2
+
+### Replace `cnfast` with `cn`
+
+Internal refactor only.
+
 ## fumadocs-python@1.0.1
 
 ### `groupBy` option

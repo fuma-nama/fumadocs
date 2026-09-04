@@ -1,6 +1,6 @@
 import { CircleCheck, CircleX, Info, TriangleAlert } from './icons';
 import type { ComponentProps } from 'react';
-import { cn } from 'cnfast';
+import { cn } from 'cn';
 
 interface CalloutProps extends ComponentProps<'div'> {
   /**

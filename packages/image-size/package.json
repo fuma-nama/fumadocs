@@ -32,7 +32,7 @@
     "types:check": "tsc --noEmit"
   },
   "devDependencies": {
-    "@types/node": "26.3.0",
+    "@types/node": "26.4.1",
     "tsconfig": "workspace:*",
     "tsdown": "0.22.14",
     "vitest": "^4.1.11"

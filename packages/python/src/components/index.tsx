@@ -1,6 +1,6 @@
 import type { ComponentProps, ReactNode } from 'react';
 import { cva } from 'class-variance-authority';
-import { cn } from 'cnfast';
+import { cn } from 'cn';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from './collapsible';
 import { buttonVariants } from 'fumadocs-ui/components/ui/button';
 import { ChevronRight } from 'lucide-react';

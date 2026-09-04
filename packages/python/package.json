@@ -1,6 +1,6 @@
 {
   "name": "fumadocs-python",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "The built-in Python docgen for Fumadocs",
   "keywords": [
     "Docs",
@@ -44,9 +44,9 @@
   "dependencies": {
     "@base-ui/react": "^1.7.0",
     "class-variance-authority": "^0.7.1",
-    "cnfast": "^0.1.0",
+    "cn": "^0.2.4",
     "hast-util-to-jsx-runtime": "^2.3.6",
-    "lucide-react": "^1.34.0",
+    "lucide-react": "^1.39.0",
     "mdast-util-mdx": "^3.0.0",
     "remark": "^15.0.1",
     "remark-rehype": "^11.1.2",
@@ -58,7 +58,7 @@
     "@types/hast": "^3.0.5",
     "@types/mdast": "^4.0.4",
     "@types/mdx": "^2.0.14",
-    "@types/node": "^26.3.0",
+    "@types/node": "^26.4.1",
     "@types/react": "^19.2.18",
     "@types/react-dom": "^19.2.5",
     "fumadocs-core": "workspace:*",

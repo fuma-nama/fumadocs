@@ -1,4 +1,14 @@
-import type { ExportedDeclarations, Symbol as TsSymbol, Project, Type } from 'ts-morph';
+import {
+  type Checker,
+  isObjectType,
+  NodeBuilderFlags,
+  ObjectFlags,
+  type Project as TsProject,
+  type Symbol as TsSymbol,
+  SymbolFlags,
+  type Type,
+} from 'typescript/unstable/sync';
+import type { Node } from 'typescript/unstable/ast';
 import fs from 'node:fs/promises';
 import {
   type BaseTypeTableProps,
@@ -8,7 +18,10 @@ import {
 import path from 'node:path';
 import { generateHash, type Cache } from '@/cache';
 import { version as packageVersion } from '../../package.json';
-import type { TypeSimplifierOptions } from '@/lib/get-simple-form';
+import { getSimpleForm, type TypeSimplifierOptions } from '@/lib/get-simple-form';
+import { createProject, type Project, type TypescriptConfig } from '@/lib/project';
+
+export { createProject, type Project, type TypescriptConfig };
 
 export interface GeneratedDoc {
   /**
@@ -38,9 +51,13 @@ export interface RawTag {
 }
 
 interface EntryContext extends GenerateOptions {
-  program: Project;
+  /**
+   * The TypeScript project (from `typescript/unstable/sync`) containing the declaration.
+   */
+  program: TsProject;
+  checker: Checker;
   type: Type;
-  declaration: ExportedDeclarations;
+  declaration: Node;
 }
 
 type Transformer = (
@@ -79,18 +96,6 @@ export interface GeneratorOptions extends TypescriptConfig {
   project?: Project;
 }
 
-export interface TypescriptConfig {
-  tsconfigPath?: string;
-}
-
-export async function createProject(options: TypescriptConfig = {}): Promise<Project> {
-  const { Project } = await import('ts-morph');
-  return new Project({
-    tsConfigFilePath: options.tsconfigPath ?? './tsconfig.json',
-    skipAddingFilesFromTsConfig: true,
-  });
-}
-
 export function createGenerator(options: GeneratorOptions = {}) {
   const cache = options?.cache ? options.cache : null;
   let instance: Project | Promise<Project> | undefined = options?.project;
@@ -98,21 +103,6 @@ export function createGenerator(options: GeneratorOptions = {}) {
   function getProject() {
     if (instance) return instance;
     return (instance = createProject(options));
-  }
-
-  function getSourceFile(project: Project, filePath: string, fileContent: string) {
-    const ext = path.extname(filePath);
-    const fileBase = filePath.slice(0, -ext.length);
-    let i = 0;
-    let sourceFile = project.getSourceFile(filePath);
-
-    while (sourceFile && sourceFile.getFullText() !== fileContent) {
-      filePath = `${fileBase}.${i++}${ext}`;
-      sourceFile = project.getSourceFile(filePath);
-    }
-
-    if (sourceFile) return sourceFile;
-    return project.createSourceFile(filePath, fileContent, { overwrite: true });
   }
 
   return {
@@ -134,23 +124,42 @@ export function createGenerator(options: GeneratorOptions = {}) {
       }
 
       const project = await getProject();
-      const sourceFile = getSourceFile(project, fullPath, content);
+      const loaded = project.getSourceFile(fullPath, file.content);
+      if (!loaded) throw new Error(`failed to load ${fullPath} into TypeScript project.`);
+
+      const { project: tsProject, sourceFile } = loaded;
+      const { checker } = tsProject;
       const out: GeneratedDoc[] = [];
+      const moduleSymbol = name ? checker.getSymbolAtLocation(sourceFile) : undefined;
 
-      for (const [k, d] of sourceFile.getExportedDeclarations()) {
-        if (d.length === 0 || !name || name !== k) continue;
+      if (moduleSymbol && name) {
+        for (const exported of checker.getExportsOfModule(moduleSymbol)) {
+          if (exported.name !== name) continue;
 
-        if (d.length > 1)
-          console.warn(`export ${k} should not have more than one type declaration.`);
+          const symbol =
+            (exported.flags & SymbolFlags.Alias) !== 0
+              ? checker.getAliasedSymbol(exported)
+              : exported;
+          if (symbol.declarations.length === 0) continue;
+          if (symbol.declarations.length > 1)
+            console.warn(`export ${name} should not have more than one type declaration.`);
 
-        const declaration = d[0];
-        const entryContext: EntryContext = {
-          ...options,
-          program: project,
-          type: declaration.getType(),
-          declaration,
-        };
-        out.push(await generate(encodeURI(`${path.basename(file.path)}-${name}`), k, entryContext));
+          const declaration = symbol.declarations[0].resolve(tsProject);
+          if (!declaration) continue;
+          const type = checker.getTypeAtLocation(declaration);
+          if (!type) continue;
+
+          const entryContext: EntryContext = {
+            ...options,
+            program: tsProject,
+            checker,
+            type,
+            declaration,
+          };
+          out.push(
+            generate(encodeURI(`${path.basename(file.path)}-${name}`), name, symbol, entryContext),
+          );
+        }
       }
 
       if (cache && cacheKey) {
@@ -164,63 +173,67 @@ export function createGenerator(options: GeneratorOptions = {}) {
   };
 }
 
-async function generate(
+function generate(
   id: string,
   name: string,
+  symbol: TsSymbol,
   entryContext: EntryContext,
-): Promise<GeneratedDoc> {
-  const { ts } = await import('ts-morph');
-  const { declaration, program } = entryContext;
-
-  const comment = declaration
-    .getSymbol()
-    ?.compilerSymbol.getDocumentationComment(program.getTypeChecker().compilerObject);
+): GeneratedDoc {
+  const { checker, type } = entryContext;
   const entries: DocEntry[] = [];
-  for (const prop of declaration.getType().getProperties()) {
-    const out = await getDocEntry(prop, entryContext);
+  for (const prop of checker.getPropertiesOfType(type)) {
+    const out = getDocEntry(prop, entryContext);
     if (out) entries.push(out);
   }
 
   return {
     id,
     name,
-    description: comment ? ts.displayPartsToString(comment) : undefined,
+    description: checker.getDocumentationCommentOfSymbol(symbol),
     entries,
   };
 }
 
-async function getDocEntry(prop: TsSymbol, context: EntryContext): Promise<DocEntry | undefined> {
-  const { ts } = await import('ts-morph');
-  const { getSimpleForm } = await import('@/lib/get-simple-form');
-  const { transform, allowInternal = false, program } = context;
-  if (context.type.isClass() && prop.getName().startsWith('#')) {
+function isClassType(type: Type): boolean {
+  return isObjectType(type) && (type.objectFlags & ObjectFlags.Class) !== 0;
+}
+
+/**
+ * Private class members (`#name`) are exposed with their escaped name (`__#1@#name`) by TypeScript.
+ */
+function isPrivateIdentifierName(name: string): boolean {
+  return name.startsWith('#') || name.startsWith('__#');
+}
+
+function getDocEntry(prop: TsSymbol, context: EntryContext): DocEntry | undefined {
+  const { transform, allowInternal = false, checker, declaration } = context;
+  if (isClassType(context.type) && isPrivateIdentifierName(prop.name)) {
     return;
   }
 
-  const subType = prop.getTypeAtLocation(context.declaration);
-  const isOptional = prop.isOptional();
+  const subType = checker.getTypeOfSymbolAtLocation(prop, declaration);
+  const isOptional = (prop.flags & SymbolFlags.Optional) !== 0;
   const tags: RawTag[] = [];
 
-  for (const tag of prop.getJsDocTags()) {
-    if (!allowInternal && tag.getName() === 'internal') return;
+  for (const tag of checker.getJsDocTagsOfSymbol(prop)) {
+    if (!allowInternal && tag.name === 'internal') return;
 
     tags.push({
-      name: tag.getName(),
-      text: ts.displayPartsToString(tag.getText()),
+      name: tag.name,
+      text: tag.text ?? '',
     });
   }
 
   const entry: DocEntry = {
-    name: prop.getName(),
-    description: ts.displayPartsToString(
-      prop.compilerSymbol.getDocumentationComment(program.getTypeChecker().compilerObject),
-    ),
+    name: prop.name,
+    description: checker.getDocumentationCommentOfSymbol(prop),
     tags,
-    type: subType.getText(
-      context.declaration,
-      ts.TypeFormatFlags.UseAliasDefinedOutsideCurrentScope | ts.TypeFormatFlags.NoTruncation,
+    type: checker.typeToString(
+      subType,
+      declaration,
+      NodeBuilderFlags.UseAliasDefinedOutsideCurrentScope | NodeBuilderFlags.NoTruncation,
     ),
-    simplifiedType: getSimpleForm(subType, program.getTypeChecker(), context.declaration, {
+    simplifiedType: getSimpleForm(subType, checker, declaration, {
       ...context.typeSimplifier,
       noUndefined: isOptional,
     }),

@@ -60,6 +60,7 @@ minimumReleaseAgeExclude:
   - '@bruits/satteri-win32-arm64-msvc@0.10.3'
   - '@bruits/satteri-win32-x64-msvc@0.10.3'
   - satteri@0.10.3
+  - cn@0.2.4
 allowBuilds:
   '@parcel/watcher': false
   core-js: false

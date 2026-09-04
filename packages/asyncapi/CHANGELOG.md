@@ -1,3 +1,9 @@
+## @fumadocs/asyncapi@0.3.5
+
+### Replace `cnfast` with `cn`
+
+Internal refactor only.
+
 ## @fumadocs/asyncapi@0.3.0
 
 ### Redesign source API

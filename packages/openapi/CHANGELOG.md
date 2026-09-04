@@ -1,3 +1,9 @@
+## fumadocs-openapi@11.4.1
+
+### Replace `cnfast` with `cn`
+
+Internal refactor only.
+
 ## fumadocs-openapi@11.4.0
 
 ### Support installing the API playground via Fumadocs CLI

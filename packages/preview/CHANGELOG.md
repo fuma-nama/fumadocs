@@ -1,3 +1,9 @@
+## fumadocs-preview@0.2.1
+
+### Replace `cnfast` with `cn`
+
+Internal refactor only.
+
 ## fumadocs-preview@0.2.0
 
 ### Default to Base UI

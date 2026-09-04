@@ -31,7 +31,7 @@
   },
   "devDependencies": {
     "@fastify/deepmerge": "^3.2.1",
-    "@types/node": "^26.3.0",
+    "@types/node": "^26.4.1",
     "postcss-selector-parser": "^7.1.5",
     "tailwindcss": "^4.3.3",
     "tsconfig": "workspace:*",

@@ -1,5 +1,5 @@
 import type { RichTextItemResponse } from '@notionhq/client';
-import { cn } from 'cnfast';
+import { cn } from 'cn';
 import type { ReactNode } from 'react';
 import type { NotionPageIcon } from './blocks';
 import { colorAttribute, getNotionColorClassName } from './colors';

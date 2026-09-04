@@ -1,18 +1,32 @@
 import { createTypeTreeBuilder, literalEnumHandler } from '../type-tree/builder';
 import type { TypeNode } from '../type-tree/types';
-import type { Project } from 'ts-morph';
+import { createProject, type Project } from './project';
+
+export type { Project };
 
 export async function createControlsProject(tsconfigPath: string): Promise<Project> {
-  const { Project } = await import('ts-morph');
-
-  return new Project({
-    tsConfigFilePath: tsconfigPath,
-    skipAddingFilesFromTsConfig: true,
-  });
+  return createProject(tsconfigPath);
 }
 
 export type Mode = '@fumadocs/story/vite/client' | '@fumadocs/story/next/client';
 
+/**
+ * The type alias declaration to append to story files, for resolving the props of a story.
+ */
+export function getControlsAlias(mode: Mode, exportName: string) {
+  const name = `_StoryProps_${exportName}_`;
+
+  return {
+    name,
+    code: `export type ${name} = import('${mode}').GetProps<typeof ${exportName}>;`,
+  };
+}
+
+/**
+ * Generate controls for an exported story.
+ *
+ * @param content - content of the story file, the alias declaration of `getControlsAlias()` is appended when missing.
+ */
 export function generateControls(
   mode: Mode,
   project: Project,
@@ -20,29 +34,24 @@ export function generateControls(
   exportName: string,
   content: string,
 ): TypeNode {
-  const aliasName = `_StoryProps_${exportName}_`;
-  const sourceFile =
-    project.getSourceFile(filePath) ??
-    project.createSourceFile(filePath, content, {
-      overwrite: true,
-    });
+  const alias = getControlsAlias(mode, exportName);
+  if (!content.includes(alias.code)) content = `${content}\n${alias.code}`;
 
-  if (!sourceFile.getTypeAlias(aliasName)) {
-    sourceFile.addTypeAlias({
-      isExported: true,
-      name: aliasName,
-      type: `import('${mode}').GetProps<typeof ${exportName}>`,
-    });
-  }
+  const loaded = project.getSourceFile(filePath, content);
+  if (!loaded) throw new Error(`Failed to load "${filePath}" into TypeScript project`);
 
-  const declarations = sourceFile.getExportedDeclarations();
-  const declaration = declarations.get(aliasName)?.[0];
-  if (!declaration || !declarations.get(exportName)) {
+  const { project: tsProject, sourceFile } = loaded;
+  const { checker } = tsProject;
+  const moduleSymbol = checker.getSymbolAtLocation(sourceFile);
+  const exports = moduleSymbol ? checker.getExportsOfModule(moduleSymbol) : [];
+  const declaration = exports
+    .find((symbol) => symbol.name === alias.name)
+    ?.declarations[0]?.resolve(tsProject);
+  const type = declaration ? checker.getTypeAtLocation(declaration) : undefined;
+
+  if (!declaration || !type || !exports.some((symbol) => symbol.name === exportName)) {
     throw new Error(`Export "${exportName}" not found in file "${filePath}"`);
   }
 
-  return createTypeTreeBuilder(project, [literalEnumHandler]).typeToNode(
-    declaration.getType(),
-    declaration,
-  );
+  return createTypeTreeBuilder(tsProject, [literalEnumHandler]).typeToNode(type, declaration);
 }

@@ -1,3 +1,9 @@
+## @fumadocs/graphql@0.2.6
+
+### Replace `cnfast` with `cn`
+
+Internal refactor only.
+
 ## @fumadocs/graphql@0.2.4
 
 ### Require `graphql` v17

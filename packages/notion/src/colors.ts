@@ -1,4 +1,4 @@
-import { cn } from 'cnfast';
+import { cn } from 'cn';
 import type { CalloutType } from 'fumadocs-ui/components/callout';
 import type { NotionColor } from './blocks';
 
