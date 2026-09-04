@@ -1,3 +1,9 @@
+## @fumadocs/base-ui@16.15.6
+
+### Replace `cnfast` with `cn`
+
+Internal refactor only.
+
 ## @fumadocs/base-ui@16.15.5
 
 ### Root types: version your docs with `root: "<type>"`

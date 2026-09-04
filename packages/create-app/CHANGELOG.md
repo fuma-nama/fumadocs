@@ -1,3 +1,9 @@
+## create-fumadocs-app@16.1.24
+
+### Replace `cnfast` with `cn`
+
+Internal refactor only.
+
 ## create-fumadocs-app@16.1.10
 
 ### Replace Orama with ZBSearch, zero-config i18n search
