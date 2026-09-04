@@ -22,7 +22,7 @@ export default defineConfig({
       pages: [
         { path: '/static.json' },
         { path: '/docs/test' }
-      ]
+      ],
     }),
     react(),
   ],
