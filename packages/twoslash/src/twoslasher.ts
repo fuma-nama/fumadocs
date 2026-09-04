@@ -25,6 +25,7 @@ import {
   findCutNotations,
   findFlagNotations,
   findQueryMarkers,
+  getObjectHash,
   TwoslashError,
   validateCodeForErrors,
   type HandbookOptions,
@@ -32,6 +33,7 @@ import {
   type NodeError,
   type NodeHover,
   type NodeWithoutPosition,
+  type TwoslashExecuteOptions,
   type TwoslashInstance,
   type TwoslashReturn,
   type TwoslashReturnMeta,
@@ -48,7 +50,7 @@ import path from 'node:path';
 
 export interface TwoslasherOptions {
   /**
-   * Directory the code blocks are virtually placed in, modules are resolved from here.
+   * Code blocks are virtually placed in the `.twoslash` directory of it, modules are resolved from there.
    *
    * @defaultValue process.cwd()
    */
@@ -81,6 +83,8 @@ const defaultCompilerOptions = {
 };
 
 const supportedExtensions = ['ts', 'tsx', 'js', 'jsx'];
+/** the time to wait for other code blocks to join a batch */
+const batchDelay = 10;
 const reFilename = /^[\t\v\f ]*\/\/\s?@filename: (.+)$/gm;
 const typeFlags =
   NodeBuilderFlags.UseAliasDefinedOutsideCurrentScope |
@@ -281,60 +285,41 @@ function describeSymbol(
   return `${head}: ${typeToString(type)}`;
 }
 
-export function createTwoslasher(options: TwoslasherOptions = {}): TwoslashInstance {
-  const root = `${normalizePath(options.cwd ?? process.cwd())}/`;
-  const configPath = `${root}tsconfig.twoslash.json`;
+export interface Twoslasher extends TwoslashInstance {
+  /**
+   * Analyze the code block together with other blocks prepared in the same tick, in one snapshot of the TypeScript project.
+   *
+   * The result is returned by the following synchronous call with the same code.
+   */
+  prepare(code: string, extension?: string, options?: TwoslashExecuteOptions): Promise<void>;
+}
+
+interface Block {
+  key: string;
+  code: string;
+  /** directory of virtual files */
+  dir: string;
+  configPath: string;
+  meta: TwoslashReturnMeta;
+  nodes: NodeWithoutPosition[];
+  pc: ReturnType<typeof createPositionConverter>;
+  options: TwoslashExecuteOptions;
+}
+
+export function createTwoslasher(options: TwoslasherOptions = {}): Twoslasher {
+  const root = `${normalizePath(options.cwd ?? process.cwd())}/.twoslash/`;
+  /** virtual files, replaced on every batch */
   const files = new Map<string, string>();
+  const openedProjects = new Set<string>();
+  const results = new Map<string, { value?: TwoslashReturn; error?: unknown }>();
+  const pending = new Map<string, Block>();
+  let scheduled: Promise<void> | undefined;
   let api: API | undefined;
   let snapshot: Snapshot | undefined;
+  let nextId = 0;
 
-  function open(next: Map<string, string>): Project {
-    const changed: string[] = [];
-    const created: string[] = [];
-    for (const file of files.keys()) {
-      if (!next.has(file)) next.set(file, '');
-    }
-    for (const [file, content] of next) {
-      const current = files.get(file);
-      if (current === content) continue;
-      (current === undefined ? created : changed).push(file);
-      files.set(file, content);
-    }
-
-    api ??= new API({
-      cwd: root,
-      fs: {
-        readFile: (file) => files.get(normalizePath(file)),
-        fileExists: (file) => (files.has(normalizePath(file)) ? true : undefined),
-      },
-    });
-
-    if (!snapshot) {
-      snapshot = api.updateSnapshot({ openProjects: [configPath] });
-    } else if (changed.length + created.length > 0) {
-      const prev = snapshot;
-      snapshot = api.updateSnapshot({ fileChanges: { changed, created } });
-      prev.dispose();
-    }
-
-    const project = snapshot.getProject(configPath);
-    if (!project) {
-      throw new TwoslashError('Failed to load project', `Cannot open ${configPath}`, '');
-    }
-    return project;
-  }
-
-  function twoslasher(
-    code: string,
-    extension = 'ts',
-    executeOptions: Parameters<TwoslashInstance>[2] = {},
-  ): TwoslashReturn {
-    const {
-      customTags = options.customTags ?? [],
-      shouldGetHoverInfo = options.shouldGetHoverInfo ?? (() => true),
-      filterNode,
-    } = executeOptions;
-
+  function parse(code: string, extension: string, executeOptions: TwoslashExecuteOptions): Block {
+    const { customTags = options.customTags ?? [] } = executeOptions;
     const meta: TwoslashReturnMeta = {
       extension,
       compilerOptions: {
@@ -354,10 +339,7 @@ export function createTwoslasher(options: TwoslasherOptions = {}): TwoslashInsta
       positionCompletions: executeOptions.positionCompletions ?? [],
       positionHighlights: executeOptions.positionHighlights ?? [],
     };
-
-    let nodes: NodeWithoutPosition[] = [];
-    const isInRemoval = (index: number) =>
-      index >= code.length || index < 0 || isInRanges(index, meta.removals, false) !== undefined;
+    const nodes: NodeWithoutPosition[] = [];
 
     // without option declarations, compiler flags are parsed as "unknown" and validated by TypeScript through the config file
     meta.flagNotations = findFlagNotations(code, customTags, []);
@@ -385,286 +367,422 @@ export function createTwoslasher(options: TwoslasherOptions = {}): TwoslashInsta
     const pc = createPositionConverter(code);
     findCutNotations(code, meta);
     findQueryMarkers(code, meta, pc);
-    meta.virtualFiles = splitFiles(code, `index.${extension}`, root);
-
-    const next = new Map<string, string>();
+    const dir = `${root}${nextId++}/`;
+    meta.virtualFiles = splitFiles(code, `index.${extension}`, dir);
     for (const file of meta.virtualFiles) {
-      if (
+      file.supportLsp =
         supportedExtensions.includes(file.extension) ||
-        (file.extension === 'json' && meta.compilerOptions.resolveJsonModule)
-      ) {
-        file.supportLsp = true;
-        next.set(file.filepath, file.content);
-      }
+        (file.extension === 'json' && !!meta.compilerOptions.resolveJsonModule);
     }
-    const rootFiles = new Set(files.keys());
-    rootFiles.delete(configPath);
-    for (const file of next.keys()) rootFiles.add(file);
-    next.set(
-      configPath,
-      JSON.stringify({ compilerOptions: meta.compilerOptions, files: Array.from(rootFiles) }),
-    );
-
-    const project = open(next);
-    const { checker, program } = project;
-    const configErrors = program.getConfigFileParsingDiagnostics();
-    if (configErrors.length > 0 && !meta.handbookOptions.noErrorValidation) {
-      throw new TwoslashError(
-        'Invalid compiler options',
-        configErrors.map((d) => d.text).join('\n'),
-        'Check the inline compiler flags in the code block.',
-      );
-    }
-
-    const identifiersMap = new Map<VirtualFile, Node[]>();
-    function getIdentifiersOfFile(file: VirtualFile): Node[] {
-      let identifiers = identifiersMap.get(file);
-      if (!identifiers) {
-        const sourceFile = program.getSourceFile(file.filepath);
-        identifiers = sourceFile ? getIdentifiers(sourceFile) : [];
-        identifiersMap.set(file, identifiers);
-      }
-      return identifiers;
-    }
-    function getFileAtPosition(pos: number): VirtualFile | undefined {
-      return meta.virtualFiles.find((i) => isInRange(pos, [i.offset, i.offset + i.content.length]));
-    }
-    function getPositionInCode(file: VirtualFile, node: Node): number {
-      return node.getStart() + file.offset;
-    }
-
-    const typeStrings = new Map<number, string>();
-    function typeToString(type: Type): string {
-      let text = typeStrings.get(type.id);
-      if (text === undefined) {
-        text = checker.typeToString(type, undefined, typeFlags);
-        typeStrings.set(type.id, text);
-      }
-      return text;
-    }
-
-    const described = new Map<string, string>();
-    const symbolDocs = new Map<number, Pick<NodeHover, 'docs' | 'tags'>>();
-    function getHover(
-      file: VirtualFile,
-      node: Node,
-      symbol: Symbol,
-      type: Type,
-    ): Omit<NodeHover, 'line' | 'character'> {
-      let target = symbol;
-      if (symbol.flags & SymbolFlags.Alias) {
-        target = checker.getAliasedSymbol(symbol);
-      } else {
-        // keys of object literals should display the property of contextual type, it contains the docs
-        const literal = getObjectLiteral(node);
-        let contextual = literal && checker.getContextualType(literal);
-        if (contextual) contextual = checker.getNonNullableType(contextual);
-        const property = contextual && checker.getPropertyOfType(contextual, symbol.name);
-        // for unions, only properties shared by all members are meaningful
-        if (
-          contextual &&
-          property &&
-          (!contextual.isUnionType() || property.declarations.length === 1)
-        ) {
-          target = property;
-          type = checker.getTypeOfSymbol(property) ?? type;
-        }
-      }
-
-      const key = `${target.id}:${type.id}:${getCall(node) ? 1 : 0}`;
-      let text = described.get(key);
-      if (text === undefined) {
-        text = describeSymbol(project, target, type, node, typeToString);
-        described.set(key, text);
-      }
-      if (symbol.flags & SymbolFlags.Alias) {
-        // call sites display the resolved signature without keyword
-        if (getCall(node)) text = text.replace(/^function /, '');
-        text = text ? `(alias) ${text}\nimport ${symbol.name}` : `import ${symbol.name}`;
-      }
-
-      let docs = symbolDocs.get(target.id);
-      if (!docs) {
-        const tags = checker.getJsDocTagsOfSymbol(target);
-        docs = {
-          docs: checker.getDocumentationCommentOfSymbol(target) || undefined,
-          tags: tags.length > 0 ? tags.map((tag) => [tag.name, tag.text]) : undefined,
-        };
-        symbolDocs.set(target.id, docs);
-      }
-
-      const start = getPositionInCode(file, node);
-      const name = node.getText();
-      return { type: 'hover', text, ...docs, start, length: name.length, target: name };
-    }
-
-    /**
-     * Resolve symbols & types of identifiers in one batch
-     */
-    function getHovers(file: VirtualFile, identifiers: Node[]) {
-      const positions = identifiers.map((node) => getPositionInCode(file, node) - file.offset);
-      const symbols = checker.getSymbolAtPosition(file.filepath, positions);
-      const types = checker.getTypeAtLocation(identifiers);
-      const out: Omit<NodeHover, 'line' | 'character'>[] = [];
-      for (let i = 0; i < identifiers.length; i++) {
-        const symbol = symbols[i];
-        const type = types[i];
-        if (symbol && type) out.push(getHover(file, identifiers[i], symbol, type));
-      }
-      return out;
-    }
-
-    for (const file of meta.virtualFiles) {
-      if (!file.supportLsp || meta.handbookOptions.noStaticSemanticInfo) continue;
-      const identifiers = getIdentifiersOfFile(file).filter((node) => {
-        const start = getPositionInCode(file, node);
-        return !isInRemoval(start) && shouldGetHoverInfo(node.getText(), start, file.filename);
-      });
-      nodes.push(...getHovers(file, identifiers));
-    }
-
-    for (const query of meta.positionQueries) {
-      const file = getFileAtPosition(query);
-      if (isInRemoval(query) || !file) {
-        throw new TwoslashError(
-          'Invalid quick info query',
-          `The request on line ${pc.indexToPos(query).line + 2} for quickinfo via ^? is in a removal range.`,
-          'This is likely that the positioning is off.',
-        );
-      }
-      const node = getIdentifiersOfFile(file).find((node) => {
-        const start = getPositionInCode(file, node);
-        return isInRange(query, [start, start + node.getText().length]);
-      });
-      const hover = node ? getHovers(file, [node])[0] : undefined;
-      if (!hover) {
-        throw new TwoslashError(
-          'Invalid quick info query',
-          `The request on line ${pc.indexToPos(query).line + 2} in ${file.filename} for quickinfo via ^? returned nothing from the compiler.`,
-          'This is likely that the positioning is off.',
-        );
-      }
-      nodes.push({ ...hover, type: 'query' });
-    }
-
-    for (const [start, end, text] of meta.positionHighlights) {
-      nodes.push({ type: 'highlight', start, length: end - start, text });
-    }
-
-    for (const target of meta.positionCompletions) {
-      const file = getFileAtPosition(target);
-      if (isInRemoval(target) || !file) {
-        throw new TwoslashError(
-          'Invalid completion query',
-          `The request on line ${pc.indexToPos(target).line + 2} for completions via ^| is in a removal range.`,
-          'This is likely that the positioning is off.',
-        );
-      }
-
-      const position = target - file.offset;
-      let prefix = code.slice(0, target).match(/[$\w]+$/)?.[0] ?? '';
-      const completions: NodeCompletion['completions'] = [];
-      const result = prefix
-        ? checker.getCompletionsAtPosition(file.filepath, position - 1)
-        : checker.getCompletionsAtPosition(file.filepath, position, {
-            triggerCharacter: (prefix = code[target - 1]),
-          });
-      if (result) {
-        for (const entry of result.entries) {
-          if (!entry.name.startsWith(prefix)) continue;
-          completions.push({ name: entry.name, kind: entry.kind && completionKinds[entry.kind] });
-        }
-      }
-      if (completions.length === 0 && !meta.handbookOptions.noErrorValidation) {
-        throw new TwoslashError(
-          'Invalid completion query',
-          `The request on line ${pc.indexToPos(target).line} in ${file.filename} for completions via ^| returned no completions from the compiler. (prefix: ${prefix})`,
-          'This is likely that the positioning is off.',
-        );
-      }
-      nodes.push({
-        type: 'completion',
-        start: target,
-        length: 0,
-        completions,
-        completionsPrefix: prefix,
-      });
-    }
-
-    let errorNodes: Omit<NodeError, 'line' | 'character'>[] = [];
-    const { noErrors, noErrorsCutted } = meta.handbookOptions;
-    if (noErrors !== true) {
-      const ignores = Array.isArray(noErrors) ? noErrors : [];
-      for (const file of meta.virtualFiles) {
-        if (!file.supportLsp) continue;
-        const diagnostics = [
-          ...program.getSemanticDiagnostics(file.filepath),
-          ...program.getSyntacticDiagnostics(file.filepath),
-        ];
-        for (const diagnostic of diagnostics) {
-          if (ignores.includes(diagnostic.code)) continue;
-          const start = diagnostic.pos + file.offset;
-          if (noErrorsCutted && isInRemoval(start)) continue;
-          const length = diagnostic.end - diagnostic.pos;
-          errorNodes.push({
-            type: 'error',
-            start,
-            length,
-            code: diagnostic.code,
-            filename: file.filename,
-            id: `err-${diagnostic.code}-${start}-${length}`,
-            text: flattenDiagnostic(diagnostic),
-            level: (['warning', 'error', 'suggestion', 'message'] as const)[diagnostic.category],
-          });
-        }
-      }
-    }
-
-    if (filterNode) {
-      nodes = nodes.filter(filterNode);
-      errorNodes = errorNodes.filter(filterNode);
-    }
-    nodes.push(...errorNodes);
-    if (!meta.handbookOptions.noErrorValidation && errorNodes.length > 0) {
-      validateCodeForErrors(errorNodes, meta.handbookOptions, root);
-    }
-
-    let outputCode = code;
-    if (!meta.handbookOptions.keepNotations) {
-      const removed = removeCodeRanges(code, meta.removals, nodes);
-      outputCode = removed.code;
-      nodes = removed.nodes;
-      meta.removals = removed.removals;
-    }
-    const indexToPos =
-      outputCode === code ? pc.indexToPos : createPositionConverter(outputCode).indexToPos;
-    const resolved = resolveNodePositions(nodes, indexToPos);
 
     return {
-      code: outputCode,
-      nodes: resolved,
+      key: getKey(code, extension),
+      code,
+      dir,
+      configPath: `${root}tsconfig.${getObjectHash(meta.compilerOptions)}.json`,
       meta,
-      get queries() {
-        return this.nodes.filter((i) => i.type === 'query');
-      },
-      get completions() {
-        return this.nodes.filter((i) => i.type === 'completion');
-      },
-      get errors() {
-        return this.nodes.filter((i) => i.type === 'error');
-      },
-      get highlights() {
-        return this.nodes.filter((i) => i.type === 'highlight');
-      },
-      get hovers() {
-        return this.nodes.filter((i) => i.type === 'hover');
-      },
-      get tags() {
-        return this.nodes.filter((i) => i.type === 'tag');
-      },
+      nodes,
+      pc,
+      options: executeOptions,
     };
   }
 
+  /**
+   * Load the blocks into the project, in one snapshot
+   */
+  function open(blocks: Block[]): Snapshot {
+    const next = new Map<string, string>();
+    /** root files of each project, grouped by compiler options */
+    const configs = new Map<string, { compilerOptions: unknown; files: string[] }>();
+    for (const block of blocks) {
+      let config = configs.get(block.configPath);
+      if (!config) {
+        config = { compilerOptions: block.meta.compilerOptions, files: [] };
+        configs.set(block.configPath, config);
+      }
+      for (const file of block.meta.virtualFiles) {
+        if (!file.supportLsp) continue;
+        next.set(file.filepath, file.content);
+        config.files.push(file.filepath);
+      }
+    }
+    for (const [configPath, config] of configs) next.set(configPath, JSON.stringify(config));
+
+    const changed: string[] = [];
+    const created: string[] = [];
+    const deleted: string[] = [];
+    for (const [file, content] of next) {
+      const current = files.get(file);
+      if (current === content) continue;
+      (current === undefined ? created : changed).push(file);
+    }
+    for (const file of files.keys()) {
+      if (!next.has(file)) deleted.push(file);
+    }
+    files.clear();
+    for (const [file, content] of next) files.set(file, content);
+
+    const openProjects: string[] = [];
+    const closeProjects: string[] = [];
+    for (const configPath of configs.keys()) {
+      if (!openedProjects.has(configPath)) openProjects.push(configPath);
+    }
+    for (const configPath of openedProjects) {
+      if (!configs.has(configPath)) closeProjects.push(configPath);
+    }
+    for (const configPath of openProjects) openedProjects.add(configPath);
+    for (const configPath of closeProjects) openedProjects.delete(configPath);
+
+    api ??= new API({
+      cwd: root,
+      fs: {
+        readFile: (file) => files.get(normalizePath(file)),
+        fileExists: (file) => (files.has(normalizePath(file)) ? true : undefined),
+        directoryExists: (dir) => (dir.startsWith(root) ? true : undefined),
+      },
+    });
+    const prev = snapshot;
+    snapshot = api.updateSnapshot({
+      openProjects,
+      closeProjects,
+      fileChanges: { changed, created, deleted },
+    });
+    prev?.dispose();
+    return snapshot;
+  }
+
+  function run(blocks: Block[]) {
+    const snapshot = open(blocks);
+    for (const block of blocks) {
+      try {
+        const project = snapshot.getProject(block.configPath);
+        if (!project) {
+          throw new TwoslashError('Failed to load project', `Cannot open ${block.configPath}`, '');
+        }
+        results.set(block.key, { value: analyze(block, project) });
+      } catch (error) {
+        results.set(block.key, { error });
+      }
+    }
+  }
+
+  function twoslasher(
+    code: string,
+    extension = 'ts',
+    executeOptions: TwoslashExecuteOptions = {},
+  ): TwoslashReturn {
+    const key = getKey(code, extension);
+    let result = results.get(key);
+    if (!result) {
+      run([pending.get(key) ?? parse(code, extension, executeOptions)]);
+      pending.delete(key);
+      result = results.get(key)!;
+    }
+    if (result.value) return result.value;
+    throw result.error;
+  }
+
   twoslasher.getCacheMap = () => undefined;
+  twoslasher.prepare = (
+    code: string,
+    extension = 'ts',
+    executeOptions: TwoslashExecuteOptions = {},
+  ): Promise<void> => {
+    const key = getKey(code, extension);
+    if (results.has(key)) return Promise.resolve();
+    if (!pending.has(key)) {
+      try {
+        pending.set(key, parse(code, extension, executeOptions));
+      } catch (error) {
+        results.set(key, { error });
+        return Promise.resolve();
+      }
+    }
+
+    return (scheduled ??= new Promise((resolve, reject) => {
+      // collect the blocks of documents being compiled concurrently
+      setTimeout(() => {
+        const blocks = Array.from(pending.values());
+        pending.clear();
+        scheduled = undefined;
+        try {
+          run(blocks);
+          resolve();
+        } catch (error) {
+          reject(error as Error);
+        }
+      }, batchDelay);
+    }));
+  };
+
   return twoslasher;
+}
+
+function getKey(code: string, extension: string): string {
+  return `${extension}\0${code}`;
+}
+
+function analyze(block: Block, project: Project): TwoslashReturn {
+  const { code, meta, pc, options: executeOptions } = block;
+  const { shouldGetHoverInfo = () => true, filterNode } = executeOptions;
+  let nodes = block.nodes;
+  const isInRemoval = (index: number) =>
+    index >= code.length || index < 0 || isInRanges(index, meta.removals, false) !== undefined;
+
+  const { checker, program } = project;
+  const configErrors = program.getConfigFileParsingDiagnostics();
+  if (configErrors.length > 0 && !meta.handbookOptions.noErrorValidation) {
+    throw new TwoslashError(
+      'Invalid compiler options',
+      configErrors.map((d) => d.text).join('\n'),
+      'Check the inline compiler flags in the code block.',
+    );
+  }
+  const identifiersMap = new Map<VirtualFile, Node[]>();
+  function getIdentifiersOfFile(file: VirtualFile): Node[] {
+    let identifiers = identifiersMap.get(file);
+    if (!identifiers) {
+      const sourceFile = program.getSourceFile(file.filepath);
+      identifiers = sourceFile ? getIdentifiers(sourceFile) : [];
+      identifiersMap.set(file, identifiers);
+    }
+    return identifiers;
+  }
+  function getFileAtPosition(pos: number): VirtualFile | undefined {
+    return meta.virtualFiles.find((i) => isInRange(pos, [i.offset, i.offset + i.content.length]));
+  }
+  function getPositionInCode(file: VirtualFile, node: Node): number {
+    return node.getStart() + file.offset;
+  }
+
+  const typeStrings = new Map<number, string>();
+  function typeToString(type: Type): string {
+    let text = typeStrings.get(type.id);
+    if (text === undefined) {
+      text = checker.typeToString(type, undefined, typeFlags);
+      typeStrings.set(type.id, text);
+    }
+    return text;
+  }
+
+  const described = new Map<string, string>();
+  const symbolDocs = new Map<number, Pick<NodeHover, 'docs' | 'tags'>>();
+  function getHover(
+    file: VirtualFile,
+    node: Node,
+    symbol: Symbol,
+    type: Type,
+  ): Omit<NodeHover, 'line' | 'character'> {
+    let target = symbol;
+    if (symbol.flags & SymbolFlags.Alias) {
+      target = checker.getAliasedSymbol(symbol);
+    } else {
+      // keys of object literals should display the property of contextual type, it contains the docs
+      const literal = getObjectLiteral(node);
+      let contextual = literal && checker.getContextualType(literal);
+      if (contextual) contextual = checker.getNonNullableType(contextual);
+      const property = contextual && checker.getPropertyOfType(contextual, symbol.name);
+      // for unions, only properties shared by all members are meaningful
+      if (
+        contextual &&
+        property &&
+        (!contextual.isUnionType() || property.declarations.length === 1)
+      ) {
+        target = property;
+        type = checker.getTypeOfSymbol(property) ?? type;
+      }
+    }
+
+    const key = `${target.id}:${type.id}:${getCall(node) ? 1 : 0}`;
+    let text = described.get(key);
+    if (text === undefined) {
+      text = describeSymbol(project, target, type, node, typeToString);
+      described.set(key, text);
+    }
+    if (symbol.flags & SymbolFlags.Alias) {
+      // call sites display the resolved signature without keyword
+      if (getCall(node)) text = text.replace(/^function /, '');
+      text = text ? `(alias) ${text}\nimport ${symbol.name}` : `import ${symbol.name}`;
+    }
+
+    let docs = symbolDocs.get(target.id);
+    if (!docs) {
+      const tags = checker.getJsDocTagsOfSymbol(target);
+      docs = {
+        docs: checker.getDocumentationCommentOfSymbol(target) || undefined,
+        tags: tags.length > 0 ? tags.map((tag) => [tag.name, tag.text]) : undefined,
+      };
+      symbolDocs.set(target.id, docs);
+    }
+
+    const start = getPositionInCode(file, node);
+    const name = node.getText();
+    return { type: 'hover', text, ...docs, start, length: name.length, target: name };
+  }
+
+  /**
+   * Resolve symbols & types of identifiers in one batch
+   */
+  function getHovers(file: VirtualFile, identifiers: Node[]) {
+    const positions = identifiers.map((node) => getPositionInCode(file, node) - file.offset);
+    const symbols = checker.getSymbolAtPosition(file.filepath, positions);
+    const types = checker.getTypeAtLocation(identifiers);
+    const out: Omit<NodeHover, 'line' | 'character'>[] = [];
+    for (let i = 0; i < identifiers.length; i++) {
+      const symbol = symbols[i];
+      const type = types[i];
+      if (symbol && type) out.push(getHover(file, identifiers[i], symbol, type));
+    }
+    return out;
+  }
+
+  for (const file of meta.virtualFiles) {
+    if (!file.supportLsp || meta.handbookOptions.noStaticSemanticInfo) continue;
+    const identifiers = getIdentifiersOfFile(file).filter((node) => {
+      const start = getPositionInCode(file, node);
+      return !isInRemoval(start) && shouldGetHoverInfo(node.getText(), start, file.filename);
+    });
+    nodes.push(...getHovers(file, identifiers));
+  }
+
+  for (const query of meta.positionQueries) {
+    const file = getFileAtPosition(query);
+    if (isInRemoval(query) || !file) {
+      throw new TwoslashError(
+        'Invalid quick info query',
+        `The request on line ${pc.indexToPos(query).line + 2} for quickinfo via ^? is in a removal range.`,
+        'This is likely that the positioning is off.',
+      );
+    }
+    const node = getIdentifiersOfFile(file).find((node) => {
+      const start = getPositionInCode(file, node);
+      return isInRange(query, [start, start + node.getText().length]);
+    });
+    const hover = node ? getHovers(file, [node])[0] : undefined;
+    if (!hover) {
+      throw new TwoslashError(
+        'Invalid quick info query',
+        `The request on line ${pc.indexToPos(query).line + 2} in ${file.filename} for quickinfo via ^? returned nothing from the compiler.`,
+        'This is likely that the positioning is off.',
+      );
+    }
+    nodes.push({ ...hover, type: 'query' });
+  }
+
+  for (const [start, end, text] of meta.positionHighlights) {
+    nodes.push({ type: 'highlight', start, length: end - start, text });
+  }
+
+  for (const target of meta.positionCompletions) {
+    const file = getFileAtPosition(target);
+    if (isInRemoval(target) || !file) {
+      throw new TwoslashError(
+        'Invalid completion query',
+        `The request on line ${pc.indexToPos(target).line + 2} for completions via ^| is in a removal range.`,
+        'This is likely that the positioning is off.',
+      );
+    }
+
+    const position = target - file.offset;
+    let prefix = code.slice(0, target).match(/[$\w]+$/)?.[0] ?? '';
+    const completions: NodeCompletion['completions'] = [];
+    const result = prefix
+      ? checker.getCompletionsAtPosition(file.filepath, position - 1)
+      : checker.getCompletionsAtPosition(file.filepath, position, {
+          triggerCharacter: (prefix = code[target - 1]),
+        });
+    if (result) {
+      for (const entry of result.entries) {
+        if (!entry.name.startsWith(prefix)) continue;
+        completions.push({ name: entry.name, kind: entry.kind && completionKinds[entry.kind] });
+      }
+    }
+    if (completions.length === 0 && !meta.handbookOptions.noErrorValidation) {
+      throw new TwoslashError(
+        'Invalid completion query',
+        `The request on line ${pc.indexToPos(target).line} in ${file.filename} for completions via ^| returned no completions from the compiler. (prefix: ${prefix})`,
+        'This is likely that the positioning is off.',
+      );
+    }
+    nodes.push({
+      type: 'completion',
+      start: target,
+      length: 0,
+      completions,
+      completionsPrefix: prefix,
+    });
+  }
+
+  let errorNodes: Omit<NodeError, 'line' | 'character'>[] = [];
+  const { noErrors, noErrorsCutted } = meta.handbookOptions;
+  if (noErrors !== true) {
+    const ignores = Array.isArray(noErrors) ? noErrors : [];
+    for (const file of meta.virtualFiles) {
+      if (!file.supportLsp) continue;
+      const diagnostics = [
+        ...program.getSemanticDiagnostics(file.filepath),
+        ...program.getSyntacticDiagnostics(file.filepath),
+      ];
+      for (const diagnostic of diagnostics) {
+        if (ignores.includes(diagnostic.code)) continue;
+        const start = diagnostic.pos + file.offset;
+        if (noErrorsCutted && isInRemoval(start)) continue;
+        const length = diagnostic.end - diagnostic.pos;
+        errorNodes.push({
+          type: 'error',
+          start,
+          length,
+          code: diagnostic.code,
+          filename: file.filename,
+          id: `err-${diagnostic.code}-${start}-${length}`,
+          text: flattenDiagnostic(diagnostic),
+          level: (['warning', 'error', 'suggestion', 'message'] as const)[diagnostic.category],
+        });
+      }
+    }
+  }
+
+  if (filterNode) {
+    nodes = nodes.filter(filterNode);
+    errorNodes = errorNodes.filter(filterNode);
+  }
+  nodes.push(...errorNodes);
+  if (!meta.handbookOptions.noErrorValidation && errorNodes.length > 0) {
+    validateCodeForErrors(errorNodes, meta.handbookOptions, block.dir);
+  }
+
+  let outputCode = code;
+  if (!meta.handbookOptions.keepNotations) {
+    const removed = removeCodeRanges(code, meta.removals, nodes);
+    outputCode = removed.code;
+    nodes = removed.nodes;
+    meta.removals = removed.removals;
+  }
+  const indexToPos =
+    outputCode === code ? pc.indexToPos : createPositionConverter(outputCode).indexToPos;
+  const resolved = resolveNodePositions(nodes, indexToPos);
+
+  return {
+    code: outputCode,
+    nodes: resolved,
+    meta,
+    get queries() {
+      return this.nodes.filter((i) => i.type === 'query');
+    },
+    get completions() {
+      return this.nodes.filter((i) => i.type === 'completion');
+    },
+    get errors() {
+      return this.nodes.filter((i) => i.type === 'error');
+    },
+    get highlights() {
+      return this.nodes.filter((i) => i.type === 'highlight');
+    },
+    get hovers() {
+      return this.nodes.filter((i) => i.type === 'hover');
+    },
+    get tags() {
+      return this.nodes.filter((i) => i.type === 'tag');
+    },
+  };
 }

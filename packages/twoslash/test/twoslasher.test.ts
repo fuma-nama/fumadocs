@@ -295,3 +295,19 @@ console.log(value);
     ]
   `);
 });
+
+test('batch', async () => {
+  const a = `const a: string = 'a';\na.length;`;
+  const b = `import { readFileSync } from 'node:fs';\nreadFileSync;`;
+  await Promise.all([twoslasher.prepare(a), twoslasher.prepare(b, 'tsx')]);
+
+  expect(twoslasher(a).hovers.map((v) => v.text)).toEqual([
+    'const a: string',
+    'const a: string',
+    '(property) String.length: number',
+  ]);
+  expect(twoslasher(b, 'tsx').hovers[1].text).toMatch(/^\(alias\) function readFileSync/);
+  // errors are reported by the synchronous call
+  await twoslasher.prepare('const c: string = 1;');
+  expect(() => twoslasher('const c: string = 1;')).toThrow();
+});

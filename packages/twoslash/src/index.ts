@@ -10,13 +10,13 @@ import type {
 import { ShikiError } from 'shiki/core';
 import {
   createTransformerFactory,
+  defaultTwoslashOptions,
   rendererRich,
   type RendererRichOptions,
   type TransformerTwoslashOptions as TransformerTwoslashCoreOptions,
   type TwoslashTypesCache,
 } from '@shikijs/twoslash/core';
-import type { TwoslashInstance } from 'twoslash/core';
-import { createTwoslasher, type TwoslasherOptions } from './twoslasher';
+import { createTwoslasher, type Twoslasher, type TwoslasherOptions } from './twoslasher';
 
 export type { TwoslashTypesCache, TwoslasherOptions };
 
@@ -31,7 +31,7 @@ export interface TransformerTwoslashOptions extends Omit<
   rendererRich?: RendererRichOptions;
 }
 
-let cachedInstance: TwoslashInstance | undefined;
+let cachedInstance: Twoslasher | undefined;
 
 // This is highly inspired by https://github.com/shikijs/shiki/blob/main/packages/vitepress-twoslash
 /**
@@ -40,15 +40,17 @@ let cachedInstance: TwoslashInstance | undefined;
 export function transformerTwoslash(_options: TransformerTwoslashOptions = {}): ShikiTransformer {
   const ignoreClass = 'nd-copy-ignore';
   const { twoslashOptions, rendererRich: rendererOptions, ...rest } = _options;
+  const { langs = ['ts', 'tsx'], typesCache } = rest;
 
   // lazy load Twoslash instance so it works on serverless platforms
-  function lazyInstance(): TwoslashInstance {
-    const wrapper: TwoslashInstance = (...args) =>
-      (cachedInstance ??= createTwoslasher(twoslashOptions))(...args);
-
-    wrapper.getCacheMap = () => undefined;
-    return wrapper;
+  function getInstance(): Twoslasher {
+    return (cachedInstance ??= createTwoslasher(twoslashOptions));
   }
+  const lazyInstance: Twoslasher = (...args) => getInstance()(...args);
+  lazyInstance.getCacheMap = () => undefined;
+  lazyInstance.prepare = (...args) => getInstance().prepare(...args);
+  // Shiki defaults to compiler options in TypeScript enum values, which `tsconfig.json` doesn't accept
+  const { compilerOptions: _, ...executeOptions } = defaultTwoslashOptions();
 
   const renderer = rendererRich({
     classExtra: ignoreClass,
@@ -120,13 +122,27 @@ export function transformerTwoslash(_options: TransformerTwoslashOptions = {}): 
     };
     return result;
   };
-  return createTransformerFactory(
-    lazyInstance(),
+  const transformer = createTransformerFactory(
+    lazyInstance,
     renderer,
   )({
     explicitTrigger: true,
+    twoslashOptions: executeOptions,
     ...rest,
   });
+
+  // analyze the code blocks of documents compiled concurrently in one batch, see `Twoslasher.prepare`
+  transformer._fd_prepare = (code, options) => {
+    const lang = options.lang === 'typescript' ? 'ts' : options.lang;
+    const meta = options.meta?.__raw ?? '';
+    if (!langs.includes(lang) || !/\btwoslash\b/.test(meta) || /no-?twoslash/.test(meta)) return;
+    if (typesCache) {
+      code = typesCache.preprocess?.(code, lang) ?? code;
+      if (typesCache.read(code, lang)) return;
+    }
+    return lazyInstance.prepare(code, lang, executeOptions);
+  };
+  return transformer;
 }
 
 function renderMarkdown(this: ShikiTransformerContextCommon, md: string): ElementContent[] {
