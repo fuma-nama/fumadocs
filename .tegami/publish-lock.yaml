@@ -1,35 +1,27 @@
 core:changelogs:
-  - content: "---\npackages:\n  npm:fumadocs-core:\n    type: patch\n---\n\n## Async `_fd_prepare` hook for Shiki transformers\n\n`rehype-code` awaits `transformer._fd_prepare(code, options)` on every transformer before highlighting a code block. Transformers can run async work (or coalesce work across the code blocks being highlighted concurrently) and serve it from the synchronous Shiki hooks afterwards.\n"
-    filename: 2026-09-04-rehype-code-prepare.md
-    v: 0.0.0
-  - content: "---\npackages:\n  npm:create-fumadocs-app:\n    type: patch\n---\n\n## Replace ts-morph with oxc-parser\n\nTemplate transforms (routes, prerender config, `RootProvider` search dialog, AI chat layout) now parse files with `oxc-parser` and edit the source text in place, instead of `ts-morph` and the TypeScript 6 compiler it bundles. Edits preserve the original formatting, including trailing commas.\n"
-    filename: 2026-09-04-create-app-oxc.md
-    v: 0.0.0
-  - content: "---\npackages:\n  npm:fumadocs-twoslash:\n    type: major\n---\n\n## Run Twoslash on TypeScript 7\n\n`fumadocs-twoslash` now runs on the native TypeScript 7 compiler (`typescript/unstable/sync`) instead of bundling its own TypeScript 6, so the types in popups come from the same compiler as your project.\n\nCode blocks of documents compiled concurrently are analyzed together in one snapshot of the TypeScript project (requires `fumadocs-core` 16.15.7 for the `_fd_prepare` hook of `rehype-code`), which removes most of the per-block cost of loading the project. Cold builds of the Fumadocs docs take 40% less time in total, with the TypeScript part 3.5x faster.\n\nThe Shiki transformer and renderer are now implemented in `fumadocs-twoslash`, `@shikijs/twoslash` and `twoslash` are no longer dependencies (nor `twoslash` a peer of TypeScript 6). The rendered HTML and the transformer options are unchanged, except that `rendererRich` only takes the options that apply to the popups of Fumadocs (`jsdoc`, `processHoverInfo`, `processHoverDocs`, `completionIcons`, `customTagIcons`); the `hast` extensions, `errorRendering`, `queryRendering`, `classExtra` and the custom `renderer` option are removed.\n\nThe `twoslashOptions` are simplified to what the native API supports:\n\n- `compilerOptions` takes `tsconfig.json` values (e.g. `moduleResolution: 'bundler'`) instead of enum values from the `typescript` package.\n- `cwd` replaces `vfsRoot`.\n- `tsModule`, `tsLibDirectory`, `fsMap`, `cache`, `customTransformers` and the per-call `positionQueries`, `positionCompletions`, `positionHighlights` are removed.\n- `@showEmit` is not supported, TypeScript 7 has no emit API yet.\n\n```ts\ntransformerTwoslash({\n  twoslashOptions: {\n    compilerOptions: {\n      types: ['node'],\n    },\n  },\n});\n```\n"
-    filename: 2026-09-04-twoslash-typescript-7.md
+  - content: "---\npackages:\n  npm:fumadocs-ui:\n    type: patch\n  npm:@fumadocs/base-ui:\n    type: patch\n---\n\n## Fix Tabs reverting to the hash target after a tab click\n\nThe hash-to-tab logic of `Tabs` ran on every render instead of only on mount and `hashchange`, because the effect depended on a `useEffectEvent` callback, which is not referentially stable.\n"
+    filename: 2026-09-05-tabs-hash-rerun.md
     v: 0.0.0
 core:packages:
-  - id: npm:@fumadocs/api-docs
-    updated: false
   - id: npm:@fumadocs/asyncapi
     updated: false
-  - id: npm:@fumadocs/base-ui
-    updated: true
   - id: npm:@fumadocs/basehub
     updated: false
+  - id: npm:@fumadocs/api-docs
+    updated: false
+  - changelogIds:
+      - 2026-09-05-tabs-hash-rerun.md
+    id: npm:@fumadocs/base-ui
+    updated: true
   - id: npm:@fumadocs/cli
     updated: false
   - id: npm:@fumadocs/content
     updated: false
   - id: npm:@fumadocs/content-collections
     updated: false
-  - changelogIds:
-      - 2026-09-04-rehype-code-prepare.md
-    id: npm:fumadocs-core
+  - id: npm:fumadocs-core
     updated: true
-  - changelogIds:
-      - 2026-09-04-create-app-oxc.md
-    id: npm:create-fumadocs-app
+  - id: npm:create-fumadocs-app
     updated: true
   - id: npm:create-fumadocs-versions
     updated: true
@@ -43,27 +35,29 @@ core:packages:
     updated: false
   - id: npm:@fumadocs/language
     updated: false
-  - id: npm:@fumadocs/local-html
-    updated: false
   - id: npm:@fumadocs/local-content
+    updated: false
+  - id: npm:@fumadocs/local-html
     updated: false
   - id: npm:@fumadocs/local-md
     updated: false
-  - id: npm:@fumadocs/mdx-remote
-    updated: false
   - id: npm:fumadocs-mdx
+    updated: false
+  - id: npm:@fumadocs/mdx-remote
     updated: false
   - id: npm:@fumadocs/notion
     updated: false
   - id: npm:fumadocs-obsidian
     updated: false
-  - id: npm:fumadocs-openapi
-    updated: false
   - id: npm:fumadocs-preview
+    updated: false
+  - id: npm:fumadocs-openapi
     updated: false
   - id: npm:fumadocs-python
     updated: false
-  - id: npm:fumadocs-ui
+  - changelogIds:
+      - 2026-09-05-tabs-hash-rerun.md
+    id: npm:fumadocs-ui
     updated: true
   - id: npm:@fumadocs/sanity
     updated: false
@@ -77,19 +71,17 @@ core:packages:
     updated: false
   - id: npm:@fumadocs/tailwind
     updated: false
-  - changelogIds:
-      - 2026-09-04-twoslash-typescript-7.md
-    id: npm:fumadocs-twoslash
-    updated: true
+  - id: npm:fumadocs-twoslash
+    updated: false
   - id: npm:fumadocs-typescript
     updated: false
   - id: npm:@fumadocs/vite
     updated: false
 npm:packages:
-  - id: npm:@fumadocs/api-docs
   - id: npm:@fumadocs/asyncapi
-  - id: npm:@fumadocs/base-ui
   - id: npm:@fumadocs/basehub
+  - id: npm:@fumadocs/api-docs
+  - id: npm:@fumadocs/base-ui
   - id: npm:@fumadocs/cli
   - id: npm:@fumadocs/content
   - id: npm:@fumadocs/content-collections
@@ -101,15 +93,15 @@ npm:packages:
   - id: npm:@fumadocs/graphql
   - id: npm:@fumari/image-size
   - id: npm:@fumadocs/language
-  - id: npm:@fumadocs/local-html
   - id: npm:@fumadocs/local-content
+  - id: npm:@fumadocs/local-html
   - id: npm:@fumadocs/local-md
-  - id: npm:@fumadocs/mdx-remote
   - id: npm:fumadocs-mdx
+  - id: npm:@fumadocs/mdx-remote
   - id: npm:@fumadocs/notion
   - id: npm:fumadocs-obsidian
-  - id: npm:fumadocs-openapi
   - id: npm:fumadocs-preview
+  - id: npm:fumadocs-openapi
   - id: npm:fumadocs-python
   - id: npm:fumadocs-ui
   - id: npm:@fumadocs/sanity
@@ -123,32 +115,32 @@ npm:packages:
   - id: npm:@fumadocs/vite
   - id: npm:docs
   - id: npm:example-astro
-  - id: npm:example-asyncapi
   - id: npm:example-base-ui
+  - id: npm:example-asyncapi
   - id: npm:example-content-collections
   - id: npm:example-graphql
-  - id: npm:example-i18n
   - id: npm:example-marble-cms
-  - id: npm:example-next
+  - id: npm:example-i18n
   - id: npm:example-next-local-html
-  - id: npm:example-next-min
+  - id: npm:example-next
   - id: npm:example-next-local-md
+  - id: npm:example-next-min
   - id: npm:example-next-shadcn
   - id: npm:example-next-static
   - id: npm:example-obsidian
-  - id: npm:example-openapi
   - id: npm:example-python
   - id: npm:example-react-router
   - id: npm:example-react-router-i18n
+  - id: npm:example-openapi
   - id: npm:example-react-router-min
   - id: npm:example-react-router-rsc
   - id: npm:example-react-router-spa
   - id: npm:example-tanstack-start
   - id: npm:example-tanstack-start-i18n
-  - id: npm:example-tanstack-start-local-md
   - id: npm:example-tanstack-start-min
+  - id: npm:example-tanstack-start-local-md
   - id: npm:example-tanstack-start-openapi
-  - id: npm:example-tanstack-start-spa
   - id: npm:example-tanstack-start-story
+  - id: npm:example-tanstack-start-spa
   - id: npm:example-waku
   - id: npm:example-waku-i18n
