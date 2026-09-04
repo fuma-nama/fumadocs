@@ -4029,6 +4029,9 @@ importers:
       '@base-ui/react':
         specifier: ^1.7.0
         version: 1.7.0(@date-fns/tz@1.5.0)(@types/react@19.2.18)(date-fns@4.4.0)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
+      '@types/hast':
+        specifier: ^3.0.5
+        version: 3.0.5
       cn:
         specifier: ^0.2.4
         version: 0.2.4
@@ -4048,9 +4051,6 @@ importers:
         specifier: ~7.0.2
         version: 7.0.2
     devDependencies:
-      '@types/hast':
-        specifier: ^3.0.5
-        version: 3.0.5
       '@types/mdast':
         specifier: ^4.0.4
         version: 4.0.4

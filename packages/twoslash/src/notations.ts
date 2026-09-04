@@ -77,20 +77,28 @@ export interface HandbookOptions {
   errors: number[];
   /** suppress all errors, or the given error codes */
   noErrors: boolean | number[];
+  /** suppress errors in the cut regions */
+  noErrorsCutted: boolean;
   /** don't check that errors are marked as expected */
   noErrorValidation: boolean;
   /** disable hover info of identifiers */
   noStaticSemanticInfo: boolean;
   /** keep the notations in the output code */
   keepNotations: boolean;
+  /** show the emitted JavaScript instead, not supported by TypeScript 7 */
+  showEmit: boolean;
+  showEmittedFile?: string;
 }
 
 export const defaultHandbookOptions: HandbookOptions = {
   errors: [],
   noErrors: false,
+  noErrorsCutted: false,
   noErrorValidation: false,
   noStaticSemanticInfo: false,
   keepNotations: false,
+  showEmit: false,
+  showEmittedFile: undefined,
 };
 
 export interface VirtualFile {
@@ -100,6 +108,9 @@ export interface VirtualFile {
   filepath: string;
   content: string;
   extension: string;
+  /** extra content of the file, not part of the code block */
+  prepend?: string;
+  append?: string;
 }
 
 export class TwoslashError extends Error {
@@ -119,7 +130,7 @@ export interface Notations {
   removals: Range[];
   queries: number[];
   completions: number[];
-  highlights: [start: number, end: number, text: string | undefined][];
+  highlights: [start: number, end: number, text?: string][];
 }
 
 const reFlag = /^\/\/\s?@(\w+)(?::\s?(.+))?$/gm;

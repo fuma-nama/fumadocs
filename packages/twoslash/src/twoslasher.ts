@@ -45,13 +45,9 @@ import {
 } from './notations';
 import path from 'node:path';
 
-export interface TwoslasherOptions {
-  /**
-   * Code blocks are virtually placed in the `.twoslash` directory of it, modules are resolved from there.
-   *
-   * @defaultValue process.cwd()
-   */
-  cwd?: string;
+export type ExtraFiles = Record<string, string | { prepend?: string; append?: string }>;
+
+export interface TwoslashExecuteOptions {
   /**
    * Compiler options in `tsconfig.json` form.
    */
@@ -67,6 +63,35 @@ export interface TwoslasherOptions {
    * A custom hook to filter out hover info for certain identifiers
    */
   shouldGetHoverInfo?: (identifier: string, start: number, filename: string) => boolean;
+  /**
+   * A custom predicate to filter out nodes for further processing
+   */
+  filterNode?: (node: NodeWithoutPosition) => boolean;
+  /**
+   * Extra files to be added to the virtual file system, or prepended/appended to existing files
+   */
+  extraFiles?: ExtraFiles;
+  /**
+   * Positions of `^?` queries, in addition to the notations in the code
+   */
+  positionQueries?: number[];
+  /**
+   * Positions of `^|` completions, in addition to the notations in the code
+   */
+  positionCompletions?: number[];
+  /**
+   * Ranges of `^^^` highlights, in addition to the notations in the code
+   */
+  positionHighlights?: [start: number, end: number, text?: string][];
+}
+
+export interface TwoslasherOptions extends TwoslashExecuteOptions {
+  /**
+   * Code blocks are virtually placed in the `.twoslash` directory of it, modules are resolved from there.
+   *
+   * @defaultValue process.cwd()
+   */
+  cwd?: string;
 }
 
 export interface TwoslashReturn {
@@ -76,13 +101,13 @@ export interface TwoslashReturn {
 }
 
 export interface Twoslasher {
-  (code: string, extension?: string): TwoslashReturn;
+  (code: string, extension?: string, options?: TwoslashExecuteOptions): TwoslashReturn;
   /**
    * Analyze the code block together with other blocks prepared in the same tick, in one snapshot of the TypeScript project.
    *
    * The result is returned by the following synchronous call with the same code.
    */
-  prepare(code: string, extension?: string): Promise<void>;
+  prepare(code: string, extension?: string, options?: TwoslashExecuteOptions): Promise<void>;
 }
 
 const defaultCompilerOptions = {
@@ -275,10 +300,10 @@ interface Block {
   notations: Notations;
   files: VirtualFile[];
   pc: PositionConverter;
+  options: TwoslashExecuteOptions;
 }
 
 export function createTwoslasher(options: TwoslasherOptions = {}): Twoslasher {
-  const { customTags = ['annotate', 'log', 'warn', 'error'], shouldGetHoverInfo } = options;
   const root = `${normalizePath(options.cwd ?? process.cwd())}/.twoslash/`;
   /** virtual files, replaced on every batch */
   const files = new Map<string, string>();
@@ -292,20 +317,35 @@ export function createTwoslasher(options: TwoslasherOptions = {}): Twoslasher {
   let snapshot: Snapshot | undefined;
   let nextId = 0;
 
-  function parse(code: string, extension: string): Block {
+  function parse(code: string, extension: string, executeOptions: TwoslashExecuteOptions): Block {
+    const { customTags = ['annotate', 'log', 'warn', 'error'], extraFiles = {} } = executeOptions;
     const notations: Notations = {
-      compilerOptions: { ...defaultCompilerOptions, ...options.compilerOptions },
-      handbookOptions: { ...defaultHandbookOptions, ...options.handbookOptions },
+      compilerOptions: {
+        ...defaultCompilerOptions,
+        ...options.compilerOptions,
+        ...executeOptions.compilerOptions,
+      },
+      handbookOptions: {
+        ...defaultHandbookOptions,
+        ...options.handbookOptions,
+        ...executeOptions.handbookOptions,
+      },
       tags: [],
       removals: [],
-      queries: [],
-      completions: [],
-      highlights: [],
+      queries: [...(executeOptions.positionQueries ?? [])],
+      completions: [...(executeOptions.positionCompletions ?? [])],
+      highlights: [...(executeOptions.positionHighlights ?? [])],
     };
     findFlagNotations(code, customTags, notations);
     findCutNotations(code, notations.removals);
     const pc = createPositionConverter(code);
     findQueryMarkers(code, pc, notations);
+    if (notations.handbookOptions.showEmit) {
+      throw new TwoslashError(
+        'Option `showEmit` is not supported',
+        'TypeScript 7 does not provide an API to emit JavaScript.',
+      );
+    }
 
     const dir = `${root}${nextId++}/`;
     const compilerOptions = JSON.stringify(notations.compilerOptions);
@@ -315,18 +355,37 @@ export function createTwoslasher(options: TwoslasherOptions = {}): Twoslasher {
       configPaths.set(compilerOptions, configPath);
     }
 
+    const files = splitFiles(code, `index.${extension}`, dir).filter(
+      (file) =>
+        supportedExtensions.includes(file.extension) ||
+        (file.extension === 'json' && !!notations.compilerOptions.resolveJsonModule),
+    );
+    for (const [filename, extra] of Object.entries(extraFiles)) {
+      const file = files.find((file) => file.filename === filename);
+      if (file) {
+        if (typeof extra !== 'string') Object.assign(file, extra);
+        continue;
+      }
+      files.push({
+        // not in the code block
+        offset: code.length,
+        filename,
+        filepath: dir + filename,
+        content: '',
+        extension: filename.slice(filename.lastIndexOf('.') + 1),
+        ...(typeof extra === 'string' ? { prepend: extra } : extra),
+      });
+    }
+
     return {
       key: getKey(code, extension),
       code,
       dir,
       configPath,
       notations,
-      files: splitFiles(code, `index.${extension}`, dir).filter(
-        (file) =>
-          supportedExtensions.includes(file.extension) ||
-          (file.extension === 'json' && !!notations.compilerOptions.resolveJsonModule),
-      ),
+      files,
       pc,
+      options: executeOptions,
     };
   }
 
@@ -344,7 +403,7 @@ export function createTwoslasher(options: TwoslasherOptions = {}): Twoslasher {
         configs.set(block.configPath, config);
       }
       for (const file of block.files) {
-        next.set(file.filepath, file.content);
+        next.set(file.filepath, (file.prepend ?? '') + file.content + (file.append ?? ''));
         config.files.push(file.filepath);
       }
     }
@@ -401,18 +460,22 @@ export function createTwoslasher(options: TwoslasherOptions = {}): Twoslasher {
         if (!project) {
           throw new TwoslashError('Failed to load project', `Cannot open ${block.configPath}`);
         }
-        results.set(block.key, { value: analyze(block, project, shouldGetHoverInfo) });
+        results.set(block.key, { value: analyze(block, project) });
       } catch (error) {
         results.set(block.key, { error });
       }
     }
   }
 
-  function twoslasher(code: string, extension = 'ts'): TwoslashReturn {
+  function twoslasher(
+    code: string,
+    extension = 'ts',
+    executeOptions: TwoslashExecuteOptions = options,
+  ): TwoslashReturn {
     const key = getKey(code, extension);
     let result = results.get(key);
     if (!result) {
-      run([pending.get(key) ?? parse(code, extension)]);
+      run([pending.get(key) ?? parse(code, extension, executeOptions)]);
       pending.delete(key);
       result = results.get(key)!;
     }
@@ -420,12 +483,16 @@ export function createTwoslasher(options: TwoslasherOptions = {}): Twoslasher {
     throw result.error;
   }
 
-  twoslasher.prepare = (code: string, extension = 'ts'): Promise<void> => {
+  twoslasher.prepare = (
+    code: string,
+    extension = 'ts',
+    executeOptions: TwoslashExecuteOptions = options,
+  ): Promise<void> => {
     const key = getKey(code, extension);
     if (results.has(key)) return Promise.resolve();
     if (!pending.has(key)) {
       try {
-        pending.set(key, parse(code, extension));
+        pending.set(key, parse(code, extension, executeOptions));
       } catch (error) {
         results.set(key, { error });
         return Promise.resolve();
@@ -455,12 +522,9 @@ function getKey(code: string, extension: string): string {
   return `${extension}\0${code}`;
 }
 
-function analyze(
-  block: Block,
-  project: Project,
-  shouldGetHoverInfo: TwoslasherOptions['shouldGetHoverInfo'] = () => true,
-): TwoslashReturn {
+function analyze(block: Block, project: Project): TwoslashReturn {
   const { code, notations, pc } = block;
+  const { shouldGetHoverInfo = () => true, filterNode } = block.options;
   const { handbookOptions, removals } = notations;
   let nodes: NodeWithoutPosition[] = [...notations.tags];
   const isInRemoval = (index: number) =>
@@ -489,8 +553,16 @@ function analyze(
   function getFileAtPosition(pos: number): VirtualFile | undefined {
     return block.files.find((i) => isInRange(pos, [i.offset, i.offset + i.content.length]));
   }
+  /** position in the file -> position in the code block */
+  function toCode(file: VirtualFile, position: number): number {
+    return position - (file.prepend?.length ?? 0) + file.offset;
+  }
+  /** position in the code block -> position in the file */
+  function toFile(file: VirtualFile, position: number): number {
+    return position - file.offset + (file.prepend?.length ?? 0);
+  }
   function getPositionInCode(file: VirtualFile, node: Node): number {
-    return node.getStart() + file.offset;
+    return toCode(file, node.getStart());
   }
 
   const typeStrings = new Map<number, string>();
@@ -562,7 +634,7 @@ function analyze(
    * Resolve symbols & types of identifiers in one batch
    */
   function getHovers(file: VirtualFile, identifiers: Node[]) {
-    const positions = identifiers.map((node) => getPositionInCode(file, node) - file.offset);
+    const positions = identifiers.map((node) => node.getStart());
     const symbols = checker.getSymbolAtPosition(file.filepath, positions);
     const types = checker.getTypeAtLocation(identifiers);
     const out: NodeWithoutPosition<NodeHover>[] = [];
@@ -622,7 +694,7 @@ function analyze(
       );
     }
 
-    const position = target - file.offset;
+    const position = toFile(file, target);
     let prefix = /[$\w]+$/.exec(code.slice(0, target))?.[0] ?? '';
     const completions: NodeCompletion['completions'] = [];
     let result;
@@ -654,8 +726,8 @@ function analyze(
     });
   }
 
-  const errorNodes: NodeWithoutPosition<NodeError>[] = [];
-  const { noErrors } = handbookOptions;
+  let errorNodes: NodeWithoutPosition<NodeError>[] = [];
+  const { noErrors, noErrorsCutted } = handbookOptions;
   if (noErrors !== true) {
     const ignores = Array.isArray(noErrors) ? noErrors : [];
     for (const file of block.files) {
@@ -665,7 +737,8 @@ function analyze(
       ];
       for (const diagnostic of diagnostics) {
         if (ignores.includes(diagnostic.code)) continue;
-        const start = diagnostic.pos + file.offset;
+        const start = toCode(file, diagnostic.pos);
+        if (noErrorsCutted && isInRemoval(start)) continue;
         const length = diagnostic.end - diagnostic.pos;
         errorNodes.push({
           type: 'error',
@@ -678,6 +751,10 @@ function analyze(
         });
       }
     }
+  }
+  if (filterNode) {
+    nodes = nodes.filter(filterNode);
+    errorNodes = errorNodes.filter(filterNode);
   }
   nodes.push(...errorNodes);
   if (!handbookOptions.noErrorValidation) validateCodeForErrors(errorNodes, handbookOptions);

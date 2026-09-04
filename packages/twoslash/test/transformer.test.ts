@@ -47,7 +47,7 @@ value.toUpper
     <span style="color:#005CC5"> </span>
     <span class="highlighted-word twoslash-highlighted">
     <span style="color:#005CC5">
-    <Popup>
+    <Popup class="twoslash-hover">
     <PopupContent class="nd-copy-ignore">
     <div class="twoslash shiki fd-codeblock prose-no-margin">
     <code class="twoslash-popup-code">
@@ -82,7 +82,7 @@ value.toUpper
     <span style="color:#D73A49"> =</span>
     <span style="color:#24292E"> </span>
     <span style="color:#24292E">
-    <Popup>
+    <Popup class="twoslash-hover">
     <PopupContent class="nd-copy-ignore">
     <div class="twoslash shiki fd-codeblock prose-no-margin">
     <code class="twoslash-popup-code">
@@ -119,7 +119,7 @@ value.toUpper
     <div class="twoslash-meta-line twoslash-error-line nd-copy-ignore">Type 'string' is not assignable to type 'number'.</div>
     <span class="line">
     <span style="color:#24292E">
-    <Popup>
+    <Popup class="twoslash-hover">
     <PopupContent class="nd-copy-ignore">
     <div class="twoslash shiki fd-codeblock prose-no-margin">
     <code class="twoslash-popup-code">
