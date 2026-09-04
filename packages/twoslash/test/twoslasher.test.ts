@@ -304,6 +304,51 @@ console.log(value);
   `);
 });
 
+test('completions', () => {
+  const dot = 'const obj = { alpha: 1 }; obj.';
+  const result = twoslasher(`// @noErrors
+${dot}
+//${' '.repeat(dot.length - 2)}^|
+type S = 'alpha' | 'beta';
+const s: S = 'a';
+//             ^|
+`);
+  expect(byType(result, 'completion').map((v) => [v.completionsPrefix, v.completions])).toEqual([
+    ['', [{ name: 'alpha', kind: 'property' }]],
+    ['a', [{ name: 'alpha', kind: 'string' }]],
+  ]);
+});
+
+test('enum members and list flags', () => {
+  const result = twoslasher(`// @lib: esnext
+enum D { Up = 1, Left = 'left' }
+D.Up; D.Left;
+`);
+  expect(
+    hovers(result)
+      .map((v) => v.text)
+      .slice(1, 3),
+  ).toEqual(['(enum member) D.Up = 1', '(enum member) D.Left = "left"']);
+  expect(() => twoslasher('// @lib: esnext\ndocument;')).toThrow(/2584/);
+});
+
+test('extra files', () => {
+  const withExtra = createTwoslasher({
+    cwd: fileURLToPath(new URL('./', import.meta.url)),
+    extraFiles: {
+      'extra.ts': 'export const v = 1;\nconst bad: string = 1;',
+      'index.ts': { prepend: 'const p = 1;\n' },
+    },
+  });
+  // errors in extra files are not reported
+  const result = withExtra(`import { v } from './extra';\nv + p;`);
+  expect(hovers(result).map((v) => [v.text, v.start])).toEqual([
+    ['(alias) const v: 1\nimport v', 9],
+    ['(alias) const v: 1\nimport v', 29],
+    ['const p: 1', 33],
+  ]);
+});
+
 test('batch', async () => {
   const a = `const a: string = 'a';\na.length;`;
   const b = `import { readFileSync } from 'node:fs';\nreadFileSync;`;

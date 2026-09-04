@@ -85,9 +85,6 @@ export interface HandbookOptions {
   noStaticSemanticInfo: boolean;
   /** keep the notations in the output code */
   keepNotations: boolean;
-  /** show the emitted JavaScript instead, not supported by TypeScript 7 */
-  showEmit: boolean;
-  showEmittedFile?: string;
 }
 
 export const defaultHandbookOptions: HandbookOptions = {
@@ -97,15 +94,12 @@ export const defaultHandbookOptions: HandbookOptions = {
   noErrorValidation: false,
   noStaticSemanticInfo: false,
   keepNotations: false,
-  showEmit: false,
-  showEmittedFile: undefined,
 };
 
 export interface VirtualFile {
   /** offset of the content in the code block */
   offset: number;
   filename: string;
-  filepath: string;
   content: string;
   extension: string;
   /** extra content of the file, not part of the code block */
@@ -137,6 +131,8 @@ const reFlag = /^\/\/\s?@(\w+)(?::\s?(.+))?$/gm;
 const reMarker = /^\s*\/\/\s*\^(\?|\||\^+)( .*)?$/gm;
 const reCut = /^\/\/\s?---cut(-before|-after|-start|-end)?---$/;
 const reFilename = /^[\t\v\f ]*\/\/\s?@filename: (.+)$/gm;
+/** compiler options taking a list, a single value is wrapped */
+const listFlags = ['lib', 'types', 'typeRoots', 'rootDirs', 'moduleSuffixes', 'customConditions'];
 
 function parseFlagValue(value: string | undefined): unknown {
   if (value === undefined || value === 'true') return true;
@@ -172,7 +168,9 @@ export function findFlagNotations(
     } else if (name in defaultHandbookOptions) {
       Object.assign(options.handbookOptions, { [name]: parseFlagValue(value) });
     } else {
-      options.compilerOptions[name] = parseFlagValue(value);
+      const parsed = parseFlagValue(value);
+      options.compilerOptions[name] =
+        listFlags.includes(name) && !Array.isArray(parsed) ? [parsed] : parsed;
     }
     options.removals.push(range);
   }
@@ -241,7 +239,7 @@ export function findQueryMarkers(
 /**
  * Split the code block into virtual files by `// @filename:` notations
  */
-export function splitFiles(code: string, defaultFilename: string, dir: string): VirtualFile[] {
+export function splitFiles(code: string, defaultFilename: string): VirtualFile[] {
   const files: VirtualFile[] = [];
   let filename = defaultFilename;
   let index = 0;
@@ -251,7 +249,6 @@ export function splitFiles(code: string, defaultFilename: string, dir: string): 
     files.push({
       offset: index,
       filename,
-      filepath: dir + filename,
       content: code.slice(index, end),
       extension: filename.slice(filename.lastIndexOf('.') + 1),
     });

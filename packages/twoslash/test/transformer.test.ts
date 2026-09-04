@@ -3,14 +3,15 @@ import { createHighlighter, hastToHtml } from 'shiki';
 import { transformerTwoslash } from '../src/transformer';
 import { fileURLToPath } from 'node:url';
 
+const transformer = transformerTwoslash({
+  twoslashOptions: {
+    cwd: fileURLToPath(new URL('./', import.meta.url)),
+    compilerOptions: { types: ['node'] },
+  },
+});
+
 test('render', async () => {
   const highlighter = await createHighlighter({ themes: ['github-light'], langs: ['ts'] });
-  const transformer = transformerTwoslash({
-    twoslashOptions: {
-      cwd: fileURLToPath(new URL('./', import.meta.url)),
-      compilerOptions: { types: ['node'] },
-    },
-  });
   const code = `// @errors: 2322 2339
 // @log: hello
 /** the value */
@@ -169,4 +170,23 @@ value.toUpper
     </code>
     </pre>"
   `);
+});
+
+test('prepared blocks', async () => {
+  const highlighter = await createHighlighter({ themes: ['github-light'], langs: ['ts'] });
+  const options = (code: string) => ({
+    lang: 'ts',
+    theme: 'github-light',
+    meta: { __raw: 'twoslash' },
+    transformers: [transformer],
+  });
+  const a = options('const a = 1;');
+  const b = options('const b = a;');
+  await Promise.all([
+    transformer._fd_prepare!('const a = 1;', a),
+    transformer._fd_prepare!('const b = a;', b),
+  ]);
+  expect(hastToHtml(highlighter.codeToHast('const a = 1;', a))).toContain('twoslash-hover');
+  // analyzed in the same batch, in separate directories
+  expect(() => highlighter.codeToHast('const b = a;', b)).toThrow(/2304/);
 });

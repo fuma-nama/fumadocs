@@ -4,6 +4,7 @@ import {
   NodeBuilderFlags,
   SignatureKind,
   SymbolFlags,
+  type CompletionInfo,
   type Diagnostic,
   type Project,
   type Snapshot,
@@ -33,8 +34,8 @@ import {
   splitFiles,
   TwoslashError,
   validateCodeForErrors,
+  type CompletionEntry,
   type HandbookOptions,
-  type NodeCompletion,
   type NodeError,
   type NodeHover,
   type NodeWithoutPosition,
@@ -47,7 +48,13 @@ import path from 'node:path';
 
 export type ExtraFiles = Record<string, string | { prepend?: string; append?: string }>;
 
-export interface TwoslashExecuteOptions {
+export interface TwoslasherOptions {
+  /**
+   * Code blocks are virtually placed in the `.twoslash` directory of it, modules are resolved from there.
+   *
+   * @defaultValue process.cwd()
+   */
+  cwd?: string;
   /**
    * Compiler options in `tsconfig.json` form.
    */
@@ -71,27 +78,6 @@ export interface TwoslashExecuteOptions {
    * Extra files to be added to the virtual file system, or prepended/appended to existing files
    */
   extraFiles?: ExtraFiles;
-  /**
-   * Positions of `^?` queries, in addition to the notations in the code
-   */
-  positionQueries?: number[];
-  /**
-   * Positions of `^|` completions, in addition to the notations in the code
-   */
-  positionCompletions?: number[];
-  /**
-   * Ranges of `^^^` highlights, in addition to the notations in the code
-   */
-  positionHighlights?: [start: number, end: number, text?: string][];
-}
-
-export interface TwoslasherOptions extends TwoslashExecuteOptions {
-  /**
-   * Code blocks are virtually placed in the `.twoslash` directory of it, modules are resolved from there.
-   *
-   * @defaultValue process.cwd()
-   */
-  cwd?: string;
 }
 
 export interface TwoslashReturn {
@@ -101,13 +87,13 @@ export interface TwoslashReturn {
 }
 
 export interface Twoslasher {
-  (code: string, extension?: string, options?: TwoslashExecuteOptions): TwoslashReturn;
+  (code: string, extension?: string): TwoslashReturn;
   /**
    * Analyze the code block together with other blocks prepared in the same tick, in one snapshot of the TypeScript project.
    *
    * The result is returned by the following synchronous call with the same code.
    */
-  prepare(code: string, extension?: string, options?: TwoslashExecuteOptions): Promise<void>;
+  prepare(code: string, extension?: string): Promise<void>;
 }
 
 const defaultCompilerOptions = {
@@ -125,7 +111,6 @@ const defaultCompilerOptions = {
 const supportedExtensions = ['ts', 'tsx', 'js', 'jsx'];
 /** the time to wait for other code blocks to join a batch */
 const batchDelay = 10;
-const completionTriggers = ['.', '"', "'", '`', '/', '@', '<', '#', ' '];
 const typeFlags =
   NodeBuilderFlags.UseAliasDefinedOutsideCurrentScope |
   NodeBuilderFlags.MultilineObjectLiterals |
@@ -140,21 +125,32 @@ const completionKinds: Partial<Record<CompletionItemKind, string>> = {
   [CompletionItemKind.Class]: 'class',
   [CompletionItemKind.Interface]: 'interface',
   [CompletionItemKind.Module]: 'module',
+  [CompletionItemKind.Constant]: 'string',
 };
 
 function normalizePath(p: string): string {
-  let out = path.resolve(p).replaceAll('\\', '/');
-  if (process.platform === 'win32' && /^[A-Z]:/.test(out)) {
-    out = out[0].toLowerCase() + out.slice(1);
-  }
-  return out;
+  p = p.replaceAll('\\', '/');
+  // the drive letter is reported in either case
+  if (process.platform === 'win32' && /^[A-Z]:/.test(p)) p = p[0].toLowerCase() + p.slice(1);
+  return p;
 }
 
-function getIdentifiers(sourceFile: SourceFile): Node[] {
-  const out: Node[] = [];
+interface Identifier {
+  node: Node;
+  /** position in the file */
+  pos: number;
+  text: string;
+}
+
+function getIdentifiers(sourceFile: SourceFile): Identifier[] {
+  const out: Identifier[] = [];
   function walk(node: Node) {
     node.forEachChild((child) => {
-      if (child.kind === SyntaxKind.Identifier) out.push(child);
+      // missing identifiers are parsed as empty ones
+      if (child.kind === SyntaxKind.Identifier && child.end > child.pos) {
+        const pos = child.getStart();
+        out.push({ node: child, pos, text: sourceFile.text.slice(pos, child.end) });
+      }
       walk(child);
     });
   }
@@ -228,19 +224,20 @@ function describeSymbol(
   project: Project,
   symbol: Symbol,
   type: Type,
-  node: Node,
+  identifier: Identifier,
+  call: CallExpression | undefined,
   typeToString: (type: Type) => string,
 ): string {
   const { checker, emitter } = project;
   const { flags } = symbol;
-  const name = symbol.name === 'default' ? node.getText() : symbol.name;
+  const { node } = identifier;
+  const name = symbol.name === 'default' ? identifier.text : symbol.name;
 
   if (flags & SymbolFlags.Variable)
     return `${variableKeyword(symbol)} ${name}: ${typeToString(type)}`;
 
   if (flags & (SymbolFlags.Function | SymbolFlags.Method)) {
     const signatures = checker.getSignaturesOfType(type, SignatureKind.Call);
-    const call = getCall(node);
     const signature = (call && checker.getResolvedSignature(call)) ?? signatures[0];
     const declaration =
       signature &&
@@ -285,8 +282,10 @@ function describeSymbol(
   let head: string;
   if (flags & (SymbolFlags.Property | SymbolFlags.Accessor))
     head = `(property) ${qualifiedName(symbol)}`;
-  else if (flags & SymbolFlags.EnumMember) head = `(enum member) ${qualifiedName(symbol)}`;
-  else head = name;
+  else if (flags & SymbolFlags.EnumMember) {
+    head = `(enum member) ${qualifiedName(symbol)}`;
+    if (type.isLiteralType()) return `${head} = ${JSON.stringify(type.value)}`;
+  } else head = name;
 
   return `${head}: ${typeToString(type)}`;
 }
@@ -296,188 +295,182 @@ interface Block {
   /** number of calls waiting for the result */
   refs: number;
   code: string;
-  /** directory of virtual files */
-  dir: string;
   configPath: string;
   notations: Notations;
+  /** files of the code block supported by the compiler */
   files: VirtualFile[];
+  /** files outside of the code block */
+  extraFiles: [filename: string, content: string][];
   pc: PositionConverter;
-  options: TwoslashExecuteOptions;
 }
 
 export function createTwoslasher(options: TwoslasherOptions = {}): Twoslasher {
-  const root = `${normalizePath(options.cwd ?? process.cwd())}/.twoslash/`;
-  /** virtual files, replaced on every batch */
+  const root = `${normalizePath(path.resolve(options.cwd ?? process.cwd()))}/.twoslash/`;
+  /** virtual files: the tsconfig of each project, and the root files, `''` when unused by the current batch */
   const files = new Map<string, string>();
-  /** config file path of each compiler options */
-  const configPaths = new Map<string, string>();
-  let openedProjects = new Set<string>();
+  const rootFiles: string[] = [];
+  /** tsconfig path of each set of compiler options */
+  const configs = new Map<string, string>();
+  const opened = new Set<string>();
   const results = new Map<string, { refs: number; value?: TwoslashReturn; error?: unknown }>();
   const pending = new Map<string, Block>();
   let scheduled: Promise<void> | undefined;
   let api: API | undefined;
   let snapshot: Snapshot | undefined;
-  let nextId = 0;
 
-  function parse(code: string, extension: string, executeOptions: TwoslashExecuteOptions): Block {
-    const { customTags = ['annotate', 'log', 'warn', 'error'], extraFiles = {} } = executeOptions;
+  /** directory of the block at `index` of a batch, the block is placed in a stable slot to keep the project unchanged */
+  const slot = (index: number) => `${root}${index}/`;
+  const isVirtualDir = (dir: string) =>
+    dir.startsWith(root)
+      ? !dir.includes('/', root.length)
+      : dir.length === root.length - 1 && root.startsWith(dir);
+
+  function parse(code: string, extension: string): Block {
+    const { customTags = ['annotate', 'log', 'warn', 'error'], extraFiles = {} } = options;
     const notations: Notations = {
-      compilerOptions: {
-        ...defaultCompilerOptions,
-        ...options.compilerOptions,
-        ...executeOptions.compilerOptions,
-      },
-      handbookOptions: {
-        ...defaultHandbookOptions,
-        ...options.handbookOptions,
-        ...executeOptions.handbookOptions,
-      },
+      compilerOptions: { ...defaultCompilerOptions, ...options.compilerOptions },
+      handbookOptions: { ...defaultHandbookOptions, ...options.handbookOptions },
       tags: [],
       removals: [],
-      queries: [...(executeOptions.positionQueries ?? [])],
-      completions: [...(executeOptions.positionCompletions ?? [])],
-      highlights: [...(executeOptions.positionHighlights ?? [])],
+      queries: [],
+      completions: [],
+      highlights: [],
     };
     findFlagNotations(code, customTags, notations);
     findCutNotations(code, notations.removals);
     const pc = createPositionConverter(code);
     findQueryMarkers(code, pc, notations);
-    if (notations.handbookOptions.showEmit) {
-      throw new TwoslashError(
-        'Option `showEmit` is not supported',
-        'TypeScript 7 does not provide an API to emit JavaScript.',
-      );
-    }
 
-    const dir = `${root}${nextId++}/`;
     const compilerOptions = JSON.stringify(notations.compilerOptions);
-    let configPath = configPaths.get(compilerOptions);
+    let configPath = configs.get(compilerOptions);
     if (!configPath) {
-      configPath = `${root}tsconfig.${configPaths.size}.json`;
-      configPaths.set(compilerOptions, configPath);
+      configPath = `${root}tsconfig.${configs.size}.json`;
+      configs.set(compilerOptions, configPath);
     }
 
-    const files = splitFiles(code, `index.${extension}`, dir).filter(
+    const files = splitFiles(code, `index.${extension}`).filter(
       (file) =>
         supportedExtensions.includes(file.extension) ||
         (file.extension === 'json' && !!notations.compilerOptions.resolveJsonModule),
     );
-    for (const [filename, extra] of Object.entries(extraFiles)) {
+    const extra: Block['extraFiles'] = [];
+    for (const [filename, value] of Object.entries(extraFiles)) {
       const file = files.find((file) => file.filename === filename);
-      if (file) {
-        if (typeof extra !== 'string') Object.assign(file, extra);
-        continue;
+      if (!file) {
+        const content =
+          typeof value === 'string' ? value : (value.prepend ?? '') + (value.append ?? '');
+        extra.push([filename, content]);
+      } else if (typeof value !== 'string') {
+        Object.assign(file, value);
       }
-      files.push({
-        // not in the code block
-        offset: code.length,
-        filename,
-        filepath: dir + filename,
-        content: '',
-        extension: filename.slice(filename.lastIndexOf('.') + 1),
-        ...(typeof extra === 'string' ? { prepend: extra } : extra),
-      });
     }
 
     return {
       key: getKey(code, extension),
       refs: 1,
       code,
-      dir,
       configPath,
       notations,
       files,
+      extraFiles: extra,
       pc,
-      options: executeOptions,
     };
   }
 
   /**
-   * Load the blocks into the project, in one snapshot
+   * Load the blocks into the projects, in one snapshot
    */
   function open(blocks: Block[]): Snapshot {
     const next = new Map<string, string>();
-    /** root files of each project, grouped by compiler options */
-    const configs = new Map<string, { compilerOptions: unknown; files: string[] }>();
-    for (const block of blocks) {
-      let config = configs.get(block.configPath);
-      if (!config) {
-        config = { compilerOptions: block.notations.compilerOptions, files: [] };
-        configs.set(block.configPath, config);
-      }
+    const openProjects: string[] = [];
+    for (let i = 0; i < blocks.length; i++) {
+      const block = blocks[i];
+      const dir = slot(i);
       for (const file of block.files) {
-        next.set(file.filepath, (file.prepend ?? '') + file.content + (file.append ?? ''));
-        config.files.push(file.filepath);
+        next.set(dir + file.filename, (file.prepend ?? '') + file.content + (file.append ?? ''));
+      }
+      for (const [filename, content] of block.extraFiles) next.set(dir + filename, content);
+      if (!opened.has(block.configPath) && !openProjects.includes(block.configPath)) {
+        openProjects.push(block.configPath);
       }
     }
-    for (const [configPath, config] of configs) next.set(configPath, JSON.stringify(config));
 
     const changed: string[] = [];
     const created: string[] = [];
-    const deleted: string[] = [];
+    for (const file of rootFiles) {
+      if (!next.has(file) && files.get(file) !== '') {
+        files.set(file, '');
+        changed.push(file);
+      }
+    }
     for (const [file, content] of next) {
       const current = files.get(file);
       if (current === content) continue;
-      (current === undefined ? created : changed).push(file);
+      if (current === undefined) {
+        created.push(file);
+        rootFiles.push(file);
+      } else {
+        changed.push(file);
+      }
+      files.set(file, content);
     }
-    for (const file of files.keys()) {
-      if (!next.has(file)) deleted.push(file);
+    // a config change costs a project reload, the file list only grows
+    if (created.length > 0 || openProjects.length > 0) {
+      const list = JSON.stringify(rootFiles);
+      for (const [compilerOptions, configPath] of configs) {
+        const content = `{"compilerOptions":${compilerOptions},"files":${list}}`;
+        if (files.get(configPath) === content) continue;
+        if (opened.has(configPath)) changed.push(configPath);
+        files.set(configPath, content);
+      }
     }
-    files.clear();
-    for (const [file, content] of next) files.set(file, content);
-
-    const openProjects: string[] = [];
-    const closeProjects: string[] = [];
-    for (const configPath of configs.keys()) {
-      if (!openedProjects.has(configPath)) openProjects.push(configPath);
-    }
-    for (const configPath of openedProjects) {
-      if (!configs.has(configPath)) closeProjects.push(configPath);
-    }
-    openedProjects = new Set(configs.keys());
 
     api ??= new API({
       cwd: root,
       fs: {
         readFile: (file) => files.get(normalizePath(file)),
-        fileExists: (file) => (files.has(normalizePath(file)) ? true : undefined),
-        directoryExists: (dir) => (dir.startsWith(root) ? true : undefined),
+        fileExists: (file) => {
+          file = normalizePath(file);
+          return file.startsWith(root) ? files.has(file) : undefined;
+        },
+        directoryExists: (dir) => {
+          dir = normalizePath(dir);
+          return dir.startsWith(root) || isVirtualDir(dir) ? isVirtualDir(dir) : undefined;
+        },
       },
     });
+    if (snapshot && changed.length === 0 && created.length === 0 && openProjects.length === 0) {
+      return snapshot;
+    }
     const prev = snapshot;
-    snapshot = api.updateSnapshot({
-      openProjects,
-      closeProjects,
-      fileChanges: { changed, created, deleted },
-    });
+    snapshot = api.updateSnapshot({ openProjects, fileChanges: { changed, created } });
     prev?.dispose();
+    for (const configPath of openProjects) opened.add(configPath);
     return snapshot;
   }
 
   function run(blocks: Block[]) {
     const snapshot = open(blocks);
-    for (const block of blocks) {
+    for (let i = 0; i < blocks.length; i++) {
+      const block = blocks[i];
       try {
         const project = snapshot.getProject(block.configPath);
         if (!project) {
           throw new TwoslashError('Failed to load project', `Cannot open ${block.configPath}`);
         }
-        results.set(block.key, { refs: block.refs, value: analyze(block, project) });
+        const value = analyze(block, project, slot(i), options);
+        results.set(block.key, { refs: block.refs, value });
       } catch (error) {
         results.set(block.key, { refs: block.refs, error });
       }
     }
   }
 
-  function twoslasher(
-    code: string,
-    extension = 'ts',
-    executeOptions: TwoslashExecuteOptions = options,
-  ): TwoslashReturn {
+  function twoslasher(code: string, extension = 'ts'): TwoslashReturn {
     const key = getKey(code, extension);
     let result = results.get(key);
     if (!result) {
-      run([pending.get(key) ?? parse(code, extension, executeOptions)]);
+      run([pending.get(key) ?? parse(code, extension)]);
       pending.delete(key);
       result = results.get(key)!;
     }
@@ -486,11 +479,7 @@ export function createTwoslasher(options: TwoslasherOptions = {}): Twoslasher {
     throw result.error;
   }
 
-  twoslasher.prepare = (
-    code: string,
-    extension = 'ts',
-    executeOptions: TwoslashExecuteOptions = options,
-  ): Promise<void> => {
+  twoslasher.prepare = (code: string, extension = 'ts'): Promise<void> => {
     const key = getKey(code, extension);
     const result = results.get(key);
     if (result) {
@@ -502,7 +491,7 @@ export function createTwoslasher(options: TwoslasherOptions = {}): Twoslasher {
       block.refs++;
     } else {
       try {
-        pending.set(key, parse(code, extension, executeOptions));
+        pending.set(key, parse(code, extension));
       } catch (error) {
         results.set(key, { refs: 1, error });
         return Promise.resolve();
@@ -532,9 +521,13 @@ function getKey(code: string, extension: string): string {
   return `${extension}\0${code}`;
 }
 
-function analyze(block: Block, project: Project): TwoslashReturn {
+function analyze(
+  block: Block,
+  project: Project,
+  dir: string,
+  { shouldGetHoverInfo, filterNode }: TwoslasherOptions,
+): TwoslashReturn {
   const { code, notations, pc } = block;
-  const { shouldGetHoverInfo = () => true, filterNode } = block.options;
   const { handbookOptions, removals } = notations;
   let nodes: NodeWithoutPosition[] = [...notations.tags];
   const isInRemoval = (index: number) =>
@@ -550,11 +543,11 @@ function analyze(block: Block, project: Project): TwoslashReturn {
     );
   }
 
-  const identifiersMap = new Map<VirtualFile, Node[]>();
-  function getIdentifiersOfFile(file: VirtualFile): Node[] {
+  const identifiersMap = new Map<VirtualFile, Identifier[]>();
+  function getIdentifiersOfFile(file: VirtualFile): Identifier[] {
     let identifiers = identifiersMap.get(file);
     if (!identifiers) {
-      const sourceFile = program.getSourceFile(file.filepath);
+      const sourceFile = program.getSourceFile(dir + file.filename);
       identifiers = sourceFile ? getIdentifiers(sourceFile) : [];
       identifiersMap.set(file, identifiers);
     }
@@ -586,10 +579,11 @@ function analyze(block: Block, project: Project): TwoslashReturn {
   const symbolDocs = new Map<number, Pick<NodeHover, 'docs' | 'tags'>>();
   function getHover(
     file: VirtualFile,
-    node: Node,
+    identifier: Identifier,
     symbol: Symbol,
     type: Type,
   ): NodeWithoutPosition<NodeHover> {
+    const { node } = identifier;
     let target = symbol;
     if (symbol.flags & SymbolFlags.Alias) {
       target = checker.getAliasedSymbol(symbol);
@@ -610,15 +604,16 @@ function analyze(block: Block, project: Project): TwoslashReturn {
       }
     }
 
-    const key = `${target.id}:${type.id}:${getCall(node) ? 1 : 0}`;
+    const call = getCall(node);
+    const key = `${target.id}:${type.id}:${call ? 1 : 0}`;
     let text = described.get(key);
     if (text === undefined) {
-      text = describeSymbol(project, target, type, node, typeToString);
+      text = describeSymbol(project, target, type, identifier, call, typeToString);
       described.set(key, text);
     }
     if (symbol.flags & SymbolFlags.Alias) {
       // call sites display the resolved signature without keyword
-      if (getCall(node)) text = text.replace(/^function /, '');
+      if (call) text = text.replace(/^function /, '');
       text = text ? `(alias) ${text}\nimport ${symbol.name}` : `import ${symbol.name}`;
     }
 
@@ -632,18 +627,23 @@ function analyze(block: Block, project: Project): TwoslashReturn {
       symbolDocs.set(target.id, docs);
     }
 
-    const start = toCode(file, node.getStart());
-    const name = node.getText();
+    const { text: name } = identifier;
+    const start = toCode(file, identifier.pos);
     return { type: 'hover', text, ...docs, start, length: name.length, target: name };
   }
 
   /**
    * Resolve symbols & types of identifiers in one batch
    */
-  function getHovers(file: VirtualFile, identifiers: Node[]) {
-    const positions = identifiers.map((node) => node.getStart());
-    const symbols = checker.getSymbolAtPosition(file.filepath, positions);
-    const types = checker.getTypeAtLocation(identifiers);
+  function getHovers(file: VirtualFile, identifiers: Identifier[]) {
+    const positions: number[] = [];
+    const nodes: Node[] = [];
+    for (const identifier of identifiers) {
+      positions.push(identifier.pos);
+      nodes.push(identifier.node);
+    }
+    const symbols = checker.getSymbolAtPosition(dir + file.filename, positions);
+    const types = checker.getTypeAtLocation(nodes);
     const out: NodeWithoutPosition<NodeHover>[] = [];
     for (let i = 0; i < identifiers.length; i++) {
       const symbol = symbols[i];
@@ -655,10 +655,14 @@ function analyze(block: Block, project: Project): TwoslashReturn {
 
   if (!handbookOptions.noStaticSemanticInfo) {
     for (const file of block.files) {
-      const identifiers = getIdentifiersOfFile(file).filter((node) => {
-        const start = toCode(file, node.getStart());
-        return !isInRemoval(start) && shouldGetHoverInfo(node.getText(), start, file.filename);
-      });
+      const identifiers: Identifier[] = [];
+      for (const identifier of getIdentifiersOfFile(file)) {
+        const start = toCode(file, identifier.pos);
+        if (isInRemoval(start)) continue;
+        if (shouldGetHoverInfo && !shouldGetHoverInfo(identifier.text, start, file.filename))
+          continue;
+        identifiers.push(identifier);
+      }
       nodes.push(...getHovers(file, identifiers));
     }
   }
@@ -672,11 +676,11 @@ function analyze(block: Block, project: Project): TwoslashReturn {
         'This is likely that the positioning is off.',
       );
     }
-    const node = getIdentifiersOfFile(file).find((node) => {
-      const start = toCode(file, node.getStart());
-      return isInRange(query, [start, start + node.getText().length]);
+    const identifier = getIdentifiersOfFile(file).find((identifier) => {
+      const start = toCode(file, identifier.pos);
+      return isInRange(query, [start, start + identifier.text.length]);
     });
-    const hover = node ? getHovers(file, [node])[0] : undefined;
+    const hover = identifier ? getHovers(file, [identifier])[0] : undefined;
     if (!hover) {
       throw new TwoslashError(
         'Invalid quick info query',
@@ -701,18 +705,17 @@ function analyze(block: Block, project: Project): TwoslashReturn {
       );
     }
 
-    const position = toFile(file, target);
-    let prefix = /[$\w]+$/.exec(code.slice(0, target))?.[0] ?? '';
-    const completions: NodeCompletion['completions'] = [];
-    let result;
-    if (prefix) {
-      result = checker.getCompletionsAtPosition(file.filepath, position - 1);
-    } else {
-      prefix = code[target - 1];
-      result = checker.getCompletionsAtPosition(file.filepath, position, {
-        triggerCharacter: completionTriggers.includes(prefix) ? prefix : undefined,
-      });
+    const prefix = /[$\w]+$/.exec(code.slice(0, target))?.[0] ?? '';
+    let result: CompletionInfo | undefined;
+    try {
+      result = checker.getCompletionsAtPosition(
+        dir + file.filename,
+        toFile(file, target) - (prefix ? 1 : 0),
+      );
+    } catch {
+      // completions of the global scope are refused, they would need auto imports
     }
+    const completions: CompletionEntry[] = [];
     for (const entry of result?.entries ?? []) {
       if (!entry.name.startsWith(prefix)) continue;
       completions.push({ name: entry.name, kind: entry.kind && completionKinds[entry.kind] });
@@ -737,26 +740,26 @@ function analyze(block: Block, project: Project): TwoslashReturn {
   const { noErrors, noErrorsCutted } = handbookOptions;
   if (noErrors !== true) {
     const ignores = Array.isArray(noErrors) ? noErrors : [];
-    for (const file of block.files) {
-      const diagnostics = [
-        ...program.getSemanticDiagnostics(file.filepath),
-        ...program.getSyntacticDiagnostics(file.filepath),
-      ];
+    function addErrors(file: VirtualFile, diagnostics: readonly Diagnostic[]) {
       for (const diagnostic of diagnostics) {
         if (ignores.includes(diagnostic.code)) continue;
         const start = toCode(file, diagnostic.pos);
         if (noErrorsCutted && isInRemoval(start)) continue;
-        const length = diagnostic.end - diagnostic.pos;
         errorNodes.push({
           type: 'error',
           start,
-          length,
+          length: diagnostic.end - diagnostic.pos,
           code: diagnostic.code,
           filename: file.filename,
           text: flattenDiagnostic(diagnostic),
           level: (['warning', 'error', 'suggestion', 'message'] as const)[diagnostic.category],
         });
       }
+    }
+    for (const file of block.files) {
+      const filepath = dir + file.filename;
+      addErrors(file, program.getSemanticDiagnostics(filepath));
+      addErrors(file, program.getSyntacticDiagnostics(filepath));
     }
   }
   if (filterNode) {

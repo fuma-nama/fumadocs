@@ -1,6 +1,6 @@
 ---
 packages:
-  npm:fumadocs-core: minor
+  npm:fumadocs-core: patch
 ---
 
 ## Async `_fd_prepare` hook for Shiki transformers

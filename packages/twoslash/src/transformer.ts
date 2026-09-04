@@ -1,22 +1,19 @@
-import type { Element, ElementContent, Text } from 'hast';
-import type { Code } from 'mdast';
-import { fromMarkdown } from 'mdast-util-from-markdown';
-import { defaultHandlers, toHast } from 'mdast-util-to-hast';
+import type { ElementContent, Text } from 'hast';
 import type {
   CodeToHastOptions,
   ShikiTransformer,
   ShikiTransformerContextCommon,
   ShikiTransformerContextMeta,
 } from 'shiki';
-import { ShikiError, splitTokens } from 'shiki/core';
-import { rendererRich, type RendererRichOptions, type TwoslashRenderer } from './renderer';
+import { splitTokens } from 'shiki/core';
+import { createRenderer, ignoreClass, type RendererOptions } from './renderer';
 import {
   createTwoslasher,
   type Twoslasher,
   type TwoslasherOptions,
-  type TwoslashExecuteOptions,
   type TwoslashReturn,
 } from './twoslasher';
+import type { NodeHover, TwoslashNode } from './notations';
 
 declare module 'shiki' {
   interface ShikiTransformerContextMeta {
@@ -26,8 +23,8 @@ declare module 'shiki' {
 
 export type TwoslashFunction = (
   code: string,
-  lang: string,
-  options?: TwoslashExecuteOptions,
+  lang?: string,
+  options?: TwoslasherOptions,
   meta?: ShikiTransformerContextMeta,
 ) => TwoslashReturn;
 
@@ -36,35 +33,32 @@ export interface TwoslashTypesCache {
    * On initialization
    */
   init?: () => void;
-
   /**
    * Preprocess the code before reading the cache, e.g. to normalize it
    */
   preprocess?: (
     code: string,
-    lang: string,
-    options?: TwoslashExecuteOptions,
+    lang?: string,
+    options?: TwoslasherOptions,
     meta?: ShikiTransformerContextMeta,
   ) => string | void;
-
   /**
    * Read cached result
    */
   read: (
     code: string,
-    lang: string,
-    options?: TwoslashExecuteOptions,
+    lang?: string,
+    options?: TwoslasherOptions,
     meta?: ShikiTransformerContextMeta,
-  ) => TwoslashReturn | null | undefined;
-
+  ) => TwoslashReturn | null;
   /**
    * Save result to cache
    */
   write: (
     code: string,
     data: TwoslashReturn,
-    lang: string,
-    options?: TwoslashExecuteOptions,
+    lang?: string,
+    options?: TwoslasherOptions,
     meta?: ShikiTransformerContextMeta,
   ) => void;
 }
@@ -111,13 +105,9 @@ export interface TransformerTwoslashOptions {
    */
   twoslashOptions?: TwoslasherOptions;
   /**
-   * Custom renderer to decide how each info should be rendered, replaces the default renderer and `rendererRich` options.
+   * Options for the renderer
    */
-  renderer?: TwoslashRenderer;
-  /**
-   * Options for the default renderer.
-   */
-  rendererRich?: RendererRichOptions;
+  rendererRich?: RendererOptions;
   /**
    * A map to store code for `@include` directive.
    * Provide your own instance if you want to clear the map between each transformation
@@ -149,8 +139,6 @@ export interface TransformerTwoslashOptions {
   typesCache?: TwoslashTypesCache;
 }
 
-/** class of elements to skip when copying the code block */
-const ignoreClass = 'nd-copy-ignore';
 const RE_TWOSLASH = /\btwoslash\b/;
 const RE_INCLUDE_MARKER = /\/\/ @include: (.*)$/gm;
 const RE_INCLUDE_META = /include\s+([\w-]+)\b.*/;
@@ -169,7 +157,6 @@ export function transformerTwoslash(options: TransformerTwoslashOptions = {}): S
     langAlias = { typescript: 'ts', json5: 'json', yml: 'yaml' },
     explicitTrigger = true,
     disableTriggers = ['notwoslash', 'no-twoslash'],
-    renderer = createRenderer(options.rendererRich),
     throws = true,
     includesMap = new Map<string, string>(),
     typesCache,
@@ -195,11 +182,14 @@ export function transformerTwoslash(options: TransformerTwoslashOptions = {}): S
       );
     },
   } = options;
+  const renderer = createRenderer(options.rendererRich);
 
   // lazy load Twoslash instance so it works on serverless platforms
   const getInstance = () => (cachedInstance ??= createTwoslasher(twoslashOptions));
   const twoslasher: TwoslashFunction =
-    options.twoslasher ?? ((code, lang, options) => getInstance()(code, lang, options));
+    options.twoslasher ?? ((code, lang) => getInstance()(code, lang));
+  /** code blocks prepared by `_fd_prepare`, keyed by the options Shiki passes to both hooks */
+  const prepared = new WeakMap<CodeToHastOptions, { code: string; result?: TwoslashReturn }>();
   typesCache?.init?.();
 
   function addInclude(name: string, code: string) {
@@ -216,8 +206,16 @@ export function transformerTwoslash(options: TransformerTwoslashOptions = {}): S
     includesMap.set(name, lines.join('\n'));
   }
 
-  function applyIncludes(code: string): string {
-    return code.replaceAll(RE_INCLUDE_MARKER, (_, key: string) => {
+  /**
+   * Resolve includes, register the block for `@include`, and read the cache
+   */
+  function prepare(
+    code: string,
+    lang: string,
+    hastOptions: CodeToHastOptions,
+    meta?: ShikiTransformerContextMeta,
+  ) {
+    code = code.replaceAll(RE_INCLUDE_MARKER, (_, key: string) => {
       const included = includesMap.get(key);
       if (included === undefined) {
         throw new Error(
@@ -226,21 +224,10 @@ export function transformerTwoslash(options: TransformerTwoslashOptions = {}): S
       }
       return included;
     });
-  }
-
-  /**
-   * Resolve includes, register the block for `@include`, and normalize the code for the cache
-   */
-  function prepareCode(
-    code: string,
-    lang: string,
-    hastOptions: CodeToHastOptions,
-    meta?: ShikiTransformerContextMeta,
-  ): string {
-    code = applyIncludes(code);
     const include = RE_INCLUDE_META.exec(hastOptions.meta?.__raw ?? '')?.[1];
     if (include) addInclude(include, code);
-    return typesCache?.preprocess?.(code, lang, twoslashOptions, meta) ?? code;
+    code = typesCache?.preprocess?.(code, lang, twoslashOptions, meta) ?? code;
+    return { code, result: typesCache?.read(code, lang, twoslashOptions, meta) ?? undefined };
   }
 
   function getLang(options: CodeToHastOptions): string {
@@ -254,25 +241,26 @@ export function transformerTwoslash(options: TransformerTwoslashOptions = {}): S
       if (options.twoslasher) return;
       const lang = getLang(hastOptions);
       if (!filter(lang, code, hastOptions)) return;
+      let entry;
       try {
-        code = prepareCode(code, lang, hastOptions);
+        entry = prepare(code, lang, hastOptions);
       } catch {
         // reported by `preprocess`
         return;
       }
-      if (typesCache?.read(code, lang, twoslashOptions)) return;
-      return getInstance().prepare(code, lang, twoslashOptions);
+      prepared.set(hastOptions, entry);
+      if (!entry.result) return getInstance().prepare(entry.code, lang);
     },
     preprocess(code) {
       const lang = getLang(this.options);
       if (!filter(lang, code, this.options, this)) return;
 
       try {
-        code = prepareCode(code, lang, this.options, this.meta);
-        let result = typesCache?.read(code, lang, twoslashOptions, this.meta);
+        const entry = prepared.get(this.options) ?? prepare(code, lang, this.options, this.meta);
+        let { result } = entry;
         if (!result) {
-          result = twoslasher(code, lang, twoslashOptions, this.meta);
-          typesCache?.write(code, result, lang, twoslashOptions, this.meta);
+          result = twoslasher(entry.code, lang, twoslashOptions, this.meta);
+          typesCache?.write(entry.code, result, lang, twoslashOptions, this.meta);
         }
         this.meta.twoslash = result;
         return result.code;
@@ -301,8 +289,7 @@ export function transformerTwoslash(options: TransformerTwoslashOptions = {}): S
       const shikiError = (message: string) =>
         onShikiError(new Error(message), this.source, this.options.lang);
 
-      function insertAfterLine(line: number, nodes: ElementContent[]) {
-        if (nodes.length === 0) return;
+      function insertAfterLine(line: number, node: ElementContent) {
         let index: number;
         if (line >= lines.length) {
           index = codeEl.children.length;
@@ -314,32 +301,33 @@ export function transformerTwoslash(options: TransformerTwoslashOptions = {}): S
           }
         }
         const after = codeEl.children[index + 1];
-        // the line break, moved after the inserted nodes
+        // the line break, moved after the inserted node
         if (after?.type === 'text' && after.value === '\n') codeEl.children.splice(index + 1, 1);
-        codeEl.children.splice(index + 1, 0, ...nodes);
+        codeEl.children.splice(index + 1, 0, node);
       }
 
-      // positions of text tokens, collected before any of them is replaced
-      const textTokens: [line: number, start: number, end: number, token: Text][] = [];
-      lines.forEach((lineEl, line) => {
+      // positions of the text tokens of each line, collected before any of them is replaced
+      const textTokens: [start: number, end: number, token: Text][][] = [];
+      for (const lineEl of lines) {
+        const tokens: [number, number, Text][] = [];
         let index = 0;
         for (const token of lineEl.children) {
           if (token.type !== 'element') continue;
           for (const child of token.children) {
             if (child.type !== 'text') continue;
-            textTokens.push([line, index, index + child.value.length, child]);
+            tokens.push([index, index + child.value.length, child]);
             index += child.value.length;
           }
         }
-      });
+        textTokens.push(tokens);
+      }
 
       /**
        * The text tokens in the range of the node
        */
-      function locateTextTokens(line: number, character: number, length: number): Text[] {
+      function locateTextTokens({ line, character, length }: TwoslashNode): Text[] {
         const out: Text[] = [];
-        for (const [l, start, end, token] of textTokens) {
-          if (l !== line) continue;
+        for (const [start, end, token] of textTokens[line] ?? []) {
           const inside =
             length === 0
               ? start < character && character <= end
@@ -353,111 +341,76 @@ export function transformerTwoslash(options: TransformerTwoslashOptions = {}): S
        * Wrap the tokens in the range of the node
        */
       function wrapTokens(
-        line: number,
-        character: number,
-        length: number,
-        wrap: (tokens: ElementContent[]) => ElementContent[],
+        { line, character, length }: TwoslashNode,
+        wrap: (tokens: ElementContent[]) => ElementContent,
       ) {
         const lineEl = lines[line];
         if (!lineEl) return;
         let index = 0;
         let start = lineEl.children.length;
         let end = 0;
-        lineEl.children.forEach((token, i) => {
+        for (let i = 0; i < lineEl.children.length; i++) {
           if (index >= character && i < start) start = i;
           if (index <= character + length && i > end) end = i;
-          index += getTokenString(token).length;
-        });
+          index += getTokenString(lineEl.children[i]).length;
+        }
         if (index <= character + length) end = lineEl.children.length;
         const targets = lineEl.children.slice(start, end);
-        lineEl.children.splice(start, targets.length, ...wrap(targets));
+        lineEl.children.splice(start, targets.length, wrap(targets));
       }
 
       const skipHover = new Set<Text>();
-      const hovers: (() => void)[] = [];
+      const hovers: [NodeHover, Text[]][] = [];
       const wraps: (() => void)[] = [];
       for (const node of result.nodes) {
         if (node.type === 'tag') {
-          if (renderer.lineCustomTag) {
-            insertAfterLine(node.line, renderer.lineCustomTag.call(this, node));
-          }
+          insertAfterLine(node.line, renderer.tagLine(node));
           continue;
         }
-
-        const tokens = locateTextTokens(node.line, node.character, node.length);
-        if (tokens.length === 0 && !(node.type === 'error' && renderer.nodesError)) {
+        const tokens = locateTextTokens(node);
+        if (tokens.length === 0 && node.type !== 'error') {
           shikiError(`Cannot find tokens for node: ${JSON.stringify(node)}`);
           continue;
         }
 
         switch (node.type) {
-          case 'error':
-            if (renderer.nodeError) {
-              for (const token of tokens) {
-                skipHover.add(token);
-                Object.assign(token, renderer.nodeError.call(this, node, { ...token }));
-              }
-            }
-            if (renderer.nodesError) {
-              for (const token of tokens) skipHover.add(token);
-              wraps.push(() =>
-                wrapTokens(
-                  node.line,
-                  node.character,
-                  node.length,
-                  (targets) => renderer.nodesError!.call(this, node, targets) ?? targets,
-                ),
-              );
-            }
-            if (renderer.lineError) insertAfterLine(node.line, renderer.lineError.call(this, node));
+          case 'hover':
+            hovers.push([node, tokens]);
             break;
           case 'query': {
             const token = tokens[0];
-            if (token && renderer.nodeQuery) {
-              skipHover.add(token);
-              Object.assign(token, renderer.nodeQuery.call(this, node, { ...token }));
-            }
-            if (renderer.lineQuery) {
-              insertAfterLine(node.line, renderer.lineQuery.call(this, node, token));
-            }
+            skipHover.add(token);
+            const target = token.value;
+            Object.assign(token, renderer.queryToken({ ...token }));
+            insertAfterLine(node.line, renderer.queryLine.call(this, node, target));
             break;
           }
           case 'completion':
-            if (renderer.nodeCompletion) {
-              for (const token of tokens) {
-                skipHover.add(token);
-                Object.assign(token, renderer.nodeCompletion.call(this, node, { ...token }));
-              }
+            for (const token of tokens) {
+              skipHover.add(token);
+              Object.assign(token, renderer.completion(node, { ...token }));
             }
-            if (renderer.lineCompletion) {
-              insertAfterLine(node.line, renderer.lineCompletion.call(this, node));
-            }
+            break;
+          case 'error':
+            for (const token of tokens) skipHover.add(token);
+            wraps.push(() => wrapTokens(node, (tokens) => renderer.errorToken(node, tokens)));
+            insertAfterLine(node.line, renderer.errorLine(node));
             break;
           case 'highlight':
-            if (renderer.nodesHighlight) {
-              wraps.push(() =>
-                wrapTokens(
-                  node.line,
-                  node.character,
-                  node.length,
-                  (targets) => renderer.nodesHighlight!.call(this, node, targets) ?? targets,
-                ),
-              );
-            }
-            break;
-          case 'hover':
-            hovers.push(() => {
-              for (const token of tokens) {
-                if (skipHover.has(token)) continue;
-                skipHover.add(token);
-                Object.assign(token, renderer.nodeStaticInfo.call(this, node, { ...token }));
-              }
-            });
+            wraps.push(() => wrapTokens(node, renderer.highlight));
             break;
         }
       }
-      for (const fn of hovers) fn();
-      for (const fn of wraps) fn();
+      // hovers after the other nodes claimed their tokens, wraps after the popups are in place
+      for (const [node, tokens] of hovers) {
+        for (const token of tokens) {
+          if (skipHover.has(token)) continue;
+          skipHover.add(token);
+          const popup = renderer.hover.call(this, node, { ...token });
+          if (popup) Object.assign(token, popup);
+        }
+      }
+      for (const wrap of wraps) wrap();
     },
   };
 }
@@ -468,128 +421,7 @@ export function transformerTwoslash(options: TransformerTwoslashOptions = {}): S
 function getTokenString(token: ElementContent): string {
   if (token.type === 'text') return token.value;
   if (token.type !== 'element' || String(token.properties.class).includes(ignoreClass)) return '';
-  return token.children.map(getTokenString).join('');
-}
-
-/**
- * The rich renderer with the popups rendered by `fumadocs-twoslash/ui`
- */
-function createRenderer(options: RendererRichOptions = {}): TwoslashRenderer {
-  return rendererRich({
-    classExtra: ignoreClass,
-    queryRendering: 'line',
-    renderMarkdown,
-    renderMarkdownInline,
-    ...options,
-    hast: {
-      hoverToken: {
-        tagName: 'Popup',
-      },
-      hoverPopup: {
-        tagName: 'PopupContent',
-        properties: {
-          class: ignoreClass,
-        },
-      },
-      hoverCompose: ({ popup, token }) => [
-        popup,
-        {
-          type: 'element',
-          tagName: 'PopupTrigger',
-          properties: {},
-          children: [token],
-        },
-      ],
-      popupDocs: {
-        class: 'prose twoslash-popup-docs',
-      },
-      popupTypes: {
-        tagName: 'div',
-        class: 'twoslash shiki fd-codeblock prose-no-margin',
-        children: (v) => {
-          if (v.length === 1 && v[0].type === 'element' && v[0].tagName === 'pre') return v;
-
-          return [
-            {
-              type: 'element',
-              tagName: 'code',
-              properties: {
-                class: 'twoslash-popup-code',
-              },
-              children: v,
-            },
-          ];
-        },
-      },
-      popupDocsTags: {
-        class: 'prose twoslash-popup-docs twoslash-popup-docs-tags',
-      },
-      nodesHighlight: {
-        class: 'highlighted-word twoslash-highlighted',
-      },
-      ...options.hast,
-    },
-  });
-}
-
-export function renderMarkdown(this: ShikiTransformerContextCommon, md: string): ElementContent[] {
-  // replace jsdoc links
-  const mdast = fromMarkdown(md.replace(/{@link (?<link>[^}]*)}/g, '$1'));
-
-  const onCode = (lang: string, node: Code) => {
-    return this.codeToHast(node.value, {
-      ...this.options,
-      transformers: [],
-      meta: node.meta ? { __raw: node.meta } : {},
-      lang,
-    }).children[0] as Element;
-  };
-
-  return (
-    toHast(mdast, {
-      handlers: {
-        code: (state, node: Code) => {
-          const lang = node.lang;
-          if (!lang) return defaultHandlers.code(state, node);
-
-          try {
-            return onCode(lang, node);
-          } catch (e) {
-            const def = defaultHandlers.code(state, node);
-
-            if (e instanceof ShikiError) {
-              this.meta._fd_postprocess ??= [];
-              this.meta._fd_postprocess.push(async ({ highlighter }) => {
-                await highlighter.loadLanguage(lang as never);
-                Object.assign(def, onCode(lang, node));
-              });
-
-              return def;
-            }
-
-            if (e instanceof Error) {
-              console.error(
-                `[fumadocs-twoslash] encountered an error when highlighting codeblock in a Twoslash popup: ${e.message}`,
-              );
-            }
-
-            return def;
-          }
-        },
-      },
-    }) as Element
-  ).children;
-}
-
-export function renderMarkdownInline(
-  this: ShikiTransformerContextCommon,
-  md: string,
-  context?: string,
-): ElementContent[] {
-  const value = context === 'tag:param' ? md.replace(/^(?<link>[\w$-]+)/, '`$1` ') : md;
-
-  const children = renderMarkdown.call(this, value);
-  if (children.length === 1 && children[0].type === 'element' && children[0].tagName === 'p')
-    return children[0].children;
-  return children;
+  let text = '';
+  for (const child of token.children) text += getTokenString(child);
+  return text;
 }
