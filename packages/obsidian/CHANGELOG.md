@@ -1,3 +1,9 @@
+## fumadocs-obsidian@1.0.4
+
+### Replace `cnfast` with `cn`
+
+Internal refactor only.
+
 ## fumadocs-obsidian@1.0.3
 
 ### Read structured data from `page.data.structuredData()`

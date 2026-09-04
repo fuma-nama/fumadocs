@@ -1,3 +1,9 @@
+## @fumadocs/api-docs@0.2.8
+
+### Replace `cnfast` with `cn`
+
+Internal refactor only.
+
 ## @fumadocs/api-docs@0.2.7
 
 ### Keep overlapping `type` sets when merging `allOf`
