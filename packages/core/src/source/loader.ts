@@ -75,6 +75,10 @@ export interface Page<
   data: Data;
 
   locale?: string | undefined;
+  /**
+   * the page is inherited from the fallback language, `locale` has no translation of it.
+   */
+  fallback?: boolean;
 }
 
 export interface Meta<
@@ -210,6 +214,7 @@ function createPageIndexer({ url }: ResolvedLoaderConfig) {
           data: item.data,
           locale: lang,
         };
+        if (storage.inherited.has(filePath)) page.fallback = true;
         pathToPage.set(path, page);
         pages.set(prefix + page.slugs.join('/'), page);
         urlToPage.set(prefix + page.url, page);

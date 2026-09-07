@@ -380,6 +380,27 @@ test('Internationalized Routing: locale-only pages do not leak into other locale
   expect(names('cn')).toStrictEqual(['Extra CN', 'Shared']);
 });
 
+test('Internationalized Routing: fallback pages are marked', () => {
+  const result = loader({
+    baseUrl: '/',
+    i18n: {
+      languages: ['en', 'cn'],
+      defaultLanguage: 'en',
+    },
+    source: {
+      files: [
+        { type: 'page', path: 'test.mdx', data: { title: 'Hello' } },
+        { type: 'page', path: 'test.cn.mdx', data: { title: 'Hello Chinese' } },
+        { type: 'page', path: 'only-en.mdx', data: { title: 'Only English' } },
+      ],
+    },
+  });
+
+  expect(result.getPage(['test'], 'cn')?.fallback).toBeUndefined();
+  expect(result.getPage(['only-en'], 'en')?.fallback).toBeUndefined();
+  expect(result.getPage(['only-en'], 'cn')?.fallback).toBe(true);
+});
+
 test('Loader: Allow duplicate pages when explicitly referenced twice', () => {
   const result = loader({
     baseUrl: '/',

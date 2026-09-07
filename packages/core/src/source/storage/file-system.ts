@@ -6,6 +6,8 @@ import { dirname } from '../path';
 export class FileSystem<File> {
   files = new Map<string, File>();
   folders = new Map<string, string[]>();
+  /** paths of files copied from `inherit` and not written since */
+  inherited = new Set<string>();
 
   constructor(inherit?: FileSystem<File>) {
     if (inherit) {
@@ -16,6 +18,7 @@ export class FileSystem<File> {
 
       for (const [k, v] of inherit.files) {
         this.files.set(k, v);
+        this.inherited.add(k);
       }
     } else {
       this.folders.set('', []);
@@ -41,6 +44,7 @@ export class FileSystem<File> {
     }
 
     this.files.set(path, file);
+    this.inherited.delete(path);
   }
 
   /**
@@ -50,7 +54,10 @@ export class FileSystem<File> {
    * @param [recursive=false] - if set to `true`, it will also delete directories.
    */
   delete(path: string, recursive = false): boolean {
-    if (this.files.delete(path)) return true;
+    if (this.files.delete(path)) {
+      this.inherited.delete(path);
+      return true;
+    }
 
     if (recursive) {
       const folder = this.folders.get(path);
