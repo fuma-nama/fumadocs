@@ -2244,6 +2244,12 @@ importers:
       fuma-cli:
         specifier: ^0.1.1
         version: 0.1.1(@emnapi/core@2.0.0-alpha.3)(@emnapi/runtime@2.0.0-alpha.3)
+      magic-string:
+        specifier: ^1.2.3
+        version: 1.2.3
+      oxc-parser:
+        specifier: ^0.128.0
+        version: 0.128.0
       picocolors:
         specifier: ^1.1.1
         version: 1.1.1
@@ -2482,12 +2488,6 @@ importers:
       fuma-cli:
         specifier: ^0.1.1
         version: 0.1.1(@emnapi/core@2.0.0-alpha.3)(@emnapi/runtime@2.0.0-alpha.3)
-      magic-string:
-        specifier: ^1.2.3
-        version: 1.2.3
-      oxc-parser:
-        specifier: ^0.128.0
-        version: 0.128.0
       picocolors:
         specifier: ^1.1.1
         version: 1.1.1

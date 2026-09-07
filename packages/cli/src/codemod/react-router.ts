@@ -7,7 +7,7 @@ import {
   getDefaultExport,
   getProperty,
   type SourceFile,
-} from '@/transform/shared';
+} from '@/codemod/shared';
 
 /**
  * filter items in a specific array initializer in the prerender function
@@ -33,14 +33,19 @@ export function filterReactRouterPrerenderArray(
 }
 
 /**
- * Add a new route to route config
+ * Add new routes to route config, an item can be raw code (e.g. `layout(...)`)
  */
-export function addReactRouterRoute(file: SourceFile, routes: { path: string; entry: string }[]) {
+export function addReactRouterRoute(
+  file: SourceFile,
+  routes: ({ path: string; entry: string } | string)[],
+) {
   modifyReactRouterRoutes(file, (arr) => {
     addElements(
       file,
       arr,
-      routes.map(({ path, entry }) => `route('${path}', '${entry}')`),
+      routes.map((item) =>
+        typeof item === 'string' ? item : `route('${item.path}', '${item.entry}')`,
+      ),
     );
   });
 }

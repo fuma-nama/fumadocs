@@ -1,4 +1,4 @@
-import { ComponentInstaller } from 'fuma-cli/registry/installer';
+import { ComponentInstaller, type IOInterface } from 'fuma-cli/registry/installer';
 import { pluginPreserveLayouts } from './plugins/preserve';
 import { RegistryConnector } from 'fuma-cli/registry/connector';
 import type { LoadedConfig } from '@/config';
@@ -12,7 +12,12 @@ export class FumadocsComponentInstaller extends ComponentInstaller {
     spin: SpinnerResult;
   } | null = null;
 
-  constructor(connector: RegistryConnector, config: LoadedConfig, cwd?: string) {
+  constructor(
+    connector: RegistryConnector,
+    config: LoadedConfig,
+    cwd?: string,
+    io?: Partial<IOInterface>,
+  ) {
     super(connector, {
       cwd,
       framework: config.framework === 'astro' ? 'none' : config.framework,
@@ -46,6 +51,7 @@ export class FumadocsComponentInstaller extends ComponentInstaller {
         onFileDownloaded: (options) => {
           this.interactive?.spin.message(options.path);
         },
+        ...io,
       },
       plugins: [pluginPreserveLayouts()],
     });

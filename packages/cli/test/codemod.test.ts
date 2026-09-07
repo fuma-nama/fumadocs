@@ -1,19 +1,20 @@
 import { expect, test } from 'vitest';
-import { addTanstackPrerender } from '@/transform/tanstack-start';
+import { addTanstackPrerender } from '@/codemod/tanstack-start';
 import fs from 'node:fs/promises';
 import path from 'node:path';
 import {
   addReactRouterRoute,
   filterReactRouterPrerenderArray,
   filterReactRouterRoute,
-} from '@/transform/react-router';
+} from '@/codemod/react-router';
 import {
   addImport,
   addJsxAttribute,
   findJsxElement,
   parseSourceFile,
   prependJsxChildren,
-} from '@/transform/shared';
+} from '@/codemod/shared';
+import { addVitePlugin, wrapNextConfig } from '@/codemod/config';
 
 async function createSourceFile(templatePath: string) {
   const content = await fs.readFile(path.join(__dirname, templatePath), 'utf-8');
@@ -142,6 +143,78 @@ export default function Layout({ children }: LayoutProps<'/'>) {
         </html>
       );
     }
+    "
+  `);
+});
+
+test('add named imports to an existing declaration', () => {
+  const file = parseSourceFile('temp.ts', `import { index, type RouteConfig } from 'a';\n`);
+  addImport(file, { from: 'a', named: ['index', 'route'] });
+  addImport(file, { from: 'b', named: ['x'] });
+  expect(file.s.toString()).toMatchInlineSnapshot(`
+    "import { index, type RouteConfig, route } from 'a';
+    import { x } from 'b';
+    "
+  `);
+});
+
+test('add vite plugin', () => {
+  const file = parseSourceFile(
+    'vite.config.ts',
+    `import { defineConfig } from 'vite';
+
+export default defineConfig({
+  plugins: [react()],
+});
+`,
+  );
+  expect(addVitePlugin(file, { name: 'fumadocsMdx', from: 'fumadocs-mdx/vite' })).toBe(true);
+  expect(file.s.toString()).toMatchInlineSnapshot(`
+    "import { defineConfig } from 'vite';
+    import { fumadocsMdx } from 'fumadocs-mdx/vite';
+
+    export default defineConfig({
+      plugins: [react(), fumadocsMdx()],
+    });
+    "
+  `);
+});
+
+test('add vite plugin: nested path & skip existing', () => {
+  const file = parseSourceFile(
+    'waku.config.ts',
+    `export default defineConfig({
+  vite: { plugins: [fumadocsMdx()] },
+});
+`,
+  );
+  expect(
+    addVitePlugin(file, { name: 'fumadocsMdx', from: 'fumadocs-mdx/vite' }, ['vite', 'plugins']),
+  ).toBe(true);
+  expect(file.s.hasChanged()).toBe(false);
+});
+
+test('wrap next config', () => {
+  const file = parseSourceFile(
+    'next.config.mjs',
+    `const config = {
+  reactStrictMode: true,
+};
+
+export default config;
+`,
+  );
+  expect(wrapNextConfig(file)).toBe(true);
+  expect(file.s.toString()).toMatchInlineSnapshot(`
+    "import { createMDX } from 'fumadocs-mdx/next';
+
+    const config = {
+      reactStrictMode: true,
+    };
+
+    const withMDX = createMDX();
+
+    export default withMDX(config);
     "
   `);
 });

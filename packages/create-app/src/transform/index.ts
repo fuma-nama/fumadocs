@@ -1,13 +1,16 @@
 import { TemplatePluginContext } from '@/index';
-import { addImport, addJsxAttribute, createSourceFile, findJsxElement } from '@/transform/shared';
-import path from 'node:path';
 import {
+  addImport,
+  addJsxAttribute,
   addReactRouterRoute,
+  addTanstackPrerender,
+  createSourceFile,
   filterReactRouterPrerenderArray,
   filterReactRouterRoute,
-} from '@/transform/react-router';
+  findJsxElement,
+} from '@fumadocs/cli/codemod';
+import path from 'node:path';
 import fs from 'node:fs/promises';
-import { addTanstackPrerender } from '@/transform/tanstack-start';
 
 interface RootLayoutMod {
   addSearchDialog: (specifier: string) => void;

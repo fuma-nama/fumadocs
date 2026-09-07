@@ -6,7 +6,7 @@ import {
   getDefaultExport,
   getProperty,
   type SourceFile,
-} from '@/transform/shared';
+} from '@/codemod/shared';
 
 /**
  * Add path to the `pages` array in tanstack start vite config.

@@ -13,6 +13,42 @@ npx @fumadocs/cli
 
 You can change the output paths of components in the config.
 
+### Init
+
+Set up Fumadocs on an existing app, it supports Next.js, React Router, Tanstack Start and Waku.
+
+```package-install
+npx @fumadocs/cli init
+```
+
+To avoid conflicts with your app, the docs are added in a dedicated route group (e.g. `app/(docs)` on Next.js) with its own provider, layout and search route. Only a few edits are made to existing files:
+
+- Fumadocs MDX plugin in your framework config.
+- Fumadocs UI styles in your global CSS.
+- `suppressHydrationWarning` on the `<html>` element of your root layout, for the theme switch.
+- `.source` in `.gitignore`.
+
+It asks before overwriting a file, pass `--yes` to skip prompts and `--no-install` to only write dependencies to `package.json`.
+
+### Features
+
+Configure a feature on your project, it installs the needed components & routes, and wires them into your app.
+
+```package-install
+npx @fumadocs/cli feature ai --provider openrouter
+```
+
+| Feature | Description                                      |
+| ------- | ------------------------------------------------ |
+| `docs`  | Set up Fumadocs, same as `init`.                 |
+| `ai`    | [Ask AI](/docs/integrations/llms#ask-ai) dialog. |
+
+See help for the options of each feature:
+
+```package-install
+npx @fumadocs/cli feature ai -h
+```
+
 ### Components
 
 Select and install components.

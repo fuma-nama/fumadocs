@@ -10,6 +10,7 @@ import packageJson from '../package.json';
 import { customise } from '@/commands/customise';
 import { add } from '@/commands/add';
 import { exportEpub } from '@/commands/export-epub';
+import { registerFeatureCommands } from '@/commands/feature';
 import { HttpRegistryConnector, LocalRegistryConnector } from 'fuma-cli/registry/connector';
 
 const program = new Command().option('--config <string>');
@@ -51,6 +52,8 @@ program
     const client = createClientFromDir(options.dir);
     await add(input, client, config);
   });
+
+registerFeatureCommands(program, createClientFromDir);
 
 const exportCmd = program.command('export').description('export documentation to various formats');
 
