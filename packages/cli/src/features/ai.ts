@@ -1,6 +1,6 @@
-import fs from 'node:fs/promises';
 import path from 'node:path';
 import type { Feature } from '@/features';
+import { findSource } from './utils';
 import { addImport, findJsxElement, prependJsxChildren } from '@/codemod';
 import { docs } from './docs';
 
@@ -37,11 +37,8 @@ export const ai: Feature<{ provider: AIProvider }> = {
     await ctx.install(`ai/${provider}`);
     ctx.env(providers[provider].env, '');
 
-    const layout = await findDocsLayout(
-      ctx.project.cwd,
-      ctx.project.baseDir,
-      ctx.project.info.routesDir,
-    );
+    const { cwd, baseDir, info } = ctx.project;
+    const layout = await findSource(cwd, path.join(baseDir, info.routesDir), '<DocsLayout');
     const edited =
       layout !== undefined &&
       (await ctx.source(layout, (file) => {
@@ -85,16 +82,3 @@ export const ai: Feature<{ provider: AIProvider }> = {
     ctx.note(`Set ${providers[provider].env} in \`.env.local\`.`);
   },
 };
-
-/** the first file rendering `<DocsLayout` under the routes directory, relative to cwd */
-async function findDocsLayout(cwd: string, baseDir: string, routesDir: string) {
-  const dir = path.join(cwd, baseDir, routesDir);
-  const entries = await fs.readdir(dir, { recursive: true, withFileTypes: true }).catch(() => []);
-  entries.sort((a, b) => a.parentPath.length - b.parentPath.length);
-
-  for (const entry of entries) {
-    if (!entry.isFile() || !entry.name.endsWith('.tsx')) continue;
-    const file = path.join(entry.parentPath, entry.name);
-    if ((await fs.readFile(file, 'utf-8')).includes('<DocsLayout')) return path.relative(cwd, file);
-  }
-}

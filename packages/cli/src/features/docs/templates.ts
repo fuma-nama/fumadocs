@@ -1,4 +1,4 @@
-import type { Framework } from '@/project';
+import type { ReactFramework } from '@/project';
 
 export interface TemplateInput {
   static: boolean;
@@ -122,7 +122,7 @@ const clientContent = `function Content({ path }: { path: string }) {
   );
 }`;
 
-export const templates: Record<Framework, Template> = {
+export const templates: Record<ReactFramework, Template> = {
   next: (input) => ({
     ...shared(input, false),
     'app/(docs)/layout.tsx': `${input.static ? "'use client';\n" : ''}import { RootProvider } from '${input.provider}';

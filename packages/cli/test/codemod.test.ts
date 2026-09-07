@@ -15,6 +15,7 @@ import {
   prependJsxChildren,
 } from '@/codemod/shared';
 import { addVitePlugin, wrapNextConfig } from '@/codemod/config';
+import { enableProcessedMarkdown } from '@/codemod/source';
 
 async function createSourceFile(templatePath: string) {
   const content = await fs.readFile(path.join(__dirname, templatePath), 'utf-8');
@@ -217,4 +218,45 @@ export default config;
     export default withMDX(config);
     "
   `);
+});
+
+test('enable processed markdown', () => {
+  const file = parseSourceFile(
+    'source.ts',
+    `export const docs = defineDocs({
+  dir: 'content/docs',
+  docs: {
+    async: true,
+  },
+});
+`,
+  );
+  expect(enableProcessedMarkdown(file)).toBe(true);
+  expect(file.s.toString()).toMatchInlineSnapshot(`
+    "export const docs = defineDocs({
+      dir: 'content/docs',
+      docs: {
+        async: true,
+        postprocess: {
+          includeProcessedMarkdown: true,
+        },
+      },
+    });
+    "
+  `);
+  expect(enableProcessedMarkdown(parseSourceFile('source.ts', file.s.toString()))).toBe(true);
+});
+
+test('transform react router config: add exclude', async () => {
+  const { addReactRouterPrerenderArray } = await import('@/codemod/react-router');
+  const sourceFile = await createSourceFile('fixtures/react-router-config.txt');
+  addReactRouterPrerenderArray(sourceFile, 'excluded', ['/api/search', '/export/epub']);
+  expect(sourceFile.s.toString()).toContain("['/api/search', '/export/epub']");
+
+  const empty = parseSourceFile(
+    'temp.ts',
+    'export default { prerender() { const excluded = []; } };',
+  );
+  addReactRouterPrerenderArray(empty, 'excluded', ['/a']);
+  expect(empty.s.toString()).toContain("const excluded = ['/a'];");
 });

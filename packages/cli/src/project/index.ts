@@ -6,7 +6,9 @@ import { exists } from '@/utils/fs';
 
 export type PackageManager = NonNullable<Awaited<ReturnType<typeof detectPackageManager>>>['name'];
 
-export type Framework = 'next' | 'react-router' | 'tanstack-start' | 'waku';
+export type Framework = 'next' | 'react-router' | 'tanstack-start' | 'waku' | 'astro';
+/** frameworks supported by features that generate routes */
+export type ReactFramework = Exclude<Framework, 'astro'>;
 
 export interface FrameworkInfo {
   /** import specifier of `RootProvider` */
@@ -47,6 +49,12 @@ export const frameworks: Record<Framework, FrameworkInfo> = {
     rootFile: 'pages/_root.tsx',
     routesDir: 'pages',
     configFiles: ['waku.config.ts'],
+  },
+  astro: {
+    provider: 'fumadocs-ui/provider/astro',
+    rootFile: 'layouts/Layout.astro',
+    routesDir: 'pages',
+    configFiles: ['astro.config.mjs', 'astro.config.ts'],
   },
 };
 

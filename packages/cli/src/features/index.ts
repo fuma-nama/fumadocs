@@ -28,6 +28,12 @@ export interface Feature<Options extends object = Record<never, never>> {
 
 export type AnyFeature = Feature<Record<string, unknown>>;
 
+export interface PackageJson {
+  scripts?: Record<string, string>;
+  dependencies?: Record<string, string>;
+  devDependencies?: Record<string, string>;
+}
+
 export interface FeatureContext {
   project: Project;
   /** write a file (relative to project root), asks before overwriting */
@@ -36,6 +42,8 @@ export interface FeatureContext {
   source: (file: string, edit: (file: SourceFile) => void) => Promise<boolean>;
   /** append lines to a text file, skip lines already present */
   append: (file: string, lines: string[]) => Promise<void>;
+  remove: (file: string) => Promise<void>;
+  packageJson: (edit: (data: PackageJson) => void) => Promise<void>;
   /** install a registry component */
   install: (name: string, subRegistry?: string) => Promise<void>;
   /** `null` to install the latest version */
@@ -57,12 +65,14 @@ export interface RunOptions {
   project: Project;
   connector: RegistryConnector;
   io: FeatureIO;
+  /** preferred versions of dependencies, when a feature doesn't specify one */
+  versions?: Record<string, string>;
 }
 
 export async function runFeature<O extends object>(
   feature: Feature<O>,
   options: O,
-  { project, connector, io }: RunOptions,
+  { project, connector, io, versions }: RunOptions,
 ): Promise<{ notes: string[] }> {
   for (const dep of feature.requires ?? []) {
     if (dep.detect && !(await dep.detect(project)))
@@ -124,6 +134,17 @@ export async function runFeature<O extends object>(
       await fs.writeFile(target, `${current}${separator}${missing.join('\n')}\n`);
       io.log(`updated ${file}`);
     },
+    async remove(file) {
+      await fs.rm(path.join(cwd, file), { force: true });
+      io.log(`removed ${file}`);
+    },
+    async packageJson(edit) {
+      const target = path.join(cwd, 'package.json');
+      const data = JSON.parse(await fs.readFile(target, 'utf-8'));
+      edit(data);
+      await fs.writeFile(target, `${JSON.stringify(data, null, 2)}\n`);
+      io.log('updated package.json');
+    },
     async install(name, subRegistry) {
       const result = await installer.install(name, subRegistry);
       const manager = await result.deps();
@@ -141,7 +162,7 @@ export async function runFeature<O extends object>(
   await feature.apply(ctx, options);
 
   if (env.length > 0) await ctx.append('.env.local', env);
-  await installDependencies(project, deps, devDeps, io);
+  await installDependencies(project, deps, devDeps, io, versions);
   return { notes };
 }
 
@@ -150,6 +171,7 @@ async function installDependencies(
   deps: Record<string, string | null>,
   devDeps: Record<string, string | null>,
   io: FeatureIO,
+  versions: Record<string, string> = {},
 ) {
   const { dependencies = {}, devDependencies = {} } = project.packageJson;
   const filter = (input: Record<string, string | null>) =>
@@ -183,10 +205,10 @@ async function installDependencies(
   const write = (field: string, entries: [string, string | null][]) => {
     if (entries.length === 0) return;
     const target = (json[field] ??= {});
-    for (const [name, version] of entries) target[name] = version ?? 'latest';
+    for (const [name, version] of entries) target[name] = version ?? versions[name] ?? 'latest';
   };
   write('dependencies', missing);
   write('devDependencies', missingDev);
-  await fs.writeFile(file, JSON.stringify(json, null, 2));
+  await fs.writeFile(file, `${JSON.stringify(json, null, 2)}\n`);
   io.log('updated package.json');
 }

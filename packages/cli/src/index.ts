@@ -65,13 +65,8 @@ exportCmd
     'framework: next, astro, tanstack-start, react-router, waku',
   )
   .option('--output <path>', 'output file path', 'docs.epub')
-  .option('--scaffold-only', 'only scaffold the EPUB route, do not copy')
-  .action(async (options: { output?: string; framework: string; scaffoldOnly?: boolean }) => {
-    await exportEpub({
-      output: options.output,
-      framework: options.framework,
-      scaffoldOnly: options.scaffoldOnly,
-    });
+  .action(async (options: { output?: string; framework: string }) => {
+    await exportEpub(options);
   });
 
 program

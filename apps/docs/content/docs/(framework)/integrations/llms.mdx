@@ -40,6 +40,12 @@ export const docs = defineDocs({
 
 `getText('processed')` returns the processed document rather than the raw file content. MDX components appear as JSX syntax by default, you can render them into meaningful Markdown with the [`output` option](/docs/headless/mdx/remark-llms#output).
 
+<Callout title="Fumadocs CLI">
+
+`npx @fumadocs/cli feature llms` creates the routes below for you, including `getLLMText` and the `includeProcessedMarkdown` option.
+
+</Callout>
+
 ### `llms.txt`
 
 You can generate it from page tree using Loader API.
@@ -418,25 +424,23 @@ Common page actions for AI, require [`*.md`](#md-extension) to be implemented fi
 
 ![AI Page Actions](/docs/ai-page-actions.png)
 
-```npm
-npx @fumadocs/cli add ai/page-actions
-```
-
-Use it in your docs page like:
+Use them in your docs page like:
 
 ```tsx title="app/docs/[[...slug]]/page.tsx"
+import { MarkdownCopyButton, ViewOptionsPopover } from 'fumadocs-ui/layouts/docs/page';
+
 // URL to fetch Markdown content, only need to append .mdx to URL if you have `*.mdx` configured.
 // Use .md instead for the Tanstack Start example above.
 // Use getPageMarkdownUrl(page).url for the Waku example above.
-const markdownUrl = `${page.url}.mdx`
+const markdownUrl = `${page.url}.mdx`;
 
 <div className="flex flex-row gap-2 items-center border-b pt-2 pb-6">
-  <LLMCopyButton markdownUrl={markdownUrl} />
-  <ViewOptions
+  <MarkdownCopyButton markdownUrl={markdownUrl} />
+  <ViewOptionsPopover
     markdownUrl={markdownUrl}
     githubUrl={`https://github.com/${owner}/${repo}/blob/main/content/docs/${page.path}`}
   />
-</div>
+</div>;
 ```
 
 ## Ask AI

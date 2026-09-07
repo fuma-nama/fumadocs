@@ -20,8 +20,10 @@ export function getConfigObject(file: SourceFile): ObjectExpression | undefined 
     if (expr.type === 'ObjectExpression') return expr;
     if (expr.type === 'TSSatisfiesExpression' || expr.type === 'TSAsExpression') {
       expr = expr.expression;
-    } else if (expr.type === 'CallExpression' && expr.arguments[0]?.type === 'ObjectExpression') {
-      expr = expr.arguments[0];
+    } else if (expr.type === 'CallExpression' && expr.arguments.length > 0) {
+      const arg = expr.arguments[0];
+      if (arg.type === 'SpreadElement') return;
+      expr = arg;
     } else if (expr.type === 'Identifier') {
       const { name } = expr;
       const init = find(

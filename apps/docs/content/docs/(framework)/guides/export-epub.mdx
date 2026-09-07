@@ -11,6 +11,14 @@ It converts your MDX content to HTML, resolves images, and produces a standards-
 
 ## Setup
 
+Fumadocs CLI can set it up for you, it creates the export route protected by an `EXPORT_SECRET` and enables `includeProcessedMarkdown`:
+
+```package-install
+npx @fumadocs/cli feature epub
+```
+
+Or manually:
+
 ### Installation
 
 ```npm
@@ -148,7 +156,7 @@ export async function getConfig() {
 
 <Callout type="warning" title="Protect the endpoint">
 
-Consider protecting `/export/epub` in production. For example, require an `Authorization: Bearer <secret>` header and set `EXPORT_SECRET` in your environment. The Fumadocs CLI scaffolds a route with this protection when you run `fumadocs export epub --scaffold-only`.
+Consider protecting `/export/epub` in production. For example, require an `Authorization: Bearer <secret>` header and set `EXPORT_SECRET` in your environment, like the route created by Fumadocs CLI.
 
 </Callout>
 

@@ -17,6 +17,37 @@ export function filterReactRouterPrerenderArray(
   array: 'paths' | 'excluded',
   filter: (item: string) => boolean,
 ) {
+  const initializer = getPrerenderArray(file, array);
+  if (!initializer) return;
+
+  filterElements(file, initializer, (element) =>
+    filter(getCodeValue(file.code.slice(element.start, element.end))),
+  );
+}
+
+/**
+ * add items to a specific array initializer in the prerender function, skip existing ones
+ */
+export function addReactRouterPrerenderArray(
+  file: SourceFile,
+  array: 'paths' | 'excluded',
+  items: string[],
+) {
+  const initializer = getPrerenderArray(file, array);
+  if (!initializer) return;
+
+  const existing = new Set<string>();
+  for (const element of initializer.elements) {
+    if (element) existing.add(getCodeValue(file.code.slice(element.start, element.end)));
+  }
+  addElements(
+    file,
+    initializer,
+    items.filter((item) => !existing.has(item)).map((item) => `'${item}'`),
+  );
+}
+
+function getPrerenderArray(file: SourceFile, array: string): ArrayExpression | undefined {
   const method = getPrerenderMethod(file);
   if (!method) return;
 
@@ -25,11 +56,7 @@ export function filterReactRouterPrerenderArray(
     'VariableDeclarator',
     (item) => item.id.type === 'Identifier' && item.id.name === array,
   )?.init;
-  if (initializer?.type !== 'ArrayExpression') return;
-
-  filterElements(file, initializer, (element) =>
-    filter(getCodeValue(file.code.slice(element.start, element.end))),
-  );
+  if (initializer?.type === 'ArrayExpression') return initializer;
 }
 
 /**

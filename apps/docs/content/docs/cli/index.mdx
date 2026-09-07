@@ -38,10 +38,15 @@ Configure a feature on your project, it installs the needed components & routes,
 npx @fumadocs/cli feature ai --provider openrouter
 ```
 
-| Feature | Description                                      |
-| ------- | ------------------------------------------------ |
-| `docs`  | Set up Fumadocs, same as `init`.                 |
-| `ai`    | [Ask AI](/docs/integrations/llms#ask-ai) dialog. |
+| Feature       | Description                                                                               |
+| ------------- | ----------------------------------------------------------------------------------------- |
+| `docs`        | Set up Fumadocs, same as `init`.                                                          |
+| `ai`          | [Ask AI](/docs/integrations/llms#ask-ai) dialog, `--provider`.                            |
+| `llms`        | [LLM routes](/docs/integrations/llms): `llms.txt`, `llms-full.txt` and per-page Markdown. |
+| `og`          | Open Graph image generation, `--engine`.                                                  |
+| `orama-cloud` | Search powered by [Orama Cloud](/docs/headless/search/orama-cloud).                       |
+| `epub`        | Route to [export EPUB](/docs/guides/export-epub).                                         |
+| `lint`        | Configure ESLint (Next.js only), Biome or Oxlint, `--linter`.                             |
 
 See help for the options of each feature:
 

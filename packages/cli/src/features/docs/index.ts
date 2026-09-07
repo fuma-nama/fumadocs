@@ -12,6 +12,7 @@ import {
 } from '@/codemod';
 import { exists } from '@/utils/fs';
 import { sampleContent, templates } from './templates';
+import { reactFramework, reactOnly } from '../utils';
 
 const cssImports = (preset: string) => [
   `@import 'fumadocs-ui/css/${preset}.css';`,
@@ -22,12 +23,14 @@ export const docs: Feature = {
   id: 'docs',
   title: 'Docs',
   description: 'set up Fumadocs on your app, in a dedicated route group',
+  supports: reactOnly,
   async detect(project) {
     return exists(path.join(project.cwd, project.baseDir, 'lib/source.ts'));
   },
   async apply(ctx) {
     const { project } = ctx;
-    const { framework, baseDir, packageJson, config } = project;
+    const { baseDir, packageJson, config } = project;
+    const framework = reactFramework(project);
     const providerProps: string[] = [];
     if (project.static) providerProps.push('search={{ SearchDialog }}');
     if ('next-themes' in (packageJson.dependencies ?? {}))
