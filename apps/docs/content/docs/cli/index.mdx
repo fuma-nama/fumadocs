@@ -28,6 +28,8 @@ To avoid conflicts with your app, the docs are added in a dedicated route group 
 - `suppressHydrationWarning` on the `<html>` element of your root layout, for the theme switch.
 - `.source` in `.gitignore`.
 
+Pass `--i18n` to set up [internationalization](/docs/internationalization): the docs routes get a locale segment (optional for the default locale where the router supports it), a `lib/i18n.ts` config and, on Next.js, a proxy scoped to the docs routes. Other features follow the i18n config of your project.
+
 It asks before overwriting a file, pass `--yes` to skip prompts and `--no-install` to only write dependencies to `package.json`.
 
 ### Features

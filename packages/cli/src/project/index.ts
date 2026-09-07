@@ -58,12 +58,19 @@ export const frameworks: Record<Framework, FrameworkInfo> = {
   },
 };
 
+export interface I18nInfo {
+  /** the default locale is hidden from URLs (`hideLocale: 'default-locale'`) */
+  optionalLocale: boolean;
+}
+
 export interface Project {
   cwd: string;
   framework: Framework;
   info: FrameworkInfo;
   /** prerendered to static HTML, no server at runtime */
   static: boolean;
+  /** `lib/i18n.ts` exists */
+  i18n: I18nInfo | null;
   packageManager: PackageManager;
   /** directory of app code, relative to `cwd` */
   baseDir: string;
@@ -110,11 +117,19 @@ export async function loadProject(
     isStatic = info.isStatic(configContent);
   }
 
+  const i18nConfig = await fs
+    .readFile(path.join(cwd, config.baseDir, 'lib/i18n.ts'), 'utf-8')
+    .catch(() => null);
+
   return {
     cwd,
     framework,
     info,
     static: isStatic,
+    i18n:
+      i18nConfig === null
+        ? null
+        : { optionalLocale: /hideLocale:\s*['"]default-locale['"]/.test(i18nConfig) },
     packageManager: pm?.name ?? 'npm',
     baseDir: config.baseDir,
     config,

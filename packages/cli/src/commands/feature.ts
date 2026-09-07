@@ -29,35 +29,42 @@ export function registerFeatureCommands(
   createConnector: (dir?: string) => RegistryConnector,
 ) {
   const parent = program.command('feature').description('configure a feature on your project');
+  for (const feature of features) register(parent.command(feature.id), feature, createConnector);
 
-  for (const feature of features) {
-    const command = parent
-      .command(feature.id)
-      .description(feature.description)
-      .option('--dir <string>', 'the root url or directory to resolve registry')
-      .option('-y, --yes', 'skip prompts, overwrite existing files')
-      .option('--no-install', 'write dependencies to package.json without installing');
+  register(
+    program
+      .command('init')
+      .description('set up Fumadocs on an existing app, same as `feature docs`'),
+    features[0],
+    createConnector,
+  );
+}
 
-    for (const [key, option] of Object.entries(feature.options ?? {})) {
+function register(
+  command: Command,
+  feature: AnyFeature,
+  createConnector: (dir?: string) => RegistryConnector,
+) {
+  command
+    .description(feature.description)
+    .option('--dir <string>', 'the root url or directory to resolve registry')
+    .option('-y, --yes', 'skip prompts, overwrite existing files')
+    .option('--no-install', 'write dependencies to package.json without installing');
+
+  for (const [key, option] of Object.entries(feature.options ?? {})) {
+    if ('choices' in option) {
       command.option(
         `--${key} <value>`,
         `${option.message} (${option.choices.map((choice) => choice.value).join(', ')})`,
       );
+    } else {
+      command.option(`--${key}`, option.message);
     }
-
-    command.action(async (options: CommandOptions) => {
-      await run(feature, options, createConnector(options.dir));
-    });
   }
 
-  program
-    .command('init')
-    .description('set up Fumadocs on an existing app, same as `feature docs`')
-    .option('-y, --yes', 'skip prompts, overwrite existing files')
-    .option('--no-install', 'write dependencies to package.json without installing')
-    .action(async (options: CommandOptions) => {
-      await run(features[0], options, createConnector());
-    });
+  command.action(async (options: CommandOptions) => {
+    await run(feature, options, createConnector(options.dir));
+  });
 }
 
 async function run(feature: AnyFeature, options: CommandOptions, connector: RegistryConnector) {
@@ -69,19 +76,30 @@ async function run(feature: AnyFeature, options: CommandOptions, connector: Regi
   const values: Record<string, unknown> = {};
   for (const [key, option] of Object.entries(feature.options ?? {})) {
     const given = options[key];
-    if (given !== undefined) {
-      if (!option.choices.some((choice) => choice.value === given))
-        throw new Error(`invalid value for --${key}: ${given}`);
-      values[key] = given;
-      continue;
-    }
+    if ('choices' in option) {
+      if (given !== undefined) {
+        if (!option.choices.some((choice) => choice.value === given))
+          throw new Error(`invalid value for --${key}: ${given}`);
+        values[key] = given;
+        continue;
+      }
 
-    const value = await select({ message: option.message, options: option.choices });
-    if (isCancel(value)) {
-      cancel('Stopped.');
-      process.exit(0);
+      const value = await select({ message: option.message, options: option.choices });
+      if (isCancel(value)) {
+        cancel('Stopped.');
+        process.exit(0);
+      }
+      values[key] = value;
+    } else if (given !== undefined || options.yes) {
+      values[key] = given === true;
+    } else {
+      const value = await confirm({ message: option.message, initialValue: option.initialValue });
+      if (isCancel(value)) {
+        cancel('Stopped.');
+        process.exit(0);
+      }
+      values[key] = value;
     }
-    values[key] = value;
   }
 
   const spin = spinner();

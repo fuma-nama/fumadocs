@@ -1,8 +1,10 @@
 import path from 'node:path';
 import type { Feature } from '@/features';
-import type { ReactFramework } from '@/project';
+import type { I18nInfo, ReactFramework } from '@/project';
 import { addElements, addReactRouterRoute, getConfigObject, getProperty } from '@/codemod';
 import { docs } from './docs';
+import { reactRouterLangSegment, tanstackLangSegment } from './docs/templates';
+import { extendNextProxy } from './llms';
 import { reactFramework } from './utils';
 
 type Engine = 'takumi' | 'next-og';
@@ -30,18 +32,23 @@ const options = (engine: Engine) =>
 
 const ext = (engine: Engine) => (engine === 'takumi' ? 'webp' : 'png');
 
-const routes: Record<ReactFramework, (engine: Engine) => [file: string, content: string]> = {
-  next: (engine) => [
-    'app/og/docs/[...slug]/route.tsx',
+type Route = (engine: Engine, i18n: I18nInfo | null) => [file: string, content: string];
+
+const routes: Record<ReactFramework, Route> = {
+  next: (engine, i18n) => [
+    `app/(docs)/${i18n ? '[lang]/' : ''}og/docs/[...slug]/route.tsx`,
     `import { source } from '@/lib/source';
 import { notFound } from 'next/navigation';
 ${imports(engine)}
 
 export const revalidate = false;
 
-export async function GET(_req: Request, { params }: RouteContext<'/og/docs/[...slug]'>) {
-  const { slug } = await params;
-  const page = source.getPage(slug.slice(0, -1));
+export async function GET(
+  _req: Request,
+  { params }: RouteContext<'${i18n ? '/[lang]' : ''}/og/docs/[...slug]'>,
+) {
+  const { slug${i18n ? ', lang' : ''} } = await params;
+  const page = source.getPage(slug.slice(0, -1)${i18n ? ', lang' : ''});
   if (!page) notFound();
 
   return new ImageResponse(
@@ -51,8 +58,9 @@ export async function GET(_req: Request, { params }: RouteContext<'/og/docs/[...
 }
 
 export function generateStaticParams() {
-  return source.getPages().map((page) => ({
-    slug: [...page.slugs, 'image.${ext(engine)}'],
+  return source.generateParams().map((item) => ({
+    ...item,
+    slug: [...item.slug, 'image.${ext(engine)}'],
   }));
 }
 `,
@@ -65,7 +73,7 @@ ${imports(engine)}
 
 export function loader({ params }: Route.LoaderArgs) {
   const slugs = params['*'].split('/').filter((v) => v.length > 0);
-  const page = source.getPage(slugs.slice(0, -1));
+  const page = source.getPage(slugs.slice(0, -1), params.lang);
   if (!page) throw new Response(undefined, { status: 404 });
 
   return new ImageResponse(
@@ -75,18 +83,20 @@ export function loader({ params }: Route.LoaderArgs) {
 }
 `,
   ],
-  'tanstack-start': (engine) => [
-    'routes/og/docs/$.tsx',
-    `import { createFileRoute } from '@tanstack/react-router';
+  'tanstack-start': (engine, i18n) => {
+    const seg = tanstackLangSegment(i18n);
+    return [
+      `routes/${seg}og/docs/$.tsx`,
+      `import { createFileRoute } from '@tanstack/react-router';
 import { source } from '@/lib/source';
 ${imports(engine)}
 
-export const Route = createFileRoute('/og/docs/$')({
+export const Route = createFileRoute('/${seg}og/docs/$')({
   server: {
     handlers: {
       GET: async ({ params }) => {
         const slugs = params._splat?.split('/') ?? [];
-        const page = source.getPage(slugs.slice(0, -1));
+        const page = source.getPage(slugs.slice(0, -1)${i18n ? ', params.lang' : ''});
         if (!page) return new Response(undefined, { status: 404 });
 
         return new ImageResponse(
@@ -98,18 +108,19 @@ export const Route = createFileRoute('/og/docs/$')({
   },
 });
 `,
-  ],
-  waku: (engine) => [
-    `pages/_api/og/docs/[...slugs]/image.${ext(engine)}.tsx`,
+    ];
+  },
+  waku: (engine, i18n) => [
+    `pages/_api/${i18n ? '[lang]/' : ''}og/docs/[...slugs]/image.${ext(engine)}.tsx`,
     `import { source } from '@/lib/source';
 import type { ApiContext } from 'waku/router';
 ${imports(engine)}
 
 export async function GET(
   _: Request,
-  { params }: ApiContext<'/og/docs/[...slugs]/image.${ext(engine)}'>,
+  { params }: ApiContext<'${i18n ? '/[lang]' : ''}/og/docs/[...slugs]/image.${ext(engine)}'>,
 ) {
-  const page = source.getPage(params.slugs);
+  const page = source.getPage(params.slugs${i18n ? ', params.lang' : ''});
   if (!page) return new Response(undefined, { status: 404 });
 
   return new ImageResponse(
@@ -121,7 +132,7 @@ export async function GET(
 export async function getConfig() {
   return {
     render: 'static' as const,
-    staticPaths: source.generateParams().map((item) => item.slug),
+    staticPaths: source.generateParams().map((item) => ${i18n ? '[item.lang, ...item.slug]' : 'item.slug'}),
   } as const;
 }
 `,
@@ -143,19 +154,21 @@ export const og: Feature<{ engine: Engine }> = {
     },
   },
   async apply(ctx, { engine }) {
-    const { baseDir, configFile } = ctx.project;
+    const { baseDir, configFile, i18n } = ctx.project;
     const framework = reactFramework(ctx.project);
     if (engine === 'next-og' && framework !== 'next')
       throw new Error('next/og is only available on Next.js');
     if (engine === 'takumi') ctx.addDependencies({ 'takumi-js': null });
 
-    const [route, content] = routes[framework](engine);
+    const [route, content] = routes[framework](engine, i18n);
     await ctx.write(path.join(baseDir, route), content);
 
     if (framework === 'react-router') {
       await ctx.source(path.join(baseDir, 'routes.ts'), (file) => {
         if (file.code.includes(route)) return;
-        addReactRouterRoute(file, [{ path: 'og/docs/*', entry: route }]);
+        addReactRouterRoute(file, [
+          { path: `${reactRouterLangSegment(i18n)}og/docs/*`, entry: route },
+        ]);
       });
     }
     if (framework === 'next' && engine === 'takumi') {
@@ -170,9 +183,12 @@ export const og: Feature<{ engine: Engine }> = {
         });
       }
     }
+    if (framework === 'next' && i18n) {
+      await extendNextProxy(ctx, ['/og/:path*', '/:lang/og/:path*']);
+    }
 
     ctx.note(
-      `The image of a page is at \`/og/docs/<slugs>/image.${ext(engine)}\`, reference it in the page metadata (e.g. \`og:image\`).`,
+      `The image of a page is at \`${i18n ? '/<lang>' : ''}/og/docs/<slugs>/image.${ext(engine)}\`, reference it in the page metadata (e.g. \`og:image\`).`,
     );
   },
 };

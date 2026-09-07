@@ -12,11 +12,18 @@ export interface SelectOption<T> {
   choices: { value: T; label: string; hint?: string }[];
 }
 
+export interface ConfirmOption {
+  message: string;
+  initialValue?: boolean;
+}
+
+export type FeatureOption<T> = [T] extends [boolean] ? ConfirmOption : SelectOption<T>;
+
 export interface Feature<Options extends object = Record<never, never>> {
   id: string;
   title: string;
   description: string;
-  options?: { [K in keyof Options]: SelectOption<Options[K]> };
+  options?: { [K in keyof Options]: FeatureOption<Options[K]> };
   /** features that must be applied first */
   requires?: AnyFeature[];
   /** whether the feature is already applied to the project */
@@ -26,7 +33,9 @@ export interface Feature<Options extends object = Record<never, never>> {
   apply(ctx: FeatureContext, options: Options): Promise<void>;
 }
 
-export type AnyFeature = Feature<Record<string, unknown>>;
+export type AnyFeature = Omit<Feature<Record<string, unknown>>, 'options'> & {
+  options?: Record<string, SelectOption<unknown> | ConfirmOption>;
+};
 
 export interface PackageJson {
   scripts?: Record<string, string>;
@@ -70,7 +79,7 @@ export interface RunOptions {
 }
 
 export async function runFeature<O extends object>(
-  feature: Feature<O>,
+  feature: Omit<Feature<O>, 'options'>,
   options: O,
   { project, connector, io, versions }: RunOptions,
 ): Promise<{ notes: string[] }> {

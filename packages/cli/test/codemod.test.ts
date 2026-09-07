@@ -260,3 +260,16 @@ test('transform react router config: add exclude', async () => {
   addReactRouterPrerenderArray(empty, 'excluded', ['/a']);
   expect(empty.s.toString()).toContain("const excluded = ['/a'];");
 });
+
+test('add next proxy matcher', async () => {
+  const { addProxyMatcher } = await import('@/codemod/next-proxy');
+  const file = parseSourceFile(
+    'proxy.ts',
+    `export const config = {
+  matcher: ['/docs/:path*', '/:lang/docs/:path*'],
+};
+`,
+  );
+  expect(addProxyMatcher(file, ['/og/:path*', '/docs/:path*'])).toBe(true);
+  expect(file.s.toString()).toContain("['/docs/:path*', '/:lang/docs/:path*', '/og/:path*']");
+});

@@ -1,7 +1,7 @@
 import fs from 'node:fs/promises';
 import path from 'node:path';
 import type { Feature, FeatureContext } from '@/features';
-import type { Project } from '@/project';
+import type { I18nInfo, Project } from '@/project';
 import {
   addImport,
   addJsxAttribute,
@@ -11,7 +11,13 @@ import {
   wrapNextConfig,
 } from '@/codemod';
 import { exists } from '@/utils/fs';
-import { sampleContent, templates } from './templates';
+import {
+  nextProxy,
+  reactRouterLangSegment,
+  sampleContent,
+  sampleContentCn,
+  templates,
+} from './templates';
 import { reactFramework, reactOnly } from '../utils';
 
 const cssImports = (preset: string) => [
@@ -19,18 +25,23 @@ const cssImports = (preset: string) => [
   `@import 'fumadocs-ui/css/preset.css';`,
 ];
 
-export const docs: Feature = {
+export const docs: Feature<{ i18n: boolean }> = {
   id: 'docs',
   title: 'Docs',
   description: 'set up Fumadocs on your app, in a dedicated route group',
   supports: reactOnly,
+  options: {
+    i18n: { message: 'Enable internationalization?', initialValue: false },
+  },
   async detect(project) {
     return exists(path.join(project.cwd, project.baseDir, 'lib/source.ts'));
   },
-  async apply(ctx) {
+  async apply(ctx, options) {
     const { project } = ctx;
     const { baseDir, packageJson, config } = project;
     const framework = reactFramework(project);
+    // Waku has no optional route segments, the locale is always in the URL
+    const i18n = project.i18n ?? (options.i18n ? { optionalLocale: framework !== 'waku' } : null);
     const providerProps: string[] = [];
     if (project.static) providerProps.push('search={{ SearchDialog }}');
     if ('next-themes' in (packageJson.dependencies ?? {}))
@@ -45,6 +56,7 @@ export const docs: Feature = {
 
     const files = templates[framework]({
       static: project.static,
+      i18n,
       provider: project.info.provider,
       providerProps: providerProps.map((prop) => ` ${prop}`).join(''),
     });
@@ -52,12 +64,14 @@ export const docs: Feature = {
       await ctx.write(path.posix.join(baseDir, file), content);
     }
     await ctx.write('content/docs/index.mdx', sampleContent);
+    if (i18n) await ctx.write('content/docs/index.cn.mdx', sampleContentCn);
     await ctx.append('.gitignore', ['.source']);
+    if (i18n && framework === 'next') await configureProxy(ctx);
 
     await configureBundler(ctx);
     await configureCss(ctx);
     await suppressHydrationWarning(ctx);
-    if (framework === 'react-router') await configureRoutes(ctx);
+    if (framework === 'react-router') await configureRoutes(ctx, i18n);
 
     const tsconfig = await fs
       .readFile(path.join(project.cwd, 'tsconfig.json'), 'utf-8')
@@ -72,9 +86,44 @@ export const docs: Feature = {
         'In SPA mode, prerender the docs pages and search index, see https://fumadocs.dev/docs/manual-installation/tanstack-start.',
       );
     }
-    ctx.note('Start the dev server and open /docs to see your docs.');
+    if (i18n && framework === 'react-router') {
+      ctx.note(
+        'When prerendering, list the docs pages with `source.getPages().map((page) => page.url)` instead of globbing content files, see https://fumadocs.dev/docs/internationalization/react-router.',
+      );
+    }
+    if (i18n) {
+      ctx.note(
+        `Languages are configured in \`lib/i18n.ts\`, translated content uses a locale suffix like \`index.cn.mdx\`.\nUI translations: https://fumadocs.dev/docs/internationalization#translations`,
+      );
+    }
+    ctx.note(
+      `Start the dev server and open ${i18n && !i18n.optionalLocale ? '/en/docs' : '/docs'} to see your docs.`,
+    );
   },
 };
+
+/** the Next.js proxy (middleware) file of the project, relative to cwd */
+export async function findNextProxy({ cwd, baseDir }: Project) {
+  for (const file of ['proxy.ts', 'middleware.ts']) {
+    for (const dir of new Set([baseDir, ''])) {
+      const target = path.join(dir, file);
+      if (await exists(path.join(cwd, target))) return target;
+    }
+  }
+}
+
+/** the i18n middleware redirects & rewrites docs URLs without locale */
+async function configureProxy(ctx: FeatureContext) {
+  const existing = await findNextProxy(ctx.project);
+  if (!existing) {
+    await ctx.write(path.join(ctx.project.baseDir, 'proxy.ts'), nextProxy);
+    return;
+  }
+
+  ctx.note(
+    `A proxy already exists at ${existing}, handle the docs locale there. Fumadocs provides \`createI18nMiddleware\` from 'fumadocs-core/i18n/middleware', see https://fumadocs.dev/docs/internationalization/next.`,
+  );
+}
 
 async function configureBundler(ctx: FeatureContext) {
   const { framework, configFile } = ctx.project;
@@ -142,12 +191,12 @@ async function suppressHydrationWarning(ctx: FeatureContext) {
     ctx.note('Add `suppressHydrationWarning` to the `<html>` element of your root layout.');
 }
 
-async function configureRoutes(ctx: FeatureContext) {
+async function configureRoutes(ctx: FeatureContext, i18n: I18nInfo | null) {
   const { baseDir } = ctx.project;
   const edited = await ctx.source(path.join(baseDir, 'routes.ts'), (file) => {
     if (file.code.includes('routes/docs/page.tsx')) return;
     addReactRouterRoute(file, [
-      "layout('routes/docs/layout.tsx', [route('docs/*', 'routes/docs/page.tsx')])",
+      `layout('routes/docs/layout.tsx', [route('${reactRouterLangSegment(i18n)}docs/*', 'routes/docs/page.tsx')])`,
       { path: 'api/search', entry: 'routes/docs/search.ts' },
     ]);
     addImport(file, { from: '@react-router/dev/routes', named: ['layout', 'route'] });
