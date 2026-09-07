@@ -18,6 +18,7 @@ import { getMDXComponents } from '@/components/mdx';
 import { Banner } from 'fumadocs-ui/components/banner';
 import { Installation } from '@/components/preview/installation';
 import { Customization } from '@/components/preview/customization';
+import { AgentInstructions } from '@/components/agent-instructions';
 import {
   DocsBody,
   DocsPage,
@@ -146,6 +147,7 @@ export default async function Page(props: PageProps<'/docs/[[...slug]]'>) {
               },
               Installation,
               Customization,
+              AgentInstructions,
             })}
           />
         </FeedbackText>

@@ -23,6 +23,7 @@ const command = program
   .option('--src', '(Next.js only) enable `src/` directory')
   .option('--install', 'install packages automatically')
   .option('--no-git', 'disable auto Git repository initialization')
+  .option('-y, --yes', 'skip prompts and use defaults for unspecified options')
   .addOption(
     new Option(
       '--linter <name>',
@@ -57,13 +58,14 @@ async function main(): Promise<void> {
   command.parse(process.argv);
   const defaultName = command.args[0];
   const config = command.opts();
+  const skipPrompts = isCI || config.yes === true;
   intro(pc.bgCyan(pc.bold('Create Fumadocs App')));
 
   const options = await group(
     {
       name: async () => {
         if (defaultName) return defaultName;
-        if (isCI) return 'untitled';
+        if (skipPrompts) return 'untitled';
 
         return text({
           message: 'Project name',
@@ -73,7 +75,7 @@ async function main(): Promise<void> {
       },
       template: async () => {
         if (config.template) return config.template;
-        if (isCI) return '+next+fuma-docs-mdx';
+        if (skipPrompts) return '+next+fuma-docs-mdx';
 
         return select<Template>({
           message: 'Choose a template',
@@ -83,7 +85,7 @@ async function main(): Promise<void> {
       },
       src: async ({ results }: { results: { template?: Template } }) => {
         if (config.src !== undefined) return config.src;
-        if (isCI || !results.template?.startsWith('+next')) return false;
+        if (skipPrompts || !results.template?.startsWith('+next')) return false;
 
         return confirm({
           message: 'Use `/src` directory?',
@@ -92,7 +94,7 @@ async function main(): Promise<void> {
       },
       lint: async ({ results }: { results: { template?: Template } }) => {
         if (config.linter !== undefined) return config.linter;
-        if (isCI) return 'disabled';
+        if (skipPrompts) return 'disabled';
 
         return select({
           message: 'Configure linter?',
@@ -133,7 +135,7 @@ async function main(): Promise<void> {
       },
       search: async () => {
         if (config.search !== undefined) return config.search;
-        if (isCI) return 'orama';
+        if (skipPrompts) return 'orama';
 
         return select({
           message: 'Choose a search solution?',
@@ -154,7 +156,7 @@ async function main(): Promise<void> {
       ogImage: async ({ results }: { results: { template?: Template } }) => {
         if (config.ogImage !== undefined) return config.ogImage;
         if (!results.template?.startsWith('+next')) return 'takumi';
-        if (isCI) return 'next/og';
+        if (skipPrompts) return 'next/og';
 
         return select({
           message: 'Configure Open Graph Image generation?',
@@ -175,7 +177,7 @@ async function main(): Promise<void> {
       aiChat: async ({ results }: { results: { template?: Template } }) => {
         if (config.aiChat !== undefined) return config.aiChat;
         if (
-          isCI ||
+          skipPrompts ||
           results.template === 'astro' ||
           results.template === '+next+fuma-docs-mdx+static' ||
           results.template!.endsWith('-spa')
@@ -209,7 +211,7 @@ async function main(): Promise<void> {
       },
       installDeps: async () => {
         if (config.install !== undefined) return config.install;
-        if (isCI) return false;
+        if (skipPrompts) return false;
 
         return confirm({
           message: `Do you want to install packages automatically? (detected as ${config.pm})`,
@@ -230,7 +232,7 @@ async function main(): Promise<void> {
     options.aiChat = false;
   }
 
-  if (!isCI) await checkDir(projectName);
+  if (!isCI) await checkDir(projectName, skipPrompts);
 
   const info = spinner();
   info.start(`Generating Project`);
@@ -305,9 +307,13 @@ async function main(): Promise<void> {
   process.exit(0);
 }
 
-async function checkDir(outputDir: string) {
+async function checkDir(outputDir: string, skipPrompts: boolean) {
   const destDir = await fs.readdir(outputDir).catch(() => null);
   if (!destDir || destDir.length === 0) return;
+  if (skipPrompts) {
+    cancel(`directory ${outputDir} already exists and is not empty.`);
+    process.exit(1);
+  }
   const del = await confirm({
     message: `directory ${outputDir} already exists, do you want to delete its files?`,
   });
