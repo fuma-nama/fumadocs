@@ -443,6 +443,24 @@ const markdownUrl = `${page.url}.mdx`;
 </div>;
 ```
 
+## MCP Server
+
+Expose your docs to AI agents through a [MCP](https://modelcontextprotocol.io) server, with tools to list, search and read pages.
+
+```package-install
+npx @fumadocs/cli feature mcp
+```
+
+It creates a `/api/mcp` route with the streamable HTTP transport, on top of the [LLM routes](#docs-for-llm) above. Connect an agent to it with:
+
+```json
+{
+  "mcpServers": {
+    "docs": { "url": "https://your-site.com/api/mcp" }
+  }
+}
+```
+
 ## Ask AI
 
 ![AI Search](/docs/ai-search.png)

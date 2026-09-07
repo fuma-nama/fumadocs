@@ -12,6 +12,14 @@ SDK, you can also plug the built-in dialog interface.
 
 ## Setup
 
+Fumadocs CLI can set it up for you, it creates the search dialog, the `static.json` route and a script to sync the search index after each build:
+
+```package-install
+npx @fumadocs/cli feature search --provider algolia
+```
+
+Or manually:
+
 Create a search dialog, replace `appId`, `apiKey` and `indexName` with your desired values.
 
 <include meta='title="components/search.tsx"'>./algolia.tsx</include>

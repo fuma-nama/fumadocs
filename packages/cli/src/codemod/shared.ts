@@ -105,6 +105,19 @@ export function prependJsxChildren(file: SourceFile, element: JSXElement, jsx: s
   s.overwrite(openingElement.end, closingElement.start, `\n${body}\n${indent}`);
 }
 
+/**
+ * Insert JSX after the children of the element
+ */
+export function appendJsxChildren(file: SourceFile, element: JSXElement, jsx: string) {
+  const { closingElement } = element;
+  if (!closingElement) return;
+  const { code, s } = file;
+  const indent = lineIndent(code, element.start);
+  const body = jsx.replaceAll(/^(?=.)/gm, `${indent}  `);
+  // children end with the indentation of the closing tag
+  s.appendLeft(closingElement.start - indent.length, `${body}\n`);
+}
+
 /** trim, and remove the common indentation */
 function dedent(text: string): string {
   const lines = text.trim().split('\n');

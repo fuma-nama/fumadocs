@@ -10,6 +10,7 @@ import {
 import {
   addImport,
   addJsxAttribute,
+  appendJsxChildren,
   findJsxElement,
   parseSourceFile,
   prependJsxChildren,
@@ -272,4 +273,66 @@ test('add next proxy matcher', async () => {
   );
   expect(addProxyMatcher(file, ['/og/:path*', '/docs/:path*'])).toBe(true);
   expect(file.s.toString()).toContain("['/docs/:path*', '/:lang/docs/:path*', '/og/:path*']");
+});
+
+test('append jsx children', () => {
+  const file = parseSourceFile(
+    'page.tsx',
+    `export default function Page() {
+  return (
+    <DocsPage>
+      <DocsBody />
+    </DocsPage>
+  );
+}
+`,
+  );
+  const element = findJsxElement(file, 'DocsPage')!;
+  appendJsxChildren(file, element, '<Feedback\n  a="b"\n/>');
+  expect(file.s.toString()).toMatchInlineSnapshot(`
+    "export default function Page() {
+      return (
+        <DocsPage>
+          <DocsBody />
+          <Feedback
+            a="b"
+          />
+        </DocsPage>
+      );
+    }
+    "
+  `);
+});
+
+test('add next rewrites', async () => {
+  const { addNextRewrites } = await import('@/codemod/config');
+  const file = parseSourceFile(
+    'next.config.mjs',
+    `const config = {
+  reactStrictMode: true,
+};
+
+export default withMDX(config);
+`,
+  );
+  expect(
+    addNextRewrites(file, [{ source: '/docs/:path*.md', destination: '/llms.mdx/docs/:path*' }]),
+  ).toBe(true);
+  expect(file.s.toString()).toMatchInlineSnapshot(`
+    "const config = {
+      reactStrictMode: true,
+      async rewrites() {
+        return [
+          {
+            source: '/docs/:path*.md',
+            destination: '/llms.mdx/docs/:path*',
+          },
+        ];
+      },
+    };
+
+    export default withMDX(config);
+    "
+  `);
+  expect(addNextRewrites(parseSourceFile('a.ts', file.s.toString()), [])).toBe(false);
 });

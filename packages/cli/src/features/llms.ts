@@ -1,7 +1,12 @@
 import path from 'node:path';
 import type { Feature } from '@/features';
 import type { I18nInfo, ReactFramework } from '@/project';
-import { addProxyMatcher, addReactRouterRoute, enableProcessedMarkdown } from '@/codemod';
+import {
+  addNextRewrites,
+  addProxyMatcher,
+  addReactRouterRoute,
+  enableProcessedMarkdown,
+} from '@/codemod';
 import { docs, findNextProxy } from './docs';
 import { reactRouterLangSegment, tanstackLangSegment } from './docs/templates';
 import { reactFramework } from './utils';
@@ -68,7 +73,10 @@ export async function GET(
   { params }: RouteContext<'${i18n ? '/[lang]' : ''}/llms.mdx/docs/[[...slug]]'>,
 ) {
   const { slug${i18n ? ', lang' : ''} } = await params;
-  const page = source.getPage(slug?.slice(0, -1)${i18n ? ', lang' : ''});
+  const slugs = slug?.slice(0, -1) ?? [];
+  // \`/docs/index.md\` is rewritten to the root page
+  if (slugs.at(-1) === 'index') slugs.pop();
+  const page = source.getPage(slugs${i18n ? ', lang' : ''});
   if (!page) notFound();
 
   return ${markdown};
@@ -83,7 +91,7 @@ export function generateStaticParams() {
 `,
     ],
   ],
-  'react-router': () => [
+  'react-router': (i18n) => [
     [
       'llms/index.ts',
       `${index}
@@ -111,7 +119,7 @@ export async function loader({ params }: Route.LoaderArgs) {
   const slugs = params['*'].split('/').filter((v) => v.length > 0);
   // remove the appended "content.md"
   slugs.pop();
-  const page = source.getPage(slugs, params.lang);
+  const page = source.getPage(slugs${i18n ? ', params.lang' : ''});
   if (!page) return new Response('not found', { status: 404 });
 
   return ${markdown};
@@ -265,17 +273,53 @@ export const llms: Feature = {
           { path: `${reactRouterLangSegment(i18n)}llms.mdx/docs/*`, entry: 'llms/mdx.ts' },
         ]);
       });
-    } else if (framework === 'next' && i18n) {
-      await extendNextProxy(ctx, ['/llms.mdx/:path*', '/:lang/llms.mdx/:path*']);
+    } else if (framework === 'next') {
+      if (i18n) await extendNextProxy(ctx, ['/llms.mdx/:path*', '/:lang/llms.mdx/:path*']);
+      await configureMarkdownUrl(ctx, i18n !== null);
     }
 
     const markdownUrl =
-      framework === 'tanstack-start' ? '`${page.url}.md`' : '`/llms.mdx${page.url}/content.md`';
+      framework === 'react-router' || framework === 'waku'
+        ? '`/llms.mdx${page.url}/content.md`'
+        : '`${page.url}.md`';
+    if (framework === 'react-router' || framework === 'waku') {
+      ctx.note(
+        'To serve pages with a `.md` suffix, rewrite `/docs/*.md` to the `llms.mdx` route in a middleware, see https://fumadocs.dev/docs/integrations/llms#md-extension.',
+      );
+    }
     ctx.note(
       `Add page actions to your docs page with \`MarkdownCopyButton\` and \`ViewOptionsPopover\` from 'fumadocs-ui/layouts/docs/page', the Markdown URL of a page is ${markdownUrl}.`,
     );
   },
 };
+
+/** `/docs/*.md` serves the Markdown of a page, like TanStack Start's `.md` route */
+async function configureMarkdownUrl(ctx: Parameters<Feature['apply']>[0], i18n: boolean) {
+  const { configFile } = ctx.project;
+  const lang = i18n ? '/:lang' : '';
+  const edited =
+    configFile !== undefined &&
+    (await ctx
+      .source(configFile, (file) => {
+        if (file.code.includes('llms.mdx')) return;
+        if (
+          !addNextRewrites(file, [
+            {
+              source: `${lang}/docs/:path*.md`,
+              destination: `${lang}/llms.mdx/docs/:path*/content.md`,
+            },
+          ])
+        )
+          throw new Error('cannot add rewrites');
+      })
+      .catch(() => false));
+
+  if (!edited) {
+    ctx.note(
+      `Rewrite \`${lang}/docs/:path*.md\` to \`${lang}/llms.mdx/docs/:path*/content.md\` in your Next.js config to serve pages with a \`.md\` suffix.`,
+    );
+  }
+}
 
 /** routes under `[lang]` need the i18n middleware to resolve the locale */
 export async function extendNextProxy(ctx: Parameters<Feature['apply']>[0], patterns: string[]) {

@@ -95,3 +95,22 @@ export function wrapNextConfig(file: SourceFile): boolean {
   addImport(file, { from: 'fumadocs-mdx/next', named: ['createMDX'] });
   return true;
 }
+
+/**
+ * Add rewrites to a Next.js config, skip if `rewrites` is already defined
+ */
+export function addNextRewrites(
+  file: SourceFile,
+  rewrites: { source: string; destination: string }[],
+): boolean {
+  const config = getConfigObject(file);
+  if (!config) return false;
+  if (getProperty(config, 'rewrites')) return false;
+
+  const items = rewrites.map(
+    ({ source, destination }) =>
+      `    {\n      source: '${source}',\n      destination: '${destination}',\n    },`,
+  );
+  addElements(file, config, [`async rewrites() {\n  return [\n${items.join('\n')}\n  ];\n}`]);
+  return true;
+}

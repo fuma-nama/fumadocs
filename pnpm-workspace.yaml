@@ -62,6 +62,7 @@ minimumReleaseAgeExclude:
   - satteri@0.10.3
   - cn@0.2.4
 allowBuilds:
+  '@mixedbread/cli': set this to true or false
   '@parcel/watcher': false
   core-js: false
   esbuild: false

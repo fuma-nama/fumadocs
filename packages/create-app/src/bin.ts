@@ -21,7 +21,7 @@ import { feature } from './plugins/feature';
 import { ai } from '@fumadocs/cli/features/ai';
 import { lint } from '@fumadocs/cli/features/lint';
 import { og } from '@fumadocs/cli/features/og';
-import { oramaCloud } from '@fumadocs/cli/features/orama-cloud';
+import { search } from '@fumadocs/cli/features/search';
 
 const command = program
   .argument('[name]', 'the project name')
@@ -36,7 +36,13 @@ const command = program
     ).choices(['eslint', 'oxlint', 'biome']),
   )
   .addOption(
-    new Option('--search <name>', 'configure a search solution').choices(['orama', 'orama-cloud']),
+    new Option('--search <name>', 'configure a search solution').choices([
+      'orama',
+      'orama-cloud',
+      'algolia',
+      'typesense',
+      'mixedbread',
+    ]),
   )
   .addOption(
     new Option('--og-image <name>', 'configure OG image generation').choices(['next-og', 'takumi']),
@@ -155,6 +161,9 @@ async function main(): Promise<void> {
               label: 'Orama Cloud',
               hint: '3rd party search solution, signup needed',
             },
+            { value: 'algolia', label: 'Algolia', hint: 'signup needed' },
+            { value: 'typesense', label: 'Typesense', hint: 'self-hosted or cloud' },
+            { value: 'mixedbread', label: 'Mixedbread', hint: 'AI search, signup needed' },
           ],
         });
       },
@@ -248,7 +257,7 @@ async function main(): Promise<void> {
     plugins.push(nextUseSrc());
   }
 
-  if (options.search === 'orama-cloud') plugins.push(feature(oramaCloud, {}));
+  if (options.search !== 'orama') plugins.push(feature(search, { provider: options.search }));
   if (options.lint !== 'disabled') plugins.push(feature(lint, { linter: options.lint }));
   if (options.ogImage === 'takumi' && options.template.startsWith('+next'))
     plugins.push(feature(og, { engine: 'takumi' }));

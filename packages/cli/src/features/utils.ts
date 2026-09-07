@@ -4,7 +4,12 @@ import type { Project, ReactFramework } from '@/project';
 import type { PackageJson } from '@/features';
 
 /** the shallowest `.ts`/`.tsx` file under `dir` whose content includes `needle`, relative to `cwd` */
-export async function findSource(cwd: string, dir: string, needle: string) {
+export async function findSource(
+  cwd: string,
+  dir: string,
+  needle: string,
+  match: (file: string) => boolean = () => true,
+) {
   const entries = await fs
     .readdir(path.join(cwd, dir), { recursive: true, withFileTypes: true })
     .catch(() => []);
@@ -14,6 +19,7 @@ export async function findSource(cwd: string, dir: string, needle: string) {
     if (!entry.isFile() || !/\.tsx?$/.test(entry.name) || entry.parentPath.includes('node_modules'))
       continue;
     const file = path.join(entry.parentPath, entry.name);
+    if (!match(file)) continue;
     if ((await fs.readFile(file, 'utf-8')).includes(needle)) return path.relative(cwd, file);
   }
 }
