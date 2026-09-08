@@ -16,7 +16,13 @@ async function readShadcnAliases(cwd: string): Promise<Record<string, string>> {
   const content = await fs.readFile(path.join(cwd, 'components.json'), 'utf-8').catch(() => null);
   if (!content) return {};
   const out: Record<string, string> = {};
-  for (const [key, alias] of Object.entries(JSON.parse(content).aliases ?? {})) {
+  let aliases: Record<string, unknown> = {};
+  try {
+    aliases = JSON.parse(content).aliases ?? {};
+  } catch {
+    return out;
+  }
+  for (const [key, alias] of Object.entries(aliases)) {
     // e.g. `@/components/ui` -> `./components/ui`
     if (typeof alias === 'string') out[key] = `.${alias.slice(alias.indexOf('/'))}`;
   }

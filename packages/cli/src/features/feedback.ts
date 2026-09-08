@@ -13,11 +13,12 @@ export const feedback: Feature = {
     const { cwd, baseDir, info, framework, static: isStatic } = ctx.project;
     await ctx.install('feedback');
 
-    // server actions are only available on RSC frameworks
-    const serverAction = !isStatic && (framework === 'next' || framework === 'waku');
+    // server actions are only available on RSC frameworks, static export has none
+    const serverAction = framework === 'next' || framework === 'waku';
     const page = await findSource(cwd, path.join(baseDir, info.routesDir), '<DocsPage');
     const edited =
       page !== undefined &&
+      !(serverAction && isStatic) &&
       (await ctx.source(page, (file) => {
         if (file.code.includes('<Feedback')) return;
         const element = findJsxElement(file, 'DocsPage');
@@ -38,7 +39,9 @@ export const feedback: Feature = {
 
     if (!edited) {
       ctx.note(
-        'Add `<Feedback />` from `@/components/feedback/client` to the bottom of your docs page.',
+        serverAction && isStatic
+          ? 'Static export has no server actions, render `<Feedback />` from `@/components/feedback/client` in a client component and send the feedback to your API in `onSendAction`.'
+          : 'Add `<Feedback />` from `@/components/feedback/client` to the bottom of your docs page.',
       );
     }
     ctx.note(

@@ -389,9 +389,11 @@ export async function extendNextProxy(ctx: FeatureContext, route: FormattedRoute
   const proxy = await findNextProxy(ctx.project);
   const edited =
     proxy !== undefined &&
-    (await ctx.source(proxy, (file) => {
-      addProxyMatcher(file, patterns);
-    }));
+    (await ctx
+      .source(proxy, (file) => {
+        if (!addProxyMatcher(file, patterns)) throw new Error('cannot find the matcher');
+      })
+      .catch(() => false));
   if (!edited)
     ctx.note(
       `Add ${patterns.map((p) => `\`${p}\``).join(', ')} to the matcher of your i18n middleware.`,

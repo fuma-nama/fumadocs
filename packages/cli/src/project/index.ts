@@ -109,7 +109,10 @@ export async function loadProject(
 ): Promise<Project> {
   const info = frameworks[framework];
   const [packageJson, pm] = await Promise.all([
-    fs.readFile(path.join(cwd, 'package.json'), 'utf-8').then(JSON.parse, () => ({})),
+    fs
+      .readFile(path.join(cwd, 'package.json'), 'utf-8')
+      .then((content) => JSON.parse(content))
+      .catch(() => ({})),
     detectPackageManager({ cwd }),
   ]);
   let configFile: string | undefined;

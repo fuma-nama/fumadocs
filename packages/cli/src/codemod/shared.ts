@@ -44,8 +44,11 @@ export async function createSourceFile(path: string): Promise<SourceFile> {
   return parseSourceFile(path, await fs.readFile(path, 'utf-8'));
 }
 
-export function getCodeValue(v: string) {
-  return new Function(`return ${v}`)();
+/** the value of a string literal, or a template literal without expressions */
+export function getStringValue(node: Node): string | undefined {
+  if (node.type === 'Literal' && typeof node.value === 'string') return node.value;
+  if (node.type === 'TemplateLiteral' && node.expressions.length === 0)
+    return node.quasis[0].value.cooked ?? undefined;
 }
 
 export function* descendants(node: Node): Generator<Node> {

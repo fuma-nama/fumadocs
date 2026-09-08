@@ -2,7 +2,7 @@ import type { CallExpression } from 'oxc-parser';
 import {
   addElements,
   find,
-  getCodeValue,
+  getStringValue,
   getDefaultExport,
   getProperty,
   type SourceFile,
@@ -30,7 +30,8 @@ export function addTanstackPrerender(file: SourceFile, paths: string[]) {
   const existingPaths = new Set<string>();
   for (const element of pages.elements) {
     const value = element?.type === 'ObjectExpression' && getProperty(element, 'path')?.value;
-    if (value) existingPaths.add(getCodeValue(file.code.slice(value.start, value.end)));
+    const path = value ? getStringValue(value) : undefined;
+    if (path !== undefined) existingPaths.add(path);
   }
   addElements(file, pages, paths.filter((path) => !existingPaths.has(path)).map(toItem));
 }

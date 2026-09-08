@@ -429,10 +429,9 @@ Use them in your docs page like:
 ```tsx title="app/docs/[[...slug]]/page.tsx"
 import { MarkdownCopyButton, ViewOptionsPopover } from 'fumadocs-ui/layouts/docs/page';
 
-// URL to fetch Markdown content, only need to append .mdx to URL if you have `*.mdx` configured.
-// Use .md instead for the Tanstack Start example above.
-// Use getPageMarkdownUrl(page).url for the Waku example above.
-const markdownUrl = `${page.url}.mdx`;
+// the URL served by the `.md` rewrite above, the root page is at `/docs/index.md`.
+// Tanstack Start: `encodeMarkdownUrl(page.slugs, page.locale)`, Waku: `getPageMarkdownUrl(page).url`.
+const markdownUrl = page.slugs.length > 0 ? `${page.url}.md` : `${page.url}/index.md`;
 
 <div className="flex flex-row gap-2 items-center border-b pt-2 pb-6">
   <MarkdownCopyButton markdownUrl={markdownUrl} />

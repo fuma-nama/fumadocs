@@ -15,7 +15,8 @@ export async function findSource(
   const entries = await fs
     .readdir(path.join(cwd, dir), { recursive: true, withFileTypes: true })
     .catch(() => []);
-  entries.sort((a, b) => a.parentPath.length - b.parentPath.length);
+  const depth = (dir: string) => dir.split(path.sep).length;
+  entries.sort((a, b) => depth(a.parentPath) - depth(b.parentPath));
 
   for (const entry of entries) {
     if (!entry.isFile() || !/\.tsx?$/.test(entry.name) || entry.parentPath.includes('node_modules'))
@@ -44,7 +45,7 @@ export const posix = (file: string) => file.split(path.sep).join('/');
 /** add an export to a source file, unless a declaration with the same name exists */
 export async function addExport(ctx: FeatureContext, file: string, name: string, code: string) {
   const current = await fs.readFile(path.join(ctx.project.cwd, file), 'utf-8').catch(() => '');
-  if (new RegExp(`export (const|function) ${name}\\b`).test(current)) return false;
+  if (new RegExp(`export (async )?(const|function) ${name}\\b`).test(current)) return false;
   await ctx.append(file, [code]);
   return true;
 }

@@ -62,7 +62,8 @@ function register(
     }
   }
 
-  command.action(async (options: CommandOptions) => {
+  command.action(async (_: CommandOptions, cmd: Command) => {
+    const options: CommandOptions = cmd.optsWithGlobals();
     await run(feature, options, createConnector(options.dir));
   });
 }
@@ -90,8 +91,10 @@ async function run(feature: AnyFeature, options: CommandOptions, connector: Regi
         process.exit(0);
       }
       values[key] = value;
-    } else if (given !== undefined || options.yes) {
+    } else if (given !== undefined) {
       values[key] = given === true;
+    } else if (options.yes) {
+      values[key] = option.initialValue ?? false;
     } else {
       const value = await confirm({ message: option.message, initialValue: option.initialValue });
       if (isCancel(value)) {

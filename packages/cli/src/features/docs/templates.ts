@@ -196,8 +196,7 @@ export const templates: Record<ReactFramework, Template> = {
       ...shared(input, false),
       [`${dir}/layout.tsx`]: input.static
         ? `'use client';
-${providerImports(input)}import { type ReactNode${i18n ? ', use' : ''} } from 'react';
-
+${providerImports(input)}${i18n ? "import { use } from 'react';\n" : ''}
 export default function Layout({ ${i18n ? 'params, ' : ''}children }: LayoutProps<'${route || '/'}'>) {
 ${i18n ? '  const { lang } = use(params);\n\n' : ''}  return (
     <RootProvider${providerProps(input)}>

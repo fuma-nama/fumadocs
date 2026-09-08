@@ -29,6 +29,9 @@ export function enableProcessedMarkdown(file: SourceFile): boolean {
   }
   if (postprocess.type !== 'ObjectExpression') return false;
 
-  if (!getProperty(postprocess, 'includeProcessedMarkdown')) addElements(file, postprocess, [flag]);
+  const existing = getProperty(postprocess, 'includeProcessedMarkdown')?.value;
+  if (!existing) addElements(file, postprocess, [flag]);
+  else if (existing.type === 'Literal' && existing.value === false)
+    file.s.overwrite(existing.start, existing.end, 'true');
   return true;
 }

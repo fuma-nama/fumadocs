@@ -3,7 +3,7 @@ import {
   addElements,
   filterElements,
   find,
-  getCodeValue,
+  getStringValue,
   getDefaultExport,
   getProperty,
   type SourceFile,
@@ -20,9 +20,10 @@ export function filterReactRouterPrerenderArray(
   const initializer = getPrerenderArray(file, array);
   if (!initializer) return;
 
-  filterElements(file, initializer, (element) =>
-    filter(getCodeValue(file.code.slice(element.start, element.end))),
-  );
+  filterElements(file, initializer, (element) => {
+    const value = getStringValue(element);
+    return value === undefined || filter(value);
+  });
 }
 
 /**
@@ -38,7 +39,8 @@ export function addReactRouterPrerenderArray(
 
   const existing = new Set<string>();
   for (const element of initializer.elements) {
-    if (element) existing.add(getCodeValue(file.code.slice(element.start, element.end)));
+    const value = element ? getStringValue(element) : undefined;
+    if (value !== undefined) existing.add(value);
   }
   addElements(
     file,
@@ -90,10 +92,9 @@ export function filterReactRouterRoute(
       const { callee, arguments: args } = element;
       if (callee.type !== 'Identifier' || callee.name !== 'route') return true;
 
-      return filter({
-        path: getCodeValue(file.code.slice(args[0].start, args[0].end)),
-        entry: getCodeValue(file.code.slice(args[1].start, args[1].end)),
-      });
+      const path = getStringValue(args[0]);
+      const entry = getStringValue(args[1]);
+      return path === undefined || entry === undefined || filter({ path, entry });
     });
   });
 }
