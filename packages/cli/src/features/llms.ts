@@ -1,6 +1,6 @@
 import path from 'node:path';
 import type { Feature, FeatureContext } from '@/features';
-import type { ReactFramework } from '@/project';
+import type { I18nInfo, ReactFramework } from '@/project';
 import { type FormattedRoute, formatRoute, type RouteDescriptor } from '@/project/route';
 import {
   addImport,
@@ -19,7 +19,7 @@ import {
   sharedRoute,
 } from './utils';
 
-const getLLMText = `
+export const getLLMText = `
 export async function getLLMText(page: (typeof source)['$inferPage']) {
   const processed = await page.data.getText('processed');
 
@@ -29,7 +29,7 @@ export async function getLLMText(page: (typeof source)['$inferPage']) {
 }`;
 
 /** the Markdown URL of a page, `/llms.mdx/docs/<slugs>/content.md` */
-const markdownUrl = `
+export const markdownUrl = `
 export function getPageMarkdownUrl(page: (typeof source)['$inferPage']) {
   const segments = [...page.slugs, 'content.md'];
 
@@ -40,7 +40,7 @@ export function getPageMarkdownUrl(page: (typeof source)['$inferPage']) {
 }`;
 
 /** TanStack Start serves Markdown with a `.md` suffix under the docs route */
-const tanstackMarkdownUrl = `
+export const tanstackMarkdownUrl = `
 export function encodeMarkdownUrl(slugs: string[], locale?: string) {
   const segments = [...slugs];
   if (segments.length === 0) {
@@ -83,7 +83,7 @@ interface Routes {
 
 type Template = (routes: Routes, i18n: boolean) => [route: FormattedRoute, content: string][];
 
-const templates: Record<ReactFramework, Template> = {
+export const templates: Record<ReactFramework, Template> = {
   next: (routes, i18n) => [
     [
       routes.index,
@@ -280,6 +280,30 @@ export async function getConfig() {
   ],
 };
 
+export function llmsRoutes(
+  framework: ReactFramework,
+  i18n: I18nInfo | null,
+  docsRoute: string,
+  contentRoute: string,
+): Routes {
+  const format = (route: RouteDescriptor) => formatRoute(route, framework, i18n);
+  return {
+    index: format({ segments: ['llms.txt'] }),
+    full: format({ segments: ['llms-full.txt'] }),
+    markdown: format(
+      framework === 'tanstack-start'
+        ? { segments: [docsRoute, '{$}.md'], locale: true }
+        : {
+            segments: [
+              contentRoute,
+              { param: 'slug', catchAll: true, optional: true, suffix: 'content.md' },
+            ],
+            locale: true,
+          },
+    ),
+  };
+}
+
 export const llms: Feature = {
   id: 'llms',
   title: 'LLM Routes',
@@ -297,49 +321,36 @@ export const llms: Feature = {
     });
     await addExport(ctx, sourceFile, 'getLLMText', getLLMText);
 
-    const format = (route: RouteDescriptor) => formatRoute(route, framework, i18n);
     const docsRoute = source.baseUrl.replace(/\/$/, '');
-    let markdown: FormattedRoute;
+    let contentRoute = `/llms.mdx${docsRoute}`;
     let helper: string;
     if (framework === 'tanstack-start') {
       await sharedRoute(ctx, 'docsRoute', source.baseUrl);
       await addExport(ctx, shared, 'encodeMarkdownUrl', tanstackMarkdownUrl);
-      markdown = format({ segments: [docsRoute, '{$}.md'], locale: true });
       helper = "`encodeMarkdownUrl(page.slugs, page.locale)` from '@/lib/shared'";
     } else {
-      const contentRoute = await sharedRoute(ctx, 'docsContentRoute', `/llms.mdx${docsRoute}`);
+      contentRoute = await sharedRoute(ctx, 'docsContentRoute', contentRoute);
       if (await addExport(ctx, sourceFile, 'getPageMarkdownUrl', markdownUrl)) {
         await ctx.source(sourceFile, (file) =>
           addImport(file, { from: './shared', named: ['docsContentRoute'] }),
         );
       }
-      markdown = format({
-        segments: [
-          contentRoute,
-          { param: 'slug', catchAll: true, optional: true, suffix: 'content.md' },
-        ],
-        locale: true,
-      });
       helper = "`getPageMarkdownUrl(page).url` from '@/lib/source'";
     }
-    const routes: Routes = {
-      index: format({ segments: ['llms.txt'] }),
-      full: format({ segments: ['llms-full.txt'] }),
-      markdown,
-    };
+    const routes = llmsRoutes(framework, i18n, docsRoute, contentRoute);
     for (const [route, content] of templates[framework](routes, i18n !== null))
       await ctx.write(path.join(baseDir, route.file), content);
 
     if (framework === 'react-router') {
-      await registerReactRouterRoutes(ctx, [routes.index, routes.full, markdown]);
+      await registerReactRouterRoutes(ctx, [routes.index, routes.full, routes.markdown]);
     } else if (framework === 'tanstack-start' && ctx.project.static && configFile) {
       // SPA mode only serves prerendered routes
       await ctx.source(configFile, (file) =>
         addTanstackPrerender(file, [routes.index.path, routes.full.path]),
       );
     } else if (framework === 'next') {
-      if (i18n) await extendNextProxy(ctx, markdown);
-      await configureMarkdownUrl(ctx, docsRoute, markdown);
+      if (i18n) await extendNextProxy(ctx, routes.markdown);
+      await configureMarkdownUrl(ctx, docsRoute, routes.markdown);
     }
     if (ctx.project.static && framework !== 'next') {
       ctx.note(
@@ -358,27 +369,30 @@ export const llms: Feature = {
 };
 
 /** `/docs/*.md` serves the Markdown of a page, like TanStack Start's `.md` route */
+export const markdownRewrite = (docsRoute: string, markdown: FormattedRoute, i18n: boolean) => ({
+  source: `${i18n ? '/:lang' : ''}${docsRoute}/:slug*.md`,
+  destination: `${markdown.pattern}/content.md`,
+});
+
 async function configureMarkdownUrl(
   ctx: FeatureContext,
   docsRoute: string,
   markdown: FormattedRoute,
 ) {
   const { configFile, i18n } = ctx.project;
-  const source = `${i18n ? '/:lang' : ''}${docsRoute}/:slug*.md`;
-  const destination = `${markdown.pattern}/content.md`;
+  const rewrite = markdownRewrite(docsRoute, markdown, i18n !== null);
   const edited =
     configFile !== undefined &&
     (await ctx
       .source(configFile, (file) => {
         if (file.code.includes('llms.mdx')) return;
-        if (!addNextRewrites(file, [{ source, destination }]))
-          throw new Error('cannot add rewrites');
+        if (!addNextRewrites(file, [rewrite])) throw new Error('cannot add rewrites');
       })
       .catch(() => false));
 
   if (!edited) {
     ctx.note(
-      `Rewrite \`${source}\` to \`${destination}\` in your Next.js config to serve pages with a \`.md\` suffix.`,
+      `Rewrite \`${rewrite.source}\` to \`${rewrite.destination}\` in your Next.js config to serve pages with a \`.md\` suffix.`,
     );
   }
 }
