@@ -29,6 +29,7 @@
     "./features/lint": "./dist/features/lint.js",
     "./features/llms": "./dist/features/llms.js",
     "./features/mcp": "./dist/features/mcp.js",
+    "./features/webmcp": "./dist/features/webmcp.js",
     "./features/og": "./dist/features/og.js",
     "./features/search": "./dist/features/search.js",
     "./features/utils": "./dist/features/utils.js",

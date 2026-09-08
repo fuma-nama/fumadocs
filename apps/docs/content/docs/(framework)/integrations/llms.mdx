@@ -460,6 +460,29 @@ It creates a `/api/mcp` route with the streamable HTTP transport, on top of the 
 }
 ```
 
+## WebMCP
+
+<Callout type="warn" title="Experimental">
+  [WebMCP](https://webmachinelearning.github.io/webmcp/) is an early web standard, available in
+  Chrome 149+ behind the `#enable-webmcp-testing` flag and an origin trial. The API may still
+  change.
+</Callout>
+
+Where the MCP server above serves agents connecting to your site, WebMCP exposes tools to the AI agent
+of the browser, on the page the reader is viewing. The tools search the docs, read a page as Markdown and
+navigate to a page.
+
+```package-install
+npx @fumadocs/cli feature webmcp
+```
+
+It creates a `WebMCP` component on top of the [LLM routes](#docs-for-llm), rendered inside `<RootProvider />`:
+
+<include meta='title="components/webmcp.tsx"'>./webmcp.tsx</include>
+
+- `search_docs` queries the search API route, use `staticClient` from `fumadocs-core/search/client/orama-static` on static sites.
+- `read_page` fetches the Markdown of a page, `/docs/page.md` on TanStack Start.
+
 ## Ask AI
 
 ![AI Search](/docs/ai-search.png)
