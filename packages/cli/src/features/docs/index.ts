@@ -5,7 +5,6 @@ import type { I18nInfo, Project } from '@/project';
 import {
   addImport,
   addJsxAttribute,
-  addReactRouterRoute,
   addVitePlugin,
   findJsxElement,
   wrapNextConfig,
@@ -18,7 +17,7 @@ import {
   sampleContentCn,
   templates,
 } from './templates';
-import { reactFramework, reactOnly } from '../utils';
+import { reactFramework, reactOnly, registerReactRouterRoutes } from '../utils';
 
 const cssImports = (preset: string) => [
   `@import 'fumadocs-ui/css/${preset}.css';`,
@@ -192,15 +191,12 @@ async function suppressHydrationWarning(ctx: FeatureContext) {
 }
 
 async function configureRoutes(ctx: FeatureContext, i18n: I18nInfo | null) {
-  const { baseDir } = ctx.project;
-  const edited = await ctx.source(path.join(baseDir, 'routes.ts'), (file) => {
-    if (file.code.includes('routes/docs/page.tsx')) return;
-    addReactRouterRoute(file, [
-      `layout('routes/docs/layout.tsx', [route('${reactRouterLangSegment(i18n)}docs/*', 'routes/docs/page.tsx')])`,
-      { path: 'api/search', entry: 'routes/docs/search.ts' },
-    ]);
+  const added = await registerReactRouterRoutes(ctx, [
+    `layout('routes/docs/layout.tsx', [route('${reactRouterLangSegment(i18n)}docs/*', 'routes/docs/page.tsx')])`,
+    { path: 'api/search', entry: 'routes/docs/search.ts' },
+  ]);
+  if (!added) return;
+  await ctx.source(path.join(ctx.project.baseDir, 'routes.ts'), (file) => {
     addImport(file, { from: '@react-router/dev/routes', named: ['layout', 'route'] });
   });
-
-  if (!edited) ctx.note('Register the docs routes in your route config, see `routes/docs`.');
 }

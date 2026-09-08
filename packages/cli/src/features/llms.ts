@@ -4,12 +4,12 @@ import type { I18nInfo, ReactFramework } from '@/project';
 import {
   addNextRewrites,
   addProxyMatcher,
-  addReactRouterRoute,
+  addTanstackPrerender,
   enableProcessedMarkdown,
 } from '@/codemod';
 import { docs, findNextProxy } from './docs';
 import { reactRouterLangSegment, tanstackLangSegment } from './docs/templates';
-import { reactFramework } from './utils';
+import { docsSegment, reactFramework, registerReactRouterRoutes, requiresMdx, url } from './utils';
 
 const getLLMText = `
 export async function getLLMText(page: (typeof source)['$inferPage']) {
@@ -34,10 +34,11 @@ const markdown = `new Response(await getLLMText(page), {
     },
   })`;
 
-type Routes = (i18n: I18nInfo | null) => [file: string, content: string][];
+/** @param docs - the docs URL segment, e.g. `docs` */
+type Routes = (i18n: I18nInfo | null, docs: string) => [file: string, content: string][];
 
 const routes: Record<ReactFramework, Routes> = {
-  next: (i18n) => [
+  next: (i18n, docs) => [
     [
       'app/llms.txt/route.ts',
       `${index}
@@ -62,7 +63,7 @@ export async function GET() {
     ],
     [
       // the per-page route is under the docs route group, with the `[lang]` segment
-      `app/(docs)/${i18n ? '[lang]/' : ''}llms.mdx/docs/[[...slug]]/route.ts`,
+      `app/(docs)/${i18n ? '[lang]/' : ''}${url('llms.mdx', docs)}/[[...slug]]/route.ts`,
       `${full}
 import { notFound } from 'next/navigation';
 
@@ -70,7 +71,7 @@ export const revalidate = false;
 
 export async function GET(
   _req: Request,
-  { params }: RouteContext<'${i18n ? '/[lang]' : ''}/llms.mdx/docs/[[...slug]]'>,
+  { params }: RouteContext<'${i18n ? '/[lang]' : ''}/${url('llms.mdx', docs)}/[[...slug]]'>,
 ) {
   const { slug${i18n ? ', lang' : ''} } = await params;
   const slugs = slug?.slice(0, -1) ?? [];
@@ -127,7 +128,7 @@ export async function loader({ params }: Route.LoaderArgs) {
 `,
     ],
   ],
-  'tanstack-start': (i18n) => {
+  'tanstack-start': (i18n, docs) => {
     const seg = tanstackLangSegment(i18n);
     return [
       [
@@ -163,11 +164,11 @@ export const Route = createFileRoute('/llms-full.txt')({
 `,
       ],
       [
-        `routes/${seg}docs/{$}[.]md.ts`,
+        `routes/${url(seg, docs)}/{$}[.]md.ts`,
         `import { createFileRoute, notFound } from '@tanstack/react-router';
 ${full}
 
-export const Route = createFileRoute('/${seg}docs/{$}.md')({
+export const Route = createFileRoute('/${url(seg, docs)}/{$}.md')({
   server: {
     handlers: {
       GET: async ({ params }) => {
@@ -187,7 +188,7 @@ export const Route = createFileRoute('/${seg}docs/{$}.md')({
       ],
     ];
   },
-  waku: (i18n) => [
+  waku: (i18n, docs) => [
     [
       'pages/_api/llms.txt.ts',
       `${index}
@@ -219,14 +220,14 @@ export async function getConfig() {
 `,
     ],
     [
-      `pages/_api/${i18n ? '[lang]/' : ''}llms.mdx/docs/[...slugs]/content.md.ts`,
+      `pages/_api/${i18n ? '[lang]/' : ''}${url('llms.mdx', docs)}/[...slugs]/content.md.ts`,
       `${full}
 import type { ApiContext } from 'waku/router';
 import { unstable_notFound } from 'waku/router/server';
 
 export async function GET(
   _: Request,
-  { params }: ApiContext<'${i18n ? '/[lang]' : ''}/llms.mdx/docs/[...slugs]/content.md'>,
+  { params }: ApiContext<'${i18n ? '/[lang]' : ''}/${url('llms.mdx', docs)}/[...slugs]/content.md'>,
 ) {
   const page = source.getPage(params.slugs${i18n ? ', params.lang' : ''});
   if (!page) unstable_notFound();
@@ -250,32 +251,39 @@ export const llms: Feature = {
   title: 'LLM Routes',
   description: 'serve docs as Markdown for LLMs: llms.txt, llms-full.txt and per-page Markdown',
   requires: [docs],
+  supports: requiresMdx,
   async apply(ctx) {
-    const { baseDir, i18n } = ctx.project;
+    const { baseDir, i18n, source, configFile } = ctx.project;
     const framework = reactFramework(ctx.project);
-    const sourceFile = path.join(baseDir, 'lib/source.ts');
-    const edited = await ctx.source(sourceFile, (file) => {
+    const docs = docsSegment(ctx);
+    await ctx.source(source.collections!, (file) => {
       if (!enableProcessedMarkdown(file))
-        throw new Error(`cannot find \`defineDocs()\` in ${sourceFile}`);
+        throw new Error(`cannot find \`defineDocs()\` in ${source.collections}`);
     });
-    if (!edited) throw new Error(`${sourceFile} not found`);
-    await ctx.append(sourceFile, [getLLMText]);
+    await ctx.append(path.join(baseDir, 'lib/source.ts'), [getLLMText]);
 
-    for (const [file, content] of routes[framework](i18n))
+    for (const [file, content] of routes[framework](i18n, docs))
       await ctx.write(path.join(baseDir, file), content);
 
     if (framework === 'react-router') {
-      await ctx.source(path.join(baseDir, 'routes.ts'), (file) => {
-        if (file.code.includes('llms/index.ts')) return;
-        addReactRouterRoute(file, [
-          { path: 'llms.txt', entry: 'llms/index.ts' },
-          { path: 'llms-full.txt', entry: 'llms/full.ts' },
-          { path: `${reactRouterLangSegment(i18n)}llms.mdx/docs/*`, entry: 'llms/mdx.ts' },
-        ]);
-      });
+      await registerReactRouterRoutes(ctx, [
+        { path: 'llms.txt', entry: 'llms/index.ts' },
+        { path: 'llms-full.txt', entry: 'llms/full.ts' },
+        { path: `${reactRouterLangSegment(i18n)}${url('llms.mdx', docs)}/*`, entry: 'llms/mdx.ts' },
+      ]);
+    } else if (framework === 'tanstack-start' && ctx.project.static && configFile) {
+      // SPA mode only serves prerendered routes
+      await ctx.source(configFile, (file) =>
+        addTanstackPrerender(file, ['/llms.txt', '/llms-full.txt']),
+      );
     } else if (framework === 'next') {
       if (i18n) await extendNextProxy(ctx, ['/llms.mdx/:path*', '/:lang/llms.mdx/:path*']);
-      await configureMarkdownUrl(ctx, i18n !== null);
+      await configureMarkdownUrl(ctx, i18n !== null, docs);
+    }
+    if (ctx.project.static && framework !== 'next') {
+      ctx.note(
+        'Per-page Markdown routes are dynamic, add the pages to your prerender config to serve them statically.',
+      );
     }
 
     const markdownUrl =
@@ -294,9 +302,14 @@ export const llms: Feature = {
 };
 
 /** `/docs/*.md` serves the Markdown of a page, like TanStack Start's `.md` route */
-async function configureMarkdownUrl(ctx: Parameters<Feature['apply']>[0], i18n: boolean) {
+async function configureMarkdownUrl(
+  ctx: Parameters<Feature['apply']>[0],
+  i18n: boolean,
+  docs: string,
+) {
   const { configFile } = ctx.project;
   const lang = i18n ? '/:lang' : '';
+  const seg = docs ? `/${docs}` : '';
   const edited =
     configFile !== undefined &&
     (await ctx
@@ -305,8 +318,8 @@ async function configureMarkdownUrl(ctx: Parameters<Feature['apply']>[0], i18n: 
         if (
           !addNextRewrites(file, [
             {
-              source: `${lang}/docs/:path*.md`,
-              destination: `${lang}/llms.mdx/docs/:path*/content.md`,
+              source: `${lang}${seg}/:path*.md`,
+              destination: `${lang}/llms.mdx${seg}/:path*/content.md`,
             },
           ])
         )
@@ -316,7 +329,7 @@ async function configureMarkdownUrl(ctx: Parameters<Feature['apply']>[0], i18n: 
 
   if (!edited) {
     ctx.note(
-      `Rewrite \`${lang}/docs/:path*.md\` to \`${lang}/llms.mdx/docs/:path*/content.md\` in your Next.js config to serve pages with a \`.md\` suffix.`,
+      `Rewrite \`${lang}${seg}/:path*.md\` to \`${lang}/llms.mdx${seg}/:path*/content.md\` in your Next.js config to serve pages with a \`.md\` suffix.`,
     );
   }
 }

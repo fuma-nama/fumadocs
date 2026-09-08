@@ -52,6 +52,12 @@ npx @fumadocs/cli feature ai --provider openrouter
 | `epub`     | Route to [export EPUB](/docs/guides/export-epub).                                         |
 | `lint`     | Configure ESLint (Next.js only), Biome or Oxlint, `--linter`.                             |
 
+Features adapt to your setup:
+
+- Fumadocs MDX with the [Macro API](/docs/mdx/macro) or a `source.config.ts`, other content sources can't use `llms`, `mcp` and `epub`.
+- The `baseUrl` of your docs, `src/` directory, `next.config.ts`, i18n, static export and SPA modes.
+- React Router with file-based routes: the routes to register are printed instead.
+
 See help for the options of each feature:
 
 ```package-install

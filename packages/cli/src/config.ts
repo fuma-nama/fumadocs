@@ -49,9 +49,12 @@ export async function createConfigSchema(cwd = process.cwd()) {
       .default(defaultAliases),
 
     baseDir: z.string().default(() => {
-      if (framework === 'react-router' && existsSync(path.resolve(cwd, 'app'))) return 'app';
-      if (existsSync(path.resolve(cwd, 'src'))) return 'src';
-      return '';
+      if (framework === 'react-router') return 'app';
+      // the routes directory of the framework decides whether app code lives in `src`
+      const routes = { next: 'app', waku: 'pages', 'tanstack-start': 'routes' }[framework] ?? '';
+      if (existsSync(path.resolve(cwd, 'src', routes))) return 'src';
+      if (routes && existsSync(path.resolve(cwd, routes))) return '';
+      return existsSync(path.resolve(cwd, 'src')) ? 'src' : '';
     }),
     uiLibrary: z.enum(['radix-ui', 'base-ui']).default('base-ui'),
     framework: z.literal(frameworks).default(framework),

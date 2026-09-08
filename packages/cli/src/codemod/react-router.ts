@@ -65,8 +65,8 @@ function getPrerenderArray(file: SourceFile, array: string): ArrayExpression | u
 export function addReactRouterRoute(
   file: SourceFile,
   routes: ({ path: string; entry: string } | string)[],
-) {
-  modifyReactRouterRoutes(file, (arr) => {
+): boolean {
+  return modifyReactRouterRoutes(file, (arr) => {
     addElements(
       file,
       arr,
@@ -98,10 +98,13 @@ export function filterReactRouterRoute(
   });
 }
 
-function modifyReactRouterRoutes(file: SourceFile, mod: (array: ArrayExpression) => void) {
+/** @returns `false` if the route config isn't an array literal (e.g. file-based routes) */
+function modifyReactRouterRoutes(file: SourceFile, mod: (array: ArrayExpression) => void): boolean {
   const exported = getDefaultExport(file);
   const initializer = exported && find(exported, 'ArrayExpression');
-  if (initializer) mod(initializer);
+  if (!initializer) return false;
+  mod(initializer);
+  return true;
 }
 
 /**

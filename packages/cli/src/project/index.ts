@@ -58,6 +58,20 @@ export const frameworks: Record<Framework, FrameworkInfo> = {
   },
 };
 
+/** how docs content is loaded, detected from `lib/source.ts` */
+export interface SourceInfo {
+  /** `lib/source.ts` exports a `source` loader */
+  loader: boolean;
+  /** file defining the Fumadocs MDX collections, relative to cwd: `lib/source.ts` (macro) or `source.config.ts`; `null` for other content sources */
+  collections: string | null;
+  /** collections are loaded lazily, `structuredData` is a function */
+  async: boolean;
+  /** base URL of docs pages */
+  baseUrl: string;
+  /** content directory */
+  dir: string;
+}
+
 export interface I18nInfo {
   /** the default locale is hidden from URLs (`hideLocale: 'default-locale'`) */
   optionalLocale: boolean;
@@ -71,6 +85,7 @@ export interface Project {
   static: boolean;
   /** `lib/i18n.ts` exists */
   i18n: I18nInfo | null;
+  source: SourceInfo;
   packageManager: PackageManager;
   /** directory of app code, relative to `cwd` */
   baseDir: string;
@@ -117,9 +132,8 @@ export async function loadProject(
     isStatic = info.isStatic(configContent);
   }
 
-  const i18nConfig = await fs
-    .readFile(path.join(cwd, config.baseDir, 'lib/i18n.ts'), 'utf-8')
-    .catch(() => null);
+  const read = (file: string) => fs.readFile(path.join(cwd, file), 'utf-8').catch(() => null);
+  const i18nConfig = await read(path.join(config.baseDir, 'lib/i18n.ts'));
 
   return {
     cwd,
@@ -135,6 +149,40 @@ export async function loadProject(
     config,
     configFile,
     packageJson,
+    source: await detectSource(cwd, config.baseDir, read),
+  };
+}
+
+async function detectSource(
+  cwd: string,
+  baseDir: string,
+  read: (file: string) => Promise<string | null>,
+): Promise<SourceInfo> {
+  const sourceFile = path.join(baseDir, 'lib/source.ts');
+  const source = (await read(sourceFile)) ?? '';
+  let collections: string | null = null;
+  let content = source;
+  if (source.includes('defineDocs(')) {
+    collections = sourceFile;
+  } else if (await exists(path.join(cwd, 'source.config.ts'))) {
+    collections = 'source.config.ts';
+    content = (await read(collections)) ?? '';
+  }
+
+  let baseUrl = /baseUrl:\s*['"]([^'"]*)['"]/.exec(source)?.[1];
+  // e.g. `baseUrl: docsRoute` from `lib/shared.ts`
+  const ref = /baseUrl:\s*(\w+)/.exec(source)?.[1];
+  if (!baseUrl && ref) {
+    const shared = (await read(path.join(baseDir, 'lib/shared.ts'))) ?? '';
+    baseUrl = new RegExp(`${ref}\\s*=\\s*['"]([^'"]*)['"]`).exec(shared)?.[1];
+  }
+
+  return {
+    loader: /export const source\b/.test(source),
+    collections,
+    async: /async:\s*true/.test(content),
+    baseUrl: baseUrl ?? '/docs',
+    dir: /dir:\s*['"]([^'"]*)['"]/.exec(content)?.[1] ?? 'content/docs',
   };
 }
 

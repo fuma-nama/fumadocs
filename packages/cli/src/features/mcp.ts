@@ -1,9 +1,9 @@
 import path from 'node:path';
 import type { Feature } from '@/features';
 import type { ReactFramework } from '@/project';
-import { addReactRouterPrerenderArray, addReactRouterRoute } from '@/codemod';
+import { addReactRouterPrerenderArray } from '@/codemod';
 import { llms } from './llms';
-import { reactFramework } from './utils';
+import { reactFramework, registerReactRouterRoutes, requiresMdx } from './utils';
 
 const server = (
   i18n: boolean,
@@ -136,7 +136,8 @@ export const mcp: Feature = {
   title: 'MCP Server',
   description: 'a MCP server for AI agents to search and read your docs, at /api/mcp',
   requires: [llms],
-  supports: (project) => (project.static ? 'MCP requires a server at runtime' : true),
+  supports: (project) =>
+    project.static ? 'MCP requires a server at runtime' : requiresMdx(project),
   async apply(ctx) {
     const { baseDir, i18n } = ctx.project;
     const framework = reactFramework(ctx.project);
@@ -146,10 +147,7 @@ export const mcp: Feature = {
     await ctx.write(path.join(baseDir, route), content);
 
     if (framework === 'react-router') {
-      await ctx.source(path.join(baseDir, 'routes.ts'), (file) => {
-        if (file.code.includes(route)) return;
-        addReactRouterRoute(file, [{ path: 'api/mcp', entry: route }]);
-      });
+      await registerReactRouterRoutes(ctx, [{ path: 'api/mcp', entry: route }]);
       await ctx.source('react-router.config.ts', (file) => {
         addReactRouterPrerenderArray(file, 'excluded', ['/api/mcp']);
       });

@@ -1,11 +1,11 @@
 import path from 'node:path';
 import type { Feature } from '@/features';
 import type { I18nInfo, ReactFramework } from '@/project';
-import { addElements, addReactRouterRoute, getConfigObject, getProperty } from '@/codemod';
+import { addElements, getConfigObject, getProperty } from '@/codemod';
 import { docs } from './docs';
 import { reactRouterLangSegment, tanstackLangSegment } from './docs/templates';
 import { extendNextProxy } from './llms';
-import { reactFramework } from './utils';
+import { docsSegment, reactFramework, registerReactRouterRoutes, url } from './utils';
 
 type Engine = 'takumi' | 'next-og';
 
@@ -32,11 +32,15 @@ const options = (engine: Engine) =>
 
 const ext = (engine: Engine) => (engine === 'takumi' ? 'webp' : 'png');
 
-type Route = (engine: Engine, i18n: I18nInfo | null) => [file: string, content: string];
+type Route = (
+  engine: Engine,
+  i18n: I18nInfo | null,
+  docs: string,
+) => [file: string, content: string];
 
 const routes: Record<ReactFramework, Route> = {
-  next: (engine, i18n) => [
-    `app/(docs)/${i18n ? '[lang]/' : ''}og/docs/[...slug]/route.tsx`,
+  next: (engine, i18n, docs) => [
+    `app/(docs)/${i18n ? '[lang]/' : ''}${url('og', docs)}/[...slug]/route.tsx`,
     `import { source } from '@/lib/source';
 import { notFound } from 'next/navigation';
 ${imports(engine)}
@@ -45,7 +49,7 @@ export const revalidate = false;
 
 export async function GET(
   _req: Request,
-  { params }: RouteContext<'${i18n ? '/[lang]' : ''}/og/docs/[...slug]'>,
+  { params }: RouteContext<'${i18n ? '/[lang]' : ''}/${url('og', docs)}/[...slug]'>,
 ) {
   const { slug${i18n ? ', lang' : ''} } = await params;
   const page = source.getPage(slug.slice(0, -1)${i18n ? ', lang' : ''});
@@ -83,15 +87,15 @@ export function loader({ params }: Route.LoaderArgs) {
 }
 `,
   ],
-  'tanstack-start': (engine, i18n) => {
+  'tanstack-start': (engine, i18n, docs) => {
     const seg = tanstackLangSegment(i18n);
     return [
-      `routes/${seg}og/docs/$.tsx`,
+      `routes/${url(seg, 'og', docs)}/$.tsx`,
       `import { createFileRoute } from '@tanstack/react-router';
 import { source } from '@/lib/source';
 ${imports(engine)}
 
-export const Route = createFileRoute('/${seg}og/docs/$')({
+export const Route = createFileRoute('/${url(seg, 'og', docs)}/$')({
   server: {
     handlers: {
       GET: async ({ params }) => {
@@ -110,15 +114,15 @@ export const Route = createFileRoute('/${seg}og/docs/$')({
 `,
     ];
   },
-  waku: (engine, i18n) => [
-    `pages/_api/${i18n ? '[lang]/' : ''}og/docs/[...slugs]/image.${ext(engine)}.tsx`,
+  waku: (engine, i18n, docs) => [
+    `pages/_api/${i18n ? '[lang]/' : ''}${url('og', docs)}/[...slugs]/image.${ext(engine)}.tsx`,
     `import { source } from '@/lib/source';
 import type { ApiContext } from 'waku/router';
 ${imports(engine)}
 
 export async function GET(
   _: Request,
-  { params }: ApiContext<'${i18n ? '/[lang]' : ''}/og/docs/[...slugs]/image.${ext(engine)}'>,
+  { params }: ApiContext<'${i18n ? '/[lang]' : ''}/${url('og', docs)}/[...slugs]/image.${ext(engine)}'>,
 ) {
   const page = source.getPage(params.slugs${i18n ? ', params.lang' : ''});
   if (!page) return new Response(undefined, { status: 404 });
@@ -160,16 +164,14 @@ export const og: Feature<{ engine: Engine }> = {
       throw new Error('next/og is only available on Next.js');
     if (engine === 'takumi') ctx.addDependencies({ 'takumi-js': null });
 
-    const [route, content] = routes[framework](engine, i18n);
+    const docs = docsSegment(ctx);
+    const [route, content] = routes[framework](engine, i18n, docs);
     await ctx.write(path.join(baseDir, route), content);
 
     if (framework === 'react-router') {
-      await ctx.source(path.join(baseDir, 'routes.ts'), (file) => {
-        if (file.code.includes(route)) return;
-        addReactRouterRoute(file, [
-          { path: `${reactRouterLangSegment(i18n)}og/docs/*`, entry: route },
-        ]);
-      });
+      await registerReactRouterRoutes(ctx, [
+        { path: `${reactRouterLangSegment(i18n)}${url('og', docs)}/*`, entry: route },
+      ]);
     }
     if (framework === 'next' && engine === 'takumi') {
       await ctx.source(path.join(baseDir, 'lib/source.ts'), (file) => {
@@ -188,7 +190,7 @@ export const og: Feature<{ engine: Engine }> = {
     }
 
     ctx.note(
-      `The image of a page is at \`${i18n ? '/<lang>' : ''}/og/docs/<slugs>/image.${ext(engine)}\`, reference it in the page metadata (e.g. \`og:image\`).`,
+      `The image of a page is at \`${i18n ? '/<lang>' : ''}/${url('og', docs)}/<slugs>/image.${ext(engine)}\`, reference it in the page metadata (e.g. \`og:image\`).`,
     );
   },
 };

@@ -1,13 +1,9 @@
 import path from 'node:path';
 import type { Feature } from '@/features';
 import type { ReactFramework } from '@/project';
-import {
-  addReactRouterPrerenderArray,
-  addReactRouterRoute,
-  enableProcessedMarkdown,
-} from '@/codemod';
+import { addReactRouterPrerenderArray, enableProcessedMarkdown } from '@/codemod';
 import { docs } from './docs';
-import { reactFramework } from './utils';
+import { reactFramework, registerReactRouterRoutes, requiresMdx } from './utils';
 
 const handler = `import { source } from '@/lib/source';
 import { exportEpub } from 'fumadocs-epub';
@@ -83,24 +79,22 @@ export const epub: Feature = {
   title: 'EPUB Export',
   description: 'a route to export docs as an EPUB file, protected by EXPORT_SECRET',
   requires: [docs],
+  supports: (project) =>
+    project.static ? 'the export route needs a server at runtime' : requiresMdx(project),
   async apply(ctx) {
-    const { baseDir } = ctx.project;
+    const { baseDir, source } = ctx.project;
     const framework = reactFramework(ctx.project);
     ctx.addDependencies({ 'fumadocs-epub': null });
 
-    const sourceFile = path.join(baseDir, 'lib/source.ts');
-    await ctx.source(sourceFile, (file) => {
+    await ctx.source(source.collections!, (file) => {
       if (!enableProcessedMarkdown(file))
-        throw new Error(`cannot find \`defineDocs()\` in ${sourceFile}`);
+        throw new Error(`cannot find \`defineDocs()\` in ${source.collections}`);
     });
 
     const [route, content] = routes[framework];
     await ctx.write(path.join(baseDir, route), content);
     if (framework === 'react-router') {
-      await ctx.source(path.join(baseDir, 'routes.ts'), (file) => {
-        if (file.code.includes(route)) return;
-        addReactRouterRoute(file, [{ path: 'export/epub', entry: route }]);
-      });
+      await registerReactRouterRoutes(ctx, [{ path: 'export/epub', entry: route }]);
       // the route needs a secret at runtime
       await ctx.source('react-router.config.ts', (file) => {
         addReactRouterPrerenderArray(file, 'excluded', ['/export/epub']);

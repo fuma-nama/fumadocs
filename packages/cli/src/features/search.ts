@@ -4,14 +4,13 @@ import type { ReactFramework } from '@/project';
 import {
   addImport,
   addJsxAttribute,
-  addReactRouterRoute,
   addTanstackPrerender,
   filterReactRouterPrerenderArray,
   filterReactRouterRoute,
   findJsxElement,
 } from '@/codemod';
 import { docs } from './docs';
-import { findSource, reactFramework, scripts } from './utils';
+import { findSource, posix, reactFramework, registerReactRouterRoutes, scripts } from './utils';
 
 /** how client code reads public env variables */
 interface Env {
@@ -110,7 +109,7 @@ interface Provider {
   dialog: (env: Env) => string;
   /** exports search indexes to a pre-rendered `static.json`, synced by `sync` after build */
   exportIndexes?: (async: boolean) => string;
-  sync?: (env: Env) => string;
+  sync?: (env: Env, dir: string) => string;
   /** server-side search, replaces the default search route */
   searchRoute?: Record<ReactFramework, string>;
 }
@@ -296,12 +295,12 @@ export default function CustomSearchDialog(props: SharedProps) {
   });
 
 ${dialogBody('Mixedbread', 'https://mixedbread.com')}`,
-    sync: () => `import { spawnSync } from 'node:child_process';
+    sync: (_env, dir) => `import { spawnSync } from 'node:child_process';
 
 // sync the content with Mixedbread CLI
 const result = spawnSync(
   'npx',
-  ['--yes', '@mixedbread/cli', 'vs', 'sync', process.env.MIXEDBREAD_STORE_ID!, './content/docs', '--ci'],
+  ['--yes', '@mixedbread/cli', 'vs', 'sync', process.env.MIXEDBREAD_STORE_ID!, '${dir}', '--ci'],
   { stdio: 'inherit' },
 );
 
@@ -403,6 +402,7 @@ export const search: Feature<{ provider: SearchProvider }> = {
   title: 'Search',
   description: 'replace the default search with a 3rd party search solution',
   requires: [docs],
+  supports: (project) => project.source.loader || '`lib/source.ts` must export a `source` loader',
   options: {
     provider: {
       message: 'Choose a search provider',
@@ -443,19 +443,15 @@ export const search: Feature<{ provider: SearchProvider }> = {
     }
 
     if (provider.exportIndexes) {
-      const async = framework === 'react-router' || framework === 'tanstack-start';
       await ctx.write(
         path.join(baseDir, 'lib/export-search-indexes.ts'),
-        provider.exportIndexes(async),
+        provider.exportIndexes(project.source.async),
       );
       const [route, content] = staticRoutes[framework];
       await ctx.write(path.join(baseDir, route), content);
 
       if (framework === 'react-router') {
-        await ctx.source(path.join(baseDir, 'routes.ts'), (file) => {
-          if (file.code.includes(route)) return;
-          addReactRouterRoute(file, [{ path: 'static.json', entry: route }]);
-        });
+        await registerReactRouterRoutes(ctx, [{ path: 'static.json', entry: route }]);
       } else if (framework === 'tanstack-start' && project.configFile) {
         await ctx.source(project.configFile, (file) =>
           addTanstackPrerender(file, ['/static.json']),
@@ -485,7 +481,7 @@ export const search: Feature<{ provider: SearchProvider }> = {
         'tanstack-start': project.static ? 'dist/client/static.json' : '.output/public/static.json',
         waku: 'dist/public/static.json',
       }[framework];
-      await ctx.write('scripts/sync-content.ts', provider.sync(env));
+      await ctx.write('scripts/sync-content.ts', provider.sync(env, project.source.dir));
       await ctx.packageJson((data) => {
         const build = data.scripts?.build ?? '';
         if (build.includes('sync-content')) return;
@@ -508,7 +504,7 @@ async function removeDefaultSearch(ctx: FeatureContext, file: string) {
   await ctx.remove(file);
   if (framework !== 'react-router') return;
 
-  const entry = path.relative(baseDir, file);
+  const entry = posix(path.relative(baseDir, file));
   await ctx.source(path.join(baseDir, 'routes.ts'), (source) => {
     filterReactRouterRoute(source, (item) => item.entry !== entry);
   });
