@@ -1,9 +1,10 @@
 import path from 'node:path';
 import type { Feature } from '@/features';
 import type { ReactFramework } from '@/project';
+import { type FormattedRoute, formatRoute } from '@/project/route';
 import { addReactRouterPrerenderArray } from '@/codemod';
 import { llms } from './llms';
-import { reactFramework, registerReactRouterRoutes, requiresMdx } from './utils';
+import { reactFramework, reactRouterTypes, registerReactRouterRoutes, requiresMdx } from './utils';
 
 const server = (
   i18n: boolean,
@@ -89,28 +90,22 @@ const handler = createMcpHandler(() => {
 });
 `;
 
-const routes: Record<ReactFramework, (i18n: boolean) => [file: string, content: string]> = {
-  next: (i18n) => [
-    'app/api/mcp/route.ts',
-    `${server(i18n)}
+type Template = (route: FormattedRoute, i18n: boolean) => string;
+
+const templates: Record<ReactFramework, Template> = {
+  next: (_, i18n) => `${server(i18n)}
 export const GET = (req: Request) => handler.fetch(req);
 export const POST = (req: Request) => handler.fetch(req);
 export const DELETE = (req: Request) => handler.fetch(req);
 `,
-  ],
-  'react-router': (i18n) => [
-    'routes/mcp.ts',
-    `import type { Route } from './+types/mcp';
+  'react-router': (route, i18n) => `${reactRouterTypes(route)}
 ${server(i18n)}
 export const loader = ({ request }: Route.LoaderArgs) => handler.fetch(request);
 export const action = ({ request }: Route.ActionArgs) => handler.fetch(request);
 `,
-  ],
-  'tanstack-start': (i18n) => [
-    'routes/api/mcp.ts',
-    `import { createFileRoute } from '@tanstack/react-router';
+  'tanstack-start': (route, i18n) => `import { createFileRoute } from '@tanstack/react-router';
 ${server(i18n)}
-export const Route = createFileRoute('/api/mcp')({
+export const Route = createFileRoute('${route.path}')({
   server: {
     handlers: {
       GET: ({ request }) => handler.fetch(request),
@@ -120,15 +115,11 @@ export const Route = createFileRoute('/api/mcp')({
   },
 });
 `,
-  ],
-  waku: (i18n) => [
-    'pages/_api/api/mcp.ts',
-    `${server(i18n)}
+  waku: (_, i18n) => `${server(i18n)}
 export const GET = (request: Request) => handler.fetch(request);
 export const POST = (request: Request) => handler.fetch(request);
 export const DELETE = (request: Request) => handler.fetch(request);
 `,
-  ],
 };
 
 export const mcp: Feature = {
@@ -143,13 +134,13 @@ export const mcp: Feature = {
     const framework = reactFramework(ctx.project);
     ctx.addDependencies({ '@modelcontextprotocol/server': null, zod: null });
 
-    const [route, content] = routes[framework](i18n !== null);
-    await ctx.write(path.join(baseDir, route), content);
+    const route = formatRoute({ segments: ['api/mcp'] }, framework, null);
+    await ctx.write(path.join(baseDir, route.file), templates[framework](route, i18n !== null));
 
     if (framework === 'react-router') {
-      await registerReactRouterRoutes(ctx, [{ path: 'api/mcp', entry: route }]);
+      await registerReactRouterRoutes(ctx, [route]);
       await ctx.source('react-router.config.ts', (file) => {
-        addReactRouterPrerenderArray(file, 'excluded', ['/api/mcp']);
+        addReactRouterPrerenderArray(file, 'excluded', [`/${route.path}`]);
       });
     }
 

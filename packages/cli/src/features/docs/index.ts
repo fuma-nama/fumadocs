@@ -10,13 +10,8 @@ import {
   wrapNextConfig,
 } from '@/codemod';
 import { exists } from '@/utils/fs';
-import {
-  nextProxy,
-  reactRouterLangSegment,
-  sampleContent,
-  sampleContentCn,
-  templates,
-} from './templates';
+import { localeSegment } from '@/project/route';
+import { nextProxy, sampleContent, sampleContentCn, templates } from './templates';
 import { reactFramework, reactOnly, registerReactRouterRoutes } from '../utils';
 
 const cssImports = (preset: string) => [
@@ -192,8 +187,8 @@ async function suppressHydrationWarning(ctx: FeatureContext) {
 
 async function configureRoutes(ctx: FeatureContext, i18n: I18nInfo | null) {
   const added = await registerReactRouterRoutes(ctx, [
-    `layout('routes/docs/layout.tsx', [route('${reactRouterLangSegment(i18n)}docs/*', 'routes/docs/page.tsx')])`,
-    { path: 'api/search', entry: 'routes/docs/search.ts' },
+    `layout('routes/docs/layout.tsx', [route('${localeSegment('react-router', i18n)}docs/*', 'routes/docs/page.tsx')])`,
+    { path: 'api/search', file: 'routes/docs/search.ts', pattern: '/api/search' },
   ]);
   if (!added) return;
   await ctx.source(path.join(ctx.project.baseDir, 'routes.ts'), (file) => {

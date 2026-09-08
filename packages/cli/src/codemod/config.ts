@@ -51,7 +51,10 @@ export function addVitePlugin(
 ): boolean {
   let object = getConfigObject(file);
   for (let i = 0; object && i < path.length - 1; i++) {
-    const value = getProperty(object, path[i])?.value;
+    let value = getProperty(object, path[i])?.value;
+    // e.g. `vite: { ... } satisfies UserConfig as Config['vite']`
+    while (value?.type === 'TSSatisfiesExpression' || value?.type === 'TSAsExpression')
+      value = value.expression;
     object = value?.type === 'ObjectExpression' ? value : undefined;
   }
   if (!object) return false;

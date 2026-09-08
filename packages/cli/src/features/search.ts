@@ -1,6 +1,7 @@
 import path from 'node:path';
 import type { Feature, FeatureContext } from '@/features';
 import type { ReactFramework } from '@/project';
+import { type FormattedRoute, formatRoute } from '@/project/route';
 import {
   addImport,
   addJsxAttribute,
@@ -347,10 +348,8 @@ export const { GET } = server;
 
 export type SearchProvider = keyof typeof providers;
 
-const staticRoutes: Record<ReactFramework, [file: string, content: string]> = {
-  next: [
-    'app/static.json/route.ts',
-    `import { exportSearchIndexes } from '@/lib/export-search-indexes';
+const staticRoutes: Record<ReactFramework, (route: FormattedRoute) => string> = {
+  next: () => `import { exportSearchIndexes } from '@/lib/export-search-indexes';
 
 export const revalidate = false;
 
@@ -358,22 +357,16 @@ export async function GET() {
   return Response.json(await exportSearchIndexes());
 }
 `,
-  ],
-  'react-router': [
-    'routes/static.ts',
-    `import { exportSearchIndexes } from '@/lib/export-search-indexes';
+  'react-router': () => `import { exportSearchIndexes } from '@/lib/export-search-indexes';
 
 export async function loader() {
   return Response.json(await exportSearchIndexes());
 }
 `,
-  ],
-  'tanstack-start': [
-    'routes/static[.]json.ts',
-    `import { createFileRoute } from '@tanstack/react-router';
+  'tanstack-start': (route) => `import { createFileRoute } from '@tanstack/react-router';
 import { exportSearchIndexes } from '@/lib/export-search-indexes';
 
-export const Route = createFileRoute('/static.json')({
+export const Route = createFileRoute('${route.path}')({
   server: {
     handlers: {
       GET: async () => Response.json(await exportSearchIndexes()),
@@ -381,10 +374,7 @@ export const Route = createFileRoute('/static.json')({
   },
 });
 `,
-  ],
-  waku: [
-    'pages/_api/static.json.ts',
-    `import { exportSearchIndexes } from '@/lib/export-search-indexes';
+  waku: () => `import { exportSearchIndexes } from '@/lib/export-search-indexes';
 
 export async function GET() {
   return Response.json(await exportSearchIndexes());
@@ -394,7 +384,6 @@ export const getConfig = () => ({
   render: 'static',
 });
 `,
-  ],
 };
 
 export const search: Feature<{ provider: SearchProvider }> = {
@@ -447,15 +436,13 @@ export const search: Feature<{ provider: SearchProvider }> = {
         path.join(baseDir, 'lib/export-search-indexes.ts'),
         provider.exportIndexes(project.source.async),
       );
-      const [route, content] = staticRoutes[framework];
-      await ctx.write(path.join(baseDir, route), content);
+      const route = formatRoute({ segments: ['static.json'] }, framework, null);
+      await ctx.write(path.join(baseDir, route.file), staticRoutes[framework](route));
 
       if (framework === 'react-router') {
-        await registerReactRouterRoutes(ctx, [{ path: 'static.json', entry: route }]);
+        await registerReactRouterRoutes(ctx, [route]);
       } else if (framework === 'tanstack-start' && project.configFile) {
-        await ctx.source(project.configFile, (file) =>
-          addTanstackPrerender(file, ['/static.json']),
-        );
+        await ctx.source(project.configFile, (file) => addTanstackPrerender(file, [route.path]));
       }
     }
 

@@ -1,4 +1,5 @@
 import type { I18nInfo, ReactFramework } from '@/project';
+import { localeSegment } from '@/project/route';
 
 export interface TemplateInput {
   static: boolean;
@@ -23,15 +24,19 @@ export const i18n = defineI18n({
 });
 `;
 
+const sharedConstants = `export const docsRoute = '/docs';
+`;
+
 const source = (async: boolean, i18n: boolean) => `import { loader } from 'fumadocs-core/source';
 import { defineDocs } from 'fumadocs-mdx/macro';
+import { docsRoute } from './shared';
 ${i18n ? "import { i18n } from '@/lib/i18n';\n" : ''}
 export const docs = defineDocs({
   dir: 'content/docs',${async ? '\n  docs: {\n    async: true,\n  },' : ''}
 });
 
 export const source = loader({
-  baseUrl: '/docs',
+  baseUrl: docsRoute,
   source: docs.toFumadocsSource(),${i18n ? '\n  i18n,' : ''}
 });
 `;
@@ -120,6 +125,7 @@ ${i18n ? '  const { locale } = useI18n();\n' : ''}  const { search, setSearch, q
 function shared(input: TemplateInput, async: boolean): Record<string, string> {
   const i18n = input.i18n !== null;
   return {
+    'lib/shared.ts': sharedConstants,
     'lib/source.ts': source(async, i18n),
     'lib/layout.shared.tsx': layoutShared(i18n),
     'components/mdx.tsx': mdx,
@@ -266,7 +272,7 @@ export async function generateMetadata(props: PageProps<'${route}/docs/[[...slug
   };
 }
 `,
-      'app/(docs)/api/search/route.ts': searchRoute.next(input),
+      'app/api/search/route.ts': searchRoute.next(input),
     };
   },
 
@@ -331,7 +337,7 @@ export async function loader(${input.static ? '' : '{ request }: Route.LoaderArg
   },
 
   'tanstack-start': (input) => {
-    const seg = tanstackLangSegment(input.i18n);
+    const seg = localeSegment('tanstack-start', input.i18n);
     const i18n = input.i18n !== null;
     return {
       ...shared(input, true),
@@ -426,8 +432,8 @@ import { createRelativeLink } from 'fumadocs-ui/mdx';
 import { DocsBody, DocsDescription, DocsPage, DocsTitle } from 'fumadocs-ui/layouts/docs/page';
 import { getMDXComponents } from '@/components/mdx';
 ${i18n ? "import { DocsLayout } from 'fumadocs-ui/layouts/docs';\nimport { baseOptions } from '@/lib/layout.shared';\n" : ''}
-export default function Page({ slugs${i18n ? ', lang' : ''} }: PageProps<'${i18n ? '/[lang]' : ''}/docs/[...slugs]'>) {
-  const page = source.getPage(slugs${i18n ? ', lang' : ''});
+export default function Page({ slug${i18n ? ', lang' : ''} }: PageProps<'${i18n ? '/[lang]' : ''}/docs/[...slug]'>) {
+  const page = source.getPage(slug${i18n ? ', lang' : ''});
   if (!page) unstable_notFound();
 
   const MDX = page.data.body;
@@ -504,7 +510,7 @@ export function Provider({ children }: { children: ReactNode }) {
   return <RootProvider${providerProps(input)}>{children}</RootProvider>;
 }
 `,
-            'pages/(docs)/[lang]/docs/[...slugs].tsx': page,
+            'pages/(docs)/[lang]/docs/[...slug].tsx': page,
           }
         : {
             'pages/(docs)/docs/_layout.tsx': `import type { ReactNode } from 'react';
@@ -520,24 +526,12 @@ export default function Layout({ children }: { children: ReactNode }) {
   );
 }
 `,
-            'pages/(docs)/docs/[...slugs].tsx': page,
+            'pages/(docs)/docs/[...slug].tsx': page,
           }),
       'pages/_api/api/search.ts': searchRoute.waku,
     };
   },
 };
-
-/** the locale segment of TanStack Start route files, e.g. `{-$lang}/` */
-export function tanstackLangSegment(i18n: I18nInfo | null) {
-  if (!i18n) return '';
-  return i18n.optionalLocale ? '{-$lang}/' : '$lang/';
-}
-
-/** the locale segment of React Router route paths, e.g. `:lang?/` */
-export function reactRouterLangSegment(i18n: I18nInfo | null) {
-  if (!i18n) return '';
-  return i18n.optionalLocale ? ':lang?/' : ':lang/';
-}
 
 export const nextProxy = `import { createI18nMiddleware } from 'fumadocs-core/i18n/middleware';
 import { i18n } from '@/lib/i18n';

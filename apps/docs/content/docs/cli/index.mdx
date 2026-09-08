@@ -21,7 +21,7 @@ Set up Fumadocs on an existing app, it supports Next.js, React Router, Tanstack 
 npx @fumadocs/cli init
 ```
 
-To avoid conflicts with your app, the docs are added in a dedicated route group (e.g. `app/(docs)` on Next.js) with its own provider, layout and search route. Only a few edits are made to existing files:
+To avoid conflicts with your app, the docs pages are added in a dedicated route group (e.g. `app/(docs)` on Next.js) with their own provider and layout, route handlers like the search API follow the [examples](https://github.com/fuma-nama/fumadocs/tree/dev/examples). Only a few edits are made to existing files:
 
 - Fumadocs MDX plugin in your framework config.
 - Fumadocs UI styles in your global CSS.
@@ -57,6 +57,8 @@ Features adapt to your setup:
 - Fumadocs MDX with the [Macro API](/docs/mdx/macro) or a `source.config.ts`, other content sources can't use `llms`, `mcp` and `epub`.
 - The `baseUrl` of your docs, `src/` directory, `next.config.ts`, i18n, static export and SPA modes.
 - React Router with file-based routes: the routes to register are printed instead.
+
+Routes are placed under the constants of `lib/shared.ts` (`docsRoute`, `docsContentRoute`, `docsImageRoute`), define them first to customize the URLs. Features that add routes also add URL helpers to `lib/source.ts`, like `getPageMarkdownUrl(page)` and `getPageImageUrl(page)`.
 
 See help for the options of each feature:
 

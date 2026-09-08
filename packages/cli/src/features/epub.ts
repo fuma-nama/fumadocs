@@ -1,9 +1,10 @@
 import path from 'node:path';
 import type { Feature } from '@/features';
 import type { ReactFramework } from '@/project';
+import { type FormattedRoute, formatRoute } from '@/project/route';
 import { addReactRouterPrerenderArray, enableProcessedMarkdown } from '@/codemod';
 import { docs } from './docs';
-import { reactFramework, registerReactRouterRoutes, requiresMdx } from './utils';
+import { reactFramework, reactRouterTypes, registerReactRouterRoutes, requiresMdx } from './utils';
 
 const handler = `import { source } from '@/lib/source';
 import { exportEpub } from 'fumadocs-epub';
@@ -35,29 +36,21 @@ async function handle(request: Request): Promise<Response> {
 }
 `;
 
-const routes: Record<ReactFramework, [file: string, content: string]> = {
-  next: [
-    'app/export/epub/route.ts',
-    `${handler}
+const templates: Record<ReactFramework, (route: FormattedRoute) => string> = {
+  next: () => `${handler}
 export const revalidate = false;
 
 export const GET = handle;
 `,
-  ],
-  'react-router': [
-    'routes/export.epub.ts',
-    `import type { Route } from './+types/export.epub';
+  'react-router': (route) => `${reactRouterTypes(route)}
 ${handler}
 export function loader({ request }: Route.LoaderArgs) {
   return handle(request);
 }
 `,
-  ],
-  'tanstack-start': [
-    'routes/export/epub.ts',
-    `import { createFileRoute } from '@tanstack/react-router';
+  'tanstack-start': (route) => `import { createFileRoute } from '@tanstack/react-router';
 ${handler}
-export const Route = createFileRoute('/export/epub')({
+export const Route = createFileRoute('${route.path}')({
   server: {
     handlers: {
       GET: ({ request }) => handle(request),
@@ -65,13 +58,9 @@ export const Route = createFileRoute('/export/epub')({
   },
 });
 `,
-  ],
-  waku: [
-    'pages/_api/export/epub.ts',
-    `${handler}
+  waku: () => `${handler}
 export const GET = handle;
 `,
-  ],
 };
 
 export const epub: Feature = {
@@ -91,13 +80,13 @@ export const epub: Feature = {
         throw new Error(`cannot find \`defineDocs()\` in ${source.collections}`);
     });
 
-    const [route, content] = routes[framework];
-    await ctx.write(path.join(baseDir, route), content);
+    const route = formatRoute({ segments: ['export/epub'] }, framework, null);
+    await ctx.write(path.join(baseDir, route.file), templates[framework](route));
     if (framework === 'react-router') {
-      await registerReactRouterRoutes(ctx, [{ path: 'export/epub', entry: route }]);
+      await registerReactRouterRoutes(ctx, [route]);
       // the route needs a secret at runtime
       await ctx.source('react-router.config.ts', (file) => {
-        addReactRouterPrerenderArray(file, 'excluded', ['/export/epub']);
+        addReactRouterPrerenderArray(file, 'excluded', [`/${route.path}`]);
       });
     }
 
