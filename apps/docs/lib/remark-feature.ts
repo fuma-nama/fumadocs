@@ -16,6 +16,7 @@ import {
   tanstackMarkdownUrl,
   templates,
 } from '@fumadocs/cli/features/llms';
+import { component as webmcp } from '@fumadocs/cli/features/webmcp';
 
 declare module 'satteri' {
   interface DataMap {
@@ -57,11 +58,17 @@ export const docs = defineDocs({
   };
   for (const framework of frameworks) {
     const base = `llms/${framework}`;
+    const tanstack = framework === 'tanstack-start';
+    files[`webmcp/${framework}/components/webmcp.tsx`] = webmcp({
+      static: false,
+      i18n: false,
+      tanstack,
+    });
     const routes = llmsRoutes(framework, null, '/docs', '/llms.mdx/docs');
     for (const [route, content] of templates[framework](routes, false)) {
       files[`${base}/${route.file}`] = content;
     }
-    if (framework === 'tanstack-start') {
+    if (tanstack) {
       files[`${base}/lib/shared.ts`] =
         `export const docsRoute = '/docs';\n${tanstackMarkdownUrl}\n`;
       continue;

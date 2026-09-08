@@ -11,7 +11,7 @@ interface Input {
   tanstack: boolean;
 }
 
-const component = ({ static: isStatic, i18n, tanstack }: Input) => `'use client';
+export const component = ({ static: isStatic, i18n, tanstack }: Input) => `'use client';
 import { useEffect } from 'react';
 import { useRouter } from 'fumadocs-core/framework';
 import { ${isStatic ? 'staticClient' : 'fetchClient'} } from 'fumadocs-core/search/client/${isStatic ? 'orama-static' : 'fetch'}';
