@@ -7,6 +7,14 @@ description: Using Typesense with Fumadocs UI.
 
 ## Setup
 
+Fumadocs CLI can set it up for you, it creates the search dialog, the `static.json` route and a script to sync the search index after each build:
+
+```package-install
+npx @fumadocs/cli feature search --provider typesense
+```
+
+Or manually:
+
 1. Integrate [Typesense Search](/docs/headless/search/typesense).
 
 2. Create a search dialog component.

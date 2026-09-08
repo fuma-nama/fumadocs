@@ -2,12 +2,14 @@ import {
   parseSync,
   type ArrayExpression,
   type ExportDefaultDeclaration,
+  type ImportDeclaration,
   type JSXElement,
   type JSXOpeningElement,
   type Node,
   type ObjectExpression,
   type ObjectProperty,
   type Program,
+  type Span,
 } from 'oxc-parser';
 import MagicString from 'magic-string';
 import fs from 'node:fs/promises';
@@ -42,8 +44,11 @@ export async function createSourceFile(path: string): Promise<SourceFile> {
   return parseSourceFile(path, await fs.readFile(path, 'utf-8'));
 }
 
-export function getCodeValue(v: string) {
-  return new Function(`return ${v}`)();
+/** the value of a string literal, or a template literal without expressions */
+export function getStringValue(node: Node): string | undefined {
+  if (node.type === 'Literal' && typeof node.value === 'string') return node.value;
+  if (node.type === 'TemplateLiteral' && node.expressions.length === 0)
+    return node.quasis[0].value.cooked ?? undefined;
 }
 
 export function* descendants(node: Node): Generator<Node> {
@@ -103,6 +108,19 @@ export function prependJsxChildren(file: SourceFile, element: JSXElement, jsx: s
   s.overwrite(openingElement.end, closingElement.start, `\n${body}\n${indent}`);
 }
 
+/**
+ * Insert JSX after the children of the element
+ */
+export function appendJsxChildren(file: SourceFile, element: JSXElement, jsx: string) {
+  const { closingElement } = element;
+  if (!closingElement) return;
+  const { code, s } = file;
+  const indent = lineIndent(code, element.start);
+  const body = jsx.replaceAll(/^(?=.)/gm, `${indent}  `);
+  // children end with the indentation of the closing tag
+  s.appendLeft(closingElement.start - indent.length, `${body}\n`);
+}
+
 /** trim, and remove the common indentation */
 function dedent(text: string): string {
   const lines = text.trim().split('\n');
@@ -139,14 +157,36 @@ export function addImport(
   file: SourceFile,
   declaration: { from: string; default?: string; named?: string[] },
 ) {
+  const { s, program } = file;
+  const existing = program.body.find(
+    (node): node is ImportDeclaration =>
+      node.type === 'ImportDeclaration' &&
+      node.importKind !== 'type' &&
+      node.source.value === declaration.from,
+  );
+
+  if (existing && !declaration.default && declaration.named) {
+    const imported = new Set<string>();
+    let last: Span | undefined;
+    for (const spec of existing.specifiers) {
+      if (spec.type !== 'ImportSpecifier') continue;
+      imported.add(spec.local.name);
+      last = spec;
+    }
+
+    const missing = declaration.named.filter((name) => !imported.has(name));
+    if (last && missing.length > 0) s.appendLeft(last.end, `, ${missing.join(', ')}`);
+    if (last) return;
+  }
+
   const parts: string[] = [];
   if (declaration.default) parts.push(declaration.default);
   if (declaration.named?.length) parts.push(`{ ${declaration.named.join(', ')} }`);
   const statement = `import ${parts.join(', ')} from '${declaration.from}';`;
 
-  const last = file.program.body.findLast((node) => node.type === 'ImportDeclaration');
-  if (last) file.s.appendLeft(last.end, `\n${statement}`);
-  else file.s.prepend(`${statement}\n`);
+  const last = program.body.findLast((node) => node.type === 'ImportDeclaration');
+  if (last) s.appendLeft(last.end, `\n${statement}`);
+  else s.prepend(`${statement}\n\n`);
 }
 
 type Container = ArrayExpression | ObjectExpression;
@@ -169,7 +209,9 @@ export function addElements(file: SourceFile, container: Container, items: strin
   const multiline = code.slice(container.start, container.end).includes('\n');
 
   if (!last) {
-    s.overwrite(container.start + 1, container.end - 1, items.join(', '));
+    // `[]` is a zero-length range which cannot be overwritten
+    if (container.end - container.start === 2) s.appendLeft(container.end - 1, items.join(', '));
+    else s.overwrite(container.start + 1, container.end - 1, items.join(', '));
     return;
   }
 

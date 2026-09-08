@@ -18,7 +18,21 @@
   ],
   "type": "module",
   "exports": {
+    "./codemod": "./dist/codemod/index.js",
     "./config": "./dist/config.js",
+    "./features": "./dist/features/index.js",
+    "./features/ai": "./dist/features/ai.js",
+    "./features/all": "./dist/features/all.js",
+    "./features/docs": "./dist/features/docs/index.js",
+    "./features/epub": "./dist/features/epub.js",
+    "./features/feedback": "./dist/features/feedback.js",
+    "./features/lint": "./dist/features/lint.js",
+    "./features/llms": "./dist/features/llms.js",
+    "./features/mcp": "./dist/features/mcp.js",
+    "./features/og": "./dist/features/og.js",
+    "./features/search": "./dist/features/search.js",
+    "./features/utils": "./dist/features/utils.js",
+    "./project": "./dist/project/index.js",
     "./registry/installer": "./dist/registry/installer.js",
     "./package.json": "./package.json"
   },
@@ -36,6 +50,8 @@
     "@clack/prompts": "^1.7.0",
     "commander": "^15.0.0",
     "fuma-cli": "^0.1.1",
+    "magic-string": "^1.2.3",
+    "oxc-parser": "^0.128.0",
     "picocolors": "^1.1.1",
     "tinyexec": "^1.3.0",
     "zod": "^4.5.4"
@@ -44,5 +60,8 @@
     "@types/node": "26.4.1",
     "tsconfig": "workspace:*",
     "tsdown": "0.22.14"
+  },
+  "engines": {
+    "node": ">=20.12.0"
   }
 }

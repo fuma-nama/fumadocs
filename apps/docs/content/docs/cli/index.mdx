@@ -13,6 +13,59 @@ npx @fumadocs/cli
 
 You can change the output paths of components in the config.
 
+### Init
+
+Set up Fumadocs on an existing app, it supports Next.js, React Router, Tanstack Start and Waku.
+
+```package-install
+npx @fumadocs/cli init
+```
+
+To avoid conflicts with your app, the docs pages are added in a dedicated route group (e.g. `app/(docs)` on Next.js) with their own provider and layout, route handlers like the search API follow the [examples](https://github.com/fuma-nama/fumadocs/tree/dev/examples). Only a few edits are made to existing files:
+
+- Fumadocs MDX plugin in your framework config.
+- Fumadocs UI styles in your global CSS.
+- `suppressHydrationWarning` on the `<html>` element of your root layout, for the theme switch.
+- `.source` in `.gitignore`.
+
+Pass `--i18n` to set up [internationalization](/docs/internationalization): the docs routes get a locale segment (optional for the default locale where the router supports it), a `lib/i18n.ts` config and, on Next.js, a proxy scoped to the docs routes. Other features follow the i18n config of your project.
+
+It asks before overwriting a file, pass `--yes` to skip prompts and `--no-install` to only write dependencies to `package.json`.
+
+### Features
+
+Configure a feature on your project, it installs the needed components & routes, and wires them into your app.
+
+```package-install
+npx @fumadocs/cli feature ai --provider openrouter
+```
+
+| Feature    | Description                                                                               |
+| ---------- | ----------------------------------------------------------------------------------------- |
+| `docs`     | Set up Fumadocs, same as `init`.                                                          |
+| `ai`       | [Ask AI](/docs/integrations/llms#ask-ai) dialog, `--provider`.                            |
+| `llms`     | [LLM routes](/docs/integrations/llms): `llms.txt`, `llms-full.txt` and per-page Markdown. |
+| `mcp`      | [MCP server](/docs/integrations/llms#mcp-server) to search and read the docs.             |
+| `og`       | Open Graph image generation, `--engine`.                                                  |
+| `search`   | 3rd party [search solution](/docs/search), `--provider`.                                  |
+| `feedback` | [Feedback](/docs/integrations/feedback) component on docs pages.                          |
+| `epub`     | Route to [export EPUB](/docs/guides/export-epub).                                         |
+| `lint`     | Configure ESLint (Next.js only), Biome or Oxlint, `--linter`.                             |
+
+Features adapt to your setup:
+
+- Fumadocs MDX with the [Macro API](/docs/mdx/macro) or a `source.config.ts`, other content sources can't use `llms`, `mcp` and `epub`.
+- The `baseUrl` of your docs, `src/` directory, `next.config.ts`, i18n, static export and SPA modes.
+- React Router with file-based routes: the routes to register are printed instead.
+
+Routes are placed under the constants of `lib/shared.ts` (`docsRoute`, `docsContentRoute`, `docsImageRoute`), define them first to customize the URLs. Features that add routes also add URL helpers to `lib/source.ts`, like `getPageMarkdownUrl(page)` and `getPageImageUrl(page)`.
+
+See help for the options of each feature:
+
+```package-install
+npx @fumadocs/cli feature ai -h
+```
+
 ### Components
 
 Select and install components.

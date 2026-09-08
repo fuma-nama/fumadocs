@@ -6,7 +6,7 @@ Instructions for AI coding agents, follow them in order. Fumadocs docs: https://
 
 Create the docs as its own app: a new directory or repository, or a new workspace package (e.g. `apps/docs`) in a monorepo.
 
-Don't add Fumadocs to an existing marketing or product app unless the user explicitly asks for it: Fumadocs UI ships global styles and its own layouts, mixing them into an unrelated app leads to style conflicts, coupled deployments and harder upgrades. If the user does want it inside an existing app, skip step 2 and follow the manual installation guide of the framework:
+Don't add Fumadocs to an existing marketing or product app unless the user explicitly asks for it: Fumadocs UI ships global styles and its own layouts, mixing them into an unrelated app leads to style conflicts, coupled deployments and harder upgrades. If the user does want it inside an existing app, skip step 2 and run `npx @fumadocs/cli@latest init --yes` in the app (adds the docs in a dedicated route group, supports Next.js, Waku, React Router and Tanstack Start), or follow the manual installation guide of the framework:
 
 - Next.js: https://fumadocs.dev/docs/manual-installation/next.mdx (Recommended)
 - Waku: https://fumadocs.dev/docs/manual-installation/waku.mdx (Recommended if user prefer Vite)
