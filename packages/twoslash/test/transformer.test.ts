@@ -58,7 +58,7 @@ value.toUpper
     <span style="color:#032F62"> "x"</span>
     </code>
     </div>
-    <div class="prose twoslash-popup-docs">
+    <div class="prose prose-sm twoslash-popup-docs">
     <p>the value</p>
     </div>
     </PopupContent>
@@ -93,7 +93,7 @@ value.toUpper
     <span style="color:#032F62"> "x"</span>
     </code>
     </div>
-    <div class="prose twoslash-popup-docs">
+    <div class="prose prose-sm twoslash-popup-docs">
     <p>the value</p>
     </div>
     </PopupContent>
@@ -130,7 +130,7 @@ value.toUpper
     <span style="color:#032F62"> "x"</span>
     </code>
     </div>
-    <div class="prose twoslash-popup-docs">
+    <div class="prose prose-sm twoslash-popup-docs">
     <p>the value</p>
     </div>
     </PopupContent>
