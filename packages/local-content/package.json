@@ -40,16 +40,16 @@
     "ws": "^8.21.3"
   },
   "devDependencies": {
-    "@types/node": "26.4.1",
+    "@types/node": "26.5.0",
     "@types/picomatch": "^4.0.3",
     "@types/react": "^19.2.18",
     "@types/ws": "^8.18.1",
     "fumadocs-core": "workspace:*",
     "react": "^19.2.8",
     "tsconfig": "workspace:*",
-    "tsdown": "0.22.14",
+    "tsdown": "0.23.0",
     "vite": "^8.2.2",
-    "vitest": "^4.1.11"
+    "vitest": "^5.0.0"
   },
   "peerDependencies": {
     "@types/react": "*",

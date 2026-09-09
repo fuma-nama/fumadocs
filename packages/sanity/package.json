@@ -34,9 +34,9 @@
     "@portabletext/react": "^8.0.1"
   },
   "devDependencies": {
-    "@sanity/client": "^8.4.0",
+    "@sanity/client": "^8.6.1",
     "@sanity/types": "^6.12.0",
-    "@types/node": "26.4.1",
+    "@types/node": "26.5.0",
     "@types/react": "^19.2.18",
     "fuma-cli": "^0.1.1",
     "fumadocs-core": "workspace:*",
@@ -45,9 +45,9 @@
     "react": "^19.2.8",
     "sanity": "^6.12.0",
     "tsconfig": "workspace:*",
-    "tsdown": "0.22.14",
+    "tsdown": "0.23.0",
     "typescript": "^7.0.2",
-    "vitest": "^4.1.11"
+    "vitest": "^5.0.0"
   },
   "peerDependencies": {
     "@sanity/client": "^7.22.0 || ^8.0.0",

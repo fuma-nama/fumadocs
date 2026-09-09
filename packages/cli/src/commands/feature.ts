@@ -1,4 +1,4 @@
-import type { Command } from 'commander';
+import type { CAC, Command } from 'cac';
 import {
   cancel,
   confirm,
@@ -25,47 +25,48 @@ interface CommandOptions extends Record<string, string | boolean | undefined> {
 }
 
 export function registerFeatureCommands(
-  program: Command,
+  cli: CAC,
   createConnector: (dir?: string) => RegistryConnector,
 ) {
-  const parent = program.command('feature').description('configure a feature on your project');
-  for (const feature of features) register(parent.command(feature.id), feature, createConnector);
+  const ids = features.map((feature) => feature.id).join(', ');
 
   register(
-    program
-      .command('init')
-      .description('set up Fumadocs on an existing app, same as `feature docs`'),
+    cli.command('feature <id>', `configure a feature on your project (${ids})`),
+    features,
+  ).action(async (id: string, options: CommandOptions) => {
+    const feature = features.find((item) => item.id === id);
+    if (!feature) throw new Error(`unknown feature: ${id}, available: ${ids}`);
+
+    await run(feature, options, createConnector(options.dir));
+  });
+
+  register(cli.command('init', 'set up Fumadocs on an existing app, same as `feature docs`'), [
     features[0],
-    createConnector,
-  );
+  ]).action(async (options: CommandOptions) => {
+    await run(features[0], options, createConnector(options.dir));
+  });
 }
 
-function register(
-  command: Command,
-  feature: AnyFeature,
-  createConnector: (dir?: string) => RegistryConnector,
-) {
+function register(command: Command, list: AnyFeature[]) {
   command
-    .description(feature.description)
     .option('--dir <string>', 'the root url or directory to resolve registry')
     .option('-y, --yes', 'skip prompts, overwrite existing files')
     .option('--no-install', 'write dependencies to package.json without installing');
 
-  for (const [key, option] of Object.entries(feature.options ?? {})) {
-    if ('choices' in option) {
-      command.option(
-        `--${key} <value>`,
-        `${option.message} (${option.choices.map((choice) => choice.value).join(', ')})`,
-      );
-    } else {
-      command.option(`--${key}`, option.message);
+  for (const feature of list) {
+    for (const [key, option] of Object.entries(feature.options ?? {})) {
+      if ('choices' in option) {
+        command.option(
+          `--${key} <value>`,
+          `${option.message} (${option.choices.map((choice) => choice.value).join(', ')})`,
+        );
+      } else {
+        command.option(`--${key}`, option.message);
+      }
     }
   }
 
-  command.action(async (_: CommandOptions, cmd: Command) => {
-    const options: CommandOptions = cmd.optsWithGlobals();
-    await run(feature, options, createConnector(options.dir));
-  });
+  return command;
 }
 
 async function run(feature: AnyFeature, options: CommandOptions, connector: RegistryConnector) {

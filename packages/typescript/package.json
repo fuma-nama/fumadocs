@@ -52,14 +52,14 @@
     "@types/estree": "^1.0.9",
     "@types/hast": "^3.0.5",
     "@types/mdast": "^4.0.4",
-    "@types/node": "26.4.1",
+    "@types/node": "26.5.0",
     "@types/react": "^19.2.18",
-    "@types/react-dom": "^19.2.5",
+    "@types/react-dom": "^19.2.7",
     "fumadocs-core": "workspace:*",
     "fumadocs-ui": "workspace:@fumadocs/base-ui@*",
     "mdast-util-mdx": "^3.0.0",
     "tsconfig": "workspace:*",
-    "tsdown": "0.22.14",
+    "tsdown": "0.23.0",
     "vfile": "^6.0.3"
   },
   "peerDependencies": {
