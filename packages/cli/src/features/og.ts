@@ -11,13 +11,15 @@ import {
   reactRouterTypes,
   registerReactRouterRoutes,
   sharedRoute,
+  type SourceRef,
+  sourceRef,
 } from './utils';
 
 type Engine = 'takumi' | 'next-og';
 
 /** the image URL of a page, `/og/docs/<slugs>/image.png` */
 const imageUrl = (ext: string) => `
-export function getPageImageUrl(page: (typeof source)['$inferPage']) {
+export function getPageImageUrl(page: { slugs: string[]; locale?: string }) {
   const segments = [...page.slugs, 'image.${ext}'];
 
   return {
@@ -37,10 +39,10 @@ const image = (engine: Engine) => `generateOGImage({
 
 const ext = (engine: Engine) => (engine === 'takumi' ? 'webp' : 'png');
 
-type Template = (route: FormattedRoute, engine: Engine, i18n: boolean) => string;
+type Template = (route: FormattedRoute, engine: Engine, i18n: boolean, src: SourceRef) => string;
 
 const templates: Record<ReactFramework, Template> = {
-  next: (route, engine, i18n) => `import { source } from '@/lib/source';
+  next: (route, engine, i18n, src) => `import { ${src.ref} } from '@/lib/source';
 import { notFound } from 'next/navigation';
 ${imports(engine)}
 
@@ -48,26 +50,26 @@ export const revalidate = false;
 
 export async function GET(_req: Request, { params }: RouteContext<'${route.path}'>) {
   const { slug${i18n ? ', lang' : ''} } = await params;
-  const page = source.getPage(slug.slice(0, -1)${i18n ? ', lang' : ''});
+  const page = ${src.resolved}.getPage(slug.slice(0, -1)${i18n ? ', lang' : ''});
   if (!page) notFound();
 
   return ${image(engine)};
 }
 
-export function generateStaticParams() {
-  return source.generateParams().map((item) => ({
+export ${src.dynamic ? 'async ' : ''}function generateStaticParams() {
+  return ${src.resolved}.generateParams().map((item) => ({
     ...item,
     slug: [...item.slug, 'image.${ext(engine)}'],
   }));
 }
 `,
-  'react-router': (route, engine, i18n) => `${reactRouterTypes(route)}
-import { source } from '@/lib/source';
+  'react-router': (route, engine, i18n, src) => `${reactRouterTypes(route)}
+import { ${src.ref} } from '@/lib/source';
 ${imports(engine)}
 
-export function loader({ params }: Route.LoaderArgs) {
+export async function loader({ params }: Route.LoaderArgs) {
   const slugs = params['*'].split('/').filter((v) => v.length > 0);
-  const page = source.getPage(slugs.slice(0, -1)${i18n ? ', params.lang' : ''});
+  const page = ${src.resolved}.getPage(slugs.slice(0, -1)${i18n ? ', params.lang' : ''});
   if (!page) throw new Response(undefined, { status: 404 });
 
   return ${image(engine)};
@@ -77,8 +79,9 @@ export function loader({ params }: Route.LoaderArgs) {
     route,
     engine,
     i18n,
+    src,
   ) => `import { createFileRoute } from '@tanstack/react-router';
-import { source } from '@/lib/source';
+import { ${src.ref} } from '@/lib/source';
 ${imports(engine)}
 
 export const Route = createFileRoute('${route.path}')({
@@ -86,7 +89,7 @@ export const Route = createFileRoute('${route.path}')({
     handlers: {
       GET: async ({ params }) => {
         const slugs = params._splat?.split('/') ?? [];
-        const page = source.getPage(slugs.slice(0, -1)${i18n ? ', params.lang' : ''});
+        const page = ${src.resolved}.getPage(slugs.slice(0, -1)${i18n ? ', params.lang' : ''});
         if (!page) return new Response(undefined, { status: 404 });
 
         return ${image(engine).replaceAll('\n  ', '\n        ')};
@@ -95,12 +98,12 @@ export const Route = createFileRoute('${route.path}')({
   },
 });
 `,
-  waku: (route, engine, i18n) => `import { source } from '@/lib/source';
+  waku: (route, engine, i18n, src) => `import { ${src.ref} } from '@/lib/source';
 import type { ApiContext } from 'waku/router';
 ${imports(engine)}
 
 export async function GET(_: Request, { params }: ApiContext<'${route.path}'>) {
-  const page = source.getPage(params.slug${i18n ? ', params.lang' : ''});
+  const page = ${src.resolved}.getPage(params.slug${i18n ? ', params.lang' : ''});
   if (!page) return new Response(undefined, { status: 404 });
 
   return ${image(engine)};
@@ -109,7 +112,7 @@ export async function GET(_: Request, { params }: ApiContext<'${route.path}'>) {
 export async function getConfig() {
   return {
     render: 'static' as const,
-    staticPaths: source.generateParams().map((item) => ${i18n ? '[item.lang, ...item.slug]' : 'item.slug'}),
+    staticPaths: ${src.resolved}.generateParams().map((item) => ${i18n ? '[item.lang, ...item.slug]' : 'item.slug'}),
   } as const;
 }
 `,
@@ -163,7 +166,7 @@ export const og: Feature<{ engine: Engine }> = {
     );
     await ctx.write(
       path.join(baseDir, route.file),
-      templates[framework](route, engine, i18n !== null),
+      templates[framework](route, engine, i18n !== null, sourceRef(ctx.project.source.dynamic)),
     );
 
     if (framework === 'react-router') await registerReactRouterRoutes(ctx, [route]);

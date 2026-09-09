@@ -116,7 +116,7 @@ export async function exportEpub<C extends LoaderConfig>(
 ): Promise<Buffer> {
   const cwd = process.cwd();
   const {
-    source,
+    source: input,
     getMarkdown = async (page) => {
       try {
         return await (page.data as { getText: (type: string) => Promise<string> }).getText('raw');
@@ -139,6 +139,7 @@ export async function exportEpub<C extends LoaderConfig>(
     publicDir = path.resolve('public'),
   } = options;
 
+  const source = typeof input === 'function' ? await input() : input;
   // Get pages in tree order (navigation order)
   const pageTree = source.getPageTree();
   const orderedPages = getPagesInTreeOrder(pageTree, (node) => source.getNodePage?.(node)).filter(

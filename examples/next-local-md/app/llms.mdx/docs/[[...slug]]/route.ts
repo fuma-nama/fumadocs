@@ -1,4 +1,4 @@
-import { getDocsLlms, getPageMarkdownUrl, getSource } from '@/lib/source';
+import { docsLlms, getPageMarkdownUrl, getSource } from '@/lib/source';
 import { notFound } from 'next/navigation';
 
 export const revalidate = false;
@@ -8,8 +8,6 @@ export async function GET(_req: Request, { params }: RouteContext<'/llms.mdx/doc
   const docs = await getSource();
   const page = docs.getPage(slug?.slice(0, -1));
   if (!page) notFound();
-
-  const docsLlms = await getDocsLlms();
 
   return new Response(await docsLlms.page(page), {
     headers: {

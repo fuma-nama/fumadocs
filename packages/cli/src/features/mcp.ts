@@ -4,12 +4,21 @@ import type { ReactFramework } from '@/project';
 import { type FormattedRoute, formatRoute } from '@/project/route';
 import { addReactRouterPrerenderArray } from '@/codemod';
 import { llms } from './llms';
-import { reactFramework, reactRouterTypes, registerReactRouterRoutes, requiresMdx } from './utils';
+import {
+  reactFramework,
+  reactRouterTypes,
+  registerReactRouterRoutes,
+  requiresMarkdown,
+  type SourceRef,
+  sourceRef,
+} from './utils';
 
-const server = `import { createMcpHandler, McpServer } from '@modelcontextprotocol/server';
+const server = ({
+  ref,
+}: SourceRef) => `import { createMcpHandler, McpServer } from '@modelcontextprotocol/server';
 import { registerSearchTool, registerSourceTools } from 'fumadocs-core/mcp';
 import { createFromSource } from 'fumadocs-core/search/server';
-import { docsLlms, source } from '@/lib/source';
+import { docsLlms, ${ref} } from '@/lib/source';
 
 const handler = createMcpHandler(() => {
   const mcp = new McpServer({
@@ -17,28 +26,28 @@ const handler = createMcpHandler(() => {
     version: '1.0.0',
   });
 
-  registerSourceTools(mcp, source, docsLlms);
-  registerSearchTool(mcp, createFromSource(source));
+  registerSourceTools(mcp, ${ref}, docsLlms);
+  registerSearchTool(mcp, createFromSource(${ref}));
 
   return mcp;
 });
 `;
 
-type Template = (route: FormattedRoute) => string;
+type Template = (route: FormattedRoute, src: SourceRef) => string;
 
 export const templates: Record<ReactFramework, Template> = {
-  next: () => `${server}
+  next: (_, src) => `${server(src)}
 export const GET = (req: Request) => handler.fetch(req);
 export const POST = (req: Request) => handler.fetch(req);
 export const DELETE = (req: Request) => handler.fetch(req);
 `,
-  'react-router': (route) => `${reactRouterTypes(route)}
-${server}
+  'react-router': (route, src) => `${reactRouterTypes(route)}
+${server(src)}
 export const loader = ({ request }: Route.LoaderArgs) => handler.fetch(request);
 export const action = ({ request }: Route.ActionArgs) => handler.fetch(request);
 `,
-  'tanstack-start': (route) => `import { createFileRoute } from '@tanstack/react-router';
-${server}
+  'tanstack-start': (route, src) => `import { createFileRoute } from '@tanstack/react-router';
+${server(src)}
 export const Route = createFileRoute('${route.path}')({
   server: {
     handlers: {
@@ -49,7 +58,7 @@ export const Route = createFileRoute('${route.path}')({
   },
 });
 `,
-  waku: () => `${server}
+  waku: (_, src) => `${server(src)}
 export const GET = (request: Request) => handler.fetch(request);
 export const POST = (request: Request) => handler.fetch(request);
 export const DELETE = (request: Request) => handler.fetch(request);
@@ -65,14 +74,17 @@ export const mcp: Feature = {
   description: 'a MCP server for AI agents to search and read your docs, at /api/mcp',
   requires: [llms],
   supports: (project) =>
-    project.static ? 'MCP requires a server at runtime' : requiresMdx(project),
+    project.static ? 'MCP requires a server at runtime' : requiresMarkdown(project),
   async apply(ctx) {
     const { baseDir } = ctx.project;
     const framework = reactFramework(ctx.project);
     ctx.addDependencies({ '@modelcontextprotocol/server': null, zod: null });
 
     const route = mcpRoute(framework);
-    await ctx.write(path.join(baseDir, route.file), templates[framework](route));
+    await ctx.write(
+      path.join(baseDir, route.file),
+      templates[framework](route, sourceRef(ctx.project.source.dynamic)),
+    );
 
     if (framework === 'react-router') {
       await registerReactRouterRoutes(ctx, [route]);

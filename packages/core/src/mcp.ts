@@ -3,6 +3,7 @@ import type { McpServer } from '@modelcontextprotocol/server';
 import type { SearchServer } from '@/search/server';
 import type { LLMsWithPages } from '@/source/llms';
 import type { LoaderConfig, LoaderOutput } from '@/source/loader';
+import type { Awaitable } from '@/types';
 
 /**
  * Register a `search` tool, backed by a search server from `fumadocs-core/search/server`.
@@ -29,7 +30,7 @@ export function registerSearchTool(mcp: McpServer, server: SearchServer): void {
  */
 export function registerSourceTools<C extends LoaderConfig>(
   mcp: McpServer,
-  source: LoaderOutput<C>,
+  source: LoaderOutput<C> | (() => Awaitable<LoaderOutput<C>>),
   llms: LLMsWithPages<C['page']>,
 ): void {
   mcp.registerTool(
@@ -40,7 +41,7 @@ export function registerSourceTools<C extends LoaderConfig>(
       inputSchema: z.object({}),
     },
     async () => ({
-      content: [{ type: 'text', text: llms.index() }],
+      content: [{ type: 'text', text: await llms.index() }],
     }),
   );
 
@@ -54,7 +55,8 @@ export function registerSourceTools<C extends LoaderConfig>(
       }),
     },
     async ({ url }) => {
-      const page = source.getPageByUrl(url);
+      const loader = typeof source === 'function' ? await source() : source;
+      const page = loader.getPageByUrl(url);
       if (!page)
         return {
           content: [{ type: 'text', text: `page not found: ${url}` }],

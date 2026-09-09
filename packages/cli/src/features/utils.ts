@@ -92,8 +92,26 @@ export async function registerReactRouterRoutes(
   return added;
 }
 
-/** features reading processed Markdown need Fumadocs MDX collections */
-export const requiresMdx = (project: Project) =>
+/** features reading page Markdown need Fumadocs MDX collections, or a runtime source exposing `page.data.content` */
+export const requiresMarkdown = (project: Project) =>
   project.framework === 'astro'
     ? 'Astro is not supported by this feature'
-    : project.source.collections !== null || 'requires Fumadocs MDX, `defineDocs()` was not found';
+    : project.source.collections !== null ||
+      project.source.dynamic ||
+      'requires Fumadocs MDX or a runtime content source';
+
+/** how generated code refers to the loader of `lib/source.ts` */
+export interface SourceRef {
+  /** resolved on demand, `lib/source.ts` exports `getSource()` instead of `source` */
+  dynamic: boolean;
+  /** passed to Fumadocs APIs, which accept a loader or a function resolving one */
+  ref: string;
+  /** reads the loader inside an async function */
+  resolved: string;
+}
+
+export function sourceRef(dynamic: boolean): SourceRef {
+  return dynamic
+    ? { dynamic: true, ref: 'getSource', resolved: '(await getSource())' }
+    : { dynamic: false, ref: 'source', resolved: 'source' };
+}

@@ -1,4 +1,5 @@
 import type { LoaderConfig, LoaderOutput, Page } from '@/source';
+import type { Awaitable } from '@/types';
 import type { StructuredData } from '@/mdx-plugins/remark-structure';
 import { basename, extname } from '@/source/path';
 import { findPath } from '@/page-tree/utils';
@@ -56,12 +57,13 @@ export async function buildIndexDefault(page: Page): Promise<SharedIndex> {
 /**
  * Build a search index for every page, in parallel.
  */
-export function buildDocuments<C extends LoaderConfig, T>(
-  source: LoaderOutput<C>,
+export async function buildDocuments<C extends LoaderConfig, T>(
+  source: LoaderOutput<C> | (() => Awaitable<LoaderOutput<C>>),
   map: (index: SharedIndex, page: C['page']) => T,
 ): Promise<T[]> {
+  const loader = typeof source === 'function' ? await source() : source;
   const tasks: Promise<T>[] = [];
-  for (const page of source.getPages()) tasks.push(build(page));
+  for (const page of loader.getPages()) tasks.push(build(page));
 
   async function build(page: C['page']) {
     return map(await buildIndexDefault(page), page);

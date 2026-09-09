@@ -11,7 +11,15 @@ import {
   findJsxElement,
 } from '@/codemod';
 import { docs } from './docs';
-import { findSource, posix, reactFramework, registerReactRouterRoutes, scripts } from './utils';
+import {
+  findSource,
+  posix,
+  reactFramework,
+  registerReactRouterRoutes,
+  scripts,
+  type SourceRef,
+  sourceRef,
+} from './utils';
 
 /** how client code reads public env variables */
 interface Env {
@@ -64,12 +72,15 @@ const dialogBody = (footer: string, url: string) => `  return (
 `;
 
 /** `structuredData` is a function on async collections (React Router & TanStack Start) */
-const typesenseIndexes = (async: boolean) => `import { source } from '@/lib/source';
+const typesenseIndexes = (
+  async: boolean,
+  { ref, resolved }: SourceRef,
+) => `import { ${ref} } from '@/lib/source';
 import type { DocumentRecord } from 'typesense-fumadocs-adapter';
 
 export async function exportSearchIndexes() {
   const results: DocumentRecord[] = [];
-  for (const page of source.getPages()) {
+  for (const page of ${resolved}.getPages()) {
     results.push({
       _id: page.url,
       structured: ${async ? 'await page.data.structuredData()' : 'page.data.structuredData'},
@@ -110,7 +121,7 @@ interface Provider {
   static: boolean;
   dialog: (env: Env) => string;
   /** exports search indexes to a pre-rendered `static.json`, synced by `sync` after build */
-  exportIndexes?: {
+  exportIndexes?: (src: SourceRef) => {
     imports: string;
     /** expression producing the documents */
     documents: string;
@@ -149,11 +160,11 @@ export default function CustomSearchDialog(props: SharedProps) {
   });
 
 ${dialogBody('Orama', 'https://orama.com')}`,
-    exportIndexes: {
-      imports: `import { source } from '@/lib/source';
+    exportIndexes: ({ ref }) => ({
+      imports: `import { ${ref} } from '@/lib/source';
 import { toDocuments } from 'fumadocs-core/search/orama-cloud';`,
-      documents: 'toDocuments(source)',
-    },
+      documents: `toDocuments(${ref})`,
+    }),
     sync: (env) =>
       syncScript(
         `import { type OramaDocument as DocumentRecord, sync } from 'fumadocs-core/search/orama-cloud';
@@ -196,11 +207,11 @@ export default function CustomSearchDialog(props: SharedProps) {
   });
 
 ${dialogBody('Algolia', 'https://algolia.com')}`,
-    exportIndexes: {
-      imports: `import { source } from '@/lib/source';
+    exportIndexes: ({ ref }) => ({
+      imports: `import { ${ref} } from '@/lib/source';
 import { toDocuments } from 'fumadocs-core/search/algolia';`,
-      documents: 'toDocuments(source)',
-    },
+      documents: `toDocuments(${ref})`,
+    }),
     sync: (env) =>
       syncScript(
         `import { type DocumentRecord, sync } from 'fumadocs-core/search/algolia';
@@ -243,11 +254,11 @@ export default function CustomSearchDialog(props: SharedProps) {
   });
 
 ${dialogBody('Typesense', 'https://typesense.org')}`,
-    exportIndexes: {
+    exportIndexes: (src) => ({
       imports: "import { exportSearchIndexes } from '@/lib/export-search-indexes';",
       documents: 'exportSearchIndexes()',
-      file: typesenseIndexes,
-    },
+      file: (async) => typesenseIndexes(async, src),
+    }),
     sync: (env) =>
       syncScript(
         `import { type DocumentRecord, sync } from 'typesense-fumadocs-adapter';
@@ -388,7 +399,10 @@ export const search: Feature<{ provider: SearchProvider }> = {
   title: 'Search',
   description: 'replace the default search with a 3rd party search solution',
   requires: [docs],
-  supports: (project) => project.source.loader || '`lib/source.ts` must export a `source` loader',
+  supports: (project) =>
+    project.source.loader ||
+    project.source.dynamic ||
+    '`lib/source.ts` must export a `source` loader',
   options: {
     provider: {
       message: 'Choose a search provider',
@@ -429,7 +443,9 @@ export const search: Feature<{ provider: SearchProvider }> = {
     }
 
     if (provider.exportIndexes) {
-      const { imports, documents, file } = provider.exportIndexes;
+      const { imports, documents, file } = provider.exportIndexes(
+        sourceRef(project.source.dynamic),
+      );
       if (file)
         await ctx.write(
           path.join(baseDir, 'lib/export-search-indexes.ts'),

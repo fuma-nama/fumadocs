@@ -1,6 +1,7 @@
 import type { Algoliasearch } from 'algoliasearch';
 import type { StructuredData } from '@/mdx-plugins/remark-structure';
 import type { LoaderConfig, LoaderOutput } from '@/source/loader';
+import type { Awaitable } from '@/types';
 import { buildDocuments } from './server/build-index';
 
 export interface DocumentRecord {
@@ -34,7 +35,7 @@ export interface DocumentRecord {
  * Build the search indexes of every page in a source.
  */
 export function toDocuments<C extends LoaderConfig>(
-  source: LoaderOutput<C>,
+  source: LoaderOutput<C> | (() => Awaitable<LoaderOutput<C>>),
   options: {
     /** Tag to filter results by. */
     tag?: (page: C['page']) => string;

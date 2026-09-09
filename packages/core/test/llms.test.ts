@@ -13,8 +13,8 @@ const docs = loader({ baseUrl: '/docs', source });
 const renderPage = (page: (typeof docs)['$inferPage']) =>
   `# ${page.data.title}\n\n${page.data.description}`;
 
-test('llms: index', () => {
-  expect(llms(docs).index()).toMatchInlineSnapshot(`
+test('llms: index', async () => {
+  await expect(llms(docs).index()).resolves.toMatchInlineSnapshot(`
     "# Docs
 
     - [Index](/docs): hello
@@ -37,6 +37,13 @@ test('llms: page requires renderPage at runtime', async () => {
   };
 
   await expect(output.full()).rejects.toThrowError('renderPage');
+});
+
+test('llms: runtime content sources', async () => {
+  const output = llms(async () => docs, { renderPage });
+
+  await expect(output.index()).resolves.toContain('[Index](/docs)');
+  await expect(output.full()).resolves.toBe('# Index\n\nhello\n\n# Page\n\nworld');
 });
 
 test('loader: get page by url', () => {

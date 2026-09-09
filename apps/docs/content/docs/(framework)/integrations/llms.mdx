@@ -30,6 +30,16 @@ It enables processed Markdown on your docs collection, adds `docsLlms` to `lib/s
   how your content source exposes its Markdown.
 </Callout>
 
+Runtime content sources like [`@fumadocs/local-md`](/docs/integrations/content/local-md) resolve on demand. Pass their `getSource` and the CLI generates the same routes:
+
+```ts
+export const docsLlms = llms(getSource, {
+  renderPage: (page) => `# ${page.data.title} (${page.url})
+
+${page.data.content}`,
+});
+```
+
 It requires `includeProcessedMarkdown` in **Fumadocs MDX**:
 
 <feature title="source.config.ts">llms/source.config.ts</feature>

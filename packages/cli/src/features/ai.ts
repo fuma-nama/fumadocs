@@ -1,5 +1,5 @@
 import path from 'node:path';
-import type { Feature } from '@/features';
+import type { Feature, FeatureContext } from '@/features';
 import { findSource } from './utils';
 import { addImport, findJsxElement, prependJsxChildren } from '@/codemod';
 import { docs } from './docs';
@@ -36,6 +36,7 @@ export const ai: Feature<{ provider: AIProvider }> = {
   async apply(ctx, { provider }) {
     await ctx.install(`ai/${provider}`);
     ctx.env(providers[provider].env, '');
+    if (ctx.project.source.dynamic) await readDynamicSource(ctx);
 
     const { cwd, baseDir, info } = ctx.project;
     const layout = await findSource(cwd, path.join(baseDir, info.routesDir), '<DocsLayout');
@@ -82,3 +83,26 @@ export const ai: Feature<{ provider: AIProvider }> = {
     ctx.note(`Set ${providers[provider].env} in \`.env.local\`.`);
   },
 };
+
+/** the installed chat route indexes pages of a static `source`, runtime sources resolve on demand */
+async function readDynamicSource(ctx: FeatureContext) {
+  const { cwd, baseDir } = ctx.project;
+  const route = await findSource(cwd, baseDir, 'createSearchServer');
+  const edited =
+    route !== undefined &&
+    (await ctx.source(route, (file) => {
+      file.s.replaceAll(
+        "import { source } from '@/lib/source';",
+        "import { getSource } from '@/lib/source';",
+      );
+      file.s.replaceAll('source.getPages()', '(await getSource()).getPages()');
+      // every page of a runtime source carries its Markdown
+      file.s.replaceAll("      if (!('getText' in page.data)) return null;\n\n", '');
+      file.s.replaceAll("await page.data.getText('processed')", 'page.data.content');
+    }));
+
+  if (!edited)
+    ctx.note(
+      'Read pages from `getSource()` in the chat route, the search index is built from `page.data.content`.',
+    );
+}

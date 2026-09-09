@@ -17,6 +17,7 @@ import {
   templates,
 } from '@fumadocs/cli/features/llms';
 import { mcpRoute, templates as mcpTemplates } from '@fumadocs/cli/features/mcp';
+import { sourceRef } from '@fumadocs/cli/features/utils';
 import { component as webmcp } from '@fumadocs/cli/features/webmcp';
 
 declare module 'satteri' {
@@ -27,6 +28,9 @@ declare module 'satteri' {
 }
 
 const frameworks = ['next', 'react-router', 'tanstack-start', 'waku'] as const;
+
+/** the docs show the setup of a Fumadocs MDX source */
+const src = sourceRef(false);
 
 /** apply a codemod to a stub file, with the inserted lines highlighted */
 function codemod(name: string, code: string, edit: (file: SourceFile) => void) {
@@ -45,7 +49,7 @@ function codemod(name: string, code: string, edit: (file: SourceFile) => void) {
 /** the files written by CLI features, keyed by `<feature>/<framework>/<file>` */
 function featureFiles() {
   const files: Record<string, string> = {
-    'llms/docs-llms.ts': `import { llms } from 'fumadocs-core/source';\n${docsLlms.trimStart()}\n`,
+    'llms/docs-llms.ts': `import { llms } from 'fumadocs-core/source';\n${docsLlms(src).trimStart()}\n`,
     'llms/source.config.ts': codemod(
       'source.config.ts',
       `import { defineDocs } from 'fumadocs-mdx/config';
@@ -66,9 +70,9 @@ export const docs = defineDocs({
       tanstack,
     });
     const mcp = mcpRoute(framework);
-    files[`mcp/${framework}/${mcp.file}`] = mcpTemplates[framework](mcp);
+    files[`mcp/${framework}/${mcp.file}`] = mcpTemplates[framework](mcp, src);
     const routes = llmsRoutes(framework, null, '/docs', '/llms.mdx/docs');
-    for (const [route, content] of templates[framework](routes, false)) {
+    for (const [route, content] of templates[framework](routes, false, src)) {
       files[`${base}/${route.file}`] = content;
     }
     if (tanstack) {

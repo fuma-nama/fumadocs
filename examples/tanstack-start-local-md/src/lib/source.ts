@@ -20,10 +20,8 @@ export async function getSource() {
   return source.get();
 }
 
-export async function getDocsLlms() {
-  return llms(await getSource(), {
-    renderPage: (page) => `# ${page.data.title} (${page.url})
+export const docsLlms = llms(getSource, {
+  renderPage: (page) => `# ${page.data.title} (${page.url})
 
 ${page.data.content}`,
-  });
-}
+});

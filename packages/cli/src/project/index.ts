@@ -62,6 +62,8 @@ export const frameworks: Record<Framework, FrameworkInfo> = {
 export interface SourceInfo {
   /** `lib/source.ts` exports a `source` loader */
   loader: boolean;
+  /** `lib/source.ts` exports `getSource()`, a runtime content source resolved on demand */
+  dynamic: boolean;
   /** file defining the Fumadocs MDX collections, relative to cwd: `lib/source.ts` (macro) or `source.config.ts`; `null` for other content sources */
   collections: string | null;
   /** collections are loaded lazily, `structuredData` is a function */
@@ -182,6 +184,7 @@ async function detectSource(
 
   return {
     loader: /export const source\b/.test(source),
+    dynamic: /export (async )?function getSource\b/.test(source),
     collections,
     async: /async:\s*true/.test(content),
     baseUrl: baseUrl ?? '/docs',

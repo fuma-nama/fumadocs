@@ -2,7 +2,7 @@ import path from 'node:path';
 import type { Feature } from '@/features';
 import { addImport, appendJsxChildren, findJsxElement } from '@/codemod';
 import { llms } from './llms';
-import { findSource, reactFramework, requiresMdx } from './utils';
+import { findSource, reactFramework, requiresMarkdown } from './utils';
 
 interface Input {
   static: boolean;
@@ -120,7 +120,7 @@ export const webmcp: Feature = {
   description:
     'expose tools to AI agents in the browser (experimental): search, read and open docs pages',
   requires: [llms],
-  supports: requiresMdx,
+  supports: requiresMarkdown,
   async apply(ctx) {
     const { cwd, baseDir, i18n } = ctx.project;
     const framework = reactFramework(ctx.project);
