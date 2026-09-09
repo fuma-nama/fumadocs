@@ -1,5 +1,7 @@
 import type { Algoliasearch } from 'algoliasearch';
 import type { StructuredData } from '@/mdx-plugins/remark-structure';
+import type { LoaderConfig, LoaderOutput } from '@/source/loader';
+import { buildDocuments } from './server/build-index';
 
 export interface DocumentRecord {
   /**
@@ -26,6 +28,26 @@ export interface DocumentRecord {
    * Data to be added to each section index
    */
   extra_data?: object;
+}
+
+/**
+ * Build the search indexes of every page in a source.
+ */
+export function toDocuments<C extends LoaderConfig>(
+  source: LoaderOutput<C>,
+  options: {
+    /** Tag to filter results by. */
+    tag?: (page: C['page']) => string;
+  } = {},
+): Promise<DocumentRecord[]> {
+  return buildDocuments(source, (index, page) => ({
+    _id: index.id,
+    title: index.title,
+    description: index.description,
+    url: index.url,
+    structured: index.structuredData,
+    tag: options.tag?.(page),
+  }));
 }
 
 export interface SyncOptions {

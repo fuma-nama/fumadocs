@@ -10,6 +10,56 @@ import type { EpubExportOptions } from './types';
 export { defaultEpubStyles } from './default-styles';
 export type { EpubConfig, EpubExportOptions } from './types';
 
+export interface EpubExportAPI {
+  GET: (request: Request) => Promise<Response>;
+}
+
+/**
+ * A route handler that exports the docs as an EPUB file.
+ *
+ * The route is guarded by `secret`: it is rejected entirely when the secret is unset (e.g. a missing
+ * environment variable), otherwise the request must carry `Authorization: Bearer <secret>`.
+ *
+ * @example
+ * ```ts
+ * import { createEpubExportAPI } from 'fumadocs-epub';
+ * import { source } from '@/lib/source';
+ *
+ * export const { GET } = createEpubExportAPI({
+ *   source,
+ *   title: 'Documentation',
+ *   secret: process.env.EXPORT_SECRET,
+ * });
+ * ```
+ */
+export function createEpubExportAPI<C extends LoaderConfig>(
+  options: EpubExportOptions<C> & {
+    secret: string | undefined;
+    /** @defaultValue 'docs.epub' */
+    filename?: string;
+  },
+): EpubExportAPI {
+  const { secret, filename = 'docs.epub', ...rest } = options;
+
+  return {
+    async GET(request) {
+      if (!secret) return new Response('the export secret is not configured.', { status: 503 });
+      const auth = request.headers.get('authorization');
+      if (auth?.replace(/^Bearer\s+/i, '') !== secret)
+        return new Response('Unauthorized', { status: auth ? 403 : 401 });
+
+      const buffer = await exportEpub(rest as EpubExportOptions<C>);
+
+      return new Response(new Uint8Array(buffer), {
+        headers: {
+          'Content-Type': 'application/epub+zip',
+          'Content-Disposition': `attachment; filename="${filename}"`,
+        },
+      });
+    },
+  };
+}
+
 /**
  * Get page directory for resolving relative image paths
  */

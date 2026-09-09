@@ -53,6 +53,23 @@ export async function buildIndexDefault(page: Page): Promise<SharedIndex> {
   };
 }
 
+/**
+ * Build a search index for every page, in parallel.
+ */
+export function buildDocuments<C extends LoaderConfig, T>(
+  source: LoaderOutput<C>,
+  map: (index: SharedIndex, page: C['page']) => T,
+): Promise<T[]> {
+  const tasks: Promise<T>[] = [];
+  for (const page of source.getPages()) tasks.push(build(page));
+
+  async function build(page: C['page']) {
+    return map(await buildIndexDefault(page), page);
+  }
+
+  return Promise.all(tasks);
+}
+
 function isBreadcrumbItem(item: unknown): item is string {
   return typeof item === 'string' && item.length > 0;
 }

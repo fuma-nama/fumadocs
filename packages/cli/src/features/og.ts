@@ -26,26 +26,14 @@ export function getPageImageUrl(page: (typeof source)['$inferPage']) {
   };
 }`;
 
-const image = `<DefaultImage title={page.data.title} description={page.data.description} site="My App" />`;
-
 const imports = (engine: Engine) =>
-  engine === 'takumi'
-    ? `import { ImageResponse } from 'takumi-js/response';
-import { generate as DefaultImage } from 'fumadocs-ui/og/takumi';`
-    : `import { ImageResponse } from 'next/og';
-import { generate as DefaultImage } from 'fumadocs-ui/og';`;
+  `import { generateOGImage } from 'fumadocs-ui/og${engine === 'takumi' ? '/takumi' : ''}';`;
 
-const options = (engine: Engine) =>
-  engine === 'takumi'
-    ? `{
-      width: 1200,
-      height: 630,
-      format: 'webp',
-    }`
-    : `{
-      width: 1200,
-      height: 630,
-    }`;
+const image = (engine: Engine) => `generateOGImage({
+    title: page.data.title,
+    description: page.data.description,
+    site: 'My App',${engine === 'takumi' ? "\n    format: 'webp'," : ''}
+  })`;
 
 const ext = (engine: Engine) => (engine === 'takumi' ? 'webp' : 'png');
 
@@ -63,10 +51,7 @@ export async function GET(_req: Request, { params }: RouteContext<'${route.path}
   const page = source.getPage(slug.slice(0, -1)${i18n ? ', lang' : ''});
   if (!page) notFound();
 
-  return new ImageResponse(
-    ${image},
-    ${options(engine)},
-  );
+  return ${image(engine)};
 }
 
 export function generateStaticParams() {
@@ -85,10 +70,7 @@ export function loader({ params }: Route.LoaderArgs) {
   const page = source.getPage(slugs.slice(0, -1)${i18n ? ', params.lang' : ''});
   if (!page) throw new Response(undefined, { status: 404 });
 
-  return new ImageResponse(
-    ${image},
-    ${options(engine)},
-  );
+  return ${image(engine)};
 }
 `,
   'tanstack-start': (
@@ -107,10 +89,7 @@ export const Route = createFileRoute('${route.path}')({
         const page = source.getPage(slugs.slice(0, -1)${i18n ? ', params.lang' : ''});
         if (!page) return new Response(undefined, { status: 404 });
 
-        return new ImageResponse(
-          ${image},
-          ${options(engine).replaceAll('\n', '\n    ')},
-        );
+        return ${image(engine).replaceAll('\n  ', '\n        ')};
       },
     },
   },
@@ -124,10 +103,7 @@ export async function GET(_: Request, { params }: ApiContext<'${route.path}'>) {
   const page = source.getPage(params.slug${i18n ? ', params.lang' : ''});
   if (!page) return new Response(undefined, { status: 404 });
 
-  return new ImageResponse(
-    ${image},
-    ${options(engine)},
-  );
+  return ${image(engine)};
 }
 
 export async function getConfig() {

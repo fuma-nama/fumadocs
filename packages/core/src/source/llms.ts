@@ -1,23 +1,63 @@
 import type { LoaderConfig, LoaderOutput } from './loader';
 import type * as PageTree from '@/page-tree';
+import type { Awaitable } from '@/types';
 
 interface Context {
   lang?: string;
 }
 
-export interface LLMsConfig {
+export interface LLMsConfig<Page = unknown> {
   TAB?: string;
   renderName?: (item: PageTree.Node | PageTree.Root, ctx: Context) => string;
   renderDescription?: (
     item: PageTree.Root | PageTree.Item | PageTree.Folder,
     ctx: Context,
   ) => string;
+
+  /**
+   * Render a page as Markdown, required by `page()` and `full()`.
+   */
+  renderPage?: (page: Page) => Awaitable<string>;
+}
+
+export interface LLMs {
+  /**
+   * generate `llms.txt` content in Markdown format.
+   *
+   * use `indexNode(node)` instead for more control (e.g. add extra sections to output).
+   */
+  index: (lang?: string) => string;
+
+  /**
+   * generate `llms.txt` content for a single page tree node.
+   */
+  indexNode: (node: PageTree.Node, lang?: string) => string;
+}
+
+export interface LLMsWithPages<Page> extends LLMs {
+  /**
+   * render a page with `renderPage`.
+   */
+  page: (page: Page) => Promise<string>;
+
+  /**
+   * generate `llms-full.txt` content: every page rendered with `renderPage`.
+   */
+  full: (lang?: string) => Promise<string>;
 }
 
 export function llms<C extends LoaderConfig = LoaderConfig>(
   loader: LoaderOutput<C>,
-  config: LLMsConfig = {},
-) {
+  config: LLMsConfig<C['page']> & { renderPage: (page: C['page']) => Awaitable<string> },
+): LLMsWithPages<C['page']>;
+export function llms<C extends LoaderConfig = LoaderConfig>(
+  loader: LoaderOutput<C>,
+  config?: LLMsConfig<C['page']>,
+): LLMs;
+export function llms<C extends LoaderConfig = LoaderConfig>(
+  loader: LoaderOutput<C>,
+  config: LLMsConfig<C['page']> = {},
+): LLMsWithPages<C['page']> {
   const {
     TAB = '  ',
     renderName = (node, ctx): string => {
@@ -96,18 +136,26 @@ export function llms<C extends LoaderConfig = LoaderConfig>(
     return out.join('\n');
   }
 
+  function renderPage(page: C['page']) {
+    if (!config.renderPage)
+      throw new Error('`renderPage` is required by `page()` and `full()`, see llms() options.');
+
+    return config.renderPage(page);
+  }
+
   return {
-    /**
-     * generate `llms.txt` content in Markdown format.
-     *
-     * use `indexNode(node)` instead for more control (e.g. add extra sections to output).
-     */
     index,
-    /**
-     * generate `llms.txt` content for a single page tree node.
-     */
-    indexNode(node: PageTree.Node, lang?: string): string {
+    indexNode(node, lang) {
       return formatNode(node, 0, { lang });
+    },
+    async page(page) {
+      return renderPage(page);
+    },
+    async full(lang) {
+      const rendered: Awaitable<string>[] = [];
+      for (const page of loader.getPages(lang)) rendered.push(renderPage(page));
+
+      return (await Promise.all(rendered)).join('\n\n');
     },
   };
 }

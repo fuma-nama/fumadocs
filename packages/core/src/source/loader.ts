@@ -150,6 +150,13 @@ export interface LoaderOutput<Config extends LoaderConfig = LoaderConfig> {
    */
   getPage: (slugs: string[] | undefined, language?: string) => Config['page'] | undefined;
 
+  /**
+   * Get page by its URL (pathname).
+   *
+   * @param language - If unspecified, look up every language.
+   */
+  getPageByUrl: (url: string, language?: string) => Config['page'] | undefined;
+
   getNodePage: (node: PageTree.Item, language?: string) => Config['page'] | undefined;
 
   getNodeMeta: (
@@ -421,6 +428,14 @@ export function loader<I extends ResolvedInput, I18n extends I18nConfig | undefi
     // we can assume page slugs are always URI encoded.
     getPage(slugs = [], language = i18n?.defaultLanguage) {
       return indexer.getPageBySlugs(slugs, language);
+    },
+    getPageByUrl(url, language) {
+      if (language !== undefined || !i18n) return indexer.getPageByUrl(url, language);
+
+      for (const lang of i18n.languages) {
+        const page = indexer.getPageByUrl(url, lang);
+        if (page) return page;
+      }
     },
     getNodeMeta(node, language = i18n?.defaultLanguage) {
       const ref = node.$ref;

@@ -1,4 +1,4 @@
-import { loader } from 'fumadocs-core/source';
+import { llms, loader } from 'fumadocs-core/source';
 import { defineDocs } from 'fumadocs-mdx/macro';
 import { lucideIconsPlugin } from 'fumadocs-core/source/lucide-icons';
 import { docsRoute } from './shared';
@@ -27,12 +27,12 @@ export const source = loader(
   },
 );
 
-export async function getLLMText(page: (typeof source)['$inferPage']) {
-  if (page.type === 'openapi') return JSON.stringify(page.data.getSchema(), null, 2);
+export const docsLlms = llms(source, {
+  renderPage: async (page) => {
+    if (page.type === 'openapi') return JSON.stringify(page.data.getSchema(), null, 2);
 
-  const processed = await page.data.getText('processed');
+    return `# ${page.data.title} (${page.url})
 
-  return `# ${page.data.title} (${page.url})
-
-${processed}`;
-}
+${await page.data.getText('processed')}`;
+  },
+});

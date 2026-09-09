@@ -1,4 +1,4 @@
-import { getLLMText, source } from '@/lib/source';
+import { docsLlms, source } from '@/lib/source';
 import { ApiContext } from 'waku/router';
 import { unstable_notFound } from 'waku/router/server';
 
@@ -10,7 +10,7 @@ export async function GET(
   const page = source.getPage(slugs);
   if (!page) unstable_notFound();
 
-  return new Response(await getLLMText(page), {
+  return new Response(await docsLlms.page(page), {
     headers: {
       'Content-Type': 'text/markdown',
     },

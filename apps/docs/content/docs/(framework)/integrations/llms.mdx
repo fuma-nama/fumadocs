@@ -11,13 +11,24 @@ Serve your docs as Markdown for LLMs and AI agents:
 npx @fumadocs/cli feature llms
 ```
 
-It enables processed Markdown on your docs collection, adds `getLLMText` to `lib/source.ts`, and creates the routes below. The generated files are listed here if you prefer a manual setup.
+It enables processed Markdown on your docs collection, adds `docsLlms` to `lib/source.ts`, and creates the routes below. The generated files are listed here if you prefer a manual setup.
 
-### `getLLMText`
+### `docsLlms`
 
-Converts a page into Markdown, from the processed document rather than the raw file content:
+`llms()` renders your docs for LLMs. `renderPage` turns one page into Markdown, from the processed document rather than the raw file content:
 
-<feature title="lib/source.ts">llms/get-llm-text.ts</feature>
+<feature title="lib/source.ts">llms/docs-llms.ts</feature>
+
+| Method         | Output                                         |
+| -------------- | ---------------------------------------------- |
+| `index(lang?)` | the `llms.txt` index, built from the page tree |
+| `page(page)`   | one page, rendered with `renderPage`           |
+| `full(lang?)`  | every page rendered with `renderPage`, joined  |
+
+<Callout title="renderPage is required">
+  `page()` and `full()` are only available when you pass `renderPage`, since Fumadocs cannot know
+  how your content source exposes its Markdown.
+</Callout>
 
 It requires `includeProcessedMarkdown` in **Fumadocs MDX**:
 
@@ -218,7 +229,26 @@ Expose your docs to AI agents through a [MCP](https://modelcontextprotocol.io) s
 npx @fumadocs/cli feature mcp
 ```
 
-It creates a `/api/mcp` route with the streamable HTTP transport, on top of the [LLM routes](#docs-for-llm) above. Connect an agent to it with:
+It creates a `/api/mcp` route with the streamable HTTP transport, on top of the [LLM routes](#docs-for-llm) above.
+The tools come from `fumadocs-core/mcp`: `registerSourceTools()` adds `list_pages` and `get_page`, `registerSearchTool()` adds `search`.
+
+<feature tab="Next.js" title="app/api/mcp/route.ts">
+  mcp/next/app/api/mcp/route.ts
+</feature>
+
+<feature tab="React Router" title="app/routes/api.mcp.ts">
+  mcp/react-router/routes/api.mcp.ts
+</feature>
+
+<feature tab="Tanstack Start" title="src/routes/api/mcp.ts">
+  mcp/tanstack-start/routes/api/mcp.ts
+</feature>
+
+<feature tab="Waku" title="pages/_api/api/mcp.ts">
+  mcp/waku/pages/_api/api/mcp.ts
+</feature>
+
+Connect an agent to it with:
 
 ```json
 {

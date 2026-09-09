@@ -64,18 +64,19 @@ const dialogBody = (footer: string, url: string) => `  return (
 `;
 
 /** `structuredData` is a function on async collections (React Router & TanStack Start) */
-const exportIndexes = (
-  imports: string,
-  record: string,
-  async: boolean,
-) => `import { source } from '@/lib/source';
-${imports}
+const typesenseIndexes = (async: boolean) => `import { source } from '@/lib/source';
+import type { DocumentRecord } from 'typesense-fumadocs-adapter';
 
 export async function exportSearchIndexes() {
-  const results: ${record.includes('_id') ? 'DocumentRecord' : 'OramaDocument'}[] = [];
+  const results: DocumentRecord[] = [];
   for (const page of source.getPages()) {
     results.push({
-${record.replace('page.data.structuredData', async ? 'await page.data.structuredData()' : 'page.data.structuredData')}
+      _id: page.url,
+      structured: ${async ? 'await page.data.structuredData()' : 'page.data.structuredData'},
+      url: page.url,
+      title: page.data.title,
+      description: page.data.description,
+      locale: page.locale,
     });
   }
   return results;
@@ -109,7 +110,13 @@ interface Provider {
   static: boolean;
   dialog: (env: Env) => string;
   /** exports search indexes to a pre-rendered `static.json`, synced by `sync` after build */
-  exportIndexes?: (async: boolean) => string;
+  exportIndexes?: {
+    imports: string;
+    /** expression producing the documents */
+    documents: string;
+    /** generated `lib/export-search-indexes.ts`, for providers without a `toDocuments()` */
+    file?: (async: boolean) => string;
+  };
   sync?: (env: Env, dir: string) => string;
   /** server-side search, replaces the default search route */
   searchRoute?: Record<ReactFramework, string>;
@@ -142,16 +149,11 @@ export default function CustomSearchDialog(props: SharedProps) {
   });
 
 ${dialogBody('Orama', 'https://orama.com')}`,
-    exportIndexes: (async) =>
-      exportIndexes(
-        "import type { OramaDocument } from 'fumadocs-core/search/orama-cloud';",
-        `      id: page.url,
-        structured: page.data.structuredData,
-        url: page.url,
-        title: page.data.title,
-        description: page.data.description,`,
-        async,
-      ),
+    exportIndexes: {
+      imports: `import { source } from '@/lib/source';
+import { toDocuments } from 'fumadocs-core/search/orama-cloud';`,
+      documents: 'toDocuments(source)',
+    },
     sync: (env) =>
       syncScript(
         `import { type OramaDocument as DocumentRecord, sync } from 'fumadocs-core/search/orama-cloud';
@@ -194,16 +196,11 @@ export default function CustomSearchDialog(props: SharedProps) {
   });
 
 ${dialogBody('Algolia', 'https://algolia.com')}`,
-    exportIndexes: (async) =>
-      exportIndexes(
-        "import type { DocumentRecord } from 'fumadocs-core/search/algolia';",
-        `      _id: page.url,
-        structured: page.data.structuredData,
-        url: page.url,
-        title: page.data.title,
-        description: page.data.description,`,
-        async,
-      ),
+    exportIndexes: {
+      imports: `import { source } from '@/lib/source';
+import { toDocuments } from 'fumadocs-core/search/algolia';`,
+      documents: 'toDocuments(source)',
+    },
     sync: (env) =>
       syncScript(
         `import { type DocumentRecord, sync } from 'fumadocs-core/search/algolia';
@@ -246,17 +243,11 @@ export default function CustomSearchDialog(props: SharedProps) {
   });
 
 ${dialogBody('Typesense', 'https://typesense.org')}`,
-    exportIndexes: (async) =>
-      exportIndexes(
-        "import type { DocumentRecord } from 'typesense-fumadocs-adapter';",
-        `      _id: page.url,
-        structured: page.data.structuredData,
-        url: page.url,
-        title: page.data.title,
-        description: page.data.description,
-        locale: page.locale,`,
-        async,
-      ),
+    exportIndexes: {
+      imports: "import { exportSearchIndexes } from '@/lib/export-search-indexes';",
+      documents: 'exportSearchIndexes()',
+      file: typesenseIndexes,
+    },
     sync: (env) =>
       syncScript(
         `import { type DocumentRecord, sync } from 'typesense-fumadocs-adapter';
@@ -348,36 +339,42 @@ export const { GET } = server;
 
 export type SearchProvider = keyof typeof providers;
 
-const staticRoutes: Record<ReactFramework, (route: FormattedRoute) => string> = {
-  next: () => `import { exportSearchIndexes } from '@/lib/export-search-indexes';
+type StaticRoute = (route: FormattedRoute, imports: string, documents: string) => string;
+
+const staticRoutes: Record<ReactFramework, StaticRoute> = {
+  next: (_, imports, documents) => `${imports}
 
 export const revalidate = false;
 
 export async function GET() {
-  return Response.json(await exportSearchIndexes());
+  return Response.json(await ${documents});
 }
 `,
-  'react-router': () => `import { exportSearchIndexes } from '@/lib/export-search-indexes';
+  'react-router': (_, imports, documents) => `${imports}
 
 export async function loader() {
-  return Response.json(await exportSearchIndexes());
+  return Response.json(await ${documents});
 }
 `,
-  'tanstack-start': (route) => `import { createFileRoute } from '@tanstack/react-router';
-import { exportSearchIndexes } from '@/lib/export-search-indexes';
+  'tanstack-start': (
+    route,
+    imports,
+    documents,
+  ) => `import { createFileRoute } from '@tanstack/react-router';
+${imports}
 
 export const Route = createFileRoute('${route.path}')({
   server: {
     handlers: {
-      GET: async () => Response.json(await exportSearchIndexes()),
+      GET: async () => Response.json(await ${documents}),
     },
   },
 });
 `,
-  waku: () => `import { exportSearchIndexes } from '@/lib/export-search-indexes';
+  waku: (_, imports, documents) => `${imports}
 
 export async function GET() {
-  return Response.json(await exportSearchIndexes());
+  return Response.json(await ${documents});
 }
 
 export const getConfig = () => ({
@@ -432,12 +429,18 @@ export const search: Feature<{ provider: SearchProvider }> = {
     }
 
     if (provider.exportIndexes) {
-      await ctx.write(
-        path.join(baseDir, 'lib/export-search-indexes.ts'),
-        provider.exportIndexes(project.source.async),
-      );
+      const { imports, documents, file } = provider.exportIndexes;
+      if (file)
+        await ctx.write(
+          path.join(baseDir, 'lib/export-search-indexes.ts'),
+          file(project.source.async),
+        );
+
       const route = formatRoute({ segments: ['static.json'] }, framework, null);
-      await ctx.write(path.join(baseDir, route.file), staticRoutes[framework](route));
+      await ctx.write(
+        path.join(baseDir, route.file),
+        staticRoutes[framework](route, imports, documents),
+      );
 
       if (framework === 'react-router') {
         await registerReactRouterRoutes(ctx, [route]);

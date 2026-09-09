@@ -9,13 +9,14 @@ import {
   type SourceFile,
 } from '@fumadocs/cli/codemod';
 import {
-  getLLMText,
+  docsLlms,
   llmsRoutes,
   markdownRewrite,
   markdownUrl,
   tanstackMarkdownUrl,
   templates,
 } from '@fumadocs/cli/features/llms';
+import { mcpRoute, templates as mcpTemplates } from '@fumadocs/cli/features/mcp';
 import { component as webmcp } from '@fumadocs/cli/features/webmcp';
 
 declare module 'satteri' {
@@ -44,7 +45,7 @@ function codemod(name: string, code: string, edit: (file: SourceFile) => void) {
 /** the files written by CLI features, keyed by `<feature>/<framework>/<file>` */
 function featureFiles() {
   const files: Record<string, string> = {
-    'llms/get-llm-text.ts': `${getLLMText.trimStart()}\n`,
+    'llms/docs-llms.ts': `import { llms } from 'fumadocs-core/source';\n${docsLlms.trimStart()}\n`,
     'llms/source.config.ts': codemod(
       'source.config.ts',
       `import { defineDocs } from 'fumadocs-mdx/config';
@@ -64,6 +65,8 @@ export const docs = defineDocs({
       i18n: false,
       tanstack,
     });
+    const mcp = mcpRoute(framework);
+    files[`mcp/${framework}/${mcp.file}`] = mcpTemplates[framework](mcp);
     const routes = llmsRoutes(framework, null, '/docs', '/llms.mdx/docs');
     for (const [route, content] of templates[framework](routes, false)) {
       files[`${base}/${route.file}`] = content;

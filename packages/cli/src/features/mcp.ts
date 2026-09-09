@@ -6,105 +6,39 @@ import { addReactRouterPrerenderArray } from '@/codemod';
 import { llms } from './llms';
 import { reactFramework, reactRouterTypes, registerReactRouterRoutes, requiresMdx } from './utils';
 
-const server = (
-  i18n: boolean,
-) => `import { createMcpHandler, McpServer } from '@modelcontextprotocol/server';
+const server = `import { createMcpHandler, McpServer } from '@modelcontextprotocol/server';
+import { registerSearchTool, registerSourceTools } from 'fumadocs-core/mcp';
 import { createFromSource } from 'fumadocs-core/search/server';
-import { llms } from 'fumadocs-core/source';
-import { z } from 'zod';
-import { getLLMText, source } from '@/lib/source';
-
-const search = createFromSource(source);
-
-function findPage(url: string) {
-${
-  i18n
-    ? `  for (const { pages } of source.getLanguages()) {
-    for (const page of pages) if (page.url === url) return page;
-  }`
-    : `  for (const page of source.getPages()) if (page.url === url) return page;`
-}
-}
+import { docsLlms, source } from '@/lib/source';
 
 const handler = createMcpHandler(() => {
-  const server = new McpServer({
+  const mcp = new McpServer({
     name: 'docs',
     version: '1.0.0',
   });
 
-  server.registerTool(
-    'list_pages',
-    {
-      title: 'List Pages',
-      description: 'List all docs pages with their URLs',
-      inputSchema: z.object({}),
-    },
-    async () => ({
-      content: [{ type: 'text', text: llms(source).index() }],
-    }),
-  );
+  registerSourceTools(mcp, source, docsLlms);
+  registerSearchTool(mcp, createFromSource(source));
 
-  server.registerTool(
-    'search',
-    {
-      title: 'Search Docs',
-      description: 'Search docs pages with a query',
-      inputSchema: z.object({
-        query: z.string(),${i18n ? '\n        locale: z.string().optional(),' : ''}
-      }),
-    },
-    async ({ query${i18n ? ', locale' : ''} }) => {
-      const results = await search.search(query${i18n ? ', { locale }' : ''});
-
-      return {
-        content: [{ type: 'text', text: JSON.stringify(results) }],
-      };
-    },
-  );
-
-  server.registerTool(
-    'get_page',
-    {
-      title: 'Get Page',
-      description: 'Get the Markdown content of a docs page by its URL',
-      inputSchema: z.object({
-        url: z.string(),
-      }),
-    },
-    async ({ url }) => {
-      const page = findPage(url);
-      if (!page) {
-        return {
-          content: [{ type: 'text', text: \`page not found: \${url}\` }],
-          isError: true,
-        };
-      }
-
-      return {
-        content: [{ type: 'text', text: await getLLMText(page) }],
-      };
-    },
-  );
-
-  return server;
+  return mcp;
 });
 `;
 
-type Template = (route: FormattedRoute, i18n: boolean) => string;
+type Template = (route: FormattedRoute) => string;
 
-const templates: Record<ReactFramework, Template> = {
-  next: (_, i18n) => `${server(i18n)}
+export const templates: Record<ReactFramework, Template> = {
+  next: () => `${server}
 export const GET = (req: Request) => handler.fetch(req);
 export const POST = (req: Request) => handler.fetch(req);
 export const DELETE = (req: Request) => handler.fetch(req);
 `,
-  'react-router': (route, i18n) => `${reactRouterTypes(route)}
-${server(i18n)}
+  'react-router': (route) => `${reactRouterTypes(route)}
+${server}
 export const loader = ({ request }: Route.LoaderArgs) => handler.fetch(request);
 export const action = ({ request }: Route.ActionArgs) => handler.fetch(request);
 `,
-  'tanstack-start': (route, i18n) => `import { createFileRoute } from '@tanstack/react-router';
-${server(i18n)}
+  'tanstack-start': (route) => `import { createFileRoute } from '@tanstack/react-router';
+${server}
 export const Route = createFileRoute('${route.path}')({
   server: {
     handlers: {
@@ -115,12 +49,15 @@ export const Route = createFileRoute('${route.path}')({
   },
 });
 `,
-  waku: (_, i18n) => `${server(i18n)}
+  waku: () => `${server}
 export const GET = (request: Request) => handler.fetch(request);
 export const POST = (request: Request) => handler.fetch(request);
 export const DELETE = (request: Request) => handler.fetch(request);
 `,
 };
+
+export const mcpRoute = (framework: ReactFramework) =>
+  formatRoute({ segments: ['api/mcp'] }, framework, null);
 
 export const mcp: Feature = {
   id: 'mcp',
@@ -130,12 +67,12 @@ export const mcp: Feature = {
   supports: (project) =>
     project.static ? 'MCP requires a server at runtime' : requiresMdx(project),
   async apply(ctx) {
-    const { baseDir, i18n } = ctx.project;
+    const { baseDir } = ctx.project;
     const framework = reactFramework(ctx.project);
     ctx.addDependencies({ '@modelcontextprotocol/server': null, zod: null });
 
-    const route = formatRoute({ segments: ['api/mcp'] }, framework, null);
-    await ctx.write(path.join(baseDir, route.file), templates[framework](route, i18n !== null));
+    const route = mcpRoute(framework);
+    await ctx.write(path.join(baseDir, route.file), templates[framework](route));
 
     if (framework === 'react-router') {
       await registerReactRouterRoutes(ctx, [route]);

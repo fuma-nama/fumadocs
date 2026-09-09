@@ -19,14 +19,12 @@ import {
   sharedRoute,
 } from './utils';
 
-export const getLLMText = `
-export async function getLLMText(page: (typeof source)['$inferPage']) {
-  const processed = await page.data.getText('processed');
+export const docsLlms = `
+export const docsLlms = llms(source, {
+  renderPage: async (page) => \`# \${page.data.title} (\${page.url})
 
-  return \`# \${page.data.title} (\${page.url})
-
-\${processed}\`;
-}`;
+\${await page.data.getText('processed')}\`,
+});`;
 
 /** the Markdown URL of a page, `/llms.mdx/docs/<slugs>/content.md` */
 export const markdownUrl = `
@@ -62,14 +60,9 @@ export function decodeMarkdownUrl(segments: string[]) {
   return out;
 }`;
 
-const index = `import { source } from '@/lib/source';
-import { llms } from 'fumadocs-core/source';`;
-const full = `import { getLLMText, source } from '@/lib/source';`;
-const fullBody = `const scan = source.getPages().map(getLLMText);
-  const scanned = await Promise.all(scan);
-
-  return new Response(scanned.join('\\n\\n'));`;
-const markdown = `new Response(await getLLMText(page), {
+const imports = `import { docsLlms } from '@/lib/source';`;
+const pageImports = `import { docsLlms, source } from '@/lib/source';`;
+const markdown = `new Response(await docsLlms.page(page), {
     headers: {
       'Content-Type': 'text/markdown',
     },
@@ -87,29 +80,29 @@ export const templates: Record<ReactFramework, Template> = {
   next: (routes, i18n) => [
     [
       routes.index,
-      `${index}
+      `${imports}
 
 export const revalidate = false;
 
 export function GET() {
-  return new Response(llms(source).index());
+  return new Response(docsLlms.index());
 }
 `,
     ],
     [
       routes.full,
-      `${full}
+      `${imports}
 
 export const revalidate = false;
 
 export async function GET() {
-  ${fullBody}
+  return new Response(await docsLlms.full());
 }
 `,
     ],
     [
       routes.markdown,
-      `${full}
+      `${pageImports}
 import { notFound } from 'next/navigation';
 
 export const revalidate = false;
@@ -137,26 +130,26 @@ export function generateStaticParams() {
   'react-router': (routes, i18n) => [
     [
       routes.index,
-      `${index}
+      `${imports}
 
 export function loader() {
-  return new Response(llms(source).index());
+  return new Response(docsLlms.index());
 }
 `,
     ],
     [
       routes.full,
-      `${full}
+      `${imports}
 
 export async function loader() {
-  ${fullBody}
+  return new Response(await docsLlms.full());
 }
 `,
     ],
     [
       routes.markdown,
       `${reactRouterTypes(routes.markdown)}
-${full}
+${pageImports}
 
 export async function loader({ params }: Route.LoaderArgs) {
   const slugs = params['*'].split('/').filter((v) => v.length > 0);
@@ -174,13 +167,13 @@ export async function loader({ params }: Route.LoaderArgs) {
     [
       routes.index,
       `import { createFileRoute } from '@tanstack/react-router';
-${index}
+${imports}
 
 export const Route = createFileRoute('${routes.index.path}')({
   server: {
     handlers: {
       GET() {
-        return new Response(llms(source).index());
+        return new Response(docsLlms.index());
       },
     },
   },
@@ -190,14 +183,12 @@ export const Route = createFileRoute('${routes.index.path}')({
     [
       routes.full,
       `import { createFileRoute } from '@tanstack/react-router';
-${full}
+${imports}
 
 export const Route = createFileRoute('${routes.full.path}')({
   server: {
     handlers: {
-      GET: async () => {
-        ${fullBody.replaceAll('\n  ', '\n        ')}
-      },
+      GET: async () => new Response(await docsLlms.full()),
     },
   },
 });
@@ -207,7 +198,7 @@ export const Route = createFileRoute('${routes.full.path}')({
       routes.markdown,
       `import { createFileRoute, notFound } from '@tanstack/react-router';
 import { decodeMarkdownUrl } from '@/lib/shared';
-${full}
+${pageImports}
 
 export const Route = createFileRoute('${routes.markdown.path}')({
   server: {
@@ -228,10 +219,10 @@ export const Route = createFileRoute('${routes.markdown.path}')({
   waku: (routes, i18n) => [
     [
       routes.index,
-      `${index}
+      `${imports}
 
 export function GET() {
-  return new Response(llms(source).index());
+  return new Response(docsLlms.index());
 }
 
 export async function getConfig() {
@@ -243,10 +234,10 @@ export async function getConfig() {
     ],
     [
       routes.full,
-      `${full}
+      `${imports}
 
 export async function GET() {
-  ${fullBody}
+  return new Response(await docsLlms.full());
 }
 
 export async function getConfig() {
@@ -258,7 +249,7 @@ export async function getConfig() {
     ],
     [
       routes.markdown,
-      `${full}
+      `${pageImports}
 import type { ApiContext } from 'waku/router';
 import { unstable_notFound } from 'waku/router/server';
 
@@ -319,7 +310,11 @@ export const llms: Feature = {
       if (!enableProcessedMarkdown(file))
         throw new Error(`cannot find \`defineDocs()\` in ${source.collections}`);
     });
-    await addExport(ctx, sourceFile, 'getLLMText', getLLMText);
+    if (await addExport(ctx, sourceFile, 'docsLlms', docsLlms)) {
+      await ctx.source(sourceFile, (file) =>
+        addImport(file, { from: 'fumadocs-core/source', named: ['llms'] }),
+      );
+    }
 
     const docsRoute = source.baseUrl.replace(/\/$/, '');
     let contentRoute = `/llms.mdx${docsRoute}`;

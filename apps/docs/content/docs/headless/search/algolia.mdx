@@ -27,22 +27,10 @@ Pre-render a static route `/static.json` to export search indexes into productio
 
 ```ts title="lib/export-search-indexes.ts"
 import { source } from '@/lib/source';
-import type { DocumentRecord } from 'fumadocs-core/search/algolia';
+import { toDocuments } from 'fumadocs-core/search/algolia';
 
-export async function exportSearchIndexes() {
-  const results: DocumentRecord[] = [];
-
-  for (const page of source.getPages()) {
-    results.push({
-      _id: page.url,
-      structured: page.data.structuredData,
-      url: page.url,
-      title: page.data.title,
-      description: page.data.description,
-    });
-  }
-
-  return results;
+export function exportSearchIndexes() {
+  return toDocuments(source);
 }
 ```
 
@@ -117,24 +105,11 @@ To configure tag filtering, add a `tag` value to indexes.
 
 ```ts title="lib/export-search-indexes.ts"
 import { source } from '@/lib/source';
-import type { DocumentRecord } from 'fumadocs-core/search/algolia';
+import { toDocuments } from 'fumadocs-core/search/algolia';
 
-export async function exportSearchIndexes() {
-  const results: DocumentRecord[] = [];
-
-  for (const page of source.getPages()) {
-    results.push({
-      _id: page.url,
-      structured: page.data.structuredData,
-      url: page.url,
-      title: page.data.title,
-      description: page.data.description,
-      // [!code ++]
-      tag: '<your value>',
-    });
-  }
-
-  return results;
+export function exportSearchIndexes() {
+  // [!code ++]
+  return toDocuments(source, { tag: (page) => page.slugs[0] });
 }
 ```
 

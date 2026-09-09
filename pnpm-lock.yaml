@@ -2398,6 +2398,9 @@ importers:
       '@mixedbread/sdk':
         specifier: 0.77.0
         version: 0.77.0
+      '@modelcontextprotocol/server':
+        specifier: 2.0.0
+        version: 2.0.0
       '@orama/core':
         specifier: ^1.2.19
         version: 1.2.19

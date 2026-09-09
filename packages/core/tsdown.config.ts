@@ -10,7 +10,7 @@ export default defineConfig({
   entry: [
     'src/{toc,link,breadcrumb,dynamic-link}.tsx',
     'src/page-tree/index.ts',
-    'src/server.ts',
+    'src/{server,mcp}.ts',
     'src/server.browser.ts',
     'src/{negotiation,content}/*',
     'src/content/md/*.ts',
