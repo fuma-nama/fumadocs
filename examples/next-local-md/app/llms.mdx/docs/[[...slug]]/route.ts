@@ -1,4 +1,5 @@
-import { docsLlms, getPageMarkdownUrl, getSource } from '@/lib/source';
+import { docsLlms, getSource } from '@/lib/source';
+import { getPageMarkdownUrl } from '@/lib/shared';
 import { notFound } from 'next/navigation';
 
 export const revalidate = false;

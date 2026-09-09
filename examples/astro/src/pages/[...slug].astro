@@ -3,7 +3,8 @@ import { render, type CollectionEntry } from "astro:content";
 import { Docs } from "@/components/docs";
 import defaultMdxComponents from "fumadocs-ui/mdx";
 import "@/styles/global.css";
-import { getPageImageUrl, source } from "@/lib/source";
+import { source } from "@/lib/source";
+import { getPageImageUrl } from "@/lib/shared";
 import Layout from "@/components/layout.astro";
 import type { TOCItemType } from "fumadocs-core/toc";
 
@@ -22,7 +23,7 @@ const { page } = Astro.props;
 const { Content, headings } = await render(page);
 const slugs = typeof Astro.params.slug === "string" ? Astro.params.slug.split("/") : [];
 const docsPage = source.getPage(slugs)!;
-const image = getPageImageUrl(docsPage);
+const image = getPageImageUrl(docsPage).url;
 
 const toc: TOCItemType[] = headings.map((heading) => ({
   depth: heading.depth,

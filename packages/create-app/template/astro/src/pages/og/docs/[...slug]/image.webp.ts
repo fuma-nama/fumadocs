@@ -1,7 +1,5 @@
 import type { APIRoute } from 'astro';
-import { createElement } from 'react';
-import { ImageResponse } from 'takumi-js/response';
-import { generate as DefaultImage } from 'fumadocs-ui/og/takumi';
+import { generateOGImage } from 'fumadocs-ui/og/takumi';
 import { source } from '@/lib/source';
 
 export function getStaticPaths() {
@@ -18,16 +16,10 @@ export const GET: APIRoute = ({ params }) => {
 
   if (!page) return new Response(undefined, { status: 404 });
 
-  return new ImageResponse(
-    createElement(DefaultImage, {
-      title: page.data.title,
-      description: page.data.description,
-      site: 'Astro',
-    }),
-    {
-      width: 1200,
-      height: 630,
-      format: 'webp',
-    },
-  );
+  return generateOGImage({
+    title: page.data.title,
+    description: page.data.description,
+    site: 'Astro',
+    format: 'webp',
+  });
 };

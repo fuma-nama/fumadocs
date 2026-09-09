@@ -21,24 +21,6 @@ export async function getSource() {
   return docsLoader.get();
 }
 
-export function getPageImageUrl(page: (typeof docsLoader)['$inferPage']) {
-  const segments = [...page.slugs, 'image.png'];
-
-  return {
-    segments,
-    url: '/' + [page.locale, ...docsImageRoute.split('/'), ...segments].filter(Boolean).join('/'),
-  };
-}
-
-export function getPageMarkdownUrl(page: (typeof docsLoader)['$inferPage']) {
-  const segments = [...page.slugs, 'content.md'];
-
-  return {
-    segments,
-    url: '/' + [page.locale, ...docsContentRoute.split('/'), ...segments].filter(Boolean).join('/'),
-  };
-}
-
 export const docsLlms = llms(getSource, {
   renderPage: (page) => `# ${page.data.title} (${page.url})
 

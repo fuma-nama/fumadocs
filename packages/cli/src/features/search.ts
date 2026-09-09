@@ -1,7 +1,7 @@
 import path from 'node:path';
 import type { Feature, FeatureContext } from '@/features';
 import type { ReactFramework } from '@/project';
-import { type FormattedRoute, formatRoute } from '@/project/route';
+import { type FormattedRoute, formatRoute, routeModule } from '@/project/route';
 import {
   addImport,
   addJsxAttribute,
@@ -350,49 +350,18 @@ export const { GET } = server;
 
 export type SearchProvider = keyof typeof providers;
 
-type StaticRoute = (route: FormattedRoute, imports: string, documents: string) => string;
-
-const staticRoutes: Record<ReactFramework, StaticRoute> = {
-  next: (_, imports, documents) => `${imports}
-
-export const revalidate = false;
-
-export async function GET() {
-  return Response.json(await ${documents});
-}
-`,
-  'react-router': (_, imports, documents) => `${imports}
-
-export async function loader() {
-  return Response.json(await ${documents});
-}
-`,
-  'tanstack-start': (
-    route,
+const staticRoute = (
+  framework: ReactFramework,
+  route: FormattedRoute,
+  imports: string,
+  documents: string,
+) =>
+  routeModule(framework, route, {
     imports,
-    documents,
-  ) => `import { createFileRoute } from '@tanstack/react-router';
-${imports}
-
-export const Route = createFileRoute('${route.path}')({
-  server: {
-    handlers: {
-      GET: async () => Response.json(await ${documents}),
-    },
-  },
-});
-`,
-  waku: (_, imports, documents) => `${imports}
-
-export async function GET() {
-  return Response.json(await ${documents});
-}
-
-export const getConfig = () => ({
-  render: 'static',
-});
-`,
-};
+    body: `Response.json(await ${documents})`,
+    revalidate: true,
+    static: true,
+  });
 
 export const search: Feature<{ provider: SearchProvider }> = {
   id: 'search',
@@ -455,7 +424,7 @@ export const search: Feature<{ provider: SearchProvider }> = {
       const route = formatRoute({ segments: ['static.json'] }, framework, null);
       await ctx.write(
         path.join(baseDir, route.file),
-        staticRoutes[framework](route, imports, documents),
+        staticRoute(framework, route, imports, documents),
       );
 
       if (framework === 'react-router') {

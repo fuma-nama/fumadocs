@@ -10,8 +10,18 @@ export const gitConfig = {
   branch: 'main',
 };
 
-export function getPageImagePath(slugs: string[], locale?: string) {
-  return (
-    '/' + [locale, ...docsImageRoute.split('/'), ...slugs, 'image.webp'].filter(Boolean).join('/')
-  );
+export function getPageUrl(base: string, segments: string[], locale?: string) {
+  return '/' + [locale, ...base.split('/'), ...segments].filter(Boolean).join('/');
+}
+
+export function getPageMarkdownUrl(page: { slugs: string[]; locale?: string }) {
+  const segments = [...page.slugs, 'content.md'];
+
+  return { segments, url: getPageUrl(docsContentRoute, segments, page.locale) };
+}
+
+export function getPageImageUrl(page: { slugs: string[]; locale?: string }) {
+  const segments = [...page.slugs, 'image.webp'];
+
+  return { segments, url: getPageUrl(docsImageRoute, segments, page.locale) };
 }

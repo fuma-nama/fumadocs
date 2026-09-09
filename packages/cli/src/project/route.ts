@@ -104,3 +104,85 @@ export function formatRoute(
     pattern: `/${patterns.join('/')}`,
   };
 }
+
+export interface RouteModule {
+  /** import statements of the handler */
+  imports: string;
+  /** expression returning a `Response` */
+  body: string;
+  /** the handler reads `request` */
+  request?: boolean;
+  /** @defaultValue `['GET']` */
+  methods?: string[];
+  /** Next.js: never revalidate the route */
+  revalidate?: boolean;
+  /** Waku: prerender the route */
+  static?: boolean;
+}
+
+/** the route module of a handler that only reads the request, per framework */
+export function routeModule(
+  framework: ReactFramework,
+  route: FormattedRoute,
+  mod: RouteModule,
+): string {
+  const { imports, body, request, methods = ['GET'], revalidate, static: isStatic } = mod;
+  const arg = request ? 'request: Request' : '';
+  const head = `${imports.trim()}\n\n`;
+
+  if (framework === 'react-router') {
+    const out: string[] = [];
+    // GET is the loader, every other method is the action
+    out.push(handler('loader', 'Route.LoaderArgs'));
+    if (methods.length > 1) out.push(handler('action', 'Route.ActionArgs'));
+
+    return `${request ? `${reactRouterTypes(route)}\n` : ''}${head}${out.join('\n')}`;
+  }
+
+  if (framework === 'tanstack-start') {
+    const out: string[] = [];
+    for (const method of methods)
+      out.push(`      ${method}: async (${request ? '{ request }' : ''}) => ${body},`);
+
+    return `import { createFileRoute } from '@tanstack/react-router';
+${head}export const Route = createFileRoute('${route.path}')({
+  server: {
+    handlers: {
+${out.join('\n')}
+    },
+  },
+});
+`;
+  }
+
+  const out: string[] = [];
+  if (framework === 'next' && revalidate) out.push('export const revalidate = false;\n');
+  for (const method of methods)
+    out.push(`export async function ${method}(${arg}) {
+  return ${body};
+}
+`);
+  if (framework === 'waku' && isStatic)
+    out.push(`export async function getConfig() {
+  return {
+    render: 'static' as const,
+  } as const;
+}
+`);
+
+  return `${head}${out.join('\n')}`;
+
+  function handler(name: string, type: string) {
+    return `export async function ${name}(${request ? `{ request }: ${type}` : ''}) {
+  return ${body};
+}
+`;
+  }
+}
+
+/** import of the generated types of a React Router route module */
+export const reactRouterTypes = (route: FormattedRoute) =>
+  `import type { Route } from './+types/${route.file
+    .split('/')
+    .pop()!
+    .replace(/\.tsx?$/, '')}';`;

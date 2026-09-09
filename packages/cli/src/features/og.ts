@@ -1,14 +1,13 @@
 import path from 'node:path';
 import type { Feature } from '@/features';
 import type { ReactFramework } from '@/project';
-import { type FormattedRoute, formatRoute } from '@/project/route';
-import { addElements, addImport, getConfigObject, getProperty } from '@/codemod';
+import { type FormattedRoute, formatRoute, reactRouterTypes } from '@/project/route';
+import { addElements, getConfigObject, getProperty } from '@/codemod';
 import { docs } from './docs';
 import { extendNextProxy } from './llms';
 import {
-  addExport,
+  addPageUrl,
   reactFramework,
-  reactRouterTypes,
   registerReactRouterRoutes,
   sharedRoute,
   type SourceRef,
@@ -22,10 +21,7 @@ const imageUrl = (ext: string) => `
 export function getPageImageUrl(page: { slugs: string[]; locale?: string }) {
   const segments = [...page.slugs, 'image.${ext}'];
 
-  return {
-    segments,
-    url: '/' + [page.locale, ...docsImageRoute.split('/'), ...segments].filter(Boolean).join('/'),
-  };
+  return { segments, url: getPageUrl(docsImageRoute, segments, page.locale) };
 }`;
 
 const imports = (engine: Engine) =>
@@ -139,18 +135,14 @@ export const og: Feature<{ engine: Engine }> = {
       throw new Error('next/og is only available on Next.js');
     if (engine === 'takumi') ctx.addDependencies({ 'takumi-js': null });
 
-    const sourceFile = path.join(baseDir, 'lib/source.ts');
+    const shared = path.join(baseDir, 'lib/shared.ts');
     const imageRoute = await sharedRoute(
       ctx,
       'docsImageRoute',
       `/og${source.baseUrl.replace(/\/$/, '')}`,
     );
-    if (await addExport(ctx, sourceFile, 'getPageImageUrl', imageUrl(ext(engine)))) {
-      await ctx.source(sourceFile, (file) =>
-        addImport(file, { from: './shared', named: ['docsImageRoute'] }),
-      );
-    } else if (engine === 'takumi') {
-      await ctx.source(sourceFile, (file) => {
+    if (!(await addPageUrl(ctx, 'getPageImageUrl', imageUrl(ext(engine)))) && engine === 'takumi') {
+      await ctx.source(shared, (file) => {
         file.s.replaceAll('image.png', 'image.webp');
       });
     }
@@ -180,7 +172,7 @@ export const og: Feature<{ engine: Engine }> = {
     if (framework === 'next' && i18n) await extendNextProxy(ctx, route);
 
     ctx.note(
-      "The image URL of a page is `getPageImageUrl(page).url` from '@/lib/source', reference it in the page metadata (e.g. `og:image`).",
+      "The image URL of a page is `getPageImageUrl(page).url` from '@/lib/shared', reference it in the page metadata (e.g. `og:image`).",
     );
   },
 };

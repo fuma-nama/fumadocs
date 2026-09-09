@@ -1,12 +1,11 @@
 import path from 'node:path';
 import type { Feature } from '@/features';
 import type { ReactFramework } from '@/project';
-import { type FormattedRoute, formatRoute } from '@/project/route';
+import { type FormattedRoute, formatRoute, routeModule } from '@/project/route';
 import { addReactRouterPrerenderArray, enableProcessedMarkdown } from '@/codemod';
 import { docs } from './docs';
 import {
   reactFramework,
-  reactRouterTypes,
   registerReactRouterRoutes,
   requiresMarkdown,
   type SourceRef,
@@ -17,7 +16,7 @@ const api = ({ dynamic, ref }: SourceRef) => `import { ${ref} } from '@/lib/sour
 import { createEpubExportAPI } from 'fumadocs-epub';
 
 const api = createEpubExportAPI({
-  source: ${ref},${dynamic ? '\n  getMarkdown: (page) => page.data.content,' : ''}
+  ${ref === 'source' ? 'source' : `source: ${ref}`},${dynamic ? '\n  getMarkdown: (page) => page.data.content,' : ''}
   title: 'Documentation',
   author: 'Your Team',
   description: 'Exported documentation',
@@ -26,32 +25,13 @@ const api = createEpubExportAPI({
 });
 `;
 
-const templates: Record<ReactFramework, (route: FormattedRoute, src: SourceRef) => string> = {
-  next: (_, src) => `${api(src)}
-export const revalidate = false;
-
-export const GET = api.GET;
-`,
-  'react-router': (route, src) => `${reactRouterTypes(route)}
-${api(src)}
-export function loader({ request }: Route.LoaderArgs) {
-  return api.GET(request);
-}
-`,
-  'tanstack-start': (route, src) => `import { createFileRoute } from '@tanstack/react-router';
-${api(src)}
-export const Route = createFileRoute('${route.path}')({
-  server: {
-    handlers: {
-      GET: ({ request }) => api.GET(request),
-    },
-  },
-});
-`,
-  waku: (_, src) => `${api(src)}
-export const GET = api.GET;
-`,
-};
+const templates = (framework: ReactFramework, route: FormattedRoute, src: SourceRef) =>
+  routeModule(framework, route, {
+    imports: api(src),
+    body: 'api.GET(request)',
+    request: true,
+    revalidate: true,
+  });
 
 export const epub: Feature = {
   id: 'epub',
@@ -75,7 +55,7 @@ export const epub: Feature = {
     const route = formatRoute({ segments: ['export/epub'] }, framework, null);
     await ctx.write(
       path.join(baseDir, route.file),
-      templates[framework](route, sourceRef(ctx.project.source.dynamic)),
+      templates(framework, route, sourceRef(ctx.project.source.dynamic)),
     );
     if (framework === 'react-router') {
       await registerReactRouterRoutes(ctx, [route]);

@@ -50,19 +50,31 @@ export async function addExport(ctx: FeatureContext, file: string, name: string,
   return true;
 }
 
+/** joins a route prefix, the locale and page segments into a URL */
+export const getPageUrl = `
+export function getPageUrl(base: string, segments: string[], locale?: string) {
+  return '/' + [locale, ...base.split('/'), ...segments].filter(Boolean).join('/');
+}`;
+
+/** add a page URL helper to `lib/shared.ts`, where the route constants live */
+export async function addPageUrl(ctx: FeatureContext, name: string, code: string) {
+  const file = path.join(ctx.project.baseDir, 'lib/shared.ts');
+  await addExport(ctx, file, 'getPageUrl', getPageUrl);
+
+  return addExport(ctx, file, name, code);
+}
+
 /** the value of a route constant in `lib/shared.ts`, defined with `value` when missing */
 export async function sharedRoute(ctx: FeatureContext, name: string, value: string) {
   const file = path.join(ctx.project.baseDir, 'lib/shared.ts');
   const current = await fs.readFile(path.join(ctx.project.cwd, file), 'utf-8').catch(() => '');
   const existing = new RegExp(`export const ${name}\\s*=\\s*['"]([^'"]*)['"]`).exec(current)?.[1];
   if (existing !== undefined) return existing;
-  await ctx.append(file, [`export const ${name} = '${value}';`]);
+  // keep a blank line after the declarations already in the file
+  const separator = current.trimEnd().endsWith(';') || current.length === 0 ? '' : '\n';
+  await ctx.append(file, [`${separator}export const ${name} = '${value}';`]);
   return value;
 }
-
-/** import of the generated types of a React Router route module */
-export const reactRouterTypes = (route: FormattedRoute) =>
-  `import type { Route } from './+types/${path.posix.basename(route.file).replace(/\.tsx?$/, '')}';`;
 
 /** add routes to `routes.ts`, or tell the user when the config isn't an array (e.g. file-based routes) */
 export async function registerReactRouterRoutes(

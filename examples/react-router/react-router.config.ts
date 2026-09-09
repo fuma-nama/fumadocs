@@ -1,7 +1,7 @@
 import type { Config } from '@react-router/dev/config';
 import { glob } from 'node:fs/promises';
 import { createGetUrl, getSlugs } from 'fumadocs-core/source';
-import { getPageImagePath } from './app/lib/shared';
+import { getPageImageUrl } from './app/lib/shared';
 
 const getUrl = createGetUrl('/docs');
 
@@ -19,7 +19,7 @@ export default {
       const slugs = getSlugs(entry);
 
       paths.push(getUrl(slugs));
-      paths.push(getPageImagePath(slugs));
+      paths.push(getPageImageUrl({ slugs }).url);
     }
 
     return paths;

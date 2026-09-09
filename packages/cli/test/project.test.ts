@@ -26,6 +26,7 @@ export const source = loader({ baseUrl: '/', source: docs.toFumadocsSource() });
   expect(baseDir).toBe('');
   expect(source).toEqual({
     loader: true,
+    dynamic: false,
     collections: 'lib/source.ts',
     async: true,
     baseUrl: '/',

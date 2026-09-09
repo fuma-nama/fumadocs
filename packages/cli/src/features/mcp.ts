@@ -1,12 +1,11 @@
 import path from 'node:path';
 import type { Feature } from '@/features';
 import type { ReactFramework } from '@/project';
-import { type FormattedRoute, formatRoute } from '@/project/route';
+import { type FormattedRoute, formatRoute, routeModule } from '@/project/route';
 import { addReactRouterPrerenderArray } from '@/codemod';
 import { llms } from './llms';
 import {
   reactFramework,
-  reactRouterTypes,
   registerReactRouterRoutes,
   requiresMarkdown,
   type SourceRef,
@@ -33,37 +32,13 @@ const handler = createMcpHandler(() => {
 });
 `;
 
-type Template = (route: FormattedRoute, src: SourceRef) => string;
-
-export const templates: Record<ReactFramework, Template> = {
-  next: (_, src) => `${server(src)}
-export const GET = (req: Request) => handler.fetch(req);
-export const POST = (req: Request) => handler.fetch(req);
-export const DELETE = (req: Request) => handler.fetch(req);
-`,
-  'react-router': (route, src) => `${reactRouterTypes(route)}
-${server(src)}
-export const loader = ({ request }: Route.LoaderArgs) => handler.fetch(request);
-export const action = ({ request }: Route.ActionArgs) => handler.fetch(request);
-`,
-  'tanstack-start': (route, src) => `import { createFileRoute } from '@tanstack/react-router';
-${server(src)}
-export const Route = createFileRoute('${route.path}')({
-  server: {
-    handlers: {
-      GET: ({ request }) => handler.fetch(request),
-      POST: ({ request }) => handler.fetch(request),
-      DELETE: ({ request }) => handler.fetch(request),
-    },
-  },
-});
-`,
-  waku: (_, src) => `${server(src)}
-export const GET = (request: Request) => handler.fetch(request);
-export const POST = (request: Request) => handler.fetch(request);
-export const DELETE = (request: Request) => handler.fetch(request);
-`,
-};
+export const templates = (framework: ReactFramework, route: FormattedRoute, src: SourceRef) =>
+  routeModule(framework, route, {
+    imports: server(src),
+    body: 'handler.fetch(request)',
+    request: true,
+    methods: ['GET', 'POST', 'DELETE'],
+  });
 
 export const mcpRoute = (framework: ReactFramework) =>
   formatRoute({ segments: ['api/mcp'] }, framework, null);
@@ -83,7 +58,7 @@ export const mcp: Feature = {
     const route = mcpRoute(framework);
     await ctx.write(
       path.join(baseDir, route.file),
-      templates[framework](route, sourceRef(ctx.project.source.dynamic)),
+      templates(framework, route, sourceRef(ctx.project.source.dynamic)),
     );
 
     if (framework === 'react-router') {

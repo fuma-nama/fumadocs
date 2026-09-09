@@ -92,16 +92,12 @@ The content of all pages in a single file.
 
 ### `*.md` [#md-extension]
 
-The Markdown of a single page, for AI agents. Pages are served under `/llms.mdx/docs/<slugs>/content.md`, the route prefix is a constant in `lib/shared.ts`.
+The Markdown of a single page, for AI agents. Pages are served under `/llms.mdx/docs/<slugs>/content.md`. The route prefix and the URL helpers of a page live in `lib/shared.ts`, so the URL layer stays yours.
 
 On Tanstack Start, the route lives under the docs route instead: `/docs/<slugs>.md`.
 
 <feature tab="Next.js" title="lib/shared.ts">
   llms/next/lib/shared.ts
-</feature>
-
-<feature tab="Next.js" title="lib/source.ts">
-  llms/next/lib/markdown-url.ts
 </feature>
 
 <feature tab="Next.js" title="app/llms.mdx/docs/[[...slug]]/route.ts">
@@ -114,10 +110,6 @@ On Tanstack Start, the route lives under the docs route instead: `/docs/<slugs>.
 
 <feature tab="React Router" title="app/lib/shared.ts">
   llms/react-router/lib/shared.ts
-</feature>
-
-<feature tab="React Router" title="app/lib/source.ts">
-  llms/react-router/lib/markdown-url.ts
 </feature>
 
 <feature tab="React Router" title="app/routes/llms.mdx.docs.ts">
@@ -163,10 +155,6 @@ export default {
 
 <feature tab="Waku" title="lib/shared.ts">
   llms/waku/lib/shared.ts
-</feature>
-
-<feature tab="Waku" title="lib/source.ts">
-  llms/waku/lib/markdown-url.ts
 </feature>
 
 <feature tab="Waku" title="pages/_api/llms.mdx/docs/[...slug]/content.md.ts">
@@ -218,8 +206,8 @@ Use them in your docs page like:
 
 ```tsx title="app/docs/[[...slug]]/page.tsx"
 import { MarkdownCopyButton, ViewOptionsPopover } from 'fumadocs-ui/layouts/docs/page';
+import { getPageMarkdownUrl } from '@/lib/shared';
 
-// Tanstack Start: `encodeMarkdownUrl(page.slugs, page.locale)` from `lib/shared.ts`
 const markdownUrl = getPageMarkdownUrl(page).url;
 
 <div className="flex flex-row gap-2 items-center border-b pt-2 pb-6">

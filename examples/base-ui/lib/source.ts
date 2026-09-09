@@ -24,24 +24,6 @@ export const source = loader({
   plugins: [lucideIconsPlugin()],
 });
 
-export function getPageImageUrl(page: (typeof source)['$inferPage']) {
-  const segments = [...page.slugs, 'image.png'];
-
-  return {
-    segments,
-    url: '/' + [page.locale, ...docsImageRoute.split('/'), ...segments].filter(Boolean).join('/'),
-  };
-}
-
-export function getPageMarkdownUrl(page: (typeof source)['$inferPage']) {
-  const segments = [...page.slugs, 'content.md'];
-
-  return {
-    segments,
-    url: '/' + [page.locale, ...docsContentRoute.split('/'), ...segments].filter(Boolean).join('/'),
-  };
-}
-
 export const docsLlms = llms(source, {
   renderPage: async (page) => `# ${page.data.title} (${page.url})
 

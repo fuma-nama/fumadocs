@@ -11,7 +11,7 @@ import {
   ViewOptionsPopover,
 } from 'fumadocs-ui/layouts/docs/page';
 import { baseOptions } from '@/lib/layout.shared';
-import { encodeMarkdownUrl, gitConfig } from '@/lib/shared';
+import { getPageMarkdownUrl, gitConfig } from '@/lib/shared';
 import { staticFunctionMiddleware } from '@tanstack/start-static-server-functions';
 import { useFumadocsLoader } from 'fumadocs-core/source/client';
 import { Suspense, use } from 'react';
@@ -38,7 +38,7 @@ const loader = createServerFn({
 
     return {
       path: page.path,
-      markdownUrl: encodeMarkdownUrl(page.slugs, page.locale),
+      markdownUrl: getPageMarkdownUrl(page).url,
       pageTree: await source.serializePageTree(source.getPageTree()),
     };
   });

@@ -11,7 +11,7 @@ import {
   ViewOptionsPopover,
 } from 'fumadocs-ui/layouts/notebook/page';
 import { baseOptions } from '@/lib/layout.shared';
-import { encodeMarkdownUrl, gitConfig } from '@/lib/shared';
+import { getPageMarkdownUrl, gitConfig } from '@/lib/shared';
 import { useFumadocsLoader } from 'fumadocs-core/source/client';
 import { Suspense, use, type ReactNode } from 'react';
 import { useMDXComponents } from '@/components/mdx';
@@ -52,7 +52,7 @@ const serverLoader = createServerFn({
     return {
       type: 'docs',
       path: page.path,
-      markdownUrl: encodeMarkdownUrl(page.slugs, page.locale),
+      markdownUrl: getPageMarkdownUrl(page).url,
       pageTree,
     };
   });

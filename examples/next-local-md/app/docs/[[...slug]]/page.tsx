@@ -1,4 +1,4 @@
-import { getPageImageUrl, getPageMarkdownUrl, getSource } from '@/lib/source';
+import { getSource } from '@/lib/source';
 import {
   DocsBody,
   DocsDescription,
@@ -11,9 +11,9 @@ import { notFound } from 'next/navigation';
 import { getMDXComponents } from '@/components/mdx';
 import type { Metadata } from 'next';
 import { createRelativeLink } from 'fumadocs-ui/mdx';
-import { gitConfig } from '@/lib/shared';
 import { Card, Cards } from 'fumadocs-ui/components/card';
 import { findSiblings } from 'fumadocs-core/page-tree';
+import { getPageImageUrl, getPageMarkdownUrl, gitConfig } from '@/lib/shared';
 
 export default async function Page(props: PageProps<'/docs/[[...slug]]'>) {
   const params = await props.params;
