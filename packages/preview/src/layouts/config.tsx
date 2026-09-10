@@ -10,7 +10,7 @@ export function layoutConfig(config: ParsedAppConfig) {
   const { base } = config.layout;
 
   return {
-    async base() {
+    async base(): Promise<BaseLayoutProps> {
       let defaultConfig: BaseLayoutProps | undefined;
       if (typeof base === 'function') defaultConfig = await base();
       else if (typeof base === 'object') defaultConfig = base;
