@@ -23,7 +23,7 @@ const routes: Record<string, RouteDescriptor> = {
   },
 };
 
-test('format routes', () => {
+test('format routes', async () => {
   const out: Record<string, unknown> = {};
   for (const [name, route] of Object.entries(routes)) {
     for (const framework of frameworks) {
@@ -40,5 +40,5 @@ test('format routes', () => {
       optionalLocale: true,
     },
   );
-  expect(out).toMatchFileSnapshot('fixtures/routes.snapshot.txt');
+  await expect(out).toMatchFileSnapshot('fixtures/routes.snapshot.txt');
 });

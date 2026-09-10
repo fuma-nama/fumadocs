@@ -3,7 +3,7 @@ import path from 'node:path';
 import type { Project, ReactFramework } from '@/project';
 import type { FormattedRoute } from '@/project/route';
 import type { FeatureContext, PackageJson } from '@/features';
-import { addReactRouterRoute } from '@/codemod';
+import { addImport, addReactRouterRoute } from '@/codemod';
 
 /** the shallowest `.ts`/`.tsx` file under `dir` whose content includes `needle`, relative to `cwd` */
 export async function findSource(
@@ -50,18 +50,19 @@ export async function addExport(ctx: FeatureContext, file: string, name: string,
   return true;
 }
 
-/** joins a route prefix, the locale and page segments into a URL */
-export const getPageUrl = `
-export function getPageUrl(base: string, segments: string[], locale?: string) {
-  return '/' + [locale, ...base.split('/'), ...segments].filter(Boolean).join('/');
-}`;
-
 /** add a page URL helper to `lib/shared.ts`, where the route constants live */
 export async function addPageUrl(ctx: FeatureContext, name: string, code: string) {
   const file = path.join(ctx.project.baseDir, 'lib/shared.ts');
-  await addExport(ctx, file, 'getPageUrl', getPageUrl);
+  if (!(await addExport(ctx, file, name, code))) return false;
 
-  return addExport(ctx, file, name, code);
+  await ctx.source(file, (source) =>
+    addImport(source, { from: 'fumadocs-core/source', named: ['createGetUrl'] }),
+  );
+  // a second pass, so the import lands after the one above instead of before it
+  if (ctx.project.i18n) {
+    await ctx.source(file, (source) => addImport(source, { from: './i18n', named: ['i18n'] }));
+  }
+  return true;
 }
 
 /** the value of a route constant in `lib/shared.ts`, defined with `value` when missing */

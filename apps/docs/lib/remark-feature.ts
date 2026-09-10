@@ -17,7 +17,7 @@ import {
   templates,
 } from '@fumadocs/cli/features/llms';
 import { mcpRoute, templates as mcpTemplates } from '@fumadocs/cli/features/mcp';
-import { getPageUrl, sourceRef } from '@fumadocs/cli/features/utils';
+import { sourceRef } from '@fumadocs/cli/features/utils';
 import { component as webmcp } from '@fumadocs/cli/features/webmcp';
 
 declare module 'satteri' {
@@ -77,11 +77,11 @@ export const docs = defineDocs({
     }
     if (tanstack) {
       files[`${base}/lib/shared.ts`] =
-        `export const docsRoute = '/docs';\n${getPageUrl}\n${tanstackMarkdownUrl}\n`;
+        `import { createGetUrl } from 'fumadocs-core/source';\n\nexport const docsRoute = '/docs';\n${tanstackMarkdownUrl(false)}\n`;
       continue;
     }
     files[`${base}/lib/shared.ts`] =
-      `export const docsContentRoute = '/llms.mdx/docs';\n${getPageUrl}\n${markdownUrl}\n`;
+      `import { createGetUrl } from 'fumadocs-core/source';\n\nexport const docsContentRoute = '/llms.mdx/docs';\n${markdownUrl(false)}\n`;
     if (framework === 'react-router') {
       files[`${base}/routes.ts`] = codemod(
         'routes.ts',

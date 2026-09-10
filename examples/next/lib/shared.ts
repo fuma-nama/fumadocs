@@ -1,3 +1,5 @@
+import { createGetUrl } from 'fumadocs-core/source';
+
 export const appName = 'My App';
 export const docsRoute = '/docs';
 export const docsImageRoute = '/og/docs';
@@ -10,18 +12,18 @@ export const gitConfig = {
   branch: 'main',
 };
 
-export function getPageUrl(base: string, segments: string[], locale?: string) {
-  return '/' + [locale, ...base.split('/'), ...segments].filter(Boolean).join('/');
-}
+const getContentUrl = createGetUrl(docsContentRoute);
 
 export function getPageMarkdownUrl(page: { slugs: string[]; locale?: string }) {
   const segments = [...page.slugs, 'content.md'];
 
-  return { segments, url: getPageUrl(docsContentRoute, segments, page.locale) };
+  return { segments, url: getContentUrl(segments, page.locale) };
 }
+
+const getImageUrl = createGetUrl(docsImageRoute);
 
 export function getPageImageUrl(page: { slugs: string[]; locale?: string }) {
   const segments = [...page.slugs, 'image.png'];
 
-  return { segments, url: getPageUrl(docsImageRoute, segments, page.locale) };
+  return { segments, url: getImageUrl(segments, page.locale) };
 }

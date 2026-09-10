@@ -2,7 +2,8 @@ import { ComponentInstaller, type IOInterface } from 'fuma-cli/registry/installe
 import { pluginPreserveLayouts } from './plugins/preserve';
 import { RegistryConnector } from 'fuma-cli/registry/connector';
 import type { LoadedConfig } from '@/config';
-import { box, confirm, isCancel, log, outro, spinner, SpinnerResult } from '@clack/prompts';
+import { box, confirm, log, outro, spinner, SpinnerResult } from '@clack/prompts';
+import { isCancel } from '@/utils/prompt';
 import picocolors from 'picocolors';
 import { detectPackageManager } from 'fuma-cli/detect';
 

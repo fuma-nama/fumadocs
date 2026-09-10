@@ -1,15 +1,6 @@
 import type { CAC, Command } from 'cac';
-import {
-  cancel,
-  confirm,
-  intro,
-  isCancel,
-  log,
-  note,
-  outro,
-  select,
-  spinner,
-} from '@clack/prompts';
+import { cancel, confirm, intro, log, note, outro, select, spinner } from '@clack/prompts';
+import { isCancel } from '@/utils/prompt';
 import picocolors from 'picocolors';
 import type { RegistryConnector } from 'fuma-cli/registry/connector';
 import { createOrLoadConfig } from '@/config';

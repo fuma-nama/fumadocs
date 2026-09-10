@@ -1,3 +1,5 @@
+import { createGetUrl } from 'fumadocs-core/source';
+
 export const appName = 'Tanstack Start';
 export const docsRoute = '/docs';
 export const docsImageRoute = '/og/docs';
@@ -9,9 +11,7 @@ export const gitConfig = {
   branch: 'main',
 };
 
-export function getPageUrl(base: string, segments: string[], locale?: string) {
-  return '/' + [locale, ...base.split('/'), ...segments].filter(Boolean).join('/');
-}
+const getDocsUrl = createGetUrl(docsRoute);
 
 export function getPageMarkdownUrl(page: { slugs: string[]; locale?: string }) {
   const segments = [...page.slugs];
@@ -21,7 +21,7 @@ export function getPageMarkdownUrl(page: { slugs: string[]; locale?: string }) {
     segments[segments.length - 1] += '.md';
   }
 
-  return { segments, url: getPageUrl(docsRoute, segments, page.locale) };
+  return { segments, url: getDocsUrl(segments, page.locale) };
 }
 
 /** @returns page slugs */

@@ -36,15 +36,19 @@ export const docsLlms = llms(${ref}, {
 });`;
 
 /** the Markdown URL of a page, `/llms.mdx/docs/<slugs>/content.md` */
-export const markdownUrl = `
+export const markdownUrl = (i18n: boolean) => `
+const getContentUrl = createGetUrl(docsContentRoute${i18n ? ', i18n' : ''});
+
 export function getPageMarkdownUrl(page: { slugs: string[]; locale?: string }) {
   const segments = [...page.slugs, 'content.md'];
 
-  return { segments, url: getPageUrl(docsContentRoute, segments, page.locale) };
+  return { segments, url: getContentUrl(segments, page.locale) };
 }`;
 
 /** TanStack Start serves Markdown with a `.md` suffix under the docs route */
-export const tanstackMarkdownUrl = `
+export const tanstackMarkdownUrl = (i18n: boolean) => `
+const getDocsUrl = createGetUrl(docsRoute${i18n ? ', i18n' : ''});
+
 export function getPageMarkdownUrl(page: { slugs: string[]; locale?: string }) {
   const segments = [...page.slugs];
   if (segments.length === 0) {
@@ -53,7 +57,7 @@ export function getPageMarkdownUrl(page: { slugs: string[]; locale?: string }) {
     segments[segments.length - 1] += '.md';
   }
 
-  return { segments, url: getPageUrl(docsRoute, segments, page.locale) };
+  return { segments, url: getDocsUrl(segments, page.locale) };
 }
 
 /** @returns page slugs */
@@ -235,10 +239,10 @@ export const llms: Feature = {
     let contentRoute = `/llms.mdx${docsRoute}`;
     if (framework === 'tanstack-start') {
       await sharedRoute(ctx, 'docsRoute', source.baseUrl);
-      await addPageUrl(ctx, 'getPageMarkdownUrl', tanstackMarkdownUrl);
+      await addPageUrl(ctx, 'getPageMarkdownUrl', tanstackMarkdownUrl(i18n !== null));
     } else {
       contentRoute = await sharedRoute(ctx, 'docsContentRoute', contentRoute);
-      await addPageUrl(ctx, 'getPageMarkdownUrl', markdownUrl);
+      await addPageUrl(ctx, 'getPageMarkdownUrl', markdownUrl(i18n !== null));
     }
     const routes = llmsRoutes(framework, i18n, docsRoute, contentRoute);
     for (const [route, content] of templates(framework, routes, i18n !== null, src))

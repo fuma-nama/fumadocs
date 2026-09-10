@@ -17,11 +17,13 @@ import {
 type Engine = 'takumi' | 'next-og';
 
 /** the image URL of a page, `/og/docs/<slugs>/image.png` */
-const imageUrl = (ext: string) => `
+const imageUrl = (ext: string, i18n: boolean) => `
+const getImageUrl = createGetUrl(docsImageRoute${i18n ? ', i18n' : ''});
+
 export function getPageImageUrl(page: { slugs: string[]; locale?: string }) {
   const segments = [...page.slugs, 'image.${ext}'];
 
-  return { segments, url: getPageUrl(docsImageRoute, segments, page.locale) };
+  return { segments, url: getImageUrl(segments, page.locale) };
 }`;
 
 const imports = (engine: Engine) =>
@@ -141,7 +143,8 @@ export const og: Feature<{ engine: Engine }> = {
       'docsImageRoute',
       `/og${source.baseUrl.replace(/\/$/, '')}`,
     );
-    if (!(await addPageUrl(ctx, 'getPageImageUrl', imageUrl(ext(engine)))) && engine === 'takumi') {
+    const added = await addPageUrl(ctx, 'getPageImageUrl', imageUrl(ext(engine), i18n !== null));
+    if (!added && engine === 'takumi') {
       await ctx.source(shared, (file) => {
         file.s.replaceAll('image.png', 'image.webp');
       });

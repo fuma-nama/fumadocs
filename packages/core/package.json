@@ -17,6 +17,7 @@
     "dist"
   ],
   "type": "module",
+  "sideEffects": false,
   "exports": {
     "./breadcrumb": "./dist/breadcrumb.js",
     "./content/github": "./dist/content/github.js",
