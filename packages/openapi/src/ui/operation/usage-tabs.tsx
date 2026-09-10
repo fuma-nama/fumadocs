@@ -27,10 +27,12 @@ import type { ExampleRequestItem } from '@/utils/get-example-requests';
 import { joinURL, resolveServerUrl } from '@fumadocs/api-docs/utils/url';
 
 export function UsageTabs({
+  path,
   method,
   operation,
   pathItem,
 }: {
+  path: string;
   method: HttpMethods;
   operation: OperationObject;
   pathItem: PathItemObject;
@@ -74,7 +76,7 @@ export function UsageTabs({
     const registry = createCodeUsageGeneratorRegistry(ctx.codeUsages);
 
     if (ctx.generateCodeSamples) {
-      for (const gen of ctx.generateCodeSamples({ operation, method, pathItem })) {
+      for (const gen of ctx.generateCodeSamples({ path, operation, method, pathItem })) {
         registry.addInline(gen);
       }
     }
@@ -86,13 +88,13 @@ export function UsageTabs({
     }
 
     return registry;
-  }, [ctx, operation, method, pathItem]);
+  }, [ctx, path, operation, method, pathItem]);
 
   return renderAPIExampleLayout(
     {
       selector: operation['x-exclusiveCodeSample'] ? null : <UsageTabsSelector />,
       usageTabs: renderAPIExampleUsageTabs(registry, ctx),
-      responseTabs: <ResponseTabs operation={operation} method={method} pathItem={pathItem} />,
+      responseTabs: <ResponseTabs operation={operation} />,
     },
     ctx,
   );

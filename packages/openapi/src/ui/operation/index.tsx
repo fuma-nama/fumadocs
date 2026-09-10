@@ -388,9 +388,12 @@ export function Operation({
         parameters: parameterNode,
         responses: responseNode,
         apiPlayground,
-        apiExample: <UsageTabs method={method} operation={operation} pathItem={pathItem} />,
+        apiExample: (
+          <UsageTabs path={path} method={method} operation={operation} pathItem={pathItem} />
+        ),
       },
       {
+        path,
         operation,
         method,
         pathItem,
