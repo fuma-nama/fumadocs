@@ -1,6 +1,6 @@
 {
   "name": "example-astro",
-  "version": "0.0.25",
+  "version": "0.0.26",
   "private": true,
   "type": "module",
   "scripts": {
@@ -14,18 +14,18 @@
     "@astrojs/markdown-remark": "^7.3.0",
     "@astrojs/mdx": "^8.0.0",
     "@astrojs/react": "^6.0.5",
-    "astro": "^7.2.10",
+    "astro": "^7.3.1",
     "fumadocs-core": "workspace:*",
     "fumadocs-ui": "workspace:@fumadocs/base-ui@*",
     "react": "^19.2.8",
     "react-dom": "^19.2.8",
     "sharp": "^0.35.4",
-    "takumi-js": "^2.13.4"
+    "takumi-js": "^2.13.7"
   },
   "devDependencies": {
     "@tailwindcss/vite": "^4.3.3",
     "@types/react": "^19.2.18",
-    "@types/react-dom": "^19.2.5",
+    "@types/react-dom": "^19.2.7",
     "tailwindcss": "^4.3.3"
   }
 }

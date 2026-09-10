@@ -1,6 +1,5 @@
-import { ImageResponse } from 'takumi-js/response';
 import type { Route } from './+types/og.docs';
-import { generate as DefaultImage } from 'fumadocs-ui/og/takumi';
+import { generateOGImage } from 'fumadocs-ui/og/takumi';
 import { source } from '@/lib/source';
 import { appName } from '@/lib/shared';
 
@@ -13,12 +12,10 @@ export function loader({ params }: Route.LoaderArgs) {
 
   if (!page) throw new Response(undefined, { status: 404 });
 
-  return new ImageResponse(
-    <DefaultImage title={page.data.title} description={page.data.description} site={appName} />,
-    {
-      width: 1200,
-      height: 630,
-      format: 'webp',
-    },
-  );
+  return generateOGImage({
+    title: page.data.title,
+    description: page.data.description,
+    site: appName,
+    format: 'webp',
+  });
 }

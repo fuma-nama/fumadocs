@@ -1,4 +1,5 @@
-import { isCancel, autocompleteMultiselect, outro, spinner } from '@clack/prompts';
+import { autocompleteMultiselect, outro, spinner } from '@clack/prompts';
+import { isCancel } from '@/utils/prompt';
 import picocolors from 'picocolors';
 import { UIRegistries } from '@/commands/shared';
 import { RegistryConnector } from 'fuma-cli/registry/connector';

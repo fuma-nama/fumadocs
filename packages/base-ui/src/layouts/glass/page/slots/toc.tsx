@@ -180,11 +180,9 @@ function TOCPanel({ className, style, ...props }: ComponentProps<'div'>) {
                 ? 'w-(--width) h-px'
                 : 'transition-[width,height] duration-300 xl:[@media(hover:none)]:w-(--width) xl:[@media(hover:none)]:h-px',
             )}
-            style={
-              {
-                '--width': `calc(pow(${item.depth}, 1.5) * var(--spacing))`,
-              } as object
-            }
+            style={{
+              '--width': `calc(pow(${item.depth}, 1.5) * var(--spacing))`,
+            }}
           />
           <span
             className={cn(

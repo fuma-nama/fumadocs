@@ -1,3 +1,101 @@
+## fumadocs-core@16.15.9
+
+### `getPageByUrl()` on the loader
+
+Look up a page by its URL:
+
+```ts
+source.getPageByUrl('/docs/getting-started');
+source.getPageByUrl('/cn/docs/getting-started', 'cn');
+```
+
+Without the `language` argument every language is looked up, unlike `getPageByHref()` which resolves the default language only.
+
+### `llms()` renders pages
+
+`llms()` used to build the `llms.txt` index only, turning a page into Markdown was left to your own `getLLMText()`. Pass `renderPage` and it covers both:
+
+```ts
+import { llms } from 'fumadocs-core/source';
+
+export const docsLlms = llms(source, {
+  renderPage: async (page) => `# ${page.data.title} (${page.url})
+
+${await page.data.getText('processed')}`,
+});
+```
+
+- `page(page)` renders one page, for the per-page Markdown route.
+- `full(lang?)` renders every page and joins them, for `llms-full.txt`.
+
+```ts
+// app/llms-full.txt/route.ts
+export const GET = async () => new Response(await docsLlms.full());
+```
+
+Both methods exist only when `renderPage` is given, in types and at runtime. Fumadocs cannot know how your content source exposes Markdown: `page.data.getText('processed')` on Fumadocs MDX, `page.data.content` on `@fumadocs/local-md`.
+
+### `fumadocs-core/mcp`: docs tools for your MCP server
+
+Register the docs tools on a server you own, rather than on a handler Fumadocs builds for you:
+
+```ts
+import { createMcpHandler, McpServer } from '@modelcontextprotocol/server';
+import { registerSearchTool, registerSourceTools } from 'fumadocs-core/mcp';
+import { createFromSource } from 'fumadocs-core/search/server';
+import { docsLlms, source } from '@/lib/source';
+
+const handler = createMcpHandler(() => {
+  const mcp = new McpServer({ name: 'docs', version: '1.0.0' });
+
+  registerSourceTools(mcp, source, docsLlms);
+  registerSearchTool(mcp, createFromSource(source));
+
+  return mcp;
+});
+
+export const GET = (req: Request) => handler.fetch(req);
+export const POST = (req: Request) => handler.fetch(req);
+export const DELETE = (req: Request) => handler.fetch(req);
+```
+
+| Function                                 | Tools                    |
+| ---------------------------------------- | ------------------------ |
+| `registerSourceTools(mcp, source, llms)` | `list_pages`, `get_page` |
+| `registerSearchTool(mcp, server)`        | `search`                 |
+
+Each takes the integration it reads from, so you can add your own tools next to them, point the search tool at another server, or register only one of the two.
+
+`@modelcontextprotocol/server` is an optional peer dependency, and `registerSourceTools` needs a `llms()` output with `renderPage`.
+
+### `toDocuments()` for Algolia and Orama Cloud
+
+Build the search indexes of every page, instead of mapping pages by hand:
+
+```ts
+// app/static.json/route.ts
+import { toDocuments } from 'fumadocs-core/search/algolia';
+import { source } from '@/lib/source';
+
+export const GET = async () => Response.json(await toDocuments(source));
+```
+
+It awaits `structuredData` when your collection is async (React Router and TanStack Start), a step that was easy to miss. Pass `tag` to filter results by a value of your choice:
+
+```ts
+toDocuments(source, { tag: (page) => page.slugs[0] });
+```
+
+Exported from `fumadocs-core/search/algolia` and `fumadocs-core/search/orama-cloud`.
+
+### Marked as side-effect free
+
+`fumadocs-core` now declares `"sideEffects": false`. No module in the package imports for side effects or ships CSS, so bundlers that rely on the hint (webpack in particular) can drop unused modules instead of keeping them alive:
+
+```ts
+import { createGetUrl } from 'fumadocs-core/source';
+```
+
 ## fumadocs-core@16.15.7
 
 ### Async `_fd_prepare` hook for Shiki transformers

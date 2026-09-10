@@ -1,7 +1,7 @@
 import { createMiddleware, createCsrfMiddleware, createStart } from '@tanstack/react-start';
 import { isMarkdownPreferred } from 'fumadocs-core/negotiation';
 import { redirect } from '@tanstack/react-router';
-import { docsRoute, encodeMarkdownUrl } from '@/lib/shared';
+import { docsRoute, getPageMarkdownUrl } from '@/lib/shared';
 
 const csrfMiddleware = createCsrfMiddleware({
   filter: (ctx) => ctx.handlerType === 'serverFn',
@@ -19,7 +19,7 @@ const llmMiddleware = createMiddleware().server(({ next, request }) => {
       .slice(docsRoute.length)
       .split('/')
       .filter((v) => v.length > 0);
-    url.pathname = encodeMarkdownUrl(slugs);
+    url.pathname = getPageMarkdownUrl({ slugs }).url;
 
     // this URL has two representations, selected by `Accept`
     throw redirect({ href: url.href, headers: { Vary: 'Accept' } });

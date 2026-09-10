@@ -1,8 +1,7 @@
-import { source } from '@/lib/source';
-import { llms } from 'fumadocs-core/source';
+import { docsLlms } from '@/lib/source';
 
-export function GET() {
-  return new Response(llms(source).index());
+export async function GET() {
+  return new Response(await docsLlms.index());
 }
 
 export async function getConfig() {

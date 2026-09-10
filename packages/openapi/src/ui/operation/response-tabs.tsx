@@ -1,5 +1,5 @@
 'use client';
-import type { HttpMethods, OperationObject, PathItemObject, ResponseObject } from '@/types';
+import type { OperationObject, ResponseObject } from '@/types';
 import { getPreferredType } from '@/utils/schema';
 import {
   AccordionContent,
@@ -50,13 +50,7 @@ export interface ResponseTabsRenderOptions {
   tabs: ResponseTab[];
 }
 
-export function ResponseTabs({
-  operation,
-}: {
-  operation: OperationObject;
-  method: HttpMethods;
-  pathItem: PathItemObject;
-}) {
+export function ResponseTabs({ operation }: { operation: OperationObject }) {
   const ctx = useRenderContext();
   const { resolve } = ctx.schema;
   const t = useTranslations({ note: 'operation page' });

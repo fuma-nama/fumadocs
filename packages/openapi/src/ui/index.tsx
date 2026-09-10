@@ -62,6 +62,7 @@ export interface CreateOpenAPIPageOptions {
    * Generate example code usage for each endpoint.
    */
   generateCodeSamples?: (options: {
+    path: string;
     operation: OperationObject;
     method: HttpMethods;
     pathItem: PathItemObject;
@@ -138,6 +139,7 @@ export interface CreateOpenAPIPageOptions {
         callbacks: ReactNode;
       },
       context: {
+        path: string;
         operation: OperationObject;
         method: HttpMethods;
         pathItem: PathItemObject;

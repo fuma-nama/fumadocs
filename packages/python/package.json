@@ -42,11 +42,11 @@
     "test": "vitest run"
   },
   "dependencies": {
-    "@base-ui/react": "^1.7.0",
+    "@base-ui/react": "^1.8.0",
     "class-variance-authority": "^0.7.1",
-    "cn": "^0.2.4",
+    "cn": "^0.2.6",
     "hast-util-to-jsx-runtime": "^2.3.6",
-    "lucide-react": "^1.39.0",
+    "lucide-react": "^1.43.0",
     "mdast-util-mdx": "^3.0.0",
     "remark": "^15.0.1",
     "remark-rehype": "^11.1.2",
@@ -58,16 +58,16 @@
     "@types/hast": "^3.0.5",
     "@types/mdast": "^4.0.4",
     "@types/mdx": "^2.0.14",
-    "@types/node": "^26.4.1",
+    "@types/node": "^26.5.0",
     "@types/react": "^19.2.18",
-    "@types/react-dom": "^19.2.5",
+    "@types/react-dom": "^19.2.7",
     "fumadocs-core": "workspace:*",
     "fumadocs-ui": "workspace:@fumadocs/base-ui@*",
     "react": "^19.2.8",
     "react-dom": "^19.2.8",
     "tsconfig": "workspace:*",
-    "tsdown": "0.22.14",
-    "vitest": "^4.1.11"
+    "tsdown": "0.23.0",
+    "vitest": "^5.0.0"
   },
   "peerDependencies": {
     "@types/hast": "*",

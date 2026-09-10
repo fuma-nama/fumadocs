@@ -15,5 +15,10 @@
     "**/*.tsx",
     ".next/types/**/*.ts"
   ],
-  "exclude": ["node_modules", "eslint.config.mjs", "components/registry/build-graph.ts"]
+  "exclude": [
+    "node_modules",
+    "eslint.config.mjs",
+    "components/registry/build-graph.ts",
+    "content/docs/(framework)/integrations/webmcp.tsx"
+  ]
 }

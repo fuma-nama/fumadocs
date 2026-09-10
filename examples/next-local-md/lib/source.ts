@@ -1,7 +1,7 @@
 import { lucideIconsPlugin } from 'fumadocs-core/source/lucide-icons';
 import { docsContentRoute, docsImageRoute, docsRoute } from './shared';
 import { localMd } from '@fumadocs/local-md';
-import { dynamicLoader } from 'fumadocs-core/source';
+import { dynamicLoader, llms } from 'fumadocs-core/source';
 
 const docs = localMd({
   dir: 'content/docs',
@@ -21,26 +21,8 @@ export async function getSource() {
   return docsLoader.get();
 }
 
-export function getPageImageUrl(page: (typeof docsLoader)['$inferPage']) {
-  const segments = [...page.slugs, 'image.png'];
+export const docsLlms = llms(getSource, {
+  renderPage: (page) => `# ${page.data.title} (${page.url})
 
-  return {
-    segments,
-    url: '/' + [page.locale, ...docsImageRoute.split('/'), ...segments].filter(Boolean).join('/'),
-  };
-}
-
-export function getPageMarkdownUrl(page: (typeof docsLoader)['$inferPage']) {
-  const segments = [...page.slugs, 'content.md'];
-
-  return {
-    segments,
-    url: '/' + [page.locale, ...docsContentRoute.split('/'), ...segments].filter(Boolean).join('/'),
-  };
-}
-
-export async function getLLMText(page: (typeof docsLoader)['$inferPage']) {
-  return `# ${page.data.title} (${page.url})
-
-${page.data.content}`;
-}
+${page.data.content}`,
+});

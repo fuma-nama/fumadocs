@@ -51,24 +51,24 @@
     "types:check": "tsc --noEmit"
   },
   "dependencies": {
-    "@base-ui/react": "^1.7.0",
-    "cn": "^0.2.4",
-    "lucide-react": "^1.39.0"
+    "@base-ui/react": "^1.8.0",
+    "cn": "^0.2.6",
+    "lucide-react": "^1.43.0"
   },
   "devDependencies": {
     "@notionhq/client": "^5.26.0",
     "@tailwindcss/oxide": "^4.3.3",
-    "@types/node": "26.4.1",
+    "@types/node": "26.5.0",
     "@types/react": "^19.2.18",
-    "@types/react-dom": "^19.2.5",
+    "@types/react-dom": "^19.2.7",
     "fumadocs-core": "workspace:*",
     "fumadocs-ui": "workspace:@fumadocs/base-ui@*",
     "react": "^19.2.8",
     "react-dom": "^19.2.8",
     "tsconfig": "workspace:*",
-    "tsdown": "0.22.14",
+    "tsdown": "0.23.0",
     "typescript": "^7.0.2",
-    "vitest": "^4.1.11"
+    "vitest": "^5.0.0"
   },
   "peerDependencies": {
     "@notionhq/client": "^5.23.0",

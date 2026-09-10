@@ -176,17 +176,20 @@ export const source = loader(
 For example, where you return text for LLM:
 
 ```ts
+import { llms } from 'fumadocs-core/source';
 import { source } from '@/lib/source';
 
-export async function getLLMText(page: (typeof source)['$inferPage']) {
-  // [!code ++:4]
-  if (page.type === 'asyncapi') {
-    // e.g. return the stringified AsyncAPI schema
-    return JSON.stringify(page.data.getSchema().bundled, null, 2);
-  }
+export const docsLlms = llms(source, {
+  renderPage: (page) => {
+    // [!code ++:4]
+    if (page.type === 'asyncapi') {
+      // e.g. return the stringified AsyncAPI schema
+      return JSON.stringify(page.data.getSchema().bundled, null, 2);
+    }
 
-  // your original flow below...
-}
+    // your original flow below...
+  },
+});
 ```
 
 And update your page renderer:

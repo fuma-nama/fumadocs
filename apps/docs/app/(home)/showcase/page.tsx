@@ -89,6 +89,11 @@ const showcases: ShowcaseObject[] = [
     url: 'https://generativea11y.com',
   },
   {
+    image: '/showcases/openpost.png',
+    name: 'OpenPost',
+    url: 'https://docs.openpo.st',
+  },
+  {
     image: '/showcases/comfydeploy.png',
     name: 'ComfyDeploy',
     url: 'https://comfydeploy.com',

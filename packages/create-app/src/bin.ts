@@ -13,51 +13,68 @@ import {
   text,
 } from '@clack/prompts';
 import pc from 'picocolors';
-import { getPackageManager, managers } from './auto-install';
+import { getPackageManager, managers, type PackageManager } from './auto-install';
 import { create, type Template, type TemplatePlugin } from './index';
 import { isCI, templates } from './constants';
-import { Option, program } from '@commander-js/extra-typings';
+import { cac } from 'cac';
+import { feature } from './plugins/feature';
+import { ai, type AIProvider } from '@fumadocs/cli/features/ai';
+import { lint } from '@fumadocs/cli/features/lint';
+import { og } from '@fumadocs/cli/features/og';
+import { search, type SearchProvider } from '@fumadocs/cli/features/search';
 
-const command = program
-  .argument('[name]', 'the project name')
+const linters = ['eslint', 'oxlint', 'biome'] as const;
+const searchProviders = ['orama', 'orama-cloud', 'algolia', 'typesense', 'mixedbread'] as const;
+const ogImages = ['next-og', 'takumi'] as const;
+const aiChats = ['openrouter', 'llmgateway', 'inkeep'] as const;
+const templateNames = templates.map((item) => item.value);
+
+interface CliOptions {
+  src?: boolean;
+  install?: boolean;
+  git: boolean;
+  yes?: boolean;
+  linter?: (typeof linters)[number];
+  search?: SearchProvider | 'orama';
+  ogImage?: (typeof ogImages)[number];
+  aiChat?: AIProvider;
+  template?: Template;
+  pm: PackageManager;
+}
+
+const cli = cac('create-fumadocs-app');
+
+cli
+  .command('[name]', 'create a Fumadocs app, [name] is the project name')
   .option('--src', '(Next.js only) enable `src/` directory')
   .option('--install', 'install packages automatically')
   .option('--no-git', 'disable auto Git repository initialization')
   .option('-y, --yes', 'skip prompts and use defaults for unspecified options')
-  .addOption(
-    new Option(
-      '--linter <name>',
-      'configure a linter/formatter, ESLint is currently Next.js only.',
-    ).choices(['eslint', 'oxlint', 'biome']),
+  .option(
+    '--linter <name>',
+    `configure a linter/formatter, ESLint is currently Next.js only. (${linters.join(', ')})`,
   )
-  .addOption(
-    new Option('--search <name>', 'configure a search solution').choices(['orama', 'orama-cloud']),
-  )
-  .addOption(
-    new Option('--og-image <name>', 'configure OG image generation').choices(['next-og', 'takumi']),
-  )
-  .addOption(
-    new Option('--ai-chat <name>', 'configure AI chat').choices([
-      'openrouter',
-      'llmgateway',
-      'inkeep',
-    ]),
-  )
-  .addOption(
-    new Option('--template <name>', 'choose a template').choices(
-      templates.map((item) => item.value),
-    ),
-  )
-  .addOption(
-    new Option('--pm <name>', 'choose a package manager')
-      .choices(managers)
-      .default(getPackageManager()),
-  );
+  .option('--search <name>', `configure a search solution (${searchProviders.join(', ')})`)
+  .option('--og-image <name>', `configure OG image generation (${ogImages.join(', ')})`)
+  .option('--ai-chat <name>', `configure AI chat (${aiChats.join(', ')})`)
+  .option('--template <name>', `choose a template (${templateNames.join(', ')})`)
+  .option('--pm <name>', `choose a package manager (${managers.join(', ')})`, {
+    default: getPackageManager(),
+  })
+  .action(main);
 
-async function main(): Promise<void> {
-  command.parse(process.argv);
-  const defaultName = command.args[0];
-  const config = command.opts();
+function checkOption(name: string, value: string | undefined, choices: readonly string[]) {
+  if (value !== undefined && !choices.includes(value))
+    throw new Error(`invalid value for --${name}: ${value}, expected: ${choices.join(', ')}`);
+}
+
+async function main(defaultName: string | undefined, config: CliOptions): Promise<void> {
+  checkOption('linter', config.linter, linters);
+  checkOption('search', config.search, searchProviders);
+  checkOption('og-image', config.ogImage, ogImages);
+  checkOption('ai-chat', config.aiChat, aiChats);
+  checkOption('template', config.template, templateNames);
+  checkOption('pm', config.pm, managers);
   const skipPrompts = isCI || config.yes === true;
   intro(pc.bgCyan(pc.bold('Create Fumadocs App')));
 
@@ -150,6 +167,9 @@ async function main(): Promise<void> {
               label: 'Orama Cloud',
               hint: '3rd party search solution, signup needed',
             },
+            { value: 'algolia', label: 'Algolia', hint: 'signup needed' },
+            { value: 'typesense', label: 'Typesense', hint: 'self-hosted or cloud' },
+            { value: 'mixedbread', label: 'Mixedbread', hint: 'AI search, signup needed' },
           ],
         });
       },
@@ -243,39 +263,11 @@ async function main(): Promise<void> {
     plugins.push(nextUseSrc());
   }
 
-  if (options.search === 'orama-cloud') {
-    const { oramaCloud } = await import('./plugins/orama-cloud');
-    plugins.push(oramaCloud());
-  }
-
-  switch (options.lint) {
-    case 'eslint': {
-      const { eslint } = await import('./plugins/eslint');
-      plugins.push(eslint());
-      break;
-    }
-    case 'biome': {
-      const { biome } = await import('./plugins/biome');
-      plugins.push(biome());
-      break;
-    }
-    case 'oxlint': {
-      const { oxlint } = await import('./plugins/oxlint');
-      plugins.push(oxlint());
-      break;
-    }
-  }
-
-  if (options.ogImage === 'takumi') {
-    const { nextUseTakumi } = await import('./plugins/next-use-takumi');
-    plugins.push(nextUseTakumi());
-  }
-
-  if (options.aiChat) {
-    const { ai } = await import('./plugins/ai');
-
-    plugins.push(ai(options.aiChat));
-  }
+  if (options.search !== 'orama') plugins.push(feature(search, { provider: options.search }));
+  if (options.lint !== 'disabled') plugins.push(feature(lint, { linter: options.lint }));
+  if (options.ogImage === 'takumi' && options.template.startsWith('+next'))
+    plugins.push(feature(og, { engine: 'takumi' }));
+  if (options.aiChat) plugins.push(feature(ai, { provider: options.aiChat }));
 
   await create({
     packageManager: config.pm,
@@ -340,7 +332,12 @@ async function checkDir(outputDir: string, skipPrompts: boolean) {
   info.stop(`Deleted files in ${outputDir}`);
 }
 
-main().catch((e: unknown) => {
-  console.error(e);
+cli.help();
+
+try {
+  cli.parse(process.argv, { run: false });
+  await cli.runMatchedCommand();
+} catch (e) {
+  console.error(pc.red(e instanceof Error ? e.message : String(e)));
   process.exit(1);
-});
+}

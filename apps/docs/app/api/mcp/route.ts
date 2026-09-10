@@ -4,6 +4,9 @@ import { z } from 'zod';
 import { ProvideLinksToolSchema } from '@/lib/inkeep/inkeep-qa-schema';
 import { createOpenAICompatible } from '@ai-sdk/openai-compatible';
 import { generateText } from 'ai';
+import { registerSourceTools } from 'fumadocs-core/mcp';
+import { docsLlms } from '@/lib/llms';
+import { source } from '@/lib/source';
 
 const openai = createOpenAICompatible({
   name: 'inkeep',
@@ -16,6 +19,8 @@ const handler = createMcpHandler(() => {
     name: 'fumadocs',
     version: '1.0.0',
   });
+
+  registerSourceTools(server, source, docsLlms);
 
   server.registerTool(
     'search',

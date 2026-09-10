@@ -15,7 +15,7 @@ const modules = import.meta.glob('./pages/**/*.{ts,tsx,js,jsx}', {
 const pages = fsRouter(modules);
 let nodeWs: WebSocketServer | undefined;
 
-const v = adapter(pages, {
+const v: ReturnType<typeof adapter> = adapter(pages, {
   middlewareFns: [
     ({ app }) => {
       if (process.env.HOT_RELOAD === '1') {

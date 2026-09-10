@@ -5,261 +5,126 @@ description: Integrate AI functionality to Fumadocs.
 
 ## Docs for LLM
 
-You can make your docs site more AI-friendly with dedicated docs content for large language models.
+Serve your docs as Markdown for LLMs and AI agents:
 
-To begin, make a `getLLMText` function that converts pages into static MDX content.
-
-In **Fumadocs MDX**, you can do:
-
-```ts title="lib/get-llm-text.ts"
-import { source } from '@/lib/source';
-
-export async function getLLMText(page: (typeof source)['$inferPage']) {
-  const processed = await page.data.getText('processed');
-
-  return `# ${page.data.title} (${page.url})
-
-${processed}`;
-}
+```package-install
+npx @fumadocs/cli feature llms
 ```
 
-It requires `includeProcessedMarkdown` to be enabled:
+It enables processed Markdown on your docs collection, adds `docsLlms` to `lib/source.ts`, and creates the routes below. The generated files are listed here if you prefer a manual setup.
 
-```ts title="source.config.ts"
-import { defineDocs } from 'fumadocs-mdx/config';
+### `docsLlms`
 
-export const docs = defineDocs({
-  docs: {
-    // [!code ++:3]
-    postprocess: {
-      includeProcessedMarkdown: true,
-    },
-  },
+`llms()` renders your docs for LLMs. `renderPage` turns one page into Markdown, from the processed document rather than the raw file content:
+
+<feature title="lib/source.ts">llms/docs-llms.ts</feature>
+
+| Method         | Output                                         |
+| -------------- | ---------------------------------------------- |
+| `index(lang?)` | the `llms.txt` index, built from the page tree |
+| `page(page)`   | one page, rendered with `renderPage`           |
+| `full(lang?)`  | every page rendered with `renderPage`, joined  |
+
+<Callout title="renderPage is required">
+  `page()` and `full()` are only available when you pass `renderPage`, since Fumadocs cannot know
+  how your content source exposes its Markdown.
+</Callout>
+
+Runtime content sources like [`@fumadocs/local-md`](/docs/integrations/content/local-md) resolve on demand. Pass their `getSource` and the CLI generates the same routes:
+
+```ts
+export const docsLlms = llms(getSource, {
+  renderPage: (page) => `# ${page.data.title} (${page.url})
+
+${page.data.content}`,
 });
 ```
 
-`getText('processed')` returns the processed document rather than the raw file content. MDX components appear as JSX syntax by default, you can render them into meaningful Markdown with the [`output` option](/docs/headless/mdx/remark-llms#output).
+It requires `includeProcessedMarkdown` in **Fumadocs MDX**:
+
+<feature title="source.config.ts">llms/source.config.ts</feature>
+
+MDX components appear as JSX syntax by default, you can render them into meaningful Markdown with the [`output` option](/docs/headless/mdx/remark-llms#output).
 
 ### `llms.txt`
 
-You can generate it from page tree using Loader API.
+An index of all pages, generated from the page tree.
 
-```ts tab="Next.js" title="app/llms.txt/route.ts"
-import { source } from '@/lib/source';
-import { llms } from 'fumadocs-core/source';
+<feature tab="Next.js" title="app/llms.txt/route.ts">
+  llms/next/app/llms.txt/route.ts
+</feature>
 
-// cached forever
-export const revalidate = false;
+<feature tab="React Router" title="app/routes.ts">
+  llms/react-router/routes.ts
+</feature>
 
-export function GET() {
-  return new Response(llms(source).index());
-}
-```
+<feature tab="React Router" title="app/routes/llms.txt.ts">
+  llms/react-router/routes/llms.txt.ts
+</feature>
 
-```ts tab="React Router" title="app/routes.ts"
-import { index, route, type RouteConfig } from '@react-router/dev/routes';
+<feature tab="Tanstack Start" title="src/routes/llms[.]txt.ts">
+  llms/tanstack-start/routes/llms[.]txt.ts
+</feature>
 
-export default [
-  // [!code ++]
-  route('llms.txt', 'routes/llms.ts'),
-] satisfies RouteConfig;
-```
-
-```ts tab="React Router" title="app/routes/llms.ts"
-import { source } from '@/lib/source';
-import { llms } from 'fumadocs-core/source';
-
-export function loader() {
-  return new Response(llms(source).index());
-}
-```
-
-```ts tab="Tanstack Start" title="src/routes/llms[.]txt.ts"
-import { createFileRoute } from '@tanstack/react-router';
-import { source } from '@/lib/source';
-import { llms } from 'fumadocs-core/source';
-
-export const Route = createFileRoute('/llms.txt')({
-  server: {
-    handlers: {
-      GET() {
-        return new Response(llms(source).index());
-      },
-    },
-  },
-});
-```
-
-```ts tab="Waku" title="pages/_api/llms.txt.ts"
-import { source } from '@/lib/source';
-import { llms } from 'fumadocs-core/source';
-
-export function GET() {
-  return new Response(llms(source).index());
-}
-
-export async function getConfig() {
-  return {
-    render: 'static' as const,
-  } as const;
-}
-```
+<feature tab="Waku" title="pages/_api/llms.txt.ts">
+  llms/waku/pages/_api/llms.txt.ts
+</feature>
 
 ### `llms-full.txt`
 
-A version of docs for AIs to read.
+The content of all pages in a single file.
 
-```ts tab="Next.js" title="app/llms-full.txt/route.ts"
-import { source } from '@/lib/source';
-import { getLLMText } from '@/lib/get-llm-text';
+<feature tab="Next.js" title="app/llms-full.txt/route.ts">
+  llms/next/app/llms-full.txt/route.ts
+</feature>
 
-// cached forever
-export const revalidate = false;
+<feature tab="React Router" title="app/routes/llms-full.txt.ts">
+  llms/react-router/routes/llms-full.txt.ts
+</feature>
 
-export async function GET() {
-  const scan = source.getPages().map(getLLMText);
-  const scanned = await Promise.all(scan);
+<feature tab="Tanstack Start" title="src/routes/llms-full[.]txt.ts">
+  llms/tanstack-start/routes/llms-full[.]txt.ts
+</feature>
 
-  return new Response(scanned.join('\n\n'));
-}
-```
-
-```ts tab="React Router" title="app/routes.ts"
-import { index, route, type RouteConfig } from '@react-router/dev/routes';
-
-export default [
-  // [!code ++]
-  route('llms-full.txt', 'routes/llms-full.ts'),
-] satisfies RouteConfig;
-```
-
-```ts tab="React Router" title="app/routes/llms-full.ts"
-import { source } from '@/lib/source';
-import { getLLMText } from '@/lib/get-llm-text';
-
-export async function loader() {
-  const scan = source.getPages().map(getLLMText);
-  const scanned = await Promise.all(scan);
-
-  return new Response(scanned.join('\n\n'));
-}
-```
-
-```ts tab="Tanstack Start" title="src/routes/llms-full[.]txt.ts"
-import { createFileRoute } from '@tanstack/react-router';
-import { source } from '@/lib/source';
-import { getLLMText } from '@/lib/get-llm-text';
-
-export const Route = createFileRoute('/llms-full.txt')({
-  server: {
-    handlers: {
-      GET: async () => {
-        const scan = source.getPages().map(getLLMText);
-        const scanned = await Promise.all(scan);
-        return new Response(scanned.join('\n\n'));
-      },
-    },
-  },
-});
-```
-
-```ts tab="Waku" title="pages/_api/llms-full.txt.ts"
-import { source } from '@/lib/source';
-import { getLLMText } from '@/lib/get-llm-text';
-
-export async function GET() {
-  const scan = source.getPages().map(getLLMText);
-  const scanned = await Promise.all(scan);
-
-  return new Response(scanned.join('\n\n'));
-}
-
-export async function getConfig() {
-  return {
-    render: 'static' as const,
-  } as const;
-}
-```
+<feature tab="Waku" title="pages/_api/llms-full.txt.ts">
+  llms/waku/pages/_api/llms-full.txt.ts
+</feature>
 
 ### `*.md` [#md-extension]
 
-Allow AI agents to get the content of a page as Markdown/MDX, by appending `.md` to the end of path.
+The Markdown of a single page, for AI agents. Pages are served under `/llms.mdx/docs/<slugs>/content.md`. The route prefix and the URL helpers of a page live in `lib/shared.ts`, so the URL layer stays yours.
 
-```ts tab="Next.js" title="app/llms.mdx/docs/[[...slug]]/route.ts"
-import { getLLMText } from '@/lib/get-llm-text';
-import { source } from '@/lib/source';
-import { notFound } from 'next/navigation';
+On Tanstack Start, the route lives under the docs route instead: `/docs/<slugs>.md`.
 
-export const revalidate = false;
+<feature tab="Next.js" title="lib/shared.ts">
+  llms/next/lib/shared.ts
+</feature>
 
-export async function GET(_req: Request, { params }: RouteContext<'/llms.mdx/docs/[[...slug]]'>) {
-  const { slug } = await params;
-  const page = source.getPage(slug);
-  if (!page) notFound();
+<feature tab="Next.js" title="app/llms.mdx/docs/[[...slug]]/route.ts">
+  llms/next/app/llms.mdx/docs/[[...slug]]/route.ts
+</feature>
 
-  return new Response(await getLLMText(page), {
-    headers: {
-      'Content-Type': 'text/markdown',
-    },
-  });
-}
+<feature tab="Next.js" title="next.config.ts">
+  llms/next/next.config.ts
+</feature>
 
-export function generateStaticParams() {
-  return source.generateParams();
-}
-```
+<feature tab="React Router" title="app/lib/shared.ts">
+  llms/react-router/lib/shared.ts
+</feature>
 
-```ts tab="Next.js" title="next.config.ts"
-import type { NextConfig } from 'next';
-
-const config: NextConfig = {
-  // [!code ++:8]
-  async rewrites() {
-    return [
-      {
-        source: '/docs/:path*.md',
-        destination: '/llms.mdx/docs/:path*',
-      },
-    ];
-  },
-};
-```
-
-```ts tab="React Router" title="app/routes.ts"
-import { index, route, type RouteConfig } from '@react-router/dev/routes';
-
-export default [
-  // [!code ++]
-  route('llms.mdx/docs/*', 'routes/docs/llms-mdx.ts'),
-] satisfies RouteConfig;
-```
-
-```ts tab="React Router" title="app/routes/docs/llms-mdx.ts"
-import type { Route } from './+types/llms-mdx';
-import { source } from '@/lib/source';
-import { getLLMText } from '@/lib/get-llm-text';
-
-export async function loader({ params }: Route.LoaderArgs) {
-  const slugs = params['*'].split('/').filter((v) => v.length > 0);
-  const page = source.getPage(slugs);
-  if (!page) {
-    return new Response('not found', { status: 404 });
-  }
-
-  return new Response(await getLLMText(page), {
-    headers: {
-      'Content-Type': 'text/markdown',
-    },
-  });
-}
-```
+<feature tab="React Router" title="app/routes/llms.mdx.docs.ts">
+  llms/react-router/routes/llms.mdx.docs.ts
+</feature>
 
 ```ts tab="React Router" title="app/root.tsx"
 import { rewritePath } from 'fumadocs-core/negotiation';
 import type { Route } from './+types/root';
 
-// [!code ++:20]
-const { rewrite: rewriteLLM } = rewritePath('/docs{/*path}.md', '/llms.mdx/docs{/*path}');
+// serve `/docs/page.md` [!code ++:11]
+const { rewrite: rewriteLLM } = rewritePath(
+  '/docs{/*path}.md',
+  '/llms.mdx/docs{/*path}/content.md',
+);
 const serverMiddleware: Route.MiddlewareFunction = async ({ request }, next) => {
   const url = new URL(request.url);
   const path = rewriteLLM(url.pathname);
@@ -282,100 +147,19 @@ export default {
 } satisfies Config;
 ```
 
-```ts tab="Tanstack Start" title="lib/shared.ts"
-// create the following utils:
+<feature tab="Tanstack Start" title="src/lib/shared.ts">
+  llms/tanstack-start/lib/shared.ts
+</feature>
 
-export const docsRoute = '/docs';
+<feature tab="Tanstack Start" title="src/routes/docs/{$}[.]md.ts">llms/tanstack-start/routes/docs/\{$\}[.]md.ts</feature>
 
-export function encodeMarkdownUrl(slugs: string[], locale?: string) {
-  const segments = [...slugs];
-  if (segments.length === 0) {
-    segments.push('index.md');
-  } else {
-    segments[segments.length - 1] += '.md';
-  }
+<feature tab="Waku" title="lib/shared.ts">
+  llms/waku/lib/shared.ts
+</feature>
 
-  return '/' + [locale, ...docsRoute.split('/'), ...segments].filter(Boolean).join('/');
-}
-
-/** @returns page slugs */
-export function decodeMarkdownUrl(segments: string[]) {
-  if (segments.length === 0) return [];
-
-  const out = [...segments];
-  out[out.length - 1] = out[out.length - 1].replace(/\.md$/, '');
-  if (out.length === 1 && out[0] === 'index') out.pop();
-  return out;
-}
-```
-
-```ts tab="Tanstack Start" title="src/routes/docs/{$}[.]md.ts"
-import { createFileRoute, notFound } from '@tanstack/react-router';
-import { source } from '@/lib/source';
-import { decodeMarkdownUrl } from '@/lib/shared';
-import { getLLMText } from '@/lib/get-llm-text';
-
-export const Route = createFileRoute('/docs/{$}.md')({
-  server: {
-    handlers: {
-      GET: async ({ params }) => {
-        const slugs = decodeMarkdownUrl(params._splat?.split('/') ?? []);
-        const page = source.getPage(slugs);
-        if (!page) throw notFound();
-
-        return new Response(await getLLMText(page), {
-          headers: {
-            'Content-Type': 'text/markdown',
-          },
-        });
-      },
-    },
-  },
-});
-```
-
-```ts tab="Waku" title="pages/_api/llms.mdx/docs/[...slugs]/content.md.ts"
-import { getLLMText } from '@/lib/get-llm-text';
-import { source } from '@/lib/source';
-import { ApiContext } from 'waku/router';
-import { unstable_notFound } from 'waku/router/server';
-
-export async function GET(
-  _: Request,
-  { params }: ApiContext<'/llms.mdx/docs/[...slugs]/content.md'>,
-) {
-  const page = source.getPage(params.slugs);
-  if (!page) unstable_notFound();
-
-  return new Response(await getLLMText(page), {
-    headers: {
-      'Content-Type': 'text/markdown',
-    },
-  });
-}
-
-export async function getConfig() {
-  const pages = source.generateParams().map((item) => item.slug);
-
-  return {
-    render: 'static' as const,
-    staticPaths: pages,
-  } as const;
-}
-```
-
-```ts tab="Waku" title="lib/source.ts"
-// create a util for Markdown URLs (append /content.md):
-
-export function getPageMarkdownUrl(page: { slugs: string[]; locale?: string }) {
-  const segments = [...page.slugs, 'content.md'];
-
-  return {
-    segments,
-    url: '/' + [page.locale, 'llms.mdx', 'docs', ...segments].filter(Boolean).join('/'),
-  };
-}
-```
+<feature tab="Waku" title="pages/_api/llms.mdx/docs/[...slug]/content.md.ts">
+  llms/waku/pages/_api/llms.mdx/docs/[...slug]/content.md.ts
+</feature>
 
 #### `Accept`
 
@@ -418,26 +202,80 @@ Common page actions for AI, require [`*.md`](#md-extension) to be implemented fi
 
 ![AI Page Actions](/docs/ai-page-actions.png)
 
-```npm
-npx @fumadocs/cli add ai/page-actions
-```
-
-Use it in your docs page like:
+Use them in your docs page like:
 
 ```tsx title="app/docs/[[...slug]]/page.tsx"
-// URL to fetch Markdown content, only need to append .mdx to URL if you have `*.mdx` configured.
-// Use .md instead for the Tanstack Start example above.
-// Use getPageMarkdownUrl(page).url for the Waku example above.
-const markdownUrl = `${page.url}.mdx`
+import { MarkdownCopyButton, ViewOptionsPopover } from 'fumadocs-ui/layouts/docs/page';
+import { getPageMarkdownUrl } from '@/lib/shared';
+
+const markdownUrl = getPageMarkdownUrl(page).url;
 
 <div className="flex flex-row gap-2 items-center border-b pt-2 pb-6">
-  <LLMCopyButton markdownUrl={markdownUrl} />
-  <ViewOptions
+  <MarkdownCopyButton markdownUrl={markdownUrl} />
+  <ViewOptionsPopover
     markdownUrl={markdownUrl}
     githubUrl={`https://github.com/${owner}/${repo}/blob/main/content/docs/${page.path}`}
   />
-</div>
+</div>;
 ```
+
+## MCP Server
+
+Expose your docs to AI agents through a [MCP](https://modelcontextprotocol.io) server, with tools to list, search and read pages.
+
+```package-install
+npx @fumadocs/cli feature mcp
+```
+
+It creates a `/api/mcp` route with the streamable HTTP transport, on top of the [LLM routes](#docs-for-llm) above.
+The tools come from `fumadocs-core/mcp`: `registerSourceTools()` adds `list_pages` and `get_page`, `registerSearchTool()` adds `search`.
+
+<feature tab="Next.js" title="app/api/mcp/route.ts">
+  mcp/next/app/api/mcp/route.ts
+</feature>
+
+<feature tab="React Router" title="app/routes/api.mcp.ts">
+  mcp/react-router/routes/api.mcp.ts
+</feature>
+
+<feature tab="Tanstack Start" title="src/routes/api/mcp.ts">
+  mcp/tanstack-start/routes/api/mcp.ts
+</feature>
+
+<feature tab="Waku" title="pages/_api/api/mcp.ts">
+  mcp/waku/pages/_api/api/mcp.ts
+</feature>
+
+Connect an agent to it with:
+
+```json
+{
+  "mcpServers": {
+    "docs": { "url": "https://your-site.com/api/mcp" }
+  }
+}
+```
+
+## WebMCP
+
+<Callout type="warn" title="Experimental">
+  [WebMCP](https://webmachinelearning.github.io/webmcp/) is an early web standard, available in
+  Chrome 149+ behind the `#enable-webmcp-testing` flag and an origin trial. The API may still
+  change.
+</Callout>
+
+Where the MCP server above serves agents connecting to your site, WebMCP exposes tools to the AI agent
+of the browser, on the page the reader is viewing. The tools search the docs, read a page as Markdown and
+navigate to a page.
+
+```package-install
+npx @fumadocs/cli feature webmcp
+```
+
+It creates a `WebMCP` component on top of the [LLM routes](#docs-for-llm), you can render it inside `<RootProvider />`.
+
+- `search_docs` queries the search API route, you can use [other clients](/docs/search) than `fetchClient`.
+- `read_page` fetches the Markdown of a page, `/docs/page.md` on TanStack Start.
 
 ## Ask AI
 

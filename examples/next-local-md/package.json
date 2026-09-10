@@ -1,6 +1,6 @@
 {
   "name": "example-next-local-md",
-  "version": "0.0.24",
+  "version": "0.0.25",
   "private": true,
   "scripts": {
     "build": "next build",
@@ -10,10 +10,10 @@
   },
   "dependencies": {
     "@fumadocs/local-md": "workspace:*",
-    "cn": "^0.2.4",
+    "cn": "^0.2.6",
     "fumadocs-core": "workspace:*",
     "fumadocs-ui": "workspace:@fumadocs/base-ui@*",
-    "lucide-react": "^1.39.0",
+    "lucide-react": "^1.43.0",
     "next": "16.3.4",
     "react": "^19.2.8",
     "react-dom": "^19.2.8"
@@ -21,10 +21,10 @@
   "devDependencies": {
     "@tailwindcss/postcss": "^4.3.3",
     "@types/mdx": "^2.0.14",
-    "@types/node": "^26.4.1",
+    "@types/node": "^26.5.0",
     "@types/react": "^19.2.18",
-    "@types/react-dom": "^19.2.5",
-    "postcss": "^8.5.26",
+    "@types/react-dom": "^19.2.7",
+    "postcss": "^8.5.28",
     "tailwindcss": "^4.3.3",
     "typescript": "^7.0.2"
   }

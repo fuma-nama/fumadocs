@@ -11,6 +11,14 @@ It converts your MDX content to HTML, resolves images, and produces a standards-
 
 ## Setup
 
+Fumadocs CLI can set it up for you, it creates the export route protected by an `EXPORT_SECRET` and enables `includeProcessedMarkdown`:
+
+```package-install
+npx @fumadocs/cli feature epub
+```
+
+Or manually:
+
 ### Installation
 
 ```npm
@@ -36,49 +44,37 @@ export const docs = defineDocs({
 
 ### Create Export Route
 
-Create a route handler to serve the EPUB:
+`createEpubExportAPI` builds the route handler. It is guarded by `secret`: without a matching `Authorization: Bearer <secret>` header the request is rejected, and the route answers `503` when the secret itself is unset.
 
 ```ts tab="Next.js" title="app/export/epub/route.ts"
 import { source } from '@/lib/source';
-import { exportEpub } from 'fumadocs-epub';
+import { createEpubExportAPI } from 'fumadocs-epub';
 
 export const revalidate = false;
 
-export async function GET(): Promise<Response> {
-  const buffer = await exportEpub({
-    source,
-    title: 'My Documentation',
-    author: 'My Team',
-    description: 'Documentation for my project',
-    cover: '/cover.png',
-  });
-  return new Response(new Uint8Array(buffer), {
-    headers: {
-      'Content-Type': 'application/epub+zip',
-      'Content-Disposition': 'attachment; filename="docs.epub"',
-    },
-  });
-}
+export const { GET } = createEpubExportAPI({
+  source,
+  title: 'My Documentation',
+  author: 'My Team',
+  description: 'Documentation for my project',
+  cover: '/cover.png',
+  secret: process.env.EXPORT_SECRET,
+});
 ```
 
 ```ts tab="React Router" title="app/routes/export.epub.ts"
+import type { Route } from './+types/export.epub';
 import { source } from '@/lib/source';
-import { exportEpub } from 'fumadocs-epub';
+import { createEpubExportAPI } from 'fumadocs-epub';
 
-export async function loader() {
-  const buffer = await exportEpub({
-    source,
-    title: 'My Documentation',
-    author: 'My Team',
-    description: 'Documentation for my project',
-    cover: '/cover.png',
-  });
-  return new Response(new Uint8Array(buffer), {
-    headers: {
-      'Content-Type': 'application/epub+zip',
-      'Content-Disposition': 'attachment; filename="docs.epub"',
-    },
-  });
+const api = createEpubExportAPI({
+  source,
+  title: 'My Documentation',
+  secret: process.env.EXPORT_SECRET,
+});
+
+export function loader({ request }: Route.LoaderArgs) {
+  return api.GET(request);
 }
 ```
 
@@ -94,26 +90,18 @@ export default [
 ```ts tab="Tanstack Start" title="src/routes/export/epub.ts"
 import { createFileRoute } from '@tanstack/react-router';
 import { source } from '@/lib/source';
-import { exportEpub } from 'fumadocs-epub';
+import { createEpubExportAPI } from 'fumadocs-epub';
+
+const api = createEpubExportAPI({
+  source,
+  title: 'My Documentation',
+  secret: process.env.EXPORT_SECRET,
+});
 
 export const Route = createFileRoute('/export/epub')({
   server: {
     handlers: {
-      GET: async () => {
-        const buffer = await exportEpub({
-          source,
-          title: 'My Documentation',
-          author: 'My Team',
-          description: 'Documentation for my project',
-          cover: '/cover.png',
-        });
-        return new Response(new Uint8Array(buffer), {
-          headers: {
-            'Content-Type': 'application/epub+zip',
-            'Content-Disposition': 'attachment; filename="docs.epub"',
-          },
-        });
-      },
+      GET: ({ request }) => api.GET(request),
     },
   },
 });
@@ -121,36 +109,16 @@ export const Route = createFileRoute('/export/epub')({
 
 ```ts tab="Waku" title="pages/_api/export/epub.ts"
 import { source } from '@/lib/source';
-import { exportEpub } from 'fumadocs-epub';
+import { createEpubExportAPI } from 'fumadocs-epub';
 
-export async function GET(): Promise<Response> {
-  const buffer = await exportEpub({
-    source,
-    title: 'My Documentation',
-    author: 'My Team',
-    description: 'Documentation for my project',
-    cover: '/cover.png',
-  });
-  return new Response(new Uint8Array(buffer), {
-    headers: {
-      'Content-Type': 'application/epub+zip',
-      'Content-Disposition': 'attachment; filename="docs.epub"',
-    },
-  });
-}
-
-export async function getConfig() {
-  return {
-    render: 'static' as const,
-  } as const;
-}
+export const { GET } = createEpubExportAPI({
+  source,
+  title: 'My Documentation',
+  secret: process.env.EXPORT_SECRET,
+});
 ```
 
-<Callout type="warning" title="Protect the endpoint">
-
-Consider protecting `/export/epub` in production. For example, require an `Authorization: Bearer <secret>` header and set `EXPORT_SECRET` in your environment. The Fumadocs CLI scaffolds a route with this protection when you run `fumadocs export epub --scaffold-only`.
-
-</Callout>
+For a public endpoint, or to build the file yourself (e.g. in a script), call `exportEpub()` directly and return the buffer.
 
 ### Using the CLI
 
@@ -165,7 +133,7 @@ This fetches from your running server (Next.js) or copies from the build output 
 
 ## Options
 
-The config passed to `exportEpub` supports these options:
+Both `exportEpub` and `createEpubExportAPI` accept these options:
 
 | Option         | Type                 | Description                                                                     |
 | -------------- | -------------------- | ------------------------------------------------------------------------------- |
@@ -181,6 +149,8 @@ The config passed to `exportEpub` supports these options:
 | `excludePages` | `(page) => boolean`  | Filter: exclude pages where this returns `true`                                 |
 | `css`          | `string`             | Custom CSS for the EPUB. Uses `defaultEpubStyles` if omitted                    |
 | `publicDir`    | `string`             | Public directory for resolving `/public/...` image paths. Default: `./public`   |
+
+`createEpubExportAPI` adds two more: `secret` (required, guards the route) and `filename` (the downloaded file name, default `docs.epub`).
 
 ### Custom CSS
 

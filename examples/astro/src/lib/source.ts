@@ -13,12 +13,6 @@ export function getStructuredData(entry: CollectionEntry<'docs'>): StructuredDat
   return structure(entry.body);
 }
 
-export function getPageImageUrl(page: (typeof source)['$inferPage']) {
-  const segments = [...page.slugs, 'image.webp'];
-
-  return '/' + [page.locale, 'og', 'docs', ...segments].filter(Boolean).join('/');
-}
-
 async function createMySource() {
   const out: StaticSource<{
     metaData: CollectionEntry<'meta'>['data'];

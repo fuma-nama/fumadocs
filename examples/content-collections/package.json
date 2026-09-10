@@ -1,6 +1,6 @@
 {
   "name": "example-content-collections",
-  "version": "0.0.24",
+  "version": "0.0.25",
   "private": true,
   "scripts": {
     "build": "next build",
@@ -21,7 +21,7 @@
     "@content-collections/next": "^0.2.11",
     "@types/mdx": "^2.0.14",
     "@types/react": "^19.2.18",
-    "@types/react-dom": "^19.2.5",
+    "@types/react-dom": "^19.2.7",
     "typescript": "^7.0.2"
   }
 }
