@@ -1,3 +1,9 @@
+## fumadocs-preview@0.2.2
+
+### CLIs on `cac`
+
+The CLIs are now built on [cac](https://github.com/cacjs/cac).
+
 ## fumadocs-preview@0.2.1
 
 ### Replace `cnfast` with `cn`
