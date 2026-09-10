@@ -1,3 +1,15 @@
+## create-fumadocs-app@16.2.0
+
+### Search providers and shared CLI features
+
+`--search` accepts `algolia`, `typesense` and `mixedbread` in addition to `orama` and `orama-cloud`.
+
+Search, linter, OG image and Ask AI options are now applied by the features of `@fumadocs/cli`, the same code that configures them on an existing app, instead of template plugins. `create-fumadocs-versions` pins the versions of the new search dependencies.
+
+### CLIs on `cac`
+
+The CLIs are now built on [cac](https://github.com/cacjs/cac).
+
 ## create-fumadocs-app@16.1.26
 
 ### Add `--yes` flag for non-interactive usage
