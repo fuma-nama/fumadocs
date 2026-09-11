@@ -49,7 +49,7 @@ function codemod(name: string, code: string, edit: (file: SourceFile) => void) {
 /** the files written by CLI features, keyed by `<feature>/<framework>/<file>` */
 function featureFiles() {
   const files: Record<string, string> = {
-    'llms/docs-llms.ts': `import { llms } from 'fumadocs-core/source';\n${docsLlms(src).trimStart()}\n`,
+    'llms/docs-llms.ts': `import { llms } from 'fumadocs-core/source';\n${docsLlms(src)}\n`,
     'llms/source.config.ts': codemod(
       'source.config.ts',
       `import { defineDocs } from 'fumadocs-mdx/config';
