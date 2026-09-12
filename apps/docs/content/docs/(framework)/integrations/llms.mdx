@@ -92,9 +92,7 @@ The content of all pages in a single file.
 
 ### `*.md` [#md-extension]
 
-The Markdown of a single page, for AI agents. Pages are served under `/llms.mdx/docs/<slugs>/content.md`. The route prefix and the URL helpers of a page live in `lib/shared.ts`, so the URL layer stays yours.
-
-On Tanstack Start, the route lives under the docs route instead: `/docs/<slugs>.md`.
+The Markdown of a single page, for AI agents.
 
 <feature tab="Next.js" title="lib/shared.ts">
   llms/next/lib/shared.ts
@@ -186,13 +184,11 @@ export default function proxy(request: NextRequest) {
 }
 ```
 
-Because the same URL now has two representations, the response needs `Vary: Accept` so shared
-caches key on the header they were selected by, rather than serving Markdown to a browser (or the
-other way round).
+Because the same URL now has two representations, the response needs `Vary: Accept` to prevent cache collisions.
 
 <Callout title="Next.js">
   Next.js discards `Vary` on App Router **page** responses, so the HTML side of the branch above
-  can't carry the header from inside the app — set it at your CDN if you serve documentation through
+  can't carry the header from inside the app. Set it at your CDN if you serve documentation through
   a shared cache.
 </Callout>
 
@@ -228,7 +224,8 @@ npx @fumadocs/cli feature mcp
 ```
 
 It creates a `/api/mcp` route with the streamable HTTP transport, on top of the [LLM routes](#docs-for-llm) above.
-The tools come from `fumadocs-core/mcp`: `registerSourceTools()` adds `list_pages` and `get_page`, `registerSearchTool()` adds `search`.
+
+The tools come from [`fumadocs-core/mcp`](/docs/headless/utils/mcp), see linked docs for details.
 
 <feature tab="Next.js" title="app/api/mcp/route.ts">
   mcp/next/app/api/mcp/route.ts
@@ -265,8 +262,7 @@ Connect an agent to it with:
 </Callout>
 
 Where the MCP server above serves agents connecting to your site, WebMCP exposes tools to the AI agent
-of the browser, on the page the reader is viewing. The tools search the docs, read a page as Markdown and
-navigate to a page.
+of the browser, on the page the reader is viewing.
 
 ```package-install
 npx @fumadocs/cli feature webmcp

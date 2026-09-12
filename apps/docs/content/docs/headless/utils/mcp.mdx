@@ -1,0 +1,75 @@
+---
+title: MCP
+description: Expose documentation search and Markdown content as MCP tools.
+---
+
+`fumadocs-core/mcp` connects your [Source API](/docs/headless/source-api) and [search server](/docs/headless/search) to a Model Context Protocol (MCP) server.
+AI agents can discover pages, read their Markdown, and search your docs through three tools:
+
+| Tool         | Input                      | Result                                     |
+| ------------ | -------------------------- | ------------------------------------------ |
+| `list_pages` | None                       | The page index produced by `llms.index()`  |
+| `get_page`   | `url`: page pathname       | The Markdown produced by `llms.page(page)` |
+| `search`     | `query`, optional `locale` | JSON-encoded search results                |
+
+For a generated HTTP endpoint, follow the [MCP integration guide](/docs/integrations/llms#mcp-server).
+Use these helpers directly when building your own server.
+
+## Installation
+
+```package-install
+fumadocs-core @modelcontextprotocol/server zod
+```
+
+## Register Tools
+
+Create a source and a `docsLlms` renderer with `renderPage` configured, as shown in [Docs for LLM](/docs/integrations/llms#docs-for-llm).
+Then register the tools on your MCP server:
+
+```ts title="lib/mcp.ts"
+import { McpServer } from '@modelcontextprotocol/server';
+import { registerSearchTool, registerSourceTools } from 'fumadocs-core/mcp';
+import { createFromSource } from 'fumadocs-core/search/server';
+import { source, docsLlms } from '@/lib/source';
+
+export const mcp = new McpServer({
+  name: 'docs',
+  version: '1.0.0',
+});
+
+registerSourceTools(mcp, source, docsLlms);
+registerSearchTool(mcp, createFromSource(source));
+```
+
+These helpers register tools only. Connect the server to a transport to expose it to clients.
+The [integration guide](/docs/integrations/llms#mcp-server) includes framework routes using the streamable HTTP transport, which requires a server at runtime.
+
+## `registerSourceTools(mcp, source, llms)`
+
+Registers `list_pages` and `get_page`.
+
+- `source` accepts a Source API loader, or a function that returns one synchronously or asynchronously.
+- `llms` must be created with `renderPage` so it can render individual pages.
+- `get_page` resolves a pathname such as `/docs/getting-started` with `source.getPageByUrl()`.
+  If no page matches, it returns an MCP error result with `isError: true`.
+
+For a runtime content source, pass its getter and a renderer built from that same getter:
+
+```ts
+registerSourceTools(mcp, getSource, docsLlms);
+```
+
+See [runtime content sources](/docs/integrations/llms#docsllms) for the corresponding renderer setup.
+
+## `registerSearchTool(mcp, server)`
+
+Registers `search` using a `SearchServer` from `fumadocs-core/search/server`.
+The tool passes `query` and the optional `locale` to `server.search()` and returns the results as a text content block containing JSON.
+
+Pass an existing search server to reuse its configuration:
+
+```ts
+registerSearchTool(mcp, searchServer);
+```
+
+Source and search tools can be registered independently, so you can expose only the capabilities your server needs.
