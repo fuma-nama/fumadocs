@@ -8,10 +8,11 @@ icon: Album
 
 Fumadocs Core offers server-side functions and headless components to build docs on React.js frameworks like Next.js, Waku, and Astro with React islands.
 
-- Search (built-in: ZBSearch, Algolia Search)
+- [Search](/docs/headless/search)
 - Breadcrumb, Sidebar, TOC Components
 - Remark/Rehype Plugins
-- Additional utilities
+- [MCP tools](/docs/headless/utils/mcp) for AI agents to search and read docs
+- [Additional utilities](/docs/headless/utils)
 
 <Callout title="Tip">
 
@@ -23,7 +24,7 @@ Fumadocs Core offers server-side functions and headless components to build docs
 
 ## Installation
 
-No other dependencies required.
+Install the core package. Individual integrations may require additional dependencies, listed in their guides.
 
 ```package-install
 fumadocs-core
@@ -89,8 +90,7 @@ export function DocsIsland({
 }
 ```
 
-It offers simple document searching as well as components for building a
-good docs.
+Explore the APIs and components:
 
 <Cards>
 
@@ -113,5 +113,11 @@ good docs.
 />
 
 <Card title="Search" href="/docs/headless/search" description="Implement document searching" />
+
+<Card
+  title="MCP"
+  href="/docs/headless/utils/mcp"
+  description="Expose page discovery, Markdown content, and search to AI agents"
+/>
 
 </Cards>
