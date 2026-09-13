@@ -183,7 +183,7 @@ export function DocsLayout(props: DocsLayoutProps) {
                 <LinkItem
                   key={i}
                   item={item}
-                  className={cn(buttonVariants({ size: 'icon-sm', color: 'ghost' }))}
+                  className={cn(buttonVariants({ size: 'icon-sm', variant: 'ghost' }))}
                   aria-label={item.label}
                 >
                   {item.icon}

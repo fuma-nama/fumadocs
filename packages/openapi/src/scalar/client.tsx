@@ -44,7 +44,7 @@ export default function ScalarPlayground({
       </code>
       <button
         type="submit"
-        className={cn(buttonVariants({ color: 'primary', size: 'sm' }), 'px-3 py-1.5')}
+        className={cn(buttonVariants({ variant: 'default', size: 'sm' }), 'px-3 py-1.5')}
         onClick={() => client?.open({ path, method: method as never })}
       >
         {t('Test')}

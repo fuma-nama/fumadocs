@@ -137,7 +137,7 @@ export function Feedback({
                 target="_blank"
                 className={cn(
                   buttonVariants({
-                    color: 'primary',
+                    variant: 'default',
                   }),
                   'text-xs',
                 )}
@@ -148,7 +148,7 @@ export function Feedback({
               <button
                 className={cn(
                   buttonVariants({
-                    color: 'secondary',
+                    variant: 'secondary',
                   }),
                   'text-xs',
                 )}
@@ -180,7 +180,7 @@ export function Feedback({
             />
             <button
               type="submit"
-              className={cn(buttonVariants({ color: 'outline' }), 'w-fit px-3')}
+              className={cn(buttonVariants({ variant: 'outline' }), 'w-fit px-3')}
               disabled={isPending}
             >
               Submit
@@ -427,7 +427,7 @@ function FeedbackTextForm({
             target="_blank"
             className={cn(
               buttonVariants({
-                color: 'primary',
+                variant: 'default',
               }),
               'text-xs',
             )}
@@ -438,7 +438,7 @@ function FeedbackTextForm({
           <button
             className={cn(
               buttonVariants({
-                color: 'secondary',
+                variant: 'secondary',
               }),
               'text-xs',
             )}
@@ -476,7 +476,7 @@ function FeedbackTextForm({
       <div className="grid grid-cols-2 gap-2 mt-auto">
         <button
           type="submit"
-          className={cn(buttonVariants({ variant: 'primary', size: 'sm' }), 'gap-1.5')}
+          className={cn(buttonVariants({ variant: 'default', size: 'sm' }), 'gap-1.5')}
           disabled={isPending}
         >
           <CornerDownRightIcon className="size-4" />

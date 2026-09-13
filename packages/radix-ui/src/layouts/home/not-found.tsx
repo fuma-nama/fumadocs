@@ -26,7 +26,7 @@ export function DefaultNotFound() {
         className={cn(
           buttonVariants({
             className: 'mt-4 gap-1.5',
-            variant: 'primary',
+            variant: 'default',
           }),
         )}
       >

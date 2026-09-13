@@ -694,7 +694,7 @@ function CopyTypeScriptPanel({
         onClick={onCopy}
         className={cn(
           buttonVariants({
-            color: 'secondary',
+            variant: 'secondary',
             className: 'p-2 gap-2',
             size: 'sm',
           }),

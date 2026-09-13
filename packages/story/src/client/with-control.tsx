@@ -104,7 +104,7 @@ function StoryComponent({ Component }: { Component: FC }) {
           </p>
           <p className="text-fd-muted-foreground mb-2">{String(error)}</p>
           <button
-            className={cn(buttonVariants({ variant: 'primary', size: 'sm' }))}
+            className={cn(buttonVariants({ variant: 'default', size: 'sm' }))}
             onClick={() => resetErrorBoundary()}
           >
             {t('Reset')}

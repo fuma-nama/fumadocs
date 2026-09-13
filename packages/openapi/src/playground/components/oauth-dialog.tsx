@@ -405,7 +405,7 @@ function Content({ schemeId, scopes, setToken, setOpen }: AuthDialogContentProps
             type="submit"
             className={cn(
               buttonVariants({
-                color: 'primary',
+                variant: 'default',
               }),
             )}
           >

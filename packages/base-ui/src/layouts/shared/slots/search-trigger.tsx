@@ -14,7 +14,8 @@ export interface SearchTriggerProps extends Omit<ComponentProps<'button'>, 'colo
 export function SearchTrigger({
   hideIfDisabled,
   size = 'icon-sm',
-  color = 'ghost',
+  color,
+  variant = color ?? 'ghost',
   ...props
 }: SearchTriggerProps) {
   const { enabled, dialogHandle } = useSearchContext();
@@ -28,7 +29,7 @@ export function SearchTrigger({
       className={cn(
         buttonVariants({
           size,
-          color,
+          variant,
         }),
         props.className,
       )}

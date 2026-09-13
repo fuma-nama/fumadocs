@@ -128,7 +128,7 @@ export default function CustomSearchDialog(props: SharedProps) {
             <PopoverTrigger
               className={buttonVariants({
                 size: 'sm',
-                color: 'ghost',
+                variant: 'ghost',
                 className: '-m-1.5 me-auto',
               })}
             >

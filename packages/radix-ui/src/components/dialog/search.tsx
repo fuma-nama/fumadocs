@@ -248,7 +248,7 @@ export function SearchDialogClose({
       onClick={() => onOpenChange(false)}
       className={cn(
         buttonVariants({
-          color: 'outline',
+          variant: 'outline',
           size: 'sm',
           className: 'font-mono text-fd-muted-foreground',
         }),

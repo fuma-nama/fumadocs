@@ -52,7 +52,6 @@
     "./components/ui/collapsible": "./dist/components/ui/collapsible.js",
     "./components/ui/navigation-menu": "./dist/components/ui/navigation-menu.js",
     "./components/ui/popover": "./dist/components/ui/popover.js",
-    "./components/ui/scroll-area": "./dist/components/ui/scroll-area.js",
     "./components/ui/tabs": "./dist/components/ui/tabs.js",
     "./contexts/i18n": "./dist/contexts/i18n.js",
     "./contexts/search": "./dist/contexts/search.js",

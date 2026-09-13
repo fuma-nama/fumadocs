@@ -61,7 +61,7 @@ export function Header(props: ComponentProps<'header'>) {
             <slots.sidebar.collapseTrigger
               className={cn(
                 buttonVariants({
-                  color: 'ghost',
+                  variant: 'ghost',
                   size: 'icon-sm',
                 }),
                 '-ms-1.5 text-fd-muted-foreground data-[collapsed=false]:hidden max-md:hidden',
@@ -104,7 +104,7 @@ export function Header(props: ComponentProps<'header'>) {
                 key={i}
                 item={item}
                 className={cn(
-                  buttonVariants({ size: 'icon-sm', color: 'ghost' }),
+                  buttonVariants({ size: 'icon-sm', variant: 'ghost' }),
                   'text-fd-muted-foreground max-lg:hidden',
                 )}
                 aria-label={item.label}
@@ -119,7 +119,7 @@ export function Header(props: ComponentProps<'header'>) {
               <slots.sidebar.trigger
                 className={cn(
                   buttonVariants({
-                    color: 'ghost',
+                    variant: 'ghost',
                     size: 'icon-sm',
                     className: 'p-2 -me-1.5',
                   }),
@@ -141,7 +141,7 @@ export function Header(props: ComponentProps<'header'>) {
               <slots.sidebar.collapseTrigger
                 className={cn(
                   buttonVariants({
-                    color: 'secondary',
+                    variant: 'secondary',
                     size: 'icon-sm',
                   }),
                   'text-fd-muted-foreground rounded-full -me-1.5',

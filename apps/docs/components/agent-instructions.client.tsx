@@ -11,7 +11,7 @@ export function CopyButton({ text }: { text: string }) {
       type="button"
       onClick={onClick}
       className={buttonVariants({
-        color: 'secondary',
+        variant: 'secondary',
         size: 'sm',
         className: 'gap-2 [&_svg]:size-3.5 [&_svg]:text-fd-muted-foreground',
       })}
