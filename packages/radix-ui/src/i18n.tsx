@@ -26,11 +26,13 @@ export function i18nProvider(
   const t = translations.extend(uiTranslations());
 
   if ('config' in t) {
-    const { defaultLanguage, languages } = t.config;
+    const { defaultLanguage, languages, hideLocale } = t.config;
     const locale = lang ?? defaultLanguage;
 
     return {
-      locale: lang,
+      locale,
+      defaultLanguage,
+      hideLocale,
       translations: t.get(locale) ?? t.get(defaultLanguage),
       locales: languages.map((code) => ({
         locale: code,
@@ -61,6 +63,8 @@ export function defineI18nUI<Languages extends string>(
       const t = localeTranslations[locale as Languages];
       return {
         locale,
+        defaultLanguage: config.defaultLanguage,
+        hideLocale: config.hideLocale,
         translations: t,
         locales: config.languages.map((code) => ({
           locale: code,
