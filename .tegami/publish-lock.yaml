@@ -1,75 +1,39 @@
 core:changelogs:
-  - content: "---\npackages:\n  npm:@fumadocs/cli:\n    type: minor\n---\n\n## `init` and `feature` commands\n\nThe CLI now configures Fumadocs on an existing app and adds features to it, beyond installing UI components. Supported on Next.js, React Router, TanStack Start and Waku.\n\n```bash\nnpx @fumadocs/cli init\nnpx @fumadocs/cli feature llms\n```\n\n`init` adds the docs pages in a dedicated route group (e.g. `app/(docs)`) with their own provider, layout and search route, so your existing setup stays untouched: it only registers the Fumadocs MDX plugin in your bundler config, imports the styles into your global CSS and adds `suppressHydrationWarning` to `<html>`. Pass `--i18n` to set up internationalization with locale-prefixed routes.\n\n`feature <id>` installs the components and routes of a feature and wires them into your app: `ai` (Ask AI dialog), `llms` (`llms.txt`, `llms-full.txt` and per-page Markdown, with the `/docs/*.md` rewrite on Next.js), `mcp`, `webmcp` (experimental), `og`, `search` (Orama Cloud, Algolia, Typesense, Mixedbread), `feedback`, `epub` and `lint`. Features follow your setup: the `baseUrl` of your docs, `src/` directory, i18n, static export and SPA modes, Fumadocs MDX with the macro API or `source.config.ts`. Route URLs are read from the constants of `lib/shared.ts` (`docsRoute`, `docsContentRoute`, `docsImageRoute`), and route features add URL helpers like `getPageMarkdownUrl(page)` to `lib/source.ts`.\n\nEvery command takes `-y` to skip prompts and `--no-install` to only write dependencies to `package.json`.\n\nComponents are installed at the directories of your shadcn `components.json` by default, so the same component isn't duplicated in two places. `export epub` no longer scaffolds the export route, run `feature epub` instead.\n"
-    filename: 2026-09-08-cli-features.md
+  - content: "---\npackages:\n  npm:fumadocs-ui:\n    type: patch\n  npm:@fumadocs/base-ui:\n    type: patch\n---\n\n## Fix language switching with hidden locale prefixes\n\nRoot Provider's `i18n` option now accepts `defaultLanguage` and `hideLocale`. The language switcher uses these options instead of guessing from the current URL, so switching from `/zh/docs` to the default language `en` with `hideLocale: 'default-locale'` navigates to `/docs`.\n\n`i18nProvider()` and `defineI18nUI()` pass these options from your i18n config automatically.\n"
+    filename: 2026-09-13-i18n-language-switch.md
     v: 0.0.0
-  - content: "---\npackages:\n  npm:@fumadocs/cli:\n    type: patch\n  npm:create-fumadocs-app:\n    type: patch\n  npm:fumadocs-preview:\n    type: patch\n---\n\n## CLIs on `cac`\n\nThe CLIs are now built on [cac](https://github.com/cacjs/cac).\n"
-    filename: 2026-09-09-cli-cac.md
-    v: 0.0.0
-  - content: "---\npackages:\n  npm:fumadocs-core:\n    type: patch\n---\n\n## `getPageByUrl()` on the loader\n\nLook up a page by its URL:\n\n```ts\nsource.getPageByUrl('/docs/getting-started');\nsource.getPageByUrl('/cn/docs/getting-started', 'cn');\n```\n\nWithout the `language` argument every language is looked up, unlike `getPageByHref()` which resolves the default language only.\n"
-    filename: 2026-09-09-get-page-by-url.md
-    v: 0.0.0
-  - content: "---\npackages:\n  npm:fumadocs-core:\n    type: patch\n---\n\n## `llms()` renders pages\n\n`llms()` used to build the `llms.txt` index only, turning a page into Markdown was left to your own `getLLMText()`. Pass `renderPage` and it covers both:\n\n```ts\nimport { llms } from 'fumadocs-core/source';\n\nexport const docsLlms = llms(source, {\n  renderPage: async (page) => `# ${page.data.title} (${page.url})\n\n${await page.data.getText('processed')}`,\n});\n```\n\n- `page(page)` renders one page, for the per-page Markdown route.\n- `full(lang?)` renders every page and joins them, for `llms-full.txt`.\n\n```ts\n// app/llms-full.txt/route.ts\nexport const GET = async () => new Response(await docsLlms.full());\n```\n\nBoth methods exist only when `renderPage` is given, in types and at runtime. Fumadocs cannot know how your content source exposes Markdown: `page.data.getText('processed')` on Fumadocs MDX, `page.data.content` on `@fumadocs/local-md`.\n"
-    filename: 2026-09-09-llms-render-page.md
-    v: 0.0.0
-  - content: "---\npackages:\n  npm:fumadocs-core:\n    type: patch\n---\n\n## `fumadocs-core/mcp`: docs tools for your MCP server\n\nRegister the docs tools on a server you own, rather than on a handler Fumadocs builds for you:\n\n```ts\nimport { createMcpHandler, McpServer } from '@modelcontextprotocol/server';\nimport { registerSearchTool, registerSourceTools } from 'fumadocs-core/mcp';\nimport { createFromSource } from 'fumadocs-core/search/server';\nimport { docsLlms, source } from '@/lib/source';\n\nconst handler = createMcpHandler(() => {\n  const mcp = new McpServer({ name: 'docs', version: '1.0.0' });\n\n  registerSourceTools(mcp, source, docsLlms);\n  registerSearchTool(mcp, createFromSource(source));\n\n  return mcp;\n});\n\nexport const GET = (req: Request) => handler.fetch(req);\nexport const POST = (req: Request) => handler.fetch(req);\nexport const DELETE = (req: Request) => handler.fetch(req);\n```\n\n| Function                                 | Tools                    |\n| ---------------------------------------- | ------------------------ |\n| `registerSourceTools(mcp, source, llms)` | `list_pages`, `get_page` |\n| `registerSearchTool(mcp, server)`        | `search`                 |\n\nEach takes the integration it reads from, so you can add your own tools next to them, point the search tool at another server, or register only one of the two.\n\n`@modelcontextprotocol/server` is an optional peer dependency, and `registerSourceTools` needs a `llms()` output with `renderPage`.\n"
-    filename: 2026-09-09-mcp-tools.md
-    v: 0.0.0
-  - content: "---\npackages:\n  npm:fumadocs-core:\n    type: patch\n---\n\n## `toDocuments()` for Algolia and Orama Cloud\n\nBuild the search indexes of every page, instead of mapping pages by hand:\n\n```ts\n// app/static.json/route.ts\nimport { toDocuments } from 'fumadocs-core/search/algolia';\nimport { source } from '@/lib/source';\n\nexport const GET = async () => Response.json(await toDocuments(source));\n```\n\nIt awaits `structuredData` when your collection is async (React Router and TanStack Start), a step that was easy to miss. Pass `tag` to filter results by a value of your choice:\n\n```ts\ntoDocuments(source, { tag: (page) => page.slugs[0] });\n```\n\nExported from `fumadocs-core/search/algolia` and `fumadocs-core/search/orama-cloud`.\n"
-    filename: 2026-09-09-search-to-documents.md
-    v: 0.0.0
-  - content: "---\npackages:\n  npm:fumadocs-core:\n    type: patch\n---\n\n## Marked as side-effect free\n\n`fumadocs-core` now declares `\"sideEffects\": false`. No module in the package imports for side effects or ships CSS, so bundlers that rely on the hint (webpack in particular) can drop unused modules instead of keeping them alive:\n\n```ts\nimport { createGetUrl } from 'fumadocs-core/source';\n```\n"
-    filename: 2026-09-10-core-side-effects.md
-    v: 0.0.0
-  - content: "---\npackages:\n  npm:create-fumadocs-app:\n    type: minor\n  npm:create-fumadocs-versions:\n    type: patch\n---\n\n## Search providers and shared CLI features\n\n`--search` accepts `algolia`, `typesense` and `mixedbread` in addition to `orama` and `orama-cloud`.\n\nSearch, linter, OG image and Ask AI options are now applied by the features of `@fumadocs/cli`, the same code that configures them on an existing app, instead of template plugins. `create-fumadocs-versions` pins the versions of the new search dependencies.\n"
-    filename: 2026-09-08-create-app-features.md
-    v: 0.0.0
-  - content: "---\npackages:\n  npm:fumadocs-epub:\n    type: patch\n---\n\n## `createEpubExportAPI()`\n\nA route handler for the EPUB export, replacing the auth check and response headers you had to write yourself:\n\n```ts\n// app/export/epub/route.ts\nimport { createEpubExportAPI } from 'fumadocs-epub';\nimport { source } from '@/lib/source';\n\nexport const { GET } = createEpubExportAPI({\n  source,\n  title: 'Documentation',\n  author: 'Your Team',\n  secret: process.env.EXPORT_SECRET,\n});\n```\n\n`secret` is required: requests must send `Authorization: Bearer <secret>`, and the route answers `503` while the secret itself is unset, so a missing environment variable cannot leave the export open. It also takes `filename` (default `docs.epub`) and every option of `exportEpub()`, which stays available for public routes and scripts.\n"
-    filename: 2026-09-09-epub-export-api.md
-    v: 0.0.0
-  - content: "---\npackages:\n  npm:fumadocs-openapi:\n    type: patch\n---\n\n## `path` in operation renderers\n\n`renderOperationLayout` and `generateCodeSamples` now receive the operation's `path`, so custom layouts no longer need a React context to reach it:\n\n```tsx\nrenderOperationLayout: (slots, { path, method }) => (\n  <div>\n    {slots.header}\n    <EndpointPreview path={path} method={method} />\n    {slots.description}\n    {slots.apiPlayground}\n  </div>\n);\n```\n"
-    filename: 2026-09-10-openapi-operation-path.md
+  - content: "---\npackages:\n  npm:fumadocs-core:\n    type: patch\n---\n\n## Fix same-page anchors on Tanstack Start\n\nTanstack Router's `Link` takes a pathname in `to` and reads the hash from a separate `hash` prop, so a same-page anchor like `[link](#installation)` was rendered as a link to the current page with the hash dropped, clicking it did nothing. The Tanstack adapter now renders a native `<a>` for those hrefs:\n\n```mdx\nJump to [Installation](#installation).\n```\n"
+    filename: 2026-09-12-tanstack-hash-links.md
     v: 0.0.0
 core:packages:
   - id: npm:@fumadocs/api-docs
     updated: false
   - id: npm:@fumadocs/asyncapi
     updated: false
-  - id: npm:@fumadocs/base-ui
+  - changelogIds:
+      - 2026-09-13-i18n-language-switch.md
+    id: npm:@fumadocs/base-ui
     updated: true
   - id: npm:@fumadocs/basehub
     updated: false
-  - changelogIds:
-      - 2026-09-08-cli-features.md
-      - 2026-09-09-cli-cac.md
-    id: npm:@fumadocs/cli
-    updated: true
+  - id: npm:@fumadocs/cli
+    updated: false
   - id: npm:@fumadocs/content
     updated: false
   - id: npm:@fumadocs/content-collections
     updated: false
   - changelogIds:
-      - 2026-09-09-get-page-by-url.md
-      - 2026-09-09-llms-render-page.md
-      - 2026-09-09-mcp-tools.md
-      - 2026-09-09-search-to-documents.md
-      - 2026-09-10-core-side-effects.md
+      - 2026-09-12-tanstack-hash-links.md
     id: npm:fumadocs-core
     updated: true
-  - changelogIds:
-      - 2026-09-08-create-app-features.md
-      - 2026-09-09-cli-cac.md
-    id: npm:create-fumadocs-app
-    updated: true
-  - changelogIds:
-      - 2026-09-08-create-app-features.md
-    id: npm:create-fumadocs-versions
+  - id: npm:create-fumadocs-app
     updated: true
   - id: npm:fumadocs-docgen
     updated: false
-  - changelogIds:
-      - 2026-09-09-epub-export-api.md
-    id: npm:fumadocs-epub
+  - id: npm:create-fumadocs-versions
     updated: true
+  - id: npm:fumadocs-epub
+    updated: false
   - id: npm:@fumadocs/graphql
     updated: false
   - id: npm:@fumari/image-size
@@ -80,27 +44,25 @@ core:packages:
     updated: false
   - id: npm:@fumadocs/local-html
     updated: false
-  - id: npm:@fumadocs/local-md
-    updated: false
   - id: npm:fumadocs-mdx
     updated: false
   - id: npm:@fumadocs/mdx-remote
+    updated: false
+  - id: npm:@fumadocs/local-md
     updated: false
   - id: npm:@fumadocs/notion
     updated: false
   - id: npm:fumadocs-obsidian
     updated: false
-  - changelogIds:
-      - 2026-09-10-openapi-operation-path.md
-    id: npm:fumadocs-openapi
-    updated: true
-  - changelogIds:
-      - 2026-09-09-cli-cac.md
-    id: npm:fumadocs-preview
-    updated: true
   - id: npm:fumadocs-python
     updated: false
-  - id: npm:fumadocs-ui
+  - id: npm:fumadocs-preview
+    updated: false
+  - id: npm:fumadocs-openapi
+    updated: false
+  - changelogIds:
+      - 2026-09-13-i18n-language-switch.md
+    id: npm:fumadocs-ui
     updated: true
   - id: npm:@fumadocs/sanity
     updated: false
@@ -130,22 +92,22 @@ npm:packages:
   - id: npm:@fumadocs/content-collections
   - id: npm:fumadocs-core
   - id: npm:create-fumadocs-app
-  - id: npm:create-fumadocs-versions
   - id: npm:fumadocs-docgen
+  - id: npm:create-fumadocs-versions
   - id: npm:fumadocs-epub
   - id: npm:@fumadocs/graphql
   - id: npm:@fumari/image-size
   - id: npm:@fumadocs/language
   - id: npm:@fumadocs/local-content
   - id: npm:@fumadocs/local-html
-  - id: npm:@fumadocs/local-md
   - id: npm:fumadocs-mdx
   - id: npm:@fumadocs/mdx-remote
+  - id: npm:@fumadocs/local-md
   - id: npm:@fumadocs/notion
   - id: npm:fumadocs-obsidian
-  - id: npm:fumadocs-openapi
-  - id: npm:fumadocs-preview
   - id: npm:fumadocs-python
+  - id: npm:fumadocs-preview
+  - id: npm:fumadocs-openapi
   - id: npm:fumadocs-ui
   - id: npm:@fumadocs/sanity
   - id: npm:@fumadocs/satteri
@@ -156,34 +118,34 @@ npm:packages:
   - id: npm:fumadocs-twoslash
   - id: npm:fumadocs-typescript
   - id: npm:@fumadocs/vite
-  - id: npm:docs
-  - id: npm:example-astro
   - id: npm:example-asyncapi
-  - id: npm:example-base-ui
   - id: npm:example-content-collections
+  - id: npm:example-astro
+  - id: npm:docs
+  - id: npm:example-base-ui
   - id: npm:example-graphql
   - id: npm:example-i18n
   - id: npm:example-marble-cms
   - id: npm:example-next
   - id: npm:example-next-local-html
-  - id: npm:example-next-local-md
   - id: npm:example-next-min
+  - id: npm:example-next-local-md
   - id: npm:example-next-shadcn
   - id: npm:example-next-static
   - id: npm:example-obsidian
   - id: npm:example-openapi
   - id: npm:example-python
   - id: npm:example-react-router
-  - id: npm:example-react-router-i18n
   - id: npm:example-react-router-min
-  - id: npm:example-react-router-rsc
+  - id: npm:example-react-router-i18n
   - id: npm:example-react-router-spa
+  - id: npm:example-react-router-rsc
   - id: npm:example-tanstack-start
   - id: npm:example-tanstack-start-i18n
-  - id: npm:example-tanstack-start-local-md
   - id: npm:example-tanstack-start-min
-  - id: npm:example-tanstack-start-openapi
+  - id: npm:example-tanstack-start-local-md
   - id: npm:example-tanstack-start-spa
-  - id: npm:example-waku
+  - id: npm:example-tanstack-start-openapi
   - id: npm:example-tanstack-start-story
+  - id: npm:example-waku
   - id: npm:example-waku-i18n
