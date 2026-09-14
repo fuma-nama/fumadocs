@@ -10,6 +10,7 @@
     "dist"
   ],
   "type": "module",
+  "sideEffects": false,
   "exports": {
     ".": "./dist/index.js",
     "./lib/utils": "./dist/lib/utils.js",
