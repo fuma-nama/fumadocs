@@ -20,7 +20,7 @@ import {
   useCodeUsages,
   useExampleRequests,
   useOperation,
-} from './context';
+} from '@/headless';
 import type { OperationLegacyOptions } from '.';
 import type { CreateOpenAPIPageOptions } from '..';
 

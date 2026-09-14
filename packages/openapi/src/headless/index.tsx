@@ -13,7 +13,7 @@ import {
   type OpenAPIComponents,
   type OpenAPIContextType,
   ServerProvider,
-} from '@/ui/contexts/api';
+} from './runtime';
 
 export {
   useOpenAPI,
@@ -25,7 +25,7 @@ export {
   type OpenAPIRuntime,
   type GenerateTypeScriptDefinitionsContext,
   type SelectedServer,
-} from '@/ui/contexts/api';
+} from './runtime';
 export { useAuth } from '@/playground/auth';
 export { useStorageKey } from '@/utils/storage-key';
 export {
@@ -47,7 +47,7 @@ export {
   type ResponseTab,
   type ResponseExample,
   type RawRequestData,
-} from '@/ui/operation/context';
+} from './operation';
 
 export interface OpenAPIProviderProps extends Partial<
   Pick<

@@ -10,7 +10,14 @@ import type {
 } from '@/types';
 import { UsageTabs } from '@/ui/operation/usage-tabs';
 import { Badge, MethodLabel } from '@/ui/components/method-label';
-import { OperationProvider, type OperationResponse, useOperation } from './context';
+import {
+  OperationProvider,
+  type OperationResponse,
+  useComponents,
+  useOpenAPI,
+  useOperation,
+  useTypeScriptDefinitions,
+} from '@/headless';
 import { useTranslations } from '@fuma-translate/react';
 import {
   AccordionContent,
@@ -26,7 +33,6 @@ import { Callout } from 'fumadocs-ui/components/callout';
 import { AnchorSection } from '@fumadocs/api-docs/auto-anchor/client';
 import { Heading } from '@/ui/components/heading';
 import { Markdown } from '../components/markdown';
-import { useComponents, useOpenAPI, useTypeScriptDefinitions } from '../contexts/api';
 import { useCopyButton } from 'fumadocs-ui/utils/use-copy-button';
 import { buttonVariants } from 'fumadocs-ui/components/ui/button';
 import { Check, Copy } from 'lucide-react';

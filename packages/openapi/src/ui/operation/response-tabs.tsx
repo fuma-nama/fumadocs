@@ -11,7 +11,7 @@ import type { ReactNode } from 'react';
 import { useTranslations } from '@fuma-translate/react';
 import { Markdown } from '../components/markdown';
 import { ClientCodeBlock } from '../components/codeblock';
-import { type ResponseExample, type ResponseTab, useResponseExamples } from './context';
+import { type ResponseExample, type ResponseTab, useResponseExamples } from '@/headless';
 import type { OperationLegacyOptions } from '.';
 
 export function ResponseTabs({ legacy }: { legacy?: OperationLegacyOptions }) {

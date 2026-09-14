@@ -15,7 +15,7 @@ import {
   useOperation,
   useResponseExamples,
 } from '@/headless';
-import { useOperationContext } from '@/ui/base';
+import { useOperationContext } from '@/ui/operation/context';
 import type { Document, HttpMethods, OperationObject } from '@/types';
 
 const museum = fileURLToPath(new URL('./fixtures/museum.yaml', import.meta.url));

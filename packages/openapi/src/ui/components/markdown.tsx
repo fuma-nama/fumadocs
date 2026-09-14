@@ -1,5 +1,5 @@
 'use client';
-import { useComponents } from '../contexts/api';
+import { useComponents } from '@/headless';
 
 export function Markdown({ md }: { md: string }) {
   const { Markdown: Comp } = useComponents();

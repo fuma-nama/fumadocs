@@ -20,7 +20,7 @@
   ],
   "exports": {
     ".": "./dist/index.js",
-    "./headless": "./dist/headless.js",
+    "./headless": "./dist/headless/index.js",
     "./i18n": "./dist/i18n.js",
     "./playground/client": "./dist/playground/client.js",
     "./requests/generators": "./dist/requests/generators/index.js",

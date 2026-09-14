@@ -1,5 +1,5 @@
 'use client';
-import { useServer } from '@/ui/contexts/api';
+import { useServer } from '@/headless';
 import {
   Select,
   SelectContent,

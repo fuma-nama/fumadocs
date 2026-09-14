@@ -1,4 +1,4 @@
-import { useOpenAPI } from '../ui/contexts/api';
+import { useOpenAPI } from '@/headless/runtime';
 import { useMemo } from 'react';
 
 type KeyName = 'server-url' | `auth-${string}`;

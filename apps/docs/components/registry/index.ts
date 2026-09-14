@@ -10,8 +10,9 @@ const baseDir = path.join(import.meta.dirname, '../../');
 
 // internal modules of `fumadocs-openapi` mapped to their public exports
 const openapiExports = new Map([
-  ['ui/contexts/api.tsx', 'fumadocs-openapi/headless'],
-  ['ui/operation/context.tsx', 'fumadocs-openapi/headless'],
+  ['headless/index.tsx', 'fumadocs-openapi/headless'],
+  ['headless/runtime.tsx', 'fumadocs-openapi/headless'],
+  ['headless/operation.tsx', 'fumadocs-openapi/headless'],
   ['playground/auth.tsx', 'fumadocs-openapi/headless'],
   ['utils/storage-key.ts', 'fumadocs-openapi/headless'],
   ['utils/get-example-requests.ts', 'fumadocs-openapi/headless'],
@@ -84,7 +85,7 @@ export const compileOptions: Partial<CompileOptions> = {
       }
 
       file = path.relative(apiDocs.registry.dir, ref.file);
-      if (file === 'components/schema/context.tsx') {
+      if (file === 'headless.tsx') {
         return {
           dep: '@fumadocs/api-docs',
           type: 'dependency',

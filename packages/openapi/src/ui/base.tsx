@@ -7,7 +7,6 @@ import {
   type ComponentProps,
   type ReactElement,
   useMemo,
-  useRef,
   type FC,
   type ReactNode,
 } from 'react';
@@ -25,22 +24,16 @@ import {
   type OperationLegacyOptions,
   type OperationPlaygroundOptions,
 } from '@/ui/operation';
-import { useOperationState } from '@/ui/operation/context';
-import type { RawRequestData, RequestData } from '@/requests/types';
-import type { ExampleRequestItem } from '@/utils/get-example-requests';
-import {
-  type OpenAPIComponents,
-  RenderContextProvider,
-  ServerProvider,
-  useRenderContext,
-} from './contexts/api';
+import { useOperationContext } from './operation/context';
+import { RenderContextProvider, useRenderContext } from './contexts/api';
+import { ServerProvider } from '@/headless/runtime';
 import { ClientCodeBlock } from './components/codeblock';
 import { Markdown } from './components/markdown';
 import { dereferenceBundledDocument } from '@/utils/document/dereference';
 import { AuthProvider } from '@/playground/auth';
 import { registerDefault } from '@/requests/generators/all';
 import { createCodeUsageGeneratorRegistry } from '@/requests/generators';
-import { defaultTypeScriptDefinitions } from '@/headless';
+import { defaultTypeScriptDefinitions, type OpenAPIComponents } from '@/headless';
 import type { ShikiFactory } from 'fumadocs-core/highlight/shiki';
 import type { GeneratedPageProps } from '@/utils/pages/builder';
 import { Schema, type SchemaUIOptions } from '@fumadocs/api-docs/components/schema';
@@ -293,44 +286,6 @@ function MarkdownPre(props: ComponentProps<'pre'>) {
       ?.slice('language-'.length) ?? 'text';
 
   return <ClientCodeBlock lang={lang} code={content.trimEnd()} />;
-}
-
-type ExampleUpdateListener = (data: RawRequestData, encoded: RequestData) => void;
-
-/** @deprecated use `useOperation()`, `useExampleRequests()` and `useExampleRequest()` from `fumadocs-openapi/headless` */
-export function useOperationContext() {
-  const state = useOperationState();
-  const legacyListeners = useRef(new WeakMap<ExampleUpdateListener, () => void>());
-
-  return useMemo(() => {
-    const { path, security, ...info } = state.info;
-    const active = () => state.examples.find((item) => item.id === state.example)!;
-
-    return {
-      ...info,
-      route: path,
-      securities: security,
-      codeUsages: state.codeUsages,
-      examples: state.examples as ExampleRequestItem[],
-      example: state.example,
-      setExample: state.setExample,
-      setExampleData: state.update,
-      addListener(listener: ExampleUpdateListener) {
-        const notify = () => {
-          const item = active();
-          listener(item.data, item.encoded);
-        };
-        notify();
-        legacyListeners.current.set(listener, notify);
-        state.subscribe(notify);
-      },
-      removeListener(listener: ExampleUpdateListener) {
-        const notify = legacyListeners.current.get(listener);
-        // the set-based store makes re-subscribing the same function a no-op
-        if (notify) state.subscribe(notify)();
-      },
-    };
-  }, [state]);
 }
 
 function LegacyUsageTabs() {

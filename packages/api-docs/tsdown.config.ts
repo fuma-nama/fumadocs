@@ -8,7 +8,8 @@ export default defineConfig({
   format: 'esm',
   target: 'es2023',
   entry: [
-    './src/{codegen,i18n,headless}.ts',
+    './src/{codegen,i18n}.ts',
+    './src/headless.tsx',
     './src/{components,auto-anchor,schema}/**/*',
     './src/utils/{id-to-title,url}.ts',
   ],
@@ -29,7 +30,6 @@ export default defineConfig({
   },
   exports: {
     enabled: true,
-    exclude: ['components/schema/context'],
     customExports(v) {
       v['./css/*'] = './css/*';
       return v;

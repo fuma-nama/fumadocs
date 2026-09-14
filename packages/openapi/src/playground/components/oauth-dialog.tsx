@@ -21,7 +21,7 @@ import {
 import type { OAuth2SecurityScheme } from '@/types';
 import { useTranslations } from '@fuma-translate/react';
 import { useAuth } from '../auth';
-import { useOpenAPI } from '@/ui/contexts/api';
+import { useOpenAPI } from '@/headless';
 
 type FlowType = keyof NonNullable<OAuth2SecurityScheme['flows']>;
 

@@ -15,23 +15,20 @@ import type { ShikiFactory } from 'fumadocs-core/highlight/shiki';
 import type { CodeToHastOptionsCommon, CodeOptionsThemes, BundledTheme } from 'shiki';
 import type { ExampleRequestItem } from '../utils/get-example-requests';
 import type { OperationProps } from './operation';
-import {
-  type GenerateTypeScriptDefinitionsContext as BaseGenerateTypeScriptDefinitionsContext,
-  type OpenAPIComponents,
-  useRenderContext,
-  useServer,
-} from './contexts/api';
-import type { ResponseTab } from './operation/context';
+import type {
+  GenerateTypeScriptDefinitionsContext as BaseGenerateTypeScriptDefinitionsContext,
+  OpenAPIComponents,
+  ResponseTab,
+} from '@/headless';
 import type { PlaygroundClientOptions } from '@/playground/client';
 import type { GeneratedPageProps, WebhookItem, OperationItem } from '@/utils/pages/builder';
 import type { ParsedSchema } from '@/utils/schema';
 import type { SchemaUIOptions } from '@fumadocs/api-docs/components/schema';
-import { createOpenAPIPageBase, useOperationContext } from './base';
+import { createOpenAPIPageBase } from './base';
 
 export type { OperationProps, OperationPlaygroundOptions } from './operation';
-export { useRenderContext, useOperationContext };
-/** @deprecated use `useServer()` from `fumadocs-openapi/headless` */
-export const useServerContext = useServer;
+export { useRenderContext, useServerContext } from './contexts/api';
+export { useOperationContext } from './operation/context';
 
 export interface GenerateTypeScriptDefinitionsContext extends BaseGenerateTypeScriptDefinitionsContext {
   /** @deprecated use `document` */

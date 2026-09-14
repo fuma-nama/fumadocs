@@ -2,7 +2,7 @@
 import { useMemo } from 'react';
 import { useTranslations } from '@fuma-translate/react';
 import { SchemaUI, type SchemaUIProps } from '@/components/schema/client';
-import { type GenerateSchemaUIOptions, generateSchemaUI } from '@/components/schema/context';
+import { type GenerateSchemaUIOptions, generateSchemaUI } from '@/headless';
 
 export {
   generateSchemaUI,
@@ -11,7 +11,7 @@ export {
   type SchemaData,
   type SchemaDataObjectProperty,
   type SchemaUIGeneratedData,
-} from '@/components/schema/context';
+} from '@/headless';
 
 export interface SchemaUIOptions extends Omit<GenerateSchemaUIOptions, 'translations'> {
   client: Omit<SchemaUIProps, 'generated'>;

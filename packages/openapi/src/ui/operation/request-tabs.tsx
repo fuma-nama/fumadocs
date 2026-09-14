@@ -12,7 +12,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from 'fumadocs-ui/components
 import { MethodLabel } from '@/ui/components/method-label';
 import { Markdown } from '../components/markdown';
 import { ClientCodeBlock } from '../components/codeblock';
-import { type ExampleRequest, useExampleRequests, useOperation } from './context';
+import { type ExampleRequest, useExampleRequests, useOperation } from '@/headless';
 import type { OperationLegacyOptions } from '.';
 
 export function RequestTabs({ legacy }: { legacy?: OperationLegacyOptions }) {

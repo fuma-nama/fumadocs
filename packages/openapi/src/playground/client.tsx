@@ -11,7 +11,7 @@ import {
   type ComponentProps,
   useRef,
 } from 'react';
-import { useOpenAPI, useServer } from '@/ui/contexts/api';
+import { useExampleRequest, useExampleRequests, useOpenAPI, useServer } from '@/headless';
 import type { BrowserFetcherOptions } from '@/playground/fetcher';
 import { DefaultResultDisplay, type ResultDisplayProps } from './components/result-display';
 import { pathnameFromRequest } from '@/requests/generators';
@@ -60,7 +60,6 @@ import {
 } from '@fumadocs/api-docs/components/playground/inputs';
 import type { HttpMethods, OperationObject, ParameterObject, PathItemObject } from '@/types';
 import { useTranslations } from '@fuma-translate/react';
-import { useExampleRequest, useExampleRequests } from '@/ui/operation/context';
 import { OAuthDialog, OAuthDialogContent, OAuthDialogTrigger } from './components/oauth-dialog';
 import { dereferenceShallow } from '@fumadocs/api-docs/schema/dereference';
 import { useAuth } from './auth';
