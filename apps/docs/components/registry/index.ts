@@ -10,8 +10,13 @@ const baseDir = path.join(import.meta.dirname, '../../');
 
 // internal modules of `fumadocs-openapi` mapped to their public exports
 const openapiExports = new Map([
-  ['ui/contexts/api.tsx', 'fumadocs-openapi/ui'],
-  ['ui/operation/context.tsx', 'fumadocs-openapi/ui'],
+  ['ui/contexts/api.tsx', 'fumadocs-openapi/headless'],
+  ['ui/operation/context.tsx', 'fumadocs-openapi/headless'],
+  ['playground/auth.tsx', 'fumadocs-openapi/headless'],
+  ['utils/storage-key.ts', 'fumadocs-openapi/headless'],
+  ['utils/get-example-requests.ts', 'fumadocs-openapi/headless'],
+  ['ui/index.tsx', 'fumadocs-openapi/ui'],
+  ['playground/client.tsx', 'fumadocs-openapi/playground/client'],
   ['requests/generators/index.ts', 'fumadocs-openapi/requests/generators'],
   // types are re-exported from the package root
   ['requests/media/adapter.ts', 'fumadocs-openapi'],
@@ -79,8 +84,17 @@ export const compileOptions: Partial<CompileOptions> = {
       }
 
       file = path.relative(apiDocs.registry.dir, ref.file);
-      // `components/schema/*` files are vendored, keep them as file references
-      if (!file.startsWith('..') && !file.startsWith('components/schema/')) {
+      if (file === 'components/schema/context.tsx') {
+        return {
+          dep: '@fumadocs/api-docs',
+          type: 'dependency',
+          specifier: '@fumadocs/api-docs/headless',
+        };
+      }
+      // the Schema UI is vendored
+      const vendored =
+        file === 'components/schema/index.tsx' || file === 'components/schema/client.tsx';
+      if (!file.startsWith('..') && !vendored) {
         if (file === 'utils/cn.ts' || file === 'utils/merge-refs.ts') {
           return {
             type: 'file',

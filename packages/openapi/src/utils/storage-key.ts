@@ -1,10 +1,10 @@
-import { useRenderContext } from '../ui/contexts/api';
+import { useOpenAPI } from '../ui/contexts/api';
 import { useMemo } from 'react';
 
 type KeyName = 'server-url' | `auth-${string}`;
 
 export function useStorageKey() {
-  const { storageKeyPrefix } = useRenderContext();
+  const { storageKeyPrefix } = useOpenAPI();
 
   return useMemo(
     () => ({

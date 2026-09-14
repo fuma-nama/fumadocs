@@ -1,10 +1,4 @@
 'use client';
-import type { HttpMethods, OperationObject, PathItemObject } from '@/types';
-import {
-  createCodeUsageGeneratorRegistry,
-  type InlineCodeUsageGenerator,
-  pathnameFromRequest,
-} from '@/requests/generators';
 import {
   CodeBlockTab,
   CodeBlockTabs,
@@ -12,7 +6,6 @@ import {
   CodeBlockTabsTrigger,
 } from 'fumadocs-ui/components/codeblock';
 import { ResponseTabs } from './response-tabs';
-import { useRenderContext, useServerContext } from '@/ui/contexts/api';
 import {
   Select,
   SelectTrigger,
@@ -20,25 +13,22 @@ import {
   SelectContent,
   SelectItem,
 } from '@fumadocs/api-docs/components/select';
-import { useState, useEffect, useMemo } from 'react';
 import { ClientCodeBlock } from '@/ui/components/codeblock';
-import { type ExampleUpdateListener, useOperationContext } from './context';
-import type { ExampleRequestItem } from '@/utils/get-example-requests';
-import { joinURL, resolveServerUrl } from '@fumadocs/api-docs/utils/url';
+import {
+  type ExampleRequest,
+  useCodeUsage,
+  useCodeUsages,
+  useExampleRequests,
+  useOperation,
+} from './context';
+import type { OperationLegacyOptions } from '.';
+import type { CreateOpenAPIPageOptions } from '..';
 
-export function UsageTabs({
-  path,
-  method,
-  operation,
-  pathItem,
-}: {
-  path: string;
-  method: HttpMethods;
-  operation: OperationObject;
-  pathItem: PathItemObject;
-}) {
-  const ctx = useRenderContext();
-  let { renderAPIExampleUsageTabs, renderAPIExampleLayout } = ctx.content ?? {};
+export function UsageTabs({ legacy }: { legacy?: OperationLegacyOptions }) {
+  const { operation } = useOperation();
+  const codeUsages = useCodeUsages();
+  const content: NonNullable<CreateOpenAPIPageOptions['content']> = legacy?.content ?? {};
+  let { renderAPIExampleLayout } = content;
 
   renderAPIExampleLayout ??= (slots) => {
     return (
@@ -50,65 +40,43 @@ export function UsageTabs({
     );
   };
 
-  renderAPIExampleUsageTabs ??= (registry) => {
-    const map = Array.from(registry.map().entries());
-    if (map.length === 0) return null;
-
-    return (
-      <CodeBlockTabs groupId="fumadocs_openapi_requests" defaultValue={map[0][0]}>
+  let usageTabs;
+  if (legacy?.UsageTabs) {
+    usageTabs = <legacy.UsageTabs />;
+  } else if (codeUsages.length > 0) {
+    usageTabs = (
+      <CodeBlockTabs groupId="fumadocs_openapi_requests" defaultValue={codeUsages[0].id}>
         <CodeBlockTabsList>
-          {map.map(([id, item]) => (
-            <CodeBlockTabsTrigger key={id} value={id}>
+          {codeUsages.map((item) => (
+            <CodeBlockTabsTrigger key={item.id} value={item.id}>
               {item.label ?? item.lang}
             </CodeBlockTabsTrigger>
           ))}
         </CodeBlockTabsList>
-        {map.map(([id, item]) => (
-          <CodeBlockTab key={id} value={id}>
-            <UsageTab id={id} lang={item.lang} />
+        {codeUsages.map((item) => (
+          <CodeBlockTab key={item.id} value={item.id}>
+            <UsageTab id={item.id} lang={item.lang} />
           </CodeBlockTab>
         ))}
       </CodeBlockTabs>
     );
-  };
-
-  const registry = useMemo(() => {
-    const registry = createCodeUsageGeneratorRegistry(ctx.codeUsages);
-
-    if (ctx.generateCodeSamples) {
-      for (const gen of ctx.generateCodeSamples({ path, operation, method, pathItem })) {
-        registry.addInline(gen);
-      }
-    }
-
-    if (operation['x-codeSamples']) {
-      for (const sample of operation['x-codeSamples']) {
-        registry.addInline(sample as InlineCodeUsageGenerator);
-      }
-    }
-
-    return registry;
-  }, [ctx, path, operation, method, pathItem]);
+  }
 
   return renderAPIExampleLayout(
     {
-      selector: operation['x-exclusiveCodeSample'] ? null : <UsageTabsSelector />,
-      usageTabs: renderAPIExampleUsageTabs(registry, ctx),
-      responseTabs: <ResponseTabs operation={operation} />,
+      selector: operation['x-exclusiveCodeSample'] ? null : <UsageTabsSelector legacy={legacy} />,
+      usageTabs,
+      responseTabs: <ResponseTabs legacy={legacy} />,
     },
-    ctx,
+    legacy!.ctx,
   );
 }
 
-function UsageTabsSelector() {
-  const { example: key, setExample: setKey, examples } = useOperationContext();
-  const { APIExampleSelector: Override } = useRenderContext().operation ?? {};
+function UsageTabsSelector({ legacy }: { legacy?: OperationLegacyOptions }) {
+  const { items, selected, select } = useExampleRequests();
+  if (legacy?.ExampleSelector) return <legacy.ExampleSelector />;
 
-  if (Override) {
-    return <Override items={examples} value={key} onValueChange={setKey} />;
-  }
-
-  function renderItem(item: ExampleRequestItem) {
+  function renderItem(item: ExampleRequest) {
     return (
       <div>
         <p className="font-medium text-sm">{item.name}</p>
@@ -117,15 +85,15 @@ function UsageTabsSelector() {
     );
   }
 
-  if (examples.length === 1) return null;
-  const items = examples.map((item) => ({ value: item.id, label: renderItem(item) }));
+  if (items.length === 1) return null;
+  const options = items.map((item) => ({ value: item.id, label: renderItem(item) }));
   return (
-    <Select items={items} value={key} onValueChange={(v) => v !== null && setKey(v)}>
+    <Select items={options} value={selected} onValueChange={(v) => v !== null && select(v)}>
       <SelectTrigger className="not-prose mb-2">
         <SelectValue />
       </SelectTrigger>
       <SelectContent>
-        {items.map((item) => (
+        {options.map((item) => (
           <SelectItem key={item.value} value={item.value}>
             {item.label}
           </SelectItem>
@@ -136,50 +104,7 @@ function UsageTabsSelector() {
 }
 
 function UsageTab({ id, lang }: { id: string; lang: string }) {
-  const { mediaAdapters, codeUsages } = useRenderContext();
-  const {
-    examples,
-    example: selectedExampleId,
-    route,
-    addListener,
-    removeListener,
-  } = useOperationContext();
-  const { server } = useServerContext();
-  const codegen = codeUsages.get(id);
-  const [mounted, setMounted] = useState(false);
-  const [data, setData] = useState(
-    () => examples.find((example) => example.id === selectedExampleId)?.encoded,
-  );
-
-  useEffect(() => {
-    const listener: ExampleUpdateListener = (_, encoded) => setData(encoded);
-
-    addListener(listener);
-    setMounted(true);
-    return () => {
-      removeListener(listener);
-    };
-  }, [addListener, removeListener]);
-
-  const code = useMemo(() => {
-    if (!data) return;
-    const url = joinURL(
-      server && mounted
-        ? new URL(resolveServerUrl(server.url, server.variables), window.location.origin).href
-        : 'https://example.com',
-      pathnameFromRequest(route, data),
-    );
-
-    if (!codegen) return;
-    return codegen.generate(
-      { ...data, url },
-      {
-        mediaAdapters,
-        custom: null,
-      },
-    );
-  }, [data, server, route, mounted, codegen, mediaAdapters]);
-
+  const code = useCodeUsage(id);
   if (!code) return null;
 
   return <ClientCodeBlock lang={lang} code={code} />;

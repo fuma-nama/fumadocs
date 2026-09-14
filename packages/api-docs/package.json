@@ -34,6 +34,7 @@
     "./components/select": "./dist/components/select.js",
     "./components/select-tab": "./dist/components/select-tab.js",
     "./components/spinner": "./dist/components/spinner.js",
+    "./headless": "./dist/headless.js",
     "./i18n": "./dist/i18n.js",
     "./schema": "./dist/schema/index.js",
     "./schema/bundle": "./dist/schema/bundle.js",

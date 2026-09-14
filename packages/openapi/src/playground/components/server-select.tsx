@@ -1,5 +1,5 @@
 'use client';
-import { useServerContext } from '@/ui/contexts/api';
+import { useServer } from '@/ui/contexts/api';
 import {
   Select,
   SelectContent,
@@ -25,7 +25,7 @@ import { useTranslations } from '@fuma-translate/react';
 import { resolveServerUrl } from '@fumadocs/api-docs/utils/url';
 
 export default function ServerSelect(props: ComponentProps<typeof DialogTrigger>) {
-  const { servers, server, setServer, setServerVariables } = useServerContext();
+  const { servers, server, setServer, setServerVariables } = useServer();
   const [open, setOpen] = useState(false);
   const [isMounted, setIsMounted] = useState(false);
   const t = useTranslations({ note: 'playground server select' });

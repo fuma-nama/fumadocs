@@ -1,15 +1,17 @@
 'use client';
 import {
+  createContext,
   type FC,
   Fragment,
   type ReactNode,
+  use,
   useEffect,
   useMemo,
   useState,
   type ComponentProps,
   useRef,
 } from 'react';
-import { useRenderContext, useServerContext } from '@/ui/contexts/api';
+import { useOpenAPI, useServer } from '@/ui/contexts/api';
 import type { BrowserFetcherOptions } from '@/playground/fetcher';
 import { DefaultResultDisplay, type ResultDisplayProps } from './components/result-display';
 import { pathnameFromRequest } from '@/requests/generators';
@@ -58,7 +60,7 @@ import {
 } from '@fumadocs/api-docs/components/playground/inputs';
 import type { HttpMethods, OperationObject, ParameterObject, PathItemObject } from '@/types';
 import { useTranslations } from '@fuma-translate/react';
-import { useOperationContext } from '@/ui/operation/context';
+import { useExampleRequest, useExampleRequests } from '@/ui/operation/context';
 import { OAuthDialog, OAuthDialogContent, OAuthDialogTrigger } from './components/oauth-dialog';
 import { dereferenceShallow } from '@fumadocs/api-docs/schema/dereference';
 import { useAuth } from './auth';
@@ -74,7 +76,8 @@ export interface FormValues extends Record<string, unknown> {
   body: unknown;
 }
 
-export interface PlaygroundClientProps extends Omit<ComponentProps<'form'>, 'method'> {
+export interface PlaygroundClientProps
+  extends Omit<ComponentProps<'form'>, 'method'>, PlaygroundClientOptions {
   route: string;
   method: HttpMethods;
   operation: OperationObject;
@@ -132,6 +135,12 @@ interface RequestBodyInfo {
   mediaType: string;
 }
 
+const OptionsContext = createContext<PlaygroundClientOptions>({});
+
+function usePlaygroundOptions() {
+  return use(OptionsContext);
+}
+
 export default function PlaygroundClient({
   route,
   method,
@@ -139,11 +148,26 @@ export default function PlaygroundClient({
   pathItem,
   writeOnly,
   readOnly,
+  transformAuthInputs,
+  fetchOptions,
+  components,
+  renderParameterField,
+  renderBodyField,
   ...rest
 }: PlaygroundClientProps) {
   const t = useTranslations({ note: 'playground' });
-  const ctx = useRenderContext();
-  const { dereferenced } = ctx.schema;
+  const { document, mediaAdapters, proxyUrl } = useOpenAPI();
+  const { dereferenced } = document;
+  const options = useMemo<PlaygroundClientOptions>(
+    () => ({
+      transformAuthInputs,
+      fetchOptions,
+      components,
+      renderParameterField,
+      renderBodyField,
+    }),
+    [transformAuthInputs, fetchOptions, components, renderParameterField, renderBodyField],
+  );
   const { parameters, body } = useMemo(() => {
     const parameters: ParameterObject[] = [];
     if (operation.parameters)
@@ -190,19 +214,11 @@ export default function PlaygroundClient({
     return result;
   }, [dereferenced, operation.security]);
 
-  const { example: exampleId, examples, setExampleData } = useOperationContext();
-  const { server } = useServerContext();
-  const {
-    mediaAdapters,
-    playground: {
-      components: {
-        ResultDisplay = DefaultResultDisplay,
-        CollapsiblePanel = DefaultCollapsiblePanel,
-      } = {},
-      fetchOptions,
-      renderBodyField,
-    } = {},
-  } = useRenderContext();
+  const { items: examples, selected: exampleId } = useExampleRequests();
+  const { update } = useExampleRequest();
+  const { server } = useServer();
+  const { ResultDisplay = DefaultResultDisplay, CollapsiblePanel = DefaultCollapsiblePanel } =
+    components ?? {};
 
   const defaultValues: FormValues = useMemo(() => {
     const requestData = examples.find((example) => example.id === exampleId)?.data;
@@ -225,12 +241,13 @@ export default function PlaygroundClient({
   const { inputs, requirementId, setRequirementId, mapInputs, initAuthInputs } = useAuthInputs(
     stf.dataEngine,
     securityEntries,
+    transformAuthInputs,
   );
 
   const testQuery = useQuery(async (input: FormValues) => {
     const fetcher = await import('./fetcher').then((mod) =>
       mod.createBrowserFetcher(mediaAdapters, {
-        proxyUrl: ctx.proxyUrl,
+        proxyUrl,
         ...fetchOptions,
       }),
     );
@@ -260,7 +277,7 @@ export default function PlaygroundClient({
       method,
       bodyMediaType: body?.mediaType,
     };
-    setExampleData(data, encodeRequestData(data, mediaAdapters, parameters));
+    update(data);
   }
 
   useListener({
@@ -295,53 +312,64 @@ export default function PlaygroundClient({
   }, [defaultValues, inputs]);
 
   return (
-    <StfProvider value={stf}>
-      <SchemaProvider docRoot={dereferenced as never} writeOnly={writeOnly} readOnly={readOnly}>
-        <form
-          {...rest}
-          className={cn(
-            'not-prose flex flex-col rounded-xl border shadow-md overflow-hidden bg-fd-card text-fd-card-foreground',
-            rest.className,
-          )}
-          onSubmit={(e) => {
-            testQuery.start(stf.dataEngine.getData() as FormValues);
-            e.preventDefault();
-          }}
-        >
-          <ServerSelect className="border-b" />
-          <div className="flex flex-row items-center gap-2 text-sm p-3 not-last:pb-0">
-            <MethodLabel>{method}</MethodLabel>
-            <Route route={route} className={cn('flex-1', operation.deprecated && 'line-through')} />
-            <button
-              type="submit"
-              className={cn(buttonVariants({ variant: 'default', size: 'sm' }), 'w-14 py-1.5')}
-              disabled={testQuery.isLoading}
-            >
-              {testQuery.isLoading ? <LoaderCircle className="size-4 animate-spin" /> : t('Send')}
-            </button>
-          </div>
-          {testQuery.data ? <ResultDisplay data={testQuery.data} reset={testQuery.reset} /> : null}
+    <OptionsContext value={options}>
+      <StfProvider value={stf}>
+        <SchemaProvider docRoot={dereferenced as never} writeOnly={writeOnly} readOnly={readOnly}>
+          <form
+            {...rest}
+            className={cn(
+              'not-prose flex flex-col rounded-xl border shadow-md overflow-hidden bg-fd-card text-fd-card-foreground',
+              rest.className,
+            )}
+            onSubmit={(e) => {
+              testQuery.start(stf.dataEngine.getData() as FormValues);
+              e.preventDefault();
+            }}
+          >
+            <ServerSelect className="border-b" />
+            <div className="flex flex-row items-center gap-2 text-sm p-3 not-last:pb-0">
+              <MethodLabel>{method}</MethodLabel>
+              <Route
+                route={route}
+                className={cn('flex-1', operation.deprecated && 'line-through')}
+              />
+              <button
+                type="submit"
+                className={cn(buttonVariants({ variant: 'default', size: 'sm' }), 'w-14 py-1.5')}
+                disabled={testQuery.isLoading}
+              >
+                {testQuery.isLoading ? <LoaderCircle className="size-4 animate-spin" /> : t('Send')}
+              </button>
+            </div>
+            {testQuery.data ? (
+              <ResultDisplay data={testQuery.data} reset={testQuery.reset} />
+            ) : null}
 
-          {securityEntries.length > 0 && (
-            <SecurityRequirements
-              securities={securityEntries}
-              securityId={requirementId}
-              setSecurityId={setRequirementId}
-            >
-              {inputs.map((input) => (
-                <Fragment key={stringifyFieldKey(input.fieldName)}>{input.children}</Fragment>
-              ))}
-            </SecurityRequirements>
-          )}
-          <ParametersForm parameters={parameters} />
-          {body && (
-            <CollapsiblePanel data-type="body" title={t('Body')}>
-              {renderBodyField ? renderBodyField('body', body) : <BodyInput field={body.schema} />}
-            </CollapsiblePanel>
-          )}
-        </form>
-      </SchemaProvider>
-    </StfProvider>
+            {securityEntries.length > 0 && (
+              <SecurityRequirements
+                securities={securityEntries}
+                securityId={requirementId}
+                setSecurityId={setRequirementId}
+              >
+                {inputs.map((input) => (
+                  <Fragment key={stringifyFieldKey(input.fieldName)}>{input.children}</Fragment>
+                ))}
+              </SecurityRequirements>
+            )}
+            <ParametersForm parameters={parameters} />
+            {body && (
+              <CollapsiblePanel data-type="body" title={t('Body')}>
+                {renderBodyField ? (
+                  renderBodyField('body', body)
+                ) : (
+                  <BodyInput field={body.schema} />
+                )}
+              </CollapsiblePanel>
+            )}
+          </form>
+        </SchemaProvider>
+      </StfProvider>
+    </OptionsContext>
   );
 }
 
@@ -360,10 +388,8 @@ function SecurityRequirements({
   const { isLoading, error } = useAuth();
   const defaultOpen = isLoading || error != null;
   const [open, setOpen] = useState(defaultOpen);
-  const {
-    schema: { dereferenced, resolve },
-    playground: { components: { CollapsiblePanel = DefaultCollapsiblePanel } = {} } = {},
-  } = useRenderContext();
+  const { dereferenced, resolve } = useOpenAPI().document;
+  const { CollapsiblePanel = DefaultCollapsiblePanel } = usePlaygroundOptions().components ?? {};
   const schemes = dereferenced.components?.securitySchemes;
 
   useOnChange(defaultOpen, () => {
@@ -470,7 +496,7 @@ const ParamTypes = ['path', 'header', 'cookie', 'query'] as const;
 type ParamType = (typeof ParamTypes)[number];
 
 function ParameterItem({ type, parameters }: { type: ParamType; parameters: ParameterObject[] }) {
-  const { renderParameterField } = useRenderContext().playground ?? {};
+  const { renderParameterField } = usePlaygroundOptions();
 
   return parameters.map((field) => {
     const fieldName: FieldKey = [type, field.name!];
@@ -497,8 +523,7 @@ function ParameterItem({ type, parameters }: { type: ParamType; parameters: Para
 }
 
 function ParametersForm({ parameters }: { parameters: ParameterObject[] }) {
-  const { components: { CollapsiblePanel = DefaultCollapsiblePanel } = {} } =
-    useRenderContext().playground ?? {};
+  const { CollapsiblePanel = DefaultCollapsiblePanel } = usePlaygroundOptions().components ?? {};
   const t = useTranslations({ note: 'playground' });
   const displayNames = {
     header: t('Header'),
@@ -581,14 +606,16 @@ export interface AuthField {
   mapOutput?: (values: unknown) => unknown;
 }
 
-function useAuthInputs(engine: DataEngine, requirements: SecurityEntry[][]) {
+function useAuthInputs(
+  engine: DataEngine,
+  requirements: SecurityEntry[][],
+  transformAuthInputs?: PlaygroundClientOptions['transformAuthInputs'],
+) {
   const authCtx = useAuth();
   const storageKeys = useStorageKey();
   const t = useTranslations({ note: 'playground' });
-  const ctx = useRenderContext();
-  const { resolve } = ctx.schema;
-  const schemes = ctx.schema.dereferenced.components?.securitySchemes;
-  const { transformAuthInputs } = ctx.playground ?? {};
+  const { dereferenced, resolve } = useOpenAPI().document;
+  const schemes = dereferenced.components?.securitySchemes;
 
   const [requirementId, setRequirementId] = useState(() => {
     if (!schemes || requirements.length === 0) return -1;

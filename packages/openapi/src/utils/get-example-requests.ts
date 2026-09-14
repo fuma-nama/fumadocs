@@ -5,9 +5,9 @@ import type {
   OperationObject,
   ParameterObject,
   PathItemObject,
-  RenderContext,
   RequestBodyObject,
 } from '@/types';
+import type { MediaAdapter } from '@/requests/media/adapter';
 import { getPreferredType, type ParsedSchema, pickExample } from '@/utils/schema';
 import { sample } from '@fumadocs/api-docs/schema/sample';
 import { dereferenceShallow } from '@fumadocs/api-docs/schema/dereference';
@@ -24,7 +24,7 @@ export interface ExampleRequestItem {
 export function getExampleRequests({
   path,
   method,
-  ctx,
+  mediaAdapters,
   operation,
   pathItem,
 }: {
@@ -32,7 +32,7 @@ export function getExampleRequests({
   pathItem: PathItemObject;
   method: HttpMethods;
   operation: OperationObject;
-  ctx: RenderContext;
+  mediaAdapters: Record<string, MediaAdapter>;
 }): ExampleRequestItem[] {
   const requestBody = dereferenceShallow(operation.requestBody);
   const media = requestBody?.content ? getPreferredType(requestBody.content) : null;
@@ -59,7 +59,7 @@ export function getExampleRequests({
         name: summary || key,
         description,
         data,
-        encoded: encodeRequestData(data, ctx.mediaAdapters, parameters),
+        encoded: encodeRequestData(data, mediaAdapters, parameters),
       });
     }
 
@@ -74,7 +74,7 @@ export function getExampleRequests({
       name: 'Default',
       description: typeof schema === 'object' ? schema.description : undefined,
       data,
-      encoded: encodeRequestData(data, ctx.mediaAdapters, parameters),
+      encoded: encodeRequestData(data, mediaAdapters, parameters),
     },
   ];
 }

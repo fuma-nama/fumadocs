@@ -8,60 +8,24 @@ import {
   AccordionTrigger,
 } from '@fumadocs/api-docs/components/accordion';
 import type { ReactNode } from 'react';
-import type { RawRequestData } from '@/requests/types';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from 'fumadocs-ui/components/tabs';
-import { pathnameFromRequest } from '@/requests/generators';
 import { MethodLabel } from '@/ui/components/method-label';
-import type { ExampleRequestItem } from '../../utils/get-example-requests';
 import { Markdown } from '../components/markdown';
 import { ClientCodeBlock } from '../components/codeblock';
-import { useRenderContext } from '../contexts/api';
-import { HttpMethods, OperationObject, PathItemObject } from '@/types';
+import { type ExampleRequest, useExampleRequests, useOperation } from './context';
+import type { OperationLegacyOptions } from '.';
 
-export interface RequestTabsRenderOptions {
-  route: string;
-  items: ExampleRequestItem[];
-  method: HttpMethods;
-  pathItem: PathItemObject;
-  operation: OperationObject;
-}
-
-export function RequestTabs({
-  path,
-  operation,
-  method,
-  pathItem,
-  examples,
-}: {
-  path: string;
-  examples: ExampleRequestItem[];
-  method: HttpMethods;
-  pathItem: PathItemObject;
-  operation: OperationObject;
-}) {
-  const ctx = useRenderContext();
+export function RequestTabs({ legacy }: { legacy?: OperationLegacyOptions }) {
+  const { operation } = useOperation();
+  const { items } = useExampleRequests();
   if (!operation.requestBody) return null;
-  const { renderRequestTabs = renderRequestTabsDefault } = ctx.content ?? {};
+  if (legacy?.RequestTabs) return <legacy.RequestTabs />;
 
-  return renderRequestTabs(
-    {
-      items: examples,
-      route: path,
-      method,
-      pathItem,
-      operation,
-    },
-    ctx,
-  );
+  return <RequestTabsDefaultContent items={items} />;
 }
 
-function renderRequestTabsDefault(options: RequestTabsRenderOptions) {
-  return <RequestTabsDefaultContent options={options} />;
-}
-
-function RequestTabsDefaultContent({ options }: { options: RequestTabsRenderOptions }) {
+function RequestTabsDefaultContent({ items }: { items: ExampleRequest[] }) {
   const t = useTranslations({ note: 'operation page' });
-  const { items } = options;
   let children: ReactNode;
 
   if (items.length > 1) {
@@ -76,13 +40,13 @@ function RequestTabsDefaultContent({ options }: { options: RequestTabsRenderOpti
         </TabsList>
         {items.map((item) => (
           <TabsContent key={item.id} value={item.id}>
-            <RequestTabsItem item={item} options={options} />
+            <RequestTabsItem item={item} />
           </TabsContent>
         ))}
       </Tabs>
     );
   } else if (items.length === 1) {
-    children = <RequestTabsItem item={items[0]} options={options} />;
+    children = <RequestTabsItem item={items[0]} />;
   } else {
     children = <p className="text-fd-muted-foreground text-xs">{t('Empty')}</p>;
   }
@@ -95,16 +59,10 @@ function RequestTabsDefaultContent({ options }: { options: RequestTabsRenderOpti
   );
 }
 
-function RequestTabsItem({
-  item,
-  options,
-}: {
-  item: ExampleRequestItem;
-  options: RequestTabsRenderOptions;
-}) {
+function RequestTabsItem({ item }: { item: ExampleRequest }) {
   const t = useTranslations({ note: 'operation page' });
   const requestData = item.data;
-  const displayNames: Partial<Record<keyof RawRequestData, ReactNode>> = {
+  const displayNames: Partial<Record<keyof ExampleRequest['data'], ReactNode>> = {
     body: (
       <>
         {t('Request Body')}
@@ -124,12 +82,12 @@ function RequestTabsItem({
       {item.description && <Markdown md={item.description} />}
       <div className="flex flex-row gap-2 items-center justify-between">
         <MethodLabel>{requestData.method}</MethodLabel>
-        <code>{pathnameFromRequest(options.route, item.encoded)}</code>
+        <code>{item.pathname}</code>
       </div>
 
       <Accordions type="multiple" className="mt-2">
         {Object.entries(displayNames).map(([k, v]) => {
-          const data = requestData[k as keyof RawRequestData];
+          const data = requestData[k as keyof ExampleRequest['data']];
           if (!data || Object.keys(data).length === 0) return;
 
           return (

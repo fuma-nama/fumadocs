@@ -153,11 +153,9 @@ npx @fumadocs/cli add fumadocs/openapi/playground
 'use client';
 import { createOpenAPIPage } from 'fumadocs-openapi/ui';
 import PlaygroundClient from '@/components/api/playground';
-import { AuthProvider } from '@/components/api/playground/auth';
 
 export const OpenAPIPage = createOpenAPIPage({
   playground: {
-    provider: ({ children }) => <AuthProvider>{children}</AuthProvider>,
     render: ({ path, method, operation, pathItem }) => (
       <PlaygroundClient
         route={path}
@@ -172,7 +170,25 @@ export const OpenAPIPage = createOpenAPIPage({
 });
 ```
 
-The installed files access the runtime of API pages from `fumadocs-openapi/ui`, such as the render context. You can also use it to build your own playground from scratch.
+### Operation
+
+The UI of operations and webhooks.
+
+```npm
+npx @fumadocs/cli add fumadocs/openapi/operation
+```
+
+```tsx title="components/api-page.tsx"
+'use client';
+import { createOpenAPIPage } from 'fumadocs-openapi/ui';
+import { Operation } from '@/components/api/operation';
+
+export const OpenAPIPage = createOpenAPIPage({
+  components: {
+    Operation,
+  },
+});
+```
 
 ### Schema UI
 
@@ -188,8 +204,8 @@ import { createOpenAPIPage } from 'fumadocs-openapi/ui';
 import { Schema } from '@/components/api/schema';
 
 export const OpenAPIPage = createOpenAPIPage({
-  schemaUI: {
-    render: (props) => <Schema {...props} />,
+  components: {
+    SchemaUI: Schema,
   },
 });
 ```

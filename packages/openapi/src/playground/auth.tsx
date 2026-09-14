@@ -1,5 +1,5 @@
 'use client';
-import { useRenderContext } from '@/ui/contexts/api';
+import { useOpenAPI } from '@/ui/contexts/api';
 import { useQuery } from '@/utils/use-query';
 import { createContext, type ReactNode, use, useEffect, useMemo, useState } from 'react';
 import type { AuthCodeState, ImplicitState } from './components/oauth-dialog';
@@ -36,7 +36,7 @@ export function useAuth() {
 }
 
 export function AuthProvider({ children }: { children: ReactNode }) {
-  const { dereferenced, resolve } = useRenderContext().schema;
+  const { dereferenced, resolve } = useOpenAPI().document;
   const schemes = dereferenced.components?.securitySchemes;
   const [store, setStore] = useState<TokenStore>({});
 

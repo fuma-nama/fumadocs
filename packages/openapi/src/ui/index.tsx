@@ -8,28 +8,46 @@ import type {
   RenderContext,
 } from '@/types';
 import type { MediaAdapter } from '@/requests/media/adapter';
-import type { ComponentProps, FC, HTMLAttributes, ReactNode } from 'react';
+import type { FC, HTMLAttributes, ReactNode } from 'react';
 import { defaultShikiFactory } from 'fumadocs-core/highlight/shiki/full';
 import type { CodeUsageGeneratorRegistry, InlineCodeUsageGenerator } from '@/requests/generators';
 import type { ShikiFactory } from 'fumadocs-core/highlight/shiki';
 import type { CodeToHastOptionsCommon, CodeOptionsThemes, BundledTheme } from 'shiki';
 import type { ExampleRequestItem } from '../utils/get-example-requests';
-import type { RequestTabsRenderOptions } from './operation/request-tabs';
-import type { ResponseTabsRenderOptions } from './operation/response-tabs';
+import type { OperationProps } from './operation';
+import {
+  type GenerateTypeScriptDefinitionsContext as BaseGenerateTypeScriptDefinitionsContext,
+  type OpenAPIComponents,
+  useRenderContext,
+  useServer,
+} from './contexts/api';
+import type { ResponseTab } from './operation/context';
 import type { PlaygroundClientOptions } from '@/playground/client';
 import type { GeneratedPageProps, WebhookItem, OperationItem } from '@/utils/pages/builder';
 import type { ParsedSchema } from '@/utils/schema';
 import type { SchemaUIOptions } from '@fumadocs/api-docs/components/schema';
-import { createOpenAPIPageBase } from './base';
+import { createOpenAPIPageBase, useOperationContext } from './base';
 
-export { useRenderContext, useServerContext } from '@/ui/contexts/api';
-export { useOperationContext } from '@/ui/operation/context';
+export type { OperationProps, OperationPlaygroundOptions } from './operation';
+export { useRenderContext, useOperationContext };
+/** @deprecated use `useServer()` from `fumadocs-openapi/headless` */
+export const useServerContext = useServer;
 
-export interface GenerateTypeScriptDefinitionsContext {
-  name: string;
-  readOnly: boolean;
-  writeOnly: boolean;
+export interface GenerateTypeScriptDefinitionsContext extends BaseGenerateTypeScriptDefinitionsContext {
+  /** @deprecated use `document` */
   ctx: RenderContext;
+}
+
+export interface RequestTabsRenderOptions {
+  route: string;
+  items: ExampleRequestItem[];
+  method: HttpMethods;
+  pathItem: PathItemObject;
+  operation: OperationObject;
+}
+
+export interface ResponseTabsRenderOptions {
+  tabs: ResponseTab[];
 }
 
 export interface APIPlaygroundProps {
@@ -37,6 +55,7 @@ export interface APIPlaygroundProps {
   method: HttpMethods;
   operation: OperationObject;
   pathItem: PathItemObject;
+  /** @deprecated use the hooks of `fumadocs-openapi/headless` */
   ctx: RenderContext;
 }
 
@@ -85,6 +104,8 @@ export interface CreateOpenAPIPageOptions {
 
   /**
    * Customize page content.
+   *
+   * @deprecated install the UI with Fumadocs CLI instead
    */
   content?: {
     renderResponseTabs?: (options: ResponseTabsRenderOptions, ctx: RenderContext) => ReactNode;
@@ -163,6 +184,7 @@ export interface CreateOpenAPIPageOptions {
    * Info UI for JSON schemas.
    */
   schemaUI?: {
+    /** @deprecated use `components.SchemaUI` */
     render?: (options: SchemaUIOptions, ctx: RenderContext) => ReactNode;
 
     /**
@@ -184,14 +206,17 @@ export interface CreateOpenAPIPageOptions {
 
     /**
      * render a page-level provider (useful for handling auth)
+     *
+     * @deprecated the auth state lives in `fumadocs-openapi/headless`
      */
     provider?: (props: { children: ReactNode }) => ReactNode;
     /**
-     * replace the renderer
+     * Replace the renderer, e.g. the playground installed with Fumadocs CLI.
      */
     render?: (props: APIPlaygroundProps) => ReactNode;
   };
 
+  /** @deprecated install the UI with Fumadocs CLI instead */
   operation?: {
     APIExampleSelector?: FC<{
       items: ExampleRequestItem[];
@@ -201,10 +226,15 @@ export interface CreateOpenAPIPageOptions {
     }>;
   };
 
-  components?: {
-    Heading?: FC<ComponentProps<'h1'> & { id: string; depth: number }>;
-    CodeBlock?: FC<{ lang: string; code: string }>;
-    Markdown?: FC<{ md: string }>;
+  components?: Partial<Omit<OpenAPIComponents, 'SchemaUI'>> & {
+    /**
+     * Replace the Schema UI, e.g. the one installed with Fumadocs CLI.
+     */
+    SchemaUI?: FC<SchemaUIOptions>;
+    /**
+     * Replace the UI of operations and webhooks, e.g. the one installed with Fumadocs CLI.
+     */
+    Operation?: FC<OperationProps>;
   };
 
   /**
