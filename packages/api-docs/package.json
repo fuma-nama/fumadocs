@@ -30,7 +30,7 @@
     "./components/playground/schema": "./dist/components/playground/schema.js",
     "./components/popover": "./dist/components/popover.js",
     "./components/schema": "./dist/components/schema/index.js",
-    "./components/schema/client": "./dist/components/schema/client.js",
+    "./components/schema/headless": "./dist/components/schema/headless.js",
     "./components/select": "./dist/components/select.js",
     "./components/select-tab": "./dist/components/select-tab.js",
     "./components/spinner": "./dist/components/spinner.js",

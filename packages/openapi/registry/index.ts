@@ -9,6 +9,37 @@ export const registry: Registry = {
   dir,
   components: [
     {
+      name: 'ui/components',
+      unlisted: true,
+      files: ['codeblock', 'heading', 'markdown', 'method-label'].map((name) => ({
+        type: 'components',
+        path: `ui/components/${name}.tsx`,
+        target: `<dir>/api/components/${name}.tsx`,
+      })),
+    },
+    {
+      name: 'page',
+      title: 'OpenAPI Page',
+      description: 'The full UI of OpenAPI pages',
+      files: [
+        {
+          type: 'components',
+          path: 'ui/base.tsx',
+          target: '<dir>/api/page.tsx',
+        },
+      ],
+    },
+    {
+      name: 'operation',
+      title: 'Operation UI',
+      description: 'The UI of operations and webhooks in OpenAPI pages',
+      files: ['index', 'request-tabs', 'response-tabs', 'usage-tabs'].map((name) => ({
+        type: 'components',
+        path: `ui/operation/${name}.tsx`,
+        target: `<dir>/api/operation/${name}.tsx`,
+      })),
+    },
+    {
       name: 'playground',
       title: 'API Playground',
       description: 'The interactive playground of OpenAPI integration',
@@ -40,33 +71,13 @@ export const registry: Registry = {
         },
         {
           type: 'components',
-          path: 'ui/components/method-label.tsx',
-          target: '<dir>/api/playground/method-label.tsx',
-        },
-        {
-          type: 'components',
-          path: 'ui/components/codeblock.tsx',
-          target: '<dir>/api/playground/codeblock.tsx',
-        },
-        {
-          type: 'components',
           path: 'utils/use-query.ts',
           target: '<dir>/api/playground/use-query.ts',
         },
         {
           type: 'components',
-          path: 'utils/storage-key.ts',
-          target: '<dir>/api/playground/storage-key.ts',
-        },
-        {
-          type: 'components',
           path: 'utils/schema.ts',
           target: '<dir>/api/playground/schema.ts',
-        },
-        {
-          type: 'components',
-          path: 'playground/auth.tsx',
-          target: '<dir>/api/playground/auth.tsx',
         },
         {
           type: 'components',

@@ -1,20 +1,11 @@
-import { useRenderContext } from '../ui/contexts/api';
-import { useMemo } from 'react';
+import { useOpenAPI } from '@/headless/runtime';
+import { useCallback } from 'react';
 
-type KeyName = 'server-url' | `auth-${string}`;
+/**
+ * Get the `localStorage` key of `name`, with the prefix of the page.
+ */
+export function useStorageKey(): (name: string) => string {
+  const { storageKeyPrefix = 'fumadocs-openapi-' } = useOpenAPI();
 
-export function useStorageKey() {
-  const { storageKeyPrefix } = useRenderContext();
-
-  return useMemo(
-    () => ({
-      of: (name: KeyName) => getStorageKey(storageKeyPrefix, name),
-      AuthField: (schemeId: string) => getStorageKey(storageKeyPrefix, `auth-${schemeId}`),
-    }),
-    [storageKeyPrefix],
-  );
-}
-
-function getStorageKey(prefix = 'fumadocs-openapi-', name: KeyName) {
-  return prefix + name;
+  return useCallback((name) => storageKeyPrefix + name, [storageKeyPrefix]);
 }

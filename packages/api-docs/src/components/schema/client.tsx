@@ -15,44 +15,25 @@ import {
   useState,
 } from 'react';
 import { useTranslations } from '@fuma-translate/react';
-import type {
-  SchemaData,
-  SchemaDataObjectProperty,
-  SchemaUIGeneratedData,
-} from '@/components/schema';
 import { buttonVariants } from 'fumadocs-ui/components/ui/button';
 import { CheckIcon, FilterIcon, LinkIcon } from 'lucide-react';
 import { Popover, PopoverContent, PopoverTrigger } from '../popover';
 import { cn } from '@/utils/cn';
 import { cva } from 'class-variance-authority';
-import { useAnchorId } from '@/auto-anchor/client';
-import { useCopyButton } from 'fumadocs-ui/utils/use-copy-button';
 import { mergeRefs } from '@/utils/merge-refs';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../select';
-
-interface PathItemType {
-  name: string;
-  $ref: string;
-  scrollTop?: number;
-  /** property name of highlighted field, only applicable for objects */
-  highlighted?: string;
-  tabValues?: string[];
-  /** popover state, only applicable for root */
-  closed?: boolean;
-}
-
-interface StateContextType {
-  rootId: string;
-  /** the first tiem will always be the root item */
-  path: PathItemType[];
-  setPath: (path: PathItemType[]) => void;
-  generated: SchemaUIGeneratedData;
-  renderTypeInfoTrigger: (props: {
-    pathName: string;
-    $ref: string;
-    children: ReactNode;
-  }) => ReactNode;
-}
+import {
+  type SchemaData,
+  type SchemaDataObjectProperty,
+  type SchemaUIContextType,
+  type SchemaUIGeneratedData,
+  SchemaUIProvider,
+  useCopySchemaLink,
+  useSchemaHighlight,
+  useSchemaPopover,
+  useSchemaTabs,
+  useSchemaUI,
+} from './headless';
 
 const typeVariants = cva('text-sm text-start text-fd-muted-foreground font-mono', {
   variants: {
@@ -63,11 +44,17 @@ const typeVariants = cva('text-sm text-start text-fd-muted-foreground font-mono'
   },
 });
 
-const Context = createContext<StateContextType | null>(null);
-
-function useStates() {
-  return use(Context)!;
+interface TypeInfoTriggerProps {
+  pathName: string;
+  $ref: string;
+  children: ReactNode;
 }
+
+/** how a type opens its schema: a popover from the root, navigation inside the popover */
+const TriggerContext = createContext<(props: TypeInfoTriggerProps) => ReactNode>((props) => (
+  <RootTypeInfoTrigger {...props} />
+));
+const renderPopoverTrigger = (props: TypeInfoTriggerProps) => <PopoverTypeInfoTrigger {...props} />;
 
 export interface SchemaUIProps {
   name: string;
@@ -77,101 +64,94 @@ export interface SchemaUIProps {
   generated: SchemaUIGeneratedData;
 }
 
-const ExcludedFromAutoAnchor = new Set<string>();
-
 export function SchemaUI({ name, required = false, as = 'property', generated }: SchemaUIProps) {
-  const rootId = useAnchorId([name]);
-  const [path, setPath] = useState<PathItemType[]>(() => [{ $ref: generated.$root, name }]);
-  const ref = useRef<HTMLDivElement>(null);
+  return (
+    <SchemaUIProvider name={name} generated={generated}>
+      <SchemaUIContent name={name} required={required} as={as} />
+    </SchemaUIProvider>
+  );
+}
+
+function SchemaUIContent({
+  name,
+  required,
+  as,
+}: {
+  name: string;
+  required: boolean;
+  as: 'property' | 'body';
+}) {
+  const { rootId, generated } = useSchemaUI();
+
+  if (as === 'property' || generated.refs[generated.$root].type === 'primitive') {
+    return (
+      <ObjectProperty
+        id={rootId}
+        name={name}
+        $type={generated.$root}
+        parentPathIndex={0}
+        required={required}
+      />
+    );
+  }
+
+  return (
+    <div id={rootId}>
+      <PathItemBody pathIndex={0} />
+    </div>
+  );
+}
+
+function RootTypeInfoTrigger({ pathName, $ref, children }: TypeInfoTriggerProps) {
+  const { path, rootId } = useSchemaUI();
+  const { open, onOpenChange } = useSchemaPopover(pathName, $ref);
   const popoverRef = useCallback(
     (element: HTMLDivElement | null) => {
       if (!element) return;
-      element.scrollTop = path.at(-1)!.scrollTop ?? 0;
+      element.scrollTop = scrollTops.get(getScrollKey(rootId, path)) ?? 0;
       const current = parseFloat(element.style.getPropertyValue('--min-height') || '200px');
       element.style.setProperty('--min-height', Math.max(element.clientHeight + 2, current) + 'px');
     },
-    [path],
+    [rootId, path],
   );
 
-  useEffect(() => {
-    if (ExcludedFromAutoAnchor.has(rootId)) return;
-    const url = new URL(window.location.href);
-    const param = url.searchParams.get('path');
-    if (url.hash !== `#${rootId}` || !param) return;
+  return (
+    <Popover open={open} onOpenChange={onOpenChange}>
+      <PopoverTrigger className={cn(typeVariants({ variant: 'trigger' }))}>
+        {children}
+      </PopoverTrigger>
+      <PopoverContent
+        ref={popoverRef}
+        className="w-[600px] max-w-(--available-width) min-h-(--min-height,200px) fd-scroll-container max-h-[460px] px-3 pt-0"
+        onScrollEnd={(e) => {
+          // ensure popover scroll top is stable
+          scrollTops.set(getScrollKey(rootId, path), (e.target as HTMLElement).scrollTop);
+        }}
+      >
+        <SchemaUIPopover />
+      </PopoverContent>
+    </Popover>
+  );
+}
 
-    const decoded = decodePath(param, url.searchParams.get('s-highlight'));
-    if (!decoded || decoded.length === 0 || decoded.some((item) => !generated.refs[item.$ref]))
-      return;
+/** scroll positions of opened schemas, restored when navigating back */
+const scrollTops = new Map<string, number>();
 
-    setPath(decoded);
-    // avoid re-triggering it again
-    ExcludedFromAutoAnchor.add(rootId);
-    if (!decoded.at(-1)!.highlighted) {
-      ref.current?.scrollIntoView({ behavior: 'smooth' });
-    }
-  }, [rootId, generated.refs]);
+function getScrollKey(rootId: string, path: SchemaUIContextType['path']) {
+  const last = path.at(-1)!;
+  return `${rootId}\0${path.length}\0${last.name}\0${last.$ref}`;
+}
+
+function PopoverTypeInfoTrigger({ pathName, $ref, children }: TypeInfoTriggerProps) {
+  const { open } = useSchemaUI();
 
   return (
-    <Context
-      value={useMemo(
-        () => ({
-          rootId,
-          path,
-          generated,
-          setPath,
-          renderTypeInfoTrigger: ({ $ref, children, pathName }) => (
-            <Popover
-              open={
-                path.length > 1 &&
-                path[1].$ref === $ref &&
-                path[1].name === pathName &&
-                !path[0].closed
-              }
-              onOpenChange={(v) => {
-                if (v) {
-                  setPath([
-                    { ...path[0], closed: false },
-                    { name: pathName, $ref },
-                  ]);
-                } else {
-                  setPath(path.map((item, i) => (i === 0 ? { ...item, closed: true } : item)));
-                }
-              }}
-            >
-              <PopoverTrigger className={cn(typeVariants({ variant: 'trigger' }))}>
-                {children}
-              </PopoverTrigger>
-              <PopoverContent
-                ref={popoverRef}
-                className="w-[600px] max-w-(--available-width) min-h-(--min-height,200px) fd-scroll-container max-h-[460px] px-3 pt-0"
-                onScrollEnd={(e) => {
-                  // ensure popover scroll top is stable
-                  path.at(-1)!.scrollTop = (e.target as HTMLElement).scrollTop;
-                }}
-              >
-                <SchemaUIPopover />
-              </PopoverContent>
-            </Popover>
-          ),
-        }),
-        [generated, path, rootId, popoverRef],
-      )}
+    <button
+      className={cn(typeVariants({ variant: 'trigger' }))}
+      onClick={() => open(pathName, $ref)}
     >
-      {as === 'property' || generated.refs[generated.$root].type === 'primitive' ? (
-        <ObjectProperty
-          ref={ref}
-          id={rootId}
-          name={name}
-          $type={generated.$root}
-          parentPathIndex={0}
-          required={required}
-        />
-      ) : (
-        <div id={rootId} ref={ref}>
-          <PathItemBody pathIndex={0} />
-        </div>
-      )}
-    </Context>
+      {children}
+    </button>
   );
 }
 
@@ -182,7 +162,28 @@ function SchemaDescription({ schema, ...props }: ComponentProps<'div'> & { schem
       {schema.infoTags && schema.infoTags.length > 0 && (
         <div className="flex flex-row gap-2 flex-wrap mt-2 empty:hidden">
           {schema.infoTags.map((tag, i) => (
-            <Fragment key={i}>{tag.node}</Fragment>
+            <Fragment key={i}>
+              {'node' in tag ? (
+                tag.node
+              ) : 'list' in tag ? (
+                <BlockTag label={tag.label}>
+                  <ul>
+                    {tag.list.map((item, i) => (
+                      <li
+                        key={i}
+                        className="font-mono list-disc list-inside ps-1 marker:text-fd-muted-foreground"
+                      >
+                        {item}
+                      </li>
+                    ))}
+                  </ul>
+                </BlockTag>
+              ) : tag.block ? (
+                <BlockTag label={tag.label}>{tag.value}</BlockTag>
+              ) : (
+                <InlineTag label={tag.label}>{tag.value}</InlineTag>
+              )}
+            </Fragment>
           ))}
         </div>
       )}
@@ -204,33 +205,11 @@ function ObjectProperty({
 }) {
   const t = useTranslations({ note: 'schema UI' });
   const {
-    path,
     generated: { refs },
-    rootId,
-  } = useStates();
+  } = useSchemaUI();
   const schema = refs[$type];
-  const parentItem = path[parentPathIndex];
-  const ref = useCallback(
-    (element: HTMLDivElement | null) => {
-      if (!element || parentItem.highlighted !== name) return;
-
-      window.setTimeout(() => {
-        element.scrollIntoView({
-          behavior: 'smooth',
-          block: 'end',
-        });
-        delete parentItem.highlighted;
-      }, 300);
-    },
-    [parentItem, name],
-  );
-  const [isChecked, onClick] = useCopyButton(() => {
-    const url = new URL(window.location.href);
-    url.hash = `#${rootId}`;
-    url.searchParams.set('s-highlight', name);
-    url.searchParams.set('path', encodePath(path));
-    return navigator.clipboard.writeText(url.href);
-  });
+  const [highlighted, ref] = useSchemaHighlight(parentPathIndex, name);
+  const [isChecked, onClick] = useCopySchemaLink(name);
 
   return (
     <div
@@ -242,7 +221,7 @@ function ObjectProperty({
         <span className="font-medium font-mono">
           <span
             className={cn(
-              parentItem.highlighted === name
+              highlighted
                 ? 'bg-fd-primary text-fd-primary-foreground rounded-sm'
                 : 'text-fd-primary',
               schema.deprecated && 'line-through opacity-80',
@@ -298,28 +277,19 @@ function PathItemBody({
 }) {
   const {
     path,
-    setPath,
     generated: { refs },
-  } = useStates();
+  } = useSchemaUI();
+  const [selected, setSelected] = useSchemaTabs(pathIndex, tabDepth);
   const schema = asSchema ?? refs[path[pathIndex].$ref];
 
   if ((schema.type === 'or' || schema.type === 'and') && schema.items.length > 0) {
-    const value = path[pathIndex].tabValues?.[tabDepth] ?? schema.items[0].$type;
+    const value = selected ?? schema.items[0].$type;
     const items = schema.items.map((item) => ({
       label: <code className="text-xs font-medium">{item.name}</code>,
       value: item.$type,
     }));
     return (
-      <Select
-        items={items}
-        value={value}
-        onValueChange={(v) => {
-          if (!v) return;
-          const next = [...path];
-          (next[pathIndex].tabValues ??= []).splice(tabDepth, 1, v);
-          setPath(next);
-        }}
-      >
+      <Select items={items} value={value} onValueChange={(v) => v && setSelected(v)}>
         <div className="flex flex-row my-2 gap-2 items-center">
           <SchemaDescription schema={schema} className="flex-1 py-0" />
 
@@ -369,7 +339,7 @@ interface ObjectSearchProps {
 }
 
 function ObjectSearch({ variant = 'default', schema, pathIndex, children }: ObjectSearchProps) {
-  const { path, setPath } = useStates();
+  const { open } = useSchemaUI();
   const [search, setSearch] = useState('');
   const deferredValue = useDeferredValue(search);
   const firstItemRef = useRef<SchemaDataObjectProperty>(null);
@@ -396,7 +366,7 @@ function ObjectSearch({ variant = 'default', schema, pathIndex, children }: Obje
           onKeyDown={(e) => {
             if (e.key === 'Enter') {
               const item = firstItemRef.current;
-              if (item) setPath([...path, { name: item.name, $ref: item.$type }]);
+              if (item) open(item.name, item.$type);
               e.preventDefault();
             }
           }}
@@ -493,8 +463,7 @@ export function BlockTag({ label, children }: { label: ReactNode; children: Reac
 }
 
 function SchemaUIPopover() {
-  const states = useStates();
-  const { path, setPath } = states;
+  const { path, back } = useSchemaUI();
   const ref = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -504,22 +473,7 @@ function SchemaUIPopover() {
   }, [path]);
 
   return (
-    <Context
-      value={useMemo(
-        () => ({
-          ...states,
-          renderTypeInfoTrigger: ({ $ref, pathName, children }) => (
-            <button
-              className={cn(typeVariants({ variant: 'trigger' }))}
-              onClick={() => setPath([...path, { name: pathName, $ref }])}
-            >
-              {children}
-            </button>
-          ),
-        }),
-        [states, setPath, path],
-      )}
-    >
+    <TriggerContext value={renderPopoverTrigger}>
       <div ref={ref}>
         <div className="sticky top-0 -mx-3 flex overflow-x-auto overflow-y-hidden items-center text-sm font-medium font-mono bg-fd-secondary text-fd-secondary-foreground px-3 h-10 border-b z-20">
           {path.map((item, i) => {
@@ -540,7 +494,7 @@ function SchemaUIPopover() {
             return (
               <button
                 key={i}
-                onClick={() => setPath(path.slice(0, i + 1))}
+                onClick={() => back(i)}
                 className={cn(
                   'hover:underline hover:text-fd-accent-foreground',
                   isDuplicated && 'text-orange-400',
@@ -558,23 +512,15 @@ function SchemaUIPopover() {
           }}
         />
       </div>
-    </Context>
+    </TriggerContext>
   );
 }
 
-function TypeInfoTrigger({
-  pathName,
-  $ref,
-  children,
-}: {
-  pathName: string;
-  $ref: string;
-  children: ReactNode;
-}) {
+function TypeInfoTrigger({ pathName, $ref, children }: TypeInfoTriggerProps) {
   const {
     generated: { refs },
-    renderTypeInfoTrigger,
-  } = useStates();
+  } = useSchemaUI();
+  const renderTrigger = use(TriggerContext);
   const schema = refs[$ref];
 
   if (
@@ -613,20 +559,5 @@ function TypeInfoTrigger({
     );
   }
 
-  return renderTypeInfoTrigger({ $ref, pathName, children });
-}
-
-function encodePath(path: PathItemType[]): string {
-  return path.map((item) => [item.name, item.$ref, ...(item.tabValues ?? [])].join('\0')).join('|');
-}
-
-function decodePath(path: string, highlighted: string | null): PathItemType[] | null {
-  const out: PathItemType[] = [];
-  for (const part of path.split('|')) {
-    const [name, $ref, ...tabValues] = part.split('\0');
-    out.push({ name, $ref, tabValues });
-  }
-
-  if (highlighted && out.length > 0) out[out.length - 1].highlighted = highlighted;
-  return out;
+  return renderTrigger({ pathName, $ref, children });
 }

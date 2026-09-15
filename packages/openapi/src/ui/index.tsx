@@ -1,73 +1,30 @@
 'use client';
-import type {
-  Awaitable,
-  Document,
-  HttpMethods,
-  OperationObject,
-  PathItemObject,
-  RenderContext,
-} from '@/types';
-import type { MediaAdapter } from '@/requests/media/adapter';
-import type { ComponentProps, FC, HTMLAttributes, ReactNode } from 'react';
+import type { FC, ReactNode } from 'react';
 import { defaultShikiFactory } from 'fumadocs-core/highlight/shiki/full';
-import type { CodeUsageGeneratorRegistry, InlineCodeUsageGenerator } from '@/requests/generators';
 import type { ShikiFactory } from 'fumadocs-core/highlight/shiki';
 import type { CodeToHastOptionsCommon, CodeOptionsThemes, BundledTheme } from 'shiki';
-import type { ExampleRequestItem } from '../utils/get-example-requests';
-import type { RequestTabsRenderOptions } from './operation/request-tabs';
-import type { ResponseTabsRenderOptions } from './operation/response-tabs';
-import type { PlaygroundClientOptions } from '@/playground/client';
-import type { GeneratedPageProps, WebhookItem, OperationItem } from '@/utils/pages/builder';
-import type { ParsedSchema } from '@/utils/schema';
 import type { SchemaUIOptions } from '@fumadocs/api-docs/components/schema';
+import type { HttpMethods, OperationObject, PathItemObject, RenderContext } from '@/types';
+import type { CodeUsageGeneratorRegistry } from '@/requests/generators';
+import type { ExampleRequestItem } from '@/utils/get-example-requests';
+import type {
+  OpenAPIPageProps,
+  OpenAPIPageProps_Preloaded,
+  OpenAPIPageProps_Spec,
+  OperationItem,
+  WebhookItem,
+} from '@/utils/pages/builder';
+import type { OpenAPIComponents, OpenAPIRuntime, ResponseTab } from '@/headless';
+import type { OperationPlaygroundOptions, OperationProps } from './operation';
 import { createOpenAPIPageBase } from './base';
 
-export { useRenderContext, useServerContext } from '@/ui/contexts/api';
-export { useOperationContext } from '@/ui/operation/context';
+export type { APIPlaygroundProps } from './operation';
+export type { GenerateTypeScriptDefinitionsContext } from '@/headless/runtime';
+export type { OpenAPIPageProps, OpenAPIPageProps_Spec, OpenAPIPageProps_Preloaded };
 
-export interface GenerateTypeScriptDefinitionsContext {
-  name: string;
-  readOnly: boolean;
-  writeOnly: boolean;
-  ctx: RenderContext;
-}
-
-export interface APIPlaygroundProps {
-  path: string;
-  method: HttpMethods;
-  operation: OperationObject;
-  pathItem: PathItemObject;
-  ctx: RenderContext;
-}
-
-export interface CreateOpenAPIPageOptions {
-  /**
-   * Generate TypeScript definitions from JSON schema.
-   *
-   * Pass `false` to disable it.
-   */
-  generateTypeScriptDefinitions?:
-    | ((
-        schema: ParsedSchema,
-        ctx: GenerateTypeScriptDefinitionsContext,
-      ) => Awaitable<string | undefined>)
-    | false;
-
-  /**
-   * Generate example code usage for all endpoints.
-   */
-  codeUsages?: CodeUsageGeneratorRegistry;
-
-  /**
-   * Generate example code usage for each endpoint.
-   */
-  generateCodeSamples?: (options: {
-    path: string;
-    operation: OperationObject;
-    method: HttpMethods;
-    pathItem: PathItemObject;
-  }) => InlineCodeUsageGenerator[];
-
+export interface CreateOpenAPIPageOptions extends Partial<
+  Omit<OpenAPIRuntime, 'doc' | 'proxyUrl'>
+> {
   shiki?: ShikiFactory;
   shikiOptions?: Omit<CodeToHastOptionsCommon, 'lang'> & CodeOptionsThemes<BundledTheme>;
 
@@ -79,17 +36,21 @@ export interface CreateOpenAPIPageOptions {
   showResponseSchema?: boolean;
 
   /**
-   * Support other media types.
-   */
-  mediaAdapters?: Record<string, MediaAdapter>;
-
-  /**
    * Customize page content.
    */
   content?: {
-    renderResponseTabs?: (options: ResponseTabsRenderOptions, ctx: RenderContext) => ReactNode;
+    renderResponseTabs?: (options: { tabs: ResponseTab[] }, ctx: RenderContext) => ReactNode;
 
-    renderRequestTabs?: (options: RequestTabsRenderOptions, ctx: RenderContext) => ReactNode;
+    renderRequestTabs?: (
+      options: {
+        route: string;
+        items: ExampleRequestItem[];
+        method: HttpMethods;
+        pathItem: PathItemObject;
+        operation: OperationObject;
+      },
+      ctx: RenderContext,
+    ) => ReactNode;
 
     renderAPIExampleLayout?: (
       slots: {
@@ -163,8 +124,6 @@ export interface CreateOpenAPIPageOptions {
    * Info UI for JSON schemas.
    */
   schemaUI?: {
-    render?: (options: SchemaUIOptions, ctx: RenderContext) => ReactNode;
-
     /**
      * Show examples under the generated content of JSON schemas.
      *
@@ -176,69 +135,19 @@ export interface CreateOpenAPIPageOptions {
   /**
    * Customize API playground.
    */
-  playground?: PlaygroundClientOptions & {
+  playground?: OperationPlaygroundOptions;
+
+  components?: Partial<Omit<OpenAPIComponents, 'SchemaUI'>> & {
     /**
-     * @defaultValue true
+     * Replace the Schema UI, e.g. the one installed with Fumadocs CLI.
      */
-    enabled?: boolean;
-
+    SchemaUI?: FC<SchemaUIOptions>;
     /**
-     * render a page-level provider (useful for handling auth)
+     * Replace the UI of operations and webhooks, e.g. the one installed with Fumadocs CLI.
      */
-    provider?: (props: { children: ReactNode }) => ReactNode;
-    /**
-     * replace the renderer
-     */
-    render?: (props: APIPlaygroundProps) => ReactNode;
+    Operation?: FC<OperationProps>;
   };
-
-  operation?: {
-    APIExampleSelector?: FC<{
-      items: ExampleRequestItem[];
-
-      value: string | undefined;
-      onValueChange: (id: string) => void;
-    }>;
-  };
-
-  components?: {
-    Heading?: FC<ComponentProps<'h1'> & { id: string; depth: number }>;
-    CodeBlock?: FC<{ lang: string; code: string }>;
-    Markdown?: FC<{ md: string }>;
-  };
-
-  /**
-   * Set a prefix for `localStorage` keys.
-   *
-   * Useful when using multiple OpenAPI instances to prevent state conflicts.
-   *
-   * @defaultValue `fumadocs-openapi-`
-   */
-  storageKeyPrefix?: string;
-
-  /** @deprecated use `components.Heading` instead */
-  renderHeading?: (props: HTMLAttributes<HTMLHeadingElement>, depth: number) => ReactNode;
-  /** @deprecated use `components.CodeBlock` instead */
-  renderCodeBlock?: (props: { lang: string; code: string }) => ReactNode;
-  /** @deprecated use `components.Markdown` instead */
-  renderMarkdown?: (md: string) => ReactNode;
 }
-
-export type OpenAPIPageProps = OpenAPIPageProps_Spec | OpenAPIPageProps_Preloaded;
-
-export type OpenAPIPageProps_Spec = Omit<GeneratedPageProps, 'document'> & {
-  payload: {
-    bundled: Document;
-    proxyUrl?: string;
-  };
-};
-
-export type OpenAPIPageProps_Preloaded = GeneratedPageProps & {
-  preloaded: {
-    docs: Record<string, Document>;
-    proxyUrl?: string;
-  };
-};
 
 /**
  * Create `<OpenAPIPage />` (a client component).
@@ -249,8 +158,3 @@ export function createOpenAPIPage(options: CreateOpenAPIPageOptions = {}): FC<Op
     shiki: options.shiki ?? defaultShikiFactory,
   });
 }
-
-/** @deprecated Use `OpenAPIPageProps` instead */
-export type ApiPageProps = OpenAPIPageProps;
-// kept for backward compatibility
-export type { OperationItem, WebhookItem } from '@/utils/pages/builder';

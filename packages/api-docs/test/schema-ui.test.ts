@@ -151,47 +151,16 @@ test('test', async () => {
     ",
           "infoTags": [
             {
-              "node": <BlockTag
-                label="Value in"
-              >
-                <ul>
-                  <li
-                    className="font-mono list-disc list-inside ps-1 marker:text-fd-muted-foreground"
-                  >
-                    "NOT_FOUND"
-                  </li>
-                  <li
-                    className="font-mono list-disc list-inside ps-1 marker:text-fd-muted-foreground"
-                  >
-                    "FORBIDDEN"
-                  </li>
-                  <li
-                    className="font-mono list-disc list-inside ps-1 marker:text-fd-muted-foreground"
-                  >
-                    "USAGE_EXCEEDED"
-                  </li>
-                  <li
-                    className="font-mono list-disc list-inside ps-1 marker:text-fd-muted-foreground"
-                  >
-                    "RATE_LIMITED"
-                  </li>
-                  <li
-                    className="font-mono list-disc list-inside ps-1 marker:text-fd-muted-foreground"
-                  >
-                    "UNAUTHORIZED"
-                  </li>
-                  <li
-                    className="font-mono list-disc list-inside ps-1 marker:text-fd-muted-foreground"
-                  >
-                    "DISABLED"
-                  </li>
-                  <li
-                    className="font-mono list-disc list-inside ps-1 marker:text-fd-muted-foreground"
-                  >
-                    "INSUFFICIENT_PERMISSIONS"
-                  </li>
-                </ul>
-              </BlockTag>,
+              "label": "Value in",
+              "list": [
+                ""NOT_FOUND"",
+                ""FORBIDDEN"",
+                ""USAGE_EXCEEDED"",
+                ""RATE_LIMITED"",
+                ""UNAUTHORIZED"",
+                ""DISABLED"",
+                ""INSUFFICIENT_PERMISSIONS"",
+              ],
             },
           ],
           "type": "primitive",

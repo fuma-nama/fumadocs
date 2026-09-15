@@ -9,10 +9,8 @@ export default defineConfig({
   target: 'es2023',
   entry: [
     './src/{index,i18n}.ts',
-    './src/ui/{index,base,create-client}.tsx',
-    './src/ui/asyncapi/index.tsx',
-    './src/ui/asyncapi-base.tsx',
-    './src/ui/client/index.tsx',
+    './src/headless/{index,base}.tsx',
+    './src/ui/{index,base}.tsx',
     './src/playground/client.tsx',
     './src/scalar/index.tsx',
     './src/server/index.tsx',

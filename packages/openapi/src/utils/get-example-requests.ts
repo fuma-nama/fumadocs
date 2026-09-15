@@ -1,13 +1,7 @@
 import { encodeRequestData } from '@/requests/media/encode';
 import type { RawRequestData, RequestData } from '@/requests/types';
-import type {
-  HttpMethods,
-  OperationObject,
-  ParameterObject,
-  PathItemObject,
-  RenderContext,
-  RequestBodyObject,
-} from '@/types';
+import type { HttpMethods, OperationObject, ParameterObject, RequestBodyObject } from '@/types';
+import type { MediaAdapter } from '@/requests/media/adapter';
 import { getPreferredType, type ParsedSchema, pickExample } from '@/utils/schema';
 import { sample } from '@fumadocs/api-docs/schema/sample';
 import { dereferenceShallow } from '@fumadocs/api-docs/schema/dereference';
@@ -24,22 +18,20 @@ export interface ExampleRequestItem {
 export function getExampleRequests({
   path,
   method,
-  ctx,
+  mediaAdapters,
   operation,
-  pathItem,
+  parameters,
 }: {
   path: string;
-  pathItem: PathItemObject;
   method: HttpMethods;
   operation: OperationObject;
-  ctx: RenderContext;
+  /** resolved parameters of the operation */
+  parameters: ParameterObject[];
+  mediaAdapters: Record<string, MediaAdapter>;
 }): ExampleRequestItem[] {
   const requestBody = dereferenceShallow(operation.requestBody);
   const media = requestBody?.content ? getPreferredType(requestBody.content) : null;
   const bodyOfType = media ? dereferenceShallow(requestBody!.content![media]) : null;
-  const parameters = [...(operation.parameters ?? []), ...(pathItem.parameters ?? [])].map(
-    dereferenceShallow,
-  );
 
   if (bodyOfType?.examples) {
     const result: ExampleRequestItem[] = [];
@@ -59,7 +51,7 @@ export function getExampleRequests({
         name: summary || key,
         description,
         data,
-        encoded: encodeRequestData(data, ctx.mediaAdapters, parameters),
+        encoded: encodeRequestData(data, mediaAdapters, parameters),
       });
     }
 
@@ -74,7 +66,7 @@ export function getExampleRequests({
       name: 'Default',
       description: typeof schema === 'object' ? schema.description : undefined,
       data,
-      encoded: encodeRequestData(data, ctx.mediaAdapters, parameters),
+      encoded: encodeRequestData(data, mediaAdapters, parameters),
     },
   ];
 }

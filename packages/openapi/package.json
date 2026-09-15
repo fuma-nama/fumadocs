@@ -20,6 +20,8 @@
   ],
   "exports": {
     ".": "./dist/index.js",
+    "./headless": "./dist/headless/index.js",
+    "./headless/base": "./dist/headless/base.js",
     "./i18n": "./dist/i18n.js",
     "./playground/client": "./dist/playground/client.js",
     "./requests/generators": "./dist/requests/generators/index.js",
@@ -35,7 +37,6 @@
     "./server": "./dist/server/index.js",
     "./ui": "./dist/ui/index.js",
     "./ui/base": "./dist/ui/base.js",
-    "./ui/create-client": "./dist/ui/create-client.js",
     "./package.json": "./package.json",
     "./css/*": "./css/*"
   },
@@ -72,6 +73,7 @@
     "@tailwindcss/oxide": "^4.3.3",
     "@types/node": "26.5.0",
     "@types/react": "^19.2.18",
+    "@types/react-dom": "^19.2.7",
     "fast-content-type-parse": "^4.0.0",
     "fuma-cli": "^0.1.1",
     "fumadocs-core": "workspace:*",

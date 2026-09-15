@@ -10,6 +10,8 @@ export default defineConfig({
   entry: [
     './src/{codegen,i18n}.ts',
     './src/{components,auto-anchor,schema}/**/*',
+    // exported from `components/schema`
+    '!./src/components/schema/client.tsx',
     './src/utils/{id-to-title,url}.ts',
   ],
   unbundle: true,

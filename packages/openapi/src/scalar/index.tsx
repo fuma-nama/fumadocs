@@ -14,11 +14,8 @@ export function withScalar(options: CreateOpenAPIPageOptions = {}): CreateOpenAP
     ...options,
     playground: {
       ...options.playground,
-      provider(props) {
-        return props.children;
-      },
-      render({ method, path, ctx }) {
-        return <Client method={method} path={path} spec={ctx.schema.bundled} />;
+      render({ method, path }) {
+        return <Client method={method} path={path} />;
       },
     },
   };

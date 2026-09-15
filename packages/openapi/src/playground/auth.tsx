@@ -1,5 +1,5 @@
 'use client';
-import { useRenderContext } from '@/ui/contexts/api';
+import { useOpenAPI } from '@/headless/runtime';
 import { useQuery } from '@/utils/use-query';
 import { createContext, type ReactNode, use, useEffect, useMemo, useState } from 'react';
 import type { AuthCodeState, ImplicitState } from './components/oauth-dialog';
@@ -31,12 +31,12 @@ const AuthContext = createContext<AuthContextType | null>(null);
 
 export function useAuth() {
   const ctx = use(AuthContext);
-  if (!ctx) throw new Error('must use this component under <AuthProvider />');
+  if (!ctx) throw new Error('Component must be used under <OpenAPIProvider />');
   return ctx;
 }
 
 export function AuthProvider({ children }: { children: ReactNode }) {
-  const { dereferenced, resolve } = useRenderContext().schema;
+  const { dereferenced, resolve } = useOpenAPI().doc;
   const schemes = dereferenced.components?.securitySchemes;
   const [store, setStore] = useState<TokenStore>({});
 
@@ -114,8 +114,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       window.history.replaceState(null, '', window.location.pathname);
     }
 
-    if (window.location.search.length > 0) onQuery();
-    if (window.location.hash.length > 1) onHash();
+    try {
+      if (window.location.search.length > 0) onQuery();
+      if (window.location.hash.length > 1) onHash();
+    } catch {
+      // ignore invalid `state`
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps -- first page load only
   }, []);
 

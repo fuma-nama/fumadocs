@@ -21,7 +21,7 @@ import {
 import type { OAuth2SecurityScheme } from '@/types';
 import { useTranslations } from '@fuma-translate/react';
 import { useAuth } from '../auth';
-import { useRenderContext } from '@/ui/contexts/api';
+import { useOpenAPI } from '@/headless';
 
 type FlowType = keyof NonNullable<OAuth2SecurityScheme['flows']>;
 
@@ -78,7 +78,7 @@ export function OAuthDialogContent(props: AuthDialogContentProps) {
 }
 
 function Content({ schemeId, scopes, setToken, setOpen }: AuthDialogContentProps) {
-  const { dereferenced, resolve } = useRenderContext().schema;
+  const { dereferenced, resolve } = useOpenAPI().doc;
   const schemes = dereferenced.components?.securitySchemes;
   const tokenInfo = useAuth().store[schemeId];
   const scheme = resolve(schemes?.[schemeId]);
