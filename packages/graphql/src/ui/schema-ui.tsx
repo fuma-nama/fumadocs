@@ -28,9 +28,10 @@ import { fromTranslations, useTranslations } from '@fuma-translate/react';
 import {
   SchemaUI,
   InlineTag,
+  type SchemaData,
+  type SchemaUIGeneratedData,
   type SchemaUIProps,
-} from '@fumadocs/api-docs/components/schema/client';
-import type { SchemaData, SchemaUIGeneratedData } from '@fumadocs/api-docs/components/schema';
+} from '@fumadocs/api-docs/components/schema';
 import { getCustomDirectives } from '@/utils/schema';
 import { useRenderContext } from './contexts/api';
 import { Markdown } from './components/markdown';

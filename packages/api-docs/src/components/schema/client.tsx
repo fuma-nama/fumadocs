@@ -33,7 +33,7 @@ import {
   useSchemaPopover,
   useSchemaTabs,
   useSchemaUI,
-} from '@/headless';
+} from './headless';
 
 const typeVariants = cva('text-sm text-start text-fd-muted-foreground font-mono', {
   variants: {

@@ -9,8 +9,9 @@ export default defineConfig({
   target: 'es2023',
   entry: [
     './src/{codegen,i18n}.ts',
-    './src/headless.tsx',
     './src/{components,auto-anchor,schema}/**/*',
+    // exported from `components/schema`
+    '!./src/components/schema/client.tsx',
     './src/utils/{id-to-title,url}.ts',
   ],
   unbundle: true,

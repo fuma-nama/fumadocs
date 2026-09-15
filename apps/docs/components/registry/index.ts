@@ -82,11 +82,11 @@ export const compileOptions: Partial<CompileOptions> = {
       }
 
       file = path.relative(apiDocs.registry.dir, ref.file);
-      if (file === 'headless.tsx') {
+      if (file === 'components/schema/headless.tsx') {
         return {
           dep: '@fumadocs/api-docs',
           type: 'dependency',
-          specifier: '@fumadocs/api-docs/headless',
+          specifier: '@fumadocs/api-docs/components/schema/headless',
         };
       }
       // the Schema UI is vendored

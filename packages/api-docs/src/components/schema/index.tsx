@@ -1,16 +1,27 @@
 'use client';
 import { useMemo } from 'react';
 import { useTranslations } from '@fuma-translate/react';
-import { SchemaUI, type SchemaUIProps } from '@/components/schema/client';
-import { type GenerateSchemaUIOptions, generateSchemaUI } from '@/headless';
+import { SchemaUI, type SchemaUIProps } from './client';
+import { type GenerateSchemaUIOptions, generateSchemaUI } from './headless';
 
 export {
   generateSchemaUI,
+  SchemaUIProvider,
+  useSchemaUI,
+  useSchemaTabs,
+  useSchemaPopover,
+  useSchemaHighlight,
+  useCopySchemaLink,
+  type InfoTag,
   type FieldBase,
   type SchemaData,
   type SchemaDataObjectProperty,
   type SchemaUIGeneratedData,
-} from '@/headless';
+  type GenerateSchemaUIOptions,
+  type SchemaPathItem,
+  type SchemaUIContextType,
+} from './headless';
+export { SchemaUI, InlineTag, BlockTag, type SchemaUIProps } from './client';
 
 export interface SchemaUIOptions extends Omit<GenerateSchemaUIOptions, 'translations'> {
   client: Omit<SchemaUIProps, 'generated'>;
