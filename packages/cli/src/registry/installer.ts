@@ -1,11 +1,43 @@
 import { ComponentInstaller, type IOInterface } from 'fuma-cli/registry/installer';
 import { pluginPreserveLayouts } from './plugins/preserve';
-import { RegistryConnector } from 'fuma-cli/registry/connector';
+import { pluginReuseUI } from './plugins/shadcn';
+import type { RegistryConnector } from 'fuma-cli/registry/connector';
+import { UIRegistries } from '@/commands/shared';
 import type { LoadedConfig } from '@/config';
 import { box, confirm, log, outro, spinner, SpinnerResult } from '@clack/prompts';
 import { isCancel } from '@/utils/prompt';
 import picocolors from 'picocolors';
 import { detectPackageManager } from 'fuma-cli/detect';
+
+const uiRegistries = new Set(Object.values(UIRegistries));
+
+/** components are compiled against one UI library, fetch them from the sub-registry of the configured one */
+class UILibraryConnector implements RegistryConnector {
+  readonly id: string;
+
+  constructor(
+    private readonly base: RegistryConnector,
+    private readonly ui: string,
+  ) {
+    this.id = base.id;
+  }
+
+  private resolve(subRegistry?: string) {
+    return subRegistry && uiRegistries.has(subRegistry) ? this.ui : subRegistry;
+  }
+
+  fetchRegistryInfo(subRegistry?: string) {
+    return this.base.fetchRegistryInfo(this.resolve(subRegistry));
+  }
+
+  fetchComponent(name: string, subRegistry?: string) {
+    return this.base.fetchComponent(name, this.resolve(subRegistry));
+  }
+
+  hasComponent(name: string, subRegistry?: string) {
+    return this.base.hasComponent(name, this.resolve(subRegistry));
+  }
+}
 
 export class FumadocsComponentInstaller extends ComponentInstaller {
   private interactive: {
@@ -19,7 +51,7 @@ export class FumadocsComponentInstaller extends ComponentInstaller {
     cwd?: string,
     io?: Partial<IOInterface>,
   ) {
-    super(connector, {
+    super(new UILibraryConnector(connector, UIRegistries[config.uiLibrary]), {
       cwd,
       framework: config.framework === 'astro' ? 'none' : config.framework,
       outDir: {
@@ -54,7 +86,7 @@ export class FumadocsComponentInstaller extends ComponentInstaller {
         },
         ...io,
       },
-      plugins: [pluginPreserveLayouts()],
+      plugins: [pluginPreserveLayouts(), pluginReuseUI(config, cwd)],
     });
   }
 

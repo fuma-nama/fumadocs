@@ -1,5 +1,9 @@
+import fs from 'node:fs/promises';
+import path from 'node:path';
 import { cancel, group, intro, log, outro, select } from '@clack/prompts';
 import picocolors from 'picocolors';
+import { parseSourceFile } from '@/codemod';
+import { frameworks } from '@/project';
 import type { Target } from '@/commands/add';
 import { UIRegistries } from '@/commands/shared';
 import { LoadedConfig } from '@/config';
@@ -9,7 +13,7 @@ import { FumadocsComponentInstaller } from '@/registry/installer';
 interface TargetInfo {
   targets: Target[];
   id: string;
-  print?: () => void;
+  print?: () => void | Promise<void>;
 }
 
 interface SlotPrintInfo {
@@ -38,12 +42,12 @@ export async function customise(config: LoadedConfig, connector: RegistryConnect
               value: {
                 id: 'docs',
                 targets: [{ subRegistry, name: 'layouts/docs' }],
-                print() {
+                print: () =>
                   printLayout(
+                    config,
                     ['fumadocs-ui/layouts/docs', '@/layouts/docs'],
                     ['fumadocs-ui/layouts/docs/page', '@/layouts/docs/page'],
-                  );
-                },
+                  ),
               },
               hint: 'the default docs layout',
             },
@@ -52,12 +56,12 @@ export async function customise(config: LoadedConfig, connector: RegistryConnect
               value: {
                 id: 'notebook',
                 targets: [{ subRegistry, name: 'layouts/notebook' }],
-                print() {
+                print: () =>
                   printLayout(
+                    config,
                     ['fumadocs-ui/layouts/notebook', '@/layouts/notebook'],
                     ['fumadocs-ui/layouts/notebook/page', '@/layouts/notebook/page'],
-                  );
-                },
+                  ),
               },
               hint: 'a more compact version of docs layout',
             },
@@ -66,12 +70,12 @@ export async function customise(config: LoadedConfig, connector: RegistryConnect
               value: {
                 id: 'flux',
                 targets: [{ subRegistry, name: 'layouts/flux' }],
-                print() {
+                print: () =>
                   printLayout(
+                    config,
                     ['fumadocs-ui/layouts/flux', '@/layouts/flux'],
                     ['fumadocs-ui/layouts/flux/page', '@/layouts/flux/page'],
-                  );
-                },
+                  ),
               },
               hint: 'the experimental variant of docs layout',
             },
@@ -80,12 +84,12 @@ export async function customise(config: LoadedConfig, connector: RegistryConnect
               value: {
                 id: 'glass',
                 targets: [{ subRegistry, name: 'layouts/glass' }],
-                print() {
+                print: () =>
                   printLayout(
+                    config,
                     ['fumadocs-ui/layouts/glass', '@/layouts/glass'],
                     ['fumadocs-ui/layouts/glass/page', '@/layouts/glass/page'],
-                  );
-                },
+                  ),
               },
               hint: 'a docs layout with floating, translucent panels',
             },
@@ -94,9 +98,7 @@ export async function customise(config: LoadedConfig, connector: RegistryConnect
               value: {
                 id: 'home',
                 targets: [{ subRegistry, name: 'layouts/home' }],
-                print() {
-                  printLayout(['fumadocs-ui/layouts/home', `@/layouts/home`]);
-                },
+                print: () => printLayout(config, ['fumadocs-ui/layouts/home', '@/layouts/home']),
               },
               hint: 'the layout for other non-docs pages',
             },
@@ -120,12 +122,12 @@ export async function customise(config: LoadedConfig, connector: RegistryConnect
               value: {
                 id: 'docs-min',
                 targets: [{ name: 'layouts/docs-min' }],
-                print() {
+                print: () =>
                   printLayout(
+                    config,
                     ['fumadocs-ui/layouts/docs', '@/layouts/docs'],
                     ['fumadocs-ui/layouts/docs/page', '@/layouts/docs/page'],
-                  );
-                },
+                  ),
               },
             },
             ...info.unlistedIndexes.flatMap((index) => {
@@ -190,19 +192,45 @@ export async function customise(config: LoadedConfig, connector: RegistryConnect
     await installer.installInteractive(target.name, target.subRegistry);
   }
 
-  targetInfo.print?.();
+  await targetInfo.print?.();
 
   outro(picocolors.bold('Have fun!'));
 }
 
-function printLayout(...maps: [from: string, to: string][]) {
+/** point the imports of route files at the installed layouts */
+export async function rewriteLayoutImports(config: LoadedConfig, map: Map<string, string>) {
+  const dir = path.join(config.baseDir, frameworks[config.framework].routesDir);
+  const entries = await fs.readdir(dir, { recursive: true, withFileTypes: true }).catch(() => []);
+  const updated: string[] = [];
+
+  for (const entry of entries) {
+    if (!entry.isFile() || !entry.name.endsWith('.tsx')) continue;
+    const file = path.join(entry.parentPath, entry.name);
+    const source = parseSourceFile(file, await fs.readFile(file, 'utf-8'));
+    for (const node of source.program.body) {
+      if (node.type !== 'ImportDeclaration') continue;
+      const to = map.get(node.source.value);
+      if (to) source.s.overwrite(node.source.start + 1, node.source.end - 1, to);
+    }
+    if (!source.s.hasChanged()) continue;
+    await source.save();
+    updated.push(file);
+  }
+
+  return updated;
+}
+
+async function printLayout(config: LoadedConfig, ...maps: [from: string, to: string][]) {
   intro(picocolors.bold('What is Next?'));
+  const updated = await rewriteLayoutImports(config, new Map(maps));
 
   log.info(
     [
       'You can check the installed layouts in `layouts` folder.',
       picocolors.dim('---'),
-      'Open your `layout.tsx` files, replace the imports of components:',
+      updated.length > 0
+        ? `Updated the imports of ${updated.join(', ')}.`
+        : 'Open your `layout.tsx` files, replace the imports of components:',
       ...maps.map(([from, to]) => picocolors.greenBright(`"${from}" -> "${to}"`)),
     ].join('\n'),
   );

@@ -44,7 +44,7 @@ export function Header({ className, ...props }: HeaderProps) {
       )}
       {slots.searchTrigger && (
         <slots.searchTrigger.sm
-          color="secondary"
+          variant="secondary"
           size="icon"
           className={cn(baseVariants, 'size-12 shrink-0 md:hidden')}
         />

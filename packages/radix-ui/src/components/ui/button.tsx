@@ -1,8 +1,11 @@
 import { cva, type VariantProps } from 'class-variance-authority';
 
+const primary =
+  'bg-fd-primary text-fd-primary-foreground hover:bg-fd-primary/80 disabled:bg-fd-secondary disabled:text-fd-secondary-foreground';
+
 const variants = {
-  primary:
-    'bg-fd-primary text-fd-primary-foreground hover:bg-fd-primary/80 disabled:bg-fd-secondary disabled:text-fd-secondary-foreground',
+  default: primary,
+  primary,
   outline: 'border hover:bg-fd-accent hover:text-fd-accent-foreground',
   ghost: 'hover:bg-fd-accent hover:text-fd-accent-foreground',
   secondary:
@@ -14,7 +17,7 @@ export const buttonVariants = cva(
   {
     variants: {
       variant: variants,
-      // fumadocs use `color` instead of `variant`
+      // `color` and `primary` predate the Shadcn UI compatible names
       color: variants,
       size: {
         sm: 'gap-1 px-2 py-1.5 text-xs',

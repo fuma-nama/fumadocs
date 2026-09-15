@@ -1,6 +1,6 @@
 {
   "name": "@fumadocs/cli",
-  "version": "1.6.0",
+  "version": "1.6.1",
   "description": "The CLI tool for Fumadocs",
   "keywords": [
     "Docs",
@@ -17,6 +17,7 @@
     "dist"
   ],
   "type": "module",
+  "sideEffects": false,
   "exports": {
     "./codemod": "./dist/codemod/index.js",
     "./config": "./dist/config.js",

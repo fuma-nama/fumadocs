@@ -1,6 +1,6 @@
 {
   "name": "@fumadocs/basehub",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "The official BaseHub integration for Fumadocs",
   "keywords": [
     "Docs",
@@ -14,6 +14,7 @@
     "dist"
   ],
   "type": "module",
+  "sideEffects": false,
   "exports": {
     ".": "./dist/toc.mjs",
     "./package.json": "./package.json"

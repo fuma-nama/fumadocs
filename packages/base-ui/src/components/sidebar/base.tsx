@@ -15,7 +15,7 @@ import {
 import Link, { type LinkProps } from 'fumadocs-core/link';
 import { useOnChange } from 'fumadocs-core/utils/use-on-change';
 import { cn } from '@/utils/cn';
-import { ScrollArea, type ScrollAreaProps, ScrollViewport } from '@/components/ui/scroll-area';
+import { ScrollArea } from '@base-ui/react/scroll-area';
 import {
   Collapsible,
   CollapsibleContent,
@@ -219,18 +219,26 @@ export function SidebarDrawerContent({ className, children, ...props }: Componen
   );
 }
 
-export function SidebarViewport({ className, ...props }: ScrollAreaProps) {
+export function SidebarViewport({ className, ...props }: ScrollArea.Root.Props) {
   return (
-    <ScrollArea
+    <ScrollArea.Root
       className={(s) =>
         cn('min-h-0 flex-1', typeof className === 'function' ? className(s) : className)
       }
       {...props}
     >
-      <ScrollViewport className="p-4 overscroll-contain mask-[linear-gradient(to_bottom,transparent,white_12px,white_calc(100%-12px),transparent)]">
+      <ScrollArea.Viewport className="size-full rounded-[inherit] p-4 overscroll-contain mask-[linear-gradient(to_bottom,transparent,white_12px,white_calc(100%-12px),transparent)]">
         {props.children}
-      </ScrollViewport>
-    </ScrollArea>
+      </ScrollArea.Viewport>
+      <ScrollArea.Corner />
+      <ScrollArea.Scrollbar
+        className={(s) =>
+          cn('flex h-full w-1.5 select-none transition-opacity', !s.hovering && 'opacity-0')
+        }
+      >
+        <ScrollArea.Thumb className="relative flex-1 rounded-full bg-fd-border" />
+      </ScrollArea.Scrollbar>
+    </ScrollArea.Root>
   );
 }
 

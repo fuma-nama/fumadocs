@@ -1,6 +1,6 @@
 {
   "name": "@fumadocs/shadcn",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Shadcn UI integration for Fumadocs.",
   "keywords": [
     "Fumadocs"
@@ -13,6 +13,7 @@
     "dist"
   ],
   "type": "module",
+  "sideEffects": false,
   "types": "./dist/index.d.ts",
   "exports": {
     ".": "./dist/index.js",

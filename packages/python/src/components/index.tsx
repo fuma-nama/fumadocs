@@ -102,7 +102,7 @@ export function PySourceCode({ children }: { children: ReactNode }) {
       <CollapsibleTrigger
         className={cn(
           buttonVariants({
-            color: 'secondary',
+            variant: 'secondary',
             size: 'sm',
             className: 'group',
           }),

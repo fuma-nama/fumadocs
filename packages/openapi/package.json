@@ -1,6 +1,6 @@
 {
   "name": "fumadocs-openapi",
-  "version": "11.4.2",
+  "version": "11.4.3",
   "description": "Generate MDX docs for your OpenAPI spec",
   "keywords": [
     "Docs",
@@ -15,6 +15,9 @@
     "dist"
   ],
   "type": "module",
+  "sideEffects": [
+    "./css/**/*.css"
+  ],
   "exports": {
     ".": "./dist/index.js",
     "./i18n": "./dist/i18n.js",

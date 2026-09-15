@@ -1,6 +1,6 @@
 {
   "name": "@fumari/image-size",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Read image dimensions without downloading the whole image. Zero dependencies.",
   "keywords": [
     "dimensions",
@@ -16,6 +16,7 @@
     "dist"
   ],
   "type": "module",
+  "sideEffects": false,
   "exports": {
     ".": "./dist/index.js",
     "./package.json": "./package.json"

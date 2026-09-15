@@ -1,6 +1,6 @@
 {
   "name": "@fumadocs/local-md",
-  "version": "0.3.4",
+  "version": "0.3.5",
   "description": "The local Markdown files content source for Fumadocs",
   "keywords": [
     "Docs",
@@ -17,6 +17,7 @@
     "dist"
   ],
   "type": "module",
+  "sideEffects": false,
   "exports": {
     ".": "./dist/index.js",
     "./client": "./dist/client.js",

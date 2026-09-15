@@ -154,7 +154,7 @@ export function EditOnGitHub(props: ComponentProps<'a'>) {
       {...props}
       className={cn(
         buttonVariants({
-          color: 'secondary',
+          variant: 'secondary',
           size: 'sm',
         }),
         'gap-1.5 not-prose',

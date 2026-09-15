@@ -56,7 +56,7 @@ export function AISearchPanelHeader({ className, ...props }: ComponentProps<'div
         className={cn(
           buttonVariants({
             size: 'icon-sm',
-            color: 'ghost',
+            variant: 'ghost',
             className: 'text-fd-muted-foreground rounded-full',
           }),
         )}
@@ -81,7 +81,7 @@ export function AISearchInputActions() {
           type="button"
           className={cn(
             buttonVariants({
-              color: 'secondary',
+              variant: 'secondary',
               size: 'sm',
               className: 'rounded-full gap-1.5',
             }),
@@ -96,7 +96,7 @@ export function AISearchInputActions() {
         type="button"
         className={cn(
           buttonVariants({
-            color: 'secondary',
+            variant: 'secondary',
             size: 'sm',
             className: 'rounded-full',
           }),
@@ -168,7 +168,7 @@ export function AISearchInput(props: ComponentProps<'form'>) {
           type="button"
           className={cn(
             buttonVariants({
-              color: 'secondary',
+              variant: 'secondary',
               className: 'transition-all rounded-full mt-2 gap-2',
             }),
           )}
@@ -183,7 +183,7 @@ export function AISearchInput(props: ComponentProps<'form'>) {
           type="submit"
           className={cn(
             buttonVariants({
-              color: 'primary',
+              variant: 'default',
               className: 'transition-all rounded-full mt-2',
             }),
           )}

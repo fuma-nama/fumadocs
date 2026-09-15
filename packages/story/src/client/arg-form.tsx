@@ -349,7 +349,7 @@ export function FieldSet({
               className={cn(
                 buttonVariants({
                   size: 'icon-xs',
-                  color: 'ghost',
+                  variant: 'ghost',
                   className: 'text-fd-muted-foreground',
                 }),
               )}
@@ -386,7 +386,7 @@ export function FieldSet({
               className={cn(
                 buttonVariants({
                   size: 'icon-xs',
-                  color: 'ghost',
+                  variant: 'ghost',
                   className: 'text-fd-muted-foreground -ms-1',
                 }),
               )}
@@ -459,7 +459,7 @@ function ArrayInput({
               aria-label={t('Remove Item', { note: 'aria-label' })}
               className={cn(
                 buttonVariants({
-                  color: 'outline',
+                  variant: 'outline',
                   size: 'icon-xs',
                 }),
               )}
@@ -474,7 +474,7 @@ function ArrayInput({
         type="button"
         className={cn(
           buttonVariants({
-            color: 'secondary',
+            variant: 'secondary',
             className: 'gap-1.5 py-2',
             size: 'sm',
           }),

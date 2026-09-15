@@ -37,6 +37,7 @@ export async function createConfigSchema(cwd = process.cwd()) {
     layoutDir: './layouts',
     cssDir: './styles',
     libDir: shadcn.lib ?? './lib',
+    utils: shadcn.utils,
   };
 
   let framework = await detectFramework(cwd);
@@ -51,6 +52,8 @@ export async function createConfigSchema(cwd = process.cwd()) {
         layoutDir: z.string().default(defaultAliases.layoutDir),
         cssDir: z.string().default(defaultAliases.cssDir),
         libDir: z.string().default(defaultAliases.libDir),
+        /** module exporting `cn`, installed components import it instead of `lib/cn.ts` */
+        utils: shadcn.utils ? z.string().default(shadcn.utils) : z.string().optional(),
       })
       .default(defaultAliases),
 

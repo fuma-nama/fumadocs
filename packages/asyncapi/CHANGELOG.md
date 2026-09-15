@@ -1,3 +1,9 @@
+## @fumadocs/asyncapi@0.3.6
+
+### Mark packages side-effect free
+
+All packages now declare `sideEffects` in `package.json`, so bundlers can tree-shake unused modules. Packages shipping stylesheets list them as side effects to keep CSS imports.
+
 ## @fumadocs/asyncapi@0.3.5
 
 ### Replace `cnfast` with `cn`

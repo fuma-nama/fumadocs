@@ -1,3 +1,9 @@
+## @fumadocs/mdx-remote@1.5.2
+
+### Mark packages side-effect free
+
+All packages now declare `sideEffects` in `package.json`, so bundlers can tree-shake unused modules. Packages shipping stylesheets list them as side effects to keep CSS imports.
+
 ## @fumadocs/mdx-remote@1.5.1
 
 ### Migrate from `js-yaml` to `yaml`

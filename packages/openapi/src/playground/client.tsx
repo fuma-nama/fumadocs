@@ -314,7 +314,7 @@ export default function PlaygroundClient({
             <Route route={route} className={cn('flex-1', operation.deprecated && 'line-through')} />
             <button
               type="submit"
-              className={cn(buttonVariants({ color: 'primary', size: 'sm' }), 'w-14 py-1.5')}
+              className={cn(buttonVariants({ variant: 'default', size: 'sm' }), 'w-14 py-1.5')}
               disabled={testQuery.isLoading}
             >
               {testQuery.isLoading ? <LoaderCircle className="size-4 animate-spin" /> : t('Send')}
@@ -532,7 +532,7 @@ function BodyInput({ field: _field }: { field: ParsedSchema }) {
         <button
           className={cn(
             buttonVariants({
-              color: 'secondary',
+              variant: 'secondary',
               size: 'sm',
               className: 'w-fit font-mono p-2',
             }),
@@ -557,7 +557,7 @@ function BodyInput({ field: _field }: { field: ParsedSchema }) {
           type="button"
           className={cn(
             buttonVariants({
-              color: 'secondary',
+              variant: 'secondary',
               size: 'sm',
               className: 'p-2',
             }),
@@ -814,7 +814,7 @@ function OAuth2Input({ fieldName, security }: { fieldName: FieldKey; security: S
             className={cn(
               buttonVariants({
                 size: 'sm',
-                color: 'secondary',
+                variant: 'secondary',
               }),
             )}
           >

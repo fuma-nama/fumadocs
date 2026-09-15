@@ -91,7 +91,7 @@ export function ObjectInput({
               aria-label={t('Remove Item', { note: 'aria-label' })}
               className={cn(
                 buttonVariants({
-                  color: 'outline',
+                  variant: 'outline',
                   size: 'icon-xs',
                 }),
               )}
@@ -131,7 +131,7 @@ export function ObjectInput({
           />
           <button
             type="button"
-            className={cn(buttonVariants({ color: 'secondary', size: 'sm' }), 'px-4')}
+            className={cn(buttonVariants({ variant: 'secondary', size: 'sm' }), 'px-4')}
             onClick={() => {
               onAppend(nextName);
               setNextName('');
@@ -192,7 +192,7 @@ export function FieldInput({
           htmlFor={id}
           className={cn(
             buttonVariants({
-              color: 'secondary',
+              variant: 'secondary',
               className: 'w-full h-9 gap-2 truncate',
             }),
           )}
@@ -564,7 +564,7 @@ function ArrayInput({
               aria-label={t('Remove Item', { note: 'aria-label' })}
               className={cn(
                 buttonVariants({
-                  color: 'outline',
+                  variant: 'outline',
                   size: 'icon-xs',
                 }),
               )}
@@ -579,7 +579,7 @@ function ArrayInput({
         type="button"
         className={cn(
           buttonVariants({
-            color: 'secondary',
+            variant: 'secondary',
             className: 'gap-1.5 py-2',
             size: 'sm',
           }),

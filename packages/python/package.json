@@ -1,6 +1,6 @@
 {
   "name": "fumadocs-python",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "The built-in Python docgen for Fumadocs",
   "keywords": [
     "Docs",
@@ -17,6 +17,9 @@
     "dist"
   ],
   "type": "module",
+  "sideEffects": [
+    "./styles/**/*.css"
+  ],
   "module": "./dist/index.js",
   "types": "./dist/index.d.ts",
   "exports": {

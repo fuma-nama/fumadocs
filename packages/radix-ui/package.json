@@ -1,6 +1,6 @@
 {
   "name": "fumadocs-ui",
-  "version": "16.15.10",
+  "version": "16.15.11",
   "description": "The Radix UI version of Fumadocs UI",
   "keywords": [
     "Docs",
@@ -18,6 +18,10 @@
     "dist"
   ],
   "type": "module",
+  "sideEffects": [
+    "./css/**/*.css",
+    "./dist/**/*.css"
+  ],
   "exports": {
     "./components/accordion": "./dist/components/accordion.js",
     "./components/banner": "./dist/components/banner.js",
@@ -52,7 +56,6 @@
     "./components/ui/collapsible": "./dist/components/ui/collapsible.js",
     "./components/ui/navigation-menu": "./dist/components/ui/navigation-menu.js",
     "./components/ui/popover": "./dist/components/ui/popover.js",
-    "./components/ui/scroll-area": "./dist/components/ui/scroll-area.js",
     "./components/ui/tabs": "./dist/components/ui/tabs.js",
     "./contexts/i18n": "./dist/contexts/i18n.js",
     "./contexts/search": "./dist/contexts/search.js",

@@ -1,6 +1,6 @@
 {
   "name": "@fumadocs/content",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "The Fuma Content adapter for Fumadocs",
   "keywords": [
     "Docs",
@@ -14,6 +14,7 @@
     "dist"
   ],
   "type": "module",
+  "sideEffects": false,
   "exports": {
     ".": "./dist/index.js",
     "./runtime": "./dist/runtime.js",

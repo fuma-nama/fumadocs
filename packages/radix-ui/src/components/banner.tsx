@@ -102,7 +102,7 @@ export function Banner({
           onClick={onClose}
           className={cn(
             buttonVariants({
-              color: 'ghost',
+              variant: 'ghost',
               className: 'absolute inset-e-2 top-1/2 -translate-y-1/2 text-fd-muted-foreground/50',
               size: 'icon-sm',
             }),

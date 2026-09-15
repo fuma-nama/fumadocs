@@ -52,7 +52,7 @@ export function DialogContent({
         <DialogPrimitive.Close
           aria-label="Close"
           className={cn(
-            buttonVariants({ size: 'icon-sm', color: 'ghost' }),
+            buttonVariants({ size: 'icon-sm', variant: 'ghost' }),
             'absolute end-2 top-2 text-fd-muted-foreground/70',
           )}
         >

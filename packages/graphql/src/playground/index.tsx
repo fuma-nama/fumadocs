@@ -244,7 +244,7 @@ export function OperationPlayground({
           <button
             type="submit"
             disabled={testQuery.isLoading || url.length === 0 || runDisabled}
-            className={cn(buttonVariants({ variant: 'primary', size: 'sm' }), 'gap-1.5 px-3')}
+            className={cn(buttonVariants({ variant: 'default', size: 'sm' }), 'gap-1.5 px-3')}
           >
             {testQuery.isLoading ? <Spinner className="size-3.5" /> : <Play className="size-3.5" />}
             {t('Run')}

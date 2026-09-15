@@ -1,6 +1,6 @@
 {
   "name": "fumadocs-mdx",
-  "version": "15.4.0",
+  "version": "15.4.1",
   "description": "The built-in source for Fumadocs",
   "keywords": [
     "Docs",
@@ -21,6 +21,7 @@
     "bin.js"
   ],
   "type": "module",
+  "sideEffects": false,
   "exports": {
     ".": "./dist/index.js",
     "./bin": "./dist/bin.js",

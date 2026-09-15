@@ -23,7 +23,7 @@ import {
 } from 'lucide-react';
 import { useOnChange } from 'fumadocs-core/utils/use-on-change';
 import { cn } from '@/utils/cn';
-import { ScrollArea, ScrollViewport } from '@/components/ui/scroll-area';
+import * as ScrollArea from '@radix-ui/react-scroll-area';
 import { buttonVariants } from '@/components/ui/button';
 import { usePathname } from 'fumadocs-core/framework';
 import { useTranslations } from '@fuma-translate/react';
@@ -203,14 +203,18 @@ export function Sidebar({ className, children, ...props }: SidebarProps) {
           className="min-w-0 bg-fd-secondary text-fd-secondary-foreground rounded-xl px-2.5 py-2 [&_svg]:size-4 border rounded-xl shadow-sm mx-2 mt-2.5 empty:hidden"
         />
       )}
-      <ScrollArea className="min-h-0 flex-1">
-        <ScrollViewport className="flex flex-col p-2 [mask-image:linear-gradient(to_bottom,transparent,white_16px,white_calc(100%-16px),transparent))]">
+      <ScrollArea.Root type="scroll" className="overflow-hidden min-h-0 flex-1">
+        <ScrollArea.Viewport className="size-full rounded-[inherit] flex flex-col p-2 [mask-image:linear-gradient(to_bottom,transparent,white_16px,white_calc(100%-16px),transparent))]">
           {menuItems.map(
             (item, i) => item.type !== 'icon' && <SidebarLinkItem key={i} item={item} />,
           )}
           {root.children.map((item, i) => cloneElement(renderNode(item), { key: i }))}
-        </ScrollViewport>
-      </ScrollArea>
+        </ScrollArea.Viewport>
+        <ScrollArea.Corner />
+        <ScrollArea.Scrollbar className="flex h-full w-1.5 select-none data-[state=hidden]:animate-fd-fade-out">
+          <ScrollArea.ScrollAreaThumb className="relative flex-1 rounded-full bg-fd-border" />
+        </ScrollArea.Scrollbar>
+      </ScrollArea.Root>
       {children}
     </aside>
   );

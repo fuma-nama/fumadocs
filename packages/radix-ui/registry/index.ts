@@ -202,10 +202,12 @@ export const registry: Registry = {
         {
           type: 'components',
           path: 'components/accordion.tsx',
+          target: '<dir>/accordion/index.tsx',
         },
         {
-          type: 'ui',
+          type: 'components',
           path: 'components/ui/accordion.tsx',
+          target: '<dir>/accordion/ui.tsx',
         },
       ],
     },
@@ -311,10 +313,12 @@ export const registry: Registry = {
         {
           type: 'components',
           path: 'components/tabs.tsx',
+          target: '<dir>/tabs/index.tsx',
         },
         {
-          type: 'ui',
+          type: 'components',
           path: 'components/ui/tabs.tsx',
+          target: '<dir>/tabs/ui.tsx',
         },
       ],
     },
@@ -344,16 +348,6 @@ export const registry: Registry = {
         {
           type: 'ui',
           path: 'components/ui/popover.tsx',
-        },
-      ],
-    },
-    {
-      name: 'scroll-area',
-      unlisted: true,
-      files: [
-        {
-          type: 'ui',
-          path: 'components/ui/scroll-area.tsx',
         },
       ],
     },
