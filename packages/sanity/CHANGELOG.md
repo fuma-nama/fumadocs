@@ -1,3 +1,9 @@
+## @fumadocs/sanity@0.2.4
+
+### Mark packages side-effect free
+
+All packages now declare `sideEffects` in `package.json`, so bundlers can tree-shake unused modules. Packages shipping stylesheets list them as side effects to keep CSS imports.
+
 ## @fumadocs/sanity@0.2.3
 
 ### Mark packages side-effect free

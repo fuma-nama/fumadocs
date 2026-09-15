@@ -2,15 +2,13 @@ core:changelogs:
   - content: "---\npackages:\n  npm:@fumadocs/api-docs:\n    type: patch\n  npm:@fumadocs/asyncapi:\n    type: patch\n  npm:@fumadocs/base-ui:\n    type: patch\n  npm:@fumadocs/basehub:\n    type: patch\n  npm:@fumadocs/cli:\n    type: patch\n  npm:@fumadocs/content:\n    type: patch\n  npm:@fumadocs/content-collections:\n    type: patch\n  npm:@fumadocs/graphql:\n    type: patch\n  npm:@fumadocs/language:\n    type: patch\n  npm:@fumadocs/local-content:\n    type: patch\n  npm:@fumadocs/local-html:\n    type: patch\n  npm:@fumadocs/local-md:\n    type: patch\n  npm:@fumadocs/mdx-remote:\n    type: patch\n  npm:@fumadocs/sanity:\n    type: patch\n  npm:@fumadocs/satteri:\n    type: patch\n  npm:@fumadocs/shadcn:\n    type: patch\n  npm:@fumadocs/story:\n    type: patch\n  npm:@fumadocs/tailwind:\n    type: patch\n  npm:@fumari/image-size:\n    type: patch\n  npm:@fumari/stf:\n    type: patch\n  npm:create-fumadocs-app:\n    type: patch\n  npm:fumadocs-docgen:\n    type: patch\n  npm:fumadocs-epub:\n    type: patch\n  npm:fumadocs-mdx:\n    type: patch\n  npm:fumadocs-obsidian:\n    type: patch\n  npm:fumadocs-openapi:\n    type: patch\n  npm:fumadocs-python:\n    type: patch\n  npm:fumadocs-twoslash:\n    type: patch\n  npm:fumadocs-typescript:\n    type: patch\n  npm:fumadocs-ui:\n    type: patch\n---\n\n## Mark packages side-effect free\n\nAll packages now declare `sideEffects` in `package.json`, so bundlers can tree-shake unused modules. Packages shipping stylesheets list them as side effects to keep CSS imports.\n"
     filename: 2026-09-14-side-effects.md
     v: 0.0.0
-  - content: "---\npackages:\n  npm:fumadocs-ui:\n    type: patch\n  npm:@fumadocs/base-ui:\n    type: patch\n---\n\n## Shadcn UI compatible primitives\n\nThe primitives in `fumadocs-ui/components/ui/*` now follow the API of Shadcn UI, so components installed by the CLI can use the ones you already have.\n\n`buttonVariants` accepts the `default` variant of Shadcn UI:\n\n```tsx\nbuttonVariants({ variant: 'default', size: 'sm' });\n```\n\n`primary` and the `color` alias still work.\n\n`fumadocs-ui/components/ui/scroll-area` is removed, the sidebars render the scroll area primitives directly.\n"
-    filename: 2026-09-13-shadcn-compatible-primitives.md
-    v: 0.0.0
-  - content: "---\npackages:\n  npm:@fumadocs/cli:\n    type: patch\n---\n\n## Reuse your Shadcn UI components\n\nOn projects with a `components.json`, the CLI leaves the `button`, `popover` and `collapsible` of your `ui` directory as they are and imports them from installed components, they share the API of Shadcn UI. `cn` is imported from your `utils` alias instead of a new `lib/cn.ts`, configurable in `cli.json`:\n\n```json\n{\n  \"aliases\": {\n    \"utils\": \"./lib/utils\"\n  }\n}\n```\n\nFumadocs' copies are only installed when you don't have them yet. The `tabs` and `accordion` primitives are Fumadocs specific, they are installed next to their components instead of the `ui` directory.\n\n- `customize` updates the imports of your route files to the installed layouts.\n- `feature ai` and `feature feedback` install the primitives of your configured `uiLibrary`, they always used the Radix UI ones before.\n"
-    filename: 2026-09-13-cli-shadcn.md
+  - content: "---\nsubject: Fumadocs OpenAPI v12\npackages:\n  npm:fumadocs-openapi:\n    type: major\n  npm:@fumadocs/api-docs:\n    type: minor\n---\n\n## Headless API pages\n\nAPI pages are now built on a headless layer, use it to build your own UI:\n\n- `fumadocs-openapi/headless`: `createOpenAPIPage()` and `<OpenAPIProvider />` with your own components, and the hooks of pages and operations, like `useOperation()`, `useExampleRequests()` and `useServer()`.\n- `fumadocs-openapi/headless/base`: `createOpenAPIPage()` and `<OpenAPIProvider />` without the default code usages and TypeScript definitions, for smaller bundles.\n- `@fumadocs/api-docs/components/schema/headless`: the generation and navigation state of Schema UI, like `generateSchemaUI()` and `useSchemaTabs()`.\n\nSee [Headless](https://fumadocs.dev/docs/integrations/openapi/headless).\n\n## Install the full UI\n\nThe entire UI of API pages can be installed with Fumadocs CLI:\n\n```npm\nnpx @fumadocs/cli add fumadocs/openapi/page\n```\n\n```tsx title=\"components/api-page.tsx\"\n'use client';\nimport { createOpenAPIPageBase } from '@/components/api/page';\nimport { defaultShikiFactory } from 'fumadocs-core/highlight/shiki/full';\n\nexport const OpenAPIPage = createOpenAPIPageBase({ shiki: defaultShikiFactory });\n```\n\nTo customise parts of it, install `fumadocs/openapi/operation` or `fumadocs/api-docs/schema`, and pass them to the new `components` options:\n\n```tsx\nexport const OpenAPIPage = createOpenAPIPage({\n  components: { Operation, SchemaUI: Schema },\n});\n```\n\n## Render custom inline code samples\n\nCode samples from `x-codeSamples` and `generateCodeSamples` are now rendered when their id isn't a built-in generator.\n\n## Data info tags in Schema UI\n\n`SchemaData.infoTags` entries are data rendered by the UI: `{ label, value, block? }` or `{ label, list }`. Custom nodes (`{ node }`) are still accepted, code reading `tag.node` must handle all shapes.\n\n## Merge `components/schema/client` into `components/schema`\n\n`@fumadocs/api-docs/components/schema` exports the entire Schema UI, including its headless utilities.\n\n```diff\n- import { SchemaUI, InlineTag } from '@fumadocs/api-docs/components/schema/client';\n+ import { SchemaUI, InlineTag } from '@fumadocs/api-docs/components/schema';\n```\n\n## Migrate options of `createOpenAPIPage()`\n\nPass components to the `components` option:\n\n```diff\n createOpenAPIPage({\n-  schemaUI: { render: (props) => <Schema {...props} /> },\n-  renderHeading: (props, depth) => <Heading depth={depth} {...props} />,\n-  renderCodeBlock: (props) => <CodeBlock {...props} />,\n-  renderMarkdown: (md) => <Markdown md={md} />,\n+  components: { SchemaUI: Schema, Heading, CodeBlock, Markdown },\n });\n```\n\n- `playground.provider` is removed, the page provides the auth state of API playground.\n- `playground.render` and `generateTypeScriptDefinitions` no longer receive `ctx`, read the document from `useOpenAPI().doc`, or the `doc` passed to `generateTypeScriptDefinitions`.\n- `operation.APIExampleSelector` is removed, install `fumadocs/openapi/operation` and edit the selector in `usage-tabs.tsx`.\n- The `ctx` of `content` render options holds your options with the `schema` and `proxyUrl` of page. `ctx.SchemaUI` and `ctx._default_processMarkdown` are removed, use `useComponents()` in a component.\n\n## Migrate hooks\n\nThe hooks of `fumadocs-openapi/ui` are replaced by `fumadocs-openapi/headless`:\n\n| v11                     | v12                                                              |\n| ----------------------- | ---------------------------------------------------------------- |\n| `useRenderContext()`    | `useOpenAPI()` (`schema` is renamed to `doc`), `useComponents()` |\n| `useServerContext()`    | `useServer()`                                                    |\n| `useOperationContext()` | `useOperation()`, `useExampleRequests()`, `useExampleRequest()`  |\n\n```diff\n- const { route, examples, example, setExample, setExampleData } = useOperationContext();\n+ const { path } = useOperation();\n+ const { items, selected, select, update } = useExampleRequests();\n+ // data of the selected example, replaces `addListener()`\n+ const data = useExampleRequest();\n```\n\nComponents installed from v11 with Fumadocs CLI (e.g. the API playground) use the old hooks, reinstall them.\n\n## Remove deprecated APIs\n\n| Removed                                                    | Use                                                 |\n| ---------------------------------------------------------- | --------------------------------------------------- |\n| `fumadocs-openapi/ui/create-client`                        | `createOpenAPIPage()` from `fumadocs-openapi/ui`    |\n| `ApiPageProps`                                             | `OpenAPIPageProps`                                  |\n| `OperationItem` and `WebhookItem` of `fumadocs-openapi/ui` | import them from `fumadocs-openapi`                 |\n| `getAPIPageProps()` and `getClientAPIPageProps()`          | `getOpenAPIPageProps()`                             |\n| `defineI18nOpenAPI()`                                      | `i18n.translations().extend(openapiTranslations())` |\n| `APIPage` of MDX components                                | `OpenAPIPage`, generated files only render it       |\n"
+    filename: 2026-09-15-openapi-v12.md
     v: 0.0.0
 core:packages:
   - changelogIds:
       - 2026-09-14-side-effects.md
+      - 2026-09-15-openapi-v12.md
     id: npm:@fumadocs/api-docs
     updated: true
   - changelogIds:
@@ -18,7 +16,6 @@ core:packages:
     id: npm:@fumadocs/asyncapi
     updated: true
   - changelogIds:
-      - 2026-09-13-shadcn-compatible-primitives.md
       - 2026-09-14-side-effects.md
     id: npm:@fumadocs/base-ui
     updated: true
@@ -27,7 +24,6 @@ core:packages:
     id: npm:@fumadocs/basehub
     updated: true
   - changelogIds:
-      - 2026-09-13-cli-shadcn.md
       - 2026-09-14-side-effects.md
     id: npm:@fumadocs/cli
     updated: true
@@ -95,6 +91,7 @@ core:packages:
     updated: true
   - changelogIds:
       - 2026-09-14-side-effects.md
+      - 2026-09-15-openapi-v12.md
     id: npm:fumadocs-openapi
     updated: true
   - id: npm:fumadocs-preview
@@ -104,7 +101,6 @@ core:packages:
     id: npm:fumadocs-python
     updated: true
   - changelogIds:
-      - 2026-09-13-shadcn-compatible-primitives.md
       - 2026-09-14-side-effects.md
     id: npm:fumadocs-ui
     updated: true
@@ -179,11 +175,12 @@ npm:packages:
   - id: npm:fumadocs-typescript
   - id: npm:@fumadocs/vite
   - id: npm:docs
-  - id: npm:example-astro
   - id: npm:example-asyncapi
+  - id: npm:example-graphql
+  - id: npm:example-openapi
+  - id: npm:example-tanstack-start-openapi
   - id: npm:example-base-ui
   - id: npm:example-content-collections
-  - id: npm:example-graphql
   - id: npm:example-i18n
   - id: npm:example-marble-cms
   - id: npm:example-next
@@ -191,11 +188,10 @@ npm:packages:
   - id: npm:example-next-local-md
   - id: npm:example-next-min
   - id: npm:example-next-static
-  - id: npm:example-next-shadcn
   - id: npm:example-obsidian
-  - id: npm:example-openapi
-  - id: npm:example-python
+  - id: npm:example-next-shadcn
   - id: npm:example-react-router
+  - id: npm:example-python
   - id: npm:example-react-router-i18n
   - id: npm:example-react-router-min
   - id: npm:example-react-router-rsc
@@ -204,8 +200,8 @@ npm:packages:
   - id: npm:example-tanstack-start-i18n
   - id: npm:example-tanstack-start-local-md
   - id: npm:example-tanstack-start-min
-  - id: npm:example-tanstack-start-openapi
   - id: npm:example-tanstack-start-spa
   - id: npm:example-tanstack-start-story
   - id: npm:example-waku
   - id: npm:example-waku-i18n
+  - id: npm:example-astro
