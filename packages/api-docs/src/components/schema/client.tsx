@@ -15,11 +15,6 @@ import {
   useState,
 } from 'react';
 import { useTranslations } from '@fuma-translate/react';
-import type {
-  SchemaData,
-  SchemaDataObjectProperty,
-  SchemaUIGeneratedData,
-} from '@/components/schema';
 import { buttonVariants } from 'fumadocs-ui/components/ui/button';
 import { CheckIcon, FilterIcon, LinkIcon } from 'lucide-react';
 import { Popover, PopoverContent, PopoverTrigger } from '../popover';
@@ -28,6 +23,10 @@ import { cva } from 'class-variance-authority';
 import { mergeRefs } from '@/utils/merge-refs';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../select';
 import {
+  type SchemaData,
+  type SchemaDataObjectProperty,
+  type SchemaUIContextType,
+  type SchemaUIGeneratedData,
   SchemaUIProvider,
   useCopySchemaLink,
   useSchemaHighlight,
@@ -104,18 +103,16 @@ function SchemaUIContent({
 }
 
 function RootTypeInfoTrigger({ pathName, $ref, children }: TypeInfoTriggerProps) {
-  const { path } = useSchemaUI();
+  const { path, rootId } = useSchemaUI();
   const { open, onOpenChange } = useSchemaPopover(pathName, $ref);
-  /** scroll positions of visited path items, restored when navigating back */
-  const scrollTops = useRef(new Map<number, number>());
   const popoverRef = useCallback(
     (element: HTMLDivElement | null) => {
       if (!element) return;
-      element.scrollTop = scrollTops.current.get(path.length) ?? 0;
+      element.scrollTop = scrollTops.get(getScrollKey(rootId, path)) ?? 0;
       const current = parseFloat(element.style.getPropertyValue('--min-height') || '200px');
       element.style.setProperty('--min-height', Math.max(element.clientHeight + 2, current) + 'px');
     },
-    [path],
+    [rootId, path],
   );
 
   return (
@@ -128,13 +125,21 @@ function RootTypeInfoTrigger({ pathName, $ref, children }: TypeInfoTriggerProps)
         className="w-[600px] max-w-(--available-width) min-h-(--min-height,200px) fd-scroll-container max-h-[460px] px-3 pt-0"
         onScrollEnd={(e) => {
           // ensure popover scroll top is stable
-          scrollTops.current.set(path.length, (e.target as HTMLElement).scrollTop);
+          scrollTops.set(getScrollKey(rootId, path), (e.target as HTMLElement).scrollTop);
         }}
       >
         <SchemaUIPopover />
       </PopoverContent>
     </Popover>
   );
+}
+
+/** scroll positions of opened schemas, restored when navigating back */
+const scrollTops = new Map<string, number>();
+
+function getScrollKey(rootId: string, path: SchemaUIContextType['path']) {
+  const last = path.at(-1)!;
+  return `${rootId}\0${path.length}\0${last.name}\0${last.$ref}`;
 }
 
 function PopoverTypeInfoTrigger({ pathName, $ref, children }: TypeInfoTriggerProps) {
@@ -160,12 +165,23 @@ function SchemaDescription({ schema, ...props }: ComponentProps<'div'> & { schem
             <Fragment key={i}>
               {'node' in tag ? (
                 tag.node
+              ) : 'list' in tag ? (
+                <BlockTag label={tag.label}>
+                  <ul>
+                    {tag.list.map((item, i) => (
+                      <li
+                        key={i}
+                        className="font-mono list-disc list-inside ps-1 marker:text-fd-muted-foreground"
+                      >
+                        {item}
+                      </li>
+                    ))}
+                  </ul>
+                </BlockTag>
               ) : tag.block ? (
                 <BlockTag label={tag.label}>{tag.value}</BlockTag>
               ) : (
-                <InlineTag label={tag.label} prose={tag.prose}>
-                  {tag.value}
-                </InlineTag>
+                <InlineTag label={tag.label}>{tag.value}</InlineTag>
               )}
             </Fragment>
           ))}

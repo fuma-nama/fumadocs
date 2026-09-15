@@ -16,16 +16,15 @@ import { FormatFlags, schemaToString } from '@/schema/to-string';
 import { mergeAllOf } from '@/schema/merge';
 import { dereferenceShallow } from '@/schema/dereference';
 
-/** a labelled value, or a custom node */
+/** a labelled value, a labelled list of values, or a custom node */
 export type InfoTag =
   | {
       label: ReactNode;
       value: ReactNode;
       /** render as a block instead of inline */
       block?: boolean;
-      /** the value is prose */
-      prose?: boolean;
     }
+  | { label: ReactNode; list: string[] }
   | { node: ReactNode };
 
 export interface FieldBase {
@@ -164,23 +163,9 @@ export function generateSchemaUI({
     }
 
     if (schema.enum && schema.enum.length > 0) {
-      const members = schema.enum.map((value) => JSON.stringify(value, null, 2));
-
       blocks.push({
         label: t('Value in'),
-        block: true,
-        value: (
-          <ul>
-            {members.map((m, i) => (
-              <li
-                key={i}
-                className="font-mono list-disc list-inside ps-1 marker:text-fd-muted-foreground"
-              >
-                {m}
-              </li>
-            ))}
-          </ul>
-        ),
+        list: schema.enum.map((value) => JSON.stringify(value, null, 2)),
       });
     }
 
@@ -542,11 +527,13 @@ export function useSchemaTabs(
   const { path, setPath } = usePathState();
 
   return [
-    path[pathIndex].tabValues?.[depth],
+    // empty for unselected parents restored from the URL
+    path[pathIndex].tabValues?.[depth] || undefined,
     (value) => {
-      const next = [...path];
-      (next[pathIndex].tabValues ??= []).splice(depth, 1, value);
-      setPath(next);
+      // selections of nested unions belong to the previous value
+      const tabValues = path[pathIndex].tabValues?.slice(0, depth) ?? [];
+      tabValues[depth] = value;
+      setPath(path.with(pathIndex, { ...path[pathIndex], tabValues }));
     },
   ];
 }

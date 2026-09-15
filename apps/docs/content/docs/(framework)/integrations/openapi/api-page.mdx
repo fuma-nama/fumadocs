@@ -141,7 +141,29 @@ export const OpenAPIPage = createOpenAPIPage({
 
 ## Customise UI
 
-For customisations beyond the available options, you can install the UI into your codebase with Fumadocs CLI, and use it in place of the built-in renderers.
+For customisations beyond the available options, you can install the UI into your codebase with [Fumadocs CLI](/docs/cli).
+
+### Full UI
+
+The entire UI of API pages, built on [the headless layer](/docs/integrations/openapi/headless).
+
+```npm
+npx @fumadocs/cli add fumadocs/openapi/page
+```
+
+It takes the same options as `createOpenAPIPage()`, with a Shiki factory.
+
+```tsx title="components/api-page.tsx"
+'use client';
+import { createOpenAPIPage } from 'fumadocs-openapi/ui'; // [!code --]
+import { createOpenAPIPageBase } from '@/components/api/page'; // [!code ++]
+import { defaultShikiFactory } from 'fumadocs-core/highlight/shiki/full'; // [!code ++]
+
+export const OpenAPIPage = createOpenAPIPage(); // [!code --]
+export const OpenAPIPage = createOpenAPIPageBase({ shiki: defaultShikiFactory }); // [!code ++]
+```
+
+The sections below install parts of the UI instead, and use them in the built-in page.
 
 ### API Playground
 

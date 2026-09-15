@@ -21,6 +21,7 @@
   "exports": {
     ".": "./dist/index.js",
     "./headless": "./dist/headless/index.js",
+    "./headless/base": "./dist/headless/base.js",
     "./i18n": "./dist/i18n.js",
     "./playground/client": "./dist/playground/client.js",
     "./requests/generators": "./dist/requests/generators/index.js",
@@ -36,7 +37,6 @@
     "./server": "./dist/server/index.js",
     "./ui": "./dist/ui/index.js",
     "./ui/base": "./dist/ui/base.js",
-    "./ui/create-client": "./dist/ui/create-client.js",
     "./package.json": "./package.json",
     "./css/*": "./css/*"
   },

@@ -13,13 +13,15 @@ import { MethodLabel } from '@/ui/components/method-label';
 import { Markdown } from '../components/markdown';
 import { ClientCodeBlock } from '../components/codeblock';
 import { type ExampleRequest, useExampleRequests, useOperation } from '@/headless';
-import type { OperationLegacyOptions } from '.';
+import type { RenderContext } from '@/types';
 
-export function RequestTabs({ legacy }: { legacy?: OperationLegacyOptions }) {
-  const { operation } = useOperation();
+export function RequestTabs({ ctx }: { ctx?: RenderContext }) {
+  const { path, method, operation, pathItem } = useOperation();
   const { items } = useExampleRequests();
   if (!operation.requestBody) return null;
-  if (legacy?.RequestTabs) return <legacy.RequestTabs />;
+
+  if (ctx?.content?.renderRequestTabs)
+    return ctx.content.renderRequestTabs({ items, route: path, method, pathItem, operation }, ctx);
 
   return <RequestTabsDefaultContent items={items} />;
 }

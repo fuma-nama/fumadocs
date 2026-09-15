@@ -247,6 +247,22 @@ export interface GeneratedPageProps {
   webhooks?: WebhookItem[];
 }
 
+export type OpenAPIPageProps = OpenAPIPageProps_Spec | OpenAPIPageProps_Preloaded;
+
+export type OpenAPIPageProps_Spec = Omit<GeneratedPageProps, 'document'> & {
+  payload: {
+    bundled: Document;
+    proxyUrl?: string;
+  };
+};
+
+export type OpenAPIPageProps_Preloaded = GeneratedPageProps & {
+  preloaded: {
+    docs: Record<string, Document>;
+    proxyUrl?: string;
+  };
+};
+
 export function getPageProps(
   entry: PageOutput | OperationOutput | WebhookOutput,
 ): GeneratedPageProps {

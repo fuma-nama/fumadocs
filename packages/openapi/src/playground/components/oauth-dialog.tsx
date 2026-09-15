@@ -78,7 +78,7 @@ export function OAuthDialogContent(props: AuthDialogContentProps) {
 }
 
 function Content({ schemeId, scopes, setToken, setOpen }: AuthDialogContentProps) {
-  const { dereferenced, resolve } = useOpenAPI().document;
+  const { dereferenced, resolve } = useOpenAPI().doc;
   const schemes = dereferenced.components?.securitySchemes;
   const tokenInfo = useAuth().store[schemeId];
   const scheme = resolve(schemes?.[schemeId]);

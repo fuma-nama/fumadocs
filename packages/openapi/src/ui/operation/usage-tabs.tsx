@@ -1,4 +1,5 @@
 'use client';
+import type { ReactNode } from 'react';
 import {
   CodeBlockTab,
   CodeBlockTabs,
@@ -14,67 +15,55 @@ import {
   SelectItem,
 } from '@fumadocs/api-docs/components/select';
 import { ClientCodeBlock } from '@/ui/components/codeblock';
-import {
-  type ExampleRequest,
-  useCodeUsage,
-  useCodeUsages,
-  useExampleRequests,
-  useOperation,
-} from '@/headless';
-import type { OperationLegacyOptions } from '.';
-import type { CreateOpenAPIPageOptions } from '..';
+import { type ExampleRequest, useCodeUsage, useExampleRequests, useOperation } from '@/headless';
+import type { RenderContext } from '@/types';
 
-export function UsageTabs({ legacy }: { legacy?: OperationLegacyOptions }) {
-  const { operation } = useOperation();
-  const codeUsages = useCodeUsages();
-  const content: NonNullable<CreateOpenAPIPageOptions['content']> = legacy?.content ?? {};
-  let { renderAPIExampleLayout } = content;
+export function UsageTabs({ ctx }: { ctx?: RenderContext }) {
+  const { operation, codeUsages } = useOperation();
+  let usageTabs: ReactNode;
 
-  renderAPIExampleLayout ??= (slots) => {
-    return (
-      <div className="prose-no-margin">
-        {slots.selector}
-        {slots.usageTabs}
-        {slots.responseTabs}
-      </div>
-    );
-  };
+  if (ctx?.content?.renderAPIExampleUsageTabs) {
+    usageTabs = ctx.content.renderAPIExampleUsageTabs(codeUsages, ctx);
+  } else {
+    const items = Array.from(codeUsages.map());
 
-  let usageTabs;
-  if (legacy?.UsageTabs) {
-    usageTabs = <legacy.UsageTabs />;
-  } else if (codeUsages.length > 0) {
-    usageTabs = (
-      <CodeBlockTabs groupId="fumadocs_openapi_requests" defaultValue={codeUsages[0].id}>
+    usageTabs = items.length > 0 && (
+      <CodeBlockTabs groupId="fumadocs_openapi_requests" defaultValue={items[0][0]}>
         <CodeBlockTabsList>
-          {codeUsages.map((item) => (
-            <CodeBlockTabsTrigger key={item.id} value={item.id}>
+          {items.map(([id, item]) => (
+            <CodeBlockTabsTrigger key={id} value={id}>
               {item.label ?? item.lang}
             </CodeBlockTabsTrigger>
           ))}
         </CodeBlockTabsList>
-        {codeUsages.map((item) => (
-          <CodeBlockTab key={item.id} value={item.id}>
-            <UsageTab id={item.id} lang={item.lang} />
+        {items.map(([id, item]) => (
+          <CodeBlockTab key={id} value={id}>
+            <UsageTab id={id} lang={item.lang} />
           </CodeBlockTab>
         ))}
       </CodeBlockTabs>
     );
   }
 
-  return renderAPIExampleLayout(
-    {
-      selector: operation['x-exclusiveCodeSample'] ? null : <UsageTabsSelector legacy={legacy} />,
-      usageTabs,
-      responseTabs: <ResponseTabs legacy={legacy} />,
-    },
-    legacy!.ctx,
+  const slots = {
+    selector: operation['x-exclusiveCodeSample'] ? null : <UsageTabsSelector />,
+    usageTabs,
+    responseTabs: <ResponseTabs ctx={ctx} />,
+  };
+
+  if (ctx?.content?.renderAPIExampleLayout) return ctx.content.renderAPIExampleLayout(slots, ctx);
+
+  return (
+    <div className="prose-no-margin">
+      {slots.selector}
+      {slots.usageTabs}
+      {slots.responseTabs}
+    </div>
   );
 }
 
-function UsageTabsSelector({ legacy }: { legacy?: OperationLegacyOptions }) {
+function UsageTabsSelector() {
   const { items, selected, select } = useExampleRequests();
-  if (legacy?.ExampleSelector) return <legacy.ExampleSelector />;
 
   function renderItem(item: ExampleRequest) {
     return (

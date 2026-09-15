@@ -7,7 +7,6 @@ import { type GenerateSchemaUIOptions, generateSchemaUI } from '@/headless';
 export {
   generateSchemaUI,
   type FieldBase,
-  type InfoTag,
   type SchemaData,
   type SchemaDataObjectProperty,
   type SchemaUIGeneratedData,

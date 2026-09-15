@@ -18,6 +18,18 @@ export const registry: Registry = {
       })),
     },
     {
+      name: 'page',
+      title: 'OpenAPI Page',
+      description: 'The full UI of OpenAPI pages',
+      files: [
+        {
+          type: 'components',
+          path: 'ui/base.tsx',
+          target: '<dir>/api/page.tsx',
+        },
+      ],
+    },
+    {
       name: 'operation',
       title: 'Operation UI',
       description: 'The UI of operations and webhooks in OpenAPI pages',

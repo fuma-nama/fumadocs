@@ -7,23 +7,17 @@ import { useTheme } from 'fumadocs-ui/provider/base';
 import { useEffect, useState } from 'react';
 import type { HttpMethods } from '@/types';
 import { useTranslations } from '@fuma-translate/react';
+import { useOpenAPI } from '@/headless';
 import '@scalar/api-client-react/style.css';
 
-export default function ScalarPlayground({
-  path,
-  method,
-  spec,
-}: {
-  spec: object;
-  path: string;
-  method: HttpMethods;
-}) {
+export default function ScalarPlayground({ path, method }: { path: string; method: HttpMethods }) {
   const { resolvedTheme } = useTheme();
+  const { bundled } = useOpenAPI().doc;
   const t = useTranslations({ note: 'scalar API client' });
   const [mounted, setMounted] = useState(false);
   const client = useApiClient({
     configuration: {
-      content: spec as never,
+      content: bundled as never,
     },
   });
 

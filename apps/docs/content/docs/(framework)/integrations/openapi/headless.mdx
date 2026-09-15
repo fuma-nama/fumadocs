@@ -3,28 +3,28 @@ title: Headless
 description: Build your own UI for API pages on the headless layer.
 ---
 
+<Callout title="Start from the full UI">
+  The [full UI](/docs/integrations/openapi/api-page#full-ui) installed with Fumadocs CLI is built on
+  this layer. Edit it instead of starting from scratch.
+</Callout>
+
 ## Overview
 
-`fumadocs-openapi/headless` provides the runtime of API pages: the document, the selected server, the auth state of playground, the details of each operation, its example requests and the code they generate.
+`fumadocs-openapi/headless` provides the state and logic of API pages, without UI:
 
-The built-in UI and the components installed with Fumadocs CLI render from the same hooks, so you can replace any part of the UI without re-implementing its logic.
+- the document and request options
+- the selected server and the playground's auth state
+- the details of each operation, its example requests and generated code usages
 
 ## Page
 
-`<OpenAPIProvider />` provides the runtime to a page, it takes the bundled document and the components the UI renders through.
+`createOpenAPIPage()` takes your components, and returns `<OpenAPIPage />` to use like the built-in one.
 
 ```tsx title="components/api-page.tsx"
 'use client';
-import {
-  type CodeBlockProps,
-  type OpenAPIComponents,
-  OpenAPIProvider,
-  useOpenAPI,
-} from 'fumadocs-openapi/headless';
-import type { OpenAPIPageProps_Spec } from 'fumadocs-openapi/ui';
-import type { HttpMethods } from 'fumadocs-openapi';
-import { Schema } from '@fumadocs/api-docs/components/schema';
-import { Operation } from '@/components/api/operation';
+import { type CodeBlockProps, createOpenAPIPage } from 'fumadocs-openapi/headless';
+import { Schema } from '@/components/api/schema';
+import { Operation } from '@/components/my-operation';
 
 function Markdown({ md }: { md: string }) {
   return <p>{md}</p>;
@@ -38,78 +38,77 @@ function CodeBlock({ lang, code }: CodeBlockProps) {
   );
 }
 
-const components: OpenAPIComponents = {
-  Markdown,
-  CodeBlock,
-  Heading({ depth, ...props }) {
-    const As = `h${depth}` as 'h2';
-    return <As {...props} />;
+export const OpenAPIPage = createOpenAPIPage({
+  components: {
+    Operation,
+    Markdown,
+    CodeBlock,
+    Heading({ depth, ...props }) {
+      const As = `h${depth}` as 'h2';
+      return <As {...props} />;
+    },
+    SchemaUI: (props) => (
+      <Schema
+        {...props}
+        renderMarkdown={(md) => <Markdown md={md} />}
+        renderCodeblock={(props) => <CodeBlock {...props} />}
+      />
+    ),
   },
-  SchemaUI: (props) => (
-    <Schema
-      {...props}
-      renderMarkdown={(md) => <Markdown md={md} />}
-      renderCodeblock={(props) => <CodeBlock {...props} />}
-    />
-  ),
-};
-
-export function OpenAPIPage({ payload, operations = [] }: OpenAPIPageProps_Spec) {
-  return (
-    <OpenAPIProvider document={payload.bundled} proxyUrl={payload.proxyUrl} components={components}>
-      {operations.map((item) => (
-        <PageOperation key={`${item.method} ${item.path}`} {...item} />
-      ))}
-    </OpenAPIProvider>
-  );
-}
-
-function PageOperation({ path, method }: { path: string; method: HttpMethods }) {
-  const { document } = useOpenAPI();
-  const pathItem = document.resolve(document.dereferenced.paths![path])!;
-
-  return (
-    <Operation path={path} method={method} pathItem={pathItem} operation={pathItem[method]!} />
-  );
-}
+});
 ```
 
-The `Operation` component can be the one installed with Fumadocs CLI, or one built from scratch as below.
+- `Operation` renders each operation and webhook of the page, see [Operation](#operation).
+- `Schema` is the [Schema UI](/docs/integrations/openapi/api-page#schema-ui) installed with Fumadocs CLI, or [your own](#schema-ui).
+- `Layout` (optional) wraps the rendered operations and webhooks.
 
-| Hook                                        | Description                                   |
-| ------------------------------------------- | --------------------------------------------- |
-| `useOpenAPI()`                              | The document and request options of the page. |
-| `useComponents()`                           | The components passed to the provider.        |
-| `useServer()`                               | The selected server and its variables.        |
-| `useAuth()`                                 | The auth state of playground.                 |
-| `useTypeScriptDefinitions(schema, options)` | TypeScript definitions of a JSON schema.      |
+<Callout title="Bundle size">
+
+The default code usages and TypeScript definitions are bundled with `fumadocs-openapi/headless`.
+
+Import `createOpenAPIPage()` from `fumadocs-openapi/headless/base` to pass your own instead.
+
+</Callout>
+
+### Hooks
+
+Components under the page can access its state.
+
+| Hook                                        | Description                                            |
+| ------------------------------------------- | ------------------------------------------------------ |
+| `useOpenAPI()`                              | The dereferenced document (`doc`) and request options. |
+| `useComponents()`                           | The components passed to the page.                     |
+| `useServer()`                               | The selected server and its variables.                 |
+| `useAuth()`                                 | The auth state of the playground.                      |
+| `useStorageKey()`                           | The `localStorage` keys of the page.                   |
+| `useTypeScriptDefinitions(schema, options)` | TypeScript definitions of a JSON schema.               |
+
+To render operations yourself, use `<OpenAPIProvider document={bundled} components={...} />` in place of `createOpenAPIPage()`.
 
 ## Operation
 
-`<OperationProvider />` derives the details of an operation or webhook, and holds its selected example request. Edits from the playground update the request data, and the generated code usages follow.
+`<OperationProvider />` derives the details of an operation or webhook, and holds its selected example request.
 
-```tsx title="components/api/operation.tsx"
+```tsx title="components/my-operation.tsx"
 'use client';
-import type { OperationProps } from 'fumadocs-openapi/ui';
 import {
   OperationProvider,
+  type PageOperationProps,
   useCodeUsage,
-  useCodeUsages,
   useOperation,
   useResponseExamples,
 } from 'fumadocs-openapi/headless';
 
-export function Operation({ path, method, operation, pathItem }: OperationProps) {
+export function Operation(props: PageOperationProps) {
   return (
-    <OperationProvider path={path} method={method} operation={operation} pathItem={pathItem}>
+    <OperationProvider {...props}>
       <Content />
     </OperationProvider>
   );
 }
 
 function Content() {
-  const { title, parameters } = useOperation();
-  const codeUsages = useCodeUsages();
+  const { title, parameters, codeUsages } = useOperation();
   const responses = useResponseExamples();
 
   return (
@@ -118,8 +117,8 @@ function Content() {
       {parameters.map(({ in: location, items }) => (
         <section key={location}>{items.map((param) => param.name).join(', ')}</section>
       ))}
-      {codeUsages.map((item) => (
-        <CodeUsage key={item.id} id={item.id} />
+      {Array.from(codeUsages.map().keys(), (id) => (
+        <CodeUsage key={id} id={id} />
       ))}
       {responses.map((tab) => (
         <pre key={tab.code}>{JSON.stringify(tab.examples?.[0]?.sample)}</pre>
@@ -134,62 +133,85 @@ function CodeUsage({ id }: { id: string }) {
 }
 ```
 
-| Hook                                  | Description                                                                                                         |
-| ------------------------------------- | ------------------------------------------------------------------------------------------------------------------- |
-| `useOperation()`                      | The operation and its resolved details: `title`, `requestBody`, `parameters`, `security`, `responses`, `callbacks`. |
-| `useExampleRequests()`                | The example requests and the selected one.                                                                          |
-| `useExampleRequest()`                 | Request data of the selected example, following updates from the playground.                                        |
-| `useCodeUsages()`, `useCodeUsage(id)` | The code usage generators, and the code they generate for the selected example.                                     |
-| `useResponseExamples()`               | Responses with example values of their preferred media type.                                                        |
+| Hook                    | Description                                                                                                                       |
+| ----------------------- | --------------------------------------------------------------------------------------------------------------------------------- |
+| `useOperation()`        | The operation and its resolved details: `title`, `requestBody`, `parameters`, `security`, `responses`, `callbacks`, `codeUsages`. |
+| `useExampleRequests()`  | The example requests, the selected one, `select()` and `update()` to edit its data.                                               |
+| `useExampleRequest()`   | Data of the selected example, following its updates.                                                                              |
+| `useCodeUsage(id)`      | The code generated by `codeUsages` for the selected example.                                                                      |
+| `useResponseExamples()` | Responses with example values of their preferred media type.                                                                      |
 
 ## Schema UI
 
-`@fumadocs/api-docs/headless` generates the data of Schema UI with `generateSchemaUI()`, and holds its navigation state: `<SchemaUIProvider />` owns the path of opened schemas, starting from the root.
+The logic of Schema UI is in `@fumadocs/api-docs`.
 
-```tsx title="components/api/schema/client.tsx"
+```npm
+npm i @fumadocs/api-docs
+```
+
+- `generateSchemaUI()` generates the data of a JSON schema.
+- `<SchemaUIProvider />` holds the opened schemas, starting from the root.
+
+```tsx title="components/my-schema.tsx"
 'use client';
+import { useMemo } from 'react';
+import type { OpenAPIComponents } from 'fumadocs-openapi/headless';
 import {
-  type SchemaUIGeneratedData,
+  generateSchemaUI,
   SchemaUIProvider,
   useSchemaTabs,
   useSchemaUI,
 } from '@fumadocs/api-docs/headless';
 
-export function SchemaUI({ name, generated }: { name: string; generated: SchemaUIGeneratedData }) {
+export const SchemaUI: OpenAPIComponents['SchemaUI'] = ({ root, client, readOnly, writeOnly }) => {
+  const generated = useMemo(
+    () =>
+      generateSchemaUI({
+        root,
+        readOnly,
+        writeOnly,
+        renderMarkdown: (md) => <p>{md}</p>,
+        renderCodeblock: ({ code }) => <pre>{code}</pre>,
+      }),
+    [root, readOnly, writeOnly],
+  );
+
   return (
-    <SchemaUIProvider name={name} generated={generated}>
-      <Body pathIndex={0} />
+    <SchemaUIProvider name={client.name} generated={generated}>
+      <Body />
     </SchemaUIProvider>
   );
-}
+};
 
-function Body({ pathIndex }: { pathIndex: number }) {
-  const { path, open, generated } = useSchemaUI();
+function Body() {
+  const { path, open, back, generated } = useSchemaUI();
+  const pathIndex = path.length - 1;
   const [selected, setSelected] = useSchemaTabs(pathIndex, 0);
   const schema = generated.refs[path[pathIndex].$ref];
 
-  if (schema.type === 'or') {
-    return (
-      <select
-        value={selected ?? schema.items[0].$type}
-        onChange={(e) => setSelected(e.target.value)}
-      >
-        {schema.items.map((item) => (
-          <option key={item.$type} value={item.$type}>
-            {item.name}
-          </option>
+  return (
+    <>
+      {pathIndex > 0 && <button onClick={() => back(pathIndex - 1)}>Back</button>}
+      {schema.type === 'or' && (
+        <select
+          value={selected ?? schema.items[0].$type}
+          onChange={(e) => setSelected(e.target.value)}
+        >
+          {schema.items.map((item) => (
+            <option key={item.$type} value={item.$type}>
+              {item.name}
+            </option>
+          ))}
+        </select>
+      )}
+      {schema.type === 'object' &&
+        schema.props.map((prop) => (
+          <button key={prop.name} onClick={() => open(prop.name, prop.$type)}>
+            {prop.name}
+          </button>
         ))}
-      </select>
-    );
-  }
-
-  if (schema.type === 'object') {
-    return schema.props.map((prop) => (
-      <button key={prop.name} onClick={() => open(prop.name, prop.$type)}>
-        {prop.name}
-      </button>
-    ));
-  }
+    </>
+  );
 }
 ```
 
@@ -198,5 +220,5 @@ function Body({ pathIndex }: { pathIndex: number }) {
 | `useSchemaUI()`                       | The generated schema data, the opened schemas, `open()` and `back()`. |
 | `useSchemaTabs(pathIndex, depth)`     | The selected member of a union schema.                                |
 | `useSchemaPopover(name, $ref)`        | Open state of the popover of a root property.                         |
-| `useSchemaHighlight(pathIndex, name)` | Whether a property is highlighted by the link it was opened from.     |
+| `useSchemaHighlight(pathIndex, name)` | Whether a property is highlighted, and a ref to scroll it into view.  |
 | `useCopySchemaLink(name)`             | Copy the link to a property.                                          |

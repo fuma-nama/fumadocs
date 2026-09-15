@@ -1,13 +1,5 @@
 'use client';
-import {
-  createContext,
-  type ReactNode,
-  use,
-  useMemo,
-  useRef,
-  useState,
-  useSyncExternalStore,
-} from 'react';
+import { createContext, type ReactNode, use, useMemo, useSyncExternalStore } from 'react';
 import { useTranslations } from '@fuma-translate/react';
 import { idToTitle } from '@fumadocs/api-docs/utils/id-to-title';
 import { sample } from '@fumadocs/api-docs/schema/sample';
@@ -33,8 +25,8 @@ import {
 import { isMediaTypeSupported } from '@/requests/media/adapter';
 import { encodeRequestData } from '@/requests/media/encode';
 import { getPreferredType, methodKeys } from '@/utils/schema';
-import { getExampleRequests, type ExampleRequestItem } from '@/utils/get-example-requests';
-import { ServerProvider, useOpenAPIContext, useServer } from './runtime';
+import { getExampleRequests } from '@/utils/get-example-requests';
+import { ServerProvider, useOpenAPI, useServer } from './runtime';
 
 export type { RawRequestData };
 export interface OperationParameters {
@@ -87,6 +79,8 @@ export interface OperationInfo {
   responses: OperationResponse[];
   /** callbacks flattened into webhook operations */
   callbacks: OperationCallback[];
+  /** code usage generators, including the inline code samples of operation */
+  codeUsages: CodeUsageGeneratorRegistry;
 }
 
 export interface ExampleRequest {
@@ -94,14 +88,9 @@ export interface ExampleRequest {
   name: string;
   description?: string;
   data: RawRequestData;
+  encoded: RequestData;
   /** pathname of the request, with path parameters and query encoded */
   pathname: string;
-}
-
-export interface CodeUsageInfo {
-  id: string;
-  lang: string;
-  label?: ReactNode;
 }
 
 export interface ResponseExample {
@@ -143,19 +132,18 @@ export interface OperationProviderProps {
   children: ReactNode;
 }
 
-interface ExampleItem extends ExampleRequestItem {
-  pathname: string;
-}
+type ExampleListener = (item: ExampleRequest) => void;
 
-export interface OperationState {
+interface OperationState {
   info: OperationInfo;
   parameters: ParameterObject[];
-  codeUsages: CodeUsageGeneratorRegistry;
-  examples: ExampleItem[];
-  example: string | undefined;
+  examples: ExampleRequest[];
+  /** the selected example, subscribe to follow its changes */
+  getExample: () => string | undefined;
   setExample: (id: string) => void;
   update: (data: RawRequestData, encoded?: RequestData) => void;
-  subscribe: (listener: () => void) => () => void;
+  /** listeners are called on selection and updates */
+  subscribe: (listener: ExampleListener) => () => void;
 }
 
 const OperationContext = createContext<OperationState | null>(null);
@@ -169,9 +157,9 @@ export function OperationProvider({
   pathItem,
   children,
 }: OperationProviderProps) {
-  const runtime = useOpenAPIContext();
-  const state = useMemo(() => {
-    const { dereferenced, resolve } = runtime.document;
+  const runtime = useOpenAPI();
+  const state = useMemo<OperationState>(() => {
+    const { dereferenced, resolve } = runtime.doc;
 
     const body = resolve(operation.requestBody);
     let requestBody: OperationInfo['requestBody'];
@@ -185,14 +173,25 @@ export function OperationProvider({
       requestBody = { description: body.description, required: body.required, content };
     }
 
-    const resolvedParameters = [
-      ...(operation.parameters ?? []),
-      ...(pathItem.parameters ?? []),
-    ].map((param) => resolve(param));
+    // operation parameters override the path item's
+    const resolvedParameters: ParameterObject[] = [];
+    const groups: Record<string, ParameterObject[]> = {};
+    const keys = new Set<string>();
+    for (const list of [operation.parameters, pathItem.parameters]) {
+      for (const item of list ?? []) {
+        const param = resolve(item);
+        const key = `${param.in}:${param.name}`;
+        if (keys.has(key)) continue;
+
+        keys.add(key);
+        resolvedParameters.push(param);
+        (groups[param.in!] ??= []).push(param);
+      }
+    }
     const parameters: OperationParameters[] = [];
     for (const location of parameterLocations) {
-      const items = resolvedParameters.filter((param) => param.in === location);
-      if (items.length > 0) parameters.push({ in: location, items });
+      const items = groups[location];
+      if (items) parameters.push({ in: location, items });
     }
 
     const security: OperationSecurity[][] = [];
@@ -236,24 +235,25 @@ export function OperationProvider({
     }
 
     const codeUsages = createCodeUsageGeneratorRegistry(runtime.codeUsages);
-    if (runtime.generateCodeSamples) {
-      for (const gen of runtime.generateCodeSamples({ path, operation, method, pathItem })) {
+    if (type === 'operation') {
+      for (const gen of runtime.generateCodeSamples?.({ path, operation, method, pathItem }) ??
+        []) {
         codeUsages.addInline(gen);
       }
-    }
-    for (const inline of operation['x-codeSamples'] ?? []) {
-      codeUsages.addInline(inline as InlineCodeUsageGenerator);
+      for (const inline of operation['x-codeSamples'] ?? []) {
+        codeUsages.addInline(inline as InlineCodeUsageGenerator);
+      }
     }
 
-    const examples: ExampleItem[] = [];
-    for (const item of getExampleRequests({
+    const examples = getExampleRequests({
       path,
       method,
       operation,
-      pathItem,
+      parameters: resolvedParameters,
       mediaAdapters: runtime.mediaAdapters,
-    })) {
-      examples.push({ ...item, pathname: pathnameFromRequest(path, item.encoded) });
+    }) as ExampleRequest[];
+    for (const item of examples) {
+      item.pathname = pathnameFromRequest(path, item.encoded);
     }
 
     const info: OperationInfo = {
@@ -272,52 +272,69 @@ export function OperationProvider({
       security,
       responses,
       callbacks,
+      codeUsages,
     };
 
-    return { info, parameters: resolvedParameters, codeUsages, examples };
+    return {
+      info,
+      parameters: resolvedParameters,
+      examples,
+      ...createExampleStore(
+        examples,
+        operation['x-exclusiveCodeSample'] ?? operation['x-selectedCodeSample'] ?? examples[0]?.id,
+        path,
+        (data) => encodeRequestData(data, runtime.mediaAdapters, resolvedParameters),
+      ),
+    };
   }, [runtime, type, path, method, operation, pathItem]);
-  const [example, setExample] = useState(
-    () =>
-      operation['x-exclusiveCodeSample'] ??
-      operation['x-selectedCodeSample'] ??
-      state.examples[0]?.id,
-  );
-  const listeners = useRef(new Set<() => void>());
-  const value = useMemo<OperationState>(
-    () => ({
-      ...state,
-      example,
-      setExample(id) {
-        if (state.examples.some((item) => item.id === id)) setExample(id);
-      },
-      update(data, encoded) {
-        const item = state.examples.find((item) => item.id === example);
-        if (!item) return;
-        // persistent changes
-        item.data = data;
-        item.encoded = encoded ?? encodeRequestData(data, runtime.mediaAdapters, state.parameters);
-        item.pathname = pathnameFromRequest(state.info.path, item.encoded);
-        for (const listener of listeners.current) listener();
-      },
-      subscribe(listener) {
-        listeners.current.add(listener);
-        return () => {
-          listeners.current.delete(listener);
-        };
-      },
-    }),
-    [state, example, runtime.mediaAdapters],
-  );
 
-  const content = <OperationContext value={value}>{children}</OperationContext>;
+  const content = <OperationContext value={state}>{children}</OperationContext>;
   const servers = operation.servers ?? pathItem.servers;
   if (!servers) return content;
 
   return <ServerProvider servers={servers as ServerObject[]}>{content}</ServerProvider>;
 }
 
-/** internal, use the hooks below */
-export function useOperationState(): OperationState {
+/** an external store, so selecting examples doesn't re-render the entire operation */
+function createExampleStore(
+  examples: ExampleRequest[],
+  selected: string | undefined,
+  path: string,
+  encode: (data: RawRequestData) => RequestData,
+): Pick<OperationState, 'getExample' | 'setExample' | 'update' | 'subscribe'> {
+  const listeners = new Set<ExampleListener>();
+  function notify(item: ExampleRequest) {
+    for (const listener of listeners) listener(item);
+  }
+
+  return {
+    getExample: () => selected,
+    setExample(id) {
+      const item = examples.find((item) => item.id === id);
+      if (!item) return;
+
+      selected = id;
+      notify(item);
+    },
+    update(data, encoded = encode(data)) {
+      const item = examples.find((item) => item.id === selected);
+      if (!item) return;
+      // persistent changes
+      item.data = data;
+      item.encoded = encoded;
+      item.pathname = pathnameFromRequest(path, encoded);
+      notify(item);
+    },
+    subscribe(listener) {
+      listeners.add(listener);
+      return () => {
+        listeners.delete(listener);
+      };
+    },
+  };
+}
+
+function useOperationState(): OperationState {
   const ctx = use(OperationContext);
   if (!ctx) throw new Error('Component must be used under <OperationProvider />');
 
@@ -330,51 +347,36 @@ export function useOperation(): OperationInfo {
 
 /**
  * Example requests of the operation, and the selected one.
+ *
+ * It doesn't follow the updates of items, use `useExampleRequest()` for the data of selected one.
  */
 export function useExampleRequests(): {
   items: ExampleRequest[];
   selected: string | undefined;
   select: (id: string) => void;
+  /** update the data of selected example */
+  update: (data: RawRequestData) => void;
 } {
-  const { examples, example, setExample } = useOperationState();
+  const { examples, getExample, setExample, update, subscribe } = useOperationState();
+  const selected = useSyncExternalStore(subscribe, getExample, getExample);
 
-  return { items: examples, selected: example, select: setExample };
+  return { items: examples, selected, select: setExample, update };
 }
 
-function useSelectedExample(): ExampleItem | undefined {
-  const { examples, example, subscribe } = useOperationState();
-  const getSnapshot = () => examples.find((item) => item.id === example)?.encoded;
+function useSelectedExample(): ExampleRequest | undefined {
+  const { examples, getExample, subscribe } = useOperationState();
+  // items are updated in place, `encoded` changes on both selection and updates
+  const getSnapshot = () => examples.find((item) => item.id === getExample())?.encoded;
   const encoded = useSyncExternalStore(subscribe, getSnapshot, getSnapshot);
 
   return examples.find((item) => item.encoded === encoded);
 }
 
 /**
- * The selected example request, following updates from the playground.
+ * Data of the selected example request, following its updates.
  */
-export function useExampleRequest(): {
-  data: RawRequestData | undefined;
-  update: (data: RawRequestData) => void;
-} {
-  const { update } = useOperationState();
-  const item = useSelectedExample();
-
-  return { data: item?.data, update };
-}
-
-/**
- * Code usage generators of the operation, including its inline code samples.
- */
-export function useCodeUsages(): CodeUsageInfo[] {
-  const { codeUsages } = useOperationState();
-
-  return useMemo(() => {
-    const out: CodeUsageInfo[] = [];
-    for (const [id, item] of codeUsages.map()) {
-      out.push({ id, lang: item.lang, label: item.label });
-    }
-    return out;
-  }, [codeUsages]);
+export function useExampleRequest(): RawRequestData | undefined {
+  return useSelectedExample()?.data;
 }
 
 const noop = () => () => {};
@@ -393,30 +395,30 @@ function useIsClient() {
  * @returns `undefined` when the generator or the example is unavailable
  */
 export function useCodeUsage(id: string): string | undefined {
-  const { mediaAdapters } = useOpenAPIContext();
-  const { codeUsages, info } = useOperationState();
+  const { mediaAdapters } = useOpenAPI();
+  const { info } = useOperationState();
   const { server } = useServer();
-  const codegen = codeUsages.get(id);
-  const data = useSelectedExample()?.encoded;
+  const codegen = info.codeUsages.get(id);
+  const { encoded, pathname } = useSelectedExample() ?? {};
   const isClient = useIsClient();
 
   return useMemo(() => {
-    if (!data || !codegen) return;
+    if (!encoded || !pathname || !codegen) return;
     const url = joinURL(
       server && isClient
         ? new URL(resolveServerUrl(server.url, server.variables), window.location.origin).href
         : 'https://example.com',
-      pathnameFromRequest(info.path, data),
+      pathname,
     );
 
     return codegen.generate(
-      { ...data, url },
+      { ...encoded, url },
       {
         mediaAdapters,
         custom: null,
       },
     );
-  }, [data, server, info.path, isClient, codegen, mediaAdapters]);
+  }, [encoded, pathname, server, isClient, codegen, mediaAdapters]);
 }
 
 /**
@@ -424,7 +426,7 @@ export function useCodeUsage(id: string): string | undefined {
  */
 export function useResponseExamples(): ResponseTab[] {
   const { responses } = useOperation();
-  const { resolve } = useOpenAPIContext().document;
+  const { resolve } = useOpenAPI().doc;
   const t = useTranslations({ note: 'operation page' });
 
   return useMemo(() => {
@@ -451,13 +453,10 @@ export function useResponseExamples(): ResponseTab[] {
             description: example?.description,
           });
         }
-      } else if (responseOfType?.example || responseOfType?.schema) {
-        tab.examples = [
-          {
-            label: t('Example'),
-            sample: getRaw(responseOfType.example) ?? sample(responseOfType.schema as object),
-          },
-        ];
+      } else if (responseOfType?.example !== undefined) {
+        tab.examples = [{ label: t('Example'), sample: getRaw(responseOfType.example) }];
+      } else if (responseOfType?.schema) {
+        tab.examples = [{ label: t('Example'), sample: sample(responseOfType.schema) }];
       }
 
       tabs.push(tab);

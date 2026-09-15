@@ -12,14 +12,13 @@ import { useTranslations } from '@fuma-translate/react';
 import { Markdown } from '../components/markdown';
 import { ClientCodeBlock } from '../components/codeblock';
 import { type ResponseExample, type ResponseTab, useResponseExamples } from '@/headless';
-import type { OperationLegacyOptions } from '.';
+import type { RenderContext } from '@/types';
 
-export function ResponseTabs({ legacy }: { legacy?: OperationLegacyOptions }) {
+export function ResponseTabs({ ctx }: { ctx?: RenderContext }) {
   const tabs = useResponseExamples();
   if (tabs.length === 0) return null;
 
-  const { renderResponseTabs } = legacy?.content ?? {};
-  if (renderResponseTabs) return renderResponseTabs({ tabs }, legacy!.ctx);
+  if (ctx?.content?.renderResponseTabs) return ctx.content.renderResponseTabs({ tabs }, ctx);
 
   return <ResponseTabsDefaultContent tabs={tabs} />;
 }

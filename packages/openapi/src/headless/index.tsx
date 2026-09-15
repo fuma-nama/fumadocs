@@ -1,19 +1,15 @@
 'use client';
-import { useMemo, type ReactNode } from 'react';
+import type { FC } from 'react';
 import { generate } from '@fumari/json-schema-ts';
 import { getRaw } from '@scalar/json-magic/magic-proxy';
-import type { Document } from '@/types';
-import { dereferenceBundledDocument } from '@/utils/document/dereference';
-import { defaultAdapters } from '@/requests/media/adapter';
-import { createCodeUsageGeneratorRegistry } from '@/requests/generators';
-import { registerDefault } from '@/requests/generators/all';
-import { AuthProvider } from '@/playground/auth';
 import {
-  OpenAPIContextProvider,
-  type OpenAPIComponents,
-  type OpenAPIContextType,
-  ServerProvider,
-} from './runtime';
+  type CodeUsageGeneratorRegistry,
+  createCodeUsageGeneratorRegistry,
+} from '@/requests/generators';
+import { registerDefault } from '@/requests/generators/all';
+import type { OpenAPIPageProps } from '@/utils/pages/builder';
+import * as Base from './base';
+import type { CreateOpenAPIPageOptions, OpenAPIProviderProps, OpenAPIRuntime } from './runtime';
 
 export {
   useOpenAPI,
@@ -23,55 +19,19 @@ export {
   type OpenAPIComponents,
   type CodeBlockProps,
   type OpenAPIRuntime,
-  type GenerateTypeScriptDefinitionsContext,
+  type OpenAPIProviderProps,
+  type CreateOpenAPIPageOptions,
+  type PageOperationProps,
+  type PageLayoutProps,
   type SelectedServer,
 } from './runtime';
 export { useAuth } from '@/playground/auth';
 export { useStorageKey } from '@/utils/storage-key';
-export {
-  OperationProvider,
-  useOperation,
-  useExampleRequests,
-  useExampleRequest,
-  useCodeUsages,
-  useCodeUsage,
-  useResponseExamples,
-  type OperationProviderProps,
-  type OperationInfo,
-  type OperationParameters,
-  type OperationSecurity,
-  type OperationResponse,
-  type OperationCallback,
-  type ExampleRequest,
-  type CodeUsageInfo,
-  type ResponseTab,
-  type ResponseExample,
-  type RawRequestData,
-} from './operation';
+export * from './operation';
 
-export interface OpenAPIProviderProps extends Partial<
-  Pick<
-    OpenAPIContextType,
-    | 'mediaAdapters'
-    | 'codeUsages'
-    | 'generateCodeSamples'
-    | 'generateTypeScriptDefinitions'
-    | 'proxyUrl'
-    | 'storageKeyPrefix'
-  >
-> {
-  /** the bundled OpenAPI document */
-  document: Document;
-  components: OpenAPIComponents;
-  children: ReactNode;
-}
-
-/**
- * Generate TypeScript definitions with `@fumari/json-schema-ts`.
- */
-export const defaultTypeScriptDefinitions: Exclude<
-  OpenAPIContextType['generateTypeScriptDefinitions'],
-  false
+const defaultTypeScriptDefinitions: Exclude<
+  OpenAPIRuntime['generateTypeScriptDefinitions'],
+  false | undefined
 > = (schema, ctx) => {
   if (typeof schema !== 'object') return;
 
@@ -79,7 +39,7 @@ export const defaultTypeScriptDefinitions: Exclude<
     // `generate` resolves `$ref`s against the schema root itself,
     // spread the bundled document into the root so in-document refs are resolvable
     return generate(
-      { ...(ctx.document.bundled as object), ...getRaw(schema) },
+      { ...(ctx.doc.bundled as object), ...getRaw(schema) },
       {
         name: ctx.name,
         readOnly: ctx.readOnly,
@@ -91,46 +51,31 @@ export const defaultTypeScriptDefinitions: Exclude<
   }
 };
 
+let defaultCodeUsages: CodeUsageGeneratorRegistry | undefined;
+
+function withDefaults<
+  T extends Pick<OpenAPIRuntime, 'codeUsages' | 'generateTypeScriptDefinitions'>,
+>(options: T): T {
+  return {
+    ...options,
+    codeUsages:
+      options.codeUsages ??
+      (defaultCodeUsages ??= registerDefault(createCodeUsageGeneratorRegistry())),
+    generateTypeScriptDefinitions:
+      options.generateTypeScriptDefinitions ?? defaultTypeScriptDefinitions,
+  };
+}
+
 /**
  * The runtime of an API page, for UIs built from the headless hooks.
  */
-export function OpenAPIProvider({
-  document,
-  mediaAdapters,
-  codeUsages,
-  generateCodeSamples,
-  generateTypeScriptDefinitions = defaultTypeScriptDefinitions,
-  proxyUrl,
-  storageKeyPrefix,
-  components,
-  children,
-}: OpenAPIProviderProps) {
-  const runtime = useMemo<OpenAPIContextType>(
-    () => ({
-      document: dereferenceBundledDocument(document),
-      mediaAdapters: { ...defaultAdapters, ...mediaAdapters },
-      codeUsages: codeUsages ?? registerDefault(createCodeUsageGeneratorRegistry()),
-      generateCodeSamples,
-      generateTypeScriptDefinitions,
-      proxyUrl,
-      storageKeyPrefix,
-    }),
-    [
-      document,
-      mediaAdapters,
-      codeUsages,
-      generateCodeSamples,
-      generateTypeScriptDefinitions,
-      proxyUrl,
-      storageKeyPrefix,
-    ],
-  );
+export function OpenAPIProvider(props: OpenAPIProviderProps) {
+  return <Base.OpenAPIProvider {...withDefaults(props)} />;
+}
 
-  return (
-    <OpenAPIContextProvider runtime={runtime} components={components}>
-      <ServerProvider servers={runtime.document.dereferenced.servers}>
-        <AuthProvider>{children}</AuthProvider>
-      </ServerProvider>
-    </OpenAPIContextProvider>
-  );
+/**
+ * Create `<OpenAPIPage />` from your own UI, it takes the props of generated pages.
+ */
+export function createOpenAPIPage(options: CreateOpenAPIPageOptions): FC<OpenAPIPageProps> {
+  return Base.createOpenAPIPage(withDefaults(options));
 }

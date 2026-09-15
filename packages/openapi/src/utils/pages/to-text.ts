@@ -196,13 +196,11 @@ function pageContent({
   }
 
   return `export default function Layout(props) {
-  const { APIPage, OpenAPIPage } = props.components ?? {};
-  // "APIPage" is the old name from v10, this allows both for backward compatibility
-  const Comp = OpenAPIPage ?? APIPage;
+  const { OpenAPIPage } = props.components ?? {};
   return (
     <>
       {props.children}
-      <Comp ${propStrs.join(' ')} />
+      <OpenAPIPage ${propStrs.join(' ')} />
     </>
   );
 }`;

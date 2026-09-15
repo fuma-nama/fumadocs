@@ -1,5 +1,5 @@
 'use client';
-import { type ComponentProps, type FC, Fragment, type ReactNode } from 'react';
+import { type ComponentProps, Fragment, type ReactNode } from 'react';
 import type {
   HttpMethods,
   MediaTypeObject,
@@ -37,7 +37,13 @@ import { useCopyButton } from 'fumadocs-ui/utils/use-copy-button';
 import { buttonVariants } from 'fumadocs-ui/components/ui/button';
 import { Check, Copy } from 'lucide-react';
 import PlaygroundClient, { type PlaygroundClientOptions } from '@/playground/client';
-import type { CreateOpenAPIPageOptions } from '..';
+
+export interface APIPlaygroundProps {
+  path: string;
+  method: HttpMethods;
+  operation: OperationObject;
+  pathItem: PathItemObject;
+}
 
 export interface OperationPlaygroundOptions extends PlaygroundClientOptions {
   /**
@@ -46,24 +52,9 @@ export interface OperationPlaygroundOptions extends PlaygroundClientOptions {
   enabled?: boolean;
 
   /**
-   * replace the renderer
+   * Replace the renderer, e.g. the playground installed with Fumadocs CLI.
    */
-  render?: (props: {
-    path: string;
-    method: HttpMethods;
-    operation: OperationObject;
-    pathItem: PathItemObject;
-  }) => ReactNode;
-}
-
-/** @deprecated options of `createOpenAPIPage()`, passed by the built-in page */
-export interface OperationLegacyOptions {
-  ctx: RenderContext;
-  content?: CreateOpenAPIPageOptions['content'];
-  /** overrides bound to the operation state by the built-in page */
-  UsageTabs?: FC;
-  ExampleSelector?: FC;
-  RequestTabs?: FC;
+  render?: (props: APIPlaygroundProps) => ReactNode;
 }
 
 export interface OperationProps {
@@ -77,15 +68,8 @@ export interface OperationProps {
   showDescription?: boolean;
   headingLevel?: number;
 
-  /**
-   * Show full response schema instead of only example response & Typescript definitions.
-   *
-   * @default true
-   */
-  showResponseSchema?: boolean;
-  playground?: OperationPlaygroundOptions;
-  /** @deprecated */
-  legacy?: OperationLegacyOptions;
+  /** the options of `createOpenAPIPage()` */
+  ctx?: RenderContext;
 }
 
 export function Operation({ type, path, method, operation, pathItem, ...props }: OperationProps) {
@@ -106,13 +90,11 @@ function OperationContent({
   showTitle,
   showDescription,
   headingLevel = 2,
-  showResponseSchema = true,
-  playground,
-  legacy,
+  ctx,
 }: Omit<OperationProps, 'type' | 'path' | 'method' | 'operation' | 'pathItem'>) {
   const t = useTranslations({ note: 'operation page' });
   const { SchemaUI } = useComponents();
-  const { resolve } = useOpenAPI().document;
+  const { resolve } = useOpenAPI().doc;
   const {
     type,
     path,
@@ -185,7 +167,7 @@ function OperationContent({
     );
   }
 
-  if (responses.length > 0 && showResponseSchema) {
+  if (responses.length > 0 && ctx?.showResponseSchema !== false) {
     responseNode = (
       <>
         <Heading id="response-body" depth={headingLevel}>
@@ -325,9 +307,7 @@ function OperationContent({
                     method={item.method}
                     pathItem={item.pathItem}
                     operation={item.operation}
-                    showResponseSchema={showResponseSchema}
-                    playground={playground}
-                    legacy={legacy}
+                    ctx={ctx}
                   />
                 </div>
               </AccordionContent>
@@ -338,30 +318,8 @@ function OperationContent({
     );
   }
 
-  const content: NonNullable<CreateOpenAPIPageOptions['content']> = legacy?.content ?? {};
-  let { renderOperationLayout, renderWebhookLayout } = content;
-
   if (type === 'operation') {
-    renderOperationLayout ??= (slots) => {
-      return (
-        <div className="flex flex-col gap-x-6 gap-y-4 @4xl:flex-row @4xl:items-start">
-          <div className="min-w-0 flex-1">
-            {slots.header}
-            {slots.apiPlayground}
-            {slots.description}
-            {slots.authSchemes}
-            {slots.parameters}
-            {slots.body}
-            {slots.responses}
-            {slots.callbacks}
-          </div>
-          <div className="@4xl:sticky @4xl:top-[calc(var(--fd-docs-row-1,2rem)+1rem)] @4xl:w-[400px]">
-            {slots.apiExample}
-          </div>
-        </div>
-      );
-    };
-
+    const playground = ctx?.playground;
     let apiPlayground: ReactNode;
     if (playground?.enabled ?? true) {
       const { enabled: _, render, ...options } = playground ?? {};
@@ -394,29 +352,54 @@ function OperationContent({
       );
     }
 
-    return renderOperationLayout(
-      {
-        header: headNode,
-        description: descriptionNode,
-        authSchemes: authNode,
-        body: bodyNode,
-        callbacks: callbacksNode,
-        parameters: parameterNode,
-        responses: responseNode,
-        apiPlayground,
-        apiExample: <UsageTabs legacy={legacy} />,
-      },
-      {
-        path,
-        operation,
-        method,
-        pathItem,
-        ctx: legacy!.ctx,
-      },
+    const slots = {
+      header: headNode,
+      description: descriptionNode,
+      authSchemes: authNode,
+      body: bodyNode,
+      callbacks: callbacksNode,
+      parameters: parameterNode,
+      responses: responseNode,
+      apiPlayground,
+      apiExample: <UsageTabs ctx={ctx} />,
+    };
+
+    if (ctx?.content?.renderOperationLayout)
+      return ctx.content.renderOperationLayout(slots, { path, operation, method, pathItem, ctx });
+
+    return (
+      <div className="flex flex-col gap-x-6 gap-y-4 @4xl:flex-row @4xl:items-start">
+        <div className="min-w-0 flex-1">
+          {slots.header}
+          {slots.apiPlayground}
+          {slots.description}
+          {slots.authSchemes}
+          {slots.parameters}
+          {slots.body}
+          {slots.responses}
+          {slots.callbacks}
+        </div>
+        <div className="@4xl:sticky @4xl:top-[calc(var(--fd-docs-row-1,2rem)+1rem)] @4xl:w-[400px]">
+          {slots.apiExample}
+        </div>
+      </div>
     );
   }
 
-  renderWebhookLayout ??= (slots) => (
+  const slots = {
+    header: headNode,
+    description: descriptionNode,
+    authSchemes: authNode,
+    body: bodyNode,
+    callbacks: callbacksNode,
+    parameters: parameterNode,
+    responses: responseNode,
+    requests: <RequestTabs ctx={ctx} />,
+  };
+
+  if (ctx?.content?.renderWebhookLayout) return ctx.content.renderWebhookLayout(slots);
+
+  return (
     <div className="flex flex-col-reverse gap-x-6 gap-y-4 @4xl:flex-row @4xl:items-start">
       <div className="min-w-0 flex-1 prose-no-margin">
         {slots.header}
@@ -432,16 +415,6 @@ function OperationContent({
       </div>
     </div>
   );
-  return renderWebhookLayout({
-    header: headNode,
-    description: descriptionNode,
-    authSchemes: authNode,
-    body: bodyNode,
-    callbacks: callbacksNode,
-    parameters: parameterNode,
-    responses: responseNode,
-    requests: <RequestTabs legacy={legacy} />,
-  });
 }
 
 function RequestBodyContentItem({

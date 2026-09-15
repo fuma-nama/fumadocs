@@ -11,11 +11,8 @@ const baseDir = path.join(import.meta.dirname, '../../');
 // internal modules of `fumadocs-openapi` mapped to their public exports
 const openapiExports = new Map([
   ['headless/index.tsx', 'fumadocs-openapi/headless'],
-  ['headless/runtime.tsx', 'fumadocs-openapi/headless'],
-  ['headless/operation.tsx', 'fumadocs-openapi/headless'],
   ['playground/auth.tsx', 'fumadocs-openapi/headless'],
   ['utils/storage-key.ts', 'fumadocs-openapi/headless'],
-  ['utils/get-example-requests.ts', 'fumadocs-openapi/headless'],
   ['ui/index.tsx', 'fumadocs-openapi/ui'],
   ['playground/client.tsx', 'fumadocs-openapi/playground/client'],
   ['requests/generators/index.ts', 'fumadocs-openapi/requests/generators'],
@@ -110,6 +107,14 @@ export const compileOptions: Partial<CompileOptions> = {
           specifier: `@fumadocs/api-docs/${toSubpath(file)}`,
         };
       }
+    }
+
+    // the Schema UI is vendored, so the installed UI owns it
+    if (ref.type === 'dependency' && ref.specifier === '@fumadocs/api-docs/components/schema') {
+      return {
+        type: 'file',
+        file: path.join(apiDocs.registry.dir, 'components/schema/index.tsx'),
+      };
     }
 
     // map dep imports to actual components

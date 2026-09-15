@@ -11,7 +11,7 @@ import {
   type ComponentProps,
   useRef,
 } from 'react';
-import { useExampleRequest, useExampleRequests, useOpenAPI, useServer } from '@/headless';
+import { useExampleRequests, useOpenAPI, useServer } from '@/headless';
 import type { BrowserFetcherOptions } from '@/playground/fetcher';
 import { DefaultResultDisplay, type ResultDisplayProps } from './components/result-display';
 import { pathnameFromRequest } from '@/requests/generators';
@@ -155,8 +155,8 @@ export default function PlaygroundClient({
   ...rest
 }: PlaygroundClientProps) {
   const t = useTranslations({ note: 'playground' });
-  const { document, mediaAdapters, proxyUrl } = useOpenAPI();
-  const { dereferenced } = document;
+  const { doc, mediaAdapters, proxyUrl } = useOpenAPI();
+  const { dereferenced } = doc;
   const options = useMemo<PlaygroundClientOptions>(
     () => ({
       transformAuthInputs,
@@ -213,8 +213,7 @@ export default function PlaygroundClient({
     return result;
   }, [dereferenced, operation.security]);
 
-  const { items: examples, selected: exampleId } = useExampleRequests();
-  const { update } = useExampleRequest();
+  const { items: examples, selected: exampleId, update } = useExampleRequests();
   const { server } = useServer();
   const { ResultDisplay = DefaultResultDisplay, CollapsiblePanel = DefaultCollapsiblePanel } =
     components ?? {};
@@ -233,7 +232,7 @@ export default function PlaygroundClient({
 
   const stf = useStf({
     // it is fine to modify `defaultValues` in place
-    // because we already try to persist the form values via `setExampleData`.
+    // because we already try to persist the form values via `update()`.
     defaultValues,
   });
 
@@ -387,7 +386,7 @@ function SecurityRequirements({
   const { isLoading, error } = useAuth();
   const defaultOpen = isLoading || error != null;
   const [open, setOpen] = useState(defaultOpen);
-  const { dereferenced, resolve } = useOpenAPI().document;
+  const { dereferenced, resolve } = useOpenAPI().doc;
   const { CollapsiblePanel = DefaultCollapsiblePanel } = usePlaygroundOptions().components ?? {};
   const schemes = dereferenced.components?.securitySchemes;
 
@@ -611,9 +610,9 @@ function useAuthInputs(
   transformAuthInputs?: PlaygroundClientOptions['transformAuthInputs'],
 ) {
   const authCtx = useAuth();
-  const storageKeys = useStorageKey();
+  const getStorageKey = useStorageKey();
   const t = useTranslations({ note: 'playground' });
-  const { dereferenced, resolve } = useOpenAPI().document;
+  const { dereferenced, resolve } = useOpenAPI().doc;
   const schemes = dereferenced.components?.securitySchemes;
 
   const [requirementId, setRequirementId] = useState(() => {
@@ -636,7 +635,7 @@ function useAuthInputs(
         return {
           fieldName,
           schemeId: item.id,
-          storageKey: storageKeys.AuthField(item.id),
+          storageKey: getStorageKey(`auth-${item.id}`),
           defaultValue: {
             username: '',
             password: '',
@@ -671,7 +670,7 @@ function useAuthInputs(
         return {
           fieldName,
           schemeId: item.id,
-          storageKey: storageKeys.AuthField(item.id),
+          storageKey: getStorageKey(`auth-${item.id}`),
           defaultValue: 'Bearer ',
           children: <OAuth2Input fieldName={fieldName} security={item} />,
         };
@@ -681,7 +680,7 @@ function useAuthInputs(
         return {
           fieldName,
           schemeId: item.id,
-          storageKey: storageKeys.AuthField(item.id),
+          storageKey: getStorageKey(`auth-${item.id}`),
           defaultValue: 'Bearer ',
           children: (
             <FieldSet
@@ -700,7 +699,7 @@ function useAuthInputs(
           fieldName,
           schemeId: item.id,
           defaultValue: '',
-          storageKey: storageKeys.AuthField(item.id),
+          storageKey: getStorageKey(`auth-${item.id}`),
           children: (
             <FieldSet
               fieldName={fieldName}
@@ -718,7 +717,7 @@ function useAuthInputs(
         fieldName,
         schemeId: item.id,
         defaultValue: '',
-        storageKey: storageKeys.AuthField(item.id),
+        storageKey: getStorageKey(`auth-${item.id}`),
         children: (
           <>
             <FieldSet
@@ -737,7 +736,7 @@ function useAuthInputs(
         ),
       };
     });
-  }, [requirement, storageKeys, schemes, resolve, t]);
+  }, [requirement, getStorageKey, schemes, resolve, t]);
   if (transformAuthInputs) inputs = transformAuthInputs(inputs);
 
   useListener({
@@ -771,7 +770,7 @@ function useAuthInputs(
     );
     if (idx !== -1) {
       // persisted value
-      localStorage.setItem(storageKeys.AuthField(updatedSchemeId), JSON.stringify(token));
+      localStorage.setItem(getStorageKey(`auth-${updatedSchemeId}`), JSON.stringify(token));
       setRequirementId(idx);
     }
   });
