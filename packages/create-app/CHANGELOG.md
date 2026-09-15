@@ -1,3 +1,9 @@
+## create-fumadocs-app@16.2.2
+
+### Mark packages side-effect free
+
+All packages now declare `sideEffects` in `package.json`, so bundlers can tree-shake unused modules. Packages shipping stylesheets list them as side effects to keep CSS imports.
+
 ## create-fumadocs-app@16.2.0
 
 ### Search providers and shared CLI features

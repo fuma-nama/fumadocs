@@ -1,3 +1,9 @@
+## @fumadocs/language@0.2.5
+
+### Mark packages side-effect free
+
+All packages now declare `sideEffects` in `package.json`, so bundlers can tree-shake unused modules. Packages shipping stylesheets list them as side effects to keep CSS imports.
+
 ## @fumadocs/language@0.2.4
 
 ### Support HTTP Basic client authentication in OAuth password flow
