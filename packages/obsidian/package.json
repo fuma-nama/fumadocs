@@ -19,6 +19,9 @@
     "dist"
   ],
   "type": "module",
+  "sideEffects": [
+    "./css/**/*.css"
+  ],
   "types": "./dist/index.d.ts",
   "exports": {
     ".": "./dist/index.js",

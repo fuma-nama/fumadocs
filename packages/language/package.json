@@ -14,6 +14,7 @@
     "dist"
   ],
   "type": "module",
+  "sideEffects": false,
   "exports": {
     "./zh-cn": "./dist/zh-cn.js",
     "./zh-tw": "./dist/zh-tw.js",

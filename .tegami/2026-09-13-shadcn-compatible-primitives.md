@@ -1,7 +1,7 @@
 ---
 packages:
-  npm:fumadocs-ui: minor
-  npm:@fumadocs/base-ui: minor
+  npm:fumadocs-ui: patch
+  npm:@fumadocs/base-ui: patch
 ---
 
 ## Shadcn UI compatible primitives

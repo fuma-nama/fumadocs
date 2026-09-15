@@ -11,6 +11,9 @@
     "dist"
   ],
   "type": "module",
+  "sideEffects": [
+    "./css/**/*.css"
+  ],
   "exports": {
     ".": "./dist/index.js",
     "./i18n": "./dist/i18n.js",

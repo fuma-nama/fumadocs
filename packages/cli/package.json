@@ -17,6 +17,7 @@
     "dist"
   ],
   "type": "module",
+  "sideEffects": false,
   "exports": {
     "./codemod": "./dist/codemod/index.js",
     "./config": "./dist/config.js",

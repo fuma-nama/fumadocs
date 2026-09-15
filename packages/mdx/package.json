@@ -21,6 +21,7 @@
     "bin.js"
   ],
   "type": "module",
+  "sideEffects": false,
   "exports": {
     ".": "./dist/index.js",
     "./bin": "./dist/bin.js",

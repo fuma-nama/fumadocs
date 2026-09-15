@@ -15,6 +15,10 @@
     "dist"
   ],
   "type": "module",
+  "sideEffects": [
+    "./css/**/*.css",
+    "./dist/**/*.css"
+  ],
   "exports": {
     "./components/accordion": "./dist/components/accordion.js",
     "./components/banner": "./dist/components/banner.js",

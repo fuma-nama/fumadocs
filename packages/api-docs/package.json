@@ -15,6 +15,9 @@
     "dist"
   ],
   "type": "module",
+  "sideEffects": [
+    "./css/**/*.css"
+  ],
   "exports": {
     "./auto-anchor": "./dist/auto-anchor/index.js",
     "./auto-anchor/client": "./dist/auto-anchor/client.js",
