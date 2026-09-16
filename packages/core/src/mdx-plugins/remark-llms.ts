@@ -101,7 +101,7 @@ export function remarkLLMs(
         case 'mdxjsEsm':
           return false;
         default:
-          return true;
+          return rest.filterElement?.(node) ?? true;
       }
     },
     stringify(node, parent, state, info, collect) {
