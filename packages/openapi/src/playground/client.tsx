@@ -16,7 +16,7 @@ import type { BrowserFetcherOptions } from '@/playground/fetcher';
 import { DefaultResultDisplay, type ResultDisplayProps } from './components/result-display';
 import { pathnameFromRequest } from '@/requests/generators';
 import { MethodLabel } from '@/ui/components/method-label';
-import { useQuery } from '@/utils/use-query';
+import { useQuery } from '@fumadocs/api-docs/utils/use-query';
 import {
   Collapsible,
   CollapsibleContent,
@@ -38,7 +38,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@fumadocs/api-docs/components/select';
-import { labelVariants } from '@fumadocs/api-docs/components/input';
+import { labelVariants } from '@fumadocs/api-docs/components/label';
 import { getPreferredType, type ParsedSchema } from '@/utils/schema';
 import ServerSelect from './components/server-select';
 import { useStorageKey } from '@/utils/storage-key';

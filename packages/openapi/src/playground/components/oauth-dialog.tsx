@@ -6,8 +6,9 @@ import {
   DialogTitle,
   DialogTrigger,
 } from '@fumadocs/api-docs/components/dialog';
-import { Input, labelVariants } from '@fumadocs/api-docs/components/input';
-import { useQuery } from '@/utils/use-query';
+import { Input } from '@fumadocs/api-docs/components/input';
+import { labelVariants } from '@fumadocs/api-docs/components/label';
+import { useQuery } from '@fumadocs/api-docs/utils/use-query';
 import { type ReactNode, useMemo, useState } from 'react';
 import { cn } from '@/utils/cn';
 import { buttonVariants } from 'fumadocs-ui/components/ui/button';

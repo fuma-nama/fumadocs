@@ -9,7 +9,8 @@ import type {
   SecuritySchemeObject,
 } from '@/types';
 import { UsageTabs } from '@/ui/operation/usage-tabs';
-import { Badge, MethodLabel } from '@/ui/components/method-label';
+import { MethodLabel } from '@/ui/components/method-label';
+import { Badge } from '@fumadocs/api-docs/components/badge';
 import {
   OperationProvider,
   type OperationResponse,

@@ -7,7 +7,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@fumadocs/api-docs/components/select';
-import { Input, labelVariants } from '@fumadocs/api-docs/components/input';
+import { Input } from '@fumadocs/api-docs/components/input';
+import { labelVariants } from '@fumadocs/api-docs/components/label';
 import { useEffect, useState, useRef, type ComponentProps } from 'react';
 import { cn } from '@/utils/cn';
 import {

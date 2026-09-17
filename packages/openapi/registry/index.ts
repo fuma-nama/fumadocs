@@ -71,11 +71,6 @@ export const registry: Registry = {
         },
         {
           type: 'components',
-          path: 'utils/use-query.ts',
-          target: '<dir>/api/playground/use-query.ts',
-        },
-        {
-          type: 'components',
           path: 'utils/schema.ts',
           target: '<dir>/api/playground/schema.ts',
         },

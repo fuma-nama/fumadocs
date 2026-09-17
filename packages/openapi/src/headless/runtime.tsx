@@ -5,9 +5,8 @@ import {
   type FC,
   type ReactNode,
   use,
-  useEffect,
+  useCallback,
   useMemo,
-  useState,
 } from 'react';
 import type {
   Awaitable,
@@ -23,6 +22,7 @@ import type { MediaAdapter } from '@/requests/media/adapter';
 import type { CodeUsageGeneratorRegistry, InlineCodeUsageGenerator } from '@/requests/generators';
 import type { ParsedSchema } from '@/utils/schema';
 import type { SchemaUIOptions } from '@fumadocs/api-docs/components/schema';
+import { useServerStore } from '@fumadocs/api-docs/utils/use-server-store';
 import type { DynamicCodeblockProps } from 'fumadocs-ui/components/dynamic-codeblock.core';
 import { useStorageKey } from '@/utils/storage-key';
 
@@ -183,6 +183,8 @@ export function useTypeScriptDefinitions(
   return result instanceof Promise ? use(result) : result;
 }
 
+const keyOfServer = (server: SelectedServer) => server.url;
+
 export function ServerProvider({
   servers,
   children,
@@ -191,67 +193,24 @@ export function ServerProvider({
   children: ReactNode;
 }) {
   const storageKey = useStorageKey()('server-url');
-  const [server, setServer] = useState<SelectedServer | null>(() => {
-    if (!servers || servers.length === 0) return null;
-    const defaultItem = servers[0];
+  const resolve = useCallback(
+    (url: string): SelectedServer | null => {
+      const server = servers?.find((item) => item.url === url);
+      if (!server) return null;
 
-    return {
-      name: defaultItem.name,
-      url: defaultItem.url!,
-      variables: getDefaultValues(defaultItem),
-    };
+      return { name: server.name, url, variables: getDefaultValues(server) };
+    },
+    [servers],
+  );
+  const store = useServerStore({
+    storageKey,
+    keyOf: keyOfServer,
+    resolve,
+    defaultKey: servers?.[0]?.url,
   });
 
-  useEffect(() => {
-    const cached = localStorage.getItem(storageKey);
-    if (!cached) return;
-
-    try {
-      const obj = JSON.parse(cached) as Partial<SelectedServer> | null;
-      if (
-        servers?.some((item) => item.url === obj?.url) &&
-        typeof obj?.variables === 'object' &&
-        obj.variables !== null
-      ) {
-        setServer(obj as SelectedServer);
-      }
-    } catch {
-      // ignore
-    }
-  }, [servers, storageKey]);
-
   return (
-    <ServerContext
-      value={useMemo(
-        () => ({
-          servers,
-          server,
-          setServerVariables(variables) {
-            setServer((prev) => {
-              if (!prev) return null;
-
-              const updated = { ...prev, variables };
-              localStorage.setItem(storageKey, JSON.stringify(updated));
-              return updated;
-            });
-          },
-          setServer(value) {
-            const obj = servers?.find((item) => item.url === value);
-            if (!obj) return;
-
-            const result: SelectedServer = {
-              name: obj.name,
-              url: value,
-              variables: getDefaultValues(obj),
-            };
-
-            localStorage.setItem(storageKey, JSON.stringify(result));
-            setServer(result);
-          },
-        }),
-        [server, servers, storageKey],
-      )}
-    >
+    <ServerContext value={useMemo(() => ({ servers, ...store }), [servers, store])}>
       {children}
     </ServerContext>
   );

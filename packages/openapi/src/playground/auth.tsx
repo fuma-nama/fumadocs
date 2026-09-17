@@ -1,6 +1,6 @@
 'use client';
 import { useOpenAPI } from '@/headless/runtime';
-import { useQuery } from '@/utils/use-query';
+import { useQuery } from '@fumadocs/api-docs/utils/use-query';
 import { createContext, type ReactNode, use, useEffect, useMemo, useState } from 'react';
 import type { AuthCodeState, ImplicitState } from './components/oauth-dialog';
 

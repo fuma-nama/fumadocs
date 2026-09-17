@@ -60,10 +60,7 @@
     "class-variance-authority": "^0.7.1",
     "cn": "^0.2.6",
     "github-slugger": "^2.0.0",
-    "hast-util-to-jsx-runtime": "^2.3.6",
     "lucide-react": "^1.43.0",
-    "remark": "^15.0.1",
-    "remark-rehype": "^11.1.2",
     "shiki": "^4.4.3",
     "yaml": "^2.9.0"
   },
