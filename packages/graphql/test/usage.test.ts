@@ -2,7 +2,7 @@ import { fileURLToPath } from 'node:url';
 import path from 'node:path';
 import fs from 'node:fs';
 import { describe, expect, test } from 'vitest';
-import { getTypeUsages } from '@/utils/usage';
+import { getTypeUsages } from '@/headless/type-docs';
 import { buildSchemaFromSDL } from '@/utils/build-schema';
 
 const cwd = fileURLToPath(new URL('./', import.meta.url));

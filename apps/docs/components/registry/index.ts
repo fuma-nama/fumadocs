@@ -2,6 +2,9 @@ import * as radixUi from '../../../../packages/radix-ui/registry/index.ts';
 import * as baseUi from '../../../../packages/base-ui/registry/index.ts';
 import * as sanity from '../../../../packages/sanity/registry/index.ts';
 import * as openapi from '../../../../packages/openapi/registry/index.ts';
+import * as asyncapi from '../../../../packages/asyncapi/registry/index.ts';
+import * as graphql from '../../../../packages/graphql/registry/index.ts';
+import * as story from '../../../../packages/story/registry/index.ts';
 import * as apiDocs from '../../../../packages/api-docs/registry/index.ts';
 import * as path from 'node:path';
 import type { CompileOptions, Registry } from 'fuma-cli/compiler';
@@ -19,6 +22,57 @@ const openapiExports = new Map([
   // types are re-exported from the package root
   ['requests/media/adapter.ts', 'fumadocs-openapi'],
   ['types.ts', 'fumadocs-openapi'],
+]);
+
+// internal modules of `@fumadocs/asyncapi` mapped to their public exports
+const asyncapiExports = new Map([
+  ['headless/index.tsx', '@fumadocs/asyncapi/headless'],
+  ['ui/index.tsx', '@fumadocs/asyncapi/ui'],
+  ['ui/base.tsx', '@fumadocs/asyncapi/ui/base'],
+  // types are re-exported from the package root
+  ['types.ts', '@fumadocs/asyncapi'],
+  ['utils/schema.ts', '@fumadocs/asyncapi'],
+  ['utils/pages/builder.ts', '@fumadocs/asyncapi'],
+  ['types/asyncapi-3.ts', '@fumadocs/asyncapi'],
+  ['utils/get-example-messages.ts', '@fumadocs/asyncapi'],
+]);
+
+// internal modules of `@fumadocs/story` mapped to their public exports
+const storyExports = new Map([
+  ['headless/index.tsx', '@fumadocs/story/headless'],
+  // type-only, so the entry's TypeScript compiler import is erased
+  ['type-tree/types.ts', '@fumadocs/story/type-tree'],
+]);
+
+// internal modules of `@fumadocs/graphql` mapped to their public exports
+const graphqlExports = new Map([
+  ['headless/index.tsx', '@fumadocs/graphql/headless'],
+  ['ui/index.tsx', '@fumadocs/graphql/ui'],
+  ['ui/base.tsx', '@fumadocs/graphql/ui/base'],
+  ['types.ts', '@fumadocs/graphql'],
+  ['utils/schema.ts', '@fumadocs/graphql'],
+  ['utils/pages.ts', '@fumadocs/graphql'],
+  ['playground/fetcher.ts', '@fumadocs/graphql'],
+  ['utils/example.ts', '@fumadocs/graphql/headless'],
+  ['utils/snippets.ts', '@fumadocs/graphql/headless'],
+  ['utils/build-schema.ts', '@fumadocs/graphql/headless'],
+]);
+
+// the UI of `@fumadocs/api-docs`, vendored so an installed API page owns all of its markup
+const apiDocsUI = new Set([
+  'components/accordion.tsx',
+  'components/badge.tsx',
+  'components/collapsible.tsx',
+  'components/dialog.tsx',
+  'components/input.tsx',
+  'components/label.tsx',
+  'components/playground/inputs.tsx',
+  'components/popover.tsx',
+  'components/schema/client.tsx',
+  'components/schema/index.tsx',
+  'components/select-tab.tsx',
+  'components/select.tsx',
+  'components/spinner.tsx',
 ]);
 
 export const compileOptions: Partial<CompileOptions> = {
@@ -81,6 +135,61 @@ export const compileOptions: Partial<CompileOptions> = {
         };
       }
 
+      file = path.relative(asyncapi.registry.dir, ref.file);
+      const asyncapiSpecifier = asyncapiExports.get(file);
+      if (asyncapiSpecifier) {
+        return {
+          dep: '@fumadocs/asyncapi',
+          type: 'dependency',
+          specifier: asyncapiSpecifier,
+        };
+      }
+      if (file === 'utils/cn.ts') {
+        return {
+          type: 'file',
+          file: path.join(radixUi.registry.dir, 'utils/cn.ts'),
+        };
+      }
+
+      file = path.relative(graphql.registry.dir, ref.file);
+      const graphqlSpecifier = graphqlExports.get(file);
+      if (graphqlSpecifier) {
+        return {
+          dep: '@fumadocs/graphql',
+          type: 'dependency',
+          specifier: graphqlSpecifier,
+        };
+      }
+      if (file === 'utils/cn.ts') {
+        return {
+          type: 'file',
+          file: path.join(radixUi.registry.dir, 'utils/cn.ts'),
+        };
+      }
+
+      file = path.relative(story.registry.dir, ref.file);
+      // Story has its own copy of the shared primitives, install the shared one instead
+      if (file === 'client/components/select.tsx' || file === 'client/components/input.tsx') {
+        return {
+          type: 'file',
+          file: path.join(apiDocs.registry.dir, 'components', path.basename(file)),
+        };
+      }
+      const storySpecifier = storyExports.get(file);
+      if (storySpecifier) {
+        return {
+          dep: '@fumadocs/story',
+          type: 'dependency',
+          specifier: storySpecifier,
+        };
+      }
+      if (file === 'utils/cn.ts') {
+        return {
+          type: 'file',
+          file: path.join(radixUi.registry.dir, 'utils/cn.ts'),
+        };
+      }
+
       file = path.relative(apiDocs.registry.dir, ref.file);
       if (file === 'components/schema/headless.tsx') {
         return {
@@ -89,10 +198,7 @@ export const compileOptions: Partial<CompileOptions> = {
           specifier: '@fumadocs/api-docs/components/schema/headless',
         };
       }
-      // the Schema UI is vendored
-      const vendored =
-        file === 'components/schema/index.tsx' || file === 'components/schema/client.tsx';
-      if (!file.startsWith('..') && !vendored) {
+      if (!file.startsWith('..') && !apiDocsUI.has(file)) {
         if (file === 'utils/cn.ts' || file === 'utils/merge-refs.ts') {
           return {
             type: 'file',
@@ -109,12 +215,17 @@ export const compileOptions: Partial<CompileOptions> = {
       }
     }
 
-    // the Schema UI is vendored, so the installed UI owns it
-    if (ref.type === 'dependency' && ref.specifier === '@fumadocs/api-docs/components/schema') {
-      return {
-        type: 'file',
-        file: path.join(apiDocs.registry.dir, 'components/schema/index.tsx'),
-      };
+    if (ref.type === 'dependency' && ref.dep === '@fumadocs/api-docs') {
+      const subpath = ref.specifier.slice('@fumadocs/api-docs/'.length);
+
+      for (const file of [`${subpath}.tsx`, `${subpath}/index.tsx`]) {
+        if (apiDocsUI.has(file)) {
+          return {
+            type: 'file',
+            file: path.join(apiDocs.registry.dir, file),
+          };
+        }
+      }
     }
 
     // map dep imports to actual components
@@ -141,6 +252,9 @@ export const registry: Registry = {
     baseUi.registry,
     sanity.registry,
     openapi.registry,
+    asyncapi.registry,
+    graphql.registry,
+    story.registry,
     apiDocs.registry,
   ],
 

@@ -6,10 +6,7 @@ import type { SchemaUIOptions } from '@fumadocs/api-docs/components/schema';
 type RequireKeys<T, K extends keyof T> = Omit<T, K> & Required<Pick<T, K>>;
 
 export interface RenderContext extends Omit<
-  RequireKeys<
-    CreateAsyncAPIPageOptions,
-    'generateTypeScriptDefinitions' | 'shikiOptions' | 'shiki'
-  >,
+  RequireKeys<CreateAsyncAPIPageOptions, 'shikiOptions' | 'shiki'>,
   'schemaUI'
 > {
   schema: DereferencedDocument;

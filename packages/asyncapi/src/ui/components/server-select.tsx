@@ -1,5 +1,5 @@
 'use client';
-import { useServerContext } from '@/ui/contexts/api';
+import { useServer } from '@/headless';
 import {
   Select,
   SelectContent,
@@ -7,7 +7,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@fumadocs/api-docs/components/select';
-import { Input, labelVariants } from '@fumadocs/api-docs/components/input';
+import { Input } from '@fumadocs/api-docs/components/input';
+import { labelVariants } from '@fumadocs/api-docs/components/label';
 import { useRef, useState, type ComponentProps } from 'react';
 import { cn } from '@/utils/cn';
 import {
@@ -27,7 +28,7 @@ import { resolveServerUrl } from '@/utils/server-url';
 import { idToTitle } from '@fumadocs/api-docs/utils/id-to-title';
 
 export function ServerSelect(props: ComponentProps<typeof DialogTrigger>) {
-  const { servers, server, setServer, setServerVariables } = useServerContext();
+  const { servers, server, setServer, setServerVariables } = useServer();
   const [open, setOpen] = useState(false);
   const t = useTranslations({ note: 'playground server select' });
   const serverSchema = server ? servers[server.id] : undefined;

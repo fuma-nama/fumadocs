@@ -21,12 +21,21 @@ export interface DereferencedDocument {
   bundled: AsyncAPIObject;
 }
 
+// documents are read-only, pages of the same document share one proxy
+const cache = new WeakMap<AsyncAPIObject, DereferencedDocument>();
+
 export function dereferenceBundledDocument(bundled: AsyncAPIObject): DereferencedDocument {
-  return {
+  const cached = cache.get(bundled);
+  if (cached) return cached;
+
+  const doc: DereferencedDocument = {
     bundled,
     dereferenced: createMagicProxy(bundled as never) as AsyncAPIObject,
     resolve(node) {
       return dereferenceShallow(node);
     },
   };
+
+  cache.set(bundled, doc);
+  return doc;
 }

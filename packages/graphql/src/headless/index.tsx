@@ -14,7 +14,6 @@ export * from './operation';
 export * from './type-docs';
 export * from '@/utils/snippets';
 export { syncOperationVariables, type OperationExample } from '@/utils/example';
-export type { FieldRef, OperationRef, TypeUsages } from '@/utils/usage';
 
 /** props of the component rendering an operation of a page */
 export interface PageOperationProps {

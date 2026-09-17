@@ -9,7 +9,7 @@ import {
   Accordions,
 } from '@fumadocs/api-docs/components/accordion';
 import { getBindingEntries, getProtocolBinding, type BindingEntry } from './protocols';
-import { ComponentProps, useMemo } from 'react';
+import { type ComponentProps, useMemo } from 'react';
 import { BindingFieldRow } from './shared';
 import { ClientCodeBlock } from '../components/codeblock';
 import { cva } from 'class-variance-authority';

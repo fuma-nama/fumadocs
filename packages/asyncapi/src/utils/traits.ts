@@ -1,7 +1,8 @@
-import type { MessageObject, OperationObject, RenderContext } from '@/types';
-import { isPlainObject } from './is-plain-object';
+import type { MessageObject, OperationObject } from '@/types';
+import type { DereferencedDocument } from '@/utils/document/dereference';
+import { isPlainObject } from '@fumadocs/api-docs/utils/is-plain-object';
 
-type Resolve = RenderContext['schema']['resolve'];
+type Resolve = DereferencedDocument['resolve'];
 
 /**
  * Merge traits into a target object per the AsyncAPI traits merge mechanism.

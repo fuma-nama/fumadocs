@@ -4,9 +4,9 @@ import type {
   MultiFormatSchemaObject,
   OperationObject,
   ReferenceObject,
-  RenderContext,
   TagObject,
 } from '@/types';
+import type { DereferencedDocument } from '@/utils/document/dereference';
 import { idToTitle } from '@fumadocs/api-docs/utils/id-to-title';
 
 export type { ParsedSchema } from '@fumadocs/api-docs/schema';
@@ -20,10 +20,9 @@ export function getTagDisplayName(tag: TagObject): string {
 
 export function getMessageDisplayName(
   message: MessageObject | ReferenceObject,
-  ctx: RenderContext,
+  resolved: MessageObject,
   idx?: number,
-) {
-  const resolved = ctx.schema.resolve(message);
+): string {
   let v = resolved.title || resolved.name;
   if (v) return v;
 
@@ -42,7 +41,7 @@ export function getOperationDisplayName(id: string, operation: OperationObject):
 
 export function getOperationMessages(
   operation: OperationObject,
-  resolve: RenderContext['schema']['resolve'],
+  resolve: DereferencedDocument['resolve'],
 ): (MessageObject | ReferenceObject)[] {
   if (operation.messages) return operation.messages;
 

@@ -1,9 +1,9 @@
 'use client';
 import type { FC, ReactNode } from 'react';
 import { useTranslations } from '@fuma-translate/react';
-import { useRenderContext } from '@/ui/contexts/api';
+import { useComponents } from '@/headless';
 import { cn } from '@/utils/cn';
-import { AsyncAPISchemaObject } from '@/types';
+import type { AsyncAPISchemaObject } from '@/types';
 
 export type BindingComponent = FC<{ binding: Record<string, unknown> }>;
 export type BindingSummaryFn = (binding: Record<string, unknown>) => string | undefined;
@@ -144,10 +144,10 @@ export function BindingTagList({ value }: { value: Record<string, string> }) {
 }
 
 export function BindingSchema({ name, schema }: { name: string; schema: AsyncAPISchemaObject }) {
-  const ctx = useRenderContext();
+  const { SchemaUI } = useComponents();
 
   return (
-    <ctx.SchemaUI
+    <SchemaUI
       client={{
         name,
         required: false,

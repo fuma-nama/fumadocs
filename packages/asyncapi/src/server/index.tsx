@@ -18,9 +18,9 @@ import {
   type OutputEntry,
   type PageOutput,
 } from '@/utils/pages/builder';
+import type { AsyncAPIPageProps_Preloaded, AsyncAPIPageProps_Spec } from '@/headless';
 import { toStaticData } from '@/utils/pages/to-static-data';
 import path from 'node:path';
-import type { AsyncAPIPageProps_Preloaded, AsyncAPIPageProps_Spec } from '@/ui';
 import type { StructuredData } from 'fumadocs-core/mdx-plugins/remark-structure';
 import type { TOCItemType } from 'fumadocs-core/toc';
 import { createAutoPreset, type SchemaToPagesOptions } from '@/utils/pages/preset-auto';
