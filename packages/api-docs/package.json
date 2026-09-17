@@ -23,9 +23,12 @@
     "./auto-anchor/client": "./dist/auto-anchor/client.js",
     "./codegen": "./dist/codegen.js",
     "./components/accordion": "./dist/components/accordion.js",
+    "./components/badge": "./dist/components/badge.js",
     "./components/collapsible": "./dist/components/collapsible.js",
+    "./components/defaults": "./dist/components/defaults.js",
     "./components/dialog": "./dist/components/dialog.js",
     "./components/input": "./dist/components/input.js",
+    "./components/label": "./dist/components/label.js",
     "./components/playground/inputs": "./dist/components/playground/inputs.js",
     "./components/playground/schema": "./dist/components/playground/schema.js",
     "./components/popover": "./dist/components/popover.js",
@@ -43,7 +46,10 @@
     "./schema/sample": "./dist/schema/sample.js",
     "./schema/to-string": "./dist/schema/to-string.js",
     "./utils/id-to-title": "./dist/utils/id-to-title.js",
+    "./utils/is-plain-object": "./dist/utils/is-plain-object.js",
     "./utils/url": "./dist/utils/url.js",
+    "./utils/use-query": "./dist/utils/use-query.js",
+    "./utils/use-server-store": "./dist/utils/use-server-store.js",
     "./package.json": "./package.json",
     "./css/*": "./css/*"
   },
@@ -65,7 +71,11 @@
     "class-variance-authority": "^0.7.1",
     "cn": "^0.2.6",
     "github-slugger": "^2.0.0",
-    "lucide-react": "^1.43.0"
+    "hast-util-to-jsx-runtime": "^2.3.6",
+    "lucide-react": "^1.43.0",
+    "remark": "^15.0.1",
+    "remark-rehype": "^11.1.2",
+    "shiki": "^4.4.3"
   },
   "devDependencies": {
     "@fastify/deepmerge": "^3.2.1",

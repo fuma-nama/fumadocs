@@ -12,7 +12,7 @@ export default defineConfig({
     './src/{components,auto-anchor,schema}/**/*',
     // exported from `components/schema`
     '!./src/components/schema/client.tsx',
-    './src/utils/{id-to-title,url}.ts',
+    './src/utils/{id-to-title,is-plain-object,url,use-query,use-server-store}.ts',
   ],
   unbundle: true,
   ignoreWatch: ['src/.translations/**'],

@@ -3,7 +3,8 @@ import { type ComponentProps, type HTMLAttributes, type ReactNode, useState } fr
 import { ChevronRight, Plus, Trash2, X } from 'lucide-react';
 import { FieldKey, useArray, useDataEngine, useFieldValue, useObject } from '@fumari/stf';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/select';
-import { Input, labelVariants } from '@/components/input';
+import { Input } from '@/components/input';
+import { labelVariants } from '@/components/label';
 import { cn } from '@/utils/cn';
 import { buttonVariants } from 'fumadocs-ui/components/ui/button';
 import { FormatFlags } from '@/schema/to-string';
