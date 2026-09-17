@@ -7,7 +7,7 @@ import { fileURLToPath } from 'node:url';
 import { createHash } from 'node:crypto';
 import { deepmerge } from '@fastify/deepmerge';
 import { createControlsProject, generateControls } from './utils/generate';
-import type { VariantInfo, WithControlProps } from './client/with-control';
+import type { VariantInfo, WithControlProps } from './headless';
 
 type Awaitable<T> = T | Promise<T>;
 
@@ -64,6 +64,11 @@ export interface Story<C extends FC<any> = FC<any>> {
 
 export interface StoryFactoryOptions {
   cache?: Cache | false;
+
+  /**
+   * Replace the UI of stories, e.g. the one installed with Fumadocs CLI.
+   */
+  WithControl?: FC<WithControlProps>;
 
   tsc?: {
     /** default to `tsconfig.json` under cwd */
@@ -149,8 +154,10 @@ export function defineStoryFactory(factoryOptions: StoryFactoryOptions = {}): St
           component: Component,
         },
         async WithControl() {
-          const { WithControl } = await import('./client/with-control');
-          return <WithControl {...await getProps()} />;
+          const Comp =
+            factoryOptions.WithControl ?? (await import('./client/with-control')).WithControl;
+
+          return <Comp {...await getProps()} />;
         },
       };
     },

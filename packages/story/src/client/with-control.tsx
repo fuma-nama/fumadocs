@@ -1,98 +1,74 @@
 'use client';
 
 import { cn } from '@/utils/cn';
-import { useStf, StfProvider, useDataEngine, useListener } from '@fumari/stf';
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from './components/select';
 import { buttonVariants } from 'fumadocs-ui/components/ui/button';
 import { AlertCircle } from 'lucide-react';
-import { FC, useState, useRef, useDeferredValue, Suspense } from 'react';
+import { type FC, Suspense } from 'react';
 import { ErrorBoundary } from 'react-error-boundary';
 import { FieldSet } from './arg-form';
-import type { TypeNode } from '@/type-tree/types';
+import { StoryProvider, useStory, useStoryArgs, type WithControlProps } from '@/headless';
 import { useTranslations } from '@fuma-translate/react';
 
-export interface WithControlProps {
-  displayName?: string;
-  Component: FC;
-  presets: (VariantInfo & {
-    controls: TypeNode;
-    defaultValues?: Record<string, unknown>;
-  })[];
+export type { VariantInfo, WithControlProps } from '@/headless';
+
+export function WithControl(props: WithControlProps) {
+  return (
+    <StoryProvider {...props}>
+      <Content />
+    </StoryProvider>
+  );
 }
 
-export interface VariantInfo {
-  variant: string;
-  description?: string;
-}
-
-export function WithControl({ presets, displayName, Component }: WithControlProps) {
+function Content() {
   const t = useTranslations({ note: 'story controls' });
-  const [variant, setVariant] = useState(presets[0].variant);
-  const preset = presets.find((preset) => preset.variant === variant);
-  const stf = useStf({
-    defaultValues: preset?.defaultValues,
-  });
+  const { presets, displayName, Component, preset, variant, setVariant } = useStory();
 
   return (
-    <StfProvider value={stf}>
-      <div className="not-prose flex flex-col gap-1 p-1 border rounded-md shadow-sm bg-fd-card text-fd-card-foreground">
-        <div className="flex flex-row items-center gap-2 empty:hidden">
-          {displayName && <p className="text-sm font-medium px-1.5">{displayName}</p>}
-          {presets.length > 1 && (
-            <Select
-              value={variant}
-              onValueChange={(value) => {
-                if (value === null) return;
-                const preset = presets.find((preset) => preset.variant === value);
-                if (preset) {
-                  setVariant(value);
-                  stf.dataEngine.reset(preset.defaultValues ?? {});
-                }
-              }}
+    <div className="not-prose flex flex-col gap-1 p-1 border rounded-md shadow-sm bg-fd-card text-fd-card-foreground">
+      <div className="flex flex-row items-center gap-2 empty:hidden">
+        {displayName && <p className="text-sm font-medium px-1.5">{displayName}</p>}
+        {presets.length > 1 && (
+          <Select
+            value={variant}
+            onValueChange={(value) => {
+              if (value === null) return;
+              setVariant(value);
+            }}
+          >
+            <SelectTrigger
+              variant="ghost"
+              className="w-fit ms-auto text-fd-muted-foreground text-xs font-medium"
             >
-              <SelectTrigger
-                variant="ghost"
-                className="w-fit ms-auto text-fd-muted-foreground text-xs font-medium"
-              >
-                <SelectValue placeholder={t('No Variant')} />
-              </SelectTrigger>
-              <SelectContent>
-                {presets.map((item) => (
-                  <SelectItem key={item.variant} value={item.variant}>
-                    <p className="text-xs font-medium">{item.variant}</p>
-                    <p className="text-xs text-fd-muted-foreground">{item.description}</p>
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          )}
-        </div>
-        <StoryComponent Component={Component} />
-        {preset && (
-          <FieldSet
-            field={preset.controls}
-            fieldName={[]}
-            name={t('Props')}
-            className="max-h-[600px] overflow-auto"
-          />
+              <SelectValue placeholder={t('No Variant')} />
+            </SelectTrigger>
+            <SelectContent>
+              {presets.map((item) => (
+                <SelectItem key={item.variant} value={item.variant}>
+                  <p className="text-xs font-medium">{item.variant}</p>
+                  <p className="text-xs text-fd-muted-foreground">{item.description}</p>
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
         )}
       </div>
-    </StfProvider>
+      <StoryComponent Component={Component} />
+      {preset && (
+        <FieldSet
+          field={preset.controls}
+          fieldName={[]}
+          name={t('Props')}
+          className="max-h-[600px] overflow-auto"
+        />
+      )}
+    </div>
   );
 }
 
 function StoryComponent({ Component }: { Component: FC }) {
   const t = useTranslations({ note: 'story error boundary' });
-  const engine = useDataEngine();
-  const timerRef = useRef(0);
-  const [args, setArgs] = useState(() => engine.getData());
-  const deferredArgs = useDeferredValue(args);
-  useListener({
-    onUpdate() {
-      if (timerRef.current) window.clearTimeout(timerRef.current);
-      timerRef.current = window.setTimeout(() => setArgs({ ...engine.getData() }), 100);
-    },
-  });
+  const args = useStoryArgs();
 
   return (
     <ErrorBoundary
@@ -113,7 +89,7 @@ function StoryComponent({ Component }: { Component: FC }) {
       )}
     >
       <Suspense>
-        <Component {...deferredArgs} key={undefined} />
+        <Component {...args} key={undefined} />
       </Suspense>
     </ErrorBoundary>
   );

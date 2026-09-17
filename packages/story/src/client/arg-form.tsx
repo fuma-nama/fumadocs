@@ -514,8 +514,8 @@ function useFieldInfo(
       };
 
       if (node.type === 'union') {
-        // Try to find which union type matches the current value
-        const matchingIndex = node.types.findIndex(validate);
+        const value = engine.get(fieldName);
+        const matchingIndex = node.types.findIndex((type) => validate(type, value));
         out.unionIndex = matchingIndex === -1 ? 0 : matchingIndex;
       }
 

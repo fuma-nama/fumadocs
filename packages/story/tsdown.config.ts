@@ -7,6 +7,7 @@ export default defineConfig({
   entry: [
     './src/index.{ts,tsx}',
     './src/i18n.ts',
+    './src/headless/index.tsx',
     './src/type-tree/index.ts',
     './src/vite/*',
     './src/next/*',
