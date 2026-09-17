@@ -36,15 +36,12 @@ function Content() {
               setVariant(value);
             }}
           >
-            <SelectTrigger
-              variant="ghost"
-              className="w-fit ms-auto text-fd-muted-foreground text-xs font-medium"
-            >
+            <SelectTrigger className="w-fit ms-auto border-none bg-transparent px-1.5 py-1 text-fd-muted-foreground text-xs font-medium">
               <SelectValue placeholder={t('No Variant')} />
             </SelectTrigger>
             <SelectContent>
               {presets.map((item) => (
-                <SelectItem key={item.variant} value={item.variant}>
+                <SelectItem key={item.variant} value={item.variant} className="gap-2">
                   <p className="text-xs font-medium">{item.variant}</p>
                   <p className="text-xs text-fd-muted-foreground">{item.description}</p>
                 </SelectItem>

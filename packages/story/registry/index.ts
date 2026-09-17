@@ -35,16 +35,6 @@ export const registry: Registry = {
           path: `type-tree/${name}.ts`,
           target: `<dir>/story/type-tree/${name}.ts`,
         })),
-        {
-          type: 'components',
-          path: 'client/components/input.tsx',
-          target: '<dir>/story/input.tsx',
-        },
-        {
-          type: 'components',
-          path: 'client/components/select.tsx',
-          target: '<dir>/story/select.tsx',
-        },
       ],
     },
   ],

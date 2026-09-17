@@ -1,7 +1,9 @@
 import * as React from 'react';
 import { cn } from '@/utils/cn';
 
-export function Input({ className, type, ...props }: React.ComponentProps<'input'>) {
+export type InputProps = React.ComponentProps<'input'>;
+
+function Input({ className, type, ref, ...props }: InputProps) {
   return (
     <input
       type={type}
@@ -9,7 +11,10 @@ export function Input({ className, type, ...props }: React.ComponentProps<'input
         'flex h-9 w-full rounded-md border bg-fd-secondary px-2 py-1.5 text-[0.8125rem] text-fd-secondary-foreground transition-colors placeholder:text-fd-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-fd-ring disabled:cursor-not-allowed disabled:opacity-50',
         className,
       )}
+      ref={ref}
       {...props}
     />
   );
 }
+
+export { Input };
