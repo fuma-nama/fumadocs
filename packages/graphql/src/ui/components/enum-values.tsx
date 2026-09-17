@@ -2,7 +2,7 @@
 import type { GraphQLEnumType } from 'graphql';
 import { useTranslations } from '@fuma-translate/react';
 import { cn } from '@/utils/cn';
-import { Badge } from './badge';
+import { Badge } from '@fumadocs/api-docs/components/badge';
 import { Markdown } from './markdown';
 
 export function EnumValueList({ type, className }: { type: GraphQLEnumType; className?: string }) {

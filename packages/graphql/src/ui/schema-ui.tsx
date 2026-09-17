@@ -30,37 +30,19 @@ import {
   InlineTag,
   type SchemaData,
   type SchemaUIGeneratedData,
-  type SchemaUIProps,
 } from '@fumadocs/api-docs/components/schema';
+import { type SchemaViewProps, type SchemaViewRoot, useGraphQL } from '@/headless';
 import { getCustomDirectives } from '@/utils/schema';
-import { useRenderContext } from './contexts/api';
 import { Markdown } from './components/markdown';
 import { EnumValueList } from './components/enum-values';
 import { DirectiveList } from './components/type-annotation';
-
-/**
- * a field-like root to render: a plain type, an argument, or a field.
- */
-export interface SchemaViewRoot {
-  type: GraphQLType;
-  description?: string | null;
-  deprecationReason?: string | null;
-  args?: readonly GraphQLArgument[];
-  default?: GraphQLDefaultInput;
-  astNode?: { readonly directives?: readonly DirectiveNode[] } | null;
-}
-
-export interface SchemaViewProps {
-  client: Omit<SchemaUIProps, 'generated'>;
-  root: SchemaViewRoot;
-}
 
 const TagCardClass = 'flex flex-col w-full bg-fd-secondary border rounded-lg shadow-md';
 const TagCardTitleClass =
   'font-medium text-xs text-fd-muted-foreground rounded-t-[inherit] bg-fd-muted not-prose border-b';
 
 export function GraphQLSchemaView({ client, root }: SchemaViewProps) {
-  const { schema } = useRenderContext().schema;
+  const { schema } = useGraphQL();
   const translations = useTranslations().translations;
   const generated = useMemo(
     () => generateGraphQLSchemaUI(schema, root, translations),

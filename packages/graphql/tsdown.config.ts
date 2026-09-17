@@ -7,7 +7,12 @@ import { packageTranslationsPlugin } from '../shared/compile-package-translation
 export default defineConfig({
   format: 'esm',
   target: 'es2023',
-  entry: ['./src/{index,i18n}.ts', './src/ui/index.tsx', './src/server/index.tsx'],
+  entry: [
+    './src/{index,i18n}.ts',
+    './src/headless/index.tsx',
+    './src/ui/{index,base}.tsx',
+    './src/server/index.tsx',
+  ],
   unbundle: true,
   ignoreWatch: ['src/.translations/**'],
   dts: {

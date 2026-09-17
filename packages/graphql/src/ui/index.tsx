@@ -1,32 +1,20 @@
 'use client';
-/* eslint-disable @typescript-eslint/no-explicit-any -- rehype-react without types */
-import {
-  Children,
-  type ComponentProps,
-  type FC,
-  type ReactElement,
-  type ReactNode,
-  useMemo,
-} from 'react';
+import type { FC, ReactNode } from 'react';
 import type { GraphQLField, GraphQLNamedType } from 'graphql';
-import { remarkGfm } from 'fumadocs-core/mdx-plugins/remark-gfm';
-import defaultMdxComponents from 'fumadocs-ui/mdx';
-import { remark } from 'remark';
-import remarkRehype from 'remark-rehype';
-import { toJsxRuntime } from 'hast-util-to-jsx-runtime';
-import * as JsxRuntime from 'react/jsx-runtime';
 import { defaultShikiFactory } from 'fumadocs-core/highlight/shiki/full';
 import type { ShikiFactory } from 'fumadocs-core/highlight/shiki';
 import type { BundledTheme, CodeOptionsThemes, CodeToHastOptionsCommon } from 'shiki';
 import type { RenderContext } from '@/types';
 import type { PlaygroundRequest, PlaygroundResult } from '@/playground/fetcher';
-import type { GeneratedPageProps, GraphQLPageItem } from '@/utils/pages';
+import type { GraphQLPageItem } from '@/utils/pages';
+import type { GraphQLLinks, GraphQLPageProps } from '@/headless';
 import type { NamedTypeKind, OperationKind } from '@/utils/schema';
-import { buildSchemaFromSDL } from '@/utils/build-schema';
-import { PageContent } from './api-page';
-import { ClientCodeBlock } from './components/codeblock';
-import { RenderContextProvider } from './contexts/api';
-import { GraphQLSchemaView, type SchemaViewProps } from './schema-ui';
+import type { GraphQLComponents, SchemaViewProps } from '@/headless';
+import type { OperationProps } from './operation';
+import type { TypeDocsProps } from './type-docs';
+import { createGraphQLPageBase } from './base';
+
+export type { GraphQLLinks, GraphQLPageProps, OperationProps, TypeDocsProps };
 
 export interface CreateGraphQLPageOptions {
   shiki?: ShikiFactory;
@@ -68,7 +56,7 @@ export interface CreateGraphQLPageOptions {
      */
     fetcher?: (request: PlaygroundRequest, ctx: RenderContext) => Promise<PlaygroundResult>;
     /**
-     * replace the playground UI.
+     * replace the playground UI, e.g. the one installed with Fumadocs CLI.
      */
     render?: (context: {
       kind: OperationKind;
@@ -122,110 +110,33 @@ export interface CreateGraphQLPageOptions {
     ) => ReactNode;
   };
   schemaUI?: {
+    /**
+     * wrap the Schema UI, `ctx.SchemaUI` renders the default one.
+     */
     render?: (options: SchemaViewProps, ctx: RenderContext) => ReactNode;
   };
-  components?: {
-    Heading?: FC<ComponentProps<'h1'> & { id: string; depth: number }>;
-    CodeBlock?: FC<{ lang: string; code: string }>;
-    Markdown?: FC<{ md: string }>;
+  components?: Partial<Omit<GraphQLComponents, 'SchemaUI'>> & {
+    /**
+     * Replace the Schema UI, e.g. the one installed with Fumadocs CLI.
+     */
+    SchemaUI?: FC<SchemaViewProps>;
+    /**
+     * Replace the UI of operations, e.g. the one installed with Fumadocs CLI.
+     */
+    Operation?: FC<OperationProps>;
+    /**
+     * Replace the UI of named types, e.g. the one installed with Fumadocs CLI.
+     */
+    TypeDocs?: FC<TypeDocsProps>;
   };
 }
 
 /**
- * pre-generated links of generated pages, see `baseUrl` in source options.
+ * Create `<GraphQLPage />` (a client component).
  */
-export interface GraphQLLinks {
-  /**
-   * type name -> page URL
-   */
-  types: Record<string, string>;
-  /**
-   * `${kind}:${name}` of operation -> page URL
-   */
-  operations: Record<string, string>;
-}
-
-export type GraphQLPageProps = GeneratedPageProps & {
-  payload: {
-    links?: GraphQLLinks;
-    sdl: string;
-  };
-};
-
-export function createGraphQLPage({
-  shiki = defaultShikiFactory,
-  shikiOptions = { themes: { light: 'github-light', dark: 'github-dark' } },
-  schemaUI: schemaUIOptions,
-  ...options
-}: CreateGraphQLPageOptions = {}): FC<GraphQLPageProps> {
-  let processor: ReturnType<typeof createMarkdownProcessor>;
-
-  function createMarkdownProcessor() {
-    const mdxComponents = {
-      ...defaultMdxComponents,
-      img: undefined,
-      pre: MarkdownPre,
-    };
-
-    function rehypeReact(this: any) {
-      this.compiler = (tree: any, file: any) => {
-        return toJsxRuntime(tree, {
-          development: false,
-          filePath: file.path,
-          ...JsxRuntime,
-          components: mdxComponents,
-        });
-      };
-    }
-
-    return remark().use(remarkGfm).use(remarkRehype).use(rehypeReact);
-  }
-
-  return function GraphQLPage(props) {
-    const schema = useMemo(() => buildSchemaFromSDL(props.payload.sdl), [props.payload.sdl]);
-
-    const ctx: RenderContext = useMemo(() => {
-      const ctx: RenderContext = {
-        schema: {
-          schema,
-          sdl: props.payload.sdl,
-          links: props.payload.links,
-        },
-        shiki,
-        shikiOptions,
-        SchemaUI(props) {
-          if (schemaUIOptions?.render) return schemaUIOptions.render(props, ctx);
-          return <GraphQLSchemaView {...props} />;
-        },
-        ...options,
-        _default_processMarkdown(md) {
-          processor ??= createMarkdownProcessor();
-          return processor.processSync(md).result as ReactNode;
-        },
-      };
-
-      return ctx;
-    }, [schema, props.payload.sdl, props.payload.links]);
-
-    return (
-      <RenderContextProvider ctx={ctx}>
-        <PageContent {...props} />
-      </RenderContextProvider>
-    );
-  };
-}
-
-function MarkdownPre(props: ComponentProps<'pre'>) {
-  const code = Children.only(props.children) as ReactElement;
-  const codeProps = code.props as ComponentProps<'code'>;
-  const content = codeProps.children;
-  if (typeof content !== 'string') return null;
-
-  const lang =
-    codeProps.className
-      ?.split(' ')
-      .find((v) => v.startsWith('language-'))
-      ?.slice('language-'.length) ?? 'text';
-
-  return <ClientCodeBlock lang={lang} code={content.trimEnd()} />;
+export function createGraphQLPage(options: CreateGraphQLPageOptions = {}): FC<GraphQLPageProps> {
+  return createGraphQLPageBase({
+    ...options,
+    shiki: options.shiki ?? defaultShikiFactory,
+  });
 }

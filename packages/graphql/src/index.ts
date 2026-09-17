@@ -12,7 +12,12 @@ export type {
   PagesBuilder,
   SchemaToPagesOptions,
 } from './utils/pages';
-export { getNamedTypeKind, type NamedTypeKind, type OperationKind } from './utils/schema';
+export {
+  getCustomDirectives,
+  getNamedTypeKind,
+  type NamedTypeKind,
+  type OperationKind,
+} from './utils/schema';
 export {
   executeGraphQL,
   type PlaygroundRequest,

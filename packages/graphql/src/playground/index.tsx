@@ -12,13 +12,7 @@ import {
   Trash2,
   TriangleAlert,
 } from 'lucide-react';
-import {
-  type GraphQLField,
-  type GraphQLSchema,
-  isRequiredArgument,
-  parse,
-  validate,
-} from 'graphql';
+import { type GraphQLSchema, isRequiredArgument, parse, validate } from 'graphql';
 import { type FieldKey, StfProvider, useListener, useStf } from '@fumari/stf';
 import { isPlainObject, stringifyFieldKey } from '@fumari/stf/lib/utils';
 import {
@@ -30,14 +24,14 @@ import { FieldSet } from '@fumadocs/api-docs/components/playground/inputs';
 import { SchemaProvider } from '@fumadocs/api-docs/components/playground/schema';
 import { Input } from '@fumadocs/api-docs/components/input';
 import { Spinner } from '@fumadocs/api-docs/components/spinner';
+import { useGraphQL, useOperation } from '@/headless';
 import { cn } from '@/utils/cn';
-import type { OperationKind } from '@/utils/schema';
-import { type OperationExample, syncOperationVariables } from '@/utils/example';
-import { useQuery } from '@/utils/use-query';
-import { useRenderContext } from '@/ui/contexts/api';
+import { syncOperationVariables } from '@/utils/example';
+import { useQuery } from '@fumadocs/api-docs/utils/use-query';
+import type { RenderContext } from '@/types';
 import { ClientCodeBlock } from '@/ui/components/codeblock';
 import { CodeEditor } from '@/ui/components/code-editor';
-import { Badge } from '@/ui/components/badge';
+import { Badge } from '@fumadocs/api-docs/components/badge';
 import { executeGraphQL, type PlaygroundResult } from './fetcher';
 import { inputTypeToJsonSchema } from './json-schema';
 import {
@@ -79,19 +73,11 @@ function toArgumentName(field: FieldKey): string | undefined {
   return typeof name === 'string' ? name : undefined;
 }
 
-export function OperationPlayground({
-  kind,
-  field,
-  example,
-}: {
-  kind: OperationKind;
-  field: GraphQLField<unknown, unknown>;
-  example: OperationExample | undefined;
-}) {
+export function OperationPlayground({ ctx }: { ctx: RenderContext }) {
   const t = useTranslations({ note: 'graphql playground' });
-  const ctx = useRenderContext();
   const playground = ctx.playground ?? {};
-  const { schema } = ctx.schema;
+  const { schema } = useGraphQL();
+  const { kind, field, example } = useOperation();
   const allowUrlEdit = playground.allowUrlEdit ?? true;
   // the default fetcher sends operations over HTTP POST, which cannot serve subscriptions
   const runDisabled = kind === 'subscription' && !playground.fetcher;
@@ -260,6 +246,8 @@ export function OperationPlayground({
             value={query}
             onValueChange={setQuery}
             lang="graphql"
+            shiki={ctx.shiki}
+            shikiOptions={ctx.shikiOptions}
             aria-label={t('Query editor')}
             className="border-t"
           />

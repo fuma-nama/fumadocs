@@ -1,7 +1,7 @@
 import type { GraphQLSchema } from 'graphql';
 import type { FC, ReactNode } from 'react';
-import type { CreateGraphQLPageOptions, GraphQLLinks } from './ui';
-import type { SchemaViewProps } from './ui/schema-ui';
+import type { CreateGraphQLPageOptions } from './ui';
+import type { GraphQLLinks, SchemaViewProps } from './headless';
 
 type RequireKeys<T, K extends keyof T> = Omit<T, K> & Required<Pick<T, K>>;
 
@@ -18,6 +18,9 @@ export interface RenderContext extends Omit<
     links?: GraphQLLinks;
   };
   _default_processMarkdown: (md: string) => ReactNode;
+  /**
+   * the default Schema UI, or the one passed to `components.SchemaUI`.
+   */
   SchemaUI: FC<SchemaViewProps>;
 }
 

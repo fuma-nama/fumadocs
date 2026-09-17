@@ -6,49 +6,45 @@ import { isRequiredArgument } from 'graphql';
 import { Callout } from 'fumadocs-ui/components/callout';
 import { Tab, Tabs } from 'fumadocs-ui/components/tabs';
 import {
-  getCustomDirectives,
-  getOperationField,
-  getOperationTitle,
-  type OperationKind,
-} from '@/utils/schema';
-import { generateOperationExample } from '@/utils/example';
-import { generateRequestSnippets } from '@/utils/snippets';
+  generateRequestSnippets,
+  OperationProvider,
+  type PageOperationProps,
+  useComponents,
+  useOperation,
+} from '@/headless';
+import type { RenderContext } from '@/types';
 import { OperationPlayground } from '@/playground';
 import { KindLabel } from '../components/badge';
 import { Heading } from '../components/heading';
 import { Markdown } from '../components/markdown';
 import { ClientCodeBlock } from '../components/codeblock';
 import { DirectiveList, TypeAnnotation } from '../components/type-annotation';
-import { useRenderContext } from '../contexts/api';
 
-export function Operation({
-  kind,
-  name,
+export interface OperationProps extends PageOperationProps {
+  /** the options of `createGraphQLPage()` */
+  ctx?: RenderContext;
+}
+
+export function Operation({ kind, name, ...props }: OperationProps) {
+  return (
+    <OperationProvider kind={kind} name={name}>
+      <OperationContent {...props} />
+    </OperationProvider>
+  );
+}
+
+function OperationContent({
   showTitle,
   showDescription,
-  headingLevel = 2,
-}: {
-  kind: OperationKind;
-  name: string;
-  showTitle?: boolean;
-  showDescription?: boolean;
-  headingLevel?: number;
-}) {
+  ctx,
+}: Omit<OperationProps, 'kind' | 'name'>) {
   const t = useTranslations({ note: 'operation page' });
-  const ctx = useRenderContext();
-  const { schema } = ctx.schema;
-  const field = useMemo(() => {
-    const field = getOperationField(schema, kind, name);
-    if (!field)
-      throw new Error(`[Fumadocs GraphQL] Operation not found in schema: ${kind} ${name}`);
-
-    return field;
-  }, [schema, kind, name]);
+  const { SchemaUI } = useComponents();
+  const { kind, name, title, field, directives, example } = useOperation();
+  let headingLevel = 2;
 
   let headNode: ReactNode = null;
   if (showTitle) {
-    const title = getOperationTitle(name);
-
     headNode = (
       <div className="flex flex-wrap gap-2 items-center justify-between">
         <Heading id={title} depth={headingLevel} className="my-0!">
@@ -70,23 +66,17 @@ export function Operation({
     </Callout>
   );
 
-  const directives = getCustomDirectives(field.astNode);
   const directivesNode = directives.length > 0 && (
     <DirectiveList directives={directives} className="my-4" />
   );
 
-  const example = useMemo(
-    () => generateOperationExample(schema, { kind, name }),
-    [schema, kind, name],
-  );
-
-  const playground = ctx.playground;
+  const playground = ctx?.playground;
   let playgroundNode: ReactNode = null;
-  if (playground && (playground.url != null || playground.fetcher || playground.render)) {
+  if (ctx && playground && (playground.url != null || playground.fetcher || playground.render)) {
     playgroundNode = playground.render ? (
       playground.render({ kind, name, operation: field, ctx })
     ) : (
-      <OperationPlayground kind={kind} field={field} example={example} />
+      <OperationPlayground ctx={ctx} />
     );
   }
 
@@ -98,7 +88,7 @@ export function Operation({
       <AnchorSection segments={['arguments']}>
         <div className="flex flex-col">
           {field.args.map((arg) => (
-            <ctx.SchemaUI
+            <SchemaUI
               key={arg.name}
               client={{
                 name: arg.name,
@@ -127,7 +117,7 @@ export function Operation({
         <TypeAnnotation type={field.type} className="text-sm not-prose" />
       </div>
       <AnchorSection segments={['returns']}>
-        <ctx.SchemaUI
+        <SchemaUI
           client={{
             name: 'returns',
             as: 'body',
@@ -183,42 +173,34 @@ export function Operation({
     );
   }
 
-  let { renderOperationLayout } = ctx.content ?? {};
-
-  renderOperationLayout ??= (slots) => {
-    return (
-      <div className="flex flex-col gap-x-6 gap-y-4 @4xl:flex-row @4xl:items-start">
-        <div className="min-w-0 flex-1">
-          {slots.header}
-          {slots.playground}
-          {slots.description}
-          {slots.deprecated}
-          {slots.directives}
-          {slots.arguments}
-          {slots.returns}
-        </div>
-        <div className="flex flex-col gap-4 mt-6 @4xl:mt-0 @4xl:sticky @4xl:top-[calc(var(--fd-docs-row-3,var(--fd-docs-row-2,0px))+1rem)] @4xl:w-[400px]">
-          {slots.example}
-        </div>
-      </div>
-    );
+  const slots = {
+    header: headNode,
+    description: descriptionNode,
+    deprecated: deprecatedNode,
+    directives: directivesNode,
+    playground: playgroundNode,
+    arguments: argsNode,
+    returns: returnsNode,
+    example: exampleNode,
   };
 
-  return renderOperationLayout(
-    {
-      header: headNode,
-      description: descriptionNode,
-      deprecated: deprecatedNode,
-      directives: directivesNode,
-      playground: playgroundNode,
-      arguments: argsNode,
-      returns: returnsNode,
-      example: exampleNode,
-    },
-    {
-      operation: field,
-      kind,
-      ctx,
-    },
+  if (ctx?.content?.renderOperationLayout)
+    return ctx.content.renderOperationLayout(slots, { operation: field, kind, ctx });
+
+  return (
+    <div className="flex flex-col gap-x-6 gap-y-4 @4xl:flex-row @4xl:items-start">
+      <div className="min-w-0 flex-1">
+        {slots.header}
+        {slots.playground}
+        {slots.description}
+        {slots.deprecated}
+        {slots.directives}
+        {slots.arguments}
+        {slots.returns}
+      </div>
+      <div className="flex flex-col gap-4 mt-6 @4xl:mt-0 @4xl:sticky @4xl:top-[calc(var(--fd-docs-row-3,var(--fd-docs-row-2,0px))+1rem)] @4xl:w-[400px]">
+        {slots.example}
+      </div>
+    </div>
   );
 }
