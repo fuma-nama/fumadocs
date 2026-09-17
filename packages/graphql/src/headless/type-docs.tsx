@@ -112,12 +112,12 @@ export interface TypeUsages {
 }
 
 /**
- * Collect usages of a named type across the schema, e.g. to render "Returned by" backlinks on type pages.
+ * Collect usages of a named type across the schema, for the "Returned by" backlinks of type pages.
  *
- * A single `O(schema)` pass with deterministic ordering, safe to memoize per `(schema, typeName)`.
- * Introspection types and root operation types are excluded from the scan.
+ * A single `O(schema)` pass with deterministic ordering, memoized per `(schema, typeName)` by
+ * {@link TypeProvider}. Introspection types and root operation types are excluded from the scan.
  */
-export function getTypeUsages(schema: GraphQLSchema, typeName: string): TypeUsages {
+function getTypeUsages(schema: GraphQLSchema, typeName: string): TypeUsages {
   const returnedBy: OperationRef[] = [];
   const memberOf: FieldRef[] = [];
   const inputFor: OperationRef[] = [];

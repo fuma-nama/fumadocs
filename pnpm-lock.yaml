@@ -1971,6 +1971,9 @@ importers:
       github-slugger:
         specifier: ^2.0.0
         version: 2.0.0
+      hast-util-to-jsx-runtime:
+        specifier: ^2.3.6
+        version: 2.3.6
       lucide-react:
         specifier: ^1.43.0
         version: 1.43.0(react@19.2.8)
@@ -1980,6 +1983,15 @@ importers:
       react-dom:
         specifier: ^19.2.0
         version: 19.2.8(react@19.2.8)
+      remark:
+        specifier: ^15.0.1
+        version: 15.0.1
+      remark-rehype:
+        specifier: ^11.1.2
+        version: 11.1.2
+      shiki:
+        specifier: ^4.4.3
+        version: 4.4.3
     devDependencies:
       '@fastify/deepmerge':
         specifier: ^3.2.1
@@ -2023,9 +2035,6 @@ importers:
       '@fumadocs/api-docs':
         specifier: workspace:*
         version: link:../api-docs
-      '@fumari/json-schema-ts':
-        specifier: ^1.0.2
-        version: 1.0.2(json-schema-typed@8.0.2)
       '@fumari/stf':
         specifier: workspace:*
         version: link:../stf
@@ -2044,9 +2053,6 @@ importers:
       github-slugger:
         specifier: ^2.0.0
         version: 2.0.0
-      hast-util-to-jsx-runtime:
-        specifier: ^2.3.6
-        version: 2.3.6
       lucide-react:
         specifier: ^1.43.0
         version: 1.43.0(react@19.2.8)
@@ -2056,12 +2062,6 @@ importers:
       react-dom:
         specifier: ^19.2.0
         version: 19.2.8(react@19.2.8)
-      remark:
-        specifier: ^15.0.1
-        version: 15.0.1
-      remark-rehype:
-        specifier: ^11.1.2
-        version: 11.1.2
       shiki:
         specifier: ^4.4.3
         version: 4.4.3
@@ -2078,6 +2078,9 @@ importers:
       '@types/react':
         specifier: ^19.2.18
         version: 19.2.18
+      fuma-cli:
+        specifier: ^0.1.1
+        version: 0.1.1(@emnapi/core@2.0.0-alpha.3)(@emnapi/runtime@2.0.0-alpha.3)
       fumadocs-core:
         specifier: workspace:*
         version: link:../core
@@ -2698,12 +2701,6 @@ importers:
       react-dom:
         specifier: ^19.2.0
         version: 19.2.8(react@19.2.8)
-      remark:
-        specifier: ^15.0.1
-        version: 15.0.1
-      remark-rehype:
-        specifier: ^11.1.2
-        version: 11.1.2
       shiki:
         specifier: ^4.4.3
         version: 4.4.3
@@ -2720,6 +2717,9 @@ importers:
       '@types/react-dom':
         specifier: ^19.2.7
         version: 19.2.7(@types/react@19.2.18)
+      fuma-cli:
+        specifier: ^0.1.1
+        version: 0.1.1(@emnapi/core@2.0.0-alpha.3)(@emnapi/runtime@2.0.0-alpha.3)
       fumadocs-core:
         specifier: workspace:*
         version: link:../core
@@ -3291,9 +3291,6 @@ importers:
       github-slugger:
         specifier: ^2.0.0
         version: 2.0.0
-      hast-util-to-jsx-runtime:
-        specifier: ^2.3.6
-        version: 2.3.6
       lucide-react:
         specifier: ^1.43.0
         version: 1.43.0(react@19.2.8)
@@ -3303,12 +3300,6 @@ importers:
       react-dom:
         specifier: ^19.2.0
         version: 19.2.8(react@19.2.8)
-      remark:
-        specifier: ^15.0.1
-        version: 15.0.1
-      remark-rehype:
-        specifier: ^11.1.2
-        version: 11.1.2
       shiki:
         specifier: ^4.4.3
         version: 4.4.3
@@ -3985,6 +3976,9 @@ importers:
       '@ungap/structured-clone':
         specifier: ^1.4.0
         version: 1.4.0
+      fuma-cli:
+        specifier: ^0.1.1
+        version: 0.1.1(@emnapi/core@2.0.0-alpha.3)(@emnapi/runtime@2.0.0-alpha.3)
       fumadocs-core:
         specifier: workspace:*
         version: link:../core

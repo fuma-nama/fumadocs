@@ -13,7 +13,7 @@ export * from './runtime';
 export * from './operation';
 export * from './type-docs';
 export * from '@/utils/snippets';
-export { syncOperationVariables, type OperationExample } from '@/utils/example';
+export type { OperationExample } from '@/utils/example';
 
 /** props of the component rendering an operation of a page */
 export interface PageOperationProps {

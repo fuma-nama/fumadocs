@@ -1,5 +1,5 @@
 export * from './generate-file';
-export type * from './types';
+export type { RenderContext } from './types';
 export type {
   OperationOutput,
   OutputEntry,

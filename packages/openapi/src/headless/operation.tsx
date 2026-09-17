@@ -445,12 +445,12 @@ export function useResponseExamples(): ResponseTab[] {
 
           tab.examples.push({
             label:
-              example?.summary ??
+              example.summary ??
               t('Example {key}', {
                 variables: { key },
               }),
             sample: getRaw(example.value),
-            description: example?.description,
+            description: example.description,
           });
         }
       } else if (responseOfType?.example !== undefined) {

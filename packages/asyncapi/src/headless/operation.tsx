@@ -19,7 +19,8 @@ import {
 } from '@/utils/schema';
 import { applyMessageTraits, applyOperationTraits } from '@/utils/traits';
 import { type ExampleMessageItem, getExampleMessages } from '@/utils/get-example-messages';
-import { type PageOperationProps, ServerProvider, useAsyncAPI, useServer } from './runtime';
+import { type PageOperationProps, useAsyncAPI } from './runtime';
+import { ServerProvider, useServer } from './server';
 
 export interface OperationParameter {
   name: string;
@@ -180,7 +181,11 @@ export function OperationProvider({ id, action, children }: OperationProviderPro
   const content = <OperationContext value={info}>{children}</OperationContext>;
   if (!servers) return content;
 
-  return <ServerProvider servers={servers}>{content}</ServerProvider>;
+  return (
+    <ServerProvider servers={servers} storageKeyPrefix={runtime.storageKeyPrefix}>
+      {content}
+    </ServerProvider>
+  );
 }
 
 export function useOperation(): OperationInfo {

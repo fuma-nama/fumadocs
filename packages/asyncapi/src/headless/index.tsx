@@ -11,6 +11,7 @@ import {
 
 export * from './runtime';
 export * from './operation';
+export { useServer, type SelectedServer } from './server';
 
 export interface PageLayoutProps {
   operations?: { item: OperationItem; children: ReactNode }[];
