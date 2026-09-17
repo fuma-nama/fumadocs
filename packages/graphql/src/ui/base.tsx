@@ -3,12 +3,7 @@ import type { FC } from 'react';
 import type { ShikiFactory } from 'fumadocs-core/highlight/shiki';
 import { createPageComponents } from '@fumadocs/api-docs/components/defaults';
 import type { RenderContext } from '@/types';
-import {
-  createGraphQLPage as createHeadlessPage,
-  type GraphQLRuntime,
-  type SchemaViewProps,
-  useGraphQL,
-} from '@/headless';
+import { createGraphQLPage as createHeadlessPage, type SchemaViewProps } from '@/headless';
 import { Operation } from '@/ui/operation';
 import { TypeDocs } from '@/ui/type-docs';
 import { GraphQLSchemaView } from '@/ui/schema-ui';
@@ -28,54 +23,35 @@ export function createGraphQLPageBase({
     TypeDocs: TypeDocsUI = TypeDocs,
     SchemaUI: SchemaUIComp = GraphQLSchemaView,
   } = components;
-  const { components: base, processMarkdown } = createPageComponents({
+  const { components: base } = createPageComponents({
     shiki,
     shikiOptions,
     components,
   });
-  const contexts = new WeakMap<GraphQLRuntime, RenderContext>();
 
-  function getRenderContext(runtime: GraphQLRuntime): RenderContext {
-    let ctx = contexts.get(runtime);
-    if (!ctx) {
-      ctx = {
-        ...options,
-        shikiOptions,
-        schema: { schema: runtime.schema, sdl: runtime.sdl, links: runtime.links },
-        SchemaUI: SchemaUIComp,
-        _default_processMarkdown: processMarkdown,
-      };
-      contexts.set(runtime, ctx);
-    }
-
-    return ctx;
-  }
-
-  function useRenderContext(): RenderContext {
-    return getRenderContext(useGraphQL());
-  }
+  const ctx: RenderContext = {
+    ...options,
+    shikiOptions,
+    SchemaUI: SchemaUIComp,
+  };
 
   return createHeadlessPage({
-    typeLinks: typeLinks && ((name, runtime) => typeLinks(name, getRenderContext(runtime))),
-    operationLinks:
-      operationLinks &&
-      ((kind, name, runtime) => operationLinks(kind, name, getRenderContext(runtime))),
+    typeLinks: typeLinks && ((name) => typeLinks(name, ctx)),
+    operationLinks: operationLinks && ((kind, name) => operationLinks(kind, name, ctx)),
     components: {
       ...base,
       SchemaUI(props: SchemaViewProps) {
-        const ctx = useRenderContext();
         if (schemaUI?.render) return schemaUI.render(props, ctx);
 
         return <SchemaUIComp {...props} />;
       },
       Operation(props) {
-        return <OperationUI {...props} ctx={useRenderContext()} />;
+        return <OperationUI {...props} ctx={ctx} />;
       },
       TypeDocs(props) {
-        return <TypeDocsUI {...props} ctx={useRenderContext()} />;
+        return <TypeDocsUI {...props} ctx={ctx} />;
       },
       Layout(props) {
-        const ctx = useRenderContext();
         if (ctx.content?.renderPageLayout) return ctx.content.renderPageLayout(props, ctx);
 
         return (

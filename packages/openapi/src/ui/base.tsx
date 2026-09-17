@@ -3,7 +3,7 @@ import type { FC } from 'react';
 import type { ShikiFactory } from 'fumadocs-core/highlight/shiki';
 import { createPageComponents } from '@fumadocs/api-docs/components/defaults';
 import { Schema } from '@fumadocs/api-docs/components/schema';
-import { createOpenAPIPage, type OpenAPIRuntime, useOpenAPI } from '@/headless';
+import { createOpenAPIPage } from '@/headless';
 import type { RenderContext } from '@/types';
 import { Operation } from '@/ui/operation';
 import type { CreateOpenAPIPageOptions, OpenAPIPageProps } from '.';
@@ -25,18 +25,7 @@ export function createOpenAPIPageBase(
     renderMarkdown,
     renderCodeblock,
   } = createPageComponents({ shiki, shikiOptions, components });
-  const contexts = new WeakMap<OpenAPIRuntime, RenderContext>();
-
-  function useRenderContext(): RenderContext {
-    const runtime = useOpenAPI();
-    let ctx = contexts.get(runtime);
-    if (!ctx) {
-      ctx = { ...options, shikiOptions, schema: runtime.doc, proxyUrl: runtime.proxyUrl };
-      contexts.set(runtime, ctx);
-    }
-
-    return ctx;
-  }
+  const ctx: RenderContext = { ...options, shikiOptions };
 
   return createOpenAPIPage({
     codeUsages: options.codeUsages,
@@ -57,10 +46,9 @@ export function createOpenAPIPageBase(
         );
       },
       Operation(props) {
-        return <OperationUI {...props} ctx={useRenderContext()} />;
+        return <OperationUI {...props} ctx={ctx} />;
       },
       Layout(props) {
-        const ctx = useRenderContext();
         if (ctx.content?.renderPageLayout) return ctx.content.renderPageLayout(props, ctx);
 
         return (

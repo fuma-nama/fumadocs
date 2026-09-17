@@ -37,7 +37,7 @@ export const registry: Registry = {
       files: ['badge', 'codeblock', 'heading', 'markdown'].map((name) => ({
         type: 'components',
         path: `ui/components/${name}.tsx`,
-        target: `<dir>/api/asyncapi/components/${name}.tsx`,
+        target: `<dir>/asyncapi/components/${name}.tsx`,
       })),
     },
     {
@@ -47,12 +47,12 @@ export const registry: Registry = {
         {
           type: 'components',
           path: 'ui/components/server-select.tsx',
-          target: '<dir>/api/asyncapi/components/server-select.tsx',
+          target: '<dir>/asyncapi/components/server-select.tsx',
         },
         {
           type: 'components',
           path: 'utils/server-url.ts',
-          target: '<dir>/api/asyncapi/components/server-url.ts',
+          target: '<dir>/asyncapi/components/server-url.ts',
         },
       ],
     },
@@ -63,22 +63,22 @@ export const registry: Registry = {
         {
           type: 'components',
           path: 'ui/bindings/accordion-bindings.tsx',
-          target: '<dir>/api/asyncapi/bindings/accordion-bindings.tsx',
+          target: '<dir>/asyncapi/bindings/accordion-bindings.tsx',
         },
         {
           type: 'components',
           path: 'ui/bindings/shared.tsx',
-          target: '<dir>/api/asyncapi/bindings/shared.tsx',
+          target: '<dir>/asyncapi/bindings/shared.tsx',
         },
         {
           type: 'components',
           path: 'ui/bindings/protocols/index.ts',
-          target: '<dir>/api/asyncapi/bindings/protocols/index.ts',
+          target: '<dir>/asyncapi/bindings/protocols/index.ts',
         },
         ...protocols.map((name) => ({
           type: 'components' as const,
           path: `ui/bindings/protocols/${name}.tsx`,
-          target: `<dir>/api/asyncapi/bindings/protocols/${name}.tsx`,
+          target: `<dir>/asyncapi/bindings/protocols/${name}.tsx`,
         })),
       ],
     },
@@ -89,8 +89,8 @@ export const registry: Registry = {
       files: [
         {
           type: 'components',
-          path: 'ui/base.tsx',
-          target: '<dir>/api/asyncapi/page.tsx',
+          path: '../registry/page.tsx',
+          target: '<dir>/asyncapi/page.tsx',
         },
       ],
     },
@@ -101,7 +101,7 @@ export const registry: Registry = {
       files: ['index', 'message-examples'].map((name) => ({
         type: 'components',
         path: `ui/operation/${name}.tsx`,
-        target: `<dir>/api/asyncapi/operation/${name}.tsx`,
+        target: `<dir>/asyncapi/operation/${name}.tsx`,
       })),
     },
   ],

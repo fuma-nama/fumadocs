@@ -4,7 +4,7 @@ import type { ShikiFactory } from 'fumadocs-core/highlight/shiki';
 import { createPageComponents } from '@fumadocs/api-docs/components/defaults';
 import { Schema } from '@fumadocs/api-docs/components/schema';
 import type { RenderContext } from '@/types';
-import { type AsyncAPIRuntime, createAsyncAPIPage, useAsyncAPI } from '@/headless';
+import { createAsyncAPIPage } from '@/headless';
 import { Operation } from '@/ui/operation';
 import type { AsyncAPIPageProps, CreateAsyncAPIPageOptions } from '.';
 
@@ -23,7 +23,6 @@ export function createAsyncAPIPageBase(
   const { Operation: OperationUI = Operation, SchemaUI: SchemaComp = Schema } = components;
   const {
     components: base,
-    processMarkdown,
     renderMarkdown,
     renderCodeblock,
   } = createPageComponents({
@@ -31,40 +30,25 @@ export function createAsyncAPIPageBase(
     shikiOptions,
     components,
   });
-  const contexts = new WeakMap<AsyncAPIRuntime, RenderContext>();
 
-  const SchemaUI: RenderContext['SchemaUI'] = (props) => {
-    const ctx = useRenderContext();
-    if (schemaUI?.render) return schemaUI.render(props, ctx);
-
-    return (
+  const ctx: RenderContext = {
+    ...options,
+    shikiOptions,
+    SchemaUI: (props) => (
       <SchemaComp
         renderMarkdown={renderMarkdown}
         renderCodeblock={renderCodeblock}
         {...props}
         showExample={props.showExample ?? schemaUI?.showExample}
       />
-    );
+    ),
   };
 
-  /** the render context of a runtime, created on demand */
-  function useRenderContext(): RenderContext {
-    const runtime = useAsyncAPI();
-    let ctx = contexts.get(runtime);
-    if (!ctx) {
-      ctx = {
-        ...options,
-        shikiOptions,
-        schema: runtime.doc,
-        storageKeyPrefix: runtime.storageKeyPrefix,
-        SchemaUI,
-        _default_processMarkdown: processMarkdown,
-      };
-      contexts.set(runtime, ctx);
-    }
+  const SchemaUI: RenderContext['SchemaUI'] = (props) => {
+    if (schemaUI?.render) return schemaUI.render(props, ctx);
 
-    return ctx;
-  }
+    return <ctx.SchemaUI {...props} />;
+  };
 
   return createAsyncAPIPage({
     storageKeyPrefix: options.storageKeyPrefix,
@@ -72,10 +56,9 @@ export function createAsyncAPIPageBase(
       ...base,
       SchemaUI,
       Operation(props) {
-        return <OperationUI {...props} ctx={useRenderContext()} />;
+        return <OperationUI {...props} ctx={ctx} />;
       },
       Layout(props) {
-        const ctx = useRenderContext();
         if (ctx.content?.renderPageLayout) return ctx.content.renderPageLayout(props, ctx);
 
         return (

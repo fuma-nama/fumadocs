@@ -15,12 +15,12 @@ import { ClientCodeBlock } from '../components/codeblock';
 import { type ExampleRequest, useExampleRequests, useOperation } from '@/headless';
 import type { RenderContext } from '@/types';
 
-export function RequestTabs({ ctx }: { ctx?: RenderContext }) {
+export function RequestTabs({ ctx }: { ctx: RenderContext }) {
   const { path, method, operation, pathItem } = useOperation();
   const { items } = useExampleRequests();
   if (!operation.requestBody) return null;
 
-  if (ctx?.content?.renderRequestTabs)
+  if (ctx.content?.renderRequestTabs)
     return ctx.content.renderRequestTabs({ items, route: path, method, pathItem, operation }, ctx);
 
   return <RequestTabsDefaultContent items={items} />;

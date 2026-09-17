@@ -22,7 +22,7 @@ import { DirectiveList, TypeAnnotation } from '../components/type-annotation';
 
 export interface OperationProps extends PageOperationProps {
   /** the options of `createGraphQLPage()` */
-  ctx?: RenderContext;
+  ctx: RenderContext;
 }
 
 export function Operation({ kind, name, ...props }: OperationProps) {
@@ -70,9 +70,9 @@ function OperationContent({
     <DirectiveList directives={directives} className="my-4" />
   );
 
-  const playground = ctx?.playground;
+  const playground = ctx.playground;
   let playgroundNode: ReactNode = null;
-  if (ctx && playground && (playground.url != null || playground.fetcher || playground.render)) {
+  if (playground && (playground.url != null || playground.fetcher || playground.render)) {
     playgroundNode = playground.render ? (
       playground.render({ kind, name, operation: field, ctx })
     ) : (
@@ -184,7 +184,7 @@ function OperationContent({
     example: exampleNode,
   };
 
-  if (ctx?.content?.renderOperationLayout)
+  if (ctx.content?.renderOperationLayout)
     return ctx.content.renderOperationLayout(slots, { operation: field, kind, ctx });
 
   return (

@@ -15,7 +15,7 @@ export const registry: Registry = {
         (name) => ({
           type: 'components',
           path: `ui/components/${name}.tsx`,
-          target: `<dir>/api/graphql/components/${name}.tsx`,
+          target: `<dir>/graphql/components/${name}.tsx`,
         }),
       ),
     },
@@ -27,7 +27,7 @@ export const registry: Registry = {
         {
           type: 'components',
           path: 'ui/schema-ui.tsx',
-          target: '<dir>/api/graphql/schema-ui.tsx',
+          target: '<dir>/graphql/schema-ui.tsx',
         },
       ],
     },
@@ -38,8 +38,8 @@ export const registry: Registry = {
       files: [
         {
           type: 'components',
-          path: 'ui/base.tsx',
-          target: '<dir>/api/graphql/page.tsx',
+          path: '../registry/page.tsx',
+          target: '<dir>/graphql/page.tsx',
         },
       ],
     },
@@ -51,7 +51,7 @@ export const registry: Registry = {
         {
           type: 'components',
           path: 'ui/operation/index.tsx',
-          target: '<dir>/api/graphql/operation/index.tsx',
+          target: '<dir>/graphql/operation/index.tsx',
         },
       ],
     },
@@ -63,7 +63,7 @@ export const registry: Registry = {
         {
           type: 'components',
           path: 'ui/type-docs/index.tsx',
-          target: '<dir>/api/graphql/type-docs/index.tsx',
+          target: '<dir>/graphql/type-docs/index.tsx',
         },
       ],
     },
@@ -75,22 +75,22 @@ export const registry: Registry = {
         {
           type: 'components',
           path: 'playground/index.tsx',
-          target: '<dir>/api/graphql/playground/index.tsx',
+          target: '<dir>/graphql/playground/index.tsx',
         },
         {
           type: 'components',
           path: 'playground/json-schema.ts',
-          target: '<dir>/api/graphql/playground/json-schema.ts',
+          target: '<dir>/graphql/playground/json-schema.ts',
         },
         {
           type: 'components',
           path: 'playground/storage.ts',
-          target: '<dir>/api/graphql/playground/storage.ts',
+          target: '<dir>/graphql/playground/storage.ts',
         },
         {
           type: 'components',
           path: 'ui/components/code-editor.tsx',
-          target: '<dir>/api/graphql/playground/code-editor.tsx',
+          target: '<dir>/graphql/playground/code-editor.tsx',
         },
       ],
     },

@@ -14,7 +14,7 @@ export const registry: Registry = {
       files: ['codeblock', 'heading', 'markdown', 'method-label'].map((name) => ({
         type: 'components',
         path: `ui/components/${name}.tsx`,
-        target: `<dir>/api/components/${name}.tsx`,
+        target: `<dir>/openapi/components/${name}.tsx`,
       })),
     },
     {
@@ -24,8 +24,8 @@ export const registry: Registry = {
       files: [
         {
           type: 'components',
-          path: 'ui/base.tsx',
-          target: '<dir>/api/page.tsx',
+          path: '../registry/page.tsx',
+          target: '<dir>/openapi/page.tsx',
         },
       ],
     },
@@ -36,7 +36,7 @@ export const registry: Registry = {
       files: ['index', 'request-tabs', 'response-tabs', 'usage-tabs'].map((name) => ({
         type: 'components',
         path: `ui/operation/${name}.tsx`,
-        target: `<dir>/api/operation/${name}.tsx`,
+        target: `<dir>/openapi/operation/${name}.tsx`,
       })),
     },
     {
@@ -47,52 +47,52 @@ export const registry: Registry = {
         {
           type: 'components',
           path: 'playground/client.tsx',
-          target: '<dir>/api/playground/index.tsx',
+          target: '<dir>/openapi/playground/index.tsx',
         },
         {
           type: 'components',
           path: 'playground/components/result-display.tsx',
-          target: '<dir>/api/playground/result-display.tsx',
+          target: '<dir>/openapi/playground/result-display.tsx',
         },
         {
           type: 'components',
           path: 'playground/components/server-select.tsx',
-          target: '<dir>/api/playground/server-select.tsx',
+          target: '<dir>/openapi/playground/server-select.tsx',
         },
         {
           type: 'components',
           path: 'playground/components/oauth-dialog.tsx',
-          target: '<dir>/api/playground/oauth-dialog.tsx',
+          target: '<dir>/openapi/playground/oauth-dialog.tsx',
         },
         {
           type: 'components',
           path: 'playground/status-info.tsx',
-          target: '<dir>/api/playground/status-info.tsx',
+          target: '<dir>/openapi/playground/status-info.tsx',
         },
         {
           type: 'components',
           path: 'utils/schema.ts',
-          target: '<dir>/api/playground/schema.ts',
+          target: '<dir>/openapi/playground/schema.ts',
         },
         {
           type: 'components',
           path: 'playground/fetcher.ts',
-          target: '<dir>/api/playground/fetcher.ts',
+          target: '<dir>/openapi/playground/fetcher.ts',
         },
         {
           type: 'components',
           path: 'requests/media/encode.ts',
-          target: '<dir>/api/playground/encode.ts',
+          target: '<dir>/openapi/playground/encode.ts',
         },
         {
           type: 'components',
           path: 'requests/media/resolve-adapter.ts',
-          target: '<dir>/api/playground/resolve-adapter.ts',
+          target: '<dir>/openapi/playground/resolve-adapter.ts',
         },
         {
           type: 'components',
           path: 'requests/types.ts',
-          target: '<dir>/api/playground/types.ts',
+          target: '<dir>/openapi/playground/types.ts',
         },
       ],
     },

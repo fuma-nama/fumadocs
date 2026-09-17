@@ -30,7 +30,7 @@ import Link from 'fumadocs-core/link';
 
 export interface TypeDocsProps extends PageTypeProps {
   /** the options of `createGraphQLPage()` */
-  ctx?: RenderContext;
+  ctx: RenderContext;
 }
 
 export function TypeDocs({ name, ...props }: TypeDocsProps) {
@@ -215,7 +215,7 @@ function TypeDocsContent({ showTitle, showDescription, ctx }: Omit<TypeDocsProps
     scalar: scalarNode,
   };
 
-  if (ctx?.content?.renderTypeLayout)
+  if (ctx.content?.renderTypeLayout)
     return ctx.content.renderTypeLayout(slots, { type, kind, ctx });
 
   return (

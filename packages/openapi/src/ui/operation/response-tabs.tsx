@@ -14,11 +14,11 @@ import { ClientCodeBlock } from '../components/codeblock';
 import { type ResponseExample, type ResponseTab, useResponseExamples } from '@/headless';
 import type { RenderContext } from '@/types';
 
-export function ResponseTabs({ ctx }: { ctx?: RenderContext }) {
+export function ResponseTabs({ ctx }: { ctx: RenderContext }) {
   const tabs = useResponseExamples();
   if (tabs.length === 0) return null;
 
-  if (ctx?.content?.renderResponseTabs) return ctx.content.renderResponseTabs({ tabs }, ctx);
+  if (ctx.content?.renderResponseTabs) return ctx.content.renderResponseTabs({ tabs }, ctx);
 
   return <ResponseTabsDefaultContent tabs={tabs} />;
 }

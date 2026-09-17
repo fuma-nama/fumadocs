@@ -70,7 +70,7 @@ export interface OperationProps {
   headingLevel?: number;
 
   /** the options of `createOpenAPIPage()` */
-  ctx?: RenderContext;
+  ctx: RenderContext;
 }
 
 export function Operation({ type, path, method, operation, pathItem, ...props }: OperationProps) {
@@ -168,7 +168,7 @@ function OperationContent({
     );
   }
 
-  if (responses.length > 0 && ctx?.showResponseSchema !== false) {
+  if (responses.length > 0 && ctx.showResponseSchema !== false) {
     responseNode = (
       <>
         <Heading id="response-body" depth={headingLevel}>
@@ -320,7 +320,7 @@ function OperationContent({
   }
 
   if (type === 'operation') {
-    const playground = ctx?.playground;
+    const playground = ctx.playground;
     let apiPlayground: ReactNode;
     if (playground?.enabled ?? true) {
       const { enabled: _, render, ...options } = playground ?? {};
@@ -365,7 +365,7 @@ function OperationContent({
       apiExample: <UsageTabs ctx={ctx} />,
     };
 
-    if (ctx?.content?.renderOperationLayout)
+    if (ctx.content?.renderOperationLayout)
       return ctx.content.renderOperationLayout(slots, { path, operation, method, pathItem, ctx });
 
     return (
@@ -398,7 +398,7 @@ function OperationContent({
     requests: <RequestTabs ctx={ctx} />,
   };
 
-  if (ctx?.content?.renderWebhookLayout) return ctx.content.renderWebhookLayout(slots);
+  if (ctx.content?.renderWebhookLayout) return ctx.content.renderWebhookLayout(slots);
 
   return (
     <div className="flex flex-col-reverse gap-x-6 gap-y-4 @4xl:flex-row @4xl:items-start">

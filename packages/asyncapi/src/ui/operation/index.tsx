@@ -39,7 +39,7 @@ import { ServerSelect } from '../components/server-select';
 
 export interface OperationProps extends PageOperationProps {
   /** the options of `createAsyncAPIPage()` */
-  ctx?: RenderContext;
+  ctx: RenderContext;
 }
 
 export function Operation({ id, action, ...props }: OperationProps) {
@@ -152,7 +152,7 @@ function OperationContent({
     );
   }
 
-  if (ctx?.content?.renderOperationLayout)
+  if (ctx.content?.renderOperationLayout)
     return ctx.content.renderOperationLayout(
       {
         header: headNode,
@@ -281,7 +281,7 @@ function MessageSection({
 }: {
   item: OperationMessage;
   headingLevel: number;
-  ctx?: RenderContext;
+  ctx: RenderContext;
 }) {
   const t = useTranslations();
   const { resolve } = useAsyncAPI().doc;

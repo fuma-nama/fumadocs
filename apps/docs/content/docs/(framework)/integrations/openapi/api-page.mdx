@@ -151,19 +151,12 @@ The entire UI of API pages, built on [the headless layer](/docs/integrations/ope
 npx @fumadocs/cli add fumadocs/openapi/page
 ```
 
-It takes the same options as `createOpenAPIPage()`, with a Shiki factory.
+It installs `<OpenAPIPage />` itself, your `components/api-page.tsx` is no longer needed.
 
-```tsx title="components/api-page.tsx"
-'use client';
-import { createOpenAPIPage } from 'fumadocs-openapi/ui'; // [!code --]
-import { createOpenAPIPageBase } from '@/components/api/page'; // [!code ++]
-import { defaultShikiFactory } from 'fumadocs-core/highlight/shiki/full'; // [!code ++]
-
-export const OpenAPIPage = createOpenAPIPage(); // [!code --]
-export const OpenAPIPage = createOpenAPIPageBase({ shiki: defaultShikiFactory }); // [!code ++]
+```tsx title="mdx-components.tsx"
+import { OpenAPIPage } from '@/components/api-page'; // [!code --]
+import { OpenAPIPage } from '@/components/openapi/page'; // [!code ++]
 ```
-
-The sections below install parts of the UI instead, and use them in the built-in page.
 
 ### API Playground
 
@@ -174,7 +167,7 @@ npx @fumadocs/cli add fumadocs/openapi/playground
 ```tsx title="components/api-page.tsx"
 'use client';
 import { createOpenAPIPage } from 'fumadocs-openapi/ui';
-import PlaygroundClient from '@/components/api/playground';
+import PlaygroundClient from '@/components/openapi/playground';
 
 export const OpenAPIPage = createOpenAPIPage({
   playground: {
@@ -203,7 +196,7 @@ npx @fumadocs/cli add fumadocs/openapi/operation
 ```tsx title="components/api-page.tsx"
 'use client';
 import { createOpenAPIPage } from 'fumadocs-openapi/ui';
-import { Operation } from '@/components/api/operation';
+import { Operation } from '@/components/openapi/operation';
 
 export const OpenAPIPage = createOpenAPIPage({
   components: {

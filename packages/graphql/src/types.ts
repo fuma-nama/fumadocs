@@ -1,23 +1,18 @@
-import type { GraphQLSchema } from 'graphql';
-import type { FC, ReactNode } from 'react';
+import type { FC } from 'react';
 import type { CreateGraphQLPageOptions } from './ui';
-import type { GraphQLLinks, SchemaViewProps } from './headless';
+import type { SchemaViewProps } from './headless';
 
 type RequireKeys<T, K extends keyof T> = Omit<T, K> & Required<Pick<T, K>>;
 
+/**
+ * the options of `createGraphQLPage()`, passed to its render functions.
+ *
+ * the page's schema and other runtime values are available from `useGraphQL()`.
+ */
 export interface RenderContext extends Omit<
   RequireKeys<CreateGraphQLPageOptions, 'shikiOptions' | 'shiki'>,
   'schemaUI'
 > {
-  schema: {
-    schema: GraphQLSchema;
-    sdl: string;
-    /**
-     * pre-generated links of generated pages, see `GraphQLPageProps['payload']['links']`.
-     */
-    links?: GraphQLLinks;
-  };
-  _default_processMarkdown: (md: string) => ReactNode;
   /**
    * the default Schema UI, or the one passed to `components.SchemaUI`.
    */

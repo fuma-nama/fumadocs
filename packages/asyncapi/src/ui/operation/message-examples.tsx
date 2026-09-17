@@ -21,12 +21,12 @@ export function MessageExamples({
 }: {
   examples: ExampleMessageItem[];
   headingLevel: number;
-  ctx?: RenderContext;
+  ctx: RenderContext;
 }) {
   const t = useTranslations({ note: 'asyncapi message example' });
   if (examples.length === 0) return null;
 
-  if (ctx?.content?.renderAPIExampleUsageTabs)
+  if (ctx.content?.renderAPIExampleUsageTabs)
     return ctx.content.renderAPIExampleUsageTabs(examples, ctx);
 
   return (

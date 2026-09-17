@@ -18,11 +18,11 @@ import { ClientCodeBlock } from '@/ui/components/codeblock';
 import { type ExampleRequest, useCodeUsage, useExampleRequests, useOperation } from '@/headless';
 import type { RenderContext } from '@/types';
 
-export function UsageTabs({ ctx }: { ctx?: RenderContext }) {
+export function UsageTabs({ ctx }: { ctx: RenderContext }) {
   const { operation, codeUsages } = useOperation();
   let usageTabs: ReactNode;
 
-  if (ctx?.content?.renderAPIExampleUsageTabs) {
+  if (ctx.content?.renderAPIExampleUsageTabs) {
     usageTabs = ctx.content.renderAPIExampleUsageTabs(codeUsages, ctx);
   } else {
     const items = Array.from(codeUsages.map());
@@ -51,7 +51,7 @@ export function UsageTabs({ ctx }: { ctx?: RenderContext }) {
     responseTabs: <ResponseTabs ctx={ctx} />,
   };
 
-  if (ctx?.content?.renderAPIExampleLayout) return ctx.content.renderAPIExampleLayout(slots, ctx);
+  if (ctx.content?.renderAPIExampleLayout) return ctx.content.renderAPIExampleLayout(slots, ctx);
 
   return (
     <div className="prose-no-margin">
