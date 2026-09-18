@@ -1,0 +1,154 @@
+---
+title: Headless
+description: Build your own UI for GraphQL pages on the headless layer.
+---
+
+## Overview
+
+`@fumadocs/graphql/headless` provides the state and logic of GraphQL pages, without UI:
+
+- the schema built from SDL, and the cross-links of generated pages
+- the details of each operation: its field, title, directives and generated example
+- the details of each named type: its kind, directives, relations and usages
+
+<Callout title="Start from the default UI">
+  [`createGraphQLPage()`](/docs/integrations/graphql/api-page) is built on this layer, its options
+  cover most customisations.
+</Callout>
+
+## Page
+
+`createGraphQLPage()` takes your components, and returns `<GraphQLPage />` to use like the built-in one.
+
+```tsx title="components/api-page.tsx"
+'use client';
+import { type CodeBlockProps, createGraphQLPage } from '@fumadocs/graphql/headless';
+import { Operation } from '@/components/my-operation';
+import { TypeDocs } from '@/components/my-type';
+
+function Markdown({ md }: { md: string }) {
+  return <p>{md}</p>;
+}
+
+function CodeBlock({ lang, code }: CodeBlockProps) {
+  return (
+    <pre>
+      <code className={`language-${lang}`}>{code}</code>
+    </pre>
+  );
+}
+
+export const GraphQLPage = createGraphQLPage({
+  components: {
+    Operation,
+    TypeDocs,
+    Markdown,
+    CodeBlock,
+    Heading({ depth, ...props }) {
+      const As = `h${depth}` as 'h2';
+      return <As {...props} />;
+    },
+    SchemaUI: ({ client, root }) => <pre>{`${client.name}: ${root.type}`}</pre>,
+  },
+});
+```
+
+- `Operation` renders each operation of the page, see [Operation](#operation).
+- `TypeDocs` renders each named type of the page, see [Type](#type).
+- `SchemaUI` renders a type, argument or field in detail.
+- `Layout` (optional) wraps the rendered items.
+
+Pass `typeLinks` and `operationLinks` to override the [cross-links](/docs/integrations/graphql/api-page#cross-linking) of pre-generated pages.
+
+### Hooks
+
+Components under the page can access its state.
+
+| Hook                          | Description                                              |
+| ----------------------------- | -------------------------------------------------------- |
+| `useGraphQL()`                | The built `schema`, its `sdl` and the page links.        |
+| `useComponents()`             | The components passed to the page.                       |
+| `useTypeLink(name)`           | The page URL of a named type, `undefined` when unlinked. |
+| `useOperationLink(kind,name)` | The page URL of an operation.                            |
+
+To render operations yourself, use `<GraphQLProvider sdl={sdl} components={...} />` in place of `createGraphQLPage()`.
+
+## Operation
+
+`<OperationProvider />` derives the details of an operation.
+
+```tsx title="components/my-operation.tsx"
+'use client';
+import {
+  OperationProvider,
+  type PageOperationProps,
+  useComponents,
+  useOperation,
+} from '@fumadocs/graphql/headless';
+
+export function Operation({ kind, name }: PageOperationProps) {
+  return (
+    <OperationProvider kind={kind} name={name}>
+      <Content />
+    </OperationProvider>
+  );
+}
+
+function Content() {
+  const { title, field, example } = useOperation();
+  const { CodeBlock, SchemaUI } = useComponents();
+
+  return (
+    <>
+      <h2>{title}</h2>
+      {field.args.map((arg) => (
+        <SchemaUI key={arg.name} client={{ name: arg.name }} root={{ type: arg.type }} />
+      ))}
+      {example && <CodeBlock lang="graphql" code={example.query} />}
+    </>
+  );
+}
+```
+
+`useOperation()` gives the `field` with its arguments and return type, the display `title`, custom `directives`, and a generated `example`. `generateRequestSnippets({ url, query, variables })` turns that example into cURL and `fetch` snippets.
+
+## Type
+
+`<TypeProvider />` derives the details of a named type.
+
+```tsx title="components/my-type.tsx"
+'use client';
+import {
+  type PageTypeProps,
+  TypeProvider,
+  useComponents,
+  useNamedType,
+} from '@fumadocs/graphql/headless';
+
+export function TypeDocs({ name }: PageTypeProps) {
+  return (
+    <TypeProvider name={name}>
+      <Content />
+    </TypeProvider>
+  );
+}
+
+function Content() {
+  const { name, kind, type, relations } = useNamedType();
+  const { SchemaUI } = useComponents();
+
+  return (
+    <>
+      <h2>
+        {name} ({kind})
+      </h2>
+      {relations.usages.returnedBy.map((op) => (
+        <span key={`${op.kind}:${op.name}`}>{op.name}</span>
+      ))}
+      <SchemaUI client={{ name, as: 'body' }} root={{ type }} />
+    </>
+  );
+}
+```
+
+`useNamedType()` gives the `type` with its `kind` and custom `directives`, plus `relations`: `implements`, `implementedBy`, `possibleTypes`, and `usages` (`returnedBy`, `inputFor`, `memberOf`, `argumentOf`).

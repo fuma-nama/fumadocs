@@ -1,0 +1,90 @@
+---
+title: Headless
+description: Replace the UI of stories, or build your own on the headless layer.
+---
+
+## Overview
+
+`@fumadocs/story/headless` provides the state of a story, without UI:
+
+- the selected variant, and the preset it resolves to
+- the arguments of the rendered component, debounced so typing doesn't re-render it on every keystroke
+
+The built-in panel is built on it, and you can swap the panel for your own.
+
+## Your own panel
+
+`defineStoryFactory()` takes a `WithControl` component, rendered in place of the built-in panel.
+
+```tsx title="lib/story.tsx"
+import { defineStoryFactory } from '@fumadocs/story/vite/client';
+import { StoryPanel } from '@/components/story-panel';
+
+export const { defineStory } = defineStoryFactory({ WithControl: StoryPanel });
+```
+
+It receives the presets of the story and the component to render.
+
+```tsx title="components/story-panel.tsx"
+'use client';
+import {
+  StoryProvider,
+  useStory,
+  useStoryArgs,
+  type WithControlProps,
+} from '@fumadocs/story/headless';
+
+export function StoryPanel(props: WithControlProps) {
+  return (
+    <StoryProvider {...props}>
+      <Content />
+    </StoryProvider>
+  );
+}
+
+function Content() {
+  const { presets, variant, setVariant, preset, Component } = useStory();
+  const args = useStoryArgs();
+
+  return (
+    <div>
+      <select value={variant} onChange={(e) => setVariant(e.target.value)}>
+        {presets.map((item) => (
+          <option key={item.variant} value={item.variant}>
+            {item.variant}
+          </option>
+        ))}
+      </select>
+      <Component {...args} />
+      <pre>{JSON.stringify(preset?.controls, null, 2)}</pre>
+    </div>
+  );
+}
+```
+
+| Hook             | Description                                                                 |
+| ---------------- | --------------------------------------------------------------------------- |
+| `useStory()`     | The presets, the selected `variant` with `setVariant`, and the `Component`. |
+| `useStoryArgs()` | The arguments of the rendered component, following the controls.            |
+
+Controls are edited through [`@fumari/stf`](https://github.com/fuma-nama/fumadocs/tree/dev/packages/stf), the form engine `<StoryProvider />` sets up. `preset.controls` is the [type tree](/docs/integrations/story#controls) of the component props.
+
+<Callout title="Start from the built-in panel">
+  Writing a full control panel means handling every node kind of the type tree. Install the built-in
+  one below and edit it instead.
+</Callout>
+
+## Install the UI
+
+The entire panel, including its argument controls:
+
+```npm
+npx @fumadocs/cli add fumadocs/story/controls
+```
+
+```tsx title="lib/story.tsx"
+import { defineStoryFactory } from '@fumadocs/story/vite/client';
+import { WithControl } from '@/components/story';
+
+export const { defineStory } = defineStoryFactory({ WithControl });
+```

@@ -1,0 +1,128 @@
+---
+title: Headless
+description: Build your own UI for AsyncAPI pages on the headless layer.
+---
+
+## Overview
+
+`@fumadocs/asyncapi/headless` provides the state and logic of API pages, without UI:
+
+- the dereferenced document
+- the servers of the page, and the selected one with its variables
+- the details of each operation: its channel, parameters, messages and reply
+
+The default UI, `createAsyncAPIPage()` from `@fumadocs/asyncapi/ui`, is built on it.
+
+## Page
+
+`createAsyncAPIPage()` takes your components, and returns `<AsyncAPIPage />` to use like the built-in one.
+
+```tsx title="components/api-page.tsx"
+'use client';
+import { type CodeBlockProps, createAsyncAPIPage } from '@fumadocs/asyncapi/headless';
+import { Schema } from '@fumadocs/api-docs/components/schema';
+import { Operation } from '@/components/my-operation';
+
+function Markdown({ md }: { md: string }) {
+  return <p>{md}</p>;
+}
+
+function CodeBlock({ lang, code }: CodeBlockProps) {
+  return (
+    <pre>
+      <code className={`language-${lang}`}>{code}</code>
+    </pre>
+  );
+}
+
+export const AsyncAPIPage = createAsyncAPIPage({
+  components: {
+    Operation,
+    Markdown,
+    CodeBlock,
+    Heading({ depth, ...props }) {
+      const As = `h${depth}` as 'h2';
+      return <As {...props} />;
+    },
+    SchemaUI: (props) => (
+      <Schema
+        {...props}
+        renderMarkdown={(md) => <Markdown md={md} />}
+        renderCodeblock={(props) => <CodeBlock {...props} />}
+      />
+    ),
+  },
+});
+```
+
+- `Operation` renders each operation of the page, see [Operation](#operation).
+- `SchemaUI` renders the JSON schemas of parameters, headers and payloads.
+- `Layout` (optional) wraps the rendered operations.
+
+### Hooks
+
+Components under the page can access its state.
+
+| Hook              | Description                                         |
+| ----------------- | --------------------------------------------------- |
+| `useAsyncAPI()`   | The dereferenced document (`doc`) and page options. |
+| `useComponents()` | The components passed to the page.                  |
+| `useServer()`     | The servers, the selected one and its variables.    |
+| `useStorageKey()` | The `localStorage` keys of the page.                |
+
+To render operations yourself, use `<AsyncAPIProvider document={bundled} components={...} />` in place of `createAsyncAPIPage()`.
+
+## Operation
+
+`<OperationProvider />` derives the details of an operation once: traits are applied, and its channel, parameters, messages and reply are resolved.
+
+```tsx title="components/my-operation.tsx"
+'use client';
+import {
+  OperationProvider,
+  type PageOperationProps,
+  useOperation,
+  useOperationSecurity,
+} from '@fumadocs/asyncapi/headless';
+
+export function Operation(props: PageOperationProps) {
+  return (
+    <OperationProvider {...props}>
+      <Content />
+    </OperationProvider>
+  );
+}
+
+function Content() {
+  const { title, channel, parameters, messages } = useOperation();
+  const schemes = useOperationSecurity();
+
+  return (
+    <>
+      <h2>{title}</h2>
+      <code>{channel.address}</code>
+      <ul>
+        {parameters.map((param) => (
+          <li key={param.name}>{param.name}</li>
+        ))}
+      </ul>
+      {messages.map((message) => (
+        <section key={message.id}>
+          <h3>{message.name}</h3>
+          {message.examples.map((example) => (
+            <pre key={example.id}>{JSON.stringify(example.payload, null, 2)}</pre>
+          ))}
+        </section>
+      ))}
+      <p>{schemes.map((scheme) => scheme.type).join(', ')}</p>
+    </>
+  );
+}
+```
+
+| Hook                     | Description                                                                                    |
+| ------------------------ | ---------------------------------------------------------------------------------------------- |
+| `useOperation()`         | The operation and its resolved details: `title`, `channel`, `parameters`, `messages`, `reply`. |
+| `useOperationSecurity()` | Security schemes of the operation, falling back to the selected server's.                      |
+
+Each message carries its `headers` and `payload` schemas, plus the `examples` to display, taken from the document or generated from the schemas.
