@@ -1,6 +1,5 @@
 'use client';
-import { createPageComponents } from '@fumadocs/api-docs/components/defaults';
-import { Schema } from '@fumadocs/api-docs/components/schema';
+import { Schema } from 'shared-api/components/schema';
 import { defaultShikiFactory } from 'fumadocs-core/highlight/shiki/full';
 import { createOpenAPIPage } from '@/headless';
 import type { RenderContext } from '@/types';
@@ -11,22 +10,14 @@ const shikiOptions = {
   themes: { light: 'github-light', dark: 'github-dark' },
 } as const;
 
-const { components, renderMarkdown, renderCodeblock } = createPageComponents({
-  shiki,
-  shikiOptions,
-});
-
 /** the options your UI renders with, passed to every operation */
 const ctx: RenderContext = { shiki, shikiOptions };
 
 export const OpenAPIPage = createOpenAPIPage({
+  shiki,
+  shikiOptions,
   components: {
-    ...components,
-    SchemaUI(props) {
-      return (
-        <Schema {...props} renderMarkdown={renderMarkdown} renderCodeblock={renderCodeblock} />
-      );
-    },
+    SchemaUI: Schema,
     Operation(props) {
       return <Operation {...props} ctx={ctx} />;
     },

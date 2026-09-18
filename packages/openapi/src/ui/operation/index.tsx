@@ -10,11 +10,11 @@ import type {
 } from '@/types';
 import { UsageTabs } from '@/ui/operation/usage-tabs';
 import { MethodLabel } from '@/ui/components/method-label';
-import { Badge } from '@fumadocs/api-docs/components/badge';
+import { SchemaUI } from '@/ui/components/schema';
+import { Badge } from 'shared-api/components/badge';
 import {
   OperationProvider,
   type OperationResponse,
-  useComponents,
   useOpenAPI,
   useOperation,
   useTypeScriptDefinitions,
@@ -26,12 +26,12 @@ import {
   AccordionItem,
   Accordions,
   AccordionTrigger,
-} from '@fumadocs/api-docs/components/accordion';
+} from 'shared-api/components/accordion';
 import { RequestTabs } from './request-tabs';
 import { cn } from '@/utils/cn';
-import { SelectTabs, SelectTabTrigger, SelectTab } from '@fumadocs/api-docs/components/select-tab';
+import { SelectTabs, SelectTabTrigger, SelectTab } from 'shared-api/components/select-tab';
 import { Callout } from 'fumadocs-ui/components/callout';
-import { AnchorSection } from '@fumadocs/api-docs/auto-anchor/client';
+import { AnchorSection } from 'shared-api/auto-anchor/client';
 import { Heading } from '@/ui/components/heading';
 import { Markdown } from '../components/markdown';
 import { useCopyButton } from 'fumadocs-ui/utils/use-copy-button';
@@ -94,7 +94,6 @@ function OperationContent({
   ctx,
 }: Omit<OperationProps, 'type' | 'path' | 'method' | 'operation' | 'pathItem'>) {
   const t = useTranslations({ note: 'operation page' });
-  const { SchemaUI } = useComponents();
   const { resolve } = useOpenAPI().doc;
   const {
     type,
@@ -427,7 +426,6 @@ function RequestBodyContentItem({
   content: MediaTypeObject;
   required?: boolean;
 }) {
-  const { SchemaUI } = useComponents();
   const ts = useTypeScriptDefinitions(content.schema, {
     name: 'RequestBody',
     readOnly: false,
@@ -493,7 +491,6 @@ function ResponseAccordion({ item: { status, response, content } }: { item: Oper
 }
 
 function ResponseAccordionItem({ item: { schema } }: { item: MediaTypeObject }) {
-  const { SchemaUI } = useComponents();
   const ts = useTypeScriptDefinitions(schema, {
     name: 'ResponseBody',
     readOnly: true,

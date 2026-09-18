@@ -1,6 +1,6 @@
 import type { CreateAsyncAPIPageOptions } from './ui';
 import type { FC } from 'react';
-import type { SchemaUIOptions } from '@fumadocs/api-docs/components/schema';
+import type { SchemaUIOptions } from 'shared-api/components/schema';
 
 type RequireKeys<T, K extends keyof T> = Omit<T, K> & Required<Pick<T, K>>;
 
@@ -14,7 +14,7 @@ export interface RenderContext extends Omit<
   'schemaUI'
 > {
   /** the default Schema UI, or the one passed to `components.SchemaUI` */
-  SchemaUI: FC<Omit<SchemaUIOptions, 'resolver' | 'renderMarkdown' | 'renderCodeblock'>>;
+  SchemaUI: FC<Omit<SchemaUIOptions, 'resolver'>>;
 }
 
 export type DistributiveOmit<T, K extends PropertyKey> = T extends unknown ? Omit<T, K> : never;

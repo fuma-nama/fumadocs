@@ -11,7 +11,7 @@ export const registry: Registry = {
     {
       name: 'ui/components',
       unlisted: true,
-      files: ['codeblock', 'heading', 'markdown', 'method-label'].map((name) => ({
+      files: ['codeblock', 'heading', 'markdown', 'method-label', 'schema'].map((name) => ({
         type: 'components',
         path: `ui/components/${name}.tsx`,
         target: `<dir>/openapi/components/${name}.tsx`,
@@ -69,31 +69,6 @@ export const registry: Registry = {
           path: 'playground/status-info.tsx',
           target: '<dir>/openapi/playground/status-info.tsx',
         },
-        {
-          type: 'components',
-          path: 'utils/schema.ts',
-          target: '<dir>/openapi/playground/schema.ts',
-        },
-        {
-          type: 'components',
-          path: 'playground/fetcher.ts',
-          target: '<dir>/openapi/playground/fetcher.ts',
-        },
-        {
-          type: 'components',
-          path: 'requests/media/encode.ts',
-          target: '<dir>/openapi/playground/encode.ts',
-        },
-        {
-          type: 'components',
-          path: 'requests/media/resolve-adapter.ts',
-          target: '<dir>/openapi/playground/resolve-adapter.ts',
-        },
-        {
-          type: 'components',
-          path: 'requests/types.ts',
-          target: '<dir>/openapi/playground/types.ts',
-        },
       ],
     },
   ],
@@ -101,7 +76,7 @@ export const registry: Registry = {
     'fumadocs-core': null,
     'fumadocs-ui': null,
     'fumadocs-openapi': null,
-    '@fumadocs/api-docs': null,
+    '@fumadocs/json-schema': null,
     '@fumari/stf': null,
     react: null,
     // dev dependency of `fumadocs-openapi` (inlined on build), but needed by vendored files

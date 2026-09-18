@@ -21,7 +21,6 @@
   "exports": {
     ".": "./dist/index.js",
     "./headless": "./dist/headless/index.js",
-    "./headless/base": "./dist/headless/base.js",
     "./i18n": "./dist/i18n.js",
     "./playground/client": "./dist/playground/client.js",
     "./requests/generators": "./dist/requests/generators/index.js",
@@ -51,8 +50,9 @@
     "types:check": "tsc --noEmit"
   },
   "dependencies": {
+    "@base-ui/react": "^1.8.0",
     "@fuma-translate/react": "^1.0.2",
-    "@fumadocs/api-docs": "workspace:*",
+    "@fumadocs/json-schema": "workspace:*",
     "@fumari/json-schema-ts": "^1.0.2",
     "@fumari/stf": "workspace:*",
     "@scalar/json-magic": "^0.13.4",
@@ -60,7 +60,10 @@
     "class-variance-authority": "^0.7.1",
     "cn": "^0.2.6",
     "github-slugger": "^2.0.0",
+    "hast-util-to-jsx-runtime": "^2.3.6",
     "lucide-react": "^1.43.0",
+    "remark": "^15.0.1",
+    "remark-rehype": "^11.1.2",
     "shiki": "^4.4.3",
     "yaml": "^2.9.0"
   },
@@ -76,6 +79,7 @@
     "fumadocs-core": "workspace:*",
     "fumadocs-ui": "workspace:@fumadocs/base-ui@*",
     "json-schema-typed": "^8.0.2",
+    "shared-api": "workspace:*",
     "tsconfig": "workspace:*",
     "tsdown": "0.23.0",
     "xml-js": "^1.6.11"

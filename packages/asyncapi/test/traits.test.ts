@@ -1,6 +1,6 @@
 import { describe, expect, test } from 'vitest';
 import { applyMessageTraits, applyOperationTraits, mergeTraits } from '@/utils/traits';
-import { dereferenceShallow } from '@fumadocs/api-docs/schema/dereference';
+import { dereference } from '@fumadocs/json-schema';
 import type { MessageObject, OperationObject } from '@/types/asyncapi-3';
 
 describe('mergeTraits', () => {
@@ -70,7 +70,7 @@ describe('applyOperationTraits', () => {
           },
         ],
       } as OperationObject,
-      dereferenceShallow,
+      dereference,
     );
 
     expect(operation.traits).toBeUndefined();
@@ -105,7 +105,7 @@ describe('applyMessageTraits', () => {
           },
         ],
       } as MessageObject,
-      dereferenceShallow,
+      dereference,
     );
 
     expect(message.traits).toBeUndefined();
@@ -133,7 +133,7 @@ describe('applyMessageTraits', () => {
           },
         ],
       } as MessageObject,
-      dereferenceShallow,
+      dereference,
     );
 
     expect(message.headers).toEqual({

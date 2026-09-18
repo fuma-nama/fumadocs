@@ -1,7 +1,7 @@
 'use client';
 import { type ReactNode, useMemo } from 'react';
 import { useTranslations } from '@fuma-translate/react';
-import { AnchorSection } from '@fumadocs/api-docs/auto-anchor/client';
+import { AnchorSection } from 'shared-api/auto-anchor/client';
 import { isRequiredArgument } from 'graphql';
 import { Callout } from 'fumadocs-ui/components/callout';
 import { Tab, Tabs } from 'fumadocs-ui/components/tabs';
@@ -9,10 +9,10 @@ import {
   generateRequestSnippets,
   OperationProvider,
   type PageOperationProps,
-  useComponents,
   useOperation,
 } from '@/headless';
 import type { RenderContext } from '@/types';
+import { SchemaUI } from '@/ui/components/schema';
 import { OperationPlayground } from '@/playground';
 import { KindLabel } from '../components/badge';
 import { Heading } from '../components/heading';
@@ -39,7 +39,6 @@ function OperationContent({
   ctx,
 }: Omit<OperationProps, 'kind' | 'name'>) {
   const t = useTranslations({ note: 'operation page' });
-  const { SchemaUI } = useComponents();
   const { kind, name, title, field, directives, example } = useOperation();
   let headingLevel = 2;
 

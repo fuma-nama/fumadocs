@@ -1,7 +1,7 @@
 import type { Document } from '@/types';
 import { createMagicProxy } from '@scalar/json-magic/magic-proxy';
-import { dereferenceShallow } from '@fumadocs/api-docs/schema/dereference';
-import type { NoReferenceSwallow } from '@fumadocs/api-docs/schema';
+import { dereference } from '@fumadocs/json-schema';
+import type { DereferencedShallow } from '@fumadocs/json-schema';
 
 export interface DereferencedDocument {
   /**
@@ -16,7 +16,7 @@ export interface DereferencedDocument {
    *
    * Non-reference values are returned as-is.
    */
-  resolve: <T>(node: T) => NoReferenceSwallow<T>;
+  resolve: <T>(node: T) => DereferencedShallow<T>;
 
   bundled: Document;
 }
@@ -32,7 +32,7 @@ export function dereferenceBundledDocument(bundled: Document): DereferencedDocum
     bundled,
     dereferenced: createMagicProxy(bundled as Record<string, unknown>) as Document,
     resolve(node) {
-      return dereferenceShallow(node);
+      return dereference(node);
     },
   };
 

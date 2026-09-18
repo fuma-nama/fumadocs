@@ -14,9 +14,9 @@ import {
   getMessageDisplayName,
   getOperationDisplayName,
   getOperationMessages,
-  type ParsedSchema,
   resolveMultiFormatSchema,
 } from '@/utils/schema';
+import type { JsonSchema } from '@fumadocs/json-schema';
 import { applyMessageTraits, applyOperationTraits } from '@/utils/traits';
 import { type ExampleMessageItem, getExampleMessages } from '@/utils/get-example-messages';
 import { type PageOperationProps, useAsyncAPI } from './runtime';
@@ -26,7 +26,7 @@ export interface OperationParameter {
   name: string;
   parameter: ParameterObject;
   /** the schema rendered by Schema UI */
-  schema: ParsedSchema;
+  schema: JsonSchema;
 }
 
 export interface OperationMessage {

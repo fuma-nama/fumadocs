@@ -1,11 +1,9 @@
 import type { ExampleObject, MediaTypeObject, TagObject } from '@/types';
-import { idToTitle } from '@fumadocs/api-docs/utils/id-to-title';
-import { dereferenceShallow } from '@fumadocs/api-docs/schema/dereference';
+import { idToTitle } from 'shared-api/utils/id-to-title';
+import { dereference } from '@fumadocs/json-schema';
 import { getRaw } from '@scalar/json-magic/magic-proxy';
 
 export const methodKeys = ['get', 'post', 'patch', 'delete', 'head', 'put'] as const;
-
-export type { ParsedSchema } from '@fumadocs/api-docs/schema';
 
 export function getPreferredType(body: Record<string, unknown>): string | undefined {
   if ('application/json' in body) return 'application/json';
@@ -39,12 +37,12 @@ export function pickExample(value: ExampleLike): unknown | undefined {
 
   if (value.content) {
     const type = getPreferredType(value.content);
-    const content = type ? dereferenceShallow(value.content[type]) : undefined;
+    const content = type ? dereference(value.content[type]) : undefined;
 
     if (type && content) {
       const example = value.examples?.[type];
       const out =
-        (example !== undefined ? getRaw(dereferenceShallow(example).value) : undefined) ??
+        (example !== undefined ? getRaw(dereference(example).value) : undefined) ??
         pickExample(content);
       if (out !== undefined) return out;
     }
@@ -52,6 +50,6 @@ export function pickExample(value: ExampleLike): unknown | undefined {
 
   if (value.examples) {
     const examples = Object.values(value.examples);
-    if (examples.length > 0) return getRaw(dereferenceShallow(examples[0]).value);
+    if (examples.length > 0) return getRaw(dereference(examples[0]).value);
   }
 }

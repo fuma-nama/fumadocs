@@ -1,14 +1,6 @@
 'use client';
-import {
-  type ComponentProps,
-  createContext,
-  type FC,
-  type ReactNode,
-  use,
-  useCallback,
-  useMemo,
-} from 'react';
-import type { SchemaUIOptions } from '@fumadocs/api-docs/components/schema';
+import { type ComponentProps, createContext, type FC, type ReactNode, use, useMemo } from 'react';
+import type { SchemaUIOptions } from 'shared-api/components/schema';
 import type { DynamicCodeblockProps } from 'fumadocs-ui/components/dynamic-codeblock.core';
 import type { AsyncAPIObject, ServerObject } from '@/types';
 import type { DereferencedDocument } from '@/utils/document/dereference';
@@ -19,7 +11,7 @@ export type CodeBlockProps = Omit<DynamicCodeblockProps, 'highlighter' | 'option
 
 /** components the UI renders through, so a page can replace them */
 export interface AsyncAPIComponents {
-  SchemaUI: FC<Omit<SchemaUIOptions, 'resolver' | 'renderMarkdown' | 'renderCodeblock'>>;
+  SchemaUI: FC<Omit<SchemaUIOptions, 'resolver'>>;
   Markdown: FC<{ md: string }>;
   CodeBlock: FC<CodeBlockProps>;
   Heading: FC<ComponentProps<'h1'> & { id: string; depth: number }>;
@@ -70,15 +62,6 @@ export function useComponents(): AsyncAPIComponents {
   if (!components) throw new Error('Component must be used under <AsyncAPIProvider />');
 
   return components;
-}
-
-/**
- * Get the `localStorage` key of `name`, with the prefix of the page.
- */
-export function useStorageKey(): (name: string) => string {
-  const { storageKeyPrefix } = useAsyncAPI();
-
-  return useCallback((name) => storageKeyPrefix + name, [storageKeyPrefix]);
 }
 
 /**

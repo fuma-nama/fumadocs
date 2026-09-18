@@ -1,6 +1,6 @@
 import type { MessageObject, OperationObject } from '@/types';
 import type { DereferencedDocument } from '@/utils/document/dereference';
-import { isPlainObject } from '@fumadocs/api-docs/utils/is-plain-object';
+import { isPlainObject } from 'shared-api/utils/is-plain-object';
 
 type Resolve = DereferencedDocument['resolve'];
 

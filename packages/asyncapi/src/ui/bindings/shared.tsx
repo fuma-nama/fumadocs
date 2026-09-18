@@ -1,7 +1,7 @@
 'use client';
 import type { FC, ReactNode } from 'react';
 import { useTranslations } from '@fuma-translate/react';
-import { useComponents } from '@/headless';
+import { SchemaUI } from '@/ui/components/schema';
 import { cn } from '@/utils/cn';
 import type { AsyncAPISchemaObject } from '@/types';
 
@@ -144,8 +144,6 @@ export function BindingTagList({ value }: { value: Record<string, string> }) {
 }
 
 export function BindingSchema({ name, schema }: { name: string; schema: AsyncAPISchemaObject }) {
-  const { SchemaUI } = useComponents();
-
   return (
     <SchemaUI
       client={{

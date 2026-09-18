@@ -4,7 +4,7 @@ import { ClientCodeBlock } from '@/ui/components/codeblock';
 import type { ExampleMessageItem } from '@/utils/get-example-messages';
 import type { RenderContext } from '@/types';
 import { useTranslations } from '@fuma-translate/react';
-import { SelectTab, SelectTabs, SelectTabTrigger } from '@fumadocs/api-docs/components/select-tab';
+import { SelectTab, SelectTabs, SelectTabTrigger } from 'shared-api/components/select-tab';
 import { Markdown } from '../components/markdown';
 import { Heading } from '../components/heading';
 import {

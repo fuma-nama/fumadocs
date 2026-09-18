@@ -62,13 +62,17 @@ export const OpenAPIPage = createOpenAPIPage({
 - `Schema` is the [Schema UI](/docs/integrations/openapi/api-page#schema-ui) installed with Fumadocs CLI, or [your own](#schema-ui).
 - `Layout` (optional) wraps the rendered operations and webhooks.
 
-<Callout title="Bundle size">
+Code usages and TypeScript definitions are opt-in, so the headless page doesn't bundle their generators:
 
-The default code usages and TypeScript definitions are bundled with `fumadocs-openapi/headless`.
+```tsx
+import { createCodeUsageGeneratorRegistry } from 'fumadocs-openapi/requests/generators';
+import { registerDefault } from 'fumadocs-openapi/requests/generators/all';
 
-Import `createOpenAPIPage()` from `fumadocs-openapi/headless/base` to pass your own instead.
-
-</Callout>
+createOpenAPIPage({
+  codeUsages: registerDefault(createCodeUsageGeneratorRegistry()),
+  components: { ... },
+});
+```
 
 ### Hooks
 
@@ -80,7 +84,6 @@ Components under the page can access its state.
 | `useComponents()`                           | The components passed to the page.                     |
 | `useServer()`                               | The selected server and its variables.                 |
 | `useAuth()`                                 | The auth state of the playground.                      |
-| `useStorageKey()`                           | The `localStorage` keys of the page.                   |
 | `useTypeScriptDefinitions(schema, options)` | TypeScript definitions of a JSON schema.               |
 
 To render operations yourself, use `<OpenAPIProvider document={bundled} components={...} />` in place of `createOpenAPIPage()`.
@@ -143,25 +146,24 @@ function CodeUsage({ id }: { id: string }) {
 
 ## Schema UI
 
-The logic of Schema UI is in `@fumadocs/api-docs`.
+The Schema UI is installed with Fumadocs CLI, so its logic and markup live in your project:
 
 ```npm
-npm i @fumadocs/api-docs
+npx @fumadocs/cli add fumadocs/api-docs/schema
 ```
 
-- `generateSchemaUI()` generates the data of a JSON schema.
-- `<SchemaUIProvider />` holds the opened schemas, starting from the root.
+It arrives as `components/api/schema/{index,client}.tsx`, where `client.tsx` holds both the markup and `<SchemaUIProvider />`, which tracks the opened schemas starting from the root. Edit it, or replace it with your own.
+
+`generateSchemaUI()`, which turns a JSON schema into render data, stays in `@fumadocs/json-schema/react`.
+
+Pass yours to the page as the `SchemaUI` component:
 
 ```tsx title="components/my-schema.tsx"
 'use client';
 import { useMemo } from 'react';
 import type { OpenAPIComponents } from 'fumadocs-openapi/headless';
-import {
-  generateSchemaUI,
-  SchemaUIProvider,
-  useSchemaTabs,
-  useSchemaUI,
-} from '@fumadocs/api-docs/components/schema';
+import { generateSchemaUI } from '@fumadocs/json-schema/react';
+import { SchemaUIProvider, useSchemaTabs, useSchemaUI } from '@/components/api/schema/client';
 
 export const SchemaUI: OpenAPIComponents['SchemaUI'] = ({ root, client, readOnly, writeOnly }) => {
   const generated = useMemo(
@@ -177,7 +179,7 @@ export const SchemaUI: OpenAPIComponents['SchemaUI'] = ({ root, client, readOnly
   );
 
   return (
-    <SchemaUIProvider name={client.name} generated={generated}>
+    <SchemaUIProvider rootId={client.rootId} name={client.name} generated={generated}>
       <Body />
     </SchemaUIProvider>
   );

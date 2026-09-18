@@ -1,9 +1,15 @@
 'use client';
 import type { FC } from 'react';
 import type { ShikiFactory } from 'fumadocs-core/highlight/shiki';
-import { createPageComponents } from '@fumadocs/api-docs/components/defaults';
-import { Schema } from '@fumadocs/api-docs/components/schema';
-import { createOpenAPIPage } from '@/headless';
+import { Schema } from 'shared-api/components/schema';
+import { generate } from '@fumari/json-schema-ts';
+import { getRaw } from '@scalar/json-magic/magic-proxy';
+import { createOpenAPIPage, type OpenAPIRuntime } from '@/headless';
+import {
+  type CodeUsageGeneratorRegistry,
+  createCodeUsageGeneratorRegistry,
+} from '@/requests/generators';
+import { registerDefault } from '@/requests/generators/all';
 import type { RenderContext } from '@/types';
 import { Operation } from '@/ui/operation';
 import type { CreateOpenAPIPageOptions, OpenAPIPageProps } from '.';
@@ -19,32 +25,25 @@ export function createOpenAPIPageBase(
     shikiOptions = { themes: { light: 'github-light', dark: 'github-dark' } },
     components = {},
   } = options;
-  const { Operation: OperationUI = Operation, SchemaUI = Schema } = components;
-  const {
-    components: base,
-    renderMarkdown,
-    renderCodeblock,
-  } = createPageComponents({ shiki, shikiOptions, components });
+  const { Operation: OperationUI = Operation, SchemaUI: SchemaComp = Schema } = components;
   const ctx: RenderContext = { ...options, shikiOptions };
 
   return createOpenAPIPage({
-    codeUsages: options.codeUsages,
+    shiki,
+    shikiOptions,
+    codeUsages:
+      options.codeUsages ??
+      (defaultCodeUsages ??= registerDefault(createCodeUsageGeneratorRegistry())),
     generateCodeSamples: options.generateCodeSamples,
-    generateTypeScriptDefinitions: options.generateTypeScriptDefinitions,
+    generateTypeScriptDefinitions:
+      options.generateTypeScriptDefinitions ?? defaultTypeScriptDefinitions,
     mediaAdapters: options.mediaAdapters,
     storageKeyPrefix: options.storageKeyPrefix,
     components: {
-      ...base,
-      SchemaUI(props) {
-        return (
-          <SchemaUI
-            renderMarkdown={renderMarkdown}
-            renderCodeblock={renderCodeblock}
-            {...props}
-            showExample={props.showExample ?? options.schemaUI?.showExample}
-          />
-        );
-      },
+      ...components,
+      SchemaUI: (props) => (
+        <SchemaComp {...props} showExample={props.showExample ?? options.schemaUI?.showExample} />
+      ),
       Operation(props) {
         return <OperationUI {...props} ctx={ctx} />;
       },
@@ -61,3 +60,27 @@ export function createOpenAPIPageBase(
     },
   });
 }
+
+let defaultCodeUsages: CodeUsageGeneratorRegistry | undefined;
+
+const defaultTypeScriptDefinitions: Exclude<
+  OpenAPIRuntime['generateTypeScriptDefinitions'],
+  false | undefined
+> = (schema, ctx) => {
+  if (typeof schema !== 'object') return;
+
+  try {
+    // `generate` resolves `$ref`s against the schema root itself,
+    // spread the bundled document into the root so in-document refs are resolvable
+    return generate(
+      { ...(ctx.doc.bundled as object), ...getRaw(schema) },
+      {
+        name: ctx.name,
+        readOnly: ctx.readOnly,
+        writeOnly: ctx.writeOnly,
+      },
+    );
+  } catch (e) {
+    console.warn('Failed to generate typescript schema:', e);
+  }
+};

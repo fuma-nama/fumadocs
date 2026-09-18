@@ -1,6 +1,6 @@
 'use client';
 import { createContext, type ReactNode, use, useCallback, useMemo } from 'react';
-import { useServerStore } from '@fumadocs/api-docs/utils/use-server-store';
+import { useServerStore } from 'shared-api/utils/use-server-store';
 import type { ServerObject } from '@/types';
 import { getDefaultValues } from '@/utils/server-url';
 

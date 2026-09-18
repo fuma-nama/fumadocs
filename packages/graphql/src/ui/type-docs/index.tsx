@@ -1,7 +1,7 @@
 'use client';
 import type { ReactNode } from 'react';
 import { useTranslations } from '@fuma-translate/react';
-import { AnchorSection } from '@fumadocs/api-docs/auto-anchor/client';
+import { AnchorSection } from 'shared-api/auto-anchor/client';
 import {
   isEnumType,
   isInputObjectType,
@@ -13,12 +13,12 @@ import {
 import {
   type PageTypeProps,
   TypeProvider,
-  useComponents,
   useNamedType,
   useOperationLink,
   useTypeLink,
 } from '@/headless';
 import type { RenderContext } from '@/types';
+import { SchemaUI } from '@/ui/components/schema';
 import type { OperationKind } from '@/utils/schema';
 import { KindLabel } from '../components/badge';
 import { Heading } from '../components/heading';
@@ -43,7 +43,6 @@ export function TypeDocs({ name, ...props }: TypeDocsProps) {
 
 function TypeDocsContent({ showTitle, showDescription, ctx }: Omit<TypeDocsProps, 'name'>) {
   const t = useTranslations({ note: 'type page' });
-  const { SchemaUI } = useComponents();
   const { name, kind, type, directives, relations } = useNamedType();
   let headingLevel = 2;
 

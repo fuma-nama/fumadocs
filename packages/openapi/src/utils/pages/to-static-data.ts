@@ -3,8 +3,8 @@ import Slugger from 'github-slugger';
 import type { TOCItemType } from 'fumadocs-core/toc';
 import type { StructuredData } from 'fumadocs-core/mdx-plugins';
 import type { GeneratedPageProps } from './builder';
-import { idToTitle } from '@fumadocs/api-docs/utils/id-to-title';
-import { dereferenceShallow } from '@fumadocs/api-docs/schema/dereference';
+import { idToTitle } from 'shared-api/utils/id-to-title';
+import { dereference } from '@fumadocs/json-schema';
 import { createMagicProxy } from '@scalar/json-magic/magic-proxy';
 
 const proxyCache = new WeakMap<Document, Document>();
@@ -49,14 +49,14 @@ export function toStaticData(
   }
 
   for (const item of page.operations ?? []) {
-    const operation = dereferenceShallow(proxied.paths?.[item.path])?.[item.method];
+    const operation = dereference(proxied.paths?.[item.path])?.[item.method];
     if (!operation) continue;
 
     pathItem(operation, item.path);
   }
 
   for (const item of page.webhooks ?? []) {
-    const webhook = dereferenceShallow(proxied.webhooks?.[item.name])?.[item.method];
+    const webhook = dereference(proxied.webhooks?.[item.name])?.[item.method];
     if (!webhook) continue;
 
     pathItem(webhook, item.name);

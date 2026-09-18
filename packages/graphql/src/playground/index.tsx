@@ -19,19 +19,19 @@ import {
   Collapsible,
   CollapsibleContent,
   CollapsibleTrigger,
-} from '@fumadocs/api-docs/components/collapsible';
-import { FieldSet } from '@fumadocs/api-docs/components/playground/inputs';
-import { SchemaProvider } from '@fumadocs/api-docs/components/playground/schema';
-import { Input } from '@fumadocs/api-docs/components/input';
-import { Spinner } from '@fumadocs/api-docs/components/spinner';
+} from 'shared-api/components/collapsible';
+import { FieldSet } from 'shared-api/components/playground/inputs';
+import { SchemaProvider } from 'shared-api/components/playground/schema';
+import { Input } from 'shared-api/components/input';
+import { Spinner } from 'shared-api/components/spinner';
 import { useGraphQL, useOperation } from '@/headless';
 import { cn } from '@/utils/cn';
 import { syncOperationVariables } from '@/utils/example';
-import { useQuery } from '@fumadocs/api-docs/utils/use-query';
+import { useQuery } from 'shared-api/utils/use-query';
 import type { RenderContext } from '@/types';
 import { ClientCodeBlock } from '@/ui/components/codeblock';
 import { CodeEditor } from '@/ui/components/code-editor';
-import { Badge } from '@fumadocs/api-docs/components/badge';
+import { Badge } from 'shared-api/components/badge';
 import { executeGraphQL, type PlaygroundResult } from './fetcher';
 import { inputTypeToJsonSchema } from './json-schema';
 import {

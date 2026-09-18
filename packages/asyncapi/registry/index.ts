@@ -34,7 +34,7 @@ export const registry: Registry = {
     {
       name: 'ui/components',
       unlisted: true,
-      files: ['badge', 'codeblock', 'heading', 'markdown'].map((name) => ({
+      files: ['badge', 'codeblock', 'heading', 'markdown', 'schema'].map((name) => ({
         type: 'components',
         path: `ui/components/${name}.tsx`,
         target: `<dir>/asyncapi/components/${name}.tsx`,
@@ -109,7 +109,7 @@ export const registry: Registry = {
     'fumadocs-core': null,
     'fumadocs-ui': null,
     '@fumadocs/asyncapi': null,
-    '@fumadocs/api-docs': null,
+    '@fumadocs/json-schema': null,
     '@fumari/stf': null,
     react: null,
   },

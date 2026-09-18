@@ -5,7 +5,7 @@ import {
   AccordionItem,
   Accordions,
   AccordionTrigger,
-} from '@fumadocs/api-docs/components/accordion';
+} from 'shared-api/components/accordion';
 import { Tab, Tabs } from 'fumadocs-ui/components/tabs';
 import type { ReactNode } from 'react';
 import { useTranslations } from '@fuma-translate/react';

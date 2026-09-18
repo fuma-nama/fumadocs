@@ -1,5 +1,5 @@
 import type { BindingProtocol } from '@/types/asyncapi-3';
-import { isPlainObject } from '@fumadocs/api-docs/utils/is-plain-object';
+import { isPlainObject } from 'shared-api/utils/is-plain-object';
 import type { ProtocolBindingDefinition } from '../shared';
 import { amqpBinding } from './amqp';
 import { amqp1Binding } from './amqp1';

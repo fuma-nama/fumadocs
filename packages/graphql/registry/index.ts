@@ -11,13 +11,19 @@ export const registry: Registry = {
     {
       name: 'ui/components',
       unlisted: true,
-      files: ['badge', 'codeblock', 'heading', 'markdown', 'type-annotation', 'enum-values'].map(
-        (name) => ({
-          type: 'components',
-          path: `ui/components/${name}.tsx`,
-          target: `<dir>/graphql/components/${name}.tsx`,
-        }),
-      ),
+      files: [
+        'badge',
+        'codeblock',
+        'heading',
+        'markdown',
+        'schema',
+        'type-annotation',
+        'enum-values',
+      ].map((name) => ({
+        type: 'components',
+        path: `ui/components/${name}.tsx`,
+        target: `<dir>/graphql/components/${name}.tsx`,
+      })),
     },
     {
       name: 'schema-ui',
@@ -79,11 +85,6 @@ export const registry: Registry = {
         },
         {
           type: 'components',
-          path: 'playground/json-schema.ts',
-          target: '<dir>/graphql/playground/json-schema.ts',
-        },
-        {
-          type: 'components',
           path: 'playground/storage.ts',
           target: '<dir>/graphql/playground/storage.ts',
         },
@@ -99,7 +100,7 @@ export const registry: Registry = {
     'fumadocs-core': null,
     'fumadocs-ui': null,
     '@fumadocs/graphql': null,
-    '@fumadocs/api-docs': null,
+    '@fumadocs/json-schema': null,
     '@fumari/stf': null,
     react: null,
   },

@@ -9,7 +9,7 @@ packages:
 API pages are now built on a headless layer, use it to build your own UI:
 
 - `createAsyncAPIPage()` and `<AsyncAPIProvider />` with your own components.
-- the hooks of pages and operations: `useAsyncAPI()`, `useComponents()`, `useServer()`, `useStorageKey()`, `useOperation()` and `useOperationSecurity()`.
+- the hooks of pages and operations: `useAsyncAPI()`, `useComponents()`, `useServer()`, `useOperation()` and `useOperationSecurity()`.
 
 ```tsx title="components/api-page.tsx"
 'use client';

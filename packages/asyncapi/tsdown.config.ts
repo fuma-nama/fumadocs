@@ -25,7 +25,7 @@ export default defineConfig({
   },
   platform: 'browser',
   deps: {
-    onlyBundle: ['@fastify/deepmerge'],
+    onlyBundle: ['shared-api', '@fastify/deepmerge'],
     neverBundle: [/^node:/, 'fs'],
   },
   exports: {
@@ -41,6 +41,12 @@ async function compileInline() {
   await mkdir('css/generated', { recursive: true });
   const scanner = new Scanner({
     sources: [
+      {
+        // the shared UI is bundled into this package, its classes belong to our CSS
+        base: path.resolve('../shared-api/src/components'),
+        pattern: '**/*.{ts,tsx}',
+        negated: false,
+      },
       {
         base: path.resolve('src'),
         pattern: 'ui/**/*.{ts,tsx}',

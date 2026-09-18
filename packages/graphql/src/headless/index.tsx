@@ -1,5 +1,10 @@
 'use client';
 import type { FC, ReactNode } from 'react';
+import type { ShikiFactory } from 'fumadocs-core/highlight/shiki';
+import {
+  createPageComponents,
+  type CreatePageComponentsOptions as PageComponentsOptions,
+} from 'shared-api/components/defaults';
 import type { GeneratedPageProps, GraphQLPageItem } from '@/utils/pages';
 import type { OperationKind } from '@/utils/schema';
 import {
@@ -12,6 +17,8 @@ import {
 export * from './runtime';
 export * from './operation';
 export * from './type-docs';
+// the playground form model: GraphQL input types as JSON Schema
+export { inputTypeToJsonSchema } from '@/playground/json-schema';
 export * from '@/utils/snippets';
 export type { OperationExample } from '@/utils/example';
 
@@ -38,14 +45,18 @@ export interface CreateGraphQLPageOptions extends Omit<
   GraphQLProviderProps,
   'sdl' | 'links' | 'components' | 'children'
 > {
-  components: GraphQLComponents & {
-    /** renders an operation of the page */
-    Operation: FC<PageOperationProps>;
-    /** renders a named type of the page */
-    TypeDocs: FC<PageTypeProps>;
-    /** wraps the rendered items */
-    Layout?: FC<PageLayoutProps>;
-  };
+  /** the Shiki highlighter of code blocks, without it they render unhighlighted */
+  shiki?: ShikiFactory;
+  shikiOptions?: PageComponentsOptions['shikiOptions'];
+  components: Pick<GraphQLComponents, 'SchemaUI'> &
+    Partial<Omit<GraphQLComponents, 'SchemaUI'>> & {
+      /** renders an operation of the page */
+      Operation: FC<PageOperationProps>;
+      /** renders a named type of the page */
+      TypeDocs: FC<PageTypeProps>;
+      /** wraps the rendered items */
+      Layout?: FC<PageLayoutProps>;
+    };
 }
 
 export type GraphQLPageProps = GeneratedPageProps & {
@@ -60,13 +71,20 @@ export type GraphQLPageProps = GeneratedPageProps & {
  */
 export function createGraphQLPage({
   components,
+  shiki,
+  shikiOptions,
   ...options
 }: CreateGraphQLPageOptions): FC<GraphQLPageProps> {
   const { Operation, TypeDocs, Layout = DefaultLayout } = components;
+  const slots: GraphQLComponents = {
+    SchemaUI: components.SchemaUI,
+    // fills the Markdown, code block and heading slots the page didn't replace
+    ...createPageComponents({ shiki, shikiOptions, components }).components,
+  };
 
   return function GraphQLPage({ payload, items, showTitle, showDescription }) {
     return (
-      <GraphQLProvider {...options} sdl={payload.sdl} links={payload.links} components={components}>
+      <GraphQLProvider {...options} sdl={payload.sdl} links={payload.links} components={slots}>
         <Layout
           items={items?.map((item) => ({
             item,

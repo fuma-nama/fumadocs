@@ -5,8 +5,9 @@ import * as openapi from '../../../../packages/openapi/registry/index.ts';
 import * as asyncapi from '../../../../packages/asyncapi/registry/index.ts';
 import * as graphql from '../../../../packages/graphql/registry/index.ts';
 import * as story from '../../../../packages/story/registry/index.ts';
-import * as apiDocs from '../../../../packages/api-docs/registry/index.ts';
+import * as apiDocs from '../../../../packages/shared-api/registry/index.ts';
 import * as path from 'node:path';
+import { existsSync } from 'node:fs';
 import type { CompileOptions, Registry } from 'fuma-cli/compiler';
 
 const baseDir = path.join(import.meta.dirname, '../../');
@@ -18,6 +19,12 @@ const openapiExports = new Map([
   ['utils/storage-key.ts', 'fumadocs-openapi/headless'],
   ['ui/index.tsx', 'fumadocs-openapi/ui'],
   ['playground/client.tsx', 'fumadocs-openapi/playground/client'],
+  // the request pipeline stays in the package, an installed playground drives it
+  ['playground/fetcher.ts', 'fumadocs-openapi/headless'],
+  ['requests/media/encode.ts', 'fumadocs-openapi/headless'],
+  ['requests/media/resolve-adapter.ts', 'fumadocs-openapi/headless'],
+  ['requests/types.ts', 'fumadocs-openapi/headless'],
+  ['utils/schema.ts', 'fumadocs-openapi/headless'],
   ['requests/generators/index.ts', 'fumadocs-openapi/requests/generators'],
   // types are re-exported from the package root
   ['requests/media/adapter.ts', 'fumadocs-openapi'],
@@ -53,27 +60,20 @@ const graphqlExports = new Map([
   ['utils/schema.ts', '@fumadocs/graphql'],
   ['utils/pages.ts', '@fumadocs/graphql'],
   ['playground/fetcher.ts', '@fumadocs/graphql'],
+  ['playground/index.tsx', '@fumadocs/graphql/playground'],
+  ['playground/json-schema.ts', '@fumadocs/graphql/headless'],
   ['utils/example.ts', '@fumadocs/graphql/headless'],
   ['utils/snippets.ts', '@fumadocs/graphql/headless'],
   ['utils/build-schema.ts', '@fumadocs/graphql/headless'],
 ]);
 
-// the UI of `@fumadocs/api-docs`, vendored so an installed API page owns all of its markup
-const apiDocsUI = new Set([
-  'components/accordion.tsx',
-  'components/badge.tsx',
-  'components/collapsible.tsx',
-  'components/dialog.tsx',
-  'components/input.tsx',
-  'components/label.tsx',
-  'components/playground/inputs.tsx',
-  'components/popover.tsx',
-  'components/schema/client.tsx',
-  'components/schema/index.tsx',
-  'components/select-tab.tsx',
-  'components/select.tsx',
-  'components/spinner.tsx',
-]);
+// `shared-api` is private, so installed code owns a copy of everything it reaches
+function apiDocsFile(subpath: string) {
+  for (const ext of ['.tsx', '.ts', '/index.tsx', '/index.ts']) {
+    const file = `${subpath}${ext}`;
+    if (existsSync(path.join(apiDocs.registry.dir, file))) return file;
+  }
+}
 
 export const compileOptions: Partial<CompileOptions> = {
   onUnknownFile(absolutePath) {
@@ -191,40 +191,21 @@ export const compileOptions: Partial<CompileOptions> = {
       }
 
       file = path.relative(apiDocs.registry.dir, ref.file);
-      if (file === 'components/schema/headless.tsx') {
+      if (file === 'utils/cn.ts' || file === 'utils/merge-refs.ts') {
         return {
-          dep: '@fumadocs/api-docs',
-          type: 'dependency',
-          specifier: '@fumadocs/api-docs/components/schema/headless',
-        };
-      }
-      if (!file.startsWith('..') && !apiDocsUI.has(file)) {
-        if (file === 'utils/cn.ts' || file === 'utils/merge-refs.ts') {
-          return {
-            type: 'file',
-            file: path.join(radixUi.registry.dir, file),
-          };
-        }
-
-        // other internal modules mirror the package's subpath exports
-        return {
-          dep: '@fumadocs/api-docs',
-          type: 'dependency',
-          specifier: `@fumadocs/api-docs/${toSubpath(file)}`,
+          type: 'file',
+          file: path.join(radixUi.registry.dir, file),
         };
       }
     }
 
-    if (ref.type === 'dependency' && ref.dep === '@fumadocs/api-docs') {
-      const subpath = ref.specifier.slice('@fumadocs/api-docs/'.length);
-
-      for (const file of [`${subpath}.tsx`, `${subpath}/index.tsx`]) {
-        if (apiDocsUI.has(file)) {
-          return {
-            type: 'file',
-            file: path.join(apiDocs.registry.dir, file),
-          };
-        }
+    if (ref.type === 'dependency' && ref.dep === 'shared-api') {
+      const file = apiDocsFile(ref.specifier.slice('shared-api/'.length));
+      if (file) {
+        return {
+          type: 'file',
+          file: path.join(apiDocs.registry.dir, file),
+        };
       }
     }
 

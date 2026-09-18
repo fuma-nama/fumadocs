@@ -25,12 +25,8 @@ import {
   valueToLiteral,
 } from 'graphql';
 import { fromTranslations, useTranslations } from '@fuma-translate/react';
-import {
-  SchemaUI,
-  InlineTag,
-  type SchemaData,
-  type SchemaUIGeneratedData,
-} from '@fumadocs/api-docs/components/schema';
+import type { SchemaData, SchemaUIGeneratedData } from '@fumadocs/json-schema/react';
+import { InlineTag, SchemaUI } from 'shared-api/components/schema';
 import { type SchemaViewProps, type SchemaViewRoot, useGraphQL } from '@/headless';
 import { getCustomDirectives } from '@/utils/schema';
 import { Markdown } from './components/markdown';

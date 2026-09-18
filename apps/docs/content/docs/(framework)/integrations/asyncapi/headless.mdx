@@ -20,7 +20,7 @@ The default UI, `createAsyncAPIPage()` from `@fumadocs/asyncapi/ui`, is built on
 ```tsx title="components/api-page.tsx"
 'use client';
 import { type CodeBlockProps, createAsyncAPIPage } from '@fumadocs/asyncapi/headless';
-import { Schema } from '@fumadocs/api-docs/components/schema';
+import { Schema } from '@/components/api/schema';
 import { Operation } from '@/components/my-operation';
 
 function Markdown({ md }: { md: string }) {
@@ -56,7 +56,7 @@ export const AsyncAPIPage = createAsyncAPIPage({
 ```
 
 - `Operation` renders each operation of the page, see [Operation](#operation).
-- `SchemaUI` renders the JSON schemas of parameters, headers and payloads.
+- `SchemaUI` renders the JSON schemas of parameters, headers and payloads, install it with `npx @fumadocs/cli add fumadocs/api-docs/schema`.
 - `Layout` (optional) wraps the rendered operations.
 
 ### Hooks
@@ -68,7 +68,6 @@ Components under the page can access its state.
 | `useAsyncAPI()`   | The dereferenced document (`doc`) and page options. |
 | `useComponents()` | The components passed to the page.                  |
 | `useServer()`     | The servers, the selected one and its variables.    |
-| `useStorageKey()` | The `localStorage` keys of the page.                |
 
 To render operations yourself, use `<AsyncAPIProvider document={bundled} components={...} />` in place of `createAsyncAPIPage()`.
 

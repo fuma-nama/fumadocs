@@ -5,10 +5,10 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from '@fumadocs/api-docs/components/dialog';
-import { Input } from '@fumadocs/api-docs/components/input';
-import { labelVariants } from '@fumadocs/api-docs/components/label';
-import { useQuery } from '@fumadocs/api-docs/utils/use-query';
+} from 'shared-api/components/dialog';
+import { Input } from 'shared-api/components/input';
+import { labelVariants } from 'shared-api/components/label';
+import { useQuery } from 'shared-api/utils/use-query';
 import { type ReactNode, useMemo, useState } from 'react';
 import { cn } from '@/utils/cn';
 import { buttonVariants } from 'fumadocs-ui/components/ui/button';
@@ -18,7 +18,7 @@ import {
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@fumadocs/api-docs/components/select';
+} from 'shared-api/components/select';
 import type { OAuth2SecurityScheme } from '@/types';
 import { useTranslations } from '@fuma-translate/react';
 import { useAuth } from '../auth';

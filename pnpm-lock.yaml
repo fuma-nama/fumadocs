@@ -1948,7 +1948,7 @@ importers:
         specifier: ^8.2.2
         version: 8.2.2(@types/node@26.5.0)(esbuild@0.28.2)(jiti@2.7.0)(terser@5.51.2)(tsx@4.23.13)(yaml@2.9.0)
 
-  packages/api-docs:
+  packages/asyncapi:
     dependencies:
       '@base-ui/react':
         specifier: ^1.8.0
@@ -1956,12 +1956,18 @@ importers:
       '@fuma-translate/react':
         specifier: ^1.0.2
         version: 1.0.2(@types/react@19.2.18)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
+      '@fumadocs/json-schema':
+        specifier: workspace:*
+        version: link:../json-schema
       '@fumari/stf':
         specifier: workspace:*
         version: link:../stf
       '@scalar/json-magic':
         specifier: ^0.13.4
         version: 0.13.4
+      chokidar:
+        specifier: ^5.0.0
+        version: 5.0.0
       class-variance-authority:
         specifier: ^0.7.1
         version: 0.7.1
@@ -1992,79 +1998,6 @@ importers:
       shiki:
         specifier: ^4.4.3
         version: 4.4.3
-    devDependencies:
-      '@fastify/deepmerge':
-        specifier: ^3.2.1
-        version: 3.2.1
-      '@tailwindcss/oxide':
-        specifier: ^4.3.3
-        version: 4.3.3
-      '@types/node':
-        specifier: 26.5.0
-        version: 26.5.0
-      '@types/react':
-        specifier: ^19.2.18
-        version: 19.2.18
-      '@types/react-dom':
-        specifier: ^19.2.7
-        version: 19.2.7(@types/react@19.2.18)
-      fuma-cli:
-        specifier: ^0.1.1
-        version: 0.1.1(@emnapi/core@2.0.0-alpha.3)(@emnapi/runtime@2.0.0-alpha.3)
-      fumadocs-core:
-        specifier: workspace:*
-        version: link:../core
-      fumadocs-ui:
-        specifier: workspace:@fumadocs/base-ui@*
-        version: link:../base-ui
-      json-schema-typed:
-        specifier: ^8.0.2
-        version: 8.0.2
-      tsconfig:
-        specifier: workspace:*
-        version: link:../tsconfig
-      tsdown:
-        specifier: 0.23.0
-        version: 0.23.0(@tsdown/css@0.23.0)(oxc-resolver@11.19.1(@emnapi/core@2.0.0-alpha.3)(@emnapi/runtime@2.0.0-alpha.3))(tsx@4.23.13)(typescript@7.0.2)(unrun@0.3.1)
-
-  packages/asyncapi:
-    dependencies:
-      '@fuma-translate/react':
-        specifier: ^1.0.2
-        version: 1.0.2(@types/react@19.2.18)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
-      '@fumadocs/api-docs':
-        specifier: workspace:*
-        version: link:../api-docs
-      '@fumari/stf':
-        specifier: workspace:*
-        version: link:../stf
-      '@scalar/json-magic':
-        specifier: ^0.13.4
-        version: 0.13.4
-      chokidar:
-        specifier: ^5.0.0
-        version: 5.0.0
-      class-variance-authority:
-        specifier: ^0.7.1
-        version: 0.7.1
-      cn:
-        specifier: ^0.2.6
-        version: 0.2.6
-      github-slugger:
-        specifier: ^2.0.0
-        version: 2.0.0
-      lucide-react:
-        specifier: ^1.43.0
-        version: 1.43.0(react@19.2.8)
-      react:
-        specifier: ^19.2.0
-        version: 19.2.8
-      react-dom:
-        specifier: ^19.2.0
-        version: 19.2.8(react@19.2.8)
-      shiki:
-        specifier: ^4.4.3
-        version: 4.4.3
       yaml:
         specifier: ^2.9.0
         version: 2.9.0
@@ -2090,6 +2023,9 @@ importers:
       json-schema-typed:
         specifier: ^8.0.2
         version: 8.0.2
+      shared-api:
+        specifier: workspace:*
+        version: link:../shared-api
       tailwindcss:
         specifier: ^4.3.3
         version: 4.3.3
@@ -2671,12 +2607,15 @@ importers:
 
   packages/graphql:
     dependencies:
+      '@base-ui/react':
+        specifier: ^1.8.0
+        version: 1.8.0(@date-fns/tz@1.5.0)(@types/react@19.2.18)(date-fns@4.4.0)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
       '@fuma-translate/react':
         specifier: ^1.0.2
         version: 1.0.2(@types/react@19.2.18)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
-      '@fumadocs/api-docs':
+      '@fumadocs/json-schema':
         specifier: workspace:*
-        version: link:../api-docs
+        version: link:../json-schema
       '@fumari/stf':
         specifier: workspace:*
         version: link:../stf
@@ -2701,6 +2640,12 @@ importers:
       react-dom:
         specifier: ^19.2.0
         version: 19.2.8(react@19.2.8)
+      remark:
+        specifier: ^15.0.1
+        version: 15.0.1
+      remark-rehype:
+        specifier: ^11.1.2
+        version: 11.1.2
       shiki:
         specifier: ^4.4.3
         version: 4.4.3
@@ -2729,6 +2674,12 @@ importers:
       graphql:
         specifier: ^17.0.2
         version: 17.0.2
+      json-schema-typed:
+        specifier: ^8.0.2
+        version: 8.0.2
+      shared-api:
+        specifier: workspace:*
+        version: link:../shared-api
       tailwindcss:
         specifier: ^4.3.3
         version: 4.3.3
@@ -2754,11 +2705,42 @@ importers:
         specifier: ^5.0.0
         version: 5.0.0(@opentelemetry/api@1.9.1)(@types/node@26.5.0)(jsdom@29.1.1(@noble/hashes@2.4.0))(vite@8.2.2(@types/node@26.5.0)(esbuild@0.28.2)(jiti@2.7.0)(terser@5.51.2)(tsx@4.23.13)(yaml@2.9.0))
 
+  packages/json-schema:
+    dependencies:
+      '@fuma-translate/react':
+        specifier: ^1.0.2
+        version: 1.0.2(@types/react@19.2.18)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
+      '@scalar/json-magic':
+        specifier: ^0.13.4
+        version: 0.13.4
+    devDependencies:
+      '@fastify/deepmerge':
+        specifier: ^3.2.1
+        version: 3.2.1
+      '@types/node':
+        specifier: 26.5.0
+        version: 26.5.0
+      '@types/react':
+        specifier: ^19.2.18
+        version: 19.2.18
+      json-schema-typed:
+        specifier: ^8.0.2
+        version: 8.0.2
+      react:
+        specifier: ^19.2.8
+        version: 19.2.8
+      tsconfig:
+        specifier: workspace:*
+        version: link:../tsconfig
+      tsdown:
+        specifier: 0.23.0
+        version: 0.23.0(@tsdown/css@0.23.0)(oxc-resolver@11.19.1(@emnapi/core@2.0.0-alpha.3)(@emnapi/runtime@2.0.0-alpha.3))(tsx@4.23.13)(typescript@7.0.2)(unrun@0.3.1)
+      vitest:
+        specifier: ^5.0.0
+        version: 5.0.0(@opentelemetry/api@1.9.1)(@types/node@26.5.0)(jsdom@29.1.1(@noble/hashes@2.4.0))(vite@8.2.2(@types/node@26.5.0)(esbuild@0.28.2)(jiti@2.7.0)(terser@5.51.2)(tsx@4.23.13)(yaml@2.9.0))
+
   packages/language:
     devDependencies:
-      '@fumadocs/api-docs':
-        specifier: workspace:*
-        version: link:../api-docs
       '@fumadocs/asyncapi':
         specifier: workspace:*
         version: link:../asyncapi
@@ -3264,12 +3246,15 @@ importers:
 
   packages/openapi:
     dependencies:
+      '@base-ui/react':
+        specifier: ^1.8.0
+        version: 1.8.0(@date-fns/tz@1.5.0)(@types/react@19.2.18)(date-fns@4.4.0)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
       '@fuma-translate/react':
         specifier: ^1.0.2
         version: 1.0.2(@types/react@19.2.18)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
-      '@fumadocs/api-docs':
+      '@fumadocs/json-schema':
         specifier: workspace:*
-        version: link:../api-docs
+        version: link:../json-schema
       '@fumari/json-schema-ts':
         specifier: ^1.0.2
         version: 1.0.2(json-schema-typed@8.0.2)
@@ -3291,6 +3276,9 @@ importers:
       github-slugger:
         specifier: ^2.0.0
         version: 2.0.0
+      hast-util-to-jsx-runtime:
+        specifier: ^2.3.6
+        version: 2.3.6
       lucide-react:
         specifier: ^1.43.0
         version: 1.43.0(react@19.2.8)
@@ -3300,6 +3288,12 @@ importers:
       react-dom:
         specifier: ^19.2.0
         version: 19.2.8(react@19.2.8)
+      remark:
+        specifier: ^15.0.1
+        version: 15.0.1
+      remark-rehype:
+        specifier: ^11.1.2
+        version: 11.1.2
       shiki:
         specifier: ^4.4.3
         version: 4.4.3
@@ -3340,6 +3334,9 @@ importers:
       json-schema-typed:
         specifier: ^8.0.2
         version: 8.0.2
+      shared-api:
+        specifier: workspace:*
+        version: link:../shared-api
       tsconfig:
         specifier: workspace:*
         version: link:../tsconfig
@@ -3908,6 +3905,82 @@ importers:
       fuma-translate:
         specifier: ^1.0.2
         version: 1.0.2
+      tsconfig:
+        specifier: workspace:*
+        version: link:../tsconfig
+      tsdown:
+        specifier: 0.23.0
+        version: 0.23.0(@tsdown/css@0.23.0)(oxc-resolver@11.19.1(@emnapi/core@2.0.0-alpha.3)(@emnapi/runtime@2.0.0-alpha.3))(tsx@4.23.13)(typescript@7.0.2)(unrun@0.3.1)
+
+  packages/shared-api:
+    dependencies:
+      '@base-ui/react':
+        specifier: ^1.8.0
+        version: 1.8.0(@date-fns/tz@1.5.0)(@types/react@19.2.18)(date-fns@4.4.0)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
+      '@fuma-translate/react':
+        specifier: ^1.0.2
+        version: 1.0.2(@types/react@19.2.18)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
+      '@fumadocs/json-schema':
+        specifier: workspace:*
+        version: link:../json-schema
+      '@fumari/stf':
+        specifier: workspace:*
+        version: link:../stf
+      class-variance-authority:
+        specifier: ^0.7.1
+        version: 0.7.1
+      cn:
+        specifier: ^0.2.6
+        version: 0.2.6
+      github-slugger:
+        specifier: ^2.0.0
+        version: 2.0.0
+      hast-util-to-jsx-runtime:
+        specifier: ^2.3.6
+        version: 2.3.6
+      lucide-react:
+        specifier: ^1.43.0
+        version: 1.43.0(react@19.2.8)
+      react:
+        specifier: ^19.2.0
+        version: 19.2.8
+      react-dom:
+        specifier: ^19.2.0
+        version: 19.2.8(react@19.2.8)
+      remark:
+        specifier: ^15.0.1
+        version: 15.0.1
+      remark-rehype:
+        specifier: ^11.1.2
+        version: 11.1.2
+      shiki:
+        specifier: ^4.4.3
+        version: 4.4.3
+    devDependencies:
+      '@scalar/json-magic':
+        specifier: ^0.13.4
+        version: 0.13.4
+      '@types/node':
+        specifier: 26.5.0
+        version: 26.5.0
+      '@types/react':
+        specifier: ^19.2.18
+        version: 19.2.18
+      '@types/react-dom':
+        specifier: ^19.2.7
+        version: 19.2.7(@types/react@19.2.18)
+      fuma-cli:
+        specifier: ^0.1.1
+        version: 0.1.1(@emnapi/core@2.0.0-alpha.3)(@emnapi/runtime@2.0.0-alpha.3)
+      fumadocs-core:
+        specifier: workspace:*
+        version: link:../core
+      fumadocs-ui:
+        specifier: workspace:@fumadocs/base-ui@*
+        version: link:../base-ui
+      json-schema-typed:
+        specifier: ^8.0.2
+        version: 8.0.2
       tsconfig:
         specifier: workspace:*
         version: link:../tsconfig
@@ -14535,6 +14608,7 @@ packages:
   sanity@6.12.0:
     resolution: {integrity: sha512-o21BRF7oxFatFcWgbZ9NBQhZSp9JxuWtwlfARGly3vqM/4Z5H7Y9J1ZUZb7XO6EAYX3DXsfn65Hivj80X5FBjQ==}
     engines: {node: '>=22.12'}
+    deprecated: 'This version of Sanity Studio has a potential data-loss bug when working with Portable Text fields. This issue is resolved in 6.14.1. Upgrade with: npm install sanity@latest. See https://www.sanity.io/docs/studio/upgrade'
     hasBin: true
     peerDependencies:
       react: ^19.2.2

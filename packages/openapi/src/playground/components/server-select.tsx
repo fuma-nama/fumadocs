@@ -6,9 +6,9 @@ import {
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@fumadocs/api-docs/components/select';
-import { Input } from '@fumadocs/api-docs/components/input';
-import { labelVariants } from '@fumadocs/api-docs/components/label';
+} from 'shared-api/components/select';
+import { Input } from 'shared-api/components/input';
+import { labelVariants } from 'shared-api/components/label';
 import { useEffect, useState, useRef, type ComponentProps } from 'react';
 import { cn } from '@/utils/cn';
 import {
@@ -18,12 +18,12 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from '@fumadocs/api-docs/components/dialog';
+} from 'shared-api/components/dialog';
 import type { ServerVariableObject } from '@/types';
 import { StfProvider, useFieldValue, useListener, useStf } from '@fumari/stf';
 import { EditIcon } from 'lucide-react';
 import { useTranslations } from '@fuma-translate/react';
-import { resolveServerUrl } from '@fumadocs/api-docs/utils/url';
+import { resolveServerUrl } from 'shared-api/utils/url';
 
 export default function ServerSelect(props: ComponentProps<typeof DialogTrigger>) {
   const { servers, server, setServer, setServerVariables } = useServer();

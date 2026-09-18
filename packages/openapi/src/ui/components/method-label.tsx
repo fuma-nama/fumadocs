@@ -1,5 +1,5 @@
 import type { HTMLAttributes } from 'react';
-import { Badge, type BadgeColor } from '@fumadocs/api-docs/components/badge';
+import { Badge, type BadgeColor } from 'shared-api/components/badge';
 
 function getMethodColor(method: string): BadgeColor {
   switch (method.toUpperCase()) {

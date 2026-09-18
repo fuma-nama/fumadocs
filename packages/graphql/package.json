@@ -23,6 +23,7 @@
     ".": "./dist/index.js",
     "./headless": "./dist/headless/index.js",
     "./i18n": "./dist/i18n.js",
+    "./playground": "./dist/playground/index.js",
     "./server": "./dist/server/index.js",
     "./ui": "./dist/ui/index.js",
     "./ui/base": "./dist/ui/base.js",
@@ -40,14 +41,17 @@
     "types:check": "tsc --noEmit"
   },
   "dependencies": {
+    "@base-ui/react": "^1.8.0",
     "@fuma-translate/react": "^1.0.2",
-    "@fumadocs/api-docs": "workspace:*",
+    "@fumadocs/json-schema": "workspace:*",
     "@fumari/stf": "workspace:*",
     "class-variance-authority": "^0.7.1",
     "cn": "^0.2.6",
     "github-slugger": "^2.0.0",
     "hast-util-to-jsx-runtime": "^2.3.6",
     "lucide-react": "^1.43.0",
+    "remark": "^15.0.1",
+    "remark-rehype": "^11.1.2",
     "shiki": "^4.4.3"
   },
   "devDependencies": {
@@ -59,6 +63,8 @@
     "fumadocs-core": "workspace:*",
     "fumadocs-ui": "workspace:@fumadocs/base-ui@*",
     "graphql": "^17.0.2",
+    "json-schema-typed": "^8.0.2",
+    "shared-api": "workspace:*",
     "tailwindcss": "^4.3.3",
     "tsconfig": "workspace:*",
     "tsdown": "0.23.0"
@@ -68,11 +74,15 @@
     "fumadocs-core": "^16.15.0",
     "fumadocs-ui": "^16.15.0",
     "graphql": "^17.0.0",
+    "json-schema-typed": "*",
     "react": "^19.2.0",
     "react-dom": "^19.2.0"
   },
   "peerDependenciesMeta": {
     "@types/react": {
+      "optional": true
+    },
+    "json-schema-typed": {
       "optional": true
     }
   }

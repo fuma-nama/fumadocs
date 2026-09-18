@@ -9,7 +9,7 @@ import type {
   PagesBuilderConfig,
 } from '@/utils/pages/builder';
 import type { DistributiveOmit, TagObject } from '@/types';
-import { dereferenceShallow } from '@fumadocs/api-docs/schema/dereference';
+import { dereference } from '@fumadocs/json-schema';
 import { getOperationDisplayName, getTagDisplayName } from '../schema';
 
 interface OperationConfig extends BaseConfig {
@@ -97,8 +97,8 @@ export function createAutoPreset(options: SchemaToPagesOptions): PagesBuilderCon
     for (const entry of entries) {
       switch (groupBy) {
         case 'channel': {
-          const operation = dereferenceShallow(doc.operations?.[entry.item.id]);
-          const channel = operation ? dereferenceShallow(operation.channel) : undefined;
+          const operation = dereference(doc.operations?.[entry.item.id]);
+          const channel = operation ? dereference(operation.channel) : undefined;
           const groupName = slugify(channel?.address || entry.item.id);
 
           let group = groups.get(groupName);
@@ -123,8 +123,8 @@ export function createAutoPreset(options: SchemaToPagesOptions): PagesBuilderCon
           break;
         }
         case 'tag': {
-          const operation = dereferenceShallow(doc.operations?.[entry.item.id])!;
-          let tags = operation.tags?.map((t) => dereferenceShallow(t));
+          const operation = dereference(doc.operations?.[entry.item.id])!;
+          let tags = operation.tags?.map((t) => dereference(t));
 
           if (!tags || tags.length === 0) {
             console.warn(
@@ -209,7 +209,7 @@ export function createAutoPreset(options: SchemaToPagesOptions): PagesBuilderCon
           },
           operations: Object.entries(doc.operations ?? {}).map(([id, operation]) => ({
             id,
-            action: dereferenceShallow(operation).action,
+            action: dereference(operation).action,
           })),
         };
         entry.path = `${nameFn.call(builder, entry)}.mdx`;
@@ -220,11 +220,11 @@ export function createAutoPreset(options: SchemaToPagesOptions): PagesBuilderCon
       if (options.per === 'tag') {
         const uniqueTags = new Map<string, TagObject>();
         for (const _op of Object.values(doc.operations ?? {})) {
-          const operation = dereferenceShallow(_op);
+          const operation = dereference(_op);
 
           if (!operation.tags) continue;
           for (const _tag of operation.tags) {
-            const tag = dereferenceShallow(_tag);
+            const tag = dereference(_tag);
             uniqueTags.set(tag.name, tag);
           }
         }
@@ -232,7 +232,7 @@ export function createAutoPreset(options: SchemaToPagesOptions): PagesBuilderCon
         for (const tag of uniqueTags.values()) {
           const operations: OperationItem[] = [];
           for (const [id, _op] of Object.entries(doc.operations ?? {})) {
-            const operation = dereferenceShallow(_op);
+            const operation = dereference(_op);
             if (operation.tags && operation.tags.includes(tag)) {
               operations.push({ id, action: operation.action });
             }
@@ -259,7 +259,7 @@ export function createAutoPreset(options: SchemaToPagesOptions): PagesBuilderCon
 
       const entries: DistributiveOmit<OperationOutput, 'path'>[] = [];
       for (const [id, _op] of Object.entries(doc.operations ?? {})) {
-        const operation = dereferenceShallow(_op);
+        const operation = dereference(_op);
 
         entries.push({
           type: 'operation',

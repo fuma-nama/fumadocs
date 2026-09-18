@@ -8,7 +8,7 @@ import type {
   GraphQLType,
 } from 'graphql';
 import type { DynamicCodeblockProps } from 'fumadocs-ui/components/dynamic-codeblock.core';
-import type { SchemaUIProps } from '@fumadocs/api-docs/components/schema';
+import type { SchemaUIProps } from 'shared-api/components/schema';
 import type { OperationKind } from '@/utils/schema';
 import { buildSchemaFromSDL } from '@/utils/build-schema';
 

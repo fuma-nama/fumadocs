@@ -7,7 +7,7 @@ import {
   AccordionItem,
   AccordionTrigger,
   Accordions,
-} from '@fumadocs/api-docs/components/accordion';
+} from 'shared-api/components/accordion';
 import { getBindingEntries, getProtocolBinding, type BindingEntry } from './protocols';
 import { type ComponentProps, useMemo } from 'react';
 import { BindingFieldRow } from './shared';

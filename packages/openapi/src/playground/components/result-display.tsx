@@ -14,7 +14,7 @@ import {
   Collapsible,
   CollapsibleContent,
   CollapsibleTrigger,
-} from '@fumadocs/api-docs/components/collapsible';
+} from 'shared-api/components/collapsible';
 
 export interface ResultDisplayProps extends ComponentProps<'div'> {
   data: FetchResult;

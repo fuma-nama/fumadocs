@@ -1,5 +1,4 @@
 'use client';
-import { createPageComponents } from '@fumadocs/api-docs/components/defaults';
 import { defaultShikiFactory } from 'fumadocs-core/highlight/shiki/full';
 import { createGraphQLPage } from '@/headless';
 import type { RenderContext } from '@/types';
@@ -12,8 +11,6 @@ const shikiOptions = {
   themes: { light: 'github-light', dark: 'github-dark' },
 } as const;
 
-const { components } = createPageComponents({ shiki, shikiOptions });
-
 /** the options your UI renders with, passed to every operation and type */
 const ctx: RenderContext = {
   shiki,
@@ -23,8 +20,9 @@ const ctx: RenderContext = {
 };
 
 export const GraphQLPage = createGraphQLPage({
+  shiki,
+  shikiOptions,
   components: {
-    ...components,
     SchemaUI: GraphQLSchemaView,
     Operation(props) {
       return <Operation {...props} ctx={ctx} />;

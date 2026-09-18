@@ -1,0 +1,237 @@
+import { type JsonSchema } from './types';
+import { deepEqual } from './utils/deep-equal';
+import { dereference } from './dereference';
+
+/**
+ * Merge `allOf` object schema
+ */
+export function mergeAllOf(schema: JsonSchema): JsonSchema {
+  schema = dereference(schema);
+  if (typeof schema === 'boolean' || !schema.allOf) return schema;
+
+  const { allOf, title, ...rest } = schema;
+  let result: JsonSchema = true;
+  for (const item of allOf) {
+    result = intersection(result, item);
+  }
+  // sibling keywords of the composed schema are the most specific, they win over members
+  result = intersection(result, rest);
+  if (typeof result !== 'boolean' && title !== undefined) result.title = title;
+  return result;
+}
+
+/**
+ * Whether the schema, or any schema it extends via `allOf`, has the given title
+ */
+function hasTitle(schema: JsonSchema, title: string): boolean {
+  schema = dereference(schema);
+  if (typeof schema === 'boolean') return false;
+  if (schema.title === title) return true;
+  if (schema.allOf) {
+    for (const item of schema.allOf) {
+      if (hasTitle(item, title)) return true;
+    }
+  }
+  return false;
+}
+
+function intersection(rawA: JsonSchema, rawB: JsonSchema): JsonSchema {
+  const a = mergeAllOf(rawA);
+  const b = mergeAllOf(rawB);
+  if (a === false || b === false) return false;
+  if (a === true) return b;
+  if (b === true) return a;
+
+  for (const unionField of ['anyOf', 'oneOf'] as const) {
+    if (a[unionField] === undefined && b[unionField] !== undefined) {
+      return {
+        ...b,
+        [unionField]: b[unionField].map((item) => intersection(item, a)),
+      };
+    }
+    if (a[unionField] !== undefined && b[unionField] === undefined) {
+      return {
+        ...a,
+        [unionField]: a[unionField].map((item) => intersection(item, b)),
+      };
+    }
+  }
+
+  const result: JsonSchema = { ...a };
+  for (const _k in b) {
+    const key = _k as keyof typeof b;
+
+    switch (key) {
+      case '$id':
+      case '$comment':
+      case 'examples':
+      case 'allOf':
+      case 'writeOnly':
+      case 'readOnly':
+        // ignored
+        break;
+      // last member wins
+      case 'description': {
+        const value = b[key];
+        if (value !== undefined) result[key] = value;
+        break;
+      }
+      case 'title': {
+        const value = b[key];
+        // skip titles already covered by the other side (same schema, or one extends the other)
+        if (value === undefined || hasTitle(rawA, value)) break;
+        result[key] =
+          result[key] === undefined || hasTitle(rawB, result[key])
+            ? value
+            : `${result[key]} & ${value}`;
+        break;
+      }
+      case 'minItems':
+      case 'minimum':
+      case 'exclusiveMinimum':
+      case 'minProperties':
+      case 'minContains':
+      case 'minLength': {
+        const value = b[key];
+        if (value === undefined) break;
+        result[key] = result[key] === undefined ? value : Math.max(result[key], value);
+        break;
+      }
+      case 'maxContains':
+      case 'maxItems':
+      case 'maxLength':
+      case 'maxProperties':
+      case 'maximum':
+      case 'exclusiveMaximum': {
+        const value = b[key];
+        if (value === undefined) break;
+        result[key] = result[key] === undefined ? value : Math.min(result[key], value);
+        break;
+      }
+      case 'enum': {
+        const value = b[key];
+        if (value === undefined) break;
+
+        result[key] = result[key] === undefined ? value : intersectArray(result[key], value);
+        break;
+      }
+      case 'anyOf':
+      case 'oneOf': {
+        const value = b[key];
+        if (value !== undefined && result[key] !== undefined) {
+          // Cross-product: each combination of items from both arrays
+          const product: JsonSchema[] = [];
+          for (const aItem of result[key]) {
+            for (const bItem of value) {
+              const merged = intersection(aItem, bItem);
+              if (merged !== false) product.push(merged);
+            }
+          }
+          result[key] = product;
+        }
+        break;
+      }
+      // require same
+      case 'format':
+      case 'const': {
+        const value = b[key];
+        if (value === undefined) break;
+        result[key] ??= value;
+
+        if (!deepEqual(result[key], value)) return false;
+        break;
+      }
+      case 'type': {
+        const value = b[key];
+        if (value === undefined) break;
+        if (result[key] === undefined) {
+          result[key] = value;
+          break;
+        }
+
+        // `type` can be a scalar or an array (e.g. `nullable: true` becomes ['string', 'null'])
+        // intersect both sets, only genuinely disjoint types are impossible
+        const aTypes = Array.isArray(result[key]) ? result[key] : [result[key]];
+        const bTypes = Array.isArray(value) ? value : [value];
+        const shared = aTypes.filter((t) => bTypes.includes(t));
+        if (shared.length === 0) return false;
+
+        result[key] = shared.length === 1 ? shared[0] : shared;
+        break;
+      }
+      // add
+      case 'required': {
+        const value = b[key];
+        if (value === undefined) break;
+        result[key] = [...(result[key] ?? []), ...value];
+        break;
+      }
+      case 'properties':
+      case 'patternProperties': {
+        const value = b[key];
+        if (value === undefined) break;
+
+        if (result[key] === undefined) {
+          result[key] = value;
+          break;
+        }
+
+        const out: Record<string, JsonSchema> = {};
+        const allProps = new Set<string>();
+        for (const k in result[key]) allProps.add(k);
+        for (const k in value) allProps.add(k);
+
+        for (const prop of allProps) {
+          const aProp = result[key][prop];
+          const bProp = value[prop];
+          if (aProp === undefined) {
+            out[prop] = bProp;
+          } else if (bProp === undefined) {
+            out[prop] = aProp;
+          } else {
+            out[prop] = intersection(aProp, bProp);
+          }
+        }
+
+        result[key] = out;
+        break;
+      }
+      case 'additionalProperties':
+      case 'additionalItems':
+      case 'contains':
+      case 'items': {
+        const value = b[key];
+        if (value === undefined) break;
+
+        result[key] = result[key] === undefined ? value : intersection(result[key], value);
+        break;
+      }
+      case 'not': {
+        const value = b[key];
+        if (value === undefined) break;
+
+        if (result[key] && value) {
+          result.not = { anyOf: [result[key], value] };
+        } else if (value) {
+          result.not = value;
+        }
+        break;
+      }
+      default:
+        result[key] = b[key];
+    }
+  }
+
+  return result;
+}
+
+function intersectArray<T>(a: readonly T[], b: readonly T[]): T[] {
+  const out = new Set<T>();
+  for (const item of a) {
+    if (b.includes(item)) out.add(item);
+  }
+  for (const item of b) {
+    if (a.includes(item)) out.add(item);
+  }
+  return Array.from(out);
+}

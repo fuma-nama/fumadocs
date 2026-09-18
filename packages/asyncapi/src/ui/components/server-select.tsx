@@ -6,9 +6,9 @@ import {
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@fumadocs/api-docs/components/select';
-import { Input } from '@fumadocs/api-docs/components/input';
-import { labelVariants } from '@fumadocs/api-docs/components/label';
+} from 'shared-api/components/select';
+import { Input } from 'shared-api/components/input';
+import { labelVariants } from 'shared-api/components/label';
 import { useRef, useState, type ComponentProps } from 'react';
 import { cn } from '@/utils/cn';
 import {
@@ -18,14 +18,14 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from '@fumadocs/api-docs/components/dialog';
+} from 'shared-api/components/dialog';
 import { StfProvider, useFieldValue, useListener, useStf } from '@fumari/stf';
 import { EditIcon } from 'lucide-react';
 import { useTranslations } from '@fuma-translate/react';
 import type { ServerObject, ServerVariableObject } from '@/types';
-import { dereferenceShallow } from '@fumadocs/api-docs/schema/dereference';
+import { dereference } from '@fumadocs/json-schema';
 import { resolveServerUrl } from '@/utils/server-url';
-import { idToTitle } from '@fumadocs/api-docs/utils/id-to-title';
+import { idToTitle } from 'shared-api/utils/id-to-title';
 
 export function ServerSelect(props: ComponentProps<typeof DialogTrigger>) {
   const { servers, server, setServer, setServerVariables } = useServer();
@@ -123,7 +123,7 @@ function ServerSelectContent({
     <StfProvider value={stf}>
       <div className="flex flex-col gap-4">
         {Object.entries(schema).map(([key, item]) => {
-          const variable = dereferenceShallow(item);
+          const variable = dereference(item);
 
           return (
             <fieldset key={key} className="flex flex-col gap-1">

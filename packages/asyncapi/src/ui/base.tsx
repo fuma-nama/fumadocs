@@ -1,8 +1,7 @@
 'use client';
 import type { FC } from 'react';
 import type { ShikiFactory } from 'fumadocs-core/highlight/shiki';
-import { createPageComponents } from '@fumadocs/api-docs/components/defaults';
-import { Schema } from '@fumadocs/api-docs/components/schema';
+import { Schema } from 'shared-api/components/schema';
 import type { RenderContext } from '@/types';
 import { createAsyncAPIPage } from '@/headless';
 import { Operation } from '@/ui/operation';
@@ -21,26 +20,12 @@ export function createAsyncAPIPageBase(
     components = {},
   } = options;
   const { Operation: OperationUI = Operation, SchemaUI: SchemaComp = Schema } = components;
-  const {
-    components: base,
-    renderMarkdown,
-    renderCodeblock,
-  } = createPageComponents({
-    shiki,
-    shikiOptions,
-    components,
-  });
 
   const ctx: RenderContext = {
     ...options,
     shikiOptions,
     SchemaUI: (props) => (
-      <SchemaComp
-        renderMarkdown={renderMarkdown}
-        renderCodeblock={renderCodeblock}
-        {...props}
-        showExample={props.showExample ?? schemaUI?.showExample}
-      />
+      <SchemaComp {...props} showExample={props.showExample ?? schemaUI?.showExample} />
     ),
   };
 
@@ -51,9 +36,11 @@ export function createAsyncAPIPageBase(
   };
 
   return createAsyncAPIPage({
+    shiki,
+    shikiOptions,
     storageKeyPrefix: options.storageKeyPrefix,
     components: {
-      ...base,
+      ...components,
       SchemaUI,
       Operation(props) {
         return <OperationUI {...props} ctx={ctx} />;

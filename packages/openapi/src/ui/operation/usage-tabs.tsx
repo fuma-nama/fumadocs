@@ -13,7 +13,7 @@ import {
   SelectValue,
   SelectContent,
   SelectItem,
-} from '@fumadocs/api-docs/components/select';
+} from 'shared-api/components/select';
 import { ClientCodeBlock } from '@/ui/components/codeblock';
 import { type ExampleRequest, useCodeUsage, useExampleRequests, useOperation } from '@/headless';
 import type { RenderContext } from '@/types';

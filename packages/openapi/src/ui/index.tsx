@@ -3,7 +3,7 @@ import type { FC, ReactNode } from 'react';
 import { defaultShikiFactory } from 'fumadocs-core/highlight/shiki/full';
 import type { ShikiFactory } from 'fumadocs-core/highlight/shiki';
 import type { CodeToHastOptionsCommon, CodeOptionsThemes, BundledTheme } from 'shiki';
-import type { SchemaUIOptions } from '@fumadocs/api-docs/components/schema';
+import type { SchemaUIOptions } from 'shared-api/components/schema';
 import type { HttpMethods, OperationObject, PathItemObject, RenderContext } from '@/types';
 import type { CodeUsageGeneratorRegistry } from '@/requests/generators';
 import type { ExampleRequestItem } from '@/utils/get-example-requests';

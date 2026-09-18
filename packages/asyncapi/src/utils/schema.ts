@@ -7,9 +7,7 @@ import type {
   TagObject,
 } from '@/types';
 import type { DereferencedDocument } from '@/utils/document/dereference';
-import { idToTitle } from '@fumadocs/api-docs/utils/id-to-title';
-
-export type { ParsedSchema } from '@fumadocs/api-docs/schema';
+import { idToTitle } from 'shared-api/utils/id-to-title';
 
 export function getTagDisplayName(tag: TagObject): string {
   if ('x-displayName' in tag && typeof tag['x-displayName'] === 'string')

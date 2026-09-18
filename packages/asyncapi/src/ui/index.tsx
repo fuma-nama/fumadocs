@@ -3,9 +3,9 @@ import type { ComponentProps, FC, ReactNode } from 'react';
 import { defaultShikiFactory } from 'fumadocs-core/highlight/shiki/full';
 import type { ShikiFactory } from 'fumadocs-core/highlight/shiki';
 import type { BundledTheme, CodeOptionsThemes, CodeToHastOptionsCommon } from 'shiki';
-import type { SchemaUIOptions } from '@fumadocs/api-docs/components/schema';
+import type { SchemaUIOptions } from 'shared-api/components/schema';
 import type { OperationObject, RenderContext } from '@/types';
-import type { ParsedSchema } from '@/utils/schema';
+import type { JsonSchema } from '@fumadocs/json-schema';
 import type { ExampleMessageItem } from '@/utils/get-example-messages';
 import type { OperationItem } from '@/utils/pages/builder';
 import type {
@@ -62,7 +62,7 @@ export interface CreateAsyncAPIPageOptions {
   schemaUI?: {
     render?: (
       options: {
-        root: ParsedSchema;
+        root: JsonSchema;
         readOnly?: boolean;
         writeOnly?: boolean;
       },

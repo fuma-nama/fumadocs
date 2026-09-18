@@ -1,4 +1,4 @@
-import { idToTitle } from '@fumadocs/api-docs/utils/id-to-title';
+import { idToTitle } from 'shared-api/utils/id-to-title';
 import {
   type DirectiveNode,
   type GraphQLField,

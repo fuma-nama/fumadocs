@@ -2,9 +2,10 @@ import { encodeRequestData } from '@/requests/media/encode';
 import type { RawRequestData, RequestData } from '@/requests/types';
 import type { HttpMethods, OperationObject, ParameterObject, RequestBodyObject } from '@/types';
 import type { MediaAdapter } from '@/requests/media/adapter';
-import { getPreferredType, type ParsedSchema, pickExample } from '@/utils/schema';
-import { sample } from '@fumadocs/api-docs/schema/sample';
-import { dereferenceShallow } from '@fumadocs/api-docs/schema/dereference';
+import { getPreferredType, pickExample } from '@/utils/schema';
+import type { JsonSchema } from '@fumadocs/json-schema';
+import { sample } from '@fumadocs/json-schema';
+import { dereference } from '@fumadocs/json-schema';
 import { getRaw } from '@scalar/json-magic/magic-proxy';
 
 export interface ExampleRequestItem {
@@ -29,15 +30,15 @@ export function getExampleRequests({
   parameters: ParameterObject[];
   mediaAdapters: Record<string, MediaAdapter>;
 }): ExampleRequestItem[] {
-  const requestBody = dereferenceShallow(operation.requestBody);
+  const requestBody = dereference(operation.requestBody);
   const media = requestBody?.content ? getPreferredType(requestBody.content) : null;
-  const bodyOfType = media ? dereferenceShallow(requestBody!.content![media]) : null;
+  const bodyOfType = media ? dereference(requestBody!.content![media]) : null;
 
   if (bodyOfType?.examples) {
     const result: ExampleRequestItem[] = [];
 
     for (const [key, item] of Object.entries(bodyOfType.examples)) {
-      const { summary, description } = dereferenceShallow(item);
+      const { summary, description } = dereference(item);
       const data = getRequestData({
         path,
         body: requestBody,
@@ -59,7 +60,7 @@ export function getExampleRequests({
   }
 
   const data = getRequestData({ path, body: requestBody, method, parameters });
-  const schema = dereferenceShallow(bodyOfType?.schema);
+  const schema = dereference(bodyOfType?.schema);
   return [
     {
       id: '_default',
@@ -100,13 +101,13 @@ function getRequestData({
         value = sample(param.schema);
       } else if (param.content) {
         const type = getPreferredType(param.content);
-        const content = type ? dereferenceShallow(param.content[type]) : undefined;
+        const content = type ? dereference(param.content[type]) : undefined;
         if (!content || !content.schema)
           throw new Error(
             `Cannot find "${param.name}" parameter info for media type "${type}" in ${path} ${method}`,
           );
 
-        value = sample(content.schema as ParsedSchema);
+        value = sample(content.schema as JsonSchema);
       }
     }
 
@@ -129,10 +130,10 @@ function getRequestData({
     const type = getPreferredType(body.content);
     if (!type) throw new Error(`Cannot find body schema for ${path} ${method}: missing media type`);
     result.bodyMediaType = type as RawRequestData['bodyMediaType'];
-    const bodyOfType = dereferenceShallow(body.content[type]);
+    const bodyOfType = dereference(body.content[type]);
 
     if (bodyOfType.examples && sampleKey) {
-      result.body = getRaw(dereferenceShallow(bodyOfType.examples[sampleKey]).value);
+      result.body = getRaw(dereference(bodyOfType.examples[sampleKey]).value);
     } else if (bodyOfType.example) {
       result.body = getRaw(bodyOfType.example);
     } else {

@@ -16,6 +16,8 @@ import {
   useOperation,
   useResponseExamples,
 } from '@/headless';
+import { createCodeUsageGeneratorRegistry } from '@/requests/generators';
+import { registerDefault } from '@/requests/generators/all';
 import type { Document, HttpMethods, OperationObject, PathItemObject } from '@/types';
 
 const museum = fileURLToPath(new URL('./fixtures/museum.yaml', import.meta.url));
@@ -42,7 +44,11 @@ async function render(
   if (extend) ({ operation, pathItem } = extend({ operation, pathItem }));
 
   renderToString(
-    <OpenAPIProvider document={bundled} components={components}>
+    <OpenAPIProvider
+      document={bundled}
+      components={components}
+      codeUsages={registerDefault(createCodeUsageGeneratorRegistry())}
+    >
       <OperationProvider path={path} method={method} operation={operation} pathItem={pathItem}>
         <Harness />
       </OperationProvider>

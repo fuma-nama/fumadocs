@@ -1,5 +1,10 @@
 'use client';
 import type { FC, ReactNode } from 'react';
+import type { ShikiFactory } from 'fumadocs-core/highlight/shiki';
+import {
+  createPageComponents,
+  type CreatePageComponentsOptions as PageComponentsOptions,
+} from 'shared-api/components/defaults';
 import type { AsyncAPIObject } from '@/types';
 import type { GeneratedPageProps, OperationItem } from '@/utils/pages/builder';
 import {
@@ -21,12 +26,16 @@ export interface CreateAsyncAPIPageOptions extends Omit<
   AsyncAPIProviderProps,
   'document' | 'components' | 'children'
 > {
-  components: AsyncAPIComponents & {
-    /** renders an operation of the page */
-    Operation: FC<PageOperationProps>;
-    /** wraps the rendered operations */
-    Layout?: FC<PageLayoutProps>;
-  };
+  /** the Shiki highlighter of code blocks, without it they render unhighlighted */
+  shiki?: ShikiFactory;
+  shikiOptions?: PageComponentsOptions['shikiOptions'];
+  components: Pick<AsyncAPIComponents, 'SchemaUI'> &
+    Partial<Omit<AsyncAPIComponents, 'SchemaUI'>> & {
+      /** renders an operation of the page */
+      Operation: FC<PageOperationProps>;
+      /** wraps the rendered operations */
+      Layout?: FC<PageLayoutProps>;
+    };
 }
 
 export type AsyncAPIPageProps = AsyncAPIPageProps_Spec | AsyncAPIPageProps_Preloaded;
@@ -49,9 +58,16 @@ export type AsyncAPIPageProps_Preloaded = GeneratedPageProps & {
  */
 export function createAsyncAPIPage({
   components,
+  shiki,
+  shikiOptions,
   ...options
 }: CreateAsyncAPIPageOptions): FC<AsyncAPIPageProps> {
   const { Operation, Layout = DefaultLayout } = components;
+  const slots: AsyncAPIComponents = {
+    SchemaUI: components.SchemaUI,
+    // fills the Markdown, code block and heading slots the page didn't replace
+    ...createPageComponents({ shiki, shikiOptions, components }).components,
+  };
 
   function Content({ showTitle, showDescription, operations }: AsyncAPIPageProps) {
     return (
@@ -85,7 +101,7 @@ export function createAsyncAPIPage({
     }
 
     return (
-      <AsyncAPIProvider {...options} document={document} components={components}>
+      <AsyncAPIProvider {...options} document={document} components={slots}>
         <Content {...props} />
       </AsyncAPIProvider>
     );

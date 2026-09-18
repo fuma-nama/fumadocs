@@ -16,12 +16,12 @@ import type { BrowserFetcherOptions } from '@/playground/fetcher';
 import { DefaultResultDisplay, type ResultDisplayProps } from './components/result-display';
 import { pathnameFromRequest } from '@/requests/generators';
 import { MethodLabel } from '@/ui/components/method-label';
-import { useQuery } from '@fumadocs/api-docs/utils/use-query';
+import { useQuery } from 'shared-api/utils/use-query';
 import {
   Collapsible,
   CollapsibleContent,
   CollapsibleTrigger,
-} from '@fumadocs/api-docs/components/collapsible';
+} from 'shared-api/components/collapsible';
 import { ChevronDown, LoaderCircle, PlusIcon } from 'lucide-react';
 import { encodeRequestData } from '@/requests/media/encode';
 import { buttonVariants } from 'fumadocs-ui/components/ui/button';
@@ -30,18 +30,18 @@ import {
   anyFields,
   SchemaProvider,
   useResolvedSchema,
-} from '@fumadocs/api-docs/components/playground/schema';
+} from 'shared-api/components/playground/schema';
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@fumadocs/api-docs/components/select';
-import { labelVariants } from '@fumadocs/api-docs/components/label';
-import { getPreferredType, type ParsedSchema } from '@/utils/schema';
+} from 'shared-api/components/select';
+import { labelVariants } from 'shared-api/components/label';
+import { getPreferredType } from '@/utils/schema';
+import type { JsonSchema } from '@fumadocs/json-schema';
 import ServerSelect from './components/server-select';
-import { useStorageKey } from '@/utils/storage-key';
 import {
   type DataEngine,
   FieldKey,
@@ -57,15 +57,15 @@ import {
   FieldSet,
   JsonInput,
   ObjectInput,
-} from '@fumadocs/api-docs/components/playground/inputs';
+} from 'shared-api/components/playground/inputs';
 import type { HttpMethods, OperationObject, ParameterObject, PathItemObject } from '@/types';
 import { useTranslations } from '@fuma-translate/react';
 import { OAuthDialog, OAuthDialogContent, OAuthDialogTrigger } from './components/oauth-dialog';
-import { dereferenceShallow } from '@fumadocs/api-docs/schema/dereference';
+import { dereference } from '@fumadocs/json-schema';
 import { useAuth } from './auth';
 import { useOnChange } from 'fumadocs-core/utils/use-on-change';
-import { Spinner } from '@fumadocs/api-docs/components/spinner';
-import { joinURL, resolveServerUrl } from '@fumadocs/api-docs/utils/url';
+import { Spinner } from 'shared-api/components/spinner';
+import { joinURL, resolveServerUrl } from 'shared-api/utils/url';
 
 export interface FormValues extends Record<string, unknown> {
   path: Record<string, unknown>;
@@ -130,7 +130,7 @@ export interface PlaygroundClientOptions {
 }
 
 interface RequestBodyInfo {
-  schema: ParsedSchema;
+  schema: JsonSchema;
   mediaType: string;
 }
 
@@ -169,20 +169,18 @@ export default function PlaygroundClient({
   );
   const { parameters, body } = useMemo(() => {
     const parameters: ParameterObject[] = [];
-    if (operation.parameters)
-      for (const p of operation.parameters) parameters.push(dereferenceShallow(p));
-    if (pathItem.parameters)
-      for (const p of pathItem.parameters) parameters.push(dereferenceShallow(p));
+    if (operation.parameters) for (const p of operation.parameters) parameters.push(dereference(p));
+    if (pathItem.parameters) for (const p of pathItem.parameters) parameters.push(dereference(p));
     let body: RequestBodyInfo | undefined;
 
     if (operation.requestBody) {
-      const content = dereferenceShallow(operation.requestBody).content;
+      const content = dereference(operation.requestBody).content;
       const mediaType = content ? getPreferredType(content) : undefined;
 
       if (content && mediaType) {
         body = {
           mediaType,
-          schema: dereferenceShallow(content[mediaType]).schema ?? true,
+          schema: dereference(content[mediaType]).schema ?? true,
         };
       }
     }
@@ -513,7 +511,7 @@ function ParameterItem({ type, parameters }: { type: ParamType; parameters: Para
         key={stringifyFieldKey(fieldName)}
         name={field.name}
         fieldName={fieldName}
-        field={(schema ?? anyFields) as ParsedSchema}
+        field={(schema ?? anyFields) as JsonSchema}
         isRequired={field.required}
       />
     );
@@ -542,7 +540,7 @@ function ParametersForm({ parameters }: { parameters: ParameterObject[] }) {
   });
 }
 
-function BodyInput({ field: _field }: { field: ParsedSchema }) {
+function BodyInput({ field: _field }: { field: JsonSchema }) {
   const field = useResolvedSchema(_field);
   const [isJson, setIsJson] = useState(false);
   const t = useTranslations({ note: 'playground' });
@@ -610,7 +608,7 @@ function useAuthInputs(
   transformAuthInputs?: PlaygroundClientOptions['transformAuthInputs'],
 ) {
   const authCtx = useAuth();
-  const getStorageKey = useStorageKey();
+  const { storageKeyPrefix } = useOpenAPI();
   const t = useTranslations({ note: 'playground' });
   const { dereferenced, resolve } = useOpenAPI().doc;
   const schemes = dereferenced.components?.securitySchemes;
@@ -635,7 +633,7 @@ function useAuthInputs(
         return {
           fieldName,
           schemeId: item.id,
-          storageKey: getStorageKey(`auth-${item.id}`),
+          storageKey: `${storageKeyPrefix}auth-${item.id}`,
           defaultValue: {
             username: '',
             password: '',
@@ -670,7 +668,7 @@ function useAuthInputs(
         return {
           fieldName,
           schemeId: item.id,
-          storageKey: getStorageKey(`auth-${item.id}`),
+          storageKey: `${storageKeyPrefix}auth-${item.id}`,
           defaultValue: 'Bearer ',
           children: <OAuth2Input fieldName={fieldName} security={item} />,
         };
@@ -680,7 +678,7 @@ function useAuthInputs(
         return {
           fieldName,
           schemeId: item.id,
-          storageKey: getStorageKey(`auth-${item.id}`),
+          storageKey: `${storageKeyPrefix}auth-${item.id}`,
           defaultValue: 'Bearer ',
           children: (
             <FieldSet
@@ -699,7 +697,7 @@ function useAuthInputs(
           fieldName,
           schemeId: item.id,
           defaultValue: '',
-          storageKey: getStorageKey(`auth-${item.id}`),
+          storageKey: `${storageKeyPrefix}auth-${item.id}`,
           children: (
             <FieldSet
               fieldName={fieldName}
@@ -717,7 +715,7 @@ function useAuthInputs(
         fieldName,
         schemeId: item.id,
         defaultValue: '',
-        storageKey: getStorageKey(`auth-${item.id}`),
+        storageKey: `${storageKeyPrefix}auth-${item.id}`,
         children: (
           <>
             <FieldSet
@@ -736,7 +734,7 @@ function useAuthInputs(
         ),
       };
     });
-  }, [requirement, getStorageKey, schemes, resolve, t]);
+  }, [requirement, storageKeyPrefix, schemes, resolve, t]);
   if (transformAuthInputs) inputs = transformAuthInputs(inputs);
 
   useListener({
@@ -770,7 +768,7 @@ function useAuthInputs(
     );
     if (idx !== -1) {
       // persisted value
-      localStorage.setItem(getStorageKey(`auth-${updatedSchemeId}`), JSON.stringify(token));
+      localStorage.setItem(`${storageKeyPrefix}auth-${updatedSchemeId}`, JSON.stringify(token));
       setRequirementId(idx);
     }
   });

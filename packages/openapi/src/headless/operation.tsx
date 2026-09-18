@@ -1,9 +1,9 @@
 'use client';
 import { createContext, type ReactNode, use, useMemo, useSyncExternalStore } from 'react';
 import { useTranslations } from '@fuma-translate/react';
-import { idToTitle } from '@fumadocs/api-docs/utils/id-to-title';
-import { sample } from '@fumadocs/api-docs/schema/sample';
-import { joinURL, resolveServerUrl } from '@fumadocs/api-docs/utils/url';
+import { idToTitle } from 'shared-api/utils/id-to-title';
+import { sample } from '@fumadocs/json-schema';
+import { joinURL, resolveServerUrl } from 'shared-api/utils/url';
 import { getRaw } from '@scalar/json-magic/magic-proxy';
 import type {
   HttpMethods,

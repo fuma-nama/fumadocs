@@ -8,6 +8,7 @@ import type {
 } from '@/types';
 import { MessageExamples } from '@/ui/operation/message-examples';
 import { ActionLabel } from '@/ui/components/badge';
+import { SchemaUI } from '@/ui/components/schema';
 import { useTranslations } from '@fuma-translate/react';
 import {
   AccordionContent,
@@ -15,10 +16,10 @@ import {
   AccordionItem,
   Accordions,
   AccordionTrigger,
-} from '@fumadocs/api-docs/components/accordion';
+} from 'shared-api/components/accordion';
 import { cn } from '@/utils/cn';
-import { SelectTabs, SelectTabTrigger, SelectTab } from '@fumadocs/api-docs/components/select-tab';
-import { AnchorSection } from '@fumadocs/api-docs/auto-anchor/client';
+import { SelectTabs, SelectTabTrigger, SelectTab } from 'shared-api/components/select-tab';
+import { AnchorSection } from 'shared-api/auto-anchor/client';
 import { Heading } from '@/ui/components/heading';
 import { Markdown } from '../components/markdown';
 import {
@@ -28,7 +29,6 @@ import {
   OperationProvider,
   type PageOperationProps,
   useAsyncAPI,
-  useComponents,
   useOperation,
   useOperationSecurity,
   useServer,
@@ -249,7 +249,6 @@ function ParametersSection({
   headingLevel: number;
 }) {
   const t = useTranslations({ note: 'operation page' });
-  const { SchemaUI } = useComponents();
 
   return (
     <>
@@ -285,7 +284,6 @@ function MessageSection({
 }) {
   const t = useTranslations();
   const { resolve } = useAsyncAPI().doc;
-  const { SchemaUI } = useComponents();
 
   return (
     <>
@@ -328,7 +326,6 @@ function MessageSection({
 
 function ReplySection({ reply, headingLevel }: { reply: OperationReply; headingLevel: number }) {
   const t = useTranslations({ note: 'operation page' });
-  const { SchemaUI } = useComponents();
 
   return (
     <>

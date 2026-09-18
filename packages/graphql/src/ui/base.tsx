@@ -1,7 +1,6 @@
 'use client';
 import type { FC } from 'react';
 import type { ShikiFactory } from 'fumadocs-core/highlight/shiki';
-import { createPageComponents } from '@fumadocs/api-docs/components/defaults';
 import type { RenderContext } from '@/types';
 import { createGraphQLPage as createHeadlessPage, type SchemaViewProps } from '@/headless';
 import { Operation } from '@/ui/operation';
@@ -23,12 +22,6 @@ export function createGraphQLPageBase({
     TypeDocs: TypeDocsUI = TypeDocs,
     SchemaUI: SchemaUIComp = GraphQLSchemaView,
   } = components;
-  const { components: base } = createPageComponents({
-    shiki,
-    shikiOptions,
-    components,
-  });
-
   const ctx: RenderContext = {
     ...options,
     shikiOptions,
@@ -36,10 +29,12 @@ export function createGraphQLPageBase({
   };
 
   return createHeadlessPage({
+    shiki,
+    shikiOptions,
     typeLinks: typeLinks && ((name) => typeLinks(name, ctx)),
     operationLinks: operationLinks && ((kind, name) => operationLinks(kind, name, ctx)),
     components: {
-      ...base,
+      ...components,
       SchemaUI(props: SchemaViewProps) {
         if (schemaUI?.render) return schemaUI.render(props, ctx);
 

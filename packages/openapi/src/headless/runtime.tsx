@@ -20,17 +20,18 @@ import type { OperationItem, WebhookItem } from '@/utils/pages/builder';
 import type { DereferencedDocument } from '@/utils/document/dereference';
 import type { MediaAdapter } from '@/requests/media/adapter';
 import type { CodeUsageGeneratorRegistry, InlineCodeUsageGenerator } from '@/requests/generators';
-import type { ParsedSchema } from '@/utils/schema';
-import type { SchemaUIOptions } from '@fumadocs/api-docs/components/schema';
-import { useServerStore } from '@fumadocs/api-docs/utils/use-server-store';
+import type { JsonSchema } from '@fumadocs/json-schema';
+import type { SchemaUIOptions } from 'shared-api/components/schema';
+import { useServerStore } from 'shared-api/utils/use-server-store';
 import type { DynamicCodeblockProps } from 'fumadocs-ui/components/dynamic-codeblock.core';
-import { useStorageKey } from '@/utils/storage-key';
+import type { ShikiFactory } from 'fumadocs-core/highlight/shiki';
+import type { CreatePageComponentsOptions as PageComponentsOptions } from 'shared-api/components/defaults';
 
 export type CodeBlockProps = Omit<DynamicCodeblockProps, 'highlighter' | 'options'>;
 
 /** components the UI renders through, so a page can replace them */
 export interface OpenAPIComponents {
-  SchemaUI: FC<Omit<SchemaUIOptions, 'renderMarkdown' | 'renderCodeblock'>>;
+  SchemaUI: FC<SchemaUIOptions>;
   Markdown: FC<{ md: string }>;
   CodeBlock: FC<CodeBlockProps>;
   Heading: FC<ComponentProps<'h1'> & { id: string; depth: number }>;
@@ -57,7 +58,7 @@ export interface OpenAPIRuntime {
    *
    * @defaultValue `fumadocs-openapi-`
    */
-  storageKeyPrefix?: string;
+  storageKeyPrefix: string;
   /**
    * Generate example code usage for all endpoints.
    */
@@ -78,7 +79,7 @@ export interface OpenAPIRuntime {
    */
   generateTypeScriptDefinitions?:
     | ((
-        schema: ParsedSchema,
+        schema: JsonSchema,
         ctx: GenerateTypeScriptDefinitionsContext,
       ) => Awaitable<string | undefined>)
     | false;
@@ -111,12 +112,16 @@ export interface CreateOpenAPIPageOptions extends Omit<
   OpenAPIProviderProps,
   'document' | 'proxyUrl' | 'components' | 'children'
 > {
-  components: OpenAPIComponents & {
-    /** renders an operation or webhook of the page */
-    Operation: FC<PageOperationProps>;
-    /** wraps the rendered operations and webhooks */
-    Layout?: FC<PageLayoutProps>;
-  };
+  /** the Shiki highlighter of code blocks, without it they render unhighlighted */
+  shiki?: ShikiFactory;
+  shikiOptions?: PageComponentsOptions['shikiOptions'];
+  components: Pick<OpenAPIComponents, 'SchemaUI'> &
+    Partial<Omit<OpenAPIComponents, 'SchemaUI'>> & {
+      /** renders an operation or webhook of the page */
+      Operation: FC<PageOperationProps>;
+      /** wraps the rendered operations and webhooks */
+      Layout?: FC<PageLayoutProps>;
+    };
 }
 
 interface ServerContextType {
@@ -164,7 +169,7 @@ export function useServer(): ServerContextType {
  * Generate TypeScript definitions of a JSON schema, `undefined` when disabled.
  */
 export function useTypeScriptDefinitions(
-  schema: ParsedSchema | undefined,
+  schema: JsonSchema | undefined,
   options: Pick<GenerateTypeScriptDefinitionsContext, 'name' | 'readOnly' | 'writeOnly'>,
 ): string | undefined {
   const runtime = useOpenAPI();
@@ -192,7 +197,7 @@ export function ServerProvider({
   servers?: ServerObject[];
   children: ReactNode;
 }) {
-  const storageKey = useStorageKey()('server-url');
+  const storageKey = `${useOpenAPI().storageKeyPrefix}server-url`;
   const resolve = useCallback(
     (url: string): SelectedServer | null => {
       const server = servers?.find((item) => item.url === url);

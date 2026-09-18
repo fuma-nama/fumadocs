@@ -9,7 +9,7 @@ export default defineConfig({
   target: 'es2023',
   entry: [
     './src/{index,i18n}.ts',
-    './src/headless/{index,base}.tsx',
+    './src/headless/index.tsx',
     './src/ui/{index,base}.tsx',
     './src/playground/client.tsx',
     './src/scalar/index.tsx',
@@ -29,6 +29,7 @@ export default defineConfig({
   platform: 'browser',
   deps: {
     onlyBundle: [
+      'shared-api',
       'fast-content-type-parse',
       '@fastify/deepmerge',
       '@scalar/openapi-upgrader',
@@ -49,6 +50,12 @@ async function compileInline() {
   await mkdir('css/generated', { recursive: true });
   const scanner = new Scanner({
     sources: [
+      {
+        // the shared UI is bundled into this package, its classes belong to our CSS
+        base: path.resolve('../shared-api/src/components'),
+        pattern: '**/*.{ts,tsx}',
+        negated: false,
+      },
       {
         base: path.resolve('src'),
         pattern: '{playground,scalar,ui}/**/*.{ts,tsx}',
