@@ -33,7 +33,6 @@ export default defineConfig({
   ],
   deps: {
     onlyBundle: [
-      'remove-markdown',
       '@formatjs/intl-localematcher',
       'path-to-regexp',
       'npm-to-yarn',

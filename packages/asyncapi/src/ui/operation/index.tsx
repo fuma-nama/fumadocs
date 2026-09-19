@@ -1,15 +1,9 @@
 'use client';
-import { type ComponentProps, Fragment, type ReactNode, useMemo } from 'react';
-import type {
-  ChannelObject,
-  CorrelationIDObject,
-  MessageObject,
-  OperationReplyObject,
-  SecuritySchemeObject,
-  ServerObject,
-} from '@/types';
+import { type ComponentProps, Fragment, type ReactNode } from 'react';
+import type { ChannelObject, CorrelationIDObject, SecuritySchemeObject } from '@/types';
 import { MessageExamples } from '@/ui/operation/message-examples';
 import { ActionLabel } from '@/ui/components/badge';
+import { SchemaUI } from '@/ui/components/schema';
 import { useTranslations } from '@fuma-translate/react';
 import {
   AccordionContent,
@@ -17,58 +11,51 @@ import {
   AccordionItem,
   Accordions,
   AccordionTrigger,
-} from '@fumadocs/api-docs/components/accordion';
+} from 'shared-api/components/accordion';
 import { cn } from '@/utils/cn';
-import { SelectTabs, SelectTabTrigger, SelectTab } from '@fumadocs/api-docs/components/select-tab';
-import { AnchorSection } from '@fumadocs/api-docs/auto-anchor/client';
+import { SelectTabs, SelectTabTrigger, SelectTab } from 'shared-api/components/select-tab';
+import { AnchorSection } from 'shared-api/auto-anchor/client';
 import { Heading } from '@/ui/components/heading';
 import { Markdown } from '../components/markdown';
-import { ServerProvider, useRenderContext, useServerContext } from '../contexts/api';
+import { useAsyncAPI, useRenderContext } from '@/utils/create-page';
+import { useServer } from '@/utils/use-server';
+import type { PageOperationProps } from '@/operation';
 import {
-  getMessageDisplayName,
-  getOperationDisplayName,
-  getOperationMessages,
-  resolveMultiFormatSchema,
-} from '@/utils/schema';
+  type OperationMessage,
+  type OperationParameter,
+  type OperationReply,
+  OperationProvider,
+  useOperation,
+  useOperationSecurity,
+} from '@/operation';
 import { MailIcon } from 'lucide-react';
-import { applyMessageTraits, applyOperationTraits } from '@/utils/traits';
 import { AccordionBindings } from '../bindings/accordion-bindings';
 import { ServerSelect } from '../components/server-select';
 
-export function Operation({
-  id,
-  action,
+export function Operation({ id, action, ...props }: PageOperationProps) {
+  return (
+    <OperationProvider id={id} action={action}>
+      <OperationContent {...props} />
+    </OperationProvider>
+  );
+}
+
+function OperationContent({
   showTitle,
   showDescription,
-  headingLevel = 2,
-}: {
-  id: string;
-  action: 'send' | 'receive';
-  showTitle?: boolean;
-  showDescription?: boolean;
-  headingLevel?: number;
-}) {
+}: Omit<PageOperationProps, 'id' | 'action'>) {
   const t = useTranslations({ note: 'operation page' });
+  const { resolve } = useAsyncAPI().doc;
   const ctx = useRenderContext();
-  const {
-    schema: { dereferenced, resolve },
-  } = ctx;
-  const operation = useMemo(() => {
-    const operation = resolve(dereferenced.operations?.[id]);
-    if (!operation) throw new Error(`[Fumadocs AsyncAPI] Operation not found in schema: ${id}`);
+  const { operation, action, channel, title, description, parameters, messages, reply } =
+    useOperation();
+  const securitySchemes = useOperationSecurity();
+  let headingLevel = 2;
 
-    return applyOperationTraits(operation, resolve);
-  }, [dereferenced, resolve, id]);
-  const channel = resolve(operation.channel);
-
-  const descriptionNode = showDescription && operation.description && (
-    <Markdown md={operation.description} />
-  );
+  const descriptionNode = showDescription && description && <Markdown md={description} />;
 
   let headNode: ReactNode = null;
   if (showTitle) {
-    const title = getOperationDisplayName(id, operation);
-
     headNode = (
       <div className="flex gap-2 items-center justify-between">
         <Heading id={title} depth={headingLevel} className="my-0!">
@@ -81,47 +68,39 @@ export function Operation({
   }
 
   const channelNode = <ChannelSection channel={channel} />;
-  const parametersNode = channel.parameters ? (
-    <ParametersSection parameters={channel.parameters} headingLevel={headingLevel} />
-  ) : null;
+  const parametersNode = parameters.length > 0 && (
+    <ParametersSection parameters={parameters} headingLevel={headingLevel} />
+  );
 
-  const messages = getOperationMessages(operation, resolve);
   const messagesNode = messages.length > 0 && (
     <>
       <Heading id="messages" depth={headingLevel} className="mt-10">
         {t('Messages')}
       </Heading>
       <Accordions type="multiple">
-        {messages.map((item, index) => {
-          const message = resolve(item);
-          const id = message.name ?? `message-${index}`;
-
-          return (
-            <AccordionItem key={id} value={id} anchorSegments={['messages', id]}>
-              <AccordionHeader>
-                <AccordionTrigger className="inline-flex items-center gap-2 font-mono">
-                  <MailIcon className="text-fd-muted-foreground size-3.5" />
-                  {getMessageDisplayName(item, ctx, index)}
-                  {message.contentType && (
-                    <span className="ms-auto text-fd-muted-foreground font-normal text-xs">
-                      {message.contentType}
-                    </span>
-                  )}
-                </AccordionTrigger>
-              </AccordionHeader>
-              <AccordionContent className="grid grid-cols-1 gap-2 @xl:grid-cols-2">
-                <MessageSection message={message} headingLevel={headingLevel + 1} />
-              </AccordionContent>
-            </AccordionItem>
-          );
-        })}
+        {messages.map((item) => (
+          <AccordionItem key={item.id} value={item.id} anchorSegments={['messages', item.id]}>
+            <AccordionHeader>
+              <AccordionTrigger className="inline-flex items-center gap-2 font-mono">
+                <MailIcon className="text-fd-muted-foreground size-3.5" />
+                {item.name}
+                {item.message.contentType && (
+                  <span className="ms-auto text-fd-muted-foreground font-normal text-xs">
+                    {item.message.contentType}
+                  </span>
+                )}
+              </AccordionTrigger>
+            </AccordionHeader>
+            <AccordionContent className="grid grid-cols-1 gap-2 @xl:grid-cols-2">
+              <MessageSection item={item} headingLevel={headingLevel + 1} />
+            </AccordionContent>
+          </AccordionItem>
+        ))}
       </Accordions>
     </>
   );
 
-  const replyNode = operation.reply && (
-    <ReplySection reply={resolve(operation.reply)} headingLevel={headingLevel} />
-  );
+  const replyNode = reply && <ReplySection reply={reply} headingLevel={headingLevel} />;
   const bindingsNode = operation.bindings && (
     <>
       <Heading id="binding" depth={headingLevel}>
@@ -135,19 +114,12 @@ export function Operation({
     </>
   );
 
-  const { server, servers } = useServerContext();
-  const serverSchema = server ? servers[server.id] : undefined;
-  const securitySchemes = operation.security ?? serverSchema?.security;
   let authNode: ReactNode = null;
-
-  if (securitySchemes && securitySchemes.length > 0) {
-    const items = securitySchemes.map((item, i) => {
-      const scheme = resolve(item);
-      return {
-        value: String(i),
-        label: <code className="text-xs truncate">{scheme.name || scheme.type}</code>,
-      };
-    });
+  if (securitySchemes.length > 0) {
+    const items = securitySchemes.map((scheme, i) => ({
+      value: String(i),
+      label: <code className="text-xs truncate">{scheme.name || scheme.type}</code>,
+    }));
 
     authNode = (
       <SelectTabs defaultValue={items[0].value}>
@@ -161,74 +133,49 @@ export function Operation({
             <div className="not-prose">{items[0].label}</div>
           )}
         </div>
-        {securitySchemes.map((item, i) => {
-          const scheme = resolve(item);
-          return (
-            <SelectTab key={i} value={items[i].value}>
-              <AuthScheme scheme={scheme} scopes={scheme.scopes ?? []} />
-            </SelectTab>
-          );
-        })}
+        {securitySchemes.map((scheme, i) => (
+          <SelectTab key={i} value={items[i].value}>
+            <AuthScheme scheme={scheme} scopes={scheme.scopes ?? []} />
+          </SelectTab>
+        ))}
       </SelectTabs>
     );
   }
 
-  let { renderOperationLayout } = ctx.content ?? {};
-
-  renderOperationLayout ??= (slots) => {
-    return (
-      <div>
-        {slots.header}
-        {slots.description}
-        {slots.server}
-        {slots.channel}
-        {slots.authSchemes}
-        {slots.parameters}
-        {slots.messages}
-        {slots.reply}
-        {slots.bindings}
-      </div>
+  if (ctx.content?.renderOperationLayout)
+    return ctx.content.renderOperationLayout(
+      {
+        header: headNode,
+        description: descriptionNode,
+        server: <ServerSection />,
+        channel: channelNode,
+        authSchemes: authNode,
+        parameters: parametersNode,
+        messages: messagesNode,
+        reply: replyNode,
+        bindings: bindingsNode,
+      },
+      { operation, action, ctx },
     );
-  };
 
-  let content = renderOperationLayout(
-    {
-      header: headNode,
-      description: descriptionNode,
-      server: <ServerSection />,
-      channel: channelNode,
-      authSchemes: authNode,
-      parameters: parametersNode,
-      messages: messagesNode,
-      reply: replyNode,
-      bindings: bindingsNode,
-    },
-    {
-      operation,
-      action,
-      ctx,
-    },
+  return (
+    <div>
+      {headNode}
+      {descriptionNode}
+      <ServerSection />
+      {channelNode}
+      {authNode}
+      {parametersNode}
+      {messagesNode}
+      {replyNode}
+      {bindingsNode}
+    </div>
   );
-
-  if (channel.servers) {
-    // `servers` of channels are Reference Objects, resolved values are referentially
-    // stable in the magic proxy, we can match them against `servers` of document
-    const servers = channel.servers.map((server) => resolve(server));
-    const filteredServers: Record<string, ServerObject> = {};
-
-    for (const [k, v] of Object.entries(dereferenced.servers ?? {})) {
-      if (servers.includes(resolve(v))) filteredServers[k] = resolve(v);
-    }
-
-    content = <ServerProvider servers={filteredServers}>{content}</ServerProvider>;
-  }
-
-  return content;
 }
 
 function ServerSection() {
-  const { resolve } = useRenderContext().schema;
-  const { servers, server } = useServerContext();
+  const { resolve } = useAsyncAPI().doc;
+  const { servers, server } = useServer();
   const serverSchema = server ? servers[server.id] : undefined;
   const hasServers = Object.keys(servers).length > 0;
 
@@ -251,7 +198,7 @@ function ServerSection() {
 
 function ChannelSection({ channel }: { channel: ChannelObject }) {
   const t = useTranslations({ note: 'asyncapi channel section' });
-  const { resolve } = useRenderContext().schema;
+  const { resolve } = useAsyncAPI().doc;
 
   if (!channel.address && !channel.summary && !channel.title && !channel.bindings) return;
 
@@ -288,13 +235,10 @@ function ParametersSection({
   parameters,
   headingLevel,
 }: {
-  parameters: NonNullable<ChannelObject['parameters']>;
+  parameters: OperationParameter[];
   headingLevel: number;
 }) {
   const t = useTranslations({ note: 'operation page' });
-  const ctx = useRenderContext();
-  const entries = Object.entries(parameters);
-  if (entries.length === 0) return null;
 
   return (
     <>
@@ -303,25 +247,16 @@ function ParametersSection({
       </Heading>
       <AnchorSection segments={['parameters']}>
         <div className="flex flex-col">
-          {entries.map(([name, item]) => {
-            const param = ctx.schema.resolve(item);
-
-            return (
-              <ctx.SchemaUI
-                key={name}
-                client={{
-                  name,
-                  required: false,
-                }}
-                root={{
-                  type: 'string',
-                  description: param.description,
-                  enum: param.enum,
-                  default: param.default,
-                }}
-              />
-            );
-          })}
+          {parameters.map((item) => (
+            <SchemaUI
+              key={item.name}
+              client={{
+                name: item.name,
+                required: false,
+              }}
+              root={item.schema}
+            />
+          ))}
         </div>
       </AnchorSection>
     </>
@@ -329,18 +264,14 @@ function ParametersSection({
 }
 
 function MessageSection({
-  message: _message,
+  item: { message, headers, payload, examples },
   headingLevel,
 }: {
-  message: MessageObject;
+  item: OperationMessage;
   headingLevel: number;
 }) {
   const t = useTranslations();
-  const ctx = useRenderContext();
-  const { resolve } = ctx.schema;
-  const message = useMemo(() => applyMessageTraits(_message, resolve), [_message, resolve]);
-  const headers = resolveMultiFormatSchema(resolve(message.headers));
-  const payload = resolveMultiFormatSchema(resolve(message.payload));
+  const { resolve } = useAsyncAPI().doc;
 
   return (
     <>
@@ -351,7 +282,7 @@ function MessageSection({
             <Heading id="headers" depth={headingLevel}>
               {t('Headers')}
             </Heading>
-            <ctx.SchemaUI client={{ name: 'headers' }} root={headers as never} />
+            <SchemaUI client={{ name: 'headers' }} root={headers as never} />
           </>
         )}
         {payload && (
@@ -359,7 +290,7 @@ function MessageSection({
             <Heading id="payload" depth={headingLevel}>
               {t('Payload')}
             </Heading>
-            <ctx.SchemaUI client={{ name: 'payload', as: 'body' }} root={payload as never} />
+            <SchemaUI client={{ name: 'payload', as: 'body' }} root={payload as never} />
           </>
         )}
         {message.correlationId && (
@@ -375,23 +306,14 @@ function MessageSection({
         )}
       </div>
       <div className="mb-2">
-        <MessageExamples message={message} headingLevel={headingLevel} />
+        <MessageExamples examples={examples} headingLevel={headingLevel} />
       </div>
     </>
   );
 }
 
-function ReplySection({
-  reply,
-  headingLevel,
-}: {
-  reply: OperationReplyObject;
-  headingLevel: number;
-}) {
+function ReplySection({ reply, headingLevel }: { reply: OperationReply; headingLevel: number }) {
   const t = useTranslations({ note: 'operation page' });
-  const ctx = useRenderContext();
-  const { resolve } = ctx.schema;
-  const address = resolve(reply.address);
 
   return (
     <>
@@ -399,26 +321,22 @@ function ReplySection({
         {t('Reply')}
       </Heading>
       <div className="border rounded-xl p-3 not-prose text-sm flex flex-col gap-3">
-        {address && (
+        {reply.address && (
           <p>
-            Address: <code>{address.location}</code>
-            {address.description && (
-              <span className="text-fd-muted-foreground"> — {address.description}</span>
+            Address: <code>{reply.address.location}</code>
+            {reply.address.description && (
+              <span className="text-fd-muted-foreground"> — {reply.address.description}</span>
             )}
           </p>
         )}
-        {reply.messages?.map((item, index) => {
-          const message = resolve(item);
-          const payload = resolveMultiFormatSchema(resolve(message.payload));
-          return (
-            <Fragment key={index}>
-              <p className="font-medium">{message.title || message.name || `Reply ${index + 1}`}</p>
-              {payload && (
-                <ctx.SchemaUI client={{ name: 'reply-payload' }} root={payload as never} />
-              )}
-            </Fragment>
-          );
-        })}
+        {reply.messages.map((item, index) => (
+          <Fragment key={index}>
+            <p className="font-medium">{item.title}</p>
+            {item.payload && (
+              <SchemaUI client={{ name: 'reply-payload' }} root={item.payload as never} />
+            )}
+          </Fragment>
+        ))}
       </div>
     </>
   );

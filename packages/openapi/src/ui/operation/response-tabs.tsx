@@ -1,112 +1,26 @@
 'use client';
-import type { OperationObject, ResponseObject } from '@/types';
-import { getPreferredType } from '@/utils/schema';
 import {
   AccordionContent,
   AccordionHeader,
   AccordionItem,
   Accordions,
   AccordionTrigger,
-} from '@fumadocs/api-docs/components/accordion';
+} from 'shared-api/components/accordion';
 import { Tab, Tabs } from 'fumadocs-ui/components/tabs';
-import { sample } from '@fumadocs/api-docs/schema/sample';
-import { getRaw } from '@scalar/json-magic/magic-proxy';
-import { useMemo, type ReactNode } from 'react';
+import type { ReactNode } from 'react';
 import { useTranslations } from '@fuma-translate/react';
 import { Markdown } from '../components/markdown';
 import { ClientCodeBlock } from '../components/codeblock';
-import { useRenderContext } from '../contexts/api';
+import { type ResponseExample, type ResponseTab, useResponseExamples } from '@/operation';
+import { useRenderContext } from '@/utils/create-page';
 
-export interface ResponseTab {
-  /**
-   * HTTP response code
-   */
-  code: string;
-
-  response: ResponseObject;
-  /**
-   * media type of response
-   */
-  mediaType: string | null;
-
-  examples?: ResponseExample[];
-}
-
-interface ResponseExample {
-  /**
-   * generated/defined example data
-   */
-  sample: unknown;
-
-  label: ReactNode;
-
-  /**
-   * description (in Markdown)
-   */
-  description?: string;
-}
-
-export interface ResponseTabsRenderOptions {
-  tabs: ResponseTab[];
-}
-
-export function ResponseTabs({ operation }: { operation: OperationObject }) {
+export function ResponseTabs() {
   const ctx = useRenderContext();
-  const { resolve } = ctx.schema;
-  const t = useTranslations({ note: 'operation page' });
-  const tabs = useMemo(() => {
-    const tabs: ResponseTab[] = [];
-    if (!operation.responses) return tabs;
-
-    for (const [code, item] of Object.entries(operation.responses)) {
-      const response = resolve(item);
-      const media = response.content ? getPreferredType(response.content) : null;
-      const responseOfType = media ? resolve(response.content?.[media]) : null;
-
-      const tab: ResponseTab = {
-        code,
-        response,
-        mediaType: media as string | null,
-      };
-
-      if (responseOfType?.examples) {
-        tab.examples ??= [];
-
-        for (const [key, item] of Object.entries(responseOfType.examples)) {
-          const example = resolve(item);
-
-          tab.examples.push({
-            label:
-              example?.summary ??
-              t('Example {key}', {
-                variables: { key },
-              }),
-            sample: getRaw(example.value),
-            description: example?.description,
-          });
-        }
-      } else if (responseOfType?.example || responseOfType?.schema) {
-        tab.examples ??= [];
-        tab.examples.push({
-          label: t('Example'),
-          sample: getRaw(responseOfType.example) ?? sample(responseOfType.schema as object),
-        });
-      }
-
-      tabs.push(tab);
-    }
-
-    return tabs;
-  }, [operation.responses, resolve, t]);
-
+  const tabs = useResponseExamples();
   if (tabs.length === 0) return null;
 
-  const { renderResponseTabs = renderResponseTabsDefault } = ctx.content ?? {};
+  if (ctx.content?.renderResponseTabs) return ctx.content.renderResponseTabs({ tabs }, ctx);
 
-  return renderResponseTabs({ tabs }, ctx);
-}
-
-function renderResponseTabsDefault({ tabs }: ResponseTabsRenderOptions): ReactNode {
   return <ResponseTabsDefaultContent tabs={tabs} />;
 }
 

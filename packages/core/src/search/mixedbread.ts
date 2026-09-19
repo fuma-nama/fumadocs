@@ -1,7 +1,6 @@
 import type { SortedResult } from '@/search';
 import type Mixedbread from '@mixedbread/sdk';
 import type { StoreSearchParams, StoreSearchResponse } from '@mixedbread/sdk/resources/stores';
-import removeMd from 'remove-markdown';
 import Slugger from 'github-slugger';
 import { createEndpoint } from '@/search/server/endpoint';
 import type { SearchAPI } from '@/search/server';
@@ -67,14 +66,7 @@ function extractHeadingTitle(text: string): string {
 
   const lines = trimmedText.split('\n');
   const firstLine = lines[0]?.trim();
-
-  if (firstLine) {
-    return removeMd(firstLine, {
-      useImgAltText: false,
-    });
-  }
-
-  return '';
+  return firstLine ?? '';
 }
 
 function defaultTransform(results: StoreSearchResult[]): SortedResult[] {

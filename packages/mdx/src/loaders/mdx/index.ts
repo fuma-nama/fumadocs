@@ -96,10 +96,7 @@ export function createMdxLoader({ getCore }: ConfigLoader): Loader {
       }
 
       if (only === 'frontmatter') {
-        return {
-          code: `export const frontmatter = ${JSON.stringify(matter.data)}`,
-          map: null,
-        };
+        return { code: `export const frontmatter = ${JSON.stringify(matter.data)}` };
       }
 
       const { buildMDX } = await import('@/loaders/mdx/build');

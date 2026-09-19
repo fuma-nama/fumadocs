@@ -31,7 +31,6 @@
     "types:check": "tsc --noEmit"
   },
   "devDependencies": {
-    "@fumadocs/api-docs": "workspace:*",
     "@fumadocs/asyncapi": "workspace:*",
     "@fumadocs/story": "workspace:*",
     "fumadocs-core": "workspace:*",
@@ -42,7 +41,6 @@
     "typescript": "^7.0.2"
   },
   "peerDependencies": {
-    "@fumadocs/api-docs": "*",
     "@fumadocs/asyncapi": "*",
     "@fumadocs/story": "*",
     "fumadocs-core": "*",
@@ -50,9 +48,6 @@
     "fumadocs-ui": "*"
   },
   "peerDependenciesMeta": {
-    "@fumadocs/api-docs": {
-      "optional": true
-    },
     "@fumadocs/asyncapi": {
       "optional": true
     },

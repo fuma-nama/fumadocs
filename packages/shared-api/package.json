@@ -1,0 +1,84 @@
+{
+  "name": "shared-api",
+  "version": "0.2.10",
+  "private": true,
+  "description": "Shared UI of the API docs integrations, bundled into them and installed by the CLI",
+  "license": "MIT",
+  "author": "Fuma Nama",
+  "type": "module",
+  "exports": {
+    "./auto-anchor": "./dist/auto-anchor/index.js",
+    "./auto-anchor/client": "./dist/auto-anchor/client.js",
+    "./codegen": "./dist/codegen.js",
+    "./components/accordion": "./dist/components/accordion.js",
+    "./components/badge": "./dist/components/badge.js",
+    "./components/collapsible": "./dist/components/collapsible.js",
+    "./components/defaults": "./dist/components/defaults.js",
+    "./components/dialog": "./dist/components/dialog.js",
+    "./components/input": "./dist/components/input.js",
+    "./components/label": "./dist/components/label.js",
+    "./components/playground/inputs": "./dist/components/playground/inputs.js",
+    "./components/playground/schema": "./dist/components/playground/schema.js",
+    "./components/popover": "./dist/components/popover.js",
+    "./components/schema": "./dist/components/schema/index.js",
+    "./components/select": "./dist/components/select.js",
+    "./components/select-tab": "./dist/components/select-tab.js",
+    "./components/spinner": "./dist/components/spinner.js",
+    "./i18n": "./dist/i18n.js",
+    "./utils/id-to-title": "./dist/utils/id-to-title.js",
+    "./utils/is-plain-object": "./dist/utils/is-plain-object.js",
+    "./utils/url": "./dist/utils/url.js",
+    "./utils/use-query": "./dist/utils/use-query.js",
+    "./utils/use-server-store": "./dist/utils/use-server-store.js",
+    "./package.json": "./package.json"
+  },
+  "scripts": {
+    "build": "tsdown",
+    "clean": "rimraf dist",
+    "dev": "tsdown --watch --clean false",
+    "lint": "oxlint .",
+    "types:check": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@base-ui/react": "^1.8.0",
+    "@fuma-translate/react": "^1.0.2",
+    "@fumadocs/json-schema": "workspace:*",
+    "@fumari/stf": "workspace:*",
+    "class-variance-authority": "^0.7.1",
+    "cn": "^0.3.0",
+    "github-slugger": "^2.0.0",
+    "hast-util-to-jsx-runtime": "^2.3.6",
+    "lucide-react": "^1.47.0",
+    "remark": "^15.0.1",
+    "remark-rehype": "^11.1.2",
+    "shiki": "^4.4.3"
+  },
+  "devDependencies": {
+    "@scalar/json-magic": "^0.13.5",
+    "@types/node": "26.6.1",
+    "@types/react": "^19.3.0",
+    "@types/react-dom": "^19.3.0",
+    "fuma-cli": "^0.1.1",
+    "fumadocs-core": "workspace:*",
+    "fumadocs-ui": "workspace:@fumadocs/base-ui@*",
+    "json-schema-typed": "^8.0.2",
+    "tsconfig": "workspace:*",
+    "tsdown": "0.23.0"
+  },
+  "peerDependencies": {
+    "@types/react": "*",
+    "fumadocs-core": "^16.9.0",
+    "fumadocs-ui": "^16.9.0",
+    "json-schema-typed": "*",
+    "react": "^19.2.0",
+    "react-dom": "^19.2.0"
+  },
+  "peerDependenciesMeta": {
+    "json-schema-typed": {
+      "optional": true
+    },
+    "@types/react": {
+      "optional": true
+    }
+  }
+}

@@ -1,6 +1,6 @@
 'use client';
 import { type DirectiveNode, getNamedType, type GraphQLType, print } from 'graphql';
-import { resolveTypeLink, useRenderContext } from '../contexts/api';
+import { useTypeLink } from '@/utils/create-page';
 import { cn } from '@/utils/cn';
 import { useTranslations } from '@fuma-translate/react';
 import { AtSignIcon } from 'lucide-react';
@@ -19,10 +19,9 @@ export function ReferenceLink({ className, ...props }: ComponentProps<typeof Lin
  * Render a type annotation like `[User!]!`, with the named type linked when `typeLinks` resolves it.
  */
 export function TypeAnnotation({ type, className }: { type: GraphQLType; className?: string }) {
-  const ctx = useRenderContext();
   const named = getNamedType(type);
   const annotation = String(type);
-  const href = resolveTypeLink(ctx, named.name);
+  const href = useTypeLink(named.name);
   const start = annotation.indexOf(named.name);
 
   return (

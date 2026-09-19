@@ -9,7 +9,7 @@ import {
   GraphQLList,
   GraphQLNonNull,
 } from 'graphql';
-import type { ParsedSchema } from '@fumadocs/api-docs/schema';
+import type { JsonSchema } from '@fumadocs/json-schema';
 import { buildSchemaFromSDL } from '@/utils/build-schema';
 import { inputTypeToJsonSchema } from '@/playground/json-schema';
 import { filterHeaderItems, getEndpointOrigin, parseStoredState } from '@/playground/storage';
@@ -179,8 +179,8 @@ type Query {
     let current = inputTypeToJsonSchema(assertInputObjectType(cyclic.getType('Node')));
     for (let i = 0; i < 8; i++) {
       expect(current).toMatchObject({ type: 'object', additionalProperties: false });
-      const properties = (current as Exclude<ParsedSchema, boolean>).properties!;
-      current = properties.child as ParsedSchema;
+      const properties = (current as Exclude<JsonSchema, boolean>).properties!;
+      current = properties.child as JsonSchema;
     }
 
     // the cycle guard stops the recursion

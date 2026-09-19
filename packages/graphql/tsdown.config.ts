@@ -7,7 +7,15 @@ import { packageTranslationsPlugin } from '../shared/compile-package-translation
 export default defineConfig({
   format: 'esm',
   target: 'es2023',
-  entry: ['./src/{index,i18n}.ts', './src/ui/index.tsx', './src/server/index.tsx'],
+  entry: [
+    './src/{index,i18n}.ts',
+    './src/{operation,type-docs}.tsx',
+    './src/utils/snippets.ts',
+    './src/playground/index.ts',
+    './src/ui/index.tsx',
+    './src/ui/playground/index.tsx',
+    './src/server/index.tsx',
+  ],
   unbundle: true,
   ignoreWatch: ['src/.translations/**'],
   dts: {
@@ -20,6 +28,7 @@ export default defineConfig({
   },
   platform: 'browser',
   deps: {
+    onlyBundle: ['shared-api'],
     neverBundle: [/^node:/, 'fs'],
   },
   exports: {
@@ -35,6 +44,12 @@ async function compileInline() {
   await mkdir('css/generated', { recursive: true });
   const scanner = new Scanner({
     sources: [
+      {
+        // the shared UI is bundled into this package, its classes belong to our CSS
+        base: path.resolve('../shared-api/src/components'),
+        pattern: '**/*.{ts,tsx}',
+        negated: false,
+      },
       {
         base: path.resolve('src'),
         pattern: '**/*.{ts,tsx}',

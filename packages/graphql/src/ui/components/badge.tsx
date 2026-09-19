@@ -1,21 +1,7 @@
-import { cva, type VariantProps } from 'class-variance-authority';
 import type { HTMLAttributes } from 'react';
-import { cn } from '@/utils/cn';
+import { Badge, type BadgeColor } from 'shared-api/components/badge';
 
-const badgeVariants = cva('font-mono font-medium', {
-  variants: {
-    color: {
-      green: 'text-green-600 dark:text-green-400',
-      yellow: 'text-yellow-600 dark:text-yellow-400',
-      red: 'text-red-600 dark:text-red-400',
-      blue: 'text-blue-600 dark:text-blue-400',
-      orange: 'text-orange-600 dark:text-orange-400',
-      gray: 'text-fd-muted-foreground',
-    },
-  },
-});
-
-function getKindColor(kind: string): VariantProps<typeof badgeVariants>['color'] {
+function getKindColor(kind: string): BadgeColor {
   switch (kind.toLowerCase()) {
     case 'query':
       return 'green';
@@ -26,18 +12,6 @@ function getKindColor(kind: string): VariantProps<typeof badgeVariants>['color']
     default:
       return 'gray';
   }
-}
-
-export function Badge({
-  className,
-  color,
-  ...props
-}: Omit<HTMLAttributes<HTMLSpanElement>, 'color'> & VariantProps<typeof badgeVariants>) {
-  return (
-    <span className={cn(badgeVariants({ color }), className)} {...props}>
-      {props.children}
-    </span>
-  );
 }
 
 export function KindLabel({

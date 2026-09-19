@@ -41,14 +41,14 @@
     "@mdx-js/mdx": "^3.1.1",
     "unified": "^11.0.5",
     "vfile": "^6.0.3",
-    "yaml": "^2.9.0"
+    "yaml": "^2.9.1"
   },
   "devDependencies": {
     "@types/mdx": "^2.0.14",
-    "@types/node": "26.5.0",
-    "@types/react": "^19.2.18",
+    "@types/node": "26.6.1",
+    "@types/react": "^19.3.0",
     "fumadocs-core": "workspace:*",
-    "react": "^19.2.8",
+    "react": "^19.3.0",
     "tinyglobby": "^0.2.17",
     "tsconfig": "workspace:*",
     "tsdown": "0.23.0"

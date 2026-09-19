@@ -3,13 +3,8 @@ import type { Translations as UITranslations } from 'fumadocs-ui/i18n';
 import type { Translations as OpenAPITranslations } from 'fumadocs-openapi/i18n';
 import type { Translations as AsyncAPITranslations } from '@fumadocs/asyncapi/i18n';
 import type { Translations as StoryTranslations } from '@fumadocs/story/i18n';
-import type { Translations as APIDocsTranslations } from '@fumadocs/api-docs/i18n';
 
-type Translations = UITranslations &
-  OpenAPITranslations &
-  AsyncAPITranslations &
-  StoryTranslations &
-  APIDocsTranslations;
+type Translations = UITranslations & OpenAPITranslations & AsyncAPITranslations & StoryTranslations;
 
 const translations = {
   displayName: '繁體中文',
@@ -66,7 +61,7 @@ const translations = {
   'Type(type table)': '型別',
   'View as Markdown(page actions)': '以 Markdown 檢視',
 
-  // @fumadocs/api-docs
+  // shared API components
   'Default(schema UI)': '預設',
   'Deprecated(schema UI)': '已棄用',
   'Enter Property Name(playground)': '輸入屬性名稱',

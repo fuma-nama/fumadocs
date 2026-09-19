@@ -1,7 +1,7 @@
 import type { AsyncAPIObject, TagObject } from '@/types';
-import { dereferenceShallow } from '@fumadocs/api-docs/schema/dereference';
+import { dereference } from '@fumadocs/json-schema';
 import { createMagicProxy } from '@scalar/json-magic/magic-proxy';
-import type { NoReferenceSwallow } from '@fumadocs/api-docs/schema';
+import type { DereferencedShallow } from '@fumadocs/json-schema';
 
 interface BaseEntry {
   path: string;
@@ -50,7 +50,7 @@ export interface PagesBuilderConfig {
 export interface PagesBuilder {
   id: string;
   document: AsyncAPIObject;
-  dereferenceShallow: <T>(schema: T) => NoReferenceSwallow<T>;
+  dereferenceShallow: <T>(schema: T) => DereferencedShallow<T>;
   create: (entry: OutputEntry) => void;
   routePathToFilePath: (path: string) => string;
 }
@@ -68,7 +68,7 @@ export function fromSchema(
   toPages({
     id: schemaId,
     document,
-    dereferenceShallow: (s) => dereferenceShallow(s),
+    dereferenceShallow: (s) => dereference(s),
     create(entry) {
       files.push(entry);
     },

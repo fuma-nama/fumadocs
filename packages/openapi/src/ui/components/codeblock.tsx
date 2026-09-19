@@ -1,21 +1,9 @@
 'use client';
-import {
-  DynamicCodeBlock,
-  type DynamicCodeblockProps,
-} from 'fumadocs-ui/components/dynamic-codeblock.core';
-import { useRenderContext } from '../contexts/api';
+import type { ComponentProps } from 'react';
+import { type OpenAPIComponents, useComponents } from '@/utils/create-page';
 
-export function ClientCodeBlock(props: Omit<DynamicCodeblockProps, 'highlighter' | 'options'>) {
-  const {
-    shiki,
-    shikiOptions,
-    renderCodeBlock,
-    components: { CodeBlock: Comp } = {},
-  } = useRenderContext();
-  if (renderCodeBlock) return renderCodeBlock(props);
-  if (Comp) return <Comp {...props} />;
+export function ClientCodeBlock(props: ComponentProps<OpenAPIComponents['CodeBlock']>) {
+  const { CodeBlock } = useComponents();
 
-  return (
-    <DynamicCodeBlock highlighter={() => shiki.getOrInit()} options={shikiOptions} {...props} />
-  );
+  return <CodeBlock {...props} />;
 }

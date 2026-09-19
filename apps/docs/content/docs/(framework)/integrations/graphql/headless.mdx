@@ -1,0 +1,144 @@
+---
+title: Headless
+description: The state and logic of GraphQL pages, without UI.
+---
+
+## Overview
+
+Everything outside `@fumadocs/graphql/ui` is headless.
+
+| Path                           | Module                                                               |
+| ------------------------------ | -------------------------------------------------------------------- |
+| `@fumadocs/graphql`            | the page: the schema built from SDL, cross-links and your components |
+| `@fumadocs/graphql/operation`  | an operation: its field, title, directives and generated example     |
+| `@fumadocs/graphql/type-docs`  | a named type: its kind, directives, relations and usages             |
+| `@fumadocs/graphql/playground` | the fetcher, form model and stored state of the playground           |
+
+## Page
+
+`createGraphQLRenderer()` takes your components and returns `<GraphQLPage />`, which accepts the props of generated pages.
+
+```tsx title="components/api-page.tsx"
+'use client';
+import { type CodeBlockProps, createGraphQLRenderer } from '@fumadocs/graphql';
+import { Operation } from '@/components/my-operation';
+import { TypeDocs } from '@/components/my-type';
+
+export const GraphQLPage = createGraphQLRenderer({
+  components: {
+    Operation,
+    TypeDocs,
+    SchemaUI: ({ client, root }) => <pre>{`${client.name}: ${root.type}`}</pre>,
+    CodeBlock({ lang, code }: CodeBlockProps) {
+      return (
+        <pre>
+          <code className={`language-${lang}`}>{code}</code>
+        </pre>
+      );
+    },
+  },
+});
+```
+
+| Component   | Renders                                                 |
+| ----------- | ------------------------------------------------------- |
+| `Operation` | each operation of the page, see [Operation](#operation) |
+| `TypeDocs`  | each named type of the page, see [Type](#type)          |
+| `SchemaUI`  | a type, argument or field in detail                     |
+| `Layout`    | optional, wraps the rendered items                      |
+
+Pass `typeLinks` and `operationLinks` to override the [cross-links](/docs/integrations/graphql/api-page#cross-linking) of pre-generated pages.
+
+### Hooks
+
+Components under the page read its state.
+
+| Hook                           | Returns                                                 |
+| ------------------------------ | ------------------------------------------------------- |
+| `useGraphQL()`                 | the built `schema`, its `sdl` and the page links        |
+| `useComponents()`              | the components passed to the page                       |
+| `useTypeLink(name)`            | the page URL of a named type, `undefined` when unlinked |
+| `useOperationLink(kind, name)` | the page URL of an operation                            |
+| `useRenderContext()`           | the render options of the page, like `playground`       |
+
+To render operations yourself, mount `<GraphQLProvider sdl={sdl} shiki={shiki} components={...} />` in place of `createGraphQLRenderer()`.
+
+## Operation
+
+`<OperationProvider />` derives the details of an operation.
+
+```tsx title="components/my-operation.tsx"
+'use client';
+import { useComponents } from '@fumadocs/graphql';
+import {
+  OperationProvider,
+  type PageOperationProps,
+  useOperation,
+} from '@fumadocs/graphql/operation';
+
+export function Operation({ kind, name }: PageOperationProps) {
+  return (
+    <OperationProvider kind={kind} name={name}>
+      <Content />
+    </OperationProvider>
+  );
+}
+
+function Content() {
+  const { title, field, example } = useOperation();
+  const { CodeBlock, SchemaUI } = useComponents();
+
+  return (
+    <>
+      <h2>{title}</h2>
+      {field.args.map((arg) => (
+        <SchemaUI key={arg.name} client={{ name: arg.name }} root={{ type: arg.type }} />
+      ))}
+      {example && <CodeBlock lang="graphql" code={example.query} />}
+    </>
+  );
+}
+```
+
+<auto-type-table path="props.ts" name="OperationInfo" />
+
+## Type
+
+`<TypeProvider />` derives the details of a named type.
+
+```tsx title="components/my-type.tsx"
+'use client';
+import { useComponents } from '@fumadocs/graphql';
+import { type PageTypeProps, TypeProvider, useNamedType } from '@fumadocs/graphql/type-docs';
+
+export function TypeDocs({ name }: PageTypeProps) {
+  return (
+    <TypeProvider name={name}>
+      <Content />
+    </TypeProvider>
+  );
+}
+
+function Content() {
+  const { name, kind, type, relations } = useNamedType();
+  const { SchemaUI } = useComponents();
+
+  return (
+    <>
+      <h2>
+        {name} ({kind})
+      </h2>
+      {relations.usages.returnedBy.map((op) => (
+        <span key={`${op.kind}:${op.name}`}>{op.name}</span>
+      ))}
+      <SchemaUI client={{ name, as: 'body' }} root={{ type }} />
+    </>
+  );
+}
+```
+
+<auto-type-table path="props.ts" name="NamedTypeInfo" />
+
+`relations.usages` is where the type appears across the schema.
+
+<auto-type-table path="props.ts" name="TypeUsages" />

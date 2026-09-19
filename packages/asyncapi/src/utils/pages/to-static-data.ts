@@ -3,7 +3,7 @@ import Slugger from 'github-slugger';
 import type { TOCItemType } from 'fumadocs-core/toc';
 import type { StructuredData } from 'fumadocs-core/mdx-plugins';
 import type { GeneratedPageProps } from './builder';
-import { dereferenceShallow } from '@fumadocs/api-docs/schema/dereference';
+import { dereference } from '@fumadocs/json-schema';
 import { createMagicProxy } from '@scalar/json-magic/magic-proxy';
 import { getOperationDisplayName } from '../schema';
 
@@ -27,7 +27,7 @@ export function toStaticData(
   const structuredData: StructuredData = { headings: [], contents: [] };
 
   for (const item of page.operations ?? []) {
-    const operation = dereferenceShallow(proxied.operations?.[item.id]);
+    const operation = dereference(proxied.operations?.[item.id]);
     if (!operation) continue;
 
     if (page.showTitle) {

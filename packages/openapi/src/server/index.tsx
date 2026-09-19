@@ -96,11 +96,6 @@ export interface OpenAPIPageData extends PageData {
   structuredData: StructuredData;
   toc: TOCItemType[];
   _openapi: InternalOpenAPIMeta;
-
-  /** @deprecated use `getOpenAPIPageProps()` instead */
-  getAPIPageProps: () => OpenAPIPageProps_Spec;
-  /** @deprecated use `getOpenAPIPageProps()` instead */
-  getClientAPIPageProps: () => OpenAPIPageProps_Spec;
 }
 
 export type OpenAPISourceOptions = SchemaToPagesOptions & {
@@ -178,12 +173,6 @@ export function createOpenAPI(options: OpenAPIOptions = {}): OpenAPIServer {
           path: `${baseDir}/${entry.path}`,
           data: {
             ...entry.info,
-            getAPIPageProps() {
-              return this.getOpenAPIPageProps();
-            },
-            getClientAPIPageProps() {
-              return this.getOpenAPIPageProps();
-            },
             getOpenAPIPageProps() {
               return {
                 payload: {

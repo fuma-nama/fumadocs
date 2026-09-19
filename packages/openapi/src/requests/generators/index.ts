@@ -1,6 +1,6 @@
 import type { MediaAdapter } from '../media/adapter';
 import type { RequestData } from '../types';
-import * as Shared from '@fumadocs/api-docs/codegen';
+import * as Shared from 'shared-api/codegen';
 
 export function pathnameFromRequest(pathname: string, { path, query }: RequestData): string {
   // First, resolve path parameters in the pathname

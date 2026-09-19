@@ -1,0 +1,71 @@
+import { dereference } from '@/dereference';
+import { createMagicProxy } from '@scalar/json-magic/magic-proxy';
+import { expect, test } from 'vitest';
+
+const doc = createMagicProxy({
+  openapi: '3.2.0',
+  info: {
+    title: 'Test',
+    version: '1.0.0',
+  },
+  paths: {},
+  components: {
+    schemas: {
+      Base: {
+        type: 'object',
+        description: 'base description',
+        properties: {
+          id: { type: 'string' },
+          self: { $ref: '#/components/schemas/Base' },
+        },
+        required: ['id'],
+      },
+      Derived: {
+        $ref: '#/components/schemas/Base',
+        description: 'local description',
+      },
+      Alias: {
+        $ref: '#/components/schemas/Derived',
+      },
+    },
+  },
+}) as any;
+
+test('dereference: merges $ref target into local schema for sibling keywords', () => {
+  const derived = dereference(doc.components.schemas.Derived);
+
+  expect(derived).toMatchObject({
+    type: 'object',
+    description: 'local description',
+    properties: {
+      id: { type: 'string' },
+    },
+    required: ['id'],
+  });
+  expect(derived).not.toHaveProperty('$ref');
+  // the virtual property of magic proxies must not be merged
+  expect(derived).not.toHaveProperty('$ref-value');
+});
+
+test('dereference: follows chained refs', () => {
+  const alias = dereference(doc.components.schemas.Alias);
+
+  expect(alias).toMatchObject({
+    type: 'object',
+    // no sibling `description` on Alias, Derived's wins
+    description: 'local description',
+  });
+});
+
+test('dereference: survives a $ref cycle', () => {
+  const cyclic = createMagicProxy({
+    components: {
+      schemas: {
+        A: { $ref: '#/components/schemas/B' },
+        B: { $ref: '#/components/schemas/A' },
+      },
+    },
+  }) as any;
+
+  expect(dereference(cyclic.components.schemas.A)).toStrictEqual({});
+});

@@ -1,6 +1,5 @@
 import type { SortedResult } from '@/search';
 import type Mixedbread from '@mixedbread/sdk';
-import removeMd from 'remove-markdown';
 import Slugger from 'github-slugger';
 import type { StoreSearchResponse } from '@mixedbread/sdk/resources/stores';
 import type { SearchClient } from '../client';
@@ -49,15 +48,7 @@ function extractHeadingTitle(text: string): string {
 
   const lines = trimmedText.split('\n');
   const firstLine = lines[0]?.trim();
-
-  if (firstLine) {
-    // Use remove-markdown to convert to plain text and remove colons
-    return removeMd(firstLine, {
-      useImgAltText: false,
-    });
-  }
-
-  return '';
+  return firstLine ?? '';
 }
 
 /**

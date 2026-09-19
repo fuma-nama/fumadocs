@@ -1,6 +1,6 @@
 {
   "name": "@fumadocs/asyncapi",
-  "version": "0.3.6",
+  "version": "0.4.0",
   "description": "Generate docs for your AsyncAPI spec",
   "keywords": [
     "Docs",
@@ -19,8 +19,13 @@
     "./css/**/*.css"
   ],
   "exports": {
-    ".": "./dist/index.js",
+    ".": {
+      "types": "./dist/index.d.ts",
+      "browser": "./dist/index.browser.js",
+      "import": "./dist/index.js"
+    },
     "./i18n": "./dist/i18n.js",
+    "./operation": "./dist/operation.js",
     "./server": "./dist/server/index.js",
     "./ui": "./dist/ui/index.js",
     "./package.json": "./package.json",
@@ -37,29 +42,31 @@
     "types:check": "tsc --noEmit"
   },
   "dependencies": {
+    "@base-ui/react": "^1.8.0",
     "@fuma-translate/react": "^1.0.2",
-    "@fumadocs/api-docs": "workspace:*",
-    "@fumari/json-schema-ts": "^1.0.2",
+    "@fumadocs/json-schema": "workspace:*",
     "@fumari/stf": "workspace:*",
-    "@scalar/json-magic": "^0.13.4",
+    "@scalar/json-magic": "^0.13.5",
     "chokidar": "^5.0.0",
     "class-variance-authority": "^0.7.1",
-    "cn": "^0.2.6",
+    "cn": "^0.3.0",
     "github-slugger": "^2.0.0",
     "hast-util-to-jsx-runtime": "^2.3.6",
-    "lucide-react": "^1.43.0",
+    "lucide-react": "^1.47.0",
     "remark": "^15.0.1",
     "remark-rehype": "^11.1.2",
     "shiki": "^4.4.3",
-    "yaml": "^2.9.0"
+    "yaml": "^2.9.1"
   },
   "devDependencies": {
     "@tailwindcss/oxide": "^4.3.3",
-    "@types/node": "26.5.0",
-    "@types/react": "^19.2.18",
+    "@types/node": "26.6.1",
+    "@types/react": "^19.3.0",
+    "fuma-cli": "^0.1.1",
     "fumadocs-core": "workspace:*",
     "fumadocs-ui": "workspace:@fumadocs/base-ui@*",
     "json-schema-typed": "^8.0.2",
+    "shared-api": "workspace:*",
     "tailwindcss": "^4.3.3",
     "tsconfig": "workspace:*",
     "tsdown": "0.23.0"

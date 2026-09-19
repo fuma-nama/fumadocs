@@ -1,18 +1,17 @@
 'use client';
-import { type ComponentProps, Fragment, use, useMemo, type ReactNode } from 'react';
-import type {
-  HttpMethods,
-  MediaTypeObject,
-  OperationObject,
-  PathItemObject,
-  SecuritySchemeObject,
-  ServerObject,
-} from '@/types';
-import { methodKeys } from '@/utils/schema';
-import { idToTitle } from '@fumadocs/api-docs/utils/id-to-title';
+import { type ComponentProps, Fragment, type ReactNode } from 'react';
+import type { HttpMethods, MediaTypeObject, SecuritySchemeObject } from '@/types';
 import { UsageTabs } from '@/ui/operation/usage-tabs';
-import { Badge, MethodLabel } from '@/ui/components/method-label';
-import { OperationProvider } from './context';
+import { MethodLabel } from '@/ui/components/method-label';
+import { SchemaUI } from '@/ui/components/schema';
+import { Badge } from 'shared-api/components/badge';
+import { useOpenAPI, useRenderContext, useTypeScriptDefinitions } from '@/utils/create-page';
+import {
+  OperationProvider,
+  type OperationResponse,
+  type PageOperationProps,
+  useOperation,
+} from '@/operation';
 import { useTranslations } from '@fuma-translate/react';
 import {
   AccordionContent,
@@ -20,70 +19,67 @@ import {
   AccordionItem,
   Accordions,
   AccordionTrigger,
-} from '@fumadocs/api-docs/components/accordion';
-import { isMediaTypeSupported } from '@/requests/media/adapter';
+} from 'shared-api/components/accordion';
 import { RequestTabs } from './request-tabs';
 import { cn } from '@/utils/cn';
-import { getExampleRequests } from '../../utils/get-example-requests';
-import { SelectTabs, SelectTabTrigger, SelectTab } from '@fumadocs/api-docs/components/select-tab';
+import { SelectTabs, SelectTabTrigger, SelectTab } from 'shared-api/components/select-tab';
 import { Callout } from 'fumadocs-ui/components/callout';
-import { AnchorSection } from '@fumadocs/api-docs/auto-anchor/client';
+import { AnchorSection } from 'shared-api/auto-anchor/client';
 import { Heading } from '@/ui/components/heading';
 import { Markdown } from '../components/markdown';
-import { ServerProvider, useRenderContext } from '../contexts/api';
 import { useCopyButton } from 'fumadocs-ui/utils/use-copy-button';
 import { buttonVariants } from 'fumadocs-ui/components/ui/button';
 import { Check, Copy } from 'lucide-react';
-import PlaygroundClient from '@/playground/client';
+import PlaygroundClient from '@/ui/playground/client';
 
-const paramTypeKeys = ['path', 'query', 'header', 'cookie'] as const;
+export interface OperationProps extends PageOperationProps {
+  headingLevel?: number;
+}
 
-export function Operation({
-  type = 'operation',
-  path,
-  operation,
-  pathItem,
-  method,
+export function Operation({ type, path, method, operation, pathItem, ...props }: OperationProps) {
+  return (
+    <OperationProvider
+      type={type}
+      path={path}
+      method={method}
+      operation={operation}
+      pathItem={pathItem}
+    >
+      <OperationContent {...props} />
+    </OperationProvider>
+  );
+}
+
+function OperationContent({
   showTitle,
   showDescription,
   headingLevel = 2,
-}: {
-  type?: 'webhook' | 'operation';
-  path: string;
-  method: HttpMethods;
-  operation: OperationObject;
-  pathItem: PathItemObject;
-
-  showTitle?: boolean;
-  showDescription?: boolean;
-  headingLevel?: number;
-}) {
+}: Pick<OperationProps, 'showTitle' | 'showDescription' | 'headingLevel'>) {
   const t = useTranslations({ note: 'operation page' });
+  const { resolve } = useOpenAPI().doc;
   const ctx = useRenderContext();
   const {
-    schema: { dereferenced, resolve },
-  } = ctx;
-  const body = resolve(operation.requestBody);
+    type,
+    path,
+    method,
+    operation,
+    pathItem,
+    title,
+    description,
+    requestBody,
+    parameters,
+    security,
+    responses,
+    callbacks,
+  } = useOperation();
   let headNode: ReactNode = null;
-  const operationDescription = operation.description ?? pathItem.description;
-  const descriptionNode = showDescription && operationDescription && (
-    <Markdown md={operationDescription} />
-  );
+  const descriptionNode = showDescription && description && <Markdown md={description} />;
   let bodyNode: ReactNode = null;
   let authNode: ReactNode = null;
   let responseNode: ReactNode = null;
   let callbacksNode: ReactNode = null;
-  const exampleRequests = useMemo(
-    () => getExampleRequests({ path, operation, method, pathItem, ctx }),
-    [ctx, operation, method, pathItem, path],
-  );
 
   if (showTitle) {
-    const title =
-      operation.summary ||
-      pathItem.summary ||
-      (operation.operationId ? idToTitle(operation.operationId) : path);
-
     headNode = (
       <div className="flex gap-2 items-center justify-between">
         <Heading id={title} depth={headingLevel} className="my-0!">
@@ -101,11 +97,11 @@ export function Operation({
     headNode = <Callout type="warn" title={t('Deprecated')} className="mt-0!" />;
   }
 
-  const contentTypes = body?.content ? Object.entries(body.content) : null;
-  if (contentTypes && contentTypes.length > 0) {
-    const items = contentTypes.map(([type]) => ({
-      label: <code className="text-xs">{type}</code>,
-      value: type,
+  if (requestBody) {
+    const contentTypes = Object.entries(requestBody.content);
+    const items = contentTypes.map(([mediaType]) => ({
+      label: <code className="text-xs">{mediaType}</code>,
+      value: mediaType,
     }));
 
     bodyNode = (
@@ -120,72 +116,58 @@ export function Operation({
             <p className="text-fd-muted-foreground not-prose">{items[0].label}</p>
           )}
         </div>
-        {body?.description && <Markdown md={body.description} />}
-        {contentTypes.map(([type, content]) => {
-          if (!isMediaTypeSupported(type, ctx.mediaAdapters)) {
-            throw new Error(`Media type ${type} is not supported (in ${path})`);
-          }
-
-          return (
-            <SelectTab key={type} anchorSegments={['request-body', type]} value={type}>
-              <RequestBodyContentItem
-                content={resolve(content)}
-                operation={operation}
-                method={method}
-              />
-            </SelectTab>
-          );
-        })}
+        {requestBody.description && <Markdown md={requestBody.description} />}
+        {contentTypes.map(([mediaType, content]) => (
+          <SelectTab key={mediaType} anchorSegments={['request-body', mediaType]} value={mediaType}>
+            <RequestBodyContentItem
+              content={content}
+              required={requestBody.required}
+              method={method}
+            />
+          </SelectTab>
+        ))}
       </SelectTabs>
     );
   }
 
-  if (operation.responses && ctx.showResponseSchema !== false) {
-    const statuses = Object.keys(operation.responses);
-
+  if (responses.length > 0 && ctx.showResponseSchema !== false) {
     responseNode = (
       <>
         <Heading id="response-body" depth={headingLevel}>
           {t('Response Body')}
         </Heading>
         <Accordions type="multiple">
-          {statuses.map((status) => (
-            <ResponseAccordion key={status} status={status} operation={operation} />
+          {responses.map((item) => (
+            <ResponseAccordion key={item.status} item={item} />
           ))}
         </Accordions>
       </>
     );
   }
 
-  const parameters = [...(operation.parameters ?? []), ...(pathItem.parameters ?? [])].map(
-    (param) => resolve(param),
-  );
-  const parameterNode = paramTypeKeys.map((type) => {
-    const params = parameters.filter((param) => param.in === type);
-    if (!params || params.length === 0) return;
-
+  const parameterNode = parameters.map(({ in: location, items }) => {
     const parameterLabel =
-      type === 'path'
+      location === 'path'
         ? t('Path Parameters')
-        : type === 'query'
+        : location === 'query'
           ? t('Query Parameters')
-          : type === 'header'
+          : location === 'header'
             ? t('Header Parameters')
             : t('Cookie Parameters');
 
     return (
-      <Fragment key={type}>
-        <Heading id={`parameters-${type}`} depth={headingLevel}>
+      <Fragment key={location}>
+        <Heading id={`parameters-${location}`} depth={headingLevel}>
           {parameterLabel}
         </Heading>
-        <AnchorSection segments={['parameters', type]}>
+        <AnchorSection segments={['parameters', location]}>
           <div className="flex flex-col">
-            {params.map((param) => {
+            {items.map((param) => {
               if (param.schema == null) return;
               const schema = resolve(param.schema);
 
               return (
-                <ctx.SchemaUI
+                <SchemaUI
                   key={param.name}
                   client={{
                     name: param.name!,
@@ -211,18 +193,13 @@ export function Operation({
     );
   });
 
-  const securities = (operation.security ?? dereferenced.security ?? []).filter(
-    (v) => Object.keys(v).length > 0,
-  );
-
-  if (type === 'operation' && securities.length > 0) {
-    const securitySchemes = dereferenced.components?.securitySchemes;
-    const items = securities.map((security, i) => {
+  if (security.length > 0) {
+    const items = security.map((requirement, i) => {
       return {
         value: String(i),
         label: (
           <div className="flex flex-col text-xs min-w-0">
-            {Object.entries(security).map(([key, scopes]) => (
+            {requirement.map(({ key, scopes }) => (
               <code key={key} className="truncate">
                 <span className="font-medium">{key}</span>{' '}
                 {scopes.length > 0 && (
@@ -247,48 +224,26 @@ export function Operation({
             <div className="not-prose">{items[0].label}</div>
           )}
         </div>
-        {securities.map((security, i) => (
+        {security.map((requirement, i) => (
           <SelectTab key={i} value={items[i].value}>
-            {Object.entries(security).map(([key, scopes]) => {
-              const scheme = resolve(securitySchemes?.[key]);
-              if (!scheme) return;
-
-              return <AuthScheme key={key} scheme={scheme} scopes={scopes} />;
-            })}
+            {requirement.map(
+              ({ key, scopes, scheme }) =>
+                scheme && <AuthScheme key={key} scheme={scheme} scopes={scopes} />,
+            )}
           </SelectTab>
         ))}
       </SelectTabs>
     );
   }
 
-  const webhookCallbacks: {
-    name: string;
-    path: string;
-    method: HttpMethods;
-    callback: PathItemObject;
-    operation: OperationObject;
-  }[] = [];
-  for (const [name, item] of Object.entries(operation.callbacks ?? {})) {
-    const callbacks = resolve(item);
-
-    for (const [path, pathItem] of Object.entries(callbacks)) {
-      const callback = resolve(pathItem);
-
-      for (const method of methodKeys) {
-        if (!callback[method]) continue;
-        webhookCallbacks.push({ name, path, method, callback, operation: callback[method] });
-      }
-    }
-  }
-
-  if (webhookCallbacks.length > 0) {
+  if (callbacks.length > 0) {
     callbacksNode = (
       <>
         <Heading id="callbacks" depth={headingLevel}>
           {t('Callbacks')}
         </Heading>
         <Accordions type="multiple">
-          {webhookCallbacks.map((item, i) => (
+          {callbacks.map((item, i) => (
             <AccordionItem
               key={i}
               value={`${item.name}\0${item.path}\0${item.method}`}
@@ -313,7 +268,7 @@ export function Operation({
                     path={path}
                     headingLevel={headingLevel + 1}
                     method={item.method}
-                    pathItem={item.callback}
+                    pathItem={item.pathItem}
                     operation={item.operation}
                   />
                 </div>
@@ -325,42 +280,15 @@ export function Operation({
     );
   }
 
-  let { renderOperationLayout, renderWebhookLayout } = ctx.content ?? {};
-
   if (type === 'operation') {
-    renderOperationLayout ??= (slots) => {
-      return (
-        <div className="flex flex-col gap-x-6 gap-y-4 @4xl:flex-row @4xl:items-start">
-          <div className="min-w-0 flex-1">
-            {slots.header}
-            {slots.apiPlayground}
-            {slots.description}
-            {slots.authSchemes}
-            {slots.parameters}
-            {slots.body}
-            {slots.responses}
-            {slots.callbacks}
-          </div>
-          <div className="@4xl:sticky @4xl:top-[calc(var(--fd-docs-row-1,2rem)+1rem)] @4xl:w-[400px]">
-            {slots.apiExample}
-          </div>
-        </div>
-      );
-    };
-
+    const playground = ctx.playground;
     let apiPlayground: ReactNode;
-    if (ctx.playground?.enabled ?? true) {
-      apiPlayground = ctx.playground?.render ? (
-        ctx.playground.render({ path, method, operation, pathItem, ctx })
+    if (playground?.enabled ?? true) {
+      const { enabled: _, render, ...options } = playground ?? {};
+      apiPlayground = render ? (
+        render({ path, method, operation, pathItem })
       ) : (
-        <PlaygroundClient
-          operation={operation}
-          pathItem={pathItem}
-          route={path}
-          method={method}
-          writeOnly
-          readOnly={false}
-        />
+        <PlaygroundClient {...options} writeOnly readOnly={false} />
       );
     } else {
       apiPlayground = (
@@ -378,52 +306,26 @@ export function Operation({
       );
     }
 
-    let content = renderOperationLayout(
-      {
-        header: headNode,
-        description: descriptionNode,
-        authSchemes: authNode,
-        body: bodyNode,
-        callbacks: callbacksNode,
-        parameters: parameterNode,
-        responses: responseNode,
-        apiPlayground,
-        apiExample: (
-          <UsageTabs path={path} method={method} operation={operation} pathItem={pathItem} />
-        ),
-      },
-      {
-        path,
-        operation,
-        method,
-        pathItem,
-        ctx,
-      },
-    );
+    const slots = {
+      header: headNode,
+      description: descriptionNode,
+      authSchemes: authNode,
+      body: bodyNode,
+      callbacks: callbacksNode,
+      parameters: parameterNode,
+      responses: responseNode,
+      apiPlayground,
+      apiExample: <UsageTabs />,
+    };
 
-    content = (
-      <OperationProvider
-        defaultExampleId={operation['x-exclusiveCodeSample'] ?? operation['x-selectedCodeSample']}
-        route={path}
-        examples={exampleRequests}
-      >
-        {content}
-      </OperationProvider>
-    );
-    if (operation.servers || pathItem.servers) {
-      content = (
-        <ServerProvider servers={(operation.servers ?? pathItem.servers) as ServerObject[]}>
-          {content}
-        </ServerProvider>
-      );
-    }
+    if (ctx.content?.renderOperationLayout)
+      return ctx.content.renderOperationLayout(slots, { path, operation, method, pathItem, ctx });
 
-    return content;
-  } else {
-    renderWebhookLayout ??= (slots) => (
-      <div className="flex flex-col-reverse gap-x-6 gap-y-4 @4xl:flex-row @4xl:items-start">
-        <div className="min-w-0 flex-1 prose-no-margin">
+    return (
+      <div className="flex flex-col gap-x-6 gap-y-4 @4xl:flex-row @4xl:items-start">
+        <div className="min-w-0 flex-1">
           {slots.header}
+          {slots.apiPlayground}
           {slots.description}
           {slots.authSchemes}
           {slots.parameters}
@@ -432,61 +334,67 @@ export function Operation({
           {slots.callbacks}
         </div>
         <div className="@4xl:sticky @4xl:top-[calc(var(--fd-docs-row-1,2rem)+1rem)] @4xl:w-[400px]">
-          {slots.requests}
+          {slots.apiExample}
         </div>
       </div>
     );
-    return renderWebhookLayout({
-      header: headNode,
-      description: descriptionNode,
-      authSchemes: authNode,
-      body: bodyNode,
-      callbacks: callbacksNode,
-      parameters: parameterNode,
-      responses: responseNode,
-      requests: (
-        <RequestTabs
-          examples={exampleRequests}
-          path={path}
-          method={method}
-          pathItem={pathItem}
-          operation={operation}
-        />
-      ),
-    });
   }
+
+  const slots = {
+    header: headNode,
+    description: descriptionNode,
+    authSchemes: authNode,
+    body: bodyNode,
+    callbacks: callbacksNode,
+    parameters: parameterNode,
+    responses: responseNode,
+    requests: <RequestTabs />,
+  };
+
+  if (ctx.content?.renderWebhookLayout) return ctx.content.renderWebhookLayout(slots);
+
+  return (
+    <div className="flex flex-col-reverse gap-x-6 gap-y-4 @4xl:flex-row @4xl:items-start">
+      <div className="min-w-0 flex-1 prose-no-margin">
+        {slots.header}
+        {slots.description}
+        {slots.authSchemes}
+        {slots.parameters}
+        {slots.body}
+        {slots.responses}
+        {slots.callbacks}
+      </div>
+      <div className="@4xl:sticky @4xl:top-[calc(var(--fd-docs-row-1,2rem)+1rem)] @4xl:w-[400px]">
+        {slots.requests}
+      </div>
+    </div>
+  );
 }
 
 function RequestBodyContentItem({
   content,
+  required,
   method,
-  operation,
 }: {
   method: HttpMethods;
   content: MediaTypeObject;
-  operation: OperationObject;
+  required?: boolean;
 }) {
-  const ctx = useRenderContext();
-  let ts = useMemo(() => {
-    if (!content.schema || !ctx.generateTypeScriptDefinitions) return;
-    return ctx.generateTypeScriptDefinitions(content.schema, {
-      name: 'RequestBody',
-      readOnly: false,
-      writeOnly: true,
-      ctx,
-    });
-  }, [content.schema, ctx]);
-  if (ts instanceof Promise) ts = use(ts);
+  const ts = useTypeScriptDefinitions(content.schema, {
+    name: 'RequestBody',
+    readOnly: false,
+    writeOnly: true,
+  });
 
   return (
     <>
       {ts && <CopyTypeScriptPanel name="request body" code={ts} className="my-4 last:mb-0" />}
       {content.schema && (
-        <ctx.SchemaUI
+        <SchemaUI
           client={{
             name: 'body',
             as: 'body',
-            required: ctx.schema.resolve(operation.requestBody)?.required,
+            required,
           }}
           root={content.schema}
           readOnly={method === 'get'}
@@ -497,10 +405,8 @@ function RequestBodyContentItem({
   );
 }
 
-function ResponseAccordion({ status, operation }: { status: string; operation: OperationObject }) {
-  const { schema } = useRenderContext();
-  const response = schema.resolve(operation.responses![status]);
-  const contentTypes = response.content ? Object.entries(response.content) : [];
+function ResponseAccordion({ item: { status, response, content } }: { item: OperationResponse }) {
+  const contentTypes = Object.entries(content);
   const items = contentTypes.map(([key]) => ({
     label: <code className="text-xs">{key}</code>,
     value: key,
@@ -527,9 +433,9 @@ function ResponseAccordion({ status, operation }: { status: string; operation: O
               <Markdown md={response.description} />
             </div>
           )}
-          {contentTypes.map(([type, item]) => (
-            <SelectTab key={type} value={type} anchorSegments={[type]}>
-              <RepsonseAccordionItem item={schema.resolve(item)} />
+          {contentTypes.map(([mediaType, media]) => (
+            <SelectTab key={mediaType} value={mediaType} anchorSegments={[mediaType]}>
+              <ResponseAccordionItem item={media} />
             </SelectTab>
           ))}
         </AccordionContent>
@@ -538,25 +444,18 @@ function ResponseAccordion({ status, operation }: { status: string; operation: O
   );
 }
 
-function RepsonseAccordionItem({ item: { schema } }: { item: MediaTypeObject }) {
-  const ctx = useRenderContext();
-  let ts = useMemo(() => {
-    if (!schema || !ctx.generateTypeScriptDefinitions) return;
-    return ctx.generateTypeScriptDefinitions(schema, {
-      name: 'ResponseBody',
-      readOnly: true,
-      writeOnly: false,
-      ctx,
-    });
-  }, [ctx, schema]);
-  // assume it is on server component when returned async
-  if (ts instanceof Promise) ts = use(ts);
+function ResponseAccordionItem({ item: { schema } }: { item: MediaTypeObject }) {
+  const ts = useTypeScriptDefinitions(schema, {
+    name: 'ResponseBody',
+    readOnly: true,
+    writeOnly: false,
+  });
 
   return (
     <>
       {ts && <CopyTypeScriptPanel name="response body" code={ts} className="mb-2" />}
       {schema && (
-        <ctx.SchemaUI
+        <SchemaUI
           client={{
             name: 'response',
             as: 'body',

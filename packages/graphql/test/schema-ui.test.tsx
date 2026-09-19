@@ -4,7 +4,14 @@ import fs from 'node:fs';
 import { describe, expect, test } from 'vitest';
 import { buildSchemaFromSDL } from '@/utils/build-schema';
 import { getOperationField } from '@/utils/schema';
-import { generateGraphQLSchemaUI } from '@/ui/schema-ui';
+import { generateGraphQLSchemaUI } from '@/utils/generate-schema-ui';
+
+const renderers = {
+  renderMarkdown: () => null,
+  renderDirectives: () => null,
+  renderArguments: () => null,
+  renderEnumValues: () => null,
+};
 
 const cwd = fileURLToPath(new URL('./', import.meta.url));
 const schema = buildSchemaFromSDL(
@@ -34,7 +41,7 @@ describe('generateGraphQLSchemaUI', () => {
     const type = schema.getType('Customer');
     expect(type).toBeDefined();
 
-    const generated = generateGraphQLSchemaUI(schema, { type: type! });
+    const generated = generateGraphQLSchemaUI(schema, { type: type! }, renderers);
 
     // cycle: Customer.orders -> Order -> Order.customer -> Customer, each
     // field ref is registered exactly once instead of recursing forever
@@ -58,7 +65,7 @@ describe('generateGraphQLSchemaUI', () => {
     const field = getOperationField(schema, 'query', 'orders');
     expect(field).toBeDefined();
 
-    const generated = generateGraphQLSchemaUI(schema, { type: field!.type });
+    const generated = generateGraphQLSchemaUI(schema, { type: field!.type }, renderers);
 
     // wrapper collapsing: `[Order!]!` collapses into the named type while the
     // GraphQL-style annotation is kept in `aliasName`

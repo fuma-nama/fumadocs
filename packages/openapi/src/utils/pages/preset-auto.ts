@@ -9,7 +9,7 @@ import type {
   WebhookOutput,
 } from '@/utils/pages/builder';
 import type { DistributiveOmit, TagObject } from '@/types';
-import { dereferenceShallow } from '@fumadocs/api-docs/schema/dereference';
+import { dereference } from '@fumadocs/json-schema';
 import { getTagDisplayName } from '@/utils/schema';
 
 interface OperationConfig extends BaseConfig {
@@ -136,9 +136,7 @@ export function createAutoPreset(options: SchemaToPagesOptions): PagesBuilderCon
         );
       }
 
-      const hook = dereferenceShallow(this.document.webhooks![result.item.name])[
-        result.item.method
-      ]!;
+      const hook = dereference(this.document.webhooks![result.item.name])[result.item.method]!;
 
       if (algorithm === 'v2' && hook.operationId) {
         return hook.operationId;
@@ -222,8 +220,8 @@ export function createAutoPreset(options: SchemaToPagesOptions): PagesBuilderCon
         case 'tag': {
           const operation =
             entry.type === 'operation'
-              ? dereferenceShallow(doc.paths?.[entry.item.path])?.[entry.item.method]
-              : dereferenceShallow(doc.webhooks?.[entry.item.name])?.[entry.item.method];
+              ? dereference(doc.paths?.[entry.item.path])?.[entry.item.method]
+              : dereference(doc.webhooks?.[entry.item.name])?.[entry.item.method];
 
           const tags: string[] = [];
           for (const name of operation?.tags ?? []) {

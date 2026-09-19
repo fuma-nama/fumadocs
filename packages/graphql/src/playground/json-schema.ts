@@ -6,12 +6,12 @@ import {
   isScalarType,
   print,
 } from 'graphql';
-import type { ParsedSchema } from '@fumadocs/api-docs/schema';
+import type { JsonSchema } from '@fumadocs/json-schema';
 
 /**
  * Convert a GraphQL input type into JSON Schema, for the playground form.
  */
-export function inputTypeToJsonSchema(type: GraphQLInputType, depth = 0): ParsedSchema {
+export function inputTypeToJsonSchema(type: GraphQLInputType, depth = 0): JsonSchema {
   if (isNonNullType(type)) return inputTypeToJsonSchema(type.ofType, depth);
   if (isListType(type))
     return {
@@ -52,7 +52,7 @@ export function inputTypeToJsonSchema(type: GraphQLInputType, depth = 0): Parsed
     return { type: 'object', additionalProperties: true };
   }
 
-  const properties: Record<string, ParsedSchema> = {};
+  const properties: Record<string, JsonSchema> = {};
   const required: string[] = [];
 
   for (const field of Object.values(type.getFields())) {

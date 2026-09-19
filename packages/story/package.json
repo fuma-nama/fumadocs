@@ -1,6 +1,6 @@
 {
   "name": "@fumadocs/story",
-  "version": "1.3.1",
+  "version": "1.4.0",
   "description": "Story integration to Fumadocs.",
   "keywords": [],
   "license": "MIT",
@@ -15,11 +15,19 @@
     "./css/**/*.css"
   ],
   "exports": {
-    ".": "./dist/index.js",
+    ".": {
+      "types": "./dist/index.d.ts",
+      "browser": "./dist/index.browser.js",
+      "import": "./dist/index.js"
+    },
     "./i18n": "./dist/i18n.js",
     "./next": "./dist/next/index.js",
     "./next/client": "./dist/next/client.js",
-    "./type-tree": "./dist/type-tree/index.js",
+    "./type-tree": {
+      "types": "./dist/type-tree/index.d.ts",
+      "browser": "./dist/type-tree/index.browser.js",
+      "import": "./dist/type-tree/index.js"
+    },
     "./vite": "./dist/vite/index.js",
     "./vite/client": "./dist/vite/client.js",
     "./webpack/story": "./dist/webpack/story.js",
@@ -41,27 +49,28 @@
     "@fuma-translate/react": "^1.0.2",
     "@fumari/stf": "workspace:*",
     "class-variance-authority": "^0.7.1",
-    "cn": "^0.2.6",
-    "lucide-react": "^1.43.0",
+    "cn": "^0.3.0",
+    "lucide-react": "^1.47.0",
     "typescript": "~7.0.2"
   },
   "devDependencies": {
     "@fastify/deepmerge": "^3.2.1",
-    "@types/node": "26.5.0",
-    "@types/react": "^19.2.18",
+    "@types/node": "26.6.1",
+    "@types/react": "^19.3.0",
     "@types/ungap__structured-clone": "^1.2.0",
     "@ungap/structured-clone": "^1.4.0",
+    "fuma-cli": "^0.1.1",
     "fumadocs-core": "workspace:*",
     "fumadocs-ui": "workspace:@fumadocs/base-ui@*",
-    "next": "^16.3.4",
-    "react": "^19.2.8",
-    "react-dom": "^19.2.8",
+    "next": "^16.3.5",
+    "react": "^19.3.0",
+    "react-dom": "^19.3.0",
     "react-error-boundary": "^6.1.5",
     "tailwindcss": "^4.3.3",
     "tsconfig": "workspace:*",
     "tsdown": "0.23.0",
-    "vite": "^8.2.2",
-    "webpack": "^5.110.3"
+    "vite": "^8.3.0",
+    "webpack": "^5.111.1"
   },
   "peerDependencies": {
     "@types/react": "*",
@@ -90,6 +99,6 @@
   "inlinedDependencies": {
     "@fastify/deepmerge": "3.2.1",
     "@ungap/structured-clone": "1.4.0",
-    "react-error-boundary": "6.1.4"
+    "react-error-boundary": "6.1.5"
   }
 }

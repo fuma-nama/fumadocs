@@ -163,6 +163,23 @@ test('parse meta strings', () => {
   `);
 });
 
+test('Remark LLMs: filterElement', async () => {
+  const result = await remark()
+    .use(remarkMdx)
+    .use(remarkLLMs, {
+      _data: true,
+      filterElement(node) {
+        if (node.type !== 'mdxJsxFlowElement' && node.type !== 'mdxJsxTextElement') return true;
+        return node.name !== 'Callout';
+      },
+    })
+    .process('<Callout type="warn">dropped</Callout>\n\ntext after\n');
+
+  expect(result.data.markdown).not.toContain('Callout');
+  expect(result.data.markdown).not.toContain('dropped');
+  expect(result.data.markdown).toContain('text after');
+});
+
 test('Remark LLMs: placeholder', async () => {
   const file = path.resolve(cwd, './fixtures/remark-llms.mdx');
   const content = await fs.readFile(file);

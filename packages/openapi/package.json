@@ -1,6 +1,6 @@
 {
   "name": "fumadocs-openapi",
-  "version": "11.4.3",
+  "version": "12.0.0",
   "description": "Generate MDX docs for your OpenAPI spec",
   "keywords": [
     "Docs",
@@ -19,9 +19,15 @@
     "./css/**/*.css"
   ],
   "exports": {
-    ".": "./dist/index.js",
+    ".": {
+      "types": "./dist/index.d.ts",
+      "browser": "./dist/index.browser.js",
+      "import": "./dist/index.js"
+    },
     "./i18n": "./dist/i18n.js",
-    "./playground/client": "./dist/playground/client.js",
+    "./operation": "./dist/operation.js",
+    "./playground": "./dist/playground/index.js",
+    "./requests": "./dist/requests/index.js",
     "./requests/generators": "./dist/requests/generators/index.js",
     "./requests/generators/all": "./dist/requests/generators/all.js",
     "./requests/generators/csharp": "./dist/requests/generators/csharp.js",
@@ -31,11 +37,11 @@
     "./requests/generators/javascript": "./dist/requests/generators/javascript.js",
     "./requests/generators/python": "./dist/requests/generators/python.js",
     "./requests/generators/rust": "./dist/requests/generators/rust.js",
-    "./scalar": "./dist/scalar/index.js",
     "./server": "./dist/server/index.js",
     "./ui": "./dist/ui/index.js",
     "./ui/base": "./dist/ui/base.js",
-    "./ui/create-client": "./dist/ui/create-client.js",
+    "./ui/playground/client": "./dist/ui/playground/client.js",
+    "./ui/scalar": "./dist/ui/scalar/index.js",
     "./package.json": "./package.json",
     "./css/*": "./css/*"
   },
@@ -50,33 +56,36 @@
     "types:check": "tsc --noEmit"
   },
   "dependencies": {
+    "@base-ui/react": "^1.8.0",
     "@fuma-translate/react": "^1.0.2",
-    "@fumadocs/api-docs": "workspace:*",
+    "@fumadocs/json-schema": "workspace:*",
     "@fumari/json-schema-ts": "^1.0.2",
     "@fumari/stf": "workspace:*",
-    "@scalar/json-magic": "^0.13.4",
+    "@scalar/json-magic": "^0.13.5",
+    "@scalar/openapi-upgrader": "^0.2.16",
     "chokidar": "^5.0.0",
     "class-variance-authority": "^0.7.1",
-    "cn": "^0.2.6",
+    "cn": "^0.3.0",
     "github-slugger": "^2.0.0",
     "hast-util-to-jsx-runtime": "^2.3.6",
-    "lucide-react": "^1.43.0",
+    "lucide-react": "^1.47.0",
     "remark": "^15.0.1",
     "remark-rehype": "^11.1.2",
     "shiki": "^4.4.3",
-    "yaml": "^2.9.0"
+    "yaml": "^2.9.1"
   },
   "devDependencies": {
-    "@scalar/api-client-react": "^2.0.44",
-    "@scalar/openapi-upgrader": "^0.2.15",
+    "@scalar/api-client-react": "^2.0.45",
     "@tailwindcss/oxide": "^4.3.3",
-    "@types/node": "26.5.0",
-    "@types/react": "^19.2.18",
+    "@types/node": "26.6.1",
+    "@types/react": "^19.3.0",
+    "@types/react-dom": "^19.3.0",
     "fast-content-type-parse": "^4.0.0",
     "fuma-cli": "^0.1.1",
     "fumadocs-core": "workspace:*",
     "fumadocs-ui": "workspace:@fumadocs/base-ui@*",
     "json-schema-typed": "^8.0.2",
+    "shared-api": "workspace:*",
     "tsconfig": "workspace:*",
     "tsdown": "0.23.0",
     "xml-js": "^1.6.11"
@@ -102,7 +111,6 @@
     }
   },
   "inlinedDependencies": {
-    "@scalar/openapi-upgrader": "0.2.15",
     "fast-content-type-parse": "4.0.0",
     "xml-js": "1.6.11"
   }

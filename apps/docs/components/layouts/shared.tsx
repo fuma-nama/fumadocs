@@ -1,4 +1,4 @@
-import { AlbumIcon, Heart, LayoutTemplate } from 'lucide-react';
+import { Heart, LayoutTemplate, SquareBookmarkIcon } from 'lucide-react';
 import Image from 'next/image';
 import type { BaseLayoutProps, LinkItemType } from 'fumadocs-ui/layouts/shared';
 import { FumadocsIcon } from '@/app/layout.client';
@@ -6,7 +6,7 @@ import Logo from '@/public/logo.png';
 
 export const linkItems: LinkItemType[] = [
   {
-    icon: <AlbumIcon />,
+    icon: <SquareBookmarkIcon />,
     text: 'Blog',
     url: '/blog',
     active: 'nested-url',

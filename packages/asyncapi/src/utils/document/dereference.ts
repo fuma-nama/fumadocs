@@ -1,7 +1,7 @@
 import type { AsyncAPIObject } from '@/types';
 import { createMagicProxy } from '@scalar/json-magic/magic-proxy';
-import { dereferenceShallow } from '@fumadocs/api-docs/schema/dereference';
-import type { NoReferenceSwallow } from '@fumadocs/api-docs/schema';
+import { dereference } from '@fumadocs/json-schema';
+import type { DereferencedShallow } from '@fumadocs/json-schema';
 
 export interface DereferencedDocument {
   /**
@@ -16,17 +16,26 @@ export interface DereferencedDocument {
    *
    * Non-reference values are returned as-is.
    */
-  resolve: <T>(node: T) => NoReferenceSwallow<T>;
+  resolve: <T>(node: T) => DereferencedShallow<T>;
 
   bundled: AsyncAPIObject;
 }
 
+// documents are read-only, pages of the same document share one proxy
+const cache = new WeakMap<AsyncAPIObject, DereferencedDocument>();
+
 export function dereferenceBundledDocument(bundled: AsyncAPIObject): DereferencedDocument {
-  return {
+  const cached = cache.get(bundled);
+  if (cached) return cached;
+
+  const doc: DereferencedDocument = {
     bundled,
     dereferenced: createMagicProxy(bundled as never) as AsyncAPIObject,
     resolve(node) {
-      return dereferenceShallow(node);
+      return dereference(node);
     },
   };
+
+  cache.set(bundled, doc);
+  return doc;
 }

@@ -1,7 +1,7 @@
 import type { MessageObject } from '@/types';
 import { resolveMultiFormatSchema } from '@/utils/schema';
-import { sample } from '@fumadocs/api-docs/schema/sample';
-import { dereferenceShallow } from '@fumadocs/api-docs/schema/dereference';
+import { sample } from '@fumadocs/json-schema';
+import { dereference } from '@fumadocs/json-schema';
 import { getRaw } from '@scalar/json-magic/magic-proxy';
 
 export interface ExampleMessageItem {
@@ -26,8 +26,8 @@ export function getExampleMessages({ message }: { message: MessageObject }): Exa
     });
   }
 
-  const headersSchema = resolveMultiFormatSchema(dereferenceShallow(message.headers));
-  const payload = resolveMultiFormatSchema(dereferenceShallow(message.payload));
+  const headersSchema = resolveMultiFormatSchema(dereference(message.headers));
+  const payload = resolveMultiFormatSchema(dereference(message.payload));
 
   return [
     {

@@ -1,8 +1,7 @@
 import { Select as SelectPrimitive } from '@base-ui/react/select';
 import { Check, ChevronDown, ChevronUp } from 'lucide-react';
-import React from 'react';
+import * as React from 'react';
 import { cn } from '@/utils/cn';
-import { cva, type VariantProps } from 'class-variance-authority';
 
 const Select = SelectPrimitive.Root;
 
@@ -10,33 +9,19 @@ const SelectGroup = SelectPrimitive.Group;
 
 const SelectValue = SelectPrimitive.Value;
 
-const triggerVariants = cva(
-  'flex items-center w-full rounded-md gap-2 text-start text-sm focus:outline-none focus:ring focus:ring-fd-ring disabled:cursor-not-allowed disabled:opacity-50',
-  {
-    variants: {
-      variant: {
-        default:
-          'border p-2 text-fd-secondary-foreground bg-fd-secondary hover:bg-fd-accent hover:text-fd-accent-foreground',
-        ghost: 'px-1.5 py-1 hover:bg-fd-accent hover:text-fd-accent-foreground',
-      },
-    },
-    defaultVariants: {
-      variant: 'default',
-    },
-  },
-);
-
 function SelectTrigger({
   className,
-  variant,
   children,
   ref,
   ...props
-}: React.ComponentProps<typeof SelectPrimitive.Trigger> & VariantProps<typeof triggerVariants>) {
+}: React.ComponentProps<typeof SelectPrimitive.Trigger>) {
   return (
     <SelectPrimitive.Trigger
       ref={ref}
-      className={cn(triggerVariants({ variant }), className)}
+      className={cn(
+        'flex items-center w-full rounded-md border p-2 gap-2 text-start text-sm text-fd-secondary-foreground bg-fd-secondary hover:bg-fd-accent focus:outline-none focus:ring focus:ring-fd-ring disabled:cursor-not-allowed disabled:opacity-50 data-placeholder:text-fd-muted-foreground',
+        className,
+      )}
       {...props}
     >
       {children}
@@ -100,7 +85,7 @@ function SelectContent({
         <SelectPrimitive.Popup
           ref={ref}
           className={cn(
-            'z-50 min-w-(--anchor-width) overflow-hidden rounded-lg border bg-fd-popover text-fd-popover-foreground shadow-md',
+            'z-50 min-w-[calc(var(--anchor-width)+--spacing(2))] overflow-hidden rounded-lg border bg-fd-popover text-fd-popover-foreground shadow-md',
             className,
           )}
           {...props}
@@ -138,13 +123,13 @@ function SelectItem({
     <SelectPrimitive.Item
       ref={ref}
       className={cn(
-        'flex select-none flex-row items-center rounded-md gap-2 py-1.5 px-2 text-sm outline-none data-[highlighted]:bg-fd-accent data-[highlighted]:text-fd-accent-foreground data-[disabled]:pointer-events-none data-[disabled]:opacity-50',
+        'flex select-none flex-row items-center rounded-md py-1.5 px-2 text-sm outline-none data-[highlighted]:bg-fd-accent data-[highlighted]:text-fd-accent-foreground data-[disabled]:pointer-events-none data-[disabled]:opacity-50',
         className,
       )}
       {...props}
     >
       <SelectPrimitive.ItemText>{children}</SelectPrimitive.ItemText>
-      <SelectPrimitive.ItemIndicator className="ms-auto">
+      <SelectPrimitive.ItemIndicator className="ms-auto shrink-0">
         <Check className="size-3.5 text-fd-primary" />
       </SelectPrimitive.ItemIndicator>
     </SelectPrimitive.Item>
@@ -153,10 +138,15 @@ function SelectItem({
 
 function SelectSeparator({
   className,
+  ref,
   ...props
 }: React.ComponentProps<typeof SelectPrimitive.Separator>) {
   return (
-    <SelectPrimitive.Separator className={cn('my-1 h-px bg-fd-muted', className)} {...props} />
+    <SelectPrimitive.Separator
+      ref={ref}
+      className={cn('my-1 h-px bg-fd-muted', className)}
+      {...props}
+    />
   );
 }
 

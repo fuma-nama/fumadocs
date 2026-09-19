@@ -16,6 +16,13 @@
       "autoPort": true
     },
     {
+      "name": "asyncapi-example",
+      "runtimeExecutable": "pnpm",
+      "runtimeArgs": ["--dir", "examples/asyncapi", "dev"],
+      "port": 3000,
+      "autoPort": true
+    },
+    {
       "name": "graphql-example",
       "runtimeExecutable": "pnpm",
       "runtimeArgs": ["--dir", "examples/graphql", "dev"],
@@ -47,6 +54,13 @@
       "name": "python-example",
       "runtimeExecutable": "pnpm",
       "runtimeArgs": ["--dir", "examples/python", "dev"],
+      "port": 3000,
+      "autoPort": true
+    },
+    {
+      "name": "story-example",
+      "runtimeExecutable": "pnpm",
+      "runtimeArgs": ["--dir", "examples/tanstack-start-story", "dev"],
       "port": 3000,
       "autoPort": true
     }

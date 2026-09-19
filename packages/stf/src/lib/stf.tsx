@@ -1,4 +1,13 @@
-import { createContext, ReactNode, use, useEffect, useMemo, useRef, useState } from 'react';
+import {
+  createContext,
+  ReactNode,
+  use,
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useSyncExternalStore,
+} from 'react';
 import {
   DataEngine,
   getDefaultValue,
@@ -6,7 +15,7 @@ import {
   type DefaultValue,
 } from './data-engine';
 import type { FieldKey } from './types';
-import { deepEqual, isPlainObject } from './utils';
+import { deepEqual, isPlainObject, stringifyFieldKey } from './utils';
 
 const Context = createContext<Stf | null>(null);
 
@@ -205,35 +214,48 @@ export function useFieldValue<V = unknown>(
 ) {
   const { stf, compute = (v) => v as V, defaultValue, isChanged = (a, b) => a !== b } = options;
   const engine = useDataEngine(stf);
-  const [value, setValue] = useState<V>(() =>
-    compute(defaultValue === undefined ? engine.get(key) : engine.init(key, defaultValue)),
-  );
-  const prevEngineRef = useRef(engine);
+  // eslint-disable-next-line react-hooks/exhaustive-deps -- `fieldKey` identifies `key`
+  const field = useMemo(() => key, [stringifyFieldKey(key)]);
+  const cacheRef = useRef<{ engine: DataEngine; field: FieldKey; value: V } | undefined>(undefined);
 
-  if (prevEngineRef.current !== engine) {
-    setValue(
-      compute(defaultValue === undefined ? engine.get(key) : engine.init(key, defaultValue)),
-    );
-    prevEngineRef.current = engine;
-  }
+  const subscribe = useCallback(
+    (onChange: () => void) => {
+      const listener: DataEngineListener = {
+        field,
+        onInit: onChange,
+        onUpdate: onChange,
+        onDelete: onChange,
+      };
 
-  function onUpdate() {
-    const computed = compute(engine.get(key));
-    setValue((prev) => (isChanged(prev, computed) ? computed : prev));
-  }
-
-  useListener({
-    field: key,
-    stf,
-    onInit: onUpdate,
-    onUpdate: onUpdate,
-    onDelete() {
-      const computed = compute(undefined);
-      setValue((prev) => (isChanged(prev, computed) ? computed : prev));
+      engine.listen(listener);
+      return () => {
+        engine.unlisten(listener);
+      };
     },
-  });
+    [engine, field],
+  );
 
-  return [value, (newValue: unknown) => engine.update(key, newValue)] as const;
+  function getSnapshot(): V {
+    const cache = cacheRef.current;
+
+    // read the field on every call, so updates between render and `subscribe` aren't missed
+    if (cache && cache.engine === engine && cache.field === field) {
+      const computed = compute(engine.get(field));
+      if (isChanged(cache.value, computed)) cache.value = computed;
+      return cache.value;
+    }
+
+    const value = compute(
+      defaultValue === undefined ? engine.get(field) : engine.init(field, defaultValue),
+    );
+    cacheRef.current = { engine, field, value };
+    return value;
+  }
+
+  return [
+    useSyncExternalStore(subscribe, getSnapshot, getSnapshot),
+    (newValue: unknown) => engine.update(field, newValue),
+  ] as const;
 }
 
 export function useListener(listener: DataEngineListener & { stf?: Stf | DataEngine }) {

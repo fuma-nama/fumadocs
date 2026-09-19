@@ -1,11 +1,10 @@
 'use client';
-import { useRenderContext } from '@/ui/contexts/api';
-import { ReactNode, useMemo } from 'react';
+import { type ReactNode, useMemo } from 'react';
 import { ClientCodeBlock } from '@/ui/components/codeblock';
-import { getExampleMessages, type ExampleMessageItem } from '@/utils/get-example-messages';
+import type { ExampleMessageItem } from '@/utils/get-example-messages';
+import { useRenderContext } from '@/utils/create-page';
 import { useTranslations } from '@fuma-translate/react';
-import { MessageObject } from '@/types';
-import { SelectTab, SelectTabs, SelectTabTrigger } from '@fumadocs/api-docs/components/select-tab';
+import { SelectTab, SelectTabs, SelectTabTrigger } from 'shared-api/components/select-tab';
 import { Markdown } from '../components/markdown';
 import { Heading } from '../components/heading';
 import {
@@ -16,59 +15,47 @@ import {
 } from 'fumadocs-ui/components/codeblock';
 
 export function MessageExamples({
-  message,
+  examples,
   headingLevel,
 }: {
-  message: MessageObject;
+  examples: ExampleMessageItem[];
   headingLevel: number;
 }) {
-  const ctx = useRenderContext();
   const t = useTranslations({ note: 'asyncapi message example' });
-  const items = useMemo(
-    () =>
-      getExampleMessages({ message }).filter(
-        (item) => item.payload !== undefined || item.headers !== undefined || item.description,
-      ),
-    [message],
-  );
-  let { renderAPIExampleUsageTabs } = ctx.content ?? {};
+  const ctx = useRenderContext();
+  if (examples.length === 0) return null;
 
-  if (items.length === 0) return null;
+  if (ctx.content?.renderAPIExampleUsageTabs)
+    return ctx.content.renderAPIExampleUsageTabs(examples, ctx);
 
-  renderAPIExampleUsageTabs ??= (examples) => {
-    if (examples.length === 0) return null;
-
-    return (
-      <div className="p-1 pt-4 border rounded-xl bg-fd-card text-fd-card-foreground prose-no-margin">
-        <Heading id="example" depth={headingLevel} className="px-4">
-          {t('Message Example')}
-        </Heading>
-        <SelectTabs defaultValue={examples[0]?.id}>
-          <SelectTabTrigger
-            className="w-full mb-2 px-4"
-            items={examples.map((item) => ({
-              label: (
-                <div>
-                  <p className="font-medium">{item.name}</p>
-                  <div className="text-sm text-fd-muted-foreground">
-                    {item.description && <Markdown md={item.description} />}
-                  </div>
+  return (
+    <div className="p-1 pt-4 border rounded-xl bg-fd-card text-fd-card-foreground prose-no-margin">
+      <Heading id="example" depth={headingLevel} className="px-4">
+        {t('Message Example')}
+      </Heading>
+      <SelectTabs defaultValue={examples[0]?.id}>
+        <SelectTabTrigger
+          className="w-full mb-2 px-4"
+          items={examples.map((item) => ({
+            label: (
+              <div>
+                <p className="font-medium">{item.name}</p>
+                <div className="text-sm text-fd-muted-foreground">
+                  {item.description && <Markdown md={item.description} />}
                 </div>
-              ),
-              value: item.id,
-            }))}
-          />
-          {examples.map((item) => (
-            <SelectTab key={item.id} value={item.id} className="prose-no-margin">
-              <MessageExampleContent item={item} />
-            </SelectTab>
-          ))}
-        </SelectTabs>
-      </div>
-    );
-  };
-
-  return renderAPIExampleUsageTabs(items, ctx);
+              </div>
+            ),
+            value: item.id,
+          }))}
+        />
+        {examples.map((item) => (
+          <SelectTab key={item.id} value={item.id} className="prose-no-margin">
+            <MessageExampleContent item={item} />
+          </SelectTab>
+        ))}
+      </SelectTabs>
+    </div>
+  );
 }
 
 function MessageExampleContent({ item }: { item: ExampleMessageItem }) {

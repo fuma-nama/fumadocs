@@ -1,6 +1,6 @@
 {
   "name": "@fumadocs/graphql",
-  "version": "0.2.7",
+  "version": "0.3.0",
   "description": "Generate docs for your GraphQL schema",
   "keywords": [
     "Docs",
@@ -22,8 +22,13 @@
   "exports": {
     ".": "./dist/index.js",
     "./i18n": "./dist/i18n.js",
+    "./operation": "./dist/operation.js",
+    "./playground": "./dist/playground/index.js",
     "./server": "./dist/server/index.js",
+    "./type-docs": "./dist/type-docs.js",
     "./ui": "./dist/ui/index.js",
+    "./ui/playground": "./dist/ui/playground/index.js",
+    "./utils/snippets": "./dist/utils/snippets.js",
     "./package.json": "./package.json",
     "./css/*": "./css/*"
   },
@@ -38,26 +43,30 @@
     "types:check": "tsc --noEmit"
   },
   "dependencies": {
+    "@base-ui/react": "^1.8.0",
     "@fuma-translate/react": "^1.0.2",
-    "@fumadocs/api-docs": "workspace:*",
+    "@fumadocs/json-schema": "workspace:*",
     "@fumari/stf": "workspace:*",
     "class-variance-authority": "^0.7.1",
-    "cn": "^0.2.6",
+    "cn": "^0.3.0",
     "github-slugger": "^2.0.0",
     "hast-util-to-jsx-runtime": "^2.3.6",
-    "lucide-react": "^1.43.0",
+    "lucide-react": "^1.47.0",
     "remark": "^15.0.1",
     "remark-rehype": "^11.1.2",
     "shiki": "^4.4.3"
   },
   "devDependencies": {
     "@tailwindcss/oxide": "^4.3.3",
-    "@types/node": "26.5.0",
-    "@types/react": "^19.2.18",
-    "@types/react-dom": "^19.2.7",
+    "@types/node": "26.6.1",
+    "@types/react": "^19.3.0",
+    "@types/react-dom": "^19.3.0",
+    "fuma-cli": "^0.1.1",
     "fumadocs-core": "workspace:*",
     "fumadocs-ui": "workspace:@fumadocs/base-ui@*",
     "graphql": "^17.0.2",
+    "json-schema-typed": "^8.0.2",
+    "shared-api": "workspace:*",
     "tailwindcss": "^4.3.3",
     "tsconfig": "workspace:*",
     "tsdown": "0.23.0"
@@ -67,11 +76,15 @@
     "fumadocs-core": "^16.15.0",
     "fumadocs-ui": "^16.15.0",
     "graphql": "^17.0.0",
+    "json-schema-typed": "*",
     "react": "^19.2.0",
     "react-dom": "^19.2.0"
   },
   "peerDependenciesMeta": {
     "@types/react": {
+      "optional": true
+    },
+    "json-schema-typed": {
       "optional": true
     }
   }

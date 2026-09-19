@@ -1,7 +1,8 @@
 import type { TypeNode } from '@/type-tree/types';
 import { type ReactNode, useMemo, type ComponentPropsWithoutRef, type FC } from 'react';
 import { deepmerge } from '@fastify/deepmerge';
-import { type VariantInfo, WithControl, WithControlProps } from '@/client/with-control';
+import { WithControl as DefaultWithControl } from '@/client/with-control';
+import type { VariantInfo, WithControlProps } from '@/provider';
 import { deserialize } from '@/utils/serialization';
 
 export interface StoryOptions<C extends FC<any>> {
@@ -67,7 +68,16 @@ export interface StoryFactory {
   defineStory: <C extends FC<any>>(options: StoryOptions<C>) => Story<C>;
 }
 
-export function defineStoryFactory(): StoryFactory {
+export interface StoryFactoryOptions {
+  /**
+   * Replace the UI of stories, e.g. the one installed with Fumadocs CLI.
+   */
+  WithControl?: FC<WithControlProps>;
+}
+
+export function defineStoryFactory({
+  WithControl = DefaultWithControl,
+}: StoryFactoryOptions = {}): StoryFactory {
   const propsDeepmerge = deepmerge({
     mergeArray: () => (_target, source) => source,
   });

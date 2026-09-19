@@ -1,7 +1,7 @@
 'use client';
-import { type ReactNode, useMemo } from 'react';
+import type { ReactNode } from 'react';
 import { useTranslations } from '@fuma-translate/react';
-import { AnchorSection } from '@fumadocs/api-docs/auto-anchor/client';
+import { AnchorSection } from 'shared-api/auto-anchor/client';
 import {
   isEnumType,
   isInputObjectType,
@@ -10,38 +10,32 @@ import {
   isScalarType,
   isUnionType,
 } from 'graphql';
-import { getCustomDirectives, getNamedTypeKind, type OperationKind } from '@/utils/schema';
-import { getTypeUsages } from '@/utils/usage';
+import { useOperationLink, useRenderContext, useTypeLink } from '@/utils/create-page';
+import type { PageTypeProps } from '@/type-docs';
+import { TypeProvider, useNamedType } from '@/type-docs';
+import { SchemaUI } from '@/ui/components/schema';
+import type { OperationKind } from '@/utils/schema';
 import { KindLabel } from '../components/badge';
 import { Heading } from '../components/heading';
 import { Markdown } from '../components/markdown';
 import { EnumValueList } from '../components/enum-values';
 import { DirectiveList, ReferenceLink, TypeAnnotation } from '../components/type-annotation';
-import { resolveOperationLink, resolveTypeLink, useRenderContext } from '../contexts/api';
 import { Braces, CornerUpLeft, Import, Layers, Variable } from 'lucide-react';
 import Link from 'fumadocs-core/link';
 
-export function TypeDocs({
-  name,
-  showTitle,
-  showDescription,
-  headingLevel = 2,
-}: {
-  name: string;
-  showTitle?: boolean;
-  showDescription?: boolean;
-  headingLevel?: number;
-}) {
+export function TypeDocs({ name, ...props }: PageTypeProps) {
+  return (
+    <TypeProvider name={name}>
+      <TypeDocsContent {...props} />
+    </TypeProvider>
+  );
+}
+
+function TypeDocsContent({ showTitle, showDescription }: Omit<PageTypeProps, 'name'>) {
   const t = useTranslations({ note: 'type page' });
   const ctx = useRenderContext();
-  const { schema } = ctx.schema;
-  const type = useMemo(() => {
-    const type = schema.getType(name);
-    if (!type) throw new Error(`[Fumadocs GraphQL] Type not found in schema: ${name}`);
-
-    return type;
-  }, [schema, name]);
-  const kind = getNamedTypeKind(type);
+  const { name, kind, type, directives, relations } = useNamedType();
+  let headingLevel = 2;
 
   let headNode: ReactNode = null;
   if (showTitle) {
@@ -58,43 +52,39 @@ export function TypeDocs({
 
   const descriptionNode = showDescription && type.description && <Markdown md={type.description} />;
 
-  const directives = getCustomDirectives(type.astNode);
   const directivesNode = directives.length > 0 && <DirectiveList directives={directives} />;
 
-  const relations: ReactNode[] = [];
-  if ((isObjectType(type) || isInterfaceType(type)) && type.getInterfaces().length > 0) {
-    relations.push(
+  const { usages } = relations;
+  const relationNodes: ReactNode[] = [];
+  if (relations.implements.length > 0) {
+    relationNodes.push(
       <TypeRelation key="implements" label={t('Implements')}>
-        {type.getInterfaces().map((i) => (
+        {relations.implements.map((i) => (
           <TypeAnnotation key={i.name} type={i} />
         ))}
       </TypeRelation>,
     );
   }
-  if (isInterfaceType(type)) {
-    const { objects } = schema.getImplementations(type);
-    if (objects.length > 0) {
-      relations.push(
-        <TypeRelation key="implemented-by" label={t('Implemented by')}>
-          {objects.map((o) => (
-            <TypeAnnotation key={o.name} type={o} />
-          ))}
-        </TypeRelation>,
-      );
-    }
-  }
-  if (isUnionType(type)) {
-    relations.push(
-      <TypeRelation key="possible-types" label={t('Possible types')}>
-        {type.getTypes().map((o) => (
+  if (relations.implementedBy.length > 0) {
+    relationNodes.push(
+      <TypeRelation key="implemented-by" label={t('Implemented by')}>
+        {relations.implementedBy.map((o) => (
           <TypeAnnotation key={o.name} type={o} />
         ))}
       </TypeRelation>,
     );
   }
-  const usages = useMemo(() => getTypeUsages(schema, name), [schema, name]);
+  if (relations.possibleTypes.length > 0) {
+    relationNodes.push(
+      <TypeRelation key="possible-types" label={t('Possible types')}>
+        {relations.possibleTypes.map((o) => (
+          <TypeAnnotation key={o.name} type={o} />
+        ))}
+      </TypeRelation>,
+    );
+  }
   if (usages.returnedBy.length > 0) {
-    relations.push(
+    relationNodes.push(
       <TypeRelation key="returned-by" label={t('Returned by')} icon={CornerUpLeft}>
         {usages.returnedBy.map((op) => (
           <OperationChip key={`${op.kind}:${op.name}`} kind={op.kind} name={op.name} />
@@ -103,7 +93,7 @@ export function TypeDocs({
     );
   }
   if (usages.inputFor.length > 0) {
-    relations.push(
+    relationNodes.push(
       <TypeRelation key="input-for" label={t('Input for')} icon={Import}>
         {usages.inputFor.map((op) => (
           <OperationChip key={`${op.kind}:${op.name}`} kind={op.kind} name={op.name} />
@@ -112,7 +102,7 @@ export function TypeDocs({
     );
   }
   if (usages.memberOf.length > 0) {
-    relations.push(
+    relationNodes.push(
       <TypeRelation key="field-of" label={t('Field of')} icon={Braces}>
         {usages.memberOf.map((ref) => (
           <FieldChip key={`${ref.parent}.${ref.field}`} parent={ref.parent} field={ref.field} />
@@ -121,7 +111,7 @@ export function TypeDocs({
     );
   }
   if (usages.argumentOf.length > 0) {
-    relations.push(
+    relationNodes.push(
       <TypeRelation key="argument-of" label={t('Argument of')} icon={Variable}>
         {usages.argumentOf.map((ref) => (
           <FieldChip key={`${ref.parent}.${ref.field}`} parent={ref.parent} field={ref.field} />
@@ -130,8 +120,8 @@ export function TypeDocs({
     );
   }
 
-  const relationsNode: ReactNode = relations.length > 0 && (
-    <TypeRelations>{relations}</TypeRelations>
+  const relationsNode: ReactNode = relationNodes.length > 0 && (
+    <TypeRelations>{relationNodes}</TypeRelations>
   );
 
   let fieldsNode: ReactNode = null;
@@ -142,7 +132,7 @@ export function TypeDocs({
           {t('Fields')}
         </Heading>
         <AnchorSection segments={['fields']}>
-          <ctx.SchemaUI
+          <SchemaUI
             client={{
               name: type.name,
               as: 'body',
@@ -159,7 +149,7 @@ export function TypeDocs({
   } else if (isUnionType(type)) {
     fieldsNode = (
       <AnchorSection segments={['types']}>
-        <ctx.SchemaUI
+        <SchemaUI
           client={{
             name: type.name,
             as: 'body',
@@ -205,22 +195,6 @@ export function TypeDocs({
     );
   }
 
-  let { renderTypeLayout } = ctx.content ?? {};
-
-  renderTypeLayout ??= (slots) => {
-    return (
-      <div className="prose-no-margin">
-        {slots.header}
-        {slots.description}
-        {slots.directives}
-        {slots.relations}
-        {slots.fields}
-        {slots.values}
-        {slots.scalar}
-      </div>
-    );
-  };
-
   const slots = {
     header: headNode,
     description: descriptionNode,
@@ -231,11 +205,20 @@ export function TypeDocs({
     scalar: scalarNode,
   };
 
-  return renderTypeLayout(slots, {
-    type,
-    kind,
-    ctx,
-  });
+  if (ctx.content?.renderTypeLayout)
+    return ctx.content.renderTypeLayout(slots, { type, kind, ctx });
+
+  return (
+    <div className="prose-no-margin">
+      {slots.header}
+      {slots.description}
+      {slots.directives}
+      {slots.relations}
+      {slots.fields}
+      {slots.values}
+      {slots.scalar}
+    </div>
+  );
 }
 
 function TypeRelations({ children }: { children: ReactNode }) {
@@ -269,8 +252,7 @@ function TypeRelation({
 }
 
 function OperationChip({ kind, name }: { kind: OperationKind; name: string }) {
-  const ctx = useRenderContext();
-  const href = resolveOperationLink(ctx, kind, name);
+  const href = useOperationLink(kind, name);
 
   if (href) {
     return (
@@ -297,8 +279,7 @@ function OperationChip({ kind, name }: { kind: OperationKind; name: string }) {
 }
 
 function FieldChip({ parent, field }: { parent: string; field: string }) {
-  const ctx = useRenderContext();
-  const href = resolveTypeLink(ctx, parent);
+  const href = useTypeLink(parent);
 
   return (
     <code className="font-mono text-fd-muted-foreground">

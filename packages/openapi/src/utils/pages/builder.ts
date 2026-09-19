@@ -1,9 +1,9 @@
 import type { Document, HttpMethods, OperationObject, PathItemObject, TagObject } from '@/types';
 import { getTagDisplayName, methodKeys } from '@/utils/schema';
-import { idToTitle } from '@fumadocs/api-docs/utils/id-to-title';
-import { dereferenceShallow } from '@fumadocs/api-docs/schema/dereference';
+import { idToTitle } from 'shared-api/utils/id-to-title';
+import { dereference } from '@fumadocs/json-schema';
 import { createMagicProxy } from '@scalar/json-magic/magic-proxy';
-import type { NoReferenceSwallow } from '@fumadocs/api-docs/schema';
+import type { DereferencedShallow } from '@fumadocs/json-schema';
 
 interface BaseEntry {
   path: string;
@@ -72,7 +72,7 @@ export interface PagesBuilder {
   id: string;
   /** bundled OpenAPI document (not dereferenced) */
   document: Document;
-  dereferenceShallow: <T>(schema: T) => NoReferenceSwallow<T>;
+  dereferenceShallow: <T>(schema: T) => DereferencedShallow<T>;
   /**
    * add output entry.
    */
@@ -132,7 +132,7 @@ export function fromSchema(
   toPages({
     id: schemaId,
     document,
-    dereferenceShallow: (s) => dereferenceShallow(s),
+    dereferenceShallow: (s) => dereference(s),
     create(entry) {
       files.push(entry);
     },
@@ -154,7 +154,7 @@ export function fromSchema(
       }
 
       for (const [name, _pathItem] of Object.entries(document.webhooks ?? {})) {
-        const pathItem = dereferenceShallow(_pathItem);
+        const pathItem = dereference(_pathItem);
         if (!pathItem) continue;
 
         for (const methodKey of methodKeys) {
@@ -183,7 +183,7 @@ export function fromSchema(
         .join('/');
     },
     fromExtractedWebhook(item) {
-      const pathItem = dereferenceShallow(document.webhooks?.[item.name]);
+      const pathItem = dereference(document.webhooks?.[item.name]);
       if (!pathItem) return;
       const operation = pathItem?.[item.method];
       if (!operation) return;
@@ -196,7 +196,7 @@ export function fromSchema(
       };
     },
     fromExtractedOperation(item) {
-      const pathItem = dereferenceShallow(document.paths?.[item.path]);
+      const pathItem = dereference(document.paths?.[item.path]);
       if (!pathItem) return;
       const operation = pathItem?.[item.method];
       if (!operation) return;
@@ -246,6 +246,22 @@ export interface GeneratedPageProps {
 
   webhooks?: WebhookItem[];
 }
+
+export type OpenAPIPageProps = OpenAPIPageProps_Spec | OpenAPIPageProps_Preloaded;
+
+export type OpenAPIPageProps_Spec = Omit<GeneratedPageProps, 'document'> & {
+  payload: {
+    bundled: Document;
+    proxyUrl?: string;
+  };
+};
+
+export type OpenAPIPageProps_Preloaded = GeneratedPageProps & {
+  preloaded: {
+    docs: Record<string, Document>;
+    proxyUrl?: string;
+  };
+};
 
 export function getPageProps(
   entry: PageOutput | OperationOutput | WebhookOutput,

@@ -20,6 +20,9 @@ export interface LoaderInput {
 
 export interface LoaderOutput {
   code: string;
+  /**
+   * source map, omit if the transformation has no meaningful mapping.
+   */
   map?: unknown;
 
   /**
@@ -118,7 +121,8 @@ export function toVite(loader: Loader): ViteLoader {
         if (result === null) return null;
         return {
           code: result.code,
-          map: result.map as TransformResult['map'],
+          // an empty map tells the bundler there is no mapping, instead of warning about a missing one
+          map: (result.map ?? { mappings: '' }) as TransformResult['map'],
           moduleType: result.moduleType,
         };
       } catch (e) {

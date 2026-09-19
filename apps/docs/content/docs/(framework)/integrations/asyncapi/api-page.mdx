@@ -32,8 +32,8 @@ export const AsyncAPIPage = createAsyncAPIPage({
           {slots.header}
           {slots.description}
           {slots.channel}
+          {slots.parameters}
           {slots.messages}
-          {slots.messageExamples}
         </div>
       );
     },
@@ -127,6 +127,65 @@ export const AsyncAPIPage = createAsyncAPIPage({
     CodeBlock({ lang, code }) {
       return <pre data-lang={lang}>{code}</pre>;
     },
+  },
+});
+```
+
+## Customise UI
+
+For customisations beyond the available options, you can install the UI into your codebase with [Fumadocs CLI](/docs/cli).
+
+### Full UI
+
+The entire UI of API pages, built on [the headless layer](/docs/integrations/asyncapi/headless).
+
+```npm
+npx @fumadocs/cli add fumadocs/asyncapi/page
+```
+
+It installs `<AsyncAPIPage />` itself, your `components/api-page.tsx` is no longer needed.
+
+```tsx title="mdx-components.tsx"
+import { AsyncAPIPage } from '@/components/api-page'; // [!code --]
+import { AsyncAPIPage } from '@/components/asyncapi/page'; // [!code ++]
+```
+
+### Operation
+
+The UI of a single operation, including its channel, messages and bindings.
+
+```npm
+npx @fumadocs/cli add fumadocs/asyncapi/operation
+```
+
+```tsx title="components/api-page.tsx"
+'use client';
+import { createAsyncAPIPage } from '@fumadocs/asyncapi/ui';
+import { Operation } from '@/components/asyncapi/operation';
+
+export const AsyncAPIPage = createAsyncAPIPage({
+  components: {
+    Operation,
+  },
+});
+```
+
+### Schema UI
+
+The UI of JSON schemas, shared with the other API integrations.
+
+```npm
+npx @fumadocs/cli add fumadocs/api-docs/schema
+```
+
+```tsx title="components/api-page.tsx"
+'use client';
+import { createAsyncAPIPage } from '@fumadocs/asyncapi/ui';
+import { Schema } from '@/components/api/schema';
+
+export const AsyncAPIPage = createAsyncAPIPage({
+  components: {
+    SchemaUI: Schema,
   },
 });
 ```
