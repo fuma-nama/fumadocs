@@ -1035,7 +1035,9 @@ components:
         id:
           type: integer
           format: int64
-          readOnly: true
+          # Upstream marks this `readOnly: true`, but it's also in `required` above and
+          # galaxy.scalar.com validates request bodies against it, rejecting the
+          # playground's spec-correct body with a 422. Keep it writable so POST/PUT work.
           examples:
             - 1
           x-variable: planetId
