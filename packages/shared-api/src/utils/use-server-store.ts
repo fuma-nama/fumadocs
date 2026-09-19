@@ -43,9 +43,10 @@ export function useServerStore<T extends { variables: Record<string, string> }>(
 
     try {
       const value: unknown = JSON.parse(cached);
-      if (isPlainObject(value) && isPlainObject(value.variables) && resolve(keyOf(value as T))) {
-        setServer(value as T);
-      }
+      if (!isPlainObject(value) || !isPlainObject(value.variables)) return;
+
+      const server = resolve(keyOf(value as T));
+      if (server) setServer({ ...server, variables: value.variables as Record<string, string> });
     } catch {
       // ignore malformed values
     }

@@ -8,7 +8,7 @@ import {
   SelectValue,
 } from 'shared-api/components/select';
 import { Input } from 'shared-api/components/input';
-import { labelVariants } from 'shared-api/components/label';
+import { Label } from 'shared-api/components/label';
 import { useRef, useState, type ComponentProps } from 'react';
 import { cn } from '@/utils/cn';
 import {
@@ -24,11 +24,9 @@ import { EditIcon } from 'lucide-react';
 import { useTranslations } from '@fuma-translate/react';
 import type { ServerObject, ServerVariableObject } from '@/types';
 import { dereference } from '@fumadocs/json-schema';
-import { resolveServerUrl } from '@/utils/server-url';
-import { idToTitle } from 'shared-api/utils/id-to-title';
 
 export function ServerSelect(props: ComponentProps<typeof DialogTrigger>) {
-  const { servers, server, setServer, setServerVariables } = useServer();
+  const { servers, server, resolveUrl, setServer, setServerVariables } = useServer();
   const [open, setOpen] = useState(false);
   const t = useTranslations({ note: 'playground server select' });
   const serverSchema = server ? servers[server.id] : undefined;
@@ -43,11 +41,9 @@ export function ServerSelect(props: ComponentProps<typeof DialogTrigger>) {
         )}
       >
         <span className="px-2 py-0.5 font-medium rounded-lg border bg-fd-primary text-xs text-fd-primary-foreground shadow-sm">
-          {server ? idToTitle(server.id) : t('Server URL')}
+          {server?.title ?? t('Server URL')}
         </span>
-        <code className="truncate min-w-0 flex-1">
-          {serverSchema && resolveServerUrl(serverSchema, server?.variables ?? {})}
-        </code>
+        <code className="truncate min-w-0 flex-1">{resolveUrl()}</code>
         <EditIcon className="size-4 text-fd-muted-foreground shrink-0" />
       </DialogTrigger>
       <DialogContent>
@@ -56,8 +52,8 @@ export function ServerSelect(props: ComponentProps<typeof DialogTrigger>) {
           <DialogDescription>{t('The base URL of your API endpoint.')}</DialogDescription>
         </DialogHeader>
         <Select
-          items={Object.entries(servers).map(([id, item]) => ({
-            label: <code className="font-medium">{resolveServerUrl(item, {})}</code>,
+          items={Object.keys(servers).map((id) => ({
+            label: <code className="font-medium">{resolveUrl(id)}</code>,
             value: id,
           }))}
           value={server?.id ?? null}
@@ -71,7 +67,7 @@ export function ServerSelect(props: ComponentProps<typeof DialogTrigger>) {
               return (
                 <SelectItem key={id} value={id}>
                   <div className="flex flex-col gap-2">
-                    <code className="font-medium">{resolveServerUrl(item, {})}</code>
+                    <code className="font-medium">{resolveUrl(id)}</code>
                     {item.description && (
                       <p className="text-fd-muted-foreground">{item.description}</p>
                     )}
@@ -127,9 +123,7 @@ function ServerSelectContent({
 
           return (
             <fieldset key={key} className="flex flex-col gap-1">
-              <label className={cn(labelVariants())} htmlFor={key}>
-                {key}
-              </label>
+              <Label htmlFor={key}>{key}</Label>
               <p className="text-xs text-fd-muted-foreground empty:hidden">
                 {variable.description}
               </p>

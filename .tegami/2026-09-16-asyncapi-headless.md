@@ -10,6 +10,7 @@ API pages are now built on a headless layer, use it to build your own UI:
 
 - `createAsyncAPIPage()` and `<AsyncAPIProvider />` with your own components.
 - the hooks of pages and operations: `useAsyncAPI()`, `useComponents()`, `useServer()`, `useOperation()` and `useOperationSecurity()`.
+- `useServer()` resolves server URLs: `resolveUrl(id)` fills in the variables of a server, and the selected one carries its `title`.
 
 ```tsx title="components/api-page.tsx"
 'use client';
@@ -26,7 +27,7 @@ See [Headless](https://fumadocs.dev/docs/integrations/asyncapi/headless).
 
 ## Install the UI
 
-The UI of API pages can be installed with Fumadocs CLI and edited:
+The UI of API pages can be installed with Fumadocs CLI and edited, reusing the `components/ui` files you already have:
 
 ```npm
 npx @fumadocs/cli add fumadocs/asyncapi/page

@@ -4,7 +4,6 @@ import { ChevronRight, Plus, Trash2, X } from 'lucide-react';
 import { FieldKey, useArray, useDataEngine, useFieldValue, useObject } from '@fumari/stf';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/select';
 import { Input } from '@/components/input';
-import { labelVariants } from '@/components/label';
 import { cn } from '@/utils/cn';
 import { buttonVariants } from 'fumadocs-ui/components/ui/button';
 import {
@@ -28,6 +27,9 @@ function FieldLabelType(props: ComponentProps<'code'>) {
     </code>
   );
 }
+
+const labelClassName =
+  'text-xs font-medium text-fd-foreground peer-disabled:cursor-not-allowed peer-disabled:opacity-70';
 
 export function ObjectInput({
   field: _field,
@@ -354,7 +356,7 @@ export function FieldSet({
     return (
       <button
         type="button"
-        className={cn(labelVariants(), 'inline-flex items-center gap-1 font-mono me-auto')}
+        className={cn(labelClassName, 'inline-flex items-center gap-1 font-mono me-auto')}
         onClick={() => {
           dataEngine.init(fieldName, generateDefault(schema));
           setShow((prev) => !prev);
@@ -369,7 +371,7 @@ export function FieldSet({
 
   function renderLabelName() {
     return (
-      <span className={cn(labelVariants(), 'font-mono me-auto')}>
+      <span className={cn(labelClassName, 'font-mono me-auto')}>
         {name}
         {isRequired && <span className="text-red-400/80 mx-1">*</span>}
       </span>

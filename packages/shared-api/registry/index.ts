@@ -4,32 +4,28 @@ import type { Registry } from 'fuma-cli/compiler';
 
 const dir = path.join(path.dirname(fileURLToPath(import.meta.url)), '../src');
 
-/** the UI of API pages, shared by the integrations */
+const primitives = ['dialog', 'input', 'label', 'popover', 'select', 'spinner'];
+
+/**
+ * the UI of API pages, shared by the integrations.
+ */
 const shared: Record<string, Registry['dependencies']> = {
   accordion: undefined,
   badge: undefined,
   collapsible: undefined,
-  dialog: undefined,
-  label: undefined,
   'playground/inputs': { '@fumari/stf': null },
-  popover: undefined,
   'select-tab': undefined,
-  spinner: undefined,
 };
 
 export const registry: Registry = {
   name: 'fumadocs/api-docs',
   dir,
   components: [
-    {
-      // following the Shadcn UI API, so the project's own `components/ui` files are reused
-      name: 'ui/primitives',
+    ...primitives.map((name) => ({
+      name: `ui/${name}`,
       unlisted: true,
-      files: [
-        { type: 'ui', path: 'components/select.tsx' },
-        { type: 'ui', path: 'components/input.tsx' },
-      ],
-    },
+      files: [{ type: 'ui' as const, path: `components/${name}.tsx` }],
+    })),
     ...Object.entries(shared).map(([name, dependencies]) => ({
       name: `ui/${name}`,
       unlisted: true,
@@ -59,15 +55,17 @@ export const registry: Registry = {
         },
       ],
     },
-    {
-      name: 'lib',
+    ...['is-plain-object', 'use-query'].map((name) => ({
+      name: `lib/${name}`,
       unlisted: true,
-      files: ['id-to-title', 'is-plain-object', 'url', 'use-query'].map((name) => ({
-        type: 'components' as const,
-        path: `utils/${name}.ts`,
-        target: `<dir>/api/lib/${name}.ts`,
-      })),
-    },
+      files: [
+        {
+          type: 'components' as const,
+          path: `utils/${name}.ts`,
+          target: `<dir>/api/lib/${name}.ts`,
+        },
+      ],
+    })),
     {
       name: 'ui/playground/schema',
       unlisted: true,

@@ -7,7 +7,7 @@ import {
   DialogTrigger,
 } from 'shared-api/components/dialog';
 import { Input } from 'shared-api/components/input';
-import { labelVariants } from 'shared-api/components/label';
+import { Label } from 'shared-api/components/label';
 import { useQuery } from 'shared-api/utils/use-query';
 import { type ReactNode, useMemo, useState } from 'react';
 import { cn } from '@/utils/cn';
@@ -280,9 +280,7 @@ function Content({ schemeId, scopes, setToken, setOpen }: AuthDialogContentProps
         type === 'implicit' ||
         type === 'password') && (
         <fieldset className="flex flex-col gap-1.5">
-          <label htmlFor="client_id" className={cn(labelVariants())}>
-            {t('Client ID')}
-          </label>
+          <Label htmlFor="client_id">{t('Client ID')}</Label>
           <p className="text-fd-muted-foreground text-sm">
             {t('The client ID of your OAuth application.')}
           </p>
@@ -300,9 +298,7 @@ function Content({ schemeId, scopes, setToken, setOpen }: AuthDialogContentProps
       )}
       {(type === 'authorizationCode' || type === 'clientCredentials' || type === 'password') && (
         <fieldset className="flex flex-col gap-1.5">
-          <label htmlFor="client_secret" className={cn(labelVariants())}>
-            {t('Client Secret')}
-          </label>
+          <Label htmlFor="client_secret">{t('Client Secret')}</Label>
           <p className="text-fd-muted-foreground text-sm">
             {t('The client secret of your OAuth application.')}
           </p>
@@ -321,9 +317,7 @@ function Content({ schemeId, scopes, setToken, setOpen }: AuthDialogContentProps
       {type === 'password' && (
         <>
           <fieldset className="flex flex-col gap-1.5">
-            <label htmlFor="client_auth" className={cn(labelVariants())}>
-              {t('Client Authentication')}
-            </label>
+            <Label htmlFor="client_auth">{t('Client Authentication')}</Label>
             <Select
               items={Object.entries(clientAuthMethods).map(([key, method]) => ({
                 label: (
@@ -351,9 +345,7 @@ function Content({ schemeId, scopes, setToken, setOpen }: AuthDialogContentProps
             </Select>
           </fieldset>
           <fieldset className="flex flex-col gap-1.5">
-            <label htmlFor="username" className={cn(labelVariants())}>
-              {t('Username')}
-            </label>
+            <Label htmlFor="username">{t('Username')}</Label>
             <Input
               id="username"
               name="username"
@@ -366,9 +358,7 @@ function Content({ schemeId, scopes, setToken, setOpen }: AuthDialogContentProps
             />
           </fieldset>
           <fieldset className="flex flex-col gap-1.5">
-            <label htmlFor="password" className={cn(labelVariants())}>
-              {t('Password')}
-            </label>
+            <Label htmlFor="password">{t('Password')}</Label>
             <Input
               id="password"
               name="password"

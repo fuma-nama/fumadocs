@@ -49,11 +49,6 @@ export const registry: Registry = {
           path: 'ui/components/server-select.tsx',
           target: '<dir>/asyncapi/components/server-select.tsx',
         },
-        {
-          type: 'components',
-          path: 'utils/server-url.ts',
-          target: '<dir>/asyncapi/components/server-url.ts',
-        },
       ],
     },
     {

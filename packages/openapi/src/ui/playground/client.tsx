@@ -40,11 +40,10 @@ import {
   SelectTrigger,
   SelectValue,
 } from 'shared-api/components/select';
-import { labelVariants } from 'shared-api/components/label';
+import { Label } from 'shared-api/components/label';
 import type { JsonSchema } from '@fumadocs/json-schema';
 import ServerSelect from './components/server-select';
 import {
-  type DataEngine,
   FieldKey,
   StfProvider,
   useDataEngine,
@@ -52,7 +51,7 @@ import {
   useListener,
   useStf,
 } from '@fumari/stf';
-import { arrayStartsWith, objectGet, objectSet, stringifyFieldKey } from '@fumari/stf/lib/utils';
+import { stringifyFieldKey } from '@fumari/stf/lib/utils';
 import {
   FieldInput,
   FieldSet,
@@ -63,10 +62,14 @@ import type { HttpMethods, OperationObject, ParameterObject, PathItemObject } fr
 import { useTranslations } from '@fuma-translate/react';
 import { OAuthDialog, OAuthDialogContent, OAuthDialogTrigger } from './components/oauth-dialog';
 import { dereference } from '@fumadocs/json-schema';
-import { usePlaygroundAuth } from '@/playground/auth';
+import {
+  type AuthField,
+  type AuthRequirement,
+  useAuthFields,
+  usePlaygroundAuth,
+} from '@/playground/auth';
 import { useOnChange } from 'fumadocs-core/utils/use-on-change';
 import { Spinner } from 'shared-api/components/spinner';
-import { joinURL, resolveServerUrl } from 'shared-api/utils/url';
 
 export interface FormValues extends Record<string, unknown> {
   path: Record<string, unknown>;
@@ -84,11 +87,6 @@ export interface PlaygroundClientProps
   pathItem: PathItemObject;
   writeOnly: boolean;
   readOnly: boolean;
-}
-
-interface SecurityEntry {
-  scopes: string[];
-  id: string;
 }
 
 export type { ResultDisplayProps };
@@ -197,29 +195,8 @@ export default function PlaygroundClient({
       parameters,
     };
   }, [operation, pathItem]);
-  const securityEntries = useMemo(() => {
-    const result: SecurityEntry[][] = [];
-    const security = operation.security ?? dereferenced.security ?? [];
-    if (security.length === 0) return result;
-
-    for (const map of security) {
-      const list: SecurityEntry[] = [];
-
-      for (const [key, scopes] of Object.entries(map)) {
-        list.push({
-          id: key,
-          scopes,
-        });
-      }
-
-      if (list.length > 0) result.push(list);
-    }
-
-    return result;
-  }, [dereferenced, operation.security]);
-
   const { items: examples, selected: exampleId, update } = useExampleRequests();
-  const { server } = useServer();
+  const { resolveUrl } = useServer();
   const { ResultDisplay = DefaultResultDisplay, CollapsiblePanel = DefaultCollapsiblePanel } =
     components ?? {};
 
@@ -241,11 +218,10 @@ export default function PlaygroundClient({
     defaultValues,
   });
 
-  const { inputs, requirementId, setRequirementId, mapInputs, initAuthInputs } = useAuthInputs(
-    stf.dataEngine,
-    securityEntries,
-    transformAuthInputs,
-  );
+  const auth = useAuthFields(stf.dataEngine, {
+    operation,
+    transform: transformAuthInputs,
+  });
 
   const testQuery = useQuery(async (input: FormValues) => {
     const fetcher = await import('@/playground/fetcher').then((mod) =>
@@ -256,27 +232,18 @@ export default function PlaygroundClient({
     );
 
     const encoded = encodeRequestData(
-      { ...mapInputs(input), method, bodyMediaType: body?.mediaType },
+      { ...auth.mapValues(input), method, bodyMediaType: body?.mediaType },
       mediaAdapters,
       parameters,
     );
-    return fetcher.fetch(
-      joinURL(
-        new URL(
-          server ? resolveServerUrl(server.url, server.variables) : '/',
-          window.location.origin,
-        ).href,
-        pathnameFromRequest(route, encoded),
-      ),
-      encoded,
-    );
+    return fetcher.fetch(resolveUrl(pathnameFromRequest(route, encoded)), encoded);
   });
 
   const timerRef = useRef<number | null>(null);
   const stfSync = useRef(false);
   function triggerExampleUpdate() {
     const data = {
-      ...mapInputs(stf.dataEngine.getData() as FormValues),
+      ...auth.mapValues(stf.dataEngine.getData() as FormValues),
       method,
       bodyMediaType: body?.mediaType,
     };
@@ -304,7 +271,7 @@ export default function PlaygroundClient({
   }, [defaultValues]);
 
   useEffect(() => {
-    const reset = initAuthInputs();
+    const reset = auth.init();
     triggerExampleUpdate();
     stfSync.current = true;
     return () => {
@@ -312,7 +279,7 @@ export default function PlaygroundClient({
       reset();
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps -- ignore other parts
-  }, [defaultValues, inputs]);
+  }, [defaultValues, auth.init]);
 
   return (
     <OptionsContext value={options}>
@@ -348,14 +315,16 @@ export default function PlaygroundClient({
               <ResultDisplay data={testQuery.data} reset={testQuery.reset} />
             ) : null}
 
-            {securityEntries.length > 0 && (
+            {auth.requirements.length > 0 && (
               <SecurityRequirements
-                securities={securityEntries}
-                securityId={requirementId}
-                setSecurityId={setRequirementId}
+                requirements={auth.requirements}
+                selected={auth.selected}
+                select={auth.select}
               >
-                {inputs.map((input) => (
-                  <Fragment key={stringifyFieldKey(input.fieldName)}>{input.children}</Fragment>
+                {auth.fields.map((field) => (
+                  <Fragment key={stringifyFieldKey(field.fieldName)}>
+                    <AuthInput field={field} />
+                  </Fragment>
                 ))}
               </SecurityRequirements>
             )}
@@ -377,31 +346,29 @@ export default function PlaygroundClient({
 }
 
 function SecurityRequirements({
-  securities,
-  setSecurityId,
-  securityId,
+  requirements,
+  select,
+  selected,
   children,
 }: {
-  securities: SecurityEntry[][];
-  securityId: number;
-  setSecurityId: (value: number) => void;
+  requirements: AuthRequirement[][];
+  selected: number;
+  select: (value: number) => void;
   children: ReactNode;
 }) {
   const t = useTranslations({ note: 'playground' });
   const { isLoading, error } = usePlaygroundAuth();
   const defaultOpen = isLoading || error != null;
   const [open, setOpen] = useState(defaultOpen);
-  const { dereferenced, resolve } = useOpenAPI().doc;
   const { CollapsiblePanel = DefaultCollapsiblePanel } = usePlaygroundOptions().components ?? {};
-  const schemes = dereferenced.components?.securitySchemes;
 
   useOnChange(defaultOpen, () => {
     if (defaultOpen) setOpen(true);
   });
 
-  const items = securities.map((requirement, i) => {
+  const items = requirements.map((requirement, i) => {
     if (requirement.length === 1) {
-      const scheme = resolve(schemes?.[requirement[0].id]);
+      const { id, scheme } = requirement[0];
 
       return {
         value: i,
@@ -410,12 +377,12 @@ function SecurityRequirements({
             <p
               className={cn(
                 'font-mono font-medium',
-                scheme?.deprecated && 'text-fd-muted-foreground line-through',
+                scheme.deprecated && 'text-fd-muted-foreground line-through',
               )}
             >
-              {requirement[0].id}
+              {id}
             </p>
-            <p className="text-fd-muted-foreground whitespace-pre-wrap">{scheme?.description}</p>
+            <p className="text-fd-muted-foreground whitespace-pre-wrap">{scheme.description}</p>
           </div>
         ),
       };
@@ -430,10 +397,7 @@ function SecurityRequirements({
               <Fragment key={i}>
                 {i > 0 && <PlusIcon className="text-fd-muted-foreground size-3.5" />}
                 <span
-                  className={cn(
-                    resolve(schemes?.[item.id])?.deprecated &&
-                      'text-fd-muted-foreground line-through',
-                  )}
+                  className={cn(item.scheme.deprecated && 'text-fd-muted-foreground line-through')}
                 >
                   {item.id}
                 </span>
@@ -443,7 +407,7 @@ function SecurityRequirements({
           <ul className="text-fd-muted-foreground whitespace-pre-wrap list-disc list-inside">
             {requirement.map((item, i) => (
               <li key={i} className="empty:hidden">
-                {resolve(schemes?.[item.id])?.description}
+                {item.scheme.description}
               </li>
             ))}
           </ul>
@@ -474,11 +438,7 @@ function SecurityRequirements({
           <p>{String(error)}</p>
         </div>
       )}
-      <Select
-        items={items}
-        value={securityId}
-        onValueChange={(v) => v !== null && setSecurityId(v)}
-      >
+      <Select items={items} value={selected} onValueChange={(v) => v !== null && select(v)}>
         <SelectTrigger>
           <SelectValue />
         </SelectTrigger>
@@ -599,236 +559,72 @@ function BodyInput({ field: _field }: { field: JsonSchema }) {
   );
 }
 
-export interface AuthField {
-  fieldName: FieldKey;
-  schemeId: string;
-  storageKey: string;
-  defaultValue: unknown;
-  children: ReactNode;
-
-  mapOutput?: (values: unknown) => unknown;
-}
-
-function useAuthInputs(
-  engine: DataEngine,
-  requirements: SecurityEntry[][],
-  transformAuthInputs?: PlaygroundClientOptions['transformAuthInputs'],
-) {
-  const authCtx = usePlaygroundAuth();
-  const { storageKeyPrefix } = useOpenAPI();
+function AuthInput({ field }: { field: AuthField }) {
   const t = useTranslations({ note: 'playground' });
-  const { dereferenced, resolve } = useOpenAPI().doc;
-  const schemes = dereferenced.components?.securitySchemes;
+  const { fieldName, scheme } = field;
 
-  const [requirementId, setRequirementId] = useState(() => {
-    if (!schemes || requirements.length === 0) return -1;
+  if (scheme.type === 'oauth2') return <OAuth2Input field={field} />;
 
-    const idx = requirements.findIndex((s) =>
-      s.every((item) => !resolve(schemes[item.id]).deprecated),
-    );
-    return idx !== -1 ? idx : 0;
-  });
-  const requirement = requirementId === -1 ? null : requirements[requirementId];
-
-  let inputs = useMemo<AuthField[]>(() => {
-    if (!requirement || !schemes) return [];
-
-    return requirement.map((item) => {
-      const scheme = resolve(schemes?.[item.id]);
-      if (scheme.type === 'http' && scheme.scheme === 'basic') {
-        const fieldName: FieldKey = ['header', 'Authorization'];
-        return {
-          fieldName,
-          schemeId: item.id,
-          storageKey: `${storageKeyPrefix}auth-${item.id}`,
-          defaultValue: {
-            username: '',
-            password: '',
+  if (scheme.type === 'http' && scheme.scheme === 'basic') {
+    return (
+      <ObjectInput
+        field={{
+          type: 'object',
+          properties: {
+            username: {
+              type: 'string',
+            },
+            password: {
+              type: 'string',
+            },
           },
-          mapOutput(out: unknown) {
-            if (out && typeof out === 'object') {
-              const obj = out as Record<string, unknown>;
-              return `Basic ${btoa(`${obj.username ?? ''}:${obj.password ?? ''}`)}`;
-            }
-            return out;
-          },
-          children: (
-            <ObjectInput
-              field={{
-                type: 'object',
-                properties: {
-                  username: {
-                    type: 'string',
-                  },
-                  password: {
-                    type: 'string',
-                  },
-                },
-              }}
-              fieldName={fieldName}
-            />
-          ),
-        };
-      }
-      if (scheme.type === 'oauth2') {
-        const fieldName: FieldKey = ['header', 'Authorization'];
-        return {
-          fieldName,
-          schemeId: item.id,
-          storageKey: `${storageKeyPrefix}auth-${item.id}`,
-          defaultValue: 'Bearer ',
-          children: <OAuth2Input fieldName={fieldName} security={item} />,
-        };
-      }
-      if (scheme.type === 'http') {
-        const fieldName: FieldKey = ['header', 'Authorization'];
-        return {
-          fieldName,
-          schemeId: item.id,
-          storageKey: `${storageKeyPrefix}auth-${item.id}`,
-          defaultValue: 'Bearer ',
-          children: (
-            <FieldSet
-              name={`${t('Authorization')} (${t('Header')})`}
-              fieldName={fieldName}
-              field={{
-                type: 'string',
-              }}
-            />
-          ),
-        };
-      }
-      if (scheme.type === 'apiKey') {
-        const fieldName: FieldKey = [scheme.in!, scheme.name!];
-        return {
-          fieldName,
-          schemeId: item.id,
-          defaultValue: '',
-          storageKey: `${storageKeyPrefix}auth-${item.id}`,
-          children: (
-            <FieldSet
-              fieldName={fieldName}
-              name={`${scheme.name} (${scheme.in})`}
-              field={{
-                type: 'string',
-              }}
-            />
-          ),
-        };
-      }
-      // fallback: openid or unknown
-      const fieldName: FieldKey = ['header', 'Authorization'];
-      return {
-        fieldName,
-        schemeId: item.id,
-        defaultValue: '',
-        storageKey: `${storageKeyPrefix}auth-${item.id}`,
-        children: (
-          <>
-            <FieldSet
-              name={`${t('Authorization')} (${t('Header')})`}
-              fieldName={fieldName}
-              field={{
-                type: 'string',
-              }}
-            />
-            <p className="text-fd-muted-foreground text-xs">
-              {t(
-                'OpenID Connect is not supported at the moment, you can still set an access token here.',
-              )}
-            </p>
-          </>
-        ),
-      };
-    });
-  }, [requirement, storageKeyPrefix, schemes, resolve, t]);
-  if (transformAuthInputs) inputs = transformAuthInputs(inputs);
-
-  useListener({
-    stf: engine,
-    onUpdate(key) {
-      for (const item of inputs) {
-        if (!arrayStartsWith(item.fieldName, key)) continue;
-        const value = engine.get(item.fieldName);
-
-        if (value != null) {
-          localStorage.setItem(item.storageKey, JSON.stringify(value));
-        }
-      }
-    },
-  });
-
-  useOnChange(authCtx.updatedSchemeId, () => {
-    const { updatedSchemeId } = authCtx;
-    if (!updatedSchemeId) return;
-    const { token } = authCtx.store[updatedSchemeId]!;
-
-    const input = inputs.find((input) => input.schemeId === updatedSchemeId);
-    if (input) {
-      // update current value
-      engine.update(input.fieldName, token);
-      return;
-    }
-
-    const idx = requirements.findIndex((requirement) =>
-      requirement.some((item) => item.id === updatedSchemeId),
+        }}
+        fieldName={fieldName}
+      />
     );
-    if (idx !== -1) {
-      // persisted value
-      localStorage.setItem(`${storageKeyPrefix}auth-${updatedSchemeId}`, JSON.stringify(token));
-      setRequirementId(idx);
-    }
-  });
+  }
 
-  return {
-    inputs,
-    requirementId,
-    setRequirementId,
-    mapInputs(values: FormValues) {
-      const cloned = structuredClone(values);
+  if (scheme.type === 'apiKey') {
+    return (
+      <FieldSet
+        fieldName={fieldName}
+        name={`${scheme.name} (${scheme.in})`}
+        field={{
+          type: 'string',
+        }}
+      />
+    );
+  }
 
-      for (const item of inputs) {
-        if (!item.mapOutput) continue;
-        objectSet(cloned, item.fieldName, item.mapOutput(objectGet(cloned, item.fieldName)));
-      }
-
-      return cloned;
-    },
-    initAuthInputs() {
-      for (const item of inputs) {
-        const stored = localStorage.getItem(item.storageKey);
-
-        if (stored) {
-          const parsed = JSON.parse(stored);
-          if (typeof parsed === typeof item.defaultValue) {
-            engine.init(item.fieldName, parsed);
-            continue;
-          }
-        }
-
-        engine.init(item.fieldName, item.defaultValue);
-      }
-
-      // reset
-      return () => {
-        for (const item of inputs) {
-          engine.delete(item.fieldName);
-        }
-      };
-    },
-  };
+  return (
+    <>
+      <FieldSet
+        name={`${t('Authorization')} (${t('Header')})`}
+        fieldName={fieldName}
+        field={{
+          type: 'string',
+        }}
+      />
+      {scheme.type !== 'http' && (
+        <p className="text-fd-muted-foreground text-xs">
+          {t(
+            'OpenID Connect is not supported at the moment, you can still set an access token here.',
+          )}
+        </p>
+      )}
+    </>
+  );
 }
 
-function OAuth2Input({ fieldName, security }: { fieldName: FieldKey; security: SecurityEntry }) {
+function OAuth2Input({ field }: { field: AuthField }) {
+  const { fieldName } = field;
   const [open, setOpen] = useState(false);
   const engine = useDataEngine();
   const t = useTranslations({ note: 'playground' });
 
   return (
     <fieldset className="flex flex-col gap-2">
-      <label htmlFor={stringifyFieldKey(fieldName)} className={cn(labelVariants())}>
-        {t('Access Token')}
-      </label>
+      <Label htmlFor={stringifyFieldKey(fieldName)}>{t('Access Token')}</Label>
       <div className="flex gap-2">
         <FieldInput
           fieldName={fieldName}
@@ -852,8 +648,8 @@ function OAuth2Input({ fieldName, security }: { fieldName: FieldKey; security: S
           </OAuthDialogTrigger>
           <OAuthDialogContent
             setOpen={setOpen}
-            schemeId={security.id}
-            scopes={security.scopes}
+            schemeId={field.schemeId}
+            scopes={field.scopes}
             setToken={(token) => engine.update(['header', 'Authorization'], token)}
           />
         </OAuthDialog>

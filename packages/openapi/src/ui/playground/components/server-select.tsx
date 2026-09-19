@@ -8,7 +8,7 @@ import {
   SelectValue,
 } from 'shared-api/components/select';
 import { Input } from 'shared-api/components/input';
-import { labelVariants } from 'shared-api/components/label';
+import { Label } from 'shared-api/components/label';
 import { useEffect, useState, useRef, type ComponentProps } from 'react';
 import { cn } from '@/utils/cn';
 import {
@@ -23,10 +23,9 @@ import type { ServerVariableObject } from '@/types';
 import { StfProvider, useFieldValue, useListener, useStf } from '@fumari/stf';
 import { EditIcon } from 'lucide-react';
 import { useTranslations } from '@fuma-translate/react';
-import { resolveServerUrl } from 'shared-api/utils/url';
 
 export default function ServerSelect(props: ComponentProps<typeof DialogTrigger>) {
-  const { servers, server, setServer, setServerVariables } = useServer();
+  const { servers, server, resolveUrl, setServer, setServerVariables } = useServer();
   const [open, setOpen] = useState(false);
   const [isMounted, setIsMounted] = useState(false);
   const t = useTranslations({ note: 'playground server select' });
@@ -51,12 +50,7 @@ export default function ServerSelect(props: ComponentProps<typeof DialogTrigger>
           {server?.name ?? t('Server URL')}
         </span>
         <code className="truncate min-w-0 flex-1">
-          {isMounted
-            ? new URL(
-                server ? resolveServerUrl(server.url, server.variables) : '/',
-                window.location.origin,
-              ).href
-            : t('loading...')}
+          {isMounted ? resolveUrl() : t('loading...')}
         </code>
         <EditIcon className="size-4" />
       </DialogTrigger>
@@ -129,9 +123,7 @@ function ServerSelectContent({
         {Object.entries(schema).map(([key, variable]) => {
           return (
             <fieldset key={key} className="flex flex-col gap-1">
-              <label className={cn(labelVariants())} htmlFor={key}>
-                {key}
-              </label>
+              <Label htmlFor={key}>{key}</Label>
               <p className="text-xs text-fd-muted-foreground empty:hidden">
                 {variable.description}
               </p>
