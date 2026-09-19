@@ -1,6 +1,6 @@
 {
   "name": "@fumadocs/json-schema",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "JSON Schema toolkit: dereference, merge, sample and stringify schemas",
   "keywords": [
     "Fumadocs",

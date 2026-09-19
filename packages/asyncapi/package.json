@@ -1,6 +1,6 @@
 {
   "name": "@fumadocs/asyncapi",
-  "version": "0.3.6",
+  "version": "0.4.0",
   "description": "Generate docs for your AsyncAPI spec",
   "keywords": [
     "Docs",

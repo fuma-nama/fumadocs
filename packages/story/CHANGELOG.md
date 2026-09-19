@@ -1,3 +1,68 @@
+## @fumadocs/story@1.4.0
+
+### Shared components of API pages
+
+#### Default page components
+
+`createOpenAPIRenderer()`, `createAsyncAPIRenderer()` and `createGraphQLRenderer()` fill the `Markdown`, `CodeBlock` and `Heading` components you didn't pass, rendering Markdown through Remark and code blocks through Shiki:
+
+```tsx
+createOpenAPIRenderer({
+  components: { SchemaUI, Operation },
+});
+```
+
+`shiki` defaults to the full bundle, `createOpenAPIBaseRenderer()` takes the factory you pass instead and leaves the bundle out.
+
+#### Installable UI
+
+The UI an API page renders through is now part of the installation, instead of being imported from the package:
+
+| Component                                                                                   | Installed at                               |
+| ------------------------------------------------------------------------------------------- | ------------------------------------------ |
+| `Select`, `Input`                                                                           | `components/ui`, reusing the project's own |
+| `Accordion`, `Collapsible`, `Dialog`, `Popover`, `Spinner`, `SelectTabs`, playground inputs | `components/api/ui`                        |
+| anchor IDs of deep-linkable sections                                                        | `components/api/ui/auto-anchor`            |
+
+`Select` and `Input` follow the Shadcn UI API, so a project that already has them keeps its own. `@fumadocs/story` no longer ships a second copy of either.
+
+`labelVariants` moved to the installed `label` component, leaving the input a plain Shadcn-compatible primitive.
+
+The integrations share one implementation of these internally, instead of each keeping a copy: the selected server and its variables, the state of an async request, the coloured label of methods and kinds, and the plain-object check of both schema layers.
+
+The request pipeline of the playground stays in the package too, so an installed playground drives it instead of copying it: `encodeRequestData()`, `resolveMediaAdapter()`, `isMediaTypeSupported()` and the request data types come from `fumadocs-openapi/requests`, and `createBrowserFetcher()` with `usePlaygroundAuth()` from `fumadocs-openapi/playground`.
+
+### Headless stories
+
+#### Replace the UI of stories
+
+The control panel is no longer fixed, `defineStoryFactory()` takes your own:
+
+```tsx title="lib/story.tsx"
+import { defineStoryFactory } from '@fumadocs/story/vite/client';
+import { WithControl } from '@/components/story';
+
+export const { defineStory } = defineStoryFactory({ WithControl });
+```
+
+Install the built-in one and edit it:
+
+```npm
+npx @fumadocs/cli add fumadocs/story/controls
+```
+
+Or build your own on `@fumadocs/story`: `<StoryProvider />` holds the selected variant and the form engine, `useStory()` exposes the presets and `useStoryArgs()` the arguments of the rendered component.
+
+The entry ships a stubbed build under the `browser` condition, so client components can import them without pulling the story factory's Node dependencies. `@fumadocs/story/type-tree` does the same: `collapse()` is stubbed under the `browser` condition, so the installed controls import the sampler, stringifier and validator from it.
+
+See [Headless](https://fumadocs.dev/docs/integrations/story/headless).
+
+#### Fix the initial branch of union controls
+
+The control of a union prop validated the field against the index of each branch, so it picked an arbitrary one. It now validates against the current value, falling back to the first branch.
+
+`validate()` from `@fumadocs/story/type-tree` also rejected `null` for `null` nodes, it compared against the string `'null'`.
+
 ## @fumadocs/story@1.3.1
 
 ### Mark packages side-effect free

@@ -1,3 +1,163 @@
+## @fumadocs/graphql@0.3.0
+
+### Headless GraphQL pages
+
+#### Headless layer
+
+GraphQL pages are now built on a headless layer, use it to build your own UI:
+
+```tsx title="components/api-page.tsx"
+'use client';
+import { createGraphQLRenderer } from '@fumadocs/graphql';
+
+export const GraphQLPage = createGraphQLRenderer({
+  components: { Operation, TypeDocs, Markdown, CodeBlock, Heading, SchemaUI },
+});
+```
+
+- `<GraphQLProvider />` holds the schema built from SDL, the page links and your components.
+- `<OperationProvider />` and `useOperation()` derive an operation: its `field`, `title`, `directives` and generated `example`.
+- `<TypeProvider />` and `useNamedType()` derive a named type: its `kind`, `directives`, `relations` and usages.
+- `useGraphQL()`, `useComponents()`, `useRenderContext()`, `useTypeLink()` and `useOperationLink()` expose the page state.
+- `generateRequestSnippets()` from `@fumadocs/graphql/utils/snippets` builds the cURL and `fetch` snippets of an example.
+- `generateGraphQLSchemaUI()` turns a type, field or argument into the data the Schema UI draws, the installed Schema UI only renders it.
+
+`@fumadocs/graphql/ui` is built on it, its rendering is unchanged. `typeLinks` and `operationLinks` receive the name (and kind) only, the `ctx` argument is gone.
+
+#### Install the UI
+
+The UI of GraphQL pages can be installed with Fumadocs CLI and edited:
+
+```npm
+npx @fumadocs/cli add fumadocs/graphql/page
+```
+
+It installs `<GraphQLPage />` itself, import it from `@/components/graphql/page` in place of your `components/api-page.tsx`.
+
+Parts are installable too (`operation`, `type-docs`, `schema-ui`, `playground`) and passed to the new `components` options:
+
+```tsx
+export const GraphQLPage = createGraphQLPage({
+  components: { Operation, TypeDocs },
+});
+```
+
+See [Headless](https://fumadocs.dev/docs/integrations/graphql/headless).
+
+#### `@fumadocs/graphql/ui/playground`
+
+The playground is its own entry, so installing the operation or page UI no longer copies it:
+
+```npm
+npx @fumadocs/cli add fumadocs/graphql/playground
+```
+
+What it runs on comes from `@fumadocs/graphql/playground`: `executeGraphQL()` (moved from the package entry), `inputTypeToJsonSchema()` for the form model of arguments, and the stored endpoint and headers.
+
+#### Highlighting out of the box
+
+`createGraphQLRenderer()` highlights code blocks with the full Shiki bundle, pass a smaller `shiki` factory to trim it.
+
+### Shared components of API pages
+
+#### Default page components
+
+`createOpenAPIRenderer()`, `createAsyncAPIRenderer()` and `createGraphQLRenderer()` fill the `Markdown`, `CodeBlock` and `Heading` components you didn't pass, rendering Markdown through Remark and code blocks through Shiki:
+
+```tsx
+createOpenAPIRenderer({
+  components: { SchemaUI, Operation },
+});
+```
+
+`shiki` defaults to the full bundle, `createOpenAPIBaseRenderer()` takes the factory you pass instead and leaves the bundle out.
+
+#### Installable UI
+
+The UI an API page renders through is now part of the installation, instead of being imported from the package:
+
+| Component                                                                                   | Installed at                               |
+| ------------------------------------------------------------------------------------------- | ------------------------------------------ |
+| `Select`, `Input`                                                                           | `components/ui`, reusing the project's own |
+| `Accordion`, `Collapsible`, `Dialog`, `Popover`, `Spinner`, `SelectTabs`, playground inputs | `components/api/ui`                        |
+| anchor IDs of deep-linkable sections                                                        | `components/api/ui/auto-anchor`            |
+
+`Select` and `Input` follow the Shadcn UI API, so a project that already has them keeps its own. `@fumadocs/story` no longer ships a second copy of either.
+
+`labelVariants` moved to the installed `label` component, leaving the input a plain Shadcn-compatible primitive.
+
+The integrations share one implementation of these internally, instead of each keeping a copy: the selected server and its variables, the state of an async request, the coloured label of methods and kinds, and the plain-object check of both schema layers.
+
+The request pipeline of the playground stays in the package too, so an installed playground drives it instead of copying it: `encodeRequestData()`, `resolveMediaAdapter()`, `isMediaTypeSupported()` and the request data types come from `fumadocs-openapi/requests`, and `createBrowserFetcher()` with `usePlaygroundAuth()` from `fumadocs-openapi/playground`.
+
+### JSON Schema toolkit
+
+#### `@fumadocs/json-schema`
+
+The JSON Schema utilities of API pages are now their own package, with no Fumadocs dependencies:
+
+```ts
+import { dereference, matches, mergeAllOf, sample, stringify } from '@fumadocs/json-schema';
+import { bundle } from '@fumadocs/json-schema/bundle';
+```
+
+`bundle()` is a separate entry because it reads files and URLs, everything else runs in the browser.
+
+`@fumadocs/json-schema/react` renders a schema into the data an API page draws: `generateSchemaUI()` with the `SchemaData` and `InfoTag` types. It was in the Schema UI before, where every install copied it. A labelled tag can be `prose`, for values like a Markdown deprecation reason.
+
+They were `@fumadocs/api-docs/schema/*` before, and the API was cleaned up while moving:
+
+| Before                                         | Now                                    |
+| ---------------------------------------------- | -------------------------------------- |
+| `ParsedSchema`                                 | `JsonSchema`                           |
+| `NoReference` / `NoReferenceSwallow`           | `Dereferenced` / `DereferencedShallow` |
+| `dereferenceShallow(schema)`                   | `dereference(schema)`                  |
+| `matchesSchema(schema, value)`                 | `matches(schema, value)`               |
+| `typeMatches(value, type)`                     | `matchesType(value, type)`             |
+| `schemaToString(schema, FormatFlags.UseAlias)` | `stringify(schema, { alias: true })`   |
+
+#### Trim code usages and TypeScript definitions
+
+`createOpenAPIBaseRenderer()` from `fumadocs-openapi` registers no code usage generators and no TypeScript definitions, so a page built on it bundles only what you pass:
+
+```tsx
+import { createCodeUsageGeneratorRegistry } from 'fumadocs-openapi/requests/generators';
+import { curl } from 'fumadocs-openapi/requests/generators/curl';
+
+createOpenAPIBaseRenderer({
+  shiki,
+  codeUsages: createCodeUsageGeneratorRegistry().register(curl),
+  components: { ... },
+});
+```
+
+`createOpenAPIRenderer()` and `fumadocs-openapi/ui` register every language and TypeScript definitions for you.
+
+#### Remove `useStorageKey()`
+
+The hook returned `(name) => storageKeyPrefix + name`. Read the prefix from the page instead:
+
+```tsx
+const { storageKeyPrefix } = useOpenAPI();
+localStorage.getItem(`${storageKeyPrefix}my-key`);
+```
+
+`useAsyncAPI()` works the same way.
+
+#### `@fumadocs/api-docs` is no longer published
+
+It held the UI the integrations share, and that UI is now either bundled into them or installed with Fumadocs CLI, so nothing imports it by name any more. If you imported it directly:
+
+| Before                                     | Now                                                  |
+| ------------------------------------------ | ---------------------------------------------------- |
+| `@fumadocs/api-docs/schema/*`              | `@fumadocs/json-schema`                              |
+| `@fumadocs/api-docs/components/schema*`    | `npx @fumadocs/cli add fumadocs/api-docs/schema`     |
+| `@fumadocs/api-docs/components/*` (the UI) | installed with the component that uses it            |
+| `@fumadocs/api-docs/i18n`                  | the integration's own `Translations` covers its keys |
+| `@fumadocs/api-docs/css/preset.css`        | already included by the integration's preset         |
+
+The CLI namespace is unchanged, `fumadocs/api-docs/schema` still installs the Schema UI.
+
 ## @fumadocs/graphql@0.2.7
 
 ### Mark packages side-effect free
