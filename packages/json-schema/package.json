@@ -34,17 +34,17 @@
   },
   "dependencies": {
     "@fuma-translate/react": "^1.0.2",
-    "@scalar/json-magic": "^0.13.4"
+    "@scalar/json-magic": "^0.13.5"
   },
   "devDependencies": {
     "@fastify/deepmerge": "^3.2.1",
-    "@types/node": "26.5.0",
-    "@types/react": "^19.2.18",
+    "@types/node": "26.6.1",
+    "@types/react": "^19.3.0",
     "json-schema-typed": "^8.0.2",
-    "react": "^19.2.8",
+    "react": "^19.3.0",
     "tsconfig": "workspace:*",
     "tsdown": "0.23.0",
-    "vitest": "^5.0.0"
+    "vitest": "^5.0.1"
   },
   "peerDependencies": {
     "json-schema-typed": "*",

@@ -55,17 +55,17 @@
     "@types/estree-jsx": "^1.0.5",
     "@types/hast": "^3.0.5",
     "@types/mdx": "^2.0.14",
-    "@types/node": "26.5.0",
-    "@types/react": "^19.2.18",
-    "@types/react-dom": "^19.2.7",
+    "@types/node": "26.6.1",
+    "@types/react": "^19.3.0",
+    "@types/react-dom": "^19.3.0",
     "@types/unist": "^3.0.3",
     "fumadocs-core": "workspace:*",
-    "react": "^19.2.8",
-    "react-dom": "^19.2.8",
+    "react": "^19.3.0",
+    "react-dom": "^19.3.0",
     "tsconfig": "workspace:*",
     "tsdown": "0.23.0",
     "unified": "^11.0.5",
-    "vite": "^8.2.2"
+    "vite": "^8.3.0"
   },
   "peerDependencies": {
     "@types/estree": "*",

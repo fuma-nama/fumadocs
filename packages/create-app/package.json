@@ -42,7 +42,7 @@
     "sync": "node ./scripts/sync.ts"
   },
   "dependencies": {
-    "@clack/prompts": "^1.8.0",
+    "@clack/prompts": "^1.8.1",
     "@fumadocs/cli": "workspace:*",
     "cac": "^7.0.0",
     "fuma-cli": "^0.1.1",
@@ -51,7 +51,7 @@
   },
   "devDependencies": {
     "@types/cross-spawn": "^6.0.6",
-    "@types/node": "26.5.0",
+    "@types/node": "26.6.1",
     "tinyglobby": "^0.2.17",
     "tsconfig": "workspace:*",
     "tsdown": "0.23.0",

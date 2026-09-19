@@ -35,12 +35,12 @@
     "zod-3": "npm:zod@^3.25.76"
   },
   "devDependencies": {
-    "@types/node": "26.5.0",
-    "@types/react": "^19.2.18",
+    "@types/node": "26.6.1",
+    "@types/react": "^19.3.0",
     "fumadocs-core": "workspace:*",
     "fumadocs-ui": "workspace:@fumadocs/base-ui@*",
-    "react": "^19.2.8",
-    "react-dom": "^19.2.8",
+    "react": "^19.3.0",
+    "react-dom": "^19.3.0",
     "shadcn": "^4.21.0",
     "tailwindcss": "^4.3.3",
     "tsconfig": "workspace:*",

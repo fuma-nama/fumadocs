@@ -40,12 +40,12 @@
   },
   "dependencies": {
     "unified": "^11.0.5",
-    "zod": "^4.5.4"
+    "zod": "^4.6.5"
   },
   "devDependencies": {
     "@content-collections/core": "0.15.2",
     "@content-collections/mdx": "^0.2.2",
-    "@types/node": "26.5.0",
+    "@types/node": "26.6.1",
     "fumadocs-core": "workspace:*",
     "tsconfig": "workspace:*",
     "tsdown": "0.23.0"
