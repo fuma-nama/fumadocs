@@ -10,9 +10,9 @@ GraphQL pages are now built on a headless layer, use it to build your own UI:
 
 ```tsx title="components/api-page.tsx"
 'use client';
-import { createGraphQLPage } from '@fumadocs/graphql';
+import { createGraphQLRenderer } from '@fumadocs/graphql';
 
-export const GraphQLPage = createGraphQLPage({
+export const GraphQLPage = createGraphQLRenderer({
   components: { Operation, TypeDocs, Markdown, CodeBlock, Heading, SchemaUI },
 });
 ```
@@ -20,10 +20,10 @@ export const GraphQLPage = createGraphQLPage({
 - `<GraphQLProvider />` holds the schema built from SDL, the page links and your components.
 - `<OperationProvider />` and `useOperation()` derive an operation: its `field`, `title`, `directives` and generated `example`.
 - `<TypeProvider />` and `useNamedType()` derive a named type: its `kind`, `directives`, `relations` and usages.
-- `useGraphQL()`, `useComponents()`, `useTypeLink()` and `useOperationLink()` expose the page state.
-- `generateRequestSnippets()` builds the cURL and `fetch` snippets of an example.
+- `useGraphQL()`, `useComponents()`, `useRenderContext()`, `useTypeLink()` and `useOperationLink()` expose the page state.
+- `generateRequestSnippets()` from `@fumadocs/graphql/utils/snippets` builds the cURL and `fetch` snippets of an example.
 
-`@fumadocs/graphql/ui` is built on it, its options and rendering are unchanged.
+`@fumadocs/graphql/ui` is built on it, its rendering is unchanged. `typeLinks` and `operationLinks` receive the name (and kind) only, the `ctx` argument is gone.
 
 ## Install the UI
 
@@ -33,13 +33,7 @@ The UI of GraphQL pages can be installed with Fumadocs CLI and edited:
 npx @fumadocs/cli add fumadocs/graphql/page
 ```
 
-```tsx title="components/api-page.tsx"
-'use client';
-import { createGraphQLPageBase } from '@/components/api/graphql/page';
-import { defaultShikiFactory } from 'fumadocs-core/highlight/shiki/full';
-
-export const GraphQLPage = createGraphQLPageBase({ shiki: defaultShikiFactory });
-```
+It installs `<GraphQLPage />` itself, import it from `@/components/graphql/page` in place of your `components/api-page.tsx`.
 
 Parts are installable too (`operation`, `type-docs`, `schema-ui`, `playground`) and passed to the new `components` options:
 
@@ -59,8 +53,8 @@ The playground is its own entry, so installing the operation or page UI no longe
 npx @fumadocs/cli add fumadocs/graphql/playground
 ```
 
-`inputTypeToJsonSchema()`, which turns GraphQL input types into the form's JSON Schema, comes from `@fumadocs/graphql`.
+What it runs on comes from `@fumadocs/graphql/playground`: `executeGraphQL()` (moved from the package entry), `inputTypeToJsonSchema()` for the form model of arguments, and the stored endpoint and headers.
 
 ## Highlighting out of the box
 
-`createGraphQLPage()` highlights code blocks with the full Shiki bundle, pass a smaller `shiki` factory to trim it.
+`createGraphQLRenderer()` highlights code blocks with the full Shiki bundle, pass a smaller `shiki` factory to trim it.

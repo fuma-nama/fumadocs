@@ -1,7 +1,8 @@
 'use client';
-import { type CodeBlockProps, useComponents } from '@/utils/create-page';
+import type { ComponentProps } from 'react';
+import { type AsyncAPIComponents, useComponents } from '@/utils/create-page';
 
-export function ClientCodeBlock(props: CodeBlockProps) {
+export function ClientCodeBlock(props: ComponentProps<AsyncAPIComponents['CodeBlock']>) {
   const { CodeBlock } = useComponents();
 
   return <CodeBlock {...props} />;

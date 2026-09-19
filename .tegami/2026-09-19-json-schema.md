@@ -33,13 +33,13 @@ They were `@fumadocs/api-docs/schema/*` before, and the API was cleaned up while
 
 ## Opt into code usages and TypeScript definitions
 
-`createOpenAPIPage()` from `fumadocs-openapi` no longer registers the default code usage generators and TypeScript definitions, so a headless page doesn't bundle them:
+`createOpenAPIRenderer()` from `fumadocs-openapi` doesn't register the default code usage generators and TypeScript definitions, so a headless page doesn't bundle them:
 
 ```tsx
 import { createCodeUsageGeneratorRegistry } from 'fumadocs-openapi/requests/generators';
 import { registerDefault } from 'fumadocs-openapi/requests/generators/all';
 
-createOpenAPIPage({
+createOpenAPIRenderer({
   codeUsages: registerDefault(createCodeUsageGeneratorRegistry()),
   components: { ... },
 });

@@ -23,10 +23,12 @@
     ".": "./dist/index.js",
     "./i18n": "./dist/i18n.js",
     "./operation": "./dist/operation.js",
+    "./playground": "./dist/playground/index.js",
     "./server": "./dist/server/index.js",
     "./type-docs": "./dist/type-docs.js",
     "./ui": "./dist/ui/index.js",
     "./ui/playground": "./dist/ui/playground/index.js",
+    "./utils/snippets": "./dist/utils/snippets.js",
     "./package.json": "./package.json",
     "./css/*": "./css/*"
   },

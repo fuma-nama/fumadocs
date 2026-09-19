@@ -1,6 +1,5 @@
 import type { OpenAPIV3_2, OpenAPIV3 } from './types/openapi';
 import type { InlineCodeUsageGenerator } from './requests/generators';
-import type { CreateOpenAPIPageOptions } from './ui';
 
 export type Document = OpenAPIV3_2.Document;
 export type OperationObject = OpenAPIV3_2.OperationObject & {
@@ -22,15 +21,6 @@ export type HttpMethods = OpenAPIV3_2.HttpMethods;
 export type ExampleObject = OpenAPIV3_2.ExampleObject;
 export type MediaTypeObject = OpenAPIV3_2.MediaTypeObject;
 export type RequestBodyObject = OpenAPIV3_2.RequestBodyObject;
-
-/**
- * the options of `createOpenAPIPage()`, passed to its render functions.
- *
- * the page's document and other runtime values are available from `useOpenAPI()`.
- */
-export type RenderContext = RequireKeys<CreateOpenAPIPageOptions, 'shiki' | 'shikiOptions'>;
-
-type RequireKeys<T, K extends keyof T> = Omit<T, K> & Required<Pick<T, K>>;
 
 export type DistributiveOmit<T, K extends PropertyKey> = T extends unknown ? Omit<T, K> : never;
 export type Awaitable<T> = T | Promise<T>;

@@ -4,7 +4,7 @@ import type { HighlighterCore } from 'shiki';
 import { toJsxRuntime } from 'hast-util-to-jsx-runtime';
 import * as JsxRuntime from 'react/jsx-runtime';
 import { highlightHast } from 'fumadocs-core/highlight/shiki';
-import type { RenderContext } from '@/types';
+import type { RenderContext } from '@/utils/create-page';
 import { cn } from '@/utils/cn';
 
 const sharedClass =

@@ -1,7 +1,7 @@
 'use client';
 import type { ComponentProps } from 'react';
 import { useAnchorId } from 'shared-api/auto-anchor/client';
-import { type GraphQLComponents, useComponents } from '@/utils/create-page';
+import { type GraphQLComponents, useComponents, useRenderContext } from '@/utils/create-page';
 
 type SlotProps = ComponentProps<GraphQLComponents['SchemaUI']>;
 
@@ -14,6 +14,12 @@ type Props = Omit<SlotProps, 'client'> & {
  */
 export function SchemaUI({ client, ...props }: Props) {
   const { SchemaUI: Comp } = useComponents();
+  const ctx = useRenderContext();
+  const options: SlotProps = {
+    ...props,
+    client: { ...client, rootId: useAnchorId([client.name]) },
+  };
 
-  return <Comp {...props} client={{ ...client, rootId: useAnchorId([client.name]) }} />;
+  if (ctx.schemaUI?.render) return ctx.schemaUI.render(options, ctx);
+  return <Comp {...options} />;
 }

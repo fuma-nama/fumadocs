@@ -16,9 +16,10 @@ import {
 } from 'shared-api/components/select';
 import { ClientCodeBlock } from '@/ui/components/codeblock';
 import { type ExampleRequest, useCodeUsage, useExampleRequests, useOperation } from '@/operation';
-import type { RenderContext } from '@/types';
+import { useRenderContext } from '@/utils/create-page';
 
-export function UsageTabs({ ctx }: { ctx: RenderContext }) {
+export function UsageTabs() {
+  const ctx = useRenderContext();
   const { operation, codeUsages } = useOperation();
   let usageTabs: ReactNode;
 
@@ -48,7 +49,7 @@ export function UsageTabs({ ctx }: { ctx: RenderContext }) {
   const slots = {
     selector: operation['x-exclusiveCodeSample'] ? null : <UsageTabsSelector />,
     usageTabs,
-    responseTabs: <ResponseTabs ctx={ctx} />,
+    responseTabs: <ResponseTabs />,
   };
 
   if (ctx.content?.renderAPIExampleLayout) return ctx.content.renderAPIExampleLayout(slots, ctx);

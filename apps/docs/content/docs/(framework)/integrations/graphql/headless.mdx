@@ -7,23 +7,24 @@ description: The state and logic of GraphQL pages, without UI.
 
 Everything outside `@fumadocs/graphql/ui` is headless.
 
-| Path                          | Module                                                               |
-| ----------------------------- | -------------------------------------------------------------------- |
-| `@fumadocs/graphql`           | the page: the schema built from SDL, cross-links and your components |
-| `@fumadocs/graphql/operation` | an operation: its field, title, directives and generated example     |
-| `@fumadocs/graphql/type-docs` | a named type: its kind, directives, relations and usages             |
+| Path                           | Module                                                               |
+| ------------------------------ | -------------------------------------------------------------------- |
+| `@fumadocs/graphql`            | the page: the schema built from SDL, cross-links and your components |
+| `@fumadocs/graphql/operation`  | an operation: its field, title, directives and generated example     |
+| `@fumadocs/graphql/type-docs`  | a named type: its kind, directives, relations and usages             |
+| `@fumadocs/graphql/playground` | the fetcher, form model and stored state of the playground           |
 
 ## Page
 
-`createGraphQLPage()` takes your components and returns `<GraphQLPage />`, which accepts the props of generated pages.
+`createGraphQLRenderer()` takes your components and returns `<GraphQLPage />`, which accepts the props of generated pages.
 
 ```tsx title="components/api-page.tsx"
 'use client';
-import { type CodeBlockProps, createGraphQLPage } from '@fumadocs/graphql';
+import { type CodeBlockProps, createGraphQLRenderer } from '@fumadocs/graphql';
 import { Operation } from '@/components/my-operation';
 import { TypeDocs } from '@/components/my-type';
 
-export const GraphQLPage = createGraphQLPage({
+export const GraphQLPage = createGraphQLRenderer({
   components: {
     Operation,
     TypeDocs,
@@ -58,8 +59,9 @@ Components under the page read its state.
 | `useComponents()`              | the components passed to the page                       |
 | `useTypeLink(name)`            | the page URL of a named type, `undefined` when unlinked |
 | `useOperationLink(kind, name)` | the page URL of an operation                            |
+| `useRenderContext()`           | the render options of the page, like `playground`       |
 
-To render operations yourself, mount `<GraphQLProvider sdl={sdl} components={...} />` in place of `createGraphQLPage()`.
+To render operations yourself, mount `<GraphQLProvider sdl={sdl} shiki={shiki} components={...} />` in place of `createGraphQLRenderer()`.
 
 ## Operation
 

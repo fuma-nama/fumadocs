@@ -2,7 +2,7 @@
 import { type ReactNode, useMemo } from 'react';
 import { ClientCodeBlock } from '@/ui/components/codeblock';
 import type { ExampleMessageItem } from '@/utils/get-example-messages';
-import type { RenderContext } from '@/types';
+import { useRenderContext } from '@/utils/create-page';
 import { useTranslations } from '@fuma-translate/react';
 import { SelectTab, SelectTabs, SelectTabTrigger } from 'shared-api/components/select-tab';
 import { Markdown } from '../components/markdown';
@@ -17,13 +17,12 @@ import {
 export function MessageExamples({
   examples,
   headingLevel,
-  ctx,
 }: {
   examples: ExampleMessageItem[];
   headingLevel: number;
-  ctx: RenderContext;
 }) {
   const t = useTranslations({ note: 'asyncapi message example' });
+  const ctx = useRenderContext();
   if (examples.length === 0) return null;
 
   if (ctx.content?.renderAPIExampleUsageTabs)

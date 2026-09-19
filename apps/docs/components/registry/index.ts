@@ -61,11 +61,12 @@ const graphqlExports = new Map([
   ['types.ts', '@fumadocs/graphql'],
   ['utils/schema.ts', '@fumadocs/graphql'],
   ['utils/pages.ts', '@fumadocs/graphql'],
-  ['playground/fetcher.ts', '@fumadocs/graphql'],
+  ['playground/fetcher.ts', '@fumadocs/graphql/playground'],
   ['ui/playground/index.tsx', '@fumadocs/graphql/ui/playground'],
-  ['playground/json-schema.ts', '@fumadocs/graphql'],
-  ['utils/example.ts', '@fumadocs/graphql'],
-  ['utils/snippets.ts', '@fumadocs/graphql'],
+  ['playground/json-schema.ts', '@fumadocs/graphql/playground'],
+  ['playground/storage.ts', '@fumadocs/graphql/playground'],
+  ['utils/example.ts', '@fumadocs/graphql/playground'],
+  ['utils/snippets.ts', '@fumadocs/graphql/utils/snippets'],
   ['utils/build-schema.ts', '@fumadocs/graphql'],
 ]);
 

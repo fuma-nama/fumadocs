@@ -1,19 +1,17 @@
 'use client';
 import { type ComponentProps, Fragment, type ReactNode } from 'react';
-import type {
-  HttpMethods,
-  MediaTypeObject,
-  OperationObject,
-  PathItemObject,
-  RenderContext,
-  SecuritySchemeObject,
-} from '@/types';
+import type { HttpMethods, MediaTypeObject, SecuritySchemeObject } from '@/types';
 import { UsageTabs } from '@/ui/operation/usage-tabs';
 import { MethodLabel } from '@/ui/components/method-label';
 import { SchemaUI } from '@/ui/components/schema';
 import { Badge } from 'shared-api/components/badge';
-import { useOpenAPI, useTypeScriptDefinitions } from '@/utils/create-page';
-import { OperationProvider, type OperationResponse, useOperation } from '@/operation';
+import { useOpenAPI, useRenderContext, useTypeScriptDefinitions } from '@/utils/create-page';
+import {
+  OperationProvider,
+  type OperationResponse,
+  type PageOperationProps,
+  useOperation,
+} from '@/operation';
 import { useTranslations } from '@fuma-translate/react';
 import {
   AccordionContent,
@@ -32,40 +30,10 @@ import { Markdown } from '../components/markdown';
 import { useCopyButton } from 'fumadocs-ui/utils/use-copy-button';
 import { buttonVariants } from 'fumadocs-ui/components/ui/button';
 import { Check, Copy } from 'lucide-react';
-import PlaygroundClient, { type PlaygroundClientOptions } from '@/ui/playground/client';
+import PlaygroundClient from '@/ui/playground/client';
 
-export interface APIPlaygroundProps {
-  path: string;
-  method: HttpMethods;
-  operation: OperationObject;
-  pathItem: PathItemObject;
-}
-
-export interface OperationPlaygroundOptions extends PlaygroundClientOptions {
-  /**
-   * @defaultValue true
-   */
-  enabled?: boolean;
-
-  /**
-   * Replace the renderer, e.g. the playground installed with Fumadocs CLI.
-   */
-  render?: (props: APIPlaygroundProps) => ReactNode;
-}
-
-export interface OperationProps {
-  type?: 'webhook' | 'operation';
-  path: string;
-  method: HttpMethods;
-  operation: OperationObject;
-  pathItem: PathItemObject;
-
-  showTitle?: boolean;
-  showDescription?: boolean;
+export interface OperationProps extends PageOperationProps {
   headingLevel?: number;
-
-  /** the options of `createOpenAPIPage()` */
-  ctx: RenderContext;
 }
 
 export function Operation({ type, path, method, operation, pathItem, ...props }: OperationProps) {
@@ -86,10 +54,10 @@ function OperationContent({
   showTitle,
   showDescription,
   headingLevel = 2,
-  ctx,
-}: Omit<OperationProps, 'type' | 'path' | 'method' | 'operation' | 'pathItem'>) {
+}: Pick<OperationProps, 'showTitle' | 'showDescription' | 'headingLevel'>) {
   const t = useTranslations({ note: 'operation page' });
   const { resolve } = useOpenAPI().doc;
+  const ctx = useRenderContext();
   const {
     type,
     path,
@@ -302,7 +270,6 @@ function OperationContent({
                     method={item.method}
                     pathItem={item.pathItem}
                     operation={item.operation}
-                    ctx={ctx}
                   />
                 </div>
               </AccordionContent>
@@ -356,7 +323,7 @@ function OperationContent({
       parameters: parameterNode,
       responses: responseNode,
       apiPlayground,
-      apiExample: <UsageTabs ctx={ctx} />,
+      apiExample: <UsageTabs />,
     };
 
     if (ctx.content?.renderOperationLayout)
@@ -389,7 +356,7 @@ function OperationContent({
     callbacks: callbacksNode,
     parameters: parameterNode,
     responses: responseNode,
-    requests: <RequestTabs ctx={ctx} />,
+    requests: <RequestTabs />,
   };
 
   if (ctx.content?.renderWebhookLayout) return ctx.content.renderWebhookLayout(slots);

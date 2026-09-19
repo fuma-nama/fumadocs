@@ -1,11 +1,6 @@
 'use client';
 import { type ComponentProps, Fragment, type ReactNode } from 'react';
-import type {
-  ChannelObject,
-  CorrelationIDObject,
-  RenderContext,
-  SecuritySchemeObject,
-} from '@/types';
+import type { ChannelObject, CorrelationIDObject, SecuritySchemeObject } from '@/types';
 import { MessageExamples } from '@/ui/operation/message-examples';
 import { ActionLabel } from '@/ui/components/badge';
 import { SchemaUI } from '@/ui/components/schema';
@@ -22,7 +17,7 @@ import { SelectTabs, SelectTabTrigger, SelectTab } from 'shared-api/components/s
 import { AnchorSection } from 'shared-api/auto-anchor/client';
 import { Heading } from '@/ui/components/heading';
 import { Markdown } from '../components/markdown';
-import { useAsyncAPI } from '@/utils/create-page';
+import { useAsyncAPI, useRenderContext } from '@/utils/create-page';
 import { useServer } from '@/utils/use-server';
 import type { PageOperationProps } from '@/operation';
 import {
@@ -37,12 +32,7 @@ import { MailIcon } from 'lucide-react';
 import { AccordionBindings } from '../bindings/accordion-bindings';
 import { ServerSelect } from '../components/server-select';
 
-export interface OperationProps extends PageOperationProps {
-  /** the options of `createAsyncAPIPage()` */
-  ctx: RenderContext;
-}
-
-export function Operation({ id, action, ...props }: OperationProps) {
+export function Operation({ id, action, ...props }: PageOperationProps) {
   return (
     <OperationProvider id={id} action={action}>
       <OperationContent {...props} />
@@ -53,10 +43,10 @@ export function Operation({ id, action, ...props }: OperationProps) {
 function OperationContent({
   showTitle,
   showDescription,
-  ctx,
-}: Omit<OperationProps, 'id' | 'action'>) {
+}: Omit<PageOperationProps, 'id' | 'action'>) {
   const t = useTranslations({ note: 'operation page' });
   const { resolve } = useAsyncAPI().doc;
+  const ctx = useRenderContext();
   const { operation, action, channel, title, description, parameters, messages, reply } =
     useOperation();
   const securitySchemes = useOperationSecurity();
@@ -102,7 +92,7 @@ function OperationContent({
               </AccordionTrigger>
             </AccordionHeader>
             <AccordionContent className="grid grid-cols-1 gap-2 @xl:grid-cols-2">
-              <MessageSection item={item} headingLevel={headingLevel + 1} ctx={ctx} />
+              <MessageSection item={item} headingLevel={headingLevel + 1} />
             </AccordionContent>
           </AccordionItem>
         ))}
@@ -276,11 +266,9 @@ function ParametersSection({
 function MessageSection({
   item: { message, headers, payload, examples },
   headingLevel,
-  ctx,
 }: {
   item: OperationMessage;
   headingLevel: number;
-  ctx: RenderContext;
 }) {
   const t = useTranslations();
   const { resolve } = useAsyncAPI().doc;
@@ -318,7 +306,7 @@ function MessageSection({
         )}
       </div>
       <div className="mb-2">
-        <MessageExamples examples={examples} headingLevel={headingLevel} ctx={ctx} />
+        <MessageExamples examples={examples} headingLevel={headingLevel} />
       </div>
     </>
   );

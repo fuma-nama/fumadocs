@@ -3,6 +3,7 @@ import path from 'node:path';
 import fs from 'node:fs';
 import { renderToString } from 'react-dom/server';
 import { describe, expect, test } from 'vitest';
+import { defaultShikiFactory } from 'fumadocs-core/highlight/shiki/full';
 import { type GraphQLComponents, GraphQLProvider } from '@/utils/create-page';
 import { TypeProvider, type TypeUsages, useNamedType } from '@/type-docs';
 
@@ -27,7 +28,7 @@ function getTypeUsages(name: string): TypeUsages {
   }
 
   renderToString(
-    <GraphQLProvider sdl={sdl} components={components}>
+    <GraphQLProvider sdl={sdl} shiki={defaultShikiFactory} components={components}>
       <TypeProvider name={name}>
         <Probe />
       </TypeProvider>

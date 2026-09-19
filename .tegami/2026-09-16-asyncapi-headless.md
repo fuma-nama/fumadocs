@@ -8,22 +8,22 @@ packages:
 
 API pages are now built on a headless layer, use it to build your own UI:
 
-- `createAsyncAPIPage()` and `<AsyncAPIProvider />` with your own components.
-- the hooks of pages and operations: `useAsyncAPI()`, `useComponents()`, `useServer()`, `useOperation()` and `useOperationSecurity()`.
+- `createAsyncAPIRenderer()` and `<AsyncAPIProvider />` with your own components.
+- the hooks of pages and operations: `useAsyncAPI()`, `useComponents()`, `useRenderContext()`, `useServer()`, `useOperation()` and `useOperationSecurity()`.
 - `useServer()` resolves server URLs: `resolveUrl(id)` fills in the variables of a server, and the selected one carries its `title`.
 
 ```tsx title="components/api-page.tsx"
 'use client';
-import { createAsyncAPIPage } from '@fumadocs/asyncapi';
+import { createAsyncAPIRenderer } from '@fumadocs/asyncapi';
 
-export const AsyncAPIPage = createAsyncAPIPage({
+export const AsyncAPIPage = createAsyncAPIRenderer({
   components: { Operation, Markdown, CodeBlock, Heading, SchemaUI },
 });
 ```
 
 See [Headless](https://fumadocs.dev/docs/integrations/asyncapi/headless).
 
-`@fumadocs/asyncapi/ui` is unchanged, it now renders through the layer.
+`@fumadocs/asyncapi/ui` renders through the layer, its options are unchanged except `content.renderAPIExampleLayout`, which was never rendered and is removed.
 
 ## Install the UI
 
@@ -33,13 +33,7 @@ The UI of API pages can be installed with Fumadocs CLI and edited, reusing the `
 npx @fumadocs/cli add fumadocs/asyncapi/page
 ```
 
-```tsx title="components/api-page.tsx"
-'use client';
-import { createAsyncAPIPageBase } from '@/components/api/asyncapi/page';
-import { defaultShikiFactory } from 'fumadocs-core/highlight/shiki/full';
-
-export const AsyncAPIPage = createAsyncAPIPageBase({ shiki: defaultShikiFactory });
-```
+It installs `<AsyncAPIPage />` itself, import it from `@/components/asyncapi/page` in place of your `components/api-page.tsx`.
 
 To replace parts of it, install `fumadocs/asyncapi/operation` or `fumadocs/api-docs/schema` and pass them to the new `components` options:
 
@@ -55,8 +49,8 @@ The option was never rendered by API pages, and it is gone with its `@fumari/jso
 
 ## Client-safe package entry
 
-`generateFiles()` reads and writes files, so the package entry ships a stubbed build under the `browser` condition. Client components can import `createAsyncAPIPage()` and the hooks without pulling `node:fs` into the bundle.
+`generateFiles()` reads and writes files, so the package entry ships a stubbed build under the `browser` condition. Client components can import `createAsyncAPIRenderer()` and the hooks without pulling `node:fs` into the bundle.
 
 ## Highlighting out of the box
 
-`createAsyncAPIPage()` highlights code blocks with the full Shiki bundle, pass a smaller `shiki` factory to trim it.
+`createAsyncAPIRenderer()` highlights code blocks with the full Shiki bundle, pass a smaller `shiki` factory to trim it.

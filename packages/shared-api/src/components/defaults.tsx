@@ -21,23 +21,19 @@ import {
 } from 'fumadocs-ui/components/dynamic-codeblock.core';
 import type { ShikiFactory } from 'fumadocs-core/highlight/shiki';
 import type { BundledTheme, CodeOptionsThemes, CodeToHastOptionsCommon } from 'shiki';
-import type { SchemaUIOptions } from '@/components/schema';
 
 export type CodeBlockProps = Omit<DynamicCodeblockProps, 'highlighter' | 'options'>;
+export type ShikiOptions = Omit<CodeToHastOptionsCommon, 'lang'> & CodeOptionsThemes<BundledTheme>;
+
+export const defaultShikiOptions: ShikiOptions = {
+  themes: { light: 'github-light', dark: 'github-dark' },
+};
 
 /** components an API page renders its content through */
 export interface PageComponents {
   Markdown: FC<{ md: string }>;
   CodeBlock: FC<CodeBlockProps>;
   Heading: FC<ComponentProps<'h1'> & { id: string; depth: number }>;
-}
-
-export interface CreatePageComponentsOptions {
-  /** without it, code blocks render unhighlighted */
-  shiki?: ShikiFactory;
-  shikiOptions?: Omit<CodeToHastOptionsCommon, 'lang'> & CodeOptionsThemes<BundledTheme>;
-  /** replace the default components */
-  components?: Partial<PageComponents>;
 }
 
 /**
@@ -47,53 +43,35 @@ export interface CreatePageComponentsOptions {
  */
 export function createPageComponents({
   shiki,
-  shikiOptions = { themes: { light: 'github-light', dark: 'github-dark' } },
-  components = {},
-}: CreatePageComponentsOptions): {
-  components: PageComponents;
-  /** render Markdown outside of a component */
-  processMarkdown: (md: string) => ReactNode;
-  /** {@link SchemaUIOptions} renderers backed by the components */
-  renderMarkdown: (md: string) => ReactNode;
-  renderCodeblock: SchemaUIOptions['renderCodeblock'];
-} {
+  shikiOptions = defaultShikiOptions,
+  components,
+}: {
+  shiki: ShikiFactory;
+  shikiOptions?: ShikiOptions;
+  /** replace the default components */
+  components: Partial<PageComponents>;
+}): PageComponents {
   const CodeBlock =
     components.CodeBlock ??
-    (shiki
-      ? (props: CodeBlockProps) => (
-          <DynamicCodeBlock
-            highlighter={() => shiki.getOrInit()}
-            options={shikiOptions}
-            {...props}
-          />
-        )
-      : ({ code, lang }: CodeBlockProps) => (
-          <pre>
-            <code className={`language-${lang}`}>{code}</code>
-          </pre>
-        ));
+    ((props: CodeBlockProps) => (
+      <DynamicCodeBlock highlighter={() => shiki.getOrInit()} options={shikiOptions} {...props} />
+    ));
 
   let processor: ReturnType<typeof createProcessor>;
-  function processMarkdown(md: string): ReactNode {
-    processor ??= createProcessor(CodeBlock);
-
-    return processor.processSync(md).result as ReactNode;
-  }
-
-  const Markdown =
-    components.Markdown ?? (({ md }: { md: string }) => useMemo(() => processMarkdown(md), [md]));
 
   return {
-    components: {
-      Markdown,
-      CodeBlock,
-      Heading:
-        components.Heading ??
-        (({ depth, ...props }) => <Heading as={`h${depth}` as 'h1'} {...props} />),
-    },
-    processMarkdown,
-    renderMarkdown: (md) => <Markdown md={md} />,
-    renderCodeblock: (props) => <CodeBlock {...props} />,
+    CodeBlock,
+    Markdown:
+      components.Markdown ??
+      (({ md }) =>
+        useMemo(() => {
+          processor ??= createProcessor(CodeBlock);
+
+          return processor.processSync(md).result as ReactNode;
+        }, [md])),
+    Heading:
+      components.Heading ??
+      (({ depth, ...props }) => <Heading as={`h${depth}` as 'h1'} {...props} />),
   };
 }
 

@@ -85,11 +85,6 @@ export const registry: Registry = {
         },
         {
           type: 'components',
-          path: 'playground/storage.ts',
-          target: '<dir>/graphql/playground/storage.ts',
-        },
-        {
-          type: 'components',
           path: 'ui/components/code-editor.tsx',
           target: '<dir>/graphql/playground/code-editor.tsx',
         },

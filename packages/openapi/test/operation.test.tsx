@@ -2,7 +2,7 @@ import { fileURLToPath } from 'node:url';
 import { renderToString } from 'react-dom/server';
 import { expect, test } from 'vitest';
 import { loadDocument } from '@/utils/document/load';
-import { createOpenAPIPage } from '@/utils/create-page';
+import { createOpenAPIRenderer } from '@/utils/create-page';
 import type { PageOperationProps } from '@/operation';
 import {
   type ExampleRequest,
@@ -36,7 +36,7 @@ async function render(
   },
 ) {
   const { bundled } = await loadDocument(museum);
-  const OpenAPIPage = createOpenAPIPage({
+  const OpenAPIPage = createOpenAPIRenderer({
     codeUsages: registerDefault(createCodeUsageGeneratorRegistry()),
     components: {
       ...components,
@@ -202,7 +202,7 @@ test('renders the operations and webhooks of a page', async () => {
   };
   const rendered: string[] = [];
 
-  const OpenAPIPage = createOpenAPIPage({
+  const OpenAPIPage = createOpenAPIRenderer({
     components: {
       ...components,
       Operation({ type, path, method, operation, showTitle }: PageOperationProps) {

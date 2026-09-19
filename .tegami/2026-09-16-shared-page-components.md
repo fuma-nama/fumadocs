@@ -9,16 +9,15 @@ packages:
 
 ## Default page components
 
-`createOpenAPIPage()`, `createAsyncAPIPage()` and `createGraphQLPage()` now fill the `Markdown`, `CodeBlock` and `Heading` components you didn't pass, rendering Markdown through Remark and code blocks through the `shiki` option:
+`createOpenAPIRenderer()`, `createAsyncAPIRenderer()` and `createGraphQLRenderer()` fill the `Markdown`, `CodeBlock` and `Heading` components you didn't pass, rendering Markdown through Remark and code blocks through Shiki:
 
 ```tsx
-createOpenAPIPage({
-  shiki: defaultShikiFactory,
+createOpenAPIRenderer({
   components: { SchemaUI, Operation },
 });
 ```
 
-`shiki` defaults to the full bundle on `createAsyncAPIPage()` and `createGraphQLPage()`. On `createOpenAPIPage()` it is optional, code blocks render unhighlighted without it.
+`shiki` defaults to the full bundle, `createOpenAPIBaseRenderer()` takes the factory you pass instead and leaves the bundle out.
 
 ## Installable UI
 

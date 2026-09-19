@@ -17,15 +17,15 @@ Everything outside `fumadocs-openapi/ui` is headless.
 
 ## Page
 
-`createOpenAPIPage()` takes your components and returns `<OpenAPIPage />`, which accepts the props of generated pages.
+`createOpenAPIRenderer()` takes your components and returns `<OpenAPIPage />`, which accepts the props of generated pages.
 
 ```tsx title="components/api-page.tsx"
 'use client';
-import { type CodeBlockProps, createOpenAPIPage } from 'fumadocs-openapi';
+import { type CodeBlockProps, createOpenAPIRenderer } from 'fumadocs-openapi';
 import { Operation } from '@/components/my-operation';
 import { SchemaUI } from '@/components/my-schema';
 
-export const OpenAPIPage = createOpenAPIPage({
+export const OpenAPIPage = createOpenAPIRenderer({
   components: {
     Operation,
     SchemaUI,
@@ -46,7 +46,7 @@ export const OpenAPIPage = createOpenAPIPage({
 | `SchemaUI`  | the JSON schemas of parameters, bodies and responses, see [Schema UI](#schema-ui) |
 | `Layout`    | optional, wraps the rendered operations and webhooks                              |
 
-`Markdown`, `CodeBlock` and `Heading` are filled in when you leave them out, rendering Markdown through Remark and code through the `shiki` option.
+`Markdown`, `CodeBlock` and `Heading` are filled in when you leave them out, rendering Markdown through Remark and code through Shiki. The full Shiki bundle is the default, `createOpenAPIBaseRenderer()` highlights through the `shiki` factory you pass instead.
 
 ### Hooks
 
@@ -58,6 +58,7 @@ Components under the page read its state.
 | `useComponents()`                           | the components passed to the page                     |
 | `useServer()`                               | the selected server and its variables                 |
 | `useTypeScriptDefinitions(schema, options)` | TypeScript definitions of a JSON schema               |
+| `useRenderContext()`                        | the render options of the page, like `playground`     |
 
 ### Code usages
 
@@ -67,7 +68,7 @@ Generators are opt-in, so a page without code samples doesn't bundle them.
 import { createCodeUsageGeneratorRegistry } from 'fumadocs-openapi/requests/generators';
 import { curl } from 'fumadocs-openapi/requests/generators/curl';
 
-createOpenAPIPage({
+createOpenAPIRenderer({
   codeUsages: createCodeUsageGeneratorRegistry().register(curl),
   components: { ... },
 });

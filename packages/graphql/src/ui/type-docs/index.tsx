@@ -10,10 +10,9 @@ import {
   isScalarType,
   isUnionType,
 } from 'graphql';
-import { useOperationLink, useTypeLink } from '@/utils/create-page';
+import { useOperationLink, useRenderContext, useTypeLink } from '@/utils/create-page';
 import type { PageTypeProps } from '@/type-docs';
 import { TypeProvider, useNamedType } from '@/type-docs';
-import type { RenderContext } from '@/types';
 import { SchemaUI } from '@/ui/components/schema';
 import type { OperationKind } from '@/utils/schema';
 import { KindLabel } from '../components/badge';
@@ -24,12 +23,7 @@ import { DirectiveList, ReferenceLink, TypeAnnotation } from '../components/type
 import { Braces, CornerUpLeft, Import, Layers, Variable } from 'lucide-react';
 import Link from 'fumadocs-core/link';
 
-export interface TypeDocsProps extends PageTypeProps {
-  /** the options of `createGraphQLPage()` */
-  ctx: RenderContext;
-}
-
-export function TypeDocs({ name, ...props }: TypeDocsProps) {
+export function TypeDocs({ name, ...props }: PageTypeProps) {
   return (
     <TypeProvider name={name}>
       <TypeDocsContent {...props} />
@@ -37,8 +31,9 @@ export function TypeDocs({ name, ...props }: TypeDocsProps) {
   );
 }
 
-function TypeDocsContent({ showTitle, showDescription, ctx }: Omit<TypeDocsProps, 'name'>) {
+function TypeDocsContent({ showTitle, showDescription }: Omit<PageTypeProps, 'name'>) {
   const t = useTranslations({ note: 'type page' });
+  const ctx = useRenderContext();
   const { name, kind, type, directives, relations } = useNamedType();
   let headingLevel = 2;
 

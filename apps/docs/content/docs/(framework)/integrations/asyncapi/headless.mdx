@@ -14,15 +14,15 @@ Everything outside `@fumadocs/asyncapi/ui` is headless.
 
 ## Page
 
-`createAsyncAPIPage()` takes your components and returns `<AsyncAPIPage />`, which accepts the props of generated pages.
+`createAsyncAPIRenderer()` takes your components and returns `<AsyncAPIPage />`, which accepts the props of generated pages.
 
 ```tsx title="components/api-page.tsx"
 'use client';
-import { type CodeBlockProps, createAsyncAPIPage } from '@fumadocs/asyncapi';
+import { type CodeBlockProps, createAsyncAPIRenderer } from '@fumadocs/asyncapi';
 import { Operation } from '@/components/my-operation';
 import { SchemaUI } from '@/components/my-schema';
 
-export const AsyncAPIPage = createAsyncAPIPage({
+export const AsyncAPIPage = createAsyncAPIRenderer({
   components: {
     Operation,
     SchemaUI,
@@ -47,13 +47,14 @@ export const AsyncAPIPage = createAsyncAPIPage({
 
 Components under the page read its state.
 
-| Hook              | Returns                                            |
-| ----------------- | -------------------------------------------------- |
-| `useAsyncAPI()`   | the dereferenced document (`doc`) and page options |
-| `useComponents()` | the components passed to the page                  |
-| `useServer()`     | the servers, the selected one and its variables    |
+| Hook                 | Returns                                            |
+| -------------------- | -------------------------------------------------- |
+| `useAsyncAPI()`      | the dereferenced document (`doc`) and page options |
+| `useComponents()`    | the components passed to the page                  |
+| `useServer()`        | the servers, the selected one and its variables    |
+| `useRenderContext()` | the render options of the page, like `content`     |
 
-To render operations yourself, mount `<AsyncAPIProvider document={bundled} components={...} />` in place of `createAsyncAPIPage()`.
+To render operations yourself, mount `<AsyncAPIProvider document={bundled} shiki={shiki} components={...} />` in place of `createAsyncAPIRenderer()`.
 
 ## Operation
 

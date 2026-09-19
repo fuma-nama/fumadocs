@@ -24,12 +24,11 @@ import { FieldSet } from 'shared-api/components/playground/inputs';
 import { SchemaProvider } from 'shared-api/components/playground/schema';
 import { Input } from 'shared-api/components/input';
 import { Spinner } from 'shared-api/components/spinner';
-import { useGraphQL } from '@/utils/create-page';
+import { useGraphQL, useRenderContext } from '@/utils/create-page';
 import { useOperation } from '@/operation';
 import { cn } from '@/utils/cn';
 import { syncOperationVariables } from '@/utils/example';
 import { useQuery } from 'shared-api/utils/use-query';
-import type { RenderContext } from '@/types';
 import { ClientCodeBlock } from '@/ui/components/codeblock';
 import { CodeEditor } from '@/ui/components/code-editor';
 import { Badge } from 'shared-api/components/badge';
@@ -74,8 +73,9 @@ function toArgumentName(field: FieldKey): string | undefined {
   return typeof name === 'string' ? name : undefined;
 }
 
-export function OperationPlayground({ ctx }: { ctx: RenderContext }) {
+export function OperationPlayground() {
   const t = useTranslations({ note: 'graphql playground' });
+  const ctx = useRenderContext();
   const playground = ctx.playground ?? {};
   const { schema } = useGraphQL();
   const { kind, field, example } = useOperation();

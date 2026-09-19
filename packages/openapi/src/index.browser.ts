@@ -3,6 +3,7 @@
  * so it is stubbed here and the rest of the entry stays importable from client code.
  */
 export * from './utils/create-page';
+export type { CodeBlockProps } from 'shared-api/components/defaults';
 export { useServer, type SelectedServer } from './utils/use-server';
 export type { MediaAdapter } from '@/requests/media/adapter';
 export type * from './types';
