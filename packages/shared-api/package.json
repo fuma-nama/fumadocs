@@ -1,6 +1,6 @@
 {
   "name": "shared-api",
-  "version": "0.2.9",
+  "version": "0.2.10",
   "private": true,
   "description": "Shared UI of the API docs integrations, bundled into them and installed by the CLI",
   "license": "MIT",
