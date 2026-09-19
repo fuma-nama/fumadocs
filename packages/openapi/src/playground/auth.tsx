@@ -13,7 +13,7 @@ import {
 import { type DataEngine, type FieldKey, useListener } from '@fumari/stf';
 import { arrayStartsWith, objectGet, objectSet } from '@fumari/stf/lib/utils';
 import { useOnChange } from 'fumadocs-core/utils/use-on-change';
-import type { OperationObject, SecuritySchemeObject } from '@/types';
+import type { OAuth2SecurityScheme, OperationObject, SecuritySchemeObject } from '@/types';
 
 export interface AuthCodeState {
   redirect_uri: string;
@@ -28,6 +28,99 @@ export interface ImplicitState {
   client_id: string;
   /** name of the source security scheme */
   scheme: string;
+}
+
+export type OAuthFlowType = keyof NonNullable<OAuth2SecurityScheme['flows']>;
+
+export interface OAuthFlowInput {
+  /** name of the security scheme */
+  schemeId: string;
+  scopes: string[];
+  clientId: string;
+  clientSecret: string;
+  username: string;
+  password: string;
+  /** where the password flow sends the client credentials */
+  clientAuth: 'body' | 'header';
+}
+
+/**
+ * Run an OAuth flow and resolve its token.
+ *
+ * `implicit` and `authorizationCode` leave the page instead: the token is picked up on return,
+ * in `usePlaygroundAuth().store`.
+ */
+export async function requestOAuthToken(
+  scheme: OAuth2SecurityScheme,
+  type: OAuthFlowType,
+  { schemeId, scopes, clientId, clientSecret, username, password, clientAuth }: OAuthFlowInput,
+): Promise<string | undefined> {
+  const flows = scheme.flows ?? {};
+  const scope = scopes.join('+');
+  const redirect_uri = window.location.href;
+
+  if (type === 'implicit' || type === 'authorizationCode') {
+    const flow = flows[type];
+    if (!flow) return;
+    const state: AuthCodeState | ImplicitState =
+      type === 'implicit'
+        ? { scheme: schemeId, client_id: clientId, redirect_uri }
+        : { scheme: schemeId, client_id: clientId, client_secret: clientSecret, redirect_uri };
+    const params = new URLSearchParams({
+      response_type: type === 'implicit' ? 'token' : 'code',
+      client_id: clientId,
+      redirect_uri,
+      scope,
+      state: JSON.stringify(state),
+    });
+
+    window.location.replace(`${flow.authorizationUrl}?${params}`);
+    return;
+  }
+
+  if (type !== 'password' && type !== 'clientCredentials') return;
+  const flow = flows[type];
+  if (!flow) return;
+
+  const headers: Record<string, string> = {};
+  const body = new URLSearchParams({ scope });
+  if (type === 'password') {
+    body.set('grant_type', 'password');
+    body.set('username', username);
+    body.set('password', password);
+    if (clientAuth === 'header') {
+      headers.Authorization = `Basic ${btoa(`${clientId}:${clientSecret}`)}`;
+    } else {
+      if (clientId) body.set('client_id', clientId);
+      if (clientSecret) body.set('client_secret', clientSecret);
+    }
+  } else {
+    body.set('grant_type', 'client_credentials');
+    body.set('client_id', clientId);
+    body.set('client_secret', clientSecret);
+  }
+
+  return fetchToken(flow.tokenUrl!, body, headers);
+}
+
+async function fetchToken(
+  tokenUrl: string,
+  body: URLSearchParams,
+  headers: Record<string, string> = {},
+): Promise<string> {
+  const res = await fetch(tokenUrl, {
+    method: 'POST',
+    headers: { ...headers, 'Content-Type': 'application/x-www-form-urlencoded' },
+    body,
+  });
+
+  if (!res.ok) throw new Error(await res.text());
+  const { access_token, token_type = 'Bearer' } = (await res.json()) as {
+    access_token: string;
+    token_type?: string;
+  };
+
+  return `${token_type} ${access_token}`;
 }
 
 /** scheme name -> token info */
@@ -72,31 +165,20 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const value = scheme.flows?.authorizationCode;
     if (!value) return;
 
-    const res = await fetch(value.tokenUrl!, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/x-www-form-urlencoded',
-      },
-      body: new URLSearchParams({
-        grant_type: 'authorization_code',
-        code,
-        // note: `state` could be invalid, but server will check it
-        redirect_uri: state.redirect_uri,
-        client_id: state.client_id,
-        client_secret: state.client_secret,
-      }),
-    });
-
-    if (!res.ok) throw new Error(await res.text());
-    const { access_token, token_type = 'Bearer' } = (await res.json()) as {
-      access_token: string;
-      token_type?: string;
-    };
-
     const info: TokenInfo = {
       type: 'authorization_code',
       ...state,
-      token: `${token_type} ${access_token}`,
+      token: await fetchToken(
+        value.tokenUrl!,
+        new URLSearchParams({
+          grant_type: 'authorization_code',
+          code,
+          // note: `state` could be invalid, but server will check it
+          redirect_uri: state.redirect_uri,
+          client_id: state.client_id,
+          client_secret: state.client_secret,
+        }),
+      ),
     };
     setStore((s) => ({
       ...s,

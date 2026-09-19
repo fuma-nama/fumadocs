@@ -9,6 +9,8 @@ export type InfoTag =
       value: ReactNode;
       /** render as a block instead of inline */
       block?: boolean;
+      /** the value is prose, like a Markdown description */
+      prose?: boolean;
     }
   | { label: ReactNode; list: string[] }
   | { node: ReactNode };

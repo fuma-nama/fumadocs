@@ -7,7 +7,7 @@ export default defineConfig({
   entry: [
     './src/index.{ts,tsx}',
     './src/{index.browser,i18n}.ts',
-    './src/type-tree/index.ts',
+    './src/type-tree/{index,index.browser}.ts',
     './src/vite/*',
     './src/next/*',
     './src/webpack/story.ts',
@@ -21,12 +21,17 @@ export default defineConfig({
   plugins: [packageTranslationsPlugin()],
   exports: {
     customExports(v) {
-      const { './index.browser': browser, ...rest } = v;
+      const { './index.browser': browser, './type-tree/index.browser': typeTree, ...rest } = v;
 
       return {
         ...rest,
-        // the story factory runs the TypeScript compiler over your files, client bundles get the stub
+        // the story factory and `collapse()` run the TypeScript compiler, client bundles get the stubs
         '.': { types: './dist/index.d.ts', browser, import: v['.'] },
+        './type-tree': {
+          types: './dist/type-tree/index.d.ts',
+          browser: typeTree,
+          import: v['./type-tree'],
+        },
         './css/*': './css/*',
       };
     },

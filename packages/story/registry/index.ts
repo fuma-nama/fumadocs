@@ -28,13 +28,6 @@ export const registry: Registry = {
           path: 'utils/date.ts',
           target: '<dir>/story/date.ts',
         },
-        // the `type-tree` entry of the package pulls the TypeScript compiler, these are its
-        // runtime-safe modules
-        ...['sampler', 'stringify', 'validator'].map((name) => ({
-          type: 'components' as const,
-          path: `type-tree/${name}.ts`,
-          target: `<dir>/story/type-tree/${name}.ts`,
-        })),
       ],
     },
   ],

@@ -19,12 +19,9 @@ import {
   SelectTrigger,
   SelectValue,
 } from 'shared-api/components/select';
-import type { OAuth2SecurityScheme } from '@/types';
 import { useTranslations } from '@fuma-translate/react';
-import { type AuthCodeState, type ImplicitState, usePlaygroundAuth } from '@/playground/auth';
+import { type OAuthFlowType, requestOAuthToken, usePlaygroundAuth } from '@/playground/auth';
 import { useOpenAPI } from '@/utils/create-page';
-
-type FlowType = keyof NonNullable<OAuth2SecurityScheme['flows']>;
 
 export interface AuthDialogContentProps {
   schemeId: string;
@@ -71,8 +68,8 @@ function Content({ schemeId, scopes, setToken, setOpen }: AuthDialogContentProps
   if (!scheme || scheme.type !== 'oauth2')
     throw new Error('unexpected schemaId: must be type oauth2');
 
-  const [type, setType] = useState<FlowType | null>(() => {
-    return Object.keys(scheme.flows!)[0] as FlowType;
+  const [type, setType] = useState<OAuthFlowType | null>(() => {
+    return Object.keys(scheme.flows!)[0] as OAuthFlowType;
   });
   const [clientAuth, setClientAuth] = useState<'body' | 'header'>('body');
 
@@ -87,7 +84,7 @@ function Content({ schemeId, scopes, setToken, setOpen }: AuthDialogContentProps
       description: t('Send the client ID and secret in the Authorization header.'),
     },
   };
-  const allFlows: Record<FlowType, FlowInfo> = useMemo(
+  const allFlows: Record<OAuthFlowType, FlowInfo> = useMemo(
     () => ({
       password: {
         name: t('Resource Owner Password Flow'),
@@ -128,104 +125,17 @@ function Content({ schemeId, scopes, setToken, setOpen }: AuthDialogContentProps
   }, [tokenInfo]);
 
   const authorize = useQuery(async (values: FormValues) => {
-    if (type === 'implicit') {
-      const value = scheme.flows![type]!;
+    if (!type) return;
+    const token = await requestOAuthToken(scheme, type, {
+      ...values,
+      schemeId,
+      scopes,
+      clientAuth,
+    });
+    if (!token) return;
 
-      const params = new URLSearchParams();
-      params.set('response_type', 'token');
-      params.set('client_id', values.clientId);
-      params.set('redirect_uri', window.location.href);
-      params.set('scope', scopes.join('+'));
-      params.set(
-        'state',
-        JSON.stringify({
-          scheme: schemeId,
-          client_id: values.clientId,
-          redirect_uri: window.location.href,
-        } satisfies ImplicitState),
-      );
-
-      window.location.replace(`${value.authorizationUrl}?${params.toString()}`);
-      return;
-    }
-    if (type === 'authorizationCode') {
-      const value = scheme.flows![type]!;
-
-      const params = new URLSearchParams();
-      params.set('response_type', 'code');
-      params.set('client_id', values.clientId);
-      params.set('redirect_uri', window.location.href);
-      params.set('scope', scopes.join('+'));
-      params.set(
-        'state',
-        JSON.stringify({
-          client_id: values.clientId,
-          client_secret: values.clientSecret,
-          redirect_uri: window.location.href,
-          scheme: schemeId,
-        } satisfies AuthCodeState),
-      );
-
-      window.location.replace(`${value.authorizationUrl}?${params.toString()}`);
-      return;
-    }
-
-    let res;
-    if (type === 'password') {
-      const value = scheme.flows![type]!;
-
-      const body = new URLSearchParams({
-        grant_type: 'password',
-        username: values.username,
-        password: values.password,
-        scope: scopes.join('+'),
-      });
-      const headers: Record<string, string> = {
-        'Content-Type': 'application/x-www-form-urlencoded',
-      };
-
-      if (clientAuth === 'header') {
-        headers.Authorization = `Basic ${btoa(`${values.clientId}:${values.clientSecret}`)}`;
-      } else {
-        if (values.clientId) body.set('client_id', values.clientId);
-        if (values.clientSecret) body.set('client_secret', values.clientSecret);
-      }
-
-      res = await fetch(value.tokenUrl!, {
-        method: 'POST',
-        headers,
-        body,
-      });
-    }
-
-    if (type === 'clientCredentials') {
-      const value = scheme.flows![type]!;
-
-      res = await fetch(value.tokenUrl!, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/x-www-form-urlencoded',
-        },
-        body: new URLSearchParams({
-          grant_type: 'client_credentials',
-          client_id: values.clientId,
-          client_secret: values.clientSecret,
-          scope: scopes.join('+'),
-        }),
-      });
-    }
-
-    if (res) {
-      if (!res.ok) throw new Error(await res.text());
-
-      const { access_token, token_type = 'Bearer' } = (await res.json()) as {
-        access_token: string;
-        token_type?: string;
-      };
-
-      setToken(`${token_type} ${access_token}`);
-      setOpen(false);
-    }
+    setToken(token);
+    setOpen(false);
   });
 
   const isLoading = authorize.isLoading;
@@ -243,7 +153,7 @@ function Content({ schemeId, scopes, setToken, setOpen }: AuthDialogContentProps
     >
       <Select
         items={Object.keys(scheme.flows!).map((key) => {
-          const { name, description } = allFlows[key as FlowType];
+          const { name, description } = allFlows[key as OAuthFlowType];
 
           return {
             value: key,
@@ -263,7 +173,7 @@ function Content({ schemeId, scopes, setToken, setOpen }: AuthDialogContentProps
         </SelectTrigger>
         <SelectContent>
           {Object.keys(scheme.flows!).map((key) => {
-            const { name, description } = allFlows[key as FlowType];
+            const { name, description } = allFlows[key as OAuthFlowType];
 
             return (
               <SelectItem key={key} value={key}>

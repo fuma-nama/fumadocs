@@ -13,7 +13,7 @@ import {
 } from 'react';
 import { useOpenAPI } from '@/utils/create-page';
 import { useServer } from '@/utils/use-server';
-import { useExampleRequests } from '@/operation';
+import { useExampleRequests, useOperation } from '@/operation';
 import type { BrowserFetcherOptions } from '@/playground/fetcher';
 import { DefaultResultDisplay, type ResultDisplayProps } from './components/result-display';
 import { pathnameFromRequest } from '@/requests/generators';
@@ -58,10 +58,9 @@ import {
   JsonInput,
   ObjectInput,
 } from 'shared-api/components/playground/inputs';
-import type { HttpMethods, OperationObject, ParameterObject, PathItemObject } from '@/types';
+import type { ParameterObject } from '@/types';
 import { useTranslations } from '@fuma-translate/react';
 import { OAuthDialog, OAuthDialogContent, OAuthDialogTrigger } from './components/oauth-dialog';
-import { dereference } from '@fumadocs/json-schema';
 import {
   type AuthField,
   type AuthRequirement,
@@ -81,10 +80,6 @@ export interface FormValues extends Record<string, unknown> {
 
 export interface PlaygroundClientProps
   extends Omit<ComponentProps<'form'>, 'method'>, PlaygroundClientOptions {
-  route: string;
-  method: HttpMethods;
-  operation: OperationObject;
-  pathItem: PathItemObject;
   writeOnly: boolean;
   readOnly: boolean;
 }
@@ -135,21 +130,11 @@ interface RequestBodyInfo {
 
 const OptionsContext = createContext<PlaygroundClientOptions>({});
 
-function getPreferredType(body: Record<string, unknown>): string | undefined {
-  if ('application/json' in body) return 'application/json';
-
-  return Object.keys(body)[0];
-}
-
 function usePlaygroundOptions() {
   return use(OptionsContext);
 }
 
 export default function PlaygroundClient({
-  route,
-  method,
-  operation,
-  pathItem,
   writeOnly,
   readOnly,
   transformAuthInputs,
@@ -162,6 +147,7 @@ export default function PlaygroundClient({
   const t = useTranslations({ note: 'playground' });
   const { doc, mediaAdapters, proxyUrl } = useOpenAPI();
   const { dereferenced } = doc;
+  const { path: route, method, operation, parameters: groups, requestBody } = useOperation();
   const options = useMemo<PlaygroundClientOptions>(
     () => ({
       transformAuthInputs,
@@ -172,29 +158,16 @@ export default function PlaygroundClient({
     }),
     [transformAuthInputs, fetchOptions, components, renderParameterField, renderBodyField],
   );
-  const { parameters, body } = useMemo(() => {
-    const parameters: ParameterObject[] = [];
-    if (operation.parameters) for (const p of operation.parameters) parameters.push(dereference(p));
-    if (pathItem.parameters) for (const p of pathItem.parameters) parameters.push(dereference(p));
-    let body: RequestBodyInfo | undefined;
+  const parameters = useMemo(() => groups.flatMap((group) => group.items), [groups]);
+  const body = useMemo<RequestBodyInfo | undefined>(() => {
+    if (!requestBody) return;
+    const mediaType =
+      'application/json' in requestBody.content
+        ? 'application/json'
+        : Object.keys(requestBody.content)[0];
 
-    if (operation.requestBody) {
-      const content = dereference(operation.requestBody).content;
-      const mediaType = content ? getPreferredType(content) : undefined;
-
-      if (content && mediaType) {
-        body = {
-          mediaType,
-          schema: dereference(content[mediaType]).schema ?? true,
-        };
-      }
-    }
-
-    return {
-      body,
-      parameters,
-    };
-  }, [operation, pathItem]);
+    return { mediaType, schema: requestBody.content[mediaType].schema ?? true };
+  }, [requestBody]);
   const { items: examples, selected: exampleId, update } = useExampleRequests();
   const { resolveUrl } = useServer();
   const { ResultDisplay = DefaultResultDisplay, CollapsiblePanel = DefaultCollapsiblePanel } =

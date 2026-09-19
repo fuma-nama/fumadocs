@@ -379,7 +379,9 @@ function SchemaDescription({ schema, ...props }: ComponentProps<'div'> & { schem
               ) : tag.block ? (
                 <BlockTag label={tag.label}>{tag.value}</BlockTag>
               ) : (
-                <InlineTag label={tag.label}>{tag.value}</InlineTag>
+                <InlineTag label={tag.label} prose={tag.prose}>
+                  {tag.value}
+                </InlineTag>
               )}
             </Fragment>
           ))}

@@ -23,7 +23,11 @@
     "./i18n": "./dist/i18n.js",
     "./next": "./dist/next/index.js",
     "./next/client": "./dist/next/client.js",
-    "./type-tree": "./dist/type-tree/index.js",
+    "./type-tree": {
+      "types": "./dist/type-tree/index.d.ts",
+      "browser": "./dist/type-tree/index.browser.js",
+      "import": "./dist/type-tree/index.js"
+    },
     "./vite": "./dist/vite/index.js",
     "./vite/client": "./dist/vite/client.js",
     "./webpack/story": "./dist/webpack/story.js",

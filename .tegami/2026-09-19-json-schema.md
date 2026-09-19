@@ -18,7 +18,7 @@ import { bundle } from '@fumadocs/json-schema/bundle';
 
 `bundle()` is a separate entry because it reads files and URLs, everything else runs in the browser.
 
-`@fumadocs/json-schema/react` renders a schema into the data an API page draws: `generateSchemaUI()` with the `SchemaData` and `InfoTag` types. It was in the Schema UI before, where every install copied it.
+`@fumadocs/json-schema/react` renders a schema into the data an API page draws: `generateSchemaUI()` with the `SchemaData` and `InfoTag` types. It was in the Schema UI before, where every install copied it. A labelled tag can be `prose`, for values like a Markdown deprecation reason.
 
 They were `@fumadocs/api-docs/schema/*` before, and the API was cleaned up while moving:
 

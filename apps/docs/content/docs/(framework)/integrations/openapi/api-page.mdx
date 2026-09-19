@@ -171,16 +171,7 @@ import PlaygroundClient from '@/components/openapi/playground';
 
 export const OpenAPIPage = createOpenAPIPage({
   playground: {
-    render: ({ path, method, operation, pathItem }) => (
-      <PlaygroundClient
-        route={path}
-        method={method}
-        operation={operation}
-        pathItem={pathItem}
-        writeOnly
-        readOnly={false}
-      />
-    ),
+    render: () => <PlaygroundClient writeOnly readOnly={false} />,
   },
 });
 ```

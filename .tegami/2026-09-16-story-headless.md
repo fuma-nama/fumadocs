@@ -23,7 +23,7 @@ npx @fumadocs/cli add fumadocs/story/controls
 
 Or build your own on `@fumadocs/story`: `<StoryProvider />` holds the selected variant and the form engine, `useStory()` exposes the presets and `useStoryArgs()` the arguments of the rendered component.
 
-The entry ships a stubbed build under the `browser` condition, so client components can import them without pulling the story factory's Node dependencies.
+The entry ships a stubbed build under the `browser` condition, so client components can import them without pulling the story factory's Node dependencies. `@fumadocs/story/type-tree` does the same: `collapse()` is stubbed under the `browser` condition, so the installed controls import the sampler, stringifier and validator from it.
 
 See [Headless](https://fumadocs.dev/docs/integrations/story/headless).
 

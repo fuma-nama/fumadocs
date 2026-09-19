@@ -50,6 +50,9 @@ const storyExports = new Map([
   ['provider.tsx', '@fumadocs/story'],
   // type-only, so the entry's TypeScript compiler import is erased
   ['type-tree/types.ts', '@fumadocs/story/type-tree'],
+  ['type-tree/sampler.ts', '@fumadocs/story/type-tree'],
+  ['type-tree/stringify.ts', '@fumadocs/story/type-tree'],
+  ['type-tree/validator.ts', '@fumadocs/story/type-tree'],
 ]);
 
 // internal modules of `@fumadocs/graphql` mapped to their public exports
@@ -60,6 +63,7 @@ const graphqlExports = new Map([
   ['ui/index.tsx', '@fumadocs/graphql/ui'],
   ['types.ts', '@fumadocs/graphql'],
   ['utils/schema.ts', '@fumadocs/graphql'],
+  ['utils/generate-schema-ui.tsx', '@fumadocs/graphql'],
   ['utils/pages.ts', '@fumadocs/graphql'],
   ['playground/fetcher.ts', '@fumadocs/graphql/playground'],
   ['ui/playground/index.tsx', '@fumadocs/graphql/ui/playground'],

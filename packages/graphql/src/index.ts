@@ -1,4 +1,5 @@
 export * from './utils/create-page';
+export * from './utils/generate-schema-ui';
 export type { CodeBlockProps } from 'shared-api/components/defaults';
 export type { OperationExample } from './utils/example';
 export type {

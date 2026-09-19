@@ -288,15 +288,7 @@ function OperationContent({
       apiPlayground = render ? (
         render({ path, method, operation, pathItem })
       ) : (
-        <PlaygroundClient
-          {...options}
-          operation={operation}
-          pathItem={pathItem}
-          route={path}
-          method={method}
-          writeOnly
-          readOnly={false}
-        />
+        <PlaygroundClient {...options} writeOnly readOnly={false} />
       );
     } else {
       apiPlayground = (
