@@ -32,7 +32,6 @@ export default defineConfig({
       'shared-api',
       'fast-content-type-parse',
       '@fastify/deepmerge',
-      '@scalar/openapi-upgrader',
       'xml-js',
     ],
     neverBundle: [/^node:/, 'fs'],

@@ -157,7 +157,6 @@
     "react-router": "^8.4.0",
     "remark-directive": "^4.0.0",
     "remark-mdx": "^3.1.1",
-    "remove-markdown": "^0.7.0",
     "tsconfig": "workspace:*",
     "tsdown": "0.23.0",
     "typescript": "^7.0.2",
@@ -248,7 +247,6 @@
     "@formatjs/fast-memoize": "3.1.7",
     "@formatjs/intl-localematcher": "0.8.13",
     "@shikijs/transformers": "4.4.3",
-    "path-to-regexp": "8.4.2",
-    "remove-markdown": "0.7.0"
+    "path-to-regexp": "8.4.2"
   }
 }
