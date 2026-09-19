@@ -14,17 +14,16 @@ const baseDir = path.join(import.meta.dirname, '../../');
 
 // internal modules of `fumadocs-openapi` mapped to their public exports
 const openapiExports = new Map([
-  ['headless/index.tsx', 'fumadocs-openapi/headless'],
-  ['playground/auth.tsx', 'fumadocs-openapi/headless'],
-  ['utils/storage-key.ts', 'fumadocs-openapi/headless'],
+  ['headless/index.tsx', 'fumadocs-openapi'],
+  ['operation.tsx', 'fumadocs-openapi/operation'],
   ['ui/index.tsx', 'fumadocs-openapi/ui'],
-  ['playground/client.tsx', 'fumadocs-openapi/playground/client'],
+  ['ui/playground/client.tsx', 'fumadocs-openapi/ui/playground/client'],
   // the request pipeline stays in the package, an installed playground drives it
-  ['playground/fetcher.ts', 'fumadocs-openapi/headless'],
-  ['requests/media/encode.ts', 'fumadocs-openapi/headless'],
-  ['requests/media/resolve-adapter.ts', 'fumadocs-openapi/headless'],
-  ['requests/types.ts', 'fumadocs-openapi/headless'],
-  ['utils/schema.ts', 'fumadocs-openapi/headless'],
+  ['playground/auth.tsx', 'fumadocs-openapi/playground'],
+  ['playground/fetcher.ts', 'fumadocs-openapi/playground'],
+  ['requests/media/encode.ts', 'fumadocs-openapi/requests'],
+  ['requests/media/resolve-adapter.ts', 'fumadocs-openapi/requests'],
+  ['requests/types.ts', 'fumadocs-openapi/requests'],
   ['requests/generators/index.ts', 'fumadocs-openapi/requests/generators'],
   // types are re-exported from the package root
   ['requests/media/adapter.ts', 'fumadocs-openapi'],
@@ -33,9 +32,9 @@ const openapiExports = new Map([
 
 // internal modules of `@fumadocs/asyncapi` mapped to their public exports
 const asyncapiExports = new Map([
-  ['headless/index.tsx', '@fumadocs/asyncapi/headless'],
+  ['headless/index.tsx', '@fumadocs/asyncapi'],
+  ['operation.tsx', '@fumadocs/asyncapi/operation'],
   ['ui/index.tsx', '@fumadocs/asyncapi/ui'],
-  ['ui/base.tsx', '@fumadocs/asyncapi/ui/base'],
   // types are re-exported from the package root
   ['types.ts', '@fumadocs/asyncapi'],
   ['utils/schema.ts', '@fumadocs/asyncapi'],
@@ -53,18 +52,19 @@ const storyExports = new Map([
 
 // internal modules of `@fumadocs/graphql` mapped to their public exports
 const graphqlExports = new Map([
-  ['headless/index.tsx', '@fumadocs/graphql/headless'],
+  ['headless/index.tsx', '@fumadocs/graphql'],
+  ['operation.tsx', '@fumadocs/graphql/operation'],
+  ['type-docs.tsx', '@fumadocs/graphql/type-docs'],
   ['ui/index.tsx', '@fumadocs/graphql/ui'],
-  ['ui/base.tsx', '@fumadocs/graphql/ui/base'],
   ['types.ts', '@fumadocs/graphql'],
   ['utils/schema.ts', '@fumadocs/graphql'],
   ['utils/pages.ts', '@fumadocs/graphql'],
   ['playground/fetcher.ts', '@fumadocs/graphql'],
-  ['playground/index.tsx', '@fumadocs/graphql/playground'],
-  ['playground/json-schema.ts', '@fumadocs/graphql/headless'],
-  ['utils/example.ts', '@fumadocs/graphql/headless'],
-  ['utils/snippets.ts', '@fumadocs/graphql/headless'],
-  ['utils/build-schema.ts', '@fumadocs/graphql/headless'],
+  ['ui/playground/index.tsx', '@fumadocs/graphql/ui/playground'],
+  ['playground/json-schema.ts', '@fumadocs/graphql'],
+  ['utils/example.ts', '@fumadocs/graphql'],
+  ['utils/snippets.ts', '@fumadocs/graphql'],
+  ['utils/build-schema.ts', '@fumadocs/graphql'],
 ]);
 
 // `shared-api` is private, so installed code owns a copy of everything it reaches

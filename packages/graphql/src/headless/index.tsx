@@ -1,6 +1,7 @@
 'use client';
 import type { FC, ReactNode } from 'react';
 import type { ShikiFactory } from 'fumadocs-core/highlight/shiki';
+import { defaultShikiFactory } from 'fumadocs-core/highlight/shiki/full';
 import {
   createPageComponents,
   type CreatePageComponentsOptions as PageComponentsOptions,
@@ -15,8 +16,6 @@ import {
 } from './runtime';
 
 export * from './runtime';
-export * from './operation';
-export * from './type-docs';
 // the playground form model: GraphQL input types as JSON Schema
 export { inputTypeToJsonSchema } from '@/playground/json-schema';
 export * from '@/utils/snippets';
@@ -45,7 +44,7 @@ export interface CreateGraphQLPageOptions extends Omit<
   GraphQLProviderProps,
   'sdl' | 'links' | 'components' | 'children'
 > {
-  /** the Shiki highlighter of code blocks, without it they render unhighlighted */
+  /** the Shiki highlighter of code blocks, the full bundle by default */
   shiki?: ShikiFactory;
   shikiOptions?: PageComponentsOptions['shikiOptions'];
   components: Pick<GraphQLComponents, 'SchemaUI'> &
@@ -71,7 +70,7 @@ export type GraphQLPageProps = GeneratedPageProps & {
  */
 export function createGraphQLPage({
   components,
-  shiki,
+  shiki = defaultShikiFactory,
   shikiOptions,
   ...options
 }: CreateGraphQLPageOptions): FC<GraphQLPageProps> {

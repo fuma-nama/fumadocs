@@ -8,7 +8,7 @@ import {
   type OperationKind,
 } from '@/utils/schema';
 import { generateOperationExample, type OperationExample } from '@/utils/example';
-import { useGraphQL } from './runtime';
+import { useGraphQL } from '@/headless/runtime';
 
 /** the operation and its resolved details, all read-only */
 export interface OperationInfo {

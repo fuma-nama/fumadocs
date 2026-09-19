@@ -12,13 +12,8 @@ import { UsageTabs } from '@/ui/operation/usage-tabs';
 import { MethodLabel } from '@/ui/components/method-label';
 import { SchemaUI } from '@/ui/components/schema';
 import { Badge } from 'shared-api/components/badge';
-import {
-  OperationProvider,
-  type OperationResponse,
-  useOpenAPI,
-  useOperation,
-  useTypeScriptDefinitions,
-} from '@/headless';
+import { useOpenAPI, useTypeScriptDefinitions } from '@/headless';
+import { OperationProvider, type OperationResponse, useOperation } from '@/operation';
 import { useTranslations } from '@fuma-translate/react';
 import {
   AccordionContent,
@@ -37,7 +32,7 @@ import { Markdown } from '../components/markdown';
 import { useCopyButton } from 'fumadocs-ui/utils/use-copy-button';
 import { buttonVariants } from 'fumadocs-ui/components/ui/button';
 import { Check, Copy } from 'lucide-react';
-import PlaygroundClient, { type PlaygroundClientOptions } from '@/playground/client';
+import PlaygroundClient, { type PlaygroundClientOptions } from '@/ui/playground/client';
 
 export interface APIPlaygroundProps {
   path: string;

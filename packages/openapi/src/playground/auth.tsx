@@ -1,8 +1,22 @@
 'use client';
-import { useOpenAPI } from '@/headless/runtime';
+import { useOpenAPI } from '@/headless';
 import { useQuery } from 'shared-api/utils/use-query';
 import { createContext, type ReactNode, use, useEffect, useMemo, useState } from 'react';
-import type { AuthCodeState, ImplicitState } from './components/oauth-dialog';
+
+export interface AuthCodeState {
+  redirect_uri: string;
+  client_id: string;
+  client_secret: string;
+  /** name of the source security scheme */
+  scheme: string;
+}
+
+export interface ImplicitState {
+  redirect_uri: string;
+  client_id: string;
+  /** name of the source security scheme */
+  scheme: string;
+}
 
 /** scheme name -> token info */
 type TokenStore = Record<string, TokenInfo | undefined>;
@@ -29,7 +43,7 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | null>(null);
 
-export function useAuth() {
+export function usePlaygroundAuth() {
   const ctx = use(AuthContext);
   if (!ctx) throw new Error('Component must be used under <OpenAPIProvider />');
   return ctx;

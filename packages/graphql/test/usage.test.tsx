@@ -3,13 +3,8 @@ import path from 'node:path';
 import fs from 'node:fs';
 import { renderToString } from 'react-dom/server';
 import { describe, expect, test } from 'vitest';
-import {
-  type GraphQLComponents,
-  GraphQLProvider,
-  TypeProvider,
-  type TypeUsages,
-  useNamedType,
-} from '@/headless';
+import { type GraphQLComponents, GraphQLProvider } from '@/headless';
+import { TypeProvider, type TypeUsages, useNamedType } from '@/type-docs';
 
 const cwd = fileURLToPath(new URL('./', import.meta.url));
 const sdl = fs.readFileSync(path.join(cwd, './fixtures/store.graphql'), 'utf8');

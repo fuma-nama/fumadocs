@@ -10,7 +10,7 @@ GraphQL pages are now built on a headless layer, use it to build your own UI:
 
 ```tsx title="components/api-page.tsx"
 'use client';
-import { createGraphQLPage } from '@fumadocs/graphql/headless';
+import { createGraphQLPage } from '@fumadocs/graphql';
 
 export const GraphQLPage = createGraphQLPage({
   components: { Operation, TypeDocs, Markdown, CodeBlock, Heading, SchemaUI },
@@ -51,6 +51,10 @@ export const GraphQLPage = createGraphQLPage({
 
 See [Headless](https://fumadocs.dev/docs/integrations/graphql/headless).
 
-## `@fumadocs/graphql/playground`
+## `@fumadocs/graphql/ui/playground`
 
-The playground is its own entry, so installing the operation or page UI no longer copies it, install `fumadocs/graphql/playground` when you want to own it. `inputTypeToJsonSchema()`, which turns GraphQL input types into the form's JSON Schema, is exported from `@fumadocs/graphql/headless`.
+The playground is its own entry, so installing the operation or page UI no longer copies it, install `fumadocs/graphql/playground` when you want to own it. `inputTypeToJsonSchema()`, which turns GraphQL input types into the form's JSON Schema, is exported from `@fumadocs/graphql`.
+
+## Highlighting out of the box
+
+`createGraphQLPage()` highlights code blocks with the full Shiki bundle unless you pass a smaller `shiki` factory, so a headless page reads the same as `@fumadocs/graphql/ui`.

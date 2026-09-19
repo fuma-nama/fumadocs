@@ -13,7 +13,7 @@ API pages are now built on a headless layer, use it to build your own UI:
 
 ```tsx title="components/api-page.tsx"
 'use client';
-import { createAsyncAPIPage } from '@fumadocs/asyncapi/headless';
+import { createAsyncAPIPage } from '@fumadocs/asyncapi';
 
 export const AsyncAPIPage = createAsyncAPIPage({
   components: { Operation, Markdown, CodeBlock, Heading, SchemaUI },
@@ -51,3 +51,11 @@ export const AsyncAPIPage = createAsyncAPIPage({
 ## Remove `generateTypeScriptDefinitions`
 
 The option was never rendered by API pages, and it is gone with its `@fumari/json-schema-ts` dependency. Passing it is now a type error, nothing else changes.
+
+## A browser-safe package entry
+
+`generateFiles()` reads and writes files, so the package entry resolves a stubbed build under the `browser` condition. Importing `createAsyncAPIPage()` or the hooks from a client component no longer pulls `node:fs` into the bundle.
+
+## Highlighting out of the box
+
+`createAsyncAPIPage()` highlights code blocks with the full Shiki bundle unless you pass a smaller `shiki` factory, so a headless page reads the same as `@fumadocs/asyncapi/ui`.

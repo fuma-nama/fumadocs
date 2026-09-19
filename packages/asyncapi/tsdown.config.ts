@@ -8,9 +8,9 @@ export default defineConfig({
   format: 'esm',
   target: 'es2023',
   entry: [
-    './src/{index,i18n}.ts',
-    './src/headless/index.tsx',
-    './src/ui/{index,base}.tsx',
+    './src/{index,index.browser,i18n}.ts',
+    './src/operation.tsx',
+    './src/ui/index.tsx',
     './src/server/index.tsx',
   ],
   unbundle: true,
@@ -31,8 +31,14 @@ export default defineConfig({
   exports: {
     enabled: true,
     customExports(v) {
-      v['./css/*'] = './css/*';
-      return v;
+      const { './index.browser': browser, ...rest } = v;
+
+      return {
+        ...rest,
+        // `generateFiles()` touches the filesystem, so client bundles get the stubbed build
+        '.': { types: './dist/index.d.ts', browser, import: v['.'] },
+        './css/*': './css/*',
+      };
     },
   },
 });

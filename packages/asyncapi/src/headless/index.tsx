@@ -1,6 +1,7 @@
 'use client';
 import type { FC, ReactNode } from 'react';
 import type { ShikiFactory } from 'fumadocs-core/highlight/shiki';
+import { defaultShikiFactory } from 'fumadocs-core/highlight/shiki/full';
 import {
   createPageComponents,
   type CreatePageComponentsOptions as PageComponentsOptions,
@@ -15,7 +16,6 @@ import {
 } from './runtime';
 
 export * from './runtime';
-export * from './operation';
 export { useServer, type SelectedServer } from './server';
 
 export interface PageLayoutProps {
@@ -26,7 +26,7 @@ export interface CreateAsyncAPIPageOptions extends Omit<
   AsyncAPIProviderProps,
   'document' | 'components' | 'children'
 > {
-  /** the Shiki highlighter of code blocks, without it they render unhighlighted */
+  /** the Shiki highlighter of code blocks, the full bundle by default */
   shiki?: ShikiFactory;
   shikiOptions?: PageComponentsOptions['shikiOptions'];
   components: Pick<AsyncAPIComponents, 'SchemaUI'> &
@@ -58,7 +58,7 @@ export type AsyncAPIPageProps_Preloaded = GeneratedPageProps & {
  */
 export function createAsyncAPIPage({
   components,
-  shiki,
+  shiki = defaultShikiFactory,
   shikiOptions,
   ...options
 }: CreateAsyncAPIPageOptions): FC<AsyncAPIPageProps> {

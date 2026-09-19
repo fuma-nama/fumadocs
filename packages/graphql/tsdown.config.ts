@@ -9,9 +9,9 @@ export default defineConfig({
   target: 'es2023',
   entry: [
     './src/{index,i18n}.ts',
-    './src/headless/index.tsx',
-    './src/ui/{index,base}.tsx',
-    './src/playground/index.tsx',
+    './src/{operation,type-docs}.tsx',
+    './src/ui/index.tsx',
+    './src/ui/playground/index.tsx',
     './src/server/index.tsx',
   ],
   unbundle: true,

@@ -15,7 +15,7 @@ import {
   SelectItem,
 } from 'shared-api/components/select';
 import { ClientCodeBlock } from '@/ui/components/codeblock';
-import { type ExampleRequest, useCodeUsage, useExampleRequests, useOperation } from '@/headless';
+import { type ExampleRequest, useCodeUsage, useExampleRequests, useOperation } from '@/operation';
 import type { RenderContext } from '@/types';
 
 export function UsageTabs({ ctx }: { ctx: RenderContext }) {

@@ -21,12 +21,12 @@
   ],
   "exports": {
     ".": "./dist/index.js",
-    "./headless": "./dist/headless/index.js",
     "./i18n": "./dist/i18n.js",
-    "./playground": "./dist/playground/index.js",
+    "./operation": "./dist/operation.js",
     "./server": "./dist/server/index.js",
+    "./type-docs": "./dist/type-docs.js",
     "./ui": "./dist/ui/index.js",
-    "./ui/base": "./dist/ui/base.js",
+    "./ui/playground": "./dist/ui/playground/index.js",
     "./package.json": "./package.json",
     "./css/*": "./css/*"
   },

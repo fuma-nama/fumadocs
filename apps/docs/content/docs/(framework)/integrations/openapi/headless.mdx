@@ -10,7 +10,7 @@ description: Build your own UI for API pages on the headless layer.
 
 ## Overview
 
-`fumadocs-openapi/headless` provides the state and logic of API pages, without UI:
+Everything outside `fumadocs-openapi/ui` is headless — the package entry gives you the state and logic of API pages, without UI:
 
 - the document and request options
 - the selected server and the playground's auth state
@@ -22,7 +22,7 @@ description: Build your own UI for API pages on the headless layer.
 
 ```tsx title="components/api-page.tsx"
 'use client';
-import { type CodeBlockProps, createOpenAPIPage } from 'fumadocs-openapi/headless';
+import { type CodeBlockProps, createOpenAPIPage } from 'fumadocs-openapi';
 import { Schema } from '@/components/api/schema';
 import { Operation } from '@/components/my-operation';
 
@@ -97,7 +97,7 @@ import {
   useCodeUsage,
   useOperation,
   useResponseExamples,
-} from 'fumadocs-openapi/headless';
+} from 'fumadocs-openapi/operation';
 
 export function Operation(props: PageOperationProps) {
   return (
@@ -158,7 +158,7 @@ Pass yours to the page as the `SchemaUI` component:
 ```tsx title="components/my-schema.tsx"
 'use client';
 import { useMemo } from 'react';
-import type { OpenAPIComponents } from 'fumadocs-openapi/headless';
+import type { OpenAPIComponents } from 'fumadocs-openapi';
 import { generateSchemaUI } from '@fumadocs/json-schema/react';
 import { SchemaUIProvider, useSchemaTabs, useSchemaUI } from '@/components/api/schema/client';
 

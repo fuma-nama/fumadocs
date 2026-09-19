@@ -26,9 +26,9 @@ import { isMediaTypeSupported } from '@/requests/media/adapter';
 import { encodeRequestData } from '@/requests/media/encode';
 import { getPreferredType, methodKeys } from '@/utils/schema';
 import { getExampleRequests } from '@/utils/get-example-requests';
-import { ServerProvider, useOpenAPI, useServer } from './runtime';
+import { useOpenAPI } from '@/headless';
+import { ServerProvider, useServer } from '@/headless/server';
 
-export type { RawRequestData };
 export interface OperationParameters {
   in: 'path' | 'query' | 'header' | 'cookie';
   items: ParameterObject[];
@@ -292,7 +292,11 @@ export function OperationProvider({
   const servers = operation.servers ?? pathItem.servers;
   if (!servers) return content;
 
-  return <ServerProvider servers={servers as ServerObject[]}>{content}</ServerProvider>;
+  return (
+    <ServerProvider servers={servers as ServerObject[]} storageKeyPrefix={runtime.storageKeyPrefix}>
+      {content}
+    </ServerProvider>
+  );
 }
 
 /** an external store, so selecting examples doesn't re-render the entire operation */

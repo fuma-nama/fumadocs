@@ -11,7 +11,7 @@ import type { ReactNode } from 'react';
 import { useTranslations } from '@fuma-translate/react';
 import { Markdown } from '../components/markdown';
 import { ClientCodeBlock } from '../components/codeblock';
-import { type ResponseExample, type ResponseTab, useResponseExamples } from '@/headless';
+import { type ResponseExample, type ResponseTab, useResponseExamples } from '@/operation';
 import type { RenderContext } from '@/types';
 
 export function ResponseTabs({ ctx }: { ctx: RenderContext }) {

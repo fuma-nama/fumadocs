@@ -21,7 +21,7 @@ import {
   type OperationKind,
   OperationKinds,
 } from '@/utils/schema';
-import { useGraphQL } from './runtime';
+import { useGraphQL } from '@/headless/runtime';
 
 /** the named type and its resolved details, all read-only */
 export interface NamedTypeInfo {

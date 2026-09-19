@@ -11,7 +11,8 @@ import {
   type ComponentProps,
   useRef,
 } from 'react';
-import { useExampleRequests, useOpenAPI, useServer } from '@/headless';
+import { useOpenAPI, useServer } from '@/headless';
+import { useExampleRequests } from '@/operation';
 import type { BrowserFetcherOptions } from '@/playground/fetcher';
 import { DefaultResultDisplay, type ResultDisplayProps } from './components/result-display';
 import { pathnameFromRequest } from '@/requests/generators';
@@ -39,7 +40,6 @@ import {
   SelectValue,
 } from 'shared-api/components/select';
 import { labelVariants } from 'shared-api/components/label';
-import { getPreferredType } from '@/utils/schema';
 import type { JsonSchema } from '@fumadocs/json-schema';
 import ServerSelect from './components/server-select';
 import {
@@ -62,7 +62,7 @@ import type { HttpMethods, OperationObject, ParameterObject, PathItemObject } fr
 import { useTranslations } from '@fuma-translate/react';
 import { OAuthDialog, OAuthDialogContent, OAuthDialogTrigger } from './components/oauth-dialog';
 import { dereference } from '@fumadocs/json-schema';
-import { useAuth } from './auth';
+import { usePlaygroundAuth } from '@/playground/auth';
 import { useOnChange } from 'fumadocs-core/utils/use-on-change';
 import { Spinner } from 'shared-api/components/spinner';
 import { joinURL, resolveServerUrl } from 'shared-api/utils/url';
@@ -115,7 +115,7 @@ export interface PlaygroundClientOptions {
    * render the parameter inputs of API endpoint.
    *
    * for updating values, use:
-   * - the `Custom.useController()` from `fumadocs-openapi/playground/client`.
+   * - the `Custom.useController()` from `fumadocs-openapi/ui/playground/client`.
    *
    * Recommended types packages: `json-schema-typed`.
    */
@@ -135,6 +135,12 @@ interface RequestBodyInfo {
 }
 
 const OptionsContext = createContext<PlaygroundClientOptions>({});
+
+function getPreferredType(body: Record<string, unknown>): string | undefined {
+  if ('application/json' in body) return 'application/json';
+
+  return Object.keys(body)[0];
+}
 
 function usePlaygroundOptions() {
   return use(OptionsContext);
@@ -241,7 +247,7 @@ export default function PlaygroundClient({
   );
 
   const testQuery = useQuery(async (input: FormValues) => {
-    const fetcher = await import('./fetcher').then((mod) =>
+    const fetcher = await import('@/playground/fetcher').then((mod) =>
       mod.createBrowserFetcher(mediaAdapters, {
         proxyUrl,
         ...fetchOptions,
@@ -381,7 +387,7 @@ function SecurityRequirements({
   children: ReactNode;
 }) {
   const t = useTranslations({ note: 'playground' });
-  const { isLoading, error } = useAuth();
+  const { isLoading, error } = usePlaygroundAuth();
   const defaultOpen = isLoading || error != null;
   const [open, setOpen] = useState(defaultOpen);
   const { dereferenced, resolve } = useOpenAPI().doc;
@@ -607,7 +613,7 @@ function useAuthInputs(
   requirements: SecurityEntry[][],
   transformAuthInputs?: PlaygroundClientOptions['transformAuthInputs'],
 ) {
-  const authCtx = useAuth();
+  const authCtx = usePlaygroundAuth();
   const { storageKeyPrefix } = useOpenAPI();
   const t = useTranslations({ note: 'playground' });
   const { dereferenced, resolve } = useOpenAPI().doc;

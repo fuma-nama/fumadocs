@@ -35,7 +35,7 @@ They were `@fumadocs/api-docs/schema/*` before, and the API was cleaned up while
 
 ## Opt into code usages and TypeScript definitions
 
-`createOpenAPIPage()` and `<OpenAPIProvider />` from `fumadocs-openapi/headless` no longer register the default code usage generators and TypeScript definitions, so a headless page doesn't bundle them:
+`createOpenAPIPage()` from `fumadocs-openapi` no longer registers the default code usage generators and TypeScript definitions, so a headless page doesn't bundle them:
 
 ```tsx
 import { createCodeUsageGeneratorRegistry } from 'fumadocs-openapi/requests/generators';
@@ -48,8 +48,6 @@ createOpenAPIPage({
 ```
 
 `fumadocs-openapi/ui` is unchanged, it registers both for you.
-
-With that, `fumadocs-openapi/headless/base` is gone — it only existed to skip those defaults.
 
 ## Remove `useStorageKey()`
 

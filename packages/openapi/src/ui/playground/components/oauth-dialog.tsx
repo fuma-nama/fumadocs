@@ -21,7 +21,7 @@ import {
 } from 'shared-api/components/select';
 import type { OAuth2SecurityScheme } from '@/types';
 import { useTranslations } from '@fuma-translate/react';
-import { useAuth } from '../auth';
+import { type AuthCodeState, type ImplicitState, usePlaygroundAuth } from '@/playground/auth';
 import { useOpenAPI } from '@/headless';
 
 type FlowType = keyof NonNullable<OAuth2SecurityScheme['flows']>;
@@ -39,21 +39,6 @@ interface FormValues {
   clientSecret: string;
   username: string;
   password: string;
-}
-
-export interface AuthCodeState {
-  redirect_uri: string;
-  client_id: string;
-  client_secret: string;
-  /** name of the source security scheme */
-  scheme: string;
-}
-
-export interface ImplicitState {
-  redirect_uri: string;
-  client_id: string;
-  /** name of the source security scheme */
-  scheme: string;
 }
 
 interface FlowInfo {
@@ -81,7 +66,7 @@ export function OAuthDialogContent(props: AuthDialogContentProps) {
 function Content({ schemeId, scopes, setToken, setOpen }: AuthDialogContentProps) {
   const { dereferenced, resolve } = useOpenAPI().doc;
   const schemes = dereferenced.components?.securitySchemes;
-  const tokenInfo = useAuth().store[schemeId];
+  const tokenInfo = usePlaygroundAuth().store[schemeId];
   const scheme = resolve(schemes?.[schemeId]);
   if (!scheme || scheme.type !== 'oauth2')
     throw new Error('unexpected schemaId: must be type oauth2');

@@ -1,3 +1,4 @@
+export * from './headless';
 export type { RenderContext } from './types';
 export type {
   GeneratedPageProps,

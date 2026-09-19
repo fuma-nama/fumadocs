@@ -10,13 +10,8 @@ import {
   isScalarType,
   isUnionType,
 } from 'graphql';
-import {
-  type PageTypeProps,
-  TypeProvider,
-  useNamedType,
-  useOperationLink,
-  useTypeLink,
-} from '@/headless';
+import { type PageTypeProps, useOperationLink, useTypeLink } from '@/headless';
+import { TypeProvider, useNamedType } from '@/type-docs';
 import type { RenderContext } from '@/types';
 import { SchemaUI } from '@/ui/components/schema';
 import type { OperationKind } from '@/utils/schema';

@@ -5,7 +5,7 @@ description: Build your own UI for GraphQL pages on the headless layer.
 
 ## Overview
 
-`@fumadocs/graphql/headless` provides the state and logic of GraphQL pages, without UI:
+Everything outside `@fumadocs/graphql/ui` is headless — the package entry gives you the state and logic of GraphQL pages, without UI:
 
 - the schema built from SDL, and the cross-links of generated pages
 - the details of each operation: its field, title, directives and generated example
@@ -22,7 +22,7 @@ description: Build your own UI for GraphQL pages on the headless layer.
 
 ```tsx title="components/api-page.tsx"
 'use client';
-import { type CodeBlockProps, createGraphQLPage } from '@fumadocs/graphql/headless';
+import { type CodeBlockProps, createGraphQLPage } from '@fumadocs/graphql';
 import { Operation } from '@/components/my-operation';
 import { TypeDocs } from '@/components/my-type';
 
@@ -79,12 +79,12 @@ To render operations yourself, use `<GraphQLProvider sdl={sdl} components={...} 
 
 ```tsx title="components/my-operation.tsx"
 'use client';
+import { useComponents } from '@fumadocs/graphql';
 import {
   OperationProvider,
   type PageOperationProps,
-  useComponents,
   useOperation,
-} from '@fumadocs/graphql/headless';
+} from '@fumadocs/graphql/operation';
 
 export function Operation({ kind, name }: PageOperationProps) {
   return (
@@ -118,12 +118,8 @@ function Content() {
 
 ```tsx title="components/my-type.tsx"
 'use client';
-import {
-  type PageTypeProps,
-  TypeProvider,
-  useComponents,
-  useNamedType,
-} from '@fumadocs/graphql/headless';
+import { useComponents } from '@fumadocs/graphql';
+import { type PageTypeProps, TypeProvider, useNamedType } from '@fumadocs/graphql/type-docs';
 
 export function TypeDocs({ name }: PageTypeProps) {
   return (

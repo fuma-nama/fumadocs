@@ -5,15 +5,11 @@ import { AnchorSection } from 'shared-api/auto-anchor/client';
 import { isRequiredArgument } from 'graphql';
 import { Callout } from 'fumadocs-ui/components/callout';
 import { Tab, Tabs } from 'fumadocs-ui/components/tabs';
-import {
-  generateRequestSnippets,
-  OperationProvider,
-  type PageOperationProps,
-  useOperation,
-} from '@/headless';
+import { generateRequestSnippets, type PageOperationProps } from '@/headless';
+import { OperationProvider, useOperation } from '@/operation';
 import type { RenderContext } from '@/types';
 import { SchemaUI } from '@/ui/components/schema';
-import { OperationPlayground } from '@/playground';
+import { OperationPlayground } from '@/ui/playground';
 import { KindLabel } from '../components/badge';
 import { Heading } from '../components/heading';
 import { Markdown } from '../components/markdown';

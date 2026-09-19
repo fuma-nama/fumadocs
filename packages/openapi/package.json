@@ -19,10 +19,15 @@
     "./css/**/*.css"
   ],
   "exports": {
-    ".": "./dist/index.js",
-    "./headless": "./dist/headless/index.js",
+    ".": {
+      "types": "./dist/index.d.ts",
+      "browser": "./dist/index.browser.js",
+      "import": "./dist/index.js"
+    },
     "./i18n": "./dist/i18n.js",
-    "./playground/client": "./dist/playground/client.js",
+    "./operation": "./dist/operation.js",
+    "./playground": "./dist/playground/index.js",
+    "./requests": "./dist/requests/index.js",
     "./requests/generators": "./dist/requests/generators/index.js",
     "./requests/generators/all": "./dist/requests/generators/all.js",
     "./requests/generators/csharp": "./dist/requests/generators/csharp.js",
@@ -32,10 +37,11 @@
     "./requests/generators/javascript": "./dist/requests/generators/javascript.js",
     "./requests/generators/python": "./dist/requests/generators/python.js",
     "./requests/generators/rust": "./dist/requests/generators/rust.js",
-    "./scalar": "./dist/scalar/index.js",
     "./server": "./dist/server/index.js",
     "./ui": "./dist/ui/index.js",
     "./ui/base": "./dist/ui/base.js",
+    "./ui/playground/client": "./dist/ui/playground/client.js",
+    "./ui/scalar": "./dist/ui/scalar/index.js",
     "./package.json": "./package.json",
     "./css/*": "./css/*"
   },

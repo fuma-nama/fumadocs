@@ -22,17 +22,15 @@ import { SelectTabs, SelectTabTrigger, SelectTab } from 'shared-api/components/s
 import { AnchorSection } from 'shared-api/auto-anchor/client';
 import { Heading } from '@/ui/components/heading';
 import { Markdown } from '../components/markdown';
+import { type PageOperationProps, useAsyncAPI, useServer } from '@/headless';
 import {
   type OperationMessage,
   type OperationParameter,
   type OperationReply,
   OperationProvider,
-  type PageOperationProps,
-  useAsyncAPI,
   useOperation,
   useOperationSecurity,
-  useServer,
-} from '@/headless';
+} from '@/operation';
 import { MailIcon } from 'lucide-react';
 import { AccordionBindings } from '../bindings/accordion-bindings';
 import { ServerSelect } from '../components/server-select';

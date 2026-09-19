@@ -2,20 +2,17 @@ import { fileURLToPath } from 'node:url';
 import { renderToString } from 'react-dom/server';
 import { expect, test } from 'vitest';
 import { loadDocument } from '@/utils/document/load';
-import { dereferenceBundledDocument } from '@/utils/document/dereference';
+import { createOpenAPIPage, type PageOperationProps } from '@/headless';
 import {
-  createOpenAPIPage,
   type ExampleRequest,
-  OpenAPIProvider,
   type OperationInfo,
   OperationProvider,
-  type PageOperationProps,
   type ResponseTab,
   useCodeUsage,
   useExampleRequests,
   useOperation,
   useResponseExamples,
-} from '@/headless';
+} from '@/operation';
 import { createCodeUsageGeneratorRegistry } from '@/requests/generators';
 import { registerDefault } from '@/requests/generators/all';
 import type { Document, HttpMethods, OperationObject, PathItemObject } from '@/types';
@@ -38,21 +35,20 @@ async function render(
   },
 ) {
   const { bundled } = await loadDocument(museum);
-  const { dereferenced, resolve } = dereferenceBundledDocument(bundled as Document);
-  let pathItem = resolve(dereferenced.paths![path])!;
-  let operation = pathItem[method]!;
-  if (extend) ({ operation, pathItem } = extend({ operation, pathItem }));
+  const OpenAPIPage = createOpenAPIPage({
+    codeUsages: registerDefault(createCodeUsageGeneratorRegistry()),
+    components: {
+      ...components,
+      Operation: (props) => (
+        <OperationProvider {...props} {...(extend ? extend(props) : null)}>
+          <Harness />
+        </OperationProvider>
+      ),
+    },
+  });
 
   renderToString(
-    <OpenAPIProvider
-      document={bundled}
-      components={components}
-      codeUsages={registerDefault(createCodeUsageGeneratorRegistry())}
-    >
-      <OperationProvider path={path} method={method} operation={operation} pathItem={pathItem}>
-        <Harness />
-      </OperationProvider>
-    </OpenAPIProvider>,
+    <OpenAPIPage payload={{ bundled: bundled as Document }} operations={[{ path, method }]} />,
   );
 }
 

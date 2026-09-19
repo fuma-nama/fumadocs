@@ -12,7 +12,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from 'fumadocs-ui/components
 import { MethodLabel } from '@/ui/components/method-label';
 import { Markdown } from '../components/markdown';
 import { ClientCodeBlock } from '../components/codeblock';
-import { type ExampleRequest, useExampleRequests, useOperation } from '@/headless';
+import { type ExampleRequest, useExampleRequests, useOperation } from '@/operation';
 import type { RenderContext } from '@/types';
 
 export function RequestTabs({ ctx }: { ctx: RenderContext }) {

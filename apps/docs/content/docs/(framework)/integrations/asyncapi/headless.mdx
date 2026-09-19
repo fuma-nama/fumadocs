@@ -5,7 +5,7 @@ description: Build your own UI for AsyncAPI pages on the headless layer.
 
 ## Overview
 
-`@fumadocs/asyncapi/headless` provides the state and logic of API pages, without UI:
+Everything outside `@fumadocs/asyncapi/ui` is headless — the package entry gives you the state and logic of API pages, without UI:
 
 - the dereferenced document
 - the servers of the page, and the selected one with its variables
@@ -19,7 +19,7 @@ The default UI, `createAsyncAPIPage()` from `@fumadocs/asyncapi/ui`, is built on
 
 ```tsx title="components/api-page.tsx"
 'use client';
-import { type CodeBlockProps, createAsyncAPIPage } from '@fumadocs/asyncapi/headless';
+import { type CodeBlockProps, createAsyncAPIPage } from '@fumadocs/asyncapi';
 import { Schema } from '@/components/api/schema';
 import { Operation } from '@/components/my-operation';
 
@@ -82,7 +82,7 @@ import {
   type PageOperationProps,
   useOperation,
   useOperationSecurity,
-} from '@fumadocs/asyncapi/headless';
+} from '@fumadocs/asyncapi/operation';
 
 export function Operation(props: PageOperationProps) {
   return (

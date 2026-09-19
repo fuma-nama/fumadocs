@@ -36,4 +36,4 @@ The UI an API page renders through is now part of the installation, instead of b
 
 The integrations share one implementation of these internally, instead of each keeping a copy: the selected server and its variables, the state of an async request, the coloured label of methods and kinds, and the plain-object check of both schema layers.
 
-The request pipeline of the playground stays in the package too — `encodeRequestData()`, `resolveMediaAdapter()`, `createBrowserFetcher()`, `getPreferredType()` and the request data types are exported from `fumadocs-openapi/headless`, so an installed playground drives them instead of copying them.
+The request pipeline of the playground stays in the package too, so an installed playground drives it instead of copying it: `encodeRequestData()`, `resolveMediaAdapter()`, `isMediaTypeSupported()` and the request data types come from `fumadocs-openapi/requests`, and `createBrowserFetcher()` with `usePlaygroundAuth()` from `fumadocs-openapi/playground`.

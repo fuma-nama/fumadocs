@@ -80,7 +80,7 @@ export const registry: Registry = {
       files: [
         {
           type: 'components',
-          path: 'playground/index.tsx',
+          path: 'ui/playground/index.tsx',
           target: '<dir>/graphql/playground/index.tsx',
         },
         {

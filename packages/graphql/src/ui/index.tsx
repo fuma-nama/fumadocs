@@ -1,4 +1,8 @@
 'use client';
+import { createGraphQLPage as createHeadlessPage } from '@/headless';
+import { Operation } from '@/ui/operation';
+import { TypeDocs } from '@/ui/type-docs';
+import { GraphQLSchemaView } from '@/ui/schema-ui';
 import type { FC, ReactNode } from 'react';
 import type { GraphQLField, GraphQLNamedType } from 'graphql';
 import { defaultShikiFactory } from 'fumadocs-core/highlight/shiki/full';
@@ -12,7 +16,6 @@ import type { NamedTypeKind, OperationKind } from '@/utils/schema';
 import type { GraphQLComponents, SchemaViewProps } from '@/headless';
 import type { OperationProps } from './operation';
 import type { TypeDocsProps } from './type-docs';
-import { createGraphQLPageBase } from './base';
 
 export type { GraphQLLinks, GraphQLPageProps, OperationProps, TypeDocsProps };
 
@@ -134,9 +137,51 @@ export interface CreateGraphQLPageOptions {
 /**
  * Create `<GraphQLPage />` (a client component).
  */
-export function createGraphQLPage(options: CreateGraphQLPageOptions = {}): FC<GraphQLPageProps> {
-  return createGraphQLPageBase({
+export function createGraphQLPage({
+  shikiOptions = { themes: { light: 'github-light', dark: 'github-dark' } },
+  schemaUI,
+  ...options
+}: CreateGraphQLPageOptions = {}): FC<GraphQLPageProps> {
+  const { shiki = defaultShikiFactory, typeLinks, operationLinks, components = {} } = options;
+  const {
+    Operation: OperationUI = Operation,
+    TypeDocs: TypeDocsUI = TypeDocs,
+    SchemaUI: SchemaUIComp = GraphQLSchemaView,
+  } = components;
+  const ctx: RenderContext = {
     ...options,
-    shiki: options.shiki ?? defaultShikiFactory,
+    shiki,
+    shikiOptions,
+    SchemaUI: SchemaUIComp,
+  };
+
+  return createHeadlessPage({
+    shiki,
+    shikiOptions,
+    typeLinks: typeLinks && ((name) => typeLinks(name, ctx)),
+    operationLinks: operationLinks && ((kind, name) => operationLinks(kind, name, ctx)),
+    components: {
+      ...components,
+      SchemaUI(props: SchemaViewProps) {
+        if (schemaUI?.render) return schemaUI.render(props, ctx);
+
+        return <SchemaUIComp {...props} />;
+      },
+      Operation(props) {
+        return <OperationUI {...props} ctx={ctx} />;
+      },
+      TypeDocs(props) {
+        return <TypeDocsUI {...props} ctx={ctx} />;
+      },
+      Layout(props) {
+        if (ctx.content?.renderPageLayout) return ctx.content.renderPageLayout(props, ctx);
+
+        return (
+          <div className="flex flex-col gap-24 text-sm @container">
+            {props.items?.map((item) => item.children)}
+          </div>
+        );
+      },
+    },
   });
 }

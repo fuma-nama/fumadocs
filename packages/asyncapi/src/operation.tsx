@@ -19,8 +19,8 @@ import {
 import type { JsonSchema } from '@fumadocs/json-schema';
 import { applyMessageTraits, applyOperationTraits } from '@/utils/traits';
 import { type ExampleMessageItem, getExampleMessages } from '@/utils/get-example-messages';
-import { type PageOperationProps, useAsyncAPI } from './runtime';
-import { ServerProvider, useServer } from './server';
+import { type PageOperationProps, useAsyncAPI } from '@/headless/runtime';
+import { ServerProvider, useServer } from '@/headless/server';
 
 export interface OperationParameter {
   name: string;

@@ -14,12 +14,13 @@ import type {
   OperationItem,
   WebhookItem,
 } from '@/utils/pages/builder';
-import type { OpenAPIComponents, OpenAPIRuntime, ResponseTab } from '@/headless';
+import type { OpenAPIComponents, OpenAPIRuntime } from '@/headless';
+import type { ResponseTab } from '@/operation';
 import type { OperationPlaygroundOptions, OperationProps } from './operation';
 import { createOpenAPIPageBase } from './base';
 
 export type { APIPlaygroundProps } from './operation';
-export type { GenerateTypeScriptDefinitionsContext } from '@/headless/runtime';
+
 export type { OpenAPIPageProps, OpenAPIPageProps_Spec, OpenAPIPageProps_Preloaded };
 
 export interface CreateOpenAPIPageOptions extends Partial<
