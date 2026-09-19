@@ -1,7 +1,7 @@
 'use client';
 import type { ComponentProps } from 'react';
 import { useAnchorId } from 'shared-api/auto-anchor/client';
-import { type GraphQLComponents, useComponents } from '@/headless';
+import { type GraphQLComponents, useComponents } from '@/utils/create-page';
 
 type SlotProps = ComponentProps<GraphQLComponents['SchemaUI']>;
 

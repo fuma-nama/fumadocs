@@ -4,7 +4,7 @@ import type { ShikiFactory } from 'fumadocs-core/highlight/shiki';
 import { Schema } from 'shared-api/components/schema';
 import { generate } from '@fumari/json-schema-ts';
 import { getRaw } from '@scalar/json-magic/magic-proxy';
-import { createOpenAPIPage, type OpenAPIRuntime } from '@/headless';
+import { createOpenAPIPage, type OpenAPIRuntime } from '@/utils/create-page';
 import {
   type CodeUsageGeneratorRegistry,
   createCodeUsageGeneratorRegistry,

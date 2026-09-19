@@ -3,8 +3,8 @@ subject: JSON Schema toolkit
 packages:
   npm:@fumadocs/json-schema: minor
   npm:fumadocs-openapi: major
-  npm:@fumadocs/asyncapi: major
-  npm:@fumadocs/graphql: major
+  npm:@fumadocs/asyncapi: minor
+  npm:@fumadocs/graphql: minor
 ---
 
 ## `@fumadocs/json-schema`
@@ -18,7 +18,7 @@ import { bundle } from '@fumadocs/json-schema/bundle';
 
 `bundle()` is a separate entry because it reads files and URLs, everything else runs in the browser.
 
-`@fumadocs/json-schema/react` renders a schema into the data an API page draws — `generateSchemaUI()` with the `SchemaData` and `InfoTag` types. It was in the Schema UI before, where every install copied it.
+`@fumadocs/json-schema/react` renders a schema into the data an API page draws: `generateSchemaUI()` with the `SchemaData` and `InfoTag` types. It was in the Schema UI before, where every install copied it.
 
 They were `@fumadocs/api-docs/schema/*` before, and the API was cleaned up while moving:
 
@@ -30,8 +30,6 @@ They were `@fumadocs/api-docs/schema/*` before, and the API was cleaned up while
 | `matchesSchema(schema, value)`                 | `matches(schema, value)`               |
 | `typeMatches(value, type)`                     | `matchesType(value, type)`             |
 | `schemaToString(schema, FormatFlags.UseAlias)` | `stringify(schema, { alias: true })`   |
-
-`fumadocs-openapi` and `@fumadocs/asyncapi` no longer export `ParsedSchema`, import `JsonSchema` from `@fumadocs/json-schema` instead.
 
 ## Opt into code usages and TypeScript definitions
 

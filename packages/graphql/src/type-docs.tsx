@@ -21,7 +21,7 @@ import {
   type OperationKind,
   OperationKinds,
 } from '@/utils/schema';
-import { useGraphQL } from '@/headless/runtime';
+import { useGraphQL } from '@/utils/create-page';
 
 /** the named type and its resolved details, all read-only */
 export interface NamedTypeInfo {
@@ -39,6 +39,13 @@ export interface NamedTypeInfo {
     possibleTypes: readonly GraphQLObjectType[];
     usages: TypeUsages;
   };
+}
+
+/** props of the component rendering a named type of a page */
+export interface PageTypeProps {
+  name: string;
+  showTitle?: boolean;
+  showDescription?: boolean;
 }
 
 export interface TypeProviderProps {

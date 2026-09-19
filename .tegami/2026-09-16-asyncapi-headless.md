@@ -52,10 +52,10 @@ export const AsyncAPIPage = createAsyncAPIPage({
 
 The option was never rendered by API pages, and it is gone with its `@fumari/json-schema-ts` dependency. Passing it is now a type error, nothing else changes.
 
-## A browser-safe package entry
+## Client-safe package entry
 
-`generateFiles()` reads and writes files, so the package entry resolves a stubbed build under the `browser` condition. Importing `createAsyncAPIPage()` or the hooks from a client component no longer pulls `node:fs` into the bundle.
+`generateFiles()` reads and writes files, so the package entry ships a stubbed build under the `browser` condition. Client components can import `createAsyncAPIPage()` and the hooks without pulling `node:fs` into the bundle.
 
 ## Highlighting out of the box
 
-`createAsyncAPIPage()` highlights code blocks with the full Shiki bundle unless you pass a smaller `shiki` factory, so a headless page reads the same as `@fumadocs/asyncapi/ui`.
+`createAsyncAPIPage()` highlights code blocks with the full Shiki bundle, pass a smaller `shiki` factory to trim it.

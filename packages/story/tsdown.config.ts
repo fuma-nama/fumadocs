@@ -6,8 +6,7 @@ export default defineConfig({
   target: 'es2023',
   entry: [
     './src/index.{ts,tsx}',
-    './src/i18n.ts',
-    './src/headless/index.tsx',
+    './src/{index.browser,i18n}.ts',
     './src/type-tree/index.ts',
     './src/vite/*',
     './src/next/*',
@@ -22,8 +21,14 @@ export default defineConfig({
   plugins: [packageTranslationsPlugin()],
   exports: {
     customExports(v) {
-      v['./css/*'] = './css/*';
-      return v;
+      const { './index.browser': browser, ...rest } = v;
+
+      return {
+        ...rest,
+        // the story factory runs the TypeScript compiler over your files, client bundles get the stub
+        '.': { types: './dist/index.d.ts', browser, import: v['.'] },
+        './css/*': './css/*',
+      };
     },
   },
   deps: {

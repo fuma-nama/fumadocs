@@ -1,7 +1,7 @@
 'use client';
 import type { ComponentProps, FC, ReactNode } from 'react';
 import { Schema } from 'shared-api/components/schema';
-import { createAsyncAPIPage as createHeadlessPage } from '@/headless';
+import { createAsyncAPIPage as createHeadlessPage } from '@/utils/create-page';
 import { Operation } from '@/ui/operation';
 import { defaultShikiFactory } from 'fumadocs-core/highlight/shiki/full';
 import type { ShikiFactory } from 'fumadocs-core/highlight/shiki';
@@ -15,7 +15,7 @@ import type {
   AsyncAPIPageProps,
   AsyncAPIPageProps_Preloaded,
   AsyncAPIPageProps_Spec,
-} from '@/headless';
+} from '@/utils/create-page';
 import type { OperationProps } from './operation';
 
 export type { AsyncAPIPageProps, AsyncAPIPageProps_Spec, AsyncAPIPageProps_Preloaded };

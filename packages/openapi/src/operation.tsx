@@ -26,8 +26,8 @@ import { isMediaTypeSupported } from '@/requests/media/adapter';
 import { encodeRequestData } from '@/requests/media/encode';
 import { getPreferredType, methodKeys } from '@/utils/schema';
 import { getExampleRequests } from '@/utils/get-example-requests';
-import { useOpenAPI } from '@/headless';
-import { ServerProvider, useServer } from '@/headless/server';
+import { useOpenAPI } from '@/utils/create-page';
+import { ServerProvider, useServer } from '@/utils/use-server';
 
 export interface OperationParameters {
   in: 'path' | 'query' | 'header' | 'cookie';
@@ -120,6 +120,17 @@ export interface ResponseTab {
   mediaType: string | null;
 
   examples?: ResponseExample[];
+}
+
+/** props of the component rendering an operation or webhook of a page */
+export interface PageOperationProps {
+  type: 'operation' | 'webhook';
+  path: string;
+  method: HttpMethods;
+  operation: OperationObject;
+  pathItem: PathItemObject;
+  showTitle?: boolean;
+  showDescription?: boolean;
 }
 
 export interface OperationProviderProps {

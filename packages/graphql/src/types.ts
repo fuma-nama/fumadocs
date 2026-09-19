@@ -1,6 +1,6 @@
 import type { FC } from 'react';
 import type { CreateGraphQLPageOptions } from './ui';
-import type { SchemaViewProps } from './headless';
+import type { SchemaViewProps } from './utils/create-page';
 
 type RequireKeys<T, K extends keyof T> = Omit<T, K> & Required<Pick<T, K>>;
 

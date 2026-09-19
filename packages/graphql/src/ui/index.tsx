@@ -1,5 +1,5 @@
 'use client';
-import { createGraphQLPage as createHeadlessPage } from '@/headless';
+import { createGraphQLPage as createHeadlessPage } from '@/utils/create-page';
 import { Operation } from '@/ui/operation';
 import { TypeDocs } from '@/ui/type-docs';
 import { GraphQLSchemaView } from '@/ui/schema-ui';
@@ -11,9 +11,9 @@ import type { BundledTheme, CodeOptionsThemes, CodeToHastOptionsCommon } from 's
 import type { RenderContext } from '@/types';
 import type { PlaygroundRequest, PlaygroundResult } from '@/playground/fetcher';
 import type { GraphQLPageItem } from '@/utils/pages';
-import type { GraphQLLinks, GraphQLPageProps } from '@/headless';
+import type { GraphQLLinks, GraphQLPageProps } from '@/utils/create-page';
 import type { NamedTypeKind, OperationKind } from '@/utils/schema';
-import type { GraphQLComponents, SchemaViewProps } from '@/headless';
+import type { GraphQLComponents, SchemaViewProps } from '@/utils/create-page';
 import type { OperationProps } from './operation';
 import type { TypeDocsProps } from './type-docs';
 

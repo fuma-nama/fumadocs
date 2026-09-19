@@ -14,7 +14,7 @@ import type {
   OperationItem,
   WebhookItem,
 } from '@/utils/pages/builder';
-import type { OpenAPIComponents, OpenAPIRuntime } from '@/headless';
+import type { OpenAPIComponents, OpenAPIRuntime } from '@/utils/create-page';
 import type { ResponseTab } from '@/operation';
 import type { OperationPlaygroundOptions, OperationProps } from './operation';
 import { createOpenAPIPageBase } from './base';

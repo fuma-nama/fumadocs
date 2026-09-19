@@ -7,10 +7,10 @@ import { AlertCircle } from 'lucide-react';
 import { type FC, Suspense } from 'react';
 import { ErrorBoundary } from 'react-error-boundary';
 import { FieldSet } from './arg-form';
-import { StoryProvider, useStory, useStoryArgs, type WithControlProps } from '@/headless';
+import { StoryProvider, useStory, useStoryArgs, type WithControlProps } from '@/provider';
 import { useTranslations } from '@fuma-translate/react';
 
-export type { VariantInfo, WithControlProps } from '@/headless';
+export type { VariantInfo, WithControlProps } from '@/provider';
 
 export function WithControl(props: WithControlProps) {
   return (

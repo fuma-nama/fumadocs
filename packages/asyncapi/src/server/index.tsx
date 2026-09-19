@@ -18,7 +18,7 @@ import {
   type OutputEntry,
   type PageOutput,
 } from '@/utils/pages/builder';
-import type { AsyncAPIPageProps_Preloaded, AsyncAPIPageProps_Spec } from '@/headless';
+import type { AsyncAPIPageProps_Preloaded, AsyncAPIPageProps_Spec } from '@/utils/create-page';
 import { toStaticData } from '@/utils/pages/to-static-data';
 import path from 'node:path';
 import type { StructuredData } from 'fumadocs-core/mdx-plugins/remark-structure';

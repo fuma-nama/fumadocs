@@ -1,5 +1,5 @@
 'use client';
-import { useOpenAPI } from '@/headless';
+import { useOpenAPI } from '@/utils/create-page';
 import { useQuery } from 'shared-api/utils/use-query';
 import { createContext, type ReactNode, use, useEffect, useMemo, useState } from 'react';
 

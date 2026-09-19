@@ -7,7 +7,7 @@ import { useTheme } from 'fumadocs-ui/provider/base';
 import { useEffect, useState } from 'react';
 import type { HttpMethods } from '@/types';
 import { useTranslations } from '@fuma-translate/react';
-import { useOpenAPI } from '@/headless';
+import { useOpenAPI } from '@/utils/create-page';
 import '@scalar/api-client-react/style.css';
 
 export default function ScalarPlayground({ path, method }: { path: string; method: HttpMethods }) {

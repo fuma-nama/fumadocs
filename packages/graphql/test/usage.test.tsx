@@ -3,7 +3,7 @@ import path from 'node:path';
 import fs from 'node:fs';
 import { renderToString } from 'react-dom/server';
 import { describe, expect, test } from 'vitest';
-import { type GraphQLComponents, GraphQLProvider } from '@/headless';
+import { type GraphQLComponents, GraphQLProvider } from '@/utils/create-page';
 import { TypeProvider, type TypeUsages, useNamedType } from '@/type-docs';
 
 const cwd = fileURLToPath(new URL('./', import.meta.url));

@@ -1,4 +1,5 @@
 'use client';
+import type { PageOperationProps } from '@/operation';
 import { type ComponentProps, createContext, type FC, type ReactNode, use, useMemo } from 'react';
 import type { Awaitable, Document, HttpMethods, OperationObject, PathItemObject } from '@/types';
 import type { OperationItem, OpenAPIPageProps, WebhookItem } from '@/utils/pages/builder';
@@ -16,9 +17,7 @@ import {
   type CreatePageComponentsOptions as PageComponentsOptions,
 } from 'shared-api/components/defaults';
 import { AuthProvider } from '@/playground/auth';
-import { ServerProvider } from './server';
-
-export { useServer, type SelectedServer } from './server';
+import { ServerProvider } from './use-server';
 
 export type CodeBlockProps = Omit<DynamicCodeblockProps, 'highlighter' | 'options'>;
 
@@ -83,17 +82,6 @@ interface OpenAPIProviderProps extends Partial<Omit<OpenAPIRuntime, 'doc'>> {
   document: Document;
   components: OpenAPIComponents;
   children: ReactNode;
-}
-
-/** props of the component rendering an operation or webhook of a page */
-export interface PageOperationProps {
-  type: 'operation' | 'webhook';
-  path: string;
-  method: HttpMethods;
-  operation: OperationObject;
-  pathItem: PathItemObject;
-  showTitle?: boolean;
-  showDescription?: boolean;
 }
 
 export interface PageLayoutProps {

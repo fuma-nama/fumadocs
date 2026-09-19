@@ -1,4 +1,4 @@
-import { useComponents } from '@/headless';
+import { useComponents } from '@/utils/create-page';
 
 export function Markdown({ md }: { md: string }) {
   const { Markdown: Comp } = useComponents();

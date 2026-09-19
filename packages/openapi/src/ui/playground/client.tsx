@@ -11,7 +11,8 @@ import {
   type ComponentProps,
   useRef,
 } from 'react';
-import { useOpenAPI, useServer } from '@/headless';
+import { useOpenAPI } from '@/utils/create-page';
+import { useServer } from '@/utils/use-server';
 import { useExampleRequests } from '@/operation';
 import type { BrowserFetcherOptions } from '@/playground/fetcher';
 import { DefaultResultDisplay, type ResultDisplayProps } from './components/result-display';

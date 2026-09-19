@@ -22,7 +22,7 @@ import {
 import type { OAuth2SecurityScheme } from '@/types';
 import { useTranslations } from '@fuma-translate/react';
 import { type AuthCodeState, type ImplicitState, usePlaygroundAuth } from '@/playground/auth';
-import { useOpenAPI } from '@/headless';
+import { useOpenAPI } from '@/utils/create-page';
 
 type FlowType = keyof NonNullable<OAuth2SecurityScheme['flows']>;
 

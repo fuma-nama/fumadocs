@@ -22,7 +22,9 @@ import { SelectTabs, SelectTabTrigger, SelectTab } from 'shared-api/components/s
 import { AnchorSection } from 'shared-api/auto-anchor/client';
 import { Heading } from '@/ui/components/heading';
 import { Markdown } from '../components/markdown';
-import { type PageOperationProps, useAsyncAPI, useServer } from '@/headless';
+import { useAsyncAPI } from '@/utils/create-page';
+import { useServer } from '@/utils/use-server';
+import type { PageOperationProps } from '@/operation';
 import {
   type OperationMessage,
   type OperationParameter,

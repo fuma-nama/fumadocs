@@ -1,7 +1,7 @@
 'use client';
 import { Schema } from 'shared-api/components/schema';
 import { defaultShikiFactory } from 'fumadocs-core/highlight/shiki/full';
-import { createOpenAPIPage } from '@/headless';
+import { createOpenAPIPage } from '@/utils/create-page';
 import type { RenderContext } from '@/types';
 import { Operation } from '@/ui/operation';
 

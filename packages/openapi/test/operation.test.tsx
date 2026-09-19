@@ -2,7 +2,8 @@ import { fileURLToPath } from 'node:url';
 import { renderToString } from 'react-dom/server';
 import { expect, test } from 'vitest';
 import { loadDocument } from '@/utils/document/load';
-import { createOpenAPIPage, type PageOperationProps } from '@/headless';
+import { createOpenAPIPage } from '@/utils/create-page';
+import type { PageOperationProps } from '@/operation';
 import {
   type ExampleRequest,
   type OperationInfo,

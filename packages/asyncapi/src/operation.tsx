@@ -19,8 +19,8 @@ import {
 import type { JsonSchema } from '@fumadocs/json-schema';
 import { applyMessageTraits, applyOperationTraits } from '@/utils/traits';
 import { type ExampleMessageItem, getExampleMessages } from '@/utils/get-example-messages';
-import { type PageOperationProps, useAsyncAPI } from '@/headless/runtime';
-import { ServerProvider, useServer } from '@/headless/server';
+import { useAsyncAPI } from '@/utils/create-page';
+import { ServerProvider, useServer } from '@/utils/use-server';
 
 export interface OperationParameter {
   name: string;
@@ -59,6 +59,14 @@ export interface OperationInfo {
   parameters: OperationParameter[];
   messages: OperationMessage[];
   reply?: OperationReply;
+}
+
+/** props of the component rendering an operation of a page */
+export interface PageOperationProps {
+  id: string;
+  action: 'send' | 'receive';
+  showTitle?: boolean;
+  showDescription?: boolean;
 }
 
 export interface OperationProviderProps extends Pick<PageOperationProps, 'id' | 'action'> {

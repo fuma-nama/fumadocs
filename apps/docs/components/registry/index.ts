@@ -14,7 +14,8 @@ const baseDir = path.join(import.meta.dirname, '../../');
 
 // internal modules of `fumadocs-openapi` mapped to their public exports
 const openapiExports = new Map([
-  ['headless/index.tsx', 'fumadocs-openapi'],
+  ['utils/create-page.tsx', 'fumadocs-openapi'],
+  ['utils/use-server.tsx', 'fumadocs-openapi'],
   ['operation.tsx', 'fumadocs-openapi/operation'],
   ['ui/index.tsx', 'fumadocs-openapi/ui'],
   ['ui/playground/client.tsx', 'fumadocs-openapi/ui/playground/client'],
@@ -32,7 +33,8 @@ const openapiExports = new Map([
 
 // internal modules of `@fumadocs/asyncapi` mapped to their public exports
 const asyncapiExports = new Map([
-  ['headless/index.tsx', '@fumadocs/asyncapi'],
+  ['utils/create-page.tsx', '@fumadocs/asyncapi'],
+  ['utils/use-server.tsx', '@fumadocs/asyncapi'],
   ['operation.tsx', '@fumadocs/asyncapi/operation'],
   ['ui/index.tsx', '@fumadocs/asyncapi/ui'],
   // types are re-exported from the package root
@@ -45,14 +47,14 @@ const asyncapiExports = new Map([
 
 // internal modules of `@fumadocs/story` mapped to their public exports
 const storyExports = new Map([
-  ['headless/index.tsx', '@fumadocs/story/headless'],
+  ['provider.tsx', '@fumadocs/story'],
   // type-only, so the entry's TypeScript compiler import is erased
   ['type-tree/types.ts', '@fumadocs/story/type-tree'],
 ]);
 
 // internal modules of `@fumadocs/graphql` mapped to their public exports
 const graphqlExports = new Map([
-  ['headless/index.tsx', '@fumadocs/graphql'],
+  ['utils/create-page.tsx', '@fumadocs/graphql'],
   ['operation.tsx', '@fumadocs/graphql/operation'],
   ['type-docs.tsx', '@fumadocs/graphql/type-docs'],
   ['ui/index.tsx', '@fumadocs/graphql/ui'],

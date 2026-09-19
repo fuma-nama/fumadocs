@@ -1,75 +1,59 @@
 ---
 title: Headless
-description: Build your own UI for AsyncAPI pages on the headless layer.
+description: The state and logic of AsyncAPI pages, without UI.
 ---
 
 ## Overview
 
-Everything outside `@fumadocs/asyncapi/ui` is headless — the package entry gives you the state and logic of API pages, without UI:
+Everything outside `@fumadocs/asyncapi/ui` is headless.
 
-- the dereferenced document
-- the servers of the page, and the selected one with its variables
-- the details of each operation: its channel, parameters, messages and reply
-
-The default UI, `createAsyncAPIPage()` from `@fumadocs/asyncapi/ui`, is built on it.
+| Path                           | Module                                                    |
+| ------------------------------ | --------------------------------------------------------- |
+| `@fumadocs/asyncapi`           | the page: the document, its servers and your components   |
+| `@fumadocs/asyncapi/operation` | an operation: its channel, parameters, messages and reply |
 
 ## Page
 
-`createAsyncAPIPage()` takes your components, and returns `<AsyncAPIPage />` to use like the built-in one.
+`createAsyncAPIPage()` takes your components and returns `<AsyncAPIPage />`, which accepts the props of generated pages.
 
 ```tsx title="components/api-page.tsx"
 'use client';
 import { type CodeBlockProps, createAsyncAPIPage } from '@fumadocs/asyncapi';
-import { Schema } from '@/components/api/schema';
 import { Operation } from '@/components/my-operation';
-
-function Markdown({ md }: { md: string }) {
-  return <p>{md}</p>;
-}
-
-function CodeBlock({ lang, code }: CodeBlockProps) {
-  return (
-    <pre>
-      <code className={`language-${lang}`}>{code}</code>
-    </pre>
-  );
-}
+import { SchemaUI } from '@/components/my-schema';
 
 export const AsyncAPIPage = createAsyncAPIPage({
   components: {
     Operation,
-    Markdown,
-    CodeBlock,
-    Heading({ depth, ...props }) {
-      const As = `h${depth}` as 'h2';
-      return <As {...props} />;
+    SchemaUI,
+    CodeBlock({ lang, code }: CodeBlockProps) {
+      return (
+        <pre>
+          <code className={`language-${lang}`}>{code}</code>
+        </pre>
+      );
     },
-    SchemaUI: (props) => (
-      <Schema
-        {...props}
-        renderMarkdown={(md) => <Markdown md={md} />}
-        renderCodeblock={(props) => <CodeBlock {...props} />}
-      />
-    ),
   },
 });
 ```
 
-- `Operation` renders each operation of the page, see [Operation](#operation).
-- `SchemaUI` renders the JSON schemas of parameters, headers and payloads, install it with `npx @fumadocs/cli add fumadocs/api-docs/schema`.
-- `Layout` (optional) wraps the rendered operations.
+| Component   | Renders                                                      |
+| ----------- | ------------------------------------------------------------ |
+| `Operation` | each operation of the page, see [Operation](#operation)      |
+| `SchemaUI`  | the JSON schemas of parameters, headers and message payloads |
+| `Layout`    | optional, wraps the rendered operations                      |
 
 ### Hooks
 
-Components under the page can access its state.
+Components under the page read its state.
 
-| Hook              | Description                                         |
-| ----------------- | --------------------------------------------------- |
-| `useAsyncAPI()`   | The dereferenced document (`doc`) and page options. |
-| `useComponents()` | The components passed to the page.                  |
-| `useServer()`     | The servers, the selected one and its variables.    |
+| Hook              | Returns                                            |
+| ----------------- | -------------------------------------------------- |
+| `useAsyncAPI()`   | the dereferenced document (`doc`) and page options |
+| `useComponents()` | the components passed to the page                  |
+| `useServer()`     | the servers, the selected one and its variables    |
 
-To render operations yourself, use `<AsyncAPIProvider document={bundled} components={...} />` in place of `createAsyncAPIPage()`.
+To render operations yourself, mount `<AsyncAPIProvider document={bundled} components={...} />` in place of `createAsyncAPIPage()`.
 
 ## Operation
 
@@ -119,9 +103,13 @@ function Content() {
 }
 ```
 
-| Hook                     | Description                                                                                    |
-| ------------------------ | ---------------------------------------------------------------------------------------------- |
-| `useOperation()`         | The operation and its resolved details: `title`, `channel`, `parameters`, `messages`, `reply`. |
-| `useOperationSecurity()` | Security schemes of the operation, falling back to the selected server's.                      |
+| Hook                     | Returns                                                                  |
+| ------------------------ | ------------------------------------------------------------------------ |
+| `useOperation()`         | the operation with its details resolved                                  |
+| `useOperationSecurity()` | security schemes of the operation, falling back to the selected server's |
 
-Each message carries its `headers` and `payload` schemas, plus the `examples` to display, taken from the document or generated from the schemas.
+<auto-type-table path="props.ts" name="OperationInfo" />
+
+Examples of a message come from the document, or are generated from its schemas.
+
+<auto-type-table path="props.ts" name="OperationMessage" />

@@ -1,5 +1,5 @@
 'use client';
-import { useServer } from '@/headless';
+import { useServer } from '@/utils/use-server';
 import {
   Select,
   SelectContent,

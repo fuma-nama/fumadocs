@@ -18,7 +18,7 @@ createOpenAPIPage({
 });
 ```
 
-`shiki` is optional — without it, code blocks render unhighlighted.
+`shiki` defaults to the full bundle on `createAsyncAPIPage()` and `createGraphQLPage()`. On `createOpenAPIPage()` it is optional, code blocks render unhighlighted without it.
 
 ## Installable UI
 

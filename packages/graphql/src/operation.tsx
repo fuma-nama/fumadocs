@@ -8,7 +8,7 @@ import {
   type OperationKind,
 } from '@/utils/schema';
 import { generateOperationExample, type OperationExample } from '@/utils/example';
-import { useGraphQL } from '@/headless/runtime';
+import { useGraphQL } from '@/utils/create-page';
 
 /** the operation and its resolved details, all read-only */
 export interface OperationInfo {
@@ -25,6 +25,14 @@ export interface OperationInfo {
    * a generated example, `undefined` when the operation cannot be sampled.
    */
   example?: OperationExample;
+}
+
+/** props of the component rendering an operation of a page */
+export interface PageOperationProps {
+  kind: OperationKind;
+  name: string;
+  showTitle?: boolean;
+  showDescription?: boolean;
 }
 
 export interface OperationProviderProps {

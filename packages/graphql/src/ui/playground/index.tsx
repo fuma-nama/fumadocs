@@ -24,7 +24,7 @@ import { FieldSet } from 'shared-api/components/playground/inputs';
 import { SchemaProvider } from 'shared-api/components/playground/schema';
 import { Input } from 'shared-api/components/input';
 import { Spinner } from 'shared-api/components/spinner';
-import { useGraphQL } from '@/headless';
+import { useGraphQL } from '@/utils/create-page';
 import { useOperation } from '@/operation';
 import { cn } from '@/utils/cn';
 import { syncOperationVariables } from '@/utils/example';

@@ -23,7 +23,7 @@ import {
   type SchemaToPagesOptions,
   type TypeOutput,
 } from '@/utils/pages';
-import type { GraphQLLinks, GraphQLPageProps } from '@/headless';
+import type { GraphQLLinks, GraphQLPageProps } from '@/utils/create-page';
 import { toStaticData } from '@/utils/to-static-data';
 import type { NamedTypeKind, OperationKind } from '@/utils/schema';
 import { KindLabel } from '@/ui/components/badge';

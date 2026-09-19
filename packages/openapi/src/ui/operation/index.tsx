@@ -12,7 +12,7 @@ import { UsageTabs } from '@/ui/operation/usage-tabs';
 import { MethodLabel } from '@/ui/components/method-label';
 import { SchemaUI } from '@/ui/components/schema';
 import { Badge } from 'shared-api/components/badge';
-import { useOpenAPI, useTypeScriptDefinitions } from '@/headless';
+import { useOpenAPI, useTypeScriptDefinitions } from '@/utils/create-page';
 import { OperationProvider, type OperationResponse, useOperation } from '@/operation';
 import { useTranslations } from '@fuma-translate/react';
 import {

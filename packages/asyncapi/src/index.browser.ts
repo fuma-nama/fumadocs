@@ -2,7 +2,8 @@
  * Browser build of the package entry: `generateFiles()` reads and writes files,
  * so it is stubbed here and the rest of the entry stays importable from client code.
  */
-export * from './headless';
+export * from './utils/create-page';
+export { useServer, type SelectedServer } from './utils/use-server';
 export type { RenderContext } from './types';
 export type {
   OperationOutput,

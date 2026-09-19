@@ -53,8 +53,14 @@ See [Headless](https://fumadocs.dev/docs/integrations/graphql/headless).
 
 ## `@fumadocs/graphql/ui/playground`
 
-The playground is its own entry, so installing the operation or page UI no longer copies it, install `fumadocs/graphql/playground` when you want to own it. `inputTypeToJsonSchema()`, which turns GraphQL input types into the form's JSON Schema, is exported from `@fumadocs/graphql`.
+The playground is its own entry, so installing the operation or page UI no longer copies it:
+
+```npm
+npx @fumadocs/cli add fumadocs/graphql/playground
+```
+
+`inputTypeToJsonSchema()`, which turns GraphQL input types into the form's JSON Schema, comes from `@fumadocs/graphql`.
 
 ## Highlighting out of the box
 
-`createGraphQLPage()` highlights code blocks with the full Shiki bundle unless you pass a smaller `shiki` factory, so a headless page reads the same as `@fumadocs/graphql/ui`.
+`createGraphQLPage()` highlights code blocks with the full Shiki bundle, pass a smaller `shiki` factory to trim it.

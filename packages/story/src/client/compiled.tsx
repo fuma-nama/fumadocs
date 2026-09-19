@@ -2,7 +2,7 @@ import type { TypeNode } from '@/type-tree/types';
 import { type ReactNode, useMemo, type ComponentPropsWithoutRef, type FC } from 'react';
 import { deepmerge } from '@fastify/deepmerge';
 import { WithControl as DefaultWithControl } from '@/client/with-control';
-import type { VariantInfo, WithControlProps } from '@/headless';
+import type { VariantInfo, WithControlProps } from '@/provider';
 import { deserialize } from '@/utils/serialization';
 
 export interface StoryOptions<C extends FC<any>> {

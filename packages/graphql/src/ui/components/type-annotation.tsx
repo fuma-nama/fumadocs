@@ -1,6 +1,6 @@
 'use client';
 import { type DirectiveNode, getNamedType, type GraphQLType, print } from 'graphql';
-import { useTypeLink } from '@/headless';
+import { useTypeLink } from '@/utils/create-page';
 import { cn } from '@/utils/cn';
 import { useTranslations } from '@fuma-translate/react';
 import { AtSignIcon } from 'lucide-react';

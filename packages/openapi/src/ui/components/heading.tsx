@@ -1,7 +1,7 @@
 'use client';
 import type { ComponentProps } from 'react';
 import { useAnchorId } from 'shared-api/auto-anchor/client';
-import { useComponents } from '@/headless';
+import { useComponents } from '@/utils/create-page';
 
 /**
  * A heading of the page, `id` is resolved against the anchor sections it is under.

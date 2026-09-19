@@ -1,6 +1,6 @@
 'use client';
 import { defaultShikiFactory } from 'fumadocs-core/highlight/shiki/full';
-import { createGraphQLPage } from '@/headless';
+import { createGraphQLPage } from '@/utils/create-page';
 import type { RenderContext } from '@/types';
 import { GraphQLSchemaView } from '@/ui/schema-ui';
 import { Operation } from '@/ui/operation';

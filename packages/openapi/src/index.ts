@@ -1,5 +1,6 @@
 export * from './generate-file';
-export * from './headless';
+export * from './utils/create-page';
+export { useServer, type SelectedServer } from './utils/use-server';
 export type { MediaAdapter } from '@/requests/media/adapter';
 export type * from './types';
 export type {

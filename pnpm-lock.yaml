@@ -211,6 +211,9 @@ importers:
       '@fumadocs/graphql':
         specifier: workspace:*
         version: link:../../packages/graphql
+      '@fumadocs/json-schema':
+        specifier: workspace:*
+        version: link:../../packages/json-schema
       '@fumadocs/satteri':
         specifier: workspace:*
         version: link:../../packages/satteri

@@ -21,7 +21,9 @@ Install the built-in one and edit it:
 npx @fumadocs/cli add fumadocs/story/controls
 ```
 
-Or build your own on `@fumadocs/story/headless`: `<StoryProvider />` holds the selected variant and the form engine, `useStory()` exposes the presets and `useStoryArgs()` the arguments of the rendered component.
+Or build your own on `@fumadocs/story`: `<StoryProvider />` holds the selected variant and the form engine, `useStory()` exposes the presets and `useStoryArgs()` the arguments of the rendered component.
+
+The entry ships a stubbed build under the `browser` condition, so client components can import them without pulling the story factory's Node dependencies.
 
 See [Headless](https://fumadocs.dev/docs/integrations/story/headless).
 
