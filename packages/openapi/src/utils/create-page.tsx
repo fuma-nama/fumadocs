@@ -7,7 +7,14 @@ import type { DereferencedDocument } from '@/utils/document/dereference';
 import { dereferenceBundledDocument } from '@/utils/document/dereference';
 import type { MediaAdapter } from '@/requests/media/adapter';
 import { defaultAdapters } from '@/requests/media/adapter';
-import type { CodeUsageGeneratorRegistry, InlineCodeUsageGenerator } from '@/requests/generators';
+import {
+  type CodeUsageGeneratorRegistry,
+  createCodeUsageGeneratorRegistry,
+  type InlineCodeUsageGenerator,
+} from '@/requests/generators';
+import { registerDefault } from '@/requests/generators/all';
+import { generate } from '@fumari/json-schema-ts';
+import { getRaw } from '@scalar/json-magic/magic-proxy';
 import type { JsonSchema } from '@fumadocs/json-schema';
 import type { SchemaUIOptions } from 'shared-api/components/schema';
 import type { PlaygroundClientOptions } from '@/ui/playground/client';
@@ -352,17 +359,44 @@ function OpenAPIProvider({
   );
 }
 
+let defaultCodeUsages: CodeUsageGeneratorRegistry | undefined;
+
+const defaultTypeScriptDefinitions: OpenAPIRuntimeOptions['generateTypeScriptDefinitions'] = (
+  schema,
+  ctx,
+) => {
+  if (typeof schema !== 'object') return;
+
+  try {
+    // `generate` resolves `$ref`s against the schema root itself,
+    // spread the bundled document into the root so in-document refs are resolvable
+    return generate(
+      { ...(ctx.doc.bundled as object), ...getRaw(schema) },
+      { name: ctx.name, readOnly: ctx.readOnly, writeOnly: ctx.writeOnly },
+    );
+  } catch (e) {
+    console.warn('Failed to generate typescript schema:', e);
+  }
+};
+
 /**
  * Create `<OpenAPIPage />` from your own UI, it takes the props of generated pages.
- *
- * Code blocks are highlighted with the full Shiki bundle, pass `shiki` to trim it.
  */
 export function createOpenAPIRenderer(options: CreateOpenAPIRendererOptions): FC<OpenAPIPageProps> {
-  return createOpenAPIBaseRenderer({ ...options, shiki: options.shiki ?? defaultShikiFactory });
+  return createOpenAPIBaseRenderer({
+    ...options,
+    shiki: options.shiki ?? defaultShikiFactory,
+    codeUsages:
+      options.codeUsages ??
+      (defaultCodeUsages ??= registerDefault(createCodeUsageGeneratorRegistry())),
+    generateTypeScriptDefinitions:
+      options.generateTypeScriptDefinitions ?? defaultTypeScriptDefinitions,
+  });
 }
 
 /**
- * `createOpenAPIRenderer()` without the Shiki bundle, code blocks are highlighted through the `shiki` you pass.
+ * `createOpenAPIRenderer()` with nothing built in: it highlights through the `shiki` you pass, and
+ * generates code usages and TypeScript definitions only when you pass them.
  */
 export function createOpenAPIBaseRenderer({
   components,

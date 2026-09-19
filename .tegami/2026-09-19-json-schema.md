@@ -31,21 +31,22 @@ They were `@fumadocs/api-docs/schema/*` before, and the API was cleaned up while
 | `typeMatches(value, type)`                     | `matchesType(value, type)`             |
 | `schemaToString(schema, FormatFlags.UseAlias)` | `stringify(schema, { alias: true })`   |
 
-## Opt into code usages and TypeScript definitions
+## Trim code usages and TypeScript definitions
 
-`createOpenAPIRenderer()` from `fumadocs-openapi` doesn't register the default code usage generators and TypeScript definitions, so a headless page doesn't bundle them:
+`createOpenAPIBaseRenderer()` from `fumadocs-openapi` registers no code usage generators and no TypeScript definitions, so a page built on it bundles only what you pass:
 
 ```tsx
 import { createCodeUsageGeneratorRegistry } from 'fumadocs-openapi/requests/generators';
-import { registerDefault } from 'fumadocs-openapi/requests/generators/all';
+import { curl } from 'fumadocs-openapi/requests/generators/curl';
 
-createOpenAPIRenderer({
-  codeUsages: registerDefault(createCodeUsageGeneratorRegistry()),
+createOpenAPIBaseRenderer({
+  shiki,
+  codeUsages: createCodeUsageGeneratorRegistry().register(curl),
   components: { ... },
 });
 ```
 
-`fumadocs-openapi/ui` is unchanged, it registers both for you.
+`createOpenAPIRenderer()` and `fumadocs-openapi/ui` register every language and TypeScript definitions for you.
 
 ## Remove `useStorageKey()`
 

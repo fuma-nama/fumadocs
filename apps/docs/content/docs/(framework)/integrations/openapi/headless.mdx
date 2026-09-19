@@ -46,8 +46,6 @@ export const OpenAPIPage = createOpenAPIRenderer({
 | `SchemaUI`  | the JSON schemas of parameters, bodies and responses, see [Schema UI](#schema-ui) |
 | `Layout`    | optional, wraps the rendered operations and webhooks                              |
 
-`Markdown`, `CodeBlock` and `Heading` are filled in when you leave them out, rendering Markdown through Remark and code through Shiki. The full Shiki bundle is the default, `createOpenAPIBaseRenderer()` highlights through the `shiki` factory you pass instead.
-
 ### Hooks
 
 Components under the page read its state.
@@ -59,22 +57,6 @@ Components under the page read its state.
 | `useServer()`                               | the selected server and its variables                 |
 | `useTypeScriptDefinitions(schema, options)` | TypeScript definitions of a JSON schema               |
 | `useRenderContext()`                        | the render options of the page, like `playground`     |
-
-### Code usages
-
-Generators are opt-in, so a page without code samples doesn't bundle them.
-
-```tsx
-import { createCodeUsageGeneratorRegistry } from 'fumadocs-openapi/requests/generators';
-import { curl } from 'fumadocs-openapi/requests/generators/curl';
-
-createOpenAPIRenderer({
-  codeUsages: createCodeUsageGeneratorRegistry().register(curl),
-  components: { ... },
-});
-```
-
-`registerDefault()` from `fumadocs-openapi/requests/generators/all` registers every language at once.
 
 ## Operation
 
