@@ -5,7 +5,7 @@ import type { Registry } from 'fuma-cli/compiler';
 const dir = path.join(path.dirname(fileURLToPath(import.meta.url)), '../src');
 
 export const registry: Registry = {
-  name: 'fumadocs/openapi',
+  name: 'openapi',
   dir,
   components: [
     {

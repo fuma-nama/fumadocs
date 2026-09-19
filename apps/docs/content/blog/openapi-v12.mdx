@@ -49,15 +49,15 @@ export const OpenAPIPage = createOpenAPIRenderer({
 
 Under the page, hooks read its state:
 
-| Hook                    | Returns                                                             |
-| ----------------------- | ------------------------------------------------------------------- |
-| `useOpenAPI()`          | the dereferenced document (`doc`) and request options               |
-| `useComponents()`       | the components passed to the page                                   |
-| `useServer()`           | the selected server, its variables, and `resolveUrl(pathname)`      |
-| `useOperation()`        | the operation with its details resolved                             |
-| `useExampleRequests()`  | the example requests, the selected one, `select()` and `update()`   |
-| `useCodeUsage(id)`      | the code generated for the selected example                         |
-| `useResponseExamples()` | responses with example values of their preferred media type         |
+| Hook                    | Returns                                                           |
+| ----------------------- | ----------------------------------------------------------------- |
+| `useOpenAPI()`          | the dereferenced document (`doc`) and request options             |
+| `useComponents()`       | the components passed to the page                                 |
+| `useServer()`           | the selected server, its variables, and `resolveUrl(pathname)`    |
+| `useOperation()`        | the operation with its details resolved                           |
+| `useExampleRequests()`  | the example requests, the selected one, `select()` and `update()` |
+| `useCodeUsage(id)`      | the code generated for the selected example                       |
+| `useResponseExamples()` | responses with example values of their preferred media type       |
 
 See [Headless](/docs/integrations/openapi/headless) for the full surface.
 
@@ -66,7 +66,7 @@ See [Headless](/docs/integrations/openapi/headless) for the full surface.
 The entire UI of API pages, built on that layer, installed with [Fumadocs CLI](/docs/cli):
 
 ```npm
-npx @fumadocs/cli add fumadocs/openapi/page
+npx @fumadocs/cli add openapi/page
 ```
 
 Your `components/api-page.tsx` is no longer needed:
@@ -89,12 +89,12 @@ export const OpenAPIPage = createOpenAPIPage({
 });
 ```
 
-| Part           | Install with                  |
-| -------------- | ----------------------------- |
-| Full page      | `fumadocs/openapi/page`       |
-| Operation UI   | `fumadocs/openapi/operation`  |
-| API Playground | `fumadocs/openapi/playground` |
-| Schema UI      | `fumadocs/api-docs/schema`    |
+| Part           | Install with         |
+| -------------- | -------------------- |
+| Full page      | `openapi/page`       |
+| Operation UI   | `openapi/operation`  |
+| API Playground | `openapi/playground` |
+| Schema UI      | `api-docs/schema`    |
 
 What you install is UI, not a fork:
 
@@ -134,12 +134,12 @@ import { bundle } from '@fumadocs/json-schema/bundle';
 | Before                                     | Now                                                  |
 | ------------------------------------------ | ---------------------------------------------------- |
 | `@fumadocs/api-docs/schema/*`              | `@fumadocs/json-schema`                              |
-| `@fumadocs/api-docs/components/schema*`    | `npx @fumadocs/cli add fumadocs/api-docs/schema`     |
+| `@fumadocs/api-docs/components/schema*`    | `npx @fumadocs/cli add api-docs/schema`              |
 | `@fumadocs/api-docs/components/*` (the UI) | installed with the component that uses it            |
 | `@fumadocs/api-docs/i18n`                  | the integration's own `Translations` covers its keys |
 | `@fumadocs/api-docs/css/preset.css`        | already included by the integration's preset         |
 
-The CLI namespace is unchanged, `fumadocs/api-docs/schema` still installs the Schema UI.
+The CLI still installs the Schema UI, now under `api-docs/schema`.
 
 </Accordion>
 
@@ -191,7 +191,7 @@ Render options that returned a component are components now:
 
 - `playground.provider` is removed, the page provides the auth state of the playground.
 - `playground.render` and `generateTypeScriptDefinitions` no longer receive `ctx`. Read the document from `useOpenAPI().doc`, or the `doc` passed to `generateTypeScriptDefinitions`.
-- `operation.APIExampleSelector` is removed, install `fumadocs/openapi/operation` and edit the selector in `usage-tabs.tsx`.
+- `operation.APIExampleSelector` is removed, install `openapi/operation` and edit the selector in `usage-tabs.tsx`.
 - `<PlaygroundClient />` reads the operation from `useOperation()`, its `route`, `method`, `operation` and `pathItem` props are gone:
 
   ```tsx
@@ -207,10 +207,10 @@ Render options that returned a component are components now:
 The hooks of `fumadocs-openapi/ui` are replaced by the headless ones:
 
 | v11                     | v12                                                                                    |
-| ----------------------- | --------------------------------------------------------------------------------------- |
+| ----------------------- | -------------------------------------------------------------------------------------- |
 | `useRenderContext()`    | `useOpenAPI()` (`schema` is renamed to `doc`), `useComponents()`, `useRenderContext()` |
-| `useServerContext()`    | `useServer()`                                                                            |
-| `useOperationContext()` | `useOperation()`, `useExampleRequests()`, `useExampleRequest()` (on `/operation`)        |
+| `useServerContext()`    | `useServer()`                                                                          |
+| `useOperationContext()` | `useOperation()`, `useExampleRequests()`, `useExampleRequest()` (on `/operation`)      |
 
 ```diff
 - const { route, examples, example, setExample, setExampleData } = useOperationContext();

@@ -140,7 +140,7 @@ For customisations beyond the available options, you can install the UI into you
 The entire UI of API pages, built on [the headless layer](/docs/integrations/asyncapi/headless).
 
 ```npm
-npx @fumadocs/cli add fumadocs/asyncapi/page
+npx @fumadocs/cli add asyncapi/page
 ```
 
 It installs `<AsyncAPIPage />` itself, your `components/api-page.tsx` is no longer needed.
@@ -155,7 +155,7 @@ import { AsyncAPIPage } from '@/components/asyncapi/page'; // [!code ++]
 The UI of a single operation, including its channel, messages and bindings.
 
 ```npm
-npx @fumadocs/cli add fumadocs/asyncapi/operation
+npx @fumadocs/cli add asyncapi/operation
 ```
 
 ```tsx title="components/api-page.tsx"
@@ -175,7 +175,7 @@ export const AsyncAPIPage = createAsyncAPIPage({
 The UI of JSON schemas, shared with the other API integrations.
 
 ```npm
-npx @fumadocs/cli add fumadocs/api-docs/schema
+npx @fumadocs/cli add api-docs/schema
 ```
 
 ```tsx title="components/api-page.tsx"

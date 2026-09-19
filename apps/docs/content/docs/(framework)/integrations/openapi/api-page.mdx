@@ -148,7 +148,7 @@ For customisations beyond the available options, you can install the UI into you
 The entire UI of API pages, built on [the headless layer](/docs/integrations/openapi/headless).
 
 ```npm
-npx @fumadocs/cli add fumadocs/openapi/page
+npx @fumadocs/cli add openapi/page
 ```
 
 It installs `<OpenAPIPage />` itself, your `components/api-page.tsx` is no longer needed.
@@ -161,7 +161,7 @@ import { OpenAPIPage } from '@/components/openapi/page'; // [!code ++]
 ### API Playground
 
 ```npm
-npx @fumadocs/cli add fumadocs/openapi/playground
+npx @fumadocs/cli add openapi/playground
 ```
 
 ```tsx title="components/api-page.tsx"
@@ -181,7 +181,7 @@ export const OpenAPIPage = createOpenAPIPage({
 The UI of operations and webhooks.
 
 ```npm
-npx @fumadocs/cli add fumadocs/openapi/operation
+npx @fumadocs/cli add openapi/operation
 ```
 
 ```tsx title="components/api-page.tsx"
@@ -201,7 +201,7 @@ export const OpenAPIPage = createOpenAPIPage({
 The UI for rendering JSON schemas.
 
 ```npm
-npx @fumadocs/cli add fumadocs/api-docs/schema
+npx @fumadocs/cli add api-docs/schema
 ```
 
 ```tsx title="components/api-page.tsx"

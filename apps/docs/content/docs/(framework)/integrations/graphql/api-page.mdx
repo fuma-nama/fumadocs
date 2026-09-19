@@ -246,7 +246,7 @@ For customisations beyond the available options, you can install the UI into you
 The entire UI of GraphQL pages, built on [the headless layer](/docs/integrations/graphql/headless).
 
 ```npm
-npx @fumadocs/cli add fumadocs/graphql/page
+npx @fumadocs/cli add graphql/page
 ```
 
 It installs `<GraphQLPage />` itself, your `components/api-page.tsx` is no longer needed.
@@ -260,12 +260,12 @@ import { GraphQLPage } from '@/components/graphql/page'; // [!code ++]
 
 Install only the pieces you want to edit, and pass them back.
 
-| Component                     | Contents                                     |
-| ----------------------------- | -------------------------------------------- |
-| `fumadocs/graphql/operation`  | operations, with their arguments and example |
-| `fumadocs/graphql/type-docs`  | named types, with their relations and fields |
-| `fumadocs/graphql/schema-ui`  | the type, argument and field details         |
-| `fumadocs/graphql/playground` | the interactive playground                   |
+| Component            | Contents                                     |
+| -------------------- | -------------------------------------------- |
+| `graphql/operation`  | operations, with their arguments and example |
+| `graphql/type-docs`  | named types, with their relations and fields |
+| `graphql/schema-ui`  | the type, argument and field details         |
+| `graphql/playground` | the interactive playground                   |
 
 ```tsx title="components/api-page.tsx"
 'use client';

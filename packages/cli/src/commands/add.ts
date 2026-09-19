@@ -38,9 +38,9 @@ export async function add(input: string[], connector: RegistryConnector, config:
 
     const groups = await Promise.all([
       scan(undefined, 'common'),
-      scan('fumadocs/sanity', 'sanity'),
-      scan('fumadocs/openapi', 'openapi'),
-      scan('fumadocs/api-docs', 'api-docs'),
+      scan('sanity', 'sanity'),
+      scan('openapi', 'openapi'),
+      scan('api-docs', 'api-docs'),
       scan(subRegistry, 'ui'),
     ]);
 

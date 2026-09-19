@@ -28,7 +28,7 @@ const protocols = [
 ];
 
 export const registry: Registry = {
-  name: 'fumadocs/asyncapi',
+  name: 'asyncapi',
   dir,
   components: [
     {

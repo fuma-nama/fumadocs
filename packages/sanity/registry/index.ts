@@ -80,14 +80,14 @@ const components: Component[] = [
 
 export const registry: Registry = {
   dir: import.meta.dirname,
-  name: 'fumadocs/sanity',
+  name: 'sanity',
   components: [
     ...components,
     {
       name: 'all',
       subComponents: components.map((comp) => ({
         type: 'sub-registry',
-        subRegistry: 'fumadocs/sanity',
+        subRegistry: 'sanity',
         component: comp.name,
       })),
     },

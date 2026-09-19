@@ -18,7 +18,7 @@ const shared: Record<string, Registry['dependencies']> = {
 };
 
 export const registry: Registry = {
-  name: 'fumadocs/api-docs',
+  name: 'api-docs',
   dir,
   components: [
     ...primitives.map((name) => ({
