@@ -1,6 +1,12 @@
 core:changelogs:
-  - content: "---\npackages:\n  npm:@fumadocs/cli:\n    type: patch\n---\n\n## Shorter names for integration components\n\nThe components of integrations dropped their `fumadocs/` prefix:\n\n```npm\nnpx @fumadocs/cli add openapi/page\n```\n\n| Before                | Now          |\n| --------------------- | ------------ |\n| `fumadocs/openapi/*`  | `openapi/*`  |\n| `fumadocs/asyncapi/*` | `asyncapi/*` |\n| `fumadocs/graphql/*`  | `graphql/*`  |\n| `fumadocs/story/*`    | `story/*`    |\n| `fumadocs/sanity/*`   | `sanity/*`   |\n| `fumadocs/api-docs/*` | `api-docs/*` |\n\nThe old names are gone, update the commands in your scripts. `fumadocs/base-ui` and `fumadocs/radix-ui` are unchanged, the CLI resolves them from your configured `uiLibrary`.\n"
-    filename: 2026-09-20-registry-names.md
+  - content: "---\npackages:\n  npm:@fumadocs/cli:\n    type: minor\n  npm:create-fumadocs-app:\n    type: patch\n---\n\n## New registry format\n\nThe CLI is upgraded to Fuma CLI 0.3, the registry is now a manifest with the raw files instead of one JSON per component.\n\n- Installing fetches every needed file in parallel, and no longer parses the installed files to link their imports.\n- Layouts are imported from `fumadocs-ui` unless you have installed them, without a Fumadocs-specific plugin.\n\nOlder versions of the CLI cannot read the new registry, upgrade to install components.\n\n### Moved files\n\nSome components are installed to a location that follows their source, update your imports if you install them again:\n\n| Before                                                                          | Now                                             |\n| ------------------------------------------------------------------------------- | ----------------------------------------------- |\n| `components/sanity/<name>.tsx`                                                  | `components/sanity/<name>.component.tsx`        |\n| `components/docs-sidebar/tabs-dropdown.tsx`                                     | `components/docs-sidebar/tabs/dropdown.tsx`     |\n| `components/openapi/playground/{result-display,server-select,oauth-dialog}.tsx` | `components/openapi/playground/components/*`    |\n| `components/graphql/playground/code-editor.tsx`                                 | `components/graphql/components/code-editor.tsx` |\n\n### Names of layout slots\n\nSlots are named after their path, like `layouts/docs/slots/sidebar` instead of `slots/docs/sidebar`. `fumadocs customise` is unchanged.\n"
+    filename: 2026-09-21-cli-registry-format.md
+    v: 0.0.0
+  - content: "---\npackages:\n  npm:fumadocs-mdx:\n    type: patch\n---\n\n## Fix `experimentalBuildCache` bloating frontmatter-only imports\n\nWith a warm build cache, `?only=frontmatter` imports were served the fully compiled page from cache instead of the frontmatter module, so every page was bundled two more times. The cache now only applies to full compilations.\n"
+    filename: 2026-09-20-build-cache-frontmatter.md
+    v: 0.0.0
+  - content: "---\npackages:\n  npm:fumadocs-openapi:\n    type: patch\n---\n\n## Fix the installed API playground\n\nThe playground installed by `npx @fumadocs/cli add openapi/playground` imported `useAuthFields`, `requestOAuthToken` and their types from `fumadocs-openapi/playground`, which did not export them. They are now exported.\n"
+    filename: 2026-09-21-openapi-playground-exports.md
     v: 0.0.0
 core:packages:
   - id: npm:@fumadocs/asyncapi
@@ -10,16 +16,16 @@ core:packages:
   - id: npm:@fumadocs/basehub
     updated: false
   - changelogIds:
-      - 2026-09-20-registry-names.md
+      - 2026-09-21-cli-registry-format.md
     id: npm:@fumadocs/cli
     updated: true
-  - id: npm:@fumadocs/content-collections
-    updated: false
-  - id: npm:fumadocs-core
-    updated: false
   - id: npm:@fumadocs/content
     updated: false
-  - id: npm:create-fumadocs-app
+  - id: npm:@fumadocs/content-collections
+    updated: false
+  - changelogIds:
+      - 2026-09-21-cli-registry-format.md
+    id: npm:create-fumadocs-app
     updated: true
   - id: npm:create-fumadocs-versions
     updated: true
@@ -27,33 +33,39 @@ core:packages:
     updated: false
   - id: npm:fumadocs-epub
     updated: false
+  - id: npm:fumadocs-core
+    updated: false
+  - id: npm:@fumadocs/graphql
+    updated: false
   - id: npm:@fumari/image-size
     updated: false
   - id: npm:@fumadocs/json-schema
     updated: false
-  - id: npm:@fumadocs/graphql
+  - id: npm:@fumadocs/local-content
     updated: false
   - id: npm:@fumadocs/language
     updated: false
-  - id: npm:@fumadocs/local-content
+  - id: npm:@fumadocs/local-md
     updated: false
   - id: npm:@fumadocs/local-html
     updated: false
-  - id: npm:@fumadocs/local-md
-    updated: false
-  - id: npm:fumadocs-mdx
-    updated: false
+  - changelogIds:
+      - 2026-09-20-build-cache-frontmatter.md
+    id: npm:fumadocs-mdx
+    updated: true
   - id: npm:@fumadocs/mdx-remote
     updated: false
   - id: npm:@fumadocs/notion
     updated: false
   - id: npm:fumadocs-obsidian
     updated: false
-  - id: npm:fumadocs-openapi
+  - changelogIds:
+      - 2026-09-21-openapi-playground-exports.md
+    id: npm:fumadocs-openapi
+    updated: true
+  - id: npm:fumadocs-preview
     updated: false
   - id: npm:fumadocs-python
-    updated: false
-  - id: npm:fumadocs-preview
     updated: false
   - id: npm:fumadocs-ui
     updated: false
@@ -67,50 +79,73 @@ core:packages:
     updated: false
   - id: npm:@fumari/stf
     updated: false
-  - id: npm:@fumadocs/story
-    updated: false
   - id: npm:@fumadocs/tailwind
+    updated: false
+  - id: npm:@fumadocs/story
     updated: false
   - id: npm:fumadocs-twoslash
     updated: false
-  - id: npm:fumadocs-typescript
-    updated: false
   - id: npm:@fumadocs/vite
+    updated: false
+  - id: npm:fumadocs-typescript
     updated: false
 npm:packages:
   - id: npm:@fumadocs/asyncapi
   - id: npm:@fumadocs/base-ui
   - id: npm:@fumadocs/basehub
   - id: npm:@fumadocs/cli
-  - id: npm:@fumadocs/content-collections
-  - id: npm:fumadocs-core
   - id: npm:@fumadocs/content
+  - id: npm:@fumadocs/content-collections
   - id: npm:create-fumadocs-app
   - id: npm:create-fumadocs-versions
   - id: npm:fumadocs-docgen
   - id: npm:fumadocs-epub
+  - id: npm:fumadocs-core
+  - id: npm:@fumadocs/graphql
   - id: npm:@fumari/image-size
   - id: npm:@fumadocs/json-schema
-  - id: npm:@fumadocs/graphql
-  - id: npm:@fumadocs/language
   - id: npm:@fumadocs/local-content
-  - id: npm:@fumadocs/local-html
+  - id: npm:@fumadocs/language
   - id: npm:@fumadocs/local-md
+  - id: npm:@fumadocs/local-html
   - id: npm:fumadocs-mdx
   - id: npm:@fumadocs/mdx-remote
   - id: npm:@fumadocs/notion
   - id: npm:fumadocs-obsidian
   - id: npm:fumadocs-openapi
-  - id: npm:fumadocs-python
   - id: npm:fumadocs-preview
+  - id: npm:fumadocs-python
   - id: npm:fumadocs-ui
   - id: npm:@fumadocs/sanity
   - id: npm:@fumadocs/satteri
   - id: npm:@fumadocs/shadcn
   - id: npm:shared-api
   - id: npm:@fumari/stf
-  - id: npm:@fumadocs/story
   - id: npm:@fumadocs/tailwind
+  - id: npm:@fumadocs/story
   - id: npm:fumadocs-twoslash
-  - id: npm:fumadocs-typescript
   - id: npm:@fumadocs/vite
+  - id: npm:fumadocs-typescript
+  - id: npm:docs
+  - id: npm:example-asyncapi
+  - id: npm:example-base-ui
+  - id: npm:example-graphql
+  - id: npm:example-i18n
+  - id: npm:example-next
+  - id: npm:example-next-min
+  - id: npm:example-next-shadcn
+  - id: npm:example-next-static
+  - id: npm:example-openapi
+  - id: npm:example-react-router
+  - id: npm:example-react-router-i18n
+  - id: npm:example-react-router-min
+  - id: npm:example-react-router-rsc
+  - id: npm:example-tanstack-start
+  - id: npm:example-react-router-spa
+  - id: npm:example-tanstack-start-i18n
+  - id: npm:example-tanstack-start-min
+  - id: npm:example-tanstack-start-openapi
+  - id: npm:example-tanstack-start-spa
+  - id: npm:example-tanstack-start-story
+  - id: npm:example-waku
+  - id: npm:example-waku-i18n
