@@ -1,3 +1,9 @@
+## fumadocs-mdx@15.4.3
+
+### Fix `experimentalBuildCache` bloating frontmatter-only imports
+
+With a warm build cache, `?only=frontmatter` imports were served the fully compiled page from cache instead of the frontmatter module, so every page was bundled two more times. The cache now only applies to full compilations.
+
 ## fumadocs-mdx@15.4.2
 
 ### Fix the `_mdast` export with `removePosition`
