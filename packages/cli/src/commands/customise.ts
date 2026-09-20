@@ -1,6 +1,6 @@
 import fs from 'node:fs/promises';
 import path from 'node:path';
-import { cancel, group, intro, log, outro, select } from '@clack/prompts';
+import { cancel, group, intro, log, outro, select, type Option } from '@clack/prompts';
 import picocolors from 'picocolors';
 import { parseSourceFile } from '@/codemod';
 import { frameworks } from '@/project';
@@ -29,7 +29,7 @@ export async function customise(config: LoadedConfig, connector: RegistryConnect
 
   const installer = new FumadocsComponentInstaller(connector, config);
   const subRegistry = UIRegistries[config.uiLibrary];
-  const info = await connector.fetchRegistryInfo(subRegistry);
+  const manifest = await installer.fetchManifest(subRegistry);
 
   const result = await group(
     {
@@ -108,6 +108,33 @@ export async function customise(config: LoadedConfig, connector: RegistryConnect
         const selected = v.results.layout!;
         if (selected.id === 'home') return Promise.resolve(selected);
 
+        const slots: Option<TargetInfo>[] = [];
+        const prefix = `layouts/${selected.id}/`;
+        for (const { name: id } of manifest.components) {
+          // <layout>/slots/<name> or <layout>/page/slots/<name>
+          const [dir, name] = id.startsWith(prefix) ? id.slice(prefix.length).split('slots/') : [];
+          if (name === undefined) continue;
+          const isPage = dir === 'page/';
+
+          slots.push({
+            label: `${isPage ? 'Page' : 'Layout'}: ${name}`,
+            hint: `only replace a part of layout${isPage ? "'s page" : ''}, useful for adjusting details`,
+            value: {
+              id,
+              targets: [{ subRegistry, name: id }],
+              print() {
+                printSlot({
+                  at: `@/${id}`,
+                  layoutId: selected.id,
+                  name,
+                  isPage,
+                  uiLibrary: config.uiLibrary,
+                });
+              },
+            },
+          });
+        }
+
         return select<TargetInfo>({
           message: 'Which part do you want to customize?',
           options: [
@@ -130,51 +157,7 @@ export async function customise(config: LoadedConfig, connector: RegistryConnect
                   ),
               },
             },
-            ...info.unlistedIndexes.flatMap((index) => {
-              const prefix = `slots/${selected.id}`;
-              if (!index.name.startsWith(prefix)) return [];
-              let name = index.name.slice(prefix.length + 1);
-
-              if (name.startsWith('page/')) {
-                name = name.slice('page/'.length);
-
-                return {
-                  label: `Page: ${name}`,
-                  hint: "only replace a part of layout's page, useful for adjusting details",
-                  value: {
-                    id: index.name,
-                    targets: [{ subRegistry, name: index.name }],
-                    print() {
-                      printSlot({
-                        at: `@/layouts/${selected.id}/page/slots/${name}`,
-                        layoutId: selected.id,
-                        name,
-                        isPage: true,
-                        uiLibrary: config.uiLibrary,
-                      });
-                    },
-                  } as TargetInfo,
-                };
-              }
-
-              return {
-                label: `Layout: ${name}`,
-                hint: 'only replace a part of layout, useful for adjusting details',
-                value: {
-                  id: index.name,
-                  targets: [{ subRegistry, name: index.name }],
-                  print() {
-                    printSlot({
-                      at: `@/layouts/${selected.id}/slots/${name}`,
-                      layoutId: selected.id,
-                      name,
-                      isPage: false,
-                      uiLibrary: config.uiLibrary,
-                    });
-                  },
-                } as TargetInfo,
-              };
-            }),
+            ...slots,
           ],
         });
       },

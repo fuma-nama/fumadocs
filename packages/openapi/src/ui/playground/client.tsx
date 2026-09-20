@@ -197,7 +197,7 @@ export default function PlaygroundClient({
   });
 
   const testQuery = useQuery(async (input: FormValues) => {
-    const fetcher = await import('@/playground/fetcher').then((mod) =>
+    const fetcher = await import('@/playground').then((mod) =>
       mod.createBrowserFetcher(mediaAdapters, {
         proxyUrl,
         ...fetchOptions,

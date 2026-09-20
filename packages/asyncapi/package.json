@@ -62,7 +62,7 @@
     "@tailwindcss/oxide": "^4.3.3",
     "@types/node": "26.6.1",
     "@types/react": "^19.3.0",
-    "fuma-cli": "^0.1.1",
+    "fuma-cli": "^0.3.1",
     "fumadocs-core": "workspace:*",
     "fumadocs-ui": "workspace:@fumadocs/base-ui@*",
     "json-schema-typed": "^8.0.2",

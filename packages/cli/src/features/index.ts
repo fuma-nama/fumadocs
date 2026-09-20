@@ -98,9 +98,8 @@ export async function runFeature<O extends object>(
   const env: string[] = [];
   const notes: string[] = [];
   const installer = new FumadocsComponentInstaller(connector, project.config, cwd, {
-    onWarn: io.log,
-    confirmFileOverride: ({ path: file }) => io.confirmOverwrite(path.relative(cwd, file)),
-    onFileDownloaded: ({ path: file }) => io.log(`installed ${path.relative(cwd, file)}`),
+    confirmFileOverride: (file) => io.confirmOverwrite(path.relative(cwd, file.output)),
+    onFileWritten: (file) => io.log(`installed ${path.relative(cwd, file.output)}`),
   });
 
   const ctx: FeatureContext = {
@@ -157,14 +156,8 @@ export async function runFeature<O extends object>(
     async install(name, subRegistry) {
       const result = await installer.install(name, subRegistry);
       const manager = await result.deps();
-      // encoded as `name` or `name@version`
-      const decode = (target: Record<string, string | null>, dep: string) => {
-        const at = dep.indexOf('@', 1);
-        if (at === -1) target[dep] = null;
-        else target[dep.slice(0, at)] = dep.slice(at + 1);
-      };
-      for (const dep of manager.dependencies) decode(deps, dep);
-      for (const dep of manager.devDependencies) decode(devDeps, dep);
+      Object.assign(deps, manager.required);
+      Object.assign(devDeps, manager.requiredDev);
     },
   };
 
