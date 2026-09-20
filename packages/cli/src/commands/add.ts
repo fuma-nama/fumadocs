@@ -27,13 +27,18 @@ export async function add(input: string[], connector: RegistryConnector, config:
     spin.start('fetching registry');
 
     async function scan(subRegistry?: string, prefix?: string): Promise<AddOption[]> {
-      const info = await connector.fetchRegistryInfo(subRegistry);
+      const manifest = await installer.fetchManifest(subRegistry);
+      const options: AddOption[] = [];
 
-      return info.indexes.map((item) => ({
-        label: `${prefix ? `${picocolors.bold(prefix)} - ` : ''}${item.title ?? item.name}`,
-        value: { name: item.name, subRegistry },
-        hint: item.description,
-      }));
+      for (const item of manifest.components) {
+        if (item.unlisted) continue;
+        options.push({
+          label: `${prefix ? `${picocolors.bold(prefix)} - ` : ''}${item.title ?? item.name}`,
+          value: { name: item.name, subRegistry },
+          hint: item.description,
+        });
+      }
+      return options;
     }
 
     const groups = await Promise.all([
@@ -57,11 +62,9 @@ export async function add(input: string[], connector: RegistryConnector, config:
 
     targets = value;
   } else {
-    targets = await Promise.all(
-      input.map(async (item) =>
-        (await connector.hasComponent(item)) ? { name: item } : { subRegistry, name: item },
-      ),
-    );
+    const root = new Set<string>();
+    for (const item of (await installer.fetchManifest()).components) root.add(item.name);
+    targets = input.map((name) => (root.has(name) ? { name } : { subRegistry, name }));
   }
 
   for (const target of targets) {

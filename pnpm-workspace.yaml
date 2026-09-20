@@ -12,6 +12,7 @@ minimumReleaseAgeExclude:
   - tegami@1.2.2
   - '@takumi-rs/*'
   - '@fumari/json-schema-ts@1.0.2'
+  - fuma-cli@0.3.1
   - takumi-js@2.1.1
   - '@yuku-analyzer/binding-darwin-arm64@0.6.3'
   - '@yuku-analyzer/binding-darwin-x64@0.6.3'
@@ -61,6 +62,7 @@ minimumReleaseAgeExclude:
   - '@bruits/satteri-win32-x64-msvc@0.10.3'
   - satteri@0.10.3
   - cn@0.2.4
+  - '@fuma-cli/interactive@0.1.2'
 allowBuilds:
   '@mixedbread/cli': true
   '@parcel/watcher': false

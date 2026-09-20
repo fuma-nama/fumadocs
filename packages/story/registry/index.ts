@@ -7,30 +7,21 @@ const dir = path.join(path.dirname(fileURLToPath(import.meta.url)), '../src');
 export const registry: Registry = {
   name: 'story',
   dir,
-  components: [
-    {
-      name: 'controls',
+  components: {
+    controls: {
       title: 'Story Controls',
       description: 'The UI of stories: the preview, variant select and argument controls',
-      files: [
-        {
-          type: 'components',
-          path: 'client/with-control.tsx',
-          target: '<dir>/story/index.tsx',
-        },
-        {
-          type: 'components',
-          path: 'client/arg-form.tsx',
-          target: '<dir>/story/arg-form.tsx',
-        },
-        {
-          type: 'components',
-          path: 'utils/date.ts',
-          target: '<dir>/story/date.ts',
-        },
-      ],
+      entry: 'client/with-control.tsx',
     },
-  ],
+  },
+  files: {
+    'client/with-control.tsx': { type: 'components', target: '<dir>/story/index.tsx' },
+    // Story has its own copy of the shared primitives
+    'client/components/{select,input}.tsx': { alias: '../../shared-api/src/components/*' },
+    'client/arg-form.tsx': { type: 'components', target: '<dir>/story/arg-form.tsx' },
+    'utils/date.ts': { type: 'components', target: '<dir>/story/date.ts' },
+    'utils/cn.ts': { alias: '../../radix-ui/src/utils/cn' },
+  },
   dependencies: {
     'fumadocs-core': null,
     'fumadocs-ui': null,

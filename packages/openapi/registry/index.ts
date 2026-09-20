@@ -7,71 +7,32 @@ const dir = path.join(path.dirname(fileURLToPath(import.meta.url)), '../src');
 export const registry: Registry = {
   name: 'openapi',
   dir,
-  components: [
-    {
-      name: 'ui/components',
-      unlisted: true,
-      files: ['codeblock', 'heading', 'markdown', 'method-label', 'schema'].map((name) => ({
-        type: 'components',
-        path: `ui/components/${name}.tsx`,
-        target: `<dir>/openapi/components/${name}.tsx`,
-      })),
-    },
-    {
-      name: 'page',
+  components: {
+    page: {
       title: 'OpenAPI Page',
       description: 'The full UI of OpenAPI pages',
-      files: [
-        {
-          type: 'components',
-          path: '../registry/page.tsx',
-          target: '<dir>/openapi/page.tsx',
-        },
-      ],
+      entry: 'registry/page.tsx',
     },
-    {
-      name: 'operation',
+    operation: {
       title: 'Operation UI',
       description: 'The UI of operations and webhooks in OpenAPI pages',
-      files: ['index', 'request-tabs', 'response-tabs', 'usage-tabs'].map((name) => ({
-        type: 'components',
-        path: `ui/operation/${name}.tsx`,
-        target: `<dir>/openapi/operation/${name}.tsx`,
-      })),
+      entry: 'ui/operation/index.tsx',
     },
-    {
-      name: 'playground',
+    playground: {
       title: 'API Playground',
       description: 'The interactive playground of OpenAPI integration',
-      files: [
-        {
-          type: 'components',
-          path: 'ui/playground/client.tsx',
-          target: '<dir>/openapi/playground/index.tsx',
-        },
-        {
-          type: 'components',
-          path: 'ui/playground/components/result-display.tsx',
-          target: '<dir>/openapi/playground/result-display.tsx',
-        },
-        {
-          type: 'components',
-          path: 'ui/playground/components/server-select.tsx',
-          target: '<dir>/openapi/playground/server-select.tsx',
-        },
-        {
-          type: 'components',
-          path: 'ui/playground/components/oauth-dialog.tsx',
-          target: '<dir>/openapi/playground/oauth-dialog.tsx',
-        },
-        {
-          type: 'components',
-          path: 'ui/playground/status-info.tsx',
-          target: '<dir>/openapi/playground/status-info.tsx',
-        },
-      ],
+      entry: 'ui/playground/client.tsx',
     },
-  ],
+  },
+  files: {
+    'registry/page.tsx': { type: 'components', target: '<dir>/openapi/page.tsx' },
+    'ui/playground/client.tsx': {
+      type: 'components',
+      target: '<dir>/openapi/playground/index.tsx',
+    },
+    'ui/{components,operation,playground}/**': { type: 'components', target: '<dir>/openapi/*' },
+    'utils/cn.ts': { alias: '../../radix-ui/src/utils/cn' },
+  },
   dependencies: {
     'fumadocs-core': null,
     'fumadocs-ui': null,

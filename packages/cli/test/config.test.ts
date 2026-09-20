@@ -4,8 +4,6 @@ import os from 'node:os';
 import path from 'node:path';
 import { getDefaultConfig } from '@/config';
 import { rewriteLayoutImports } from '@/commands/customise';
-import { pluginReuseUI } from '@/registry/plugins/shadcn';
-import type { DownloadedComponent } from 'fuma-cli/registry/installer';
 
 test('config: align with shadcn aliases', async () => {
   const config = await getDefaultConfig(path.join(__dirname, 'fixtures/shadcn'));
@@ -19,26 +17,6 @@ test('config: align with shadcn aliases', async () => {
       "utils": "./lib/utils",
     }
   `);
-});
-
-test('reuse the ui components & cn of shadcn', async () => {
-  const cwd = path.join(__dirname, 'fixtures/shadcn');
-  const plugin = pluginReuseUI(await getDefaultConfig(cwd), cwd);
-  const comp = {
-    files: [
-      { type: 'ui', path: 'components/ui/button.tsx' },
-      { type: 'ui', path: 'components/ui/popover.tsx' },
-      { type: 'lib', path: 'utils/cn.ts' },
-    ],
-  } as DownloadedComponent;
-
-  const result = (await plugin.beforeInstall!(comp, {} as never)) as DownloadedComponent;
-  expect(result.files).toEqual([{ type: 'ui', path: 'components/ui/popover.tsx' }]);
-  expect(
-    plugin.transformImport!('local:utils/cn.ts', {
-      filePath: path.join(cwd, 'components/feedback/client.tsx'),
-    } as never),
-  ).toBe('../../lib/utils');
 });
 
 test('customise: rewrite layout imports of route files', async () => {

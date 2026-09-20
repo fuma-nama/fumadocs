@@ -50,8 +50,9 @@
   },
   "dependencies": {
     "@clack/prompts": "^1.8.1",
+    "@fuma-cli/interactive": "^0.1.2",
     "cac": "^7.0.0",
-    "fuma-cli": "^0.1.1",
+    "fuma-cli": "^0.3.1",
     "magic-string": "^1.4.1",
     "oxc-parser": "^0.150.0",
     "picocolors": "^1.1.1",
