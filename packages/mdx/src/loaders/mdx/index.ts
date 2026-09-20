@@ -43,7 +43,7 @@ export function createMdxLoader({ getCore }: ConfigLoader): Loader {
       let after: (() => Promise<void>) | undefined;
 
       const { experimentalBuildCache = false } = core.getConfig().global;
-      if (!isDevelopment && experimentalBuildCache) {
+      if (!isDevelopment && experimentalBuildCache && only === 'all') {
         const cacheDir = experimentalBuildCache;
         // macro ids contain path separators, keep the key a valid file name
         const scope = (macroId ?? collectionName ?? 'global').replace(/[^a-zA-Z0-9_-]/g, '_');
