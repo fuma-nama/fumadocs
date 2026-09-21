@@ -68,6 +68,7 @@ export function MarkdownCopyButton({
 export function ViewOptionsPopover({
   markdownUrl,
   githubUrl,
+  pageUrl: pageUrlProp,
   ...props
 }: ComponentProps<typeof PopoverTrigger> & {
   /**
@@ -79,14 +80,23 @@ export function ViewOptionsPopover({
    * Source file URL on GitHub
    */
   githubUrl?: string;
+
+  /**
+   * The page URL the AI prompts ask to read.
+   *
+   * Defaults to the URL the reader is on, without query and hash (the router
+   * pathname during server rendering). Set it when the site should hand out a
+   * canonical URL instead.
+   */
+  pageUrl?: string;
 }) {
   const pathname = usePathname();
   const t = useTranslations({ note: 'page actions' });
   const items = useMemo(() => {
     const pageUrl =
-      typeof window === 'undefined' ? pathname : new URL(pathname, window.location.origin);
+      pageUrlProp ?? (typeof window === 'undefined' ? pathname : currentPageUrl(window.location));
     const q = t('Read {url}, I want to ask questions about it.', {
-      variables: { url: String(pageUrl) },
+      variables: { url: pageUrl },
     });
 
     return [
@@ -222,7 +232,7 @@ export function ViewOptionsPopover({
         })}`,
       },
     ].filter((v) => !!v);
-  }, [githubUrl, markdownUrl, pathname, t]);
+  }, [githubUrl, markdownUrl, pathname, t, pageUrlProp]);
 
   return (
     <Popover>
@@ -259,6 +269,20 @@ export function ViewOptionsPopover({
       </PopoverContent>
     </Popover>
   );
+}
+
+/**
+ * The URL the reader is on, without query and hash.
+ *
+ * Read from `location` rather than rebuilt from the router pathname: Next's
+ * `usePathname()` omits a configured `basePath`, so a site mounted under one
+ * would otherwise send AI assistants a URL that does not exist.
+ */
+function currentPageUrl(location: Location): string {
+  const url = new URL(location.href);
+  url.search = '';
+  url.hash = '';
+  return url.href;
 }
 
 function withBasePath(href: string) {
