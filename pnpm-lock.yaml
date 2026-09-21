@@ -2552,6 +2552,9 @@ importers:
       react-router:
         specifier: ^8.4.0
         version: 8.4.0(react-dom@19.3.0(react@19.3.0))(react@19.3.0)
+      rehype-raw:
+        specifier: ^7.0.0
+        version: 7.0.0
       remark-directive:
         specifier: ^4.0.0
         version: 4.0.0(supports-color@8.1.1)

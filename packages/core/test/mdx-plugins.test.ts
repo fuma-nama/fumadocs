@@ -15,6 +15,9 @@ import {
 import { fileURLToPath } from 'node:url';
 import remarkMdx from 'remark-mdx';
 import remarkGfm from 'remark-gfm';
+import remarkRehype from 'remark-rehype';
+import rehypeRaw from 'rehype-raw';
+import type { RehypeTOCItemType } from '@/mdx-plugins/rehype-toc';
 import { createProcessor } from '@mdx-js/mdx';
 import { remarkSteps } from '@/mdx-plugins/remark-steps';
 import remarkDirective from 'remark-directive';
@@ -143,6 +146,29 @@ test('Rehype Toc', async () => {
   await expect(result.value).toMatchFileSnapshot(
     path.resolve(cwd, './fixtures/rehype-toc.output.js'),
   );
+});
+
+test('Rehype Toc: step numbers survive rehype-raw', async () => {
+  // `remarkSteps` sets `data-fd-step` as a number. `rehype-raw` re-parses the
+  // tree from HTML, which turns it into the canonical `dataFdStep` string.
+  const content = '### 1. Install\n\n<span>inline html</span>\n\n### 2. Configure\n\ndone';
+  const steps = async (withRaw: boolean) => {
+    let toc: RehypeTOCItemType[] | undefined;
+    const processor = remark()
+      .use(remarkHeading)
+      .use(remarkSteps)
+      .use(remarkRehype, { allowDangerousHtml: true })
+      .use(withRaw ? [rehypeRaw] : [])
+      .use(rehypeToc, { exportToc: { as: 'data' } })
+      .use(() => (_tree, file) => {
+        toc = file.data.rehypeToc;
+      });
+    await processor.run(processor.parse(content));
+    return toc?.map((item) => item._step);
+  };
+
+  expect(await steps(false)).toEqual([1, 2]);
+  expect(await steps(true)).toEqual([1, 2]);
 });
 
 test('parse meta strings', () => {
