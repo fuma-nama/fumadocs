@@ -1,3 +1,11 @@
+## fumadocs-openapi@12.0.2
+
+### Subscribe with `useSyncExternalStore`
+
+#### Optimize Performance
+
+Use `useSyncExternalStore()` from React.
+
 ## fumadocs-openapi@12.0.1
 
 ### Fix the installed API playground
