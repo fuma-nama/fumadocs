@@ -1,3 +1,25 @@
+## fumadocs-ui@16.15.13
+
+### Keep the collapsed sidebar's controls off the page title
+
+With the sidebar collapsed, the docs layout floats the reopen and search buttons in a fixed pill at the top-left of the page and starts the article at the same row.
+Wherever the article is not centered with room to spare, every viewport below about 1280px, the pill covered the page title.
+The article now leaves room for the pill while the sidebar is collapsed.
+
+### AI page actions name the page by the URL the reader is on
+
+The "Open in ..." prompts built the page URL from the router pathname and the origin.
+Next's `usePathname()` omits a configured `basePath`, so a site mounted under one sent assistants a URL that did not exist.
+
+The prompt now uses the reader's current URL, without query and hash, and falls back to the pathname during server rendering.
+A new `pageUrl` prop on `ViewOptionsPopover` sets a canonical URL instead.
+
+### Subscribe with `useSyncExternalStore`
+
+#### Optimize Performance
+
+Use `useSyncExternalStore()` from React.
+
 ## fumadocs-ui@16.15.11
 
 ### Shadcn UI compatible primitives
