@@ -52,6 +52,18 @@ const TocOnlyTag = '[toc]';
 const NoTocTag = '[!toc]';
 const HeadingTags = new Set(['h1', 'h2', 'h3', 'h4', 'h5', 'h6']);
 
+/**
+ * Read the step number `remarkSteps` assigns to a heading.
+ */
+function getStep(properties: Element['properties']): number | undefined {
+  const raw = properties['data-fd-step'] ?? properties.dataFdStep;
+  if (typeof raw === 'number') return raw;
+  if (typeof raw === 'string' && raw.trim() !== '') {
+    const step = Number(raw);
+    if (Number.isFinite(step)) return step;
+  }
+}
+
 export function rehypeToc(
   this: Processor,
   { exportToc = true }: RehypeTocOptions = {},
@@ -94,10 +106,7 @@ export function rehypeToc(
         title: element,
         depth: Number(element.tagName[1]),
         url: `#${id}`,
-        _step:
-          typeof element.properties['data-fd-step'] === 'number'
-            ? element.properties['data-fd-step']
-            : undefined,
+        _step: getStep(element.properties),
       });
 
       if (isTocOnly && parent && typeof idx === 'number') {
