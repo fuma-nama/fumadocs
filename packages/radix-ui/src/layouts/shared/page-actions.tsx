@@ -14,7 +14,7 @@ const cache = new Map<string, Promise<string>>();
  * see https://fumadocs.dev/docs/integrations/llms#page-actions to customize.
  */
 export function MarkdownCopyButton({
-  markdownUrl,
+  markdownUrl: _markdownUrl,
   ...props
 }: ComponentProps<'button'> & {
   /**
@@ -22,6 +22,7 @@ export function MarkdownCopyButton({
    */
   markdownUrl: string;
 }) {
+  const markdownUrl = withBasePath(_markdownUrl);
   const t = useTranslations({ note: 'page actions' });
   const [isLoading, setLoading] = useState(false);
   const [checked, onClick] = useCopyButton(async () => {
@@ -31,7 +32,7 @@ export function MarkdownCopyButton({
     setLoading(true);
 
     try {
-      const promise = fetch(withBasePath(markdownUrl)).then((res) => res.text());
+      const promise = fetch(markdownUrl).then((res) => res.text());
       cache.set(markdownUrl, promise);
       await navigator.clipboard.write([
         new ClipboardItem({
@@ -69,6 +70,7 @@ export function MarkdownCopyButton({
 export function ViewOptionsPopover({
   markdownUrl,
   githubUrl,
+  pageUrl: pageUrlProp,
   ...props
 }: ComponentProps<typeof PopoverTrigger> & {
   /**
@@ -80,14 +82,23 @@ export function ViewOptionsPopover({
    * Source file URL on GitHub
    */
   githubUrl?: string;
+
+  /**
+   * The page URL the AI prompts ask to read.
+   *
+   * Defaults to the URL the reader is on, without query and hash (the router
+   * pathname during server rendering). Set it when the site should hand out a
+   * canonical URL instead.
+   */
+  pageUrl?: string;
 }) {
   const pathname = usePathname();
   const t = useTranslations({ note: 'page actions' });
   const items = useMemo(() => {
     const pageUrl =
-      typeof window === 'undefined' ? pathname : new URL(pathname, window.location.origin);
+      pageUrlProp ?? (typeof window === 'undefined' ? pathname : window.location.href);
     const q = t('Read {url}, I want to ask questions about it.', {
-      variables: { url: String(pageUrl) },
+      variables: { url: pageUrl },
     });
 
     return [
@@ -103,7 +114,7 @@ export function ViewOptionsPopover({
       },
       markdownUrl && {
         title: t('View as Markdown'),
-        href: withBasePath(markdownUrl),
+        href: markdownUrl,
         icon: <TextIcon />,
       },
       {
@@ -223,7 +234,7 @@ export function ViewOptionsPopover({
         })}`,
       },
     ].filter((v) => !!v);
-  }, [githubUrl, markdownUrl, pathname, t]);
+  }, [githubUrl, markdownUrl, pathname, t, pageUrlProp]);
 
   return (
     <Popover>
