@@ -14,7 +14,7 @@ const cache = new Map<string, Promise<string>>();
  * see https://fumadocs.dev/docs/integrations/llms#page-actions to customize.
  */
 export function MarkdownCopyButton({
-  markdownUrl,
+  markdownUrl: _markdownUrl,
   ...props
 }: ComponentProps<'button'> & {
   /**
@@ -22,6 +22,7 @@ export function MarkdownCopyButton({
    */
   markdownUrl: string;
 }) {
+  const markdownUrl = withBasePath(_markdownUrl);
   const t = useTranslations({ note: 'page actions' });
   const [isLoading, setLoading] = useState(false);
   const [checked, onClick] = useCopyButton(async () => {
@@ -31,7 +32,7 @@ export function MarkdownCopyButton({
     setLoading(true);
 
     try {
-      const promise = fetch(withBasePath(markdownUrl)).then((res) => res.text());
+      const promise = fetch(markdownUrl).then((res) => res.text());
       cache.set(markdownUrl, promise);
       await navigator.clipboard.write([
         new ClipboardItem({
@@ -62,6 +63,7 @@ export function MarkdownCopyButton({
     </button>
   );
 }
+
 /**
  * see https://fumadocs.dev/docs/integrations/llms#page-actions to customize.
  */
@@ -94,7 +96,7 @@ export function ViewOptionsPopover({
   const t = useTranslations({ note: 'page actions' });
   const items = useMemo(() => {
     const pageUrl =
-      pageUrlProp ?? (typeof window === 'undefined' ? pathname : currentPageUrl(window.location));
+      pageUrlProp ?? (typeof window === 'undefined' ? pathname : window.location.href);
     const q = t('Read {url}, I want to ask questions about it.', {
       variables: { url: pageUrl },
     });
@@ -112,7 +114,7 @@ export function ViewOptionsPopover({
       },
       markdownUrl && {
         title: t('View as Markdown'),
-        href: withBasePath(markdownUrl),
+        href: markdownUrl,
         icon: <TextIcon />,
       },
       {
@@ -269,20 +271,6 @@ export function ViewOptionsPopover({
       </PopoverContent>
     </Popover>
   );
-}
-
-/**
- * The URL the reader is on, without query and hash.
- *
- * Read from `location` rather than rebuilt from the router pathname: Next's
- * `usePathname()` omits a configured `basePath`, so a site mounted under one
- * would otherwise send AI assistants a URL that does not exist.
- */
-function currentPageUrl(location: Location): string {
-  const url = new URL(location.href);
-  url.search = '';
-  url.hash = '';
-  return url.href;
 }
 
 function withBasePath(href: string) {
