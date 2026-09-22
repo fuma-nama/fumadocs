@@ -54,11 +54,6 @@ const HeadingTags = new Set(['h1', 'h2', 'h3', 'h4', 'h5', 'h6']);
 
 /**
  * Read the step number `remarkSteps` assigns to a heading.
- *
- * `remarkSteps` sets `data-fd-step` as a number. A later `rehype-raw` pass
- * re-parses the tree from HTML, so the property comes back under its canonical
- * name `dataFdStep` with a string value. Accept both shapes so the step
- * numbers still reach the TOC.
  */
 function getStep(properties: Element['properties']): number | undefined {
   const raw = properties['data-fd-step'] ?? properties.dataFdStep;
@@ -67,7 +62,6 @@ function getStep(properties: Element['properties']): number | undefined {
     const step = Number(raw);
     if (Number.isFinite(step)) return step;
   }
-  return undefined;
 }
 
 export function rehypeToc(
