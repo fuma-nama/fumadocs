@@ -3,9 +3,9 @@ import { renderToStaticMarkup } from 'react-dom/server';
 import { FrameworkProvider } from 'fumadocs-core/framework';
 import { defineI18n, type I18nConfig } from 'fumadocs-core/i18n';
 import * as radix from '../src/contexts/i18n';
-import * as base from '../../base-ui/src/contexts/i18n';
+import * as base from '@fumadocs/base-ui/contexts/i18n';
 import * as radixHelpers from '../src/i18n';
-import * as baseHelpers from '../../base-ui/src/i18n';
+import * as baseHelpers from '@fumadocs/base-ui/i18n';
 
 for (const [name, { I18nProvider, useI18n }, helpers] of [
   ['Radix UI', radix, radixHelpers],

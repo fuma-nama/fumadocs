@@ -9,7 +9,7 @@ import {
   useEffectEvent,
   useMemo,
   useRef,
-  useState,
+  useSyncExternalStore,
 } from 'react';
 import scrollIntoView from 'scroll-into-view-if-needed';
 import { mergeRefs } from '@/utils/merge-refs';
@@ -64,12 +64,7 @@ export function ScrollProvider({ containerRef, children }: ScrollProviderProps) 
 }
 
 export function AnchorProvider({ toc, single = false, children }: AnchorProviderProps) {
-  const observer = useMemo(() => new Observer(), []);
-
-  observer.single = single;
-  useEffect(() => {
-    observer.setItems(toc);
-  }, [observer, toc]);
+  const observer = useMemo(() => new Observer(toc, single), [toc, single]);
 
   useEffect(() => {
     observer.watch({
@@ -87,64 +82,42 @@ export interface TOCItemProps extends ComponentProps<'a'> {
   onActiveChange?: (v: boolean) => void;
 }
 
-export function TOCItem({
-  ref,
-  onActiveChange = () => null,
-  autoScroll = true,
-  ...props
-}: TOCItemProps) {
+export function TOCItem({ ref, onActiveChange, autoScroll = true, ...props }: TOCItemProps) {
   const id = props.href ? getItemId(props.href) : null;
   const containerRef = use(ScrollContext);
   const anchorRef = useRef<HTMLAnchorElement>(null);
-  const isInitialRef = useRef(true);
+  const isMountedRef = useRef(false);
   const observer = useObserver();
-  const [active, setActive] = useState(() =>
-    observer.items.some((item) => item.id === id && item.active),
-  );
+  const active = useObserverValue((observer) => id !== null && observer.activeAnchors.includes(id));
+  const prevActiveRef = useRef(active);
 
-  const onUpdate = useEffectEvent((items: TOCItemInfo[], initial: boolean) => {
-    const itemData = id ? items.find((item) => item.id === id) : null;
-    if (!itemData) return;
-    const isChanged = itemData.active !== active;
+  if (prevActiveRef.current !== active) {
+    prevActiveRef.current = active;
+    onActiveChange?.(active);
+  }
 
-    if (isChanged) {
-      setActive(itemData.active);
-      onActiveChange(itemData.active);
-    }
+  useEffect(() => {
+    if (id === null) return;
 
-    const anchor = anchorRef.current;
-    const container = containerRef?.current;
-    if (!autoScroll || !anchor || !container) return;
+    const callback = () => {
+      const anchor = anchorRef.current;
+      const container = containerRef?.current;
 
-    let lastActive: TOCItemInfo | undefined;
-    for (const item of items) {
-      if (!item.active) continue;
-      if (!lastActive || lastActive.t < item.t) {
-        lastActive = item;
+      if (autoScroll && observer.activeAnchor === id && anchor && container) {
+        scrollIntoView(anchor, {
+          behavior: isMountedRef.current ? 'smooth' : 'instant',
+          block: 'center',
+          inline: 'center',
+          scrollMode: 'always',
+          boundary: container,
+        });
       }
-    }
+    };
 
-    if (lastActive?.id === id) {
-      scrollIntoView(anchor, {
-        behavior: initial ? 'instant' : 'smooth',
-        block: 'center',
-        inline: 'center',
-        scrollMode: 'always',
-        boundary: container,
-      });
-    }
-  });
-
-  useEffect(() => {
-    if (autoScroll) onUpdate(observer.items, isInitialRef.current);
-    isInitialRef.current = false;
-  }, [observer, autoScroll]);
-
-  useEffect(() => {
-    const listener: ChangeListener = (items) => onUpdate(items, false);
-    observer.listen(listener);
-    return () => observer.unlisten(listener);
-  }, [observer]);
+    callback();
+    isMountedRef.current = true;
+    return observer.subscribe(callback);
+  }, [autoScroll, id, observer, containerRef]);
 
   return <a ref={mergeRefs(anchorRef, ref)} data-active={active} {...props} />;
 }
@@ -153,6 +126,14 @@ function useObserver() {
   const observer = use(ObserverContext);
   if (!observer) throw new Error(`Component must be used under the <AnchorProvider /> component.`);
   return observer;
+}
+
+/** subscribe to a value of the observer, it must be stable between updates */
+function useObserverValue<T>(get: (observer: Observer) => T): T {
+  const observer = useObserver();
+  const getSnapshot = () => get(observer);
+
+  return useSyncExternalStore(observer.subscribe, getSnapshot, getSnapshot);
 }
 
 /** @returns static info object, useful for custom rendering logic */
@@ -175,59 +156,43 @@ export function useTOCListener(listener: ChangeListener) {
   const observer = useObserver();
   const callback = useEffectEvent(listener);
 
-  useEffect(() => {
-    observer.listen(callback);
-    return () => observer.unlisten(callback);
-  }, [observer]);
+  useEffect(() => observer.subscribe(callback), [observer]);
 }
 
 export function useTOCSelector<T>(
   select: (items: TOCItemInfo[]) => T,
   isEqual: (a: T, b: T) => boolean = isEqualShallow,
 ) {
-  const observer = useObserver();
-  const [value, setValue] = useState<T>(() => select(observer.items));
-  useTOCListener((items) => {
-    const next = select(items);
-    if (!isEqual(value, next)) setValue(next);
-  });
+  const cache = useRef<{ items: TOCItemInfo[]; select: typeof select; value: T }>(null);
 
-  return value;
+  return useObserverValue(({ items }) => {
+    const prev = cache.current;
+    if (prev && prev.items === items && prev.select === select) return prev.value;
+
+    const next = select(items);
+    // keep the previous reference when equal, so consumers don't re-render
+    const value = prev && isEqual(prev.value, next) ? prev.value : next;
+    cache.current = { items, select, value };
+    return value;
+  });
 }
 
 /**
  * The estimated active heading ID
  */
 export function useActiveAnchor(): string | undefined {
-  return useTOCSelector((items) => {
-    let out: TOCItemInfo | undefined;
-    for (const item of items) {
-      if (!item.active) continue;
-
-      if (!out || item.t > out.t) {
-        out = item;
-      }
-    }
-
-    return out?.id;
-  });
+  return useObserverValue((observer) => observer.activeAnchor);
 }
 
 /**
  * The id of visible anchors
  */
 export function useActiveAnchors(): string[] {
-  return useTOCSelector((items) => {
-    const out: string[] = [];
-    for (const item of items) {
-      if (item.active) out.push(item.id);
-    }
-    return out;
-  });
+  return useObserverValue((observer) => observer.activeAnchors);
 }
 
 export function useItems(): TOCItemInfo[] {
-  return useTOCSelector((items) => items);
+  return useObserverValue((observer) => observer.items);
 }
 
 function getItemId(url: string) {
@@ -238,10 +203,24 @@ function getItemId(url: string) {
 type ChangeListener = (items: TOCItemInfo[]) => void;
 
 class Observer {
-  items: TOCItemInfo[] = [];
-  single = false;
+  items: TOCItemInfo[];
+  /** ids of active items */
+  activeAnchors: string[] = [];
+  /** id of the most recently activated item */
+  activeAnchor: string | undefined;
   private observer: IntersectionObserver | null = null;
   private listeners = new Set<ChangeListener>();
+
+  constructor(
+    toc: TOCItemType[],
+    readonly single: boolean,
+  ) {
+    this.items = [];
+    for (const item of toc) {
+      const id = getItemId(item.url);
+      if (id) this.items.push({ id, active: false, fallback: false, t: 0, original: item });
+    }
+  }
 
   listen(listener: ChangeListener) {
     this.listeners.add(listener);
@@ -251,39 +230,23 @@ class Observer {
     this.listeners.delete(listener);
   }
 
-  setItems(newItems: TOCItemType[]) {
-    const observer = this.observer;
-    if (observer) {
-      for (const item of this.items) {
-        const element = document.getElementById(item.id);
-        if (!element) continue;
-        observer.unobserve(element);
-      }
-    }
-
-    const next: TOCItemInfo[] = [];
-    for (const item of newItems) {
-      const id = getItemId(item.url);
-      if (!id) continue;
-
-      next.push({
-        id,
-        active: false,
-        fallback: false,
-        t: 0,
-        original: item,
-      });
-    }
-
-    this.update(next);
-    this.observeItems();
-  }
+  // arrow function: passed detached to `useSyncExternalStore`
+  subscribe = (listener: ChangeListener) => {
+    this.listeners.add(listener);
+    return () => {
+      this.listeners.delete(listener);
+    };
+  };
 
   watch(options?: IntersectionObserverInit) {
     if (this.observer) return;
 
     this.observer = new IntersectionObserver(this.callback.bind(this), options);
-    this.observeItems();
+    for (const item of this.items) {
+      const element = document.getElementById(item.id);
+      if (!element) continue;
+      this.observer.observe(element);
+    }
   }
 
   unwatch() {
@@ -342,17 +305,19 @@ class Observer {
     this.update(updated);
   }
 
-  private observeItems() {
-    if (!this.observer) return;
-    for (const item of this.items) {
-      const element = document.getElementById(item.id);
-      if (!element) continue;
-      this.observer.observe(element);
-    }
-  }
-
   private update(next: TOCItemInfo[]) {
+    let latest: TOCItemInfo | undefined;
+    const activeAnchors: string[] = [];
+    for (const item of next) {
+      if (!item.active) continue;
+
+      activeAnchors.push(item.id);
+      if (!latest || item.t > latest.t) latest = item;
+    }
+
     this.items = next;
+    this.activeAnchors = activeAnchors;
+    this.activeAnchor = latest?.id;
     for (const listener of this.listeners) listener(next);
   }
 }

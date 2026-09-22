@@ -2,10 +2,12 @@
 import { cva } from 'class-variance-authority';
 import { Airplay, Moon, Sun } from 'lucide-react';
 import { useTheme } from 'next-themes';
-import { type ComponentProps, useEffect, useState } from 'react';
+import { type ComponentProps, useSyncExternalStore } from 'react';
 import { flushSync } from 'react-dom';
 import { cn } from '@/utils/cn';
 import { useTranslations } from '@fuma-translate/react';
+
+const noop = () => () => {};
 
 const itemVariants = cva('size-6.5 p-1.5 text-fd-muted-foreground', {
   variants: {
@@ -24,7 +26,12 @@ export interface ThemeSwitchProps extends ComponentProps<'div'> {
 
 export function ThemeSwitch({ className, mode = 'light-dark', ...props }: ThemeSwitchProps) {
   const { setTheme, theme, resolvedTheme } = useTheme();
-  const [mounted, setMounted] = useState(false);
+  // `false` on the server and during hydration
+  const mounted = useSyncExternalStore(
+    noop,
+    () => true,
+    () => false,
+  );
   const t = useTranslations({ note: 'theme switcher' });
   const themeAriaLabels = {
     light: t('Light', { note: 'aria-label' }),
@@ -39,10 +46,6 @@ export function ThemeSwitch({ className, mode = 'light-dark', ...props }: ThemeS
       setTheme(newTheme);
     }
   };
-
-  useEffect(() => {
-    setMounted(true);
-  }, []);
 
   const container = cn(
     'inline-flex items-center rounded-full border p-1 overflow-hidden *:rounded-full',

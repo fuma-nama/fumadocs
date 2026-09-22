@@ -1,22 +1,20 @@
 'use client';
-import { useEffect, useState } from 'react';
+import { useSyncExternalStore } from 'react';
 
-export function useIsScrollTop({ enabled = true }: { enabled?: boolean }) {
-  const [isTop, setIsTop] = useState<boolean | undefined>();
+const subscribe = (onChange: () => void) => {
+  window.addEventListener('scroll', onChange, { passive: true });
+  return () => window.removeEventListener('scroll', onChange);
+};
+const noop = () => () => {};
+const getServerSnapshot = () => undefined;
 
-  useEffect(() => {
-    if (!enabled) return;
-
-    const listener = () => {
-      setIsTop(window.scrollY < 10);
-    };
-
-    listener();
-    window.addEventListener('scroll', listener);
-    return () => {
-      window.removeEventListener('scroll', listener);
-    };
-  }, [enabled]);
-
-  return isTop;
+/**
+ * @returns `undefined` on the server, during hydration, or when disabled.
+ */
+export function useIsScrollTop({ enabled = true }: { enabled?: boolean }): boolean | undefined {
+  return useSyncExternalStore(
+    enabled ? subscribe : noop,
+    () => (enabled ? window.scrollY < 10 : undefined),
+    getServerSnapshot,
+  );
 }

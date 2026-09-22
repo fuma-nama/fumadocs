@@ -1,16 +1,17 @@
 'use client';
 
-import { use, useEffect, useId, useState } from 'react';
+import { use, useId, useSyncExternalStore } from 'react';
 import { useTheme } from 'next-themes';
 
 export function Mermaid({ chart }: { chart: string }) {
-  const [mounted, setMounted] = useState(false);
+  // `false` on the server and during hydration
+  const isClient = useSyncExternalStore(
+    () => () => {},
+    () => true,
+    () => false,
+  );
 
-  useEffect(() => {
-    setMounted(true);
-  }, []);
-
-  if (!mounted) return;
+  if (!isClient) return;
   return <MermaidContent chart={chart} />;
 }
 

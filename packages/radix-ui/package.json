@@ -165,6 +165,7 @@
     "unist-util-visit": "^5.1.0"
   },
   "devDependencies": {
+    "@fumadocs/base-ui": "workspace:*",
     "@fumadocs/cli": "workspace:*",
     "@tailwindcss/cli": "^4.3.3",
     "@tailwindcss/oxide": "^4.3.3",

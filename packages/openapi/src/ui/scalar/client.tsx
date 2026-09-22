@@ -4,26 +4,29 @@ import { buttonVariants } from 'fumadocs-ui/components/ui/button';
 import { useApiClient } from '@scalar/api-client-react';
 import { MethodLabel } from '@/ui/components/method-label';
 import { useTheme } from 'fumadocs-ui/provider/base';
-import { useEffect, useState } from 'react';
+import { useSyncExternalStore } from 'react';
 import type { HttpMethods } from '@/types';
 import { useTranslations } from '@fuma-translate/react';
 import { useOpenAPI } from '@/utils/create-page';
 import '@scalar/api-client-react/style.css';
 
+const noop = () => () => {};
+
 export default function ScalarPlayground({ path, method }: { path: string; method: HttpMethods }) {
   const { resolvedTheme } = useTheme();
   const { bundled } = useOpenAPI().doc;
   const t = useTranslations({ note: 'scalar API client' });
-  const [mounted, setMounted] = useState(false);
+  // `false` on the server and during hydration
+  const mounted = useSyncExternalStore(
+    noop,
+    () => true,
+    () => false,
+  );
   const client = useApiClient({
     configuration: {
       content: bundled as never,
     },
   });
-
-  useEffect(() => {
-    setMounted(true);
-  }, []);
 
   return (
     <div

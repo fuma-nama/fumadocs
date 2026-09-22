@@ -12,6 +12,7 @@ import {
   useEffectEvent,
   useMemo,
   useState,
+  useSyncExternalStore,
 } from 'react';
 
 interface HotKey {
@@ -95,14 +96,17 @@ export function useSearchContext(): SearchContextType {
   return use(SearchContext);
 }
 
+const noop = () => () => {};
+
 function MetaOrControl() {
-  const [key, setKey] = useState('⌘');
+  // `false` on the server and during hydration
+  const isClient = useSyncExternalStore(
+    noop,
+    () => true,
+    () => false,
+  );
 
-  useEffect(() => {
-    if (/Windows|Linux/i.test(window.navigator.userAgent)) setKey('Ctrl');
-  }, []);
-
-  return key;
+  return isClient && /Windows|Linux/i.test(navigator.userAgent) ? 'Ctrl' : '⌘';
 }
 
 const DEFAULT_HOT_KEYS: HotKey[] = [

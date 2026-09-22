@@ -9,7 +9,7 @@ import {
 } from 'shared-api/components/select';
 import { Input } from 'shared-api/components/input';
 import { Label } from 'shared-api/components/label';
-import { useEffect, useState, useRef, type ComponentProps } from 'react';
+import { useState, useRef, useSyncExternalStore, type ComponentProps } from 'react';
 import { cn } from '@/utils/cn';
 import {
   Dialog,
@@ -24,15 +24,18 @@ import { StfProvider, useFieldValue, useListener, useStf } from '@fumari/stf';
 import { EditIcon } from 'lucide-react';
 import { useTranslations } from '@fuma-translate/react';
 
+const noop = () => () => {};
+
 export default function ServerSelect(props: ComponentProps<typeof DialogTrigger>) {
   const { servers, server, resolveUrl, setServer, setServerVariables } = useServer();
   const [open, setOpen] = useState(false);
-  const [isMounted, setIsMounted] = useState(false);
+  // `false` on the server and during hydration
+  const isMounted = useSyncExternalStore(
+    noop,
+    () => true,
+    () => false,
+  );
   const t = useTranslations({ note: 'playground server select' });
-
-  useEffect(() => {
-    setIsMounted(true);
-  }, []);
 
   if (!servers || servers.length <= 0) return;
   const serverSchema = server ? servers.find((obj) => obj.url === server.url) : null;

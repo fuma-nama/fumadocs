@@ -1,5 +1,6 @@
 'use client';
-import { type ReactNode, useEffect, useMemo, useState, createContext, use } from 'react';
+import { type ReactNode, useMemo, createContext, use } from 'react';
+import { useIsScrollTop } from '@/utils/use-is-scroll-top';
 
 export interface PageStyles {
   tocNav?: string;
@@ -45,21 +46,8 @@ export function NavProvider({
   transparentMode = 'none',
   children,
 }: NavProviderProps & { children: ReactNode }) {
-  const [transparent, setTransparent] = useState(transparentMode !== 'none');
-
-  useEffect(() => {
-    if (transparentMode !== 'top') return;
-
-    const listener = () => {
-      setTransparent(window.scrollY < 10);
-    };
-
-    listener();
-    window.addEventListener('scroll', listener);
-    return () => {
-      window.removeEventListener('scroll', listener);
-    };
-  }, [transparentMode]);
+  const isTop = useIsScrollTop({ enabled: transparentMode === 'top' });
+  const transparent = transparentMode === 'top' ? (isTop ?? true) : transparentMode === 'always';
 
   return (
     <NavContext value={useMemo(() => ({ isTransparent: transparent }), [transparent])}>
