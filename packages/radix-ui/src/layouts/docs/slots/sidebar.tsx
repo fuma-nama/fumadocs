@@ -1,13 +1,7 @@
 'use client';
 import * as Base from '@/components/sidebar/base';
 import { cn } from '@/utils/cn';
-import {
-  type ComponentProps,
-  type ReactNode,
-  type RefObject,
-  useLayoutEffect,
-  useRef,
-} from 'react';
+import { type ComponentProps, type ReactNode, type RefObject, useRef } from 'react';
 import { cva } from 'class-variance-authority';
 import {
   createPageTreeRenderer,
@@ -66,7 +60,40 @@ export function Sidebar({ footer, banner, collapsible = true, components, ...res
     props: { tabs, nav, tabMode },
   } = useDocsLayout();
   const iconLinks = menuItems.filter((item) => item.type === 'icon');
+  const asideRef = useRef<HTMLElement>(null);
   const asideCollapseTriggerRef = useRef<HTMLButtonElement>(null);
+  const pillPanelRef = useRef<HTMLDivElement>(null);
+  const pillCollapseTriggerRef = useRef<HTMLButtonElement>(null);
+
+  /**
+   * Moves focus to the collapse trigger that becomes visible when the
+   * sidebar transitions between collapsed/expanded (or hovered/unhovered)
+   * states, so focus doesn't fall back to `<body>` when the panel
+   * containing the previously focused element becomes `inert`.
+   *
+   * Called from inside the collapse-trigger click handlers and the
+   * hover-preview pointer handlers, after the state change (and its
+   * resulting `inert` attributes) have already been committed to the DOM
+   * via `flushSync` — so this reads live `inert` state off the DOM rather
+   * than re-deriving it, and there's no race with the browser's own focus
+   * fixup to narrow, since the DOM is already settled by the time this runs.
+   *
+   * Checks whether focus was anywhere inside the panel that just became
+   * inert (not only the collapse trigger button), so it also catches e.g. a
+   * focused sidebar link or the search trigger. Focus elsewhere on the page
+   * is left untouched.
+   */
+  function handlePanelInertChange(previousActiveElement: Element | null) {
+    if (asideRef.current?.inert && asideRef.current.contains(previousActiveElement)) {
+      pillCollapseTriggerRef.current?.focus();
+    } else if (
+      pillPanelRef.current?.inert &&
+      pillPanelRef.current.contains(previousActiveElement)
+    ) {
+      asideCollapseTriggerRef.current?.focus();
+    }
+  }
+
   const viewport = (
     <Base.SidebarViewport>
       {menuItems
@@ -80,7 +107,14 @@ export function Sidebar({ footer, banner, collapsible = true, components, ...res
 
   return (
     <>
-      <SidebarContent asideCollapseTriggerRef={asideCollapseTriggerRef} {...rest}>
+      <SidebarContent
+        asideRef={asideRef}
+        pillPanelRef={pillPanelRef}
+        pillCollapseTriggerRef={pillCollapseTriggerRef}
+        onCollapsedChange={handlePanelInertChange}
+        onHoverChange={handlePanelInertChange}
+        {...rest}
+      >
         <div className="flex flex-col gap-3 p-4 pb-2">
           <div className="flex">
             {slots.navTitle && (
@@ -90,6 +124,7 @@ export function Sidebar({ footer, banner, collapsible = true, components, ...res
             {collapsible && (
               <SidebarCollapseTrigger
                 ref={asideCollapseTriggerRef}
+                onCollapsedChange={handlePanelInertChange}
                 className={cn(
                   buttonVariants({
                     variant: 'ghost',
@@ -212,27 +247,23 @@ function SidebarContent({
   ref: refProp,
   className,
   children,
-  asideCollapseTriggerRef,
+  asideRef,
+  pillPanelRef,
+  pillCollapseTriggerRef,
+  onCollapsedChange,
+  onHoverChange,
   ...props
 }: ComponentProps<'aside'> & {
-  asideCollapseTriggerRef: RefObject<HTMLButtonElement | null>;
+  asideRef: RefObject<HTMLElement | null>;
+  pillPanelRef: RefObject<HTMLDivElement | null>;
+  pillCollapseTriggerRef: RefObject<HTMLButtonElement | null>;
+  onCollapsedChange: (previousActiveElement: Element | null) => void;
+  onHoverChange: (previousActiveElement: Element | null) => void;
 }) {
-  const ref = useRef<HTMLElement>(null);
-  const pillCollapseTriggerRef = useRef<HTMLButtonElement>(null);
-  const pillPanelRef = useRef<HTMLDivElement>(null);
-
   return (
-    <Base.SidebarContent>
-      {({ collapsed, hovered, ref: asideRef, ...rest }) => (
+    <Base.SidebarContent onHoverChange={onHoverChange}>
+      {({ collapsed, hovered, ref: baseAsideRef, ...rest }) => (
         <>
-          <SidebarCollapseFocusManager
-            collapsed={collapsed}
-            hovered={hovered}
-            asideRef={ref}
-            asideCollapseTriggerRef={asideCollapseTriggerRef}
-            pillPanelRef={pillPanelRef}
-            pillCollapseTriggerRef={pillCollapseTriggerRef}
-          />
           <div
             data-sidebar-placeholder=""
             className="sticky top-(--fd-docs-row-1) z-20 [grid-area:sidebar] pointer-events-none *:pointer-events-auto h-[calc(var(--fd-docs-height)-var(--fd-docs-row-1))] md:layout:[--fd-sidebar-width:268px] max-md:hidden"
@@ -240,7 +271,7 @@ function SidebarContent({
             {collapsed && <div className="absolute inset-s-0 inset-y-0 w-4" {...rest} />}
             <aside
               id="nd-sidebar"
-              ref={mergeRefs(ref, refProp, asideRef)}
+              ref={mergeRefs(asideRef, refProp, baseAsideRef)}
               data-collapsed={collapsed}
               data-hovered={collapsed && hovered}
               inert={collapsed && !hovered ? true : undefined}
@@ -252,8 +283,8 @@ function SidebarContent({
                     ? 'shadow-lg translate-x-2 rtl:-translate-x-2'
                     : '-translate-x-(--fd-sidebar-width) rtl:translate-x-full',
                 ],
-                ref.current &&
-                  (ref.current.getAttribute('data-collapsed') === 'true') !== collapsed &&
+                asideRef.current &&
+                  (asideRef.current.getAttribute('data-collapsed') === 'true') !== collapsed &&
                   'transition-[width,inset-block,translate,background-color]',
                 className,
               )}
@@ -274,6 +305,7 @@ function SidebarContent({
           >
             <Base.SidebarCollapseTrigger
               ref={pillCollapseTriggerRef}
+              onCollapsedChange={onCollapsedChange}
               className={cn(
                 buttonVariants({
                   variant: 'ghost',
@@ -290,62 +322,6 @@ function SidebarContent({
       )}
     </Base.SidebarContent>
   );
-}
-
-/**
- * Moves focus to the collapse trigger that becomes visible when the sidebar
- * transitions between collapsed/expanded (or hovered/unhovered) states, so
- * focus doesn't fall back to `<body>` when the panel containing the
- * previously focused element becomes `inert`.
- *
- * Uses `useLayoutEffect` (rather than `useEffect`) so the transfer runs
- * synchronously right after the `inert` attribute is committed to the DOM,
- * before the browser's own async "focus fixup" step has a chance to move
- * focus to `<body>` first. This narrows the race but can't close it
- * entirely: some browsers apply focus fixup synchronously for certain
- * changes, which no React effect timing can pre-empt.
- *
- * Checks whether focus was anywhere inside the panel that just became
- * inert (not only the collapse trigger button), so it also catches e.g. a
- * focused sidebar link or the search trigger. Focus elsewhere on the page
- * is left untouched.
- */
-function SidebarCollapseFocusManager({
-  collapsed,
-  hovered,
-  asideRef,
-  asideCollapseTriggerRef,
-  pillPanelRef,
-  pillCollapseTriggerRef,
-}: {
-  collapsed: boolean;
-  hovered: boolean;
-  asideRef: RefObject<HTMLElement | null>;
-  asideCollapseTriggerRef: RefObject<HTMLButtonElement | null>;
-  pillPanelRef: RefObject<HTMLDivElement | null>;
-  pillCollapseTriggerRef: RefObject<HTMLButtonElement | null>;
-}) {
-  const prevRef = useRef({ collapsed, hovered });
-
-  useLayoutEffect(() => {
-    const { collapsed: prevCollapsed, hovered: prevHovered } = prevRef.current;
-    prevRef.current = { collapsed, hovered };
-
-    const wasAsideInert = prevCollapsed && !prevHovered;
-    const isAsideInert = collapsed && !hovered;
-    const wasPillInert = !prevCollapsed || prevHovered;
-    const isPillInert = !collapsed || hovered;
-
-    const active = document.activeElement;
-
-    if (!wasAsideInert && isAsideInert && asideRef.current?.contains(active)) {
-      pillCollapseTriggerRef.current?.focus();
-    } else if (!wasPillInert && isPillInert && pillPanelRef.current?.contains(active)) {
-      asideCollapseTriggerRef.current?.focus();
-    }
-  }, [collapsed, hovered, asideRef, asideCollapseTriggerRef, pillPanelRef, pillCollapseTriggerRef]);
-
-  return null;
 }
 
 function SidebarDrawer({

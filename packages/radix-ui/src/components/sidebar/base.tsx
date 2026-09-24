@@ -14,6 +14,7 @@ import {
 } from 'react';
 import Link, { type LinkProps } from 'fumadocs-core/link';
 import { useOnChange } from 'fumadocs-core/utils/use-on-change';
+import { flushSync } from 'react-dom';
 import { cn } from '@/utils/cn';
 import {
   Collapsible,
@@ -131,9 +132,22 @@ export function useFolderDepth() {
 
 export function SidebarContent({
   mode: allowedMode = 'full',
+  onHoverChange,
   children,
 }: {
   mode?: Mode | true;
+  /**
+   * Called right after a hover-preview state change (from pointer enter/leave)
+   * has been committed to the DOM via `flushSync`, so `inert` is already
+   * up to date and it's safe to move focus without racing the browser's own
+   * focus fixup.
+   *
+   * @param previousActiveElement - `document.activeElement` captured right
+   * before the state change was applied (at pointer-enter time, or right
+   * before the leave-delay timeout fires for pointer-leave), i.e. what was
+   * focused going into the transition.
+   */
+  onHoverChange?: (previousActiveElement: Element | null) => void;
   children: (state: {
     ref: RefObject<HTMLElement | null>;
     collapsed: boolean;
@@ -167,14 +181,21 @@ export function SidebarContent({
     onPointerEnter(e) {
       if (shouldIgnoreHover(e)) return;
       window.clearTimeout(timerRef.current);
-      setHover(true);
+
+      const previousActiveElement = document.activeElement;
+      flushSync(() => setHover(true));
+      onHoverChange?.(previousActiveElement);
     },
     onPointerLeave(e) {
       if (shouldIgnoreHover(e)) return;
       window.clearTimeout(timerRef.current);
 
       timerRef.current = window.setTimeout(
-        () => setHover(false),
+        () => {
+          const previousActiveElement = document.activeElement;
+          flushSync(() => setHover(false));
+          onHoverChange?.(previousActiveElement);
+        },
         // if mouse is leaving the viewport, add a close delay
         Math.min(e.clientX, document.body.clientWidth - e.clientX) > 100 ? 0 : 500,
       );
@@ -389,7 +410,22 @@ export function SidebarTrigger({ children, ...props }: ComponentProps<'button'>)
   );
 }
 
-export function SidebarCollapseTrigger(props: ComponentProps<'button'>) {
+export function SidebarCollapseTrigger({
+  onCollapsedChange,
+  ...props
+}: ComponentProps<'button'> & {
+  /**
+   * Called right after the collapsed state toggled by this trigger has been
+   * committed to the DOM via `flushSync`, so `inert` is already up to date
+   * and it's safe to move focus without racing the browser's own focus
+   * fixup.
+   *
+   * @param previousActiveElement - `document.activeElement` captured right
+   * before the state change was applied, i.e. what was focused going into
+   * the transition (typically this trigger itself).
+   */
+  onCollapsedChange?: (previousActiveElement: Element | null) => void;
+}) {
   const { collapsed, setCollapsed } = useSidebar();
   const t = useTranslations({ note: 'sidebar' });
 
@@ -399,7 +435,9 @@ export function SidebarCollapseTrigger(props: ComponentProps<'button'>) {
       aria-label={t('Collapse Sidebar', { note: 'aria-label' })}
       data-collapsed={collapsed}
       onClick={() => {
-        setCollapsed((prev) => !prev);
+        const previousActiveElement = document.activeElement;
+        flushSync(() => setCollapsed((prev) => !prev));
+        onCollapsedChange?.(previousActiveElement);
       }}
       {...props}
     >
