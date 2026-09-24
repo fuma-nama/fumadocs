@@ -1,3 +1,29 @@
+## fumadocs-ui@16.15.14
+
+### Wrap page footer descriptions instead of truncating
+
+The previous/next page footer cards now wrap long descriptions instead of cutting them off with an ellipsis.
+
+### Announce copy confirmation to screen readers
+
+Copy buttons are polite live regions whose label switches to "Copied" after a successful copy, so screen readers announce it. The code block's copy button no longer reports success when the clipboard write fails.
+
+### Expose the search dialog as a combobox
+
+The search input is now a `combobox` that controls a `listbox` of `option` results and reports the highlighted result through `aria-activedescendant`, so screen readers announce results as you move through them. Hidden result buttons are removed from the tab order, and the empty state is announced as a status message.
+
+### Remove hidden sidebar controls from the tab order
+
+The collapsed sidebar and its floating pill are now `inert` while hidden, and toggling the sidebar moves focus to the trigger that becomes visible.
+
+### Add `block` TOC style
+
+A TOC style without the track line: headings are indented by depth, and a block slides behind the active headings.
+
+```tsx
+<DocsPage tableOfContent={{ style: 'block' }} />
+```
+
 ## fumadocs-ui@16.15.13
 
 ### Keep the collapsed sidebar's controls off the page title
