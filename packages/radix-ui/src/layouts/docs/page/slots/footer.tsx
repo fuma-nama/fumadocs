@@ -76,7 +76,7 @@ function FooterItem({ item, index }: { item: Item; index: 0 | 1 }) {
         <Icon className="-mx-1 size-4 shrink-0 rtl:rotate-180" />
         <p>{item.name}</p>
       </div>
-      <p className="text-fd-muted-foreground truncate">
+      <p className="text-fd-muted-foreground">
         {item.description ?? (index === 0 ? t('Previous Page') : t('Next Page'))}
       </p>
     </Link>
