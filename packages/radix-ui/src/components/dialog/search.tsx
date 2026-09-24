@@ -10,6 +10,7 @@ import {
   useCallback,
   useEffect,
   useEffectEvent,
+  useId,
   useMemo,
   useRef,
   useState,
@@ -71,15 +72,27 @@ const ListContext = createContext<{
    */
   hasResults: boolean;
   setHasResults: (v: boolean) => void;
+  /**
+   * Per-`SearchDialog`-instance id, generated with `useId()`, used to namespace the
+   * list id and item ids so multiple mounted dialogs never collide.
+   */
+  id: string;
 } | null>(null);
 
 /**
  * Id of the element with `role="listbox"`, referenced by the search input's `aria-controls`.
  */
-const SEARCH_LIST_ID = 'fd-search-list';
+function getListId(baseId: string): string {
+  return `${baseId}-list`;
+}
 
-function getSearchItemId(id: string): string {
-  return `fd-search-item-${id.replace(/\s+/g, '-')}`;
+/**
+ * Id of a search item's `role="option"` element, referenced by the search input's
+ * `aria-activedescendant`. `encodeURIComponent` is used instead of a naive whitespace
+ * replacement so distinct item ids (e.g. `"a b"` and `"a-b"`) can never collide.
+ */
+function getSearchItemId(baseId: string, itemId: string): string {
+  return `${baseId}-item-${encodeURIComponent(itemId)}`;
 }
 
 const TagsListContext = createContext<{
@@ -210,6 +223,7 @@ export function SearchDialog({
 
   const [active, setActive] = useState<string | null>(null);
   const [hasResults, setHasResults] = useState(false);
+  const id = useId();
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -233,8 +247,9 @@ export function SearchDialog({
               setActive,
               hasResults,
               setHasResults,
+              id,
             }),
-            [active, hasResults],
+            [active, hasResults, id],
           )}
         >
           {children}
@@ -251,7 +266,7 @@ export function SearchDialogHeader(props: ComponentProps<'div'>) {
 export function SearchDialogInput(props: ComponentProps<'input'>) {
   const t = useTranslations({ note: 'search dialog' });
   const { search, onSearchChange } = useSearch();
-  const { active, hasResults } = useSearchList();
+  const { active, hasResults, id } = useSearchList();
 
   return (
     <input
@@ -260,8 +275,10 @@ export function SearchDialogInput(props: ComponentProps<'input'>) {
       aria-label={t('Search')}
       aria-autocomplete="list"
       aria-expanded={hasResults}
-      aria-controls={SEARCH_LIST_ID}
-      aria-activedescendant={active ? getSearchItemId(active) : undefined}
+      aria-controls={getListId(id)}
+      // only reference an option that's genuinely active and currently present,
+      // never a stale id left over after results disappeared
+      aria-activedescendant={active && hasResults ? getSearchItemId(id, active) : undefined}
       value={search}
       onChange={(e) => onSearchChange(e.target.value)}
       placeholder={t('Search')}
@@ -356,7 +373,7 @@ export function SearchDialogList({
   const t = useTranslations({ note: 'search dialog' });
   const ref = useRef<HTMLDivElement>(null);
   const { onSelect } = useSearch();
-  const { active, setActive, setHasResults } = useSearchList();
+  const { active, setActive, setHasResults, id } = useSearchList();
   const hasResults = items !== null && items.length > 0;
 
   // sync the initial active item once items are available, mirroring the
@@ -414,6 +431,10 @@ export function SearchDialogList({
   useOnChange(items, () => {
     if (items && items.length > 0) {
       setActive(items[0].id);
+    } else {
+      // clear the active item so the input stops referencing a removed option
+      // via `aria-activedescendant`
+      setActive(null);
     }
   });
 
@@ -428,7 +449,7 @@ export function SearchDialogList({
       )}
     >
       <div
-        id={SEARCH_LIST_ID}
+        id={getListId(id)}
         role={hasResults ? 'listbox' : undefined}
         aria-label={hasResults ? t('Search Results', { note: 'aria-label' }) : undefined}
         className={cn('w-full flex flex-col overflow-y-auto max-h-[460px] p-1', !items && 'hidden')}
@@ -436,9 +457,54 @@ export function SearchDialogList({
         {items?.length === 0 && Empty()}
 
         {items?.map((item) => (
-          <Fragment key={item.id}>{Item({ item, onClick: () => onSelect(item) })}</Fragment>
+          <SearchDialogOption key={item.id} id={getSearchItemId(id, item.id)} item={item}>
+            {Item({ item, onClick: () => onSelect(item) })}
+          </SearchDialogOption>
         ))}
       </div>
+    </div>
+  );
+}
+
+/**
+ * Wraps whatever a `SearchDialogList`'s `Item` render prop returns (the default
+ * `SearchDialogListItem`, or a caller-supplied custom renderer) and guarantees the
+ * `role="option"` / `id` / `tabIndex` ARIA-option contract regardless of what that
+ * renderer's own output carries.
+ */
+function SearchDialogOption({
+  item,
+  id,
+  children,
+}: {
+  item: SearchItemType;
+  id: string;
+  children: ReactNode;
+}) {
+  const { active: activeId } = useSearchList();
+  const active = item.id === activeId;
+
+  return (
+    <div
+      ref={useCallback(
+        (element: HTMLDivElement | null) => {
+          if (active && element) {
+            scrollIntoView(element, {
+              scrollMode: 'if-needed',
+              block: 'nearest',
+              boundary: element.parentElement,
+            });
+          }
+        },
+        [active],
+      )}
+      id={id}
+      role="option"
+      aria-selected={active}
+      tabIndex={-1}
+      className="shrink-0"
+    >
+      {children}
     </div>
   );
 }
@@ -498,24 +564,14 @@ export function SearchDialogListItem({
   return (
     <button
       type="button"
-      ref={useCallback(
-        (element: HTMLButtonElement | null) => {
-          if (active && element) {
-            scrollIntoView(element, {
-              scrollMode: 'if-needed',
-              block: 'nearest',
-              boundary: element.parentElement,
-            });
-          }
-        },
-        [active],
-      )}
-      id={getSearchItemId(item.id)}
-      role="option"
-      aria-selected={active}
+      // `role="option"` and `id` are provided by the `SearchDialogOption` wrapper that
+      // `SearchDialogList` renders around this element, so the option contract holds
+      // even for callers that supply their own `Item` renderer. `tabIndex={-1}` is
+      // repeated here (harmless alongside the wrapper's) so this button never becomes
+      // independently Tab-focusable and breaks the roving aria-activedescendant pattern.
       tabIndex={-1}
       className={cn(
-        'relative select-none shrink-0 px-2.5 py-2 text-start text-sm overflow-hidden rounded-lg',
+        'relative w-full select-none px-2.5 py-2 text-start text-sm overflow-hidden rounded-lg',
         active && 'bg-fd-accent text-fd-accent-foreground',
         className,
       )}

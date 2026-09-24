@@ -1,6 +1,6 @@
 ---
 packages:
-  "fumadocs-ui": patch
+  'fumadocs-ui': patch
 ---
 
 ### Add combobox/listbox/option roles to the search dialog
