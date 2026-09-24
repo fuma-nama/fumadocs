@@ -87,9 +87,12 @@ export function createCodegen({
       const cacheKey = JSON.stringify({ patterns, base });
       let files = globCache.get(cacheKey);
       if (!files) {
+        // sort the results so the generated code (and therefore `getPages()`) is
+        // deterministic between builds, instead of relying on the underlying glob
+        // implementation's unspecified traversal order.
         files = glob(patterns, {
           cwd: base,
-        });
+        }).then((result) => result.sort());
         globCache.set(cacheKey, files);
       }
 
