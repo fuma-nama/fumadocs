@@ -65,7 +65,22 @@ const RootContext = createContext<{
 const ListContext = createContext<{
   active: string | null;
   setActive: (v: string | null) => void;
+  /**
+   * Whether the list currently has results to show, used to derive `aria-expanded`
+   * on the search input.
+   */
+  hasResults: boolean;
+  setHasResults: (v: boolean) => void;
 } | null>(null);
+
+/**
+ * Id of the element with `role="listbox"`, referenced by the search input's `aria-controls`.
+ */
+const SEARCH_LIST_ID = 'fd-search-list';
+
+function getSearchItemId(id: string): string {
+  return `fd-search-item-${id.replace(/\s+/g, '-')}`;
+}
 
 const TagsListContext = createContext<{
   value?: string;
@@ -193,6 +208,9 @@ export function SearchDialog({
   const onSelectCallback = useRef(onSelect);
   onSelectCallback.current = onSelect;
 
+  const [active, setActive] = useState<string | null>(null);
+  const [hasResults, setHasResults] = useState(false);
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <RootContext
@@ -208,7 +226,19 @@ export function SearchDialog({
           [isLoading, open, search],
         )}
       >
-        {children}
+        <ListContext
+          value={useMemo(
+            () => ({
+              active,
+              setActive,
+              hasResults,
+              setHasResults,
+            }),
+            [active, hasResults],
+          )}
+        >
+          {children}
+        </ListContext>
       </RootContext>
     </Dialog>
   );
@@ -221,10 +251,17 @@ export function SearchDialogHeader(props: ComponentProps<'div'>) {
 export function SearchDialogInput(props: ComponentProps<'input'>) {
   const t = useTranslations({ note: 'search dialog' });
   const { search, onSearchChange } = useSearch();
+  const { active, hasResults } = useSearchList();
 
   return (
     <input
       {...props}
+      role="combobox"
+      aria-label={t('Search')}
+      aria-autocomplete="list"
+      aria-expanded={hasResults}
+      aria-controls={SEARCH_LIST_ID}
+      aria-activedescendant={active ? getSearchItemId(active) : undefined}
       value={search}
       onChange={(e) => onSearchChange(e.target.value)}
       placeholder={t('Search')}
@@ -316,11 +353,22 @@ export function SearchDialogList({
    */
   Item?: (props: { item: SearchItemType; onClick: () => void }) => ReactNode;
 }) {
+  const t = useTranslations({ note: 'search dialog' });
   const ref = useRef<HTMLDivElement>(null);
   const { onSelect } = useSearch();
-  const [active, setActive] = useState<string | null>(() =>
-    items && items.length > 0 ? items[0].id : null,
-  );
+  const { active, setActive, setHasResults } = useSearchList();
+  const hasResults = items !== null && items.length > 0;
+
+  // sync the initial active item once items are available, mirroring the
+  // reset-on-change behaviour below
+  useEffect(() => {
+    if (items && items.length > 0) setActive(items[0].id);
+    // oxlint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  useEffect(() => {
+    setHasResults(hasResults);
+  }, [hasResults, setHasResults]);
 
   const onKey = useEffectEvent((e: KeyboardEvent) => {
     if (!items || e.isComposing || e.keyCode === 229) return;
@@ -380,23 +428,16 @@ export function SearchDialogList({
       )}
     >
       <div
+        id={SEARCH_LIST_ID}
+        role={hasResults ? 'listbox' : undefined}
+        aria-label={hasResults ? t('Search Results', { note: 'aria-label' }) : undefined}
         className={cn('w-full flex flex-col overflow-y-auto max-h-[460px] p-1', !items && 'hidden')}
       >
-        <ListContext
-          value={useMemo(
-            () => ({
-              active,
-              setActive,
-            }),
-            [active],
-          )}
-        >
-          {items?.length === 0 && Empty()}
+        {items?.length === 0 && Empty()}
 
-          {items?.map((item) => (
-            <Fragment key={item.id}>{Item({ item, onClick: () => onSelect(item) })}</Fragment>
-          ))}
-        </ListContext>
+        {items?.map((item) => (
+          <Fragment key={item.id}>{Item({ item, onClick: () => onSelect(item) })}</Fragment>
+        ))}
       </div>
     </div>
   );
@@ -469,7 +510,10 @@ export function SearchDialogListItem({
         },
         [active],
       )}
+      id={getSearchItemId(item.id)}
+      role="option"
       aria-selected={active}
+      tabIndex={-1}
       className={cn(
         'relative select-none shrink-0 px-2.5 py-2 text-start text-sm overflow-hidden rounded-lg',
         active && 'bg-fd-accent text-fd-accent-foreground',
