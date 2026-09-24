@@ -18,7 +18,13 @@ export function useCopyButton(
 
   const onClick: MouseEventHandler = useCallback(() => {
     if (timeoutRef.current) window.clearTimeout(timeoutRef.current);
-    const res = Promise.resolve(callbackRef.current());
+
+    let res;
+    try {
+      res = Promise.resolve(callbackRef.current());
+    } catch (error) {
+      res = Promise.reject(error);
+    }
 
     void res.then(
       () => {
@@ -29,6 +35,7 @@ export function useCopyButton(
         }, 1500);
       },
       () => {
+        setChecked(false);
         announce(tRef.current('Failed to copy'));
       },
     );

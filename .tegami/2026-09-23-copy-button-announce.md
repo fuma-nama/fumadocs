@@ -1,6 +1,6 @@
 ---
 packages:
-  "fumadocs-ui": patch
+  'fumadocs-ui': patch
 ---
 
 ### Announce copy button confirmation to screen readers
