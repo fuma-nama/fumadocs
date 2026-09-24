@@ -5,7 +5,7 @@ description: Replace the UI of stories, or build your own on the headless layer.
 
 ## Overview
 
-`@fumadocs/story/headless` provides the state of a story, without UI:
+`@fumadocs/story` exports `<StoryProvider />`, `useStory()` and `useStoryArgs()`, which provide the state of a story without UI:
 
 - the selected variant, and the preset it resolves to
 - the arguments of the rendered component, debounced so typing doesn't re-render it on every keystroke
@@ -27,12 +27,7 @@ It receives the presets of the story and the component to render.
 
 ```tsx title="components/story-panel.tsx"
 'use client';
-import {
-  StoryProvider,
-  useStory,
-  useStoryArgs,
-  type WithControlProps,
-} from '@fumadocs/story/headless';
+import { StoryProvider, useStory, useStoryArgs, type WithControlProps } from '@fumadocs/story';
 
 export function StoryPanel(props: WithControlProps) {
   return (
