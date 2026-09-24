@@ -119,7 +119,7 @@ export function TOCItem({ ref, onActiveChange, autoScroll = true, ...props }: TO
     return observer.subscribe(callback);
   }, [autoScroll, id, observer, containerRef]);
 
-  return <a ref={mergeRefs(anchorRef, ref)} data-active={active} {...props} />;
+  return <a ref={mergeRefs(anchorRef, ref)} data-active={String(active)} {...props} />;
 }
 
 function useObserver() {

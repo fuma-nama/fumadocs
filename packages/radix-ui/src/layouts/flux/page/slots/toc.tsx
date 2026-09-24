@@ -19,6 +19,7 @@ import {
 } from 'react';
 import * as TocDefault from '@/components/toc/default';
 import * as TocClerk from '@/components/toc/clerk';
+import * as TocBlock from '@/components/toc/block';
 import { AnimatePresence, motion } from 'motion/react';
 import { createPortal } from 'react-dom';
 
@@ -26,6 +27,8 @@ const TocPopoverContext = createContext<{
   open: boolean;
   setOpen: (open: boolean) => void;
 } | null>(null);
+
+const variants = { normal: TocDefault, clerk: TocClerk, block: TocBlock };
 
 export type TOCProviderProps = Base.TOCProviderProps;
 
@@ -54,6 +57,10 @@ export type TOCProps = {
       style: 'clerk';
       list?: TocClerk.TOCItemsProps;
     }
+  | {
+      style: 'block';
+      list?: TocBlock.TOCItemsProps;
+    }
 );
 
 export function TOC({
@@ -66,7 +73,7 @@ export function TOC({
   list,
 }: TOCProps) {
   const items = Base.useTOCItems();
-  const { TOCItems, TOCEmpty, TOCItem } = style === 'clerk' ? TocClerk : TocDefault;
+  const { TOCItems, TOCEmpty, TOCItem } = variants[style];
 
   if (items.length === 0 && !header && !footer) return;
 

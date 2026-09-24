@@ -48,6 +48,7 @@
     "./components/steps": "./dist/components/steps.js",
     "./components/tabs": "./dist/components/tabs.js",
     "./components/toc": "./dist/components/toc/index.js",
+    "./components/toc/block": "./dist/components/toc/block.js",
     "./components/toc/clerk": "./dist/components/toc/clerk.js",
     "./components/toc/default": "./dist/components/toc/default.js",
     "./components/type-table": "./dist/components/type-table.js",

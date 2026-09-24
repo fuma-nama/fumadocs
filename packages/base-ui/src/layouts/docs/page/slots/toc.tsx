@@ -1,6 +1,7 @@
 'use client';
 import * as TocDefault from '@/components/toc/default';
 import * as TocClerk from '@/components/toc/clerk';
+import * as TocBlock from '@/components/toc/block';
 import * as Base from '@/components/toc';
 import { useTranslations } from '@fuma-translate/react';
 import { cn } from '@/utils/cn';
@@ -19,6 +20,8 @@ import {
 import { useTreePath } from '@/contexts/tree';
 import { Collapsible, CollapsibleTrigger, CollapsibleContent } from '@/components/ui/collapsible';
 import { useDocsLayout } from '../..';
+
+const variants = { normal: TocDefault, clerk: TocClerk, block: TocBlock };
 
 export type TOCProviderProps = Base.TOCProviderProps;
 
@@ -46,12 +49,16 @@ export type TOCProps = {
       style: 'clerk';
       list?: TocClerk.TOCItemsProps;
     }
+  | {
+      style: 'block';
+      list?: TocBlock.TOCItemsProps;
+    }
 );
 
 export function TOC({ container, header, footer, style = 'normal', list }: TOCProps) {
   const t = useTranslations({ note: 'table of contents' });
   const items = Base.useTOCItems();
-  const { TOCItems, TOCEmpty, TOCItem } = style === 'clerk' ? TocClerk : TocDefault;
+  const { TOCItems, TOCEmpty, TOCItem } = variants[style];
 
   if (items.length === 0 && !header && !footer) {
     return <div id="nd-toc-placeholder" className="hidden xl:layout:[--fd-toc-width:268px]" />;
@@ -115,6 +122,10 @@ export type TOCPopoverProps = {
       style: 'clerk';
       list?: TocClerk.TOCItemsProps;
     }
+  | {
+      style: 'block';
+      list?: TocBlock.TOCItemsProps;
+    }
 );
 
 export function TOCPopover({
@@ -130,7 +141,7 @@ export function TOCPopover({
   const ref = useRef<HTMLElement>(null);
   const [open, setOpen] = useState(false);
   const { isNavTransparent } = useDocsLayout();
-  const { TOCItems, TOCItem, TOCEmpty } = style === 'clerk' ? TocClerk : TocDefault;
+  const { TOCItems, TOCItem, TOCEmpty } = variants[style];
 
   const onClickOutside = useEffectEvent((e: Event) => {
     if (!open || !(e.target instanceof HTMLElement)) return;
