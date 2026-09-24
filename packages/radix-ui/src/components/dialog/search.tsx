@@ -21,6 +21,7 @@ import type { HighlightedText, ReactSortedResult as BaseResultType } from 'fumad
 import { cva } from 'class-variance-authority';
 import { useRouter } from 'fumadocs-core/framework';
 import type { SharedProps } from '@/contexts/search';
+import { useOnChange } from 'fumadocs-core/utils/use-on-change';
 import scrollIntoView from 'scroll-into-view-if-needed';
 import { buttonVariants } from '@/components/ui/button';
 import { createMarkdownRenderer } from 'fumadocs-core/content/md';
@@ -191,7 +192,6 @@ export function SearchDialog({
   };
   const onSelectCallback = useRef(onSelect);
   onSelectCallback.current = onSelect;
-  const [active, setActive] = useState<string | null>(null);
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -208,9 +208,7 @@ export function SearchDialog({
           [isLoading, open, search],
         )}
       >
-        <ListContext value={useMemo(() => ({ active, setActive }), [active])}>
-          {children}
-        </ListContext>
+        {children}
       </RootContext>
     </Dialog>
   );
@@ -223,7 +221,6 @@ export function SearchDialogHeader(props: ComponentProps<'div'>) {
 export function SearchDialogInput(props: ComponentProps<'input'>) {
   const t = useTranslations({ note: 'search dialog' });
   const { search, onSearchChange } = useSearch();
-  const { active } = useSearchList();
 
   return (
     <input
@@ -231,8 +228,6 @@ export function SearchDialogInput(props: ComponentProps<'input'>) {
       aria-label={t('Search')}
       aria-autocomplete="list"
       aria-controls="fd-search-list"
-      aria-expanded={active !== null}
-      aria-activedescendant={active !== null ? `fd-search-option-${active}` : undefined}
       {...props}
       value={search}
       onChange={(e) => onSearchChange(e.target.value)}
@@ -328,7 +323,9 @@ export function SearchDialogList({
   const ref = useRef<HTMLDivElement>(null);
   const t = useTranslations({ note: 'search dialog' });
   const { onSelect } = useSearch();
-  const { active, setActive } = useSearchList();
+  const [active, setActive] = useState<string | null>(() =>
+    items && items.length > 0 ? items[0].id : null,
+  );
 
   const onKey = useEffectEvent((e: KeyboardEvent) => {
     if (!items || e.isComposing || e.keyCode === 229) return;
@@ -371,9 +368,19 @@ export function SearchDialogList({
     };
   }, []);
 
-  useEffect(() => {
+  useOnChange(items, () => {
     setActive(items?.[0]?.id ?? null);
-  }, [items, setActive]);
+  });
+
+  // the combobox input is a sibling, sync its state here
+  useEffect(() => {
+    const input = ref.current?.closest('[role="dialog"]')?.querySelector('[role="combobox"]');
+    if (!input) return;
+
+    input.setAttribute('aria-expanded', String(active !== null));
+    if (active !== null) input.setAttribute('aria-activedescendant', `fd-search-option-${active}`);
+    else input.removeAttribute('aria-activedescendant');
+  }, [active]);
 
   return (
     <div
@@ -392,11 +399,21 @@ export function SearchDialogList({
         aria-label={items?.length ? t('Search') : undefined}
         className={cn('w-full flex flex-col overflow-y-auto max-h-[460px] p-1', !items && 'hidden')}
       >
-        {items?.length === 0 && Empty()}
+        <ListContext
+          value={useMemo(
+            () => ({
+              active,
+              setActive,
+            }),
+            [active],
+          )}
+        >
+          {items?.length === 0 && Empty()}
 
-        {items?.map((item) => (
-          <Fragment key={item.id}>{Item({ item, onClick: () => onSelect(item) })}</Fragment>
-        ))}
+          {items?.map((item) => (
+            <Fragment key={item.id}>{Item({ item, onClick: () => onSelect(item) })}</Fragment>
+          ))}
+        </ListContext>
       </div>
     </div>
   );
@@ -577,6 +594,6 @@ export function useTagsList() {
 
 export function useSearchList() {
   const ctx = use(ListContext);
-  if (!ctx) throw new Error('Missing <SearchDialog />');
+  if (!ctx) throw new Error('Missing <SearchDialogList />');
   return ctx;
 }
