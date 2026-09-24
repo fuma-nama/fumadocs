@@ -1,15 +1,14 @@
 'use client';
 import { type MouseEventHandler, useCallback, useEffect, useRef, useState } from 'react';
 import { useTranslations } from '@fuma-translate/react';
-import { useAnnouncer } from '@/contexts/announcer';
 
 export function useCopyButton(
   onCopy: () => void | Promise<void>,
-): [checked: boolean, onClick: MouseEventHandler] {
+): [checked: boolean, onClick: MouseEventHandler, message: string] {
   const [checked, setChecked] = useState(false);
+  const [message, setMessage] = useState('');
   const callbackRef = useRef(onCopy);
   const timeoutRef = useRef<number | null>(null);
-  const announce = useAnnouncer();
   const t = useTranslations({ note: 'copy button status, announced to screen readers' });
   const tRef = useRef(t);
 
@@ -18,6 +17,7 @@ export function useCopyButton(
 
   const onClick: MouseEventHandler = useCallback(() => {
     if (timeoutRef.current) window.clearTimeout(timeoutRef.current);
+    setMessage('');
 
     let res;
     try {
@@ -29,17 +29,18 @@ export function useCopyButton(
     void res.then(
       () => {
         setChecked(true);
-        announce(tRef.current('Copied to clipboard'));
+        setMessage(tRef.current('Copied to clipboard'));
         timeoutRef.current = window.setTimeout(() => {
           setChecked(false);
+          setMessage('');
         }, 1500);
       },
       () => {
         setChecked(false);
-        announce(tRef.current('Failed to copy'));
+        setMessage(tRef.current('Failed to copy'));
       },
     );
-  }, [announce]);
+  }, []);
 
   // Avoid updates after being unmounted
   useEffect(() => {
@@ -48,5 +49,5 @@ export function useCopyButton(
     };
   }, []);
 
-  return [checked, onClick];
+  return [checked, onClick, message];
 }

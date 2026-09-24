@@ -57,7 +57,6 @@
     "./components/ui/navigation-menu": "./dist/components/ui/navigation-menu.js",
     "./components/ui/popover": "./dist/components/ui/popover.js",
     "./components/ui/tabs": "./dist/components/ui/tabs.js",
-    "./contexts/announcer": "./dist/contexts/announcer.js",
     "./contexts/i18n": "./dist/contexts/i18n.js",
     "./contexts/search": "./dist/contexts/search.js",
     "./contexts/tree": "./dist/contexts/tree.js",

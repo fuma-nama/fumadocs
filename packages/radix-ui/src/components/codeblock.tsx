@@ -159,7 +159,7 @@ function CopyButton({
   containerRef: RefObject<HTMLElement | null>;
 }) {
   const t = useTranslations({ note: 'code block' });
-  const [checked, onClick] = useCopyButton(() => {
+  const [checked, onClick, message] = useCopyButton(() => {
     const pre = containerRef.current?.getElementsByTagName('pre').item(0);
     if (!pre) return;
 
@@ -172,24 +172,31 @@ function CopyButton({
   });
 
   return (
-    <button
-      type="button"
-      data-checked={checked || undefined}
-      className={cn(
-        buttonVariants({
-          className: 'hover:text-fd-accent-foreground data-checked:text-fd-accent-foreground',
-          size: 'icon-xs',
-        }),
-        className,
-      )}
-      aria-label={
-        checked ? t('Copied Text', { note: 'aria-label' }) : t('Copy Text', { note: 'aria-label' })
-      }
-      onClick={onClick}
-      {...props}
-    >
-      {checked ? <Check /> : <Clipboard />}
-    </button>
+    <>
+      <button
+        type="button"
+        data-checked={checked || undefined}
+        className={cn(
+          buttonVariants({
+            className: 'hover:text-fd-accent-foreground data-checked:text-fd-accent-foreground',
+            size: 'icon-xs',
+          }),
+          className,
+        )}
+        aria-label={
+          checked
+            ? t('Copied Text', { note: 'aria-label' })
+            : t('Copy Text', { note: 'aria-label' })
+        }
+        onClick={onClick}
+        {...props}
+      >
+        {checked ? <Check /> : <Clipboard />}
+      </button>
+      <span role="status" aria-live="polite" className="sr-only">
+        {message}
+      </span>
+    </>
   );
 }
 

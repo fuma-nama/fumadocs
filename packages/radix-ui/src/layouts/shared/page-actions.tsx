@@ -25,7 +25,7 @@ export function MarkdownCopyButton({
   const markdownUrl = withBasePath(_markdownUrl);
   const t = useTranslations({ note: 'page actions' });
   const [isLoading, setLoading] = useState(false);
-  const [checked, onClick] = useCopyButton(async () => {
+  const [checked, onClick, message] = useCopyButton(async () => {
     const cached = cache.get(markdownUrl);
     if (cached) return navigator.clipboard.writeText(await cached);
 
@@ -45,22 +45,27 @@ export function MarkdownCopyButton({
   });
 
   return (
-    <button
-      disabled={isLoading}
-      onClick={onClick}
-      {...props}
-      className={cn(
-        buttonVariants({
-          variant: 'secondary',
-          size: 'sm',
-          className: 'gap-2 [&_svg]:size-3.5 [&_svg]:text-fd-muted-foreground',
-        }),
-        props.className,
-      )}
-    >
-      {checked ? <Check /> : <Copy />}
-      {props.children ?? t('Copy Markdown')}
-    </button>
+    <>
+      <button
+        disabled={isLoading}
+        onClick={onClick}
+        {...props}
+        className={cn(
+          buttonVariants({
+            variant: 'secondary',
+            size: 'sm',
+            className: 'gap-2 [&_svg]:size-3.5 [&_svg]:text-fd-muted-foreground',
+          }),
+          props.className,
+        )}
+      >
+        {checked ? <Check /> : <Copy />}
+        {props.children ?? t('Copy Markdown')}
+      </button>
+      <span role="status" aria-live="polite" className="sr-only">
+        {message}
+      </span>
+    </>
   );
 }
 
