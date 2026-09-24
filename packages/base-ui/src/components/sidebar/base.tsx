@@ -405,9 +405,17 @@ export function SidebarCollapseTrigger(props: ComponentProps<'button'>) {
     <button
       type="button"
       aria-label={t('Collapse Sidebar', { note: 'aria-label' })}
+      aria-controls="nd-sidebar"
+      aria-expanded={!collapsed}
       data-collapsed={collapsed}
-      onClick={() => {
-        setCollapsed((prev) => !prev);
+      onClick={(e) => {
+        const button = e.currentTarget;
+        ReactDOM.flushSync(() => setCollapsed((prev) => !prev));
+        // hand focus to the visible trigger if this one became hidden
+        if (button.matches('[inert] *'))
+          document
+            .querySelector<HTMLElement>('[aria-controls="nd-sidebar"]:not([inert] *)')
+            ?.focus();
       }}
       {...props}
     >

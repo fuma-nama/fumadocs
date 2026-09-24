@@ -14,6 +14,7 @@ import {
 } from 'react';
 import Link, { type LinkProps } from 'fumadocs-core/link';
 import { useOnChange } from 'fumadocs-core/utils/use-on-change';
+import { flushSync } from 'react-dom';
 import { cn } from '@/utils/cn';
 import {
   Collapsible,
@@ -397,9 +398,17 @@ export function SidebarCollapseTrigger(props: ComponentProps<'button'>) {
     <button
       type="button"
       aria-label={t('Collapse Sidebar', { note: 'aria-label' })}
+      aria-controls="nd-sidebar"
+      aria-expanded={!collapsed}
       data-collapsed={collapsed}
-      onClick={() => {
-        setCollapsed((prev) => !prev);
+      onClick={(e) => {
+        const button = e.currentTarget;
+        flushSync(() => setCollapsed((prev) => !prev));
+        // hand focus to the visible trigger if this one became hidden
+        if (button.matches('[inert] *'))
+          document
+            .querySelector<HTMLElement>('[aria-controls="nd-sidebar"]:not([inert] *)')
+            ?.focus();
       }}
       {...props}
     >
