@@ -1,6 +1,6 @@
 ---
 packages:
-  "fumadocs-ui": patch
+  'fumadocs-ui': patch
 ---
 
 ### Improve light-mode callout color contrast
