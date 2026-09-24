@@ -168,7 +168,7 @@ function CopyButton({
       node.replaceWith('\n');
     });
 
-    void navigator.clipboard.writeText(clone.textContent ?? '');
+    return navigator.clipboard.writeText(clone.textContent ?? '');
   });
 
   return (

@@ -6,6 +6,7 @@ import { DirectionProvider } from '@radix-ui/react-direction';
 import { ThemeProvider, type ThemeProviderProps, useTheme } from 'next-themes';
 import { I18nProvider, type I18nProviderProps } from '@/contexts/i18n';
 import { SearchProvider, type SearchProviderProps } from '@/contexts/search';
+import { AnnouncerProvider } from '@/contexts/announcer';
 
 /**
  * Whether the event should be ignored because the user is interacting with an editable element,
@@ -137,7 +138,11 @@ export function RootProvider({
     body = <I18nProvider {...i18n}>{body}</I18nProvider>;
   }
 
-  return <DirectionProvider dir={dir}>{body}</DirectionProvider>;
+  return (
+    <DirectionProvider dir={dir}>
+      <AnnouncerProvider>{body}</AnnouncerProvider>
+    </DirectionProvider>
+  );
 }
 
 export {
