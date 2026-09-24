@@ -164,7 +164,7 @@ function CopyButton({
       node.replaceWith('\n');
     });
 
-    void navigator.clipboard.writeText(clone.textContent ?? '');
+    return navigator.clipboard.writeText(clone.textContent ?? '');
   });
 
   return (
@@ -178,13 +178,16 @@ function CopyButton({
         }),
         className,
       )}
-      aria-label={
-        checked ? t('Copied Text', { note: 'aria-label' }) : t('Copy Text', { note: 'aria-label' })
-      }
+      aria-live="polite"
       onClick={onClick}
       {...props}
     >
       {checked ? <Check /> : <Clipboard />}
+      <span className="sr-only">
+        {checked
+          ? t('Copied Text', { note: 'aria-label' })
+          : t('Copy Text', { note: 'aria-label' })}
+      </span>
     </button>
   );
 }

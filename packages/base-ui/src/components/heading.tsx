@@ -33,7 +33,7 @@ export function Heading<T extends Types = 'h1'>({ as, ...props }: HeadingProps<T
         {props.children}
       </a>
       <button
-        aria-label={t('Copy Anchor Link', { note: 'aria-label' })}
+        aria-live="polite"
         className={cn(
           buttonVariants({
             variant: 'ghost',
@@ -44,6 +44,11 @@ export function Heading<T extends Types = 'h1'>({ as, ...props }: HeadingProps<T
         onClick={onCopy}
       >
         {isChecked ? <CopyCheckIcon /> : <LinkIcon />}
+        <span className="sr-only">
+          {isChecked
+            ? t('Copied Anchor Link', { note: 'aria-label' })
+            : t('Copy Anchor Link', { note: 'aria-label' })}
+        </span>
       </button>
     </As>
   );

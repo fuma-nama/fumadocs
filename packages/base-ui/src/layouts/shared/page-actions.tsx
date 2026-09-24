@@ -47,6 +47,7 @@ export function MarkdownCopyButton({
   return (
     <button
       disabled={isLoading}
+      aria-live="polite"
       onClick={onClick}
       {...props}
       className={cn(
@@ -59,7 +60,7 @@ export function MarkdownCopyButton({
       )}
     >
       {checked ? <Check /> : <Copy />}
-      {props.children ?? t('Copy Markdown')}
+      {props.children ?? (checked ? t('Copied Markdown') : t('Copy Markdown'))}
     </button>
   );
 }
