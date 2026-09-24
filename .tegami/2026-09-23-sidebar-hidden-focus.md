@@ -1,6 +1,6 @@
 ---
 packages:
-  "fumadocs-ui": patch
+  'fumadocs-ui': patch
 ---
 
 ### Remove hidden sidebar controls from the tab order

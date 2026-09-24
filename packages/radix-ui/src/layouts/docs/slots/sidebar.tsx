@@ -5,7 +5,7 @@ import {
   type ComponentProps,
   type ReactNode,
   type RefObject,
-  useEffect,
+  useLayoutEffect,
   useRef,
 } from 'react';
 import { cva } from 'class-variance-authority';
@@ -219,6 +219,7 @@ function SidebarContent({
 }) {
   const ref = useRef<HTMLElement>(null);
   const pillCollapseTriggerRef = useRef<HTMLButtonElement>(null);
+  const pillPanelRef = useRef<HTMLDivElement>(null);
 
   return (
     <Base.SidebarContent>
@@ -227,7 +228,9 @@ function SidebarContent({
           <SidebarCollapseFocusManager
             collapsed={collapsed}
             hovered={hovered}
+            asideRef={ref}
             asideCollapseTriggerRef={asideCollapseTriggerRef}
+            pillPanelRef={pillPanelRef}
             pillCollapseTriggerRef={pillCollapseTriggerRef}
           />
           <div
@@ -261,6 +264,7 @@ function SidebarContent({
             </aside>
           </div>
           <div
+            ref={pillPanelRef}
             data-sidebar-panel=""
             className={cn(
               'fixed flex top-[calc(--spacing(4)+var(--fd-docs-row-3))] inset-s-4 shadow-lg transition-opacity rounded-xl p-0.5 border bg-fd-muted text-fd-muted-foreground z-10',
@@ -291,34 +295,55 @@ function SidebarContent({
 /**
  * Moves focus to the collapse trigger that becomes visible when the sidebar
  * transitions between collapsed/expanded (or hovered/unhovered) states, so
- * focus doesn't fall back to `<body>` when the previously focused trigger
- * becomes `inert`.
+ * focus doesn't fall back to `<body>` when the panel containing the
+ * previously focused element becomes `inert`.
  *
- * Only steals focus when the currently focused element is one of the two
- * collapse triggers themselves, never from anything else on the page.
+ * Uses `useLayoutEffect` (rather than `useEffect`) so the transfer runs
+ * synchronously right after the `inert` attribute is committed to the DOM,
+ * before the browser's own async "focus fixup" step has a chance to move
+ * focus to `<body>` first. This narrows the race but can't close it
+ * entirely: some browsers apply focus fixup synchronously for certain
+ * changes, which no React effect timing can pre-empt.
+ *
+ * Checks whether focus was anywhere inside the panel that just became
+ * inert (not only the collapse trigger button), so it also catches e.g. a
+ * focused sidebar link or the search trigger. Focus elsewhere on the page
+ * is left untouched.
  */
 function SidebarCollapseFocusManager({
   collapsed,
   hovered,
+  asideRef,
   asideCollapseTriggerRef,
+  pillPanelRef,
   pillCollapseTriggerRef,
 }: {
   collapsed: boolean;
   hovered: boolean;
+  asideRef: RefObject<HTMLElement | null>;
   asideCollapseTriggerRef: RefObject<HTMLButtonElement | null>;
+  pillPanelRef: RefObject<HTMLDivElement | null>;
   pillCollapseTriggerRef: RefObject<HTMLButtonElement | null>;
 }) {
-  useEffect(() => {
+  const prevRef = useRef({ collapsed, hovered });
+
+  useLayoutEffect(() => {
+    const { collapsed: prevCollapsed, hovered: prevHovered } = prevRef.current;
+    prevRef.current = { collapsed, hovered };
+
+    const wasAsideInert = prevCollapsed && !prevHovered;
+    const isAsideInert = collapsed && !hovered;
+    const wasPillInert = !prevCollapsed || prevHovered;
+    const isPillInert = !collapsed || hovered;
+
     const active = document.activeElement;
 
-    if (collapsed && !hovered) {
-      if (active === asideCollapseTriggerRef.current) {
-        pillCollapseTriggerRef.current?.focus();
-      }
-    } else if (active === pillCollapseTriggerRef.current) {
+    if (!wasAsideInert && isAsideInert && asideRef.current?.contains(active)) {
+      pillCollapseTriggerRef.current?.focus();
+    } else if (!wasPillInert && isPillInert && pillPanelRef.current?.contains(active)) {
       asideCollapseTriggerRef.current?.focus();
     }
-  }, [collapsed, hovered, asideCollapseTriggerRef, pillCollapseTriggerRef]);
+  }, [collapsed, hovered, asideRef, asideCollapseTriggerRef, pillPanelRef, pillCollapseTriggerRef]);
 
   return null;
 }
