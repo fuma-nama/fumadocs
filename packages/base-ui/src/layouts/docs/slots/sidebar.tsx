@@ -1,7 +1,7 @@
 'use client';
 import * as Base from '@/components/sidebar/base';
 import { cn } from '@/utils/cn';
-import { type ComponentProps, type ReactNode, type RefObject, useRef } from 'react';
+import { type ComponentProps, type ReactNode, useRef } from 'react';
 import { cva } from 'class-variance-authority';
 import {
   createPageTreeRenderer,
@@ -60,40 +60,6 @@ export function Sidebar({ footer, banner, collapsible = true, components, ...res
     props: { tabs, nav, tabMode },
   } = useDocsLayout();
   const iconLinks = menuItems.filter((item) => item.type === 'icon');
-  const asideRef = useRef<HTMLElement>(null);
-  const asideCollapseTriggerRef = useRef<HTMLButtonElement>(null);
-  const pillPanelRef = useRef<HTMLDivElement>(null);
-  const pillCollapseTriggerRef = useRef<HTMLButtonElement>(null);
-
-  /**
-   * Moves focus to the collapse trigger that becomes visible when the
-   * sidebar transitions between collapsed/expanded (or hovered/unhovered)
-   * states, so focus doesn't fall back to `<body>` when the panel
-   * containing the previously focused element becomes `inert`.
-   *
-   * Called from inside the collapse-trigger click handlers and the
-   * hover-preview pointer handlers, after the state change (and its
-   * resulting `inert` attributes) have already been committed to the DOM
-   * via `flushSync` — so this reads live `inert` state off the DOM rather
-   * than re-deriving it, and there's no race with the browser's own focus
-   * fixup to narrow, since the DOM is already settled by the time this runs.
-   *
-   * Checks whether focus was anywhere inside the panel that just became
-   * inert (not only the collapse trigger button), so it also catches e.g. a
-   * focused sidebar link or the search trigger. Focus elsewhere on the page
-   * is left untouched.
-   */
-  function handlePanelInertChange(previousActiveElement: Element | null) {
-    if (asideRef.current?.inert && asideRef.current.contains(previousActiveElement)) {
-      pillCollapseTriggerRef.current?.focus();
-    } else if (
-      pillPanelRef.current?.inert &&
-      pillPanelRef.current.contains(previousActiveElement)
-    ) {
-      asideCollapseTriggerRef.current?.focus();
-    }
-  }
-
   const viewport = (
     <Base.SidebarViewport>
       <div className="flex flex-col gap-0.5">
@@ -109,14 +75,7 @@ export function Sidebar({ footer, banner, collapsible = true, components, ...res
 
   return (
     <>
-      <SidebarContent
-        asideRef={asideRef}
-        pillPanelRef={pillPanelRef}
-        pillCollapseTriggerRef={pillCollapseTriggerRef}
-        onCollapsedChange={handlePanelInertChange}
-        onHoverChange={handlePanelInertChange}
-        {...rest}
-      >
+      <SidebarContent {...rest}>
         <div className="flex flex-col gap-3 p-4 pb-2">
           <div className="flex">
             {slots.navTitle && (
@@ -125,8 +84,6 @@ export function Sidebar({ footer, banner, collapsible = true, components, ...res
             {nav?.children}
             {collapsible && (
               <SidebarCollapseTrigger
-                ref={asideCollapseTriggerRef}
-                onCollapsedChange={handlePanelInertChange}
                 className={cn(
                   buttonVariants({
                     variant: 'ghost',
@@ -245,26 +202,12 @@ export function SidebarTrigger(props: ComponentProps<'button'>) {
   return <Base.SidebarTrigger {...props} />;
 }
 
-function SidebarContent({
-  ref: refProp,
-  className,
-  children,
-  asideRef,
-  pillPanelRef,
-  pillCollapseTriggerRef,
-  onCollapsedChange,
-  onHoverChange,
-  ...props
-}: ComponentProps<'aside'> & {
-  asideRef: RefObject<HTMLElement | null>;
-  pillPanelRef: RefObject<HTMLDivElement | null>;
-  pillCollapseTriggerRef: RefObject<HTMLButtonElement | null>;
-  onCollapsedChange: (previousActiveElement: Element | null) => void;
-  onHoverChange: (previousActiveElement: Element | null) => void;
-}) {
+function SidebarContent({ ref: refProp, className, children, ...props }: ComponentProps<'aside'>) {
+  const ref = useRef<HTMLElement>(null);
+
   return (
-    <Base.SidebarContent onHoverChange={onHoverChange}>
-      {({ collapsed, hovered, ref: baseAsideRef, ...rest }) => (
+    <Base.SidebarContent>
+      {({ collapsed, hovered, ref: asideRef, ...rest }) => (
         <>
           <div
             data-sidebar-placeholder=""
@@ -273,10 +216,10 @@ function SidebarContent({
             {collapsed && <div className="absolute inset-s-0 inset-y-0 w-4" {...rest} />}
             <aside
               id="nd-sidebar"
-              ref={mergeRefs(asideRef, refProp, baseAsideRef)}
+              ref={mergeRefs(ref, refProp, asideRef)}
               data-collapsed={collapsed}
               data-hovered={collapsed && hovered}
-              inert={collapsed && !hovered ? true : undefined}
+              inert={collapsed && !hovered}
               className={cn(
                 'absolute flex flex-col w-full inset-s-0 inset-y-0 items-end bg-fd-card text-sm border-e duration-250 *:w-(--fd-sidebar-width)',
                 collapsed && [
@@ -285,8 +228,8 @@ function SidebarContent({
                     ? 'shadow-lg translate-x-2 rtl:-translate-x-2'
                     : '-translate-x-(--fd-sidebar-width) rtl:translate-x-full',
                 ],
-                asideRef.current &&
-                  (asideRef.current.getAttribute('data-collapsed') === 'true') !== collapsed &&
+                ref.current &&
+                  (ref.current.getAttribute('data-collapsed') === 'true') !== collapsed &&
                   'transition-[width,inset-block,translate,background-color]',
                 className,
               )}
@@ -297,17 +240,14 @@ function SidebarContent({
             </aside>
           </div>
           <div
-            ref={pillPanelRef}
             data-sidebar-panel=""
             className={cn(
               'fixed flex top-[calc(--spacing(4)+var(--fd-docs-row-3))] inset-s-4 shadow-lg transition-opacity rounded-xl p-0.5 border bg-fd-muted text-fd-muted-foreground z-10',
               (!collapsed || hovered) && 'pointer-events-none opacity-0',
             )}
-            inert={!collapsed || hovered ? true : undefined}
+            inert={!collapsed || hovered}
           >
             <Base.SidebarCollapseTrigger
-              ref={pillCollapseTriggerRef}
-              onCollapsedChange={onCollapsedChange}
               className={cn(
                 buttonVariants({
                   variant: 'ghost',
