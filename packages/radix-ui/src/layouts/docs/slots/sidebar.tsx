@@ -1,7 +1,13 @@
 'use client';
 import * as Base from '@/components/sidebar/base';
 import { cn } from '@/utils/cn';
-import { type ComponentProps, type ReactNode, useRef } from 'react';
+import {
+  type ComponentProps,
+  type ReactNode,
+  type RefObject,
+  useEffect,
+  useRef,
+} from 'react';
 import { cva } from 'class-variance-authority';
 import {
   createPageTreeRenderer,
@@ -60,6 +66,7 @@ export function Sidebar({ footer, banner, collapsible = true, components, ...res
     props: { tabs, nav, tabMode },
   } = useDocsLayout();
   const iconLinks = menuItems.filter((item) => item.type === 'icon');
+  const asideCollapseTriggerRef = useRef<HTMLButtonElement>(null);
   const viewport = (
     <Base.SidebarViewport>
       {menuItems
@@ -73,7 +80,7 @@ export function Sidebar({ footer, banner, collapsible = true, components, ...res
 
   return (
     <>
-      <SidebarContent {...rest}>
+      <SidebarContent asideCollapseTriggerRef={asideCollapseTriggerRef} {...rest}>
         <div className="flex flex-col gap-3 p-4 pb-2">
           <div className="flex">
             {slots.navTitle && (
@@ -82,6 +89,7 @@ export function Sidebar({ footer, banner, collapsible = true, components, ...res
             {nav?.children}
             {collapsible && (
               <SidebarCollapseTrigger
+                ref={asideCollapseTriggerRef}
                 className={cn(
                   buttonVariants({
                     variant: 'ghost',
@@ -200,13 +208,28 @@ export function SidebarTrigger(props: ComponentProps<'button'>) {
   return <Base.SidebarTrigger {...props} />;
 }
 
-function SidebarContent({ ref: refProp, className, children, ...props }: ComponentProps<'aside'>) {
+function SidebarContent({
+  ref: refProp,
+  className,
+  children,
+  asideCollapseTriggerRef,
+  ...props
+}: ComponentProps<'aside'> & {
+  asideCollapseTriggerRef: RefObject<HTMLButtonElement | null>;
+}) {
   const ref = useRef<HTMLElement>(null);
+  const pillCollapseTriggerRef = useRef<HTMLButtonElement>(null);
 
   return (
     <Base.SidebarContent>
       {({ collapsed, hovered, ref: asideRef, ...rest }) => (
         <>
+          <SidebarCollapseFocusManager
+            collapsed={collapsed}
+            hovered={hovered}
+            asideCollapseTriggerRef={asideCollapseTriggerRef}
+            pillCollapseTriggerRef={pillCollapseTriggerRef}
+          />
           <div
             data-sidebar-placeholder=""
             className="sticky top-(--fd-docs-row-1) z-20 [grid-area:sidebar] pointer-events-none *:pointer-events-auto h-[calc(var(--fd-docs-height)-var(--fd-docs-row-1))] md:layout:[--fd-sidebar-width:268px] max-md:hidden"
@@ -217,6 +240,7 @@ function SidebarContent({ ref: refProp, className, children, ...props }: Compone
               ref={mergeRefs(ref, refProp, asideRef)}
               data-collapsed={collapsed}
               data-hovered={collapsed && hovered}
+              inert={collapsed && !hovered ? true : undefined}
               className={cn(
                 'absolute flex flex-col w-full inset-s-0 inset-y-0 items-end bg-fd-card text-sm border-e duration-250 *:w-(--fd-sidebar-width)',
                 collapsed && [
@@ -242,8 +266,10 @@ function SidebarContent({ ref: refProp, className, children, ...props }: Compone
               'fixed flex top-[calc(--spacing(4)+var(--fd-docs-row-3))] inset-s-4 shadow-lg transition-opacity rounded-xl p-0.5 border bg-fd-muted text-fd-muted-foreground z-10',
               (!collapsed || hovered) && 'pointer-events-none opacity-0',
             )}
+            inert={!collapsed || hovered ? true : undefined}
           >
             <Base.SidebarCollapseTrigger
+              ref={pillCollapseTriggerRef}
               className={cn(
                 buttonVariants({
                   variant: 'ghost',
@@ -260,6 +286,41 @@ function SidebarContent({ ref: refProp, className, children, ...props }: Compone
       )}
     </Base.SidebarContent>
   );
+}
+
+/**
+ * Moves focus to the collapse trigger that becomes visible when the sidebar
+ * transitions between collapsed/expanded (or hovered/unhovered) states, so
+ * focus doesn't fall back to `<body>` when the previously focused trigger
+ * becomes `inert`.
+ *
+ * Only steals focus when the currently focused element is one of the two
+ * collapse triggers themselves, never from anything else on the page.
+ */
+function SidebarCollapseFocusManager({
+  collapsed,
+  hovered,
+  asideCollapseTriggerRef,
+  pillCollapseTriggerRef,
+}: {
+  collapsed: boolean;
+  hovered: boolean;
+  asideCollapseTriggerRef: RefObject<HTMLButtonElement | null>;
+  pillCollapseTriggerRef: RefObject<HTMLButtonElement | null>;
+}) {
+  useEffect(() => {
+    const active = document.activeElement;
+
+    if (collapsed && !hovered) {
+      if (active === asideCollapseTriggerRef.current) {
+        pillCollapseTriggerRef.current?.focus();
+      }
+    } else if (active === pillCollapseTriggerRef.current) {
+      asideCollapseTriggerRef.current?.focus();
+    }
+  }, [collapsed, hovered, asideCollapseTriggerRef, pillCollapseTriggerRef]);
+
+  return null;
 }
 
 function SidebarDrawer({
