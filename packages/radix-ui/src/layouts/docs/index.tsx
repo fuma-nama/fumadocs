@@ -7,6 +7,7 @@ import {
   type GetLayoutTabsOptions,
   type LayoutTab,
 } from '@/layouts/shared';
+import { sanitizeTreeForClient } from '@/utils/sanitize-tree';
 import { type DocsSlots, LayoutBody } from './client';
 
 export interface DocsLayoutProps extends BaseLayoutProps {
@@ -42,21 +43,27 @@ export function DocsLayout({
   children,
   ...props
 }: DocsLayoutProps) {
+  // Strip fields that only the loader needs (`$ref`, non-root `$id`s, unset optional fields)
+  // before the tree crosses into client-rendered flight data (see fuma-nama/fumadocs#3578).
+  // Tabs are derived from this same sanitized tree so `$folder` references stay consistent
+  // with the tree passed to `LayoutBody`.
+  const clientTree = sanitizeTreeForClient(tree);
+
   const tabs = useMemo(() => {
     if (Array.isArray(layoutTabs)) {
       return layoutTabs;
     }
     if (typeof layoutTabs === 'object') {
-      return getLayoutTabs(tree, layoutTabs);
+      return getLayoutTabs(clientTree, layoutTabs);
     }
     if (layoutTabs !== false) {
-      return getLayoutTabs(tree);
+      return getLayoutTabs(clientTree);
     }
     return [];
-  }, [tree, layoutTabs]);
+  }, [clientTree, layoutTabs]);
 
   return (
-    <LayoutBody tree={tree} tabs={tabs} tabMode={tabMode} sidebar={sidebarProps} {...props}>
+    <LayoutBody tree={clientTree} tabs={tabs} tabMode={tabMode} sidebar={sidebarProps} {...props}>
       {children}
     </LayoutBody>
   );
