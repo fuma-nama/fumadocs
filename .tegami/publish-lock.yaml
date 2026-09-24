@@ -1,48 +1,70 @@
 core:changelogs:
-  - content: "---\npackages:\n  npm:create-fumadocs-app:\n    type: patch\n---\n\n## Move `proxy.ts` into `src` when the `/src` directory is enabled\n\nThe Next.js template ships a `proxy.ts` that rewrites `<page>.md` and `Accept: text/markdown` requests to the Markdown route.\nWith the `/src` option, the CLI moved `app`, `lib` and `components` into `src` but left `proxy.ts` at the project root, where Next.js silently ignores it.\n\nThe CLI now moves `proxy.ts` (and the other root convention files Next.js reads next to `app`) into `src`, so the Markdown rewrite runs in generated projects.\n"
-    filename: 2026-09-23-create-app-src-proxy.md
+  - content: "---\npackages:\n  fumadocs-ui:\n    type: patch\n  \"@fumadocs/base-ui\":\n    type: patch\n  \"@fumadocs/language\":\n    type: patch\n---\n\n### Announce copy confirmation to screen readers\n\nCopy buttons are polite live regions whose label switches to \"Copied\" after a successful copy, so screen readers announce it. The code block's copy button no longer reports success when the clipboard write fails.\n"
+    filename: 2026-09-24-copy-button-announce.md
+    v: 0.0.0
+  - content: "---\npackages:\n  fumadocs-ui:\n    type: patch\n  \"@fumadocs/base-ui\":\n    type: patch\n---\n\n### Expose the search dialog as a combobox\n\nThe search input is now a `combobox` that controls a `listbox` of `option` results and reports the highlighted result through `aria-activedescendant`, so screen readers announce results as you move through them. Hidden result buttons are removed from the tab order, and the empty state is announced as a status message.\n"
+    filename: 2026-09-24-search-dialog-a11y.md
+    v: 0.0.0
+  - content: "---\npackages:\n  fumadocs-ui:\n    type: patch\n  \"@fumadocs/base-ui\":\n    type: patch\n---\n\n### Remove hidden sidebar controls from the tab order\n\nThe collapsed sidebar and its floating pill are now `inert` while hidden, and toggling the sidebar moves focus to the trigger that becomes visible.\n"
+    filename: 2026-09-24-sidebar-hidden-focus.md
+    v: 0.0.0
+  - content: "---\npackages:\n  fumadocs-ui:\n    type: patch\n  \"@fumadocs/base-ui\":\n    type: patch\n---\n\n### Add `block` TOC style\n\nA TOC style without the track line: headings are indented by depth, and a block slides behind the active headings.\n\n```tsx\n<DocsPage tableOfContent={{ style: 'block' }} />\n```\n"
+    filename: 2026-09-24-toc-block-style.md
+    v: 0.0.0
+  - content: "---\npackages:\n  fumadocs-mdx:\n    type: patch\n---\n\n### Sort glob results for deterministic codegen\n\n`fumadocs-mdx`'s Node codegen now sorts glob-matched files before generating collections, so the output (and anything derived from `getPages()`) is stable across builds of unchanged content. The Vite codegen path was checked separately: Vite's own `import.meta.glob` already sorts matched files internally, so it did not need the same fix.\n"
+    filename: 2026-09-23-mdx-sort-glob-results.md
+    v: 0.0.0
+  - content: "---\npackages:\n  fumadocs-ui:\n    type: patch\n---\n\n### Wrap page footer descriptions instead of truncating\n\nThe previous/next page footer cards now wrap long descriptions instead of cutting them off with an ellipsis.\n"
+    filename: 2026-09-23-footer-description-wrap.md
     v: 0.0.0
 core:packages:
   - id: npm:@fumadocs/asyncapi
     updated: false
-  - id: npm:@fumadocs/base-ui
-    updated: false
+  - changelogIds:
+      - 2026-09-24-copy-button-announce.md
+      - 2026-09-24-search-dialog-a11y.md
+      - 2026-09-24-sidebar-hidden-focus.md
+      - 2026-09-24-toc-block-style.md
+    id: npm:@fumadocs/base-ui
+    updated: true
   - id: npm:@fumadocs/basehub
-    updated: false
-  - id: npm:@fumadocs/content-collections
     updated: false
   - id: npm:@fumadocs/cli
     updated: false
   - id: npm:@fumadocs/content
     updated: false
-  - id: npm:fumadocs-core
+  - id: npm:@fumadocs/content-collections
     updated: false
+  - id: npm:fumadocs-core
+    updated: true
+  - id: npm:create-fumadocs-app
+    updated: true
   - id: npm:create-fumadocs-versions
     updated: true
-  - id: npm:fumadocs-docgen
-    updated: false
-  - changelogIds:
-      - 2026-09-23-create-app-src-proxy.md
-    id: npm:create-fumadocs-app
-    updated: true
   - id: npm:fumadocs-epub
+    updated: false
+  - id: npm:fumadocs-docgen
     updated: false
   - id: npm:@fumadocs/graphql
     updated: false
   - id: npm:@fumari/image-size
     updated: false
-  - id: npm:@fumadocs/language
-    updated: false
   - id: npm:@fumadocs/json-schema
     updated: false
+  - changelogIds:
+      - 2026-09-24-copy-button-announce.md
+    id: npm:@fumadocs/language
+    updated: true
   - id: npm:@fumadocs/local-content
-    updated: false
-  - id: npm:@fumadocs/local-html
     updated: false
   - id: npm:@fumadocs/local-md
     updated: false
-  - id: npm:fumadocs-mdx
+  - id: npm:@fumadocs/local-html
     updated: false
+  - changelogIds:
+      - 2026-09-23-mdx-sort-glob-results.md
+    id: npm:fumadocs-mdx
+    updated: true
   - id: npm:@fumadocs/notion
     updated: false
   - id: npm:@fumadocs/mdx-remote
@@ -53,19 +75,25 @@ core:packages:
     updated: false
   - id: npm:fumadocs-openapi
     updated: false
-  - id: npm:fumadocs-ui
-    updated: false
   - id: npm:fumadocs-python
     updated: false
+  - changelogIds:
+      - 2026-09-23-footer-description-wrap.md
+      - 2026-09-24-copy-button-announce.md
+      - 2026-09-24-search-dialog-a11y.md
+      - 2026-09-24-sidebar-hidden-focus.md
+      - 2026-09-24-toc-block-style.md
+    id: npm:fumadocs-ui
+    updated: true
   - id: npm:@fumadocs/sanity
-    updated: false
-  - id: npm:@fumadocs/shadcn
     updated: false
   - id: npm:@fumadocs/satteri
     updated: false
-  - id: npm:@fumari/stf
+  - id: npm:@fumadocs/shadcn
     updated: false
   - id: npm:shared-api
+    updated: false
+  - id: npm:@fumari/stf
     updated: false
   - id: npm:@fumadocs/story
     updated: false
@@ -81,36 +109,67 @@ npm:packages:
   - id: npm:@fumadocs/asyncapi
   - id: npm:@fumadocs/base-ui
   - id: npm:@fumadocs/basehub
-  - id: npm:@fumadocs/content-collections
   - id: npm:@fumadocs/cli
   - id: npm:@fumadocs/content
+  - id: npm:@fumadocs/content-collections
   - id: npm:fumadocs-core
-  - id: npm:create-fumadocs-versions
-  - id: npm:fumadocs-docgen
   - id: npm:create-fumadocs-app
+  - id: npm:create-fumadocs-versions
   - id: npm:fumadocs-epub
+  - id: npm:fumadocs-docgen
   - id: npm:@fumadocs/graphql
   - id: npm:@fumari/image-size
-  - id: npm:@fumadocs/language
   - id: npm:@fumadocs/json-schema
+  - id: npm:@fumadocs/language
   - id: npm:@fumadocs/local-content
-  - id: npm:@fumadocs/local-html
   - id: npm:@fumadocs/local-md
+  - id: npm:@fumadocs/local-html
   - id: npm:fumadocs-mdx
   - id: npm:@fumadocs/notion
   - id: npm:@fumadocs/mdx-remote
   - id: npm:fumadocs-obsidian
   - id: npm:fumadocs-preview
   - id: npm:fumadocs-openapi
-  - id: npm:fumadocs-ui
   - id: npm:fumadocs-python
+  - id: npm:fumadocs-ui
   - id: npm:@fumadocs/sanity
-  - id: npm:@fumadocs/shadcn
   - id: npm:@fumadocs/satteri
-  - id: npm:@fumari/stf
+  - id: npm:@fumadocs/shadcn
   - id: npm:shared-api
+  - id: npm:@fumari/stf
   - id: npm:@fumadocs/story
   - id: npm:@fumadocs/tailwind
   - id: npm:fumadocs-twoslash
   - id: npm:fumadocs-typescript
   - id: npm:@fumadocs/vite
+  - id: npm:docs
+  - id: npm:example-astro
+  - id: npm:example-asyncapi
+  - id: npm:example-base-ui
+  - id: npm:example-content-collections
+  - id: npm:example-graphql
+  - id: npm:example-i18n
+  - id: npm:example-marble-cms
+  - id: npm:example-next
+  - id: npm:example-next-local-html
+  - id: npm:example-next-local-md
+  - id: npm:example-next-min
+  - id: npm:example-next-shadcn
+  - id: npm:example-next-static
+  - id: npm:example-obsidian
+  - id: npm:example-openapi
+  - id: npm:example-python
+  - id: npm:example-react-router
+  - id: npm:example-react-router-i18n
+  - id: npm:example-react-router-min
+  - id: npm:example-react-router-rsc
+  - id: npm:example-react-router-spa
+  - id: npm:example-tanstack-start
+  - id: npm:example-tanstack-start-i18n
+  - id: npm:example-tanstack-start-local-md
+  - id: npm:example-tanstack-start-min
+  - id: npm:example-tanstack-start-openapi
+  - id: npm:example-tanstack-start-spa
+  - id: npm:example-tanstack-start-story
+  - id: npm:example-waku
+  - id: npm:example-waku-i18n

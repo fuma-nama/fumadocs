@@ -1,3 +1,9 @@
+## @fumadocs/language@0.2.6
+
+### Announce copy confirmation to screen readers
+
+Copy buttons are polite live regions whose label switches to "Copied" after a successful copy, so screen readers announce it. The code block's copy button no longer reports success when the clipboard write fails.
+
 ## @fumadocs/language@0.2.5
 
 ### Mark packages side-effect free
