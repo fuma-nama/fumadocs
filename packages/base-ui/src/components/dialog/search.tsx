@@ -21,7 +21,6 @@ import type { HighlightedText, ReactSortedResult } from 'fumadocs-core/search';
 import { cva } from 'class-variance-authority';
 import { useRouter } from 'fumadocs-core/framework';
 import type { SharedProps } from '@/contexts/search';
-import { useOnChange } from 'fumadocs-core/utils/use-on-change';
 import scrollIntoView from 'scroll-into-view-if-needed';
 import { buttonVariants } from '@/components/ui/button';
 import { createMarkdownRenderer } from 'fumadocs-core/content/md';
@@ -194,6 +193,7 @@ export function SearchDialog({
   };
   const onSelectCallback = useRef(onSelect);
   onSelectCallback.current = onSelect;
+  const [active, setActive] = useState<string | null>(null);
 
   return (
     <Dialog.Root open={open} onOpenChange={onOpenChange} handle={dialogHandle}>
@@ -210,7 +210,9 @@ export function SearchDialog({
           [isLoading, open, search],
         )}
       >
-        {children}
+        <ListContext value={useMemo(() => ({ active, setActive }), [active])}>
+          {children}
+        </ListContext>
       </RootContext>
     </Dialog.Root>
   );
@@ -223,10 +225,17 @@ export function SearchDialogHeader(props: ComponentProps<'div'>) {
 export function SearchDialogInput(props: ComponentProps<'input'>) {
   const t = useTranslations({ note: 'search dialog' });
   const { search, onSearchChange } = useSearch();
+  const { active } = useSearchList();
 
   return (
     <input
       data-fd-search-dialog-input=""
+      role="combobox"
+      aria-label={t('Search')}
+      aria-autocomplete="list"
+      aria-controls="fd-search-list"
+      aria-expanded={active !== null}
+      aria-activedescendant={active !== null ? `fd-search-option-${active}` : undefined}
       value={search}
       onChange={(e) => onSearchChange(e.target.value)}
       placeholder={t('Search')}
@@ -332,7 +341,7 @@ export function SearchDialogContent({
 export function SearchDialogList({
   items = null,
   Empty = () => (
-    <div className="py-12 text-center text-sm text-fd-muted-foreground">
+    <div role="status" className="py-12 text-center text-sm text-fd-muted-foreground">
       <T text="No results found" note="search dialog" />
     </div>
   ),
@@ -350,10 +359,9 @@ export function SearchDialogList({
   Item?: (props: { item: SearchItemType; onClick: () => void }) => ReactNode;
 }) {
   const ref = useRef<HTMLDivElement>(null);
+  const t = useTranslations({ note: 'search dialog' });
   const { onSelect } = useSearch();
-  const [active, setActive] = useState<string | null>(() =>
-    items && items.length > 0 ? items[0].id : null,
-  );
+  const { active, setActive } = useSearchList();
 
   const onKey = useEffectEvent((e: KeyboardEvent) => {
     if (!items || e.isComposing || e.keyCode === 229) return;
@@ -398,11 +406,9 @@ export function SearchDialogList({
     };
   }, []);
 
-  useOnChange(items, () => {
-    if (items && items.length > 0) {
-      setActive(items[0].id);
-    }
-  });
+  useEffect(() => {
+    setActive(items?.[0]?.id ?? null);
+  }, [items, setActive]);
 
   return (
     <div
@@ -415,23 +421,17 @@ export function SearchDialogList({
       )}
     >
       <div
+        id="fd-search-list"
+        // an empty listbox is invalid, expose it only with options
+        role={items?.length ? 'listbox' : undefined}
+        aria-label={items?.length ? t('Search') : undefined}
         className={cn('w-full flex flex-col overflow-y-auto max-h-[460px] p-1', !items && 'hidden')}
       >
-        <ListContext
-          value={useMemo(
-            () => ({
-              active,
-              setActive,
-            }),
-            [active],
-          )}
-        >
-          {items?.length === 0 && Empty()}
+        {items?.length === 0 && Empty()}
 
-          {items?.map((item) => (
-            <Fragment key={item.id}>{Item({ item, onClick: () => onSelect(item) })}</Fragment>
-          ))}
-        </ListContext>
+        {items?.map((item) => (
+          <Fragment key={item.id}>{Item({ item, onClick: () => onSelect(item) })}</Fragment>
+        ))}
       </div>
     </div>
   );
@@ -492,6 +492,9 @@ export function SearchDialogListItem({
   return (
     <button
       type="button"
+      id={`fd-search-option-${item.id}`}
+      role="option"
+      tabIndex={-1}
       ref={useCallback(
         (element: HTMLButtonElement | null) => {
           if (active && element) {
@@ -608,6 +611,6 @@ export function useTagsList() {
 
 export function useSearchList() {
   const ctx = use(ListContext);
-  if (!ctx) throw new Error('Missing <SearchDialogList />');
+  if (!ctx) throw new Error('Missing <SearchDialog />');
   return ctx;
 }
