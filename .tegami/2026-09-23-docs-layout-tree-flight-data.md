@@ -1,6 +1,6 @@
 ---
 packages:
-  "fumadocs-ui": patch
+  'fumadocs-ui': patch
 ---
 
 ### Strip internal page-tree fields from client flight data
