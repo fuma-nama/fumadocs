@@ -1,6 +1,6 @@
 ---
 packages:
-  "fumadocs-mdx": patch
+  'fumadocs-mdx': patch
 ---
 
 ### Sort glob results for deterministic codegen
