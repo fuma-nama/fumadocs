@@ -14,7 +14,7 @@ type HeadingProps<T extends Types> = Omit<ComponentPropsWithoutRef<T>, 'as'> & {
 export function Heading<T extends Types = 'h1'>({ as, ...props }: HeadingProps<T>) {
   const As = as ?? 'h1';
   const t = useTranslations({ note: 'heading anchor' });
-  const [isChecked, onCopy] = useCopyButton(() => {
+  const [isChecked, onCopy, message] = useCopyButton(() => {
     if (!props.id) return;
 
     const url = new URL(window.location.href);
@@ -45,6 +45,9 @@ export function Heading<T extends Types = 'h1'>({ as, ...props }: HeadingProps<T
       >
         {isChecked ? <CopyCheckIcon /> : <LinkIcon />}
       </button>
+      <span role="status" aria-live="polite" className="sr-only">
+        {message}
+      </span>
     </As>
   );
 }

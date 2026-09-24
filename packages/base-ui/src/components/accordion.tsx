@@ -80,7 +80,7 @@ export function Accordion({
 
 function CopyButton({ id }: { id: string }) {
   const t = useTranslations({ note: 'accordion' });
-  const [checked, onClick] = useCopyButton(() => {
+  const [checked, onClick, message] = useCopyButton(() => {
     const url = new URL(window.location.href);
     url.hash = id;
 
@@ -88,18 +88,23 @@ function CopyButton({ id }: { id: string }) {
   });
 
   return (
-    <button
-      type="button"
-      aria-label={t('Copy Link', { note: 'aria-label' })}
-      className={cn(
-        buttonVariants({
-          variant: 'ghost',
-          className: 'text-fd-muted-foreground me-2',
-        }),
-      )}
-      onClick={onClick}
-    >
-      {checked ? <Check className="size-3.5" /> : <LinkIcon className="size-3.5" />}
-    </button>
+    <>
+      <button
+        type="button"
+        aria-label={t('Copy Link', { note: 'aria-label' })}
+        className={cn(
+          buttonVariants({
+            variant: 'ghost',
+            className: 'text-fd-muted-foreground me-2',
+          }),
+        )}
+        onClick={onClick}
+      >
+        {checked ? <Check className="size-3.5" /> : <LinkIcon className="size-3.5" />}
+      </button>
+      <span role="status" aria-live="polite" className="sr-only">
+        {message}
+      </span>
+    </>
   );
 }
