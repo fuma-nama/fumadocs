@@ -4,29 +4,6 @@ import fs from 'node:fs/promises';
 import fsSync from 'node:fs';
 import { createRequire } from 'node:module';
 import path from 'node:path';
-import type { DepOptimizationOptions, SSROptions, UserConfig } from 'vite';
-
-interface CrawlFrameworkPkgsOptions {
-  root: string;
-  isBuild: boolean;
-  workspaceRoot?: string;
-  viteUserConfig?: UserConfig;
-  isFrameworkPkgByJson?: (pkgJson: Record<string, unknown>) => boolean;
-  isFrameworkPkgByName?: (pkgName: string) => boolean | undefined;
-  isSemiFrameworkPkgByJson?: (pkgJson: Record<string, unknown>) => boolean;
-  isSemiFrameworkPkgByName?: (pkgName: string) => boolean | undefined;
-}
-
-interface CrawlFrameworkPkgsResult {
-  optimizeDeps: {
-    include: string[];
-    exclude: string[];
-  };
-  ssr: {
-    noExternal: string[];
-    external: string[];
-  };
-}
 
 interface PackageJson {
   dependencies?: Record<string, string>;
@@ -34,216 +11,132 @@ interface PackageJson {
   exports?: unknown;
   main?: string;
   module?: string;
-  private?: boolean;
-  [key: string]: unknown;
+  type?: string;
 }
 
-interface PnpApi {
-  getDependencyTreeRoots(): Array<{ name: string; reference: string }>;
-  getPackageInformation(locator: { name: string; reference: string }): {
-    packageLocation: string;
-  };
-  resolveToUnqualified(dep: string, parent: string): string | undefined;
+interface Node {
+  pkgJsonPath: string;
+  pkgJson?: PackageJson;
+  /** dependency names from the root down to this package */
+  chain: string[];
 }
 
-let pnp: PnpApi | undefined;
-let pnpWorkspaceLocators: Array<{ name: string; reference: string }> = [];
+export interface CrawlResult {
+  /** framework packages in the tree */
+  framework: string[];
+  /** `optimizeDeps.include` entries for the CommonJS packages below them */
+  include: string[];
+}
+
+let pnp: { resolveToUnqualified(dep: string, parent: string): string | undefined } | undefined;
 
 if (process.versions.pnp) {
   try {
-    pnp = createRequire(import.meta.url)('pnpapi') as PnpApi;
-    pnpWorkspaceLocators = pnp.getDependencyTreeRoots();
+    pnp = createRequire(import.meta.url)('pnpapi');
   } catch {
-    // Non-PnP installs do not need this branch.
+    // not available outside PnP
   }
 }
 
+/**
+ * Breadth-first, so each `package.json` is read once however many chains reach it, and the chain
+ * recorded for a CommonJS package is the shortest one (ties broken by name): Vite hashes
+ * `optimizeDeps.include`, the output must not depend on I/O order.
+ */
 export async function crawlFrameworkPkgs(
-  options: CrawlFrameworkPkgsOptions,
-): Promise<CrawlFrameworkPkgsResult> {
-  const pkgJsonPath = await findClosestPkgJsonPath(options.root);
+  root: string,
+  isFrameworkPkg: (name: string) => boolean | undefined,
+): Promise<CrawlResult> {
+  const rootPkgJsonPath = await findClosestPkgJsonPath(root);
+  if (!rootPkgJsonPath) return { framework: [], include: [] };
 
-  if (!pkgJsonPath) {
-    return {
-      optimizeDeps: { include: [], exclude: [] },
-      ssr: { noExternal: [], external: [] },
-    };
+  const framework = new Set<string>();
+  const include: string[] = [];
+  const visited = new Set([rootPkgJsonPath]);
+  let discovered = new Map<string, Node>();
+  let level: Node[] = [
+    { pkgJsonPath: rootPkgJsonPath, pkgJson: await readJson(rootPkgJsonPath), chain: [] },
+  ];
+
+  async function visit(parent: Node, dep: string) {
+    const pkgJsonPath = await findDepPkgJsonPath(dep, parent.pkgJsonPath);
+    if (!pkgJsonPath) return;
+    if (isFrameworkPkg(dep)) framework.add(dep);
+    if (visited.has(pkgJsonPath)) return;
+
+    const chain = [...parent.chain, dep];
+    const found = discovered.get(pkgJsonPath);
+    if (found) {
+      if (compareChains(chain, found.chain) < 0) found.chain = chain;
+      return;
+    }
+
+    const node: Node = { pkgJsonPath, chain };
+    discovered.set(pkgJsonPath, node);
+    node.pkgJson = await readJson(pkgJsonPath).catch(() => undefined);
   }
 
-  const pkgJson = await readJson(pkgJsonPath).catch((e: unknown) => {
-    throw new Error(`Unable to read ${pkgJsonPath}`, { cause: e });
-  });
+  while (level.length > 0) {
+    const tasks: Promise<void>[] = [];
+    discovered = new Map();
 
-  const optimizeDepsIncludeByPkgJsonPath = new Map<string, string>();
-  const optimizeDepsSubpathsByPkgJsonPath = new Map<string, string[]>();
-  let optimizeDepsInclude: string[] = [];
-  let optimizeDepsExclude: string[] = [];
-  let ssrNoExternal: string[] = [];
-  let ssrExternal: string[] = [];
+    for (const node of level) {
+      const isRoot = node.chain.length === 0;
+      const deps = Object.keys(node.pkgJson!.dependencies ?? {});
+      if (isRoot) deps.push(...Object.keys(node.pkgJson!.devDependencies ?? {}));
 
-  await crawl(pkgJsonPath, pkgJson);
-  optimizeDepsInclude = [...optimizeDepsIncludeByPkgJsonPath.entries()].flatMap(
-    ([depPkgJsonPath, chain]) =>
-      (optimizeDepsSubpathsByPkgJsonPath.get(depPkgJsonPath) ?? ['.']).map((subpath) =>
-        subpath === '.' ? chain : chain + subpath.slice(1),
-      ),
-  );
-
-  if (options.viteUserConfig) {
-    const userOptimizeDepsExclude = options.viteUserConfig.optimizeDeps?.exclude;
-    if (userOptimizeDepsExclude) {
-      optimizeDepsInclude = optimizeDepsInclude.filter(
-        (dep) => !isDepExcluded(dep, userOptimizeDepsExclude),
-      );
+      for (const dep of deps) {
+        const flag = isFrameworkPkg(dep);
+        // only what sits below a framework package is served unbundled
+        if (flag === false || (isRoot && !flag)) continue;
+        tasks.push(visit(node, dep));
+      }
     }
+    await Promise.all(tasks);
 
-    const userOptimizeDepsInclude = options.viteUserConfig.optimizeDeps?.include;
-    if (userOptimizeDepsInclude) {
-      optimizeDepsExclude = optimizeDepsExclude.filter(
-        (dep) => !isDepIncluded(dep, userOptimizeDepsInclude),
-      );
-    }
+    level = [];
+    tasks.length = 0;
+    for (const node of discovered.values()) {
+      visited.add(node.pkgJsonPath);
+      if (!node.pkgJson) continue;
 
-    const userSsrExternal = options.viteUserConfig.ssr?.external;
-    if (userSsrExternal) {
-      ssrNoExternal = ssrNoExternal.filter((dep) => !isDepExternaled(dep, userSsrExternal));
-    }
-
-    const userSsrNoExternal = options.viteUserConfig.ssr?.noExternal;
-    if (userSsrNoExternal) {
-      ssrExternal = ssrExternal.filter((dep) => !isDepNoExternaled(dep, userSsrNoExternal));
-    }
-  }
-
-  optimizeDepsInclude.sort();
-  optimizeDepsExclude.sort();
-  ssrExternal.sort();
-  ssrNoExternal.sort();
-
-  return {
-    optimizeDeps: {
-      include: optimizeDepsInclude,
-      exclude: optimizeDepsExclude,
-    },
-    ssr: {
-      noExternal: ssrNoExternal,
-      external: ssrExternal,
-    },
-  };
-
-  async function crawl(
-    currentPkgJsonPath: string,
-    currentPkgJson: PackageJson,
-    parentDepNames: string[] = [],
-    parentIsFrameworkPkg = false,
-    hasFrameworkAncestor = false,
-  ) {
-    const isRoot = parentDepNames.length === 0;
-    const crawlDevDependencies =
-      isRoot ||
-      isPrivateWorkspacePackage(currentPkgJsonPath, currentPkgJson, options.workspaceRoot);
-
-    const deps = [
-      ...Object.keys(currentPkgJson.dependencies ?? {}),
-      ...(crawlDevDependencies ? Object.keys(currentPkgJson.devDependencies ?? {}) : []),
-    ].filter((dep) => !parentDepNames.includes(dep));
-
-    await Promise.all(
-      deps.map(async (dep) => {
-        const frameworkByName = options.isFrameworkPkgByName?.(dep);
-        const semiFrameworkByName = options.isSemiFrameworkPkgByName?.(dep);
-
-        if (frameworkByName === false || semiFrameworkByName === false) {
-          return;
-        }
-
-        const depPkgJsonPath = await findDepPkgJsonPath(
-          dep,
-          currentPkgJsonPath,
-          !!options.workspaceRoot,
-        );
-        if (!depPkgJsonPath) return;
-
-        const depPkgJson = await readJson(depPkgJsonPath).catch(() => {});
-        if (!depPkgJson) return;
-
-        const isFrameworkPkg =
-          frameworkByName === true || options.isFrameworkPkgByJson?.(depPkgJson) === true;
-        const isSemiFrameworkPkg =
-          semiFrameworkByName === true || options.isSemiFrameworkPkgByJson?.(depPkgJson) === true;
-        const depChain = parentDepNames.concat(dep);
-
-        if (isFrameworkPkg || isSemiFrameworkPkg) {
-          if (isFrameworkPkg) {
-            pushUnique(optimizeDepsExclude, dep);
-            pushUnique(ssrNoExternal, dep);
-          } else {
-            pushUnique(ssrNoExternal, dep);
+      tasks.push(
+        pkgNeedsOptimization(node.pkgJson, node.pkgJsonPath).then((needed) => {
+          if (!needed) {
+            level.push(node);
+            return;
           }
 
-          await crawl(depPkgJsonPath, depPkgJson, depChain, true, true);
-          return;
-        }
-
-        if (!hasFrameworkAncestor) return;
-
-        const needsOptimization = await pkgNeedsOptimization(depPkgJson, depPkgJsonPath);
-
-        if (needsOptimization) {
-          addOptimizedDep(depPkgJsonPath, depChain, depPkgJson);
-        } else {
-          await crawl(depPkgJsonPath, depPkgJson, depChain, false, true);
-        }
-
-        if (!options.isBuild && parentIsFrameworkPkg) {
-          pushUnique(ssrExternal, dep);
-        }
-      }),
-    );
+          const chain = node.chain.join(' > ');
+          for (const subpath of getExportsSubpaths(node.pkgJson!.exports)) {
+            include.push(subpath === '.' ? chain : chain + subpath.slice(1));
+          }
+        }),
+      );
+    }
+    await Promise.all(tasks);
   }
 
-  function addOptimizedDep(depPkgJsonPath: string, depChain: string[], depPkgJson: PackageJson) {
-    const includePath = depChain.join(' > ');
-    const current = optimizeDepsIncludeByPkgJsonPath.get(depPkgJsonPath);
+  return { framework: [...framework].sort(), include: include.sort() };
+}
 
-    if (!current || compareDepChains(includePath, current) < 0) {
-      optimizeDepsIncludeByPkgJsonPath.set(depPkgJsonPath, includePath);
-    }
+function compareChains(left: string[], right: string[]) {
+  for (let i = 0; i < left.length; i++) {
+    if (left[i] !== right[i]) return left[i] < right[i] ? -1 : 1;
+  }
+  return 0;
+}
 
-    if (!optimizeDepsSubpathsByPkgJsonPath.has(depPkgJsonPath)) {
-      optimizeDepsSubpathsByPkgJsonPath.set(depPkgJsonPath, getExportsSubpaths(depPkgJson.exports));
-    }
+async function findClosestPkgJsonPath(dir: string): Promise<string | undefined> {
+  for (let current = dir; ; current = path.dirname(current)) {
+    const pkg = path.join(current, 'package.json');
+    const stat = await fs.stat(pkg).catch(() => undefined);
+    if (stat?.isFile()) return pkg;
+    if (path.dirname(current) === current) return;
   }
 }
 
-export async function findClosestPkgJsonPath(
-  dir: string,
-  predicate?: (pkgJsonPath: string) => boolean | Promise<boolean>,
-): Promise<string | undefined> {
-  let currentDir = dir.endsWith('package.json') ? path.dirname(dir) : dir;
-
-  while (currentDir) {
-    const pkg = path.join(currentDir, 'package.json');
-
-    try {
-      const stat = await fs.stat(pkg);
-      if (stat.isFile() && (!predicate || (await predicate(pkg)))) {
-        return pkg;
-      }
-    } catch {
-      // Keep walking up.
-    }
-
-    const nextDir = path.dirname(currentDir);
-    if (nextDir === currentDir) break;
-    currentDir = nextDir;
-  }
-}
-
-export async function pkgNeedsOptimization(
-  pkgJson: PackageJson,
-  pkgJsonPath: string,
-): Promise<boolean> {
+async function pkgNeedsOptimization(pkgJson: PackageJson, pkgJsonPath: string): Promise<boolean> {
   if (pkgJson.module || pkgJson.type === 'module') return false;
 
   // an export map alone doesn't imply ESM: CJS-only packages (e.g. `use-sync-external-store`)
@@ -299,115 +192,37 @@ function getExportsSubpaths(exportsField: unknown): string[] {
     return ['.'];
   }
 
-  const subpathKeys = Object.keys(exportsField).filter((key) => key.startsWith('.'));
-  if (subpathKeys.length === 0) return ['.'];
-
-  return subpathKeys.filter(
-    (key) =>
-      (key === '.' || /^\.\/[^*.]+$/.test(key)) &&
-      exportsHasJsEntry((exportsField as Record<string, unknown>)[key]),
-  );
+  const subpaths: string[] = [];
+  let hasSubpathKeys = false;
+  for (const [key, value] of Object.entries(exportsField)) {
+    if (!key.startsWith('.')) continue;
+    hasSubpathKeys = true;
+    if ((key === '.' || /^\.\/[^*.]+$/.test(key)) && exportsHasJsEntry(value)) subpaths.push(key);
+  }
+  return hasSubpathKeys ? subpaths : ['.'];
 }
 
-async function findDepPkgJsonPath(
-  dep: string,
-  parent: string,
-  usePnpWorkspaceLocators: boolean,
-): Promise<string | undefined> {
+async function findDepPkgJsonPath(dep: string, parent: string): Promise<string | undefined> {
   if (pnp) {
-    if (usePnpWorkspaceLocators) {
-      try {
-        const locator = pnpWorkspaceLocators.find((root) => root.name === dep);
-        if (locator) {
-          const pkgPath = pnp.getPackageInformation(locator).packageLocation;
-          return path.resolve(pkgPath, 'package.json');
-        }
-      } catch {
-        // Fall back to normal PnP resolution.
-      }
-    }
-
     try {
       const depRoot = pnp.resolveToUnqualified(dep, parent);
-      if (!depRoot) return;
-      return path.join(depRoot, 'package.json');
+      return depRoot ? path.join(depRoot, 'package.json') : undefined;
     } catch {
       return;
     }
   }
 
-  let root = parent;
-
-  while (root) {
+  for (let root = parent; ; root = path.dirname(root)) {
     const pkg = path.join(root, 'node_modules', dep, 'package.json');
-
     try {
       await fs.access(pkg);
       return fsSync.realpathSync(pkg);
     } catch {
-      // Keep walking up.
+      if (path.dirname(root) === root) return;
     }
-
-    const nextRoot = path.dirname(root);
-    if (nextRoot === root) break;
-    root = nextRoot;
   }
 }
 
 async function readJson(pkgJsonPath: string): Promise<PackageJson> {
-  return JSON.parse(await fs.readFile(pkgJsonPath, 'utf8')) as PackageJson;
-}
-
-function isPrivateWorkspacePackage(
-  pkgJsonPath: string,
-  pkgJson: PackageJson,
-  workspaceRoot?: string,
-) {
-  return !!(
-    workspaceRoot &&
-    pkgJson.private &&
-    !pkgJsonPath.match(/[/\\]node_modules[/\\]/) &&
-    !path.relative(workspaceRoot, pkgJsonPath).startsWith('..')
-  );
-}
-
-function pushUnique(array: string[], value: string) {
-  if (!array.includes(value)) array.push(value);
-}
-
-function compareDepChains(left: string, right: string) {
-  const leftDepth = left.split(' > ').length;
-  const rightDepth = right.split(' > ').length;
-
-  if (leftDepth !== rightDepth) return leftDepth - rightDepth;
-  return left.localeCompare(right);
-}
-
-function isDepIncluded(
-  dep: string,
-  optimizeDepsInclude: NonNullable<DepOptimizationOptions['include']>,
-) {
-  return optimizeDepsInclude.some((include) => dep === include);
-}
-
-function isDepExcluded(
-  dep: string,
-  optimizeDepsExclude: NonNullable<DepOptimizationOptions['exclude']>,
-) {
-  return optimizeDepsExclude.some((exclude) => dep === exclude || dep.startsWith(`${exclude} > `));
-}
-
-function isDepNoExternaled(dep: string, ssrNoExternal: NonNullable<SSROptions['noExternal']>) {
-  if (typeof ssrNoExternal === 'boolean') return ssrNoExternal;
-  const noExternals = Array.isArray(ssrNoExternal) ? ssrNoExternal : [ssrNoExternal];
-
-  return noExternals.some((noExternal) => {
-    if (typeof noExternal === 'string') return dep === noExternal;
-    return noExternal.test(dep);
-  });
-}
-
-function isDepExternaled(dep: string, ssrExternal: NonNullable<SSROptions['external']>) {
-  if (typeof ssrExternal === 'boolean') return ssrExternal;
-  return ssrExternal.some((external) => dep === external);
+  return JSON.parse(await fs.readFile(pkgJsonPath, 'utf8'));
 }

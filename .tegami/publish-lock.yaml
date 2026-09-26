@@ -1,32 +1,15 @@
 core:changelogs:
-  - content: "---\npackages:\n  fumadocs-ui:\n    type: patch\n  \"@fumadocs/base-ui\":\n    type: patch\n  \"@fumadocs/language\":\n    type: patch\n---\n\n### Announce copy confirmation to screen readers\n\nCopy buttons are polite live regions whose label switches to \"Copied\" after a successful copy, so screen readers announce it. The code block's copy button no longer reports success when the clipboard write fails.\n"
-    filename: 2026-09-24-copy-button-announce.md
+  - content: "---\npackages:\n  fumadocs-mdx:\n    type: patch\n---\n\n### Stop recrawling `node_modules` on every Vite config resolution\n\nThe config hook of `fumadocs-mdx/vite` walked the dependency tree below Fumadocs packages once per chain reaching a package, so a docs app with a few Fumadocs packages read ~10k `package.json` files (~0.9s) each time Vite resolved its config, which it does once per build environment.\n\nThe crawl now visits each package once, breadth-first, and still records the shortest chain to every CommonJS dependency (`fumadocs-ui > @base-ui/react > use-sync-external-store/shim` and friends). The result is memoized for the process until the package manager's install state changes, so a build with several environments crawls once.\n"
+    filename: 2026-09-25-vite-config-crawl.md
     v: 0.0.0
-  - content: "---\npackages:\n  fumadocs-ui:\n    type: patch\n  \"@fumadocs/base-ui\":\n    type: patch\n---\n\n### Expose the search dialog as a combobox\n\nThe search input is now a `combobox` that controls a `listbox` of `option` results and reports the highlighted result through `aria-activedescendant`, so screen readers announce results as you move through them. Hidden result buttons are removed from the tab order, and the empty state is announced as a status message.\n"
-    filename: 2026-09-24-search-dialog-a11y.md
-    v: 0.0.0
-  - content: "---\npackages:\n  fumadocs-ui:\n    type: patch\n  \"@fumadocs/base-ui\":\n    type: patch\n---\n\n### Remove hidden sidebar controls from the tab order\n\nThe collapsed sidebar and its floating pill are now `inert` while hidden, and toggling the sidebar moves focus to the trigger that becomes visible.\n"
-    filename: 2026-09-24-sidebar-hidden-focus.md
-    v: 0.0.0
-  - content: "---\npackages:\n  fumadocs-ui:\n    type: patch\n  \"@fumadocs/base-ui\":\n    type: patch\n---\n\n### Add `block` TOC style\n\nA TOC style without the track line: headings are indented by depth, and a block slides behind the active headings.\n\n```tsx\n<DocsPage tableOfContent={{ style: 'block' }} />\n```\n"
-    filename: 2026-09-24-toc-block-style.md
-    v: 0.0.0
-  - content: "---\npackages:\n  fumadocs-mdx:\n    type: patch\n---\n\n### Sort glob results for deterministic codegen\n\n`fumadocs-mdx`'s Node codegen now sorts glob-matched files before generating collections, so the output (and anything derived from `getPages()`) is stable across builds of unchanged content. The Vite codegen path was checked separately: Vite's own `import.meta.glob` already sorts matched files internally, so it did not need the same fix.\n"
-    filename: 2026-09-23-mdx-sort-glob-results.md
-    v: 0.0.0
-  - content: "---\npackages:\n  fumadocs-ui:\n    type: patch\n---\n\n### Wrap page footer descriptions instead of truncating\n\nThe previous/next page footer cards now wrap long descriptions instead of cutting them off with an ellipsis.\n"
-    filename: 2026-09-23-footer-description-wrap.md
+  - content: "---\npackages:\n  fumadocs-openapi:\n    type: patch\n---\n\n### Send uppercase HTTP methods from the playground\n\nThe Fetch API only normalizes the case of some methods, so PATCH requests were sent as `patch`, which servers and edges like Vercel reject.\n"
+    filename: 2026-09-25-openapi-method-case.md
     v: 0.0.0
 core:packages:
   - id: npm:@fumadocs/asyncapi
     updated: false
-  - changelogIds:
-      - 2026-09-24-copy-button-announce.md
-      - 2026-09-24-search-dialog-a11y.md
-      - 2026-09-24-sidebar-hidden-focus.md
-      - 2026-09-24-toc-block-style.md
-    id: npm:@fumadocs/base-ui
-    updated: true
+  - id: npm:@fumadocs/base-ui
+    updated: false
   - id: npm:@fumadocs/basehub
     updated: false
   - id: npm:@fumadocs/cli
@@ -36,55 +19,49 @@ core:packages:
   - id: npm:@fumadocs/content-collections
     updated: false
   - id: npm:fumadocs-core
-    updated: true
+    updated: false
   - id: npm:create-fumadocs-app
     updated: true
   - id: npm:create-fumadocs-versions
     updated: true
-  - id: npm:fumadocs-epub
-    updated: false
   - id: npm:fumadocs-docgen
     updated: false
   - id: npm:@fumadocs/graphql
+    updated: false
+  - id: npm:fumadocs-epub
     updated: false
   - id: npm:@fumari/image-size
     updated: false
   - id: npm:@fumadocs/json-schema
     updated: false
-  - changelogIds:
-      - 2026-09-24-copy-button-announce.md
-    id: npm:@fumadocs/language
-    updated: true
-  - id: npm:@fumadocs/local-content
+  - id: npm:@fumadocs/language
     updated: false
-  - id: npm:@fumadocs/local-md
+  - id: npm:@fumadocs/local-content
     updated: false
   - id: npm:@fumadocs/local-html
     updated: false
+  - id: npm:@fumadocs/local-md
+    updated: false
+  - id: npm:@fumadocs/mdx-remote
+    updated: false
   - changelogIds:
-      - 2026-09-23-mdx-sort-glob-results.md
+      - 2026-09-25-vite-config-crawl.md
     id: npm:fumadocs-mdx
     updated: true
   - id: npm:@fumadocs/notion
     updated: false
-  - id: npm:@fumadocs/mdx-remote
-    updated: false
   - id: npm:fumadocs-obsidian
     updated: false
+  - changelogIds:
+      - 2026-09-25-openapi-method-case.md
+    id: npm:fumadocs-openapi
+    updated: true
   - id: npm:fumadocs-preview
-    updated: false
-  - id: npm:fumadocs-openapi
     updated: false
   - id: npm:fumadocs-python
     updated: false
-  - changelogIds:
-      - 2026-09-23-footer-description-wrap.md
-      - 2026-09-24-copy-button-announce.md
-      - 2026-09-24-search-dialog-a11y.md
-      - 2026-09-24-sidebar-hidden-focus.md
-      - 2026-09-24-toc-block-style.md
-    id: npm:fumadocs-ui
-    updated: true
+  - id: npm:fumadocs-ui
+    updated: false
   - id: npm:@fumadocs/sanity
     updated: false
   - id: npm:@fumadocs/satteri
@@ -115,21 +92,21 @@ npm:packages:
   - id: npm:fumadocs-core
   - id: npm:create-fumadocs-app
   - id: npm:create-fumadocs-versions
-  - id: npm:fumadocs-epub
   - id: npm:fumadocs-docgen
   - id: npm:@fumadocs/graphql
+  - id: npm:fumadocs-epub
   - id: npm:@fumari/image-size
   - id: npm:@fumadocs/json-schema
   - id: npm:@fumadocs/language
   - id: npm:@fumadocs/local-content
-  - id: npm:@fumadocs/local-md
   - id: npm:@fumadocs/local-html
+  - id: npm:@fumadocs/local-md
+  - id: npm:@fumadocs/mdx-remote
   - id: npm:fumadocs-mdx
   - id: npm:@fumadocs/notion
-  - id: npm:@fumadocs/mdx-remote
   - id: npm:fumadocs-obsidian
-  - id: npm:fumadocs-preview
   - id: npm:fumadocs-openapi
+  - id: npm:fumadocs-preview
   - id: npm:fumadocs-python
   - id: npm:fumadocs-ui
   - id: npm:@fumadocs/sanity
@@ -142,33 +119,25 @@ npm:packages:
   - id: npm:fumadocs-twoslash
   - id: npm:fumadocs-typescript
   - id: npm:@fumadocs/vite
+  - id: npm:example-openapi
+  - id: npm:example-tanstack-start-openapi
   - id: npm:docs
-  - id: npm:example-astro
   - id: npm:example-asyncapi
   - id: npm:example-base-ui
-  - id: npm:example-content-collections
   - id: npm:example-graphql
   - id: npm:example-i18n
-  - id: npm:example-marble-cms
   - id: npm:example-next
-  - id: npm:example-next-local-html
-  - id: npm:example-next-local-md
-  - id: npm:example-next-min
   - id: npm:example-next-shadcn
   - id: npm:example-next-static
-  - id: npm:example-obsidian
-  - id: npm:example-openapi
-  - id: npm:example-python
+  - id: npm:example-next-min
   - id: npm:example-react-router
   - id: npm:example-react-router-i18n
   - id: npm:example-react-router-min
   - id: npm:example-react-router-rsc
   - id: npm:example-react-router-spa
   - id: npm:example-tanstack-start
-  - id: npm:example-tanstack-start-i18n
-  - id: npm:example-tanstack-start-local-md
   - id: npm:example-tanstack-start-min
-  - id: npm:example-tanstack-start-openapi
+  - id: npm:example-tanstack-start-i18n
   - id: npm:example-tanstack-start-spa
   - id: npm:example-tanstack-start-story
   - id: npm:example-waku

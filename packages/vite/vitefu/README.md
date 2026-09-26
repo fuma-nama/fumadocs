@@ -1,4 +1,3 @@
-This is a patched version of `vitefu`, it is necessary because Fumadocs have multiple ESM deps that actually reference CJS deps.
-For example: `fumadocs-core > ... > micomark > debug`.
+Derived from `vitefu`, trimmed to what `getConfig` needs.
 
-`vitefu` doesn't perform deeper traverse, this patch enforces that.
+`vitefu` stops at the first non-framework dependency, but Fumadocs has ESM dependencies that reference CJS ones (e.g. `fumadocs-core > ... > micromark > debug`), so this version keeps traversing below framework packages.

@@ -3,6 +3,8 @@ title: Docs Page
 description: A page in your documentation
 ---
 
+import { TOCStyle, TOCStylePreview } from './page.client';
+
 Page is the base element of a documentation, it includes Table of contents,
 Footer, and Breadcrumb.
 
@@ -155,11 +157,15 @@ return (
 
 Choose another style for the TOC:
 
-| Style              | Description                                                                   |
-| ------------------ | ----------------------------------------------------------------------------- |
-| `normal` (default) | A track line with a thumb on active headings.                                 |
-| `clerk`            | A track line following heading depth, inspired by [Clerk](https://clerk.com). |
-| `block`            | No track line, a block slides behind active headings.                         |
+<Wrapper>
+  <TOCStylePreview>
+    <TOCStyle value="normal">A track line with a thumb on active headings (default).</TOCStyle>
+    <TOCStyle value="clerk">
+      A track line following heading depth, inspired by [Clerk](https://clerk.com).
+    </TOCStyle>
+    <TOCStyle value="block">No track line, a block slides behind active headings.</TOCStyle>
+  </TOCStylePreview>
+</Wrapper>
 
 ```tsx
 import { DocsPage } from 'fumadocs-ui/layouts/<layout>/page';

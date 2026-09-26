@@ -61,7 +61,8 @@ export function createBrowserFetcher(
     async fetch(url, data) {
       let requestUrl = new URL(url, document.baseURI);
       let requestInit: RequestInit = {
-        method: data.method,
+        // fetch only normalizes the case of some methods
+        method: data.method.toUpperCase(),
         cache: 'no-cache',
         signal:
           typeof requestTimeout === 'number'
