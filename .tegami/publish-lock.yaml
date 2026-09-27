@@ -1,15 +1,17 @@
 core:changelogs:
-  - content: "---\npackages:\n  fumadocs-mdx:\n    type: patch\n---\n\n### Stop recrawling `node_modules` on every Vite config resolution\n\nThe config hook of `fumadocs-mdx/vite` walked the dependency tree below Fumadocs packages once per chain reaching a package, so a docs app with a few Fumadocs packages read ~10k `package.json` files (~0.9s) each time Vite resolved its config, which it does once per build environment.\n\nThe crawl now visits each package once, breadth-first, and still records the shortest chain to every CommonJS dependency (`fumadocs-ui > @base-ui/react > use-sync-external-store/shim` and friends). The result is memoized for the process until the package manager's install state changes, so a build with several environments crawls once.\n"
-    filename: 2026-09-25-vite-config-crawl.md
+  - content: "---\npackages:\n  fumadocs-openapi:\n    type: patch\n  \"@fumadocs/asyncapi\":\n    type: patch\n  \"@fumadocs/graphql\":\n    type: patch\n  \"@fumadocs/language\":\n    type: patch\n---\n\n### Name schema property link buttons for screen readers\n\nGive the icon-only property link button a translated label and announce when its link has been copied.\nInclude Simplified and Traditional Chinese translations for both labels.\n"
+    filename: 2026-09-26-schema-link-label.md
     v: 0.0.0
-  - content: "---\npackages:\n  fumadocs-openapi:\n    type: patch\n---\n\n### Send uppercase HTTP methods from the playground\n\nThe Fetch API only normalizes the case of some methods, so PATCH requests were sent as `patch`, which servers and edges like Vercel reject.\n"
-    filename: 2026-09-25-openapi-method-case.md
+  - content: "---\npackages:\n  fumadocs-core:\n    type: patch\n---\n\n### Fix infinite recursion in the MDX stringifier with `mdast-util-to-markdown@2.1.3`\n\nThe stringifier wraps every `toMarkdown` handler but dropped their `attention` and `peek` properties, which `mdast-util-to-markdown@2.1.3` relies on to serialize bold and italic text. Pages containing them overflowed the stack during build.\n"
+    filename: 2026-09-27-stringifier-attention.md
     v: 0.0.0
 core:packages:
-  - id: npm:@fumadocs/asyncapi
-    updated: false
+  - changelogIds:
+      - 2026-09-26-schema-link-label.md
+    id: npm:@fumadocs/asyncapi
+    updated: true
   - id: npm:@fumadocs/base-ui
-    updated: false
+    updated: true
   - id: npm:@fumadocs/basehub
     updated: false
   - id: npm:@fumadocs/cli
@@ -18,23 +20,27 @@ core:packages:
     updated: false
   - id: npm:@fumadocs/content-collections
     updated: false
-  - id: npm:fumadocs-core
-    updated: false
+  - changelogIds:
+      - 2026-09-27-stringifier-attention.md
+    id: npm:fumadocs-core
+    updated: true
   - id: npm:create-fumadocs-app
     updated: true
   - id: npm:create-fumadocs-versions
     updated: true
-  - id: npm:fumadocs-docgen
-    updated: false
-  - id: npm:@fumadocs/graphql
-    updated: false
   - id: npm:fumadocs-epub
     updated: false
+  - id: npm:fumadocs-docgen
+    updated: false
+  - changelogIds:
+      - 2026-09-26-schema-link-label.md
+    id: npm:@fumadocs/graphql
+    updated: true
+  - changelogIds:
+      - 2026-09-26-schema-link-label.md
+    id: npm:@fumadocs/language
+    updated: true
   - id: npm:@fumari/image-size
-    updated: false
-  - id: npm:@fumadocs/json-schema
-    updated: false
-  - id: npm:@fumadocs/language
     updated: false
   - id: npm:@fumadocs/local-content
     updated: false
@@ -42,35 +48,33 @@ core:packages:
     updated: false
   - id: npm:@fumadocs/local-md
     updated: false
-  - id: npm:@fumadocs/mdx-remote
+  - id: npm:fumadocs-mdx
     updated: false
-  - changelogIds:
-      - 2026-09-25-vite-config-crawl.md
-    id: npm:fumadocs-mdx
-    updated: true
-  - id: npm:@fumadocs/notion
+  - id: npm:@fumadocs/mdx-remote
     updated: false
   - id: npm:fumadocs-obsidian
     updated: false
+  - id: npm:@fumadocs/notion
+    updated: false
+  - id: npm:@fumadocs/json-schema
+    updated: false
   - changelogIds:
-      - 2026-09-25-openapi-method-case.md
+      - 2026-09-26-schema-link-label.md
     id: npm:fumadocs-openapi
     updated: true
   - id: npm:fumadocs-preview
     updated: false
   - id: npm:fumadocs-python
     updated: false
-  - id: npm:fumadocs-ui
-    updated: false
   - id: npm:@fumadocs/sanity
     updated: false
+  - id: npm:fumadocs-ui
+    updated: true
   - id: npm:@fumadocs/satteri
     updated: false
   - id: npm:@fumadocs/shadcn
     updated: false
   - id: npm:shared-api
-    updated: false
-  - id: npm:@fumari/stf
     updated: false
   - id: npm:@fumadocs/story
     updated: false
@@ -78,9 +82,11 @@ core:packages:
     updated: false
   - id: npm:fumadocs-twoslash
     updated: false
-  - id: npm:fumadocs-typescript
-    updated: false
   - id: npm:@fumadocs/vite
+    updated: false
+  - id: npm:@fumari/stf
+    updated: false
+  - id: npm:fumadocs-typescript
     updated: false
 npm:packages:
   - id: npm:@fumadocs/asyncapi
@@ -92,53 +98,61 @@ npm:packages:
   - id: npm:fumadocs-core
   - id: npm:create-fumadocs-app
   - id: npm:create-fumadocs-versions
+  - id: npm:fumadocs-epub
   - id: npm:fumadocs-docgen
   - id: npm:@fumadocs/graphql
-  - id: npm:fumadocs-epub
-  - id: npm:@fumari/image-size
-  - id: npm:@fumadocs/json-schema
   - id: npm:@fumadocs/language
+  - id: npm:@fumari/image-size
   - id: npm:@fumadocs/local-content
   - id: npm:@fumadocs/local-html
   - id: npm:@fumadocs/local-md
-  - id: npm:@fumadocs/mdx-remote
   - id: npm:fumadocs-mdx
-  - id: npm:@fumadocs/notion
+  - id: npm:@fumadocs/mdx-remote
   - id: npm:fumadocs-obsidian
+  - id: npm:@fumadocs/notion
+  - id: npm:@fumadocs/json-schema
   - id: npm:fumadocs-openapi
   - id: npm:fumadocs-preview
   - id: npm:fumadocs-python
-  - id: npm:fumadocs-ui
   - id: npm:@fumadocs/sanity
+  - id: npm:fumadocs-ui
   - id: npm:@fumadocs/satteri
   - id: npm:@fumadocs/shadcn
   - id: npm:shared-api
-  - id: npm:@fumari/stf
   - id: npm:@fumadocs/story
   - id: npm:@fumadocs/tailwind
   - id: npm:fumadocs-twoslash
-  - id: npm:fumadocs-typescript
   - id: npm:@fumadocs/vite
+  - id: npm:@fumari/stf
+  - id: npm:fumadocs-typescript
   - id: npm:example-openapi
   - id: npm:example-tanstack-start-openapi
   - id: npm:docs
   - id: npm:example-asyncapi
-  - id: npm:example-base-ui
   - id: npm:example-graphql
   - id: npm:example-i18n
-  - id: npm:example-next
-  - id: npm:example-next-shadcn
-  - id: npm:example-next-static
-  - id: npm:example-next-min
-  - id: npm:example-react-router
   - id: npm:example-react-router-i18n
+  - id: npm:example-tanstack-start-i18n
+  - id: npm:example-waku-i18n
+  - id: npm:example-astro
+  - id: npm:example-base-ui
+  - id: npm:example-content-collections
+  - id: npm:example-marble-cms
+  - id: npm:example-next
+  - id: npm:example-next-local-html
+  - id: npm:example-next-local-md
+  - id: npm:example-next-min
+  - id: npm:example-next-static
+  - id: npm:example-next-shadcn
+  - id: npm:example-obsidian
+  - id: npm:example-python
+  - id: npm:example-react-router
   - id: npm:example-react-router-min
   - id: npm:example-react-router-rsc
   - id: npm:example-react-router-spa
   - id: npm:example-tanstack-start
+  - id: npm:example-tanstack-start-local-md
   - id: npm:example-tanstack-start-min
-  - id: npm:example-tanstack-start-i18n
   - id: npm:example-tanstack-start-spa
   - id: npm:example-tanstack-start-story
   - id: npm:example-waku
-  - id: npm:example-waku-i18n

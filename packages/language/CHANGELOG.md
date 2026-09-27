@@ -1,3 +1,10 @@
+## @fumadocs/language@0.2.7
+
+### Name schema property link buttons for screen readers
+
+Give the icon-only property link button a translated label and announce when its link has been copied.
+Include Simplified and Traditional Chinese translations for both labels.
+
 ## @fumadocs/language@0.2.6
 
 ### Announce copy confirmation to screen readers

@@ -1,3 +1,10 @@
+## fumadocs-openapi@12.0.4
+
+### Name schema property link buttons for screen readers
+
+Give the icon-only property link button a translated label and announce when its link has been copied.
+Include Simplified and Traditional Chinese translations for both labels.
+
 ## fumadocs-openapi@12.0.3
 
 ### Send uppercase HTTP methods from the playground
