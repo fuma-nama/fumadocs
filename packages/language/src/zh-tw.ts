@@ -65,6 +65,8 @@ const translations = {
   'View as Markdown(page actions)': '以 Markdown 檢視',
 
   // shared API components
+  'Copied Link(schema UI)(aria-label)': '已複製連結',
+  'Copy Link(schema UI)(aria-label)': '複製連結',
   'Default(schema UI)': '預設',
   'Deprecated(schema UI)': '已棄用',
   'Enter Property Name(playground)': '輸入屬性名稱',
