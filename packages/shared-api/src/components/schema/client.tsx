@@ -450,6 +450,7 @@ function ObjectProperty({
           </span>
         )}
         <button
+          aria-live="polite"
           className={cn(
             buttonVariants({ size: 'icon-xs', variant: 'ghost' }),
             'text-fd-muted-foreground [&_svg]:size-3.5',
@@ -457,6 +458,11 @@ function ObjectProperty({
           onClick={onClick}
         >
           {isChecked ? <CheckIcon /> : <LinkIcon />}
+          <span className="sr-only">
+            {isChecked
+              ? t('Copied Link', { note: 'aria-label' })
+              : t('Copy Link', { note: 'aria-label' })}
+          </span>
         </button>
       </div>
       <SchemaDescription schema={schema} className="pb-0" />
