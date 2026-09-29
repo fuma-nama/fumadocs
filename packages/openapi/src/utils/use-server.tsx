@@ -75,7 +75,12 @@ export function ServerProvider({
   );
   const resolveUrl = useCallback(
     (pathname = '') => {
-      const base = isClient ? getServerUrl(server) : 'https://example.com';
+      const base = isClient
+        ? new URL(
+            server ? resolveServerUrl(server.url, server.variables) : '/',
+            window.location.origin,
+          ).href
+        : 'https://example.com';
 
       return pathname ? joinURL(base, pathname) : base;
     },
@@ -89,14 +94,6 @@ export function ServerProvider({
       {children}
     </ServerContext>
   );
-}
-
-/** the URL of a server with its variables filled in, resolved against the page origin */
-export function getServerUrl(server: SelectedServer | null): string {
-  return new URL(
-    server ? resolveServerUrl(server.url, server.variables) : '/',
-    window.location.origin,
-  ).href;
 }
 
 function getDefaultValues(server: ServerObject): Record<string, string> {
