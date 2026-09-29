@@ -378,24 +378,34 @@ function SecurityRequirements({
           <p>{String(error)}</p>
         </div>
       )}
-      <Select items={items} value={selected} onValueChange={(v) => v !== null && select(v)}>
-        <SelectTrigger>
-          <SelectValue />
-        </SelectTrigger>
-        <SelectContent>
-          {items.map(({ value, label }) => (
-            <Fragment key={value}>
-              <SelectItem value={value}>{label}</SelectItem>
-              <div className="px-2 pb-1.5 text-xs text-fd-muted-foreground empty:hidden">
-                {requirements[value].map(
-                  ({ id, scheme }) =>
-                    scheme.description && <Markdown key={id} md={scheme.description} />,
+      <div className="overflow-hidden rounded-md border bg-fd-secondary focus-within:ring focus-within:ring-fd-ring">
+        <Select items={items} value={selected} onValueChange={(v) => v !== null && select(v)}>
+          <SelectTrigger className="rounded-t-md rounded-b-none border-0 bg-transparent focus:ring-0">
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            {items.map(({ value, label }) => (
+              <SelectItem key={value} value={value}>
+                {label}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+        <div className="grid grid-cols-[auto_1fr] gap-2 border-t px-2 py-1.5 text-xs text-fd-muted-foreground empty:hidden">
+          {requirements[selected]?.map(({ id, scheme }, _, arr) => {
+            if (!scheme.description) return;
+
+            return (
+              <Fragment key={id}>
+                {arr.length > 1 && (
+                  <span className="font-medium font-mono text-fd-primary">{id}</span>
                 )}
-              </div>
-            </Fragment>
-          ))}
-        </SelectContent>
-      </Select>
+                <Markdown md={scheme.description} />
+              </Fragment>
+            );
+          })}
+        </div>
+      </div>
       {children}
     </CollapsiblePanel>
   );
