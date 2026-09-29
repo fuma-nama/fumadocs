@@ -83,18 +83,18 @@ export async function requestOAuthToken(
       type === 'implicit'
         ? { scheme: schemeId, client_id: clientId, redirect_uri }
         : { scheme: schemeId, client_id: clientId, client_secret: clientSecret, redirect_uri };
-    const params = new URLSearchParams({
-      response_type: type === 'implicit' ? 'token' : 'code',
-      client_id: clientId,
-      redirect_uri,
-      scope,
-      state: JSON.stringify(state),
-    });
+    // keep the params of `authorizationUrl`, like `audience`
+    const url = new URL(flow.authorizationUrl!, serverUrl);
+    url.searchParams.set('response_type', type === 'implicit' ? 'token' : 'code');
+    url.searchParams.set('client_id', clientId);
+    url.searchParams.set('redirect_uri', redirect_uri);
+    url.searchParams.set('scope', scope);
+    url.searchParams.set('state', JSON.stringify(state));
 
     // where `createOAuthHandler()` sends users back to
     if (redirectUrl)
       document.cookie = `fumadocs-openapi-oauth=${encodeURIComponent(window.location.pathname)}; path=/`;
-    window.location.replace(`${new URL(flow.authorizationUrl!, serverUrl)}?${params}`);
+    window.location.replace(url);
     return;
   }
 
@@ -113,7 +113,8 @@ export async function requestOAuthToken(
   }
 
   if (clientAuth === 'header') {
-    headers.Authorization = `Basic ${btoa(`${clientId}:${clientSecret}`)}`;
+    // form-encoded first, see RFC 6749 section 2.3.1
+    headers.Authorization = `Basic ${btoa(`${encodeURIComponent(clientId)}:${encodeURIComponent(clientSecret)}`)}`;
   } else {
     if (clientId) body.set('client_id', clientId);
     if (clientSecret) body.set('client_secret', clientSecret);

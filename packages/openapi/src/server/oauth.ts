@@ -3,12 +3,14 @@
  */
 export function createOAuthHandler(): (req: Request) => Response {
   return (req) => {
-    const url = new URL(req.url);
     const page = /(?:^|;\s*)fumadocs-openapi-oauth=([^;]+)/.exec(req.headers.get('cookie') ?? '');
-    const target = new URL(decodeURIComponent(page?.[1] ?? '/'), url);
-    if (target.origin !== url.origin) return new Response(null, { status: 400 });
+    // only allow paths of the same origin
+    const target = page && URL.parse(decodeURIComponent(page[1]), 'http://localhost');
+    if (!target || target.origin !== 'http://localhost') return new Response(null, { status: 400 });
 
-    target.search = url.search;
-    return Response.redirect(target, 302);
+    return new Response(null, {
+      status: 302,
+      headers: { Location: target.pathname + new URL(req.url).search },
+    });
   };
 }

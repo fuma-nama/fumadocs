@@ -88,7 +88,7 @@ export function createBrowserFetcher(
           return {
             type: 'client_error',
             url,
-            message: `[Fumadocs] No adapter for ${data.bodyMediaType}, you need to specify one from 'createOpenAPI()'.`,
+            message: `[Fumadocs] No media adapter for ${data.bodyMediaType}, pass one to \`mediaAdapters\` of \`createOpenAPIPage()\`.`,
           };
 
         if (data.bodyMediaType !== 'multipart/form-data') {
