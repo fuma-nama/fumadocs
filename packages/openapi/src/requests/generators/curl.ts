@@ -1,10 +1,11 @@
 import { doubleQuote, indent, inputToString, singleQuote } from '@/requests/string-utils';
+import { resolveMediaAdapter } from '@/requests/media/adapter';
 import type { CodeUsageGenerator } from '@/requests/generators';
 
 export const curl: CodeUsageGenerator = {
   label: 'cURL',
   lang: 'bash',
-  generate(data) {
+  generate(data, { mediaAdapters }) {
     const s: string[] = [];
     s.push(`curl -X ${data.method.toUpperCase()} "${data.url}"`);
 
@@ -26,7 +27,11 @@ export const curl: CodeUsageGenerator = {
       for (const [key, value] of Object.entries(data.body)) {
         s.push(`-F ${key}=${doubleQuote(inputToString(value))}`);
       }
-    } else if (data.body && data.bodyMediaType) {
+    } else if (
+      data.body &&
+      data.bodyMediaType &&
+      resolveMediaAdapter(data.bodyMediaType, mediaAdapters)
+    ) {
       const escaped = singleQuote(
         inputToString(
           data.body,

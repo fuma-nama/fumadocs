@@ -1,7 +1,8 @@
 import { createFileRoute, notFound } from '@tanstack/react-router';
 import { DocsLayout } from 'fumadocs-ui/layouts/notebook';
 import { createServerFn } from '@tanstack/react-start';
-import { docs, source } from '@/lib/source';
+import { docs } from '@/lib/collections';
+import { source } from '@/lib/source';
 import {
   DocsBody,
   DocsDescription,
@@ -43,7 +44,6 @@ const serverLoader = createServerFn({
       return {
         type: 'openapi',
         title: page.data.title,
-        description: page.data.description,
         pageTree,
         props: page.data.getOpenAPIPageProps(),
       };
@@ -90,7 +90,6 @@ function Page() {
     content = (
       <DocsPage full>
         <DocsTitle>{page.title}</DocsTitle>
-        <DocsDescription>{page.description}</DocsDescription>
         <DocsBody>
           <OpenAPIPage {...page.props} />
         </DocsBody>

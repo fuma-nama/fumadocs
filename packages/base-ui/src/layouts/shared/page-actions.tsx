@@ -8,7 +8,7 @@ import { buttonVariants } from '@/components/ui/button';
 import { usePathname } from 'fumadocs-core/framework';
 import { useTranslations } from '@fuma-translate/react';
 
-const cache = new Map<string, Promise<string>>();
+const cache = new Map<string, string>();
 
 /**
  * see https://fumadocs.dev/docs/integrations/llms#page-actions to customize.
@@ -27,16 +27,19 @@ export function MarkdownCopyButton({
   const [isLoading, setLoading] = useState(false);
   const [checked, onClick] = useCopyButton(async () => {
     const cached = cache.get(markdownUrl);
-    if (cached) return navigator.clipboard.writeText(await cached);
+    if (cached) return navigator.clipboard.writeText(cached);
 
     setLoading(true);
 
     try {
-      const promise = fetch(markdownUrl).then((res) => res.text());
-      cache.set(markdownUrl, promise);
       await navigator.clipboard.write([
         new ClipboardItem({
-          'text/plain': promise,
+          'text/plain': fetch(markdownUrl).then(async (res) => {
+            if (!res.ok) throw new Error(`Failed to fetch ${markdownUrl}: ${res.status}`);
+            const content = await res.text();
+            cache.set(markdownUrl, content);
+            return content;
+          }),
         }),
       ]);
     } finally {

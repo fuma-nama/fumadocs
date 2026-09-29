@@ -163,9 +163,9 @@ import { createBrowserFetcher, usePlaygroundAuth } from 'fumadocs-openapi/playgr
 import { encodeRequestData } from 'fumadocs-openapi/requests';
 ```
 
-| Export                   | Does                                                                  |
-| ------------------------ | --------------------------------------------------------------------- |
-| `usePlaygroundAuth()`    | the auth state of the page, its token store and the state of a flow   |
-| `createBrowserFetcher()` | sends a request from the browser, through `proxyUrl` when set         |
-| `encodeRequestData()`    | turns the data of an example into a body, headers and query           |
-| `resolveMediaAdapter()`  | the adapter of a media type, `isMediaTypeSupported()` checks it first |
+| Export                   | Does                                                                |
+| ------------------------ | ------------------------------------------------------------------- |
+| `usePlaygroundAuth()`    | the auth state of the page, its token store and the state of a flow |
+| `createBrowserFetcher()` | sends a request from the browser, through `proxyUrl` when set       |
+| `encodeRequestData()`    | turns the data of an example into a body, headers and query         |
+| `resolveMediaAdapter()`  | the adapter of a media type, `undefined` when unsupported           |

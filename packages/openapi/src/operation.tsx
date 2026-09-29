@@ -22,7 +22,6 @@ import {
   type InlineCodeUsageGenerator,
   pathnameFromRequest,
 } from '@/requests/generators';
-import { isMediaTypeSupported } from '@/requests/media/adapter';
 import { encodeRequestData } from '@/requests/media/encode';
 import { getPreferredType, methodKeys } from '@/utils/schema';
 import { getExampleRequests } from '@/utils/get-example-requests';
@@ -177,8 +176,6 @@ export function OperationProvider({
     if (body?.content && Object.keys(body.content).length > 0) {
       const content: Record<string, MediaTypeObject> = {};
       for (const [mediaType, item] of Object.entries(body.content)) {
-        if (!isMediaTypeSupported(mediaType, runtime.mediaAdapters))
-          throw new Error(`Media type ${mediaType} is not supported (in ${path})`);
         content[mediaType] = resolve(item);
       }
       requestBody = { description: body.description, required: body.required, content };
@@ -441,6 +438,8 @@ export function useResponseExamples(): ResponseTab[] {
 
         for (const [key, item] of Object.entries(responseOfType.examples)) {
           const example = resolve(item);
+          // e.g. examples with `externalValue`
+          if (example.value === undefined) continue;
 
           tab.examples.push({
             label:

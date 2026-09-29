@@ -1,5 +1,6 @@
 'use client';
 import { useOpenAPI } from '@/utils/create-page';
+import { getServerUrl, useServer } from '@/utils/use-server';
 import { useQuery } from 'shared-api/utils/use-query';
 import {
   createContext,
@@ -40,8 +41,12 @@ export interface OAuthFlowInput {
   clientSecret: string;
   username: string;
   password: string;
-  /** where the password flow sends the client credentials */
+  /** where the password and client credentials flows send the client credentials */
   clientAuth: 'body' | 'header';
+  /** URL of the selected server, relative URLs of the flow resolve against it */
+  serverUrl: string;
+  /** URL of the `createOAuthHandler()` route, defaults to the page */
+  redirectUrl?: string;
 }
 
 /**
@@ -53,15 +58,27 @@ export interface OAuthFlowInput {
 export async function requestOAuthToken(
   scheme: OAuth2SecurityScheme,
   type: OAuthFlowType,
-  { schemeId, scopes, clientId, clientSecret, username, password, clientAuth }: OAuthFlowInput,
+  {
+    schemeId,
+    scopes,
+    clientId,
+    clientSecret,
+    username,
+    password,
+    clientAuth,
+    serverUrl,
+    redirectUrl,
+  }: OAuthFlowInput,
 ): Promise<string | undefined> {
   const flows = scheme.flows ?? {};
-  const scope = scopes.join('+');
-  const redirect_uri = window.location.href;
+  const scope = scopes.join(' ');
 
   if (type === 'implicit' || type === 'authorizationCode') {
     const flow = flows[type];
     if (!flow) return;
+    // redirect URIs cannot have a fragment
+    const redirect_uri = new URL(redirectUrl ?? window.location.pathname, window.location.origin)
+      .href;
     const state: AuthCodeState | ImplicitState =
       type === 'implicit'
         ? { scheme: schemeId, client_id: clientId, redirect_uri }
@@ -74,7 +91,10 @@ export async function requestOAuthToken(
       state: JSON.stringify(state),
     });
 
-    window.location.replace(`${flow.authorizationUrl}?${params}`);
+    // where `createOAuthHandler()` sends users back to
+    if (redirectUrl)
+      document.cookie = `fumadocs-openapi-oauth=${encodeURIComponent(window.location.pathname)}; path=/`;
+    window.location.replace(`${new URL(flow.authorizationUrl!, serverUrl)}?${params}`);
     return;
   }
 
@@ -88,23 +108,22 @@ export async function requestOAuthToken(
     body.set('grant_type', 'password');
     body.set('username', username);
     body.set('password', password);
-    if (clientAuth === 'header') {
-      headers.Authorization = `Basic ${btoa(`${clientId}:${clientSecret}`)}`;
-    } else {
-      if (clientId) body.set('client_id', clientId);
-      if (clientSecret) body.set('client_secret', clientSecret);
-    }
   } else {
     body.set('grant_type', 'client_credentials');
-    body.set('client_id', clientId);
-    body.set('client_secret', clientSecret);
   }
 
-  return fetchToken(flow.tokenUrl!, body, headers);
+  if (clientAuth === 'header') {
+    headers.Authorization = `Basic ${btoa(`${clientId}:${clientSecret}`)}`;
+  } else {
+    if (clientId) body.set('client_id', clientId);
+    if (clientSecret) body.set('client_secret', clientSecret);
+  }
+
+  return fetchToken(new URL(flow.tokenUrl!, serverUrl), body, headers);
 }
 
 async function fetchToken(
-  tokenUrl: string,
+  tokenUrl: URL,
   body: URLSearchParams,
   headers: Record<string, string> = {},
 ): Promise<string> {
@@ -156,6 +175,7 @@ export function usePlaygroundAuth() {
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const { dereferenced, resolve } = useOpenAPI().doc;
+  const { server } = useServer();
   const schemes = dereferenced.components?.securitySchemes;
   const [store, setStore] = useState<TokenStore>({});
 
@@ -169,7 +189,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       type: 'authorization_code',
       ...state,
       token: await fetchToken(
-        value.tokenUrl!,
+        new URL(value.tokenUrl!, getServerUrl(server)),
         new URLSearchParams({
           grant_type: 'authorization_code',
           code,

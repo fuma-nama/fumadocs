@@ -18,6 +18,7 @@ import type { BrowserFetcherOptions } from '@/playground/fetcher';
 import { DefaultResultDisplay, type ResultDisplayProps } from './components/result-display';
 import { pathnameFromRequest } from '@/requests/generators';
 import { MethodLabel } from '@/ui/components/method-label';
+import { Markdown } from '@/ui/components/markdown';
 import { useQuery } from 'shared-api/utils/use-query';
 import {
   Collapsible,
@@ -339,55 +340,21 @@ function SecurityRequirements({
     if (defaultOpen) setOpen(true);
   });
 
-  const items = requirements.map((requirement, i) => {
-    if (requirement.length === 1) {
-      const { id, scheme } = requirement[0];
-
-      return {
-        value: i,
-        label: (
-          <div>
-            <p
-              className={cn(
-                'font-mono font-medium',
-                scheme.deprecated && 'text-fd-muted-foreground line-through',
-              )}
-            >
-              {id}
-            </p>
-            <p className="text-fd-muted-foreground whitespace-pre-wrap">{scheme.description}</p>
-          </div>
-        ),
-      };
-    }
-
-    return {
-      value: i,
-      label: (
-        <div>
-          <p className="inline-flex items-center gap-1 font-mono font-medium">
-            {requirement.map((item, i) => (
-              <Fragment key={i}>
-                {i > 0 && <PlusIcon className="text-fd-muted-foreground size-3.5" />}
-                <span
-                  className={cn(item.scheme.deprecated && 'text-fd-muted-foreground line-through')}
-                >
-                  {item.id}
-                </span>
-              </Fragment>
-            ))}
-          </p>
-          <ul className="text-fd-muted-foreground whitespace-pre-wrap list-disc list-inside">
-            {requirement.map((item, i) => (
-              <li key={i} className="empty:hidden">
-                {item.scheme.description}
-              </li>
-            ))}
-          </ul>
-        </div>
-      ),
-    };
-  });
+  const items = requirements.map((requirement, i) => ({
+    value: i,
+    label: (
+      <p className="inline-flex items-center gap-1 font-mono font-medium">
+        {requirement.map((item, i) => (
+          <Fragment key={i}>
+            {i > 0 && <PlusIcon className="text-fd-muted-foreground size-3.5" />}
+            <span className={cn(item.scheme.deprecated && 'text-fd-muted-foreground line-through')}>
+              {item.id}
+            </span>
+          </Fragment>
+        ))}
+      </p>
+    ),
+  }));
 
   return (
     <CollapsiblePanel
@@ -423,6 +390,11 @@ function SecurityRequirements({
           ))}
         </SelectContent>
       </Select>
+      <div className="text-fd-muted-foreground empty:hidden">
+        {requirements[selected].map(
+          ({ id, scheme }) => scheme.description && <Markdown key={id} md={scheme.description} />,
+        )}
+      </div>
       {children}
     </CollapsiblePanel>
   );

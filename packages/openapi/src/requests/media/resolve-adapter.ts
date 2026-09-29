@@ -31,24 +31,10 @@ export function resolveMediaAdapter(
     }
   }
 
-  if (mediaType === 'text/plain') {
+  if (normalized === 'text/plain') {
     console.warn(
       'there is no defined behaviour for encoding form values into "text/plain", using JSON encoder for now.',
     );
     return adapters['application/json'];
   }
-}
-
-/**
- * Check if a media type is supported by the given adapters.
- *
- * @param mediaType - The media type to check
- * @param adapters - Record of media adapters
- * @returns true if the media type is supported
- */
-export function isMediaTypeSupported(
-  mediaType: string,
-  adapters: Record<string, MediaAdapter>,
-): boolean {
-  return resolveMediaAdapter(mediaType, adapters) !== undefined;
 }
