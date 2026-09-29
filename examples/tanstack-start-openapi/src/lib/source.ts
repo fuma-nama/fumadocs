@@ -1,19 +1,10 @@
 import { llms, loader } from 'fumadocs-core/source';
-import { defineDocs } from 'fumadocs-mdx/macro';
 import { lucideIconsPlugin } from 'fumadocs-core/source/lucide-icons';
+import { docs } from './collections';
 import { docsRoute } from './shared';
 import { openapi } from './openapi';
 
-export const docs = defineDocs({
-  dir: 'content/docs',
-  docs: {
-    async: true,
-    postprocess: {
-      includeProcessedMarkdown: true,
-    },
-  },
-});
-
+// server-only: `staticSource()` reads files, client code imports `docs` from `./collections`
 export const source = loader(
   {
     docs: docs.toFumadocsSource(),

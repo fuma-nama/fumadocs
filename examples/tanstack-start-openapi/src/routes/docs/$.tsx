@@ -1,7 +1,8 @@
 import { createFileRoute, notFound } from '@tanstack/react-router';
 import { DocsLayout } from 'fumadocs-ui/layouts/notebook';
 import { createServerFn } from '@tanstack/react-start';
-import { docs, source } from '@/lib/source';
+import { docs } from '@/lib/collections';
+import { source } from '@/lib/source';
 import {
   DocsBody,
   DocsDescription,

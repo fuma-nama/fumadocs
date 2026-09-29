@@ -226,13 +226,14 @@ export default function Page({ slug }) {
 
 Pass a client payload from server, then render the page using the `<OpenAPIPage />` component you created above.
 
-For example, in Tanstack Start:
+For example, in Tanstack Start. Only import `source` on the server, `staticSource()` reads files: define [Macro API](/docs/mdx/macro) collections in another module, like `lib/collections.ts`.
 
 ```tsx title="routes/docs/$.tsx"
 import { createFileRoute, notFound } from '@tanstack/react-router';
 import { DocsLayout } from 'fumadocs-ui/layouts/docs';
 import { createServerFn } from '@tanstack/react-start';
-import { docs, source } from '@/lib/source';
+import { docs } from '@/lib/collections';
+import { source } from '@/lib/source';
 import { DocsBody, DocsPage, DocsTitle } from 'fumadocs-ui/layouts/docs/page';
 import { useFumadocsLoader } from 'fumadocs-core/source/client';
 import { type ReactNode, Suspense } from 'react';
