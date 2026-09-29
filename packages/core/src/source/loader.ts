@@ -182,7 +182,8 @@ export interface LoaderOutput<Config extends LoaderConfig = LoaderConfig> {
 }
 
 /**
- * Slugs are URI encoded by default, but routers may pass them decoded: key pages by the decoded form, so both resolve.
+ * Generated slugs are URI encoded, but routers like React Router pass them decoded.
+ * Key pages by the decoded form so both resolve.
  */
 function slugsKey(slugs: string[]): string {
   const key = slugs.join('/');
@@ -195,7 +196,7 @@ function slugsKey(slugs: string[]): string {
 }
 
 function createPageIndexer({ url }: ResolvedLoaderConfig) {
-  // (locale.slugs -> page), with `slugsKey()`
+  // (locale.slugsKey -> page)
   const pages = new Map<string, Page>();
   // (locale.path -> page)
   const pathToMeta = new Map<string, Meta>();
