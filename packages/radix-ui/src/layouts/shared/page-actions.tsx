@@ -118,7 +118,7 @@ export function ViewOptionsPopover({
       },
       markdownUrl && {
         title: t('View as Markdown'),
-        href: markdownUrl,
+        href: withBasePath(markdownUrl),
         icon: <TextIcon />,
       },
       {
