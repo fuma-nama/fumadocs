@@ -4,4 +4,4 @@ export {
   type EncodedParameter,
   type EncodedParameterMultiple,
 } from './media/encode';
-export { isMediaTypeSupported, resolveMediaAdapter } from './media/resolve-adapter';
+export { resolveMediaAdapter } from './media/resolve-adapter';

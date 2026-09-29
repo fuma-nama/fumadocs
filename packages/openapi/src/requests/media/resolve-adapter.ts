@@ -38,17 +38,3 @@ export function resolveMediaAdapter(
     return adapters['application/json'];
   }
 }
-
-/**
- * Check if a media type is supported by the given adapters.
- *
- * @param mediaType - The media type to check
- * @param adapters - Record of media adapters
- * @returns true if the media type is supported
- */
-export function isMediaTypeSupported(
-  mediaType: string,
-  adapters: Record<string, MediaAdapter>,
-): boolean {
-  return resolveMediaAdapter(mediaType, adapters) !== undefined;
-}

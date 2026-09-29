@@ -9,4 +9,6 @@ A request body with a media type that has no adapter no longer throws. It is sho
 
 `text/plain` with parameters, like `text/plain; charset=utf-8`, is also handled like `text/plain`.
 
+`isMediaTypeSupported()` is removed, use `resolveMediaAdapter()` instead.
+
 Fix [#3615](https://github.com/fuma-nama/fumadocs/issues/3615)
