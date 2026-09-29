@@ -178,3 +178,20 @@ function stringifyOutput(output: OutputFile[]) {
   }
   return lines.join('\n\n');
 }
+
+test('OAuth handler sends users back to the page that started the flow', () => {
+  const handler = createOpenAPI().createOAuthHandler();
+  const request = (page?: string) =>
+    handler(
+      new Request('https://docs.example.com/api/oauth?code=abc&state=xyz', {
+        headers: page ? { cookie: `fumadocs-openapi-oauth=${encodeURIComponent(page)}` } : {},
+      }),
+    );
+
+  const res = request('/docs/Get%20A%20Thing');
+  expect(res.status).toBe(302);
+  expect(res.headers.get('location')).toBe('/docs/Get%20A%20Thing?code=abc&state=xyz');
+  expect(request().status).toBe(400);
+  expect(request('//evil.example').status).toBe(400);
+  expect(request('https://evil.example/docs').status).toBe(400);
+});

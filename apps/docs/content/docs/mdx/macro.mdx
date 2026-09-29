@@ -69,6 +69,12 @@ export default function Page({ path }: { path: string }) {
 }
 ```
 
+<Callout type="warn">
+  The browser runs the whole module you import `docs` from. When your `loader()` has server-only
+  sources, like `openapi.staticSource()`, define collections in another module (e.g.
+  `lib/collections.ts`) and import them from there.
+</Callout>
+
 #### Async collections
 
 With [`async`](/docs/mdx/async) enabled, only the frontmatter is bundled upfront and the content is fetched on demand.

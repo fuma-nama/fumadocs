@@ -54,6 +54,8 @@ export interface OpenAPIRuntimeOptions {
    * @defaultValue `fumadocs-openapi-`
    */
   storageKeyPrefix?: string;
+  /** URL of the `createOAuthHandler()` route, the redirect URI of OAuth flows instead of the page */
+  oauthRedirectUrl?: string;
   /**
    * Generate example code usage for all endpoints.
    */
@@ -309,6 +311,7 @@ function OpenAPIProvider({
   generateTypeScriptDefinitions,
   proxyUrl,
   storageKeyPrefix = 'fumadocs-openapi-',
+  oauthRedirectUrl,
   shiki,
   shikiOptions = defaultShikiOptions,
   showResponseSchema,
@@ -327,6 +330,7 @@ function OpenAPIProvider({
       generateTypeScriptDefinitions,
       proxyUrl,
       storageKeyPrefix,
+      oauthRedirectUrl,
     }),
     [
       document,
@@ -336,6 +340,7 @@ function OpenAPIProvider({
       generateTypeScriptDefinitions,
       proxyUrl,
       storageKeyPrefix,
+      oauthRedirectUrl,
     ],
   );
   const render = useMemo<RenderContext>(

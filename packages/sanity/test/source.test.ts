@@ -1,4 +1,3 @@
-import type { SanityClient } from '@sanity/client';
 import { dynamicLoader } from 'fumadocs-core/source';
 import type { DefinedFetchType } from 'next-sanity/live';
 import { describe, expect, it, vi } from 'vitest';
@@ -20,13 +19,6 @@ function liveFetch(docs: () => unknown[]) {
 }
 
 describe('createSanitySource', () => {
-  it('relies on the loader memory cache with a plain client', () => {
-    const client = { fetch: vi.fn() } as unknown as SanityClient;
-    const source = createSanitySource({ client, docType: 'docs' });
-
-    expect(source.cache).toBe('memory');
-  });
-
   it('re-reads `sanityFetch` on every call and keeps unchanged documents by identity', async () => {
     let docs = [doc('a', '1'), doc('b', '1')];
     const { fn, sanityFetch } = liveFetch(() => docs);

@@ -1,3 +1,10 @@
+## @fumadocs/graphql@0.3.1
+
+### Name schema property link buttons for screen readers
+
+Give the icon-only property link button a translated label and announce when its link has been copied.
+Include Simplified and Traditional Chinese translations for both labels.
+
 ## @fumadocs/graphql@0.3.0
 
 ### Headless GraphQL pages

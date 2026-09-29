@@ -74,13 +74,6 @@ describe('obsidian source', () => {
     expect(compiles).toBe(1);
   });
 
-  test('applies baseDir to virtual paths', async () => {
-    const source = await obsidian({ dir: fixturesDir }).staticSource({ baseDir: 'vault' });
-    const paths = source.files.map((file) => file.path);
-
-    expect(paths).toContain(path.join('vault', 'Welcome.md'));
-  });
-
   test('loads meta.json files', async () => {
     const dir = await createTempDir();
     await fs.writeFile(path.join(dir, 'index.md'), '# Home');

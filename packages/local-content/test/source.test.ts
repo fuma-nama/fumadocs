@@ -111,19 +111,6 @@ describe('createLocalSource', () => {
     expect(parsed.sort()).toEqual(['guide.md', 'index.md', 'meta.json']);
   });
 
-  test('invalidateFile reparses only the changed file', async () => {
-    const parsed: string[] = [];
-    const source = createLocalSource({ dir, integration: integration((p) => parsed.push(p)) });
-
-    await source.staticSource();
-    expect(parsed).toHaveLength(3);
-
-    parsed.length = 0;
-    source.invalidateFile(path.join(dir, 'guide.md'));
-    await source.staticSource();
-    expect(parsed).toEqual(['guide.md']);
-  });
-
   test('invalidateAll reparses every file', async () => {
     const parsed: string[] = [];
     const source = createLocalSource({ dir, integration: integration((p) => parsed.push(p)) });

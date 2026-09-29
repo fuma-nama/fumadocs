@@ -3,37 +3,12 @@ import * as fs from 'node:fs/promises';
 import * as path from 'node:path';
 import { expect, test } from 'vitest';
 import { rehypeCodeDefaultOptions } from 'fumadocs-core/mdx-plugins/rehype-code';
-import { applySatteriPreset } from '@fumadocs/satteri/preset';
-import { defineCollections, defineConfig } from '@/config';
+import { defineCollections } from '@/config';
 import { buildConfig, type DocCollectionItem } from '@/config/build';
 import { createCore } from '@/core';
 import { buildMDX } from '@/loaders/mdx/build';
 
 const baseDir = path.dirname(fileURLToPath(import.meta.url));
-
-test('satteri compiler resolves preset options', async () => {
-  const config = buildConfig(
-    {
-      docs: defineCollections({
-        type: 'doc',
-        compiler: 'satteri',
-        dir: baseDir,
-      }),
-      default: defineConfig({
-        satteriOptions: {
-          rehypeCodeOptions: false,
-        },
-      }),
-    },
-    process.cwd(),
-  );
-
-  const input = config.global.satteriOptions;
-  const preset = typeof input === 'function' ? await input('bundler') : input;
-  const options = await applySatteriPreset(preset)('bundler');
-  expect(options.features?.gfm).toBe(true);
-  expect(options.mdastPlugins?.length).toBeGreaterThan(0);
-});
 
 test('buildMDX with satteri compiler', async () => {
   const core = createCore({

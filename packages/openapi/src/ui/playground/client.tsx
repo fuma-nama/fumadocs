@@ -18,6 +18,7 @@ import type { BrowserFetcherOptions } from '@/playground/fetcher';
 import { DefaultResultDisplay, type ResultDisplayProps } from './components/result-display';
 import { pathnameFromRequest } from '@/requests/generators';
 import { MethodLabel } from '@/ui/components/method-label';
+import { Markdown } from '@/ui/components/markdown';
 import { useQuery } from 'shared-api/utils/use-query';
 import {
   Collapsible,
@@ -339,55 +340,21 @@ function SecurityRequirements({
     if (defaultOpen) setOpen(true);
   });
 
-  const items = requirements.map((requirement, i) => {
-    if (requirement.length === 1) {
-      const { id, scheme } = requirement[0];
-
-      return {
-        value: i,
-        label: (
-          <div>
-            <p
-              className={cn(
-                'font-mono font-medium',
-                scheme.deprecated && 'text-fd-muted-foreground line-through',
-              )}
-            >
-              {id}
-            </p>
-            <p className="text-fd-muted-foreground whitespace-pre-wrap">{scheme.description}</p>
-          </div>
-        ),
-      };
-    }
-
-    return {
-      value: i,
-      label: (
-        <div>
-          <p className="inline-flex items-center gap-1 font-mono font-medium">
-            {requirement.map((item, i) => (
-              <Fragment key={i}>
-                {i > 0 && <PlusIcon className="text-fd-muted-foreground size-3.5" />}
-                <span
-                  className={cn(item.scheme.deprecated && 'text-fd-muted-foreground line-through')}
-                >
-                  {item.id}
-                </span>
-              </Fragment>
-            ))}
-          </p>
-          <ul className="text-fd-muted-foreground whitespace-pre-wrap list-disc list-inside">
-            {requirement.map((item, i) => (
-              <li key={i} className="empty:hidden">
-                {item.scheme.description}
-              </li>
-            ))}
-          </ul>
-        </div>
-      ),
-    };
-  });
+  const items = requirements.map((requirement, i) => ({
+    value: i,
+    label: (
+      <span className="inline-flex items-center gap-1 font-mono font-medium">
+        {requirement.map((item, i) => (
+          <Fragment key={i}>
+            {i > 0 && <PlusIcon className="text-fd-muted-foreground size-3.5" />}
+            <span className={cn(item.scheme.deprecated && 'text-fd-muted-foreground line-through')}>
+              {item.id}
+            </span>
+          </Fragment>
+        ))}
+      </span>
+    ),
+  }));
 
   return (
     <CollapsiblePanel
@@ -411,18 +378,34 @@ function SecurityRequirements({
           <p>{String(error)}</p>
         </div>
       )}
-      <Select items={items} value={selected} onValueChange={(v) => v !== null && select(v)}>
-        <SelectTrigger>
-          <SelectValue />
-        </SelectTrigger>
-        <SelectContent>
-          {items.map(({ value, label }) => (
-            <SelectItem key={value} value={value}>
-              {label}
-            </SelectItem>
-          ))}
-        </SelectContent>
-      </Select>
+      <div className="overflow-hidden rounded-md border bg-fd-secondary focus-within:ring focus-within:ring-fd-ring">
+        <Select items={items} value={selected} onValueChange={(v) => v !== null && select(v)}>
+          <SelectTrigger className="rounded-t-md rounded-b-none border-0 bg-transparent focus:ring-0">
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            {items.map(({ value, label }) => (
+              <SelectItem key={value} value={value}>
+                {label}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+        <div className="grid grid-cols-[auto_1fr] gap-2 border-t px-2 py-1.5 text-xs text-fd-muted-foreground empty:hidden">
+          {requirements[selected]?.map(({ id, scheme }, _, arr) => {
+            if (!scheme.description) return;
+
+            return (
+              <Fragment key={id}>
+                {arr.length > 1 && (
+                  <span className="font-medium font-mono text-fd-primary">{id}</span>
+                )}
+                <Markdown md={scheme.description} />
+              </Fragment>
+            );
+          })}
+        </div>
+      </div>
       {children}
     </CollapsiblePanel>
   );

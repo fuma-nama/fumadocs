@@ -2,7 +2,7 @@ import { encodeRequestData } from '@/requests/media/encode';
 import type { RawRequestData, RequestData } from '@/requests/types';
 import type { HttpMethods, OperationObject, ParameterObject, RequestBodyObject } from '@/types';
 import type { MediaAdapter } from '@/requests/media/adapter';
-import { getPreferredType, pickExample } from '@/utils/schema';
+import { getExampleValue, getPreferredType, pickExample } from '@/utils/schema';
 import type { JsonSchema } from '@fumadocs/json-schema';
 import { sample } from '@fumadocs/json-schema';
 import { dereference } from '@fumadocs/json-schema';
@@ -133,7 +133,7 @@ function getRequestData({
     const bodyOfType = dereference(body.content[type]);
 
     if (bodyOfType.examples && sampleKey) {
-      result.body = getRaw(dereference(bodyOfType.examples[sampleKey]).value);
+      result.body = getExampleValue(dereference(bodyOfType.examples[sampleKey]));
     } else if (bodyOfType.example) {
       result.body = getRaw(bodyOfType.example);
     } else {

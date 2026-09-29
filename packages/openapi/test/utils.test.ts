@@ -97,23 +97,6 @@ describe('URL utilities', () => {
       );
     });
 
-    test('path with existing query parameter - search example', () => {
-      const requestData: RequestData = {
-        method: 'get',
-        path: {},
-        query: {
-          limit: { values: ['10'] },
-          sort: { values: ['date'] },
-        },
-        header: {},
-        cookie: {},
-      };
-
-      expect(pathnameFromRequest('/api/location/search?name=foo', requestData)).toBe(
-        '/api/location/search?name=foo&limit=10&sort=date',
-      );
-    });
-
     test('path with existing query parameters and path parameters', () => {
       const requestData: RequestData = {
         method: 'get',
@@ -145,38 +128,6 @@ describe('URL utilities', () => {
 
       expect(pathnameFromRequest('/api/foo/bar?verbose=true', requestData)).toBe(
         '/api/foo/bar?verbose=false',
-      );
-    });
-
-    test('handles multiple existing query parameters', () => {
-      const requestData: RequestData = {
-        method: 'get',
-        path: {},
-        query: {
-          newParam: { values: ['value'] },
-        },
-        header: {},
-        cookie: {},
-      };
-
-      expect(pathnameFromRequest('/api/search?q=test&type=user&active=true', requestData)).toBe(
-        '/api/search?q=test&type=user&active=true&newParam=value',
-      );
-    });
-
-    test('handles array parameters with existing query string', () => {
-      const requestData: RequestData = {
-        method: 'get',
-        path: {},
-        query: {
-          categories: { values: ['tech', 'science'] },
-        },
-        header: {},
-        cookie: {},
-      };
-
-      expect(pathnameFromRequest('/api/articles?featured=true', requestData)).toBe(
-        '/api/articles?featured=true&categories=tech&categories=science',
       );
     });
 

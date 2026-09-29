@@ -172,6 +172,69 @@ test('keeps falsy response examples', async () => {
   expect(tabs[0].examples?.[0].sample).toBe(0);
 });
 
+test('skips response examples without a value', async () => {
+  let tabs: ResponseTab[] = [];
+
+  await render(
+    '/museum-hours',
+    'get',
+    function Harness() {
+      tabs = useResponseExamples();
+      return null;
+    },
+    ({ operation, pathItem }) => ({
+      operation: {
+        ...operation,
+        responses: {
+          '200': {
+            description: 'ok',
+            content: {
+              'application/json': {
+                schema: { type: 'object' },
+                examples: {
+                  Default: {},
+                  Populated: { value: { id: '1' } },
+                  Data: { dataValue: { id: '2' } },
+                },
+              },
+            },
+          },
+        },
+      },
+      pathItem,
+    }),
+  );
+
+  expect(tabs[0].examples?.map((example) => example.sample)).toEqual([{ id: '1' }, { id: '2' }]);
+});
+
+test('renders request bodies of unsupported media types', async () => {
+  let info: OperationInfo;
+  let curl: string | undefined;
+
+  await render(
+    '/special-events',
+    'post',
+    function Harness() {
+      info = useOperation();
+      curl = useCodeUsage('curl');
+      return null;
+    },
+    ({ operation, pathItem }) => ({
+      operation: {
+        ...operation,
+        requestBody: {
+          content: { 'application/pdf': { schema: { type: 'string', format: 'binary' } } },
+        },
+      },
+      pathItem,
+    }),
+  );
+
+  expect(Object.keys(info!.requestBody!.content)).toEqual(['application/pdf']);
+  expect(curl).not.toContain('-d');
+});
+
 test('generates inline code samples', async () => {
   let code: string | undefined;
 

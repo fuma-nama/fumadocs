@@ -103,6 +103,8 @@ You can create a media adapter to support other media types in API pages, a medi
 - Converting value into `fetch()` body compatible with corresponding media type.
 - Generate code example based on different programming language/tool.
 
+Request bodies of other media types are read-only: they are left out of code usages, and cannot be sent from the playground.
+
 ```tsx title="components/api-page.tsx" twoslash
 'use client';
 import { createOpenAPIPage } from 'fumadocs-openapi/ui';

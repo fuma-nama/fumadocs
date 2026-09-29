@@ -1,3 +1,17 @@
+## fumadocs-core@16.15.16
+
+### Get pages by decoded slugs
+
+`getPage()` accepts both URI encoded and decoded slugs. React Router and TanStack Router pass decoded params, so pages with spaces or non-ASCII characters in their slugs were not found.
+
+Fix [#3613](https://github.com/fuma-nama/fumadocs/issues/3613)
+
+## fumadocs-core@16.15.15
+
+### Fix infinite recursion in the MDX stringifier with `mdast-util-to-markdown@2.1.3`
+
+The stringifier wraps every `toMarkdown` handler but dropped their `attention` and `peek` properties, which `mdast-util-to-markdown@2.1.3` relies on to serialize bold and italic text. Pages containing them overflowed the stack during build.
+
 ## fumadocs-core@16.15.13
 
 ### Keep TOC step numbers after an HTML re-parse

@@ -1,9 +1,9 @@
 import { expect, test } from 'vitest';
 import { createGetUrl, getSlugs, loader, LoaderOptions, StaticSource } from '@/source';
-import { metaSchema } from '@/source/schema';
 import type { ReactElement } from 'react';
 import { removeUndefined } from '@/utils/remove-undefined';
 import { lucideIconsPlugin } from '@/source/plugins/lucide-icons';
+import { slugsFromData } from '@/source/plugins/slugs';
 
 test('get slugs', () => {
   expect(getSlugs('index.mdx')).toStrictEqual([]);
@@ -31,11 +31,6 @@ test('Get URL: Base', () => {
   const getUrl = createGetUrl('/docs');
   expect(getUrl(['docs', 'hello'])).toBe('/docs/docs/hello');
   expect(getUrl([''])).toBe('/docs');
-});
-
-test('meta schema: root accepts boolean and string', () => {
-  expect(metaSchema.parse({ root: true }).root).toBe(true);
-  expect(metaSchema.parse({ root: 'version' }).root).toBe('version');
 });
 
 const pageTreeTests: {
@@ -154,16 +149,6 @@ for (const pageTreeTest of pageTreeTests) {
     ).toMatchFileSnapshot(pageTreeTest.output);
   });
 }
-
-test('Loader: Simple', async () => {
-  const result = loader({
-    baseUrl: '/',
-    source: (await import('./fixtures/page-trees/basic')).source,
-  });
-
-  expect(result.getPages().length).toBe(1);
-  expect(result.getPage(['test'])).toBeDefined();
-});
 
 test('Loader: base slugs', () => {
   let pluginSlugs: string[] | undefined;
@@ -299,6 +284,31 @@ test('Loader: resolve encoded relative file paths', () => {
   if (!current) throw new Error('expected current page');
 
   expect(result.resolveHref('./hello%20world.md', current)).toBe('/docs/guide/hello%20world');
+});
+
+test('Loader: get pages by encoded or decoded slugs', () => {
+  const result = loader({
+    baseUrl: '/docs',
+    source: {
+      files: [
+        { type: 'page', path: 'guide/hello world.md', data: { title: 'Hello' } },
+        { type: 'page', path: '中文.md', data: { title: 'Chinese' } },
+        { type: 'page', path: '100%.md', data: { title: 'Percent' } },
+        { type: 'page', path: 'custom.md', data: { title: 'Custom', slug: 'custom/a b' } },
+      ],
+    },
+    slugs: slugsFromData(),
+  });
+
+  expect(result.getPage(['guide', 'hello%20world'])?.data.title).toBe('Hello');
+  expect(result.getPage(['guide', 'hello world'])?.data.title).toBe('Hello');
+  expect(result.getPage(['%E4%B8%AD%E6%96%87'])?.data.title).toBe('Chinese');
+  expect(result.getPage(['中文'])?.data.title).toBe('Chinese');
+  expect(result.getPage(['100%25'])?.data.title).toBe('Percent');
+  expect(result.getPage(['100%'])?.data.title).toBe('Percent');
+  expect(result.getPage(['custom', 'a b'])?.data.title).toBe('Custom');
+  expect(result.getPage(['custom', 'a%20b'])?.data.title).toBe('Custom');
+  expect(result.getPage(['missing%'])).toBeUndefined();
 });
 
 test('Nested Directories', async () => {

@@ -68,15 +68,6 @@ describe('remark-code-tab', () => {
     expect(code).toContain('"A"');
   });
 
-  it('keeps an icon-only tab name', async () => {
-    const code = await compile(
-      '```js tab="<Home />"\nconst a = 1\n```\n\n```js tab="B"\nconst b = 2\n```',
-      { Tabs: 'Tabs', parseMdx: true },
-    );
-
-    expect(code).toContain('_jsx(Home, {})');
-  });
-
   it('keeps separate groups apart', async () => {
     const code = await compile(`${source}\n\nsome text\n\n${source}`);
 

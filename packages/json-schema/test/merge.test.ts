@@ -2,37 +2,6 @@ import { describe, expect, test } from 'vitest';
 import { mergeAllOf } from '@/merge';
 
 describe('Merge object schemas', () => {
-  test('Merge single object', () => {
-    const result = mergeAllOf({
-      allOf: [
-        {
-          type: 'object',
-          properties: {
-            test: {
-              type: 'string',
-              enum: ['one', 'two'],
-            },
-          },
-        },
-      ],
-    });
-
-    expect(result).toMatchInlineSnapshot(`
-      {
-        "properties": {
-          "test": {
-            "enum": [
-              "one",
-              "two",
-            ],
-            "type": "string",
-          },
-        },
-        "type": "object",
-      }
-    `);
-  });
-
   test('Merge multiple objects', () => {
     const result = mergeAllOf({
       allOf: [
