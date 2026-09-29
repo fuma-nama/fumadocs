@@ -1,4 +1,4 @@
-import type { Heading, Link, Nodes, Root } from 'mdast';
+import type { Heading, Link, LinkReference, Nodes, Root } from 'mdast';
 import { remark } from 'remark';
 import remarkGfm from 'remark-gfm';
 import type { PluggableList, Processor, Transformer } from 'unified';
@@ -241,10 +241,16 @@ export function defaultStringifier(config: StringifyOptions): Stringifier {
       link(node: Link, _, state, info) {
         return state.containerPhrasing(node, info);
       },
+      linkReference(node: LinkReference, _, state, info) {
+        return state.containerPhrasing(node, info);
+      },
       heading(node: Heading, _, state, info) {
         return state.containerPhrasing(node, info);
       },
       image() {
+        return '';
+      },
+      imageReference() {
         return '';
       },
       ...config.handlers,

@@ -1,0 +1,204 @@
+---
+title: Google Drive
+description: Publish a Google Drive folder with Fumadocs.
+---
+
+## Introduction
+
+`@fumadocs/google-drive` turns a Google Drive folder into a Fumadocs content source. It provides a dynamic [content source](/docs/headless/source-api) that crawls the folder over the Drive API:
+
+- folders become sidebar folders,
+- Google Docs are exported as Markdown,
+- Markdown (`.md`) files are downloaded as-is.
+
+The package has no dependencies. Render the Markdown with [MDX Remote](/docs/integrations/content/mdx-remote).
+
+## Setup
+
+Install the integration, MDX Remote, and Google's auth library:
+
+```package-install
+@fumadocs/google-drive @fumadocs/mdx-remote google-auth-library
+```
+
+### Google Drive Access [step]
+
+1. In Google Cloud, enable the **Google Drive API** and create a **service account** with a JSON key.
+2. Share the Drive folder with the service account's email as a **Viewer**.
+3. Store the key and the folder ID in server-only environment variables. The folder ID is the last segment of the folder URL.
+
+```ini title=".env.local"
+GOOGLE_SERVICE_ACCOUNT_KEY={"type":"service_account",...}
+GOOGLE_DRIVE_FOLDER_ID=...
+```
+
+<Callout type="info">
+  Folders in shared drives work the same way, the source detects the drive from the folder.
+</Callout>
+
+### Drive Integration [step]
+
+Pass a function that returns an access token. Any OAuth 2.0 token with the `drive.readonly` scope works, the auth library caches and refreshes it for you:
+
+```ts title="lib/drive.ts"
+import { GoogleAuth } from 'google-auth-library';
+import { createGoogleDrive } from '@fumadocs/google-drive';
+
+const auth = new GoogleAuth({
+  credentials: JSON.parse(process.env.GOOGLE_SERVICE_ACCOUNT_KEY!),
+  scopes: ['https://www.googleapis.com/auth/drive.readonly'],
+});
+
+export const drive = createGoogleDrive({
+  getAccessToken: () => auth.getAccessToken(),
+});
+```
+
+### Content Loader [step]
+
+Pass `drive.dynamicSource()` to `dynamicLoader()` and expose the loader through `getSource()`:
+
+```ts title="lib/source.ts"
+import { dynamicLoader } from 'fumadocs-core/source';
+import { drive } from '@/lib/drive';
+
+const source = dynamicLoader(
+  drive.dynamicSource({
+    folderId: process.env.GOOGLE_DRIVE_FOLDER_ID!,
+    // check for changes every 60 seconds
+    staleTime: 60_000,
+  }),
+  {
+    baseUrl: '/docs',
+  },
+);
+
+export async function getSource() {
+  return source.get();
+}
+```
+
+### Render Pages [step]
+
+Use the loader in your layout to build the page tree:
+
+```tsx title="app/docs/layout.tsx"
+import { getSource } from '@/lib/source';
+import { DocsLayout } from 'fumadocs-ui/layouts/docs';
+
+export default async function Layout({ children }: LayoutProps<'/docs'>) {
+  const source = await getSource();
+
+  return <DocsLayout tree={source.getPageTree()}>{children}</DocsLayout>;
+}
+```
+
+Load the page content and compile it with MDX Remote. The `md` format treats content as plain Markdown, so documents cannot run code:
+
+```tsx title="app/docs/[[...slug]]/page.tsx"
+import { notFound } from 'next/navigation';
+import { createCompiler } from '@fumadocs/mdx-remote';
+import { getSource } from '@/lib/source';
+import { getMDXComponents } from '@/components/mdx';
+import { DocsPage, DocsBody, DocsDescription, DocsTitle } from 'fumadocs-ui/layouts/docs/page';
+
+const compiler = createCompiler({ format: 'md' });
+
+export default async function Page({ params }: PageProps<'/docs/[[...slug]]'>) {
+  const { slug = [] } = await params;
+  const source = await getSource();
+
+  const page = source.getPage(slug);
+  if (!page) notFound();
+
+  // [!code highlight:2]
+  const { content } = await page.data.load();
+  const { body: MdxContent, toc } = await compiler.compile({ source: content });
+
+  return (
+    <DocsPage toc={toc}>
+      <DocsTitle>{page.data.title}</DocsTitle>
+      <DocsDescription>{page.data.description}</DocsDescription>
+      <DocsBody>
+        <MdxContent components={getMDXComponents()} />
+      </DocsBody>
+    </DocsPage>
+  );
+}
+```
+
+### Done [step]
+
+Add documents to the folder, they appear under the docs route.
+
+## Folder Structure
+
+| Drive item  | Becomes                                                             |
+| ----------- | ------------------------------------------------------------------- |
+| Folder      | A folder, titled after its name                                     |
+| Google Doc  | A page, exported as Markdown                                        |
+| `.md` file  | A page, its frontmatter is available as `frontmatter` from `load()` |
+| `meta.json` | The folder's [meta file](/docs/headless/page-conventions#meta)      |
+| Other files | Ignored                                                             |
+
+Names are turned into URL slugs, `Getting Started` becomes `getting-started`. A document named `index` is the folder's landing page and takes the folder's title.
+
+<Callout type="warn" title="No Duplicated URL">
+  Two items in a folder that resolve to the same slug, like `Setup` and `setup.md`, fail with a
+  descriptive error instead of silently replacing a page.
+</Callout>
+
+### Meta Files
+
+Upload a `meta.json` file to a folder to set its title, icon, or page order. Refer to pages by their slugs:
+
+```json title="meta.json"
+{
+  "title": "Guides",
+  "pages": ["installation", "configuration", "..."]
+}
+```
+
+## Page Data
+
+Besides `title` and `description` (from the Drive file description), `page.data.file` holds the Drive metadata. For example, link to the original document:
+
+```tsx
+const { file } = page.data;
+
+<a href={file.webViewLink}>Edit in Google Drive</a>;
+<p>Last updated: {new Date(file.modifiedTime).toLocaleDateString()}</p>;
+```
+
+## Caching
+
+The loader caches the folder until you invalidate it. With `staleTime`, requests after that duration are still served the cached folder while it is crawled again in the background, so visitors never wait for Drive.
+
+A crawl lists folders without downloading documents. Files with an unchanged version keep their pages, so the page tree and search index are rebuilt only when something changed.
+
+Loaded pages are cached in memory by file version, up to 16M characters in total, least recently used pages are dropped first.
+
+To refresh immediately, call `revalidate()` from a trusted route:
+
+```ts title="lib/source.ts"
+export function revalidateDrive() {
+  return source.revalidate();
+}
+```
+
+## Search
+
+Pages implement `structuredData()`, so they work with the built-in [search server](/docs/headless/search/orama). Search data is cached for each file version, re-indexing only downloads changed files.
+
+```ts title="app/api/search/route.ts"
+import { createFromSource } from 'fumadocs-core/search/server';
+import { getSource } from '@/lib/source';
+
+export const { GET } = createFromSource(getSource);
+```
+
+The first search on a new server downloads every document to build the index. To skip that wait, prerender the index with `staticGET` when your framework supports it, see [Built-in Search](/docs/headless/search/orama).
+
+## Images
+
+Google's Markdown export embeds images as base64 data URIs, so images add to the page size. For image-heavy pages, prefer Markdown files that link images hosted elsewhere.

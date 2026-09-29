@@ -75,6 +75,10 @@
     {
       "heading": "heading",
       "content": "Test"
+    },
+    {
+      "heading": "references",
+      "content": "Reference Link, ref and ref."
     }
   ],
   "headings": [
@@ -93,6 +97,10 @@
     {
       "id": "heading",
       "content": "Heading"
+    },
+    {
+      "id": "references",
+      "content": "References"
     }
   ]
 }

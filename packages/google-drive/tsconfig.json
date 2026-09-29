@@ -1,0 +1,10 @@
+{
+  "extends": "tsconfig/base.json",
+  "compilerOptions": {
+    "noEmit": true,
+    "lib": ["ESNext", "DOM"],
+    "module": "ESNext",
+    "target": "ES2022"
+  },
+  "exclude": ["node_modules", "dist"]
+}
