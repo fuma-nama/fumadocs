@@ -1,3 +1,49 @@
+## fumadocs-openapi@12.1.0
+
+### Render security scheme descriptions as Markdown in the playground
+
+Fix [#3607](https://github.com/fuma-nama/fumadocs/issues/3607)
+
+### Render request bodies of unsupported media types read-only
+
+A request body with a media type that has no adapter no longer throws. It is shown as usual, left out of code usages, and cannot be sent from the playground.
+
+`text/plain` with parameters, like `text/plain; charset=utf-8`, is also handled like `text/plain`.
+
+`isMediaTypeSupported()` is removed, use `resolveMediaAdapter()` instead.
+
+Fix [#3615](https://github.com/fuma-nama/fumadocs/issues/3615)
+
+### Add `createOAuthHandler()`
+
+A route handler to use as the single OAuth redirect URI of API playgrounds, instead of registering every page. Pass its URL to `createOpenAPIPage({ oauthRedirectUrl })`.
+
+```ts title="app/api/oauth/route.ts"
+import { openapi } from '@/lib/openapi';
+
+export const GET = openapi.createOAuthHandler();
+```
+
+Fix [#3611](https://github.com/fuma-nama/fumadocs/issues/3611)
+
+### Fix OAuth flows of the API playground
+
+- The client credentials flow can send the client credentials in an HTTP Basic `Authorization` header, like the password flow ([#3609](https://github.com/fuma-nama/fumadocs/issues/3609)).
+- Relative `authorizationUrl` and `tokenUrl` are resolved against the selected server, `requestOAuthToken()` requires a `serverUrl` for it ([#3610](https://github.com/fuma-nama/fumadocs/issues/3610)).
+- The `redirect_uri` leaves out the fragment and query of the page, a fragment is not allowed in redirect URIs.
+- Multiple scopes are space-delimited, they were sent as a single scope joined by `+`.
+- Query params of `authorizationUrl`, like `audience`, are kept.
+- HTTP Basic client credentials are form-encoded, as RFC 6749 requires.
+- The implicit and authorization code flows send a random `state`, and keep the flow in `sessionStorage` instead of the URL: the client secret is no longer sent to the authorization server, the token URL resolves against the server selected when the flow starts, and only flows started in the same tab are accepted.
+
+### Skip response examples without a value
+
+An Example Object can omit `value`, like when it uses `externalValue`, which crashed the operation page. These examples are skipped.
+
+Examples with the OpenAPI 3.2 `dataValue` are rendered too.
+
+Fix [#3608](https://github.com/fuma-nama/fumadocs/issues/3608)
+
 ## fumadocs-openapi@12.0.4
 
 ### Name schema property link buttons for screen readers
