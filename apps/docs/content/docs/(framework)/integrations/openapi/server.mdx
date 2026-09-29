@@ -101,3 +101,43 @@ export const openapi = createOpenAPI({
   proxyUrl: '/api/proxy', // [!code ++]
 });
 ```
+
+## OAuth Redirect
+
+OAuth providers only accept registered redirect URIs, but the API playground redirects to the current page by default.
+Create a route handler as the redirect URI of every page, it sends users back to the page that started the flow.
+
+```ts tab="Next.js" title="app/api/oauth/route.ts"
+import { openapi } from '@/lib/openapi';
+
+export const GET = openapi.createOAuthHandler();
+```
+
+```ts tab="Tanstack Start" title="app/routes/api/oauth.ts"
+import { openapi } from '@/lib/openapi';
+import { createFileRoute } from '@tanstack/react-router';
+
+const handler = openapi.createOAuthHandler();
+
+export const Route = createFileRoute('/api/oauth')({
+  server: {
+    handlers: {
+      GET: async ({ request }) => handler(request),
+    },
+  },
+});
+```
+
+```ts tab="Waku" title="src/pages/_api/api/oauth.ts"
+import { openapi } from '@/lib/openapi';
+
+export const GET = openapi.createOAuthHandler();
+```
+
+Pass its URL to `createOpenAPIPage()`, and register the full URL (e.g. `https://docs.example.com/api/oauth`) on your OAuth provider.
+
+```tsx title="components/api-page.tsx"
+export const OpenAPIPage = createOpenAPIPage({
+  oauthRedirectUrl: '/api/oauth', // [!code ++]
+});
+```

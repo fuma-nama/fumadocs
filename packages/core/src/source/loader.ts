@@ -181,10 +181,7 @@ export interface LoaderOutput<Config extends LoaderConfig = LoaderConfig> {
   serializePageTree: (tree: PageTree.Root) => Promise<SerializedPageTree>;
 }
 
-/**
- * Generated slugs are URI encoded, but routers like React Router pass them decoded.
- * Key pages by the decoded form so both resolve.
- */
+/** decoded, generated slugs are URI encoded but some routers pass them decoded */
 function slugsKey(slugs: string[]): string {
   const key = slugs.join('/');
 

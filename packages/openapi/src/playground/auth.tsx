@@ -43,12 +43,10 @@ export interface OAuthFlowInput {
   password: string;
   /** where the password and client credentials flows send the client credentials */
   clientAuth: 'body' | 'header';
-  /**
-   * URL of the selected server, relative URLs of the flow are resolved against it.
-   *
-   * @defaultValue the page URL
-   */
-  serverUrl?: string;
+  /** URL of the selected server, relative URLs of the flow resolve against it */
+  serverUrl: string;
+  /** URL of the `createOAuthHandler()` route, defaults to the page */
+  redirectUrl?: string;
 }
 
 /**
@@ -68,29 +66,35 @@ export async function requestOAuthToken(
     username,
     password,
     clientAuth,
-    serverUrl = window.location.href,
+    serverUrl,
+    redirectUrl,
   }: OAuthFlowInput,
 ): Promise<string | undefined> {
   const flows = scheme.flows ?? {};
   const scope = scopes.join(' ');
-  // redirect URIs must not include a fragment, the query is removed on return
-  const redirect_uri = window.location.origin + window.location.pathname;
 
   if (type === 'implicit' || type === 'authorizationCode') {
     const flow = flows[type];
     if (!flow) return;
+    // redirect URIs cannot have a fragment
+    const redirect_uri = new URL(redirectUrl ?? window.location.pathname, window.location.origin)
+      .href;
     const state: AuthCodeState | ImplicitState =
       type === 'implicit'
         ? { scheme: schemeId, client_id: clientId, redirect_uri }
         : { scheme: schemeId, client_id: clientId, client_secret: clientSecret, redirect_uri };
-    const url = new URL(flow.authorizationUrl!, serverUrl);
-    url.searchParams.set('response_type', type === 'implicit' ? 'token' : 'code');
-    url.searchParams.set('client_id', clientId);
-    url.searchParams.set('redirect_uri', redirect_uri);
-    url.searchParams.set('scope', scope);
-    url.searchParams.set('state', JSON.stringify(state));
+    const params = new URLSearchParams({
+      response_type: type === 'implicit' ? 'token' : 'code',
+      client_id: clientId,
+      redirect_uri,
+      scope,
+      state: JSON.stringify(state),
+    });
 
-    window.location.replace(url);
+    // where `createOAuthHandler()` sends users back to
+    if (redirectUrl)
+      document.cookie = `fumadocs-openapi-oauth=${encodeURIComponent(window.location.pathname)}; path=/`;
+    window.location.replace(`${new URL(flow.authorizationUrl!, serverUrl)}?${params}`);
     return;
   }
 

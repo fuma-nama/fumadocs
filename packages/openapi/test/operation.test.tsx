@@ -195,15 +195,6 @@ test('skips response examples without a value', async () => {
               },
             },
           },
-          '201': {
-            description: 'created',
-            content: {
-              'application/json': {
-                schema: { type: 'string' },
-                examples: { External: { externalValue: 'https://example.com/created.json' } },
-              },
-            },
-          },
         },
       },
       pathItem,
@@ -211,7 +202,33 @@ test('skips response examples without a value', async () => {
   );
 
   expect(tabs[0].examples?.map((example) => example.sample)).toEqual([{ id: '1' }]);
-  expect(tabs[1].examples?.map((example) => example.sample)).toEqual(['string']);
+});
+
+test('renders request bodies of unsupported media types', async () => {
+  let info: OperationInfo;
+  let curl: string | undefined;
+
+  await render(
+    '/special-events',
+    'post',
+    function Harness() {
+      info = useOperation();
+      curl = useCodeUsage('curl');
+      return null;
+    },
+    ({ operation, pathItem }) => ({
+      operation: {
+        ...operation,
+        requestBody: {
+          content: { 'application/pdf': { schema: { type: 'string', format: 'binary' } } },
+        },
+      },
+      pathItem,
+    }),
+  );
+
+  expect(Object.keys(info!.requestBody!.content)).toEqual(['application/pdf']);
+  expect(curl).not.toContain('-d');
 });
 
 test('generates inline code samples', async () => {

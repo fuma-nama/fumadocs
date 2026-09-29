@@ -1,4 +1,5 @@
 import { createProxy } from '@/server/proxy';
+import { createOAuthHandler } from '@/server/oauth';
 import { loadDocument } from '@/utils/document/load';
 import type { Document, Awaitable } from '@/types';
 import fs from 'node:fs';
@@ -59,6 +60,7 @@ export type { OpenAPIPageProps_Spec, OpenAPIPageProps_Preloaded };
 
 export interface OpenAPIServer {
   createProxy: typeof createProxy;
+  createOAuthHandler: typeof createOAuthHandler;
   getSchemas: () => Promise<Record<string, LoadedDocument>>;
   getSchema: (document: string) => Promise<LoadedDocument>;
   readonly options: OpenAPIOptions;
@@ -257,6 +259,7 @@ export function createOpenAPI(options: OpenAPIOptions = {}): OpenAPIServer {
   return {
     options,
     createProxy,
+    createOAuthHandler,
     _getWatchPaths() {
       return Object.keys(resolvedInput).filter((key) => !URL.canParse(key) && fs.existsSync(key));
     },

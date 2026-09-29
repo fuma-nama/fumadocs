@@ -62,7 +62,8 @@ export function OAuthDialogContent(props: AuthDialogContentProps) {
 }
 
 function Content({ schemeId, scopes, setToken, setOpen }: AuthDialogContentProps) {
-  const { dereferenced, resolve } = useOpenAPI().doc;
+  const { doc, oauthRedirectUrl } = useOpenAPI();
+  const { dereferenced, resolve } = doc;
   const schemes = dereferenced.components?.securitySchemes;
   const tokenInfo = usePlaygroundAuth().store[schemeId];
   const { resolveUrl } = useServer();
@@ -134,6 +135,7 @@ function Content({ schemeId, scopes, setToken, setOpen }: AuthDialogContentProps
       scopes,
       clientAuth,
       serverUrl: resolveUrl(),
+      redirectUrl: oauthRedirectUrl,
     });
     if (!token) return;
 
