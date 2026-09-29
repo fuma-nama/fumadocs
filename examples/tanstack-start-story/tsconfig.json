@@ -1,5 +1,5 @@
 {
-  "include": ["**/*.ts", "**/*.tsx"],
+  "include": ["**/*.ts", "**/*.tsx", "**/*.mdx"],
   "compilerOptions": {
     "strict": true,
     "esModuleInterop": true,
@@ -15,8 +15,7 @@
     "allowJs": true,
     "forceConsistentCasingInFileNames": true,
     "paths": {
-      "@/*": ["./src/*"],
-      "collections/*": ["./.source/*"]
+      "@/*": ["./src/*"]
     },
     "noEmit": true
   }

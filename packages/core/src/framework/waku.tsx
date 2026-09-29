@@ -31,7 +31,11 @@ const framework: Framework = {
   },
   Link({ href, prefetch = true, ...props }) {
     return (
-      <Link to={href!} unstable_prefetchOnEnter={prefetch} {...props}>
+      <Link
+        to={href!}
+        unstable_prefetchOnEnter={prefetch ? { mode: 'once' } : undefined}
+        {...props}
+      >
         {props.children}
       </Link>
     );

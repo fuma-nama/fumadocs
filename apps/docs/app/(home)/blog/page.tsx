@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { blog } from '@/lib/source';
+import { blogLoader } from '@/lib/source';
 import { PathUtils } from 'fumadocs-core/source';
 import BannerImage from './banner.png';
 import Image from 'next/image';
@@ -9,7 +9,7 @@ function getName(path: string) {
 }
 
 export default function Page() {
-  const posts = [...blog.getPages()].sort(
+  const posts = [...blogLoader.getPages()].sort(
     (a, b) =>
       new Date(b.data.date ?? getName(b.path)).getTime() -
       new Date(a.data.date ?? getName(a.path)).getTime(),

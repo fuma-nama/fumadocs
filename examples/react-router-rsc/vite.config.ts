@@ -2,10 +2,10 @@ import { unstable_reactRouterRSC as reactRouterRSC } from '@react-router/dev/vit
 import rsc from '@vitejs/plugin-rsc';
 import tailwindcss from '@tailwindcss/vite';
 import { defineConfig } from 'vite';
-import mdx from 'fumadocs-mdx/vite';
+import { fumadocsMdx } from 'fumadocs-mdx/vite';
 
 export default defineConfig({
-  plugins: [mdx(), tailwindcss(), reactRouterRSC(), rsc()],
+  plugins: [fumadocsMdx(), tailwindcss(), reactRouterRSC(), rsc()],
   resolve: {
     tsconfigPaths: true,
   },

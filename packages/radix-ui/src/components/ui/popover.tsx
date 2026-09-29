@@ -12,7 +12,7 @@ export function PopoverContent({
   align = 'center',
   sideOffset = 4,
   ...props
-}: React.ComponentPropsWithRef<typeof PopoverPrimitive.Content>) {
+}: React.ComponentProps<typeof PopoverPrimitive.Content>) {
   return (
     <PopoverPrimitive.Portal>
       <PopoverPrimitive.Content

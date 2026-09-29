@@ -1,6 +1,6 @@
 {
   "name": "@fumadocs/vite",
-  "version": "0.0.2",
+  "version": "0.1.0",
   "private": true,
   "description": "Internal configs for Fumadocs + Vite",
   "keywords": [
@@ -25,13 +25,15 @@
     "clean": "rimraf dist",
     "dev": "tsdown --watch --clean false",
     "lint": "oxlint .",
+    "test": "vitest run",
     "types:check": "tsc --noEmit"
   },
   "devDependencies": {
-    "@types/node": "^25.9.1",
+    "@types/node": "^26.6.1",
     "tsconfig": "workspace:*",
-    "tsdown": "0.22.0",
-    "typescript": "^6.0.3",
-    "vite": "^8.0.14"
+    "tsdown": "0.23.0",
+    "typescript": "^7.0.2",
+    "vite": "^8.3.0",
+    "vitest": "^5.0.1"
   }
 }

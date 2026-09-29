@@ -3,7 +3,53 @@ title: create-fumadocs-app
 description: The CLI to create new Fumadocs apps
 ---
 
-## Overview
+## Usage
+
+```npm
+npx create-fumadocs-app@latest my-docs
+```
+
+It asks for the template and features to configure, you can also pass them as options.
+
+### Options
+
+| Option              | Description                                                                               |
+| ------------------- | ----------------------------------------------------------------------------------------- |
+| `--template <name>` | The template to use, see [Templates](#templates).                                         |
+| `--src`             | (Next.js only) Use the `src/` directory.                                                  |
+| `--linter <name>`   | Configure a linter: `eslint` (Next.js only), `oxlint` or `biome`.                         |
+| `--search <name>`   | Search solution: `orama` (default, local search) or `orama-cloud`.                        |
+| `--og-image <name>` | (Next.js only) OG image generation: `next-og` or `takumi`, other templates use Takumi.    |
+| `--ai-chat <name>`  | AI chat: `openrouter`, `llmgateway` or `inkeep`, not available on static & SPA templates. |
+| `--install`         | Install dependencies automatically.                                                       |
+| `--no-git`          | Skip Git repository initialization.                                                       |
+| `--pm <name>`       | Package manager: `npm`, `pnpm`, `yarn` or `bun`, detected from how the CLI is invoked.    |
+| `-y, --yes`         | Skip prompts, use defaults for options not specified.                                     |
+
+### Templates
+
+| Value                        | Description                                |
+| ---------------------------- | ------------------------------------------ |
+| `+next+fuma-docs-mdx`        | Next.js (default)                          |
+| `+next+fuma-docs-mdx+static` | Next.js with static export                 |
+| `waku`                       | Waku                                       |
+| `react-router`               | React Router                               |
+| `react-router-spa`           | React Router in SPA mode                   |
+| `tanstack-start`             | Tanstack Start                             |
+| `tanstack-start-spa`         | Tanstack Start in SPA mode                 |
+| `astro`                      | Astro with React islands (partial support) |
+
+### Non-interactive
+
+Pass `--yes` to skip prompts, useful for scripts, CI and AI agents:
+
+```npm
+npx create-fumadocs-app@latest my-docs --template +next+fuma-docs-mdx --install --yes
+```
+
+Options you didn't specify use their defaults: no linter, local search, no AI chat. It fails when the target directory already exists and is not empty.
+
+## Programmatic API
 
 Despite the classical CLI usage, you can also use it in scripts like:
 

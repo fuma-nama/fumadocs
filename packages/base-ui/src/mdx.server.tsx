@@ -11,7 +11,7 @@ import defaultMdxComponents from '@/mdx';
  */
 export function createRelativeLink<C extends LoaderConfig>(
   source: LoaderOutput<C>,
-  page: Page,
+  page: Page | C['page'],
   OverrideLink: FC<ComponentProps<'a'>> = defaultMdxComponents.a,
 ): FC<ComponentProps<'a'>> {
   return async function RelativeLink({ href, ...props }) {

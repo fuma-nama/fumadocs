@@ -1,3 +1,36 @@
+## fumadocs-epub@1.2.2
+
+### Mark packages side-effect free
+
+All packages now declare `sideEffects` in `package.json`, so bundlers can tree-shake unused modules. Packages shipping stylesheets list them as side effects to keep CSS imports.
+
+## fumadocs-epub@1.2.1
+
+### `createEpubExportAPI()`
+
+A route handler for the EPUB export, replacing the auth check and response headers you had to write yourself:
+
+```ts
+// app/export/epub/route.ts
+import { createEpubExportAPI } from 'fumadocs-epub';
+import { source } from '@/lib/source';
+
+export const { GET } = createEpubExportAPI({
+  source,
+  title: 'Documentation',
+  author: 'Your Team',
+  secret: process.env.EXPORT_SECRET,
+});
+```
+
+`secret` is required: requests must send `Authorization: Bearer <secret>`, and the route answers `503` while the secret itself is unset, so a missing environment variable cannot leave the export open. It also takes `filename` (default `docs.epub`) and every option of `exportEpub()`, which stays available for public routes and scripts.
+
+## fumadocs-epub@1.2.0
+
+### Default to Base UI
+
+Internal packages & templates now use Base UI rather than Radix UI.
+
 # fumadocs-epub
 
 ## 1.1.0

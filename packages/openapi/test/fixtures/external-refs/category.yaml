@@ -1,0 +1,9 @@
+components:
+  schemas:
+    Category:
+      type: object
+      properties:
+        name:
+          type: string
+        parent:
+          $ref: '#/components/schemas/Category'

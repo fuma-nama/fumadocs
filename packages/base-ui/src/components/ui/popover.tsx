@@ -12,7 +12,7 @@ export function PopoverContent({
   align = 'center',
   sideOffset = 4,
   ...props
-}: React.ComponentPropsWithRef<typeof Primitive.Popup> &
+}: React.ComponentProps<typeof Primitive.Popup> &
   Pick<Primitive.Positioner.Props, 'sideOffset' | 'align'>) {
   return (
     <Primitive.Portal>
@@ -20,7 +20,7 @@ export function PopoverContent({
         <Primitive.Popup
           className={(s) =>
             cn(
-              'z-50 origin-(--transform-origin) overflow-y-auto max-h-(--available-height) min-w-[240px] max-w-[98vw] rounded-xl border bg-fd-popover/60 backdrop-blur-lg p-2 text-sm text-fd-popover-foreground shadow-lg focus-visible:outline-none data-[closed]:animate-fd-popover-out data-[open]:animate-fd-popover-in',
+              'z-50 origin-(--transform-origin) overflow-y-auto max-h-(--available-height) min-w-[240px] w-(--anchor-width) max-w-[98vw] rounded-xl border bg-fd-popover/60 backdrop-blur-lg p-2 text-sm text-fd-popover-foreground shadow-lg focus-visible:outline-none data-closed:animate-fd-popover-out data-open:animate-fd-popover-in',
               typeof className === 'function' ? className(s) : className,
             )
           }

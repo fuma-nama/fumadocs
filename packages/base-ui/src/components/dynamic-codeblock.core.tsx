@@ -57,7 +57,7 @@ export function DynamicCodeBlock({
     ...options,
     components: {
       pre: DefaultPre,
-      ...options.components,
+      ...options?.components,
     },
   };
   let node = useShikiDynamic(highlighter, code, shikiOptions, [id, lang, code]);

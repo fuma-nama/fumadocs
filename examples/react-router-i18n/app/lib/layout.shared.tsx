@@ -1,7 +1,7 @@
 import type { BaseLayoutProps } from 'fumadocs-ui/layouts/shared';
 import { i18n } from '#/lib/i18n.ts';
 
-export function baseOptions(locale = i18n.defaultLanguage): BaseLayoutProps {
+export function baseOptions(locale: string = i18n.defaultLanguage): BaseLayoutProps {
   return {
     nav: {
       title: `React Router ${locale}`,

@@ -1,0 +1,207 @@
+{
+  "llms.txt (next)": {
+    "file": "app/llms.txt/route.ts",
+    "path": "/llms.txt",
+    "pattern": "/llms.txt",
+  },
+  "llms.txt (next, i18n)": {
+    "file": "app/llms.txt/route.ts",
+    "path": "/llms.txt",
+    "pattern": "/llms.txt",
+  },
+  "llms.txt (react-router)": {
+    "file": "routes/llms.txt.ts",
+    "path": "llms.txt",
+    "pattern": "/llms.txt",
+  },
+  "llms.txt (react-router, i18n)": {
+    "file": "routes/llms.txt.ts",
+    "path": "llms.txt",
+    "pattern": "/llms.txt",
+  },
+  "llms.txt (tanstack-start)": {
+    "file": "routes/llms[.]txt.ts",
+    "path": "/llms.txt",
+    "pattern": "/llms.txt",
+  },
+  "llms.txt (tanstack-start, i18n)": {
+    "file": "routes/llms[.]txt.ts",
+    "path": "/llms.txt",
+    "pattern": "/llms.txt",
+  },
+  "llms.txt (waku)": {
+    "file": "pages/_api/llms.txt.ts",
+    "path": "/llms.txt",
+    "pattern": "/llms.txt",
+  },
+  "llms.txt (waku, i18n)": {
+    "file": "pages/_api/llms.txt.ts",
+    "path": "/llms.txt",
+    "pattern": "/llms.txt",
+  },
+  "markdown (next)": {
+    "file": "app/llms.mdx/docs/[[...slug]]/route.ts",
+    "path": "/llms.mdx/docs/[[...slug]]",
+    "pattern": "/llms.mdx/docs/:slug*",
+  },
+  "markdown (next, i18n)": {
+    "file": "app/[lang]/llms.mdx/docs/[[...slug]]/route.ts",
+    "path": "/[lang]/llms.mdx/docs/[[...slug]]",
+    "pattern": "/:lang/llms.mdx/docs/:slug*",
+  },
+  "markdown (react-router)": {
+    "file": "routes/llms.mdx.docs.ts",
+    "path": "llms.mdx/docs/*",
+    "pattern": "/llms.mdx/docs/:slug*",
+  },
+  "markdown (react-router, i18n)": {
+    "file": "routes/llms.mdx.docs.ts",
+    "path": ":lang?/llms.mdx/docs/*",
+    "pattern": "/:lang/llms.mdx/docs/:slug*",
+  },
+  "markdown (tanstack-start)": {
+    "file": "routes/llms[.]mdx/docs/$.ts",
+    "path": "/llms.mdx/docs/$",
+    "pattern": "/llms.mdx/docs/:slug*",
+  },
+  "markdown (tanstack-start, i18n)": {
+    "file": "routes/{-$lang}/llms[.]mdx/docs/$.ts",
+    "path": "/{-$lang}/llms.mdx/docs/$",
+    "pattern": "/:lang/llms.mdx/docs/:slug*",
+  },
+  "markdown (waku)": {
+    "file": "pages/_api/llms.mdx/docs/[...slug]/content.md.ts",
+    "path": "/llms.mdx/docs/[...slug]/content.md",
+    "pattern": "/llms.mdx/docs/:slug*",
+  },
+  "markdown (waku, i18n)": {
+    "file": "pages/_api/[lang]/llms.mdx/docs/[...slug]/content.md.ts",
+    "path": "/[lang]/llms.mdx/docs/[...slug]/content.md",
+    "pattern": "/:lang/llms.mdx/docs/:slug*",
+  },
+  "mcp (next)": {
+    "file": "app/api/mcp/route.ts",
+    "path": "/api/mcp",
+    "pattern": "/api/mcp",
+  },
+  "mcp (next, i18n)": {
+    "file": "app/api/mcp/route.ts",
+    "path": "/api/mcp",
+    "pattern": "/api/mcp",
+  },
+  "mcp (react-router)": {
+    "file": "routes/api.mcp.ts",
+    "path": "api/mcp",
+    "pattern": "/api/mcp",
+  },
+  "mcp (react-router, i18n)": {
+    "file": "routes/api.mcp.ts",
+    "path": "api/mcp",
+    "pattern": "/api/mcp",
+  },
+  "mcp (tanstack-start)": {
+    "file": "routes/api/mcp.ts",
+    "path": "/api/mcp",
+    "pattern": "/api/mcp",
+  },
+  "mcp (tanstack-start, i18n)": {
+    "file": "routes/api/mcp.ts",
+    "path": "/api/mcp",
+    "pattern": "/api/mcp",
+  },
+  "mcp (waku)": {
+    "file": "pages/_api/api/mcp.ts",
+    "path": "/api/mcp",
+    "pattern": "/api/mcp",
+  },
+  "mcp (waku, i18n)": {
+    "file": "pages/_api/api/mcp.ts",
+    "path": "/api/mcp",
+    "pattern": "/api/mcp",
+  },
+  "og (next)": {
+    "file": "app/og/docs/[...slug]/route.ts",
+    "path": "/og/docs/[...slug]",
+    "pattern": "/og/docs/:slug*",
+  },
+  "og (next, i18n)": {
+    "file": "app/[lang]/og/docs/[...slug]/route.ts",
+    "path": "/[lang]/og/docs/[...slug]",
+    "pattern": "/:lang/og/docs/:slug*",
+  },
+  "og (react-router)": {
+    "file": "routes/og.docs.ts",
+    "path": "og/docs/*",
+    "pattern": "/og/docs/:slug*",
+  },
+  "og (react-router, i18n)": {
+    "file": "routes/og.docs.ts",
+    "path": ":lang?/og/docs/*",
+    "pattern": "/:lang/og/docs/:slug*",
+  },
+  "og (tanstack-start)": {
+    "file": "routes/og/docs/$.ts",
+    "path": "/og/docs/$",
+    "pattern": "/og/docs/:slug*",
+  },
+  "og (tanstack-start, i18n)": {
+    "file": "routes/{-$lang}/og/docs/$.ts",
+    "path": "/{-$lang}/og/docs/$",
+    "pattern": "/:lang/og/docs/:slug*",
+  },
+  "og (waku)": {
+    "file": "pages/_api/og/docs/[...slug]/image.png.ts",
+    "path": "/og/docs/[...slug]/image.png",
+    "pattern": "/og/docs/:slug*",
+  },
+  "og (waku, i18n)": {
+    "file": "pages/_api/[lang]/og/docs/[...slug]/image.png.ts",
+    "path": "/[lang]/og/docs/[...slug]/image.png",
+    "pattern": "/:lang/og/docs/:slug*",
+  },
+  "root docs markdown (next)": {
+    "file": "app/llms.mdx/[...slug]/route.ts",
+    "path": "/llms.mdx/[...slug]",
+    "pattern": "/llms.mdx/:slug*",
+  },
+  "root docs markdown (next, i18n)": {
+    "file": "app/llms.mdx/[...slug]/route.ts",
+    "path": "/llms.mdx/[...slug]",
+    "pattern": "/llms.mdx/:slug*",
+  },
+  "root docs markdown (react-router)": {
+    "file": "routes/llms.mdx.ts",
+    "path": "llms.mdx/*",
+    "pattern": "/llms.mdx/:slug*",
+  },
+  "root docs markdown (react-router, i18n)": {
+    "file": "routes/llms.mdx.ts",
+    "path": "llms.mdx/*",
+    "pattern": "/llms.mdx/:slug*",
+  },
+  "root docs markdown (tanstack-start)": {
+    "file": "routes/llms[.]mdx/$.ts",
+    "path": "/llms.mdx/$",
+    "pattern": "/llms.mdx/:slug*",
+  },
+  "root docs markdown (tanstack-start, i18n)": {
+    "file": "routes/llms[.]mdx/$.ts",
+    "path": "/llms.mdx/$",
+    "pattern": "/llms.mdx/:slug*",
+  },
+  "root docs markdown (waku)": {
+    "file": "pages/_api/llms.mdx/[...slug]/content.md.ts",
+    "path": "/llms.mdx/[...slug]/content.md",
+    "pattern": "/llms.mdx/:slug*",
+  },
+  "root docs markdown (waku, i18n)": {
+    "file": "pages/_api/llms.mdx/[...slug]/content.md.ts",
+    "path": "/llms.mdx/[...slug]/content.md",
+    "pattern": "/llms.mdx/:slug*",
+  },
+  "tanstack markdown": {
+    "file": "routes/{-$lang}/docs/{$}[.]md.ts",
+    "path": "/{-$lang}/docs/{$}.md",
+    "pattern": "/:lang/docs/{$}.md",
+  },
+}

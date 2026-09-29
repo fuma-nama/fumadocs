@@ -53,12 +53,10 @@ export function CalloutContainer({
         'flex gap-2 my-4 rounded-xl border bg-fd-card p-3 ps-1 text-sm text-fd-card-foreground shadow-md',
         className,
       )}
-      style={
-        {
-          '--callout-color': `var(--color-fd-${type}, var(--color-fd-muted))`,
-          ...style,
-        } as object
-      }
+      style={{
+        '--callout-color': `var(--color-fd-${type}, var(--color-fd-muted))`,
+        ...style,
+      }}
       {...props}
     >
       <div role="none" className="w-0.5 bg-(--callout-color)/50 rounded-sm" />

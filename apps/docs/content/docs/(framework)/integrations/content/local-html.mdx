@@ -1,0 +1,237 @@
+---
+title: Local HTML
+description: Content source for local HTML files.
+---
+
+## Introduction
+
+`@fumadocs/local-html` is a content source for local HTML files, it is bundleless (works fully at runtime) by design.
+
+It is made for pages you receive as HTML instead of author yourself, like exported decks, reports, and the output of other tools. Each file is adapted to your docs theme rather than rendered as it came.
+
+As compared to [Local Markdown](/docs/integrations/content/local-md), HTML is treated as data to adapt, not as a document format to write in.
+
+### Limitations
+
+- Scripts are stripped, the interactive behaviour of the original page is not preserved.
+- No MDX components in content, but you can map HTML tags to components at render phase.
+- Processing is a transform, not sanitization. Nothing that executes survives it, but the remaining markup is rendered as-is, and the resources it references (images above all) are fetched by everyone who opens the page. Keep the content directory to files you trust, like your Markdown content.
+
+## Setup
+
+Install the package:
+
+```package-install
+@fumadocs/local-html
+```
+
+Create a `localHtml` instance and connect it to Fumadocs:
+
+```ts title="lib/source.ts"
+import { dynamicLoader } from 'fumadocs-core/source';
+import { localHtml } from '@fumadocs/local-html';
+
+const pages = localHtml({
+  dir: 'content/pages',
+  // options
+});
+
+const pagesLoader = dynamicLoader(pages.dynamicSource(), {
+  baseUrl: '/docs',
+});
+
+export async function getSource() {
+  return pagesLoader.get();
+}
+```
+
+The returned source from `pagesLoader.get()` is a normal [content loader](/docs/headless/source-api) instance.
+
+## Usage
+
+`page.data.load()` returns a renderer for the processed content:
+
+```tsx title="app/docs/[[...slug]]/page.tsx"
+import { getSource } from '@/lib/source';
+import { DocsPage, DocsBody, DocsTitle, DocsDescription } from 'fumadocs-ui/page';
+import { notFound } from 'next/navigation';
+
+export default async function Page(props: PageProps<'/docs/[[...slug]]'>) {
+  const params = await props.params;
+  const source = await getSource();
+  const page = source.getPage(params.slug);
+  if (!page) notFound();
+
+  const renderer = await page.data.load();
+  const { body, toc } = await renderer.render();
+
+  return (
+    <DocsPage toc={toc}>
+      <DocsTitle>{page.data.title}</DocsTitle>
+      <DocsDescription>{page.data.description}</DocsDescription>
+      <DocsBody>{body}</DocsBody>
+    </DocsPage>
+  );
+}
+```
+
+Pass components to `render()` to map HTML tags onto your own, like headings with anchors:
+
+```tsx
+import { getMDXComponents } from '@/mdx-components';
+
+const { body, toc } = await renderer.render(getMDXComponents());
+```
+
+### Page Metadata
+
+The title and description of each page are read from its `<head>`:
+
+- `<title>` becomes the page title.
+- `<meta name="description">` becomes the description.
+
+You can override them (and set an icon) without touching the visible content, using `fumadocs:` metas:
+
+```html
+<meta name="fumadocs:title" content="My Page" />
+<meta name="fumadocs:description" content="A short description." />
+<meta name="fumadocs:icon" content="SquareBookmark" />
+```
+
+Every `<meta name>`/`content` pair of the document is also available on `page.data.metadata`.
+
+Like other local sources, `meta.json` files customize the page tree, validated with `metaSchema`.
+
+### Content Options
+
+A page keeps only its content element: the only `<main>`, then the only `<article>`, falling back to `<body>` with page chrome like `<header>` and `<nav>` dropped. Its `class` and `style` attributes are removed so your theme's prose styling takes over, and its headings get ids to power the table of contents and search.
+
+Each part of that is configurable:
+
+```ts
+import { localHtml } from '@fumadocs/local-html';
+
+const pages = localHtml({
+  dir: 'content/pages',
+  // keep the original class/style attributes instead of adapting to your theme
+  adaptStyles: false,
+  // drop additional tags from the content
+  exclude: ['aside'],
+  // custom logic to pick the element holding the page content
+  selectContent: (root) => {
+    // return a hast element, or undefined for the default behaviour
+  },
+});
+```
+
+### Syntax Highlighting
+
+`<pre><code>` blocks are highlighted with [Shiki](https://shiki.style), using the same options as [Local Markdown](/docs/integrations/content/local-md):
+
+```ts
+const pages = localHtml({
+  dir: 'content/pages',
+  rehypeCodeOptions: {
+    themes: {
+      light: 'github-light',
+      dark: 'github-dark',
+    },
+  },
+});
+```
+
+The language is read from the `language-*` class of the block, on the `<code>` or its enclosing `<pre>`:
+
+```html
+<pre><code class="language-ts">const answer: number = 42;</code></pre>
+```
+
+A block without one falls back to plain text. Pass `rehypeCodeOptions: false` to disable syntax highlighting.
+
+### Hot Reload
+
+`local-html` works at runtime, so nothing watches your files by default. During development, pick one of the two watchers.
+
+#### Vite
+
+Vite already watches your project, so its watcher can invalidate the source in the same process. No extra process or port.
+
+```ts tab="vite.config.ts"
+import { localContentPlugin } from '@fumadocs/local-html/dev/vite';
+
+export default defineConfig({
+  plugins: [localContentPlugin()],
+});
+```
+
+```ts tab="lib/source.ts"
+import { watchWithVite } from '@fumadocs/local-html/dev/vite';
+
+if (import.meta.env.DEV) {
+  watchWithVite(pages);
+}
+```
+
+#### Dev Server
+
+For everything else, run the bundled dev server alongside your app. The watcher lives in one process and broadcasts over a websocket, so it works when your framework runs several workers.
+
+```json tab="package.json"
+{
+  "scripts": {
+    "dev": "local-html dev -- next dev"
+  }
+}
+```
+
+```ts tab="lib/source.ts"
+import { watchWithDevServer } from '@fumadocs/local-html/dev/ws';
+
+// change it if you use a different framework (e.g. import.meta.env.DEV)
+if (process.env.NODE_ENV === 'development') {
+  void watchWithDevServer(pages);
+}
+```
+
+The command publishes its URL through an environment variable, so no configuration is needed. Pass one explicitly if you run the server yourself, and use `-p` to change the port:
+
+```ts
+void watchWithDevServer(pages, { url: 'ws://127.0.0.1:8000/_fumadocs_local_md' });
+```
+
+This invalidates the source on the server. On frameworks that cache rendered output in the browser, like Next.js, render `<DevClient />` in your root layout so the page refreshes too:
+
+```tsx title="app/layout.tsx"
+import { DevClient } from '@fumadocs/local-html/dev/react-client';
+
+export function RootLayout({ children }) {
+  return (
+    <RootProvider>
+      {/* [!code ++] */}
+      <DevClient />
+      {children}
+    </RootProvider>
+  );
+}
+```
+
+Both watchers keep the loader in sync when local HTML files change. To wire up your own instead, call `pages.invalidateFile(path)` when a file changes.
+
+### Disable Revalidation
+
+You can use `staticSource()` when you only need a one-time snapshot without revalidation.
+
+It works with a normal `loader()` instead of only `dynamicLoader()`:
+
+```ts title="lib/source.ts"
+import { loader } from 'fumadocs-core/source';
+import { localHtml } from '@fumadocs/local-html';
+
+const pages = localHtml({
+  dir: 'content/pages',
+});
+
+export const source = loader(await pages.staticSource(), {
+  baseUrl: '/docs',
+});
+```

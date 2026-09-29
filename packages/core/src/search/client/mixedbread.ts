@@ -1,6 +1,5 @@
 import type { SortedResult } from '@/search';
 import type Mixedbread from '@mixedbread/sdk';
-import removeMd from 'remove-markdown';
 import Slugger from 'github-slugger';
 import type { StoreSearchResponse } from '@mixedbread/sdk/resources/stores';
 import type { SearchClient } from '../client';
@@ -49,21 +48,13 @@ function extractHeadingTitle(text: string): string {
 
   const lines = trimmedText.split('\n');
   const firstLine = lines[0]?.trim();
-
-  if (firstLine) {
-    // Use remove-markdown to convert to plain text and remove colons
-    return removeMd(firstLine, {
-      useImgAltText: false,
-    });
-  }
-
-  return '';
+  return firstLine ?? '';
 }
 
 /**
  * @deprecated Use `createMixedbreadSearchAPI` from `fumadocs-core/search/mixedbread` instead.
  * This client-side approach exposes your API key in the browser.
- * The server-side approach keeps the key secure and uses `type: 'fetch'` on the client.
+ * The server-side approach keeps the key secure and uses `client: fetchClient(...)` on the client.
  */
 export function mixedbreadClient(options: MixedbreadOptions): SearchClient {
   const { client, storeIdentifier, tag } = options;

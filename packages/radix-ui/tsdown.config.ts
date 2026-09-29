@@ -2,6 +2,8 @@ import { defineConfig } from 'tsdown';
 import { Scanner } from '@tailwindcss/oxide';
 import { mkdir, writeFile } from 'node:fs/promises';
 import path from 'node:path';
+import { x } from 'tinyexec';
+import { packageTranslationsPlugin } from '../shared/compile-package-translations.ts';
 
 export default defineConfig({
   format: 'esm',
@@ -19,14 +21,19 @@ export default defineConfig({
   ],
   fixedExtension: false,
   unbundle: true,
+  ignoreWatch: ['src/.translations/**'],
   dts: {
     sourcemap: false,
   },
   css: {
     inject: true,
   },
+  plugins: [packageTranslationsPlugin({ extraKeys: ['displayName'] })],
   async onSuccess() {
     await compileInline();
+    await x('tailwindcss', ['-i', 'css/style.css', '-o', './dist/style.css'], {
+      nodeOptions: { stdio: 'inherit' },
+    });
   },
   deps: {
     onlyBundle: ['react-medium-image-zoom'],
@@ -72,7 +79,7 @@ async function compileInline() {
   const commonNames = scanner.scan();
   await writeFile('css/generated/shared.css', namesToFile(commonNames));
 
-  const layouts = ['flux', 'notebook', 'home', 'docs'];
+  const layouts = ['flux', 'notebook', 'home', 'docs', 'glass'];
   const commonNameSet = new Set(commonNames);
 
   for (const layout of layouts) {
@@ -96,5 +103,5 @@ async function compileInline() {
 }
 
 function namesToFile(names: string[]) {
-  return names.map((name) => `@source inline(${JSON.stringify(name)});`).join('\n');
+  return `@source inline(${JSON.stringify(names.join(' '))});`;
 }

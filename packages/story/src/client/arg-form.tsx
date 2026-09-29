@@ -25,7 +25,7 @@ import { stringifyFieldKey } from '@fumari/stf/lib/utils';
 import { validate } from '@/type-tree/validator';
 import { formatDateForInput } from '@/utils/date';
 import { cva } from 'class-variance-authority';
-import { useTranslations } from './i18n';
+import { useTranslations } from '@fuma-translate/react';
 
 const labelVariants = cva(
   'text-xs font-mono font-medium text-fd-foreground peer-disabled:cursor-not-allowed peer-disabled:opacity-70',
@@ -120,7 +120,7 @@ export function FieldInput({
   fieldName: FieldKey;
 }) {
   const engine = useDataEngine();
-  const t = useTranslations();
+  const t = useTranslations({ note: 'story arguments form' });
   const [value, setValue] = useFieldValue(fieldName);
   const id = stringifyFieldKey(fieldName);
 
@@ -153,12 +153,24 @@ export function FieldInput({
 
   if (field.type === 'enum') {
     const idx = field.members.findIndex((m) => m.value === value);
+    const items: { label: ReactNode; value: number }[] = field.members.map((member, i) => ({
+      value: i,
+      label: member.label,
+    }));
+
+    if (!isRequired) {
+      items.push({
+        value: -1,
+        label: <span className="text-fd-muted-foreground">{t('Unset')}</span>,
+      });
+    }
 
     return (
       <Select
-        value={idx >= 0 ? String(idx) : '-1'}
-        onValueChange={(v: string) => {
-          const index = Number(v);
+        items={items}
+        value={idx === -1 && isRequired ? null : idx}
+        onValueChange={(index) => {
+          if (index === null) return;
           if (index >= 0 && index < field.members.length) {
             setValue(field.members[index]!.value);
           } else {
@@ -170,30 +182,40 @@ export function FieldInput({
           <SelectValue />
         </SelectTrigger>
         <SelectContent>
-          {field.members.map((member, i) => (
-            <SelectItem key={i} value={String(i)}>
-              {member.label}
+          {items.map((item) => (
+            <SelectItem key={item.value} value={item.value}>
+              {item.label}
             </SelectItem>
           ))}
-          {!isRequired && <SelectItem value="-1">{t.unset}</SelectItem>}
         </SelectContent>
       </Select>
     );
   }
 
   if (field.type === 'boolean') {
+    const items = [
+      { value: true, label: t('True') },
+      { value: false, label: t('False') },
+      ...(!isRequired
+        ? [{ value: null, label: <span className="text-fd-muted-foreground">{t('Unset')}</span> }]
+        : []),
+    ];
+
     return (
       <Select
-        value={String(value)}
-        onValueChange={(val: string) => setValue(val === 'undefined' ? undefined : val === 'true')}
+        items={items}
+        value={typeof value === 'boolean' ? value : null}
+        onValueChange={(val) => setValue(val === null ? undefined : val)}
       >
         <SelectTrigger id={id} {...props}>
           <SelectValue />
         </SelectTrigger>
         <SelectContent>
-          <SelectItem value="true">{t.booleanTrue}</SelectItem>
-          <SelectItem value="false">{t.booleanFalse}</SelectItem>
-          {!isRequired && <SelectItem value="undefined">{t.unset}</SelectItem>}
+          {items.map((item) => (
+            <SelectItem key={String(item.value)} value={item.value}>
+              {item.label}
+            </SelectItem>
+          ))}
         </SelectContent>
       </Select>
     );
@@ -202,7 +224,7 @@ export function FieldInput({
     return renderUnset(
       <Input
         id={id}
-        placeholder={t.dateInputPlaceholder}
+        placeholder={t('Enter date')}
         type="date"
         value={value instanceof Date ? formatDateForInput(value) : ''}
         onChange={(e) => {
@@ -217,10 +239,10 @@ export function FieldInput({
       id={id}
       placeholder={
         field.type === 'number'
-          ? t.numberInputPlaceholder
+          ? t('Enter number')
           : field.type === 'bigint'
-            ? t.bigintInputPlaceholder
-            : t.textInputPlaceholder
+            ? t('Enter bigint')
+            : t('Enter text')
       }
       type={field.type === 'number' || field.type === 'bigint' ? 'number' : 'text'}
       value={String(value ?? '')}
@@ -327,7 +349,7 @@ export function FieldSet({
               className={cn(
                 buttonVariants({
                   size: 'icon-xs',
-                  color: 'ghost',
+                  variant: 'ghost',
                   className: 'text-fd-muted-foreground',
                 }),
               )}
@@ -364,7 +386,7 @@ export function FieldSet({
               className={cn(
                 buttonVariants({
                   size: 'icon-xs',
-                  color: 'ghost',
+                  variant: 'ghost',
                   className: 'text-fd-muted-foreground -ms-1',
                 }),
               )}
@@ -412,7 +434,7 @@ function ArrayInput({
   fieldName: FieldKey;
   items: TypeNode;
 } & ComponentProps<'div'>) {
-  const t = useTranslations();
+  const t = useTranslations({ note: 'story arguments form' });
   const name = fieldName.at(-1) ?? '';
   const { items, insertItem, removeItem } = useArray(fieldName, {
     defaultValue: [],
@@ -434,10 +456,10 @@ function ArrayInput({
           toolbar={
             <button
               type="button"
-              aria-label={t.arrayInputRemoveItem}
+              aria-label={t('Remove Item', { note: 'aria-label' })}
               className={cn(
                 buttonVariants({
-                  color: 'outline',
+                  variant: 'outline',
                   size: 'icon-xs',
                 }),
               )}
@@ -452,7 +474,7 @@ function ArrayInput({
         type="button"
         className={cn(
           buttonVariants({
-            color: 'secondary',
+            variant: 'secondary',
             className: 'gap-1.5 py-2',
             size: 'sm',
           }),
@@ -462,7 +484,7 @@ function ArrayInput({
         }}
       >
         <Plus className="size-4" />
-        {t.arrayInputAddItem}
+        {t('New Item')}
       </button>
     </div>
   );
@@ -492,8 +514,8 @@ function useFieldInfo(
       };
 
       if (node.type === 'union') {
-        // Try to find which union type matches the current value
-        const matchingIndex = node.types.findIndex(validate);
+        const value = engine.get(fieldName);
+        const matchingIndex = node.types.findIndex((type) => validate(type, value));
         out.unionIndex = matchingIndex === -1 ? 0 : matchingIndex;
       }
 

@@ -1,0 +1,982 @@
+asyncapi: 3.1.0
+id: 'wss://wss-primary.slack.com/websocket'
+info:
+  title: Slack Real Time Messaging API
+  version: 1.0.0
+servers:
+  production:
+    host: slack.com
+    pathname: /api/rtm.connect
+    protocol: https
+    protocolVersion: '1.1'
+    security:
+      - $ref: '#/components/securitySchemes/token'
+channels:
+  root:
+    address: /
+    messages:
+      outgoingMessage:
+        $ref: '#/components/messages/outgoingMessage'
+      hello:
+        $ref: '#/components/messages/hello'
+      connectionError:
+        $ref: '#/components/messages/connectionError'
+      accountsChanged:
+        $ref: '#/components/messages/accountsChanged'
+      botAdded:
+        $ref: '#/components/messages/botAdded'
+      botChanged:
+        $ref: '#/components/messages/botChanged'
+      channelArchive:
+        $ref: '#/components/messages/channelArchive'
+      channelCreated:
+        $ref: '#/components/messages/channelCreated'
+      channelDeleted:
+        $ref: '#/components/messages/channelDeleted'
+      channelHistoryChanged:
+        $ref: '#/components/messages/channelHistoryChanged'
+      channelJoined:
+        $ref: '#/components/messages/channelJoined'
+      channelLeft:
+        $ref: '#/components/messages/channelLeft'
+      channelMarked:
+        $ref: '#/components/messages/channelMarked'
+      channelRename:
+        $ref: '#/components/messages/channelRename'
+      channelUnarchive:
+        $ref: '#/components/messages/channelUnarchive'
+      commandsChanged:
+        $ref: '#/components/messages/commandsChanged'
+      dndUpdated:
+        $ref: '#/components/messages/dndUpdated'
+      dndUpdatedUser:
+        $ref: '#/components/messages/dndUpdatedUser'
+      emailDomainChanged:
+        $ref: '#/components/messages/emailDomainChanged'
+      emojiRemoved:
+        $ref: '#/components/messages/emojiRemoved'
+      emojiAdded:
+        $ref: '#/components/messages/emojiAdded'
+      fileChange:
+        $ref: '#/components/messages/fileChange'
+      fileCommentAdded:
+        $ref: '#/components/messages/fileCommentAdded'
+      fileCommentDeleted:
+        $ref: '#/components/messages/fileCommentDeleted'
+      fileCommentEdited:
+        $ref: '#/components/messages/fileCommentEdited'
+      fileCreated:
+        $ref: '#/components/messages/fileCreated'
+      fileDeleted:
+        $ref: '#/components/messages/fileDeleted'
+      filePublic:
+        $ref: '#/components/messages/filePublic'
+      fileShared:
+        $ref: '#/components/messages/fileShared'
+      fileUnshared:
+        $ref: '#/components/messages/fileUnshared'
+      goodbye:
+        $ref: '#/components/messages/goodbye'
+      groupArchive:
+        $ref: '#/components/messages/groupArchive'
+      groupClose:
+        $ref: '#/components/messages/groupClose'
+      groupHistoryChanged:
+        $ref: '#/components/messages/groupHistoryChanged'
+      groupJoined:
+        $ref: '#/components/messages/groupJoined'
+      groupLeft:
+        $ref: '#/components/messages/groupLeft'
+      groupMarked:
+        $ref: '#/components/messages/groupMarked'
+      groupOpen:
+        $ref: '#/components/messages/groupOpen'
+      groupRename:
+        $ref: '#/components/messages/groupRename'
+      groupUnarchive:
+        $ref: '#/components/messages/groupUnarchive'
+      imClose:
+        $ref: '#/components/messages/imClose'
+      imCreated:
+        $ref: '#/components/messages/imCreated'
+      imMarked:
+        $ref: '#/components/messages/imMarked'
+      imOpen:
+        $ref: '#/components/messages/imOpen'
+      manualPresenceChange:
+        $ref: '#/components/messages/manualPresenceChange'
+      memberJoinedChannel:
+        $ref: '#/components/messages/memberJoinedChannel'
+      message:
+        $ref: '#/components/messages/message'
+operations:
+  receiveOutgoingMessage:
+    action: receive
+    channel:
+      $ref: '#/channels/root'
+    messages:
+      - $ref: '#/channels/root/messages/outgoingMessage'
+  sendMessages:
+    action: send
+    channel:
+      $ref: '#/channels/root'
+    messages:
+      - $ref: '#/channels/root/messages/hello'
+      - $ref: '#/channels/root/messages/connectionError'
+      - $ref: '#/channels/root/messages/accountsChanged'
+      - $ref: '#/channels/root/messages/botAdded'
+      - $ref: '#/channels/root/messages/botChanged'
+      - $ref: '#/channels/root/messages/channelArchive'
+      - $ref: '#/channels/root/messages/channelCreated'
+      - $ref: '#/channels/root/messages/channelDeleted'
+      - $ref: '#/channels/root/messages/channelHistoryChanged'
+      - $ref: '#/channels/root/messages/channelJoined'
+      - $ref: '#/channels/root/messages/channelLeft'
+      - $ref: '#/channels/root/messages/channelMarked'
+      - $ref: '#/channels/root/messages/channelRename'
+      - $ref: '#/channels/root/messages/channelUnarchive'
+      - $ref: '#/channels/root/messages/commandsChanged'
+      - $ref: '#/channels/root/messages/dndUpdated'
+      - $ref: '#/channels/root/messages/dndUpdatedUser'
+      - $ref: '#/channels/root/messages/emailDomainChanged'
+      - $ref: '#/channels/root/messages/emojiRemoved'
+      - $ref: '#/channels/root/messages/emojiAdded'
+      - $ref: '#/channels/root/messages/fileChange'
+      - $ref: '#/channels/root/messages/fileCommentAdded'
+      - $ref: '#/channels/root/messages/fileCommentDeleted'
+      - $ref: '#/channels/root/messages/fileCommentEdited'
+      - $ref: '#/channels/root/messages/fileCreated'
+      - $ref: '#/channels/root/messages/fileDeleted'
+      - $ref: '#/channels/root/messages/filePublic'
+      - $ref: '#/channels/root/messages/fileShared'
+      - $ref: '#/channels/root/messages/fileUnshared'
+      - $ref: '#/channels/root/messages/goodbye'
+      - $ref: '#/channels/root/messages/groupArchive'
+      - $ref: '#/channels/root/messages/groupClose'
+      - $ref: '#/channels/root/messages/groupHistoryChanged'
+      - $ref: '#/channels/root/messages/groupJoined'
+      - $ref: '#/channels/root/messages/groupLeft'
+      - $ref: '#/channels/root/messages/groupMarked'
+      - $ref: '#/channels/root/messages/groupOpen'
+      - $ref: '#/channels/root/messages/groupRename'
+      - $ref: '#/channels/root/messages/groupUnarchive'
+      - $ref: '#/channels/root/messages/imClose'
+      - $ref: '#/channels/root/messages/imCreated'
+      - $ref: '#/channels/root/messages/imMarked'
+      - $ref: '#/channels/root/messages/imOpen'
+      - $ref: '#/channels/root/messages/manualPresenceChange'
+      - $ref: '#/channels/root/messages/memberJoinedChannel'
+      - $ref: '#/channels/root/messages/message'
+components:
+  securitySchemes:
+    token:
+      type: httpApiKey
+      name: token
+      in: query
+  schemas:
+    attachment:
+      type: object
+      properties:
+        fallback:
+          type: string
+        color:
+          type: string
+        pretext:
+          type: string
+        author_name:
+          type: string
+        author_link:
+          type: string
+          format: uri
+        author_icon:
+          type: string
+          format: uri
+        title:
+          type: string
+        title_link:
+          type: string
+          format: uri
+        text:
+          type: string
+        fields:
+          type: array
+          items:
+            type: object
+            properties:
+              title:
+                type: string
+              value:
+                type: string
+              short:
+                type: boolean
+        image_url:
+          type: string
+          format: uri
+        thumb_url:
+          type: string
+          format: uri
+        footer:
+          type: string
+        footer_icon:
+          type: string
+          format: uri
+        ts:
+          type: number
+  messages:
+    hello:
+      summary: First event received upon connection.
+      payload:
+        type: object
+        properties:
+          type:
+            type: string
+            enum:
+              - hello
+    connectionError:
+      summary: Event received when a connection error happens.
+      payload:
+        type: object
+        properties:
+          type:
+            type: string
+            enum:
+              - error
+          error:
+            type: object
+            properties:
+              code:
+                type: number
+              msg:
+                type: string
+    accountsChanged:
+      summary: The list of accounts a user is signed into has changed.
+      payload:
+        type: object
+        properties:
+          type:
+            type: string
+            enum:
+              - accounts_changed
+    botAdded:
+      summary: A bot user was added.
+      payload:
+        type: object
+        properties:
+          type:
+            type: string
+            enum:
+              - bot_added
+          bot:
+            type: object
+            properties:
+              id:
+                type: string
+              app_id:
+                type: string
+              name:
+                type: string
+              icons:
+                type: object
+                additionalProperties:
+                  type: string
+    botChanged:
+      summary: A bot user was changed.
+      payload:
+        type: object
+        properties:
+          type:
+            type: string
+            enum:
+              - bot_added
+          bot:
+            type: object
+            properties:
+              id:
+                type: string
+              app_id:
+                type: string
+              name:
+                type: string
+              icons:
+                type: object
+                additionalProperties:
+                  type: string
+    channelArchive:
+      summary: A channel was archived.
+      payload:
+        type: object
+        properties:
+          type:
+            type: string
+            enum:
+              - channel_archive
+          channel:
+            type: string
+          user:
+            type: string
+    channelCreated:
+      summary: A channel was created.
+      payload:
+        type: object
+        properties:
+          type:
+            type: string
+            enum:
+              - channel_created
+          channel:
+            type: object
+            properties:
+              id:
+                type: string
+              name:
+                type: string
+              created:
+                type: number
+              creator:
+                type: string
+    channelDeleted:
+      summary: A channel was deleted.
+      payload:
+        type: object
+        properties:
+          type:
+            type: string
+            enum:
+              - channel_deleted
+          channel:
+            type: string
+    channelHistoryChanged:
+      summary: Bulk updates were made to a channel's history.
+      payload:
+        type: object
+        properties:
+          type:
+            type: string
+            enum:
+              - channel_history_changed
+          latest:
+            type: string
+          ts:
+            type: string
+          event_ts:
+            type: string
+    channelJoined:
+      summary: You joined a channel.
+      payload:
+        type: object
+        properties:
+          type:
+            type: string
+            enum:
+              - channel_joined
+          channel:
+            type: object
+            properties:
+              id:
+                type: string
+              name:
+                type: string
+              created:
+                type: number
+              creator:
+                type: string
+    channelLeft:
+      summary: You left a channel.
+      payload:
+        type: object
+        properties:
+          type:
+            type: string
+            enum:
+              - channel_left
+          channel:
+            type: string
+    channelMarked:
+      summary: Your channel read marker was updated.
+      payload:
+        type: object
+        properties:
+          type:
+            type: string
+            enum:
+              - channel_marked
+          channel:
+            type: string
+          ts:
+            type: string
+    channelRename:
+      summary: A channel was renamed.
+      payload:
+        type: object
+        properties:
+          type:
+            type: string
+            enum:
+              - channel_rename
+          channel:
+            type: object
+            properties:
+              id:
+                type: string
+              name:
+                type: string
+              created:
+                type: number
+    channelUnarchive:
+      summary: A channel was unarchived.
+      payload:
+        type: object
+        properties:
+          type:
+            type: string
+            enum:
+              - channel_unarchive
+          channel:
+            type: string
+          user:
+            type: string
+    commandsChanged:
+      summary: A slash command has been added or changed.
+      payload:
+        type: object
+        properties:
+          type:
+            type: string
+            enum:
+              - commands_changed
+          event_ts:
+            type: string
+    dndUpdated:
+      summary: Do not Disturb settings changed for the current user.
+      payload:
+        type: object
+        properties:
+          type:
+            type: string
+            enum:
+              - dnd_updated
+          user:
+            type: string
+          dnd_status:
+            type: object
+            properties:
+              dnd_enabled:
+                type: boolean
+              next_dnd_start_ts:
+                type: number
+              next_dnd_end_ts:
+                type: number
+              snooze_enabled:
+                type: boolean
+              snooze_endtime:
+                type: number
+    dndUpdatedUser:
+      summary: Do not Disturb settings changed for a member.
+      payload:
+        type: object
+        properties:
+          type:
+            type: string
+            enum:
+              - dnd_updated_user
+          user:
+            type: string
+          dnd_status:
+            type: object
+            properties:
+              dnd_enabled:
+                type: boolean
+              next_dnd_start_ts:
+                type: number
+              next_dnd_end_ts:
+                type: number
+    emailDomainChanged:
+      summary: The workspace email domain has changed.
+      payload:
+        type: object
+        properties:
+          type:
+            type: string
+            enum:
+              - email_domain_changed
+          email_domain:
+            type: string
+          event_ts:
+            type: string
+    emojiRemoved:
+      summary: A custom emoji has been removed.
+      payload:
+        type: object
+        properties:
+          type:
+            type: string
+            enum:
+              - emoji_changed
+          subtype:
+            type: string
+            enum:
+              - remove
+          names:
+            type: array
+            items:
+              type: string
+          event_ts:
+            type: string
+    emojiAdded:
+      summary: A custom emoji has been added.
+      payload:
+        type: object
+        properties:
+          type:
+            type: string
+            enum:
+              - emoji_changed
+          subtype:
+            type: string
+            enum:
+              - add
+          name:
+            type: string
+          value:
+            type: string
+            format: uri
+          event_ts:
+            type: string
+    fileChange:
+      summary: A file was changed.
+      payload:
+        type: object
+        properties:
+          type:
+            type: string
+            enum:
+              - file_change
+          file_id:
+            type: string
+          file:
+            type: object
+            properties:
+              id:
+                type: string
+    fileCommentAdded:
+      summary: A file comment was added.
+      payload:
+        type: object
+        properties:
+          type:
+            type: string
+            enum:
+              - file_comment_added
+          comment: {}
+          file_id:
+            type: string
+          file:
+            type: object
+            properties:
+              id:
+                type: string
+    fileCommentDeleted:
+      summary: A file comment was deleted.
+      payload:
+        type: object
+        properties:
+          type:
+            type: string
+            enum:
+              - file_comment_deleted
+          comment:
+            type: string
+          file_id:
+            type: string
+          file:
+            type: object
+            properties:
+              id:
+                type: string
+    fileCommentEdited:
+      summary: A file comment was edited.
+      payload:
+        type: object
+        properties:
+          type:
+            type: string
+            enum:
+              - file_comment_edited
+          comment: {}
+          file_id:
+            type: string
+          file:
+            type: object
+            properties:
+              id:
+                type: string
+    fileCreated:
+      summary: A file was created.
+      payload:
+        type: object
+        properties:
+          type:
+            type: string
+            enum:
+              - file_created
+          file_id:
+            type: string
+          file:
+            type: object
+            properties:
+              id:
+                type: string
+    fileDeleted:
+      summary: A file was deleted.
+      payload:
+        type: object
+        properties:
+          type:
+            type: string
+            enum:
+              - file_deleted
+          file_id:
+            type: string
+          event_ts:
+            type: string
+    filePublic:
+      summary: A file was made public.
+      payload:
+        type: object
+        properties:
+          type:
+            type: string
+            enum:
+              - file_public
+          file_id:
+            type: string
+          file:
+            type: object
+            properties:
+              id:
+                type: string
+    fileShared:
+      summary: A file was shared.
+      payload:
+        type: object
+        properties:
+          type:
+            type: string
+            enum:
+              - file_shared
+          file_id:
+            type: string
+          file:
+            type: object
+            properties:
+              id:
+                type: string
+    fileUnshared:
+      summary: A file was unshared.
+      payload:
+        type: object
+        properties:
+          type:
+            type: string
+            enum:
+              - file_unshared
+          file_id:
+            type: string
+          file:
+            type: object
+            properties:
+              id:
+                type: string
+    goodbye:
+      summary: The server intends to close the connection soon.
+      payload:
+        type: object
+        properties:
+          type:
+            type: string
+            enum:
+              - goodbye
+    groupArchive:
+      summary: A private channel was archived.
+      payload:
+        type: object
+        properties:
+          type:
+            type: string
+            enum:
+              - group_archive
+          channel:
+            type: string
+    groupClose:
+      summary: You closed a private channel.
+      payload:
+        type: object
+        properties:
+          type:
+            type: string
+            enum:
+              - group_close
+          user:
+            type: string
+          channel:
+            type: string
+    groupHistoryChanged:
+      summary: Bulk updates were made to a private channel's history.
+      payload:
+        type: object
+        properties:
+          type:
+            type: string
+            enum:
+              - group_history_changed
+          latest:
+            type: string
+          ts:
+            type: string
+          event_ts:
+            type: string
+    groupJoined:
+      summary: You joined a private channel.
+      payload:
+        type: object
+        properties:
+          type:
+            type: string
+            enum:
+              - group_joined
+          channel:
+            type: object
+            properties:
+              id:
+                type: string
+              name:
+                type: string
+              created:
+                type: number
+              creator:
+                type: string
+    groupLeft:
+      summary: You left a private channel.
+      payload:
+        type: object
+        properties:
+          type:
+            type: string
+            enum:
+              - group_left
+          channel:
+            type: string
+    groupMarked:
+      summary: A private channel read marker was updated.
+      payload:
+        type: object
+        properties:
+          type:
+            type: string
+            enum:
+              - group_marked
+          channel:
+            type: string
+          ts:
+            type: string
+    groupOpen:
+      summary: You opened a private channel.
+      payload:
+        type: object
+        properties:
+          type:
+            type: string
+            enum:
+              - group_open
+          user:
+            type: string
+          channel:
+            type: string
+    groupRename:
+      summary: A private channel was renamed.
+      payload:
+        type: object
+        properties:
+          type:
+            type: string
+            enum:
+              - group_rename
+          channel:
+            type: object
+            properties:
+              id:
+                type: string
+              name:
+                type: string
+              created:
+                type: number
+    groupUnarchive:
+      summary: A private channel was unarchived.
+      payload:
+        type: object
+        properties:
+          type:
+            type: string
+            enum:
+              - group_unarchive
+          channel:
+            type: string
+          user:
+            type: string
+    imClose:
+      summary: You closed a DM.
+      payload:
+        type: object
+        properties:
+          type:
+            type: string
+            enum:
+              - im_close
+          channel:
+            type: string
+          user:
+            type: string
+    imCreated:
+      summary: A DM was created.
+      payload:
+        type: object
+        properties:
+          type:
+            type: string
+            enum:
+              - im_created
+          channel:
+            type: object
+            properties:
+              id:
+                type: string
+              name:
+                type: string
+              created:
+                type: number
+              creator:
+                type: string
+          user:
+            type: string
+    imMarked:
+      summary: A direct message read marker was updated.
+      payload:
+        type: object
+        properties:
+          type:
+            type: string
+            enum:
+              - im_marked
+          channel:
+            type: string
+          ts:
+            type: string
+    imOpen:
+      summary: You opened a DM.
+      payload:
+        type: object
+        properties:
+          type:
+            type: string
+            enum:
+              - im_open
+          channel:
+            type: string
+          user:
+            type: string
+    manualPresenceChange:
+      summary: You manually updated your presence.
+      payload:
+        type: object
+        properties:
+          type:
+            type: string
+            enum:
+              - manual_presence_change
+          presence:
+            type: string
+    memberJoinedChannel:
+      summary: A user joined a public or private channel.
+      payload:
+        type: object
+        properties:
+          type:
+            type: string
+            enum:
+              - member_joined_channel
+          user:
+            type: string
+          channel:
+            type: string
+          channel_type:
+            type: string
+            enum:
+              - C
+              - G
+          team:
+            type: string
+          inviter:
+            type: string
+    memberLeftChannel:
+      summary: A user left a public or private channel.
+      payload:
+        type: object
+        properties:
+          type:
+            type: string
+            enum:
+              - member_left_channel
+          user:
+            type: string
+          channel:
+            type: string
+          channel_type:
+            type: string
+            enum:
+              - C
+              - G
+          team:
+            type: string
+    message:
+      summary: A message was sent to a channel.
+      payload:
+        type: object
+        properties:
+          type:
+            type: string
+            enum:
+              - message
+          user:
+            type: string
+          channel:
+            type: string
+          text:
+            type: string
+          ts:
+            type: string
+          attachments:
+            type: array
+            items:
+              $ref: '#/components/schemas/attachment'
+          edited:
+            type: object
+            properties:
+              user:
+                type: string
+              ts:
+                type: string
+    outgoingMessage:
+      summary: A message was sent to a channel.
+      payload:
+        type: object
+        properties:
+          id:
+            type: number
+          type:
+            type: string
+            enum:
+              - message
+          channel:
+            type: string
+          text:
+            type: string

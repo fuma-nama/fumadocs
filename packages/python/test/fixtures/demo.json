@@ -1,0 +1,565 @@
+{
+  "name": "demo",
+  "path": "demo",
+  "filepath": "/private/tmp/claude-501/-Users-xred-dev-fumadocs/b5e363c6-6b8c-4c3f-861d-a8c31d643bd1/scratchpad/venv/lib/python3.9/site-packages/griffe/_internal/importer.py",
+  "description": "A demo package.\n\nIt exercises **every** section kind of `fumapy` output, including `{braces}` and <angles>.",
+  "docstring": [],
+  "attributes": [
+    {
+      "name": "DEFAULT_TIMEOUT",
+      "annotation": "float",
+      "description": [
+        {
+          "kind": "text",
+          "value": "Seconds to wait before giving up."
+        }
+      ],
+      "value": "5.0"
+    }
+  ],
+  "modules": {
+    "logger": {
+      "name": "logger",
+      "path": "demo.logger",
+      "filepath": "/private/tmp/claude-501/-Users-xred-dev-fumadocs/b5e363c6-6b8c-4c3f-861d-a8c31d643bd1/scratchpad/venv/lib/python3.9/site-packages/griffe/_internal/logger.py",
+      "description": null,
+      "docstring": [],
+      "attributes": [
+        {
+          "name": "logger",
+          "annotation": "Logger",
+          "description": [
+            {
+              "kind": "text",
+              "value": "Our global logger, used throughout the library.\n\nGriffe's output and error messages are logging messages.\n\nGriffe provides the [`patch_loggers`][griffe.patch_loggers]\nfunction so dependent libraries can patch Griffe loggers as they see fit.\n\nFor example, to fit in the MkDocs logging configuration\nand prefix each log message with the module name:\n\n```python\nimport logging\nfrom griffe import patch_loggers\n\n\nclass LoggerAdapter(logging.LoggerAdapter):\n    def __init__(self, prefix, logger):\n        super().__init__(logger, {})\n        self.prefix = prefix\n\n    def process(self, msg, kwargs):\n        return f\"{self.prefix}: {msg}\", kwargs\n\n\ndef get_logger(name):\n    logger = logging.getLogger(f\"mkdocs.plugins.{name}\")\n    return LoggerAdapter(name, logger)\n\n\npatch_loggers(get_logger)\n```"
+            }
+          ],
+          "value": "Logger._get()"
+        }
+      ],
+      "modules": {},
+      "classes": {
+        "Logger": {
+          "name": "Logger",
+          "path": "demo.logger.Logger",
+          "description": null,
+          "parameters": [
+            {
+              "name": "name",
+              "annotation": "str",
+              "description": null,
+              "value": null
+            }
+          ],
+          "attributes": [],
+          "docstring": [],
+          "functions": {
+            "__init__": {
+              "name": "__init__",
+              "path": "demo.logger.Logger.__init__",
+              "signature": "(name) -> None",
+              "description": null,
+              "parameters": [
+                {
+                  "name": "name",
+                  "annotation": "str",
+                  "description": null,
+                  "value": null
+                }
+              ],
+              "returns": {
+                "name": "",
+                "annotation": "None",
+                "description": null
+              },
+              "docstring": [],
+              "source": "def __init__(self, name: str) -> None:\n    # Default logger that can be patched by third-party.\n    self._logger = self.__class__._default_logger(name)"
+            },
+            "__getattr__": {
+              "name": "__getattr__",
+              "path": "demo.logger.Logger.__getattr__",
+              "signature": "(name) -> Any",
+              "description": null,
+              "parameters": [
+                {
+                  "name": "name",
+                  "annotation": "str",
+                  "description": null,
+                  "value": null
+                }
+              ],
+              "returns": {
+                "name": "",
+                "annotation": "typing.Any",
+                "description": null
+              },
+              "docstring": [],
+              "source": "def __getattr__(self, name: str) -> Any:\n    # Forward everything to the logger.\n    return getattr(self._logger, name)"
+            },
+            "disable": {
+              "name": "disable",
+              "path": "demo.logger.Logger.disable",
+              "signature": "() -> Iterator[None]",
+              "description": "Temporarily disable logging.",
+              "parameters": [],
+              "returns": {
+                "name": "",
+                "annotation": "collections.abc.Iterator[None]",
+                "description": null
+              },
+              "docstring": [],
+              "source": "@contextmanager\ndef disable(self) -> Iterator[None]:\n    \"\"\"Temporarily disable logging.\"\"\"\n    old_level = self._logger.level\n    self._logger.setLevel(100)\n    try:\n        yield\n    finally:\n        self._logger.setLevel(old_level)"
+            },
+            "_get": {
+              "name": "_get",
+              "path": "demo.logger.Logger._get",
+              "signature": "(name='griffe') -> Logger",
+              "description": null,
+              "parameters": [
+                {
+                  "name": "name",
+                  "annotation": "str",
+                  "description": null,
+                  "value": "'griffe'"
+                }
+              ],
+              "returns": {
+                "name": "",
+                "annotation": "griffe._internal.logger.Logger",
+                "description": null
+              },
+              "docstring": [],
+              "source": "@classmethod\ndef _get(cls, name: str = \"griffe\") -> Logger:\n    if name not in cls._instances:\n        cls._instances[name] = cls(name)\n    return cls._instances[name]"
+            },
+            "_patch_loggers": {
+              "name": "_patch_loggers",
+              "path": "demo.logger.Logger._patch_loggers",
+              "signature": "(get_logger_func) -> None",
+              "description": null,
+              "parameters": [
+                {
+                  "name": "get_logger_func",
+                  "annotation": "Callable",
+                  "description": null,
+                  "value": null
+                }
+              ],
+              "returns": {
+                "name": "",
+                "annotation": "None",
+                "description": null
+              },
+              "docstring": [],
+              "source": "@classmethod\ndef _patch_loggers(cls, get_logger_func: Callable) -> None:\n    # Patch current instances.\n    for name, instance in cls._instances.items():\n        instance._logger = get_logger_func(name)\n\n    # Future instances will be patched as well.\n    cls._default_logger = get_logger_func"
+            }
+          },
+          "source": "class Logger:\n    _default_logger: Any = logging.getLogger\n    _instances: ClassVar[dict[str, Logger]] = {}\n\n    def __init__(self, name: str) -> None:\n        # Default logger that can be patched by third-party.\n        self._logger = self.__class__._default_logger(name)\n\n    def __getattr__(self, \n    ...",
+          "inherited_members": {}
+        }
+      },
+      "functions": {
+        "get_logger": {
+          "name": "get_logger",
+          "path": "demo.logger.get_logger",
+          "signature": "(name='griffe') -> Logger",
+          "description": "Create and return a new logger instance.",
+          "parameters": [
+            {
+              "name": "name",
+              "annotation": "str",
+              "description": [
+                {
+                  "kind": "text",
+                  "value": "The logger name."
+                }
+              ],
+              "value": "'griffe'"
+            }
+          ],
+          "returns": {
+            "name": "",
+            "annotation": "griffe._internal.logger.Logger",
+            "description": "The logger."
+          },
+          "docstring": [],
+          "source": "def get_logger(name: str = \"griffe\") -> Logger:\n    \"\"\"Create and return a new logger instance.\n\n    Parameters:\n        name: The logger name.\n\n    Returns:\n        The logger.\n    \"\"\"\n    return Logger._get(name)"
+        },
+        "patch_loggers": {
+          "name": "patch_loggers",
+          "path": "demo.logger.patch_loggers",
+          "signature": "(get_logger_func) -> None",
+          "description": "Patch Griffe logger and Griffe extensions' loggers.",
+          "parameters": [
+            {
+              "name": "get_logger_func",
+              "annotation": "Callable[[str], Any]",
+              "description": [
+                {
+                  "kind": "text",
+                  "value": "A function accepting a name as parameter and returning a logger."
+                }
+              ]
+            }
+          ],
+          "returns": {
+            "name": "",
+            "annotation": "None",
+            "description": null
+          },
+          "docstring": [],
+          "source": "def patch_loggers(get_logger_func: Callable[[str], Any]) -> None:\n    \"\"\"Patch Griffe logger and Griffe extensions' loggers.\n\n    Parameters:\n        get_logger_func: A function accepting a name as parameter and returning a logger.\n    \"\"\"\n    Logger._patch_loggers(get_logger_func)"
+        }
+      }
+    },
+    "utils": {
+      "name": "utils",
+      "path": "demo.utils",
+      "description": "Helpers without classes or submodules.",
+      "docstring": null,
+      "attributes": [],
+      "modules": {},
+      "classes": {},
+      "functions": {
+        "sys_path": {
+          "name": "sys_path",
+          "path": "demo.utils.sys_path",
+          "signature": "(*paths) -> Iterator[None]",
+          "description": "Redefine `sys.path` temporarily.",
+          "parameters": [
+            {
+              "name": "paths",
+              "annotation": "str | Path",
+              "description": null,
+              "value": "()"
+            }
+          ],
+          "returns": {
+            "name": "",
+            "annotation": "collections.abc.Iterator[None]",
+            "description": null
+          },
+          "docstring": [
+            {
+              "kind": "yields",
+              "value": [
+                {
+                  "name": "",
+                  "annotation": "None",
+                  "description": "Nothing."
+                }
+              ]
+            }
+          ],
+          "source": "@contextmanager\ndef sys_path(*paths: str | Path) -> Iterator[None]:\n    \"\"\"Redefine `sys.path` temporarily.\n\n    Parameters:\n        *paths: The paths to use when importing modules.\n            If no paths are given, keep `sys.path` untouched.\n\n    Yields:\n        Nothing.\n    \"\"\"\n    if not paths:\n\n    ..."
+        }
+      }
+    }
+  },
+  "classes": {
+    "GitInfo": {
+      "name": "GitInfo",
+      "path": "demo.GitInfo",
+      "description": "Information about a Git repository.",
+      "parameters": [
+        {
+          "name": "repository",
+          "annotation": "Path",
+          "description": null,
+          "value": null
+        },
+        {
+          "name": "service",
+          "annotation": "KnownGitService",
+          "description": null,
+          "value": null
+        },
+        {
+          "name": "remote_url",
+          "annotation": "str",
+          "description": null,
+          "value": null
+        },
+        {
+          "name": "commit_hash",
+          "annotation": "str",
+          "description": null,
+          "value": null
+        }
+      ],
+      "attributes": [
+        {
+          "name": "repository",
+          "annotation": "Path",
+          "description": [
+            {
+              "kind": "text",
+              "value": "The path to the Git repository."
+            }
+          ],
+          "value": null
+        },
+        {
+          "name": "service",
+          "annotation": "KnownGitService",
+          "description": [
+            {
+              "kind": "text",
+              "value": "The Git hosting service (used to build the right URLs)."
+            }
+          ],
+          "value": null
+        },
+        {
+          "name": "remote_url",
+          "annotation": "str",
+          "description": [
+            {
+              "kind": "text",
+              "value": "The remote URL of the Git repository."
+            }
+          ],
+          "value": null
+        },
+        {
+          "name": "commit_hash",
+          "annotation": "str",
+          "description": [
+            {
+              "kind": "text",
+              "value": "A commit hash (usually the current checked-out one)."
+            }
+          ],
+          "value": null
+        }
+      ],
+      "docstring": [],
+      "functions": {
+        "from_package": {
+          "name": "from_package",
+          "path": "demo.GitInfo.from_package",
+          "signature": "(package) -> GitInfo | None",
+          "description": "Create a GitInfo instance from a Griffe package.",
+          "parameters": [
+            {
+              "name": "package",
+              "annotation": "Module",
+              "description": null,
+              "value": null
+            }
+          ],
+          "returns": {
+            "name": "",
+            "annotation": "GitInfo | None",
+            "description": "The GitInfo instance, or None if unknown."
+          },
+          "docstring": [],
+          "source": "@classmethod\ndef from_package(cls, package: Module) -> GitInfo | None:\n    \"\"\"Create a GitInfo instance from a Griffe package.\n\n    Returns:\n        The GitInfo instance, or None if unknown.\n    \"\"\"\n    try:\n        path = package.filepath[0] if isinstance(package.filepath, list) else package.filepa\n    ..."
+        },
+        "get_source_link": {
+          "name": "get_source_link",
+          "path": "demo.GitInfo.get_source_link",
+          "signature": "(filepath, lineno, endlineno) -> str | None",
+          "description": "Get the source link for the file at the given line numbers.",
+          "parameters": [
+            {
+              "name": "filepath",
+              "annotation": "str | Path",
+              "description": null,
+              "value": null
+            },
+            {
+              "name": "lineno",
+              "annotation": "int",
+              "description": null,
+              "value": null
+            },
+            {
+              "name": "endlineno",
+              "annotation": "int",
+              "description": null,
+              "value": null
+            }
+          ],
+          "returns": {
+            "name": "",
+            "annotation": "str | None",
+            "description": "The source link, or None if unknown."
+          },
+          "docstring": [],
+          "source": "def get_source_link(self, filepath: str | Path, lineno: int, endlineno: int) -> str | None:\n    \"\"\"Get the source link for the file at the given line numbers.\n\n    Returns:\n        The source link, or None if unknown.\n    \"\"\"\n    return _get_source_link(self.service, self.remote_url, self.commit_has\n    ..."
+        },
+        "__init__": {
+          "name": "__init__",
+          "path": "demo.GitInfo.__init__",
+          "signature": "(repository, service, remote_url, commit_hash) -> None",
+          "description": null,
+          "parameters": [
+            {
+              "name": "repository",
+              "annotation": "Path",
+              "description": null,
+              "value": null
+            },
+            {
+              "name": "service",
+              "annotation": "KnownGitService",
+              "description": null,
+              "value": null
+            },
+            {
+              "name": "remote_url",
+              "annotation": "str",
+              "description": null,
+              "value": null
+            },
+            {
+              "name": "commit_hash",
+              "annotation": "str",
+              "description": null,
+              "value": null
+            }
+          ],
+          "returns": {
+            "name": "",
+            "annotation": "None",
+            "description": null
+          },
+          "docstring": [],
+          "source": ""
+        }
+      },
+      "source": "@dataclass\nclass GitInfo:\n    \"\"\"Information about a Git repository.\"\"\"\n\n    repository: Path\n    \"\"\"The path to the Git repository.\"\"\"\n    service: KnownGitService\n    \"\"\"The Git hosting service (used to build the right URLs).\"\"\"\n    remote_url: str\n    \"\"\"The remote URL of the Git repository.\"\"\"\n \n    ...",
+      "inherited_members": {}
+    }
+  },
+  "functions": {
+    "_error_details": {
+      "name": "_error_details",
+      "path": "demo._error_details",
+      "signature": "(error, objpath) -> str",
+      "description": null,
+      "parameters": [
+        {
+          "name": "error",
+          "annotation": "BaseException",
+          "description": null,
+          "value": null
+        },
+        {
+          "name": "objpath",
+          "annotation": "str",
+          "description": null,
+          "value": null
+        }
+      ],
+      "returns": {
+        "name": "",
+        "annotation": "str",
+        "description": null
+      },
+      "docstring": [
+        {
+          "kind": "admonition",
+          "value": {
+            "annotation": "example",
+            "description": "```python\nimport griffe\n\nmodule = griffe.load(...)\n```\n\nThis is a shortcut for:\n\n```python\nfrom griffe import GriffeLoader\n\nloader = GriffeLoader(...)\nmodule = loader.load(...)\n```\n\nSee the documentation for the loader: [`GriffeLoader`][griffe.GriffeLoader]."
+          },
+          "title": "Example"
+        },
+        {
+          "kind": "examples",
+          "value": [
+            [
+              "examples",
+              ">>> foo = griffe_object[\"foo\"]\n>>> bar = griffe_object[\"path.to.bar\"]\n>>> qux = griffe_object[(\"path\", \"to\", \"qux\")]"
+            ]
+          ]
+        }
+      ],
+      "source": "def _error_details(error: BaseException, objpath: str) -> str:\n    return f\"With sys.path = {sys.path!r}, accessing {objpath!r} raises {error.__class__.__name__}: {error}\""
+    },
+    "sys_path": {
+      "name": "sys_path",
+      "path": "demo.sys_path",
+      "signature": "(*paths) -> Iterator[None]",
+      "description": "Redefine `sys.path` temporarily.",
+      "parameters": [
+        {
+          "name": "paths",
+          "annotation": "str | Path",
+          "description": null,
+          "value": "()"
+        }
+      ],
+      "returns": {
+        "name": "",
+        "annotation": "collections.abc.Iterator[None]",
+        "description": null
+      },
+      "docstring": [
+        {
+          "kind": "yields",
+          "value": [
+            {
+              "name": "",
+              "annotation": "None",
+              "description": "Nothing."
+            }
+          ]
+        }
+      ],
+      "source": "@contextmanager\ndef sys_path(*paths: str | Path) -> Iterator[None]:\n    \"\"\"Redefine `sys.path` temporarily.\n\n    Parameters:\n        *paths: The paths to use when importing modules.\n            If no paths are given, keep `sys.path` untouched.\n\n    Yields:\n        Nothing.\n    \"\"\"\n    if not paths:\n\n    ..."
+    },
+    "dynamic_import": {
+      "name": "dynamic_import",
+      "path": "demo.dynamic_import",
+      "signature": "(import_path, import_paths=None) -> Any",
+      "description": "Dynamically import the specified object.\n\nIt can be a module, class, method, function, attribute, type alias,\nnested arbitrarily.\n\nIt works like this:\n\n- for a given object path `a.b.x.y`\n- it tries to import `a.b.x.y` as a module (with `importlib.import_module`)\n- if it fails, it tries again with `a.b.x`, storing `y`\n- then `a.b`, storing `x.y`\n- then `a`, storing `b.x.y`\n- if nothing worked, it raises an error\n- if one of the iteration worked, it moves on, and...\n- it tries to get the remaining (stored) parts with `getattr`\n- for example it gets `b` from `a`, then `x` from `b`, etc.\n- if a single attribute access fails, it raises an error\n- if everything worked, it returns the last obtained attribute\n\nSince the function potentially tries multiple things before succeeding,\nall errors happening along the way are recorded, and re-emitted with\nan `ImportError` when it fails, to let users know what was tried.\n\nIMPORTANT: The paths given through the `import_paths` parameter are used\nto temporarily patch `sys.path`: this function is therefore not thread-safe.\n\nIMPORTANT: The paths given as `import_paths` must be *correct*.\nThe contents of `sys.path` must be consistent to what a user of the imported code\nwould expect. Given a set of paths, if the import fails for a user, it will fail here too,\nwith potentially unintuitive errors. If we wanted to make this function more robust,\nwe could add a loop to \"roll the window\" of given paths, shifting them to the left\n(for example: `(\"/a/a\", \"/a/b\", \"/a/c/\")`, then `(\"/a/b\", \"/a/c\", \"/a/a/\")`,\nthen `(\"/a/c\", \"/a/a\", \"/a/b/\")`), to make sure each entry is given highest priority\nat least once, maintaining relative order, but we deem this unnecessary for now.",
+      "parameters": [
+        {
+          "name": "import_path",
+          "annotation": "str",
+          "description": [
+            {
+              "kind": "text",
+              "value": "The path of the object to import."
+            }
+          ]
+        },
+        {
+          "name": "import_paths",
+          "annotation": "Sequence[str | Path] | None",
+          "description": [
+            {
+              "kind": "text",
+              "value": "The (sys) paths to import the object from."
+            }
+          ],
+          "value": "None"
+        }
+      ],
+      "returns": {
+        "name": "",
+        "annotation": "typing.Any",
+        "description": "The imported object."
+      },
+      "docstring": [
+        {
+          "kind": "raises",
+          "value": [
+            {
+              "annotation": "ModuleNotFoundError",
+              "description": "When the object's module could not be found."
+            },
+            {
+              "annotation": "ImportError",
+              "description": "When there was an import error or when couldn't get the attribute."
+            }
+          ]
+        }
+      ],
+      "source": "def dynamic_import(import_path: str, import_paths: Sequence[str | Path] | None = None) -> Any:\n    \"\"\"Dynamically import the specified object.\n\n    It can be a module, class, method, function, attribute, type alias,\n    nested arbitrarily.\n\n    It works like this:\n\n    - for a given object path `a.b\n    ..."
+    }
+  },
+  "version": "1.0.0"
+}

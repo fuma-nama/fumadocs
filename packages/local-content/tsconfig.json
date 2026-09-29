@@ -1,0 +1,14 @@
+{
+  "extends": "tsconfig/base.json",
+  "compilerOptions": {
+    "paths": {
+      "@/*": ["./src/*"]
+    },
+    "noEmit": true,
+    "lib": ["ESNext", "DOM"],
+    "types": ["vite/client"],
+    "module": "ESNext",
+    "target": "ES2020"
+  },
+  "exclude": ["node_modules", "eslint.config.mjs", "dist"]
+}

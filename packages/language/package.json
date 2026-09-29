@@ -1,6 +1,6 @@
 {
   "name": "@fumadocs/language",
-  "version": "0.0.1",
+  "version": "0.2.7",
   "description": "Common language packs for Fumadocs",
   "keywords": [
     "documentation",
@@ -14,6 +14,7 @@
     "dist"
   ],
   "type": "module",
+  "sideEffects": false,
   "exports": {
     "./zh-cn": "./dist/zh-cn.js",
     "./zh-tw": "./dist/zh-tw.js",
@@ -30,21 +31,26 @@
     "types:check": "tsc --noEmit"
   },
   "devDependencies": {
+    "@fumadocs/asyncapi": "workspace:*",
     "@fumadocs/story": "workspace:*",
     "fumadocs-core": "workspace:*",
     "fumadocs-openapi": "workspace:*",
-    "fumadocs-ui": "workspace:*",
+    "fumadocs-ui": "workspace:@fumadocs/base-ui@*",
     "tsconfig": "workspace:*",
-    "tsdown": "0.22.0",
-    "typescript": "^6.0.3"
+    "tsdown": "0.23.0",
+    "typescript": "^7.0.2"
   },
   "peerDependencies": {
+    "@fumadocs/asyncapi": "*",
     "@fumadocs/story": "*",
     "fumadocs-core": "*",
     "fumadocs-openapi": "*",
     "fumadocs-ui": "*"
   },
   "peerDependenciesMeta": {
+    "@fumadocs/asyncapi": {
+      "optional": true
+    },
     "@fumadocs/story": {
       "optional": true
     },

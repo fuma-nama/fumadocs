@@ -1,0 +1,27 @@
+<div><p>A demo package.</p>
+<p>It exercises <strong>every</strong> section kind of <code>fumapy</code> output, including <code>{braces}</code> and &lt;angles&gt;.</p>
+<section data-component="PyAttributes"><section data-component="PyAttribute" name="DEFAULT_TIMEOUT" type="float" value="5.0"><p>Seconds to wait before giving up.</p></section></section>
+<div data-tabs="Class,Functions,Modules"><section data-tab="Class"><nav><a href="/docs/demo/GitInfo">GitInfo</a></nav></section><section data-tab="Functions"><section data-component="PyFunction" name="_error_details" type="(error, objpath) -&gt; str"><aside data-type="example">Example<figure /><p>This is a shortcut for:</p><figure /><p>See the documentation for the loader: [<code>GriffeLoader</code>][griffe.GriffeLoader].</p></aside><figure /><section data-component="PySourceCode"><figure /></section><div><section data-component="PyParameter" name="error" type="BaseException"></section><section data-component="PyParameter" name="objpath" type="str"></section></div><section data-component="PyFunctionReturn" type="str"></section></section><section data-component="PyFunction" name="sys_path" type="(*paths) -&gt; Iterator[None]"><p>Redefine <code>sys.path</code> temporarily.</p><section data-component="PySourceCode"><figure /></section><div><section data-component="PyParameter" name="paths" type="str | Path" value="()"></section></div><section data-component="PyFunctionReturn" type="collections.abc.Iterator[None]"></section></section><section data-component="PyFunction" name="dynamic_import" type="(import_path, import_paths=None) -&gt; Any"><p>Dynamically import the specified object.</p><p>It can be a module, class, method, function, attribute, type alias,
+nested arbitrarily.</p><p>It works like this:</p><ul>
+<li>for a given object path <code>a.b.x.y</code></li>
+<li>it tries to import <code>a.b.x.y</code> as a module (with <code>importlib.import_module</code>)</li>
+<li>if it fails, it tries again with <code>a.b.x</code>, storing <code>y</code></li>
+<li>then <code>a.b</code>, storing <code>x.y</code></li>
+<li>then <code>a</code>, storing <code>b.x.y</code></li>
+<li>if nothing worked, it raises an error</li>
+<li>if one of the iteration worked, it moves on, and...</li>
+<li>it tries to get the remaining (stored) parts with <code>getattr</code></li>
+<li>for example it gets <code>b</code> from <code>a</code>, then <code>x</code> from <code>b</code>, etc.</li>
+<li>if a single attribute access fails, it raises an error</li>
+<li>if everything worked, it returns the last obtained attribute</li>
+</ul><p>Since the function potentially tries multiple things before succeeding,
+all errors happening along the way are recorded, and re-emitted with
+an <code>ImportError</code> when it fails, to let users know what was tried.</p><p>IMPORTANT: The paths given through the <code>import_paths</code> parameter are used
+to temporarily patch <code>sys.path</code>: this function is therefore not thread-safe.</p><p>IMPORTANT: The paths given as <code>import_paths</code> must be <em>correct</em>.
+The contents of <code>sys.path</code> must be consistent to what a user of the imported code
+would expect. Given a set of paths, if the import fails for a user, it will fail here too,
+with potentially unintuitive errors. If we wanted to make this function more robust,
+we could add a loop to &quot;roll the window&quot; of given paths, shifting them to the left
+(for example: <code>(&quot;/a/a&quot;, &quot;/a/b&quot;, &quot;/a/c/&quot;)</code>, then <code>(&quot;/a/b&quot;, &quot;/a/c&quot;, &quot;/a/a/&quot;)</code>,
+then <code>(&quot;/a/c&quot;, &quot;/a/a&quot;, &quot;/a/b/&quot;)</code>), to make sure each entry is given highest priority
+at least once, maintaining relative order, but we deem this unnecessary for now.</p><section data-component="PySourceCode"><figure /></section><div><section data-component="PyParameter" name="import_path" type="str"><p>The path of the object to import.</p></section><section data-component="PyParameter" name="import_paths" type="Sequence[str | Path] | None" value="None"><p>The (sys) paths to import the object from.</p></section></div><section data-component="PyFunctionReturn" type="typing.Any"><p>The imported object.</p></section></section></section><section data-tab="Modules"><nav><a href="/docs/demo/logger">logger</a><a href="/docs/demo/utils">utils</a></nav></section></div></div>

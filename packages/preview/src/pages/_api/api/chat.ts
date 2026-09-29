@@ -1,6 +1,8 @@
 import {
   convertToModelMessages,
   LanguageModel,
+  createUIMessageStreamResponse,
+  toUIMessageStream,
   stepCountIs,
   streamText,
   tool,
@@ -8,7 +10,7 @@ import {
 } from 'ai';
 import { z } from 'zod';
 import { getSource, Source } from '@/lib/source';
-import { Document, type DocumentData } from 'flexsearch';
+import { Document, type MergedDocumentSearchResults, type DocumentData } from 'flexsearch';
 import { revalidable } from '@/lib/revalidable';
 import { getConfigRuntime } from '@/config/load-runtime';
 import { defaultModel, isAISupported } from '@/lib/ai';
@@ -137,10 +139,21 @@ export async function POST(req: Request) {
     toolChoice: 'auto',
   });
 
-  return result.toUIMessageStreamResponse();
+  return createUIMessageStreamResponse({
+    stream: toUIMessageStream({ stream: result.stream }),
+  });
 }
 
-const searchTool = tool({
+const searchTool: ReturnType<
+  typeof tool<
+    {
+      query: string;
+      limit: number;
+    },
+    MergedDocumentSearchResults<CustomDocument>,
+    Record<never, unknown>
+  >
+> = tool({
   description: 'Search the docs content and return raw JSON results.',
   inputSchema: z.object({
     query: z.string(),

@@ -1,0 +1,6 @@
+{
+  // `build-graph.ts` is written for the consumer's source object, it is excluded from the app but still needs `paths` when compiling the registry
+  "extends": "../../tsconfig.json",
+  "include": ["build-graph.ts"],
+  "exclude": []
+}

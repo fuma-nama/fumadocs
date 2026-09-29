@@ -1,5 +1,9 @@
-import { cancel, group, intro, log, outro, select } from '@clack/prompts';
+import fs from 'node:fs/promises';
+import path from 'node:path';
+import { cancel, group, intro, log, outro, select, type Option } from '@clack/prompts';
 import picocolors from 'picocolors';
+import { parseSourceFile } from '@/codemod';
+import { frameworks } from '@/project';
 import type { Target } from '@/commands/add';
 import { UIRegistries } from '@/commands/shared';
 import { LoadedConfig } from '@/config';
@@ -9,7 +13,7 @@ import { FumadocsComponentInstaller } from '@/registry/installer';
 interface TargetInfo {
   targets: Target[];
   id: string;
-  print?: () => void;
+  print?: () => void | Promise<void>;
 }
 
 interface SlotPrintInfo {
@@ -17,6 +21,7 @@ interface SlotPrintInfo {
   layoutId: string;
   name: string;
   isPage: boolean;
+  uiLibrary: LoadedConfig['uiLibrary'];
 }
 
 export async function customise(config: LoadedConfig, connector: RegistryConnector) {
@@ -24,7 +29,7 @@ export async function customise(config: LoadedConfig, connector: RegistryConnect
 
   const installer = new FumadocsComponentInstaller(connector, config);
   const subRegistry = UIRegistries[config.uiLibrary];
-  const info = await connector.fetchRegistryInfo(subRegistry);
+  const manifest = await installer.fetchManifest(subRegistry);
 
   const result = await group(
     {
@@ -37,12 +42,12 @@ export async function customise(config: LoadedConfig, connector: RegistryConnect
               value: {
                 id: 'docs',
                 targets: [{ subRegistry, name: 'layouts/docs' }],
-                print() {
+                print: () =>
                   printLayout(
+                    config,
                     ['fumadocs-ui/layouts/docs', '@/layouts/docs'],
                     ['fumadocs-ui/layouts/docs/page', '@/layouts/docs/page'],
-                  );
-                },
+                  ),
               },
               hint: 'the default docs layout',
             },
@@ -51,12 +56,12 @@ export async function customise(config: LoadedConfig, connector: RegistryConnect
               value: {
                 id: 'notebook',
                 targets: [{ subRegistry, name: 'layouts/notebook' }],
-                print() {
+                print: () =>
                   printLayout(
+                    config,
                     ['fumadocs-ui/layouts/notebook', '@/layouts/notebook'],
                     ['fumadocs-ui/layouts/notebook/page', '@/layouts/notebook/page'],
-                  );
-                },
+                  ),
               },
               hint: 'a more compact version of docs layout',
             },
@@ -65,23 +70,35 @@ export async function customise(config: LoadedConfig, connector: RegistryConnect
               value: {
                 id: 'flux',
                 targets: [{ subRegistry, name: 'layouts/flux' }],
-                print() {
+                print: () =>
                   printLayout(
+                    config,
                     ['fumadocs-ui/layouts/flux', '@/layouts/flux'],
                     ['fumadocs-ui/layouts/flux/page', '@/layouts/flux/page'],
-                  );
-                },
+                  ),
               },
               hint: 'the experimental variant of docs layout',
+            },
+            {
+              label: 'Glass Layout',
+              value: {
+                id: 'glass',
+                targets: [{ subRegistry, name: 'layouts/glass' }],
+                print: () =>
+                  printLayout(
+                    config,
+                    ['fumadocs-ui/layouts/glass', '@/layouts/glass'],
+                    ['fumadocs-ui/layouts/glass/page', '@/layouts/glass/page'],
+                  ),
+              },
+              hint: 'a docs layout with floating, translucent panels',
             },
             {
               label: 'Home Layout',
               value: {
                 id: 'home',
                 targets: [{ subRegistry, name: 'layouts/home' }],
-                print() {
-                  printLayout(['fumadocs-ui/layouts/home', `@/layouts/home`]);
-                },
+                print: () => printLayout(config, ['fumadocs-ui/layouts/home', '@/layouts/home']),
               },
               hint: 'the layout for other non-docs pages',
             },
@@ -90,6 +107,33 @@ export async function customise(config: LoadedConfig, connector: RegistryConnect
       target: (v): Promise<TargetInfo | symbol> => {
         const selected = v.results.layout!;
         if (selected.id === 'home') return Promise.resolve(selected);
+
+        const slots: Option<TargetInfo>[] = [];
+        const prefix = `layouts/${selected.id}/`;
+        for (const { name: id } of manifest.components) {
+          // <layout>/slots/<name> or <layout>/page/slots/<name>
+          const [dir, name] = id.startsWith(prefix) ? id.slice(prefix.length).split('slots/') : [];
+          if (name === undefined) continue;
+          const isPage = dir === 'page/';
+
+          slots.push({
+            label: `${isPage ? 'Page' : 'Layout'}: ${name}`,
+            hint: `only replace a part of layout${isPage ? "'s page" : ''}, useful for adjusting details`,
+            value: {
+              id,
+              targets: [{ subRegistry, name: id }],
+              print() {
+                printSlot({
+                  at: `@/${id}`,
+                  layoutId: selected.id,
+                  name,
+                  isPage,
+                  uiLibrary: config.uiLibrary,
+                });
+              },
+            },
+          });
+        }
 
         return select<TargetInfo>({
           message: 'Which part do you want to customize?',
@@ -105,57 +149,15 @@ export async function customise(config: LoadedConfig, connector: RegistryConnect
               value: {
                 id: 'docs-min',
                 targets: [{ name: 'layouts/docs-min' }],
-                print() {
+                print: () =>
                   printLayout(
+                    config,
                     ['fumadocs-ui/layouts/docs', '@/layouts/docs'],
                     ['fumadocs-ui/layouts/docs/page', '@/layouts/docs/page'],
-                  );
-                },
+                  ),
               },
             },
-            ...info.unlistedIndexes.flatMap((index) => {
-              const prefix = `slots/${selected.id}`;
-              if (!index.name.startsWith(prefix)) return [];
-              let name = index.name.slice(prefix.length + 1);
-
-              if (name.startsWith('page/')) {
-                name = name.slice('page/'.length);
-
-                return {
-                  label: `Page: ${name}`,
-                  hint: "only replace a part of layout's page, useful for adjusting details",
-                  value: {
-                    id: index.name,
-                    targets: [{ subRegistry, name: index.name }],
-                    print() {
-                      printSlot({
-                        at: `@/layouts/${selected.id}/page/slots/${name}`,
-                        layoutId: selected.id,
-                        name,
-                        isPage: true,
-                      });
-                    },
-                  } as TargetInfo,
-                };
-              }
-
-              return {
-                label: `Layout: ${name}`,
-                hint: 'only replace a part of layout, useful for adjusting details',
-                value: {
-                  id: index.name,
-                  targets: [{ subRegistry, name: index.name }],
-                  print() {
-                    printSlot({
-                      at: `@/layouts/${selected.id}/slots/${name}`,
-                      layoutId: selected.id,
-                      name,
-                      isPage: false,
-                    });
-                  },
-                } as TargetInfo,
-              };
-            }),
+            ...slots,
           ],
         });
       },
@@ -173,45 +175,118 @@ export async function customise(config: LoadedConfig, connector: RegistryConnect
     await installer.installInteractive(target.name, target.subRegistry);
   }
 
-  targetInfo.print?.();
+  await targetInfo.print?.();
 
   outro(picocolors.bold('Have fun!'));
 }
 
-function printLayout(...maps: [from: string, to: string][]) {
+/** point the imports of route files at the installed layouts */
+export async function rewriteLayoutImports(config: LoadedConfig, map: Map<string, string>) {
+  const dir = path.join(config.baseDir, frameworks[config.framework].routesDir);
+  const entries = await fs.readdir(dir, { recursive: true, withFileTypes: true }).catch(() => []);
+  const updated: string[] = [];
+
+  for (const entry of entries) {
+    if (!entry.isFile() || !entry.name.endsWith('.tsx')) continue;
+    const file = path.join(entry.parentPath, entry.name);
+    const source = parseSourceFile(file, await fs.readFile(file, 'utf-8'));
+    for (const node of source.program.body) {
+      if (node.type !== 'ImportDeclaration') continue;
+      const to = map.get(node.source.value);
+      if (to) source.s.overwrite(node.source.start + 1, node.source.end - 1, to);
+    }
+    if (!source.s.hasChanged()) continue;
+    await source.save();
+    updated.push(file);
+  }
+
+  return updated;
+}
+
+async function printLayout(config: LoadedConfig, ...maps: [from: string, to: string][]) {
   intro(picocolors.bold('What is Next?'));
+  const updated = await rewriteLayoutImports(config, new Map(maps));
 
   log.info(
     [
       'You can check the installed layouts in `layouts` folder.',
       picocolors.dim('---'),
-      'Open your `layout.tsx` files, replace the imports of components:',
+      updated.length > 0
+        ? `Updated the imports of ${updated.join(', ')}.`
+        : 'Open your `layout.tsx` files, replace the imports of components:',
       ...maps.map(([from, to]) => picocolors.greenBright(`"${from}" -> "${to}"`)),
     ].join('\n'),
   );
 }
 
-function printSlot({ at, layoutId, name, isPage }: SlotPrintInfo) {
+function printSlot({ at, layoutId, name, isPage, uiLibrary }: SlotPrintInfo) {
   intro(picocolors.bold('What is Next?'));
 
   log.info(`You can check the installed layout slot in "${at}".`);
 
-  const code = getSlotCode({ at, layoutId, name, isPage });
+  const code = getSlotCode({ at, layoutId, name, isPage, uiLibrary });
 
   if (code) {
+    const layoutComponent = layoutId === 'glass' ? '<GlassLayout />' : '<DocsLayout />';
+
     if (isPage) {
       log.info(
         `${picocolors.bold('At your <DocsPage /> component, update your "slots" prop:')}\n\n${code}`,
       );
     } else {
       log.info(
-        `${picocolors.bold('At your <DocsLayout /> component, update your "slots" prop:')}\n\n${code}`,
+        `${picocolors.bold(`At your ${layoutComponent} component, update your "slots" prop:`)}\n\n${code}`,
       );
     }
   }
 }
 
-function getSlotCode({ at, layoutId, name, isPage }: SlotPrintInfo): string | undefined {
+function getSlotCode({ at, layoutId, name, isPage, uiLibrary }: SlotPrintInfo): string | undefined {
+  if (layoutId === 'glass') {
+    // Glass layout wires its page slots directly, only layout-level slots are swappable.
+    if (isPage) return;
+
+    switch (name) {
+      case 'header':
+        return `import { Header } from '${at}';
+
+return (
+  <GlassLayout
+    slots={{
+      header: Header,
+    }}
+  >
+    ...
+  </GlassLayout>
+);`;
+      case 'sidebar': {
+        // `sidebar` slot file holds the whole sidebar system (desktop, mobile drawer, provider).
+        // Base UI additionally exposes a `drawerHandle` for its swipeable drawer.
+        const imports = ['Sidebar', 'SidebarDrawer', 'SidebarProvider', 'useSidebar'];
+        if (uiLibrary === 'base-ui') imports.push('drawerHandle');
+
+        return `import { ${imports.join(', ')} } from '${at}';
+
+return (
+  <GlassLayout
+    slots={{
+      sidebar: {
+        main: Sidebar,
+        provider: SidebarProvider,
+        use: useSidebar,
+        drawer: SidebarDrawer,${uiLibrary === 'base-ui' ? '\n        drawerHandle,' : ''}
+      },
+    }}
+  >
+    ...
+  </GlassLayout>
+);`;
+      }
+      default:
+        return;
+    }
+  }
+
   if (isPage) {
     switch (name) {
       case 'toc':

@@ -2,13 +2,12 @@ import type * as PageTree from '@/page-tree/definitions';
 import type { I18nConfig } from '@/i18n';
 import { createContentStorageBuilder, type ContentStorage } from './storage/content';
 import { createPageTreeBuilder, type PageTreeOptions } from '@/source/page-tree/builder';
-import { joinPath } from './path';
-import { normalizeUrl } from '@/utils/normalize-url';
-import { SlugFn, slugsPlugin } from '@/source/plugins/slugs';
+import { dirname, joinPath } from './path';
+import { normalizeUrl } from '@/utils/url';
+import { slugsPlugin, SlugsPluginOptions } from '@/source/plugins/slugs';
 import { iconPlugin, type IconResolver } from '@/source/plugins/icon';
-import type { MetaData, PageData, StaticSource } from './source';
+import { isStaticSource, type MetaData, type PageData, type StaticSource } from './source';
 import { visit } from '@/page-tree/utils';
-import path from 'node:path';
 import type { PageTreeTransformer } from '@/source/page-tree/builder';
 import type { SerializedPageTree } from './client';
 import { FileSystem } from './storage/file-system';
@@ -25,7 +24,7 @@ export interface LoaderConfig {
 export interface LoaderOptions<
   S extends ContentStorage = ContentStorage,
   I18n extends I18nConfig | undefined = I18nConfig | undefined,
-> {
+> extends SlugsPluginOptions<S> {
   baseUrl: string;
   i18n?: I18n;
   url?: (slugs: string[], locale?: string) => string;
@@ -41,7 +40,6 @@ export interface LoaderOptions<
         typedPlugin: (plugin: LoaderPlugin<S>) => LoaderPlugin;
       }) => LoaderPluginOption[]);
   icon?: IconResolver;
-  slugs?: SlugFn<S>;
 }
 
 export interface ResolvedLoaderConfig {
@@ -88,6 +86,11 @@ export interface Meta<
 }
 
 export interface LoaderOutput<Config extends LoaderConfig = LoaderConfig> {
+  // infer types, `undefined` in runtime
+  readonly $inferPage: Config['page'];
+  readonly $inferMeta: Config['meta'];
+  readonly $infer: Config;
+
   pageTree: Config['i18n'] extends I18nConfig ? Record<string, PageTree.Root> : PageTree.Root;
 
   getPageTree: (locale?: string) => PageTree.Root;
@@ -141,11 +144,18 @@ export interface LoaderOutput<Config extends LoaderConfig = LoaderConfig> {
   }[];
 
   /**
-   * Get page with slugs, the slugs can also be URI encoded.
+   * Get page with slugs, they can be URI encoded or decoded.
    *
    * @param language - If unspecified, the default language will be used.
    */
   getPage: (slugs: string[] | undefined, language?: string) => Config['page'] | undefined;
+
+  /**
+   * Get page by its URL (pathname).
+   *
+   * @param language - If unspecified, look up every language.
+   */
+  getPageByUrl: (url: string, language?: string) => Config['page'] | undefined;
 
   getNodePage: (node: PageTree.Item, language?: string) => Config['page'] | undefined;
 
@@ -169,18 +179,28 @@ export interface LoaderOutput<Config extends LoaderConfig = LoaderConfig> {
    * serialize page tree for non-RSC environments
    */
   serializePageTree: (tree: PageTree.Root) => Promise<SerializedPageTree>;
+}
 
-  get $inferPage(): Config['page'];
-  get $inferMeta(): Config['meta'];
+/** decoded, generated slugs are URI encoded but some routers pass them decoded */
+function slugsKey(slugs: string[]): string {
+  const key = slugs.join('/');
+
+  try {
+    return decodeURI(key);
+  } catch {
+    return key;
+  }
 }
 
 function createPageIndexer({ url }: ResolvedLoaderConfig) {
-  // (locale.slugs -> page)
+  // (locale.slugsKey -> page)
   const pages = new Map<string, Page>();
   // (locale.path -> page)
   const pathToMeta = new Map<string, Meta>();
   // (locale.path -> meta)
   const pathToPage = new Map<string, Page>();
+  // (locale.url -> page)
+  const urlToPage = new Map<string, Page>();
 
   return {
     scan(storage: ContentStorage, lang?: string) {
@@ -209,25 +229,21 @@ function createPageIndexer({ url }: ResolvedLoaderConfig) {
           locale: lang,
         };
         pathToPage.set(path, page);
-        pages.set(prefix + page.slugs.join('/'), page);
+        pages.set(prefix + slugsKey(page.slugs), page);
+        urlToPage.set(prefix + page.url, page);
       }
     },
     getPage(path: string, lang = '') {
       return pathToPage.get(`${lang}.${path}`);
     },
+    getPageByUrl(url: string, lang = '') {
+      return urlToPage.get(`${lang}.${url}`);
+    },
     getMeta(path: string, lang = '') {
       return pathToMeta.get(`${lang}.${path}`);
     },
-    // the slugs plugin generates encoded slugs by default.
-    // we can assume page slugs are always URI encoded.
     getPageBySlugs(slugs: string[], lang = '') {
-      // `slugs` is already decoded
-      let page = pages.get(`${lang}.${slugs.join('/')}`);
-      if (page) return page;
-
-      // `slugs` is URI encoded
-      page = pages.get(`${lang}.${slugs.map(decodeURI).join('/')}`);
-      if (page) return page;
+      return pages.get(`${lang}.${slugsKey(slugs)}`);
     },
     /** do not filter by language if `lang` is not specified */
     getPages(lang?: string) {
@@ -264,6 +280,7 @@ export function createGetUrl(baseUrl: string, i18n?: I18nConfig): ResolvedLoader
   };
 }
 
+/** content loader API for static content sources */
 export function loader<I extends ResolvedInput, I18n extends I18nConfig | undefined = undefined>(
   source: I,
   options: LoaderOptions<NoInfer<GenerateStorage<I>>, I18n>,
@@ -273,6 +290,7 @@ export function loader<I extends ResolvedInput, I18n extends I18nConfig | undefi
   i18n: I18n;
 }>;
 
+/** content loader API for static content sources */
 export function loader<I extends ResolvedInput, I18n extends I18nConfig | undefined = undefined>(
   options: LoaderOptions<NoInfer<GenerateStorage<I>>, I18n> & {
     source: I;
@@ -357,11 +375,17 @@ export function loader<I extends ResolvedInput, I18n extends I18nConfig | undefi
       let target;
 
       if (value.startsWith('./') || value.startsWith('../')) {
-        const path = joinPath(dir, value);
+        let decoded = value;
+        try {
+          decoded = decodeURI(value);
+        } catch {
+          // keep malformed hrefs untouched so custom resolvers can still handle them
+        }
+        const path = joinPath(dir, decoded);
 
         target = indexer.getPage(path, language);
       } else {
-        target = this.getPages(language).find((item) => item.url === value);
+        target = indexer.getPageByUrl(value, language);
       }
 
       if (target)
@@ -373,7 +397,7 @@ export function loader<I extends ResolvedInput, I18n extends I18nConfig | undefi
     resolveHref(href, parent) {
       if (href.startsWith('./') || href.startsWith('../')) {
         const target = this.getPageByHref(href, {
-          dir: path.dirname(parent.path),
+          dir: dirname(parent.path),
           language: parent.locale,
         });
 
@@ -403,10 +427,16 @@ export function loader<I extends ResolvedInput, I18n extends I18nConfig | undefi
 
       return list;
     },
-    // the slugs plugin generates encoded slugs by default.
-    // we can assume page slugs are always URI encoded.
     getPage(slugs = [], language = i18n?.defaultLanguage) {
       return indexer.getPageBySlugs(slugs, language);
+    },
+    getPageByUrl(url, language) {
+      if (language !== undefined || !i18n) return indexer.getPageByUrl(url, language);
+
+      for (const lang of i18n.languages) {
+        const page = indexer.getPageByUrl(url, lang);
+        if (page) return page;
+      }
     },
     getNodeMeta(node, language = i18n?.defaultLanguage) {
       const ref = node.$ref;
@@ -467,12 +497,20 @@ export function loader<I extends ResolvedInput, I18n extends I18nConfig | undefi
     },
   };
 
+  if (isStaticSource(loaderConfig.input)) {
+    loaderConfig.input.configureStatic?.({ loader: out });
+  } else {
+    for (const [k, v] of Object.entries(loaderConfig.input)) {
+      v.configureStatic?.({ loader: out, source: k });
+    }
+  }
+
   return out as never;
 }
 
 function resolveConfig(
   input: ResolvedInput,
-  { slugs, icon, plugins = [], baseUrl, url, ...base }: LoaderOptions,
+  { slugs, baseSlugs, icon, plugins = [], baseUrl, url, ...base }: LoaderOptions,
 ): ResolvedLoaderConfig {
   let config: ResolvedLoaderConfig = {
     ...base,
@@ -485,7 +523,7 @@ function resolveConfig(
             typedPlugin: (plugin) => plugin as unknown as LoaderPlugin,
           })
         : plugins),
-      slugsPlugin(slugs),
+      slugsPlugin({ slugs, baseSlugs }),
     ]),
   };
 

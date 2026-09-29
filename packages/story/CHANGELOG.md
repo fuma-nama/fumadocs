@@ -1,4 +1,130 @@
+## @fumadocs/story@1.4.0
+
+### Shared components of API pages
+
+#### Default page components
+
+`createOpenAPIRenderer()`, `createAsyncAPIRenderer()` and `createGraphQLRenderer()` fill the `Markdown`, `CodeBlock` and `Heading` components you didn't pass, rendering Markdown through Remark and code blocks through Shiki:
+
+```tsx
+createOpenAPIRenderer({
+  components: { SchemaUI, Operation },
+});
+```
+
+`shiki` defaults to the full bundle, `createOpenAPIBaseRenderer()` takes the factory you pass instead and leaves the bundle out.
+
+#### Installable UI
+
+The UI an API page renders through is now part of the installation, instead of being imported from the package:
+
+| Component                                                                                   | Installed at                               |
+| ------------------------------------------------------------------------------------------- | ------------------------------------------ |
+| `Select`, `Input`                                                                           | `components/ui`, reusing the project's own |
+| `Accordion`, `Collapsible`, `Dialog`, `Popover`, `Spinner`, `SelectTabs`, playground inputs | `components/api/ui`                        |
+| anchor IDs of deep-linkable sections                                                        | `components/api/ui/auto-anchor`            |
+
+`Select` and `Input` follow the Shadcn UI API, so a project that already has them keeps its own. `@fumadocs/story` no longer ships a second copy of either.
+
+`labelVariants` moved to the installed `label` component, leaving the input a plain Shadcn-compatible primitive.
+
+The integrations share one implementation of these internally, instead of each keeping a copy: the selected server and its variables, the state of an async request, the coloured label of methods and kinds, and the plain-object check of both schema layers.
+
+The request pipeline of the playground stays in the package too, so an installed playground drives it instead of copying it: `encodeRequestData()`, `resolveMediaAdapter()`, `isMediaTypeSupported()` and the request data types come from `fumadocs-openapi/requests`, and `createBrowserFetcher()` with `usePlaygroundAuth()` from `fumadocs-openapi/playground`.
+
+### Headless stories
+
+#### Replace the UI of stories
+
+The control panel is no longer fixed, `defineStoryFactory()` takes your own:
+
+```tsx title="lib/story.tsx"
+import { defineStoryFactory } from '@fumadocs/story/vite/client';
+import { WithControl } from '@/components/story';
+
+export const { defineStory } = defineStoryFactory({ WithControl });
+```
+
+Install the built-in one and edit it:
+
+```npm
+npx @fumadocs/cli add fumadocs/story/controls
+```
+
+Or build your own on `@fumadocs/story`: `<StoryProvider />` holds the selected variant and the form engine, `useStory()` exposes the presets and `useStoryArgs()` the arguments of the rendered component.
+
+The entry ships a stubbed build under the `browser` condition, so client components can import them without pulling the story factory's Node dependencies. `@fumadocs/story/type-tree` does the same: `collapse()` is stubbed under the `browser` condition, so the installed controls import the sampler, stringifier and validator from it.
+
+See [Headless](https://fumadocs.dev/docs/integrations/story/headless).
+
+#### Fix the initial branch of union controls
+
+The control of a union prop validated the field against the index of each branch, so it picked an arbitrary one. It now validates against the current value, falling back to the first branch.
+
+`validate()` from `@fumadocs/story/type-tree` also rejected `null` for `null` nodes, it compared against the string `'null'`.
+
+## @fumadocs/story@1.3.1
+
+### Mark packages side-effect free
+
+All packages now declare `sideEffects` in `package.json`, so bundlers can tree-shake unused modules. Packages shipping stylesheets list them as side effects to keep CSS imports.
+
+## @fumadocs/story@1.3.0
+
+### Replace `cnfast` with `cn`
+
+Internal refactor only.
+
+### Generate controls with the native TypeScript compiler
+
+`@fumadocs/story` no longer depends on ts-morph. Story controls are generated with the TypeScript 7 native compiler (`tsgo`), bundled as a dependency, independent of the TypeScript version of your project.
+
+Transforming a story file is about 5x faster (first file 300 ms → 30 ms, edits 20 ms → 5 ms) and uses a fraction of the memory, which mostly matters in dev where every edit regenerates controls.
+
+**Behavior changes**
+
+- Custom handlers of `@fumadocs/story/type-tree` receive TypeScript 7 API objects (`Type`, `Node`, and a `Project` exposing `project.checker`) instead of ts-morph wrappers.
+- Properties of mapped types (e.g. `Pick<Props, ...>`) and members of string literal unions may appear in a different order in the generated controls, following the native compiler.
+
+## @fumadocs/story@1.2.0
+
+### Default to Base UI
+
+Internal packages & templates now use Base UI rather than Radix UI.
+
+## @fumadocs/story@1.1.2
+
+### Migrate to `cnfast`
+
+Drop `tailwind-merge`.
+
 # @fumadocs/story
+
+## 1.1.1
+
+### Patch Changes
+
+- 5017289: Use stable `fuma-translate`
+- Updated dependencies [5017289]
+- Updated dependencies [7a77722]
+  - fumadocs-ui@16.10.1
+  - fumadocs-core@16.10.1
+
+## 1.1.0
+
+### Minor Changes
+
+- 779efff: **Introduce new translations API**
+
+  It is now powered by `fuma-translate`. Be careful: while the API surface is same, some translation keys are changed, unused labels will be ignored.
+
+### Patch Changes
+
+- Updated dependencies [9b9545f]
+- Updated dependencies [0cc1fac]
+- Updated dependencies [779efff]
+  - fumadocs-core@16.10.0
+  - fumadocs-ui@16.10.0
 
 ## 1.0.2
 

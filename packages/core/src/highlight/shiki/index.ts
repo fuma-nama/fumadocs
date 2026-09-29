@@ -27,7 +27,12 @@ export function createShikiFactory(config: Pick<ShikiFactory, 'init'>): ShikiFac
 
   return {
     init(options) {
-      return (instance = config.init(options));
+      const created = config.init(options);
+      if (created instanceof Promise)
+        created.catch(() => {
+          if (instance === created) instance = undefined;
+        });
+      return (instance = created);
     },
     getOrInit() {
       return instance ?? this.init();
@@ -48,17 +53,20 @@ export async function highlightHast(
 ): Promise<Root> {
   const { fallbackLanguage = 'text', ...resolved } = options;
   const { isSpecialLang } = await import('shiki/core');
+  const loaded = highlighter.getLoadedLanguages();
   if (
     !isSpecialLang(resolved.lang) &&
     !(resolved.lang in highlighter.getBundledLanguages()) &&
-    !highlighter.getLoadedLanguages().includes(resolved.lang)
+    !loaded.includes(resolved.lang)
   ) {
     resolved.lang = fallbackLanguage;
   }
 
   await Promise.all([
     loadMissingTheme(highlighter, getRequiredThemes(resolved)),
-    highlighter.loadLanguage(resolved.lang as never),
+    !isSpecialLang(resolved.lang) &&
+      !loaded.includes(resolved.lang) &&
+      highlighter.loadLanguage(resolved.lang as never),
   ]);
 
   return highlighter.codeToHast(code, resolved);

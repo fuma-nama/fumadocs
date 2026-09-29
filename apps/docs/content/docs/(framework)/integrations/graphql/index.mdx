@@ -1,0 +1,132 @@
+---
+title: GraphQL
+description: Generating docs for GraphQL schema.
+---
+
+## Setup
+
+Install the required packages.
+
+```npm
+npm i @fumadocs/graphql graphql
+```
+
+### Generate Styles
+
+Add the following line:
+
+```css title="Tailwind CSS"
+@import 'tailwindcss';
+@import 'fumadocs-ui/css/neutral.css';
+@import 'fumadocs-ui/css/preset.css';
+/* [!code ++] */
+@import '@fumadocs/graphql/css/preset.css';
+```
+
+### Configure Plugin
+
+Create the GraphQL server instance & `<GraphQLPage />` component.
+
+```ts tab="lib/graphql.ts"
+import { createGraphQL } from '@fumadocs/graphql/server';
+
+// note: this is a server-side API
+export const graphql = createGraphQL({
+  // the GraphQL schema, it accepts:
+  // SDL files/URLs (including `extend type`), SDL text,
+  // introspection results, and `GraphQLSchema` instances.
+  input: ['./schema.graphql'],
+});
+```
+
+```tsx tab="components/api-page.tsx"
+'use client';
+import { createGraphQLPage } from '@fumadocs/graphql/ui';
+
+export const GraphQLPage = createGraphQLPage({
+  playground: {
+    // enable the interactive playground on operation pages (optional)
+    url: 'https://api.example.com/graphql',
+  },
+});
+```
+
+See [`createGraphQL()`](/docs/integrations/graphql/server) & [`createGraphQLPage()`](/docs/integrations/graphql/api-page) for available options.
+
+### Generate Pages
+
+Integrate into [Loader API](/docs/headless/source-api/source) to generate pages, without generating real files.
+
+```ts title="lib/source.ts"
+import { loader } from 'fumadocs-core/source';
+import { docs } from 'collections/server';
+import { graphql } from '@/lib/graphql';
+
+export const source = loader(
+  // [!code ++:7]
+  {
+    docs: docs.toFumadocsSource(),
+    graphql: await graphql.staticSource({
+      baseDir: 'graphql',
+      baseUrl: '/docs',
+    }),
+  },
+  {
+    baseUrl: '/docs',
+    // [!code ++] optional: adds a query/mutation/subscription badge to each page item in page tree
+    plugins: [graphql.loaderPlugin()],
+    // ...
+  },
+);
+```
+
+It generates a page per operation & named type by default, grouped into folders by their kind (e.g. `queries/`, `objects/`). Pass the `baseUrl` of your `loader()` to pre-generate links, so type & operation references are cross-linked automatically.
+
+**It will change the type of your pages**, make sure to update all references to your `source`, and update your page renderer:
+
+```tsx title="docs/[[...slug]]/page.tsx"
+import { GraphQLPage } from '@/components/api-page';
+
+export default function Page({ slug }) {
+  const page = source.getPage(slug);
+
+  // for GraphQL pages
+  if (page.type === 'graphql') {
+    return (
+      <DocsPage toc={page.data.toc} full>
+        <DocsTitle>{page.data.title}</DocsTitle>
+        <DocsDescription>{page.data.description}</DocsDescription>
+        <DocsBody>
+          <GraphQLPage {...page.data.getGraphQLPageProps()} />
+        </DocsBody>
+      </DocsPage>
+    );
+  }
+
+  // your original flow below...
+}
+```
+
+<Callout type='warn' title="Ensure the migration is complete!">
+
+Run a type check to verify before continuing, e.g.
+
+```npm
+npm run types:check
+```
+
+</Callout>
+
+## Features
+
+The official GraphQL integration supports:
+
+- A page per operation (query/mutation/subscription) and named type
+- Arguments, fields, deprecations, default values, and custom directive callouts
+- Usage backlinks on type pages (returned by, field of, input for)
+- Generated example queries/responses & request snippets (cURL, JavaScript)
+- Interactive playground: highlighted query editor with live validation, a variables form generated from argument types, and custom headers
+
+### Demo
+
+See the [GraphQL example](/docs/graphql).

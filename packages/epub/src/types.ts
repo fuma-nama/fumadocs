@@ -28,8 +28,8 @@ export interface EpubConfig<Config extends LoaderConfig = LoaderConfig> {
 export interface EpubExportOptions<
   Config extends LoaderConfig = LoaderConfig,
 > extends EpubConfig<Config> {
-  /** Fumadocs source (from loader()) */
-  source: LoaderOutput<Config>;
+  /** Fumadocs source (from `loader()`, or a function resolving one for runtime content sources) */
+  source: LoaderOutput<Config> | (() => Promise<LoaderOutput<Config>>);
   /** function to get page Markdown content */
   getMarkdown?: (page: Config['page']) => string | undefined | Promise<string | undefined>;
 }

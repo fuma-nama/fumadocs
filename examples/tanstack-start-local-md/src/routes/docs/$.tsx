@@ -1,7 +1,7 @@
 import { createFileRoute, notFound } from '@tanstack/react-router';
 import { DocsLayout } from 'fumadocs-ui/layouts/docs';
 import { createServerFn } from '@tanstack/react-start';
-import { getSource, slugsToMarkdownPath } from '@/lib/source';
+import { getSource } from '@/lib/source';
 import {
   DocsBody,
   DocsDescription,
@@ -11,11 +11,20 @@ import {
   ViewOptionsPopover,
 } from 'fumadocs-ui/layouts/docs/page';
 import { baseOptions } from '@/lib/layout.shared';
-import { gitConfig } from '@/lib/shared';
+import { getPageMarkdownUrl, gitConfig } from '@/lib/shared';
 import { useFumadocsLoader } from 'fumadocs-core/source/client';
 import { useMemo } from 'react';
 import { useMDXComponents } from '@/components/mdx';
 import { rendererFromSerialized } from '@fumadocs/local-md/client';
+import type { MarkdownRendererSerializedOptions } from '@fumadocs/local-md';
+
+// TanStack Start validates that server function results are serializable, but its type-level
+// check cannot verify the HAST tree inside the payload: register it as a serializable type.
+declare module '@tanstack/router-core' {
+  interface SerializableExtensions {
+    fumadocsMarkdownRenderer: MarkdownRendererSerializedOptions;
+  }
+}
 
 export const Route = createFileRoute('/docs/$')({
   component: Page,
@@ -28,7 +37,7 @@ export const Route = createFileRoute('/docs/$')({
 const serverLoader = createServerFn({
   method: 'GET',
 })
-  .inputValidator((slugs: string[]) => slugs)
+  .validator((slugs: string[]) => slugs)
   .handler(async ({ data: slugs }) => {
     const source = await getSource();
     const page = source.getPage(slugs);
@@ -40,7 +49,7 @@ const serverLoader = createServerFn({
       path: page.path,
       frontmatter: page.data.frontmatter,
       render: serialize(),
-      markdownUrl: slugsToMarkdownPath(page.slugs).url,
+      markdownUrl: getPageMarkdownUrl(page).url,
       pageTree: await source.serializePageTree(source.getPageTree()),
     };
   });

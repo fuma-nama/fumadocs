@@ -1,17 +1,19 @@
 import type { RequestData } from '@/requests/types';
 import type { MediaAdapter } from '@/requests/media/adapter';
-import { resolveMediaAdapter } from '@/requests/media/adapter';
+import { resolveMediaAdapter } from '@/requests/media/resolve-adapter';
 import type { Awaitable } from '@/types';
 
 export type FetchResult = FetchResponseResult | FetchErrorResult;
 
 export interface FetchErrorResult {
   type: 'client_error';
+  url: string;
   message: string;
 }
 
 export interface FetchResponseResult {
   type: 'response';
+  url: string;
   status: number;
   headers: Headers;
   body: ArrayBuffer;
@@ -59,7 +61,8 @@ export function createBrowserFetcher(
     async fetch(url, data) {
       let requestUrl = new URL(url, document.baseURI);
       let requestInit: RequestInit = {
-        method: data.method,
+        // fetch only normalizes the case of some methods
+        method: data.method.toUpperCase(),
         cache: 'no-cache',
         signal:
           typeof requestTimeout === 'number'
@@ -84,7 +87,8 @@ export function createBrowserFetcher(
         if (!adapter)
           return {
             type: 'client_error',
-            message: `[Fumadocs] No adapter for ${data.bodyMediaType}, you need to specify one from 'createOpenAPI()'.`,
+            url,
+            message: `[Fumadocs] No media adapter for ${data.bodyMediaType}, pass one to \`mediaAdapters\` of \`createOpenAPIPage()\`.`,
           };
 
         if (data.bodyMediaType !== 'multipart/form-data') {
@@ -120,6 +124,7 @@ export function createBrowserFetcher(
         .then(async (res): Promise<FetchResult> => {
           return {
             type: 'response',
+            url: res.url,
             status: res.status,
             headers: res.headers,
             body: await res.arrayBuffer(),
@@ -130,6 +135,7 @@ export function createBrowserFetcher(
 
           return {
             type: 'client_error',
+            url,
             message: `Client side error: ${message}`,
           };
         });

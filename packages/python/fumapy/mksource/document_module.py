@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from importlib.metadata import version
+from importlib.metadata import PackageNotFoundError, version
 
 import griffe
 
@@ -40,8 +40,8 @@ def parse_module(m: griffe.Object) -> Module:
     if m.is_package:
         try:
             res["version"] = version(m.name)
-        except AttributeError:
-            res["version"] = "unknown"
+        except PackageNotFoundError:
+            pass
 
     return res
 
@@ -63,6 +63,12 @@ def parse_class(c: griffe.Class) -> Class:
         "source": c.source,
         "inherited_members": {},
     }
+    # the class docstring documents the constructor's parameters
+    init = res["functions"].get("__init__")
+    if init is not None:
+        documented = {p["name"]: p["description"] for p in res["parameters"]}
+        for param in init["parameters"]:
+            param["description"] = param["description"] or documented.get(param["name"])
     for member in c.inherited_members.values():
         parent_path = ".".join(member.canonical_path.split(".")[:-1])
         member_info = {"kind": member.kind, "path": member.canonical_path}

@@ -1,12 +1,12 @@
-import type { OpenAPIV3_2, OpenAPIV3 } from './_openapi/types';
-import type { NoReference } from '@/utils/schema';
-import type { DereferencedDocument } from '@/utils/document/dereference';
-import type { OpenAPIOptions } from '@/server';
-import type { CreateAPIPageOptions } from './ui/base';
+import type { OpenAPIV3_2, OpenAPIV3 } from './types/openapi';
 import type { InlineCodeUsageGenerator } from './requests/generators';
 
 export type Document = OpenAPIV3_2.Document;
-export type OperationObject = OpenAPIV3_2.OperationObject;
+export type OperationObject = OpenAPIV3_2.OperationObject & {
+  'x-codeSamples'?: InlineCodeUsageGenerator[];
+  'x-selectedCodeSample'?: string;
+  'x-exclusiveCodeSample'?: string;
+};
 export type ParameterObject = OpenAPIV3_2.ParameterObject;
 export type SecuritySchemeObject = OpenAPIV3_2.SecuritySchemeObject;
 export type ReferenceObject = OpenAPIV3_2.ReferenceObject;
@@ -21,36 +21,6 @@ export type HttpMethods = OpenAPIV3_2.HttpMethods;
 export type ExampleObject = OpenAPIV3_2.ExampleObject;
 export type MediaTypeObject = OpenAPIV3_2.MediaTypeObject;
 export type RequestBodyObject = OpenAPIV3_2.RequestBodyObject;
-
-export type MethodInformation = NoReference<OperationObject> & {
-  method: HttpMethods;
-  'x-codeSamples'?: InlineCodeUsageGenerator[];
-  'x-selectedCodeSample'?: string;
-  'x-exclusiveCodeSample'?: string;
-};
-
-type RequireKeys<T, K extends keyof T> = Omit<T, K> & Required<Pick<T, K>>;
-
-export interface RenderContext
-  extends
-    Pick<OpenAPIOptions, 'proxyUrl'>,
-    Omit<
-      RequireKeys<
-        CreateAPIPageOptions,
-        | 'renderMarkdown'
-        | 'generateTypeScriptDefinitions'
-        | 'renderCodeBlock'
-        | 'mediaAdapters'
-        | 'codeUsages'
-      >,
-      'renderHeading' | 'generateTypeScriptSchema'
-    > {
-  /**
-   * dereferenced schema
-   */
-  schema: DereferencedDocument;
-  clientBoundary: typeof import('@/ui/client/boundary');
-}
 
 export type DistributiveOmit<T, K extends PropertyKey> = T extends unknown ? Omit<T, K> : never;
 export type Awaitable<T> = T | Promise<T>;

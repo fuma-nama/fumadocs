@@ -2,7 +2,6 @@ import { fileURLToPath } from 'node:url';
 import versionPkg from '../../create-app-versions/package.json';
 import * as corePkg from '../../core/package.json';
 import * as mdxPkg from '../../mdx/package.json';
-import * as radixPkg from '../../radix-ui/package.json';
 import * as basePkg from '../../base-ui/package.json';
 
 export const sourceDir = fileURLToPath(new URL(`../`, import.meta.url).href);
@@ -12,6 +11,7 @@ export const isCI = Boolean(process.env.CI);
 export interface TemplateInfo {
   value:
     | '+next+fuma-docs-mdx'
+    | 'astro'
     | 'waku'
     | 'react-router'
     | 'react-router-spa'
@@ -35,20 +35,21 @@ export const templates: TemplateInfo[] = [
   {
     value: '+next+fuma-docs-mdx',
     label: 'Next.js: Fumadocs MDX',
-    hint: 'recommended',
+    hint: 'recommended: powerful and mature',
     appDir: '',
     rootProviderPath: 'app/layout.tsx',
+  },
+  {
+    value: 'waku',
+    label: 'Waku: Fumadocs MDX',
+    hint: 'recommended: fast and simple',
+    appDir: 'src',
+    rootProviderPath: 'components/provider.tsx',
   },
   {
     value: '+next+fuma-docs-mdx+static',
     label: 'Next.js Static: Fumadocs MDX',
     appDir: '',
-    rootProviderPath: 'components/provider.tsx',
-  },
-  {
-    value: 'waku',
-    label: 'Waku: Fumadocs MDX',
-    appDir: 'src',
     rootProviderPath: 'components/provider.tsx',
   },
   {
@@ -77,12 +78,21 @@ export const templates: TemplateInfo[] = [
     appDir: 'src',
     rootProviderPath: 'routes/__root.tsx',
   },
+  {
+    value: 'astro',
+    label: 'Astro: React Islands',
+    hint: 'partial support only, uses Astro Content Collections.',
+    appDir: 'src',
+    rootProviderPath: 'components/docs.tsx',
+  },
 ];
 
-const workspaces = [corePkg, mdxPkg, radixPkg, basePkg];
+const workspaces = [corePkg, mdxPkg, basePkg];
 
 export const depVersions = versionPkg.dependencies;
 
 for (const workspace of workspaces) {
   depVersions[workspace.name as keyof typeof depVersions] = workspace.version;
 }
+
+depVersions['fumadocs-ui'] = `npm:${basePkg.name}@${basePkg.version}`;

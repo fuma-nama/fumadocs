@@ -5,14 +5,6 @@ import { visit } from 'unist-util-visit';
 import type { TOCItemType } from '@/toc';
 import { flattenNode } from '@/mdx-plugins/utils';
 
-declare module 'mdast' {
-  export interface HeadingData extends Data {
-    hProperties?: {
-      id?: string;
-    } & Record<string, unknown>;
-  }
-}
-
 const regex = /\s*\[#(?<slug>[^]+?)]\s*$/;
 
 export interface RemarkHeadingOptions {

@@ -1,5 +1,12 @@
 import { createLLMGateway } from '@llmgateway/ai-sdk-provider';
-import { convertToModelMessages, stepCountIs, streamText, tool } from 'ai';
+import {
+  convertToModelMessages,
+  createUIMessageStreamResponse,
+  stepCountIs,
+  streamText,
+  tool,
+  toUIMessageStream,
+} from 'ai';
 import { z } from 'zod';
 import { source } from '@/lib/source';
 import { Document, type DocumentData } from 'flexsearch';
@@ -95,7 +102,9 @@ export const handler = $routeHandler(
       toolChoice: 'auto',
     });
 
-    return result.toUIMessageStreamResponse();
+    return createUIMessageStreamResponse({
+      stream: toUIMessageStream({ stream: result.stream }),
+    });
   },
 );
 

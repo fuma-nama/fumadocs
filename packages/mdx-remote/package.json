@@ -1,6 +1,6 @@
 {
   "name": "@fumadocs/mdx-remote",
-  "version": "1.4.10",
+  "version": "1.5.2",
   "description": "The remote MDX files adapter for Fumadocs",
   "keywords": [
     "Docs",
@@ -14,6 +14,7 @@
     "dist"
   ],
   "type": "module",
+  "sideEffects": false,
   "module": "./dist/index.js",
   "types": "./dist/index.d.ts",
   "exports": {
@@ -38,19 +39,19 @@
   },
   "dependencies": {
     "@mdx-js/mdx": "^3.1.1",
-    "js-yaml": "^4.1.1",
     "unified": "^11.0.5",
-    "vfile": "^6.0.3"
+    "vfile": "^6.0.3",
+    "yaml": "^2.9.1"
   },
   "devDependencies": {
-    "@types/mdx": "^2.0.13",
-    "@types/node": "25.9.1",
-    "@types/react": "^19.2.15",
+    "@types/mdx": "^2.0.14",
+    "@types/node": "26.6.1",
+    "@types/react": "^19.3.0",
     "fumadocs-core": "workspace:*",
-    "react": "^19.2.6",
-    "tinyglobby": "^0.2.16",
+    "react": "^19.3.0",
+    "tinyglobby": "^0.2.17",
     "tsconfig": "workspace:*",
-    "tsdown": "0.22.0"
+    "tsdown": "0.23.0"
   },
   "peerDependencies": {
     "@types/mdx": "*",

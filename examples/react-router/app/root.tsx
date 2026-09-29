@@ -90,7 +90,16 @@ const serverMiddleware: Route.MiddlewareFunction = async ({ request }, next) => 
 
   if (isMarkdownPreferred(request)) {
     const docsPath = rewriteDocs(url.pathname);
-    if (docsPath) return Response.redirect(new URL(docsPath, url));
+    // this URL has two representations selected by `Accept`, and the headers of
+    // `Response.redirect()` are immutable, so build the response directly
+    if (docsPath)
+      return new Response(null, {
+        status: 302,
+        headers: {
+          Location: new URL(docsPath, url).toString(),
+          Vary: 'Accept',
+        },
+      });
   }
 
   return next();

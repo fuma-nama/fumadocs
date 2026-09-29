@@ -1,10 +1,9 @@
 {
   "name": "fumadocs-typescript",
-  "version": "5.2.6",
+  "version": "5.4.1",
   "description": "Typescript Integration for Fumadocs",
   "keywords": [
     "Docs",
-    "NextJs",
     "fumadocs"
   ],
   "homepage": "https://fumadocs.dev",
@@ -15,6 +14,7 @@
     "dist"
   ],
   "type": "module",
+  "sideEffects": false,
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
   "exports": {
@@ -43,25 +43,24 @@
     "hast-util-to-jsx-runtime": "^2.3.6",
     "remark": "^15.0.1",
     "remark-rehype": "^11.1.2",
-    "shiki": "^4.1.0",
-    "ts-morph": "^28.0.0",
+    "shiki": "^4.4.3",
+    "typescript": "~7.0.2",
     "unified": "^11.0.5",
     "unist-util-visit": "^5.1.0"
   },
   "devDependencies": {
     "@mdx-js/mdx": "^3.1.1",
     "@types/estree": "^1.0.9",
-    "@types/hast": "^3.0.4",
+    "@types/hast": "^3.0.5",
     "@types/mdast": "^4.0.4",
-    "@types/node": "25.9.1",
-    "@types/react": "^19.2.15",
-    "@types/react-dom": "^19.2.3",
+    "@types/node": "26.6.1",
+    "@types/react": "^19.3.0",
+    "@types/react-dom": "^19.3.0",
     "fumadocs-core": "workspace:*",
-    "fumadocs-ui": "workspace:*",
+    "fumadocs-ui": "workspace:@fumadocs/base-ui@*",
     "mdast-util-mdx": "^3.0.0",
     "tsconfig": "workspace:*",
-    "tsdown": "0.22.0",
-    "typescript": "^6.0.3",
+    "tsdown": "0.23.0",
     "vfile": "^6.0.3"
   },
   "peerDependencies": {
@@ -84,10 +83,10 @@
     "@types/mdast": {
       "optional": true
     },
-    "fumadocs-ui": {
+    "@types/react": {
       "optional": true
     },
-    "@types/react": {
+    "fumadocs-ui": {
       "optional": true
     }
   }

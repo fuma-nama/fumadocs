@@ -14,7 +14,7 @@ import {
   useRef,
   useState,
 } from 'react';
-import { I18nLabel, useTranslations } from '@/contexts/i18n';
+import { useTranslations, T } from '@fuma-translate/react';
 import { cn } from '@/utils/cn';
 import { Dialog, DialogContent, DialogOverlay, DialogTitle } from '@radix-ui/react-dialog';
 import type { HighlightedText, ReactSortedResult as BaseResultType } from 'fumadocs-core/search';
@@ -219,15 +219,19 @@ export function SearchDialogHeader(props: ComponentProps<'div'>) {
 }
 
 export function SearchDialogInput(props: ComponentProps<'input'>) {
-  const t = useTranslations();
+  const t = useTranslations({ note: 'search dialog' });
   const { search, onSearchChange } = useSearch();
 
   return (
     <input
+      role="combobox"
+      aria-label={t('Search')}
+      aria-autocomplete="list"
+      aria-controls="fd-search-list"
       {...props}
       value={search}
       onChange={(e) => onSearchChange(e.target.value)}
-      placeholder={t.search}
+      placeholder={t('Search')}
       className="w-0 flex-1 bg-transparent text-lg placeholder:text-fd-muted-foreground focus-visible:outline-none"
     />
   );
@@ -239,16 +243,16 @@ export function SearchDialogClose({
   ...props
 }: ComponentProps<'button'>) {
   const { onOpenChange } = useSearch();
-  const t = useTranslations();
+  const t = useTranslations({ note: 'search dialog' });
 
   return (
     <button
       type="button"
-      aria-label={t.searchClose}
+      aria-label={t('Close Search', { note: 'aria-label' })}
       onClick={() => onOpenChange(false)}
       className={cn(
         buttonVariants({
-          color: 'outline',
+          variant: 'outline',
           size: 'sm',
           className: 'font-mono text-fd-muted-foreground',
         }),
@@ -278,7 +282,7 @@ export function SearchDialogOverlay(props: ComponentProps<typeof DialogOverlay>)
 }
 
 export function SearchDialogContent({ children, ...props }: ComponentProps<typeof DialogContent>) {
-  const t = useTranslations();
+  const t = useTranslations({ note: 'search dialog' });
 
   return (
     <DialogContent
@@ -290,7 +294,7 @@ export function SearchDialogContent({ children, ...props }: ComponentProps<typeo
         props.className,
       )}
     >
-      <DialogTitle className="hidden">{t.search}</DialogTitle>
+      <DialogTitle className="hidden">{t('Search')}</DialogTitle>
       {children}
     </DialogContent>
   );
@@ -299,8 +303,8 @@ export function SearchDialogContent({ children, ...props }: ComponentProps<typeo
 export function SearchDialogList({
   items = null,
   Empty = () => (
-    <div className="py-12 text-center text-sm text-fd-muted-foreground">
-      <I18nLabel label="searchNoResult" />
+    <div role="status" className="py-12 text-center text-sm text-fd-muted-foreground">
+      <T text="No results found" note="search dialog" />
     </div>
   ),
   Item = (props) => <SearchDialogListItem {...props} />,
@@ -317,13 +321,14 @@ export function SearchDialogList({
   Item?: (props: { item: SearchItemType; onClick: () => void }) => ReactNode;
 }) {
   const ref = useRef<HTMLDivElement>(null);
+  const t = useTranslations({ note: 'search dialog' });
   const { onSelect } = useSearch();
   const [active, setActive] = useState<string | null>(() =>
     items && items.length > 0 ? items[0].id : null,
   );
 
   const onKey = useEffectEvent((e: KeyboardEvent) => {
-    if (!items || e.isComposing) return;
+    if (!items || e.isComposing || e.keyCode === 229) return;
 
     if (e.key === 'ArrowDown' || e.key == 'ArrowUp') {
       let idx = items.findIndex((item) => item.id === active);
@@ -364,10 +369,18 @@ export function SearchDialogList({
   }, []);
 
   useOnChange(items, () => {
-    if (items && items.length > 0) {
-      setActive(items[0].id);
-    }
+    setActive(items?.[0]?.id ?? null);
   });
+
+  // the combobox input is a sibling, sync its state here
+  useEffect(() => {
+    const input = ref.current?.closest('[role="dialog"]')?.querySelector('[role="combobox"]');
+    if (!input) return;
+
+    input.setAttribute('aria-expanded', String(active !== null));
+    if (active !== null) input.setAttribute('aria-activedescendant', `fd-search-option-${active}`);
+    else input.removeAttribute('aria-activedescendant');
+  }, [active]);
 
   return (
     <div
@@ -380,6 +393,10 @@ export function SearchDialogList({
       )}
     >
       <div
+        id="fd-search-list"
+        // an empty listbox is invalid, expose it only with options
+        role={items?.length ? 'listbox' : undefined}
+        aria-label={items?.length ? t('Search') : undefined}
         className={cn('w-full flex flex-col overflow-y-auto max-h-[460px] p-1', !items && 'hidden')}
       >
         <ListContext
@@ -457,6 +474,9 @@ export function SearchDialogListItem({
   return (
     <button
       type="button"
+      id={`fd-search-option-${item.id}`}
+      role="option"
+      tabIndex={-1}
       ref={useCallback(
         (element: HTMLButtonElement | null) => {
           if (active && element) {

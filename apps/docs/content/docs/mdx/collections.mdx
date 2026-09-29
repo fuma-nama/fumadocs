@@ -156,7 +156,7 @@ You can pass build-time information to runtime using the `postprocess` API.
   });
   ```
 
-  You can obtain the included content with `getText()` (e.g. with `loader()`):
+  `getText('processed')` is the recommended way to obtain it (e.g. with `loader()`):
 
   ```ts
   import { source } from '@/lib/source';

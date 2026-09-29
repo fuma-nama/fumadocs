@@ -1,0 +1,47 @@
+{
+  "type": "root",
+  "$id": "root",
+  "name": "Docs",
+  "children": [
+    {
+      "type": "folder",
+      "name": "1.0.0",
+      "root": "version",
+      "children": [
+        {
+          "$id": "v1/index.mdx",
+          "type": "page",
+          "name": "Introduction",
+          "url": "/v1"
+        },
+        {
+          "$id": "v1/guide.mdx",
+          "type": "page",
+          "name": "Guide",
+          "url": "/v1/guide"
+        }
+      ],
+      "$id": "v1"
+    },
+    {
+      "type": "folder",
+      "name": "2.0.0",
+      "root": "version",
+      "children": [
+        {
+          "$id": "v2/index.mdx",
+          "type": "page",
+          "name": "Introduction",
+          "url": "/v2"
+        },
+        {
+          "$id": "v2/guide.mdx",
+          "type": "page",
+          "name": "Guide",
+          "url": "/v2/guide"
+        }
+      ],
+      "$id": "v2"
+    }
+  ]
+}

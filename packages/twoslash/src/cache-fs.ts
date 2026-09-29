@@ -5,7 +5,7 @@ import { createHash } from 'node:crypto';
 import * as fs from 'node:fs';
 import * as path from 'node:path';
 import * as process from 'node:process';
-import type { TwoslashTypesCache } from '@shikijs/twoslash';
+import type { TwoslashTypesCache } from './transformer';
 
 export interface FileSystemTypeResultCacheOptions {
   /**

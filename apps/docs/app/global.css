@@ -4,6 +4,9 @@
 @import 'fumadocs-twoslash/twoslash.css';
 @import 'fumadocs-openapi/css/preset.css';
 @import '@fumadocs/story/css/preset.css';
+@import '@fumadocs/asyncapi/css/preset.css';
+@import '@fumadocs/graphql/css/preset.css';
+@import '@fumari/sponsors/style.css';
 @plugin 'tailwindcss-animate';
 
 @theme {
@@ -30,6 +33,7 @@
 }
 
 @theme inline {
+  --default-font-family: var(--font-sans);
   --default-mono-font-family: var(--font-mono);
   --animate-marquee: marquee var(--duration) infinite linear;
   --animate-marquee-vertical: marquee-vertical var(--duration) linear infinite;

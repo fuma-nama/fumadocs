@@ -1,0 +1,58 @@
+---
+title: Visual Editor
+description: Write Markdown and MDX visually, with your files as the source of truth.
+---
+
+## Introduction
+
+[Fumadocs Editor](https://editor.fumadocs.dev) is a visual editor for Fumadocs MDX.
+
+### Start with Studio
+
+Studio opens your local docs in a browser without adding an editor to your app.
+From your Fumadocs project, run:
+
+```bash
+npx @fumadocs-editor/studio
+```
+
+Studio requires **Node.js 24 or later**. It looks for `content/docs`, or the parent directories when missing.
+To select a different content folder:
+
+```bash
+npx @fumadocs-editor/studio --root ./docs
+```
+
+Edits autosave to disk, and changes from your code editor merge into the open document.
+The file list follows your `meta.json` ordering.
+
+Review the changes in Git and publish them through your site's usual deployment workflow.
+
+> Studio edits existing files. Create, rename, and delete files in your code editor or file manager instead.
+
+### Use as a Library
+
+Use `@fumadocs-editor/ui` to build an editing interface inside your own app. See the docs for details:
+
+<Cards>
+  <Card title="React Quick Start" href="https://editor.fumadocs.dev">
+    Install the editor, import its styles, and render your first editable document.
+  </Card>
+  <Card title="Studio Configuration" href="https://editor.fumadocs.dev/studio">
+    Configure the content folder, custom components, and styles.
+  </Card>
+  <Card title="File Sync" href="https://editor.fumadocs.dev/sync">
+    Connect an embedded editor to files through your development server.
+  </Card>
+</Cards>
+
+### Write with Components
+
+Built-in editing support includes Fumadocs components such as Callout, Cards, Steps, Accordions, and Files.
+
+Custom components can define their own editable regions with [component specs](https://editor.fumadocs.dev/components).
+
+<Callout title="Keep your existing content setup">
+  The editor works on your Markdown and MDX files. Continue using [Fumadocs MDX](/docs/mdx) to load
+  them and your React framework to render the published site.
+</Callout>

@@ -1,0 +1,52 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Local HTML</title>
+    <meta name="description" content="Plain HTML files, rendered with the docs theme." />
+    <meta name="fumadocs:icon" content="Album" />
+  </head>
+  <body>
+    <main>
+      <p>
+        Every <code>.html</code> file under <code>content/pages</code> becomes a page. Nothing here
+        is authored in Markdown &mdash; these are the kind of files you get out of an exporter, a
+        report generator, or an agent.
+      </p>
+
+      <h2>What the source does</h2>
+      <ul>
+        <li>
+          Scopes the content to <code>&lt;main&gt;</code> or <code>&lt;article&gt;</code>, dropping
+          page chrome, scripts and styles.
+        </li>
+        <li>
+          Removes <code>class</code> and <code>style</code> attributes, so the docs theme takes over
+          the styling.
+        </li>
+        <li>Generates heading ids, which power the table of contents and search.</li>
+        <li>
+          Reads the title and description from <code>&lt;title&gt;</code> and
+          <code>&lt;meta&gt;</code> tags.
+        </li>
+        <li>Highlights <code>&lt;pre&gt;&lt;code&gt;</code> blocks with Shiki:</li>
+      </ul>
+
+      <pre><code class="language-ts">const pages = localHtml({
+  dir: 'content/pages',
+});</code></pre>
+      <p>
+        The language comes from the <code>language-*</code> class the block already carries. Pass
+        <code>rehypeCodeOptions: false</code> to leave code blocks untouched.
+      </p>
+
+      <h2>The pages</h2>
+      <p>
+        <a href="./quarterly-report.html">Quarterly Report</a> is a full document with a header, nav
+        and footer around its content &mdash; relative links between files are resolved by
+        <code>createRelativeLink</code>. <a href="./fragment.html">A Fragment Page</a> has no
+        document shell at all.
+      </p>
+    </main>
+  </body>
+</html>

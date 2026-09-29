@@ -1,6 +1,7 @@
 import { createI18nSearchAPI, createSearchAPI, type ExportedData } from '@/search/server';
 import { expect, test } from 'vitest';
 import { structure } from '@/mdx-plugins';
+import { buildDocuments } from '@/search/server/build-doc';
 
 test('Search API', async () => {
   const api = createSearchAPI('simple', {
@@ -74,11 +75,169 @@ something`,
   `);
 });
 
+test('buildDocuments: page description duplicated in contents is indexed once', () => {
+  // OpenAPI single-operation pages emit the operation description as both the page
+  // description and a `contents` entry (#3509) — only the anchored record must survive
+  const docs = buildDocuments([
+    {
+      id: '1',
+      title: 'Past',
+      description: 'Get the carbon intensity for a zone.',
+      url: '/docs/past',
+      structuredData: {
+        headings: [{ id: 'past', content: 'Past' }],
+        contents: [{ heading: 'past', content: 'Get the carbon intensity for a zone.' }],
+      },
+    },
+  ]);
+
+  const texts = docs.filter((doc) => doc.type === 'text');
+  expect(texts).toHaveLength(1);
+  expect(texts[0].url).toBe('/docs/past#past');
+
+  // a description distinct from the body keeps its own record
+  const distinct = buildDocuments([
+    {
+      id: '1',
+      title: 'Page',
+      description: 'A frontmatter description.',
+      url: '/docs/page',
+      structuredData: {
+        headings: [],
+        contents: [{ heading: undefined, content: 'The body text.' }],
+      },
+    },
+  ]);
+  expect(distinct.filter((doc) => doc.type === 'text')).toHaveLength(2);
+});
+
 test('Search API I18n', async () => {
   const api = createI18nSearchAPI('simple', {
     i18n: {
       languages: ['italian', 'en'],
       defaultLanguage: 'en',
+    },
+    indexes: [
+      {
+        title: 'ciao mondo amico italian',
+        content: 'ciao mondo amico',
+        url: '/hello-world',
+        locale: 'italian',
+      },
+      {
+        title: 'Hello World English',
+        content: 'Hello World',
+        url: '/hello-world',
+        locale: 'en',
+      },
+    ],
+  });
+
+  expect(await api.search('English', { locale: 'en' })).toHaveLength(1);
+  expect(await api.search('amico', { locale: 'italian' })).toHaveLength(1);
+  expect(await api.search('italian', { locale: 'en' })).toHaveLength(0);
+  const exported = (await api.export()) as ExportedData;
+  // zero-config i18n: a single multilingual database shared by all locales
+  expect(exported.type).toBe('simple');
+  if (exported.type !== 'i18n') expect(exported.i18n).toBe(true);
+});
+
+test('Search API I18n: zero-config languages', async () => {
+  const api = createI18nSearchAPI('simple', {
+    i18n: {
+      languages: ['cn', 'ru'],
+      defaultLanguage: 'cn',
+    },
+    indexes: [
+      {
+        title: '快速開始使用框架',
+        content: '快速開始使用框架',
+        url: '/cn/hello-world',
+        locale: 'cn',
+      },
+      {
+        title: 'Начало работы, ёлка',
+        content: 'Начало работы, ёлка',
+        url: '/ru/hello-world',
+        locale: 'ru',
+      },
+    ],
+  });
+
+  expect(await api.search('框架', { locale: 'cn' })).toHaveLength(1);
+  // diacritics folding: `елка` matches `ёлка`
+  expect(await api.search('елка', { locale: 'ru' })).toHaveLength(1);
+  expect(await api.search('框架', { locale: 'ru' })).toHaveLength(0);
+});
+
+// a stemmer that folds every form of "record" onto a marker unrelated to the indexed text,
+// so a hit can only come from the custom tokenizer being applied on both index and query.
+const stemmer = (word: string) => (word.startsWith('record') ? 'pterodactyl' : word);
+const tokenizer = { language: 'multilingual', stemming: true, stemmer } as const;
+
+const indexes = [
+  {
+    title: 'Recording',
+    content: 'Start a recording session.',
+    url: '/help/recording',
+  },
+];
+
+test('Search API: custom tokenizer', async () => {
+  expect(await createSearchAPI('simple', { indexes }).search('pterodactyl')).toHaveLength(0);
+  expect(
+    await createSearchAPI('simple', { indexes, tokenizer }).search('pterodactyl'),
+  ).toHaveLength(1);
+
+  // `components.tokenizer` routes into the same code path
+  expect(
+    await createSearchAPI('simple', { indexes, components: { tokenizer } }).search('pterodactyl'),
+  ).toHaveLength(1);
+});
+
+test('Search API I18n: custom tokenizer', async () => {
+  const api = createI18nSearchAPI('simple', {
+    i18n: {
+      languages: ['en'],
+      defaultLanguage: 'en',
+    },
+    tokenizer,
+    indexes: indexes.map((index) => ({ ...index, locale: 'en' })),
+  });
+
+  expect(await api.search('pterodactyl', { locale: 'en' })).toHaveLength(1);
+});
+
+test('Search API: language is forwarded to the engine', async () => {
+  // an unsupported language is rejected by the engine, which proves the value reaches it
+  await expect(
+    createSearchAPI('simple', { indexes, language: 'klingon' }).search('recording'),
+  ).rejects.toThrow(/not supported/);
+
+  // ...and is dropped once a tokenizer takes over, which defines its own language
+  await expect(
+    createSearchAPI('simple', { indexes, language: 'klingon', tokenizer }).search('pterodactyl'),
+  ).resolves.toHaveLength(1);
+
+  // i18n servers must not clobber it either
+  await expect(
+    createI18nSearchAPI('simple', {
+      i18n: { languages: ['en'], defaultLanguage: 'en' },
+      indexes: indexes.map((index) => ({ ...index, locale: 'en' })),
+      language: 'klingon',
+    } as never).search('recording'),
+  ).rejects.toThrow(/not supported/);
+});
+
+test('Search API I18n: legacy locale map', async () => {
+  const api = createI18nSearchAPI('simple', {
+    i18n: {
+      languages: ['italian', 'en'],
+      defaultLanguage: 'en',
+    },
+    localeMap: {
+      italian: 'italian',
+      en: 'english',
     },
     indexes: [
       {

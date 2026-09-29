@@ -1,0 +1,90 @@
+{
+  "name": "@fumadocs/asyncapi",
+  "version": "0.4.1",
+  "description": "Generate docs for your AsyncAPI spec",
+  "keywords": [
+    "Docs",
+    "Fumadocs"
+  ],
+  "homepage": "https://fumadocs.dev",
+  "license": "MIT",
+  "author": "Fuma Nama",
+  "repository": "github:fuma-nama/fumadocs",
+  "files": [
+    "css",
+    "dist"
+  ],
+  "type": "module",
+  "sideEffects": [
+    "./css/**/*.css"
+  ],
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "browser": "./dist/index.browser.js",
+      "import": "./dist/index.js"
+    },
+    "./i18n": "./dist/i18n.js",
+    "./operation": "./dist/operation.js",
+    "./server": "./dist/server/index.js",
+    "./ui": "./dist/ui/index.js",
+    "./package.json": "./package.json",
+    "./css/*": "./css/*"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "scripts": {
+    "build": "tsdown",
+    "clean": "rimraf dist",
+    "dev": "tsdown --watch --clean false",
+    "lint": "oxlint .",
+    "types:check": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@base-ui/react": "^1.8.0",
+    "@fuma-translate/react": "^1.0.2",
+    "@fumadocs/json-schema": "workspace:*",
+    "@fumari/stf": "workspace:*",
+    "@scalar/json-magic": "^0.13.5",
+    "chokidar": "^5.0.0",
+    "class-variance-authority": "^0.7.1",
+    "cn": "^0.3.0",
+    "github-slugger": "^2.0.0",
+    "hast-util-to-jsx-runtime": "^2.3.6",
+    "lucide-react": "^1.47.0",
+    "remark": "^15.0.1",
+    "remark-rehype": "^11.1.2",
+    "shiki": "^4.4.3",
+    "yaml": "^2.9.1"
+  },
+  "devDependencies": {
+    "@tailwindcss/oxide": "^4.3.3",
+    "@types/node": "26.6.1",
+    "@types/react": "^19.3.0",
+    "fuma-cli": "^0.3.1",
+    "fumadocs-core": "workspace:*",
+    "fumadocs-ui": "workspace:@fumadocs/base-ui@*",
+    "json-schema-typed": "^8.0.2",
+    "shared-api": "workspace:*",
+    "tailwindcss": "^4.3.3",
+    "tsconfig": "workspace:*",
+    "tsdown": "0.23.0"
+  },
+  "peerDependencies": {
+    "@types/react": "*",
+    "fumadocs-core": "^16.15.0",
+    "fumadocs-ui": "^16.15.0",
+    "json-schema-typed": "*",
+    "react": "^19.2.0",
+    "react-dom": "^19.2.0"
+  },
+  "peerDependenciesMeta": {
+    "json-schema-typed": {
+      "optional": true
+    },
+    "@types/react": {
+      "optional": true
+    }
+  }
+}

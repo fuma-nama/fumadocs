@@ -4,7 +4,7 @@ import { type HTMLAttributes, useEffect, useState } from 'react';
 import { X } from 'lucide-react';
 import { cn } from '@/utils/cn';
 import { buttonVariants } from '@/components/ui/button';
-import { useTranslations } from '@/contexts/i18n';
+import { useTranslations } from '@fuma-translate/react';
 
 type BannerVariant = 'rainbow' | 'normal';
 
@@ -43,7 +43,7 @@ export function Banner({
    */
   changeLayout?: boolean;
 }) {
-  const t = useTranslations();
+  const t = useTranslations({ note: 'banner' });
   const [open, setOpen] = useState(true);
   const globalKey = id ? `nd-banner-${encodeBase32(id)}` : null;
 
@@ -98,11 +98,11 @@ export function Banner({
       {id ? (
         <button
           type="button"
-          aria-label={t.bannerClose}
+          aria-label={t('Close Banner', { note: 'aria-label' })}
           onClick={onClose}
           className={cn(
             buttonVariants({
-              color: 'ghost',
+              variant: 'ghost',
               className: 'absolute inset-e-2 top-1/2 -translate-y-1/2 text-fd-muted-foreground/50',
               size: 'icon-sm',
             }),
@@ -123,16 +123,14 @@ function flow({ colors }: { colors: string[] }) {
     <>
       <div
         className="absolute inset-0 -z-1"
-        style={
-          {
-            maskImage,
-            maskComposite: 'intersect',
-            animation: 'fd-moving-banner 20s linear infinite',
-            backgroundImage: `repeating-linear-gradient(70deg, ${[...colors, colors[0]].map((color, i) => `${color} ${(i * 50) / colors.length}%`).join(', ')})`,
-            backgroundSize: '200% 100%',
-            filter: 'saturate(2)',
-          } as object
-        }
+        style={{
+          maskImage,
+          maskComposite: 'intersect',
+          animation: 'fd-moving-banner 20s linear infinite',
+          backgroundImage: `repeating-linear-gradient(70deg, ${[...colors, colors[0]].map((color, i) => `${color} ${(i * 50) / colors.length}%`).join(', ')})`,
+          backgroundSize: '200% 100%',
+          filter: 'saturate(2)',
+        }}
       />
       <style>
         {`@keyframes fd-moving-banner {

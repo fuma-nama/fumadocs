@@ -6,11 +6,24 @@ icon: Rocket
 
 ## Overview
 
-Fumadocs MDX is a bundler plugin, in other words, it has a higher performance bottleneck.
-With bundlers like Webpack and Turbopack, it is enough for large docs sites with nearly 500+ MDX files, which is sufficient for almost all use cases.
+Fumadocs MDX is a bundler plugin, in other words, it has a higher performance bottleneck depending on the underlying bundler.
+
+For typical bundlers like Turbopack and Vite, it is enough for large docs sites with nearly 500+ MDX files, which is sufficient for almost all use cases.
 
 Since Fumadocs MDX works with your bundler, you can import any files including client components in your MDX files.
 This allows high flexibility and ensures everything is optimized by default.
+
+### Development Server
+
+There's two categories:
+
+- **Lazy**: Bundlers like Vite, and runtime-side loaders like Node.js & Bun, can compile MDX files on-demand when a module is requested (e.g. when `await import()` is called), the dev server performance will not be significantly affected by the number of MDX files.
+
+  However, ensure to enable [Lazy Loading](/docs/mdx/async), so that lazy compilation can take effect.
+
+- **Precompiled**: Webpack & Turbopack do not support lazy compilation on dev mode, all MDX files must be precompiled ahead of time. The dev server might be slow depending of the number of MDX files to precompile.
+
+  While this is a bundler-level limitation, we recommend [Local Markdown](/docs/integrations/content/local-md) as an alternative if the slowness is a concern. It skips the bundler layer, MDX files are loaded & compiled on runtime. See the linked introduction for details.
 
 ### Image Optimization
 
@@ -35,29 +48,26 @@ import HelloImage from './hello.png';
 
 ![Banner](/banner.png)
 
-## Caveats
+### Production Build
 
-Although Fumadocs MDX can handle nearly 500+ files, it could be slow and inefficient.
-A huge amount of MDX files can cause extremely high memory usage during build and development mode.
+In a production build, the most consuming parts are usually TypeScript docgens (the TypeScript Compiler is slow without tsgo), and the trivial work with all MDX files summed up.
 
-This is because of:
+Without cache, a huge amount of MDX files can cause extremely high memory usage during build. This is because:
 
-- Bundlers do a lot of work under the hood to bundle MDX and JavaScript files and optimize performance.
-- Bundlers are not supposed to compile hundreds of MDX files.
-
-## Solutions
+- After MDX files are compiled into JavaScript, bundlers also have to bundle the output JavaScript files.
+- Even the compilation time of each MDX file is trivial, it can be slow when summed up. For example, ~2500 files, assuming 25ms per file, cold build will take up to 62.5 seconds.
 
 The main solution is to make the compilation on-demand, such that content is only loaded when it's being requested.
 
-### Remote Source
+#### Local Markdown
+
+As suggested in the development server section, [Local Markdown](/docs/integrations/content/local-md) is a good alternative that runs purely on runtime, without extra compilation work.
+
+#### Remote Source
 
 Create your custom content source with remoting content loading.
 
-You can ensure your custom source doesn't need to pre-compile content files, it can process them on-demand with SSG which can **improve your build speed.**
+If your content source doesn't need to pre-compile content files, it can process them on-demand with SSG which can **improve your build speed.**
 However, you cannot leverage build time optimizations (e.g. bundling).
 
 See [Custom Source](/docs/integrations/content/custom) for implementing custom sources.
-
-### Lazy Loading
-
-See [Lazy Loading](/docs/mdx/async).

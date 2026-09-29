@@ -7,10 +7,30 @@ import { cn } from '@/utils/cn';
 import { useSidebar } from '@/components/sidebar/base';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { isLayoutTabActive, type LayoutTab } from '@/layouts/shared';
+import { useTabsGroups } from '@/contexts/tree';
 
 export type SidebarTabWithProps = LayoutTab;
 
+/**
+ * Renders the given tabs as a dropdown per tabs group, one for each root folder on the
+ * current page's path, letting users switch between root folders of the same type.
+ */
 export function SidebarTabsDropdown({
+  options,
+  placeholder,
+  ...props
+}: {
+  placeholder?: ReactNode;
+  options: LayoutTab[];
+} & ComponentProps<'button'>) {
+  const groups = useTabsGroups(options);
+
+  return groups.map((group, i) => (
+    <Dropdown key={i} options={group.options} placeholder={placeholder} {...props} />
+  ));
+}
+
+function Dropdown({
   options,
   placeholder,
   ...props

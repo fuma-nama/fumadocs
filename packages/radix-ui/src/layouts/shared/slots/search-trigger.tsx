@@ -2,7 +2,7 @@
 import type { ComponentProps } from 'react';
 import { Search } from 'lucide-react';
 import { useSearchContext } from '@/contexts/search';
-import { useTranslations } from '@/contexts/i18n';
+import { useTranslations } from '@fuma-translate/react';
 import { cn } from '@/utils/cn';
 import { type ButtonProps, buttonVariants } from '@/components/ui/button';
 
@@ -13,11 +13,12 @@ export interface SearchTriggerProps extends Omit<ComponentProps<'button'>, 'colo
 export function SearchTrigger({
   hideIfDisabled,
   size = 'icon-sm',
-  color = 'ghost',
+  color,
+  variant = color ?? 'ghost',
   ...props
 }: SearchTriggerProps) {
   const { setOpenSearch, enabled } = useSearchContext();
-  const t = useTranslations();
+  const t = useTranslations({ note: 'search trigger' });
   if (hideIfDisabled && !enabled) return null;
 
   return (
@@ -26,12 +27,12 @@ export function SearchTrigger({
       className={cn(
         buttonVariants({
           size,
-          color,
+          variant,
         }),
         props.className,
       )}
       data-search=""
-      aria-label={t.searchOpen}
+      aria-label={t('Open Search', { note: 'aria-label' })}
       onClick={() => {
         setOpenSearch(true);
       }}
@@ -47,7 +48,7 @@ export interface FullSearchTriggerProps extends ComponentProps<'button'> {
 
 export function FullSearchTrigger({ hideIfDisabled, ...props }: FullSearchTriggerProps) {
   const { enabled, hotKey, setOpenSearch } = useSearchContext();
-  const t = useTranslations();
+  const t = useTranslations({ note: 'search trigger' });
   if (hideIfDisabled && !enabled) return null;
 
   return (
@@ -64,7 +65,7 @@ export function FullSearchTrigger({ hideIfDisabled, ...props }: FullSearchTrigge
       }}
     >
       <Search className="size-4" />
-      {t.search}
+      {t('Search')}
       <div className="ms-auto inline-flex gap-0.5">
         {hotKey.map((k, i) => (
           <kbd key={i} className="rounded-md border bg-fd-background px-1.5">

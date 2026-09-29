@@ -87,6 +87,20 @@ export const Route = createFileRoute('/rss.xml')({
 });
 ```
 
+```ts tab="Waku" title="pages/_api/rss.xml.ts"
+import { getRSS } from '@/lib/rss';
+
+export function GET() {
+  return new Response(getRSS());
+}
+
+export async function getConfig() {
+  return {
+    render: 'static' as const,
+  } as const;
+}
+```
+
 ### Next.js Metadata
 
 You can add an alternates object to the metadata object with your feed’s title and URL.

@@ -78,15 +78,15 @@ Fumadocs 16 removed substantial amount of deprecated APIs accumulated since v15.
 
   ```ts
   // [!code --]
-  import { ... } from 'fumadocs-core/search/orama-cloud';
+  import { oramaCloudClient } from 'fumadocs-core/search/client/orama-cloud';
   // [!code ++]
-  import { ... } from 'fumadocs-core/search/orama-cloud-legacy';
+  import { oramaCloudLegacyClient } from 'fumadocs-core/search/client/orama-cloud-legacy';
 
   useSearch({
     // [!code --]
-    type: 'orama-cloud',
+    client: oramaCloudClient(...),
     // [!code ++]
-    type: 'orama-cloud-legacy',
+    client: oramaCloudLegacyClient(...),
   })
   ```
 

@@ -7,15 +7,15 @@ import { baseDir } from '@/constants';
 export async function runStart({
   host,
   dirs,
-  port: defaultPort = '8080',
+  port: defaultPort = 8080,
 }: {
   dirs?: string[];
   host?: string;
-  port?: string;
+  port?: number;
 }) {
   loadEnv();
   overrideNodeEnv('production');
-  const port = await getFreePort(parseInt(defaultPort, 10));
+  const port = await getFreePort(defaultPort);
   const serveFileUrl = pathToFileURL(path.resolve(baseDir, 'dist', 'waku', 'serve-node.js')).href;
   if (host) {
     process.env.HOST = host;

@@ -1,0 +1,212 @@
+---
+title: createGraphQL()
+description: The GraphQL server instance.
+---
+
+## GraphQL Server
+
+The main config for Fumadocs GraphQL.
+
+> It should not be referenced in browser environments.
+
+### `input`
+
+The GraphQL schemas to read from, either:
+
+- an array of file paths/URLs to SDL files.
+- a record of schema id -> input.
+
+Record inputs accept SDL file paths/URLs, SDL text, introspection results, `GraphQLSchema` instances, and functions returning them.
+
+```ts tab="Basic"
+import { createGraphQL } from '@fumadocs/graphql/server';
+
+export const graphql = createGraphQL({
+  input: ['./schema.graphql'],
+});
+```
+
+```ts tab="Record"
+import { createGraphQL } from '@fumadocs/graphql/server';
+
+export const graphql = createGraphQL({
+  input: {
+    // [id]: schema input
+    store: './store.graphql',
+    remote: 'https://example.com/schema.graphql',
+    // functions, e.g. downloading an introspection result
+    galaxy: async () => {
+      const res = await fetch('https://example.com/introspection.json');
+      return res.json();
+    },
+  },
+});
+```
+
+You can pass an array of SDL files to merge them into a single schema, type extensions (e.g. `extend type Query`) are supported.
+
+```ts
+import { createGraphQL } from '@fumadocs/graphql/server';
+
+export const graphql = createGraphQL({
+  input: {
+    api: ['./base.graphql', './orders.graphql'],
+  },
+});
+```
+
+### `disableCache`
+
+Disable caching of loaded schemas. Useful during development when schemas change frequently.
+
+```ts
+import { createGraphQL } from '@fumadocs/graphql/server';
+
+export const graphql = createGraphQL({
+  input: ['./schema.graphql'],
+  disableCache: true,
+});
+```
+
+## Generating Pages
+
+`staticSource()` and `dynamicSource()` generate pages for your `loader()`, they share the same options.
+
+```ts title="lib/source.ts"
+export const source = loader(
+  {
+    docs: docs.toFumadocsSource(),
+    graphql: await graphql.staticSource({
+      baseDir: 'graphql',
+      baseUrl: '/docs',
+    }),
+  },
+  // ...
+);
+```
+
+### `per`
+
+Customize the content of pages, default to `item`.
+
+| mode   | content                     | file path         |
+| ------ | --------------------------- | ----------------- |
+| item   | each operation & named type | `{name}.mdx`      |
+| file   | everything in same schema   | `{file_name}.mdx` |
+| custom | see below                   | N/A               |
+
+When set to `custom`, you can pass a function to fully customize the generation process:
+
+```ts
+import { graphql } from '@/lib/graphql';
+
+await graphql.staticSource({
+  per: 'custom',
+  toPages(builder) {
+    builder.create({
+      type: 'operation',
+      path: 'my-orders.mdx',
+      info: { title: 'My Orders' },
+      item: { kind: 'query', name: 'orders' },
+    });
+  },
+});
+```
+
+### `groupBy`
+
+For `per: 'item'`, customize how generated pages are grouped into folders, default to `kind`.
+
+| mode | folders                                    |
+| ---- | ------------------------------------------ |
+| kind | by their kind, e.g. `queries/`, `objects/` |
+| none | no folders                                 |
+
+You can also pass a function that returns the group name of an entry:
+
+```ts
+import { graphql } from '@/lib/graphql';
+
+await graphql.staticSource({
+  groupBy: (entry) => (entry.type === 'operation' ? 'operations' : 'types'),
+});
+```
+
+### `includeOperations` & `includeTypes`
+
+For `per: 'item'`, filter the operations (query/mutation/subscription fields) and named types to generate pages for, default to `true`.
+
+```ts
+import { graphql } from '@/lib/graphql';
+
+await graphql.staticSource({
+  // skip subscriptions
+  includeOperations: (kind, field) => kind !== 'subscription',
+  // skip internal types
+  includeTypes: (type) => !type.name.startsWith('Internal'),
+});
+```
+
+### `name` & `slugify`
+
+Customize the file name of generated pages.
+
+GraphQL names are already URL-safe, hence the original name (including its case) is kept by default.
+
+```ts
+import { graphql } from '@/lib/graphql';
+
+await graphql.staticSource({
+  name: (entry) => entry.item.name.toLowerCase(),
+});
+```
+
+`slugify` converts group names (and item names by default) into URL-friendly segments.
+
+### `baseUrl`
+
+The `baseUrl` of your `loader()`.
+
+When specified, links of generated pages are pre-generated and passed to the UI, so type & operation references are cross-linked automatically.
+
+```ts
+import { graphql } from '@/lib/graphql';
+
+await graphql.staticSource({
+  baseUrl: '/docs',
+});
+```
+
+### `meta`
+
+Generate `meta.json` files to customize the page tree, disabled by default.
+
+| `folderStyle` | page tree                                  |
+| ------------- | ------------------------------------------ |
+| folder        | a folder per group (default)               |
+| separator     | a separator per group, with pages under it |
+
+```ts
+import { graphql } from '@/lib/graphql';
+
+await graphql.staticSource({
+  meta: { folderStyle: 'separator' },
+});
+```
+
+## Loader Plugin
+
+`loaderPlugin()` decorates GraphQL pages in your page tree:
+
+- a `query`/`mutation`/`subscription` badge per operation page.
+- a strikethrough on deprecated operations.
+
+```ts title="lib/source.ts"
+export const source = loader(
+  // ...
+  {
+    baseUrl: '/docs',
+    plugins: [graphql.loaderPlugin()],
+  },
+);
+```

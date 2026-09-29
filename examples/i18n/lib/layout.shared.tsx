@@ -1,17 +1,9 @@
 import type { BaseLayoutProps } from 'fumadocs-ui/layouts/shared';
 import { i18n } from '@/lib/i18n';
-import { uiTranslations } from 'fumadocs-ui/i18n';
 import { zhTW } from '@fumadocs/language/zh-tw';
+import { uiTranslations } from 'fumadocs-ui/i18n';
 
-export const translations = i18n
-  .translations()
-  .extend(uiTranslations())
-  .preset('cn', zhTW())
-  .add('ui', {
-    cn: {
-      displayName: 'Chinese',
-    },
-  });
+export const translations = i18n.translations().extend(uiTranslations()).preset('cn', zhTW());
 
 export function baseOptions(locale: string): BaseLayoutProps {
   return {

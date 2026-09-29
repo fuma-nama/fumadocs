@@ -4,6 +4,7 @@ import appCss from '@/styles/app.css?url';
 import { RootProvider } from 'fumadocs-ui/provider/tanstack';
 import { i18nProvider, uiTranslations } from 'fumadocs-ui/i18n';
 import { i18n } from '@/lib/i18n';
+import { zhTW } from '@fumadocs/language/zh-tw';
 
 export const Route = createRootRoute({
   head: () => ({
@@ -35,13 +36,10 @@ function RootComponent() {
 const translations = i18n
   .translations()
   .extend(uiTranslations())
-  .add('ui', {
+  .preset('cn', zhTW())
+  .add({
     cn: {
-      displayName: 'Chinese',
-      search: 'Translated Content',
-    },
-    en: {
-      displayName: 'English',
+      'Search(search trigger)': 'Translated Content',
     },
   });
 

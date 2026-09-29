@@ -19,18 +19,18 @@ import { ChevronDown, Languages } from 'lucide-react';
 import { useIsScrollTop } from '@/utils/use-is-scroll-top';
 import { useHomeLayout } from '..';
 import type { NavOptions } from '@/layouts/shared';
-import { useTranslations } from '@/contexts/i18n';
+import { useTranslations } from '@fuma-translate/react';
 
 export const navItemVariants = cva('[&_svg]:size-4', {
   variants: {
     variant: {
       main: 'inline-flex items-center gap-1 p-2 text-fd-muted-foreground transition-colors hover:text-fd-accent-foreground data-[active=true]:text-fd-primary',
       button: buttonVariants({
-        color: 'secondary',
+        variant: 'secondary',
         className: 'gap-1.5',
       }),
       icon: buttonVariants({
-        color: 'ghost',
+        variant: 'ghost',
         size: 'icon',
       }),
     },
@@ -47,7 +47,7 @@ export function Header(props: ComponentProps<'header'>) {
     slots,
     props: { nav },
   } = useHomeLayout();
-  const t = useTranslations();
+  const t = useTranslations({ note: 'mobile menu' });
   if (nav?.component) return nav.component;
 
   return (
@@ -91,11 +91,11 @@ export function Header(props: ComponentProps<'header'>) {
         <NavigationMenuItem asChild>
           <div>
             <NavigationMenuTrigger
-              aria-label={t.menuToggle}
+              aria-label={t('Toggle Menu', { note: 'aria-label' })}
               className={cn(
                 buttonVariants({
                   size: 'icon',
-                  color: 'ghost',
+                  variant: 'ghost',
                   className: 'group [&_svg]:size-5.5',
                 }),
               )}
@@ -291,10 +291,10 @@ function MobileNavigationMenuLinkItem({
             main: 'inline-flex items-center gap-2 py-1.5 transition-colors hover:text-fd-popover-foreground/50 data-[active=true]:font-medium data-[active=true]:text-fd-primary [&_svg]:size-4',
             icon: buttonVariants({
               size: 'icon',
-              color: 'ghost',
+              variant: 'ghost',
             }),
             button: buttonVariants({
-              color: 'secondary',
+              variant: 'secondary',
               className: 'gap-1.5 [&_svg]:size-4',
             }),
           }[item.type ?? 'main'],

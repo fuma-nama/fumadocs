@@ -32,7 +32,7 @@ export const accordionComponents: {
 } = {
   accordion({ value, renderNode }) {
     return (
-      <Accordions type="single">
+      <Accordions>
         <Accordion
           title={value.title && renderBlocks(value.title, renderNode)}
           id={value.id}
@@ -45,7 +45,7 @@ export const accordionComponents: {
   },
   accordions({ value, renderNode }) {
     return (
-      <Accordions type={value.type ?? 'single'}>
+      <Accordions multiple={value.type === 'multiple'}>
         {value.items?.map((item) => (
           <Accordion
             key={item._key}

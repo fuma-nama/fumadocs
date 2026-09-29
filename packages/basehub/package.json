@@ -1,6 +1,6 @@
 {
   "name": "@fumadocs/basehub",
-  "version": "0.0.1",
+  "version": "0.1.1",
   "description": "The official BaseHub integration for Fumadocs",
   "keywords": [
     "Docs",
@@ -14,6 +14,7 @@
     "dist"
   ],
   "type": "module",
+  "sideEffects": false,
   "exports": {
     ".": "./dist/toc.mjs",
     "./package.json": "./package.json"
@@ -29,16 +30,16 @@
     "types:check": "tsc --noEmit"
   },
   "devDependencies": {
-    "@types/node": "25.9.1",
-    "@types/react": "^19.2.15",
-    "basehub": "^9.5.3",
-    "fuma-cli": "^0.1.1",
+    "@types/node": "26.6.1",
+    "@types/react": "^19.3.0",
+    "basehub": "9.6.0",
+    "fuma-cli": "^0.3.1",
     "fumadocs-core": "workspace:*",
-    "fumadocs-ui": "workspace:*",
-    "react": "^19.2.6",
+    "fumadocs-ui": "workspace:@fumadocs/base-ui@*",
+    "react": "^19.3.0",
     "tsconfig": "workspace:*",
-    "tsdown": "0.22.0",
-    "typescript": "^6.0.3"
+    "tsdown": "0.23.0",
+    "typescript": "^7.0.2"
   },
   "peerDependencies": {
     "@types/react": "*",

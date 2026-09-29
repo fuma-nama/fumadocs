@@ -7,6 +7,9 @@
     "module": "esnext",
     "moduleResolution": "bundler",
     "jsx": "react-jsx",
+    "paths": {
+      "@/*": ["./app/*"]
+    },
     "resolvePackageJsonImports": true,
     "allowImportingTsExtensions": true,
     "rootDirs": [".", "./.react-router/types"],

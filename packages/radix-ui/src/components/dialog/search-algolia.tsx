@@ -1,6 +1,7 @@
 'use client';
 
 import { type AlgoliaOptions, useDocsSearch } from 'fumadocs-core/search/client';
+import { algoliaClient } from 'fumadocs-core/search/client/algolia';
 import { type ReactNode, useMemo, useState } from 'react';
 import { useOnChange } from 'fumadocs-core/utils/use-on-change';
 import {
@@ -58,10 +59,11 @@ export default function AlgoliaSearchDialog({
   const [tag, setTag] = useState(defaultTag);
   const { locale } = useI18n();
   const { search, setSearch, query } = useDocsSearch({
-    type: 'algolia',
-    tag,
-    locale,
-    ...searchOptions,
+    client: algoliaClient({
+      tag,
+      locale,
+      ...searchOptions,
+    }),
   });
   const defaultItems = useMemo<SortedResult[] | null>(() => {
     if (links.length === 0) return null;

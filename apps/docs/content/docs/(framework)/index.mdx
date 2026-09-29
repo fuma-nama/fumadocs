@@ -6,6 +6,8 @@ icon: Rocket
 
 import { CpuIcon, PanelsTopLeftIcon, DatabaseIcon, TerminalIcon } from 'lucide-react';
 
+<AgentInstructions />
+
 ## Introduction
 
 Fumadocs <span className='text-fd-muted-foreground text-sm'>(Foo-ma docs)</span> is a **documentation framework**, designed to be fast, flexible,
@@ -51,9 +53,15 @@ A command line tool to install UI components and automate things, useful for cus
 
 Some basic knowledge of React.js would be useful for further customizations.
 
-<Callout title="Love Fumadocs but not familiar with React?">
-  [Fumapress](https://press.fumadocs.dev) is a site generator that has lower barrier for beginners.
-  It enforces a React framework of its own, and offers a better DX in return.
+<Callout title="Try Fumadocs with simpler DX">
+
+[Fumapress](https://press.fumadocs.dev) is a site generator that manages more features on top of Fumadocs.
+
+- Automatic routing, `llms.txt`, MCP and more basic features.
+- Based on Vite ([Waku](https://waku.gg)).
+
+It enforces a React framework of its own, and offers a better DX in return.
+
 </Callout>
 
 ## Automatic Installation
@@ -66,7 +74,7 @@ npm create fumadocs-app
 
 It will ask you the built-in template to use:
 
-- **React.js framework**: Next.js, Waku, React Router, Tanstack Start.
+- **Framework**: Next.js, Astro (with React), Waku, React Router, Tanstack Start.
 - **Content source**: Fumadocs MDX.
 
 A new fumadocs app should be initialized, with following features configured by default:
@@ -178,9 +186,23 @@ export default defineConfig({
 ### For Next.js
 
 <Accordions>
-  <Accordion id='node-23' title="Getting error on production build?">
+  <Accordion id='node-issues' title="Known Node.js issues">
 
-    Node.js 23.1 might have problems with Next.js, see [#1021](https://github.com/fuma-nama/fumadocs/issues/1021). Make sure to change your Node.js version.
+    If you have similar Turbopack errors like:
+
+    ```
+    JSON file not found: FileSystemPath { ... path: "lib/locales/sources/file.json.json" }
+    ```
+
+    It is usually because `require(esm)` is not supported ([#3312](https://github.com/fuma-nama/fumadocs/issues/3312)), please upgrade to Node.js 22+.
+
+    On Node.js 23.1, if you encountered this error in production build:
+
+    ```
+    Could not find a production build in the '.next' directory.
+    ```
+
+    It is a known problem, see [#1021](https://github.com/fuma-nama/fumadocs/issues/1021), you can upgrade your Node.js version to 23.6.0+.
 
   </Accordion>
   <Accordion id='dynamic-route' title="It uses Dynamic Route, will it be poor in performance?">

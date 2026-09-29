@@ -1,0 +1,54 @@
+openapi: 3.1.0
+info:
+  title: Double oneOf Test
+  description: Minimal spec to reproduce allOf with multiple oneOf arrays.
+  version: 1.0.0
+
+paths:
+  /items:
+    post:
+      summary: Create item
+      operationId: createItem
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateItem'
+      responses:
+        '200':
+          description: OK
+
+components:
+  schemas:
+    CreateItem:
+      type: object
+      allOf:
+        - oneOf:
+            - type: object
+              title: color
+              required: [color]
+              properties:
+                color:
+                  type: string
+            - type: object
+              title: pattern
+              required: [pattern]
+              properties:
+                pattern:
+                  type: string
+        - oneOf:
+            - type: object
+              title: small
+              required: [size]
+              properties:
+                size:
+                  type: string
+                  enum: [S, M]
+            - type: object
+              title: large
+              required: [size]
+              properties:
+                size:
+                  type: string
+                  enum: [L, XL]

@@ -111,6 +111,11 @@ declare module 'shiki' {
     /** [Fumadocs: rehype-code] run async tasks after process */
     _fd_postprocess?: ((ctx: { highlighter: HighlighterCore }) => Promise<void>)[];
   }
+
+  interface ShikiTransformer {
+    /** [Fumadocs: rehype-code] run async tasks before highlighting the code block */
+    _fd_prepare?: (code: string, options: CodeToHastOptions) => Promise<void> | void;
+  }
 }
 
 export default function rehypeShikiFromHighlighter(
@@ -187,6 +192,13 @@ export default function rehypeShikiFromHighlighter(
     };
 
     if (stripEndNewline && code.endsWith('\n')) code = code.slice(0, -1);
+
+    const prepare: Promise<void>[] = [];
+    for (const transformer of transformers) {
+      const task = transformer._fd_prepare?.(code, codeOptions);
+      if (task) prepare.push(task);
+    }
+    if (prepare.length > 0) await Promise.all(prepare);
 
     const fragment = highlighter.codeToHast(code, codeOptions);
     if (_fd_postprocess && _fd_postprocess.length > 0) {

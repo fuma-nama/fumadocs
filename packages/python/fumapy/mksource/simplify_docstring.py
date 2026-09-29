@@ -2,6 +2,8 @@ import typing as t
 
 import griffe
 
+from .utils import signature_parameters
+
 
 class SimplifiedDocstring(t.NamedTuple):
     description: str | None
@@ -22,7 +24,7 @@ def simplify_docstring(
                 "description": None,
                 "value": p.default,
             }
-            for p in parent.parameters
+            for p in signature_parameters(parent)
         ]
 
     def get_returns_from_signature(parent: griffe.Function):
@@ -82,17 +84,9 @@ def simplify_docstring(
         if sec.kind == "parameters":
             map = {i.name: i for i in sec.value}
             params_list = []
-            for param in parent.parameters:
-                if param.name in map:
-                    docstring = map[param.name]
-                    try:
-                        docstring.description = griffe.parse_google(
-                            griffe.Docstring(docstring.description)
-                        )
-                    except AttributeError:
-                        pass
-                    params_list.append(docstring)
-                else:
+            for param in signature_parameters(parent):
+                docstring = map.get(param.name)
+                if docstring is None:
                     params_list.append(
                         {
                             "name": param.name,
@@ -101,6 +95,20 @@ def simplify_docstring(
                             "value": param.default,
                         }
                     )
+                    continue
+
+                try:
+                    documented = griffe.parse_google(griffe.Docstring(docstring.description))
+                except AttributeError:
+                    documented = docstring.description
+                params_list.append(
+                    {
+                        "name": docstring.name,
+                        "annotation": docstring.annotation,
+                        "description": documented,
+                        "value": docstring.value,
+                    }
+                )
 
             parameters = params_list
             continue

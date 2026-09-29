@@ -67,7 +67,7 @@ const cardVariants = cva('rounded-2xl text-sm p-6 bg-origin-border shadow-lg', {
 
 export default function Page() {
   return (
-    <main className="text-landing-foreground pt-4 pb-6 dark:text-landing-foreground-dark md:pb-12">
+    <div className="text-landing-foreground pt-4 pb-6 dark:text-landing-foreground-dark md:pb-12">
       <div className="relative flex min-h-[600px] h-[70vh] max-h-[900px] border rounded-2xl overflow-hidden mx-auto w-full max-w-[1400px] bg-origin-border">
         <Hero />
         <div className="flex flex-col z-2 px-4 size-full md:p-12 max-md:items-center max-md:text-center">
@@ -143,7 +143,7 @@ export default function Page() {
         <ForNonEnginners />
         <OpenSource />
       </div>
-    </main>
+    </div>
   );
 }
 
@@ -666,7 +666,11 @@ function ForEngineers() {
           }}
           code={`
 import { loader } from 'fumadocs-core/source';
-import { docs } from 'collections/server';
+import { defineDocs } from 'fumadocs-mdx/macro';
+
+const docs = defineDocs({
+  dir: 'content/docs',
+});
 
 export const source = loader({
   source: docs.toFumadocsSource(),
@@ -806,9 +810,13 @@ function OpenSource() {
         </h3>
         <p className="mb-8">Fumadocs is 100% powered by passion and open source community.</p>
         <div className="mb-8 flex flex-row items-center gap-2">
-          <Link href="/sponsors" className={cn(buttonVariants({ variant: 'primary' }))}>
+          <a
+            href="https://fuma-nama.dev/sponsors"
+            rel="noreferrer noopener"
+            className={cn(buttonVariants({ variant: 'primary' }))}
+          >
             Sponsors
-          </Link>
+          </a>
           <a
             href="https://github.com/fuma-nama/fumadocs/graphs/contributors"
             rel="noreferrer noopener"

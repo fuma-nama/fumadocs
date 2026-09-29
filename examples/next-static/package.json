@@ -1,33 +1,32 @@
 {
   "name": "example-next-static",
-  "version": "0.0.0",
+  "version": "0.0.37",
   "private": true,
   "scripts": {
     "build": "next build",
     "dev": "next dev",
     "start": "serve out",
-    "types:check": "fumadocs-mdx && next typegen && tsc --noEmit"
+    "types:check": "next typegen && tsc --noEmit"
   },
   "dependencies": {
-    "@orama/orama": "^3.1.18",
+    "cn": "^0.3.0",
     "fumadocs-core": "workspace:*",
     "fumadocs-mdx": "workspace:*",
-    "fumadocs-ui": "workspace:*",
-    "lucide-react": "^1.17.0",
-    "next": "16.2.6",
-    "react": "^19.2.6",
-    "react-dom": "^19.2.6",
-    "tailwind-merge": "^3.6.0"
+    "fumadocs-ui": "workspace:@fumadocs/base-ui@*",
+    "lucide-react": "^1.47.0",
+    "next": "16.3.5",
+    "react": "^19.3.0",
+    "react-dom": "^19.3.0"
   },
   "devDependencies": {
-    "@tailwindcss/postcss": "^4.3.0",
-    "@types/mdx": "^2.0.13",
-    "@types/node": "^25.9.1",
-    "@types/react": "^19.2.15",
-    "@types/react-dom": "^19.2.3",
-    "postcss": "^8.5.15",
+    "@tailwindcss/postcss": "^4.3.3",
+    "@types/mdx": "^2.0.14",
+    "@types/node": "^26.6.1",
+    "@types/react": "^19.3.0",
+    "@types/react-dom": "^19.3.0",
+    "postcss": "^8.5.28",
     "serve": "^14.2.6",
-    "tailwindcss": "^4.3.0",
-    "typescript": "^6.0.3"
+    "tailwindcss": "^4.3.3",
+    "typescript": "^7.0.2"
   }
 }

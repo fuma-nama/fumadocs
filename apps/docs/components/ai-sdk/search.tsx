@@ -11,13 +11,13 @@ import {
   useRef,
   useState,
 } from 'react';
+import { flushSync } from 'react-dom';
 import { Loader2, MessageCircleIcon, RefreshCw, SearchIcon, Send, X } from 'lucide-react';
 import { cn } from '@/lib/cn';
 import { buttonVariants } from 'fumadocs-ui/components/ui/button';
 import { useChat, type UseChatHelpers } from '@ai-sdk/react';
 import { DefaultChatTransport, type Tool, type UIMessage, type UIToolInvocation } from 'ai';
 import { Markdown } from '../markdown';
-import { Presence } from '@radix-ui/react-presence';
 
 export type ChatUIMessage = UIMessage<
   never,
@@ -60,7 +60,7 @@ export function AISearchPanelHeader({ className, ...props }: ComponentProps<'div
         className={cn(
           buttonVariants({
             size: 'icon-sm',
-            color: 'ghost',
+            variant: 'ghost',
             className: 'text-fd-muted-foreground rounded-full',
           }),
         )}
@@ -85,7 +85,7 @@ export function AISearchInputActions() {
           type="button"
           className={cn(
             buttonVariants({
-              color: 'secondary',
+              variant: 'secondary',
               size: 'sm',
               className: 'rounded-full gap-1.5',
             }),
@@ -100,7 +100,7 @@ export function AISearchInputActions() {
         type="button"
         className={cn(
           buttonVariants({
-            color: 'secondary',
+            variant: 'secondary',
             size: 'sm',
             className: 'rounded-full',
           }),
@@ -159,6 +159,8 @@ export function AISearchInput(props: ComponentProps<'form'>) {
           localStorage.setItem(StorageKeyInput, e.target.value);
         }}
         onKeyDown={(event) => {
+          // keyCode 229: Safari fires `compositionend` before this keydown, `isComposing` is already false
+          if (event.nativeEvent.isComposing || event.keyCode === 229) return;
           if (!event.shiftKey && event.key === 'Enter') {
             onStart(event);
           }
@@ -170,7 +172,7 @@ export function AISearchInput(props: ComponentProps<'form'>) {
           type="button"
           className={cn(
             buttonVariants({
-              color: 'secondary',
+              variant: 'secondary',
               className: 'transition-all rounded-full mt-2 gap-2',
             }),
           )}
@@ -185,7 +187,7 @@ export function AISearchInput(props: ComponentProps<'form'>) {
           type="submit"
           className={cn(
             buttonVariants({
-              color: 'primary',
+              variant: 'default',
               className: 'transition-all rounded-full mt-2',
             }),
           )}
@@ -357,7 +359,10 @@ export function AISearchTrigger({
 
 export function AISearchPanel() {
   const { open, setOpen } = useAISearchContext();
+  const [actualOpen, setActualOpen] = useState(open);
   useHotKey();
+
+  if (open && !actualOpen) setActualOpen(open);
 
   return (
     <>
@@ -380,16 +385,19 @@ export function AISearchPanel() {
           }
         }`}
       </style>
-      <Presence present={open}>
+      {actualOpen && (
         <div
           className={cn(
             'fixed inset-0 z-30 backdrop-blur-xs bg-fd-overlay lg:hidden',
             open ? 'animate-fd-fade-in' : 'animate-fd-fade-out',
           )}
           onClick={() => setOpen(false)}
+          onAnimationEnd={() => {
+            if (!open) flushSync(() => setActualOpen(false));
+          }}
         />
-      </Presence>
-      <Presence present={open}>
+      )}
+      {actualOpen && (
         <div
           className={cn(
             'overflow-hidden z-30 bg-fd-card text-fd-card-foreground [--ai-chat-width:400px] 2xl:[--ai-chat-width:460px]',
@@ -399,6 +407,9 @@ export function AISearchPanel() {
               ? 'animate-fd-dialog-in lg:animate-[ask-ai-open_200ms]'
               : 'animate-fd-dialog-out lg:animate-[ask-ai-close_200ms]',
           )}
+          onAnimationEnd={() => {
+            if (!open) flushSync(() => setActualOpen(false));
+          }}
         >
           <div className="flex flex-col size-full p-2 lg:p-3 lg:w-(--ai-chat-width)">
             <AISearchPanelHeader />
@@ -411,7 +422,7 @@ export function AISearchPanel() {
             </div>
           </div>
         </div>
-      </Presence>
+      )}
     </>
   );
 }

@@ -10,8 +10,9 @@ import type { FSWatcher } from 'chokidar';
 import { validate } from './utils/validation';
 import type { VFile } from 'vfile';
 import type { IndexFilePlugin } from './plugins/index-file';
-import type { PostprocessOptions } from './config';
 import { ident } from './utils/codegen';
+// type-only: `@/macro/eval` pulls in build-time deps, and core also runs in the app runtime
+import type { MacroCollector } from './macro/eval';
 
 type Awaitable<T> = T | Promise<T>;
 
@@ -91,10 +92,20 @@ export interface ServerContext {
 }
 
 export interface CoreOptions {
+  root?: string;
   environment: string;
-  configPath: string;
-  outDir: string;
   plugins?: PluginOption[];
+  /**
+   * @defaultValue source.config.ts
+   */
+  configPath?: string;
+
+  /**
+   * Output directory of generated files
+   *
+   * @defaultValue '.source'
+   */
+  outDir?: string;
 
   /**
    * the workspace info if this instance is created as a workspace
@@ -146,6 +157,9 @@ async function getPlugins(pluginOptions: PluginOption[]): Promise<Plugin[]> {
 }
 
 export function createCore(options: CoreOptions) {
+  const root = options.root ? path.resolve(options.root) : process.cwd();
+  const outDir = path.resolve(root, options.outDir ?? '.source');
+  const configPath = path.resolve(root, options.configPath ?? 'source.config.ts');
   let config: LoadedConfig;
   let plugins: Plugin[];
   const workspaces = new Map<string, Core>();
@@ -173,6 +187,31 @@ export function createCore(options: CoreOptions) {
      * Convenient cache store, reset when config changes
      */
     cache: new Map<string, unknown>(),
+    /**
+     * Collects the collections declared with `fumadocs-mdx/macro`.
+     *
+     * Assigned by the bundler adapter when the macro API is enabled, so that every loader of a
+     * build shares one collector (and hence one evaluation of each macro module).
+     */
+    macro: undefined as MacroCollector | undefined,
+    /** absolute path */
+    get outDir() {
+      return outDir;
+    },
+    /** absolute path */
+    get root() {
+      return root;
+    },
+    /** absolute path */
+    get configPath() {
+      return configPath;
+    },
+    get workspace() {
+      return options.workspace;
+    },
+    get environment() {
+      return options.environment;
+    },
     async init({ config: newConfig }: { config: Awaitable<LoadedConfig> }) {
       config = await newConfig;
       this.cache.clear();
@@ -190,7 +229,7 @@ export function createCore(options: CoreOptions) {
           Object.entries(config.workspaces).map(async ([name, workspace]) => {
             const core = createCore({
               ...options,
-              outDir: path.join(options.outDir, name),
+              outDir: path.join(outDir, name),
               workspace: {
                 name,
                 parent: this,
@@ -206,9 +245,6 @@ export function createCore(options: CoreOptions) {
     getWorkspaces() {
       return workspaces;
     },
-    getOptions() {
-      return options;
-    },
     getConfig(): LoadedConfig {
       return config;
     },
@@ -216,7 +252,7 @@ export function createCore(options: CoreOptions) {
      * The file path of compiled config file, the file may not exist (e.g. on Vite, or still compiling)
      */
     getCompiledConfigPath(): string {
-      return path.join(options.outDir, 'source.config.mjs');
+      return path.join(outDir, 'source.config.mjs');
     },
     getPlugins() {
       return plugins;
@@ -268,7 +304,7 @@ export function createCore(options: CoreOptions) {
       if (write) {
         await Promise.all(
           out.entries.map(async (entry) => {
-            const file = path.join(options.outDir, entry.path);
+            const file = path.join(outDir, entry.path);
 
             await fs.mkdir(path.dirname(file), { recursive: true });
             await fs.writeFile(file, entry.content);
@@ -339,12 +375,31 @@ export function createCore(options: CoreOptions) {
   };
 }
 
+/**
+ * @returns the doc collection of a `doc`/`docs` collection, `undefined` for `meta`
+ */
+function docCollectionOf(collection: CollectionItem): DocCollectionItem | undefined {
+  switch (collection.type) {
+    case 'doc':
+      return collection;
+    case 'docs':
+      return collection.docs;
+  }
+}
+
 function postprocessPlugin(): Plugin {
   const LinkReferenceTypes = `{
   /**
    * extracted references (e.g. hrefs, paths), useful for analyzing relationships between pages.
    */
   extractedReferences: import("fumadocs-mdx").ExtractedReference[];
+}`;
+
+  const LastModifiedTypes = `{
+  /**
+   * Last modified date of document file, obtained from version control.
+   */
+  lastModified?: Date;
 }`;
 
   return {
@@ -354,28 +409,19 @@ function postprocessPlugin(): Plugin {
         lines.push('{');
         lines.push('  DocData: {');
         for (const collection of this.core.getCollections()) {
-          let postprocessOptions: Partial<PostprocessOptions> | undefined;
-          switch (collection.type) {
-            case 'doc':
-              postprocessOptions = collection.postprocess;
-              break;
-            case 'docs':
-              postprocessOptions = collection.docs.postprocess;
-              break;
-          }
+          const docs = docCollectionOf(collection);
+          if (!docs) continue;
 
-          if (postprocessOptions?.extractLinkReferences) {
-            lines.push(ident(`${collection.name}: ${LinkReferenceTypes},`, 2));
-          }
+          const extras: string[] = [];
+          if (docs.postprocess?.extractLinkReferences) extras.push(LinkReferenceTypes);
+          if (docs.lastModified) extras.push(LastModifiedTypes);
+          if (extras.length === 0) continue;
+
+          lines.push(ident(`${collection.name}: ${extras.join(' & ')},`, 2));
         }
         lines.push('  }');
         lines.push('}');
         return lines.join('\n');
-      },
-      serverOptions(options) {
-        options.doc ??= {};
-        options.doc.passthroughs ??= [];
-        options.doc.passthroughs.push('extractedReferences');
       },
     },
   };

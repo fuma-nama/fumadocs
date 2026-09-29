@@ -1,6 +1,6 @@
 {
   "name": "@fumadocs/tailwind",
-  "version": "0.0.5",
+  "version": "0.1.2",
   "description": "The Tailwind CSS utils for Fumadocs UI.",
   "keywords": [
     "Docs",
@@ -14,6 +14,7 @@
     "dist"
   ],
   "type": "module",
+  "sideEffects": false,
   "exports": {
     ".": "./dist/index.mjs",
     "./typography": "./dist/typography/index.mjs",
@@ -31,11 +32,11 @@
   },
   "devDependencies": {
     "@fastify/deepmerge": "^3.2.1",
-    "@types/node": "^25.9.1",
-    "postcss-selector-parser": "^7.1.1",
-    "tailwindcss": "^4.3.0",
+    "@types/node": "^26.6.1",
+    "postcss-selector-parser": "^7.1.6",
+    "tailwindcss": "^4.3.3",
     "tsconfig": "workspace:*",
-    "tsdown": "0.22.0"
+    "tsdown": "0.23.0"
   },
   "peerDependencies": {
     "tailwindcss": "^4.0.0"
@@ -48,7 +49,7 @@
   "inlinedDependencies": {
     "@fastify/deepmerge": "3.2.1",
     "cssesc": "3.0.0",
-    "postcss-selector-parser": "7.1.1",
+    "postcss-selector-parser": "7.1.6",
     "util-deprecate": "1.0.2"
   }
 }

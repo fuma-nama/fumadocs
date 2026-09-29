@@ -1,6 +1,6 @@
 import type { PageProps } from 'waku/router';
 import defaultMdxComponents from 'fumadocs-ui/mdx';
-import { getPageImage, getSource, type SourcePage } from '@/lib/source';
+import { getPageImageUrl, getSource, type SourcePage } from '@/lib/source';
 import { layoutConfig } from '@/layouts/config';
 import { getConfigRuntime } from '@/config/load-runtime';
 import { Card, Cards } from 'fumadocs-ui/components/card';
@@ -73,7 +73,7 @@ interface MdPresetComponents {
     | typeof import('fumadocs-ui/layouts/flux/page');
 }
 
-export default async function DocPage({ slugs }: PageProps<'/docs/[...slugs]'>) {
+export default async function DocPage({ slugs }: PageProps<'/[...slugs]'>) {
   const config = await getConfigRuntime();
   const source = await getSource(config);
   const page = source.getPage(slugs);
@@ -194,24 +194,22 @@ async function MdContent({
   }
 
   const mdxComponents = useMdxComponents(page);
-  const toc = compiled.file.data.rehypeToc?.map(
-    (item): TOCItemType => ({
-      ...item,
-      title: compiler.render(
-        {
-          type: 'root',
-          children: item.title.children,
-        },
-        compiled.file,
-        mdxComponents,
-      ),
-    }),
-  );
+  const toc = compiled.file.data.rehypeToc?.map((item): TOCItemType => ({
+    ...item,
+    title: compiler.render(
+      {
+        type: 'root',
+        children: item.title.children,
+      },
+      compiled.file,
+      mdxComponents,
+    ),
+  }));
 
   return renderContainer(
     <DocsPage toc={toc}>
       <title>{page.data.title}</title>
-      <meta property="og:image" content={getPageImage(slugs).url} />
+      <meta property="og:image" content={getPageImageUrl(page)} />
       <meta property="og:description" content={page.data.description} />
       <DocsTitle>{page.data.title}</DocsTitle>
       <DocsDescription>{page.data.description}</DocsDescription>

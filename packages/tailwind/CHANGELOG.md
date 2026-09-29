@@ -1,3 +1,21 @@
+## @fumadocs/tailwind@0.1.2
+
+### Mark packages side-effect free
+
+All packages now declare `sideEffects` in `package.json`, so bundlers can tree-shake unused modules. Packages shipping stylesheets list them as side effects to keep CSS imports.
+
+## @fumadocs/tailwind@0.1.1
+
+### Support scalable prose typography
+
+Scale prose typography with the unitless `--tw-prose-size` variable and add a `prose-sm` modifier for optically adjusted small text.
+
+## @fumadocs/tailwind@0.1.0
+
+### Default to Base UI
+
+Internal packages & templates now use Base UI rather than Radix UI.
+
 # @fumadocs/tailwind
 
 ## 0.0.5

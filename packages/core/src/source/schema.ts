@@ -9,7 +9,7 @@ export const metaSchema = z.object({
   /** specify a index page for folder */
   pagesIndex: z.string().optional(),
   description: z.string().optional(),
-  root: z.boolean().optional(),
+  root: z.union([z.boolean(), z.string()]).optional(),
   defaultOpen: z.boolean().optional(),
   collapsible: z.boolean().optional(),
   icon: z.string().optional(),

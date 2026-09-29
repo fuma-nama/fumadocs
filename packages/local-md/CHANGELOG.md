@@ -1,3 +1,41 @@
+## @fumadocs/local-md@0.3.5
+
+### Mark packages side-effect free
+
+All packages now declare `sideEffects` in `package.json`, so bundlers can tree-shake unused modules. Packages shipping stylesheets list them as side effects to keep CSS imports.
+
+## @fumadocs/local-md@0.3.4
+
+### Read structured data from `page.data.structuredData()`
+
+Search indexing no longer falls back to `(await page.data.load()).structuredData`. Runtime content sources expose `structuredData()` on page data instead, sharing the compile with `load()`:
+
+```ts
+const structuredData = await page.data.structuredData();
+```
+
+The renderer returned by `load()` still carries `structuredData`, existing code keeps working.
+
+## @fumadocs/local-md@0.3.1
+
+### Improve performance
+
+Fixed cache misses and edge cases.
+
+### Extract shared local content source logic to `@fumadocs/local-content`
+
+## @fumadocs/local-md@0.3.0
+
+### Default to Base UI
+
+Internal packages & templates now use Base UI rather than Radix UI.
+
+## @fumadocs/local-md@0.2.4
+
+### Fix deprecation warnings
+
+Address https://github.com/fuma-nama/fumadocs/issues/3380.
+
 # @fumadocs/local-md
 
 ## 0.2.3

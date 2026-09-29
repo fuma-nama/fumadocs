@@ -1,24 +1,33 @@
-import type { OpenAPIServer } from '@/server';
-import * as base from './base';
+'use client';
+import type { FC } from 'react';
 import { defaultShikiFactory } from 'fumadocs-core/highlight/shiki/full';
-import { FullProvider } from './client/full';
+import type {
+  CreateOpenAPIRendererOptions,
+  OpenAPIRenderOptions,
+  OpenAPIRuntimeOptions,
+} from '@/utils/create-page';
+import type {
+  OpenAPIPageProps,
+  OpenAPIPageProps_Preloaded,
+  OpenAPIPageProps_Spec,
+} from '@/utils/pages/builder';
+import { createOpenAPIPageBase } from './base';
 
-export type CreateAPIPageOptions = Partial<base.CreateAPIPageOptions>;
+export type { OpenAPIPageProps, OpenAPIPageProps_Spec, OpenAPIPageProps_Preloaded };
 
-export function createAPIPage(server: OpenAPIServer, options: CreateAPIPageOptions = {}) {
-  const APIPage = base.createAPIPage(server, {
-    shiki: defaultShikiFactory,
-    shikiOptions: { themes: { light: 'github-light', dark: 'github-dark' } },
-    ...options,
-  });
-
-  return function APIPageFull(props: base.ServerApiPageProps) {
-    return (
-      <FullProvider>
-        <APIPage {...props} />
-      </FullProvider>
-    );
-  };
+export interface CreateOpenAPIPageOptions extends OpenAPIRuntimeOptions, OpenAPIRenderOptions {
+  /**
+   * Replace parts of the UI, e.g. the ones installed with Fumadocs CLI.
+   */
+  components?: Partial<CreateOpenAPIRendererOptions['components']>;
 }
 
-export type { ApiPageProps, OperationItem, WebhookItem } from './api-page';
+/**
+ * Create `<OpenAPIPage />` (a client component).
+ */
+export function createOpenAPIPage(options: CreateOpenAPIPageOptions = {}): FC<OpenAPIPageProps> {
+  return createOpenAPIPageBase({
+    ...options,
+    shiki: options.shiki ?? defaultShikiFactory,
+  });
+}

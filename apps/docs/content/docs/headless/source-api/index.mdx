@@ -57,8 +57,10 @@ Define a custom function to generate slugs from page files.
 import { loader } from 'fumadocs-core/source';
 
 loader({
-  slugs(file) {
+  slugs(file, next) {
     console.log(file.path, file.data);
+    // you can build on the default slugs with `next()`
+    if (file.path.startsWith('blog/')) return ['blog', ...next()];
     // or return `undefined` to fallback to default value
     return ['my', 'slug'];
   },
@@ -218,7 +220,7 @@ function MyComponent() {
 `dynamicLoader()` provides extra revalidation functionality to content sources, you should use it with a [dynamic source](/docs/headless/source-api/source#dynamic-source).
 
 ```ts
-import { dynamicLoader } from 'fumadocs-core/source/dynamic';
+import { dynamicLoader } from 'fumadocs-core/source';
 import { createMySource } from './my-source';
 
 const source = dynamicLoader(createMySource(), {

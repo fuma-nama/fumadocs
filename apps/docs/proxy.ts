@@ -2,10 +2,10 @@ import { NextRequest, NextResponse } from 'next/server';
 import { isMarkdownPreferred, rewritePath } from 'fumadocs-core/negotiation';
 
 const { rewrite: rewriteLLM } = rewritePath('/docs/*path', '/llms.mdx/*path');
-const { rewrite: rewriteMdx } = rewritePath('/docs{/*path}.mdx', '/llms.mdx{/*path}');
+const { rewrite: rewriteMd } = rewritePath('/docs{/*path}.md{x}', '/llms.mdx{/*path}');
 
 export default function proxy(request: NextRequest) {
-  const result = rewriteMdx(request.nextUrl.pathname);
+  const result = rewriteMd(request.nextUrl.pathname);
   if (result) {
     return NextResponse.rewrite(new URL(result, request.nextUrl));
   }
@@ -14,7 +14,10 @@ export default function proxy(request: NextRequest) {
     const result = rewriteLLM(request.nextUrl.pathname);
 
     if (result) {
-      return NextResponse.rewrite(new URL(result, request.nextUrl));
+      return NextResponse.rewrite(new URL(result, request.nextUrl), {
+        // this URL has two representations, selected by `Accept`
+        headers: { Vary: 'Accept' },
+      });
     }
   }
 

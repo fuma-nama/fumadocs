@@ -11,15 +11,11 @@ export async function loadMissingTheme(
   themes: (ThemeRegistrationAny | string)[],
 ) {
   const bundled = highlighter.getBundledThemes();
+  const loaded = highlighter.getLoadedThemes();
   const missingThemes = themes.filter((theme) => {
-    if (typeof theme === 'string' && !(theme in bundled)) return false;
-
-    try {
-      highlighter.getTheme(theme);
-      return false;
-    } catch {
-      return true;
-    }
+    if (typeof theme === 'string') return theme in bundled && !loaded.includes(theme);
+    // `getTheme` would re-normalize a theme object on every call
+    return theme.name === undefined || !loaded.includes(theme.name);
   });
 
   if (missingThemes.length > 0) await highlighter.loadTheme(...(missingThemes as never[]));
@@ -30,15 +26,10 @@ export async function loadMissingLanguage(
   langs: (LanguageRegistration | string)[],
 ) {
   const bundled = highlighter.getBundledLanguages();
+  const loaded = highlighter.getLoadedLanguages();
   const missingLangs = langs.filter((lang) => {
-    if (typeof lang === 'string' && !(lang in bundled)) return false;
-
-    try {
-      highlighter.getLanguage(lang);
-      return false;
-    } catch {
-      return true;
-    }
+    if (typeof lang === 'string') return lang in bundled && !loaded.includes(lang);
+    return !loaded.includes(lang.name);
   });
 
   if (missingLangs.length > 0) await highlighter.loadLanguage(...(missingLangs as never[]));

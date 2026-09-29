@@ -1,4 +1,3 @@
-import type { ProcessorOptions } from '@mdx-js/mdx';
 import type {
   AnyCollection,
   DocCollection,
@@ -7,7 +6,6 @@ import type {
   MetaCollection,
 } from '@/config/define';
 import picomatch from 'picomatch';
-import { applyMdxPreset } from '@/config/preset';
 import path from 'node:path';
 
 export type BuildEnvironment = 'bundler' | 'runtime';
@@ -15,10 +13,6 @@ export type BuildEnvironment = 'bundler' | 'runtime';
 export interface LoadedConfig {
   collections: Map<string, CollectionItem>;
   global: GlobalConfig;
-  getMDXOptions(
-    collection?: DocCollectionItem,
-    environment?: BuildEnvironment,
-  ): ProcessorOptions | Promise<ProcessorOptions>;
   workspaces: Record<
     string,
     {
@@ -141,7 +135,6 @@ export function buildConfig(config: Record<string, unknown>, cwd: string): Loade
     );
   }
 
-  const mdxOptionsCache = new Map<string, ProcessorOptions | Promise<ProcessorOptions>>();
   return {
     global: loaded,
     collections,
@@ -156,26 +149,5 @@ export function buildConfig(config: Record<string, unknown>, cwd: string): Loade
         ];
       }),
     ),
-    getMDXOptions(collection, environment = 'bundler') {
-      const key = collection ? `${environment}:${collection.name}` : environment;
-      const cached = mdxOptionsCache.get(key);
-      if (cached) return cached;
-      let result: ProcessorOptions | Promise<ProcessorOptions>;
-
-      if (collection?.mdxOptions) {
-        const optionsFn = collection.mdxOptions;
-        result = typeof optionsFn === 'function' ? optionsFn(environment) : optionsFn;
-      } else {
-        result = (async () => {
-          const optionsFn = this.global.mdxOptions;
-          const options = typeof optionsFn === 'function' ? await optionsFn() : optionsFn;
-
-          return applyMdxPreset(options)(environment);
-        })();
-      }
-
-      mdxOptionsCache.set(key, result);
-      return result;
-    },
   };
 }

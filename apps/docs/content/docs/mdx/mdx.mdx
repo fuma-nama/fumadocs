@@ -121,3 +121,38 @@ export const blog = defineCollections({
   }),
 });
 ```
+
+## Source Map
+
+Source maps are disabled by default, since generating them slows down compilation.
+
+To enable, install `source-map` and pass its generator to MDX options:
+
+```npm
+npm i -D source-map
+```
+
+```ts tab="Global Config" title="source.config.ts"
+import { defineConfig } from 'fumadocs-mdx/config';
+import { SourceMapGenerator } from 'source-map';
+
+export default defineConfig({
+  mdxOptions: {
+    SourceMapGenerator,
+  },
+});
+```
+
+```ts tab="Collection Config"
+import { defineCollections, applyMdxPreset } from 'fumadocs-mdx/config';
+import { SourceMapGenerator } from 'source-map';
+
+export const blog = defineCollections({
+  type: 'doc',
+  mdxOptions: applyMdxPreset({
+    SourceMapGenerator,
+  }),
+});
+```
+
+Errors thrown from compiled content can now be traced back to the original Markdown file.

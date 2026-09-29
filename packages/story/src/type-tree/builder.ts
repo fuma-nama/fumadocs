@@ -1,4 +1,26 @@
-import { Type, Node, ts, type Project } from 'ts-morph';
+import {
+  type Checker,
+  isBigIntLiteralType,
+  isBooleanLiteralType,
+  isIntersectionType,
+  isLiteralType,
+  isObjectType,
+  isTypeReference,
+  isUnionType,
+  NodeBuilderFlags,
+  type Project,
+  SignatureKind,
+  SymbolFlags,
+  type Type,
+  TypeFlags,
+} from 'typescript/unstable/sync';
+import {
+  isEnumDeclaration,
+  isNumericLiteral,
+  isStringLiteral,
+  type Node,
+  SyntaxKind,
+} from 'typescript/unstable/ast';
 import type { LiteralNode, ObjectNode, TypeNode, UnionNode } from './types';
 import { validate } from './validator';
 
@@ -17,6 +39,9 @@ export type Handler = (options: {
   flag: TypeToNodeFlag;
 
   builder: TypeTreeBuilder;
+  /**
+   * The TypeScript project (from `typescript/unstable/sync`) of the type, use `project.checker` for type checking.
+   */
   project: Project;
   cache: Map<TypeToNodeFlag, WeakMap<Type, TypeNode>>;
   getCache: () => TypeNode | undefined;
@@ -32,32 +57,61 @@ export type Handler = (options: {
   next: (type: Type, flag: TypeToNodeFlag, location?: Node) => TypeNode;
 }) => TypeNode;
 
-const baseHandler: Handler = ({ type, flag, location, setCache, root }) => {
-  // Handle primitive types
-  if (type.isString()) return { type: 'string' };
-  if (type.isNumber()) return { type: 'number' };
-  if (type.isBoolean()) return { type: 'boolean' };
-  if (type.isBigInt()) return { type: 'bigint' };
-  const symbol = type.getSymbol();
-  if (symbol && symbol.getName() === 'Date') return { type: 'date' };
-  if (type.isUndefined()) return { type: 'undefined' };
-  if (type.isUnknown()) return { type: 'unknown' };
-  if (type.isNull()) return { type: 'null' };
-  if (type.isNever() || type.getCallSignatures().length > 0) return { type: 'never' };
+/**
+ * Private class members (`#name`) are exposed with their escaped name (`__#1@#name`) by TypeScript.
+ */
+function isPrivateName(name: string): boolean {
+  return name.startsWith('#') || name.startsWith('__#');
+}
 
-  if (type.isUnion()) {
+function getLiteralValue(checker: Checker, type: Type): string | number | boolean | bigint {
+  if (isBooleanLiteralType(type)) {
+    return typeof type.value === 'boolean' ? type.value : checker.typeToString(type) === 'true';
+  }
+
+  if (isBigIntLiteralType(type)) {
+    const value: unknown = type.value;
+    if (typeof value === 'bigint') return value;
+    if (typeof value === 'object' && value !== null && 'base10Value' in value) {
+      const { negative, base10Value } = value as { negative?: boolean; base10Value: string };
+      return BigInt(`${negative ? '-' : ''}${base10Value}`);
+    }
+    return BigInt(value as string | number);
+  }
+
+  return (type as { value?: string | number }).value ?? checker.typeToString(type);
+}
+
+const baseHandler: Handler = ({ type, flag, location, project, setCache, root }) => {
+  const { checker } = project;
+  const { flags } = type;
+
+  // Handle primitive types
+  if (flags & TypeFlags.String) return { type: 'string' };
+  if (flags & TypeFlags.Number) return { type: 'number' };
+  if (flags & TypeFlags.Boolean) return { type: 'boolean' };
+  if (flags & TypeFlags.BigInt) return { type: 'bigint' };
+  const symbol = type.getSymbol();
+  if (symbol && symbol.name === 'Date') return { type: 'date' };
+  if (flags & TypeFlags.Undefined) return { type: 'undefined' };
+  if (flags & TypeFlags.Unknown) return { type: 'unknown' };
+  if (flags & TypeFlags.Null) return { type: 'null' };
+  if (flags & TypeFlags.Never || checker.getSignaturesOfType(type, SignatureKind.Call).length > 0)
+    return { type: 'never' };
+
+  if (isUnionType(type)) {
     const result: TypeNode = {
       type: 'union',
       types: [],
     };
     setCache(result);
-    for (const t of type.getUnionTypes()) result.types.push(root(t, flag));
+    for (const t of type.getTypes()) result.types.push(root(t, flag));
     Object.assign(result, unwrapUnion(result));
     return result;
   }
 
-  if (type.isIntersection() && (flag & TypeToNodeFlag.NoIntersection) === 0) {
-    const intersectionTypes = type.getIntersectionTypes();
+  if (isIntersectionType(type) && (flag & TypeToNodeFlag.NoIntersection) === 0) {
+    const intersectionTypes = type.getTypes();
     const result: TypeNode = {
       type: 'intersection',
       members: [],
@@ -72,26 +126,17 @@ const baseHandler: Handler = ({ type, flag, location, setCache, root }) => {
     return result;
   }
 
-  if (type.isLiteral()) {
-    let value: string | boolean | bigint | number;
-    if (type.isBooleanLiteral()) {
-      value = type.getText() === 'true';
-    } else if (type.isBigIntLiteral()) {
-      value = BigInt((type.getLiteralValue() as ts.PseudoBigInt).base10Value);
-    } else {
-      value = type.getLiteralValue() as string | number;
-    }
-
+  if (isLiteralType(type)) {
     // Handle literals
     return {
       type: 'literal',
-      value,
+      value: getLiteralValue(checker, type),
     };
   }
 
-  if (type.isArray() || type.isReadonlyArray()) {
+  if (checker.isArrayType(type)) {
     // Handle arrays
-    const elementType = type.getArrayElementType();
+    const elementType = isTypeReference(type) ? checker.getTypeArguments(type)[0] : undefined;
 
     const result: TypeNode = {
       type: 'array',
@@ -102,9 +147,9 @@ const baseHandler: Handler = ({ type, flag, location, setCache, root }) => {
     return result;
   }
 
-  if (type.isTuple()) {
+  if (checker.isTupleType(type)) {
     // Convert tuple to array with union element type
-    const elements = type.getTupleElements();
+    const elements = isTypeReference(type) ? checker.getTypeArguments(type) : [];
     if (elements.length === 0) {
       return {
         type: 'array',
@@ -125,23 +170,22 @@ const baseHandler: Handler = ({ type, flag, location, setCache, root }) => {
   }
 
   // Handle enums
-  const enumSymbol = type.getSymbol();
-  if (enumSymbol && enumSymbol.getFlags() & ts.SymbolFlags.Enum) {
-    const enumDeclaration = enumSymbol.getValueDeclaration();
-    if (enumDeclaration && Node.isEnumDeclaration(enumDeclaration)) {
-      const members = enumDeclaration.getMembers().map((member) => {
-        const name = member.getName();
-        const initializer = member.getInitializer();
+  if (symbol && symbol.flags & SymbolFlags.Enum) {
+    const enumDeclaration = symbol.valueDeclaration?.resolve(project);
+    if (enumDeclaration && isEnumDeclaration(enumDeclaration)) {
+      const members = enumDeclaration.members.map((member) => {
+        const name = member.name.getText();
+        const initializer = member.initializer;
         let value: unknown = name;
 
         if (initializer) {
-          if (Node.isStringLiteral(initializer)) {
+          if (isStringLiteral(initializer)) {
             value = initializer.getText().slice(1, -1);
-          } else if (Node.isNumericLiteral(initializer)) {
+          } else if (isNumericLiteral(initializer)) {
             value = Number.parseFloat(initializer.getText());
-          } else if (Node.isTrueLiteral(initializer)) {
+          } else if (initializer.kind === SyntaxKind.TrueKeyword) {
             value = true;
-          } else if (Node.isFalseLiteral(initializer)) {
+          } else if (initializer.kind === SyntaxKind.FalseKeyword) {
             value = false;
           }
         }
@@ -160,23 +204,23 @@ const baseHandler: Handler = ({ type, flag, location, setCache, root }) => {
   }
 
   // Handle objects and interfaces
-  if (type.isObject() || type.isClassOrInterface() || type.getProperties().length > 0) {
-    const properties = type.getProperties();
+  const properties = checker.getPropertiesOfType(type);
+  if (isObjectType(type) || properties.length > 0) {
     const alias = type.getAliasSymbol();
     const aliasTypeArguments = type.getAliasTypeArguments();
     const result: TypeNode = {
       type: 'object',
-      displayName: alias && aliasTypeArguments.length === 0 ? alias.getName() : undefined,
+      displayName: alias && aliasTypeArguments.length === 0 ? alias.name : undefined,
       properties: [],
     };
     setCache(result);
 
     for (const prop of properties) {
       // Skip private properties
-      if (prop.getName().startsWith('#')) continue;
+      if (isPrivateName(prop.name)) continue;
 
-      const propType = prop.getTypeAtLocation(location);
-      let child = root(propType, flag, prop.getValueDeclaration());
+      const propType = checker.getTypeOfSymbolAtLocation(prop, location);
+      let child = root(propType, flag, prop.valueDeclaration?.resolve(project));
       if (child.type === 'union') {
         child = unwrapUnion({
           ...child,
@@ -188,9 +232,9 @@ const baseHandler: Handler = ({ type, flag, location, setCache, root }) => {
 
       if (child.type !== 'never') {
         result.properties.push({
-          name: prop.getName(),
+          name: prop.name,
           type: child,
-          required: !prop.isOptional(),
+          required: (prop.flags & SymbolFlags.Optional) === 0,
         });
       }
     }
@@ -199,7 +243,11 @@ const baseHandler: Handler = ({ type, flag, location, setCache, root }) => {
 
   return {
     type: 'never',
-    displayName: type.getText(location, ts.TypeFormatFlags.UseAliasDefinedOutsideCurrentScope),
+    displayName: checker.typeToString(
+      type,
+      location,
+      NodeBuilderFlags.UseAliasDefinedOutsideCurrentScope,
+    ),
   };
 };
 

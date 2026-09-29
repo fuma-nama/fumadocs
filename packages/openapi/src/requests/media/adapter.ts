@@ -1,5 +1,10 @@
-import { backtickQuote, inputToString, tripleDoubleQuote } from '@/requests/string-utils';
-export { resolveMediaAdapter, isMediaTypeSupported } from './resolve-adapter';
+import {
+  backtickQuote,
+  inputToString,
+  rustRawStringLiteral,
+  tripleDoubleQuote,
+} from '@/requests/string-utils';
+export { resolveMediaAdapter } from './resolve-adapter';
 // @ts-expect-error -- untyped
 import js2xml from 'xml-js/lib/js2xml';
 
@@ -254,5 +259,9 @@ function str(
     const input = `\n${inputToString(init, mediaType)}\n`;
 
     return `var body = new StringContent(${tripleDoubleQuote(input)}, Encoding.UTF8, "${mediaType}");`;
+  }
+
+  if (ctx.lang === 'rust') {
+    return `let body = ${rustRawStringLiteral(inputToString(init, mediaType))};`;
   }
 }

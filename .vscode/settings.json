@@ -3,14 +3,13 @@
     ["cva\\(([^)]*)\\)", "[\"'`]([^\"'`]*).*?[\"'`]"],
     ["cn\\(([^)]*)\\)", "(?:'|\"|`)([^']*)(?:'|\"|`)"]
   ],
-  "oxc.enable.oxlint": false,
+  "oxc.enable.oxlint": true,
   "files.associations": {
     "**/packages/create-app/template/**/*": "plaintext"
   },
   "[json]": {
     "editor.defaultFormatter": "oxc.oxc-vscode"
   },
-  "prettier.enable": false,
   "editor.formatOnSave": true,
   "editor.defaultFormatter": "oxc.oxc-vscode",
   "oxc.fmt.configPath": ".oxfmtrc.jsonc",

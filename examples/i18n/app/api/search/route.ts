@@ -1,18 +1,5 @@
 import { source } from '@/lib/source';
 import { createFromSource } from 'fumadocs-core/search/server';
-import { createTokenizer } from '@orama/tokenizers/mandarin';
 
-export const { GET } = createFromSource(source, {
-  localeMap: {
-    // [locale]: Orama options
-    cn: {
-      components: {
-        tokenizer: createTokenizer(),
-      },
-      search: {
-        threshold: 0,
-        tolerance: 0,
-      },
-    },
-  },
-});
+// zero config: the default `multilingual` mode works for every language
+export const { GET } = createFromSource(source);

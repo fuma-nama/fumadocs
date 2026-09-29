@@ -1,4 +1,562 @@
+## fumadocs-openapi@12.1.0
+
+### Render security scheme descriptions as Markdown in the playground
+
+Fix [#3607](https://github.com/fuma-nama/fumadocs/issues/3607)
+
+### Render request bodies of unsupported media types read-only
+
+A request body with a media type that has no adapter no longer throws. It is shown as usual, left out of code usages, and cannot be sent from the playground.
+
+`text/plain` with parameters, like `text/plain; charset=utf-8`, is also handled like `text/plain`.
+
+`isMediaTypeSupported()` is removed, use `resolveMediaAdapter()` instead.
+
+Fix [#3615](https://github.com/fuma-nama/fumadocs/issues/3615)
+
+### Add `createOAuthHandler()`
+
+A route handler to use as the single OAuth redirect URI of API playgrounds, instead of registering every page. Pass its URL to `createOpenAPIPage({ oauthRedirectUrl })`.
+
+```ts title="app/api/oauth/route.ts"
+import { openapi } from '@/lib/openapi';
+
+export const GET = openapi.createOAuthHandler();
+```
+
+Fix [#3611](https://github.com/fuma-nama/fumadocs/issues/3611)
+
+### Fix OAuth flows of the API playground
+
+- The client credentials flow can send the client credentials in an HTTP Basic `Authorization` header, like the password flow ([#3609](https://github.com/fuma-nama/fumadocs/issues/3609)).
+- Relative `authorizationUrl` and `tokenUrl` are resolved against the selected server, `requestOAuthToken()` requires a `serverUrl` for it ([#3610](https://github.com/fuma-nama/fumadocs/issues/3610)).
+- The `redirect_uri` leaves out the fragment and query of the page, a fragment is not allowed in redirect URIs.
+- Multiple scopes are space-delimited, they were sent as a single scope joined by `+`.
+- Query params of `authorizationUrl`, like `audience`, are kept.
+- HTTP Basic client credentials are form-encoded, as RFC 6749 requires.
+- The implicit and authorization code flows send a random `state`, and keep the flow in `sessionStorage` instead of the URL: the client secret is no longer sent to the authorization server, the token URL resolves against the server selected when the flow starts, and only flows started in the same tab are accepted.
+
+### Skip response examples without a value
+
+An Example Object can omit `value`, like when it uses `externalValue`, which crashed the operation page. These examples are skipped.
+
+Examples with the OpenAPI 3.2 `dataValue` are rendered too.
+
+Fix [#3608](https://github.com/fuma-nama/fumadocs/issues/3608)
+
+## fumadocs-openapi@12.0.4
+
+### Name schema property link buttons for screen readers
+
+Give the icon-only property link button a translated label and announce when its link has been copied.
+Include Simplified and Traditional Chinese translations for both labels.
+
+## fumadocs-openapi@12.0.3
+
+### Send uppercase HTTP methods from the playground
+
+The Fetch API only normalizes the case of some methods, so PATCH requests were sent as `patch`, which servers and edges like Vercel reject.
+
+## fumadocs-openapi@12.0.2
+
+### Subscribe with `useSyncExternalStore`
+
+#### Optimize Performance
+
+Use `useSyncExternalStore()` from React.
+
+## fumadocs-openapi@12.0.1
+
+### Fix the installed API playground
+
+The playground installed by `npx @fumadocs/cli add openapi/playground` imported `useAuthFields`, `requestOAuthToken` and their types from `fumadocs-openapi/playground`, which did not export them. They are now exported.
+
+## fumadocs-openapi@12.0.0
+
+### Fumadocs OpenAPI v12
+
+#### Headless API pages
+
+API pages are now built on a headless layer, use it to build your own UI:
+
+- `fumadocs-openapi`: `createOpenAPIRenderer()` with your own components, and the hooks of a page: `useOpenAPI()`, `useComponents()`, `useServer()` and `useRenderContext()`. `createOpenAPIBaseRenderer()` is the same with nothing built in: pass `shiki`, `codeUsages` and `generateTypeScriptDefinitions` yourself.
+- `fumadocs-openapi/operation`: `<OperationProvider />` and the hooks of an operation, like `useOperation()` and `useExampleRequests()`.
+- `fumadocs-openapi/playground`: `useAuthFields()` turns the security requirements of an operation into form fields, the ones the API playground renders and encodes into request data. `requestOAuthToken()` runs an OAuth flow of a security scheme.
+- the Schema UI, installed with `npx @fumadocs/cli add fumadocs/api-docs/schema`: its generation and navigation state (`generateSchemaUI()`, `useSchemaTabs()`) come with the copy.
+
+`useServer()` also resolves the URL of a request: `resolveUrl(pathname)` fills in the variables of the selected server, against the page origin.
+
+See [Headless](https://fumadocs.dev/docs/integrations/openapi/headless).
+
+#### Install the full UI
+
+The entire UI of API pages can be installed with Fumadocs CLI:
+
+```npm
+npx @fumadocs/cli add fumadocs/openapi/page
+```
+
+It installs `<OpenAPIPage />` itself, import it from `@/components/openapi/page` in place of your `components/api-page.tsx`.
+
+To customise parts of it, install `fumadocs/openapi/operation` or `fumadocs/api-docs/schema`, and pass them to the new `components` options:
+
+```tsx
+export const OpenAPIPage = createOpenAPIPage({
+  components: { Operation, SchemaUI: Schema },
+});
+```
+
+#### Render custom inline code samples
+
+Code samples from `x-codeSamples` and `generateCodeSamples` are now rendered when their id isn't a built-in generator.
+
+#### Data info tags in Schema UI
+
+`SchemaData.infoTags` entries are data rendered by the UI: `{ label, value, block? }` or `{ label, list }`. Custom nodes (`{ node }`) are still accepted, code reading `tag.node` must handle all shapes.
+
+#### Migrate options of `createOpenAPIPage()`
+
+Pass components to the `components` option:
+
+```diff
+ createOpenAPIPage({
+-  schemaUI: { render: (props) => <Schema {...props} /> },
+-  renderHeading: (props, depth) => <Heading depth={depth} {...props} />,
+-  renderCodeBlock: (props) => <CodeBlock {...props} />,
+-  renderMarkdown: (md) => <Markdown md={md} />,
++  components: { SchemaUI: Schema, Heading, CodeBlock, Markdown },
+ });
+```
+
+- `playground.provider` is removed, the page provides the auth state of API playground.
+- `playground.render` and `generateTypeScriptDefinitions` no longer receive `ctx`, read the document from `useOpenAPI().doc`, or the `doc` passed to `generateTypeScriptDefinitions`.
+- `operation.APIExampleSelector` is removed, install `fumadocs/openapi/operation` and edit the selector in `usage-tabs.tsx`.
+- `<PlaygroundClient />` reads the operation from `useOperation()`, its `route`, `method`, `operation` and `pathItem` props are gone: `playground.render` becomes `() => <PlaygroundClient writeOnly readOnly={false} />`.
+- The `ctx` of `content` render options is the render options of the page, what `useRenderContext()` returns: `shiki`, `content`, `playground`, `showResponseSchema` and `schemaUI`. `ctx.schema`, `ctx.SchemaUI` and `ctx._default_processMarkdown` are removed, read the document from `useOpenAPI().doc` and the components from `useComponents()`.
+
+#### Migrate hooks
+
+The hooks of `fumadocs-openapi/ui` are replaced by the headless ones:
+
+| v11                     | v12                                                                                                                    |
+| ----------------------- | ---------------------------------------------------------------------------------------------------------------------- |
+| `useRenderContext()`    | `useOpenAPI()` (`schema` is renamed to `doc`), `useComponents()`, and `useRenderContext()` for the render options only |
+| `useServerContext()`    | `useServer()`                                                                                                          |
+| `useOperationContext()` | `useOperation()`, `useExampleRequests()`, `useExampleRequest()` (on `/operation`)                                      |
+
+```diff
+- const { route, examples, example, setExample, setExampleData } = useOperationContext();
++ const { path } = useOperation();
++ const { items, selected, select, update } = useExampleRequests();
++ // data of the selected example, replaces `addListener()`
++ const data = useExampleRequest();
+```
+
+Components installed from v11 with Fumadocs CLI (e.g. the API playground) use the old hooks, reinstall them.
+
+#### Remove deprecated APIs
+
+| Removed                                                    | Use                                                 |
+| ---------------------------------------------------------- | --------------------------------------------------- |
+| `fumadocs-openapi/ui/create-client`                        | `createOpenAPIPage()` from `fumadocs-openapi/ui`    |
+| `ApiPageProps`                                             | `OpenAPIPageProps`                                  |
+| `OperationItem` and `WebhookItem` of `fumadocs-openapi/ui` | import them from `fumadocs-openapi`                 |
+| `getAPIPageProps()` and `getClientAPIPageProps()`          | `getOpenAPIPageProps()`                             |
+| `defineI18nOpenAPI()`                                      | `i18n.translations().extend(openapiTranslations())` |
+| `APIPage` of MDX components                                | `OpenAPIPage`, generated files only render it       |
+
+#### Moved exports
+
+Everything that renders sits under `/ui`:
+
+| Was                                  | Now                                     |
+| ------------------------------------ | --------------------------------------- |
+| `fumadocs-openapi/playground/client` | `fumadocs-openapi/ui/playground/client` |
+| `fumadocs-openapi/scalar`            | `fumadocs-openapi/ui/scalar`            |
+
+`GenerateTypeScriptDefinitionsContext` now comes from the package entry, next to the runtime option it types.
+
+#### Client-safe package entry
+
+`generateFiles()` reads and writes files, so the package entry ships a stubbed build under the `browser` condition. Client components can import `createOpenAPIRenderer()` and the hooks without pulling `node:fs` into the bundle.
+
+### Shared components of API pages
+
+#### Default page components
+
+`createOpenAPIRenderer()`, `createAsyncAPIRenderer()` and `createGraphQLRenderer()` fill the `Markdown`, `CodeBlock` and `Heading` components you didn't pass, rendering Markdown through Remark and code blocks through Shiki:
+
+```tsx
+createOpenAPIRenderer({
+  components: { SchemaUI, Operation },
+});
+```
+
+`shiki` defaults to the full bundle, `createOpenAPIBaseRenderer()` takes the factory you pass instead and leaves the bundle out.
+
+#### Installable UI
+
+The UI an API page renders through is now part of the installation, instead of being imported from the package:
+
+| Component                                                                                   | Installed at                               |
+| ------------------------------------------------------------------------------------------- | ------------------------------------------ |
+| `Select`, `Input`                                                                           | `components/ui`, reusing the project's own |
+| `Accordion`, `Collapsible`, `Dialog`, `Popover`, `Spinner`, `SelectTabs`, playground inputs | `components/api/ui`                        |
+| anchor IDs of deep-linkable sections                                                        | `components/api/ui/auto-anchor`            |
+
+`Select` and `Input` follow the Shadcn UI API, so a project that already has them keeps its own. `@fumadocs/story` no longer ships a second copy of either.
+
+`labelVariants` moved to the installed `label` component, leaving the input a plain Shadcn-compatible primitive.
+
+The integrations share one implementation of these internally, instead of each keeping a copy: the selected server and its variables, the state of an async request, the coloured label of methods and kinds, and the plain-object check of both schema layers.
+
+The request pipeline of the playground stays in the package too, so an installed playground drives it instead of copying it: `encodeRequestData()`, `resolveMediaAdapter()`, `isMediaTypeSupported()` and the request data types come from `fumadocs-openapi/requests`, and `createBrowserFetcher()` with `usePlaygroundAuth()` from `fumadocs-openapi/playground`.
+
+### JSON Schema toolkit
+
+#### `@fumadocs/json-schema`
+
+The JSON Schema utilities of API pages are now their own package, with no Fumadocs dependencies:
+
+```ts
+import { dereference, matches, mergeAllOf, sample, stringify } from '@fumadocs/json-schema';
+import { bundle } from '@fumadocs/json-schema/bundle';
+```
+
+`bundle()` is a separate entry because it reads files and URLs, everything else runs in the browser.
+
+`@fumadocs/json-schema/react` renders a schema into the data an API page draws: `generateSchemaUI()` with the `SchemaData` and `InfoTag` types. It was in the Schema UI before, where every install copied it. A labelled tag can be `prose`, for values like a Markdown deprecation reason.
+
+They were `@fumadocs/api-docs/schema/*` before, and the API was cleaned up while moving:
+
+| Before                                         | Now                                    |
+| ---------------------------------------------- | -------------------------------------- |
+| `ParsedSchema`                                 | `JsonSchema`                           |
+| `NoReference` / `NoReferenceSwallow`           | `Dereferenced` / `DereferencedShallow` |
+| `dereferenceShallow(schema)`                   | `dereference(schema)`                  |
+| `matchesSchema(schema, value)`                 | `matches(schema, value)`               |
+| `typeMatches(value, type)`                     | `matchesType(value, type)`             |
+| `schemaToString(schema, FormatFlags.UseAlias)` | `stringify(schema, { alias: true })`   |
+
+#### Trim code usages and TypeScript definitions
+
+`createOpenAPIBaseRenderer()` from `fumadocs-openapi` registers no code usage generators and no TypeScript definitions, so a page built on it bundles only what you pass:
+
+```tsx
+import { createCodeUsageGeneratorRegistry } from 'fumadocs-openapi/requests/generators';
+import { curl } from 'fumadocs-openapi/requests/generators/curl';
+
+createOpenAPIBaseRenderer({
+  shiki,
+  codeUsages: createCodeUsageGeneratorRegistry().register(curl),
+  components: { ... },
+});
+```
+
+`createOpenAPIRenderer()` and `fumadocs-openapi/ui` register every language and TypeScript definitions for you.
+
+#### Remove `useStorageKey()`
+
+The hook returned `(name) => storageKeyPrefix + name`. Read the prefix from the page instead:
+
+```tsx
+const { storageKeyPrefix } = useOpenAPI();
+localStorage.getItem(`${storageKeyPrefix}my-key`);
+```
+
+`useAsyncAPI()` works the same way.
+
+#### `@fumadocs/api-docs` is no longer published
+
+It held the UI the integrations share, and that UI is now either bundled into them or installed with Fumadocs CLI, so nothing imports it by name any more. If you imported it directly:
+
+| Before                                     | Now                                                  |
+| ------------------------------------------ | ---------------------------------------------------- |
+| `@fumadocs/api-docs/schema/*`              | `@fumadocs/json-schema`                              |
+| `@fumadocs/api-docs/components/schema*`    | `npx @fumadocs/cli add fumadocs/api-docs/schema`     |
+| `@fumadocs/api-docs/components/*` (the UI) | installed with the component that uses it            |
+| `@fumadocs/api-docs/i18n`                  | the integration's own `Translations` covers its keys |
+| `@fumadocs/api-docs/css/preset.css`        | already included by the integration's preset         |
+
+The CLI namespace is unchanged, `fumadocs/api-docs/schema` still installs the Schema UI.
+
+## fumadocs-openapi@11.4.3
+
+### Mark packages side-effect free
+
+All packages now declare `sideEffects` in `package.json`, so bundlers can tree-shake unused modules. Packages shipping stylesheets list them as side effects to keep CSS imports.
+
+## fumadocs-openapi@11.4.2
+
+### `path` in operation renderers
+
+`renderOperationLayout` and `generateCodeSamples` now receive the operation's `path`, so custom layouts no longer need a React context to reach it:
+
+```tsx
+renderOperationLayout: (slots, { path, method }) => (
+  <div>
+    {slots.header}
+    <EndpointPreview path={path} method={method} />
+    {slots.description}
+    {slots.apiPlayground}
+  </div>
+);
+```
+
+## fumadocs-openapi@11.4.1
+
+### Replace `cnfast` with `cn`
+
+Internal refactor only.
+
+## fumadocs-openapi@11.4.0
+
+### Support installing the API playground via Fumadocs CLI
+
+```npm
+npx @fumadocs/cli add fumadocs/openapi/playground
+```
+
+Use it with the `playground.provider` and `playground.render` options, see [Customise UI](https://fumadocs.dev/docs/integrations/openapi/api-page#customise-ui).
+
+### Pass full props to `schemaUI.render`
+
+It now receives the same props as the built-in Schema UI (including `renderMarkdown` and `renderCodeblock`), so a customised Schema UI can act as a drop-in replacement:
+
+```tsx
+schemaUI: {
+  render: (props) => <Schema {...props} />,
+},
+```
+
+### New exports
+
+- OpenAPI schema types from `fumadocs-openapi` (e.g. `OperationObject`, `HttpMethods`).
+- `useRenderContext`, `useServerContext` and `useOperationContext` from `fumadocs-openapi/ui`.
+
+## fumadocs-openapi@11.3.5
+
+### Fix OpenAPI 3.0 `example` in external files crashing `OpenAPIPage`
+
+The version upgrader ran after external documents were embedded under `x-ext`, where it can no longer classify schemas by their JSON path: a schema-level `example` from an external 3.0 file became an Example Object map instead of the JSON Schema `examples` array, crashing the schema UI with `schema.examples is not iterable`.
+
+Each document is now upgraded before bundling embeds it. This also honors the external file's own declared OpenAPI version, so a 3.0 file referenced from a 3.1 document is upgraded too (previously it was skipped entirely).
+
+### Support OpenAPI 3.2 tag hierarchy in `groupBy: 'tag'`
+
+`generateFiles` now follows the tag hierarchy introduced in OpenAPI 3.2: a tag with a `parent` becomes a folder nested inside its parent tag's folder (including the generated `meta.json`), and tags with a `kind` other than `nav` no longer form groups, matching their intent (e.g. `badge`).
+
+Operations referencing undeclared tags or having no tags are no longer dropped silently, which previously could produce an empty output directory. Undeclared tags now form their own group, and untagged operations are grouped under an `unknown` folder with a warning.
+
+## fumadocs-openapi@11.3.4
+
+### Support HTTP Basic client authentication in OAuth password flow
+
+Some OAuth servers require client credentials in an HTTP Basic `Authorization` header instead of the request body. The password flow dialog now offers a Client Authentication select to choose between the two methods, as described in [RFC 6749, section 2.3.1](https://www.rfc-editor.org/rfc/rfc6749#section-2.3.1).
+
+Fix [#3506](https://github.com/fuma-nama/fumadocs/issues/3506)
+
+## fumadocs-openapi@11.3.3
+
+### Fix playground result URL
+
+## fumadocs-openapi@11.3.2
+
+### Improve OAuth Password Flow
+
+Support optional Client ID and Client Secret in the OAuth password flow of API playground, they are sent along the token request when specified.
+
+### Enhance result display of API playground
+
+The response panel now gives you the full picture of a request:
+
+- the resolved request URL, including path and query parameters
+- response headers in a collapsible list
+- response body labeled with its content type
+
+Client-side errors also show the request URL, making issues like a wrong server URL easy to spot.
+
+For custom `ResultDisplay` components, `FetchResult` now carries a `url` field.
+
+`@fumadocs/language` includes translations for the new UI.
+
+## fumadocs-openapi@11.3.1
+
+### Simplify cache
+
+## fumadocs-openapi@11.3.0
+
+### Redesign source API
+
+Content sources can hook into the static loader they are attached to, and dynamic sources can opt out of the loader's in-memory file cache.
+
+`configureStatic` runs when a source is attached to `loader()`, and again whenever `dynamicLoader()` builds a new static loader:
+
+```ts
+export function createMySource(): DynamicSource {
+  return {
+    cache: 'custom',
+    async files() {
+      return loadFiles();
+    },
+    configureStatic({ loader, source }) {
+      // `loader` is the created static loader
+      // `source` is the record key when using named sources
+    },
+    configure(loader, { source }) {
+      loader.invalidate();
+    },
+  };
+}
+```
+
+- `cache: 'memory'` (default): `files()` is called once until `invalidate()`.
+- `cache: 'custom'`: the source caches itself. `dynamicLoader()` re-runs `files()` on `get()` and rebuilds only when the file list is shallowly different (by identity).
+
+### Integrations
+
+GraphQL cross-links are generated from the attached loader instead of a `baseUrl` option on `staticSource()`. Local, OpenAPI, and AsyncAPI `dynamicSource()` use `cache: 'custom'` and reuse generated files by identity until `invalidate()`.
+
+Sanity now uses `cache: 'custom'` when given a `sanityFetch` from `next-sanity/live`, calling `invalidate()` in draft mode is no longer needed.
+
+## fumadocs-openapi@11.2.4
+
+### Improve OpenAPI source generation performance
+
+Reuse the JSON Magic proxy while generating static data for pages from the same OpenAPI document.
+
+## fumadocs-openapi@11.2.2
+
+### Harden `createProxy()` against SSRF
+
+- `allowedOrigins` now defaults to the proxy route's own origin, so an unconfigured proxy is same-origin only instead of an open proxy. A warning is logged when neither `allowedOrigins` nor `filterRequest` is set.
+- The allowlist is now enforced on redirects: an allowed upstream can no longer redirect the proxy to a disallowed origin.
+
+### `allowedOrigins` regex support
+
+`allowedOrigins` entries can now be a `RegExp` in addition to an exact origin string.
+
+### Fix proxy decoding
+
+Fix `ERR_CONTENT_DECODING_FAILED` for compressed upstream responses: the stale `content-encoding`/`content-length` headers are now dropped, since `fetch()` already decodes the body before it is proxied back.
+
+## fumadocs-openapi@11.2.1
+
+### Fix invalid data in generated request examples
+
+Remove invalid data from generated request body example.
+
+## fumadocs-openapi@11.2.0
+
+### Use `@scalar/json-magic` for dereferencing
+
+This will affect all raw access to OpenAPI/AsyncAPI documents, ensure to use `dereferenceShallow()` public API.
+
+### Migrate from `js-yaml` to `yaml`
+
+## fumadocs-openapi@11.1.1
+
+### Fix minor UI inconsistencies
+
+More aligned with original styles.
+
+## fumadocs-openapi@11.1.0
+
+### Add Rust codegen for OpenAPI examples
+
+
+
+### Default to Base UI
+
+Internal packages & templates now use Base UI rather than Radix UI.
+
+## fumadocs-openapi@11.0.6
+
+### Migrate to `cnfast`
+
+Drop `tailwind-merge`.
+
+## fumadocs-openapi@11.0.4
+
+### Improve Schema UI tag rendering
+
+Change behaviour for multi-line value in schema tags.
+
+## fumadocs-openapi@11.0.3
+
+### Fix style warning in usage tabs
+
+
+
+### Fix TypeScript definitions name
+
+The type name now reflect on the actual meaning.
+
 # @fuma-docs/openapi
+
+## 11.0.2
+
+### Patch Changes
+
+- 2b79077: fix missing legacy export
+
+## 11.0.1
+
+### Patch Changes
+
+- 5017289: Use stable `fuma-translate`
+- Updated dependencies [5017289]
+- Updated dependencies [7a77722]
+  - @fumadocs/api-docs@0.0.2
+  - fumadocs-ui@16.10.1
+  - fumadocs-core@16.10.1
+
+## 11.0.0
+
+### Major Changes
+
+- f027706: **Unify RSC & client APIs**
+  - `createAPIPage()` & `createClientAPIPage()` unify into `createOpenAPIPage()`:
+    - no longer accepts an `OpenAPIServer` & `client` option.
+    - requires `api-page.tsx` to be a client component.
+    - server should pass page props using `page.data.getOpenAPIPageProps()` (virtual files) or `openapi.preloadOpenAPIPage()` (pre-generated files).
+  - Remove subpath exports: `ui/client`.
+
+  **Server & loader**
+  - `getSchema()` no longer includes the dereferenced document.
+  - `input`: drop the whole-map factory `() => SchemaMap`. Use a record instead: `[k: string]: string | Document | (() => Awaitable<string | Document>)`.
+
+  **Customization callbacks**
+
+  More context will be available to callbacks:
+  - `generateCodeSamples`: `(method: MethodInformation)` → `({ operation, method, pathItem })`.
+  - `renderOperationLayout`: `(slots, ctx, method)` → `(slots, { operation, method, pathItem, ctx })`.
+  - `playground.render`: `method: MethodInformation` → `({ operation, method, pathItem })`.
+
+  **Drop deprecated APIs**
+  - `transformerOpenAPI()`: use `openapiPlugin()` instead.
+  - `createCodeSample()`: use `CodeUsageGenerator` API instead.
+  - `generateTypeScriptSchema()`: use `generateTypeScriptDefinitions()` instead.
+  - `playground.requestTimeout` option: use `fetchOptions.requestTimeout` instead.
+  - `allowedUrls` option: use `allowedOrigins` or `filterRequest` instead.
+  - `groupStyle` option: use `folderStyle` instead.
+
+  **Other**
+  - `generateFiles` & `beforeWrite` context: remove `documents` field, access from the OpenAPI server instead.
+
+### Minor Changes
+
+- 779efff: **Introduce new translations API**
+
+  It is now powered by `fuma-translate`. Be careful: while the API surface is same, some translation keys are changed, unused labels will be ignored.
+
+### Patch Changes
+
+- Updated dependencies [9b9545f]
+- Updated dependencies [0cc1fac]
+- Updated dependencies [779efff]
+  - fumadocs-core@16.10.0
+  - fumadocs-ui@16.10.0
 
 ## 10.10.3
 

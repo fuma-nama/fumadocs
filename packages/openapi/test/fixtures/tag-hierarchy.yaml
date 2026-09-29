@@ -1,0 +1,56 @@
+openapi: 3.2.0
+info:
+  title: Store API
+  description: A test fixture for OpenAPI 3.2 tag hierarchy.
+  version: 1.0.0
+
+tags:
+  - name: store
+    summary: Store
+    description: Product areas of the store.
+    kind: nav
+  - name: products
+    summary: Products
+    description: Operations related to products.
+    parent: store
+  - name: inventory
+    summary: Inventory
+    description: Operations related to inventory.
+    parent: store
+  - name: beta
+    summary: Beta
+    kind: badge
+
+paths:
+  /products:
+    get:
+      operationId: listProducts
+      summary: List products
+      tags:
+        - products
+      responses:
+        '200':
+          description: A list of products.
+  /inventory/{productId}:
+    get:
+      operationId: getInventoryForProduct
+      summary: Get product inventory
+      tags:
+        - inventory
+        - beta
+      parameters:
+        - name: productId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Inventory details.
+  /health:
+    get:
+      operationId: healthCheck
+      summary: Health check
+      responses:
+        '200':
+          description: Service status.

@@ -1,4 +1,338 @@
+## fumadocs-ui@16.15.17
+
+### Apply the Vite base path to the "View as Markdown" link
+
+`<ViewOptionsPopover />` linked to `markdownUrl` without the Vite `base`, so sites served under a base path got a 404. It now prefixes the URL like `<MarkdownCopyButton />` does.
+
+Fix [#3620](https://github.com/fuma-nama/fumadocs/issues/3620)
+
+## fumadocs-ui@16.15.16
+
+### Don't copy failed Markdown responses
+
+`<MarkdownCopyButton />` copied the body of error responses, like a 404 page, and kept it cached until a full reload. Failed responses are rejected, and only successful ones are cached.
+
+Fix [#3612](https://github.com/fuma-nama/fumadocs/issues/3612)
+
+## fumadocs-ui@16.15.14
+
+### Wrap page footer descriptions instead of truncating
+
+The previous/next page footer cards now wrap long descriptions instead of cutting them off with an ellipsis.
+
+### Announce copy confirmation to screen readers
+
+Copy buttons are polite live regions whose label switches to "Copied" after a successful copy, so screen readers announce it. The code block's copy button no longer reports success when the clipboard write fails.
+
+### Expose the search dialog as a combobox
+
+The search input is now a `combobox` that controls a `listbox` of `option` results and reports the highlighted result through `aria-activedescendant`, so screen readers announce results as you move through them. Hidden result buttons are removed from the tab order, and the empty state is announced as a status message.
+
+### Remove hidden sidebar controls from the tab order
+
+The collapsed sidebar and its floating pill are now `inert` while hidden, and toggling the sidebar moves focus to the trigger that becomes visible.
+
+### Add `block` TOC style
+
+A TOC style without the track line: headings are indented by depth, and a block slides behind the active headings.
+
+```tsx
+<DocsPage tableOfContent={{ style: 'block' }} />
+```
+
+## fumadocs-ui@16.15.13
+
+### Keep the collapsed sidebar's controls off the page title
+
+With the sidebar collapsed, the docs layout floats the reopen and search buttons in a fixed pill at the top-left of the page and starts the article at the same row.
+Wherever the article is not centered with room to spare, every viewport below about 1280px, the pill covered the page title.
+The article now leaves room for the pill while the sidebar is collapsed.
+
+### AI page actions name the page by the URL the reader is on
+
+The "Open in ..." prompts built the page URL from the router pathname and the origin.
+Next's `usePathname()` omits a configured `basePath`, so a site mounted under one sent assistants a URL that did not exist.
+
+The prompt now uses the reader's current URL, without query and hash, and falls back to the pathname during server rendering.
+A new `pageUrl` prop on `ViewOptionsPopover` sets a canonical URL instead.
+
+### Subscribe with `useSyncExternalStore`
+
+#### Optimize Performance
+
+Use `useSyncExternalStore()` from React.
+
+## fumadocs-ui@16.15.11
+
+### Shadcn UI compatible primitives
+
+The primitives in `fumadocs-ui/components/ui/*` now follow the API of Shadcn UI, so components installed by the CLI can use the ones you already have.
+
+`buttonVariants` accepts the `default` variant of Shadcn UI:
+
+```tsx
+buttonVariants({ variant: 'default', size: 'sm' });
+```
+
+`primary` and the `color` alias still work.
+
+`fumadocs-ui/components/ui/scroll-area` is removed, the sidebars render the scroll area primitives directly.
+
+### Mark packages side-effect free
+
+All packages now declare `sideEffects` in `package.json`, so bundlers can tree-shake unused modules. Packages shipping stylesheets list them as side effects to keep CSS imports.
+
+## fumadocs-ui@16.15.10
+
+### Fix language switching with hidden locale prefixes
+
+Root Provider's `i18n` option now accepts `defaultLanguage` and `hideLocale`. The language switcher uses these options instead of guessing from the current URL, so switching from `/zh/docs` to the default language `en` with `hideLocale: 'default-locale'` navigates to `/docs`.
+
+`i18nProvider()` and `defineI18nUI()` pass these options from your i18n config automatically.
+
+## fumadocs-ui@16.15.8
+
+### Fix Tabs reverting to the hash target after a tab click
+
+The hash-to-tab logic of `Tabs` ran on every render instead of only on mount and `hashchange`, because the effect depended on a `useEffectEvent` callback, which is not referentially stable.
+
+## fumadocs-ui@16.15.6
+
+### Replace `cnfast` with `cn`
+
+Internal refactor only.
+
+## fumadocs-ui@16.15.5
+
+### Root types: version your docs with `root: "<type>"`
+
+`root` in `meta.json` now accepts a string, the type of root folder. Root folders of the same type under the same parent are interchangeable, which is how you keep multiple versions of the same docs in one site:
+
+```json tab="content/docs/v1/meta.json"
+{
+  "title": "1.0.0",
+  "root": "version"
+}
+```
+
+```json tab="content/docs/v2/meta.json"
+{
+  "title": "2.0.0",
+  "root": "version"
+}
+```
+
+The sidebar only shows the opened version, and docs layouts render a dropdown to switch between them. Switching keeps your place: it navigates to the same page in the other version (`/docs/v1/guide` to `/docs/v2/guide`), or its index page when the page doesn't exist there.
+
+`root: true` is simply the default type, displayed as tabs. See [Versioning](https://fumadocs.dev/docs/versioning) for the guide and [Root Type](https://fumadocs.dev/docs/page-conventions#root-type) for the reference.
+
+### Tabs are grouped by root folder
+
+Layout tabs are now grouped by the root folders on the current page's path, with one dropdown per group. This changes a few behaviours of the existing `root: true` tabs:
+
+- Clicking a tab navigates to the same page in the target folder when it exists, otherwise its index page as before.
+- With nested root folders, each level gets its own dropdown instead of one flat list. Tab lists (`tabMode: 'top'` on Docs layout, `tabMode: 'navbar'` on Notebook layout) show the innermost `root: true` group, and are hidden on pages outside of any root folder.
+- `getLayoutTabs()` includes typed root folders too, so a custom `transform` also decorates them. Custom `tabs` entries bound to a page tree folder are grouped the same way, other entries are appended to the `root: true` dropdown.
+- `tabs={false}` disables the dropdowns of typed root folders as well.
+
+### `findProjection()` in `fumadocs-core/page-tree`
+
+Find the structural projection of a page in another root folder, the page at the same file path relative to the root folder:
+
+```ts
+import { findProjection } from 'fumadocs-core/page-tree';
+
+findProjection(v1, v2, page)?.url;
+```
+
+## fumadocs-ui@16.15.4
+
+### Fix Next.js `<Link>` not scrolling to top under docs layouts
+
+The page container rendered `<main style="display: contents">`, which Next.js' scroll handler treats as a hidden element: `display: contents` generates no box, so its `getBoundingClientRect()` is all-zero, indistinguishable from `display: none`. The handler skips it (and the sticky TOC siblings) without ever descending into children, dropping the scroll-to-top on navigation entirely.
+
+The `<main>` element in Docs, Notebook and Flux page containers is now a real grid item (`display: grid; grid-area: main`) wrapping the unchanged `#nd-page` article, which centers via the grid instead of `mx-auto`. Rendering is identical, but if your custom CSS has element rules on `main` that were previously inert, they now apply.
+
+## fumadocs-ui@16.15.2
+
+### Improve Vitepress theme
+
+More contrast & aligned to Vitepress.
+
+## fumadocs-ui@16.14.5
+
+### Add a `main` landmark to docs, notebook and flux pages
+
+The page container slot now wraps `<article id="nd-page">` in a `<main class="contents">` in the docs, notebook and flux layouts. All props, `id="nd-page"` and the layout classes stay on the `<article>`, so existing selectors and refs keep working.
+
+## fumadocs-ui@16.14.3
+
+### Fix TOC overscroll
+
+## fumadocs-ui@16.14.2
+
+### Fix crash in `DynamicCodeBlock` when `options` is undefined
+
+`DynamicCodeBlock` read `options.components` unconditionally while building its Shiki config, even though `options` is optional on the public wrapper component. Passing an explicit `options={undefined}` (e.g. a value forwarded from another optional prop) crashed with `Cannot read properties of undefined (reading 'components')` instead of falling back to the default `pre` renderer.
+
+`options` is now read with optional chaining, so an undefined `options` behaves the same as omitting the prop entirely.
+
+## fumadocs-ui@16.14.0
+
+### Replace Orama with ZBSearch, zero-config i18n search
+
+The built-in search engine moved from `@orama/orama` to [ZBSearch](https://www.zbsearch.dev), a near drop-in successor. All module paths and APIs are unchanged, and search now works with **every language out of the box**: the new default `multilingual` mode uses Unicode word segmentation, so i18n search needs zero config.
+
+```ts
+import { createFromSource } from 'fumadocs-core/search/server';
+
+// no `localeMap`, no `@orama/tokenizers`, CJK included
+export const { GET } = createFromSource(source);
+```
+
+All locales now share a single search database — results are filtered by the locale of your pages at query time. Same for static mode:
+
+```ts
+import { staticClient } from 'fumadocs-core/search/client/orama-static';
+
+const client = staticClient({ locale });
+```
+
+### Renames
+
+- `oramaStaticClient` → `staticClient` (old name kept as deprecated alias)
+- `initOrama` → `initDB`, it now creates a ZBSearch instance and is optional — the exported data restores the tokenizer on load
+
+### Deprecated
+
+- `localeMap` is no longer needed. It still works for language-specific stemming/stop-words and keeps the legacy per-locale databases when specified.
+
+### Notes for advanced usage
+
+- `language`, `components`, `plugins` and `search` options are now typed against ZBSearch instead of `@orama/orama` — custom tokenizers or plugins written for Orama must be swapped to their ZBSearch equivalents.
+- The exported static search data is now a ZBSearch database (i18n exports became a single unified database), so server and client should be on the same fumadocs-core version.
+- `@orama/orama` and `@orama/tokenizers` can be removed from your dependencies unless you use them directly. Orama **Cloud** integrations (`fumadocs-core/search/orama-cloud`) are unaffected.
+
+## fumadocs-ui@16.13.0
+
+### Add hotkey for toggling light/dark mode
+
+Press <kbd>D</kbd> to toggle between light and dark mode. It is ignored while typing in an editable element or when a dialog (e.g. search) is opened.
+
+Customise it with the `theme.hotKey` option of `<RootProvider />`, or pass `false` to disable.
+
+## fumadocs-ui@16.12.0
+
+### Introduce Glass Layout
+
+A new layout for docs, a smooth, beautiful variant built around floating, translucent panels.
+
+### Don't force-mount inactive tab content by default
+
+Styled `Tabs` previously kept every tab panel mounted in the DOM (hidden with `display: none`). Inactive panels are now unmounted by default, following the underlying primitive.
+
+You can still opt back into keeping panels mounted per tab with `forceMount` (`fumadocs-ui`) or `keepMounted` (`@fumadocs/base-ui`) on `Tab` / `TabsContent`.
+
+### Open the tab containing a linked heading
+
+When a tab's content stays mounted (`forceMount` / `keepMounted`), navigating to a URL hash that points to an element inside a tab — such as a Table of Contents link to a heading — now opens the tab it belongs to and scrolls to the target. This runs on both initial load and `hashchange`.
+
+## fumadocs-ui@16.11.5
+
+### Correct codeblock props
+
+The type of `title` is now `ReactNode` instead of string.
+
+### Expose sidebar trigger state to assistive technology
+
+`SidebarTrigger` now sets `aria-expanded` and `aria-controls`, and its label changes between `Open Sidebar` and `Close Sidebar` depending on the state.
+
+Previously, both the button opening the mobile sidebar and the one closing it were named `Open Sidebar`, and neither conveyed whether the sidebar was open.
+
+A new `Close Sidebar` translation key is available for customisation.
+
+## fumadocs-ui@16.11.2
+
+### Add Astro framework support
+
+Add Astro as a supported framework with React islands, including framework providers, an example app, create-app template support, search integration, OG image generation, and documentation.
+
+## fumadocs-ui@16.11.0
+
+### Updated the theme switch to use `document.startViewTransition()` for smoother theme transitions with graceful fallback.
+
+
+
+### Default to Base UI
+
+Internal packages & templates now use Base UI rather than Radix UI.
+
+### Support `noCopy` attribute for codeblocks
+
+Use `noCopy` to remove copy button from codeblocks.
+
+## fumadocs-ui@16.10.7
+
+### Fix Page Actions base path handling
+
+The `<PageActions />` component will handle base path for passed `markdownUrl`.
+
+## fumadocs-ui@16.10.6
+
+### Migrate to `cnfast`
+
+Drop `tailwind-merge`.
+
+## fumadocs-ui@16.10.5
+
+### Fix "Open in ChatGPT" page action URL
+
+ChatGPT now uses the `prompt` query parameter (it redirects `q` to `prompt`), so the page action link is built as `https://chatgpt.com/?prompt=...&hints=search` to open reliably.
+
 # fumadocs-ui
+
+## 16.10.3
+
+### Patch Changes
+
+- 5499f59: type-safe provider props
+  - fumadocs-core@16.10.3
+
+## 16.10.2
+
+### Patch Changes
+
+- e977acf: **Change the TOC variants**
+
+  The "clerk" TOC variant will revert to the original Clerk-like style, the redesigned TOC (the one you see on official docs) will be the new default.
+
+- 0997dd6: Deprecate `type: "xxx"` usage of `useDocsSearch()`, pass the `client` object instead. The allows a smaller bundle size with improved performance.
+- Updated dependencies [7e9548b]
+- Updated dependencies [0997dd6]
+- Updated dependencies [71d58b8]
+  - fumadocs-core@16.10.2
+
+## 16.10.1
+
+### Patch Changes
+
+- 5017289: Use stable `fuma-translate`
+- 7a77722: fix display name of languages
+  - fumadocs-core@16.10.1
+
+## 16.10.0
+
+### Minor Changes
+
+- 779efff: **Introduce new translations API**
+
+  It is now powered by `fuma-translate`. Be careful: while the API surface is same, some translation keys are changed, unused labels will be ignored.
+
+### Patch Changes
+
+- 0cc1fac: Make `uiTranslations()` optional for translations API
+- Updated dependencies [9b9545f]
+  - fumadocs-core@16.10.0
 
 ## 16.9.3
 

@@ -1,118 +1,130 @@
 import {
-  type ComponentPropsWithoutRef,
-  type ComponentRef,
+  ComponentProps,
   createContext,
-  forwardRef,
   type ReactNode,
   useContext,
+  useId,
   useMemo,
   useRef,
-  useState,
 } from 'react';
-import { Popover, PopoverContent, PopoverPortal, PopoverTrigger } from '@radix-ui/react-popover';
+import { Popover as PopoverPrimitive } from '@base-ui/react/popover';
 import { cn } from '@/ui/cn';
 
 interface PopupContextObject {
-  open: boolean;
-  setOpen: (open: boolean) => void;
-
+  triggerId: string;
+  handle: PopoverPrimitive.Handle<unknown>;
   handleOpen: (e: React.PointerEvent) => void;
   handleClose: (e: React.PointerEvent) => void;
 }
 
+let opening: PopoverPrimitive.Handle<unknown> | undefined;
+
 const PopupContext = createContext<PopupContextObject | undefined>(undefined);
 
-function Popup({ delay = 300, children }: { delay?: number; children: ReactNode }) {
-  const [open, setOpen] = useState(false);
+function Popup({
+  openDelay = 200,
+  closeDelay = 100,
+  children,
+}: {
+  openDelay?: number;
+  closeDelay?: number;
+  children: ReactNode;
+}) {
+  const triggerId = useId();
+  const handle = useMemo(() => PopoverPrimitive.createHandle(), []);
   const openTimeoutRef = useRef<number>(undefined);
   const closeTimeoutRef = useRef<number>(undefined);
 
   return (
-    <Popover open={open} onOpenChange={setOpen}>
+    <PopoverPrimitive.Root handle={handle}>
       <PopupContext.Provider
         value={useMemo(
           () => ({
-            open,
-            setOpen,
+            triggerId,
+            handle,
             handleOpen(e) {
               if (e.pointerType === 'touch') return;
               if (closeTimeoutRef.current) clearTimeout(closeTimeoutRef.current);
+              const openPopup = () => {
+                opening?.close();
+                opening = handle;
+                handle.open(triggerId);
+              };
 
-              openTimeoutRef.current = window.setTimeout(() => {
-                setOpen(true);
-              }, delay);
+              if (opening) {
+                openPopup();
+                return;
+              }
+
+              openTimeoutRef.current = window.setTimeout(openPopup, openDelay);
             },
             handleClose(e) {
               if (e.pointerType === 'touch') return;
               if (openTimeoutRef.current) clearTimeout(openTimeoutRef.current);
 
               closeTimeoutRef.current = window.setTimeout(() => {
-                setOpen(false);
-              }, delay);
+                handle.close();
+                opening = undefined;
+              }, closeDelay);
             },
           }),
-          [delay, open],
+          [openDelay, closeDelay, handle],
         )}
       >
         {children}
       </PopupContext.Provider>
-    </Popover>
+    </PopoverPrimitive.Root>
   );
 }
 
-const PopupTrigger = forwardRef<
-  ComponentRef<typeof PopoverTrigger>,
-  ComponentPropsWithoutRef<typeof PopoverTrigger>
->(({ children, ...props }, ref) => {
+function PopupTrigger(props: ComponentProps<typeof PopoverPrimitive.Trigger>) {
   const ctx = useContext(PopupContext);
   if (!ctx) throw new Error('Missing Popup Context');
 
   return (
-    <PopoverTrigger
-      ref={ref}
+    <PopoverPrimitive.Trigger
+      id={ctx.triggerId}
+      handle={ctx.handle}
       onPointerEnter={ctx.handleOpen}
       onPointerLeave={ctx.handleClose}
-      asChild
       {...props}
-    >
-      <button type="button" className="twoslash-hover">
-        {children}
-      </button>
-    </PopoverTrigger>
+      className={cn('twoslash-hover', props.className)}
+    />
   );
-});
+}
 
-PopupTrigger.displayName = 'PopupTrigger';
-
-const PopupContent = forwardRef<
-  ComponentRef<typeof PopoverContent>,
-  ComponentPropsWithoutRef<typeof PopoverContent>
->(({ className, side = 'bottom', align = 'center', sideOffset = 4, ...props }, ref) => {
+function PopupContent({
+  className,
+  side = 'bottom',
+  align = 'center',
+  sideOffset = 4,
+  ref,
+  ...props
+}: React.ComponentProps<typeof PopoverPrimitive.Popup> &
+  Pick<React.ComponentProps<typeof PopoverPrimitive.Positioner>, 'align' | 'side' | 'sideOffset'>) {
   const ctx = useContext(PopupContext);
   if (!ctx) throw new Error('Missing Popup Context');
 
   return (
-    <PopoverPortal>
-      <PopoverContent
-        ref={ref}
+    <PopoverPrimitive.Portal>
+      <PopoverPrimitive.Positioner
         side={side}
         align={align}
         sideOffset={sideOffset}
-        className={cn('fd-twoslash-popover', className)}
-        onPointerEnter={ctx.handleOpen}
-        onPointerLeave={ctx.handleClose}
-        onOpenAutoFocus={(e) => {
-          e.preventDefault();
-        }}
-        onCloseAutoFocus={(e) => {
-          e.preventDefault();
-        }}
-        {...props}
-      />
-    </PopoverPortal>
+        className="fd-twoslash-popover-positioner"
+      >
+        <PopoverPrimitive.Popup
+          ref={ref}
+          className={cn('fd-twoslash-popover', className)}
+          onPointerEnter={ctx.handleOpen}
+          onPointerLeave={ctx.handleClose}
+          initialFocus={false}
+          finalFocus={false}
+          {...props}
+        />
+      </PopoverPrimitive.Positioner>
+    </PopoverPrimitive.Portal>
   );
-});
-
-PopupContent.displayName = 'PopupContent';
+}
 
 export { Popup, PopupTrigger, PopupContent };

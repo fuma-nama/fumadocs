@@ -1,4 +1,34 @@
+## fumadocs-preview@0.2.2
+
+### CLIs on `cac`
+
+The CLIs are now built on [cac](https://github.com/cacjs/cac).
+
+## fumadocs-preview@0.2.1
+
+### Replace `cnfast` with `cn`
+
+Internal refactor only.
+
+## fumadocs-preview@0.2.0
+
+### Default to Base UI
+
+Internal packages & templates now use Base UI rather than Radix UI.
+
+## fumadocs-preview@0.1.5
+
+### Migrate to `cnfast`
+
+Drop `tailwind-merge`.
+
 # fumadocs-preview
+
+## 0.1.4
+
+### Patch Changes
+
+- 6dc8812: Use Waku beta 2
 
 ## 0.1.3
 

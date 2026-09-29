@@ -8,17 +8,21 @@ export function Container(props: ComponentProps<'article'>) {
   const { full } = useDocsPage();
 
   return (
-    <article
-      id="nd-page"
-      data-full={full}
-      {...props}
-      className={cn(
-        'flex flex-col w-full max-w-[900px] mx-auto [grid-area:main] px-4 py-6 gap-4 md:px-6 md:pt-8 xl:px-8 xl:pt-14',
-        full && 'max-w-[1168px]',
-        props.className,
-      )}
-    >
-      {props.children}
-    </article>
+    <main className="grid [grid-area:main] justify-items-center" data-layout-main="">
+      <article
+        id="nd-page"
+        data-layout-content=""
+        data-full={full}
+        {...props}
+        className={cn(
+          'flex flex-col min-w-0 w-full max-w-[900px] px-4 py-6 gap-4 md:px-6 md:pt-8 xl:px-8 xl:pt-14',
+          'md:in-data-[sidebar-collapsed=true]:pt-16 xl:in-data-[sidebar-collapsed=true]:pt-14',
+          full && 'max-w-[1168px]',
+          props.className,
+        )}
+      >
+        {props.children}
+      </article>
+    </main>
   );
 }

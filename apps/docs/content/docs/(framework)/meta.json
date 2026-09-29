@@ -15,11 +15,11 @@
     "markdown",
     "---Configurations---",
     "navigation",
-    "versioning",
     "deploying",
     "internationalization",
     "search",
     "---Integrations---",
+    "editor",
     "...integrations"
   ]
 }

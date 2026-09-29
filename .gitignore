@@ -12,6 +12,9 @@ node_modules
 # testing
 /coverage
 
+# generated translation types
+**/.translations/
+
 # outputs
 .turbo
 .next
@@ -45,3 +48,9 @@ next-env.d.ts
 packages/radix-ui/css/generated/*.css
 packages/base-ui/css/generated/*.css
 packages/openapi/css/generated/*.css
+packages/api-docs/css/generated/*.css
+packages/asyncapi/css/generated/*.css
+packages/graphql/css/generated/*.css
+packages/obsidian/css/generated/*.css
+packages/notion/css/generated/*.css
+.pnpm-store

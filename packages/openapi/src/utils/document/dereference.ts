@@ -1,35 +1,41 @@
-import type { JSONSchema } from 'json-schema-typed/draft-2020-12';
-import type { NoReference } from '../schema';
-import { dereferenceSync } from '../schema/dereference';
 import type { Document } from '@/types';
+import { createMagicProxy } from '@scalar/json-magic/magic-proxy';
+import { dereference } from '@fumadocs/json-schema';
+import type { DereferencedShallow } from '@fumadocs/json-schema';
 
 export interface DereferencedDocument {
   /**
-   * dereferenced document
+   * document wrapped in a magic proxy (`@scalar/json-magic`).
+   *
+   * Reference Objects remain in the document — resolve them lazily with {@link resolve}.
    */
-  dereferenced: NoReference<Document>;
+  dereferenced: Document;
 
   /**
-   * Get raw $ref from dereferenced object
+   * Shallowly resolve a Reference Object from the document, merging sibling keywords.
+   *
+   * Non-reference values are returned as-is.
    */
-  getRawRef: (obj: object) => string | undefined;
+  resolve: <T>(node: T) => DereferencedShallow<T>;
 
   bundled: Document;
 }
 
-export function dereferenceDocument(bundled: Document): DereferencedDocument {
-  /**
-   * Dereferenced value and its original `$ref` value
-   */
-  const dereferenceMap = new Map<object, string>();
+// documents are read-only, pages of the same document share one proxy
+const cache = new WeakMap<Document, DereferencedDocument>();
 
-  return {
+export function dereferenceBundledDocument(bundled: Document): DereferencedDocument {
+  const cached = cache.get(bundled);
+  if (cached) return cached;
+
+  const doc: DereferencedDocument = {
     bundled,
-    dereferenced: dereferenceSync(bundled as JSONSchema, (schema, ref) => {
-      dereferenceMap.set(schema as object, ref);
-    }) as NoReference<Document>,
-    getRawRef(obj: object) {
-      return dereferenceMap.get(obj);
+    dereferenced: createMagicProxy(bundled as Record<string, unknown>) as Document,
+    resolve(node) {
+      return dereference(node);
     },
   };
+
+  cache.set(bundled, doc);
+  return doc;
 }

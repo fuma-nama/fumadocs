@@ -4,20 +4,40 @@ import { existsSync } from 'node:fs';
 import path from 'node:path';
 import { detectFramework } from 'fuma-cli/detect';
 
-const frameworks = ['next', 'waku', 'react-router', 'tanstack-start'] as const;
+const frameworks = ['next', 'astro', 'waku', 'react-router', 'tanstack-start'] as const;
 export type Framework = (typeof frameworks)[number];
 
 function isSupportedFramework(v: string): v is Framework {
   return frameworks.includes(v as Framework);
 }
 
+/** directories from shadcn's `components.json`, so components are installed at the same place */
+async function readShadcnAliases(cwd: string): Promise<Record<string, string>> {
+  const content = await fs.readFile(path.join(cwd, 'components.json'), 'utf-8').catch(() => null);
+  if (!content) return {};
+  const out: Record<string, string> = {};
+  let aliases: Record<string, unknown> = {};
+  try {
+    aliases = JSON.parse(content).aliases ?? {};
+  } catch {
+    return out;
+  }
+  for (const [key, alias] of Object.entries(aliases)) {
+    // e.g. `@/components/ui` -> `./components/ui`
+    if (typeof alias === 'string') out[key] = `.${alias.slice(alias.indexOf('/'))}`;
+  }
+  return out;
+}
+
 export async function createConfigSchema(cwd = process.cwd()) {
+  const shadcn = await readShadcnAliases(cwd);
   const defaultAliases = {
-    uiDir: './components/ui',
-    componentsDir: './components',
+    uiDir: shadcn.ui ?? './components/ui',
+    componentsDir: shadcn.components ?? './components',
     layoutDir: './layouts',
     cssDir: './styles',
-    libDir: './lib',
+    libDir: shadcn.lib ?? './lib',
+    utils: shadcn.utils,
   };
 
   let framework = await detectFramework(cwd);
@@ -28,19 +48,24 @@ export async function createConfigSchema(cwd = process.cwd()) {
     aliases: z
       .object({
         uiDir: z.string().default(defaultAliases.uiDir),
-        componentsDir: z.string().default(defaultAliases.uiDir),
+        componentsDir: z.string().default(defaultAliases.componentsDir),
         layoutDir: z.string().default(defaultAliases.layoutDir),
-        cssDir: z.string().default(defaultAliases.componentsDir),
+        cssDir: z.string().default(defaultAliases.cssDir),
         libDir: z.string().default(defaultAliases.libDir),
+        /** module exporting `cn`, installed components import it instead of `lib/cn.ts` */
+        utils: shadcn.utils ? z.string().default(shadcn.utils) : z.string().optional(),
       })
       .default(defaultAliases),
 
     baseDir: z.string().default(() => {
-      if (framework === 'react-router' && existsSync(path.resolve(cwd, 'app'))) return 'app';
-      if (existsSync(path.resolve(cwd, 'src'))) return 'src';
-      return '';
+      if (framework === 'react-router') return 'app';
+      // the routes directory of the framework decides whether app code lives in `src`
+      const routes = { next: 'app', waku: 'pages', 'tanstack-start': 'routes' }[framework] ?? '';
+      if (existsSync(path.resolve(cwd, 'src', routes))) return 'src';
+      if (routes && existsSync(path.resolve(cwd, routes))) return '';
+      return existsSync(path.resolve(cwd, 'src')) ? 'src' : '';
     }),
-    uiLibrary: z.enum(['radix-ui', 'base-ui']).default('radix-ui'),
+    uiLibrary: z.enum(['radix-ui', 'base-ui']).default('base-ui'),
     framework: z.literal(frameworks).default(framework),
 
     commands: z

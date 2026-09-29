@@ -5,8 +5,20 @@ function round(num: number) {
     .replace(/\.0$/, '');
 }
 
+function scaled(value: string) {
+  return `calc(${value} * var(--tw-prose-size))`;
+}
+
+function scaledPx(value: number) {
+  return scaled(`${round(value)}px`);
+}
+
 function rem(px: number) {
   return `${round(px / 16)}rem`;
+}
+
+function scaledRem(px: number) {
+  return scaled(rem(px));
 }
 
 function em(px: number, base: number) {
@@ -43,7 +55,7 @@ export const roundedTable = {
   },
   th: {
     textAlign: 'start',
-    padding: 'calc(var(--spacing) * 2.5)',
+    padding: scaled('var(--spacing) * 2.5'),
     'border-inline-start': '1px solid var(--color-fd-border)',
     background: 'var(--color-fd-muted)',
   },
@@ -56,7 +68,7 @@ export const roundedTable = {
   td: {
     textAlign: 'start',
     'border-inline-start': '1px solid var(--color-fd-border)',
-    padding: 'calc(var(--spacing) * 2.5)',
+    padding: scaled('var(--spacing) * 2.5'),
   },
   'td:first-child': {
     'border-inline-start': 'none',
@@ -129,10 +141,11 @@ export interface Config {
 export const DEFAULT: Config = {
   css: [
     {
+      '--tw-prose-size': '1',
       color: 'var(--tw-prose-body)',
       maxWidth: 'none',
-      fontSize: rem(16),
-      lineHeight: '1.75rem',
+      fontSize: scaledRem(16),
+      lineHeight: scaledRem(28),
 
       '[class~="lead"]': {
         fontSize: em(20, 16),
@@ -142,7 +155,7 @@ export const DEFAULT: Config = {
         color: 'var(--tw-prose-lead)',
       },
       ul: {
-        paddingInlineStart: '1rem',
+        paddingInlineStart: scaledRem(16),
         listStyleType: 'disc',
         marginTop: em(20, 16),
         marginBottom: em(20, 16),
@@ -273,7 +286,7 @@ export const DEFAULT: Config = {
       h1: {
         color: 'var(--tw-prose-headings)',
         fontWeight: '800',
-        fontSize: 'var(--text-3xl)',
+        fontSize: scaled('var(--text-3xl)'),
         marginTop: '0',
         marginBottom: em(32, 36),
         lineHeight: round(40 / 36),
@@ -359,9 +372,9 @@ export const DEFAULT: Config = {
         boxShadow: '0 0 0 1px var(--tw-prose-kbd-shadows),0 3px 0 var(--tw-prose-kbd-shadows)',
       },
       code: {
-        padding: '3px',
+        padding: scaledPx(3),
         border: 'solid 1px',
-        fontSize: '13px',
+        fontSize: scaledPx(13),
         borderColor: `var(--color-fd-border)`,
         borderRadius: '5px',
         fontWeight: '400',
@@ -373,7 +386,7 @@ export const DEFAULT: Config = {
       },
       'h1 code': {
         color: 'inherit',
-        fontSize: 'var(--text-2xl)',
+        fontSize: scaled('var(--text-2xl)'),
       },
       'h2 code': {
         color: 'inherit',
@@ -441,6 +454,17 @@ export const DEFAULT: Config = {
       },
       '> :last-child': {
         marginBottom: '0',
+      },
+    },
+  ],
+};
+
+export const SMALL: Config = {
+  css: [
+    {
+      '--tw-prose-size': '0.875',
+      'dt, strong, blockquote, h1, h2, h3, h4, kbd, thead th, a:not([data-card])': {
+        fontWeight: '450',
       },
     },
   ],

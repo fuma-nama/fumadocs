@@ -1,4 +1,517 @@
+## fumadocs-core@16.15.16
+
+### Get pages by decoded slugs
+
+`getPage()` accepts both URI encoded and decoded slugs. React Router and TanStack Router pass decoded params, so pages with spaces or non-ASCII characters in their slugs were not found.
+
+Fix [#3613](https://github.com/fuma-nama/fumadocs/issues/3613)
+
+## fumadocs-core@16.15.15
+
+### Fix infinite recursion in the MDX stringifier with `mdast-util-to-markdown@2.1.3`
+
+The stringifier wraps every `toMarkdown` handler but dropped their `attention` and `peek` properties, which `mdast-util-to-markdown@2.1.3` relies on to serialize bold and italic text. Pages containing them overflowed the stack during build.
+
+## fumadocs-core@16.15.13
+
+### Keep TOC step numbers after an HTML re-parse
+
+`remarkSteps` marks each step heading with a numeric `data-fd-step`, and the TOC plugin only read it as a number.
+A later `rehype-raw` pass re-parses the tree from HTML, so the property came back as the canonical `dataFdStep` string and every step number silently vanished from the table of contents.
+
+`rehypeToc` now accepts both shapes, so pipelines that render raw HTML in Markdown keep their numbered TOC.
+
+### Subscribe with `useSyncExternalStore`
+
+#### Optimize Performance
+
+Use `useSyncExternalStore()` from React.
+
+## fumadocs-core@16.15.12
+
+### Fix `filterElement` being ignored by `remarkLLMs`
+
+`remarkLLMs` wrote its own `filterElement` over yours, so the option did nothing:
+
+```ts
+remarkLLMs({
+  // never ran
+  filterElement: (node) => node.name !== 'Callout',
+});
+```
+
+Your function now runs for every node except `mdxjsEsm`, which stays excluded either way.
+
+Fumadocs MDX passes this option through `postprocess.includeProcessedMarkdown`.
+
+## fumadocs-core@16.15.10
+
+### Fix same-page anchors on Tanstack Start
+
+Tanstack Router's `Link` takes a pathname in `to` and reads the hash from a separate `hash` prop, so a same-page anchor like `[link](#installation)` was rendered as a link to the current page with the hash dropped, clicking it did nothing. The Tanstack adapter now renders a native `<a>` for those hrefs:
+
+```mdx
+Jump to [Installation](#installation).
+```
+
+## fumadocs-core@16.15.9
+
+### `getPageByUrl()` on the loader
+
+Look up a page by its URL:
+
+```ts
+source.getPageByUrl('/docs/getting-started');
+source.getPageByUrl('/cn/docs/getting-started', 'cn');
+```
+
+Without the `language` argument every language is looked up, unlike `getPageByHref()` which resolves the default language only.
+
+### `llms()` renders pages
+
+`llms()` used to build the `llms.txt` index only, turning a page into Markdown was left to your own `getLLMText()`. Pass `renderPage` and it covers both:
+
+```ts
+import { llms } from 'fumadocs-core/source';
+
+export const docsLlms = llms(source, {
+  renderPage: async (page) => `# ${page.data.title} (${page.url})
+
+${await page.data.getText('processed')}`,
+});
+```
+
+- `page(page)` renders one page, for the per-page Markdown route.
+- `full(lang?)` renders every page and joins them, for `llms-full.txt`.
+
+```ts
+// app/llms-full.txt/route.ts
+export const GET = async () => new Response(await docsLlms.full());
+```
+
+Both methods exist only when `renderPage` is given, in types and at runtime. Fumadocs cannot know how your content source exposes Markdown: `page.data.getText('processed')` on Fumadocs MDX, `page.data.content` on `@fumadocs/local-md`.
+
+### `fumadocs-core/mcp`: docs tools for your MCP server
+
+Register the docs tools on a server you own, rather than on a handler Fumadocs builds for you:
+
+```ts
+import { createMcpHandler, McpServer } from '@modelcontextprotocol/server';
+import { registerSearchTool, registerSourceTools } from 'fumadocs-core/mcp';
+import { createFromSource } from 'fumadocs-core/search/server';
+import { docsLlms, source } from '@/lib/source';
+
+const handler = createMcpHandler(() => {
+  const mcp = new McpServer({ name: 'docs', version: '1.0.0' });
+
+  registerSourceTools(mcp, source, docsLlms);
+  registerSearchTool(mcp, createFromSource(source));
+
+  return mcp;
+});
+
+export const GET = (req: Request) => handler.fetch(req);
+export const POST = (req: Request) => handler.fetch(req);
+export const DELETE = (req: Request) => handler.fetch(req);
+```
+
+| Function                                 | Tools                    |
+| ---------------------------------------- | ------------------------ |
+| `registerSourceTools(mcp, source, llms)` | `list_pages`, `get_page` |
+| `registerSearchTool(mcp, server)`        | `search`                 |
+
+Each takes the integration it reads from, so you can add your own tools next to them, point the search tool at another server, or register only one of the two.
+
+`@modelcontextprotocol/server` is an optional peer dependency, and `registerSourceTools` needs a `llms()` output with `renderPage`.
+
+### `toDocuments()` for Algolia and Orama Cloud
+
+Build the search indexes of every page, instead of mapping pages by hand:
+
+```ts
+// app/static.json/route.ts
+import { toDocuments } from 'fumadocs-core/search/algolia';
+import { source } from '@/lib/source';
+
+export const GET = async () => Response.json(await toDocuments(source));
+```
+
+It awaits `structuredData` when your collection is async (React Router and TanStack Start), a step that was easy to miss. Pass `tag` to filter results by a value of your choice:
+
+```ts
+toDocuments(source, { tag: (page) => page.slugs[0] });
+```
+
+Exported from `fumadocs-core/search/algolia` and `fumadocs-core/search/orama-cloud`.
+
+### Marked as side-effect free
+
+`fumadocs-core` now declares `"sideEffects": false`. No module in the package imports for side effects or ships CSS, so bundlers that rely on the hint (webpack in particular) can drop unused modules instead of keeping them alive:
+
+```ts
+import { createGetUrl } from 'fumadocs-core/source';
+```
+
+## fumadocs-core@16.15.7
+
+### Async `_fd_prepare` hook for Shiki transformers
+
+`rehype-code` awaits `transformer._fd_prepare(code, options)` on every transformer before highlighting a code block. Transformers can run async work (or coalesce work across the code blocks being highlighted concurrently) and serve it from the synchronous Shiki hooks afterwards.
+
+## fumadocs-core@16.15.5
+
+### Root types: version your docs with `root: "<type>"`
+
+`root` in `meta.json` now accepts a string, the type of root folder. Root folders of the same type under the same parent are interchangeable, which is how you keep multiple versions of the same docs in one site:
+
+```json tab="content/docs/v1/meta.json"
+{
+  "title": "1.0.0",
+  "root": "version"
+}
+```
+
+```json tab="content/docs/v2/meta.json"
+{
+  "title": "2.0.0",
+  "root": "version"
+}
+```
+
+The sidebar only shows the opened version, and docs layouts render a dropdown to switch between them. Switching keeps your place: it navigates to the same page in the other version (`/docs/v1/guide` to `/docs/v2/guide`), or its index page when the page doesn't exist there.
+
+`root: true` is simply the default type, displayed as tabs. See [Versioning](https://fumadocs.dev/docs/versioning) for the guide and [Root Type](https://fumadocs.dev/docs/page-conventions#root-type) for the reference.
+
+### Tabs are grouped by root folder
+
+Layout tabs are now grouped by the root folders on the current page's path, with one dropdown per group. This changes a few behaviours of the existing `root: true` tabs:
+
+- Clicking a tab navigates to the same page in the target folder when it exists, otherwise its index page as before.
+- With nested root folders, each level gets its own dropdown instead of one flat list. Tab lists (`tabMode: 'top'` on Docs layout, `tabMode: 'navbar'` on Notebook layout) show the innermost `root: true` group, and are hidden on pages outside of any root folder.
+- `getLayoutTabs()` includes typed root folders too, so a custom `transform` also decorates them. Custom `tabs` entries bound to a page tree folder are grouped the same way, other entries are appended to the `root: true` dropdown.
+- `tabs={false}` disables the dropdowns of typed root folders as well.
+
+### `findProjection()` in `fumadocs-core/page-tree`
+
+Find the structural projection of a page in another root folder, the page at the same file path relative to the root folder:
+
+```ts
+import { findProjection } from 'fumadocs-core/page-tree';
+
+findProjection(v1, v2, page)?.url;
+```
+
+## fumadocs-core@16.15.3
+
+### Fix duplicated search result for pages whose description repeats in the content
+
+Pages generated by Fumadocs OpenAPI emit the operation description as both the page description and a content section, so every endpoint page listed the same line twice in the search dialog. Search indexing now skips the page description when an identical content record exists, keeping the record with the heading anchor.
+
+Fix [#3509](https://github.com/fuma-nama/fumadocs/issues/3509)
+
+### Remark LLMs: export a component with `output: "function"`
+
+With `output: "function"`, `_markdown` becomes a component instead of a string: Markdown content is still stringified at compile time, while JSX elements stay as JSX, receiving their original props.
+
+```ts
+// fumadocs-mdx collection config
+postprocess: {
+  includeProcessedMarkdown: { output: 'function' },
+},
+```
+
+Render it with `renderToMarkdown` from `fumadocs-core/server`. Elements resolve from `props.components`: a component can call `asMarkdown()` to output its own Markdown form, other components (including missing ones) are serialized as JSX syntax.
+
+```tsx
+import { renderToMarkdown } from 'fumadocs-core/server';
+
+const { _markdown: Content } = await page.data.load();
+const text = await renderToMarkdown(<Content components={getMDXComponents()} />);
+```
+
+`getText('processed')` keeps working: it renders the component for you, with an optional components map:
+
+```ts
+const text = await page.data.getText('processed', { components: getMDXComponents() });
+```
+
+Supported in bundler collections with both compilers, and in `dynamic: true` collections & `@fumadocs/satteri/local-md` with the Sätteri compiler.
+
+### `fumadocs-core/server`: render React trees into Markdown
+
+The Markdown renderer of Fumapress is now part of Fumadocs core. `renderToMarkdown()` converts RSC output into Markdown, and calling `asMarkdown()` is how a server component opts in with its own Markdown form:
+
+```tsx
+import { asMarkdown, md, renderToMarkdown } from 'fumadocs-core/server';
+
+async function Callout({ title, children }) {
+  if (asMarkdown()) return md.linePrefix('> ')`**${title}**\n${children}`;
+
+  return <div className="callout">...</div>;
+}
+
+const text = await renderToMarkdown(
+  <Callout title="Note">
+    <p>Hello</p>
+  </Callout>,
+);
+// > **Note**
+// >
+// > Hello
+```
+
+Components that never call `asMarkdown()` are kept as JSX syntax with their serializable props, so are client components, which never run on the server. Host elements returned by an opted-in component are converted with a built-in HTML to Markdown table.
+
+`renderRoute()` renders a page element only when its component opts in, for giving arbitrary routes a Markdown version. In the browser the module resolves to a stub where `asMarkdown()` is always `false`.
+
+## fumadocs-core@16.15.1
+
+### Forward dynamic loader from `fumadocs-core/source`
+
+
+
+### Read structured data from `page.data.structuredData()`
+
+Search indexing no longer falls back to `(await page.data.load()).structuredData`. Runtime content sources expose `structuredData()` on page data instead, sharing the compile with `load()`:
+
+```ts
+const structuredData = await page.data.structuredData();
+```
+
+The renderer returned by `load()` still carries `structuredData`, existing code keeps working.
+
+## fumadocs-core@16.15.0
+
+### Redesign source API
+
+Content sources can hook into the static loader they are attached to, and dynamic sources can opt out of the loader's in-memory file cache.
+
+`configureStatic` runs when a source is attached to `loader()`, and again whenever `dynamicLoader()` builds a new static loader:
+
+```ts
+export function createMySource(): DynamicSource {
+  return {
+    cache: 'custom',
+    async files() {
+      return loadFiles();
+    },
+    configureStatic({ loader, source }) {
+      // `loader` is the created static loader
+      // `source` is the record key when using named sources
+    },
+    configure(loader, { source }) {
+      loader.invalidate();
+    },
+  };
+}
+```
+
+- `cache: 'memory'` (default): `files()` is called once until `invalidate()`.
+- `cache: 'custom'`: the source caches itself. `dynamicLoader()` re-runs `files()` on `get()` and rebuilds only when the file list is shallowly different (by identity).
+
+### Integrations
+
+GraphQL cross-links are generated from the attached loader instead of a `baseUrl` option on `staticSource()`. Local, OpenAPI, and AsyncAPI `dynamicSource()` use `cache: 'custom'` and reuse generated files by identity until `invalidate()`.
+
+Sanity now uses `cache: 'custom'` when given a `sanityFetch` from `next-sanity/live`, calling `invalidate()` in draft mode is no longer needed.
+
+### Return heading and text results from the Algolia client
+
+`algoliaClient` grouped hits into page, heading and text results, then dropped everything except pages. All three are now returned with highlighting, matching the other search clients.
+
+### Fix locale-only pages leaking into other locales
+
+i18n storages no longer share folder arrays with the fallback locale. Locale-only pages previously appeared in every locale's page tree as duplicate nodes.
+
+### Index pages by URL
+
+`getPageByHref` resolves absolute URLs through an index instead of scanning all pages on every call.
+
+### Do not cache rejected promises
+
+The dynamic loader's `files()`, Notion's page `load()`, `createFromSource`'s index build, and Shiki factory init retry on the next call after a transient failure, instead of returning the same rejection forever.
+
+### Highlight only the search results within `limit`
+
+`limit` bounds the returned hits, so search now stops at that many results instead of highlighting every matched page and slicing afterwards.
+
+## fumadocs-core@16.14.5
+
+### Loader: `next` parameter for custom `slugs` function
+
+The `slugs` option now receives a `next` function as its second argument, which generates the default slugs from the file path. This lets custom slug functions build on the default generation instead of reimplementing it:
+
+```ts
+loader({
+  slugs(file, next) {
+    if (file.path.startsWith('blog/')) return ['blog', ...next()];
+    // return `undefined` to generate default slugs
+  },
+});
+```
+
+**Behavior change:** conflicting cases like `dir/index.mdx` vs `dir.mdx` are now resolved for custom slugs functions as well. Index files are always processed after other pages, and receive an `index` suffix when their slugs (custom or default) collide with an existing page — previously, custom slugs functions that produced such collisions threw a `Duplicated slugs` error.
+
+## fumadocs-core@16.14.4
+
+### Introduce `@fumari/image-size`, replacing `image-size` in `remarkImage`
+
+A fork of [probe-image-size](https://github.com/nodeca/probe-image-size) with no dependencies of its own.
+
+```ts
+import { probe, imageSize } from '@fumari/image-size';
+
+await probe('./public/banner.png'); // { width: 1200, height: 630, type: 'png', mime: 'image/png' }
+await probe('https://example.com/banner.png', { timeout: 5000 });
+
+imageSize(bytes); // the same result, or `null`
+```
+
+`remarkImage` now uses it in both `fumadocs-core` and `@fumadocs/satteri`. Remote images are no longer downloaded in full just to be measured, and redirects are followed. Sizes are always in pixels, so an SVG sized in `em` or `pt` is converted instead of being skipped. Remote requests also time out after 30 seconds by default.
+
+One behaviour difference worth knowing: the supported formats are avif/heic/heif, bmp, gif, ico, jpeg, png, psd, svg, tiff and webp. Sizes for jxl, tga, pnm, dds, icns, cur, ktx and jp2 can no longer be resolved and go through `onError` instead.
+
+Sequential scanning stops after 512 KB, but that never loses an image: the one format that stores its dimensions past that point — TIFF with a trailing IFD — is resolved by following the header's pointer with a targeted read, using an HTTP `Range` request for remote files (and skipping through the body when the server ignores ranges).
+
+## fumadocs-core@16.14.1
+
+### Fix unusable `tokenizer` search option
+
+The search engine rejects a `language` alongside a custom `tokenizer`, since the tokenizer carries its own. Both search entry points supplied one unconditionally — `createDB`/`createDBSimple` through a destructuring default that `language: undefined` could not suppress, and `createI18nSearchAPI` by hardcoding `multilingual` after the spread — so passing `tokenizer` always threw `NO_LANGUAGE_WITH_CUSTOM_TOKENIZER` at index-build time. On i18n sources there was no call that worked at all.
+
+`language` is now omitted when a tokenizer is present (from either `tokenizer` or `components.tokenizer`), and i18n servers no longer overwrite a caller-supplied `language`. Attaching a stemmer to the default multilingual segmentation works as documented:
+
+```ts
+import { stemmer } from '@zbsearch/stemmers/english';
+
+createFromSource(source, {
+  tokenizer: { language: 'multilingual', stemming: true, stemmer },
+});
+```
+
+## fumadocs-core@16.14.0
+
+### Replace Orama with ZBSearch, zero-config i18n search
+
+The built-in search engine moved from `@orama/orama` to [ZBSearch](https://www.zbsearch.dev), a near drop-in successor. All module paths and APIs are unchanged, and search now works with **every language out of the box**: the new default `multilingual` mode uses Unicode word segmentation, so i18n search needs zero config.
+
+```ts
+import { createFromSource } from 'fumadocs-core/search/server';
+
+// no `localeMap`, no `@orama/tokenizers`, CJK included
+export const { GET } = createFromSource(source);
+```
+
+All locales now share a single search database — results are filtered by the locale of your pages at query time. Same for static mode:
+
+```ts
+import { staticClient } from 'fumadocs-core/search/client/orama-static';
+
+const client = staticClient({ locale });
+```
+
+### Renames
+
+- `oramaStaticClient` → `staticClient` (old name kept as deprecated alias)
+- `initOrama` → `initDB`, it now creates a ZBSearch instance and is optional — the exported data restores the tokenizer on load
+
+### Deprecated
+
+- `localeMap` is no longer needed. It still works for language-specific stemming/stop-words and keeps the legacy per-locale databases when specified.
+
+### Notes for advanced usage
+
+- `language`, `components`, `plugins` and `search` options are now typed against ZBSearch instead of `@orama/orama` — custom tokenizers or plugins written for Orama must be swapped to their ZBSearch equivalents.
+- The exported static search data is now a ZBSearch database (i18n exports became a single unified database), so server and client should be on the same fumadocs-core version.
+- `@orama/orama` and `@orama/tokenizers` can be removed from your dependencies unless you use them directly. Orama **Cloud** integrations (`fumadocs-core/search/orama-cloud`) are unaffected.
+
+## fumadocs-core@16.13.0
+
+### Respect quality values in `isMarkdownPreferred`
+
+`isMarkdownPreferred()` previously returned `true` whenever a Markdown media type appeared anywhere
+in `Accept`, ignoring how the client ranked it. A request for `Accept: text/html;q=0.9, text/markdown;q=0.1`
+was served Markdown even though it clearly preferred HTML.
+
+It now compares the client's highest quality value for a Markdown type against its highest value for
+HTML, and only prefers Markdown when Markdown ranks at least as high. Wildcards (`*/*`, `text/*`)
+count towards HTML, so `Accept: */*` keeps receiving HTML.
+
+A tie still prefers Markdown, so agents sending `Accept: text/html,text/markdown,text/plain,*/*;q=0.5`
+are unaffected.
+
+The negotiation examples and templates now also set `Vary: Accept` on the negotiated Markdown
+response, so shared caches key on the header the representation was selected by.
+
+## fumadocs-core@16.12.1
+
+### Obsidian content source v1
+
+Render Obsidian vaults directly through static or dynamic Fumadocs sources, with lazy in-memory compilation and local content hot reload. Remove the old generated-file and remark-plugin integrations.
+
+Resolve URL-encoded relative file links against their decoded source paths.
+
+## fumadocs-core@16.12.0
+
+### Introduce Glass Layout
+
+A new layout for docs, a smooth, beautiful variant built around floating, translucent panels.
+
+## fumadocs-core@16.11.4
+
+### Migrate from `js-yaml` to `yaml`
+
+## fumadocs-core@16.11.2
+
+### Add Astro framework support
+
+Add Astro as a supported framework with React islands, including framework providers, an example app, create-app template support, search integration, OG image generation, and documentation.
+
+## fumadocs-core@16.11.0
+
+### Default to Base UI
+
+Internal packages & templates now use Base UI rather than Radix UI.
+
+### Support `noCopy` attribute for codeblocks
+
+Use `noCopy` to remove copy button from codeblocks.
+
+## fumadocs-core@16.10.6
+
+### Migrate to `cnfast`
+
+Drop `tailwind-merge`.
+
+### Handle Vite `BASE_URL` for default values
+
+The default search URL endpoint will auto include the base path.
+
+## fumadocs-core@16.10.4
+
+### React Router v8 support
+
+The peer dependencies now include v8, note that previous versions can also work with v8 seamlessly, this is only updating the peer dependency range.
+
 # fumadocs-core
+
+## 16.10.3
+
+## 16.10.2
+
+### Patch Changes
+
+- 7e9548b: Fix infinite re-render where (1) a React transition is triggered, (2) the search dialog is inside `<Suspense />`. This causes the `loading` state to be `false` even after `setLoading(true)`, as transition will freeze state updates, and break the render-time state checks of `useDocsSearch()`.
+- 0997dd6: Deprecate `type: "xxx"` usage of `useDocsSearch()`, pass the `client` object instead. The allows a smaller bundle size with improved performance.
+- 71d58b8: Add `$infer` to content loader instance for easier type inference.
+
+## 16.10.1
+
+## 16.10.0
+
+### Patch Changes
+
+- 9b9545f: Add package issue tracker metadata.
 
 ## 16.9.3
 

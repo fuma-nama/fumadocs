@@ -1,8 +1,8 @@
 import { source } from '@/lib/source';
 import { notFound } from 'next/navigation';
 import { generate as MetadataImage, getImageResponseOptions } from './generate';
-import { ImageResponse } from '@takumi-rs/image-response';
-import { getPageImage } from '@/lib/metadata';
+import { ImageResponse } from 'takumi-js/response';
+import { getPageImageUrl } from '@/lib/metadata';
 
 export const revalidate = false;
 
@@ -21,6 +21,6 @@ export function generateStaticParams(): {
   slug: string[];
 }[] {
   return source.getPages().map((page) => ({
-    slug: getPageImage(page).segments,
+    slug: getPageImageUrl(page).segments,
   }));
 }

@@ -1,3 +1,51 @@
+## fumadocs-obsidian@1.0.5
+
+### Mark packages side-effect free
+
+All packages now declare `sideEffects` in `package.json`, so bundlers can tree-shake unused modules. Packages shipping stylesheets list them as side effects to keep CSS imports.
+
+## fumadocs-obsidian@1.0.4
+
+### Replace `cnfast` with `cn`
+
+Internal refactor only.
+
+## fumadocs-obsidian@1.0.3
+
+### Read structured data from `page.data.structuredData()`
+
+Search indexing no longer falls back to `(await page.data.load()).structuredData`. Runtime content sources expose `structuredData()` on page data instead, sharing the compile with `load()`:
+
+```ts
+const structuredData = await page.data.structuredData();
+```
+
+The renderer returned by `load()` still carries `structuredData`, existing code keeps working.
+
+## fumadocs-obsidian@1.0.1
+
+### Support CSS preset
+
+Include required css classes by importing the preset.
+
+## fumadocs-obsidian@1.0.0
+
+### Obsidian content source v1
+
+Render Obsidian vaults directly through static or dynamic Fumadocs sources, with lazy in-memory compilation and local content hot reload. Remove the old generated-file and remark-plugin integrations.
+
+Resolve URL-encoded relative file links against their decoded source paths.
+
+## fumadocs-obsidian@0.2.1
+
+### Migrate from `js-yaml` to `yaml`
+
+## fumadocs-obsidian@0.2.0
+
+### Default to Base UI
+
+Internal packages & templates now use Base UI rather than Radix UI.
+
 # fumadocs-obsidian
 
 ## 0.1.0

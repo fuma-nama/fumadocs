@@ -1,7 +1,7 @@
 'use client';
 
 import * as Base from '@/components/toc';
-import { useTranslations } from '@/contexts/i18n';
+import { useTranslations } from '@fuma-translate/react';
 import { useTreePath } from '@/contexts/tree';
 import { cn } from '@/utils/cn';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
@@ -19,6 +19,7 @@ import {
 } from 'react';
 import * as TocDefault from '@/components/toc/default';
 import * as TocClerk from '@/components/toc/clerk';
+import * as TocBlock from '@/components/toc/block';
 import { AnimatePresence, motion } from 'motion/react';
 import { createPortal } from 'react-dom';
 
@@ -26,6 +27,8 @@ const TocPopoverContext = createContext<{
   open: boolean;
   setOpen: (open: boolean) => void;
 } | null>(null);
+
+const variants = { normal: TocDefault, clerk: TocClerk, block: TocBlock };
 
 export type TOCProviderProps = Base.TOCProviderProps;
 
@@ -54,6 +57,10 @@ export type TOCProps = {
       style: 'clerk';
       list?: TocClerk.TOCItemsProps;
     }
+  | {
+      style: 'block';
+      list?: TocBlock.TOCItemsProps;
+    }
 );
 
 export function TOC({
@@ -66,7 +73,7 @@ export function TOC({
   list,
 }: TOCProps) {
   const items = Base.useTOCItems();
-  const { TOCItems, TOCEmpty, TOCItem } = style === 'clerk' ? TocClerk : TocDefault;
+  const { TOCItems, TOCEmpty, TOCItem } = variants[style];
 
   if (items.length === 0 && !header && !footer) return;
 
@@ -152,7 +159,7 @@ function PageTOCPopoverPhysical({ className, children, ...rest }: ComponentProps
 }
 
 function PageTOCPopoverTrigger({ className, ...props }: ComponentProps<'button'>) {
-  const t = useTranslations();
+  const t = useTranslations({ note: 'table of contents' });
   const { open } = use(TocPopoverContext)!;
   const items = Base.useItems();
   const selectedIdx = items.findIndex((item) => item.active);
@@ -201,7 +208,7 @@ function PageTOCPopoverTrigger({ className, ...props }: ComponentProps<'button'>
           </motion.span>
         ) : (
           <motion.span key=":toc" {...spanProps}>
-            {t.toc}
+            {t('On this page')}
           </motion.span>
         )}
       </AnimatePresence>

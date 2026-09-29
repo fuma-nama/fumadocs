@@ -11,7 +11,7 @@ export function validate(node: TypeNode, value: unknown): boolean {
     case 'union':
       return node.types.some((t) => validate(t, value));
     case 'null':
-      return value === 'null';
+      return value === null;
     case 'literal':
       return node.value === value;
     case 'unknown':

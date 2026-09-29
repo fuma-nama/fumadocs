@@ -89,7 +89,7 @@ export function baseSlots({ useProps }: { useProps: () => BaseSlotsProps }) {
   }
 
   return {
-    useProvider(options: BaseLayoutProps): {
+    useBaseSlots(options: BaseLayoutProps): {
       baseSlots: BaseSlots;
       baseProps: BaseSlotsProps;
     } {

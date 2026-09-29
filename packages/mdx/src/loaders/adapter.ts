@@ -1,8 +1,8 @@
-import type { CompilerOptions } from '@/loaders/mdx/build-mdx';
+import type { CompilerOptions } from '@/loaders/mdx/build';
 import type { LoadFnOutput, LoadHook } from 'node:module';
 import { fileURLToPath } from 'node:url';
 import fs from 'node:fs/promises';
-import type { HookFilter, TransformPluginContext } from 'rolldown';
+import type { TransformPluginContext } from 'rolldown';
 import type { Environment, TransformResult } from 'vite';
 import { parse } from 'node:querystring';
 import { ValidationError } from '@/utils/validation';
@@ -20,6 +20,9 @@ export interface LoaderInput {
 
 export interface LoaderOutput {
   code: string;
+  /**
+   * source map, omit if the transformation has no meaningful mapping.
+   */
   map?: unknown;
 
   /**
@@ -33,13 +36,6 @@ export interface LoaderOutput {
 type Awaitable<T> = T | Promise<T>;
 
 export interface Loader {
-  /**
-   * Filter file paths, the input can be either a file URL or file path.
-   *
-   * Must take resource query into consideration.
-   */
-  test?: RegExp;
-
   /**
    * Transform input into JavaScript.
    *
@@ -58,9 +54,9 @@ export interface Loader {
   };
 }
 
-export function toNode(loader: Loader): LoadHook {
+export function toNode(test: RegExp | undefined, loader: Loader): LoadHook {
   return async (url, _context, nextLoad): Promise<LoadFnOutput> => {
-    if (url.startsWith('file:///') && (!loader.test || loader.test.test(url))) {
+    if (url.startsWith('file:///') && (!test || test.test(url))) {
       const parsedUrl = new URL(url);
       const filePath = fileURLToPath(parsedUrl);
 
@@ -90,8 +86,6 @@ export function toNode(loader: Loader): LoadHook {
 }
 
 export interface ViteLoader {
-  filter: HookFilter;
-
   transform: (
     this: TransformPluginContext & { environment?: Environment },
     value: string,
@@ -101,9 +95,6 @@ export interface ViteLoader {
 
 export function toVite(loader: Loader): ViteLoader {
   return {
-    filter: {
-      id: loader.test,
-    },
     async transform(value, id) {
       const [file, query = ''] = id.split('?', 2);
 
@@ -130,7 +121,8 @@ export function toVite(loader: Loader): ViteLoader {
         if (result === null) return null;
         return {
           code: result.code,
-          map: result.map as TransformResult['map'],
+          // an empty map tells the bundler there is no mapping, instead of warning about a missing one
+          map: (result.map ?? { mappings: '' }) as TransformResult['map'],
           moduleType: result.moduleType,
         };
       } catch (e) {
@@ -182,7 +174,7 @@ export function toWebpack(loader: Loader): WebpackLoader {
   };
 }
 
-export function toBun(loader: Loader) {
+export function toBun(test: RegExp | undefined, loader: Loader) {
   function toResult(output: LoaderOutput | null): Bun.OnLoadResult {
     // it errors, treat this as an exception
     if (!output) return;
@@ -195,7 +187,7 @@ export function toBun(loader: Loader) {
 
   return (build: Bun.PluginBuilder) => {
     // avoid using async here, because it will cause dynamic require() to fail
-    build.onLoad({ filter: loader.test ?? /.+/ }, (args) => {
+    build.onLoad({ filter: test ?? /.+/ }, (args) => {
       const [filePath, query = ''] = args.path.split('?', 2);
       const input: LoaderInput = {
         async getSource() {

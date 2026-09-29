@@ -1,8 +1,8 @@
 import { createFileRoute, notFound } from '@tanstack/react-router';
 import { DocsLayout } from 'fumadocs-ui/layouts/notebook';
 import { createServerFn } from '@tanstack/react-start';
-import { slugsToMarkdownPath, source } from '@/lib/source';
-import browserCollections from 'collections/browser';
+import { docs } from '@/lib/collections';
+import { source } from '@/lib/source';
 import {
   DocsBody,
   DocsDescription,
@@ -12,11 +12,11 @@ import {
   ViewOptionsPopover,
 } from 'fumadocs-ui/layouts/notebook/page';
 import { baseOptions } from '@/lib/layout.shared';
-import { gitConfig } from '@/lib/shared';
+import { getPageMarkdownUrl, gitConfig } from '@/lib/shared';
 import { useFumadocsLoader } from 'fumadocs-core/source/client';
-import { Suspense, type ReactNode } from 'react';
+import { Suspense, use, type ReactNode } from 'react';
 import { useMDXComponents } from '@/components/mdx';
-import { ClientAPIPage } from '@/components/api-page';
+import { OpenAPIPage } from '@/components/api-page';
 
 export const Route = createFileRoute('/docs/$')({
   component: Page,
@@ -25,7 +25,7 @@ export const Route = createFileRoute('/docs/$')({
     const data = await serverLoader({ data: slugs });
 
     if (data.type === 'docs') {
-      await clientLoader.preload(data.path);
+      await docs.getPage(data.path)?.preload();
     }
     return data;
   },
@@ -34,7 +34,7 @@ export const Route = createFileRoute('/docs/$')({
 const serverLoader = createServerFn({
   method: 'GET',
 })
-  .inputValidator((slugs: string[]) => slugs)
+  .validator((slugs: string[]) => slugs)
   .handler(async ({ data: slugs }) => {
     const page = source.getPage(slugs);
     if (!page) throw notFound();
@@ -44,50 +44,43 @@ const serverLoader = createServerFn({
       return {
         type: 'openapi',
         title: page.data.title,
-        description: page.data.description,
         pageTree,
-        props: await page.data.getClientAPIPageProps(),
+        props: page.data.getOpenAPIPageProps(),
       };
     }
 
     return {
       type: 'docs',
       path: page.path,
-      markdownUrl: slugsToMarkdownPath(page.slugs).url,
+      markdownUrl: getPageMarkdownUrl(page).url,
       pageTree,
     };
   });
 
-const clientLoader = browserCollections.docs.createClientLoader({
-  component(
-    { toc, frontmatter, default: MDX },
-    // you can define props for the component
-    {
-      markdownUrl,
-      path,
-    }: {
-      markdownUrl: string;
-      path: string;
-    },
-  ) {
-    return (
-      <DocsPage toc={toc} tableOfContent={{ style: 'clerk' }}>
-        <DocsTitle>{frontmatter.title}</DocsTitle>
-        <DocsDescription>{frontmatter.description}</DocsDescription>
-        <div className="flex flex-row gap-2 items-center border-b -mt-4 pb-6">
-          <MarkdownCopyButton markdownUrl={markdownUrl} />
-          <ViewOptionsPopover
-            markdownUrl={markdownUrl}
-            githubUrl={`https://github.com/${gitConfig.user}/${gitConfig.repo}/blob/${gitConfig.branch}/content/docs/${path}`}
-          />
-        </div>
-        <DocsBody>
-          <MDX components={useMDXComponents()} />
-        </DocsBody>
-      </DocsPage>
-    );
-  },
-});
+function Content({ path, markdownUrl }: { path: string; markdownUrl: string }) {
+  const page = docs.getPage(path);
+  if (!page) throw new Error(`unknown page: ${path}`);
+
+  const { toc } = use(page.load());
+  const MDX = page.body;
+
+  return (
+    <DocsPage toc={toc}>
+      <DocsTitle>{page.title}</DocsTitle>
+      <DocsDescription>{page.description}</DocsDescription>
+      <div className="flex flex-row gap-2 items-center border-b -mt-4 pb-6">
+        <MarkdownCopyButton markdownUrl={markdownUrl} />
+        <ViewOptionsPopover
+          markdownUrl={markdownUrl}
+          githubUrl={`https://github.com/${gitConfig.user}/${gitConfig.repo}/blob/${gitConfig.branch}/content/docs/${path}`}
+        />
+      </div>
+      <DocsBody>
+        <MDX components={useMDXComponents()} />
+      </DocsBody>
+    </DocsPage>
+  );
+}
 
 function Page() {
   const page = useFumadocsLoader(Route.useLoaderData());
@@ -97,14 +90,17 @@ function Page() {
     content = (
       <DocsPage full>
         <DocsTitle>{page.title}</DocsTitle>
-        <DocsDescription>{page.description}</DocsDescription>
         <DocsBody>
-          <ClientAPIPage {...page.props} />
+          <OpenAPIPage {...page.props} />
         </DocsBody>
       </DocsPage>
     );
   } else {
-    content = <Suspense>{clientLoader.useContent(page.path, page)}</Suspense>;
+    content = (
+      <Suspense>
+        <Content path={page.path} markdownUrl={page.markdownUrl} />
+      </Suspense>
+    );
   }
 
   const base = baseOptions();

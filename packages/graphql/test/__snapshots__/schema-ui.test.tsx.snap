@@ -1,0 +1,215 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`generateGraphQLSchemaUI > Customer object with cyclic references 1`] = `
+{
+  "$root": "$root",
+  "refs": {
+    "$root": {
+      "aliasName": "Customer",
+      "deprecated": false,
+      "props": [
+        "id",
+        "name",
+        "email",
+        "contact",
+        "orders",
+      ],
+      "type": "object",
+    },
+    "ContactInfo.email": {
+      "aliasName": "String!",
+      "deprecated": false,
+      "props": undefined,
+      "type": "primitive",
+    },
+    "ContactInfo.phone": {
+      "aliasName": "String",
+      "deprecated": false,
+      "props": undefined,
+      "type": "primitive",
+    },
+    "Customer.contact": {
+      "aliasName": "ContactInfo",
+      "deprecated": false,
+      "props": [
+        "email",
+        "phone",
+      ],
+      "type": "object",
+    },
+    "Customer.email": {
+      "aliasName": "String",
+      "deprecated": true,
+      "props": undefined,
+      "type": "primitive",
+    },
+    "Customer.id": {
+      "aliasName": "ID!",
+      "deprecated": false,
+      "props": undefined,
+      "type": "primitive",
+    },
+    "Customer.name": {
+      "aliasName": "String!",
+      "deprecated": false,
+      "props": undefined,
+      "type": "primitive",
+    },
+    "Customer.orders": {
+      "aliasName": "[Order!]!",
+      "deprecated": false,
+      "props": [
+        "id",
+        "status",
+        "createdAt",
+        "total",
+        "customer",
+      ],
+      "type": "object",
+    },
+    "Order.createdAt": {
+      "aliasName": "DateTime!",
+      "deprecated": false,
+      "props": undefined,
+      "type": "primitive",
+    },
+    "Order.customer": {
+      "aliasName": "Customer!",
+      "deprecated": false,
+      "props": [
+        "id",
+        "name",
+        "email",
+        "contact",
+        "orders",
+      ],
+      "type": "object",
+    },
+    "Order.id": {
+      "aliasName": "ID!",
+      "deprecated": false,
+      "props": undefined,
+      "type": "primitive",
+    },
+    "Order.status": {
+      "aliasName": "OrderStatus!",
+      "deprecated": false,
+      "props": undefined,
+      "type": "primitive",
+    },
+    "Order.total": {
+      "aliasName": "Float!",
+      "deprecated": false,
+      "props": undefined,
+      "type": "primitive",
+    },
+  },
+}
+`;
+
+exports[`generateGraphQLSchemaUI > orders query return type keeps wrapper alias 1`] = `
+{
+  "$root": "$root",
+  "refs": {
+    "$root": {
+      "aliasName": "[Order!]!",
+      "deprecated": false,
+      "props": [
+        "id",
+        "status",
+        "createdAt",
+        "total",
+        "customer",
+      ],
+      "type": "object",
+    },
+    "ContactInfo.email": {
+      "aliasName": "String!",
+      "deprecated": false,
+      "props": undefined,
+      "type": "primitive",
+    },
+    "ContactInfo.phone": {
+      "aliasName": "String",
+      "deprecated": false,
+      "props": undefined,
+      "type": "primitive",
+    },
+    "Customer.contact": {
+      "aliasName": "ContactInfo",
+      "deprecated": false,
+      "props": [
+        "email",
+        "phone",
+      ],
+      "type": "object",
+    },
+    "Customer.email": {
+      "aliasName": "String",
+      "deprecated": true,
+      "props": undefined,
+      "type": "primitive",
+    },
+    "Customer.id": {
+      "aliasName": "ID!",
+      "deprecated": false,
+      "props": undefined,
+      "type": "primitive",
+    },
+    "Customer.name": {
+      "aliasName": "String!",
+      "deprecated": false,
+      "props": undefined,
+      "type": "primitive",
+    },
+    "Customer.orders": {
+      "aliasName": "[Order!]!",
+      "deprecated": false,
+      "props": [
+        "id",
+        "status",
+        "createdAt",
+        "total",
+        "customer",
+      ],
+      "type": "object",
+    },
+    "Order.createdAt": {
+      "aliasName": "DateTime!",
+      "deprecated": false,
+      "props": undefined,
+      "type": "primitive",
+    },
+    "Order.customer": {
+      "aliasName": "Customer!",
+      "deprecated": false,
+      "props": [
+        "id",
+        "name",
+        "email",
+        "contact",
+        "orders",
+      ],
+      "type": "object",
+    },
+    "Order.id": {
+      "aliasName": "ID!",
+      "deprecated": false,
+      "props": undefined,
+      "type": "primitive",
+    },
+    "Order.status": {
+      "aliasName": "OrderStatus!",
+      "deprecated": false,
+      "props": undefined,
+      "type": "primitive",
+    },
+    "Order.total": {
+      "aliasName": "Float!",
+      "deprecated": false,
+      "props": undefined,
+      "type": "primitive",
+    },
+  },
+}
+`;

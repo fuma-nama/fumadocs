@@ -7,7 +7,6 @@ from griffe_typingdoc import TypingDocExtension
 
 from .mksource import CustomEncoder, parse_module
 
-DOCSTRING_TYPE = "google"
 STORE_SOURCE = True
 
 def generate() -> None:
@@ -38,12 +37,22 @@ def generate() -> None:
         default=".",
         help="The directory to save the documentation in",
     )
+    parser.add_argument(
+        "--docstring-style",
+        "-s",
+        choices=["google", "numpy", "sphinx"],
+        default="google",
+        help="The docstring style to parse sections from",
+    )
     args = parser.parse_args()
 
     extensions = griffe.load_extensions(TypingDocExtension)
     pkg = parse_module(
         griffe.load(
-            args.module, docstring_parser="auto", store_source=STORE_SOURCE, extensions=extensions
+            args.module,
+            docstring_parser=args.docstring_style,
+            store_source=STORE_SOURCE,
+            extensions=extensions,
         )
     )
     api_filename = f"{args.module}.json"

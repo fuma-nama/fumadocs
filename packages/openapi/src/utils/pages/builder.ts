@@ -1,8 +1,9 @@
-import type { DereferencedDocument } from '@/utils/document/dereference';
-import type { ApiPageProps, OperationItem, WebhookItem } from '@/ui/api-page';
-import type { OperationObject, PathItemObject, TagObject } from '@/types';
-import { getTagDisplayName, methodKeys, type NoReference } from '@/utils/schema';
-import { idToTitle } from '@/utils/id-to-title';
+import type { Document, HttpMethods, OperationObject, PathItemObject, TagObject } from '@/types';
+import { getTagDisplayName, methodKeys } from '@/utils/schema';
+import { idToTitle } from 'shared-api/utils/id-to-title';
+import { dereference } from '@fumadocs/json-schema';
+import { createMagicProxy } from '@scalar/json-magic/magic-proxy';
+import type { DereferencedShallow } from '@fumadocs/json-schema';
 
 interface BaseEntry {
   path: string;
@@ -39,6 +40,25 @@ export interface OutputGroup extends BaseEntry {
   tag?: TagObject;
 }
 
+export interface WebhookItem {
+  /**
+   * webhook name in `webhooks`
+   */
+  name: string;
+  method: HttpMethods;
+}
+
+export interface OperationItem {
+  /**
+   * the path of operation in `paths`
+   */
+  path: string;
+  /**
+   * the HTTP method of operation
+   */
+  method: HttpMethods;
+}
+
 export type OutputEntry = PageOutput | OperationOutput | WebhookOutput | OutputGroup;
 
 export interface PagesBuilderConfig {
@@ -50,7 +70,9 @@ export interface PagesBuilder {
    * the input ID in OpenAPI server
    */
   id: string;
-  document: DereferencedDocument;
+  /** bundled OpenAPI document (not dereferenced) */
+  document: Document;
+  dereferenceShallow: <T>(schema: T) => DereferencedShallow<T>;
   /**
    * add output entry.
    */
@@ -68,15 +90,15 @@ export interface PagesBuilder {
   fromExtractedWebhook: (item: WebhookItem) =>
     | {
         get displayName(): string;
-        pathItem: NoReference<PathItemObject>;
-        operation: NoReference<OperationObject>;
+        pathItem: PathItemObject;
+        operation: OperationObject;
       }
     | undefined;
   fromExtractedOperation: (item: OperationItem) =>
     | {
         get displayName(): string;
-        pathItem: NoReference<PathItemObject>;
-        operation: NoReference<OperationObject>;
+        pathItem: PathItemObject;
+        operation: OperationObject;
       }
     | undefined;
   fromTag: (tag: TagObject) => {
@@ -99,23 +121,25 @@ interface ExtractedInfo {
 
 export function fromSchema(
   schemaId: string,
-  processed: DereferencedDocument,
+  bundled: Document,
   config: PagesBuilderConfig,
 ): OutputEntry[] {
   const files: OutputEntry[] = [];
   const { toPages } = config;
-  const { dereferenced } = processed;
+  // wrap in a magic proxy so that `dereferenceShallow` can resolve refs lazily
+  const document = createMagicProxy(bundled as Record<string, unknown>) as Document;
 
   toPages({
     id: schemaId,
-    document: processed,
+    document,
+    dereferenceShallow: (s) => dereference(s),
     create(entry) {
       files.push(entry);
     },
     extract() {
       const result: ExtractedInfo = { webhooks: [], operations: [] };
 
-      for (const [path, pathItem] of Object.entries(dereferenced.paths ?? {})) {
+      for (const [path, pathItem] of Object.entries(document.paths ?? {})) {
         if (!pathItem) continue;
 
         for (const methodKey of methodKeys) {
@@ -129,7 +153,8 @@ export function fromSchema(
         }
       }
 
-      for (const [name, pathItem] of Object.entries(dereferenced.webhooks ?? {})) {
+      for (const [name, _pathItem] of Object.entries(document.webhooks ?? {})) {
+        const pathItem = dereference(_pathItem);
         if (!pathItem) continue;
 
         for (const methodKey of methodKeys) {
@@ -158,7 +183,7 @@ export function fromSchema(
         .join('/');
     },
     fromExtractedWebhook(item) {
-      const pathItem = dereferenced.webhooks?.[item.name];
+      const pathItem = dereference(document.webhooks?.[item.name]);
       if (!pathItem) return;
       const operation = pathItem?.[item.method];
       if (!operation) return;
@@ -171,7 +196,7 @@ export function fromSchema(
       };
     },
     fromExtractedOperation(item) {
-      const pathItem = dereferenced.paths?.[item.path];
+      const pathItem = dereference(document.paths?.[item.path]);
       if (!pathItem) return;
       const operation = pathItem?.[item.method];
       if (!operation) return;
@@ -195,7 +220,7 @@ export function fromSchema(
       };
     },
     fromTagName(name) {
-      const tag = dereferenced.tags?.find((item) => item.name === name);
+      const tag = document.tags?.find((item) => item.name === name);
       if (!tag) return;
 
       return {
@@ -208,7 +233,39 @@ export function fromSchema(
   return files;
 }
 
-export function getPageProps(entry: PageOutput | OperationOutput | WebhookOutput): ApiPageProps {
+export interface GeneratedPageProps {
+  /** schema ID */
+  document: string;
+  showTitle?: boolean;
+  showDescription?: boolean;
+
+  /**
+   * An array of operations
+   */
+  operations?: OperationItem[];
+
+  webhooks?: WebhookItem[];
+}
+
+export type OpenAPIPageProps = OpenAPIPageProps_Spec | OpenAPIPageProps_Preloaded;
+
+export type OpenAPIPageProps_Spec = Omit<GeneratedPageProps, 'document'> & {
+  payload: {
+    bundled: Document;
+    proxyUrl?: string;
+  };
+};
+
+export type OpenAPIPageProps_Preloaded = GeneratedPageProps & {
+  preloaded: {
+    docs: Record<string, Document>;
+    proxyUrl?: string;
+  };
+};
+
+export function getPageProps(
+  entry: PageOutput | OperationOutput | WebhookOutput,
+): GeneratedPageProps {
   if (entry.type === 'operation')
     return {
       document: entry.schemaId,

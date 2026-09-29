@@ -137,7 +137,7 @@ export function Feedback({
                 target="_blank"
                 className={cn(
                   buttonVariants({
-                    color: 'primary',
+                    variant: 'default',
                   }),
                   'text-xs',
                 )}
@@ -148,7 +148,7 @@ export function Feedback({
               <button
                 className={cn(
                   buttonVariants({
-                    color: 'secondary',
+                    variant: 'secondary',
                   }),
                   'text-xs',
                 )}
@@ -171,6 +171,8 @@ export function Feedback({
               className="border rounded-lg bg-fd-secondary text-fd-secondary-foreground p-3 resize-none focus-visible:outline-none placeholder:text-fd-muted-foreground"
               placeholder="Leave your feedback..."
               onKeyDown={(e) => {
+                // keyCode 229: Safari fires `compositionend` before this keydown, `isComposing` is already false
+                if (e.nativeEvent.isComposing || e.keyCode === 229) return;
                 if (!e.shiftKey && e.key === 'Enter') {
                   submit(e);
                 }
@@ -178,7 +180,7 @@ export function Feedback({
             />
             <button
               type="submit"
-              className={cn(buttonVariants({ color: 'outline' }), 'w-fit px-3')}
+              className={cn(buttonVariants({ variant: 'outline' }), 'w-fit px-3')}
               disabled={isPending}
             >
               Submit
@@ -425,7 +427,7 @@ function FeedbackTextForm({
             target="_blank"
             className={cn(
               buttonVariants({
-                color: 'primary',
+                variant: 'default',
               }),
               'text-xs',
             )}
@@ -436,7 +438,7 @@ function FeedbackTextForm({
           <button
             className={cn(
               buttonVariants({
-                color: 'secondary',
+                variant: 'secondary',
               }),
               'text-xs',
             )}
@@ -464,6 +466,8 @@ function FeedbackTextForm({
         className="border rounded-lg bg-fd-secondary text-fd-secondary-foreground p-3 resize-none focus-visible:outline-none placeholder:text-fd-muted-foreground"
         placeholder="Leave your feedback..."
         onKeyDown={(e) => {
+          // keyCode 229: Safari fires `compositionend` before this keydown, `isComposing` is already false
+          if (e.nativeEvent.isComposing || e.keyCode === 229) return;
           if (!e.shiftKey && e.key === 'Enter') {
             submit(e);
           }
@@ -472,7 +476,7 @@ function FeedbackTextForm({
       <div className="grid grid-cols-2 gap-2 mt-auto">
         <button
           type="submit"
-          className={cn(buttonVariants({ variant: 'primary', size: 'sm' }), 'gap-1.5')}
+          className={cn(buttonVariants({ variant: 'default', size: 'sm' }), 'gap-1.5')}
           disabled={isPending}
         >
           <CornerDownRightIcon className="size-4" />

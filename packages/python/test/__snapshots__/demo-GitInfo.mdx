@@ -1,0 +1,93 @@
+Information about a Git repository.
+
+## Attributes
+
+<PyAttributes>
+  <PyAttribute name="repository" type="Path">
+    The path to the Git repository.
+  </PyAttribute>
+
+  <PyAttribute name="service" type="KnownGitService">
+    The Git hosting service (used to build the right URLs).
+  </PyAttribute>
+
+  <PyAttribute name="remote_url" type="str">
+    The remote URL of the Git repository.
+  </PyAttribute>
+
+  <PyAttribute name="commit_hash" type="str">
+    A commit hash (usually the current checked-out one).
+  </PyAttribute>
+</PyAttributes>
+
+## Functions
+
+<PyFunction name="__init__" type="(repository, service, remote_url, commit_hash) -> None" kind="constructor">
+  <div>
+    <PyParameter name="repository" type="Path" />
+
+    <PyParameter name="service" type="KnownGitService" />
+
+    <PyParameter name="remote_url" type="str" />
+
+    <PyParameter name="commit_hash" type="str" />
+  </div>
+
+  <PyFunctionReturn type="None" />
+</PyFunction>
+
+<PyFunction name="from_package" type="(package) -> GitInfo | None">
+  Create a GitInfo instance from a Griffe package.
+
+  <PySourceCode>
+    ```python
+    @classmethod
+    def from_package(cls, package: Module) -> GitInfo | None:
+        """Create a GitInfo instance from a Griffe package.
+
+        Returns:
+            The GitInfo instance, or None if unknown.
+        """
+        try:
+            path = package.filepath[0] if isinstance(package.filepath, list) else package.filepa
+        ...
+    ```
+  </PySourceCode>
+
+  <div>
+    <PyParameter name="package" type="Module" />
+  </div>
+
+  <PyFunctionReturn type="GitInfo | None">
+    The GitInfo instance, or None if unknown.
+  </PyFunctionReturn>
+</PyFunction>
+
+<PyFunction name="get_source_link" type="(filepath, lineno, endlineno) -> str | None">
+  Get the source link for the file at the given line numbers.
+
+  <PySourceCode>
+    ```python
+    def get_source_link(self, filepath: str | Path, lineno: int, endlineno: int) -> str | None:
+        """Get the source link for the file at the given line numbers.
+
+        Returns:
+            The source link, or None if unknown.
+        """
+        return _get_source_link(self.service, self.remote_url, self.commit_has
+        ...
+    ```
+  </PySourceCode>
+
+  <div>
+    <PyParameter name="filepath" type="str | Path" />
+
+    <PyParameter name="lineno" type="int" />
+
+    <PyParameter name="endlineno" type="int" />
+  </div>
+
+  <PyFunctionReturn type="str | None">
+    The source link, or None if unknown.
+  </PyFunctionReturn>
+</PyFunction>

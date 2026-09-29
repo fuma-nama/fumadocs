@@ -1,6 +1,6 @@
 {
   "name": "@fumadocs/base-ui",
-  "version": "16.9.3",
+  "version": "16.15.17",
   "description": "The Base UI version of Fumadocs UI",
   "keywords": [
     "Docs",
@@ -15,6 +15,10 @@
     "dist"
   ],
   "type": "module",
+  "sideEffects": [
+    "./css/**/*.css",
+    "./dist/**/*.css"
+  ],
   "exports": {
     "./components/accordion": "./dist/components/accordion.js",
     "./components/banner": "./dist/components/banner.js",
@@ -41,15 +45,14 @@
     "./components/steps": "./dist/components/steps.js",
     "./components/tabs": "./dist/components/tabs.js",
     "./components/toc": "./dist/components/toc/index.js",
+    "./components/toc/block": "./dist/components/toc/block.js",
     "./components/toc/clerk": "./dist/components/toc/clerk.js",
     "./components/toc/default": "./dist/components/toc/default.js",
     "./components/type-table": "./dist/components/type-table.js",
     "./components/ui/accordion": "./dist/components/ui/accordion.js",
     "./components/ui/button": "./dist/components/ui/button.js",
     "./components/ui/collapsible": "./dist/components/ui/collapsible.js",
-    "./components/ui/navigation-menu": "./dist/components/ui/navigation-menu.js",
     "./components/ui/popover": "./dist/components/ui/popover.js",
-    "./components/ui/scroll-area": "./dist/components/ui/scroll-area.js",
     "./components/ui/tabs": "./dist/components/ui/tabs.js",
     "./contexts/i18n": "./dist/contexts/i18n.js",
     "./contexts/search": "./dist/contexts/search.js",
@@ -73,6 +76,13 @@
     "./layouts/flux/slots/container": "./dist/layouts/flux/slots/container.js",
     "./layouts/flux/slots/sidebar": "./dist/layouts/flux/slots/sidebar.js",
     "./layouts/flux/slots/tab-dropdown": "./dist/layouts/flux/slots/tab-dropdown.js",
+    "./layouts/glass": "./dist/layouts/glass/index.js",
+    "./layouts/glass/page": "./dist/layouts/glass/page/index.js",
+    "./layouts/glass/page/slots/breadcrumb": "./dist/layouts/glass/page/slots/breadcrumb.js",
+    "./layouts/glass/page/slots/footer": "./dist/layouts/glass/page/slots/footer.js",
+    "./layouts/glass/page/slots/toc": "./dist/layouts/glass/page/slots/toc.js",
+    "./layouts/glass/slots/header": "./dist/layouts/glass/slots/header.js",
+    "./layouts/glass/slots/sidebar": "./dist/layouts/glass/slots/sidebar.js",
     "./layouts/home": "./dist/layouts/home/index.js",
     "./layouts/home/navbar": "./dist/layouts/home/navbar.js",
     "./layouts/home/not-found": "./dist/layouts/home/not-found.js",
@@ -99,6 +109,7 @@
     "./og": "./dist/og.js",
     "./og/takumi": "./dist/og/takumi.js",
     "./page": "./dist/page.js",
+    "./provider/astro": "./dist/provider/astro.js",
     "./provider/base": "./dist/provider/base.js",
     "./provider/next": "./dist/provider/next.js",
     "./provider/react-router": "./dist/provider/react-router.js",
@@ -116,60 +127,59 @@
     "access": "public"
   },
   "scripts": {
-    "build": "pnpm build:layout && pnpm build:tailwind",
-    "build:layout": "tsdown",
-    "build:tailwind": "tailwindcss -i css/style.css -o ./dist/style.css",
+    "build": "tsdown",
     "clean": "rimraf dist",
-    "dev": "concurrently \"tsdown --watch --clean false\" \"tailwindcss -i css/style.css -o ./dist/style.css -w\"",
+    "dev": "tsdown --watch --clean false",
     "lint": "oxlint .",
     "types:check": "tsc --noEmit"
   },
   "dependencies": {
-    "@base-ui/react": "^1.5.0",
+    "@base-ui/react": "^1.8.0",
+    "@fuma-translate/react": "^1.0.2",
     "@fumadocs/tailwind": "workspace:*",
     "class-variance-authority": "^0.7.1",
-    "lucide-react": "^1.17.0",
-    "motion": "^12.40.0",
+    "cn": "^0.3.0",
+    "lucide-react": "^1.47.0",
+    "motion": "^13.4.0",
     "next-themes": "^0.4.6",
     "react-remove-scroll": "^2.7.2",
     "rehype-raw": "^7.0.0",
     "scroll-into-view-if-needed": "^3.1.0",
-    "shiki": "^4.1.0",
-    "tailwind-merge": "^3.6.0",
+    "shiki": "^4.4.3",
     "unist-util-visit": "^5.1.0"
   },
   "devDependencies": {
     "@fumadocs/cli": "workspace:*",
-    "@tailwindcss/cli": "^4.3.0",
-    "@tailwindcss/oxide": "^4.3.0",
-    "@tsdown/css": "^0.22.0",
-    "@types/hast": "^3.0.4",
-    "@types/mdx": "^2.0.13",
-    "@types/node": "^25.9.1",
-    "@types/react": "^19.2.15",
-    "@types/react-dom": "^19.2.3",
-    "fuma-cli": "^0.1.1",
+    "@tailwindcss/cli": "^4.3.3",
+    "@tailwindcss/oxide": "^4.3.3",
+    "@tsdown/css": "^0.23.0",
+    "@types/hast": "^3.0.5",
+    "@types/mdx": "^2.0.14",
+    "@types/node": "^26.6.1",
+    "@types/react": "^19.3.0",
+    "@types/react-dom": "^19.3.0",
+    "fuma-cli": "^0.3.1",
     "fumadocs-core": "workspace:*",
-    "react-medium-image-zoom": "^5.4.5",
-    "tailwindcss": "^4.3.0",
+    "react-medium-image-zoom": "^5.4.9",
+    "tailwindcss": "^4.3.3",
     "tsconfig": "workspace:*",
-    "tsdown": "0.22.0",
+    "tsdown": "0.23.0",
     "unified": "^11.0.5"
   },
   "peerDependencies": {
-    "@takumi-rs/image-response": "*",
     "@types/mdx": "*",
     "@types/react": "*",
     "fumadocs-core": "workspace:*",
     "next": "16.x.x",
     "react": "^19.2.0",
-    "react-dom": "^19.2.0"
+    "react-dom": "^19.2.0",
+    "takumi-js": "*"
   },
   "peerDependenciesMeta": {
     "next": {
       "optional": true
     },
-    "@takumi-rs/image-response": {
+    "takumi-js": {
       "optional": true
     },
     "@types/mdx": {
@@ -180,6 +190,6 @@
     }
   },
   "inlinedDependencies": {
-    "react-medium-image-zoom": "5.4.5"
+    "react-medium-image-zoom": "5.4.9"
   }
 }

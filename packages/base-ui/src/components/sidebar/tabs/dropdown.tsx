@@ -7,24 +7,45 @@ import { cn } from '@/utils/cn';
 import { useSidebar } from '@/components/sidebar/base';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { isLayoutTabActive, type LayoutTab } from '@/layouts/shared';
+import { useTabsGroups, useTreePath } from '@/contexts/tree';
 
 export type SidebarTabWithProps = LayoutTab;
 
+/**
+ * Renders the given tabs as a dropdown per tabs group, one for each root folder on the
+ * current page's path, letting users switch between root folders of the same type.
+ */
 export function SidebarTabsDropdown({
   options,
   placeholder,
   ...props
 }: {
   placeholder?: ReactNode;
-  options: SidebarTabWithProps[];
+  options: LayoutTab[];
+} & ComponentProps<'button'>) {
+  const groups = useTabsGroups(options);
+
+  return groups.map((group, i) => (
+    <Dropdown key={i} options={group.options} placeholder={placeholder} {...props} />
+  ));
+}
+
+function Dropdown({
+  options,
+  placeholder,
+  ...props
+}: {
+  placeholder?: ReactNode;
+  options: LayoutTab[];
 } & ComponentProps<'button'>) {
   const [open, setOpen] = useState(false);
   const { closeOnRedirect } = useSidebar();
   const pathname = usePathname();
+  const path = useTreePath();
 
   const selected = useMemo(() => {
-    return options.findLast((item) => isTabActive(item, pathname));
-  }, [options, pathname]);
+    return options.findLast((item) => isLayoutTabActive(item, path, pathname));
+  }, [options, path, pathname]);
 
   const onClick = () => {
     closeOnRedirect.current = false;
@@ -51,7 +72,7 @@ export function SidebarTabsDropdown({
         <PopoverTrigger
           {...props}
           className={cn(
-            'flex items-center gap-2 rounded-lg p-2 border bg-fd-secondary/50 text-start text-fd-secondary-foreground transition-colors hover:bg-fd-accent data-open:bg-fd-accent data-open:text-fd-accent-foreground',
+            'flex items-center gap-2 rounded-lg p-2 border bg-fd-secondary/50 text-start text-fd-secondary-foreground transition-colors hover:bg-fd-accent data-[popup-open]:bg-fd-accent data-[popup-open]:text-fd-accent-foreground',
             props.className,
           )}
         >
@@ -96,5 +117,3 @@ export function SidebarTabsDropdown({
     </Popover>
   );
 }
-
-export const isTabActive = isLayoutTabActive;

@@ -1,8 +1,7 @@
 import { createMiddleware, createStart } from '@tanstack/react-start';
 import { isMarkdownPreferred } from 'fumadocs-core/negotiation';
 import { redirect } from '@tanstack/react-router';
-import { docsRoute } from '@/lib/shared';
-import { slugsToMarkdownPath } from './lib/source';
+import { docsRoute, getPageMarkdownUrl } from '@/lib/shared';
 
 const llmMiddleware = createMiddleware().server(({ next, request }) => {
   const url = new URL(request.url);
@@ -16,9 +15,10 @@ const llmMiddleware = createMiddleware().server(({ next, request }) => {
       .slice(docsRoute.length)
       .split('/')
       .filter((v) => v.length > 0);
-    url.pathname = slugsToMarkdownPath(slugs).url;
+    url.pathname = getPageMarkdownUrl({ slugs }).url;
 
-    throw redirect(url);
+    // this URL has two representations, selected by `Accept`
+    throw redirect({ href: url.href, headers: { Vary: 'Accept' } });
   }
 
   return next();

@@ -82,10 +82,12 @@ export const { GET } = createMixedbreadSearchAPI({
 
   ```ts
   import { useDocsSearch } from 'fumadocs-core/search/client';
+  import { fetchClient } from 'fumadocs-core/search/client/fetch';
 
   const client = useDocsSearch({
-    type: 'fetch',
-    api: '/api/search',
+    client: fetchClient({
+      api: '/api/search',
+    }),
   });
   ```
 
@@ -112,12 +114,14 @@ And update your search client:
 
   ```ts
   import { useDocsSearch } from 'fumadocs-core/search/client';
+  import { fetchClient } from 'fumadocs-core/search/client/fetch';
 
   const { search, setSearch, query } = useDocsSearch({
-    type: 'fetch',
-    api: '/api/search',
-    tag: '<your tag value>',
-    // ...
+    client: fetchClient({
+      api: '/api/search',
+      tag: '<your tag value>',
+      // ...
+    }),
   });
   ```
 

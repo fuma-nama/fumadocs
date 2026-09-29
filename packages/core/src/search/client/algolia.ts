@@ -74,16 +74,9 @@ export function algoliaClient(options: AlgoliaOptions): SearchClient {
           });
 
       const highlighter = createContentHighlighter(query);
-      return groupResults(result.results[0].hits).flatMap((hit) => {
-        if (hit.type === 'page') {
-          return {
-            ...hit,
-            content: highlighter.highlightMarkdown(hit.content),
-          };
-        }
-
-        return [];
-      });
+      const results = groupResults(result.results[0].hits);
+      for (const item of results) item.content = highlighter.highlightMarkdown(item.content);
+      return results;
     },
   };
 }

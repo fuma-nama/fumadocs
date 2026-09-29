@@ -1,4 +1,5 @@
-import { isCancel, autocompleteMultiselect, outro, spinner } from '@clack/prompts';
+import { autocompleteMultiselect, outro, spinner } from '@clack/prompts';
+import { isCancel } from '@/utils/prompt';
 import picocolors from 'picocolors';
 import { UIRegistries } from '@/commands/shared';
 import { RegistryConnector } from 'fuma-cli/registry/connector';
@@ -26,23 +27,32 @@ export async function add(input: string[], connector: RegistryConnector, config:
     spin.start('fetching registry');
 
     async function scan(subRegistry?: string, prefix?: string): Promise<AddOption[]> {
-      const info = await connector.fetchRegistryInfo(subRegistry);
+      const manifest = await installer.fetchManifest(subRegistry);
+      const options: AddOption[] = [];
 
-      return info.indexes.map((item) => ({
-        label: `${prefix ? `${picocolors.bold(prefix)} - ` : ''}${item.title ?? item.name}`,
-        value: { name: item.name, subRegistry },
-        hint: item.description,
-      }));
+      for (const item of manifest.components) {
+        if (item.unlisted) continue;
+        options.push({
+          label: `${prefix ? `${picocolors.bold(prefix)} - ` : ''}${item.title ?? item.name}`,
+          value: { name: item.name, subRegistry },
+          hint: item.description,
+        });
+      }
+      return options;
     }
+
+    const groups = await Promise.all([
+      scan(undefined, 'common'),
+      scan('sanity', 'sanity'),
+      scan('openapi', 'openapi'),
+      scan('api-docs', 'api-docs'),
+      scan(subRegistry, 'ui'),
+    ]);
 
     spin.stop(picocolors.bold(picocolors.greenBright('registry fetched')));
     const value = await autocompleteMultiselect({
       message: 'Select components to install',
-      options: [
-        ...(await scan(undefined, 'common')),
-        ...(await scan('fumadocs/sanity', 'sanity')),
-        ...(await scan(subRegistry, 'ui')),
-      ].sort((a, b) => a.label.localeCompare(b.label)),
+      options: groups.flat().sort((a, b) => a.label.localeCompare(b.label)),
     });
 
     if (isCancel(value)) {
@@ -52,11 +62,9 @@ export async function add(input: string[], connector: RegistryConnector, config:
 
     targets = value;
   } else {
-    targets = await Promise.all(
-      input.map(async (item) =>
-        (await connector.hasComponent(item)) ? { name: item } : { subRegistry, name: item },
-      ),
-    );
+    const root = new Set<string>();
+    for (const item of (await installer.fetchManifest()).components) root.add(item.name);
+    targets = input.map((name) => (root.has(name) ? { name } : { subRegistry, name }));
   }
 
   for (const target of targets) {

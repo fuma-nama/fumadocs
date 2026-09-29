@@ -1,0 +1,68 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "docs",
+      "runtimeExecutable": "pnpm",
+      "runtimeArgs": ["--filter=docs", "dev"],
+      "port": 3000,
+      "autoPort": true
+    },
+    {
+      "name": "obsidian-example",
+      "runtimeExecutable": "pnpm",
+      "runtimeArgs": ["--dir", "examples/obsidian", "dev"],
+      "port": 3000,
+      "autoPort": true
+    },
+    {
+      "name": "asyncapi-example",
+      "runtimeExecutable": "pnpm",
+      "runtimeArgs": ["--dir", "examples/asyncapi", "dev"],
+      "port": 3000,
+      "autoPort": true
+    },
+    {
+      "name": "graphql-example",
+      "runtimeExecutable": "pnpm",
+      "runtimeArgs": ["--dir", "examples/graphql", "dev"],
+      "port": 3000,
+      "autoPort": true
+    },
+    {
+      "name": "local-html-example",
+      "runtimeExecutable": "pnpm",
+      "runtimeArgs": ["--dir", "examples/next-local-html", "dev"],
+      "port": 3000,
+      "autoPort": true
+    },
+    {
+      "name": "next-min-example",
+      "runtimeExecutable": "pnpm",
+      "runtimeArgs": ["--dir", "examples/next-min", "dev"],
+      "port": 3000,
+      "autoPort": true
+    },
+    {
+      "name": "openapi-example",
+      "runtimeExecutable": "pnpm",
+      "runtimeArgs": ["--dir", "examples/openapi", "dev"],
+      "port": 3000,
+      "autoPort": true
+    },
+    {
+      "name": "python-example",
+      "runtimeExecutable": "pnpm",
+      "runtimeArgs": ["--dir", "examples/python", "dev"],
+      "port": 3000,
+      "autoPort": true
+    },
+    {
+      "name": "story-example",
+      "runtimeExecutable": "pnpm",
+      "runtimeArgs": ["--dir", "examples/tanstack-start-story", "dev"],
+      "port": 3000,
+      "autoPort": true
+    }
+  ]
+}

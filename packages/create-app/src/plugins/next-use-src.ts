@@ -17,7 +17,8 @@ export function nextUseSrc(): TemplatePlugin {
           if (
             isRelative(path.join(this.dest, 'app'), file) ||
             isRelative(path.join(this.dest, 'lib'), file) ||
-            isRelative(path.join(this.dest, 'components'), file)
+            isRelative(path.join(this.dest, 'components'), file) ||
+            isRootConventionFile(this.dest, file)
           ) {
             return path.join(this.dest, 'src', path.relative(this.dest, file));
           }
@@ -43,6 +44,18 @@ export function nextUseSrc(): TemplatePlugin {
       await fs.writeFile(tsconfigPath, JSON.stringify(config, null, 2));
     },
   };
+}
+
+/**
+ * Next.js only reads these files from the same level as `app`, so they must move into `src` too.
+ */
+const rootConventionFiles = ['proxy', 'middleware', 'instrumentation', 'instrumentation-client'];
+
+function isRootConventionFile(dest: string, file: string) {
+  const relative = path.relative(dest, file);
+  if (relative.includes(path.sep)) return false;
+
+  return rootConventionFiles.includes(relative.replace(/\.(ts|js|mts|mjs)$/, ''));
 }
 
 function isRelative(dir: string, file: string) {

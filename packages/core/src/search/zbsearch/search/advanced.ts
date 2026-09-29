@@ -1,0 +1,80 @@
+import { getByID, search, type SearchParams, type ZBSearch } from 'zbsearch';
+import { type AdvancedDocument, type advancedSchema } from '@/search/zbsearch/create-db';
+import { removeUndefined } from '@/utils/remove-undefined';
+import { createContentHighlighter, type SortedResult } from '@/search';
+
+export async function searchAdvanced(
+  db: ZBSearch<typeof advancedSchema>,
+  query: string,
+  tag: string | string[] = [],
+  {
+    mode = 'fulltext',
+    ...override
+  }: Partial<SearchParams<ZBSearch<typeof advancedSchema>, AdvancedDocument>> = {},
+  locale?: string,
+): Promise<SortedResult[]> {
+  if (typeof tag === 'string') tag = [tag];
+
+  const params = {
+    limit: 60,
+    mode,
+    ...override,
+    where: removeUndefined({
+      tags:
+        tag.length > 0
+          ? {
+              containsAll: tag,
+            }
+          : undefined,
+      locale: locale ? { eq: locale } : undefined,
+      ...override.where,
+    }),
+    groupBy: {
+      properties: ['page_id'],
+      maxResult: 8,
+      ...override.groupBy,
+    },
+    properties: mode === 'fulltext' ? ['content'] : ['content', 'embeddings'],
+  } as SearchParams<typeof db, AdvancedDocument>;
+
+  if (query.length > 0) {
+    params.term = query;
+  }
+
+  const highlighter = createContentHighlighter(query);
+  const result = await search(db, params);
+  // `limit` bounds `result.hits`, not `result.groups`: there is one group per
+  // matched page, so stop early instead of highlighting every matched page
+  const limit = typeof params.limit === 'number' ? params.limit : Infinity;
+  const list: SortedResult[] = [];
+  for (const item of result.groups ?? []) {
+    if (list.length >= limit) break;
+    const pageId = item.values[0] as string;
+
+    const page = getByID(db, pageId);
+    if (!page) continue;
+
+    list.push({
+      id: pageId,
+      type: 'page',
+      content: highlighter.highlightMarkdown(page.content),
+      breadcrumbs: page.breadcrumbs,
+      url: page.url,
+    });
+
+    for (const hit of item.result) {
+      if (list.length >= limit) break;
+      if (hit.document.type === 'page') continue;
+
+      list.push({
+        id: hit.document.id.toString(),
+        content: highlighter.highlightMarkdown(hit.document.content),
+        breadcrumbs: hit.document.breadcrumbs,
+        type: hit.document.type as SortedResult['type'],
+        url: hit.document.url,
+      });
+    }
+  }
+
+  return list;
+}

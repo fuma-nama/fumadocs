@@ -1,6 +1,7 @@
 import type { Awaitable } from '@/types';
 import type { DynamicLoader } from './dynamic';
 import type { StructuredData } from '@/mdx-plugins';
+import type { LoaderOutput } from './loader';
 
 export type SourceUnion<Config extends SourceConfig = SourceConfig> =
   | StaticSource<Config>
@@ -11,14 +12,55 @@ export type SourceUnion<Config extends SourceConfig = SourceConfig> =
  */
 export type Source<Config extends SourceConfig = SourceConfig> = StaticSource<Config>;
 
-export interface StaticSource<Config extends SourceConfig = SourceConfig> {
+export interface GenericSourceOptions {
+  /** the base directory for generated virtual files */
+  baseDir?: string;
+
+  /**
+   * when the source is attached to a new static loader, before loader output is accessible.
+   *
+   * can be called multiple times when attached to a dynamic loader.
+   **/
+  configureStatic?: (opts: { loader: LoaderOutput; source?: string }) => void;
+
+  /**
+   * when the source is attached to a dynamic loader.
+   *
+   * called at most once for each source object.
+   **/
+  configureDynamic?: (opts: { loader: DynamicLoader; source?: string }) => void;
+}
+
+export interface StaticSource<
+  Config extends SourceConfig = SourceConfig,
+> extends GenericSourceOptions {
   files: VirtualFile<Config>[];
 }
 
-export interface DynamicSource<Config extends SourceConfig = SourceConfig> {
+/** one dynamic source object can only be used by one dynamic loader */
+export type DynamicSource<Config extends SourceConfig = SourceConfig> = GenericSourceOptions & {
+  /**
+   * - `memory`: the dynamic loader's in-memory cache handles caching.
+   * - `custom`: the source handles caching itself. When the newer result of `files()` is (shallowly) different from the previous result, the source is considered revalidated, and all associated properties will be re-computed.
+   *
+   * @default 'memory'
+   **/
+  cache?: 'memory' | 'custom';
   files: () => Awaitable<VirtualFile<Config>[]>;
-  configure?: (loader: DynamicLoader) => void;
-}
+  /** @deprecated use `configureDynamic` instead */
+  configure?: (loader: DynamicLoader, opts: { source?: string }) => void;
+  /** when the source is invalidated */
+  invalidate?: () => void;
+} & (
+    | {
+        cache?: 'memory';
+        /** enable time-based revalidation, the previous result will be stale after the specified duration (ms) */
+        staleTime?: number;
+      }
+    | {
+        cache: 'custom';
+      }
+  );
 
 type SourceConfig = {
   pageData: PageData;
@@ -28,7 +70,7 @@ type SourceConfig = {
 export interface MetaData {
   icon?: string | undefined;
   title?: string | undefined;
-  root?: boolean | undefined;
+  root?: boolean | string | undefined;
   pages?: string[] | undefined;
   pagesIndex?: string | undefined;
   defaultOpen?: boolean | undefined;
@@ -101,18 +143,6 @@ export function multiple<T extends Record<string, StaticSource>>(
   return out as never;
 }
 
-export function source<Page extends PageData, Meta extends MetaData>(config: {
-  pages: VirtualPage<Page>[];
-  metas: VirtualMeta<Meta>[];
-}): StaticSource<{
-  pageData: Page;
-  metaData: Meta;
-}> {
-  return {
-    files: [...config.pages, ...config.metas],
-  };
-}
-
 interface SourceUpdater<Config extends SourceConfig> {
   files: <Page extends PageData, Meta extends MetaData>(
     fn: (files: VirtualFile<Config>[]) => (VirtualPage<Page> | VirtualMeta<Meta>)[],
@@ -137,7 +167,7 @@ interface SourceUpdater<Config extends SourceConfig> {
 }
 
 /**
- * update a source object in-place.
+ * update a **static** source object in-place.
  */
 export function update<Config extends SourceConfig>(
   source: StaticSource<Config>,

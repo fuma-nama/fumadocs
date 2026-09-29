@@ -14,14 +14,8 @@ const config: NextConfig = {
       fullUrl: true,
     },
   },
-  serverExternalPackages: [
-    'ts-morph',
-    'typescript',
-    'oxc-transform',
-    'twoslash',
-    'shiki',
-    '@takumi-rs/image-response',
-  ],
+  allowedDevOrigins: ['192.168.52.84'],
+  serverExternalPackages: ['ts-morph', 'typescript', 'shiki', '@takumi-rs/core'],
   images: {
     remotePatterns: [
       {
@@ -30,15 +24,6 @@ const config: NextConfig = {
         port: '',
       },
     ],
-  },
-  async redirects() {
-    return [
-      {
-        source: '/docs/versioning',
-        destination: '/docs/navigation',
-        permanent: false,
-      },
-    ];
   },
 };
 

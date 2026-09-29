@@ -45,17 +45,16 @@ import { i18n } from '@/lib/i18n';
 import { uiTranslations } from 'fumadocs-ui/i18n';
 import type { BaseLayoutProps } from 'fumadocs-ui/layouts/shared';
 
-// [!code ++:12]
-export const i18nUI = i18n
+// [!code ++:11]
+export const translations = i18n
   .translations()
   .extend(uiTranslations())
-  .add('ui', {
+  .add({
     en: {
       displayName: 'English',
     },
     cn: {
       displayName: 'Chinese',
-      search: '搜尋文檔',
     },
   });
 
@@ -210,7 +209,7 @@ export function generateStaticParams() {
 
 Configure i18n on your search solution.
 
-- **Built-in Search (Orama):** See [Internationalization](/docs/headless/search/orama#internationalization).
+- **Built-in Search:** See [Internationalization](/docs/headless/search/orama#internationalization).
 - **Cloud Solutions (e.g. Algolia):** They usually have official support for multilingual.
 
 ## Writing Documents

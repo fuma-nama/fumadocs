@@ -1,8 +1,7 @@
 import { expect, test } from 'vitest';
-import { createGenerator } from '@/lib/base';
+import { createGenerator, createProject } from '@/lib/base';
 import { getSimpleForm } from '@/lib/get-simple-form';
-import { createProject } from '@/lib/base';
-import { type Node, ts } from 'ts-morph';
+import { isVariableDeclaration, type Node } from 'typescript/unstable/ast';
 import path from 'node:path';
 import { fileURLToPath } from 'url';
 
@@ -113,14 +112,14 @@ const project = await createProject({
 
 function getSimpleForms(fileName: string, sourceCode: string) {
   const out: string[] = [];
-  const sourceFile = project.createSourceFile(fileName, sourceCode, {
-    overwrite: true,
-  });
-  const checker = project.getTypeChecker();
+  const loaded = project.getSourceFile(path.resolve(fileName), sourceCode);
+  if (!loaded) throw new Error(`failed to load ${fileName}`);
+  const { sourceFile, project: tsProject } = loaded;
+  const { checker } = tsProject;
 
   function visit(node: Node) {
-    if (node.isKind(ts.SyntaxKind.VariableDeclaration)) {
-      const type = checker.getTypeAtLocation(node);
+    if (isVariableDeclaration(node)) {
+      const type = checker.getTypeAtLocation(node)!;
 
       out.push(`Raw: ${node.getText()}
 Simplified: ${getSimpleForm(type, checker)}`);

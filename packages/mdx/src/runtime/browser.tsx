@@ -1,7 +1,7 @@
 import { type ReactNode, type FC, use } from 'react';
 import type { StandardSchemaV1 } from '@standard-schema/spec';
 import type { DocCollection, DocsCollection } from '@/config/define';
-import type { CompiledMDXProperties } from '@/loaders/mdx/build-mdx';
+import type { CompiledMDXProperties } from '@/loaders/mdx/build';
 import type { InternalTypeConfig } from './types';
 
 type CompiledMDXFile<

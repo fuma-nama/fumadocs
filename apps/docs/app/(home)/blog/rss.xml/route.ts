@@ -1,5 +1,5 @@
 import { Feed } from 'feed';
-import { blog } from '@/lib/source';
+import { blogLoader } from '@/lib/source';
 import { NextResponse } from 'next/server';
 
 export const revalidate = false;
@@ -18,7 +18,7 @@ export function GET() {
     copyright: 'All rights reserved 2025, Fuma Nama',
   });
 
-  for (const page of blog.getPages().sort((a, b) => {
+  for (const page of blogLoader.getPages().sort((a, b) => {
     return new Date(b.data.date).getTime() - new Date(a.data.date).getTime();
   })) {
     feed.addItem({

@@ -1,11 +1,11 @@
 import type { Route } from './+types/docs';
 import { DocsLayout } from 'fumadocs-ui/layouts/docs';
 import { DocsBody, DocsDescription, DocsPage, DocsTitle } from 'fumadocs-ui/layouts/docs/page';
-import { source } from '@/lib/source';
-import browserCollections from 'collections/browser';
+import { docs, source } from '@/lib/source';
 import { baseOptions } from '@/lib/layout.shared';
 import { useFumadocsLoader } from 'fumadocs-core/source/client';
 import { useMDXComponents } from '@/components/mdx';
+import { use } from 'react';
 
 export async function loader({ params }: Route.LoaderArgs) {
   const slugs = params['*'].split('/').filter((v) => v.length > 0);
@@ -19,32 +19,33 @@ export async function loader({ params }: Route.LoaderArgs) {
   };
 }
 
-const clientLoader = browserCollections.docs.createClientLoader({
-  component(
-    { toc, frontmatter, default: Mdx },
-    // you can define props for the `<Content />` component
-    props?: { className: string },
-  ) {
-    return (
-      <DocsPage toc={toc} {...props}>
-        <title>{frontmatter.title}</title>
-        <meta name="description" content={frontmatter.description} />
-        <DocsTitle>{frontmatter.title}</DocsTitle>
-        <DocsDescription>{frontmatter.description}</DocsDescription>
-        <DocsBody>
-          <Mdx components={useMDXComponents()} />
-        </DocsBody>
-      </DocsPage>
-    );
-  },
-});
+function Content({ path }: { path: string }) {
+  const page = docs.getPage(path);
+  if (!page) throw new Error(`unknown page: ${path}`);
+
+  // content is loaded lazily, call `page.preload()` in your loader to avoid suspending
+  const { toc } = use(page.load());
+  const Mdx = page.body;
+
+  return (
+    <DocsPage toc={toc}>
+      <title>{page.title}</title>
+      <meta name="description" content={page.description} />
+      <DocsTitle>{page.title}</DocsTitle>
+      <DocsDescription>{page.description}</DocsDescription>
+      <DocsBody>
+        <Mdx components={useMDXComponents()} />
+      </DocsBody>
+    </DocsPage>
+  );
+}
 
 export default function Page({ loaderData }: Route.ComponentProps) {
   const { path, pageTree } = useFumadocsLoader(loaderData);
 
   return (
     <DocsLayout {...baseOptions()} tree={pageTree}>
-      {clientLoader.useContent(path)}
+      <Content path={path} />
     </DocsLayout>
   );
 }

@@ -1,4 +1,193 @@
+## fumadocs-mdx@15.4.5
+
+### Stop recrawling `node_modules` on every Vite config resolution
+
+The config hook of `fumadocs-mdx/vite` walked the dependency tree below Fumadocs packages once per chain reaching a package, so a docs app with a few Fumadocs packages read ~10k `package.json` files (~0.9s) each time Vite resolved its config, which it does once per build environment.
+
+The crawl now visits each package once, breadth-first, and still records the shortest chain to every CommonJS dependency (`fumadocs-ui > @base-ui/react > use-sync-external-store/shim` and friends). The result is memoized for the process until the package manager's install state changes, so a build with several environments crawls once.
+
+## fumadocs-mdx@15.4.4
+
+### Sort glob results for deterministic codegen
+
+`fumadocs-mdx`'s Node codegen now sorts glob-matched files before generating collections, so the output (and anything derived from `getPages()`) is stable across builds of unchanged content. The Vite codegen path was checked separately: Vite's own `import.meta.glob` already sorts matched files internally, so it did not need the same fix.
+
+## fumadocs-mdx@15.4.3
+
+### Fix `experimentalBuildCache` bloating frontmatter-only imports
+
+With a warm build cache, `?only=frontmatter` imports were served the fully compiled page from cache instead of the frontmatter module, so every page was bundled two more times. The cache now only applies to full compilations.
+
+## fumadocs-mdx@15.4.2
+
+### Fix the `_mdast` export with `removePosition`
+
+```ts
+// fumadocs-mdx collection config
+postprocess: {
+  includeMDAST: { removePosition: true },
+},
+```
+
+This exported `_mdast` with no value, and `getMDAST()` then reported that `includeMDAST` was disabled. `removePosition` strips positions in place and returns nothing, so `JSON.stringify` received `undefined`.
+
+The tree is now cloned, stripped, and serialized from the clone.
+
+### Fix `SOURCEMAP_BROKEN` warnings on Vite
+
+With `build.sourcemap` enabled, Vite warned once per content and meta file because the loaders returned no source map. They now return an empty map when nothing is generated.
+
+Source maps for MDX stay opt-in, pass `SourceMapGenerator` from `source-map` to MDX options:
+
+```ts
+import { SourceMapGenerator } from 'source-map';
+
+export default defineConfig({
+  mdxOptions: {
+    SourceMapGenerator,
+  },
+});
+```
+
+## fumadocs-mdx@15.4.1
+
+### Mark packages side-effect free
+
+All packages now declare `sideEffects` in `package.json`, so bundlers can tree-shake unused modules. Packages shipping stylesheets list them as side effects to keep CSS imports.
+
+## fumadocs-mdx@15.4.0
+
+### Remark LLMs: export a component with `output: "function"`
+
+With `output: "function"`, `_markdown` becomes a component instead of a string: Markdown content is still stringified at compile time, while JSX elements stay as JSX, receiving their original props.
+
+```ts
+// fumadocs-mdx collection config
+postprocess: {
+  includeProcessedMarkdown: { output: 'function' },
+},
+```
+
+Render it with `renderToMarkdown` from `fumadocs-core/server`. Elements resolve from `props.components`: a component can call `asMarkdown()` to output its own Markdown form, other components (including missing ones) are serialized as JSX syntax.
+
+```tsx
+import { renderToMarkdown } from 'fumadocs-core/server';
+
+const { _markdown: Content } = await page.data.load();
+const text = await renderToMarkdown(<Content components={getMDXComponents()} />);
+```
+
+`getText('processed')` keeps working: it renders the component for you, with an optional components map:
+
+```ts
+const text = await page.data.getText('processed', { components: getMDXComponents() });
+```
+
+Supported in bundler collections with both compilers, and in `dynamic: true` collections & `@fumadocs/satteri/local-md` with the Sätteri compiler.
+
+## fumadocs-mdx@15.3.1
+
+### Scope `lastModified` git log to the content directory
+
+`git log` is scoped to the collection's content directory instead of buffering the repository's entire history in every worker.
+
+### Fix Vite dev server crash on declaration-only dependencies
+
+The injected Vite config no longer pre-bundles packages without runtime JavaScript, such as `@types/mdx`. Pre-bundling them made esbuild parse `.d.ts` files and fail on imports that only exist in type space, crashing the dev server.
+
+### Encode `import.meta.glob` query values
+
+The Vite codegen passed the query to `import.meta.glob` as an object, letting the bundler serialize it. Rolldown inlines the values as-is, so a macro id such as `src/lib/source.ts#docs` left an unescaped `/` in the content file's module id and relative imports from that module (e.g. images from `![Banner](/logo.png)`) failed to resolve, since the importer's directory is derived from the raw id.
+
+The query is now serialized (and percent-encoded) by Fumadocs itself, matching what the Node.js codegen already did.
+
+## fumadocs-mdx@15.3.0
+
+### Sätteri 0.10
+
+`@fumadocs/satteri` now requires `satteri` ^0.10.3, and the plugins were rewritten on its new capabilities:
+
+- Exports (`frontmatter`, `toc`, `structuredData`, …) are emitted by an `after` document hook instead of an anchor marker appended to the source, so plugins no longer see (or need to skip) the anchor node.
+- `remark-steps`, `remark-admonition` and `remark-code-tab` still detect their targets through node visitors (so documents without the construct cost nothing), but process each parent exactly once in an `after` hook, replacing the per-visit dedup workarounds.
+- `remark-llms` stringifies the document root from a `before` hook instead of subscribing to 19 node types to find it.
+- Markdown documents compile through Sätteri's own `markdownToJs`; the hand-assembled pipeline is gone. Raw HTML in `.md` files is still dropped, matching the previous behavior.
+- `rehype-katex` parses KaTeX output with Sätteri's `htmlToHast`, dropping the `hast-util-from-html` dependency.
+- No plugin reads `node.position`, so Sätteri now skips source-position tracking entirely (~15% faster parse).
+
+**Breaking:** `ExtraPluginHooks.beforeToJs` was removed. Seed `ctx.data` from a Sätteri `before` hook on the plugin definition instead — it also receives the document root:
+
+```ts
+import { defineMdastPlugin } from 'satteri';
+
+defineMdastPlugin({
+  name: 'my-plugin',
+  before(root, ctx) {
+    ctx.data.myValue ??= [];
+  },
+});
+```
+
+## fumadocs-mdx@15.2.3
+
+### Fix Base UI's `use-sync-external-store` breaking Vite dev servers
+
+The Vite config is now derived from your project's own dependencies at startup, instead of being generated ahead of time against ours.
+
+Builds keep the alias that replaces the shim with React, which is now applied only there. Pre-bundling is a dev server feature, and on builds a bundler that leaves the shim's `require('react')` in place gives it a second React instance whose hook dispatcher is null, breaking every component with a Base UI store.
+
+## fumadocs-mdx@15.2.2
+
+### Support thenable Next.js config
+
+Allow the promises to be awaited.
+
+## fumadocs-mdx@15.2.1
+
+### Support simpler `fumadocsMdx` vite plugin usage
+
+Use the `fumadocsMdx` method instead for better syntax around macro usage.
+
+### Support browser helpers for Macro API
+
+Use preload & lazy body renderer on non-rsc environment.
+
+## fumadocs-mdx@15.2.0
+
+### Support Macro API
+
+Use `fumadocs-mdx/macro` to define collections, and enable the macro-style API from bundler plugin (e.g. `createMDX`) using the `include` option.
+
+## fumadocs-mdx@15.1.1
+
+### Migrate from `js-yaml` to `yaml`
+
+## fumadocs-mdx@15.1.0
+
+### Default to Base UI
+
+Internal packages & templates now use Base UI rather than Radix UI.
+
+## fumadocs-mdx@15.0.13
+
+### Require `collection` query param at regex matching
+
+Instead of passing through all JSON/YAML files, the meta loader now requires `collection` query param to be triggered.
+
 # next-docs-mdx
+
+## 15.0.12
+
+### Patch Changes
+
+- 9b9545f: Add package issue tracker metadata.
+- Updated dependencies [9b9545f]
+  - fumadocs-core@16.10.0
+
+## 15.0.11
+
+### Patch Changes
+
+- 2d65ceb: Support hot reload in `source.config.ts` with Vite plugin
 
 ## 15.0.10
 

@@ -10,7 +10,8 @@ export class FileSystem<File> {
   constructor(inherit?: FileSystem<File>) {
     if (inherit) {
       for (const [k, v] of inherit.folders) {
-        this.folders.set(k, v);
+        // copy: `write`/`makeDir` mutate these arrays, which must not leak into `inherit`
+        this.folders.set(k, [...v]);
       }
 
       for (const [k, v] of inherit.files) {

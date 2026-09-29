@@ -1,12 +1,12 @@
-import type { ApiPageProps, OperationItem, WebhookItem } from '@/ui/api-page';
-import type { DereferencedDocument } from '@/utils/document/dereference';
-import type { TagObject } from '@/types';
-import { dump } from 'js-yaml';
-import { removeUndefined } from '@/utils/remove-undefined';
+import type { Document, TagObject } from '@/types';
+import { stringify } from 'yaml';
 import {
+  type GeneratedPageProps,
   getPageProps,
+  type OperationItem,
   type OperationOutput,
   type PageOutput,
+  type WebhookItem,
   type WebhookOutput,
 } from '@/utils/pages/builder';
 import type { InternalOpenAPIMeta } from '@/server';
@@ -55,7 +55,7 @@ export interface PagesToTextOptions {
 
 export function toText(
   entry: PageOutput | OperationOutput | WebhookOutput,
-  processed: DereferencedDocument,
+  doc: Document,
   options: PagesToTextOptions = {},
 ) {
   const { frontmatter, includeDescription = false } = options;
@@ -73,18 +73,18 @@ export function toText(
     pageProps.showDescription = false;
   }
 
-  let meta: InternalOpenAPIMeta | undefined;
+  let meta: InternalOpenAPIMeta = {
+    preload: [entry.schemaId],
+  };
   if (entry.type === 'operation' || entry.type === 'webhook') {
     const operation = entry.item;
 
-    meta = {
-      method: operation.method.toUpperCase(),
-      webhook: entry.type === 'webhook',
-      deprecated: entry.info.deprecated,
-    };
+    meta.method = operation.method.toUpperCase();
+    meta.webhook = entry.type === 'webhook';
+    meta.deprecated = entry.info.deprecated;
   }
 
-  const data = toStaticData(pageProps, processed.dereferenced);
+  const data = toStaticData(pageProps, doc);
 
   return generateDocument(
     {
@@ -110,7 +110,10 @@ export function generateDocument(
 ): string {
   const { addGeneratedComment = true, imports } = options;
   const out: string[] = [];
-  const banner = dump(removeUndefined(frontmatter as object)).trimEnd();
+  const banner = stringify(frontmatter, {
+    compat: 'yaml-1.1',
+    singleQuote: true,
+  }).trimEnd();
   if (banner.length > 0) out.push(`---\n${banner}\n---`);
 
   if (addGeneratedComment) {
@@ -155,8 +158,8 @@ function pageContent({
   document,
   webhooks,
   operations,
-}: ApiPageProps): string {
-  const propStrs: string[] = [`document={${doubleQuote(document)}}`];
+}: GeneratedPageProps): string {
+  const propStrs: string[] = [`document=${doubleQuote(document)}`];
 
   // filter extra properties in props
   if (webhooks) {
@@ -192,5 +195,13 @@ function pageContent({
     propStrs.push(`showDescription`);
   }
 
-  return `<APIPage ${propStrs.join(' ')} />`;
+  return `export default function Layout(props) {
+  const { OpenAPIPage } = props.components ?? {};
+  return (
+    <>
+      {props.children}
+      <OpenAPIPage ${propStrs.join(' ')} />
+    </>
+  );
+}`;
 }

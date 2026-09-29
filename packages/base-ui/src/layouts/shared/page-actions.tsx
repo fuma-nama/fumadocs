@@ -6,16 +6,15 @@ import { useCopyButton } from '@/utils/use-copy-button';
 import { Popover, PopoverTrigger, PopoverContent } from '@/components/ui/popover';
 import { buttonVariants } from '@/components/ui/button';
 import { usePathname } from 'fumadocs-core/framework';
-import { renderTranslation } from 'fumadocs-core/i18n';
-import { useTranslations } from '@/contexts/i18n';
+import { useTranslations } from '@fuma-translate/react';
 
-const cache = new Map<string, Promise<string>>();
+const cache = new Map<string, string>();
 
 /**
  * see https://fumadocs.dev/docs/integrations/llms#page-actions to customize.
  */
 export function MarkdownCopyButton({
-  markdownUrl,
+  markdownUrl: _markdownUrl,
   ...props
 }: ComponentProps<'button'> & {
   /**
@@ -23,20 +22,24 @@ export function MarkdownCopyButton({
    */
   markdownUrl: string;
 }) {
-  const t = useTranslations();
+  const markdownUrl = withBasePath(_markdownUrl);
+  const t = useTranslations({ note: 'page actions' });
   const [isLoading, setLoading] = useState(false);
   const [checked, onClick] = useCopyButton(async () => {
     const cached = cache.get(markdownUrl);
-    if (cached) return navigator.clipboard.writeText(await cached);
+    if (cached) return navigator.clipboard.writeText(cached);
 
     setLoading(true);
 
     try {
-      const promise = fetch(markdownUrl).then((res) => res.text());
-      cache.set(markdownUrl, promise);
       await navigator.clipboard.write([
         new ClipboardItem({
-          'text/plain': promise,
+          'text/plain': fetch(markdownUrl).then(async (res) => {
+            if (!res.ok) throw new Error(`Failed to fetch ${markdownUrl}: ${res.status}`);
+            const content = await res.text();
+            cache.set(markdownUrl, content);
+            return content;
+          }),
         }),
       ]);
     } finally {
@@ -47,11 +50,12 @@ export function MarkdownCopyButton({
   return (
     <button
       disabled={isLoading}
+      aria-live="polite"
       onClick={onClick}
       {...props}
       className={cn(
         buttonVariants({
-          color: 'secondary',
+          variant: 'secondary',
           size: 'sm',
           className: 'gap-2 [&_svg]:size-3.5 [&_svg]:text-fd-muted-foreground',
         }),
@@ -59,16 +63,18 @@ export function MarkdownCopyButton({
       )}
     >
       {checked ? <Check /> : <Copy />}
-      {props.children ?? t.pageActionsCopyMarkdown}
+      {props.children ?? (checked ? t('Copied Markdown') : t('Copy Markdown'))}
     </button>
   );
 }
+
 /**
  * see https://fumadocs.dev/docs/integrations/llms#page-actions to customize.
  */
 export function ViewOptionsPopover({
   markdownUrl,
   githubUrl,
+  pageUrl: pageUrlProp,
   ...props
 }: ComponentProps<typeof PopoverTrigger> & {
   /**
@@ -80,17 +86,28 @@ export function ViewOptionsPopover({
    * Source file URL on GitHub
    */
   githubUrl?: string;
+
+  /**
+   * The page URL the AI prompts ask to read.
+   *
+   * Defaults to the URL the reader is on, without query and hash (the router
+   * pathname during server rendering). Set it when the site should hand out a
+   * canonical URL instead.
+   */
+  pageUrl?: string;
 }) {
   const pathname = usePathname();
-  const t = useTranslations();
+  const t = useTranslations({ note: 'page actions' });
   const items = useMemo(() => {
     const pageUrl =
-      typeof window === 'undefined' ? pathname : new URL(pathname, window.location.origin);
-    const q = renderTranslation(t.pageActionsOpenInLLMPrompt, { url: String(pageUrl) });
+      pageUrlProp ?? (typeof window === 'undefined' ? pathname : window.location.href);
+    const q = t('Read {url}, I want to ask questions about it.', {
+      variables: { url: pageUrl },
+    });
 
     return [
       githubUrl && {
-        title: t.pageActionsOpenGitHub,
+        title: t('Open in GitHub'),
         href: githubUrl,
         icon: (
           <svg fill="currentColor" role="img" viewBox="0 0 24 24">
@@ -100,12 +117,12 @@ export function ViewOptionsPopover({
         ),
       },
       markdownUrl && {
-        title: t.pageActionsViewMarkdown,
-        href: markdownUrl,
+        title: t('View as Markdown'),
+        href: withBasePath(markdownUrl),
         icon: <TextIcon />,
       },
       {
-        title: t.pageActionsOpenScira,
+        title: t('Open in Scira AI'),
         href: `https://scira.ai/?${new URLSearchParams({
           q,
         })}`,
@@ -169,10 +186,10 @@ export function ViewOptionsPopover({
         ),
       },
       {
-        title: t.pageActionsOpenChatGPT,
+        title: t('Open in ChatGPT'),
         href: `https://chatgpt.com/?${new URLSearchParams({
+          prompt: q,
           hints: 'search',
-          q,
         })}`,
         icon: (
           <svg
@@ -187,7 +204,7 @@ export function ViewOptionsPopover({
         ),
       },
       {
-        title: t.pageActionsOpenClaude,
+        title: t('Open in Claude'),
         href: `https://claude.ai/new?${new URLSearchParams({
           q,
         })}`,
@@ -204,7 +221,7 @@ export function ViewOptionsPopover({
         ),
       },
       {
-        title: t.pageActionsOpenCursor,
+        title: t('Open in Cursor'),
         icon: (
           <svg
             fill="currentColor"
@@ -221,7 +238,7 @@ export function ViewOptionsPopover({
         })}`,
       },
     ].filter((v) => !!v);
-  }, [githubUrl, markdownUrl, pathname, t]);
+  }, [githubUrl, markdownUrl, pathname, t, pageUrlProp]);
 
   return (
     <Popover>
@@ -230,15 +247,15 @@ export function ViewOptionsPopover({
         className={(state) =>
           cn(
             buttonVariants({
-              color: 'secondary',
+              variant: 'secondary',
               size: 'sm',
             }),
-            'gap-2 data-[state=open]:bg-fd-accent data-[state=open]:text-fd-accent-foreground',
+            'gap-2 data-[popup-open]:bg-fd-accent data-[popup-open]:text-fd-accent-foreground',
             typeof props.className === 'function' ? props.className(state) : props.className,
           )
         }
       >
-        {props.children ?? t.pageActionsOpen}
+        {props.children ?? t('Open')}
         <ChevronDown className="size-3.5 text-fd-muted-foreground" />
       </PopoverTrigger>
       <PopoverContent className="flex flex-col">
@@ -258,4 +275,17 @@ export function ViewOptionsPopover({
       </PopoverContent>
     </Popover>
   );
+}
+
+function withBasePath(href: string) {
+  // ignore external
+  if (href.match(/^\w+:/) || href.startsWith('//')) return href;
+
+  const basePath =
+    // @ts-expect-error -- vite env
+    typeof import.meta.env !== 'undefined' && typeof import.meta.env.BASE_URL === 'string'
+      ? // @ts-expect-error -- vite env
+        import.meta.env.BASE_URL.replace(/\/$/, '')
+      : '';
+  return basePath + href;
 }

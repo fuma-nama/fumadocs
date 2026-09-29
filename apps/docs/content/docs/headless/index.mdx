@@ -1,17 +1,18 @@
 ---
 title: Introduction
 description: Getting started with core library
-icon: Album
+icon: SquareBookmark
 ---
 
 ## What is this?
 
-Fumadocs Core offers server-side functions and headless components to build docs on any React.js frameworks like Next.js.
+Fumadocs Core offers server-side functions and headless components to build docs on React.js frameworks like Next.js, Waku, and Astro with React islands.
 
-- Search (built-in: Orama, Algolia Search)
+- [Search](/docs/headless/search)
 - Breadcrumb, Sidebar, TOC Components
 - Remark/Rehype Plugins
-- Additional utilities
+- [MCP tools](/docs/headless/utils/mcp) for AI agents to search and read docs
+- [Additional utilities](/docs/headless/utils)
 
 <Callout title="Tip">
 
@@ -23,7 +24,7 @@ Fumadocs Core offers server-side functions and headless components to build docs
 
 ## Installation
 
-No other dependencies required.
+Install the core package. Individual integrations may require additional dependencies, listed in their guides.
 
 ```package-install
 fumadocs-core
@@ -68,8 +69,28 @@ export function Root({ children }: { children: ReactNode }) {
 }
 ```
 
-It offers simple document searching as well as components for building a
-good docs.
+```tsx tab="Astro"
+import type { ReactNode } from 'react';
+import { AstroProvider } from 'fumadocs-core/framework/astro';
+
+export function DocsIsland({
+  children,
+  pathname,
+  params,
+}: {
+  children: ReactNode;
+  pathname: string;
+  params: Record<string, string | string[] | undefined>;
+}) {
+  return (
+    <AstroProvider pathname={pathname} params={params}>
+      {children}
+    </AstroProvider>
+  );
+}
+```
+
+Explore the APIs and components:
 
 <Cards>
 
@@ -92,5 +113,11 @@ good docs.
 />
 
 <Card title="Search" href="/docs/headless/search" description="Implement document searching" />
+
+<Card
+  title="MCP"
+  href="/docs/headless/utils/mcp"
+  description="Expose page discovery, Markdown content, and search to AI agents"
+/>
 
 </Cards>

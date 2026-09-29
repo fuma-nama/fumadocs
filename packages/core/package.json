@@ -1,12 +1,15 @@
 {
   "name": "fumadocs-core",
-  "version": "16.9.3",
+  "version": "16.15.17",
   "description": "The React.js library for building a documentation website",
   "keywords": [
     "Docs",
     "Fumadocs"
   ],
   "homepage": "https://fumadocs.dev",
+  "bugs": {
+    "url": "https://github.com/fuma-nama/fumadocs/issues"
+  },
   "license": "MIT",
   "author": "Fuma Nama",
   "repository": "github:fuma-nama/fumadocs",
@@ -14,6 +17,7 @@
     "dist"
   ],
   "type": "module",
+  "sideEffects": false,
   "exports": {
     "./breadcrumb": "./dist/breadcrumb.js",
     "./content/github": "./dist/content/github.js",
@@ -24,6 +28,7 @@
     "./content/toc": "./dist/content/toc.js",
     "./dynamic-link": "./dist/dynamic-link.js",
     "./framework": "./dist/framework/index.js",
+    "./framework/astro": "./dist/framework/astro.js",
     "./framework/next": "./dist/framework/next.js",
     "./framework/react-router": "./dist/framework/react-router.js",
     "./framework/tanstack": "./dist/framework/tanstack.js",
@@ -36,6 +41,7 @@
     "./i18n": "./dist/i18n/index.js",
     "./i18n/middleware": "./dist/i18n/middleware.js",
     "./link": "./dist/link.js",
+    "./mcp": "./dist/mcp.js",
     "./mdx-plugins": "./dist/mdx-plugins/index.js",
     "./mdx-plugins/codeblock-utils": "./dist/mdx-plugins/codeblock-utils.js",
     "./mdx-plugins/rehype-code": "./dist/mdx-plugins/rehype-code.js",
@@ -77,6 +83,11 @@
     "./search/orama-cloud": "./dist/search/orama-cloud.js",
     "./search/orama-cloud-legacy": "./dist/search/orama-cloud-legacy.js",
     "./search/server": "./dist/search/server.js",
+    "./server": {
+      "browser": "./dist/server.browser.js",
+      "import": "./dist/server.js"
+    },
+    "./server.browser": "./dist/server.browser.js",
     "./source": "./dist/source/index.js",
     "./source/client": "./dist/source/client/index.js",
     "./source/dynamic": "./dist/source/dynamic.js",
@@ -105,61 +116,60 @@
     "types:check": "tsc --noEmit"
   },
   "dependencies": {
-    "@orama/orama": "^3.1.18",
+    "@fumari/image-size": "workspace:^",
     "estree-util-value-to-estree": "^3.5.0",
     "github-slugger": "^2.0.0",
     "hast-util-to-estree": "^3.1.3",
     "hast-util-to-jsx-runtime": "^2.3.6",
-    "js-yaml": "^4.1.1",
     "mdast-util-mdx": "^3.0.0",
     "mdast-util-to-markdown": "^2.1.2",
+    "npm-to-yarn": "3.2.0",
     "remark": "^15.0.1",
     "remark-gfm": "^4.0.1",
     "remark-rehype": "^11.1.2",
     "scroll-into-view-if-needed": "^3.1.0",
-    "shiki": "^4.1.0",
-    "tinyglobby": "^0.2.16",
+    "shiki": "^4.4.3",
+    "tinyglobby": "^0.2.17",
     "unified": "^11.0.5",
     "unist-util-visit": "^5.1.0",
-    "vfile": "^6.0.3"
+    "vfile": "^6.0.3",
+    "yaml": "^2.9.1",
+    "zbsearch": "^4.0.0"
   },
   "devDependencies": {
-    "@formatjs/intl-localematcher": "^0.8.9",
+    "@formatjs/intl-localematcher": "^0.9.0",
     "@mdx-js/mdx": "^3.1.1",
-    "@mixedbread/sdk": "0.72.0",
+    "@mixedbread/sdk": "0.78.0",
+    "@modelcontextprotocol/server": "2.0.0",
     "@orama/core": "^1.2.19",
     "@oramacloud/client": "^2.1.4",
-    "@shikijs/transformers": "^4.1.0",
-    "@tanstack/react-router": "1.170.8",
+    "@shikijs/transformers": "^4.4.3",
+    "@tanstack/react-router": "1.170.38",
     "@types/estree-jsx": "^1.0.5",
-    "@types/hast": "^3.0.4",
-    "@types/js-yaml": "^4.0.9",
+    "@types/hast": "^3.0.5",
     "@types/mdast": "^4.0.4",
-    "@types/negotiator": "^0.6.4",
-    "@types/node": "25.9.1",
-    "@types/react": "^19.2.15",
-    "@types/react-dom": "^19.2.3",
-    "algoliasearch": "5.52.1",
+    "@types/node": "26.6.1",
+    "@types/react": "^19.3.0",
+    "@types/react-dom": "^19.3.0",
+    "algoliasearch": "5.59.0",
     "flexsearch": "^0.8.212",
-    "image-size": "^2.0.2",
-    "lucide-react": "^1.17.0",
-    "negotiator": "^1.0.0",
-    "next": "16.2.6",
-    "npm-to-yarn": "^3.0.1",
+    "lucide-react": "^1.47.0",
+    "next": "16.3.5",
     "path-to-regexp": "^8.4.2",
-    "react-router": "7.15.1",
+    "react-router": "^8.4.0",
+    "rehype-raw": "^7.0.0",
     "remark-directive": "^4.0.0",
     "remark-mdx": "^3.1.1",
-    "remove-markdown": "^0.6.4",
     "tsconfig": "workspace:*",
-    "tsdown": "0.22.0",
-    "typescript": "^6.0.3",
-    "waku": "1.0.0-beta.1",
-    "zod": "4.4.3"
+    "tsdown": "0.23.0",
+    "typescript": "^7.0.2",
+    "waku": "1.0.0-rc.1",
+    "zod": "4.6.5"
   },
   "peerDependencies": {
     "@mdx-js/mdx": "*",
     "@mixedbread/sdk": "0.x.x",
+    "@modelcontextprotocol/server": "2.x.x",
     "@orama/core": "1.x.x",
     "@oramacloud/client": "2.x.x",
     "@tanstack/react-router": "1.x.x",
@@ -173,7 +183,7 @@
     "next": "16.x.x",
     "react": "^19.2.0",
     "react-dom": "^19.2.0",
-    "react-router": "7.x.x",
+    "react-router": "7.x.x || 8.x.x",
     "waku": "*",
     "zod": "4.x.x"
   },
@@ -194,6 +204,9 @@
       "optional": true
     },
     "@mixedbread/sdk": {
+      "optional": true
+    },
+    "@modelcontextprotocol/server": {
       "optional": true
     },
     "@types/react": {
@@ -234,13 +247,9 @@
     }
   },
   "inlinedDependencies": {
-    "@formatjs/fast-memoize": "3.1.5",
-    "@formatjs/intl-localematcher": "0.8.9",
-    "@shikijs/transformers": "4.1.0",
-    "image-size": "2.0.2",
-    "negotiator": "1.0.0",
-    "npm-to-yarn": "3.0.1",
-    "path-to-regexp": "8.4.2",
-    "remove-markdown": "0.6.4"
+    "@formatjs/fast-memoize": "3.1.7",
+    "@formatjs/intl-localematcher": "0.9.0",
+    "@shikijs/transformers": "4.4.3",
+    "path-to-regexp": "8.4.2"
   }
 }

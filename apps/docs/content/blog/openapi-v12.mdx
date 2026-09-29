@@ -1,0 +1,265 @@
+---
+title: Fumadocs OpenAPI v12
+description: Headless API pages, and a UI you own.
+author: Fuma Nama
+date: 2026-09-20
+---
+
+We are pleased to announce the release of Fumadocs OpenAPI v12.
+
+An API page used to be one component with a long list of render options. v12 splits it in two:
+
+- a headless layer that owns the state and logic,
+- the UI it renders through, which you can install and edit.
+
+Options remain for the small tweaks, the rest is yours to replace.
+
+<Callout type="warn" title="Upgrading from v10?">
+
+Read the [Fumadocs OpenAPI v11](/blog/openapi-v11) announcement first.
+
+</Callout>
+
+## Headless API Pages
+
+Everything outside `fumadocs-openapi/ui` renders nothing on its own.
+
+| Path                                   | Module                                                      |
+| -------------------------------------- | ----------------------------------------------------------- |
+| `fumadocs-openapi`                     | the page: the document, its servers and your components     |
+| `fumadocs-openapi/operation`           | an operation: its details, example requests and code usages |
+| `fumadocs-openapi/playground`          | the auth state and the fetcher of the playground            |
+| `fumadocs-openapi/requests`            | encoding the data of an example into a real request         |
+| `fumadocs-openapi/requests/generators` | turning that request into code usages                       |
+
+`createOpenAPIRenderer()` takes your components and returns an `<OpenAPIPage />` that accepts the props of generated pages:
+
+```tsx title="components/api-page.tsx"
+'use client';
+import { createOpenAPIRenderer } from 'fumadocs-openapi';
+import { Operation } from '@/components/my-operation';
+import { SchemaUI } from '@/components/my-schema';
+
+export const OpenAPIPage = createOpenAPIRenderer({
+  components: { Operation, SchemaUI },
+});
+```
+
+`Markdown`, `CodeBlock` and `Heading` are filled in when you leave them out, so a custom UI starts from two components.
+
+Under the page, hooks read its state:
+
+| Hook                    | Returns                                                           |
+| ----------------------- | ----------------------------------------------------------------- |
+| `useOpenAPI()`          | the dereferenced document (`doc`) and request options             |
+| `useComponents()`       | the components passed to the page                                 |
+| `useServer()`           | the selected server, its variables, and `resolveUrl(pathname)`    |
+| `useOperation()`        | the operation with its details resolved                           |
+| `useExampleRequests()`  | the example requests, the selected one, `select()` and `update()` |
+| `useCodeUsage(id)`      | the code generated for the selected example                       |
+| `useResponseExamples()` | responses with example values of their preferred media type       |
+
+See [Headless](/docs/integrations/openapi/headless) for the full surface.
+
+## Install the UI
+
+The entire UI of API pages, built on that layer, installed with [Fumadocs CLI](/docs/cli):
+
+```npm
+npx @fumadocs/cli add openapi/page
+```
+
+Your `components/api-page.tsx` is no longer needed:
+
+```tsx title="mdx-components.tsx"
+import { OpenAPIPage } from '@/components/api-page'; // [!code --]
+import { OpenAPIPage } from '@/components/openapi/page'; // [!code ++]
+```
+
+Or take one part of it, and pass the rest through `components`:
+
+```tsx title="components/api-page.tsx"
+'use client';
+import { createOpenAPIPage } from 'fumadocs-openapi/ui';
+import { Operation } from '@/components/openapi/operation';
+import { Schema } from '@/components/api/schema';
+
+export const OpenAPIPage = createOpenAPIPage({
+  components: { Operation, SchemaUI: Schema },
+});
+```
+
+| Part           | Install with         |
+| -------------- | -------------------- |
+| Full page      | `openapi/page`       |
+| Operation UI   | `openapi/operation`  |
+| API Playground | `openapi/playground` |
+| Schema UI      | `api-docs/schema`    |
+
+What you install is UI, not a fork:
+
+- the request pipeline of the playground stays in the package, an edited playground still drives the real one.
+- `Select` and `Input` follow the Shadcn UI API, a project that already has them keeps its own.
+
+## `@fumadocs/json-schema`
+
+The JSON Schema utilities of API pages are their own package, with no Fumadocs dependencies:
+
+```ts
+import { dereference, matches, mergeAllOf, sample, stringify } from '@fumadocs/json-schema';
+import { bundle } from '@fumadocs/json-schema/bundle';
+```
+
+- `bundle()` is a separate entry because it reads files and URLs, everything else runs in the browser.
+- `@fumadocs/json-schema/react` turns a schema into the data an API page draws. `generateSchemaUI()` flattens it, so your UI walks a map from `$root` instead of recursing.
+- `@fumadocs/api-docs` is no longer published, its UI is now bundled into the integrations or installed with the CLI.
+
+<Accordions>
+
+<Accordion title="Renamed while moving">
+
+| Before                                         | Now                                    |
+| ---------------------------------------------- | -------------------------------------- |
+| `ParsedSchema`                                 | `JsonSchema`                           |
+| `NoReference` / `NoReferenceSwallow`           | `Dereferenced` / `DereferencedShallow` |
+| `dereferenceShallow(schema)`                   | `dereference(schema)`                  |
+| `matchesSchema(schema, value)`                 | `matches(schema, value)`               |
+| `typeMatches(value, type)`                     | `matchesType(value, type)`             |
+| `schemaToString(schema, FormatFlags.UseAlias)` | `stringify(schema, { alias: true })`   |
+
+</Accordion>
+
+<Accordion title="Imported `@fumadocs/api-docs` directly?">
+
+| Before                                     | Now                                                  |
+| ------------------------------------------ | ---------------------------------------------------- |
+| `@fumadocs/api-docs/schema/*`              | `@fumadocs/json-schema`                              |
+| `@fumadocs/api-docs/components/schema*`    | `npx @fumadocs/cli add api-docs/schema`              |
+| `@fumadocs/api-docs/components/*` (the UI) | installed with the component that uses it            |
+| `@fumadocs/api-docs/i18n`                  | the integration's own `Translations` covers its keys |
+| `@fumadocs/api-docs/css/preset.css`        | already included by the integration's preset         |
+
+The CLI still installs the Schema UI, now under `api-docs/schema`.
+
+</Accordion>
+
+</Accordions>
+
+## Smaller Bundles
+
+`createOpenAPIBaseRenderer()` is the renderer with nothing built in, it bundles only what you pass:
+
+```tsx
+createOpenAPIBaseRenderer({
+  shiki,
+  codeUsages: createCodeUsageGeneratorRegistry().register(curl),
+  components: { Operation, SchemaUI },
+});
+```
+
+`createOpenAPIRenderer()` and `fumadocs-openapi/ui` register the full Shiki bundle, every code usage generator and TypeScript definitions for you.
+
+The package entry is client-safe too. `generateFiles()` reads and writes files, so it ships stubbed under the `browser` condition, and a client component importing the renderer no longer pulls `node:fs` into the bundle.
+
+## Migration
+
+Run a type check after upgrading:
+
+```npm
+npm run types:check
+```
+
+<Callout type="warn">
+
+Components installed from v11 with Fumadocs CLI, like the API playground, use the old hooks. Reinstall them.
+
+</Callout>
+
+### Options
+
+Render options that returned a component are components now:
+
+```diff
+ createOpenAPIPage({
+-  schemaUI: { render: (props) => <Schema {...props} /> },
+-  renderHeading: (props, depth) => <Heading depth={depth} {...props} />,
+-  renderCodeBlock: (props) => <CodeBlock {...props} />,
+-  renderMarkdown: (md) => <Markdown md={md} />,
++  components: { SchemaUI: Schema, Heading, CodeBlock, Markdown },
+ });
+```
+
+- `playground.provider` is removed, the page provides the auth state of the playground.
+- `playground.render` and `generateTypeScriptDefinitions` no longer receive `ctx`. Read the document from `useOpenAPI().doc`, or the `doc` passed to `generateTypeScriptDefinitions`.
+- `operation.APIExampleSelector` is removed, install `openapi/operation` and edit the selector in `usage-tabs.tsx`.
+- `<PlaygroundClient />` reads the operation from `useOperation()`, its `route`, `method`, `operation` and `pathItem` props are gone:
+
+  ```tsx
+  playground: {
+    render: () => <PlaygroundClient writeOnly readOnly={false} />,
+  }
+  ```
+
+- The `ctx` of `content` render options is the render options of the page, what `useRenderContext()` returns. `ctx.schema`, `ctx.SchemaUI` and `ctx._default_processMarkdown` are removed, read them from `useOpenAPI().doc` and `useComponents()`.
+
+### Hooks
+
+The hooks of `fumadocs-openapi/ui` are replaced by the headless ones:
+
+| v11                     | v12                                                                                    |
+| ----------------------- | -------------------------------------------------------------------------------------- |
+| `useRenderContext()`    | `useOpenAPI()` (`schema` is renamed to `doc`), `useComponents()`, `useRenderContext()` |
+| `useServerContext()`    | `useServer()`                                                                          |
+| `useOperationContext()` | `useOperation()`, `useExampleRequests()`, `useExampleRequest()` (on `/operation`)      |
+
+```diff
+- const { route, examples, example, setExample, setExampleData } = useOperationContext();
++ const { path } = useOperation();
++ const { items, selected, select, update } = useExampleRequests();
++ // data of the selected example, replaces `addListener()`
++ const data = useExampleRequest();
+```
+
+`useStorageKey()` is removed, read the prefix from the page:
+
+```tsx
+const { storageKeyPrefix } = useOpenAPI();
+localStorage.getItem(`${storageKeyPrefix}my-key`);
+```
+
+### Removed & Moved
+
+<Accordions>
+
+<Accordion title="Deprecated APIs, removed">
+
+| Removed                                                    | Use                                                 |
+| ---------------------------------------------------------- | --------------------------------------------------- |
+| `fumadocs-openapi/ui/create-client`                        | `createOpenAPIPage()` from `fumadocs-openapi/ui`    |
+| `ApiPageProps`                                             | `OpenAPIPageProps`                                  |
+| `OperationItem` and `WebhookItem` of `fumadocs-openapi/ui` | import them from `fumadocs-openapi`                 |
+| `getAPIPageProps()` and `getClientAPIPageProps()`          | `getOpenAPIPageProps()`                             |
+| `defineI18nOpenAPI()`                                      | `i18n.translations().extend(openapiTranslations())` |
+| `APIPage` of MDX components                                | `OpenAPIPage`, generated files only render it       |
+
+</Accordion>
+
+<Accordion title="Everything that renders sits under `/ui`">
+
+| Was                                  | Now                                     |
+| ------------------------------------ | --------------------------------------- |
+| `fumadocs-openapi/playground/client` | `fumadocs-openapi/ui/playground/client` |
+| `fumadocs-openapi/scalar`            | `fumadocs-openapi/ui/scalar`            |
+
+`GenerateTypeScriptDefinitionsContext` comes from the package entry, next to the runtime option it types.
+
+</Accordion>
+
+</Accordions>
+
+## Also in v12
+
+- Code samples from `x-codeSamples` and `generateCodeSamples` are rendered when their id isn't a built-in generator.
+- `SchemaData.infoTags` entries are data the UI renders: `{ label, value, block? }` or `{ label, list }`. Custom nodes (`{ node }`) still work, code reading `tag.node` must handle all shapes.
+
+Thanks for supporting Fumadocs, share your upgrade experience on [GitHub](https://github.com/fuma-nama/fumadocs) :)

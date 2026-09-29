@@ -21,6 +21,7 @@ import { AnimatePresence, motion } from 'motion/react';
 import { RemoveScroll } from 'react-remove-scroll';
 import { useFluxLayout } from '..';
 import { XIcon, SidebarIcon } from 'lucide-react';
+import { useTranslations } from '@fuma-translate/react';
 
 const MotionSidebarItem = motion.create(Base.SidebarItem);
 const MotionSidebarFolderTrigger = motion.create(Base.SidebarFolderTrigger);
@@ -67,20 +68,14 @@ export function Sidebar({ footer, banner, components, ...rest }: SidebarProps) {
   return (
     <SidebarContent {...rest}>
       <div className="flex flex-col gap-3 p-4 pb-2 empty:hidden">{banner}</div>
-      <Base.SidebarViewport>
-        <div className="flex flex-col">
-          {menuItems
-            .filter((v) => v.type !== 'icon')
-            .map((item, i, list) => (
-              <SidebarLinkItem
-                key={i}
-                item={item}
-                className={cn(i === list.length - 1 && 'mb-4')}
-              />
-            ))}
-          <SidebarPageTree {...components} />
-        </div>
-      </Base.SidebarViewport>
+      <div className="flex flex-col p-4">
+        {menuItems
+          .filter((v) => v.type !== 'icon')
+          .map((item, i, list) => (
+            <SidebarLinkItem key={i} item={item} className={cn(i === list.length - 1 && 'mb-4')} />
+          ))}
+        <SidebarPageTree {...components} />
+      </div>
       {footer}
     </SidebarContent>
   );
@@ -88,8 +83,21 @@ export function Sidebar({ footer, banner, components, ...rest }: SidebarProps) {
 
 export function SidebarTrigger(props: ComponentProps<'button'>) {
   const { open, setOpen } = useSidebar();
+  const t = useTranslations({ note: 'sidebar' });
+
   return (
-    <button onClick={() => setOpen((prev) => !prev)} {...props}>
+    <button
+      type="button"
+      aria-label={
+        open
+          ? t('Close Sidebar', { note: 'aria-label' })
+          : t('Open Sidebar', { note: 'aria-label' })
+      }
+      aria-expanded={open}
+      aria-controls="nd-sidebar"
+      onClick={() => setOpen((prev) => !prev)}
+      {...props}
+    >
       <AnimatePresence mode="wait">
         <motion.span
           key={open ? 'open' : 'closed'}

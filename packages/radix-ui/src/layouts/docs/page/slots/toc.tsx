@@ -1,8 +1,9 @@
 'use client';
 import * as TocDefault from '@/components/toc/default';
 import * as TocClerk from '@/components/toc/clerk';
+import * as TocBlock from '@/components/toc/block';
 import * as Base from '@/components/toc';
-import { I18nLabel, useTranslations } from '@/contexts/i18n';
+import { useTranslations } from '@fuma-translate/react';
 import { cn } from '@/utils/cn';
 import { ChevronDown, Text } from 'lucide-react';
 import {
@@ -19,6 +20,8 @@ import {
 import { useTreePath } from '@/contexts/tree';
 import { Collapsible, CollapsibleTrigger, CollapsibleContent } from '@/components/ui/collapsible';
 import { useDocsLayout } from '../..';
+
+const variants = { normal: TocDefault, clerk: TocClerk, block: TocBlock };
 
 export type TOCProviderProps = Base.TOCProviderProps;
 
@@ -46,11 +49,16 @@ export type TOCProps = {
       style: 'clerk';
       list?: TocClerk.TOCItemsProps;
     }
+  | {
+      style: 'block';
+      list?: TocBlock.TOCItemsProps;
+    }
 );
 
 export function TOC({ container, header, footer, style = 'normal', list }: TOCProps) {
   const items = Base.useTOCItems();
-  const { TOCItems, TOCEmpty, TOCItem } = style === 'clerk' ? TocClerk : TocDefault;
+  const t = useTranslations({ note: 'table of contents' });
+  const { TOCItems, TOCEmpty, TOCItem } = variants[style];
 
   if (items.length === 0 && !header && !footer) {
     return <div id="nd-toc-placeholder" className="hidden xl:layout:[--fd-toc-width:268px]" />;
@@ -71,7 +79,7 @@ export function TOC({ container, header, footer, style = 'normal', list }: TOCPr
         className="inline-flex items-center gap-1.5 text-sm text-fd-muted-foreground"
       >
         <Text className="size-4" />
-        <I18nLabel label="toc" />
+        {t('On this page')}
       </h3>
       <Base.TOCScrollArea>
         <TOCItems {...list}>
@@ -114,6 +122,10 @@ export type TOCPopoverProps = {
       style: 'clerk';
       list?: TocClerk.TOCItemsProps;
     }
+  | {
+      style: 'block';
+      list?: TocBlock.TOCItemsProps;
+    }
 );
 
 export function TOCPopover({
@@ -129,7 +141,7 @@ export function TOCPopover({
   const ref = useRef<HTMLElement>(null);
   const [open, setOpen] = useState(false);
   const { isNavTransparent } = useDocsLayout();
-  const { TOCItems, TOCItem, TOCEmpty } = style === 'clerk' ? TocClerk : TocDefault;
+  const { TOCItems, TOCItem, TOCEmpty } = variants[style];
 
   const onClickOutside = useEffectEvent((e: Event) => {
     if (!open || !(e.target instanceof HTMLElement)) return;
@@ -197,7 +209,7 @@ export function TOCPopover({
 }
 
 function PageTOCPopoverTrigger({ className, ...props }: ComponentProps<'button'>) {
-  const t = useTranslations();
+  const t = useTranslations({ note: 'table of contents' });
   const { open } = use(TocPopoverContext)!;
   const items = Base.useItems();
   const selectedIdx = items.findIndex((item) => item.active);
@@ -226,7 +238,7 @@ function PageTOCPopoverTrigger({ className, ...props }: ComponentProps<'button'>
             showItem && 'opacity-0 -translate-y-full pointer-events-none',
           )}
         >
-          {path?.name ?? t.toc}
+          {path?.name ?? t('On this page')}
         </span>
         <span
           className={cn(

@@ -61,7 +61,12 @@ export function remarkConvert({ resolver }: RemarkConvertOptions): Transformer<R
       if (node.type === 'link' || node.type === 'image') {
         if (node.type === 'link' && node.data?.isWikiLink) return 'skip';
 
-        const url = decodeURI(node.url);
+        let url = node.url;
+        try {
+          url = decodeURI(url);
+        } catch {
+          // not percent-encoded, resolve the href as written
+        }
         if (node.type === 'link' && url.startsWith('#')) {
           const heading = url.slice(1);
           node.url = `#${getHeadingHash(heading)}`;

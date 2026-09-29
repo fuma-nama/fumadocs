@@ -1,0 +1,85 @@
+## @fumadocs/language@0.2.7
+
+### Name schema property link buttons for screen readers
+
+Give the icon-only property link button a translated label and announce when its link has been copied.
+Include Simplified and Traditional Chinese translations for both labels.
+
+## @fumadocs/language@0.2.6
+
+### Announce copy confirmation to screen readers
+
+Copy buttons are polite live regions whose label switches to "Copied" after a successful copy, so screen readers announce it. The code block's copy button no longer reports success when the clipboard write fails.
+
+## @fumadocs/language@0.2.5
+
+### Mark packages side-effect free
+
+All packages now declare `sideEffects` in `package.json`, so bundlers can tree-shake unused modules. Packages shipping stylesheets list them as side effects to keep CSS imports.
+
+## @fumadocs/language@0.2.4
+
+### Support HTTP Basic client authentication in OAuth password flow
+
+Some OAuth servers require client credentials in an HTTP Basic `Authorization` header instead of the request body. The password flow dialog now offers a Client Authentication select to choose between the two methods, as described in [RFC 6749, section 2.3.1](https://www.rfc-editor.org/rfc/rfc6749#section-2.3.1).
+
+Fix [#3506](https://github.com/fuma-nama/fumadocs/issues/3506)
+
+## @fumadocs/language@0.2.3
+
+### Enhance result display of API playground
+
+The response panel now gives you the full picture of a request:
+
+- the resolved request URL, including path and query parameters
+- response headers in a collapsible list
+- response body labeled with its content type
+
+Client-side errors also show the request URL, making issues like a wrong server URL easy to spot.
+
+For custom `ResultDisplay` components, `FetchResult` now carries a `url` field.
+
+`@fumadocs/language` includes translations for the new UI.
+
+## @fumadocs/language@0.2.2
+
+### Add new translation keys
+
+## @fumadocs/language@0.2.1
+
+### Expose sidebar trigger state to assistive technology
+
+`SidebarTrigger` now sets `aria-expanded` and `aria-controls`, and its label changes between `Open Sidebar` and `Close Sidebar` depending on the state.
+
+Previously, both the button opening the mobile sidebar and the one closing it were named `Open Sidebar`, and neither conveyed whether the sidebar was open.
+
+A new `Close Sidebar` translation key is available for customisation.
+
+## @fumadocs/language@0.2.0
+
+### Default to Base UI
+
+Internal packages & templates now use Base UI rather than Radix UI.
+
+# @fumadocs/language
+
+## 0.1.0
+
+### Minor Changes
+
+- 779efff: **Introduce new translations API**
+
+  It is now powered by `fuma-translate`. Be careful: while the API surface is same, some translation keys are changed, unused labels will be ignored.
+
+### Patch Changes
+
+- Updated dependencies [9b9545f]
+- Updated dependencies [f027706]
+- Updated dependencies [0cc1fac]
+- Updated dependencies [74102c5]
+- Updated dependencies [779efff]
+  - fumadocs-core@16.10.0
+  - fumadocs-openapi@11.0.0
+  - fumadocs-ui@16.10.0
+  - @fumadocs/asyncapi@0.0.1
+  - @fumadocs/story@1.1.0

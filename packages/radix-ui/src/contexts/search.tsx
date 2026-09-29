@@ -1,7 +1,9 @@
 'use client';
+import type { DefaultSearchDialogProps } from '@/components/dialog/search-default';
 import {
   type ComponentType,
   createContext,
+  lazy,
   type ReactNode,
   Suspense,
   use,
@@ -9,6 +11,7 @@ import {
   useEffectEvent,
   useMemo,
   useState,
+  useSyncExternalStore,
 } from 'react';
 
 interface HotKey {
@@ -32,7 +35,7 @@ export interface TagItem {
   value: string;
 }
 
-export interface SearchProviderProps {
+export interface SearchProviderProps<DialogProps extends SharedProps = DefaultSearchDialogProps> {
   /**
    * Preload search dialog before opening it
    *
@@ -55,14 +58,14 @@ export interface SearchProviderProps {
   /**
    * Replace default search dialog, allowing you to use other solutions such as Algolia Search
    *
-   * It receives the `open` and `onOpenChange` prop, can be lazy loaded with `next/dynamic`
+   * It receives the `open` and `onOpenChange` prop, can be lazy loaded with `React.lazy()`
    */
-  SearchDialog: ComponentType<SharedProps>;
+  SearchDialog?: ComponentType<DialogProps>;
 
   /**
    * Additional props to the dialog
    */
-  options?: Partial<SharedProps & Record<string, unknown>>;
+  options?: Partial<DialogProps>;
 
   children?: ReactNode;
 }
@@ -85,33 +88,40 @@ export function useSearchContext(): SearchContextType {
   return use(SearchContext);
 }
 
+const noop = () => () => {};
+
 function MetaOrControl() {
-  const [key, setKey] = useState('⌘');
+  // `false` on the server and during hydration
+  const isClient = useSyncExternalStore(
+    noop,
+    () => true,
+    () => false,
+  );
 
-  useEffect(() => {
-    if (/Windows|Linux/i.test(window.navigator.userAgent)) setKey('Ctrl');
-  }, []);
-
-  return key;
+  return isClient && /Windows|Linux/i.test(navigator.userAgent) ? 'Ctrl' : '⌘';
 }
 
-export function SearchProvider({
-  SearchDialog,
+const DEFAULT_HOT_KEYS: HotKey[] = [
+  {
+    key: (e) => e.metaKey || e.ctrlKey,
+    display: <MetaOrControl />,
+  },
+  {
+    key: 'k',
+    display: 'K',
+  },
+];
+
+const DefaultSearchDialog = lazy(() => import('@/components/dialog/search-default'));
+
+export function SearchProvider<DialogProps extends SharedProps = DefaultSearchDialogProps>({
+  SearchDialog = DefaultSearchDialog,
   children,
   preload = true,
   options,
-  hotKey = [
-    {
-      key: (e) => e.metaKey || e.ctrlKey,
-      display: <MetaOrControl />,
-    },
-    {
-      key: 'k',
-      display: 'K',
-    },
-  ],
+  hotKey = DEFAULT_HOT_KEYS,
   links,
-}: SearchProviderProps) {
+}: SearchProviderProps<DialogProps>) {
   const [isOpen, setIsOpen] = useState(preload ? false : undefined);
   const onKeyDown = useEffectEvent((e: KeyboardEvent) => {
     if (hotKey.every((v) => (typeof v.key === 'string' ? e.key === v.key : v.key(e)))) {
@@ -125,7 +135,7 @@ export function SearchProvider({
     return () => {
       window.removeEventListener('keydown', onKeyDown);
     };
-  }, [hotKey]);
+  }, []);
 
   return (
     <SearchContext
@@ -139,17 +149,12 @@ export function SearchProvider({
         [isOpen, hotKey],
       )}
     >
-      {isOpen !== undefined && (
-        <Suspense fallback={null}>
-          <SearchDialog
-            open={isOpen}
-            onOpenChange={setIsOpen}
-            // @ts-expect-error -- insert prop for official UIs
-            links={links}
-            {...options}
-          />
-        </Suspense>
-      )}
+      <Suspense fallback={null}>
+        {isOpen !== undefined && (
+          // @ts-expect-error -- assume all required props are filled
+          <SearchDialog open={isOpen} onOpenChange={setIsOpen} links={links} {...options} />
+        )}
+      </Suspense>
 
       {children}
     </SearchContext>

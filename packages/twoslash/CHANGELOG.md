@@ -1,3 +1,58 @@
+## fumadocs-twoslash@4.0.1
+
+### Mark packages side-effect free
+
+All packages now declare `sideEffects` in `package.json`, so bundlers can tree-shake unused modules. Packages shipping stylesheets list them as side effects to keep CSS imports.
+
+## fumadocs-twoslash@4.0.0
+
+### Run Twoslash on TypeScript 7
+
+`fumadocs-twoslash` now runs on the native TypeScript 7 compiler (`typescript/unstable/sync`) instead of bundling its own TypeScript 6, so the types in popups come from the same compiler as your project.
+
+Code blocks of documents compiled concurrently are analyzed together in one snapshot of the TypeScript project (requires `fumadocs-core` 16.15.7 for the `_fd_prepare` hook of `rehype-code`), which removes most of the per-block cost of loading the project. Cold builds of the Fumadocs docs take 40% less time in total, with the TypeScript part 3.5x faster.
+
+The Shiki transformer and renderer are now implemented in `fumadocs-twoslash`, `@shikijs/twoslash` and `twoslash` are no longer dependencies (nor `twoslash` a peer of TypeScript 6). The rendered HTML and the transformer options are unchanged, except that `rendererRich` only takes the options that apply to the popups of Fumadocs (`jsdoc`, `processHoverInfo`, `processHoverDocs`, `completionIcons`, `customTagIcons`); the `hast` extensions, `errorRendering`, `queryRendering`, `classExtra` and the custom `renderer` option are removed.
+
+The `twoslashOptions` are simplified to what the native API supports:
+
+- `compilerOptions` takes `tsconfig.json` values (e.g. `moduleResolution: 'bundler'`) instead of enum values from the `typescript` package.
+- `cwd` replaces `vfsRoot`.
+- `tsModule`, `tsLibDirectory`, `fsMap`, `cache`, `customTransformers` and the per-call `positionQueries`, `positionCompletions`, `positionHighlights` are removed.
+- `@showEmit` is not supported, TypeScript 7 has no emit API yet.
+
+```ts
+transformerTwoslash({
+  twoslashOptions: {
+    compilerOptions: {
+      types: ['node'],
+    },
+  },
+});
+```
+
+## fumadocs-twoslash@3.3.1
+
+### Replace `cnfast` with `cn`
+
+Internal refactor only.
+
+### Bundle TypeScript for Twoslash
+
+`fumadocs-twoslash` now depends on its own TypeScript 6 and passes it to Twoslash, so the transformer keeps working in projects on TypeScript 7 (whose package no longer provides the compiler API Twoslash requires). Previously, every Twoslash code block that was not already in the types cache failed with `Cannot read properties of undefined (reading 'readFile')`.
+
+## fumadocs-twoslash@3.3.0
+
+### Default to Base UI
+
+Internal packages & templates now use Base UI rather than Radix UI.
+
+## fumadocs-twoslash@3.2.1
+
+### Migrate to `cnfast`
+
+Drop `tailwind-merge`.
+
 # fumadocs-twoslash
 
 ## 3.2.0

@@ -6,7 +6,7 @@ import { cva } from 'class-variance-authority';
 import { cn } from '@/utils/cn';
 import { type ComponentProps, type ReactNode, useEffect, useState } from 'react';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
-import { useTranslations } from '@/contexts/i18n';
+import { useTranslations } from '@fuma-translate/react';
 
 export interface ParameterNode {
   name: string;
@@ -55,7 +55,7 @@ export function TypeTable({
   className,
   ...props
 }: { type: Record<string, TypeNode> } & ComponentProps<'div'>) {
-  const t = useTranslations();
+  const t = useTranslations({ note: 'type table' });
 
   return (
     <div
@@ -67,8 +67,8 @@ export function TypeTable({
       {...props}
     >
       <div className="flex font-medium items-center px-3 py-1 not-prose text-fd-muted-foreground">
-        <p className="w-1/4">{t.typeTableProp}</p>
-        <p className="@max-xl:hidden">{t.typeTableType}</p>
+        <p className="w-1/4">{t('Prop')}</p>
+        <p className="@max-xl:hidden">{t('Type')}</p>
       </div>
       {Object.entries(type).map(([key, value]) => (
         <Item key={key} parentId={id} name={key} item={value} />
@@ -96,7 +96,7 @@ function Item({
   name: string;
   item: TypeNode;
 }) {
-  const t = useTranslations();
+  const t = useTranslations({ note: 'type table' });
   const [open, setOpen] = useState(false);
   const id = parentId ? `${parentId}-${name}` : undefined;
 
@@ -147,19 +147,19 @@ function Item({
           </div>
           {typeDescription && (
             <>
-              <p className={cn(fieldVariants())}>{t.typeTableType}</p>
+              <p className={cn(fieldVariants())}>{t('Type')}</p>
               <p className="my-auto not-prose">{typeDescription}</p>
             </>
           )}
           {defaultValue && (
             <>
-              <p className={cn(fieldVariants())}>{t.typeTableDefault}</p>
+              <p className={cn(fieldVariants())}>{t('Default')}</p>
               <p className="my-auto not-prose">{defaultValue}</p>
             </>
           )}
           {parameters.length > 0 && (
             <>
-              <p className={cn(fieldVariants())}>{t.typeTableParameters}</p>
+              <p className={cn(fieldVariants())}>{t('Parameters')}</p>
               <div className="flex flex-col gap-2">
                 {parameters.map((param) => (
                   <div key={param.name} className="inline-flex items-center flex-wrap gap-1">
@@ -172,7 +172,7 @@ function Item({
           )}
           {returns && (
             <>
-              <p className={cn(fieldVariants())}>{t.typeTableReturns}</p>
+              <p className={cn(fieldVariants())}>{t('Returns')}</p>
               <div className="my-auto text-sm prose prose-no-margin">{returns}</div>
             </>
           )}

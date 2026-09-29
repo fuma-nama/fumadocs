@@ -35,24 +35,29 @@ export function rehypeCodeDefaultOptions(): RehypeCodeOptionsCommon {
       }),
     ],
     parseMetaString(meta) {
-      const parsed = parseCodeBlockAttributes(meta, ['title', 'tab']);
-      const data: Record<string, unknown> = parsed.attributes;
-      parsed.rest = parseLineNumber(parsed.rest, data);
+      const parsed = parseCodeBlockAttributes(meta, ['title', 'tab', 'noCopy', 'lineNumbers']);
+      const data: Record<string, unknown> = {};
+      for (const [k, v] of Object.entries(parsed.attributes)) {
+        if (k === 'noCopy') {
+          data.allowCopy = 'false';
+          continue;
+        }
+
+        if (k === 'lineNumbers') {
+          data['data-line-numbers'] = true;
+          if (typeof v === 'number') {
+            data['data-line-numbers-start'] = v;
+          }
+          continue;
+        }
+
+        data[k] = v;
+      }
 
       data.__raw = parsed.rest;
       return data;
     },
   };
-}
-
-function parseLineNumber(str: string, data: Record<string, unknown>) {
-  return str.replace(/lineNumbers=(\d+)|lineNumbers/, (_, ...args) => {
-    data['data-line-numbers'] = true;
-
-    if (args[0] !== undefined) data['data-line-numbers-start'] = Number(args[0]);
-
-    return '';
-  });
 }
 
 export type RehypeCodeOptionsCommon = RehypeShikiCoreOptions & {

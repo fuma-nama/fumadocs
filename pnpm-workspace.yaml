@@ -3,7 +3,68 @@ packages:
   - apps/*
   - examples/*
   - '!examples/stackblitz'
+minimumReleaseAgeExclude:
+  - '@fumari/sponsors@0.1.0'
+  - 'fuma-translate'
+  - '@fuma-translate/*'
+  - react-router
+  - '@react-router/*'
+  - tegami@1.2.2
+  - '@takumi-rs/*'
+  - '@fumari/json-schema-ts@1.0.2'
+  - fuma-cli@0.3.1
+  - takumi-js@2.1.1
+  - '@yuku-analyzer/binding-darwin-arm64@0.6.3'
+  - '@yuku-analyzer/binding-darwin-x64@0.6.3'
+  - '@yuku-analyzer/binding-freebsd-x64@0.6.3'
+  - '@yuku-analyzer/binding-linux-arm-gnu@0.6.3'
+  - '@yuku-analyzer/binding-linux-arm-musl@0.6.3'
+  - '@yuku-analyzer/binding-linux-arm64-gnu@0.6.3'
+  - '@yuku-analyzer/binding-linux-arm64-musl@0.6.3'
+  - '@yuku-analyzer/binding-linux-x64-gnu@0.6.3'
+  - '@yuku-analyzer/binding-linux-x64-musl@0.6.3'
+  - '@yuku-analyzer/binding-win32-arm64@0.6.3'
+  - '@yuku-analyzer/binding-win32-x64@0.6.3'
+  - yuku-analyzer@0.6.3
+  - '@yuku-codegen/binding-darwin-arm64@0.6.4'
+  - '@yuku-codegen/binding-darwin-x64@0.6.4'
+  - '@yuku-codegen/binding-freebsd-x64@0.6.4'
+  - '@yuku-codegen/binding-linux-arm-gnu@0.6.4'
+  - '@yuku-codegen/binding-linux-arm-musl@0.6.4'
+  - '@yuku-codegen/binding-linux-arm64-gnu@0.6.4'
+  - '@yuku-codegen/binding-linux-arm64-musl@0.6.4'
+  - '@yuku-codegen/binding-linux-x64-gnu@0.6.4'
+  - '@yuku-codegen/binding-linux-x64-musl@0.6.4'
+  - '@yuku-codegen/binding-win32-arm64@0.6.4'
+  - '@yuku-codegen/binding-win32-x64@0.6.4'
+  - '@yuku-parser/binding-darwin-arm64@0.6.4'
+  - '@yuku-parser/binding-darwin-x64@0.6.4'
+  - '@yuku-parser/binding-freebsd-x64@0.6.4'
+  - '@yuku-parser/binding-linux-arm-gnu@0.6.4'
+  - '@yuku-parser/binding-linux-arm-musl@0.6.4'
+  - '@yuku-parser/binding-linux-arm64-gnu@0.6.4'
+  - '@yuku-parser/binding-linux-arm64-musl@0.6.4'
+  - '@yuku-parser/binding-linux-x64-gnu@0.6.4'
+  - '@yuku-parser/binding-linux-x64-musl@0.6.4'
+  - '@yuku-parser/binding-win32-arm64@0.6.4'
+  - '@yuku-parser/binding-win32-x64@0.6.4'
+  - yuku-codegen@0.6.4
+  - yuku-parser@0.6.4
+  - zbsearch@3.3.4
+  - '@bruits/satteri-darwin-arm64@0.10.3'
+  - '@bruits/satteri-darwin-x64@0.10.3'
+  - '@bruits/satteri-linux-arm64-gnu@0.10.3'
+  - '@bruits/satteri-linux-arm64-musl@0.10.3'
+  - '@bruits/satteri-linux-x64-gnu@0.10.3'
+  - '@bruits/satteri-linux-x64-musl@0.10.3'
+  - '@bruits/satteri-wasm32-wasi@0.10.3'
+  - '@bruits/satteri-win32-arm64-msvc@0.10.3'
+  - '@bruits/satteri-win32-x64-msvc@0.10.3'
+  - satteri@0.10.3
+  - cn@0.2.4
+  - '@fuma-cli/interactive@0.1.2'
 allowBuilds:
+  '@mixedbread/cli': true
   '@parcel/watcher': false
   core-js: false
   esbuild: false

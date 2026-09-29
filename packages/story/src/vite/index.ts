@@ -2,7 +2,7 @@ import path from 'node:path';
 import type { Plugin } from 'vite';
 import { createControlsProject } from '@/utils/generate';
 import { transformStoryFile } from '@/utils/transform';
-import type { Project } from 'ts-morph';
+import type { Project } from '@/utils/generate';
 
 export interface StoryPluginOptions {
   /**

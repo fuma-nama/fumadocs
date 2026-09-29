@@ -1,0 +1,10 @@
+openapi: 3.0.3
+info:
+  title: Example schemas
+  version: 1.0.0
+paths: {}
+components:
+  schemas:
+    EmailAddress:
+      type: string
+      example: noreply@example.com

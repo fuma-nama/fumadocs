@@ -1,119 +1,96 @@
-import type { MethodInformation, RenderContext } from '@/types';
-import type { NoReference } from '@/utils/schema';
-import { I18nLabel } from '@/ui/client/i18n';
+'use client';
+import { useTranslations } from '@fuma-translate/react';
 import {
   AccordionContent,
   AccordionHeader,
   AccordionItem,
   Accordions,
   AccordionTrigger,
-} from '@/ui/components/accordion';
+} from 'shared-api/components/accordion';
 import type { ReactNode } from 'react';
-import type { RawRequestData } from '@/requests/types';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from 'fumadocs-ui/components/tabs';
-import { resolveRequestData } from '@/utils/url';
-import { MethodLabel } from '../components/method-label';
-import type { ExampleRequestItem } from './get-example-requests';
+import { MethodLabel } from '@/ui/components/method-label';
+import { Markdown } from '../components/markdown';
+import { ClientCodeBlock } from '../components/codeblock';
+import { type ExampleRequest, useExampleRequests, useOperation } from '@/operation';
+import { useRenderContext } from '@/utils/create-page';
 
-export interface RequestTabsRenderContext extends RenderContext {
-  route: string;
-  operation: NoReference<MethodInformation>;
-}
-
-export function RequestTabs({
-  path,
-  operation,
-  examples,
-  ctx,
-}: {
-  path: string;
-  examples: ExampleRequestItem[];
-  operation: NoReference<MethodInformation>;
-  ctx: RenderContext;
-}) {
+export function RequestTabs() {
+  const ctx = useRenderContext();
+  const { path, method, operation, pathItem } = useOperation();
+  const { items } = useExampleRequests();
   if (!operation.requestBody) return null;
-  const { renderRequestTabs = renderRequestTabsDefault } = ctx.content ?? {};
 
-  return renderRequestTabs(examples, {
-    ...ctx,
-    route: path,
-    operation,
-  });
+  if (ctx.content?.renderRequestTabs)
+    return ctx.content.renderRequestTabs({ items, route: path, method, pathItem, operation }, ctx);
+
+  return <RequestTabsDefaultContent items={items} />;
 }
 
-function renderRequestTabsDefault(items: ExampleRequestItem[], ctx: RequestTabsRenderContext) {
+function RequestTabsDefaultContent({ items }: { items: ExampleRequest[] }) {
+  const t = useTranslations({ note: 'operation page' });
   let children: ReactNode;
+
   if (items.length > 1) {
     children = (
       <Tabs defaultValue={items[0].id}>
         <TabsList>
           {items.map((item) => (
             <TabsTrigger key={item.id} value={item.id}>
-              {item.id === '_default' ? <I18nLabel label="requestTabNameDefault" /> : item.name}
+              {item.id === '_default' ? t('Default') : item.name}
             </TabsTrigger>
           ))}
         </TabsList>
         {items.map((item) => (
           <TabsContent key={item.id} value={item.id}>
-            <RequestTabsItem item={item} ctx={ctx} />
+            <RequestTabsItem item={item} />
           </TabsContent>
         ))}
       </Tabs>
     );
   } else if (items.length === 1) {
-    children = <RequestTabsItem item={items[0]} ctx={ctx} />;
+    children = <RequestTabsItem item={items[0]} />;
   } else {
-    children = (
-      <p className="text-fd-muted-foreground text-xs">
-        <I18nLabel label="empty" />
-      </p>
-    );
+    children = <p className="text-fd-muted-foreground text-xs">{t('Empty')}</p>;
   }
 
   return (
     <div className="p-3 rounded-xl border prose-no-margin bg-fd-card text-fd-card-foreground shadow-md">
-      <p className="font-semibold border-b pb-2">
-        <I18nLabel label="titleRequestTabs" />
-      </p>
+      <p className="font-semibold border-b pb-2">{t('Example Requests')}</p>
       {children}
     </div>
   );
 }
 
-function RequestTabsItem({
-  item,
-  ctx,
-}: {
-  item: ExampleRequestItem;
-  ctx: RequestTabsRenderContext;
-}) {
+function RequestTabsItem({ item }: { item: ExampleRequest }) {
+  const t = useTranslations({ note: 'operation page' });
   const requestData = item.data;
-  const displayNames: Partial<Record<keyof RawRequestData, ReactNode>> = {
+  const displayNames: Partial<Record<keyof ExampleRequest['data'], ReactNode>> = {
     body: (
       <>
-        <I18nLabel label="titleRequestBody" />
+        {t('Request Body')}
         <code className="text-xs text-fd-muted-foreground ms-auto">
           {requestData.bodyMediaType}
         </code>
       </>
     ),
-    cookie: <I18nLabel label="cookieParameters" />,
-    header: <I18nLabel label="headerParameters" />,
-    query: <I18nLabel label="queryParameters" />,
-    path: <I18nLabel label="pathParameters" />,
+    cookie: t('Cookie Parameters'),
+    header: t('Header Parameters'),
+    query: t('Query Parameters'),
+    path: t('Path Parameters'),
   };
 
   return (
     <>
-      {item.description && ctx.renderMarkdown(item.description)}
+      {item.description && <Markdown md={item.description} />}
       <div className="flex flex-row gap-2 items-center justify-between">
         <MethodLabel>{requestData.method}</MethodLabel>
-        <code>{resolveRequestData(ctx.route, item.encoded)}</code>
+        <code>{item.pathname}</code>
       </div>
 
       <Accordions type="multiple" className="mt-2">
         {Object.entries(displayNames).map(([k, v]) => {
-          const data = requestData[k as keyof RawRequestData];
+          const data = requestData[k as keyof ExampleRequest['data']];
           if (!data || Object.keys(data).length === 0) return;
 
           return (
@@ -122,10 +99,7 @@ function RequestTabsItem({
                 <AccordionTrigger>{v}</AccordionTrigger>
               </AccordionHeader>
               <AccordionContent className="prose-no-margin">
-                {ctx.renderCodeBlock({
-                  lang: 'json',
-                  code: JSON.stringify(data, null, 2),
-                })}
+                <ClientCodeBlock lang="json" code={JSON.stringify(data, null, 2)} />
               </AccordionContent>
             </AccordionItem>
           );

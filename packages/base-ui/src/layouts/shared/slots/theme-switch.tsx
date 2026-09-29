@@ -2,9 +2,12 @@
 import { cva } from 'class-variance-authority';
 import { Airplay, Moon, Sun } from 'lucide-react';
 import { useTheme } from 'next-themes';
-import { type ComponentProps, useEffect, useState } from 'react';
+import { type ComponentProps, useSyncExternalStore } from 'react';
+import { flushSync } from 'react-dom';
 import { cn } from '@/utils/cn';
-import { useTranslations } from '@/contexts/i18n';
+import { useTranslations } from '@fuma-translate/react';
+
+const noop = () => () => {};
 
 const itemVariants = cva('size-6.5 p-1.5 text-fd-muted-foreground', {
   variants: {
@@ -15,11 +18,7 @@ const itemVariants = cva('size-6.5 p-1.5 text-fd-muted-foreground', {
   },
 });
 
-const full = [
-  ['light', Sun, 'themeLight'] as const,
-  ['dark', Moon, 'themeDark'] as const,
-  ['system', Airplay, 'themeSystem'] as const,
-];
+const themes = [['light', Sun] as const, ['dark', Moon] as const, ['system', Airplay] as const];
 
 export interface ThemeSwitchProps extends ComponentProps<'div'> {
   mode?: 'light-dark' | 'light-dark-system';
@@ -27,12 +26,26 @@ export interface ThemeSwitchProps extends ComponentProps<'div'> {
 
 export function ThemeSwitch({ className, mode = 'light-dark', ...props }: ThemeSwitchProps) {
   const { setTheme, theme, resolvedTheme } = useTheme();
-  const [mounted, setMounted] = useState(false);
-  const t = useTranslations();
+  // `false` on the server and during hydration
+  const mounted = useSyncExternalStore(
+    noop,
+    () => true,
+    () => false,
+  );
+  const t = useTranslations({ note: 'theme switcher' });
+  const themeAriaLabels = {
+    light: t('Light', { note: 'aria-label' }),
+    dark: t('Dark', { note: 'aria-label' }),
+    system: t('System', { note: 'aria-label' }),
+  };
 
-  useEffect(() => {
-    setMounted(true);
-  }, []);
+  const handleThemeChange = (newTheme: string) => {
+    if (document?.startViewTransition) {
+      document.startViewTransition(() => flushSync(() => setTheme(newTheme)));
+    } else {
+      setTheme(newTheme);
+    }
+  };
 
   const container = cn(
     'inline-flex items-center rounded-full border p-1 overflow-hidden *:rounded-full',
@@ -45,11 +58,11 @@ export function ThemeSwitch({ className, mode = 'light-dark', ...props }: ThemeS
     return (
       <button
         className={container}
-        aria-label={t.themeToggle}
-        onClick={() => setTheme(value === 'light' ? 'dark' : 'light')}
+        aria-label={t('Toggle Theme', { note: 'aria-label' })}
+        onClick={() => handleThemeChange(value === 'light' ? 'dark' : 'light')}
         data-theme-toggle=""
       >
-        {full.map(([key, Icon]) => {
+        {themes.map(([key, Icon]) => {
           if (key === 'system') return;
 
           return (
@@ -68,16 +81,27 @@ export function ThemeSwitch({ className, mode = 'light-dark', ...props }: ThemeS
 
   return (
     <div className={container} data-theme-toggle="" {...props}>
-      {full.map(([key, Icon, label]) => (
-        <button
-          key={key}
-          aria-label={t[label]}
-          className={cn(itemVariants({ active: value === key }))}
-          onClick={() => setTheme(key)}
-        >
-          <Icon className="size-full" fill="currentColor" />
-        </button>
-      ))}
+      <button
+        aria-label={themeAriaLabels.light}
+        className={cn(itemVariants({ active: value === 'light' }))}
+        onClick={() => handleThemeChange('light')}
+      >
+        <Sun className="size-full" fill="currentColor" />
+      </button>
+      <button
+        aria-label={themeAriaLabels.dark}
+        className={cn(itemVariants({ active: value === 'dark' }))}
+        onClick={() => handleThemeChange('dark')}
+      >
+        <Moon className="size-full" fill="currentColor" />
+      </button>
+      <button
+        aria-label={themeAriaLabels.system}
+        className={cn(itemVariants({ active: value === 'system' }))}
+        onClick={() => handleThemeChange('system')}
+      >
+        <Airplay className="size-full" fill="currentColor" />
+      </button>
     </div>
   );
 }

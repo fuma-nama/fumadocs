@@ -7,18 +7,18 @@
     "dev": "waku dev",
     "build": "waku build",
     "start": "waku start",
-    "types:check": "fumadocs-mdx && tsc --noEmit"
+    "types:check": "tsc --noEmit"
   },
   "dependencies": {
-    "@takumi-rs/image-response": "^1.2.1",
-    "fumadocs-core": "16.9.3",
-    "fumadocs-mdx": "15.0.10",
-    "fumadocs-ui": "16.9.3",
+    "cn": "^0.2.4",
+    "fumadocs-core": "16.11.0",
+    "fumadocs-mdx": "15.1.0",
+    "fumadocs-ui": "16.11.0",
     "lucide-react": "^1.16.0",
     "react": "^19.2.6",
     "react-dom": "^19.2.6",
     "react-server-dom-webpack": "^19.2.6",
-    "tailwind-merge": "^3.6.0",
+    "takumi-js": "^2.1.1",
     "waku": "1.0.0-beta.1"
   },
   "devDependencies": {
@@ -28,7 +28,7 @@
     "@types/react": "^19.2.14",
     "@types/react-dom": "^19.2.3",
     "tailwindcss": "^4.3.0",
-    "typescript": "^6.0.3",
+    "typescript": "^7.0.2",
     "vite": "^8.0.13"
   }
 }

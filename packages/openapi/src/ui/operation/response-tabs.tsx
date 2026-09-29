@@ -1,107 +1,37 @@
-import type { MethodInformation, RenderContext, ResponseObject } from '@/types';
-import { getPreferredType, type NoReference } from '@/utils/schema';
+'use client';
 import {
   AccordionContent,
   AccordionHeader,
   AccordionItem,
   Accordions,
   AccordionTrigger,
-} from '@/ui/components/accordion';
+} from 'shared-api/components/accordion';
 import { Tab, Tabs } from 'fumadocs-ui/components/tabs';
-import { sample } from '@/utils/schema/sample';
-import { useMemo, type ReactNode } from 'react';
-import { I18nLabel } from '@/ui/client/i18n';
+import type { ReactNode } from 'react';
+import { useTranslations } from '@fuma-translate/react';
+import { Markdown } from '../components/markdown';
+import { ClientCodeBlock } from '../components/codeblock';
+import { type ResponseExample, type ResponseTab, useResponseExamples } from '@/operation';
+import { useRenderContext } from '@/utils/create-page';
 
-export interface ResponseTab {
-  /**
-   * HTTP response code
-   */
-  code: string;
-
-  response: NoReference<ResponseObject>;
-  /**
-   * media type of response
-   */
-  mediaType: string | null;
-
-  examples?: ResponseExample[];
-}
-
-interface ResponseExample {
-  /**
-   * generated/defined example data
-   */
-  sample: unknown;
-
-  label: ReactNode;
-
-  /**
-   * description (in Markdown)
-   */
-  description?: string;
-}
-
-export function ResponseTabs({
-  operation,
-  ctx,
-}: {
-  operation: NoReference<MethodInformation>;
-  ctx: RenderContext;
-}) {
-  const tabs = useMemo(() => {
-    const tabs: ResponseTab[] = [];
-    if (!operation.responses) return tabs;
-
-    for (const [code, response] of Object.entries(operation.responses)) {
-      const media = response.content ? getPreferredType(response.content) : null;
-      const responseOfType = media ? response.content?.[media] : null;
-
-      const tab: ResponseTab = {
-        code,
-        response,
-        mediaType: media as string | null,
-      };
-
-      if (responseOfType?.examples) {
-        tab.examples ??= [];
-
-        for (const [key, sample] of Object.entries(responseOfType.examples)) {
-          tab.examples.push({
-            label: sample?.summary ?? <I18nLabel label="responseTabName" replacements={{ key }} />,
-            sample: sample.value,
-            description: sample?.description,
-          });
-        }
-      } else if (responseOfType?.example || responseOfType?.schema) {
-        tab.examples ??= [];
-        tab.examples.push({
-          label: <I18nLabel label="responseTabNameDefault" />,
-          sample: responseOfType.example ?? sample(responseOfType.schema as object),
-        });
-      }
-
-      tabs.push(tab);
-    }
-
-    return tabs;
-  }, [operation.responses]);
-
+export function ResponseTabs() {
+  const ctx = useRenderContext();
+  const tabs = useResponseExamples();
   if (tabs.length === 0) return null;
 
-  const { renderResponseTabs = renderResponseTabsDefault } = ctx.content ?? {};
+  if (ctx.content?.renderResponseTabs) return ctx.content.renderResponseTabs({ tabs }, ctx);
 
-  return renderResponseTabs(tabs, ctx);
+  return <ResponseTabsDefaultContent tabs={tabs} />;
 }
 
-function renderResponseTabsDefault(tabs: ResponseTab[], ctx: RenderContext): ReactNode {
+function ResponseTabsDefaultContent({ tabs }: { tabs: ResponseTab[] }) {
+  const t = useTranslations({ note: 'operation page' });
+
   function renderExampleContent(example: ResponseExample) {
     return (
       <>
-        {example.description && ctx.renderMarkdown(example.description)}
-        {ctx.renderCodeBlock({
-          lang: 'json',
-          code: JSON.stringify(example.sample, null, 2),
-        })}
+        {example.description && <Markdown md={example.description} />}
+        <ClientCodeBlock lang="json" code={JSON.stringify(example.sample, null, 2)} />
       </>
     );
   }
@@ -111,7 +41,7 @@ function renderResponseTabsDefault(tabs: ResponseTab[], ctx: RenderContext): Rea
       {tabs.map((tab) => {
         const { examples = [] } = tab;
 
-        let slot: ReactNode = <I18nLabel label="empty" />;
+        let slot: ReactNode = t('Empty');
         if (examples.length > 1) {
           slot = (
             <Accordions type="single" className="pt-2" defaultValue="0">

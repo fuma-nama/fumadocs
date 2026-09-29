@@ -1,3 +1,119 @@
+## @fumadocs/cli@1.7.0
+
+### New registry format
+
+The CLI is upgraded to Fuma CLI 0.3, the registry is now a manifest with the raw files instead of one JSON per component.
+
+- Installing fetches every needed file in parallel, and no longer parses the installed files to link their imports.
+- Layouts are imported from `fumadocs-ui` unless you have installed them, without a Fumadocs-specific plugin.
+
+Older versions of the CLI cannot read the new registry, upgrade to install components.
+
+### Moved files
+
+Some components are installed to a location that follows their source, update your imports if you install them again:
+
+| Before                                                                          | Now                                             |
+| ------------------------------------------------------------------------------- | ----------------------------------------------- |
+| `components/sanity/<name>.tsx`                                                  | `components/sanity/<name>.component.tsx`        |
+| `components/docs-sidebar/tabs-dropdown.tsx`                                     | `components/docs-sidebar/tabs/dropdown.tsx`     |
+| `components/openapi/playground/{result-display,server-select,oauth-dialog}.tsx` | `components/openapi/playground/components/*`    |
+| `components/graphql/playground/code-editor.tsx`                                 | `components/graphql/components/code-editor.tsx` |
+
+### Names of layout slots
+
+Slots are named after their path, like `layouts/docs/slots/sidebar` instead of `slots/docs/sidebar`. `fumadocs customise` is unchanged.
+
+## @fumadocs/cli@1.6.2
+
+### Shorter names for integration components
+
+The components of integrations dropped their `fumadocs/` prefix:
+
+```npm
+npx @fumadocs/cli add openapi/page
+```
+
+| Before                | Now          |
+| --------------------- | ------------ |
+| `fumadocs/openapi/*`  | `openapi/*`  |
+| `fumadocs/asyncapi/*` | `asyncapi/*` |
+| `fumadocs/graphql/*`  | `graphql/*`  |
+| `fumadocs/story/*`    | `story/*`    |
+| `fumadocs/sanity/*`   | `sanity/*`   |
+| `fumadocs/api-docs/*` | `api-docs/*` |
+
+The old names are gone, update the commands in your scripts. `fumadocs/base-ui` and `fumadocs/radix-ui` are unchanged, the CLI resolves them from your configured `uiLibrary`.
+
+## @fumadocs/cli@1.6.1
+
+### Reuse your Shadcn UI components
+
+On projects with a `components.json`, the CLI leaves the `button`, `popover` and `collapsible` of your `ui` directory as they are and imports them from installed components, they share the API of Shadcn UI. `cn` is imported from your `utils` alias instead of a new `lib/cn.ts`, configurable in `cli.json`:
+
+```json
+{
+  "aliases": {
+    "utils": "./lib/utils"
+  }
+}
+```
+
+Fumadocs' copies are only installed when you don't have them yet. The `tabs` and `accordion` primitives are Fumadocs specific, they are installed next to their components instead of the `ui` directory.
+
+- `customize` updates the imports of your route files to the installed layouts.
+- `feature ai` and `feature feedback` install the primitives of your configured `uiLibrary`, they always used the Radix UI ones before.
+
+### Mark packages side-effect free
+
+All packages now declare `sideEffects` in `package.json`, so bundlers can tree-shake unused modules. Packages shipping stylesheets list them as side effects to keep CSS imports.
+
+## @fumadocs/cli@1.6.0
+
+### `init` and `feature` commands
+
+The CLI now configures Fumadocs on an existing app and adds features to it, beyond installing UI components. Supported on Next.js, React Router, TanStack Start and Waku.
+
+```bash
+npx @fumadocs/cli init
+npx @fumadocs/cli feature llms
+```
+
+`init` adds the docs pages in a dedicated route group (e.g. `app/(docs)`) with their own provider, layout and search route, so your existing setup stays untouched: it only registers the Fumadocs MDX plugin in your bundler config, imports the styles into your global CSS and adds `suppressHydrationWarning` to `<html>`. Pass `--i18n` to set up internationalization with locale-prefixed routes.
+
+`feature <id>` installs the components and routes of a feature and wires them into your app: `ai` (Ask AI dialog), `llms` (`llms.txt`, `llms-full.txt` and per-page Markdown, with the `/docs/*.md` rewrite on Next.js), `mcp`, `webmcp` (experimental), `og`, `search` (Orama Cloud, Algolia, Typesense, Mixedbread), `feedback`, `epub` and `lint`. Features follow your setup: the `baseUrl` of your docs, `src/` directory, i18n, static export and SPA modes, Fumadocs MDX with the macro API or `source.config.ts`. Route URLs are read from the constants of `lib/shared.ts` (`docsRoute`, `docsContentRoute`, `docsImageRoute`), and route features add URL helpers like `getPageMarkdownUrl(page)` to `lib/source.ts`.
+
+Every command takes `-y` to skip prompts and `--no-install` to only write dependencies to `package.json`.
+
+Components are installed at the directories of your shadcn `components.json` by default, so the same component isn't duplicated in two places. `export epub` no longer scaffolds the export route, run `feature epub` instead.
+
+### CLIs on `cac`
+
+The CLIs are now built on [cac](https://github.com/cacjs/cac).
+
+## @fumadocs/cli@1.5.0
+
+### Add API Playground & Schema UI components
+
+Install the UI of API integrations into your codebase:
+
+```npm
+npx @fumadocs/cli add fumadocs/openapi/playground
+npx @fumadocs/cli add fumadocs/api-docs/schema
+```
+
+## @fumadocs/cli@1.4.1
+
+### Add Astro framework support
+
+Add Astro as a supported framework with React islands, including framework providers, an example app, create-app template support, search integration, OG image generation, and documentation.
+
+## @fumadocs/cli@1.4.0
+
+### Default to Base UI
+
+Internal packages & templates now use Base UI rather than Radix UI.
+
 # fumadocs
 
 ## 1.3.10

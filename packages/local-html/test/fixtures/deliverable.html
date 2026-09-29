@@ -1,0 +1,56 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Product Kickoff</title>
+    <meta name="description" content="Kickoff deck for the product team." />
+    <meta name="author" content="Docs Team" />
+    <style>
+      body {
+        font-family: sans-serif;
+      }
+      .statline {
+        display: flex;
+      }
+    </style>
+  </head>
+  <body onload="init()">
+    <header class="shell">
+      <span class="wordmark">Acme</span>
+      <nav><a href="#roadmap">Roadmap</a></nav>
+    </header>
+    <main class="content">
+      <h1 class="display">Product Kickoff</h1>
+      <p class="lede">What we are building and why it matters.</p>
+      <h2 id="goals">Goals</h2>
+      <p>Ship the first slice by <strong>March</strong>.</p>
+      <ul>
+        <li>Validate demand</li>
+        <li onclick="track()">Deliver the aha-moment</li>
+      </ul>
+      <h2>The Roadmap</h2>
+      <table class="evidence">
+        <thead>
+          <tr>
+            <th>Phase</th>
+            <th class="num">Weeks</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Now</td>
+            <td class="num" style="text-align: right">4</td>
+          </tr>
+          <tr>
+            <td>Next</td>
+            <td class="num">6</td>
+          </tr>
+        </tbody>
+      </table>
+      <script>
+        console.log('inline analytics');
+      </script>
+    </main>
+    <footer class="shell">Acme</footer>
+  </body>
+</html>

@@ -1,16 +1,9 @@
 import { createFileRoute } from '@tanstack/react-router';
 import { source } from '@/lib/source';
 import { createFromSource } from 'fumadocs-core/search/server';
-import { createTokenizer } from '@orama/tokenizers/mandarin';
 
-const server = createFromSource(source, {
-  localeMap: {
-    en: 'english',
-    cn: {
-      tokenizer: createTokenizer(),
-    },
-  },
-});
+// zero config: the default `multilingual` mode works for every language
+const server = createFromSource(source);
 
 export const Route = createFileRoute('/api/search')({
   server: {

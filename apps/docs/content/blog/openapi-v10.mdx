@@ -27,12 +27,8 @@ This redesign separates API page and server concerns, removes `disablePlayground
    export const openapi = createOpenAPI({
      input: [path.resolve('./scalar.yaml')],
      proxyUrl: '/api/proxy',
-     mediaAdapters: {
-       /* adapters */
-     },
-     shikiOptions: {
-       /* options */
-     },
+     mediaAdapters: {/* adapters */},
+     shikiOptions: {/* options */},
    });
    ```
 
@@ -53,12 +49,8 @@ This redesign separates API page and server concerns, removes `disablePlayground
    import { createAPIPage } from 'fumadocs-openapi/ui';
 
    export const APIPage = createAPIPage(openapi, {
-     mediaAdapters: {
-       /* adapters */
-     },
-     shikiOptions: {
-       /* options */
-     },
+     mediaAdapters: {/* adapters */},
+     shikiOptions: {/* options */},
    });
    ```
 
@@ -91,9 +83,7 @@ This redesign separates API page and server concerns, removes `disablePlayground
 
    export default defineClientConfig({
      playground: {
-       transformAuthInputs: (inputs) => [
-         /* modified inputs */
-       ],
+       transformAuthInputs: (inputs) => [/* modified inputs */],
      },
    });
    ```

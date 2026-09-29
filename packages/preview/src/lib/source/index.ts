@@ -1,13 +1,19 @@
-import { loader, source } from 'fumadocs-core/source';
+import { loader, StaticSource } from 'fumadocs-core/source';
 import { revalidable } from '@/lib/revalidable';
 import { lucideIconsPlugin } from 'fumadocs-core/source/lucide-icons';
-import { getPages } from './storage';
+import { getPages, RawMeta, RawPage } from './storage';
 import type { ParsedAppConfig } from '@/config/global';
 
 export const getSource = revalidable({
   async create(config: ParsedAppConfig) {
+    const out = await getPages(config.content);
     return loader({
-      source: source(await getPages(config.content)),
+      source: {
+        files: [...out.metas, ...out.pages],
+      } as StaticSource<{
+        metaData: RawMeta['data'];
+        pageData: RawPage['data'];
+      }>,
       plugins: [lucideIconsPlugin()],
       baseUrl: '/',
     });
@@ -17,11 +23,8 @@ export const getSource = revalidable({
 export type Source = Awaited<ReturnType<typeof getSource>>;
 export type SourcePage = Source['$inferPage'];
 
-export function getPageImage(slugs: string[]) {
-  const segments = [...slugs, 'image.webp'];
+export function getPageImageUrl(page: SourcePage) {
+  const segments = [...page.slugs, 'image.webp'];
 
-  return {
-    segments,
-    url: `/og/${segments.join('/')}`,
-  };
+  return '/' + [page.locale, 'og', ...segments].filter(Boolean).join('/');
 }

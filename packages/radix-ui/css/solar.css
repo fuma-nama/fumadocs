@@ -17,18 +17,13 @@
 
 @variant md {
   #nd-docs-layout {
-    #nd-page {
-      @apply relative md:px-9 xl:px-12;
+    [data-layout-main] {
+      @apply relative p-4;
     }
 
-    #nd-page:before {
+    [data-layout-main]:before {
       content: '';
-      @apply absolute inset-0 bg-fd-article rounded-xl border shadow-xl m-4 mb-2 -z-1;
-    }
-
-    [data-toc-popover-trigger],
-    [data-toc-popover-content] {
-      @apply px-4;
+      @apply absolute inset-4 bg-fd-article rounded-xl border shadow-md -z-1;
     }
 
     [data-toc-popover] {
@@ -37,24 +32,19 @@
 
       header {
         transform-origin: top center;
-        @apply border rounded-xl shadow-lg transition-[margin] has-data-[active=true]:-mx-2 has-data-[active=true]:bg-fd-popover/80;
+        @apply bg-fd-popover/50 border rounded-xl shadow-md transition-[margin] has-data-[active=true]:-mx-2 has-data-[active=true]:bg-fd-popover/80;
       }
     }
   }
 
   #nd-notebook-layout {
-    #nd-page {
-      @apply relative md:px-9 xl:px-12;
+    [data-layout-main] {
+      @apply relative p-4;
     }
 
-    #nd-page:before {
+    [data-layout-main]:before {
       content: '';
-      @apply absolute inset-0 bg-fd-article rounded-xl border shadow-xl m-4 mb-2 -z-1;
-    }
-
-    [data-toc-popover-trigger],
-    [data-toc-popover-content] {
-      @apply px-4;
+      @apply absolute inset-4 bg-fd-article rounded-xl border shadow-md -z-1;
     }
 
     [data-toc-popover] {
@@ -63,7 +53,7 @@
 
       header {
         transform-origin: top center;
-        @apply border rounded-xl shadow-lg transition-[margin] has-data-[active=true]:-mx-2 has-data-[active=true]:bg-fd-popover/80;
+        @apply bg-fd-popover/50 border rounded-xl shadow-md transition-[margin] has-data-[active=true]:-mx-2 has-data-[active=true]:bg-fd-popover/80;
       }
     }
   }

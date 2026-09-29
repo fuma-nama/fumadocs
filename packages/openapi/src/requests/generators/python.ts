@@ -5,7 +5,7 @@ import { doubleQuote } from '../string-utils';
 export const python: CodeUsageGenerator = {
   label: 'Python',
   lang: 'python',
-  generate(url, data, { mediaAdapters }) {
+  generate(data, { mediaAdapters }) {
     const headers: Record<string, string> = {};
     const imports = new Set<string>();
     const params = [`"${data.method.toUpperCase()}"`, 'url'];
@@ -49,7 +49,7 @@ export const python: CodeUsageGenerator = {
       .map((name) => 'import ' + name)
       .join('\n')}
 
-url = ${doubleQuote(url)}
+url = ${doubleQuote(data.url)}
 ${body ?? ''}
 response = requests.request(${params.join(', ')})
 

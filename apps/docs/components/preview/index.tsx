@@ -108,7 +108,7 @@ export function zoomImage(): ReactNode {
 export function accordion(): ReactNode {
   return (
     <Wrapper>
-      <Accordions type="single" collapsible>
+      <Accordions>
         <Accordion id="what-is-fumadocs" title="What is Fumadocs?">
           A framework for building documentation
         </Accordion>

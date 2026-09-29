@@ -13,19 +13,21 @@ import {
   type SharedProps,
 } from 'fumadocs-ui/components/dialog/search';
 import { useDocsSearch } from 'fumadocs-core/search/client';
+import { algoliaClient } from 'fumadocs-core/search/client/algolia';
 import { useI18n } from 'fumadocs-ui/contexts/i18n';
 
 const appId = 'replace me';
 const apiKey = 'replace me';
-const client = liteClient(appId, apiKey);
+const algolia = liteClient(appId, apiKey);
 
 export default function CustomSearchDialog(props: SharedProps) {
   const { locale } = useI18n(); // (optional) for i18n
   const { search, setSearch, query } = useDocsSearch({
-    type: 'algolia',
-    client,
-    indexName: 'document',
-    locale,
+    client: algoliaClient({
+      client: algolia,
+      indexName: 'document',
+      locale,
+    }),
   });
 
   return (

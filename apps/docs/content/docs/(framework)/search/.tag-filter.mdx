@@ -12,13 +12,15 @@ import {
 } from 'fumadocs-ui/components/dialog/search';
 import { useState } from 'react';
 import { useDocsSearch } from 'fumadocs-core/search/client';
+import { fetchClient } from 'fumadocs-core/search/client/fetch';
 
 export default function CustomSearchDialog(props: SharedProps) {
   // [!code ++]
   const [tag, setTag] = useState<string | undefined>();
   const { search, setSearch, query } = useDocsSearch({
-    tag, // [!code ++]
-    // other options depending on your search engine
+    client: fetchClient({
+      tag, // [!code ++]
+    }),
   });
 
   return (

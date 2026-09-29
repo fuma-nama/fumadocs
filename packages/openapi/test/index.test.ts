@@ -1,17 +1,8 @@
 import { fileURLToPath } from 'node:url';
 import { afterEach, describe, expect, test, vi } from 'vitest';
-import { idToTitle } from '@/utils/id-to-title';
 import { generateFilesOnly, type OutputFile } from '@/generate-file';
 import { createOpenAPI } from '@/server';
 import path from 'node:path';
-
-describe('Utilities', () => {
-  test('Operation ID to Title', () => {
-    expect(idToTitle('getKey')).toBe('Get Key');
-    expect(idToTitle('requestId30')).toBe('Request Id30');
-    expect(idToTitle('requestId-30')).toBe('Request Id 30');
-  });
-});
 
 const cwd = fileURLToPath(new URL('./', import.meta.url));
 
@@ -23,9 +14,9 @@ describe('Generate documents', () => {
   test('Pet Store (Per Operation)', async () => {
     const out = await generateFilesOnly({
       input: createOpenAPI({
-        input: () => ({
+        input: {
           petstore: path.join(cwd, './fixtures/petstore.yaml'),
-        }),
+        },
       }),
       per: 'operation',
     });
@@ -36,9 +27,9 @@ describe('Generate documents', () => {
   test('Museum (Per Tag)', async () => {
     const out = await generateFilesOnly({
       input: createOpenAPI({
-        input: () => ({
+        input: {
           museum: path.join(cwd, './fixtures/museum.yaml'),
-        }),
+        },
       }),
       per: 'tag',
     });
@@ -49,9 +40,9 @@ describe('Generate documents', () => {
   test('Unkey (Per File)', async () => {
     const out = await generateFilesOnly({
       input: createOpenAPI({
-        input: () => ({
+        input: {
           unkey: path.join(cwd, './fixtures/unkey.json'),
-        }),
+        },
       }),
       per: 'file',
     });
@@ -62,10 +53,10 @@ describe('Generate documents', () => {
   test('Generate Files', async () => {
     const out = await generateFilesOnly({
       input: createOpenAPI({
-        input: () => ({
+        input: {
           museum: path.join(cwd, './fixtures/museum.yaml'),
           petstore: path.join(cwd, './fixtures/petstore.yaml'),
-        }),
+        },
       }),
       per: 'file',
     });
@@ -87,9 +78,9 @@ describe('Generate documents', () => {
   test('Generate Files - groupBy tag per operation', async () => {
     const out = await generateFilesOnly({
       input: createOpenAPI({
-        input: () => ({
+        input: {
           products: path.join(cwd, './fixtures/products.yaml'),
-        }),
+        },
       }),
       per: 'operation',
       groupBy: 'tag',
@@ -101,12 +92,29 @@ describe('Generate documents', () => {
     await expect(stringifyOutput(out)).toMatchFileSnapshot('./out/products-group-by-tag.md');
   });
 
+  test('Generate Files - groupBy tag with tag hierarchy', async () => {
+    const warn = vi.spyOn(console, 'warn').mockImplementation(() => {});
+    const out = await generateFilesOnly({
+      input: createOpenAPI({
+        input: {
+          store: path.join(cwd, './fixtures/tag-hierarchy.yaml'),
+        },
+      }),
+      per: 'operation',
+      groupBy: 'tag',
+      meta: true,
+    });
+
+    expect(warn).toHaveBeenCalledOnce();
+    await expect(stringifyOutput(out)).toMatchFileSnapshot('./out/tag-hierarchy.md');
+  });
+
   test('Generate Files - with index', async () => {
     const out = await generateFilesOnly({
       input: createOpenAPI({
-        input: () => ({
+        input: {
           products: path.join(cwd, './fixtures/products.yaml'),
-        }),
+        },
       }),
       per: 'operation',
       name: {
@@ -133,9 +141,9 @@ describe('Generate documents', () => {
   test('Generate Files - with meta', async () => {
     const out = await generateFilesOnly({
       input: createOpenAPI({
-        input: () => ({
+        input: {
           products: path.join(cwd, './fixtures/products.yaml'),
-        }),
+        },
       }),
       per: 'operation',
       meta: true,
@@ -147,9 +155,9 @@ describe('Generate documents', () => {
   test('Generate Files - with meta + groupBy', async () => {
     const out = await generateFilesOnly({
       input: createOpenAPI({
-        input: () => ({
+        input: {
           products: path.join(cwd, './fixtures/products.yaml'),
-        }),
+        },
       }),
       per: 'operation',
       groupBy: 'tag',
@@ -170,3 +178,20 @@ function stringifyOutput(output: OutputFile[]) {
   }
   return lines.join('\n\n');
 }
+
+test('OAuth handler sends users back to the page that started the flow', () => {
+  const handler = createOpenAPI().createOAuthHandler();
+  const request = (page?: string) =>
+    handler(
+      new Request('https://docs.example.com/api/oauth?code=abc&state=xyz', {
+        headers: page ? { cookie: `fumadocs-openapi-oauth=${encodeURIComponent(page)}` } : {},
+      }),
+    );
+
+  const res = request('/docs/Get%20A%20Thing');
+  expect(res.status).toBe(302);
+  expect(res.headers.get('location')).toBe('/docs/Get%20A%20Thing?code=abc&state=xyz');
+  expect(request().status).toBe(400);
+  expect(request('//evil.example').status).toBe(400);
+  expect(request('https://evil.example/docs').status).toBe(400);
+});

@@ -4,7 +4,7 @@ import * as Twoslash from 'fumadocs-twoslash/ui';
 import { Callout } from 'fumadocs-ui/components/callout';
 import { TypeTable } from 'fumadocs-ui/components/type-table';
 import * as Preview from '@/components/preview';
-import { createMetadata, getPageImage } from '@/lib/metadata';
+import { createMetadata, getPageImageUrl } from '@/lib/metadata';
 import { source } from '@/lib/source';
 import { Wrapper } from '@/components/preview/wrapper';
 import { Mermaid } from '@/components/mdx/mermaid';
@@ -18,16 +18,19 @@ import { getMDXComponents } from '@/components/mdx';
 import { Banner } from 'fumadocs-ui/components/banner';
 import { Installation } from '@/components/preview/installation';
 import { Customization } from '@/components/preview/customization';
+import { AgentInstructions } from '@/components/agent-instructions';
 import {
   DocsBody,
   DocsPage,
   PageLastUpdate,
   MarkdownCopyButton,
   ViewOptionsPopover,
+  DocsPageProps,
 } from 'fumadocs-ui/layouts/docs/page';
 import { NotFound } from '@/components/layouts/not-found';
 import { getSuggestions } from './suggestions';
 import { PathUtils } from 'fumadocs-core/source';
+import { AsyncAPIPageLazy, GraphQLPageLazy, OpenAPIPageLazy } from './lazy';
 
 function PreviewRenderer({ preview }: { preview: string }): ReactNode {
   if (preview && preview in Preview) {
@@ -51,14 +54,43 @@ export default async function Page(props: PageProps<'/docs/[[...slug]]'>) {
       />
     );
 
+  const pageProps = {
+    // tableOfContent: {
+    //   footer: <SponsorsMarquee />,
+    // },
+  } satisfies Partial<DocsPageProps>;
+
   if (page.type === 'openapi') {
-    const { APIPage } = await import('@/components/api-page');
     return (
-      <DocsPage full>
+      <DocsPage full {...pageProps}>
         <h1 className="text-[1.75em] font-semibold">{page.data.title}</h1>
 
         <DocsBody>
-          <APIPage {...page.data.getAPIPageProps()} />
+          <OpenAPIPageLazy {...page.data.getOpenAPIPageProps()} />
+        </DocsBody>
+      </DocsPage>
+    );
+  }
+
+  if (page.type === 'asyncapi') {
+    return (
+      <DocsPage full {...pageProps}>
+        <h1 className="text-[1.75em] font-semibold">{page.data.title}</h1>
+
+        <DocsBody>
+          <AsyncAPIPageLazy {...page.data.getAsyncAPIPageProps()} />
+        </DocsBody>
+      </DocsPage>
+    );
+  }
+
+  if (page.type === 'graphql') {
+    return (
+      <DocsPage full {...pageProps}>
+        <h1 className="text-[1.75em] font-semibold">{page.data.title}</h1>
+
+        <DocsBody>
+          <GraphQLPageLazy {...page.data.getGraphQLPageProps()} />
         </DocsBody>
       </DocsPage>
     );
@@ -67,15 +99,10 @@ export default async function Page(props: PageProps<'/docs/[[...slug]]'>) {
   const { body: Mdx, toc, lastModified } = await page.data.load();
 
   return (
-    <DocsPage
-      toc={toc}
-      tableOfContent={{
-        style: 'clerk',
-      }}
-    >
+    <DocsPage toc={toc} {...pageProps}>
       <h1 className="text-[1.75em] font-semibold">{page.data.title}</h1>
       <p className="text-lg text-fd-muted-foreground mb-2">{page.data.description}</p>
-      <div className="flex flex-row flex-wrap gap-2 items-center border-b pb-6">
+      <div className="flex flex-row flex-wrap gap-2 items-center border-b pb-6 mb-4">
         <MarkdownCopyButton markdownUrl={`${page.url}.mdx`} />
         <ViewOptionsPopover
           markdownUrl={`${page.url}.mdx`}
@@ -120,6 +147,7 @@ export default async function Page(props: PageProps<'/docs/[[...slug]]'>) {
               },
               Installation,
               Customization,
+              AgentInstructions,
             })}
           />
         </FeedbackText>
@@ -162,7 +190,7 @@ export async function generateMetadata(props: PageProps<'/docs/[[...slug]]'>): P
   const description = page.data.description ?? 'The library for building documentation sites';
 
   const image = {
-    url: getPageImage(page).url,
+    url: getPageImageUrl(page).url,
     width: 1200,
     height: 630,
   };

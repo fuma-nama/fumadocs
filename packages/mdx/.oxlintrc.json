@@ -7,7 +7,13 @@
   "env": {
     "builtin": true
   },
-  "ignorePatterns": ["dist/", "node_modules/", "test/**/*.output.js", "bin.js"],
+  "ignorePatterns": [
+    "dist/",
+    "node_modules/",
+    "test/**/*.output.js",
+    "test/**/*.output.ts",
+    "bin.js"
+  ],
   "rules": {
     "constructor-super": "error",
     "for-direction": "error",

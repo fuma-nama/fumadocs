@@ -2,11 +2,6 @@ import fs from 'node:fs/promises';
 import path, { join } from 'node:path';
 import { x } from 'tinyexec';
 
-export async function writeFile(file: string, content: string) {
-  await fs.mkdir(path.dirname(file), { recursive: true });
-  await fs.writeFile(file, content);
-}
-
 export async function copy(
   from: string,
   to: string,
@@ -95,16 +90,4 @@ export async function tryGitInit(cwd: string): Promise<boolean> {
 
     return false;
   }
-}
-
-export function pick<T extends object, K extends keyof T>(obj: T, keys: K[]): Pick<T, K> {
-  const result: Partial<T> = {};
-
-  for (const key of keys) {
-    if (key in obj) {
-      result[key] = obj[key];
-    }
-  }
-
-  return result as Pick<T, K>;
 }

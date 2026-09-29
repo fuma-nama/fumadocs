@@ -1,0 +1,15 @@
+openapi: 3.1.0
+info:
+  title: External refs
+  version: 1.0.0
+paths:
+  /pets:
+    get:
+      operationId: listPets
+      responses:
+        '200':
+          description: ok
+          content:
+            application/json:
+              schema:
+                $ref: './pet.yaml'

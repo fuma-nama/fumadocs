@@ -1,7 +1,7 @@
 import { match as matchLocale } from '@formatjs/intl-localematcher';
 import { type NextProxy, NextResponse } from 'next/server';
 import type { I18nConfig } from '@/i18n';
-import { getNegotiator } from '@/negotiation';
+import { negotiateLanguages } from '@/utils/accept-language';
 import type { NextURL } from 'next/dist/server/web/next-url';
 
 interface MiddlewareOptions extends I18nConfig {
@@ -84,7 +84,7 @@ export function createI18nMiddleware({
         return NextResponse.rewrite(formatter.add(url, defaultLanguage));
       }
 
-      const finalLanguages = getNegotiator(request).languages(languages);
+      const finalLanguages = negotiateLanguages(request.headers.get('accept-language'), languages);
       const preferred = matchLocale(finalLanguages, languages, defaultLanguage);
       if (hideLocale === 'always') {
         const locale = request.cookies.get(cookieName)?.value ?? preferred;

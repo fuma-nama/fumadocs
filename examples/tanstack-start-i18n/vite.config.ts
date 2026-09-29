@@ -2,7 +2,7 @@ import react from '@vitejs/plugin-react';
 import { tanstackStart } from '@tanstack/react-start/plugin/vite';
 import { defineConfig } from 'vite';
 import tailwindcss from '@tailwindcss/vite';
-import mdx from 'fumadocs-mdx/vite';
+import { fumadocsMdx } from 'fumadocs-mdx/vite';
 import { i18n } from './src/lib/i18n';
 
 export default defineConfig({
@@ -10,7 +10,7 @@ export default defineConfig({
     port: 3000,
   },
   plugins: [
-    mdx(),
+    fumadocsMdx(),
     tailwindcss(),
     tanstackStart({
       prerender: {

@@ -1,5 +1,5 @@
 import { type NextRequest, NextResponse } from 'next/server';
-import { getLLMText } from '@/lib/get-llm-text';
+import { docsLlms } from '@/lib/llms';
 import { source } from '@/lib/source';
 import { notFound } from 'next/navigation';
 
@@ -10,7 +10,7 @@ export async function GET(_req: NextRequest, { params }: RouteContext<'/llms.mdx
   const page = source.getPage(slug);
   if (!page) notFound();
 
-  return new NextResponse(await getLLMText(page), {
+  return new NextResponse(await docsLlms.page(page), {
     headers: {
       'Content-Type': 'text/markdown',
     },

@@ -95,9 +95,14 @@ export function remarkPostprocess(
 
     if (includeMDAST) {
       const options = includeMDAST === true ? {} : includeMDAST;
-      const mdast = JSON.stringify(
-        options.removePosition ? removePosition(structuredClone(tree)) : tree,
-      );
+      let serialized = tree;
+
+      if (options.removePosition) {
+        serialized = structuredClone(tree);
+        removePosition(serialized); // mutates without returning anything
+      }
+
+      const mdast = JSON.stringify(serialized);
 
       file.data['mdx-export'].push({
         name: '_mdast',

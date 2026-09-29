@@ -17,6 +17,8 @@ import { type LayoutTab, isLayoutTabActive } from '@/layouts/shared';
 import { Popover, PopoverTrigger, PopoverContent } from '@/components/ui/popover';
 import { usePathname } from 'fumadocs-core/framework';
 import Link from 'fumadocs-core/link';
+import { useTabsGroups } from '@/contexts/tree';
+import { SidebarTabsDropdown } from '@/components/sidebar/tabs/dropdown';
 
 export function Header(props: ComponentProps<'header'>) {
   const {
@@ -28,7 +30,8 @@ export function Header(props: ComponentProps<'header'>) {
   const { open } = slots.sidebar?.useSidebar?.() ?? {};
   const navMode = nav?.mode ?? 'auto';
   const sidebarCollapsible = sidebar.collapsible ?? true;
-  const showLayoutTabs = tabMode === 'navbar' && tabs.length > 0;
+  const groups = useTabsGroups(tabs);
+  const showLayoutTabs = tabMode === 'navbar' && groups.length > 0;
 
   if (nav?.component) return nav.component;
 
@@ -43,7 +46,10 @@ export function Header(props: ComponentProps<'header'>) {
         props.className,
       )}
     >
-      <div data-header-body="" className="flex border-b px-4 gap-2 h-14 md:px-6">
+      <div
+        data-header-body=""
+        className={cn('flex border-b px-4 gap-2 h-14', navMode === 'top' && 'md:px-6')}
+      >
         <div
           className={cn(
             'items-center',
@@ -55,7 +61,7 @@ export function Header(props: ComponentProps<'header'>) {
             <slots.sidebar.collapseTrigger
               className={cn(
                 buttonVariants({
-                  color: 'ghost',
+                  variant: 'ghost',
                   size: 'icon-sm',
                 }),
                 '-ms-1.5 text-fd-muted-foreground data-[collapsed=false]:hidden max-md:hidden',
@@ -98,7 +104,7 @@ export function Header(props: ComponentProps<'header'>) {
                 key={i}
                 item={item}
                 className={cn(
-                  buttonVariants({ size: 'icon-sm', color: 'ghost' }),
+                  buttonVariants({ size: 'icon-sm', variant: 'ghost' }),
                   'text-fd-muted-foreground max-lg:hidden',
                 )}
                 aria-label={item.label}
@@ -113,7 +119,7 @@ export function Header(props: ComponentProps<'header'>) {
               <slots.sidebar.trigger
                 className={cn(
                   buttonVariants({
-                    color: 'ghost',
+                    variant: 'ghost',
                     size: 'icon-sm',
                     className: 'p-2 -me-1.5',
                   }),
@@ -135,7 +141,7 @@ export function Header(props: ComponentProps<'header'>) {
               <slots.sidebar.collapseTrigger
                 className={cn(
                   buttonVariants({
-                    color: 'secondary',
+                    variant: 'secondary',
                     size: 'icon-sm',
                   }),
                   'text-fd-muted-foreground rounded-full -me-1.5',
@@ -159,20 +165,27 @@ export function Header(props: ComponentProps<'header'>) {
 }
 
 function LayoutHeaderTabs({
-  tabs,
+  tabs: allTabs,
   className,
   ...props
 }: ComponentProps<'div'> & {
   tabs: LayoutTab[];
 }) {
   const pathname = usePathname();
+  const tabs = useTabsGroups(allTabs).findLast(
+    (group) => typeof group.active?.root !== 'string',
+  )?.options;
+  const typedTabs = useMemo(() => {
+    return allTabs.filter((tab) => typeof tab.$folder?.root === 'string');
+  }, [allTabs]);
   const selectedIdx = useMemo(() => {
-    return tabs.findLastIndex((option) => isLayoutTabActive(option, pathname));
+    return tabs?.findLastIndex((option) => isLayoutTabActive(option, pathname)) ?? -1;
   }, [tabs, pathname]);
 
   return (
     <div className={cn('flex flex-row items-end gap-6', className)} {...props}>
-      {tabs.map((option, i) => {
+      {typedTabs.length > 0 && <SidebarTabsDropdown options={typedTabs} className="my-auto p-1" />}
+      {tabs?.map((option, i) => {
         const { title, url, unlisted, props: { className, ...rest } = {} } = option;
         const isSelected = selectedIdx === i;
 

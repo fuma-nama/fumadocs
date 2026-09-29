@@ -1,26 +1,8 @@
-import type { TranslationsAPIExtension } from 'fumadocs-core/i18n';
+import translationKeys from '@/.translations/keys.json';
+import type { TranslationExtension } from 'fumadocs-core/i18n';
+import type { Translations } from '@/.translations';
 
-export const defaultTranslations = {
-  noVariant: 'No Variant',
-  props: 'Props',
-  renderError: 'Encountered error when rendering the component.',
-  reset: 'Reset',
-  unset: 'Unset',
-  booleanTrue: 'True',
-  booleanFalse: 'False',
-  dateInputPlaceholder: 'Enter date',
-  numberInputPlaceholder: 'Enter number',
-  bigintInputPlaceholder: 'Enter bigint',
-  textInputPlaceholder: 'Enter text',
-  arrayInputRemoveItem: 'Remove Item',
-  arrayInputAddItem: 'New Item',
-};
-
-export type Translations = typeof defaultTranslations;
-
-export function storyTranslations(): TranslationsAPIExtension<'story', Translations> {
-  return {
-    namespace: 'story',
-    defaultValue: defaultTranslations,
-  };
+export type { Translations };
+export function storyTranslations(): TranslationExtension<keyof Translations> {
+  return { keys: translationKeys as never };
 }

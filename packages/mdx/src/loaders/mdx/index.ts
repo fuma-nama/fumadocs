@@ -6,12 +6,12 @@ import fs from 'node:fs/promises';
 import path from 'node:path';
 import { createHash } from 'node:crypto';
 import type { ConfigLoader } from '@/loaders/config';
-import { mdxLoaderGlob } from '..';
 
 const querySchema = z.looseObject({
   only: z.literal(['frontmatter', 'all']).default('all'),
   collection: z.string().optional(),
   workspace: z.string().optional(),
+  macro_id: z.string().optional(),
 });
 
 const cacheEntry = z.object({
@@ -24,12 +24,18 @@ type CacheEntry = z.infer<typeof cacheEntry>;
 
 export function createMdxLoader({ getCore }: ConfigLoader): Loader {
   return {
-    test: mdxLoaderGlob,
     async load({ getSource, development: isDevelopment, query, compiler, filePath }) {
       let core = await getCore();
+      // macro collections live on the root core, read it before switching to a workspace
+      const macro = core.macro;
       const value = await getSource();
       const matter = frontmatter(value);
-      const { collection: collectionName, workspace, only } = querySchema.parse(query);
+      const {
+        collection: collectionName,
+        workspace,
+        only,
+        macro_id: macroId,
+      } = querySchema.parse(query);
       if (workspace) {
         core = core.getWorkspaces().get(workspace) ?? core;
       }
@@ -37,9 +43,11 @@ export function createMdxLoader({ getCore }: ConfigLoader): Loader {
       let after: (() => Promise<void>) | undefined;
 
       const { experimentalBuildCache = false } = core.getConfig().global;
-      if (!isDevelopment && experimentalBuildCache) {
+      if (!isDevelopment && experimentalBuildCache && only === 'all') {
         const cacheDir = experimentalBuildCache;
-        const cacheKey = `${collectionName ?? 'global'}_${generateCacheHash(filePath)}`;
+        // macro ids contain path separators, keep the key a valid file name
+        const scope = (macroId ?? collectionName ?? 'global').replace(/[^a-zA-Z0-9_-]/g, '_');
+        const cacheKey = `${scope}_${generateCacheHash(filePath)}`;
 
         const cached = await fs
           .readFile(path.join(cacheDir, cacheKey), 'utf-8')
@@ -59,16 +67,25 @@ export function createMdxLoader({ getCore }: ConfigLoader): Loader {
         };
       }
 
-      const collection = collectionName ? core.getCollection(collectionName) : undefined;
-
       let docCollection: DocCollectionItem | undefined;
-      switch (collection?.type) {
-        case 'doc':
-          docCollection = collection;
-          break;
-        case 'docs':
-          docCollection = collection.docs;
-          break;
+      if (macro && macroId !== undefined) {
+        const resolved = await macro.resolve(macroId);
+        for (const input of resolved.inputs) compiler.addDependency(input);
+
+        const item = resolved.collection;
+        if (item.type === 'docs') docCollection = item.docs;
+        else if (item.type === 'doc') docCollection = item;
+      } else {
+        const collection = collectionName ? core.getCollection(collectionName) : undefined;
+
+        switch (collection?.type) {
+          case 'doc':
+            docCollection = collection;
+            break;
+          case 'docs':
+            docCollection = collection.docs;
+            break;
+        }
       }
 
       if (docCollection) {
@@ -79,13 +96,10 @@ export function createMdxLoader({ getCore }: ConfigLoader): Loader {
       }
 
       if (only === 'frontmatter') {
-        return {
-          code: `export const frontmatter = ${JSON.stringify(matter.data)}`,
-          map: null,
-        };
+        return { code: `export const frontmatter = ${JSON.stringify(matter.data)}` };
       }
 
-      const { buildMDX } = await import('@/loaders/mdx/build-mdx');
+      const { buildMDX } = await import('@/loaders/mdx/build');
       const compiled = await buildMDX(core, docCollection, {
         isDevelopment,
         // ensure the line number is correct in errors
@@ -97,7 +111,7 @@ export function createMdxLoader({ getCore }: ConfigLoader): Loader {
       });
 
       const out: LoaderOutput = {
-        code: String(compiled.value),
+        code: compiled.code,
         moduleType: 'js',
         map: compiled.map,
       };

@@ -8,7 +8,7 @@ export const revalidate = false;
 export async function GET(): Promise<Response> {
   const pages = source.getPages();
   const promises = pages.map(async (page) => {
-    if (page.type === 'openapi') return;
+    if (page.type !== 'docs') return;
 
     const items = getBreadcrumbItems(page.url, source.getPageTree(), {
       includePage: false,
@@ -17,7 +17,7 @@ export async function GET(): Promise<Response> {
 
     return {
       id: page.url,
-      structured: (await page.data.load()).structuredData,
+      structured: await page.data.structuredData(),
       tag: getSection(page.slugs[0]),
       url: page.url,
       title: page.data.title,

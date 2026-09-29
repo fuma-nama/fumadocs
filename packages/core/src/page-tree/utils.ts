@@ -165,6 +165,29 @@ export function findPath(
   return run(nodes) ?? null;
 }
 
+/**
+ * Find the structural projection of `page` (under the root folder `from`) in `to`:
+ * the page at the same file path relative to the root folder.
+ */
+export function findProjection(
+  from: PageTree.Folder,
+  to: PageTree.Folder,
+  page: PageTree.Item,
+): PageTree.Item | undefined {
+  const prefix = from.$ref && `${from.$ref.folder}/`;
+  if (!prefix || !to.$ref || !page.$ref?.startsWith(prefix)) return;
+  const target = `${to.$ref.folder}/${page.$ref.slice(prefix.length)}`;
+
+  let result: PageTree.Item | undefined;
+  visit(to, (node) => {
+    if (node.type === 'page' && node.$ref === target) {
+      result = node;
+      return 'break';
+    }
+  });
+  return result;
+}
+
 const VisitBreak = Symbol('VisitBreak');
 
 /**

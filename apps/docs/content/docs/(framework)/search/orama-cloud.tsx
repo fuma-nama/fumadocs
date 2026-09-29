@@ -13,10 +13,11 @@ import {
   type SharedProps,
 } from 'fumadocs-ui/components/dialog/search';
 import { useDocsSearch } from 'fumadocs-core/search/client';
+import { oramaCloudClient } from 'fumadocs-core/search/client/orama-cloud';
 import { OramaCloud } from '@orama/core';
 import { useI18n } from 'fumadocs-ui/contexts/i18n';
 
-const client = new OramaCloud({
+const orama = new OramaCloud({
   projectId: '',
   apiKey: '',
 });
@@ -24,9 +25,10 @@ const client = new OramaCloud({
 export default function CustomSearchDialog(props: SharedProps) {
   const { locale } = useI18n(); // (optional) for i18n
   const { search, setSearch, query } = useDocsSearch({
-    type: 'orama-cloud',
-    client,
-    locale,
+    client: oramaCloudClient({
+      client: orama,
+      locale,
+    }),
   });
 
   return (

@@ -4,7 +4,6 @@ import { getConfig } from '@fumadocs/vite';
 
 export default defineConfig({
   distDir: 'dist/waku',
-  unstable_adapter: './src/lib/waku/adapter.ts',
   vite: {
     resolve: {
       tsconfigPaths: true,
@@ -14,8 +13,8 @@ export default defineConfig({
       tailwindcss(),
       {
         name: 'internal',
-        config() {
-          return getConfig({ root: process.cwd() });
+        config(_, env) {
+          return getConfig({ root: process.cwd(), isBuild: env.command === 'build' });
         },
       },
     ],

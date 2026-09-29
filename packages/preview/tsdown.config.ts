@@ -8,6 +8,6 @@ export default defineConfig({
   dts: true,
   sourcemap: false,
   deps: {
-    onlyBundle: [],
+    onlyBundle: ['clsx', 'class-variance-authority'],
   },
 });

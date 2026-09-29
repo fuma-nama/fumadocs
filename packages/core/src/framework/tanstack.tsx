@@ -4,6 +4,9 @@ import { useParams, Link, useRouter, useRouterState } from '@tanstack/react-rout
 
 const framework: Framework = {
   Link({ href, prefetch = true, ...props }) {
+    // Tanstack Router drops the hash of same-page anchors, use a native anchor instead
+    if (href?.startsWith('#')) return <a href={href} {...props} />;
+
     return (
       <Link to={href} preload={prefetch ? 'intent' : false} {...props}>
         {props.children}

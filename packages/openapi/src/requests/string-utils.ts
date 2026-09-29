@@ -71,6 +71,20 @@ export function backtickQuote(str: string): string {
   return `\`${str.replace(/\\/g, '\\\\').replace(/`/g, '\\`')}\``;
 }
 
+/**
+ * Returns the input string wrapped inside a Rust string literal,
+ * with increasing number of # to escape `"#`
+ */
+export function rustRawStringLiteral(str: string): string {
+  let hashes = '#';
+
+  while (str.includes(`"${hashes}`)) {
+    hashes += '#';
+  }
+
+  return `r${hashes}"${str}"${hashes}`;
+}
+
 export function indent(code: string, tab: number = 1) {
   const p = '  '.repeat(tab);
   return code

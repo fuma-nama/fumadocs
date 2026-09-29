@@ -1,0 +1,74 @@
+---
+title: Markdown Rendering
+description: Render React elements into Markdown.
+---
+
+## Overview
+
+`fumadocs-core/server` renders React Server Components, into a Markdown document:
+
+```tsx tab="Input"
+import { renderToMarkdown } from 'fumadocs-core/server';
+
+const text = await renderToMarkdown(
+  <div>
+    <h2>Hello World</h2>
+    <p>
+      Some <b>rich</b> content.
+    </p>
+  </div>,
+);
+```
+
+```md tab="Output"
+## Hello World
+
+Some **rich** content.
+```
+
+It powers the component exported by [Remark LLMs](/docs/headless/mdx/remark-llms#output) with `output: "function"`, and works on any server-rendered content you want to serve as Markdown.
+
+> `renderToMarkdown()` is server-only.
+
+## `asMarkdown`
+
+Components define their own Markdown form. Calling `asMarkdown()` during render is the opt-in: it returns `true` when the component is being rendered into Markdown, and the HTML elements it returns are converted.
+
+```tsx
+import { asMarkdown, md } from 'fumadocs-core/server';
+
+function Callout({ title, children }) {
+  if (asMarkdown()) return md.linePrefix('> ')`**${title}**\n${children}`;
+
+  return <div className="...">...</div>;
+}
+```
+
+A component that never calls it is kept as JSX syntax with its props, like:
+
+```mdx
+<Tabs items={['a', 'b']}>...</Tabs>
+```
+
+This includes client components, which don't execute on the server.
+
+## `md`
+
+Tagged template for Markdown output, interpolated values can be strings, React nodes, promises, or arrays of them. Use it to stringify `children` before manipulating them.
+
+Two variants return the content as a block:
+
+- `md.linePrefix(prefix)`: prefix every line, e.g. `'> '` for quote blocks.
+- `md.indent(size)`: indent every line.
+
+## `renderRoute`
+
+Render a page element into Markdown, or `undefined` when its component doesn't call `asMarkdown()`.
+
+```tsx
+import { renderRoute } from 'fumadocs-core/server';
+
+const text = await renderRoute(<Page params={params} />);
+```
+
+Useful for serving a Markdown variant of a route: pages that opt in produce Markdown, other pages return `undefined` so you can fall back to a 404 or another source.

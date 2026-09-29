@@ -3,7 +3,7 @@
  *
  * All copyright belongs to https://github.com/lucide-icons/lucide, we bundle it as part of library to avoid upstream issues.
  */
-import { type ComponentProps, createElement, forwardRef } from 'react';
+import { type ComponentProps, createElement } from 'react';
 
 const defaultAttributes: LucideProps = {
   xmlns: 'http://www.w3.org/2000/svg',
@@ -34,16 +34,14 @@ export interface LucideProps extends ComponentProps<'svg'> {
 export type IconNode = [elementName: SVGElementType, attrs: Record<string, string>][];
 
 const createLucideIcon = (iconName: string, iconNode: IconNode) => {
-  const Component = forwardRef<SVGSVGElement, LucideProps>(
-    ({ size = 24, color = 'currentColor', children, ...props }, ref) => {
-      return (
-        <svg ref={ref} {...defaultAttributes} width={size} height={size} stroke={color} {...props}>
-          {iconNode.map(([tag, attr]) => createElement(tag, attr))}
-          {children}
-        </svg>
-      );
-    },
-  );
+  function Component({ size = 24, color = 'currentColor', children, ref, ...props }: LucideProps) {
+    return (
+      <svg ref={ref} {...defaultAttributes} width={size} height={size} stroke={color} {...props}>
+        {iconNode.map(([tag, attr]) => createElement(tag, attr))}
+        {children}
+      </svg>
+    );
+  }
 
   Component.displayName = iconName;
   return Component;

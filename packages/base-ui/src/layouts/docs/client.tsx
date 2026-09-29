@@ -23,7 +23,7 @@ import {
   type BaseSlots,
   type BaseSlotsProps,
 } from '../shared';
-import { TreeContextProvider } from '@/contexts/tree';
+import { TreeContextProvider, useTabsGroups, useTreePath } from '@/contexts/tree';
 import { Header } from './slots/header';
 import { Container } from './slots/container';
 
@@ -38,7 +38,7 @@ export interface DocsSlots extends BaseSlots {
   };
 }
 
-const { useProvider } = baseSlots({
+const { useBaseSlots } = baseSlots({
   useProps() {
     return useDocsLayout().props;
   },
@@ -87,7 +87,7 @@ export function LayoutBody(
   } = props;
   const isTop = useIsScrollTop({ enabled: navTransparentMode === 'top' }) ?? true;
   const isNavTransparent = navTransparentMode === 'top' ? isTop : navTransparentMode === 'always';
-  const { baseSlots, baseProps } = useProvider(props);
+  const { baseSlots, baseProps } = useBaseSlots(props);
   const linkItems = useLinkItems(props);
   const slots: DocsSlots = {
     ...baseSlots,
@@ -134,15 +134,18 @@ export function LayoutBody(
 }
 
 function LayoutTabs({
-  tabs,
+  tabs: allTabs,
   ...props
 }: ComponentProps<'div'> & {
   tabs: LayoutTab[];
 }) {
   const pathname = usePathname();
+  const path = useTreePath();
+  const group = useTabsGroups(allTabs).findLast((group) => typeof group.active?.root !== 'string');
   const selected = useMemo(() => {
-    return tabs.findLast((option) => isLayoutTabActive(option, pathname));
-  }, [tabs, pathname]);
+    return group?.options.findLast((option) => isLayoutTabActive(option, path, pathname));
+  }, [group, path, pathname]);
+  if (!group) return;
 
   return (
     <div
@@ -152,7 +155,7 @@ function LayoutTabs({
         props.className,
       )}
     >
-      {tabs.map((tab, i) => (
+      {group.options.map((tab, i) => (
         <Link
           key={i}
           href={tab.url}

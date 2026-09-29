@@ -1,6 +1,10 @@
 import { loader } from 'fumadocs-core/source';
 import { i18n } from '@/lib/i18n';
-import { docs } from 'collections/server';
+import { defineDocs } from 'fumadocs-mdx/macro';
+
+const docs = defineDocs({
+  dir: 'content/docs',
+});
 
 export const source = loader({
   baseUrl: '/docs',

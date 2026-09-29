@@ -5,11 +5,11 @@ import { resolveMediaAdapter } from '@/requests/media/adapter';
 export const go: CodeUsageGenerator = {
   label: 'Go',
   lang: 'go',
-  generate(url, data, { mediaAdapters }) {
+  generate(data, { mediaAdapters }) {
     const imports = ['fmt', 'net/http', 'io/ioutil'];
     const headers = new Map<string, string>();
     const variables = new Map<string, string>();
-    variables.set('url', doubleQuote(url));
+    variables.set('url', doubleQuote(data.url));
 
     for (const header in data.header) {
       headers.set(header, doubleQuote(data.header[header].value));

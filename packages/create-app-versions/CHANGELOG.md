@@ -1,4 +1,64 @@
+## create-fumadocs-versions@16.2.0
+
+### Search providers and shared CLI features
+
+`--search` accepts `algolia`, `typesense` and `mixedbread` in addition to `orama` and `orama-cloud`.
+
+Search, linter, OG image and Ask AI options are now applied by the features of `@fumadocs/cli`, the same code that configures them on an existing app, instead of template plugins. `create-fumadocs-versions` pins the versions of the new search dependencies.
+
+## create-fumadocs-versions@16.1.0
+
+### Default to Base UI
+
+Internal packages & templates now use Base UI rather than Radix UI.
+
 # create-fumadocs-versions
+
+## 16.0.124
+
+### Patch Changes
+
+- Updated dependencies [5499f59]
+  - fumadocs-ui@16.10.3
+  - fumadocs-core@16.10.3
+
+## 16.0.123
+
+### Patch Changes
+
+- Updated dependencies [e977acf]
+- Updated dependencies [7e9548b]
+- Updated dependencies [0997dd6]
+- Updated dependencies [71d58b8]
+  - fumadocs-ui@16.10.2
+  - fumadocs-core@16.10.2
+
+## 16.0.122
+
+### Patch Changes
+
+- Updated dependencies [5017289]
+- Updated dependencies [7a77722]
+  - fumadocs-ui@16.10.1
+  - fumadocs-core@16.10.1
+
+## 16.0.121
+
+### Patch Changes
+
+- Updated dependencies [9b9545f]
+- Updated dependencies [0cc1fac]
+- Updated dependencies [779efff]
+  - fumadocs-core@16.10.0
+  - fumadocs-mdx@15.0.12
+  - fumadocs-ui@16.10.0
+
+## 16.0.120
+
+### Patch Changes
+
+- Updated dependencies [2d65ceb]
+  - fumadocs-mdx@15.0.11
 
 ## 16.0.119
 

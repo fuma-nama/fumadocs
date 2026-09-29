@@ -37,6 +37,13 @@ export interface TabsProps extends ComponentProps<typeof Primitive.Root> {
 
 const TabsContext = createContext<{
   valueToIdMap: Map<string, string>;
+  /**
+   * Mounted tab panels, mapped by their value.
+   *
+   * Only populated for panels that stay in the DOM (e.g. `keepMounted`), which is
+   * what allows us to open the tab containing a hash target.
+   */
+  panels: Map<string, HTMLElement>;
 } | null>(null);
 
 function useTabContext() {
@@ -61,6 +68,7 @@ export function Tabs({
 }: TabsProps) {
   const tabsRef = useRef<HTMLDivElement>(null);
   const valueToIdMap = useMemo(() => new Map<string, string>(), []);
+  const panels = useMemo(() => new Map<string, HTMLElement>(), []);
   const [value, setValue] =
     _value === undefined
       ? // eslint-disable-next-line react-hooks/rules-of-hooks -- not supposed to change controlled/uncontrolled
@@ -80,20 +88,42 @@ export function Tabs({
     return () => {
       groupListeners.delete(setValue);
     };
-  }, [groupId, persist, setValue]);
+    // oxlint-disable-next-line react-hooks/exhaustive-deps
+  }, [groupId, persist]);
 
   useLayoutEffect(() => {
-    const hash = window.location.hash.slice(1);
-    if (!hash) return;
+    const openFromHash = () => {
+      const hash = window.location.hash.slice(1);
+      if (!hash) return;
 
-    for (const [value, id] of valueToIdMap.entries()) {
-      if (id === hash) {
-        setValue(value);
-        tabsRef.current?.scrollIntoView();
-        break;
+      // hash points to a tab's own anchor id
+      for (const [value, id] of valueToIdMap.entries()) {
+        if (id === hash) {
+          setValue(value);
+          tabsRef.current?.scrollIntoView();
+          return;
+        }
       }
-    }
-  }, [setValue, valueToIdMap]);
+
+      // hash points to an element inside a mounted (e.g. `keepMounted`) panel,
+      // open the tab it belongs to, then scroll to it once the panel is visible.
+      const target = document.getElementById(hash);
+      if (!target) return;
+
+      for (const [value, panel] of panels.entries()) {
+        if (!panel.contains(target)) continue;
+
+        setValue(value);
+        requestAnimationFrame(() => target.scrollIntoView());
+        return;
+      }
+    };
+
+    openFromHash();
+    window.addEventListener('hashchange', openFromHash);
+    return () => window.removeEventListener('hashchange', openFromHash);
+    // oxlint-disable-next-line react-hooks/exhaustive-deps
+  }, [valueToIdMap, panels]);
 
   return (
     <Primitive.Root
@@ -122,22 +152,29 @@ export function Tabs({
       }}
       {...props}
     >
-      <TabsContext value={useMemo(() => ({ valueToIdMap }), [valueToIdMap])}>
+      <TabsContext value={useMemo(() => ({ valueToIdMap, panels }), [valueToIdMap, panels])}>
         {props.children}
       </TabsContext>
     </Primitive.Root>
   );
 }
 
-export function TabsContent({ value, ...props }: ComponentProps<typeof Primitive.Panel>) {
-  const { valueToIdMap } = useTabContext();
+export function TabsContent({ value, ref, ...props }: ComponentProps<typeof Primitive.Panel>) {
+  const { valueToIdMap, panels } = useTabContext();
 
   if (props.id) {
     valueToIdMap.set(value, props.id);
   }
 
   return (
-    <Primitive.Panel value={value} {...props}>
+    <Primitive.Panel
+      ref={mergeRefs(ref, (element) => {
+        if (element) panels.set(value, element);
+        else panels.delete(value);
+      })}
+      value={value}
+      {...props}
+    >
       {props.children}
     </Primitive.Panel>
   );

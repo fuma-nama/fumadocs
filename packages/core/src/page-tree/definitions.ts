@@ -60,7 +60,14 @@ export interface Folder extends ID {
   type: 'folder';
   name: ReactNode;
   description?: ReactNode;
-  root?: boolean;
+  /**
+   * Mark as a root folder, `true` for the default type.
+   *
+   * A string value specifies its **root type**: root folders of the same type
+   * under the same parent scope are interchangeable (e.g. versions), and pages
+   * can map to their structural projection in another root.
+   */
+  root?: boolean | string;
   defaultOpen?: boolean;
   collapsible?: boolean;
   index?: Item;

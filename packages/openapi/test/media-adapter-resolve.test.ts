@@ -1,9 +1,5 @@
 import { describe, expect, test } from 'vitest';
-import {
-  defaultAdapters,
-  isMediaTypeSupported,
-  resolveMediaAdapter,
-} from '@/requests/media/adapter';
+import { defaultAdapters, resolveMediaAdapter } from '@/requests/media/adapter';
 
 describe('Media Adapter Resolution', () => {
   test('resolves exact match', () => {
@@ -48,6 +44,11 @@ describe('Media Adapter Resolution', () => {
     }
   });
 
+  test('resolves text/plain with parameters', () => {
+    const adapter = resolveMediaAdapter('text/plain; charset=utf-8', defaultAdapters);
+    expect(adapter).toBe(defaultAdapters['application/json']);
+  });
+
   test('returns undefined for unsupported media type', () => {
     const adapter = resolveMediaAdapter('application/yaml', defaultAdapters);
     expect(adapter).toBeUndefined();
@@ -56,16 +57,5 @@ describe('Media Adapter Resolution', () => {
   test('returns undefined for unsupported +suffix', () => {
     const adapter = resolveMediaAdapter('application/custom+yaml', defaultAdapters);
     expect(adapter).toBeUndefined();
-  });
-
-  test('isMediaTypeSupported returns true for supported types', () => {
-    expect(isMediaTypeSupported('application/json', defaultAdapters)).toBe(true);
-    expect(isMediaTypeSupported('application/json-patch+json', defaultAdapters)).toBe(true);
-    expect(isMediaTypeSupported('multipart/form-data', defaultAdapters)).toBe(true);
-  });
-
-  test('isMediaTypeSupported returns false for unsupported types', () => {
-    expect(isMediaTypeSupported('application/yaml', defaultAdapters)).toBe(false);
-    expect(isMediaTypeSupported('application/unknown', defaultAdapters)).toBe(false);
   });
 });

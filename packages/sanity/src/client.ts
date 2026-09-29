@@ -8,11 +8,9 @@ export function renderToc(opts: {
 }): TOCItemType[] {
   const { render, toc } = opts;
 
-  return toc.map(
-    (item): TOCItemType => ({
-      depth: Number(item.level ?? 0),
-      title: render({ ...item, style: undefined }),
-      url: `#${item._key}`,
-    }),
-  );
+  return toc.map((item): TOCItemType => ({
+    depth: Number(item.level ?? 0),
+    title: render({ ...item, style: undefined }),
+    url: `#${item._key}`,
+  }));
 }

@@ -1,48 +1,100 @@
 import type { LoaderConfig, LoaderOutput } from './loader';
 import type * as PageTree from '@/page-tree';
+import type { Awaitable } from '@/types';
 
 interface Context {
   lang?: string;
 }
 
-export interface LLMsConfig {
+interface RenderContext<C extends LoaderConfig> extends Context {
+  loader: LoaderOutput<C>;
+}
+
+export interface LLMsConfig<Page = unknown> {
   TAB?: string;
   renderName?: (item: PageTree.Node | PageTree.Root, ctx: Context) => string;
   renderDescription?: (
     item: PageTree.Root | PageTree.Item | PageTree.Folder,
     ctx: Context,
   ) => string;
+
+  /**
+   * Render a page as Markdown, required by `page()` and `full()`.
+   */
+  renderPage?: (page: Page) => Awaitable<string>;
+}
+
+export interface LLMs {
+  /**
+   * generate `llms.txt` content in Markdown format.
+   *
+   * use `indexNode(node)` instead for more control (e.g. add extra sections to output).
+   */
+  index: (lang?: string) => Promise<string>;
+
+  /**
+   * generate `llms.txt` content for a single page tree node.
+   */
+  indexNode: (node: PageTree.Node, lang?: string) => Promise<string>;
+}
+
+export interface LLMsWithPages<Page> extends LLMs {
+  /**
+   * render a page with `renderPage`.
+   */
+  page: (page: Page) => Promise<string>;
+
+  /**
+   * generate `llms-full.txt` content: every page rendered with `renderPage`.
+   */
+  full: (lang?: string) => Promise<string>;
 }
 
 export function llms<C extends LoaderConfig = LoaderConfig>(
-  loader: LoaderOutput<C>,
-  config: LLMsConfig = {},
-) {
-  const {
-    TAB = '  ',
-    renderName = (node, ctx): string => {
-      if (node.type === 'page') {
-        const page = loader.getNodePage(node, ctx.lang);
-        if (page?.data.title) return page.data.title;
-      } else if (node.type !== 'separator') {
-        const meta = loader.getNodeMeta(node, ctx.lang);
-        if (meta?.data.title) return meta.data.title;
-      }
+  input: LoaderOutput<C> | (() => Awaitable<LoaderOutput<C>>),
+  config: LLMsConfig<C['page']> & { renderPage: (page: C['page']) => Awaitable<string> },
+): LLMsWithPages<C['page']>;
+export function llms<C extends LoaderConfig = LoaderConfig>(
+  input: LoaderOutput<C> | (() => Awaitable<LoaderOutput<C>>),
+  config?: LLMsConfig<C['page']>,
+): LLMs;
+export function llms<C extends LoaderConfig = LoaderConfig>(
+  input: LoaderOutput<C> | (() => Awaitable<LoaderOutput<C>>),
+  config: LLMsConfig<C['page']> = {},
+): LLMsWithPages<C['page']> {
+  const { TAB = '  ' } = config;
+  const resolve = () => (typeof input === 'function' ? input() : input);
 
-      return typeof node.name === 'string' ? node.name : '';
-    },
-    renderDescription = (node, ctx): string => {
-      if (node.type === 'page') {
-        const page = loader.getNodePage(node, ctx.lang);
-        if (page?.data.description) return page.data.description;
-      } else {
-        const meta = loader.getNodeMeta(node, ctx.lang);
-        if (meta?.data.description) return meta.data.description;
-      }
+  function renderName(node: PageTree.Node | PageTree.Root, ctx: RenderContext<C>): string {
+    if (config.renderName) return config.renderName(node, ctx);
 
-      return typeof node.description === 'string' ? node.description : '';
-    },
-  } = config;
+    if (node.type === 'page') {
+      const page = ctx.loader.getNodePage(node, ctx.lang);
+      if (page?.data.title) return page.data.title;
+    } else if (node.type !== 'separator') {
+      const meta = ctx.loader.getNodeMeta(node, ctx.lang);
+      if (meta?.data.title) return meta.data.title;
+    }
+
+    return typeof node.name === 'string' ? node.name : '';
+  }
+
+  function renderDescription(
+    node: PageTree.Root | PageTree.Item | PageTree.Folder,
+    ctx: RenderContext<C>,
+  ): string {
+    if (config.renderDescription) return config.renderDescription(node, ctx);
+
+    if (node.type === 'page') {
+      const page = ctx.loader.getNodePage(node, ctx.lang);
+      if (page?.data.description) return page.data.description;
+    } else {
+      const meta = ctx.loader.getNodeMeta(node, ctx.lang);
+      if (meta?.data.description) return meta.data.description;
+    }
+
+    return typeof node.description === 'string' ? node.description : '';
+  }
 
   function formatListItem(name: string, description: string, indent: number) {
     const prefix = TAB.repeat(indent);
@@ -52,7 +104,7 @@ export function llms<C extends LoaderConfig = LoaderConfig>(
     return `${prefix}- ${name}`;
   }
 
-  function formatNode(node: PageTree.Node, indent: number, ctx: Context): string {
+  function formatNode(node: PageTree.Node, indent: number, ctx: RenderContext<C>): string {
     switch (node.type) {
       case 'page': {
         return formatListItem(
@@ -79,15 +131,17 @@ export function llms<C extends LoaderConfig = LoaderConfig>(
     }
   }
 
-  function index(lang?: string): string {
+  function formatIndex(loader: LoaderOutput<C>, lang?: string): string {
     if (loader._i18n && lang === undefined) {
-      const { languages } = loader._i18n;
-      return languages.map(index).join('\n\n');
+      const out: string[] = [];
+      for (const language of loader._i18n.languages) out.push(formatIndex(loader, language));
+
+      return out.join('\n\n');
     }
 
+    const ctx: RenderContext<C> = { lang, loader };
     const pageTree = loader.getPageTree(lang);
     const out: string[] = [];
-    const ctx: Context = { lang };
     out.push(`# ${renderName(pageTree, ctx)}`, '');
     const description = renderDescription(pageTree, ctx);
     if (description) out.push(`> ${description}`, '');
@@ -96,18 +150,29 @@ export function llms<C extends LoaderConfig = LoaderConfig>(
     return out.join('\n');
   }
 
+  function renderPage(page: C['page']) {
+    if (!config.renderPage)
+      throw new Error('`renderPage` is required by `page()` and `full()`, see llms() options.');
+
+    return config.renderPage(page);
+  }
+
   return {
-    /**
-     * generate `llms.txt` content in Markdown format.
-     *
-     * use `indexNode(node)` instead for more control (e.g. add extra sections to output).
-     */
-    index,
-    /**
-     * generate `llms.txt` content for a single page tree node.
-     */
-    indexNode(node: PageTree.Node, lang?: string): string {
-      return formatNode(node, 0, { lang });
+    async index(lang) {
+      return formatIndex(await resolve(), lang);
+    },
+    async indexNode(node, lang) {
+      return formatNode(node, 0, { lang, loader: await resolve() });
+    },
+    async page(page) {
+      return renderPage(page);
+    },
+    async full(lang) {
+      const loader = await resolve();
+      const rendered: Awaitable<string>[] = [];
+      for (const page of loader.getPages(lang)) rendered.push(renderPage(page));
+
+      return (await Promise.all(rendered)).join('\n\n');
     },
   };
 }
