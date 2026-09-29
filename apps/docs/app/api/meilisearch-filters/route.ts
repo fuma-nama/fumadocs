@@ -14,7 +14,7 @@ export async function GET(request: Request) {
     });
 
     return NextResponse.json(filters);
-  } catch (error) {
+  } catch {
     return NextResponse.json([], { status: 500 });
   }
 }

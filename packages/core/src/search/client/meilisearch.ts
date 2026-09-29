@@ -10,6 +10,10 @@ export interface MeilisearchClientOptions {
    * Concrete value of 'filterAttribute' to filter results by.
    */
   filterAttributeValue?: string;
+  /**
+   * Value of the 'language' attribute to restrict results to one locale.
+   */
+  language?: string;
 }
 
 export interface MeilisearchFilterOptions {
@@ -19,23 +23,50 @@ export interface MeilisearchFilterOptions {
   filterAttribute: string;
 }
 
-export function meilisearchClient({
-  filterAttribute,
-  filterAttributeValue,
-}: MeilisearchClientOptions): SearchClient {
-  const api = '/api/meilisearch-search';
+export interface MeilisearchSearchPage {
+  results: SortedResult[];
+  totalHits: number;
+  totalPages: number;
+  page: number;
+}
 
+function buildSearchUrl(query: string, page: number, options: MeilisearchClientOptions): URL {
+  const { filterAttribute, filterAttributeValue, language } = options;
+
+  const url = new URL('/api/meilisearch-search', window.location.origin);
+  url.searchParams.set('query', query);
+  url.searchParams.set('page', String(page));
+  if (filterAttribute) url.searchParams.set('filterAttribute', filterAttribute);
+  if (filterAttributeValue) url.searchParams.set('filterAttributeValue', filterAttributeValue);
+  if (language) url.searchParams.set('language', language);
+
+  return url;
+}
+
+export async function meilisearchSearchPage(
+  options: MeilisearchClientOptions,
+  query: string,
+  page = 1,
+): Promise<MeilisearchSearchPage> {
+  const res = await fetch(buildSearchUrl(query, page, options));
+  if (!res.ok) throw new Error(await res.text());
+
+  return (await res.json()) as MeilisearchSearchPage;
+}
+
+export function meilisearchClient(options: MeilisearchClientOptions): SearchClient {
   return {
     async search(query) {
-      const url = new URL(api, window.location.origin);
-      url.searchParams.set('query', query);
-      if (filterAttribute) url.searchParams.set('filterAttribute', filterAttribute);
-      if (filterAttributeValue) url.searchParams.set('filterAttributeValue', filterAttributeValue);
-
-      const res = await fetch(url);
-      if (!res.ok) throw new Error(await res.text());
-      const result = (await res.json()) as SortedResult[];
-      return result;
+      const { results } = await meilisearchSearchPage(options, query, 1);
+      return results;
+    },
+    async searchPage(query, page) {
+      const {
+        results,
+        page: currentPage,
+        totalPages,
+      } = await meilisearchSearchPage(options, query, page);
+      return { results, page: currentPage, totalPages };
     },
   };
 }

@@ -9,20 +9,26 @@ import {
   SearchDialogIcon,
   SearchDialogInput,
   SearchDialogList,
+  SearchDialogListItem,
   SearchDialogOverlay,
+  type SearchItemType,
   type SharedProps,
 } from 'fumadocs-ui/components/dialog/search';
-import { useEffect, useState, useMemo } from 'react';
+import { useEffect, useState, useMemo, useCallback } from 'react';
 import { Popover, PopoverContent, PopoverTrigger } from 'fumadocs-ui/components/ui/popover';
-import { cn } from '@/lib/cn';
 import { buttonVariants } from '@/components/ui/button';
 import { ChevronDown } from 'lucide-react';
 import { useDocsSearch } from 'fumadocs-core/search/client';
 import { meilisearchFilters } from 'fumadocs-core/search/client/meilisearch';
+import { useI18n } from 'fumadocs-ui/contexts/i18n';
+import { cn } from '@/lib/cn';
+import './meilisearch.css';
 
 const FILTER_ATTRIBUTE = process.env.MEILISEARCH_FILTER_ATTRIBUTE || 'scope';
 
 export default function MeilisearchSearchDialog(props: SharedProps) {
+  const { locale } = useI18n();
+
   const defaultFilter = 'None';
   const [openFilterDialog, setOpenFilterDialog] = useState(false);
   const [activeFilter, setActiveFilter] = useState<string>('');
@@ -33,11 +39,15 @@ export default function MeilisearchSearchDialog(props: SharedProps) {
       type: 'meilisearch' as const,
       filterAttributeValue: activeFilter,
       filterAttribute: FILTER_ATTRIBUTE,
+      language: locale,
     }),
-    [activeFilter, FILTER_ATTRIBUTE],
+    [activeFilter, locale],
   );
 
-  const { search, setSearch, query } = useDocsSearch(clientOptions);
+  const { search, setSearch, query, loadMore, isLoadingMore, hasMore } = useDocsSearch(
+    clientOptions,
+    [activeFilter, locale],
+  );
 
   useEffect(() => {
     if (!props.open) return;
@@ -49,12 +59,12 @@ export default function MeilisearchSearchDialog(props: SharedProps) {
         const availableFilters = [];
         availableFilters.push(defaultFilter);
 
-        let fetchedFilters = await meilisearchFilters({
+        const fetchedFilters = await meilisearchFilters({
           filterAttribute: FILTER_ATTRIBUTE,
         });
-        fetchedFilters?.forEach((filter: string) => {
+        for (const filter of fetchedFilters ?? []) {
           availableFilters.push(filter);
-        });
+        }
 
         if (finishRequest) {
           setFilterOptions(availableFilters);
@@ -76,19 +86,59 @@ export default function MeilisearchSearchDialog(props: SharedProps) {
     };
   }, [props.open]);
 
+  const handleSearchChange = (value: string) => {
+    setSearch(value);
+  };
+
+  const handleLoadMore = useCallback(() => {
+    if (!isLoadingMore) loadMore();
+  }, [loadMore, isLoadingMore]);
+
+  const items = useMemo<SearchItemType[] | null>(() => {
+    if (query.data === 'empty' || !query.data) return null;
+    if (!hasMore) return query.data;
+
+    return [
+      ...query.data,
+      {
+        id: '__load-more__',
+        type: 'action',
+        node: (
+          <span className="text-fd-muted-foreground text-sm">
+            {isLoadingMore ? 'Loading more results…' : 'Load more'}
+          </span>
+        ),
+        onSelect: handleLoadMore,
+      },
+    ];
+  }, [query.data, hasMore, isLoadingMore, handleLoadMore]);
+
+  const renderItem = useCallback(
+    ({ item, onClick }: { item: SearchItemType; onClick: () => void }) =>
+      item.type === 'action' ? (
+        <SearchDialogListItem item={item} onClick={item.onSelect} />
+      ) : (
+        <SearchDialogListItem item={item} onClick={onClick} />
+      ),
+    [],
+  );
+
   return (
-    <SearchDialog search={search} onSearchChange={setSearch} isLoading={query.isLoading} {...props}>
+    <SearchDialog
+      search={search}
+      onSearchChange={handleSearchChange}
+      isLoading={query.isLoading}
+      {...props}
+    >
       <SearchDialogOverlay />
-      <SearchDialogContent>
+      <SearchDialogContent className="meilisearch-dialog">
         <SearchDialogHeader>
           <SearchDialogIcon />
           <SearchDialogInput />
           <SearchDialogClose />
         </SearchDialogHeader>
 
-        <SearchDialogList
-          items={query.data !== 'empty' ? query.data : null}
-        />
+        <SearchDialogList items={items} Item={renderItem} />
 
         <SearchDialogFooter className="flex flex-row items-center gap-2">
           <Popover open={openFilterDialog} onOpenChange={setOpenFilterDialog}>

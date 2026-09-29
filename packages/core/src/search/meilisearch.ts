@@ -1,194 +1,145 @@
-import { type SortedResult, createContentHighlighter } from '@/search';
+import { escapeRegExp } from '@/search';
 import { createEndpoint } from '@/search/server/endpoint';
-import type { SearchAPI, QueryOptions } from '@/search/server/types';
-import { codeToHtml } from 'shiki';
-import { transformerNotationWordHighlight } from '@shikijs/transformers';
+import type { SearchAPI } from '@/search/server/types';
+import type {
+  FacetHit,
+  MeilisearchOptions,
+  MeilisearchPage,
+  MeilisearchQueryOptions,
+  SearchHit,
+} from './meilisearch/types';
+import { mapHitsToSortedResults } from './meilisearch/content';
 
-export interface MeilisearchOptions {
-  /**
-   * The identifier of the Meilisearch index to search in.
-   */
-  indexUid: string;
-  /**
-   * The Meilisearch client instance.
-   */
-  client: any;
-  /**
-   * Attribute name used for filtering.
-   */
-  filterAttribute?: string;
-  /**
-   * Concrete value of 'filterAttribute' to filter results by.
-   */
-  filterAttributeValue?: string;
-}
+export type {
+  MeilisearchOptions,
+  MeilisearchQueryOptions,
+  MeilisearchPage,
+} from './meilisearch/types';
 
-type FacetHit = {
-  value: string;
-  count: number;
-};
+const HITS_PER_PAGE = 20;
 
-/**
- * Meilisearch documents are expected to contain:
- * - url: Page path including anchor (e.g., "/guide#installation")
- * - heading: The heading text for the search result
- * - pageTitle: The title of the page
- * - rawContent: Text with the search result in a Markdown format
- * - content: Plain text with the search result
- */
+const EMPTY_PAGE: MeilisearchPage = { results: [], totalHits: 0, totalPages: 0, page: 1 };
 
-type SearchHit = {
-  url: string;
-  heading: string;
-  pageTitle: string;
-  rawContent: string;
-  content: string;
-};
+export function createMeilisearchAPI(
+  options: MeilisearchOptions,
+): SearchAPI<MeilisearchQueryOptions> {
+  const { indexUid, client, filterAttribute, filterAttributeValue, language, transformUrl } =
+    options;
 
-type ParsedCodeBlock = {
-  lang: string;
-  code: string;
-};
+  async function searchPage(query: string, page: number): Promise<MeilisearchPage> {
+    const trimmedQuery = query.trim();
+    if (!trimmedQuery) {
+      return EMPTY_PAGE;
+    }
 
-export function createMeilisearchAPI(options: MeilisearchOptions): SearchAPI<QueryOptions> {
-  const { indexUid, client, filterAttribute, filterAttributeValue } = options;
+    const index = client.index(indexUid);
+    const hits: SearchHit[] = [];
+    let currentPage = page;
+    let totalPages = 1;
 
-  return createEndpoint({
-    async search(query) {
-      const trimmedQuery = query.trim();
-
-      if (!trimmedQuery) {
-        return [];
-      }
-
-      const index = client.index(indexUid);
-
+    while (true) {
       const response = await index.search(trimmedQuery, {
-        filter: createFilter(filterAttribute, filterAttributeValue),
+        filter: createFilter(filterAttribute, filterAttributeValue, language),
+        attributesToHighlight: ['heading', 'rawContent'],
+        highlightPreTag: '<mark>',
+        highlightPostTag: '</mark>',
+        page: currentPage,
+        hitsPerPage: HITS_PER_PAGE,
       });
 
-      return mapHitsToSortedResults(response.hits as SearchHit[], trimmedQuery);
+      hits.push(...(response.hits as SearchHit[]));
+
+      const totalHits = response.totalHits ?? 0;
+      totalPages = response.totalPages ?? 1;
+
+      const results = await mapHitsToSortedResults(hits, trimmedQuery, transformUrl);
+      if (results.length > HITS_PER_PAGE || currentPage >= totalPages) {
+        return { results, totalHits, totalPages, page: currentPage };
+      }
+
+      currentPage += 1;
+    }
+  }
+
+  const endpoint = createEndpoint<MeilisearchQueryOptions>({
+    async search(query, searchOptions) {
+      return (await searchPage(query, searchOptions?.page ?? 1)).results;
     },
 
     async export() {
       throw new Error('Export is not implemented.');
     },
   });
+
+  return {
+    ...endpoint,
+    async GET(request: Request): Promise<Response> {
+      const url = new URL(request.url);
+      const query = url.searchParams.get('query');
+      if (!query) {
+        return Response.json(EMPTY_PAGE);
+      }
+
+      const page = Number(url.searchParams.get('page'));
+      const pageNumber = Number.isInteger(page) && page > 0 ? page : 1;
+
+      return Response.json(await searchPage(query, pageNumber));
+    },
+  };
 }
 
-function createFilter(filterAttribute?: string, filterAttributeValue?: string): string | undefined {
-  if (!filterAttribute || !filterAttributeValue) {
-    return undefined;
-  }
-
-  return `${filterAttribute} = "${filterAttributeValue}"`;
+export interface UrlNormalizerOptions {
+  /**
+   * Locale segments that may prefix indexed URLs (e.g. `['cz', 'en']`).
+   * A URL starting with one of them gets the base path inserted *after*
+   * the locale.
+   */
+  locales?: string[];
+  /**
+   * Base path of the searched section, without trailing slash
+   * (e.g. `/docs`). URLs not starting with it get it prepended.
+   */
+  basePath?: string;
 }
 
-async function mapHitsToSortedResults(hits: SearchHit[], query: string): Promise<SortedResult[]> {
-  const highlighter = createContentHighlighter(query);
+export function createUrlNormalizer({
+  locales = [],
+  basePath,
+}: UrlNormalizerOptions): (url: string) => string {
+  const cleanBase = basePath && basePath !== '/' ? basePath.replace(/\/+$/, '') : undefined;
+  const localePattern =
+    locales.length > 0
+      ? new RegExp(`^/(${locales.map(escapeRegExp).join('|')})(\\/.*|)$`)
+      : undefined;
 
-  const pages = new Map<string, SortedResult>();
-  const pageItems = new Map<string, SortedResult[]>();
-
-  let idCounter = 0;
-
-  for (const hit of hits) {
-    const pageId = hit.url;
-
-    if (!pages.has(pageId)) {
-      pages.set(pageId, createPageResult(hit, highlighter));
-      pageItems.set(pageId, []);
+  return (url: string): string => {
+    const localeMatch = localePattern?.exec(url);
+    if (localeMatch) {
+      return `/${localeMatch[1]}${cleanBase ?? ''}${localeMatch[2]}`;
     }
 
-    const content = await highlightHitContent(hit.rawContent, query, highlighter);
-
-    pageItems.get(pageId)?.push({
-      id: `${pageId}-${idCounter++}`,
-      type: 'text',
-      content,
-      url: hit.url,
-    });
-  }
-
-  return flattenGroupedResults(pages, pageItems);
-}
-
-function createPageResult(
-  hit: SearchHit,
-  highlighter: ReturnType<typeof createContentHighlighter>,
-): SortedResult {
-  return {
-    id: hit.url,
-    type: 'page',
-    content: highlighter.highlightMarkdown(hit.heading),
-    breadcrumbs: [hit.pageTitle],
-    url: hit.url,
+    if (cleanBase && !url.startsWith(cleanBase)) {
+      return `${cleanBase}${url}`;
+    }
+    return url;
   };
 }
 
-async function highlightHitContent(
-  content: string,
-  query: string,
-  highlighter: ReturnType<typeof createContentHighlighter>,
-): Promise<string> {
-  const codeBlock = parseCodeBlock(content);
+function createFilter(
+  filterAttribute?: string,
+  filterAttributeValue?: string,
+  language?: string,
+): string | undefined {
+  const conditions: string[] = [];
 
-  if (!codeBlock) {
-    return highlighter.highlightMarkdown(content);
+  if (filterAttribute && filterAttributeValue) {
+    conditions.push(`${filterAttribute} = "${filterAttributeValue}"`);
+  }
+  if (language) {
+    conditions.push(`language = "${language}"`);
   }
 
-  return highlightCodeBlock(codeBlock, query);
-}
-
-function parseCodeBlock(content: string): ParsedCodeBlock | null {
-  const trimmedContent = content.trim();
-
-  const match = trimmedContent.match(/^```([^\s`]*)[^\n]*\n([\s\S]*?)\n```$/);
-
-  if (!match) {
-    return null;
-  }
-
-  return {
-    lang: match[1] || 'text',
-    code: match[2],
-  };
-}
-
-async function highlightCodeBlock(codeBlock: ParsedCodeBlock, query: string): Promise<string> {
-  const modifiedCode = addWordHighlightNotation(codeBlock.code, query);
-
-  return codeToHtml(modifiedCode, {
-    lang: codeBlock.lang,
-    theme: 'slack-dark',
-    transformers: [transformerNotationWordHighlight({})],
-  });
-}
-
-function addWordHighlightNotation(code: string, query: string): string {
-  const lines = code.split('\n');
-  const result = [];
-
-  for (let i = 1; i < lines.length - 1; i++) {
-    result.push(`// [!code word:${query}]`);
-    result.push(lines[i]);
-  }
-
-  return result.join('\n');
-}
-
-function flattenGroupedResults(
-  pages: Map<string, SortedResult>,
-  pageItems: Map<string, SortedResult[]>,
-): SortedResult[] {
-  const results: SortedResult[] = [];
-
-  for (const [pageId, page] of pages) {
-    results.push(page);
-    results.push(...(pageItems.get(pageId) ?? []));
-  }
-
-  return results;
+  return conditions.length > 0 ? conditions.join(' AND ') : undefined;
 }
 
 export async function fetchFilters(options: MeilisearchOptions): Promise<string[]> {
@@ -206,7 +157,7 @@ export async function fetchFilters(options: MeilisearchOptions): Promise<string[
       facetQuery: '',
     });
 
-    return facetResponse.facetHits.map((hit: FacetHit) => hit.value);
+    return (facetResponse.facetHits as FacetHit[]).map((hit) => hit.value);
   } catch (error) {
     console.error(
       `Failed to fetch facet values for '${filterAttribute}' from index '${indexUid}':`,

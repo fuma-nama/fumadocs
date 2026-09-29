@@ -1,0 +1,14 @@
+/*
+ * Fixes invisible/faded code blocks in Meilisearch search results.
+ *
+ * Removes the gradient `mask-image` some UI frameworks apply to scrollable
+ * `pre code` elements, scoped to this dialog via the `.meilisearch-dialog`
+ * class on `SearchDialogContent`.
+ */
+.meilisearch-dialog pre > code,
+.meilisearch-dialog .prose pre > code,
+.meilisearch-dialog .search-result-pre,
+.meilisearch-dialog .search-result-code {
+  -webkit-mask-image: none !important;
+  mask-image: none !important;
+}

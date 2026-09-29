@@ -1,4 +1,4 @@
-import { type DependencyList, useMemo, useRef, useState } from 'react';
+import { type DependencyList, useCallback, useMemo, useRef, useState } from 'react';
 import { useDebounce } from '@/utils/use-debounce';
 import { type FetchOptions } from '@/search/client/fetch';
 import type { StaticOptions } from '@/search/client/orama-static';
@@ -12,6 +12,12 @@ import type { FlexsearchStaticOptions } from './client/flexsearch-static';
 import type { MeilisearchClientOptions } from './client/meilisearch';
 import { isEqualShallow } from '@/utils/is-equal';
 
+export interface PagedSearchResult {
+  results: SortedResult[];
+  page: number;
+  totalPages: number;
+}
+
 interface UseDocsSearch {
   search: string;
   setSearch: (v: string) => void;
@@ -20,6 +26,14 @@ interface UseDocsSearch {
     data?: SortedResult[] | 'empty';
     error?: Error;
   };
+  /**
+   * Load and append the next page of results.
+   *
+   * Only functional when the search client implements `searchPage` (currently only Meilisearch).
+   */
+  loadMore: () => void;
+  isLoadingMore: boolean;
+  hasMore: boolean;
 }
 
 export type ClientPreset =
@@ -76,6 +90,13 @@ export type ClientPreset =
 
 export interface SearchClient {
   search: (query: string) => Awaitable<SortedResult[]>;
+  /**
+   * Optional paged search, implemented by clients that support pagination
+   * (currently only Meilisearch).
+   *
+   * When defined, `useDocsSearch` exposes `loadMore`, `isLoadingMore` and `hasMore`.
+   */
+  searchPage?: (query: string, page: number) => Awaitable<PagedSearchResult>;
   deps?: DependencyList;
 }
 
@@ -109,6 +130,11 @@ export function useDocsSearch(
   const [isLoading, setIsLoading] = useState(false);
   const debouncedValue = useDebounce(search, delayMs);
 
+  const [isLoadingMore, setIsLoadingMore] = useState(false);
+  const [pageInfo, setPageInfo] = useState({ page: 1, totalPages: 1 });
+  const loadingMoreRef = useRef(false);
+  const debouncedRef = useRef('');
+
   let client: SearchClient | Promise<SearchClient>;
 
   if ('type' in clientRest) {
@@ -136,11 +162,7 @@ export function useDocsSearch(
         break;
       }
       case 'meilisearch': {
-        const res = (promiseMap[clientRest.type] ??= import('./client/meilisearch')) as Promise<
-          typeof import('./client/meilisearch')
-        >;
-        const { meilisearchClient } = use(res);
-        client = meilisearchClient(clientRest);
+        client = import('./client/meilisearch').then((mod) => mod.meilisearchClient(clientRest));
         break;
       }
       case 'static': {
@@ -183,14 +205,25 @@ export function useDocsSearch(
         try {
           setIsLoading(true);
 
+          const resolvedClient = await client;
           let res: SortedResult[] | 'empty';
-          if (debouncedValue.length === 0 && !allowEmpty) res = 'empty';
-          else res = await (await client).search(debouncedValue);
+          let page = { page: 1, totalPages: 1 };
+          if (debouncedValue.length === 0 && !allowEmpty) {
+            res = 'empty';
+          } else if (resolvedClient.searchPage) {
+            const firstPage = await resolvedClient.searchPage(debouncedValue, 1);
+            res = firstPage.results.length > 0 ? firstPage.results : 'empty';
+            page = { page: firstPage.page, totalPages: firstPage.totalPages };
+          } else {
+            res = await resolvedClient.search(debouncedValue);
+          }
 
           if (!this.interrupt) {
             setActiveDeps(deps);
+            debouncedRef.current = debouncedValue;
             setError(undefined);
             setResults(res);
+            setPageInfo(page);
           }
         } catch (err) {
           if (!this.interrupt) setError(err as Error);
@@ -202,9 +235,43 @@ export function useDocsSearch(
     void activeTaskRef.current.start();
   }
 
+  const loadMore = useCallback(() => {
+    if (loadingMoreRef.current || !debouncedValue || pageInfo.page >= pageInfo.totalPages) {
+      return;
+    }
+
+    loadingMoreRef.current = true;
+    setIsLoadingMore(true);
+    void Promise.resolve(client)
+      .then((resolvedClient) => {
+        if (!resolvedClient.searchPage) return undefined;
+        return resolvedClient.searchPage(debouncedValue, pageInfo.page + 1);
+      })
+      .then((res) => {
+        if (!res || debouncedRef.current !== debouncedValue) return;
+        setResults((prev: SortedResult[] | 'empty') => {
+          const prevList = prev === 'empty' ? [] : prev;
+          return [...prevList, ...res.results];
+        });
+        setPageInfo({ page: res.page, totalPages: res.totalPages });
+      })
+      .catch((err: Error) => setError(err))
+      .finally(() => {
+        loadingMoreRef.current = false;
+        setIsLoadingMore(false);
+      });
+  }, [client, debouncedValue, pageInfo]);
+
   return useMemo(
-    () => ({ search, setSearch, query: { isLoading, data: results, error } }),
-    [search, isLoading, results, error],
+    () => ({
+      search,
+      setSearch,
+      query: { isLoading, data: results, error },
+      loadMore,
+      isLoadingMore,
+      hasMore: pageInfo.page < pageInfo.totalPages,
+    }),
+    [search, isLoading, results, error, loadMore, isLoadingMore, pageInfo],
   );
 }
 
