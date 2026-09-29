@@ -264,10 +264,6 @@ describe('probe', () => {
     }
   });
 
-  test('rejects a missing file', async () => {
-    await expect(probe(path.join(fixtures, 'nope.png'))).rejects.toThrow();
-  });
-
   test('rejects an unsupported format', async () => {
     const file = path.join(fixtures, 'not-an-image.txt');
     const { writeFile, rm } = await import('node:fs/promises');

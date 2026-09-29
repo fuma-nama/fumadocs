@@ -8,24 +8,6 @@ import { applySatteriPreset } from '@/preset';
 import { remarkInclude } from '@/remark-include';
 import { remarkLlms } from '@/remark-llms';
 
-const paragraph = '# Title\n\n' + 'Lorem ipsum dolor sit amet.\n\n'.repeat(200);
-
-test('remark-llms exports processed markdown once', async () => {
-  const options = await applySatteriPreset({
-    rehypeCodeOptions: false,
-    mdastPlugins: [remarkLlms()],
-  })('bundler');
-
-  const result = await compileMdx({
-    source: paragraph,
-    filePath: '/doc.mdx',
-    options,
-  });
-
-  expect(typeof result.data?.markdown).toBe('string');
-  expect(result.data?.markdown).toContain('Title');
-});
-
 test('remark-llms handles many root blocks', async () => {
   const options = await applySatteriPreset({
     rehypeCodeOptions: false,

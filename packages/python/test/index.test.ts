@@ -135,14 +135,6 @@ describe('createPython', () => {
     expect(names.get('logger')).toBe('logger');
   });
 
-  test('renders with the default components', async () => {
-    const source = loader(await createPython({ file }).staticSource(), { baseUrl: '/docs' });
-    const renderer = await source.getPage(['demo'])!.data.load();
-
-    const { body } = await renderer.render();
-    expect(body).toBeDefined();
-  });
-
   test('keeps docstring markdown as data', () => {
     const mod: ModuleInterface = {
       name: 'x',

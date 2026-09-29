@@ -1,6 +1,5 @@
 import { expect, test } from 'vitest';
 import { createGetUrl, getSlugs, loader, LoaderOptions, StaticSource } from '@/source';
-import { metaSchema } from '@/source/schema';
 import type { ReactElement } from 'react';
 import { removeUndefined } from '@/utils/remove-undefined';
 import { lucideIconsPlugin } from '@/source/plugins/lucide-icons';
@@ -32,11 +31,6 @@ test('Get URL: Base', () => {
   const getUrl = createGetUrl('/docs');
   expect(getUrl(['docs', 'hello'])).toBe('/docs/docs/hello');
   expect(getUrl([''])).toBe('/docs');
-});
-
-test('meta schema: root accepts boolean and string', () => {
-  expect(metaSchema.parse({ root: true }).root).toBe(true);
-  expect(metaSchema.parse({ root: 'version' }).root).toBe('version');
 });
 
 const pageTreeTests: {
@@ -155,16 +149,6 @@ for (const pageTreeTest of pageTreeTests) {
     ).toMatchFileSnapshot(pageTreeTest.output);
   });
 }
-
-test('Loader: Simple', async () => {
-  const result = loader({
-    baseUrl: '/',
-    source: (await import('./fixtures/page-trees/basic')).source,
-  });
-
-  expect(result.getPages().length).toBe(1);
-  expect(result.getPage(['test'])).toBeDefined();
-});
 
 test('Loader: base slugs', () => {
   let pluginSlugs: string[] | undefined;

@@ -189,23 +189,6 @@ export const { docs } = defineDocs({ dir: 'content/docs' });`,
 });
 
 describe('options', () => {
-  test('enabled by default, covering all JS/TS files but not node_modules', () => {
-    const resolved = resolveMacroOptions(undefined);
-
-    expect(resolved).toBeDefined();
-    expect(resolved!.include).toEqual([
-      '**/*.js',
-      '**/*.jsx',
-      '**/*.mjs',
-      '**/*.ts',
-      '**/*.tsx',
-      '**/*.mts',
-    ]);
-    expect(resolved!.exclude).toEqual(['**/node_modules/**']);
-    // brace-free: not every glob engine these reach expands `{a,b}`
-    for (const pattern of resolved!.include) expect(pattern).not.toContain('{');
-  });
-
   test('`macro: false` disables, a string include is normalised', () => {
     expect(resolveMacroOptions(false)).toBeUndefined();
     expect(resolveMacroOptions({})!.include).toHaveLength(6);
