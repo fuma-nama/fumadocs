@@ -298,6 +298,11 @@ export default function PlaygroundClient({
                 {auth.fields.map((field) => (
                   <Fragment key={stringifyFieldKey(field.fieldName)}>
                     <AuthInput field={field} />
+                    {field.scheme.description && (
+                      <div className="text-fd-muted-foreground text-xs">
+                        <Markdown md={field.scheme.description} />
+                      </div>
+                    )}
                   </Fragment>
                 ))}
               </SecurityRequirements>
@@ -390,11 +395,6 @@ function SecurityRequirements({
           ))}
         </SelectContent>
       </Select>
-      <div className="text-fd-muted-foreground empty:hidden">
-        {requirements[selected].map(
-          ({ id, scheme }) => scheme.description && <Markdown key={id} md={scheme.description} />,
-        )}
-      </div>
       {children}
     </CollapsiblePanel>
   );
