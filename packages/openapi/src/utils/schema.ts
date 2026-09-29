@@ -42,7 +42,7 @@ export function pickExample(value: ExampleLike): unknown | undefined {
     if (type && content) {
       const example = value.examples?.[type];
       const out =
-        (example !== undefined ? getRaw(dereference(example).value) : undefined) ??
+        (example !== undefined ? getExampleValue(dereference(example)) : undefined) ??
         pickExample(content);
       if (out !== undefined) return out;
     }
@@ -50,6 +50,11 @@ export function pickExample(value: ExampleLike): unknown | undefined {
 
   if (value.examples) {
     const examples = Object.values(value.examples);
-    if (examples.length > 0) return getRaw(dereference(examples[0]).value);
+    if (examples.length > 0) return getExampleValue(dereference(examples[0]));
   }
+}
+
+/** the value of an Example Object, `dataValue` since OpenAPI 3.2 */
+export function getExampleValue(example: ExampleObject): unknown {
+  return getRaw(example.dataValue ?? example.value);
 }

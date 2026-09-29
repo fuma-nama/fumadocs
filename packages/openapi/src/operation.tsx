@@ -23,7 +23,7 @@ import {
   pathnameFromRequest,
 } from '@/requests/generators';
 import { encodeRequestData } from '@/requests/media/encode';
-import { getPreferredType, methodKeys } from '@/utils/schema';
+import { getExampleValue, getPreferredType, methodKeys } from '@/utils/schema';
 import { getExampleRequests } from '@/utils/get-example-requests';
 import { useOpenAPI } from '@/utils/create-page';
 import { ServerProvider, useServer } from '@/utils/use-server';
@@ -438,8 +438,9 @@ export function useResponseExamples(): ResponseTab[] {
 
         for (const [key, item] of Object.entries(responseOfType.examples)) {
           const example = resolve(item);
+          const sample = getExampleValue(example);
           // e.g. examples with `externalValue`
-          if (example.value === undefined) continue;
+          if (sample === undefined) continue;
 
           tab.examples.push({
             label:
@@ -447,7 +448,7 @@ export function useResponseExamples(): ResponseTab[] {
               t('Example {key}', {
                 variables: { key },
               }),
-            sample: getRaw(example.value),
+            sample,
             description: example.description,
           });
         }

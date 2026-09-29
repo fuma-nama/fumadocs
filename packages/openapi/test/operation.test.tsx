@@ -191,7 +191,11 @@ test('skips response examples without a value', async () => {
             content: {
               'application/json': {
                 schema: { type: 'object' },
-                examples: { Default: {}, Populated: { value: { id: '1' } } },
+                examples: {
+                  Default: {},
+                  Populated: { value: { id: '1' } },
+                  Data: { dataValue: { id: '2' } },
+                },
               },
             },
           },
@@ -201,7 +205,7 @@ test('skips response examples without a value', async () => {
     }),
   );
 
-  expect(tabs[0].examples?.map((example) => example.sample)).toEqual([{ id: '1' }]);
+  expect(tabs[0].examples?.map((example) => example.sample)).toEqual([{ id: '1' }, { id: '2' }]);
 });
 
 test('renders request bodies of unsupported media types', async () => {

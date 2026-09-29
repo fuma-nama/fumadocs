@@ -343,7 +343,7 @@ function SecurityRequirements({
   const items = requirements.map((requirement, i) => ({
     value: i,
     label: (
-      <p className="inline-flex items-center gap-1 font-mono font-medium">
+      <span className="inline-flex items-center gap-1 font-mono font-medium">
         {requirement.map((item, i) => (
           <Fragment key={i}>
             {i > 0 && <PlusIcon className="text-fd-muted-foreground size-3.5" />}
@@ -352,7 +352,7 @@ function SecurityRequirements({
             </span>
           </Fragment>
         ))}
-      </p>
+      </span>
     ),
   }));
 
@@ -384,17 +384,18 @@ function SecurityRequirements({
         </SelectTrigger>
         <SelectContent>
           {items.map(({ value, label }) => (
-            <SelectItem key={value} value={value}>
-              {label}
-            </SelectItem>
+            <Fragment key={value}>
+              <SelectItem value={value}>{label}</SelectItem>
+              <div className="px-2 pb-1.5 text-xs text-fd-muted-foreground empty:hidden">
+                {requirements[value].map(
+                  ({ id, scheme }) =>
+                    scheme.description && <Markdown key={id} md={scheme.description} />,
+                )}
+              </div>
+            </Fragment>
           ))}
         </SelectContent>
       </Select>
-      <div className="text-fd-muted-foreground empty:hidden">
-        {requirements[selected].map(
-          ({ id, scheme }) => scheme.description && <Markdown key={id} md={scheme.description} />,
-        )}
-      </div>
       {children}
     </CollapsiblePanel>
   );
