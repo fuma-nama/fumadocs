@@ -144,7 +144,7 @@ export interface LoaderOutput<Config extends LoaderConfig = LoaderConfig> {
   }[];
 
   /**
-   * Get page with slugs, the slugs can also be URI encoded.
+   * Get page with slugs, they can be URI encoded or decoded.
    *
    * @param language - If unspecified, the default language will be used.
    */
@@ -181,8 +181,21 @@ export interface LoaderOutput<Config extends LoaderConfig = LoaderConfig> {
   serializePageTree: (tree: PageTree.Root) => Promise<SerializedPageTree>;
 }
 
+/**
+ * Slugs are URI encoded by default, but routers may pass them decoded: key pages by the decoded form, so both resolve.
+ */
+function slugsKey(slugs: string[]): string {
+  const key = slugs.join('/');
+
+  try {
+    return decodeURI(key);
+  } catch {
+    return key;
+  }
+}
+
 function createPageIndexer({ url }: ResolvedLoaderConfig) {
-  // (locale.slugs -> page)
+  // (locale.slugs -> page), with `slugsKey()`
   const pages = new Map<string, Page>();
   // (locale.path -> page)
   const pathToMeta = new Map<string, Meta>();
@@ -218,7 +231,7 @@ function createPageIndexer({ url }: ResolvedLoaderConfig) {
           locale: lang,
         };
         pathToPage.set(path, page);
-        pages.set(prefix + page.slugs.join('/'), page);
+        pages.set(prefix + slugsKey(page.slugs), page);
         urlToPage.set(prefix + page.url, page);
       }
     },
@@ -231,16 +244,8 @@ function createPageIndexer({ url }: ResolvedLoaderConfig) {
     getMeta(path: string, lang = '') {
       return pathToMeta.get(`${lang}.${path}`);
     },
-    // the slugs plugin generates encoded slugs by default.
-    // we can assume page slugs are always URI encoded.
     getPageBySlugs(slugs: string[], lang = '') {
-      // `slugs` is already decoded
-      let page = pages.get(`${lang}.${slugs.join('/')}`);
-      if (page) return page;
-
-      // `slugs` is URI encoded
-      page = pages.get(`${lang}.${slugs.map(decodeURI).join('/')}`);
-      if (page) return page;
+      return pages.get(`${lang}.${slugsKey(slugs)}`);
     },
     /** do not filter by language if `lang` is not specified */
     getPages(lang?: string) {
@@ -424,8 +429,6 @@ export function loader<I extends ResolvedInput, I18n extends I18nConfig | undefi
 
       return list;
     },
-    // the slugs plugin generates encoded slugs by default.
-    // we can assume page slugs are always URI encoded.
     getPage(slugs = [], language = i18n?.defaultLanguage) {
       return indexer.getPageBySlugs(slugs, language);
     },

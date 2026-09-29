@@ -48,6 +48,11 @@ describe('Media Adapter Resolution', () => {
     }
   });
 
+  test('resolves text/plain with parameters', () => {
+    const adapter = resolveMediaAdapter('text/plain; charset=utf-8', defaultAdapters);
+    expect(adapter).toBe(defaultAdapters['application/json']);
+  });
+
   test('returns undefined for unsupported media type', () => {
     const adapter = resolveMediaAdapter('application/yaml', defaultAdapters);
     expect(adapter).toBeUndefined();

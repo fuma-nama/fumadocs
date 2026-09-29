@@ -43,7 +43,6 @@ const serverLoader = createServerFn({
       return {
         type: 'openapi',
         title: page.data.title,
-        description: page.data.description,
         pageTree,
         props: page.data.getOpenAPIPageProps(),
       };
@@ -90,7 +89,6 @@ function Page() {
     content = (
       <DocsPage full>
         <DocsTitle>{page.title}</DocsTitle>
-        <DocsDescription>{page.description}</DocsDescription>
         <DocsBody>
           <OpenAPIPage {...page.props} />
         </DocsBody>

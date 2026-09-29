@@ -1,5 +1,6 @@
 'use client';
 import { useOpenAPI } from '@/utils/create-page';
+import { getServerUrl, useServer } from '@/utils/use-server';
 import { useQuery } from 'shared-api/utils/use-query';
 import {
   createContext,
@@ -40,8 +41,14 @@ export interface OAuthFlowInput {
   clientSecret: string;
   username: string;
   password: string;
-  /** where the password flow sends the client credentials */
+  /** where the password and client credentials flows send the client credentials */
   clientAuth: 'body' | 'header';
+  /**
+   * URL of the selected server, relative URLs of the flow are resolved against it.
+   *
+   * @defaultValue the page URL
+   */
+  serverUrl?: string;
 }
 
 /**
@@ -53,11 +60,21 @@ export interface OAuthFlowInput {
 export async function requestOAuthToken(
   scheme: OAuth2SecurityScheme,
   type: OAuthFlowType,
-  { schemeId, scopes, clientId, clientSecret, username, password, clientAuth }: OAuthFlowInput,
+  {
+    schemeId,
+    scopes,
+    clientId,
+    clientSecret,
+    username,
+    password,
+    clientAuth,
+    serverUrl = window.location.href,
+  }: OAuthFlowInput,
 ): Promise<string | undefined> {
   const flows = scheme.flows ?? {};
-  const scope = scopes.join('+');
-  const redirect_uri = window.location.href;
+  const scope = scopes.join(' ');
+  // redirect URIs must not include a fragment, the query is removed on return
+  const redirect_uri = window.location.origin + window.location.pathname;
 
   if (type === 'implicit' || type === 'authorizationCode') {
     const flow = flows[type];
@@ -66,15 +83,14 @@ export async function requestOAuthToken(
       type === 'implicit'
         ? { scheme: schemeId, client_id: clientId, redirect_uri }
         : { scheme: schemeId, client_id: clientId, client_secret: clientSecret, redirect_uri };
-    const params = new URLSearchParams({
-      response_type: type === 'implicit' ? 'token' : 'code',
-      client_id: clientId,
-      redirect_uri,
-      scope,
-      state: JSON.stringify(state),
-    });
+    const url = new URL(flow.authorizationUrl!, serverUrl);
+    url.searchParams.set('response_type', type === 'implicit' ? 'token' : 'code');
+    url.searchParams.set('client_id', clientId);
+    url.searchParams.set('redirect_uri', redirect_uri);
+    url.searchParams.set('scope', scope);
+    url.searchParams.set('state', JSON.stringify(state));
 
-    window.location.replace(`${flow.authorizationUrl}?${params}`);
+    window.location.replace(url);
     return;
   }
 
@@ -88,23 +104,22 @@ export async function requestOAuthToken(
     body.set('grant_type', 'password');
     body.set('username', username);
     body.set('password', password);
-    if (clientAuth === 'header') {
-      headers.Authorization = `Basic ${btoa(`${clientId}:${clientSecret}`)}`;
-    } else {
-      if (clientId) body.set('client_id', clientId);
-      if (clientSecret) body.set('client_secret', clientSecret);
-    }
   } else {
     body.set('grant_type', 'client_credentials');
-    body.set('client_id', clientId);
-    body.set('client_secret', clientSecret);
   }
 
-  return fetchToken(flow.tokenUrl!, body, headers);
+  if (clientAuth === 'header') {
+    headers.Authorization = `Basic ${btoa(`${clientId}:${clientSecret}`)}`;
+  } else {
+    if (clientId) body.set('client_id', clientId);
+    if (clientSecret) body.set('client_secret', clientSecret);
+  }
+
+  return fetchToken(new URL(flow.tokenUrl!, serverUrl), body, headers);
 }
 
 async function fetchToken(
-  tokenUrl: string,
+  tokenUrl: URL,
   body: URLSearchParams,
   headers: Record<string, string> = {},
 ): Promise<string> {
@@ -156,6 +171,7 @@ export function usePlaygroundAuth() {
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const { dereferenced, resolve } = useOpenAPI().doc;
+  const { server } = useServer();
   const schemes = dereferenced.components?.securitySchemes;
   const [store, setStore] = useState<TokenStore>({});
 
@@ -169,7 +185,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       type: 'authorization_code',
       ...state,
       token: await fetchToken(
-        value.tokenUrl!,
+        new URL(value.tokenUrl!, getServerUrl(server)),
         new URLSearchParams({
           grant_type: 'authorization_code',
           code,

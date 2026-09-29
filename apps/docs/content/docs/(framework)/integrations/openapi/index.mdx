@@ -233,7 +233,7 @@ import { createFileRoute, notFound } from '@tanstack/react-router';
 import { DocsLayout } from 'fumadocs-ui/layouts/docs';
 import { createServerFn } from '@tanstack/react-start';
 import { docs, source } from '@/lib/source';
-import { DocsBody, DocsDescription, DocsPage, DocsTitle } from 'fumadocs-ui/layouts/docs/page';
+import { DocsBody, DocsPage, DocsTitle } from 'fumadocs-ui/layouts/docs/page';
 import { useFumadocsLoader } from 'fumadocs-core/source/client';
 import { type ReactNode, Suspense } from 'react';
 import { OpenAPIPage } from '@/components/api-page';
@@ -261,12 +261,11 @@ const serverLoader = createServerFn({
     if (!page) throw notFound();
 
     const pageTree = await source.serializePageTree(source.getPageTree());
-    // different result for OpenAPI pages [!code ++:9]
+    // different result for OpenAPI pages [!code ++:8]
     if (page.type === 'openapi') {
       return {
         type: 'openapi',
         title: page.data.title,
-        description: page.data.description,
         pageTree,
         props: page.data.getOpenAPIPageProps(),
       };
@@ -289,12 +288,11 @@ function Page() {
   const page = useFumadocsLoader(Route.useLoaderData());
   let content: ReactNode;
 
-  // render OpenAPI page content [!code ++:11]
+  // render OpenAPI page content [!code ++:10]
   if (page.type === 'openapi') {
     content = (
       <DocsPage full>
         <DocsTitle>{page.title}</DocsTitle>
-        <DocsDescription>{page.description}</DocsDescription>
         <DocsBody>
           {/* pass the payload data */}
           <OpenAPIPage {...page.props} />

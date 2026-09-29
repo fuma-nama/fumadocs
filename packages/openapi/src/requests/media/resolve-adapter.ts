@@ -31,7 +31,7 @@ export function resolveMediaAdapter(
     }
   }
 
-  if (mediaType === 'text/plain') {
+  if (normalized === 'text/plain') {
     console.warn(
       'there is no defined behaviour for encoding form values into "text/plain", using JSON encoder for now.',
     );

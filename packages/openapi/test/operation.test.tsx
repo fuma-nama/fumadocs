@@ -172,6 +172,48 @@ test('keeps falsy response examples', async () => {
   expect(tabs[0].examples?.[0].sample).toBe(0);
 });
 
+test('skips response examples without a value', async () => {
+  let tabs: ResponseTab[] = [];
+
+  await render(
+    '/museum-hours',
+    'get',
+    function Harness() {
+      tabs = useResponseExamples();
+      return null;
+    },
+    ({ operation, pathItem }) => ({
+      operation: {
+        ...operation,
+        responses: {
+          '200': {
+            description: 'ok',
+            content: {
+              'application/json': {
+                schema: { type: 'object' },
+                examples: { Default: {}, Populated: { value: { id: '1' } } },
+              },
+            },
+          },
+          '201': {
+            description: 'created',
+            content: {
+              'application/json': {
+                schema: { type: 'string' },
+                examples: { External: { externalValue: 'https://example.com/created.json' } },
+              },
+            },
+          },
+        },
+      },
+      pathItem,
+    }),
+  );
+
+  expect(tabs[0].examples?.map((example) => example.sample)).toEqual([{ id: '1' }]);
+  expect(tabs[1].examples?.map((example) => example.sample)).toEqual(['string']);
+});
+
 test('generates inline code samples', async () => {
   let code: string | undefined;
 

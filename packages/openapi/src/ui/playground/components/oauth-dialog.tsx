@@ -22,6 +22,7 @@ import {
 import { useTranslations } from '@fuma-translate/react';
 import { type OAuthFlowType, requestOAuthToken, usePlaygroundAuth } from '@/playground/auth';
 import { useOpenAPI } from '@/utils/create-page';
+import { useServer } from '@/utils/use-server';
 
 export interface AuthDialogContentProps {
   schemeId: string;
@@ -64,6 +65,7 @@ function Content({ schemeId, scopes, setToken, setOpen }: AuthDialogContentProps
   const { dereferenced, resolve } = useOpenAPI().doc;
   const schemes = dereferenced.components?.securitySchemes;
   const tokenInfo = usePlaygroundAuth().store[schemeId];
+  const { resolveUrl } = useServer();
   const scheme = resolve(schemes?.[schemeId]);
   if (!scheme || scheme.type !== 'oauth2')
     throw new Error('unexpected schemaId: must be type oauth2');
@@ -131,6 +133,7 @@ function Content({ schemeId, scopes, setToken, setOpen }: AuthDialogContentProps
       schemeId,
       scopes,
       clientAuth,
+      serverUrl: resolveUrl(),
     });
     if (!token) return;
 
@@ -224,36 +227,38 @@ function Content({ schemeId, scopes, setToken, setOpen }: AuthDialogContentProps
           />
         </fieldset>
       )}
+      {(type === 'clientCredentials' || type === 'password') && (
+        <fieldset className="flex flex-col gap-1.5">
+          <Label htmlFor="client_auth">{t('Client Authentication')}</Label>
+          <Select
+            items={Object.entries(clientAuthMethods).map(([key, method]) => ({
+              label: (
+                <>
+                  <p className="font-medium">{method.name}</p>
+                  <p className="text-fd-muted-foreground">{method.description}</p>
+                </>
+              ),
+              value: key,
+            }))}
+            value={clientAuth}
+            onValueChange={(v) => v !== null && setClientAuth(v)}
+          >
+            <SelectTrigger id="client_auth" disabled={isLoading}>
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              {Object.entries(clientAuthMethods).map(([key, method]) => (
+                <SelectItem key={key} value={key}>
+                  <p className="font-medium">{method.name}</p>
+                  <p className="text-fd-muted-foreground">{method.description}</p>
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </fieldset>
+      )}
       {type === 'password' && (
         <>
-          <fieldset className="flex flex-col gap-1.5">
-            <Label htmlFor="client_auth">{t('Client Authentication')}</Label>
-            <Select
-              items={Object.entries(clientAuthMethods).map(([key, method]) => ({
-                label: (
-                  <>
-                    <p className="font-medium">{method.name}</p>
-                    <p className="text-fd-muted-foreground">{method.description}</p>
-                  </>
-                ),
-                value: key,
-              }))}
-              value={clientAuth}
-              onValueChange={(v) => v !== null && setClientAuth(v)}
-            >
-              <SelectTrigger id="client_auth" disabled={isLoading}>
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                {Object.entries(clientAuthMethods).map(([key, method]) => (
-                  <SelectItem key={key} value={key}>
-                    <p className="font-medium">{method.name}</p>
-                    <p className="text-fd-muted-foreground">{method.description}</p>
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </fieldset>
           <fieldset className="flex flex-col gap-1.5">
             <Label htmlFor="username">{t('Username')}</Label>
             <Input

@@ -17,7 +17,6 @@ export default async function Page(props: { params: Promise<{ slug?: string[] }>
     return (
       <DocsPage toc={page.data.toc} full>
         <DocsTitle>{page.data.title}</DocsTitle>
-        <DocsDescription>{page.data.description}</DocsDescription>
         <DocsBody>
           <OpenAPIPage {...page.data.getOpenAPIPageProps()} />
         </DocsBody>

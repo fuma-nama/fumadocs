@@ -435,23 +435,26 @@ export function useResponseExamples(): ResponseTab[] {
       const media = getPreferredType(content) ?? null;
       const responseOfType = media ? content[media] : null;
       const tab: ResponseTab = { code, response, mediaType: media };
+      const examples: ResponseExample[] = [];
 
-      if (responseOfType?.examples) {
-        tab.examples = [];
+      for (const [key, item] of Object.entries(responseOfType?.examples ?? {})) {
+        const example = resolve(item);
+        // it can have an `externalValue` instead, or nothing
+        if (example.value === undefined) continue;
 
-        for (const [key, item] of Object.entries(responseOfType.examples)) {
-          const example = resolve(item);
+        examples.push({
+          label:
+            example.summary ??
+            t('Example {key}', {
+              variables: { key },
+            }),
+          sample: getRaw(example.value),
+          description: example.description,
+        });
+      }
 
-          tab.examples.push({
-            label:
-              example.summary ??
-              t('Example {key}', {
-                variables: { key },
-              }),
-            sample: getRaw(example.value),
-            description: example.description,
-          });
-        }
+      if (examples.length > 0) {
+        tab.examples = examples;
       } else if (responseOfType?.example !== undefined) {
         tab.examples = [{ label: t('Example'), sample: getRaw(responseOfType.example) }];
       } else if (responseOfType?.schema) {
