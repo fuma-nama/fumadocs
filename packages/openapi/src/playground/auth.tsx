@@ -7,12 +7,12 @@ import {
   use,
   useCallback,
   useEffect,
+  useEffectEvent,
   useMemo,
   useState,
 } from 'react';
 import { type DataEngine, type FieldKey, useListener } from '@fumari/stf';
 import { arrayStartsWith, objectGet, objectSet } from '@fumari/stf/lib/utils';
-import { useOnChange } from 'fumadocs-core/utils/use-on-change';
 import type { OAuth2SecurityScheme, OperationObject, SecuritySchemeObject } from '@/types';
 
 /** an `implicit` or `authorizationCode` flow that left the page, in `sessionStorage` */
@@ -23,6 +23,7 @@ interface PendingFlow {
   scheme: string;
   client_id: string;
   client_secret: string;
+  client_auth: OAuthFlowInput['clientAuth'];
   redirect_uri: string;
   token_url?: string;
 }
@@ -39,7 +40,10 @@ export interface OAuthFlowInput {
   clientSecret: string;
   username: string;
   password: string;
-  /** where the password and client credentials flows send the client credentials */
+  /**
+   * where token requests send the client credentials,
+   * `header` (HTTP Basic) applies only with a client secret, otherwise the `client_id` goes in the body
+   */
   clientAuth: 'body' | 'header';
   /** URL of the selected server, relative URLs of the flow resolve against it */
   serverUrl: string;
@@ -79,6 +83,7 @@ export async function requestOAuthToken(
       scheme: schemeId,
       client_id: clientId,
       client_secret: clientSecret,
+      client_auth: clientAuth,
       // redirect URIs cannot have a fragment
       redirect_uri: new URL(redirectUrl ?? window.location.pathname, window.location.origin).href,
       token_url: 'tokenUrl' in flow ? new URL(flow.tokenUrl!, serverUrl).href : undefined,
@@ -103,7 +108,6 @@ export async function requestOAuthToken(
   const flow = flows[type];
   if (!flow) return;
 
-  const headers: Record<string, string> = {};
   const body = new URLSearchParams({ scope });
   if (type === 'password') {
     body.set('grant_type', 'password');
@@ -113,27 +117,32 @@ export async function requestOAuthToken(
     body.set('grant_type', 'client_credentials');
   }
 
-  if (clientAuth === 'header') {
-    // form-encoded first, see RFC 6749 section 2.3.1
-    headers.Authorization = `Basic ${btoa(`${encodeURIComponent(clientId)}:${encodeURIComponent(clientSecret)}`)}`;
-  } else {
-    if (clientId) body.set('client_id', clientId);
-    if (clientSecret) body.set('client_secret', clientSecret);
-  }
-
-  return fetchToken(new URL(flow.tokenUrl!, serverUrl).href, body, headers);
+  return fetchToken(new URL(flow.tokenUrl!, serverUrl).href, body, {
+    client_id: clientId,
+    client_secret: clientSecret,
+    client_auth: clientAuth,
+  });
 }
 
 async function fetchToken(
   tokenUrl: string,
   body: URLSearchParams,
-  headers: Record<string, string> = {},
+  {
+    client_id,
+    client_secret,
+    client_auth,
+  }: Pick<PendingFlow, 'client_id' | 'client_secret' | 'client_auth'>,
 ): Promise<string> {
-  const res = await fetch(tokenUrl, {
-    method: 'POST',
-    headers: { ...headers, 'Content-Type': 'application/x-www-form-urlencoded' },
-    body,
-  });
+  const headers: Record<string, string> = { 'Content-Type': 'application/x-www-form-urlencoded' };
+  if (client_auth === 'header' && client_secret) {
+    // form-encoded first, see RFC 6749 section 2.3.1
+    headers.Authorization = `Basic ${btoa(`${encodeURIComponent(client_id)}:${encodeURIComponent(client_secret)}`)}`;
+  } else {
+    if (client_id) body.set('client_id', client_id);
+    if (client_secret) body.set('client_secret', client_secret);
+  }
+
+  const res = await fetch(tokenUrl, { method: 'POST', headers, body });
 
   if (!res.ok) throw new Error(await res.text());
   const { access_token, token_type = 'Bearer' } = (await res.json()) as {
@@ -151,6 +160,7 @@ type TokenInfo =
       type: 'authorization_code';
       client_id: string;
       client_secret: string;
+      client_auth: OAuthFlowInput['clientAuth'];
       token: string;
     }
   | {
@@ -159,11 +169,14 @@ type TokenInfo =
       token: string;
     };
 
+type TokenListener = (schemeId: string, token: string) => void;
+
 interface AuthContextType {
   store: TokenStore;
-  updatedSchemeId: string | null;
   isLoading: boolean;
   error?: unknown;
+  /** listen to the tokens of flows returning to the page, returns a cleanup */
+  subscribe: (listener: TokenListener) => () => void;
 }
 
 const AuthContext = createContext<AuthContextType | null>(null);
@@ -176,6 +189,21 @@ export function usePlaygroundAuth() {
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [store, setStore] = useState<TokenStore>({});
+  const listeners = useMemo(() => new Set<TokenListener>(), []);
+  const subscribe = useCallback(
+    (listener: TokenListener) => {
+      listeners.add(listener);
+      return () => {
+        listeners.delete(listener);
+      };
+    },
+    [listeners],
+  );
+
+  function save(schemeId: string, info: TokenInfo) {
+    setStore((s) => ({ ...s, [schemeId]: info }));
+    for (const listener of listeners) listener(schemeId, info.token);
+  }
 
   const authCodeQuery = useQuery(async (code: string, flow: PendingFlow) => {
     const token = await fetchToken(
@@ -184,20 +212,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         grant_type: 'authorization_code',
         code,
         redirect_uri: flow.redirect_uri,
-        client_id: flow.client_id,
-        client_secret: flow.client_secret,
       }),
+      flow,
     );
 
-    setStore((s) => ({
-      ...s,
-      [flow.scheme]: {
-        type: 'authorization_code',
-        client_id: flow.client_id,
-        client_secret: flow.client_secret,
-        token,
-      },
-    }));
+    save(flow.scheme, {
+      type: 'authorization_code',
+      client_id: flow.client_id,
+      client_secret: flow.client_secret,
+      client_auth: flow.client_auth,
+      token,
+    });
   });
 
   useEffect(() => {
@@ -214,14 +239,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     if (code && query.get('state') === flow.state) {
       authCodeQuery.start(code, flow);
     } else if (token && hash.get('state') === flow.state) {
-      setStore((s) => ({
-        ...s,
-        [flow.scheme]: {
-          type: 'implicit',
-          client_id: flow.client_id,
-          token: `${hash.get('token_type') ?? 'Bearer'} ${token}`,
-        },
-      }));
+      save(flow.scheme, {
+        type: 'implicit',
+        client_id: flow.client_id,
+        token: `${hash.get('token_type') ?? 'Bearer'} ${token}`,
+      });
     } else {
       return;
     }
@@ -236,11 +258,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       value={useMemo(
         () => ({
           store,
-          updatedSchemeId: Object.keys(store)[0] ?? null,
           isLoading: authCodeQuery.isLoading,
           error: authCodeQuery.error,
+          subscribe,
         }),
-        [store, authCodeQuery.isLoading, authCodeQuery.error],
+        [store, authCodeQuery.isLoading, authCodeQuery.error, subscribe],
       )}
     >
       {children}
@@ -297,7 +319,7 @@ export function useAuthFields(
   engine: DataEngine,
   { operation, transform }: AuthFieldsOptions = {},
 ): AuthFields {
-  const auth = usePlaygroundAuth();
+  const { subscribe } = usePlaygroundAuth();
   const { storageKeyPrefix, doc } = useOpenAPI();
   const { dereferenced, resolve } = doc;
   const schemes = dereferenced.components?.securitySchemes;
@@ -384,25 +406,23 @@ export function useAuthFields(
     },
   });
 
-  useOnChange(auth.updatedSchemeId, () => {
-    const { updatedSchemeId } = auth;
-    if (!updatedSchemeId) return;
-    const { token } = auth.store[updatedSchemeId]!;
-
-    const field = fields.find((field) => field.schemeId === updatedSchemeId);
+  const onToken = useEffectEvent((schemeId: string, token: string) => {
+    const field = fields.find((field) => field.schemeId === schemeId);
     if (field) {
       // update current value
       engine.update(field.fieldName, token);
       return;
     }
 
-    const idx = requirements.findIndex((req) => req.some((item) => item.id === updatedSchemeId));
+    const idx = requirements.findIndex((req) => req.some((item) => item.id === schemeId));
     if (idx !== -1) {
       // persisted value
-      localStorage.setItem(`${storageKeyPrefix}auth-${updatedSchemeId}`, JSON.stringify(token));
+      localStorage.setItem(`${storageKeyPrefix}auth-${schemeId}`, JSON.stringify(token));
       select(idx);
     }
   });
+
+  useEffect(() => subscribe(onToken), [subscribe]);
 
   return {
     requirements,
