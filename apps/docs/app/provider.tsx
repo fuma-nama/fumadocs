@@ -5,11 +5,7 @@ import dynamic from 'next/dynamic';
 import type { ReactNode } from 'react';
 import { Tooltip } from '@base-ui/react/tooltip';
 
-// const SearchDialog = dynamic(() => import('@/components/layouts/search'), {
-//   ssr: false,
-// });
-
-const SearchDialog = dynamic(() => import('@/components/layouts/meilisearch'), {
+const SearchDialog = dynamic(() => import('@/components/layouts/search'), {
   ssr: false,
 });
 
