@@ -85,6 +85,7 @@
     "@types/three": "^0.186.0",
     "algoliasearch": "5.59.0",
     "browserslist-config-baseline": "^0.5.0",
+    "meilisearch": "0.62.0",
     "next-validate-link": "^1.6.7",
     "postcss": "^8.5.28",
     "shadcn": "4.21.0",

@@ -72,11 +72,13 @@
     "./search/client/algolia": "./dist/search/client/algolia.js",
     "./search/client/fetch": "./dist/search/client/fetch.js",
     "./search/client/flexsearch-static": "./dist/search/client/flexsearch-static.js",
+    "./search/client/meilisearch": "./dist/search/client/meilisearch.js",
     "./search/client/mixedbread": "./dist/search/client/mixedbread.js",
     "./search/client/orama-cloud": "./dist/search/client/orama-cloud.js",
     "./search/client/orama-cloud-legacy": "./dist/search/client/orama-cloud-legacy.js",
     "./search/client/orama-static": "./dist/search/client/orama-static.js",
     "./search/flexsearch": "./dist/search/flexsearch.js",
+    "./search/meilisearch": "./dist/search/meilisearch.js",
     "./search/mixedbread": "./dist/search/mixedbread.js",
     "./search/orama-cloud": "./dist/search/orama-cloud.js",
     "./search/orama-cloud-legacy": "./dist/search/orama-cloud-legacy.js",
@@ -152,6 +154,7 @@
     "algoliasearch": "5.59.0",
     "flexsearch": "^0.8.212",
     "lucide-react": "^1.47.0",
+    "meilisearch": "0.62.0",
     "next": "16.3.5",
     "path-to-regexp": "^8.4.2",
     "react-router": "^8.4.0",
@@ -178,6 +181,7 @@
     "algoliasearch": "5.x.x",
     "flexsearch": "*",
     "lucide-react": "*",
+    "meilisearch": ">=0.50.0 <1.0.0",
     "next": "16.x.x",
     "react": "^19.2.0",
     "react-dom": "^19.2.0",
@@ -217,6 +221,9 @@
       "optional": true
     },
     "algoliasearch": {
+      "optional": true
+    },
+    "meilisearch": {
       "optional": true
     },
     "next": {

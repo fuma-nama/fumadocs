@@ -18,7 +18,7 @@ export default defineConfig({
     'src/source/{index,llms,dynamic,schema}.ts',
     'src/source/client/*.{ts,tsx}',
     'src/source/plugins/{lucide-icons,slugs,status-badges}.{ts,tsx}',
-    'src/search/{index,client,server,algolia,orama-cloud,orama-cloud-legacy,mixedbread,flexsearch}.ts',
+    'src/search/{index,client,server,algolia,orama-cloud,orama-cloud-legacy,mixedbread,flexsearch,meilisearch}.ts',
     'src/search/client/*.ts',
     'src/utils/use-on-change.ts',
     'src/utils/use-media-query.ts',

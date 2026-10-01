@@ -1,0 +1,124 @@
+---
+title: Meilisearch
+description: Integrate Meilisearch with Fumadocs
+---
+
+[Meilisearch](https://www.meilisearch.com) is an open-source search engine with typo tolerance and filtering, you can self-host it or use Meilisearch Cloud.
+
+## Setup
+
+Install dependencies:
+
+```package-install
+meilisearch
+```
+
+### API Keys
+
+Start a Meilisearch instance by [self-hosting](https://www.meilisearch.com/docs/learn/self_hosted/getting_started_with_self_hosted_meilisearch) or on [Meilisearch Cloud](https://www.meilisearch.com/cloud), and store its credentials in `.env.local` (`VITE_` instead of `NEXT_PUBLIC_` outside Next.js):
+
+```dotenv
+NEXT_PUBLIC_MEILISEARCH_HOST="URL of your instance"
+NEXT_PUBLIC_MEILISEARCH_SEARCH_KEY="search API key"
+MEILISEARCH_ADMIN_KEY="Default Admin API Key"
+```
+
+The search key is exposed to the browser, [create one](https://www.meilisearch.com/docs/learn/security/basic_security) that can only search the `docs` index. Keep the admin key private.
+
+### Sync Documents
+
+Pre-render a `static.json` route to export the search documents on build, and sync them to Meilisearch with a script after each build:
+
+<feature>search/meilisearch</feature>
+
+`sync()` configures the index and replaces its documents, the old documents stay searchable until the new ones are indexed. The `build` script syncs on every build, set the same variables on your deployment platform.
+
+### Search UI
+
+You can consider different options for implementing the UI:
+
+- Using [Fumadocs UI search dialog](/docs/search/meilisearch).
+- Build your own using the built-in search client hook:
+
+  ```ts twoslash
+  import { Meilisearch } from 'meilisearch';
+  import { useDocsSearch } from 'fumadocs-core/search/client';
+  import { meilisearchClient } from 'fumadocs-core/search/client/meilisearch';
+
+  const client = new Meilisearch({
+    host: 'host url',
+    apiKey: 'search api key',
+  });
+
+  const { search, setSearch, query } = useDocsSearch({
+    client: meilisearchClient({
+      client,
+      indexName: 'docs',
+    }),
+  });
+  ```
+
+  <auto-type-table type='import("fumadocs-core/search/client/meilisearch").MeilisearchOptions' />
+
+- Use their official clients directly.
+
+## Options
+
+### Tag Filter
+
+To configure tag filtering, pass a `tag` to `toDocuments()` in the `static.json` route:
+
+```ts
+toDocuments(source, { tag: (page) => page.slugs[0] });
+```
+
+And update your search client:
+
+- **Fumadocs UI**: Enable [Tag Filter](/docs/search/meilisearch#tag-filter) on Search UI.
+- **Search Client**: pass a tag to `meilisearchClient()`.
+
+  ```ts
+  import { useDocsSearch } from 'fumadocs-core/search/client';
+  import { meilisearchClient } from 'fumadocs-core/search/client/meilisearch';
+
+  const { search, setSearch, query } = useDocsSearch({
+    client: meilisearchClient({
+      tag: '<your tag value>', // [!code ++]
+      // ...
+    }),
+  });
+  ```
+
+### Internationalization
+
+Documents include the locale of their pages, pass `locale` to search in a language:
+
+```ts
+import { useI18n } from 'fumadocs-ui/contexts/i18n';
+import { useDocsSearch } from 'fumadocs-core/search/client';
+import { meilisearchClient } from 'fumadocs-core/search/client/meilisearch';
+
+const { locale } = useI18n();
+const { search, setSearch, query } = useDocsSearch({
+  client: meilisearchClient({
+    locale, // [!code ++]
+    // ...
+  }),
+});
+```
+
+### Index Settings
+
+`sync()` only sets `searchableAttributes` and `filterableAttributes`, other settings like synonyms and typo tolerance are kept. You can tune them from the Meilisearch dashboard or the `meilisearch` client.
+
+## Under the Hood
+
+Each heading and paragraph is a document, with the page title, URL and breadcrumbs. Only `content` is searchable, the search client groups results by page.
+
+| Attribute | Description                                |
+| --------- | ------------------------------------------ |
+| `type`    | `page`, `heading` or `text`                |
+| `content` | Page title, heading or paragraph           |
+| `heading` | ID of the heading it belongs to (optional) |
+| `tag`     | Tag(s) to filter results (optional)        |
+| `locale`  | Locale of page (optional)                  |
