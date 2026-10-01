@@ -5,7 +5,6 @@ description: Integrate Meilisearch Search with Fumadocs
 
 The Meilisearch client searches the within an external documentation files. This external documentation needs to match the pages in Fumadocs.
 
-
 ### Meilisearch setup
 
 1. Deploy self-hosted Meilisearch or use Meilisearch Cloud [(details)](https://www.meilisearch.com/docs/getting_started/overview)
@@ -26,7 +25,6 @@ export type { Meilisearch } from 'meilisearch';
 const host = process.env.MEILISEARCH_HOST;
 const apiKey = process.env.MEILISEARCH_KEY;
 export const MEILISEARCH_INDEX = process.env.MEILISEARCH_INDEX || 'docs';
-
 
 if (!host) {
   throw new Error('Missing MEILISEARCH_HOST environment variable');
@@ -287,3 +285,4 @@ const SearchDialog = dynamic(() => import('@/components/layouts/meilisearch'), {
 ### Filter attribute
 
 The Meilisearch search dialog allows to specify a attribute which should be used for filtering. The _useDocsSearch_ hook automatically fetches all available values for this attribute and the search dialog displays them in the dropdown.
+````
