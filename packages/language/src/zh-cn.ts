@@ -123,6 +123,7 @@ const translations = {
   'Deprecated(operation page)': '已弃用',
   'Deprecated(security scheme)': '已弃用',
   'Device Authorization(OAuth dialog)': '设备授权',
+  'Download(playground result display)': '下载',
   'Empty(operation page)': '空白',
   'Enter Value(playground server select)': '输入值',
   'Enter value(OAuth dialog)': '输入值',

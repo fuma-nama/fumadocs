@@ -24,7 +24,14 @@ import { og } from '@fumadocs/cli/features/og';
 import { search, type SearchProvider } from '@fumadocs/cli/features/search';
 
 const linters = ['eslint', 'oxlint', 'biome'] as const;
-const searchProviders = ['orama', 'orama-cloud', 'algolia', 'typesense', 'mixedbread'] as const;
+const searchProviders = [
+  'orama',
+  'orama-cloud',
+  'algolia',
+  'meilisearch',
+  'typesense',
+  'mixedbread',
+] as const;
 const ogImages = ['next-og', 'takumi'] as const;
 const aiChats = ['openrouter', 'llmgateway', 'inkeep'] as const;
 const templateNames = templates.map((item) => item.value);
@@ -168,6 +175,7 @@ async function main(defaultName: string | undefined, config: CliOptions): Promis
               hint: '3rd party search solution, signup needed',
             },
             { value: 'algolia', label: 'Algolia', hint: 'signup needed' },
+            { value: 'meilisearch', label: 'Meilisearch', hint: 'self-hosted or cloud' },
             { value: 'typesense', label: 'Typesense', hint: 'self-hosted or cloud' },
             { value: 'mixedbread', label: 'Mixedbread', hint: 'AI search, signup needed' },
           ],

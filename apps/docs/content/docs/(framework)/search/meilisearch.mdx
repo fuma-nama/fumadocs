@@ -5,4 +5,65 @@ description: Using Meilisearch with Fumadocs UI.
 
 ## Setup
 
+Fumadocs CLI can set it up for you, it creates the search dialog, the `static.json` route and a script to sync the search index after each build:
+
+```package-install
+npx @fumadocs/cli feature search --provider meilisearch
+```
+
+Or manually:
+
+1. Integrate [Meilisearch](/docs/headless/search/meilisearch).
+
+2. Create a search dialog, replace `host` and `apiKey` with your host URL and search API key.
+
+   <include meta='title="components/search.tsx"'>./meilisearch.tsx</include>
+
+<include>.shared.mdx</include>
+
 ### Tag Filter
+
+Optionally, you can add UI for filtering results by tags. Configure [Tag Filter](/docs/headless/search/meilisearch#tag-filter) on documents and add the following:
+
+```tsx
+'use client';
+
+import {
+  SearchDialog,
+  SearchDialogContent,
+  SearchDialogFooter,
+  SearchDialogOverlay,
+  type SharedProps,
+  TagsList,
+  TagsListItem,
+} from 'fumadocs-ui/components/dialog/search';
+import { useState } from 'react';
+import { useDocsSearch } from 'fumadocs-core/search/client';
+import { meilisearchClient } from 'fumadocs-core/search/client/meilisearch';
+
+export default function CustomSearchDialog(props: SharedProps) {
+  // [!code ++]
+  const [tag, setTag] = useState<string | undefined>();
+  const { search, setSearch, query } = useDocsSearch({
+    client: meilisearchClient({
+      tag, // [!code ++]
+      // other options...
+    }),
+  });
+
+  return (
+    <SearchDialog>
+      <SearchDialogOverlay />
+      <SearchDialogContent>
+        ...
+        <SearchDialogFooter className="flex flex-row">
+          {/* [!code ++:3] */}
+          <TagsList tag={tag} onTagChange={setTag}>
+            <TagsListItem value="my-value">My Value</TagsListItem>
+          </TagsList>
+        </SearchDialogFooter>
+      </SearchDialogContent>
+    </SearchDialog>
+  );
+}
+```

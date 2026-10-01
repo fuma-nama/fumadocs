@@ -45,7 +45,7 @@ Or manually:
    export default function TypesenseSearchDialog(props: SharedProps) {
      const { locale } = useI18n(); // optional
      const { search, setSearch, query } = useTypesenseSearch({
-       typesenseCollectionName: `YOUR_TYPESENSE_COLLECTION_NAME`,
+       typesenseCollectionName: 'docs',
        locale,
        legacy: false, // optional, set to true for fumadocs-ui version < 16.6.0
        client,

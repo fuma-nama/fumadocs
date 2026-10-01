@@ -77,7 +77,8 @@ export function server<Config, TC extends InternalTypeConfig>() {
 
     return {
       path: file,
-      fullPath: PathUtils.joinPath(base, file),
+      // `joinPath()` drops leading `../` and `/`, which `base` may contain
+      fullPath: !base || base.endsWith('/') ? base + file : `${base}/${file}`,
     };
   }
 

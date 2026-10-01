@@ -74,17 +74,19 @@ function Content({ schemeId, scopes, setToken, setOpen }: AuthDialogContentProps
   const [type, setType] = useState<OAuthFlowType | null>(() => {
     return Object.keys(scheme.flows!)[0] as OAuthFlowType;
   });
-  const [clientAuth, setClientAuth] = useState<'body' | 'header'>('body');
+  const [clientAuth, setClientAuth] = useState<'body' | 'header'>(() =>
+    tokenInfo?.type === 'authorization_code' ? tokenInfo.client_auth : 'header',
+  );
 
   const t = useTranslations({ note: 'OAuth dialog' });
   const clientAuthMethods = {
-    body: {
-      name: t('Send client credentials in body'),
-      description: t('Include the client ID and secret in the token request body.'),
-    },
     header: {
       name: t('Send as Basic Auth header'),
       description: t('Send the client ID and secret in the Authorization header.'),
+    },
+    body: {
+      name: t('Send client credentials in body'),
+      description: t('Include the client ID and secret in the token request body.'),
     },
   };
   const allFlows: Record<OAuthFlowType, FlowInfo> = useMemo(
@@ -207,7 +209,7 @@ function Content({ schemeId, scopes, setToken, setOpen }: AuthDialogContentProps
             autoComplete="off"
             disabled={isLoading}
             defaultValue={defaultValues.clientId}
-            required={type !== 'password' || clientAuth === 'header'}
+            required={type !== 'password'}
           />
         </fieldset>
       )}
@@ -225,11 +227,11 @@ function Content({ schemeId, scopes, setToken, setOpen }: AuthDialogContentProps
             autoComplete="off"
             disabled={isLoading}
             defaultValue={defaultValues.clientSecret}
-            required={type !== 'password' || clientAuth === 'header'}
+            required={type !== 'password'}
           />
         </fieldset>
       )}
-      {(type === 'clientCredentials' || type === 'password') && (
+      {(type === 'authorizationCode' || type === 'clientCredentials' || type === 'password') && (
         <fieldset className="flex flex-col gap-1.5">
           <Label htmlFor="client_auth">{t('Client Authentication')}</Label>
           <Select

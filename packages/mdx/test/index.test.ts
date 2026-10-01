@@ -3,11 +3,13 @@ import * as path from 'node:path';
 import { expect, test } from 'vitest';
 import { z } from 'zod';
 import { ValidationError } from '@/utils/validation';
-import { defineCollections, defineConfig, defineDocs } from '@/config';
+import { type DocCollection, defineCollections, defineConfig, defineDocs } from '@/config';
 import { buildConfig } from '@/config/build';
 import { createCore } from '@/core';
 import indexFile from '@/plugins/index-file';
 import lastModified from '@/plugins/last-modified';
+import { server } from '@/runtime/server';
+import type { InternalTypeConfig } from '@/runtime/types';
 
 test('format errors', async () => {
   const schema = z.object({
@@ -201,3 +203,16 @@ for (const { name, config } of cases) {
     }
   });
 }
+
+test('keep collection dir outside the project in file paths', async () => {
+  const create = server<{ docs: DocCollection }, InternalTypeConfig>();
+  const entry = { default: () => null, toc: [], structuredData: { headings: [], contents: [] } };
+  const docs = await create.doc('docs', '../content/docs', { './a.mdx': entry, 'b/c.mdx': entry });
+  const absolute = await create.doc('docs', '/content/docs', { './a.mdx': entry });
+
+  expect(docs.map((doc) => doc.info.fullPath)).toEqual([
+    '../content/docs/a.mdx',
+    '../content/docs/b/c.mdx',
+  ]);
+  expect(absolute[0].info.fullPath).toBe('/content/docs/a.mdx');
+});

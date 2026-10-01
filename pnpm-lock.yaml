@@ -413,6 +413,9 @@ importers:
       browserslist-config-baseline:
         specifier: ^0.5.0
         version: 0.5.0
+      meilisearch:
+        specifier: 0.62.0
+        version: 0.62.0
       next-validate-link:
         specifier: ^1.6.7
         version: 1.6.7(@types/mdast@4.0.4)(@types/unist@3.0.3)(supports-color@8.1.1)
@@ -2554,7 +2557,10 @@ importers:
         version: 0.8.212
       lucide-react:
         specifier: ^1.47.0
-        version: 1.48.0(react@19.3.0)
+        version: 1.47.0(react@19.3.0)
+      meilisearch:
+        specifier: 0.62.0
+        version: 0.62.0
       next:
         specifier: 16.3.5
         version: 16.3.5(@babel/core@7.29.7(supports-color@8.1.1))(@types/node@26.6.1)(react-dom@19.3.0(react@19.3.0))(react@19.3.0)
@@ -2649,6 +2655,9 @@ importers:
       fumadocs-ui:
         specifier: workspace:*
         version: link:../radix-ui
+      meilisearch:
+        specifier: ^0.62.0
+        version: 0.62.0
       oxlint:
         specifier: ^1.83.0
         version: 1.86.0
@@ -12986,8 +12995,8 @@ packages:
     resolution: {integrity: sha512-yz3xRaG20c6/BOzvYoDaGtPmGscs7YivItZEEqe6GbwNfHuxu9YNmvnEkMzKldAGY4/80pRcQRZSEnhquk9XuQ==}
     engines: {node: '>= 0.8'}
 
-  meilisearch@0.58.0:
-    resolution: {integrity: sha512-MXFlU+JVG2I3tDI4brS3UHxEv2fjOROP24TPP16c8dGHTulb1kxMgXvKP0x4ImvUcsVVJFi4QXP0JNDS/TaWaw==}
+  meilisearch@0.62.0:
+    resolution: {integrity: sha512-/ETDW7mmWI2NcSmtJdTPhbjsIbs3VcuapszX5X6JhdHB0XbszPOhqd3EB2bEylL0HK7dgwh/4Z3MdyuycWVf5A==}
     engines: {node: ^20.19.0 || >=22.12.0}
 
   mendoza@3.0.8:
@@ -25196,7 +25205,7 @@ snapshots:
 
   media-typer@1.1.1: {}
 
-  meilisearch@0.58.0: {}
+  meilisearch@0.62.0: {}
 
   mendoza@3.0.8: {}
 
