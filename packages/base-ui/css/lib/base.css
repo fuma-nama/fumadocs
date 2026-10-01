@@ -159,7 +159,8 @@
   #nd-notebook-layout:has(&),
   #nd-home-layout:has(&),
   #nd-flux-layout:has(&),
-  #fd-glass-layout:has(&) {
+  #fd-glass-layout:has(&),
+  #fd-spacious-layout:has(&) {
     @slot;
   }
 }
