@@ -85,30 +85,21 @@ export default defineConfig({
 });
 `;
 
-/** `lib/export-search-indexes.ts` of a custom search integration */
-const customIndexes = (async: boolean) => `import { source } from '@/lib/source';
-import type { StructuredData } from 'fumadocs-core/mdx-plugins';
+/** builds the documents of a custom search integration in the `static.json` route */
+const customDocuments = (async: boolean) => `import { source } from '@/lib/source';
 
-export interface DocumentRecord {
-  title: string;
-  description?: string;
-  url: string;
-  structured: StructuredData;
-}
-
-export async function exportSearchIndexes() {
-  const results: DocumentRecord[] = [];
+async function getDocuments() {
+  const documents = [];
   for (const page of source.getPages()) {
-    results.push({
+    documents.push({
       structured: ${async ? 'await page.data.structuredData()' : 'page.data.structuredData'},
       url: page.url,
       title: page.data.title,
       description: page.data.description,
     });
   }
-  return results;
-}
-`;
+  return documents;
+}`;
 
 interface FeatureTab {
   tab: string;
@@ -281,21 +272,20 @@ await sync(client, records);
     ]);
 
     addTabs('search/custom', framework, [
-      [path.posix.join(baseDir, 'lib/export-search-indexes.ts'), customIndexes(source.async)],
-      [
-        routeFile,
-        staticRoute(
-          framework,
-          "import { exportSearchIndexes } from '@/lib/export-search-indexes';",
-          'exportSearchIndexes()',
-        ),
-      ],
+      [routeFile, staticRoute(framework, customDocuments(source.async), 'getDocuments()')],
       ...registration,
       [
         'scripts/sync-content.ts',
         syncScript(
           output,
-          "import type { DocumentRecord } from '@/lib/export-search-indexes';",
+          `import type { StructuredData } from 'fumadocs-core/mdx-plugins';
+
+interface DocumentRecord {
+  title: string;
+  description?: string;
+  url: string;
+  structured: StructuredData;
+}`,
           '// sync the records to your search engine\n',
         ),
       ],

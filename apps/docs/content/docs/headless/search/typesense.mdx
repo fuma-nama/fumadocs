@@ -57,25 +57,14 @@ To implement the search UI, you can either:
 
 ### Tag Filter
 
-To configure tag filtering, add a `tag` value to indexes.
+To configure tag filtering, add a `tag` value to the documents in the `static.json` route:
 
-```ts title="lib/export-search-indexes.ts"
-import { source } from '@/lib/source';
-import type { DocumentRecord } from 'typesense-fumadocs-adapter';
-
-export async function exportSearchIndexes() {
-  const results: DocumentRecord[] = [];
-
-  for (const page of source.getPages()) {
-    results.push({
-      // other fields...
-      // [!code ++]
-      tag: '<your value>',
-    });
-  }
-
-  return results;
-}
+```ts
+documents.push({
+  // other fields...
+  // [!code ++]
+  tag: '<your value>',
+});
 ```
 
 And update your search client:

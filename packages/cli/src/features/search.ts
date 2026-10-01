@@ -73,16 +73,16 @@ const dialogBody = (footer: string, url: string) => `  return (
 `;
 
 /** `structuredData` is a function on async collections (React Router & TanStack Start) */
-const typesenseIndexes = (
-  async: boolean,
+const typesenseDocuments = (
   { ref, resolved }: SourceRef,
+  async: boolean,
 ) => `import { ${ref} } from '@/lib/source';
 import type { DocumentRecord } from 'typesense-fumadocs-adapter';
 
-export async function exportSearchIndexes() {
-  const results: DocumentRecord[] = [];
+async function getDocuments() {
+  const documents: DocumentRecord[] = [];
   for (const page of ${resolved}.getPages()) {
-    results.push({
+    documents.push({
       _id: page.url,
       structured: ${async ? 'await page.data.structuredData()' : 'page.data.structuredData'},
       url: page.url,
@@ -91,9 +91,8 @@ export async function exportSearchIndexes() {
       locale: page.locale,
     });
   }
-  return results;
-}
-`;
+  return documents;
+}`;
 
 /** `scripts/sync-content.ts`, syncing the search indexes pre-rendered to `output` */
 export const syncScript = (
@@ -120,12 +119,14 @@ interface Provider {
   static: boolean;
   dialog: (env: Env) => string;
   /** exports search indexes to a pre-rendered `static.json`, synced by `sync` after build */
-  exportIndexes?: (src: SourceRef) => {
-    imports: string;
+  exportIndexes?: (
+    src: SourceRef,
+    async: boolean,
+  ) => {
+    /** code before the route handler */
+    head: string;
     /** expression producing the documents */
     documents: string;
-    /** generated `lib/export-search-indexes.ts`, for providers without a `toDocuments()` */
-    file?: (async: boolean) => string;
   };
   /** `scripts/sync-content.ts`, run after build */
   sync?: (env: Env, paths: { dir: string; output: string }) => string;
@@ -161,7 +162,7 @@ export default function CustomSearchDialog(props: SharedProps) {
 
 ${dialogBody('Orama', 'https://orama.com')}`,
     exportIndexes: ({ ref }) => ({
-      imports: `import { ${ref} } from '@/lib/source';
+      head: `import { ${ref} } from '@/lib/source';
 import { toDocuments } from 'fumadocs-core/search/orama-cloud';`,
       documents: `toDocuments(${ref})`,
     }),
@@ -209,7 +210,7 @@ export default function CustomSearchDialog(props: SharedProps) {
 
 ${dialogBody('Algolia', 'https://algolia.com')}`,
     exportIndexes: ({ ref }) => ({
-      imports: `import { ${ref} } from '@/lib/source';
+      head: `import { ${ref} } from '@/lib/source';
 import { toDocuments } from 'fumadocs-core/search/algolia';`,
       documents: `toDocuments(${ref})`,
     }),
@@ -260,7 +261,7 @@ export default function CustomSearchDialog(props: SharedProps) {
 
 ${dialogBody('Meilisearch', 'https://www.meilisearch.com')}`,
     exportIndexes: ({ ref }) => ({
-      imports: `import { ${ref} } from '@/lib/source';
+      head: `import { ${ref} } from '@/lib/source';
 import { toDocuments } from 'fumadocs-core/search/meilisearch';`,
       documents: `toDocuments(${ref})`,
     }),
@@ -307,10 +308,9 @@ export default function CustomSearchDialog(props: SharedProps) {
   });
 
 ${dialogBody('Typesense', 'https://typesense.org')}`,
-    exportIndexes: (src) => ({
-      imports: "import { exportSearchIndexes } from '@/lib/export-search-indexes';",
-      documents: 'exportSearchIndexes()',
-      file: (async) => typesenseIndexes(async, src),
+    exportIndexes: (src, async) => ({
+      head: typesenseDocuments(src, async),
+      documents: 'getDocuments()',
     }),
     sync: (env, { output }) =>
       syncScript(
@@ -408,9 +408,9 @@ export type SearchProvider = keyof typeof providers;
 export const staticJson = (framework: ReactFramework) =>
   formatRoute({ segments: ['static.json'] }, framework, null);
 
-export const staticRoute = (framework: ReactFramework, imports: string, documents: string) =>
+export const staticRoute = (framework: ReactFramework, head: string, documents: string) =>
   routeModule(framework, staticJson(framework), {
-    imports,
+    imports: head,
     body: `Response.json(await ${documents})`,
     revalidate: true,
     static: true,
@@ -449,12 +449,10 @@ export function templates(
   ];
 
   if (provider.exportIndexes) {
-    const { imports, documents, file } = provider.exportIndexes(sourceRef(source.dynamic));
-    if (file)
-      files.push([path.posix.join(baseDir, 'lib/export-search-indexes.ts'), file(source.async)]);
+    const { head, documents } = provider.exportIndexes(sourceRef(source.dynamic), source.async);
     files.push([
       path.posix.join(baseDir, staticJson(framework).file),
-      staticRoute(framework, imports, documents),
+      staticRoute(framework, head, documents),
     ]);
   }
   if (provider.sync)
