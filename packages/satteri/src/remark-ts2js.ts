@@ -41,12 +41,12 @@ export function remarkTs2js({
       const meta = parseCodeBlockAttributes(node.meta ?? '', ['ts2js']);
       if (!disableTrigger && !('ts2js' in meta.attributes)) return;
 
-      const [{ parse }, { strip }] = await Promise.all([
+      const [{ parse }, { generate }] = await Promise.all([
         import('yuku-parser'),
         import('yuku-codegen'),
       ]);
       const { program } = parse(node.value, { lang });
-      const result = strip(program);
+      const result = generate(program, { strip: true });
 
       ctx.replaceNode(
         node,

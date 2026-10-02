@@ -46,7 +46,7 @@ export function remarkTypeScriptToJavaScript({
   disableTrigger = false,
 }: TypeScriptToJavaScriptOptions = {}): Transformer<Root> {
   return async (tree) => {
-    const [{ parse }, { strip }] = await Promise.all([
+    const [{ parse }, { generate }] = await Promise.all([
       import('yuku-parser'),
       import('yuku-codegen'),
     ]);
@@ -62,7 +62,7 @@ export function remarkTypeScriptToJavaScript({
       tasks.push(
         (async () => {
           const { program } = parse(node.value, { lang });
-          const result = strip(program);
+          const result = generate(program, { strip: true });
 
           const replacement = generateCodeBlockTabs({
             persist,
