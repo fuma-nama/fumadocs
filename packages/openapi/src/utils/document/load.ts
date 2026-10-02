@@ -13,7 +13,7 @@ export async function loadDocument(input: string | Document): Promise<{
     const bundled = await bundle<Document>(input, {
       transform: (document) =>
         typeof document === 'object' && document !== null
-          ? upgrade(document as Record<string, unknown>, '3.2')
+          ? upgrade(document as Record<string, unknown>, '3.2', { onIncompatible: 'ignore' })
           : document,
     });
     return { bundled };
