@@ -23,7 +23,12 @@ trieve-ts-sdk trieve-fumadocs-adapter
 ### Sign up on Trieve
 
 Sign up and create a dataset. Then obtain 2 API keys where one has only read access and the other has admin access to create and delete chunks.
-Store these credentials in environment variables.
+Store the dataset ID and admin key in `.env.local` for syncing:
+
+```dotenv
+TRIEVE_DATASET_ID="dataset ID"
+TRIEVE_ADMIN_API_KEY="admin API key"
+```
 
 <Callout title="Notice">
   One API Key should have only read access for the public facing search and the other should have
@@ -32,64 +37,11 @@ Store these credentials in environment variables.
 
 ### Sync Dataset
 
-Export the search indexes by pre-rendering a static route.
+Trieve takes the records of the [Algolia integration](/docs/headless/search/algolia). Export them with a pre-rendered `static.json` route, and sync them to Trieve with a script after each build:
 
-```ts title="lib/export-search-indexes.ts"
-import { source } from '@/lib/source';
-import { type TrieveDocument } from 'trieve-fumadocs-adapter/search/sync';
+<feature>search/trieve</feature>
 
-export async function exportSearchIndexes() {
-  const results: TrieveDocument[] = [];
-
-  for (const page of source.getPages()) {
-    results.push({
-      _id: page.url,
-      structured: page.data.structuredData,
-      url: page.url,
-      title: page.data.title,
-      description: page.data.description,
-    });
-  }
-
-  return results;
-}
-```
-
-<include>.static-route-example.mdx</include>
-
-Create a script, the `sync` function will sync search indexes.
-
-```ts title="scripts/sync-content.ts"
-import * as fs from 'node:fs';
-import { sync, type TrieveDocument } from 'trieve-fumadocs-adapter/search/sync';
-import { TrieveSDK } from 'trieve-ts-sdk';
-
-const filePath = '<see below>';
-const content = fs.readFileSync(filePath);
-
-const records: TrieveDocument[] = JSON.parse(content.toString());
-
-const client = new TrieveSDK({
-  apiKey: 'adminApiKey',
-  datasetId: 'datasetId',
-});
-
-sync(client, records);
-```
-
-<include>.static-route-output.mdx</include>
-
-Make sure to run the script after build:
-
-```json title="package.json"
-{
-  "scripts": {
-    "build": "... && bun scripts/sync-content.ts"
-  }
-}
-```
-
-> You can also integrate it with your CI/CD pipeline.
+The `build` script syncs on every build, set the same variables on your deployment platform.
 
 ### Search UI
 

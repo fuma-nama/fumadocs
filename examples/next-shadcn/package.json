@@ -1,6 +1,6 @@
 {
   "name": "example-next-shadcn",
-  "version": "0.0.37",
+  "version": "0.0.38",
   "private": true,
   "scripts": {
     "build": "next build",
@@ -13,10 +13,10 @@
     "fumadocs-core": "workspace:*",
     "fumadocs-mdx": "workspace:*",
     "fumadocs-ui": "workspace:@fumadocs/base-ui@*",
-    "lucide-react": "^1.47.0",
-    "next": "16.3.5",
+    "lucide-react": "^1.49.0",
+    "next": "16.3.8",
     "react": "^19.3.0",
-    "react-day-picker": "^10.0.1",
+    "react-day-picker": "^10.0.2",
     "react-dom": "^19.3.0",
     "shadcn": "4.21.0"
   },

@@ -18,60 +18,21 @@ algoliasearch
 
 ### Sign up on Algolia
 
-Sign up and obtain the app id and API keys for your search. Store these
-credentials in environment variables.
+Sign up and obtain the app id and API keys for your search, store them in `.env.local` (`VITE_` instead of `NEXT_PUBLIC_` outside Next.js):
+
+```dotenv
+NEXT_PUBLIC_ALGOLIA_APP_ID="app ID"
+NEXT_PUBLIC_ALGOLIA_SEARCH_KEY="search-only API key"
+ALGOLIA_WRITE_KEY="write API key"
+```
 
 ### Sync Search Indexes
 
-Pre-render a static route `/static.json` to export search indexes into production build:
+Pre-render a `static.json` route to export the search indexes on build, and sync them to Algolia with a script after each build:
 
-```ts title="lib/export-search-indexes.ts"
-import { source } from '@/lib/source';
-import { toDocuments } from 'fumadocs-core/search/algolia';
+<feature>search/algolia</feature>
 
-export function exportSearchIndexes() {
-  return toDocuments(source);
-}
-```
-
-<include>.static-route-example.mdx</include>
-
-Make a script to sync search indexes:
-
-```ts title="scripts/sync-content.ts" twoslash
-import { algoliasearch } from 'algoliasearch';
-import { sync, DocumentRecord } from 'fumadocs-core/search/algolia';
-import * as fs from 'node:fs';
-
-const filePath = '<see below>';
-const content = fs.readFileSync(filePath);
-
-const records = JSON.parse(content.toString()) as DocumentRecord[];
-
-const client = algoliasearch('id', 'key');
-
-// update the index settings and sync search indexes
-void sync(client, {
-  indexName: 'document',
-  documents: records,
-});
-```
-
-<include>.static-route-output.mdx</include>
-
-Now run the script after build:
-
-```json title="package.json"
-{
-  "scripts": {
-    "build": "... && bun ./scripts/sync-content.ts"
-  }
-}
-```
-
-### Workflow
-
-You may manually upload search indexes with the script, or integrate it with your CI/CD pipeline.
+`sync()` updates the index settings and replaces all records. The `build` script syncs on every build, set the same variables on your deployment platform.
 
 ### Search UI
 
@@ -101,16 +62,10 @@ You can consider different options for implementing the UI:
 
 ### Tag Filter
 
-To configure tag filtering, add a `tag` value to indexes.
+To configure tag filtering, pass a `tag` to `toDocuments()` in the `static.json` route:
 
-```ts title="lib/export-search-indexes.ts"
-import { source } from '@/lib/source';
-import { toDocuments } from 'fumadocs-core/search/algolia';
-
-export function exportSearchIndexes() {
-  // [!code ++]
-  return toDocuments(source, { tag: (page) => page.slugs[0] });
-}
+```ts
+toDocuments(source, { tag: (page) => page.slugs[0] });
 ```
 
 And update your search client:

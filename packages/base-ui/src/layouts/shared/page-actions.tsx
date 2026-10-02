@@ -37,7 +37,7 @@ export function MarkdownCopyButton({
           'text/plain': fetch(markdownUrl).then(async (res) => {
             if (!res.ok) throw new Error(`Failed to fetch ${markdownUrl}: ${res.status}`);
             const content = await res.text();
-            cache.set(markdownUrl, content);
+            if (process.env.NODE_ENV === 'production') cache.set(markdownUrl, content);
             return content;
           }),
         }),

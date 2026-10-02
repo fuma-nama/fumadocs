@@ -1,6 +1,6 @@
 'use client';
 import { Fragment, type ReactNode, useEffect, useMemo, useState, type ComponentProps } from 'react';
-import { ChevronDown, CircleX, SignpostIcon } from 'lucide-react';
+import { ChevronDown, CircleX, DownloadIcon, SignpostIcon } from 'lucide-react';
 import type { FetchResponseResult, FetchResult } from '@/playground/fetcher';
 import { useStatusInfo } from '../status-info';
 import { buttonVariants } from 'fumadocs-ui/components/ui/button';
@@ -88,14 +88,22 @@ function ResponseResult({
 }) {
   const t = useTranslations({ note: 'playground result display' });
   const statusInfo = useStatusInfo(data.status);
+  const [objectUrl, setObjectUrl] = useState<string>();
   const { parameters, type } = useMemo(
     () => safeParse(data.headers.get('Content-Type') ?? 'text/plain'),
     [data.headers],
   );
-  let body: ReactNode;
 
+  useEffect(() => {
+    const objectUrl = URL.createObjectURL(new Blob([data.body], { type }));
+    setObjectUrl(objectUrl);
+
+    return () => URL.revokeObjectURL(objectUrl);
+  }, [data.body, type]);
+
+  let body: ReactNode;
   if (type.startsWith('image/')) {
-    body = <ImageResult mime={type} buffer={data.body} />;
+    body = objectUrl && <ImageResult mime={type} src={objectUrl} />;
   } else if (data.body.byteLength > 0) {
     const lang = getTextFormat(type);
 
@@ -121,12 +129,22 @@ function ResponseResult({
     <div {...rest} className={cn(panelVariants(), rest.className)}>
       <div className="flex items-center gap-1.5">
         <statusInfo.icon className={cn('size-4 shrink-0', statusInfo.color)} />
-        <p className="text-sm font-medium text-nowrap">
+        <p className="min-w-0 me-auto text-sm font-medium truncate">
           {data.status} {statusInfo.description}
         </p>
+        {data.body.byteLength > 0 && (
+          <a
+            href={objectUrl}
+            download={getFileName(data.headers)}
+            className={cn(buttonVariants({ size: 'sm', variant: 'outline' }), 'gap-2')}
+          >
+            <DownloadIcon className="size-3.5 text-fd-muted-foreground" />
+            {t('Download')}
+          </a>
+        )}
         <button
           type="button"
-          className={cn(buttonVariants({ size: 'sm', variant: 'outline' }), 'ms-auto')}
+          className={buttonVariants({ size: 'sm', variant: 'outline' })}
           onClick={() => reset()}
         >
           {t('Close')}
@@ -208,23 +226,35 @@ function TextResult({
   );
 }
 
-function ImageResult({ mime, buffer }: { mime: string; buffer: ArrayBuffer }) {
-  const [objectUrl, setObjectUrl] = useState<string | null>(null);
-
-  useEffect(() => {
-    const blob = new Blob([buffer], { type: mime });
-    const url = URL.createObjectURL(blob);
-    setObjectUrl(url);
-    return () => URL.revokeObjectURL(url);
-  }, [mime, buffer]);
-
-  if (!objectUrl) return;
+function ImageResult({ mime, src }: { mime: string; src: string }) {
   return (
     <figure className="w-full p-1 bg-fd-card border rounded-lg shadow-sm">
       <figcaption className="text-xs text-fd-muted-foreground font-mono p-1 pb-2">
         {mime}
       </figcaption>
-      <img src={objectUrl} alt="" className="w-full rounded-md" />
+      <img src={src} alt="" className="w-full rounded-md" />
     </figure>
   );
+}
+
+/**
+ * The file name from `Content-Disposition`, preferring `filename*` (RFC 6266), without directories.
+ */
+function getFileName(headers: Headers): string {
+  const disposition = headers.get('Content-Disposition') ?? '';
+  const extended = /(?:^|;)\s*filename\*\s*=\s*[^']*'[^']*'([^\s;"]+)/i.exec(disposition);
+  let name: string | undefined;
+
+  if (extended) {
+    try {
+      name = decodeURIComponent(extended[1]);
+    } catch {}
+  }
+
+  if (!name) {
+    const match = /(?:^|;)\s*filename\s*=\s*(?:"((?:\\.|[^"\\])*)"|([^\s;]+))/i.exec(disposition);
+    name = match?.[1]?.replace(/\\(.)/g, '$1') ?? match?.[2];
+  }
+
+  return name?.replace(/^.*[/\\]/, '') || 'response';
 }

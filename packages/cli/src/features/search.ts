@@ -1,7 +1,8 @@
+import fs from 'node:fs/promises';
 import path from 'node:path';
 import type { Feature, FeatureContext } from '@/features';
-import type { ReactFramework } from '@/project';
-import { type FormattedRoute, formatRoute, routeModule } from '@/project/route';
+import type { ReactFramework, SourceInfo } from '@/project';
+import { formatRoute, routeModule } from '@/project/route';
 import {
   addImport,
   addJsxAttribute,
@@ -72,16 +73,16 @@ const dialogBody = (footer: string, url: string) => `  return (
 `;
 
 /** `structuredData` is a function on async collections (React Router & TanStack Start) */
-const typesenseIndexes = (
-  async: boolean,
+const typesenseDocuments = (
   { ref, resolved }: SourceRef,
+  async: boolean,
 ) => `import { ${ref} } from '@/lib/source';
 import type { DocumentRecord } from 'typesense-fumadocs-adapter';
 
-export async function exportSearchIndexes() {
-  const results: DocumentRecord[] = [];
+async function getDocuments() {
+  const documents: DocumentRecord[] = [];
   for (const page of ${resolved}.getPages()) {
-    results.push({
+    documents.push({
       _id: page.url,
       structured: ${async ? 'await page.data.structuredData()' : 'page.data.structuredData'},
       url: page.url,
@@ -90,24 +91,21 @@ export async function exportSearchIndexes() {
       locale: page.locale,
     });
   }
-  return results;
-}
-`;
+  return documents;
+}`;
 
-const syncScript = (imports: string, body: string) => `import * as fs from 'node:fs/promises';
+/** `scripts/sync-content.ts`, syncing the search indexes pre-rendered to `output` */
+export const syncScript = (
+  output: string,
+  imports: string,
+  body: string,
+) => `import * as fs from 'node:fs/promises';
 ${imports}
 
-async function main(filePath: string) {
-  const content = await fs.readFile(filePath);
-  const records = JSON.parse(content.toString()) as DocumentRecord[];
-${body}
-  console.log(\`search updated: \${records.length} records\`);
-}
+const records = JSON.parse(await fs.readFile('${output}', 'utf-8')) as DocumentRecord[];
 
-// the path of pre-rendered \`static.json\`
-const filePath = process.argv[2];
-if (!filePath) throw new Error('missing the path of static.json');
-void main(filePath);
+${body}
+console.log(\`search updated: \${records.length} records\`);
 `;
 
 interface Provider {
@@ -121,14 +119,17 @@ interface Provider {
   static: boolean;
   dialog: (env: Env) => string;
   /** exports search indexes to a pre-rendered `static.json`, synced by `sync` after build */
-  exportIndexes?: (src: SourceRef) => {
-    imports: string;
+  exportIndexes?: (
+    src: SourceRef,
+    async: boolean,
+  ) => {
+    /** code before the route handler */
+    head: string;
     /** expression producing the documents */
     documents: string;
-    /** generated `lib/export-search-indexes.ts`, for providers without a `toDocuments()` */
-    file?: (async: boolean) => string;
   };
-  sync?: (env: Env, dir: string) => string;
+  /** `scripts/sync-content.ts`, run after build */
+  sync?: (env: Env, paths: { dir: string; output: string }) => string;
   /** server-side search, replaces the default search route */
   searchRoute?: Record<ReactFramework, string>;
 }
@@ -161,23 +162,24 @@ export default function CustomSearchDialog(props: SharedProps) {
 
 ${dialogBody('Orama', 'https://orama.com')}`,
     exportIndexes: ({ ref }) => ({
-      imports: `import { ${ref} } from '@/lib/source';
+      head: `import { ${ref} } from '@/lib/source';
 import { toDocuments } from 'fumadocs-core/search/orama-cloud';`,
       documents: `toDocuments(${ref})`,
     }),
-    sync: (env) =>
+    sync: (env, { output }) =>
       syncScript(
+        output,
         `import { type OramaDocument as DocumentRecord, sync } from 'fumadocs-core/search/orama-cloud';
 import { OramaCloud } from '@orama/core';`,
-        `  const orama = new OramaCloud({
-    projectId: process.env.${env.prefix}ORAMA_PROJECT_ID!,
-    apiKey: process.env.ORAMA_PRIVATE_API_KEY!,
-  });
+        `const orama = new OramaCloud({
+  projectId: process.env.${env.prefix}ORAMA_PROJECT_ID!,
+  apiKey: process.env.ORAMA_PRIVATE_API_KEY!,
+});
 
-  await sync(orama, {
-    index: process.env.${env.prefix}ORAMA_DATASOURCE_ID!,
-    documents: records,
-  });
+await sync(orama, {
+  index: process.env.${env.prefix}ORAMA_DATASOURCE_ID!,
+  documents: records,
+});
 `,
       ),
   },
@@ -208,23 +210,75 @@ export default function CustomSearchDialog(props: SharedProps) {
 
 ${dialogBody('Algolia', 'https://algolia.com')}`,
     exportIndexes: ({ ref }) => ({
-      imports: `import { ${ref} } from '@/lib/source';
+      head: `import { ${ref} } from '@/lib/source';
 import { toDocuments } from 'fumadocs-core/search/algolia';`,
       documents: `toDocuments(${ref})`,
     }),
-    sync: (env) =>
+    sync: (env, { output }) =>
       syncScript(
+        output,
         `import { type DocumentRecord, sync } from 'fumadocs-core/search/algolia';
 import { algoliasearch } from 'algoliasearch';`,
-        `  const client = algoliasearch(
-    process.env.${env.prefix}ALGOLIA_APP_ID!,
-    process.env.ALGOLIA_WRITE_KEY!,
-  );
+        `const client = algoliasearch(
+  process.env.${env.prefix}ALGOLIA_APP_ID!,
+  process.env.ALGOLIA_WRITE_KEY!,
+);
 
-  await sync(client, {
-    indexName: 'document',
-    documents: records,
+await sync(client, {
+  indexName: 'document',
+  documents: records,
+});
+`,
+      ),
+  },
+  meilisearch: {
+    label: 'Meilisearch',
+    hint: 'self-hosted or cloud',
+    dependencies: { meilisearch: null },
+    publicEnv: ['MEILISEARCH_HOST', 'MEILISEARCH_SEARCH_KEY'],
+    privateEnv: ['MEILISEARCH_ADMIN_KEY'],
+    static: true,
+    dialog: (env) => `'use client';
+${dialogImports}
+import { useDocsSearch } from 'fumadocs-core/search/client';
+import { meilisearchClient } from 'fumadocs-core/search/client/meilisearch';
+import { Meilisearch } from 'meilisearch';
+
+const client = new Meilisearch({
+  host: ${env.read}MEILISEARCH_HOST!,
+  apiKey: ${env.read}MEILISEARCH_SEARCH_KEY!,
+});
+
+export default function CustomSearchDialog(props: SharedProps) {
+  const { locale } = useI18n();
+  const { search, setSearch, query } = useDocsSearch({
+    client: meilisearchClient({
+      client,
+      indexName: 'docs',
+      locale,
+    }),
   });
+
+${dialogBody('Meilisearch', 'https://www.meilisearch.com')}`,
+    exportIndexes: ({ ref }) => ({
+      head: `import { ${ref} } from '@/lib/source';
+import { toDocuments } from 'fumadocs-core/search/meilisearch';`,
+      documents: `toDocuments(${ref})`,
+    }),
+    sync: (env, { output }) =>
+      syncScript(
+        output,
+        `import { type DocumentRecord, sync } from 'fumadocs-core/search/meilisearch';
+import { Meilisearch } from 'meilisearch';`,
+        `const client = new Meilisearch({
+  host: process.env.${env.prefix}MEILISEARCH_HOST!,
+  apiKey: process.env.MEILISEARCH_ADMIN_KEY!,
+});
+
+await sync(client, {
+  indexName: 'docs',
+  documents: records,
+});
 `,
       ),
   },
@@ -254,25 +308,25 @@ export default function CustomSearchDialog(props: SharedProps) {
   });
 
 ${dialogBody('Typesense', 'https://typesense.org')}`,
-    exportIndexes: (src) => ({
-      imports: "import { exportSearchIndexes } from '@/lib/export-search-indexes';",
-      documents: 'exportSearchIndexes()',
-      file: (async) => typesenseIndexes(async, src),
+    exportIndexes: (src, async) => ({
+      head: typesenseDocuments(src, async),
+      documents: 'getDocuments()',
     }),
-    sync: (env) =>
+    sync: (env, { output }) =>
       syncScript(
+        output,
         `import { type DocumentRecord, sync } from 'typesense-fumadocs-adapter';
 import { Client } from 'typesense';`,
-        `  const client = new Client({
-    nodes: [{ url: process.env.${env.prefix}TYPESENSE_URL! }],
-    apiKey: process.env.TYPESENSE_API_KEY!,
-    connectionTimeoutSeconds: 60 * 15,
-  });
+        `const client = new Client({
+  nodes: [{ url: process.env.${env.prefix}TYPESENSE_URL! }],
+  apiKey: process.env.TYPESENSE_API_KEY!,
+  connectionTimeoutSeconds: 60 * 15,
+});
 
-  await sync(client, {
-    typesenseCollectionName: 'docs',
-    documents: records,
-  });
+await sync(client, {
+  typesenseCollectionName: 'docs',
+  documents: records,
+});
 `,
       ),
   },
@@ -298,7 +352,7 @@ export default function CustomSearchDialog(props: SharedProps) {
   });
 
 ${dialogBody('Mixedbread', 'https://mixedbread.com')}`,
-    sync: (_env, dir) => `import { spawnSync } from 'node:child_process';
+    sync: (_env, { dir }) => `import { spawnSync } from 'node:child_process';
 
 // sync the content with Mixedbread CLI
 const result = spawnSync(
@@ -350,18 +404,61 @@ export const { GET } = server;
 
 export type SearchProvider = keyof typeof providers;
 
-const staticRoute = (
-  framework: ReactFramework,
-  route: FormattedRoute,
-  imports: string,
-  documents: string,
-) =>
-  routeModule(framework, route, {
-    imports,
+/** pre-rendered on build to export the search indexes */
+export const staticJson = (framework: ReactFramework) =>
+  formatRoute({ segments: ['static.json'] }, framework, null);
+
+export const staticRoute = (framework: ReactFramework, head: string, documents: string) =>
+  routeModule(framework, staticJson(framework), {
+    imports: head,
     body: `Response.json(await ${documents})`,
     revalidate: true,
     static: true,
   });
+
+/** where `static.json` is pre-rendered on build, `config` is the Vite config of TanStack Start */
+export function staticOutput(framework: ReactFramework, config = ''): string {
+  switch (framework) {
+    case 'next':
+      return '.next/server/app/static.json.body';
+    case 'react-router':
+      return 'build/client/static.json';
+    case 'waku':
+      return 'dist/public/static.json';
+    case 'tanstack-start':
+      // Nitro moves the client output to the directory of its preset
+      if (/preset:\s*['"]vercel['"]/.test(config)) return '.vercel/output/static/static.json';
+      return /\bnitro\(/.test(config) ? '.output/public/static.json' : 'dist/client/static.json';
+  }
+}
+
+/** runs the sync script after build */
+export const syncCommand = 'node --env-file-if-exists=.env.local scripts/sync-content.ts';
+
+/** the files written by a provider, relative to the project, `output` is where `static.json` is pre-rendered */
+export function templates(
+  name: SearchProvider,
+  framework: ReactFramework,
+  { baseDir, source }: { baseDir: string; source: Pick<SourceInfo, 'dynamic' | 'async' | 'dir'> },
+  output: string,
+): [file: string, content: string][] {
+  const provider: Provider = providers[name];
+  const env = publicEnv(framework === 'next');
+  const files: [string, string][] = [
+    [path.posix.join(baseDir, 'components/search.tsx'), provider.dialog(env)],
+  ];
+
+  if (provider.exportIndexes) {
+    const { head, documents } = provider.exportIndexes(sourceRef(source.dynamic), source.async);
+    files.push([
+      path.posix.join(baseDir, staticJson(framework).file),
+      staticRoute(framework, head, documents),
+    ]);
+  }
+  if (provider.sync)
+    files.push(['scripts/sync-content.ts', provider.sync(env, { dir: source.dir, output })]);
+  return files;
+}
 
 export const search: Feature<{ provider: SearchProvider }> = {
   id: 'search',
@@ -389,10 +486,16 @@ export const search: Feature<{ provider: SearchProvider }> = {
     const provider: Provider = providers[name];
     if (project.static && !provider.static)
       throw new Error(`${provider.label} requires a server at runtime`);
-    const env = publicEnv(framework === 'next');
+
+    const config =
+      framework === 'tanstack-start' && project.configFile
+        ? await fs.readFile(path.join(project.cwd, project.configFile), 'utf-8')
+        : '';
+    const output = staticOutput(framework, config);
 
     ctx.addDependencies(provider.dependencies);
-    await ctx.write(path.join(baseDir, 'components/search.tsx'), provider.dialog(env));
+    for (const [file, content] of templates(name, framework, project, output))
+      await ctx.write(file, content);
 
     // other routes (e.g. MCP) also create a search server, only match the search route itself
     const searchRoute = await findSource(
@@ -412,21 +515,7 @@ export const search: Feature<{ provider: SearchProvider }> = {
     }
 
     if (provider.exportIndexes) {
-      const { imports, documents, file } = provider.exportIndexes(
-        sourceRef(project.source.dynamic),
-      );
-      if (file)
-        await ctx.write(
-          path.join(baseDir, 'lib/export-search-indexes.ts'),
-          file(project.source.async),
-        );
-
-      const route = formatRoute({ segments: ['static.json'] }, framework, null);
-      await ctx.write(
-        path.join(baseDir, route.file),
-        staticRoute(framework, route, imports, documents),
-      );
-
+      const route = staticJson(framework);
       if (framework === 'react-router') {
         await registerReactRouterRoutes(ctx, [route]);
       } else if (framework === 'tanstack-start' && project.configFile) {
@@ -449,22 +538,14 @@ export const search: Feature<{ provider: SearchProvider }> = {
       );
 
     if (provider.sync) {
-      // path of the pre-rendered `static.json`, passed to the sync script
-      const output = {
-        next: '.next/server/app/static.json.body',
-        'react-router': 'build/client/static.json',
-        'tanstack-start': project.static ? 'dist/client/static.json' : '.output/public/static.json',
-        waku: 'dist/public/static.json',
-      }[framework];
-      await ctx.write('scripts/sync-content.ts', provider.sync(env, project.source.dir));
       await ctx.packageJson((data) => {
         const build = data.scripts?.build ?? '';
         if (build.includes('sync-content')) return;
-        const sync = `node --env-file-if-exists=.env.local scripts/sync-content.ts${provider.exportIndexes ? ` ${output}` : ''}`;
-        scripts(data, { build: build ? `${build} && ${sync}` : sync });
+        scripts(data, { build: build ? `${build} && ${syncCommand}` : syncCommand });
       });
     }
 
+    const env = publicEnv(framework === 'next');
     for (const key of provider.publicEnv) ctx.env(env.prefix + key, '');
     for (const key of provider.privateEnv) ctx.env(key, '');
     ctx.note(

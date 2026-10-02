@@ -1,3 +1,30 @@
+## create-fumadocs-app@16.2.13
+
+### Meilisearch integration
+
+Search your docs with [Meilisearch](https://www.meilisearch.com), self-hosted or on Meilisearch Cloud.
+
+- `toDocuments()` and `sync()` from `fumadocs-core/search/meilisearch` export your pages and replace the documents of an index, old documents stay searchable until the new ones are indexed.
+- `meilisearchClient()` from `fumadocs-core/search/client/meilisearch` searches from the browser with `useDocsSearch()`, filtered by tag and locale.
+
+```tsx
+const client = new Meilisearch({ host, apiKey: searchKey });
+
+useDocsSearch({
+  client: meilisearchClient({ client, indexName: 'docs', locale }),
+});
+```
+
+Set it up with `npx @fumadocs/cli feature search --provider meilisearch`, or choose it in `create-fumadocs-app`.
+
+Fix [#3627](https://github.com/fuma-nama/fumadocs/issues/3627)
+
+### Simpler search sync setup
+
+- `feature search` writes the path of the pre-rendered `static.json` into `scripts/sync-content.ts`, and the `build` script runs it without arguments.
+- On TanStack Start, the path follows the Nitro output: `.output/public`, `.vercel/output/static` with the `vercel` preset, or `dist/client` without Nitro.
+- Typesense documents are built in the `static.json` route, without a separate `lib/export-search-indexes.ts`.
+
 ## create-fumadocs-app@16.2.7
 
 ### Move `proxy.ts` into `src` when the `/src` directory is enabled

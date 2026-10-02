@@ -15,99 +15,21 @@ typesense typesense-fumadocs-adapter
 
 ### Start Typesense Server
 
-You can either self-host the Typesense server or use their cloud service. Follow their [getting started guide](https://typesense.org/docs/guide/install-typesense.html) to set up your server and obtain the API key and server URL.
+You can either self-host the Typesense server or use their cloud service. Follow their [getting started guide](https://typesense.org/docs/guide/install-typesense.html) to set up your server, and store its credentials in `.env.local` (`VITE_` instead of `NEXT_PUBLIC_` outside Next.js):
+
+```dotenv
+NEXT_PUBLIC_TYPESENSE_URL="server URL"
+NEXT_PUBLIC_TYPESENSE_SEARCH_KEY="search-only API key"
+TYPESENSE_API_KEY="API key with write access"
+```
 
 ### Sync Dataset
 
-Export the search indexes by pre-rendering a static route.
+Export the search indexes with a pre-rendered `static.json` route, and sync them to Typesense with a script after each build:
 
-```ts title="lib/export-search-indexes.ts"
-import { source } from '@/lib/source';
-import { findPath } from 'fumadocs-core/page-tree';
-import type { DocumentRecord } from 'typesense-fumadocs-adapter';
+<feature>search/typesense</feature>
 
-export async function exportSearchIndexes() {
-  const results: DocumentRecord[] = [];
-
-  function isBreadcrumbItem(item: unknown): item is string {
-    return typeof item === 'string' && item.length > 0;
-  }
-
-  for (const page of source.getPages()) {
-    let breadcrumbs: string[] | undefined;
-    const pageTree = source.getPageTree(page.locale);
-    const path = findPath(
-      pageTree.children,
-      (node) => node.type === 'page' && node.url === page.url,
-    );
-
-    if (path) {
-      breadcrumbs = [];
-      path.pop();
-      if (isBreadcrumbItem(pageTree.name)) {
-        breadcrumbs.push(pageTree.name);
-      }
-      for (const segment of path) {
-        if (!isBreadcrumbItem(segment.name)) continue;
-        breadcrumbs.push(segment.name);
-      }
-    }
-
-    results.push({
-      _id: page.url,
-      structured: page.data.structuredData,
-      url: page.url,
-      title: page.data.title,
-      description: page.data.description,
-      breadcrumbs,
-      locale: page.locale,
-    });
-  }
-
-  return results;
-}
-```
-
-<include>.static-route-example.mdx</include>
-
-Create a script to sync search indexes:
-
-```ts title="scripts/sync-content.ts"
-import * as fs from 'node:fs';
-import { sync, DocumentRecord } from 'typesense-fumadocs-adapter';
-import { Client } from 'typesense';
-
-const filePath = '<see below>';
-const content = fs.readFileSync(filePath);
-
-const records = JSON.parse(content.toString()) as DocumentRecord[];
-
-const client = new Client({
-  nodes: [{ url: 'YOUR_TYPESENSE_SERVER_URL' }],
-  apiKey: 'YOUR_TYPESENSE_API_KEY_WITH_WRITE_ACCESS',
-  connectionTimeoutSeconds: 60 * 15,
-});
-
-// update the collection settings and sync search indexes
-void sync(client, {
-  typesenseCollectionName: 'YOUR_COLLECTION_NAME',
-  documents: records,
-});
-```
-
-<include>.static-route-output.mdx</include>
-
-Make sure to run the script after build:
-
-```json title="package.json"
-{
-  "scripts": {
-    "build": "... && bun scripts/sync-content.ts"
-  }
-}
-```
-
-> You can also integrate it with your CI/CD pipeline.
+The `build` script syncs on every build, set the same variables on your deployment platform.
 
 ### Search UI
 
@@ -126,7 +48,7 @@ To implement the search UI, you can either:
   });
 
   const { search, setSearch, query } = useTypesenseSearch({
-    typesenseCollectionName: 'YOUR_COLLECTION_NAME',
+    typesenseCollectionName: 'docs',
     client,
   });
   ```
@@ -135,25 +57,14 @@ To implement the search UI, you can either:
 
 ### Tag Filter
 
-To configure tag filtering, add a `tag` value to indexes.
+To configure tag filtering, add a `tag` value to the documents in the `static.json` route:
 
-```ts title="lib/export-search-indexes.ts"
-import { source } from '@/lib/source';
-import type { DocumentRecord } from 'typesense-fumadocs-adapter';
-
-export async function exportSearchIndexes() {
-  const results: DocumentRecord[] = [];
-
-  for (const page of source.getPages()) {
-    results.push({
-      // other fields...
-      // [!code ++]
-      tag: '<your value>',
-    });
-  }
-
-  return results;
-}
+```ts
+documents.push({
+  // other fields...
+  // [!code ++]
+  tag: '<your value>',
+});
 ```
 
 And update your search client:
@@ -171,29 +82,7 @@ And update your search client:
 
 ### Internationalization (i18n)
 
-To support internationalization, make sure to add a `locale` value to each document.
-
-```ts title="lib/export-search-indexes.ts"
-import { source } from '@/lib/source';
-import { findPath } from 'fumadocs-core/page-tree';
-import type { DocumentRecord } from 'typesense-fumadocs-adapter';
-
-export async function exportSearchIndexes() {
-  const results: DocumentRecord[] = [];
-
-  for (const page of source.getPages()) {
-    results.push({
-      // other fields...
-      // [!code ++]
-      locale: page.locale,
-    });
-  }
-
-  return results;
-}
-```
-
-And update your search client:
+Documents include the `locale` of their pages, pass `locale` to the search client:
 
 ```ts
 import { useI18n } from 'fumadocs-ui/contexts/i18n';
@@ -207,4 +96,4 @@ const { search, setSearch, query } = useTypesenseSearch({
 });
 ```
 
-Under the hood, Typesense will create separate collections for each locale. The collection name is appended with the `_{locale}` suffix (e.g., `YOUR_COLLECTION_NAME_en`, `YOUR_COLLECTION_NAME_fr`).
+Under the hood, Typesense will create separate collections for each locale. The collection name is appended with the `_{locale}` suffix (e.g., `docs_en`, `docs_fr`).

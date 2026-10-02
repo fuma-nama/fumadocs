@@ -1,7 +1,11 @@
 import { createI18nSearchAPI, createSearchAPI, type ExportedData } from '@/search/server';
 import { expect, test } from 'vitest';
+import type { Meilisearch, SearchParams } from 'meilisearch';
 import { structure } from '@/mdx-plugins';
 import { buildDocuments } from '@/search/server/build-doc';
+import { loader } from '@/source';
+import { sync, toDocuments } from '@/search/meilisearch';
+import { meilisearchClient } from '@/search/client/meilisearch';
 
 test('Search API', async () => {
   const api = createSearchAPI('simple', {
@@ -266,6 +270,178 @@ test('Search API I18n: legacy locale map', async () => {
     [
       "italian",
       "en",
+    ]
+  `);
+});
+
+test('Meilisearch: sync', async () => {
+  const source = loader({
+    baseUrl: '/docs',
+    source: {
+      files: [
+        {
+          type: 'page',
+          path: 'guide/install.mdx',
+          data: {
+            title: 'Installation',
+            description: 'Install the package.',
+            structuredData: structure('## Using npm\n\nRun `npm install`.'),
+          },
+        },
+      ],
+    },
+  });
+  const calls: unknown[] = [];
+  const task = (...args: unknown[]) => {
+    calls.push(args);
+    return { waitTask: async () => ({ status: 'succeeded', error: null }) };
+  };
+  const client = {
+    index: () => ({ updateSettings: task, addDocuments: task, deleteDocuments: task }),
+  } as unknown as Meilisearch;
+
+  const documents = await toDocuments(source, { tag: (page) => page.slugs[0] });
+  await sync(client, { indexName: 'docs', documents });
+  expect(calls).toMatchInlineSnapshot(`
+    [
+      [
+        {
+          "filterableAttributes": [
+            "id",
+            "tag",
+            "locale",
+          ],
+          "searchableAttributes": [
+            "content",
+          ],
+        },
+      ],
+      [
+        [
+          {
+            "breadcrumbs": [
+              "Docs",
+              "Guide",
+            ],
+            "content": "Installation",
+            "heading": undefined,
+            "id": 0,
+            "locale": undefined,
+            "tag": "guide",
+            "title": "Installation",
+            "type": "page",
+            "url": "/docs/guide/install",
+          },
+          {
+            "breadcrumbs": [
+              "Docs",
+              "Guide",
+            ],
+            "content": "Install the package.",
+            "heading": undefined,
+            "id": 1,
+            "locale": undefined,
+            "tag": "guide",
+            "title": "Installation",
+            "type": "text",
+            "url": "/docs/guide/install",
+          },
+          {
+            "breadcrumbs": [
+              "Docs",
+              "Guide",
+            ],
+            "content": "Using npm",
+            "heading": "using-npm",
+            "id": 2,
+            "locale": undefined,
+            "tag": "guide",
+            "title": "Installation",
+            "type": "heading",
+            "url": "/docs/guide/install",
+          },
+          {
+            "breadcrumbs": [
+              "Docs",
+              "Guide",
+            ],
+            "content": "Run \`npm install\`.",
+            "heading": "using-npm",
+            "id": 3,
+            "locale": undefined,
+            "tag": "guide",
+            "title": "Installation",
+            "type": "text",
+            "url": "/docs/guide/install",
+          },
+        ],
+        {
+          "primaryKey": "id",
+        },
+      ],
+      [
+        {
+          "filter": "id >= 4",
+        },
+      ],
+    ]
+  `);
+});
+
+test('Meilisearch: search client', async () => {
+  let params: SearchParams | undefined;
+  const page = { title: 'Page A', url: '/a' };
+  const hits = [
+    { ...page, id: 2, type: 'text', heading: 'x', content: 'hello x' },
+    { id: 5, type: 'page', title: 'Page B', url: '/b', content: 'Page B' },
+    { ...page, id: 0, type: 'page', content: 'Page A' },
+    { ...page, id: 3, type: 'heading', heading: 'y', content: 'hello y' },
+  ];
+  const client = {
+    index: () => ({
+      async search(_query: string, options: SearchParams) {
+        params = options;
+        return { hits };
+      },
+    }),
+  } as unknown as Meilisearch;
+
+  const results = await meilisearchClient({
+    client,
+    indexName: 'docs',
+    tag: 'guide',
+    locale: 'en',
+  }).search('hello');
+
+  expect(params?.filter).toEqual(['locale = "en"', 'tag = "guide"']);
+  expect(results).toMatchInlineSnapshot(`
+    [
+      {
+        "breadcrumbs": undefined,
+        "content": "Page A",
+        "id": "/a",
+        "type": "page",
+        "url": "/a",
+      },
+      {
+        "content": "<mark>hello</mark> x",
+        "id": "2",
+        "type": "text",
+        "url": "/a#x",
+      },
+      {
+        "content": "<mark>hello</mark> y",
+        "id": "3",
+        "type": "heading",
+        "url": "/a#y",
+      },
+      {
+        "breadcrumbs": undefined,
+        "content": "Page B",
+        "id": "/b",
+        "type": "page",
+        "url": "/b",
+      },
     ]
   `);
 });
