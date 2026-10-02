@@ -51,7 +51,7 @@
   },
   "devDependencies": {
     "@types/cross-spawn": "^6.0.6",
-    "@types/node": "26.6.1",
+    "@types/node": "26.6.3",
     "tinyglobby": "^0.2.17",
     "tsconfig": "workspace:*",
     "tsdown": "0.23.0",

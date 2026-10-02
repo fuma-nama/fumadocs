@@ -43,9 +43,9 @@
     "zod": "^4.6.5"
   },
   "devDependencies": {
-    "@content-collections/core": "0.15.2",
+    "@content-collections/core": "0.15.3",
     "@content-collections/mdx": "^0.2.2",
-    "@types/node": "26.6.1",
+    "@types/node": "26.6.3",
     "fumadocs-core": "workspace:*",
     "tsconfig": "workspace:*",
     "tsdown": "0.23.0"

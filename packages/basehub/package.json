@@ -30,7 +30,7 @@
     "types:check": "tsc --noEmit"
   },
   "devDependencies": {
-    "@types/node": "26.6.1",
+    "@types/node": "26.6.3",
     "@types/react": "^19.3.0",
     "basehub": "9.6.0",
     "fuma-cli": "^0.3.1",
