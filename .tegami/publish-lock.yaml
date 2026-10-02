@@ -1,27 +1,45 @@
 core:changelogs:
-  - content: "---\npackages:\n  fumadocs-ui:\n    type: patch\n  \"@fumadocs/base-ui\":\n    type: patch\n---\n\n### Apply the Vite base path to the \"View as Markdown\" link\n\n`<ViewOptionsPopover />` linked to `markdownUrl` without the Vite `base`, so sites served under a base path got a 404. It now prefixes the URL like `<MarkdownCopyButton />` does.\n\nFix [#3620](https://github.com/fuma-nama/fumadocs/issues/3620)\n"
-    filename: 2026-09-29-view-markdown-base-path.md
+  - content: "---\npackages:\n  fumadocs-core:\n    type: patch\n  \"@fumadocs/cli\":\n    type: patch\n  create-fumadocs-app:\n    type: patch\n---\n\n### Meilisearch integration\n\nSearch your docs with [Meilisearch](https://www.meilisearch.com), self-hosted or on Meilisearch Cloud.\n\n- `toDocuments()` and `sync()` from `fumadocs-core/search/meilisearch` export your pages and replace the documents of an index, old documents stay searchable until the new ones are indexed.\n- `meilisearchClient()` from `fumadocs-core/search/client/meilisearch` searches from the browser with `useDocsSearch()`, filtered by tag and locale.\n\n```tsx\nconst client = new Meilisearch({ host, apiKey: searchKey });\n\nuseDocsSearch({\n  client: meilisearchClient({ client, indexName: 'docs', locale }),\n});\n```\n\nSet it up with `npx @fumadocs/cli feature search --provider meilisearch`, or choose it in `create-fumadocs-app`.\n\nFix [#3627](https://github.com/fuma-nama/fumadocs/issues/3627)\n"
+    filename: 2026-10-01-meilisearch.md
+    v: 0.0.0
+  - content: "---\npackages:\n  \"@fumadocs/cli\":\n    type: patch\n  create-fumadocs-app:\n    type: patch\n---\n\n### Simpler search sync setup\n\n- `feature search` writes the path of the pre-rendered `static.json` into `scripts/sync-content.ts`, and the `build` script runs it without arguments.\n- On TanStack Start, the path follows the Nitro output: `.output/public`, `.vercel/output/static` with the `vercel` preset, or `dist/client` without Nitro.\n- Typesense documents are built in the `static.json` route, without a separate `lib/export-search-indexes.ts`.\n"
+    filename: 2026-10-01-search-sync-script.md
+    v: 0.0.0
+  - content: "---\npackages:\n  fumadocs-openapi:\n    type: patch\n  \"@fumadocs/language\":\n    type: patch\n---\n\n### Download response bodies from the playground\n\nThe result panel of the API playground has a **Download** button for non-empty responses. The file is named from the `Content-Disposition` header, preferring `filename*` and without directories, otherwise `response`, which browsers complete with the extension of the media type.\n\nFor the browser to read `Content-Disposition`, cross-origin APIs have to list it in `Access-Control-Expose-Headers`, or be requested through the proxy.\n\nFix [#3625](https://github.com/fuma-nama/fumadocs/issues/3625)\n"
+    filename: 2026-09-30-openapi-download-response.md
+    v: 0.0.0
+  - content: "---\npackages:\n  fumadocs-mdx:\n    type: patch\n---\n\n### Keep collection `dir` outside the project in file paths\n\nWhen a collection's `dir` was outside the project (e.g. `../content/docs`), the leading `../` was dropped from `info.fullPath` and `absolutePath`, so `getText('raw')` failed with `ENOENT`.\n\nFix [#3623](https://github.com/fuma-nama/fumadocs/issues/3623)\n"
+    filename: 2026-09-30-mdx-outside-dir.md
+    v: 0.0.0
+  - content: "---\npackages:\n  fumadocs-openapi:\n    type: patch\n---\n\n### Send OAuth client credentials as HTTP Basic by default\n\nToken requests of the playground default to **Send as Basic Auth header**, which RFC 6749 requires authorization servers to support.\n\n- The authorization code flow has the **Client Authentication** selector too, it always sent the client credentials in the body.\n- The password flow no longer requires client credentials with either method.\n- Without a client secret, the `client_id` is sent in the body instead, as public clients do.\n\nFix [#3629](https://github.com/fuma-nama/fumadocs/issues/3629)\n"
+    filename: 2026-10-01-openapi-oauth-basic-default.md
     v: 0.0.0
 core:packages:
   - id: npm:@fumadocs/asyncapi
     updated: false
-  - changelogIds:
-      - 2026-09-29-view-markdown-base-path.md
-    id: npm:@fumadocs/base-ui
+  - id: npm:@fumadocs/base-ui
     updated: true
-  - id: npm:@fumadocs/cli
-    updated: false
+  - changelogIds:
+      - 2026-10-01-meilisearch.md
+      - 2026-10-01-search-sync-script.md
+    id: npm:@fumadocs/cli
+    updated: true
   - id: npm:@fumadocs/content
     updated: false
   - id: npm:@fumadocs/basehub
     updated: false
   - id: npm:@fumadocs/content-collections
     updated: false
-  - id: npm:fumadocs-core
-    updated: true
-  - id: npm:create-fumadocs-app
+  - changelogIds:
+      - 2026-10-01-meilisearch.md
+      - 2026-10-01-search-sync-script.md
+    id: npm:create-fumadocs-app
     updated: true
   - id: npm:create-fumadocs-versions
+    updated: true
+  - changelogIds:
+      - 2026-10-01-meilisearch.md
+    id: npm:fumadocs-core
     updated: true
   - id: npm:fumadocs-docgen
     updated: false
@@ -31,17 +49,21 @@ core:packages:
     updated: false
   - id: npm:@fumari/image-size
     updated: false
-  - id: npm:@fumadocs/language
-    updated: false
   - id: npm:@fumadocs/json-schema
     updated: false
+  - changelogIds:
+      - 2026-09-30-openapi-download-response.md
+    id: npm:@fumadocs/language
+    updated: true
   - id: npm:@fumadocs/local-html
-    updated: false
-  - id: npm:@fumadocs/local-content
     updated: false
   - id: npm:@fumadocs/local-md
     updated: false
-  - id: npm:fumadocs-mdx
+  - changelogIds:
+      - 2026-09-30-mdx-outside-dir.md
+    id: npm:fumadocs-mdx
+    updated: true
+  - id: npm:@fumadocs/local-content
     updated: false
   - id: npm:@fumadocs/notion
     updated: false
@@ -49,15 +71,16 @@ core:packages:
     updated: false
   - id: npm:fumadocs-obsidian
     updated: false
+  - changelogIds:
+      - 2026-09-30-openapi-download-response.md
+      - 2026-10-01-openapi-oauth-basic-default.md
+    id: npm:fumadocs-openapi
+    updated: true
   - id: npm:fumadocs-preview
-    updated: false
-  - id: npm:fumadocs-openapi
     updated: false
   - id: npm:fumadocs-python
     updated: false
-  - changelogIds:
-      - 2026-09-29-view-markdown-base-path.md
-    id: npm:fumadocs-ui
+  - id: npm:fumadocs-ui
     updated: true
   - id: npm:@fumadocs/sanity
     updated: false
@@ -65,9 +88,9 @@ core:packages:
     updated: false
   - id: npm:@fumadocs/shadcn
     updated: false
-  - id: npm:@fumari/stf
-    updated: false
   - id: npm:shared-api
+    updated: false
+  - id: npm:@fumari/stf
     updated: false
   - id: npm:@fumadocs/story
     updated: false
@@ -86,64 +109,64 @@ npm:packages:
   - id: npm:@fumadocs/content
   - id: npm:@fumadocs/basehub
   - id: npm:@fumadocs/content-collections
-  - id: npm:fumadocs-core
   - id: npm:create-fumadocs-app
   - id: npm:create-fumadocs-versions
+  - id: npm:fumadocs-core
   - id: npm:fumadocs-docgen
   - id: npm:fumadocs-epub
   - id: npm:@fumadocs/graphql
   - id: npm:@fumari/image-size
-  - id: npm:@fumadocs/language
   - id: npm:@fumadocs/json-schema
+  - id: npm:@fumadocs/language
   - id: npm:@fumadocs/local-html
-  - id: npm:@fumadocs/local-content
   - id: npm:@fumadocs/local-md
   - id: npm:fumadocs-mdx
+  - id: npm:@fumadocs/local-content
   - id: npm:@fumadocs/notion
   - id: npm:@fumadocs/mdx-remote
   - id: npm:fumadocs-obsidian
-  - id: npm:fumadocs-preview
   - id: npm:fumadocs-openapi
+  - id: npm:fumadocs-preview
   - id: npm:fumadocs-python
   - id: npm:fumadocs-ui
   - id: npm:@fumadocs/sanity
   - id: npm:@fumadocs/satteri
   - id: npm:@fumadocs/shadcn
-  - id: npm:@fumari/stf
   - id: npm:shared-api
+  - id: npm:@fumari/stf
   - id: npm:@fumadocs/story
   - id: npm:@fumadocs/tailwind
   - id: npm:fumadocs-twoslash
   - id: npm:fumadocs-typescript
   - id: npm:@fumadocs/vite
   - id: npm:docs
-  - id: npm:example-astro
   - id: npm:example-asyncapi
   - id: npm:example-base-ui
-  - id: npm:example-content-collections
   - id: npm:example-graphql
   - id: npm:example-i18n
-  - id: npm:example-marble-cms
   - id: npm:example-next
-  - id: npm:example-next-local-html
-  - id: npm:example-next-local-md
   - id: npm:example-next-min
-  - id: npm:example-next-static
-  - id: npm:example-obsidian
-  - id: npm:example-openapi
-  - id: npm:example-python
-  - id: npm:example-react-router
-  - id: npm:example-react-router-i18n
-  - id: npm:example-react-router-min
-  - id: npm:example-react-router-spa
   - id: npm:example-next-shadcn
+  - id: npm:example-next-static
+  - id: npm:example-openapi
+  - id: npm:example-react-router-i18n
+  - id: npm:example-react-router
+  - id: npm:example-react-router-min
   - id: npm:example-react-router-rsc
+  - id: npm:example-react-router-spa
   - id: npm:example-tanstack-start
   - id: npm:example-tanstack-start-i18n
-  - id: npm:example-tanstack-start-local-md
   - id: npm:example-tanstack-start-min
   - id: npm:example-tanstack-start-openapi
   - id: npm:example-tanstack-start-spa
   - id: npm:example-tanstack-start-story
-  - id: npm:example-waku-i18n
   - id: npm:example-waku
+  - id: npm:example-waku-i18n
+  - id: npm:example-astro
+  - id: npm:example-content-collections
+  - id: npm:example-marble-cms
+  - id: npm:example-next-local-html
+  - id: npm:example-next-local-md
+  - id: npm:example-obsidian
+  - id: npm:example-python
+  - id: npm:example-tanstack-start-local-md

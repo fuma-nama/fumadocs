@@ -1,3 +1,23 @@
+## fumadocs-openapi@12.1.1
+
+### Download response bodies from the playground
+
+The result panel of the API playground has a **Download** button for non-empty responses. The file is named from the `Content-Disposition` header, preferring `filename*` and without directories, otherwise `response`, which browsers complete with the extension of the media type.
+
+For the browser to read `Content-Disposition`, cross-origin APIs have to list it in `Access-Control-Expose-Headers`, or be requested through the proxy.
+
+Fix [#3625](https://github.com/fuma-nama/fumadocs/issues/3625)
+
+### Send OAuth client credentials as HTTP Basic by default
+
+Token requests of the playground default to **Send as Basic Auth header**, which RFC 6749 requires authorization servers to support.
+
+- The authorization code flow has the **Client Authentication** selector too, it always sent the client credentials in the body.
+- The password flow no longer requires client credentials with either method.
+- Without a client secret, the `client_id` is sent in the body instead, as public clients do.
+
+Fix [#3629](https://github.com/fuma-nama/fumadocs/issues/3629)
+
 ## fumadocs-openapi@12.1.0
 
 ### Render security scheme descriptions as Markdown in the playground
