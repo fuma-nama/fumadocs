@@ -9,6 +9,10 @@ export default defineConfig({
   format: 'esm',
   target: 'es2023',
   platform: 'browser',
+  // rolldown inlines it on browser platform, leave it to the app's bundler
+  define: {
+    'process.env.NODE_ENV': 'process.env.NODE_ENV',
+  },
   entry: [
     './src/*.{ts,tsx}',
     './src/{components,contexts,provider,tailwind,og}/**/*.{ts,tsx}',
