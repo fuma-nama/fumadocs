@@ -53,10 +53,12 @@ export function fileGenerator({
       if (trim) value = value.trim();
 
       if (codeblock === false) {
-        return {
-          type: 'paragraph',
-          children: [{ type: 'text', value }],
-        } as Paragraph;
+        const paragraphs: Paragraph[] = [];
+        for (const block of value.split(/\r?\n\s*\n/)) {
+          if (block)
+            paragraphs.push({ type: 'paragraph', children: [{ type: 'text', value: block }] });
+        }
+        return paragraphs;
       }
 
       const codeOptions = codeblock === true ? {} : codeblock;
