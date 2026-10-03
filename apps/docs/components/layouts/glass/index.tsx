@@ -1,6 +1,6 @@
 import { baseOptions, linkItems, logo } from '@/components/layouts/shared';
 import { source } from '@/lib/source';
-import { AISearch, AISearchPanel } from '@/components/inkeep/search';
+import { AISearch } from '@/components/inkeep/search';
 import { getSection } from '@/lib/source/navigation';
 import type { CSSProperties, ReactNode } from 'react';
 import { getLayoutTabs } from 'fumadocs-ui/layouts/shared';
@@ -52,7 +52,6 @@ export function Glass({ children }: { children: ReactNode }) {
         }}
         tabs={tabs}
       >
-        <AISearchPanel />
         {children}
       </ClientGlassLayout>
     </AISearch>

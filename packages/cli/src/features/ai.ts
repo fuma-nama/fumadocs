@@ -1,7 +1,7 @@
 import path from 'node:path';
+import type { ImportDeclaration } from 'oxc-parser';
 import type { Feature, FeatureContext } from '@/features';
 import { findSource } from './utils';
-import { addImport, findJsxElement, prependJsxChildren } from '@/codemod';
 import { docs } from './docs';
 
 const providers = {
@@ -38,51 +38,103 @@ export const ai: Feature<{ provider: AIProvider }> = {
     ctx.env(providers[provider].env, '');
     if (ctx.project.source.dynamic) await readDynamicSource(ctx);
 
-    const { cwd, baseDir, info } = ctx.project;
+    const { cwd, baseDir, info, config } = ctx.project;
     const layout = await findSource(cwd, path.join(baseDir, info.routesDir), '<DocsLayout');
-    const edited =
-      layout !== undefined &&
-      (await ctx.source(layout, (file) => {
-        if (file.code.includes('<AISearch')) return;
-        const element = findJsxElement(file, 'DocsLayout');
-        if (!element) return;
+    let layoutModule: string | undefined;
+    let wired = false;
 
-        prependJsxChildren(
-          file,
-          element,
-          `<AISearch>
-  <AISearchPanel />
-  <AISearchTrigger
-    position="float"
-    className={cn(
-      buttonVariants({
-        variant: 'secondary',
-        className: 'text-fd-muted-foreground rounded-2xl',
-      }),
-    )}
-  >
-    <MessageCircleIcon className="size-4.5" />
-    Ask AI
-  </AISearchTrigger>
-</AISearch>`,
+    if (layout !== undefined) {
+      await ctx.source(layout, (file) => {
+        wired = file.code.includes(`'${clientLayoutImport}'`);
+        // `aiChat` takes client state, render the layout from a client component
+        const declaration =
+          !wired &&
+          file.program.body.find(
+            (node): node is ImportDeclaration =>
+              node.type === 'ImportDeclaration' &&
+              node.importKind !== 'type' &&
+              /^fumadocs-ui\/layouts\/(docs|notebook|glass|spacious)$/.test(node.source.value) &&
+              node.specifiers.length === 1 &&
+              node.specifiers[0].local.name === 'DocsLayout',
+          );
+        if (!declaration) return;
+
+        layoutModule = declaration.source.value;
+        file.s.overwrite(
+          declaration.source.start,
+          declaration.source.end,
+          `'${clientLayoutImport}'`,
         );
-        addImport(file, {
-          from: '@/components/ai/search',
-          named: ['AISearch', 'AISearchPanel', 'AISearchTrigger'],
-        });
-        addImport(file, { from: 'lucide-react', named: ['MessageCircleIcon'] });
-        addImport(file, { from: '@/lib/cn', named: ['cn'] });
-        addImport(file, { from: 'fumadocs-ui/components/ui/button', named: ['buttonVariants'] });
-      }));
+      });
+    }
 
-    if (!edited) {
+    if (layoutModule) {
+      await ctx.write(
+        path.join(baseDir, config.aliases.componentsDir, 'ai/layout.tsx'),
+        clientLayout(layoutModule),
+      );
+    } else if (!wired) {
       ctx.note(
-        'Add `<AISearch>` from `@/components/ai/search` to your docs layout, see https://fumadocs.dev/docs/integrations/llms#ask-ai.',
+        'Pass the AI chat to your docs layout, see https://fumadocs.dev/docs/integrations/llms#ask-ai.',
       );
     }
     ctx.note(`Set ${providers[provider].env} in \`.env.local\`.`);
   },
 };
+
+const clientLayoutImport = '@/components/ai/layout';
+
+const floatingTrigger = `
+      <AISearchTrigger
+        position="float"
+        className={cn(
+          buttonVariants({
+            variant: 'secondary',
+            className: 'text-fd-muted-foreground rounded-2xl',
+          }),
+        )}
+      >
+        <MessageCircleIcon className="size-4.5" />
+        Ask AI
+      </AISearchTrigger>`;
+
+/** a client component rendering the docs layout with the installed chat */
+function clientLayout(layoutModule: string) {
+  // Glass and Spacious layouts have their own trigger
+  const trigger = /\/(docs|notebook)$/.test(layoutModule);
+
+  return `'use client';
+import { DocsLayout as Layout, type DocsLayoutProps } from '${layoutModule}';
+${
+  trigger
+    ? `import { buttonVariants } from 'fumadocs-ui/components/ui/button';
+import { MessageCircleIcon } from 'lucide-react';
+import { cn } from '@/lib/cn';
+`
+    : ''
+}import {
+  AISearch,
+  AISearchPanel,${trigger ? '\n  AISearchTrigger,' : ''}
+  useAISearchContext,
+  useHotKey,
+} from './search';
+
+export function DocsLayout(props: DocsLayoutProps) {
+  return (
+    <AISearch>
+      <ChatLayout {...props} />${trigger ? floatingTrigger : ''}
+    </AISearch>
+  );
+}
+
+function ChatLayout(props: DocsLayoutProps) {
+  const { open, setOpen } = useAISearchContext();
+  useHotKey();
+
+  return <Layout {...props} aiChat={{ open, onOpenChange: setOpen, panel: <AISearchPanel /> }} />;
+}
+`;
+}
 
 /** the installed chat route indexes pages of a static `source`, runtime sources resolve on demand */
 async function readDynamicSource(ctx: FeatureContext) {

@@ -1,16 +1,31 @@
 'use client';
 import { Popover } from '@base-ui/react/popover';
+import { type TOCItemInfo, useTOCSelector } from 'fumadocs-core/toc';
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import * as Base from '@/components/toc';
 import * as TocDefault from '@/components/toc/default';
 import * as TocClerk from '@/components/toc/clerk';
 import * as TocBlock from '@/components/toc/block';
-import { useTreePath } from '@/contexts/tree';
 import { cn } from '@/utils/cn';
 import { useTranslations } from '@fuma-translate/react';
 import { ChevronDownIcon, TextIcon } from 'lucide-react';
-import { type ComponentProps, type ReactNode, useState } from 'react';
+import {
+  type ComponentProps,
+  type CSSProperties,
+  type ReactNode,
+  useEffect,
+  useLayoutEffect,
+  useRef,
+  useState,
+} from 'react';
+import { useTreePath } from '@/contexts/tree';
 
 const variants = { normal: TocDefault, clerk: TocClerk, block: TocBlock };
+
+// selectors to re-render only when the value changes
+const selectTopmost = (items: TOCItemInfo[]) => items.find((item) => item.active)?.original;
+const selectProgress = (items: TOCItemInfo[]) =>
+  (items.findLastIndex((item) => item.active) + 1) / Math.max(1, items.length);
 
 export type TOCProviderProps = Base.TOCProviderProps;
 
@@ -23,8 +38,7 @@ type TOCStyle =
   | { style: 'normal'; list?: TocDefault.TOCItemsProps }
   | { style: 'clerk'; list?: TocClerk.TOCItemsProps };
 
-export type TOCProps = {
-  container?: ComponentProps<'div'>;
+type TOCContent = {
   /**
    * Custom content in TOC container, before the main TOC
    */
@@ -35,10 +49,11 @@ export type TOCProps = {
   footer?: ReactNode;
 } & TOCStyle;
 
-export function TOC({ container, header, footer, style = 'block', list }: TOCProps) {
+export type TOCProps = TOCContent & { container?: ComponentProps<'div'> };
+
+export function TOC({ container, header, footer, ...props }: TOCProps) {
   const t = useTranslations({ note: 'table of contents' });
   const items = Base.useTOCItems();
-  const { TOCItems, TOCItem } = variants[style];
   if (items.length === 0 && !header && !footer) return;
 
   return (
@@ -46,7 +61,11 @@ export function TOC({ container, header, footer, style = 'block', list }: TOCPro
       id="nd-toc"
       {...container}
       className={cn(
-        'sticky top-12 flex flex-col w-60 shrink-0 h-[calc(var(--fd-layout-height)-var(--spacing)*16-2px)] pt-10 pb-4 max-xl:hidden',
+        'sticky top-0 flex flex-col w-60 shrink-0 h-[calc(var(--fd-layout-height)-var(--spacing)*18-2px)] pt-6 pb-4 overflow-clip *:min-w-60 transition-[opacity,visibility] duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] motion-reduce:transition-none max-md:hidden',
+        // collapse on narrower panel, not animated as some browsers (e.g. Firefox) resolve container queries after the initial render
+        '@max-[62rem]:invisible @max-[62rem]:w-0 @max-[62rem]:-ms-16 @max-[62rem]:opacity-0 @max-[62rem]:not-in-data-[ai-chat]:transition-none',
+        // or along with the panel when opening AI chat, before it squeezes the content
+        'in-data-[ai-chat]:invisible in-data-[ai-chat]:w-0 in-data-[ai-chat]:-ms-16 in-data-[ai-chat]:opacity-0',
         container?.className,
       )}
     >
@@ -55,39 +74,94 @@ export function TOC({ container, header, footer, style = 'block', list }: TOCPro
         <TextIcon className="size-4" />
         {t('On this page')}
       </h3>
-      <Base.TOCScrollArea>
-        <TOCItems {...list}>
-          {items.map((item) => (
-            <TOCItem key={item.url} item={item} />
-          ))}
-        </TOCItems>
-      </Base.TOCScrollArea>
+      <TOCList {...props} />
       {footer}
     </div>
   );
 }
 
-export type TOCPopoverProps = {
+export type TOCDropdownProps = TOCContent & {
   trigger?: ComponentProps<'button'>;
   content?: ComponentProps<'div'>;
-  header?: ReactNode;
-  footer?: ReactNode;
-} & TOCStyle;
+};
 
+export type TOCPopoverProps = TOCDropdownProps & { container?: ComponentProps<'div'> };
+
+/** the TOC bar for mobile */
 export function TOCPopover({
+  container,
   trigger,
   content,
   header,
   footer,
-  style = 'block',
-  list,
+  ...props
 }: TOCPopoverProps) {
   const t = useTranslations({ note: 'table of contents' });
-  const items = Base.useItems();
+  const items = Base.useTOCItems();
   const page = useTreePath().at(-1);
+  const ref = useRef<HTMLElement>(null);
   const [open, setOpen] = useState(false);
-  const { TOCItems, TOCItem } = variants[style];
-  const active = items.findLast((item) => item.active);
+
+  useEffect(() => {
+    if (!open) return;
+    const onClick = (e: MouseEvent) => {
+      if (e.target instanceof Node && !ref.current?.contains(e.target)) setOpen(false);
+    };
+
+    window.addEventListener('click', onClick);
+    return () => window.removeEventListener('click', onClick);
+  }, [open]);
+
+  if (items.length === 0 && !header && !footer) return;
+  return (
+    <Collapsible
+      open={open}
+      onOpenChange={setOpen}
+      {...container}
+      // expand over the content below
+      className={cn('sticky top-14 z-10 h-10 md:hidden', container?.className)}
+    >
+      <header
+        ref={ref}
+        className={cn(
+          'border-b bg-fd-background/80 backdrop-blur-sm transition-shadow',
+          open && 'shadow-lg',
+        )}
+      >
+        <CollapsibleTrigger
+          {...trigger}
+          className={cn(
+            'flex w-full h-10 items-center gap-2.5 px-4 text-start text-sm text-fd-muted-foreground focus-visible:outline-none',
+            trigger?.className,
+          )}
+        >
+          <TOCProgress size={18} className={cn('shrink-0', open && 'text-fd-primary')} />
+          {/* the page title is no longer visible after scrolling */}
+          <ActiveHeading
+            fallback={page?.name ?? t('On this page')}
+            className={cn('flex-1 transition-colors', open && 'text-fd-foreground')}
+          />
+          <ChevronDownIcon
+            className={cn('size-4 shrink-0 mx-0.5 transition-transform', open && 'rotate-180')}
+          />
+        </CollapsibleTrigger>
+        <CollapsibleContent {...content}>
+          <div className="flex flex-col px-4 max-h-[50vh]">
+            {header}
+            <TOCList {...props} onSelect={() => setOpen(false)} />
+            {footer}
+          </div>
+        </CollapsibleContent>
+      </header>
+    </Collapsible>
+  );
+}
+
+/** the TOC dropdown for page header */
+export function TOCDropdown({ trigger, content, header, footer, ...props }: TOCDropdownProps) {
+  const t = useTranslations({ note: 'table of contents' });
+  const items = Base.useTOCItems();
+  const [open, setOpen] = useState(false);
   if (items.length === 0 && !header && !footer) return;
 
   return (
@@ -95,61 +169,30 @@ export function TOCPopover({
       <Popover.Trigger
         {...trigger}
         className={cn(
-          'flex items-center gap-2.5 min-w-0 h-8 px-2 -mx-2 rounded-lg text-start text-sm text-fd-muted-foreground transition-colors hover:bg-fd-accent/60 hover:text-fd-accent-foreground data-popup-open:bg-fd-accent data-popup-open:text-fd-accent-foreground',
+          'flex items-center gap-2 min-w-0 h-8 px-1.5 -mx-1.5 rounded-lg text-start text-sm text-fd-muted-foreground transition-colors hover:bg-fd-accent/60 hover:text-fd-accent-foreground data-popup-open:bg-fd-accent data-popup-open:text-fd-accent-foreground',
           trigger?.className,
         )}
       >
-        <ProgressCircle
-          value={(items.findLastIndex((item) => item.active) + 1) / Math.max(1, items.length)}
-          className="shrink-0"
+        <TOCProgress className="shrink-0" />
+        <ActiveHeading
+          fallback={t('On this page')}
+          className="data-[active=true]:text-fd-foreground"
         />
-        <span className="grid min-w-0 *:col-start-1 *:row-start-1 *:truncate">
-          <span
-            className={cn(
-              'transition-[opacity,translate] duration-300',
-              active && 'opacity-0 -translate-y-2',
-            )}
-          >
-            {page?.name ?? t('On this page')}
-          </span>
-          <span
-            className={cn(
-              'text-fd-foreground transition-[opacity,translate] duration-300',
-              !active && 'opacity-0 translate-y-2',
-            )}
-          >
-            {active?.original.title}
-          </span>
-        </span>
-        <ChevronDownIcon className="size-3.5 shrink-0" />
+        <ChevronDownIcon
+          className={cn('size-3.5 shrink-0 transition-transform', open && 'rotate-180')}
+        />
       </Popover.Trigger>
       <Popover.Portal>
-        <Popover.Positioner
-          side="bottom"
-          align="start"
-          sideOffset={8}
-          positionMethod="fixed"
-          className="z-50"
-        >
+        <Popover.Positioner align="start" sideOffset={8} positionMethod="fixed" className="z-50">
           <Popover.Popup
             {...content}
             className={cn(
-              'flex flex-col w-[min(22rem,calc(100vw-1rem))] max-h-[min(28rem,var(--available-height))] p-3 rounded-2xl border bg-fd-popover text-fd-popover-foreground shadow-xl outline-none origin-(--transform-origin) transition-[opacity,scale] duration-200 ease-[cubic-bezier(0.32,0.72,0,1)] data-starting-style:opacity-0 data-starting-style:scale-95 data-ending-style:opacity-0 data-ending-style:scale-95',
+              'flex flex-col w-[min(22rem,calc(100vw-1rem))] max-h-[min(28rem,var(--available-height))] p-3 rounded-2xl border bg-fd-popover text-fd-popover-foreground shadow-xl outline-none origin-(--transform-origin) transition-[opacity,scale] duration-150 ease-[cubic-bezier(0.22,1,0.36,1)] data-starting-style:opacity-0 data-starting-style:scale-95 data-ending-style:opacity-0 data-ending-style:scale-95 motion-reduce:transition-none',
               content?.className,
             )}
           >
             {header}
-            <Base.TOCScrollArea className="py-1">
-              <TOCItems {...list}>
-                {items.map((item) => (
-                  <TOCItem
-                    key={item.original.url}
-                    item={item.original}
-                    onClick={() => setOpen(false)}
-                  />
-                ))}
-              </TOCItems>
-            </Base.TOCScrollArea>
+            <TOCList {...props} className="py-1" onSelect={() => setOpen(false)} />
             {footer}
           </Popover.Popup>
         </Popover.Positioner>
@@ -158,10 +201,97 @@ export function TOCPopover({
   );
 }
 
-function ProgressCircle({ value, ...props }: ComponentProps<'svg'> & { value: number }) {
-  const size = 16;
-  const radius = size / 2 - 1.5;
-  const circumference = 2 * Math.PI * radius;
+function TOCList({
+  style = 'block',
+  list,
+  className,
+  onSelect,
+}: TOCStyle & { className?: string; onSelect?: () => void }) {
+  const items = Base.useTOCItems();
+  const { TOCItems, TOCItem } = variants[style];
+
+  return (
+    <Base.TOCScrollArea className={className}>
+      <TOCItems {...list}>
+        {items.map((item) => (
+          <TOCItem key={item.url} item={item} onClick={onSelect} />
+        ))}
+      </TOCItems>
+    </Base.TOCScrollArea>
+  );
+}
+
+/**
+ * The active heading, settled so fast scrolling won't flicker it.
+ */
+function ActiveHeading({ fallback, className }: { fallback: ReactNode; className?: string }) {
+  const items = Base.useTOCItems();
+  const active = useTOCSelector(selectTopmost);
+  const [shown, setShown] = useState({ item: active, roll: 1 });
+  const ref = useRef<HTMLSpanElement>(null);
+  const width = useRef(0);
+  const pendingSince = useRef<number | null>(null);
+
+  useEffect(() => {
+    if (active === shown.item) {
+      pendingSince.current = null;
+      return;
+    }
+
+    // wait 150ms to settle, but don't hold it for over 600ms during a long scroll
+    pendingSince.current ??= performance.now();
+    const delay = Math.min(150, pendingSince.current + 600 - performance.now());
+    const timer = window.setTimeout(() => {
+      pendingSince.current = null;
+      // the visible width before swapping, it can be in the middle of a glide
+      width.current = ref.current?.offsetWidth ?? 0;
+      // roll in from the direction of scrolling
+      const roll = items.indexOf(active!) >= items.indexOf(shown.item!) ? 1 : -1;
+      setShown({ item: active, roll });
+    }, delay);
+    return () => window.clearTimeout(timer);
+  }, [items, active, shown]);
+
+  // glide to the width of new heading
+  useLayoutEffect(() => {
+    const element = ref.current;
+    const from = width.current;
+    if (!element || from === 0) return;
+    for (const animation of element.getAnimations()) animation.cancel();
+    element.removeAttribute('data-gliding');
+    const to = element.offsetWidth;
+    if (from === to || matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+
+    // clip instead of ellipsis while gliding
+    element.setAttribute('data-gliding', '');
+    element.animate([{ width: `${from}px` }, { width: `${to}px` }], {
+      duration: 320,
+      easing: 'cubic-bezier(0.22, 1, 0.36, 1)',
+    }).onfinish = () => element.removeAttribute('data-gliding');
+  }, [shown]);
+
+  return (
+    <span
+      ref={ref}
+      data-active={shown.item !== undefined}
+      className={cn('flex min-w-0 overflow-hidden', className)}
+    >
+      <span
+        key={shown.item?.url}
+        className="truncate in-data-gliding:text-clip motion-safe:animate-fd-roll-in"
+        style={{ '--fd-roll': shown.roll } as CSSProperties}
+      >
+        {shown.item ? shown.item.title : fallback}
+      </span>
+    </span>
+  );
+}
+
+/** the reading progress of page */
+function TOCProgress({ size = 16, ...props }: ComponentProps<'svg'> & { size?: number }) {
+  const value = useTOCSelector(selectProgress);
+  const circle = { cx: size / 2, cy: size / 2, r: size / 2 - 1.5, fill: 'none', strokeWidth: 1.5 };
+  const circumference = 2 * Math.PI * circle.r;
 
   return (
     <svg
@@ -174,25 +304,14 @@ function ProgressCircle({ value, ...props }: ComponentProps<'svg'> & { value: nu
       aria-valuemax={1}
       {...props}
     >
+      <circle {...circle} className="stroke-current/25" />
       <circle
-        cx={size / 2}
-        cy={size / 2}
-        r={radius}
-        fill="none"
-        strokeWidth={1.5}
-        className="stroke-current/25"
-      />
-      <circle
-        cx={size / 2}
-        cy={size / 2}
-        r={radius}
-        fill="none"
-        strokeWidth={1.5}
+        {...circle}
         stroke="currentColor"
         strokeLinecap="round"
         strokeDasharray={circumference}
         strokeDashoffset={circumference * (1 - value)}
-        transform={`rotate(-90 ${size / 2} ${size / 2})`}
+        transform={`rotate(-90 ${circle.cx} ${circle.cy})`}
         className="transition-[stroke-dashoffset] duration-300"
       />
     </svg>

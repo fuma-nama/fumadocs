@@ -106,8 +106,8 @@
     "./layouts/spacious/page/slots/breadcrumb": "./dist/layouts/spacious/page/slots/breadcrumb.js",
     "./layouts/spacious/page/slots/footer": "./dist/layouts/spacious/page/slots/footer.js",
     "./layouts/spacious/page/slots/toc": "./dist/layouts/spacious/page/slots/toc.js",
+    "./layouts/spacious/slots/actions": "./dist/layouts/spacious/slots/actions.js",
     "./layouts/spacious/slots/header": "./dist/layouts/spacious/slots/header.js",
-    "./layouts/spacious/slots/menu": "./dist/layouts/spacious/slots/menu.js",
     "./layouts/spacious/slots/sidebar": "./dist/layouts/spacious/slots/sidebar.js",
     "./mdx": {
       "types": "./dist/mdx.d.ts",

@@ -1,168 +1,240 @@
 'use client';
-import { Drawer } from '@base-ui/react/drawer';
+import { Menu } from '@base-ui/react/menu';
 import { ScrollArea } from '@base-ui/react/scroll-area';
-import { MessageCircleIcon, SidebarIcon, XIcon } from 'lucide-react';
-import type { ComponentProps, ReactNode } from 'react';
+import { usePathname } from 'fumadocs-core/framework';
+import Link from 'fumadocs-core/link';
+import {
+  CheckIcon,
+  ChevronsUpDownIcon,
+  LanguagesIcon,
+  MessageCircleIcon,
+  SidebarIcon,
+} from 'lucide-react';
+import type { ComponentProps } from 'react';
 import { useTranslations } from '@fuma-translate/react';
 import * as Base from '@/components/sidebar/base';
 import { createPageTreeRenderer } from '@/components/sidebar/page-tree';
 import { createLinkItemRenderer } from '@/components/sidebar/link-item';
 import { buttonVariants } from '@/components/ui/button';
+import { useTabsGroups, useTreePath } from '@/contexts/tree';
+import { isLayoutTabActive, type LayoutTab, LinkItem } from '@/layouts/shared';
 import { cn } from '@/utils/cn';
 import { useSpaciousLayout } from '..';
-import { SiteMenu } from './menu';
 
 export type SidebarProviderProps = Base.SidebarProviderProps;
 export type SidebarProps = ComponentProps<'aside'>;
 
-/** the hover fill comes from `HoverArea` */
+/** the hover fill comes from the gliding block of `SidebarItems` */
 const itemClass =
-  'relative flex w-full items-center gap-2.5 rounded-lg px-2 py-1.5 text-start text-fd-muted-foreground wrap-anywhere outline-none transition-colors focus-visible:ring-2 focus-visible:ring-fd-ring hover:not-data-[active=true]:text-fd-accent-foreground data-[active=true]:bg-fd-primary/10 data-[active=true]:text-fd-primary [&_svg]:size-4 [&_svg]:shrink-0';
+  'relative flex w-full items-center gap-3 rounded-lg px-2.5 py-2 text-start text-fd-muted-foreground wrap-anywhere outline-none transition-colors focus-visible:ring-2 focus-visible:ring-fd-ring hover:not-data-[active=true]:text-fd-accent-foreground data-[active=true]:bg-fd-primary/10 data-[active=true]:text-fd-primary [&_svg]:size-4 [&_svg]:shrink-0';
 
 /** highlight the guide line next to an active nested item */
 const nestedItemClass =
-  "data-[active=true]:before:content-[''] data-[active=true]:before:absolute data-[active=true]:before:-start-1 data-[active=true]:before:inset-y-1.5 data-[active=true]:before:w-px data-[active=true]:before:bg-fd-primary";
-
-/** fade out when collapsed into a rail */
-const railHidden = 'transition-opacity duration-200 group-data-[collapsed=true]/sidebar:opacity-0';
-
-/** shrink into an icon button when collapsed into a rail */
-const railItemClass = cn(
-  itemClass,
-  'overflow-hidden whitespace-nowrap transition-[width,color,background-color] hover:bg-fd-accent/60 group-data-[collapsed=true]/sidebar:w-8',
-);
+  "data-[active=true]:before:content-[''] data-[active=true]:before:absolute data-[active=true]:before:-start-1 data-[active=true]:before:inset-y-2 data-[active=true]:before:w-px data-[active=true]:before:bg-fd-primary";
 
 export function SidebarProvider(props: SidebarProviderProps) {
   return <Base.SidebarProvider {...props} />;
 }
 
 export function Sidebar({ className, ...props }: SidebarProps) {
-  const { collapsed } = Base.useSidebar();
+  const { collapsed, mode } = Base.useSidebar();
   const { slots } = useSpaciousLayout();
+  // the drawer is used instead
+  if (mode !== 'full') return;
 
   return (
     <aside
       id="nd-sidebar"
       data-collapsed={collapsed}
+      inert={collapsed}
       className={cn(
-        'group/sidebar relative [grid-area:sidebar] flex overflow-hidden text-sm max-md:hidden',
+        'group/sidebar [grid-area:sidebar] flex min-h-0 overflow-clip text-sm max-md:hidden',
+        // keep a gutter in place of the collapsed sidebar
         collapsed
-          ? 'md:layout:[--fd-sidebar-width:--spacing(12)]'
+          ? 'md:layout:[--fd-sidebar-width:--spacing(2)]'
           : 'md:layout:[--fd-sidebar-width:268px]',
         className,
       )}
       {...props}
     >
-      <div className="flex flex-col shrink-0 w-[268px]">
-        <div className="flex items-center h-16 ps-4 pe-12">
-          <slots.navTitle
+      <div className="flex flex-col shrink-0 w-[268px] transition-[opacity,translate] duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] group-data-[collapsed=true]/sidebar:-translate-x-3 group-data-[collapsed=true]/sidebar:opacity-0 rtl:group-data-[collapsed=true]/sidebar:translate-x-3 motion-reduce:transition-none">
+        <div className="flex items-center gap-2 h-18 ps-5.5 pe-3">
+          <slots.navTitle className="inline-flex items-center gap-2 min-w-0 me-auto text-[0.9375rem] font-semibold" />
+          <Base.SidebarCollapseTrigger
             className={cn(
-              'inline-flex items-center gap-2 min-w-0 text-[0.9375rem] font-semibold',
-              railHidden,
+              buttonVariants({ variant: 'ghost', size: 'icon-sm' }),
+              'size-8 text-fd-muted-foreground',
             )}
-          />
+          >
+            <SidebarIcon />
+          </Base.SidebarCollapseTrigger>
         </div>
-        <SidebarActions />
-        <SidebarBody
-          inert={collapsed}
-          className="transition-opacity duration-200 group-data-[collapsed=true]/sidebar:opacity-0"
-        />
-        <div className="p-2">
-          <SiteMenu />
+        <div className="flex flex-col gap-2 px-3 empty:hidden">
+          <TabsMenu />
+          {slots.searchTrigger && (
+            <slots.searchTrigger.full
+              hideIfDisabled
+              className="h-10 gap-3 rounded-xl ps-[9px] pe-2 [&_svg]:shrink-0"
+            />
+          )}
         </div>
+        <SidebarViewport />
       </div>
-      <Base.SidebarCollapseTrigger
-        className={cn(
-          buttonVariants({ variant: 'ghost', size: 'icon-sm' }),
-          'absolute top-4 end-2 size-8 text-fd-muted-foreground',
-        )}
-      >
-        <SidebarIcon />
-      </Base.SidebarCollapseTrigger>
     </aside>
   );
 }
 
 export function SidebarDrawer() {
-  const { open, setOpen } = Base.useSidebar();
-  const { slots } = useSpaciousLayout();
-  const t = useTranslations({ note: 'sidebar' });
-
-  return (
-    <Drawer.Root open={open} onOpenChange={setOpen} swipeDirection="left">
-      <Drawer.Portal>
-        <Drawer.Backdrop className="fixed inset-0 z-40 bg-fd-overlay backdrop-blur-xs opacity-[calc(1-var(--drawer-swipe-progress))] transition-opacity duration-450 ease-[cubic-bezier(0.32,0.72,0,1)] data-swiping:duration-0 data-starting-style:opacity-0 data-ending-style:opacity-0 data-ending-style:duration-[calc(var(--drawer-swipe-strength)*400ms)]" />
-        <Drawer.Viewport className="fixed inset-0 z-40 flex">
-          <Drawer.Popup
-            id="nd-sidebar-mobile"
-            className="flex flex-col w-[85vw] max-w-[320px] h-full overflow-y-auto overscroll-contain [scrollbar-width:none] bg-fd-card text-[0.9375rem] border-e shadow-xl outline-none [transform:translateX(var(--drawer-swipe-movement-x))] transition-transform duration-450 ease-[cubic-bezier(0.32,0.72,0,1)] data-swiping:select-none data-swiping:duration-0 data-starting-style:[transform:translateX(-100%)] data-ending-style:[transform:translateX(-100%)] data-ending-style:duration-[calc(var(--drawer-swipe-strength)*400ms)]"
-          >
-            <Drawer.Content className="flex flex-col flex-1">
-              <div className="sticky top-0 z-10 flex items-center h-14 ps-4 pe-2 bg-fd-card">
-                <Drawer.Title
-                  render={
-                    <slots.navTitle className="inline-flex items-center gap-2 min-w-0 me-auto font-semibold" />
-                  }
-                />
-                <Drawer.Close
-                  aria-label={t('Close Sidebar', { note: 'aria-label' })}
-                  className={cn(
-                    buttonVariants({ variant: 'ghost', size: 'icon-sm' }),
-                    'text-fd-muted-foreground',
-                  )}
-                >
-                  <XIcon />
-                </Drawer.Close>
-              </div>
-              <SidebarActions />
-              <div className="flex flex-col flex-1 px-2 pb-4">
-                <SidebarItems />
-              </div>
-              <div className="sticky bottom-0 p-2 bg-fd-card">
-                <SiteMenu />
-              </div>
-            </Drawer.Content>
-          </Drawer.Popup>
-        </Drawer.Viewport>
-      </Drawer.Portal>
-    </Drawer.Root>
-  );
-}
-
-function SidebarActions() {
+  const { setOpen } = Base.useSidebar();
   const {
     slots,
+    menuItems,
     props: { aiChat },
   } = useSpaciousLayout();
   const t = useTranslations({ note: 'AI chat button' });
 
   return (
-    <div className="flex flex-col gap-1.5 px-2 pb-2 empty:hidden">
-      {slots.searchTrigger && (
-        <slots.searchTrigger.full
-          hideIfDisabled
-          className="w-full overflow-hidden whitespace-nowrap ps-[7px] transition-[width,color,background-color] [&_svg]:shrink-0 group-data-[collapsed=true]/sidebar:w-8 group-data-[collapsed=true]/sidebar:text-transparent group-data-[collapsed=true]/sidebar:[&_svg]:text-fd-muted-foreground"
-        />
-      )}
-      {aiChat && (
-        <button
-          type="button"
-          aria-pressed={aiChat.open}
-          className={railItemClass}
-          onClick={() => aiChat.onOpenChange(!aiChat.open)}
-        >
-          <MessageCircleIcon />
-          <span className={railHidden}>{t('Ask AI')}</span>
-        </button>
-      )}
-    </div>
+    <>
+      <Base.SidebarDrawerOverlay className="fixed z-40 inset-0 backdrop-blur-xs data-[state=open]:animate-fd-fade-in data-[state=closed]:animate-fd-fade-out" />
+      <Base.SidebarDrawerContent className="fixed z-40 inset-e-0 inset-y-0 flex flex-col w-[85%] max-w-[380px] text-[0.9375rem] bg-fd-background border-s shadow-lg data-[state=open]:animate-fd-sidebar-in data-[state=closed]:animate-fd-sidebar-out">
+        {/* the close button takes the place of navbar's sidebar trigger */}
+        <div className="flex items-center gap-1.5 h-14 ps-[13px] pe-2.5 text-fd-muted-foreground">
+          <div className="flex flex-1">
+            {menuItems.map(
+              (item, i) =>
+                item.type === 'icon' && (
+                  <LinkItem
+                    key={i}
+                    item={item}
+                    aria-label={item.label}
+                    className={buttonVariants({
+                      variant: 'ghost',
+                      size: 'icon-sm',
+                      className: 'p-2',
+                    })}
+                  >
+                    {item.icon}
+                  </LinkItem>
+                ),
+            )}
+          </div>
+          {slots.languageSelect && (
+            <slots.languageSelect.root>
+              <LanguagesIcon className="size-4.5" />
+              <slots.languageSelect.text />
+            </slots.languageSelect.root>
+          )}
+          {slots.themeSwitch && <slots.themeSwitch className="p-0" />}
+          <Base.SidebarTrigger
+            className={buttonVariants({ variant: 'ghost', size: 'icon-sm', className: 'p-2' })}
+          >
+            <SidebarIcon />
+          </Base.SidebarTrigger>
+        </div>
+        <div className="flex flex-col gap-2 px-3 empty:hidden">
+          <TabsMenu />
+          {aiChat && (
+            <button
+              type="button"
+              className={cn(itemClass, 'hover:bg-fd-accent/60')}
+              onClick={() => {
+                setOpen(false);
+                aiChat.onOpenChange(true);
+              }}
+            >
+              <MessageCircleIcon />
+              {t('Ask AI')}
+            </button>
+          )}
+        </div>
+        <SidebarViewport />
+      </Base.SidebarDrawerContent>
+    </>
   );
 }
 
-function SidebarBody({ className, ...props }: ComponentProps<'div'>) {
+/** switch between layout tabs */
+function TabsMenu() {
+  const {
+    props: { tabs },
+  } = useSpaciousLayout();
+  const t = useTranslations();
+  const pathname = usePathname();
+  const path = useTreePath();
+  const options =
+    useTabsGroups(tabs).findLast((group) => typeof group.active?.root !== 'string')?.options ?? [];
+  const selected = options.findLast((tab) => isLayoutTabActive(tab, path, pathname));
+  if (options.length === 0) return;
+
   return (
-    <ScrollArea.Root className={cn('min-h-0 flex-1', className)} {...props}>
-      <ScrollArea.Viewport className="size-full overscroll-contain px-2 pt-2 pb-6 mask-[linear-gradient(to_bottom,transparent,white_8px,white_calc(100%-24px),transparent)]">
+    <Menu.Root>
+      <Menu.Trigger className="flex w-full h-10 items-center gap-3 rounded-xl border bg-fd-secondary/50 ps-[9px] pe-2.5 text-start font-medium outline-none transition-colors hover:bg-fd-accent focus-visible:ring-2 focus-visible:ring-fd-ring data-popup-open:bg-fd-accent [&_svg]:size-4 [&_svg]:shrink-0">
+        {selected && <TabIcon tab={selected} />}
+        <span className={cn('flex-1 truncate', !selected && 'text-fd-muted-foreground')}>
+          {selected ? selected.title : t('Layout Tab', { note: 'layout tab trigger' })}
+        </span>
+        <ChevronsUpDownIcon className="size-3.5! text-fd-muted-foreground" />
+      </Menu.Trigger>
+      <Menu.Portal>
+        <Menu.Positioner
+          align="start"
+          sideOffset={8}
+          alignOffset={-4}
+          positionMethod="fixed"
+          className="z-50"
+        >
+          <Menu.Popup className="flex flex-col w-[calc(var(--anchor-width)+--spacing(2))] max-h-(--available-height) overflow-y-auto p-1 rounded-2xl border bg-fd-popover text-sm text-fd-popover-foreground shadow-lg outline-none origin-(--transform-origin) transition-[opacity,scale] duration-150 ease-[cubic-bezier(0.22,1,0.36,1)] data-starting-style:opacity-0 data-starting-style:scale-95 data-ending-style:opacity-0 data-ending-style:scale-[0.97] data-ending-style:duration-100 motion-reduce:transition-none">
+            {options.map((tab, i) => {
+              if (tab.unlisted && tab !== selected) return;
+
+              return (
+                <Menu.LinkItem
+                  key={i}
+                  closeOnClick
+                  render={<Link href={tab.url} {...tab.props} />}
+                  className={cn(
+                    'flex w-full min-h-9 items-start gap-3 rounded-lg px-[9px] py-2 text-start outline-none transition-colors duration-100 data-highlighted:bg-fd-accent data-highlighted:text-fd-accent-foreground [&_svg]:size-4 [&_svg]:shrink-0',
+                    tab.props?.className,
+                  )}
+                >
+                  <TabIcon tab={tab} className="mt-0.5" />
+                  <span className="flex flex-col flex-1 min-w-0">
+                    <span className="truncate font-medium">{tab.title}</span>
+                    {tab.description && (
+                      <span className="truncate text-xs text-fd-muted-foreground">
+                        {tab.description}
+                      </span>
+                    )}
+                  </span>
+                  {tab === selected && <CheckIcon className="mt-0.5 text-fd-primary" />}
+                </Menu.LinkItem>
+              );
+            })}
+          </Menu.Popup>
+        </Menu.Positioner>
+      </Menu.Portal>
+    </Menu.Root>
+  );
+}
+
+function TabIcon({ tab, className }: { tab: LayoutTab; className?: string }) {
+  return (
+    <span
+      className={cn(
+        'flex items-center justify-center shrink-0 size-4 font-medium',
+        !tab.icon && 'rounded bg-fd-muted text-[10px] text-fd-muted-foreground',
+        className,
+      )}
+    >
+      {tab.icon ?? (typeof tab.title === 'string' ? tab.title.charAt(0) : null)}
+    </span>
+  );
+}
+
+function SidebarViewport() {
+  return (
+    <ScrollArea.Root className="min-h-0 flex-1 mt-2">
+      <ScrollArea.Viewport className="size-full overscroll-contain px-3 pt-4 pb-8 mask-[linear-gradient(to_bottom,transparent,white_16px,white_calc(100%-32px),transparent)]">
         <SidebarItems />
       </ScrollArea.Viewport>
       <ScrollArea.Scrollbar
@@ -180,34 +252,24 @@ function SidebarItems() {
   const { menuItems } = useSpaciousLayout();
 
   return (
-    <HoverArea className="flex flex-col gap-6">
-      <div className="flex flex-col gap-0.5 empty:hidden">
-        {menuItems.map(
-          (item, i) => item.type !== 'icon' && <SidebarLinkItem key={i} item={item} />,
-        )}
-      </div>
-      <div className="flex flex-col gap-0.5">
-        <SidebarPageTree />
-      </div>
-    </HoverArea>
-  );
-}
-
-/**
- * A soft block glides to the item under the mouse or keyboard focus.
- */
-function HoverArea({ className, children }: { className?: string; children: ReactNode }) {
-  return (
-    <div ref={follow} className={cn('relative', className)}>
+    <div ref={follow} className="relative flex flex-col gap-6">
       <div
         aria-hidden
         className="absolute top-0 left-0 rounded-lg bg-fd-accent/60 opacity-0 pointer-events-none transition-opacity duration-200 ease-[cubic-bezier(0.22,1,0.36,1)] motion-safe:data-glide:transition-[translate,width,height,opacity]"
       />
-      {children}
+      <div className="flex flex-col empty:hidden">
+        {menuItems.map(
+          (item, i) => item.type !== 'icon' && <SidebarLinkItem key={i} item={item} />,
+        )}
+      </div>
+      <div className="flex flex-col">
+        <SidebarPageTree />
+      </div>
     </div>
   );
 }
 
+/** a soft block glides to the item under the mouse or keyboard focus */
 function follow(area: HTMLDivElement | null) {
   const block = area?.firstElementChild;
   if (!area || !(block instanceof HTMLElement)) return;
@@ -225,10 +287,12 @@ function follow(area: HTMLDivElement | null) {
 
     const rect = item.getBoundingClientRect();
     const origin = area.getBoundingClientRect();
-    block.style.translate = `${rect.left - origin.left}px ${rect.top - origin.top}px`;
+    // inset to keep apart from the background of active item
+    block.style.translate = `${rect.left - origin.left}px ${rect.top - origin.top + 2}px`;
     block.style.width = `${rect.width}px`;
-    block.style.height = `${rect.height}px`;
-    block.style.opacity = '1';
+    block.style.height = `${rect.height - 4}px`;
+    // still glide through it, the active item has its own background
+    block.style.opacity = item.matches('[data-active=true]') ? '0' : '1';
   };
   const itemOf = (target: EventTarget | null) =>
     target instanceof Element ? target.closest('a[href], button') : null;
@@ -268,8 +332,8 @@ function SidebarSeparator({ className, ...props }: ComponentProps<'p'>) {
   return (
     <Base.SidebarSeparator
       className={cn(
-        'mb-1 px-2 text-xs font-medium text-fd-muted-foreground [&_svg]:size-3.5 [&_svg]:shrink-0',
-        depth > 0 && 'mt-3 first:mt-1',
+        'mb-1.5 px-2.5 text-xs font-medium text-fd-muted-foreground [&_svg]:size-3.5 [&_svg]:shrink-0',
+        depth > 0 && 'mt-4 first:mt-1',
         className,
       )}
       {...props}
@@ -309,7 +373,7 @@ function SidebarFolderContent(props: ComponentProps<typeof Base.SidebarFolderCon
   return (
     <Base.SidebarFolderContent
       {...props}
-      className="relative flex flex-col gap-0.5 ms-3 ps-1 pt-0.5 before:content-[''] before:absolute before:start-0 before:inset-y-0.5 before:w-px before:bg-fd-border"
+      className="relative flex flex-col ms-3 ps-1 before:content-[''] before:absolute before:start-0 before:inset-y-1 before:w-px before:bg-fd-border"
     />
   );
 }

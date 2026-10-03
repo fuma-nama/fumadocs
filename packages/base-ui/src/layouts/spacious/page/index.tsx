@@ -1,27 +1,40 @@
 'use client';
-import { type ComponentProps, createContext, type FC, use, useEffect, useState } from 'react';
+import {
+  type ComponentProps,
+  createContext,
+  type CSSProperties,
+  type FC,
+  use,
+  useEffect,
+  useState,
+} from 'react';
 import { usePathname } from 'fumadocs-core/framework';
 import type { TOCItemType } from 'fumadocs-core/toc';
 import { useTranslations } from '@fuma-translate/react';
-import { EditIcon } from 'lucide-react';
+import { EditIcon, SidebarIcon } from 'lucide-react';
+import { SidebarCollapseTrigger, useSidebar } from '@/components/sidebar/base';
 import { buttonVariants } from '@/components/ui/button';
 import { cn } from '@/utils/cn';
 import {
   TOC,
+  TOCDropdown,
   TOCPopover,
   TOCProvider,
+  type TOCDropdownProps,
   type TOCPopoverProps,
   type TOCProps,
   type TOCProviderProps,
 } from './slots/toc';
 import { Footer, type FooterProps } from './slots/footer';
-import { Breadcrumb, type BreadcrumbProps } from './slots/breadcrumb';
+import { Breadcrumb, type BreadcrumbProps, useBreadcrumbItems } from './slots/breadcrumb';
+import { useSpaciousLayout } from '..';
 
 interface DocsPageSlots {
   toc: {
     provider: FC<TOCProviderProps>;
     main: FC<TOCProps>;
     popover: FC<TOCPopoverProps>;
+    dropdown: FC<TOCDropdownProps>;
   };
   footer: FC<FooterProps>;
   breadcrumb: FC<BreadcrumbProps>;
@@ -71,10 +84,29 @@ export function DocsPage({
   const slots: DocsPageSlots = {
     breadcrumb: customSlots.breadcrumb ?? Breadcrumb,
     footer: customSlots.footer ?? Footer,
-    toc: customSlots.toc ?? { provider: TOCProvider, main: TOC, popover: TOCPopover },
+    toc: customSlots.toc ?? {
+      provider: TOCProvider,
+      main: TOC,
+      popover: TOCPopover,
+      dropdown: TOCDropdown,
+    },
   };
+  const layout = useSpaciousLayout();
   const hasPopover = tocPopoverEnabled && toc.length > 0;
+  const hasFolders = useBreadcrumbItems(breadcrumb).length > 0 && breadcrumbEnabled;
   const pathname = usePathname();
+  const tocDropdown = hasPopover && (
+    <span
+      className={cn(
+        "flex items-center gap-1.5 min-w-0 in-[nav]:not-first:before:content-['/'] in-[nav]:not-first:before:text-fd-muted-foreground/50",
+        // only when the TOC is collapsed, see `TOC` for the transitions
+        tocEnabled &&
+          'invisible opacity-0 transition-[opacity,visibility] duration-300 motion-reduce:transition-none @max-[62rem]:visible @max-[62rem]:opacity-100 @max-[62rem]:not-in-data-[ai-chat]:transition-none in-data-[ai-chat]:visible in-data-[ai-chat]:opacity-100',
+      )}
+    >
+      <slots.toc.dropdown {...tocPopoverProps} />
+    </span>
+  );
 
   return (
     <PageContext value={{ full, slots }}>
@@ -83,36 +115,53 @@ export function DocsPage({
           // a new page starts from the top of panel
           key={pathname}
           id="nd-page-panel"
-          className="relative flex flex-col min-w-0 [grid-area:main] md:my-2 md:me-2 md:overflow-y-auto md:overscroll-y-contain md:scrollbar-thin md:scrollbar-gutter-both md:rounded-2xl md:border md:bg-fd-background md:shadow-sm md:[&_[id]]:scroll-mt-20 print:overflow-visible"
+          className="@container relative flex flex-col min-w-0 min-h-0 [grid-area:main] md:my-2 md:me-2 md:overflow-clip md:rounded-2xl md:border md:bg-fd-background md:shadow-sm print:overflow-visible"
         >
-          <header className="sticky top-14 z-10 flex shrink-0 items-center h-11 px-4 border-b bg-fd-background/80 backdrop-blur-md empty:hidden md:top-0 md:h-12 md:px-6 md:border-b-0 md:bg-fd-background md:after:absolute md:after:inset-x-0 md:after:top-full md:after:h-6 md:after:bg-linear-to-b md:after:from-fd-background md:after:pointer-events-none">
-            {breadcrumbEnabled && (
-              <slots.breadcrumb
-                {...breadcrumb}
-                className={cn(hasPopover && 'max-xl:hidden', breadcrumb.className)}
-              />
+          {hasPopover && <slots.toc.popover {...tocPopoverProps} />}
+          <header
+            className={cn(
+              'absolute inset-x-0 top-0 z-10 flex items-center gap-2 h-14 ps-6 pe-4 bg-linear-to-b from-fd-background to-transparent pointer-events-none *:pointer-events-auto max-md:hidden',
+              // fade out shorter when the start of header is empty
+              hasFolders || (hasPopover && !tocEnabled)
+                ? 'from-50%'
+                : hasPopover
+                  ? '@max-[62rem]:from-50% in-data-[ai-chat]:from-50% @min-[62rem]:not-in-data-[ai-chat]:to-40%'
+                  : 'to-40%',
             )}
-            {hasPopover && (
-              <slots.toc.popover
-                {...tocPopoverProps}
-                trigger={{
-                  ...tocPopoverProps.trigger,
-                  className: cn('xl:hidden', tocPopoverProps.trigger?.className),
-                }}
-              />
+          >
+            <ExpandSidebar />
+            {breadcrumbEnabled ? (
+              <slots.breadcrumb {...breadcrumb}>{tocDropdown}</slots.breadcrumb>
+            ) : (
+              tocDropdown
             )}
+            <layout.slots.actions className="ms-auto" />
           </header>
-          <div className="flex flex-1 justify-center gap-12 px-4 md:px-8">
+          <div
+            className="flex flex-1 gap-16 px-4 md:min-h-0 md:pt-14 md:px-[max(--spacing(6),calc((100%-var(--fd-page-width))/2))] md:overflow-y-auto md:overscroll-y-contain md:scrollbar-thin md:scrollbar-gutter-stable md:[&_[id]]:scroll-mt-16"
+            // center on wider viewports, by the full width so the TOC collapsing won't move the article
+            style={
+              {
+                '--fd-page-width': `${(full ? 1200 : 760) + (tocEnabled && toc.length > 0 ? 304 : 0)}px`,
+              } as CSSProperties
+            }
+          >
             <article
               id="nd-page"
               data-full={full}
               className={cn(
-                'flex flex-col gap-4 w-full min-w-0 max-w-[760px] pt-8 pb-12 md:pt-10',
+                'flex flex-col gap-4 w-full min-w-0 max-w-[760px] pt-8 pb-16 md:pt-6',
                 full && 'max-w-[1200px]',
                 className,
               )}
               {...props}
             >
+              {breadcrumbEnabled && (
+                <slots.breadcrumb
+                  {...breadcrumb}
+                  className={cn('md:hidden', breadcrumb.className)}
+                />
+              )}
               {children}
               {footerEnabled && <slots.footer {...footer} />}
             </article>
@@ -121,6 +170,23 @@ export function DocsPage({
         </div>
       </slots.toc.provider>
     </PageContext>
+  );
+}
+
+/** show the sidebar again when collapsed */
+function ExpandSidebar() {
+  const { collapsed } = useSidebar();
+  if (!collapsed) return;
+
+  return (
+    <SidebarCollapseTrigger
+      className={cn(
+        buttonVariants({ variant: 'ghost', size: 'icon-sm' }),
+        '-ms-2 size-8 text-fd-muted-foreground',
+      )}
+    >
+      <SidebarIcon />
+    </SidebarCollapseTrigger>
   );
 }
 

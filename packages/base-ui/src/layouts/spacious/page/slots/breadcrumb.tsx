@@ -7,20 +7,35 @@ import { cn } from '@/utils/cn';
 
 export type BreadcrumbProps = BreadcrumbOptions & ComponentProps<'nav'>;
 
-export function Breadcrumb({
+const separator = <span className="shrink-0 text-fd-muted-foreground/50">/</span>;
+
+export function useBreadcrumbItems({
   includeRoot,
   includeSeparator,
-  includePage = true,
-  className,
-  ...props
-}: BreadcrumbProps) {
+  includePage,
+}: BreadcrumbOptions = {}) {
   const path = useTreePath();
   const { root } = useTreeContext();
-  const items = useMemo(
+
+  return useMemo(
     () => getBreadcrumbItemsFromPath(root, path, { includePage, includeSeparator, includeRoot }),
     [includePage, includeRoot, includeSeparator, path, root],
   );
-  if (items.length === 0) return;
+}
+
+/**
+ * The folders of current page, `children` is appended after them.
+ */
+export function Breadcrumb({
+  includeRoot,
+  includeSeparator,
+  includePage,
+  className,
+  children,
+  ...props
+}: BreadcrumbProps) {
+  const items = useBreadcrumbItems({ includeRoot, includeSeparator, includePage });
+  if (items.length === 0 && !children) return;
 
   return (
     <nav
@@ -30,26 +45,22 @@ export function Breadcrumb({
       )}
       {...props}
     >
-      {items.map((item, i) => {
-        const last = i === items.length - 1;
-        const className = cn('truncate', last && 'text-fd-foreground font-medium');
-
-        return (
-          <Fragment key={i}>
-            {i > 0 && <span className="text-fd-muted-foreground/50">/</span>}
-            {item.url && !last ? (
-              <Link
-                href={item.url}
-                className={cn(className, 'transition-colors hover:text-fd-accent-foreground')}
-              >
-                {item.name}
-              </Link>
-            ) : (
-              <span className={className}>{item.name}</span>
-            )}
-          </Fragment>
-        );
-      })}
+      {items.map((item, i) => (
+        <Fragment key={i}>
+          {i > 0 && separator}
+          {item.url ? (
+            <Link
+              href={item.url}
+              className="truncate transition-colors hover:text-fd-accent-foreground"
+            >
+              {item.name}
+            </Link>
+          ) : (
+            <span className="truncate">{item.name}</span>
+          )}
+        </Fragment>
+      ))}
+      {children}
     </nav>
   );
 }

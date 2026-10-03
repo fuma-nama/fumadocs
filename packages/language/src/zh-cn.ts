@@ -30,6 +30,7 @@ const translations = {
   'Default(type table)': '默认值',
   'Edit on GitHub(edit page)': '在 GitHub 上编辑',
   'Hide Sidebar(sidebar)': '隐藏侧边栏',
+  'Language(language switcher)': '语言',
   'Last updated on(page footer)': '最后更新于',
   'Layout Tab(layout tab trigger)': '布局标签',
   'Light(theme switcher)(aria-label)': '浅色',
@@ -46,6 +47,7 @@ const translations = {
   'Open in GitHub(page actions)': '在 GitHub 中打开',
   'Open in Scira AI(page actions)': '在 Scira AI 中打开',
   'Open(page actions)': '打开',
+  'Options(aria-label)': '选项',
   'Page Not Found(404 not found page)': '找不到页面',
   'Parameters(type table)': '参数',
   'Previous Page(pagination)': '上一页',
@@ -59,6 +61,7 @@ const translations = {
   'Table of Contents(inline table of contents)': '目录',
   'The page you are looking for might have been removed, had its name changed, or is temporarily unavailable.(404 not found page)':
     '你要查找的页面可能已被移除、名称已变更，或暂时无法使用。',
+  'Theme(site menu)': '主题',
   'Toggle Menu(home layout header)(aria-label)': '切换菜单',
   'Toggle Theme(theme switcher)(aria-label)': '切换主题',
   'Type(type table)': '类型',

@@ -2,6 +2,7 @@
 import type * as PageTree from 'fumadocs-core/page-tree';
 import { type ComponentProps, createContext, type FC, use, useMemo } from 'react';
 import {
+  type AIChatOptions,
   type BaseLayoutProps,
   type BaseSlots,
   type BaseSlotsProps,
@@ -21,9 +22,15 @@ import {
   type SidebarProviderProps,
 } from './slots/sidebar';
 import { Header } from './slots/header';
+import { AIChatPanel } from '@/layouts/shared/client';
+import { HeaderActions } from './slots/actions';
 
-export interface SpaciousSlots extends BaseSlots {
+export interface DocsSlots extends BaseSlots {
   header: FC<ComponentProps<'header'>>;
+  /**
+   * The actions at the top right of page panel
+   */
+  actions: FC<ComponentProps<'div'>>;
   sidebar: {
     provider: FC<SidebarProviderProps>;
     main: FC<SidebarProps>;
@@ -31,34 +38,31 @@ export interface SpaciousSlots extends BaseSlots {
   };
 }
 
-export interface SpaciousLayoutProps extends BaseLayoutProps {
+export interface DocsLayoutProps extends BaseLayoutProps {
   tree: PageTree.Root;
   tabs?: LayoutTab[] | GetLayoutTabsOptions | false;
-  aiChat?: {
-    open: boolean;
-    onOpenChange: (open: boolean) => void;
-  };
+  aiChat?: AIChatOptions;
   sidebar?: Omit<SidebarProviderProps, 'children'>;
-  slots?: Partial<SpaciousSlots>;
+  slots?: Partial<DocsSlots>;
 }
 
-interface SlotsProps extends BaseSlotsProps<SpaciousLayoutProps> {
+interface SlotsProps extends BaseSlotsProps<DocsLayoutProps> {
   tabs: LayoutTab[];
-  aiChat?: SpaciousLayoutProps['aiChat'];
+  aiChat?: DocsLayoutProps['aiChat'];
 }
 
 const LayoutContext = createContext<{
   props: SlotsProps;
   navItems: LinkItemType[];
   menuItems: LinkItemType[];
-  slots: SpaciousSlots;
+  slots: DocsSlots;
 } | null>(null);
 
 export function useSpaciousLayout() {
   const context = use(LayoutContext);
   if (!context)
     throw new Error(
-      'Please use Spacious layout components under <SpaciousLayout /> (`fumadocs-ui/layouts/spacious`).',
+      'Please use Spacious layout components under <DocsLayout /> (`fumadocs-ui/layouts/spacious`).',
     );
   return context;
 }
@@ -69,7 +73,7 @@ const { useBaseSlots } = baseSlots({
   },
 });
 
-export function SpaciousLayout(props: SpaciousLayoutProps) {
+export function DocsLayout(props: DocsLayoutProps) {
   const { tree, tabs: tabsOptions, aiChat, sidebar, slots: customSlots = {}, children } = props;
   const linkItems = useLinkItems(props);
   const { baseSlots, baseProps } = useBaseSlots(props);
@@ -79,9 +83,10 @@ export function SpaciousLayout(props: SpaciousLayoutProps) {
     return getLayoutTabs(tree, { transform: (option) => option, ...tabsOptions });
   }, [tree, tabsOptions]);
 
-  const slots: SpaciousSlots = {
+  const slots: DocsSlots = {
     ...baseSlots,
     header: customSlots.header ?? Header,
+    actions: customSlots.actions ?? HeaderActions,
     sidebar: customSlots.sidebar ?? {
       provider: SidebarProvider,
       main: Sidebar,
@@ -95,15 +100,25 @@ export function SpaciousLayout(props: SpaciousLayoutProps) {
         <slots.sidebar.provider {...sidebar}>
           <div
             id="fd-spacious-layout"
-            className="relative grid min-h-(--fd-layout-height) transition-[grid-template-columns] duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] motion-reduce:transition-none [--fd-layout-height:calc(100dvh-var(--fd-banner-height,0px))] [--fd-sidebar-width:0px] [--fd-right-width:0px] md:h-(--fd-layout-height) md:overflow-hidden md:bg-fd-card print:h-auto print:overflow-visible"
+            // the TOC moves to page header when AI chat is open
+            data-ai-chat={aiChat?.open && aiChat.panel ? '' : undefined}
+            className="relative grid min-h-(--fd-layout-height) transition-[grid-template-columns] duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] motion-reduce:transition-none [--fd-layout-height:calc(100dvh-var(--fd-banner-height,0px))] [--fd-sidebar-width:0px] md:h-(--fd-layout-height) md:overflow-clip md:bg-fd-card print:h-auto print:overflow-visible"
             style={{
               gridTemplate: `"sidebar header right" auto
-"sidebar main right" 1fr / var(--fd-sidebar-width) minmax(0, 1fr) var(--fd-right-width)`,
+"sidebar main right" 1fr / var(--fd-sidebar-width) minmax(0, 1fr) auto`,
             }}
           >
             <slots.sidebar.main />
             <slots.header />
             {children}
+            {aiChat?.panel && (
+              <AIChatPanel
+                open={aiChat.open}
+                className="[grid-area:right] xl:my-2 xl:me-2 xl:rounded-2xl xl:border xl:bg-fd-background xl:shadow-sm"
+              >
+                {aiChat.panel}
+              </AIChatPanel>
+            )}
             <slots.sidebar.drawer />
           </div>
         </slots.sidebar.provider>

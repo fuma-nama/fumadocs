@@ -3,6 +3,7 @@ import { type HTMLAttributes, type ReactNode, useMemo } from 'react';
 import type { SidebarProps, SidebarProviderProps } from './slots/sidebar';
 import {
   getLayoutTabs,
+  type AIChatOptions,
   type BaseLayoutProps,
   type GetLayoutTabsOptions,
   type LayoutTab,
@@ -15,6 +16,7 @@ export interface DocsLayoutProps extends BaseLayoutProps {
   tabMode?: 'top' | 'auto';
   tabs?: LayoutTab[] | GetLayoutTabsOptions | false;
   containerProps?: HTMLAttributes<HTMLDivElement>;
+  aiChat?: AIChatOptions;
   slots?: Partial<DocsSlots>;
 }
 

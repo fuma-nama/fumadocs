@@ -1,60 +1,59 @@
-import { DocsLayout } from 'fumadocs-ui/layouts/docs';
 import { baseOptions, linkItems, logo } from '@/components/layouts/shared';
 import { source } from '@/lib/source';
-import { AISearch, AISearchPanel, AISearchTrigger } from '@/components/inkeep/search';
+import { AISearch, AISearchTrigger } from '@/components/inkeep/search';
 import { getSection } from '@/lib/source/navigation';
 import { MessageCircleIcon } from 'lucide-react';
 import { cn } from '@/lib/cn';
 import { buttonVariants } from 'fumadocs-ui/components/ui/button';
+import { getLayoutTabs } from 'fumadocs-ui/layouts/shared';
 import type { CSSProperties } from 'react';
+import { ClientDocsLayout } from './client';
 import 'katex/dist/katex.min.css';
 
 export function DefaultLayout({ children }: LayoutProps<'/docs'>) {
   const base = baseOptions();
 
   return (
-    <DocsLayout
-      {...base}
-      tree={source.getPageTree()}
-      // just icon items
-      links={linkItems.filter((item) => item.type === 'icon')}
-      nav={{
-        ...base.nav,
-        title: (
-          <>
-            {logo}
-            <span className="font-medium in-[.uwu]:hidden max-md:hidden">Fumadocs</span>
-          </>
-        ),
-      }}
-      tabs={{
-        transform(option, node) {
-          const meta = source.getNodeMeta(node);
-          if (!meta || !node.icon) return option;
-          const color = `var(--${getSection(meta.path)}-color, var(--color-fd-foreground))`;
+    <AISearch>
+      <ClientDocsLayout
+        {...base}
+        tree={source.getPageTree()}
+        // just icon items
+        links={linkItems.filter((item) => item.type === 'icon')}
+        nav={{
+          ...base.nav,
+          title: (
+            <>
+              {logo}
+              <span className="font-medium in-[.uwu]:hidden max-md:hidden">Fumadocs</span>
+            </>
+          ),
+        }}
+        tabs={getLayoutTabs(source.getPageTree(), {
+          transform(option, node) {
+            const meta = source.getNodeMeta(node);
+            if (!meta || !node.icon) return option;
+            const color = `var(--${getSection(meta.path)}-color, var(--color-fd-foreground))`;
 
-          return {
-            ...option,
-            icon: (
-              <div
-                className="[&_svg]:size-full rounded-lg size-full text-(--tab-color) max-md:bg-(--tab-color)/10 max-md:border max-md:p-1.5"
-                style={
-                  {
-                    '--tab-color': color,
-                  } as CSSProperties
-                }
-              >
-                {node.icon}
-              </div>
-            ),
-          };
-        },
-      }}
-    >
-      {children}
-
-      <AISearch>
-        <AISearchPanel />
+            return {
+              ...option,
+              icon: (
+                <div
+                  className="[&_svg]:size-full rounded-lg size-full text-(--tab-color) max-md:bg-(--tab-color)/10 max-md:border max-md:p-1.5"
+                  style={
+                    {
+                      '--tab-color': color,
+                    } as CSSProperties
+                  }
+                >
+                  {node.icon}
+                </div>
+              ),
+            };
+          },
+        })}
+      >
+        {children}
         <AISearchTrigger
           position="float"
           className={cn(
@@ -67,7 +66,7 @@ export function DefaultLayout({ children }: LayoutProps<'/docs'>) {
           <MessageCircleIcon className="size-4.5" />
           Ask AI
         </AISearchTrigger>
-      </AISearch>
-    </DocsLayout>
+      </ClientDocsLayout>
+    </AISearch>
   );
 }

@@ -1,9 +1,9 @@
 'use client';
 
 import { AISearchPanel, useAISearchContext, useHotKey } from '@/components/inkeep/search';
-import { DocsLayout, type DocsLayoutProps } from 'fumadocs-ui/layouts/spacious';
+import { DocsLayout, type DocsLayoutProps } from 'fumadocs-ui/layouts/docs';
 
-export function ClientSpaciousLayout(props: DocsLayoutProps) {
+export function ClientDocsLayout(props: DocsLayoutProps) {
   const { open, setOpen } = useAISearchContext();
   useHotKey();
 

@@ -10,6 +10,9 @@
   --animate-fd-fade-in: fd-fade-in 300ms ease;
   --animate-fd-fade-out: fd-fade-out 300ms ease;
 
+  /* slide in from below, or from above when `--fd-roll` is -1 */
+  --animate-fd-roll-in: fd-roll-in 320ms cubic-bezier(0.22, 1, 0.36, 1);
+
   --animate-fd-dialog-in: fd-dialog-in 300ms cubic-bezier(0.16, 1, 0.3, 1);
   --animate-fd-dialog-out: fd-dialog-out 300ms cubic-bezier(0.16, 1, 0.3, 1);
 
@@ -71,6 +74,14 @@
     }
     to {
       opacity: 1;
+    }
+  }
+
+  @keyframes fd-roll-in {
+    from {
+      opacity: 0;
+      translate: 0 calc(var(--fd-roll, 1) * 0.6em);
+      filter: blur(2px);
     }
   }
 
