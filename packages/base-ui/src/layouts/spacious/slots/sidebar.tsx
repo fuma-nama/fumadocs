@@ -48,17 +48,15 @@ export function Sidebar({ className, ...props }: SidebarProps) {
       data-collapsed={collapsed}
       inert={collapsed}
       className={cn(
-        'group/sidebar [grid-area:sidebar] flex min-h-0 overflow-clip text-sm max-md:hidden',
+        'group/sidebar [grid-area:sidebar] flex min-h-0 overflow-clip text-sm md:layout:[--fd-sidebar-width:268px] max-md:hidden',
         // keep a gutter in place of the collapsed sidebar
-        collapsed
-          ? 'md:layout:[--fd-sidebar-width:--spacing(2)]'
-          : 'md:layout:[--fd-sidebar-width:268px]',
+        collapsed && 'md:layout:[--fd-sidebar-col:--spacing(2)]',
         className,
       )}
       {...props}
     >
-      <div className="flex flex-col shrink-0 w-[268px] transition-[opacity,translate] duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] group-data-[collapsed=true]/sidebar:-translate-x-3 group-data-[collapsed=true]/sidebar:opacity-0 rtl:group-data-[collapsed=true]/sidebar:translate-x-3 motion-reduce:transition-none">
-        <div className="flex items-center gap-2 h-18 ps-5.5 pe-3">
+      <div className="flex flex-col shrink-0 w-(--fd-sidebar-width) transition-[opacity,translate] duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] group-data-[collapsed=true]/sidebar:-translate-x-3 group-data-[collapsed=true]/sidebar:opacity-0 rtl:group-data-[collapsed=true]/sidebar:translate-x-3 motion-reduce:transition-none">
+        <div className="flex items-center gap-2 h-(--fd-header-height) my-2 ps-5.5 pe-3">
           <slots.navTitle className="inline-flex items-center gap-2 min-w-0 me-auto text-[0.9375rem] font-semibold" />
           <Base.SidebarCollapseTrigger
             className={cn(
@@ -74,7 +72,7 @@ export function Sidebar({ className, ...props }: SidebarProps) {
           {slots.searchTrigger && (
             <slots.searchTrigger.full
               hideIfDisabled
-              className="h-10 gap-3 rounded-xl ps-[9px] pe-2 [&_svg]:shrink-0"
+              className="h-10 gap-3 rounded-xl ps-[calc(--spacing(2.5)-1px)] pe-2 [&_svg]:shrink-0"
             />
           )}
         </div>
@@ -98,7 +96,7 @@ export function SidebarDrawer() {
       <Base.SidebarDrawerOverlay className="fixed z-40 inset-0 backdrop-blur-xs data-[state=open]:animate-fd-fade-in data-[state=closed]:animate-fd-fade-out" />
       <Base.SidebarDrawerContent className="fixed z-40 inset-e-0 inset-y-0 flex flex-col w-[85%] max-w-[380px] text-[0.9375rem] bg-fd-background border-s shadow-lg data-[state=open]:animate-fd-sidebar-in data-[state=closed]:animate-fd-sidebar-out">
         {/* the close button takes the place of navbar's sidebar trigger */}
-        <div className="flex items-center gap-1.5 h-14 ps-[13px] pe-2.5 text-fd-muted-foreground">
+        <div className="flex items-center gap-1.5 h-(--fd-header-height) ps-3.5 pe-2.5 text-fd-muted-foreground">
           <div className="flex flex-1">
             {menuItems.map(
               (item, i) =>
@@ -168,7 +166,7 @@ function TabsMenu() {
 
   return (
     <Menu.Root>
-      <Menu.Trigger className="flex w-full h-10 items-center gap-3 rounded-xl border bg-fd-secondary/50 ps-[9px] pe-2.5 text-start font-medium outline-none transition-colors hover:bg-fd-accent focus-visible:ring-2 focus-visible:ring-fd-ring data-popup-open:bg-fd-accent [&_svg]:size-4 [&_svg]:shrink-0">
+      <Menu.Trigger className="flex w-full h-10 items-center gap-3 rounded-xl border bg-fd-secondary/50 ps-[calc(--spacing(2.5)-1px)] pe-2.5 text-start font-medium outline-none transition-colors hover:bg-fd-accent focus-visible:ring-2 focus-visible:ring-fd-ring data-popup-open:bg-fd-accent [&_svg]:size-4 [&_svg]:shrink-0">
         {selected && <TabIcon tab={selected} />}
         <span className={cn('flex-1 truncate', !selected && 'text-fd-muted-foreground')}>
           {selected ? selected.title : t('Layout Tab', { note: 'layout tab trigger' })}
@@ -193,7 +191,7 @@ function TabsMenu() {
                   closeOnClick
                   render={<Link href={tab.url} {...tab.props} />}
                   className={cn(
-                    'flex w-full min-h-9 items-start gap-3 rounded-lg px-[9px] py-2 text-start outline-none transition-colors duration-100 data-highlighted:bg-fd-accent data-highlighted:text-fd-accent-foreground [&_svg]:size-4 [&_svg]:shrink-0',
+                    'flex w-full min-h-9 items-start gap-3 rounded-lg px-[calc(--spacing(2.5)-1px)] py-2 text-start outline-none transition-colors duration-100 data-highlighted:bg-fd-accent data-highlighted:text-fd-accent-foreground [&_svg]:size-4 [&_svg]:shrink-0',
                     tab.props?.className,
                   )}
                 >
@@ -253,9 +251,10 @@ function SidebarItems() {
 
   return (
     <div ref={follow} className="relative flex flex-col gap-6">
+      {/* inset to keep apart from the background of active item */}
       <div
         aria-hidden
-        className="absolute top-0 left-0 rounded-lg bg-fd-accent/60 opacity-0 pointer-events-none transition-opacity duration-200 ease-[cubic-bezier(0.22,1,0.36,1)] motion-safe:data-glide:transition-[translate,width,height,opacity]"
+        className="absolute top-0 left-0 py-0.5 rounded-lg bg-fd-accent/60 bg-clip-content opacity-0 pointer-events-none transition-opacity duration-200 ease-[cubic-bezier(0.22,1,0.36,1)] motion-safe:data-glide:transition-[translate,width,height,opacity]"
       />
       <div className="flex flex-col empty:hidden">
         {menuItems.map(
@@ -287,10 +286,9 @@ function follow(area: HTMLDivElement | null) {
 
     const rect = item.getBoundingClientRect();
     const origin = area.getBoundingClientRect();
-    // inset to keep apart from the background of active item
-    block.style.translate = `${rect.left - origin.left}px ${rect.top - origin.top + 2}px`;
+    block.style.translate = `${rect.left - origin.left}px ${rect.top - origin.top}px`;
     block.style.width = `${rect.width}px`;
-    block.style.height = `${rect.height - 4}px`;
+    block.style.height = `${rect.height}px`;
     // still glide through it, the active item has its own background
     block.style.opacity = item.matches('[data-active=true]') ? '0' : '1';
   };

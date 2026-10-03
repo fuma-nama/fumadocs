@@ -14,7 +14,6 @@ import {
   type CSSProperties,
   type ReactNode,
   useEffect,
-  useLayoutEffect,
   useRef,
   useState,
 } from 'react';
@@ -61,11 +60,9 @@ export function TOC({ container, header, footer, ...props }: TOCProps) {
       id="nd-toc"
       {...container}
       className={cn(
-        'sticky top-0 flex flex-col w-60 shrink-0 h-[calc(var(--fd-layout-height)-var(--spacing)*18-2px)] pt-6 pb-4 overflow-clip *:min-w-60 transition-[opacity,visibility] duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] motion-reduce:transition-none max-md:hidden',
-        // collapse on narrower panel, not animated as some browsers (e.g. Firefox) resolve container queries after the initial render
-        '@max-[62rem]:invisible @max-[62rem]:w-0 @max-[62rem]:-ms-16 @max-[62rem]:opacity-0 @max-[62rem]:not-in-data-[ai-chat]:transition-none',
-        // or along with the panel when opening AI chat, before it squeezes the content
-        'in-data-[ai-chat]:invisible in-data-[ai-chat]:w-0 in-data-[ai-chat]:-ms-16 in-data-[ai-chat]:opacity-0',
+        'sticky top-0 flex flex-col shrink-0 w-(--fd-toc-width) h-full ps-16 pt-6 pb-4 layout:[--fd-toc-width:--spacing(76)]',
+        // moved to the page header on narrower panel, or when AI chat is open
+        'max-md:hidden @max-5xl:hidden in-data-[ai-chat]:hidden',
         container?.className,
       )}
     >
@@ -119,7 +116,7 @@ export function TOCPopover({
       onOpenChange={setOpen}
       {...container}
       // expand over the content below
-      className={cn('sticky top-14 z-10 h-10 md:hidden', container?.className)}
+      className={cn('sticky top-(--fd-header-height) z-10 h-10 md:hidden', container?.className)}
     >
       <header
         ref={ref}
@@ -222,66 +219,27 @@ function TOCList({
 }
 
 /**
- * The active heading, settled so fast scrolling won't flicker it.
+ * The active heading, rolls in from the direction of scrolling.
  */
 function ActiveHeading({ fallback, className }: { fallback: ReactNode; className?: string }) {
   const items = Base.useTOCItems();
   const active = useTOCSelector(selectTopmost);
   const [shown, setShown] = useState({ item: active, roll: 1 });
-  const ref = useRef<HTMLSpanElement>(null);
-  const width = useRef(0);
-  const pendingSince = useRef<number | null>(null);
-
-  useEffect(() => {
-    if (active === shown.item) {
-      pendingSince.current = null;
-      return;
-    }
-
-    // wait 150ms to settle, but don't hold it for over 600ms during a long scroll
-    pendingSince.current ??= performance.now();
-    const delay = Math.min(150, pendingSince.current + 600 - performance.now());
-    const timer = window.setTimeout(() => {
-      pendingSince.current = null;
-      // the visible width before swapping, it can be in the middle of a glide
-      width.current = ref.current?.offsetWidth ?? 0;
-      // roll in from the direction of scrolling
-      const roll = items.indexOf(active!) >= items.indexOf(shown.item!) ? 1 : -1;
-      setShown({ item: active, roll });
-    }, delay);
-    return () => window.clearTimeout(timer);
-  }, [items, active, shown]);
-
-  // glide to the width of new heading
-  useLayoutEffect(() => {
-    const element = ref.current;
-    const from = width.current;
-    if (!element || from === 0) return;
-    for (const animation of element.getAnimations()) animation.cancel();
-    element.removeAttribute('data-gliding');
-    const to = element.offsetWidth;
-    if (from === to || matchMedia('(prefers-reduced-motion: reduce)').matches) return;
-
-    // clip instead of ellipsis while gliding
-    element.setAttribute('data-gliding', '');
-    element.animate([{ width: `${from}px` }, { width: `${to}px` }], {
-      duration: 320,
-      easing: 'cubic-bezier(0.22, 1, 0.36, 1)',
-    }).onfinish = () => element.removeAttribute('data-gliding');
-  }, [shown]);
+  if (shown.item !== active) {
+    setShown({ item: active, roll: items.indexOf(active!) >= items.indexOf(shown.item!) ? 1 : -1 });
+  }
 
   return (
     <span
-      ref={ref}
-      data-active={shown.item !== undefined}
+      data-active={active !== undefined}
       className={cn('flex min-w-0 overflow-hidden', className)}
     >
       <span
-        key={shown.item?.url}
-        className="truncate in-data-gliding:text-clip motion-safe:animate-fd-roll-in"
+        key={active?.url}
+        className="truncate motion-safe:animate-fd-roll-in"
         style={{ '--fd-roll': shown.roll } as CSSProperties}
       >
-        {shown.item ? shown.item.title : fallback}
+        {active ? active.title : fallback}
       </span>
     </span>
   );

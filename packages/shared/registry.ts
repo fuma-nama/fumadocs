@@ -43,9 +43,9 @@ export function createUIRegistry({
       entry: ['layouts/glass/index.tsx', 'layouts/glass/page/index.tsx'],
     },
     'layouts/home': { unlisted: true, entry: 'layouts/home/index.tsx' },
+    'layouts/*': { unlisted: true, entry: 'layouts/**/slots/*' },
     // components only available in one of the UI packages
     ...extra,
-    'layouts/*': { unlisted: true, entry: 'layouts/**/slots/*' },
   };
 
   return {

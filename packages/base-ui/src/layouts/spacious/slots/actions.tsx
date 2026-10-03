@@ -15,7 +15,6 @@ import {
   SunIcon,
   SunMoonIcon,
 } from 'lucide-react';
-import { useMediaQuery } from 'fumadocs-core/utils/use-media-query';
 import { useTheme } from 'next-themes';
 import type { ComponentProps, CSSProperties, MouseEvent } from 'react';
 import { flushSync } from 'react-dom';
@@ -81,8 +80,6 @@ function OptionsMenu() {
   const t = useTranslations();
   const iconLinks = menuItems.filter((item) => item.type === 'icon');
   const hasOptions = Boolean(aiChat || slots.themeSwitch);
-  // the language switcher and icon links are only in header on wider viewports
-  const compact = useMediaQuery('(width < 64rem)');
   if (!hasOptions && !slots.languageSelect && iconLinks.length === 0) return;
 
   return (
@@ -99,7 +96,7 @@ function OptionsMenu() {
       </Menu.Trigger>
       <Menu.Portal>
         <Menu.Positioner align="end" sideOffset={8} positionMethod="fixed" className="z-50">
-          <Menu.Popup className={cn(popupClass, 'w-64 divide-y')}>
+          <Menu.Popup className={cn(popupClass, 'w-64 *:not-first:border-t')}>
             {aiChat && (
               <div className="p-1">
                 <Menu.Item className={itemClass} onClick={() => aiChat.onOpenChange(!aiChat.open)}>
@@ -117,9 +114,10 @@ function OptionsMenu() {
                 <ThemeSegments />
               </div>
             )}
-            {compact && slots.languageSelect && <Languages />}
-            {compact && iconLinks.length > 0 && (
-              <div className="flex flex-col p-1">
+            {/* the language switcher and icon links are in header on wider viewports */}
+            {slots.languageSelect && <Languages className="lg:hidden" />}
+            {iconLinks.length > 0 && (
+              <div className="flex flex-col p-1 lg:hidden">
                 {iconLinks.map((item, i) => (
                   <Menu.LinkItem
                     key={i}
@@ -141,12 +139,12 @@ function OptionsMenu() {
   );
 }
 
-function Languages() {
+function Languages({ className }: { className?: string }) {
   const { locale, locales = [], onChange } = useI18n();
   const t = useTranslations({ note: 'language switcher' });
 
   return (
-    <div className="p-1">
+    <div className={cn('p-1', className)}>
       <Menu.SubmenuRoot>
         <Menu.SubmenuTrigger className={cn(itemClass, 'data-popup-open:bg-fd-accent')}>
           <LanguagesIcon className="text-fd-muted-foreground" />

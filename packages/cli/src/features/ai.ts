@@ -39,6 +39,8 @@ export const ai: Feature<{ provider: AIProvider }> = {
     if (ctx.project.source.dynamic) await readDynamicSource(ctx);
 
     const { cwd, baseDir, info, config } = ctx.project;
+    // e.g. `./components` -> `@/components/ai/layout`
+    const clientLayoutImport = `@/${path.posix.join(config.aliases.componentsDir, 'ai/layout')}`;
     const layout = await findSource(cwd, path.join(baseDir, info.routesDir), '<DocsLayout');
     let layoutModule: string | undefined;
     let wired = false;
@@ -82,17 +84,13 @@ export const ai: Feature<{ provider: AIProvider }> = {
   },
 };
 
-const clientLayoutImport = '@/components/ai/layout';
-
 const floatingTrigger = `
       <AISearchTrigger
         position="float"
-        className={cn(
-          buttonVariants({
-            variant: 'secondary',
-            className: 'text-fd-muted-foreground rounded-2xl',
-          }),
-        )}
+        className={buttonVariants({
+          variant: 'secondary',
+          className: 'text-fd-muted-foreground rounded-2xl',
+        })}
       >
         <MessageCircleIcon className="size-4.5" />
         Ask AI
@@ -109,7 +107,6 @@ ${
   trigger
     ? `import { buttonVariants } from 'fumadocs-ui/components/ui/button';
 import { MessageCircleIcon } from 'lucide-react';
-import { cn } from '@/lib/cn';
 `
     : ''
 }import {

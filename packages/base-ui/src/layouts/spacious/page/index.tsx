@@ -1,13 +1,5 @@
 'use client';
-import {
-  type ComponentProps,
-  createContext,
-  type CSSProperties,
-  type FC,
-  use,
-  useEffect,
-  useState,
-} from 'react';
+import { type ComponentProps, createContext, type FC, use, useSyncExternalStore } from 'react';
 import { usePathname } from 'fumadocs-core/framework';
 import type { TOCItemType } from 'fumadocs-core/toc';
 import { useTranslations } from '@fuma-translate/react';
@@ -95,18 +87,6 @@ export function DocsPage({
   const hasPopover = tocPopoverEnabled && toc.length > 0;
   const hasFolders = useBreadcrumbItems(breadcrumb).length > 0 && breadcrumbEnabled;
   const pathname = usePathname();
-  const tocDropdown = hasPopover && (
-    <span
-      className={cn(
-        "flex items-center gap-1.5 min-w-0 in-[nav]:not-first:before:content-['/'] in-[nav]:not-first:before:text-fd-muted-foreground/50",
-        // only when the TOC is collapsed, see `TOC` for the transitions
-        tocEnabled &&
-          'invisible opacity-0 transition-[opacity,visibility] duration-300 motion-reduce:transition-none @max-[62rem]:visible @max-[62rem]:opacity-100 @max-[62rem]:not-in-data-[ai-chat]:transition-none in-data-[ai-chat]:visible in-data-[ai-chat]:opacity-100',
-      )}
-    >
-      <slots.toc.dropdown {...tocPopoverProps} />
-    </span>
-  );
 
   return (
     <PageContext value={{ full, slots }}>
@@ -120,38 +100,37 @@ export function DocsPage({
           {hasPopover && <slots.toc.popover {...tocPopoverProps} />}
           <header
             className={cn(
-              'absolute inset-x-0 top-0 z-10 flex items-center gap-2 h-14 ps-6 pe-4 bg-linear-to-b from-fd-background to-transparent pointer-events-none *:pointer-events-auto max-md:hidden',
+              'absolute inset-x-0 top-0 z-10 flex items-center gap-1.5 h-(--fd-header-height) ps-6 pe-4 bg-linear-to-b from-fd-background to-transparent pointer-events-none *:pointer-events-auto max-md:hidden',
               // fade out shorter when the start of header is empty
-              hasFolders || (hasPopover && !tocEnabled)
-                ? 'from-50%'
-                : hasPopover
-                  ? '@max-[62rem]:from-50% in-data-[ai-chat]:from-50% @min-[62rem]:not-in-data-[ai-chat]:to-40%'
-                  : 'to-40%',
+              hasFolders || hasPopover ? 'from-50%' : 'to-40%',
             )}
           >
             <ExpandSidebar />
-            {breadcrumbEnabled ? (
-              <slots.breadcrumb {...breadcrumb}>{tocDropdown}</slots.breadcrumb>
-            ) : (
-              tocDropdown
+            {breadcrumbEnabled && <slots.breadcrumb {...breadcrumb} />}
+            {hasPopover && (
+              <div
+                className={cn(
+                  'flex items-center gap-1.5 min-w-0',
+                  // in place of the TOC when it is hidden
+                  tocEnabled && 'hidden @max-5xl:flex in-data-[ai-chat]:flex',
+                )}
+              >
+                {hasFolders && <span className="text-sm text-fd-muted-foreground/50">/</span>}
+                <slots.toc.dropdown {...tocPopoverProps} />
+              </div>
             )}
             <layout.slots.actions className="ms-auto" />
           </header>
           <div
-            className="flex flex-1 gap-16 px-4 md:min-h-0 md:pt-14 md:px-[max(--spacing(6),calc((100%-var(--fd-page-width))/2))] md:overflow-y-auto md:overscroll-y-contain md:scrollbar-thin md:scrollbar-gutter-stable md:[&_[id]]:scroll-mt-16"
-            // center on wider viewports, by the full width so the TOC collapsing won't move the article
-            style={
-              {
-                '--fd-page-width': `${(full ? 1200 : 760) + (tocEnabled && toc.length > 0 ? 304 : 0)}px`,
-              } as CSSProperties
-            }
+            // center on wider viewports, by the full width so hiding the TOC won't move the article
+            className="flex flex-1 items-start px-4 md:min-h-0 md:pt-(--fd-header-height) md:px-[max(--spacing(6),calc((100%-var(--fd-page-width)-var(--fd-toc-width))/2))] md:overflow-y-auto md:overscroll-y-contain md:scrollbar-thin md:scrollbar-gutter-stable md:scroll-pt-(--fd-header-height) md:[&_[id]]:scroll-mt-2"
           >
             <article
               id="nd-page"
               data-full={full}
               className={cn(
-                'flex flex-col gap-4 w-full min-w-0 max-w-[760px] pt-8 pb-16 md:pt-6',
-                full && 'max-w-[1200px]',
+                'flex flex-col gap-4 w-full min-w-0 max-w-(--fd-page-width) pt-8 pb-16 md:pt-6',
+                full && 'layout:[--fd-page-width:1200px]',
                 className,
               )}
               {...props}
@@ -235,17 +214,19 @@ export function DocsTitle({ className, ...props }: ComponentProps<'h1'>) {
   return <h1 {...props} className={cn('text-[1.75em] font-semibold', className)} />;
 }
 
+const subscribe = () => () => {};
+
 export function PageLastUpdate({
   date: value,
   ...props
 }: Omit<ComponentProps<'p'>, 'children'> & { date: Date }) {
   const t = useTranslations({ note: 'page footer' });
-  const [date, setDate] = useState('');
-
-  useEffect(() => {
-    // to the timezone of client
-    setDate(value.toLocaleDateString());
-  }, [value]);
+  // to the timezone of client, empty on server
+  const date = useSyncExternalStore(
+    subscribe,
+    () => value.toLocaleDateString(),
+    () => '',
+  );
 
   return (
     <p {...props} className={cn('text-sm text-fd-muted-foreground', props.className)}>

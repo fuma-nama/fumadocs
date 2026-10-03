@@ -11,4 +11,4 @@ Docs, Notebook, and Glass layouts accept an `aiChat` option, pass your chat as `
 
 Your chat component no longer needs layout-specific positioning, like targeting `#nd-docs-layout` or overriding `--fd-right-width`.
 
-The `ai` feature of Fumadocs CLI now renders your docs layout from a client component at `components/ai/layout.tsx`, which passes the installed chat to `aiChat`. It supports Docs, Notebook, Glass, and Spacious layouts, and only adds a floating trigger to the layouts without their own.
+The `ai` feature of Fumadocs CLI now renders your docs layout from a client component at `ai/layout.tsx` in your components directory, which passes the installed chat to `aiChat`. It supports Docs, Notebook, Glass, and Spacious layouts, and only adds a floating trigger to the layouts without their own.

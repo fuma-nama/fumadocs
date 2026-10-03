@@ -102,10 +102,10 @@ export function DocsLayout(props: DocsLayoutProps) {
             id="fd-spacious-layout"
             // the TOC moves to page header when AI chat is open
             data-ai-chat={aiChat?.open && aiChat.panel ? '' : undefined}
-            className="relative grid min-h-(--fd-layout-height) transition-[grid-template-columns] duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] motion-reduce:transition-none [--fd-layout-height:calc(100dvh-var(--fd-banner-height,0px))] [--fd-sidebar-width:0px] md:h-(--fd-layout-height) md:overflow-clip md:bg-fd-card print:h-auto print:overflow-visible"
+            className="relative grid min-h-(--fd-layout-height) transition-[grid-template-columns] duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] motion-reduce:transition-none [--fd-layout-height:calc(100dvh-var(--fd-banner-height,0px))] [--fd-header-height:--spacing(14)] [--fd-page-width:760px] [--fd-sidebar-width:0px] [--fd-sidebar-col:var(--fd-sidebar-width)] [--fd-toc-width:0px] md:h-(--fd-layout-height) md:overflow-clip md:bg-fd-card print:h-auto print:overflow-visible"
             style={{
               gridTemplate: `"sidebar header right" auto
-"sidebar main right" 1fr / var(--fd-sidebar-width) minmax(0, 1fr) auto`,
+"sidebar main right" 1fr / var(--fd-sidebar-col) minmax(0, 1fr) auto`,
             }}
           >
             <slots.sidebar.main />

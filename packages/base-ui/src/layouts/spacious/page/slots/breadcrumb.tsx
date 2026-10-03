@@ -7,8 +7,6 @@ import { cn } from '@/utils/cn';
 
 export type BreadcrumbProps = BreadcrumbOptions & ComponentProps<'nav'>;
 
-const separator = <span className="shrink-0 text-fd-muted-foreground/50">/</span>;
-
 export function useBreadcrumbItems({
   includeRoot,
   includeSeparator,
@@ -24,18 +22,17 @@ export function useBreadcrumbItems({
 }
 
 /**
- * The folders of current page, `children` is appended after them.
+ * The folders of current page
  */
 export function Breadcrumb({
   includeRoot,
   includeSeparator,
   includePage,
   className,
-  children,
   ...props
 }: BreadcrumbProps) {
   const items = useBreadcrumbItems({ includeRoot, includeSeparator, includePage });
-  if (items.length === 0 && !children) return;
+  if (items.length === 0) return;
 
   return (
     <nav
@@ -47,7 +44,7 @@ export function Breadcrumb({
     >
       {items.map((item, i) => (
         <Fragment key={i}>
-          {i > 0 && separator}
+          {i > 0 && <span className="shrink-0 text-fd-muted-foreground/50">/</span>}
           {item.url ? (
             <Link
               href={item.url}
@@ -60,7 +57,6 @@ export function Breadcrumb({
           )}
         </Fragment>
       ))}
-      {children}
     </nav>
   );
 }
