@@ -48,7 +48,7 @@ function IconLinks({ className }: { className?: string }) {
   );
 }
 
-/** the top right of page, AI chat, the language switcher and icon links are moved into `OptionsMenu` on smaller viewports */
+/** AI chat, language switcher and icon links move into the options menu on smaller viewports */
 export function HeaderActions({ className, ...props }: ComponentProps<'div'>) {
   const {
     slots,
@@ -89,7 +89,6 @@ export function HeaderActions({ className, ...props }: ComponentProps<'div'>) {
   );
 }
 
-/** page-level options: AI chat, theme, language and icon links */
 function OptionsMenu() {
   const {
     props: { aiChat },
@@ -210,7 +209,6 @@ const themes = [
   ['dark', MoonIcon, '40deg'],
 ] as const;
 
-/** theme options with a sliding thumb */
 function ThemeSegments() {
   const { theme, setTheme } = useTheme();
   const t = useTranslations({ note: 'theme switcher' });

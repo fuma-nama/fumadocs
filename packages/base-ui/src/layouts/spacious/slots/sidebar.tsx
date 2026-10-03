@@ -39,7 +39,6 @@ const itemVariants = cva(
   },
 );
 
-/** highlights the guide line of folder next to an active item */
 const activeLine = <span className="absolute -start-1 inset-y-2 w-px bg-fd-primary" />;
 
 export function SidebarProvider(props: SidebarProviderProps) {
@@ -110,7 +109,6 @@ export function SidebarDrawer() {
     <>
       <Base.SidebarDrawerOverlay className="fixed z-40 inset-0 backdrop-blur-xs data-[state=open]:animate-fd-fade-in data-[state=closed]:animate-fd-fade-out" />
       <Base.SidebarDrawerContent className="fixed z-40 inset-e-0 inset-y-0 flex flex-col w-[85%] max-w-[380px] text-[0.9375rem] bg-fd-background border-s shadow-lg data-[state=open]:animate-fd-sidebar-in data-[state=closed]:animate-fd-sidebar-out">
-        {/* the close button takes the place of navbar's sidebar trigger */}
         <div className="flex items-center gap-1.5 h-(--fd-header-height) ps-3.5 pe-2.5 text-fd-muted-foreground">
           <div className="flex flex-1">
             {menuItems.map(
@@ -166,7 +164,6 @@ export function SidebarDrawer() {
   );
 }
 
-/** switch between layout tabs */
 function TabsMenu() {
   const {
     props: { tabs },
@@ -275,7 +272,9 @@ function SidebarItems() {
       {links.map((item, i) => (
         <SidebarLinkItem key={i} item={item} className={cn(i === links.length - 1 && 'mb-6')} />
       ))}
-      <SidebarPageTree />
+      <div className="flex flex-col">
+        <SidebarPageTree />
+      </div>
     </div>
   );
 }
@@ -301,7 +300,7 @@ function follow(area: HTMLDivElement | null) {
     block.style.translate = `${rect.left - origin.left}px ${rect.top - origin.top}px`;
     block.style.width = `${rect.width}px`;
     block.style.height = `${rect.height}px`;
-    // still glide through it, the active item has its own background
+    // the active item has its own background
     block.style.opacity = item.matches('[data-active=true]') ? '0' : '1';
   };
   const itemOf = (target: EventTarget | null) =>

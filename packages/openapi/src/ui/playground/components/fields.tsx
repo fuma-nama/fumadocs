@@ -59,8 +59,9 @@ export type NavigateFn = (entry: FieldEntry, siblings: FieldEntry[]) => void;
 /** the type of a field, at the end of its cell like a unit */
 const typeClassName = 'flex shrink-0 items-center pe-1 font-mono text-xs text-fd-muted-foreground';
 
-/** reserved at the end of every cell so their types align, holds the actions of field */
-const slotClassName = 'flex w-7 shrink-0 items-center justify-center';
+/** holds the actions of field, reserved in tables so their types align, an end padding when stacked */
+const slotClassName =
+  'flex w-7 shrink-0 items-center justify-center @max-sm:pe-2 @max-sm:empty:w-2';
 
 const rowButtonClassName =
   'flex h-10 w-full items-center gap-2 px-4 text-[0.8125rem] text-fd-muted-foreground transition-colors hover:bg-fd-accent/40 hover:text-fd-accent-foreground focus-visible:bg-fd-secondary focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-inset focus-visible:ring-fd-ring/60';

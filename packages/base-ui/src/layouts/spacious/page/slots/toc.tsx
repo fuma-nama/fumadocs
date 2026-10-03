@@ -64,9 +64,12 @@ export function TOC({ container, header, footer, ...props }: TOCProps) {
       id="nd-toc"
       {...container}
       className={cn(
-        'sticky top-0 flex flex-col shrink-0 w-(--fd-toc-width) h-full ps-16 pt-6 pb-4 layout:[--fd-toc-width:--spacing(76)] max-md:hidden @max-5xl:hidden',
-        // moved to the page header on narrower panel, or when AI chat is open
-        aiChat?.open && aiChat.panel && 'hidden',
+        'sticky top-0 flex flex-col shrink-0 w-(--fd-toc-width) h-full ps-16 pt-6 pb-4 overflow-clip *:min-w-[calc(var(--fd-toc-width)---spacing(16))] layout:[--fd-toc-width:--spacing(76)] transition-[width,padding,opacity,visibility] duration-300 ease-in-out motion-reduce:transition-none max-md:hidden',
+        // collapse along with AI chat
+        aiChat?.open && aiChat.panel
+          ? 'invisible w-0 ps-0 opacity-0'
+          : // not animated, container queries may resolve after the initial render
+            '@max-5xl:invisible @max-5xl:w-0 @max-5xl:ps-0 @max-5xl:opacity-0 @max-5xl:transition-none',
         container?.className,
       )}
     >
@@ -135,7 +138,6 @@ export function TOCPopover({
           )}
         >
           <TOCProgress size={18} className={cn('shrink-0', open && 'text-fd-primary')} />
-          {/* the page title is no longer visible after scrolling */}
           <ActiveHeading
             fallback={page?.name ?? t('On this page')}
             className={cn('flex-1 transition-colors', open && 'text-fd-foreground')}
@@ -144,13 +146,12 @@ export function TOCPopover({
             className={cn('size-4 shrink-0 mx-0.5 transition-transform', open && 'rotate-180')}
           />
         </CollapsibleTrigger>
-        <CollapsibleContent
-          {...content}
-          className={cn('flex flex-col px-4 max-h-[50vh]', content?.className)}
-        >
-          {header}
-          <TOCList {...props} onSelect={() => setOpen(false)} />
-          {footer}
+        <CollapsibleContent {...content}>
+          <div className="flex flex-col px-4 max-h-[50vh]">
+            {header}
+            <TOCList {...props} onSelect={() => setOpen(false)} />
+            {footer}
+          </div>
         </CollapsibleContent>
       </header>
     </Collapsible>
@@ -220,9 +221,7 @@ function TOCList({
   );
 }
 
-/**
- * The active heading, rolls in from the direction of scrolling.
- */
+/** rolls in from the direction of scrolling */
 function ActiveHeading({
   fallback,
   className,
@@ -252,7 +251,6 @@ function ActiveHeading({
   );
 }
 
-/** the reading progress of page */
 function TOCProgress({ size = 16, ...props }: ComponentProps<'svg'> & { size?: number }) {
   const value = useTOCSelector(selectProgress);
   const circle = { cx: size / 2, cy: size / 2, r: size / 2 - 1.5, fill: 'none', strokeWidth: 1.5 };

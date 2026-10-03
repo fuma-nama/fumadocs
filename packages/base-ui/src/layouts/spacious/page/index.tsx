@@ -102,7 +102,7 @@ export function DocsPage({
           <header
             className={cn(
               'absolute inset-x-0 top-0 z-10 flex items-center gap-1.5 h-(--fd-header-height) ps-6 pe-4 bg-linear-to-b from-fd-background to-transparent pointer-events-none *:pointer-events-auto max-md:hidden',
-              // fade out shorter when the start of header is empty
+              // shorter fade for an empty header start
               hasFolders || tocPopoverEnabled ? 'from-50%' : 'to-40%',
             )}
           >
@@ -111,9 +111,11 @@ export function DocsPage({
             {tocPopoverEnabled && (
               <div
                 className={cn(
-                  'flex items-center gap-1.5 min-w-0',
-                  // in place of the TOC when it is hidden
-                  tocEnabled && !(aiChat?.open && aiChat.panel) && 'hidden @max-5xl:flex',
+                  'flex items-center gap-1.5 min-w-0 transition-[opacity,visibility] duration-300 motion-reduce:transition-none',
+                  // in place of the hidden TOC
+                  tocEnabled &&
+                    !(aiChat?.open && aiChat.panel) &&
+                    'invisible opacity-0 @max-5xl:visible @max-5xl:opacity-100 @max-5xl:transition-none',
                 )}
               >
                 {hasFolders && <span className="text-sm text-fd-muted-foreground/50">/</span>}
@@ -123,7 +125,7 @@ export function DocsPage({
             <layout.slots.actions className="ms-auto" />
           </header>
           <div
-            // center on wider viewports, by the full width so hiding the TOC won't move the article
+            // centered with the TOC, so hiding it won't move the article
             className="flex flex-1 items-start px-4 md:min-h-0 md:pt-(--fd-header-height) md:px-[max(--spacing(6),calc((100%-var(--fd-page-width)-var(--fd-toc-width))/2))] md:overflow-y-auto md:overscroll-y-contain md:scrollbar-thin md:scrollbar-gutter-stable md:scroll-pt-(--fd-header-height) md:[&_[id]]:scroll-mt-2"
           >
             <article
@@ -153,7 +155,6 @@ export function DocsPage({
   );
 }
 
-/** show the sidebar again when collapsed */
 function ExpandSidebar() {
   const { collapsed } = useSidebar();
   if (!collapsed) return;
@@ -222,7 +223,7 @@ export function PageLastUpdate({
   ...props
 }: Omit<ComponentProps<'p'>, 'children'> & { date: Date }) {
   const t = useTranslations({ note: 'page footer' });
-  // to the timezone of client, empty on server
+  // in the client timezone
   const date = useSyncExternalStore(
     subscribe,
     () => value.toLocaleDateString(),

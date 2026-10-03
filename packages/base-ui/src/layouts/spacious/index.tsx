@@ -23,6 +23,7 @@ import {
 } from './slots/sidebar';
 import { Header } from './slots/header';
 import { AIChatPanel } from '@/layouts/shared/client';
+import { cn } from '@/utils/cn';
 import { HeaderActions } from './slots/actions';
 
 export interface DocsSlots extends BaseSlots {
@@ -112,7 +113,10 @@ export function DocsLayout(props: DocsLayoutProps) {
             {aiChat?.panel && (
               <AIChatPanel
                 open={aiChat.open}
-                className="[grid-area:right] xl:my-2 xl:me-2 xl:rounded-2xl xl:border xl:bg-fd-background xl:shadow-sm"
+                className={cn(
+                  '[grid-area:right] xl:my-2 xl:rounded-2xl xl:border xl:bg-fd-background xl:shadow-sm',
+                  aiChat.open && 'xl:me-2',
+                )}
               >
                 {aiChat.panel}
               </AIChatPanel>

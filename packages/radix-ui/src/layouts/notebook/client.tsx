@@ -123,7 +123,7 @@ export function LayoutBody(
             {aiChat?.panel && (
               <AIChatPanel
                 open={aiChat.open}
-                className="[grid-area:toc] justify-self-end xl:sticky xl:top-(--fd-docs-row-3) xl:h-[calc(var(--fd-docs-height)-var(--fd-docs-row-3))] xl:border-s"
+                className="[grid-area:toc] justify-self-end xl:sticky xl:max-w-full xl:top-(--fd-docs-row-3) xl:h-[calc(var(--fd-docs-height)-var(--fd-docs-row-3))] xl:border-s"
               >
                 {aiChat.panel}
               </AIChatPanel>

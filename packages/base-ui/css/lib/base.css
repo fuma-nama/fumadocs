@@ -176,6 +176,19 @@
   }
 }
 
+/* to transition the columns alone */
+@property --fd-sidebar-col {
+  syntax: '<length>';
+  inherits: true;
+  initial-value: 0px;
+}
+
+@property --fd-ai-chat-col {
+  syntax: '<length>';
+  inherits: true;
+  initial-value: 0px;
+}
+
 .fd-page-tree-item-name {
   @apply inline-flex items-center gap-1 w-full;
 }

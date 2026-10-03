@@ -1,7 +1,7 @@
 'use client';
 
 import { cn } from '@/utils/cn';
-import { useEffect, useState, type ComponentProps } from 'react';
+import type { ComponentProps } from 'react';
 import { useNotebookLayout } from '../client';
 
 export function Container(props: ComponentProps<'div'>) {
@@ -11,19 +11,12 @@ export function Container(props: ComponentProps<'div'>) {
   } = useNotebookLayout();
   const pageCol = 'calc(var(--fd-layout-width,97rem) - var(--fd-sidebar-col) - var(--fd-toc-col))';
   const { collapsed } = slots.sidebar?.useSidebar?.() ?? {};
-  const [previousCollapsed, setPreviousCollapsed] = useState(collapsed);
-  const isCollapseChanged = previousCollapsed !== collapsed;
-
-  // will only set data attribute for an instant
-  useEffect(() => {
-    if (isCollapseChanged) setPreviousCollapsed(collapsed);
-  }, [collapsed, isCollapseChanged]);
+  const aiChatOpen = Boolean(aiChat?.open && aiChat.panel);
 
   return (
     <div
       id="nd-notebook-layout"
       data-sidebar-collapsed={collapsed}
-      data-column-changed={isCollapseChanged}
       {...props}
       style={{
         gridTemplate:
@@ -41,8 +34,8 @@ export function Container(props: ComponentProps<'div'>) {
         ...props.style,
       }}
       className={cn(
-        'grid overflow-x-clip min-h-(--fd-docs-height) auto-cols-auto auto-rows-auto [--fd-docs-height:100dvh] [--fd-header-height:0px] [--fd-toc-popover-height:0px] [--fd-sidebar-width:0px] [--fd-toc-width:0px] [--fd-toc-col:var(--fd-toc-width)] data-[column-changed=true]:transition-[grid-template-columns]',
-        aiChat?.open && aiChat.panel && 'xl:[--fd-toc-col:var(--fd-ai-chat-width)]',
+        'grid overflow-x-clip min-h-(--fd-docs-height) auto-cols-auto auto-rows-auto [--fd-docs-height:100dvh] [--fd-header-height:0px] [--fd-toc-popover-height:0px] [--fd-sidebar-width:0px] [--fd-toc-width:0px] [--fd-toc-col:max(var(--fd-toc-width),var(--fd-ai-chat-col))] [transition:--fd-sidebar-col_150ms,--fd-ai-chat-col_300ms_ease-in-out]',
+        aiChatOpen && 'xl:[--fd-ai-chat-col:var(--fd-ai-chat-width)]',
         props.className,
       )}
     >
