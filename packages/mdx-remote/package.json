@@ -45,7 +45,7 @@
   },
   "devDependencies": {
     "@types/mdx": "^2.0.14",
-    "@types/node": "26.6.3",
+    "@types/node": "26.6.4",
     "@types/react": "^19.3.0",
     "fumadocs-core": "workspace:*",
     "react": "^19.3.0",
