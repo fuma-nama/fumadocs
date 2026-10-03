@@ -1,3 +1,27 @@
+## @fumadocs/base-ui@16.16.0
+
+### Place AI chat in layouts
+
+Docs, Notebook, and Glass layouts accept an `aiChat` option, pass your chat as `aiChat.panel` and the layout places it beside the page on wide viewports, and floats it over the page on smaller ones.
+
+Your chat component no longer needs layout-specific positioning, like targeting `#nd-docs-layout` or overriding `--fd-right-width`.
+
+The `ai` feature of Fumadocs CLI now renders your docs layout from a client component at `ai/layout.tsx` in your components directory, which passes the installed chat to `aiChat`. It supports Docs, Notebook, Glass, and Spacious layouts, and only adds a floating trigger to the layouts without their own.
+
+### Export Glass layout as `DocsLayout`
+
+Like other docs layouts, `fumadocs-ui/layouts/glass` exports `DocsLayout`, `DocsLayoutProps`, and `DocsSlots`. The `GlassLayout` names remain as aliases.
+
+### Introduce Spacious Layout
+
+A less compact version of Docs Layout, the page sits in an inset panel beside the sidebar, with page-level actions at the top of the panel.
+
+- Use it from `fumadocs-ui/layouts/spacious` and `fumadocs-ui/layouts/spacious/page`, and import the styles from `fumadocs-ui/css/generated/spacious.css`.
+- Pass `aiChat.panel` to render your AI chat in the layout, docked beside the page on wide screens and floating over it on smaller ones.
+- Customize it with `npx @fumadocs/cli customize`, only available for Base UI.
+
+The Chinese presets of `@fumadocs/language` include translations for its new strings.
+
 ## @fumadocs/base-ui@16.15.17
 
 ### Apply the Vite base path to the "View as Markdown" link
