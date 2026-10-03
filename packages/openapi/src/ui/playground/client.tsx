@@ -1,39 +1,32 @@
 'use client';
 import {
-  createContext,
+  type ComponentProps,
   type FC,
-  Fragment,
   type ReactNode,
-  use,
   useEffect,
+  useEffectEvent,
   useMemo,
   useState,
-  type ComponentProps,
-  useRef,
 } from 'react';
+import { Dialog } from '@base-ui/react/dialog';
+import { Play, X } from 'lucide-react';
+import { useOnChange } from 'fumadocs-core/utils/use-on-change';
 import { useOpenAPI } from '@/utils/create-page';
 import { useServer } from '@/utils/use-server';
 import { useExampleRequests, useOperation } from '@/operation';
 import type { BrowserFetcherOptions } from '@/playground/fetcher';
-import { DefaultResultDisplay, type ResultDisplayProps } from './components/result-display';
-import { pathnameFromRequest } from '@/requests/generators';
-import { MethodLabel } from '@/ui/components/method-label';
-import { Markdown } from '@/ui/components/markdown';
-import { useQuery } from 'shared-api/utils/use-query';
 import {
-  Collapsible,
-  CollapsibleContent,
-  CollapsibleTrigger,
-} from 'shared-api/components/collapsible';
-import { ChevronDown, LoaderCircle, PlusIcon } from 'lucide-react';
+  DefaultResultDisplay,
+  iconButtonClassName,
+  type ResultDisplayProps,
+} from './components/result-display';
+import { pathnameFromRequest } from '@/requests/generators';
+import { EndpointBar } from '@/ui/components/endpoint';
+import { useQuery } from 'shared-api/utils/use-query';
 import { encodeRequestData } from '@/requests/media/encode';
 import { buttonVariants } from 'fumadocs-ui/components/ui/button';
 import { cn } from '@/utils/cn';
-import {
-  anyFields,
-  SchemaProvider,
-  useResolvedSchema,
-} from 'shared-api/components/playground/schema';
+import { SchemaProvider } from 'shared-api/components/playground/schema';
 import {
   Select,
   SelectContent,
@@ -41,35 +34,20 @@ import {
   SelectTrigger,
   SelectValue,
 } from 'shared-api/components/select';
-import { Label } from 'shared-api/components/label';
-import type { JsonSchema } from '@fumadocs/json-schema';
-import ServerSelect from './components/server-select';
 import {
-  FieldKey,
+  type DataEngineListener,
+  type FieldKey,
   StfProvider,
-  useDataEngine,
   useFieldValue,
-  useListener,
   useStf,
 } from '@fumari/stf';
-import { stringifyFieldKey } from '@fumari/stf/lib/utils';
-import {
-  FieldInput,
-  FieldSet,
-  JsonInput,
-  ObjectInput,
-} from 'shared-api/components/playground/inputs';
 import type { ParameterObject } from '@/types';
 import { useTranslations } from '@fuma-translate/react';
-import { OAuthDialog, OAuthDialogContent, OAuthDialogTrigger } from './components/oauth-dialog';
-import {
-  type AuthField,
-  type AuthRequirement,
-  useAuthFields,
-  usePlaygroundAuth,
-} from '@/playground/auth';
-import { useOnChange } from 'fumadocs-core/utils/use-on-change';
-import { Spinner } from 'shared-api/components/spinner';
+import { type AuthField, useAuthFields, usePlaygroundAuth } from '@/playground/auth';
+import { UrlBar } from './components/url-bar';
+import { type RequestBodyInfo, RequestPanel } from './components/request-panel';
+import { ResponsePanel, type TestResult } from './components/response-panel';
+import { Segmented, SegmentedList } from './components/segmented';
 
 export interface FormValues extends Record<string, unknown> {
   path: Record<string, unknown>;
@@ -79,19 +57,13 @@ export interface FormValues extends Record<string, unknown> {
   body: unknown;
 }
 
-export interface PlaygroundClientProps
-  extends Omit<ComponentProps<'form'>, 'method'>, PlaygroundClientOptions {
+export interface PlaygroundClientProps extends ComponentProps<'div'>, PlaygroundClientOptions {
   writeOnly: boolean;
   readOnly: boolean;
 }
 
 export type { ResultDisplayProps };
 export { DefaultResultDisplay };
-
-export interface CollapsiblePanelProps extends Omit<ComponentProps<typeof Collapsible>, 'title'> {
-  'data-type': 'authorization' | 'body' | ParamType;
-  title: ReactNode;
-}
 
 export interface PlaygroundClientOptions {
   /**
@@ -103,7 +75,6 @@ export interface PlaygroundClientOptions {
 
   components?: {
     ResultDisplay?: FC<ResultDisplayProps>;
-    CollapsiblePanel?: FC<CollapsiblePanelProps>;
   };
 
   /**
@@ -124,17 +95,6 @@ export interface PlaygroundClientOptions {
   renderBodyField?: (fieldName: 'body', info: RequestBodyInfo) => ReactNode;
 }
 
-interface RequestBodyInfo {
-  schema: JsonSchema;
-  mediaType: string;
-}
-
-const OptionsContext = createContext<PlaygroundClientOptions>({});
-
-function usePlaygroundOptions() {
-  return use(OptionsContext);
-}
-
 export default function PlaygroundClient({
   writeOnly,
   readOnly,
@@ -147,32 +107,22 @@ export default function PlaygroundClient({
 }: PlaygroundClientProps) {
   const t = useTranslations({ note: 'playground' });
   const { doc, mediaAdapters, proxyUrl } = useOpenAPI();
-  const { dereferenced } = doc;
   const { path: route, method, operation, parameters: groups, requestBody } = useOperation();
-  const options = useMemo<PlaygroundClientOptions>(
-    () => ({
-      transformAuthInputs,
-      fetchOptions,
-      components,
-      renderParameterField,
-      renderBodyField,
-    }),
-    [transformAuthInputs, fetchOptions, components, renderParameterField, renderBodyField],
-  );
-  const parameters = useMemo(() => groups.flatMap((group) => group.items), [groups]);
-  const body = useMemo<RequestBodyInfo | undefined>(() => {
-    if (!requestBody) return;
-    const mediaType =
-      'application/json' in requestBody.content
-        ? 'application/json'
-        : Object.keys(requestBody.content)[0];
-
-    return { mediaType, schema: requestBody.content[mediaType].schema ?? true };
-  }, [requestBody]);
+  const parameters = groups.flatMap((group) => group.items);
+  let body: RequestBodyInfo | undefined;
+  if (requestBody) {
+    const { content } = requestBody;
+    const mediaType = 'application/json' in content ? 'application/json' : Object.keys(content)[0];
+    body = { mediaType, schema: content[mediaType].schema ?? true };
+  }
   const { items: examples, selected: exampleId, update } = useExampleRequests();
   const { resolveUrl } = useServer();
-  const { ResultDisplay = DefaultResultDisplay, CollapsiblePanel = DefaultCollapsiblePanel } =
-    components ?? {};
+  const [open, setOpen] = useState(false);
+
+  // reopen after the OAuth flow started here returns to the page
+  useOnChange(usePlaygroundAuth().origin, (origin) => {
+    if (origin === `${method} ${route}`) setOpen(true);
+  });
 
   const defaultValues: FormValues = useMemo(() => {
     const requestData = examples.find((example) => example.id === exampleId)?.data;
@@ -191,13 +141,14 @@ export default function PlaygroundClient({
     // because we already try to persist the form values via `update()`.
     defaultValues,
   });
+  const engine = stf.dataEngine;
 
-  const auth = useAuthFields(stf.dataEngine, {
+  const auth = useAuthFields(engine, {
     operation,
     transform: transformAuthInputs,
   });
 
-  const testQuery = useQuery(async (input: FormValues) => {
+  const testQuery = useQuery(async (input: FormValues): Promise<TestResult> => {
     const fetcher = await import('@/playground').then((mod) =>
       mod.createBrowserFetcher(mediaAdapters, {
         proxyUrl,
@@ -210,444 +161,197 @@ export default function PlaygroundClient({
       mediaAdapters,
       parameters,
     );
-    return fetcher.fetch(resolveUrl(pathnameFromRequest(route, encoded)), encoded);
+    const start = performance.now();
+    const result = await fetcher.fetch(resolveUrl(pathnameFromRequest(route, encoded)), encoded);
+    return { id: start, result, duration: performance.now() - start };
   });
 
-  const timerRef = useRef<number | null>(null);
-  const stfSync = useRef(false);
-  function triggerExampleUpdate() {
-    const data = {
-      ...auth.mapValues(stf.dataEngine.getData() as FormValues),
+  const syncExample = useEffectEvent(() => {
+    update({
+      ...auth.mapValues(engine.getData() as FormValues),
       method,
       bodyMediaType: body?.mediaType,
-    };
-    update(data);
-  }
-
-  useListener({
-    stf,
-    onUpdate() {
-      if (!stfSync.current) return;
-      if (timerRef.current) {
-        window.clearTimeout(timerRef.current);
-      }
-
-      timerRef.current = window.setTimeout(triggerExampleUpdate, 400);
-    },
+    });
   });
 
   useEffect(() => {
     // same object reference = unchanged
-    if (stf.dataEngine.getData() === defaultValues) return;
+    if (engine.getData() !== defaultValues) engine.reset(defaultValues);
+  }, [engine, defaultValues]);
 
-    stf.dataEngine.reset(defaultValues);
-    // eslint-disable-next-line react-hooks/exhaustive-deps -- ignore other parts
-  }, [defaultValues]);
-
+  const initAuth = auth.init;
+  // write the auth values again after resets, then sync the edits with a delay
   useEffect(() => {
-    const reset = auth.init();
-    triggerExampleUpdate();
-    stfSync.current = true;
+    const reset = initAuth();
+    syncExample();
+    let timer: number | undefined;
+    const listener: DataEngineListener = {
+      onUpdate() {
+        window.clearTimeout(timer);
+        timer = window.setTimeout(syncExample, 400);
+      },
+    };
+
+    engine.listen(listener);
     return () => {
-      stfSync.current = false;
+      engine.unlisten(listener);
+      window.clearTimeout(timer);
       reset();
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps -- ignore other parts
-  }, [defaultValues, auth.init]);
+  }, [engine, defaultValues, initAuth]);
 
   return (
-    <OptionsContext value={options}>
-      <StfProvider value={stf}>
-        <SchemaProvider docRoot={dereferenced as never} writeOnly={writeOnly} readOnly={readOnly}>
-          <form
-            {...rest}
-            className={cn(
-              'not-prose flex flex-col rounded-xl border shadow-md overflow-hidden bg-fd-card text-fd-card-foreground',
-              rest.className,
-            )}
-            onSubmit={(e) => {
-              testQuery.start(stf.dataEngine.getData() as FormValues);
-              e.preventDefault();
-            }}
-          >
-            <ServerSelect className="border-b" />
-            <div className="flex flex-row items-center gap-2 text-sm p-3 not-last:pb-0">
-              <MethodLabel>{method}</MethodLabel>
-              <Route
-                route={route}
-                className={cn('flex-1', operation.deprecated && 'line-through')}
+    <StfProvider value={stf}>
+      <SchemaProvider docRoot={doc.dereferenced as never} writeOnly={writeOnly} readOnly={readOnly}>
+        <Dialog.Root open={open} onOpenChange={setOpen}>
+          <EndpointBar method={method} route={route} deprecated={operation.deprecated} {...rest}>
+            <Dialog.Trigger
+              className={cn(
+                buttonVariants({ variant: 'primary', size: 'sm' }),
+                'group shrink-0 gap-1.5 rounded-lg px-3 transition-[background-color,scale] active:scale-[0.97] motion-reduce:transition-none',
+              )}
+            >
+              <Play className="size-3 fill-current transition-transform duration-200 group-hover:translate-x-px motion-reduce:transition-none" />
+              {t('Try it out')}
+            </Dialog.Trigger>
+          </EndpointBar>
+          <Dialog.Portal>
+            <Dialog.Backdrop className="fixed inset-0 z-50 bg-black/40 backdrop-blur-xs transition-opacity duration-200 data-ending-style:opacity-0 data-starting-style:opacity-0" />
+            <Dialog.Popup className="fixed inset-0 z-50 flex flex-col overflow-hidden bg-fd-background text-fd-foreground outline-none transition-[opacity,scale] duration-200 ease-[cubic-bezier(0.16,1,0.3,1)] data-ending-style:scale-[0.98] data-ending-style:opacity-0 data-ending-style:duration-150 data-starting-style:scale-[0.98] data-starting-style:opacity-0 motion-reduce:transition-opacity sm:inset-auto sm:top-1/2 sm:left-1/2 sm:h-[min(52rem,calc(100dvh-3rem))] sm:w-[min(80rem,calc(100vw-3rem))] sm:-translate-x-1/2 sm:-translate-y-1/2 sm:rounded-2xl sm:border sm:shadow-2xl">
+              <PlaygroundDialog
+                auth={auth}
+                body={body}
+                parameters={parameters}
+                result={testQuery.data}
+                loading={testQuery.isLoading}
+                onSend={() => testQuery.start(engine.getData() as FormValues)}
+                onReset={testQuery.reset}
+                renderParameterField={renderParameterField}
+                renderBodyField={renderBodyField}
+                ResultDisplay={components?.ResultDisplay}
               />
-              <button
-                type="submit"
-                className={cn(buttonVariants({ variant: 'default', size: 'sm' }), 'w-14 py-1.5')}
-                disabled={testQuery.isLoading}
-              >
-                {testQuery.isLoading ? <LoaderCircle className="size-4 animate-spin" /> : t('Send')}
-              </button>
-            </div>
-            {testQuery.data ? (
-              <ResultDisplay data={testQuery.data} reset={testQuery.reset} />
-            ) : null}
-
-            {auth.requirements.length > 0 && (
-              <SecurityRequirements
-                requirements={auth.requirements}
-                selected={auth.selected}
-                select={auth.select}
-              >
-                {auth.fields.map((field) => (
-                  <Fragment key={stringifyFieldKey(field.fieldName)}>
-                    <AuthInput field={field} />
-                  </Fragment>
-                ))}
-              </SecurityRequirements>
-            )}
-            <ParametersForm parameters={parameters} />
-            {body && (
-              <CollapsiblePanel data-type="body" title={t('Body')}>
-                {renderBodyField ? (
-                  renderBodyField('body', body)
-                ) : (
-                  <BodyInput field={body.schema} />
-                )}
-              </CollapsiblePanel>
-            )}
-          </form>
-        </SchemaProvider>
-      </StfProvider>
-    </OptionsContext>
+            </Dialog.Popup>
+          </Dialog.Portal>
+        </Dialog.Root>
+      </SchemaProvider>
+    </StfProvider>
   );
 }
 
-function SecurityRequirements({
-  requirements,
-  select,
-  selected,
-  children,
-}: {
-  requirements: AuthRequirement[][];
-  selected: number;
-  select: (value: number) => void;
-  children: ReactNode;
+function PlaygroundDialog({
+  auth,
+  body,
+  parameters,
+  result,
+  loading,
+  onSend,
+  onReset,
+  renderParameterField,
+  renderBodyField,
+  ResultDisplay,
+}: Pick<PlaygroundClientOptions, 'renderParameterField' | 'renderBodyField'> & {
+  auth: ReturnType<typeof useAuthFields>;
+  body?: RequestBodyInfo;
+  parameters: ParameterObject[];
+  result?: TestResult;
+  loading: boolean;
+  onSend: () => void;
+  onReset: () => void;
+  ResultDisplay?: FC<ResultDisplayProps>;
 }) {
   const t = useTranslations({ note: 'playground' });
-  const { isLoading, error } = usePlaygroundAuth();
-  const defaultOpen = isLoading || error != null;
-  const [open, setOpen] = useState(defaultOpen);
-  const { CollapsiblePanel = DefaultCollapsiblePanel } = usePlaygroundOptions().components ?? {};
-
-  useOnChange(defaultOpen, () => {
-    if (defaultOpen) setOpen(true);
-  });
-
-  const items = requirements.map((requirement, i) => ({
-    value: i,
-    label: (
-      <span className="inline-flex items-center gap-1 font-mono font-medium">
-        {requirement.map((item, i) => (
-          <Fragment key={i}>
-            {i > 0 && <PlusIcon className="text-fd-muted-foreground size-3.5" />}
-            <span className={cn(item.scheme.deprecated && 'text-fd-muted-foreground line-through')}>
-              {item.id}
-            </span>
-          </Fragment>
-        ))}
-      </span>
-    ),
-  }));
+  const { title, method, path, operation } = useOperation();
+  const [view, setView] = useState('request');
 
   return (
-    <CollapsiblePanel
-      title={
-        <>
-          {t('Authorization')}
-          {isLoading && (
-            <span className="border-s ps-2 inline-flex items-center gap-1.5 text-fd-muted-foreground text-xs font-mono">
-              <Spinner /> {t('Fetching token...')}
-            </span>
-          )}
-        </>
-      }
-      data-type="authorization"
-      open={open}
-      onOpenChange={setOpen}
+    <form
+      noValidate
+      className="flex min-h-0 flex-1 flex-col"
+      onSubmit={(e) => {
+        e.preventDefault();
+        if (loading) return;
+        onSend();
+        setView('response');
+      }}
+      onKeyDown={(e) => {
+        if (e.key !== 'Enter' || !(e.metaKey || e.ctrlKey)) return;
+        e.preventDefault();
+        e.currentTarget.requestSubmit();
+      }}
     >
-      {error != null && (
-        <div className="p-2 border rounded-lg bg-fd-secondary">
-          <p className="text-fd-muted-foreground font-medium mb-1">{t('Failed to fetch token')}</p>
-          <p>{String(error)}</p>
-        </div>
-      )}
-      <div className="overflow-hidden rounded-md border bg-fd-secondary focus-within:ring focus-within:ring-fd-ring">
-        <Select items={items} value={selected} onValueChange={(v) => v !== null && select(v)}>
-          <SelectTrigger className="rounded-t-md rounded-b-none border-0 bg-transparent focus:ring-0">
-            <SelectValue />
-          </SelectTrigger>
-          <SelectContent>
-            {items.map(({ value, label }) => (
-              <SelectItem key={value} value={value}>
-                {label}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-        <div className="grid grid-cols-[auto_1fr] gap-2 border-t px-2 py-1.5 text-xs text-fd-muted-foreground empty:hidden">
-          {requirements[selected]?.map(({ id, scheme }, _, arr) => {
-            if (!scheme.description) return;
-
-            return (
-              <Fragment key={id}>
-                {arr.length > 1 && (
-                  <span className="font-medium font-mono text-fd-primary">{id}</span>
-                )}
-                <Markdown md={scheme.description} />
-              </Fragment>
-            );
-          })}
+      <div className="flex h-12 shrink-0 items-center gap-2 ps-4 pe-2 sm:ps-5">
+        <Dialog.Title className="truncate text-sm font-medium">{title}</Dialog.Title>
+        {operation.deprecated && (
+          <span className="rounded-md bg-amber-500/10 px-1.5 py-0.5 text-xs font-medium text-amber-600 dark:text-amber-400">
+            {t('Deprecated')}
+          </span>
+        )}
+        <div className="ms-auto flex items-center gap-1">
+          <ExampleSelect />
+          <Dialog.Close aria-label={t('Close')} className={iconButtonClassName}>
+            <X />
+          </Dialog.Close>
         </div>
       </div>
-      {children}
-    </CollapsiblePanel>
-  );
-}
-
-const ParamTypes = ['path', 'header', 'cookie', 'query'] as const;
-type ParamType = (typeof ParamTypes)[number];
-
-function ParameterItem({ type, parameters }: { type: ParamType; parameters: ParameterObject[] }) {
-  const { renderParameterField } = usePlaygroundOptions();
-
-  return parameters.map((field) => {
-    const fieldName: FieldKey = [type, field.name!];
-    if (renderParameterField) {
-      return renderParameterField(fieldName, field);
-    }
-
-    const contentTypes = field.content && Object.keys(field.content);
-    const schema =
-      field.content && contentTypes && contentTypes.length > 0
-        ? field.content[contentTypes[0]].schema
-        : field.schema;
-
-    return (
-      <FieldSet
-        key={stringifyFieldKey(fieldName)}
-        name={field.name}
-        fieldName={fieldName}
-        field={(schema ?? anyFields) as JsonSchema}
-        isRequired={field.required}
-      />
-    );
-  });
-}
-
-function ParametersForm({ parameters }: { parameters: ParameterObject[] }) {
-  const { CollapsiblePanel = DefaultCollapsiblePanel } = usePlaygroundOptions().components ?? {};
-  const t = useTranslations({ note: 'playground' });
-  const displayNames = {
-    header: t('Header'),
-    cookie: t('Cookies'),
-    query: t('Query'),
-    path: t('Path'),
-  };
-
-  return ParamTypes.map((type) => {
-    const items = parameters.filter((v) => v.in === type);
-    if (items.length === 0) return;
-
-    return (
-      <CollapsiblePanel key={type} data-type={type} title={displayNames[type]}>
-        <ParameterItem parameters={items} type={type} />
-      </CollapsiblePanel>
-    );
-  });
-}
-
-function BodyInput({ field: _field }: { field: JsonSchema }) {
-  const field = useResolvedSchema(_field);
-  const [isJson, setIsJson] = useState(false);
-  const t = useTranslations({ note: 'playground' });
-
-  if (field.format === 'binary') return <FieldSet field={field} fieldName={['body']} isRequired />;
-
-  if (isJson)
-    return (
-      <>
-        <button
-          className={cn(
-            buttonVariants({
-              variant: 'secondary',
-              size: 'sm',
-              className: 'w-fit font-mono p-2',
-            }),
-          )}
-          onClick={() => setIsJson(false)}
-          type="button"
-        >
-          {t('Close JSON Editor')}
-        </button>
-        <JsonInput fieldName={['body']} />
-      </>
-    );
-
-  return (
-    <FieldSet
-      field={field}
-      fieldName={['body']}
-      collapsible={false}
-      isRequired
-      name={
-        <button
-          type="button"
-          className={cn(
-            buttonVariants({
-              variant: 'secondary',
-              size: 'sm',
-              className: 'p-2',
-            }),
-          )}
-          onClick={() => setIsJson(true)}
-        >
-          {t('Open JSON Editor')}
-        </button>
-      }
-    />
-  );
-}
-
-function AuthInput({ field }: { field: AuthField }) {
-  const t = useTranslations({ note: 'playground' });
-  const { fieldName, scheme } = field;
-
-  if (scheme.type === 'oauth2') return <OAuth2Input field={field} />;
-
-  if (scheme.type === 'http' && scheme.scheme === 'basic') {
-    return (
-      <ObjectInput
-        field={{
-          type: 'object',
-          properties: {
-            username: {
-              type: 'string',
-            },
-            password: {
-              type: 'string',
-            },
-          },
-        }}
-        fieldName={fieldName}
-      />
-    );
-  }
-
-  if (scheme.type === 'apiKey') {
-    return (
-      <FieldSet
-        fieldName={fieldName}
-        name={`${scheme.name} (${scheme.in})`}
-        field={{
-          type: 'string',
-        }}
-      />
-    );
-  }
-
-  return (
-    <>
-      <FieldSet
-        name={`${t('Authorization')} (${t('Header')})`}
-        fieldName={fieldName}
-        field={{
-          type: 'string',
-        }}
-      />
-      {scheme.type !== 'http' && (
-        <p className="text-fd-muted-foreground text-xs">
-          {t(
-            'OpenID Connect is not supported at the moment, you can still set an access token here.',
-          )}
-        </p>
-      )}
-    </>
-  );
-}
-
-function OAuth2Input({ field }: { field: AuthField }) {
-  const { fieldName } = field;
-  const [open, setOpen] = useState(false);
-  const engine = useDataEngine();
-  const t = useTranslations({ note: 'playground' });
-
-  return (
-    <fieldset className="flex flex-col gap-2">
-      <Label htmlFor={stringifyFieldKey(fieldName)}>{t('Access Token')}</Label>
-      <div className="flex gap-2">
-        <FieldInput
-          fieldName={fieldName}
-          field={{
-            type: 'string',
-          }}
-          className="flex-1"
+      <div className="shrink-0 px-3 pb-3 sm:px-4">
+        <UrlBar
+          method={method}
+          route={path}
+          parameters={parameters.filter((param) => param.in === 'path')}
+          deprecated={operation.deprecated}
+          loading={loading}
         />
-
-        <OAuthDialog open={open} onOpenChange={setOpen}>
-          <OAuthDialogTrigger
-            type="button"
-            className={cn(
-              buttonVariants({
-                size: 'sm',
-                variant: 'secondary',
-              }),
-            )}
-          >
-            {t('Authorize')}
-          </OAuthDialogTrigger>
-          <OAuthDialogContent
-            setOpen={setOpen}
-            schemeId={field.schemeId}
-            scopes={field.scopes}
-            setToken={(token) => engine.update(['header', 'Authorization'], token)}
-          />
-        </OAuthDialog>
       </div>
-    </fieldset>
+      <Segmented value={view} onValueChange={setView} className="shrink-0 px-3 pb-3 md:hidden">
+        <SegmentedList
+          className="*:flex-1 *:justify-center"
+          items={[
+            { value: 'request', label: t('Request') },
+            { value: 'response', label: t('Response') },
+          ]}
+        />
+      </Segmented>
+      <div className="mx-3 mb-3 grid min-h-0 flex-1 overflow-hidden rounded-xl border bg-fd-card sm:mx-4 sm:mb-4 md:grid-cols-[minmax(0,11fr)_minmax(0,9fr)]">
+        <RequestPanel
+          auth={auth}
+          body={body}
+          parameters={parameters}
+          renderParameterField={renderParameterField}
+          renderBodyField={renderBodyField}
+          className={cn(view !== 'request' && 'max-md:hidden')}
+        />
+        <ResponsePanel
+          result={result}
+          loading={loading}
+          onReset={onReset}
+          ResultDisplay={ResultDisplay}
+          className={cn('md:border-s', view !== 'response' && 'max-md:hidden')}
+        />
+      </div>
+    </form>
   );
 }
 
-function Route({ route, ...props }: ComponentProps<'div'> & { route: string }) {
-  return (
-    <div
-      {...props}
-      className={cn(
-        'flex flex-row items-center gap-0.5 overflow-auto text-nowrap',
-        props.className,
-      )}
-    >
-      {route.split('/').map((part, index) => (
-        <Fragment key={index}>
-          {index > 0 && <span className="text-fd-muted-foreground">/</span>}
-          {part.startsWith('{') && part.endsWith('}') ? (
-            <code className="bg-fd-primary/10 text-fd-primary">{part}</code>
-          ) : (
-            <code className="text-fd-foreground">{part}</code>
-          )}
-        </Fragment>
-      ))}
-    </div>
-  );
-}
+function ExampleSelect() {
+  const { items, selected, select } = useExampleRequests();
+  const t = useTranslations({ note: 'playground' });
+  if (items.length <= 1) return null;
+  const options = items.map((item) => ({ value: item.id, label: item.name }));
 
-export function DefaultCollapsiblePanel({ title, children, ...props }: CollapsiblePanelProps) {
   return (
-    <Collapsible {...props} className={cn('border-b last:border-b-0', props.className)}>
-      <CollapsibleTrigger className="group w-full flex items-center gap-2 p-3 text-sm font-medium">
-        {title}
-        <ChevronDown className="ms-auto size-3.5 text-fd-muted-foreground group-data-[panel-open]:rotate-180" />
-      </CollapsibleTrigger>
-      <CollapsibleContent>
-        <div className="flex flex-col gap-3 p-3 pt-1">{children}</div>
-      </CollapsibleContent>
-    </Collapsible>
+    <Select items={options} value={selected ?? null} onValueChange={(v) => v !== null && select(v)}>
+      <SelectTrigger className="h-8 w-auto max-w-64 gap-1.5 border-0 bg-transparent px-2 text-xs hover:bg-fd-accent focus:ring-0 focus-visible:ring-2">
+        <span className="text-fd-muted-foreground">{t('Example')}</span>
+        <SelectValue className="truncate font-medium" />
+      </SelectTrigger>
+      <SelectContent align="end">
+        {options.map((option) => (
+          <SelectItem key={option.value} value={option.value}>
+            {option.label}
+          </SelectItem>
+        ))}
+      </SelectContent>
+    </Select>
   );
 }
 
