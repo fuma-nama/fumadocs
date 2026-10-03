@@ -1,5 +1,12 @@
 'use client';
-import { type ComponentProps, Fragment, type ReactNode, useEffect, useMemo, useState } from 'react';
+import {
+  type ComponentProps,
+  Fragment,
+  type ReactNode,
+  useCallback,
+  useMemo,
+  useState,
+} from 'react';
 import { DownloadIcon, FileIcon, X } from 'lucide-react';
 import type { FetchResponseResult, FetchResult } from '@/playground/fetcher';
 import { useStatusInfo } from '../status-info';
@@ -120,26 +127,26 @@ function ResponseResult({
   const t = useTranslations({ note: 'playground result display' });
   const statusInfo = useStatusInfo(data.status);
   const [view, setView] = useState('body');
-  const [objectUrl, setObjectUrl] = useState<string>();
-  const { parameters, type } = useMemo(
-    () => safeParse(data.headers.get('Content-Type') ?? 'text/plain'),
-    [data.headers],
-  );
-  const headers = useMemo(() => Array.from(data.headers), [data.headers]);
+  const { parameters, type } = safeParse(data.headers.get('Content-Type') ?? 'text/plain');
+  const headers = Array.from(data.headers);
   const size = data.body.byteLength;
-
-  useEffect(() => {
-    const objectUrl = URL.createObjectURL(new Blob([data.body], { type }));
-    setObjectUrl(objectUrl);
-
-    return () => URL.revokeObjectURL(objectUrl);
-  }, [data.body, type]);
+  // link elements to the body, its object URL is revoked with them
+  const bodyUrlRef = useCallback(
+    (element: HTMLImageElement | HTMLAnchorElement | null) => {
+      if (!element) return;
+      const url = URL.createObjectURL(new Blob([data.body], { type }));
+      if (element instanceof HTMLAnchorElement) element.href = url;
+      else element.src = url;
+      return () => URL.revokeObjectURL(url);
+    },
+    [data.body, type],
+  );
 
   let body: ReactNode;
   if (type.startsWith('image/')) {
-    body = objectUrl && (
+    body = (
       <div className="flex min-h-full items-center justify-center p-4">
-        <img src={objectUrl} alt="" className="max-w-full rounded-lg border" />
+        <img ref={bodyUrlRef} alt="" className="max-w-full rounded-lg border" />
       </div>
     );
   } else if (size > 0) {
@@ -207,7 +214,7 @@ function ResponseResult({
           <div className="flex shrink-0 items-center">
             {size > 0 && (
               <a
-                href={objectUrl}
+                ref={bodyUrlRef}
                 download={getFileName(data.headers)}
                 aria-label={t('Download')}
                 title={t('Download')}

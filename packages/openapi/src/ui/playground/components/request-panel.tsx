@@ -1,5 +1,5 @@
 'use client';
-import { Fragment, type ReactNode, useLayoutEffect, useMemo, useRef, useState } from 'react';
+import { Fragment, type ReactNode, useState } from 'react';
 import {
   ArrowLeft,
   Braces,
@@ -77,6 +77,9 @@ const motionClassNames: Record<Motion, string> = {
   previous: 'motion-safe:starting:-translate-y-4',
 };
 
+const transitionClassName =
+  'motion-safe:transition-[opacity,translate] motion-safe:duration-300 motion-safe:ease-[cubic-bezier(0.16,1,0.3,1)]';
+
 /** the overview of all request inputs, nested fields open in their own panel */
 export function RequestPanel({
   auth,
@@ -96,8 +99,6 @@ export function RequestPanel({
   const [stack, setStack] = useState<FieldEntry[]>([]);
   const [oauth, setOAuth] = useState<AuthField | null>(null);
   const [motion, setMotion] = useState<Motion>('forward');
-  const scrollRef = useRef<HTMLDivElement>(null);
-  const overviewScroll = useRef(0);
   const current = stack.at(-1);
   const sectionNames: Record<string, string> = {
     path: t('Path'),
@@ -114,39 +115,26 @@ export function RequestPanel({
         const field = resolveField(target.schema, undefined);
         return field ? generateDefault(field) : undefined;
       });
-    if (stack.length === 0 && scrollRef.current)
-      overviewScroll.current = scrollRef.current.scrollTop;
     setMotion(nextMotion ?? (next.length >= stack.length ? 'forward' : 'back'));
     setStack(next);
   }
 
-  function openOAuth(field: AuthField | null) {
-    if (field && scrollRef.current) overviewScroll.current = scrollRef.current.scrollTop;
-    setMotion(field ? 'forward' : 'back');
-    setOAuth(field);
+  function openNested(parents: FieldEntry[]): NavigateFn {
+    return (entry, siblings) =>
+      navigate([...parents, { ...entry, siblings: getNestedFields(engine, siblings) }]);
   }
 
-  useLayoutEffect(() => {
-    if (scrollRef.current)
-      scrollRef.current.scrollTop = stack.length === 0 && !oauth ? overviewScroll.current : 0;
-  }, [stack, oauth]);
-
-  const panelClassName = cn(
-    'starting:opacity-0 motion-safe:transition-[opacity,translate] motion-safe:duration-300 motion-safe:ease-[cubic-bezier(0.16,1,0.3,1)]',
-    motionClassNames[motion],
-  );
-
-  return (
-    <div
-      ref={scrollRef}
-      className={cn('fd-scroll-container @container min-h-0 overflow-y-auto', className)}
-    >
-      {oauth ? (
-        <>
+  let panel: ReactNode = null;
+  if (oauth) {
+    panel = (
+      <Panel
+        id="oauth"
+        motion="forward"
+        nav={
           <PanelNav
             root={t('Authorization')}
-            onRoot={() => openOAuth(null)}
-            onBack={() => openOAuth(null)}
+            onRoot={() => setOAuth(null)}
+            onBack={() => setOAuth(null)}
           >
             <Crumb>
               <span aria-current="page" className="truncate px-1.5 py-1 font-mono font-medium">
@@ -154,44 +142,85 @@ export function RequestPanel({
               </span>
             </Crumb>
           </PanelNav>
-          <div key="oauth" className={panelClassName}>
-            <OAuthPanel
-              field={oauth}
-              onToken={(token) => {
-                engine.update(oauth.fieldName, token);
-                openOAuth(null);
-              }}
-            />
-          </div>
-        </>
-      ) : current ? (
-        <>
+        }
+      >
+        <OAuthPanel
+          field={oauth}
+          onToken={(token) => {
+            engine.update(oauth.fieldName, token);
+            setOAuth(null);
+          }}
+        />
+      </Panel>
+    );
+  } else if (current) {
+    panel = (
+      <Panel
+        id={stringifyFieldKey(current.fieldName)}
+        motion={motion}
+        nav={
           <Breadcrumbs
             root={sectionNames[stack[0].fieldName[0]]}
             stack={stack}
             onNavigate={navigate}
           />
-          <div key={stringifyFieldKey(current.fieldName)} className={panelClassName}>
-            <FieldRows
-              entry={current}
-              showDescription
-              onNavigate={(entry) => navigate([...stack, entry])}
-            />
-          </div>
-        </>
-      ) : (
-        <div key="overview" className={panelClassName}>
-          <Overview
-            {...options}
-            auth={auth}
-            body={body}
-            parameters={parameters}
-            sectionNames={sectionNames}
-            onNavigate={(entry) => navigate([entry])}
-            onOAuth={openOAuth}
-          />
-        </div>
-      )}
+        }
+      >
+        <FieldRows entry={current} showDescription onNavigate={openNested(stack)} />
+      </Panel>
+    );
+  }
+
+  // the overview stays under panels, keeping its scroll position
+  return (
+    <div className={cn('@container grid min-h-0', className)}>
+      <div
+        className={cn(
+          'fd-scroll-container min-h-0 overflow-y-auto [grid-area:1/1] starting:opacity-0 motion-safe:starting:translate-x-6',
+          transitionClassName,
+          panel && 'invisible opacity-0 motion-safe:-translate-x-6',
+        )}
+      >
+        <Overview
+          {...options}
+          auth={auth}
+          body={body}
+          parameters={parameters}
+          sectionNames={sectionNames}
+          onNavigate={openNested([])}
+          onOAuth={setOAuth}
+        />
+      </div>
+      {panel}
+    </div>
+  );
+}
+
+/** a panel over the overview, its content animates in when `id` changes */
+function Panel({
+  id,
+  motion,
+  nav,
+  children,
+}: {
+  id: string;
+  motion: Motion;
+  nav: ReactNode;
+  children: ReactNode;
+}) {
+  return (
+    <div className="flex min-h-0 flex-col [grid-area:1/1]">
+      {nav}
+      <div
+        key={id}
+        className={cn(
+          'fd-scroll-container min-h-0 flex-1 overflow-y-auto starting:opacity-0',
+          transitionClassName,
+          motionClassNames[motion],
+        )}
+      >
+        {children}
+      </div>
     </div>
   );
 }
@@ -218,7 +247,7 @@ function PanelNav({
   return (
     <nav
       aria-label={t('Breadcrumb')}
-      className="sticky top-0 z-10 flex h-10 items-center gap-1 border-b bg-fd-card ps-1.5 pe-1.5 text-[0.8125rem]"
+      className="flex h-10 shrink-0 items-center gap-1 border-b ps-1.5 pe-1.5 text-[0.8125rem]"
     >
       <button
         type="button"
@@ -389,23 +418,6 @@ function Overview({
   onOAuth: (field: AuthField) => void;
 }) {
   const t = useTranslations({ note: 'playground' });
-  const engine = useDataEngine();
-  const groups = useMemo(() => {
-    const out: Partial<Record<ParamType, { param: ParameterObject; entry: FieldEntry }[]>> = {};
-    for (const param of parameters) {
-      const type = param.in as ParamType;
-      (out[type] ??= []).push({
-        param,
-        entry: {
-          fieldName: [type, param.name!],
-          name: param.name!,
-          schema: getParameterSchema(param),
-          removal: getRemoval(param.required ?? false, false),
-        },
-      });
-    }
-    return out;
-  }, [parameters]);
 
   if (auth.requirements.length === 0 && parameters.length === 0 && !body) {
     return (
@@ -419,14 +431,14 @@ function Overview({
     <>
       {auth.requirements.length > 0 && <AuthSection auth={auth} onOAuth={onOAuth} />}
       {paramTypes.map((type) => {
-        const items = groups[type];
-        if (!items) return;
-        const navigate: NavigateFn = (entry) => {
-          const candidates: FieldEntry[] = [];
-          for (const item of items) candidates.push(item.entry);
-
-          onNavigate({ ...entry, siblings: getNestedFields(engine, candidates) });
-        };
+        const items = parameters.filter((param) => param.in === type);
+        if (items.length === 0) return;
+        const entries = items.map((param): FieldEntry => ({
+          fieldName: [type, param.name!],
+          name: param.name!,
+          schema: getParameterSchema(param),
+          removal: getRemoval(param.required ?? false, false),
+        }));
 
         return (
           <Section
@@ -435,26 +447,21 @@ function Overview({
             title={sectionNames[type]}
             count={items.length}
           >
-            {items.map(({ param, entry }) => {
-              if (renderParameterField)
-                return (
-                  <Fragment key={entry.name}>
-                    {renderParameterField(entry.fieldName, param)}
-                  </Fragment>
-                );
-
-              return (
+            {items.map((param, i) =>
+              renderParameterField ? (
+                <Fragment key={param.name}>
+                  {renderParameterField(entries[i].fieldName, param)}
+                </Fragment>
+              ) : (
                 <FieldRow
-                  key={entry.name}
-                  name={entry.name}
-                  fieldName={entry.fieldName}
-                  schema={entry.schema}
+                  key={param.name}
+                  entry={entries[i]}
                   required={param.required}
                   description={param.description}
-                  onNavigate={navigate}
+                  onNavigate={() => onNavigate(entries[i], entries)}
                 />
-              );
-            })}
+              ),
+            )}
           </Section>
         );
       })}
@@ -644,10 +651,7 @@ function BodySection({
   const t = useTranslations({ note: 'playground' });
   const [mode, setMode] = useState('form');
   const root = useResolvedSchema(body.schema);
-  const entry = useMemo<FieldEntry>(
-    () => ({ fieldName: ['body'], name: 'body', schema: body.schema }),
-    [body.schema],
-  );
+  const entry: FieldEntry = { fieldName: ['body'], name: 'body', schema: body.schema };
   const allowJson =
     !renderBodyField &&
     body.mediaType !== 'multipart/form-data' &&
@@ -687,7 +691,7 @@ function BodySection({
 function JsonEditor({ fieldName }: { fieldName: FieldKey }) {
   const engine = useDataEngine();
   const [error, setError] = useState<string | null>(null);
-  const [value, setValue] = useState(() => JSON.stringify(engine.init(fieldName, {}), null, 2));
+  const [value, setValue] = useState(() => JSON.stringify(engine.get(fieldName) ?? {}, null, 2));
 
   return (
     <div className="flex flex-col">

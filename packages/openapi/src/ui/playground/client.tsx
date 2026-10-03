@@ -1,12 +1,12 @@
 'use client';
 import {
+  type ComponentProps,
   type FC,
   type ReactNode,
   useEffect,
+  useEffectEvent,
   useMemo,
-  useRef,
   useState,
-  type ComponentProps,
 } from 'react';
 import { Dialog } from '@base-ui/react/dialog';
 import { Play, X } from 'lucide-react';
@@ -34,7 +34,13 @@ import {
   SelectTrigger,
   SelectValue,
 } from 'shared-api/components/select';
-import { type FieldKey, StfProvider, useFieldValue, useListener, useStf } from '@fumari/stf';
+import {
+  type DataEngineListener,
+  type FieldKey,
+  StfProvider,
+  useFieldValue,
+  useStf,
+} from '@fumari/stf';
 import type { ParameterObject } from '@/types';
 import { useTranslations } from '@fuma-translate/react';
 import { type AuthField, useAuthFields, usePlaygroundAuth } from '@/playground/auth';
@@ -102,16 +108,13 @@ export default function PlaygroundClient({
   const t = useTranslations({ note: 'playground' });
   const { doc, mediaAdapters, proxyUrl } = useOpenAPI();
   const { path: route, method, operation, parameters: groups, requestBody } = useOperation();
-  const parameters = useMemo(() => groups.flatMap((group) => group.items), [groups]);
-  const body = useMemo<RequestBodyInfo | undefined>(() => {
-    if (!requestBody) return;
-    const mediaType =
-      'application/json' in requestBody.content
-        ? 'application/json'
-        : Object.keys(requestBody.content)[0];
-
-    return { mediaType, schema: requestBody.content[mediaType].schema ?? true };
-  }, [requestBody]);
+  const parameters = groups.flatMap((group) => group.items);
+  let body: RequestBodyInfo | undefined;
+  if (requestBody) {
+    const { content } = requestBody;
+    const mediaType = 'application/json' in content ? 'application/json' : Object.keys(content)[0];
+    body = { mediaType, schema: content[mediaType].schema ?? true };
+  }
   const { items: examples, selected: exampleId, update } = useExampleRequests();
   const { resolveUrl } = useServer();
   const [open, setOpen] = useState(false);
@@ -138,8 +141,9 @@ export default function PlaygroundClient({
     // because we already try to persist the form values via `update()`.
     defaultValues,
   });
+  const engine = stf.dataEngine;
 
-  const auth = useAuthFields(stf.dataEngine, {
+  const auth = useAuthFields(engine, {
     operation,
     transform: transformAuthInputs,
   });
@@ -162,47 +166,39 @@ export default function PlaygroundClient({
     return { id: start, result, duration: performance.now() - start };
   });
 
-  const timerRef = useRef<number | null>(null);
-  const stfSync = useRef(false);
-  function triggerExampleUpdate() {
-    const data = {
-      ...auth.mapValues(stf.dataEngine.getData() as FormValues),
+  const syncExample = useEffectEvent(() => {
+    update({
+      ...auth.mapValues(engine.getData() as FormValues),
       method,
       bodyMediaType: body?.mediaType,
-    };
-    update(data);
-  }
-
-  useListener({
-    stf,
-    onUpdate() {
-      if (!stfSync.current) return;
-      if (timerRef.current) {
-        window.clearTimeout(timerRef.current);
-      }
-
-      timerRef.current = window.setTimeout(triggerExampleUpdate, 400);
-    },
+    });
   });
 
   useEffect(() => {
     // same object reference = unchanged
-    if (stf.dataEngine.getData() === defaultValues) return;
+    if (engine.getData() !== defaultValues) engine.reset(defaultValues);
+  }, [engine, defaultValues]);
 
-    stf.dataEngine.reset(defaultValues);
-    // eslint-disable-next-line react-hooks/exhaustive-deps -- ignore other parts
-  }, [defaultValues]);
-
+  const initAuth = auth.init;
+  // write the auth values again after resets, then sync the edits with a delay
   useEffect(() => {
-    const reset = auth.init();
-    triggerExampleUpdate();
-    stfSync.current = true;
+    const reset = initAuth();
+    syncExample();
+    let timer: number | undefined;
+    const listener: DataEngineListener = {
+      onUpdate() {
+        window.clearTimeout(timer);
+        timer = window.setTimeout(syncExample, 400);
+      },
+    };
+
+    engine.listen(listener);
     return () => {
-      stfSync.current = false;
+      engine.unlisten(listener);
+      window.clearTimeout(timer);
       reset();
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps -- ignore other parts
-  }, [defaultValues, auth.init]);
+  }, [engine, defaultValues, initAuth]);
 
   return (
     <StfProvider value={stf}>
@@ -228,7 +224,7 @@ export default function PlaygroundClient({
                 parameters={parameters}
                 result={testQuery.data}
                 loading={testQuery.isLoading}
-                onSend={() => testQuery.start(stf.dataEngine.getData() as FormValues)}
+                onSend={() => testQuery.start(engine.getData() as FormValues)}
                 onReset={testQuery.reset}
                 renderParameterField={renderParameterField}
                 renderBodyField={renderBodyField}
@@ -266,10 +262,6 @@ function PlaygroundDialog({
   const t = useTranslations({ note: 'playground' });
   const { title, method, path, operation } = useOperation();
   const [view, setView] = useState('request');
-  const pathParameters = useMemo(
-    () => parameters.filter((param) => param.in === 'path'),
-    [parameters],
-  );
 
   return (
     <form
@@ -304,7 +296,7 @@ function PlaygroundDialog({
         <UrlBar
           method={method}
           route={path}
-          parameters={pathParameters}
+          parameters={parameters.filter((param) => param.in === 'path')}
           deprecated={operation.deprecated}
           loading={loading}
         />

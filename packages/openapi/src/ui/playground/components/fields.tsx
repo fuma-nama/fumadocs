@@ -53,7 +53,8 @@ export interface FieldEntry {
   removal?: 'unset' | 'remove';
 }
 
-export type NavigateFn = (entry: FieldEntry) => void;
+/** open a nested field, `siblings` are the fields of its parent */
+export type NavigateFn = (entry: FieldEntry, siblings: FieldEntry[]) => void;
 
 /** the type of a field, at the end of its cell like a unit */
 const typeClassName = 'flex shrink-0 items-center pe-1 font-mono text-xs text-fd-muted-foreground';
@@ -759,27 +760,22 @@ export function getRemoval(required: boolean, removable: boolean): FieldEntry['r
 }
 
 export function FieldRow({
-  name,
-  fieldName,
-  schema,
+  entry: { name, fieldName, schema },
   required = false,
   description,
   onNavigate,
   onRemove,
 }: {
-  name: string;
-  fieldName: FieldKey;
-  schema: JsonSchema;
+  entry: FieldEntry;
   required?: boolean;
   description?: string;
-  onNavigate: NavigateFn;
+  onNavigate: () => void;
   onRemove?: () => void;
 }) {
   const { readOnly, writeOnly } = useSchemaContext();
   const resolved = useResolvedSchema(schema);
   const t = useTranslations({ note: 'playground' });
   if (schema === false) return null;
-  const removal = getRemoval(required, onRemove !== undefined);
 
   return (
     <SchemaSwitch fieldName={fieldName} schema={schema}>
@@ -805,13 +801,7 @@ export function FieldRow({
 
         // their unions are selected in their own panels
         if (type === 'object' || type === 'array')
-          return (
-            <NavRow
-              {...props}
-              type={typeLabel(field, true)}
-              onNavigate={() => onNavigate({ fieldName, name, schema, removal })}
-            />
-          );
+          return <NavRow {...props} type={typeLabel(field, true)} onNavigate={onNavigate} />;
         return <ValueRow {...props} type={cellType(field, selector)} />;
       }}
     </SchemaSwitch>
@@ -828,7 +818,6 @@ function ObjectRows({
   onNavigate: NavigateFn;
 }) {
   const t = useTranslations({ note: 'playground' });
-  const engine = useDataEngine();
   const { generateDefault } = useSchemaUtils();
   const schemaKeys = field.properties ? Object.keys(field.properties) : [];
   const {
@@ -848,30 +837,21 @@ function ObjectRows({
     patternProperties,
   });
   const hiddenKeys = isLazy ? schemaKeys.filter((key) => !_objectKeys.includes(key)) : [];
-
-  function navigate(entry: FieldEntry) {
-    const candidates: FieldEntry[] = [];
-    for (const child of properties)
-      candidates.push({
-        fieldName: child.field,
-        name: child.key,
-        schema: child.info,
-        removal: getRemoval(field.required?.includes(child.key) ?? false, child.kind !== 'fixed'),
-      });
-
-    onNavigate({ ...entry, siblings: getNestedFields(engine, candidates) });
-  }
+  const entries = properties.map((child): FieldEntry => ({
+    fieldName: child.field,
+    name: child.key,
+    schema: child.info,
+    removal: getRemoval(field.required?.includes(child.key) ?? false, child.kind !== 'fixed'),
+  }));
 
   return (
     <>
-      {properties.map((child) => (
+      {properties.map((child, i) => (
         <FieldRow
           key={child.key}
-          name={child.key}
-          fieldName={child.field}
-          schema={child.info}
+          entry={entries[i]}
           required={field.required?.includes(child.key)}
-          onNavigate={navigate}
+          onNavigate={() => onNavigate(entries[i], entries)}
           onRemove={child.kind === 'fixed' ? undefined : () => onDelete(child.key)}
         />
       ))}
@@ -945,35 +925,25 @@ function ArrayRows({
   onNavigate: NavigateFn;
 }) {
   const t = useTranslations({ note: 'playground' });
-  const engine = useDataEngine();
   const { generateDefault } = useSchemaUtils();
   const { items, insertItem, removeItem } = useArray(fieldName);
   const itemSchema = field.items ?? anyFields;
-
-  function navigate(entry: FieldEntry) {
-    const candidates: FieldEntry[] = [];
-    for (const item of items)
-      candidates.push({
-        fieldName: item.field,
-        name: `[${item.index}]`,
-        schema: itemSchema,
-        removal: 'remove',
-      });
-
-    onNavigate({ ...entry, siblings: getNestedFields(engine, candidates) });
-  }
+  const entries = items.map((item): FieldEntry => ({
+    fieldName: item.field,
+    name: `[${item.index}]`,
+    schema: itemSchema,
+    removal: 'remove',
+  }));
 
   return (
     <>
-      {items.map((item) => (
+      {entries.map((entry, i) => (
         <FieldRow
-          key={item.index}
-          name={`[${item.index}]`}
-          fieldName={item.field}
-          schema={itemSchema}
+          key={i}
+          entry={entry}
           required
-          onNavigate={navigate}
-          onRemove={() => removeItem(item.index)}
+          onNavigate={() => onNavigate(entry, entries)}
+          onRemove={() => removeItem(i)}
         />
       ))}
       <button

@@ -1,5 +1,5 @@
 'use client';
-import { type FC, useMemo, useState } from 'react';
+import { type FC, useState } from 'react';
 import { SendHorizontal } from 'lucide-react';
 import { useTranslations } from '@fuma-translate/react';
 import {
@@ -78,8 +78,7 @@ export function ResponsePanel({
 }
 
 function RequestExample() {
-  const { codeUsages } = useOperation();
-  const items = useMemo(() => Array.from(codeUsages.map()), [codeUsages]);
+  const items = Array.from(useOperation().codeUsages.map());
   if (items.length === 0) return null;
 
   return (
