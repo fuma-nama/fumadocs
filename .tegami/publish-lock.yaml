@@ -1,45 +1,44 @@
 core:changelogs:
-  - content: "---\npackages:\n  fumadocs-core:\n    type: patch\n  \"@fumadocs/cli\":\n    type: patch\n  create-fumadocs-app:\n    type: patch\n---\n\n### Meilisearch integration\n\nSearch your docs with [Meilisearch](https://www.meilisearch.com), self-hosted or on Meilisearch Cloud.\n\n- `toDocuments()` and `sync()` from `fumadocs-core/search/meilisearch` export your pages and replace the documents of an index, old documents stay searchable until the new ones are indexed.\n- `meilisearchClient()` from `fumadocs-core/search/client/meilisearch` searches from the browser with `useDocsSearch()`, filtered by tag and locale.\n\n```tsx\nconst client = new Meilisearch({ host, apiKey: searchKey });\n\nuseDocsSearch({\n  client: meilisearchClient({ client, indexName: 'docs', locale }),\n});\n```\n\nSet it up with `npx @fumadocs/cli feature search --provider meilisearch`, or choose it in `create-fumadocs-app`.\n\nFix [#3627](https://github.com/fuma-nama/fumadocs/issues/3627)\n"
-    filename: 2026-10-01-meilisearch.md
+  - content: "---\npackages:\n  fumadocs-ui:\n    type: minor\n  \"@fumadocs/base-ui\":\n    type: minor\n  \"@fumadocs/cli\":\n    type: patch\n---\n\n### Place AI chat in layouts\n\nDocs, Notebook, and Glass layouts accept an `aiChat` option, pass your chat as `aiChat.panel` and the layout places it beside the page on wide viewports, and floats it over the page on smaller ones.\n\nYour chat component no longer needs layout-specific positioning, like targeting `#nd-docs-layout` or overriding `--fd-right-width`.\n\nThe `ai` feature of Fumadocs CLI now renders your docs layout from a client component at `ai/layout.tsx` in your components directory, which passes the installed chat to `aiChat`. It supports Docs, Notebook, Glass, and Spacious layouts, and only adds a floating trigger to the layouts without their own.\n"
+    filename: 2026-10-03-ai-chat-panel.md
     v: 0.0.0
-  - content: "---\npackages:\n  \"@fumadocs/cli\":\n    type: patch\n  create-fumadocs-app:\n    type: patch\n---\n\n### Simpler search sync setup\n\n- `feature search` writes the path of the pre-rendered `static.json` into `scripts/sync-content.ts`, and the `build` script runs it without arguments.\n- On TanStack Start, the path follows the Nitro output: `.output/public`, `.vercel/output/static` with the `vercel` preset, or `dist/client` without Nitro.\n- Typesense documents are built in the `static.json` route, without a separate `lib/export-search-indexes.ts`.\n"
-    filename: 2026-10-01-search-sync-script.md
+  - content: "---\npackages:\n  fumadocs-ui:\n    type: patch\n  \"@fumadocs/base-ui\":\n    type: patch\n---\n\n### Export Glass layout as `DocsLayout`\n\nLike other docs layouts, `fumadocs-ui/layouts/glass` exports `DocsLayout`, `DocsLayoutProps`, and `DocsSlots`. The `GlassLayout` names remain as aliases.\n"
+    filename: 2026-10-03-glass-docs-layout.md
     v: 0.0.0
-  - content: "---\npackages:\n  fumadocs-openapi:\n    type: patch\n  \"@fumadocs/language\":\n    type: patch\n---\n\n### Download response bodies from the playground\n\nThe result panel of the API playground has a **Download** button for non-empty responses. The file is named from the `Content-Disposition` header, preferring `filename*` and without directories, otherwise `response`, which browsers complete with the extension of the media type.\n\nFor the browser to read `Content-Disposition`, cross-origin APIs have to list it in `Access-Control-Expose-Headers`, or be requested through the proxy.\n\nFix [#3625](https://github.com/fuma-nama/fumadocs/issues/3625)\n"
-    filename: 2026-09-30-openapi-download-response.md
+  - content: "---\npackages:\n  \"@fumadocs/base-ui\":\n    type: minor\n  \"@fumadocs/cli\":\n    type: patch\n  \"@fumadocs/language\":\n    type: patch\n---\n\n### Introduce Spacious Layout\n\nA less compact version of Docs Layout, the page sits in an inset panel beside the sidebar, with page-level actions at the top of the panel.\n\n- Use it from `fumadocs-ui/layouts/spacious` and `fumadocs-ui/layouts/spacious/page`, and import the styles from `fumadocs-ui/css/generated/spacious.css`.\n- Pass `aiChat.panel` to render your AI chat in the layout, docked beside the page on wide screens and floating over it on smaller ones.\n- Customize it with `npx @fumadocs/cli customize`, only available for Base UI.\n\nThe Chinese presets of `@fumadocs/language` include translations for its new strings.\n"
+    filename: 2026-10-03-spacious-layout.md
     v: 0.0.0
-  - content: "---\npackages:\n  fumadocs-mdx:\n    type: patch\n---\n\n### Keep collection `dir` outside the project in file paths\n\nWhen a collection's `dir` was outside the project (e.g. `../content/docs`), the leading `../` was dropped from `info.fullPath` and `absolutePath`, so `getText('raw')` failed with `ENOENT`.\n\nFix [#3623](https://github.com/fuma-nama/fumadocs/issues/3623)\n"
-    filename: 2026-09-30-mdx-outside-dir.md
+  - content: "---\npackages:\n  fumadocs-openapi:\n    type: minor\n  \"@fumadocs/language\":\n    type: patch\n---\n\n### Redesigned API playground\n\nThe playground moves into a dialog, opened from **Try in Playground** on the endpoint bar of API pages.\n\n- The URL bar selects the server, edits its variables, and fills path parameters inline.\n- Auth, parameters and the request body are edited in one panel, one row per field with its type in the input. Descriptions and constraints like ranges and defaults open from the info button next to the field name.\n- Nested objects and arrays open in their own panel, navigated with breadcrumbs. The current breadcrumb switches between the nested fields of its parent, and the body can be edited as JSON.\n- OAuth 2.0 authorization opens in the same panel instead of a nested dialog, with the flow, client credentials and scopes to request. When a flow redirects to authorize, the playground reopens with the token once it returns to the page.\n- The response shows beside the code usages with its status, duration, size and headers. Until a request is sent, the documented response examples are shown instead.\n- Send requests with <kbd>Cmd/Ctrl</kbd> + <kbd>Enter</kbd>.\n\n`components.CollapsiblePanel` of the playground options is removed, with the `DefaultCollapsiblePanel` and `CollapsiblePanelProps` exports of `fumadocs-openapi/ui/playground/client`.\n\nExtra props of `<PlaygroundClient />` like `className` now go to its endpoint bar instead of a form, so form props like `onSubmit` are no longer accepted.\n"
+    filename: 2026-10-03-openapi-playground-dialog.md
     v: 0.0.0
-  - content: "---\npackages:\n  fumadocs-openapi:\n    type: patch\n---\n\n### Send OAuth client credentials as HTTP Basic by default\n\nToken requests of the playground default to **Send as Basic Auth header**, which RFC 6749 requires authorization servers to support.\n\n- The authorization code flow has the **Client Authentication** selector too, it always sent the client credentials in the body.\n- The password flow no longer requires client credentials with either method.\n- Without a client secret, the `client_id` is sent in the body instead, as public clients do.\n\nFix [#3629](https://github.com/fuma-nama/fumadocs/issues/3629)\n"
-    filename: 2026-10-01-openapi-oauth-basic-default.md
+  - content: "---\npackages:\n  fumadocs-openapi:\n    type: minor\n---\n\n### Headless API playground\n\n`usePlayground()` from `fumadocs-openapi/playground` holds the state of an API playground: its form, auth and the request it sends. The playground installed with Fumadocs CLI is built on it, so the installed code is only UI.\n\n- Responses of `createBrowserFetcher()` carry `duration`, `mediaType`, `fileName` and `text()`.\n- Parameters of `useOperation()` are typed as `OperationParameter`, with the `name` and `in` required by OpenAPI. Parameters without a name are skipped.\n- `writeOnly` and `readOnly` of `<PlaygroundClient />` are deprecated, they default to the values for requests.\n- `FormValues` of `fumadocs-openapi/ui/playground/client` is deprecated.\n"
+    filename: 2026-10-04-openapi-headless-playground.md
     v: 0.0.0
 core:packages:
   - id: npm:@fumadocs/asyncapi
     updated: false
-  - id: npm:@fumadocs/base-ui
-    updated: true
   - changelogIds:
-      - 2026-10-01-meilisearch.md
-      - 2026-10-01-search-sync-script.md
+      - 2026-10-03-ai-chat-panel.md
+      - 2026-10-03-glass-docs-layout.md
+      - 2026-10-03-spacious-layout.md
+    id: npm:@fumadocs/base-ui
+    updated: true
+  - id: npm:@fumadocs/basehub
+    updated: false
+  - changelogIds:
+      - 2026-10-03-ai-chat-panel.md
+      - 2026-10-03-spacious-layout.md
     id: npm:@fumadocs/cli
     updated: true
   - id: npm:@fumadocs/content
     updated: false
-  - id: npm:@fumadocs/basehub
-    updated: false
   - id: npm:@fumadocs/content-collections
     updated: false
-  - changelogIds:
-      - 2026-10-01-meilisearch.md
-      - 2026-10-01-search-sync-script.md
-    id: npm:create-fumadocs-app
+  - id: npm:fumadocs-core
+    updated: true
+  - id: npm:create-fumadocs-app
     updated: true
   - id: npm:create-fumadocs-versions
-    updated: true
-  - changelogIds:
-      - 2026-10-01-meilisearch.md
-    id: npm:fumadocs-core
     updated: true
   - id: npm:fumadocs-docgen
     updated: false
@@ -51,48 +50,50 @@ core:packages:
     updated: false
   - id: npm:@fumadocs/json-schema
     updated: false
+  - id: npm:@fumadocs/local-content
+    updated: false
   - changelogIds:
-      - 2026-09-30-openapi-download-response.md
+      - 2026-10-03-openapi-playground-dialog.md
+      - 2026-10-03-spacious-layout.md
     id: npm:@fumadocs/language
     updated: true
   - id: npm:@fumadocs/local-html
     updated: false
   - id: npm:@fumadocs/local-md
     updated: false
-  - changelogIds:
-      - 2026-09-30-mdx-outside-dir.md
-    id: npm:fumadocs-mdx
-    updated: true
-  - id: npm:@fumadocs/local-content
-    updated: false
-  - id: npm:@fumadocs/notion
+  - id: npm:fumadocs-mdx
     updated: false
   - id: npm:@fumadocs/mdx-remote
     updated: false
   - id: npm:fumadocs-obsidian
     updated: false
+  - id: npm:@fumadocs/notion
+    updated: false
   - changelogIds:
-      - 2026-09-30-openapi-download-response.md
-      - 2026-10-01-openapi-oauth-basic-default.md
+      - 2026-10-03-openapi-playground-dialog.md
+      - 2026-10-04-openapi-headless-playground.md
     id: npm:fumadocs-openapi
     updated: true
   - id: npm:fumadocs-preview
     updated: false
   - id: npm:fumadocs-python
     updated: false
-  - id: npm:fumadocs-ui
+  - changelogIds:
+      - 2026-10-03-ai-chat-panel.md
+      - 2026-10-03-glass-docs-layout.md
+    id: npm:fumadocs-ui
     updated: true
-  - id: npm:@fumadocs/sanity
-    updated: false
   - id: npm:@fumadocs/satteri
     updated: false
+  - id: npm:@fumadocs/sanity
+    updated: false
   - id: npm:@fumadocs/shadcn
+    updated: false
+  - id: npm:@fumadocs/story
     updated: false
   - id: npm:shared-api
     updated: false
   - id: npm:@fumari/stf
-    updated: false
-  - id: npm:@fumadocs/story
     updated: false
   - id: npm:@fumadocs/tailwind
     updated: false
@@ -105,68 +106,68 @@ core:packages:
 npm:packages:
   - id: npm:@fumadocs/asyncapi
   - id: npm:@fumadocs/base-ui
+  - id: npm:@fumadocs/basehub
   - id: npm:@fumadocs/cli
   - id: npm:@fumadocs/content
-  - id: npm:@fumadocs/basehub
   - id: npm:@fumadocs/content-collections
+  - id: npm:fumadocs-core
   - id: npm:create-fumadocs-app
   - id: npm:create-fumadocs-versions
-  - id: npm:fumadocs-core
   - id: npm:fumadocs-docgen
   - id: npm:fumadocs-epub
   - id: npm:@fumadocs/graphql
   - id: npm:@fumari/image-size
   - id: npm:@fumadocs/json-schema
+  - id: npm:@fumadocs/local-content
   - id: npm:@fumadocs/language
   - id: npm:@fumadocs/local-html
   - id: npm:@fumadocs/local-md
   - id: npm:fumadocs-mdx
-  - id: npm:@fumadocs/local-content
-  - id: npm:@fumadocs/notion
   - id: npm:@fumadocs/mdx-remote
   - id: npm:fumadocs-obsidian
+  - id: npm:@fumadocs/notion
   - id: npm:fumadocs-openapi
   - id: npm:fumadocs-preview
   - id: npm:fumadocs-python
   - id: npm:fumadocs-ui
-  - id: npm:@fumadocs/sanity
   - id: npm:@fumadocs/satteri
+  - id: npm:@fumadocs/sanity
   - id: npm:@fumadocs/shadcn
+  - id: npm:@fumadocs/story
   - id: npm:shared-api
   - id: npm:@fumari/stf
-  - id: npm:@fumadocs/story
   - id: npm:@fumadocs/tailwind
   - id: npm:fumadocs-twoslash
   - id: npm:fumadocs-typescript
   - id: npm:@fumadocs/vite
   - id: npm:docs
+  - id: npm:example-astro
   - id: npm:example-asyncapi
   - id: npm:example-base-ui
+  - id: npm:example-content-collections
   - id: npm:example-graphql
   - id: npm:example-i18n
   - id: npm:example-next
-  - id: npm:example-next-min
+  - id: npm:example-marble-cms
+  - id: npm:example-next-local-md
+  - id: npm:example-next-local-html
   - id: npm:example-next-shadcn
   - id: npm:example-next-static
   - id: npm:example-openapi
-  - id: npm:example-react-router-i18n
+  - id: npm:example-python
+  - id: npm:example-obsidian
   - id: npm:example-react-router
+  - id: npm:example-next-min
+  - id: npm:example-react-router-i18n
   - id: npm:example-react-router-min
-  - id: npm:example-react-router-rsc
   - id: npm:example-react-router-spa
+  - id: npm:example-react-router-rsc
   - id: npm:example-tanstack-start
   - id: npm:example-tanstack-start-i18n
-  - id: npm:example-tanstack-start-min
+  - id: npm:example-tanstack-start-local-md
   - id: npm:example-tanstack-start-openapi
+  - id: npm:example-tanstack-start-min
   - id: npm:example-tanstack-start-spa
   - id: npm:example-tanstack-start-story
   - id: npm:example-waku
   - id: npm:example-waku-i18n
-  - id: npm:example-astro
-  - id: npm:example-content-collections
-  - id: npm:example-marble-cms
-  - id: npm:example-next-local-html
-  - id: npm:example-next-local-md
-  - id: npm:example-obsidian
-  - id: npm:example-python
-  - id: npm:example-tanstack-start-local-md
