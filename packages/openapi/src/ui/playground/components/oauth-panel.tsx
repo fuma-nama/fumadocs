@@ -5,16 +5,10 @@ import { useTranslations } from '@fuma-translate/react';
 import { buttonVariants } from 'fumadocs-ui/components/ui/button';
 import { Spinner } from 'shared-api/components/spinner';
 import { useQuery } from 'shared-api/utils/use-query';
-import {
-  type AuthField,
-  type OAuthFlowType,
-  requestOAuthToken,
-  usePlaygroundAuth,
-} from '@/playground/auth';
-import { useOperation } from '@/operation';
+import { type AuthField, type OAuthFlowType, usePlaygroundAuth } from '@/playground/auth';
+import type { OAuthInput } from '@/playground/use-playground';
 import type { OAuth2SecurityScheme } from '@/types';
 import { Markdown } from '@/ui/components/markdown';
-import { useOpenAPI } from '@/utils/create-page';
 import { useServer } from '@/utils/use-server';
 import { cn } from '@/utils/cn';
 import { CheckRow, SelectRow, TextRow, ValueRow } from './fields';
@@ -29,14 +23,14 @@ interface Credentials extends Record<string, unknown> {
 /** obtain the access token of an OAuth 2.0 scheme */
 export function OAuthPanel({
   field,
-  onToken,
+  authorize,
+  onAuthorized,
 }: {
   field: AuthField;
-  onToken: (token: string) => void;
+  authorize: (input: OAuthInput) => Promise<string | undefined>;
+  onAuthorized: () => void;
 }) {
   const t = useTranslations({ note: 'OAuth dialog' });
-  const { oauthRedirectUrl } = useOpenAPI();
-  const { path, method } = useOperation();
   const { resolveUrl } = useServer();
   const tokenInfo = usePlaygroundAuth().store[field.schemeId];
   const scheme = field.scheme as OAuth2SecurityScheme;
@@ -85,22 +79,19 @@ export function OAuthPanel({
   const scopeOptions: Record<string, string> = { ...flow?.scopes };
   for (const scope of field.scopes) scopeOptions[scope] ??= '';
 
-  const authorize = useQuery(async () => {
+  const query = useQuery(async () => {
     const credentials = stf.dataEngine.getData() as Credentials;
-    const token = await requestOAuthToken(scheme, type, {
-      schemeId: field.schemeId,
+    const token = await authorize({
+      type,
       scopes: Array.from(scopes),
       clientId: credentials.client_id ?? '',
       clientSecret: credentials.client_secret ?? '',
       username: credentials.username ?? '',
       password: credentials.password ?? '',
       clientAuth,
-      serverUrl,
-      redirectUrl: oauthRedirectUrl,
-      origin: `${method} ${path}`,
     });
 
-    if (token) onToken(token);
+    if (token) onAuthorized();
   });
 
   return (
@@ -111,7 +102,7 @@ export function OAuthPanel({
           if (e.key !== 'Enter' || !(e.target instanceof HTMLInputElement)) return;
           e.preventDefault();
           e.stopPropagation();
-          if (supported && !authorize.isLoading) void authorize.start();
+          if (supported && !query.isLoading) void query.start();
         }}
       >
         {scheme.description && (
@@ -216,25 +207,25 @@ export function OAuthPanel({
           <p
             className={cn(
               'min-w-0 flex-1 text-xs',
-              authorize.error ? 'text-red-400' : 'text-fd-muted-foreground',
+              query.error ? 'text-red-400' : 'text-fd-muted-foreground',
             )}
           >
-            {authorize.error
-              ? String(authorize.error)
+            {query.error
+              ? String(query.error)
               : !supported
                 ? t('Unsupported')
                 : redirects && t('You will be redirected to authorize, then back to this page.')}
           </p>
           <button
             type="button"
-            disabled={!supported || authorize.isLoading}
-            onClick={() => void authorize.start()}
+            disabled={!supported || query.isLoading}
+            onClick={() => void query.start()}
             className={cn(
               buttonVariants({ variant: 'primary', size: 'sm' }),
               'shrink-0 gap-1.5 px-3',
             )}
           >
-            {authorize.isLoading && <Spinner className="size-3" />}
+            {query.isLoading && <Spinner className="size-3" />}
             {t('Authorize')}
           </button>
         </div>

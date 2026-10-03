@@ -15,14 +15,11 @@ import type { CodeBlockProps } from 'fumadocs-ui/components/codeblock';
 import { cn } from '@/utils/cn';
 import { ClientCodeBlock } from '@/ui/components/codeblock';
 import { useTranslations } from '@fuma-translate/react';
-import { safeParse } from 'fast-content-type-parse';
 import type { BuiltinLanguage, SpecialLanguage } from 'shiki';
 import { Segmented, SegmentedList, SegmentedPanel } from './segmented';
 
 export interface ResultDisplayProps extends ComponentProps<'div'> {
   data: FetchResult;
-  /** how long the request took, in milliseconds */
-  duration?: number;
   reset: () => void;
 }
 
@@ -46,7 +43,7 @@ export function PanelHeader({ className, ...props }: ComponentProps<'div'>) {
   );
 }
 
-export function DefaultResultDisplay({ data, duration, reset, ...rest }: ResultDisplayProps) {
+export function DefaultResultDisplay({ data, reset, ...rest }: ResultDisplayProps) {
   const t = useTranslations({ note: 'playground result display' });
 
   if (data.type === 'client_error') {
@@ -77,7 +74,7 @@ export function DefaultResultDisplay({ data, duration, reset, ...rest }: ResultD
     );
   }
 
-  return <ResponseResult data={data} duration={duration} reset={reset} {...rest} />;
+  return <ResponseResult data={data} reset={reset} {...rest} />;
 }
 
 function getTextFormat(mime: string): BuiltinLanguage | SpecialLanguage | null {
@@ -116,18 +113,16 @@ function formatSize(bytes: number): string {
 
 function ResponseResult({
   data,
-  duration,
   reset,
   ...rest
 }: ComponentProps<'div'> & {
   data: FetchResponseResult;
-  duration?: number;
   reset: () => void;
 }) {
   const t = useTranslations({ note: 'playground result display' });
   const statusInfo = useStatusInfo(data.status);
   const [view, setView] = useState('body');
-  const { parameters, type } = safeParse(data.headers.get('Content-Type') ?? 'text/plain');
+  const type = data.mediaType ?? 'text/plain';
   const headers = Array.from(data.headers);
   const size = data.body.byteLength;
   // link elements to the body, its object URL is revoked with them
@@ -153,7 +148,7 @@ function ResponseResult({
     const lang = getTextFormat(type);
 
     if (lang) {
-      body = <TextResult lang={lang} charset={parameters.charset} data={data} />;
+      body = <TextResult lang={lang} data={data} />;
     } else {
       body = (
         <div className="flex h-full flex-col items-center justify-center gap-2 p-6 text-center">
@@ -193,8 +188,7 @@ function ResponseResult({
             <span className="font-normal text-fd-muted-foreground">{statusInfo.description}</span>
           </p>
           <p className="hidden shrink-0 text-xs text-fd-muted-foreground tabular-nums @md:block">
-            {duration !== undefined && `${formatDuration(duration)} · `}
-            {formatSize(size)}
+            {formatDuration(data.duration)} · {formatSize(size)}
           </p>
           <SegmentedList
             className="ms-auto shrink-0"
@@ -215,7 +209,7 @@ function ResponseResult({
             {size > 0 && (
               <a
                 ref={bodyUrlRef}
-                download={getFileName(data.headers)}
+                download={data.fileName ?? 'response'}
                 aria-label={t('Download')}
                 title={t('Download')}
                 className={iconButtonClassName}
@@ -259,30 +253,20 @@ function ResponseResult({
 
 function TextResult({
   lang,
-  charset,
   data,
 }: {
   lang: BuiltinLanguage | SpecialLanguage;
   data: FetchResponseResult;
-  charset?: string;
 }) {
   const code = useMemo(() => {
-    let out: string;
-    if (charset) {
-      try {
-        out = new TextDecoder(charset).decode(data.body);
-      } catch {}
+    const text = data.text();
+    if (lang !== 'json') return text;
+    try {
+      return JSON.stringify(JSON.parse(text), null, 2);
+    } catch {
+      return text;
     }
-
-    out ??= new TextDecoder('utf-8').decode(data.body);
-    if (lang === 'json') {
-      try {
-        out = JSON.stringify(JSON.parse(out), null, 2);
-      } catch {}
-    }
-
-    return out;
-  }, [lang, charset, data.body]);
+  }, [lang, data]);
 
   return (
     <ClientCodeBlock
@@ -291,26 +275,4 @@ function TextResult({
       codeblock={panelCodeBlock}
     />
   );
-}
-
-/**
- * The file name from `Content-Disposition`, preferring `filename*` (RFC 6266), without directories.
- */
-function getFileName(headers: Headers): string {
-  const disposition = headers.get('Content-Disposition') ?? '';
-  const extended = /(?:^|;)\s*filename\*\s*=\s*[^']*'[^']*'([^\s;"]+)/i.exec(disposition);
-  let name: string | undefined;
-
-  if (extended) {
-    try {
-      name = decodeURIComponent(extended[1]);
-    } catch {}
-  }
-
-  if (!name) {
-    const match = /(?:^|;)\s*filename\s*=\s*(?:"((?:\\.|[^"\\])*)"|([^\s;]+))/i.exec(disposition);
-    name = match?.[1]?.replace(/\\(.)/g, '$1') ?? match?.[2];
-  }
-
-  return name?.replace(/^.*[/\\]/, '') || 'response';
 }

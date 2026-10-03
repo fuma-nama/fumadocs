@@ -40,7 +40,5 @@ export const registry: Registry = {
     '@fumadocs/json-schema': null,
     '@fumari/stf': null,
     react: null,
-    // dev dependency of `fumadocs-openapi` (inlined on build), but needed by vendored files
-    'fast-content-type-parse': '^3.0.0',
   },
 };

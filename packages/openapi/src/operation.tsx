@@ -30,8 +30,14 @@ import { ServerProvider, useServer } from '@/utils/use-server';
 
 export interface OperationParameters {
   in: 'path' | 'query' | 'header' | 'cookie';
-  items: ParameterObject[];
+  items: OperationParameter[];
 }
+
+/** a resolved parameter, with the `name` and `in` required by OpenAPI */
+export type OperationParameter = ParameterObject & {
+  name: string;
+  in: OperationParameters['in'];
+};
 
 export interface OperationSecurity {
   key: string;
@@ -183,7 +189,6 @@ export function OperationProvider({
 
     // operation parameters override the path item's
     const resolvedParameters: ParameterObject[] = [];
-    const groups: Record<string, ParameterObject[]> = {};
     const keys = new Set<string>();
     for (const list of [operation.parameters, pathItem.parameters]) {
       for (const item of list ?? []) {
@@ -193,13 +198,14 @@ export function OperationProvider({
 
         keys.add(key);
         resolvedParameters.push(param);
-        (groups[param.in!] ??= []).push(param);
       }
     }
     const parameters: OperationParameters[] = [];
     for (const location of parameterLocations) {
-      const items = groups[location];
-      if (items) parameters.push({ in: location, items });
+      const items = resolvedParameters.filter(
+        (param): param is OperationParameter => param.in === location && param.name !== undefined,
+      );
+      if (items.length > 0) parameters.push({ in: location, items });
     }
 
     const security: OperationSecurity[][] = [];

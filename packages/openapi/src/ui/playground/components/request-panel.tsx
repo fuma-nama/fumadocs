@@ -30,7 +30,9 @@ import {
   SelectValue,
 } from 'shared-api/components/select';
 import { Spinner } from 'shared-api/components/spinner';
-import { type AuthField, type useAuthFields, usePlaygroundAuth } from '@/playground/auth';
+import { type AuthField, usePlaygroundAuth } from '@/playground/auth';
+import type { Playground, PlaygroundAuth, RequestBodyInfo } from '@/playground/use-playground';
+import { type OperationParameters, useOperation } from '@/operation';
 import type { ParameterObject } from '@/types';
 import { cn } from '@/utils/cn';
 import {
@@ -47,20 +49,12 @@ import {
 import { OAuthPanel } from './oauth-panel';
 import { Segmented, SegmentedList } from './segmented';
 
-export interface RequestBodyInfo {
-  schema: JsonSchema;
-  mediaType: string;
-}
-
 interface RenderOptions {
   renderParameterField?: (fieldName: FieldKey, param: ParameterObject) => ReactNode;
   renderBodyField?: (fieldName: 'body', info: RequestBodyInfo) => ReactNode;
 }
 
-const paramTypes = ['path', 'query', 'header', 'cookie'] as const;
-type ParamType = (typeof paramTypes)[number];
-
-const sectionIcons: Record<ParamType, LucideIcon> = {
+const sectionIcons: Record<OperationParameters['in'], LucideIcon> = {
   path: Route,
   query: SlidersHorizontal,
   header: Rows3,
@@ -82,15 +76,11 @@ const transitionClassName =
 
 /** the overview of all request inputs, nested fields open in their own panel */
 export function RequestPanel({
-  auth,
-  body,
-  parameters,
+  playground: { auth, body },
   className,
   ...options
 }: RenderOptions & {
-  auth: ReturnType<typeof useAuthFields>;
-  body?: RequestBodyInfo;
-  parameters: ParameterObject[];
+  playground: Playground;
   className?: string;
 }) {
   const t = useTranslations({ note: 'playground' });
@@ -146,10 +136,8 @@ export function RequestPanel({
       >
         <OAuthPanel
           field={oauth}
-          onToken={(token) => {
-            engine.update(oauth.fieldName, token);
-            setOAuth(null);
-          }}
+          authorize={(input) => auth.authorize(oauth, input)}
+          onAuthorized={() => setOAuth(null)}
         />
       </Panel>
     );
@@ -176,7 +164,7 @@ export function RequestPanel({
     <div className={cn('@container grid min-h-0', className)}>
       <div
         className={cn(
-          'fd-scroll-container min-h-0 overflow-y-auto [grid-area:1/1] starting:opacity-0 motion-safe:starting:translate-x-6',
+          'fd-scroll-container min-h-0 overflow-y-auto [grid-area:1/1]',
           transitionClassName,
           panel && 'invisible opacity-0 motion-safe:-translate-x-6',
         )}
@@ -185,7 +173,6 @@ export function RequestPanel({
           {...options}
           auth={auth}
           body={body}
-          parameters={parameters}
           sectionNames={sectionNames}
           onNavigate={openNested([])}
           onOAuth={setOAuth}
@@ -403,21 +390,20 @@ function SiblingSelect({
 function Overview({
   auth,
   body,
-  parameters,
   sectionNames,
   onNavigate,
   onOAuth,
   renderParameterField,
   renderBodyField,
 }: RenderOptions & {
-  auth: ReturnType<typeof useAuthFields>;
+  auth: PlaygroundAuth;
   body?: RequestBodyInfo;
-  parameters: ParameterObject[];
   sectionNames: Record<string, string>;
   onNavigate: NavigateFn;
   onOAuth: (field: AuthField) => void;
 }) {
   const t = useTranslations({ note: 'playground' });
+  const { parameters } = useOperation();
 
   if (auth.requirements.length === 0 && parameters.length === 0 && !body) {
     return (
@@ -430,12 +416,10 @@ function Overview({
   return (
     <>
       {auth.requirements.length > 0 && <AuthSection auth={auth} onOAuth={onOAuth} />}
-      {paramTypes.map((type) => {
-        const items = parameters.filter((param) => param.in === type);
-        if (items.length === 0) return;
+      {parameters.map(({ in: type, items }) => {
         const entries = items.map((param): FieldEntry => ({
-          fieldName: [type, param.name!],
-          name: param.name!,
+          fieldName: [type, param.name],
+          name: param.name,
           schema: getParameterSchema(param),
           removal: getRemoval(param.required ?? false, false),
         }));
@@ -513,7 +497,7 @@ function AuthSection({
   auth,
   onOAuth,
 }: {
-  auth: ReturnType<typeof useAuthFields>;
+  auth: PlaygroundAuth;
   onOAuth: (field: AuthField) => void;
 }) {
   const t = useTranslations({ note: 'playground' });

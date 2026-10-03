@@ -1,3 +1,4 @@
+import { safeParse } from 'fast-content-type-parse';
 import type { RequestData } from '@/requests/types';
 import type { MediaAdapter } from '@/requests/media/adapter';
 import { resolveMediaAdapter } from '@/requests/media/resolve-adapter';
@@ -17,6 +18,14 @@ export interface FetchResponseResult {
   status: number;
   headers: Headers;
   body: ArrayBuffer;
+  /** how long the request took, in milliseconds */
+  duration: number;
+  /** the media type of `Content-Type` like `application/json` */
+  mediaType?: string;
+  /** the file name from `Content-Disposition`, without directories */
+  fileName?: string;
+  /** decode the body with the charset of `Content-Type`, UTF-8 by default */
+  text: () => string;
 }
 
 export interface Fetcher {
@@ -120,14 +129,27 @@ export function createBrowserFetcher(
 
       if (onRequestInit) requestInit = await onRequestInit(requestInit);
 
+      const start = performance.now();
       return fetch(requestUrl, requestInit)
         .then(async (res): Promise<FetchResult> => {
+          const body = await res.arrayBuffer();
+          const { type, parameters } = safeParse(res.headers.get('Content-Type') ?? '');
+
           return {
             type: 'response',
             url: res.url,
             status: res.status,
             headers: res.headers,
-            body: await res.arrayBuffer(),
+            body,
+            duration: performance.now() - start,
+            mediaType: type || undefined,
+            fileName: getFileName(res.headers),
+            text() {
+              try {
+                if (parameters.charset) return new TextDecoder(parameters.charset).decode(body);
+              } catch {}
+              return new TextDecoder().decode(body);
+            },
           };
         })
         .catch((e): FetchResult => {
@@ -141,4 +163,25 @@ export function createBrowserFetcher(
         });
     },
   };
+}
+
+/** prefers `filename*` (RFC 6266) */
+function getFileName(headers: Headers): string | undefined {
+  const disposition = headers.get('Content-Disposition');
+  if (!disposition) return;
+  const extended = /(?:^|;)\s*filename\*\s*=\s*[^']*'[^']*'([^\s;"]+)/i.exec(disposition);
+  let name: string | undefined;
+
+  if (extended) {
+    try {
+      name = decodeURIComponent(extended[1]);
+    } catch {}
+  }
+
+  if (!name) {
+    const match = /(?:^|;)\s*filename\s*=\s*(?:"((?:\\.|[^"\\])*)"|([^\s;]+))/i.exec(disposition);
+    name = match?.[1]?.replace(/\\(.)/g, '$1') ?? match?.[2];
+  }
+
+  return name?.replace(/^.*[/\\]/, '') || undefined;
 }

@@ -205,7 +205,7 @@ const translations = {
   'The client secret of your OAuth application.(OAuth dialog)': '你的 OAuth 应用程序客户端密钥。',
   'This endpoint has no parameters.(playground)': '此端点没有参数。',
   'Too Many Requests(playground status info)': '请求过多',
-  'Try it out(playground)': '试一试',
+  'Try in Playground(playground)': '测试',
   'Type(playground)': '类型',
   'TypeScript Definitions(TypeScript definitions)': 'TypeScript 定义',
   'Unauthorized(playground status info)': '未授权',

@@ -162,6 +162,8 @@ import { OpenAPIPage } from '@/components/openapi/page'; // [!code ++]
 
 ### API Playground
 
+The UI of the playground, its state comes from [`usePlayground()`](/docs/integrations/openapi/headless#playground).
+
 ```npm
 npx @fumadocs/cli add openapi/playground
 ```
@@ -173,7 +175,7 @@ import PlaygroundClient from '@/components/openapi/playground';
 
 export const OpenAPIPage = createOpenAPIPage({
   playground: {
-    render: () => <PlaygroundClient writeOnly readOnly={false} />,
+    render: () => <PlaygroundClient />,
   },
 });
 ```

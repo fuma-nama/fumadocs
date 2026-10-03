@@ -11,7 +11,7 @@ Everything outside `fumadocs-openapi/ui` is headless.
 | -------------------------------------- | ----------------------------------------------------------- |
 | `fumadocs-openapi`                     | the page: the document, its servers and your components     |
 | `fumadocs-openapi/operation`           | an operation: its details, example requests and code usages |
-| `fumadocs-openapi/playground`          | the auth state and the fetcher of the playground            |
+| `fumadocs-openapi/playground`          | an API playground: its form, auth and requests              |
 | `fumadocs-openapi/requests`            | encoding the data of an example into a real request         |
 | `fumadocs-openapi/requests/generators` | turning that request into code usages                       |
 
@@ -156,16 +156,64 @@ The page passes `renderMarkdown` and `renderCodeblock` in, so descriptions and e
 
 ## Playground
 
-Send a request without the built-in playground.
+`usePlayground()` holds the state of an API playground under `<OperationProvider />`. Its form starts from the selected example request, and edits sync back to the example, so code usages follow them.
 
-```tsx
-import { createBrowserFetcher, usePlaygroundAuth } from 'fumadocs-openapi/playground';
-import { encodeRequestData } from 'fumadocs-openapi/requests';
+```tsx title="components/my-playground.tsx"
+'use client';
+import { StfProvider, useFieldValue } from '@fumari/stf';
+import { useOperation } from 'fumadocs-openapi/operation';
+import { usePlayground } from 'fumadocs-openapi/playground';
+
+export function MyPlayground() {
+  const { parameters } = useOperation();
+  const { stf, send, isSending, response } = usePlayground();
+
+  return (
+    <StfProvider value={stf}>
+      {parameters.map(({ in: location, items }) =>
+        items.map((param) => (
+          <ParameterInput key={`${location}.${param.name}`} location={location} name={param.name} />
+        )),
+      )}
+      <button disabled={isSending} onClick={send}>
+        Send
+      </button>
+      {response?.result.type === 'response' && <pre>{response.result.text()}</pre>}
+    </StfProvider>
+  );
+}
+
+function ParameterInput({ location, name }: { location: string; name: string }) {
+  const [value, setValue] = useFieldValue([location, name]);
+
+  return (
+    <input
+      aria-label={name}
+      value={String(value ?? '')}
+      onChange={(e) => setValue(e.target.value)}
+    />
+  );
+}
 ```
 
-| Export                   | Does                                                                |
-| ------------------------ | ------------------------------------------------------------------- |
-| `usePlaygroundAuth()`    | the auth state of the page, its token store and the state of a flow |
-| `createBrowserFetcher()` | sends a request from the browser, through `proxyUrl` when set       |
-| `encodeRequestData()`    | turns the data of an example into a body, headers and query         |
-| `resolveMediaAdapter()`  | the adapter of a media type, `undefined` when unsupported           |
+| Field                                                | Is                                                                                                                                  |
+| ---------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------- |
+| `stf`                                                | the form (a `@fumari/stf` data engine), holding `path`, `query`, `header`, `cookie` and `body`                                      |
+| `body`                                               | the request body edited in the form, with its preferred media type                                                                  |
+| `auth`                                               | the auth fields of the selected security requirement, `select()` switches it, `authorize()` obtains an OAuth 2.0 token into a field |
+| `send()`, `isSending`, `response`, `clearResponse()` | send the form as a request, and the result of the last one                                                                          |
+
+It accepts `fetchOptions` to customise requests, like `onRequestInit()`, and `transformAuthInputs` to customise the auth fields.
+
+### Requests
+
+The parts `usePlayground()` builds on, to send a request without it.
+
+| Export                   | Does                                                                                                                                |
+| ------------------------ | ----------------------------------------------------------------------------------------------------------------------------------- |
+| `createBrowserFetcher()` | sends a request from the browser, through `proxyUrl` when set, its responses carry `duration`, `mediaType`, `fileName` and `text()` |
+| `encodeRequestData()`    | turns the data of an example into a body, headers and query, from `fumadocs-openapi/requests`                                       |
+| `resolveMediaAdapter()`  | the adapter of a media type, `undefined` when unsupported                                                                           |
+| `usePlaygroundAuth()`    | the auth state of the page, its token store and the state of a flow                                                                 |
+| `useAuthFields()`        | the auth fields of an operation in a form, and the request data they encode into                                                    |
+| `requestOAuthToken()`    | runs an OAuth 2.0 flow                                                                                                              |

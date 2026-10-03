@@ -171,7 +171,7 @@ function OperationContent({
                 <SchemaUI
                   key={param.name}
                   client={{
-                    name: param.name!,
+                    name: param.name,
                     required: param.required,
                   }}
                   root={
@@ -289,7 +289,7 @@ function OperationContent({
       apiPlayground = render ? (
         render({ path, method, operation, pathItem })
       ) : (
-        <PlaygroundClient {...options} writeOnly readOnly={false} />
+        <PlaygroundClient {...options} />
       );
     } else {
       apiPlayground = (

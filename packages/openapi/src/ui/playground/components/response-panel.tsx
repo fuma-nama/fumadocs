@@ -17,7 +17,7 @@ import {
 } from 'shared-api/components/select';
 import { Spinner } from 'shared-api/components/spinner';
 import { useCodeUsage, useOperation, useResponseExamples } from '@/operation';
-import type { FetchResult } from '@/playground/fetcher';
+import type { PlaygroundResponse } from '@/playground/use-playground';
 import { ClientCodeBlock } from '@/ui/components/codeblock';
 import { Markdown } from '@/ui/components/markdown';
 import { cn } from '@/utils/cn';
@@ -29,21 +29,15 @@ import {
 } from './result-display';
 import { Segmented, SegmentedList, SegmentedPanel } from './segmented';
 
-export interface TestResult {
-  id: number;
-  result: FetchResult;
-  duration: number;
-}
-
 /** the code usages of the request, above its response or the documented examples */
 export function ResponsePanel({
-  result,
+  response,
   loading,
   onReset,
   ResultDisplay = DefaultResultDisplay,
   className,
 }: {
-  result?: TestResult;
+  response?: PlaygroundResponse;
   loading: boolean;
   onReset: () => void;
   ResultDisplay?: FC<ResultDisplayProps>;
@@ -55,11 +49,10 @@ export function ResponsePanel({
     <div className={cn('@container flex min-h-0 flex-col', className)}>
       <RequestExample />
       <div className="relative flex min-h-0 flex-1 flex-col">
-        {result ? (
+        {response ? (
           <ResultDisplay
-            key={result.id}
-            data={result.result}
-            duration={result.duration}
+            key={response.id}
+            data={response.result}
             reset={onReset}
             className="starting:opacity-0 motion-safe:transition-[opacity,translate] motion-safe:duration-300 motion-safe:starting:translate-y-1"
           />
