@@ -5,10 +5,7 @@ import { type CSSProperties, useEffect, useState, type ComponentProps } from 're
 import { useDocsLayout } from '..';
 
 export function Container(props: ComponentProps<'div'>) {
-  const {
-    slots,
-    props: { aiChat },
-  } = useDocsLayout();
+  const { slots } = useDocsLayout();
   const { collapsed } = slots.sidebar.useSidebar();
   const [previousCollapsed, setPreviousCollapsed] = useState(collapsed);
   const isCollapseChanged = previousCollapsed !== collapsed;
@@ -23,7 +20,6 @@ export function Container(props: ComponentProps<'div'>) {
       id="nd-docs-layout"
       data-sidebar-collapsed={collapsed}
       data-column-changed={isCollapseChanged}
-      data-ai-chat={aiChat?.open && aiChat.panel ? '' : undefined}
       {...props}
       style={
         {

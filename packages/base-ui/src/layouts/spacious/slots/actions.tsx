@@ -67,7 +67,8 @@ export function HeaderActions({ className, ...props }: ComponentProps<'div'>) {
           aria-pressed={aiChat.open}
           className={cn(
             buttonVariants({ variant: 'ghost' }),
-            'h-7.5 gap-1.5 px-2 text-fd-muted-foreground aria-pressed:bg-fd-accent aria-pressed:text-fd-accent-foreground max-lg:hidden',
+            'h-7.5 gap-1.5 px-2 max-lg:hidden',
+            aiChat.open ? 'bg-fd-accent text-fd-accent-foreground' : 'text-fd-muted-foreground',
           )}
           onClick={() => aiChat.onOpenChange(!aiChat.open)}
         >
@@ -243,7 +244,7 @@ function ThemeSegments() {
       {index !== -1 && (
         <span
           aria-hidden
-          className="absolute top-0.5 start-0.5 size-7 rounded-full bg-fd-background shadow-sm ring-1 ring-fd-border [translate:calc(var(--index)*100%)_0] rtl:[translate:calc(var(--index)*-100%)_0] transition-[translate] duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] motion-reduce:transition-none"
+          className="absolute top-0.5 start-0.5 size-7 rounded-full bg-fd-background shadow-sm ring-1 ring-fd-border translate-x-[calc(var(--index)*100%)] rtl:-translate-x-[calc(var(--index)*100%)] transition-[translate] duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] motion-reduce:transition-none"
           style={{ '--index': index } as CSSProperties}
         />
       )}
@@ -252,7 +253,12 @@ function ThemeSegments() {
           key={key}
           value={key}
           aria-label={labels[key]}
-          className="relative flex items-center justify-center size-7 rounded-full text-fd-muted-foreground outline-none transition-colors duration-150 hover:text-fd-foreground focus-visible:ring-2 focus-visible:ring-fd-ring data-checked:text-fd-foreground data-highlighted:text-fd-foreground data-highlighted:not-data-checked:bg-fd-accent [&_svg]:size-3.5"
+          className={cn(
+            'relative flex items-center justify-center size-7 rounded-full outline-none transition-colors duration-150 hover:text-fd-foreground focus-visible:ring-2 focus-visible:ring-fd-ring data-highlighted:text-fd-foreground [&_svg]:size-3.5',
+            key === theme
+              ? 'text-fd-foreground'
+              : 'text-fd-muted-foreground data-highlighted:bg-fd-accent',
+          )}
           onClick={(e) => onPick(e, turn)}
         >
           <Icon />

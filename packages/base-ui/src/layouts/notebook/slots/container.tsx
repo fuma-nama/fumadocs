@@ -24,7 +24,6 @@ export function Container(props: ComponentProps<'div'>) {
       id="nd-notebook-layout"
       data-sidebar-collapsed={collapsed}
       data-column-changed={isCollapseChanged}
-      data-ai-chat={aiChat?.open && aiChat.panel ? '' : undefined}
       {...props}
       style={{
         gridTemplate:
@@ -42,7 +41,8 @@ export function Container(props: ComponentProps<'div'>) {
         ...props.style,
       }}
       className={cn(
-        'grid overflow-x-clip min-h-(--fd-docs-height) auto-cols-auto auto-rows-auto [--fd-docs-height:100dvh] [--fd-header-height:0px] [--fd-toc-popover-height:0px] [--fd-sidebar-width:0px] [--fd-toc-width:0px] [--fd-toc-col:var(--fd-toc-width)] xl:data-[ai-chat]:[--fd-toc-col:var(--fd-ai-chat-width)] data-[column-changed=true]:transition-[grid-template-columns]',
+        'grid overflow-x-clip min-h-(--fd-docs-height) auto-cols-auto auto-rows-auto [--fd-docs-height:100dvh] [--fd-header-height:0px] [--fd-toc-popover-height:0px] [--fd-sidebar-width:0px] [--fd-toc-width:0px] [--fd-toc-col:var(--fd-toc-width)] data-[column-changed=true]:transition-[grid-template-columns]',
+        aiChat?.open && aiChat.panel && 'xl:[--fd-toc-col:var(--fd-ai-chat-width)]',
         props.className,
       )}
     >

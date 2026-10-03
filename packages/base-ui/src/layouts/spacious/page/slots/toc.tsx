@@ -18,6 +18,7 @@ import {
   useState,
 } from 'react';
 import { useTreePath } from '@/contexts/tree';
+import { useSpaciousLayout } from '../..';
 
 const variants = { normal: TocDefault, clerk: TocClerk, block: TocBlock };
 
@@ -53,6 +54,9 @@ export type TOCProps = TOCContent & { container?: ComponentProps<'div'> };
 export function TOC({ container, header, footer, ...props }: TOCProps) {
   const t = useTranslations({ note: 'table of contents' });
   const items = Base.useTOCItems();
+  const {
+    props: { aiChat },
+  } = useSpaciousLayout();
   if (items.length === 0 && !header && !footer) return;
 
   return (
@@ -60,9 +64,9 @@ export function TOC({ container, header, footer, ...props }: TOCProps) {
       id="nd-toc"
       {...container}
       className={cn(
-        'sticky top-0 flex flex-col shrink-0 w-(--fd-toc-width) h-full ps-16 pt-6 pb-4 layout:[--fd-toc-width:--spacing(76)]',
+        'sticky top-0 flex flex-col shrink-0 w-(--fd-toc-width) h-full ps-16 pt-6 pb-4 layout:[--fd-toc-width:--spacing(76)] max-md:hidden @max-5xl:hidden',
         // moved to the page header on narrower panel, or when AI chat is open
-        'max-md:hidden @max-5xl:hidden in-data-[ai-chat]:hidden',
+        aiChat?.open && aiChat.panel && 'hidden',
         container?.className,
       )}
     >
@@ -140,12 +144,13 @@ export function TOCPopover({
             className={cn('size-4 shrink-0 mx-0.5 transition-transform', open && 'rotate-180')}
           />
         </CollapsibleTrigger>
-        <CollapsibleContent {...content}>
-          <div className="flex flex-col px-4 max-h-[50vh]">
-            {header}
-            <TOCList {...props} onSelect={() => setOpen(false)} />
-            {footer}
-          </div>
+        <CollapsibleContent
+          {...content}
+          className={cn('flex flex-col px-4 max-h-[50vh]', content?.className)}
+        >
+          {header}
+          <TOCList {...props} onSelect={() => setOpen(false)} />
+          {footer}
         </CollapsibleContent>
       </header>
     </Collapsible>
@@ -162,15 +167,15 @@ export function TOCDropdown({ trigger, content, header, footer, ...props }: TOCD
       <Popover.Trigger
         {...trigger}
         className={cn(
-          'flex items-center gap-2 min-w-0 h-8 px-1.5 -mx-1.5 rounded-lg text-start text-sm text-fd-muted-foreground transition-colors hover:bg-fd-accent/60 hover:text-fd-accent-foreground data-popup-open:bg-fd-accent data-popup-open:text-fd-accent-foreground',
+          'flex items-center gap-2 min-w-0 h-8 px-1.5 -mx-1.5 rounded-lg text-start text-sm transition-colors',
+          open
+            ? 'bg-fd-accent text-fd-accent-foreground'
+            : 'text-fd-muted-foreground hover:bg-fd-accent/60 hover:text-fd-accent-foreground',
           trigger?.className,
         )}
       >
         <TOCProgress className="shrink-0" />
-        <ActiveHeading
-          fallback={t('On this page')}
-          className="data-[active=true]:text-fd-foreground"
-        />
+        <ActiveHeading fallback={t('On this page')} activeClassName="text-fd-foreground" />
         <ChevronDownIcon
           className={cn('size-3.5 shrink-0 transition-transform', open && 'rotate-180')}
         />
@@ -218,7 +223,15 @@ function TOCList({
 /**
  * The active heading, rolls in from the direction of scrolling.
  */
-function ActiveHeading({ fallback, className }: { fallback: ReactNode; className?: string }) {
+function ActiveHeading({
+  fallback,
+  className,
+  activeClassName,
+}: {
+  fallback: ReactNode;
+  className?: string;
+  activeClassName?: string;
+}) {
   const items = Base.useTOCItems();
   const active = useTOCSelector(selectTopmost);
   const [shown, setShown] = useState({ item: active, roll: 1 });
@@ -227,10 +240,7 @@ function ActiveHeading({ fallback, className }: { fallback: ReactNode; className
   }
 
   return (
-    <span
-      data-active={active !== undefined}
-      className={cn('flex min-w-0 overflow-hidden', className)}
-    >
+    <span className={cn('flex min-w-0 overflow-hidden', active && activeClassName, className)}>
       <span
         key={active?.url}
         className="truncate motion-safe:animate-fd-roll-in"

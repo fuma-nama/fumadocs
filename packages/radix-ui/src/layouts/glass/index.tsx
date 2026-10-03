@@ -117,7 +117,6 @@ export function DocsLayout(props: DocsLayoutProps) {
         <TreeContextProvider tree={tree}>
           <div
             id="fd-glass-layout"
-            data-ai-chat={aiChat?.open && aiChat.panel ? '' : undefined}
             className="grid overflow-x-clip min-h-dvh [--fd-main-width:900px] [--fd-left-width:0px] [--fd-right-width:0px]"
             style={{
               gridTemplate: `"left left-margin main right-margin right" 1fr / var(--fd-left-width) ${leftSpace} 1fr minmax(calc(50% - var(--fd-main-width)/2 - var(--fd-right-width) + min(${leftSpace}, 0px)), auto) var(--fd-right-width)`,

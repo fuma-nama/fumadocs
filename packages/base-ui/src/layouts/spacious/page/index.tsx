@@ -85,6 +85,7 @@ export function DocsPage({
     },
   };
   const layout = useSpaciousLayout();
+  const { aiChat } = layout.props;
   const hasFolders = useBreadcrumbItems(breadcrumb).length > 0 && breadcrumbEnabled;
   const pathname = usePathname();
 
@@ -112,7 +113,7 @@ export function DocsPage({
                 className={cn(
                   'flex items-center gap-1.5 min-w-0',
                   // in place of the TOC when it is hidden
-                  tocEnabled && 'hidden @max-5xl:flex in-data-[ai-chat]:flex',
+                  tocEnabled && !(aiChat?.open && aiChat.panel) && 'hidden @max-5xl:flex',
                 )}
               >
                 {hasFolders && <span className="text-sm text-fd-muted-foreground/50">/</span>}

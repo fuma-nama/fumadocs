@@ -1,6 +1,7 @@
 'use client';
 import { Menu } from '@base-ui/react/menu';
 import { ScrollArea } from '@base-ui/react/scroll-area';
+import { cva } from 'class-variance-authority';
 import { usePathname } from 'fumadocs-core/framework';
 import Link from 'fumadocs-core/link';
 import {
@@ -25,12 +26,21 @@ export type SidebarProviderProps = Base.SidebarProviderProps;
 export type SidebarProps = ComponentProps<'aside'>;
 
 /** the hover fill comes from the gliding block of `SidebarItems` */
-const itemClass =
-  'relative flex w-full items-center gap-3 rounded-lg px-2.5 py-2 text-start text-fd-muted-foreground wrap-anywhere outline-none transition-colors focus-visible:ring-2 focus-visible:ring-fd-ring hover:not-data-[active=true]:text-fd-accent-foreground data-[active=true]:bg-fd-primary/10 data-[active=true]:text-fd-primary [&_svg]:size-4 [&_svg]:shrink-0';
+const itemVariants = cva(
+  'relative flex w-full items-center gap-3 rounded-lg px-2.5 py-2 text-start wrap-anywhere outline-none transition-colors focus-visible:ring-2 focus-visible:ring-fd-ring [&_svg]:size-4 [&_svg]:shrink-0',
+  {
+    variants: {
+      active: {
+        true: 'bg-fd-primary/10 text-fd-primary',
+        false: 'text-fd-muted-foreground hover:text-fd-accent-foreground',
+      },
+    },
+    defaultVariants: { active: false },
+  },
+);
 
-/** highlight the guide line next to an active nested item */
-const nestedItemClass =
-  "data-[active=true]:before:content-[''] data-[active=true]:before:absolute data-[active=true]:before:-start-1 data-[active=true]:before:inset-y-2 data-[active=true]:before:w-px data-[active=true]:before:bg-fd-primary";
+/** highlights the guide line of folder next to an active item */
+const activeLine = <span className="absolute -start-1 inset-y-2 w-px bg-fd-primary" />;
 
 export function SidebarProvider(props: SidebarProviderProps) {
   return <Base.SidebarProvider {...props} />;
@@ -48,14 +58,19 @@ export function Sidebar({ className, ...props }: SidebarProps) {
       data-collapsed={collapsed}
       inert={collapsed}
       className={cn(
-        'group/sidebar [grid-area:sidebar] flex min-h-0 overflow-clip text-sm md:layout:[--fd-sidebar-width:268px] max-md:hidden',
+        '[grid-area:sidebar] flex min-h-0 overflow-clip text-sm md:layout:[--fd-sidebar-width:268px] max-md:hidden',
         // keep a gutter in place of the collapsed sidebar
         collapsed && 'md:layout:[--fd-sidebar-col:--spacing(2)]',
         className,
       )}
       {...props}
     >
-      <div className="flex flex-col shrink-0 w-(--fd-sidebar-width) transition-[opacity,translate] duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] group-data-[collapsed=true]/sidebar:-translate-x-3 group-data-[collapsed=true]/sidebar:opacity-0 rtl:group-data-[collapsed=true]/sidebar:translate-x-3 motion-reduce:transition-none">
+      <div
+        className={cn(
+          'flex flex-col shrink-0 w-(--fd-sidebar-width) transition-[opacity,translate] duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] motion-reduce:transition-none',
+          collapsed && '-translate-x-3 opacity-0 rtl:translate-x-3',
+        )}
+      >
         <div className="flex items-center gap-2 h-(--fd-header-height) my-2 ps-5.5 pe-3">
           <slots.navTitle className="inline-flex items-center gap-2 min-w-0 me-auto text-[0.9375rem] font-semibold" />
           <Base.SidebarCollapseTrigger
@@ -134,7 +149,7 @@ export function SidebarDrawer() {
           {aiChat && (
             <button
               type="button"
-              className={cn(itemClass, 'hover:bg-fd-accent/60')}
+              className={cn(itemVariants(), 'hover:bg-fd-accent/60')}
               onClick={() => {
                 setOpen(false);
                 aiChat.onOpenChange(true);
@@ -248,22 +263,19 @@ function SidebarViewport() {
 
 function SidebarItems() {
   const { menuItems } = useSpaciousLayout();
+  const links = menuItems.filter((item) => item.type !== 'icon');
 
   return (
-    <div ref={follow} className="relative flex flex-col gap-6">
+    <div ref={follow} className="relative flex flex-col">
       {/* inset to keep apart from the background of active item */}
       <div
         aria-hidden
-        className="absolute top-0 left-0 py-0.5 rounded-lg bg-fd-accent/60 bg-clip-content opacity-0 pointer-events-none transition-opacity duration-200 ease-[cubic-bezier(0.22,1,0.36,1)] motion-safe:data-glide:transition-[translate,width,height,opacity]"
+        className="absolute top-0 left-0 py-0.5 rounded-lg bg-fd-accent/60 bg-clip-content opacity-0 pointer-events-none transition-opacity duration-200 ease-[cubic-bezier(0.22,1,0.36,1)] motion-safe:transition-[translate,width,height,opacity]"
       />
-      <div className="flex flex-col empty:hidden">
-        {menuItems.map(
-          (item, i) => item.type !== 'icon' && <SidebarLinkItem key={i} item={item} />,
-        )}
-      </div>
-      <div className="flex flex-col">
-        <SidebarPageTree />
-      </div>
+      {links.map((item, i) => (
+        <SidebarLinkItem key={i} item={item} className={cn(i === links.length - 1 && 'mb-6')} />
+      ))}
+      <SidebarPageTree />
     </div>
   );
 }
@@ -277,7 +289,7 @@ function follow(area: HTMLDivElement | null) {
   const show = (item: Element | null) => {
     if (item === current) return;
     // glide between items, appear in place when coming from outside
-    block.toggleAttribute('data-glide', current !== null);
+    block.style.transitionProperty = current ? '' : 'opacity';
     current = item;
     if (!item) {
       block.style.opacity = '0';
@@ -339,40 +351,64 @@ function SidebarSeparator({ className, ...props }: ComponentProps<'p'>) {
   );
 }
 
-function SidebarItem({ className, ...props }: ComponentProps<typeof Base.SidebarItem>) {
+function SidebarItem({
+  active,
+  className,
+  children,
+  ...props
+}: ComponentProps<typeof Base.SidebarItem>) {
   const depth = Base.useFolderDepth();
 
   return (
     <Base.SidebarItem
-      className={cn(itemClass, depth > 0 && nestedItemClass, className)}
+      active={active}
+      className={cn(itemVariants({ active }), className)}
       {...props}
-    />
+    >
+      {active && depth > 0 && activeLine}
+      {children}
+    </Base.SidebarItem>
   );
 }
 
 function SidebarFolderTrigger(props: ComponentProps<typeof Base.SidebarFolderTrigger>) {
   return (
-    <Base.SidebarFolderTrigger {...props} className={cn(itemClass, '[&>[data-icon]]:size-3.5')} />
+    <Base.SidebarFolderTrigger
+      {...props}
+      className={cn(itemVariants(), '[&>[data-icon]]:size-3.5')}
+    />
   );
 }
 
-function SidebarFolderLink({ className, ...props }: ComponentProps<typeof Base.SidebarFolderLink>) {
+function SidebarFolderLink({
+  active,
+  className,
+  children,
+  ...props
+}: ComponentProps<typeof Base.SidebarFolderLink>) {
   const depth = Base.useFolderDepth();
 
   return (
     <Base.SidebarFolderLink
-      className={cn(itemClass, '[&>[data-icon]]:size-3.5', depth > 1 && nestedItemClass, className)}
+      active={active}
+      className={cn(itemVariants({ active }), '[&>[data-icon]]:size-3.5', className)}
       {...props}
-    />
+    >
+      {active && depth > 1 && activeLine}
+      {children}
+    </Base.SidebarFolderLink>
   );
 }
 
-function SidebarFolderContent(props: ComponentProps<typeof Base.SidebarFolderContent>) {
+function SidebarFolderContent({
+  children,
+  ...props
+}: ComponentProps<typeof Base.SidebarFolderContent>) {
   return (
-    <Base.SidebarFolderContent
-      {...props}
-      className="relative flex flex-col ms-3 ps-1 before:content-[''] before:absolute before:start-0 before:inset-y-1 before:w-px before:bg-fd-border"
-    />
+    <Base.SidebarFolderContent {...props} className="relative flex flex-col ms-3 ps-1">
+      <span className="absolute start-0 inset-y-1 w-px bg-fd-border" />
+      {children}
+    </Base.SidebarFolderContent>
   );
 }
 
