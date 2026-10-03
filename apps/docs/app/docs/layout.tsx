@@ -1,3 +1,1 @@
-import { Spacious } from '@/components/layouts/spacious';
-
-export default Spacious;
+export { DefaultLayout as default } from '@/components/layouts/default';
