@@ -1,6 +1,6 @@
 {
   "name": "example-openapi",
-  "version": "0.0.43",
+  "version": "0.0.44",
   "private": true,
   "scripts": {
     "build": "next build",
@@ -16,7 +16,7 @@
     "next": "16.3.8",
     "react": "^19.3.0",
     "react-dom": "^19.3.0",
-    "shiki": "^4.4.3"
+    "shiki": "^4.5.0"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4.3.3",

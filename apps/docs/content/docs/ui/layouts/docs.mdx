@@ -269,6 +269,16 @@ export function SidebarSeparator({ className, style, children, ...props }: Compo
 
 <auto-type-table cwd path="content/docs/ui/props.ts" name="SidebarProps" />
 
+## AI Chat
+
+Pass your chat panel to `aiChat` with its open state, the layout places it beside the page on wide screens, and floats it over the page on smaller ones.
+
+```tsx
+<DocsLayout aiChat={{ open, onOpenChange: setOpen, panel: <MyChat /> }} />
+```
+
+See [Ask AI](/docs/integrations/llms#ask-ai) for a pre-built chat.
+
 ## Advanced
 
 ### Prefetching

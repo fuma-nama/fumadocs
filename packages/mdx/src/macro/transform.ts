@@ -1,15 +1,10 @@
 import path from 'node:path';
 import MagicString from 'magic-string';
-import type {
-  Module as YukuModule,
-  Symbol as YukuSymbol,
-  NodeOfType,
-  NodeType,
-} from 'yuku-analyzer';
+import type { Binding as YukuBinding, Module as YukuModule } from 'yuku-analyzer';
 import { createCodegen, slash } from '@/utils/codegen';
 import { MacroModuleId } from './options';
 
-type YukuNode = NodeOfType<NodeType>;
+type YukuNode = Parameters<YukuModule['parentOf']>[0];
 
 const SupportedPatterns = {
   doc: '**/*.{mdx,md}',
@@ -107,8 +102,8 @@ export function parseMacroId(id: string): { cfg: string; name: string } | undefi
 }
 
 async function analyzeModule(code: string, file: string): Promise<YukuModule> {
-  const { Analyzer } = await import('yuku-analyzer');
-  const module = new Analyzer().addFile(file, code, { sourceType: 'module' });
+  const { analyze } = await import('yuku-analyzer');
+  const module = analyze(code, { path: file, sourceType: 'module' });
   const errors = module.diagnostics.filter((diagnostic) => diagnostic.severity === 'error');
   if (errors.length > 0) {
     const first = errors[0];
@@ -219,7 +214,7 @@ async function parseMacroModule(code: string, file: string): Promise<ParsedMacro
   const module = await analyzeModule(code, file);
   const program = module.ast as unknown as Node;
 
-  const macroSymbols = new Map<YukuSymbol, MacroFn>();
+  const macroSymbols = new Map<YukuBinding, MacroFn>();
   const imports: Node[] = [];
 
   for (const statement of program.body as Node[]) {
@@ -260,7 +255,7 @@ async function parseMacroModule(code: string, file: string): Promise<ParsedMacro
         imported.type === 'Identifier' ? (imported.name as string) : (imported.value as string);
       if (name !== 'defineDocs' && name !== 'defineCollections') continue;
 
-      const symbol = module.symbolOf(spec.local as unknown as YukuNode);
+      const symbol = module.bindingOf(spec.local as unknown as YukuNode);
       if (symbol) macroSymbols.set(symbol, name);
     }
 
@@ -289,7 +284,7 @@ async function parseMacroModule(code: string, file: string): Promise<ParsedMacro
 
       const callee = init.callee as Node;
       if (callee.type !== 'Identifier') continue;
-      const symbol = module.symbolOf(callee as unknown as YukuNode);
+      const symbol = module.bindingOf(callee as unknown as YukuNode);
       const fn = symbol ? macroSymbols.get(symbol) : undefined;
       if (fn === undefined) continue;
 
@@ -365,13 +360,13 @@ function retainMacroDependencies(parsed: ParsedMacroModule): Set<Node> {
   const dependencies = new Map<Node, Set<Node>>();
 
   for (const reference of parsed.module.references) {
-    if (reference.inTypePosition || !reference.symbol) continue;
+    if (reference.inTypePosition || !reference.binding) continue;
     const statement = topLevelStatement(parsed.module, reference.node as unknown as Node);
     if (!statement) continue;
 
     let refs = dependencies.get(statement);
     if (!refs) dependencies.set(statement, (refs = new Set()));
-    for (const declaration of reference.symbol.declarations) {
+    for (const declaration of reference.binding.declarations) {
       const dependency = topLevelStatement(parsed.module, declaration as Node);
       if (dependency && dependency !== statement) refs.add(dependency);
     }

@@ -59,6 +59,9 @@ export function TOC({ container, header, footer, style = 'normal', list }: TOCPr
   const items = Base.useTOCItems();
   const t = useTranslations({ note: 'table of contents' });
   const { TOCItems, TOCEmpty, TOCItem } = variants[style];
+  const {
+    props: { aiChat },
+  } = useDocsLayout();
 
   if (items.length === 0 && !header && !footer) {
     return <div id="nd-toc-placeholder" className="hidden xl:layout:[--fd-toc-width:268px]" />;
@@ -70,6 +73,9 @@ export function TOC({ container, header, footer, style = 'normal', list }: TOCPr
       {...container}
       className={cn(
         'sticky top-(--fd-docs-row-1) h-[calc(var(--fd-docs-height)-var(--fd-docs-row-1))] flex flex-col [grid-area:toc] w-(--fd-toc-width) pt-12 pe-4 pb-2 xl:layout:[--fd-toc-width:268px] max-xl:hidden',
+        // AI chat takes its place
+        'transition-[opacity,visibility] duration-300',
+        aiChat?.open && aiChat.panel && 'invisible opacity-0',
         container?.className,
       )}
     >

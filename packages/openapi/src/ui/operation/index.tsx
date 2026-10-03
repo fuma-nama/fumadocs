@@ -31,6 +31,7 @@ import { useCopyButton } from 'fumadocs-ui/utils/use-copy-button';
 import { buttonVariants } from 'fumadocs-ui/components/ui/button';
 import { Check, Copy } from 'lucide-react';
 import PlaygroundClient from '@/ui/playground/client';
+import { EndpointBar } from '@/ui/components/endpoint';
 
 export interface OperationProps extends PageOperationProps {
   headingLevel?: number;
@@ -170,7 +171,7 @@ function OperationContent({
                 <SchemaUI
                   key={param.name}
                   client={{
-                    name: param.name!,
+                    name: param.name,
                     required: param.required,
                   }}
                   root={
@@ -288,21 +289,11 @@ function OperationContent({
       apiPlayground = render ? (
         render({ path, method, operation, pathItem })
       ) : (
-        <PlaygroundClient {...options} writeOnly readOnly={false} />
+        <PlaygroundClient {...options} />
       );
     } else {
       apiPlayground = (
-        <div className="flex flex-row items-center gap-2.5 p-3 rounded-xl border bg-fd-card text-fd-card-foreground not-prose">
-          <MethodLabel className="text-xs">{method}</MethodLabel>
-          <code
-            className={cn(
-              'flex-1 overflow-auto text-nowrap text-[0.8125rem] text-fd-muted-foreground',
-              operation.deprecated && 'line-through',
-            )}
-          >
-            {path}
-          </code>
-        </div>
+        <EndpointBar method={method} route={path} deprecated={operation.deprecated} />
       );
     }
 

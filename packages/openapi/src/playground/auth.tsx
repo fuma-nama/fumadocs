@@ -26,6 +26,7 @@ interface PendingFlow {
   client_auth: OAuthFlowInput['clientAuth'];
   redirect_uri: string;
   token_url?: string;
+  origin?: string;
 }
 
 const pendingFlowKey = 'fumadocs-openapi-oauth';
@@ -49,6 +50,8 @@ export interface OAuthFlowInput {
   serverUrl: string;
   /** URL of the `createOAuthHandler()` route, defaults to the page */
   redirectUrl?: string;
+  /** where the flow started, like an operation, restored when it returns to the page */
+  origin?: string;
 }
 
 /**
@@ -70,6 +73,7 @@ export async function requestOAuthToken(
     clientAuth,
     serverUrl,
     redirectUrl,
+    origin,
   }: OAuthFlowInput,
 ): Promise<string | undefined> {
   const flows = scheme.flows ?? {};
@@ -87,6 +91,7 @@ export async function requestOAuthToken(
       // redirect URIs cannot have a fragment
       redirect_uri: new URL(redirectUrl ?? window.location.pathname, window.location.origin).href,
       token_url: 'tokenUrl' in flow ? new URL(flow.tokenUrl!, serverUrl).href : undefined,
+      origin,
     };
     sessionStorage.setItem(pendingFlowKey, JSON.stringify(pending));
     // where `createOAuthHandler()` sends users back to
@@ -175,6 +180,8 @@ interface AuthContextType {
   store: TokenStore;
   isLoading: boolean;
   error?: unknown;
+  /** `origin` of the flow that returned to the page */
+  origin?: string;
   /** listen to the tokens of flows returning to the page, returns a cleanup */
   subscribe: (listener: TokenListener) => () => void;
 }
@@ -189,6 +196,7 @@ export function usePlaygroundAuth() {
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [store, setStore] = useState<TokenStore>({});
+  const [origin, setOrigin] = useState<string>();
   const listeners = useMemo(() => new Set<TokenListener>(), []);
   const subscribe = useCallback(
     (listener: TokenListener) => {
@@ -248,6 +256,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       return;
     }
 
+    setOrigin(flow.origin);
     sessionStorage.removeItem(pendingFlowKey);
     window.history.replaceState(null, '', window.location.pathname);
     // eslint-disable-next-line react-hooks/exhaustive-deps -- first page load only
@@ -260,9 +269,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           store,
           isLoading: authCodeQuery.isLoading,
           error: authCodeQuery.error,
+          origin,
           subscribe,
         }),
-        [store, authCodeQuery.isLoading, authCodeQuery.error, subscribe],
+        [store, authCodeQuery.isLoading, authCodeQuery.error, origin, subscribe],
       )}
     >
       {children}

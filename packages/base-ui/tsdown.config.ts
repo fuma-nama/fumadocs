@@ -80,7 +80,7 @@ export async function compileInline() {
   const commonNames = scanner.scan();
   await writeFile('css/generated/shared.css', namesToFile(commonNames));
 
-  const layouts = ['flux', 'notebook', 'home', 'docs', 'glass'];
+  const layouts = ['flux', 'notebook', 'home', 'docs', 'glass', 'spacious'];
   const commonNameSet = new Set(commonNames);
 
   for (const layout of layouts) {

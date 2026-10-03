@@ -26,7 +26,7 @@ import {
   MarkdownCopyButton,
   ViewOptionsPopover,
   DocsPageProps,
-} from 'fumadocs-ui/layouts/docs/page';
+} from 'fumadocs-ui/layouts/spacious/page';
 import { NotFound } from '@/components/layouts/not-found';
 import { getSuggestions } from './suggestions';
 import { PathUtils } from 'fumadocs-core/source';

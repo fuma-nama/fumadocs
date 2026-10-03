@@ -55,11 +55,11 @@
   },
   "devDependencies": {
     "@types/mdast": "^4.0.4",
-    "@types/node": "26.6.3",
+    "@types/node": "26.6.4",
     "@types/react": "^19.3.0",
     "fumadocs-core": "workspace:*",
     "fumadocs-ui": "workspace:@fumadocs/base-ui@*",
-    "shiki": "4.4.3",
+    "shiki": "4.5.0",
     "tsconfig": "workspace:*",
     "tsdown": "0.23.0"
   },

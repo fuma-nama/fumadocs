@@ -75,7 +75,7 @@
     "unist-util-visit": "^5.1.0",
     "vfile": "^6.0.3",
     "yaml": "^2.9.1",
-    "yuku-analyzer": "^0.14.0",
+    "yuku-analyzer": "^0.17.0",
     "zod": "^4.6.5"
   },
   "devDependencies": {
@@ -84,7 +84,7 @@
     "@types/bun": "^1.4.2",
     "@types/mdast": "^4.0.4",
     "@types/mdx": "^2.0.14",
-    "@types/node": "^26.6.3",
+    "@types/node": "^26.6.4",
     "@types/picomatch": "^4.0.3",
     "@types/react": "^19.3.0",
     "fumadocs-core": "workspace:*",
@@ -98,7 +98,7 @@
     "satteri": "^0.10.5",
     "tsconfig": "workspace:*",
     "tsdown": "0.23.0",
-    "vite": "^8.3.1",
+    "vite": "^8.3.2",
     "webpack": "^5.111.1"
   },
   "peerDependencies": {
