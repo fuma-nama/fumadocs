@@ -12,7 +12,7 @@ import {
   Rows3,
   SlidersHorizontal,
 } from 'lucide-react';
-import { type FieldKey, useDataEngine } from '@fumari/stf';
+import { type FieldKey, useDataEngine, useFieldValue } from '@fumari/stf';
 import { stringifyFieldKey } from '@fumari/stf/lib/utils';
 import type { JsonSchema } from '@fumadocs/json-schema';
 import { useTranslations } from '@fuma-translate/react';
@@ -688,27 +688,35 @@ function BodySection({
 
 function JsonEditor({ fieldName }: { fieldName: FieldKey }) {
   const engine = useDataEngine();
-  const [error, setError] = useState<string | null>(null);
-  const [value, setValue] = useState(() => JSON.stringify(engine.get(fieldName) ?? {}, null, 2));
+  const [value] = useFieldValue(fieldName);
+  const [draft, setDraft] = useState(() => ({ value, text: formatJson(value), error: '' }));
+  if (draft.value !== value) setDraft({ value, text: formatJson(value), error: '' });
 
   return (
     <div className="flex flex-col">
       <textarea
         aria-label="JSON"
-        value={value}
+        value={draft.text}
         spellCheck={false}
         onChange={(e) => {
-          setValue(e.target.value);
+          const text = e.target.value;
           try {
-            engine.update(fieldName, JSON.parse(e.target.value));
-            setError(null);
+            const parsed: unknown = JSON.parse(text);
+            setDraft({ value: parsed, text, error: '' });
+            engine.update(fieldName, parsed);
           } catch (err) {
-            if (err instanceof Error) setError(err.message);
+            setDraft({ ...draft, text, error: err instanceof Error ? err.message : '' });
           }
         }}
         className="min-h-60 w-full resize-none bg-transparent px-4 py-3 font-mono text-[0.8125rem] leading-relaxed outline-none field-sizing-content"
       />
-      {error && <p className="border-t px-4 py-2 font-mono text-xs text-red-400">{error}</p>}
+      {draft.error && (
+        <p className="border-t px-4 py-2 font-mono text-xs text-red-400">{draft.error}</p>
+      )}
     </div>
   );
+}
+
+function formatJson(value: unknown): string {
+  return JSON.stringify(value ?? {}, null, 2);
 }

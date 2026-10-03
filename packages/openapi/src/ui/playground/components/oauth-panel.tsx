@@ -111,7 +111,7 @@ export function OAuthPanel({
           if (e.key !== 'Enter' || !(e.target instanceof HTMLInputElement)) return;
           e.preventDefault();
           e.stopPropagation();
-          if (supported) void authorize.start();
+          if (supported && !authorize.isLoading) void authorize.start();
         }}
       >
         {scheme.description && (

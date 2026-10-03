@@ -269,6 +269,7 @@ function PlaygroundDialog({
       className="flex min-h-0 flex-1 flex-col"
       onSubmit={(e) => {
         e.preventDefault();
+        if (loading) return;
         onSend();
         setView('response');
       }}
