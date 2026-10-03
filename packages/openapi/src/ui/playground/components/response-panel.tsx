@@ -1,0 +1,210 @@
+'use client';
+import { type FC, useMemo, useState } from 'react';
+import { SendHorizontal } from 'lucide-react';
+import { useTranslations } from '@fuma-translate/react';
+import {
+  CodeBlockTab,
+  CodeBlockTabs,
+  CodeBlockTabsList,
+  CodeBlockTabsTrigger,
+} from 'fumadocs-ui/components/codeblock';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from 'shared-api/components/select';
+import { Spinner } from 'shared-api/components/spinner';
+import { type ResponseTab, useCodeUsage, useOperation, useResponseExamples } from '@/operation';
+import type { FetchResult } from '@/playground/fetcher';
+import { ClientCodeBlock } from '@/ui/components/codeblock';
+import { Markdown } from '@/ui/components/markdown';
+import { cn } from '@/utils/cn';
+import {
+  DefaultResultDisplay,
+  PanelHeader,
+  panelCodeBlock,
+  type ResultDisplayProps,
+} from './result-display';
+import { Segmented, SegmentedList, SegmentedPanel } from './segmented';
+
+export interface TestResult {
+  id: number;
+  result: FetchResult;
+  duration: number;
+}
+
+/** the code usages of the request, above its response or the documented examples */
+export function ResponsePanel({
+  result,
+  loading,
+  onReset,
+  ResultDisplay = DefaultResultDisplay,
+  className,
+}: {
+  result?: TestResult;
+  loading: boolean;
+  onReset: () => void;
+  ResultDisplay?: FC<ResultDisplayProps>;
+  className?: string;
+}) {
+  const t = useTranslations({ note: 'playground' });
+
+  return (
+    <div className={cn('@container flex min-h-0 flex-col', className)}>
+      <RequestExample />
+      <div className="relative flex min-h-0 flex-1 flex-col">
+        {result ? (
+          <ResultDisplay
+            key={result.id}
+            data={result.result}
+            duration={result.duration}
+            reset={onReset}
+            className="starting:opacity-0 motion-safe:transition-[opacity,translate] motion-safe:duration-300 motion-safe:starting:translate-y-1"
+          />
+        ) : (
+          <ResponseExamples />
+        )}
+        {loading && (
+          <div className="absolute inset-0 flex items-center justify-center gap-2 bg-fd-card/70 text-sm text-fd-muted-foreground backdrop-blur-[1px] transition-opacity delay-150 duration-200 starting:opacity-0">
+            <Spinner className="size-3.5" />
+            {t('Sending request...')}
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+function RequestExample() {
+  const { codeUsages } = useOperation();
+  const items = useMemo(() => Array.from(codeUsages.map()), [codeUsages]);
+  if (items.length === 0) return null;
+
+  return (
+    <CodeBlockTabs
+      groupId="fumadocs_openapi_requests"
+      defaultValue={items[0][0]}
+      className="my-0 shrink-0 rounded-none border-0 border-b bg-transparent"
+    >
+      <CodeBlockTabsList className="h-10 items-stretch border-b [scrollbar-width:none]">
+        {items.map(([id, item]) => (
+          <CodeBlockTabsTrigger key={id} value={id}>
+            {item.label ?? item.lang}
+          </CodeBlockTabsTrigger>
+        ))}
+      </CodeBlockTabsList>
+      {items.map(([id, item]) => (
+        <CodeBlockTab key={id} value={id}>
+          <UsageCode id={id} lang={item.lang} />
+        </CodeBlockTab>
+      ))}
+    </CodeBlockTabs>
+  );
+}
+
+function UsageCode({ id, lang }: { id: string; lang: string }) {
+  const code = useCodeUsage(id);
+  if (!code) return null;
+
+  return (
+    <ClientCodeBlock
+      lang={lang}
+      code={code}
+      codeblock={{
+        className: 'rounded-none border-0 bg-transparent shadow-none',
+        viewportProps: { className: 'max-h-[min(18rem,30vh)]' },
+      }}
+    />
+  );
+}
+
+function ResponseExamples() {
+  const t = useTranslations({ note: 'playground' });
+  const tabs = useResponseExamples();
+
+  if (tabs.length === 0) {
+    return (
+      <div className="flex flex-1 flex-col items-center justify-center gap-3 p-6 text-center">
+        <div className="rounded-xl border bg-fd-secondary p-2.5 text-fd-muted-foreground">
+          <SendHorizontal className="size-4" />
+        </div>
+        <p className="text-sm text-fd-muted-foreground">
+          {t('Send a request to see its response.')}
+        </p>
+      </div>
+    );
+  }
+
+  return (
+    <Segmented defaultValue={tabs[0].code} className="flex min-h-0 flex-1 flex-col">
+      <PanelHeader>
+        <span className="text-[0.8125rem] font-medium">{t('Response')}</span>
+        <span className="hidden text-xs text-fd-muted-foreground @sm:inline">{t('Example')}</span>
+        <SegmentedList
+          className="ms-auto min-w-0 overflow-x-auto [scrollbar-width:none]"
+          items={tabs.map((tab) => ({
+            value: tab.code,
+            label: <span className="font-mono">{tab.code}</span>,
+          }))}
+        />
+      </PanelHeader>
+      {tabs.map((tab) => (
+        <SegmentedPanel
+          key={tab.code}
+          value={tab.code}
+          className="flex min-h-0 flex-1 flex-col overflow-auto"
+        >
+          <ResponseExample tab={tab} />
+        </SegmentedPanel>
+      ))}
+    </Segmented>
+  );
+}
+
+function ResponseExample({ tab }: { tab: ResponseTab }) {
+  const t = useTranslations({ note: 'playground' });
+  const [selected, setSelected] = useState('0');
+  const examples = tab.examples ?? [];
+  const example = examples[Number(selected)];
+
+  return (
+    <>
+      {tab.response.description && (
+        <div className="border-b px-4 py-2.5 text-xs text-fd-muted-foreground [&_a]:underline">
+          <Markdown md={tab.response.description} />
+        </div>
+      )}
+      {examples.length > 1 && (
+        <Select
+          items={examples.map((item, i) => ({ value: String(i), label: item.label }))}
+          value={selected}
+          onValueChange={(v) => v !== null && setSelected(v)}
+        >
+          <SelectTrigger className="min-h-9 shrink-0 rounded-none border-0 border-b bg-transparent px-4 text-xs hover:bg-fd-accent/40 focus:ring-0">
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            {examples.map((item, i) => (
+              <SelectItem key={i} value={String(i)} className="text-xs">
+                {item.label}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      )}
+      {example ? (
+        <div className="min-h-0 flex-1">
+          <ClientCodeBlock
+            lang="json"
+            code={JSON.stringify(example.sample, null, 2)}
+            codeblock={panelCodeBlock}
+          />
+        </div>
+      ) : (
+        <p className="p-4 text-sm text-fd-muted-foreground">{t('No example available.')}</p>
+      )}
+    </>
+  );
+}

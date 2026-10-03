@@ -1,5 +1,5 @@
 import { Select as SelectPrimitive } from '@base-ui/react/select';
-import { Check, ChevronDown, ChevronUp } from 'lucide-react';
+import { Check, ChevronDown } from 'lucide-react';
 import * as React from 'react';
 import { cn } from '@/utils/cn';
 
@@ -32,6 +32,10 @@ function SelectTrigger({
   );
 }
 
+// edge fades shown while the list can scroll, they scroll it on hover
+// (`null` children replace the default arrow glyphs)
+const scrollArrowClassName = 'inset-x-0 z-10 h-6 from-fd-popover to-transparent';
+
 function SelectScrollUpButton({
   className,
   ref,
@@ -40,10 +44,10 @@ function SelectScrollUpButton({
   return (
     <SelectPrimitive.ScrollUpArrow
       ref={ref}
-      className={cn('flex items-center justify-center py-1', className)}
+      className={cn(scrollArrowClassName, 'top-0 bg-linear-to-b', className)}
       {...props}
     >
-      <ChevronUp className="size-4" />
+      {null}
     </SelectPrimitive.ScrollUpArrow>
   );
 }
@@ -56,10 +60,10 @@ function SelectScrollDownButton({
   return (
     <SelectPrimitive.ScrollDownArrow
       ref={ref}
-      className={cn('flex items-center justify-center py-1', className)}
+      className={cn(scrollArrowClassName, 'bottom-0 bg-linear-to-t', className)}
       {...props}
     >
-      <ChevronDown className="size-4" />
+      {null}
     </SelectPrimitive.ScrollDownArrow>
   );
 }
@@ -85,7 +89,7 @@ function SelectContent({
         <SelectPrimitive.Popup
           ref={ref}
           className={cn(
-            'z-50 min-w-[calc(var(--anchor-width)+--spacing(2))] overflow-hidden rounded-lg border bg-fd-popover text-fd-popover-foreground shadow-md',
+            'relative z-50 min-w-[calc(var(--anchor-width)+--spacing(2))] overflow-hidden rounded-lg border bg-fd-popover text-fd-popover-foreground shadow-md',
             className,
           )}
           {...props}
@@ -123,7 +127,7 @@ function SelectItem({
     <SelectPrimitive.Item
       ref={ref}
       className={cn(
-        'flex select-none flex-row items-center rounded-md py-1.5 px-2 text-sm outline-none data-[highlighted]:bg-fd-accent data-[highlighted]:text-fd-accent-foreground data-[disabled]:pointer-events-none data-[disabled]:opacity-50',
+        'flex select-none flex-row items-center gap-2 rounded-md py-1.5 px-2 text-sm outline-none data-[highlighted]:bg-fd-accent data-[highlighted]:text-fd-accent-foreground data-[disabled]:pointer-events-none data-[disabled]:opacity-50',
         className,
       )}
       {...props}
