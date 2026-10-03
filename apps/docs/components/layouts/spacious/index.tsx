@@ -31,7 +31,8 @@ export function Spacious({ children }: { children: ReactNode }) {
       <ClientSpaciousLayout
         {...base}
         tree={source.getPageTree()}
-        links={linkItems}
+        // just icon items
+        links={linkItems.filter((item) => item.type === 'icon')}
         nav={{
           ...base.nav,
           title: (

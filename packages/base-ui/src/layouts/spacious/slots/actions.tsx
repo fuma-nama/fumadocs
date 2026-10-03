@@ -48,15 +48,33 @@ function IconLinks({ className }: { className?: string }) {
   );
 }
 
-/** the top right of page, the language switcher and icon links are moved into `OptionsMenu` on smaller viewports */
+/** the top right of page, AI chat, the language switcher and icon links are moved into `OptionsMenu` on smaller viewports */
 export function HeaderActions({ className, ...props }: ComponentProps<'div'>) {
-  const { slots } = useSpaciousLayout();
+  const {
+    slots,
+    props: { aiChat },
+  } = useSpaciousLayout();
+  const t = useTranslations({ note: 'AI chat button' });
 
   return (
     <div
       className={cn('flex items-center gap-0.5 rounded-lg bg-fd-background', className)}
       {...props}
     >
+      {aiChat && (
+        <button
+          type="button"
+          aria-pressed={aiChat.open}
+          className={cn(
+            buttonVariants({ variant: 'ghost' }),
+            'h-7.5 gap-1.5 px-2 text-fd-muted-foreground aria-pressed:bg-fd-accent aria-pressed:text-fd-accent-foreground max-lg:hidden',
+          )}
+          onClick={() => aiChat.onOpenChange(!aiChat.open)}
+        >
+          <MessageCircleIcon className="size-4" />
+          {t('Ask AI')}
+        </button>
+      )}
       {slots.languageSelect && (
         <slots.languageSelect.root className="h-7.5 gap-1.5 px-2 text-fd-muted-foreground max-lg:hidden">
           <LanguagesIcon className="size-4" />
@@ -79,8 +97,7 @@ function OptionsMenu() {
   } = useSpaciousLayout();
   const t = useTranslations();
   const iconLinks = menuItems.filter((item) => item.type === 'icon');
-  const hasOptions = Boolean(aiChat || slots.themeSwitch);
-  if (!hasOptions && !slots.languageSelect && iconLinks.length === 0) return;
+  if (!aiChat && !slots.themeSwitch && !slots.languageSelect && iconLinks.length === 0) return;
 
   return (
     <Menu.Root>
@@ -89,7 +106,8 @@ function OptionsMenu() {
         className={cn(
           buttonVariants({ variant: 'ghost', size: 'icon-sm' }),
           'text-fd-muted-foreground data-popup-open:bg-fd-accent data-popup-open:text-fd-accent-foreground',
-          !hasOptions && 'lg:hidden',
+          // only the theme options remain on wider viewports
+          !slots.themeSwitch && 'lg:hidden',
         )}
       >
         <EllipsisIcon />
@@ -97,24 +115,28 @@ function OptionsMenu() {
       <Menu.Portal>
         <Menu.Positioner align="end" sideOffset={8} positionMethod="fixed" className="z-50">
           <Menu.Popup className={cn(popupClass, 'w-64 *:not-first:border-t')}>
-            {aiChat && (
-              <div className="p-1">
-                <Menu.Item className={itemClass} onClick={() => aiChat.onOpenChange(!aiChat.open)}>
-                  <MessageCircleIcon className="text-fd-muted-foreground" />
-                  {t('Ask AI', { note: 'AI chat button' })}
-                </Menu.Item>
+            {(aiChat || slots.themeSwitch) && (
+              <div className="flex flex-col p-1">
+                {aiChat && (
+                  <Menu.Item
+                    className={cn(itemClass, 'lg:hidden')}
+                    onClick={() => aiChat.onOpenChange(!aiChat.open)}
+                  >
+                    <MessageCircleIcon className="text-fd-muted-foreground" />
+                    {t('Ask AI', { note: 'AI chat button' })}
+                  </Menu.Item>
+                )}
+                {slots.themeSwitch && (
+                  <div className="flex items-center gap-3 py-1 ps-2.5 pe-1">
+                    <SunMoonIcon className="size-4 text-fd-muted-foreground" />
+                    <span aria-hidden className="flex-1">
+                      {t('Theme', { note: 'site menu' })}
+                    </span>
+                    <ThemeSegments />
+                  </div>
+                )}
               </div>
             )}
-            {slots.themeSwitch && (
-              <div className="flex items-center gap-3 py-2 ps-3.5 pe-2">
-                <SunMoonIcon className="size-4 text-fd-muted-foreground" />
-                <span aria-hidden className="flex-1">
-                  {t('Theme', { note: 'site menu' })}
-                </span>
-                <ThemeSegments />
-              </div>
-            )}
-            {/* the language switcher and icon links are in header on wider viewports */}
             {slots.languageSelect && <Languages className="lg:hidden" />}
             {iconLinks.length > 0 && (
               <div className="flex flex-col p-1 lg:hidden">

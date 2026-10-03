@@ -94,7 +94,6 @@ export function TOCPopover({
   ...props
 }: TOCPopoverProps) {
   const t = useTranslations({ note: 'table of contents' });
-  const items = Base.useTOCItems();
   const page = useTreePath().at(-1);
   const ref = useRef<HTMLElement>(null);
   const [open, setOpen] = useState(false);
@@ -109,7 +108,6 @@ export function TOCPopover({
     return () => window.removeEventListener('click', onClick);
   }, [open]);
 
-  if (items.length === 0 && !header && !footer) return;
   return (
     <Collapsible
       open={open}
@@ -157,9 +155,7 @@ export function TOCPopover({
 /** the TOC dropdown for page header */
 export function TOCDropdown({ trigger, content, header, footer, ...props }: TOCDropdownProps) {
   const t = useTranslations({ note: 'table of contents' });
-  const items = Base.useTOCItems();
   const [open, setOpen] = useState(false);
-  if (items.length === 0 && !header && !footer) return;
 
   return (
     <Popover.Root open={open} onOpenChange={setOpen}>
@@ -205,11 +201,12 @@ function TOCList({
   onSelect,
 }: TOCStyle & { className?: string; onSelect?: () => void }) {
   const items = Base.useTOCItems();
-  const { TOCItems, TOCItem } = variants[style];
+  const { TOCItems, TOCItem, TOCEmpty } = variants[style];
 
   return (
     <Base.TOCScrollArea className={className}>
       <TOCItems {...list}>
+        {items.length === 0 && <TOCEmpty />}
         {items.map((item) => (
           <TOCItem key={item.url} item={item} onClick={onSelect} />
         ))}

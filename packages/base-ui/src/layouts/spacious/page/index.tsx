@@ -65,7 +65,7 @@ export function DocsPage({
   full = false,
   toc = [],
   tableOfContent: { enabled: tocEnabled = !full, single, ...tocProps } = {},
-  tableOfContentPopover: { enabled: tocPopoverEnabled = true, ...tocPopoverProps } = {},
+  tableOfContentPopover: { enabled: tocPopoverEnabled, ...tocPopoverProps } = {},
   breadcrumb: { enabled: breadcrumbEnabled = true, ...breadcrumb } = {},
   footer: { enabled: footerEnabled = true, ...footer } = {},
   slots: customSlots = {},
@@ -73,6 +73,7 @@ export function DocsPage({
   children,
   ...props
 }: DocsPageProps) {
+  tocPopoverEnabled ??= Boolean(toc.length > 0 || tocPopoverProps.header || tocPopoverProps.footer);
   const slots: DocsPageSlots = {
     breadcrumb: customSlots.breadcrumb ?? Breadcrumb,
     footer: customSlots.footer ?? Footer,
@@ -84,30 +85,29 @@ export function DocsPage({
     },
   };
   const layout = useSpaciousLayout();
-  const hasPopover = tocPopoverEnabled && toc.length > 0;
   const hasFolders = useBreadcrumbItems(breadcrumb).length > 0 && breadcrumbEnabled;
   const pathname = usePathname();
 
   return (
     <PageContext value={{ full, slots }}>
-      <slots.toc.provider single={single} toc={toc}>
+      <slots.toc.provider single={single} toc={tocEnabled || tocPopoverEnabled ? toc : []}>
         <div
           // a new page starts from the top of panel
           key={pathname}
           id="nd-page-panel"
           className="@container relative flex flex-col min-w-0 min-h-0 [grid-area:main] md:my-2 md:me-2 md:overflow-clip md:rounded-2xl md:border md:bg-fd-background md:shadow-sm print:overflow-visible"
         >
-          {hasPopover && <slots.toc.popover {...tocPopoverProps} />}
+          {tocPopoverEnabled && <slots.toc.popover {...tocPopoverProps} />}
           <header
             className={cn(
               'absolute inset-x-0 top-0 z-10 flex items-center gap-1.5 h-(--fd-header-height) ps-6 pe-4 bg-linear-to-b from-fd-background to-transparent pointer-events-none *:pointer-events-auto max-md:hidden',
               // fade out shorter when the start of header is empty
-              hasFolders || hasPopover ? 'from-50%' : 'to-40%',
+              hasFolders || tocPopoverEnabled ? 'from-50%' : 'to-40%',
             )}
           >
             <ExpandSidebar />
             {breadcrumbEnabled && <slots.breadcrumb {...breadcrumb} />}
-            {hasPopover && (
+            {tocPopoverEnabled && (
               <div
                 className={cn(
                   'flex items-center gap-1.5 min-w-0',
