@@ -16,7 +16,7 @@ import {
   SelectValue,
 } from 'shared-api/components/select';
 import { Spinner } from 'shared-api/components/spinner';
-import { type ResponseTab, useCodeUsage, useOperation, useResponseExamples } from '@/operation';
+import { useCodeUsage, useOperation, useResponseExamples } from '@/operation';
 import type { FetchResult } from '@/playground/fetcher';
 import { ClientCodeBlock } from '@/ui/components/codeblock';
 import { Markdown } from '@/ui/components/markdown';
@@ -122,6 +122,8 @@ function UsageCode({ id, lang }: { id: string; lang: string }) {
 function ResponseExamples() {
   const t = useTranslations({ note: 'playground' });
   const tabs = useResponseExamples();
+  const [code, setCode] = useState<string>();
+  const [selected, setSelected] = useState(0);
 
   if (tabs.length === 0) {
     return (
@@ -136,74 +138,70 @@ function ResponseExamples() {
     );
   }
 
+  const tab = tabs.find((item) => item.code === code) ?? tabs[0];
+  const examples = tab.examples ?? [];
+  const example = examples[selected];
+
   return (
-    <Segmented defaultValue={tabs[0].code} className="flex min-h-0 flex-1 flex-col">
+    <Segmented
+      value={tab.code}
+      onValueChange={(value: string) => {
+        setCode(value);
+        setSelected(0);
+      }}
+      className="flex min-h-0 flex-1 flex-col"
+    >
       <PanelHeader>
-        <span className="text-[0.8125rem] font-medium">{t('Response')}</span>
-        <span className="hidden text-xs text-fd-muted-foreground @sm:inline">{t('Example')}</span>
+        <span className="shrink-0 text-[0.8125rem] font-medium">{t('Response')}</span>
+        <div
+          title={tab.response.description}
+          className="min-w-0 flex-1 truncate text-xs text-fd-muted-foreground [&_*]:inline [&_a]:underline"
+        >
+          {tab.response.description && <Markdown md={tab.response.description} />}
+        </div>
+        {examples.length > 1 && (
+          <Select
+            items={examples.map((item, i) => ({ value: String(i), label: item.label }))}
+            value={String(selected)}
+            onValueChange={(v) => v !== null && setSelected(Number(v))}
+          >
+            <SelectTrigger className="h-7 w-auto max-w-40 shrink-0 gap-1.5 border-0 bg-transparent px-2 text-xs hover:bg-fd-accent focus:ring-0 focus-visible:ring-2">
+              <SelectValue className="truncate" />
+            </SelectTrigger>
+            <SelectContent align="end">
+              {examples.map((item, i) => (
+                <SelectItem key={i} value={String(i)} className="text-xs">
+                  {item.label}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        )}
         <SegmentedList
-          className="ms-auto min-w-0 overflow-x-auto [scrollbar-width:none]"
-          items={tabs.map((tab) => ({
-            value: tab.code,
-            label: <span className="font-mono">{tab.code}</span>,
+          className="max-w-1/2 shrink-0 overflow-x-auto [scrollbar-width:none]"
+          items={tabs.map((item) => ({
+            value: item.code,
+            label: <span className="font-mono">{item.code}</span>,
           }))}
         />
       </PanelHeader>
-      {tabs.map((tab) => (
-        <SegmentedPanel
-          key={tab.code}
-          value={tab.code}
-          className="flex min-h-0 flex-1 flex-col overflow-auto"
-        >
-          <ResponseExample tab={tab} />
-        </SegmentedPanel>
-      ))}
+      <SegmentedPanel
+        key={tab.code}
+        value={tab.code}
+        className="flex min-h-0 flex-1 flex-col overflow-auto"
+      >
+        {example ? (
+          <div className="min-h-0 flex-1">
+            <ClientCodeBlock
+              lang="json"
+              code={JSON.stringify(example.sample, null, 2)}
+              codeblock={panelCodeBlock}
+            />
+          </div>
+        ) : (
+          <p className="p-4 text-sm text-fd-muted-foreground">{t('No example available.')}</p>
+        )}
+      </SegmentedPanel>
     </Segmented>
-  );
-}
-
-function ResponseExample({ tab }: { tab: ResponseTab }) {
-  const t = useTranslations({ note: 'playground' });
-  const [selected, setSelected] = useState('0');
-  const examples = tab.examples ?? [];
-  const example = examples[Number(selected)];
-
-  return (
-    <>
-      {tab.response.description && (
-        <div className="border-b px-4 py-2.5 text-xs text-fd-muted-foreground [&_a]:underline">
-          <Markdown md={tab.response.description} />
-        </div>
-      )}
-      {examples.length > 1 && (
-        <Select
-          items={examples.map((item, i) => ({ value: String(i), label: item.label }))}
-          value={selected}
-          onValueChange={(v) => v !== null && setSelected(v)}
-        >
-          <SelectTrigger className="min-h-9 shrink-0 rounded-none border-0 border-b bg-transparent px-4 text-xs hover:bg-fd-accent/40 focus:ring-0">
-            <SelectValue />
-          </SelectTrigger>
-          <SelectContent>
-            {examples.map((item, i) => (
-              <SelectItem key={i} value={String(i)} className="text-xs">
-                {item.label}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-      )}
-      {example ? (
-        <div className="min-h-0 flex-1">
-          <ClientCodeBlock
-            lang="json"
-            code={JSON.stringify(example.sample, null, 2)}
-            codeblock={panelCodeBlock}
-          />
-        </div>
-      ) : (
-        <p className="p-4 text-sm text-fd-muted-foreground">{t('No example available.')}</p>
-      )}
-    </>
   );
 }

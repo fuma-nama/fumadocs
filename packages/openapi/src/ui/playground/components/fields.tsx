@@ -2,7 +2,7 @@
 import { Fragment, type ReactNode, useId, useMemo, useState } from 'react';
 import { Popover } from '@base-ui/react/popover';
 import { Select as SelectPrimitive } from '@base-ui/react/select';
-import { Check, ChevronRight, Info, Plus, Trash2, Upload, X } from 'lucide-react';
+import { Check, ChevronRight, ChevronsUpDown, Info, Plus, Trash2, Upload, X } from 'lucide-react';
 import {
   type DataEngine,
   type FieldKey,
@@ -181,14 +181,16 @@ function TypeSelect({
 }) {
   const t = useTranslations({ note: 'playground' });
 
-  // styled as the type label, aligned to it by the negative margin
   return (
     <Select items={options} value={value} onValueChange={(v) => v !== null && onChange(v)}>
       <SelectPrimitive.Trigger
         aria-label={t('Type')}
-        className="-me-1 max-w-40 min-w-0 cursor-pointer truncate rounded-md px-1 py-0.5 font-mono text-xs text-fd-muted-foreground underline decoration-fd-muted-foreground/50 decoration-dotted underline-offset-[3px] transition-colors hover:bg-fd-accent hover:text-fd-accent-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-fd-ring/50 data-popup-open:bg-fd-accent data-popup-open:text-fd-accent-foreground"
+        className="flex h-5 max-w-40 min-w-0 cursor-pointer items-center gap-0.5 rounded-md border bg-fd-secondary ps-1.5 pe-1 font-mono text-xs text-fd-muted-foreground transition-colors hover:bg-fd-accent hover:text-fd-accent-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-fd-ring/50 data-popup-open:bg-fd-accent data-popup-open:text-fd-accent-foreground"
       >
-        <SelectValue />
+        <SelectValue className="truncate" />
+        <SelectPrimitive.Icon className="shrink-0">
+          <ChevronsUpDown className="size-3" />
+        </SelectPrimitive.Icon>
       </SelectPrimitive.Trigger>
       <SelectContent>
         {options.map((option) => (
@@ -305,7 +307,7 @@ function FieldInfo({
         delay={200}
         closeDelay={100}
         aria-label={tPlayground('Field Info')}
-        className="inline-flex size-5 shrink-0 items-center justify-center rounded text-fd-muted-foreground/70 transition-colors hover:text-fd-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-fd-ring data-popup-open:text-fd-foreground"
+        className="inline-flex size-5 shrink-0 ms-auto items-center justify-center rounded text-fd-muted-foreground/70 transition-colors hover:text-fd-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-fd-ring data-popup-open:text-fd-foreground"
       >
         <Info className="size-3.5" />
       </Popover.Trigger>
@@ -999,7 +1001,7 @@ export function FieldRows({
               </div>
             )}
             {selector && (
-              <div className="flex min-h-10 items-center gap-2 border-b px-4 text-xs text-fd-muted-foreground">
+              <div className="flex min-h-10 items-center gap-2 border-b ps-4 pe-4 text-xs text-fd-muted-foreground @sm:pe-8">
                 {t('Schema')}
                 <span className="ms-auto">{selector}</span>
               </div>

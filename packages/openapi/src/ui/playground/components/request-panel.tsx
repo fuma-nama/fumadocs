@@ -496,8 +496,8 @@ function Section({
 }) {
   return (
     <section className="border-b last:border-b-0">
-      <div className="sticky top-0 z-10 flex h-10 items-center gap-2 border-b bg-fd-card ps-4 pe-2">
-        <Icon className="size-3.5 shrink-0 text-fd-muted-foreground" />
+      <div className="sticky top-0 z-10 flex h-12 items-center gap-2 border-b bg-fd-card ps-4 pe-7.5">
+        <Icon className="size-3.5 shrink-0 text-fd-primary" />
         <h3 className="text-[0.8125rem] font-medium">{title}</h3>
         {count !== undefined && (
           <span className="text-xs text-fd-muted-foreground tabular-nums">{count}</span>
@@ -549,7 +549,7 @@ function AuthSection({
           )}
           {items.length > 1 ? (
             <Select items={items} value={selected} onValueChange={(v) => v !== null && select(v)}>
-              <SelectTrigger className="h-7 w-auto max-w-60 gap-1.5 border-0 bg-transparent px-2 text-xs hover:bg-fd-accent focus:ring-0 focus-visible:ring-2">
+              <SelectTrigger className="-me-2 h-7 w-auto max-w-60 gap-1.5 border-0 bg-transparent px-2 text-xs hover:bg-fd-accent focus:ring-0 focus-visible:ring-2">
                 <SelectValue className="truncate" />
               </SelectTrigger>
               <SelectContent align="end">
@@ -561,9 +561,7 @@ function AuthSection({
               </SelectContent>
             </Select>
           ) : (
-            <span className="truncate pe-2 text-xs text-fd-muted-foreground">
-              {items[0]?.label}
-            </span>
+            <span className="truncate text-xs text-fd-muted-foreground">{items[0]?.label}</span>
           )}
         </>
       }
@@ -670,7 +668,7 @@ function BodySection({
         <>
           <code className="truncate text-xs text-fd-muted-foreground">{body.mediaType}</code>
           {allowJson && (
-            <Segmented value={mode} onValueChange={setMode}>
+            <Segmented value={mode} onValueChange={setMode} className="-me-2.5">
               <SegmentedList
                 aria-label={t('Editor')}
                 items={[
