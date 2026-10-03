@@ -20,7 +20,8 @@ import { remarkMdxMermaid } from 'fumadocs-core/mdx-plugins/remark-mdx-mermaid';
 import { Mermaid } from '@/components/mermaid';
 import type { ComponentProps, ReactNode } from 'react';
 import { Image } from '@/components/image';
-import { AISearch, AISearchPanel, AISearchTrigger } from '@/components/ai/search';
+import { AISearch, AISearchTrigger } from '@/components/ai/search';
+import { AIDocsLayout } from '@/components/ai/layout';
 import { cn } from '@/lib/cn';
 import { buttonVariants } from 'fumadocs-ui/components/ui/button';
 import { MessageCircleIcon } from 'lucide-react';
@@ -92,16 +93,18 @@ export default async function DocPage({ slugs }: PageProps<'/[...slugs]'>) {
     };
   }
 
-  return <MdContent slugs={slugs} page={page} components={mdPresetComponents} />;
+  return <MdContent slugs={slugs} page={page} preset={mdPreset} components={mdPresetComponents} />;
 }
 
 async function MdContent({
   slugs,
   page,
+  preset,
   components,
 }: {
   slugs: string[];
   page?: SourcePage;
+  preset: string;
   components: MdPresetComponents;
 }) {
   const config = await getConfigRuntime();
@@ -111,29 +114,29 @@ async function MdContent({
   const { DocsBody, DocsTitle, DocsPage, DocsDescription } = components.page;
 
   async function renderContainer(children: ReactNode) {
-    const hasAI = await isAISupported();
-    return (
-      <DocsLayout {...await layout.docs()}>
-        {hasAI && (
-          <AISearch>
-            <AISearchPanel />
-            <AISearchTrigger
-              position="float"
-              className={cn(
-                buttonVariants({
-                  variant: 'secondary',
-                  className: 'text-fd-muted-foreground rounded-2xl',
-                }),
-              )}
-            >
-              <MessageCircleIcon className="size-4.5" />
-              Ask AI
-            </AISearchTrigger>
-          </AISearch>
-        )}
+    const props = await layout.docs();
+    // only Docs layout places the AI chat
+    if (preset !== 'docs' || !(await isAISupported()))
+      return <DocsLayout {...props}>{children}</DocsLayout>;
 
-        {children}
-      </DocsLayout>
+    return (
+      <AISearch>
+        <AIDocsLayout {...props}>
+          {children}
+          <AISearchTrigger
+            position="float"
+            className={cn(
+              buttonVariants({
+                variant: 'secondary',
+                className: 'text-fd-muted-foreground rounded-2xl',
+              }),
+            )}
+          >
+            <MessageCircleIcon className="size-4.5" />
+            Ask AI
+          </AISearchTrigger>
+        </AIDocsLayout>
+      </AISearch>
     );
   }
 

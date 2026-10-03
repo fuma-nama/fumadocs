@@ -1,4 +1,16 @@
 {
   "$schema": "../../../../.source/json-schema/docs.meta.json",
-  "pages": ["---Configurations---", "links", "nav", "---Components---", "..."]
+  "pages": [
+    "---Configurations---",
+    "links",
+    "nav",
+    "---Components---",
+    "docs",
+    "flux",
+    "glass",
+    "home-layout",
+    "notebook",
+    "spacious",
+    "..."
+  ]
 }

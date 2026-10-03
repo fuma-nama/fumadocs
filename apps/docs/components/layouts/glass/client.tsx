@@ -1,18 +1,13 @@
 'use client';
 
-import { useAISearchContext } from '@/components/inkeep/search';
-import { GlassLayout, GlassLayoutProps } from 'fumadocs-ui/layouts/glass';
+import { AISearchPanel, useAISearchContext, useHotKey } from '@/components/inkeep/search';
+import { DocsLayout, type DocsLayoutProps } from 'fumadocs-ui/layouts/glass';
 
-export function ClientGlassLayout(props: GlassLayoutProps) {
+export function ClientGlassLayout(props: DocsLayoutProps) {
   const { open, setOpen } = useAISearchContext();
+  useHotKey();
 
   return (
-    <GlassLayout
-      {...props}
-      aiChat={{
-        open,
-        onOpenChange: setOpen,
-      }}
-    />
+    <DocsLayout {...props} aiChat={{ open, onOpenChange: setOpen, panel: <AISearchPanel /> }} />
   );
 }

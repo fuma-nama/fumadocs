@@ -13,4 +13,10 @@ export const registry = createUIRegistry({
     'fumadocs-ui': 'npm:@fumadocs/base-ui',
     react: null,
   },
+  components: {
+    'layouts/spacious': {
+      unlisted: true,
+      entry: ['layouts/spacious/index.tsx', 'layouts/spacious/page/index.tsx'],
+    },
+  },
 });

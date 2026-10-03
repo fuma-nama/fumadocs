@@ -32,7 +32,11 @@ export function TOCItems({ ref, className, children, ...props }: TOCItemsProps) 
         bottom = pos[1];
       }
 
-      if (top !== -1) block.style.clipPath = `inset(${top}px 0 ${height - bottom}px round 8px)`;
+      if (top === -1) return;
+      block.style.clipPath = `inset(${top}px 0 ${height - bottom}px round 8px)`;
+      // place the block instantly at first, only animate the changes after
+      if (!block.hasAttribute('data-ready'))
+        requestAnimationFrame(() => block.setAttribute('data-ready', ''));
     };
 
     const observer = new ResizeObserver(() => {
@@ -61,7 +65,7 @@ export function TOCItems({ ref, className, children, ...props }: TOCItemsProps) 
     >
       <div
         ref={blockRef}
-        className="absolute inset-0 bg-linear-to-r from-fd-primary/10 [clip-path:inset(0_0_100%)] transition-[clip-path] duration-300 ease-out"
+        className="absolute inset-0 bg-linear-to-r from-fd-primary/10 [clip-path:inset(0_0_100%)] data-ready:transition-[clip-path] duration-300 ease-out"
       />
       {children}
     </div>

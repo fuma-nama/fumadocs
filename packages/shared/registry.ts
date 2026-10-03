@@ -1,9 +1,10 @@
 import type { Registry } from 'fuma-cli/compiler';
 
 /** the UI packages share the same structure */
-export function createUIRegistry(
-  options: Pick<Registry, 'name' | 'dir' | 'dependencies'>,
-): Registry {
+export function createUIRegistry({
+  components: extra,
+  ...options
+}: Pick<Registry, 'name' | 'dir' | 'dependencies' | 'components'>): Registry {
   const components: NonNullable<Registry['components']> = {
     accordion: 'components/accordion.tsx',
     banner: 'components/banner.tsx',
@@ -43,6 +44,8 @@ export function createUIRegistry(
     },
     'layouts/home': { unlisted: true, entry: 'layouts/home/index.tsx' },
     'layouts/*': { unlisted: true, entry: 'layouts/**/slots/*' },
+    // components only available in one of the UI packages
+    ...extra,
   };
 
   return {

@@ -30,6 +30,7 @@ const translations = {
   'Default(type table)': '預設值',
   'Edit on GitHub(edit page)': '在 GitHub 上編輯',
   'Hide Sidebar(sidebar)': '隱藏側邊欄',
+  'Language(language switcher)': '語言',
   'Last updated on(page footer)': '最後更新於',
   'Layout Tab(layout tab trigger)': '版面標籤',
   'Light(theme switcher)(aria-label)': '淺色',
@@ -46,6 +47,7 @@ const translations = {
   'Open in GitHub(page actions)': '在 GitHub 中開啟',
   'Open in Scira AI(page actions)': '在 Scira AI 中開啟',
   'Open(page actions)': '開啟',
+  'Options(aria-label)': '選項',
   'Page Not Found(404 not found page)': '找不到頁面',
   'Parameters(type table)': '參數',
   'Previous Page(pagination)': '上一頁',
@@ -59,6 +61,7 @@ const translations = {
   'Table of Contents(inline table of contents)': '目錄',
   'The page you are looking for might have been removed, had its name changed, or is temporarily unavailable.(404 not found page)':
     '你要尋找的頁面可能已被移除、名稱已變更，或暫時無法使用。',
+  'Theme(site menu)': '主題',
   'Toggle Menu(home layout header)(aria-label)': '切換選單',
   'Toggle Theme(theme switcher)(aria-label)': '切換主題',
   'Type(type table)': '型別',

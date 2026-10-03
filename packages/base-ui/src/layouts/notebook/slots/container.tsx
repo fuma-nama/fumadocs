@@ -6,11 +6,10 @@ import { useNotebookLayout } from '../client';
 
 export function Container(props: ComponentProps<'div'>) {
   const {
-    props: { nav },
+    props: { nav, aiChat },
     slots,
   } = useNotebookLayout();
-  const pageCol =
-    'calc(var(--fd-layout-width,97rem) - var(--fd-sidebar-col) - var(--fd-toc-width))';
+  const pageCol = 'calc(var(--fd-layout-width,97rem) - var(--fd-sidebar-col) - var(--fd-toc-col))';
   const { collapsed } = slots.sidebar?.useSidebar?.() ?? {};
   const [previousCollapsed, setPreviousCollapsed] = useState(collapsed);
   const isCollapseChanged = previousCollapsed !== collapsed;
@@ -25,16 +24,17 @@ export function Container(props: ComponentProps<'div'>) {
       id="nd-notebook-layout"
       data-sidebar-collapsed={collapsed}
       data-column-changed={isCollapseChanged}
+      data-ai-chat={aiChat?.open && aiChat.panel ? '' : undefined}
       {...props}
       style={{
         gridTemplate:
           nav?.mode === 'top'
             ? `". header header header ."
 "sidebar sidebar toc-popover toc-popover ."
-"sidebar sidebar main toc ." 1fr / minmax(min-content, 1fr) var(--fd-sidebar-col) minmax(0, ${pageCol}) var(--fd-toc-width) minmax(min-content, 1fr)`
+"sidebar sidebar main toc ." 1fr / minmax(min-content, 1fr) var(--fd-sidebar-col) minmax(0, ${pageCol}) var(--fd-toc-col) minmax(min-content, 1fr)`
             : `"sidebar sidebar header header ."
 "sidebar sidebar toc-popover toc-popover ."
-"sidebar sidebar main toc ." 1fr / minmax(min-content, 1fr) var(--fd-sidebar-col) minmax(0, ${pageCol}) var(--fd-toc-width) minmax(min-content, 1fr)`,
+"sidebar sidebar main toc ." 1fr / minmax(min-content, 1fr) var(--fd-sidebar-col) minmax(0, ${pageCol}) var(--fd-toc-col) minmax(min-content, 1fr)`,
         '--fd-docs-row-1': 'var(--fd-banner-height, 0px)',
         '--fd-docs-row-2': 'calc(var(--fd-docs-row-1) + var(--fd-header-height))',
         '--fd-docs-row-3': 'calc(var(--fd-docs-row-2) + var(--fd-toc-popover-height))',
@@ -42,7 +42,7 @@ export function Container(props: ComponentProps<'div'>) {
         ...props.style,
       }}
       className={cn(
-        'grid overflow-x-clip min-h-(--fd-docs-height) auto-cols-auto auto-rows-auto [--fd-docs-height:100dvh] [--fd-header-height:0px] [--fd-toc-popover-height:0px] [--fd-sidebar-width:0px] [--fd-toc-width:0px] data-[column-changed=true]:transition-[grid-template-columns]',
+        'grid overflow-x-clip min-h-(--fd-docs-height) auto-cols-auto auto-rows-auto [--fd-docs-height:100dvh] [--fd-header-height:0px] [--fd-toc-popover-height:0px] [--fd-sidebar-width:0px] [--fd-toc-width:0px] [--fd-toc-col:var(--fd-toc-width)] xl:data-[ai-chat]:[--fd-toc-col:var(--fd-ai-chat-width)] data-[column-changed=true]:transition-[grid-template-columns]',
         props.className,
       )}
     >

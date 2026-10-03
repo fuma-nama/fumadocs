@@ -2,6 +2,7 @@ import type * as PageTree from 'fumadocs-core/page-tree';
 import { type HTMLAttributes, useMemo } from 'react';
 import type { SidebarProps, SidebarProviderProps } from './slots/sidebar';
 import {
+  type AIChatOptions,
   type GetLayoutTabsOptions,
   type LayoutTab,
   type NavOptions,
@@ -17,6 +18,7 @@ export interface DocsLayoutProps extends Omit<BaseLayoutProps, 'nav'> {
   sidebar?: SidebarOptions;
   nav?: NavOptions & { mode?: 'top' | 'auto' };
   containerProps?: HTMLAttributes<HTMLDivElement>;
+  aiChat?: AIChatOptions;
   slots?: Partial<DocsSlots>;
 }
 

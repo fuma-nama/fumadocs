@@ -93,6 +93,24 @@ export async function customise(config: LoadedConfig, connector: RegistryConnect
               },
               hint: 'a docs layout with floating, translucent panels',
             },
+            ...(config.uiLibrary === 'base-ui'
+              ? [
+                  {
+                    label: 'Spacious Layout',
+                    value: {
+                      id: 'spacious',
+                      targets: [{ subRegistry, name: 'layouts/spacious' }],
+                      print: () =>
+                        printLayout(
+                          config,
+                          ['fumadocs-ui/layouts/spacious', '@/layouts/spacious'],
+                          ['fumadocs-ui/layouts/spacious/page', '@/layouts/spacious/page'],
+                        ),
+                    },
+                    hint: 'a docs layout with the page in an inset panel, Base UI only',
+                  },
+                ]
+              : []),
             {
               label: 'Home Layout',
               value: {
@@ -224,232 +242,129 @@ function printSlot({ at, layoutId, name, isPage, uiLibrary }: SlotPrintInfo) {
 
   log.info(`You can check the installed layout slot in "${at}".`);
 
-  const code = getSlotCode({ at, layoutId, name, isPage, uiLibrary });
+  const slot = getSlot({ layoutId, name, isPage, uiLibrary });
+  if (!slot) return;
 
-  if (code) {
-    const layoutComponent = layoutId === 'glass' ? '<GlassLayout />' : '<DocsLayout />';
+  const [imports, value] = slot;
+  // every layout names its components `DocsLayout` and `DocsPage`
+  const component = isPage ? 'DocsPage' : 'DocsLayout';
+  log.info(`${picocolors.bold(`At your <${component} /> component, update your "slots" prop:`)}
 
-    if (isPage) {
-      log.info(
-        `${picocolors.bold('At your <DocsPage /> component, update your "slots" prop:')}\n\n${code}`,
-      );
-    } else {
-      log.info(
-        `${picocolors.bold(`At your ${layoutComponent} component, update your "slots" prop:`)}\n\n${code}`,
-      );
-    }
-  }
+import { ${imports} } from '${at}';
+
+return (
+  <${component}
+    slots={{
+      ${value},
+    }}
+  >
+    ...
+  </${component}>
+);`);
 }
 
-function getSlotCode({ at, layoutId, name, isPage, uiLibrary }: SlotPrintInfo): string | undefined {
-  if (layoutId === 'glass') {
-    // Glass layout wires its page slots directly, only layout-level slots are swappable.
-    if (isPage) return;
-
-    switch (name) {
-      case 'header':
-        return `import { Header } from '${at}';
-
-return (
-  <GlassLayout
-    slots={{
-      header: Header,
-    }}
-  >
-    ...
-  </GlassLayout>
-);`;
-      case 'sidebar': {
-        // `sidebar` slot file holds the whole sidebar system (desktop, mobile drawer, provider).
-        // Base UI additionally exposes a `drawerHandle` for its swipeable drawer.
-        const imports = ['Sidebar', 'SidebarDrawer', 'SidebarProvider', 'useSidebar'];
-        if (uiLibrary === 'base-ui') imports.push('drawerHandle');
-
-        return `import { ${imports.join(', ')} } from '${at}';
-
-return (
-  <GlassLayout
-    slots={{
-      sidebar: {
-        main: Sidebar,
-        provider: SidebarProvider,
-        use: useSidebar,
-        drawer: SidebarDrawer,${uiLibrary === 'base-ui' ? '\n        drawerHandle,' : ''}
-      },
-    }}
-  >
-    ...
-  </GlassLayout>
-);`;
-      }
-      default:
-        return;
-    }
-  }
-
+/** the names to import from slot file, and the entry of `slots` prop */
+function getSlot({
+  layoutId,
+  name,
+  isPage,
+  uiLibrary,
+}: Omit<SlotPrintInfo, 'at'>): [imports: string, value: string] | undefined {
   if (isPage) {
+    // Glass layout wires its page slots directly, only layout-level slots are swappable.
+    if (layoutId === 'glass') return;
+
     switch (name) {
       case 'toc':
-        if (layoutId === 'flux') {
-          return `import { TOCProvider, TOC } from '${at}';
-
-return (
-  <DocsPage
-    slots={{
-      toc: {
+        if (layoutId === 'flux')
+          return [
+            'TOCProvider, TOC',
+            `toc: {
         provider: TOCProvider,
         main: TOC,
-      },
-    }}
-  >
-    ...
-  </DocsPage>
-);`;
-        }
-
-        return `import { TOCProvider, TOC, TOCPopover } from '${at}';
-
-return (
-  <DocsPage
-    slots={{
-      toc: {
+      }`,
+          ];
+        if (layoutId === 'spacious')
+          return [
+            'TOCProvider, TOC, TOCPopover, TOCDropdown',
+            `toc: {
         provider: TOCProvider,
         main: TOC,
         popover: TOCPopover,
-      },
-    }}
-  >
-    ...
-  </DocsPage>
-);`;
-      case 'container': {
-        return `import { Container } from '${at}';
-
-return (
-  <DocsPage
-    slots={{
-      container: Container,
-    }}
-  >
-    ...
-  </DocsPage>
-);`;
-      }
-      case 'footer': {
-        return `import { Footer } from '${at}';
-
-return (
-  <DocsPage
-    slots={{
-      footer: Footer,
-    }}
-  >
-    ...
-  </DocsPage>
-);`;
-      }
-      case 'breadcrumb': {
-        return `import { Breadcrumb } from '${at}';
-
-return (
-  <DocsPage
-    slots={{
-      breadcrumb: Breadcrumb,
-    }}
-  >
-    ...
-  </DocsPage>
-);`;
-      }
+        dropdown: TOCDropdown,
+      }`,
+          ];
+        return [
+          'TOCProvider, TOC, TOCPopover',
+          `toc: {
+        provider: TOCProvider,
+        main: TOC,
+        popover: TOCPopover,
+      }`,
+        ];
+      case 'container':
+        return ['Container', 'container: Container'];
+      case 'footer':
+        return ['Footer', 'footer: Footer'];
+      case 'breadcrumb':
+        return ['Breadcrumb', 'breadcrumb: Breadcrumb'];
       default:
         return;
     }
   }
 
   switch (name) {
-    case 'sidebar': {
-      if (layoutId === 'notebook') {
-        return `import {
-  SidebarProvider,
-  Sidebar,
-  SidebarTrigger,
-  SidebarCollapseTrigger,
-  useSidebar,
-} from '${at}';
-
-return (
-  <DocsLayout
-    slots={{
-      sidebar: {
+    case 'sidebar':
+      if (layoutId === 'glass') {
+        // the slot file holds the whole sidebar system, Base UI additionally exposes a `drawerHandle` for its swipeable drawer
+        const drawerHandle = uiLibrary === 'base-ui';
+        return [
+          `Sidebar, SidebarDrawer, SidebarProvider, useSidebar${drawerHandle ? ', drawerHandle' : ''}`,
+          `sidebar: {
+        main: Sidebar,
+        provider: SidebarProvider,
+        use: useSidebar,
+        drawer: SidebarDrawer,${drawerHandle ? '\n        drawerHandle,' : ''}
+      }`,
+        ];
+      }
+      if (layoutId === 'spacious')
+        return [
+          'Sidebar, SidebarDrawer, SidebarProvider',
+          `sidebar: {
+        provider: SidebarProvider,
+        main: Sidebar,
+        drawer: SidebarDrawer,
+      }`,
+        ];
+      if (layoutId === 'notebook')
+        return [
+          'SidebarProvider, Sidebar, SidebarTrigger, SidebarCollapseTrigger, useSidebar',
+          `sidebar: {
         provider: SidebarProvider,
         root: Sidebar,
         trigger: SidebarTrigger,
         collapseTrigger: SidebarCollapseTrigger,
         useSidebar: useSidebar,
-      },
-    }}
-  >
-    ...
-  </DocsLayout>
-);`;
-      }
-
-      return `import { SidebarProvider, Sidebar, SidebarTrigger, useSidebar } from '${at}';
-
-return (
-  <DocsLayout
-    slots={{
-      sidebar: {
+      }`,
+        ];
+      return [
+        'SidebarProvider, Sidebar, SidebarTrigger, useSidebar',
+        `sidebar: {
         provider: SidebarProvider,
         root: Sidebar,
         trigger: SidebarTrigger,
         useSidebar: useSidebar,
-      },
-    }}
-  >
-    ...
-  </DocsLayout>
-);`;
-    }
-    case 'container': {
-      return `import { Container } from '${at}';
-
-return (
-  <DocsLayout
-    slots={{
-      container: Container,
-    }}
-  >
-    ...
-  </DocsLayout>
-);`;
-    }
-    case 'header': {
-      return `import { Header } from '${at}';
-
-return (
-  <DocsLayout
-    slots={{
-      header: Header,
-    }}
-  >
-    ...
-  </DocsLayout>
-);`;
-    }
-    case 'tab-dropdown': {
-      return `import { TabDropdown } from '${at}';
-
-return (
-  <DocsLayout
-    slots={{
-      tabDropdown: TabDropdown,
-    }}
-  >
-    ...
-  </DocsLayout>
-);`;
-    }
+      }`,
+      ];
+    case 'header':
+      return ['Header', 'header: Header'];
+    case 'container':
+      return ['Container', 'container: Container'];
+    case 'tab-dropdown':
+      return ['TabDropdown', 'tabDropdown: TabDropdown'];
+    case 'actions':
+      return ['HeaderActions', 'actions: HeaderActions'];
     default:
       return;
   }

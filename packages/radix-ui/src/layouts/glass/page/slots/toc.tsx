@@ -90,7 +90,7 @@ export function TOC({ container, header, footer }: TOCProps) {
         id="nd-toc"
         {...container}
         className={cn(
-          'z-10 grid transition-[width,padding] duration-300 [grid-area:right]',
+          'z-10 grid transition-[width,padding] duration-300 [grid-area:right] in-data-[ai-chat]:invisible',
           'xl:sticky xl:top-10 xl:h-[calc(100dvh---spacing(10))] md:layout:[--fd-right-width:12px] xl:layout:[--fd-right-width:240px] xl:items-center xl:pe-4',
           'max-xl:fixed max-xl:top-1/2 max-xl:-translate-y-1/2 max-xl:end-1 max-xl:bg-fd-popover max-xl:text-fd-popover-foreground max-xl:border max-xl:rounded-xl max-xl:shadow-md max-xl:mask-none max-xl:max-h-[calc(100dvh---spacing(32))] max-xl:grid-cols-[calc(240px---spacing(6))]',
           inAnimation && 'overflow-y-hidden',

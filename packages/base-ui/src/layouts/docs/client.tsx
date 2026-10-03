@@ -23,6 +23,7 @@ import {
   type BaseSlots,
   type BaseSlotsProps,
 } from '../shared';
+import { AIChatPanel } from '../shared/client';
 import { TreeContextProvider, useTabsGroups, useTreePath } from '@/contexts/tree';
 import { Header } from './slots/header';
 import { Container } from './slots/container';
@@ -47,6 +48,7 @@ const { useBaseSlots } = baseSlots({
 interface SlotsProps extends BaseSlotsProps<DocsLayoutProps> {
   tabs: LayoutTab[];
   tabMode: NonNullable<DocsLayoutProps['tabMode']>;
+  aiChat?: DocsLayoutProps['aiChat'];
 }
 
 const LayoutContext = createContext<{
@@ -83,6 +85,7 @@ export function LayoutBody(
     tabMode = 'auto',
     tree,
     containerProps,
+    aiChat,
     children,
   } = props;
   const isTop = useIsScrollTop({ enabled: navTransparentMode === 'top' }) ?? true;
@@ -108,6 +111,7 @@ export function LayoutBody(
           props: {
             tabMode,
             tabs,
+            aiChat,
             ...baseProps,
           },
           isNavTransparent,
@@ -126,6 +130,14 @@ export function LayoutBody(
               />
             )}
             {children}
+            {aiChat?.panel && (
+              <AIChatPanel
+                open={aiChat.open}
+                className="[grid-area:toc] justify-self-end xl:sticky xl:top-(--fd-docs-row-1) xl:h-[calc(var(--fd-docs-height)-var(--fd-docs-row-1))] xl:border-s"
+              >
+                {aiChat.panel}
+              </AIChatPanel>
+            )}
           </slots.container>
         </slots.sidebar.provider>
       </LayoutContext>

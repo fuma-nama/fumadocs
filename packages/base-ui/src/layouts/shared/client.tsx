@@ -2,7 +2,8 @@
 import { usePathname } from 'fumadocs-core/framework';
 import Link from 'fumadocs-core/link';
 import { useI18n } from '@/contexts/i18n';
-import type { FC, ComponentProps } from 'react';
+import { cn } from '@/utils/cn';
+import { type FC, type ComponentProps, type ReactNode, useState } from 'react';
 import { isLinkItemActive, type BaseLayoutProps, type LinkItemType } from '.';
 import {
   type LanguageSelectProps,
@@ -30,6 +31,36 @@ export function LinkItem({
     <Link ref={ref} href={item.url} external={item.external} {...props} data-active={active}>
       {props.children}
     </Link>
+  );
+}
+
+/**
+ * The place of AI chat, docked by the layout on wide viewports, and floating on smaller ones.
+ */
+export function AIChatPanel({
+  open,
+  className,
+  children,
+}: {
+  open: boolean;
+  className?: string;
+  children: ReactNode;
+}) {
+  // render the chat on client, once opened
+  const [mounted, setMounted] = useState(open);
+  if (open && !mounted) setMounted(true);
+
+  return (
+    <aside
+      className={cn(
+        'z-40 flex flex-col w-(--fd-ai-chat-width) overflow-clip bg-fd-card text-fd-card-foreground layout:[--fd-ai-chat-width:min(--spacing(100),100vw---spacing(4))] transition-[display,opacity,translate] transition-discrete duration-300 ease-out starting:opacity-0 starting:translate-x-full rtl:starting:-translate-x-full motion-reduce:transition-none max-xl:fixed max-xl:inset-y-2 max-xl:end-2 max-xl:rounded-2xl max-xl:border max-xl:shadow-xl',
+        // when docked, close at once to resize the page only once
+        !open && 'hidden opacity-0 translate-x-full rtl:-translate-x-full xl:transition-none',
+        className,
+      )}
+    >
+      {mounted && children}
+    </aside>
   );
 }
 
