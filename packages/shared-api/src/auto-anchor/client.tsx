@@ -40,20 +40,21 @@ export function useAnchorId(segments: string[] | false): string | null {
  */
 export function useAnchorLink(segments: string[] | false, onLink: () => void) {
   const id = useAnchorId(segments);
+  // the hash when it links into the section, so each link into it reveals it again
   const linked = useSyncExternalStore(
     subscribeHash,
     () => {
       const hash = window.location.hash.slice(1);
-      return id !== null && (hash === id || hash.startsWith(`${id}.`));
+      return id !== null && (hash === id || hash.startsWith(`${id}.`)) ? hash : null;
     },
-    () => false,
+    () => null,
   );
   const link = useEffectEvent(onLink);
   const scroll = useRef(false);
 
   useEffect(() => {
     if (!linked) return;
-    scroll.current = !document.getElementById(window.location.hash.slice(1));
+    scroll.current = !document.getElementById(linked);
     link();
   }, [linked]);
 
