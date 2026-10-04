@@ -1,3 +1,11 @@
+## @fumadocs/json-schema@0.3.0
+
+### Headless Schema UI
+
+`<SchemaUIProvider />` from `@fumadocs/json-schema/react/client` holds the state of a Schema UI: the schemas opened from properties, the selected members of unions, and links to a property. `useSchemaUI()` reads and navigates it.
+
+The Schema UI installed with Fumadocs CLI (`api-docs/schema`) is built on it, so the installed code is only UI.
+
 ## @fumadocs/json-schema@0.2.0
 
 ### JSON Schema toolkit
