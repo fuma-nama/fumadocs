@@ -11,7 +11,15 @@ import {
   useRef,
   useState,
 } from 'react';
-import { Loader2, MessageCircleIcon, RefreshCw, SearchIcon, Send, X } from 'lucide-react';
+import {
+  ArrowUpIcon,
+  MessageCircleIcon,
+  RefreshCw,
+  SearchIcon,
+  SquareIcon,
+  TrashIcon,
+  XIcon,
+} from 'lucide-react';
 import { cn } from '@/lib/cn';
 import { buttonVariants } from 'fumadocs-ui/components/ui/button';
 import { useChat, type UseChatHelpers } from '@ai-sdk/react';
@@ -36,12 +44,10 @@ const Context = createContext<{
 } | null>(null);
 
 export function AISearchPanelHeader({ className, ...props }: ComponentProps<'div'>) {
-  const { setOpen } = useAISearchContext();
-
   return (
     <div
       className={cn(
-        'sticky top-0 flex items-start gap-2 border rounded-xl bg-fd-secondary text-fd-secondary-foreground shadow-sm',
+        'sticky top-0 flex items-start gap-2 border rounded-xl bg-fd-secondary text-fd-secondary-foreground',
         className,
       )}
       {...props}
@@ -53,60 +59,61 @@ export function AISearchPanelHeader({ className, ...props }: ComponentProps<'div
         </p>
       </div>
 
-      <button
-        aria-label="Close"
-        tabIndex={-1}
-        className={cn(
-          buttonVariants({
-            size: 'icon-sm',
-            variant: 'ghost',
-            className: 'text-fd-muted-foreground rounded-full',
-          }),
-        )}
-        onClick={() => setOpen(false)}
-      >
-        <X />
-      </button>
+      <div className="flex items-center gap-1 p-2">
+        <AISearchInputActions />
+      </div>
     </div>
   );
 }
 
 export function AISearchInputActions() {
+  const { setOpen } = useAISearchContext();
   const { messages, status, setMessages, regenerate } = useChatContext();
   const isLoading = status === 'streaming';
 
-  if (messages.length === 0) return null;
-
   return (
     <>
-      {!isLoading && messages.at(-1)?.role === 'assistant' && (
+      {!isLoading && messages.length > 0 && messages.at(-1)?.role === 'assistant' && (
         <button
           type="button"
           className={cn(
             buttonVariants({
-              variant: 'secondary',
-              size: 'sm',
-              className: 'rounded-full gap-1.5',
+              size: 'icon-xs',
+              variant: 'ghost',
+              className: 'text-fd-muted-foreground rounded-full',
             }),
           )}
           onClick={() => regenerate()}
         >
-          <RefreshCw className="size-4" />
-          Retry
+          <RefreshCw />
         </button>
       )}
       <button
         type="button"
         className={cn(
           buttonVariants({
-            variant: 'secondary',
-            size: 'sm',
-            className: 'rounded-full',
+            size: 'icon-xs',
+            variant: 'ghost',
+            className: 'text-fd-muted-foreground rounded-full',
           }),
         )}
         onClick={() => setMessages([])}
       >
-        Clear Chat
+        <TrashIcon />
+      </button>
+      <button
+        aria-label="Close"
+        tabIndex={-1}
+        className={cn(
+          buttonVariants({
+            size: 'icon-xs',
+            variant: 'ghost',
+            className: 'text-fd-muted-foreground rounded-full',
+          }),
+        )}
+        onClick={() => setOpen(false)}
+      >
+        <XIcon />
       </button>
     </>
   );
@@ -151,7 +158,6 @@ export function AISearchInput(props: ComponentProps<'form'>) {
         value={input}
         placeholder={isLoading ? 'AI is answering...' : 'Ask a question'}
         autoFocus
-        className="p-3"
         disabled={status === 'streaming' || status === 'submitted'}
         onChange={(e) => {
           setInput(e.target.value);
@@ -172,13 +178,13 @@ export function AISearchInput(props: ComponentProps<'form'>) {
           className={cn(
             buttonVariants({
               variant: 'secondary',
-              className: 'transition-all rounded-full mt-2 gap-2',
+              size: 'icon-sm',
+              className: 'transition-opacity rounded-full mt-2 [&_svg]:size-3',
             }),
           )}
           onClick={stop}
         >
-          <Loader2 className="size-4 animate-spin text-fd-muted-foreground" />
-          Abort Answer
+          <SquareIcon className="fill-current" />
         </button>
       ) : (
         <button
@@ -187,12 +193,13 @@ export function AISearchInput(props: ComponentProps<'form'>) {
           className={cn(
             buttonVariants({
               variant: 'default',
-              className: 'transition-all rounded-full mt-2',
+              className: 'transition-opacity rounded-full mt-2 [&_svg]:size-4',
+              size: 'icon-sm',
             }),
           )}
           disabled={input.length === 0}
         >
-          <Send className="size-4" />
+          <ArrowUpIcon />
         </button>
       )}
     </form>
@@ -244,12 +251,12 @@ function Input(props: ComponentProps<'textarea'>) {
   const shared = cn('col-start-1 row-start-1', props.className);
 
   return (
-    <div className="grid flex-1">
+    <div className="grid flex-1 p-3">
       <textarea
         id="nd-ai-input"
         {...props}
         className={cn(
-          'resize-none bg-transparent placeholder:text-fd-muted-foreground focus-visible:outline-none',
+          'flex field-sizing-content resize-none min-h-11 max-h-32 w-full bg-transparent placeholder:text-fd-muted-foreground focus-visible:outline-none text-base disabled:opacity-50 md:text-sm',
           shared,
         )}
       />
@@ -259,11 +266,6 @@ function Input(props: ComponentProps<'textarea'>) {
     </div>
   );
 }
-
-const roleName: Record<string, string> = {
-  user: 'you',
-  assistant: 'fumadocs',
-};
 
 function Message({ message, ...props }: { message: ChatUIMessage } & ComponentProps<'div'>) {
   let markdown = '';
@@ -286,15 +288,13 @@ function Message({ message, ...props }: { message: ChatUIMessage } & ComponentPr
 
   return (
     <div onClick={(e) => e.stopPropagation()} {...props}>
-      <p
+      <div
         className={cn(
-          'mb-1 text-sm font-medium text-fd-muted-foreground',
-          message.role === 'assistant' && 'text-fd-primary',
+          'prose text-sm',
+          message.role === 'user' &&
+            'px-3 py-2 w-fit max-w-[min(100%,36rem)] rounded-2xl bg-fd-secondary ms-auto',
         )}
       >
-        {roleName[message.role] ?? 'unknown'}
-      </p>
-      <div className="prose text-sm">
         <Markdown text={markdown} />
       </div>
 
@@ -343,7 +343,7 @@ export function AISearchTrigger({
       data-state={open ? 'open' : 'closed'}
       className={cn(
         position === 'float' && [
-          'fixed bottom-4 gap-3 w-24 inset-e-[calc(--spacing(4)+var(--removed-body-scroll-bar-size,0px))] shadow-lg z-20 transition-[translate,opacity]',
+          'fixed bottom-4 gap-3 w-24 inset-e-[calc(--spacing(4)+var(--removed-body-scroll-bar-size,0px))] z-20 transition-[translate,opacity]',
           open && 'translate-y-10 opacity-0',
         ],
         className,
@@ -361,11 +361,8 @@ export function AISearchPanel() {
     <div className="flex flex-col size-full p-2">
       <AISearchPanelHeader />
       <AISearchPanelList className="flex-1" />
-      <div className="rounded-xl border bg-fd-secondary text-fd-secondary-foreground shadow-sm has-focus-visible:shadow-md">
+      <div className="rounded-xl border bg-fd-secondary text-fd-secondary-foreground">
         <AISearchInput />
-        <div className="flex items-center gap-1.5 p-1 empty:hidden">
-          <AISearchInputActions />
-        </div>
       </div>
     </div>
   );
