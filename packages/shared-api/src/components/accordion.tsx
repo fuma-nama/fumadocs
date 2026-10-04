@@ -4,7 +4,7 @@ import { Accordion as Primitive } from '@base-ui/react/accordion';
 import { ChevronRight } from 'lucide-react';
 import { createContext, use, useMemo, useState, type ComponentProps } from 'react';
 import { cn } from '@/utils/cn';
-import { AnchorSection, useAnchorLink } from '@/auto-anchor/client';
+import { AnchorSection, useAnchorLink } from '@/auto-anchor';
 
 const Context = createContext<{
   type: 'single' | 'multiple';

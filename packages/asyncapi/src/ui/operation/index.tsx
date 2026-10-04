@@ -14,7 +14,7 @@ import {
 } from 'shared-api/components/accordion';
 import { cn } from '@/utils/cn';
 import { SelectTabs, SelectTabTrigger, SelectTab } from 'shared-api/components/select-tab';
-import { AnchorSection } from 'shared-api/auto-anchor/client';
+import { AnchorSection } from 'shared-api/auto-anchor';
 import { Heading } from '@/ui/components/heading';
 import { Markdown } from '../components/markdown';
 import { useAsyncAPI, useRenderContext } from '@/utils/create-page';

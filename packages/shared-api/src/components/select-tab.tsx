@@ -3,7 +3,7 @@
 import { cn } from '@/utils/cn';
 import { SelectTrigger, Select, SelectValue, SelectContent, SelectItem } from './select';
 import { type ReactNode, useState, useMemo, type ComponentProps, createContext, use } from 'react';
-import { AnchorSection, useAnchorLink } from '@/auto-anchor/client';
+import { AnchorSection, useAnchorLink } from '@/auto-anchor';
 
 const Context = createContext<{
   value: string | null;

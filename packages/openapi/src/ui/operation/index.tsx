@@ -19,7 +19,7 @@ import { RequestTabs } from './request-tabs';
 import { cn } from '@/utils/cn';
 import { SelectTabs, SelectTabTrigger, SelectTab } from 'shared-api/components/select-tab';
 import { Callout } from 'fumadocs-ui/components/callout';
-import { AnchorSection, useAnchorLink } from 'shared-api/auto-anchor/client';
+import { AnchorSection, useAnchorLink } from 'shared-api/auto-anchor';
 import { Heading } from '@/ui/components/heading';
 import { Markdown } from '../components/markdown';
 import { useCopyButton } from 'fumadocs-ui/utils/use-copy-button';

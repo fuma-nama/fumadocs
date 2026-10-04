@@ -1,6 +1,6 @@
 'use client';
 import type { ComponentProps } from 'react';
-import { useAnchorId } from 'shared-api/auto-anchor/client';
+import { useAnchorId } from 'shared-api/auto-anchor';
 import { useComponents } from '@/utils/create-page';
 
 /**

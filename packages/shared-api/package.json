@@ -7,7 +7,7 @@
   "author": "Fuma Nama",
   "type": "module",
   "exports": {
-    "./auto-anchor/client": "./dist/auto-anchor/client.js",
+    "./auto-anchor": "./dist/auto-anchor/index.js",
     "./codegen": "./dist/codegen.js",
     "./components/accordion": "./dist/components/accordion.js",
     "./components/badge": "./dist/components/badge.js",
