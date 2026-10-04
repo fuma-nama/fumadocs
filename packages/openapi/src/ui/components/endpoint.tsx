@@ -1,4 +1,4 @@
-import { type ComponentProps, Fragment } from 'react';
+import type { ComponentProps } from 'react';
 import { cn } from '@/utils/cn';
 import { MethodLabel } from './method-label';
 
@@ -33,16 +33,22 @@ function Route({ route, ...props }: ComponentProps<'div'> & { route: string }) {
         props.className,
       )}
     >
-      {route.split('/').map((part, index) => (
-        <Fragment key={index}>
-          {index > 0 && <span className="text-fd-muted-foreground">/</span>}
-          {part.startsWith('{') && part.endsWith('}') ? (
-            <span className="rounded-md bg-fd-primary/10 px-1 text-fd-primary">{part}</span>
-          ) : (
-            part
-          )}
-        </Fragment>
-      ))}
+      {/* variables, including runtime expressions like `{$request.body#/url}`, and slashes between texts */}
+      {route.split(/(\{[^}]*\}|\/)/).map((part, index) => {
+        if (index % 2 === 0) return part;
+        if (part === '/')
+          return (
+            <span key={index} className="text-fd-muted-foreground">
+              /
+            </span>
+          );
+
+        return (
+          <span key={index} className="rounded-md bg-fd-primary/10 px-1 text-fd-primary">
+            {part}
+          </span>
+        );
+      })}
     </div>
   );
 }

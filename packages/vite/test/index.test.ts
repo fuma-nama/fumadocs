@@ -94,6 +94,10 @@ test('pre-bundles CJS runtime entries only, never declaration files (#3492)', as
 });
 
 test('reads each package.json once, whatever the number of chains reaching it (#3599)', async () => {
+  // fresh module: an install-state file above the temp dir (e.g. `~/node_modules/.package-lock.json`)
+  // lets earlier tests memoize the crawl for this root
+  vi.resetModules();
+  const { getConfig } = await import('../src');
   const readFile = vi.spyOn(fs, 'readFile');
   await getConfig({ root, isBuild: false });
 

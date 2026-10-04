@@ -1,6 +1,6 @@
 {
   "name": "example-next-min",
-  "version": "0.0.39",
+  "version": "0.0.40",
   "private": true,
   "scripts": {
     "build": "next build",

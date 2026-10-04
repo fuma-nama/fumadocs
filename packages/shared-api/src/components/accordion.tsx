@@ -2,10 +2,9 @@
 
 import { Accordion as Primitive } from '@base-ui/react/accordion';
 import { ChevronRight } from 'lucide-react';
-import { createContext, use, useEffect, useMemo, useState, type ComponentProps } from 'react';
+import { createContext, use, useMemo, useState, type ComponentProps } from 'react';
 import { cn } from '@/utils/cn';
-import { anchorIdStartsWith } from '@/auto-anchor';
-import { AnchorSection, useAnchorId } from '@/auto-anchor/client';
+import { AnchorSection, useAnchorLink } from '@/auto-anchor';
 
 const Context = createContext<{
   type: 'single' | 'multiple';
@@ -48,11 +47,7 @@ export function AccordionItem({
   anchorSegments?: string[];
 }) {
   const ctx = use(Context)!;
-  const id = useAnchorId(anchorSegments ?? false);
-
-  useEffect(() => {
-    if (id && anchorIdStartsWith(window.location.hash.slice(1), id)) ctx.setValue([value]);
-  }, [value, id, ctx]);
+  useAnchorLink(anchorSegments ?? false, () => ctx.setValue([value]));
 
   const content = (
     <Primitive.Item

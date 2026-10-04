@@ -1,7 +1,7 @@
 'use client';
 import { type ReactNode, useMemo } from 'react';
 import { useTranslations } from '@fuma-translate/react';
-import { AnchorSection } from 'shared-api/auto-anchor/client';
+import { AnchorSection } from 'shared-api/auto-anchor';
 import { isRequiredArgument } from 'graphql';
 import { Callout } from 'fumadocs-ui/components/callout';
 import { Tab, Tabs } from 'fumadocs-ui/components/tabs';

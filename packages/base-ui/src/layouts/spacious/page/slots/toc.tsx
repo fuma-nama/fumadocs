@@ -121,15 +121,12 @@ export function TOCPopover({
       onOpenChange={setOpen}
       {...container}
       // expand over the content below
-      className={cn('sticky top-(--fd-header-height) z-10 h-10 md:hidden', container?.className)}
+      className={cn(
+        'sticky top-[calc(var(--fd-banner-height,0px)+var(--fd-header-height))] z-30 [grid-area:toc-popover] h-(--fd-toc-popover-height) md:hidden max-md:layout:[--fd-toc-popover-height:--spacing(10)]',
+        container?.className,
+      )}
     >
-      <header
-        ref={ref}
-        className={cn(
-          'border-b bg-fd-background/80 backdrop-blur-sm transition-shadow',
-          open && 'shadow-lg',
-        )}
-      >
+      <header ref={ref} className="bg-fd-card [anchor-name:--fd-top-bar]">
         <CollapsibleTrigger
           {...trigger}
           className={cn(

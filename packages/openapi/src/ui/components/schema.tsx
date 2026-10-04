@@ -1,6 +1,6 @@
 'use client';
 import { type ComponentProps, useMemo } from 'react';
-import { useAnchorId } from 'shared-api/auto-anchor/client';
+import { useAnchorId } from 'shared-api/auto-anchor';
 import { type OpenAPIComponents, useComponents, useRenderContext } from '@/utils/create-page';
 
 type SlotProps = ComponentProps<OpenAPIComponents['SchemaUI']>;

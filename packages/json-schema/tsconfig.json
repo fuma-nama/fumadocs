@@ -6,7 +6,8 @@
     },
     "types": ["@types/node"],
     "noEmit": true,
-    "lib": ["ESNext"],
+    "lib": ["ESNext", "DOM"],
+    "jsx": "react-jsx",
     "module": "ESNext",
     "target": "ES2023"
   },

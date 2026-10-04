@@ -101,9 +101,11 @@ export function DocsLayout(props: DocsLayoutProps) {
         <slots.sidebar.provider {...sidebar}>
           <div
             id="fd-spacious-layout"
-            className="relative grid min-h-(--fd-layout-height) transition-[grid-template-columns] duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] motion-reduce:transition-none [--fd-layout-height:calc(100dvh-var(--fd-banner-height,0px))] [--fd-header-height:--spacing(14)] [--fd-page-width:760px] [--fd-sidebar-width:0px] [--fd-sidebar-col:var(--fd-sidebar-width)] [--fd-toc-width:0px] md:h-(--fd-layout-height) md:overflow-clip md:bg-fd-card print:h-auto print:overflow-visible"
+            // like docs layouts, `--fd-docs-row-3` is the height of the bars above the page on mobile
+            className="relative grid min-h-(--fd-layout-height) bg-fd-card transition-[grid-template-columns] duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] motion-reduce:transition-none [--fd-layout-height:calc(100dvh-var(--fd-banner-height,0px))] [--fd-header-height:--spacing(14)] [--fd-page-width:760px] [--fd-sidebar-width:0px] [--fd-sidebar-col:var(--fd-sidebar-width)] [--fd-toc-width:0px] max-md:[--fd-docs-row-3:calc(var(--fd-banner-height,0px)+var(--fd-header-height)+var(--fd-toc-popover-height,0px))] md:h-(--fd-layout-height) md:overflow-clip print:h-auto print:overflow-visible"
             style={{
               gridTemplate: `"sidebar header right" auto
+"sidebar toc-popover right" auto
 "sidebar main right" 1fr / var(--fd-sidebar-col) minmax(0, 1fr) auto`,
             }}
           >

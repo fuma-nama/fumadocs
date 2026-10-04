@@ -4,20 +4,7 @@ import { useTranslations } from '@fuma-translate/react';
 import { SchemaUI, type SchemaUIProps } from './client';
 import { type GenerateSchemaUIOptions, generateSchemaUI } from '@fumadocs/json-schema/react';
 
-export {
-  SchemaUI,
-  SchemaUIProvider,
-  InlineTag,
-  BlockTag,
-  useSchemaUI,
-  useSchemaTabs,
-  useSchemaPopover,
-  useSchemaHighlight,
-  useCopySchemaLink,
-  type SchemaPathItem,
-  type SchemaUIProps,
-  type SchemaUIContextType,
-} from './client';
+export { SchemaUI, type SchemaUIProps } from './client';
 
 export interface SchemaUIOptions extends Omit<GenerateSchemaUIOptions, 'translations'> {
   client: Omit<SchemaUIProps, 'generated'>;
