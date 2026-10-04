@@ -34,7 +34,7 @@ export function AISearchPanelHeader({ className, ...props }: ComponentProps<'div
   return (
     <div
       className={cn(
-        'sticky top-0 flex items-start gap-2 border rounded-xl bg-fd-secondary text-fd-secondary-foreground shadow-sm',
+        'sticky top-0 flex items-start gap-2 border rounded-xl bg-fd-secondary text-fd-secondary-foreground',
         className,
       )}
       {...props}
@@ -333,7 +333,7 @@ export function AISearchTrigger({
       data-state={open ? 'open' : 'closed'}
       className={cn(
         position === 'float' && [
-          'fixed bottom-4 gap-3 w-24 inset-e-[calc(--spacing(4)+var(--removed-body-scroll-bar-size,0px))] shadow-lg z-20 transition-[translate,opacity]',
+          'fixed bottom-4 gap-3 w-24 inset-e-[calc(--spacing(4)+var(--removed-body-scroll-bar-size,0px))] z-20 transition-[translate,opacity]',
           open && 'translate-y-10 opacity-0',
         ],
         className,
@@ -351,7 +351,7 @@ export function AISearchPanel() {
     <div className="flex flex-col size-full p-2">
       <AISearchPanelHeader />
       <AISearchPanelList className="flex-1" />
-      <div className="rounded-xl border bg-fd-secondary text-fd-secondary-foreground shadow-sm has-focus-visible:shadow-md">
+      <div className="rounded-xl border bg-fd-secondary text-fd-secondary-foreground">
         <AISearchInput />
         <div className="flex items-center gap-1.5 p-1 empty:hidden">
           <AISearchInputActions />

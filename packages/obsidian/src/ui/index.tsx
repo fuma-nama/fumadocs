@@ -18,7 +18,7 @@ export function ObsidianCallout({ className, type = 'info', ...props }: CalloutP
   return (
     <div
       className={cn(
-        'flex gap-2 my-4 rounded-xl border bg-fd-card p-3 ps-1 text-sm text-fd-card-foreground shadow-md',
+        'flex gap-2 my-4 rounded-xl border bg-fd-card p-3 ps-1 text-sm text-fd-card-foreground',
         className,
       )}
       {...props}
