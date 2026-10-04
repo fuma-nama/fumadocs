@@ -1,4 +1,5 @@
 'use client';
+import { slug } from 'github-slugger';
 import {
   createContext,
   type ReactNode,
@@ -6,32 +7,30 @@ import {
   useCallback,
   useEffect,
   useEffectEvent,
-  useMemo,
   useRef,
   useSyncExternalStore,
 } from 'react';
-import { anchorIdStartsWith, anchorSegments } from '.';
 
-const AnchorContext = createContext<string[]>([]);
+const AnchorContext = createContext('');
 
-/** Append segment to anchor IDs */
+/** Append segments to the anchor IDs below */
 export function AnchorSection({ segments, children }: { segments: string[]; children: ReactNode }) {
-  const v = use(AnchorContext);
-
-  return (
-    <AnchorContext value={useMemo(() => [...v, ...segments], [v, segments])}>
-      {children}
-    </AnchorContext>
-  );
+  return <AnchorContext value={useAnchorId(segments)}>{children}</AnchorContext>;
 }
 
+/** the anchor ID of the section, with `segments` slugified and appended by `.` */
 export function useAnchorId(segments: false): null;
 export function useAnchorId(segments: string[]): string;
 export function useAnchorId(segments: string[] | false): string | null;
 
 export function useAnchorId(segments: string[] | false): string | null {
   if (!segments) return null;
-  return anchorSegments(...use(AnchorContext), ...segments);
+  let id = use(AnchorContext);
+  for (const segment of segments) {
+    const slugged = slug(segment);
+    if (slugged) id = id ? `${id}.${slugged}` : slugged;
+  }
+  return id;
 }
 
 /**
@@ -43,7 +42,10 @@ export function useAnchorLink(segments: string[] | false, onLink: () => void) {
   const id = useAnchorId(segments);
   const linked = useSyncExternalStore(
     subscribeHash,
-    () => id !== null && anchorIdStartsWith(window.location.hash.slice(1), id),
+    () => {
+      const hash = window.location.hash.slice(1);
+      return id !== null && (hash === id || hash.startsWith(`${id}.`));
+    },
     () => false,
   );
   const link = useEffectEvent(onLink);
