@@ -68,7 +68,8 @@ export function SchemaUIProvider({ id, name, generated, children }: SchemaUIProv
     if (restored.has(id)) return;
     const url = new URL(window.location.href);
     const param = url.searchParams.get('path');
-    if (url.hash !== `#${id}` || !param) return;
+    // percent-encoded, like the hash of `getLink()`
+    if (url.hash !== new URL(`#${id}`, url).hash || !param) return;
 
     const path = decodePath(param);
     if (path[0].$ref !== $root || path.some((item) => !refs[item.$ref])) return;
