@@ -19,6 +19,7 @@
     ".": "./dist/index.js",
     "./bundle": "./dist/bundle.js",
     "./react": "./dist/react.js",
+    "./react/client": "./dist/react/client.js",
     "./package.json": "./package.json"
   },
   "publishConfig": {

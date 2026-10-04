@@ -27,7 +27,7 @@ import {
   panelCodeBlock,
   type ResultDisplayProps,
 } from './result-display';
-import { Segmented, SegmentedList, SegmentedPanel } from './segmented';
+import { Segmented, SegmentedList, SegmentedPanel } from '@/ui/components/segmented';
 
 /** the code usages of the request, above its response or the documented examples */
 export function ResponsePanel({

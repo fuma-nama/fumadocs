@@ -14,6 +14,8 @@ Everything outside `fumadocs-openapi/ui` is headless.
 | `fumadocs-openapi/playground`          | an API playground: its form, auth and requests              |
 | `fumadocs-openapi/requests`            | encoding the data of an example into a real request         |
 | `fumadocs-openapi/requests/generators` | turning that request into code usages                       |
+| `@fumadocs/json-schema/react`          | the Schema UI: JSON schemas flattened for UI                |
+| `@fumadocs/json-schema/react/client`   | the state of a Schema UI                                    |
 
 ## Page
 
@@ -120,30 +122,66 @@ function CodeUsage({ id }: { id: string }) {
 
 `generateSchemaUI()` flattens a JSON schema: every `$ref` it reaches becomes an entry in `refs`, so your UI walks a map from `$root` instead of recursing.
 
+`<SchemaUIProvider />` holds the state on top of it: the schemas opened from properties, the selected members of unions, and links to a property.
+
 ```tsx title="components/my-schema.tsx"
 'use client';
 import { useMemo } from 'react';
 import { generateSchemaUI } from '@fumadocs/json-schema/react';
+import { SchemaUIProvider, useSchemaUI } from '@fumadocs/json-schema/react/client';
 import type { OpenAPIComponents } from 'fumadocs-openapi';
 
 export const SchemaUI: OpenAPIComponents['SchemaUI'] = ({ client, ...options }) => {
-  const { $root, refs } = useMemo(() => generateSchemaUI(options), [options.root]);
-  const schema = refs[$root];
-  if (schema.type !== 'object') return null;
+  const generated = useMemo(() => generateSchemaUI(options), [options.root]);
 
   return (
-    <ul>
-      {schema.props.map((prop) => (
-        <li key={prop.name}>
-          {prop.name}: {refs[prop.$type].typeName}
-        </li>
-      ))}
-    </ul>
+    <SchemaUIProvider id={client.rootId} name={client.name} generated={generated}>
+      <div id={client.rootId}>
+        <Schema />
+      </div>
+    </SchemaUIProvider>
   );
 };
+
+function Schema() {
+  const { refs, path, open, back } = useSchemaUI();
+  const { schema } = path[path.length - 1];
+
+  return (
+    <>
+      {path.length > 1 && <button onClick={() => back(path.length - 2)}>Back</button>}
+      {schema.type === 'object' && (
+        <ul>
+          {schema.props.map((prop) => (
+            <li key={prop.name}>
+              {prop.name}:{' '}
+              <button onClick={() => open(prop.name, prop.$type)}>
+                {refs[prop.$type].typeName}
+              </button>
+            </li>
+          ))}
+        </ul>
+      )}
+    </>
+  );
+}
 ```
 
-The page passes `renderMarkdown` and `renderCodeblock` in, so descriptions and examples render through your own components. `client` carries the anchor ID and name of the root, for deep links into a property.
+| `useSchemaUI()`                   | Is                                                                           |
+| --------------------------------- | ---------------------------------------------------------------------------- |
+| `path`                            | the opened schemas, starting from the root                                   |
+| `open(name, $ref)`, `back(index)` | navigate `path`                                                              |
+| `getLink(index, name)`            | the URL linking to a property of a path item, visiting it opens `path` again |
+| `highlighted`                     | the property of the last path item that the URL links to                     |
+
+Each item of `path` has the `schema` to show, and its `unions` with the selected members. `select()` of a union shows another member.
+
+The page passes `renderMarkdown` and `renderCodeblock` in, so descriptions and examples render through your own components. `client` carries the anchor ID and name of the root, links to a property are resolved against it.
+
+<Callout title="Render the slots of client">
+  Bodies and responses pass `client.selector` to select their media type, and `client.actions` to
+  copy their TypeScript definitions.
+</Callout>
 
 <Accordions>
   <Accordion title="The shape of each entry">

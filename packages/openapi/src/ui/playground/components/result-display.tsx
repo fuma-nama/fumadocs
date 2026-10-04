@@ -16,7 +16,7 @@ import { cn } from '@/utils/cn';
 import { ClientCodeBlock } from '@/ui/components/codeblock';
 import { useTranslations } from '@fuma-translate/react';
 import type { BuiltinLanguage, SpecialLanguage } from 'shiki';
-import { Segmented, SegmentedList, SegmentedPanel } from './segmented';
+import { Segmented, SegmentedList, SegmentedPanel } from '@/ui/components/segmented';
 
 export interface ResultDisplayProps extends ComponentProps<'div'> {
   data: FetchResult;

@@ -11,6 +11,7 @@ import {
   type ResultDisplayProps,
 } from './components/result-display';
 import { EndpointBar } from '@/ui/components/endpoint';
+import { DialogPopup } from '@/ui/components/dialog';
 import { buttonVariants } from 'fumadocs-ui/components/ui/button';
 import { cn } from '@/utils/cn';
 import { SchemaProvider } from 'shared-api/components/playground/schema';
@@ -33,7 +34,7 @@ import {
 import { UrlBar } from './components/url-bar';
 import { RequestPanel } from './components/request-panel';
 import { ResponsePanel } from './components/response-panel';
-import { Segmented, SegmentedList } from './components/segmented';
+import { Segmented, SegmentedList } from '@/ui/components/segmented';
 
 export interface PlaygroundClientProps extends ComponentProps<'div'>, PlaygroundClientOptions {
   /** @deprecated it defaults to `true` for requests */
@@ -112,17 +113,14 @@ export default function PlaygroundClient({
               {t('Try in Playground')}
             </Dialog.Trigger>
           </EndpointBar>
-          <Dialog.Portal>
-            <Dialog.Backdrop className="fixed inset-0 z-50 bg-black/40 backdrop-blur-xs transition-opacity duration-200 data-ending-style:opacity-0 data-starting-style:opacity-0" />
-            <Dialog.Popup className="fixed inset-0 z-50 flex flex-col overflow-hidden bg-fd-background text-fd-foreground outline-none transition-[opacity,scale] duration-200 ease-[cubic-bezier(0.16,1,0.3,1)] data-ending-style:scale-[0.98] data-ending-style:opacity-0 data-ending-style:duration-150 data-starting-style:scale-[0.98] data-starting-style:opacity-0 motion-reduce:transition-opacity sm:inset-auto sm:top-1/2 sm:left-1/2 sm:h-[min(52rem,calc(100dvh-3rem))] sm:w-[min(80rem,calc(100vw-3rem))] sm:-translate-x-1/2 sm:-translate-y-1/2 sm:rounded-2xl sm:border sm:shadow-2xl">
-              <PlaygroundDialog
-                playground={playground}
-                renderParameterField={renderParameterField}
-                renderBodyField={renderBodyField}
-                ResultDisplay={components?.ResultDisplay}
-              />
-            </Dialog.Popup>
-          </Dialog.Portal>
+          <DialogPopup className="sm:h-[min(52rem,calc(100dvh-3rem))] sm:w-[min(80rem,calc(100vw-3rem))]">
+            <PlaygroundDialog
+              playground={playground}
+              renderParameterField={renderParameterField}
+              renderBodyField={renderBodyField}
+              ResultDisplay={components?.ResultDisplay}
+            />
+          </DialogPopup>
         </Dialog.Root>
       </SchemaProvider>
     </StfProvider>
