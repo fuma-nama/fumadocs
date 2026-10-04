@@ -29,6 +29,7 @@ import { Check, ChevronRight, Copy, Plus, X } from 'lucide-react';
 import PlaygroundClient from '@/ui/playground/client';
 import { EndpointBar } from '@/ui/components/endpoint';
 import { Segmented, SegmentedList, SegmentedPanel } from '@/ui/components/segmented';
+import { DialogPopup } from '@/ui/components/dialog';
 
 export interface OperationProps extends PageOperationProps {
   headingLevel?: number;
@@ -329,7 +330,6 @@ function SectionHeader({
   );
 }
 
-/** a compact select in the header of cards */
 /** selects the variant shown in a card, like the media type, a label when there is only one */
 function CardSelector({ items }: { items: { label: ReactNode; value: string }[] }) {
   if (items.length > 1)
@@ -352,50 +352,58 @@ function MediaContent({
 }: {
   schema: MediaTypeObject['schema'];
   required?: boolean;
-  selector?: ReactNode;
+  selector: ReactNode;
   request?: boolean;
 }) {
-  const t = useTranslations({ note: 'TypeScript definitions' });
   const { method } = useOperation();
   const ts = useTypeScriptDefinitions(schema, {
     name: request ? 'RequestBody' : 'ResponseBody',
     readOnly: !request,
     writeOnly: request,
   });
-  const [isChecked, onCopy] = useCopyButton(() => {
-    if (ts) void navigator.clipboard.writeText(ts);
-  });
+
+  if (!schema)
+    return (
+      <div className="not-prose flex h-9 items-center rounded-xl border bg-fd-card ps-1.5 pe-1 text-[0.8125rem]">
+        {selector}
+      </div>
+    );
 
   return (
-    schema && (
-      <SchemaUI
-        client={{
-          name: request ? 'body' : 'response',
-          as: 'body',
-          required,
-          selector,
-          actions: ts && (
-            <button
-              type="button"
-              title={t('Use the {name} type in TypeScript.', {
-                variables: { name: request ? 'request body' : 'response body' },
-              })}
-              onClick={onCopy}
-              className={cn(
-                buttonVariants({ variant: 'ghost', size: 'sm' }),
-                '-my-1 shrink-0 gap-1.5 text-fd-muted-foreground',
-              )}
-            >
-              {isChecked ? <Check className="size-3.5" /> : <Copy className="size-3.5" />}
-              TypeScript
-            </button>
-          ),
-        }}
-        root={schema}
-        readOnly={!request || method === 'get'}
-        writeOnly={request && method !== 'get'}
-      />
-    )
+    <SchemaUI
+      client={{
+        name: request ? 'body' : 'response',
+        as: 'body',
+        required,
+        selector,
+        actions: ts && (
+          <CopyTypeScript code={ts} name={request ? 'request body' : 'response body'} />
+        ),
+      }}
+      root={schema}
+      readOnly={!request || method === 'get'}
+      writeOnly={request && method !== 'get'}
+    />
+  );
+}
+
+function CopyTypeScript({ code, name }: { code: string; name: string }) {
+  const t = useTranslations({ note: 'TypeScript definitions' });
+  const [isChecked, onCopy] = useCopyButton(() => navigator.clipboard.writeText(code));
+
+  return (
+    <button
+      type="button"
+      title={t('Use the {name} type in TypeScript.', { variables: { name } })}
+      onClick={onCopy}
+      className={cn(
+        buttonVariants({ variant: 'ghost', size: 'sm' }),
+        '-my-1 shrink-0 gap-1.5 text-fd-muted-foreground [&_svg]:size-3.5',
+      )}
+    >
+      {isChecked ? <Check /> : <Copy />}
+      TypeScript
+    </button>
   );
 }
 
@@ -409,16 +417,12 @@ function ResponseSection({
 }) {
   const t = useTranslations({ note: 'operation page' });
   const id = useAnchorId(['response']);
-  // select the response that the URL links to by default
-  const linked = useSyncExternalStore(
-    subscribeHash,
-    () => {
-      const hash = window.location.hash.slice(1);
-      return responses.find((item) =>
-        anchorIdStartsWith(hash, anchorSegments(`\0${id}`, item.status)),
-      )?.status;
-    },
-    () => undefined,
+  // the response that the URL links to is selected by default
+  const linked = useHash(
+    (hash) =>
+      responses.find((item) => anchorIdStartsWith(hash, anchorSegments(`\0${id}`, item.status)))
+        ?.status,
+    undefined,
   );
   const [selected, setSelected] = useState<string>();
 
@@ -430,11 +434,8 @@ function ResponseSection({
     >
       <SectionHeader id="response-body" depth={headingLevel} title={t('Response Body')}>
         <SegmentedList
-          className="max-w-full overflow-x-auto [scrollbar-width:none]"
-          items={responses.map((item) => ({
-            value: item.status,
-            label: <span className="font-mono">{item.status}</span>,
-          }))}
+          className="max-w-full overflow-x-auto font-mono [scrollbar-width:none]"
+          items={responses.map((item) => ({ value: item.status, label: item.status }))}
         />
       </SectionHeader>
       {responses.map((item) => (
@@ -523,11 +524,6 @@ function AuthScheme({ scheme, scopes }: { scheme: SecuritySchemeObject; scopes: 
   );
 }
 
-function subscribeHash(onChange: () => void) {
-  window.addEventListener('hashchange', onChange);
-  return () => window.removeEventListener('hashchange', onChange);
-}
-
 /** a callback, its operation opens in a dialog */
 function Callback({
   item,
@@ -541,63 +537,66 @@ function Callback({
   const t = useTranslations({ note: 'operation page' });
   const segments = ['callbacks', item.name, item.path, item.method];
   const id = useAnchorId(segments);
-  // open by default when the URL links to its content
-  const linked = useSyncExternalStore(
-    subscribeHash,
-    () => anchorIdStartsWith(window.location.hash.slice(1), id),
-    () => false,
-  );
+  // opened by default when the URL links to its content
+  const linked = useHash((hash) => anchorIdStartsWith(hash, id), false);
   const [open, setOpen] = useState<boolean>();
 
   return (
     <Dialog.Root open={open ?? linked} onOpenChange={setOpen}>
-      <Dialog.Trigger className="group flex w-full items-center gap-3 border-t px-4 py-3 text-start transition-colors first:border-t-0 hover:bg-fd-accent/40 focus-visible:bg-fd-accent/40 focus-visible:outline-none">
-        <span className="flex min-w-0 flex-1 flex-col gap-1">
-          <span className="font-mono text-[0.8125rem] font-medium">{item.name}</span>
-          <span className="flex min-w-0 items-baseline gap-2 text-xs">
-            <MethodLabel>{item.method}</MethodLabel>
-            <code className="min-w-0 wrap-anywhere text-fd-muted-foreground">{item.path}</code>
-          </span>
-        </span>
-        <ChevronRight className="size-4 shrink-0 text-fd-muted-foreground transition-transform group-hover:translate-x-0.5 motion-reduce:transition-none" />
+      <Dialog.Trigger className="group grid w-full grid-cols-[auto_minmax(0,1fr)_auto] items-baseline gap-x-2 gap-y-1 border-t px-4 py-3 text-start transition-colors first:border-t-0 hover:bg-fd-accent/40 focus-visible:bg-fd-accent/40 focus-visible:outline-none">
+        <span className="col-span-2 font-mono text-[0.8125rem] font-medium">{item.name}</span>
+        <ChevronRight className="row-span-2 ms-1 size-4 self-center text-fd-muted-foreground transition-transform group-hover:translate-x-0.5 motion-reduce:transition-none" />
+        <MethodLabel className="text-xs">{item.method}</MethodLabel>
+        <code className="text-xs wrap-anywhere text-fd-muted-foreground">{item.path}</code>
       </Dialog.Trigger>
-      <Dialog.Portal>
-        <Dialog.Backdrop className="fixed inset-0 z-50 bg-black/40 backdrop-blur-xs transition-opacity duration-200 data-ending-style:opacity-0 data-starting-style:opacity-0" />
-        <Dialog.Popup className="fixed inset-0 z-50 flex flex-col overflow-hidden bg-fd-background text-fd-foreground outline-none transition-[opacity,scale] duration-200 ease-[cubic-bezier(0.16,1,0.3,1)] data-ending-style:scale-[0.98] data-ending-style:opacity-0 data-ending-style:duration-150 data-starting-style:scale-[0.98] data-starting-style:opacity-0 motion-reduce:transition-opacity sm:inset-auto sm:top-1/2 sm:left-1/2 sm:max-h-[min(52rem,calc(100dvh-3rem))] sm:w-[min(64rem,calc(100vw-3rem))] sm:-translate-x-1/2 sm:-translate-y-1/2 sm:rounded-2xl sm:border sm:shadow-2xl">
-          <div className="flex h-12 shrink-0 items-center gap-2 ps-4 pe-2 sm:ps-5">
-            <Dialog.Title className="truncate font-mono text-sm font-medium">
-              {item.name}
-            </Dialog.Title>
-            <Dialog.Close
-              aria-label={t('Close')}
-              className={cn(
-                buttonVariants({ variant: 'ghost', size: 'icon-sm' }),
-                'ms-auto shrink-0 text-fd-muted-foreground',
-              )}
-            >
-              <X />
-            </Dialog.Close>
-          </div>
-          <EndpointBar
-            method={item.method}
-            route={item.path}
-            deprecated={item.operation.deprecated}
-            className="mx-3 mb-3 shrink-0 sm:mx-4"
-          />
-          <div className="fd-scroll-container prose min-h-0 flex-1 overflow-y-auto border-t p-5 text-sm @container [--fd-docs-row-1:0px] [--fd-docs-row-3:0px]">
-            <AnchorSection segments={segments}>
-              <Operation
-                type="webhook"
-                path={path}
-                headingLevel={headingLevel}
-                method={item.method}
-                pathItem={item.pathItem}
-                operation={item.operation}
-              />
-            </AnchorSection>
-          </div>
-        </Dialog.Popup>
-      </Dialog.Portal>
+      <DialogPopup className="sm:max-h-[min(52rem,calc(100dvh-3rem))] sm:w-[min(64rem,calc(100vw-3rem))]">
+        <div className="flex h-12 shrink-0 items-center gap-2 ps-4 pe-2 sm:ps-5">
+          <Dialog.Title className="truncate font-mono text-sm font-medium">
+            {item.name}
+          </Dialog.Title>
+          <Dialog.Close
+            aria-label={t('Close')}
+            className={cn(
+              buttonVariants({ variant: 'ghost', size: 'icon-sm' }),
+              'ms-auto shrink-0 text-fd-muted-foreground',
+            )}
+          >
+            <X />
+          </Dialog.Close>
+        </div>
+        <EndpointBar
+          method={item.method}
+          route={item.path}
+          deprecated={item.operation.deprecated}
+          className="mx-3 mb-3 shrink-0 sm:mx-4"
+        />
+        <div className="fd-scroll-container prose min-h-0 flex-1 overflow-y-auto border-t p-5 text-sm @container [--fd-docs-row-1:0px] [--fd-docs-row-3:0px]">
+          <AnchorSection segments={segments}>
+            <Operation
+              type="webhook"
+              path={path}
+              headingLevel={headingLevel}
+              method={item.method}
+              pathItem={item.pathItem}
+              operation={item.operation}
+            />
+          </AnchorSection>
+        </div>
+      </DialogPopup>
     </Dialog.Root>
   );
+}
+
+/** a value derived from the URL hash, following its changes */
+function useHash<T>(derive: (hash: string) => T, serverValue: T): T {
+  return useSyncExternalStore(
+    subscribeHash,
+    () => derive(window.location.hash.slice(1)),
+    () => serverValue,
+  );
+}
+
+function subscribeHash(onChange: () => void) {
+  window.addEventListener('hashchange', onChange);
+  return () => window.removeEventListener('hashchange', onChange);
 }
