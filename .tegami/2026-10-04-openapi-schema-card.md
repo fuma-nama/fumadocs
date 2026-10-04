@@ -21,7 +21,7 @@ On API pages:
 - The media type of request bodies and responses is selected in the top of their cards.
 - Authorization fields start with where they are sent, like `header` or `query`. The security requirement is selected in the top of their card.
 - Parameters and authorization are grouped in cards.
-- Responses are tabs of their status codes instead of accordions, a link to a response selects its tab.
+- Responses are tabs of their status codes instead of accordions, a link to a response selects its tab and scrolls to it.
 - Callbacks open in a dialog instead of expanding in the page, with their full URL on top.
 - Runtime expressions in routes, like `{$request.body#/url}`, are highlighted as a whole.
 - TypeScript definitions are copied from a button in the top of the body and response cards.

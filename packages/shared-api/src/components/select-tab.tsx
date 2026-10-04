@@ -12,7 +12,7 @@ import {
   useEffect,
 } from 'react';
 import { anchorIdStartsWith } from '@/auto-anchor';
-import { AnchorSection, useAnchorId } from '@/auto-anchor/client';
+import { AnchorSection, scrollToHash, useAnchorId } from '@/auto-anchor/client';
 
 const Context = createContext<{
   value: string | null;
@@ -48,7 +48,7 @@ export function SelectTab({
   }, [id, value, setValue]);
 
   if (value !== currentValue) return;
-  const content = <div {...props} />;
+  const content = <div ref={scrollToHash} {...props} />;
   return anchorSegments ? (
     <AnchorSection segments={anchorSegments}>{content}</AnchorSection>
   ) : (

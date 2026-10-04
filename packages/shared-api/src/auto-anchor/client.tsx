@@ -15,6 +15,17 @@ export function AnchorSection({ segments, children }: { segments: string[]; chil
   );
 }
 
+let scrolled: string | undefined;
+
+/** a ref for content the URL hash links into, the browser scrolls to the hash before it renders */
+export function scrollToHash(element: HTMLElement | null) {
+  const target = document.getElementById(window.location.hash.slice(1));
+  // once, not again when the content renders after switching back to it
+  if (!element || !target || target.id === scrolled || !element.contains(target)) return;
+  scrolled = target.id;
+  target.scrollIntoView();
+}
+
 export function useAnchorId(segments: false): null;
 export function useAnchorId(segments: string[]): string;
 export function useAnchorId(segments: string[] | false): string | null;

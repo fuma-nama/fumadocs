@@ -20,7 +20,7 @@ import { cn } from '@/utils/cn';
 import { SelectTabs, SelectTabTrigger, SelectTab } from 'shared-api/components/select-tab';
 import { Callout } from 'fumadocs-ui/components/callout';
 import { anchorIdStartsWith, anchorSegments } from 'shared-api/auto-anchor';
-import { AnchorSection, useAnchorId } from 'shared-api/auto-anchor/client';
+import { AnchorSection, scrollToHash, useAnchorId } from 'shared-api/auto-anchor/client';
 import { Heading } from '@/ui/components/heading';
 import { Markdown } from '../components/markdown';
 import { useCopyButton } from 'fumadocs-ui/utils/use-copy-button';
@@ -431,7 +431,7 @@ function ResponseSection({
         />
       </SectionHeader>
       {responses.map((item) => (
-        <SegmentedPanel key={item.status} value={item.status}>
+        <SegmentedPanel key={item.status} value={item.status} ref={scrollToHash}>
           <AnchorSection segments={['response', item.status]}>
             <ResponseContent item={item} />
           </AnchorSection>
@@ -559,7 +559,10 @@ function Callback({
           deprecated={item.operation.deprecated}
           className="mx-3 mb-3 shrink-0 sm:mx-4"
         />
-        <div className="fd-scroll-container prose min-h-0 flex-1 overflow-y-auto border-t p-5 text-sm @container [--fd-docs-row-1:0px] [--fd-docs-row-3:0px]">
+        <div
+          ref={scrollToHash}
+          className="fd-scroll-container prose min-h-0 flex-1 overflow-y-auto border-t p-5 text-sm @container [--fd-docs-row-1:0px] [--fd-docs-row-3:0px]"
+        >
           <AnchorSection segments={segments}>
             <Operation
               type="webhook"
