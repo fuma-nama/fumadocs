@@ -18,12 +18,12 @@ export const registry: Registry = {
     },
   },
   files: {
-    'components/{dialog,input,label,popover,select,spinner}.tsx': { type: 'ui' },
+    'components/{dialog,input,label,select,spinner}.tsx': { type: 'ui' },
     'components/schema/*': { type: 'components', target: '<dir>/api/schema/*' },
     'components/**': { type: 'components', target: '<dir>/api/ui/*' },
     'auto-anchor/*': { type: 'components', target: '<dir>/api/ui/auto-anchor/*' },
     'utils/{is-plain-object,use-query}.ts': { type: 'components', target: '<dir>/api/lib/*' },
-    'utils/{cn,merge-refs}.ts': { alias: '../../radix-ui/src/utils/*' },
+    'utils/cn.ts': { alias: '../../radix-ui/src/utils/*' },
   },
   dependencies: {
     'fumadocs-core': null,

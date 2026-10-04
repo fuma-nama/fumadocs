@@ -19,7 +19,6 @@
     "./components/label": "./dist/components/label.js",
     "./components/playground/inputs": "./dist/components/playground/inputs.js",
     "./components/playground/schema": "./dist/components/playground/schema.js",
-    "./components/popover": "./dist/components/popover.js",
     "./components/schema": "./dist/components/schema/index.js",
     "./components/select": "./dist/components/select.js",
     "./components/select-tab": "./dist/components/select-tab.js",

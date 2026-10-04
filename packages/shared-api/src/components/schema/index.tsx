@@ -10,8 +10,6 @@ export {
   InlineTag,
   BlockTag,
   useSchemaUI,
-  useSchemaTabs,
-  useSchemaPopover,
   useSchemaHighlight,
   useCopySchemaLink,
   type SchemaPathItem,

@@ -47,7 +47,7 @@ import {
   ValueRow,
 } from './fields';
 import { OAuthPanel } from './oauth-panel';
-import { Segmented, SegmentedList } from './segmented';
+import { Segmented, SegmentedList } from '@/ui/components/segmented';
 
 interface RenderOptions {
   renderParameterField?: (fieldName: FieldKey, param: ParameterObject) => ReactNode;

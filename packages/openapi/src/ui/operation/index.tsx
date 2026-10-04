@@ -1,6 +1,7 @@
 'use client';
-import { type ComponentProps, Fragment, type ReactNode } from 'react';
-import type { HttpMethods, MediaTypeObject, SecuritySchemeObject } from '@/types';
+import { Fragment, type ReactNode, useState, useSyncExternalStore } from 'react';
+import { Dialog } from '@base-ui/react/dialog';
+import type { MediaTypeObject, SecuritySchemeObject } from '@/types';
 import { UsageTabs } from '@/ui/operation/usage-tabs';
 import { MethodLabel } from '@/ui/components/method-label';
 import { SchemaUI } from '@/ui/components/schema';
@@ -8,30 +9,26 @@ import { Badge } from 'shared-api/components/badge';
 import { useOpenAPI, useRenderContext, useTypeScriptDefinitions } from '@/utils/create-page';
 import {
   OperationProvider,
+  type OperationCallback,
   type OperationResponse,
   type PageOperationProps,
   useOperation,
 } from '@/operation';
 import { useTranslations } from '@fuma-translate/react';
-import {
-  AccordionContent,
-  AccordionHeader,
-  AccordionItem,
-  Accordions,
-  AccordionTrigger,
-} from 'shared-api/components/accordion';
 import { RequestTabs } from './request-tabs';
 import { cn } from '@/utils/cn';
 import { SelectTabs, SelectTabTrigger, SelectTab } from 'shared-api/components/select-tab';
 import { Callout } from 'fumadocs-ui/components/callout';
-import { AnchorSection } from 'shared-api/auto-anchor/client';
+import { anchorIdStartsWith, anchorSegments } from 'shared-api/auto-anchor';
+import { AnchorSection, useAnchorId } from 'shared-api/auto-anchor/client';
 import { Heading } from '@/ui/components/heading';
 import { Markdown } from '../components/markdown';
 import { useCopyButton } from 'fumadocs-ui/utils/use-copy-button';
 import { buttonVariants } from 'fumadocs-ui/components/ui/button';
-import { Check, Copy } from 'lucide-react';
+import { Check, ChevronRight, Copy, Plus, X } from 'lucide-react';
 import PlaygroundClient from '@/ui/playground/client';
 import { EndpointBar } from '@/ui/components/endpoint';
+import { Segmented, SegmentedList, SegmentedPanel } from '@/ui/components/segmented';
 
 export interface OperationProps extends PageOperationProps {
   headingLevel?: number;
@@ -101,29 +98,25 @@ function OperationContent({
   if (requestBody) {
     const contentTypes = Object.entries(requestBody.content);
     const items = contentTypes.map(([mediaType]) => ({
-      label: <code className="text-xs">{mediaType}</code>,
+      label: <code>{mediaType}</code>,
       value: mediaType,
     }));
 
     bodyNode = (
       <SelectTabs defaultValue={items[0].value}>
-        <div className="flex gap-2 items-center justify-between mt-10">
-          <Heading id="request-body" depth={headingLevel} className="my-0!">
-            {t('Request Body')}
-          </Heading>
-          {contentTypes.length > 1 ? (
-            <SelectTabTrigger items={items} className="font-medium" />
-          ) : (
-            <p className="text-fd-muted-foreground not-prose">{items[0].label}</p>
-          )}
-        </div>
-        {requestBody.description && <Markdown md={requestBody.description} />}
+        <SectionHeader id="request-body" depth={headingLevel} title={t('Request Body')} />
+        {requestBody.description && (
+          <div className="mb-3 prose-no-margin text-fd-muted-foreground">
+            <Markdown md={requestBody.description} />
+          </div>
+        )}
         {contentTypes.map(([mediaType, content]) => (
           <SelectTab key={mediaType} anchorSegments={['request-body', mediaType]} value={mediaType}>
-            <RequestBodyContentItem
-              content={content}
+            <MediaContent
+              schema={content.schema}
               required={requestBody.required}
-              method={method}
+              selector={<CardSelector items={items} />}
+              request
             />
           </SelectTab>
         ))}
@@ -132,18 +125,7 @@ function OperationContent({
   }
 
   if (responses.length > 0 && ctx.showResponseSchema !== false) {
-    responseNode = (
-      <>
-        <Heading id="response-body" depth={headingLevel}>
-          {t('Response Body')}
-        </Heading>
-        <Accordions type="multiple">
-          {responses.map((item) => (
-            <ResponseAccordion key={item.status} item={item} />
-          ))}
-        </Accordions>
-      </>
-    );
+    responseNode = <ResponseSection responses={responses} headingLevel={headingLevel} />;
   }
 
   const parameterNode = parameters.map(({ in: location, items }) => {
@@ -158,11 +140,9 @@ function OperationContent({
 
     return (
       <Fragment key={location}>
-        <Heading id={`parameters-${location}`} depth={headingLevel}>
-          {parameterLabel}
-        </Heading>
+        <SectionHeader id={`parameters-${location}`} depth={headingLevel} title={parameterLabel} />
         <AnchorSection segments={['parameters', location]}>
-          <div className="flex flex-col">
+          <div className="rounded-xl border bg-fd-card px-3">
             {items.map((param) => {
               if (param.schema == null) return;
               const schema = resolve(param.schema);
@@ -195,44 +175,41 @@ function OperationContent({
   });
 
   if (security.length > 0) {
-    const items = security.map((requirement, i) => {
-      return {
-        value: String(i),
-        label: (
-          <div className="flex flex-col text-xs min-w-0">
-            {requirement.map(({ key, scopes }) => (
-              <code key={key} className="truncate">
-                <span className="font-medium">{key}</span>{' '}
+    const items = security.map((requirement, i) => ({
+      value: String(i),
+      label: (
+        <code className="flex min-w-0 items-center gap-1">
+          {requirement.map(({ key, scopes }, j) => (
+            <Fragment key={key}>
+              {j > 0 && <Plus className="size-3 shrink-0 text-fd-muted-foreground" />}
+              <span className="truncate">
+                {key}
                 {scopes.length > 0 && (
-                  <span className="text-fd-muted-foreground">{scopes.join(', ')}</span>
+                  <span className="text-fd-muted-foreground"> {scopes.join(', ')}</span>
                 )}
-              </code>
-            ))}
-          </div>
-        ),
-      };
-    });
+              </span>
+            </Fragment>
+          ))}
+        </code>
+      ),
+    }));
 
     authNode = (
       <SelectTabs defaultValue={items[0].value}>
-        <div className="flex items-start justify-between gap-2 mt-10">
-          <Heading id="authorization" depth={headingLevel} className="my-0!">
-            {t('Authorization')}
-          </Heading>
-          {items.length > 1 ? (
-            <SelectTabTrigger items={items} />
-          ) : (
-            <div className="not-prose">{items[0].label}</div>
-          )}
+        <SectionHeader id="authorization" depth={headingLevel} title={t('Authorization')} />
+        <div className="overflow-hidden rounded-xl border bg-fd-card">
+          <div className="flex h-9 items-center border-b ps-1.5 pe-1 text-[0.8125rem] not-prose">
+            <CardSelector items={items} />
+          </div>
+          {security.map((requirement, i) => (
+            <SelectTab key={i} value={items[i].value} className="px-3">
+              {requirement.map(
+                ({ key, scopes, scheme }) =>
+                  scheme && <AuthScheme key={key} scheme={scheme} scopes={scopes} />,
+              )}
+            </SelectTab>
+          ))}
         </div>
-        {security.map((requirement, i) => (
-          <SelectTab key={i} value={items[i].value}>
-            {requirement.map(
-              ({ key, scopes, scheme }) =>
-                scheme && <AuthScheme key={key} scheme={scheme} scopes={scopes} />,
-            )}
-          </SelectTab>
-        ))}
       </SelectTabs>
     );
   }
@@ -240,43 +217,12 @@ function OperationContent({
   if (callbacks.length > 0) {
     callbacksNode = (
       <>
-        <Heading id="callbacks" depth={headingLevel}>
-          {t('Callbacks')}
-        </Heading>
-        <Accordions type="multiple">
+        <SectionHeader id="callbacks" depth={headingLevel} title={t('Callbacks')} />
+        <div className="overflow-hidden rounded-xl border bg-fd-card not-prose">
           {callbacks.map((item, i) => (
-            <AccordionItem
-              key={i}
-              value={`${item.name}\0${item.path}\0${item.method}`}
-              anchorSegments={['callbacks', item.name, item.path, item.method]}
-            >
-              <AccordionHeader>
-                <AccordionTrigger className="gap-3">
-                  <div>
-                    <p className="font-mono mb-2">{item.name}</p>
-
-                    <div className="flex items-center gap-2 text-xs">
-                      <MethodLabel>{item.method}</MethodLabel>
-                      <code className="text-fd-muted-foreground">{item.path}</code>
-                    </div>
-                  </div>
-                </AccordionTrigger>
-              </AccordionHeader>
-              <AccordionContent>
-                <div className="border p-3 mb-2 @container prose-no-margin rounded-2xl">
-                  <Operation
-                    type="webhook"
-                    path={path}
-                    headingLevel={headingLevel + 1}
-                    method={item.method}
-                    pathItem={item.pathItem}
-                    operation={item.operation}
-                  />
-                </div>
-              </AccordionContent>
-            </AccordionItem>
+            <Callback key={i} item={item} path={path} headingLevel={headingLevel + 1} />
           ))}
-        </Accordions>
+        </div>
       </>
     );
   }
@@ -362,237 +308,296 @@ function OperationContent({
   );
 }
 
-function RequestBodyContentItem({
-  content,
-  required,
-  method,
+function SectionHeader({
+  id,
+  depth,
+  title,
+  children,
 }: {
-  method: HttpMethods;
-  content: MediaTypeObject;
-  required?: boolean;
+  id: string;
+  depth: number;
+  title: ReactNode;
+  children?: ReactNode;
 }) {
-  const ts = useTypeScriptDefinitions(content.schema, {
-    name: 'RequestBody',
-    readOnly: false,
-    writeOnly: true,
-  });
-
   return (
-    <>
-      {ts && <CopyTypeScriptPanel name="request body" code={ts} className="my-4 last:mb-0" />}
-      {content.schema && (
-        <SchemaUI
-          client={{
-            name: 'body',
-            as: 'body',
-            required,
-          }}
-          root={content.schema}
-          readOnly={method === 'get'}
-          writeOnly={method !== 'get'}
-        />
-      )}
-    </>
+    <div className="flex flex-wrap items-center gap-2 mt-10 mb-3 first:mt-0">
+      <Heading id={id} depth={depth} className="my-0! me-auto">
+        {title}
+      </Heading>
+      {children}
+    </div>
   );
 }
 
-function ResponseAccordion({ item: { status, response, content } }: { item: OperationResponse }) {
+/** a compact select in the header of cards */
+/** selects the variant shown in a card, like the media type, a label when there is only one */
+function CardSelector({ items }: { items: { label: ReactNode; value: string }[] }) {
+  if (items.length > 1)
+    return (
+      <SelectTabTrigger
+        items={items}
+        className="h-7 w-auto gap-1 border-0 bg-transparent px-1.5 py-0 text-[0.8125rem] font-medium hover:bg-fd-accent hover:text-fd-accent-foreground focus:ring-0 focus-visible:ring-2 focus-visible:ring-inset data-popup-open:bg-fd-accent"
+      />
+    );
+
+  return <span className="min-w-0 px-1.5 font-medium">{items[0].label}</span>;
+}
+
+/** the schema of a request body or response in a media type */
+function MediaContent({
+  schema,
+  required,
+  selector,
+  request = false,
+}: {
+  schema: MediaTypeObject['schema'];
+  required?: boolean;
+  selector?: ReactNode;
+  request?: boolean;
+}) {
+  const t = useTranslations({ note: 'TypeScript definitions' });
+  const { method } = useOperation();
+  const ts = useTypeScriptDefinitions(schema, {
+    name: request ? 'RequestBody' : 'ResponseBody',
+    readOnly: !request,
+    writeOnly: request,
+  });
+  const [isChecked, onCopy] = useCopyButton(() => {
+    if (ts) void navigator.clipboard.writeText(ts);
+  });
+
+  return (
+    schema && (
+      <SchemaUI
+        client={{
+          name: request ? 'body' : 'response',
+          as: 'body',
+          required,
+          selector,
+          actions: ts && (
+            <button
+              type="button"
+              title={t('Use the {name} type in TypeScript.', {
+                variables: { name: request ? 'request body' : 'response body' },
+              })}
+              onClick={onCopy}
+              className={cn(
+                buttonVariants({ variant: 'ghost', size: 'sm' }),
+                '-my-1 shrink-0 gap-1.5 text-fd-muted-foreground',
+              )}
+            >
+              {isChecked ? <Check className="size-3.5" /> : <Copy className="size-3.5" />}
+              TypeScript
+            </button>
+          ),
+        }}
+        root={schema}
+        readOnly={!request || method === 'get'}
+        writeOnly={request && method !== 'get'}
+      />
+    )
+  );
+}
+
+/** the responses as tabs of their status codes */
+function ResponseSection({
+  responses,
+  headingLevel,
+}: {
+  responses: OperationResponse[];
+  headingLevel: number;
+}) {
+  const t = useTranslations({ note: 'operation page' });
+  const id = useAnchorId(['response']);
+  // select the response that the URL links to by default
+  const linked = useSyncExternalStore(
+    subscribeHash,
+    () => {
+      const hash = window.location.hash.slice(1);
+      return responses.find((item) =>
+        anchorIdStartsWith(hash, anchorSegments(`\0${id}`, item.status)),
+      )?.status;
+    },
+    () => undefined,
+  );
+  const [selected, setSelected] = useState<string>();
+
+  return (
+    <Segmented
+      value={selected ?? linked ?? responses[0].status}
+      onValueChange={setSelected}
+      className="mt-10 first:mt-0"
+    >
+      <SectionHeader id="response-body" depth={headingLevel} title={t('Response Body')}>
+        <SegmentedList
+          className="max-w-full overflow-x-auto [scrollbar-width:none]"
+          items={responses.map((item) => ({
+            value: item.status,
+            label: <span className="font-mono">{item.status}</span>,
+          }))}
+        />
+      </SectionHeader>
+      {responses.map((item) => (
+        <SegmentedPanel key={item.status} value={item.status}>
+          <AnchorSection segments={['response', item.status]}>
+            <ResponseContent item={item} />
+          </AnchorSection>
+        </SegmentedPanel>
+      ))}
+    </Segmented>
+  );
+}
+
+function ResponseContent({ item: { response, content } }: { item: OperationResponse }) {
   const contentTypes = Object.entries(content);
-  const items = contentTypes.map(([key]) => ({
-    label: <code className="text-xs">{key}</code>,
-    value: key,
+  const items = contentTypes.map(([mediaType]) => ({
+    label: <code>{mediaType}</code>,
+    value: mediaType,
   }));
 
   return (
-    <AccordionItem
-      value={status}
-      anchorSegments={['response', status]}
-      className="data-[open]:border-b-0"
-    >
-      <SelectTabs defaultValue={items[0]?.value}>
-        <AccordionHeader>
-          <AccordionTrigger className="font-mono">{status}</AccordionTrigger>
-          {items.length === 1 ? (
-            <p className="text-fd-muted-foreground not-prose py-2">{items[0].label}</p>
-          ) : (
-            items.length > 0 && <SelectTabTrigger items={items} className="my-1.5 py-1" />
-          )}
-        </AccordionHeader>
-        <AccordionContent className="ps-4.5 pe-3 border rounded-xl">
-          {response.description && (
-            <div className="prose-no-margin mt-3 mb-2">
-              <Markdown md={response.description} />
-            </div>
-          )}
-          {contentTypes.map(([mediaType, media]) => (
-            <SelectTab key={mediaType} value={mediaType} anchorSegments={[mediaType]}>
-              <ResponseAccordionItem item={media} />
-            </SelectTab>
-          ))}
-        </AccordionContent>
-      </SelectTabs>
-    </AccordionItem>
-  );
-}
-
-function ResponseAccordionItem({ item: { schema } }: { item: MediaTypeObject }) {
-  const ts = useTypeScriptDefinitions(schema, {
-    name: 'ResponseBody',
-    readOnly: true,
-    writeOnly: false,
-  });
-
-  return (
-    <>
-      {ts && <CopyTypeScriptPanel name="response body" code={ts} className="mb-2" />}
-      {schema && (
-        <SchemaUI
-          client={{
-            name: 'response',
-            as: 'body',
-          }}
-          root={schema}
-          readOnly
-        />
+    <SelectTabs defaultValue={items[0]?.value}>
+      {response.description && (
+        <div className="mb-3 prose-no-margin text-fd-muted-foreground">
+          <Markdown md={response.description} />
+        </div>
       )}
-    </>
+      {contentTypes.map(([mediaType, media]) => (
+        <SelectTab key={mediaType} value={mediaType} anchorSegments={[mediaType]}>
+          <MediaContent schema={media.schema} selector={<CardSelector items={items} />} />
+        </SelectTab>
+      ))}
+    </SelectTabs>
   );
 }
 
 function AuthScheme({ scheme, scopes }: { scheme: SecuritySchemeObject; scopes: string[] }) {
   const t = useTranslations({ note: 'security scheme' });
+  let name: string;
+  let type = '<token>';
+  let location: string | undefined;
 
   if (scheme.type === 'http' || scheme.type === 'oauth2') {
-    return (
-      <AuthProperty
-        name={t('Authorization')}
-        type={
-          scheme.type === 'http' && scheme.scheme === 'basic'
-            ? t('Basic <token>')
-            : t('Bearer <token>')
-        }
-        deprecated={scheme.deprecated}
-        scopes={scopes}
-      >
-        {scheme.description && <Markdown md={scheme.description} />}
-        <p>
-          {t('In')}: <code>header</code>
-        </p>
-      </AuthProperty>
-    );
+    name = t('Authorization');
+    type =
+      scheme.type === 'http' && scheme.scheme === 'basic'
+        ? t('Basic <token>')
+        : t('Bearer <token>');
+    location = 'header';
+  } else if (scheme.type === 'apiKey') {
+    name = scheme.name!;
+    location = scheme.in;
+  } else if (scheme.type === 'openIdConnect') {
+    name = t('OpenID Connect');
+  } else {
+    return null;
   }
-
-  if (scheme.type === 'apiKey') {
-    return (
-      <AuthProperty
-        name={scheme.name!}
-        type="<token>"
-        deprecated={scheme.deprecated}
-        scopes={scopes}
-      >
-        {scheme.description && <Markdown md={scheme.description} />}
-        <p>
-          {t('In')}: <code>{scheme.in}</code>
-        </p>
-      </AuthProperty>
-    );
-  }
-
-  if (scheme.type === 'openIdConnect') {
-    return (
-      <AuthProperty
-        name={t('OpenID Connect')}
-        type="<token>"
-        deprecated={scheme.deprecated}
-        scopes={scopes}
-      >
-        {scheme.description && <Markdown md={scheme.description} />}
-      </AuthProperty>
-    );
-  }
-}
-
-function AuthProperty({
-  name,
-  type,
-  deprecated = false,
-  scopes = [],
-  className,
-  ...props
-}: ComponentProps<'div'> & {
-  name: ReactNode;
-  type: ReactNode;
-  deprecated?: boolean;
-  scopes?: string[];
-}) {
-  const t = useTranslations({ note: 'security scheme' });
 
   return (
-    <div className={cn('text-sm border-t my-4 first:border-t-0', className)}>
-      <div className="flex flex-wrap items-center gap-3 not-prose">
-        <span className="font-medium font-mono text-fd-primary">{name}</span>
-        <span className="text-sm font-mono text-fd-muted-foreground">{type}</span>
-        {deprecated && (
+    <div className="border-t py-2.5 first:border-t-0">
+      <div className="flex flex-wrap items-center gap-2 not-prose">
+        {location && (
+          <span className="rounded-md border bg-fd-secondary px-1.5 font-mono text-xs leading-5 text-fd-muted-foreground">
+            {location}
+          </span>
+        )}
+        <code className="text-[0.8125rem] font-medium text-fd-primary">{name}</code>
+        <code className="text-xs text-fd-muted-foreground">{type}</code>
+        {scheme.deprecated && (
           <Badge color="red" className="text-xs">
             {t('Deprecated')}
           </Badge>
         )}
       </div>
-      <div className="prose-no-margin pt-2.5 empty:hidden">
-        {props.children}
-        {scopes.length > 0 && (
-          <p>
-            {t('Scope')}: <code>{scopes.join(', ')}</code>
-          </p>
-        )}
-      </div>
+      {(scheme.description || scopes.length > 0) && (
+        <div className="mt-1 prose-no-margin text-fd-muted-foreground">
+          {scheme.description && <Markdown md={scheme.description} />}
+          {scopes.length > 0 && (
+            <p>
+              {t('Scope')}: <code>{scopes.join(', ')}</code>
+            </p>
+          )}
+        </div>
+      )}
     </div>
   );
 }
 
-function CopyTypeScriptPanel({
-  name,
-  code,
-  className,
+function subscribeHash(onChange: () => void) {
+  window.addEventListener('hashchange', onChange);
+  return () => window.removeEventListener('hashchange', onChange);
+}
+
+/** a callback, its operation opens in a dialog */
+function Callback({
+  item,
+  path,
+  headingLevel,
 }: {
-  code: string;
-  name: 'response body' | 'request body';
-  className?: string;
+  item: OperationCallback;
+  path: string;
+  headingLevel: number;
 }) {
-  const [isChecked, onCopy] = useCopyButton(() => {
-    void navigator.clipboard.writeText(code);
-  });
-  const t = useTranslations({ note: 'TypeScript definitions' });
+  const t = useTranslations({ note: 'operation page' });
+  const segments = ['callbacks', item.name, item.path, item.method];
+  const id = useAnchorId(segments);
+  // open by default when the URL links to its content
+  const linked = useSyncExternalStore(
+    subscribeHash,
+    () => anchorIdStartsWith(window.location.hash.slice(1), id),
+    () => false,
+  );
+  const [open, setOpen] = useState<boolean>();
+
   return (
-    <div
-      className={cn(
-        'flex items-start justify-between gap-2 bg-fd-card text-fd-card-foreground border rounded-xl p-3 not-prose',
-        className,
-      )}
-    >
-      <div>
-        <p className="font-medium text-sm mb-2">{t('TypeScript Definitions')}</p>
-        <p className="text-xs text-fd-muted-foreground">
-          {t('Use the {name} type in TypeScript.', {
-            variables: {
-              name,
-            },
-          })}
-        </p>
-      </div>
-      <button
-        onClick={onCopy}
-        className={cn(
-          buttonVariants({
-            variant: 'secondary',
-            className: 'p-2 gap-2',
-            size: 'sm',
-          }),
-        )}
-      >
-        {isChecked ? <Check className="size-3.5" /> : <Copy className="size-3.5" />}
-        {t('Copy')}
-      </button>
-    </div>
+    <Dialog.Root open={open ?? linked} onOpenChange={setOpen}>
+      <Dialog.Trigger className="group flex w-full items-center gap-3 border-t px-4 py-3 text-start transition-colors first:border-t-0 hover:bg-fd-accent/40 focus-visible:bg-fd-accent/40 focus-visible:outline-none">
+        <span className="flex min-w-0 flex-1 flex-col gap-1">
+          <span className="font-mono text-[0.8125rem] font-medium">{item.name}</span>
+          <span className="flex min-w-0 items-baseline gap-2 text-xs">
+            <MethodLabel>{item.method}</MethodLabel>
+            <code className="min-w-0 wrap-anywhere text-fd-muted-foreground">{item.path}</code>
+          </span>
+        </span>
+        <ChevronRight className="size-4 shrink-0 text-fd-muted-foreground transition-transform group-hover:translate-x-0.5 motion-reduce:transition-none" />
+      </Dialog.Trigger>
+      <Dialog.Portal>
+        <Dialog.Backdrop className="fixed inset-0 z-50 bg-black/40 backdrop-blur-xs transition-opacity duration-200 data-ending-style:opacity-0 data-starting-style:opacity-0" />
+        <Dialog.Popup className="fixed inset-0 z-50 flex flex-col overflow-hidden bg-fd-background text-fd-foreground outline-none transition-[opacity,scale] duration-200 ease-[cubic-bezier(0.16,1,0.3,1)] data-ending-style:scale-[0.98] data-ending-style:opacity-0 data-ending-style:duration-150 data-starting-style:scale-[0.98] data-starting-style:opacity-0 motion-reduce:transition-opacity sm:inset-auto sm:top-1/2 sm:left-1/2 sm:max-h-[min(52rem,calc(100dvh-3rem))] sm:w-[min(64rem,calc(100vw-3rem))] sm:-translate-x-1/2 sm:-translate-y-1/2 sm:rounded-2xl sm:border sm:shadow-2xl">
+          <div className="flex h-12 shrink-0 items-center gap-2 ps-4 pe-2 sm:ps-5">
+            <Dialog.Title className="truncate font-mono text-sm font-medium">
+              {item.name}
+            </Dialog.Title>
+            <Dialog.Close
+              aria-label={t('Close')}
+              className={cn(
+                buttonVariants({ variant: 'ghost', size: 'icon-sm' }),
+                'ms-auto shrink-0 text-fd-muted-foreground',
+              )}
+            >
+              <X />
+            </Dialog.Close>
+          </div>
+          <EndpointBar
+            method={item.method}
+            route={item.path}
+            deprecated={item.operation.deprecated}
+            className="mx-3 mb-3 shrink-0 sm:mx-4"
+          />
+          <div className="fd-scroll-container prose min-h-0 flex-1 overflow-y-auto border-t p-5 text-sm @container [--fd-docs-row-1:0px] [--fd-docs-row-3:0px]">
+            <AnchorSection segments={segments}>
+              <Operation
+                type="webhook"
+                path={path}
+                headingLevel={headingLevel}
+                method={item.method}
+                pathItem={item.pathItem}
+                operation={item.operation}
+              />
+            </AnchorSection>
+          </div>
+        </Dialog.Popup>
+      </Dialog.Portal>
+    </Dialog.Root>
   );
 }

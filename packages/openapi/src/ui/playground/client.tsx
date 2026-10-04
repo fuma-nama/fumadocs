@@ -33,7 +33,7 @@ import {
 import { UrlBar } from './components/url-bar';
 import { RequestPanel } from './components/request-panel';
 import { ResponsePanel } from './components/response-panel';
-import { Segmented, SegmentedList } from './components/segmented';
+import { Segmented, SegmentedList } from '@/ui/components/segmented';
 
 export interface PlaygroundClientProps extends ComponentProps<'div'>, PlaygroundClientOptions {
   /** @deprecated it defaults to `true` for requests */
