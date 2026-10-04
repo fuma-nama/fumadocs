@@ -47,6 +47,10 @@ export interface DocsPageProps extends ComponentProps<'article'> {
   tableOfContentPopover?: TOCPopoverProps & { enabled?: boolean };
 }
 
+/** the panel on mobile, stays in place as the window scrolls, its top follows the bars */
+const mobilePanel =
+  'fixed inset-x-2 bottom-2 top-[calc(var(--fd-banner-height,0px)+var(--fd-header-height))] supports-[top:anchor(--a_bottom)]:top-[anchor(--fd-top-bar_bottom)] rounded-2xl md:hidden';
+
 const PageContext = createContext<{
   full: boolean;
   slots: DocsPageSlots;
@@ -92,13 +96,14 @@ export function DocsPage({
   return (
     <PageContext value={{ full, slots }}>
       <slots.toc.provider single={single} toc={tocEnabled || tocPopoverEnabled ? toc : []}>
+        {tocPopoverEnabled && <slots.toc.popover {...tocPopoverProps} />}
+        <div className={cn(mobilePanel, 'bg-fd-background')} />
         <div
           // a new page starts from the top of panel
           key={pathname}
           id="nd-page-panel"
-          className="@container relative flex flex-col min-w-0 min-h-0 [grid-area:main] md:my-2 md:me-2 md:overflow-clip md:rounded-2xl md:border md:bg-fd-background md:shadow-sm print:overflow-visible"
+          className="@container relative flex flex-col min-w-0 min-h-0 [grid-area:main] mx-2 md:ms-0 md:my-2 md:overflow-clip md:rounded-2xl md:border md:bg-fd-background md:shadow-sm print:overflow-visible"
         >
-          {tocPopoverEnabled && <slots.toc.popover {...tocPopoverProps} />}
           <header
             className={cn(
               'absolute inset-x-0 top-0 z-10 flex items-center gap-1.5 h-(--fd-header-height) ps-6 pe-4 bg-linear-to-b from-fd-background to-transparent pointer-events-none *:pointer-events-auto max-md:hidden',
@@ -124,15 +129,12 @@ export function DocsPage({
             )}
             <layout.slots.actions className="ms-auto" />
           </header>
-          <div
-            // centered with the TOC, so hiding it won't move the article
-            className="flex flex-1 items-start px-4 md:min-h-0 md:pt-(--fd-header-height) md:px-[max(--spacing(6),calc((100%-var(--fd-page-width)-var(--fd-toc-width))/2))] md:overflow-y-auto md:overscroll-y-contain md:scrollbar-thin md:scrollbar-gutter-stable md:scroll-pt-(--fd-header-height) md:[&_[id]]:scroll-mt-2"
-          >
+          <div className="flex flex-1 items-start px-4 md:min-h-0 md:pt-(--fd-header-height) md:px-[max(--spacing(6),calc((100%-var(--fd-page-width)-var(--fd-toc-width))/2))] md:overflow-y-auto md:overscroll-y-contain md:scrollbar-thin md:scrollbar-gutter-stable md:scroll-pt-(--fd-header-height) md:[&_[id]]:scroll-mt-2">
             <article
               id="nd-page"
               data-full={full}
               className={cn(
-                'flex flex-col gap-4 w-full min-w-0 max-w-(--fd-page-width) pt-8 pb-16 md:pt-6',
+                'flex flex-col gap-4 w-full min-w-0 max-w-(--fd-page-width) pt-6 pb-8 md:pb-16',
                 full && 'layout:[--fd-page-width:1200px]',
                 className,
               )}
@@ -150,6 +152,13 @@ export function DocsPage({
             {tocEnabled && <slots.toc.main {...tocProps} />}
           </div>
         </div>
+        <div
+          // over the page: border, fades in from the edges, and the outer surface around it
+          className={cn(
+            mobilePanel,
+            'z-20 border outline-8 outline-fd-card bg-origin-border bg-[linear-gradient(var(--color-fd-background),transparent_16px,transparent_calc(100%-16px),var(--color-fd-background))] pointer-events-none',
+          )}
+        />
       </slots.toc.provider>
     </PageContext>
   );
