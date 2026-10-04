@@ -44,7 +44,7 @@ export function useAnchorLink(segments: string[] | false, onLink: () => void) {
   const linked = useSyncExternalStore(
     subscribeHash,
     () => {
-      const hash = window.location.hash.slice(1);
+      const hash = getHash();
       return id !== null && (hash === id || hash.startsWith(`${id}.`)) ? hash : null;
     },
     () => null,
@@ -61,8 +61,18 @@ export function useAnchorLink(segments: string[] | false, onLink: () => void) {
   return useCallback((element: HTMLElement | null) => {
     if (!element || !scroll.current) return;
     scroll.current = false;
-    (document.getElementById(window.location.hash.slice(1)) ?? element).scrollIntoView();
+    (document.getElementById(getHash()) ?? element).scrollIntoView();
   }, []);
+}
+
+/** the URL hash, decoded like the browser does to find its target */
+function getHash(): string {
+  const hash = window.location.hash.slice(1);
+  try {
+    return decodeURIComponent(hash);
+  } catch {
+    return hash;
+  }
 }
 
 function subscribeHash(onChange: () => void) {
