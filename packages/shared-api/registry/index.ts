@@ -23,7 +23,7 @@ export const registry: Registry = {
     'components/**': { type: 'components', target: '<dir>/api/ui/*' },
     'auto-anchor/*': { type: 'components', target: '<dir>/api/ui/auto-anchor/*' },
     'utils/{is-plain-object,use-query}.ts': { type: 'components', target: '<dir>/api/lib/*' },
-    'utils/cn.ts': { alias: '../../radix-ui/src/utils/*' },
+    'utils/cn.ts': { alias: '../../radix-ui/src/utils/cn' },
   },
   dependencies: {
     'fumadocs-core': null,
