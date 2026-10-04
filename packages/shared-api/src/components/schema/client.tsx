@@ -1,5 +1,6 @@
 'use client';
 import { createContext, Fragment, type ReactNode, use, useCallback, useRef, useState } from 'react';
+import { flushSync } from 'react-dom';
 import { useTranslations } from '@fuma-translate/react';
 import { buttonVariants } from 'fumadocs-ui/components/ui/button';
 import { useCopyButton } from 'fumadocs-ui/utils/use-copy-button';
@@ -170,8 +171,11 @@ function SchemaCard({
 
   // the opened schema replaces the properties above, scroll back to the breadcrumbs
   function navigate(direction: keyof typeof motionClassNames, update: () => void) {
-    setMotion(direction);
-    update();
+    // render the panel before scrolling, Safari stops the scroll when the layout changes
+    flushSync(() => {
+      setMotion(direction);
+      update();
+    });
     headerRef.current?.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
   }
 
