@@ -101,9 +101,10 @@ export function DocsLayout(props: DocsLayoutProps) {
         <slots.sidebar.provider {...sidebar}>
           <div
             id="fd-spacious-layout"
-            className="relative grid min-h-(--fd-layout-height) transition-[grid-template-columns] duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] motion-reduce:transition-none [--fd-layout-height:calc(100dvh-var(--fd-banner-height,0px))] [--fd-header-height:--spacing(14)] [--fd-page-width:760px] [--fd-sidebar-width:0px] [--fd-sidebar-col:var(--fd-sidebar-width)] [--fd-toc-width:0px] md:h-(--fd-layout-height) md:overflow-clip md:bg-fd-card print:h-auto print:overflow-visible"
+            className="relative grid min-h-(--fd-layout-height) bg-fd-card transition-[grid-template-columns] duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] motion-reduce:transition-none [--fd-layout-height:calc(100dvh-var(--fd-banner-height,0px))] [--fd-header-height:--spacing(14)] [--fd-page-width:760px] [--fd-sidebar-width:0px] [--fd-sidebar-col:var(--fd-sidebar-width)] [--fd-toc-width:0px] md:h-(--fd-layout-height) md:overflow-clip print:h-auto print:overflow-visible"
             style={{
               gridTemplate: `"sidebar header right" auto
+"sidebar toc-popover right" auto
 "sidebar main right" 1fr / var(--fd-sidebar-col) minmax(0, 1fr) auto`,
             }}
           >

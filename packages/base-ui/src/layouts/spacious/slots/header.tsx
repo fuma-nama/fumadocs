@@ -14,7 +14,7 @@ export function Header({ className, ...props }: ComponentProps<'header'>) {
     <header
       id="nd-subnav"
       className={cn(
-        'sticky top-0 z-30 [grid-area:header] flex items-center h-(--fd-header-height) ps-4 pe-2.5 border-b bg-fd-background/80 backdrop-blur-sm md:hidden',
+        'sticky top-(--fd-banner-height,0px) z-30 [grid-area:header] flex items-center h-(--fd-header-height) ps-4 pe-2.5 bg-fd-card [anchor-name:--fd-top-bar] md:hidden',
         className,
       )}
       {...props}
