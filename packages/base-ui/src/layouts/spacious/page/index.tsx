@@ -92,7 +92,10 @@ export function DocsPage({
   return (
     <PageContext value={{ full, slots }}>
       <slots.toc.provider single={single} toc={tocEnabled || tocPopoverEnabled ? toc : []}>
-        {tocPopoverEnabled && <slots.toc.popover {...tocPopoverProps} />}
+        <div className="sticky top-[calc(var(--fd-banner-height,0px)+var(--fd-header-height))] z-30 [grid-area:toc-popover] self-start md:hidden">
+          {tocPopoverEnabled && <slots.toc.popover {...tocPopoverProps} />}
+          <div className="absolute inset-x-2 top-full h-[calc(var(--fd-layout-height)-var(--fd-header-height)-100%)] rounded-t-2xl border-x border-t outline-8 outline-fd-card [clip-path:inset(0_-8px_-8px)] bg-origin-border bg-[linear-gradient(var(--color-fd-background),transparent_16px)] pointer-events-none" />
+        </div>
         <div
           // a new page starts from the top of panel
           key={pathname}
@@ -147,7 +150,6 @@ export function DocsPage({
             {tocEnabled && <slots.toc.main {...tocProps} />}
           </div>
         </div>
-        <div className="fixed inset-x-2 bottom-0 top-(--fd-docs-row-3) supports-[top:anchor(--a_bottom)]:top-[anchor(--fd-top-bar_bottom)] z-20 rounded-t-2xl border-x border-t outline-8 outline-fd-card bg-origin-border bg-[linear-gradient(var(--color-fd-background),transparent_16px)] pointer-events-none md:hidden" />
       </slots.toc.provider>
     </PageContext>
   );
