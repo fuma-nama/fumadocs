@@ -47,10 +47,6 @@ export interface DocsPageProps extends ComponentProps<'article'> {
   tableOfContentPopover?: TOCPopoverProps & { enabled?: boolean };
 }
 
-/** the panel on mobile, stays in place as the window scrolls, its top follows the bars */
-const mobilePanel =
-  'fixed inset-x-2 bottom-2 top-[calc(var(--fd-banner-height,0px)+var(--fd-header-height))] supports-[top:anchor(--a_bottom)]:top-[anchor(--fd-top-bar_bottom)] rounded-2xl md:hidden';
-
 const PageContext = createContext<{
   full: boolean;
   slots: DocsPageSlots;
@@ -97,12 +93,11 @@ export function DocsPage({
     <PageContext value={{ full, slots }}>
       <slots.toc.provider single={single} toc={tocEnabled || tocPopoverEnabled ? toc : []}>
         {tocPopoverEnabled && <slots.toc.popover {...tocPopoverProps} />}
-        <div className={cn(mobilePanel, 'bg-fd-background')} />
         <div
           // a new page starts from the top of panel
           key={pathname}
           id="nd-page-panel"
-          className="@container relative flex flex-col min-w-0 min-h-0 [grid-area:main] mx-2 md:ms-0 md:my-2 md:overflow-clip md:rounded-2xl md:border md:bg-fd-background md:shadow-sm print:overflow-visible"
+          className="@container relative flex flex-col min-w-0 min-h-0 [grid-area:main] mx-2 bg-fd-background md:ms-0 md:my-2 md:overflow-clip md:rounded-2xl md:border md:shadow-sm print:overflow-visible"
         >
           <header
             className={cn(
@@ -152,13 +147,7 @@ export function DocsPage({
             {tocEnabled && <slots.toc.main {...tocProps} />}
           </div>
         </div>
-        <div
-          // over the page: border, fades in from the edges, and the outer surface around it
-          className={cn(
-            mobilePanel,
-            'z-20 border outline-8 outline-fd-card bg-origin-border bg-[linear-gradient(var(--color-fd-background),transparent_16px,transparent_calc(100%-16px),var(--color-fd-background))] pointer-events-none',
-          )}
-        />
+        <div className="fixed inset-x-2 bottom-0 top-[calc(var(--fd-banner-height,0px)+var(--fd-header-height))] supports-[top:anchor(--a_bottom)]:top-[anchor(--fd-top-bar_bottom)] z-20 rounded-t-2xl border-x border-t outline-8 outline-fd-card bg-origin-border bg-[linear-gradient(var(--color-fd-background),transparent_16px)] pointer-events-none md:hidden" />
       </slots.toc.provider>
     </PageContext>
   );
