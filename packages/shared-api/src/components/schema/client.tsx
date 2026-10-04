@@ -43,8 +43,8 @@ const crumbClassName =
 
 const chevronClassName = 'size-3.5 shrink-0 text-fd-muted-foreground/60';
 
-/** below the sticky headers of docs layouts */
-const scrollMarginClassName = 'scroll-mt-[calc(var(--fd-docs-row-3,0px)+0.5rem)]';
+/** below the sticky headers of docs layouts, with room for those of other layouts */
+const scrollMarginClassName = 'scroll-mt-[calc(var(--fd-docs-row-3,0px)+5rem)]';
 
 const tagClassName =
   'rounded-md border bg-fd-secondary px-1.5 py-0.5 text-xs text-fd-secondary-foreground';
@@ -216,7 +216,8 @@ function SchemaCard({
     <div
       id={id}
       className={cn(
-        '@container overflow-hidden rounded-xl border bg-fd-card text-fd-card-foreground',
+        // a scroll container, like `overflow-hidden`, would drop the scroll margin of the header
+        '@container overflow-clip rounded-xl border bg-fd-card text-fd-card-foreground',
         scrollMarginClassName,
         className,
       )}
