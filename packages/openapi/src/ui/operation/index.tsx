@@ -1,5 +1,5 @@
 'use client';
-import { Fragment, type ReactNode, useState, useSyncExternalStore } from 'react';
+import { Fragment, type ReactNode, useState } from 'react';
 import { Dialog } from '@base-ui/react/dialog';
 import type { MediaTypeObject, SecuritySchemeObject } from '@/types';
 import { UsageTabs } from '@/ui/operation/usage-tabs';
@@ -19,8 +19,7 @@ import { RequestTabs } from './request-tabs';
 import { cn } from '@/utils/cn';
 import { SelectTabs, SelectTabTrigger, SelectTab } from 'shared-api/components/select-tab';
 import { Callout } from 'fumadocs-ui/components/callout';
-import { anchorIdStartsWith, anchorSegments } from 'shared-api/auto-anchor';
-import { AnchorSection, scrollToHash, useAnchorId } from 'shared-api/auto-anchor/client';
+import { AnchorSection, useAnchorLink } from 'shared-api/auto-anchor/client';
 import { Heading } from '@/ui/components/heading';
 import { Markdown } from '../components/markdown';
 import { useCopyButton } from 'fumadocs-ui/utils/use-copy-button';
@@ -415,12 +414,7 @@ function ResponseSection({
   headingLevel: number;
 }) {
   const t = useTranslations({ note: 'operation page' });
-  const id = useAnchorId(['response']);
-  const [selected = responses[0].status, setSelected] = useHashState(
-    (hash) =>
-      responses.find((item) => anchorIdStartsWith(hash, anchorSegments(`\0${id}`, item.status)))
-        ?.status,
-  );
+  const [selected, setSelected] = useState(responses[0].status);
 
   return (
     <Segmented value={selected} onValueChange={setSelected} className="mt-10 first:mt-0">
@@ -431,17 +425,21 @@ function ResponseSection({
         />
       </SectionHeader>
       {responses.map((item) => (
-        <SegmentedPanel key={item.status} value={item.status} ref={scrollToHash}>
-          <AnchorSection segments={['response', item.status]}>
-            <ResponseContent item={item} />
-          </AnchorSection>
-        </SegmentedPanel>
+        <ResponseContent key={item.status} item={item} onLink={() => setSelected(item.status)} />
       ))}
     </Segmented>
   );
 }
 
-function ResponseContent({ item: { response, content } }: { item: OperationResponse }) {
+function ResponseContent({
+  item: { status, response, content },
+  onLink,
+}: {
+  item: OperationResponse;
+  onLink: () => void;
+}) {
+  const segments = ['response', status];
+  const ref = useAnchorLink(segments, onLink);
   const contentTypes = Object.entries(content);
   const items = contentTypes.map(([mediaType]) => ({
     label: <code>{mediaType}</code>,
@@ -449,18 +447,22 @@ function ResponseContent({ item: { response, content } }: { item: OperationRespo
   }));
 
   return (
-    <SelectTabs defaultValue={items[0]?.value}>
-      {response.description && (
-        <div className="mb-3 prose-no-margin text-fd-muted-foreground">
-          <Markdown md={response.description} />
-        </div>
-      )}
-      {contentTypes.map(([mediaType, media]) => (
-        <SelectTab key={mediaType} value={mediaType} anchorSegments={[mediaType]}>
-          <MediaContent schema={media.schema} selector={<CardSelector items={items} />} />
-        </SelectTab>
-      ))}
-    </SelectTabs>
+    <SegmentedPanel value={status} ref={ref}>
+      <AnchorSection segments={segments}>
+        <SelectTabs defaultValue={items[0]?.value}>
+          {response.description && (
+            <div className="mb-3 prose-no-margin text-fd-muted-foreground">
+              <Markdown md={response.description} />
+            </div>
+          )}
+          {contentTypes.map(([mediaType, media]) => (
+            <SelectTab key={mediaType} value={mediaType} anchorSegments={[mediaType]}>
+              <MediaContent schema={media.schema} selector={<CardSelector items={items} />} />
+            </SelectTab>
+          ))}
+        </SelectTabs>
+      </AnchorSection>
+    </SegmentedPanel>
   );
 }
 
@@ -527,8 +529,8 @@ function Callback({
 }) {
   const t = useTranslations({ note: 'operation page' });
   const segments = ['callbacks', item.name, item.path, item.method];
-  const id = useAnchorId(segments);
-  const [open, setOpen] = useHashState((hash) => anchorIdStartsWith(hash, id));
+  const [open, setOpen] = useState(false);
+  const ref = useAnchorLink(segments, () => setOpen(true));
 
   return (
     <Dialog.Root open={open} onOpenChange={setOpen}>
@@ -560,7 +562,7 @@ function Callback({
           className="mx-3 mb-3 shrink-0 sm:mx-4"
         />
         <div
-          ref={scrollToHash}
+          ref={ref}
           className="fd-scroll-container prose min-h-0 flex-1 overflow-y-auto border-t p-5 text-sm @container [--fd-docs-row-1:0px] [--fd-docs-row-3:0px]"
         >
           <AnchorSection segments={segments}>
@@ -577,22 +579,4 @@ function Callback({
       </DialogPopup>
     </Dialog.Root>
   );
-}
-
-/** a state that takes the value `fromHash` derives from the URL hash whenever it changes, unless nullish */
-function useHashState<T>(fromHash: (hash: string) => T): [T, (value: T) => void] {
-  const linked = useSyncExternalStore(
-    subscribeHash,
-    () => fromHash(window.location.hash.slice(1)),
-    () => fromHash(''),
-  );
-  const [state, setState] = useState({ linked, value: linked });
-  if (state.linked !== linked) setState({ linked, value: linked ?? state.value });
-
-  return [state.value, (value) => setState({ linked, value })];
-}
-
-function subscribeHash(onChange: () => void) {
-  window.addEventListener('hashchange', onChange);
-  return () => window.removeEventListener('hashchange', onChange);
 }

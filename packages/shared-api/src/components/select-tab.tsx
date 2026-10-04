@@ -2,17 +2,8 @@
 
 import { cn } from '@/utils/cn';
 import { SelectTrigger, Select, SelectValue, SelectContent, SelectItem } from './select';
-import {
-  type ReactNode,
-  useState,
-  useMemo,
-  type ComponentProps,
-  createContext,
-  use,
-  useEffect,
-} from 'react';
-import { anchorIdStartsWith } from '@/auto-anchor';
-import { AnchorSection, scrollToHash, useAnchorId } from '@/auto-anchor/client';
+import { type ReactNode, useState, useMemo, type ComponentProps, createContext, use } from 'react';
+import { AnchorSection, useAnchorLink } from '@/auto-anchor/client';
 
 const Context = createContext<{
   value: string | null;
@@ -41,14 +32,10 @@ export function SelectTab({
   anchorSegments?: string[];
 }) {
   const { value: currentValue, setValue } = use(Context)!;
-  const id = useAnchorId(anchorSegments ?? false);
-
-  useEffect(() => {
-    if (id && anchorIdStartsWith(window.location.hash.slice(1), id)) setValue(value);
-  }, [id, value, setValue]);
+  const ref = useAnchorLink(anchorSegments ?? false, () => setValue(value));
 
   if (value !== currentValue) return;
-  const content = <div ref={scrollToHash} {...props} />;
+  const content = <div ref={ref} {...props} />;
   return anchorSegments ? (
     <AnchorSection segments={anchorSegments}>{content}</AnchorSection>
   ) : (
