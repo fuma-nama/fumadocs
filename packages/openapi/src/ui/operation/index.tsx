@@ -330,7 +330,7 @@ function SectionHeader({
   );
 }
 
-/** selects the variant shown in a card, like the media type, a label when there is only one */
+/** selects the variant shown in a card, like the media type */
 function CardSelector({ items }: { items: { label: ReactNode; value: string }[] }) {
   if (items.length > 1)
     return (
@@ -407,7 +407,6 @@ function CopyTypeScript({ code, name }: { code: string; name: string }) {
   );
 }
 
-/** the responses as tabs of their status codes */
 function ResponseSection({
   responses,
   headingLevel,
@@ -417,21 +416,14 @@ function ResponseSection({
 }) {
   const t = useTranslations({ note: 'operation page' });
   const id = useAnchorId(['response']);
-  // the response that the URL links to is selected by default
-  const linked = useHash(
+  const [selected = responses[0].status, setSelected] = useHashState(
     (hash) =>
       responses.find((item) => anchorIdStartsWith(hash, anchorSegments(`\0${id}`, item.status)))
         ?.status,
-    undefined,
   );
-  const [selected, setSelected] = useState<string>();
 
   return (
-    <Segmented
-      value={selected ?? linked ?? responses[0].status}
-      onValueChange={setSelected}
-      className="mt-10 first:mt-0"
-    >
+    <Segmented value={selected} onValueChange={setSelected} className="mt-10 first:mt-0">
       <SectionHeader id="response-body" depth={headingLevel} title={t('Response Body')}>
         <SegmentedList
           className="max-w-full overflow-x-auto font-mono [scrollbar-width:none]"
@@ -524,7 +516,6 @@ function AuthScheme({ scheme, scopes }: { scheme: SecuritySchemeObject; scopes: 
   );
 }
 
-/** a callback, its operation opens in a dialog */
 function Callback({
   item,
   path,
@@ -537,12 +528,10 @@ function Callback({
   const t = useTranslations({ note: 'operation page' });
   const segments = ['callbacks', item.name, item.path, item.method];
   const id = useAnchorId(segments);
-  // opened by default when the URL links to its content
-  const linked = useHash((hash) => anchorIdStartsWith(hash, id), false);
-  const [open, setOpen] = useState<boolean>();
+  const [open, setOpen] = useHashState((hash) => anchorIdStartsWith(hash, id));
 
   return (
-    <Dialog.Root open={open ?? linked} onOpenChange={setOpen}>
+    <Dialog.Root open={open} onOpenChange={setOpen}>
       <Dialog.Trigger className="group grid w-full grid-cols-[auto_minmax(0,1fr)_auto] items-baseline gap-x-2 gap-y-1 border-t px-4 py-3 text-start transition-colors first:border-t-0 hover:bg-fd-accent/40 focus-visible:bg-fd-accent/40 focus-visible:outline-none">
         <span className="col-span-2 font-mono text-[0.8125rem] font-medium">{item.name}</span>
         <ChevronRight className="row-span-2 ms-1 size-4 self-center text-fd-muted-foreground transition-transform group-hover:translate-x-0.5 motion-reduce:transition-none" />
@@ -587,13 +576,17 @@ function Callback({
   );
 }
 
-/** a value derived from the URL hash, following its changes */
-function useHash<T>(derive: (hash: string) => T, serverValue: T): T {
-  return useSyncExternalStore(
+/** a state that takes the value `fromHash` derives from the URL hash whenever it changes, unless nullish */
+function useHashState<T>(fromHash: (hash: string) => T): [T, (value: T) => void] {
+  const linked = useSyncExternalStore(
     subscribeHash,
-    () => derive(window.location.hash.slice(1)),
-    () => serverValue,
+    () => fromHash(window.location.hash.slice(1)),
+    () => fromHash(''),
   );
+  const [state, setState] = useState({ linked, value: linked });
+  if (state.linked !== linked) setState({ linked, value: linked ?? state.value });
+
+  return [state.value, (value) => setState({ linked, value })];
 }
 
 function subscribeHash(onChange: () => void) {

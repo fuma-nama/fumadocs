@@ -29,7 +29,6 @@ export interface SchemaUIProps {
   generated: SchemaUIGeneratedData;
 }
 
-/** how a type opens its schema */
 const TypeContext = createContext<{
   open: (name: string, $ref: string) => void;
   /** set for the root property, its types toggle the card below it */
@@ -80,7 +79,6 @@ export function SchemaUI({
   );
 }
 
-/** the root as a property, the schemas opened from its type are in a card below it */
 function RootProperty({
   id,
   name,
@@ -284,7 +282,6 @@ function Breadcrumbs({
   onBack,
 }: {
   from: number;
-  /** shown after the crumbs */
   unions: SchemaUnion[];
   onBack: (index: number) => void;
 }) {
@@ -543,7 +540,6 @@ function ObjectProperty({
   );
 }
 
-/** the type of a property, the schemas that have more to show open from it */
 function TypeInfo({ name, $ref, children }: { name: string; $ref: string; children: ReactNode }) {
   const { refs } = useSchemaUI();
   const { open, isExpanded } = use(TypeContext)!;

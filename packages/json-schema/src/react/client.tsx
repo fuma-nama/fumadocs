@@ -36,7 +36,6 @@ export interface SchemaUIState {
 export interface SchemaUIProviderProps {
   /** anchor ID of the root, links are resolved against it */
   id: string;
-  /** name of the root */
   name: string;
   generated: SchemaUIGeneratedData;
   children: ReactNode;
@@ -72,13 +71,13 @@ export function SchemaUIProvider({ id, name, generated, children }: SchemaUIProv
     if (url.hash !== `#${id}` || !param) return;
 
     const path = decodePath(param);
-    if (path.some((item) => !refs[item.$ref])) return;
+    if (path[0].$ref !== $root || path.some((item) => !refs[item.$ref])) return;
 
     const highlighted = url.searchParams.get('s-highlight') ?? undefined;
     restored.add(id);
     setState({ path, highlighted });
     if (!highlighted) document.getElementById(id)?.scrollIntoView({ behavior: 'smooth' });
-  }, [id, refs]);
+  }, [id, $root, refs]);
 
   const value = useMemo<SchemaUIState>(() => {
     const path = state.path.map((entry, index): SchemaPathItem => {
