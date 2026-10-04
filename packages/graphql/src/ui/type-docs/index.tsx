@@ -1,7 +1,7 @@
 'use client';
 import type { ReactNode } from 'react';
 import { useTranslations } from '@fuma-translate/react';
-import { AnchorSection } from 'shared-api/auto-anchor/client';
+import { AnchorSection } from 'shared-api/auto-anchor';
 import {
   isEnumType,
   isInputObjectType,

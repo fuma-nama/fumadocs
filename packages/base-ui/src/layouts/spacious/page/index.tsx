@@ -147,7 +147,7 @@ export function DocsPage({
             {tocEnabled && <slots.toc.main {...tocProps} />}
           </div>
         </div>
-        <div className="fixed inset-x-2 bottom-0 top-[calc(var(--fd-banner-height,0px)+var(--fd-header-height))] supports-[top:anchor(--a_bottom)]:top-[anchor(--fd-top-bar_bottom)] z-20 rounded-t-2xl border-x border-t outline-8 outline-fd-card bg-origin-border bg-[linear-gradient(var(--color-fd-background),transparent_16px)] pointer-events-none md:hidden" />
+        <div className="fixed inset-x-2 bottom-0 top-(--fd-docs-row-3) supports-[top:anchor(--a_bottom)]:top-[anchor(--fd-top-bar_bottom)] z-20 rounded-t-2xl border-x border-t outline-8 outline-fd-card bg-origin-border bg-[linear-gradient(var(--color-fd-background),transparent_16px)] pointer-events-none md:hidden" />
       </slots.toc.provider>
     </PageContext>
   );

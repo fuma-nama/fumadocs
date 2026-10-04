@@ -122,7 +122,7 @@ export function TOCPopover({
       {...container}
       // expand over the content below
       className={cn(
-        'sticky top-[calc(var(--fd-banner-height,0px)+var(--fd-header-height))] z-30 [grid-area:toc-popover] h-10 md:hidden',
+        'sticky top-[calc(var(--fd-banner-height,0px)+var(--fd-header-height))] z-30 [grid-area:toc-popover] h-(--fd-toc-popover-height) md:hidden max-md:layout:[--fd-toc-popover-height:--spacing(10)]',
         container?.className,
       )}
     >
