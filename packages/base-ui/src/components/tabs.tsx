@@ -9,7 +9,6 @@ import {
   useEffect,
   useId,
   useMemo,
-  useState,
 } from 'react';
 import { cn } from '@/utils/cn';
 import * as Unstyled from './ui/tabs';
@@ -89,7 +88,6 @@ export function Tabs({
   defaultValue = items ? escapeValue(items[defaultIndex]) : undefined,
   ...props
 }: TabsProps) {
-  const [value, setValue] = useState(defaultValue);
   const collection = useMemo<CollectionKey[]>(() => [], []);
 
   return (
@@ -101,11 +99,7 @@ export function Tabs({
           typeof className === 'function' ? className(s) : className,
         )
       }
-      value={value}
-      onValueChange={(v: string) => {
-        if (items && !items.some((item) => escapeValue(item) === v)) return;
-        setValue(v);
-      }}
+      defaultValue={defaultValue}
       {...props}
     >
       {items && (
