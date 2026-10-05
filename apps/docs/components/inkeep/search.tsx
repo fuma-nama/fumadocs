@@ -61,7 +61,6 @@ export function AISearchPanelHeader(props: ComponentProps<'div'>) {
           onClick={() => {
             void chat.stop();
             chat.setMessages([]);
-            chat.clearError();
             focusInput();
           }}
         >

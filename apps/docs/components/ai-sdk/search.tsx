@@ -74,7 +74,6 @@ export function AISearchPanelHeader(props: ComponentProps<'div'>) {
           onClick={() => {
             void chat.stop();
             chat.setMessages([]);
-            chat.clearError();
             focusInput();
           }}
         >
@@ -176,50 +175,34 @@ function Message({
 }
 
 function Search({ part, live }: { part: SearchPart; live: boolean }) {
-  const query = part.input?.query;
-  const detail = query ? `“${query}”` : undefined;
-
-  if (part.state === 'output-error') {
-    return (
-      <ChatActivity
-        icon={<SearchIcon />}
-        label={<span className="text-fd-error">Search failed</span>}
-        detail={detail}
-      />
-    );
-  }
-
-  if (part.state !== 'output-available') {
-    return (
-      <ChatActivity
-        icon={<SearchIcon />}
-        running={live}
-        label={live ? 'Searching' : 'Search stopped'}
-        detail={detail}
-      />
-    );
-  }
-
+  const done = part.state === 'output-available';
   const links: ReactNode[] = [];
-  for (const result of part.output) {
-    if (!result.doc) continue;
-    links.push(
-      <Link
-        key={result.doc.url}
-        href={result.doc.url}
-        className="truncate transition-colors hover:text-fd-accent-foreground"
-      >
-        {result.doc.title}
-      </Link>,
-    );
+  let label: ReactNode = live ? 'Searching' : 'Search stopped';
+  if (part.state === 'output-error') label = <span className="text-fd-error">Search failed</span>;
+
+  if (done) {
+    label = 'Searched';
+    for (const { doc } of part.output) {
+      if (!doc) continue;
+      links.push(
+        <Link
+          key={doc.url}
+          href={doc.url}
+          className="truncate transition-colors hover:text-fd-accent-foreground"
+        >
+          {doc.title}
+        </Link>,
+      );
+    }
   }
 
   return (
     <ChatActivity
       icon={<SearchIcon />}
-      label="Searched"
-      detail={detail}
-      meta={`${links.length} ${links.length === 1 ? 'result' : 'results'}`}
+      running={live && !part.state.startsWith('output-')}
+      label={label}
+      detail={part.input?.query && `“${part.input.query}”`}
+      meta={done && `${links.length} ${links.length === 1 ? 'result' : 'results'}`}
     >
       {links.length > 0 && links}
     </ChatActivity>

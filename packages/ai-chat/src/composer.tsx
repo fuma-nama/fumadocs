@@ -85,9 +85,8 @@ export function ChatComposerSubmit({
       type={busy ? 'button' : 'submit'}
       aria-label={busy ? t('Stop', { note: 'aria-label' }) : t('Send', { note: 'aria-label' })}
       disabled={!busy && disabled}
-      data-state={busy ? 'busy' : disabled ? 'idle' : 'ready'}
       className={cn(
-        'flex size-7 shrink-0 items-center justify-center rounded-md bg-fd-primary text-fd-primary-foreground transition-[background-color,color,scale] duration-200 ease-[cubic-bezier(0.34,1.56,0.64,1)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-fd-ring active:scale-90 data-[state=idle]:bg-fd-accent data-[state=idle]:text-fd-muted-foreground motion-reduce:transition-none',
+        'flex size-7 shrink-0 items-center justify-center rounded-md bg-fd-primary text-fd-primary-foreground transition-[background-color,color,scale] duration-200 ease-[cubic-bezier(0.34,1.56,0.64,1)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-fd-ring active:scale-90 disabled:bg-fd-accent disabled:text-fd-muted-foreground motion-reduce:transition-none',
         className,
       )}
       onClick={busy ? onStop : undefined}

@@ -44,7 +44,7 @@ export function ChatEmpty({
       {description && (
         <p
           className="mt-1 text-sm text-fd-muted-foreground motion-safe:animate-fd-roll-in"
-          style={stagger(60)}
+          style={stagger()}
         >
           {description}
         </p>
@@ -68,7 +68,7 @@ export function ChatSuggestions({ className, ...props }: ComponentProps<'ul'>) {
 
 export function ChatSuggestion({ className, ...props }: ComponentProps<'button'>) {
   return (
-    <li className="motion-safe:animate-fd-roll-in" style={stagger(140)}>
+    <li className="motion-safe:animate-fd-roll-in" style={stagger(100)}>
       <button
         type="button"
         className={cn(
