@@ -25,6 +25,7 @@ import {
 } from 'lucide-react';
 import { useOnChange } from 'fumadocs-core/utils/use-on-change';
 import { cn } from '@/utils/cn';
+import { useHotKey } from '@/utils/hotkey';
 import { ScrollArea } from '@base-ui/react/scroll-area';
 import { buttonVariants } from '@/components/ui/button';
 import { usePathname } from 'fumadocs-core/framework';
@@ -60,6 +61,15 @@ const Context = createContext<{
 
 export function SidebarProvider({ children, collapsible = true }: SidebarProviderProps) {
   const [collapsed, setCollapsed] = useState(false);
+
+  useHotKey(
+    (e) => {
+      if (!(e.metaKey || e.ctrlKey) || e.shiftKey || e.altKey || e.key !== 'b') return;
+      e.preventDefault();
+      setCollapsed((prev) => !prev);
+    },
+    { enabled: collapsible, ignoreTyping: true },
+  );
 
   return (
     <Context

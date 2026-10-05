@@ -1,23 +1,12 @@
 'use client';
 
-import { type ReactNode, useEffect, useEffectEvent } from 'react';
+import type { ReactNode } from 'react';
 import { flushSync } from 'react-dom';
 import { DirectionProvider } from '@radix-ui/react-direction';
 import { ThemeProvider, type ThemeProviderProps, useTheme } from 'next-themes';
 import { I18nProvider, type I18nProviderProps } from '@/contexts/i18n';
 import { SearchProvider, type SearchProviderProps } from '@/contexts/search';
-
-/**
- * Whether the event should be ignored because the user is interacting with an editable element,
- * or an opened dialog (e.g. the search dialog).
- */
-function isTypingTarget(target: EventTarget | null): boolean {
-  if (!(target instanceof HTMLElement)) return false;
-  if (target.isContentEditable) return true;
-  if (['INPUT', 'TEXTAREA', 'SELECT'].includes(target.tagName)) return true;
-
-  return target.closest('[role="dialog"]') !== null;
-}
+import { useHotKey } from '@/utils/hotkey';
 
 interface SearchOptions extends Omit<SearchProviderProps, 'children'> {
   /**
@@ -73,32 +62,25 @@ export interface RootProviderProps {
 function ThemeHotKey({ hotKey }: { hotKey: Exclude<ThemeOptions['hotKey'], false | undefined> }) {
   const { setTheme, resolvedTheme } = useTheme();
 
-  const onKeyDown = useEffectEvent((e: KeyboardEvent) => {
-    if (e.defaultPrevented || e.isComposing || e.keyCode === 229) return;
-    if (isTypingTarget(e.target)) return;
+  useHotKey(
+    (e) => {
+      // a custom function is responsible for its own modifiers
+      const matched =
+        typeof hotKey === 'string'
+          ? !e.metaKey && !e.ctrlKey && !e.altKey && e.key.toLowerCase() === hotKey.toLowerCase()
+          : hotKey(e);
+      if (!matched) return;
 
-    // a custom function is responsible for its own modifiers
-    const matched =
-      typeof hotKey === 'string'
-        ? !e.metaKey && !e.ctrlKey && !e.altKey && e.key.toLowerCase() === hotKey.toLowerCase()
-        : hotKey(e);
-    if (!matched) return;
-
-    e.preventDefault();
-    const next = resolvedTheme === 'dark' ? 'light' : 'dark';
-    if (document?.startViewTransition) {
-      document.startViewTransition(() => flushSync(() => setTheme(next)));
-    } else {
-      setTheme(next);
-    }
-  });
-
-  useEffect(() => {
-    window.addEventListener('keydown', onKeyDown);
-    return () => {
-      window.removeEventListener('keydown', onKeyDown);
-    };
-  }, []);
+      e.preventDefault();
+      const next = resolvedTheme === 'dark' ? 'light' : 'dark';
+      if (document?.startViewTransition) {
+        document.startViewTransition(() => flushSync(() => setTheme(next)));
+      } else {
+        setTheme(next);
+      }
+    },
+    { ignoreTyping: true },
+  );
 
   return null;
 }

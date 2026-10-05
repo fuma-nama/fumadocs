@@ -2,14 +2,8 @@
 
 import * as Base from '@/components/sidebar/base';
 import { cn } from '@/utils/cn';
-import {
-  type ComponentProps,
-  type ReactNode,
-  useEffect,
-  useEffectEvent,
-  useRef,
-  useState,
-} from 'react';
+import { useHotKey } from '@/utils/hotkey';
+import { type ComponentProps, type ReactNode, useRef, useState } from 'react';
 import { cva } from 'class-variance-authority';
 import {
   createPageTreeRenderer,
@@ -54,12 +48,12 @@ export interface SidebarProps extends ComponentProps<'aside'> {
   footer?: ReactNode;
 }
 
-export type SidebarProviderProps = Base.SidebarProviderProps;
+export type SidebarProviderProps = Omit<Base.SidebarProviderProps, 'collapsible'>;
 
 export const { useSidebar } = Base;
 
 export function SidebarProvider(props: SidebarProviderProps) {
-  return <Base.SidebarProvider {...props} />;
+  return <Base.SidebarProvider {...props} collapsible={false} />;
 }
 
 export function Sidebar({ footer, banner, components, ...rest }: SidebarProps) {
@@ -127,18 +121,15 @@ function SidebarContent({ ref: refProp, className, children, ...props }: Compone
   const [blockScroll, setBlockScroll] = useState(false);
   const { open, setOpen } = useSidebar();
 
-  const listener = useEffectEvent((e: KeyboardEvent) => {
-    if (open && e.key === 'Escape') {
-      setOpen(false);
-      e.preventDefault();
-    }
-  });
-  useEffect(() => {
-    window.addEventListener('keydown', listener);
-    return () => {
-      window.removeEventListener('keydown', listener);
-    };
-  }, []);
+  useHotKey(
+    (e) => {
+      if (e.key === 'Escape') {
+        setOpen(false);
+        e.preventDefault();
+      }
+    },
+    { enabled: open },
+  );
 
   if (open && !blockScroll) setBlockScroll(true);
 

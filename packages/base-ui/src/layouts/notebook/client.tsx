@@ -115,7 +115,11 @@ export function LayoutBody(
           ...linkItems,
         }}
       >
-        <slots.sidebar.provider defaultOpenLevel={defaultOpenLevel} prefetch={prefetch}>
+        <slots.sidebar.provider
+          defaultOpenLevel={defaultOpenLevel}
+          prefetch={prefetch}
+          collapsible={sidebarProps.collapsible}
+        >
           <slots.container {...containerProps}>
             {navEnabled && <slots.header />}
             <slots.sidebar.root {...sidebarProps} />

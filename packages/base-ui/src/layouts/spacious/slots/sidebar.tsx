@@ -22,7 +22,7 @@ import { isLayoutTabActive, type LayoutTab, LinkItem } from '@/layouts/shared';
 import { cn } from '@/utils/cn';
 import { useSpaciousLayout } from '..';
 
-export type SidebarProviderProps = Base.SidebarProviderProps;
+export type SidebarProviderProps = Omit<Base.SidebarProviderProps, 'collapsible'>;
 export type SidebarProps = ComponentProps<'aside'>;
 
 /** the hover fill comes from the gliding block of `SidebarItems` */

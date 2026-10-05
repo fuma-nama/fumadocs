@@ -7,12 +7,11 @@ import {
   type ReactNode,
   Suspense,
   use,
-  useEffect,
-  useEffectEvent,
   useMemo,
   useState,
   useSyncExternalStore,
 } from 'react';
+import { useHotKey } from '@/utils/hotkey';
 
 interface HotKey {
   display: ReactNode;
@@ -123,19 +122,12 @@ export function SearchProvider<DialogProps extends SharedProps = DefaultSearchDi
   links,
 }: SearchProviderProps<DialogProps>) {
   const [isOpen, setIsOpen] = useState(preload ? false : undefined);
-  const onKeyDown = useEffectEvent((e: KeyboardEvent) => {
+  useHotKey((e) => {
     if (hotKey.every((v) => (typeof v.key === 'string' ? e.key === v.key : v.key(e)))) {
       setIsOpen((open) => !open);
       e.preventDefault();
     }
   });
-
-  useEffect(() => {
-    window.addEventListener('keydown', onKeyDown);
-    return () => {
-      window.removeEventListener('keydown', onKeyDown);
-    };
-  }, []);
 
   return (
     <SearchContext
