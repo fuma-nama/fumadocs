@@ -75,6 +75,7 @@ export function AISearchInputActions() {
     <>
       {!isLoading && messages.length > 0 && messages.at(-1)?.role === 'assistant' && (
         <button
+          aria-label="Retry"
           type="button"
           className={cn(
             buttonVariants({
@@ -89,6 +90,7 @@ export function AISearchInputActions() {
         </button>
       )}
       <button
+        aria-label="Clear chat"
         type="button"
         className={cn(
           buttonVariants({
@@ -156,7 +158,7 @@ export function AISearchInput(props: ComponentProps<'form'>) {
       />
       {isLoading ? (
         <button
-          key="bn"
+          aria-label="Stop generating"
           type="button"
           className={cn(
             buttonVariants({
@@ -171,7 +173,7 @@ export function AISearchInput(props: ComponentProps<'form'>) {
         </button>
       ) : (
         <button
-          key="bn"
+          aria-label="Send message"
           type="submit"
           className={cn(
             buttonVariants({
