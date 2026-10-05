@@ -24,6 +24,7 @@ export type ChatUIMessage = UIMessage<
 export function AIChat({ children }: { children: ReactNode }) {
   const chat = useChat<ChatUIMessage>({
     id: 'search',
+    throttle: 40,
     transport: new DefaultChatTransport({
       api: '/api/chat',
     }),
@@ -39,11 +40,13 @@ export function AIChat({ children }: { children: ReactNode }) {
           { type: 'text', text },
         ],
       })}
-      renderPart={(part, live) =>
-        part.type === 'tool-search' && <AIChatSearch part={part} live={live} />
-      }
+      renderPart={renderPart}
     >
       {children}
     </AIChatProvider>
   );
+}
+
+function renderPart(part: ChatUIMessage['parts'][number], live: boolean) {
+  if (part.type === 'tool-search') return <AIChatSearch part={part} live={live} />;
 }

@@ -12,6 +12,7 @@ export { AIChatPanel, AIChatTrigger, useAIChat } from '@fumadocs/ai-chat';
 export function AIChat({ children }: { children: ReactNode }) {
   const chat = useChat<InkeepUIMessage>({
     id: 'search',
+    throttle: 40,
     transport: new DefaultChatTransport({
       api: '/api/chat',
     }),
@@ -27,15 +28,7 @@ export function AIChat({ children }: { children: ReactNode }) {
           { type: 'text', text },
         ],
       })}
-      renderPart={(part) =>
-        part.type === 'tool-provideLinks' && (
-          <AIChatSources
-            sources={
-              (part.input as z.infer<typeof ProvideLinksToolSchema> | undefined)?.links ?? []
-            }
-          />
-        )
-      }
+      renderPart={renderPart}
       description={
         <>
           Answers from the docs, powered by{' '}
@@ -54,4 +47,11 @@ export function AIChat({ children }: { children: ReactNode }) {
       {children}
     </AIChatProvider>
   );
+}
+
+function renderPart(part: InkeepUIMessage['parts'][number]) {
+  if (part.type !== 'tool-provideLinks') return;
+  const input = part.input as z.infer<typeof ProvideLinksToolSchema> | undefined;
+
+  return <AIChatSources sources={input?.links ?? []} />;
 }

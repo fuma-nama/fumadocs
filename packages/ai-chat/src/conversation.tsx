@@ -125,12 +125,15 @@ function stop(state: Scroll) {
   state.frame = undefined;
 }
 
+let reducedMotion: MediaQueryList | undefined;
+
 /** eases to the end, which may move while gliding */
 function glide(scroller: HTMLElement, state: Scroll) {
   stop(state);
   const from = scroller.scrollTop;
   const distance = Math.abs(endOf(scroller) - from);
-  if (distance < 2 || matchMedia('(prefers-reduced-motion: reduce)').matches) {
+  reducedMotion ??= matchMedia('(prefers-reduced-motion: reduce)');
+  if (distance < 2 || reducedMotion.matches) {
     jump(scroller, state, endOf(scroller));
     return;
   }

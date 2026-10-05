@@ -24,11 +24,13 @@ import {
   createContext,
   type CSSProperties,
   Fragment,
+  memo,
   type ReactNode,
   type RefObject,
   use,
   useEffect,
   useEffectEvent,
+  useMemo,
   useRef,
   useState,
 } from 'react';
@@ -40,23 +42,23 @@ export interface AIChatOptions<Message extends UIMessage = UIMessage> {
   chat: UseChatHelpers<Message>;
   /** the message to send for a question, defaults to its text */
   toMessage?: (text: string) => Parameters<UseChatHelpers<Message>['sendMessage']>[0];
-  /** renders a part other than text, such as a tool call */
+  /** renders a part other than text, such as a tool call, keep it stable so settled messages skip re-rendering */
   renderPart?: (part: Message['parts'][number], live: boolean) => ReactNode;
   /** under the title of a new chat */
   description?: ReactNode;
   suggestions?: string[];
 }
 
-interface AIChatContext extends AIChatOptions {
-  open: boolean;
-  setOpen: (open: boolean) => void;
+interface ChatState extends AIChatOptions {
   /** an answer is on its way */
   busy: boolean;
   send: (text: string) => void;
   inputRef: RefObject<HTMLTextAreaElement | null>;
 }
 
-const Context = createContext<AIChatContext | null>(null);
+// separate from the chat, so layouts reading `open` skip the updates of a streaming answer
+const OpenContext = createContext<{ open: boolean; setOpen: (open: boolean) => void } | null>(null);
+const ChatContext = createContext<ChatState | null>(null);
 
 /**
  * The chat state, `Ctrl + /` opens it and `Escape` closes it.
@@ -66,6 +68,7 @@ export function AIChatProvider<Message extends UIMessage>({
   ...options
 }: AIChatOptions<Message> & { children: ReactNode }) {
   const [open, setOpen] = useState(false);
+  const openState = useMemo(() => ({ open, setOpen }), [open]);
   const inputRef = useRef<HTMLTextAreaElement>(null);
   const { chat, toMessage } = options;
 
@@ -85,23 +88,28 @@ export function AIChatProvider<Message extends UIMessage>({
   }, []);
 
   return (
-    <Context
-      value={{
-        ...(options as unknown as AIChatOptions),
-        open,
-        setOpen,
-        busy: chat.status === 'streaming' || chat.status === 'submitted',
-        send: (text) => void chat.sendMessage(toMessage ? toMessage(text) : { text }),
-        inputRef,
-      }}
-    >
-      {children}
-    </Context>
+    <OpenContext value={openState}>
+      <ChatContext
+        value={{
+          ...(options as unknown as AIChatOptions),
+          busy: chat.status === 'streaming' || chat.status === 'submitted',
+          send: (text) => void chat.sendMessage(toMessage ? toMessage(text) : { text }),
+          inputRef,
+        }}
+      >
+        {children}
+      </ChatContext>
+    </OpenContext>
   );
 }
 
+/** whether the chat is open */
 export function useAIChat() {
-  return use(Context)!;
+  return use(OpenContext)!;
+}
+
+function useChatState() {
+  return use(ChatContext)!;
 }
 
 /** the chat panel, for the `aiChat` option of docs layouts */
@@ -117,7 +125,8 @@ export function AIChatPanel() {
 
 /** the first question as title, with new chat and close buttons */
 export function AIChatHeader() {
-  const { chat, setOpen, inputRef } = useAIChat();
+  const { setOpen } = useAIChat();
+  const { chat, inputRef } = useChatState();
   const t = useTranslations({ note: 'AI chat' });
   const first = chat.messages.find((message) => message.role === 'user');
   const title = first ? textOf(first) : t('Ask AI');
@@ -152,7 +161,7 @@ export function AIChatHeader() {
 
 /** the conversation, or an intro with suggestions when it is new */
 export function AIChatMessages({ className }: { className?: string }) {
-  const { chat, busy, description, suggestions, send, inputRef } = useAIChat();
+  const { chat, busy, renderPart, description, suggestions, send, inputRef } = useChatState();
   const t = useTranslations({ note: 'AI chat' });
   const last = chat.messages.at(-1);
   const turns: UIMessage[][] = [];
@@ -220,6 +229,8 @@ export function AIChatMessages({ className }: { className?: string }) {
                 message={message}
                 live={busy && message === last}
                 last={message === last}
+                renderPart={renderPart}
+                onRetry={chat.regenerate}
               />
             ))}
             {latest && busy && isPending(last) && <Thinking />}
@@ -238,7 +249,8 @@ const field = 'col-start-1 row-start-1 px-1.5 py-1';
 
 /** the question form, its draft survives reloads */
 export function AIChatInput({ className }: { className?: string }) {
-  const { chat, busy, open, send, inputRef } = useAIChat();
+  const { open } = useAIChat();
+  const { chat, busy, send, inputRef } = useChatState();
   const t = useTranslations({ note: 'AI chat' });
   const [input, setInput] = useState(() => localStorage.getItem(StorageKey) ?? '');
   const text = input.trim();
@@ -441,8 +453,20 @@ export function AIChatSearch({
   );
 }
 
-function Message({ message, live, last }: { message: UIMessage; live: boolean; last: boolean }) {
-  const { chat, renderPart } = useAIChat();
+/** memoized, as settled messages keep their identity while an answer streams */
+const Message = memo(function Message({
+  message,
+  live,
+  last,
+  renderPart,
+  onRetry,
+}: {
+  message: UIMessage;
+  live: boolean;
+  last: boolean;
+  renderPart: AIChatOptions['renderPart'];
+  onRetry: () => unknown;
+}) {
   const t = useTranslations({ note: 'AI chat' });
   const text = textOf(message);
 
@@ -476,7 +500,7 @@ function Message({ message, live, last }: { message: UIMessage; live: boolean; l
         >
           <CopyAction text={text} className={small} />
           {last && (
-            <Action label={t('Retry')} className={small} onClick={() => chat.regenerate()}>
+            <Action label={t('Retry')} className={small} onClick={() => void onRetry()}>
               <RefreshCwIcon />
             </Action>
           )}
@@ -484,7 +508,7 @@ function Message({ message, live, last }: { message: UIMessage; live: boolean; l
       )}
     </div>
   );
-}
+});
 
 const small = 'size-6 [&_svg]:size-3.5';
 

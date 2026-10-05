@@ -1,9 +1,10 @@
 'use client';
+import { CodeBlock, Pre as CodePre } from 'fumadocs-ui/components/codeblock';
 import { DynamicCodeBlock } from 'fumadocs-ui/components/dynamic-codeblock';
 import defaultMdxComponents from 'fumadocs-ui/mdx';
 import type { ElementContent, Root } from 'hast';
 import { type Components, toJsxRuntime } from 'hast-util-to-jsx-runtime';
-import { type ComponentProps, memo } from 'react';
+import { type ComponentProps, memo, useState } from 'react';
 import { Fragment, jsx, jsxs } from 'react/jsx-runtime';
 import { remark } from 'remark';
 import remarkGfm from 'remark-gfm';
@@ -11,13 +12,16 @@ import remarkRehype from 'remark-rehype';
 import remend from 'remend';
 import { visit } from 'unist-util-visit';
 
-const processor = remark().use(remarkGfm).use(remarkRehype).use(rehypeWords);
+const processor = remark().use(remarkGfm).use(remarkRehype);
+const streamProcessor = remark().use(remarkGfm).use(remarkRehype).use(rehypeWords);
 
 const components: Components = {
   ...defaultMdxComponents,
   pre: Pre,
   img: 'img',
 };
+// code is highlighted once its block settles
+const liveComponents: Components = { ...components, pre: LivePre };
 
 /**
  * An answer in Markdown. While `live`, only its last block re-renders, with unclosed syntax completed.
@@ -31,19 +35,24 @@ export function Markdown({ text, live }: { text: string; live: boolean }) {
         <Block
           key={i}
           text={live && i === blocks.length - 1 ? remend(block, { linkMode: 'text-only' }) : block}
+          live={live && i === blocks.length - 1}
         />
       ))}
     </div>
   );
 }
 
-const Block = memo(function Block({ text }: { text: string }) {
-  return toJsxRuntime(processor.runSync(processor.parse(text)), {
+const Block = memo(function Block({ text, live }: { text: string; live: boolean }) {
+  // only words that stream in fade, a chat from history renders plain text
+  const [streamed] = useState(live);
+  const p = streamed ? streamProcessor : processor;
+
+  return toJsxRuntime(p.runSync(p.parse(text)), {
     development: false,
     Fragment,
     jsx,
     jsxs,
-    components,
+    components: live ? liveComponents : components,
   });
 });
 
@@ -90,11 +99,29 @@ export function splitBlocks(text: string): string[] {
 }
 
 function Pre({ children }: ComponentProps<'pre'>) {
-  const code = (children as { props?: ComponentProps<'code'> } | undefined)?.props;
-  if (typeof code?.children !== 'string') return null;
+  const code = codeOf(children);
+  if (!code) return null;
   const lang = /language-(\S+)/.exec(code.className ?? '')?.[1] ?? 'text';
 
   return <DynamicCodeBlock lang={lang === 'mdx' ? 'md' : lang} code={code.children.trimEnd()} />;
+}
+
+function LivePre({ children }: ComponentProps<'pre'>) {
+  const code = codeOf(children);
+  if (!code) return null;
+
+  return (
+    <CodeBlock className="my-0">
+      <CodePre>
+        <code>{code.children.trimEnd()}</code>
+      </CodePre>
+    </CodeBlock>
+  );
+}
+
+function codeOf(children: unknown) {
+  const props = (children as { props?: ComponentProps<'code'> } | undefined)?.props;
+  if (typeof props?.children === 'string') return props as { children: string; className?: string };
 }
 
 /** each word fades in as it streams */
