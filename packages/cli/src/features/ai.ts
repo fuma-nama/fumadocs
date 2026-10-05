@@ -84,18 +84,6 @@ export const ai: Feature<{ provider: AIProvider }> = {
   },
 };
 
-const floatingTrigger = `
-      <AISearchTrigger
-        position="float"
-        className={buttonVariants({
-          variant: 'secondary',
-          className: 'text-fd-muted-foreground rounded-2xl',
-        })}
-      >
-        <MessageCircleIcon className="size-4.5" />
-        Ask AI
-      </AISearchTrigger>`;
-
 /** a client component rendering the docs layout with the installed chat */
 function clientLayout(layoutModule: string) {
   // Glass and Spacious layouts have their own trigger
@@ -103,32 +91,20 @@ function clientLayout(layoutModule: string) {
 
   return `'use client';
 import { DocsLayout as Layout, type DocsLayoutProps } from '${layoutModule}';
-${
-  trigger
-    ? `import { buttonVariants } from 'fumadocs-ui/components/ui/button';
-import { MessageCircleIcon } from 'lucide-react';
-`
-    : ''
-}import {
-  AISearch,
-  AISearchPanel,${trigger ? '\n  AISearchTrigger,' : ''}
-  useAISearchContext,
-  useHotKey,
-} from './search';
+import { AIChat, AIChatPanel,${trigger ? ' AIChatTrigger,' : ''} useAIChat } from './search';
 
 export function DocsLayout(props: DocsLayoutProps) {
   return (
-    <AISearch>
-      <ChatLayout {...props} />${trigger ? floatingTrigger : ''}
-    </AISearch>
+    <AIChat>
+      <ChatLayout {...props} />${trigger ? '\n      <AIChatTrigger />' : ''}
+    </AIChat>
   );
 }
 
 function ChatLayout(props: DocsLayoutProps) {
-  const { open, setOpen } = useAISearchContext();
-  useHotKey();
+  const { open, setOpen } = useAIChat();
 
-  return <Layout {...props} aiChat={{ open, onOpenChange: setOpen, panel: <AISearchPanel /> }} />;
+  return <Layout {...props} aiChat={{ open, onOpenChange: setOpen, panel: <AIChatPanel /> }} />;
 }
 `;
 }

@@ -22,7 +22,7 @@ import { isLayoutTabActive, type LayoutTab, LinkItem } from '@/layouts/shared';
 import { cn } from '@/utils/cn';
 import { useSpaciousLayout } from '..';
 
-export type SidebarProviderProps = Base.SidebarProviderProps;
+export type SidebarProviderProps = Omit<Base.SidebarProviderProps, 'collapsible'>;
 export type SidebarProps = ComponentProps<'aside'>;
 
 /** the hover fill comes from the gliding block of `SidebarItems` */
@@ -108,7 +108,7 @@ export function SidebarDrawer() {
   return (
     <>
       <Base.SidebarDrawerOverlay className="fixed z-40 inset-0 backdrop-blur-xs data-[state=open]:animate-fd-fade-in data-[state=closed]:animate-fd-fade-out" />
-      <Base.SidebarDrawerContent className="fixed z-40 inset-e-0 inset-y-0 flex flex-col w-[85%] max-w-[380px] text-[0.9375rem] bg-fd-background border-s shadow-lg data-[state=open]:animate-fd-sidebar-in data-[state=closed]:animate-fd-sidebar-out">
+      <Base.SidebarDrawerContent className="fixed z-40 inset-e-0 inset-y-0 flex flex-col w-[85%] max-w-95 text-[0.9375rem] bg-fd-background border-s shadow-lg data-[state=open]:animate-fd-sidebar-in data-[state=closed]:animate-fd-sidebar-out">
         <div className="flex items-center gap-1.5 h-(--fd-header-height) ps-3.5 pe-2.5 text-fd-muted-foreground">
           <div className="flex flex-1">
             {menuItems.map(
@@ -193,7 +193,7 @@ function TabsMenu() {
           positionMethod="fixed"
           className="z-50"
         >
-          <Menu.Popup className="flex flex-col w-[calc(var(--anchor-width)+--spacing(2))] max-h-(--available-height) overflow-y-auto p-1 rounded-2xl border bg-fd-popover text-sm text-fd-popover-foreground shadow-lg outline-none origin-(--transform-origin) transition-[opacity,scale] duration-150 ease-[cubic-bezier(0.22,1,0.36,1)] data-starting-style:opacity-0 data-starting-style:scale-95 data-ending-style:opacity-0 data-ending-style:scale-[0.97] data-ending-style:duration-100 motion-reduce:transition-none">
+          <Menu.Popup className="flex flex-col w-[calc(var(--anchor-width)+--spacing(2))] max-h-(--available-height) overflow-y-auto p-1 rounded-2xl border bg-fd-popover text-sm text-fd-popover-foreground shadow-lg outline-none origin-(--transform-origin) transition-[opacity,scale] duration-150 ease-[cubic-bezier(0.22,1,0.36,1)] data-starting-style:opacity-0 data-starting-style:scale-95 data-ending-style:opacity-0 data-ending-style:scale-97 data-ending-style:duration-100 motion-reduce:transition-none">
             {options.map((tab, i) => {
               if (tab.unlisted && tab !== selected) return;
 
@@ -244,7 +244,7 @@ function TabIcon({ tab, className }: { tab: LayoutTab; className?: string }) {
 function SidebarViewport() {
   return (
     <ScrollArea.Root className="min-h-0 flex-1 mt-2">
-      <ScrollArea.Viewport className="size-full overscroll-contain px-3 pt-4 pb-8 mask-[linear-gradient(to_bottom,transparent,white_16px,white_calc(100%-32px),transparent)]">
+      <ScrollArea.Viewport className="size-full overscroll-contain px-3 pt-4 pb-8 mask-t-from-[calc(100%-16px)] mask-b-from-[calc(100%-32px)]">
         <SidebarItems />
       </ScrollArea.Viewport>
       <ScrollArea.Scrollbar

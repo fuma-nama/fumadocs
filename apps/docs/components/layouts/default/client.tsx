@@ -1,13 +1,10 @@
 'use client';
 
-import { AISearchPanel, useAISearchContext, useHotKey } from '@/components/inkeep/search';
+import { AIChatPanel, useAIChat } from '@/components/inkeep/search';
 import { DocsLayout, type DocsLayoutProps } from 'fumadocs-ui/layouts/docs';
 
 export function ClientDocsLayout(props: DocsLayoutProps) {
-  const { open, setOpen } = useAISearchContext();
-  useHotKey();
+  const { open, setOpen } = useAIChat();
 
-  return (
-    <DocsLayout {...props} aiChat={{ open, onOpenChange: setOpen, panel: <AISearchPanel /> }} />
-  );
+  return <DocsLayout {...props} aiChat={{ open, onOpenChange: setOpen, panel: <AIChatPanel /> }} />;
 }

@@ -25,7 +25,7 @@ import { cn } from '@/utils/cn';
 import { useSpaciousLayout } from '..';
 
 const popupClass =
-  'flex flex-col max-h-(--available-height) overflow-y-auto rounded-2xl border bg-fd-popover text-sm text-fd-popover-foreground shadow-lg outline-none origin-(--transform-origin) transition-[opacity,scale] duration-150 ease-[cubic-bezier(0.22,1,0.36,1)] data-starting-style:opacity-0 data-starting-style:scale-95 data-ending-style:opacity-0 data-ending-style:scale-[0.97] data-ending-style:duration-100 motion-reduce:transition-none';
+  'flex flex-col max-h-(--available-height) overflow-y-auto rounded-2xl border bg-fd-popover text-sm text-fd-popover-foreground shadow-lg outline-none origin-(--transform-origin) transition-[opacity,scale] duration-150 ease-[cubic-bezier(0.22,1,0.36,1)] data-starting-style:opacity-0 data-starting-style:scale-95 data-ending-style:opacity-0 data-ending-style:scale-97 data-ending-style:duration-100 motion-reduce:transition-none';
 
 const itemClass =
   'flex w-full min-h-9 items-center gap-3 rounded-lg px-2.5 py-1.5 text-start outline-none transition-colors duration-100 data-highlighted:bg-fd-accent data-highlighted:text-fd-accent-foreground [&_svg]:size-4 [&_svg]:shrink-0';
@@ -61,16 +61,14 @@ export function HeaderActions({ className, ...props }: ComponentProps<'div'>) {
       className={cn('flex items-center gap-0.5 rounded-lg bg-fd-background', className)}
       {...props}
     >
-      {aiChat && (
+      {aiChat && !aiChat.open && (
         <button
           type="button"
-          aria-pressed={aiChat.open}
           className={cn(
             buttonVariants({ variant: 'ghost' }),
-            'h-7.5 gap-1.5 px-2 max-lg:hidden',
-            aiChat.open ? 'bg-fd-accent text-fd-accent-foreground' : 'text-fd-muted-foreground',
+            'h-7.5 gap-1.5 px-2 text-fd-muted-foreground max-lg:hidden',
           )}
-          onClick={() => aiChat.onOpenChange(!aiChat.open)}
+          onClick={() => aiChat.onOpenChange(true)}
         >
           <MessageCircleIcon className="size-4" />
           {t('Ask AI')}
@@ -242,7 +240,7 @@ function ThemeSegments() {
       {index !== -1 && (
         <span
           aria-hidden
-          className="absolute top-0.5 start-0.5 size-7 rounded-full bg-fd-background shadow-sm ring-1 ring-fd-border translate-x-[calc(var(--index)*100%)] rtl:-translate-x-[calc(var(--index)*100%)] transition-[translate] duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] motion-reduce:transition-none"
+          className="absolute top-0.5 start-0.5 size-7 rounded-full bg-fd-background shadow-sm ring-1 ring-fd-border translate-x-[calc(var(--index)*100%)] rtl:-translate-x-[calc(var(--index)*100%)] transition-transform duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] motion-reduce:transition-none"
           style={{ '--index': index } as CSSProperties}
         />
       )}

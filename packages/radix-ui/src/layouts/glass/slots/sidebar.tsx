@@ -60,7 +60,7 @@ export function SidebarProvider({ children, collapsible = true }: SidebarProvide
   // The Radix sidebar base handles the mobile drawer state (open/close) as well as
   // the desktop `collapsed` state we reuse for Glass's collapse behavior.
   return (
-    <BaseSidebarProvider>
+    <BaseSidebarProvider collapsible={collapsible}>
       <CollapsibleContext value={collapsible}>{children}</CollapsibleContext>
     </BaseSidebarProvider>
   );

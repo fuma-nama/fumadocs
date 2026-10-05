@@ -92,7 +92,10 @@ export function DocsPage({
   return (
     <PageContext value={{ full, slots }}>
       <slots.toc.provider single={single} toc={tocEnabled || tocPopoverEnabled ? toc : []}>
-        {tocPopoverEnabled && <slots.toc.popover {...tocPopoverProps} />}
+        <div className="sticky top-[calc(var(--fd-banner-height,0px)+var(--fd-header-height))] z-30 [grid-area:toc-popover] self-start md:hidden">
+          {tocPopoverEnabled && <slots.toc.popover {...tocPopoverProps} />}
+          <div className="absolute inset-x-2 top-full h-[calc(var(--fd-layout-height)-var(--fd-header-height)-100%)] rounded-t-2xl border-x border-t outline-8 outline-fd-card [clip-path:inset(0_-8px_-8px)] bg-origin-border bg-linear-to-b from-fd-background to-transparent to-[16px] pointer-events-none" />
+        </div>
         <div
           // a new page starts from the top of panel
           key={pathname}
@@ -124,12 +127,12 @@ export function DocsPage({
             )}
             <layout.slots.actions className="ms-auto" />
           </header>
-          <div className="flex flex-1 items-start px-4 md:min-h-0 md:pt-(--fd-header-height) md:px-[max(--spacing(6),calc((100%-var(--fd-page-width)-var(--fd-toc-width))/2))] md:overflow-y-auto md:overscroll-y-contain md:scrollbar-thin md:scrollbar-gutter-stable md:scroll-pt-(--fd-header-height) md:[&_[id]]:scroll-mt-2">
+          <div className="flex flex-1 items-start px-4 md:min-h-0 md:pt-(--fd-header-height) md:px-[max(--spacing(6),calc((100%-var(--fd-page-width)-var(--fd-toc-width))/2))] md:overflow-y-auto md:overscroll-y-contain md:scrollbar-thin md:scrollbar-gutter-stable">
             <article
               id="nd-page"
               data-full={full}
               className={cn(
-                'flex flex-col gap-4 w-full min-w-0 max-w-(--fd-page-width) pt-6 pb-8 md:pb-16',
+                'flex flex-col gap-4 w-full min-w-0 max-w-(--fd-page-width) pt-6 pb-8',
                 full && 'layout:[--fd-page-width:1200px]',
                 className,
               )}
@@ -147,7 +150,6 @@ export function DocsPage({
             {tocEnabled && <slots.toc.main {...tocProps} />}
           </div>
         </div>
-        <div className="fixed inset-x-2 bottom-0 top-(--fd-docs-row-3) supports-[top:anchor(--a_bottom)]:top-[anchor(--fd-top-bar_bottom)] z-20 rounded-t-2xl border-x border-t outline-8 outline-fd-card bg-origin-border bg-[linear-gradient(var(--color-fd-background),transparent_16px)] pointer-events-none md:hidden" />
       </slots.toc.provider>
     </PageContext>
   );

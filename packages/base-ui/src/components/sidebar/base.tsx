@@ -15,6 +15,7 @@ import {
 import Link, { type LinkProps } from 'fumadocs-core/link';
 import { useOnChange } from 'fumadocs-core/utils/use-on-change';
 import { cn } from '@/utils/cn';
+import { useHotKey } from '@/utils/hotkey';
 import { ScrollArea } from '@base-ui/react/scroll-area';
 import {
   Collapsible,
@@ -58,6 +59,13 @@ export interface SidebarProviderProps {
    */
   prefetch?: boolean;
 
+  /**
+   * Support collapsing the sidebar on desktop mode
+   *
+   * @defaultValue true
+   */
+  collapsible?: boolean;
+
   children?: ReactNode;
 }
 
@@ -75,6 +83,7 @@ const FolderContext = createContext<{
 export function SidebarProvider({
   defaultOpenLevel = 0,
   prefetch,
+  collapsible = true,
   children,
 }: SidebarProviderProps) {
   const closeOnRedirect = useRef(true);
@@ -89,6 +98,15 @@ export function SidebarProvider({
     }
     closeOnRedirect.current = true;
   });
+
+  useHotKey(
+    (e) => {
+      if (!(e.metaKey || e.ctrlKey) || e.shiftKey || e.altKey || e.key !== 'b') return;
+      e.preventDefault();
+      setCollapsed((prev) => !prev);
+    },
+    { enabled: collapsible && mode === 'full', ignoreTyping: true },
+  );
 
   return (
     <SidebarContext

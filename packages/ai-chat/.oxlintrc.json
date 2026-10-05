@@ -1,0 +1,3 @@
+{
+  "extends": ["../base-ui/.oxlintrc.json"]
+}

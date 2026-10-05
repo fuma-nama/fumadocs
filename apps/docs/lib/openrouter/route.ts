@@ -6,6 +6,7 @@ import {
   streamText,
   tool,
   toUIMessageStream,
+  type InferToolOutput,
 } from 'ai';
 import { z } from 'zod';
 import { source } from '@/lib/source';
@@ -67,6 +68,7 @@ const openrouter = createOpenRouter({
 const systemPrompt = [
   'You are an AI assistant for a documentation site.',
   'Use the `search` tool to retrieve relevant docs context before answering when needed.',
+  'A user message may begin with [Client Context], the page they are reading. For questions about "this page", search its title.',
   'The `search` tool returns raw JSON results from documentation. Use those results to ground your answer and cite sources as markdown links using the document `url` field when available.',
   'If you cannot find the answer in search results, say you do not know and suggest a better search query.',
 ].join('\n');
@@ -112,7 +114,7 @@ const searchTool = tool({
     query: z.string(),
     limit: z.number().int().min(1).max(100).default(10),
   }),
-  async execute({ query, limit }) {
+  async execute({ query, limit }): Promise<InferToolOutput<SearchTool>> {
     const search = await searchServer;
     return await search.searchAsync(query, { limit, merge: true, enrich: true });
   },

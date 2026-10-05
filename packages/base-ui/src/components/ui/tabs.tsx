@@ -44,6 +44,10 @@ const TabsContext = createContext<{
    * what allows us to open the tab containing a hash target.
    */
   panels: Map<string, HTMLElement>;
+  /**
+   * Values of mounted triggers, unknown values from the tab group are ignored.
+   */
+  triggers: Set<string>;
 } | null>(null);
 
 function useTabContext() {
@@ -54,7 +58,20 @@ function useTabContext() {
 
 export const TabsList = Primitive.List;
 
-export const TabsTrigger = Primitive.Tab;
+export function TabsTrigger({ value, ref, ...props }: ComponentProps<typeof Primitive.Tab>) {
+  const { triggers } = useTabContext();
+
+  return (
+    <Primitive.Tab
+      ref={mergeRefs(ref, (element) => {
+        if (element) triggers.add(value);
+        else triggers.delete(value);
+      })}
+      value={value}
+      {...props}
+    />
+  );
+}
 
 export function Tabs({
   ref,
@@ -69,61 +86,64 @@ export function Tabs({
   const tabsRef = useRef<HTMLDivElement>(null);
   const valueToIdMap = useMemo(() => new Map<string, string>(), []);
   const panels = useMemo(() => new Map<string, HTMLElement>(), []);
+  const triggers = useMemo(() => new Set<string>(), []);
   const [value, setValue] =
     _value === undefined
       ? // eslint-disable-next-line react-hooks/rules-of-hooks -- not supposed to change controlled/uncontrolled
         useState(defaultValue)
       : // eslint-disable-next-line react-hooks/rules-of-hooks -- not supposed to change controlled/uncontrolled
-        [_value, useEffectEvent((v: string) => _onValueChange?.(v))];
+        [_value, (v: string) => _onValueChange?.(v)];
+
+  const onChange = useEffectEvent((v: string) => {
+    if (triggers.has(v)) setValue(v);
+  });
+
+  const openFromHash = useEffectEvent(() => {
+    const hash = window.location.hash.slice(1);
+    if (!hash) return;
+
+    // hash points to a tab's own anchor id
+    for (const [value, id] of valueToIdMap.entries()) {
+      if (id === hash) {
+        setValue(value);
+        tabsRef.current?.scrollIntoView();
+        return;
+      }
+    }
+
+    // hash points to an element inside a mounted (e.g. `keepMounted`) panel,
+    // open the tab it belongs to, then scroll to it once the panel is visible.
+    const target = document.getElementById(hash);
+    if (!target) return;
+
+    for (const [value, panel] of panels.entries()) {
+      if (!panel.contains(target)) continue;
+
+      setValue(value);
+      requestAnimationFrame(() => target.scrollIntoView());
+      return;
+    }
+  });
 
   useLayoutEffect(() => {
     if (!groupId) return;
     let previous = sessionStorage.getItem(groupId);
     if (persist) previous ??= localStorage.getItem(groupId);
-    if (previous) setValue(previous);
+    if (previous) onChange(previous);
 
     const groupListeners = listeners.get(groupId) ?? new Set();
-    groupListeners.add(setValue);
+    groupListeners.add(onChange);
     listeners.set(groupId, groupListeners);
     return () => {
-      groupListeners.delete(setValue);
+      groupListeners.delete(onChange);
     };
-    // oxlint-disable-next-line react-hooks/exhaustive-deps
   }, [groupId, persist]);
 
   useLayoutEffect(() => {
-    const openFromHash = () => {
-      const hash = window.location.hash.slice(1);
-      if (!hash) return;
-
-      // hash points to a tab's own anchor id
-      for (const [value, id] of valueToIdMap.entries()) {
-        if (id === hash) {
-          setValue(value);
-          tabsRef.current?.scrollIntoView();
-          return;
-        }
-      }
-
-      // hash points to an element inside a mounted (e.g. `keepMounted`) panel,
-      // open the tab it belongs to, then scroll to it once the panel is visible.
-      const target = document.getElementById(hash);
-      if (!target) return;
-
-      for (const [value, panel] of panels.entries()) {
-        if (!panel.contains(target)) continue;
-
-        setValue(value);
-        requestAnimationFrame(() => target.scrollIntoView());
-        return;
-      }
-    };
-
     openFromHash();
     window.addEventListener('hashchange', openFromHash);
     return () => window.removeEventListener('hashchange', openFromHash);
-    // oxlint-disable-next-line react-hooks/exhaustive-deps
-  }, [valueToIdMap, panels]);
+  }, []);
 
   return (
     <Primitive.Root
@@ -152,7 +172,12 @@ export function Tabs({
       }}
       {...props}
     >
-      <TabsContext value={useMemo(() => ({ valueToIdMap, panels }), [valueToIdMap, panels])}>
+      <TabsContext
+        value={useMemo(
+          () => ({ valueToIdMap, panels, triggers }),
+          [valueToIdMap, panels, triggers],
+        )}
+      >
         {props.children}
       </TabsContext>
     </Primitive.Root>
