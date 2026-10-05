@@ -6,6 +6,7 @@ import {
   streamText,
   tool,
   toUIMessageStream,
+  type InferToolOutput,
 } from 'ai';
 import { z } from 'zod';
 import { source } from '@/lib/source';
@@ -114,7 +115,7 @@ const searchTool = tool({
     query: z.string(),
     limit: z.number().int().min(1).max(100).default(10),
   }),
-  async execute({ query, limit }) {
+  async execute({ query, limit }): Promise<InferToolOutput<SearchTool>> {
     const search = await searchServer;
     return await search.searchAsync(query, { limit, merge: true, enrich: true });
   },

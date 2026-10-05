@@ -3,7 +3,6 @@ import {
   type ComponentProps,
   createContext,
   type ReactNode,
-  type SyntheticEvent,
   use,
   useEffect,
   useEffectEvent,
@@ -11,288 +10,212 @@ import {
   useRef,
   useState,
 } from 'react';
-import { Loader2, MessageCircleIcon, RefreshCw, SearchIcon, Send, X } from 'lucide-react';
+import { RefreshCwIcon, SearchIcon, SquarePenIcon, XIcon } from 'lucide-react';
 import { cn } from '../../lib/cn';
-import { buttonVariants } from 'fumadocs-ui/components/ui/button';
-import { type UIMessage, useChat, type UseChatHelpers } from '@ai-sdk/react';
-import { DefaultChatTransport, type Tool, type UIToolInvocation } from 'ai';
-import { Markdown } from '../markdown';
+import Link from 'fumadocs-core/link';
+import { useChat, type UseChatHelpers } from '@ai-sdk/react';
+import { DefaultChatTransport, type InferUITool, type UIMessage } from 'ai';
+import {
+  ChatAction,
+  ChatActions,
+  ChatActivity,
+  ChatComposer,
+  ChatComposerInput,
+  ChatComposerSubmit,
+  ChatConversation,
+  ChatCopyAction,
+  ChatEmpty,
+  ChatError,
+  ChatHeader,
+  ChatMarkdown,
+  ChatMessage,
+  ChatSuggestion,
+  ChatSuggestions,
+  ChatThinking,
+  ChatTurn,
+} from '@fumadocs/ai-chat';
 import type { SearchTool } from '@/pages/_api/api/chat';
+
+type ChatUIMessage = UIMessage<never, never, { search: InferUITool<SearchTool> }>;
+type Chat = UseChatHelpers<ChatUIMessage>;
+type SearchPart = Extract<ChatUIMessage['parts'][number], { type: 'tool-search' }>;
 
 const Context = createContext<{
   open: boolean;
   setOpen: (open: boolean) => void;
-  chat: UseChatHelpers<UIMessage>;
+  chat: Chat;
 } | null>(null);
 
-export function AISearchPanelHeader({ className, ...props }: ComponentProps<'div'>) {
-  const { setOpen } = useAISearchContext();
+const suggestions = ['Summarize this page', 'How do I get started?', 'What can I customize?'];
+
+export function AISearchPanelHeader(props: ComponentProps<'div'>) {
+  const { setOpen, chat } = useAISearchContext();
+  const first = chat.messages.find((message) => message.role === 'user');
 
   return (
-    <div
-      className={cn(
-        'sticky top-0 flex items-start gap-2 border rounded-xl bg-fd-secondary text-fd-secondary-foreground shadow-sm',
-        className,
-      )}
-      {...props}
-    >
-      <div className="px-3 py-2 flex-1">
-        <p className="text-sm font-medium mb-2">AI Chat</p>
-        <p className="text-xs text-fd-muted-foreground">
-          AI can be inaccurate, please verify the answers.
-        </p>
-      </div>
-
-      <button
-        aria-label="Close"
-        tabIndex={-1}
-        className={cn(
-          buttonVariants({
-            size: 'icon-sm',
-            variant: 'ghost',
-            className: 'text-fd-muted-foreground rounded-full',
-          }),
-        )}
-        onClick={() => setOpen(false)}
-      >
-        <X />
-      </button>
-    </div>
-  );
-}
-
-export function AISearchInputActions() {
-  const { messages, status, setMessages, regenerate } = useChatContext();
-  const isLoading = status === 'streaming';
-
-  if (messages.length === 0) return null;
-
-  return (
-    <>
-      {!isLoading && messages.at(-1)?.role === 'assistant' && (
-        <button
-          type="button"
-          className={cn(
-            buttonVariants({
-              variant: 'secondary',
-              size: 'sm',
-              className: 'rounded-full gap-1.5',
-            }),
-          )}
-          onClick={() => regenerate()}
+    <ChatHeader title={first ? textOf(first) : 'Ask AI'} {...props}>
+      {first && (
+        <ChatAction
+          label="New chat"
+          className="motion-safe:animate-fd-popover-in"
+          onClick={() => {
+            void chat.stop();
+            chat.setMessages([]);
+            chat.clearError();
+            focusInput();
+          }}
         >
-          <RefreshCw className="size-4" />
-          Retry
-        </button>
+          <SquarePenIcon />
+        </ChatAction>
       )}
-      <button
-        type="button"
-        className={cn(
-          buttonVariants({
-            variant: 'secondary',
-            size: 'sm',
-            className: 'rounded-full',
-          }),
-        )}
-        onClick={() => setMessages([])}
-      >
-        Clear Chat
-      </button>
-    </>
+      <ChatAction label="Close" onClick={() => setOpen(false)}>
+        <XIcon />
+      </ChatAction>
+    </ChatHeader>
   );
 }
 
 const StorageKeyInput = '__ai_search_input';
 export function AISearchInput(props: ComponentProps<'form'>) {
-  const { status, sendMessage, stop } = useChatContext();
+  const { open, chat } = useAISearchContext();
   const [input, setInput] = useState(() => localStorage.getItem(StorageKeyInput) ?? '');
-  const isLoading = status === 'streaming' || status === 'submitted';
-  const onStart = (e?: SyntheticEvent) => {
-    e?.preventDefault();
-    void sendMessage({ text: input });
-    setInput('');
-    localStorage.removeItem(StorageKeyInput);
-  };
+  const inputRef = useRef<HTMLTextAreaElement>(null);
+  const busy = chat.status === 'streaming' || chat.status === 'submitted';
 
   useEffect(() => {
-    if (isLoading) document.getElementById('nd-ai-input')?.focus();
-  }, [isLoading]);
+    if (open && !matchMedia('(pointer: coarse)').matches)
+      inputRef.current?.focus({ preventScroll: true });
+  }, [open]);
 
   return (
-    <form {...props} className={cn('flex items-start pe-2', props.className)} onSubmit={onStart}>
-      <Input
+    <ChatComposer
+      {...props}
+      onSubmit={(e) => {
+        e.preventDefault();
+        const text = input.trim();
+        if (busy || text.length === 0) return;
+        void chat.sendMessage({ text });
+        setInput('');
+        localStorage.removeItem(StorageKeyInput);
+      }}
+    >
+      <ChatComposerInput
+        ref={inputRef}
+        id="nd-ai-input"
         value={input}
-        placeholder={isLoading ? 'AI is answering...' : 'Ask a question'}
-        autoFocus
-        className="p-3"
-        disabled={status === 'streaming' || status === 'submitted'}
+        placeholder={chat.messages.length > 0 ? 'Ask a follow-up' : 'Ask a question'}
         onChange={(e) => {
           setInput(e.target.value);
           localStorage.setItem(StorageKeyInput, e.target.value);
         }}
-        onKeyDown={(event) => {
-          // keyCode 229: Safari fires `compositionend` before this keydown, `isComposing` is already false
-          if (event.nativeEvent.isComposing || event.keyCode === 229) return;
-          if (!event.shiftKey && event.key === 'Enter') {
-            onStart(event);
-          }
+      />
+      <ChatComposerSubmit
+        busy={busy}
+        disabled={input.trim().length === 0}
+        onStop={() => {
+          void chat.stop();
+          inputRef.current?.focus();
         }}
       />
-      {isLoading ? (
-        <button
-          key="bn"
-          type="button"
-          className={cn(
-            buttonVariants({
-              variant: 'secondary',
-              className: 'transition-all rounded-full mt-2 gap-2',
-            }),
-          )}
-          onClick={stop}
-        >
-          <Loader2 className="size-4 animate-spin text-fd-muted-foreground" />
-          Abort Answer
-        </button>
-      ) : (
-        <button
-          key="bn"
-          type="submit"
-          className={cn(
-            buttonVariants({
-              variant: 'default',
-              className: 'transition-all rounded-full mt-2',
-            }),
-          )}
-          disabled={input.length === 0}
-        >
-          <Send className="size-4" />
-        </button>
-      )}
-    </form>
+    </ChatComposer>
   );
 }
 
-function List(props: Omit<ComponentProps<'div'>, 'dir'>) {
-  const containerRef = useRef<HTMLDivElement>(null);
+function Message({
+  message,
+  live,
+  last,
+}: {
+  message: ChatUIMessage;
+  live: boolean;
+  last: boolean;
+}) {
+  const { regenerate } = useChatContext();
+  const text = textOf(message);
+  if (message.role === 'user') return <ChatMessage from="user">{text}</ChatMessage>;
 
-  useEffect(() => {
-    if (!containerRef.current) return;
-    function callback() {
-      const container = containerRef.current;
-      if (!container) return;
-
-      container.scrollTo({
-        top: container.scrollHeight,
-        behavior: 'instant',
-      });
-    }
-
-    const observer = new ResizeObserver(callback);
-    callback();
-
-    const element = containerRef.current?.firstElementChild;
-
-    if (element) {
-      observer.observe(element);
-    }
-
-    return () => {
-      observer.disconnect();
-    };
-  }, []);
-
-  return (
-    <div
-      ref={containerRef}
-      {...props}
-      className={cn('fd-scroll-container overflow-y-auto min-w-0 flex flex-col', props.className)}
-    >
-      {props.children}
-    </div>
-  );
-}
-
-function Input(props: ComponentProps<'textarea'>) {
-  const ref = useRef<HTMLDivElement>(null);
-  const shared = cn('col-start-1 row-start-1', props.className);
-
-  return (
-    <div className="grid flex-1">
-      <textarea
-        id="nd-ai-input"
-        {...props}
-        className={cn(
-          'resize-none bg-transparent placeholder:text-fd-muted-foreground focus-visible:outline-none',
-          shared,
-        )}
-      />
-      <div ref={ref} className={cn(shared, 'break-all invisible')}>
-        {`${props.value?.toString() ?? ''}\n`}
-      </div>
-    </div>
-  );
-}
-
-const roleName: Record<string, string> = {
-  user: 'you',
-  assistant: 'fumadocs',
-};
-
-function Message({ message, ...props }: { message: UIMessage } & ComponentProps<'div'>) {
-  let markdown = '';
-  const searchCalls: UIToolInvocation<SearchTool>[] = [];
-
-  for (const part of message.parts ?? []) {
-    if (part.type === 'text') {
-      markdown += part.text;
-      continue;
-    }
-
-    if (part.type.startsWith('tool-')) {
-      const toolName = part.type.slice('tool-'.length);
-      const p = part as UIToolInvocation<Tool>;
-
-      if (toolName !== 'search' || !p.toolCallId) continue;
-      searchCalls.push(p);
+  const items: ReactNode[] = [];
+  for (const [i, part] of message.parts.entries()) {
+    if (part.type === 'tool-search') {
+      items.push(<Search key={part.toolCallId} part={part} live={live} />);
+    } else if (part.type === 'text' && part.text) {
+      items.push(
+        <ChatMarkdown key={i} text={part.text} live={live && part.state === 'streaming'} />,
+      );
     }
   }
 
   return (
-    <div onClick={(e) => e.stopPropagation()} {...props}>
-      <p
-        className={cn(
-          'mb-1 text-sm font-medium text-fd-muted-foreground',
-          message.role === 'assistant' && 'text-fd-primary',
-        )}
-      >
-        {roleName[message.role] ?? 'unknown'}
-      </p>
-      <div className="prose text-sm">
-        <Markdown text={markdown} />
-      </div>
+    <ChatMessage from="assistant">
+      {items}
+      {!live && text && (
+        <ChatActions pinned={last}>
+          <ChatCopyAction text={text} />
+          {last && (
+            <ChatAction label="Retry" onClick={() => regenerate()}>
+              <RefreshCwIcon />
+            </ChatAction>
+          )}
+        </ChatActions>
+      )}
+    </ChatMessage>
+  );
+}
 
-      {searchCalls.map((call) => {
-        return (
-          <div
-            key={call.toolCallId}
-            className="flex flex-row gap-2 items-center mt-3 rounded-lg border bg-fd-secondary text-fd-muted-foreground text-xs p-2"
-          >
-            <SearchIcon className="size-4" />
-            {call.state === 'output-error' || call.state === 'output-denied' ? (
-              <p className="text-fd-error">{call.errorText ?? 'Failed to search'}</p>
-            ) : (
-              <p>{!call.output ? 'Searching…' : `${call.output.length} search results`}</p>
-            )}
-          </div>
-        );
-      })}
-    </div>
+function Search({ part, live }: { part: SearchPart; live: boolean }) {
+  const query = part.input?.query;
+  const detail = query ? `“${query}”` : undefined;
+
+  if (part.state === 'output-error') {
+    return (
+      <ChatActivity
+        icon={<SearchIcon />}
+        label={<span className="text-fd-error">Search failed</span>}
+        detail={detail}
+      />
+    );
+  }
+
+  if (part.state !== 'output-available') {
+    return (
+      <ChatActivity
+        icon={<SearchIcon />}
+        running={live}
+        label={live ? 'Searching' : 'Search stopped'}
+        detail={detail}
+      />
+    );
+  }
+
+  const links: ReactNode[] = [];
+  for (const result of part.output) {
+    if (!result.doc) continue;
+    links.push(
+      <Link
+        key={result.doc.url}
+        href={result.doc.url}
+        className="truncate transition-colors hover:text-fd-accent-foreground"
+      >
+        {result.doc.title}
+      </Link>,
+    );
+  }
+
+  return (
+    <ChatActivity
+      icon={<SearchIcon />}
+      label="Searched"
+      detail={detail}
+      meta={`${links.length} ${links.length === 1 ? 'result' : 'results'}`}
+    >
+      {links.length > 0 && links}
+    </ChatActivity>
   );
 }
 
 export function AISearch({ children }: { children: ReactNode }) {
   const [open, setOpen] = useState(false);
-  const chat = useChat({
+  const chat = useChat<ChatUIMessage>({
     id: 'search',
     transport: new DefaultChatTransport({
       api: '/api/chat',
@@ -331,47 +254,97 @@ export function AISearchTrigger({
 
 export function AISearchPanel() {
   return (
-    <div className="flex flex-col size-full p-2">
+    <div className="flex size-full flex-col">
       <AISearchPanelHeader />
       <AISearchPanelList className="flex-1" />
-      <div className="rounded-xl border bg-fd-secondary text-fd-secondary-foreground shadow-sm has-focus-visible:shadow-md">
-        <AISearchInput />
-        <div className="flex items-center gap-1.5 p-1 empty:hidden">
-          <AISearchInputActions />
-        </div>
-      </div>
+      <AISearchInput className="mx-3 mb-3" />
     </div>
   );
 }
 
-export function AISearchPanelList({ className, style, ...props }: ComponentProps<'div'>) {
+export function AISearchPanelList(props: ComponentProps<'div'>) {
   const chat = useChatContext();
-  const messages = chat.messages.filter((msg) => msg.role !== 'system');
+  const live = chat.status === 'streaming' || chat.status === 'submitted';
+  const last = chat.messages.at(-1);
+  const pending = live ? pendingOf(last) : undefined;
+  const turns: ChatUIMessage[][] = [];
+  let current: ChatUIMessage[] | undefined;
+
+  for (const message of chat.messages) {
+    if (message.role === 'system') continue;
+    if (message.role === 'user' || !current) turns.push((current = [message]));
+    else current.push(message);
+  }
 
   return (
-    <List
-      className={cn('py-4 overscroll-contain', className)}
-      style={{
-        maskImage:
-          'linear-gradient(to bottom, transparent, white 1rem, white calc(100% - 1rem), transparent 100%)',
-        ...style,
-      }}
-      {...props}
-    >
-      {messages.length === 0 ? (
-        <div className="text-sm text-fd-muted-foreground/80 size-full flex flex-col items-center justify-center text-center gap-2">
-          <MessageCircleIcon fill="currentColor" stroke="none" />
-          <p onClick={(e) => e.stopPropagation()}>Start a new chat below.</p>
-        </div>
+    <ChatConversation {...props}>
+      {turns.length === 0 ? (
+        <ChatEmpty
+          title="What do you want to know?"
+          description="Answers come from the docs, AI can make mistakes."
+        >
+          <ChatSuggestions>
+            {suggestions.map((question) => (
+              <ChatSuggestion
+                key={question}
+                onClick={() => {
+                  void chat.sendMessage({ text: question });
+                  focusInput();
+                }}
+              >
+                {question}
+              </ChatSuggestion>
+            ))}
+          </ChatSuggestions>
+        </ChatEmpty>
       ) : (
-        <div className="flex flex-col px-3 gap-4">
-          {messages.map((item) => (
-            <Message key={item.id} message={item} />
-          ))}
-        </div>
+        turns.map((turn, i) => {
+          const latest = i === turns.length - 1;
+
+          return (
+            <ChatTurn key={turn[0]!.id}>
+              {turn.map((message) => (
+                <Message
+                  key={message.id}
+                  message={message}
+                  live={live && message === last}
+                  last={message === last}
+                />
+              ))}
+              {latest && pending && <ChatThinking>{pending}</ChatThinking>}
+              {latest && chat.error && (
+                <ChatError onRetry={() => chat.regenerate()}>{chat.error.message}</ChatError>
+              )}
+            </ChatTurn>
+          );
+        })
       )}
-    </List>
+    </ChatConversation>
   );
+}
+
+/** what the assistant is doing while nothing shows */
+function pendingOf(message: ChatUIMessage | undefined) {
+  if (message?.role !== 'assistant') return 'Thinking';
+  let last: ChatUIMessage['parts'][number] | undefined;
+  for (const part of message.parts) {
+    if (part.type === 'tool-search' || (part.type === 'text' && part.text.length > 0)) last = part;
+  }
+  if (!last) return 'Thinking';
+  if (last.type === 'tool-search' && last.state === 'output-available') return 'Reading results';
+}
+
+/** the clicked button is gone, keep the focus in the chat */
+function focusInput() {
+  document.getElementById('nd-ai-input')?.focus();
+}
+
+function textOf(message: ChatUIMessage) {
+  let text = '';
+  for (const part of message.parts) {
+    if (part.type === 'text') text += part.text;
+  }
+  return text;
 }
 
 export function useHotKey() {

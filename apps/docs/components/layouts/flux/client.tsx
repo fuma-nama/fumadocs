@@ -9,7 +9,6 @@ import {
 import {
   AISearch,
   AISearchInput,
-  AISearchInputActions,
   AISearchPanelHeader,
   AISearchPanelList,
   useAISearchContext,
@@ -67,6 +66,7 @@ function CustomNavigationPanel({ tool, ...props }: NavigationPanelProps) {
           {ai.open && (
             <motion.div
               className="flex flex-col size-full mx-auto sm:max-w-[380px]"
+              onClick={(e) => e.stopPropagation()}
               variants={{
                 show: {
                   y: 0,
@@ -88,8 +88,8 @@ function CustomNavigationPanel({ tool, ...props }: NavigationPanelProps) {
                 },
               }}
             >
-              <AISearchPanelHeader onClick={(e) => e.stopPropagation()} />
-              <AISearchPanelList className="px-3 flex-1" />
+              <AISearchPanelHeader />
+              <AISearchPanelList className="flex-1" />
             </motion.div>
           )}
         </AnimatePresence>
@@ -129,10 +129,7 @@ function CustomNavigationPanel({ tool, ...props }: NavigationPanelProps) {
                 exit="hide"
                 transition={{ duration: 0.2 }}
               >
-                <AISearchInput />
-                <div className="flex items-center gap-1.5 p-1 empty:hidden">
-                  <AISearchInputActions />
-                </div>
+                <AISearchInput className="border-0 bg-transparent shadow-none focus-within:ring-0" />
               </motion.div>
             ) : (
               <motion.div

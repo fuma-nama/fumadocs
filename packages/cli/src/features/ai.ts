@@ -1,7 +1,8 @@
 import path from 'node:path';
 import type { ImportDeclaration } from 'oxc-parser';
 import type { Feature, FeatureContext } from '@/features';
-import { findSource } from './utils';
+import { exists } from '@/utils/fs';
+import { findCssEntry, findSource } from './utils';
 import { docs } from './docs';
 
 const providers = {
@@ -80,9 +81,15 @@ export const ai: Feature<{ provider: AIProvider }> = {
         'Pass the AI chat to your docs layout, see https://fumadocs.dev/docs/integrations/llms#ask-ai.',
       );
     }
+    const css = await findCssEntry(ctx.project);
+    if (css && (await exists(path.join(cwd, css)))) await ctx.append(css, [cssImport]);
+    else ctx.note(`Add the chat styles to your global CSS file:\n  ${cssImport}`);
+
     ctx.note(`Set ${providers[provider].env} in \`.env.local\`.`);
   },
 };
+
+const cssImport = `@import '@fumadocs/ai-chat/css/preset.css';`;
 
 const floatingTrigger = `
       <AISearchTrigger

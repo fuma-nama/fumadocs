@@ -1,0 +1,73 @@
+{
+  "name": "@fumadocs/ai-chat",
+  "version": "0.0.1",
+  "description": "Composable AI chat UI for Fumadocs",
+  "keywords": [
+    "AI",
+    "Docs",
+    "Fumadocs"
+  ],
+  "homepage": "https://fumadocs.dev",
+  "license": "MIT",
+  "author": "Fuma Nama",
+  "repository": "github:fuma-nama/fumadocs",
+  "files": [
+    "css",
+    "dist"
+  ],
+  "type": "module",
+  "sideEffects": [
+    "./css/**/*.css"
+  ],
+  "exports": {
+    ".": "./dist/index.js",
+    "./i18n": "./dist/i18n.js",
+    "./package.json": "./package.json",
+    "./css/*": "./css/*"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "scripts": {
+    "build": "tsdown",
+    "clean": "rimraf dist",
+    "dev": "tsdown --watch",
+    "lint": "oxlint .",
+    "types:check": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@base-ui/react": "^1.8.0",
+    "@fuma-translate/react": "^1.0.2",
+    "cn": "^0.4.0",
+    "hast-util-to-jsx-runtime": "^2.3.6",
+    "lucide-react": "^1.50.0",
+    "remark": "^15.0.1",
+    "remark-gfm": "^4.0.1",
+    "remark-rehype": "^11.1.2",
+    "remend": "^1.4.0",
+    "unist-util-visit": "^5.1.0"
+  },
+  "devDependencies": {
+    "@types/hast": "^3.0.5",
+    "@types/node": "26.6.4",
+    "@types/react": "^19.3.0",
+    "fumadocs-core": "workspace:*",
+    "fumadocs-ui": "workspace:@fumadocs/base-ui@*",
+    "react": "^19.3.0",
+    "react-dom": "^19.3.0",
+    "tsconfig": "workspace:*",
+    "tsdown": "0.23.0"
+  },
+  "peerDependencies": {
+    "@types/react": "*",
+    "fumadocs-core": "^16.10.0",
+    "fumadocs-ui": "^16.10.0",
+    "react": "^19.2.0",
+    "react-dom": "^19.2.0"
+  },
+  "peerDependenciesMeta": {
+    "@types/react": {
+      "optional": true
+    }
+  }
+}

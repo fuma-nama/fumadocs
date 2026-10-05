@@ -27,6 +27,18 @@ export async function findSource(
   }
 }
 
+/** resolve the global CSS file imported by the root file */
+export async function findCssEntry({ cwd, baseDir, info }: Project): Promise<string | undefined> {
+  const rootFile = path.join(baseDir, info.rootFile);
+  const content = await fs.readFile(path.join(cwd, rootFile), 'utf-8').catch(() => '');
+  const match = /import\s+(?:\w+\s+from\s+)?['"]([^'"]+\.css)(?:\?url)?['"]/.exec(content);
+  if (!match) return;
+  const specifier = match[1];
+
+  if (specifier.startsWith('@/')) return path.join(baseDir, specifier.slice(2));
+  if (specifier.startsWith('.')) return path.join(path.dirname(rootFile), specifier);
+}
+
 export function scripts(json: PackageJson, scripts: Record<string, string>) {
   Object.assign((json.scripts ??= {}), scripts);
 }

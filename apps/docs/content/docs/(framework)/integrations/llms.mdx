@@ -336,6 +336,13 @@ INKEEP_API_KEY="..."
 </Tab>
 </Tabs>
 
+The installed chat is built with `@fumadocs/ai-chat`, a composable chat UI. The CLI adds its Tailwind CSS preset:
+
+```css title="Tailwind CSS"
+/* [!code ++] */
+@import '@fumadocs/ai-chat/css/preset.css';
+```
+
 Docs layouts render the chat from their `aiChat` option, as it takes client state, create a client component for your layout, and use it in place of the original one:
 
 ```tsx tab="Docs & Notebook" title="components/ai/layout.tsx"

@@ -67,7 +67,7 @@ export const registry: Registry = {
     'components/registry/build-graph.ts': { type: 'lib' },
     'components/{ai-sdk,inkeep}/search.tsx': { type: 'components', target: '<dir>/ai/search.tsx' },
     'components/feedback/*': { type: 'components', target: '<dir>/feedback/*' },
-    'components/{graph-view,markdown}.tsx': { type: 'components' },
+    'components/graph-view.tsx': { type: 'components' },
     'lib/{openrouter,llmgateway,inkeep}/route.ts': { type: 'route-handler', route: 'api/chat' },
     'lib/inkeep/*': { type: 'lib', target: '<dir>/ai/*' },
     'lib/og/*': { type: 'lib', target: '<dir>/og/*' },
@@ -76,5 +76,6 @@ export const registry: Registry = {
   dependencies: {
     'fumadocs-core': null,
     'fumadocs-ui': null,
+    '@fumadocs/ai-chat': null,
   },
 };
