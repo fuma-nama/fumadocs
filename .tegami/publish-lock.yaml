@@ -1,26 +1,39 @@
 core:changelogs:
-  - content: "---\npackages:\n  fumadocs-openapi:\n    type: minor\n  \"@fumadocs/asyncapi\":\n    type: patch\n  \"@fumadocs/graphql\":\n    type: patch\n  \"@fumadocs/language\":\n    type: patch\n---\n\n### Schema UI in cards\n\nNested schemas open in a card instead of a popover, navigated with breadcrumbs on top of it. Request bodies and responses render in the card directly, a property opens its card below itself.\n\n- Panels slide in from the side they are navigated to, the page scrolls back to the breadcrumbs after navigating.\n- Breadcrumbs that don't fit collapse into a menu, keeping the first crumb and the ones closest to the current schema.\n- The union selector moves next to the breadcrumbs, the filter into the top of the card. In narrow cards, the filter takes a row of its own.\n- Rows are more compact, enum values and constraints are shown as tags.\n- The Schema UI client props accept `selector`, shown above the breadcrumbs, and `actions`, shown next to the filter.\n\nOn API pages:\n\n- The media type of request bodies and responses is selected in the top of their cards.\n- Authorization fields start with where they are sent, like `header` or `query`. The security requirement is selected in the top of their card.\n- Parameters and authorization are grouped in cards.\n- Responses are tabs of their status codes instead of accordions, a link to a response selects its tab and scrolls to it.\n- Callbacks open in a dialog instead of expanding in the page, with their full URL on top.\n- Runtime expressions in routes, like `{$request.body#/url}`, are highlighted as a whole.\n- TypeScript definitions are copied from a button in the top of the body and response cards.\n"
-    filename: 2026-10-04-openapi-schema-card.md
+  - content: "---\npackages:\n  \"@fumadocs/ai-chat\":\n    type: minor\n  \"@fumadocs/cli\":\n    type: patch\n---\n\n## New package: `@fumadocs/ai-chat`\n\nThe Ask AI chat for AI SDK: pass the result of `useChat()` to `AIChatProvider`, then render `AIChatPanel` in the `aiChat` option of docs layouts. Questions rest at the top while answers stream below, and Markdown is rendered block by block, so unclosed syntax never shows.\n\nThe `ai/*` components of the CLI install its source along with the integration, and the generated layout uses `AIChat`, `AIChatPanel`, `AIChatTrigger` and `useAIChat`.\n"
+    filename: 2026-10-05-ai-chat-package.md
     v: 0.0.0
-  - content: "---\npackages:\n  \"@fumadocs/base-ui\":\n    type: patch\n---\n\n### Improve Spacious layout on mobile\n\nThe page sits in an inset panel on mobile too, while the navbar and table of contents bar stay on the outer surface.\n\n- The sidebar drawer floats as an inset panel, like the AI chat.\n- The navbar and table of contents bar stay below the `<Banner />`.\n- Like the Docs layout, `--fd-docs-row-3` is the bottom of these bars, so API pages scroll their content below them.\n"
-    filename: 2026-10-04-spacious-mobile.md
+  - content: "---\npackages:\n  fumadocs-ui:\n    type: patch\n  \"@fumadocs/base-ui\":\n    type: patch\n---\n\n### Focus inside the AI chat panel when opened\n\nThe `aiChat` panel turns visible as soon as it opens, so its input can take focus right away. It still hides only after the closing transition.\n"
+    filename: 2026-10-05-ai-chat-focus.md
     v: 0.0.0
-  - content: "---\npackages:\n  \"@fumadocs/json-schema\":\n    type: minor\n---\n\n### Headless Schema UI\n\n`<SchemaUIProvider />` from `@fumadocs/json-schema/react/client` holds the state of a Schema UI: the schemas opened from properties, the selected members of unions, and links to a property. `useSchemaUI()` reads and navigates it.\n\nThe Schema UI installed with Fumadocs CLI (`api-docs/schema`) is built on it, so the installed code is only UI.\n"
-    filename: 2026-10-04-headless-schema-ui.md
+  - content: "---\npackages:\n  fumadocs-ui:\n    type: patch\n  \"@fumadocs/base-ui\":\n    type: patch\n---\n\n### Collapse the sidebar with `Ctrl + B`\n\nOn desktop, press `Ctrl + B` (`⌘ + B` on macOS) to collapse or expand the sidebar, in layouts that support collapsing it. Like the theme hotkey, it is ignored while typing in an editable element, or when a dialog is opened.\n"
+    filename: 2026-10-05-sidebar-hotkey.md
+    v: 0.0.0
+  - content: "---\npackages:\n  \"@fumadocs/base-ui\":\n    type: patch\n---\n\n### Fix Spacious layout on Firefox mobile\n\nWhen scrolling in Firefox, the top edge of the page panel moved away from the navbar and table of contents bar, ending up in the middle of the page or off screen. It now stays below the bars, without relying on CSS anchor positioning.\n"
+    filename: 2026-10-05-spacious-firefox.md
+    v: 0.0.0
+  - content: "---\npackages:\n  fumadocs-ui:\n    type: patch\n  \"@fumadocs/base-ui\":\n    type: patch\n---\n\n### Ignore unknown values in tab groups\n\nTabs with a `groupId`, including code block tabs with `tab-group`, applied persisted or shared values even when none of their tabs matched, for example after renaming a tab, or when tabs in the same group have different items. They then showed no content until a tab was clicked. Such values are now ignored.\n"
+    filename: 2026-10-05-tabs-group-value.md
     v: 0.0.0
 core:packages:
   - changelogIds:
-      - 2026-10-04-openapi-schema-card.md
-    id: npm:@fumadocs/asyncapi
+      - 2026-10-05-ai-chat-package.md
+    id: npm:@fumadocs/ai-chat
     updated: true
-  - changelogIds:
-      - 2026-10-04-spacious-mobile.md
-    id: npm:@fumadocs/base-ui
-    updated: true
+  - id: npm:@fumadocs/asyncapi
+    updated: false
   - id: npm:@fumadocs/basehub
     updated: false
-  - id: npm:@fumadocs/cli
-    updated: false
+  - changelogIds:
+      - 2026-10-05-ai-chat-package.md
+    id: npm:@fumadocs/cli
+    updated: true
+  - changelogIds:
+      - 2026-10-05-ai-chat-focus.md
+      - 2026-10-05-sidebar-hotkey.md
+      - 2026-10-05-spacious-firefox.md
+      - 2026-10-05-tabs-group-value.md
+    id: npm:@fumadocs/base-ui
+    updated: true
   - id: npm:@fumadocs/content
     updated: false
   - id: npm:@fumadocs/content-collections
@@ -35,20 +48,14 @@ core:packages:
     updated: false
   - id: npm:fumadocs-epub
     updated: false
-  - changelogIds:
-      - 2026-10-04-openapi-schema-card.md
-    id: npm:@fumadocs/graphql
-    updated: true
+  - id: npm:@fumadocs/graphql
+    updated: false
   - id: npm:@fumari/image-size
     updated: false
-  - changelogIds:
-      - 2026-10-04-headless-schema-ui.md
-    id: npm:@fumadocs/json-schema
-    updated: true
-  - changelogIds:
-      - 2026-10-04-openapi-schema-card.md
-    id: npm:@fumadocs/language
-    updated: true
+  - id: npm:@fumadocs/json-schema
+    updated: false
+  - id: npm:@fumadocs/language
+    updated: false
   - id: npm:@fumadocs/local-content
     updated: false
   - id: npm:@fumadocs/local-html
@@ -57,21 +64,23 @@ core:packages:
     updated: false
   - id: npm:fumadocs-mdx
     updated: false
-  - id: npm:@fumadocs/mdx-remote
-    updated: false
   - id: npm:@fumadocs/notion
+    updated: false
+  - id: npm:@fumadocs/mdx-remote
     updated: false
   - id: npm:fumadocs-obsidian
     updated: false
+  - id: npm:fumadocs-openapi
+    updated: false
   - id: npm:fumadocs-preview
     updated: false
-  - changelogIds:
-      - 2026-10-04-openapi-schema-card.md
-    id: npm:fumadocs-openapi
-    updated: true
   - id: npm:fumadocs-python
     updated: false
-  - id: npm:fumadocs-ui
+  - changelogIds:
+      - 2026-10-05-ai-chat-focus.md
+      - 2026-10-05-sidebar-hotkey.md
+      - 2026-10-05-tabs-group-value.md
+    id: npm:fumadocs-ui
     updated: true
   - id: npm:@fumadocs/sanity
     updated: false
@@ -79,11 +88,11 @@ core:packages:
     updated: false
   - id: npm:@fumadocs/shadcn
     updated: false
-  - id: npm:shared-api
-    updated: true
   - id: npm:@fumari/stf
     updated: false
   - id: npm:@fumadocs/story
+    updated: false
+  - id: npm:shared-api
     updated: false
   - id: npm:@fumadocs/tailwind
     updated: false
@@ -94,10 +103,11 @@ core:packages:
   - id: npm:@fumadocs/vite
     updated: false
 npm:packages:
+  - id: npm:@fumadocs/ai-chat
   - id: npm:@fumadocs/asyncapi
-  - id: npm:@fumadocs/base-ui
   - id: npm:@fumadocs/basehub
   - id: npm:@fumadocs/cli
+  - id: npm:@fumadocs/base-ui
   - id: npm:@fumadocs/content
   - id: npm:@fumadocs/content-collections
   - id: npm:fumadocs-core
@@ -113,51 +123,51 @@ npm:packages:
   - id: npm:@fumadocs/local-html
   - id: npm:@fumadocs/local-md
   - id: npm:fumadocs-mdx
-  - id: npm:@fumadocs/mdx-remote
   - id: npm:@fumadocs/notion
+  - id: npm:@fumadocs/mdx-remote
   - id: npm:fumadocs-obsidian
-  - id: npm:fumadocs-preview
   - id: npm:fumadocs-openapi
+  - id: npm:fumadocs-preview
   - id: npm:fumadocs-python
   - id: npm:fumadocs-ui
   - id: npm:@fumadocs/sanity
   - id: npm:@fumadocs/satteri
   - id: npm:@fumadocs/shadcn
-  - id: npm:shared-api
   - id: npm:@fumari/stf
   - id: npm:@fumadocs/story
+  - id: npm:shared-api
   - id: npm:@fumadocs/tailwind
   - id: npm:fumadocs-twoslash
   - id: npm:fumadocs-typescript
   - id: npm:@fumadocs/vite
   - id: npm:docs
-  - id: npm:example-asyncapi
-  - id: npm:example-graphql
-  - id: npm:example-openapi
-  - id: npm:example-tanstack-start-openapi
-  - id: npm:example-i18n
-  - id: npm:example-react-router-i18n
-  - id: npm:example-tanstack-start-i18n
-  - id: npm:example-waku-i18n
-  - id: npm:example-astro
   - id: npm:example-base-ui
+  - id: npm:example-asyncapi
+  - id: npm:example-astro
   - id: npm:example-content-collections
-  - id: npm:example-marble-cms
+  - id: npm:example-graphql
+  - id: npm:example-i18n
   - id: npm:example-next
+  - id: npm:example-marble-cms
   - id: npm:example-next-local-html
   - id: npm:example-next-local-md
   - id: npm:example-next-min
   - id: npm:example-next-shadcn
   - id: npm:example-next-static
+  - id: npm:example-openapi
   - id: npm:example-obsidian
   - id: npm:example-python
   - id: npm:example-react-router
-  - id: npm:example-react-router-min
+  - id: npm:example-react-router-i18n
   - id: npm:example-react-router-rsc
-  - id: npm:example-react-router-spa
   - id: npm:example-tanstack-start
+  - id: npm:example-react-router-spa
+  - id: npm:example-react-router-min
   - id: npm:example-tanstack-start-local-md
   - id: npm:example-tanstack-start-min
+  - id: npm:example-tanstack-start-i18n
+  - id: npm:example-tanstack-start-openapi
   - id: npm:example-tanstack-start-spa
   - id: npm:example-tanstack-start-story
+  - id: npm:example-waku-i18n
   - id: npm:example-waku
