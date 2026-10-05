@@ -1,6 +1,7 @@
 import { ProvideLinksToolSchema } from '@/lib/inkeep/inkeep-qa-schema';
 import { createOpenAICompatible } from '@ai-sdk/openai-compatible';
 import { $routeHandler } from 'fuma-cli/macros/route-handler';
+import type { AIChatClientData } from '@fumadocs/ai-chat';
 import {
   convertToModelMessages,
   createUIMessageStreamResponse,
@@ -9,14 +10,7 @@ import {
   type UIMessage,
 } from 'ai';
 
-export type InkeepUIMessage = UIMessage<
-  never,
-  {
-    client: {
-      location: string;
-    };
-  }
->;
+export type InkeepUIMessage = UIMessage<never, { client: AIChatClientData }>;
 
 const openai = createOpenAICompatible({
   name: 'inkeep',

@@ -1,10 +1,7 @@
 import { baseOptions, linkItems, logo } from '@/components/layouts/shared';
 import { source } from '@/lib/source';
-import { AISearch, AISearchTrigger } from '@/components/inkeep/search';
+import { AIChat, AIChatTrigger } from '@/components/inkeep/search';
 import { getSection } from '@/lib/source/navigation';
-import { MessageCircleIcon } from 'lucide-react';
-import { cn } from '@/lib/cn';
-import { buttonVariants } from 'fumadocs-ui/components/ui/button';
 import { getLayoutTabs } from 'fumadocs-ui/layouts/shared';
 import type { CSSProperties } from 'react';
 import { ClientDocsLayout } from './client';
@@ -14,7 +11,7 @@ export function DefaultLayout({ children }: LayoutProps<'/docs'>) {
   const base = baseOptions();
 
   return (
-    <AISearch>
+    <AIChat>
       <ClientDocsLayout
         {...base}
         tree={source.getPageTree()}
@@ -54,19 +51,8 @@ export function DefaultLayout({ children }: LayoutProps<'/docs'>) {
         })}
       >
         {children}
-        <AISearchTrigger
-          position="float"
-          className={cn(
-            buttonVariants({
-              variant: 'secondary',
-              className: 'text-fd-muted-foreground rounded-2xl',
-            }),
-          )}
-        >
-          <MessageCircleIcon className="size-4.5" />
-          Ask AI
-        </AISearchTrigger>
+        <AIChatTrigger />
       </ClientDocsLayout>
-    </AISearch>
+    </AIChat>
   );
 }

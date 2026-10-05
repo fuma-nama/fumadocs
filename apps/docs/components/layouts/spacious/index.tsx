@@ -1,6 +1,6 @@
 import { baseOptions, linkItems, logo } from '@/components/layouts/shared';
 import { source } from '@/lib/source';
-import { AISearch } from '@/components/inkeep/search';
+import { AIChat } from '@/components/inkeep/search';
 import { getSection } from '@/lib/source/navigation';
 import type { CSSProperties, ReactNode } from 'react';
 import { getLayoutTabs } from 'fumadocs-ui/layouts/shared';
@@ -27,7 +27,7 @@ export function Spacious({ children }: { children: ReactNode }) {
   });
 
   return (
-    <AISearch>
+    <AIChat>
       <ClientSpaciousLayout
         {...base}
         tree={source.getPageTree()}
@@ -46,6 +46,6 @@ export function Spacious({ children }: { children: ReactNode }) {
       >
         {children}
       </ClientSpaciousLayout>
-    </AISearch>
+    </AIChat>
   );
 }

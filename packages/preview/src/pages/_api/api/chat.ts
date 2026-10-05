@@ -48,6 +48,7 @@ const createSearchServer = revalidable({
 const systemPrompt = [
   'You are an AI assistant for a documentation site.',
   'Use the `search` tool to retrieve relevant docs context before answering when needed.',
+  'A user message may begin with [Client Context], the page they are reading. For questions about "this page", search its title.',
   'The `search` tool returns raw JSON results from documentation. Use those results to ground your answer and cite sources as markdown links using the document `url` field when available.',
   'If you cannot find the answer in search results, say you do not know and suggest a better search query.',
 ].join('\n');
@@ -135,7 +136,12 @@ export async function POST(req: Request) {
       search: searchTool,
     },
     system: systemPrompt,
-    messages: await convertToModelMessages(reqJson.messages ?? []),
+    messages: await convertToModelMessages(reqJson.messages ?? [], {
+      convertDataPart(part) {
+        if (part.type === 'data-client')
+          return { type: 'text', text: `[Client Context: ${JSON.stringify(part.data)}]` };
+      },
+    }),
     toolChoice: 'auto',
   });
 
