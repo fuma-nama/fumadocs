@@ -64,7 +64,7 @@ export function TOC({ container, header, footer, ...props }: TOCProps) {
       id="nd-toc"
       {...container}
       className={cn(
-        'sticky top-0 flex flex-col shrink-0 w-(--fd-toc-width) h-full ps-16 pt-6 pb-4 overflow-clip *:min-w-[calc(var(--fd-toc-width)---spacing(16))] layout:[--fd-toc-width:--spacing(76)] transition-[width,padding,opacity,visibility] duration-300 ease-in-out motion-reduce:transition-none max-md:hidden',
+        'sticky top-0 flex flex-col shrink-0 w-(--fd-toc-width) h-full ps-16 pt-8 pb-4 overflow-clip *:min-w-[calc(var(--fd-toc-width)---spacing(16))] layout:[--fd-toc-width:--spacing(76)] transition-[width,padding,opacity,visibility] duration-300 ease-in-out motion-reduce:transition-none max-md:hidden',
         // collapse along with AI chat
         aiChat?.open && aiChat.panel
           ? 'invisible w-0 ps-0 opacity-0'
@@ -179,7 +179,7 @@ export function TOCDropdown({ trigger, content, header, footer, ...props }: TOCD
           <Popover.Popup
             {...content}
             className={cn(
-              'flex flex-col w-[min(22rem,calc(100vw-1rem))] max-h-[min(28rem,var(--available-height))] p-3 rounded-2xl border bg-fd-popover text-fd-popover-foreground shadow-xl outline-none origin-(--transform-origin) transition-[opacity,scale] duration-150 ease-[cubic-bezier(0.22,1,0.36,1)] data-starting-style:opacity-0 data-starting-style:scale-95 data-ending-style:opacity-0 data-ending-style:scale-95 motion-reduce:transition-none',
+              'flex flex-col w-88 max-w-(--available-width) max-h-[min(28rem,var(--available-height))] p-3 rounded-2xl border bg-fd-popover text-fd-popover-foreground shadow-xl outline-none origin-(--transform-origin) transition-[opacity,scale] duration-150 ease-[cubic-bezier(0.22,1,0.36,1)] data-starting-style:opacity-0 data-starting-style:scale-95 data-ending-style:opacity-0 data-ending-style:scale-95 motion-reduce:transition-none',
               content?.className,
             )}
           >
