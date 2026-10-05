@@ -17,7 +17,7 @@ interface Scroll {
 const ConversationContext = createContext<{ pin: () => void } | null>(null);
 
 /**
- * Follows the answer until the reader scrolls up. A new turn rises to the top, as the last turn has room for it.
+ * Follows the answer until the reader scrolls up, asking again follows the new one.
  */
 export function Conversation({ className, children }: { className?: string; children: ReactNode }) {
   const t = useTranslations({ note: 'AI chat' });
@@ -72,7 +72,7 @@ export function Conversation({ className, children }: { className?: string; chil
     <div className={cn('relative min-h-0', className)}>
       <div
         ref={scrollRef}
-        className="fd-scroll-container size-full overflow-y-auto overscroll-contain [container-type:size]"
+        className="fd-scroll-container size-full overflow-y-auto overscroll-contain"
         style={{
           maskImage:
             'linear-gradient(to bottom, transparent, white 1rem, white calc(100% - 1rem), transparent)',
@@ -96,14 +96,11 @@ export function Conversation({ className, children }: { className?: string; chil
   );
 }
 
-/**
- * A question with its answer, the last one fills the view so its question can rest at the top.
- */
 export function Turn({ children }: { children: ReactNode }) {
   const { pin } = use(ConversationContext)!;
   useLayoutEffect(() => pin(), [pin]);
 
-  return <div className="flex flex-col gap-4 last:min-h-[calc(100cqh-2.25rem)]">{children}</div>;
+  return <div className="flex flex-col gap-4">{children}</div>;
 }
 
 function endOf(scroller: HTMLElement) {

@@ -124,7 +124,6 @@ function codeOf(children: unknown) {
   if (typeof props?.children === 'string') return props as { children: string; className?: string };
 }
 
-/** each word fades in as it streams */
 function rehypeWords() {
   return (tree: Root) => {
     visit(tree, ['text', 'element'], (node, index, parent) => {
@@ -137,7 +136,7 @@ function rehypeWords() {
         words.push({
           type: 'element',
           tagName: 'span',
-          properties: { className: ['animate-fd-fade-in'] },
+          properties: { className: ['motion-safe:animate-fd-fade-in'] },
           children: [{ type: 'text', value: word }],
         });
       }

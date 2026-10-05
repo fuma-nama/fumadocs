@@ -3,12 +3,22 @@ import type { ReactNode } from 'react';
 import { useChat } from '@ai-sdk/react';
 import { DefaultChatTransport, type InferUITool, type UIMessage } from 'ai';
 import { DocsLayout, type DocsLayoutProps } from 'fumadocs-ui/layouts/docs';
-import { AIChatPanel, AIChatProvider, AIChatSearch, useAIChat } from '@fumadocs/ai-chat';
+import {
+  type AIChatClientData,
+  AIChatPanel,
+  AIChatProvider,
+  AIChatSearch,
+  useAIChat,
+} from '@fumadocs/ai-chat';
 import type { SearchTool } from '@/pages/_api/api/chat';
 
 export { AIChatTrigger } from '@fumadocs/ai-chat';
 
-type ChatUIMessage = UIMessage<never, never, { search: InferUITool<SearchTool> }>;
+type ChatUIMessage = UIMessage<
+  never,
+  { client: AIChatClientData },
+  { search: InferUITool<SearchTool> }
+>;
 
 export function AIChat({ children }: { children: ReactNode }) {
   const chat = useChat<ChatUIMessage>({

@@ -21,13 +21,6 @@ export function AIChat({ children }: { children: ReactNode }) {
   return (
     <AIChatProvider
       chat={chat}
-      toMessage={(text) => ({
-        role: 'user',
-        parts: [
-          { type: 'data-client', data: { location: location.href } },
-          { type: 'text', text },
-        ],
-      })}
       renderPart={renderPart}
       description={
         <>
@@ -50,7 +43,8 @@ export function AIChat({ children }: { children: ReactNode }) {
 }
 
 function renderPart(part: InkeepUIMessage['parts'][number]) {
-  if (part.type !== 'tool-provideLinks') return;
+  // links stream in as partial JSON
+  if (part.type !== 'tool-provideLinks' || part.state === 'input-streaming') return;
   const input = part.input as z.infer<typeof ProvideLinksToolSchema> | undefined;
 
   return <AIChatSources sources={input?.links ?? []} />;

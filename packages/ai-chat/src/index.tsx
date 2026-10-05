@@ -38,9 +38,15 @@ import { Conversation, Turn } from './conversation';
 import { Markdown } from './markdown';
 import { cn } from './cn';
 
+/** the page a question is asked from, sent as a `data-client` part */
+export interface AIChatClientData {
+  location: string;
+  title: string;
+}
+
 export interface AIChatOptions<Message extends UIMessage = UIMessage> {
   chat: UseChatHelpers<Message>;
-  /** the message to send for a question, defaults to its text */
+  /** the message to send for a question, defaults to its text with `AIChatClientData` */
   toMessage?: (text: string) => Parameters<UseChatHelpers<Message>['sendMessage']>[0];
   /** renders a part other than text, such as a tool call, keep it stable so settled messages skip re-rendering */
   renderPart?: (part: Message['parts'][number], live: boolean) => ReactNode;
@@ -50,7 +56,6 @@ export interface AIChatOptions<Message extends UIMessage = UIMessage> {
 }
 
 interface ChatState extends AIChatOptions {
-  /** an answer is on its way */
   busy: boolean;
   send: (text: string) => void;
   inputRef: RefObject<HTMLTextAreaElement | null>;
@@ -70,7 +75,7 @@ export function AIChatProvider<Message extends UIMessage>({
   const [open, setOpen] = useState(false);
   const openState = useMemo(() => ({ open, setOpen }), [open]);
   const inputRef = useRef<HTMLTextAreaElement>(null);
-  const { chat, toMessage } = options;
+  const { chat, toMessage } = options as unknown as AIChatOptions;
 
   const onKeyDown = useEffectEvent((e: KeyboardEvent) => {
     if (e.key === 'Escape' && open) {
@@ -93,7 +98,22 @@ export function AIChatProvider<Message extends UIMessage>({
         value={{
           ...(options as unknown as AIChatOptions),
           busy: chat.status === 'streaming' || chat.status === 'submitted',
-          send: (text) => void chat.sendMessage(toMessage ? toMessage(text) : { text }),
+          send: (text) =>
+            void chat.sendMessage(
+              toMessage?.(text) ?? {
+                role: 'user',
+                parts: [
+                  {
+                    type: 'data-client',
+                    data: {
+                      location: location.href,
+                      title: document.title,
+                    } satisfies AIChatClientData,
+                  },
+                  { type: 'text', text },
+                ],
+              },
+            ),
           inputRef,
         }}
       >
@@ -123,7 +143,6 @@ export function AIChatPanel() {
   );
 }
 
-/** the first question as title, with new chat and close buttons */
 export function AIChatHeader() {
   const { setOpen } = useAIChat();
   const { chat, inputRef } = useChatState();
@@ -159,7 +178,6 @@ export function AIChatHeader() {
   );
 }
 
-/** the conversation, or an intro with suggestions when it is new */
 export function AIChatMessages({ className }: { className?: string }) {
   const { chat, busy, renderPart, description, suggestions, send, inputRef } = useChatState();
   const t = useTranslations({ note: 'AI chat' });
@@ -252,13 +270,19 @@ export function AIChatInput({ className }: { className?: string }) {
   const { open } = useAIChat();
   const { chat, busy, send, inputRef } = useChatState();
   const t = useTranslations({ note: 'AI chat' });
-  const [input, setInput] = useState(() => localStorage.getItem(StorageKey) ?? '');
+  const [input, setInput] = useState('');
   const text = input.trim();
 
   function update(value: string) {
     setInput(value);
     localStorage.setItem(StorageKey, value);
   }
+
+  // read after hydration, as the server has no drafts
+  useEffect(() => {
+    const draft = localStorage.getItem(StorageKey);
+    if (draft) setInput(draft);
+  }, []);
 
   useEffect(() => {
     if (open && !matchMedia('(pointer: coarse)').matches)
@@ -349,10 +373,11 @@ export function AIChatTrigger({ className }: { className?: string }) {
       type="button"
       className={cn(
         buttonVariants({ variant: 'secondary' }),
-        'fixed inset-e-[calc(--spacing(4)+var(--removed-body-scroll-bar-size,0px))] bottom-4 z-20 gap-2 rounded-2xl text-fd-muted-foreground shadow-lg transition-[translate,opacity]',
+        'fixed inset-e-[calc(--spacing(4)+var(--removed-body-scroll-bar-size,0px))] bottom-4 z-20 gap-2 rounded-2xl text-fd-muted-foreground shadow-lg transition-[translate,opacity] motion-reduce:transition-none',
         open && 'translate-y-10 opacity-0',
         className,
       )}
+      inert={open}
       onClick={() => setOpen(!open)}
     >
       <MessageCircleIcon className="size-4.5" />
@@ -361,7 +386,6 @@ export function AIChatTrigger({ className }: { className?: string }) {
   );
 }
 
-/** cited pages, as chips under the answer */
 export function AIChatSources({
   sources,
 }: {
@@ -495,7 +519,7 @@ const Message = memo(function Message({
           className={cn(
             '-ms-1.25 -mt-1 flex items-center motion-safe:animate-fd-fade-in',
             !last &&
-              'opacity-0 transition-opacity group-focus-within/message:opacity-100 group-hover/message:opacity-100 pointer-coarse:opacity-100',
+              'opacity-0 transition-opacity group-focus-within/message:opacity-100 group-hover/message:opacity-100 motion-reduce:transition-none pointer-coarse:opacity-100',
           )}
         >
           <CopyAction text={text} className={small} />
@@ -560,7 +584,6 @@ function Failure({ reason, onRetry }: { reason: string; onRetry: () => void }) {
   );
 }
 
-/** an icon button, labelled by a tooltip */
 function Action({
   label,
   className,
@@ -635,7 +658,6 @@ function Spinner() {
   );
 }
 
-/** rises in after its earlier siblings */
 function stagger(base = 0): CSSProperties {
   return {
     animationDelay: `calc(${base}ms + (sibling-index() - 1) * 50ms)`,

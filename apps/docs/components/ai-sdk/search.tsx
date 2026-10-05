@@ -2,7 +2,7 @@
 import type { ReactNode } from 'react';
 import { useChat } from '@ai-sdk/react';
 import { DefaultChatTransport, type InferUITool, type Tool, type UIMessage } from 'ai';
-import { AIChatProvider, AIChatSearch } from '@fumadocs/ai-chat';
+import { type AIChatClientData, AIChatProvider, AIChatSearch } from '@fumadocs/ai-chat';
 
 export { AIChatPanel, AIChatTrigger, useAIChat } from '@fumadocs/ai-chat';
 
@@ -13,11 +13,7 @@ export type SearchTool = Tool<
 
 export type ChatUIMessage = UIMessage<
   never,
-  {
-    client: {
-      location: string;
-    };
-  },
+  { client: AIChatClientData },
   { search: InferUITool<SearchTool> }
 >;
 
@@ -31,17 +27,7 @@ export function AIChat({ children }: { children: ReactNode }) {
   });
 
   return (
-    <AIChatProvider
-      chat={chat}
-      toMessage={(text) => ({
-        role: 'user',
-        parts: [
-          { type: 'data-client', data: { location: location.href } },
-          { type: 'text', text },
-        ],
-      })}
-      renderPart={renderPart}
-    >
+    <AIChatProvider chat={chat} renderPart={renderPart}>
       {children}
     </AIChatProvider>
   );
