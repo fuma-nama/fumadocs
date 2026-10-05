@@ -1,3 +1,21 @@
+## @fumadocs/base-ui@16.16.2
+
+### Focus inside the AI chat panel when opened
+
+The `aiChat` panel turns visible as soon as it opens, so its input can take focus right away. It still hides only after the closing transition.
+
+### Collapse the sidebar with `Ctrl + B`
+
+On desktop, press `Ctrl + B` (`⌘ + B` on macOS) to collapse or expand the sidebar, in layouts that support collapsing it. Like the theme hotkey, it is ignored while typing in an editable element, or when a dialog is opened.
+
+### Fix Spacious layout on Firefox mobile
+
+When scrolling in Firefox, the top edge of the page panel moved away from the navbar and table of contents bar, ending up in the middle of the page or off screen. It now stays below the bars, without relying on CSS anchor positioning.
+
+### Ignore unknown values in tab groups
+
+Tabs with a `groupId`, including code block tabs with `tab-group`, applied persisted or shared values even when none of their tabs matched, for example after renaming a tab, or when tabs in the same group have different items. They then showed no content until a tab was clicked. Such values are now ignored.
+
 ## @fumadocs/base-ui@16.16.1
 
 ### Improve Spacious layout on mobile
