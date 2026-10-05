@@ -1,6 +1,6 @@
 import { baseOptions, linkItems, logo } from '@/components/layouts/shared';
 import { source } from '@/lib/source';
-import { AISearch } from '@/components/inkeep/search';
+import { AIChat } from '@/components/inkeep/search';
 import { getSection } from '@/lib/source/navigation';
 import type { CSSProperties, ReactNode } from 'react';
 import { getLayoutTabs } from 'fumadocs-ui/layouts/shared';
@@ -35,7 +35,7 @@ export function Glass({ children }: { children: ReactNode }) {
   });
 
   return (
-    <AISearch>
+    <AIChat>
       <ClientGlassLayout
         {...base}
         tree={source.getPageTree()}
@@ -54,6 +54,6 @@ export function Glass({ children }: { children: ReactNode }) {
       >
         {children}
       </ClientGlassLayout>
-    </AISearch>
+    </AIChat>
   );
 }

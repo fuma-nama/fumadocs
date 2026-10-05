@@ -336,50 +336,28 @@ INKEEP_API_KEY="..."
 </Tab>
 </Tabs>
 
-The installed chat is built with `@fumadocs/ai-chat`, a composable chat UI. The CLI adds its Tailwind CSS preset:
-
-```css title="Tailwind CSS"
-/* [!code ++] */
-@import '@fumadocs/ai-chat/css/preset.css';
-```
-
 Docs layouts render the chat from their `aiChat` option, as it takes client state, create a client component for your layout, and use it in place of the original one:
 
 ```tsx tab="Docs & Notebook" title="components/ai/layout.tsx"
 'use client';
 // or `fumadocs-ui/layouts/notebook`
 import { DocsLayout as Layout, type DocsLayoutProps } from 'fumadocs-ui/layouts/docs';
-import { buttonVariants } from 'fumadocs-ui/components/ui/button';
-import { MessageCircleIcon } from 'lucide-react';
-import { cn } from '@/lib/cn';
 // the installed components
-import { AISearch, AISearchPanel, AISearchTrigger, useAISearchContext, useHotKey } from './search';
+import { AIChat, AIChatPanel, AIChatTrigger, useAIChat } from './search';
 
 export function DocsLayout(props: DocsLayoutProps) {
   return (
-    <AISearch>
+    <AIChat>
       <ChatLayout {...props} />
-      <AISearchTrigger
-        position="float"
-        className={cn(
-          buttonVariants({
-            variant: 'secondary',
-            className: 'text-fd-muted-foreground rounded-2xl',
-          }),
-        )}
-      >
-        <MessageCircleIcon className="size-4.5" />
-        Ask AI
-      </AISearchTrigger>
-    </AISearch>
+      <AIChatTrigger />
+    </AIChat>
   );
 }
 
 function ChatLayout(props: DocsLayoutProps) {
-  const { open, setOpen } = useAISearchContext();
-  useHotKey();
+  const { open, setOpen } = useAIChat();
 
-  return <Layout {...props} aiChat={{ open, onOpenChange: setOpen, panel: <AISearchPanel /> }} />;
+  return <Layout {...props} aiChat={{ open, onOpenChange: setOpen, panel: <AIChatPanel /> }} />;
 }
 ```
 
@@ -393,22 +371,21 @@ import { DocsLayout } from '@/components/ai/layout'; // [!code ++]
 // or `fumadocs-ui/layouts/spacious`
 import { DocsLayout as Layout, type DocsLayoutProps } from 'fumadocs-ui/layouts/glass';
 // the installed components
-import { AISearch, AISearchPanel, useAISearchContext, useHotKey } from './search';
+import { AIChat, AIChatPanel, useAIChat } from './search';
 
 // the layout has its own Ask AI button
 export function DocsLayout(props: DocsLayoutProps) {
   return (
-    <AISearch>
+    <AIChat>
       <ChatLayout {...props} />
-    </AISearch>
+    </AIChat>
   );
 }
 
 function ChatLayout(props: DocsLayoutProps) {
-  const { open, setOpen } = useAISearchContext();
-  useHotKey();
+  const { open, setOpen } = useAIChat();
 
-  return <Layout {...props} aiChat={{ open, onOpenChange: setOpen, panel: <AISearchPanel /> }} />;
+  return <Layout {...props} aiChat={{ open, onOpenChange: setOpen, panel: <AIChatPanel /> }} />;
 }
 ```
 

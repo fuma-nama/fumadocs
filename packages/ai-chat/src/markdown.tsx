@@ -1,5 +1,4 @@
 'use client';
-import { cn } from 'cn';
 import { DynamicCodeBlock } from 'fumadocs-ui/components/dynamic-codeblock';
 import defaultMdxComponents from 'fumadocs-ui/mdx';
 import type { ElementContent, Root } from 'hast';
@@ -11,7 +10,6 @@ import remarkGfm from 'remark-gfm';
 import remarkRehype from 'remark-rehype';
 import remend from 'remend';
 import { visit } from 'unist-util-visit';
-import { splitBlocks } from './utils/blocks';
 
 const processor = remark().use(remarkGfm).use(remarkRehype).use(rehypeWords);
 
@@ -24,16 +22,11 @@ const components: Components = {
 /**
  * An answer in Markdown. While `live`, only its last block re-renders, with unclosed syntax completed.
  */
-export function ChatMarkdown({
-  text,
-  live = false,
-  className,
-  ...props
-}: ComponentProps<'div'> & { text: string; live?: boolean }) {
+export function Markdown({ text, live }: { text: string; live: boolean }) {
   const blocks = splitBlocks(text);
 
   return (
-    <div className={cn('prose prose-no-margin text-sm', className)} {...props}>
+    <div className="prose prose-no-margin text-sm">
       {blocks.map((block, i) => (
         <Block
           key={i}
@@ -53,6 +46,48 @@ const Block = memo(function Block({ text }: { text: string }) {
     components,
   });
 });
+
+const listItem = /^(?:[-*+]|\d{1,9}[.)])\s/;
+
+/** top-level blocks split at blank lines, a block continues through code fences, indented lines and list items */
+export function splitBlocks(text: string): string[] {
+  const blocks: string[] = [];
+  let block = '';
+  let fence: string | undefined;
+  let blank = false;
+  let inList = false;
+
+  for (const line of text.split('\n')) {
+    if (fence) {
+      block += `\n${line}`;
+      const close = /^ {0,3}(`{3,}|~{3,})\s*$/.exec(line)?.[1];
+      if (close && close[0] === fence[0] && close.length >= fence.length) fence = undefined;
+      continue;
+    }
+
+    if (line.trim().length === 0) {
+      blank = true;
+      continue;
+    }
+
+    const indented = /^\s/.test(line);
+    if (block.length === 0) {
+      block = line;
+    } else if (blank && !indented && !(inList && listItem.test(line))) {
+      blocks.push(block);
+      block = line;
+    } else {
+      block += blank ? `\n\n${line}` : `\n${line}`;
+    }
+
+    if (!indented) inList = listItem.test(line);
+    blank = false;
+    fence = /^ {0,3}(`{3,}|~{3,})/.exec(line)?.[1];
+  }
+
+  if (block.length > 0) blocks.push(block);
+  return blocks;
+}
 
 function Pre({ children }: ComponentProps<'pre'>) {
   const code = (children as { props?: ComponentProps<'code'> } | undefined)?.props;

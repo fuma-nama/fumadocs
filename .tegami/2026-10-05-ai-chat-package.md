@@ -6,8 +6,6 @@ packages:
 
 ## New package: `@fumadocs/ai-chat`
 
-A composable chat UI for Ask AI integrations: conversation with pinned questions and follow scrolling, composer, messages, sources, activity rows, suggestions and error notices. `ChatMarkdown` renders streamed answers block by block, completing unclosed syntax so raw `**` or half-typed links never show. The `ai/*` components of the CLI are built on it, and the CLI adds its Tailwind CSS preset:
+The Ask AI chat for AI SDK: pass the result of `useChat()` to `AIChatProvider`, then render `AIChatPanel` in the `aiChat` option of docs layouts. Questions rest at the top while answers stream below, and Markdown is rendered block by block, so unclosed syntax never shows.
 
-```css
-@import '@fumadocs/ai-chat/css/preset.css';
-```
+The `ai/*` components of the CLI install its source along with the integration, and the generated layout uses `AIChat`, `AIChatPanel`, `AIChatTrigger` and `useAIChat`.

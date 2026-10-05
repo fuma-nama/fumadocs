@@ -20,11 +20,7 @@ import { remarkMdxMermaid } from 'fumadocs-core/mdx-plugins/remark-mdx-mermaid';
 import { Mermaid } from '@/components/mermaid';
 import type { ComponentProps, ReactNode } from 'react';
 import { Image } from '@/components/image';
-import { AISearch, AISearchTrigger } from '@/components/ai/search';
-import { AIDocsLayout } from '@/components/ai/layout';
-import { cn } from '@/lib/cn';
-import { buttonVariants } from 'fumadocs-ui/components/ui/button';
-import { MessageCircleIcon } from 'lucide-react';
+import { AIChat, AIChatTrigger, AIDocsLayout } from '@/components/ai/search';
 import { isAISupported } from '@/lib/ai';
 
 const compiler = createMarkdownCompiler({
@@ -120,23 +116,12 @@ async function MdContent({
       return <DocsLayout {...props}>{children}</DocsLayout>;
 
     return (
-      <AISearch>
+      <AIChat>
         <AIDocsLayout {...props}>
           {children}
-          <AISearchTrigger
-            position="float"
-            className={cn(
-              buttonVariants({
-                variant: 'secondary',
-                className: 'text-fd-muted-foreground rounded-2xl',
-              }),
-            )}
-          >
-            <MessageCircleIcon className="size-4.5" />
-            Ask AI
-          </AISearchTrigger>
+          <AIChatTrigger />
         </AIDocsLayout>
-      </AISearch>
+      </AIChat>
     );
   }
 

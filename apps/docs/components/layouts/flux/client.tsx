@@ -6,14 +6,8 @@ import {
   NavigationPanelOverlay,
   NavigationPanelProps,
 } from 'fumadocs-ui/layouts/flux';
-import {
-  AISearch,
-  AISearchInput,
-  AISearchPanelHeader,
-  AISearchPanelList,
-  useAISearchContext,
-  useHotKey,
-} from '@/components/inkeep/search';
+import { AIChat, useAIChat } from '@/components/inkeep/search';
+import { AIChatHeader, AIChatInput, AIChatMessages } from '@fumadocs/ai-chat';
 import { MessageCircleIcon } from 'lucide-react';
 import { buttonVariants } from 'fumadocs-ui/components/ui/button';
 import { cn } from '@/lib/cn';
@@ -23,22 +17,21 @@ import { useEffect, useState } from 'react';
 
 export function LayoutClient(props: DocsLayoutProps) {
   return (
-    <AISearch>
+    <AIChat>
       <DocsLayout
         {...props}
         renderNavigationPanel={(panel) => <CustomNavigationPanel {...panel} />}
       >
         {props.children}
       </DocsLayout>
-    </AISearch>
+    </AIChat>
   );
 }
 
 function CustomNavigationPanel({ tool, ...props }: NavigationPanelProps) {
   const [mounted, setMounted] = useState(false);
-  const ai = useAISearchContext();
+  const ai = useAIChat();
   const sidebar = useSidebar();
-  useHotKey();
 
   const variants = {
     show: {
@@ -88,8 +81,8 @@ function CustomNavigationPanel({ tool, ...props }: NavigationPanelProps) {
                 },
               }}
             >
-              <AISearchPanelHeader />
-              <AISearchPanelList className="flex-1" />
+              <AIChatHeader />
+              <AIChatMessages className="flex-1" />
             </motion.div>
           )}
         </AnimatePresence>
@@ -129,7 +122,7 @@ function CustomNavigationPanel({ tool, ...props }: NavigationPanelProps) {
                 exit="hide"
                 transition={{ duration: 0.2 }}
               >
-                <AISearchInput className="border-0 bg-transparent shadow-none focus-within:ring-0" />
+                <AIChatInput className="border-0 bg-transparent shadow-none focus-within:ring-0" />
               </motion.div>
             ) : (
               <motion.div

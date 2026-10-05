@@ -1,5 +1,5 @@
 import { describe, expect, test } from 'vitest';
-import { splitBlocks } from '../src/utils/blocks';
+import { splitBlocks } from '../src/markdown';
 
 describe('splitBlocks', () => {
   test('splits at blank lines', () => {

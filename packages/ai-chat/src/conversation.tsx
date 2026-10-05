@@ -1,8 +1,8 @@
 'use client';
 import { useTranslations } from '@fuma-translate/react';
-import { cn } from 'cn';
 import { ArrowDownIcon } from 'lucide-react';
-import { type ComponentProps, createContext, use, useLayoutEffect, useRef, useState } from 'react';
+import { createContext, type ReactNode, use, useLayoutEffect, useRef, useState } from 'react';
+import { cn } from './cn';
 
 interface Scroll {
   follow: boolean;
@@ -19,7 +19,7 @@ const ConversationContext = createContext<{ pin: () => void } | null>(null);
 /**
  * Follows the answer until the reader scrolls up. A new turn rises to the top, as the last turn has room for it.
  */
-export function ChatConversation({ className, children, ...props }: ComponentProps<'div'>) {
+export function Conversation({ className, children }: { className?: string; children: ReactNode }) {
   const t = useTranslations({ note: 'AI chat' });
   const scrollRef = useRef<HTMLDivElement>(null);
   const listRef = useRef<HTMLDivElement>(null);
@@ -69,7 +69,7 @@ export function ChatConversation({ className, children, ...props }: ComponentPro
   }, []);
 
   return (
-    <div className={cn('relative min-h-0', className)} {...props}>
+    <div className={cn('relative min-h-0', className)}>
       <div
         ref={scrollRef}
         className="fd-scroll-container size-full overflow-y-auto overscroll-contain [container-type:size]"
@@ -99,16 +99,11 @@ export function ChatConversation({ className, children, ...props }: ComponentPro
 /**
  * A question with its answer, the last one fills the view so its question can rest at the top.
  */
-export function ChatTurn({ className, ...props }: ComponentProps<'div'>) {
+export function Turn({ children }: { children: ReactNode }) {
   const { pin } = use(ConversationContext)!;
   useLayoutEffect(() => pin(), [pin]);
 
-  return (
-    <div
-      className={cn('flex flex-col gap-4 last:min-h-[calc(100cqh-2.25rem)]', className)}
-      {...props}
-    />
-  );
+  return <div className="flex flex-col gap-4 last:min-h-[calc(100cqh-2.25rem)]">{children}</div>;
 }
 
 function endOf(scroller: HTMLElement) {

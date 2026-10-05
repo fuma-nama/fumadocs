@@ -12,7 +12,7 @@ import {
 import { exists } from '@/utils/fs';
 import { localeSegment } from '@/project/route';
 import { nextProxy, sampleContent, sampleContentCn, templates } from './templates';
-import { findCssEntry, reactFramework, reactOnly, registerReactRouterRoutes } from '../utils';
+import { reactFramework, reactOnly, registerReactRouterRoutes } from '../utils';
 
 const cssImports = (preset: string) => [
   `@import 'fumadocs-ui/css/${preset}.css';`,
@@ -144,6 +144,18 @@ async function configureBundler(ctx: FeatureContext) {
         : "Add `fumadocsMdx()` from 'fumadocs-mdx/vite' to the Vite plugins of your config file.",
     );
   }
+}
+
+/** resolve the global CSS file imported by the root file */
+async function findCssEntry({ cwd, baseDir, info }: Project): Promise<string | undefined> {
+  const rootFile = path.join(baseDir, info.rootFile);
+  const content = await fs.readFile(path.join(cwd, rootFile), 'utf-8').catch(() => '');
+  const match = /import\s+(?:\w+\s+from\s+)?['"]([^'"]+\.css)(?:\?url)?['"]/.exec(content);
+  if (!match) return;
+  const specifier = match[1];
+
+  if (specifier.startsWith('@/')) return path.join(baseDir, specifier.slice(2));
+  if (specifier.startsWith('.')) return path.join(path.dirname(rootFile), specifier);
 }
 
 async function configureCss(ctx: FeatureContext) {

@@ -1,8 +1,7 @@
 import path from 'node:path';
 import type { ImportDeclaration } from 'oxc-parser';
 import type { Feature, FeatureContext } from '@/features';
-import { exists } from '@/utils/fs';
-import { findCssEntry, findSource } from './utils';
+import { findSource } from './utils';
 import { docs } from './docs';
 
 const providers = {
@@ -81,27 +80,9 @@ export const ai: Feature<{ provider: AIProvider }> = {
         'Pass the AI chat to your docs layout, see https://fumadocs.dev/docs/integrations/llms#ask-ai.',
       );
     }
-    const css = await findCssEntry(ctx.project);
-    if (css && (await exists(path.join(cwd, css)))) await ctx.append(css, [cssImport]);
-    else ctx.note(`Add the chat styles to your global CSS file:\n  ${cssImport}`);
-
     ctx.note(`Set ${providers[provider].env} in \`.env.local\`.`);
   },
 };
-
-const cssImport = `@import '@fumadocs/ai-chat/css/preset.css';`;
-
-const floatingTrigger = `
-      <AISearchTrigger
-        position="float"
-        className={buttonVariants({
-          variant: 'secondary',
-          className: 'text-fd-muted-foreground rounded-2xl',
-        })}
-      >
-        <MessageCircleIcon className="size-4.5" />
-        Ask AI
-      </AISearchTrigger>`;
 
 /** a client component rendering the docs layout with the installed chat */
 function clientLayout(layoutModule: string) {
@@ -110,32 +91,20 @@ function clientLayout(layoutModule: string) {
 
   return `'use client';
 import { DocsLayout as Layout, type DocsLayoutProps } from '${layoutModule}';
-${
-  trigger
-    ? `import { buttonVariants } from 'fumadocs-ui/components/ui/button';
-import { MessageCircleIcon } from 'lucide-react';
-`
-    : ''
-}import {
-  AISearch,
-  AISearchPanel,${trigger ? '\n  AISearchTrigger,' : ''}
-  useAISearchContext,
-  useHotKey,
-} from './search';
+import { AIChat, AIChatPanel,${trigger ? ' AIChatTrigger,' : ''} useAIChat } from './search';
 
 export function DocsLayout(props: DocsLayoutProps) {
   return (
-    <AISearch>
-      <ChatLayout {...props} />${trigger ? floatingTrigger : ''}
-    </AISearch>
+    <AIChat>
+      <ChatLayout {...props} />${trigger ? '\n      <AIChatTrigger />' : ''}
+    </AIChat>
   );
 }
 
 function ChatLayout(props: DocsLayoutProps) {
-  const { open, setOpen } = useAISearchContext();
-  useHotKey();
+  const { open, setOpen } = useAIChat();
 
-  return <Layout {...props} aiChat={{ open, onOpenChange: setOpen, panel: <AISearchPanel /> }} />;
+  return <Layout {...props} aiChat={{ open, onOpenChange: setOpen, panel: <AIChatPanel /> }} />;
 }
 `;
 }

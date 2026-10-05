@@ -2142,6 +2142,9 @@ importers:
         specifier: ^5.1.0
         version: 5.1.0
     devDependencies:
+      '@ai-sdk/react':
+        specifier: ^4.0.130
+        version: 4.0.130(react@19.3.0)(zod@4.6.5)
       '@types/hast':
         specifier: ^3.0.5
         version: 3.0.5
@@ -2151,6 +2154,12 @@ importers:
       '@types/react':
         specifier: ^19.3.0
         version: 19.3.0
+      ai:
+        specifier: ^7.0.127
+        version: 7.0.127(zod@4.6.5)
+      fuma-cli:
+        specifier: ^0.3.1
+        version: 0.3.2
       fumadocs-core:
         specifier: workspace:*
         version: link:../core

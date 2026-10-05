@@ -6,6 +6,7 @@ import * as asyncapi from '../../../../packages/asyncapi/registry/index.ts';
 import * as graphql from '../../../../packages/graphql/registry/index.ts';
 import * as story from '../../../../packages/story/registry/index.ts';
 import * as apiDocs from '../../../../packages/shared-api/registry/index.ts';
+import * as aiChat from '../../../../packages/ai-chat/registry/index.ts';
 import * as path from 'node:path';
 import type { Registry } from 'fuma-cli/compiler';
 
@@ -25,6 +26,7 @@ export const registry: Registry = {
     graphql.registry,
     story.registry,
     apiDocs.registry,
+    aiChat.registry,
   ],
   components: {
     'layouts/docs-min': {
@@ -76,6 +78,5 @@ export const registry: Registry = {
   dependencies: {
     'fumadocs-core': null,
     'fumadocs-ui': null,
-    '@fumadocs/ai-chat': null,
   },
 };

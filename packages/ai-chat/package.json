@@ -1,7 +1,7 @@
 {
   "name": "@fumadocs/ai-chat",
   "version": "0.0.1",
-  "description": "Composable AI chat UI for Fumadocs",
+  "description": "AI chat UI for Fumadocs, built on AI SDK",
   "keywords": [
     "AI",
     "Docs",
@@ -48,9 +48,12 @@
     "unist-util-visit": "^5.1.0"
   },
   "devDependencies": {
+    "@ai-sdk/react": "^4.0.130",
     "@types/hast": "^3.0.5",
     "@types/node": "26.6.4",
     "@types/react": "^19.3.0",
+    "ai": "^7.0.127",
+    "fuma-cli": "^0.3.1",
     "fumadocs-core": "workspace:*",
     "fumadocs-ui": "workspace:@fumadocs/base-ui@*",
     "react": "^19.3.0",
@@ -59,7 +62,9 @@
     "tsdown": "0.23.0"
   },
   "peerDependencies": {
+    "@ai-sdk/react": "^4.0.0",
     "@types/react": "*",
+    "ai": "^7.0.0",
     "fumadocs-core": "^16.10.0",
     "fumadocs-ui": "^16.10.0",
     "react": "^19.2.0",
