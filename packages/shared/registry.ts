@@ -62,7 +62,7 @@ export function createUIRegistry({
       'components/*.css': { type: 'css' },
       'components/{banner,callout,card,codeblock,files,github-info,heading,image-zoom,inline-toc,steps,type-table}.tsx':
         { type: 'components' },
-      'utils/{cn,merge-refs,urls}.ts': { type: 'lib' },
+      'utils/{cn,merge-refs,urls,hotkey}.ts': { type: 'lib' },
       'layouts/shared/page-actions.tsx': {
         type: 'components',
         target: '<dir>/ai/page-actions.tsx',
