@@ -27,6 +27,34 @@ describe('remark-structure', () => {
     expect(data.contents[1]).toEqual({ heading: 'section', content: 'body' });
   });
 
+  it('records a table row with the header row', async () => {
+    const data = await compile(
+      '| a | **b** |\n| :- | -: |\n| `x \\| y` | [link](/l) |\n| 2 | 3 |\n\n| only |\n| - |',
+    );
+
+    expect(data.contents).toMatchInlineSnapshot(`
+      [
+        {
+          "content": "| a      | b    |
+      | ------ | ---- |
+      | x \\| y | link |",
+          "heading": undefined,
+        },
+        {
+          "content": "| a | b |
+      | - | - |
+      | 2 | 3 |",
+          "heading": undefined,
+        },
+        {
+          "content": "| only |
+      | ---- |",
+          "heading": undefined,
+        },
+      ]
+    `);
+  });
+
   it('exports empty structured data for documents without matches', async () => {
     const data = await compile('```js\nconst x = 1\n```');
 
@@ -80,6 +108,35 @@ describe('remark-structure: stringify', () => {
         {
           "content": "<TypeTable type="{ percentage: { description: 'The percentage of scroll position to display the roll button', type: '…" />",
           "heading": "api",
+        },
+      ]
+    `);
+  });
+
+  it('slices table rows with the authored header row', async () => {
+    const options = await applySatteriPreset({
+      rehypeCodeOptions: false,
+      remarkStructureOptions: { stringify: true },
+    })('bundler');
+    const result = await compileMdx({
+      source: '| a | **b** |\n| :- | -: |\n| `x \\| y` | [link](/l) |\n| 2 | 3 |\n',
+      filePath: '/test.mdx',
+      options,
+    });
+
+    expect((result.data?.structuredData as StructuredData).contents).toMatchInlineSnapshot(`
+      [
+        {
+          "content": "| a | **b** |
+      | :- | -: |
+      | \`x \\| y\` | link |",
+          "heading": undefined,
+        },
+        {
+          "content": "| a | **b** |
+      | :- | -: |
+      | 2 | 3 |",
+          "heading": undefined,
         },
       ]
     `);

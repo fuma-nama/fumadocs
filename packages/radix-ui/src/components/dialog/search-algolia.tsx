@@ -1,7 +1,6 @@
 'use client';
 
-import { type AlgoliaOptions, useDocsSearch } from 'fumadocs-core/search/client';
-import { algoliaClient } from 'fumadocs-core/search/client/algolia';
+import { type AlgoliaOptions, useAlgoliaSearch } from 'fumadocs-core/search/client';
 import { type ReactNode, useMemo, useState } from 'react';
 import { useOnChange } from 'fumadocs-core/utils/use-on-change';
 import {
@@ -58,12 +57,10 @@ export default function AlgoliaSearchDialog({
 }: AlgoliaSearchDialogProps) {
   const [tag, setTag] = useState(defaultTag);
   const { locale } = useI18n();
-  const { search, setSearch, query } = useDocsSearch({
-    client: algoliaClient({
-      tag,
-      locale,
-      ...searchOptions,
-    }),
+  const { search, setSearch, isLoading, result } = useAlgoliaSearch({
+    tag,
+    locale,
+    ...searchOptions,
   });
   const defaultItems = useMemo<SortedResult[] | null>(() => {
     if (links.length === 0) return null;
@@ -82,7 +79,7 @@ export default function AlgoliaSearchDialog({
   const label = showAlgolia && <AlgoliaTitle />;
 
   return (
-    <SearchDialog search={search} onSearchChange={setSearch} isLoading={query.isLoading} {...props}>
+    <SearchDialog search={search} onSearchChange={setSearch} isLoading={isLoading} {...props}>
       <SearchDialogOverlay />
       <SearchDialogContent>
         <SearchDialogHeader>
@@ -90,7 +87,7 @@ export default function AlgoliaSearchDialog({
           <SearchDialogInput />
           <SearchDialogClose />
         </SearchDialogHeader>
-        <SearchDialogList items={query.data !== 'empty' ? query.data : defaultItems} />
+        <SearchDialogList items={result.data ?? defaultItems} query={result.query} />
       </SearchDialogContent>
       <SearchDialogFooter>
         {tags.length > 0 ? (

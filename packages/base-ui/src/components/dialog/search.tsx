@@ -27,7 +27,9 @@ import { buttonVariants } from '@/components/ui/button';
 import { createMarkdownRenderer } from 'fumadocs-core/content/md';
 import rehypeRaw from 'rehype-raw';
 import { visit } from 'unist-util-visit';
-import type { Transformer } from 'unified';
+import type { Processor, Transformer } from 'unified';
+import { gfmTable } from 'micromark-extension-gfm-table';
+import { gfmTableFromMarkdown } from 'mdast-util-gfm-table';
 import type { Root } from 'hast';
 import { mergeRefs } from '@/utils/merge-refs';
 
@@ -66,6 +68,8 @@ const RootContext = createContext<{
 const ListContext = createContext<{
   active: string | null;
   setActive: (v: string | null) => void;
+  /** highlighted in items */
+  query: string;
 } | null>(null);
 
 const TagsListContext = createContext<{
@@ -74,14 +78,25 @@ const TagsListContext = createContext<{
   allowClear: boolean;
 } | null>(null);
 
-const PreContext = createContext(false);
+/** where inline code is rendered */
+const CodeContext = createContext<'pre' | 'cell' | null>(null);
+
+/** in a table of search results: whether its rows have a header row */
+const TableContext = createContext<boolean | null>(null);
 
 const mdRenderer = createMarkdownRenderer({
+  remarkPlugins: [remarkTable],
   remarkRehypeOptions: {
     allowDangerousHtml: true,
   },
   rehypePlugins: [rehypeRaw, rehypeCustomElements],
 });
+
+const tableCell = 'min-w-0 text-start font-normal not-last:truncate last:line-clamp-2';
+
+// rows without header, like the props of type tables
+const propRow =
+  '[&_th:first-child]:font-medium [&_th:first-child]:text-fd-primary [&_th:nth-child(2)]:text-xs [&_th:not(:first-child)]:text-fd-muted-foreground';
 
 const mdComponents = {
   // from the deprecated `highlightMarkdown()` of custom search clients
@@ -97,8 +112,9 @@ const mdComponents = {
   },
   code(props: ComponentProps<'pre'>) {
     // eslint-disable-next-line react-hooks/rules-of-hooks -- this is a component
-    const inPre = use(PreContext);
-    if (inPre)
+    const scope = use(CodeContext);
+    if (scope === 'cell') return <code {...props} />;
+    if (scope === 'pre')
       return (
         <code
           {...props}
@@ -144,6 +160,25 @@ const mdComponents = {
       </span>
     );
   },
+  // the cells are laid out by the grid of `SearchTable`
+  table: (props: ComponentProps<'table'>) => <table {...props} className="contents" />,
+  thead: (props: ComponentProps<'thead'>) => <thead {...props} className="contents" />,
+  tbody: (props: ComponentProps<'tbody'>) => <tbody {...props} className="contents" />,
+  tr: (props: ComponentProps<'tr'>) => <tr {...props} className="contents" />,
+  th({ children, ...props }: ComponentProps<'th'>) {
+    return (
+      <th {...props} className={tableCell}>
+        <CodeContext value="cell">{children}</CodeContext>
+      </th>
+    );
+  },
+  td({ children, ...props }: ComponentProps<'td'>) {
+    return (
+      <td {...props} className={tableCell}>
+        <CodeContext value="cell">{children}</CodeContext>
+      </td>
+    );
+  },
   pre(props: ComponentProps<'pre'>) {
     return (
       <pre
@@ -153,11 +188,20 @@ const mdComponents = {
           props.className,
         )}
       >
-        <PreContext value={true}>{props.children}</PreContext>
+        <CodeContext value="pre">{props.children}</CodeContext>
       </pre>
     );
   },
 };
+
+function remarkTable(this: Processor) {
+  const data = this.data() as {
+    micromarkExtensions?: unknown[];
+    fromMarkdownExtensions?: unknown[];
+  };
+  (data.micromarkExtensions ??= []).push(gfmTable());
+  (data.fromMarkdownExtensions ??= []).push(gfmTableFromMarkdown());
+}
 
 function rehypeCustomElements(): Transformer<Root, Root> {
   return (tree) => {
@@ -343,6 +387,7 @@ export function SearchDialogContent({
 
 export function SearchDialogList({
   items = null,
+  query,
   Empty = () => (
     <div role="status" className="py-12 text-center text-sm text-fd-muted-foreground">
       <T text="No results found" note="search dialog" />
@@ -352,6 +397,12 @@ export function SearchDialogList({
   ...props
 }: Omit<ComponentProps<'div'>, 'children'> & {
   items: SearchItemType[] | null | undefined;
+  /**
+   * The search query of `items`, its matches are highlighted.
+   *
+   * @defaultValue the search input
+   */
+  query?: string;
   /**
    * Renderer for empty list UI
    */
@@ -363,7 +414,8 @@ export function SearchDialogList({
 }) {
   const ref = useRef<HTMLDivElement>(null);
   const t = useTranslations({ note: 'search dialog' });
-  const { onSelect } = useSearch();
+  const { onSelect, search } = useSearch();
+  const highlight = query ?? search;
   const [active, setActive] = useState<string | null>(() =>
     items && items.length > 0 ? items[0].id : null,
   );
@@ -447,16 +499,98 @@ export function SearchDialogList({
             () => ({
               active,
               setActive,
+              query: highlight,
             }),
-            [active],
+            [active, highlight],
           )}
         >
           {items?.length === 0 && Empty()}
 
-          {items?.map((item) => (
-            <Fragment key={item.id}>{Item({ item, onClick: () => onSelect(item) })}</Fragment>
-          ))}
+          {items && renderItems(items, (item) => Item({ item, onClick: () => onSelect(item) }))}
         </ListContext>
+      </div>
+    </div>
+  );
+}
+
+/** consecutive rows of a table share a table */
+function renderItems(
+  items: SearchItemType[],
+  render: (item: SearchItemType) => ReactNode,
+): ReactNode[] {
+  const out: ReactNode[] = [];
+  for (let i = 0; i < items.length;) {
+    const header = tableOf(items[i]);
+    let end = i + 1;
+    if (header !== undefined) {
+      while (end < items.length && tableOf(items[end]) === header) end++;
+    }
+
+    const rows: ReactNode[] = [];
+    for (let j = i; j < end; j++) {
+      rows.push(<Fragment key={items[j].id}>{render(items[j])}</Fragment>);
+    }
+
+    if (header === undefined) out.push(...rows);
+    else {
+      // the header row, or the row of a table without header
+      const { content } = items[i] as { content: string };
+      out.push(
+        <SearchTable key={items[i].id} header={header} columns={columnsOf(content)}>
+          {rows}
+        </SearchTable>,
+      );
+    }
+    i = end;
+  }
+
+  return out;
+}
+
+/** the header row of a table record, or an empty string for a row without header */
+function tableOf(item: SearchItemType): string | undefined {
+  if (item.type === 'action' || typeof item.content !== 'string' || !item.content.startsWith('|'))
+    return;
+
+  const end = item.content.indexOf('\n');
+  // records pad their cells to their own widths
+  return item.content.includes('\n', end + 1) ? item.content.slice(0, end).replace(/ +/g, ' ') : '';
+}
+
+/** the number of cells in the first row of a Markdown table */
+function columnsOf(table: string): number {
+  let count = -1;
+  for (let i = 0; i < table.length && table[i] !== '\n'; i++) {
+    if (table[i] === '|' && table[i - 1] !== '\\') count++;
+  }
+
+  return Math.max(count, 1);
+}
+
+function SearchTable({
+  header,
+  columns,
+  children,
+}: {
+  header: string;
+  columns: number;
+  children: ReactNode;
+}) {
+  return (
+    <div role="group" className="relative shrink-0 px-2.5 py-2">
+      <div role="none" className="absolute inset-s-3 inset-y-0 w-px bg-fd-border" />
+      <div
+        className="ms-4 grid gap-x-3 overflow-hidden rounded-lg border bg-fd-card text-sm"
+        style={{ gridTemplateColumns: `${'fit-content(30%) '.repeat(columns - 1)}minmax(0, 1fr)` }}
+      >
+        {header && (
+          <div className="col-span-full grid grid-cols-subgrid bg-fd-secondary px-3 py-1 text-xs text-fd-muted-foreground">
+            <mdRenderer.Markdown components={mdComponents}>
+              {`${header}\n|${' --- |'.repeat(columns)}`}
+            </mdRenderer.Markdown>
+          </div>
+        )}
+        <TableContext value={header.length > 0}>{children}</TableContext>
       </div>
     </div>
   );
@@ -472,13 +606,19 @@ export function SearchDialogListItem({
   renderMarkdown?: (v: string) => ReactNode;
   item: SearchItemType;
 }) {
-  const { search } = useSearch();
-  const { active: activeId, setActive } = useSearchList();
+  const { active: activeId, setActive, query } = useSearchList();
+  const table = use(TableContext);
   const active = item.id === activeId;
-  const highlightRef = useHighlightQuery(search);
+  const highlightRef = useHighlightQuery(query);
 
   if (item.type === 'action') {
     children ??= item.node;
+  } else if (table !== null) {
+    children ??= (
+      <div ref={highlightRef} className={cn('contents', table ? '[&_thead]:hidden' : propRow)}>
+        {typeof item.content === 'string' ? renderMarkdown(item.content) : item.content}
+      </div>
+    );
   } else {
     children ??= (
       <>
@@ -526,7 +666,7 @@ export function SearchDialogListItem({
             scrollIntoView(element, {
               scrollMode: 'if-needed',
               block: 'nearest',
-              boundary: element.parentElement,
+              boundary: element.closest('[role="listbox"]'),
             });
           }
         },
@@ -534,7 +674,10 @@ export function SearchDialogListItem({
       )}
       aria-selected={active}
       className={cn(
-        'relative shrink-0 px-2.5 py-2 text-start text-sm overflow-hidden rounded-lg [&_::highlight(fd-search)]:text-fd-primary [&_::highlight(fd-search)]:underline',
+        'text-start [&_::highlight(fd-search)]:text-fd-primary [&_::highlight(fd-search)]:underline',
+        table === null
+          ? 'relative shrink-0 px-2.5 py-2 text-sm overflow-hidden rounded-lg'
+          : 'col-span-full grid grid-cols-subgrid items-baseline px-3 py-1.5 not-first:border-t',
         active && 'bg-fd-accent text-fd-accent-foreground',
         className,
       )}

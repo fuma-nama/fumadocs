@@ -10,19 +10,7 @@
     },
     {
       "heading": "heading-3",
-      "content": "Name"
-    },
-    {
-      "heading": "heading-3",
-      "content": "Description"
-    },
-    {
-      "heading": "heading-3",
-      "content": "Hello World"
-    },
-    {
-      "heading": "heading-3",
-      "content": "Goodbye"
+      "content": "| Name        | Description |\n| ----------- | ----------- |\n| Hello World | Goodbye     |"
     },
     {
       "heading": "heading-3",
@@ -58,19 +46,7 @@
     },
     {
       "heading": "heading",
-      "content": "key"
-    },
-    {
-      "heading": "heading",
-      "content": "**value**"
-    },
-    {
-      "heading": "heading",
-      "content": "apple"
-    },
-    {
-      "heading": "heading",
-      "content": "banana **test**"
+      "content": "| key   | **value**       |\n| ----- | --------------- |\n| apple | banana **test** |"
     },
     {
       "heading": "heading",

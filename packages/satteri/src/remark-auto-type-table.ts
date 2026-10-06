@@ -16,6 +16,7 @@ import {
   type RemarkAutoTypeTableOptions,
   type TypeTableProps,
 } from 'fumadocs-typescript';
+import type { StructuredData } from 'fumadocs-core/mdx-plugins/remark-structure';
 import { formatTable, replaceSource } from './stringifier';
 import { jsxToSource } from './utils';
 
@@ -110,21 +111,39 @@ async function buildTypeProp(
   return prop;
 }
 
+/** the prop, type and description cells of an entry */
+function entryCells(entry: DocEntry): string[] {
+  const tags = parseTags(entry.tags);
+  let description = entry.description.replace(/{@link (?<link>[^}]*)}/g, '$1').trim();
+  if (tags.default) description += `${description ? ' ' : ''}Default: \`${tags.default}\``;
+  if (entry.deprecated) description = `**Deprecated.** ${description}`;
+
+  return [
+    `\`${entry.name}${entry.required ? '' : '?'}\``,
+    `\`${entry.simplifiedType}\``,
+    description,
+  ];
+}
+
+/** a search record for each prop: a table row without header, linked to the prop */
+function docToRecords(id: string, doc: GeneratedDoc): StructuredData['contents'] {
+  const contents: StructuredData['contents'] = [];
+  for (const entry of doc.entries) {
+    let row = '|';
+    for (const cell of entryCells(entry)) {
+      row += ` ${cell.replace(/\s*\n\s*/g, ' ').replaceAll('|', '\\|')} |`;
+    }
+
+    contents.push({ heading: `${id}-${entry.name}`, content: `${row}\n| --- | --- | --- |` });
+  }
+
+  return contents;
+}
+
 /** the generated type table as a Markdown table, for source-based Markdown output */
 function docToMarkdown(doc: GeneratedDoc): string {
   const rows = [['Prop', 'Type', 'Description']];
-  for (const entry of doc.entries) {
-    const tags = parseTags(entry.tags);
-    let description = entry.description.replace(/{@link (?<link>[^}]*)}/g, '$1').trim();
-    if (tags.default) description += `${description ? ' ' : ''}Default: \`${tags.default}\``;
-    if (entry.deprecated) description = `**Deprecated.** ${description}`;
-
-    rows.push([
-      `\`${entry.name}${entry.required ? '' : '?'}\``,
-      `\`${entry.simplifiedType}\``,
-      description,
-    ]);
-  }
+  for (const entry of doc.entries) rows.push(entryCells(entry));
 
   let out = `### ${doc.name}\n\n`;
   if (doc.description) out += `${doc.description.trim()}\n\n`;
@@ -210,6 +229,7 @@ export function remarkAutoTypeTable(config: RemarkAutoTypeTableOptions = {}) {
 
       const children: MdxJsxFlowElement[] = [];
       for (const doc of output) {
+        const id = `type-table-${doc.id}`;
         children.push({
           type: 'mdxJsxFlowElement',
           name: outputName,
@@ -217,7 +237,7 @@ export function remarkAutoTypeTable(config: RemarkAutoTypeTableOptions = {}) {
             {
               type: 'mdxJsxAttribute',
               name: 'id',
-              value: `type-table-${doc.id}`,
+              value: id,
             },
             {
               type: 'mdxJsxAttribute',
@@ -230,6 +250,7 @@ export function remarkAutoTypeTable(config: RemarkAutoTypeTableOptions = {}) {
             ...attributes,
           ],
           children: [],
+          data: { structuredData: { contents: docToRecords(id, doc) }, _stringify: { text: '' } },
         });
       }
 

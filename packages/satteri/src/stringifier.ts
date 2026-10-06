@@ -1,3 +1,4 @@
+import type { Nodes } from 'mdast';
 import type { MdastVisitorContext } from 'satteri';
 
 /** a replacement of a source range, ordered by `start` and non-overlapping */
@@ -99,8 +100,8 @@ export interface Stringifier {
   /** a region of the document, with the edits inside it applied */
   slice(start: number, end: number): string;
   /**
-   * A single node as Markdown: its source slice, or its plain text content without
-   * a position. JSX elements become an HTML tag synthesized from their fields.
+   * A single node as Markdown: its `data._stringify.text`, its source slice, or its plain
+   * text content without a position. JSX elements become an HTML tag synthesized from their fields.
    */
   stringify(node: PositionedNode): string;
 }
@@ -140,6 +141,9 @@ export function createStringifier(ctx: MdastVisitorContext): Stringifier {
       return splice(source, start, end, edits());
     },
     stringify(node) {
+      const stringified = (node as Nodes).data?._stringify;
+      if (typeof stringified === 'object' && 'text' in stringified) return stringified.text;
+
       const { type } = node as { type?: string };
       if (type === 'mdxJsxFlowElement' || type === 'mdxJsxTextElement') {
         return syntheticElement(node as JsxElementNode, ctx);

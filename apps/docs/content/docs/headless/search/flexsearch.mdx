@@ -53,12 +53,9 @@ You can search documents using:
 - **Search Client**:
 
 ```ts twoslash
-import { useDocsSearch } from 'fumadocs-core/search/client';
-import { fetchClient } from 'fumadocs-core/search/client/fetch';
+import { useFetchSearch } from 'fumadocs-core/search/client';
 
-const client = useDocsSearch({
-  client: fetchClient(),
-});
+const { search, setSearch, isLoading, result } = useFetchSearch();
 ```
 
 <auto-type-table type='import("fumadocs-core/search/client/fetch").FetchOptions' />
@@ -91,16 +88,13 @@ const server = flexsearchFromSource(source, {
 and update your search client:
 
 - **Fumadocs UI**: Configure [Tag Filter](/docs/search/flexsearch#tag-filter) on Search UI.
-- **Search Client**: pass a tag to `fetchClient`.
+- **Search Client**: pass a tag to `useFetchSearch()`.
 
 ```ts
-import { useDocsSearch } from 'fumadocs-core/search/client';
-import { fetchClient } from 'fumadocs-core/search/client/fetch';
+import { useFetchSearch } from 'fumadocs-core/search/client';
 
-const client = useDocsSearch({
-  client: fetchClient({
-    tag: '<value>', // [!code ++]
-  }),
+const { search, setSearch, isLoading, result } = useFetchSearch({
+  tag: '<value>', // [!code ++]
 });
 ```
 
@@ -126,15 +120,15 @@ and update your search clients:
 - **Search Client**: change your client adapter.
 
   ```ts
-  import { useDocsSearch } from 'fumadocs-core/search/client';
+  import { useSearchClient } from 'fumadocs-core/search/client';
   import { flexsearchStaticClient } from 'fumadocs-core/search/client/flexsearch-static';
 
-  const client = useDocsSearch({
-    client: flexsearchStaticClient({
+  const { search, setSearch, isLoading, result } = useSearchClient(
+    flexsearchStaticClient({
       // optional: pass tag & locale
       tag,
     }),
-  });
+  );
   ```
 
   <auto-type-table type='import("fumadocs-core/search/client/flexsearch-static").FlexsearchStaticOptions' />

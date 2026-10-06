@@ -139,12 +139,9 @@ You can search documents using:
 - **Search Client**:
 
 ```ts twoslash
-import { useDocsSearch } from 'fumadocs-core/search/client';
-import { fetchClient } from 'fumadocs-core/search/client/fetch';
+import { useFetchSearch } from 'fumadocs-core/search/client';
 
-const client = useDocsSearch({
-  client: fetchClient(),
-});
+const { search, setSearch, isLoading, result } = useFetchSearch();
 ```
 
 <auto-type-table type='import("fumadocs-core/search/client/fetch").FetchOptions' />
@@ -177,16 +174,13 @@ const server = createFromSource(source, {
 and update your search client:
 
 - **Fumadocs UI**: Configure [Tag Filter](/docs/search/orama#tag-filter) on Search UI.
-- **Search Client**: pass a tag to `fetchClient`.
+- **Search Client**: pass a tag to `useFetchSearch()`.
 
 ```ts
-import { useDocsSearch } from 'fumadocs-core/search/client';
-import { fetchClient } from 'fumadocs-core/search/client/fetch';
+import { useFetchSearch } from 'fumadocs-core/search/client';
 
-const client = useDocsSearch({
-  client: fetchClient({
-    tag: '<value>', // [!code ++]
-  }),
+const { search, setSearch, isLoading, result } = useFetchSearch({
+  tag: '<value>', // [!code ++]
 });
 ```
 
@@ -267,15 +261,12 @@ and update your search clients:
 
 - **Fumadocs UI**: use [static client](/docs/search/orama#static) on Search UI.
 
-- **Search Client**: use `staticClient` instead of `fetchClient`.
+- **Search Client**: use `useStaticSearch()` instead of `useFetchSearch()`.
 
   ```ts
-  import { useDocsSearch } from 'fumadocs-core/search/client';
-  import { staticClient } from 'fumadocs-core/search/client/orama-static';
+  import { useStaticSearch } from 'fumadocs-core/search/client';
 
-  const client = useDocsSearch({
-    client: staticClient(),
-  });
+  const { search, setSearch, isLoading, result } = useStaticSearch();
   ```
 
   <auto-type-table type='import("fumadocs-core/search/client/orama-static").StaticOptions' />
@@ -328,17 +319,14 @@ and update your search clients:
   Add `locale` to the search client, this will only allow pages with specified locale to be searchable by the user.
 
 ```ts
-import { useDocsSearch } from 'fumadocs-core/search/client';
-import { fetchClient } from 'fumadocs-core/search/client/fetch';
+import { useFetchSearch } from 'fumadocs-core/search/client';
 
-const { search, setSearch, query } = useDocsSearch({
-  client: fetchClient({
-    locale: 'cn',
-  }),
+const { search, setSearch, isLoading, result } = useFetchSearch({
+  locale: 'cn',
 });
 ```
 
-This also applies to **Static Mode**, pass `locale` to `staticClient` instead.
+This also applies to **Static Mode**, pass `locale` to `useStaticSearch()` instead.
 
 <Callout title="Language-specific Tokenization">
 
@@ -376,7 +364,7 @@ This also applies to **Static Mode**, pass `locale` to `staticClient` instead.
 
     <Callout type="warn" title="Static Mode">
       A custom `tokenizer` must also be given to the client, since it needs to tokenize the query the same way.
-      Pass it via `initDB` on `staticClient`.
+      Pass it via `initDB` on `useStaticSearch()`.
     </Callout>
 
 </Callout>

@@ -1,7 +1,12 @@
 import type { BaseIndex } from '@/search/algolia';
 import type { Hit, LiteClient, SearchResponse } from 'algoliasearch/lite';
 import type { SortedResult } from '@/search';
-import type { SearchClient } from '../client';
+import {
+  type SearchClient,
+  type UseSearchOptions,
+  type UseSearchReturn,
+  useSearchClient,
+} from '@/search/use-search-client';
 
 export interface AlgoliaOptions {
   indexName: string;
@@ -76,4 +81,8 @@ export function algoliaClient(options: AlgoliaOptions): SearchClient {
       return groupResults(result.results[0].hits);
     },
   };
+}
+
+export function useAlgoliaSearch(options: AlgoliaOptions & UseSearchOptions): UseSearchReturn {
+  return useSearchClient(algoliaClient(options), options);
 }

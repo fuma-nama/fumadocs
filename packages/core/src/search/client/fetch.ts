@@ -1,5 +1,10 @@
 import type { SortedResult } from '@/search';
-import type { SearchClient } from '../client';
+import {
+  type SearchClient,
+  type UseSearchOptions,
+  type UseSearchReturn,
+  useSearchClient,
+} from '@/search/use-search-client';
 import { BASE_PATH, join } from '@/utils/url';
 
 export interface FetchOptions {
@@ -50,4 +55,11 @@ export function fetchClient({
       return result;
     },
   };
+}
+
+/**
+ * Search with the search server, or an API of the same format.
+ */
+export function useFetchSearch(options?: FetchOptions & UseSearchOptions): UseSearchReturn {
+  return useSearchClient(fetchClient(options), options);
 }

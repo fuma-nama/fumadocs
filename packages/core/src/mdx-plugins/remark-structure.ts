@@ -39,9 +39,9 @@ export interface StructureOptions {
   /**
    * MDAST node types to be scanned as a content block.
    *
-   * If a node's type is listed in this array, it will be converted into a single content block.
+   * If a node's type is listed in this array, it will be converted into a single content block, except tables which become a content block per row, along with the header row.
    *
-   * @defaultValue ['heading', 'paragraph', 'blockquote', 'tableCell', 'mdxJsxFlowElement']
+   * @defaultValue ['heading', 'paragraph', 'blockquote', 'table', 'mdxJsxFlowElement']
    */
   types?: string[] | ((node: Nodes) => boolean);
 
@@ -92,7 +92,7 @@ declare module 'vfile' {
 }
 
 export const remarkStructureDefaultOptions = {
-  types: ['heading', 'paragraph', 'blockquote', 'tableCell', 'mdxJsxFlowElement'],
+  types: ['heading', 'paragraph', 'blockquote', 'table', 'mdxJsxFlowElement'],
   mdxTypes(node) {
     return !node.children || node.children.length === 0;
   },
@@ -162,6 +162,18 @@ export function remarkStructure(
       switch (element.type) {
         case 'root':
           return;
+        case 'table': {
+          const [head, ...rows] = element.children;
+          if (rows.length === 0) break;
+
+          for (const row of rows) {
+            const content = stringify
+              .call(this, { ...element, children: [head, row] }, stringifierCtx)
+              .trim();
+            if (content.length > 0) data.contents.push({ heading: lastHeading, content });
+          }
+          return 'skip';
+        }
         case 'mdxJsxFlowElement':
         case 'mdxJsxTextElement':
           if (!mdxTypes(element)) return;

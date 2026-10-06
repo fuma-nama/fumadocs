@@ -4,6 +4,8 @@ import { expect, test } from 'vitest';
 import * as path from 'node:path';
 import * as fs from 'node:fs/promises';
 import { createProcessor } from '@mdx-js/mdx';
+import { remarkHeading } from 'fumadocs-core/mdx-plugins/remark-heading';
+import { remarkStructure } from 'fumadocs-core/mdx-plugins/remark-structure';
 
 const relative = (s: string): string => path.resolve(fileURLToPath(new URL(s, import.meta.url)));
 
@@ -44,4 +46,33 @@ test('Run on MDX files', async () => {
     value: await fs.readFile(file, 'utf-8'),
   });
   await expect(String(output.value)).toMatchFileSnapshot('./fixtures/test.output.js');
+});
+
+test('Search records of props', async () => {
+  const file = relative('./fixtures/test.mdx');
+  const processor = createProcessor({
+    remarkPlugins: [[remarkAutoTypeTable, { generator }], remarkHeading, remarkStructure],
+  });
+
+  const output = await processor.process({
+    path: file,
+    value: await fs.readFile(file, 'utf-8'),
+  });
+  expect(output.data.structuredData).toMatchInlineSnapshot(`
+    {
+      "contents": [
+        {
+          "content": "| \`name\` | \`string\` | The name of player Default: \`Henry\` |
+    | --- | --- | --- |",
+          "heading": "type-table-test-2.ts-Player-name",
+        },
+        {
+          "content": "| \`age\` | \`timestamp\` |  |
+    | --- | --- | --- |",
+          "heading": "type-table-test-2.ts-Player-age",
+        },
+      ],
+      "headings": [],
+    }
+  `);
 });

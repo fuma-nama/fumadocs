@@ -81,13 +81,10 @@ export const { GET } = createMixedbreadSearchAPI({
 - **Search Client**:
 
   ```ts
-  import { useDocsSearch } from 'fumadocs-core/search/client';
-  import { fetchClient } from 'fumadocs-core/search/client/fetch';
+  import { useFetchSearch } from 'fumadocs-core/search/client';
 
-  const client = useDocsSearch({
-    client: fetchClient({
-      api: '/api/search',
-    }),
+  const { search, setSearch, isLoading, result } = useFetchSearch({
+    api: '/api/search',
   });
   ```
 
@@ -113,15 +110,12 @@ And update your search client:
 - **Search Client**: You can add the tag filter like:
 
   ```ts
-  import { useDocsSearch } from 'fumadocs-core/search/client';
-  import { fetchClient } from 'fumadocs-core/search/client/fetch';
+  import { useFetchSearch } from 'fumadocs-core/search/client';
 
-  const { search, setSearch, query } = useDocsSearch({
-    client: fetchClient({
-      api: '/api/search',
-      tag: '<your tag value>',
-      // ...
-    }),
+  const { search, setSearch, isLoading, result } = useFetchSearch({
+    api: '/api/search',
+    tag: '<your tag value>',
+    // ...
   });
   ```
 

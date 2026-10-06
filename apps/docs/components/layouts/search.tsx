@@ -13,8 +13,7 @@ import {
   type SearchItemType,
   type SharedProps,
 } from 'fumadocs-ui/components/dialog/search';
-import { useDocsSearch } from 'fumadocs-core/search/client';
-import { fetchClient } from 'fumadocs-core/search/client/fetch';
+import { useFetchSearch } from 'fumadocs-core/search/client';
 import { useMemo, useState } from 'react';
 import { Popover, PopoverContent, PopoverTrigger } from 'fumadocs-ui/components/ui/popover';
 import { ArrowRight, ChevronDown } from 'lucide-react';
@@ -59,11 +58,7 @@ const items = [
 export default function CustomSearchDialog(props: SharedProps) {
   const [open, setOpen] = useState(false);
   const [tag, setTag] = useState<string | undefined>();
-  const { search, setSearch, query } = useDocsSearch({
-    client: fetchClient({
-      tag,
-    }),
-  });
+  const { search, setSearch, isLoading, result } = useFetchSearch({ tag });
   const { full } = useTreeContext();
   const router = useRouter();
   const searchMap = useMemo(() => {
@@ -105,7 +100,7 @@ export default function CustomSearchDialog(props: SharedProps) {
   }, [router, search, searchMap]);
 
   return (
-    <SearchDialog search={search} onSearchChange={setSearch} isLoading={query.isLoading} {...props}>
+    <SearchDialog search={search} onSearchChange={setSearch} isLoading={isLoading} {...props}>
       <SearchDialogOverlay />
       <SearchDialogContent>
         <SearchDialogHeader>
@@ -114,14 +109,8 @@ export default function CustomSearchDialog(props: SharedProps) {
           <SearchDialogClose />
         </SearchDialogHeader>
         <SearchDialogList
-          items={
-            query.data !== 'empty' || pageTreeAction
-              ? [
-                  ...(pageTreeAction ? [pageTreeAction] : []),
-                  ...(Array.isArray(query.data) ? query.data : []),
-                ]
-              : null
-          }
+          items={pageTreeAction ? [pageTreeAction, ...(result.data ?? [])] : result.data}
+          query={result.query}
         />
         <SearchDialogFooter className="flex flex-row flex-wrap gap-2 items-center">
           <Popover open={open} onOpenChange={setOpen}>

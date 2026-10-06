@@ -63,7 +63,7 @@ describe('remark-auto-type-table', () => {
     `);
   });
 
-  it('keeps search records as a single tag', async () => {
+  it('records a table row for each prop', async () => {
     const options = await applySatteriPreset({
       rehypeCodeOptions: false,
       remarkStructureOptions: {
@@ -85,8 +85,14 @@ describe('remark-auto-type-table', () => {
     expect((result.data?.structuredData as StructuredData).contents).toMatchInlineSnapshot(`
       [
         {
-          "content": "<TypeTable id="type-table-type-table.ts-TestProps" type="{&quot;name&quot;: {type: <>{&quot;string&quot;}</>,typeDescription: <>{&quot;string | undefined&quot;}</>,required: false,default…" />",
-          "heading": "api",
+          "content": "| \`name?\` | \`string\` | The visible name. Default: \`"hello"\` |
+      | --- | --- | --- |",
+          "heading": "type-table-type-table.ts-TestProps-name",
+        },
+        {
+          "content": "| \`enabled\` | \`union\` | Whether it is enabled |
+      | --- | --- | --- |",
+          "heading": "type-table-type-table.ts-TestProps-enabled",
         },
       ]
     `);
