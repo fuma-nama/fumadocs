@@ -1,5 +1,5 @@
 import type { Root } from 'mdast';
-import type { ReactNode } from 'react';
+import { type ReactNode, useCallback } from 'react';
 import { remark } from 'remark';
 import { visit } from 'unist-util-visit';
 
@@ -37,44 +37,58 @@ function buildRegexFromQuery(query: string): RegExp | null {
 }
 
 /**
- * Highlight matches of `query` in the text of `element` with the CSS Custom Highlight API, style them with `::highlight(fd-search)`.
+ * Highlight matches of `query` in the text of an element with the CSS Custom Highlight API, style them with `::highlight(fd-search)`.
  *
- * The highlights stay when `element` is moved, but not when its text changes, call it again in that case.
+ * Text in elements with `data-highlight-ignore` is skipped. The highlights stay when the element is moved, but not when its text changes, give it a new `key` in that case.
  *
- * @returns a function to remove the highlights
+ * @returns a ref callback for the element
  */
-export function highlightQuery(element: Element, query: string): () => void {
-  const regex = buildRegexFromQuery(query);
-  if (!regex || typeof Highlight === 'undefined') return () => {};
+export function useHighlightQuery(query: string) {
+  return useCallback(
+    (element: Element | null) => {
+      const regex = buildRegexFromQuery(query);
+      if (!element || !regex || typeof Highlight === 'undefined') return () => {};
 
-  let highlight = CSS.highlights.get('fd-search');
-  if (!highlight) CSS.highlights.set('fd-search', (highlight = new Highlight()));
+      let highlight = CSS.highlights.get('fd-search');
+      if (!highlight) CSS.highlights.set('fd-search', (highlight = new Highlight()));
 
-  const walker = document.createTreeWalker(element, NodeFilter.SHOW_TEXT);
-  const ranges: StaticRange[] = [];
-  while (walker.nextNode()) {
-    const node = walker.currentNode as Text;
-    for (const match of node.data.matchAll(regex)) {
-      const range = new StaticRange({
-        startContainer: node,
-        startOffset: match.index,
-        endContainer: node,
-        endOffset: match.index + match[0].length,
-      });
-      highlight.add(range);
-      ranges.push(range);
-    }
-  }
+      const walker = document.createTreeWalker(
+        element,
+        NodeFilter.SHOW_ELEMENT | NodeFilter.SHOW_TEXT,
+        (node) => {
+          if (!(node instanceof Element)) return NodeFilter.FILTER_ACCEPT;
+          return node.hasAttribute('data-highlight-ignore')
+            ? NodeFilter.FILTER_REJECT
+            : NodeFilter.FILTER_SKIP;
+        },
+      );
+      const ranges: StaticRange[] = [];
+      while (walker.nextNode()) {
+        const node = walker.currentNode as Text;
+        for (const match of node.data.matchAll(regex)) {
+          const range = new StaticRange({
+            startContainer: node,
+            startOffset: match.index,
+            endContainer: node,
+            endOffset: match.index + match[0].length,
+          });
+          highlight.add(range);
+          ranges.push(range);
+        }
+      }
 
-  return () => {
-    for (const range of ranges) highlight.delete(range);
-  };
+      return () => {
+        for (const range of ranges) highlight.delete(range);
+      };
+    },
+    [query],
+  );
 }
 
 const processor = /* @__PURE__ */ remark();
 
 /**
- * @deprecated search results are no longer highlighted, highlight the rendered results with `highlightQuery()` instead.
+ * @deprecated search results are no longer highlighted, highlight the rendered results with `useHighlightQuery()` instead.
  */
 export function createContentHighlighter(query: string | RegExp) {
   const regex = typeof query === 'string' ? buildRegexFromQuery(query) : query;

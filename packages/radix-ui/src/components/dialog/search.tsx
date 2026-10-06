@@ -17,7 +17,7 @@ import {
 import { useTranslations, T } from '@fuma-translate/react';
 import { cn } from '@/utils/cn';
 import { Dialog, DialogContent, DialogOverlay, DialogTitle } from '@radix-ui/react-dialog';
-import { highlightQuery, type ReactSortedResult as BaseResultType } from 'fumadocs-core/search';
+import { useHighlightQuery, type ReactSortedResult as BaseResultType } from 'fumadocs-core/search';
 import { cva } from 'class-variance-authority';
 import { useRouter } from 'fumadocs-core/framework';
 import type { SharedProps } from '@/contexts/search';
@@ -119,14 +119,21 @@ const mdComponents = {
   }: Record<string, unknown> & { _tagName: string; children: ReactNode }) {
     return (
       <span className="inline-flex max-w-full items-center border p-0.5 rounded-md bg-fd-card text-fd-card-foreground divide-x divide-fd-border">
-        <code className="rounded-sm px-0.5 me-1 bg-fd-primary font-medium text-xs text-fd-primary-foreground border-none">
+        <code
+          data-highlight-ignore=""
+          className="rounded-sm px-0.5 me-1 bg-fd-primary font-medium text-xs text-fd-primary-foreground border-none"
+        >
           {_tagName}
         </code>
         {Object.entries(rest).map(([k, v]) => {
           if (typeof v !== 'string') return;
 
           return (
-            <code key={k} className="truncate text-xs text-fd-muted-foreground px-1">
+            <code
+              key={k}
+              data-highlight-ignore=""
+              className="truncate text-xs text-fd-muted-foreground px-1"
+            >
               <span className="text-fd-card-foreground">{k}: </span>
               {v}
             </code>
@@ -433,10 +440,7 @@ export function SearchDialogListItem({
   const { search } = useSearch();
   const { active: activeId, setActive } = useSearchList();
   const active = item.id === activeId;
-  const highlightRef = useCallback(
-    (element: HTMLDivElement) => highlightQuery(element, search),
-    [search],
-  );
+  const highlightRef = useHighlightQuery(search);
 
   if (item.type === 'action') {
     children ??= item.node;

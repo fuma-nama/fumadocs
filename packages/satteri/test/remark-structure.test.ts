@@ -62,6 +62,29 @@ describe('remark-structure: stringify', () => {
     ]);
   });
 
+  it('keeps authored elements as a single-line tag', async () => {
+    const options = await applySatteriPreset({
+      rehypeCodeOptions: false,
+      remarkStructureOptions: {
+        stringify: { filterElement: (node) => node.name === 'TypeTable' },
+      },
+    })('bundler');
+    const result = await compileMdx({
+      source: `## API\n\n<TypeTable\n  type={{\n    percentage: {\n      description: 'The percentage of scroll position to display the roll button',\n      type: 'number',\n    },\n  }}\n/>\n`,
+      filePath: '/test.mdx',
+      options,
+    });
+
+    expect((result.data?.structuredData as StructuredData).contents).toMatchInlineSnapshot(`
+      [
+        {
+          "content": "<TypeTable type="{ percentage: { description: 'The percentage of scroll position to display the roll button', type: '…" />",
+          "heading": "api",
+        },
+      ]
+    `);
+  });
+
   it('synthesizes plugin-inserted elements from their fields', async () => {
     const options = await applySatteriPreset({
       rehypeCodeOptions: false,
@@ -98,7 +121,7 @@ describe('remark-structure: stringify', () => {
     const data = result.data?.structuredData as StructuredData;
 
     expect(data.contents).toEqual([
-      { heading: 'api', content: '<TypeTable type={{ name: "string" }} />' },
+      { heading: 'api', content: '<TypeTable type="{ name: &quot;string&quot; }" />' },
     ]);
   });
 });

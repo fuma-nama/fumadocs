@@ -4,6 +4,7 @@ import { describe, expect, it } from 'vitest';
 import { compileMdx } from '@/compile';
 import { applySatteriPreset } from '@/preset';
 import { remarkAutoTypeTable } from '@/remark-auto-type-table';
+import type { StructuredData } from '@/remark-structure';
 
 const fixtures = path.join(path.dirname(fileURLToPath(import.meta.url)), 'fixtures');
 
@@ -59,6 +60,35 @@ describe('remark-auto-type-table', () => {
           throw new Error("Expected " + (component ? "component" : "object") + " \`" + id + "\` to be defined: you likely forgot to import, pass, or provide it.");
       }
       "
+    `);
+  });
+
+  it('keeps search records as a single tag', async () => {
+    const options = await applySatteriPreset({
+      rehypeCodeOptions: false,
+      remarkStructureOptions: {
+        stringify: { filterElement: (node) => node.name === 'TypeTable' },
+      },
+      mdastPlugins: [
+        remarkAutoTypeTable({
+          renderType: (type) => ({ type: 'text', value: type }),
+          renderMarkdown: (md) => ({ type: 'text', value: md }),
+        }),
+      ],
+    })('bundler');
+    const result = await compileMdx({
+      source: '## API\n\n<auto-type-table path="./type-table.ts" name="TestProps" />',
+      filePath: path.join(fixtures, 'page.mdx'),
+      options,
+    });
+
+    expect((result.data?.structuredData as StructuredData).contents).toMatchInlineSnapshot(`
+      [
+        {
+          "content": "<TypeTable id="type-table-type-table.ts-TestProps" type="{&quot;name&quot;: {type: <>{&quot;string&quot;}</>,typeDescription: <>{&quot;string | undefined&quot;}</>,required: false,default…" />",
+          "heading": "api",
+        },
+      ]
     `);
   });
 

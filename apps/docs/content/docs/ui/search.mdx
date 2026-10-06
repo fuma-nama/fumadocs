@@ -136,17 +136,18 @@ Matches of the search query are highlighted with the [CSS Custom Highlight API](
 }
 ```
 
-When rendering results on your own, highlight them with `highlightQuery()`.
+When rendering results on your own, highlight them with `useHighlightQuery()`.
 
 ```tsx title="components/search-result.tsx"
 'use client';
-import { highlightQuery } from 'fumadocs-core/search';
-import { type ReactNode, useCallback } from 'react';
+import { useHighlightQuery } from 'fumadocs-core/search';
+import type { ReactNode } from 'react';
 
 export function SearchResult({ query, children }: { query: string; children: ReactNode }) {
-  // returns a function to remove the highlights
-  const ref = useCallback((element: HTMLElement) => highlightQuery(element, query), [query]);
+  const ref = useHighlightQuery(query);
 
   return <div ref={ref}>{children}</div>;
 }
 ```
+
+Text inside elements with `data-highlight-ignore` is not highlighted, like the badges of components.

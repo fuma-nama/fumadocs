@@ -99,8 +99,8 @@ export interface Stringifier {
   /** a region of the document, with the edits inside it applied */
   slice(start: number, end: number): string;
   /**
-   * A single node as Markdown: its source slice. A node without a position
-   * becomes its plain text content, or a synthesized tag for JSX elements.
+   * A single node as Markdown: its source slice, or its plain text content without
+   * a position. JSX elements become an HTML tag synthesized from their fields.
    */
   stringify(node: PositionedNode): string;
 }
@@ -140,14 +140,13 @@ export function createStringifier(ctx: MdastVisitorContext): Stringifier {
       return splice(source, start, end, edits());
     },
     stringify(node) {
-      const pos = offsets(node);
-      if (pos) return splice(source, pos.start, pos.end, edits());
-
       const { type } = node as { type?: string };
       if (type === 'mdxJsxFlowElement' || type === 'mdxJsxTextElement') {
         return syntheticElement(node as JsxElementNode, ctx);
       }
 
+      const pos = offsets(node);
+      if (pos) return splice(source, pos.start, pos.end, edits());
       return ctx.textContent(node as never);
     },
   };
@@ -188,19 +187,25 @@ interface JsxElementNode extends PositionedNode {
   )[];
 }
 
-/** the tag of a plugin-inserted JSX element, reconstructed from its fields */
+/**
+ * A JSX element as an HTML tag, so Markdown renderers read it as an element. Expression
+ * values become strings, all values are kept on one line and truncated.
+ */
 function syntheticElement(node: JsxElementNode, ctx: MdastVisitorContext): string {
   let attrs = '';
   for (const attr of node.attributes) {
-    if (attr.type === 'mdxJsxExpressionAttribute') {
-      if (attr.value) attrs += ` {${attr.value}}`;
-    } else if (attr.value == null) {
+    if (attr.type === 'mdxJsxExpressionAttribute') continue;
+    if (attr.value == null) {
       attrs += ` ${attr.name}`;
-    } else if (typeof attr.value === 'string') {
-      attrs += ` ${attr.name}="${attr.value}"`;
-    } else if (attr.value.value) {
-      attrs += ` ${attr.name}={${attr.value.value}}`;
+      continue;
     }
+
+    let value = (typeof attr.value === 'string' ? attr.value : attr.value.value).replace(
+      /\s+/g,
+      ' ',
+    );
+    if (value.length > 100) value = `${value.slice(0, 100)}…`;
+    attrs += ` ${attr.name}="${value.replaceAll('&', '&amp;').replaceAll('"', '&quot;')}"`;
   }
 
   const children = ctx.textContent(node as never);
