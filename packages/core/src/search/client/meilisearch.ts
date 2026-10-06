@@ -1,6 +1,6 @@
 import type { Meilisearch } from 'meilisearch';
 import type { MeilisearchDocument } from '@/search/meilisearch';
-import { createContentHighlighter, type SortedResult } from '@/search';
+import type { SortedResult } from '@/search';
 import type { SearchClient } from '../client';
 
 export interface MeilisearchOptions {
@@ -37,7 +37,6 @@ export function meilisearchClient(options: MeilisearchOptions): SearchClient {
       const { hits } = await client
         .index<MeilisearchDocument>(indexName)
         .search(query, { filter, limit: 20 });
-      const highlighter = createContentHighlighter(query);
       // page URL -> the page and its matched sections
       const groups = new Map<string, SortedResult[]>();
 
@@ -48,7 +47,7 @@ export function meilisearchClient(options: MeilisearchOptions): SearchClient {
             {
               id: hit.url,
               type: 'page',
-              content: highlighter.highlightMarkdown(hit.title),
+              content: hit.title,
               breadcrumbs: hit.breadcrumbs,
               url: hit.url,
             },
@@ -60,7 +59,7 @@ export function meilisearchClient(options: MeilisearchOptions): SearchClient {
         group.push({
           id: hit.id.toString(),
           type: hit.type,
-          content: highlighter.highlightMarkdown(hit.content),
+          content: hit.content,
           url: hit.heading ? `${hit.url}#${hit.heading}` : hit.url,
         });
       }

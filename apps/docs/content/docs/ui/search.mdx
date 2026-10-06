@@ -108,9 +108,7 @@ export default function DefaultSearchDialog(props: SharedProps) {
 
 ### Content Renderer
 
-The content in search result supports Markdown, match highlights are expressed using `<mark />`.
-
-You can customize the Markdown renderer.
+The content in search result supports Markdown, you can customize the Markdown renderer.
 
 ```tsx title="components/search.tsx"
 <SearchDialogList
@@ -125,4 +123,30 @@ You can customize the Markdown renderer.
     />
   )}
 />
+```
+
+### Highlights
+
+Matches of the search query are highlighted with the [CSS Custom Highlight API](https://developer.mozilla.org/en-US/docs/Web/API/CSS_Custom_Highlight_API), style them with `::highlight(fd-search)`.
+
+```css title="global.css"
+::highlight(fd-search) {
+  color: var(--color-fd-primary-foreground);
+  background-color: var(--color-fd-primary);
+}
+```
+
+When rendering results on your own, highlight them with `highlightQuery()`.
+
+```tsx title="components/search-result.tsx"
+'use client';
+import { highlightQuery } from 'fumadocs-core/search';
+import { type ReactNode, useCallback } from 'react';
+
+export function SearchResult({ query, children }: { query: string; children: ReactNode }) {
+  // returns a function to remove the highlights
+  const ref = useCallback((element: HTMLElement) => highlightQuery(element, query), [query]);
+
+  return <div ref={ref}>{children}</div>;
+}
 ```

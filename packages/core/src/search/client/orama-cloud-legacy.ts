@@ -1,7 +1,7 @@
 import type { ClientSearchParams, OramaClient } from '@oramacloud/client';
 import { removeUndefined } from '@/utils/remove-undefined';
 import type { OramaIndex } from '@/search/orama-cloud-legacy';
-import { createContentHighlighter, type SortedResult } from '@/search';
+import type { SortedResult } from '@/search';
 import type { SearchClient } from '../client';
 
 interface CrawlerIndex {
@@ -43,7 +43,6 @@ export function oramaCloudLegacyClient(options: OramaCloudLegacyOptions): Search
   return {
     deps: [index, client, tag],
     async search(query) {
-      const highlighter = createContentHighlighter(query);
       const list: SortedResult[] = [];
 
       if (index === 'crawler') {
@@ -69,13 +68,13 @@ export function oramaCloudLegacyClient(options: OramaCloudLegacyOptions): Search
             {
               id: hit.id,
               type: 'page',
-              content: highlighter.highlightMarkdown(doc.title),
+              content: doc.title,
               url: doc.path,
             },
             {
               id: 'page' + hit.id,
               type: 'text',
-              content: highlighter.highlightMarkdown(doc.content),
+              content: doc.content,
               url: doc.path,
             },
           );
@@ -111,7 +110,7 @@ export function oramaCloudLegacyClient(options: OramaCloudLegacyOptions): Search
             list.push({
               id: doc.page_id,
               type: 'page',
-              content: highlighter.highlightMarkdown(doc.title),
+              content: doc.title,
               breadcrumbs: doc.breadcrumbs,
               url: doc.url,
             });
@@ -120,7 +119,7 @@ export function oramaCloudLegacyClient(options: OramaCloudLegacyOptions): Search
 
           list.push({
             id: doc.id,
-            content: highlighter.highlightMarkdown(doc.content),
+            content: doc.content,
             type: doc.content === doc.section ? 'heading' : 'text',
             url: doc.section_id ? `${doc.url}#${doc.section_id}` : doc.url,
           });

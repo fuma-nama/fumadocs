@@ -1,7 +1,7 @@
 import { getByID, search, type SearchParams, type ZBSearch } from 'zbsearch';
 import { type AdvancedDocument, type advancedSchema } from '@/search/zbsearch/create-db';
 import { removeUndefined } from '@/utils/remove-undefined';
-import { createContentHighlighter, type SortedResult } from '@/search';
+import type { SortedResult } from '@/search';
 
 export async function searchAdvanced(
   db: ZBSearch<typeof advancedSchema>,
@@ -41,10 +41,8 @@ export async function searchAdvanced(
     params.term = query;
   }
 
-  const highlighter = createContentHighlighter(query);
   const result = await search(db, params);
-  // `limit` bounds `result.hits`, not `result.groups`: there is one group per
-  // matched page, so stop early instead of highlighting every matched page
+  // `limit` bounds `result.hits`, not `result.groups` (one group per matched page)
   const limit = typeof params.limit === 'number' ? params.limit : Infinity;
   const list: SortedResult[] = [];
   for (const item of result.groups ?? []) {
@@ -57,7 +55,7 @@ export async function searchAdvanced(
     list.push({
       id: pageId,
       type: 'page',
-      content: highlighter.highlightMarkdown(page.content),
+      content: page.content,
       breadcrumbs: page.breadcrumbs,
       url: page.url,
     });
@@ -68,7 +66,7 @@ export async function searchAdvanced(
 
       list.push({
         id: hit.document.id.toString(),
-        content: highlighter.highlightMarkdown(hit.document.content),
+        content: hit.document.content,
         breadcrumbs: hit.document.breadcrumbs,
         type: hit.document.type as SortedResult['type'],
         url: hit.document.url,

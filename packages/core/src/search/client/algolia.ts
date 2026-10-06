@@ -1,6 +1,6 @@
 import type { BaseIndex } from '@/search/algolia';
 import type { Hit, LiteClient, SearchResponse } from 'algoliasearch/lite';
-import { createContentHighlighter, type SortedResult } from '@/search';
+import type { SortedResult } from '@/search';
 import type { SearchClient } from '../client';
 
 export interface AlgoliaOptions {
@@ -73,10 +73,7 @@ export function algoliaClient(options: AlgoliaOptions): SearchClient {
             ],
           });
 
-      const highlighter = createContentHighlighter(query);
-      const results = groupResults(result.results[0].hits);
-      for (const item of results) item.content = highlighter.highlightMarkdown(item.content);
-      return results;
+      return groupResults(result.results[0].hits);
     },
   };
 }

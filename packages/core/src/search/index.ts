@@ -13,14 +13,13 @@ export interface SortedResult<Content = string> {
    * breadcrumbs to be displayed on UI
    */
   breadcrumbs?: Content[];
-  /**
-   * @deprecated it is now included in `content` as Markdown using `<mark />`.
-   */
-  contentWithHighlights?: HighlightedText<Content>[];
 }
 
 export type ReactSortedResult = SortedResult<ReactNode>;
 
+/**
+ * @deprecated
+ */
 export interface HighlightedText<Content = string> {
   type: 'text';
   content: Content;
@@ -29,21 +28,54 @@ export interface HighlightedText<Content = string> {
   };
 }
 
-function escapeRegExp(input: string): string {
-  return input.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+function buildRegexFromQuery(query: string): RegExp | null {
+  const source = query
+    .trim()
+    .replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
+    .replace(/\s+/g, '|');
+  return source ? new RegExp(source, 'gi') : null;
 }
 
-function buildRegexFromQuery(q: string): RegExp | null {
-  const trimmed = q.trim();
-  if (trimmed.length === 0) return null;
-  const terms = Array.from(new Set(trimmed.split(/\s+/).filter(Boolean)));
-  if (terms.length === 0) return null;
-  const escaped = terms.map(escapeRegExp).join('|');
-  return new RegExp(`(${escaped})`, 'gi');
+/**
+ * Highlight matches of `query` in the text of `element` with the CSS Custom Highlight API, style them with `::highlight(fd-search)`.
+ *
+ * The highlights stay when `element` is moved, but not when its text changes, call it again in that case.
+ *
+ * @returns a function to remove the highlights
+ */
+export function highlightQuery(element: Element, query: string): () => void {
+  const regex = buildRegexFromQuery(query);
+  if (!regex || typeof Highlight === 'undefined') return () => {};
+
+  let highlight = CSS.highlights.get('fd-search');
+  if (!highlight) CSS.highlights.set('fd-search', (highlight = new Highlight()));
+
+  const walker = document.createTreeWalker(element, NodeFilter.SHOW_TEXT);
+  const ranges: StaticRange[] = [];
+  while (walker.nextNode()) {
+    const node = walker.currentNode as Text;
+    for (const match of node.data.matchAll(regex)) {
+      const range = new StaticRange({
+        startContainer: node,
+        startOffset: match.index,
+        endContainer: node,
+        endOffset: match.index + match[0].length,
+      });
+      highlight.add(range);
+      ranges.push(range);
+    }
+  }
+
+  return () => {
+    for (const range of ranges) highlight.delete(range);
+  };
 }
 
-const processor = remark();
+const processor = /* @__PURE__ */ remark();
 
+/**
+ * @deprecated search results are no longer highlighted, highlight the rendered results with `highlightQuery()` instead.
+ */
 export function createContentHighlighter(query: string | RegExp) {
   const regex = typeof query === 'string' ? buildRegexFromQuery(query) : query;
 
