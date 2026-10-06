@@ -24,21 +24,24 @@ export interface LLMsConfig<Page = unknown> {
   renderPage?: (page: Page) => Awaitable<string>;
 }
 
-export interface LLMs {
+export interface LLMs<IndexOutput extends Awaitable<string> = Awaitable<string>> {
   /**
    * generate `llms.txt` content in Markdown format.
    *
    * use `indexNode(node)` instead for more control (e.g. add extra sections to output).
    */
-  index: (lang?: string) => Promise<string>;
+  index: (lang?: string) => IndexOutput;
 
   /**
    * generate `llms.txt` content for a single page tree node.
    */
-  indexNode: (node: PageTree.Node, lang?: string) => Promise<string>;
+  indexNode: (node: PageTree.Node, lang?: string) => IndexOutput;
 }
 
-export interface LLMsWithPages<Page> extends LLMs {
+export interface LLMsWithPages<
+  Page,
+  IndexOutput extends Awaitable<string> = Awaitable<string>,
+> extends LLMs<IndexOutput> {
   /**
    * render a page with `renderPage`.
    */
@@ -51,19 +54,26 @@ export interface LLMsWithPages<Page> extends LLMs {
 }
 
 export function llms<C extends LoaderConfig = LoaderConfig>(
-  input: LoaderOutput<C> | (() => Awaitable<LoaderOutput<C>>),
+  input: LoaderOutput<C>,
   config: LLMsConfig<C['page']> & { renderPage: (page: C['page']) => Awaitable<string> },
-): LLMsWithPages<C['page']>;
+): LLMsWithPages<C['page'], string>;
 export function llms<C extends LoaderConfig = LoaderConfig>(
-  input: LoaderOutput<C> | (() => Awaitable<LoaderOutput<C>>),
+  input: LoaderOutput<C>,
   config?: LLMsConfig<C['page']>,
-): LLMs;
+): LLMs<string>;
+export function llms<C extends LoaderConfig = LoaderConfig>(
+  input: () => Awaitable<LoaderOutput<C>>,
+  config: LLMsConfig<C['page']> & { renderPage: (page: C['page']) => Awaitable<string> },
+): LLMsWithPages<C['page'], Promise<string>>;
+export function llms<C extends LoaderConfig = LoaderConfig>(
+  input: () => Awaitable<LoaderOutput<C>>,
+  config?: LLMsConfig<C['page']>,
+): LLMs<Promise<string>>;
 export function llms<C extends LoaderConfig = LoaderConfig>(
   input: LoaderOutput<C> | (() => Awaitable<LoaderOutput<C>>),
   config: LLMsConfig<C['page']> = {},
-): LLMsWithPages<C['page']> {
+): LLMs | LLMsWithPages<C['page']> {
   const { TAB = '  ' } = config;
-  const resolve = () => (typeof input === 'function' ? input() : input);
 
   function renderName(node: PageTree.Node | PageTree.Root, ctx: RenderContext<C>): string {
     if (config.renderName) return config.renderName(node, ctx);
@@ -157,18 +167,19 @@ export function llms<C extends LoaderConfig = LoaderConfig>(
     return config.renderPage(page);
   }
 
+  function withLoader(render: (loader: LoaderOutput<C>) => string): Awaitable<string> {
+    if (typeof input === 'function') return Promise.resolve(input()).then(render);
+    return render(input);
+  }
+
   return {
-    async index(lang) {
-      return formatIndex(await resolve(), lang);
-    },
-    async indexNode(node, lang) {
-      return formatNode(node, 0, { lang, loader: await resolve() });
-    },
+    index: (lang) => withLoader((loader) => formatIndex(loader, lang)),
+    indexNode: (node, lang) => withLoader((loader) => formatNode(node, 0, { lang, loader })),
     async page(page) {
       return renderPage(page);
     },
     async full(lang) {
-      const loader = await resolve();
+      const loader = typeof input === 'function' ? await input() : input;
       const rendered: Awaitable<string>[] = [];
       for (const page of loader.getPages(lang)) rendered.push(renderPage(page));
 
