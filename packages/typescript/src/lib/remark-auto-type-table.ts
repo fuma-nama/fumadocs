@@ -11,6 +11,7 @@ import { toEstree } from 'hast-util-to-estree';
 import { type ParameterTag, parseTags } from '@/lib/parse-tags';
 import type { MdxJsxAttribute, MdxJsxExpressionAttribute, MdxJsxFlowElement } from 'mdast-util-mdx';
 import type { VFile } from 'vfile';
+import type { StructuredData } from 'fumadocs-core/mdx-plugins/remark-structure';
 
 function objectBuilder() {
   const out: ObjectExpression = {
@@ -138,6 +139,30 @@ export interface RemarkAutoTypeTableOptions {
   generator?: Generator;
 }
 
+/** a search record for each prop: a table row without header, linked to the prop */
+function typeTableRecords(id: string, entries: DocEntry[]): StructuredData['contents'] {
+  const contents: StructuredData['contents'] = [];
+  for (const entry of entries) {
+    const tags = parseTags(entry.tags);
+    let description = entry.description.replace(/{@link (?<link>[^}]*)}/g, '$1').trim();
+    if (tags.default) description += `${description ? ' ' : ''}Default: \`${tags.default}\``;
+    if (entry.deprecated) description = `**Deprecated.** ${description}`;
+
+    let row = '|';
+    for (const cell of [
+      `\`${entry.name}${entry.required ? '' : '?'}\``,
+      `\`${entry.simplifiedType}\``,
+      description,
+    ]) {
+      row += ` ${cell.replace(/\s*\n\s*/g, ' ').replaceAll('|', '\\|')} |`;
+    }
+
+    contents.push({ heading: `${id}-${entry.name}`, content: `${row}\n| --- | --- | --- |` });
+  }
+
+  return contents;
+}
+
 export interface TypeTableProps extends BaseTypeTableProps {
   cwd?: true;
 }
@@ -219,6 +244,10 @@ export function remarkAutoTypeTable(
           ...attributes,
         ],
         children: [],
+        data: {
+          structuredData: { contents: typeTableRecords(`type-table-${doc.id}`, doc.entries) },
+          _stringify: { text: '' },
+        },
       });
     }
 

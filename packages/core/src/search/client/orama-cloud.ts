@@ -2,7 +2,12 @@ import type { OramaCloud, OramaCloudSearchParams } from '@orama/core';
 import { removeUndefined } from '@/utils/remove-undefined';
 import type { OramaIndex } from '@/search/orama-cloud';
 import type { SortedResult } from '@/search';
-import type { SearchClient } from '../client';
+import {
+  type SearchClient,
+  type UseSearchOptions,
+  type UseSearchReturn,
+  useSearchClient,
+} from '@/search/use-search-client';
 
 interface CrawlerIndex {
   path: string;
@@ -130,4 +135,10 @@ export function oramaCloudClient(options: OramaCloudOptions): SearchClient {
       return list.length > 80 ? list.slice(0, 80) : list;
     },
   };
+}
+
+export function useOramaCloudSearch(
+  options: OramaCloudOptions & UseSearchOptions,
+): UseSearchReturn {
+  return useSearchClient(oramaCloudClient(options), options);
 }

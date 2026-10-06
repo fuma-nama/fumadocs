@@ -43,16 +43,13 @@ You can consider different options for implementing the UI:
 
   ```ts twoslash
   import { liteClient } from 'algoliasearch/lite';
-  import { useDocsSearch } from 'fumadocs-core/search/client';
-  import { algoliaClient } from 'fumadocs-core/search/client/algolia';
+  import { useAlgoliaSearch } from 'fumadocs-core/search/client';
 
   const algolia = liteClient('id', 'key');
 
-  const { search, setSearch, query } = useDocsSearch({
-    client: algoliaClient({
-      indexName: 'document',
-      client: algolia,
-    }),
+  const { search, setSearch, isLoading, result } = useAlgoliaSearch({
+    indexName: 'document',
+    client: algolia,
   });
   ```
 
@@ -74,14 +71,11 @@ And update your search client:
 - **Search Client**: You can add the tag filter like:
 
   ```ts
-  import { useDocsSearch } from 'fumadocs-core/search/client';
-  import { algoliaClient } from 'fumadocs-core/search/client/algolia';
+  import { useAlgoliaSearch } from 'fumadocs-core/search/client';
 
-  const { search, setSearch, query } = useDocsSearch({
-    client: algoliaClient({
-      tag: '<your tag value>',
-      // ...
-    }),
+  const { search, setSearch, isLoading, result } = useAlgoliaSearch({
+    tag: '<your tag value>',
+    // ...
   });
   ```
 

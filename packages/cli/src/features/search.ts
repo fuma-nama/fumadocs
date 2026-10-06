@@ -47,8 +47,9 @@ const dialogImports = `import {
 } from 'fumadocs-ui/components/dialog/search';
 import { useI18n } from 'fumadocs-ui/contexts/i18n';`;
 
-const dialogBody = (footer: string, url: string) => `  return (
-    <SearchDialog search={search} onSearchChange={setSearch} isLoading={query.isLoading} {...props}>
+/** `legacy` for hooks in the shape of the deprecated `useDocsSearch()`, like the Typesense adapter */
+const dialogBody = (footer: string, url: string, legacy = false) => `  return (
+    <SearchDialog search={search} onSearchChange={setSearch} isLoading={${legacy ? 'query.isLoading' : 'isLoading'}} {...props}>
       <SearchDialogOverlay />
       <SearchDialogContent>
         <SearchDialogHeader>
@@ -56,7 +57,7 @@ const dialogBody = (footer: string, url: string) => `  return (
           <SearchDialogInput />
           <SearchDialogClose />
         </SearchDialogHeader>
-        <SearchDialogList items={query.data !== 'empty' ? query.data : null} />
+        <SearchDialogList ${legacy ? "items={query.data !== 'empty' ? query.data : null}" : 'items={result.data} query={result.query}'} />
         <SearchDialogFooter>
           <a
             href="${url}"
@@ -144,7 +145,7 @@ const providers = {
     static: true,
     dialog: (env) => `'use client';
 ${dialogImports}
-import { useDocsSearch } from 'fumadocs-core/search/client';
+import { useOramaCloudSearch } from 'fumadocs-core/search/client';
 import { OramaCloud } from '@orama/core';
 
 const client = new OramaCloud({
@@ -154,8 +155,7 @@ const client = new OramaCloud({
 
 export default function CustomSearchDialog(props: SharedProps) {
   const { locale } = useI18n();
-  const { search, setSearch, query } = useDocsSearch({
-    type: 'orama-cloud',
+  const { search, setSearch, isLoading, result } = useOramaCloudSearch({
     client,
     locale,
   });
@@ -192,20 +192,17 @@ await sync(orama, {
     static: true,
     dialog: (env) => `'use client';
 ${dialogImports}
-import { useDocsSearch } from 'fumadocs-core/search/client';
-import { algoliaClient } from 'fumadocs-core/search/client/algolia';
+import { useAlgoliaSearch } from 'fumadocs-core/search/client';
 import { liteClient } from 'algoliasearch/lite';
 
 const algolia = liteClient(${env.read}ALGOLIA_APP_ID!, ${env.read}ALGOLIA_SEARCH_KEY!);
 
 export default function CustomSearchDialog(props: SharedProps) {
   const { locale } = useI18n();
-  const { search, setSearch, query } = useDocsSearch({
-    client: algoliaClient({
-      client: algolia,
-      indexName: 'document',
-      locale,
-    }),
+  const { search, setSearch, isLoading, result } = useAlgoliaSearch({
+    client: algolia,
+    indexName: 'document',
+    locale,
   });
 
 ${dialogBody('Algolia', 'https://algolia.com')}`,
@@ -240,8 +237,7 @@ await sync(client, {
     static: true,
     dialog: (env) => `'use client';
 ${dialogImports}
-import { useDocsSearch } from 'fumadocs-core/search/client';
-import { meilisearchClient } from 'fumadocs-core/search/client/meilisearch';
+import { useMeilisearch } from 'fumadocs-core/search/client';
 import { Meilisearch } from 'meilisearch';
 
 const client = new Meilisearch({
@@ -251,12 +247,10 @@ const client = new Meilisearch({
 
 export default function CustomSearchDialog(props: SharedProps) {
   const { locale } = useI18n();
-  const { search, setSearch, query } = useDocsSearch({
-    client: meilisearchClient({
-      client,
-      indexName: 'docs',
-      locale,
-    }),
+  const { search, setSearch, isLoading, result } = useMeilisearch({
+    client,
+    indexName: 'docs',
+    locale,
   });
 
 ${dialogBody('Meilisearch', 'https://www.meilisearch.com')}`,
@@ -307,7 +301,7 @@ export default function CustomSearchDialog(props: SharedProps) {
     client,
   });
 
-${dialogBody('Typesense', 'https://typesense.org')}`,
+${dialogBody('Typesense', 'https://typesense.org', true)}`,
     exportIndexes: (src, async) => ({
       head: typesenseDocuments(src, async),
       documents: 'getDocuments()',
@@ -339,16 +333,13 @@ await sync(client, {
     static: false,
     dialog: () => `'use client';
 ${dialogImports}
-import { useDocsSearch } from 'fumadocs-core/search/client';
-import { fetchClient } from 'fumadocs-core/search/client/fetch';
+import { useFetchSearch } from 'fumadocs-core/search/client';
 
 export default function CustomSearchDialog(props: SharedProps) {
   const { locale } = useI18n();
-  const { search, setSearch, query } = useDocsSearch({
-    client: fetchClient({
-      api: '/api/search',
-      locale,
-    }),
+  const { search, setSearch, isLoading, result } = useFetchSearch({
+    api: '/api/search',
+    locale,
   });
 
 ${dialogBody('Mixedbread', 'https://mixedbread.com')}`,

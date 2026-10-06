@@ -3,7 +3,12 @@ import { searchSimple } from '@/search/zbsearch/search/simple';
 import { searchAdvanced } from '@/search/zbsearch/search/advanced';
 import type { advancedSchema, simpleSchema } from '@/search/zbsearch/create-db';
 import type { ExportedData } from '@/search/server';
-import type { SearchClient } from '../client';
+import {
+  type SearchClient,
+  type UseSearchOptions,
+  type UseSearchReturn,
+  useSearchClient,
+} from '@/search/use-search-client';
 import { BASE_PATH, join } from '@/utils/url';
 
 export interface StaticOptions {
@@ -156,6 +161,13 @@ export function staticClient(options: StaticOptions = {}): SearchClient {
       );
     },
   };
+}
+
+/**
+ * Search the indexes exported by the search server, in the browser.
+ */
+export function useStaticSearch(options?: StaticOptions & UseSearchOptions): UseSearchReturn {
+  return useSearchClient(staticClient(options), options);
 }
 
 /**

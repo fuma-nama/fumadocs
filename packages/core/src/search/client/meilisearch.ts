@@ -1,7 +1,12 @@
 import type { Meilisearch } from 'meilisearch';
 import type { MeilisearchDocument } from '@/search/meilisearch';
 import type { SortedResult } from '@/search';
-import type { SearchClient } from '../client';
+import {
+  type SearchClient,
+  type UseSearchOptions,
+  type UseSearchReturn,
+  useSearchClient,
+} from '@/search/use-search-client';
 
 export interface MeilisearchOptions {
   /**
@@ -69,4 +74,8 @@ export function meilisearchClient(options: MeilisearchOptions): SearchClient {
       return results;
     },
   };
+}
+
+export function useMeilisearch(options: MeilisearchOptions & UseSearchOptions): UseSearchReturn {
+  return useSearchClient(meilisearchClient(options), options);
 }

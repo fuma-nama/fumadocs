@@ -167,7 +167,7 @@ function toIndex(page: OramaDocument): OramaIndex[] {
   page.structured.contents.forEach((p) => {
     const heading = p.heading ? page.structured.headings.find((h) => p.heading === h.id) : null;
 
-    const index = createIndex(heading?.content, heading?.id, p.content);
+    const index = createIndex(heading?.content, p.heading, p.content);
 
     if (heading && !scannedHeadings.has(heading.id)) {
       scannedHeadings.add(heading.id);

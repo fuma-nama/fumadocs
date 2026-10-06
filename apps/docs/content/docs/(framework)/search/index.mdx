@@ -13,6 +13,31 @@ You can choose & configure the search client according to your search engine, it
 
 <DocsCategory />
 
+### Search Hooks
+
+Search clients come with React hooks, like `useFetchSearch()` and `useAlgoliaSearch()`, returning the same shape:
+
+```ts
+import { useFetchSearch } from 'fumadocs-core/search/client';
+
+// `result.data` is the results of `result.query`
+const { search, setSearch, isLoading, result } = useFetchSearch();
+```
+
+For other search engines, pass your search client to `useSearchClient()`:
+
+```ts
+import { type SearchClient, useSearchClient } from 'fumadocs-core/search/client';
+
+const client: SearchClient = {
+  async search(query) {
+    // return `SortedResult[]`
+  },
+};
+
+const { search, setSearch, isLoading, result } = useSearchClient(client);
+```
+
 ### Community Integrations
 
 A list of integrations maintained by community.

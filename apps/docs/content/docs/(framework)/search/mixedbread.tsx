@@ -12,21 +12,18 @@ import {
   SearchDialogOverlay,
   type SharedProps,
 } from 'fumadocs-ui/components/dialog/search';
-import { useDocsSearch } from 'fumadocs-core/search/client';
-import { fetchClient } from 'fumadocs-core/search/client/fetch';
+import { useFetchSearch } from 'fumadocs-core/search/client';
 import { useI18n } from 'fumadocs-ui/contexts/i18n';
 
 export default function CustomSearchDialog(props: SharedProps) {
   const { locale } = useI18n(); // (optional) for i18n
-  const { search, setSearch, query } = useDocsSearch({
-    client: fetchClient({
-      api: '/api/search',
-      locale,
-    }),
+  const { search, setSearch, isLoading, result } = useFetchSearch({
+    api: '/api/search',
+    locale,
   });
 
   return (
-    <SearchDialog search={search} onSearchChange={setSearch} isLoading={query.isLoading} {...props}>
+    <SearchDialog search={search} onSearchChange={setSearch} isLoading={isLoading} {...props}>
       <SearchDialogOverlay />
       <SearchDialogContent>
         <SearchDialogHeader>
@@ -34,7 +31,7 @@ export default function CustomSearchDialog(props: SharedProps) {
           <SearchDialogInput />
           <SearchDialogClose />
         </SearchDialogHeader>
-        <SearchDialogList items={query.data !== 'empty' ? query.data : null} />
+        <SearchDialogList items={result.data} query={result.query} />
         <SearchDialogFooter>
           <a
             href="https://mixedbread.com"

@@ -1,6 +1,6 @@
 'use client';
 
-import { SearchClient, useDocsSearch } from 'fumadocs-core/search/client';
+import { type SearchClient, useSearchClient } from 'fumadocs-core/search/client';
 import { fetchClient } from 'fumadocs-core/search/client/fetch';
 import { type ReactNode, use, useMemo, useState } from 'react';
 import { useOnChange } from 'fumadocs-core/utils/use-on-change';
@@ -84,7 +84,7 @@ export default function DefaultSearchDialog({
     });
   }
 
-  const { search, setSearch, query } = useDocsSearch({ client, delayMs });
+  const { search, setSearch, isLoading, result } = useSearchClient(client, { delayMs });
   const defaultItems = useMemo<SortedResult[] | null>(() => {
     if (links.length === 0) return null;
     return links.map(([name, link]) => ({
@@ -100,7 +100,7 @@ export default function DefaultSearchDialog({
   });
 
   return (
-    <SearchDialog search={search} onSearchChange={setSearch} isLoading={query.isLoading} {...props}>
+    <SearchDialog search={search} onSearchChange={setSearch} isLoading={isLoading} {...props}>
       <SearchDialogOverlay />
       <SearchDialogContent>
         <SearchDialogHeader>
@@ -108,7 +108,7 @@ export default function DefaultSearchDialog({
           <SearchDialogInput />
           <SearchDialogClose />
         </SearchDialogHeader>
-        <SearchDialogList items={query.data !== 'empty' ? query.data : defaultItems} />
+        <SearchDialogList items={result.data ?? defaultItems} query={result.query} />
       </SearchDialogContent>
       <SearchDialogFooter>
         {tags.length > 0 && (

@@ -50,18 +50,18 @@ import {
   TagsListItem,
 } from 'fumadocs-ui/components/dialog/search';
 import { useState } from 'react';
-import { useDocsSearch } from 'fumadocs-core/search/client';
+import { useSearchClient } from 'fumadocs-core/search/client';
 import { flexsearchStaticClient } from 'fumadocs-core/search/client/flexsearch-static';
 
 export default function CustomSearchDialog(props: SharedProps) {
   // [!code ++]
   const [tag, setTag] = useState<string | undefined>();
-  const { search, setSearch, query } = useDocsSearch({
-    client: flexsearchStaticClient({
+  const { search, setSearch, isLoading, result } = useSearchClient(
+    flexsearchStaticClient({
       // [!code ++]
       tag,
     }),
-  });
+  );
 
   return (
     <SearchDialog>

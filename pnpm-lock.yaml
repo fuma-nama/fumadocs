@@ -2287,6 +2287,12 @@ importers:
       lucide-react:
         specifier: ^1.50.0
         version: 1.50.0(@types/react@19.3.0)(react@19.3.0)
+      mdast-util-gfm-table:
+        specifier: ^2.0.0
+        version: 2.0.0(supports-color@8.1.1)
+      micromark-extension-gfm-table:
+        specifier: ^2.1.2
+        version: 2.1.2
       motion:
         specifier: ^14.0.0
         version: 14.0.0(react-dom@19.3.0(react@19.3.0))(react@19.3.0)
@@ -3864,6 +3870,12 @@ importers:
       lucide-react:
         specifier: ^1.50.0
         version: 1.50.0(@types/react@19.3.0)(react@19.3.0)
+      mdast-util-gfm-table:
+        specifier: ^2.0.0
+        version: 2.0.0(supports-color@8.1.1)
+      micromark-extension-gfm-table:
+        specifier: ^2.1.2
+        version: 2.1.2
       motion:
         specifier: ^14.0.0
         version: 14.0.0(react-dom@19.3.0(react@19.3.0))(react@19.3.0)

@@ -41,6 +41,8 @@ export default defineConfig({
     ],
   },
   exports: {
+    // re-exported by `search/client`, a separate module so bundlers drop its dynamic imports when unused
+    exclude: ['search/client/docs-search'],
     customExports: {
       './server': {
         browser: './dist/server.browser.js',
