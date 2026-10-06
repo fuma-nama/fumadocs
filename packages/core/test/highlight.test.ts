@@ -16,3 +16,15 @@ test('highlight search results', () => {
     `"wor ld <mark>hello</mark>"`,
   );
 });
+
+test('highlight inline code', () => {
+  const highlighter = createContentHighlighter('register');
+
+  expect(highlighter.highlightMarkdown('call `register` and register')).toBe(
+    'call <code><mark>register</mark></code> and <mark>register</mark>',
+  );
+  expect(highlighter.highlightMarkdown('`a < register`')).toBe(
+    '<code>a &lt; <mark>register</mark></code>',
+  );
+  expect(highlighter.highlightMarkdown('`other` register')).toBe('`other` <mark>register</mark>');
+});

@@ -98,24 +98,38 @@ export function createContentHighlighter(query: string | RegExp) {
 
 function highlightInTree(tree: Root, regex: RegExp) {
   visit(tree, 'text', (node) => {
-    let out = '';
-    const content = node.value;
-
-    let i = 0;
-    for (const match of content.matchAll(regex)) {
-      if (i < match.index) {
-        out += content.substring(i, match.index);
-      }
-
-      out += `<mark>${match[0]}</mark>`;
-      i = match.index + match[0].length;
-    }
-
-    if (i < content.length) {
-      out += content.substring(i);
-    }
-
     node.type = 'html' as never;
-    node.value = out;
+    node.value = mark(node.value, regex);
   });
+
+  visit(tree, 'inlineCode', (node) => {
+    if (node.value.search(regex) === -1) return;
+    node.type = 'html' as never;
+    node.value = `<code>${mark(node.value, regex, escapeHtml)}</code>`;
+  });
+}
+
+function mark(content: string, regex: RegExp, escape = (s: string) => s): string {
+  let out = '';
+
+  let i = 0;
+  for (const match of content.matchAll(regex)) {
+    if (i < match.index) {
+      out += escape(content.substring(i, match.index));
+    }
+
+    out += `<mark>${escape(match[0])}</mark>`;
+    i = match.index + match[0].length;
+  }
+
+  if (i < content.length) {
+    out += escape(content.substring(i));
+  }
+
+  return out;
+}
+
+// raw HTML parses the `<` that a code span showed as text
+function escapeHtml(s: string): string {
+  return s.replaceAll('&', '&amp;').replaceAll('<', '&lt;').replaceAll('>', '&gt;');
 }
