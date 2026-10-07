@@ -78,11 +78,21 @@ export function meilisearchClient(options: MeilisearchOptions): SearchClient {
   };
 }
 
-export function useMeilisearch(options: MeilisearchOptions & UseSearchOptions) {
-  const { client, indexName, tag, locale } = options;
+export function useMeilisearch({
+  client,
+  indexName,
+  locale,
+  tag,
+  ...rest
+}: MeilisearchOptions & UseSearchOptions) {
+  const tags = String(tag ?? '');
   const run = useCallback(
-    (query: string) => searchMeilisearch({ client, indexName, tag, locale }, query),
-    [client, indexName, tag, locale],
+    (query: string) =>
+      searchMeilisearch(
+        { client, indexName, locale, tag: tags ? tags.split(',') : undefined },
+        query,
+      ),
+    [client, indexName, locale, tags],
   );
-  return useSearch(run, options);
+  return useSearch(run, rest);
 }

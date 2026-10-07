@@ -140,8 +140,11 @@ export interface RemarkAutoTypeTableOptions {
   generator?: Generator;
 }
 
-/** a search record for each prop: a table row without header, linked to the prop */
-export function typeTableRecords(id: string, entries: DocEntry[]): StructuredData['contents'] {
+/** the structured data of a type table, a table row without header for each prop, linked to the prop */
+export function typeTableToStructuredData(
+  id: string,
+  entries: DocEntry[],
+): StructuredData['contents'] {
   const contents: StructuredData['contents'] = [];
   for (const entry of entries) {
     const tags = parseTags(entry.tags);
@@ -247,7 +250,9 @@ export function remarkAutoTypeTable(
         ],
         children: [],
         data: {
-          structuredData: { contents: typeTableRecords(`type-table-${doc.id}`, doc.entries) },
+          structuredData: {
+            contents: typeTableToStructuredData(`type-table-${doc.id}`, doc.entries),
+          },
           _stringify: { text: '' },
         },
       });

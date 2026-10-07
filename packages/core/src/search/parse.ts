@@ -1,49 +1,45 @@
-import type { Element, Root } from 'hast';
-import type { Processor } from 'unified';
-import { remark } from 'remark';
-import remarkRehype from 'remark-rehype';
-import rehypeRaw from 'rehype-raw';
-import { gfmTable } from 'micromark-extension-gfm-table';
-import { gfmTableFromMarkdown } from 'mdast-util-gfm-table';
-import { visit } from 'unist-util-visit';
+import type { Nodes, Root } from 'hast';
+import { fromDom } from 'hast-util-from-dom';
+import { micromark, type Options } from 'micromark';
+import { gfmTable, gfmTableHtml } from 'micromark-extension-gfm-table';
 import type { SortedResult } from '@/search';
-import type { SearchResultItem, SearchResultRecord, SearchResultTable } from './use-search';
+import type { SearchResultItem, SearchResultTable } from './use-search';
 
-const processor = remark()
-  .use(remarkTable)
-  .use(remarkRehype, { allowDangerousHtml: true })
-  .use(rehypeRaw)
-  .use(rehypeCustomElements);
+const options: Options = {
+  allowDangerousHtml: true,
+  extensions: [gfmTable()],
+  htmlExtensions: [gfmTableHtml()],
+};
 
 /**
- * Parse the Markdown content of results, and gather the rows of a table after its first row, tables are scoped to the page before them.
+ * Parse the Markdown content of results with the HTML parser of browsers, and gather the rows of a table after its first row, tables are scoped to the page before them.
  */
 export function parseResults(results: SortedResult[]): SearchResultItem[] {
   const items: SearchResultItem[] = [];
   const tables = new Map<string, SearchResultTable>();
+  const template = document.createElement('template');
 
   for (const result of results) {
     if (result.type === 'page') tables.clear();
-    const record: SearchResultRecord = {
-      ...result,
-      hastContent: processor.runSync(processor.parse(result.content)),
-    };
-    const table = record.hastContent.children.find((node) => node.type === 'element');
-    // a row without header is parsed as the header row
-    const [head, body] = table?.tagName === 'table' ? (table.children as Element[]) : [];
-    const row = (body ?? head)?.children[0] as Element | undefined;
-    if (!table || !row) {
+    template.innerHTML = micromark(result.content, options);
+    const record = { ...result, hastContent: toHast(template.content) };
+    const table = template.content.firstElementChild;
+    if (!(table instanceof HTMLTableElement) || table.rows.length === 0) {
       items.push(record);
       continue;
     }
 
     let entry = result.table ? tables.get(result.table) : undefined;
     if (!entry) {
+      const columns = table.rows[0].cells.length;
+      // a row without header is parsed as the header row
+      const body = table.tHead && table.tBodies.item(0);
+      body?.remove();
       entry = {
         type: 'table',
         id: result.id,
-        columns: row.children.length,
-        header: body && { type: 'root', children: [{ ...table, children: [head] }] },
+        columns,
+        header: body ? toHast(template.content) : undefined,
         rows: [],
       };
       items.push(entry);
@@ -55,22 +51,14 @@ export function parseResults(results: SortedResult[]): SearchResultItem[] {
   return items;
 }
 
-function remarkTable(this: Processor) {
-  const data = this.data() as Record<string, unknown[]>;
-  (data.micromarkExtensions ??= []).push(gfmTable());
-  (data.fromMarkdownExtensions ??= []).push(gfmTableFromMarkdown());
+function toHast(fragment: DocumentFragment) {
+  return fromDom(fragment, { afterTransform }) as Root;
 }
 
 /** elements unknown to HTML, like the JSX elements of records, become `custom` elements with a `tagName` property */
-function rehypeCustomElements() {
-  return (tree: Root) => {
-    if (typeof document === 'undefined') return;
-
-    visit(tree, 'element', (node) => {
-      if (document.createElement(node.tagName) instanceof HTMLUnknownElement) {
-        node.properties.tagName = node.tagName;
-        node.tagName = 'custom';
-      }
-    });
-  };
+function afterTransform(node: Node, hast: Nodes) {
+  if (hast.type === 'element' && node instanceof HTMLUnknownElement) {
+    hast.properties.tagName = hast.tagName;
+    hast.tagName = 'custom';
+  }
 }

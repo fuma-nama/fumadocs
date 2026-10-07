@@ -1,4 +1,4 @@
-import { useCallback } from 'react';
+import { useCallback, useRef } from 'react';
 import { create, load, type AnyZBSearch, type SearchParams, type ZBSearch } from 'zbsearch';
 import { searchSimple } from '@/search/zbsearch/search/simple';
 import { searchAdvanced } from '@/search/zbsearch/search/advanced';
@@ -165,13 +165,24 @@ export function staticClient(options: StaticOptions = {}): SearchClient {
 /**
  * Search the indexes exported by the search server, in the browser.
  */
-export function useStaticSearch(options: StaticOptions & UseSearchOptions = {}) {
-  const { from, initDB, initOrama, tag, locale, search } = options;
+export function useStaticSearch({
+  from,
+  locale,
+  tag,
+  ...rest
+}: StaticOptions & UseSearchOptions = {}) {
+  const latest = useRef(rest);
+  latest.current = rest;
+  const tags = String(tag ?? '');
   const run = useCallback(
-    (query: string) => searchStatic({ from, initDB, initOrama, tag, locale, search }, query),
-    [from, initDB, initOrama, tag, locale, search],
+    (query: string) =>
+      searchStatic(
+        { ...latest.current, from, locale, tag: tags ? tags.split(',') : undefined },
+        query,
+      ),
+    [from, locale, tags],
   );
-  return useSearch(run, options);
+  return useSearch(run, rest);
 }
 
 /**

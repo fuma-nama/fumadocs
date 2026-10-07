@@ -1,4 +1,4 @@
-import { useCallback } from 'react';
+import { useCallback, useRef } from 'react';
 import type { BaseIndex } from '@/search/algolia';
 import type { Hit, LiteClient, SearchResponse } from 'algoliasearch/lite';
 import type { SortedResult } from '@/search';
@@ -83,11 +83,18 @@ export function algoliaClient(options: AlgoliaOptions): SearchClient {
   };
 }
 
-export function useAlgoliaSearch(options: AlgoliaOptions & UseSearchOptions) {
-  const { indexName, client, locale, tag, onSearch } = options;
+export function useAlgoliaSearch({
+  indexName,
+  client,
+  locale,
+  tag,
+  ...rest
+}: AlgoliaOptions & UseSearchOptions) {
+  const latest = useRef(rest);
+  latest.current = rest;
   const run = useCallback(
-    (query: string) => searchAlgolia({ indexName, client, locale, tag, onSearch }, query),
-    [indexName, client, locale, tag, onSearch],
+    (query: string) => searchAlgolia({ ...latest.current, indexName, client, locale, tag }, query),
+    [indexName, client, locale, tag],
   );
-  return useSearch(run, options);
+  return useSearch(run, rest);
 }

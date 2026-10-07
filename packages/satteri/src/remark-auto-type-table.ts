@@ -15,7 +15,7 @@ import {
   type RawTag,
   type RemarkAutoTypeTableOptions,
   type TypeTableProps,
-  typeTableRecords,
+  typeTableToStructuredData,
 } from 'fumadocs-typescript';
 import { formatTable, replaceSource } from './stringifier';
 import { jsxToSource } from './utils';
@@ -232,7 +232,7 @@ export function remarkAutoTypeTable(config: RemarkAutoTypeTableOptions = {}) {
             ...attributes,
           ],
           children: [],
-          data: { structuredData: { contents: typeTableRecords(id, doc.entries) } },
+          data: { structuredData: { contents: typeTableToStructuredData(id, doc.entries) } },
         });
       }
 

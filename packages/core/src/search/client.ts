@@ -1,4 +1,5 @@
 export {
+  useSearch as experimental_useSearch,
   useHighlightQuery,
   type UseSearchOptions,
   type SearchResult,
