@@ -105,7 +105,7 @@ export default function DefaultSearchDialog(props: SharedProps) {
 
 ### Content Renderer
 
-The content in search result supports Markdown, you can customize the Markdown renderer.
+To render the Markdown content of search items on your own instead, pass `renderMarkdown`.
 
 ```tsx title="components/search.tsx"
 <SearchDialogList
@@ -118,6 +118,21 @@ The content in search result supports Markdown, you can customize the Markdown r
       }}
     />
   )}
+/>
+```
+
+### Tables
+
+Customize how tables in results are rendered. A custom `Table` renders the rows on its own:
+
+```tsx title="components/search.tsx"
+<SearchDialogList
+  // show the rows without a card
+  Table={({ table, Item, onSelect }) =>
+    table.rows.map((row) => (
+      <Fragment key={row.id}>{Item({ item: row, onClick: () => onSelect(row) })}</Fragment>
+    ))
+  }
 />
 ```
 
@@ -138,7 +153,7 @@ When rendering results on your own, highlight them with `useHighlightQuery()`.
 
 ```tsx title="components/search-result.tsx"
 'use client';
-import { useHighlightQuery } from 'fumadocs-core/search';
+import { useHighlightQuery } from 'fumadocs-core/search/client';
 import type { ReactNode } from 'react';
 
 export function SearchResult({ query, children }: { query: string; children: ReactNode }) {
