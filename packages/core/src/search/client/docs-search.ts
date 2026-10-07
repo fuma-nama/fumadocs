@@ -1,10 +1,7 @@
-import type { DependencyList } from 'react';
+import { type DependencyList, useCallback } from 'react';
 import type { SortedResult } from '@/search';
-import {
-  type SearchClient,
-  type UseSearchOptions,
-  useSearchClient,
-} from '@/search/use-search-client';
+import type { Awaitable } from '@/types';
+import { type UseSearchOptions, useSearch } from '../use-search';
 import type { FetchOptions } from './fetch';
 import type { StaticOptions } from './orama-static';
 import type { AlgoliaOptions } from './algolia';
@@ -13,64 +10,20 @@ import type { OramaCloudLegacyOptions } from './orama-cloud-legacy';
 import type { MixedbreadOptions } from './mixedbread';
 import type { FlexsearchStaticOptions } from './flexsearch-static';
 
-interface UseDocsSearch {
-  search: string;
-  setSearch: (v: string) => void;
-  query: {
-    isLoading: boolean;
-    data?: SortedResult[] | 'empty';
-    error?: Error;
-  };
+export interface SearchClient {
+  search: (query: string) => Awaitable<SortedResult[]>;
+  deps?: DependencyList;
 }
 
 export type ClientPreset =
-  | ({
-      /**
-       * @deprecated Pass `client: fetchClient(...)` instead.
-       */
-      type: 'fetch';
-    } & FetchOptions)
-  | ({
-      /**
-       * @deprecated Pass `client: staticClient(...)` instead.
-       */
-      type: 'static';
-    } & StaticOptions)
-  | ({
-      /**
-       * @deprecated Pass `client: algoliaClient(...)` instead.
-       */
-      type: 'algolia';
-    } & AlgoliaOptions)
-  | ({
-      /**
-       * @deprecated Pass `client: oramaCloudClient(...)` instead.
-       */
-      type: 'orama-cloud';
-    } & OramaCloudOptions)
-  | ({
-      /**
-       * @deprecated Pass `client: oramaCloudLegacyClient(...)` instead.
-       */
-      type: 'orama-cloud-legacy';
-    } & OramaCloudLegacyOptions)
-  | ({
-      /**
-       * @deprecated Pass `client: flexsearchStaticClient(...)` instead.
-       */
-      type: 'flexsearch-static';
-    } & FlexsearchStaticOptions)
-  | ({
-      /**
-       * @deprecated Use `createMixedbreadSearchAPI` from `fumadocs-core/search/mixedbread` instead.
-       * This client-side approach exposes your API key in the browser.
-       * The server-side approach keeps the key secure and uses `client: fetchClient(...)` on the client.
-       */
-      type: 'mixedbread';
-    } & MixedbreadOptions)
-  | {
-      client: SearchClient;
-    };
+  | ({ type: 'fetch' } & FetchOptions)
+  | ({ type: 'static' } & StaticOptions)
+  | ({ type: 'algolia' } & AlgoliaOptions)
+  | ({ type: 'orama-cloud' } & OramaCloudOptions)
+  | ({ type: 'orama-cloud-legacy' } & OramaCloudLegacyOptions)
+  | ({ type: 'flexsearch-static' } & FlexsearchStaticOptions)
+  | ({ type: 'mixedbread' } & MixedbreadOptions)
+  | { client: SearchClient };
 
 type PresetOptions = Extract<ClientPreset, { type: string }>;
 
@@ -79,22 +32,21 @@ type PresetOptions = Extract<ClientPreset, { type: string }>;
  *
  * Note: it will re-query when its parameters changed, make sure to define `deps` array if you encounter rendering issues.
  *
- * @deprecated Use the search hook of your provider instead, like `useFetchSearch()`, or `useSearchClient()` for other search clients.
+ * @deprecated Use the search hook of your provider instead, like `useFetchSearch()`.
  */
 export function useDocsSearch(
   { delayMs, allowEmpty, ...options }: ClientPreset & UseSearchOptions,
   customDeps?: DependencyList,
-): UseDocsSearch {
+) {
   const client = 'type' in options ? presetClient(options) : options.client;
-  const { search, setSearch, isLoading, result } = useSearchClient(
-    customDeps ? { deps: customDeps, search: (query) => client.search(query) } : client,
-    { delayMs, allowEmpty },
-  );
+  const run = useCallback((query: string) => client.search(query), customDeps ?? client.deps ?? []);
+  const output = useSearch(run, { delayMs, allowEmpty });
+  const { isLoading, result } = output;
 
   return {
-    search,
-    setSearch,
-    query: { isLoading, data: result.data ?? 'empty', error: result.error },
+    ...output,
+    setSearch: output.onSearchChange,
+    query: { isLoading, data: result.data ?? ('empty' as const), error: result.error },
   };
 }
 

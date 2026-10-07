@@ -1,4 +1,7 @@
+import { useCallback } from 'react';
 import type { SearchClient } from '../client';
+import { type UseSearchOptions, useSearch } from '../use-search';
+import type { SortedResult } from '@/search';
 import type { ExportedData } from '../flexsearch';
 import type { Document } from 'flexsearch';
 import { createDocument, search, type Doc } from '../flexsearch/utils';
@@ -21,23 +24,21 @@ function initDocument(data: Record<string, string>) {
 
 const cacheMap = new Map<string, Promise<Map<string, Document<Doc>>>>();
 
-export function flexsearchStaticClient(options: FlexsearchStaticOptions = {}): SearchClient {
-  const { from = join(BASE_PATH, '/api/search'), locale = '', tag } = options;
-
+async function searchFlexsearchStatic(
+  { from = join(BASE_PATH, '/api/search'), locale = '', tag }: FlexsearchStaticOptions,
+  query: string,
+): Promise<SortedResult[]> {
   let dbs = cacheMap.get(from);
-  if (!dbs && typeof window !== 'undefined') {
-    dbs = init(from);
-    cacheMap.set(from, dbs);
-  }
+  if (!dbs) cacheMap.set(from, (dbs = init(from)));
+  const db = (await dbs).get(locale);
+  if (!db) return [];
+  return search(db, query, tag);
+}
 
+export function flexsearchStaticClient(options: FlexsearchStaticOptions = {}): SearchClient {
   return {
-    deps: [from, locale, tag],
-    async search(query) {
-      const loaded = await dbs!;
-      const db = loaded.get(locale);
-      if (!db) return [];
-      return search(db, query, tag);
-    },
+    deps: [options.from, options.locale, String(options.tag)],
+    search: (query) => searchFlexsearchStatic(options, query),
   };
 }
 
@@ -63,4 +64,13 @@ async function init(from: string) {
   }
 
   return dbs;
+}
+
+export function useFlexsearchStatic(options: FlexsearchStaticOptions & UseSearchOptions = {}) {
+  const { from, locale, tag } = options;
+  const run = useCallback(
+    (query: string) => searchFlexsearchStatic({ from, locale, tag }, query),
+    [from, locale, tag],
+  );
+  return useSearch(run, options);
 }

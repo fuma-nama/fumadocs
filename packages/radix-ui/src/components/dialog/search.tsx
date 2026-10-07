@@ -18,6 +18,7 @@ import { useTranslations, T } from '@fuma-translate/react';
 import { cn } from '@/utils/cn';
 import { Dialog, DialogContent, DialogOverlay, DialogTitle } from '@radix-ui/react-dialog';
 import { useHighlightQuery, type ReactSortedResult as BaseResultType } from 'fumadocs-core/search';
+import type { SearchResult } from 'fumadocs-core/search/client';
 import { cva } from 'class-variance-authority';
 import { useRouter } from 'fumadocs-core/framework';
 import type { SharedProps } from '@/contexts/search';
@@ -51,6 +52,8 @@ export interface SearchDialogProps extends SharedProps {
   onSearchChange: (v: string) => void;
   onSelect?: (item: SearchItemType) => void;
   isLoading?: boolean;
+  /** the last completed search, `<SearchDialogList />` shows its results */
+  result?: SearchResult;
 
   children: ReactNode;
 }
@@ -62,6 +65,7 @@ const RootContext = createContext<{
   onSearchChange: (v: string) => void;
   onSelect: (item: SearchItemType) => void;
   isLoading: boolean;
+  result?: SearchResult;
 } | null>(null);
 
 const ListContext = createContext<{
@@ -222,6 +226,7 @@ export function SearchDialog({
   search,
   onSearchChange,
   isLoading = false,
+  result,
   onSelect: onSelectProp,
   children,
 }: SearchDialogProps) {
@@ -253,11 +258,12 @@ export function SearchDialog({
             open,
             search,
             isLoading,
+            result,
             onOpenChange: (v) => onOpenChangeCallback.current(v),
             onSearchChange: (v) => onSearchChangeCallback.current(v),
             onSelect: (v) => onSelectCallback.current(v),
           }),
-          [isLoading, open, search],
+          [isLoading, open, search, result],
         )}
       >
         {children}
@@ -353,8 +359,8 @@ export function SearchDialogContent({ children, ...props }: ComponentProps<typeo
 }
 
 export function SearchDialogList({
-  items = null,
-  query,
+  items: itemsProp,
+  defaultItems = null,
   Empty = () => (
     <div role="status" className="py-12 text-center text-sm text-fd-muted-foreground">
       <T text="No results found" note="search dialog" />
@@ -363,13 +369,10 @@ export function SearchDialogList({
   Item = (props) => <SearchDialogListItem {...props} />,
   ...props
 }: Omit<ComponentProps<'div'>, 'children'> & {
-  items: SearchItemType[] | null | undefined;
-  /**
-   * The search query of `items`, its matches are highlighted.
-   *
-   * @defaultValue the search input
-   */
-  query?: string;
+  /** @defaultValue the results of `result` from `<SearchDialog />` */
+  items?: SearchItemType[] | null;
+  /** shown without results */
+  defaultItems?: SearchItemType[] | null;
   /**
    * Renderer for empty list UI
    */
@@ -381,8 +384,9 @@ export function SearchDialogList({
 }) {
   const ref = useRef<HTMLDivElement>(null);
   const t = useTranslations({ note: 'search dialog' });
-  const { onSelect, search } = useSearch();
-  const highlight = query ?? search;
+  const { onSelect, search, result } = useSearch();
+  const items = itemsProp === undefined ? (result?.data ?? defaultItems) : itemsProp;
+  const query = result ? result.query : search;
   const [active, setActive] = useState<string | null>(() =>
     items && items.length > 0 ? items[0].id : null,
   );
@@ -464,9 +468,9 @@ export function SearchDialogList({
             () => ({
               active,
               setActive,
-              query: highlight,
+              query,
             }),
-            [active, highlight],
+            [active, query],
           )}
         >
           {items?.length === 0 && Empty()}

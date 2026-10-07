@@ -57,7 +57,7 @@ export default function AlgoliaSearchDialog({
 }: AlgoliaSearchDialogProps) {
   const [tag, setTag] = useState(defaultTag);
   const { locale } = useI18n();
-  const { search, setSearch, isLoading, result } = useAlgoliaSearch({
+  const search = useAlgoliaSearch({
     tag,
     locale,
     ...searchOptions,
@@ -79,7 +79,7 @@ export default function AlgoliaSearchDialog({
   const label = showAlgolia && <AlgoliaTitle />;
 
   return (
-    <SearchDialog search={search} onSearchChange={setSearch} isLoading={isLoading} {...props}>
+    <SearchDialog {...search} {...props}>
       <SearchDialogOverlay />
       <SearchDialogContent>
         <SearchDialogHeader>
@@ -87,7 +87,7 @@ export default function AlgoliaSearchDialog({
           <SearchDialogInput />
           <SearchDialogClose />
         </SearchDialogHeader>
-        <SearchDialogList items={result.data ?? defaultItems} query={result.query} />
+        <SearchDialogList defaultItems={defaultItems} />
       </SearchDialogContent>
       <SearchDialogFooter>
         {tags.length > 0 ? (

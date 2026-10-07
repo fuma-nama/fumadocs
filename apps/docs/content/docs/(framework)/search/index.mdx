@@ -15,28 +15,18 @@ You can choose & configure the search client according to your search engine, it
 
 ### Search Hooks
 
-Search clients come with React hooks, like `useFetchSearch()` and `useAlgoliaSearch()`, returning the same shape:
+Search clients come with React hooks, like `useFetchSearch()` and `useAlgoliaSearch()`, returning the props of `<SearchDialog />`:
 
-```ts
+```tsx
 import { useFetchSearch } from 'fumadocs-core/search/client';
 
 // `result.data` is the results of `result.query`
-const { search, setSearch, isLoading, result } = useFetchSearch();
+const search = useFetchSearch();
+
+<SearchDialog {...search} {...props} />;
 ```
 
-For other search engines, pass your search client to `useSearchClient()`:
-
-```ts
-import { type SearchClient, useSearchClient } from 'fumadocs-core/search/client';
-
-const client: SearchClient = {
-  async search(query) {
-    // return `SortedResult[]`
-  },
-};
-
-const { search, setSearch, isLoading, result } = useSearchClient(client);
-```
+They search again when an option changes, define the arrays, objects and functions you pass outside of render, or memoize them.
 
 ### Community Integrations
 

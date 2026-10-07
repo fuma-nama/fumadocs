@@ -101,10 +101,10 @@ import {
 import { useStaticSearch } from 'fumadocs-core/search/client';
 ${i18n ? "import { useI18n } from 'fumadocs-ui/contexts/i18n';\n" : ''}
 export default function DefaultSearchDialog(props: SharedProps) {
-${i18n ? '  const { locale } = useI18n();\n' : ''}  const { search, setSearch, isLoading, result } = useStaticSearch(${i18n ? '{ locale }' : ''});
+${i18n ? '  const { locale } = useI18n();\n' : ''}  const search = useStaticSearch(${i18n ? '{ locale }' : ''});
 
   return (
-    <SearchDialog search={search} onSearchChange={setSearch} isLoading={isLoading} {...props}>
+    <SearchDialog {...search} {...props}>
       <SearchDialogOverlay />
       <SearchDialogContent>
         <SearchDialogHeader>
@@ -112,7 +112,7 @@ ${i18n ? '  const { locale } = useI18n();\n' : ''}  const { search, setSearch, i
           <SearchDialogInput />
           <SearchDialogClose />
         </SearchDialogHeader>
-        <SearchDialogList items={result.data} query={result.query} />
+        <SearchDialogList />
       </SearchDialogContent>
     </SearchDialog>
   );

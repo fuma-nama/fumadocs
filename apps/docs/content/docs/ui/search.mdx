@@ -82,12 +82,12 @@ import { useI18n } from 'fumadocs-ui/contexts/i18n';
 
 export default function DefaultSearchDialog(props: SharedProps) {
   const { locale } = useI18n(); // (optional) for i18n
-  const { search, setSearch, isLoading, result } = useFetchSearch({
+  const search = useFetchSearch({
     locale,
   });
 
   return (
-    <SearchDialog search={search} onSearchChange={setSearch} isLoading={isLoading} {...props}>
+    <SearchDialog {...search} {...props}>
       <SearchDialogOverlay />
       <SearchDialogContent>
         <SearchDialogHeader>
@@ -95,7 +95,7 @@ export default function DefaultSearchDialog(props: SharedProps) {
           <SearchDialogInput />
           <SearchDialogClose />
         </SearchDialogHeader>
-        <SearchDialogList items={result.data} query={result.query} />
+        <SearchDialogList />
       </SearchDialogContent>
       <SearchDialogFooter>{/* footer items */}</SearchDialogFooter>
     </SearchDialog>
@@ -109,8 +109,6 @@ The content in search result supports Markdown, you can customize the Markdown r
 
 ```tsx title="components/search.tsx"
 <SearchDialogList
-  items={result.data}
-  query={result.query}
   // [!code highlight:8]
   Item={(props) => (
     <SearchDialogListItem
@@ -134,7 +132,7 @@ Matches of the search query are highlighted with the [CSS Custom Highlight API](
 }
 ```
 
-`<SearchDialogList />` highlights its `query` prop, defaulting to the search input. Pass the query of the results (`result.query`) so highlights always match them.
+`<SearchDialogList />` highlights the query of `result` from `<SearchDialog />`, or the search input without it.
 
 When rendering results on your own, highlight them with `useHighlightQuery()`.
 

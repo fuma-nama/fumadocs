@@ -1,13 +1,10 @@
+import { useCallback } from 'react';
 import type { OramaCloud, OramaCloudSearchParams } from '@orama/core';
 import { removeUndefined } from '@/utils/remove-undefined';
 import type { OramaIndex } from '@/search/orama-cloud';
 import type { SortedResult } from '@/search';
-import {
-  type SearchClient,
-  type UseSearchOptions,
-  type UseSearchReturn,
-  useSearchClient,
-} from '@/search/use-search-client';
+import type { SearchClient } from '../client';
+import { type UseSearchOptions, useSearch } from '../use-search';
 
 interface CrawlerIndex {
   path: string;
@@ -42,103 +39,110 @@ export interface OramaCloudOptions {
   locale?: string;
 }
 
-export function oramaCloudClient(options: OramaCloudOptions): SearchClient {
+async function searchOramaCloud(
+  options: OramaCloudOptions,
+  query: string,
+): Promise<SortedResult[]> {
   const { index = 'default', client, params: extraParams, tag } = options;
+  const list: SortedResult[] = [];
 
-  return {
-    deps: [index, client, tag],
-    async search(query) {
-      const list: SortedResult[] = [];
+  if (index === 'crawler') {
+    const result = await client.search({
+      datasources: [],
+      ...extraParams,
+      term: query,
+      where: {
+        category: tag
+          ? {
+              eq: tag.slice(0, 1).toUpperCase() + tag.slice(1),
+            }
+          : undefined,
+        ...extraParams?.where,
+      },
+      limit: 10,
+    });
+    if (!result) return list;
 
-      if (index === 'crawler') {
-        const result = await client.search({
-          datasources: [],
-          ...extraParams,
-          term: query,
-          where: {
-            category: tag
-              ? {
-                  eq: tag.slice(0, 1).toUpperCase() + tag.slice(1),
-                }
-              : undefined,
-            ...extraParams?.where,
-          },
-          limit: 10,
-        });
-        if (!result) return list;
+    for (const hit of result.hits) {
+      const doc = hit.document as unknown as CrawlerIndex;
 
-        for (const hit of result.hits) {
-          const doc = hit.document as unknown as CrawlerIndex;
-
-          list.push(
-            {
-              id: hit.id,
-              type: 'page',
-              content: doc.title,
-              url: doc.path,
-            },
-            {
-              id: 'page' + hit.id,
-              type: 'text',
-              content: doc.content,
-              url: doc.path,
-            },
-          );
-        }
-
-        return list;
-      }
-
-      const result = await client.search({
-        datasources: [],
-        ...extraParams,
-        term: query,
-        limit: 20,
-        where: removeUndefined({
-          tag,
-          ...extraParams?.where,
-        }),
-        groupBy: {
-          properties: ['page_id'],
-          max_results: 7,
-          ...extraParams?.groupBy,
+      list.push(
+        {
+          id: hit.id,
+          type: 'page',
+          content: doc.title,
+          url: doc.path,
         },
-      });
-      if (!result || !result.groups) return list;
+        {
+          id: 'page' + hit.id,
+          type: 'text',
+          content: doc.content,
+          url: doc.path,
+        },
+      );
+    }
 
-      for (const item of result.groups) {
-        let addedHead = false;
+    return list;
+  }
 
-        for (const hit of item.result) {
-          const doc = hit.document as unknown as OramaIndex;
+  const result = await client.search({
+    datasources: [],
+    ...extraParams,
+    term: query,
+    limit: 20,
+    where: removeUndefined({
+      tag,
+      ...extraParams?.where,
+    }),
+    groupBy: {
+      properties: ['page_id'],
+      max_results: 7,
+      ...extraParams?.groupBy,
+    },
+  });
+  if (!result || !result.groups) return list;
 
-          if (!addedHead) {
-            list.push({
-              id: doc.page_id,
-              type: 'page',
-              content: doc.title,
-              breadcrumbs: doc.breadcrumbs,
-              url: doc.url,
-            });
-            addedHead = true;
-          }
+  for (const item of result.groups) {
+    let addedHead = false;
 
-          list.push({
-            id: doc.id,
-            content: doc.content,
-            type: doc.content === doc.section ? 'heading' : 'text',
-            url: doc.section_id ? `${doc.url}#${doc.section_id}` : doc.url,
-          });
-        }
+    for (const hit of item.result) {
+      const doc = hit.document as unknown as OramaIndex;
+
+      if (!addedHead) {
+        list.push({
+          id: doc.page_id,
+          type: 'page',
+          content: doc.title,
+          breadcrumbs: doc.breadcrumbs,
+          url: doc.url,
+        });
+        addedHead = true;
       }
 
-      return list.length > 80 ? list.slice(0, 80) : list;
-    },
+      list.push({
+        id: doc.id,
+        content: doc.content,
+        type: doc.content === doc.section ? 'heading' : 'text',
+        url: doc.section_id ? `${doc.url}#${doc.section_id}` : doc.url,
+      });
+    }
+  }
+
+  return list.length > 80 ? list.slice(0, 80) : list;
+}
+
+export function oramaCloudClient(options: OramaCloudOptions): SearchClient {
+  return {
+    deps: [options.index, options.client, options.tag],
+    search: (query) => searchOramaCloud(options, query),
   };
 }
 
-export function useOramaCloudSearch(
-  options: OramaCloudOptions & UseSearchOptions,
-): UseSearchReturn {
-  return useSearchClient(oramaCloudClient(options), options);
+export function useOramaCloudSearch(options: OramaCloudOptions & UseSearchOptions) {
+  const { client, index, params, tag } = options;
+  const run = useCallback(
+    (query: string) => searchOramaCloud({ client, index, params, tag }, query),
+    [client, index, params, tag],
+  );
+  return useSearch(run, options);
 }

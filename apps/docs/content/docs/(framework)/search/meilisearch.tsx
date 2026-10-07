@@ -22,14 +22,14 @@ const client = new Meilisearch({
 
 export default function CustomSearchDialog(props: SharedProps) {
   const { locale } = useI18n(); // (optional) for i18n
-  const { search, setSearch, isLoading, result } = useMeilisearch({
+  const search = useMeilisearch({
     client,
     indexName: 'docs',
     locale,
   });
 
   return (
-    <SearchDialog search={search} onSearchChange={setSearch} isLoading={isLoading} {...props}>
+    <SearchDialog {...search} {...props}>
       <SearchDialogOverlay />
       <SearchDialogContent>
         <SearchDialogHeader>
@@ -37,7 +37,7 @@ export default function CustomSearchDialog(props: SharedProps) {
           <SearchDialogInput />
           <SearchDialogClose />
         </SearchDialogHeader>
-        <SearchDialogList items={result.data} query={result.query} />
+        <SearchDialogList />
         <SearchDialogFooter>
           <a
             href="https://www.meilisearch.com"

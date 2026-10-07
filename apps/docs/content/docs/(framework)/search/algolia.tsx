@@ -21,14 +21,14 @@ const algolia = liteClient(appId, apiKey);
 
 export default function CustomSearchDialog(props: SharedProps) {
   const { locale } = useI18n(); // (optional) for i18n
-  const { search, setSearch, isLoading, result } = useAlgoliaSearch({
+  const search = useAlgoliaSearch({
     client: algolia,
     indexName: 'document',
     locale,
   });
 
   return (
-    <SearchDialog search={search} onSearchChange={setSearch} isLoading={isLoading} {...props}>
+    <SearchDialog {...search} {...props}>
       <SearchDialogOverlay />
       <SearchDialogContent>
         <SearchDialogHeader>
@@ -36,7 +36,7 @@ export default function CustomSearchDialog(props: SharedProps) {
           <SearchDialogInput />
           <SearchDialogClose />
         </SearchDialogHeader>
-        <SearchDialogList items={result.data} query={result.query} />
+        <SearchDialogList />
         <SearchDialogFooter>
           <a
             href="https://algolia.com"

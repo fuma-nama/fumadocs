@@ -64,7 +64,7 @@ export default function OramaSearchDialog({
 }: OramaSearchDialogProps) {
   const { locale } = useI18n();
   const [tag, setTag] = useState(defaultTag);
-  const { search, setSearch, isLoading, result } = useOramaCloudSearch({
+  const search = useOramaCloudSearch({
     client,
     index,
     params: searchOptions,
@@ -90,7 +90,7 @@ export default function OramaSearchDialog({
   const label = showOrama && <Label />;
 
   return (
-    <SearchDialog search={search} onSearchChange={setSearch} isLoading={isLoading} {...props}>
+    <SearchDialog {...search} {...props}>
       <SearchDialogOverlay />
       <SearchDialogContent>
         <SearchDialogHeader>
@@ -98,7 +98,7 @@ export default function OramaSearchDialog({
           <SearchDialogInput />
           <SearchDialogClose />
         </SearchDialogHeader>
-        <SearchDialogList items={result.data ?? defaultItems} query={result.query} />
+        <SearchDialogList defaultItems={defaultItems} />
         <SearchDialogFooter>
           {tags.length > 0 ? (
             <TagsList tag={tag} onTagChange={setTag} allowClear={allowClear}>
