@@ -47,6 +47,7 @@ function groupResults(hits: Hit<BaseIndex>[]): SortedResult[] {
       type: hit.content === hit.section ? 'heading' : 'text',
       url: hit.section_id ? `${hit.url}#${hit.section_id}` : hit.url,
       content: hit.content,
+      table: hit.table,
     });
   }
 

@@ -2284,15 +2284,12 @@ importers:
       cn:
         specifier: ^0.4.0
         version: 0.4.0
+      hast-util-to-jsx-runtime:
+        specifier: ^2.3.6
+        version: 2.3.6(supports-color@8.1.1)
       lucide-react:
         specifier: ^1.50.0
         version: 1.50.0(@types/react@19.3.0)(react@19.3.0)
-      mdast-util-gfm-table:
-        specifier: ^2.0.0
-        version: 2.0.0(supports-color@8.1.1)
-      micromark-extension-gfm-table:
-        specifier: ^2.1.2
-        version: 2.1.2
       motion:
         specifier: ^14.0.0
         version: 14.0.0(react-dom@19.3.0(react@19.3.0))(react@19.3.0)
@@ -2311,9 +2308,6 @@ importers:
       react-remove-scroll:
         specifier: ^2.7.2
         version: 2.7.2(@types/react@19.3.0)(react@19.3.0)
-      rehype-raw:
-        specifier: ^7.0.0
-        version: 7.0.0
       scroll-into-view-if-needed:
         specifier: ^3.1.0
         version: 3.1.0
@@ -2323,9 +2317,6 @@ importers:
       takumi-js:
         specifier: '*'
         version: 2.14.0(csstype@3.2.3)(preact@10.29.8)(react@19.3.0)
-      unist-util-visit:
-        specifier: ^5.1.0
-        version: 5.1.0
     devDependencies:
       '@fumadocs/cli':
         specifier: workspace:*
@@ -2339,9 +2330,6 @@ importers:
       '@tsdown/css':
         specifier: ^0.23.0
         version: 0.23.0(jiti@2.7.0)(postcss@8.5.28)(tsdown@0.23.0)(yaml@2.9.1)
-      '@types/hast':
-        specifier: ^3.0.5
-        version: 3.0.5
       '@types/mdx':
         specifier: ^2.0.14
         version: 2.0.14
@@ -2372,9 +2360,6 @@ importers:
       tsdown:
         specifier: 0.23.0
         version: 0.23.0(@tsdown/css@0.23.0)(oxc-resolver@11.24.2)(typescript@7.0.2)(unrun@0.3.1)
-      unified:
-        specifier: ^11.0.5
-        version: 11.0.5
 
   packages/basehub:
     devDependencies:
@@ -2519,12 +2504,18 @@ importers:
       hast-util-to-jsx-runtime:
         specifier: ^2.3.6
         version: 2.3.6(supports-color@8.1.1)
+      mdast-util-gfm-table:
+        specifier: ^2.0.0
+        version: 2.0.0(supports-color@8.1.1)
       mdast-util-mdx:
         specifier: ^3.0.0
         version: 3.0.0(supports-color@8.1.1)
       mdast-util-to-markdown:
         specifier: ^2.1.3
         version: 2.1.3
+      micromark-extension-gfm-table:
+        specifier: ^2.1.2
+        version: 2.1.2
       npm-to-yarn:
         specifier: 3.2.0
         version: 3.2.0
@@ -2534,6 +2525,9 @@ importers:
       react-dom:
         specifier: ^19.2.0
         version: 19.3.0(react@19.3.0)
+      rehype-raw:
+        specifier: ^7.0.0
+        version: 7.0.0
       remark:
         specifier: ^15.0.1
         version: 15.0.1(supports-color@8.1.1)
@@ -2631,9 +2625,6 @@ importers:
       react-router:
         specifier: ^8.4.0
         version: 8.4.0(react-dom@19.3.0(react@19.3.0))(react@19.3.0)
-      rehype-raw:
-        specifier: ^7.0.0
-        version: 7.0.0
       remark-directive:
         specifier: ^4.0.0
         version: 4.0.0(supports-color@8.1.1)
@@ -3867,15 +3858,12 @@ importers:
       cn:
         specifier: ^0.4.0
         version: 0.4.0
+      hast-util-to-jsx-runtime:
+        specifier: ^2.3.6
+        version: 2.3.6(supports-color@8.1.1)
       lucide-react:
         specifier: ^1.50.0
         version: 1.50.0(@types/react@19.3.0)(react@19.3.0)
-      mdast-util-gfm-table:
-        specifier: ^2.0.0
-        version: 2.0.0(supports-color@8.1.1)
-      micromark-extension-gfm-table:
-        specifier: ^2.1.2
-        version: 2.1.2
       motion:
         specifier: ^14.0.0
         version: 14.0.0(react-dom@19.3.0(react@19.3.0))(react@19.3.0)
@@ -3894,9 +3882,6 @@ importers:
       react-remove-scroll:
         specifier: ^2.7.2
         version: 2.7.2(@types/react@19.3.0)(react@19.3.0)
-      rehype-raw:
-        specifier: ^7.0.0
-        version: 7.0.0
       scroll-into-view-if-needed:
         specifier: ^3.1.0
         version: 3.1.0
@@ -3906,9 +3891,6 @@ importers:
       takumi-js:
         specifier: '*'
         version: 2.14.0(csstype@3.2.3)(preact@10.29.8)(react@19.3.0)
-      unist-util-visit:
-        specifier: ^5.1.0
-        version: 5.1.0
     devDependencies:
       '@fumadocs/base-ui':
         specifier: workspace:*
@@ -3925,9 +3907,6 @@ importers:
       '@tsdown/css':
         specifier: ^0.23.0
         version: 0.23.0(jiti@2.7.0)(postcss@8.5.28)(tsdown@0.23.0)(yaml@2.9.1)
-      '@types/hast':
-        specifier: ^3.0.5
-        version: 3.0.5
       '@types/mdx':
         specifier: ^2.0.14
         version: 2.0.14
@@ -3958,9 +3937,6 @@ importers:
       tsdown:
         specifier: 0.23.0
         version: 0.23.0(@tsdown/css@0.23.0)(oxc-resolver@11.24.2)(typescript@7.0.2)(unrun@0.3.1)
-      unified:
-        specifier: ^11.0.5
-        version: 11.0.5
 
   packages/sanity:
     dependencies:

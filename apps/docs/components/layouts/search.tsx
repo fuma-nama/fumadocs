@@ -110,7 +110,7 @@ export default function CustomSearchDialog(props: SharedProps) {
         </SearchDialogHeader>
         <SearchDialogList
           items={
-            pageTreeAction ? [pageTreeAction, ...(search.result.data ?? [])] : search.result.data
+            pageTreeAction ? [pageTreeAction, ...(search.result.items ?? [])] : search.result.items
           }
         />
         <SearchDialogFooter className="flex flex-row flex-wrap gap-2 items-center">

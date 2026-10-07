@@ -1,4 +1,4 @@
-import type { Heading, Link, Nodes, Root } from 'mdast';
+import type { Heading, Link, Nodes, Root, TableRow } from 'mdast';
 import { remark } from 'remark';
 import remarkGfm from 'remark-gfm';
 import type { PluggableList, Processor, Transformer } from 'unified';
@@ -11,6 +11,7 @@ import type {
   MdxJsxTextElement,
 } from 'mdast-util-mdx';
 import { remarkHeading } from './remark-heading';
+import { tableRowToStructuredData } from '@/search';
 import {
   type Stringifier as BaseStringifier,
   type StringifyOptions as BaseStringifyOptions,
@@ -22,9 +23,11 @@ interface StructuredDataHeading {
   content: string;
 }
 
-interface StructuredDataContent {
+export interface StructuredDataContent {
   heading: string | undefined;
   content: string;
+  /** the table of a table row, unique in its page */
+  table?: string;
 }
 
 export interface StructuredData {
@@ -133,6 +136,7 @@ export function remarkStructure(
   return (tree, file) => {
     const data: StructuredData = { contents: [], headings: [] };
     let lastHeading: string | undefined;
+    let tables = 0;
 
     // Fumadocs OpenAPI Generated Structured Data
     if (file.data.frontmatter) {
@@ -156,6 +160,10 @@ export function remarkStructure(
         }
       },
     };
+    const stringifyCells = (row: TableRow) =>
+      row.children.map((cell) =>
+        stringify.call(this, { type: 'paragraph', children: cell.children }, stringifierCtx).trim(),
+      );
 
     visit(tree, (element) => {
       if (!types(element)) return;
@@ -164,14 +172,17 @@ export function remarkStructure(
           return;
         case 'table': {
           const [head, ...rows] = element.children;
-          if (rows.length === 0) break;
-
-          for (const row of rows) {
-            const content = stringify
-              .call(this, { ...element, children: [head, row] }, stringifierCtx)
-              .trim();
-            if (content.length > 0) data.contents.push({ heading: lastHeading, content });
-          }
+          const header = stringifyCells(head);
+          const table = `table-${tables++}`;
+          for (const row of rows)
+            data.contents.push(
+              tableRowToStructuredData({
+                table,
+                heading: lastHeading,
+                row: stringifyCells(row),
+                header,
+              }),
+            );
           return 'skip';
         }
         case 'mdxJsxFlowElement':

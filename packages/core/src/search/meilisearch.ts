@@ -34,6 +34,7 @@ export interface MeilisearchDocument extends Omit<DocumentRecord, 'description' 
    */
   heading?: string;
   content: string;
+  table?: string;
 }
 
 /**
@@ -81,7 +82,8 @@ export async function sync(client: Meilisearch, options: SyncOptions): Promise<v
     if (description && !structured.contents.some((item) => item.content === description))
       add('text', description);
     for (const heading of structured.headings) add('heading', heading.content, heading.id);
-    for (const item of structured.contents) add('text', item.content, item.heading);
+    for (const item of structured.contents)
+      documents.push({ ...page, id: documents.length, type: 'text', ...item });
   }
 
   await run(

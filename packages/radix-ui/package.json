@@ -156,16 +156,13 @@
     "@radix-ui/react-tabs": "^1.1.21",
     "class-variance-authority": "^0.7.1",
     "cn": "^0.4.0",
+    "hast-util-to-jsx-runtime": "^2.3.6",
     "lucide-react": "^1.50.0",
-    "mdast-util-gfm-table": "^2.0.0",
-    "micromark-extension-gfm-table": "^2.1.2",
     "motion": "^14.0.0",
     "next-themes": "^0.4.6",
     "react-remove-scroll": "^2.7.2",
-    "rehype-raw": "^7.0.0",
     "scroll-into-view-if-needed": "^3.1.0",
-    "shiki": "^4.5.0",
-    "unist-util-visit": "^5.1.0"
+    "shiki": "^4.5.0"
   },
   "devDependencies": {
     "@fumadocs/base-ui": "workspace:*",
@@ -173,7 +170,6 @@
     "@tailwindcss/cli": "^4.3.3",
     "@tailwindcss/oxide": "^4.3.3",
     "@tsdown/css": "^0.23.0",
-    "@types/hast": "^3.0.5",
     "@types/mdx": "^2.0.14",
     "@types/node": "^26.6.4",
     "@types/react": "^19.3.0",
@@ -183,8 +179,7 @@
     "react-medium-image-zoom": "^5.4.9",
     "tailwindcss": "^4.3.3",
     "tsconfig": "workspace:*",
-    "tsdown": "0.23.0",
-    "unified": "^11.0.5"
+    "tsdown": "0.23.0"
   },
   "peerDependencies": {
     "@types/mdx": "*",

@@ -2,6 +2,7 @@ import { getByID, search, type SearchParams, type ZBSearch } from 'zbsearch';
 import { type AdvancedDocument, type advancedSchema } from '@/search/zbsearch/create-db';
 import { removeUndefined } from '@/utils/remove-undefined';
 import type { SortedResult } from '@/search';
+import type { SharedDocument } from '@/search/server/build-doc';
 
 export async function searchAdvanced(
   db: ZBSearch<typeof advancedSchema>,
@@ -70,6 +71,7 @@ export async function searchAdvanced(
         breadcrumbs: hit.document.breadcrumbs,
         type: hit.document.type as SortedResult['type'],
         url: hit.document.url,
+        table: (hit.document as SharedDocument).table,
       });
     }
   }

@@ -68,7 +68,7 @@
     "@types/hast": "*",
     "@types/mdast": "*",
     "@types/react": "*",
-    "fumadocs-core": "^16.7.0",
+    "fumadocs-core": "^16.17.0",
     "fumadocs-ui": "^16.7.0",
     "react": "^19.2.0",
     "react-dom": "^19.2.0"

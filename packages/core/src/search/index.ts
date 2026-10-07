@@ -1,7 +1,9 @@
 import type { Root } from 'mdast';
-import { type ReactNode, useCallback } from 'react';
+import type { ReactNode } from 'react';
 import { remark } from 'remark';
 import { visit } from 'unist-util-visit';
+import type { StructuredDataContent } from '@/mdx-plugins/remark-structure';
+import { buildRegexFromQuery } from './highlight';
 
 export interface SortedResult<Content = string> {
   id: string;
@@ -13,9 +15,46 @@ export interface SortedResult<Content = string> {
    * breadcrumbs to be displayed on UI
    */
   breadcrumbs?: Content[];
+
+  /** the table of a table row, unique in its page */
+  table?: string;
 }
 
 export type ReactSortedResult = SortedResult<ReactNode>;
+
+/**
+ * A table row as structured data: a Markdown table of the row, after the header row of its table.
+ */
+export function tableRowToStructuredData({
+  table,
+  heading,
+  row,
+  header,
+}: {
+  /** the id of its table, unique in its page */
+  table: string;
+  heading?: string;
+  /** the cells, as inline Markdown */
+  row: string[];
+  /** the cells of the header row, tables like the props of type tables have none */
+  header?: string[];
+}): StructuredDataContent {
+  const formatRow = (cells: string[]) => {
+    let out = '|';
+    for (const cell of cells)
+      out += ` ${cell.replace(/\s*\n\s*/g, ' ').replace(/(?<!\\)\|/g, '\\|')} |`;
+    return out;
+  };
+  const delimiter = `|${' --- |'.repeat((header ?? row).length)}`;
+
+  return {
+    heading,
+    content: header
+      ? `${formatRow(header)}\n${delimiter}\n${formatRow(row)}`
+      : `${formatRow(row)}\n${delimiter}`,
+    table,
+  };
+}
 
 /**
  * @deprecated
@@ -28,69 +67,11 @@ export interface HighlightedText<Content = string> {
   };
 }
 
-function buildRegexFromQuery(query: string): RegExp | null {
-  const source = query
-    .trim()
-    .replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
-    .replace(/\s+/g, '|');
-  return source ? new RegExp(source, 'gi') : null;
-}
-
-/**
- * Highlight matches of `query` in the text of an element with the CSS Custom Highlight API, style them with `::highlight(fd-search)`.
- *
- * Text in elements with `data-highlight-ignore` is skipped. The highlights stay when the element is moved, but not when its text changes, give it a new `key` in that case.
- *
- * @returns a ref callback for the element
- */
-export function useHighlightQuery(query: string) {
-  return useCallback(
-    (element: Element | null) => {
-      const regex = buildRegexFromQuery(query);
-      if (!element || !regex || typeof Highlight === 'undefined') return () => {};
-
-      let highlight = CSS.highlights.get('fd-search');
-      if (!highlight) CSS.highlights.set('fd-search', (highlight = new Highlight()));
-
-      const walker = document.createTreeWalker(
-        element,
-        NodeFilter.SHOW_ELEMENT | NodeFilter.SHOW_TEXT,
-        (node) => {
-          if (!(node instanceof Element)) return NodeFilter.FILTER_ACCEPT;
-          return node.hasAttribute('data-highlight-ignore')
-            ? NodeFilter.FILTER_REJECT
-            : NodeFilter.FILTER_SKIP;
-        },
-      );
-      const ranges: StaticRange[] = [];
-      while (walker.nextNode()) {
-        const node = walker.currentNode as Text;
-        for (const match of node.data.matchAll(regex)) {
-          const range = new StaticRange({
-            startContainer: node,
-            startOffset: match.index,
-            endContainer: node,
-            endOffset: match.index + match[0].length,
-          });
-          highlight.add(range);
-          ranges.push(range);
-        }
-      }
-
-      return () => {
-        for (const range of ranges) highlight.delete(range);
-      };
-    },
-    [query],
-  );
-}
-
-const processor = /* @__PURE__ */ remark();
-
 /**
  * @deprecated search results are no longer highlighted, highlight the rendered results with `useHighlightQuery()` instead.
  */
 export function createContentHighlighter(query: string | RegExp) {
+  const processor = remark();
   const regex = typeof query === 'string' ? buildRegexFromQuery(query) : query;
 
   return {

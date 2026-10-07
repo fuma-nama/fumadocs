@@ -9,21 +9,20 @@ packages:
 
 ### Search hooks for each provider
 
-`fumadocs-core/search/client` exports a search hook for each search client, they return the props of `<SearchDialog />`: `{ search, onSearchChange, isLoading, result }`. `result` is the last completed search, its `data` and `error` along with the `query` they belong to.
+`fumadocs-core/search/client` exports a hook for each search client, like `useFetchSearch()`. They return the props of `<SearchDialog />`:
 
 ```tsx
-import { useFetchSearch } from 'fumadocs-core/search/client';
-
 const search = useFetchSearch({ locale });
 
 <SearchDialog {...search} {...props}>
-  {/* ... */}
   <SearchDialogList />
 </SearchDialog>;
 ```
 
-- `useFetchSearch()`, `useStaticSearch()`, `useAlgoliaSearch()`, `useOramaCloudSearch()` and `useMeilisearch()`, importing one doesn't bundle the others.
-- `useFlexsearchStatic()` and `useOramaCloudLegacySearch()` are exported from the paths of their clients, like `fumadocs-core/search/client/flexsearch-static`.
-- `useDocsSearch()` is deprecated, its output can be spread to `<SearchDialog />` as well.
-- `<SearchDialog />` accepts `result`, `<SearchDialogList />` shows its results, or `defaultItems` without results, and highlights its query instead of the search input.
-- The search dialogs of Fumadocs CLI and Create Fumadocs App use the new hooks.
+`result` is the last completed search, its `items` have their content decoded into `hastContent`.
+
+- `useDocsSearch()` is deprecated.
+- `useFlexsearchStatic()` and `useOramaCloudLegacySearch()` are exported from the paths of their clients.
+- `<SearchDialogList />` shows `defaultItems` without results.
+- `renderMarkdown` of `<SearchDialogListItem />` renders `content` instead of `hastContent`. Without it, the string content of custom items is shown as text.
+- The templates of Fumadocs CLI and Create Fumadocs App use the new hooks.
