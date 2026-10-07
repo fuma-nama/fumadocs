@@ -59,6 +59,7 @@ export async function search(
         breadcrumbs: item.breadcrumbs,
         type: item.type,
         url: item.url,
+        table: item.table,
       });
     }
   }

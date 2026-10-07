@@ -66,28 +66,23 @@ test('Remark Structure', async () => {
 });
 
 test('Remark Structure: a record per table row', () => {
-  const { contents } = structure(
-    '| a | b |\n| - | - |\n| 1 | 2 |\n| 3 | 4 |\n\n| header only |\n| - |',
-  );
+  const { contents } = structure('| a | b |\n| - | - |\n| 1 | 2 |\n| 3 | 4 |');
 
   expect(contents).toMatchInlineSnapshot(`
     [
       {
         "content": "| a | b |
-    | - | - |
+    | --- | --- |
     | 1 | 2 |",
         "heading": undefined,
+        "table": "table-0",
       },
       {
         "content": "| a | b |
-    | - | - |
+    | --- | --- |
     | 3 | 4 |",
         "heading": undefined,
-      },
-      {
-        "content": "| header only |
-    | ----------- |",
-        "heading": undefined,
+        "table": "table-0",
       },
     ]
   `);

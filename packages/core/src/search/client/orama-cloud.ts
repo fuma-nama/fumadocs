@@ -87,6 +87,7 @@ async function searchOramaCloud(
 
   const result = await client.search({
     datasources: [],
+    properties: ['title', 'section', 'content'],
     ...extraParams,
     term: query,
     limit: 20,
@@ -124,6 +125,7 @@ async function searchOramaCloud(
         content: doc.content,
         type: doc.content === doc.section ? 'heading' : 'text',
         url: doc.section_id ? `${doc.url}#${doc.section_id}` : doc.url,
+        table: doc.table,
       });
     }
   }

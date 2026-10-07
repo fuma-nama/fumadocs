@@ -84,7 +84,8 @@ async function searchOramaCloudLegacy(
     return list;
   }
 
-  const params: ClientSearchParams = {
+  const params: ClientSearchParams & { properties?: string[] } = {
+    properties: ['title', 'section', 'content'],
     ...extraParams,
     term: query,
     where: removeUndefined({
@@ -123,6 +124,7 @@ async function searchOramaCloudLegacy(
         content: doc.content,
         type: doc.content === doc.section ? 'heading' : 'text',
         url: doc.section_id ? `${doc.url}#${doc.section_id}` : doc.url,
+        table: doc.table,
       });
     }
   }

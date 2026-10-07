@@ -62,6 +62,7 @@ async function searchMeilisearch(
       type: hit.type,
       content: hit.content,
       url: hit.heading ? `${hit.url}#${hit.heading}` : hit.url,
+      table: hit.table,
     });
   }
 

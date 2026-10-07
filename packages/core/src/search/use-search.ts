@@ -1,6 +1,8 @@
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
+import type { Root } from 'hast';
 import type { SortedResult } from '@/search';
 import type { Awaitable } from '@/types';
+import { buildRegexFromQuery } from './highlight';
 
 export interface UseSearchOptions {
   /**
@@ -18,11 +20,29 @@ export interface UseSearchOptions {
   allowEmpty?: boolean;
 }
 
+export interface SearchResultRecord extends SortedResult {
+  /** `content` decoded */
+  hastContent: Root;
+}
+
+export interface SearchResultTable {
+  type: 'table';
+  /** the id of its first row */
+  id: string;
+  columns: number;
+  /** tables like the props of type tables have no header */
+  header?: Root;
+  rows: SearchResultRecord[];
+}
+
+export type SearchResultItem = SearchResultRecord | SearchResultTable;
+
 export interface SearchResult {
-  /** the query searched for `data` */
+  /** the query of the last completed search */
   query: string;
-  /** `undefined` when nothing is searched, or the search failed */
-  data?: SortedResult[];
+  /** `undefined` when nothing is searched */
+  items?: SearchResultItem[];
+  /** the search failed, `items` are kept from the search before */
   error?: Error;
 }
 
@@ -55,14 +75,17 @@ export function useSearch(
 
     let active = true;
     const timer = setTimeout(async () => {
-      const result: SearchResult = { query: search };
       try {
-        result.data = await run(search);
+        const [results, { decodeResults }] = await Promise.all([run(search), import('./decode')]);
+        const items = decodeResults(results);
+        if (active) setDone({ result: { query: search, items }, run });
       } catch (error) {
-        result.error = error as Error;
+        if (active)
+          setDone((prev) => ({
+            result: { ...prev.result, query: search, error: error as Error },
+            run,
+          }));
       }
-
-      if (active) setDone({ result, run });
     }, delayMs);
 
     return () => {
@@ -77,4 +100,53 @@ export function useSearch(
     isLoading: !empty && (done.result.query !== search || done.run !== run),
     result: done.result,
   };
+}
+
+/**
+ * Highlight matches of `query` in the text of an element with the CSS Custom Highlight API, style them with `::highlight(fd-search)`.
+ *
+ * Text in elements with `data-highlight-ignore` is skipped. The highlights stay when the element is moved, but not when its text changes, give it a new `key` in that case.
+ *
+ * @returns a ref callback for the element
+ */
+export function useHighlightQuery(query: string) {
+  return useCallback(
+    (element: Element | null) => {
+      const regex = buildRegexFromQuery(query);
+      if (!element || !regex || typeof Highlight === 'undefined') return () => {};
+
+      let highlight = CSS.highlights.get('fd-search');
+      if (!highlight) CSS.highlights.set('fd-search', (highlight = new Highlight()));
+
+      const walker = document.createTreeWalker(
+        element,
+        NodeFilter.SHOW_ELEMENT | NodeFilter.SHOW_TEXT,
+        (node) => {
+          if (!(node instanceof Element)) return NodeFilter.FILTER_ACCEPT;
+          return node.hasAttribute('data-highlight-ignore')
+            ? NodeFilter.FILTER_REJECT
+            : NodeFilter.FILTER_SKIP;
+        },
+      );
+      const ranges: StaticRange[] = [];
+      while (walker.nextNode()) {
+        const node = walker.currentNode as Text;
+        for (const match of node.data.matchAll(regex)) {
+          const range = new StaticRange({
+            startContainer: node,
+            startOffset: match.index,
+            endContainer: node,
+            endOffset: match.index + match[0].length,
+          });
+          highlight.add(range);
+          ranges.push(range);
+        }
+      }
+
+      return () => {
+        for (const range of ranges) highlight.delete(range);
+      };
+    },
+    [query],
+  );
 }

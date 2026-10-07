@@ -12,6 +12,7 @@ import { type ParameterTag, parseTags } from '@/lib/parse-tags';
 import type { MdxJsxAttribute, MdxJsxExpressionAttribute, MdxJsxFlowElement } from 'mdast-util-mdx';
 import type { VFile } from 'vfile';
 import type { StructuredData } from 'fumadocs-core/mdx-plugins/remark-structure';
+import { tableRowToStructuredData } from 'fumadocs-core/search';
 
 function objectBuilder() {
   const out: ObjectExpression = {
@@ -140,7 +141,7 @@ export interface RemarkAutoTypeTableOptions {
 }
 
 /** a search record for each prop: a table row without header, linked to the prop */
-function typeTableRecords(id: string, entries: DocEntry[]): StructuredData['contents'] {
+export function typeTableRecords(id: string, entries: DocEntry[]): StructuredData['contents'] {
   const contents: StructuredData['contents'] = [];
   for (const entry of entries) {
     const tags = parseTags(entry.tags);
@@ -148,16 +149,17 @@ function typeTableRecords(id: string, entries: DocEntry[]): StructuredData['cont
     if (tags.default) description += `${description ? ' ' : ''}Default: \`${tags.default}\``;
     if (entry.deprecated) description = `**Deprecated.** ${description}`;
 
-    let row = '|';
-    for (const cell of [
-      `\`${entry.name}${entry.required ? '' : '?'}\``,
-      `\`${entry.simplifiedType}\``,
-      description,
-    ]) {
-      row += ` ${cell.replace(/\s*\n\s*/g, ' ').replaceAll('|', '\\|')} |`;
-    }
-
-    contents.push({ heading: `${id}-${entry.name}`, content: `${row}\n| --- | --- | --- |` });
+    contents.push(
+      tableRowToStructuredData({
+        table: id,
+        heading: `${id}-${entry.name}`,
+        row: [
+          `\`${entry.name}${entry.required ? '' : '?'}\``,
+          `\`${entry.simplifiedType}\``,
+          description,
+        ],
+      }),
+    );
   }
 
   return contents;

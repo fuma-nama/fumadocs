@@ -1,7 +1,7 @@
 import { type DependencyList, useCallback } from 'react';
 import type { SortedResult } from '@/search';
 import type { Awaitable } from '@/types';
-import { type UseSearchOptions, useSearch } from '../use-search';
+import { type SearchResultRecord, type UseSearchOptions, useSearch } from '../use-search';
 import type { FetchOptions } from './fetch';
 import type { StaticOptions } from './orama-static';
 import type { AlgoliaOptions } from './algolia';
@@ -42,11 +42,19 @@ export function useDocsSearch(
   const run = useCallback((query: string) => client.search(query), customDeps ?? client.deps ?? []);
   const output = useSearch(run, { delayMs, allowEmpty });
   const { isLoading, result } = output;
+  let data: SearchResultRecord[] | 'empty' = 'empty';
+  if (result.items) {
+    data = [];
+    for (const item of result.items) {
+      if (item.type === 'table') data.push(...item.rows);
+      else data.push(item);
+    }
+  }
 
   return {
     ...output,
     setSearch: output.onSearchChange,
-    query: { isLoading, data: result.data ?? ('empty' as const), error: result.error },
+    query: { isLoading, data, error: result.error },
   };
 }
 

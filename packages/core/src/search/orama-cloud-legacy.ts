@@ -84,6 +84,7 @@ export interface OramaIndex {
   section_id?: string;
 
   content: string;
+  table?: string;
 }
 
 export async function sync(cloudManager: CloudManager, options: SyncOptions): Promise<void> {
@@ -119,6 +120,7 @@ function toIndex(page: OramaDocument): OramaIndex[] {
     section: string | undefined,
     sectionId: string | undefined,
     content: string,
+    table?: string,
   ): OramaIndex {
     return {
       id: `${page.id}-${(id++).toString()}`,
@@ -129,6 +131,7 @@ function toIndex(page: OramaDocument): OramaIndex[] {
       section,
       section_id: sectionId,
       content,
+      table,
       breadcrumbs: page.breadcrumbs,
       ...page.extra_data,
     };
@@ -139,7 +142,7 @@ function toIndex(page: OramaDocument): OramaIndex[] {
   page.structured.contents.forEach((p) => {
     const heading = p.heading ? page.structured.headings.find((h) => p.heading === h.id) : null;
 
-    const index = createIndex(heading?.content, p.heading, p.content);
+    const index = createIndex(heading?.content, p.heading, p.content, p.table);
 
     if (heading && !scannedHeadings.has(heading.id)) {
       scannedHeadings.add(heading.id);

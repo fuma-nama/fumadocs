@@ -1,4 +1,12 @@
-export type { UseSearchOptions, SearchResult, UseSearchReturn } from './use-search';
+export {
+  useHighlightQuery,
+  type UseSearchOptions,
+  type SearchResult,
+  type SearchResultItem,
+  type SearchResultRecord,
+  type SearchResultTable,
+  type UseSearchReturn,
+} from './use-search';
 export { useFetchSearch, type FetchOptions } from './client/fetch';
 export { useStaticSearch, type StaticOptions } from './client/orama-static';
 export { useAlgoliaSearch, type AlgoliaOptions } from './client/algolia';

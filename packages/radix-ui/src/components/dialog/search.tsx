@@ -17,24 +17,25 @@ import {
 import { useTranslations, T } from '@fuma-translate/react';
 import { cn } from '@/utils/cn';
 import { Dialog, DialogContent, DialogOverlay, DialogTitle } from '@radix-ui/react-dialog';
-import { useHighlightQuery, type ReactSortedResult as BaseResultType } from 'fumadocs-core/search';
-import type { SearchResult } from 'fumadocs-core/search/client';
+import type { ReactSortedResult as BaseResultType } from 'fumadocs-core/search';
+import {
+  useHighlightQuery,
+  type SearchResult,
+  type SearchResultItem,
+  type SearchResultRecord,
+  type SearchResultTable,
+} from 'fumadocs-core/search/client';
+import { type Options, toJsxRuntime } from 'hast-util-to-jsx-runtime';
+import * as JsxRuntime from 'react/jsx-runtime';
 import { cva } from 'class-variance-authority';
 import { useRouter } from 'fumadocs-core/framework';
 import type { SharedProps } from '@/contexts/search';
 import { useOnChange } from 'fumadocs-core/utils/use-on-change';
 import scrollIntoView from 'scroll-into-view-if-needed';
 import { buttonVariants } from '@/components/ui/button';
-import { createMarkdownRenderer } from 'fumadocs-core/content/md';
-import rehypeRaw from 'rehype-raw';
-import { visit } from 'unist-util-visit';
-import type { Processor, Transformer } from 'unified';
-import { gfmTable } from 'micromark-extension-gfm-table';
-import { gfmTableFromMarkdown } from 'mdast-util-gfm-table';
-import type { Root } from 'hast';
 
 export type SearchItemType =
-  | (BaseResultType & {
+  | ((BaseResultType | SearchResultRecord) & {
       external?: boolean;
     })
   | {
@@ -43,6 +44,18 @@ export type SearchItemType =
       node: ReactNode;
       onSelect: () => void;
     };
+
+type ItemRenderer = (props: {
+  item: SearchItemType;
+  table?: SearchResultTable;
+  onClick: () => void;
+}) => ReactNode;
+
+interface TableProps {
+  table: SearchResultTable;
+  Item: ItemRenderer;
+  onSelect: (item: SearchItemType) => void;
+}
 
 // needed for backward compatible since some previous guides referenced it
 export type { SharedProps };
@@ -71,7 +84,6 @@ const RootContext = createContext<{
 const ListContext = createContext<{
   active: string | null;
   setActive: (v: string | null) => void;
-  /** highlighted in items */
   query: string;
 } | null>(null);
 
@@ -81,25 +93,10 @@ const TagsListContext = createContext<{
   allowClear: boolean;
 } | null>(null);
 
-/** where inline code is rendered */
-const CodeContext = createContext<'pre' | 'cell' | null>(null);
+const PreContext = createContext(false);
 
-/** in a table of search results: whether its rows have a header row */
-const TableContext = createContext<boolean | null>(null);
-
-const mdRenderer = createMarkdownRenderer({
-  remarkPlugins: [remarkTable],
-  remarkRehypeOptions: {
-    allowDangerousHtml: true,
-  },
-  rehypePlugins: [rehypeRaw, rehypeCustomElements],
-});
-
-const tableCell = 'min-w-0 text-start font-normal not-last:truncate last:line-clamp-2';
-
-// rows without header, like the props of type tables
-const propRow =
-  '[&_th:first-child]:font-medium [&_th:first-child]:text-fd-primary [&_th:nth-child(2)]:text-xs [&_th:not(:first-child)]:text-fd-muted-foreground';
+const tableCell =
+  'min-w-0 text-start font-normal not-last:truncate last:line-clamp-2 [&_code]:border-0 [&_code]:bg-transparent [&_code]:px-0 [&_code]:text-inherit';
 
 const mdComponents = {
   // from the deprecated `highlightMarkdown()` of custom search clients
@@ -115,9 +112,8 @@ const mdComponents = {
   },
   code(props: ComponentProps<'pre'>) {
     // eslint-disable-next-line react-hooks/rules-of-hooks -- this is a component
-    const scope = use(CodeContext);
-    if (scope === 'cell') return <code {...props} />;
-    if (scope === 'pre')
+    const inPre = use(PreContext);
+    if (inPre)
       return (
         <code
           {...props}
@@ -133,17 +129,17 @@ const mdComponents = {
     );
   },
   custom({
-    _tagName = 'fragment',
+    tagName,
     children,
     ...rest
-  }: Record<string, unknown> & { _tagName: string; children: ReactNode }) {
+  }: Record<string, unknown> & { tagName: string; children?: ReactNode }) {
     return (
       <span className="inline-flex max-w-full items-center border p-0.5 rounded-md bg-fd-card text-fd-card-foreground divide-x divide-fd-border">
         <code
           data-highlight-ignore=""
           className="rounded-sm px-0.5 me-1 bg-fd-primary font-medium text-xs text-fd-primary-foreground border-none"
         >
-          {_tagName}
+          {tagName}
         </code>
         {Object.entries(rest).map(([k, v]) => {
           if (typeof v !== 'string') return;
@@ -163,25 +159,8 @@ const mdComponents = {
       </span>
     );
   },
-  // the cells are laid out by the grid of `SearchTable`
-  table: (props: ComponentProps<'table'>) => <table {...props} className="contents" />,
-  thead: (props: ComponentProps<'thead'>) => <thead {...props} className="contents" />,
-  tbody: (props: ComponentProps<'tbody'>) => <tbody {...props} className="contents" />,
-  tr: (props: ComponentProps<'tr'>) => <tr {...props} className="contents" />,
-  th({ children, ...props }: ComponentProps<'th'>) {
-    return (
-      <th {...props} className={tableCell}>
-        <CodeContext value="cell">{children}</CodeContext>
-      </th>
-    );
-  },
-  td({ children, ...props }: ComponentProps<'td'>) {
-    return (
-      <td {...props} className={tableCell}>
-        <CodeContext value="cell">{children}</CodeContext>
-      </td>
-    );
-  },
+  th: (props: ComponentProps<'th'>) => <th {...props} className={tableCell} />,
+  td: (props: ComponentProps<'td'>) => <td {...props} className={tableCell} />,
   pre(props: ComponentProps<'pre'>) {
     return (
       <pre
@@ -191,34 +170,13 @@ const mdComponents = {
           props.className,
         )}
       >
-        <CodeContext value="pre">{props.children}</CodeContext>
+        <PreContext value={true}>{props.children}</PreContext>
       </pre>
     );
   },
 };
 
-function remarkTable(this: Processor) {
-  const data = this.data() as {
-    micromarkExtensions?: unknown[];
-    fromMarkdownExtensions?: unknown[];
-  };
-  (data.micromarkExtensions ??= []).push(gfmTable());
-  (data.fromMarkdownExtensions ??= []).push(gfmTableFromMarkdown());
-}
-
-function rehypeCustomElements(): Transformer<Root, Root> {
-  return (tree) => {
-    visit(tree, (node) => {
-      if (
-        node.type === 'element' &&
-        document.createElement(node.tagName) instanceof HTMLUnknownElement
-      ) {
-        node.properties._tagName = node.tagName;
-        node.tagName = 'custom';
-      }
-    });
-  };
-}
+const renderOptions: Options = { development: false, components: mdComponents, ...JsxRuntime };
 
 export function SearchDialog({
   open,
@@ -367,12 +325,13 @@ export function SearchDialogList({
     </div>
   ),
   Item = (props) => <SearchDialogListItem {...props} />,
+  Table = (props) => <SearchDialogListTable {...props} />,
   ...props
 }: Omit<ComponentProps<'div'>, 'children'> & {
   /** @defaultValue the results of `result` from `<SearchDialog />` */
-  items?: SearchItemType[] | null;
+  items?: (SearchItemType | SearchResultItem)[] | null;
   /** shown without results */
-  defaultItems?: SearchItemType[] | null;
+  defaultItems?: (SearchItemType | SearchResultItem)[] | null;
   /**
    * Renderer for empty list UI
    */
@@ -380,32 +339,37 @@ export function SearchDialogList({
   /**
    * Renderer for items
    */
-  Item?: (props: { item: SearchItemType; onClick: () => void }) => ReactNode;
+  Item?: ItemRenderer;
+  /**
+   * Renderer for tables, `Item` and `onSelect` render their rows
+   */
+  Table?: (props: TableProps) => ReactNode;
 }) {
   const ref = useRef<HTMLDivElement>(null);
   const t = useTranslations({ note: 'search dialog' });
   const { onSelect, search, result } = useSearch();
-  const items = itemsProp === undefined ? (result?.data ?? defaultItems) : itemsProp;
+  const items = itemsProp === undefined ? (result?.items ?? defaultItems) : itemsProp;
   const query = result ? result.query : search;
-  const [active, setActive] = useState<string | null>(() =>
-    items && items.length > 0 ? items[0].id : null,
+  const [active, setActive] = useState<string | null>(
+    () => (items && flattenItems(items)[0]?.id) ?? null,
   );
 
   const onKey = useEffectEvent((e: KeyboardEvent) => {
     if (!items || e.isComposing || e.keyCode === 229) return;
+    const list = flattenItems(items);
 
     if (e.key === 'ArrowDown' || e.key == 'ArrowUp') {
-      let idx = items.findIndex((item) => item.id === active);
+      let idx = list.findIndex((item) => item.id === active);
       if (idx === -1) idx = 0;
       else if (e.key === 'ArrowDown') idx++;
       else idx--;
 
-      setActive(items.at(idx % items.length)?.id ?? null);
+      setActive(list.at(idx % list.length)?.id ?? null);
       e.preventDefault();
     }
 
     if (e.key === 'Enter') {
-      const selected = items.find((item) => item.id === active);
+      const selected = list.find((item) => item.id === active);
 
       if (selected) onSelect(selected);
       e.preventDefault();
@@ -433,7 +397,7 @@ export function SearchDialogList({
   }, []);
 
   useOnChange(items, () => {
-    setActive(items?.[0]?.id ?? null);
+    setActive((items && flattenItems(items)[0]?.id) ?? null);
   });
 
   // the combobox input is a sibling, sync its state here
@@ -452,7 +416,7 @@ export function SearchDialogList({
       ref={ref}
       data-empty={items === null}
       className={cn(
-        'overflow-hidden h-(--fd-animated-height) transition-[height]',
+        'overflow-hidden h-(--fd-animated-height) transition-[height] [&_::highlight(fd-search)]:text-fd-primary [&_::highlight(fd-search)]:underline',
         props.className,
       )}
     >
@@ -475,91 +439,60 @@ export function SearchDialogList({
         >
           {items?.length === 0 && Empty()}
 
-          {items && renderItems(items, (item) => Item({ item, onClick: () => onSelect(item) }))}
+          {items?.map((item) => (
+            <Fragment key={item.id}>
+              {item.type === 'table'
+                ? Table({ table: item, Item, onSelect })
+                : Item({ item, onClick: () => onSelect(item) })}
+            </Fragment>
+          ))}
         </ListContext>
       </div>
     </div>
   );
 }
 
-/** consecutive rows of a table share a table */
-function renderItems(
-  items: SearchItemType[],
-  render: (item: SearchItemType) => ReactNode,
-): ReactNode[] {
-  const out: ReactNode[] = [];
-  for (let i = 0; i < items.length;) {
-    const header = tableOf(items[i]);
-    let end = i + 1;
-    if (header !== undefined) {
-      while (end < items.length && tableOf(items[end]) === header) end++;
-    }
-
-    const rows: ReactNode[] = [];
-    for (let j = i; j < end; j++) {
-      rows.push(<Fragment key={items[j].id}>{render(items[j])}</Fragment>);
-    }
-
-    if (header === undefined) out.push(...rows);
-    else {
-      // the header row, or the row of a table without header
-      const { content } = items[i] as { content: string };
-      out.push(
-        <SearchTable key={items[i].id} header={header} columns={columnsOf(content)}>
-          {rows}
-        </SearchTable>,
-      );
-    }
-    i = end;
+function flattenItems(items: (SearchItemType | SearchResultItem)[]): SearchItemType[] {
+  const out: SearchItemType[] = [];
+  for (const item of items) {
+    if (item.type === 'table') out.push(...item.rows);
+    else out.push(item);
   }
 
   return out;
 }
 
-/** the header row of a table record, or an empty string for a row without header */
-function tableOf(item: SearchItemType): string | undefined {
-  if (item.type === 'action' || typeof item.content !== 'string' || !item.content.startsWith('|'))
-    return;
+export function SearchDialogListTable({ table, Item, onSelect }: TableProps) {
+  const { query } = useSearchList();
+  const highlightRef = useHighlightQuery(query);
 
-  const end = item.content.indexOf('\n');
-  // records pad their cells to their own widths
-  return item.content.includes('\n', end + 1) ? item.content.slice(0, end).replace(/ +/g, ' ') : '';
-}
-
-/** the number of cells in the first row of a Markdown table */
-function columnsOf(table: string): number {
-  let count = -1;
-  for (let i = 0; i < table.length && table[i] !== '\n'; i++) {
-    if (table[i] === '|' && table[i - 1] !== '\\') count++;
-  }
-
-  return Math.max(count, 1);
-}
-
-function SearchTable({
-  header,
-  columns,
-  children,
-}: {
-  header: string;
-  columns: number;
-  children: ReactNode;
-}) {
   return (
-    <div role="group" className="relative shrink-0 px-2.5 py-2">
-      <div role="none" className="absolute inset-s-3 inset-y-0 w-px bg-fd-border" />
+    <div role="group" className="ms-3 shrink-0 border-s py-2 ps-3.25 pe-2.5">
       <div
-        className="ms-4 grid gap-x-3 overflow-hidden rounded-lg border bg-fd-card text-sm"
-        style={{ gridTemplateColumns: `${'fit-content(30%) '.repeat(columns - 1)}minmax(0, 1fr)` }}
+        className={cn(
+          'grid gap-x-3 overflow-hidden rounded-lg border bg-fd-card text-sm [&_:is(table,thead,tbody,tr)]:contents',
+          // rows without header, like the props of type tables
+          table.header
+            ? '[&_[role=option]_thead]:hidden'
+            : '[&_th:first-child]:font-medium [&_th:first-child]:text-fd-primary [&_th:nth-child(2)]:text-xs [&_th:not(:first-child)]:text-fd-muted-foreground',
+        )}
+        style={{
+          gridTemplateColumns: `${'fit-content(30%) '.repeat(table.columns - 1)}minmax(30%, 1fr)`,
+        }}
       >
-        {header && (
-          <div className="col-span-full grid grid-cols-subgrid bg-fd-secondary px-3 py-1 text-xs text-fd-muted-foreground">
-            <mdRenderer.Markdown components={mdComponents}>
-              {`${header}\n|${' --- |'.repeat(columns)}`}
-            </mdRenderer.Markdown>
+        {table.header && (
+          <div
+            ref={highlightRef}
+            className="col-span-full grid grid-cols-subgrid bg-fd-secondary px-3 py-1 text-xs text-fd-muted-foreground"
+          >
+            {toJsxRuntime(table.header, renderOptions)}
           </div>
         )}
-        <TableContext value={header.length > 0}>{children}</TableContext>
+        {table.rows.map((row) => (
+          <Fragment key={row.id}>
+            {Item({ item: row, table, onClick: () => onSelect(row) })}
+          </Fragment>
+        ))}
       </div>
     </div>
   );
@@ -567,25 +500,34 @@ function SearchTable({
 
 export function SearchDialogListItem({
   item,
+  table,
   className,
   children,
-  renderMarkdown = (s) => <mdRenderer.Markdown components={mdComponents}>{s}</mdRenderer.Markdown>,
+  renderMarkdown,
   ...props
 }: ComponentProps<'button'> & {
+  /** the table of a row */
+  table?: SearchResultTable;
+  /** render the Markdown `content` of items, instead of their `hastContent` */
   renderMarkdown?: (v: string) => ReactNode;
   item: SearchItemType;
 }) {
   const { active: activeId, setActive, query } = useSearchList();
-  const table = use(TableContext);
   const active = item.id === activeId;
   const highlightRef = useHighlightQuery(query);
+  const content = useMemo(() => {
+    if (item.type === 'action') return item.node;
+    if (renderMarkdown && typeof item.content === 'string') return renderMarkdown(item.content);
+    if ('hastContent' in item) return toJsxRuntime(item.hastContent, renderOptions);
+    return item.content;
+  }, [item, renderMarkdown]);
 
   if (item.type === 'action') {
-    children ??= item.node;
-  } else if (table !== null) {
+    children ??= content;
+  } else if (table) {
     children ??= (
-      <div ref={highlightRef} className={cn('contents', table ? '[&_thead]:hidden' : propRow)}>
-        {typeof item.content === 'string' ? renderMarkdown(item.content) : item.content}
+      <div ref={highlightRef} className="contents">
+        {content}
       </div>
     );
   } else {
@@ -617,7 +559,7 @@ export function SearchDialogListItem({
               : 'text-fd-popover-foreground/80',
           )}
         >
-          {typeof item.content === 'string' ? renderMarkdown(item.content) : item.content}
+          {content}
         </div>
       </>
     );
@@ -643,10 +585,10 @@ export function SearchDialogListItem({
       )}
       aria-selected={active}
       className={cn(
-        'text-start [&_::highlight(fd-search)]:text-fd-primary [&_::highlight(fd-search)]:underline',
-        table === null
-          ? 'relative shrink-0 px-2.5 py-2 text-sm overflow-hidden rounded-lg'
-          : 'col-span-full grid grid-cols-subgrid items-baseline px-3 py-1.5 not-first:border-t',
+        'text-start',
+        table
+          ? 'col-span-full grid grid-cols-subgrid items-baseline px-3 py-1.5 not-first:border-t'
+          : 'relative shrink-0 px-2.5 py-2 text-sm overflow-hidden rounded-lg',
         active && 'bg-fd-accent text-fd-accent-foreground',
         className,
       )}

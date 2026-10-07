@@ -65,11 +65,13 @@ test('Search records of props', async () => {
           "content": "| \`name\` | \`string\` | The name of player Default: \`Henry\` |
     | --- | --- | --- |",
           "heading": "type-table-test-2.ts-Player-name",
+          "table": "type-table-test-2.ts-Player",
         },
         {
           "content": "| \`age\` | \`timestamp\` |  |
     | --- | --- | --- |",
           "heading": "type-table-test-2.ts-Player-age",
+          "table": "type-table-test-2.ts-Player",
         },
       ],
       "headings": [],

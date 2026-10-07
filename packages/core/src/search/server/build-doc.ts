@@ -9,6 +9,7 @@ export interface SharedDocument {
   tags: string[];
   url: string;
   locale?: string;
+  table?: string;
 }
 
 export function buildDocuments(indexes: SharedIndex[]) {
@@ -66,6 +67,7 @@ export function buildDocuments(indexes: SharedIndex[]) {
         url: content.heading ? `${page.url}#${content.heading}` : page.url,
         content: content.content,
         locale: page.locale,
+        table: content.table,
       });
     }
   }

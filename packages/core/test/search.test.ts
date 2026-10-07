@@ -2,6 +2,9 @@ import { createI18nSearchAPI, createSearchAPI, type ExportedData } from '@/searc
 import { expect, test } from 'vitest';
 import type { Meilisearch, SearchParams } from 'meilisearch';
 import { structure } from '@/mdx-plugins';
+import { tableRowToStructuredData } from '@/search';
+import { decodeResults } from '@/search/decode';
+import type { SearchResultTable } from '@/search/use-search';
 import { buildDocuments } from '@/search/server/build-doc';
 import { loader } from '@/source';
 import { sync, toDocuments } from '@/search/meilisearch';
@@ -72,11 +75,88 @@ something`,
         "breadcrumbs": undefined,
         "content": "Hello World",
         "id": "1-0",
+        "table": undefined,
         "type": "heading",
         "url": "/#hello-world",
       },
     ]
   `);
+});
+
+test('Search API Advanced: table ids are metadata', async () => {
+  const api = createSearchAPI('advanced', {
+    indexes: [
+      {
+        id: '1',
+        title: 'Index',
+        structuredData: structure('| Prop | Type |\n| --- | --- |\n| `id` | string |'),
+        url: '/',
+      },
+    ],
+  });
+
+  expect(await api.search('string')).toContainEqual(expect.objectContaining({ table: 'table-0' }));
+  expect(await api.search('table')).toHaveLength(0);
+});
+
+test('tableRowToStructuredData', () => {
+  expect(
+    tableRowToStructuredData({
+      table: 't',
+      row: ['`a | b`', 'two\nlines'],
+      header: ['Prop', 'Type'],
+    }),
+  ).toEqual({
+    heading: undefined,
+    content: '| Prop | Type |\n| --- | --- |\n| `a \\| b` | two lines |',
+    table: 't',
+  });
+  expect(tableRowToStructuredData({ table: 't', row: ['`a \\| b`'] }).content).toBe(
+    '| `a \\| b` |\n| --- |',
+  );
+});
+
+test('decodeResults: the rows of a table follow its first row', () => {
+  const row = (id: string, url: string, cells: string[], header?: string[]) => ({
+    id,
+    type: 'text' as const,
+    url,
+    ...tableRowToStructuredData({ table: 't', row: cells, header }),
+  });
+  const entries = decodeResults([
+    { id: 'p', type: 'page', url: '/a', content: 'Page' },
+    row('r1', '/a', ['a', '1'], ['Prop', 'Value']),
+    { id: 'x', type: 'text', url: '/a', content: '**text**' },
+    row('r2', '/a', ['b', '2'], ['Prop', 'Value']),
+    { id: 'p2', type: 'page', url: '/b', content: 'Page' },
+    row('r3', '/b', ['c', '3']),
+  ]);
+
+  expect(
+    entries.map((entry) =>
+      entry.type === 'table'
+        ? {
+            header: entry.header !== undefined,
+            columns: entry.columns,
+            rows: entry.rows.map((row) => row.id),
+          }
+        : entry.id,
+    ),
+  ).toEqual([
+    'p',
+    { header: true, columns: 2, rows: ['r1', 'r2'] },
+    'x',
+    'p2',
+    { header: false, columns: 2, rows: ['r3'] },
+  ]);
+  const table = entries[1] as SearchResultTable;
+  const findTable = (root: { children: object[] }) =>
+    root.children.find((node) => 'tagName' in node && node.tagName === 'table');
+  expect(findTable(table.header!)).toMatchObject({ children: [{ tagName: 'thead' }] });
+  expect(findTable(table.rows[0].hastContent)).toMatchObject({
+    children: [{ tagName: 'thead' }, { tagName: 'tbody' }],
+  });
+  expect(table.rows[0].content).toBe(row('r1', '/a', ['a', '1'], ['Prop', 'Value']).content);
 });
 
 test('buildDocuments: page description duplicated in contents is indexed once', () => {
@@ -426,12 +506,14 @@ test('Meilisearch: search client', async () => {
       {
         "content": "hello x",
         "id": "2",
+        "table": undefined,
         "type": "text",
         "url": "/a#x",
       },
       {
         "content": "hello y",
         "id": "3",
+        "table": undefined,
         "type": "heading",
         "url": "/a#y",
       },
