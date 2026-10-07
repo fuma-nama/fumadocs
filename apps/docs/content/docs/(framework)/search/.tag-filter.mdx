@@ -16,12 +16,12 @@ import { useFetchSearch } from 'fumadocs-core/search/client';
 export default function CustomSearchDialog(props: SharedProps) {
   // [!code ++]
   const [tag, setTag] = useState<string | undefined>();
-  const { search, setSearch, isLoading, result } = useFetchSearch({
+  const search = useFetchSearch({
     tag, // [!code ++]
   });
 
   return (
-    <SearchDialog>
+    <SearchDialog {...search} {...props}>
       <SearchDialogOverlay />
       <SearchDialogContent>
         ...

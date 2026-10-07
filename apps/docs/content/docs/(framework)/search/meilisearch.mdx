@@ -43,13 +43,13 @@ import { useMeilisearch } from 'fumadocs-core/search/client';
 export default function CustomSearchDialog(props: SharedProps) {
   // [!code ++]
   const [tag, setTag] = useState<string | undefined>();
-  const { search, setSearch, isLoading, result } = useMeilisearch({
+  const search = useMeilisearch({
     tag, // [!code ++]
     // other options...
   });
 
   return (
-    <SearchDialog>
+    <SearchDialog {...search} {...props}>
       <SearchDialogOverlay />
       <SearchDialogContent>
         ...

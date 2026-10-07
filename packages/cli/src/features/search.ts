@@ -49,7 +49,7 @@ import { useI18n } from 'fumadocs-ui/contexts/i18n';`;
 
 /** `legacy` for hooks in the shape of the deprecated `useDocsSearch()`, like the Typesense adapter */
 const dialogBody = (footer: string, url: string, legacy = false) => `  return (
-    <SearchDialog search={search} onSearchChange={setSearch} isLoading={${legacy ? 'query.isLoading' : 'isLoading'}} {...props}>
+    <SearchDialog ${legacy ? 'search={search} onSearchChange={setSearch} isLoading={query.isLoading}' : '{...search}'} {...props}>
       <SearchDialogOverlay />
       <SearchDialogContent>
         <SearchDialogHeader>
@@ -57,7 +57,7 @@ const dialogBody = (footer: string, url: string, legacy = false) => `  return (
           <SearchDialogInput />
           <SearchDialogClose />
         </SearchDialogHeader>
-        <SearchDialogList ${legacy ? "items={query.data !== 'empty' ? query.data : null}" : 'items={result.data} query={result.query}'} />
+        <SearchDialogList ${legacy ? "items={query.data !== 'empty' ? query.data : null} " : ''}/>
         <SearchDialogFooter>
           <a
             href="${url}"
@@ -155,7 +155,7 @@ const client = new OramaCloud({
 
 export default function CustomSearchDialog(props: SharedProps) {
   const { locale } = useI18n();
-  const { search, setSearch, isLoading, result } = useOramaCloudSearch({
+  const search = useOramaCloudSearch({
     client,
     locale,
   });
@@ -199,7 +199,7 @@ const algolia = liteClient(${env.read}ALGOLIA_APP_ID!, ${env.read}ALGOLIA_SEARCH
 
 export default function CustomSearchDialog(props: SharedProps) {
   const { locale } = useI18n();
-  const { search, setSearch, isLoading, result } = useAlgoliaSearch({
+  const search = useAlgoliaSearch({
     client: algolia,
     indexName: 'document',
     locale,
@@ -247,7 +247,7 @@ const client = new Meilisearch({
 
 export default function CustomSearchDialog(props: SharedProps) {
   const { locale } = useI18n();
-  const { search, setSearch, isLoading, result } = useMeilisearch({
+  const search = useMeilisearch({
     client,
     indexName: 'docs',
     locale,
@@ -337,7 +337,7 @@ import { useFetchSearch } from 'fumadocs-core/search/client';
 
 export default function CustomSearchDialog(props: SharedProps) {
   const { locale } = useI18n();
-  const { search, setSearch, isLoading, result } = useFetchSearch({
+  const search = useFetchSearch({
     api: '/api/search',
     locale,
   });

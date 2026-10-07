@@ -83,7 +83,7 @@ export const { GET } = createMixedbreadSearchAPI({
   ```ts
   import { useFetchSearch } from 'fumadocs-core/search/client';
 
-  const { search, setSearch, isLoading, result } = useFetchSearch({
+  const { search, onSearchChange, isLoading, result } = useFetchSearch({
     api: '/api/search',
   });
   ```
@@ -112,7 +112,7 @@ And update your search client:
   ```ts
   import { useFetchSearch } from 'fumadocs-core/search/client';
 
-  const { search, setSearch, isLoading, result } = useFetchSearch({
+  const { search, onSearchChange, isLoading, result } = useFetchSearch({
     api: '/api/search',
     tag: '<your tag value>',
     // ...

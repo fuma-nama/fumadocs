@@ -43,11 +43,13 @@ To search documents on the client side, consider:
     apiKey: process.env.NEXT_PUBLIC_ORAMA_API_KEY,
   });
 
-  const { search, setSearch, isLoading, result } = useOramaCloudSearch({
+  const params = {
+    // optional search params
+  };
+
+  const { search, onSearchChange, isLoading, result } = useOramaCloudSearch({
     client: orama,
-    params: {
-      // optional search params
-    },
+    params,
   });
   ```
 
@@ -71,12 +73,14 @@ const orama = new OramaCloud({
   apiKey: '<read only api key>',
 });
 
-const { search, setSearch, isLoading, result } = useOramaCloudSearch({
+const params = {
+  // optional search params
+};
+
+const { search, onSearchChange, isLoading, result } = useOramaCloudSearch({
   index: 'crawler',
   client: orama,
-  params: {
-    // optional search params
-  },
+  params,
 });
 ```
 

@@ -9,16 +9,21 @@ packages:
 
 ### Search hooks for each provider
 
-`fumadocs-core/search/client` exports a search hook for each search client, they return `{ search, setSearch, isLoading, result }`. `result` is the last completed search, its `data` and `error` along with the `query` they belong to.
+`fumadocs-core/search/client` exports a search hook for each search client, they return the props of `<SearchDialog />`: `{ search, onSearchChange, isLoading, result }`. `result` is the last completed search, its `data` and `error` along with the `query` they belong to.
 
-```ts
+```tsx
 import { useFetchSearch } from 'fumadocs-core/search/client';
 
-const { search, setSearch, isLoading, result } = useFetchSearch({ locale });
+const search = useFetchSearch({ locale });
+
+<SearchDialog {...search} {...props}>
+  {/* ... */}
+  <SearchDialogList />
+</SearchDialog>;
 ```
 
 - `useFetchSearch()`, `useStaticSearch()`, `useAlgoliaSearch()`, `useOramaCloudSearch()` and `useMeilisearch()`, importing one doesn't bundle the others.
-- `useSearchClient()` searches with other search clients, like `flexsearchStaticClient()`.
-- `useDocsSearch()` is deprecated.
-- `<SearchDialogList />` highlights its `query` prop, defaulting to the search input. Pass `result.query` so highlights match the results while typing.
+- `useFlexsearchStatic()` and `useOramaCloudLegacySearch()` are exported from the paths of their clients, like `fumadocs-core/search/client/flexsearch-static`.
+- `useDocsSearch()` is deprecated, its output can be spread to `<SearchDialog />` as well.
+- `<SearchDialog />` accepts `result`, `<SearchDialogList />` shows its results, or `defaultItems` without results, and highlights its query instead of the search input.
 - The search dialogs of Fumadocs CLI and Create Fumadocs App use the new hooks.
