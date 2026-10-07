@@ -20,11 +20,16 @@ Search clients come with React hooks, like `useFetchSearch()` and `useAlgoliaSea
 ```tsx
 import { useFetchSearch } from 'fumadocs-core/search/client';
 
-// `result.data` is the results of `result.query`
 const search = useFetchSearch();
 
 <SearchDialog {...search} {...props} />;
 ```
+
+`result` is the last completed search:
+
+- `items`: its results, with their content also parsed as [hast](https://github.com/syntax-tree/hast) as `hastContent`. The rows of a table are grouped into a `table` item.
+- `query`: the query it searched for.
+- `error`: set when the search failed, `items` stay from the last successful search.
 
 They search again when an option changes, define the arrays, objects and functions you pass outside of render, or memoize them.
 

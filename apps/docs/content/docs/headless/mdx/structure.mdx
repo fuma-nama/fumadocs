@@ -54,10 +54,11 @@ array, each item contains a `heading` prop indicating the heading of paragraph.
 
 #### Content
 
-| Prop      |                                 |
-| --------- | ------------------------------- |
-| `heading` | Heading of paragraph (nullable) |
-| `content` | Text content (Markdown)         |
+| Prop      |                                                                             |
+| --------- | --------------------------------------------------------------------------- |
+| `heading` | Heading of paragraph (nullable)                                             |
+| `content` | Text content (Markdown)                                                     |
+| `table`   | Table of a table row, unique in its page. Metadata, not searched (optional) |
 
 The content is stringified as Markdown text, you can customize it using the [`stringify`](#options) option.
 
