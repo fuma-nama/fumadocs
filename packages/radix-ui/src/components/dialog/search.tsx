@@ -350,8 +350,8 @@ export function SearchDialogList({
   const { onSelect, search, result } = useSearch();
   const items = itemsProp === undefined ? (result?.items ?? defaultItems) : itemsProp;
   const query = result ? result.query : search;
-  const [active, setActive] = useState<string | null>(
-    () => (items && flattenItems(items)[0]?.id) ?? null,
+  const [active, setActive] = useState<string | null>(() =>
+    items && items.length > 0 ? items[0].id : null,
   );
 
   const onKey = useEffectEvent((e: KeyboardEvent) => {
@@ -397,7 +397,7 @@ export function SearchDialogList({
   }, []);
 
   useOnChange(items, () => {
-    setActive((items && flattenItems(items)[0]?.id) ?? null);
+    setActive(items?.[0]?.id ?? null);
   });
 
   // the combobox input is a sibling, sync its state here
@@ -465,6 +465,10 @@ function flattenItems(items: (SearchItemType | SearchResultItem)[]): SearchItemT
 export function SearchDialogListTable({ table, Item, onSelect }: TableProps) {
   const { query } = useSearchList();
   const highlightRef = useHighlightQuery(query);
+  const header = useMemo(
+    () => table.header && toJsxRuntime(table.header, renderOptions),
+    [table.header],
+  );
 
   return (
     <div role="group" className="ms-3 shrink-0 border-s py-2 ps-3.25 pe-2.5">
@@ -480,12 +484,12 @@ export function SearchDialogListTable({ table, Item, onSelect }: TableProps) {
           gridTemplateColumns: `${'fit-content(30%) '.repeat(table.columns - 1)}minmax(30%, 1fr)`,
         }}
       >
-        {table.header && (
+        {header && (
           <div
             ref={highlightRef}
             className="col-span-full grid grid-cols-subgrid bg-fd-secondary px-3 py-1 text-xs text-fd-muted-foreground"
           >
-            {toJsxRuntime(table.header, renderOptions)}
+            {header}
           </div>
         )}
         {table.rows.map((row) => (

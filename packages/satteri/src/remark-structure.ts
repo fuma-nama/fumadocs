@@ -1,5 +1,5 @@
 import type { MdastPluginDefinition, MdastVisitorContext } from 'satteri';
-import type { Nodes, Table, TableRow } from 'mdast';
+import type { Nodes, TableRow } from 'mdast';
 import type { StructuredData } from 'fumadocs-core/mdx-plugins/remark-structure';
 import { tableRowToStructuredData } from 'fumadocs-core/search';
 import { createStringifier, offsets, type Stringifier } from './stringifier';
@@ -48,11 +48,11 @@ interface ContentRecord {
   content?: string;
 }
 
-interface TableRowRecord {
-  node: Table;
+interface TableRecord {
   heading: string | undefined;
   table: string;
-  row: TableRow;
+  head: TableRow;
+  rows: TableRow[];
 }
 
 export function remarkStructure({
@@ -67,7 +67,7 @@ export function remarkStructure({
 
   const plugin: ExtraPluginHooks & { (): MdastPluginDefinition } = () => {
     const data: StructuredData = { contents: [], headings: [] };
-    const records: (ContentRecord | TableRowRecord)[] = [];
+    const records: (ContentRecord | TableRecord)[] = [];
     let lastHeading: string | undefined;
     let tables = 0;
     let s: Stringifier;
@@ -99,9 +99,8 @@ export function remarkStructure({
 
       if (!matchType(node)) return;
       if (node.type === 'table') {
-        const table = `table-${tables++}`;
-        for (const row of node.children.slice(1))
-          records.push({ node, heading: lastHeading, table, row });
+        const [head, ...rows] = node.children;
+        records.push({ heading: lastHeading, table: `table-${tables++}`, head, rows });
         return;
       }
       if (
@@ -140,15 +139,17 @@ export function remarkStructure({
       },
       after(_root: unknown, ctx: MdastVisitorContext) {
         for (const record of records) {
-          if ('row' in record) {
-            data.contents.push(
-              tableRowToStructuredData({
-                table: record.table,
-                heading: record.heading,
-                row: stringifyCells(record.row, ctx),
-                header: stringifyCells(record.node.children[0], ctx),
-              }),
-            );
+          if ('rows' in record) {
+            const header = stringifyCells(record.head, ctx);
+            for (const row of record.rows)
+              data.contents.push(
+                tableRowToStructuredData({
+                  table: record.table,
+                  heading: record.heading,
+                  row: stringifyCells(row, ctx),
+                  header,
+                }),
+              );
             continue;
           }
 

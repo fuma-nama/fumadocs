@@ -1,4 +1,4 @@
-import { type DependencyList, useCallback } from 'react';
+import { type DependencyList, useCallback, useMemo } from 'react';
 import type { SortedResult } from '@/search';
 import type { Awaitable } from '@/types';
 import { type SearchResultRecord, type UseSearchOptions, useSearch } from '../use-search';
@@ -38,18 +38,20 @@ export function useDocsSearch(
   { delayMs, allowEmpty, ...options }: ClientPreset & UseSearchOptions,
   customDeps?: DependencyList,
 ) {
-  const client = 'type' in options ? presetClient(options) : options.client;
+  const client = 'type' in options ? createPresetClient(options) : options.client;
   const run = useCallback((query: string) => client.search(query), customDeps ?? client.deps ?? []);
   const output = useSearch(run, { delayMs, allowEmpty });
   const { isLoading, result } = output;
-  let data: SearchResultRecord[] | 'empty' = 'empty';
-  if (result.items) {
-    data = [];
+  const data = useMemo(() => {
+    if (!result.items) return 'empty' as const;
+    const out: SearchResultRecord[] = [];
     for (const item of result.items) {
-      if (item.type === 'table') data.push(...item.rows);
-      else data.push(item);
+      if (item.type === 'table') out.push(...item.rows);
+      else out.push(item);
     }
-  }
+
+    return out;
+  }, [result.items]);
 
   return {
     ...output,
@@ -58,7 +60,7 @@ export function useDocsSearch(
   };
 }
 
-function presetClient(options: PresetOptions): SearchClient {
+function createPresetClient(options: PresetOptions): SearchClient {
   const client = loadPreset(options);
 
   return {
