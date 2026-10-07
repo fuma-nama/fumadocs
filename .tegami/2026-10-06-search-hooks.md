@@ -19,7 +19,7 @@ const search = useFetchSearch({ locale });
 </SearchDialog>;
 ```
 
-`result` is the last completed search, its `items` have their content decoded into `hastContent`.
+`result` is the last completed search, its `items` have their content parsed into `hastContent`.
 
 - `useDocsSearch()` is deprecated.
 - `useFlexsearchStatic()` and `useOramaCloudLegacySearch()` are exported from the paths of their clients.

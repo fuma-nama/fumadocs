@@ -16,9 +16,9 @@ const processor = remark()
   .use(rehypeCustomElements);
 
 /**
- * Decode the Markdown content of results, and gather the rows of a table after its first row, tables are scoped to the page before them.
+ * Parse the Markdown content of results, and gather the rows of a table after its first row, tables are scoped to the page before them.
  */
-export function decodeResults(results: SortedResult[]): SearchResultItem[] {
+export function parseResults(results: SortedResult[]): SearchResultItem[] {
   const items: SearchResultItem[] = [];
   const tables = new Map<string, SearchResultTable>();
 
@@ -29,16 +29,16 @@ export function decodeResults(results: SortedResult[]): SearchResultItem[] {
       hastContent: processor.runSync(processor.parse(result.content)),
     };
     const table = record.hastContent.children.find((node) => node.type === 'element');
-    if (table?.tagName !== 'table') {
+    // a row without header is parsed as the header row
+    const [head, body] = table?.tagName === 'table' ? (table.children as Element[]) : [];
+    const row = (body ?? head)?.children[0] as Element | undefined;
+    if (!table || !row) {
       items.push(record);
       continue;
     }
 
     let entry = result.table ? tables.get(result.table) : undefined;
     if (!entry) {
-      // a row without header is parsed as the header row
-      const [head, body] = table.children as Element[];
-      const [row] = (body ?? head).children as Element[];
       entry = {
         type: 'table',
         id: result.id,

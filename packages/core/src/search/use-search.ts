@@ -21,7 +21,7 @@ export interface UseSearchOptions {
 }
 
 export interface SearchResultRecord extends SortedResult {
-  /** `content` decoded */
+  /** `content` parsed */
   hastContent: Root;
 }
 
@@ -76,9 +76,8 @@ export function useSearch(
     let active = true;
     const timer = setTimeout(async () => {
       try {
-        const [results, { decodeResults }] = await Promise.all([run(search), import('./decode')]);
-        const items = decodeResults(results);
-        if (active) setDone({ result: { query: search, items }, run });
+        const [results, { parseResults }] = await Promise.all([run(search), import('./parse')]);
+        if (active) setDone({ result: { query: search, items: parseResults(results) }, run });
       } catch (error) {
         if (active)
           setDone((prev) => ({
