@@ -38,26 +38,34 @@ export interface SearchResultTable {
 export type SearchResultItem = SearchResultRecord | SearchResultTable;
 
 export interface SearchResult {
-  /** the query of the last completed search */
+  /** the query searched for */
   query: string;
-  /** `undefined` when nothing is searched */
-  items?: SearchResultItem[];
-  /** the search failed, `items` are kept from the search before */
-  error?: Error;
+  items: SearchResultItem[];
 }
 
 export interface UseSearchReturn {
   search: string;
   onSearchChange: (search: string) => void;
+  /** a search for `search` is pending */
   isLoading: boolean;
-  /** the last completed search */
-  result: SearchResult;
+  /** the last successful search, `undefined` when nothing is searched */
+  data?: SearchResult;
+  /** the last search failed, `data` stays from the search before */
+  error?: Error;
 }
 
-const idle: { result: SearchResult; run?: unknown } = { result: { query: '' } };
+interface State {
+  /** the query of the last completed search */
+  query: string;
+  run?: unknown;
+  data?: SearchResult;
+  error?: Error;
+}
+
+const idle: State = { query: '' };
 
 /**
- * The base of search hooks.
+ * The base of search hooks, for search engines without one.
  *
  * @param run - memoized search function, search again when changed
  */
@@ -66,9 +74,9 @@ export function useSearch(
   { delayMs = 100, allowEmpty = false }: UseSearchOptions = {},
 ): UseSearchReturn {
   const [search, setSearch] = useState('');
-  const [done, setDone] = useState(idle);
+  const [state, setState] = useState(idle);
   const empty = search.length === 0 && !allowEmpty;
-  if (empty && done !== idle) setDone(idle);
+  if (empty && state !== idle) setState(idle);
 
   useEffect(() => {
     if (empty) return;
@@ -77,13 +85,10 @@ export function useSearch(
     const timer = setTimeout(async () => {
       try {
         const [results, { parseResults }] = await Promise.all([run(search), import('./parse')]);
-        if (active) setDone({ result: { query: search, items: parseResults(results) }, run });
-      } catch (error) {
         if (active)
-          setDone((prev) => ({
-            result: { ...prev.result, query: search, error: error as Error },
-            run,
-          }));
+          setState({ query: search, run, data: { query: search, items: parseResults(results) } });
+      } catch (error) {
+        if (active) setState((prev) => ({ ...prev, query: search, run, error: error as Error }));
       }
     }, delayMs);
 
@@ -96,8 +101,9 @@ export function useSearch(
   return {
     search,
     onSearchChange: setSearch,
-    isLoading: !empty && (done.result.query !== search || done.run !== run),
-    result: done.result,
+    isLoading: !empty && (state.query !== search || state.run !== run),
+    data: state.data,
+    error: state.error,
   };
 }
 

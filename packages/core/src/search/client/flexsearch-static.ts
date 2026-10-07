@@ -66,11 +66,17 @@ async function init(from: string) {
   return dbs;
 }
 
-export function useFlexsearchStatic(options: FlexsearchStaticOptions & UseSearchOptions = {}) {
-  const { from, locale, tag } = options;
+export function useFlexsearchStatic({
+  from,
+  locale,
+  tag,
+  ...rest
+}: FlexsearchStaticOptions & UseSearchOptions = {}) {
+  const tags = String(tag ?? '');
   const run = useCallback(
-    (query: string) => searchFlexsearchStatic({ from, locale, tag }, query),
-    [from, locale, tag],
+    (query: string) =>
+      searchFlexsearchStatic({ from, locale, tag: tags ? tags.split(',') : undefined }, query),
+    [from, locale, tags],
   );
-  return useSearch(run, options);
+  return useSearch(run, rest);
 }

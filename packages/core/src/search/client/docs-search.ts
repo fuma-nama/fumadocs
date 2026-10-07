@@ -32,7 +32,7 @@ type PresetOptions = Extract<ClientPreset, { type: string }>;
  *
  * Note: it will re-query when its parameters changed, make sure to define `deps` array if you encounter rendering issues.
  *
- * @deprecated Use the search hook of your provider instead, like `useFetchSearch()`.
+ * @deprecated Use the search hook of your provider instead, like `useFetchSearch()`, or `experimental_useSearch()` for other clients.
  */
 export function useDocsSearch(
   { delayMs, allowEmpty, ...options }: ClientPreset & UseSearchOptions,
@@ -41,22 +41,21 @@ export function useDocsSearch(
   const client = 'type' in options ? createPresetClient(options) : options.client;
   const run = useCallback((query: string) => client.search(query), customDeps ?? client.deps ?? []);
   const output = useSearch(run, { delayMs, allowEmpty });
-  const { isLoading, result } = output;
   const data = useMemo(() => {
-    if (!result.items) return 'empty' as const;
+    if (!output.data) return 'empty' as const;
     const out: SearchResultRecord[] = [];
-    for (const item of result.items) {
+    for (const item of output.data.items) {
       if (item.type === 'table') out.push(...item.rows);
       else out.push(item);
     }
 
     return out;
-  }, [result.items]);
+  }, [output.data]);
 
   return {
     ...output,
     setSearch: output.onSearchChange,
-    query: { isLoading, data, error: result.error },
+    query: { isLoading: output.isLoading, data, error: output.error },
   };
 }
 

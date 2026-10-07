@@ -1,4 +1,4 @@
-import { useCallback } from 'react';
+import { useCallback, useRef } from 'react';
 import type { ClientSearchParams, OramaClient } from '@oramacloud/client';
 import { removeUndefined } from '@/utils/remove-undefined';
 import type { OramaIndex } from '@/search/orama-cloud-legacy';
@@ -139,11 +139,17 @@ export function oramaCloudLegacyClient(options: OramaCloudLegacyOptions): Search
   };
 }
 
-export function useOramaCloudLegacySearch(options: OramaCloudLegacyOptions & UseSearchOptions) {
-  const { client, index, params, tag } = options;
+export function useOramaCloudLegacySearch({
+  client,
+  index,
+  tag,
+  ...rest
+}: OramaCloudLegacyOptions & UseSearchOptions) {
+  const latest = useRef(rest);
+  latest.current = rest;
   const run = useCallback(
-    (query: string) => searchOramaCloudLegacy({ client, index, params, tag }, query),
-    [client, index, params, tag],
+    (query: string) => searchOramaCloudLegacy({ ...latest.current, client, index, tag }, query),
+    [client, index, tag],
   );
-  return useSearch(run, options);
+  return useSearch(run, rest);
 }

@@ -1,4 +1,4 @@
-import { useCallback } from 'react';
+import { useCallback, useRef } from 'react';
 import type { SortedResult } from '@/search';
 import type { SearchClient } from '../client';
 import { type UseSearchOptions, useSearch } from '../use-search';
@@ -57,11 +57,18 @@ export function fetchClient(options: FetchOptions = {}): SearchClient {
 /**
  * Search with the search server, or an API of the same format.
  */
-export function useFetchSearch(options: FetchOptions & UseSearchOptions = {}) {
-  const { api, locale, tag, cache } = options;
+export function useFetchSearch({
+  api,
+  locale,
+  tag,
+  ...rest
+}: FetchOptions & UseSearchOptions = {}) {
+  const latest = useRef(rest);
+  latest.current = rest;
+  const tags = String(tag ?? '');
   const run = useCallback(
-    (query: string) => searchFetch({ api, locale, tag, cache }, query),
-    [api, locale, tag, cache],
+    (query: string) => searchFetch({ ...latest.current, api, locale, tag: tags }, query),
+    [api, locale, tags],
   );
-  return useSearch(run, options);
+  return useSearch(run, rest);
 }

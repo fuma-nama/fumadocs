@@ -10,9 +10,10 @@ import {
   useCallback,
   useEffect,
   useEffectEvent,
+  useLayoutEffect,
   useMemo,
   useRef,
-  useState,
+  useSyncExternalStore,
 } from 'react';
 import { useTranslations, T } from '@fuma-translate/react';
 import { cn } from '@/utils/cn';
@@ -30,7 +31,6 @@ import * as JsxRuntime from 'react/jsx-runtime';
 import { cva } from 'class-variance-authority';
 import { useRouter } from 'fumadocs-core/framework';
 import type { SharedProps } from '@/contexts/search';
-import { useOnChange } from 'fumadocs-core/utils/use-on-change';
 import scrollIntoView from 'scroll-into-view-if-needed';
 import { buttonVariants } from '@/components/ui/button';
 import { mergeRefs } from '@/utils/merge-refs';
@@ -66,8 +66,8 @@ export interface SearchDialogProps extends SharedProps {
   onSearchChange: (v: string) => void;
   onSelect?: (item: SearchItemType) => void;
   isLoading?: boolean;
-  /** the last completed search, `<SearchDialogList />` shows its results */
-  result?: SearchResult;
+  /** the last successful search, `<SearchDialogList />` shows its results */
+  data?: SearchResult;
 
   children: ReactNode;
 }
@@ -79,13 +79,13 @@ const RootContext = createContext<{
   onSearchChange: (v: string) => void;
   onSelect: (item: SearchItemType) => void;
   isLoading: boolean;
-  result?: SearchResult;
-} | null>(null);
-
-const ListContext = createContext<{
-  active: string | null;
-  setActive: (v: string | null) => void;
+  data?: SearchResult;
+  /** the query to highlight */
   query: string;
+  /** the id of the active item */
+  getActive: () => string | null;
+  setActive: (id: string | null) => void;
+  subscribeActive: (listener: () => void) => () => void;
 } | null>(null);
 
 const TagsListContext = createContext<{
@@ -95,9 +95,6 @@ const TagsListContext = createContext<{
 } | null>(null);
 
 const PreContext = createContext(false);
-
-const tableCell =
-  'min-w-0 text-start font-normal not-last:truncate last:line-clamp-2 [&_code]:border-0 [&_code]:bg-transparent [&_code]:px-0 [&_code]:text-inherit';
 
 const mdComponents = {
   // from the deprecated `highlightMarkdown()` of custom search clients
@@ -160,8 +157,6 @@ const mdComponents = {
       </span>
     );
   },
-  th: (props: ComponentProps<'th'>) => <th {...props} className={tableCell} />,
-  td: (props: ComponentProps<'td'>) => <td {...props} className={tableCell} />,
   pre(props: ComponentProps<'pre'>) {
     return (
       <pre
@@ -179,13 +174,46 @@ const mdComponents = {
 
 const renderOptions: Options = { development: false, components: mdComponents, ...JsxRuntime };
 
+function Children({ children }: { children?: ReactNode }) {
+  return children;
+}
+
+function TableCell(props: ComponentProps<'div'>) {
+  return (
+    <div
+      {...props}
+      className="min-w-0 not-last:truncate last:line-clamp-2 [&_code]:border-0 [&_code]:bg-transparent [&_code]:px-0 [&_code]:text-inherit"
+    />
+  );
+}
+
+// tables of cards render their cells only, the grid of `<SearchDialogListTable />` lays them out
+const tableRenderOptions: Options = {
+  ...renderOptions,
+  components: {
+    ...mdComponents,
+    table: Children,
+    thead: Children,
+    tbody: Children,
+    tr: Children,
+    th: TableCell,
+    td: TableCell,
+  },
+};
+
+// rows of tables with header, `<SearchDialogListTable />` shows the header once
+const rowRenderOptions: Options = {
+  ...tableRenderOptions,
+  components: { ...tableRenderOptions.components, thead: () => null },
+};
+
 export function SearchDialog({
   open,
   onOpenChange,
   search,
   onSearchChange,
   isLoading = false,
-  result,
+  data,
   onSelect: onSelectProp,
   children,
   dialogHandle,
@@ -209,21 +237,40 @@ export function SearchDialog({
   };
   const onSelectCallback = useRef(onSelect);
   onSelectCallback.current = onSelect;
+  // the input and items subscribe to the active item, so only they re-render when it changes
+  const activeItem = useMemo(() => {
+    let active: string | null = null;
+    const listeners = new Set<() => void>();
+
+    return {
+      getActive: () => active,
+      setActive(id: string | null) {
+        active = id;
+        for (const listener of listeners) listener();
+      },
+      subscribeActive(listener: () => void) {
+        listeners.add(listener);
+        return () => void listeners.delete(listener);
+      },
+    };
+  }, []);
 
   return (
     <Dialog.Root open={open} onOpenChange={onOpenChange} handle={dialogHandle}>
       <RootContext
         value={useMemo(
           () => ({
+            ...activeItem,
             open,
             search,
             isLoading,
-            result,
+            data,
+            query: data ? data.query : search,
             onOpenChange: (v) => onOpenChangeCallback.current(v),
             onSearchChange: (v) => onSearchChangeCallback.current(v),
             onSelect: (v) => onSelectCallback.current(v),
           }),
-          [isLoading, open, search, result],
+          [activeItem, isLoading, open, search, data],
         )}
       >
         {children}
@@ -238,12 +285,15 @@ export function SearchDialogHeader(props: ComponentProps<'div'>) {
 
 export function SearchDialogInput(props: ComponentProps<'input'>) {
   const t = useTranslations({ note: 'search dialog' });
-  const { search, onSearchChange } = useSearch();
+  const { search, onSearchChange, getActive, subscribeActive } = useSearch();
+  const active = useSyncExternalStore(subscribeActive, getActive, getActive);
 
   return (
     <input
       data-fd-search-dialog-input=""
       role="combobox"
+      aria-expanded={active !== null}
+      aria-activedescendant={active !== null ? `fd-search-option-${active}` : undefined}
       aria-label={t('Search')}
       aria-autocomplete="list"
       aria-controls="fd-search-list"
@@ -361,7 +411,7 @@ export function SearchDialogList({
   Table = (props) => <SearchDialogListTable {...props} />,
   ...props
 }: Omit<ComponentProps<'div'>, 'children'> & {
-  /** @defaultValue the results of `result` from `<SearchDialog />` */
+  /** @defaultValue the results of `data` from `<SearchDialog />` */
   items?: (SearchItemType | SearchResultItem)[] | null;
   /** shown without results */
   defaultItems?: (SearchItemType | SearchResultItem)[] | null;
@@ -380,19 +430,17 @@ export function SearchDialogList({
 }) {
   const ref = useRef<HTMLDivElement>(null);
   const t = useTranslations({ note: 'search dialog' });
-  const { onSelect, search, result } = useSearch();
-  const items = itemsProp === undefined ? (result?.items ?? defaultItems) : itemsProp;
-  const query = result ? result.query : search;
-  const [active, setActive] = useState<string | null>(() =>
-    items && items.length > 0 ? items[0].id : null,
-  );
+  const { onSelect, data, getActive, setActive } = useSearch();
+  const items = itemsProp === undefined ? (data?.items ?? defaultItems) : itemsProp;
+
+  useLayoutEffect(() => setActive(items?.[0]?.id ?? null), [setActive, items]);
 
   const onKey = useEffectEvent((e: KeyboardEvent) => {
     if (!items || e.isComposing || e.keyCode === 229) return;
     const list = flattenItems(items);
 
     if (e.key === 'ArrowDown' || e.key == 'ArrowUp') {
-      let idx = list.findIndex((item) => item.id === active);
+      let idx = list.findIndex((item) => item.id === getActive());
       if (idx === -1) idx = 0;
       else if (e.key === 'ArrowDown') idx++;
       else idx--;
@@ -402,7 +450,7 @@ export function SearchDialogList({
     }
 
     if (e.key === 'Enter') {
-      const selected = list.find((item) => item.id === active);
+      const selected = list.find((item) => item.id === getActive());
 
       if (selected) onSelect(selected);
       e.preventDefault();
@@ -431,20 +479,6 @@ export function SearchDialogList({
     };
   }, []);
 
-  useOnChange(items, () => {
-    setActive(items?.[0]?.id ?? null);
-  });
-
-  // the combobox input is a sibling, sync its state here
-  useEffect(() => {
-    const input = ref.current?.closest('[role="dialog"]')?.querySelector('[role="combobox"]');
-    if (!input) return;
-
-    input.setAttribute('aria-expanded', String(active !== null));
-    if (active !== null) input.setAttribute('aria-activedescendant', `fd-search-option-${active}`);
-    else input.removeAttribute('aria-activedescendant');
-  }, [active]);
-
   return (
     <div
       {...props}
@@ -462,26 +496,15 @@ export function SearchDialogList({
         aria-label={items?.length ? t('Search') : undefined}
         className={cn('w-full flex flex-col overflow-y-auto max-h-[460px] p-1', !items && 'hidden')}
       >
-        <ListContext
-          value={useMemo(
-            () => ({
-              active,
-              setActive,
-              query,
-            }),
-            [active, query],
-          )}
-        >
-          {items?.length === 0 && Empty()}
+        {items?.length === 0 && Empty()}
 
-          {items?.map((item) => (
-            <Fragment key={item.id}>
-              {item.type === 'table'
-                ? Table({ table: item, Item, onSelect })
-                : Item({ item, onClick: () => onSelect(item) })}
-            </Fragment>
-          ))}
-        </ListContext>
+        {items?.map((item) => (
+          <Fragment key={item.id}>
+            {item.type === 'table'
+              ? Table({ table: item, Item, onSelect })
+              : Item({ item, onClick: () => onSelect(item) })}
+          </Fragment>
+        ))}
       </div>
     </div>
   );
@@ -498,30 +521,32 @@ function flattenItems(items: (SearchItemType | SearchResultItem)[]): SearchItemT
 }
 
 export function SearchDialogListTable({ table, Item, onSelect }: TableProps) {
-  const { query } = useSearchList();
+  const { query } = useSearch();
   const highlightRef = useHighlightQuery(query);
+  const headerId = `fd-search-table-${table.id}`;
   const header = useMemo(
-    () => table.header && toJsxRuntime(table.header, renderOptions),
+    () => table.header && toJsxRuntime(table.header, tableRenderOptions),
     [table.header],
   );
 
   return (
-    <div role="group" className="ms-3 shrink-0 border-s py-2 ps-3.25 pe-2.5">
+    <div
+      // the header names the rows
+      role={table.header ? 'group' : undefined}
+      aria-labelledby={table.header ? headerId : undefined}
+      className="ms-3 shrink-0 border-s py-2 ps-3.25 pe-2.5"
+    >
       <div
-        className={cn(
-          'grid gap-x-3 overflow-hidden rounded-lg border bg-fd-card text-sm [&_:is(table,thead,tbody,tr)]:contents',
-          // rows without header, like the props of type tables
-          table.header
-            ? '[&_[role=option]_thead]:hidden'
-            : '[&_th:first-child]:font-medium [&_th:first-child]:text-fd-primary [&_th:nth-child(2)]:text-xs [&_th:not(:first-child)]:text-fd-muted-foreground',
-        )}
+        className="grid gap-x-3 overflow-hidden rounded-lg border bg-fd-card text-sm"
         style={{
           gridTemplateColumns: `${'fit-content(30%) '.repeat(table.columns - 1)}minmax(30%, 1fr)`,
         }}
       >
         {header && (
           <div
+            id={headerId}
             ref={highlightRef}
+            aria-hidden
             className="col-span-full grid grid-cols-subgrid bg-fd-secondary px-3 py-1 text-xs text-fd-muted-foreground"
           >
             {header}
@@ -544,28 +569,38 @@ export function SearchDialogListItem({
   children,
   renderMarkdown,
   ...props
-}: ComponentProps<'button'> & {
+}: ComponentProps<'div'> & {
   /** the table of a row */
   table?: SearchResultTable;
   /** render the Markdown `content` of items, instead of their `hastContent` */
   renderMarkdown?: (v: string) => ReactNode;
   item: SearchItemType;
 }) {
-  const { active: activeId, setActive, query } = useSearchList();
-  const active = item.id === activeId;
+  const { query, getActive, setActive, subscribeActive } = useSearch();
+  const isActive = () => getActive() === item.id;
+  const active = useSyncExternalStore(subscribeActive, isActive, isActive);
   const highlightRef = useHighlightQuery(query);
   const content = useMemo(() => {
     if (item.type === 'action') return item.node;
     if (renderMarkdown && typeof item.content === 'string') return renderMarkdown(item.content);
-    if ('hastContent' in item) return toJsxRuntime(item.hastContent, renderOptions);
-    return item.content;
-  }, [item, renderMarkdown]);
+    if (!('hastContent' in item)) return item.content;
+    if (!table) return toJsxRuntime(item.hastContent, renderOptions);
+    return toJsxRuntime(item.hastContent, table.header ? rowRenderOptions : tableRenderOptions);
+  }, [item, renderMarkdown, table]);
 
   if (item.type === 'action') {
     children ??= content;
   } else if (table) {
     children ??= (
-      <div ref={highlightRef} className="contents">
+      <div
+        ref={highlightRef}
+        className={cn(
+          'contents',
+          // rows without header, like the props of type tables
+          !table.header &&
+            '*:first:font-medium *:first:text-fd-primary *:nth-2:text-xs *:not-first:text-fd-muted-foreground',
+        )}
+      >
         {content}
       </div>
     );
@@ -605,13 +640,11 @@ export function SearchDialogListItem({
   }
 
   return (
-    <button
-      type="button"
+    <div
       id={`fd-search-option-${item.id}`}
       role="option"
-      tabIndex={-1}
       ref={useCallback(
-        (element: HTMLButtonElement | null) => {
+        (element: HTMLDivElement | null) => {
           if (active && element) {
             scrollIntoView(element, {
               scrollMode: 'if-needed',
@@ -624,7 +657,7 @@ export function SearchDialogListItem({
       )}
       aria-selected={active}
       className={cn(
-        'text-start',
+        'cursor-default',
         table
           ? 'col-span-full grid grid-cols-subgrid items-baseline px-3 py-1.5 not-first:border-t'
           : 'relative shrink-0 px-2.5 py-2 text-sm overflow-hidden rounded-lg',
@@ -635,7 +668,7 @@ export function SearchDialogListItem({
       {...props}
     >
       {children}
-    </button>
+    </div>
   );
 }
 
@@ -724,11 +757,5 @@ export function useSearch() {
 export function useTagsList() {
   const ctx = use(TagsListContext);
   if (!ctx) throw new Error('Missing <TagsList />');
-  return ctx;
-}
-
-export function useSearchList() {
-  const ctx = use(ListContext);
-  if (!ctx) throw new Error('Missing <SearchDialogList />');
   return ctx;
 }
