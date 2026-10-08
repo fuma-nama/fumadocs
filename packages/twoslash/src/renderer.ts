@@ -84,6 +84,8 @@ export function createRenderer(options: RendererOptions = {}) {
       : { ...completionIcons, ...options.completionIcons };
   const tags =
     options.customTagIcons === false ? undefined : { ...tagIcons, ...options.customTagIcons };
+  /** highlighted type info of the hovers in each code block */
+  const highlighted = new WeakMap<object, Map<string, ElementContent[]>>();
 
   function popupContent(
     this: ShikiTransformerContext,
@@ -93,17 +95,28 @@ export function createRenderer(options: RendererOptions = {}) {
     const content = processHoverInfo(info.text);
     if (!content || content === 'any') return [];
 
-    let lang = this.options.lang;
-    if (lang === 'jsx') lang = 'tsx';
-    else if (lang === 'js' || lang === 'javascript') lang = 'ts';
     const multiline = content.trim().includes('\n');
-    const types = this.codeToHast(content, {
-      ...this.options,
-      meta: {},
-      transformers: [],
-      lang,
-      structure: multiline ? 'classic' : 'inline',
-    }).children as ElementContent[];
+    let cache = highlighted.get(this.meta);
+    if (!cache) {
+      cache = new Map();
+      highlighted.set(this.meta, cache);
+    }
+    let types = cache.get(content);
+    if (types) {
+      types = structuredClone(types);
+    } else {
+      let lang = this.options.lang;
+      if (lang === 'jsx') lang = 'tsx';
+      else if (lang === 'js' || lang === 'javascript') lang = 'ts';
+      types = this.codeToHast(content, {
+        ...this.options,
+        meta: {},
+        transformers: [],
+        lang,
+        structure: multiline ? 'classic' : 'inline',
+      }).children as ElementContent[];
+      cache.set(content, types);
+    }
 
     const out = [
       element('div', { class: 'twoslash shiki fd-codeblock prose-no-margin' }, [

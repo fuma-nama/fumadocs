@@ -7,6 +7,7 @@ import {
   type CompletionInfo,
   type Diagnostic,
   type Project,
+  type Signature,
   type Snapshot,
   type Symbol,
   type Type,
@@ -44,13 +45,15 @@ import {
   type TwoslashNode,
   type VirtualFile,
 } from './notations';
+import { randomUUID } from 'node:crypto';
+import fs from 'node:fs';
 import path from 'node:path';
 
 export type ExtraFiles = Record<string, string | { prepend?: string; append?: string }>;
 
 export interface TwoslasherOptions {
   /**
-   * Code blocks are virtually placed in the `.twoslash` directory of it, modules are resolved from there.
+   * Code blocks are placed in the `.twoslash` directory of it while being analyzed, modules are resolved from there.
    *
    * @defaultValue process.cwd()
    */
@@ -75,7 +78,7 @@ export interface TwoslasherOptions {
    */
   filterNode?: (node: NodeWithoutPosition) => boolean;
   /**
-   * Extra files to be added to the virtual file system, or prepended/appended to existing files
+   * Extra files to be added next to the code block, or prepended/appended to existing files
    */
   extraFiles?: ExtraFiles;
 }
@@ -114,7 +117,9 @@ const batchDelay = 10;
 const typeFlags =
   NodeBuilderFlags.UseAliasDefinedOutsideCurrentScope |
   NodeBuilderFlags.MultilineObjectLiterals |
-  NodeBuilderFlags.NoTruncation;
+  NodeBuilderFlags.IgnoreErrors;
+/** longer types are truncated by the checker */
+const maxTypeLength = 500;
 
 const completionKinds: Partial<Record<CompletionItemKind, string>> = {
   [CompletionItemKind.Method]: 'method',
@@ -127,13 +132,6 @@ const completionKinds: Partial<Record<CompletionItemKind, string>> = {
   [CompletionItemKind.Module]: 'module',
   [CompletionItemKind.Constant]: 'string',
 };
-
-function normalizePath(p: string): string {
-  p = p.replaceAll('\\', '/');
-  // the drive letter is reported in either case
-  if (process.platform === 'win32' && /^[A-Z]:/.test(p)) p = p[0].toLowerCase() + p.slice(1);
-  return p;
-}
 
 interface Identifier {
   node: Node;
@@ -217,6 +215,34 @@ function getObjectLiteral(node: Node): Expression | undefined {
   return isKey ? (parent.parent as Expression) : undefined;
 }
 
+function printType(project: Project, type: Type, location?: Node, flags = typeFlags): string {
+  const { checker, emitter } = project;
+  const text = checker.typeToString(type, location, flags | NodeBuilderFlags.NoTruncation);
+  if (text.length <= maxTypeLength) return text;
+  // `typeToString` cuts truncated types at 320 characters
+  const node = checker.typeToTypeNode(type, location, flags);
+  return node ? emitter.printNode(node) : text;
+}
+
+function printSignature(
+  project: Project,
+  signature: Signature,
+  location: Node,
+): string | undefined {
+  const { checker, emitter } = project;
+  const print = (flags: number) => {
+    const node = checker.signatureToSignatureDeclaration(
+      signature,
+      SyntaxKind.MethodSignature,
+      location,
+      flags,
+    );
+    return node && emitter.printNode(node);
+  };
+  const text = print(typeFlags | NodeBuilderFlags.NoTruncation);
+  return text && text.length > maxTypeLength ? print(typeFlags) : text;
+}
+
 /**
  * Approximate the display string of quick info, TypeScript 7 doesn't provide a language service.
  */
@@ -239,20 +265,13 @@ function describeSymbol(
   if (flags & (SymbolFlags.Function | SymbolFlags.Method)) {
     const signatures = checker.getSignaturesOfType(type, SignatureKind.Call);
     const signature = (call && checker.getResolvedSignature(call)) ?? signatures[0];
-    const declaration =
-      signature &&
-      checker.signatureToSignatureDeclaration(
-        signature,
-        SyntaxKind.MethodSignature,
-        node,
-        typeFlags,
-      );
+    const printed = signature && printSignature(project, signature, node);
 
-    if (declaration) {
+    if (printed) {
       const head =
         flags & SymbolFlags.Method ? `(method) ${qualifiedName(symbol)}` : `function ${name}`;
       const overloads = signatures.length - 1;
-      let text = head + emitter.printNode(declaration).replace(/;$/, '');
+      let text = head + printed.replace(/;$/, '');
       if (overloads > 0) text += ` (+${overloads} overload${overloads > 1 ? 's' : ''})`;
       return text;
     }
@@ -275,7 +294,7 @@ function describeSymbol(
     if (flags & SymbolFlags.Class) return `class ${text}`;
     if (flags & SymbolFlags.Interface) return `interface ${text}`;
     const declared = checker.getDeclaredTypeOfSymbol(symbol);
-    return `type ${text} = ${checker.typeToString(declared, node, typeFlags | NodeBuilderFlags.InTypeAlias)}`;
+    return `type ${text} = ${printType(project, declared, node, typeFlags | NodeBuilderFlags.InTypeAlias)}`;
   }
   if (flags & SymbolFlags.TypeParameter) return `(type parameter) ${name}`;
 
@@ -305,8 +324,9 @@ interface Block {
 }
 
 export function createTwoslasher(options: TwoslasherOptions = {}): Twoslasher {
-  const root = `${normalizePath(path.resolve(options.cwd ?? process.cwd()))}/.twoslash/`;
-  /** virtual files: the tsconfig of each project, and the root files, `''` when unused by the current batch */
+  const cwd = path.resolve(options.cwd ?? process.cwd());
+  const root = `${path.join(cwd, '.twoslash', randomUUID()).replaceAll('\\', '/')}/`;
+  /** the tsconfig of each project, and the root files, `''` when unused by the current batch */
   const files = new Map<string, string>();
   const rootFiles: string[] = [];
   /** tsconfig path of each set of compiler options */
@@ -320,8 +340,6 @@ export function createTwoslasher(options: TwoslasherOptions = {}): Twoslasher {
 
   /** directory of the block at `index` of a batch, the block is placed in a stable slot to keep the project unchanged */
   const slot = (index: number) => `${root}${index}/`;
-  /** directories of the virtual files */
-  const dirs = new Set([root.slice(0, -1)]);
 
   function parse(code: string, extension: string): Block {
     const { customTags = ['annotate', 'log', 'warn', 'error'], extraFiles = {} } = options;
@@ -351,6 +369,15 @@ export function createTwoslasher(options: TwoslasherOptions = {}): Twoslasher {
         supportedExtensions.includes(file.extension) ||
         (file.extension === 'json' && !!notations.compilerOptions.resolveJsonModule),
     );
+    for (const file of files) {
+      // the files are written to the disk
+      if (file.filename.split(/[/\\]/).includes('..')) {
+        throw new TwoslashError(
+          'Invalid filename',
+          `${file.filename} is outside of the code block directory.`,
+        );
+      }
+    }
     const extra: Block['extraFiles'] = [];
     for (const [filename, value] of Object.entries(extraFiles)) {
       const file = files.find((file) => file.filename === filename);
@@ -407,9 +434,6 @@ export function createTwoslasher(options: TwoslasherOptions = {}): Twoslasher {
       if (current === undefined) {
         created.push(file);
         rootFiles.push(file);
-        for (let i = file.lastIndexOf('/'); i >= root.length; i = file.lastIndexOf('/', i - 1)) {
-          dirs.add(file.slice(0, i));
-        }
       } else {
         changed.push(file);
       }
@@ -426,25 +450,26 @@ export function createTwoslasher(options: TwoslasherOptions = {}): Twoslasher {
       }
     }
 
-    api ??= new API({
-      cwd: root,
-      fs: {
-        readFile: (file) => files.get(normalizePath(file)),
-        fileExists: (file) => {
-          file = normalizePath(file);
-          return file.startsWith(root) ? files.has(file) : undefined;
-        },
-        directoryExists: (dir) => {
-          dir = normalizePath(dir);
-          return dirs.has(dir) || (dir.startsWith(root) ? false : undefined);
-        },
-      },
-    });
+    api ??= new API({ cwd });
     if (snapshot && changed.length === 0 && created.length === 0 && openProjects.length === 0) {
       return snapshot;
     }
+    // only read while creating the snapshot, FS callbacks cost a round trip for each lookup of module resolution
+    for (const [file, content] of files) {
+      fs.mkdirSync(path.dirname(file), { recursive: true });
+      fs.writeFileSync(file, content);
+    }
     const prev = snapshot;
-    snapshot = api.updateSnapshot({ openProjects, fileChanges: { changed, created } });
+    try {
+      snapshot = api.updateSnapshot({ openProjects, fileChanges: { changed, created } });
+    } finally {
+      fs.rmSync(root, { recursive: true, force: true });
+      try {
+        fs.rmdirSync(path.dirname(root));
+      } catch {
+        // used by other instances
+      }
+    }
     prev?.dispose();
     for (const configPath of openProjects) opened.add(configPath);
     return snapshot;
@@ -570,7 +595,7 @@ function analyze(
   function typeToString(type: Type): string {
     let text = typeStrings.get(type.id);
     if (text === undefined) {
-      text = checker.typeToString(type, undefined, typeFlags);
+      text = printType(project, type);
       typeStrings.set(type.id, text);
     }
     return text;
