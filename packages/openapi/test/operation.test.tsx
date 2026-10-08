@@ -107,7 +107,7 @@ test('derives the operation view model', async () => {
     ['400', null, undefined],
     ['404', null, undefined],
   ]);
-  expect(curl).toContain('https://example.com/special-events');
+  expect(curl).toContain('https://api.fake-museum-example.com/v1/special-events');
 });
 
 test('groups parameters by location', async () => {

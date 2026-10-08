@@ -42,10 +42,12 @@ export function inputToString(
 }
 
 /**
- * Returns the input string wrapped in single quotes, escaping internal single quotes and backslashes.
+ * Returns the value of a `Cookie` header with the given cookies.
  */
-export function singleQuote(str: string): string {
-  return `'${str.replace(/\\/g, '\\\\').replace(/'/g, "\\'")}'`;
+export function cookieString(cookies: Record<string, { value: string }>): string {
+  let out = '';
+  for (const k in cookies) out += `${out ? '; ' : ''}${k}=${cookies[k].value}`;
+  return out;
 }
 
 /**
@@ -65,10 +67,17 @@ export function tripleDoubleQuote(str: string): string {
 }
 
 /**
- * Returns the input string wrapped in backticks, escaping internal backticks and backslashes.
+ * Returns the input string wrapped in a JavaScript template literal, escaping internal backticks, backslashes and `${`.
  */
 export function backtickQuote(str: string): string {
-  return `\`${str.replace(/\\/g, '\\\\').replace(/`/g, '\\`')}\``;
+  return `\`${str.replace(/[\\`]|\$\{/g, '\\$&')}\``;
+}
+
+/**
+ * Returns the input string wrapped inside a Go raw string literal, where backticks can't be escaped and are concatenated instead.
+ */
+export function goRawStringLiteral(str: string): string {
+  return `\`${str.replaceAll('`', '` + "`" + `')}\``;
 }
 
 /**

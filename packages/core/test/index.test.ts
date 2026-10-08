@@ -3,8 +3,9 @@ import { describe, expect, test } from 'vitest';
 import type { Folder, Item, Root } from '@/page-tree/definitions';
 import { findNeighbour, findProjection, findSiblings } from '@/page-tree/utils';
 import { getBreadcrumbItems } from '@/breadcrumb';
-import { DefaultFormatter } from '@/i18n/middleware';
+import { createI18nMiddleware, DefaultFormatter } from '@/i18n/middleware';
 import { NextURL } from 'next/dist/server/web/next-url';
+import { type NextFetchEvent, NextRequest } from 'next/server';
 import { updateHref } from '@/dynamic-link';
 
 test('Find Neighbours', () => {
@@ -238,6 +239,22 @@ test('I18n: Format URL', () => {
       }),
     ).href,
   ).toBe('https://fumadocs.dev/docs/');
+});
+
+test('I18n: Ignore unsupported locale cookies', () => {
+  const middleware = createI18nMiddleware({
+    languages: ['en', 'fr'],
+    defaultLanguage: 'en',
+    hideLocale: 'always',
+  });
+  const rewriteOf = (cookie: string) => {
+    const request = new NextRequest('https://fumadocs.dev/docs', { headers: { cookie } });
+    const res = middleware(request, {} as NextFetchEvent) as Response;
+    return res.headers.get('x-middleware-rewrite');
+  };
+
+  expect(rewriteOf('FD_LOCALE=fr')).toBe('https://fumadocs.dev/fr/docs');
+  expect(rewriteOf('FD_LOCALE=de')).toBe('https://fumadocs.dev/en/docs');
 });
 
 const tree: Root = {

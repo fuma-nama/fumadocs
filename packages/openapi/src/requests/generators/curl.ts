@@ -1,5 +1,5 @@
-import { doubleQuote, indent, inputToString, singleQuote } from '@/requests/string-utils';
-import { resolveMediaAdapter } from '@/requests/media/adapter';
+import { inputToString } from '@/requests/string-utils';
+import { resolveMediaAdapter } from '@/requests/media/resolve-adapter';
 import type { CodeUsageGenerator } from '@/requests/generators';
 
 export const curl: CodeUsageGenerator = {
@@ -7,32 +7,28 @@ export const curl: CodeUsageGenerator = {
   lang: 'bash',
   generate(data, { mediaAdapters }) {
     const s: string[] = [];
-    s.push(`curl -X ${data.method.toUpperCase()} "${data.url}"`);
+    s.push(`curl -X ${data.method.toUpperCase()} ${shellQuote(data.url)}`);
 
     for (const header in data.header) {
-      const value = `${header}: ${data.header[header].value}`;
-
-      s.push(`-H "${value}"`);
+      s.push(`-H ${shellQuote(`${header}: ${data.header[header].value}`)}`);
     }
 
     for (const k in data.cookie) {
-      const param = data.cookie[k];
-
-      s.push(`--cookie ${doubleQuote(`${k}=${param.value}`)}`);
+      s.push(`--cookie ${shellQuote(`${k}=${data.cookie[k].value}`)}`);
     }
 
     if (data.body && data.bodyMediaType === 'multipart/form-data') {
       if (typeof data.body !== 'object') throw new Error('[CURL] request body must be an object.');
 
       for (const [key, value] of Object.entries(data.body)) {
-        s.push(`-F ${key}=${doubleQuote(inputToString(value))}`);
+        s.push(`-F ${shellQuote(`${key}=${inputToString(value)}`)}`);
       }
     } else if (
       data.body &&
       data.bodyMediaType &&
       resolveMediaAdapter(data.bodyMediaType, mediaAdapters)
     ) {
-      const escaped = singleQuote(
+      const escaped = shellQuote(
         inputToString(
           data.body,
           // @ts-expect-error -- assume the body media type is supported
@@ -40,10 +36,15 @@ export const curl: CodeUsageGenerator = {
         ),
       );
 
-      s.push(`-H "Content-Type: ${data.bodyMediaType}"`);
+      s.push(`-H 'Content-Type: ${data.bodyMediaType}'`);
       s.push(`-d ${escaped}`);
     }
 
-    return s.flatMap((v, i) => indent(v, i > 0 ? 1 : 0)).join(' \\\n');
+    return s.join(' \\\n  ');
   },
 };
+
+/** single quotes keep the string literal, each `'` closes them to add an escaped quote */
+function shellQuote(str: string): string {
+  return `'${str.replaceAll("'", `'\\''`)}'`;
+}

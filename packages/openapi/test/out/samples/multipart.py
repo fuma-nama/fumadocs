@@ -1,12 +1,11 @@
 import requests
 
 url = "http://localhost:8080/hello_world?search=ai"
-body = """{
-  "id": "id",
-  "note": "it's \\"quoted\\" \\\\ `a` ${b}"
-}"""
-response = requests.request("GET", url, data = body, headers = {
-  "Content-Type": "application/json", 
+body = {
+  "name": (None, "Mars"),
+  "image": (None, "@mars.jpg"),
+}
+response = requests.request("POST", url, files = body, headers = {
   "authorization": "Bearer", 
   "if-none-match": "\"etag\""
 }, cookies = {

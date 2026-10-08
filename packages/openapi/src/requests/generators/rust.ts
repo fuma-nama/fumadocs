@@ -1,54 +1,37 @@
-import { doubleQuote, indent } from '@/requests/string-utils';
+import { cookieString, doubleQuote, indent } from '@/requests/string-utils';
 import type { CodeUsageGenerator } from '@/requests/generators';
-import { MediaContext, resolveMediaAdapter } from '@/requests/media/adapter';
+import { generateBodyExample } from '@/requests/media/adapter';
 
 export const rust: CodeUsageGenerator = {
   label: 'Rust',
   lang: 'rust',
   generate(data, { mediaAdapters }) {
-    const headers = new Map<string, string>();
+    const body = generateBodyExample(data, mediaAdapters, { lang: 'rust' });
+    const request = [`.request(Method::${data.method.toUpperCase()}, url)`];
 
-    for (const header in data.header) {
-      headers.set(header, doubleQuote(data.header[header].value));
+    for (const k in data.header) {
+      request.push(`.header(${doubleQuote(k)}, ${doubleQuote(data.header[k].value)})`);
     }
 
-    const cookies = Object.entries(data.cookie);
-    if (cookies.length > 0) {
-      headers.set(
-        'Cookie',
-        doubleQuote(cookies.map(([k, param]) => `${k}=${param.value}`).join('; ')),
-      );
+    const cookie = cookieString(data.cookie);
+    if (cookie) request.push(`.header("Cookie", ${doubleQuote(cookie)})`);
+    if (body && data.bodyMediaType === 'multipart/form-data') {
+      request.push('.multipart(body)');
+    } else if (body) {
+      request.push(`.header("Content-Type", ${doubleQuote(data.bodyMediaType!)})`, '.body(body)');
     }
+    request.push('.send()', '.await?', '.text()', '.await?;');
 
-    let body: string | undefined;
+    return `use reqwest::{Client, Method, Result};
 
-    if (data.body && data.bodyMediaType) {
-      const adapter = resolveMediaAdapter(data.bodyMediaType, mediaAdapters);
-      headers.set('Content-Type', `"${data.bodyMediaType}"`);
-      body = adapter?.generateExample(data as { body: unknown }, { lang: 'rust' } as MediaContext);
-    }
-
-    return `use reqwest::{Result, Client};
-
+#[tokio::main]
 async fn main() -> Result<()> {
   let client = Client::new();
 
-  let url = "${data.url}";
-${body ? indent(body) + '\n' : ''}
+  let url = ${doubleQuote(data.url)};
+${body ? `${indent(body)}\n` : ''}
   let res = client
-    .${data.method.toLowerCase()}(url)
-${
-  headers.size <= 0
-    ? ''
-    : indent(
-        Array.from(headers.entries())
-          .map(([key, value]) => `  .header("${key}", ${value})`)
-          .join('\n'),
-      ) + '\n'
-}${body ? '    .body(body)\n' : ''}    .send()
-    .await?
-    .text()
-    .await?;
+${indent(request.join('\n'), 2)}
 
   println!("{}", res);
   Ok(())

@@ -87,7 +87,8 @@ export function createI18nMiddleware({
       const finalLanguages = negotiateLanguages(request.headers.get('accept-language'), languages);
       const preferred = matchLocale(finalLanguages, languages, defaultLanguage);
       if (hideLocale === 'always') {
-        const locale = request.cookies.get(cookieName)?.value ?? preferred;
+        let locale = request.cookies.get(cookieName)?.value;
+        if (!locale || !languages.includes(locale)) locale = preferred;
 
         return NextResponse.rewrite(formatter.add(url, locale));
       }

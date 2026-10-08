@@ -1,53 +1,36 @@
 import type { CodeUsageGenerator } from '@/requests/generators';
-import { resolveMediaAdapter } from '@/requests/media/adapter';
+import { generateBodyExample } from '@/requests/media/adapter';
 import { doubleQuote } from '../string-utils';
 
 export const python: CodeUsageGenerator = {
   label: 'Python',
   lang: 'python',
   generate(data, { mediaAdapters }) {
-    const headers: Record<string, string> = {};
-    const imports = new Set<string>();
+    const imports = new Set(['requests']);
+    const body = generateBodyExample(data, mediaAdapters, { lang: 'python' });
     const params = [`"${data.method.toUpperCase()}"`, 'url'];
-    let body: string | undefined;
+    const headers: Record<string, string> = {};
 
-    imports.add('requests');
-
-    if (data.body && data.bodyMediaType) {
-      const adapter = resolveMediaAdapter(data.bodyMediaType, mediaAdapters);
-      headers['Content-Type'] = data.bodyMediaType;
-
-      body = adapter?.generateExample(data as { body: unknown }, {
-        lang: 'python',
-      });
-
-      if (body) {
-        params.push('data = body');
-      }
+    // requests sets the boundary of `files`
+    if (body && data.bodyMediaType === 'multipart/form-data') {
+      params.push('files = body');
+    } else if (body) {
+      headers['Content-Type'] = data.bodyMediaType!;
+      params.push('data = body');
     }
 
-    for (const [k, v] of Object.entries(data.header)) {
-      headers[k] = v.value;
-    }
-
+    for (const k in data.header) headers[k] = data.header[k].value;
     if (Object.keys(headers).length > 0) {
       params.push(`headers = ${generatePythonObject(headers, imports)}`);
     }
 
-    const inputCookies = Object.entries(data.cookie);
-    if (inputCookies.length > 0) {
-      const cookies: Record<string, string> = {};
-
-      for (const [k, v] of inputCookies) {
-        cookies[k] = v.value;
-      }
-
+    const cookies: Record<string, string> = {};
+    for (const k in data.cookie) cookies[k] = data.cookie[k].value;
+    if (Object.keys(cookies).length > 0) {
       params.push(`cookies = ${generatePythonObject(cookies, imports)}`);
     }
 
-    return `${Array.from(imports)
-      .map((name) => 'import ' + name)
-      .join('\n')}
+    return `${Array.from(imports, (name) => `import ${name}`).join('\n')}
 
 url = ${doubleQuote(data.url)}
 ${body ?? ''}

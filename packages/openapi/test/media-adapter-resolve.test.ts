@@ -1,5 +1,6 @@
 import { describe, expect, test } from 'vitest';
-import { defaultAdapters, resolveMediaAdapter } from '@/requests/media/adapter';
+import { defaultAdapters } from '@/requests/media/adapter';
+import { resolveMediaAdapter } from '@/requests/media/resolve-adapter';
 
 describe('Media Adapter Resolution', () => {
   test('resolves exact match', () => {
