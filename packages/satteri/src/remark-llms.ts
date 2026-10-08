@@ -64,18 +64,18 @@ export function remarkLlms({
     const drop = (node: PositionedNode) => s.replace(node, '');
     const keep = (node: JsxElementNode & { type: string; children: PositionedNode[] }) => {
       const name = node.name;
-      if (!jsx || !name || !componentNameRegex.test(name)) return;
-
-      let open = `<_c.${name}`;
-      for (const attr of node.attributes) {
-        if (attr.type === 'mdxJsxExpressionAttribute') open += ` {${attr.value}}`;
-        else if (attr.value == null) open += ` ${attr.name}`;
-        else if (typeof attr.value === 'string')
-          open += ` ${attr.name}={${JSON.stringify(attr.value)}}`;
-        else open += ` ${attr.name}={${attr.value.value}}`;
-      }
+      if (!name || !componentNameRegex.test(name)) return;
 
       s.replace(node, (s) => {
+        let open = `<_c.${name}`;
+        for (const attr of node.attributes) {
+          if (attr.type === 'mdxJsxExpressionAttribute') open += ` {${attr.value}}`;
+          else if (attr.value == null) open += ` ${attr.name}`;
+          else if (typeof attr.value === 'string')
+            open += ` ${attr.name}={${JSON.stringify(attr.value)}}`;
+          else open += ` ${attr.name}={${attr.value.value}}`;
+        }
+
         const inline = node.type === 'mdxJsxTextElement';
         let children = s.inner(node);
         // block content on its own lines
@@ -94,8 +94,8 @@ export function remarkLlms({
       yaml: drop,
       toml: drop,
       heading: (node) => stringifyHeadingId(s, node, headingIds),
-      mdxJsxFlowElement: keep,
-      mdxJsxTextElement: keep,
+      // elements are kept in function output only
+      ...(jsx && { mdxJsxFlowElement: keep, mdxJsxTextElement: keep }),
       after(root, ctx) {
         const text = s.stringify(root).trim();
         const value = text ? `${text}\n` : '';

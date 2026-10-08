@@ -107,19 +107,17 @@ const docs = defineDocs({
           parseMdx: true,
         },
         remarkStructureOptions: {
-          stringify: {
-            filterElement(node) {
-              switch (node.name) {
-                case 'File':
-                case 'TypeTable':
-                case 'Callout':
-                case 'Card':
-                case 'Custom':
-                  return true;
-                default:
-                  return false;
-              }
-            },
+          filterElement(node) {
+            switch (node.name) {
+              case 'File':
+              case 'TypeTable':
+              case 'Callout':
+              case 'Card':
+              case 'Custom':
+                return true;
+              default:
+                return false;
+            }
           },
         },
         remarkImageOptions: isLint ? false : undefined,
