@@ -11,3 +11,4 @@ Search results no longer wrap matches in `<mark>`, `content` is the indexed Mark
 
 - `createContentHighlighter()` is deprecated.
 - Removed `contentWithHighlights` from search results, and the `renderHighlights` prop of `<SearchDialogListItem />`.
+- `<SearchDialogListItem />` renders the Markdown of results with the `prose prose-sm` typography.

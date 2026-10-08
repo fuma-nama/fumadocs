@@ -329,7 +329,7 @@ await sync(client, {
     hint: 'AI search, signup needed',
     dependencies: { '@mixedbread/sdk': null },
     publicEnv: [],
-    privateEnv: ['MIXEDBREAD_API_KEY', 'MIXEDBREAD_STORE_ID'],
+    privateEnv: ['MXBAI_API_KEY', 'MIXEDBREAD_STORE_ID'],
     static: false,
     dialog: () => `'use client';
 ${dialogImports}
@@ -348,7 +348,7 @@ ${dialogBody('Mixedbread', 'https://mixedbread.com')}`,
 // sync the content with Mixedbread CLI
 const result = spawnSync(
   'npx',
-  ['--yes', '@mixedbread/cli', 'vs', 'sync', process.env.MIXEDBREAD_STORE_ID!, '${dir}', '--ci'],
+  ['--yes', '@mixedbread/cli', 'store', 'sync', process.env.MIXEDBREAD_STORE_ID!, '${dir}', '--yes'],
   { stdio: 'inherit' },
 );
 
@@ -359,9 +359,7 @@ process.exit(result.status ?? 1);
 import Mixedbread from '@mixedbread/sdk';
 
 const server = createMixedbreadSearchAPI({
-  client: new Mixedbread({
-    apiKey: process.env.MIXEDBREAD_API_KEY,
-  }),
+  client: new Mixedbread(),
   storeIdentifier: process.env.MIXEDBREAD_STORE_ID!,
 });
 `;

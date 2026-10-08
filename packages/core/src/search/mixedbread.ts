@@ -1,7 +1,8 @@
 import type { SortedResult } from '@/search';
 import type Mixedbread from '@mixedbread/sdk';
 import type { StoreSearchParams, StoreSearchResponse } from '@mixedbread/sdk/resources/stores';
-import Slugger from 'github-slugger';
+import { slug } from 'github-slugger';
+import { headingIdRegex } from '@/mdx-plugins/heading-id';
 import { createEndpoint } from '@/search/server/endpoint';
 import type { SearchAPI } from '@/search/server';
 
@@ -55,51 +56,37 @@ export interface MixedbreadSearchOptions {
   transform?: (results: StoreSearchResult[], query: string) => SortedResult[];
 }
 
-const slugger = new Slugger();
-
-function extractHeadingTitle(text: string): string {
-  const trimmedText = text.trim();
-
-  if (!trimmedText.startsWith('#')) {
-    return '';
-  }
-
-  const lines = trimmedText.split('\n');
-  const firstLine = lines[0]?.trim();
-  return firstLine ?? '';
-}
-
 function defaultTransform(results: StoreSearchResult[]): SortedResult[] {
-  return results.flatMap((item) => {
+  // file ID -> the page and its matched headings
+  const groups = new Map<string, SortedResult[]>();
+
+  for (const item of results) {
     const metadata = item.generated_metadata;
-
     const url = metadata.url || '#';
-    const title = metadata.title || 'Untitled';
-
-    const chunkResults: SortedResult[] = [
-      {
-        id: `${item.file_id}-${item.chunk_index}-page`,
-        type: 'page',
-        content: title,
-        url,
-      },
-    ];
-
-    const headingTitle = item.type === 'text' && item.text ? extractHeadingTitle(item.text) : '';
-
-    if (headingTitle) {
-      slugger.reset();
-
-      chunkResults.push({
-        id: `${item.file_id}-${item.chunk_index}-heading`,
-        type: 'heading',
-        content: headingTitle,
-        url: `${url}#${slugger.slug(headingTitle)}`,
-      });
+    let group = groups.get(item.file_id);
+    if (!group) {
+      group = [{ id: item.file_id, type: 'page', content: metadata.title || 'Untitled', url }];
+      groups.set(item.file_id, group);
     }
 
-    return chunkResults;
-  });
+    // the heading a chunk starts with
+    const heading =
+      item.type === 'text' && item.text?.trimStart().startsWith('#') && 'chunk_headings' in metadata
+        ? metadata.chunk_headings?.[0]?.text
+        : undefined;
+    if (!heading) continue;
+
+    const id = headingIdRegex.exec(heading);
+    const content = id ? heading.slice(0, id.index) : heading;
+    group.push({
+      id: `${item.file_id}-${item.chunk_index}`,
+      type: 'heading',
+      content,
+      url: `${url}#${id?.groups?.slug ?? slug(content)}`,
+    });
+  }
+
+  return [...groups.values()].flat();
 }
 
 export function createMixedbreadSearchAPI(options: MixedbreadSearchOptions): SearchAPI {

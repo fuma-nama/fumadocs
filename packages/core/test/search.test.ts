@@ -1,11 +1,13 @@
 import { createI18nSearchAPI, createSearchAPI, type ExportedData } from '@/search/server';
-import { expect, test } from 'vitest';
+import { expect, test, vi } from 'vitest';
 import type { Meilisearch, SearchParams } from 'meilisearch';
 import { structure } from '@/mdx-plugins';
 import { buildDocuments } from '@/search/server/build-doc';
 import { loader } from '@/source';
 import { sync, toDocuments } from '@/search/meilisearch';
 import { meilisearchClient } from '@/search/client/meilisearch';
+import type Mixedbread from '@mixedbread/sdk';
+import { createMixedbreadSearchAPI } from '@/search/mixedbread';
 
 test('Search API', async () => {
   const api = createSearchAPI('simple', {
@@ -463,4 +465,63 @@ test('Meilisearch: search client', async () => {
       },
     ]
   `);
+});
+
+test('Mixedbread: chunks grouped by page, linking to headings', async () => {
+  const chunk = (file_id: string, chunk_index: number, text: string, heading?: string) => ({
+    type: 'text',
+    file_id,
+    chunk_index,
+    text,
+    generated_metadata: {
+      title: `Page ${file_id}`,
+      url: `/${file_id}`,
+      chunk_headings: heading ? [{ level: 2, text: heading }] : [],
+    },
+  });
+  const search = vi.fn(async () => ({
+    data: [
+      chunk('a', 1, '## Setup `client`', 'Setup client'),
+      chunk('b', 0, '---\ntitle: Page b\n---\n\n## Usage', 'Usage'),
+      chunk('a', 2, '## Options [#custom-id]', 'Options [#custom-id]'),
+    ],
+  }));
+  const api = createMixedbreadSearchAPI({
+    client: { stores: { search } } as unknown as Mixedbread,
+    storeIdentifier: 'docs',
+  });
+
+  expect(await api.search('setup', { tag: ['ui'] })).toMatchInlineSnapshot(`
+    [
+      {
+        "content": "Page a",
+        "id": "a",
+        "type": "page",
+        "url": "/a",
+      },
+      {
+        "content": "Setup client",
+        "id": "a-1",
+        "type": "heading",
+        "url": "/a#setup-client",
+      },
+      {
+        "content": "Options",
+        "id": "a-2",
+        "type": "heading",
+        "url": "/a#custom-id",
+      },
+      {
+        "content": "Page b",
+        "id": "b",
+        "type": "page",
+        "url": "/b",
+      },
+    ]
+  `);
+  expect(search).toHaveBeenCalledWith(
+    expect.objectContaining({
+      filters: { key: 'generated_metadata.tag', operator: 'in', value: ['ui'] },
+    }),
+  );
 });

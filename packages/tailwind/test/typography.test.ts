@@ -23,7 +23,7 @@ describe('typography', () => {
 
     expect(css).toContain('--tw-prose-size: 1;');
     expect(css).toContain('font-size: calc(1rem * var(--tw-prose-size));');
-    expect(css).toContain('line-height: calc(1.75rem * var(--tw-prose-size));');
+    expect(css).toContain('line-height: var(--tw-leading, calc(1.75rem * var(--tw-prose-size)));');
     expect(css).toContain('font-size: calc(var(--text-3xl) * var(--tw-prose-size));');
     expect(css).toContain('padding: calc(3px * var(--tw-prose-size));');
     expect(css).toContain('padding: calc(var(--spacing) * 2.5 * var(--tw-prose-size));');
@@ -45,6 +45,15 @@ describe('typography', () => {
     expect(smallCss).not.toContain('font-weight: 700;');
     expect(smallCss).not.toContain('font-weight: 800;');
     expect(smallCss).not.toContain('font-weight: 900;');
+  });
+
+  it('removes the outer margins of blockquote content', async () => {
+    const css = await build(['prose']);
+
+    // after the margins of `p`, with the same specificity
+    expect(css.indexOf(':where(p)')).toBeLessThan(css.indexOf('blockquote > :first-child'));
+    expect(css).toMatch(/blockquote > :first-child[^{]*\{\s*margin-top: 0;/);
+    expect(css).toMatch(/blockquote > :last-child[^{]*\{\s*margin-bottom: 0;/);
   });
 
   it('uses the configured class name for the small modifier', async () => {

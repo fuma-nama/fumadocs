@@ -145,7 +145,8 @@ export const DEFAULT: Config = {
       color: 'var(--tw-prose-body)',
       maxWidth: 'none',
       fontSize: scaledRem(16),
-      lineHeight: scaledRem(28),
+      // set by `leading-*` utilities, which `text-*` utilities read too
+      lineHeight: `var(--tw-leading, ${scaledRem(28)})`,
 
       '[class~="lead"]': {
         fontSize: em(20, 16),
@@ -453,6 +454,12 @@ export const DEFAULT: Config = {
         marginTop: '0',
       },
       '> :last-child': {
+        marginBottom: '0',
+      },
+      'blockquote > :first-child': {
+        marginTop: '0',
+      },
+      'blockquote > :last-child': {
         marginBottom: '0',
       },
     },

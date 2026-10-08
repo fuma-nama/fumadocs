@@ -93,8 +93,6 @@ const TagsListContext = createContext<{
   allowClear: boolean;
 } | null>(null);
 
-const PreContext = createContext(false);
-
 const mdComponents = {
   // from the deprecated `highlightMarkdown()` of custom search clients
   mark(props: ComponentProps<'mark'>) {
@@ -103,27 +101,6 @@ const mdComponents = {
   a: 'span',
   p(props: ComponentProps<'p'>) {
     return <p {...props} className="min-w-0" />;
-  },
-  strong(props: ComponentProps<'strong'>) {
-    return <strong {...props} className="text-fd-accent-foreground font-medium" />;
-  },
-  code(props: ComponentProps<'pre'>) {
-    // eslint-disable-next-line react-hooks/rules-of-hooks -- this is a component
-    const inPre = use(PreContext);
-    if (inPre)
-      return (
-        <code
-          {...props}
-          className="mask-[linear-gradient(to_bottom,white,white_30px,transparent_80px)]"
-        />
-      );
-
-    return (
-      <code
-        {...props}
-        className="border rounded-md px-px bg-fd-secondary text-fd-secondary-foreground"
-      />
-    );
   },
   custom({
     tagName,
@@ -134,7 +111,7 @@ const mdComponents = {
       <span className="inline-flex max-w-full items-center border p-0.5 rounded-md bg-fd-card text-fd-card-foreground divide-x divide-fd-border">
         <code
           data-highlight-ignore=""
-          className="rounded-sm px-0.5 me-1 bg-fd-primary font-medium text-xs text-fd-primary-foreground border-none"
+          className="not-prose rounded-sm px-0.5 me-1 bg-fd-primary font-medium text-xs text-fd-primary-foreground border-none"
         >
           {tagName}
         </code>
@@ -145,7 +122,7 @@ const mdComponents = {
             <code
               key={k}
               data-highlight-ignore=""
-              className="truncate text-xs text-fd-muted-foreground px-1"
+              className="not-prose truncate text-xs text-fd-muted-foreground px-1"
             >
               <span className="text-fd-card-foreground">{k}: </span>
               {v}
@@ -161,12 +138,10 @@ const mdComponents = {
       <pre
         {...props}
         className={cn(
-          'flex flex-col border rounded-md my-0.5 p-2 bg-fd-secondary text-fd-secondary-foreground max-h-20 overflow-hidden',
+          'not-prose flex flex-col border rounded-md my-0.5 p-2 bg-fd-secondary text-fd-secondary-foreground max-h-20 overflow-hidden *:mask-[linear-gradient(to_bottom,white,white_30px,transparent_80px)]',
           props.className,
         )}
-      >
-        <PreContext value={true}>{props.children}</PreContext>
-      </pre>
+      />
     );
   },
 };
@@ -178,12 +153,7 @@ function Children({ children }: { children?: ReactNode }) {
 }
 
 function TableCell(props: ComponentProps<'div'>) {
-  return (
-    <div
-      {...props}
-      className="min-w-0 not-last:truncate last:line-clamp-2 [&_code]:border-0 [&_code]:bg-transparent [&_code]:px-0 [&_code]:text-inherit"
-    />
-  );
+  return <div {...props} className="min-w-0 not-last:truncate last:line-clamp-2" />;
 }
 
 // tables of cards render their cells only, the grid of `<SearchDialogListTable />` lays them out
@@ -589,11 +559,11 @@ export function SearchDialogListItem({
         <div
           ref={highlightRef}
           className={cn(
-            'min-w-0',
+            'prose prose-sm leading-5 min-w-0',
             item.type === 'text' && 'ps-4',
             item.type === 'heading' && 'ps-8',
             item.type === 'page' || item.type === 'heading'
-              ? 'font-medium'
+              ? 'font-medium text-inherit'
               : 'text-fd-popover-foreground/80',
           )}
         >
