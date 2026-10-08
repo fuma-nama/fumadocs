@@ -1,4 +1,4 @@
-import type { Processor, Transformer } from 'unified';
+import type { Transformer } from 'unified';
 import type { Root, RootContent } from 'mdast';
 import { visit } from 'unist-util-visit';
 import { valueToEstree } from 'estree-util-value-to-estree';
@@ -43,15 +43,12 @@ export interface PostprocessOptions {
  * - collect references
  * - write frontmatter (auto-title & description)
  */
-export function remarkPostprocess(
-  this: Processor,
-  {
-    includeProcessedMarkdown = false,
-    includeMDAST = false,
-    extractLinkReferences = false,
-    valueToExport = [],
-  }: PostprocessOptions,
-): Transformer<Root, Root> {
+export function remarkPostprocess({
+  includeProcessedMarkdown = false,
+  includeMDAST = false,
+  extractLinkReferences = false,
+  valueToExport = [],
+}: PostprocessOptions): Transformer<Root, Root> {
   return (tree, file) => {
     const frontmatter = (file.data.frontmatter ??= {});
     if (!frontmatter.title) {
@@ -86,8 +83,7 @@ export function remarkPostprocess(
     }
 
     if (includeProcessedMarkdown) {
-      const llms = remarkLLMs.call(
-        this,
+      const llms = remarkLLMs(
         typeof includeProcessedMarkdown === 'object' ? includeProcessedMarkdown : undefined,
       );
       llms(tree, file, () => undefined);

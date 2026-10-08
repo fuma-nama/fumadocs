@@ -2,6 +2,7 @@
 import type { Transformer } from 'unified';
 import type { Root, RootContent } from 'mdast';
 import { visit } from 'unist-util-visit';
+import { replaceSource } from 'fumadocs-core/mdx-plugins/stringifier';
 
 export function remarkShow(options?: {
   variables?: Record<string, unknown>;
@@ -31,6 +32,8 @@ export function remarkShow(options?: {
         tasks.push(
           (async () => {
             const value = typeof callback === 'function' ? await callback(file) : callback;
+            // in Markdown output, the content without the element
+            replaceSource(file, node, value === true ? (s) => s.inner(node) : '');
 
             Object.assign(node, {
               type: 'mdxJsxFlowElement',

@@ -53,7 +53,6 @@ export function remarkFeedbackBlock({
         type: 'mdxJsxFlowElement',
         name: tagName,
         attributes,
-        data: { _stringify: 'children-only' },
         children: [],
       });
     }

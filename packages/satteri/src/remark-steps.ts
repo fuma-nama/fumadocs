@@ -37,16 +37,15 @@ export function remarkSteps({ steps = 'fd-steps', step = 'fd-step' }: RemarkStep
     } as MdastNode;
   }
 
-  // Returns a new heading node with the step prefix/tag stripped, or `false`
-  // when the heading is not a step
-  function handleHeadingStep(node: Heading): Heading | false {
+  // Strips the step prefix/tag from a heading in place, so it keeps its position.
+  // Returns `false` when the heading is not a step
+  function handleHeadingStep(node: Heading, ctx: MdastVisitorContext): boolean {
     const head = node.children[0];
     if (head?.type === 'text') {
       const match = StepRegex.exec(head.value);
       if (match) {
-        const newChildren = [...node.children];
-        newChildren[0] = { ...head, value: match[2]! };
-        return { ...node, children: newChildren };
+        ctx.setProperty(head, 'value', match[2]!);
+        return true;
       }
     }
 
@@ -54,9 +53,8 @@ export function remarkSteps({ steps = 'fd-steps', step = 'fd-step' }: RemarkStep
     if (tail?.type === 'text') {
       const stepValue = handleTag(tail.value, StepTag);
       if (stepValue !== false) {
-        const newChildren = [...node.children];
-        newChildren[newChildren.length - 1] = { ...tail, value: stepValue };
-        return { ...node, children: newChildren };
+        ctx.setProperty(tail, 'value', stepValue);
+        return true;
       }
     }
 
@@ -98,23 +96,15 @@ export function remarkSteps({ steps = 'fd-steps', step = 'fd-step' }: RemarkStep
         }
       }
 
-      const stepped = handleHeadingStep(node);
-      if (!stepped) {
+      if (!handleHeadingStep(node, ctx)) {
         onEnd();
         continue;
       }
 
-      const steppedData = (stepped.data ?? {}) as { hProperties?: Record<string, unknown> };
-      output[i] = {
-        ...stepped,
-        data: {
-          ...steppedData,
-          hProperties: {
-            ...steppedData.hProperties,
-            'data-fd-step': currentStep++,
-          },
-        },
-      } as MdastNode;
+      ctx.setProperty(node, 'data', {
+        ...data,
+        hProperties: { ...data.hProperties, 'data-fd-step': currentStep++ },
+      });
       if (startIdx === -1) startIdx = i;
     }
 

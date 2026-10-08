@@ -11,13 +11,13 @@ import { highlightHast, type HighlightHastOptions } from 'fumadocs-core/highligh
 import {
   createGenerator,
   type DocEntry,
-  type GeneratedDoc,
   type RawTag,
   type RemarkAutoTypeTableOptions,
   type TypeTableProps,
+  typeTableToMarkdown,
   typeTableToStructuredData,
 } from 'fumadocs-typescript';
-import { formatTable, replaceSource } from './stringifier';
+import { replaceSource } from './stringifier';
 import { jsxToSource } from './utils';
 
 export type { RemarkAutoTypeTableOptions } from 'fumadocs-typescript';
@@ -109,27 +109,6 @@ async function buildTypeProp(
   }
   prop += '}';
   return prop;
-}
-
-/** the generated type table as a Markdown table, for source-based Markdown output */
-function docToMarkdown(doc: GeneratedDoc): string {
-  const rows = [['Prop', 'Type', 'Description']];
-  for (const entry of doc.entries) {
-    const tags = parseTags(entry.tags);
-    let description = entry.description.replace(/{@link (?<link>[^}]*)}/g, '$1').trim();
-    if (tags.default) description += `${description ? ' ' : ''}Default: \`${tags.default}\``;
-    if (entry.deprecated) description = `**Deprecated.** ${description}`;
-
-    rows.push([
-      `\`${entry.name}${entry.required ? '' : '?'}\``,
-      `\`${entry.simplifiedType}\``,
-      description,
-    ]);
-  }
-
-  let out = `### ${doc.name}\n\n`;
-  if (doc.description) out += `${doc.description.trim()}\n\n`;
-  return out + formatTable(rows);
 }
 
 export function remarkAutoTypeTable(config: RemarkAutoTypeTableOptions = {}) {
@@ -242,10 +221,8 @@ export function remarkAutoTypeTable(config: RemarkAutoTypeTableOptions = {}) {
 
       replaceSource(ctx, node, () => {
         let markdown = '';
-        for (const doc of output) {
-          if (markdown) markdown += '\n';
-          markdown += docToMarkdown(doc);
-        }
+        for (const doc of output)
+          markdown += `${markdown ? '\n\n' : ''}${typeTableToMarkdown(doc)}`;
         return markdown;
       });
 

@@ -66,9 +66,6 @@ describe('remark-auto-type-table', () => {
   it('records a table row for each prop', async () => {
     const options = await applySatteriPreset({
       rehypeCodeOptions: false,
-      remarkStructureOptions: {
-        stringify: { filterElement: (node) => node.name === 'TypeTable' },
-      },
       mdastPlugins: [
         remarkAutoTypeTable({
           renderType: (type) => ({ type: 'text', value: type }),

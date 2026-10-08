@@ -1,6 +1,8 @@
 import type { Blockquote, PhrasingContent, Root } from 'mdast';
 import type { Transformer } from 'unified';
 import { visit } from 'unist-util-visit';
+import type { VFile } from 'vfile';
+import { replaceSource } from 'fumadocs-core/mdx-plugins/stringifier';
 import { separate } from '@/utils/mdast-separate';
 import { createCallout } from '@/utils/mdast-create';
 import { resolveInternalHref, VaultResolver } from '@/build-resolver';
@@ -13,7 +15,7 @@ export interface RemarkConvertOptions {
   resolver: VaultResolver;
 }
 
-function resolveCallout(node: Blockquote) {
+function resolveCallout(node: Blockquote, file: VFile) {
   const head = node.children[0];
   if (!head || head.type !== 'paragraph') return;
   const textNode = head.children[0];
@@ -23,6 +25,7 @@ function resolveCallout(node: Blockquote) {
   if (!match) return;
 
   textNode.value = textNode.value.slice(match[0].length).trimStart();
+  replaceSource(file, head, (s) => s.stringify(head).replace(RegexCalloutHead, '').trimStart());
 
   const [title, rest] = separate(/\r?\n/, head.children) ?? [head.children];
   const body = node.children.slice(1);
@@ -39,6 +42,8 @@ function resolveCallout(node: Blockquote) {
       {
         type: 'paragraph',
         children: title as PhrasingContent[],
+        // the title stands for the head in records
+        position: head.position,
       },
     ],
     body,
@@ -52,7 +57,7 @@ export function remarkConvert({ resolver }: RemarkConvertOptions): Transformer<R
 
     visit(tree, ['blockquote', 'link', 'image'], (node) => {
       if (node.type === 'blockquote') {
-        const callout = resolveCallout(node);
+        const callout = resolveCallout(node, file);
         if (callout) replace(node, callout);
 
         return;

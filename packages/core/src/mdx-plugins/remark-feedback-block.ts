@@ -90,9 +90,6 @@ export function remarkFeedbackBlock({
             value: id,
           },
         ],
-        data: {
-          _stringify: 'children-only',
-        },
         children: [node as BlockContent],
       };
       if (generateBody)

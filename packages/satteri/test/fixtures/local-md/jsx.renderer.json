@@ -1,6 +1,15 @@
 {
   "structuredData": {
-    "contents": [],
+    "contents": [
+      {
+        "heading": "jsx-expressions",
+        "content": "A"
+      },
+      {
+        "heading": "jsx-expressions",
+        "content": "B"
+      }
+    ],
     "headings": [
       {
         "id": "jsx-expressions",

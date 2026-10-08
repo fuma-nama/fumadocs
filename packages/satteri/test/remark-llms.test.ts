@@ -7,6 +7,8 @@ import { compileMdx } from '@/compile';
 import { applySatteriPreset } from '@/preset';
 import { remarkInclude } from '@/remark-include';
 import { remarkLlms } from '@/remark-llms';
+import { type Replacement, replaceSource, type Stringifier } from '@/stringifier';
+import { defineMdastPlugin, type MdastPluginInput } from 'satteri';
 
 test('remark-llms handles many root blocks', async () => {
   const options = await applySatteriPreset({
@@ -79,6 +81,127 @@ test('remark-llms splices included content', async () => {
   expect(markdown).toContain('After.');
 });
 
+test('included content goes through the plugins', async () => {
+  const options = await applySatteriPreset({ rehypeCodeOptions: false })('bundler');
+  // includes first, as in fumadocs-mdx
+  options.mdastPlugins = [remarkInclude(), ...(options.mdastPlugins ?? []), remarkLlms()];
+
+  const result = await compileMdx({
+    source: '<include>./content.mdx</include>\n',
+    filePath: path.resolve(import.meta.dirname, './fixtures/remark-include/entry.mdx'),
+    options,
+  });
+
+  expect(result.data?.markdown).toBe(
+    '## Content Heading [#content-heading]\n\nSome **bold-marker** content.\n',
+  );
+  expect(result.data?.structuredData).toEqual({
+    headings: [{ id: 'content-heading', content: 'Content Heading' }],
+    contents: [{ heading: 'content-heading', content: 'Some **bold-marker** content.' }],
+  });
+});
+
+test('remark-llms function output keeps replaced content in elements', async () => {
+  const options = await applySatteriPreset({
+    rehypeCodeOptions: false,
+    mdastPlugins: [remarkInclude(), remarkLlms({ output: 'function' })],
+  })('bundler');
+
+  const result = await compileMdx({
+    source:
+      '<Callout>\n  <include>./content.mdx</include>\n</Callout>\n\n<Step>\n\n```npm\nnpm i fumadocs-core\n```\n\n</Step>\n',
+    filePath: path.resolve(import.meta.dirname, './fixtures/remark-include/entry.mdx'),
+    options,
+  });
+
+  expect(result.code).toContain(
+    'children: "\\n## Content Heading\\n\\nSome **bold-marker** content.\\n"',
+  );
+  // the code block replaced by `remarkNpm`
+  expect(result.code).toContain('children: "\\n```npm\\nnpm i fumadocs-core\\n```\\n"');
+});
+
+test('remark-llms composes nested edits', async () => {
+  type Node = Parameters<Stringifier['inner']>[0] & { name?: string | null };
+  const replace = (name: string, text: (node: Node) => Replacement) =>
+    defineMdastPlugin({
+      name: `replace-${name}`,
+      options: { position: true },
+      mdxJsxFlowElement(node, ctx) {
+        if (node.name === name) replaceSource(ctx, node, text(node));
+      },
+    });
+  const stringify = async (plugins: MdastPluginInput[]) => {
+    const result = await compileMdx({
+      source: '<Outer>\n  <Item />\n</Outer>\n\n<Item />\n',
+      filePath: '/doc.mdx',
+      options: { mdastPlugins: [...plugins, remarkLlms()] },
+    });
+    return result.data?.markdown;
+  };
+
+  // a string covers the edits inside made before it, and blocks those made after
+  const outer = replace('Outer', () => 'Outer.');
+  const item = replace('Item', () => 'Item.');
+  expect(await stringify([outer, item])).toBe('Outer.\n\nItem.\n');
+  expect(await stringify([item, outer])).toBe('Outer.\n\nItem.\n');
+
+  // a function applies the edits inside, the last edit of a node wins
+  const wrap = replace('Outer', (node) => (s) => `[${s.inner(node)}]`);
+  expect(
+    await stringify([replace('Item', () => 'Before.'), wrap, replace('Item', () => 'After.')]),
+  ).toBe('[After.]\n\nAfter.\n');
+});
+
+test('remark-llms keeps replacements inside their containers', async () => {
+  const options = await applySatteriPreset({
+    rehypeCodeOptions: false,
+    mdastPlugins: [remarkInclude(), remarkLlms()],
+  })('bundler');
+
+  const result = await compileMdx({
+    source: [
+      'Setext',
+      '======',
+      '',
+      '- Item:',
+      '',
+      '  <include>./content.mdx</include>',
+      '',
+      '> <include>./code.ts</include>',
+      '',
+    ].join('\n'),
+    filePath: path.resolve(import.meta.dirname, './fixtures/remark-include/entry.mdx'),
+    options,
+  });
+
+  expect(result.data?.markdown).toMatchInlineSnapshot(`
+    "Setext [#setext]
+    ======
+
+    - Item:
+
+      ## Content Heading
+
+      Some **bold-marker** content.
+
+    > \`\`\`ts
+    > export function main() {
+    >   console.log('main-marker');
+    > }
+    >
+    > // #region setup
+    > export function setup() {
+    >   console.log('region-marker');
+    > }
+    > // #endregion
+    >
+    > export const other = 1;
+    > \`\`\`
+    "
+  `);
+});
+
 test('remark-llms shows generated content of replaced nodes', async () => {
   const { remarkAutoTypeTable } = await import('@/remark-auto-type-table');
   const options = await applySatteriPreset({
@@ -103,10 +226,10 @@ test('remark-llms shows generated content of replaced nodes', async () => {
 
     ### TestProps
 
-    | Prop      | Type     | Description                          |
-    | --------- | -------- | ------------------------------------ |
-    | \`name?\`   | \`string\` | The visible name. Default: \`"hello"\` |
-    | \`enabled\` | \`union\`  | Whether it is enabled                |
+    | Prop | Type | Description |
+    | --- | --- | --- |
+    | \`name?\` | \`string\` | The visible name. Default: \`"hello"\` |
+    | \`enabled\` | \`union\` | Whether it is enabled |
     "
   `);
 });

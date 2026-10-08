@@ -17,7 +17,7 @@ import type { Root } from 'hast';
 import remarkRehype from 'remark-rehype';
 import { unified, type PluggableList } from 'unified';
 import { VFile } from 'vfile';
-import { buildPages, type BuiltPage } from './build';
+import { buildPages, mdx, type BuiltPage } from './build';
 import type { ModuleInterface } from './generated';
 import { pythonPlugin } from './plugin';
 import { createRenderer, type PythonRenderer } from './renderer';
@@ -85,8 +85,9 @@ export function createPython(config: PythonConfig): PythonSource {
     page: BuiltPage,
     href: (target: BuiltPage) => string,
   ): Promise<PythonRenderer> {
-    const file = new VFile({ path: page.path });
-    const tree = (await processor.run(page.build(href), file)) as Root;
+    // compile the MDX the CLI would write, so Markdown output and search records have a source
+    const file = new VFile({ path: page.path, value: mdx.stringify(page.build(href)) });
+    const tree = (await processor.run(mdx.parse(file), file)) as Root;
 
     return createRenderer({
       tree,

@@ -1,8 +1,12 @@
-import type { RootContent } from 'mdast';
+import type { Nodes, RootContent } from 'mdast';
 import { valueToEstree } from 'estree-util-value-to-estree';
 import type { Expression } from 'estree-jsx';
-import type { MdxjsEsm } from 'mdast-util-mdx';
+import type { MdxJsxFlowElement, MdxJsxTextElement, MdxjsEsm } from 'mdast-util-mdx';
 import type Hast from 'hast';
+
+export function isJsxElement(node: Nodes): node is MdxJsxFlowElement | MdxJsxTextElement {
+  return node.type === 'mdxJsxFlowElement' || node.type === 'mdxJsxTextElement';
+}
 
 export function flattenNode(node: RootContent): string {
   if ('children' in node) return node.children.map(flattenNode).join('');

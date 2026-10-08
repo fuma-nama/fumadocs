@@ -4,8 +4,7 @@ import type { Transformer } from 'unified';
 import { visit } from 'unist-util-visit';
 import type { TOCItemType } from '@/toc';
 import { flattenNode } from '@/mdx-plugins/utils';
-
-const regex = /\s*\[#(?<slug>[^]+?)]\s*$/;
+import { headingIdRegex } from '@/mdx-plugins/heading-id';
 
 export interface RemarkHeadingOptions {
   slug?: (root: Root, heading: Heading, text: string) => string;
@@ -60,7 +59,7 @@ export function remarkHeading({
 
       const lastNode = heading.children.at(-1);
       if (lastNode?.type === 'text' && customId) {
-        const match = regex.exec(lastNode.value);
+        const match = headingIdRegex.exec(lastNode.value);
 
         if (match?.[1]) {
           props.id = match[1];

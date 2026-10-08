@@ -4,6 +4,7 @@ import type { MdastPluginDefinition, MdastVisitorContext } from 'satteri';
 import type { Image } from 'mdast';
 import type { MdxJsxFlowElement } from 'satteri';
 import type { ExtraPluginHooks } from './compile';
+import { replaceSource } from './stringifier';
 
 const VALID_BLUR_EXT = ['.jpeg', '.png', '.webp', '.avif', '.jpg'];
 const EXTERNAL_URL_REGEX = /^https?:\/\//;
@@ -59,6 +60,7 @@ export function remarkImage({
         if (onError === 'ignore' || node.url.endsWith('.svg')) {
           return;
         } else if (onError === 'hide') {
+          replaceSource(ctx, node, '');
           ctx.removeNode(node);
         } else if (typeof onError === 'function') {
           onError(error as Error);
@@ -107,6 +109,8 @@ async function updateImage(
           value: { type: 'mdxJsxAttributeValueExpression', value: variableName },
         },
       ],
+      // Sätteri drops the position of inserted nodes, stringifiers read the image's from here
+      data: { position: node.position } as MdxJsxFlowElement['data'],
     };
 
     if (node.title) {

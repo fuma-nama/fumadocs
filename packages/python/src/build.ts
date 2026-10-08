@@ -3,6 +3,7 @@ import type { BlockContent, Code, DefinitionContent, Heading, Root } from 'mdast
 import type { MdxJsxAttribute, MdxJsxFlowElement } from 'mdast-util-mdx';
 import { remarkGfm } from 'fumadocs-core/mdx-plugins/remark-gfm';
 import { remark } from 'remark';
+import remarkMdx from 'remark-mdx';
 import type {
   AttributeInterface,
   ClassInterface,
@@ -30,6 +31,9 @@ const parser = remark()
     // docstrings are not HTML, keep `<` as text
     (this.data().micromarkExtensions ??= []).push({ disable: { null: ['htmlFlow', 'htmlText'] } });
   });
+
+/** built pages as MDX, the source they compile from */
+export const mdx = remark().use(remarkMdx).use(remarkGfm);
 
 /** One page per module and class, a class page comes before its module. */
 export function buildPages(root: ModuleInterface, groupBy: PythonGroupBy = 'module'): BuiltPage[] {

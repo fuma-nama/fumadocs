@@ -1,6 +1,6 @@
 import { type Processor, type Transformer, unified } from 'unified';
 import { visit } from 'unist-util-visit';
-import type { Code, Node, Root, RootContent } from 'mdast';
+import type { Code, Node, Nodes, Root, RootContent } from 'mdast';
 import * as path from 'node:path';
 import * as fs from 'node:fs/promises';
 import { frontmatter } from 'fumadocs-core/content/md/frontmatter';
@@ -8,6 +8,7 @@ import type { MdxJsxFlowElement, MdxJsxTextElement } from 'mdast-util-mdx';
 import { remarkHeading } from 'fumadocs-core/mdx-plugins';
 import { VFile } from 'vfile';
 import type { Directives } from 'mdast-util-directive';
+import { embedSource, replaceSource } from 'fumadocs-core/mdx-plugins/stringifier';
 import { remarkMarkAndUnravel } from '@/loaders/mdx/remark-unravel';
 import { flattenNode } from './mdast-utils';
 
@@ -195,10 +196,12 @@ export function remarkInclude(this: Processor): Transformer<Root, Root> {
   const TagName = 'include';
 
   const embedContent = async (
+    target: Nodes,
     targetPath: string,
     heading: string | undefined,
     params: Params,
     parent: VFile,
+    root: VFile,
   ) => {
     const { _getProcessor = () => this, _compiler } = parent.data;
     let content: string;
@@ -220,6 +223,14 @@ export function remarkInclude(this: Processor): Transformer<Root, Root> {
       if (heading) {
         value = extractCodeRegion(content, heading.trim());
       }
+      let fence = '```';
+      while (value.includes(fence)) fence += '`';
+      replaceSource(
+        root,
+        target,
+        `${fence}${lang}${params.meta ? ` ${params.meta}` : ''}\n${value.replace(/\r?\n$/, '')}\n${fence}`,
+      );
+
       return {
         type: 'code',
         lang,
@@ -255,11 +266,12 @@ export function remarkInclude(this: Processor): Transformer<Root, Root> {
       mdast = await baseProcessor.run(mdast);
     }
 
-    await update(mdast, targetFile);
+    embedSource(root, target, parsed.content, mdast.children);
+    await update(mdast, targetFile, root);
     return mdast;
   };
 
-  async function update(tree: Root, file: VFile) {
+  async function update(tree: Root, file: VFile, root: VFile) {
     const queue: Promise<void>[] = [];
 
     visit(tree, ElementLikeTypes, (_node, _, parent) => {
@@ -276,9 +288,13 @@ export function remarkInclude(this: Processor): Transformer<Root, Root> {
         relativePath,
       );
 
+      const target = parent && parent.type === 'paragraph' ? parent : node;
       queue.push(
-        embedContent(targetPath, section, attributes, file).then((replace) => {
-          Object.assign(parent && parent.type === 'paragraph' ? parent : node, replace);
+        embedContent(target, targetPath, section, attributes, file, root).then((replace) => {
+          // the node keeps its position for the stringifier
+          const { position } = target;
+          for (const key in target) delete target[key as keyof Nodes];
+          Object.assign(target, replace, { position });
         }),
       );
 
@@ -289,6 +305,6 @@ export function remarkInclude(this: Processor): Transformer<Root, Root> {
   }
 
   return async (tree, file) => {
-    await update(tree, file);
+    await update(tree, file, file);
   };
 }

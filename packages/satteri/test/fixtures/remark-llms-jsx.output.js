@@ -3,11 +3,11 @@ export const structuredData = {
     "contents": [
         {
             "heading": "hello-world",
-            "content": "Content with inline bold element."
+            "content": "Content with inline **bold** element."
         },
         {
             "heading": "hello-world",
-            "content": "Some content here."
+            "content": "Some *content* here."
         },
         {
             "heading": "hello-world",

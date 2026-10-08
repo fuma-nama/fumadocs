@@ -20,6 +20,8 @@ interface Context {
   node: Code;
   path: string;
   cwd: string;
+  /** record the Markdown of generated content with `replaceSource()` from `fumadocs-core/mdx-plugins/stringifier` */
+  file: VFile;
 }
 
 export interface RemarkDocGenOptions {
@@ -47,6 +49,7 @@ export function remarkDocGen({ generators = [] }: RemarkDocGenOptions): Transfor
           cwd: file.cwd,
           path: file.path,
           node: code,
+          file,
         });
         const index = parent.children.findIndex((c) => c === code);
 

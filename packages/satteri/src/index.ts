@@ -1,6 +1,7 @@
 import type { StructuredData } from 'fumadocs-core/mdx-plugins/remark-structure';
 import type { TOCItemType } from 'fumadocs-core/toc';
 import type { RehypeTocItemType } from './rehype-toc';
+import type { Features } from 'satteri';
 
 /** host compiler hooks (e.g. a bundler loader), used for watch-mode dependency tracking */
 export interface CompilerHooks {
@@ -22,6 +23,8 @@ declare module 'satteri' {
 
     _cwd?: string;
     _compiler?: CompilerHooks;
+    /** the parse features of the document, for content parsed by plugins */
+    _features?: Features;
     _valueToExport?: string[];
     frontmatter?: Record<string, unknown>;
   }

@@ -67,7 +67,7 @@
     "@types/estree": "*",
     "@types/hast": "*",
     "@types/mdast": "*",
-    "fumadocs-core": "^15.7.2 || ^16.0.0",
+    "fumadocs-core": "^16.17.0",
     "mdast-util-mdx": "*"
   },
   "peerDependenciesMeta": {

@@ -2,6 +2,7 @@ import { visit } from 'unist-util-visit';
 import type { Paragraph, Parent, PhrasingContent, Root, RootContent } from 'mdast';
 import type { Transformer } from 'unified';
 import type { MdxJsxFlowElement } from 'mdast-util-mdx';
+import { replaceSource } from 'fumadocs-core/mdx-plugins/stringifier';
 import { getFileHref, getHeadingHash } from '@/utils/get-refs';
 import { ParsedFile } from '@/build-storage';
 import { VaultResolver } from '@/build-resolver';
@@ -33,6 +34,9 @@ export function remarkWikilinks({ resolver }: RemarkWikilinksOptions): Transform
 
       function traverse(cur: RootContent) {
         if (cur.type === 'text') {
+          if (!cur.value.includes('[[')) return;
+          replaceSource(file, cur, (s) => toText(s.stringify(cur)));
+
           const output = resolveParagraphText(cur.value, sourceFile, resolver);
           const idx = parents[0].children.indexOf(cur);
           let insertIdx = idx;
@@ -69,6 +73,13 @@ export function remarkWikilinks({ resolver }: RemarkWikilinksOptions): Transform
       parent.children.splice(index, 1, ...replaceParagraph);
     });
   };
+}
+
+/** wikilinks as their text, embeds have none */
+function toText(markdown: string): string {
+  return markdown.replace(RegexWikilink, (link, content: string) =>
+    link.startsWith('!') ? '' : (RegexContent.exec(content)?.groups?.alias ?? content),
+  );
 }
 
 type ResolveParagraphTextResult =

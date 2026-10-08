@@ -295,6 +295,10 @@ function processTabValue(nodes: Code[]) {
  */
 function mdxToAst(processor: Processor, name: string): Root {
   const node = processor.parse(name) as Root;
+  // positions in the tab name, not the document
+  visit(node, (child) => {
+    delete child.position;
+  });
   node.children = node.children.flatMap((child) => {
     if (child.type === 'paragraph') return child.children;
 

@@ -9,6 +9,8 @@ import { remark } from 'remark';
 import { remarkTypeScriptToJavaScript } from '@/remark-ts2js';
 import { readFile } from 'node:fs/promises';
 import { remarkShow } from '@/remark-show';
+import { remarkLLMs } from 'fumadocs-core/mdx-plugins/remark-llms';
+import { VFile } from 'vfile';
 
 const cwd = path.dirname(fileURLToPath(import.meta.url));
 
@@ -115,4 +117,28 @@ test('Remark Show', async () => {
   await expect(result.toString()).toMatchFileSnapshot(
     path.resolve(cwd, './fixtures/remark-show.output.jsx'),
   );
+});
+
+test('Markdown output', async () => {
+  const docgen = new VFile({
+    cwd,
+    value: await readFile(path.resolve(cwd, './fixtures/file-gen.md')),
+  });
+  const processor = remark()
+    .use(remarkDocGen, { generators: [fileGenerator()] })
+    .use(remarkLLMs, { _data: true });
+  await processor.run(processor.parse(docgen), docgen);
+  await expect(docgen.data.markdown).toMatchFileSnapshot(
+    path.resolve(cwd, './fixtures/file-gen.output.llms.md'),
+  );
+
+  const show = new VFile(await readFile(path.resolve(cwd, './fixtures/remark-show.mdx')));
+  const mdx = createProcessor({
+    remarkPlugins: [
+      [remarkShow, { variables: { test: () => false } }],
+      [remarkLLMs, { _data: true }],
+    ],
+  });
+  await mdx.process(show);
+  expect(show.data.markdown).toBe('## Hello World\n\n```ts\nconsole.log("Goodbye")\n```\n');
 });

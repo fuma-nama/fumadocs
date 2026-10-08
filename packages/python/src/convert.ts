@@ -1,11 +1,8 @@
 import * as fs from 'node:fs/promises';
 import * as path from 'node:path';
-import { mdxToMarkdown } from 'mdast-util-mdx';
-import { remarkGfm } from 'fumadocs-core/mdx-plugins/remark-gfm';
-import { remark } from 'remark';
 import { getSlugs } from 'fumadocs-core/source';
 import type { ModuleInterface } from './generated';
-import { buildPages, type BuiltPage } from './build';
+import { buildPages, mdx, type BuiltPage } from './build';
 import type { PythonGroupBy } from './source';
 
 export interface ConvertOptions {
@@ -30,12 +27,6 @@ export interface OutputFile {
   content: string;
 }
 
-const stringifier = remark()
-  .use(remarkGfm)
-  .use(function () {
-    (this.data().toMarkdownExtensions ??= []).push(mdxToMarkdown());
-  });
-
 /** Convert a module into MDX files, one per module and class. */
 export function convert(mod: ModuleInterface, options: ConvertOptions = {}): OutputFile[] {
   const { baseUrl = '/' } = options;
@@ -45,7 +36,7 @@ export function convert(mod: ModuleInterface, options: ConvertOptions = {}): Out
   return buildPages(mod, options.groupBy).map((page) => ({
     path: page.path,
     title: page.title,
-    content: stringifier.stringify(page.build(href)),
+    content: mdx.stringify(page.build(href)),
   }));
 }
 
