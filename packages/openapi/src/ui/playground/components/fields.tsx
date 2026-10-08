@@ -1,8 +1,18 @@
 'use client';
-import { Fragment, type ReactNode, useId, useMemo, useState } from 'react';
+import { Fragment, type MouseEventHandler, type ReactNode, useId, useMemo, useState } from 'react';
 import { Popover } from '@base-ui/react/popover';
 import { Select as SelectPrimitive } from '@base-ui/react/select';
-import { Check, ChevronRight, ChevronsUpDown, Info, Plus, Trash2, Upload, X } from 'lucide-react';
+import {
+  Check,
+  ChevronRight,
+  ChevronsUpDown,
+  Copy,
+  Info,
+  Plus,
+  Trash2,
+  Upload,
+  X,
+} from 'lucide-react';
 import {
   type DataEngine,
   type FieldKey,
@@ -36,6 +46,7 @@ import {
 } from 'shared-api/components/select';
 import { useTranslations } from '@fuma-translate/react';
 import { buttonVariants } from 'fumadocs-ui/components/ui/button';
+import { useCopyButton } from 'fumadocs-ui/utils/use-copy-button';
 import { cn } from '@/utils/cn';
 import { Markdown } from '@/ui/components/markdown';
 
@@ -351,7 +362,7 @@ function SlotButton({
   children,
 }: {
   label: string;
-  onClick: () => void;
+  onClick: MouseEventHandler;
   children: ReactNode;
 }) {
   return (
@@ -683,14 +694,43 @@ export function SelectRow({
 }
 
 /** a row of read-only text */
-export function TextRow({ name, children }: { name: string; children: ReactNode }) {
+export function TextRow({
+  name,
+  description,
+  copyable = false,
+  children,
+}: {
+  name: string;
+  description?: string;
+  /** add a button copying the text */
+  copyable?: boolean;
+  children: string;
+}) {
   return (
-    <Row name={name} readOnly>
+    <Row
+      name={name}
+      readOnly
+      info={<FieldInfo name={name} field={{ type: 'string' }} description={description} />}
+    >
       <span className="flex min-w-0 flex-1 items-center px-3 text-fd-muted-foreground">
         <span className="truncate">{children}</span>
       </span>
-      <span className={slotClassName} />
+      <span className={slotClassName}>{copyable && <CopyButton text={children} />}</span>
     </Row>
+  );
+}
+
+function CopyButton({ text }: { text: string }) {
+  const t = useTranslations({ note: 'playground' });
+  const [isChecked, onCopy] = useCopyButton(() => navigator.clipboard.writeText(text));
+
+  return (
+    <SlotButton
+      label={isChecked ? t('Copied', { note: 'aria-label' }) : t('Copy', { note: 'aria-label' })}
+      onClick={onCopy}
+    >
+      {isChecked ? <Check /> : <Copy />}
+    </SlotButton>
   );
 }
 
@@ -704,14 +744,16 @@ export function LinkRow({
   onClick: () => void;
   children: ReactNode;
 }) {
-  const id = useId();
-
   return (
-    <Row name={name} htmlFor={id}>
-      <NavButton id={id} onClick={onClick}>
-        <span className="text-fd-muted-foreground">{children}</span>
-      </NavButton>
-    </Row>
+    <button
+      type="button"
+      onClick={onClick}
+      className={cn(rowButtonClassName, 'group/nav border-b last:border-b-0')}
+    >
+      <span className="min-w-0 flex-1 truncate text-start">{children}</span>
+      <span className={typeClassName}>{name}</span>
+      <ChevronRight className="size-3.5 transition-transform duration-200 group-hover/nav:translate-x-0.5 motion-reduce:transition-none" />
+    </button>
   );
 }
 

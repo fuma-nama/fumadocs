@@ -81,6 +81,6 @@ export async function AutoTypeTable({
 function toJsx(hast: Nodes) {
   return toJsxRuntime(hast, {
     ...JsxRuntime,
-    components: { ...defaultMdxComponents, img: undefined },
+    components: { ...defaultMdxComponents, img: 'img' },
   });
 }

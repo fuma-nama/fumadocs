@@ -99,6 +99,8 @@ const translations = {
   '1 item(playground)': '1 项',
   'Accepted(playground status info)': '已接受',
   'Add Item(playground)': '添加项目',
+  'Add this to the allowed redirect URIs of your OAuth application.(OAuth dialog)':
+    '将其添加到你的 OAuth 应用程序允许的重定向 URI 中。',
   'Add(playground)': '添加',
   'Authenticate using username and password.(OAuth dialog)': '使用用户名和密码进行验证。',
   'Authenticate with 3rd party services(OAuth dialog)': '通过第三方服务进行验证',
@@ -130,6 +132,8 @@ const translations = {
   'Conflict(playground status info)': '冲突',
   'Cookie Parameters(operation page)': 'Cookie 参数',
   'Cookies(playground)': 'Cookie',
+  'Copied(playground)(aria-label)': '已复制',
+  'Copy(playground)(aria-label)': '复制',
   'Created(playground status info)': '已创建',
   'Default(operation page)': '默认',
   'Deprecated(operation page)': '已弃用',

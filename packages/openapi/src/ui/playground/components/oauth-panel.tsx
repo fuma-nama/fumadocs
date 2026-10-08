@@ -9,6 +9,7 @@ import { type AuthField, type OAuthFlowType, usePlaygroundAuth } from '@/playgro
 import type { OAuthInput } from '@/playground/use-playground';
 import type { OAuth2SecurityScheme } from '@/types';
 import { Markdown } from '@/ui/components/markdown';
+import { useOpenAPI } from '@/utils/create-page';
 import { useServer } from '@/utils/use-server';
 import { cn } from '@/utils/cn';
 import { CheckRow, SelectRow, TextRow, ValueRow } from './fields';
@@ -31,6 +32,7 @@ export function OAuthPanel({
   onAuthorized: () => void;
 }) {
   const t = useTranslations({ note: 'OAuth dialog' });
+  const { oauthRedirectUrl } = useOpenAPI();
   const { resolveUrl } = useServer();
   const tokenInfo = usePlaygroundAuth().store[field.schemeId];
   const scheme = field.scheme as OAuth2SecurityScheme;
@@ -180,6 +182,15 @@ export function OAuthPanel({
         )}
         {flow && 'tokenUrl' in flow && flow.tokenUrl && (
           <TextRow name="token_url">{new URL(flow.tokenUrl, serverUrl).href}</TextRow>
+        )}
+        {redirects && (
+          <TextRow
+            name="redirect_uri"
+            description={t('Add this to the allowed redirect URIs of your OAuth application.')}
+            copyable
+          >
+            {new URL(oauthRedirectUrl ?? window.location.pathname, window.location.origin).href}
+          </TextRow>
         )}
         {Object.keys(scopeOptions).length > 0 && (
           <>
