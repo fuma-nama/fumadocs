@@ -47,7 +47,7 @@ You can consider different options for implementing the UI:
 
   const algolia = liteClient('id', 'key');
 
-  const { search, onSearchChange, isLoading, result } = useAlgoliaSearch({
+  const { search, onSearchChange, isLoading, data } = useAlgoliaSearch({
     indexName: 'document',
     client: algolia,
   });
@@ -73,7 +73,7 @@ And update your search client:
   ```ts
   import { useAlgoliaSearch } from 'fumadocs-core/search/client';
 
-  const { search, onSearchChange, isLoading, result } = useAlgoliaSearch({
+  const { search, onSearchChange, isLoading, data } = useAlgoliaSearch({
     tag: '<your tag value>',
     // ...
   });

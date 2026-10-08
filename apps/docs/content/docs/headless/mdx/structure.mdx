@@ -1,94 +1,110 @@
 ---
 title: Remark Structure
-description: Extract information from your documents, useful for implementing document search
+description: Extract search records from your documents.
 ---
+
+The `remarkStructure` plugin extracts the headings and contents of a document as records for [search](/docs/headless/search). Records keep the Markdown you wrote, see [Stringification](/docs/headless/mdx/stringification) for how it's generated.
+
+```mdx tab="Input"
+## Installation
+
+Run the [command](/docs/cli) below.
+
+<Callout>Restart the **server** after it.</Callout>
+
+| Option | Default |
+| ------ | ------- |
+| `dir`  | `docs`  |
+```
+
+```json tab="Output"
+{
+  "headings": [{ "id": "installation", "content": "Installation" }],
+  "contents": [
+    { "heading": "installation", "content": "Run the command below." },
+    { "heading": "installation", "content": "<Callout>Restart the **server** after it.</Callout>" },
+    {
+      "heading": "installation",
+      "content": "| Option | Default |\n| --- | --- |\n| `dir` | `docs` |",
+      "table": "table-0"
+    }
+  ]
+}
+```
 
 ## Usage
 
-Add it as a remark plugin.
-
-```ts tab="MDX Compiler"
-import { compile } from '@mdx-js/mdx';
-import { remarkStructure } from 'fumadocs-core/mdx-plugins';
-
-const vfile = await compile('...', {
-  remarkPlugins: [remarkStructure],
-});
-```
-
-```ts tab="Fumadocs MDX" title="source.config.ts"
+```ts title="source.config.ts" tab="Fumadocs MDX"
 import { defineConfig } from 'fumadocs-mdx/config';
 
 export default defineConfig({
   mdxOptions: {
-    // This plugin is enabled by default on Fumadocs MDX
-    // options:
+    // enabled by default, exported as `structuredData`
     remarkStructureOptions: {},
   },
 });
 ```
 
-Extracted information could be found in `vfile.data.structuredData`, you may
-write your own plugin to convert it into a MDX export.
+```ts tab="MDX Compiler"
+import { compile } from '@mdx-js/mdx';
+import { remarkStructure } from 'fumadocs-core/mdx-plugins';
 
-### Options
+const file = await compile('...', {
+  // `exportAs` exports it from the document too
+  remarkPlugins: [[remarkStructure, { exportAs: 'structuredData' }]],
+});
 
-<auto-type-table
-  path="../props.ts"
-  name="StructureOptions"
-/>
-
-### Output
-
-A list of headings and contents. Paragraphs will be extracted to the `contents`
-array, each item contains a `heading` prop indicating the heading of paragraph.
-
-<Callout title="Note">A heading can have multiple paragraphs.</Callout>
-
-#### Heading
-
-| Prop      |                                      |
-| --------- | ------------------------------------ |
-| `id`      | unique identifier or slug of heading |
-| `content` | Text content (Markdown)              |
-
-#### Content
-
-| Prop      |                                                                             |
-| --------- | --------------------------------------------------------------------------- |
-| `heading` | Heading of paragraph (nullable)                                             |
-| `content` | Text content (Markdown)                                                     |
-| `table`   | Table of a table row, unique in its page. Metadata, not searched (optional) |
-
-The content is stringified as Markdown text, you can customize it using the [`stringify`](#options) option.
-
-## As a Function
-
-Accepts MDX/markdown content and return structurized data.
-
-```ts
-import { structure } from 'fumadocs-core/mdx-plugins';
-
-structure(page.body.raw);
+console.log(file.data.structuredData);
 ```
 
-<Callout title="Tip" className="mt-4">
-If you have custom remark plugins enabled, such as
-`remark-math`, you have to pass these plugins to the function. This avoids unreadable content on paragraphs.
+## Records
+
+Headings, paragraphs, blockquotes, tables and JSX elements are recorded (see `types`):
+
+- Links are replaced by their text, images are removed.
+- A table has a record per row, as a table of its header and that row. The rows share a `table` field.
+- JSX elements are replaced by their content, except those kept as HTML tags by `filterElement`, which search dialogs render as components.
+- A JSX element is a record when it has no children (see `mdxTypes`), or fits on one line.
+- Content inside a record isn't recorded again.
+
+By default, `File`, `TypeTable`, `Callout` and `Card` are kept as HTML tags:
+
+```ts title="source.config.ts"
+import { defineConfig } from 'fumadocs-mdx/config';
+
+export default defineConfig({
+  mdxOptions: {
+    remarkStructureOptions: {
+      filterElement: (node) => node.name === 'Callout' || node.name === 'Banner',
+    },
+  },
+});
+```
+
+## Plugins
+
+Nodes inserted by plugins aren't recorded, a plugin adds the records of its node with `data.structuredData`:
+
+```ts
+node.data = {
+  ...node.data,
+  structuredData: {
+    // `heading` defaults to the current heading
+    contents: [{ heading: undefined, content: 'Generated **content**' }],
+  },
+};
+```
+
+## As a Function
 
 ```ts
 import { structure } from 'fumadocs-core/mdx-plugins';
 import remarkMath from 'remark-math';
 
-structure(page.body.raw, [remarkMath]);
+// with the remark plugins your content needs
+const data = structure(content, [remarkMath], options);
 ```
 
-</Callout>
+## Options
 
-### Parameters
-
-| Parameter       |                        |
-| --------------- | ---------------------- |
-| `content`       | MDX/markdown content   |
-| `remarkPlugins` | List of remark plugins |
-| `options`       | Custom options         |
+<auto-type-table path="../props.ts" name="StructureOptions" />

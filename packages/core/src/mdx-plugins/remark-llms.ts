@@ -63,7 +63,7 @@ export interface LLMsOptions {
   output?: 'function' | 'string';
 
   /**
-   * @private output in file data, unavailable with `output: 'function'`
+   * @internal output in file data, unavailable with `output: 'function'`
    */
   _data?: boolean;
 }

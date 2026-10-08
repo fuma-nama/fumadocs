@@ -55,7 +55,7 @@ You can search documents using:
 ```ts twoslash
 import { useFetchSearch } from 'fumadocs-core/search/client';
 
-const { search, onSearchChange, isLoading, result } = useFetchSearch();
+const { search, onSearchChange, isLoading, data } = useFetchSearch();
 ```
 
 <auto-type-table type='import("fumadocs-core/search/client/fetch").FetchOptions' />
@@ -93,7 +93,7 @@ and update your search client:
 ```ts
 import { useFetchSearch } from 'fumadocs-core/search/client';
 
-const { search, onSearchChange, isLoading, result } = useFetchSearch({
+const { search, onSearchChange, isLoading, data } = useFetchSearch({
   tag: '<value>', // [!code ++]
 });
 ```
@@ -122,7 +122,7 @@ and update your search clients:
   ```ts
   import { useFlexsearchStatic } from 'fumadocs-core/search/client/flexsearch-static';
 
-  const { search, onSearchChange, isLoading, result } = useFlexsearchStatic({
+  const { search, onSearchChange, isLoading, data } = useFlexsearchStatic({
     // optional: pass tag & locale
     tag,
   });

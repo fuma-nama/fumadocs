@@ -141,7 +141,7 @@ You can search documents using:
 ```ts twoslash
 import { useFetchSearch } from 'fumadocs-core/search/client';
 
-const { search, onSearchChange, isLoading, result } = useFetchSearch();
+const { search, onSearchChange, isLoading, data } = useFetchSearch();
 ```
 
 <auto-type-table type='import("fumadocs-core/search/client/fetch").FetchOptions' />
@@ -179,7 +179,7 @@ and update your search client:
 ```ts
 import { useFetchSearch } from 'fumadocs-core/search/client';
 
-const { search, onSearchChange, isLoading, result } = useFetchSearch({
+const { search, onSearchChange, isLoading, data } = useFetchSearch({
   tag: '<value>', // [!code ++]
 });
 ```
@@ -266,7 +266,7 @@ and update your search clients:
   ```ts
   import { useStaticSearch } from 'fumadocs-core/search/client';
 
-  const { search, onSearchChange, isLoading, result } = useStaticSearch();
+  const { search, onSearchChange, isLoading, data } = useStaticSearch();
   ```
 
   <auto-type-table type='import("fumadocs-core/search/client/orama-static").StaticOptions' />
@@ -321,7 +321,7 @@ and update your search clients:
 ```ts
 import { useFetchSearch } from 'fumadocs-core/search/client';
 
-const { search, onSearchChange, isLoading, result } = useFetchSearch({
+const { search, onSearchChange, isLoading, data } = useFetchSearch({
   locale: 'cn',
 });
 ```

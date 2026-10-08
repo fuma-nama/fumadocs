@@ -40,10 +40,19 @@ Configure authentication and sync your documentation:
 mxbai config keys add YOUR_API_KEY
 
 # Sync your documentation
-mxbai vs sync YOUR_STORE_ID "./content/docs"
+mxbai store sync YOUR_STORE_ID "./content/docs"
 ```
 
 The CLI will automatically detect changes in your documentation and update the store accordingly.
+
+Search results show the `title` of pages and link to their `url`, add them to the frontmatter of each page:
+
+```md
+---
+title: Mixedbread
+url: /docs/headless/search/mixedbread
+---
+```
 
 ### Workflow
 
@@ -52,10 +61,12 @@ You can automatically sync your documentation by adding a sync script to your `p
 ```json
 {
   "scripts": {
-    "build": "... && mxbai vs sync YOUR_STORE_ID './content/docs' --ci"
+    "build": "... && mxbai store sync YOUR_STORE_ID './content/docs' --yes"
   }
 }
 ```
+
+On CI, set the `MXBAI_API_KEY` environment variable to authenticate the CLI.
 
 ### Search API
 
@@ -83,7 +94,7 @@ export const { GET } = createMixedbreadSearchAPI({
   ```ts
   import { useFetchSearch } from 'fumadocs-core/search/client';
 
-  const { search, onSearchChange, isLoading, result } = useFetchSearch({
+  const { search, onSearchChange, isLoading, data } = useFetchSearch({
     api: '/api/search',
   });
   ```
@@ -112,7 +123,7 @@ And update your search client:
   ```ts
   import { useFetchSearch } from 'fumadocs-core/search/client';
 
-  const { search, onSearchChange, isLoading, result } = useFetchSearch({
+  const { search, onSearchChange, isLoading, data } = useFetchSearch({
     api: '/api/search',
     tag: '<your tag value>',
     // ...

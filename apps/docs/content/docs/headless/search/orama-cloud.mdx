@@ -47,7 +47,7 @@ To search documents on the client side, consider:
     // optional search params
   };
 
-  const { search, onSearchChange, isLoading, result } = useOramaCloudSearch({
+  const { search, onSearchChange, isLoading, data } = useOramaCloudSearch({
     client: orama,
     params,
   });
@@ -77,7 +77,7 @@ const params = {
   // optional search params
 };
 
-const { search, onSearchChange, isLoading, result } = useOramaCloudSearch({
+const { search, onSearchChange, isLoading, data } = useOramaCloudSearch({
   index: 'crawler',
   client: orama,
   params,
