@@ -1,3 +1,32 @@
+## fumadocs-openapi@12.4.0
+
+### Fix images in descriptions, show the OAuth redirect URI
+
+- Images in Markdown of API pages, like the description of an operation, and in descriptions of `<AutoTypeTable />` props no longer crash the page with "Element type is invalid".
+- The OAuth panel of the playground shows the `redirect_uri` of the authorization code and implicit flows, with a button to copy it: the `oauthRedirectUrl` route when set, otherwise the current page.
+- The Authorize row of OAuth schemes in the playground is one button, filling the row.
+
+Fix [#3661](https://github.com/fuma-nama/fumadocs/issues/3661), [#3663](https://github.com/fuma-nama/fumadocs/issues/3663)
+
+### Auth providers in the API playground
+
+- `playground.authProviders` handle security schemes: their rows, panels like signing in, and how values are sent. Omitted options come from the built-in providers.
+- Sign-ins leaving the page use `useAuthRedirect()`.
+- HTTP schemes other than Basic default to their own prefix, like `Token `.
+- The username and password of HTTP Basic auth are remembered.
+- OpenID Connect schemes default to a `Bearer` token.
+
+Fix [#3671](https://github.com/fuma-nama/fumadocs/issues/3671)
+
+### Fix code samples and matrix parameters
+
+- Render absolute server URLs on the server instead of `https://example.com`.
+- Escape values correctly in every language, and send `multipart/form-data` fields.
+- Go, Java, C# and Rust samples compile for every HTTP method.
+- Serialize `style: matrix` arrays according to `explode`.
+
+Fix [#3673](https://github.com/fuma-nama/fumadocs/issues/3673)
+
 ## fumadocs-openapi@12.3.0
 
 ### Schema UI in cards
