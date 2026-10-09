@@ -94,6 +94,11 @@ const showcases: ShowcaseObject[] = [
     url: 'https://docs.openpo.st',
   },
   {
+    image: '/showcases/turbobulls.png',
+    name: 'Turbobulls',
+    url: 'https://www.turbobulls.com/help',
+  },
+  {
     image: '/showcases/comfydeploy.png',
     name: 'ComfyDeploy',
     url: 'https://comfydeploy.com',
