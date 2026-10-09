@@ -123,6 +123,26 @@ describe('Generate AsyncAPI documents', () => {
     expect(stringifyOutput(out)).toMatchSnapshot();
   });
 
+  test('Streetlights (with imports)', async () => {
+    const out = await generateFilesOnly({
+      input: createAsyncAPI({
+        input: {
+          streetlights: path.join(cwd, './fixtures/streetlights.yaml'),
+        },
+      }),
+      per: 'file',
+      imports: [
+        { names: ['API_BASE_URL', 'Foo'], from: '@/constants' },
+        { names: ['Bar'], from: '@/components/bar' },
+      ],
+    });
+
+    expect(out).toHaveLength(1);
+    expect(out[0].content).toContain(
+      'import { API_BASE_URL, Foo } from "@/constants";\nimport { Bar } from "@/components/bar";\n\n',
+    );
+  });
+
   test('throws error when no input files found', async () => {
     await expect(
       generateFilesOnly({

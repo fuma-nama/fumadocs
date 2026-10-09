@@ -99,7 +99,7 @@ export function generateDocument(
 
   if (imports) {
     out.push(
-      ...imports
+      imports
         .map((item) => `import { ${item.names.join(', ')} } from ${doubleQuote(item.from)};`)
         .join('\n'),
     );
