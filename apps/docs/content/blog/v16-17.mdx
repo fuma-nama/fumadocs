@@ -1,0 +1,340 @@
+---
+title: Fumadocs 16.17
+description: Better Markdown, better search, better performance.
+author: Fuma Nama
+date: 2026-10-09
+---
+
+import { MarkdownLayer } from './v16-17/layer';
+import { Pipeline } from './v16-17/pipeline';
+import { RenderToMarkdown } from './v16-17/render';
+import { TableRecords } from './v16-17/search';
+import { PerfChart } from './v16-17/perf';
+
+We are pleased to announce the release of Fumadocs 16.17.
+
+This release rethinks how Fumadocs turns your pages into Markdown, and builds on top of it:
+
+- **A new stringification pipeline:** Markdown that gives humans and agents the right context.
+- **Better search:** records that keep the structure of your content.
+- **Better performance:** Markdown and search records are generated over 10x faster.
+
+## The Markdown Form of a Page
+
+A page is read in more places than a browser. Agents fetch its Markdown from `.md` routes, `llms.txt` and MCP servers, readers copy it into ChatGPT, and your search indexes it.
+
+<MarkdownLayer />
+
+In Fumadocs, [Remark LLMs](/docs/headless/mdx/remark-llms) generates the Markdown, and [Remark Structure](/docs/headless/mdx/structure) generates the search records.
+
+For these readers, the Markdown is the page. It should be informative: the content you wrote, not how we render it.
+
+16.17 rethinks the layer that generates it.
+
+### The Old Pipeline
+
+Both plugins used to stringify the syntax tree, after the other remark plugins. By then, the tree was already transformed for rendering:
+
+<Pipeline from="tree" />
+
+This is what 16.16 generated from a page of 9 lines:
+
+````mdx tab="Input"
+## Installation
+
+```npm
+npm i fumadocs-core
+```
+
+![Preview](./preview.png)
+
+<auto-type-table path="./props.ts" name="Options" />
+````
+
+````md tab="16.16 Output"
+## Installation [#installation]
+
+<CodeBlockTabs defaultValue="npm">
+  <CodeBlockTabsList>
+    <CodeBlockTabsTrigger value="npm">
+      npm
+    </CodeBlockTabsTrigger>
+
+    <CodeBlockTabsTrigger value="pnpm">
+      pnpm
+    </CodeBlockTabsTrigger>
+
+    <CodeBlockTabsTrigger value="yarn">
+      yarn
+    </CodeBlockTabsTrigger>
+
+    <CodeBlockTabsTrigger value="bun">
+      bun
+    </CodeBlockTabsTrigger>
+
+  </CodeBlockTabsList>
+
+  <CodeBlockTab value="npm">
+    ```bash
+    npm i fumadocs-core
+    ```
+  </CodeBlockTab>
+
+  <CodeBlockTab value="pnpm">
+    ```bash
+    pnpm add fumadocs-core
+    ```
+  </CodeBlockTab>
+
+  <CodeBlockTab value="yarn">
+    ```bash
+    yarn add fumadocs-core
+    ```
+  </CodeBlockTab>
+
+  <CodeBlockTab value="bun">
+    ```bash
+    bun add fumadocs-core
+    ```
+  </CodeBlockTab>
+</CodeBlockTabs>
+
+<img alt="Preview" src="__img0" />
+
+<TypeTable
+  id="type-table-props.ts-Options"
+  type="{
+  &#x22;id&#x22;: &#x22;props.ts-Options&#x22;,
+  &#x22;name&#x22;: &#x22;Options&#x22;,
+  &#x22;description&#x22;: &#x22;&#x22;,
+  &#x22;entries&#x22;: [
+    {
+      &#x22;name&#x22;: &#x22;dir&#x22;,
+      &#x22;description&#x22;: &#x22;The directory of pages.&#x22;,
+      &#x22;tags&#x22;: [],
+      &#x22;type&#x22;: &#x22;string&#x22;,
+      &#x22;simplifiedType&#x22;: &#x22;string&#x22;,
+      &#x22;required&#x22;: true,
+      &#x22;deprecated&#x22;: false
+    },
+    {
+      &#x22;name&#x22;: &#x22;baseUrl&#x22;,
+      &#x22;description&#x22;: &#x22;The base URL of pages.&#x22;,
+      &#x22;tags&#x22;: [
+        {
+          &#x22;name&#x22;: &#x22;defaultValue&#x22;,
+          &#x22;text&#x22;: &#x22;'/'&#x22;
+        }
+      ],
+      &#x22;type&#x22;: &#x22;string | undefined&#x22;,
+      &#x22;simplifiedType&#x22;: &#x22;string&#x22;,
+      &#x22;required&#x22;: false,
+      &#x22;deprecated&#x22;: false
+    }
+  ]
+}"
+/>
+````
+
+- **Generated elements pollute the Markdown.** `<CodeBlockTabs>` and `<img>` are how we render the page, not your content. `__img0` doesn't even exist outside the bundle.
+- **Components are not rendered.** A JSX element is only its tag and props, its content lives in the React component. The type table became a JSON blob.
+- **Your Markdown is reformatted.** `-` lists become `*`, `_emphasis_` becomes `*emphasis*`, and `2 * 3` is escaped into `2 \* 3`.
+- **It is slow.** The whole tree is serialized for every page, and again for every search record.
+
+We fixed it in two parts.
+
+### Components, Rendered
+
+Since 16.15, `fumadocs-core/server` renders React Server Components into Markdown. A component opts in by calling `asMarkdown()`, and returns its Markdown form:
+
+```tsx title="components/callout.tsx"
+import { asMarkdown, md } from 'fumadocs-core/server';
+
+export function Callout({ title, children }) {
+  if (asMarkdown()) return md.linePrefix('> ')`**${title}**\n${children}`;
+
+  return <div className="callout">...</div>;
+}
+```
+
+With `output: 'function'`, Remark LLMs exports the Markdown as a component instead of a string. Markdown stays as you wrote it, JSX elements are rendered by your MDX components:
+
+<RenderToMarkdown />
+
+```ts title="source.config.ts"
+import { defineDocs } from 'fumadocs-mdx/config';
+
+export const docs = defineDocs({
+  docs: {
+    postprocess: {
+      includeProcessedMarkdown: { output: 'function' },
+    },
+  },
+});
+```
+
+```ts
+import { getMDXComponents } from '@/components/mdx';
+
+const markdown = await page.data.getText('processed', {
+  components: getMDXComponents(),
+});
+```
+
+Components that never call `asMarkdown()`, including client components, are kept as JSX with their props. See [Markdown Rendering](/docs/headless/utils/markdown).
+
+### Source + Edits
+
+The other part is where the Markdown comes from.
+
+In 16.17, it is sliced from your source instead of stringified from the tree. Every remark plugin maintains two pipelines:
+
+- the syntax tree, transformed for rendering.
+- edits to your source, for the generated Markdown.
+
+<Pipeline from="source" />
+
+The rules are simple:
+
+- A node with a position outputs its source.
+- A node inserted by plugins outputs nothing, the plugin describes its Markdown instead.
+
+The same page, in 16.17:
+
+````md
+## Installation [#installation]
+
+```npm
+npm i fumadocs-core
+```
+
+![Preview](./preview.png)
+
+### Options
+
+| Prop       | Type     | Description                           |
+| ---------- | -------- | ------------------------------------- |
+| `dir`      | `string` | The directory of pages.               |
+| `baseUrl?` | `string` | The base URL of pages. Default: `'/'` |
+````
+
+Plugins record their edits with `replaceSource()`:
+
+```ts title="remark-note.ts"
+import type { Root } from 'mdast';
+import type { VFile } from 'vfile';
+import { visit } from 'unist-util-visit';
+import { replaceSource } from 'fumadocs-core/mdx-plugins/stringifier';
+
+export function remarkNote() {
+  return (tree: Root, file: VFile) => {
+    visit(tree, 'mdxJsxFlowElement', (node) => {
+      if (node.name !== 'Note') return;
+
+      replaceSource(file, node, (s) => `**Note:**\n\n${s.inner(node)}`);
+      // transform the node for rendering...
+    });
+  };
+}
+```
+
+- `embedSource()` embeds content parsed from another source, like [included files](/docs/mdx/include).
+- A namespace limits an edit to some outputs, like `search` for search records.
+
+It brings:
+
+- **Quality:** Markdown stays as you wrote it, local images keep their addresses, and generated nodes leave no noise.
+- **Performance:** no tree is serialized, Remark LLMs is up to 45x faster.
+
+The Sätteri compiler has worked this way since `@fumadocs/satteri` 0.5, now the remark plugins of Fumadocs Core behave the same. See [Stringification](/docs/headless/mdx/stringification) for details.
+
+## Better Search
+
+Search records come from the same pipeline, so they are Markdown as you wrote it. The search dialog renders them with typography, and elements like `<Callout />` and `<TypeTable />` as components.
+
+### Tables, by Row
+
+<TableRecords />
+
+A table records each row, as a table of its header and that row. Type tables from `auto-type-table` record a row for each prop. In the search dialog, the matched rows of a table are grouped back into a table.
+
+### Highlights with CSS
+
+Search results no longer wrap matches in `<mark>`, the content stays as indexed. The search dialog highlights matches with the [CSS Custom Highlight API](https://developer.mozilla.org/en-US/docs/Web/API/CSS_Custom_Highlight_API):
+
+```css
+::highlight(fd-search) {
+  color: var(--color-fd-primary);
+  text-decoration: underline;
+}
+```
+
+Custom search UIs can use `useHighlightQuery()` from `fumadocs-core/search/client`.
+
+### Search Hooks
+
+Each search client has its own hook, like `useFetchSearch()` and `useAlgoliaSearch()`, returning the props of `<SearchDialog />`:
+
+```tsx
+import { useFetchSearch } from 'fumadocs-core/search/client';
+
+const search = useFetchSearch();
+
+<SearchDialog {...search} {...props} />;
+```
+
+`useDocsSearch()` is deprecated, see [Search](/docs/search#search-hooks).
+
+### Mixedbread
+
+`sync()` from `fumadocs-core/search/mixedbread` uploads a file for each page, whose chunks are its title, headings and paragraphs. Results link to their headings, and render tables like other integrations.
+
+See [Mixedbread](/docs/headless/search/mixedbread).
+
+## Better Performance
+
+<PerfChart />
+
+| Document | Remark LLMs   | Remark Structure | Default plugins |
+| -------- | ------------- | ---------------- | --------------- |
+| 0.5 MB   | 49 → 1.1 ms   | 49 → 2.4 ms      | 119 → 9.4 ms    |
+| 2 MB     | 184 → 4.1 ms  | 196 → 11.1 ms    | 482 → 34.1 ms   |
+| 5 MB     | 498 → 14.1 ms | 594 → 30.3 ms    | 1,496 → 87.5 ms |
+
+Default plugins are the remark plugins of Fumadocs MDX, with Remark LLMs enabled.
+
+- The remark and rehype plugins of Fumadocs Core no longer slow down quadratically on large documents, like `rehypeToc()` taking 17 ms instead of 239 ms on a 5 MB page.
+- The search dialog parses results with micromark and the HTML parser of browsers, instead of a remark & rehype pipeline.
+- Twoslash analyzes code blocks about 2x faster, and truncates types longer than 500 characters in popups. Add `.twoslash` to your `.gitignore`.
+
+## Refactored & Deprecated APIs
+
+16.17 is a minor release. Re-sync your search indexes to pick up the new records, including Mixedbread stores synced with `mxbai store sync`.
+
+The internal APIs of stringification and search are refactored, for plugins and search UIs built on them:
+
+| Before                                                 | Now                                                                              |
+| ------------------------------------------------------ | -------------------------------------------------------------------------------- |
+| `data._stringify`                                      | `replaceSource()` & `embedSource()` from `fumadocs-core/mdx-plugins/stringifier` |
+| `defaultStringifier()`                                 | `createStringifier()`                                                            |
+| `placeholder()`                                        | the `mdxAsPlaceholder` option                                                    |
+| `stringify` & `allowedMdxAttributes` of Remark plugins | `filterElement`, and `replaceSource()` for custom Markdown                       |
+| `useSearchList()`                                      | `getActive()`, `setActive()` & `subscribeActive()` from `useSearch()`            |
+| `contentWithHighlights` & `renderHighlights`           | `useHighlightQuery()`                                                            |
+
+- Remark Structure defaults `types` to `table` instead of `tableCell`.
+- `<SearchDialogListItem />` renders a `div`, and its `renderMarkdown` receives `content`.
+- `fumadocs-mdx`, `fumadocs-docgen` and `fumadocs-obsidian` require `fumadocs-core` 16.17.0.
+
+Deprecated APIs keep working:
+
+- `useDocsSearch()`: use the hook of your search client.
+- `createContentHighlighter()`: matches are highlighted with CSS.
+
+## Also in 16.17
+
+- **Fumadocs OpenAPI 12.4:** auth providers for the API playground (`playground.authProviders`), the OAuth redirect URI with a copy button, and fixed code samples in every language.
+- `index()` and `indexNode()` of `llms()` return a string again when it receives a loader.
+- The advanced search server returns up to 60 results when the request has no `limit`.
+
+Thanks for supporting Fumadocs, share your upgrade experience on [GitHub](https://github.com/fuma-nama/fumadocs) :)
