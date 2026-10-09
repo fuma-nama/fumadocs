@@ -14,6 +14,8 @@ import {
   useOperation,
   useResponseExamples,
 } from '@/operation';
+import { DataEngine } from '@fumari/stf';
+import { useAuthFields } from '@/playground/auth';
 import { createCodeUsageGeneratorRegistry } from '@/requests/generators';
 import { registerDefault } from '@/requests/generators/all';
 import type { Document, HttpMethods, OperationObject, PathItemObject } from '@/types';
@@ -287,5 +289,44 @@ test('renders the operations and webhooks of a page', async () => {
   expect(rendered).toEqual([
     'operation get /museum-hours Get museum hours true',
     'webhook post /newExhibition New exhibition true',
+  ]);
+});
+
+test('encodes auth fields with their providers', async () => {
+  const engine = new DataEngine();
+  const result: unknown[] = [];
+
+  await render('/museum-hours', 'get', () => {
+    const { operation } = useOperation();
+    const builtin = useAuthFields(engine, { operation });
+    const custom = useAuthFields(engine, {
+      operation,
+      providers: [
+        {
+          on: 'MuseumPlaceholderAuth',
+          onRequest(data, value) {
+            data.header['X-Token'] = value;
+          },
+        },
+      ],
+    });
+
+    result.push(
+      builtin.fields[0].fieldName,
+      custom.fields[0].defaultValue,
+      builtin.mapValues({
+        header: {},
+        auth: { MuseumPlaceholderAuth: { username: 'a', password: 'b' } },
+      }),
+      custom.mapValues({ header: {}, auth: { MuseumPlaceholderAuth: 'token' } }),
+    );
+    return null;
+  });
+
+  expect(result).toEqual([
+    ['auth', 'MuseumPlaceholderAuth'],
+    { username: '', password: '' },
+    { header: { Authorization: `Basic ${btoa('a:b')}` } },
+    { header: { 'X-Token': 'token' } },
   ]);
 });

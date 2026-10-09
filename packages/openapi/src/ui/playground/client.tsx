@@ -1,5 +1,5 @@
 'use client';
-import { type ComponentProps, type FC, type ReactNode, useState } from 'react';
+import { type ComponentProps, type FC, type ReactNode, useMemo, useState } from 'react';
 import { Dialog } from '@base-ui/react/dialog';
 import { Play, X } from 'lucide-react';
 import { useOnChange } from 'fumadocs-core/utils/use-on-change';
@@ -33,6 +33,7 @@ import {
 } from '@/playground/use-playground';
 import { UrlBar } from './components/url-bar';
 import { RequestPanel } from './components/request-panel';
+import { oauthPanelProvider } from './components/oauth-panel';
 import { ResponsePanel } from './components/response-panel';
 import { Segmented, SegmentedList } from '@/ui/components/segmented';
 
@@ -81,6 +82,7 @@ export interface PlaygroundClientOptions extends PlaygroundOptions {
 export default function PlaygroundClient({
   writeOnly = true,
   readOnly = false,
+  authProviders,
   transformAuthInputs,
   fetchOptions,
   components,
@@ -91,7 +93,8 @@ export default function PlaygroundClient({
   const t = useTranslations({ note: 'playground' });
   const { doc } = useOpenAPI();
   const { path, method, operation } = useOperation();
-  const playground = usePlayground({ transformAuthInputs, fetchOptions });
+  const providers = useMemo(() => [...(authProviders ?? []), oauthPanelProvider], [authProviders]);
+  const playground = usePlayground({ authProviders: providers, transformAuthInputs, fetchOptions });
   const [open, setOpen] = useState(false);
 
   useOnChange(playground.auth.flowReturned, (returned) => {
@@ -140,20 +143,17 @@ function PlaygroundDialog({
   const { title, method, path, operation, parameters } = useOperation();
   const { response, isSending, send, clearResponse } = playground;
   const [view, setView] = useState('request');
+  const onSubmit = (e: { preventDefault: () => void }) => {
+    e.preventDefault();
+    void send();
+    setView('response');
+  };
 
   return (
-    <form
-      noValidate
+    <div
       className="flex min-h-0 flex-1 flex-col"
-      onSubmit={(e) => {
-        e.preventDefault();
-        void send();
-        setView('response');
-      }}
       onKeyDown={(e) => {
-        if (e.key !== 'Enter' || !(e.metaKey || e.ctrlKey)) return;
-        e.preventDefault();
-        e.currentTarget.requestSubmit();
+        if (e.key === 'Enter' && (e.metaKey || e.ctrlKey)) onSubmit(e);
       }}
     >
       <div className="flex h-12 shrink-0 items-center gap-2 ps-4 pe-2 sm:ps-5">
@@ -170,7 +170,7 @@ function PlaygroundDialog({
           </Dialog.Close>
         </div>
       </div>
-      <div className="shrink-0 px-3 pb-3 sm:px-4">
+      <form noValidate className="shrink-0 px-3 pb-3 sm:px-4" onSubmit={onSubmit}>
         <UrlBar
           method={method}
           route={path}
@@ -178,7 +178,7 @@ function PlaygroundDialog({
           deprecated={operation.deprecated}
           loading={isSending}
         />
-      </div>
+      </form>
       <Segmented value={view} onValueChange={setView} className="shrink-0 px-3 pb-3 md:hidden">
         <SegmentedList
           className="*:flex-1 *:justify-center"
@@ -191,6 +191,7 @@ function PlaygroundDialog({
       <div className="mx-3 mb-3 grid min-h-0 flex-1 overflow-hidden rounded-xl border bg-fd-card sm:mx-4 sm:mb-4 md:grid-cols-[minmax(0,11fr)_minmax(0,9fr)]">
         <RequestPanel
           playground={playground}
+          onSubmit={onSubmit}
           renderParameterField={renderParameterField}
           renderBodyField={renderBodyField}
           className={cn(view !== 'request' && 'max-md:hidden')}
@@ -203,7 +204,7 @@ function PlaygroundDialog({
           className={cn('md:border-s', view !== 'response' && 'max-md:hidden')}
         />
       </div>
-    </form>
+    </div>
   );
 }
 

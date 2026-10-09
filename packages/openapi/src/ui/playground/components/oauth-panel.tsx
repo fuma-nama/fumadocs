@@ -1,12 +1,18 @@
 'use client';
 import { useState } from 'react';
-import { StfProvider, useStf } from '@fumari/stf';
+import { StfProvider, useDataEngine, useStf } from '@fumari/stf';
 import { useTranslations } from '@fuma-translate/react';
 import { buttonVariants } from 'fumadocs-ui/components/ui/button';
 import { Spinner } from 'shared-api/components/spinner';
 import { useQuery } from 'shared-api/utils/use-query';
-import { type AuthField, type OAuthFlowType, usePlaygroundAuth } from '@/playground/auth';
-import type { OAuthInput } from '@/playground/use-playground';
+import {
+  type AuthPanelProps,
+  type AuthProvider,
+  finishOAuthFlow,
+  type OAuthFlowType,
+  requestOAuthToken,
+  useAuthRedirect,
+} from '@/playground/auth';
 import type { OAuth2SecurityScheme } from '@/types';
 import { Markdown } from '@/ui/components/markdown';
 import { useOpenAPI } from '@/utils/create-page';
@@ -21,33 +27,55 @@ interface Credentials extends Record<string, unknown> {
   password?: string;
 }
 
+/** OAuth 2.0 schemes, authorized in a panel */
+export const oauthPanelProvider: AuthProvider = {
+  on: ({ scheme }) => scheme.type === 'oauth2',
+  render: function OAuthRows({ field, Value, Panel }) {
+    const t = useTranslations({ note: 'playground' });
+    const engine = useDataEngine();
+    const query = useQuery(async (token: Promise<string> | string) => {
+      engine.update(field.fieldName, await token);
+    });
+
+    useAuthRedirect(field, (url, data) => {
+      const token = finishOAuthFlow(url, data);
+      if (token !== undefined) void query.start(token);
+    });
+
+    return (
+      <>
+        <Value name="Authorization" type="header" description={field.scheme.description} />
+        {query.isLoading && (
+          <p className="flex items-center gap-1.5 border-b px-4 py-2.5 text-xs text-fd-muted-foreground">
+            <Spinner className="size-3" />
+            {t('Fetching token...')}
+          </p>
+        )}
+        {query.error != null && (
+          <div className="border-b px-4 py-2.5 text-xs">
+            <p className="font-medium text-red-400">{t('Failed to fetch token')}</p>
+            <p className="text-fd-muted-foreground">{String(query.error)}</p>
+          </div>
+        )}
+        <Panel title={t('Authorize')} component={OAuthPanel} />
+      </>
+    );
+  },
+};
+
 /** obtain the access token of an OAuth 2.0 scheme */
-export function OAuthPanel({
-  field,
-  authorize,
-  onAuthorized,
-}: {
-  field: AuthField;
-  authorize: (input: OAuthInput) => Promise<string | undefined>;
-  onAuthorized: () => void;
-}) {
+function OAuthPanel({ field, close }: AuthPanelProps) {
   const t = useTranslations({ note: 'OAuth dialog' });
+  const engine = useDataEngine();
+  const redirect = useAuthRedirect(field);
   const { oauthRedirectUrl } = useOpenAPI();
   const { resolveUrl } = useServer();
-  const tokenInfo = usePlaygroundAuth().store[field.schemeId];
   const scheme = field.scheme as OAuth2SecurityScheme;
   const flows = scheme.flows ?? {};
   const [type, setType] = useState(() => Object.keys(flows)[0] as OAuthFlowType);
-  const [clientAuth, setClientAuth] = useState<'body' | 'header'>(() =>
-    tokenInfo?.type === 'authorization_code' ? tokenInfo.client_auth : 'header',
-  );
+  const [clientAuth, setClientAuth] = useState<'body' | 'header'>('header');
   const [scopes, setScopes] = useState(() => new Set(field.scopes));
-  const stf = useStf({
-    defaultValues: (): Credentials => ({
-      client_id: tokenInfo?.client_id,
-      client_secret: tokenInfo?.type === 'authorization_code' ? tokenInfo.client_secret : undefined,
-    }),
-  });
+  const stf = useStf({});
 
   const flowInfo: Record<OAuthFlowType, { name: string; description: string }> = {
     authorizationCode: {
@@ -83,28 +111,31 @@ export function OAuthPanel({
 
   const query = useQuery(async () => {
     const credentials = stf.dataEngine.getData() as Credentials;
-    const token = await authorize({
-      type,
+    const token = await requestOAuthToken(scheme, type, {
+      schemeId: field.schemeId,
       scopes: Array.from(scopes),
       clientId: credentials.client_id ?? '',
       clientSecret: credentials.client_secret ?? '',
       username: credentials.username ?? '',
       password: credentials.password ?? '',
       clientAuth,
+      serverUrl,
+      redirectUrl: oauthRedirectUrl,
+      redirect,
     });
+    if (!token) return;
 
-    if (token) onAuthorized();
+    engine.update(field.fieldName, token);
+    close();
   });
 
   return (
     <StfProvider value={stf}>
-      <div
-        onKeyDown={(e) => {
-          // Enter would send the request of playground
-          if (e.key !== 'Enter' || !(e.target instanceof HTMLInputElement)) return;
+      <form
+        noValidate
+        onSubmit={(e) => {
           e.preventDefault();
-          e.stopPropagation();
-          if (supported && !query.isLoading) void query.start();
+          void query.start();
         }}
       >
         {scheme.description && (
@@ -228,9 +259,8 @@ export function OAuthPanel({
                 : redirects && t('You will be redirected to authorize, then back to this page.')}
           </p>
           <button
-            type="button"
+            type="submit"
             disabled={!supported || query.isLoading}
-            onClick={() => void query.start()}
             className={cn(
               buttonVariants({ variant: 'primary', size: 'sm' }),
               'shrink-0 gap-1.5 px-3',
@@ -240,7 +270,7 @@ export function OAuthPanel({
             {t('Authorize')}
           </button>
         </div>
-      </div>
+      </form>
     </StfProvider>
   );
 }

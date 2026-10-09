@@ -1,10 +1,15 @@
 // the headless parts of the playground, so an installed UI drives them instead of copying them
 export {
   type AuthField,
+  type AuthPanelProps,
+  type AuthProvider,
+  type AuthRenderProps,
   type AuthRequirement,
+  finishOAuthFlow,
   type OAuthFlowType,
   requestOAuthToken,
   useAuthFields,
+  useAuthRedirect,
   usePlaygroundAuth,
 } from './auth';
 export {

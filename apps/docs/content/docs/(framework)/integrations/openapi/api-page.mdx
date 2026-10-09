@@ -141,6 +141,107 @@ export const OpenAPIPage = createOpenAPIPage({
 });
 ```
 
+## Authorization
+
+Auth providers handle the security schemes of the playground: the rows of their values, and how values are sent.
+
+```tsx title="components/api-page.tsx"
+'use client';
+import { createOpenAPIPage } from 'fumadocs-openapi/ui';
+import { Custom } from 'fumadocs-openapi/ui/playground/client';
+import type { AuthPanelProps } from 'fumadocs-openapi/playground';
+
+export const OpenAPIPage = createOpenAPIPage({
+  playground: {
+    authProviders: [
+      {
+        // a scheme ID or a function, every scheme when omitted
+        on: 'my-auth',
+        render: ({ Value, Panel }) => (
+          <>
+            <Value name="Authorization" type="header" />
+            <Panel title="Sign in" component={SignIn} />
+          </>
+        ),
+      },
+    ],
+  },
+});
+
+function SignIn({ field, close }: AuthPanelProps) {
+  const { setValue } = Custom.useController(field.fieldName);
+
+  return (
+    <button
+      onClick={async () => {
+        const res = await fetch('/api/token');
+        setValue(`Bearer ${await res.text()}`);
+        close();
+      }}
+    >
+      Sign in
+    </button>
+  );
+}
+```
+
+| Option      | Is                                                                   |
+| ----------- | -------------------------------------------------------------------- |
+| `on`        | the security schemes it handles                                      |
+| `render`    | its rows, from `Value` (an input of the value) and `Panel` (a panel) |
+| `onRequest` | write the value into request data, for requests and code usages      |
+
+Define providers outside of components, the auth fields are created again when they change.
+
+Rows and panels hold their own state, `Custom.useController(field.fieldName)` reads and writes the value. It starts from the default of scheme, like `Bearer `, and is remembered per scheme.
+
+<Accordions>
+  <Accordion title="Sign-ins leaving the page">
+    Leave the page with the function from `useAuthRedirect()`. When the page loads again, the playground reopens, and the rows get the data back in `onReturn`.
+
+    ```tsx
+    import { Custom } from 'fumadocs-openapi/ui/playground/client';
+    import {
+      type AuthPanelProps,
+      type AuthRenderProps,
+      useAuthRedirect,
+    } from 'fumadocs-openapi/playground';
+
+    function Rows({ field, Value, Panel }: AuthRenderProps) {
+      const { setValue } = Custom.useController(field.fieldName);
+
+      useAuthRedirect(field, (url, state) => {
+        if (url.searchParams.get('state') === state)
+          setValue(`Bearer ${url.searchParams.get('token')}`);
+      });
+
+      return (
+        <>
+          <Value name="Authorization" type="header" />
+          <Panel title="Sign in" component={SignIn} />
+        </>
+      );
+    }
+
+    function SignIn({ field }: AuthPanelProps) {
+      const redirect = useAuthRedirect(field);
+
+      return (
+        <button
+          onClick={() => {
+            const state = crypto.randomUUID();
+            redirect(`https://auth.example.com/login?state=${state}`, state);
+          }}
+        >
+          Sign in
+        </button>
+      );
+    }
+    ```
+
+  </Accordion>
+</Accordions>
+
 ## Customise UI
 
 For customisations beyond the available options, you can install the UI into your codebase with [Fumadocs CLI](/docs/cli).

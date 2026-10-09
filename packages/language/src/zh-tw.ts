@@ -173,8 +173,6 @@ const translations = {
   'Not Modified(playground status info)': '未修改',
   'Not set(playground)': '未設定',
   'OK(playground status info)': '成功',
-  'OpenID Connect is not supported at the moment, you can still set an access token here.(playground)':
-    '目前不支援 OpenID Connect，你仍可在此設定存取權杖。',
   'OpenID Connect(security scheme)': 'OpenID Connect',
   'Path Parameters(operation page)': '路徑參數',
   'Path(playground)': '路徑',
