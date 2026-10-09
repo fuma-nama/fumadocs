@@ -166,6 +166,45 @@ describe('Generate documents', () => {
 
     await expect(stringifyOutput(out)).toMatchFileSnapshot('./out/products-with-meta+groupby.md');
   });
+
+  test('Generate Files - with imports', async () => {
+    const out = await generateFilesOnly({
+      input: createOpenAPI({
+        input: {
+          petstore: path.join(cwd, './fixtures/petstore.yaml'),
+        },
+      }),
+      per: 'file',
+      imports: [
+        { names: ['API_BASE_URL'], from: '@/constants' },
+        { names: ['Foo', 'Bar'], from: '@/components' },
+      ],
+    });
+
+    expect(out.length).toBeGreaterThan(0);
+    for (const file of out) {
+      // each import is a single line, in the order they were given
+      expect(file.content).toContain(
+        'import { API_BASE_URL } from "@/constants";\nimport { Foo, Bar } from "@/components";',
+      );
+    }
+  });
+
+  test('Generate Files - with empty imports', async () => {
+    const options = {
+      input: createOpenAPI({
+        input: {
+          petstore: path.join(cwd, './fixtures/petstore.yaml'),
+        },
+      }),
+      per: 'file',
+    } as const;
+
+    const withEmpty = await generateFilesOnly({ ...options, imports: [] });
+    const without = await generateFilesOnly(options);
+
+    expect(withEmpty).toEqual(without);
+  });
 });
 
 function stringifyOutput(output: OutputFile[]) {
