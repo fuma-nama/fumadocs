@@ -20,6 +20,8 @@ export default function CustomSearchDialog(props: SharedProps) {
   const search = useFetchSearch({
     api: '/api/search',
     locale,
+    // every search is a request to Mixedbread
+    delayMs: 300,
   });
 
   return (

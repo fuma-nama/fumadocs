@@ -10,6 +10,7 @@ export async function searchAdvanced(
   tag: string | string[] = [],
   {
     mode = 'fulltext',
+    limit = 60,
     ...override
   }: Partial<SearchParams<ZBSearch<typeof advancedSchema>, AdvancedDocument>> = {},
   locale?: string,
@@ -17,7 +18,7 @@ export async function searchAdvanced(
   if (typeof tag === 'string') tag = [tag];
 
   const params = {
-    limit: 60,
+    limit,
     mode,
     ...override,
     where: removeUndefined({
@@ -44,7 +45,6 @@ export async function searchAdvanced(
 
   const result = await search(db, params);
   // `limit` bounds `result.hits`, not `result.groups` (one group per matched page)
-  const limit = typeof params.limit === 'number' ? params.limit : Infinity;
   const list: SortedResult[] = [];
   for (const item of result.groups ?? []) {
     if (list.length >= limit) break;

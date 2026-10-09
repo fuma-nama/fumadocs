@@ -130,7 +130,7 @@ interface Provider {
     documents: string;
   };
   /** `scripts/sync-content.ts`, run after build */
-  sync?: (env: Env, paths: { dir: string; output: string }) => string;
+  sync?: (env: Env, paths: { output: string }) => string;
   /** server-side search, replaces the default search route */
   searchRoute?: Record<ReactFramework, string>;
 }
@@ -340,20 +340,27 @@ export default function CustomSearchDialog(props: SharedProps) {
   const search = useFetchSearch({
     api: '/api/search',
     locale,
+    // every search is a request to Mixedbread
+    delayMs: 300,
   });
 
 ${dialogBody('Mixedbread', 'https://mixedbread.com')}`,
-    sync: (_env, { dir }) => `import { spawnSync } from 'node:child_process';
-
-// sync the content with Mixedbread CLI
-const result = spawnSync(
-  'npx',
-  ['--yes', '@mixedbread/cli', 'store', 'sync', process.env.MIXEDBREAD_STORE_ID!, '${dir}', '--yes'],
-  { stdio: 'inherit' },
-);
-
-process.exit(result.status ?? 1);
+    exportIndexes: ({ ref }) => ({
+      head: `import { ${ref} } from '@/lib/source';
+import { toDocuments } from 'fumadocs-core/search/mixedbread';`,
+      documents: `toDocuments(${ref})`,
+    }),
+    sync: (_env, { output }) =>
+      syncScript(
+        output,
+        `import { type DocumentRecord, sync } from 'fumadocs-core/search/mixedbread';
+import Mixedbread from '@mixedbread/sdk';`,
+        `await sync(new Mixedbread(), {
+  storeIdentifier: process.env.MIXEDBREAD_STORE_ID!,
+  documents: records,
+});
 `,
+      ),
     searchRoute: (() => {
       const server = `import { createMixedbreadSearchAPI } from 'fumadocs-core/search/mixedbread';
 import Mixedbread from '@mixedbread/sdk';
@@ -428,7 +435,7 @@ export const syncCommand = 'node --env-file-if-exists=.env.local scripts/sync-co
 export function templates(
   name: SearchProvider,
   framework: ReactFramework,
-  { baseDir, source }: { baseDir: string; source: Pick<SourceInfo, 'dynamic' | 'async' | 'dir'> },
+  { baseDir, source }: { baseDir: string; source: Pick<SourceInfo, 'dynamic' | 'async'> },
   output: string,
 ): [file: string, content: string][] {
   const provider: Provider = providers[name];
@@ -444,8 +451,7 @@ export function templates(
       staticRoute(framework, head, documents),
     ]);
   }
-  if (provider.sync)
-    files.push(['scripts/sync-content.ts', provider.sync(env, { dir: source.dir, output })]);
+  if (provider.sync) files.push(['scripts/sync-content.ts', provider.sync(env, { output })]);
   return files;
 }
 

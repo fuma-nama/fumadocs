@@ -7,7 +7,7 @@ import { loader } from '@/source';
 import { sync, toDocuments } from '@/search/meilisearch';
 import { meilisearchClient } from '@/search/client/meilisearch';
 import type Mixedbread from '@mixedbread/sdk';
-import { createMixedbreadSearchAPI } from '@/search/mixedbread';
+import { createMixedbreadSearchAPI, sync as syncMixedbread } from '@/search/mixedbread';
 
 test('Search API', async () => {
   const api = createSearchAPI('simple', {
@@ -467,23 +467,38 @@ test('Meilisearch: search client', async () => {
   `);
 });
 
-test('Mixedbread: chunks grouped by page, linking to headings', async () => {
-  const chunk = (file_id: string, chunk_index: number, text: string, heading?: string) => ({
+test('Search API Advanced: results are limited', async () => {
+  const api = createSearchAPI('advanced', {
+    indexes: Array.from({ length: 40 }, (_, i) => ({
+      id: String(i),
+      title: `Page ${i}`,
+      url: `/${i}`,
+      structuredData: structure('## Hello\n\nsomething'),
+    })),
+  });
+
+  expect(await api.search('something')).toHaveLength(60);
+  expect(await api.search('something', { limit: 10 })).toHaveLength(10);
+});
+
+test('Mixedbread: records grouped by page', async () => {
+  const chunk = (chunk_index: number, text: string, generated_metadata: object) => ({
     type: 'text',
-    file_id,
+    file_id: 'file-a',
     chunk_index,
     text,
-    generated_metadata: {
-      title: `Page ${file_id}`,
-      url: `/${file_id}`,
-      chunk_headings: heading ? [{ level: 2, text: heading }] : [],
-    },
+    metadata: { title: 'Page A', url: '/a', breadcrumbs: ['Docs'], tags: ['ui'], hash: '' },
+    generated_metadata,
   });
   const search = vi.fn(async () => ({
     data: [
-      chunk('a', 1, '## Setup `client`', 'Setup client'),
-      chunk('b', 0, '---\ntitle: Page b\n---\n\n## Usage', 'Usage'),
-      chunk('a', 2, '## Options [#custom-id]', 'Options [#custom-id]'),
+      chunk(3, '| `hotKey?` | `array` |\n| --- | --- |', {
+        kind: 'text',
+        heading: 'props',
+        table: 'table-0',
+      }),
+      chunk(0, 'Page A', { kind: 'page' }),
+      chunk(1, 'Props', { kind: 'heading', heading: 'props' }),
     ],
   }));
   const api = createMixedbreadSearchAPI({
@@ -491,37 +506,133 @@ test('Mixedbread: chunks grouped by page, linking to headings', async () => {
     storeIdentifier: 'docs',
   });
 
-  expect(await api.search('setup', { tag: ['ui'] })).toMatchInlineSnapshot(`
+  expect(await api.search('hot key', { tag: ['ui'], locale: 'en', limit: 100 }))
+    .toMatchInlineSnapshot(`
     [
       {
-        "content": "Page a",
-        "id": "a",
+        "breadcrumbs": [
+          "Docs",
+        ],
+        "content": "Page A",
+        "id": "file-a",
         "type": "page",
         "url": "/a",
       },
       {
-        "content": "Setup client",
-        "id": "a-1",
-        "type": "heading",
-        "url": "/a#setup-client",
+        "content": "| \`hotKey?\` | \`array\` |
+    | --- | --- |",
+        "id": "file-a-3",
+        "table": "table-0",
+        "type": "text",
+        "url": "/a#props",
       },
       {
-        "content": "Options",
-        "id": "a-2",
+        "content": "Props",
+        "id": "file-a-1",
+        "table": undefined,
         "type": "heading",
-        "url": "/a#custom-id",
-      },
-      {
-        "content": "Page b",
-        "id": "b",
-        "type": "page",
-        "url": "/b",
+        "url": "/a#props",
       },
     ]
   `);
   expect(search).toHaveBeenCalledWith(
     expect.objectContaining({
-      filters: { key: 'generated_metadata.tag', operator: 'in', value: ['ui'] },
+      // requests can't raise `topK`
+      top_k: 10,
+      filters: {
+        all: [
+          { key: 'locale', operator: 'eq', value: 'en' },
+          { key: 'tags', operator: 'contains', value: 'ui' },
+        ],
+      },
     }),
   );
+});
+
+test('Mixedbread: sync', async () => {
+  // files of the store by ID
+  const files = new Map<string, { external_id: string; metadata: object }>([
+    ['old-a', { external_id: '/a', metadata: { hash: 'outdated' } }],
+    ['removed', { external_id: '/removed', metadata: {} }],
+  ]);
+  const uploads: { chunks: unknown; body: { external_id: string } }[] = [];
+  const client = {
+    stores: {
+      files: {
+        list: async () => ({
+          data: Array.from(files, ([id, file]) => ({ id, ...file })),
+          pagination: { has_more: false },
+        }),
+        upload: async (_: string, file: File, body: { external_id: string; metadata: object }) => {
+          uploads.push({ chunks: JSON.parse(await file.text()), body });
+          files.set(`file-${uploads.length}`, body);
+        },
+      },
+    },
+    files: { delete: async (id: string) => files.delete(id) },
+  } as unknown as Mixedbread;
+  const options = {
+    storeIdentifier: 'docs',
+    documents: [
+      {
+        title: 'Page A',
+        description: 'About A',
+        url: '/a',
+        tag: 'ui',
+        structured: structure('## Props\n\n| Prop | Type |\n| --- | --- |\n| `a` | `string` |'),
+      },
+      // a locale sharing the URL
+      { title: 'Page A', url: '/a', locale: 'fr', structured: structure('Bonjour') },
+    ],
+  };
+
+  await syncMixedbread(client, options);
+  expect(uploads[0].chunks).toMatchInlineSnapshot(`
+    [
+      {
+        "generated_metadata": {
+          "kind": "page",
+        },
+        "text": "Page A",
+        "type": "text",
+      },
+      {
+        "generated_metadata": {
+          "kind": "text",
+        },
+        "text": "About A",
+        "type": "text",
+      },
+      {
+        "generated_metadata": {
+          "heading": "props",
+          "kind": "heading",
+        },
+        "text": "Props",
+        "type": "text",
+      },
+      {
+        "generated_metadata": {
+          "heading": "props",
+          "kind": "text",
+          "table": "table-0",
+        },
+        "text": "| Prop | Type |
+    | --- | --- |
+    | \`a\` | \`string\` |",
+        "type": "text",
+      },
+    ]
+  `);
+  expect(uploads.map((item) => item.body.external_id)).toEqual(['/a', 'fr:/a']);
+  expect([...files.keys()]).toEqual(['file-1', 'file-2']);
+
+  // unchanged pages are skipped
+  await syncMixedbread(client, options);
+  expect(uploads).toHaveLength(2);
+
+  // metadata changes are uploaded
+  options.documents[0].tag = 'core';
+  await syncMixedbread(client, options);
+  expect(uploads).toHaveLength(3);
 });

@@ -58,7 +58,13 @@ const buildCommands = {
   waku: 'waku build',
 };
 
-const searchProviders = ['algolia', 'orama-cloud', 'meilisearch', 'typesense'] as const;
+const searchProviders = [
+  'algolia',
+  'orama-cloud',
+  'meilisearch',
+  'typesense',
+  'mixedbread',
+] as const;
 
 const routesConfig = `import { index, route, type RouteConfig } from '@react-router/dev/routes';
 

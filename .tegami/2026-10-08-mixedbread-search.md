@@ -1,11 +1,12 @@
 ---
 packages:
-  'fumadocs-core': patch
+  'fumadocs-core': minor
   '@fumadocs/cli': patch
 ---
 
-### Group Mixedbread results by page
+### Sync Mixedbread stores with `sync()`
 
-`createMixedbreadSearchAPI()` returns each page once, followed by the headings its matched chunks start with, instead of a page for every chunk. Headings come from the `chunk_headings` of Mixedbread without `#` markers, which search dialogs now render as Markdown headings, and link to their anchors, including custom IDs like `[#id]`.
-
-The Mixedbread template of Fumadocs CLI syncs with `mxbai store sync`, as `mxbai vs sync` is removed from Mixedbread CLI v2, and reads the API key from `MXBAI_API_KEY` like the Mixedbread SDK and CLI.
+- `sync()` and `toDocuments()` from `fumadocs-core/search/mixedbread` upload a file for each page, whose chunks are its title, headings and paragraphs. Results link to their headings and render tables like other search integrations.
+- Stores synced with `mxbai store sync` need a re-sync, the frontmatter of pages is no longer read.
+- Tag filters match the tags of pages, `locale` filters results by language, and the `limit` of requests can only lower `topK`.
+- The Mixedbread template of Fumadocs CLI syncs a pre-rendered `static.json` with `sync()`, debounces searches by 300 ms, and reads the API key from `MXBAI_API_KEY`.
