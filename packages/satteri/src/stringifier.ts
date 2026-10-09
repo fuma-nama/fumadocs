@@ -18,6 +18,8 @@ interface Edit {
   text: Replacement;
   /** the range of the node that a range edit goes with */
   owner: Range | undefined;
+  /** the namespace of a plugin's edit, every namespace if unset */
+  namespace: string | undefined;
 }
 
 /** an embedded source, output in place of the `host` range */
@@ -27,7 +29,7 @@ interface Embed extends Range {
 
 declare module 'satteri' {
   interface DataMap {
-    /** the edits of plugins, for every stringifier of the document */
+    /** the edits of plugins, for the stringifiers of their namespace */
     _sourceEdits?: Edit[];
     /** sources embedded after the document's, e.g. included files */
     _embeddedSource?: string;
@@ -55,11 +57,14 @@ export function offsets(node: PositionedNode): Range | undefined {
 
 /**
  * Replace the Markdown of an authored node, ignored without a position. The last edit of a node wins.
+ *
+ * @param namespace - limit the edit to the stringifiers of a namespace, like `search` for search records
  */
 export function replaceSource(
   ctx: MdastVisitorContext,
   node: PositionedNode,
   text: Replacement,
+  namespace?: 'search' | (string & {}),
 ): void {
   const range = offsets(node);
   if (range && range.end > range.start)
@@ -68,6 +73,7 @@ export function replaceSource(
       end: range.end,
       text,
       owner: undefined,
+      namespace,
     });
 }
 
@@ -132,7 +138,13 @@ export interface Stringifier {
   within: (range: Range, outer: Range) => boolean;
 }
 
-export function createStringifier(ctx: MdastVisitorContext): Stringifier {
+/**
+ * @param namespace - also apply the edits of this namespace, like `search` for search records
+ */
+export function createStringifier(
+  ctx: MdastVisitorContext,
+  namespace?: 'search' | (string & {}),
+): Stringifier {
   const source = ctx.source + (ctx.data._embeddedSource ?? '');
   const embeds = ctx.data._embeds ?? [];
   const own: Edit[] = [];
@@ -143,7 +155,10 @@ export function createStringifier(ctx: MdastVisitorContext): Stringifier {
   function getEdits(): Edit[] {
     if (edits) return edits;
     // the edits of plugins first, so the stringifier's own win
-    edits = ctx.data._sourceEdits ? ctx.data._sourceEdits.concat(own) : own.slice();
+    edits = [];
+    for (const edit of ctx.data._sourceEdits ?? [])
+      if (edit.namespace === undefined || edit.namespace === namespace) edits.push(edit);
+    for (const edit of own) edits.push(edit);
     // an outer edit comes first, edits of the same range keep their order
     return edits.sort((a, b) => a.start - b.start || b.end - a.end);
   }
@@ -213,11 +228,17 @@ export function createStringifier(ctx: MdastVisitorContext): Stringifier {
     replace(node, text) {
       const range = offsets(node);
       if (!range || range.end === range.start) return;
-      own.push({ start: range.start, end: range.end, text, owner: undefined });
+      own.push({
+        start: range.start,
+        end: range.end,
+        text,
+        owner: undefined,
+        namespace: undefined,
+      });
       edits = undefined;
     },
     edit(start, end, text, node) {
-      own.push({ start, end, text, owner: node && offsets(node) });
+      own.push({ start, end, text, owner: node && offsets(node), namespace: undefined });
       edits = undefined;
     },
     slice(start, end) {

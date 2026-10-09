@@ -1,6 +1,6 @@
-import { type BlockContent, type Code, type Root } from 'mdast';
+import { type BlockContent, type Code, type Nodes, type Root } from 'mdast';
 import { type Transformer } from 'unified';
-import { visit } from 'unist-util-visit';
+import { walk } from './utils';
 import type { VFile } from 'vfile';
 
 type Awaitable<T> = T | Promise<T>;
@@ -35,8 +35,8 @@ export function remarkDocGen({ generators = [] }: RemarkDocGenOptions): Transfor
     generators.forEach((gen) => gen.onFile?.(tree, file));
     const queue: Promise<void>[] = [];
 
-    visit(tree, 'code', (code, _, parent) => {
-      if (code.lang !== 'json' || !code.meta || !parent) return;
+    walk<Nodes>(tree, (code, _, parent) => {
+      if (code.type !== 'code' || code.lang !== 'json' || !code.meta || !parent) return;
 
       const matches = metaRegex.exec(code.meta);
       if (!matches) return;

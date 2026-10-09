@@ -1,9 +1,8 @@
 import Slugger from 'github-slugger';
-import type { Heading, Root } from 'mdast';
+import type { Heading, Nodes, Root } from 'mdast';
 import type { Transformer } from 'unified';
-import { visit } from 'unist-util-visit';
 import type { TOCItemType } from '@/toc';
-import { flattenNode } from '@/mdx-plugins/utils';
+import { flattenNode, walk } from '@/mdx-plugins/utils';
 import { headingIdRegex } from '@/mdx-plugins/heading-id';
 
 export interface RemarkHeadingOptions {
@@ -52,7 +51,8 @@ export function remarkHeading({
     const toc: TOCItemType[] = [];
     slugger?.reset();
 
-    visit(root, 'heading', (heading) => {
+    walk<Nodes>(root, (heading) => {
+      if (heading.type !== 'heading') return;
       heading.data ||= {};
       heading.data.hProperties ||= {};
       const props = heading.data.hProperties;

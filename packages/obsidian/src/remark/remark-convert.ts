@@ -1,6 +1,5 @@
-import type { Blockquote, PhrasingContent, Root } from 'mdast';
+import type { Blockquote, Nodes, PhrasingContent, Root } from 'mdast';
 import type { Transformer } from 'unified';
-import { visit } from 'unist-util-visit';
 import type { VFile } from 'vfile';
 import { replaceSource } from 'fumadocs-core/mdx-plugins/stringifier';
 import { separate } from '@/utils/mdast-separate';
@@ -8,6 +7,7 @@ import { createCallout } from '@/utils/mdast-create';
 import { resolveInternalHref, VaultResolver } from '@/build-resolver';
 import { replace } from '@/utils/mdast-replace';
 import { getFileHref, getHeadingHash } from '@/utils/get-refs';
+import { walk } from '@/utils/mdast-walk';
 
 const RegexCalloutHead = /^\[!(?<type>\w+)](?<collapsible>\+)?/;
 
@@ -55,7 +55,7 @@ export function remarkConvert({ resolver }: RemarkConvertOptions): Transformer<R
     const sourceFile = file.data.source;
     if (!sourceFile) return;
 
-    visit(tree, ['blockquote', 'link', 'image'], (node) => {
+    walk<Nodes>(tree, (node) => {
       if (node.type === 'blockquote') {
         const callout = resolveCallout(node, file);
         if (callout) replace(node, callout);

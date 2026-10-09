@@ -1,12 +1,12 @@
 // from internal remark plugins in https://github.com/mdx-js/mdx/blob/main/packages/mdx/lib/plugin/remark-mark-and-unravel.js
 // we need to ensure consistency with MDX.js when parsing embed content in `remark-include`
-import { visit } from 'unist-util-visit';
 import type { Transformer } from 'unified';
-import type { Root, RootContent } from 'mdast';
+import type { Nodes, Root, RootContent } from 'mdast';
+import { walk } from './mdast-utils';
 
 export function remarkMarkAndUnravel(): Transformer<Root, Root> {
   return (tree) => {
-    visit(tree, function (node, index, parent) {
+    walk<Nodes>(tree, (node, index, parent) => {
       let offset = -1;
       let all = true;
       let oneOrMore = false;
@@ -52,7 +52,8 @@ export function remarkMarkAndUnravel(): Transformer<Root, Root> {
           }
 
           parent.children.splice(index, 1, ...newChildren);
-          return index;
+          // the new nodes only hold phrasing content, nothing in them to unravel
+          return 'skip';
         }
       }
     });

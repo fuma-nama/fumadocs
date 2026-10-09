@@ -1,7 +1,6 @@
 import type { Transformer } from 'unified';
-import type { Root, RootContent } from 'mdast';
-import { visit } from 'unist-util-visit';
-import { flattenNode } from './utils';
+import type { Nodes, Root, RootContent } from 'mdast';
+import { flattenNode, walk } from './utils';
 import Slugger from 'github-slugger';
 import { createHash } from 'node:crypto';
 
@@ -55,7 +54,7 @@ export function remarkBlockId({
   return (tree) => {
     const slugger = new Slugger();
 
-    visit(tree, (node) => {
+    walk<Nodes>(tree, (node) => {
       if (node.type === 'root' || node.data?.hProperties?.id) return;
 
       const resolved = shouldGenerate(node);

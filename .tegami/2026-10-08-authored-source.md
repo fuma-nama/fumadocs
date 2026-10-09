@@ -13,7 +13,7 @@ packages:
 
 `remarkLLMs()` and `remarkStructure()` of `fumadocs-core` slice their Markdown from the authored source like Sätteri, instead of stringifying the syntax tree. It is much faster, Markdown is no longer escaped or reformatted, and local images keep their addresses. Re-sync your search indexes to pick up the new records.
 
-- Plugins record the Markdown of content they replace with `replaceSource()` or `embedSource()` from `fumadocs-core/mdx-plugins/stringifier`, in place of `data._stringify`, and add search records with `data.structuredData`. Nodes they insert otherwise are left out.
+- Plugins record the Markdown of content they replace with `replaceSource()` or `embedSource()` from `fumadocs-core/mdx-plugins/stringifier`, in place of `data._stringify`, and add search records with `data.structuredData`. Nodes they insert otherwise are left out. A `namespace` limits an edit to the stringifiers of that namespace, like `search` for search records.
 - Search records are always Markdown, also in Sätteri. `filterElement` replaces `stringify.filterElement`, it chooses the JSX elements kept as HTML tags (`File`, `TypeTable`, `Callout` and `Card` by default) that search dialogs render as components. Other elements and links are replaced by their content, images are removed, and an element on one line is recorded like a paragraph.
 - Removed `defaultStringifier()` (use `createStringifier()`), `StringifyOptions`, `allowedMdxAttributes`, `filterMdxAttributes`, `placeholder()` (use `mdxAsPlaceholder`), and the `stringify` and `mdast-util-to-markdown` options of both plugins.
 - Included content goes through the plugins like the document's own, Sätteri includes `.md` files as Markdown.

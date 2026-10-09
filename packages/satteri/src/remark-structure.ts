@@ -144,7 +144,7 @@ export function remarkStructure({
       options: { position: true },
       before(_root: unknown, ctx: MdastVisitorContext) {
         ctx.data.structuredData ??= data;
-        s = createStringifier(ctx);
+        s = createStringifier(ctx, 'search');
 
         const frontmatter = ctx.data.frontmatter as
           | { _openapi?: { structuredData?: StructuredData } }

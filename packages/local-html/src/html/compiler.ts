@@ -1,10 +1,10 @@
 import { fromHtml } from 'hast-util-from-html';
-import { visit, SKIP } from 'unist-util-visit';
 import Slugger from 'github-slugger';
 import type { RehypeTOCItemType, StructuredData } from 'fumadocs-core/mdx-plugins';
-import type { Element, ElementContent, Properties, Root } from 'hast';
+import type { Element, ElementContent, Nodes, Properties, Root } from 'hast';
 import type { RehypeCodeOptions } from 'fumadocs-core/mdx-plugins/rehype-code';
 import { highlightCode } from './highlight';
+import { walk } from './walk';
 
 export interface ProcessHtmlOptions {
   /**
@@ -100,8 +100,8 @@ function toClassNames(value: Properties[string]): string[] {
 export function textOf(node: Element | Root): string {
   let out = '';
 
-  visit(node, 'text', (text) => {
-    out += text.value;
+  walk<Nodes>(node, (child) => {
+    if (child.type === 'text') out += child.value;
   });
 
   return out;
@@ -111,10 +111,10 @@ export function textOf(node: Element | Root): string {
 function findScope(root: Root, tagName: string): Element | undefined {
   const found: Element[] = [];
 
-  visit(root, 'element', (element) => {
-    if (element.tagName !== tagName) return;
+  walk<Nodes>(root, (element) => {
+    if (element.type !== 'element' || element.tagName !== tagName) return;
     found.push(element);
-    return SKIP;
+    return 'skip';
   });
 
   const hasContent = (child: ElementContent) =>
@@ -134,8 +134,9 @@ export async function processHtml(
 
   const slugger = new Slugger();
   // seed with the ids of the document, so generated ones cannot collide
-  visit(input, 'element', (element) => {
-    if (typeof element.properties.id === 'string') slugger.slug(element.properties.id);
+  walk<Nodes>(input, (element) => {
+    if (element.type === 'element' && typeof element.properties.id === 'string')
+      slugger.slug(element.properties.id);
   });
 
   const toc: RehypeTOCItemType[] = [];

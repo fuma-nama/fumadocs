@@ -1,10 +1,10 @@
-import type { Root } from 'mdast';
-import { visit } from 'unist-util-visit';
+import type { Nodes, Root } from 'mdast';
 import type { Transformer } from 'unified';
 import type { MdxJsxAttribute, MdxJsxFlowElement } from 'mdast-util-mdx';
 import type { VFile } from 'vfile';
 import path from 'node:path';
 import { replaceSource } from './stringifier';
+import { walk } from './utils';
 
 export interface FileNode {
   depth: number;
@@ -166,7 +166,7 @@ export function remarkMdxFiles(options: RemarkMdxFilesOptions = {}): Transformer
   return async (tree, file) => {
     const queue: Promise<void>[] = [];
 
-    visit(tree, ['code', 'mdxJsxFlowElement'] as const, (node) => {
+    walk<Nodes>(tree, (node) => {
       if (node.type === 'code') {
         if (node.lang !== lang || !node.value) return;
 

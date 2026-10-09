@@ -1,8 +1,8 @@
-import type { Root } from 'mdast';
+import type { Nodes, Root } from 'mdast';
 import type { ReactNode } from 'react';
 import { remark } from 'remark';
-import { visit } from 'unist-util-visit';
 import type { StructuredDataContent } from '@/mdx-plugins/remark-structure';
+import { walk } from '@/mdx-plugins/utils';
 import { buildRegexFromQuery } from './highlight';
 
 export interface SortedResult<Content = string> {
@@ -124,7 +124,8 @@ export function createContentHighlighter(query: string | RegExp) {
 }
 
 function highlightInTree(tree: Root, regex: RegExp) {
-  visit(tree, 'text', (node) => {
+  walk<Nodes>(tree, (node) => {
+    if (node.type !== 'text') return;
     let out = '';
     const content = node.value;
 

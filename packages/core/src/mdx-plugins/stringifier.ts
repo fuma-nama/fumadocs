@@ -33,7 +33,7 @@ interface DocumentState {
   embeds: Embed[];
   /** the ranges of embedded nodes, after the document's source */
   ranges: WeakMap<Nodes, Range>;
-  replacements: Map<Nodes, Replacement>;
+  replacements: { node: Nodes; text: Replacement; namespace: string | undefined }[];
 }
 
 const documents = new WeakMap<VFile, DocumentState>();
@@ -43,7 +43,7 @@ function getDocument(file: VFile): DocumentState {
   if (!doc)
     documents.set(
       file,
-      (doc = { embedded: '', embeds: [], ranges: new WeakMap(), replacements: new Map() }),
+      (doc = { embedded: '', embeds: [], ranges: new WeakMap(), replacements: [] }),
     );
   return doc;
 }
@@ -56,9 +56,16 @@ function getRange(node: Nodes): Range | undefined {
 
 /**
  * Replace the Markdown of an authored node, ignored without a position. The last edit of a node wins.
+ *
+ * @param namespace - limit the edit to the stringifiers of a namespace, like `search` for search records
  */
-export function replaceSource(file: VFile, node: Nodes, text: Replacement): void {
-  getDocument(file).replacements.set(node, text);
+export function replaceSource(
+  file: VFile,
+  node: Nodes,
+  text: Replacement,
+  namespace?: 'search' | (string & {}),
+): void {
+  getDocument(file).replacements.push({ node, text, namespace });
 }
 
 /**
@@ -115,13 +122,19 @@ export interface Stringifier {
   within: (range: Range, outer: Range) => boolean;
 }
 
-export function createStringifier(file: VFile): Stringifier {
+/**
+ * @param namespace - also apply the edits of this namespace, like `search` for search records
+ */
+export function createStringifier(file: VFile, namespace?: 'search' | (string & {})): Stringifier {
   const doc = documents.get(file);
   const ranges = doc?.ranges;
   const embeds = doc?.embeds ?? [];
   const source = String(file) + (doc?.embedded ?? '');
   // the edits of plugins first, so the stringifier's own win
-  const replaced = new Map(doc?.replacements);
+  const replaced = new Map<Nodes, Replacement>();
+  for (const edit of doc?.replacements ?? [])
+    if (edit.namespace === undefined || edit.namespace === namespace)
+      replaced.set(edit.node, edit.text);
   const own: Edit[] = [];
   // nodes whose replacement is running, it doesn't apply inside itself
   const active = new Set<Nodes>();

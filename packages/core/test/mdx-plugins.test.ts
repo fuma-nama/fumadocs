@@ -26,11 +26,11 @@ import { remarkSteps } from '@/mdx-plugins/remark-steps';
 import remarkDirective from 'remark-directive';
 import { remarkLLMs } from '@/mdx-plugins/remark-llms';
 import { renderPlaceholder } from '@/mdx-plugins/remark-llms.runtime';
-import { visit } from 'unist-util-visit';
-import type { Heading, Root, RootContent } from 'mdast';
+import type { Heading, Nodes, Root, RootContent } from 'mdast';
 import type { MdxJsxFlowElement } from 'mdast-util-mdx';
 import { VFile } from 'vfile';
 import { embedSource, type Replacement, replaceSource } from '@/mdx-plugins/stringifier';
+import { walk } from '@/mdx-plugins/utils';
 
 const cwd = path.dirname(fileURLToPath(import.meta.url));
 
@@ -128,8 +128,8 @@ test('Remark Structure: embedded content and elements in records', async () => {
   const processor = remark()
     .use(remarkMdx)
     .use(() => (tree: Root, file: VFile) => {
-      visit(tree, 'mdxJsxFlowElement', (node) => {
-        if (node.name !== 'Embed') return;
+      walk<Nodes>(tree, (node) => {
+        if (node.type !== 'mdxJsxFlowElement' || node.name !== 'Embed') return;
         const source = 'Embedded *text*.';
         const { children } = remark().parse(source);
         embedSource(file, node, source, children);
@@ -201,6 +201,32 @@ test('Remark Steps', async () => {
 
   await expect(result.value).toMatchFileSnapshot(
     path.resolve(cwd, './fixtures/remark-steps.output.md'),
+  );
+});
+
+test('Remark Steps: tags in search records only', async () => {
+  const file = new VFile(
+    '### Install [step]\n\nRun it.\n\n### Configure [step] [#config]\n\n> ### Quoted [step]\n',
+  );
+  const processor = remark()
+    .use(remarkHeading)
+    .use(remarkSteps)
+    .use(remarkStructure)
+    .use(remarkLLMs, { _data: true });
+  await processor.run(processor.parse(file), file);
+
+  expect(file.data.structuredData).toEqual({
+    headings: [
+      { id: 'install-step', content: 'Install' },
+      { id: 'config', content: 'Configure' },
+    ],
+    contents: [
+      { heading: 'install-step', content: 'Run it.' },
+      { heading: 'config', content: '> ### Quoted' },
+    ],
+  });
+  expect(file.data.markdown).toBe(
+    '### Install [step] [#install-step]\n\nRun it.\n\n### Configure [step] [#config]\n\n> ### Quoted [step] [#quoted-step]\n',
   );
 });
 
@@ -382,7 +408,7 @@ test('Remark LLMs: keep the authored source', async () => {
   const result = await remark()
     .use(remarkMdx)
     .use(() => (tree: Root, file: VFile) => {
-      visit(tree, (node, index, parent) => {
+      walk<Nodes>(tree, (node, index, parent) => {
         // generated nodes don't change the output
         if (node.type === 'image' && parent && index !== undefined)
           parent.children[index] = {
@@ -451,7 +477,7 @@ test('Remark LLMs: ignore generated nodes', async () => {
   };
   const generated = () => {
     const tree = remark().parse('## Generated\n\nGenerated text.');
-    visit(tree, (node) => {
+    walk<Nodes>(tree, (node) => {
       delete node.position;
     });
     return tree.children;
@@ -482,8 +508,8 @@ test('Remark LLMs: nested replacements', async () => {
   };
   const find = (tree: Root, name: string) => {
     const out: MdxJsxFlowElement[] = [];
-    visit(tree, 'mdxJsxFlowElement', (node) => {
-      if (node.name === name) out.push(node);
+    walk<Nodes>(tree, (node) => {
+      if (node.type === 'mdxJsxFlowElement' && node.name === name) out.push(node);
     });
     return out;
   };
@@ -558,7 +584,9 @@ test('Remark LLMs: replaced headings', async () => {
     const result = await remark()
       .use(remarkMdx)
       .use(() => (tree: Root, file: VFile) => {
-        visit(tree, 'heading', (node) => replaceSource(file, node, text(node)));
+        walk<Nodes>(tree, (node) => {
+          if (node.type === 'heading') replaceSource(file, node, text(node));
+        });
       })
       .use(remarkHeading)
       .use(remarkLLMs, { _data: true })
@@ -584,12 +612,12 @@ test('Remark LLMs: replacements of embedded content', async () => {
       const embedded = remark().use(remarkMdx).parse(source);
       const { children } = embedded;
       // before and after embedding
-      visit(embedded, (node) => {
+      walk<Nodes>(embedded, (node) => {
         if (node.type === 'mdxJsxTextElement' && node.name === 'A') replaceSource(file, node, 'a');
       });
       embedSource(file, target, source, children);
       Object.assign(target, { type: 'root', children });
-      visit(tree, (node) => {
+      walk<Nodes>(tree, (node) => {
         if (node.type === 'mdxJsxTextElement' && node.name === 'B') replaceSource(file, node, 'b');
         if (node.type === 'mdxJsxFlowElement' && node.name === 'C')
           replaceSource(file, node, 'Multi\n\nline');
@@ -623,7 +651,7 @@ test('Remark LLMs: edits of plugins', async () => {
   const result = await remark()
     .use(remarkMdx)
     .use(() => (tree: Root, file: VFile) => {
-      visit(tree, (node, index, parent) => {
+      walk<Nodes>(tree, (node, index, parent) => {
         if (node.type !== 'mdxJsxFlowElement' && node.type !== 'mdxJsxTextElement') return;
         if (node.name === 'Replace') replaceSource(file, node, '**replaced**');
         if (node.name === 'Embed') {

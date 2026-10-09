@@ -1,9 +1,9 @@
 import { describe, expect, test } from 'vitest';
 import { remark } from 'remark';
 import remarkRehype from 'remark-rehype';
-import { visit } from 'unist-util-visit';
-import type { Element, Root } from 'hast';
+import type { Nodes, Root } from 'hast';
 import { rehypeCode } from '@/mdx-plugins';
+import { walk } from '@/mdx-plugins/utils';
 
 async function process(source: string): Promise<Root> {
   const processor = remark().use(remarkRehype).use(rehypeCode, { inline: 'tailing-curly-colon' });
@@ -18,12 +18,13 @@ async function process(source: string): Promise<Root> {
 function countTokens(tree: Root, tagName: 'pre' | 'code'): number {
   let count = 0;
 
-  visit(tree, 'element', (node: Element) => {
-    if (node.tagName !== tagName) return;
+  walk<Nodes>(tree, (node) => {
+    if (node.type !== 'element' || node.tagName !== tagName) return;
     const classes = node.properties?.class ?? node.properties?.className;
     if (!String(classes ?? '').includes('shiki')) return;
 
-    visit(node, 'element', (child: Element) => {
+    walk<Nodes>(node, (child) => {
+      if (child.type !== 'element') return;
       if (child.tagName === 'span' && typeof child.properties?.style === 'string') count++;
     });
   });

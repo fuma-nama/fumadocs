@@ -1,6 +1,6 @@
-import type { Root } from 'mdast';
+import type { Nodes, Root } from 'mdast';
 import type { Processor, Transformer } from 'unified';
-import { visit } from 'unist-util-visit';
+import { walk } from '@/utils/mdast-walk';
 
 const RegexDelimiter = /(?<!\\)%%/g;
 
@@ -11,8 +11,9 @@ export function remarkObsidianComment(this: Processor): Transformer<Root, Root> 
     if (!source.includes('%%')) return;
 
     const code: [start: number, end: number][] = [];
-    visit(tree, ['code', 'inlineCode'], (node) => {
-      code.push([node.position!.start.offset!, node.position!.end.offset!]);
+    walk<Nodes>(tree, (node) => {
+      if (node.type === 'code' || node.type === 'inlineCode')
+        code.push([node.position!.start.offset!, node.position!.end.offset!]);
     });
 
     let value = '';

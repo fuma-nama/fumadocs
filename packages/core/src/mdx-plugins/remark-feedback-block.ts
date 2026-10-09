@@ -1,9 +1,8 @@
 import type { Transformer } from 'unified';
-import type { BlockContent, Root, RootContent } from 'mdast';
+import type { BlockContent, Nodes, Root, RootContent } from 'mdast';
 import type { MdxJsxFlowElement } from 'mdast-util-mdx';
-import { visit } from 'unist-util-visit';
 import { createHash } from 'node:crypto';
-import { flattenNode } from './utils';
+import { flattenNode, walk } from './utils';
 
 export interface RemarkFeedbackBlockOptions {
   /**
@@ -67,7 +66,7 @@ export function remarkFeedbackBlock({
   return (tree) => {
     const counts = new Map<string, number>();
 
-    visit(tree, (node, index, parent) => {
+    walk<Nodes>(tree, (node, index, parent) => {
       if (node.type === 'root' || !parent || typeof index !== 'number') return;
       const resolved = resolve(node);
       if (resolved === false) return;

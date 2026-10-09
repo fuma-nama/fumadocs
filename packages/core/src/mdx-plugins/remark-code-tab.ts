@@ -1,12 +1,12 @@
 import type { Processor, Transformer } from 'unified';
-import type { BlockContent, Code, Root, RootContent } from 'mdast';
-import { visit } from 'unist-util-visit';
+import type { BlockContent, Code, Nodes, Root, RootContent } from 'mdast';
 import type { MdxJsxFlowElement } from 'mdast-util-mdx';
 import {
   type CodeBlockTabsOptions,
   generateCodeBlockTabs,
   parseCodeBlockAttributes,
 } from '@/mdx-plugins/codeblock-utils';
+import { walk } from '@/mdx-plugins/utils';
 
 type TabType = 'CodeBlockTabs' | 'Tabs';
 export interface RemarkCodeTabOptions {
@@ -206,7 +206,7 @@ export function remarkCodeTab(
   const { parseMdx = false, Tabs = 'CodeBlockTabs' } = options;
 
   return (tree) => {
-    visit(tree, (node) => {
+    walk<Nodes>(tree, (node) => {
       if (!('children' in node) || node.data?._code_tab_visited) return 'skip';
       let localTabs: TabType = Tabs;
       let localParseMdx = parseMdx;
@@ -296,7 +296,7 @@ function processTabValue(nodes: Code[]) {
 function mdxToAst(processor: Processor, name: string): Root {
   const node = processor.parse(name) as Root;
   // positions in the tab name, not the document
-  visit(node, (child) => {
+  walk<Nodes>(node, (child) => {
     delete child.position;
   });
   node.children = node.children.flatMap((child) => {

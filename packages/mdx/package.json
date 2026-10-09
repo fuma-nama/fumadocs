@@ -72,7 +72,6 @@
     "tinyglobby": "^0.2.17",
     "unified": "^11.0.5",
     "unist-util-remove-position": "^5.0.0",
-    "unist-util-visit": "^5.1.0",
     "vfile": "^6.0.3",
     "yaml": "^2.9.1",
     "yuku-analyzer": "^0.17.0",

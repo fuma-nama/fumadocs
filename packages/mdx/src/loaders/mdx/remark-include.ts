@@ -1,5 +1,4 @@
 import { type Processor, type Transformer, unified } from 'unified';
-import { visit } from 'unist-util-visit';
 import type { Code, Node, Nodes, Root, RootContent } from 'mdast';
 import * as path from 'node:path';
 import * as fs from 'node:fs/promises';
@@ -10,7 +9,7 @@ import { VFile } from 'vfile';
 import type { Directives } from 'mdast-util-directive';
 import { embedSource, replaceSource } from 'fumadocs-core/mdx-plugins/stringifier';
 import { remarkMarkAndUnravel } from '@/loaders/mdx/remark-unravel';
-import { flattenNode } from './mdast-utils';
+import { flattenNode, walk } from './mdast-utils';
 
 /**
  * VS Code–style region extraction
@@ -155,7 +154,7 @@ function extractSection(root: Root, section: string): Root | undefined {
   let nodes: RootContent[] | undefined;
   let capturingHeadingContent = false;
 
-  visit(root, (node) => {
+  walk<Nodes>(root, (node) => {
     if (node.type === 'heading') {
       if (capturingHeadingContent) {
         return false;
@@ -274,9 +273,8 @@ export function remarkInclude(this: Processor): Transformer<Root, Root> {
   async function update(tree: Root, file: VFile, root: VFile) {
     const queue: Promise<void>[] = [];
 
-    visit(tree, ElementLikeTypes, (_node, _, parent) => {
-      const node = _node as ElementLikeContent;
-      if (node.name !== TagName) return;
+    walk<Nodes>(tree, (node, _, parent) => {
+      if (!isElementLike(node) || node.name !== TagName) return;
 
       const specifier = flattenNode(node);
       if (specifier.length === 0) return 'skip';
@@ -288,7 +286,8 @@ export function remarkInclude(this: Processor): Transformer<Root, Root> {
         relativePath,
       );
 
-      const target = parent && parent.type === 'paragraph' ? parent : node;
+      const host = parent as Nodes | undefined;
+      const target = host?.type === 'paragraph' ? host : node;
       queue.push(
         embedContent(target, targetPath, section, attributes, file, root).then((replace) => {
           // the node keeps its position for the stringifier

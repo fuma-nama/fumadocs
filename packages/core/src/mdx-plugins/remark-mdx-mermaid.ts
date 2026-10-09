@@ -1,8 +1,8 @@
-import { visit } from 'unist-util-visit';
 import type { Transformer } from 'unified';
-import type { Root } from 'mdast';
+import type { Nodes, Root } from 'mdast';
 import type { MdxJsxFlowElement } from 'mdast-util-mdx';
 import { replaceSource } from './stringifier';
+import { walk } from './utils';
 
 function toMDX(code: string): MdxJsxFlowElement {
   return {
@@ -33,7 +33,8 @@ export function remarkMdxMermaid(options: RemarkMdxMermaidOptions = {}): Transfo
   const { lang = 'mermaid' } = options;
 
   return (tree, file) => {
-    visit(tree, 'code', (node, idx, parent) => {
+    walk<Nodes>(tree, (node, idx, parent) => {
+      if (node.type !== 'code') return;
       if (node.lang !== lang || !node.value || typeof idx !== 'number' || !parent) return;
 
       // the element is generated, its Markdown is the authored code block

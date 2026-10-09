@@ -3,7 +3,7 @@ import { remark } from 'remark';
 import remarkGfm from 'remark-gfm';
 import type { PluggableList, Transformer } from 'unified';
 import { VFile } from 'vfile';
-import { isJsxElement, toMdxExport } from './utils';
+import { isJsxElement, toMdxExport, walk } from './utils';
 import { createStringifier, type Stringifier } from './stringifier';
 import { headingIdRegex } from './heading-id';
 import type { MdxJsxFlowElement, MdxJsxTextElement } from 'mdast-util-mdx';
@@ -117,7 +117,7 @@ export function remarkStructure({
 
   return (tree, file) => {
     const data: StructuredData = { contents: [], headings: [] };
-    const s = createStringifier(file);
+    const s = createStringifier(file, 'search');
 
     // Fumadocs OpenAPI Generated Structured Data
     if (file.data.frontmatter) {
@@ -203,12 +203,7 @@ export function remarkStructure({
         });
       }
     };
-    // a walk of our own, `unist-util-visit` finds the index of each node in its parent
-    const walk = (node: Nodes) => {
-      collect(node);
-      if ('children' in node) for (const child of node.children) walk(child);
-    };
-    walk(tree);
+    walk<Nodes>(tree, collect);
     for (const record of records) record();
 
     file.data.structuredData = data;

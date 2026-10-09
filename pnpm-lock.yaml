@@ -259,12 +259,6 @@ importers:
       d3-force:
         specifier: ^3.0.0
         version: 3.0.0
-      estree-util-build-jsx:
-        specifier: ^3.0.1
-        version: 3.0.1
-      estree-util-to-js:
-        specifier: ^2.0.0
-        version: 2.0.0
       feed:
         specifier: ^6.0.0
         version: 6.0.0
@@ -301,9 +295,6 @@ importers:
       graphql:
         specifier: ^17.0.2
         version: 17.0.2
-      hast-util-to-jsx-runtime:
-        specifier: ^2.3.6
-        version: 2.3.6(supports-color@8.1.1)
       katex:
         specifier: 0.19.0
         version: 0.19.0
@@ -346,9 +337,6 @@ importers:
       takumi-js:
         specifier: ^2.14.0
         version: 2.14.0(csstype@3.2.3)(preact@10.29.8)(react@19.3.0)
-      unist-util-visit:
-        specifier: ^5.1.0
-        version: 5.1.0
       zod:
         specifier: ^4.6.5
         version: 4.6.5
@@ -371,9 +359,6 @@ importers:
       '@types/d3-force':
         specifier: ^3.0.10
         version: 3.0.10
-      '@types/estree':
-        specifier: ^1.0.9
-        version: 1.0.9
       '@types/hast':
         specifier: ^3.0.5
         version: 3.0.5
@@ -2138,9 +2123,6 @@ importers:
       remend:
         specifier: ^1.4.0
         version: 1.4.0
-      unist-util-visit:
-        specifier: ^5.1.0
-        version: 5.1.0
     devDependencies:
       '@ai-sdk/react':
         specifier: ^4.0.130
@@ -2546,9 +2528,6 @@ importers:
       unified:
         specifier: ^11.0.5
         version: 11.0.5
-      unist-util-visit:
-        specifier: ^5.1.0
-        version: 5.1.0
       vfile:
         specifier: ^6.0.3
         version: 6.0.3
@@ -2743,9 +2722,6 @@ importers:
       unified:
         specifier: ^11.0.5
         version: 11.0.5
-      unist-util-visit:
-        specifier: ^5.1.0
-        version: 5.1.0
       vfile:
         specifier: ^6.0.3
         version: 6.0.3
@@ -2813,9 +2789,6 @@ importers:
       unified:
         specifier: ^11.0.5
         version: 11.0.5
-      unist-util-visit:
-        specifier: ^5.1.0
-        version: 5.1.0
     devDependencies:
       '@types/mdast':
         specifier: ^4.0.4
@@ -3069,9 +3042,6 @@ importers:
       unified:
         specifier: ^11.0.5
         version: 11.0.5
-      unist-util-visit:
-        specifier: ^5.1.0
-        version: 5.1.0
     devDependencies:
       '@types/hast':
         specifier: ^3.0.5
@@ -3224,9 +3194,6 @@ importers:
       unist-util-remove-position:
         specifier: ^5.0.0
         version: 5.0.0
-      unist-util-visit:
-        specifier: ^5.1.0
-        version: 5.1.0
       vfile:
         specifier: ^6.0.3
         version: 6.0.3
@@ -3425,9 +3392,6 @@ importers:
       unified:
         specifier: ^11.0.5
         version: 11.0.5
-      unist-util-visit:
-        specifier: ^5.1.0
-        version: 5.1.0
       vfile:
         specifier: ^6.0.3
         version: 6.0.3
@@ -3719,9 +3683,6 @@ importers:
       unified:
         specifier: ^11.0.5
         version: 11.0.5
-      unist-util-visit:
-        specifier: ^5.1.0
-        version: 5.1.0
       vfile:
         specifier: ^6.0.3
         version: 6.0.3
@@ -4424,9 +4385,6 @@ importers:
       unified:
         specifier: ^11.0.5
         version: 11.0.5
-      unist-util-visit:
-        specifier: ^5.1.0
-        version: 5.1.0
     devDependencies:
       '@mdx-js/mdx':
         specifier: ^3.1.1

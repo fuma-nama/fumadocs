@@ -9,10 +9,10 @@ import {
 import type { StructuredData } from 'fumadocs-core/mdx-plugins';
 import type { DynamicSource, MetaData, PageData, StaticSource } from 'fumadocs-core/source';
 import * as defaultSchemas from 'fumadocs-core/source/schema';
-import type { Element, Root } from 'hast';
-import { visit } from 'unist-util-visit';
+import type { Nodes, Root } from 'hast';
 import { parseHtml, processHtml, textOf, type ProcessHtmlOptions } from './html/compiler';
 import { fromAst, type HtmlRenderer } from './html/renderer';
+import { walk } from './html/walk';
 
 export const defaultInclude = ['**/*.{html,json}'];
 
@@ -132,7 +132,8 @@ function extractMetadata(tree: Root): { title?: string; metadata: Record<string,
   const metadata: Record<string, string> = {};
   let title: string | undefined;
 
-  visit(tree, 'element', (element: Element) => {
+  walk<Nodes>(tree, (element) => {
+    if (element.type !== 'element') return;
     // `<title>` also exists inside SVG; only the document title is meaningful
     if (element.tagName === 'svg') return 'skip';
 

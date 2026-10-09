@@ -44,6 +44,13 @@ export function remarkNote() {
 - A function runs after every plugin. `s.stringify(node)` and `s.inner(node)` (its children) give their Markdown, with the edits inside.
 - When a node is edited more than once, the last edit wins.
 
+To edit a namespace only, like `search` for the records of Remark Structure, pass it as the last argument:
+
+```ts
+// the Markdown for LLMs keeps the tag, search records don't
+replaceSource(file, node, (s) => s.stringify(node).replace(' [step]', ''), 'search');
+```
+
 For search, a plugin adds the records of its nodes with [`data.structuredData`](/docs/headless/mdx/structure#plugins).
 
 ## Embedded Content

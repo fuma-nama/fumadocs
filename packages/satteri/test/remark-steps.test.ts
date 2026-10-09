@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest';
 import { compileMdx } from '@/compile';
 import { applySatteriPreset } from '@/preset';
 import { remarkSteps } from '@/remark-steps';
+import { remarkLlms } from '@/remark-llms';
 
 async function compile(source: string) {
   const options = await applySatteriPreset({
@@ -29,6 +30,33 @@ describe('remark-steps', () => {
 
     expect(code).toContain('fd-steps');
     expect(code).not.toContain('[step]');
+  });
+
+  it('leaves the [step] tag out of search records only', async () => {
+    const options = await applySatteriPreset({
+      rehypeCodeOptions: false,
+      mdastPlugins: [remarkSteps(), remarkLlms()],
+    })('bundler');
+    const { data } = await compileMdx({
+      source:
+        '### Install [step]\n\nRun it.\n\n### Configure [step] [#config]\n\n> ### Quoted [step]\n',
+      filePath: '/test.mdx',
+      options,
+    });
+
+    expect(data.structuredData).toEqual({
+      headings: [
+        { id: 'install-step', content: 'Install' },
+        { id: 'config', content: 'Configure' },
+      ],
+      contents: [
+        { heading: 'install-step', content: 'Run it.' },
+        { heading: 'config', content: '> ### Quoted' },
+      ],
+    });
+    expect(data.markdown).toBe(
+      '### Install [step] [#install-step]\n\nRun it.\n\n### Configure [step] [#config]\n\n> ### Quoted [step] [#quoted-step]\n',
+    );
   });
 
   it('ends the group at a non-step heading', async () => {

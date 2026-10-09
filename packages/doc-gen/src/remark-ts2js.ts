@@ -1,10 +1,10 @@
 import type { Transformer } from 'unified';
-import type { Root } from 'mdast';
-import { visit } from 'unist-util-visit';
+import type { Nodes, Root } from 'mdast';
 import {
   generateCodeBlockTabs,
   parseCodeBlockAttributes,
 } from 'fumadocs-core/mdx-plugins/codeblock-utils';
+import { walk } from './utils';
 
 export interface TypeScriptToJavaScriptOptions {
   /**
@@ -52,7 +52,8 @@ export function remarkTypeScriptToJavaScript({
     ]);
     const tasks: Promise<void>[] = [];
 
-    visit(tree, 'code', (node) => {
+    walk<Nodes>(tree, (node) => {
+      if (node.type !== 'code') return;
       const lang = node.lang;
       if (lang !== 'ts' && lang !== 'tsx') return;
 

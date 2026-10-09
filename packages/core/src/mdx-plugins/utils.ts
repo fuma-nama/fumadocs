@@ -8,6 +8,25 @@ export function isJsxElement(node: Nodes): node is MdxJsxFlowElement | MdxJsxTex
   return node.type === 'mdxJsxFlowElement' || node.type === 'mdxJsxTextElement';
 }
 
+/**
+ * Visit a tree in document order, returning `skip` skips the children of a node. Unlike `unist-util-visit`, it doesn't
+ * look up the index of each node in its parent, which is quadratic on wide trees.
+ */
+export function walk<N extends { type: string; children?: N[] }>(
+  node: N,
+  visitor: (
+    node: N,
+    index: number | undefined,
+    parent: { children: N[] } | undefined,
+  ) => 'skip' | void,
+  index?: number,
+  parent?: { children: N[] },
+): void {
+  if (visitor(node, index, parent) === 'skip' || !node.children) return;
+  for (let i = 0; i < node.children.length; i++)
+    walk(node.children[i], visitor, i, node as { children: N[] });
+}
+
 export function flattenNode(node: RootContent): string {
   if ('children' in node) return node.children.map(flattenNode).join('');
 

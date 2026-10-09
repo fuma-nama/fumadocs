@@ -1,11 +1,11 @@
-import { visit } from 'unist-util-visit';
-import type { Paragraph, Parent, PhrasingContent, Root, RootContent } from 'mdast';
+import type { Nodes, Paragraph, Parent, PhrasingContent, Root, RootContent } from 'mdast';
 import type { Transformer } from 'unified';
 import type { MdxJsxFlowElement } from 'mdast-util-mdx';
 import { replaceSource } from 'fumadocs-core/mdx-plugins/stringifier';
 import { getFileHref, getHeadingHash } from '@/utils/get-refs';
 import { ParsedFile } from '@/build-storage';
 import { VaultResolver } from '@/build-resolver';
+import { walk } from '@/utils/mdast-walk';
 
 declare module 'mdast' {
   interface LinkData {
@@ -26,8 +26,8 @@ export function remarkWikilinks({ resolver }: RemarkWikilinksOptions): Transform
     if (!file.data.source) return;
     const sourceFile = file.data.source;
 
-    visit(tree, 'paragraph', (node, index, parent) => {
-      if (typeof index !== 'number' || !parent) return;
+    walk<Nodes>(tree, (node, index, parent) => {
+      if (node.type !== 'paragraph' || typeof index !== 'number' || !parent) return;
 
       const replaceParagraph: RootContent[] = [node];
       let parents: Parent[] = [];

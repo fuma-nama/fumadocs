@@ -1,9 +1,8 @@
 import type { Transformer } from 'unified';
-import type { Root, RootContent } from 'mdast';
-import { visit } from 'unist-util-visit';
+import type { Nodes, Root, RootContent } from 'mdast';
 import { valueToEstree } from 'estree-util-value-to-estree';
 import { removePosition } from 'unist-util-remove-position';
-import { flattenNode } from './mdast-utils';
+import { flattenNode, walk } from './mdast-utils';
 import type { LLMsOptions } from 'fumadocs-core/mdx-plugins';
 import { remarkLLMs } from 'fumadocs-core/mdx-plugins/remark-llms';
 
@@ -52,8 +51,8 @@ export function remarkPostprocess({
   return (tree, file) => {
     const frontmatter = (file.data.frontmatter ??= {});
     if (!frontmatter.title) {
-      visit(tree, 'heading', (node) => {
-        if (node.depth === 1) {
+      walk<Nodes>(tree, (node) => {
+        if (node.type === 'heading' && node.depth === 1) {
           frontmatter.title = flattenNode(node);
           return false;
         }
@@ -69,7 +68,8 @@ export function remarkPostprocess({
     if (extractLinkReferences) {
       const urls: ExtractedReference[] = [];
 
-      visit(tree, 'link', (node) => {
+      walk<Nodes>(tree, (node) => {
+        if (node.type !== 'link') return;
         urls.push({
           href: node.url,
         });

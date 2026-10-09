@@ -1,11 +1,11 @@
 import * as path from 'node:path';
-import type { Image, Root, RootContent } from 'mdast';
+import type { Image, Nodes, Root, RootContent } from 'mdast';
 import type { Transformer } from 'unified';
-import { visit } from 'unist-util-visit';
 import type { MdxjsEsm } from 'mdast-util-mdx';
 import type { MdxJsxFlowElement } from 'mdast-util-mdx';
 import { fileURLToPath } from 'node:url';
 import { replaceSource } from './stringifier';
+import { walk } from './utils';
 
 const VALID_BLUR_EXT = ['.jpeg', '.png', '.webp', '.avif', '.jpg'];
 const EXTERNAL_URL_REGEX = /^https?:\/\//;
@@ -184,8 +184,8 @@ export function remarkImage({
       node.data.hProperties.height = size.height.toString();
     }
 
-    visit(tree, 'image', (node, _, parent) => {
-      if (!parent) return;
+    walk<Nodes>(tree, (node, _, parent) => {
+      if (node.type !== 'image' || !parent) return;
       const src = parseSrc(decodeURI(node.url), publicDir, file.dirname);
       if (!src) return;
 

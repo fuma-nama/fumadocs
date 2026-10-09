@@ -4,9 +4,9 @@ import { fileURLToPath } from 'node:url';
 import { remark } from 'remark';
 import remarkMdx from 'remark-mdx';
 import remarkDirective from 'remark-directive';
-import { visit } from 'unist-util-visit';
-import type { Root } from 'mdast';
+import type { Nodes, Root } from 'mdast';
 import { remarkPostprocess } from '@/loaders/mdx/remark-postprocess';
+import { walk } from '@/loaders/mdx/mdast-utils';
 import { defineCollections } from '@/config';
 import { buildConfig } from '@/config/build';
 import { createCore } from '@/core';
@@ -52,7 +52,7 @@ test('includeMDAST with removePosition exports the tree', async () => {
   expect(tree.type).toBe('root');
 
   const positions: unknown[] = [];
-  visit(tree, (node) => {
+  walk<Nodes>(tree, (node) => {
     positions.push(node.position);
   });
 

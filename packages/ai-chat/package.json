@@ -44,8 +44,7 @@
     "remark": "^15.0.1",
     "remark-gfm": "^4.0.1",
     "remark-rehype": "^11.1.2",
-    "remend": "^1.4.0",
-    "unist-util-visit": "^5.1.0"
+    "remend": "^1.4.0"
   },
   "devDependencies": {
     "@ai-sdk/react": "^4.0.130",

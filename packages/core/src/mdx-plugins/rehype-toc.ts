@@ -1,9 +1,8 @@
 import type { Processor, Transformer } from 'unified';
-import type { Root, Element } from 'hast';
+import type { Root, Element, Nodes } from 'hast';
 import { toEstree } from 'hast-util-to-estree';
 import type { JSXElement, ObjectExpression } from 'estree-jsx';
-import { visit } from 'unist-util-visit';
-import { handleTag, toMdxExportRaw } from './utils';
+import { handleTag, toMdxExportRaw, walk } from './utils';
 
 export interface RehypeTocOptions {
   /**
@@ -79,7 +78,8 @@ export function rehypeToc(
   return (tree, file) => {
     const items: RehypeTOCItemType[] = [];
 
-    visit(tree, 'element', (element, idx, parent) => {
+    walk<Nodes>(tree, (element, idx, parent) => {
+      if (element.type !== 'element') return;
       if (!HeadingTags.has(element.tagName) || element.children.length === 0) return;
 
       const id = element.properties.id;

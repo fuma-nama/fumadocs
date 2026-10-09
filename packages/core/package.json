@@ -133,7 +133,6 @@
     "shiki": "^4.5.0",
     "tinyglobby": "^0.2.17",
     "unified": "^11.0.5",
-    "unist-util-visit": "^5.1.0",
     "vfile": "^6.0.3",
     "yaml": "^2.9.1",
     "zbsearch": "^4.0.1"
