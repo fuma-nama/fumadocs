@@ -173,6 +173,15 @@ export const og: Feature<{ engine: Engine }> = {
       });
     }
     if (framework === 'next' && i18n) await extendNextProxy(ctx, route);
+    if (ctx.project.static && framework === 'react-router') {
+      ctx.note(
+        'Image routes are dynamic, add `getPageImageUrl(page).url` of each page to your prerender config.',
+      );
+    } else if (ctx.project.static && framework === 'tanstack-start') {
+      ctx.note(
+        'TanStack Start prerenders responses as text, which breaks images. Prerender the image routes with Nitro instead, see https://fumadocs.dev/docs/integrations/og/takumi.',
+      );
+    }
 
     ctx.note(
       "The image URL of a page is `getPageImageUrl(page).url` from '@/lib/shared', reference it in the page metadata (e.g. `og:image`).",

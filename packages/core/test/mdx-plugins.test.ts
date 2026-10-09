@@ -152,16 +152,16 @@ test('Remark Structure: a record per table row', () => {
   expect(contents).toMatchInlineSnapshot(`
     [
       {
-        "content": "| a | b |
+        "content": "| a   | b   |
     | --- | --- |
-    | 1 | 2 |",
+    | 1   | 2   |",
         "heading": undefined,
         "table": "table-0",
       },
       {
-        "content": "| a | b |
+        "content": "| a   | b   |
     | --- | --- |
-    | 3 | 4 |",
+    | 3   | 4   |",
         "heading": undefined,
         "table": "table-0",
       },

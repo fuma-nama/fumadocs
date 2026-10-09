@@ -91,6 +91,37 @@ return (
 );
 ```
 
+```ts tab="TanStack Start" title="src/lib/shared.ts"
+import { createGetUrl } from 'fumadocs-core/source';
+
+// [!code ++:7]
+const getImageUrl = createGetUrl('/og/docs');
+
+export function getPageImageUrl(page: { slugs: string[]; locale?: string }) {
+  const segments = [...page.slugs, 'image.webp'];
+
+  return { segments, url: getImageUrl(segments, page.locale) };
+}
+```
+
+```tsx tab="TanStack Start" title="src/routes/docs/$.tsx"
+// [!code ++]
+import { getPageImageUrl } from '@/lib/shared';
+
+export const Route = createFileRoute('/docs/$')({
+  // [!code ++:3]
+  head: ({ loaderData }) => ({
+    meta: loaderData ? [{ property: 'og:image', content: loaderData.imageUrl }] : [],
+  }),
+});
+
+// Somewhere in your server function
+return {
+  // [!code ++]
+  imageUrl: getPageImageUrl(page).url,
+};
+```
+
 ```tsx tab="Vite Based Framework" title="app/lib/source.ts"
 // [!code ++:5]
 export function getPageImageUrl(page: (typeof source)['$inferPage']) {
@@ -115,7 +146,7 @@ return (
 
 > We append `image.webp` to the end of slugs so that we can access it via `/og/docs/my-page/image.webp`, which results in smaller image sizes. You could use `image.png` if you prefer.
 
-Finally, create a route handler to generate images at build time:
+Finally, create a route handler to generate images:
 
 ```tsx tab="Next.js" title="app/og/docs/[...slug]/route.tsx"
 import { getPageImageUrl, source } from '@/lib/source';
@@ -196,6 +227,57 @@ export async function getConfig() {
     staticPaths: pages,
   } as const;
 }
+```
+
+```ts tab="TanStack Start" title="src/routes/og/docs/$.ts"
+import { createFileRoute } from '@tanstack/react-router';
+import { generateOGImage } from 'fumadocs-ui/og/takumi';
+import { source } from '@/lib/source';
+
+export const Route = createFileRoute('/og/docs/$')({
+  server: {
+    handlers: {
+      GET: ({ params }) => {
+        const slugs = (params._splat?.split('/') ?? []).filter((v) => v.length > 0).slice(0, -1);
+        const page = source.getPage(slugs);
+        if (!page) return new Response(undefined, { status: 404 });
+
+        return generateOGImage({
+          title: page.data.title,
+          description: page.data.description,
+          site: 'My App',
+          format: 'webp',
+        });
+      },
+    },
+  },
+});
+```
+
+```ts tab="TanStack Start" title="vite.config.ts"
+// SPA mode only: TanStack Start pre-renders responses as text, which breaks images
+import { defineConfig } from 'vite';
+import { nitro } from 'nitro/vite';
+// [!code ++:3]
+import { glob } from 'node:fs/promises';
+import { getSlugs } from 'fumadocs-core/source';
+import { getPageImageUrl } from './src/lib/shared';
+
+// [!code ++:4]
+const imageRoutes: string[] = [];
+for await (const entry of glob('**/*.mdx', { cwd: 'content/docs' })) {
+  imageRoutes.push(getPageImageUrl({ slugs: getSlugs(entry) }).url);
+}
+
+export default defineConfig({
+  plugins: [
+    // other plugins...
+    nitro({
+      // [!code ++]
+      prerender: { routes: imageRoutes },
+    }),
+  ],
+});
 ```
 
 ```ts tab="React Router" title="app/routes.ts"

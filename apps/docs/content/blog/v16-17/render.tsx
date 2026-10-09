@@ -21,7 +21,7 @@ const elements: Element[] = [
     kind: 'Server component',
     note: 'asMarkdown()',
     jsx: "<TypeTable type={{\n  baseUrl: { type: 'string' },\n}} />",
-    markdown: '| Prop | Type |\n| --- | --- |\n| `baseUrl` | `string` |',
+    markdown: '| Prop      | Type     |\n| --------- | -------- |\n| `baseUrl` | `string` |',
   },
   {
     kind: 'Client component',

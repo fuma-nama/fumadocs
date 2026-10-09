@@ -1,5 +1,6 @@
 import { AsyncLocalStorage } from 'node:async_hooks';
 import { isValidElement, type ElementType, type ReactElement, type ReactNode } from 'react';
+import { markdownTable } from '@/mdx-plugins/stringifier';
 
 /**
  * Render React trees (RSC) into Markdown.
@@ -344,6 +345,10 @@ function attribute(key: string, value: unknown): string | undefined {
   }
 }
 
+// the rows and cells of a table, until it formats them
+const ROW = '\u001e';
+const CELL = '\u001f';
+
 const INLINE_TAGS = new Set([
   'a',
   'abbr',
@@ -463,30 +468,22 @@ async function host(tag: string, props: Props, state: State): Promise<string> {
     case 'br':
       return '\n';
     case 'table': {
-      const rows = (await children({ inline: false })).replace(/\n\s*\n/g, '\n').trim();
-      if (rows.length === 0) return '';
-      const end = rows.indexOf('\n');
-      const first = end === -1 ? rows : rows.slice(0, end);
-      return `\n${first}\n${separatorRow(first)}${end === -1 ? '' : rows.slice(end)}\n\n`;
+      const rows: string[][] = [];
+      // without the text before the first row & cell
+      for (const row of (await children({ inline: false })).split(ROW).slice(1))
+        rows.push(row.split(CELL).slice(1));
+      return rows.length === 0 ? '' : `\n${markdownTable(rows)}\n\n`;
     }
     case 'tr':
-      return `|${await children({ inline: false })}\n`;
+      return `${ROW}${await children({ inline: false })}`;
     case 'th':
-    case 'td': {
-      const c = (await children({ inline: true })).trim().replace(/\s*\n\s*/g, ' ');
-      return ` ${c.replaceAll('|', '\\|')} |`;
-    }
+    case 'td':
+      return `${CELL}${await children({ inline: true })}`;
   }
 
   if (INLINE_TAGS.has(tag)) return children({ inline: true });
   const c = (await children({ inline: false })).trim();
   return c.length === 0 ? '' : `\n${c}\n\n`;
-}
-
-function separatorRow(row: string): string {
-  // unescaped pipes only
-  const cells = Math.max(1, (row.match(/(?<!\\)\|/g)?.length ?? 2) - 1);
-  return `|${' --- |'.repeat(cells)}`;
 }
 
 function wrap(text: string, marker: string): string {

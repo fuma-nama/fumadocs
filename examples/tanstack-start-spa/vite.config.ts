@@ -4,6 +4,14 @@ import { defineConfig } from 'vite';
 import tailwindcss from '@tailwindcss/vite';
 import { fumadocsMdx } from 'fumadocs-mdx/vite';
 import { nitro } from 'nitro/vite';
+import { glob } from 'node:fs/promises';
+import { getSlugs } from 'fumadocs-core/source';
+import { getPageImageUrl } from './src/lib/shared';
+
+const imageRoutes: string[] = [];
+for await (const entry of glob('**/*.mdx', { cwd: 'content/docs' })) {
+  imageRoutes.push(getPageImageUrl({ slugs: getSlugs(entry) }).url);
+}
 
 export default defineConfig({
   server: {
@@ -38,7 +46,10 @@ export default defineConfig({
     }),
     react(),
     // please see https://tanstack.com/start/latest/docs/framework/react/guide/hosting#nitro for guides on hosting
-    nitro(),
+    nitro({
+      // TanStack Start pre-renders responses as text, which breaks images
+      prerender: { routes: imageRoutes },
+    }),
   ],
   resolve: {
     tsconfigPaths: true,

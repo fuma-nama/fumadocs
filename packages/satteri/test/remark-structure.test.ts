@@ -108,16 +108,16 @@ describe('remark-structure', () => {
     expect(data.contents).toMatchInlineSnapshot(`
       [
         {
-          "content": "| a | **b** |
-      | --- | --- |
-      | \`x \\| y\` | link |",
+          "content": "| a        | **b** |
+      | -------- | ----- |
+      | \`x \\| y\` | link  |",
           "heading": undefined,
           "table": "table-0",
         },
         {
-          "content": "| a | **b** |
-      | --- | --- |
-      | 2 | 3 |",
+          "content": "| a   | **b** |
+      | --- | ----- |
+      | 2   | 3     |",
           "heading": undefined,
           "table": "table-0",
         },

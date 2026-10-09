@@ -11,7 +11,7 @@ import {
   ViewOptionsPopover,
 } from 'fumadocs-ui/layouts/docs/page';
 import { baseOptions } from '@/lib/layout.shared';
-import { getPageMarkdownUrl, gitConfig } from '@/lib/shared';
+import { getPageImageUrl, getPageMarkdownUrl, gitConfig } from '@/lib/shared';
 import { useFumadocsLoader } from 'fumadocs-core/source/client';
 import { Suspense, use } from 'react';
 import { useMDXComponents } from '@/components/mdx';
@@ -24,6 +24,9 @@ export const Route = createFileRoute('/docs/$')({
     await docs.getPage(data.path)?.preload();
     return data;
   },
+  head: ({ loaderData }) => ({
+    meta: loaderData ? [{ property: 'og:image', content: loaderData.imageUrl }] : [],
+  }),
 });
 
 const serverLoader = createServerFn({
@@ -37,6 +40,7 @@ const serverLoader = createServerFn({
     return {
       path: page.path,
       markdownUrl: getPageMarkdownUrl(page).url,
+      imageUrl: getPageImageUrl(page).url,
       pageTree: await source.serializePageTree(source.getPageTree()),
     };
   });

@@ -19,7 +19,7 @@
       },
       {
         "heading": "second-section",
-        "content": "| Column A | Column B |\n| --- | --- |\n| one | two |",
+        "content": "| Column A | Column B |\n| -------- | -------- |\n| one      | two      |",
         "table": "table-0"
       }
     ],

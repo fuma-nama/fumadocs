@@ -13,7 +13,7 @@ import { baseOptions } from '@/lib/layout.shared';
 import { useFumadocsLoader } from 'fumadocs-core/source/client';
 import { useMDXComponents } from '@/components/mdx';
 import { use } from 'react';
-import { getPageMarkdownUrl, gitConfig } from '@/lib/shared';
+import { getPageImageUrl, getPageMarkdownUrl, gitConfig } from '@/lib/shared';
 
 export async function loader({ params }: Route.LoaderArgs) {
   const slugs = params['*'].split('/').filter((v) => v.length > 0);
@@ -24,10 +24,19 @@ export async function loader({ params }: Route.LoaderArgs) {
     path: page.path,
     markdownUrl: getPageMarkdownUrl(page).url,
     pageTree: await source.serializePageTree(source.getPageTree()),
+    imagePath: getPageImageUrl(page).url,
   };
 }
 
-function Content({ path, markdownUrl }: { path: string; markdownUrl: string }) {
+function Content({
+  path,
+  markdownUrl,
+  imagePath,
+}: {
+  path: string;
+  markdownUrl: string;
+  imagePath: string;
+}) {
   const page = docs.getPage(path);
   if (!page) throw new Error(`unknown page: ${path}`);
 
@@ -39,6 +48,7 @@ function Content({ path, markdownUrl }: { path: string; markdownUrl: string }) {
     <DocsPage toc={toc}>
       <title>{page.title}</title>
       <meta name="description" content={page.description} />
+      <meta property="og:image" content={imagePath} />
       <DocsTitle>{page.title}</DocsTitle>
       <DocsDescription>{page.description}</DocsDescription>
       <div className="flex flex-row gap-2 items-center border-b -mt-4 pb-6">
@@ -56,11 +66,11 @@ function Content({ path, markdownUrl }: { path: string; markdownUrl: string }) {
 }
 
 export default function Page({ loaderData }: Route.ComponentProps) {
-  const { pageTree, path, markdownUrl } = useFumadocsLoader(loaderData);
+  const { pageTree, path, markdownUrl, imagePath } = useFumadocsLoader(loaderData);
 
   return (
     <DocsLayout {...baseOptions()} tree={pageTree}>
-      <Content path={path} markdownUrl={markdownUrl} />
+      <Content path={path} markdownUrl={markdownUrl} imagePath={imagePath} />
     </DocsLayout>
   );
 }

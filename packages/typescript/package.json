@@ -1,6 +1,6 @@
 {
   "name": "fumadocs-typescript",
-  "version": "5.5.0",
+  "version": "5.5.1",
   "description": "Typescript Integration for Fumadocs",
   "keywords": [
     "Docs",
@@ -67,7 +67,7 @@
     "@types/hast": "*",
     "@types/mdast": "*",
     "@types/react": "*",
-    "fumadocs-core": "^16.17.0",
+    "fumadocs-core": "^16.17.1",
     "fumadocs-ui": "^16.7.0",
     "react": "^19.2.0",
     "react-dom": "^19.2.0"

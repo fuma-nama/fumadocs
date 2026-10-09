@@ -19,3 +19,11 @@ export function getPageMarkdownUrl(page: { slugs: string[]; locale?: string }) {
 
   return { segments, url: getContentUrl(segments, page.locale) };
 }
+
+const getImageUrl = createGetUrl(docsImageRoute);
+
+export function getPageImageUrl(page: { slugs: string[]; locale?: string }) {
+  const segments = [...page.slugs, 'image.webp'];
+
+  return { segments, url: getImageUrl(segments, page.locale) };
+}

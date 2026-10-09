@@ -259,6 +259,11 @@ async function main(defaultName: string | undefined, config: CliOptions): Promis
     console.warn(pc.yellow('AI Chat is not supported by the Astro template yet, skipping it.'));
     options.aiChat = false;
   }
+  if (options.ogImage === 'next-og' && !options.template.startsWith('+next')) {
+    console.warn(
+      pc.yellow('next/og is only available on Next.js, the template uses Takumi instead.'),
+    );
+  }
 
   if (!isCI) await checkDir(projectName, skipPrompts);
 
