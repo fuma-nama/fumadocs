@@ -1,6 +1,6 @@
 {
   "name": "example-asyncapi",
-  "version": "0.0.45",
+  "version": "0.0.46",
   "private": true,
   "scripts": {
     "build": "next build",

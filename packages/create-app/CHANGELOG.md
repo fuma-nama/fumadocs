@@ -1,3 +1,11 @@
+## create-fumadocs-app@16.2.18
+
+### OG images in every template
+
+- The TanStack Start, TanStack Start SPA and React Router SPA templates generate OG images of docs pages with Takumi.
+- `--og-image next-og` warns on templates other than Next.js, instead of being ignored silently.
+- The `og` feature tells you how to prerender the images in SPA mode.
+
 ## create-fumadocs-app@16.2.17
 
 ### Search hooks for each provider

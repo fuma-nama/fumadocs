@@ -1,3 +1,9 @@
+## @fumadocs/asyncapi@0.4.4
+
+### Fix `imports` option of `generateFiles()`
+
+Imports were written one character per line. They are now written as whole `import` lines, same as the fix for `fumadocs-openapi` in #3678.
+
 ## @fumadocs/asyncapi@0.4.3
 
 ### Fix images in descriptions, show the OAuth redirect URI
