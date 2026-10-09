@@ -10,7 +10,7 @@
     },
     {
       "heading": "heading-3",
-      "content": "| Name | Description |\n| --- | --- |\n| Hello World | Goodbye |",
+      "content": "| Name        | Description |\n| ----------- | ----------- |\n| Hello World | Goodbye     |",
       "table": "table-0"
     },
     {
@@ -47,7 +47,7 @@
     },
     {
       "heading": "heading",
-      "content": "| key | **value** |\n| --- | --- |\n| apple | banana **test** |",
+      "content": "| key   | **value**       |\n| ----- | --------------- |\n| apple | banana **test** |",
       "table": "table-1"
     },
     {

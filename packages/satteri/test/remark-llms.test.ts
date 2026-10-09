@@ -226,10 +226,10 @@ test('remark-llms shows generated content of replaced nodes', async () => {
 
     ### TestProps
 
-    | Prop | Type | Description |
-    | --- | --- | --- |
-    | \`name?\` | \`string\` | The visible name. Default: \`"hello"\` |
-    | \`enabled\` | \`union\` | Whether it is enabled |
+    | Prop      | Type     | Description                          |
+    | --------- | -------- | ------------------------------------ |
+    | \`name?\`   | \`string\` | The visible name. Default: \`"hello"\` |
+    | \`enabled\` | \`union\`  | Whether it is enabled                |
     "
   `);
 });

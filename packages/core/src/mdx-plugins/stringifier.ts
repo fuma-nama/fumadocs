@@ -270,6 +270,29 @@ export function createStringifier(file: VFile, namespace?: 'search' | (string & 
   return s;
 }
 
+/**
+ * A Markdown table with aligned columns, its first row is the header.
+ *
+ * @param rows - the cells of each row, as inline Markdown
+ */
+export function markdownTable(rows: string[][]): string {
+  const widths: number[] = [];
+  const table = rows.map((row) =>
+    row.map((cell, i) => {
+      let text = cell.trim();
+      if (/[\n|]/.test(text))
+        text = text.replace(/\s*\n\s*|(?<!\\)\|/g, (s) => (s === '|' ? '\\|' : ' '));
+      // the delimiter row needs three hyphens
+      widths[i] = Math.max(widths[i] ?? 3, text.length);
+      return text;
+    }),
+  );
+  const line = (row: string[]) =>
+    `| ${widths.map((w, i) => (row[i] ?? '').padEnd(w)).join(' | ')} |`;
+
+  return [table[0], widths.map((w) => '-'.repeat(w)), ...table.slice(1)].map(line).join('\n');
+}
+
 const containerPrefixRegex = /^(?:[ \t]*(?:>|[-*+](?=[ \t])|\d{1,9}[.)](?=[ \t])))*[ \t]*/;
 
 /** the prefix of the containers (e.g. lists & blockquotes) at `start`, on the lines after the first */

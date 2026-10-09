@@ -12,7 +12,7 @@ import type { MdxJsxAttribute, MdxJsxExpressionAttribute, MdxJsxFlowElement } fr
 import type { VFile } from 'vfile';
 import type { StructuredData } from 'fumadocs-core/mdx-plugins/remark-structure';
 import { tableRowToStructuredData } from 'fumadocs-core/search';
-import { replaceSource } from 'fumadocs-core/mdx-plugins/stringifier';
+import { markdownTable, replaceSource } from 'fumadocs-core/mdx-plugins/stringifier';
 
 function objectBuilder() {
   const out: ObjectExpression = {
@@ -163,14 +163,10 @@ export function typeTableToStructuredData(
 export function typeTableToMarkdown(doc: GeneratedDoc): string {
   let out = `### ${doc.name}\n\n`;
   if (doc.description) out += `${doc.description.trim()}\n\n`;
-  out += '| Prop | Type | Description |\n| --- | --- | --- |';
-  for (const entry of doc.entries) {
-    out += '\n|';
-    for (const cell of typeTableRow(entry))
-      out += ` ${cell.replace(/\s*\n\s*/g, ' ').replaceAll('|', '\\|')} |`;
-  }
+  const rows = [['Prop', 'Type', 'Description']];
+  for (const entry of doc.entries) rows.push(typeTableRow(entry));
 
-  return out;
+  return out + markdownTable(rows);
 }
 
 function typeTableRow(entry: DocEntry): string[] {

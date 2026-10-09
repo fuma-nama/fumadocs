@@ -61,15 +61,14 @@ const sourceOutput: Line[] = [
     ),
   },
   { text: '… 7 lines as written', className: fold },
-  { text: '### Options', className: addedLine },
-  { text: '', className: addedLine },
-  { text: '| Prop | Type | Description |', className: addedLine },
-  { text: '| --- | --- | --- |', className: addedLine },
-  { text: '| `dir` | `string` | The directory of pages. |', className: addedLine },
-  {
-    text: "| `baseUrl?` | `string` | The base URL of pages. Default: `'/'` |",
-    className: addedLine,
-  },
+  ...[
+    '### Options',
+    '',
+    '| Prop       | Type     | Description                           |',
+    '| ---------- | -------- | ------------------------------------- |',
+    '| `dir`      | `string` | The directory of pages.               |',
+    "| `baseUrl?` | `string` | The base URL of pages. Default: `'/'` |",
+  ].map((text) => ({ text, className: addedLine })),
 ];
 
 function Generated({ children }: { children: string }) {
@@ -233,7 +232,7 @@ export function Pipeline({ from }: { from: 'tree' | 'source' }) {
       aside={
         from === 'tree' ? (
           <span className="inline-flex items-center gap-1.5">
-            <Noise>{' '.repeat(5)}</Noise> from generated nodes · 81 lines
+            <Noise>{'\u00a0'.repeat(5)}</Noise> from generated nodes · 81 lines
           </span>
         ) : (
           <span className="inline-flex items-center gap-1.5">

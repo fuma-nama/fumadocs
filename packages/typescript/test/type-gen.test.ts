@@ -64,13 +64,13 @@ test('Search records of props', async () => {
       "contents": [
         {
           "content": "| \`name\` | \`string\` | The name of player Default: \`Henry\` |
-    | --- | --- | --- |",
+    | ------ | -------- | ----------------------------------- |",
           "heading": "type-table-test-2.ts-Player-name",
           "table": "type-table-test-2.ts-Player",
         },
         {
-          "content": "| \`age\` | \`timestamp\` |  |
-    | --- | --- | --- |",
+          "content": "| \`age\` | \`timestamp\` |     |
+    | ----- | ----------- | --- |",
           "heading": "type-table-test-2.ts-Player-age",
           "table": "type-table-test-2.ts-Player",
         },
@@ -98,10 +98,10 @@ test('Markdown of type tables', async () => {
 
     Player in the room
 
-    | Prop | Type | Description |
-    | --- | --- | --- |
-    | \`name\` | \`string\` | The name of player Default: \`Henry\` |
-    | \`age\` | \`timestamp\` |  |
+    | Prop   | Type        | Description                         |
+    | ------ | ----------- | ----------------------------------- |
+    | \`name\` | \`string\`    | The name of player Default: \`Henry\` |
+    | \`age\`  | \`timestamp\` |                                     |
     "
   `);
 });

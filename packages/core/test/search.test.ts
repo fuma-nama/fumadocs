@@ -617,9 +617,9 @@ test('Mixedbread: sync', async () => {
           "kind": "text",
           "table": "table-0",
         },
-        "text": "| Prop | Type |
-    | --- | --- |
-    | \`a\` | \`string\` |",
+        "text": "| Prop | Type     |
+    | ---- | -------- |
+    | \`a\`  | \`string\` |",
         "type": "text",
       },
     ]

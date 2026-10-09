@@ -83,13 +83,13 @@ describe('remark-auto-type-table', () => {
       [
         {
           "content": "| \`name?\` | \`string\` | The visible name. Default: \`"hello"\` |
-      | --- | --- | --- |",
+      | ------- | -------- | ------------------------------------ |",
           "heading": "type-table-type-table.ts-TestProps-name",
           "table": "type-table-type-table.ts-TestProps",
         },
         {
           "content": "| \`enabled\` | \`union\` | Whether it is enabled |
-      | --- | --- | --- |",
+      | --------- | ------- | --------------------- |",
           "heading": "type-table-type-table.ts-TestProps-enabled",
           "table": "type-table-type-table.ts-TestProps",
         },
