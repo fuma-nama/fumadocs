@@ -1,10 +1,12 @@
 import {
   backtickQuote,
+  goRawStringLiteral,
   inputToString,
   rustRawStringLiteral,
   tripleDoubleQuote,
 } from '@/requests/string-utils';
-export { resolveMediaAdapter } from './resolve-adapter';
+import type { RequestData } from '@/requests/types';
+import { resolveMediaAdapter } from './resolve-adapter';
 // @ts-expect-error -- untyped
 import js2xml from 'xml-js/lib/js2xml';
 
@@ -168,45 +170,44 @@ export const defaultAdapters = {
       return formData;
     },
     generateExample(data, ctx) {
-      if (ctx.lang === 'python') {
-        return `body = ${JSON.stringify(data.body, null, 2)}`;
-      }
-
       const s: string[] = [];
-      if (ctx.lang === 'js') {
-        s.push(`const body = new FormData();`);
+      const fields: [key: string, value: string][] = [];
+      for (const [key, value] of Object.entries(data.body as object)) {
+        if (value != null) fields.push([JSON.stringify(key), inputToString(value)]);
+      }
 
-        for (const [key, value] of Object.entries(data.body as object)) {
-          s.push(`body.set(${key}, ${JSON.stringify(inputToString(value))})`);
+      switch (ctx.lang) {
+        case 'js':
+          s.push('const body = new FormData();');
+          for (const [key, value] of fields) s.push(`body.set(${key}, ${JSON.stringify(value)})`);
+          break;
+        case 'python':
+          s.push('body = {');
+          for (const [key, value] of fields) s.push(`  ${key}: (None, ${JSON.stringify(value)}),`);
+          s.push('}');
+          break;
+        case 'go': {
+          const { addImport } = ctx as GoContext;
+          addImport('bytes');
+          addImport('mime/multipart');
+          s.push('body := new(bytes.Buffer)', 'mp := multipart.NewWriter(body)');
+          for (const [key, value] of fields) {
+            s.push(`mp.WriteField(${key}, ${JSON.stringify(value)})`);
+          }
+          s.push('mp.Close()');
+          break;
         }
-      }
-
-      if (ctx.lang === 'go') {
-        const { addImport } = ctx as GoContext;
-        addImport('mime/multipart');
-        addImport('bytes');
-
-        s.push('body := new(bytes.Buffer)');
-        s.push('mp := multipart.NewWriter(payload)');
-
-        for (const [key, value] of Object.entries(data.body as object)) {
-          if (!value) continue;
-
-          const escaped = backtickQuote(inputToString(value, 'application/json'));
-
-          s.push(`mp.WriteField("${key}", ${escaped})`);
-        }
-      }
-
-      if (ctx.lang === 'java') {
-        const { addImport } = ctx as JavaContext;
-        addImport('java.net.http.HttpRequest.BodyPublishers');
-
-        s.push(`var body = BodyPublishers.ofByteArray(new byte[] { ... });`);
-      }
-
-      if (ctx.lang === 'csharp') {
-        s.push(`var body = new MultipartFormDataContent();`);
+        case 'csharp':
+          s.push('var body = new MultipartFormDataContent();');
+          for (const [key, value] of fields) {
+            s.push(`body.Add(new StringContent(${JSON.stringify(value)}), ${key});`);
+          }
+          break;
+        case 'rust':
+          s.push('let body = reqwest::multipart::Form::new()');
+          for (const [key, value] of fields) s.push(`  .text(${key}, ${JSON.stringify(value)})`);
+          s[s.length - 1] += ';';
+          break;
       }
 
       if (s.length > 0) return s.join('\n');
@@ -223,6 +224,22 @@ export const defaultAdapters = {
   },
 } satisfies Record<string, MediaAdapter>;
 
+/**
+ * Generate the code that inits a `body` variable for the request body, `undefined` when unsupported.
+ */
+export function generateBodyExample(
+  data: RequestData,
+  adapters: Record<string, MediaAdapter>,
+  ctx: MediaContext,
+): string | undefined {
+  if (!data.body || !data.bodyMediaType) return;
+
+  return resolveMediaAdapter(data.bodyMediaType, adapters)?.generateExample(
+    data as { body: unknown },
+    ctx,
+  );
+}
+
 function str(
   init: unknown,
   mediaType:
@@ -232,36 +249,25 @@ function str(
     | 'application/xml',
   ctx: MediaContext,
 ) {
-  if (ctx.lang === 'js') {
-    if (mediaType === 'application/json') {
-      return `const body = JSON.stringify(${JSON.stringify(init, null, 2)})`;
-    }
-    return `const body = ${backtickQuote(inputToString(init, mediaType))}`;
+  if (ctx.lang === 'js' && mediaType === 'application/json') {
+    return `const body = JSON.stringify(${JSON.stringify(init, null, 2)})`;
   }
 
-  if (ctx.lang === 'python') {
-    return `body = ${tripleDoubleQuote(inputToString(init, mediaType))}`;
-  }
-
-  if (ctx.lang === 'go') {
-    const { addImport } = ctx as GoContext;
-    addImport('strings');
-    return `body := strings.NewReader(${backtickQuote(inputToString(init, mediaType))})`;
-  }
-
-  if (ctx.lang === 'java') {
-    const { addImport } = ctx as JavaContext;
-    addImport('java.net.http.HttpRequest.BodyPublishers');
-    return `var body = BodyPublishers.ofString(${tripleDoubleQuote(inputToString(init, mediaType))});`;
-  }
-
-  if (ctx.lang === 'csharp') {
-    const input = `\n${inputToString(init, mediaType)}\n`;
-
-    return `var body = new StringContent(${tripleDoubleQuote(input)}, Encoding.UTF8, "${mediaType}");`;
-  }
-
-  if (ctx.lang === 'rust') {
-    return `let body = ${rustRawStringLiteral(inputToString(init, mediaType))};`;
+  const text = inputToString(init, mediaType);
+  switch (ctx.lang) {
+    case 'js':
+      return `const body = ${backtickQuote(text)}`;
+    case 'python':
+      return `body = ${tripleDoubleQuote(text)}`;
+    case 'go':
+      (ctx as GoContext).addImport('strings');
+      return `body := strings.NewReader(${goRawStringLiteral(text)})`;
+    case 'java':
+      (ctx as JavaContext).addImport('java.net.http.HttpRequest.BodyPublishers');
+      return `var body = BodyPublishers.ofString(${tripleDoubleQuote(`\n${text}`)});`;
+    case 'csharp':
+      return `var body = new StringContent("""\n${text}\n""", Encoding.UTF8, "${mediaType}");`;
+    case 'rust':
+      return `let body = ${rustRawStringLiteral(text)};`;
   }
 }

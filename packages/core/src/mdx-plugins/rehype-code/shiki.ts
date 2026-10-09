@@ -1,7 +1,7 @@
-import type { Root, Element, ElementContent } from 'hast';
+import type { Root, Element, ElementContent, Nodes } from 'hast';
 import type { Transformer } from 'unified';
 import { isSpecialLang } from 'shiki/core';
-import { visit } from 'unist-util-visit';
+import { walk } from '../utils';
 import {
   type InlineCodeParser,
   InlineCodeParsers,
@@ -222,11 +222,11 @@ export default function rehypeShikiFromHighlighter(
   return async (tree) => {
     const queue: Promise<void>[] = [];
 
-    visit(tree, 'element', (node, index, parent) => {
+    walk<Nodes>(tree, (node, index, parent) => {
       let parsed: ShikiParsedData | undefined;
 
       // needed for hast node replacement
-      if (!parent || index == null) return;
+      if (node.type !== 'element' || !parent || index == null) return;
 
       if (node.tagName === 'pre') {
         parsed = PreParser(tree, node);

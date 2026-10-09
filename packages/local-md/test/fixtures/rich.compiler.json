@@ -898,19 +898,8 @@
         },
         {
           "heading": "second-section",
-          "content": "Column A"
-        },
-        {
-          "heading": "second-section",
-          "content": "Column B"
-        },
-        {
-          "heading": "second-section",
-          "content": "one"
-        },
-        {
-          "heading": "second-section",
-          "content": "two"
+          "content": "| Column A | Column B |\n| --- | --- |\n| one | two |",
+          "table": "table-0"
         }
       ],
       "headings": [

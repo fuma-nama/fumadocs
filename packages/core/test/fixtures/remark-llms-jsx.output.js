@@ -13,10 +13,10 @@ export function _markdown(props) {
       title: "Note",
       count: 1 + 1,
       open: true,
-      children: ["Some *content* here.\n\n", _jsx(_c.Tabs, {
+      children: ["\nSome *content* here.\n\n", _jsx(_c.Tabs, {
         items: ["a", "b"],
-        children: "nested"
-      })]
+        children: "\nnested\n"
+      }), "\n"]
     }), "\n\nEnding paragraph.\n"]
   });
 }

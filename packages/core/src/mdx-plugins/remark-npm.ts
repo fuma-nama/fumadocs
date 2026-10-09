@@ -1,8 +1,9 @@
-import type { Root } from 'mdast';
+import type { Nodes, Root } from 'mdast';
 import type { Transformer } from 'unified';
-import { visit } from 'unist-util-visit';
 import convert from 'npm-to-yarn';
 import { type CodeBlockTabsOptions, generateCodeBlockTabs } from '@/mdx-plugins/codeblock-utils';
+import { replaceSource } from './stringifier';
+import { walk } from './utils';
 
 interface PackageManager {
   name: string;
@@ -52,9 +53,9 @@ export function remarkNpm({
     { command: (cmd) => convertLines(cmd, 'bun'), name: 'bun' },
   ],
 }: RemarkNpmOptions = {}): Transformer<Root, Root> {
-  return (tree) => {
-    visit(tree, 'code', (node, idx, parent) => {
-      if (typeof idx !== 'number' || !parent) return;
+  return (tree, file) => {
+    walk<Nodes>(tree, (node, idx, parent) => {
+      if (node.type !== 'code' || typeof idx !== 'number' || !parent) return;
       let code: string;
 
       switch (node.lang) {
@@ -101,6 +102,8 @@ export function remarkNpm({
         });
       }
 
+      // the tabs are generated, their Markdown is the authored code block
+      replaceSource(file, node, (s) => s.stringify(node));
       parent.children[idx] = generateCodeBlockTabs(options);
       return 'skip';
     });

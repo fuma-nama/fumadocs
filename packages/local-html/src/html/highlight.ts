@@ -1,5 +1,5 @@
-import type { Element, Root } from 'hast';
-import { visit, SKIP } from 'unist-util-visit';
+import type { Element, Nodes, Root } from 'hast';
+import { walk } from './walk';
 import type { RehypeCodeOptions } from 'fumadocs-core/mdx-plugins/rehype-code';
 
 const LanguagePrefix = 'language-';
@@ -20,11 +20,11 @@ function languageOf(properties: Element['properties']): string | undefined {
 function prepareCodeBlocks(tree: Root): boolean {
   let found = false;
 
-  visit(tree, 'element', (element) => {
-    if (element.tagName !== 'pre') return;
+  walk<Nodes>(tree, (element) => {
+    if (element.type !== 'element' || element.tagName !== 'pre') return;
 
     const code = element.children[0];
-    if (code?.type !== 'element' || code.tagName !== 'code') return SKIP;
+    if (code?.type !== 'element' || code.tagName !== 'code') return 'skip';
     found = true;
 
     const language = languageOf(element.properties);
@@ -33,7 +33,7 @@ function prepareCodeBlocks(tree: Root): boolean {
       code.properties.className = Array.isArray(classes) ? [...classes, language] : [language];
     }
 
-    return SKIP;
+    return 'skip';
   });
 
   return found;

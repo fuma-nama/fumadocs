@@ -48,6 +48,7 @@ test('Remark LLMs: jsx', async () => {
     Content with <Badge type="info">inline **bold**</Badge> element.
 
     > **Note (2)**
+    >
     > Some *content* here.
     >
     > <Tabs items={["a","b"]}>

@@ -13,6 +13,47 @@ You can choose & configure the search client according to your search engine, it
 
 <DocsCategory />
 
+### Search Hooks
+
+Search clients come with React hooks, like `useFetchSearch()` and `useAlgoliaSearch()`, returning the props of `<SearchDialog />`:
+
+```tsx
+import { useFetchSearch } from 'fumadocs-core/search/client';
+
+const search = useFetchSearch();
+
+<SearchDialog {...search} {...props} />;
+```
+
+Along with `search` and `onSearchChange` for the search input, they return:
+
+- `data`: the last successful search, kept while searching again and after an error.
+  - `items`: its results, with their content also parsed as [hast](https://github.com/syntax-tree/hast) as `hastContent`. The rows of a table are grouped into a `table` item.
+  - `query`: the query it searched for.
+- `error`: set when the last search failed.
+- `isLoading`: whether a search for `search` is pending.
+
+For other search engines, pass a memoized search function to `experimental_useSearch()`, it searches again when the function changes.
+
+```tsx
+'use client';
+import { useCallback } from 'react';
+import { experimental_useSearch } from 'fumadocs-core/search/client';
+import type { SortedResult } from 'fumadocs-core/search';
+
+export function useMySearch(locale: string) {
+  const search = useCallback(
+    async (query: string): Promise<SortedResult[]> => {
+      const res = await fetch(`/api/my-search?${new URLSearchParams({ query, locale })}`);
+      return res.json();
+    },
+    [locale],
+  );
+
+  return experimental_useSearch(search);
+}
+```
+
 ### Community Integrations
 
 A list of integrations maintained by community.

@@ -1,11 +1,9 @@
 import Slugger from 'github-slugger';
-import type { Heading, Root } from 'mdast';
+import type { Heading, Nodes, Root } from 'mdast';
 import type { Transformer } from 'unified';
-import { visit } from 'unist-util-visit';
 import type { TOCItemType } from '@/toc';
-import { flattenNode } from '@/mdx-plugins/utils';
-
-const regex = /\s*\[#(?<slug>[^]+?)]\s*$/;
+import { flattenNode, walk } from '@/mdx-plugins/utils';
+import { headingIdRegex } from '@/mdx-plugins/heading-id';
 
 export interface RemarkHeadingOptions {
   slug?: (root: Root, heading: Heading, text: string) => string;
@@ -53,14 +51,15 @@ export function remarkHeading({
     const toc: TOCItemType[] = [];
     slugger?.reset();
 
-    visit(root, 'heading', (heading) => {
+    walk<Nodes>(root, (heading) => {
+      if (heading.type !== 'heading') return;
       heading.data ||= {};
       heading.data.hProperties ||= {};
       const props = heading.data.hProperties;
 
       const lastNode = heading.children.at(-1);
       if (lastNode?.type === 'text' && customId) {
-        const match = regex.exec(lastNode.value);
+        const match = headingIdRegex.exec(lastNode.value);
 
         if (match?.[1]) {
           props.id = match[1];

@@ -3,91 +3,63 @@ title: Mixedbread
 description: Integrate Mixedbread Search with Fumadocs
 ---
 
-## Introduction
-
-The Mixedbread Integration uses vector search to provide semantic search capabilities for your documentation. It indexes your documentation content into a store, enabling users to search using natural language queries and find relevant content based on meaning rather than just keyword matching.
+[Mixedbread](https://www.mixedbread.com) provides semantic search, users can search with natural language and find content by meaning rather than keywords.
 
 ## Setup
 
-### Get your API Key
-
-1. Sign up at [Mixedbread](https://platform.mixedbread.com)
-2. Navigate to [API Keys](https://platform.mixedbread.com/platform?next=api-keys)
-3. Create a new API key and store it in your environment variables
-
-### Create a Store
-
-To sync your documentation, you'll need to create a store:
-
-1. Go to the [Stores](https://platform.mixedbread.com/platform?next=stores) in your Mixedbread dashboard
-2. Create a new store for your documentation
-3. Copy the store ID
-
-### Sync Documentation
-
-Use the [Mixedbread CLI](https://www.mixedbread.com/cli) to sync your documentation:
-
-Install the CLI:
+Install dependencies:
 
 ```package-install
-@mixedbread/cli -D
+@mixedbread/sdk
 ```
 
-Configure authentication and sync your documentation:
+### API Key
 
-```bash
-# Configure authentication
-mxbai config keys add YOUR_API_KEY
+Sign up at [Mixedbread](https://platform.mixedbread.com), create an [API key](https://platform.mixedbread.com/platform?next=api-keys) and a [store](https://platform.mixedbread.com/platform?next=stores) for your docs, and store them in `.env.local`:
 
-# Sync your documentation
-mxbai vs sync YOUR_STORE_ID "./content/docs"
+```dotenv
+MXBAI_API_KEY="your API key"
+MIXEDBREAD_STORE_ID="your store ID"
 ```
 
-The CLI will automatically detect changes in your documentation and update the store accordingly.
+Searching runs on your server, the API key is never exposed to the browser.
 
-### Workflow
+### Sync Documents
 
-You can automatically sync your documentation by adding a sync script to your `package.json`:
+Pre-render a `static.json` route to export the search documents on build, and sync them to your store with a script after each build:
 
-```json
-{
-  "scripts": {
-    "build": "... && mxbai vs sync YOUR_STORE_ID './content/docs' --ci"
-  }
-}
-```
+<feature>search/mixedbread</feature>
+
+`sync()` uploads a file for each page, and skips the pages unchanged since the last sync. Files of removed pages are deleted, use a store dedicated to your docs. The `build` script syncs on every build, set the same variables on your deployment platform.
 
 ### Search API
 
-Create an API route to handle search requests server-side:
+Create a route to search your store:
 
 ```ts title="app/api/search/route.ts"
 import { createMixedbreadSearchAPI } from 'fumadocs-core/search/mixedbread';
 import Mixedbread from '@mixedbread/sdk';
 
-const client = new Mixedbread({
-  apiKey: 'YOUR_API_KEY',
-});
-
 export const { GET } = createMixedbreadSearchAPI({
-  client,
-  storeIdentifier: 'YOUR_STORE_ID',
+  client: new Mixedbread(), // reads `MXBAI_API_KEY`
+  storeIdentifier: process.env.MIXEDBREAD_STORE_ID!,
 });
 ```
 
-### Search Client
+### Search UI
 
-- **Fumadocs UI**: see [Search UI](/docs/search/mixedbread) for details.
-- **Search Client**:
+You can consider different options for implementing the UI:
 
-  ```ts
-  import { useDocsSearch } from 'fumadocs-core/search/client';
-  import { fetchClient } from 'fumadocs-core/search/client/fetch';
+- Using [Fumadocs UI search dialog](/docs/search/mixedbread).
+- Build your own using the built-in search client hook:
 
-  const client = useDocsSearch({
-    client: fetchClient({
-      api: '/api/search',
-    }),
+  ```ts twoslash
+  import { useFetchSearch } from 'fumadocs-core/search/client';
+
+  const { search, onSearchChange, isLoading, data } = useFetchSearch({
+    api: '/api/search',
+    // every search is a request to Mixedbread
+    delayMs: 300,
   });
   ```
 
@@ -95,34 +67,47 @@ export const { GET } = createMixedbreadSearchAPI({
 
 ### Tag Filter
 
-To filter search results by tags, add a tag field to your document metadata:
+To configure tag filtering, pass a `tag` to `toDocuments()` in the `static.json` route:
 
-```md
----
-title: Mixedbread
-description: Integrate Mixedbread Search with Fumadocs
-url: /docs/headless/search/mixedbread
-// [!code ++]
-tag: docs
----
+```ts
+toDocuments(source, { tag: (page) => page.slugs[0] });
 ```
 
 And update your search client:
 
 - **Fumadocs UI**: Enable [Tag Filter](/docs/search/mixedbread#tag-filter) on Search UI.
-- **Search Client**: You can add the tag filter like:
+- **Search Client**: pass a tag to `useFetchSearch()`.
 
   ```ts
-  import { useDocsSearch } from 'fumadocs-core/search/client';
-  import { fetchClient } from 'fumadocs-core/search/client/fetch';
+  import { useFetchSearch } from 'fumadocs-core/search/client';
 
-  const { search, setSearch, query } = useDocsSearch({
-    client: fetchClient({
-      api: '/api/search',
-      tag: '<your tag value>',
-      // ...
-    }),
+  const { search, onSearchChange, isLoading, data } = useFetchSearch({
+    tag: '<your tag value>', // [!code ++]
+    // ...
   });
   ```
 
-This allows you to scope searches to specific sections of your documentation.
+### Internationalization
+
+Documents include the locale of their pages, pass `locale` to search in a language:
+
+```ts
+import { useI18n } from 'fumadocs-ui/contexts/i18n';
+import { useFetchSearch } from 'fumadocs-core/search/client';
+
+const { locale } = useI18n();
+const { search, onSearchChange, isLoading, data } = useFetchSearch({
+  locale, // [!code ++]
+  // ...
+});
+```
+
+## Under the Hood
+
+Each page is a file keyed by its URL, with the page title, URL, breadcrumbs, tags and locale as metadata. Its chunks are the title, headings and paragraphs of the page, every result is a chunk:
+
+| Chunk Metadata | Description                                |
+| -------------- | ------------------------------------------ |
+| `kind`         | `page`, `heading` or `text`                |
+| `heading`      | ID of the heading it belongs to (optional) |
+| `table`        | Table of a table row (optional)            |

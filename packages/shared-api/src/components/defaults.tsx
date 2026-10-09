@@ -93,7 +93,7 @@ function createProcessor(CodeBlock: FC<CodeBlockProps>) {
 
   const mdxComponents = {
     ...defaultMdxComponents,
-    img: undefined,
+    img: 'img',
     pre: Pre,
   };
 

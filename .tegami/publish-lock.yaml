@@ -1,113 +1,187 @@
 core:changelogs:
-  - content: "---\npackages:\n  \"@fumadocs/ai-chat\":\n    type: minor\n  \"@fumadocs/cli\":\n    type: patch\n---\n\n## New package: `@fumadocs/ai-chat`\n\nThe Ask AI chat for AI SDK: pass the result of `useChat()` to `AIChatProvider`, then render `AIChatPanel` in the `aiChat` option of docs layouts. Questions rest at the top while answers stream below, and Markdown is rendered block by block, so unclosed syntax never shows.\n\nThe `ai/*` components of the CLI install its source along with the integration, and the generated layout uses `AIChat`, `AIChatPanel`, `AIChatTrigger` and `useAIChat`.\n"
-    filename: 2026-10-05-ai-chat-package.md
+  - content: "---\npackages:\n  fumadocs-openapi:\n    type: patch\n  \"@fumadocs/asyncapi\":\n    type: patch\n  \"@fumadocs/graphql\":\n    type: patch\n  fumadocs-typescript:\n    type: patch\n  \"@fumadocs/language\":\n    type: patch\n---\n\n### Fix images in descriptions, show the OAuth redirect URI\n\n- Images in Markdown of API pages, like the description of an operation, and in descriptions of `<AutoTypeTable />` props no longer crash the page with \"Element type is invalid\".\n- The OAuth panel of the playground shows the `redirect_uri` of the authorization code and implicit flows, with a button to copy it: the `oauthRedirectUrl` route when set, otherwise the current page.\n- The Authorize row of OAuth schemes in the playground is one button, filling the row.\n\nFix [#3661](https://github.com/fuma-nama/fumadocs/issues/3661), [#3663](https://github.com/fuma-nama/fumadocs/issues/3663)\n"
+    filename: 2026-10-08-api-markdown-images.md
     v: 0.0.0
-  - content: "---\npackages:\n  fumadocs-ui:\n    type: patch\n  \"@fumadocs/base-ui\":\n    type: patch\n---\n\n### Focus inside the AI chat panel when opened\n\nThe `aiChat` panel turns visible as soon as it opens, so its input can take focus right away. It still hides only after the closing transition.\n"
-    filename: 2026-10-05-ai-chat-focus.md
+  - content: "---\npackages:\n  fumadocs-core:\n    type: minor\n  fumadocs-ui:\n    type: minor\n  \"@fumadocs/base-ui\":\n    type: minor\n---\n\n### Highlight search results with CSS\n\nSearch results no longer wrap matches in `<mark>`, `content` is the indexed Markdown. The search dialog highlights matches with the [CSS Custom Highlight API](https://developer.mozilla.org/en-US/docs/Web/API/CSS_Custom_Highlight_API), style them with `::highlight(fd-search)`. Custom search UIs can use `useHighlightQuery()` from `fumadocs-core/search/client`.\n\n- `createContentHighlighter()` is deprecated.\n- Removed `contentWithHighlights` from search results, and the `renderHighlights` prop of `<SearchDialogListItem />`.\n- `<SearchDialogListItem />` renders the Markdown of results with the `prose prose-sm` typography.\n"
+    filename: 2026-10-06-search-css-highlight.md
     v: 0.0.0
-  - content: "---\npackages:\n  fumadocs-ui:\n    type: patch\n  \"@fumadocs/base-ui\":\n    type: patch\n---\n\n### Collapse the sidebar with `Ctrl + B`\n\nOn desktop, press `Ctrl + B` (`⌘ + B` on macOS) to collapse or expand the sidebar, in layouts that support collapsing it. Like the theme hotkey, it is ignored while typing in an editable element, or when a dialog is opened.\n"
-    filename: 2026-10-05-sidebar-hotkey.md
+  - content: "---\npackages:\n  fumadocs-core:\n    type: minor\n  fumadocs-ui:\n    type: minor\n  \"@fumadocs/base-ui\":\n    type: minor\n  \"@fumadocs/cli\":\n    type: patch\n  create-fumadocs-app:\n    type: patch\n---\n\n### Search hooks for each provider\n\n`fumadocs-core/search/client` exports a hook for each search client, like `useFetchSearch()`. They return the props of `<SearchDialog />`:\n\n```tsx\nconst search = useFetchSearch({ locale });\n\n<SearchDialog {...search} {...props}>\n  <SearchDialogList />\n</SearchDialog>;\n```\n\n`data` is the last successful search, its `items` have their content parsed into `hastContent`. `error` is set when the last search failed.\n\n- `experimental_useSearch()` creates a search hook from a memoized search function.\n- `useDocsSearch()` is deprecated.\n- `useFlexsearchStatic()` and `useOramaCloudLegacySearch()` are exported from the paths of their clients.\n- `<SearchDialogList />` shows `defaultItems` without results.\n- `useSearchList()` is removed, `useSearch()` returns `getActive()`, `setActive()` and `subscribeActive()` for the active item.\n- `<SearchDialogListItem />` renders a `div` instead of a `button`, table rows render their cells only.\n- `renderMarkdown` of `<SearchDialogListItem />` renders `content` instead of `hastContent`. Without it, the string content of custom items is shown as text.\n- The templates of Fumadocs CLI and Create Fumadocs App use the new hooks.\n"
+    filename: 2026-10-06-search-hooks.md
     v: 0.0.0
-  - content: "---\npackages:\n  \"@fumadocs/base-ui\":\n    type: patch\n---\n\n### Fix Spacious layout on Firefox mobile\n\nWhen scrolling in Firefox, the top edge of the page panel moved away from the navbar and table of contents bar, ending up in the middle of the page or off screen. It now stays below the bars, without relying on CSS anchor positioning.\n"
-    filename: 2026-10-05-spacious-firefox.md
+  - content: "---\npackages:\n  fumadocs-core:\n    type: minor\n  fumadocs-typescript:\n    type: minor\n  \"@fumadocs/satteri\":\n    type: minor\n  fumadocs-ui:\n    type: minor\n  \"@fumadocs/base-ui\":\n    type: minor\n---\n\n### Index tables by row\n\nStructured data records each table row as a Markdown table of its header row and itself, instead of a record per cell. Type tables from `auto-type-table` record a row for each prop instead of the `TypeTable` element. Re-sync your search indexes to pick them up.\n\n- `remarkStructure()` defaults `types` to `table` instead of `tableCell`.\n- `tableRowToStructuredData()` from `fumadocs-core/search` creates the structured data of a table row, `typeTableToStructuredData()` from `fumadocs-typescript` of a type table.\n- Search hooks group the rows of a table into a `table` item, `<SearchDialogList />` renders it with `Table`, `<SearchDialogListTable />` by default.\n- Algolia and Orama Cloud link to the anchor of every record, like the props of type tables.\n- Orama Cloud searches `title`, `section` and `content` by default, set `params.properties` to search other fields.\n- `remarkStructure()` of Sätteri records the `data.structuredData` of nodes in place of the nodes.\n"
+    filename: 2026-10-06-search-table-rows.md
     v: 0.0.0
-  - content: "---\npackages:\n  fumadocs-ui:\n    type: patch\n  \"@fumadocs/base-ui\":\n    type: patch\n---\n\n### Ignore unknown values in tab groups\n\nTabs with a `groupId`, including code block tabs with `tab-group`, applied persisted or shared values even when none of their tabs matched, for example after renaming a tab, or when tabs in the same group have different items. They then showed no content until a tab was clicked. Such values are now ignored.\n"
-    filename: 2026-10-05-tabs-group-value.md
+  - content: "---\npackages:\n  fumadocs-ui:\n    type: patch\n  \"@fumadocs/base-ui\":\n    type: patch\n---\n\n### Show page tree roots on fallback pages\n\nOn pages from the fallback page tree, layout tabs list the root folders of the main page tree again.\n"
+    filename: 2026-10-09-fallback-tabs.md
+    v: 0.0.0
+  - content: "---\npackages:\n  fumadocs-core:\n    type: minor\n  \"@fumadocs/cli\":\n    type: patch\n---\n\n### Sync Mixedbread stores with `sync()`\n\n- `sync()` and `toDocuments()` from `fumadocs-core/search/mixedbread` upload a file for each page, whose chunks are its title, headings and paragraphs. Results link to their headings and render tables like other search integrations.\n- Stores synced with `mxbai store sync` need a re-sync, the frontmatter of pages is no longer read.\n- Tag filters match the tags of pages, `locale` filters results by language, and the `limit` of requests can only lower `topK`.\n- The Mixedbread template of Fumadocs CLI syncs a pre-rendered `static.json` with `sync()`, debounces searches by 300 ms, and reads the API key from `MXBAI_API_KEY`.\n"
+    filename: 2026-10-08-mixedbread-search.md
+    v: 0.0.0
+  - content: "---\npackages:\n  fumadocs-core:\n    type: patch\n---\n\n### Restore sync `index()` and `indexNode()` in `llms()`\n\nSince 16.15.9, `index()` and `indexNode()` of `llms()` returned a promise, so code using them as strings, like joining `indexNode()` results, printed `[object Promise]` without a type error. They return a string again when `llms()` receives a loader, and only return a promise when it receives a function like `getSource` of runtime content sources. Awaiting them keeps working in both cases.\n"
+    filename: 2026-10-06-llms-sync-index.md
+    v: 0.0.0
+  - content: "---\npackages:\n  fumadocs-core:\n    type: minor\n  \"@fumadocs/satteri\":\n    type: minor\n  fumadocs-mdx:\n    type: patch\n  fumadocs-typescript:\n    type: minor\n  fumadocs-docgen:\n    type: minor\n  fumadocs-obsidian:\n    type: patch\n  fumadocs-python:\n    type: patch\n---\n\n### Markdown and search records from the authored source\n\n`remarkLLMs()` and `remarkStructure()` of `fumadocs-core` slice their Markdown from the authored source like Sätteri, instead of stringifying the syntax tree. It is much faster, Markdown is no longer escaped or reformatted, and local images keep their addresses. Re-sync your search indexes to pick up the new records.\n\n- Plugins record the Markdown of content they replace with `replaceSource()` or `embedSource()` from `fumadocs-core/mdx-plugins/stringifier`, in place of `data._stringify`, and add search records with `data.structuredData`. Nodes they insert otherwise are left out. A `namespace` limits an edit to the stringifiers of that namespace, like `search` for search records.\n- Search records are always Markdown, also in Sätteri. `filterElement` replaces `stringify.filterElement`, it chooses the JSX elements kept as HTML tags (`File`, `TypeTable`, `Callout` and `Card` by default) that search dialogs render as components. Other elements and links are replaced by their content, images are removed, and an element on one line is recorded like a paragraph.\n- Removed `defaultStringifier()` (use `createStringifier()`), `StringifyOptions`, `allowedMdxAttributes`, `filterMdxAttributes`, `placeholder()` (use `mdxAsPlaceholder`), and the `stringify` and `mdast-util-to-markdown` options of both plugins.\n- Included content goes through the plugins like the document's own, Sätteri includes `.md` files as Markdown.\n- `<auto-files>` shows its files in a code block, `auto-type-table` its props in a Markdown table, created by `typeTableToMarkdown()` from `fumadocs-typescript`.\n- `remarkShow()` and `fileGenerator()` of `fumadocs-docgen` record their Markdown, generators receive the `file` to do the same.\n- Records of `fumadocs-obsidian` resolve wikilinks, and leave comments, block IDs, callout markers and embeds out. Comments are removed before parsing, so they no longer split a paragraph.\n- Pages of `fumadocs-python` compile from their MDX, so they have Markdown and search records.\n- `fumadocs-mdx`, `fumadocs-docgen` and `fumadocs-obsidian` require `fumadocs-core` 16.17.0.\n\nFix [#3662](https://github.com/fuma-nama/fumadocs/issues/3662)\n"
+    filename: 2026-10-08-authored-source.md
+    v: 0.0.0
+  - content: "---\npackages:\n  fumadocs-core:\n    type: patch\n  \"@fumadocs/satteri\":\n    type: patch\n  fumadocs-epub:\n    type: patch\n---\n\n### Fix Markdown output and search records\n\n- `remarkImage()` with `onError: 'hide'` removes the right images when a paragraph has several, and Sätteri removes them from the Markdown too.\n- `files` code blocks of `remarkMdxFiles()` nest the entries under the last item of a folder (after `└──`), and trees indented with spaces only.\n- The remark and rehype plugins no longer slow down quadratically on large documents, like `rehypeToc()` taking 17 ms instead of 239 ms on a 5 MB page.\n- `fumadocs-epub` removes every unresolved image, the second of two adjacent ones was kept.\n- Sätteri: headings with expression props, like `<Badge value={1} />` or local images, compile again, without these elements in their `toc` entry.\n- Sätteri: `remarkStructure()` records every node type listed in `types`, like `fumadocs-core`. A blockquote is one search record instead of two. In the Markdown, includes and type tables stay inside their list item or blockquote, heading IDs no longer break setext and closed ATX headings, and nested replacements no longer duplicate the source after them.\n"
+    filename: 2026-10-08-markdown-fixes.md
+    v: 0.0.0
+  - content: "---\npackages:\n  fumadocs-core:\n    type: patch\n---\n\n### Ignore unsupported locale cookies\n\nWith `hideLocale: 'always'`, `createI18nMiddleware()` ignores locale cookies that aren't in `languages`.\n"
+    filename: 2026-10-09-i18n-locale-cookie.md
+    v: 0.0.0
+  - content: "---\npackages:\n  fumadocs-core:\n    type: patch\n---\n\n### Limit results of the advanced search server\n\n- Without a `limit` in the request, it returns up to 60 results instead of every matched record.\n- The `limit` in its `search` option applies to requests without one.\n"
+    filename: 2026-10-09-search-default-limit.md
+    v: 0.0.0
+  - content: "---\npackages:\n  fumadocs-openapi:\n    type: minor\n---\n\n### Auth providers in the API playground\n\n- `playground.authProviders` handle security schemes: their rows, panels like signing in, and how values are sent. Omitted options come from the built-in providers.\n- Sign-ins leaving the page use `useAuthRedirect()`.\n- HTTP schemes other than Basic default to their own prefix, like `Token `.\n- The username and password of HTTP Basic auth are remembered.\n- OpenID Connect schemes default to a `Bearer` token.\n\nFix [#3671](https://github.com/fuma-nama/fumadocs/issues/3671)\n"
+    filename: 2026-10-09-openapi-auth-providers.md
+    v: 0.0.0
+  - content: "---\npackages:\n  fumadocs-openapi:\n    type: patch\n---\n\n### Fix code samples and matrix parameters\n\n- Render absolute server URLs on the server instead of `https://example.com`.\n- Escape values correctly in every language, and send `multipart/form-data` fields.\n- Go, Java, C# and Rust samples compile for every HTTP method.\n- Serialize `style: matrix` arrays according to `explode`.\n\nFix [#3673](https://github.com/fuma-nama/fumadocs/issues/3673)\n"
+    filename: 2026-10-09-openapi-request-fixes.md
+    v: 0.0.0
+  - content: "---\npackages:\n  \"@fumadocs/tailwind\":\n    type: patch\n---\n\n### Tune prose line height with `leading-*`\n\n`prose` reads its line height from `--tw-leading`, so `leading-*` utilities change it regardless of class order, like they do with `text-*` utilities.\n\nThe first and last children of blockquotes have no outer margins, so a blockquote at the start or end of `prose` no longer leaves a gap.\n"
+    filename: 2026-10-09-prose-leading.md
+    v: 0.0.0
+  - content: "---\npackages:\n  fumadocs-twoslash:\n    type: patch\n---\n\n### Truncate long types in hovers, faster analysis\n\n- Types longer than 500 characters in hover popups are truncated by the checker (`... 26 more ...`) instead of printed in full, so pages with large object types compile to much smaller MDX.\n- Code blocks are briefly written to the `.twoslash` directory while being analyzed, instead of going through filesystem callbacks, which makes the analysis about 2x faster. Add `.twoslash` to your `.gitignore`.\n- Identical popups of a code block are highlighted once.\n\nFix [#3672](https://github.com/fuma-nama/fumadocs/issues/3672)\n"
+    filename: 2026-10-09-twoslash-truncation.md
     v: 0.0.0
 core:packages:
-  - changelogIds:
-      - 2026-10-05-ai-chat-package.md
-    id: npm:@fumadocs/ai-chat
-    updated: true
-  - id: npm:@fumadocs/asyncapi
+  - id: npm:@fumadocs/ai-chat
     updated: false
+  - changelogIds:
+      - 2026-10-08-api-markdown-images.md
+    id: npm:@fumadocs/asyncapi
+    updated: true
+  - changelogIds:
+      - 2026-10-06-search-css-highlight.md
+      - 2026-10-06-search-hooks.md
+      - 2026-10-06-search-table-rows.md
+      - 2026-10-09-fallback-tabs.md
+    id: npm:@fumadocs/base-ui
+    updated: true
   - id: npm:@fumadocs/basehub
     updated: false
   - changelogIds:
-      - 2026-10-05-ai-chat-package.md
+      - 2026-10-06-search-hooks.md
+      - 2026-10-08-mixedbread-search.md
     id: npm:@fumadocs/cli
-    updated: true
-  - changelogIds:
-      - 2026-10-05-ai-chat-focus.md
-      - 2026-10-05-sidebar-hotkey.md
-      - 2026-10-05-spacious-firefox.md
-      - 2026-10-05-tabs-group-value.md
-    id: npm:@fumadocs/base-ui
     updated: true
   - id: npm:@fumadocs/content
     updated: false
   - id: npm:@fumadocs/content-collections
     updated: false
-  - id: npm:fumadocs-core
+  - changelogIds:
+      - 2026-10-06-llms-sync-index.md
+      - 2026-10-06-search-css-highlight.md
+      - 2026-10-06-search-hooks.md
+      - 2026-10-06-search-table-rows.md
+      - 2026-10-08-authored-source.md
+      - 2026-10-08-markdown-fixes.md
+      - 2026-10-08-mixedbread-search.md
+      - 2026-10-09-i18n-locale-cookie.md
+      - 2026-10-09-search-default-limit.md
+    id: npm:fumadocs-core
     updated: true
-  - id: npm:create-fumadocs-app
+  - changelogIds:
+      - 2026-10-06-search-hooks.md
+    id: npm:create-fumadocs-app
     updated: true
   - id: npm:create-fumadocs-versions
     updated: true
-  - id: npm:fumadocs-docgen
-    updated: false
-  - id: npm:fumadocs-epub
-    updated: false
-  - id: npm:@fumadocs/graphql
-    updated: false
+  - changelogIds:
+      - 2026-10-08-authored-source.md
+    id: npm:fumadocs-docgen
+    updated: true
+  - changelogIds:
+      - 2026-10-08-markdown-fixes.md
+    id: npm:fumadocs-epub
+    updated: true
+  - changelogIds:
+      - 2026-10-08-api-markdown-images.md
+    id: npm:@fumadocs/graphql
+    updated: true
   - id: npm:@fumari/image-size
     updated: false
   - id: npm:@fumadocs/json-schema
     updated: false
-  - id: npm:@fumadocs/language
-    updated: false
+  - changelogIds:
+      - 2026-10-08-api-markdown-images.md
+    id: npm:@fumadocs/language
+    updated: true
   - id: npm:@fumadocs/local-content
     updated: false
   - id: npm:@fumadocs/local-html
     updated: false
   - id: npm:@fumadocs/local-md
     updated: false
-  - id: npm:fumadocs-mdx
+  - changelogIds:
+      - 2026-10-08-authored-source.md
+    id: npm:fumadocs-mdx
+    updated: true
+  - id: npm:@fumadocs/mdx-remote
     updated: false
   - id: npm:@fumadocs/notion
     updated: false
-  - id: npm:@fumadocs/mdx-remote
-    updated: false
-  - id: npm:fumadocs-obsidian
-    updated: false
-  - id: npm:fumadocs-openapi
-    updated: false
+  - changelogIds:
+      - 2026-10-08-authored-source.md
+    id: npm:fumadocs-obsidian
+    updated: true
+  - changelogIds:
+      - 2026-10-08-api-markdown-images.md
+      - 2026-10-09-openapi-auth-providers.md
+      - 2026-10-09-openapi-request-fixes.md
+    id: npm:fumadocs-openapi
+    updated: true
   - id: npm:fumadocs-preview
     updated: false
-  - id: npm:fumadocs-python
-    updated: false
   - changelogIds:
-      - 2026-10-05-ai-chat-focus.md
-      - 2026-10-05-sidebar-hotkey.md
-      - 2026-10-05-tabs-group-value.md
+      - 2026-10-08-authored-source.md
+    id: npm:fumadocs-python
+    updated: true
+  - changelogIds:
+      - 2026-10-06-search-css-highlight.md
+      - 2026-10-06-search-hooks.md
+      - 2026-10-06-search-table-rows.md
+      - 2026-10-09-fallback-tabs.md
     id: npm:fumadocs-ui
     updated: true
   - id: npm:@fumadocs/sanity
     updated: false
-  - id: npm:@fumadocs/satteri
-    updated: false
+  - changelogIds:
+      - 2026-10-06-search-table-rows.md
+      - 2026-10-08-authored-source.md
+      - 2026-10-08-markdown-fixes.md
+    id: npm:@fumadocs/satteri
+    updated: true
   - id: npm:@fumadocs/shadcn
+    updated: false
+  - id: npm:shared-api
     updated: false
   - id: npm:@fumari/stf
     updated: false
   - id: npm:@fumadocs/story
     updated: false
-  - id: npm:shared-api
-    updated: false
-  - id: npm:@fumadocs/tailwind
-    updated: false
-  - id: npm:fumadocs-twoslash
-    updated: false
-  - id: npm:fumadocs-typescript
-    updated: false
+  - changelogIds:
+      - 2026-10-09-prose-leading.md
+    id: npm:@fumadocs/tailwind
+    updated: true
+  - changelogIds:
+      - 2026-10-09-twoslash-truncation.md
+    id: npm:fumadocs-twoslash
+    updated: true
+  - changelogIds:
+      - 2026-10-06-search-table-rows.md
+      - 2026-10-08-api-markdown-images.md
+      - 2026-10-08-authored-source.md
+    id: npm:fumadocs-typescript
+    updated: true
   - id: npm:@fumadocs/vite
     updated: false
 npm:packages:
   - id: npm:@fumadocs/ai-chat
   - id: npm:@fumadocs/asyncapi
+  - id: npm:@fumadocs/base-ui
   - id: npm:@fumadocs/basehub
   - id: npm:@fumadocs/cli
-  - id: npm:@fumadocs/base-ui
   - id: npm:@fumadocs/content
   - id: npm:@fumadocs/content-collections
   - id: npm:fumadocs-core
@@ -123,8 +197,8 @@ npm:packages:
   - id: npm:@fumadocs/local-html
   - id: npm:@fumadocs/local-md
   - id: npm:fumadocs-mdx
-  - id: npm:@fumadocs/notion
   - id: npm:@fumadocs/mdx-remote
+  - id: npm:@fumadocs/notion
   - id: npm:fumadocs-obsidian
   - id: npm:fumadocs-openapi
   - id: npm:fumadocs-preview
@@ -133,41 +207,41 @@ npm:packages:
   - id: npm:@fumadocs/sanity
   - id: npm:@fumadocs/satteri
   - id: npm:@fumadocs/shadcn
+  - id: npm:shared-api
   - id: npm:@fumari/stf
   - id: npm:@fumadocs/story
-  - id: npm:shared-api
   - id: npm:@fumadocs/tailwind
   - id: npm:fumadocs-twoslash
   - id: npm:fumadocs-typescript
   - id: npm:@fumadocs/vite
   - id: npm:docs
-  - id: npm:example-base-ui
-  - id: npm:example-asyncapi
   - id: npm:example-astro
-  - id: npm:example-content-collections
+  - id: npm:example-asyncapi
+  - id: npm:example-base-ui
   - id: npm:example-graphql
-  - id: npm:example-i18n
-  - id: npm:example-next
+  - id: npm:example-content-collections
   - id: npm:example-marble-cms
+  - id: npm:example-next
   - id: npm:example-next-local-html
   - id: npm:example-next-local-md
-  - id: npm:example-next-min
   - id: npm:example-next-shadcn
+  - id: npm:example-next-min
   - id: npm:example-next-static
-  - id: npm:example-openapi
   - id: npm:example-obsidian
+  - id: npm:example-openapi
   - id: npm:example-python
   - id: npm:example-react-router
   - id: npm:example-react-router-i18n
-  - id: npm:example-react-router-rsc
-  - id: npm:example-tanstack-start
-  - id: npm:example-react-router-spa
   - id: npm:example-react-router-min
+  - id: npm:example-react-router-rsc
+  - id: npm:example-react-router-spa
+  - id: npm:example-tanstack-start
+  - id: npm:example-tanstack-start-i18n
   - id: npm:example-tanstack-start-local-md
   - id: npm:example-tanstack-start-min
-  - id: npm:example-tanstack-start-i18n
   - id: npm:example-tanstack-start-openapi
   - id: npm:example-tanstack-start-spa
   - id: npm:example-tanstack-start-story
-  - id: npm:example-waku-i18n
   - id: npm:example-waku
+  - id: npm:example-waku-i18n
+  - id: npm:example-i18n

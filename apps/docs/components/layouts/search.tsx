@@ -13,8 +13,7 @@ import {
   type SearchItemType,
   type SharedProps,
 } from 'fumadocs-ui/components/dialog/search';
-import { useDocsSearch } from 'fumadocs-core/search/client';
-import { fetchClient } from 'fumadocs-core/search/client/fetch';
+import { useFetchSearch } from 'fumadocs-core/search/client';
 import { useMemo, useState } from 'react';
 import { Popover, PopoverContent, PopoverTrigger } from 'fumadocs-ui/components/ui/popover';
 import { ArrowRight, ChevronDown } from 'lucide-react';
@@ -59,11 +58,7 @@ const items = [
 export default function CustomSearchDialog(props: SharedProps) {
   const [open, setOpen] = useState(false);
   const [tag, setTag] = useState<string | undefined>();
-  const { search, setSearch, query } = useDocsSearch({
-    client: fetchClient({
-      tag,
-    }),
-  });
+  const search = useFetchSearch({ tag });
   const { full } = useTreeContext();
   const router = useRouter();
   const searchMap = useMemo(() => {
@@ -82,9 +77,9 @@ export default function CustomSearchDialog(props: SharedProps) {
     return map;
   }, [full]);
   const pageTreeAction = useMemo<SearchItemType | undefined>(() => {
-    if (search.length === 0) return;
+    if (search.search.length === 0) return;
 
-    const normalized = search.toLowerCase();
+    const normalized = search.search.toLowerCase();
     for (const [k, page] of searchMap) {
       if (!k.startsWith(normalized)) continue;
 
@@ -102,10 +97,10 @@ export default function CustomSearchDialog(props: SharedProps) {
         onSelect: () => router.push(page.url),
       };
     }
-  }, [router, search, searchMap]);
+  }, [router, search.search, searchMap]);
 
   return (
-    <SearchDialog search={search} onSearchChange={setSearch} isLoading={query.isLoading} {...props}>
+    <SearchDialog {...search} {...props}>
       <SearchDialogOverlay />
       <SearchDialogContent>
         <SearchDialogHeader>
@@ -115,12 +110,7 @@ export default function CustomSearchDialog(props: SharedProps) {
         </SearchDialogHeader>
         <SearchDialogList
           items={
-            query.data !== 'empty' || pageTreeAction
-              ? [
-                  ...(pageTreeAction ? [pageTreeAction] : []),
-                  ...(Array.isArray(query.data) ? query.data : []),
-                ]
-              : null
+            pageTreeAction ? [pageTreeAction, ...(search.data?.items ?? [])] : search.data?.items
           }
         />
         <SearchDialogFooter className="flex flex-row flex-wrap gap-2 items-center">

@@ -1,13 +1,9 @@
 import type { MdastPluginEntry } from 'satteri';
 import { defineMdastPlugin } from 'satteri';
-import {
-  createStringifier,
-  offsets,
-  type SourceEdit,
-  type Stringifier,
-  type PositionedNode,
-} from './stringifier';
+import { createStringifier, type PositionedNode, type Stringifier } from './stringifier';
 import type { ExtraPluginHooks } from './compile';
+import { stringifyHeadingId } from './heading-id';
+import type { JsxElementNode } from './utils';
 
 export interface LLMsOptions {
   /**
@@ -38,16 +34,18 @@ export interface LLMsOptions {
   output?: 'function' | 'string';
 }
 
-interface JsxSpan {
-  start: number;
-  end: number;
+/** a JSX element kept in function output */
+interface KeptElement {
+  /** the opening tag without its end, with the name prefixed */
+  open: string;
   name: string;
   inline: boolean;
-  children: JsxSpan[];
+  /** Markdown with the markers of kept elements */
+  children: string;
 }
 
-const customIdRegex = /\s*\[#[^]+?]\s*$/;
 const componentNameRegex = /^[A-Z][\w$]*$/;
+const markerRegex = /\0(\d+)\0/g;
 
 /**
  * Export the document as Markdown, sliced from the authored source: heading IDs are added,
@@ -60,20 +58,29 @@ export function remarkLlms({
 }: LLMsOptions = {}) {
   const jsx = output === 'function';
   const factory = () => {
-    const spans: JsxSpan[] = [];
+    const kept: KeptElement[] = [];
     let s: Stringifier;
 
-    const drop = (node: PositionedNode) => s.remove(node);
-    const collectJsx = (node: PositionedNode & { type: string; name?: string | null }) => {
-      if (!jsx || !node.name || !componentNameRegex.test(node.name)) return;
-      const pos = offsets(node);
-      if (!pos) return;
+    const drop = (node: PositionedNode) => s.replace(node, '');
+    const keep = (node: JsxElementNode & { type: string; children: PositionedNode[] }) => {
+      const name = node.name;
+      if (!name || !componentNameRegex.test(name)) return;
 
-      spans.push({
-        ...pos,
-        name: node.name,
-        inline: node.type === 'mdxJsxTextElement',
-        children: [],
+      s.replace(node, (s) => {
+        let open = `<_c.${name}`;
+        for (const attr of node.attributes) {
+          if (attr.type === 'mdxJsxExpressionAttribute') open += ` {${attr.value}}`;
+          else if (attr.value == null) open += ` ${attr.name}`;
+          else if (typeof attr.value === 'string')
+            open += ` ${attr.name}={${JSON.stringify(attr.value)}}`;
+          else open += ` ${attr.name}={${attr.value.value}}`;
+        }
+
+        const inline = node.type === 'mdxJsxTextElement';
+        let children = s.inner(node);
+        // block content on its own lines
+        if (children && !inline) children = `\n${children}\n`;
+        return `\0${kept.push({ open, name, inline, children }) - 1}\0`;
       });
     };
 
@@ -86,35 +93,23 @@ export function remarkLlms({
       mdxjsEsm: drop,
       yaml: drop,
       toml: drop,
-      heading(node) {
-        const pos = offsets(node);
-        if (!pos) return;
-
-        const slice = s.source.slice(pos.start, pos.end);
-        const marker = customIdRegex.exec(slice);
-        if (!headingIds) {
-          if (marker) s.edit(pos.start + marker.index, pos.end, '');
-          return;
-        }
-
-        const id = (node.data as { hProperties?: { id?: unknown } } | undefined)?.hProperties?.id;
-        if (typeof id === 'string' && !marker) s.edit(pos.end, pos.end, ` [#${id}]`);
-      },
-      mdxJsxFlowElement: collectJsx,
-      mdxJsxTextElement: collectJsx,
+      heading: (node) => stringifyHeadingId(s, node, headingIds),
+      // elements are kept in function output only
+      ...(jsx && { mdxJsxFlowElement: keep, mdxJsxTextElement: keep }),
       after(root, ctx) {
-        const end = root.position?.end.offset ?? s.source.length;
+        const text = s.stringify(root).trim();
+        const value = text ? `${text}\n` : '';
 
         if (!jsx) {
-          ctx.data.markdown ??= `${s.slice(0, end).trim()}\n`;
+          ctx.data.markdown ??= value;
           return;
         }
         if (!as) return;
 
-        const roots = buildTree(spans, s.edits);
+        const body = kept.length > 0 ? `<>${toCode(value, kept)}</>` : JSON.stringify(value);
         ctx.prependChild(root, {
           type: 'mdxjsEsm',
-          value: toComponentCode(as, childrenToCode(s, 0, end, roots), roots.length > 0),
+          value: toComponentCode(as, body, kept.length > 0),
         });
       },
     });
@@ -125,28 +120,6 @@ export function remarkLlms({
       if (as && !jsx) addExport(as, JSON.stringify(data.markdown ?? ''));
     },
   } satisfies ExtraPluginHooks) as MdastPluginEntry & ExtraPluginHooks;
-}
-
-/**
- * Nest the pre-order span list by containment, dropping spans that overlap an edit
- * (e.g. a JSX element inside an include-replaced paragraph).
- */
-function buildTree(spans: JsxSpan[], edits: readonly SourceEdit[]): JsxSpan[] {
-  const roots: JsxSpan[] = [];
-  const stack: JsxSpan[] = [];
-  let e = 0;
-
-  for (const span of spans) {
-    while (e < edits.length && edits[e].end <= span.start) e++;
-    if (e < edits.length && edits[e].start < span.end && edits[e].end > span.start) continue;
-
-    while (stack.length > 0 && stack[stack.length - 1].end <= span.start) stack.pop();
-    const parent = stack[stack.length - 1];
-    (parent ? parent.children : roots).push(span);
-    stack.push(span);
-  }
-
-  return roots;
 }
 
 function toComponentCode(as: string, body: string, hasJsx: boolean): string {
@@ -161,117 +134,25 @@ function toComponentCode(as: string, body: string, hasJsx: boolean): string {
 }
 
 /**
- * Generate the JSX for the document: Markdown becomes string literals, kept
- * elements stay as JSX with `_c.`-prefixed names and their attributes verbatim.
+ * Generate the JSX for Markdown with the markers of kept elements: Markdown becomes string literals, kept elements
+ * stay as JSX with `_c.`-prefixed names and their attributes.
  */
-function childrenToCode(s: Stringifier, start: number, end: number, spans: JsxSpan[]): string {
-  if (spans.length === 0) {
-    const text = s.slice(start, end).trim();
-    return text ? JSON.stringify(`${text}\n`) : '""';
-  }
-
-  return `<>${innerToCode(s, start, end, spans)}</>`;
-}
-
-function elementToCode(s: Stringifier, span: JsxSpan): string {
-  const tagEnd = scanTagEnd(s.source, span.start, span.end);
-  // name & attributes verbatim, so the compiler re-parses them the same way
-  const open = `<_c.${s.source.slice(span.start + 1, tagEnd + 1)}`;
-
-  let out: string;
-  if (s.source[tagEnd - 1] === '/') {
-    out = open;
-  } else {
-    const closeStart = s.source.lastIndexOf('</', span.end);
-    out = `${open}${innerToCode(s, tagEnd + 1, closeStart, span.children)}</_c.${span.name}>`;
-  }
-
-  // keep inline elements in inline context when rendered
-  return span.inline ? `<span>${out}</span>` : out;
-}
-
-function innerToCode(s: Stringifier, start: number, end: number, children: JsxSpan[]): string {
-  const indent = commonIndent(s.source.slice(start, end));
-  const parts: string[] = [];
-  let cursor = start;
-
-  const pushText = (text: string) => {
-    if (text.trim()) parts.push(`{${JSON.stringify(dedent(text, indent))}}`);
+function toCode(text: string, kept: KeptElement[]): string {
+  let out = '';
+  let idx = 0;
+  const pushText = (chunk: string) => {
+    if (chunk.trim()) out += `{${JSON.stringify(chunk)}}`;
   };
 
-  for (const child of children) {
-    pushText(s.slice(cursor, child.start));
-    parts.push(elementToCode(s, child));
-    cursor = child.end;
+  for (const match of text.matchAll(markerRegex)) {
+    pushText(text.slice(idx, match.index));
+    const { open, name, inline, children } = kept[Number(match[1])];
+    const element = children ? `${open}>${toCode(children, kept)}</_c.${name}>` : `${open} />`;
+    // keep inline elements in inline context when rendered
+    out += inline ? `<span>${element}</span>` : element;
+    idx = match.index + match[0].length;
   }
-  pushText(s.slice(cursor, end));
-
-  return parts.join('');
-}
-
-/** the authored indentation of an element's children, stripped from their chunks */
-function commonIndent(text: string): number {
-  let min = Infinity;
-  for (const line of text.split('\n')) {
-    if (line.trim().length === 0) continue;
-    let i = 0;
-    while (line[i] === ' ') i++;
-    min = Math.min(min, i);
-  }
-
-  return min === Infinity ? 0 : min;
-}
-
-function dedent(text: string, indent: number): string {
-  if (indent === 0) return text;
-
-  const lines = text.split('\n');
-  let out = '';
-  for (let j = 0; j < lines.length; j++) {
-    if (j > 0) out += '\n';
-    let i = 0;
-    while (i < indent && lines[j][i] === ' ') i++;
-    out += lines[j].slice(i);
-  }
+  pushText(text.slice(idx));
 
   return out;
-}
-
-/**
- * Index of the `>` ending the opening tag. Quotes at brace depth 0 are JSX attribute
- * strings (no escapes); quotes inside `{}` follow JavaScript escaping.
- */
-function scanTagEnd(source: string, start: number, end: number): number {
-  let quote = '';
-  let depth = 0;
-
-  for (let i = start + 1; i < end; i++) {
-    const c = source[i];
-    if (quote) {
-      if (c === '\\' && depth > 0) i++;
-      else if (c === quote) quote = '';
-      continue;
-    }
-
-    switch (c) {
-      case '"':
-      case "'":
-        quote = c;
-        break;
-      case '`':
-        if (depth > 0) quote = c;
-        break;
-      case '{':
-        depth++;
-        break;
-      case '}':
-        depth--;
-        break;
-      case '>':
-        if (depth === 0) return i;
-        break;
-    }
-  }
-
-  return end - 1;
 }

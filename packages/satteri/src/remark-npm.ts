@@ -2,6 +2,7 @@ import { defineMdastPlugin } from 'satteri';
 import convert from 'npm-to-yarn';
 import { generateCodeBlockTabs } from 'fumadocs-core/mdx-plugins/codeblock-utils';
 import type { CodeBlockTabsOptions } from 'fumadocs-core/mdx-plugins/codeblock-utils';
+import { replaceSource } from './stringifier';
 
 interface PackageManager {
   name: string;
@@ -77,6 +78,8 @@ export function remarkNpm({
         });
       }
 
+      // the tabs are generated, their Markdown is the authored code block
+      replaceSource(ctx, node, (s) => s.stringify(node));
       ctx.replaceNode(node, generateCodeBlockTabs(options));
     },
   });

@@ -1,6 +1,6 @@
 {
   "name": "fumadocs-python",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "description": "The built-in Python docgen for Fumadocs",
   "keywords": [
     "Docs",
@@ -52,6 +52,7 @@
     "lucide-react": "^1.50.0",
     "mdast-util-mdx": "^3.0.0",
     "remark": "^15.0.1",
+    "remark-mdx": "^3.1.1",
     "remark-rehype": "^11.1.2",
     "unified": "^11.0.5",
     "vfile": "^6.0.3"

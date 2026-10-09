@@ -1,9 +1,10 @@
-import type { Root } from 'mdast';
-import { visit } from 'unist-util-visit';
+import type { Nodes, Root } from 'mdast';
 import type { Transformer } from 'unified';
 import type { MdxJsxAttribute, MdxJsxFlowElement } from 'mdast-util-mdx';
 import type { VFile } from 'vfile';
 import path from 'node:path';
+import { replaceSource } from './stringifier';
+import { walk } from './utils';
 
 export interface FileNode {
   depth: number;
@@ -40,29 +41,29 @@ interface AutoFilesProps extends Partial<ToMdxOptions> {
 function parseFileTree(code: string) {
   const lines = code.split(/\r?\n/);
   const stack = new Map<number, Node>();
+  let root: Node | undefined;
 
   for (const line of lines) {
-    let depth = 0;
-    let name = line;
-    let match: RegExpMatchArray | null;
-
-    while ((match = /(?:├──|│|└──)\s*/.exec(name))) {
-      name = name.slice(match[0].length);
-      depth++;
-    }
-
+    const name = line.replace(/^[\s│├└─]+/, '');
     if (!name) continue;
-    const node: Node = name.endsWith('/')
-      ? { type: 'folder', name, children: [], depth }
-      : { type: 'file', name, depth };
 
+    // children start at a later column than their parent
+    const column = line.length - name.length;
     let parent: Node | undefined;
-    for (let i = depth - 1; i >= 0 && !parent; i--) {
+    for (let i = column - 1; i >= 0 && !parent; i--) {
       parent = stack.get(i);
     }
 
-    stack.set(depth, node);
-    if (!parent) continue;
+    const depth = parent ? parent.depth + 1 : 0;
+    const node: Node = name.endsWith('/')
+      ? { type: 'folder', name, children: [], depth }
+      : { type: 'file', name, depth };
+    stack.set(column, node);
+    if (!parent) {
+      root = node;
+      continue;
+    }
+
     if (parent.type === 'file') {
       Object.assign(parent, {
         type: 'folder',
@@ -73,7 +74,7 @@ function parseFileTree(code: string) {
     (parent as FolderNode).children.push(node);
   }
 
-  return stack.get(0);
+  return root;
 }
 
 function defaultToMDX(node: Node, options: ToMdxOptions, depth = 0): MdxJsxFlowElement {
@@ -158,13 +159,14 @@ export function remarkMdxFiles(options: RemarkMdxFilesOptions = {}): Transformer
     const baseDir = file.dirname ?? file.cwd;
     const cwd = dir ? path.join(baseDir, dir) : baseDir;
     const files = await glob(patterns, { cwd });
+    replaceSource(file, node, `\`\`\`\n${files.join('\n')}\n\`\`\``);
     Object.assign(node, toMdx(buildFileTreeFromGlob(cwd, files), { defaultOpenAll }));
   }
 
   return async (tree, file) => {
     const queue: Promise<void>[] = [];
 
-    visit(tree, ['code', 'mdxJsxFlowElement'] as const, (node) => {
+    walk<Nodes>(tree, (node) => {
       if (node.type === 'code') {
         if (node.lang !== lang || !node.value) return;
 

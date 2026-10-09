@@ -2,7 +2,7 @@
 import { CodeBlock, Pre as CodePre } from 'fumadocs-ui/components/codeblock';
 import { DynamicCodeBlock } from 'fumadocs-ui/components/dynamic-codeblock';
 import defaultMdxComponents from 'fumadocs-ui/mdx';
-import type { ElementContent, Root } from 'hast';
+import type { Element, ElementContent, Root } from 'hast';
 import { type Components, toJsxRuntime } from 'hast-util-to-jsx-runtime';
 import { type ComponentProps, memo, useState } from 'react';
 import { Fragment, jsx, jsxs } from 'react/jsx-runtime';
@@ -10,7 +10,6 @@ import { remark } from 'remark';
 import remarkGfm from 'remark-gfm';
 import remarkRehype from 'remark-rehype';
 import remend from 'remend';
-import { visit } from 'unist-util-visit';
 
 const processor = remark().use(remarkGfm).use(remarkRehype);
 const streamProcessor = remark().use(remarkGfm).use(remarkRehype).use(rehypeWords);
@@ -125,10 +124,11 @@ function codeOf(children: unknown) {
 }
 
 function rehypeWords() {
-  return (tree: Root) => {
-    visit(tree, ['text', 'element'], (node, index, parent) => {
-      if (node.type === 'element' && node.tagName === 'pre') return 'skip';
-      if (node.type !== 'text' || !parent || index === undefined) return;
+  const split = (parent: Root | Element) => {
+    for (let i = 0; i < parent.children.length; i++) {
+      const node = parent.children[i];
+      if (node.type === 'element' && node.tagName !== 'pre') split(node);
+      if (node.type !== 'text') continue;
 
       const words: ElementContent[] = [];
       for (const word of node.value.split(/(?=\s)/)) {
@@ -141,8 +141,10 @@ function rehypeWords() {
         });
       }
 
-      parent.children.splice(index, 1, ...words);
-      return index + words.length;
-    });
+      parent.children.splice(i, 1, ...words);
+      i += words.length - 1;
+    }
   };
+
+  return (tree: Root) => split(tree);
 }

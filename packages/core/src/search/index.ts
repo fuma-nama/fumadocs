@@ -1,7 +1,9 @@
-import type { Root } from 'mdast';
+import type { Nodes, Root } from 'mdast';
 import type { ReactNode } from 'react';
 import { remark } from 'remark';
-import { visit } from 'unist-util-visit';
+import type { StructuredDataContent } from '@/mdx-plugins/remark-structure';
+import { walk } from '@/mdx-plugins/utils';
+import { buildRegexFromQuery } from './highlight';
 
 export interface SortedResult<Content = string> {
   id: string;
@@ -13,14 +15,50 @@ export interface SortedResult<Content = string> {
    * breadcrumbs to be displayed on UI
    */
   breadcrumbs?: Content[];
-  /**
-   * @deprecated it is now included in `content` as Markdown using `<mark />`.
-   */
-  contentWithHighlights?: HighlightedText<Content>[];
+
+  /** the table of a table row, unique in its page */
+  table?: string;
 }
 
 export type ReactSortedResult = SortedResult<ReactNode>;
 
+/**
+ * A table row as structured data: a Markdown table of the row, after the header row of its table.
+ */
+export function tableRowToStructuredData({
+  table,
+  heading,
+  row,
+  header,
+}: {
+  /** the id of its table, unique in its page */
+  table: string;
+  heading?: string;
+  /** the cells, as inline Markdown */
+  row: string[];
+  /** the cells of the header row, tables like the props of type tables have none */
+  header?: string[];
+}): StructuredDataContent {
+  const formatRow = (cells: string[]) => {
+    let out = '|';
+    for (const cell of cells)
+      out += ` ${cell.replace(/\s*\n\s*/g, ' ').replace(/(?<!\\)\|/g, '\\|')} |`;
+    return out;
+  };
+  const delimiter = `|${' --- |'.repeat((header ?? row).length)}`;
+
+  return {
+    heading,
+    content: header
+      ? `${formatRow(header)}\n${delimiter}\n${formatRow(row)}`
+      : `${formatRow(row)}\n${delimiter}`,
+    table,
+  };
+}
+
+/**
+ * @deprecated
+ */
 export interface HighlightedText<Content = string> {
   type: 'text';
   content: Content;
@@ -29,22 +67,11 @@ export interface HighlightedText<Content = string> {
   };
 }
 
-function escapeRegExp(input: string): string {
-  return input.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-}
-
-function buildRegexFromQuery(q: string): RegExp | null {
-  const trimmed = q.trim();
-  if (trimmed.length === 0) return null;
-  const terms = Array.from(new Set(trimmed.split(/\s+/).filter(Boolean)));
-  if (terms.length === 0) return null;
-  const escaped = terms.map(escapeRegExp).join('|');
-  return new RegExp(`(${escaped})`, 'gi');
-}
-
-const processor = remark();
-
+/**
+ * @deprecated search results are no longer highlighted, highlight the rendered results with `useHighlightQuery()` instead.
+ */
 export function createContentHighlighter(query: string | RegExp) {
+  const processor = remark();
   const regex = typeof query === 'string' ? buildRegexFromQuery(query) : query;
 
   return {
@@ -97,7 +124,8 @@ export function createContentHighlighter(query: string | RegExp) {
 }
 
 function highlightInTree(tree: Root, regex: RegExp) {
-  visit(tree, 'text', (node) => {
+  walk<Nodes>(tree, (node) => {
+    if (node.type !== 'text') return;
     let out = '';
     const content = node.value;
 

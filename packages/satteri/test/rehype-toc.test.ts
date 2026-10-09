@@ -46,6 +46,23 @@ describe('rehype-toc', () => {
     `);
   });
 
+  it('skips elements with expressions in headings', async () => {
+    const code = await compile('## A ![icon](./icon.png) <Badge value={1} /> <Badge text="b" />');
+
+    expect(tocExport(code)).toMatchInlineSnapshot(`
+      "[{
+          title: _jsxs(_Fragment, { children: [
+              "A ",
+              " ",
+              " ",
+              _jsx(Badge, { text: "b" })
+          ] }),
+          url: "#a-icon--",
+          depth: 2
+      }]"
+    `);
+  });
+
   it('excludes [!toc] headings and strips the tag from output', async () => {
     const code = await compile('## Visible\n\n## Hidden [!toc]');
     const rendered = withoutToc(code);

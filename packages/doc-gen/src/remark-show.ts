@@ -1,7 +1,8 @@
 /// <reference types="mdast-util-mdx" />
 import type { Transformer } from 'unified';
-import type { Root, RootContent } from 'mdast';
-import { visit } from 'unist-util-visit';
+import type { Nodes, Root, RootContent } from 'mdast';
+import { replaceSource } from 'fumadocs-core/mdx-plugins/stringifier';
+import { walk } from './utils';
 
 export function remarkShow(options?: {
   variables?: Record<string, unknown>;
@@ -12,8 +13,8 @@ export function remarkShow(options?: {
     const { toJs } = await import('estree-util-to-js');
     const tasks: Promise<void>[] = [];
 
-    visit(tree, 'mdxJsxFlowElement', (node) => {
-      if (node.name !== 'show') return;
+    walk<Nodes>(tree, (node) => {
+      if (node.type !== 'mdxJsxFlowElement' || node.name !== 'show') return;
 
       for (const attr of node.attributes) {
         if (attr.type !== 'mdxJsxAttribute' || attr.name !== 'on') continue;
@@ -31,6 +32,8 @@ export function remarkShow(options?: {
         tasks.push(
           (async () => {
             const value = typeof callback === 'function' ? await callback(file) : callback;
+            // in Markdown output, the content without the element
+            replaceSource(file, node, value === true ? (s) => s.inner(node) : '');
 
             Object.assign(node, {
               type: 'mdxJsxFlowElement',

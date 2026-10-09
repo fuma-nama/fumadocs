@@ -1,8 +1,7 @@
-import type { Code, Root } from 'mdast';
+import type { Code, Nodes, Root } from 'mdast';
 import type { Transformer } from 'unified';
-import { visit } from 'unist-util-visit';
 import convert from 'npm-to-yarn';
-import { createElement, expressionToAttribute } from './utils';
+import { createElement, expressionToAttribute, walk } from './utils';
 
 interface PackageManager {
   name: string;
@@ -56,8 +55,8 @@ export function remarkInstall({
   ],
 }: RemarkInstallOptions = {}): Transformer<Root, Root> {
   return (tree) => {
-    visit(tree, 'code', (node) => {
-      if (node.lang !== 'package-install') return 'skip';
+    walk<Nodes>(tree, (node) => {
+      if (node.type !== 'code' || node.lang !== 'package-install') return;
 
       const value =
         node.value.startsWith('npm') || node.value.startsWith('npx')

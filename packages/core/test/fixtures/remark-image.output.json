@@ -85,6 +85,18 @@
           ],
           "children": [],
           "name": "img",
+          "position": {
+            "end": {
+              "column": 20,
+              "line": 1,
+              "offset": 19,
+            },
+            "start": {
+              "column": 1,
+              "line": 1,
+              "offset": 0,
+            },
+          },
           "type": "mdxJsxFlowElement",
         },
       ],
@@ -179,6 +191,18 @@
           ],
           "children": [],
           "name": "img",
+          "position": {
+            "end": {
+              "column": 30,
+              "line": 5,
+              "offset": 96,
+            },
+            "start": {
+              "column": 1,
+              "line": 5,
+              "offset": 67,
+            },
+          },
           "type": "mdxJsxFlowElement",
         },
       ],

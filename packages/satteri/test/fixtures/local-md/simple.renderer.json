@@ -3,7 +3,7 @@
     "contents": [
       {
         "heading": "title",
-        "content": "Intro paragraph with emphasis."
+        "content": "Intro paragraph with **emphasis**."
       },
       {
         "heading": "list",

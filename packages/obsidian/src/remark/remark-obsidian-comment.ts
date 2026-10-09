@@ -1,22 +1,38 @@
-import type { Transformer } from 'unified';
-import type { Root, RootContent } from 'mdast';
-import { separate } from '@/utils/mdast-separate';
+import type { Nodes, Root } from 'mdast';
+import type { Processor, Transformer } from 'unified';
+import { walk } from '@/utils/mdast-walk';
 
-const RegexDelimiter = /(?<!\\)%%/;
+const RegexDelimiter = /(?<!\\)%%/g;
 
-export function remarkObsidianComment(): Transformer<Root, Root> {
-  function removeComment(nodes: RootContent[]): RootContent[] {
-    const start = separate(RegexDelimiter, nodes);
-    if (!start) return nodes;
-    const [before, rest] = start;
+/** Remove comments from the source and parse it again, delimiters in code are kept. */
+export function remarkObsidianComment(this: Processor): Transformer<Root, Root> {
+  return (tree, file) => {
+    const source = String(file);
+    if (!source.includes('%%')) return;
 
-    const end = separate(RegexDelimiter, rest);
-    if (!end) return nodes;
+    const code: [start: number, end: number][] = [];
+    walk<Nodes>(tree, (node) => {
+      if (node.type === 'code' || node.type === 'inlineCode')
+        code.push([node.position!.start.offset!, node.position!.end.offset!]);
+    });
 
-    return [...before, ...removeComment(end[1])];
-  }
+    let value = '';
+    let cursor = 0;
+    let open: number | undefined;
+    for (const { index } of source.matchAll(RegexDelimiter)) {
+      if (code.some(([start, end]) => index >= start && index < end)) continue;
+      if (open === undefined) {
+        open = index;
+        continue;
+      }
 
-  return (tree) => {
-    tree.children = removeComment(tree.children);
+      value += source.slice(cursor, open);
+      cursor = index + 2;
+      open = undefined;
+    }
+    if (cursor === 0) return;
+
+    file.value = value + source.slice(cursor);
+    Object.assign(tree, this.parse(file));
   };
 }

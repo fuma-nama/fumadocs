@@ -1,16 +1,18 @@
-import type { Root } from 'mdast';
+import type { Root, RootContent } from 'mdast';
 import type { Nodes } from 'hast';
 import type { Transformer } from 'unified';
 import type { Expression, ExpressionStatement, ObjectExpression } from 'estree';
-import { createGenerator, type DocEntry, type Generator } from '@/lib/base';
+import { createGenerator, type DocEntry, type GeneratedDoc, type Generator } from '@/lib/base';
 import { type MarkdownRenderer, markdownRenderer, type ShikiOptions } from '@/markdown';
 import { valueToEstree } from 'estree-util-value-to-estree';
-import { visit } from 'unist-util-visit';
 import { type BaseTypeTableProps, type GenerateTypeTableOptions } from '@/lib/type-table';
 import { toEstree } from 'hast-util-to-estree';
 import { type ParameterTag, parseTags } from '@/lib/parse-tags';
 import type { MdxJsxAttribute, MdxJsxExpressionAttribute, MdxJsxFlowElement } from 'mdast-util-mdx';
 import type { VFile } from 'vfile';
+import type { StructuredData } from 'fumadocs-core/mdx-plugins/remark-structure';
+import { tableRowToStructuredData } from 'fumadocs-core/search';
+import { replaceSource } from 'fumadocs-core/mdx-plugins/stringifier';
 
 function objectBuilder() {
   const out: ObjectExpression = {
@@ -138,6 +140,52 @@ export interface RemarkAutoTypeTableOptions {
   generator?: Generator;
 }
 
+/** the structured data of a type table, a table row without header for each prop, linked to the prop */
+export function typeTableToStructuredData(
+  id: string,
+  entries: DocEntry[],
+): StructuredData['contents'] {
+  const contents: StructuredData['contents'] = [];
+  for (const entry of entries) {
+    contents.push(
+      tableRowToStructuredData({
+        table: id,
+        heading: `${id}-${entry.name}`,
+        row: typeTableRow(entry),
+      }),
+    );
+  }
+
+  return contents;
+}
+
+/** a type table as Markdown: a heading, its description, and a table of its props */
+export function typeTableToMarkdown(doc: GeneratedDoc): string {
+  let out = `### ${doc.name}\n\n`;
+  if (doc.description) out += `${doc.description.trim()}\n\n`;
+  out += '| Prop | Type | Description |\n| --- | --- | --- |';
+  for (const entry of doc.entries) {
+    out += '\n|';
+    for (const cell of typeTableRow(entry))
+      out += ` ${cell.replace(/\s*\n\s*/g, ' ').replaceAll('|', '\\|')} |`;
+  }
+
+  return out;
+}
+
+function typeTableRow(entry: DocEntry): string[] {
+  const tags = parseTags(entry.tags);
+  let description = entry.description.replace(/{@link (?<link>[^}]*)}/g, '$1').trim();
+  if (tags.default) description += `${description ? ' ' : ''}Default: \`${tags.default}\``;
+  if (entry.deprecated) description = `**Deprecated.** ${description}`;
+
+  return [
+    `\`${entry.name}${entry.required ? '' : '?'}\``,
+    `\`${entry.simplifiedType}\``,
+    description,
+  ];
+}
+
 export interface TypeTableProps extends BaseTypeTableProps {
   cwd?: true;
 }
@@ -219,17 +267,22 @@ export function remarkAutoTypeTable(
           ...attributes,
         ],
         children: [],
+        data: {
+          structuredData: {
+            contents: typeTableToStructuredData(`type-table-${doc.id}`, doc.entries),
+          },
+        },
       });
     }
 
-    return rendered;
+    return { output, rendered };
   }
 
   return async (tree, file) => {
     const queue: Promise<void>[] = [];
 
-    visit(tree, 'mdxJsxFlowElement', (node) => {
-      if (node.name !== name) return;
+    walk(tree, (node) => {
+      if (node.type !== 'mdxJsxFlowElement' || node.name !== name) return;
       const props: TypeTableProps = {};
       const attributes: (MdxJsxAttribute | MdxJsxExpressionAttribute)[] = [];
 
@@ -270,11 +323,12 @@ export function remarkAutoTypeTable(
 
       queue.push(
         generate(file, props, attributes)
-          .then((children) => {
-            Object.assign(node, {
-              type: 'root',
-              children,
-            } satisfies Root);
+          .then(({ output, rendered }) => {
+            let markdown = '';
+            for (const doc of output)
+              markdown += `${markdown ? '\n\n' : ''}${typeTableToMarkdown(doc)}`;
+            replaceSource(file, node, markdown);
+            Object.assign(node, { type: 'root', children: rendered } satisfies Root);
           })
           .catch((err) => {
             onError('failed to generate type table', err);
@@ -285,4 +339,13 @@ export function remarkAutoTypeTable(
 
     await Promise.all(queue);
   };
+}
+
+/** visit a tree in document order, returning `skip` skips the children of a node */
+function walk(
+  node: Root | RootContent,
+  visitor: (node: Root | RootContent) => 'skip' | void,
+): void {
+  if (visitor(node) === 'skip' || !('children' in node)) return;
+  for (const child of node.children) walk(child, visitor);
 }

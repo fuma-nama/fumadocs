@@ -3,14 +3,9 @@ import * as path from 'node:path';
 import { readFile } from 'node:fs/promises';
 import Slugger from 'github-slugger';
 import { defineMdastPlugin, markdownToMdast, mdxToMdast } from 'satteri';
-import type {
-  MdastNode,
-  MdastPluginDefinition,
-  MdastVisitorContext,
-  RawMdastContent,
-} from 'satteri';
+import type { MdastNode, MdastPluginDefinition, MdastVisitorContext, Features } from 'satteri';
 import { frontmatter } from 'fumadocs-core/content/md/frontmatter';
-import { replaceSource } from '@/stringifier';
+import { embedSource, replaceSource } from '@/stringifier';
 import { flattenNode } from '@/utils';
 import type { Code, Heading, RootContent } from 'mdast';
 
@@ -35,6 +30,8 @@ interface IncludeNode {
 
 interface IncludeState {
   cwd: string;
+  /** the parse features of the document */
+  features: Features;
   addDependency: (file: string) => void;
   /** open files, from the entry document to the innermost include */
   stack: string[];
@@ -59,33 +56,15 @@ const PARSE_FEATURES = { gfm: true, directive: true, headingAttributes: true };
  * Nested includes are resolved recursively, relative to the file they appear in.
  */
 export function remarkInclude({ cwd }: RemarkIncludeOptions = {}): MdastPluginDefinition {
-  async function visit(
-    node: IncludeNode,
-    ctx: MdastVisitorContext,
-  ): Promise<Code | RawMdastContent | void> {
-    if (node.name !== 'include') return;
-    const result = await replaceInclude(node, ctx, cwd);
-    if (!result) return;
-
-    replaceSource(ctx, node, result.markdown);
-    return result.replacement;
+  async function visit(node: IncludeNode, ctx: MdastVisitorContext) {
+    if (node.name === 'include') await include(node, node, ctx, cwd);
   }
 
   async function visitInline(node: IncludeNode, ctx: MdastVisitorContext) {
     if (node.name !== 'include') return;
-    const result = await replaceInclude(node, ctx, cwd);
-    if (!result) return;
-
     // the replacement is block content: replace the wrapping paragraph
     const parent = ctx.parent(node as never);
-    if (parent?.type === 'paragraph') {
-      replaceSource(ctx, parent as IncludeNode, result.markdown);
-      ctx.replaceNode(parent, result.replacement);
-      return;
-    }
-
-    replaceSource(ctx, node, result.markdown);
-    return result.replacement;
+    await include(node, parent?.type === 'paragraph' ? parent : node, ctx, cwd);
   }
 
   return defineMdastPlugin({
@@ -98,17 +77,13 @@ export function remarkInclude({ cwd }: RemarkIncludeOptions = {}): MdastPluginDe
   }) as MdastPluginDefinition;
 }
 
-interface IncludeResult {
-  replacement: Code | RawMdastContent;
-  /** the replacement as Markdown source text, for `remark-llms` */
-  markdown: () => string;
-}
-
-async function replaceInclude(
+/** replace `target` with the content `node` includes */
+async function include(
   node: IncludeNode,
+  target: IncludeNode,
   ctx: MdastVisitorContext,
   cwdOption?: string,
-): Promise<IncludeResult | void> {
+): Promise<void> {
   const specifier = ctx.textContent(node as never).trim();
   if (!specifier) return;
 
@@ -121,40 +96,21 @@ async function replaceInclude(
 
   const state: IncludeState = {
     cwd,
+    features: ctx.data._features ?? PARSE_FEATURES,
     addDependency: (file) => ctx.data._compiler?.addDependency(file),
     stack: filePath ? [filePath] : [],
   };
 
   if (isCodeInclude(targetPath, attributes)) {
     const code = await readCodeInclude(targetPath, section, attributes, state);
-    return { replacement: code, markdown: () => toCodeFence(code) };
+    replaceSource(ctx, target, toCodeFence(code));
+    ctx.replaceNode(target as never, code);
+    return;
   }
 
-  const raw = await readMarkdownInclude(targetPath, section, state);
-  return { replacement: { raw }, markdown: () => stripEsm(raw, path.extname(targetPath)) };
-}
-
-/**
- * Drop top-level ESM nodes from included content: they stay in the compiled
- * document, but are noise in Markdown output.
- */
-function stripEsm(text: string, ext: string): string {
-  if (ext !== '.mdx') return text;
-
-  let out = '';
-  let cursor = 0;
-  for (const node of parseTree(text, ext).children) {
-    if (node.type !== 'mdxjsEsm') continue;
-    const start = node.position?.start.offset;
-    const end = node.position?.end.offset;
-    if (start === undefined || end === undefined) continue;
-
-    out += text.slice(cursor, start);
-    cursor = end;
-    while (text[cursor] === '\n' && (out === '' || out.endsWith('\n\n'))) cursor++;
-  }
-
-  return out + text.slice(cursor);
+  const { source, content } = await readMarkdownInclude(targetPath, section, state);
+  embedSource(ctx, target, source, content);
+  ctx.replaceNode(target as never, content as MdastNode[]);
 }
 
 function isCodeInclude(targetPath: string, attributes: Record<string, string | null | undefined>) {
@@ -181,11 +137,12 @@ async function readCodeInclude(
   };
 }
 
+/** the source of a Markdown include and its content, parsed like the document */
 async function readMarkdownInclude(
   targetPath: string,
   section: string | undefined,
   state: IncludeState,
-): Promise<string> {
+): Promise<{ source: string; content: RootContent[] }> {
   if (state.stack.includes(targetPath)) {
     throw new Error(`Circular include detected: ${[...state.stack, targetPath].join(' -> ')}`);
   }
@@ -196,8 +153,8 @@ async function readMarkdownInclude(
 
   let raw: string;
   if (section) {
-    const tree = parseTree(body, ext);
-    const extracted = extractSectionRaw(tree.children as RootContent[], section, body);
+    const tree = parseTree(body, ext, PARSE_FEATURES);
+    const extracted = extractSectionRaw(tree.children, section, body);
     if (extracted === undefined) {
       throw new Error(
         `Cannot find section ${section} in ${targetPath}, make sure you have encapsulated the section in a <section id="${section}"> tag, or a :::section directive with remark-directive configured.`,
@@ -205,7 +162,7 @@ async function readMarkdownInclude(
     }
     raw = extracted;
   } else {
-    raw = body.trimEnd();
+    raw = body.replace(/^\s*\n/, '').trimEnd();
   }
 
   state.stack.push(targetPath);
@@ -239,11 +196,12 @@ async function expandNestedIncludes(
   text: string,
   file: string,
   state: IncludeState,
-): Promise<string> {
-  const tree = parseTree(text, path.extname(file));
+): Promise<{ source: string; content: RootContent[] }> {
+  const ext = path.extname(file);
+  const tree = parseTree(text, ext, state.features);
   const targets: { node: IncludeNode; start: number; end: number }[] = [];
   collectIncludes(tree.children as IncludeNode[], targets);
-  if (targets.length === 0) return text;
+  if (targets.length === 0) return { source: text, content: tree.children };
 
   let out = text;
   for (let i = targets.length - 1; i >= 0; i--) {
@@ -252,7 +210,7 @@ async function expandNestedIncludes(
     if (replacement === undefined) continue;
     out = out.slice(0, target.start) + replacement + out.slice(target.end);
   }
-  return out;
+  return { source: out, content: parseTree(out, ext, state.features).children };
 }
 
 function collectIncludes(
@@ -290,7 +248,7 @@ async function resolveNestedInclude(
     return toCodeFence(await readCodeInclude(targetPath, section, attributes, state));
   }
 
-  return readMarkdownInclude(targetPath, section, state);
+  return (await readMarkdownInclude(targetPath, section, state)).source;
 }
 
 function toCodeFence(code: Code): string {
@@ -299,12 +257,12 @@ function toCodeFence(code: Code): string {
   }, 2);
   const fence = '`'.repeat(longestRun + 1);
   const info = [code.lang ?? '', code.meta ?? ''].filter(Boolean).join(' ');
-  return `${fence}${info}\n${code.value}\n${fence}`;
+  return `${fence}${info}\n${code.value.replace(/\r?\n$/, '')}\n${fence}`;
 }
 
-function parseTree(source: string, ext: string) {
+function parseTree(source: string, ext: string, features: Features) {
   const parse = ext === '.mdx' ? mdxToMdast : markdownToMdast;
-  return parse(source, { features: PARSE_FEATURES }) as { children: RootContent[] };
+  return parse(source, { features }) as { children: RootContent[] };
 }
 
 function parseElementAttributes(element: IncludeNode): Record<string, string | null | undefined> {

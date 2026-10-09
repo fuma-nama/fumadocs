@@ -1,5 +1,6 @@
 'use client';
-import { useEffect, useEffectEvent, useMemo, useState } from 'react';
+import { useEffect, useEffectEvent, useMemo, useState, useSyncExternalStore } from 'react';
+import { useOnChange } from 'fumadocs-core/utils/use-on-change';
 import { type DataEngineListener, type Stf, useStf } from '@fumari/stf';
 import type { JsonSchema } from '@fumadocs/json-schema';
 import { useExampleRequests, useOperation } from '@/operation';
@@ -12,16 +13,22 @@ import { getPreferredType } from '@/utils/schema';
 import { useServer } from '@/utils/use-server';
 import {
   type AuthField,
+  type AuthProvider,
   type AuthRequirement,
   type OAuthFlowInput,
   type OAuthFlowType,
+  readPendingFlow,
   requestOAuthToken,
   useAuthFields,
   usePlaygroundAuth,
 } from './auth';
 import { type BrowserFetcherOptions, createBrowserFetcher, type FetchResult } from './fetcher';
 
+const subscribeNever = () => () => {};
+
 export interface PlaygroundOptions {
+  /** handle security schemes, before the built-in providers */
+  authProviders?: AuthProvider[];
   /** customise the auth fields, like their default values */
   transformAuthInputs?: (fields: AuthField[]) => AuthField[];
   fetchOptions?: BrowserFetcherOptions;
@@ -47,7 +54,7 @@ export interface PlaygroundAuth {
    * `implicit` and `authorizationCode` leave the page without a token, `flowReturned` is set when they return.
    */
   authorize: (field: AuthField, input: OAuthInput) => Promise<string | undefined>;
-  /** an OAuth flow started here has returned to the page */
+  /** a flow started here has returned to the page */
   flowReturned: boolean;
 }
 
@@ -85,6 +92,7 @@ export interface Playground {
  * Edits are synced to the example request, so code usages follow them.
  */
 export function usePlayground({
+  authProviders,
   transformAuthInputs,
   fetchOptions,
 }: PlaygroundOptions = {}): Playground {
@@ -94,7 +102,17 @@ export function usePlayground({
   const { resolveUrl } = useServer();
   // where OAuth flows return to
   const origin = `${method} ${path}`;
-  const flowReturned = usePlaygroundAuth().origin === origin;
+  const oauthOrigin = usePlaygroundAuth().origin;
+  // the scheme of a flow that left the page with `useAuthRedirect()`, and returned to this playground
+  const returnedScheme = useSyncExternalStore(
+    subscribeNever,
+    () => {
+      const flow = readPendingFlow();
+      if (flow?.origin === origin) return flow.scheme;
+    },
+    () => undefined,
+  );
+  const flowReturned = returnedScheme !== undefined || oauthOrigin === origin;
   const [response, setResponse] = useState<PlaygroundResponse>();
   const [isSending, setSending] = useState(false);
   let body: RequestBodyInfo | undefined;
@@ -117,17 +135,27 @@ export function usePlayground({
   // edited in place, they are persisted to the example by `update()` anyway
   const stf = useStf({ defaultValues });
   const engine = stf.dataEngine;
-  const auth = useAuthFields(engine, { operation, transform: transformAuthInputs });
+  const auth = useAuthFields(engine, {
+    operation,
+    providers: authProviders,
+    transform: transformAuthInputs,
+  });
 
   function getRequestData(): RawRequestData {
-    return {
-      ...auth.mapValues(engine.getData() as typeof defaultValues),
+    return auth.mapValues({
+      ...(engine.getData() as typeof defaultValues),
       method,
       bodyMediaType: body?.mediaType,
-    };
+    });
   }
 
   const syncExample = useEffectEvent(() => update(getRequestData()));
+
+  // its provider finishes the flow, it must be selected
+  useOnChange(returnedScheme, (scheme) => {
+    const idx = auth.requirements.findIndex((req) => req.some((item) => item.id === scheme));
+    if (idx !== -1) auth.select(idx);
+  });
 
   useEffect(() => {
     // same object reference = unchanged

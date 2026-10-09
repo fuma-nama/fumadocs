@@ -1,8 +1,10 @@
+import { useCallback, useRef } from 'react';
 import type { ClientSearchParams, OramaClient } from '@oramacloud/client';
 import { removeUndefined } from '@/utils/remove-undefined';
 import type { OramaIndex } from '@/search/orama-cloud-legacy';
-import { createContentHighlighter, type SortedResult } from '@/search';
+import type { SortedResult } from '@/search';
 import type { SearchClient } from '../client';
+import { type UseSearchOptions, useSearch } from '../use-search';
 
 interface CrawlerIndex {
   path: string;
@@ -37,97 +39,117 @@ export interface OramaCloudLegacyOptions {
   locale?: string;
 }
 
-export function oramaCloudLegacyClient(options: OramaCloudLegacyOptions): SearchClient {
+async function searchOramaCloudLegacy(
+  options: OramaCloudLegacyOptions,
+  query: string,
+): Promise<SortedResult[]> {
   const { index = 'default', client, params: extraParams = {}, tag } = options;
+  const list: SortedResult[] = [];
 
-  return {
-    deps: [index, client, tag],
-    async search(query) {
-      const highlighter = createContentHighlighter(query);
-      const list: SortedResult[] = [];
+  if (index === 'crawler') {
+    const result = await client.search({
+      ...extraParams,
+      term: query,
+      where: {
+        category: tag
+          ? {
+              eq: tag.slice(0, 1).toUpperCase() + tag.slice(1),
+            }
+          : undefined,
+        ...extraParams.where,
+      },
+      limit: 10,
+    });
+    if (!result) return list;
 
-      if (index === 'crawler') {
-        const result = await client.search({
-          ...extraParams,
-          term: query,
-          where: {
-            category: tag
-              ? {
-                  eq: tag.slice(0, 1).toUpperCase() + tag.slice(1),
-                }
-              : undefined,
-            ...extraParams.where,
-          },
-          limit: 10,
-        });
-        if (!result) return list;
+    for (const hit of result.hits) {
+      const doc = hit.document as unknown as CrawlerIndex;
 
-        for (const hit of result.hits) {
-          const doc = hit.document as unknown as CrawlerIndex;
-
-          list.push(
-            {
-              id: hit.id,
-              type: 'page',
-              content: highlighter.highlightMarkdown(doc.title),
-              url: doc.path,
-            },
-            {
-              id: 'page' + hit.id,
-              type: 'text',
-              content: highlighter.highlightMarkdown(doc.content),
-              url: doc.path,
-            },
-          );
-        }
-
-        return list;
-      }
-
-      const params: ClientSearchParams = {
-        ...extraParams,
-        term: query,
-        where: removeUndefined({
-          tag,
-          ...extraParams.where,
-        }),
-        groupBy: {
-          properties: ['page_id'],
-          maxResult: 7,
-          ...extraParams.groupBy,
+      list.push(
+        {
+          id: hit.id,
+          type: 'page',
+          content: doc.title,
+          url: doc.path,
         },
-      };
+        {
+          id: 'page' + hit.id,
+          type: 'text',
+          content: doc.content,
+          url: doc.path,
+        },
+      );
+    }
 
-      const result = await client.search(params);
-      if (!result || !result.groups) return list;
+    return list;
+  }
 
-      for (const item of result.groups) {
-        let addedHead = false;
-
-        for (const hit of item.result) {
-          const doc = hit.document as unknown as OramaIndex;
-
-          if (!addedHead) {
-            list.push({
-              id: doc.page_id,
-              type: 'page',
-              content: highlighter.highlightMarkdown(doc.title),
-              breadcrumbs: doc.breadcrumbs,
-              url: doc.url,
-            });
-            addedHead = true;
-          }
-
-          list.push({
-            id: doc.id,
-            content: highlighter.highlightMarkdown(doc.content),
-            type: doc.content === doc.section ? 'heading' : 'text',
-            url: doc.section_id ? `${doc.url}#${doc.section_id}` : doc.url,
-          });
-        }
-      }
-
-      return list;
+  const params: ClientSearchParams & { properties?: string[] } = {
+    properties: ['title', 'section', 'content'],
+    ...extraParams,
+    term: query,
+    where: removeUndefined({
+      tag,
+      ...extraParams.where,
+    }),
+    groupBy: {
+      properties: ['page_id'],
+      maxResult: 7,
+      ...extraParams.groupBy,
     },
   };
+
+  const result = await client.search(params);
+  if (!result || !result.groups) return list;
+
+  for (const item of result.groups) {
+    let addedHead = false;
+
+    for (const hit of item.result) {
+      const doc = hit.document as unknown as OramaIndex;
+
+      if (!addedHead) {
+        list.push({
+          id: doc.page_id,
+          type: 'page',
+          content: doc.title,
+          breadcrumbs: doc.breadcrumbs,
+          url: doc.url,
+        });
+        addedHead = true;
+      }
+
+      list.push({
+        id: doc.id,
+        content: doc.content,
+        type: doc.content === doc.section ? 'heading' : 'text',
+        url: doc.section_id ? `${doc.url}#${doc.section_id}` : doc.url,
+        table: doc.table,
+      });
+    }
+  }
+
+  return list;
+}
+
+export function oramaCloudLegacyClient(options: OramaCloudLegacyOptions): SearchClient {
+  return {
+    deps: [options.index, options.client, options.tag],
+    search: (query) => searchOramaCloudLegacy(options, query),
+  };
+}
+
+export function useOramaCloudLegacySearch({
+  client,
+  index,
+  tag,
+  ...rest
+}: OramaCloudLegacyOptions & UseSearchOptions) {
+  const latest = useRef(rest);
+  latest.current = rest;
+  const run = useCallback(
+    (query: string) => searchOramaCloudLegacy({ ...latest.current, client, index, tag }, query),
+    [client, index, tag],
+  );
+  return useSearch(run, rest);
 }

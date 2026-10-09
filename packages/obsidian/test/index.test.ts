@@ -58,6 +58,25 @@ describe('obsidian source', () => {
     expect(toc.map((item) => item.url)).toContain('#introduction');
   });
 
+  test('keeps Obsidian syntax out of search records', async () => {
+    const source = await obsidian({ dir: fixturesDir, remarkImageOptions: false }).staticSource();
+    const page = source.files.find((file) => file.path === 'Welcome.md');
+    if (page?.type !== 'page') throw new Error('expected Welcome.md');
+
+    const { contents } = await page.data.structuredData();
+    expect(contents.map((item) => item.content)).toEqual([
+      'This is your new _vault_.',
+      'Make a note of something, create a link, or try the Importer!',
+      '<Card href="/docs/headless">Hello World</Card>',
+      "When you're ready, delete this note and make the vault your own.",
+      'traditional Markdown images:',
+      'Hello World hello world **hello**\nI love Fumadocs.',
+      '#Introduction!!',
+      'Alt',
+      'Nothing',
+    ]);
+  });
+
   test('compiles a page once', async () => {
     let compiles = 0;
     const source = await obsidian({

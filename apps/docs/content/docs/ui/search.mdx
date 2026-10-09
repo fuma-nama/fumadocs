@@ -65,8 +65,7 @@ Fumadocs UI also exposes a lower level `<SearchDialog />` component for advanced
 ```tsx twoslash
 'use client';
 import React from 'react';
-import { useDocsSearch } from 'fumadocs-core/search/client';
-import { fetchClient } from 'fumadocs-core/search/client/fetch';
+import { useFetchSearch } from 'fumadocs-core/search/client';
 import {
   SearchDialog,
   SearchDialogClose,
@@ -83,14 +82,12 @@ import { useI18n } from 'fumadocs-ui/contexts/i18n';
 
 export default function DefaultSearchDialog(props: SharedProps) {
   const { locale } = useI18n(); // (optional) for i18n
-  const { search, setSearch, query } = useDocsSearch({
-    client: fetchClient({
-      locale,
-    }),
+  const search = useFetchSearch({
+    locale,
   });
 
   return (
-    <SearchDialog search={search} onSearchChange={setSearch} isLoading={query.isLoading} {...props}>
+    <SearchDialog {...search} {...props}>
       <SearchDialogOverlay />
       <SearchDialogContent>
         <SearchDialogHeader>
@@ -98,7 +95,7 @@ export default function DefaultSearchDialog(props: SharedProps) {
           <SearchDialogInput />
           <SearchDialogClose />
         </SearchDialogHeader>
-        <SearchDialogList items={query.data !== 'empty' ? query.data : null} />
+        <SearchDialogList />
       </SearchDialogContent>
       <SearchDialogFooter>{/* footer items */}</SearchDialogFooter>
     </SearchDialog>
@@ -108,13 +105,10 @@ export default function DefaultSearchDialog(props: SharedProps) {
 
 ### Content Renderer
 
-The content in search result supports Markdown, match highlights are expressed using `<mark />`.
-
-You can customize the Markdown renderer.
+To render the Markdown content of search items on your own instead, pass `renderMarkdown`.
 
 ```tsx title="components/search.tsx"
 <SearchDialogList
-  items={query.data !== 'empty' ? query.data : null}
   // [!code highlight:8]
   Item={(props) => (
     <SearchDialogListItem
@@ -126,3 +120,47 @@ You can customize the Markdown renderer.
   )}
 />
 ```
+
+### Tables
+
+Customize how tables in results are rendered. A custom `Table` renders the rows on its own:
+
+```tsx title="components/search.tsx"
+<SearchDialogList
+  // show the rows without a card
+  Table={({ table, Item, onSelect }) =>
+    table.rows.map((row) => (
+      <Fragment key={row.id}>{Item({ item: row, onClick: () => onSelect(row) })}</Fragment>
+    ))
+  }
+/>
+```
+
+### Highlights
+
+Matches of the search query are highlighted with the [CSS Custom Highlight API](https://developer.mozilla.org/en-US/docs/Web/API/CSS_Custom_Highlight_API), style them with `::highlight(fd-search)`.
+
+```css title="global.css"
+::highlight(fd-search) {
+  color: var(--color-fd-primary-foreground);
+  background-color: var(--color-fd-primary);
+}
+```
+
+`<SearchDialogList />` highlights the query of `data` from `<SearchDialog />`, or the search input without it.
+
+When rendering results on your own, highlight them with `useHighlightQuery()`.
+
+```tsx title="components/search-result.tsx"
+'use client';
+import { useHighlightQuery } from 'fumadocs-core/search/client';
+import type { ReactNode } from 'react';
+
+export function SearchResult({ query, children }: { query: string; children: ReactNode }) {
+  const ref = useHighlightQuery(query);
+
+  return <div ref={ref}>{children}</div>;
+}
+```
+
+Text inside elements with `data-highlight-ignore` is not highlighted, like the badges of components.

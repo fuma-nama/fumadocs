@@ -1,0 +1,71 @@
+---
+title: Stringification
+description: How Fumadocs turns your documents into Markdown.
+---
+
+[Remark LLMs](/docs/headless/mdx/remark-llms) and [Remark Structure](/docs/headless/mdx/structure) output Markdown, for LLMs and search. Instead of stringifying the syntax tree, they slice your authored source:
+
+- Markdown stays as you wrote it, nothing is escaped or reformatted.
+- Remark plugins change it only by recording edits.
+- It's fast, no syntax tree is serialized.
+
+## How It Works
+
+The output is the source of your document, with the edits of plugins applied. Nodes are located by their `position`:
+
+- A node with a `position` outputs its source.
+- A node without one, like those inserted by plugins, outputs nothing. Its plugin defines its Markdown instead.
+
+For example, [Remark Image](/docs/headless/mdx/remark-image) turns `![alt](./image.png)` into an `<img>` element, the output keeps `![alt](./image.png)`.
+
+## Editing the Output
+
+A plugin replacing authored content records the Markdown of its node with `replaceSource()`:
+
+```ts title="remark-note.ts"
+import type { Root } from 'mdast';
+import type { VFile } from 'vfile';
+import { visit } from 'unist-util-visit';
+import { replaceSource } from 'fumadocs-core/mdx-plugins/stringifier';
+
+export function remarkNote() {
+  return (tree: Root, file: VFile) => {
+    visit(tree, 'mdxJsxFlowElement', (node) => {
+      if (node.name !== 'Note') return;
+
+      replaceSource(file, node, (s) => `**Note:**\n\n${s.inner(node)}`);
+      // transform the node for rendering...
+    });
+  };
+}
+```
+
+- A string replaces the node, along with the edits inside it.
+- A function runs after every plugin. `s.stringify(node)` and `s.inner(node)` (its children) give their Markdown, with the edits inside.
+- When a node is edited more than once, the last edit wins.
+
+To edit a namespace only, like `search` for the records of Remark Structure, pass it as the last argument:
+
+```ts
+// the Markdown for LLMs keeps the tag, search records don't
+replaceSource(file, node, (s) => s.stringify(node).replace(' [step]', ''), 'search');
+```
+
+For search, a plugin adds the records of its nodes with [`data.structuredData`](/docs/headless/mdx/structure#plugins).
+
+## Embedded Content
+
+Nodes parsed from another source, like an [included file](/docs/mdx/include), have positions in that source. Embed them with `embedSource()` to stringify them like your own content:
+
+```ts
+import { embedSource } from 'fumadocs-core/mdx-plugins/stringifier';
+
+// replaces `node` with the nodes parsed from `otherSource`
+embedSource(file, node, otherSource, otherTree.children);
+```
+
+Other nodes parsed from a string must not keep their `position`, it doesn't point into your document.
+
+<Callout title="Sätteri">
+  The Sätteri compiler of Fumadocs MDX works the same way, with its own versions of these plugins.
+</Callout>

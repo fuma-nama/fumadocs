@@ -1,6 +1,6 @@
 {
   "name": "fumadocs-docgen",
-  "version": "3.1.1",
+  "version": "3.2.0",
   "description": "Useful remark utilities and plugins",
   "keywords": [
     "Docs",
@@ -44,7 +44,6 @@
     "estree-util-value-to-estree": "^3.5.0",
     "npm-to-yarn": "^3.2.0",
     "unified": "^11.0.5",
-    "unist-util-visit": "^5.1.0",
     "vfile": "^6.0.3",
     "yuku-codegen": "^0.17.0",
     "yuku-parser": "^0.17.0",
@@ -67,7 +66,7 @@
     "@types/estree": "*",
     "@types/hast": "*",
     "@types/mdast": "*",
-    "fumadocs-core": "^15.7.2 || ^16.0.0",
+    "fumadocs-core": "^16.17.0",
     "mdast-util-mdx": "*"
   },
   "peerDependenciesMeta": {

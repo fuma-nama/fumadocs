@@ -132,8 +132,8 @@ function serializePathParameter(
       if (Array.isArray(value)) {
         output[field.name!] = {
           value: explode
-            ? `${specifier}${value.join(',')}`
-            : `${specifier}${value.join(specifier)}`,
+            ? `${specifier}${value.join(specifier)}`
+            : `${specifier}${value.join(',')}`,
         };
         break;
       }

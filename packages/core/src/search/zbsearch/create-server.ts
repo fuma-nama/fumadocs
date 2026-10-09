@@ -137,7 +137,7 @@ export function initAdvancedSearch(options: AdvancedOptions): SearchServer<Engin
         tag,
         {
           ...options.search,
-          limit,
+          limit: limit ?? options.search?.limit,
           mode: mode === 'vector' ? 'vector' : 'fulltext',
         },
         options.localeFilter && locale ? locale : undefined,

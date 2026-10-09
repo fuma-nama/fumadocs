@@ -1,10 +1,10 @@
-import type { Processor, Transformer } from 'unified';
-import { toMdxExport } from './utils';
-import type { Heading, Nodes, Parents, Root } from 'mdast';
-import { defaultStringifier, type StringifyOptions } from './stringifier';
+import type { Transformer } from 'unified';
+import { isJsxElement, toMdxExport } from './utils';
+import type { Nodes, Root } from 'mdast';
 import type { MdxJsxFlowElement, MdxJsxTextElement, MdxjsEsm } from 'mdast-util-mdx';
-import { defaultHandlers, type Info, type State } from 'mdast-util-to-markdown';
 import type { PlaceholderData } from './remark-llms.runtime';
+import { createStringifier } from './stringifier';
+import { stringifyHeadingId } from './heading-id';
 import type {
   Expression,
   JSXAttribute,
@@ -16,7 +16,7 @@ import type {
   Statement,
 } from 'estree-jsx';
 
-export interface LLMsOptions extends StringifyOptions {
+export interface LLMsOptions {
   /**
    * export name for output Markdown.
    *
@@ -38,23 +38,12 @@ export interface LLMsOptions extends StringifyOptions {
    * - `children-only`: exclude element but keep its children.
    * - `false`: exclude element & its children.
    *
-   * Default:
-   *
-   * ```ts
-   * filterElement = (node) => {
-   *   switch (node.type) {
-   *     case 'mdxjsEsm':
-   *       return false;
-   *     default:
-   *       return true;
-   *   }
-   * },
-   * ```
+   * ESM nodes are always excluded.
    */
-  filterElement?: StringifyOptions['filterElement'];
+  filterElement?: (node: Nodes) => boolean | 'children-only';
 
   /**
-   * Tag names of MDX components to be stringified as `placeholder()`, you can also use `placeholder()` directly in `stringify` callback.
+   * Tag names of MDX components to be output as placeholders, render them with `renderPlaceholder()`.
    *
    * Ignored with `output: 'function'`.
    */
@@ -64,8 +53,8 @@ export interface LLMsOptions extends StringifyOptions {
    * Form of the export:
    *
    * - `string`: the output Markdown.
-   * - `function`: a component: Markdown content is still stringified at compile time, while JSX
-   *   elements are kept as JSX, receiving their original props and resolving from `props.components`.
+   * - `function`: a component: Markdown content is kept as authored, while JSX elements are
+   *   kept as JSX, receiving their original props and resolving from `props.components`.
    *   Render it with `renderToMarkdown` from `fumadocs-core/server`, where a component
    *   can call `asMarkdown()` to define its own Markdown form.
    *
@@ -74,83 +63,75 @@ export interface LLMsOptions extends StringifyOptions {
   output?: 'function' | 'string';
 
   /**
-   * @private output in file data, unavailable with `output: 'function'`
+   * @internal output in file data, unavailable with `output: 'function'`
    */
   _data?: boolean;
 }
 
+type JsxElement = MdxJsxFlowElement | MdxJsxTextElement;
+
+const componentNameRegex = /^[A-Z][\w$]*$/;
+
 /**
- * generate `llms.txt` for markdown.
+ * Generate Markdown for LLMs from the authored source, other plugins can edit it with
+ * `replaceSource()` from `fumadocs-core/mdx-plugins/stringifier`.
  */
-export function remarkLLMs(
-  this: Processor,
-  {
-    as = '_markdown',
-    headingIds = true,
-    _data = false,
-    mdxAsPlaceholder,
-    output = 'string',
-    ...rest
-  }: LLMsOptions = {},
-): Transformer<Root, Root> {
+export function remarkLLMs({
+  as = '_markdown',
+  headingIds = true,
+  _data = false,
+  mdxAsPlaceholder,
+  output = 'string',
+  filterElement,
+}: LLMsOptions = {}): Transformer<Root, Root> {
   const jsx = output === 'function';
-  const stringifier = defaultStringifier<JsxCollect | undefined>({
-    ...rest,
-    filterElement(node) {
-      switch (node.type) {
-        case 'mdxjsEsm':
-          return false;
-        default:
-          return rest.filterElement?.(node) ?? true;
-      }
-    },
-    stringify(node, parent, state, info, collect) {
-      if (mdxAsPlaceholder && !collect) {
-        switch (node.type) {
-          case 'mdxJsxFlowElement':
-          case 'mdxJsxTextElement':
-            if (node.name && mdxAsPlaceholder.includes(node.name))
-              return placeholder(node, parent, state, info);
+
+  return (tree, file) => {
+    const s = createStringifier(file);
+    const collect: JsxCollect = [];
+
+    const visit = (nodes: Nodes[]) => {
+      for (const node of nodes) {
+        const visibility = node.type === 'mdxjsEsm' ? false : (filterElement?.(node) ?? true);
+        if (visibility === false) {
+          s.replace(node, '');
+          continue;
+        }
+
+        if ('children' in node) visit(node.children);
+        if (visibility === 'children-only') {
+          s.replace(node, (s) => s.inner(node));
+        } else if (node.type === 'heading') {
+          stringifyHeadingId(s, node, headingIds);
+        } else if (isJsxElement(node) && node.name) {
+          if (!jsx && mdxAsPlaceholder?.includes(node.name))
+            s.replace(node, (s) => toPlaceholder(node, s.inner(node)));
+          else if (jsx && componentNameRegex.test(node.name))
+            s.replace(node, (s) => {
+              let children = s.inner(node);
+              // block content on its own lines
+              if (children && node.type === 'mdxJsxFlowElement') children = `\n${children}\n`;
+              return `\0${collect.push({ node, children }) - 1}\0`;
+            });
         }
       }
+    };
 
-      const custom = rest.stringify?.(node, parent, state, info, undefined);
-      if (custom) return custom;
-      if (collect) return collectJsx(node, state, info, collect);
-    },
-    handlers: {
-      heading(node: Heading, _p, state, info) {
-        const id = node.data?.hProperties?.id;
-        const defaultValue = defaultHandlers.heading(node, _p, state, info);
-        return headingIds && id ? `${defaultValue} [#${id}]` : defaultValue;
-      },
-      ...rest.handlers,
-    },
-  });
+    visit(tree.children);
+    const text = s.stringify(tree).trim();
+    const value = text ? `${text}\n` : '';
 
-  return (node, file) => {
     if (jsx) {
-      const collect: JsxCollect = [];
-      const text = stringifier.call(this, node, collect);
-      node.children.unshift(jsxToEstree(as, toJsxChunks(text, collect)));
+      tree.children.unshift(jsxToEstree(as, toJsxChunks(value, collect)));
       return;
     }
 
-    const value = stringifier.call(this, node, undefined);
-    node.children.unshift(toMdxExport(as, value));
+    tree.children.unshift(toMdxExport(as, value));
     if (_data) file.data.markdown = value;
   };
 }
 
-/**
- * Preserve AST data to render the MDX component at runtime, use `renderPlaceholder()` to render the placeholders.
- */
-export function placeholder(
-  node: MdxJsxTextElement | MdxJsxFlowElement,
-  _parent: Parents | undefined,
-  state: State,
-  info: Info,
-) {
+function toPlaceholder(node: JsxElement, children: string): string {
   const attributes: Record<string, unknown> = {};
   for (const attr of node.attributes) {
     if (attr.type === 'mdxJsxExpressionAttribute') continue;
@@ -159,50 +140,24 @@ export function placeholder(
 
   return `\0${JSON.stringify({
     name: node.name,
-    children: state.containerPhrasing(node, info),
+    children,
     attributes,
   } satisfies PlaceholderData)}\0`;
 }
 
-type JsxCollect = { node: MdxJsxFlowElement | MdxJsxTextElement; children: string }[];
+type JsxCollect = { node: JsxElement; children: string }[];
 
 interface JsxChunkElement {
-  node: MdxJsxFlowElement | MdxJsxTextElement;
+  node: JsxElement;
   children: JsxChunk[];
 }
 
 type JsxChunk = string | JsxChunkElement;
 
-/**
- * `stringify` branch for the `function` output: collect the element and return a marker,
- * resolved later by `toJsxChunks()`. Only components (capitalized names) are kept.
- */
-function collectJsx(
-  node: Nodes,
-  state: State,
-  info: Info,
-  collect: JsxCollect,
-): string | undefined {
-  switch (node.type) {
-    case 'mdxJsxFlowElement':
-    case 'mdxJsxTextElement': {
-      if (!node.name || !/^[A-Z][\w$]*$/.test(node.name)) return;
-
-      const entry = { node, children: '' };
-      const marker = `\0${collect.push(entry) - 1}\0`;
-      entry.children =
-        node.type === 'mdxJsxTextElement'
-          ? state.containerPhrasing(node, info)
-          : state.containerFlow(node, info);
-      return marker;
-    }
-  }
-}
-
 const Marker = /\0(\d+)\0/g;
 
 /**
- * Split stringified Markdown on the markers emitted by `collectJsx()` into
+ * Split stringified Markdown on the markers of kept JSX elements into
  * alternating text chunks and kept JSX elements, recursively for their children.
  */
 function toJsxChunks(text: string, collect: JsxCollect): JsxChunk[] {

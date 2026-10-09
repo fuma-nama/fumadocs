@@ -1,5 +1,7 @@
 import { describe, expect, test } from 'vitest';
 import { pathnameFromRequest } from '@/requests/generators';
+import { defaultAdapters } from '@/requests/media/adapter';
+import { encodeRequestData } from '@/requests/media/encode';
 import type { RequestData } from '@/requests/types';
 
 describe('URL utilities', () => {
@@ -186,4 +188,18 @@ describe('URL utilities', () => {
       );
     });
   });
+});
+
+test('serializes matrix path parameters', () => {
+  const encode = (value: unknown, explode: boolean) =>
+    encodeRequestData(
+      { method: 'get', path: { id: value }, query: {}, header: {}, cookie: {} },
+      defaultAdapters,
+      [{ name: 'id', in: 'path', style: 'matrix', explode }],
+    ).path.id.value;
+
+  expect(encode([3, 4], true)).toBe(';id=3;id=4');
+  expect(encode([3, 4], false)).toBe(';id=3,4');
+  expect(encode({ a: 1, b: 2 }, true)).toBe(';a=1;b=2');
+  expect(encode({ a: 1, b: 2 }, false)).toBe(';id=a,1,b,2');
 });

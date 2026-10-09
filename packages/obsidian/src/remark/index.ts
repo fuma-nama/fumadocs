@@ -14,9 +14,10 @@ declare module 'vfile' {
 
 export function getRemarkPlugins(resolver: VaultResolver): PluggableList {
   return [
+    // parses the source again
+    remarkObsidianComment,
     [remarkWikilinks, { resolver }],
     [remarkConvert, { resolver }],
-    remarkObsidianComment,
     remarkBlockId,
   ];
 }

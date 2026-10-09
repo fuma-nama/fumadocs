@@ -80,7 +80,15 @@ export async function setIndexSettings(client: Algoliasearch, indexName: string)
     indexName,
     indexSettings: {
       attributeForDistinct: 'page_id',
-      attributesToRetrieve: ['title', 'section', 'content', 'url', 'section_id', 'breadcrumbs'],
+      attributesToRetrieve: [
+        'title',
+        'section',
+        'content',
+        'url',
+        'section_id',
+        'breadcrumbs',
+        'table',
+      ],
       searchableAttributes: ['title', 'section', 'content'],
       attributesToSnippet: [],
       attributesForFaceting: ['tag'],
@@ -97,6 +105,7 @@ function toIndex(page: DocumentRecord): BaseIndex[] {
     section: string | undefined,
     sectionId: string | undefined,
     content: string,
+    table?: string,
   ): BaseIndex {
     return {
       objectID: `${page._id}-${(id++).toString()}`,
@@ -108,6 +117,7 @@ function toIndex(page: DocumentRecord): BaseIndex[] {
       section,
       section_id: sectionId,
       content,
+      table,
       ...page.extra_data,
     };
   }
@@ -118,7 +128,7 @@ function toIndex(page: DocumentRecord): BaseIndex[] {
   for (const p of contents) {
     const heading = p.heading ? headings.find((h) => p.heading === h.id) : null;
 
-    const index = createIndex(heading?.content, heading?.id, p.content);
+    const index = createIndex(heading?.content, p.heading, p.content, p.table);
 
     if (heading && !scannedHeadings.has(heading.id)) {
       scannedHeadings.add(heading.id);
@@ -169,4 +179,5 @@ export interface BaseIndex {
   breadcrumbs?: string[];
 
   content: string;
+  table?: string;
 }

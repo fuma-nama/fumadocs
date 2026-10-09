@@ -35,8 +35,7 @@ To search documents on the client side, consider:
 - Custom search UI using the built-in hook of Fumadocs:
 
   ```ts
-  import { useDocsSearch } from 'fumadocs-core/search/client';
-  import { oramaCloudClient } from 'fumadocs-core/search/client/orama-cloud';
+  import { useOramaCloudSearch } from 'fumadocs-core/search/client';
   import { OramaCloud } from '@orama/core';
 
   const orama = new OramaCloud({
@@ -44,13 +43,13 @@ To search documents on the client side, consider:
     apiKey: process.env.NEXT_PUBLIC_ORAMA_API_KEY,
   });
 
-  const { search, setSearch, query } = useDocsSearch({
-    client: oramaCloudClient({
-      client: orama,
-      params: {
-        // optional search params
-      },
-    }),
+  const params = {
+    // optional search params
+  };
+
+  const { search, onSearchChange, isLoading, data } = useOramaCloudSearch({
+    client: orama,
+    params,
   });
   ```
 
@@ -66,8 +65,7 @@ To search documents on the client side, consider:
 Same as REST API integration, but make sure to set `index` to `crawler`.
 
 ```ts
-import { useDocsSearch } from 'fumadocs-core/search/client';
-import { oramaCloudClient } from 'fumadocs-core/search/client/orama-cloud';
+import { useOramaCloudSearch } from 'fumadocs-core/search/client';
 import { OramaCloud } from '@orama/core';
 
 const orama = new OramaCloud({
@@ -75,14 +73,14 @@ const orama = new OramaCloud({
   apiKey: '<read only api key>',
 });
 
-const { search, setSearch, query } = useDocsSearch({
-  client: oramaCloudClient({
-    index: 'crawler',
-    client: orama,
-    params: {
-      // optional search params
-    },
-  }),
+const params = {
+  // optional search params
+};
+
+const { search, onSearchChange, isLoading, data } = useOramaCloudSearch({
+  index: 'crawler',
+  client: orama,
+  params,
 });
 ```
 

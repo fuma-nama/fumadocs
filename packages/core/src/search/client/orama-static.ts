@@ -1,9 +1,12 @@
+import { useCallback, useRef } from 'react';
 import { create, load, type AnyZBSearch, type SearchParams, type ZBSearch } from 'zbsearch';
 import { searchSimple } from '@/search/zbsearch/search/simple';
 import { searchAdvanced } from '@/search/zbsearch/search/advanced';
 import type { advancedSchema, simpleSchema } from '@/search/zbsearch/create-db';
 import type { ExportedData } from '@/search/server';
+import type { SortedResult } from '@/search';
 import type { SearchClient } from '../client';
+import { type UseSearchOptions, useSearch } from '../use-search';
 import { BASE_PATH, join } from '@/utils/url';
 
 export interface StaticOptions {
@@ -114,48 +117,72 @@ function getDBCached({
   return result;
 }
 
-export function staticClient(options: StaticOptions = {}): SearchClient {
+async function searchStatic(options: StaticOptions, query: string): Promise<SortedResult[]> {
   const { tag, locale, search } = options;
+  const { map, unified, i18n } = await getDBCached(options);
+  let db: LoadedDB | undefined;
+  let filterLocale: string | undefined;
 
-  return {
-    deps: [tag, locale],
-    async search(query) {
-      const { map, unified, i18n } = await getDBCached(options);
-      let db: LoadedDB | undefined;
-      let filterLocale: string | undefined;
+  if (unified) {
+    db = map.get('');
+    if (i18n) filterLocale = locale;
+  } else {
+    db = map.get(locale ?? '');
 
-      if (unified) {
-        db = map.get('');
-        if (i18n) filterLocale = locale;
-      } else {
-        db = map.get(locale ?? '');
-
-        if (!db) {
-          console.warn(
-            `failed to find search data for "${locale}", available: ${Array.from(map.keys())}.`,
-          );
-          db = map.values().next().value;
-        }
-      }
-
-      if (!db) return [];
-      if (db.type === 'simple')
-        return searchSimple(
-          db.db as ZBSearch<typeof simpleSchema>,
-          query,
-          search as never,
-          filterLocale,
-        );
-
-      return searchAdvanced(
-        db.db as ZBSearch<typeof advancedSchema>,
-        query,
-        tag,
-        search as never,
-        filterLocale,
+    if (!db) {
+      console.warn(
+        `failed to find search data for "${locale}", available: ${Array.from(map.keys())}.`,
       );
-    },
+      db = map.values().next().value;
+    }
+  }
+
+  if (!db) return [];
+  if (db.type === 'simple')
+    return searchSimple(
+      db.db as ZBSearch<typeof simpleSchema>,
+      query,
+      search as never,
+      filterLocale,
+    );
+
+  return searchAdvanced(
+    db.db as ZBSearch<typeof advancedSchema>,
+    query,
+    tag,
+    search as never,
+    filterLocale,
+  );
+}
+
+export function staticClient(options: StaticOptions = {}): SearchClient {
+  return {
+    deps: [String(options.tag), options.locale],
+    search: (query) => searchStatic(options, query),
   };
+}
+
+/**
+ * Search the indexes exported by the search server, in the browser.
+ */
+export function useStaticSearch({
+  from,
+  locale,
+  tag,
+  ...rest
+}: StaticOptions & UseSearchOptions = {}) {
+  const latest = useRef(rest);
+  latest.current = rest;
+  const tags = String(tag ?? '');
+  const run = useCallback(
+    (query: string) =>
+      searchStatic(
+        { ...latest.current, from, locale, tag: tags ? tags.split(',') : undefined },
+        query,
+      ),
+    [from, locale, tags],
+  );
+  return useSearch(run, rest);
 }
 
 /**

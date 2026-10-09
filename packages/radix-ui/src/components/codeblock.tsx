@@ -96,7 +96,7 @@ export function CodeBlock({
         inTab ? 'bg-fd-secondary -mx-px -mb-px last:rounded-b-xl' : 'my-4 bg-fd-card rounded-xl',
         keepBackground && 'bg-(--shiki-light-bg) dark:bg-(--shiki-dark-bg)',
 
-        'shiki relative border shadow-sm not-prose overflow-hidden text-sm',
+        'shiki relative border not-prose overflow-hidden text-sm',
         props.className,
       )}
     >

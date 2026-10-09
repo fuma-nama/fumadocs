@@ -42,19 +42,16 @@ You can consider different options for implementing the UI:
 
   ```ts twoslash
   import { Meilisearch } from 'meilisearch';
-  import { useDocsSearch } from 'fumadocs-core/search/client';
-  import { meilisearchClient } from 'fumadocs-core/search/client/meilisearch';
+  import { useMeilisearch } from 'fumadocs-core/search/client';
 
   const client = new Meilisearch({
     host: 'host url',
     apiKey: 'search api key',
   });
 
-  const { search, setSearch, query } = useDocsSearch({
-    client: meilisearchClient({
-      client,
-      indexName: 'docs',
-    }),
+  const { search, onSearchChange, isLoading, data } = useMeilisearch({
+    client,
+    indexName: 'docs',
   });
   ```
 
@@ -75,17 +72,14 @@ toDocuments(source, { tag: (page) => page.slugs[0] });
 And update your search client:
 
 - **Fumadocs UI**: Enable [Tag Filter](/docs/search/meilisearch#tag-filter) on Search UI.
-- **Search Client**: pass a tag to `meilisearchClient()`.
+- **Search Client**: pass a tag to `useMeilisearch()`.
 
   ```ts
-  import { useDocsSearch } from 'fumadocs-core/search/client';
-  import { meilisearchClient } from 'fumadocs-core/search/client/meilisearch';
+  import { useMeilisearch } from 'fumadocs-core/search/client';
 
-  const { search, setSearch, query } = useDocsSearch({
-    client: meilisearchClient({
-      tag: '<your tag value>', // [!code ++]
-      // ...
-    }),
+  const { search, onSearchChange, isLoading, data } = useMeilisearch({
+    tag: '<your tag value>', // [!code ++]
+    // ...
   });
   ```
 
@@ -95,15 +89,12 @@ Documents include the locale of their pages, pass `locale` to search in a langua
 
 ```ts
 import { useI18n } from 'fumadocs-ui/contexts/i18n';
-import { useDocsSearch } from 'fumadocs-core/search/client';
-import { meilisearchClient } from 'fumadocs-core/search/client/meilisearch';
+import { useMeilisearch } from 'fumadocs-core/search/client';
 
 const { locale } = useI18n();
-const { search, setSearch, query } = useDocsSearch({
-  client: meilisearchClient({
-    locale, // [!code ++]
-    // ...
-  }),
+const { search, onSearchChange, isLoading, data } = useMeilisearch({
+  locale, // [!code ++]
+  // ...
 });
 ```
 

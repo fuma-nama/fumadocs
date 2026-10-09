@@ -1,7 +1,7 @@
-import type { BlockContent, DefinitionContent, PhrasingContent, Root } from 'mdast';
+import type { BlockContent, DefinitionContent, Nodes, PhrasingContent, Root } from 'mdast';
 import type { MdxJsxAttribute, MdxJsxFlowElement } from 'mdast-util-mdx';
 import type { Transformer } from 'unified';
-import { visit } from 'unist-util-visit';
+import { walk } from './utils';
 
 export interface RemarkDirectiveAdmonitionOptions {
   /**
@@ -43,8 +43,8 @@ export function remarkDirectiveAdmonition({
   },
 }: RemarkDirectiveAdmonitionOptions = {}): Transformer<Root, Root> {
   return (tree) => {
-    visit(tree, 'containerDirective', (node) => {
-      if (!(node.name in types)) return;
+    walk<Nodes>(tree, (node) => {
+      if (node.type !== 'containerDirective' || !(node.name in types)) return;
 
       const attributes: MdxJsxAttribute[] = [
         {

@@ -61,7 +61,8 @@ export async function compileMdx({
   environment = 'bundler',
   options: { mdastPlugins = [], hastPlugins = [], ...satteriOptions },
 }: CompileMdxOptions): Promise<CompileMdxResult> {
-  const data: Data = { ...satteriOptions.data };
+  const features = { gfm: true, frontmatter: false, directive: true, ...satteriOptions.features };
+  const data: Data = { ...satteriOptions.data, _features: features };
   if (frontmatter) data.frontmatter = frontmatter;
   const plugins = [...mdastPlugins, ...hastPlugins] as ExtraPluginHooks[];
 
@@ -77,12 +78,7 @@ export async function compileMdx({
     outputFormat,
     fileURL: satteriOptions.fileURL ?? pathToFileURL(filePath),
     data,
-    features: {
-      gfm: true,
-      frontmatter: false,
-      directive: true,
-      ...satteriOptions.features,
-    },
+    features,
   };
 
   const result = await (format === 'md'

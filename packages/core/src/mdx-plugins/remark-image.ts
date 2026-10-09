@@ -1,10 +1,11 @@
 import * as path from 'node:path';
-import type { Image, Root, RootContent } from 'mdast';
+import type { Image, Nodes, Root, RootContent } from 'mdast';
 import type { Transformer } from 'unified';
-import { visit } from 'unist-util-visit';
 import type { MdxjsEsm } from 'mdast-util-mdx';
 import type { MdxJsxFlowElement } from 'mdast-util-mdx';
 import { fileURLToPath } from 'node:url';
+import { replaceSource } from './stringifier';
+import { walk } from './utils';
 
 const VALID_BLUR_EXT = ['.jpeg', '.png', '.webp', '.avif', '.jpg'];
 const EXTERNAL_URL_REGEX = /^https?:\/\//;
@@ -116,6 +117,7 @@ export function remarkImage({
           children: [],
           type: 'mdxJsxFlowElement',
           name: 'img',
+          position: node.position,
           attributes: [
             {
               type: 'mdxJsxAttribute',
@@ -182,8 +184,8 @@ export function remarkImage({
       node.data.hProperties.height = size.height.toString();
     }
 
-    visit(tree, 'image', (node, idx, parent) => {
-      if (typeof idx !== 'number' || !parent) return;
+    walk<Nodes>(tree, (node, _, parent) => {
+      if (node.type !== 'image' || !parent) return;
       const src = parseSrc(decodeURI(node.url), publicDir, file.dirname);
       if (!src) return;
 
@@ -195,7 +197,8 @@ export function remarkImage({
           }
 
           if (onError === 'hide') {
-            parent.children.splice(idx, 1);
+            replaceSource(file, node, '');
+            parent.children.splice(parent.children.indexOf(node), 1);
             return;
           }
 
@@ -203,9 +206,8 @@ export function remarkImage({
           onError(e);
         })
         .then((res) => {
-          if (res) {
-            parent.children[idx] = res;
-          }
+          // other images of the parent may be removed before
+          if (res) parent.children[parent.children.indexOf(node)] = res;
         });
 
       promises.push(task);

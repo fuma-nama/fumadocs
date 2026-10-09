@@ -1,5 +1,13 @@
 'use client';
-import { Fragment, type ReactNode, useState } from 'react';
+import {
+  type ComponentProps,
+  createContext,
+  type FC,
+  Fragment,
+  type ReactNode,
+  use,
+  useState,
+} from 'react';
 import {
   ArrowLeft,
   Braces,
@@ -29,8 +37,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from 'shared-api/components/select';
-import { Spinner } from 'shared-api/components/spinner';
-import { type AuthField, usePlaygroundAuth } from '@/playground/auth';
+import { type AuthField, type AuthPanelProps, type AuthRenderProps } from '@/playground/auth';
 import type { Playground, PlaygroundAuth, RequestBodyInfo } from '@/playground/use-playground';
 import { type OperationParameters, useOperation } from '@/operation';
 import type { ParameterObject } from '@/types';
@@ -46,7 +53,6 @@ import {
   resolveField,
   ValueRow,
 } from './fields';
-import { OAuthPanel } from './oauth-panel';
 import { Segmented, SegmentedList } from '@/ui/components/segmented';
 
 interface RenderOptions {
@@ -74,20 +80,27 @@ const motionClassNames: Record<Motion, string> = {
 const transitionClassName =
   'motion-safe:transition-[opacity,translate] motion-safe:duration-300 motion-safe:ease-[cubic-bezier(0.16,1,0.3,1)]';
 
+interface AuthTarget {
+  field: AuthField;
+  component: FC<AuthPanelProps>;
+}
+
 /** the overview of all request inputs, nested fields open in their own panel */
 export function RequestPanel({
   playground: { auth, body },
+  onSubmit,
   className,
   ...options
 }: RenderOptions & {
   playground: Playground;
+  onSubmit: (e: { preventDefault: () => void }) => void;
   className?: string;
 }) {
   const t = useTranslations({ note: 'playground' });
   const engine = useDataEngine();
   const { generateDefault } = useSchemaUtils();
   const [stack, setStack] = useState<FieldEntry[]>([]);
-  const [oauth, setOAuth] = useState<AuthField | null>(null);
+  const [authorizing, setAuthorizing] = useState<AuthTarget | null>(null);
   const [motion, setMotion] = useState<Motion>('forward');
   const current = stack.at(-1);
   const sectionNames: Record<string, string> = {
@@ -115,30 +128,25 @@ export function RequestPanel({
   }
 
   let panel: ReactNode = null;
-  if (oauth) {
+  if (authorizing) {
+    const { field, component: Component } = authorizing;
+    const close = () => setAuthorizing(null);
+
     panel = (
       <Panel
-        id="oauth"
+        id="auth"
         motion="forward"
         nav={
-          <PanelNav
-            root={t('Authorization')}
-            onRoot={() => setOAuth(null)}
-            onBack={() => setOAuth(null)}
-          >
+          <PanelNav root={t('Authorization')} onRoot={close} onBack={close}>
             <Crumb>
               <span aria-current="page" className="truncate px-1.5 py-1 font-mono font-medium">
-                {oauth.schemeId}
+                {field.schemeId}
               </span>
             </Crumb>
           </PanelNav>
         }
       >
-        <OAuthPanel
-          field={oauth}
-          authorize={(input) => auth.authorize(oauth, input)}
-          onAuthorized={() => setOAuth(null)}
-        />
+        <Component field={field} close={close} />
       </Panel>
     );
   } else if (current) {
@@ -159,26 +167,29 @@ export function RequestPanel({
     );
   }
 
-  // the overview stays under panels, keeping its scroll position
+  // the overview stays under panels, keeping its scroll position, auth panels are outside the request form
   return (
     <div className={cn('@container grid min-h-0', className)}>
-      <div
-        className={cn(
-          'fd-scroll-container min-h-0 overflow-y-auto [grid-area:1/1]',
-          transitionClassName,
-          panel && 'invisible opacity-0 motion-safe:-translate-x-6',
-        )}
-      >
-        <Overview
-          {...options}
-          auth={auth}
-          body={body}
-          sectionNames={sectionNames}
-          onNavigate={openNested([])}
-          onOAuth={setOAuth}
-        />
-      </div>
-      {panel}
+      <form noValidate className="contents" onSubmit={onSubmit}>
+        <div
+          className={cn(
+            'fd-scroll-container min-h-0 overflow-y-auto [grid-area:1/1]',
+            transitionClassName,
+            panel && 'invisible opacity-0 motion-safe:-translate-x-6',
+          )}
+        >
+          <Overview
+            {...options}
+            auth={auth}
+            body={body}
+            sectionNames={sectionNames}
+            onNavigate={openNested([])}
+            onAuthorize={setAuthorizing}
+          />
+        </div>
+        {!authorizing && panel}
+      </form>
+      {authorizing && panel}
     </div>
   );
 }
@@ -392,7 +403,7 @@ function Overview({
   body,
   sectionNames,
   onNavigate,
-  onOAuth,
+  onAuthorize,
   renderParameterField,
   renderBodyField,
 }: RenderOptions & {
@@ -400,7 +411,7 @@ function Overview({
   body?: RequestBodyInfo;
   sectionNames: Record<string, string>;
   onNavigate: NavigateFn;
-  onOAuth: (field: AuthField) => void;
+  onAuthorize: (target: AuthTarget) => void;
 }) {
   const t = useTranslations({ note: 'playground' });
   const { parameters } = useOperation();
@@ -415,7 +426,7 @@ function Overview({
 
   return (
     <>
-      {auth.requirements.length > 0 && <AuthSection auth={auth} onOAuth={onOAuth} />}
+      {auth.requirements.length > 0 && <AuthSection auth={auth} onAuthorize={onAuthorize} />}
       {parameters.map(({ in: type, items }) => {
         const entries = items.map((param): FieldEntry => ({
           fieldName: [type, param.name],
@@ -495,13 +506,12 @@ function Section({
 
 function AuthSection({
   auth,
-  onOAuth,
+  onAuthorize,
 }: {
   auth: PlaygroundAuth;
-  onOAuth: (field: AuthField) => void;
+  onAuthorize: (target: AuthTarget) => void;
 }) {
   const t = useTranslations({ note: 'playground' });
-  const { isLoading, error } = usePlaygroundAuth();
   const { requirements, selected, select, fields } = auth;
   const items = requirements.map((requirement, i) => ({
     value: i,
@@ -524,101 +534,67 @@ function AuthSection({
       icon={KeyRound}
       title={t('Authorization')}
       actions={
-        <>
-          {isLoading && (
-            <span className="inline-flex items-center gap-1.5 text-xs text-fd-muted-foreground">
-              <Spinner className="size-3" />
-              {t('Fetching token...')}
-            </span>
-          )}
-          {items.length > 1 ? (
-            <Select items={items} value={selected} onValueChange={(v) => v !== null && select(v)}>
-              <SelectTrigger className="h-7 w-auto max-w-60 gap-1.5 @sm:-me-2 border-0 bg-transparent px-2 text-xs hover:bg-fd-accent focus:ring-0 focus-visible:ring-2">
-                <SelectValue className="truncate" />
-              </SelectTrigger>
-              <SelectContent align="end">
-                {items.map(({ value, label }) => (
-                  <SelectItem key={value} value={value} className="text-xs">
-                    {label}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          ) : (
-            <span className="truncate text-xs text-fd-muted-foreground">{items[0]?.label}</span>
-          )}
-        </>
+        items.length > 1 ? (
+          <Select items={items} value={selected} onValueChange={(v) => v !== null && select(v)}>
+            <SelectTrigger className="h-7 w-auto max-w-60 gap-1.5 @sm:-me-2 border-0 bg-transparent px-2 text-xs hover:bg-fd-accent focus:ring-0 focus-visible:ring-2">
+              <SelectValue className="truncate" />
+            </SelectTrigger>
+            <SelectContent align="end">
+              {items.map(({ value, label }) => (
+                <SelectItem key={value} value={value} className="text-xs">
+                  {label}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        ) : (
+          <span className="truncate text-xs text-fd-muted-foreground">{items[0]?.label}</span>
+        )
       }
     >
-      {error != null && (
-        <div className="border-b px-4 py-2.5 text-xs">
-          <p className="font-medium text-red-400">{t('Failed to fetch token')}</p>
-          <p className="text-fd-muted-foreground">{String(error)}</p>
-        </div>
-      )}
-      {fields.map((field) => (
-        <AuthRows key={stringifyFieldKey(field.fieldName)} field={field} onOAuth={onOAuth} />
-      ))}
+      {fields.map((field) => {
+        const Render = field.provider.render!;
+
+        return (
+          <AuthFieldContext key={stringifyFieldKey(field.fieldName)} value={{ field, onAuthorize }}>
+            <Render field={field} Value={AuthValue} Panel={AuthPanelRow} />
+          </AuthFieldContext>
+        );
+      })}
     </Section>
   );
 }
 
-function AuthRows({ field, onOAuth }: { field: AuthField; onOAuth: (field: AuthField) => void }) {
-  const t = useTranslations({ note: 'playground' });
-  const { fieldName, scheme } = field;
+const AuthFieldContext = createContext<{
+  field: AuthField;
+  onAuthorize: (target: AuthTarget) => void;
+} | null>(null);
 
-  if (scheme.type === 'http' && scheme.scheme === 'basic') {
-    return (
-      <>
-        <ValueRow
-          name="username"
-          type="basic"
-          description={scheme.description}
-          fieldName={[...fieldName, 'username']}
-          field={{ type: 'string' }}
-        />
-        <ValueRow
-          name="password"
-          fieldName={[...fieldName, 'password']}
-          field={{ type: 'string', format: 'password' }}
-        />
-      </>
-    );
-  }
+const stringSchema: Exclude<JsonSchema, boolean> = { type: 'string' };
 
-  if (scheme.type === 'apiKey') {
-    return (
-      <ValueRow
-        name={scheme.name!}
-        type={scheme.in}
-        description={scheme.description}
-        fieldName={fieldName}
-        field={{ type: 'string' }}
-      />
-    );
-  }
+function AuthValue({
+  path,
+  schema = stringSchema,
+  ...props
+}: ComponentProps<AuthRenderProps['Value']>) {
+  const { field } = use(AuthFieldContext)!;
 
   return (
-    <>
-      <ValueRow
-        name="Authorization"
-        type="header"
-        description={
-          scheme.type === 'http' || scheme.type === 'oauth2'
-            ? scheme.description
-            : t(
-                'OpenID Connect is not supported at the moment, you can still set an access token here.',
-              )
-        }
-        fieldName={fieldName}
-        field={{ type: 'string' }}
-      />
-      {scheme.type === 'oauth2' && (
-        <LinkRow name={field.schemeId} onClick={() => onOAuth(field)}>
-          {t('Authorize')}
-        </LinkRow>
-      )}
-    </>
+    <ValueRow
+      {...props}
+      fieldName={path ? [...field.fieldName, path] : field.fieldName}
+      field={schema}
+    />
+  );
+}
+
+function AuthPanelRow({ title, component }: ComponentProps<AuthRenderProps['Panel']>) {
+  const { field, onAuthorize } = use(AuthFieldContext)!;
+
+  return (
+    <LinkRow name={field.schemeId} onClick={() => onAuthorize({ field, component })}>
+      {title}
+    </LinkRow>
   );
 }
 

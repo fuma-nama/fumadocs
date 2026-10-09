@@ -3,6 +3,7 @@ import * as path from 'node:path';
 import type { Code, Paragraph } from 'mdast';
 import { z } from 'zod';
 import type { DocGenerator } from './remark-docgen';
+import { replaceSource } from 'fumadocs-core/mdx-plugins/stringifier';
 
 export interface FileGeneratorOptions {
   /** @defaultValue true */
@@ -53,6 +54,7 @@ export function fileGenerator({
       if (trim) value = value.trim();
 
       if (codeblock === false) {
+        replaceSource(ctx.file, ctx.node, value);
         const paragraphs: Paragraph[] = [];
         for (const block of value.split(/\r?\n\s*\n/)) {
           if (block)
@@ -61,14 +63,15 @@ export function fileGenerator({
         return paragraphs;
       }
 
-      const codeOptions = codeblock === true ? {} : codeblock;
-
-      return {
-        type: 'code',
-        lang: codeOptions.lang ?? path.extname(dest).slice(1),
-        meta: codeOptions.meta,
-        value,
-      } as Code;
+      const { lang = path.extname(dest).slice(1), meta } = codeblock === true ? {} : codeblock;
+      let fence = '```';
+      while (value.includes(fence)) fence += '`';
+      replaceSource(
+        ctx.file,
+        ctx.node,
+        `${fence}${lang}${meta ? ` ${meta}` : ''}\n${value}\n${fence}`,
+      );
+      return { type: 'code', lang, meta, value } as Code;
     },
   };
 }

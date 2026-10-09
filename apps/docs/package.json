@@ -1,6 +1,6 @@
 {
   "name": "docs",
-  "version": "0.1.49",
+  "version": "0.1.50",
   "private": true,
   "scripts": {
     "build": "pnpm build:pre && next build && pnpm build:post",
@@ -34,8 +34,6 @@
     "class-variance-authority": "^0.7.1",
     "cn": "^0.4.0",
     "d3-force": "^3.0.0",
-    "estree-util-build-jsx": "^3.0.1",
-    "estree-util-to-js": "^2.0.0",
     "feed": "^6.0.0",
     "flexsearch": "^0.8.212",
     "fuma-cli": "^0.3.1",
@@ -48,7 +46,6 @@
     "fumadocs-typescript": "workspace:^",
     "fumadocs-ui": "workspace:@fumadocs/base-ui@*",
     "graphql": "^17.0.2",
-    "hast-util-to-jsx-runtime": "^2.3.6",
     "katex": "0.19.0",
     "lucide-react": "^1.50.0",
     "mermaid": "^12.1.0",
@@ -63,7 +60,6 @@
     "satteri": "^0.10.5",
     "shiki": "^4.5.0",
     "takumi-js": "^2.14.0",
-    "unist-util-visit": "^5.1.0",
     "zod": "^4.6.5"
   },
   "devDependencies": {
@@ -73,7 +69,6 @@
     "@next/env": "16.3.8",
     "@tailwindcss/postcss": "^4.3.3",
     "@types/d3-force": "^3.0.10",
-    "@types/estree": "^1.0.9",
     "@types/hast": "^3.0.5",
     "@types/mdast": "^4.0.4",
     "@types/mdx": "^2.0.14",

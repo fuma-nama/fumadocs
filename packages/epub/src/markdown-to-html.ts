@@ -2,8 +2,7 @@ import type { Transformer } from 'unified';
 import remarkGfm from 'remark-gfm';
 import remarkRehype from 'remark-rehype';
 import rehypeStringify from 'rehype-stringify';
-import type { Root } from 'mdast';
-import { visit } from 'unist-util-visit';
+import type { Root, RootContent } from 'mdast';
 import { remark } from 'remark';
 import { resolveImageSrc } from './image-resolver';
 
@@ -25,14 +24,21 @@ function remarkResolveImg(): Transformer<Root, Root> {
     const { pageDir, publicDir } = file.data;
     if (!pageDir || !publicDir) return;
 
-    visit(tree, 'image', (node, idx, parent) => {
-      const resolved = resolveImageSrc(node.url, pageDir, publicDir);
-      if (resolved) {
-        node.url = resolved;
-      } else if (idx !== undefined && parent) {
-        parent.children.splice(idx, 1);
+    const visit = (parent: Root | RootContent) => {
+      if (!('children' in parent)) return;
+      for (let i = 0; i < parent.children.length; i++) {
+        const node = parent.children[i];
+        if (node.type !== 'image') {
+          visit(node);
+          continue;
+        }
+
+        const resolved = resolveImageSrc(node.url, pageDir, publicDir);
+        if (resolved) node.url = resolved;
+        else parent.children.splice(i--, 1);
       }
-    });
+    };
+    visit(tree);
   };
 }
 

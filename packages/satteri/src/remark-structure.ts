@@ -1,24 +1,22 @@
 import type { MdastPluginDefinition, MdastVisitorContext } from 'satteri';
-import type { Nodes } from 'mdast';
+import type { Nodes, TableRow } from 'mdast';
 import type { StructuredData } from 'fumadocs-core/mdx-plugins/remark-structure';
-import { createStringifier, type Stringifier } from './stringifier';
+import { tableRowToStructuredData } from 'fumadocs-core/search';
+import { createStringifier, offsets, type Stringifier } from './stringifier';
+import { headingIdRegex } from './heading-id';
 import type { ExtraPluginHooks } from './compile';
+import type { JsxElementNode } from './utils';
 
 export interface StructureOptions {
   types?: string[] | ((node: Nodes) => boolean);
   mdxTypes?: (node: Nodes) => boolean;
 
   /**
-   * Include Markdown syntax in content records, sliced from the authored source.
+   * Return `true` to keep a JSX element as an HTML tag, other elements are replaced by their content.
    *
-   * Links and JSX elements are flattened into their plain text, return `true` from
-   * `filterElement` to keep an element's syntax instead.
+   * Default: keep `File`, `TypeTable`, `Callout` and `Card` elements.
    */
-  stringify?:
-    | boolean
-    | {
-        filterElement?: (node: Nodes & { name?: string | null }) => boolean;
-      };
+  filterElement?: (node: Nodes & { name?: string | null }) => boolean;
 
   /**
    * export as `structuredData` (if true) or specified variable name.
@@ -28,48 +26,105 @@ export interface StructureOptions {
   exportAs?: string | boolean;
 }
 
-const STRUCTURE_VISITORS = [
+/** the nodes that a function of `types` can match */
+const RECORD_VISITORS = [
   'heading',
   'paragraph',
   'blockquote',
+  'table',
   'tableCell',
   'mdxJsxFlowElement',
-] as const;
+];
+/** the nodes edited in records */
+const EDIT_VISITORS = [
+  'mdxJsxFlowElement',
+  'mdxJsxTextElement',
+  'link',
+  'linkReference',
+  'image',
+  'imageReference',
+];
 
 interface ContentRecord {
   node: Nodes;
   heading: string | undefined;
   /** set for heading records */
   id?: string;
+  table?: string;
+  /** set for generated records */
+  content?: string;
 }
 
+interface TableRecord {
+  heading: string | undefined;
+  table: string;
+  head: TableRow;
+  rows: TableRow[];
+}
+
+/**
+ * Extract content into structured data, as Markdown sliced from the authored source. Links and JSX elements are
+ * replaced by their content, images are removed.
+ */
 export function remarkStructure({
-  types = ['heading', 'paragraph', 'blockquote', 'tableCell', 'mdxJsxFlowElement'],
+  types = ['heading', 'paragraph', 'blockquote', 'table', 'mdxJsxFlowElement'],
   mdxTypes = (node) => !('children' in node) || node.children.length === 0,
-  stringify = false,
+  filterElement = (node) => {
+    switch (node.name) {
+      case 'File':
+      case 'TypeTable':
+      case 'Callout':
+      case 'Card':
+        return true;
+      default:
+        return false;
+    }
+  },
   exportAs = true,
 }: StructureOptions = {}) {
   const matchType =
     typeof types === 'function' ? types : (node: Nodes) => types.includes(node.type);
-  const filterElement = typeof stringify === 'object' ? stringify.filterElement : undefined;
+  const visitors = [...(typeof types === 'function' ? RECORD_VISITORS : types), ...EDIT_VISITORS];
 
   const plugin: ExtraPluginHooks & { (): MdastPluginDefinition } = () => {
     const data: StructuredData = { contents: [], headings: [] };
-    const records: ContentRecord[] = [];
+    const records: (ContentRecord | TableRecord)[] = [];
     let lastHeading: string | undefined;
+    let covered: { start: number; end: number } | undefined;
+    let tables = 0;
     let s: Stringifier;
 
+    function stringifyCells(row: TableRow): string[] {
+      return row.children.map((cell) => s.inner(cell).trim());
+    }
+
     function visit(node: Nodes) {
-      if (stringify && (node.type === 'mdxJsxFlowElement' || node.type === 'mdxJsxTextElement')) {
-        // elements without a Markdown form become their text content in records
-        if (!filterElement?.(node)) s.flatten(node);
+      // links and elements become their content, unless kept as HTML tags, images are removed
+      if (node.type === 'link' || node.type === 'linkReference')
+        s.replace(node, (s) => s.inner(node));
+      else if (node.type === 'image' || node.type === 'imageReference') s.replace(node, '');
+      else if (isJsxElement(node))
+        s.replace(node, filterElement(node) ? (s) => toHtmlTag(node, s) : (s) => s.inner(node));
+
+      if (node.data?.structuredData) {
+        for (const { heading, content, table } of node.data.structuredData.contents)
+          records.push({ node, heading: heading ?? lastHeading, table, content });
+        covered = offsets(node) ?? covered;
+        return;
       }
       if (!matchType(node)) return;
-      if (
-        (node.type === 'mdxJsxFlowElement' || node.type === 'mdxJsxTextElement') &&
-        !mdxTypes(node)
-      )
+
+      // nodes without a source, generated by plugins, and nodes in a record aren't records
+      const range = offsets(node);
+      if (!range || (covered && s.within(range, covered))) return;
+      if (isJsxElement(node) && !isInline(s.source, range) && !mdxTypes(node)) return;
+      covered = range;
+
+      if (node.type === 'table') {
+        const [head, ...rows] = node.children;
+        records.push({ heading: lastHeading, table: `table-${tables++}`, head, rows });
         return;
+      }
 
       if (node.type === 'heading') {
         const id = (node.data as { hProperties?: { id?: string } } | undefined)?.hProperties?.id;
@@ -83,12 +138,13 @@ export function remarkStructure({
       records.push({ node, heading: lastHeading });
     }
 
-    const definition: MdastPluginDefinition = {
+    return {
       name: 'remark-structure',
-      options: stringify ? { position: true } : undefined,
+      // positions tell authored nodes from generated ones
+      options: { position: true },
       before(_root: unknown, ctx: MdastVisitorContext) {
         ctx.data.structuredData ??= data;
-        s = createStringifier(ctx);
+        s = createStringifier(ctx, 'search');
 
         const frontmatter = ctx.data.frontmatter as
           | { _openapi?: { structuredData?: StructuredData } }
@@ -99,31 +155,35 @@ export function remarkStructure({
           data.contents.push(...openapiData.contents);
         }
       },
-      after(_root: unknown, ctx: MdastVisitorContext) {
+      after() {
         for (const record of records) {
-          // heading text is already plain, remark-heading stripped its markers
+          if ('rows' in record) {
+            const header = stringifyCells(record.head);
+            for (const row of record.rows)
+              data.contents.push(
+                tableRowToStructuredData({
+                  table: record.table,
+                  heading: record.heading,
+                  row: stringifyCells(row),
+                  header,
+                }),
+              );
+            continue;
+          }
+
+          const { node } = record;
           const content = (
-            stringify && !record.id ? s.stringify(record.node) : ctx.textContent(record.node)
+            record.content ??
+            (record.id ? s.inner(node).replace(headingIdRegex, '') : s.stringify(node))
           ).trim();
           if (content.length === 0) continue;
 
           if (record.id) data.headings.push({ id: record.id, content });
-          else data.contents.push({ heading: record.heading, content });
+          else data.contents.push({ heading: record.heading, content, table: record.table });
         }
       },
-      ...Object.fromEntries(STRUCTURE_VISITORS.map((key) => [key, visit])),
+      ...Object.fromEntries(visitors.map((key) => [key, visit])),
     };
-    if (stringify) {
-      // flattened in records; links & images have no position once plugins replaced them
-      Object.assign(definition, {
-        mdxJsxTextElement: visit,
-        link: (node: Nodes) => s.flatten(node),
-        linkReference: (node: Nodes) => s.flatten(node),
-        image: (node: Nodes) => s.remove(node),
-      });
-    }
-
-    return definition;
   };
   plugin.collectExports = ({ data, addExport }) => {
     if (exportAs) {
@@ -137,3 +197,39 @@ export function remarkStructure({
 }
 
 export type { StructuredData } from 'fumadocs-core/mdx-plugins/remark-structure';
+
+/** an element on one line has inline content, recorded like a paragraph */
+function isInline(source: string, range: { start: number; end: number }): boolean {
+  const line = source.indexOf('\n', range.start);
+  return line === -1 || line >= range.end;
+}
+
+function isJsxElement(node: Nodes): node is Nodes & JsxElementNode {
+  return node.type === 'mdxJsxFlowElement' || node.type === 'mdxJsxTextElement';
+}
+
+/**
+ * A JSX element as an HTML tag, so search dialogs render it as an element. Expression
+ * values become strings, values and content are kept on one line, values are truncated.
+ */
+function toHtmlTag(node: Nodes & JsxElementNode, s: Stringifier): string {
+  let attrs = '';
+  for (const attr of node.attributes) {
+    if (attr.type === 'mdxJsxExpressionAttribute') continue;
+    if (attr.value == null) {
+      attrs += ` ${attr.name}`;
+      continue;
+    }
+
+    let value = (typeof attr.value === 'string' ? attr.value : attr.value.value).replace(
+      /\s+/g,
+      ' ',
+    );
+    if (value.length > 100) value = `${value.slice(0, 100)}…`;
+    attrs += ` ${attr.name}="${value.replaceAll('&', '&amp;').replaceAll('"', '&quot;')}"`;
+  }
+
+  const children = s.inner(node).replace(/\s+/g, ' ');
+  if (!children) return `<${node.name}${attrs} />`;
+  return `<${node.name}${attrs}>${children}</${node.name}>`;
+}

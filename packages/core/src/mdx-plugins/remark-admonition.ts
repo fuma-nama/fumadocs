@@ -1,7 +1,6 @@
 import { type Transformer } from 'unified';
-import { visit } from 'unist-util-visit';
-import { type Root, type RootContent } from 'mdast';
-import { flattenNode } from '@/mdx-plugins/utils';
+import { type Nodes, type Root, type RootContent } from 'mdast';
+import { flattenNode, walk } from '@/mdx-plugins/utils';
 
 export interface RemarkAdmonitionOptions {
   tag?: string;
@@ -88,7 +87,7 @@ export function remarkAdmonition(options: RemarkAdmonitionOptions = {}): Transfo
   }
 
   return (tree) => {
-    visit(tree, (node) => {
+    walk<Nodes>(tree, (node) => {
       if (!('children' in node)) return;
 
       replaceNodes(node.children);

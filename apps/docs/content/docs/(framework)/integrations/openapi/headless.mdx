@@ -241,7 +241,7 @@ function ParameterInput({ location, name }: { location: string; name: string }) 
 | `auth`                                               | the auth fields of the selected security requirement, `select()` switches it, `authorize()` obtains an OAuth 2.0 token into a field |
 | `send()`, `isSending`, `response`, `clearResponse()` | send the form as a request, and the result of the last one                                                                          |
 
-It accepts `fetchOptions` to customise requests, like `onRequestInit()`, and `transformAuthInputs` to customise the auth fields.
+It accepts `fetchOptions` to customise requests, like `onRequestInit()`, `authProviders` to handle security schemes, see [Authorization](/docs/integrations/openapi/api-page#authorization), and `transformAuthInputs` to customise the auth fields.
 
 ### Requests
 

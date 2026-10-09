@@ -280,6 +280,54 @@ const a: string = 1;
   expect(() => twoslasher(`const a: string = 1;`)).toThrow();
 });
 
+test('truncate long types', () => {
+  let code = 'const fields = {\n';
+  for (let i = 0; i < 30; i++)
+    code += `  field${i}: (label?: string) => ({ kind: 'f${i}' as const, label }),\n`;
+  code += '};\nfunction getFields() {\n  return fields;\n}';
+  const texts = new Map(hovers(twoslasher(code)).map((v) => [v.target, v.text]));
+
+  expect([texts.get('fields'), texts.get('getFields')]).toMatchInlineSnapshot(`
+    [
+      "const fields: {
+        field0: (label?: string | undefined) => {
+            kind: "f0";
+            label: string | undefined;
+        };
+        field1: (label?: string | undefined) => {
+            kind: "f1";
+            label: string | undefined;
+        };
+        field2: (label?: string | undefined) => {
+            ...;
+        };
+        ... 26 more ...;
+        field29: (label?: string | undefined) => {
+            ...;
+        };
+    }",
+      "function getFields(): {
+        field0: (label?: string) => {
+            kind: 'f0';
+            label: string | undefined;
+        };
+        field1: (label?: string) => {
+            kind: 'f1';
+            label: string | undefined;
+        };
+        field2: (label?: string) => {
+            kind: 'f2';
+            label: string | undefined;
+        };
+        ... 26 more ...;
+        field29: (label?: string) => {
+            ...;
+        };
+    }",
+    ]
+  `);
+});
+
 test('cut and filename', () => {
   const result = twoslasher(`
 // @filename: util.ts
@@ -313,6 +361,9 @@ import { value } from './sub/util';
 value;
 `);
   expect(hovers(result).at(-1)?.text).toBe('(alias) const value: 1\nimport value');
+  expect(() => twoslasher('// @filename: ../../../util.ts\nexport {};')).toThrow(
+    /Invalid filename/,
+  );
 });
 
 test('completions', () => {

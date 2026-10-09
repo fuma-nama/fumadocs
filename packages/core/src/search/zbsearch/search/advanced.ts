@@ -1,7 +1,8 @@
 import { getByID, search, type SearchParams, type ZBSearch } from 'zbsearch';
 import { type AdvancedDocument, type advancedSchema } from '@/search/zbsearch/create-db';
 import { removeUndefined } from '@/utils/remove-undefined';
-import { createContentHighlighter, type SortedResult } from '@/search';
+import type { SortedResult } from '@/search';
+import type { SharedDocument } from '@/search/server/build-doc';
 
 export async function searchAdvanced(
   db: ZBSearch<typeof advancedSchema>,
@@ -9,6 +10,7 @@ export async function searchAdvanced(
   tag: string | string[] = [],
   {
     mode = 'fulltext',
+    limit = 60,
     ...override
   }: Partial<SearchParams<ZBSearch<typeof advancedSchema>, AdvancedDocument>> = {},
   locale?: string,
@@ -16,7 +18,7 @@ export async function searchAdvanced(
   if (typeof tag === 'string') tag = [tag];
 
   const params = {
-    limit: 60,
+    limit,
     mode,
     ...override,
     where: removeUndefined({
@@ -41,11 +43,8 @@ export async function searchAdvanced(
     params.term = query;
   }
 
-  const highlighter = createContentHighlighter(query);
   const result = await search(db, params);
-  // `limit` bounds `result.hits`, not `result.groups`: there is one group per
-  // matched page, so stop early instead of highlighting every matched page
-  const limit = typeof params.limit === 'number' ? params.limit : Infinity;
+  // `limit` bounds `result.hits`, not `result.groups` (one group per matched page)
   const list: SortedResult[] = [];
   for (const item of result.groups ?? []) {
     if (list.length >= limit) break;
@@ -57,7 +56,7 @@ export async function searchAdvanced(
     list.push({
       id: pageId,
       type: 'page',
-      content: highlighter.highlightMarkdown(page.content),
+      content: page.content,
       breadcrumbs: page.breadcrumbs,
       url: page.url,
     });
@@ -68,10 +67,11 @@ export async function searchAdvanced(
 
       list.push({
         id: hit.document.id.toString(),
-        content: highlighter.highlightMarkdown(hit.document.content),
+        content: hit.document.content,
         breadcrumbs: hit.document.breadcrumbs,
         type: hit.document.type as SortedResult['type'],
         url: hit.document.url,
+        table: (hit.document as SharedDocument).table,
       });
     }
   }

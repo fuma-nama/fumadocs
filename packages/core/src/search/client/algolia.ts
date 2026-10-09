@@ -1,7 +1,9 @@
+import { useCallback, useRef } from 'react';
 import type { BaseIndex } from '@/search/algolia';
 import type { Hit, LiteClient, SearchResponse } from 'algoliasearch/lite';
-import { createContentHighlighter, type SortedResult } from '@/search';
+import type { SortedResult } from '@/search';
 import type { SearchClient } from '../client';
+import { type UseSearchOptions, useSearch } from '../use-search';
 
 export interface AlgoliaOptions {
   indexName: string;
@@ -45,38 +47,54 @@ function groupResults(hits: Hit<BaseIndex>[]): SortedResult[] {
       type: hit.content === hit.section ? 'heading' : 'text',
       url: hit.section_id ? `${hit.url}#${hit.section_id}` : hit.url,
       content: hit.content,
+      table: hit.table,
     });
   }
 
   return grouped;
 }
 
-export function algoliaClient(options: AlgoliaOptions): SearchClient {
+async function searchAlgolia(options: AlgoliaOptions, query: string): Promise<SortedResult[]> {
   const { indexName, onSearch, client, locale, tag } = options;
+  if (query.trim().length === 0) return [];
+
+  const result = onSearch
+    ? await onSearch(query, tag, locale)
+    : await client.searchForHits<BaseIndex>({
+        requests: [
+          {
+            type: 'default',
+            indexName,
+            query,
+            distinct: 5,
+            hitsPerPage: 10,
+            filters: tag ? `tag:${tag}` : undefined,
+          },
+        ],
+      });
+
+  return groupResults(result.results[0].hits);
+}
+
+export function algoliaClient(options: AlgoliaOptions): SearchClient {
   return {
-    deps: [indexName, client, locale, tag],
-    async search(query) {
-      if (query.trim().length === 0) return [];
-
-      const result = onSearch
-        ? await onSearch(query, tag, locale)
-        : await client.searchForHits<BaseIndex>({
-            requests: [
-              {
-                type: 'default',
-                indexName,
-                query,
-                distinct: 5,
-                hitsPerPage: 10,
-                filters: tag ? `tag:${tag}` : undefined,
-              },
-            ],
-          });
-
-      const highlighter = createContentHighlighter(query);
-      const results = groupResults(result.results[0].hits);
-      for (const item of results) item.content = highlighter.highlightMarkdown(item.content);
-      return results;
-    },
+    deps: [options.indexName, options.client, options.locale, options.tag],
+    search: (query) => searchAlgolia(options, query),
   };
+}
+
+export function useAlgoliaSearch({
+  indexName,
+  client,
+  locale,
+  tag,
+  ...rest
+}: AlgoliaOptions & UseSearchOptions) {
+  const latest = useRef(rest);
+  latest.current = rest;
+  const run = useCallback(
+    (query: string) => searchAlgolia({ ...latest.current, indexName, client, locale, tag }, query),
+    [indexName, client, locale, tag],
+  );
+  return useSearch(run, rest);
 }

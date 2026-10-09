@@ -78,15 +78,15 @@ export function useTabsGroups(tabs: LayoutTab[]): TabsGroup[] {
     const out: TabsGroup[] = [];
     const last = path[path.length - 1];
     const page = last?.type === 'page' ? last : undefined;
-    let scope: PageTree.Root | PageTree.Folder =
-      tree.fallback && !tree.children.includes(path[0]) ? tree.fallback : tree;
+    // the fallback tree shares the same scope as the main tree
+    let scope = tree.fallback ? [...tree.children, ...tree.fallback.children] : tree.children;
 
     for (const node of path) {
       if (node.type !== 'folder' || !node.root) continue;
       const group: TabsGroup = { active: node, options: [] };
       collectTabs(scope, node, page, tabs, group.options);
       if (group.options.length > 0) out.push(group);
-      scope = node;
+      scope = node.children;
     }
 
     const custom = tabs.filter((tab) => !tab.$folder);
@@ -102,13 +102,13 @@ export function useTabsGroups(tabs: LayoutTab[]): TabsGroup[] {
 
 /** collect the tabs of root folders with the same type as `active` within a scope */
 function collectTabs(
-  scope: PageTree.Root | PageTree.Folder,
+  scope: PageTree.Node[],
   active: PageTree.Folder,
   page: PageTree.Item | undefined,
   tabs: LayoutTab[],
   out: LayoutTab[],
 ) {
-  for (const node of scope.children) {
+  for (const node of scope) {
     if (node.type !== 'folder') continue;
     if (node.root === active.root) {
       const tab = tabs.find(
@@ -120,7 +120,7 @@ function collectTabs(
       out.push(projection ? { ...tab, url: projection.url } : tab);
     } else if (!node.root) {
       // any other root folder starts a new scope
-      collectTabs(node, active, page, tabs, out);
+      collectTabs(node.children, active, page, tabs, out);
     }
   }
 }

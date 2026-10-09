@@ -47,8 +47,9 @@ const dialogImports = `import {
 } from 'fumadocs-ui/components/dialog/search';
 import { useI18n } from 'fumadocs-ui/contexts/i18n';`;
 
-const dialogBody = (footer: string, url: string) => `  return (
-    <SearchDialog search={search} onSearchChange={setSearch} isLoading={query.isLoading} {...props}>
+/** `legacy` for hooks in the shape of the deprecated `useDocsSearch()`, like the Typesense adapter */
+const dialogBody = (footer: string, url: string, legacy = false) => `  return (
+    <SearchDialog ${legacy ? 'search={search} onSearchChange={setSearch} isLoading={query.isLoading}' : '{...search}'} {...props}>
       <SearchDialogOverlay />
       <SearchDialogContent>
         <SearchDialogHeader>
@@ -56,7 +57,7 @@ const dialogBody = (footer: string, url: string) => `  return (
           <SearchDialogInput />
           <SearchDialogClose />
         </SearchDialogHeader>
-        <SearchDialogList items={query.data !== 'empty' ? query.data : null} />
+        <SearchDialogList ${legacy ? "items={query.data !== 'empty' ? query.data : null} " : ''}/>
         <SearchDialogFooter>
           <a
             href="${url}"
@@ -129,7 +130,7 @@ interface Provider {
     documents: string;
   };
   /** `scripts/sync-content.ts`, run after build */
-  sync?: (env: Env, paths: { dir: string; output: string }) => string;
+  sync?: (env: Env, paths: { output: string }) => string;
   /** server-side search, replaces the default search route */
   searchRoute?: Record<ReactFramework, string>;
 }
@@ -144,7 +145,7 @@ const providers = {
     static: true,
     dialog: (env) => `'use client';
 ${dialogImports}
-import { useDocsSearch } from 'fumadocs-core/search/client';
+import { useOramaCloudSearch } from 'fumadocs-core/search/client';
 import { OramaCloud } from '@orama/core';
 
 const client = new OramaCloud({
@@ -154,8 +155,7 @@ const client = new OramaCloud({
 
 export default function CustomSearchDialog(props: SharedProps) {
   const { locale } = useI18n();
-  const { search, setSearch, query } = useDocsSearch({
-    type: 'orama-cloud',
+  const search = useOramaCloudSearch({
     client,
     locale,
   });
@@ -192,20 +192,17 @@ await sync(orama, {
     static: true,
     dialog: (env) => `'use client';
 ${dialogImports}
-import { useDocsSearch } from 'fumadocs-core/search/client';
-import { algoliaClient } from 'fumadocs-core/search/client/algolia';
+import { useAlgoliaSearch } from 'fumadocs-core/search/client';
 import { liteClient } from 'algoliasearch/lite';
 
 const algolia = liteClient(${env.read}ALGOLIA_APP_ID!, ${env.read}ALGOLIA_SEARCH_KEY!);
 
 export default function CustomSearchDialog(props: SharedProps) {
   const { locale } = useI18n();
-  const { search, setSearch, query } = useDocsSearch({
-    client: algoliaClient({
-      client: algolia,
-      indexName: 'document',
-      locale,
-    }),
+  const search = useAlgoliaSearch({
+    client: algolia,
+    indexName: 'document',
+    locale,
   });
 
 ${dialogBody('Algolia', 'https://algolia.com')}`,
@@ -240,8 +237,7 @@ await sync(client, {
     static: true,
     dialog: (env) => `'use client';
 ${dialogImports}
-import { useDocsSearch } from 'fumadocs-core/search/client';
-import { meilisearchClient } from 'fumadocs-core/search/client/meilisearch';
+import { useMeilisearch } from 'fumadocs-core/search/client';
 import { Meilisearch } from 'meilisearch';
 
 const client = new Meilisearch({
@@ -251,12 +247,10 @@ const client = new Meilisearch({
 
 export default function CustomSearchDialog(props: SharedProps) {
   const { locale } = useI18n();
-  const { search, setSearch, query } = useDocsSearch({
-    client: meilisearchClient({
-      client,
-      indexName: 'docs',
-      locale,
-    }),
+  const search = useMeilisearch({
+    client,
+    indexName: 'docs',
+    locale,
   });
 
 ${dialogBody('Meilisearch', 'https://www.meilisearch.com')}`,
@@ -307,7 +301,7 @@ export default function CustomSearchDialog(props: SharedProps) {
     client,
   });
 
-${dialogBody('Typesense', 'https://typesense.org')}`,
+${dialogBody('Typesense', 'https://typesense.org', true)}`,
     exportIndexes: (src, async) => ({
       head: typesenseDocuments(src, async),
       documents: 'getDocuments()',
@@ -335,42 +329,44 @@ await sync(client, {
     hint: 'AI search, signup needed',
     dependencies: { '@mixedbread/sdk': null },
     publicEnv: [],
-    privateEnv: ['MIXEDBREAD_API_KEY', 'MIXEDBREAD_STORE_ID'],
+    privateEnv: ['MXBAI_API_KEY', 'MIXEDBREAD_STORE_ID'],
     static: false,
     dialog: () => `'use client';
 ${dialogImports}
-import { useDocsSearch } from 'fumadocs-core/search/client';
-import { fetchClient } from 'fumadocs-core/search/client/fetch';
+import { useFetchSearch } from 'fumadocs-core/search/client';
 
 export default function CustomSearchDialog(props: SharedProps) {
   const { locale } = useI18n();
-  const { search, setSearch, query } = useDocsSearch({
-    client: fetchClient({
-      api: '/api/search',
-      locale,
-    }),
+  const search = useFetchSearch({
+    api: '/api/search',
+    locale,
+    // every search is a request to Mixedbread
+    delayMs: 300,
   });
 
 ${dialogBody('Mixedbread', 'https://mixedbread.com')}`,
-    sync: (_env, { dir }) => `import { spawnSync } from 'node:child_process';
-
-// sync the content with Mixedbread CLI
-const result = spawnSync(
-  'npx',
-  ['--yes', '@mixedbread/cli', 'vs', 'sync', process.env.MIXEDBREAD_STORE_ID!, '${dir}', '--ci'],
-  { stdio: 'inherit' },
-);
-
-process.exit(result.status ?? 1);
+    exportIndexes: ({ ref }) => ({
+      head: `import { ${ref} } from '@/lib/source';
+import { toDocuments } from 'fumadocs-core/search/mixedbread';`,
+      documents: `toDocuments(${ref})`,
+    }),
+    sync: (_env, { output }) =>
+      syncScript(
+        output,
+        `import { type DocumentRecord, sync } from 'fumadocs-core/search/mixedbread';
+import Mixedbread from '@mixedbread/sdk';`,
+        `await sync(new Mixedbread(), {
+  storeIdentifier: process.env.MIXEDBREAD_STORE_ID!,
+  documents: records,
+});
 `,
+      ),
     searchRoute: (() => {
       const server = `import { createMixedbreadSearchAPI } from 'fumadocs-core/search/mixedbread';
 import Mixedbread from '@mixedbread/sdk';
 
 const server = createMixedbreadSearchAPI({
-  client: new Mixedbread({
-    apiKey: process.env.MIXEDBREAD_API_KEY,
-  }),
+  client: new Mixedbread(),
   storeIdentifier: process.env.MIXEDBREAD_STORE_ID!,
 });
 `;
@@ -439,7 +435,7 @@ export const syncCommand = 'node --env-file-if-exists=.env.local scripts/sync-co
 export function templates(
   name: SearchProvider,
   framework: ReactFramework,
-  { baseDir, source }: { baseDir: string; source: Pick<SourceInfo, 'dynamic' | 'async' | 'dir'> },
+  { baseDir, source }: { baseDir: string; source: Pick<SourceInfo, 'dynamic' | 'async'> },
   output: string,
 ): [file: string, content: string][] {
   const provider: Provider = providers[name];
@@ -455,8 +451,7 @@ export function templates(
       staticRoute(framework, head, documents),
     ]);
   }
-  if (provider.sync)
-    files.push(['scripts/sync-content.ts', provider.sync(env, { dir: source.dir, output })]);
+  if (provider.sync) files.push(['scripts/sync-content.ts', provider.sync(env, { output })]);
   return files;
 }
 

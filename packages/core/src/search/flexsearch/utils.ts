@@ -1,5 +1,5 @@
 import Search, { type DocumentOptions, type Document, type DocumentData } from 'flexsearch';
-import { createContentHighlighter, type SortedResult } from '..';
+import type { SortedResult } from '..';
 import type { SharedDocument } from '../server/build-doc';
 
 export type Doc = SharedDocument & DocumentData;
@@ -23,7 +23,6 @@ export async function search(
   if (arr.length === 0) return out;
 
   const results = arr[0].result;
-  const highlighter = createContentHighlighter(query);
   // page id -> heading/content item
   const grouped = new Map<string, Doc[]>();
 
@@ -48,7 +47,7 @@ export async function search(
     out.push({
       id: page_id,
       type: 'page',
-      content: highlighter.highlightMarkdown(page.content),
+      content: page.content,
       breadcrumbs: page.breadcrumbs,
       url: page.url,
     });
@@ -56,10 +55,11 @@ export async function search(
     for (const item of items) {
       out.push({
         id: item.id,
-        content: highlighter.highlightMarkdown(item.content),
+        content: item.content,
         breadcrumbs: item.breadcrumbs,
         type: item.type,
         url: item.url,
+        table: item.table,
       });
     }
   }

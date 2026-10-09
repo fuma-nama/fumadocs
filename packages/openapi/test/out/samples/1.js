@@ -1,5 +1,6 @@
 const body = JSON.stringify({
-  "id": "id"
+  "id": "id",
+  "note": "it's \"quoted\" \\ `a` ${b}"
 })
 
 fetch("http://localhost:8080/hello_world?search=ai", {
@@ -7,6 +8,7 @@ fetch("http://localhost:8080/hello_world?search=ai", {
   headers: {
     "Content-Type": "application/json",
     "authorization": "Bearer",
+    "if-none-match": "\"etag\"",
     "cookie": "mode=light"
   },
   body

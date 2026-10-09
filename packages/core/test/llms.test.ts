@@ -1,5 +1,5 @@
 import { expect, test } from 'vitest';
-import { llms, loader, type StaticSource } from '@/source';
+import { llms, loader, type LLMsWithPages, type StaticSource } from '@/source';
 import { defineI18n } from '@/i18n';
 
 const source: StaticSource = {
@@ -13,14 +13,17 @@ const docs = loader({ baseUrl: '/docs', source });
 const renderPage = (page: (typeof docs)['$inferPage']) =>
   `# ${page.data.title}\n\n${page.data.description}`;
 
-test('llms: index', async () => {
-  await expect(llms(docs).index()).resolves.toMatchInlineSnapshot(`
+test('llms: index', () => {
+  const output = llms(docs);
+
+  expect(output.index()).toMatchInlineSnapshot(`
     "# Docs
 
     - [Index](/docs): hello
     - Nested
       - [Page](/docs/nested/page): world"
   `);
+  expect(output.indexNode(docs.pageTree.children[0])).toBe('- [Index](/docs): hello');
 });
 
 test('llms: page & full', async () => {
@@ -32,9 +35,7 @@ test('llms: page & full', async () => {
 
 test('llms: page requires renderPage at runtime', async () => {
   // the type-level guard is bypassed by untyped callers
-  const output = llms(docs) as ReturnType<typeof llms<never>> & {
-    full: () => Promise<string>;
-  };
+  const output = llms(docs) as LLMsWithPages<never>;
 
   await expect(output.full()).rejects.toThrowError('renderPage');
 });

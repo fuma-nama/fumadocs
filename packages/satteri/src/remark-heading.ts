@@ -1,8 +1,7 @@
 import Slugger from 'github-slugger';
 import { defineMdastPlugin, type MdastVisitorContext } from 'satteri';
 import type { Heading } from 'mdast';
-
-const regex = /\s*\[#(?<slug>[^]+?)]\s*$/;
+import { headingIdRegex } from './heading-id';
 
 export interface RemarkHeadingOptions {
   slug?: (heading: Heading, text: string) => string;
@@ -38,7 +37,7 @@ export function remarkHeading({
         let title = ctx.textContent(node);
         const lastNode = node.children.at(-1);
         if (lastNode?.type === 'text' && customId) {
-          const match = regex.exec(lastNode.value);
+          const match = headingIdRegex.exec(lastNode.value);
           if (match?.[1]) {
             hProperties.id = match[1];
             const stripped = lastNode.value.slice(0, match.index!);
