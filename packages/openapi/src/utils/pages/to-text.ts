@@ -128,9 +128,9 @@ export function generateDocument(
     out.push(`{/* ${commentContent} */}`);
   }
 
-  if (imports) {
+  if (imports && imports.length > 0) {
     out.push(
-      ...imports
+      imports
         .map((item) => `import { ${item.names.join(', ')} } from ${doubleQuote(item.from)};`)
         .join('\n'),
     );
