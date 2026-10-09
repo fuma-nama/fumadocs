@@ -1,3 +1,92 @@
+## fumadocs-core@16.17.0
+
+### Restore sync `index()` and `indexNode()` in `llms()`
+
+Since 16.15.9, `index()` and `indexNode()` of `llms()` returned a promise, so code using them as strings, like joining `indexNode()` results, printed `[object Promise]` without a type error. They return a string again when `llms()` receives a loader, and only return a promise when it receives a function like `getSource` of runtime content sources. Awaiting them keeps working in both cases.
+
+### Highlight search results with CSS
+
+Search results no longer wrap matches in `<mark>`, `content` is the indexed Markdown. The search dialog highlights matches with the [CSS Custom Highlight API](https://developer.mozilla.org/en-US/docs/Web/API/CSS_Custom_Highlight_API), style them with `::highlight(fd-search)`. Custom search UIs can use `useHighlightQuery()` from `fumadocs-core/search/client`.
+
+- `createContentHighlighter()` is deprecated.
+- Removed `contentWithHighlights` from search results, and the `renderHighlights` prop of `<SearchDialogListItem />`.
+- `<SearchDialogListItem />` renders the Markdown of results with the `prose prose-sm` typography.
+
+### Search hooks for each provider
+
+`fumadocs-core/search/client` exports a hook for each search client, like `useFetchSearch()`. They return the props of `<SearchDialog />`:
+
+```tsx
+const search = useFetchSearch({ locale });
+
+<SearchDialog {...search} {...props}>
+  <SearchDialogList />
+</SearchDialog>;
+```
+
+`data` is the last successful search, its `items` have their content parsed into `hastContent`. `error` is set when the last search failed.
+
+- `experimental_useSearch()` creates a search hook from a memoized search function.
+- `useDocsSearch()` is deprecated.
+- `useFlexsearchStatic()` and `useOramaCloudLegacySearch()` are exported from the paths of their clients.
+- `<SearchDialogList />` shows `defaultItems` without results.
+- `useSearchList()` is removed, `useSearch()` returns `getActive()`, `setActive()` and `subscribeActive()` for the active item.
+- `<SearchDialogListItem />` renders a `div` instead of a `button`, table rows render their cells only.
+- `renderMarkdown` of `<SearchDialogListItem />` renders `content` instead of `hastContent`. Without it, the string content of custom items is shown as text.
+- The templates of Fumadocs CLI and Create Fumadocs App use the new hooks.
+
+### Index tables by row
+
+Structured data records each table row as a Markdown table of its header row and itself, instead of a record per cell. Type tables from `auto-type-table` record a row for each prop instead of the `TypeTable` element. Re-sync your search indexes to pick them up.
+
+- `remarkStructure()` defaults `types` to `table` instead of `tableCell`.
+- `tableRowToStructuredData()` from `fumadocs-core/search` creates the structured data of a table row, `typeTableToStructuredData()` from `fumadocs-typescript` of a type table.
+- Search hooks group the rows of a table into a `table` item, `<SearchDialogList />` renders it with `Table`, `<SearchDialogListTable />` by default.
+- Algolia and Orama Cloud link to the anchor of every record, like the props of type tables.
+- Orama Cloud searches `title`, `section` and `content` by default, set `params.properties` to search other fields.
+- `remarkStructure()` of Sätteri records the `data.structuredData` of nodes in place of the nodes.
+
+### Markdown and search records from the authored source
+
+`remarkLLMs()` and `remarkStructure()` of `fumadocs-core` slice their Markdown from the authored source like Sätteri, instead of stringifying the syntax tree. It is much faster, Markdown is no longer escaped or reformatted, and local images keep their addresses. Re-sync your search indexes to pick up the new records.
+
+- Plugins record the Markdown of content they replace with `replaceSource()` or `embedSource()` from `fumadocs-core/mdx-plugins/stringifier`, in place of `data._stringify`, and add search records with `data.structuredData`. Nodes they insert otherwise are left out. A `namespace` limits an edit to the stringifiers of that namespace, like `search` for search records.
+- Search records are always Markdown, also in Sätteri. `filterElement` replaces `stringify.filterElement`, it chooses the JSX elements kept as HTML tags (`File`, `TypeTable`, `Callout` and `Card` by default) that search dialogs render as components. Other elements and links are replaced by their content, images are removed, and an element on one line is recorded like a paragraph.
+- Removed `defaultStringifier()` (use `createStringifier()`), `StringifyOptions`, `allowedMdxAttributes`, `filterMdxAttributes`, `placeholder()` (use `mdxAsPlaceholder`), and the `stringify` and `mdast-util-to-markdown` options of both plugins.
+- Included content goes through the plugins like the document's own, Sätteri includes `.md` files as Markdown.
+- `<auto-files>` shows its files in a code block, `auto-type-table` its props in a Markdown table, created by `typeTableToMarkdown()` from `fumadocs-typescript`.
+- `remarkShow()` and `fileGenerator()` of `fumadocs-docgen` record their Markdown, generators receive the `file` to do the same.
+- Records of `fumadocs-obsidian` resolve wikilinks, and leave comments, block IDs, callout markers and embeds out. Comments are removed before parsing, so they no longer split a paragraph.
+- Pages of `fumadocs-python` compile from their MDX, so they have Markdown and search records.
+- `fumadocs-mdx`, `fumadocs-docgen` and `fumadocs-obsidian` require `fumadocs-core` 16.17.0.
+
+Fix [#3662](https://github.com/fuma-nama/fumadocs/issues/3662)
+
+### Fix Markdown output and search records
+
+- `remarkImage()` with `onError: 'hide'` removes the right images when a paragraph has several, and Sätteri removes them from the Markdown too.
+- `files` code blocks of `remarkMdxFiles()` nest the entries under the last item of a folder (after `└──`), and trees indented with spaces only.
+- The remark and rehype plugins no longer slow down quadratically on large documents, like `rehypeToc()` taking 17 ms instead of 239 ms on a 5 MB page.
+- `fumadocs-epub` removes every unresolved image, the second of two adjacent ones was kept.
+- Sätteri: headings with expression props, like `<Badge value={1} />` or local images, compile again, without these elements in their `toc` entry.
+- Sätteri: `remarkStructure()` records every node type listed in `types`, like `fumadocs-core`. A blockquote is one search record instead of two. In the Markdown, includes and type tables stay inside their list item or blockquote, heading IDs no longer break setext and closed ATX headings, and nested replacements no longer duplicate the source after them.
+
+### Sync Mixedbread stores with `sync()`
+
+- `sync()` and `toDocuments()` from `fumadocs-core/search/mixedbread` upload a file for each page, whose chunks are its title, headings and paragraphs. Results link to their headings and render tables like other search integrations.
+- Stores synced with `mxbai store sync` need a re-sync, the frontmatter of pages is no longer read.
+- Tag filters match the tags of pages, `locale` filters results by language, and the `limit` of requests can only lower `topK`.
+- The Mixedbread template of Fumadocs CLI syncs a pre-rendered `static.json` with `sync()`, debounces searches by 300 ms, and reads the API key from `MXBAI_API_KEY`.
+
+### Ignore unsupported locale cookies
+
+With `hideLocale: 'always'`, `createI18nMiddleware()` ignores locale cookies that aren't in `languages`.
+
+### Limit results of the advanced search server
+
+- Without a `limit` in the request, it returns up to 60 results instead of every matched record.
+- The `limit` in its `search` option applies to requests without one.
+
 ## fumadocs-core@16.15.18
 
 ### Meilisearch integration

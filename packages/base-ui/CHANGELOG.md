@@ -1,3 +1,51 @@
+## @fumadocs/base-ui@16.17.0
+
+### Highlight search results with CSS
+
+Search results no longer wrap matches in `<mark>`, `content` is the indexed Markdown. The search dialog highlights matches with the [CSS Custom Highlight API](https://developer.mozilla.org/en-US/docs/Web/API/CSS_Custom_Highlight_API), style them with `::highlight(fd-search)`. Custom search UIs can use `useHighlightQuery()` from `fumadocs-core/search/client`.
+
+- `createContentHighlighter()` is deprecated.
+- Removed `contentWithHighlights` from search results, and the `renderHighlights` prop of `<SearchDialogListItem />`.
+- `<SearchDialogListItem />` renders the Markdown of results with the `prose prose-sm` typography.
+
+### Search hooks for each provider
+
+`fumadocs-core/search/client` exports a hook for each search client, like `useFetchSearch()`. They return the props of `<SearchDialog />`:
+
+```tsx
+const search = useFetchSearch({ locale });
+
+<SearchDialog {...search} {...props}>
+  <SearchDialogList />
+</SearchDialog>;
+```
+
+`data` is the last successful search, its `items` have their content parsed into `hastContent`. `error` is set when the last search failed.
+
+- `experimental_useSearch()` creates a search hook from a memoized search function.
+- `useDocsSearch()` is deprecated.
+- `useFlexsearchStatic()` and `useOramaCloudLegacySearch()` are exported from the paths of their clients.
+- `<SearchDialogList />` shows `defaultItems` without results.
+- `useSearchList()` is removed, `useSearch()` returns `getActive()`, `setActive()` and `subscribeActive()` for the active item.
+- `<SearchDialogListItem />` renders a `div` instead of a `button`, table rows render their cells only.
+- `renderMarkdown` of `<SearchDialogListItem />` renders `content` instead of `hastContent`. Without it, the string content of custom items is shown as text.
+- The templates of Fumadocs CLI and Create Fumadocs App use the new hooks.
+
+### Index tables by row
+
+Structured data records each table row as a Markdown table of its header row and itself, instead of a record per cell. Type tables from `auto-type-table` record a row for each prop instead of the `TypeTable` element. Re-sync your search indexes to pick them up.
+
+- `remarkStructure()` defaults `types` to `table` instead of `tableCell`.
+- `tableRowToStructuredData()` from `fumadocs-core/search` creates the structured data of a table row, `typeTableToStructuredData()` from `fumadocs-typescript` of a type table.
+- Search hooks group the rows of a table into a `table` item, `<SearchDialogList />` renders it with `Table`, `<SearchDialogListTable />` by default.
+- Algolia and Orama Cloud link to the anchor of every record, like the props of type tables.
+- Orama Cloud searches `title`, `section` and `content` by default, set `params.properties` to search other fields.
+- `remarkStructure()` of Sätteri records the `data.structuredData` of nodes in place of the nodes.
+
+### Show page tree roots on fallback pages
+
+On pages from the fallback page tree, layout tabs list the root folders of the main page tree again.
+
 ## @fumadocs/base-ui@16.16.2
 
 ### Focus inside the AI chat panel when opened
