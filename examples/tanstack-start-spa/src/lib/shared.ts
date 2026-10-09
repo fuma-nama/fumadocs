@@ -33,3 +33,11 @@ export function decodeMarkdownUrl(segments: string[]) {
   if (out.length === 1 && out[0] === 'index') out.pop();
   return out;
 }
+
+const getImageUrl = createGetUrl(docsImageRoute);
+
+export function getPageImageUrl(page: { slugs: string[]; locale?: string }) {
+  const segments = [...page.slugs, 'image.webp'];
+
+  return { segments, url: getImageUrl(segments, page.locale) };
+}

@@ -18,7 +18,8 @@
     "lucide-react": "^1.50.0",
     "react": "^19.3.0",
     "react-dom": "^19.3.0",
-    "react-router": "^8.4.0"
+    "react-router": "^8.4.0",
+    "takumi-js": "^2.14.0"
   },
   "devDependencies": {
     "@react-router/dev": "^8.4.0",

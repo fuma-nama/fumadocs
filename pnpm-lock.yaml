@@ -1489,6 +1489,9 @@ importers:
       react-router:
         specifier: ^8.4.0
         version: 8.4.0(react-dom@19.3.0(react@19.3.0))(react@19.3.0)
+      takumi-js:
+        specifier: ^2.14.0
+        version: 2.14.0(csstype@3.2.3)(preact@10.29.8)(react@19.3.0)
     devDependencies:
       '@react-router/dev':
         specifier: ^8.4.0
@@ -1556,6 +1559,9 @@ importers:
       react-dom:
         specifier: ^19.3.0
         version: 19.3.0(react@19.3.0)
+      takumi-js:
+        specifier: ^2.14.0
+        version: 2.14.0(csstype@3.2.3)(preact@10.29.8)(react@19.3.0)
     devDependencies:
       '@tailwindcss/vite':
         specifier: ^4.3.3
@@ -1885,6 +1891,9 @@ importers:
       react-dom:
         specifier: ^19.3.0
         version: 19.3.0(react@19.3.0)
+      takumi-js:
+        specifier: ^2.14.0
+        version: 2.14.0(csstype@3.2.3)(preact@10.29.8)(react@19.3.0)
     devDependencies:
       '@tailwindcss/vite':
         specifier: ^4.3.3
