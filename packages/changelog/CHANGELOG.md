@@ -1,7 +1,4 @@
----
-packages:
-  '@fumadocs/changelog': minor
----
+## @fumadocs/changelog@0.1.0
 
 ### New package: `@fumadocs/changelog`
 

@@ -1,3 +1,10 @@
+## fumadocs-typescript@5.5.2
+
+### Code blocks in type tables
+
+- `remarkAutoTypeTable()` of `@fumadocs/satteri` highlights the code blocks in descriptions.
+- Code blocks of unknown languages in descriptions are shown as plain text, instead of failing the build.
+
 ## fumadocs-typescript@5.5.1
 
 ### Format generated Markdown tables
