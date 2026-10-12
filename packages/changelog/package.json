@@ -1,6 +1,6 @@
 {
   "name": "@fumadocs/changelog",
-  "version": "0.0.1",
+  "version": "0.1.0",
   "description": "Changelog entries from your releases",
   "keywords": [
     "Changelog",
