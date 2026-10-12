@@ -18,10 +18,11 @@ export function markdownRenderer(options?: ShikiOptions): MarkdownRenderer {
     .use(remarkGfm)
     .use(remarkRehype)
     .use(rehypeCode, {
-      langs: ['ts', 'tsx'],
-      // disable default transformers & meta parser
+      // disable default transformers, meta parser and icons, code blocks here have no title
       transformers: [],
       parseMetaString: undefined,
+      icon: false,
+      fallbackLanguage: 'plaintext',
       ...options,
     });
   return {

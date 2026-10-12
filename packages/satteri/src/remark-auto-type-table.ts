@@ -1,5 +1,5 @@
 import { defineMdastPlugin, markdownToHast } from 'satteri';
-import type { ElementContent, Nodes } from 'hast';
+import type { ElementContent, Nodes, Root } from 'hast';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import type {
@@ -8,6 +8,7 @@ import type {
   MdxJsxFlowElement,
 } from 'satteri';
 import { highlightHast, type HighlightHastOptions } from 'fumadocs-core/highlight';
+import { rehypeCode } from 'fumadocs-core/mdx-plugins/rehype-code';
 import {
   createGenerator,
   type DocEntry,
@@ -23,17 +24,6 @@ import { jsxToSource } from './utils';
 export type { RemarkAutoTypeTableOptions } from 'fumadocs-typescript';
 
 type RenderHast = (value: string) => Nodes | Promise<Nodes>;
-
-function sanitizeHast(node: Nodes): Nodes {
-  if (node.type === 'raw') return { type: 'text', value: node.value };
-  if ('children' in node && Array.isArray(node.children)) {
-    return {
-      ...node,
-      children: node.children.map((child) => sanitizeHast(child as Nodes)),
-    } as Nodes;
-  }
-  return node;
-}
 
 function parseTags(tags: RawTag[]) {
   const typed: {
@@ -146,11 +136,22 @@ export function remarkAutoTypeTable(config: RemarkAutoTypeTableOptions = {}) {
       };
     });
 
+  let highlightCode: ReturnType<typeof rehypeCode> | undefined;
   const renderMarkdown: RenderHast =
     renderMarkdownOption ??
-    ((md) => {
+    (async (md) => {
       md = md.replace(/{@link (?<link>[^}]*)}/g, '$1');
-      return sanitizeHast(markdownToHast(md, { features: { gfm: true } }));
+      const tree = markdownToHast(md, { features: { gfm: true }, position: false }) as Root;
+      highlightCode ??= rehypeCode.call({} as never, {
+        // disable default transformers, meta parser and icons, code blocks here have no title
+        transformers: [],
+        parseMetaString: undefined,
+        icon: false,
+        fallbackLanguage: 'plaintext',
+        ...shiki,
+      });
+      await highlightCode(tree, null as never, () => undefined);
+      return tree;
     });
 
   return defineMdastPlugin({

@@ -49,10 +49,14 @@ const element: Handle = (node: JsxElement, state) => {
   return defaultHandlers.mdxJsxFlowElement(node, state);
 };
 
+/** raw HTML of Markdown is kept as text */
+const raw: Handle = (node: { value: string }, state) =>
+  defaultHandlers.text({ type: 'text', value: node.value }, state);
+
 export function jsxToSource(hast: Nodes): string {
   const estree = toEstree(hast, {
     elementAttributeNameCase: 'react',
-    handlers: { mdxJsxFlowElement: element, mdxJsxTextElement: element },
+    handlers: { mdxJsxFlowElement: element, mdxJsxTextElement: element, raw },
   });
   const source = toJs(estree, { handlers: jsx }).value.trim();
   return source.endsWith(';') ? source.slice(0, -1) : source;

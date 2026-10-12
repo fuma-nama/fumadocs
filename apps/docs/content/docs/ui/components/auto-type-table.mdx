@@ -36,7 +36,7 @@ description: Auto-generated type table
 
 <Callout title="Server Component only" type="warn">
 
-You cannot use this in a client component, instead, try the [build-time MDX integration](/docs/integrations/typescript#mdx-integration) instead.
+You cannot use this in a client component, instead, try the [build-time MDX integration](/docs/markdown/typescript#mdx-integration) instead.
 
 </Callout>
 
@@ -75,7 +75,7 @@ export function getMDXComponents(components?: MDXComponents) {
 
 You can now reference `<AutoTypeTable />` in your MDX content.
 
-See [TypeScript DocGen](/docs/integrations/typescript) for more usages.
+See [TypeScript DocGen](/docs/markdown/typescript) for more usages.
 
 ### From File
 
@@ -139,7 +139,7 @@ export interface MyInterface {
 Under the hood, it uses the [Typescript Compiler API](https://github.com/microsoft/TypeScript/wiki/Using-the-Compiler-API) to extract type information.
 Your `tsconfig.json` file in the current working directory will be loaded.
 
-You can change the compiler settings from [`createGenerator()`](/docs/integrations/typescript).
+You can change the compiler settings from [`createGenerator()`](/docs/markdown/typescript).
 
 ```ts
 import { createGenerator, createFileSystemGeneratorCache } from 'fumadocs-typescript';
