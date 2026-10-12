@@ -18,6 +18,7 @@ import { remarkSteps } from '@fumadocs/satteri/remark-steps';
 import { remarkBlockId } from '@fumadocs/satteri/remark-block-id';
 import { remarkTs2js } from '@fumadocs/satteri/remark-ts2js';
 import { remarkFeature } from '@/lib/remark-feature';
+import { type BlogAuthor, blogPageSchema } from '@/lib/blog';
 import { remarkAutoTypeTable } from '@fumadocs/satteri/remark-auto-type-table';
 import { rehypeCodeDefaultOptions } from 'fumadocs-core/mdx-plugins/rehype-code';
 import { transformerTwoslash } from 'fumadocs-twoslash';
@@ -151,11 +152,10 @@ const blog = defineCollections({
   type: 'doc',
   compiler: 'satteri',
   dir: 'content/blog',
-  schema: pageSchema.extend({
-    author: z.string(),
+  schema: blogPageSchema.extend({
     date: z.iso.date().or(z.date()),
     /** Open Graph image, defaults to the site banner */
-    image: z.string().optional(),
+    ogImage: z.string().optional(),
   }),
   async: true,
   async satteriOptions() {
@@ -269,6 +269,15 @@ function transformerEscape(): ShikiTransformer {
 export const blogLoader = loader(blog.toFumadocsSource(), {
   baseUrl: '/blog',
 });
+
+export const blogAuthors: Record<string, BlogAuthor> = {
+  fuma: {
+    name: 'Fuma Nama',
+    title: 'Maintainer',
+    url: 'https://fuma-nama.dev',
+    image: 'https://avatars.githubusercontent.com/u/76240755',
+  },
+};
 
 export type Page = (typeof source)['$inferPage'];
 export type Meta = (typeof source)['$inferMeta'];

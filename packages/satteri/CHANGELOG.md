@@ -1,3 +1,10 @@
+## @fumadocs/satteri@0.6.1
+
+### Code blocks in type tables
+
+- `remarkAutoTypeTable()` of `@fumadocs/satteri` highlights the code blocks in descriptions.
+- Code blocks of unknown languages in descriptions are shown as plain text, instead of failing the build.
+
 ## @fumadocs/satteri@0.6.0
 
 ### Index tables by row

@@ -1,6 +1,6 @@
 {
   "name": "docs",
-  "version": "0.1.51",
+  "version": "0.1.52",
   "private": true,
   "scripts": {
     "build": "pnpm build:pre && next build && pnpm build:post",
@@ -19,6 +19,7 @@
     "@floating-ui/react-dom": "^2.1.9",
     "@fumadocs/ai-chat": "workspace:*",
     "@fumadocs/asyncapi": "workspace:*",
+    "@fumadocs/changelog": "workspace:*",
     "@fumadocs/graphql": "workspace:*",
     "@fumadocs/json-schema": "workspace:*",
     "@fumadocs/satteri": "workspace:*",

@@ -1,0 +1,65 @@
+---
+title: Page History
+description: Display contributors and Git history on documentation pages.
+---
+
+> This is a community-maintained integration.
+
+[fumadocs-git-changelog](https://github.com/shenxianovo/fumadocs-git-changelog) displays contributors and a collapsible history of changes on documentation pages. It reads Git history at build time and supports Fumadocs MDX and Sätteri.
+
+[View the live demo](https://fumadocs-git-changelog.vercel.app).
+
+## Setup
+
+Requires Node.js 24.14 or later and Fumadocs 16.17 or later within the 16.x release line.
+
+### 1. Install the package
+
+```package-install
+fumadocs-git-changelog
+```
+
+### 2. Import the styles
+
+Add the following import after your Fumadocs styles:
+
+```css title="app/global.css"
+@import 'fumadocs-git-changelog/css/preset.css';
+```
+
+### 3. Register the plugin
+
+Add `remarkGitChangelog` to your docs collection and set `repoURL` to your repository URL. Keep any existing schema and compiler options.
+
+```ts title="source.config.ts"
+import { applyMdxPreset, defineDocs } from 'fumadocs-mdx/config';
+import { remarkGitChangelog } from 'fumadocs-git-changelog/remark';
+
+export const docs = defineDocs({
+  dir: 'content/docs',
+  docs: {
+    mdxOptions: applyMdxPreset({
+      remarkPlugins: [[remarkGitChangelog, { repoURL: 'https://github.com/owner/repository' }]],
+    }),
+  },
+});
+```
+
+Contributors and page history now appear at the end of each document in this collection. No page-template changes are needed.
+
+## Git history
+
+The build environment needs Git and the repository's full history. In GitHub Actions, use `fetch-depth: 0`:
+
+```yaml
+- uses: actions/checkout@v6
+  with:
+    fetch-depth: 0
+```
+
+- Commit new files before building to include their history.
+- Rebuild after new commits. During development, restart the server to pick up Git-only changes.
+
+## Configuration
+
+You can toggle contributors and history independently, customize translations, and optionally resolve GitHub avatars and profile links.

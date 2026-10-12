@@ -1,0 +1,175 @@
+---
+title: Changelog
+description: Show the releases of your project.
+---
+
+## Installation
+
+Install the timeline component, it adds `@fumadocs/changelog` to your dependencies:
+
+```npm
+npx @fumadocs/cli@latest add changelog
+```
+
+## Usage
+
+Fetch a page of entries, render them with `ChangelogTimeline`, and link to the other pages with `ChangelogPagination`:
+
+```tsx tab="Next.js" title="app/changelog/[[...page]]/page.tsx"
+import { notFound } from 'next/navigation';
+import { githubReleases } from '@fumadocs/changelog/github';
+import { ChangelogPagination, ChangelogTimeline } from '@/components/changelog';
+
+export const revalidate = 3600;
+
+export default async function Page(props: PageProps<'/changelog/[[...page]]'>) {
+  const { page: segments = [] } = await props.params;
+  const page = Number(segments[0] ?? 1);
+  const { entries, nextPage } = await githubReleases({
+    owner: 'fuma-nama',
+    repo: 'fumadocs',
+    token: process.env.GITHUB_TOKEN,
+    page,
+  });
+  if (entries.length === 0) notFound();
+
+  return (
+    <>
+      <ChangelogTimeline entries={entries} />
+      <ChangelogPagination
+        newer={page > 1 ? `/changelog/${page - 1}` : undefined}
+        older={nextPage ? `/changelog/${nextPage}` : undefined}
+      />
+    </>
+  );
+}
+```
+
+```tsx tab="React Router" title="app/routes/changelog.tsx"
+import type { Route } from './+types/changelog';
+import { githubReleases } from '@fumadocs/changelog/github';
+import { ChangelogPagination, ChangelogTimeline } from '@/components/changelog';
+
+export async function loader({ params }: Route.LoaderArgs) {
+  const page = Number(params.page ?? 1);
+  const releases = await githubReleases({
+    owner: 'fuma-nama',
+    repo: 'fumadocs',
+    token: process.env.GITHUB_TOKEN,
+    page,
+  });
+  if (releases.entries.length === 0) throw new Response('Not Found', { status: 404 });
+
+  return { page, ...releases };
+}
+
+export default function Page({ loaderData }: Route.ComponentProps) {
+  const { page, entries, nextPage } = loaderData;
+
+  return (
+    <>
+      <ChangelogTimeline entries={entries} />
+      <ChangelogPagination
+        newer={page > 1 ? `/changelog/${page - 1}` : undefined}
+        older={nextPage ? `/changelog/${nextPage}` : undefined}
+      />
+    </>
+  );
+}
+```
+
+```ts tab="React Router" title="app/routes.ts"
+import { route, type RouteConfig } from '@react-router/dev/routes';
+
+export default [
+  // [!code ++]
+  route('changelog/:page?', 'routes/changelog.tsx'),
+] satisfies RouteConfig;
+```
+
+```tsx tab="Tanstack Start" title="src/routes/changelog.{-$page}.tsx"
+import { createFileRoute, notFound } from '@tanstack/react-router';
+import { createServerFn } from '@tanstack/react-start';
+import { githubReleases } from '@fumadocs/changelog/github';
+import { ChangelogPagination, ChangelogTimeline } from '@/components/changelog';
+
+const getReleases = createServerFn({ method: 'GET' })
+  .validator((page: number) => page)
+  .handler(async ({ data: page }) => {
+    const releases = await githubReleases({
+      owner: 'fuma-nama',
+      repo: 'fumadocs',
+      token: process.env.GITHUB_TOKEN,
+      page,
+    });
+    if (releases.entries.length === 0) throw notFound();
+
+    return releases;
+  });
+
+export const Route = createFileRoute('/changelog/{-$page}')({
+  loader: async ({ params }) => {
+    const page = Number(params.page ?? 1);
+    return { page, ...(await getReleases({ data: page })) };
+  },
+  component: Page,
+});
+
+function Page() {
+  const { page, entries, nextPage } = Route.useLoaderData();
+
+  return (
+    <>
+      <ChangelogTimeline entries={entries} />
+      <ChangelogPagination
+        newer={page > 1 ? `/changelog/${page - 1}` : undefined}
+        older={nextPage ? `/changelog/${nextPage}` : undefined}
+      />
+    </>
+  );
+}
+```
+
+The timeline groups entries by month, and renders their Markdown with code highlighting. With React Server Components, it renders on the server, otherwise also in the browser.
+
+## Sources
+
+### GitHub Releases
+
+`githubReleases()` returns a page of the published releases of a repository, with `nextPage` when there are older releases.
+
+- Versions are read from the release names like `fumadocs-ui@16.17.0`, or their tags.
+- Entries have a `prerelease` property for pre-releases.
+- GitHub limits unauthenticated requests to 60 per hour, pass a `token` and cache the page, like `export const revalidate = 3600` on Next.js.
+- GitHub lists the first 1000 releases, or 10000 with a token, later pages have no entries.
+
+<auto-type-table type="import('@fumadocs/changelog/github').GitHubReleasesOptions" />
+
+### Custom Entries
+
+Entries are plain objects, create them from any source:
+
+<auto-type-table type="import('@fumadocs/changelog').ChangelogEntry" />
+
+For example, a collection of MDX files. Pass `body` to render the content yourself:
+
+```tsx title="app/changelog/page.tsx"
+import { changelogSource } from '@/lib/source';
+import { getMDXComponents } from '@/components/mdx';
+import { ChangelogTimeline, type ChangelogTimelineEntry } from '@/components/changelog';
+
+export default function Page() {
+  const entries: ChangelogTimelineEntry[] = changelogSource.getPages().map((page) => {
+    const MDX = page.data.body;
+
+    return {
+      id: page.url,
+      title: page.data.title,
+      date: new Date(page.data.date),
+      body: <MDX components={getMDXComponents()} />,
+    };
+  });
+
+  return <ChangelogTimeline entries={entries} />;
+}
+```

@@ -43,6 +43,16 @@ export const registry: Registry = {
       description: 'Component to send user feedbacks about the docs',
       entry: 'components/feedback/client.tsx',
     },
+    blog: {
+      title: 'Blog',
+      description: 'Blog posts with authors, tags and the pages of tags',
+      entry: ['components/blog/index.tsx', 'lib/blog.ts'],
+    },
+    changelog: {
+      title: 'Changelog',
+      description: 'A timeline of changelog entries',
+      entry: 'components/changelog.tsx',
+    },
     'ai/openrouter': {
       title: 'AI Chat (AI SDK)',
       description: 'Ask AI dialog for your docs, default using OpenRouter',
@@ -69,6 +79,9 @@ export const registry: Registry = {
     'components/registry/build-graph.ts': { type: 'lib' },
     'components/{ai-sdk,inkeep}/search.tsx': { type: 'components', target: '<dir>/ai/search.tsx' },
     'components/feedback/*': { type: 'components', target: '<dir>/feedback/*' },
+    'components/blog/*': { type: 'components', target: '<dir>/blog/*' },
+    'lib/blog.ts': { type: 'lib' },
+    'components/changelog.tsx': { type: 'components' },
     'components/graph-view.tsx': { type: 'components' },
     'lib/{openrouter,llmgateway,inkeep}/route.ts': { type: 'route-handler', route: 'api/chat' },
     'lib/inkeep/*': { type: 'lib', target: '<dir>/ai/*' },
@@ -78,5 +91,6 @@ export const registry: Registry = {
   dependencies: {
     'fumadocs-core': null,
     'fumadocs-ui': null,
+    '@fumadocs/changelog': null,
   },
 };

@@ -9,7 +9,7 @@ import {
 import Link from 'fumadocs-core/link';
 import Image from 'next/image';
 import Preview from '@/public/banner.png';
-import { Book, ComponentIcon, Pencil, PlusIcon, Server } from 'lucide-react';
+import { Book, ComponentIcon, HistoryIcon, Pencil, PlusIcon, Server } from 'lucide-react';
 
 export default function Layout({ children }: LayoutProps<'/'>) {
   return (
@@ -30,6 +30,11 @@ export default function Layout({ children }: LayoutProps<'/'>) {
               text: 'Components',
               url: '/docs/ui/components',
               icon: <ComponentIcon />,
+            },
+            {
+              text: 'Changelog',
+              url: '/changelog',
+              icon: <HistoryIcon />,
             },
           ],
         },
@@ -91,6 +96,17 @@ export default function Layout({ children }: LayoutProps<'/'>) {
                   <p className="font-medium">Manual Installation</p>
                   <p className="text-fd-muted-foreground text-sm">
                     Setup Fumadocs for your existing React.js app.
+                  </p>
+                </NavbarMenuLink>
+
+                <NavbarMenuLink
+                  href="/changelog"
+                  className="flex-row items-center md:col-span-2 lg:col-span-3"
+                >
+                  <HistoryIcon className="bg-fd-primary text-fd-primary-foreground p-1 rounded-md" />
+                  <p className="font-medium">Changelog</p>
+                  <p className="text-fd-muted-foreground text-sm">
+                    The latest releases of Fumadocs.
                   </p>
                 </NavbarMenuLink>
               </NavbarMenuContent>
