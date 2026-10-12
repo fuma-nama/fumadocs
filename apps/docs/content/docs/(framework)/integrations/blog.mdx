@@ -1,0 +1,196 @@
+---
+title: Blog
+description: Add a blog to your app.
+---
+
+## Installation
+
+```npm
+npx @fumadocs/cli@latest add blog
+```
+
+It installs the components to `components/blog`, and the utilities of posts to `lib/blog.ts`.
+
+Define a collection for your posts with `blogPageSchema`, and register your authors:
+
+```ts title="lib/source.ts"
+import { defineCollections } from 'fumadocs-mdx/macro';
+import { loader } from 'fumadocs-core/source';
+import { type BlogAuthor, blogPageSchema } from '@/lib/blog';
+
+const blog = defineCollections({
+  type: 'doc',
+  dir: 'content/blog',
+  schema: blogPageSchema,
+});
+
+export const blogSource = loader({
+  baseUrl: '/blog',
+  source: blog.toFumadocsSource(),
+});
+
+export const blogAuthors: Record<string, BlogAuthor> = {
+  fuma: {
+    name: 'Fuma Nama',
+    title: 'Maintainer',
+    url: 'https://fuma-nama.dev',
+    image: 'https://avatars.githubusercontent.com/u/76240755',
+  },
+};
+```
+
+Write your posts under `content/blog`:
+
+```mdx title="content/blog/hello-world.mdx"
+---
+title: Hello World
+description: My first post.
+date: 2026-10-12
+tags: [Announcement]
+authors: [fuma]
+image: /blog/hello-world.png
+---
+```
+
+| Field     | Description                                  |
+| --------- | -------------------------------------------- |
+| `date`    | Publish date, posts are sorted by it         |
+| `tags`    | Each tag has its page under `/blog/tags`     |
+| `authors` | Keys of your authors, unknown keys are names |
+| `image`   | Cover image URL, shown on the cards of posts |
+
+<Callout title="Remote images">
+  Cover images and avatars render with the `Image` component of your framework. On Next.js, allow
+  their hosts in `images.remotePatterns`.
+</Callout>
+
+## Pages
+
+`getPosts()` resolves the authors and tags of pages, newest first. Render them in your routes.
+
+### Posts
+
+```tsx title="app/blog/page.tsx"
+import { blogAuthors, blogSource } from '@/lib/source';
+import { getPosts } from '@/lib/blog';
+import { BlogCards } from '@/components/blog';
+
+export default function Page() {
+  return <BlogCards posts={getPosts(blogSource.getPages(), blogAuthors)} />;
+}
+```
+
+### Post
+
+`findPost()` finds a post along with the newer and older posts. With `toc`, a floating panel shows the table of contents and a share button.
+
+```tsx title="app/blog/[slug]/page.tsx"
+import { notFound } from 'next/navigation';
+import { blogAuthors, blogSource } from '@/lib/source';
+import { findPost, getPosts } from '@/lib/blog';
+import { getMDXComponents } from '@/components/mdx';
+import {
+  BlogAuthors,
+  BlogBackLink,
+  BlogBody,
+  BlogDate,
+  BlogDescription,
+  BlogHeader,
+  BlogPage,
+  BlogPostNav,
+  BlogTags,
+  BlogTitle,
+} from '@/components/blog';
+
+export default async function Page(props: PageProps<'/blog/[slug]'>) {
+  const { slug } = await props.params;
+  const page = blogSource.getPage([slug]);
+  const found = page && findPost(getPosts(blogSource.getPages(), blogAuthors), page.url);
+  if (!page || !found) notFound();
+
+  const { post, newer, older } = found;
+  const MDX = page.data.body;
+
+  return (
+    <BlogPage toc={page.data.toc}>
+      <BlogHeader>
+        <BlogBackLink href="/blog" />
+        <BlogTitle>{post.title}</BlogTitle>
+        <BlogDescription>{post.description}</BlogDescription>
+        <BlogAuthors authors={post.authors} />
+        <BlogTags tags={post.tags} />
+        {post.date && <BlogDate date={post.date} />}
+      </BlogHeader>
+      <BlogBody>
+        <MDX components={getMDXComponents()} />
+      </BlogBody>
+      <BlogPostNav newer={newer} older={older} />
+    </BlogPage>
+  );
+}
+```
+
+### Tags
+
+List all tags with `getTags()`:
+
+```tsx title="app/blog/tags/page.tsx"
+import { blogSource } from '@/lib/source';
+import { getPosts, getTags } from '@/lib/blog';
+import { BlogHeader, BlogTagCards, BlogTitle } from '@/components/blog';
+
+export default function Page() {
+  const tags = getTags(getPosts(blogSource.getPages()));
+
+  return (
+    <>
+      <BlogHeader>
+        <BlogTitle>All Tags</BlogTitle>
+      </BlogHeader>
+      <BlogTagCards tags={tags} />
+    </>
+  );
+}
+```
+
+And the posts of a tag with `getTagPosts()`, it returns `undefined` for unknown tags:
+
+```tsx title="app/blog/tags/[tag]/page.tsx"
+import { notFound } from 'next/navigation';
+import { blogAuthors, blogSource } from '@/lib/source';
+import { getPosts, getTagPosts, getTags } from '@/lib/blog';
+import { BlogCards, BlogHeader, BlogTitle } from '@/components/blog';
+
+export default async function Page(props: PageProps<'/blog/tags/[tag]'>) {
+  const { tag } = await props.params;
+  const result = getTagPosts(getPosts(blogSource.getPages(), blogAuthors), tag);
+  if (!result) notFound();
+
+  return (
+    <>
+      <BlogHeader>
+        <BlogTitle>{result.tag.name}</BlogTitle>
+      </BlogHeader>
+      <BlogCards posts={result.posts} />
+    </>
+  );
+}
+
+export function generateStaticParams() {
+  return getTags(getPosts(blogSource.getPages())).map((tag) => ({ tag: tag.slug }));
+}
+```
+
+## Internationalization
+
+Pass the pages of a locale to `getPosts()`, like `blogSource.getPages(lang)`.
+
+The URLs of tag pages come from `getBlogUrl` in `lib/blog.ts`, pass it your i18n config to match the URLs of your loader:
+
+```ts title="lib/blog.ts"
+import { i18n } from '@/lib/i18n';
+
+export const getBlogUrl = createGetUrl('/blog', i18n);
+```
+
+To publish a feed of your posts, see [RSS Feed](/docs/guides/rss).

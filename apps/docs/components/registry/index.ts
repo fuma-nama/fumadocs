@@ -43,6 +43,11 @@ export const registry: Registry = {
       description: 'Component to send user feedbacks about the docs',
       entry: 'components/feedback/client.tsx',
     },
+    blog: {
+      title: 'Blog',
+      description: 'Blog posts with authors, tags and the pages of tags',
+      entry: ['components/blog/index.tsx', 'lib/blog.ts'],
+    },
     'ai/openrouter': {
       title: 'AI Chat (AI SDK)',
       description: 'Ask AI dialog for your docs, default using OpenRouter',
@@ -69,6 +74,8 @@ export const registry: Registry = {
     'components/registry/build-graph.ts': { type: 'lib' },
     'components/{ai-sdk,inkeep}/search.tsx': { type: 'components', target: '<dir>/ai/search.tsx' },
     'components/feedback/*': { type: 'components', target: '<dir>/feedback/*' },
+    'components/blog/*': { type: 'components', target: '<dir>/blog/*' },
+    'lib/blog.ts': { type: 'lib' },
     'components/graph-view.tsx': { type: 'components' },
     'lib/{openrouter,llmgateway,inkeep}/route.ts': { type: 'route-handler', route: 'api/chat' },
     'lib/inkeep/*': { type: 'lib', target: '<dir>/ai/*' },

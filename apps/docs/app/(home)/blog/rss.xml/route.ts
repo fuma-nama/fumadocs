@@ -1,5 +1,6 @@
 import { Feed } from 'feed';
-import { blogLoader } from '@/lib/source';
+import { blogAuthors, blogLoader } from '@/lib/source';
+import { getPosts } from '@/lib/blog';
 import { NextResponse } from 'next/server';
 
 export const revalidate = false;
@@ -18,21 +19,16 @@ export function GET() {
     copyright: 'All rights reserved 2025, Fuma Nama',
   });
 
-  for (const page of blogLoader.getPages().sort((a, b) => {
-    return new Date(b.data.date).getTime() - new Date(a.data.date).getTime();
-  })) {
-    feed.addItem({
-      id: page.url,
-      title: page.data.title,
-      description: page.data.description,
-      link: `${baseUrl}${page.url}`,
-      date: new Date(page.data.date),
+  for (const post of getPosts(blogLoader.getPages(), blogAuthors)) {
+    if (!post.date) continue;
 
-      author: [
-        {
-          name: page.data.author,
-        },
-      ],
+    feed.addItem({
+      id: post.url,
+      title: post.title,
+      description: post.description,
+      link: `${baseUrl}${post.url}`,
+      date: post.date,
+      author: post.authors.map((author) => ({ name: author.name, link: author.url })),
     });
   }
 
