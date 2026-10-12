@@ -1,0 +1,10 @@
+{
+  "extends": "tsconfig/base.json",
+  "compilerOptions": {
+    "types": ["@types/node"],
+    "lib": ["ESNext"],
+    "module": "ESNext",
+    "target": "ES2023"
+  },
+  "exclude": ["node_modules", "dist"]
+}

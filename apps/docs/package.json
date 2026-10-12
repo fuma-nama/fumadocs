@@ -19,6 +19,7 @@
     "@floating-ui/react-dom": "^2.1.9",
     "@fumadocs/ai-chat": "workspace:*",
     "@fumadocs/asyncapi": "workspace:*",
+    "@fumadocs/changelog": "workspace:*",
     "@fumadocs/graphql": "workspace:*",
     "@fumadocs/json-schema": "workspace:*",
     "@fumadocs/satteri": "workspace:*",

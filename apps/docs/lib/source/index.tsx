@@ -154,6 +154,8 @@ const blog = defineCollections({
   dir: 'content/blog',
   schema: blogPageSchema.extend({
     date: z.iso.date().or(z.date()),
+    /** Open Graph image, defaults to the site banner */
+    ogImage: z.string().optional(),
   }),
   async: true,
   async satteriOptions() {

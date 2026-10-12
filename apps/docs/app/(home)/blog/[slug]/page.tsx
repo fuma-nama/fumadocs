@@ -54,11 +54,11 @@ export async function generateMetadata(props: PageProps<'/blog/[slug]'>): Promis
 
   if (!page) notFound();
 
-  const { image } = page.data;
+  const { ogImage } = page.data;
   return createMetadata({
     title: page.data.title,
     description: page.data.description ?? 'The library for building documentation sites',
-    ...(image && { openGraph: { images: image }, twitter: { images: image } }),
+    ...(ogImage && { openGraph: { images: ogImage }, twitter: { images: ogImage } }),
   });
 }
 
