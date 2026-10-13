@@ -204,7 +204,7 @@ function Row({
         className={cn(
           'flex min-h-9 min-w-0 items-stretch text-[0.8125rem] transition-colors @max-sm:mx-4 @max-sm:overflow-hidden @max-sm:rounded-lg @max-sm:border @max-sm:bg-fd-secondary/50 @sm:min-h-10 @sm:border-s',
           !readOnly &&
-            'hover:bg-fd-accent/40 has-focus-visible:border-fd-primary has-focus-visible:bg-fd-secondary',
+            'hover:bg-fd-accent/40 has-focus-visible:border-fd-ring has-focus-visible:bg-fd-secondary',
         )}
       >
         {children}

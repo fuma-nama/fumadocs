@@ -93,6 +93,7 @@ The story panel scales the frame down to fit, with a button to open it in fullsc
 ```tsx title="components/my-layout.story.tsx"
 import { defineStory } from '@/lib/story';
 import { MyLayout } from './my-layout';
+import { Window } from './window';
 
 export const story = defineStory({
   Component: MyLayout,
@@ -101,6 +102,8 @@ export const story = defineStory({
     // viewport size, optional
     width: 1280,
     height: 800,
+    // wraps the frame, e.g. in a window, optional
+    Container: Window,
   },
 });
 ```
@@ -119,6 +122,7 @@ export default function Page() {
 
 - The page must be on the same origin as your docs.
 - Arguments are sent with `postMessage()`, they must be serializable (no functions or JSX).
+- `Container` must be a client component.
 
 </Callout>
 

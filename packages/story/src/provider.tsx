@@ -40,6 +40,12 @@ export interface StoryFrameOptions {
    * @defaultValue 800
    */
   height?: number;
+  /**
+   * wrap the frame, like a window around it.
+   *
+   * must be a client component when passed from server components.
+   */
+  Container?: FC<{ children: ReactNode }>;
 }
 
 export interface WithControlProps {

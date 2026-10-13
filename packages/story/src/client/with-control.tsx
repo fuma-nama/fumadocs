@@ -35,7 +35,7 @@ function Content() {
   const reset = () => setVariant(variant);
 
   return (
-    <div className="not-prose my-4 overflow-hidden rounded-xl border bg-fd-card text-fd-card-foreground">
+    <div className="not-prose overflow-hidden rounded-xl border bg-fd-card text-fd-card-foreground">
       {(displayName || presets.length > 1 || frame) && (
         <div className="flex h-10 items-center justify-end gap-1 border-b ps-4 pe-1.5">
           {displayName && (
@@ -138,6 +138,7 @@ function FramePreview({
   src,
   width = 1280,
   height = 800,
+  Container,
   ref,
 }: StoryFrameOptions & { ref: RefObject<HTMLIFrameElement | null> }) {
   const { displayName } = useStory();
@@ -159,10 +160,10 @@ function FramePreview({
     [ref, connect],
   );
 
-  return (
+  const viewport = (
     <div
       ref={observe}
-      className="relative overflow-hidden bg-fd-background not-last:border-b"
+      className="relative overflow-hidden bg-fd-background"
       style={{ aspectRatio: `${width} / ${height}` }}
     >
       {scale !== undefined && (
@@ -178,6 +179,12 @@ function FramePreview({
           style={{ transform: `scale(${scale})` }}
         />
       )}
+    </div>
+  );
+
+  return (
+    <div className="not-last:border-b">
+      {Container ? <Container>{viewport}</Container> : viewport}
     </div>
   );
 }
