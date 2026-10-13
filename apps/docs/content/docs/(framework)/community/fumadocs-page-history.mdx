@@ -5,9 +5,9 @@ description: Display contributors and Git history on documentation pages.
 
 > This is a community-maintained integration.
 
-[fumadocs-git-changelog](https://github.com/shenxianovo/fumadocs-git-changelog) displays contributors and a collapsible history of changes on documentation pages. It reads Git history at build time and supports Fumadocs MDX and Sätteri.
+[fumadocs-page-history](https://github.com/shenxianovo/fumadocs-page-history) displays contributors and a collapsible history of changes on documentation pages. It reads Git history at build time and supports Fumadocs MDX and Sätteri.
 
-[View the live demo](https://fumadocs-git-changelog.vercel.app).
+[View the live demo](https://fumadocs-page-history.vercel.app).
 
 ## Setup
 
@@ -16,7 +16,7 @@ Requires Node.js 24.14 or later and Fumadocs 16.17 or later within the 16.x rele
 ### 1. Install the package
 
 ```package-install
-fumadocs-git-changelog
+fumadocs-page-history
 ```
 
 ### 2. Import the styles
@@ -24,7 +24,7 @@ fumadocs-git-changelog
 Add the following import after your Fumadocs styles:
 
 ```css title="app/global.css"
-@import 'fumadocs-git-changelog/css/preset.css';
+@import 'fumadocs-page-history/css/preset.css';
 ```
 
 ### 3. Register the plugin
@@ -33,7 +33,7 @@ Add `remarkGitChangelog` to your docs collection and set `repoURL` to your repos
 
 ```ts title="source.config.ts"
 import { applyMdxPreset, defineDocs } from 'fumadocs-mdx/config';
-import { remarkGitChangelog } from 'fumadocs-git-changelog/remark';
+import { remarkGitChangelog } from 'fumadocs-page-history/remark';
 
 export const docs = defineDocs({
   dir: 'content/docs',
