@@ -54,6 +54,7 @@ const translations = {
   'Prop(type table)': '屬性',
   'Read {url}, I want to ask questions about it.(page actions)': '閱讀 {url}，我想詢問相關問題。',
   'Returns(type table)': '回傳值',
+  'Search failed(search dialog)': '搜尋失敗',
   'Search(search dialog)': '搜尋',
   'Search(search trigger)': '搜尋',
   'Show Sidebar(sidebar)': '顯示側邊欄',

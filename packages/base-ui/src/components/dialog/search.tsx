@@ -68,6 +68,8 @@ export interface SearchDialogProps extends SharedProps {
   isLoading?: boolean;
   /** the last successful search, `<SearchDialogList />` shows its results */
   data?: SearchResult;
+  /** the last search failed, `<SearchDialogList />` shows an error instead of `data` */
+  error?: Error;
 
   children: ReactNode;
 }
@@ -80,6 +82,7 @@ const RootContext = createContext<{
   onSelect: (item: SearchItemType) => void;
   isLoading: boolean;
   data?: SearchResult;
+  error?: Error;
   /** the query to highlight */
   query: string;
   /** the id of the active item */
@@ -184,6 +187,7 @@ export function SearchDialog({
   onSearchChange,
   isLoading = false,
   data,
+  error,
   onSelect: onSelectProp,
   children,
   dialogHandle,
@@ -235,12 +239,13 @@ export function SearchDialog({
             search,
             isLoading,
             data,
+            error,
             query: data ? data.query : search,
             onOpenChange: (v) => onOpenChangeCallback.current(v),
             onSearchChange: (v) => onSearchChangeCallback.current(v),
             onSelect: (v) => onSelectCallback.current(v),
           }),
-          [activeItem, isLoading, open, search, data],
+          [activeItem, isLoading, open, search, data, error],
         )}
       >
         {children}
@@ -369,6 +374,8 @@ export function SearchDialogContent({
   );
 }
 
+const noItems: SearchResultItem[] = [];
+
 export function SearchDialogList({
   items: itemsProp,
   defaultItems = null,
@@ -400,8 +407,10 @@ export function SearchDialogList({
 }) {
   const ref = useRef<HTMLDivElement>(null);
   const t = useTranslations({ note: 'search dialog' });
-  const { onSelect, data, getActive, setActive } = useSearch();
-  const items = itemsProp === undefined ? (data?.items ?? defaultItems) : itemsProp;
+  const { onSelect, data, error, getActive, setActive } = useSearch();
+  // after a failed search, `data` is from the search before it and doesn't match the query
+  const failed = itemsProp === undefined && error !== undefined;
+  const items = failed ? noItems : itemsProp === undefined ? (data?.items ?? defaultItems) : itemsProp;
 
   useLayoutEffect(() => setActive(items?.[0]?.id ?? null), [setActive, items]);
 
@@ -466,7 +475,12 @@ export function SearchDialogList({
         aria-label={items?.length ? t('Search') : undefined}
         className={cn('w-full flex flex-col overflow-y-auto max-h-[460px] p-1', !items && 'hidden')}
       >
-        {items?.length === 0 && Empty()}
+        {failed && (
+          <div role="status" className="py-12 text-center text-sm text-fd-muted-foreground">
+            <T text="Search failed" note="search dialog" />
+          </div>
+        )}
+        {items?.length === 0 && !failed && Empty()}
 
         {items?.map((item) => (
           <Fragment key={item.id}>
