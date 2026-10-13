@@ -26,7 +26,7 @@ export function LayoutTabsDropdown({
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger
         className={cn(
-          'inline-flex items-center gap-2 text-sm font-medium rounded-full transition-colors hover:bg-fd-accent data-[state=open]:bg-fd-accent',
+          'inline-flex items-center gap-2 text-sm font-medium rounded-full transition-colors [&_svg]:size-4 hover:bg-fd-accent data-[state=open]:bg-fd-accent',
           size === 'lg' && 'text-[0.9375rem]',
           className,
         )}

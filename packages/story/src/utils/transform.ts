@@ -6,7 +6,7 @@ import {
 } from 'typescript/unstable/ast';
 import { generateControls, getControlsAlias, type Mode, type Project } from './generate';
 import type { TypeNode } from '../type-tree/types';
-import { findDefineStoryCalls } from './parse';
+import { findDefineStoryCalls, type ParsedStoryCall } from './parse';
 import { serialize } from '@/utils/serialization';
 
 interface TextEdit {
@@ -76,17 +76,20 @@ export function transformStoryFile(
   const loaded = project.getSourceFile(id, code);
   if (!loaded) throw new Error(`Failed to load "${id}" into TypeScript project`);
 
-  const calls = findDefineStoryCalls(loaded.project, loaded.sourceFile).filter(
+  const calls: ParsedStoryCall[] = [];
+  // type alias declarations are appended to the end, positions of `code` stay valid.
+  let aliases = '';
+  for (const parsed of findDefineStoryCalls(loaded.project, loaded.sourceFile)) {
     // invalid structure
-    (parsed) => parsed.call.arguments.length === 1,
-  );
+    if (parsed.call.arguments.length !== 1) continue;
+    calls.push(parsed);
+
+    const alias = getControlsAlias(mode, parsed.exportName);
+    if (!code.includes(alias.code)) aliases += `\n${alias.code}`;
+  }
   if (calls.length === 0) return;
 
-  // type alias declarations are appended to the end, positions of `code` stay valid.
-  const aliases = calls
-    .map((parsed) => getControlsAlias(mode, parsed.exportName))
-    .filter((alias) => !code.includes(alias.code));
-  const content = [code, ...aliases.map((alias) => alias.code)].join('\n');
+  const content = code + aliases;
   const edits: TextEdit[] = [];
 
   for (const parsed of calls) {
@@ -102,5 +105,5 @@ export function transformStoryFile(
     edits.push(injectControls(loaded.sourceFile, optionsArg, parsed.exportName, controls));
   }
 
-  return [applyEdits(code, edits), ...aliases.map((alias) => alias.code)].join('\n');
+  return applyEdits(code, edits) + aliases;
 }

@@ -473,5 +473,5 @@ function SidebarFolder({ folder }: { folder: PageTree.Folder }) {
 }
 
 function isNodeInPath(node: PageTree.Node, path: PageTree.Node[]) {
-  return path.some((other) => other.$id === node.$id || other === node);
+  return path.some((other) => other === node || (node.$id !== undefined && other.$id === node.$id));
 }

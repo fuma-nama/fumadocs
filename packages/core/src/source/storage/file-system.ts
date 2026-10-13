@@ -4,18 +4,15 @@ import { dirname } from '../path';
  * In memory file system.
  */
 export class FileSystem<File> {
-  files = new Map<string, File>();
+  files: Map<string, File>;
   folders = new Map<string, string[]>();
 
   constructor(inherit?: FileSystem<File>) {
+    this.files = new Map(inherit?.files);
     if (inherit) {
       for (const [k, v] of inherit.folders) {
         // copy: `write`/`makeDir` mutate these arrays, which must not leak into `inherit`
         this.folders.set(k, [...v]);
-      }
-
-      for (const [k, v] of inherit.files) {
-        this.files.set(k, v);
       }
     } else {
       this.folders.set('', []);
@@ -71,6 +68,7 @@ export class FileSystem<File> {
   }
 
   makeDir(path: string): void {
+    if (this.folders.has(path)) return;
     const cur: string[] = [];
     let parentPath = '';
 

@@ -184,6 +184,7 @@ export interface LoaderOutput<Config extends LoaderConfig = LoaderConfig> {
 /** decoded, generated slugs are URI encoded but some routers pass them decoded */
 function slugsKey(slugs: string[]): string {
   const key = slugs.join('/');
+  if (!key.includes('%')) return key;
 
   try {
     return decodeURI(key);
@@ -192,25 +193,31 @@ function slugsKey(slugs: string[]): string {
   }
 }
 
+interface LocaleIndex {
+  /** slugs key -> page */
+  pages: Map<string, Page>;
+  pathToPage: Map<string, Page>;
+  pathToMeta: Map<string, Meta>;
+  urlToPage: Map<string, Page>;
+}
+
 function createPageIndexer({ url }: ResolvedLoaderConfig) {
-  // (locale.slugsKey -> page)
-  const pages = new Map<string, Page>();
-  // (locale.path -> page)
-  const pathToMeta = new Map<string, Meta>();
-  // (locale.path -> meta)
-  const pathToPage = new Map<string, Page>();
-  // (locale.url -> page)
-  const urlToPage = new Map<string, Page>();
+  /** locale (empty without i18n) -> index */
+  const indexes = new Map<string, LocaleIndex>();
 
   return {
     scan(storage: ContentStorage, lang?: string) {
-      for (const filePath of storage.getFiles()) {
-        const item = storage.read(filePath)!;
-        const prefix = lang ? `${lang}.` : '.';
-        const path = prefix + filePath;
+      const index: LocaleIndex = {
+        pages: new Map(),
+        pathToPage: new Map(),
+        pathToMeta: new Map(),
+        urlToPage: new Map(),
+      };
+      indexes.set(lang ?? '', index);
 
+      for (const [path, item] of storage.files) {
         if (item.format === 'meta') {
-          pathToMeta.set(path, {
+          index.pathToMeta.set(path, {
             type: item.type,
             path: item.path,
             absolutePath: item.absolutePath,
@@ -228,31 +235,29 @@ function createPageIndexer({ url }: ResolvedLoaderConfig) {
           data: item.data,
           locale: lang,
         };
-        pathToPage.set(path, page);
-        pages.set(prefix + slugsKey(page.slugs), page);
-        urlToPage.set(prefix + page.url, page);
+        index.pathToPage.set(path, page);
+        index.pages.set(slugsKey(page.slugs), page);
+        index.urlToPage.set(page.url, page);
       }
     },
     getPage(path: string, lang = '') {
-      return pathToPage.get(`${lang}.${path}`);
+      return indexes.get(lang)?.pathToPage.get(path);
     },
     getPageByUrl(url: string, lang = '') {
-      return urlToPage.get(`${lang}.${url}`);
+      return indexes.get(lang)?.urlToPage.get(url);
     },
     getMeta(path: string, lang = '') {
-      return pathToMeta.get(`${lang}.${path}`);
+      return indexes.get(lang)?.pathToMeta.get(path);
     },
     getPageBySlugs(slugs: string[], lang = '') {
-      return pages.get(`${lang}.${slugsKey(slugs)}`);
+      return indexes.get(lang)?.pages.get(slugsKey(slugs));
     },
     /** do not filter by language if `lang` is not specified */
     getPages(lang?: string) {
       const out: Page[] = [];
-
-      for (const [key, value] of pages.entries()) {
-        if (lang === undefined || key.startsWith(`${lang}.`)) {
-          out.push(value);
-        }
+      for (const [key, index] of indexes) {
+        if (lang !== undefined && key !== lang) continue;
+        for (const page of index.pages.values()) out.push(page);
       }
 
       return out;
@@ -261,22 +266,18 @@ function createPageIndexer({ url }: ResolvedLoaderConfig) {
 }
 
 export function createGetUrl(baseUrl: string, i18n?: I18nConfig): ResolvedLoaderConfig['url'] {
-  const baseSlugs = baseUrl.split('/');
+  const hideLocale = i18n?.hideLocale ?? 'never';
+  let base = '';
+  for (const seg of baseUrl.split('/')) if (seg.length > 0) base += `/${seg}`;
 
   return (slugs, locale) => {
-    const hideLocale = i18n?.hideLocale ?? 'never';
-    let urlLocale: string | undefined;
+    const showLocale =
+      hideLocale === 'never' ||
+      (hideLocale === 'default-locale' && locale !== i18n?.defaultLanguage);
+    let url = locale && showLocale ? `/${locale}${base}` : base;
+    for (const slug of slugs) if (slug.length > 0) url += `/${slug}`;
 
-    if (hideLocale === 'never') {
-      urlLocale = locale;
-    } else if (hideLocale === 'default-locale' && locale !== i18n?.defaultLanguage) {
-      urlLocale = locale;
-    }
-
-    const paths = [...baseSlugs, ...slugs];
-    if (urlLocale) paths.unshift(urlLocale);
-
-    return `/${paths.filter((v) => v.length > 0).join('/')}`;
+    return url || '/';
   };
 }
 
@@ -351,15 +352,14 @@ export function loader<I extends ResolvedInput, I18n extends I18nConfig | undefi
     };
 
     if (storage instanceof FileSystem) {
-      const out = createPageTreeBuilder(storage, options).root();
-      return (pageTrees = out);
-    } else {
-      const out: Record<string, PageTree.Root> = {};
-      for (const locale in storage) {
-        out[locale] = createPageTreeBuilder([locale, storage], options).root();
-      }
-      return (pageTrees = out);
+      return (pageTrees = createPageTreeBuilder(storage, options).root());
     }
+
+    const out: Record<string, PageTree.Root> = {};
+    for (const locale in storage) {
+      out[locale] = createPageTreeBuilder(storage[locale], options, locale, storage).root();
+    }
+    return (pageTrees = out);
   }
 
   const out: LoaderOutput = {
@@ -460,19 +460,17 @@ export function loader<I extends ResolvedInput, I18n extends I18nConfig | undefi
       return getPageTrees() as PageTree.Root;
     },
     // @ts-expect-error -- ignore this
-    generateParams(slug, lang) {
-      if (i18n) {
-        return this.getLanguages().flatMap((entry) =>
-          entry.pages.map((page) => ({
-            [slug ?? 'slug']: page.slugs,
-            [lang ?? 'lang']: entry.language,
-          })),
-        );
+    generateParams(slug = 'slug', lang = 'lang') {
+      const params: Record<string, string | string[]>[] = [];
+      if (!i18n) {
+        for (const page of this.getPages()) params.push({ [slug]: page.slugs });
+        return params;
       }
 
-      return this.getPages().map((page) => ({
-        [slug ?? 'slug']: page.slugs,
-      }));
+      for (const entry of this.getLanguages()) {
+        for (const page of entry.pages) params.push({ [slug]: page.slugs, [lang]: entry.language });
+      }
+      return params;
     },
     async serializePageTree(tree) {
       const { renderToString } = await import('react-dom/server.edge');

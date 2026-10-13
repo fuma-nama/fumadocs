@@ -166,7 +166,7 @@ function LayoutTabs({
     <div
       {...props}
       className={cn(
-        'flex flex-row items-end gap-6 overflow-auto [grid-area:main]',
+        'flex flex-row items-end gap-6 overflow-auto [grid-area:tabs]',
         props.className,
       )}
     >

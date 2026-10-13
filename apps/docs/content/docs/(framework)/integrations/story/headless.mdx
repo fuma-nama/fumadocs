@@ -57,10 +57,11 @@ function Content() {
 }
 ```
 
-| Hook             | Description                                                                 |
-| ---------------- | --------------------------------------------------------------------------- |
-| `useStory()`     | The presets, the selected `variant` with `setVariant`, and the `Component`. |
-| `useStoryArgs()` | The arguments of the rendered component, following the controls.            |
+| Hook              | Description                                                                                     |
+| ----------------- | ----------------------------------------------------------------------------------------------- |
+| `useStory()`      | The presets, the selected `variant` with `setVariant`, the `Component` and `frame`.             |
+| `useStoryArgs()`  | The arguments of the rendered component, following the controls.                                |
+| `useStoryFrame()` | A ref for the iframe of [`frame`](/docs/integrations/story#frame), sending the arguments to it. |
 
 Controls are edited through [`@fumari/stf`](https://github.com/fuma-nama/fumadocs/tree/dev/packages/stf), the form engine `<StoryProvider />` sets up. `preset.controls` is the [type tree](/docs/integrations/story#controls) of the component props.
 

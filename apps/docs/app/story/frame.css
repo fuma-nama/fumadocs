@@ -1,0 +1,3 @@
+@import '../global.css';
+/* layouts only rendered in frames */
+@import 'fumadocs-ui/css/generated/glass.css';

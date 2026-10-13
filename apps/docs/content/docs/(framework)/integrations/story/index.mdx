@@ -85,6 +85,56 @@ export const story = defineStory({
 });
 ```
 
+### `frame`
+
+Components filling the viewport, like layouts, can be rendered in an iframe.
+The story panel scales the frame down to fit, with a button to open it in fullscreen.
+
+```tsx title="components/my-layout.story.tsx"
+import { defineStory } from '@/lib/story';
+import { MyLayout } from './my-layout.lazy';
+import { Window } from './window';
+
+export const story = defineStory({
+  Component: MyLayout,
+  frame: {
+    src: '/story/my-layout',
+    // viewport size, optional
+    width: 1280,
+    height: 800,
+    // wraps the frame, e.g. in a window, optional
+    Container: Window,
+  },
+});
+```
+
+Create a page at `src` to render the component, it receives the arguments from the story panel:
+
+```tsx title="app/story/my-layout/page.tsx"
+import { story } from '@/components/my-layout.story';
+
+export default function Page() {
+  return <story.Frame />;
+}
+```
+
+Pages with the story would load the component too, pass a lazy one (e.g. `next/dynamic` or `React.lazy`) so only the frame loads it:
+
+```tsx title="components/my-layout.lazy.tsx"
+'use client';
+import dynamic from 'next/dynamic';
+
+export const MyLayout = dynamic(() => import('./my-layout').then((mod) => mod.MyLayout));
+```
+
+<Callout title="Good to know">
+
+- The page must be on the same origin as your docs.
+- Arguments are sent with `postMessage()`, they must be serializable (no functions or JSX).
+- `Container` must be a client component.
+
+</Callout>
+
 ### Internationalization
 
 Assuming you have configured [Internationalization](/docs/internationalization) at UI level:
@@ -108,7 +158,7 @@ export const translations = i18n
     cn: {
       displayName: 'Chinese',
       // [!code ++]
-      'New Item(story arguments form)': '新增項目',
+      'Add Item(story arguments form)': '新增項目',
     },
   });
 ```

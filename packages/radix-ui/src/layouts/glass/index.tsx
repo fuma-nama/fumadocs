@@ -77,16 +77,9 @@ export function DocsLayout(props: DocsLayoutProps) {
   const { baseSlots, baseProps } = useBaseSlots(props);
 
   const tabs = useMemo(() => {
-    if (Array.isArray(defaultTabs)) {
-      return defaultTabs;
-    }
-    if (typeof defaultTabs === 'object') {
-      return getLayoutTabs(tree, defaultTabs);
-    }
-    if (defaultTabs !== false) {
-      return getLayoutTabs(tree);
-    }
-    return [];
+    if (Array.isArray(defaultTabs)) return defaultTabs;
+    if (defaultTabs === false) return [];
+    return getLayoutTabs(tree, { transform: (option) => option, ...defaultTabs });
   }, [tree, defaultTabs]);
 
   const slots: DocsSlots = {

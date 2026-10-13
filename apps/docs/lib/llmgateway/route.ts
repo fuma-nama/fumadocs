@@ -89,18 +89,16 @@ export const handler = $routeHandler(
       tools: {
         search: searchTool,
       },
-      messages: [
-        { role: 'system', content: systemPrompt },
-        ...(await convertToModelMessages<ChatUIMessage>(reqJson.messages ?? [], {
-          convertDataPart(part) {
-            if (part.type === 'data-client')
-              return {
-                type: 'text',
-                text: `[Client Context: ${JSON.stringify(part.data)}]`,
-              };
-          },
-        })),
-      ],
+      instructions: systemPrompt,
+      messages: await convertToModelMessages<ChatUIMessage>(reqJson.messages ?? [], {
+        convertDataPart(part) {
+          if (part.type === 'data-client')
+            return {
+              type: 'text',
+              text: `[Client Context: ${JSON.stringify(part.data)}]`,
+            };
+        },
+      }),
       toolChoice: 'auto',
     });
 

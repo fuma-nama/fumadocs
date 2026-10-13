@@ -75,7 +75,7 @@ const slotClassName =
   'flex w-7 shrink-0 items-center justify-center @max-sm:pe-2 @max-sm:empty:w-2';
 
 const rowButtonClassName =
-  'flex h-10 w-full items-center gap-2 px-4 text-[0.8125rem] text-fd-muted-foreground transition-colors hover:bg-fd-accent/40 hover:text-fd-accent-foreground focus-visible:bg-fd-secondary focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-inset focus-visible:ring-fd-ring/60';
+  'flex h-10 w-full items-center gap-2 px-4 text-[0.8125rem] text-fd-muted-foreground transition-colors hover:bg-fd-accent/40 hover:text-fd-accent-foreground focus-visible:bg-fd-secondary focus-visible:text-fd-accent-foreground focus-visible:outline-none';
 
 function getType(field: Schema): string | undefined {
   if (typeof field.type === 'string') return field.type;
@@ -253,7 +253,7 @@ export function Row({
         className={cn(
           'flex min-h-9 min-w-0 items-stretch text-[0.8125rem] transition-colors @max-sm:mx-4 @max-sm:overflow-hidden @max-sm:rounded-lg @max-sm:border @max-sm:bg-fd-secondary/50 @sm:min-h-10 @sm:border-s',
           !readOnly &&
-            'hover:bg-fd-accent/40 has-focus-visible:bg-fd-secondary has-focus-visible:ring-1 has-focus-visible:ring-fd-ring/60 has-focus-visible:ring-inset',
+            'hover:bg-fd-accent/40 has-focus-visible:border-fd-ring has-focus-visible:bg-fd-secondary',
         )}
       >
         {children}

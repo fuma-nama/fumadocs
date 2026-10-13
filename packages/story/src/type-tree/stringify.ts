@@ -16,6 +16,8 @@ export function typeToString(node: TypeNode, flags: FormatFlags = FormatFlags.No
         return `"${node.value}"`;
       }
       return String(node.value);
+    case 'enum':
+      return node.members.map((member) => member.label).join(' | ');
     case 'union':
       return node.types.map((t) => typeToString(t, flags)).join(' | ');
     case 'intersection':
