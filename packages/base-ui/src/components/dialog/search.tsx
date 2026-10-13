@@ -410,7 +410,11 @@ export function SearchDialogList({
   const { onSelect, data, error, getActive, setActive } = useSearch();
   // after a failed search, `data` is from the search before it and doesn't match the query
   const failed = itemsProp === undefined && error !== undefined;
-  const items = failed ? noItems : itemsProp === undefined ? (data?.items ?? defaultItems) : itemsProp;
+  const items = failed
+    ? noItems
+    : itemsProp === undefined
+      ? (data?.items ?? defaultItems)
+      : itemsProp;
 
   useLayoutEffect(() => setActive(items?.[0]?.id ?? null), [setActive, items]);
 
