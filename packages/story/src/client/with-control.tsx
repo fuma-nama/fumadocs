@@ -147,8 +147,13 @@ function FramePreview({
   const observe = useCallback(
     (element: HTMLDivElement) => {
       const observer = new ResizeObserver(() => setScale(element.clientWidth / width));
-      observer.observe(element);
-      return () => observer.disconnect();
+      // the frame shares the main thread with the page, load it when the page is idle
+      const idle = window.requestIdleCallback ?? setTimeout;
+      const handle = idle(() => observer.observe(element));
+      return () => {
+        (window.cancelIdleCallback ?? clearTimeout)(handle);
+        observer.disconnect();
+      };
     },
     [width],
   );

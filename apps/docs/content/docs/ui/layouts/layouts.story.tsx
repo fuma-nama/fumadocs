@@ -1,10 +1,12 @@
 import { defineStory } from '@/lib/story';
-import { DocsLayoutPreview } from '@/components/layout-preview/docs';
-import { NotebookLayoutPreview } from '@/components/layout-preview/notebook';
-import { SpaciousLayoutPreview } from '@/components/layout-preview/spacious';
-import { FluxLayoutPreview } from '@/components/layout-preview/flux';
-import { GlassLayoutPreview } from '@/components/layout-preview/glass';
-import { HomeLayoutPreview } from '@/components/layout-preview/home';
+import {
+  DocsLayoutPreview,
+  FluxLayoutPreview,
+  GlassLayoutPreview,
+  HomeLayoutPreview,
+  NotebookLayoutPreview,
+  SpaciousLayoutPreview,
+} from '@/components/layout-preview';
 import { StoryWindow } from '@/components/layout-preview/window';
 
 const base = {

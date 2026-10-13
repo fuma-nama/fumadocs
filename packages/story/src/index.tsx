@@ -2,7 +2,7 @@ import * as fs from 'node:fs/promises';
 import { collapse } from './type-tree/collapse';
 import { cached, type Cache } from './cache';
 import type { TypeNode } from './type-tree/types';
-import type { ComponentPropsWithoutRef, FC } from 'react';
+import type { ComponentPropsWithoutRef, ComponentType, FC } from 'react';
 import { fileURLToPath } from 'node:url';
 import { createHash } from 'node:crypto';
 import { createControlsProject, generateControls } from './utils/generate';
@@ -12,7 +12,7 @@ import { StoryFrame } from './client/frame';
 
 type Awaitable<T> = T | Promise<T>;
 
-export interface StoryOptions<C extends FC<any>> {
+export interface StoryOptions<C extends ComponentType<any>> {
   /**
    * the export name of story, necessary for TypeScript Compiler.
    *
@@ -35,7 +35,7 @@ export interface StoryOptions<C extends FC<any>> {
   frame?: StoryFrameOptions;
 }
 
-export interface ArgsOptions<C extends FC<any> = FC<any>> {
+export interface ArgsOptions<C extends ComponentType<any> = ComponentType<any>> {
   /**
    * the default values of arguments.
    */
@@ -63,7 +63,7 @@ export * from './provider';
 export { type Cache } from './cache';
 export { createFileSystemCache } from './cache/fs';
 
-export interface Story<C extends FC<any> = FC<any>> {
+export interface Story<C extends ComponentType<any> = ComponentType<any>> {
   /** render as a server component (require RSC). */
   WithControl: FC;
   /** render the component for `frame`, with arguments from `<WithControl />`. */
@@ -88,7 +88,10 @@ export interface StoryFactoryOptions {
 }
 
 export interface StoryFactory {
-  defineStory: <C extends FC<any>>(urlOrPath: URL | string, options: StoryOptions<C>) => Story<C>;
+  defineStory: <C extends ComponentType<any>>(
+    urlOrPath: URL | string,
+    options: StoryOptions<C>,
+  ) => Story<C>;
 }
 
 /**

@@ -92,7 +92,7 @@ The story panel scales the frame down to fit, with a button to open it in fullsc
 
 ```tsx title="components/my-layout.story.tsx"
 import { defineStory } from '@/lib/story';
-import { MyLayout } from './my-layout';
+import { MyLayout } from './my-layout.lazy';
 import { Window } from './window';
 
 export const story = defineStory({
@@ -116,6 +116,15 @@ import { story } from '@/components/my-layout.story';
 export default function Page() {
   return <story.Frame />;
 }
+```
+
+Pages with the story would load the component too, pass a lazy one (e.g. `next/dynamic` or `React.lazy`) so only the frame loads it:
+
+```tsx title="components/my-layout.lazy.tsx"
+'use client';
+import dynamic from 'next/dynamic';
+
+export const MyLayout = dynamic(() => import('./my-layout').then((mod) => mod.MyLayout));
 ```
 
 <Callout title="Good to know">

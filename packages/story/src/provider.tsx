@@ -1,6 +1,7 @@
 'use client';
 import {
   createContext,
+  type ComponentType,
   type FC,
   type ReactNode,
   type RefCallback,
@@ -50,7 +51,7 @@ export interface StoryFrameOptions {
 
 export interface WithControlProps {
   displayName?: string;
-  Component: FC;
+  Component: ComponentType;
   presets: StoryPreset[];
   /** render the component in an iframe */
   frame?: StoryFrameOptions;

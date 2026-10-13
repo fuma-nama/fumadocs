@@ -1,5 +1,5 @@
 'use client';
-import { type FC, useSyncExternalStore } from 'react';
+import { type ComponentType, Suspense, useSyncExternalStore } from 'react';
 
 // kept across navigations inside the frame
 let args: Record<string, unknown> | null = null;
@@ -25,12 +25,18 @@ function subscribe(onChange: () => void) {
 /**
  * Render the component with arguments from the story panel embedding this page.
  */
-export function StoryFrame({ Component }: { Component: FC }) {
+export function StoryFrame({ Component }: { Component: ComponentType }) {
   const value = useSyncExternalStore(
     subscribe,
     () => args,
     () => null,
   );
 
-  return value && <Component {...value} />;
+  return (
+    value && (
+      <Suspense>
+        <Component {...value} />
+      </Suspense>
+    )
+  );
 }

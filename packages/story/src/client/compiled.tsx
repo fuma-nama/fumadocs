@@ -1,5 +1,11 @@
 import type { TypeNode } from '@/type-tree/types';
-import { type ReactNode, useMemo, type ComponentPropsWithoutRef, type FC } from 'react';
+import {
+  type ComponentPropsWithoutRef,
+  type ComponentType,
+  type FC,
+  type ReactNode,
+  useMemo,
+} from 'react';
 import { WithControl as DefaultWithControl } from '@/client/with-control';
 import type { StoryFrameOptions, VariantInfo, WithControlProps } from '@/provider';
 import { StoryFrame } from '@/client/frame';
@@ -7,7 +13,7 @@ import { deserialize } from '@/utils/serialization';
 import { collapse } from '@/type-tree/collapse';
 import { mergeArgs } from '@/utils/args';
 
-export interface StoryOptions<C extends FC<any>> {
+export interface StoryOptions<C extends ComponentType<any>> {
   displayName?: string;
   Component: C;
 
@@ -34,7 +40,7 @@ export interface StoryOptions<C extends FC<any>> {
   };
 }
 
-export interface ArgsOptions<C extends FC<any> = FC<any>> {
+export interface ArgsOptions<C extends ComponentType<any> = ComponentType<any>> {
   /**
    * the default values of arguments.
    */
@@ -51,7 +57,7 @@ export interface ArgsOptions<C extends FC<any> = FC<any>> {
   };
 }
 
-export interface Story<C extends FC<any> = FC<any>> {
+export interface Story<C extends ComponentType<any> = ComponentType<any>> {
   /** render as a component. */
   WithControl: FC;
 
@@ -77,7 +83,7 @@ type ReplaceReactNode<V> = ReactNode extends V
     : V;
 
 export interface StoryFactory {
-  defineStory: <C extends FC<any>>(options: StoryOptions<C>) => Story<C>;
+  defineStory: <C extends ComponentType<any>>(options: StoryOptions<C>) => Story<C>;
 }
 
 export interface StoryFactoryOptions {
