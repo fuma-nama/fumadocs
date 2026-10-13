@@ -559,6 +559,73 @@ test('Loader: No duplicate pages when referencing subfolder items and folder', (
   `);
 });
 
+test('Loader: No duplicate pages when a folder takes a listed page as index', () => {
+  const result = loader({
+    baseUrl: '/',
+    pageTree: {
+      noRef: true,
+    },
+    source: {
+      files: [
+        { type: 'meta', path: 'meta.json', data: { pages: ['guide/intro', 'guide'] } },
+        { type: 'meta', path: 'guide/meta.json', data: { pagesIndex: 'intro' } },
+        { type: 'page', path: 'guide/intro.mdx', data: { title: 'Intro' } },
+        { type: 'page', path: 'guide/setup.mdx', data: { title: 'Setup' } },
+      ],
+    },
+  });
+
+  expect(removeUndefined(result.pageTree, true)).toMatchInlineSnapshot(`
+    {
+      "$id": "root",
+      "children": [
+        {
+          "$id": "guide",
+          "children": [
+            {
+              "$id": "guide/setup.mdx",
+              "name": "Setup",
+              "type": "page",
+              "url": "/guide/setup",
+            },
+          ],
+          "index": {
+            "$id": "guide/intro.mdx",
+            "name": "Intro",
+            "type": "page",
+            "url": "/guide/intro",
+          },
+          "name": "Intro",
+          "type": "folder",
+        },
+      ],
+      "name": "Docs",
+      "type": "root",
+    }
+  `);
+});
+
+test('Internationalized Routing: fallback page tree keeps the locale', () => {
+  const result = loader({
+    baseUrl: '/docs',
+    i18n: {
+      languages: ['en', 'cn'],
+      defaultLanguage: 'en',
+    },
+    source: {
+      files: [
+        { type: 'meta', path: 'meta.json', data: { pages: ['index'] } },
+        { type: 'page', path: 'index.mdx', data: { title: 'Home' } },
+        { type: 'page', path: 'hidden.mdx', data: { title: 'Hidden' } },
+      ],
+    },
+  });
+
+  expect(result.getPageTree('cn').fallback?.children).toMatchObject([
+    { $id: 'fallback:cn:hidden.mdx', url: '/cn/docs/hidden' },
+  ]);
+});
+
 test('Loader: Serialize data', async () => {
   const result = loader({
     baseUrl: '/',

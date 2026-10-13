@@ -50,38 +50,30 @@ const EmptyLang = Symbol();
 export function createContentStorageBuilder(loaderConfig: ResolvedLoaderConfig) {
   const { input, plugins, i18n } = loaderConfig;
 
-  let parser: (normalizedPath: string) => [string, (string | string[])?];
-  if (!i18n) {
-    parser = (path) => [path];
-  } else if (i18n.parser === 'dir') {
+  let parser: (normalizedPath: string) => [string, (string | string[])?] = (path) => [path];
+  if (i18n) {
     const langSet = new Set(i18n.languages);
 
     parser = (path) => {
-      const [locale, ...segs] = path.split('/');
-      if (!locale || segs.length === 0) return [path];
+      let locale: string;
+      let rest: string;
+      if (i18n.parser === 'dir') {
+        // `{locale}/file.ext`
+        const slash = path.indexOf('/');
+        if (slash <= 0) return [path];
+        locale = path.slice(0, slash);
+        rest = path.slice(slash + 1);
+      } else {
+        // `file.{locale}.ext`
+        const ext = path.lastIndexOf('.');
+        const dot = path.lastIndexOf('.', ext - 1);
+        if (dot === -1 || dot < path.lastIndexOf('/')) return [path];
+        locale = path.slice(dot + 1, ext);
+        rest = path.slice(0, dot) + path.slice(ext);
+      }
 
-      if (langSet.has(locale)) return [segs.join('/'), locale];
-      if (locale === '$') return [segs.join('/'), i18n.languages];
-
-      return [path];
-    };
-  } else {
-    const langSet = new Set(i18n.languages);
-
-    parser = (path) => {
-      const segs = path.split('/');
-      const base = segs.pop();
-      if (!base) return [path];
-
-      const parts = base.split('.');
-      if (parts.length < 3) return [path];
-
-      const [locale] = parts.splice(parts.length - 2, 1);
-      segs.push(parts.join('.'));
-
-      if (langSet.has(locale)) return [segs.join('/'), locale];
-      if (locale === '$') return [segs.join('/'), i18n.languages];
-
+      if (langSet.has(locale)) return [rest, locale];
+      if (locale === '$') return [rest, i18n.languages];
       return [path];
     };
   }

@@ -46,9 +46,8 @@ export function slugsPlugin(optsOrFn: SlugsPluginOptions | SlugFn = {}): LoaderP
       const indexFiles: string[] = [];
       const taken = new Set<string>();
 
-      for (const path of storage.getFiles()) {
-        const file = storage.read(path);
-        if (!file || file.format !== 'page') continue;
+      for (const [path, file] of storage.files) {
+        if (file.format !== 'page') continue;
 
         if (file.slugs) {
           if (baseSlugs.length > 0 && !prepended.has(file)) {
