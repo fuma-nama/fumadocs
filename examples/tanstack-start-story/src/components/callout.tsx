@@ -4,9 +4,5 @@ import type { ComponentProps } from 'react';
 export function CalloutStory(
   props: Pick<ComponentProps<typeof Callout>, 'title' | 'type' | 'children'>,
 ) {
-  return (
-    <div className="p-3 bg-fd-background border rounded-md">
-      <Callout {...props} />
-    </div>
-  );
+  return <Callout {...props} className="my-0" />;
 }

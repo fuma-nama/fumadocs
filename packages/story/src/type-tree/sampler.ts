@@ -2,10 +2,14 @@ import type { TypeNode } from '../type-tree/types';
 
 export function getDefaultValue(node: TypeNode): unknown {
   switch (node.type) {
-    case 'object':
-      return Object.fromEntries(
-        node.properties.map((prop) => [prop.name, getDefaultValue(prop.type)]),
-      );
+    case 'object': {
+      // optional properties are left to the defaults of components
+      const out: Record<string, unknown> = {};
+      for (const prop of node.properties) {
+        if (prop.required) out[prop.name] = getDefaultValue(prop.type);
+      }
+      return out;
+    }
     case 'array':
       return [];
     case 'null':

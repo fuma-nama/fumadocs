@@ -4240,9 +4240,6 @@ importers:
       '@fumari/stf':
         specifier: workspace:*
         version: link:../stf
-      class-variance-authority:
-        specifier: ^0.7.1
-        version: 0.7.1
       cn:
         specifier: ^0.4.0
         version: 0.4.0
@@ -4253,9 +4250,6 @@ importers:
         specifier: ~7.0.2
         version: 7.0.2
     devDependencies:
-      '@fastify/deepmerge':
-        specifier: ^3.2.1
-        version: 3.2.1
       '@types/node':
         specifier: 26.6.4
         version: 26.6.4

@@ -1,9 +1,11 @@
 import type { TypeNode } from '@/type-tree/types';
 import { type ReactNode, useMemo, type ComponentPropsWithoutRef, type FC } from 'react';
-import { deepmerge } from '@fastify/deepmerge';
 import { WithControl as DefaultWithControl } from '@/client/with-control';
-import type { VariantInfo, WithControlProps } from '@/provider';
+import type { StoryFrameOptions, VariantInfo, WithControlProps } from '@/provider';
+import { StoryFrame } from '@/client/frame';
 import { deserialize } from '@/utils/serialization';
+import { collapse } from '@/type-tree/collapse';
+import { mergeArgs } from '@/utils/args';
 
 export interface StoryOptions<C extends FC<any>> {
   displayName?: string;
@@ -13,6 +15,13 @@ export interface StoryOptions<C extends FC<any>> {
    * story arguments, you can pass an array of options for multiple presets.
    */
   args?: ArgsOptions<C> | (ArgsOptions<C> & VariantInfo)[];
+
+  /**
+   * Render the component in an iframe, for components filling the viewport like layouts.
+   *
+   * Arguments are sent to the frame with `postMessage()`, they must be serializable.
+   */
+  frame?: StoryFrameOptions;
 
   /**
    * Controls & data generated at build time by `@fumadocs/story/vite` or `@fumadocs/story/next`.
@@ -46,6 +55,9 @@ export interface Story<C extends FC<any> = FC<any>> {
   /** render as a component. */
   WithControl: FC;
 
+  /** render the component for `frame`, with arguments from `<WithControl />`. */
+  Frame: FC;
+
   _private_: {
     component?: C;
   };
@@ -78,12 +90,8 @@ export interface StoryFactoryOptions {
 export function defineStoryFactory({
   WithControl = DefaultWithControl,
 }: StoryFactoryOptions = {}): StoryFactory {
-  const propsDeepmerge = deepmerge({
-    mergeArray: () => (_target, source) => source,
-  });
-
   return {
-    defineStory({ Component, displayName, args = {}, _generated }) {
+    defineStory({ Component, displayName, args = {}, frame, _generated }) {
       let generatedControls: TypeNode | undefined;
 
       function getProps(): WithControlProps {
@@ -92,6 +100,7 @@ export function defineStoryFactory({
         return {
           Component,
           displayName,
+          frame,
           presets: normalized.map((preset) => {
             const fixedValues = typeof preset.fixed === 'function' ? preset.fixed() : preset.fixed;
             const initial =
@@ -101,21 +110,23 @@ export function defineStoryFactory({
             if (preset.controls && 'node' in preset.controls) {
               controls = preset.controls.node;
             } else if (_generated) {
-              generatedControls ??= deserialize(_generated.controls) as TypeNode;
-              controls = generatedControls;
+              // `collapse()` edits in place, presets with fixed values get their own copy
+              controls = fixedValues
+                ? collapse(deserialize(_generated.controls) as TypeNode, fixedValues)
+                : (generatedControls ??= deserialize(_generated.controls) as TypeNode);
             } else {
               throw new Error(
                 `[@fumadocs/story] No generated data for story, make sure the Vite plugin or Turbopack loader is configured correctly`,
               );
             }
 
+            const defaultValues = fixedValues ? mergeArgs(initial, fixedValues) : initial;
+
             return {
               variant: preset.variant,
               description: preset.description,
               controls,
-              defaultValues: (fixedValues
-                ? propsDeepmerge(initial, fixedValues)
-                : initial) as Record<string, unknown>,
+              defaultValues: defaultValues as Record<string, unknown>,
             };
           }),
         };
@@ -129,6 +140,9 @@ export function defineStoryFactory({
           const props = useMemo(getProps, []);
 
           return <WithControl {...props} />;
+        },
+        Frame() {
+          return <StoryFrame Component={Component} />;
         },
       };
     },

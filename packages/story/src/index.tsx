@@ -1,13 +1,14 @@
 import * as fs from 'node:fs/promises';
-import { collapse } from './type-tree/builder';
+import { collapse } from './type-tree/collapse';
 import { cached, type Cache } from './cache';
 import type { TypeNode } from './type-tree/types';
 import type { ComponentPropsWithoutRef, FC } from 'react';
 import { fileURLToPath } from 'node:url';
 import { createHash } from 'node:crypto';
-import { deepmerge } from '@fastify/deepmerge';
 import { createControlsProject, generateControls } from './utils/generate';
-import type { VariantInfo, WithControlProps } from './provider';
+import { mergeArgs } from './utils/args';
+import type { StoryFrameOptions, VariantInfo, WithControlProps } from './provider';
+import { StoryFrame } from './client/frame';
 
 type Awaitable<T> = T | Promise<T>;
 
@@ -25,6 +26,13 @@ export interface StoryOptions<C extends FC<any>> {
    * story arguments, you can pass an array of options for multiple presets.
    */
   args?: ArgsOptions<C> | (ArgsOptions<C> & VariantInfo)[];
+
+  /**
+   * Render the component in an iframe, for components filling the viewport like layouts.
+   *
+   * Arguments are sent to the frame with `postMessage()`, they must be serializable.
+   */
+  frame?: StoryFrameOptions;
 }
 
 export interface ArgsOptions<C extends FC<any> = FC<any>> {
@@ -58,6 +66,8 @@ export { createFileSystemCache } from './cache/fs';
 export interface Story<C extends FC<any> = FC<any>> {
   /** render as a server component (require RSC). */
   WithControl: FC;
+  /** render the component for `frame`, with arguments from `<WithControl />`. */
+  Frame: FC;
   _private_: {
     component?: C;
   };
@@ -89,9 +99,6 @@ export interface StoryFactory {
 export function defineStoryFactory(factoryOptions: StoryFactoryOptions = {}): StoryFactory {
   let _project: ReturnType<typeof createControlsProject> | undefined;
   const { cache = false } = factoryOptions;
-  const propsDeepmerge = deepmerge({
-    mergeArray: () => (_target, source) => source,
-  });
 
   function initProject() {
     const { tsconfigPath = './tsconfig.json' } = factoryOptions.tsc ?? {};
@@ -108,7 +115,7 @@ export function defineStoryFactory(factoryOptions: StoryFactoryOptions = {}): St
   }
 
   return {
-    defineStory(urlOrPath, { Component, name = 'story', displayName, args = {} }) {
+    defineStory(urlOrPath, { Component, name = 'story', displayName, args = {}, frame }) {
       const filePath =
         urlOrPath instanceof URL || urlOrPath.startsWith('file:///')
           ? fileURLToPath(urlOrPath)
@@ -120,6 +127,7 @@ export function defineStoryFactory(factoryOptions: StoryFactoryOptions = {}): St
         return {
           Component,
           displayName,
+          frame,
           presets: await Promise.all(
             normalized.map(async (preset): Promise<WithControlProps['presets'][number]> => {
               const fixedValues =
@@ -137,13 +145,13 @@ export function defineStoryFactory(factoryOptions: StoryFactoryOptions = {}): St
                 if (fixedValues) controls = collapse(controls, fixedValues);
               }
 
+              const defaultValues = fixedValues ? mergeArgs(initial, fixedValues) : initial;
+
               return {
                 variant: preset.variant,
                 description: preset.description,
                 controls,
-                defaultValues: (fixedValues
-                  ? propsDeepmerge(initial, fixedValues)
-                  : initial) as Record<string, unknown>,
+                defaultValues: defaultValues as Record<string, unknown>,
               };
             }),
           ),
@@ -159,6 +167,9 @@ export function defineStoryFactory(factoryOptions: StoryFactoryOptions = {}): St
             factoryOptions.WithControl ?? (await import('./client/with-control')).WithControl;
 
           return <Comp {...await getProps()} />;
+        },
+        Frame() {
+          return <StoryFrame Component={Component} />;
         },
       };
     },

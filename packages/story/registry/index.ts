@@ -16,10 +16,9 @@ export const registry: Registry = {
   },
   files: {
     'client/with-control.tsx': { type: 'components', target: '<dir>/story/index.tsx' },
+    'client/{controls,fields}.tsx': { type: 'components', target: '<dir>/story/*' },
     // Story has its own copy of the shared primitives
-    'client/components/{select,input}.tsx': { alias: '../../shared-api/src/components/*' },
-    'client/arg-form.tsx': { type: 'components', target: '<dir>/story/arg-form.tsx' },
-    'utils/date.ts': { type: 'components', target: '<dir>/story/date.ts' },
+    'client/components/select.tsx': { alias: '../../shared-api/src/components/select' },
     'utils/cn.ts': { alias: '../../radix-ui/src/utils/cn' },
   },
   dependencies: {

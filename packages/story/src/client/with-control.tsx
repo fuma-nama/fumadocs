@@ -3,11 +3,19 @@
 import { cn } from '@/utils/cn';
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from './components/select';
 import { buttonVariants } from 'fumadocs-ui/components/ui/button';
-import { AlertCircle } from 'lucide-react';
-import { type FC, Suspense } from 'react';
+import { CircleAlert, Maximize } from 'lucide-react';
+import { type RefObject, Suspense, useCallback, useRef, useState } from 'react';
 import { ErrorBoundary } from 'react-error-boundary';
-import { FieldSet } from './arg-form';
-import { StoryProvider, useStory, useStoryArgs, type WithControlProps } from '@/provider';
+import { Controls } from './controls';
+import {
+  type StoryFrameOptions,
+  StoryProvider,
+  useStory,
+  useStoryArgs,
+  useStoryFrame,
+  type WithControlProps,
+} from '@/provider';
+import type { TypeNode } from '@/type-tree/types';
 import { useTranslations } from '@fuma-translate/react';
 
 export type { VariantInfo, WithControlProps } from '@/provider';
@@ -22,72 +30,154 @@ export function WithControl(props: WithControlProps) {
 
 function Content() {
   const t = useTranslations({ note: 'story controls' });
-  const { presets, displayName, Component, preset, variant, setVariant } = useStory();
+  const { presets, displayName, frame, preset, variant, setVariant } = useStory();
+  const frameRef = useRef<HTMLIFrameElement>(null);
+  const reset = () => setVariant(variant);
 
   return (
-    <div className="not-prose flex flex-col gap-1 p-1 border rounded-md shadow-sm bg-fd-card text-fd-card-foreground">
-      <div className="flex flex-row items-center gap-2 empty:hidden">
-        {displayName && <p className="text-sm font-medium px-1.5">{displayName}</p>}
-        {presets.length > 1 && (
-          <Select
-            value={variant}
-            onValueChange={(value) => {
-              if (value === null) return;
-              setVariant(value);
-            }}
-          >
-            <SelectTrigger className="w-fit ms-auto border-none bg-transparent px-1.5 py-1 text-fd-muted-foreground text-xs font-medium">
-              <SelectValue placeholder={t('No Variant')} />
-            </SelectTrigger>
-            <SelectContent>
-              {presets.map((item) => (
-                <SelectItem key={item.variant} value={item.variant} className="gap-2">
-                  <p className="text-xs font-medium">{item.variant}</p>
-                  <p className="text-xs text-fd-muted-foreground">{item.description}</p>
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        )}
-      </div>
-      <StoryComponent Component={Component} />
-      {preset && (
-        <FieldSet
-          field={preset.controls}
-          fieldName={[]}
-          name={t('Props')}
-          className="max-h-[600px] overflow-auto"
-        />
+    <div className="not-prose my-4 overflow-hidden rounded-xl border bg-fd-card text-fd-card-foreground">
+      {(displayName || presets.length > 1 || frame) && (
+        <div className="flex h-10 items-center justify-end gap-1 border-b ps-4 pe-1.5">
+          {displayName && (
+            <p className="me-auto truncate text-[0.8125rem] font-medium">{displayName}</p>
+          )}
+          {presets.length > 1 && <VariantSelect />}
+          {frame && (
+            <button
+              type="button"
+              aria-label={t('Fullscreen')}
+              title={t('Fullscreen')}
+              onClick={() => frameRef.current?.requestFullscreen()}
+              className={cn(
+                buttonVariants({ variant: 'ghost', size: 'icon-sm' }),
+                'text-fd-muted-foreground [&_svg]:size-3.5',
+              )}
+            >
+              <Maximize />
+            </button>
+          )}
+        </div>
+      )}
+      {frame ? <FramePreview {...frame} ref={frameRef} /> : <Preview onReset={reset} />}
+      {preset && hasControls(preset.controls) && (
+        <Controls key={variant} node={preset.controls} onReset={reset} />
       )}
     </div>
   );
 }
 
-function StoryComponent({ Component }: { Component: FC }) {
+function hasControls(node: TypeNode): boolean {
+  const root = node.type === 'intersection' ? node.intersection : node;
+  return root.type !== 'never' && (root.type !== 'object' || root.properties.length > 0);
+}
+
+function VariantSelect() {
+  const t = useTranslations({ note: 'story controls' });
+  const { presets, variant, setVariant } = useStory();
+
+  return (
+    <Select value={variant} onValueChange={(value) => value !== null && setVariant(value)}>
+      <SelectTrigger className="h-7 w-auto max-w-64 gap-1.5 border-0 bg-transparent px-2 text-xs hover:bg-fd-accent focus:ring-0 focus-visible:ring-2">
+        <span className="text-fd-muted-foreground">{t('Variant')}</span>
+        <SelectValue className="truncate font-medium" />
+      </SelectTrigger>
+      <SelectContent align="end">
+        {presets.map((item) => (
+          <SelectItem key={item.variant} value={item.variant} className="text-xs">
+            <span className="flex flex-col">
+              {item.variant}
+              {item.description && (
+                <span className="text-fd-muted-foreground">{item.description}</span>
+              )}
+            </span>
+          </SelectItem>
+        ))}
+      </SelectContent>
+    </Select>
+  );
+}
+
+function Preview({ onReset }: { onReset: () => void }) {
   const t = useTranslations({ note: 'story error boundary' });
+  const { Component } = useStory();
   const args = useStoryArgs();
 
   return (
-    <ErrorBoundary
-      fallbackRender={({ error, resetErrorBoundary }) => (
-        <div className="p-3 border rounded-lg bg-fd-card text-fd-card-foreground text-sm">
-          <p className="inline-flex items-center gap-2 font-medium mb-2">
-            <AlertCircle className="text-fd-error size-4" />
-            {t('Encountered error when rendering the component.')}
-          </p>
-          <p className="text-fd-muted-foreground mb-2">{String(error)}</p>
-          <button
-            className={cn(buttonVariants({ variant: 'default', size: 'sm' }))}
-            onClick={() => resetErrorBoundary()}
-          >
-            {t('Reset')}
-          </button>
-        </div>
-      )}
+    <div className="bg-fd-background p-4 not-last:border-b">
+      <ErrorBoundary
+        // recover once the arguments change
+        resetKeys={[args]}
+        fallbackRender={({ error }) => (
+          <div role="alert" className="flex flex-col items-start gap-2 text-sm">
+            <p className="inline-flex items-center gap-2 font-medium">
+              <CircleAlert className="size-3.5 shrink-0 text-fd-error" />
+              {t('Encountered error when rendering the component.')}
+            </p>
+            <p className="font-mono text-xs break-all text-fd-muted-foreground">
+              {error instanceof Error ? error.message : String(error)}
+            </p>
+            <button
+              type="button"
+              className={cn(buttonVariants({ variant: 'secondary', size: 'sm' }))}
+              onClick={onReset}
+            >
+              {t('Reset')}
+            </button>
+          </div>
+        )}
+      >
+        <Suspense>
+          <Component {...args} key={undefined} />
+        </Suspense>
+      </ErrorBoundary>
+    </div>
+  );
+}
+
+function FramePreview({
+  src,
+  width = 1280,
+  height = 800,
+  ref,
+}: StoryFrameOptions & { ref: RefObject<HTMLIFrameElement | null> }) {
+  const { displayName } = useStory();
+  const connect = useStoryFrame();
+  const [scale, setScale] = useState<number>();
+  const observe = useCallback(
+    (element: HTMLDivElement) => {
+      const observer = new ResizeObserver(() => setScale(element.clientWidth / width));
+      observer.observe(element);
+      return () => observer.disconnect();
+    },
+    [width],
+  );
+  const frameRef = useCallback(
+    (iframe: HTMLIFrameElement) => {
+      ref.current = iframe;
+      return connect(iframe);
+    },
+    [ref, connect],
+  );
+
+  return (
+    <div
+      ref={observe}
+      className="relative overflow-hidden bg-fd-background not-last:border-b"
+      style={{ aspectRatio: `${width} / ${height}` }}
     >
-      <Suspense>
-        <Component {...args} key={undefined} />
-      </Suspense>
-    </ErrorBoundary>
+      {scale !== undefined && (
+        <iframe
+          ref={frameRef}
+          src={src}
+          title={displayName}
+          loading="lazy"
+          width={width}
+          height={height}
+          // `transform` is reset in fullscreen, unlike `scale`
+          className="absolute top-0 left-0 origin-top-left"
+          style={{ transform: `scale(${scale})` }}
+        />
+      )}
+    </div>
   );
 }

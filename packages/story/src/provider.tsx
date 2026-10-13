@@ -3,7 +3,9 @@ import {
   createContext,
   type FC,
   type ReactNode,
+  type RefCallback,
   use,
+  useCallback,
   useDeferredValue,
   useMemo,
   useRef,
@@ -11,6 +13,7 @@ import {
 } from 'react';
 import { StfProvider, useDataEngine, useListener, useStf } from '@fumari/stf';
 import type { TypeNode } from '@/type-tree/types';
+import { cloneArgs } from '@/utils/args';
 
 export interface VariantInfo {
   variant: string;
@@ -22,10 +25,29 @@ export interface StoryPreset extends VariantInfo {
   defaultValues?: Record<string, unknown>;
 }
 
+export interface StoryFrameOptions {
+  /** same-origin URL of a page rendering `<story.Frame />` */
+  src: string;
+  /**
+   * viewport width of the frame, scaled down to fit the panel.
+   *
+   * @defaultValue 1280
+   */
+  width?: number;
+  /**
+   * viewport height of the frame.
+   *
+   * @defaultValue 800
+   */
+  height?: number;
+}
+
 export interface WithControlProps {
   displayName?: string;
   Component: FC;
   presets: StoryPreset[];
+  /** render the component in an iframe */
+  frame?: StoryFrameOptions;
 }
 
 export interface StoryProviderProps extends WithControlProps {
@@ -45,11 +67,17 @@ const StoryContext = createContext<StoryState | null>(null);
 /**
  * The state of a story: its selected variant and the arguments of the rendered component.
  */
-export function StoryProvider({ presets, displayName, Component, children }: StoryProviderProps) {
+export function StoryProvider({
+  presets,
+  displayName,
+  Component,
+  frame,
+  children,
+}: StoryProviderProps) {
   const [variant, setVariant] = useState(presets[0].variant);
   const preset = presets.find((preset) => preset.variant === variant);
   const stf = useStf({
-    defaultValues: preset?.defaultValues,
+    defaultValues: () => cloneArgs(preset?.defaultValues ?? {}),
   });
 
   return (
@@ -60,6 +88,7 @@ export function StoryProvider({ presets, displayName, Component, children }: Sto
             presets,
             displayName,
             Component,
+            frame,
             preset,
             variant,
             setVariant(value) {
@@ -67,10 +96,10 @@ export function StoryProvider({ presets, displayName, Component, children }: Sto
               if (!preset) return;
 
               setVariant(value);
-              stf.dataEngine.reset(preset.defaultValues ?? {});
+              stf.dataEngine.reset(cloneArgs(preset.defaultValues ?? {}));
             },
           }),
-          [presets, displayName, Component, preset, variant, stf],
+          [presets, displayName, Component, frame, preset, variant, stf],
         )}
       >
         {children}
@@ -92,13 +121,35 @@ export function useStory(): StoryState {
 export function useStoryArgs(): Record<string, unknown> {
   const engine = useDataEngine();
   const timerRef = useRef(0);
-  const [args, setArgs] = useState(() => engine.getData());
+  const [args, setArgs] = useState(() => cloneArgs(engine.getData()));
   useListener({
     onUpdate() {
       if (timerRef.current) window.clearTimeout(timerRef.current);
-      timerRef.current = window.setTimeout(() => setArgs({ ...engine.getData() }), 100);
+      timerRef.current = window.setTimeout(() => setArgs(cloneArgs(engine.getData())), 100);
     },
   });
 
   return useDeferredValue(args) as Record<string, unknown>;
+}
+
+/**
+ * Ref of the iframe for `frame`, it sends the story arguments to `<story.Frame />`.
+ */
+export function useStoryFrame(): RefCallback<HTMLIFrameElement> {
+  const args = useStoryArgs();
+
+  return useCallback(
+    (iframe: HTMLIFrameElement) => {
+      const send = () =>
+        iframe.contentWindow?.postMessage({ type: 'fumadocs-story:args', args }, location.origin);
+      const onMessage = (e: MessageEvent) => {
+        if (e.source === iframe.contentWindow && e.data?.type === 'fumadocs-story:ready') send();
+      };
+
+      window.addEventListener('message', onMessage);
+      send();
+      return () => window.removeEventListener('message', onMessage);
+    },
+    [args],
+  );
 }

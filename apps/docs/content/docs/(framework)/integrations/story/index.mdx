@@ -85,6 +85,43 @@ export const story = defineStory({
 });
 ```
 
+### `frame`
+
+Components filling the viewport, like layouts, can be rendered in an iframe.
+The story panel scales the frame down to fit, with a button to open it in fullscreen.
+
+```tsx title="components/my-layout.story.tsx"
+import { defineStory } from '@/lib/story';
+import { MyLayout } from './my-layout';
+
+export const story = defineStory({
+  Component: MyLayout,
+  frame: {
+    src: '/story/my-layout',
+    // viewport size, optional
+    width: 1280,
+    height: 800,
+  },
+});
+```
+
+Create a page at `src` to render the component, it receives the arguments from the story panel:
+
+```tsx title="app/story/my-layout/page.tsx"
+import { story } from '@/components/my-layout.story';
+
+export default function Page() {
+  return <story.Frame />;
+}
+```
+
+<Callout title="Good to know">
+
+- The page must be on the same origin as your docs.
+- Arguments are sent with `postMessage()`, they must be serializable (no functions or JSX).
+
+</Callout>
+
 ### Internationalization
 
 Assuming you have configured [Internationalization](/docs/internationalization) at UI level:
@@ -108,7 +145,7 @@ export const translations = i18n
     cn: {
       displayName: 'Chinese',
       // [!code ++]
-      'New Item(story arguments form)': '新增項目',
+      'Add Item(story arguments form)': '新增項目',
     },
   });
 ```
