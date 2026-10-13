@@ -1,3 +1,9 @@
+## fumadocs-openapi@12.4.2
+
+### Playground focus
+
+- Focused fields highlight their own border, instead of a ring inside the column borders.
+
 ## fumadocs-openapi@12.4.1
 
 ### Write `imports` of `generateFiles()` as import lines

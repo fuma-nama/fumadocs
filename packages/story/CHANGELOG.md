@@ -1,3 +1,21 @@
+## @fumadocs/story@1.5.0
+
+### Redesigned story controls
+
+- Props are edited in rows like the OpenAPI playground, nested objects and arrays open in a panel with breadcrumbs.
+- Reset the props to the defaults of the variant.
+- `fixed` values hide their controls with the Vite plugin and Turbopack loader too.
+- Switching back to a variant restores its default values.
+- `getDefaultValue()` leaves optional properties unset, `typeToString()` prints enums as their members.
+- Updated translation keys of the controls, see `@fumadocs/language` for the new ones.
+
+### Story frames
+
+- New `frame` option of `defineStory()`, renders components filling the viewport (e.g. layouts) in an iframe, scaled to fit the panel. Its `Container` wraps the frame, like a window.
+- `story.Frame` renders the component on the frame page, with the arguments from the story panel.
+- Story components can be any component type, like lazy ones that only the frame page loads.
+- `useStoryFrame()` connects your own panel to the frame.
+
 ## @fumadocs/story@1.4.0
 
 ### Shared components of API pages
