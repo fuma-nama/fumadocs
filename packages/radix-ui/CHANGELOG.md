@@ -1,3 +1,11 @@
+## fumadocs-ui@16.17.2
+
+### Layout fixes
+
+- Docs Layout: layout tabs with `tabMode: 'top'` no longer cover the page.
+- Glass Layout: sidebar items are not all active with a page tree without `$id`.
+- Glass Layout: icons of layout tabs are sized correctly with the default `tabs` option.
+
 ## fumadocs-ui@16.17.0
 
 ### Highlight search results with CSS
