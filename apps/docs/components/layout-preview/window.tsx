@@ -1,5 +1,5 @@
 'use client';
-import Image from 'next/image';
+import { Image } from 'fumadocs-core/framework';
 import type { ReactNode } from 'react';
 import Wallpaper from '@/app/(home)/story.png';
 
@@ -10,9 +10,8 @@ export function StoryWindow({ children }: { children: ReactNode }) {
       <Image
         src={Wallpaper}
         alt=""
-        fill
         sizes="(min-width: 768px) 900px, 100vw"
-        className="pointer-events-none object-cover"
+        className="pointer-events-none absolute inset-0 size-full object-cover"
       />
       <div className="relative overflow-hidden rounded-xl border bg-fd-background shadow-xl">
         <div className="flex h-8 items-center gap-1.5 border-b bg-fd-card px-3">
