@@ -1,6 +1,6 @@
 'use client';
 
-import { ChevronRight, Hash, SearchIcon } from 'lucide-react';
+import { ChevronRight, CircleAlert, Hash, SearchIcon } from 'lucide-react';
 import {
   type ComponentProps,
   createContext,
@@ -68,6 +68,8 @@ export interface SearchDialogProps extends SharedProps {
   isLoading?: boolean;
   /** the last successful search, `<SearchDialogList />` shows its results */
   data?: SearchResult;
+  /** the last search failed, `<SearchDialogList />` shows it above the results of `data` */
+  error?: Error;
 
   children: ReactNode;
 }
@@ -80,6 +82,7 @@ const RootContext = createContext<{
   onSelect: (item: SearchItemType) => void;
   isLoading: boolean;
   data?: SearchResult;
+  error?: Error;
   /** the query to highlight */
   query: string;
   /** the id of the active item */
@@ -184,6 +187,7 @@ export function SearchDialog({
   onSearchChange,
   isLoading = false,
   data,
+  error,
   onSelect: onSelectProp,
   children,
   dialogHandle,
@@ -235,12 +239,13 @@ export function SearchDialog({
             search,
             isLoading,
             data,
+            error,
             query: data ? data.query : search,
             onOpenChange: (v) => onOpenChangeCallback.current(v),
             onSearchChange: (v) => onSearchChangeCallback.current(v),
             onSelect: (v) => onSelectCallback.current(v),
           }),
-          [activeItem, isLoading, open, search, data],
+          [activeItem, isLoading, open, search, data, error],
         )}
       >
         {children}
@@ -400,10 +405,13 @@ export function SearchDialogList({
 }) {
   const ref = useRef<HTMLDivElement>(null);
   const t = useTranslations({ note: 'search dialog' });
-  const { onSelect, data, getActive, setActive } = useSearch();
+  const { onSelect, data, error, getActive, setActive } = useSearch();
   const items = itemsProp === undefined ? (data?.items ?? defaultItems) : itemsProp;
 
-  useLayoutEffect(() => setActive(items?.[0]?.id ?? null), [setActive, items]);
+  useLayoutEffect(
+    () => setActive(error ? null : (items?.[0]?.id ?? null)),
+    [setActive, items, error],
+  );
 
   const onKey = useEffectEvent((e: KeyboardEvent) => {
     if (!items || e.isComposing || e.keyCode === 229) return;
@@ -432,13 +440,13 @@ export function SearchDialogList({
     if (!element) return;
 
     const observer = new ResizeObserver(() => {
-      const viewport = element.firstElementChild!;
+      let height = 0;
+      for (const child of element.children) height += (child as HTMLElement).offsetHeight;
 
-      element.style.setProperty('--fd-animated-height', `${viewport.clientHeight}px`);
+      element.style.setProperty('--fd-animated-height', `${height}px`);
     });
 
-    const viewport = element.firstElementChild;
-    if (viewport) observer.observe(viewport);
+    for (const child of element.children) observer.observe(child);
 
     const content: Pick<Window, 'addEventListener' | 'removeEventListener'> =
       document.getElementById('fd-search-dialog-content') ?? window;
@@ -453,12 +461,33 @@ export function SearchDialogList({
     <div
       {...props}
       ref={ref}
-      data-empty={items === null}
+      data-empty={items === null && !error}
       className={cn(
         'overflow-hidden h-(--fd-animated-height) transition-[height] [&_::highlight(fd-search)]:text-fd-primary [&_::highlight(fd-search)]:underline',
         props.className,
       )}
     >
+      <p
+        role="status"
+        className={cn('truncate text-sm not-empty:p-3', items && 'not-empty:border-b')}
+      >
+        {error && (
+          <>
+            <CircleAlert className="inline size-5 me-2 align-top text-fd-error" />
+            {data ? (
+              <T
+                text="Search failed, showing results for {query}"
+                note="search dialog"
+                variables={{
+                  query: <span className="font-medium">{data.query}</span>,
+                }}
+              />
+            ) : (
+              <T text="Search failed" note="search dialog" />
+            )}
+          </>
+        )}
+      </p>
       <div
         id="fd-search-list"
         // an empty listbox is invalid, expose it only with options
