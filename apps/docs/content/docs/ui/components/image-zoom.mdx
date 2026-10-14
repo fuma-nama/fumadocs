@@ -4,6 +4,8 @@ description: Allow zoom-in images in your documentation
 preview: zoomImage
 ---
 
+import { ImageZoom, Lightbox } from 'fumadocs-ui/components/image-zoom';
+
 <Installation name="image-zoom" />
 
 ## Usage
@@ -34,3 +36,84 @@ Now image zoom will be automatically enabled on all images.
 ### Image Optimization
 
 On Next.js, a default [`sizes` property](https://nextjs.org/docs/app/api-reference/components/image#sizes) will be defined for `<Image />` component if not specified.
+
+## Lightbox
+
+Zoomable images inside `<Lightbox />` open in one viewer, browse them with arrow keys, swipes or the side buttons.
+
+<Wrapper>
+  <Lightbox>
+    <div className="not-prose grid grid-cols-2 gap-2">
+      <ImageZoom
+        src="/docs/notebook-tab-mode.png"
+        width={1453}
+        height={963}
+        alt="Notebook layout"
+        title="Tab mode: navbar"
+      />
+      <ImageZoom
+        src="/docs/notebook-nav-mode.png"
+        width={1451}
+        height={954}
+        alt="Notebook layout"
+        caption={
+          <>
+            Nav mode: top, see <a href="/docs/ui/layouts/notebook#nav-mode">Notebook Layout</a>
+          </>
+        }
+      />
+    </div>
+  </Lightbox>
+</Wrapper>
+
+Wrap your page content to browse every image of the page:
+
+```tsx title="app/docs/[[...slug]]/page.tsx"
+import { Lightbox } from 'fumadocs-ui/components/image-zoom';
+
+<DocsBody>
+  {/* [!code ++] */}
+  <Lightbox>
+    <MDX components={getMDXComponents()} />
+    {/* [!code ++] */}
+  </Lightbox>
+</DocsBody>;
+```
+
+### Caption
+
+The image title is shown as caption.
+
+```mdx
+![Notebook Layout](/notebook.png 'Tab mode: navbar')
+```
+
+Pass `caption` for rich content like links.
+
+```tsx
+<ImageZoom
+  src="/notebook.png"
+  alt="Notebook Layout"
+  caption={
+    <>
+      See <a href="/docs/ui/layouts/notebook">Notebook Layout</a>
+    </>
+  }
+/>
+```
+
+### Gallery
+
+To browse a set of images on its own, wrap them in another `<Lightbox />`, for example as a grid:
+
+```mdx
+<Lightbox>
+<div className="not-prose grid grid-cols-2 gap-2">
+
+![Light Mode](/light.png)
+
+![Dark Mode](/dark.png)
+
+</div>
+</Lightbox>
+```

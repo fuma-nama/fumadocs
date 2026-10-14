@@ -75,3 +75,9 @@
     transition-duration: 0.01ms !important;
   }
 }
+
+::view-transition-old(fd-lightbox),
+::view-transition-new(fd-lightbox) {
+  height: 100%;
+  object-fit: cover;
+}
