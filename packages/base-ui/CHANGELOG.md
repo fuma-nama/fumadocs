@@ -1,3 +1,27 @@
+## @fumadocs/base-ui@16.17.3
+
+### Lightbox for zoomable images
+
+Zoomable images inside `<Lightbox />` open in one viewer, browse them with arrow keys, swipes or the side buttons.
+
+```tsx
+import { Lightbox } from 'fumadocs-ui/components/image-zoom';
+
+<Lightbox>
+  <MDX components={getMDXComponents()} />
+</Lightbox>;
+```
+
+- The image title is shown as caption, pass `caption` to `<ImageZoom />` for rich content.
+- `rmiz` props don't apply inside `<Lightbox />`.
+- Added translation keys of the image viewer to `@fumadocs/language`.
+
+### Show failed searches in the search dialog
+
+- `<SearchDialog />` accepts the `error` of search hooks, `<SearchDialogList />` shows it above the previous results.
+
+Fix [#3698](https://github.com/fuma-nama/fumadocs/issues/3698)
+
 ## @fumadocs/base-ui@16.17.2
 
 ### Layout fixes
