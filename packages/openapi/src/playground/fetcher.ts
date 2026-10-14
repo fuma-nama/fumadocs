@@ -57,6 +57,16 @@ export interface BrowserFetcherOptions {
   onRequestInit?: (requestInit: RequestInit) => Awaitable<RequestInit>;
 }
 
+/**
+ * The URL requesting `url` through the proxy of `createProxy()`, `url` itself without a proxy.
+ */
+export function proxied(url: string, proxyUrl?: string): string {
+  if (!proxyUrl) return url;
+  const out = new URL(proxyUrl, document.baseURI);
+  out.searchParams.append('url', url);
+  return out.href;
+}
+
 export function createBrowserFetcher(
   adapters: Record<string, MediaAdapter>,
   {
@@ -68,7 +78,7 @@ export function createBrowserFetcher(
 ): Fetcher {
   return {
     async fetch(url, data) {
-      let requestUrl = new URL(url, document.baseURI);
+      const requestUrl = new URL(proxied(url, proxyUrl), document.baseURI);
       let requestInit: RequestInit = {
         // fetch only normalizes the case of some methods
         method: data.method.toUpperCase(),
@@ -84,11 +94,6 @@ export function createBrowserFetcher(
       for (const key in data.header) {
         const param = data.header[key];
         headers.append(key, param.value);
-      }
-
-      if (proxyUrl) {
-        requestUrl = new URL(proxyUrl, document.baseURI);
-        requestUrl.searchParams.append('url', url);
       }
 
       if (data.bodyMediaType && data.body) {

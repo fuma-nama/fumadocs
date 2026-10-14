@@ -42,7 +42,11 @@ export const openapi = createOpenAPI({
 ## Creating Proxy
 
 A proxy server is useful for executing HTTP (`fetch`) requests, as it doesn't have CORS constraints like on the browser.
-We can use it for executing HTTP requests on the OpenAPI playground, when the target API endpoints do not have CORS configured correctly.
+
+We use it for:
+
+- Executing HTTP requests on the OpenAPI playground, when the target API endpoints do not have CORS configured correctly.
+- OAuth requests of confidential clients (with a client secret) and device flows.
 
 <Callout type="warn" title="Warning">
   Do not use this on unreliable sites and API endpoints, the proxy server will forward all received
@@ -58,6 +62,7 @@ import { openapi } from '@/lib/openapi';
 
 export const { GET, HEAD, PUT, POST, PATCH, DELETE } = openapi.createProxy({
   // important: set a list of allowed origins for proxied requests
+  // such as the origin of your Web & authorization server
   allowedOrigins: ['https://example.com'],
 });
 ```

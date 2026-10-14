@@ -468,45 +468,60 @@ function ResponseContent({
 
 function AuthScheme({ scheme, scopes }: { scheme: SecuritySchemeObject; scopes: string[] }) {
   const t = useTranslations({ note: 'security scheme' });
-  let name: string;
-  let type = '<token>';
-  let location: string | undefined;
+  let name = t('Authorization');
+  let type: string | undefined = t('Bearer <token>');
+  let location = 'header';
+  const configUrl = scheme.type === 'openIdConnect' ? scheme.openIdConnectUrl : undefined;
 
-  if (scheme.type === 'http' || scheme.type === 'oauth2') {
-    name = t('Authorization');
-    type =
-      scheme.type === 'http' && scheme.scheme === 'basic'
-        ? t('Basic <token>')
-        : t('Bearer <token>');
-    location = 'header';
-  } else if (scheme.type === 'apiKey') {
-    name = scheme.name!;
-    location = scheme.in;
-  } else if (scheme.type === 'openIdConnect') {
-    name = t('OpenID Connect');
-  } else {
-    return null;
+  switch (scheme.type) {
+    case 'apiKey':
+      name = scheme.name!;
+      type = '<token>';
+      location = scheme.in!;
+      break;
+    case 'mutualTLS':
+      name = t('Client certificate');
+      type = undefined;
+      location = 'tls';
+      break;
+    case 'http': {
+      // case-insensitive, see RFC 7235
+      const auth = scheme.scheme?.toLowerCase();
+      if (auth === 'basic') type = t('Basic <token>');
+      else if (auth === 'bearer' && scheme.bearerFormat) type = `Bearer <${scheme.bearerFormat}>`;
+      else if (scheme.scheme && auth !== 'bearer')
+        type = `${scheme.scheme[0].toUpperCase()}${scheme.scheme.slice(1)} <token>`;
+      break;
+    }
+    case 'oauth2':
+    case 'openIdConnect':
+      break;
+    default:
+      return null;
   }
 
   return (
     <div className="border-t py-2.5 first:border-t-0">
       <div className="flex flex-wrap items-center gap-2 not-prose">
-        {location && (
-          <span className="rounded-md border bg-fd-secondary px-1.5 font-mono text-xs leading-5 text-fd-muted-foreground">
-            {location}
-          </span>
-        )}
+        <span className="rounded-md border bg-fd-secondary px-1.5 font-mono text-xs leading-5 text-fd-muted-foreground">
+          {location}
+        </span>
         <code className="text-[0.8125rem] font-medium text-fd-primary">{name}</code>
-        <code className="text-xs text-fd-muted-foreground">{type}</code>
+        {type && <code className="text-xs text-fd-muted-foreground">{type}</code>}
         {scheme.deprecated && (
           <Badge color="red" className="text-xs">
             {t('Deprecated')}
           </Badge>
         )}
       </div>
-      {(scheme.description || scopes.length > 0) && (
+      {(scheme.description || scopes.length > 0 || configUrl) && (
         <div className="mt-1 prose-no-margin text-fd-muted-foreground">
           {scheme.description && <Markdown md={scheme.description} />}
+          {configUrl && (
+            <p>
+              {t('OpenID Connect')}: <code>{configUrl}</code>
+            </p>
+          )}
           {scopes.length > 0 && (
             <p>
               {t('Scope')}: <code>{scopes.join(', ')}</code>

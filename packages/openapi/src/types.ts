@@ -17,6 +17,7 @@ export type CallbackObject = OpenAPIV3_2.CallbackObject;
 export type ServerVariableObject = OpenAPIV3.ServerVariableObject;
 export type ResponseObject = OpenAPIV3_2.ResponseObject;
 export type OAuth2SecurityScheme = OpenAPIV3_2.OAuth2SecurityScheme;
+export type OAuthFlows = OpenAPIV3_2.OAuthFlows;
 export type HttpMethods = OpenAPIV3_2.HttpMethods;
 export type ExampleObject = OpenAPIV3_2.ExampleObject;
 export type MediaTypeObject = OpenAPIV3_2.MediaTypeObject;

@@ -258,6 +258,7 @@ export declare namespace OpenAPIV3_2 {
     | ApiKeySecurityScheme
     | OAuth2SecurityScheme
     | OpenIdSecurityScheme
+    | MutualTLSSecurityScheme
   ) & {
     deprecated?: boolean;
   };
@@ -276,6 +277,7 @@ export declare namespace OpenAPIV3_2 {
     }
   >;
   export type OpenIdSecurityScheme = OpenAPIV3_1.OpenIdSecurityScheme;
+  export type MutualTLSSecurityScheme = OpenAPIV3_1.MutualTLSSecurityScheme;
   export type TagObject = OpenAPIV3_1.TagObject & {
     summary?: string;
     parent?: string;
@@ -492,12 +494,16 @@ export declare namespace OpenAPIV3_1 {
       pathItems?: Record<string, ReferenceObject | PathItemObject>;
     }
   >;
-  export type SecuritySchemeObject = OpenAPIV3.SecuritySchemeObject;
+  export type SecuritySchemeObject = OpenAPIV3.SecuritySchemeObject | MutualTLSSecurityScheme;
   export type HttpSecurityScheme = OpenAPIV3.HttpSecurityScheme;
   export type ApiKeySecurityScheme = OpenAPIV3.ApiKeySecurityScheme;
   export type OAuthFlows = OpenAPIV3.OAuthFlows;
   export type OAuth2SecurityScheme = OpenAPIV3.OAuth2SecurityScheme;
   export type OpenIdSecurityScheme = OpenAPIV3.OpenIdSecurityScheme;
+  export type MutualTLSSecurityScheme = {
+    type?: 'mutualTLS';
+    description?: string;
+  };
   export type TagObject = OpenAPIV3.TagObject;
 }
 export declare namespace OpenAPIV3 {
