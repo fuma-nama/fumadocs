@@ -1,31 +1,23 @@
 core:changelogs:
-  - content: "---\npackages:\n  fumadocs-ui:\n    type: patch\n  \"@fumadocs/base-ui\":\n    type: patch\n---\n\n### Layout fixes\n\n- Docs Layout: layout tabs with `tabMode: 'top'` no longer cover the page.\n- Glass Layout: sidebar items are not all active with a page tree without `$id`.\n- Glass Layout: icons of layout tabs are sized correctly with the default `tabs` option.\n"
-    filename: 2026-10-13-layout-fixes.md
+  - content: "---\npackages:\n  fumadocs-ui:\n    type: patch\n  \"@fumadocs/base-ui\":\n    type: patch\n  \"@fumadocs/language\":\n    type: patch\n---\n\n### Lightbox for zoomable images\n\nZoomable images inside `<Lightbox />` open in one viewer, browse them with arrow keys, swipes or the side buttons.\n\n```tsx\nimport { Lightbox } from 'fumadocs-ui/components/image-zoom';\n\n<Lightbox>\n  <MDX components={getMDXComponents()} />\n</Lightbox>;\n```\n\n- The image title is shown as caption, pass `caption` to `<ImageZoom />` for rich content.\n- `rmiz` props don't apply inside `<Lightbox />`.\n- Added translation keys of the image viewer to `@fumadocs/language`.\n"
+    filename: 2026-10-14-lightbox.md
     v: 0.0.0
-  - content: "---\npackages:\n  fumadocs-core:\n    type: patch\n---\n\n### Faster `loader()`\n\n- Page trees are built faster, especially with custom `sort` options.\n- Faster `loader()` setup and page lookups like `getPage()` and `getPageByUrl()`.\n- Fallback page trees of i18n sources keep the locale in URLs and IDs.\n- A page listed in `pages` is no longer duplicated when another folder takes it with a higher priority, like `pagesIndex`.\n"
-    filename: 2026-10-13-faster-loader.md
-    v: 0.0.0
-  - content: "---\npackages:\n  \"@fumadocs/story\":\n    type: minor\n  \"@fumadocs/language\":\n    type: patch\n---\n\n### Redesigned story controls\n\n- Props are edited in rows like the OpenAPI playground, nested objects and arrays open in a panel with breadcrumbs.\n- Reset the props to the defaults of the variant.\n- `fixed` values hide their controls with the Vite plugin and Turbopack loader too.\n- Switching back to a variant restores its default values.\n- `getDefaultValue()` leaves optional properties unset, `typeToString()` prints enums as their members.\n- Updated translation keys of the controls, see `@fumadocs/language` for the new ones.\n"
-    filename: 2026-10-13-story-controls.md
-    v: 0.0.0
-  - content: "---\npackages:\n  fumadocs-openapi:\n    type: patch\n---\n\n### Playground focus\n\n- Focused fields highlight their own border, instead of a ring inside the column borders.\n"
-    filename: 2026-10-13-playground-focus.md
-    v: 0.0.0
-  - content: "---\npackages:\n  \"@fumadocs/story\":\n    type: minor\n---\n\n### Story frames\n\n- New `frame` option of `defineStory()`, renders components filling the viewport (e.g. layouts) in an iframe, scaled to fit the panel. Its `Container` wraps the frame, like a window.\n- `story.Frame` renders the component on the frame page, with the arguments from the story panel.\n- Story components can be any component type, like lazy ones that only the frame page loads.\n- `useStoryFrame()` connects your own panel to the frame.\n"
-    filename: 2026-10-13-story-frame.md
+  - content: "---\npackages:\n  fumadocs-ui:\n    type: patch\n  \"@fumadocs/base-ui\":\n    type: patch\n  \"@fumadocs/language\":\n    type: patch\n---\n\n### Show failed searches in the search dialog\n\n- `<SearchDialog />` accepts the `error` of search hooks, `<SearchDialogList />` shows it above the previous results.\n\nFix [#3698](https://github.com/fuma-nama/fumadocs/issues/3698)\n"
+    filename: 2026-10-14-search-dialog-error.md
     v: 0.0.0
 core:packages:
   - id: npm:@fumadocs/ai-chat
     updated: false
-  - changelogIds:
-      - 2026-10-13-layout-fixes.md
-    id: npm:@fumadocs/base-ui
-    updated: true
   - id: npm:@fumadocs/asyncapi
     updated: false
-  - id: npm:@fumadocs/basehub
-    updated: false
+  - changelogIds:
+      - 2026-10-14-lightbox.md
+      - 2026-10-14-search-dialog-error.md
+    id: npm:@fumadocs/base-ui
+    updated: true
   - id: npm:@fumadocs/changelog
+    updated: false
+  - id: npm:@fumadocs/basehub
     updated: false
   - id: npm:@fumadocs/cli
     updated: false
@@ -33,26 +25,25 @@ core:packages:
     updated: false
   - id: npm:@fumadocs/content-collections
     updated: false
-  - changelogIds:
-      - 2026-10-13-faster-loader.md
-    id: npm:fumadocs-core
+  - id: npm:fumadocs-core
     updated: true
   - id: npm:create-fumadocs-app
     updated: true
-  - id: npm:create-fumadocs-versions
-    updated: true
   - id: npm:fumadocs-docgen
     updated: false
-  - id: npm:fumadocs-epub
-    updated: false
+  - id: npm:create-fumadocs-versions
+    updated: true
   - id: npm:@fumadocs/graphql
+    updated: false
+  - id: npm:fumadocs-epub
     updated: false
   - id: npm:@fumari/image-size
     updated: false
   - id: npm:@fumadocs/json-schema
     updated: false
   - changelogIds:
-      - 2026-10-13-story-controls.md
+      - 2026-10-14-lightbox.md
+      - 2026-10-14-search-dialog-error.md
     id: npm:@fumadocs/language
     updated: true
   - id: npm:@fumadocs/local-content
@@ -61,72 +52,68 @@ core:packages:
     updated: false
   - id: npm:@fumadocs/local-md
     updated: false
-  - id: npm:fumadocs-mdx
-    updated: false
   - id: npm:@fumadocs/mdx-remote
+    updated: false
+  - id: npm:fumadocs-mdx
     updated: false
   - id: npm:@fumadocs/notion
     updated: false
   - id: npm:fumadocs-obsidian
     updated: false
-  - changelogIds:
-      - 2026-10-13-playground-focus.md
-    id: npm:fumadocs-openapi
-    updated: true
+  - id: npm:fumadocs-openapi
+    updated: false
   - id: npm:fumadocs-preview
     updated: false
   - id: npm:fumadocs-python
     updated: false
   - changelogIds:
-      - 2026-10-13-layout-fixes.md
+      - 2026-10-14-lightbox.md
+      - 2026-10-14-search-dialog-error.md
     id: npm:fumadocs-ui
     updated: true
   - id: npm:@fumadocs/sanity
     updated: false
+  - id: npm:@fumadocs/shadcn
+    updated: false
   - id: npm:@fumadocs/satteri
     updated: false
-  - id: npm:@fumadocs/shadcn
+  - id: npm:@fumari/stf
     updated: false
   - id: npm:shared-api
     updated: false
-  - changelogIds:
-      - 2026-10-13-story-controls.md
-      - 2026-10-13-story-frame.md
-    id: npm:@fumadocs/story
-    updated: true
-  - id: npm:@fumari/stf
+  - id: npm:@fumadocs/story
     updated: false
   - id: npm:@fumadocs/tailwind
     updated: false
   - id: npm:fumadocs-twoslash
     updated: false
-  - id: npm:fumadocs-typescript
-    updated: false
   - id: npm:@fumadocs/vite
+    updated: false
+  - id: npm:fumadocs-typescript
     updated: false
 npm:packages:
   - id: npm:@fumadocs/ai-chat
-  - id: npm:@fumadocs/base-ui
   - id: npm:@fumadocs/asyncapi
-  - id: npm:@fumadocs/basehub
+  - id: npm:@fumadocs/base-ui
   - id: npm:@fumadocs/changelog
+  - id: npm:@fumadocs/basehub
   - id: npm:@fumadocs/cli
   - id: npm:@fumadocs/content
   - id: npm:@fumadocs/content-collections
   - id: npm:fumadocs-core
   - id: npm:create-fumadocs-app
-  - id: npm:create-fumadocs-versions
   - id: npm:fumadocs-docgen
-  - id: npm:fumadocs-epub
+  - id: npm:create-fumadocs-versions
   - id: npm:@fumadocs/graphql
+  - id: npm:fumadocs-epub
   - id: npm:@fumari/image-size
   - id: npm:@fumadocs/json-schema
   - id: npm:@fumadocs/language
   - id: npm:@fumadocs/local-content
   - id: npm:@fumadocs/local-html
   - id: npm:@fumadocs/local-md
-  - id: npm:fumadocs-mdx
   - id: npm:@fumadocs/mdx-remote
+  - id: npm:fumadocs-mdx
   - id: npm:@fumadocs/notion
   - id: npm:fumadocs-obsidian
   - id: npm:fumadocs-openapi
@@ -134,43 +121,43 @@ npm:packages:
   - id: npm:fumadocs-python
   - id: npm:fumadocs-ui
   - id: npm:@fumadocs/sanity
-  - id: npm:@fumadocs/satteri
   - id: npm:@fumadocs/shadcn
+  - id: npm:@fumadocs/satteri
+  - id: npm:@fumari/stf
   - id: npm:shared-api
   - id: npm:@fumadocs/story
-  - id: npm:@fumari/stf
   - id: npm:@fumadocs/tailwind
   - id: npm:fumadocs-twoslash
-  - id: npm:fumadocs-typescript
   - id: npm:@fumadocs/vite
-  - id: npm:example-astro
+  - id: npm:fumadocs-typescript
   - id: npm:docs
   - id: npm:example-asyncapi
+  - id: npm:example-astro
   - id: npm:example-base-ui
   - id: npm:example-content-collections
   - id: npm:example-graphql
   - id: npm:example-i18n
-  - id: npm:example-next-local-html
-  - id: npm:example-next
   - id: npm:example-marble-cms
+  - id: npm:example-next
+  - id: npm:example-next-local-html
   - id: npm:example-next-local-md
   - id: npm:example-next-min
-  - id: npm:example-next-shadcn
   - id: npm:example-next-static
-  - id: npm:example-openapi
   - id: npm:example-obsidian
+  - id: npm:example-openapi
+  - id: npm:example-next-shadcn
   - id: npm:example-python
-  - id: npm:example-react-router
   - id: npm:example-react-router-i18n
-  - id: npm:example-react-router-min
+  - id: npm:example-react-router
   - id: npm:example-react-router-rsc
+  - id: npm:example-react-router-min
   - id: npm:example-react-router-spa
-  - id: npm:example-tanstack-start
   - id: npm:example-tanstack-start-i18n
+  - id: npm:example-tanstack-start
   - id: npm:example-tanstack-start-local-md
   - id: npm:example-tanstack-start-min
-  - id: npm:example-tanstack-start-openapi
   - id: npm:example-tanstack-start-spa
+  - id: npm:example-tanstack-start-openapi
   - id: npm:example-tanstack-start-story
   - id: npm:example-waku
   - id: npm:example-waku-i18n
