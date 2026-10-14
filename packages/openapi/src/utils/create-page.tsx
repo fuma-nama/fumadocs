@@ -26,7 +26,6 @@ import {
   type PageComponents,
   type ShikiOptions,
 } from 'shared-api/components/defaults';
-import { PlaygroundAuthProvider } from '@/playground/auth';
 import { ServerProvider } from './use-server';
 
 /** components the UI renders through, so a page can replace them */
@@ -356,7 +355,7 @@ function OpenAPIProvider({
             servers={runtime.doc.dereferenced.servers}
             storageKeyPrefix={runtime.storageKeyPrefix}
           >
-            <PlaygroundAuthProvider>{children}</PlaygroundAuthProvider>
+            {children}
           </ServerProvider>
         </OptionsContext>
       </ComponentsContext>

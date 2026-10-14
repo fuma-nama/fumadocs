@@ -7,7 +7,6 @@ import { useExampleRequests, useOperation } from '@/operation';
 import { pathnameFromRequest } from '@/requests/generators';
 import { encodeRequestData } from '@/requests/media/encode';
 import type { RawRequestData } from '@/requests/types';
-import type { OAuth2SecurityScheme } from '@/types';
 import { useOpenAPI } from '@/utils/create-page';
 import { getPreferredType } from '@/utils/schema';
 import { useServer } from '@/utils/use-server';
@@ -20,7 +19,6 @@ import {
   readPendingFlow,
   requestOAuthToken,
   useAuthFields,
-  usePlaygroundAuth,
 } from './auth';
 import { type BrowserFetcherOptions, createBrowserFetcher, type FetchResult } from './fetcher';
 
@@ -49,17 +47,18 @@ export interface PlaygroundAuth {
   /** the fields of the selected requirement */
   fields: AuthField[];
   /**
-   * Obtain the access token of an OAuth 2.0 field, and write it into the field.
+   * Obtain the access token of an OAuth 2.0 or OpenID Connect field, and write it into the field.
    *
-   * `implicit` and `authorizationCode` leave the page without a token, `flowReturned` is set when they return.
+   * `implicit` and `authorizationCode` leave the page without a token, `flowReturned` is set when they return, finish them with `useAuthRedirect()` and `finishOAuthFlow()`.
    */
   authorize: (field: AuthField, input: OAuthInput) => Promise<string | undefined>;
   /** a flow started here has returned to the page */
   flowReturned: boolean;
 }
 
-export interface OAuthInput extends Partial<
-  Pick<OAuthFlowInput, 'clientId' | 'clientSecret' | 'username' | 'password' | 'clientAuth'>
+export interface OAuthInput extends Pick<
+  OAuthFlowInput,
+  'clientId' | 'clientSecret' | 'username' | 'password' | 'clientAuth' | 'onUserCode' | 'signal'
 > {
   type: OAuthFlowType;
   /** defaults to the scopes required by the operation */
@@ -102,8 +101,7 @@ export function usePlayground({
   const { resolveUrl } = useServer();
   // where OAuth flows return to
   const origin = `${method} ${path}`;
-  const oauthOrigin = usePlaygroundAuth().origin;
-  // the scheme of a flow that left the page with `useAuthRedirect()`, and returned to this playground
+  // the scheme of a flow that left the page, and returned to this playground
   const returnedScheme = useSyncExternalStore(
     subscribeNever,
     () => {
@@ -112,7 +110,7 @@ export function usePlayground({
     },
     () => undefined,
   );
-  const flowReturned = returnedScheme !== undefined || oauthOrigin === origin;
+  const flowReturned = returnedScheme !== undefined;
   const [response, setResponse] = useState<PlaygroundResponse>();
   const [isSending, setSending] = useState(false);
   let body: RequestBodyInfo | undefined;
@@ -191,17 +189,14 @@ export function usePlayground({
       selected: auth.selected,
       select: auth.select,
       fields: auth.fields,
-      async authorize(field, { type, scopes = field.scopes, clientAuth = 'header', ...input }) {
-        const token = await requestOAuthToken(field.scheme as OAuth2SecurityScheme, type, {
-          clientId: input.clientId ?? '',
-          clientSecret: input.clientSecret ?? '',
-          username: input.username ?? '',
-          password: input.password ?? '',
+      async authorize(field, { type, scopes = field.scopes, ...input }) {
+        const token = await requestOAuthToken(field.scheme, type, {
+          ...input,
           scopes,
-          clientAuth,
           schemeId: field.schemeId,
           serverUrl: resolveUrl(),
           redirectUrl: oauthRedirectUrl,
+          proxyUrl,
           origin,
         });
         if (token) engine.update(field.fieldName, token);

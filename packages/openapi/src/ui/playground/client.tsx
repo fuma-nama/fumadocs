@@ -32,7 +32,7 @@ import {
   usePlayground,
 } from '@/playground/use-playground';
 import { UrlBar } from './components/url-bar';
-import { RequestPanel } from './components/request-panel';
+import { mutualTLSProvider, RequestPanel } from './components/request-panel';
 import { oauthPanelProvider } from './components/oauth-panel';
 import { ResponsePanel } from './components/response-panel';
 import { Segmented, SegmentedList } from '@/ui/components/segmented';
@@ -93,7 +93,10 @@ export default function PlaygroundClient({
   const t = useTranslations({ note: 'playground' });
   const { doc } = useOpenAPI();
   const { path, method, operation } = useOperation();
-  const providers = useMemo(() => [...(authProviders ?? []), oauthPanelProvider], [authProviders]);
+  const providers = useMemo(
+    () => [...(authProviders ?? []), oauthPanelProvider, mutualTLSProvider],
+    [authProviders],
+  );
   const playground = usePlayground({ authProviders: providers, transformAuthInputs, fetchOptions });
   const [open, setOpen] = useState(false);
 

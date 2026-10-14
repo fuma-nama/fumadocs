@@ -1,11 +1,10 @@
 'use client';
 import { useOpenAPI } from '@/utils/create-page';
+import { useServer } from '@/utils/use-server';
 import { useQuery } from 'shared-api/utils/use-query';
 import {
-  createContext,
   type FC,
   type ReactNode,
-  use,
   useCallback,
   useEffect,
   useEffectEvent,
@@ -15,36 +14,35 @@ import {
 import { type DataEngine, type FieldKey, useListener } from '@fumari/stf';
 import { arrayStartsWith, objectGet } from '@fumari/stf/lib/utils';
 import type { JsonSchema } from '@fumadocs/json-schema';
-import type { OAuth2SecurityScheme, OperationObject, SecuritySchemeObject } from '@/types';
+import type { OAuthFlows, OperationObject, SecuritySchemeObject } from '@/types';
 import type { RawRequestData } from '@/requests/types';
 import { useOperation } from '@/operation';
+import { proxied } from './fetcher';
 
-/** an `implicit` or `authorizationCode` flow that left the page */
-interface OAuthFlowData {
-  /** the random `state` of the flow */
-  state: string;
+/** how token requests authenticate the client */
+interface OAuthClient {
   client_id: string;
   client_secret: string;
-  client_auth: OAuthFlowInput['clientAuth'];
+  client_auth: NonNullable<OAuthFlowInput['clientAuth']>;
+}
+
+/** an `implicit` or `authorizationCode` flow that left the page */
+interface OAuthFlowData extends OAuthClient {
+  /** the random `state` of the flow */
+  state: string;
   redirect_uri: string;
   token_url?: string;
+  /** the PKCE code verifier of `authorizationCode` */
+  code_verifier?: string;
 }
 
-/** a flow of `requestOAuthToken()` that left the page, in `sessionStorage` */
-interface PendingOAuthFlow extends OAuthFlowData {
-  /** name of the security scheme */
-  scheme: string;
-  origin?: string;
-}
-
-/** a flow that left the page with `useAuthRedirect()`, in `sessionStorage` */
+/** a flow that left the page, in `sessionStorage` */
 interface PendingFlow {
   scheme: string;
-  origin: string;
+  origin?: string;
   data: unknown;
 }
 
-const pendingOAuthKey = 'fumadocs-openapi-oauth';
 const pendingFlowKey = 'fumadocs-openapi-flow';
 
 export function readPendingFlow(): PendingFlow | undefined {
@@ -52,79 +50,116 @@ export function readPendingFlow(): PendingFlow | undefined {
   if (stored) return JSON.parse(stored) as PendingFlow;
 }
 
-function leavePage(url: string | URL, redirectUrl?: string, flow?: PendingFlow) {
-  if (flow) sessionStorage.setItem(pendingFlowKey, JSON.stringify(flow));
+function leavePage(url: string | URL, flow: PendingFlow, redirectUrl?: string) {
+  sessionStorage.setItem(pendingFlowKey, JSON.stringify(flow));
   // where `createOAuthHandler()` sends users back to
   if (redirectUrl)
     document.cookie = `fumadocs-openapi-oauth=${encodeURIComponent(window.location.pathname)}; path=/`;
   window.location.replace(url);
 }
 
-export type OAuthFlowType = keyof NonNullable<OAuth2SecurityScheme['flows']>;
+export type OAuthFlowType = keyof OAuthFlows;
 
 export interface OAuthFlowInput {
   /** name of the security scheme */
   schemeId: string;
   scopes: string[];
-  clientId: string;
-  clientSecret: string;
-  username: string;
-  password: string;
+  clientId?: string;
+  clientSecret?: string;
+  username?: string;
+  password?: string;
   /**
    * where token requests send the client credentials,
    * `header` (HTTP Basic) applies only with a client secret, otherwise the `client_id` goes in the body
+   *
+   * @defaultValue 'header'
    */
-  clientAuth: 'body' | 'header';
+  clientAuth?: 'body' | 'header';
   /** URL of the selected server, relative URLs of the flow resolve against it */
   serverUrl: string;
   /** URL of the `createOAuthHandler()` route, defaults to the page */
   redirectUrl?: string;
+  /** URL of the `createProxy()` route, requests of confidential clients (with a client secret) and devices go through it */
+  proxyUrl?: string;
   /** where the flow started, like an operation, restored when it returns to the page */
   origin?: string;
   /**
    * leave the page for `implicit` and `authorizationCode`, like the one of `useAuthRedirect()`, `finishOAuthFlow()` takes `data` when it returns.
    *
-   * By default, `usePlaygroundAuth()` finishes them.
+   * By default, they return to the `useAuthRedirect()` of scheme at `origin`.
    */
   redirect?: (url: URL, data: unknown) => void;
+  /** show the code of `deviceAuthorization`, the token resolves once users enter it on the verification page */
+  onUserCode?: (code: DeviceUserCode) => void;
+  /** cancel the flow, like the polling of `deviceAuthorization` */
+  signal?: AbortSignal;
+}
+
+export interface DeviceUserCode {
+  /** the code users enter on the verification page */
+  userCode: string;
+  verificationUri: string;
+  /** the verification page with the code filled in */
+  verificationUriComplete?: string;
+}
+
+interface DeviceAuthorizationResponse {
+  device_code: string;
+  user_code: string;
+  verification_uri: string;
+  verification_uri_complete?: string;
+  expires_in: number;
+  interval?: number;
 }
 
 /**
- * Run an OAuth flow and resolve its token.
+ * Run an OAuth flow and resolve its token, `openIdConnect` schemes run the flows of their OpenID Connect configuration.
  *
  * `implicit` and `authorizationCode` leave the page instead, see `redirect`.
  */
 export async function requestOAuthToken(
-  scheme: OAuth2SecurityScheme,
+  scheme: SecuritySchemeObject,
   type: OAuthFlowType,
   {
     schemeId,
     scopes,
-    clientId,
-    clientSecret,
-    username,
-    password,
-    clientAuth,
+    clientId = '',
+    clientSecret = '',
+    username = '',
+    password = '',
+    clientAuth = 'header',
     serverUrl,
     redirectUrl,
+    proxyUrl,
     origin,
     redirect,
+    onUserCode,
+    signal,
   }: OAuthFlowInput,
 ): Promise<string | undefined> {
-  const flows = scheme.flows ?? {};
+  const flows =
+    scheme.type === 'openIdConnect'
+      ? await discoverOAuthFlows(scheme.openIdConnectUrl!, serverUrl)
+      : (scheme.type === 'oauth2' && scheme.flows) || {};
+  // only public clients are expected to make requests from browsers, see RFC 10017 and RFC 8628
+  const via = clientSecret || type === 'deviceAuthorization' ? proxyUrl : undefined;
+  const endpoint = (url: string) => proxied(new URL(url, serverUrl).href, via);
   const scope = scopes.join(' ');
+  const client: OAuthClient = {
+    client_id: clientId,
+    client_secret: clientSecret,
+    client_auth: clientAuth,
+  };
 
   if (type === 'implicit' || type === 'authorizationCode') {
     const flow = flows[type];
     if (!flow) return;
     const data: OAuthFlowData = {
+      ...client,
       state: crypto.getRandomValues(new Uint32Array(4)).join(''),
-      client_id: clientId,
-      client_secret: clientSecret,
-      client_auth: clientAuth,
       // redirect URIs cannot have a fragment
       redirect_uri: new URL(redirectUrl ?? window.location.pathname, window.location.origin).href,
-      token_url: 'tokenUrl' in flow ? new URL(flow.tokenUrl!, serverUrl).href : undefined,
+      token_url: 'tokenUrl' in flow ? endpoint(flow.tokenUrl!) : undefined,
     };
 
     // keep the params of `authorizationUrl`, like `audience`
@@ -134,19 +169,62 @@ export async function requestOAuthToken(
     url.searchParams.set('redirect_uri', data.redirect_uri);
     url.searchParams.set('scope', scope);
     url.searchParams.set('state', data.state);
-    if (redirect) {
-      redirect(url, data);
-    } else {
-      const pending: PendingOAuthFlow = { ...data, scheme: schemeId, origin };
-      sessionStorage.setItem(pendingOAuthKey, JSON.stringify(pending));
-      leavePage(url, redirectUrl);
+    if (type === 'authorizationCode') {
+      // PKCE, see RFC 7636
+      data.code_verifier = base64Url(crypto.getRandomValues(new Uint8Array(32)));
+      const challenge = await crypto.subtle.digest(
+        'SHA-256',
+        new TextEncoder().encode(data.code_verifier),
+      );
+      url.searchParams.set('code_challenge', base64Url(new Uint8Array(challenge)));
+      url.searchParams.set('code_challenge_method', 'S256');
     }
+
+    if (redirect) redirect(url, data);
+    else leavePage(url, { scheme: schemeId, origin, data }, redirectUrl);
     return;
   }
 
-  if (type !== 'password' && type !== 'clientCredentials') return;
   const flow = flows[type];
-  if (!flow) return;
+  if (!flow?.tokenUrl) return;
+  const tokenUrl = endpoint(flow.tokenUrl);
+
+  if (type === 'deviceAuthorization') {
+    const device = await postForm<DeviceAuthorizationResponse>(
+      endpoint(flows.deviceAuthorization!.deviceAuthorizationUrl!),
+      new URLSearchParams({ scope }),
+      client,
+      signal,
+    );
+    onUserCode?.({
+      userCode: device.user_code,
+      verificationUri: device.verification_uri,
+      verificationUriComplete: device.verification_uri_complete,
+    });
+
+    // poll until users finish, see RFC 8628 section 3.5
+    const body = new URLSearchParams({
+      grant_type: 'urn:ietf:params:oauth:grant-type:device_code',
+      device_code: device.device_code,
+    });
+    const expiresAt = Date.now() + device.expires_in * 1000;
+    let interval = (device.interval ?? 5) * 1000;
+    while (Date.now() < expiresAt) {
+      // ends early when cancelled, the request then rejects right away
+      await new Promise((resolve) => {
+        setTimeout(resolve, interval);
+        signal?.addEventListener('abort', resolve);
+      });
+      try {
+        return await fetchToken(tokenUrl, body, client, signal);
+      } catch (e) {
+        const code = e instanceof OAuthError ? e.code : undefined;
+        if (code === 'slow_down') interval += 5000;
+        else if (code !== 'authorization_pending') throw e;
+      }
+    }
+    throw new Error('The device code has expired.');
+  }
 
   const body = new URLSearchParams({ scope });
   if (type === 'password') {
@@ -157,11 +235,7 @@ export async function requestOAuthToken(
     body.set('grant_type', 'client_credentials');
   }
 
-  return fetchToken(new URL(flow.tokenUrl!, serverUrl).href, body, {
-    client_id: clientId,
-    client_secret: clientSecret,
-    client_auth: clientAuth,
-  });
+  return fetchToken(tokenUrl, body, client, signal);
 }
 
 /**
@@ -179,6 +253,7 @@ export function finishOAuthFlow(url: URL, data: unknown): Promise<string> | stri
       code,
       redirect_uri: flow.redirect_uri,
     });
+    if (flow.code_verifier) body.set('code_verifier', flow.code_verifier);
     return fetchToken(flow.token_url!, body, flow);
   }
 
@@ -188,15 +263,22 @@ export function finishOAuthFlow(url: URL, data: unknown): Promise<string> | stri
     return `${hash.get('token_type') ?? 'Bearer'} ${token}`;
 }
 
-async function fetchToken(
-  tokenUrl: string,
+/** an error response of OAuth 2.0 endpoints, `code` is its `error` */
+class OAuthError extends Error {
+  constructor(
+    message: string,
+    readonly code?: string,
+  ) {
+    super(message);
+  }
+}
+
+async function postForm<T>(
+  url: string,
   body: URLSearchParams,
-  {
-    client_id,
-    client_secret,
-    client_auth,
-  }: Pick<OAuthFlowData, 'client_id' | 'client_secret' | 'client_auth'>,
-): Promise<string> {
+  { client_id, client_secret, client_auth }: OAuthClient,
+  signal?: AbortSignal,
+): Promise<T> {
   const headers: Record<string, string> = { 'Content-Type': 'application/x-www-form-urlencoded' };
   if (client_auth === 'header' && client_secret) {
     // form-encoded first, see RFC 6749 section 2.3.1
@@ -206,120 +288,111 @@ async function fetchToken(
     if (client_secret) body.set('client_secret', client_secret);
   }
 
-  const res = await fetch(tokenUrl, { method: 'POST', headers, body });
+  const res = await fetch(url, { method: 'POST', headers, body, signal });
+  const text = await res.text();
+  let data: (T & { error?: string; error_description?: string }) | undefined;
+  try {
+    data = JSON.parse(text);
+  } catch {}
+  // some servers respond errors with 200
+  if (res.ok && data && !data.error) return data;
 
-  if (!res.ok) throw new Error(await res.text());
-  const { access_token, token_type = 'Bearer' } = (await res.json()) as {
+  let message = text;
+  if (data?.error)
+    message = data.error_description ? `${data.error}: ${data.error_description}` : data.error;
+  throw new OAuthError(message, data?.error);
+}
+
+async function fetchToken(
+  url: string,
+  body: URLSearchParams,
+  client: OAuthClient,
+  signal?: AbortSignal,
+): Promise<string> {
+  const { access_token, token_type = 'Bearer' } = await postForm<{
     access_token: string;
     token_type?: string;
-  };
+  }>(url, body, client, signal);
 
   return `${token_type} ${access_token}`;
 }
 
-/** scheme name -> token info */
-type TokenStore = Record<string, TokenInfo | undefined>;
-type TokenInfo =
-  | {
-      type: 'authorization_code';
-      client_id: string;
-      client_secret: string;
-      client_auth: OAuthFlowInput['clientAuth'];
-      token: string;
-    }
-  | {
-      type: 'implicit';
-      client_id: string;
-      token: string;
+function base64Url(bytes: Uint8Array): string {
+  return btoa(String.fromCharCode(...bytes))
+    .replace(/\+/g, '-')
+    .replace(/\//g, '_')
+    .replace(/=+$/, '');
+}
+
+const discovered = new Map<string, Promise<OAuthFlows>>();
+
+/**
+ * The OAuth 2.0 flows of an OpenID Connect configuration, cached until it fails.
+ */
+function discoverOAuthFlows(configUrl: string, serverUrl: string): Promise<OAuthFlows> {
+  const url = new URL(configUrl, serverUrl).href;
+  let result = discovered.get(url);
+  if (result) return result;
+
+  result = fetch(url).then(async (res) => {
+    if (!res.ok) throw new Error(`${res.status} ${res.statusText}`);
+    const config = (await res.json()) as {
+      authorization_endpoint?: string;
+      token_endpoint?: string;
+      device_authorization_endpoint?: string;
+      grant_types_supported?: string[];
+      scopes_supported?: string[];
     };
+    // some configurations have relative endpoints
+    const resolve = (endpoint?: string) => endpoint && new URL(endpoint, url).href;
+    const authorizationUrl = resolve(config.authorization_endpoint);
+    const tokenUrl = resolve(config.token_endpoint);
+    const deviceAuthorizationUrl = resolve(config.device_authorization_endpoint);
+    // the default of OpenID Connect Discovery
+    const grants = new Set(config.grant_types_supported ?? ['authorization_code', 'implicit']);
+    const scopes: Record<string, string> = {};
+    for (const scope of config.scopes_supported ?? []) scopes[scope] = '';
 
-type TokenListener = (schemeId: string, token: string) => void;
+    const flows: OAuthFlows = {};
+    if (authorizationUrl && tokenUrl && grants.has('authorization_code'))
+      flows.authorizationCode = { authorizationUrl, tokenUrl, scopes };
+    if (authorizationUrl && grants.has('implicit')) flows.implicit = { authorizationUrl, scopes };
+    if (tokenUrl && grants.has('password')) flows.password = { tokenUrl, scopes };
+    if (tokenUrl && grants.has('client_credentials'))
+      flows.clientCredentials = { tokenUrl, scopes };
+    if (
+      deviceAuthorizationUrl &&
+      tokenUrl &&
+      grants.has('urn:ietf:params:oauth:grant-type:device_code')
+    )
+      flows.deviceAuthorization = { deviceAuthorizationUrl, tokenUrl, scopes };
+    return flows;
+  });
+  discovered.set(url, result);
+  result.catch(() => discovered.delete(url));
+  return result;
+}
 
-interface AuthContextType {
-  store: TokenStore;
-  isLoading: boolean;
+/**
+ * The OAuth 2.0 flows of a field, `openIdConnect` schemes discover them from their OpenID Connect configuration.
+ */
+export function useOAuthFlows({ scheme }: AuthField): {
+  /** `undefined` while discovering */
+  flows?: OAuthFlows;
   error?: unknown;
-  /** `origin` of the flow that returned to the page */
-  origin?: string;
-  /** listen to the tokens of flows returning to the page, returns a cleanup */
-  subscribe: (listener: TokenListener) => () => void;
-}
-
-const AuthContext = createContext<AuthContextType | null>(null);
-
-export function usePlaygroundAuth() {
-  const ctx = use(AuthContext);
-  if (!ctx) throw new Error('Component must be used under <OpenAPIProvider />');
-  return ctx;
-}
-
-export function PlaygroundAuthProvider({ children }: { children: ReactNode }) {
-  const [store, setStore] = useState<TokenStore>({});
-  const [origin, setOrigin] = useState<string>();
-  const { subscribe, emit } = useMemo(() => {
-    const listeners = new Set<TokenListener>();
-
-    return {
-      subscribe(listener: TokenListener) {
-        listeners.add(listener);
-        return () => {
-          listeners.delete(listener);
-        };
-      },
-      emit(schemeId: string, token: string) {
-        for (const listener of listeners) listener(schemeId, token);
-      },
-    };
-  }, []);
-
-  const returnQuery = useQuery(async (flow: PendingOAuthFlow, result: Promise<string> | string) => {
-    setOrigin(flow.origin);
-    const token = await result;
-    const info: TokenInfo =
-      typeof result === 'string'
-        ? { type: 'implicit', client_id: flow.client_id, token }
-        : {
-            type: 'authorization_code',
-            client_id: flow.client_id,
-            client_secret: flow.client_secret,
-            client_auth: flow.client_auth,
-            token,
-          };
-
-    setStore((s) => ({ ...s, [flow.scheme]: info }));
-    emit(flow.scheme, token);
+} {
+  const serverUrl = useServer().resolveUrl();
+  const query = useQuery(discoverOAuthFlows);
+  const discover = useEffectEvent(() => {
+    if (scheme.type !== 'openIdConnect') return;
+    query.reset();
+    void query.start(scheme.openIdConnectUrl!, serverUrl);
   });
 
-  const onMount = useEffectEvent(() => {
-    const stored = sessionStorage.getItem(pendingOAuthKey);
-    if (!stored) return;
-    const flow = JSON.parse(stored) as PendingOAuthFlow;
-    const result = finishOAuthFlow(new URL(window.location.href), flow);
-    if (result === undefined) return;
+  useEffect(() => discover(), [scheme, serverUrl]);
 
-    sessionStorage.removeItem(pendingOAuthKey);
-    window.history.replaceState(null, '', window.location.pathname);
-    void returnQuery.start(flow, result);
-  });
-
-  useEffect(() => onMount(), []);
-
-  return (
-    <AuthContext
-      value={useMemo(
-        () => ({
-          store,
-          isLoading: returnQuery.isLoading,
-          error: returnQuery.error,
-          origin,
-          subscribe,
-        }),
-        [store, returnQuery.isLoading, returnQuery.error, origin, subscribe],
-      )}
-    >
-      {children}
-    </AuthContext>
-  );
+  if (scheme.type === 'openIdConnect') return { flows: query.data, error: query.error };
+  return { flows: (scheme.type === 'oauth2' && scheme.flows) || {} };
 }
 
 /**
@@ -345,7 +418,7 @@ export function useAuthRedirect(
   });
 
   useEffect(() => onMount(), []);
-  return (url, data) => leavePage(url, oauthRedirectUrl, { scheme: field.schemeId, origin, data });
+  return (url, data) => leavePage(url, { scheme: field.schemeId, origin, data }, oauthRedirectUrl);
 }
 
 export interface AuthRequirement {
@@ -403,7 +476,7 @@ export interface AuthField {
 
 const builtinProviders: AuthProvider[] = [
   {
-    on: ({ scheme }) => scheme.type === 'http' && scheme.scheme === 'basic',
+    on: ({ scheme }) => scheme.type === 'http' && scheme.scheme?.toLowerCase() === 'basic',
     render: ({ field, Value }) => (
       <>
         <Value
@@ -431,6 +504,12 @@ const builtinProviders: AuthProvider[] = [
     },
   },
   {
+    // the browser presents its client certificate instead
+    on: ({ scheme }) => scheme.type === 'mutualTLS',
+    render: () => null,
+    onRequest() {},
+  },
+  {
     render: ({ field, Value }) => (
       <Value name="Authorization" type="header" description={field.scheme.description} />
     ),
@@ -453,8 +532,9 @@ function findProvider(providers: AuthProvider[] = [], item: AuthRequirement): Au
 
 function getDefaultValue(scheme: SecuritySchemeObject): unknown {
   if (scheme.type === 'apiKey') return '';
+  if (scheme.type === 'mutualTLS') return null;
   if (scheme.type !== 'http' || !scheme.scheme) return 'Bearer ';
-  if (scheme.scheme === 'basic') return { username: '', password: '' };
+  if (scheme.scheme.toLowerCase() === 'basic') return { username: '', password: '' };
   // HTTP schemes are prefixed by their name, like `Token `
   return `${scheme.scheme[0].toUpperCase()}${scheme.scheme.slice(1)} `;
 }
@@ -491,7 +571,6 @@ export function useAuthFields(
   engine: DataEngine,
   { operation, providers, transform }: AuthFieldsOptions = {},
 ): AuthFields {
-  const { subscribe } = usePlaygroundAuth();
   const { storageKeyPrefix, doc } = useOpenAPI();
   const { dereferenced, resolve } = doc;
   const schemes = dereferenced.components?.securitySchemes;
@@ -551,24 +630,6 @@ export function useAuthFields(
       }
     },
   });
-
-  const onToken = useEffectEvent((schemeId: string, token: string) => {
-    const field = fields.find((field) => field.schemeId === schemeId);
-    if (field) {
-      // update current value
-      engine.update(field.fieldName, token);
-      return;
-    }
-
-    const idx = requirements.findIndex((req) => req.some((item) => item.id === schemeId));
-    if (idx !== -1) {
-      // persisted value
-      localStorage.setItem(`${storageKeyPrefix}auth-${schemeId}`, JSON.stringify(token));
-      select(idx);
-    }
-  });
-
-  useEffect(() => subscribe(onToken), [subscribe]);
 
   return {
     requirements,

@@ -5,12 +5,13 @@ export {
   type AuthProvider,
   type AuthRenderProps,
   type AuthRequirement,
+  type DeviceUserCode,
   finishOAuthFlow,
   type OAuthFlowType,
   requestOAuthToken,
   useAuthFields,
   useAuthRedirect,
-  usePlaygroundAuth,
+  useOAuthFlows,
 } from './auth';
 export {
   type BrowserFetcherOptions,
