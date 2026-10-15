@@ -98,7 +98,8 @@ export default function PlaygroundClient({
     [authProviders],
   );
   const playground = usePlayground({ authProviders: providers, transformAuthInputs, fetchOptions });
-  const [open, setOpen] = useState(false);
+  // client-rendered pages read the returned flow on the first render
+  const [open, setOpen] = useState(playground.auth.flowReturned);
 
   useOnChange(playground.auth.flowReturned, (returned) => {
     if (returned) setOpen(true);

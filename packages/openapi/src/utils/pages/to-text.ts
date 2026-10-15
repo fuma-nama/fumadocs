@@ -9,8 +9,7 @@ import {
   type WebhookItem,
   type WebhookOutput,
 } from '@/utils/pages/builder';
-import type { InternalOpenAPIMeta } from '@/server';
-import { toStaticData } from '@/utils/pages/to-static-data';
+import { type InternalOpenAPIMeta, toStaticData } from '@/utils/pages/to-static-data';
 import { doubleQuote } from '@/requests/string-utils';
 
 export interface PagesToTextOptions {

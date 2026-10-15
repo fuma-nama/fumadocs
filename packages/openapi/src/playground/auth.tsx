@@ -3,15 +3,17 @@ import { useOpenAPI } from '@/utils/create-page';
 import { useServer } from '@/utils/use-server';
 import { useQuery } from 'shared-api/utils/use-query';
 import {
+  createContext,
   type FC,
   type ReactNode,
+  use,
   useCallback,
   useEffect,
-  useEffectEvent,
   useMemo,
   useState,
+  useSyncExternalStore,
 } from 'react';
-import { type DataEngine, type FieldKey, useListener } from '@fumari/stf';
+import { type DataEngine, type FieldKey, type Stf, useListener, useStf } from '@fumari/stf';
 import { arrayStartsWith, objectGet } from '@fumari/stf/lib/utils';
 import type { JsonSchema } from '@fumadocs/json-schema';
 import type { OAuthFlows, OperationObject, SecuritySchemeObject } from '@/types';
@@ -38,17 +40,17 @@ interface OAuthFlowData extends OAuthClient {
 
 /** a flow that left the page, in `sessionStorage` */
 interface PendingFlow {
+  /** name of the security scheme */
   scheme: string;
+  /** where the flow started, like an operation */
   origin?: string;
+  /** the data it left the page with */
   data: unknown;
+  /** an OAuth flow started without `redirect`, the page finishes it */
+  oauth?: true;
 }
 
 const pendingFlowKey = 'fumadocs-openapi-flow';
-
-export function readPendingFlow(): PendingFlow | undefined {
-  const stored = sessionStorage.getItem(pendingFlowKey);
-  if (stored) return JSON.parse(stored) as PendingFlow;
-}
 
 function leavePage(url: string | URL, flow: PendingFlow, redirectUrl?: string) {
   sessionStorage.setItem(pendingFlowKey, JSON.stringify(flow));
@@ -86,7 +88,7 @@ export interface OAuthFlowInput {
   /**
    * leave the page for `implicit` and `authorizationCode`, like the one of `useAuthRedirect()`, `finishOAuthFlow()` takes `data` when it returns.
    *
-   * By default, they return to the `useAuthRedirect()` of scheme at `origin`.
+   * By default, the page finishes them, see `usePlaygroundAuth()`.
    */
   redirect?: (url: URL, data: unknown) => void;
   /** show the code of `deviceAuthorization`, the token resolves once users enter it on the verification page */
@@ -137,10 +139,11 @@ export async function requestOAuthToken(
     signal,
   }: OAuthFlowInput,
 ): Promise<string | undefined> {
-  const flows =
+  const { flows, error } =
     scheme.type === 'openIdConnect'
       ? await discoverOAuthFlows(scheme.openIdConnectUrl!, serverUrl)
-      : (scheme.type === 'oauth2' && scheme.flows) || {};
+      : { flows: (scheme.type === 'oauth2' && scheme.flows) || {} };
+  if (!flows) throw error;
   // only public clients are expected to make requests from browsers, see RFC 10017 and RFC 8628
   const via = clientSecret || type === 'deviceAuthorization' ? proxyUrl : undefined;
   const endpoint = (url: string) => proxied(new URL(url, serverUrl).href, via);
@@ -181,7 +184,7 @@ export async function requestOAuthToken(
     }
 
     if (redirect) redirect(url, data);
-    else leavePage(url, { scheme: schemeId, origin, data }, redirectUrl);
+    else leavePage(url, { scheme: schemeId, origin, data, oauth: true }, redirectUrl);
     return;
   }
 
@@ -218,7 +221,7 @@ export async function requestOAuthToken(
       try {
         return await fetchToken(tokenUrl, body, client, signal);
       } catch (e) {
-        const code = e instanceof OAuthError ? e.code : undefined;
+        const code = e instanceof Error ? e.cause : undefined;
         if (code === 'slow_down') interval += 5000;
         else if (code !== 'authorization_pending') throw e;
       }
@@ -263,16 +266,6 @@ export function finishOAuthFlow(url: URL, data: unknown): Promise<string> | stri
     return `${hash.get('token_type') ?? 'Bearer'} ${token}`;
 }
 
-/** an error response of OAuth 2.0 endpoints, `code` is its `error` */
-class OAuthError extends Error {
-  constructor(
-    message: string,
-    readonly code?: string,
-  ) {
-    super(message);
-  }
-}
-
 async function postForm<T>(
   url: string,
   body: URLSearchParams,
@@ -300,7 +293,8 @@ async function postForm<T>(
   let message = text;
   if (data?.error)
     message = data.error_description ? `${data.error}: ${data.error_description}` : data.error;
-  throw new OAuthError(message, data?.error);
+  // the `error` code of OAuth 2.0 endpoints
+  throw new Error(message, { cause: data?.error });
 }
 
 async function fetchToken(
@@ -324,17 +318,20 @@ function base64Url(bytes: Uint8Array): string {
     .replace(/=+$/, '');
 }
 
-const discovered = new Map<string, Promise<OAuthFlows>>();
+/** the OAuth 2.0 flows of an OpenID Connect configuration, or why discovering them failed */
+type OpenIdConnectFlows = { flows: OAuthFlows; error?: never } | { flows?: never; error: unknown };
+
+const discovered = new Map<string, Promise<OpenIdConnectFlows>>();
 
 /**
- * The OAuth 2.0 flows of an OpenID Connect configuration, cached until it fails.
+ * The OAuth 2.0 flows of an OpenID Connect configuration, cached.
  */
-function discoverOAuthFlows(configUrl: string, serverUrl: string): Promise<OAuthFlows> {
+function discoverOAuthFlows(configUrl: string, serverUrl: string): Promise<OpenIdConnectFlows> {
   const url = new URL(configUrl, serverUrl).href;
   let result = discovered.get(url);
   if (result) return result;
 
-  result = fetch(url).then(async (res) => {
+  result = fetch(url).then(async (res): Promise<OpenIdConnectFlows> => {
     if (!res.ok) throw new Error(`${res.status} ${res.statusText}`);
     const config = (await res.json()) as {
       authorization_endpoint?: string;
@@ -366,33 +363,20 @@ function discoverOAuthFlows(configUrl: string, serverUrl: string): Promise<OAuth
       grants.has('urn:ietf:params:oauth:grant-type:device_code')
     )
       flows.deviceAuthorization = { deviceAuthorizationUrl, tokenUrl, scopes };
-    return flows;
+    return { flows };
   });
+  result = result.catch((error: unknown) => ({ error }));
   discovered.set(url, result);
-  result.catch(() => discovered.delete(url));
   return result;
 }
 
 /**
- * The OAuth 2.0 flows of a field, `openIdConnect` schemes discover them from their OpenID Connect configuration.
+ * The OAuth 2.0 flows of an OpenID Connect configuration, or the error of discovering them, a relative URL resolves against the selected server.
+ *
+ * It suspends while discovering them.
  */
-export function useOAuthFlows({ scheme }: AuthField): {
-  /** `undefined` while discovering */
-  flows?: OAuthFlows;
-  error?: unknown;
-} {
-  const serverUrl = useServer().resolveUrl();
-  const query = useQuery(discoverOAuthFlows);
-  const discover = useEffectEvent(() => {
-    if (scheme.type !== 'openIdConnect') return;
-    query.reset();
-    void query.start(scheme.openIdConnectUrl!, serverUrl);
-  });
-
-  useEffect(() => discover(), [scheme, serverUrl]);
-
-  if (scheme.type === 'openIdConnect') return { flows: query.data, error: query.error };
-  return { flows: (scheme.type === 'oauth2' && scheme.flows) || {} };
+export function useOpenIdConnectFlows(configUrl: string): OpenIdConnectFlows {
+  return use(discoverOAuthFlows(configUrl, useServer().resolveUrl()));
 }
 
 /**
@@ -406,19 +390,137 @@ export function useAuthRedirect(
 ): (url: string | URL, data?: unknown) => void {
   const { oauthRedirectUrl } = useOpenAPI();
   const { method, path } = useOperation();
+  const { returned } = usePlaygroundAuth();
   const origin = `${method} ${path}`;
-  const onMount = useEffectEvent(() => {
-    if (!onReturn) return;
-    const flow = readPendingFlow();
-    if (flow?.scheme !== field.schemeId || flow.origin !== origin) return;
-    sessionStorage.removeItem(pendingFlowKey);
-    const url = new URL(window.location.href);
+  // `onReturn` gets the flow once, ending it
+  useEffect(() => {
+    if (!onReturn || !returned || returned.oauth) return;
+    if (returned.scheme !== field.schemeId || returned.origin !== origin) return;
+    if (!endReturnedFlow(returned)) return;
     window.history.replaceState(null, '', window.location.pathname);
-    onReturn(url, flow.data);
+    onReturn(returned.url, returned.data);
+  }, [returned, onReturn, field.schemeId, origin]);
+  return (url, data) => leavePage(url, { scheme: field.schemeId, origin, data }, oauthRedirectUrl);
+}
+
+type TokenInfo =
+  | {
+      type: 'authorization_code';
+      client_id: string;
+      client_secret: string;
+      client_auth: OAuthClient['client_auth'];
+      token: string;
+    }
+  | {
+      type: 'implicit';
+      client_id: string;
+      token: string;
+    };
+
+interface ReturnedFlow extends PendingFlow {
+  /** the URL it returned to */
+  url: URL;
+}
+
+/** the flow that returned to the page, taken out of `sessionStorage` once read, until it is handled */
+let returnedFlow: ReturnedFlow | null | undefined;
+
+const subscribeNever = () => () => {};
+
+function getReturnedFlow(): ReturnedFlow | undefined {
+  if (returnedFlow === undefined) {
+    const stored = sessionStorage.getItem(pendingFlowKey);
+    sessionStorage.removeItem(pendingFlowKey);
+    returnedFlow = stored
+      ? { ...(JSON.parse(stored) as PendingFlow), url: new URL(window.location.href) }
+      : null;
+  }
+  return returnedFlow ?? undefined;
+}
+
+/** the returned flow is handled, `false` when it was already handled */
+function endReturnedFlow(flow: ReturnedFlow): boolean {
+  if (returnedFlow !== flow) return false;
+  returnedFlow = null;
+  return true;
+}
+
+/** returned OAuth flows the page is finishing */
+const finishing = new WeakSet<ReturnedFlow>();
+
+interface PlaygroundAuthState {
+  /** the values of security schemes, shared by the playgrounds of page */
+  stf: Stf;
+  /** the flow that returned to the page, until it is handled */
+  returned?: ReturnedFlow;
+  /** `origin` of the flow that returned to the page */
+  origin?: string;
+  /** the page is finishing the returned OAuth flow */
+  isLoading: boolean;
+  error?: unknown;
+  /** token info of the OAuth flow the page finished, by scheme */
+  store: Record<string, TokenInfo | undefined>;
+}
+
+const AuthContext = createContext<PlaygroundAuthState | null>(null);
+
+/**
+ * The auth of page: the values of security schemes, and the flow that returned to it.
+ */
+export function usePlaygroundAuth(): PlaygroundAuthState {
+  const ctx = use(AuthContext);
+  if (!ctx) throw new Error('Component must be used under <OpenAPIProvider />');
+  return ctx;
+}
+
+export function PlaygroundAuthProvider({ children }: { children: ReactNode }) {
+  const stf = useStf({ defaultValues: { auth: {} } });
+  // the server renders without it
+  const returned = useSyncExternalStore(subscribeNever, getReturnedFlow, () => undefined);
+  const query = useQuery(async (flow: ReturnedFlow) => {
+    const result = finishOAuthFlow(flow.url, flow.data);
+    if (result !== undefined) window.history.replaceState(null, '', window.location.pathname);
+
+    try {
+      // users may come back without finishing it
+      const token = await result;
+      if (token === undefined) return;
+      stf.dataEngine.update(['auth', flow.scheme], token);
+
+      const { client_id, client_secret, client_auth } = flow.data as OAuthFlowData;
+      const info: TokenInfo =
+        typeof result === 'string'
+          ? { type: 'implicit', client_id, token }
+          : { type: 'authorization_code', client_id, client_secret, client_auth, token };
+      return { [flow.scheme]: info };
+    } finally {
+      endReturnedFlow(flow);
+    }
   });
 
-  useEffect(() => onMount(), []);
-  return (url, data) => leavePage(url, { scheme: field.schemeId, origin, data }, oauthRedirectUrl);
+  // the page finishes OAuth flows started without `redirect`
+  if (returned?.oauth && !finishing.has(returned)) {
+    finishing.add(returned);
+    void query.start(returned);
+  }
+
+  return (
+    <AuthContext
+      value={useMemo(
+        () => ({
+          stf,
+          returned,
+          origin: returned?.origin,
+          isLoading: query.isLoading,
+          error: query.error,
+          store: query.data ?? {},
+        }),
+        [stf, returned, query.isLoading, query.error, query.data],
+      )}
+    >
+      {children}
+    </AuthContext>
+  );
 }
 
 export interface AuthRequirement {
@@ -466,7 +568,7 @@ export interface AuthField {
   schemeId: string;
   scheme: SecuritySchemeObject;
   scopes: string[];
-  /** the form field holding its value */
+  /** the field holding its value, in the auth values of page */
   fieldName: FieldKey;
   /** `localStorage` key of its persisted value */
   storageKey: string;
@@ -547,9 +649,9 @@ export interface AuthFields {
   select: (index: number) => void;
   /** the fields of the selected requirement */
   fields: AuthField[];
-  /** encode the auth fields of form values into request data */
+  /** encode the auth values of page into request data, like the form values */
   mapValues: <T>(values: T) => T;
-  /** write the persisted values into the form, returns a cleanup removing them */
+  /** restore the persisted values, returns a cleanup */
   init: () => () => void;
 }
 
@@ -571,6 +673,7 @@ export function useAuthFields(
   engine: DataEngine,
   { operation, providers, transform }: AuthFieldsOptions = {},
 ): AuthFields {
+  const page = usePlaygroundAuth().stf.dataEngine;
   const { storageKeyPrefix, doc } = useOpenAPI();
   const { dereferenced, resolve } = doc;
   const schemes = dereferenced.components?.securitySchemes;
@@ -618,13 +721,13 @@ export function useAuthFields(
   }, [requirement, storageKeyPrefix, providers, transform]);
 
   useListener({
-    stf: engine,
+    stf: page,
     onUpdate(key) {
       for (const field of fields) {
         // the field, its properties, or its parents
         if (!arrayStartsWith(key, field.fieldName) && !arrayStartsWith(field.fieldName, key))
           continue;
-        const value = engine.get(field.fieldName);
+        const value = page.get(field.fieldName);
 
         if (value != null) localStorage.setItem(field.storageKey, JSON.stringify(value));
       }
@@ -638,7 +741,7 @@ export function useAuthFields(
     fields,
     mapValues: useCallback(
       (values) => {
-        const cloned = structuredClone(values);
+        const cloned = structuredClone({ ...values, auth: page.get(['auth']) });
         const data = cloned as unknown as RawRequestData & { auth?: unknown };
         for (const field of fields)
           field.provider.onRequest!(data, objectGet(data, field.fieldName), field);
@@ -646,26 +749,18 @@ export function useAuthFields(
         delete data.auth;
         return cloned;
       },
-      [fields],
+      [page, fields],
     ),
     init: useCallback(() => {
       for (const field of fields) {
-        const stored = localStorage.getItem(field.storageKey);
-
-        if (stored) {
-          const parsed: unknown = JSON.parse(stored);
-          if (typeof parsed === typeof field.defaultValue) {
-            engine.init(field.fieldName, parsed);
-            continue;
-          }
-        }
-
-        engine.init(field.fieldName, field.defaultValue);
+        page.init(field.fieldName, () => {
+          const stored = localStorage.getItem(field.storageKey);
+          const parsed: unknown = stored ? JSON.parse(stored) : undefined;
+          return typeof parsed === typeof field.defaultValue ? parsed : field.defaultValue;
+        });
       }
 
-      return () => {
-        for (const field of fields) engine.delete(field.fieldName);
-      };
-    }, [engine, fields]),
+      return () => {};
+    }, [page, fields]),
   };
 }

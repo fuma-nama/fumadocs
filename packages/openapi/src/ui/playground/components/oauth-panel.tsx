@@ -1,5 +1,5 @@
 'use client';
-import { type ReactNode, useEffect, useRef, useState } from 'react';
+import { type ReactNode, Suspense, useEffect, useRef, useState } from 'react';
 import { Check, Copy, ExternalLink } from 'lucide-react';
 import { StfProvider, useDataEngine, useStf } from '@fumari/stf';
 import { useTranslations } from '@fuma-translate/react';
@@ -15,7 +15,7 @@ import {
   type OAuthFlowType,
   requestOAuthToken,
   useAuthRedirect,
-  useOAuthFlows,
+  useOpenIdConnectFlows,
 } from '@/playground/auth';
 import type { OAuthInput } from '@/playground/use-playground';
 import type { OAuthFlows } from '@/types';
@@ -67,38 +67,50 @@ export const oauthPanelProvider: AuthProvider = {
 /** obtain the access token of an OAuth 2.0 or OpenID Connect scheme */
 function OAuthPanel({ field, close }: AuthPanelProps) {
   const t = useTranslations({ note: 'OAuth dialog' });
-  const { flows, error } = useOAuthFlows(field);
-  let content: ReactNode;
-
-  if (error != null) {
-    content = (
-      <div className="border-b px-4 py-2.5 text-xs">
-        <p className="font-medium text-red-400">
-          {t('Failed to load the OpenID Connect configuration')}
-        </p>
-        <p className="text-fd-muted-foreground">{String(error)}</p>
-      </div>
-    );
-  } else if (flows) {
-    content = <OAuthForm field={field} flows={flows} close={close} />;
-  } else {
-    content = (
-      <p className="flex items-center gap-1.5 border-b px-4 py-2.5 text-xs text-fd-muted-foreground">
-        <Spinner className="size-3" />
-        {t('Loading the OpenID Connect configuration...')}
-      </p>
-    );
-  }
+  const { scheme } = field;
 
   return (
     <>
-      {field.scheme.description && (
+      {scheme.description && (
         <div className="border-b px-4 py-2.5 text-xs text-fd-muted-foreground [&_a]:underline">
-          <Markdown md={field.scheme.description} />
+          <Markdown md={scheme.description} />
         </div>
       )}
-      {content}
+      {scheme.type === 'openIdConnect' ? (
+        <Suspense
+          fallback={
+            <p className="flex items-center gap-1.5 border-b px-4 py-2.5 text-xs text-fd-muted-foreground">
+              <Spinner className="size-3" />
+              {t('Loading the OpenID Connect configuration...')}
+            </p>
+          }
+        >
+          <OpenIdConnectForm field={field} configUrl={scheme.openIdConnectUrl!} close={close} />
+        </Suspense>
+      ) : (
+        <OAuthForm
+          field={field}
+          flows={(scheme.type === 'oauth2' && scheme.flows) || {}}
+          close={close}
+        />
+      )}
     </>
+  );
+}
+
+/** the flows of OpenID Connect schemes come from their configuration */
+function OpenIdConnectForm({ configUrl, ...props }: AuthPanelProps & { configUrl: string }) {
+  const t = useTranslations({ note: 'OAuth dialog' });
+  const { flows, error } = useOpenIdConnectFlows(configUrl);
+  if (flows) return <OAuthForm {...props} flows={flows} />;
+
+  return (
+    <div className="border-b px-4 py-2.5 text-xs">
+      <p className="font-medium text-red-400">
+        {t('Failed to load the OpenID Connect configuration')}
+      </p>
+      <p className="text-fd-muted-foreground">{String(error)}</p>
+    </div>
   );
 }
 
