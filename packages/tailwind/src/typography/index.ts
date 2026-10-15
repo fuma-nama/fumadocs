@@ -184,6 +184,11 @@ export const typography: ReturnType<typeof plugin.withOptions<Options>> =
           modifier: 'sm',
           prefix,
         }),
+        [`.${className}-xs`]: configToCss(styles.EXTRA_SMALL, {
+          className,
+          modifier: 'xs',
+          prefix,
+        }),
       });
     };
   });

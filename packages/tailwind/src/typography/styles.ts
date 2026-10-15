@@ -466,13 +466,17 @@ export const DEFAULT: Config = {
   ],
 };
 
+const smallWeights = {
+  'dt, strong, blockquote, h1, h2, h3, h4, kbd, thead th, a:not([data-card])': {
+    fontWeight: '450',
+  },
+};
+
+// line heights of `text-sm` and `text-xs`
 export const SMALL: Config = {
-  css: [
-    {
-      '--tw-prose-size': '0.875',
-      'dt, strong, blockquote, h1, h2, h3, h4, kbd, thead th, a:not([data-card])': {
-        fontWeight: '450',
-      },
-    },
-  ],
+  css: [{ '--tw-prose-size': '0.875', lineHeight: `var(--tw-leading, ${rem(20)})` }, smallWeights],
+};
+
+export const EXTRA_SMALL: Config = {
+  css: [{ '--tw-prose-size': '0.75', lineHeight: `var(--tw-leading, ${rem(16)})` }, smallWeights],
 };

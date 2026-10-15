@@ -7,6 +7,14 @@ import { idToTitle } from 'shared-api/utils/id-to-title';
 import { dereference } from '@fumadocs/json-schema';
 import { createMagicProxy } from '@scalar/json-magic/magic-proxy';
 
+/** the `_openapi` data of pages */
+export interface InternalOpenAPIMeta {
+  method?: string;
+  webhook?: boolean;
+  deprecated?: boolean;
+  preload?: string[];
+}
+
 const proxyCache = new WeakMap<Document, Document>();
 
 export function toStaticData(

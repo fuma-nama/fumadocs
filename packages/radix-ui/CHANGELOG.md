@@ -1,3 +1,15 @@
+## fumadocs-ui@16.17.4
+
+### Keyboard-scrollable MDX tables
+
+- Tables of `defaultMdxComponents` are focusable, so keyboard users can scroll wide tables in Safari.
+
+Fix [#3706](https://github.com/fuma-nama/fumadocs/issues/3706)
+
+### Use `prose-sm` and `prose-xs` for small prose
+
+Small prose in TOC items, type tables, API descriptions and AI chat scales its code and headings with the text.
+
 ## fumadocs-ui@16.17.3
 
 ### Lightbox for zoomable images

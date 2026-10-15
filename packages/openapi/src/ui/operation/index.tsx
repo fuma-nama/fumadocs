@@ -2,7 +2,7 @@
 import { Fragment, type ReactNode, useState } from 'react';
 import { Dialog } from '@base-ui/react/dialog';
 import type { MediaTypeObject, SecuritySchemeObject } from '@/types';
-import { UsageTabs } from '@/ui/operation/usage-tabs';
+import { RequestTabs, UsageTabs } from '@/ui/operation/usage-tabs';
 import { MethodLabel } from '@/ui/components/method-label';
 import { SchemaUI } from '@/ui/components/schema';
 import { Badge } from 'shared-api/components/badge';
@@ -15,7 +15,6 @@ import {
   useOperation,
 } from '@/operation';
 import { useTranslations } from '@fuma-translate/react';
-import { RequestTabs } from './request-tabs';
 import { cn } from '@/utils/cn';
 import { SelectTabs, SelectTabTrigger, SelectTab } from 'shared-api/components/select-tab';
 import { Callout } from 'fumadocs-ui/components/callout';
@@ -270,7 +269,7 @@ function OperationContent({
           {slots.responses}
           {slots.callbacks}
         </div>
-        <div className="@4xl:sticky @4xl:top-[calc(var(--fd-docs-row-1,2rem)+1rem)] @4xl:w-[400px]">
+        <div className="@4xl:sticky @4xl:top-[calc(var(--fd-docs-row-3,0px)+1rem)] @4xl:flex @4xl:max-h-[calc(var(--fd-docs-height,100dvh)-var(--fd-docs-row-3,0px)-2rem)] @4xl:w-[400px] @4xl:flex-col">
           {slots.apiExample}
         </div>
       </div>
@@ -301,7 +300,7 @@ function OperationContent({
         {slots.responses}
         {slots.callbacks}
       </div>
-      <div className="@4xl:sticky @4xl:top-[calc(var(--fd-docs-row-1,2rem)+1rem)] @4xl:w-[400px]">
+      <div className="@4xl:sticky @4xl:top-[calc(var(--fd-docs-row-3,0px)+1rem)] @4xl:flex @4xl:max-h-[calc(var(--fd-docs-height,100dvh)-var(--fd-docs-row-3,0px)-2rem)] @4xl:w-[400px] @4xl:flex-col">
         {slots.requests}
       </div>
     </div>
@@ -468,45 +467,60 @@ function ResponseContent({
 
 function AuthScheme({ scheme, scopes }: { scheme: SecuritySchemeObject; scopes: string[] }) {
   const t = useTranslations({ note: 'security scheme' });
-  let name: string;
-  let type = '<token>';
-  let location: string | undefined;
+  let name = t('Authorization');
+  let type: string | undefined = t('Bearer <token>');
+  let location = 'header';
+  const configUrl = scheme.type === 'openIdConnect' ? scheme.openIdConnectUrl : undefined;
 
-  if (scheme.type === 'http' || scheme.type === 'oauth2') {
-    name = t('Authorization');
-    type =
-      scheme.type === 'http' && scheme.scheme === 'basic'
-        ? t('Basic <token>')
-        : t('Bearer <token>');
-    location = 'header';
-  } else if (scheme.type === 'apiKey') {
-    name = scheme.name!;
-    location = scheme.in;
-  } else if (scheme.type === 'openIdConnect') {
-    name = t('OpenID Connect');
-  } else {
-    return null;
+  switch (scheme.type) {
+    case 'apiKey':
+      name = scheme.name!;
+      type = '<token>';
+      location = scheme.in!;
+      break;
+    case 'mutualTLS':
+      name = t('Client certificate');
+      type = undefined;
+      location = 'tls';
+      break;
+    case 'http': {
+      // case-insensitive, see RFC 7235
+      const auth = scheme.scheme?.toLowerCase();
+      if (auth === 'basic') type = t('Basic <token>');
+      else if (auth === 'bearer' && scheme.bearerFormat) type = `Bearer <${scheme.bearerFormat}>`;
+      else if (scheme.scheme && auth !== 'bearer')
+        type = `${scheme.scheme[0].toUpperCase()}${scheme.scheme.slice(1)} <token>`;
+      break;
+    }
+    case 'oauth2':
+    case 'openIdConnect':
+      break;
+    default:
+      return null;
   }
 
   return (
     <div className="border-t py-2.5 first:border-t-0">
       <div className="flex flex-wrap items-center gap-2 not-prose">
-        {location && (
-          <span className="rounded-md border bg-fd-secondary px-1.5 font-mono text-xs leading-5 text-fd-muted-foreground">
-            {location}
-          </span>
-        )}
+        <span className="rounded-md border bg-fd-secondary px-1.5 font-mono text-xs leading-5 text-fd-muted-foreground">
+          {location}
+        </span>
         <code className="text-[0.8125rem] font-medium text-fd-primary">{name}</code>
-        <code className="text-xs text-fd-muted-foreground">{type}</code>
+        {type && <code className="text-xs text-fd-muted-foreground">{type}</code>}
         {scheme.deprecated && (
           <Badge color="red" className="text-xs">
             {t('Deprecated')}
           </Badge>
         )}
       </div>
-      {(scheme.description || scopes.length > 0) && (
+      {(scheme.description || scopes.length > 0 || configUrl) && (
         <div className="mt-1 prose-no-margin text-fd-muted-foreground">
           {scheme.description && <Markdown md={scheme.description} />}
+          {configUrl && (
+            <p>
+              {t('OpenID Connect')}: <code>{configUrl}</code>
+            </p>
+          )}
           {scopes.length > 0 && (
             <p>
               {t('Scope')}: <code>{scopes.join(', ')}</code>
@@ -563,7 +577,7 @@ function Callback({
         />
         <div
           ref={ref}
-          className="fd-scroll-container prose min-h-0 flex-1 overflow-y-auto border-t p-5 text-sm @container [--fd-docs-row-1:0px] [--fd-docs-row-3:0px]"
+          className="fd-scroll-container prose prose-sm min-h-0 flex-1 overflow-y-auto border-t p-5 @container [--fd-docs-row-3:0px]"
         >
           <AnchorSection segments={segments}>
             <Operation

@@ -234,12 +234,12 @@ function ParameterInput({ location, name }: { location: string; name: string }) 
 }
 ```
 
-| Field                                                | Is                                                                                                                                  |
-| ---------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------- |
-| `stf`                                                | the form (a `@fumari/stf` data engine), holding `path`, `query`, `header`, `cookie` and `body`                                      |
-| `body`                                               | the request body edited in the form, with its preferred media type                                                                  |
-| `auth`                                               | the auth fields of the selected security requirement, `select()` switches it, `authorize()` obtains an OAuth 2.0 token into a field |
-| `send()`, `isSending`, `response`, `clearResponse()` | send the form as a request, and the result of the last one                                                                          |
+| Field                                                | Is                                                                                                                                    |
+| ---------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------- |
+| `stf`                                                | the form (a `@fumari/stf` data engine), holding `path`, `query`, `header`, `cookie` and `body`, and the auth values of page at `auth` |
+| `body`                                               | the request body edited in the form, with its preferred media type                                                                    |
+| `auth`                                               | the auth fields of the selected security requirement, `select()` switches it, `authorize()` obtains an OAuth 2.0 token into a field   |
+| `send()`, `isSending`, `response`, `clearResponse()` | send the form as a request, and the result of the last one                                                                            |
 
 It accepts `fetchOptions` to customise requests, like `onRequestInit()`, `authProviders` to handle security schemes, see [Authorization](/docs/integrations/openapi/api-page#authorization), and `transformAuthInputs` to customise the auth fields.
 
@@ -247,11 +247,12 @@ It accepts `fetchOptions` to customise requests, like `onRequestInit()`, `authPr
 
 The parts `usePlayground()` builds on, to send a request without it.
 
-| Export                   | Does                                                                                                                                |
-| ------------------------ | ----------------------------------------------------------------------------------------------------------------------------------- |
-| `createBrowserFetcher()` | sends a request from the browser, through `proxyUrl` when set, its responses carry `duration`, `mediaType`, `fileName` and `text()` |
-| `encodeRequestData()`    | turns the data of an example into a body, headers and query, from `fumadocs-openapi/requests`                                       |
-| `resolveMediaAdapter()`  | the adapter of a media type, `undefined` when unsupported                                                                           |
-| `usePlaygroundAuth()`    | the auth state of the page, its token store and the state of a flow                                                                 |
-| `useAuthFields()`        | the auth fields of an operation in a form, and the request data they encode into                                                    |
-| `requestOAuthToken()`    | runs an OAuth 2.0 flow                                                                                                              |
+| Export                    | Does                                                                                                                                |
+| ------------------------- | ----------------------------------------------------------------------------------------------------------------------------------- |
+| `createBrowserFetcher()`  | sends a request from the browser, through `proxyUrl` when set, its responses carry `duration`, `mediaType`, `fileName` and `text()` |
+| `encodeRequestData()`     | turns the data of an example into a body, headers and query, from `fumadocs-openapi/requests`                                       |
+| `resolveMediaAdapter()`   | the adapter of a media type, `undefined` when unsupported                                                                           |
+| `useAuthFields()`         | the auth fields of an operation, and the request data they encode into                                                              |
+| `usePlaygroundAuth()`     | the auth values of the page in `stf`, and the flow that returned to it in `returned`                                                |
+| `useOpenIdConnectFlows()` | the OAuth 2.0 flows of an OpenID Connect configuration, or the `error` of discovering them, it suspends while loading               |
+| `requestOAuthToken()`     | runs an OAuth 2.0 flow, `onUserCode` shows the code users enter for device authorization                                            |

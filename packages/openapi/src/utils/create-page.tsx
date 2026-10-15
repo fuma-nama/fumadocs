@@ -47,7 +47,7 @@ export interface OpenAPIRuntimeOptions {
    */
   mediaAdapters?: Record<string, MediaAdapter>;
   /**
-   * Set a prefix for `localStorage` keys.
+   * Set a prefix for storage keys.
    *
    * Useful when using multiple OpenAPI instances to prevent state conflicts.
    *

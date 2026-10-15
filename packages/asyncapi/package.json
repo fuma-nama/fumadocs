@@ -1,6 +1,6 @@
 {
   "name": "@fumadocs/asyncapi",
-  "version": "0.4.4",
+  "version": "0.4.5",
   "description": "Generate docs for your AsyncAPI spec",
   "keywords": [
     "Docs",
@@ -44,8 +44,8 @@
   "dependencies": {
     "@base-ui/react": "^1.8.0",
     "@fuma-translate/react": "^1.0.2",
-    "@fumadocs/json-schema": "workspace:*",
-    "@fumari/stf": "workspace:*",
+    "@fumadocs/json-schema": "workspace:^",
+    "@fumari/stf": "workspace:^",
     "@scalar/json-magic": "^0.15.4",
     "chokidar": "^5.0.0",
     "class-variance-authority": "^0.7.1",

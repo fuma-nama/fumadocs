@@ -1,13 +1,20 @@
 'use client';
-import { useEffect, useEffectEvent, useMemo, useState, useSyncExternalStore } from 'react';
-import { useOnChange } from 'fumadocs-core/utils/use-on-change';
-import { type DataEngineListener, type Stf, useStf } from '@fumari/stf';
+import { useEffect, useEffectEvent, useMemo, useState } from 'react';
+import {
+  DataEngine,
+  type DataEngineListener,
+  type DefaultValue,
+  type FieldKey,
+  type OnDeleteContext,
+  type OnInitContext,
+  type OnUpdateContext,
+  type Stf,
+} from '@fumari/stf';
 import type { JsonSchema } from '@fumadocs/json-schema';
 import { useExampleRequests, useOperation } from '@/operation';
 import { pathnameFromRequest } from '@/requests/generators';
 import { encodeRequestData } from '@/requests/media/encode';
 import type { RawRequestData } from '@/requests/types';
-import type { OAuth2SecurityScheme } from '@/types';
 import { useOpenAPI } from '@/utils/create-page';
 import { getPreferredType } from '@/utils/schema';
 import { useServer } from '@/utils/use-server';
@@ -17,14 +24,50 @@ import {
   type AuthRequirement,
   type OAuthFlowInput,
   type OAuthFlowType,
-  readPendingFlow,
   requestOAuthToken,
   useAuthFields,
   usePlaygroundAuth,
 } from './auth';
 import { type BrowserFetcherOptions, createBrowserFetcher, type FetchResult } from './fetcher';
 
-const subscribeNever = () => () => {};
+/** the form of a playground, its `auth` is the auth values of page */
+class PlaygroundForm extends DataEngine {
+  private readonly auth: DataEngine;
+
+  constructor(defaultValues: NonNullable<object>, auth: DataEngine) {
+    super(defaultValues);
+    this.auth = auth;
+  }
+
+  override get(key: FieldKey) {
+    return key[0] === 'auth' ? this.auth.get(key) : super.get(key);
+  }
+
+  override init(key: FieldKey, defaultValue?: DefaultValue, ctx?: OnInitContext) {
+    return key[0] === 'auth'
+      ? this.auth.init(key, defaultValue, ctx)
+      : super.init(key, defaultValue, ctx);
+  }
+
+  override update(key: FieldKey, value: unknown, ctx?: Partial<OnUpdateContext>) {
+    return key[0] === 'auth' ? this.auth.update(key, value, ctx) : super.update(key, value, ctx);
+  }
+
+  override delete(key: FieldKey, ctx?: OnDeleteContext) {
+    return key[0] === 'auth' ? this.auth.delete(key, ctx) : super.delete(key, ctx);
+  }
+
+  override listen(listener: DataEngineListener) {
+    const [root] = listener.field ?? [];
+    if (root !== 'auth') super.listen(listener);
+    if (root === undefined || root === 'auth') this.auth.listen(listener);
+  }
+
+  override unlisten(listener: DataEngineListener) {
+    super.unlisten(listener);
+    this.auth.unlisten(listener);
+  }
+}
 
 export interface PlaygroundOptions {
   /** handle security schemes, before the built-in providers */
@@ -49,17 +92,18 @@ export interface PlaygroundAuth {
   /** the fields of the selected requirement */
   fields: AuthField[];
   /**
-   * Obtain the access token of an OAuth 2.0 field, and write it into the field.
+   * Obtain the access token of an OAuth 2.0 or OpenID Connect field, and write it into the field.
    *
-   * `implicit` and `authorizationCode` leave the page without a token, `flowReturned` is set when they return.
+   * `implicit` and `authorizationCode` leave the page without a token, the page finishes them when they return, and `flowReturned` is set.
    */
   authorize: (field: AuthField, input: OAuthInput) => Promise<string | undefined>;
   /** a flow started here has returned to the page */
   flowReturned: boolean;
 }
 
-export interface OAuthInput extends Partial<
-  Pick<OAuthFlowInput, 'clientId' | 'clientSecret' | 'username' | 'password' | 'clientAuth'>
+export interface OAuthInput extends Pick<
+  OAuthFlowInput,
+  'clientId' | 'clientSecret' | 'username' | 'password' | 'clientAuth' | 'onUserCode' | 'signal'
 > {
   type: OAuthFlowType;
   /** defaults to the scopes required by the operation */
@@ -102,17 +146,10 @@ export function usePlayground({
   const { resolveUrl } = useServer();
   // where OAuth flows return to
   const origin = `${method} ${path}`;
-  const oauthOrigin = usePlaygroundAuth().origin;
-  // the scheme of a flow that left the page with `useAuthRedirect()`, and returned to this playground
-  const returnedScheme = useSyncExternalStore(
-    subscribeNever,
-    () => {
-      const flow = readPendingFlow();
-      if (flow?.origin === origin) return flow.scheme;
-    },
-    () => undefined,
-  );
-  const flowReturned = returnedScheme !== undefined || oauthOrigin === origin;
+  const page = usePlaygroundAuth();
+  // the scheme of a flow that left this playground, and returned
+  const returnedScheme = page.returned?.origin === origin ? page.returned.scheme : undefined;
+  const flowReturned = returnedScheme !== undefined;
   const [response, setResponse] = useState<PlaygroundResponse>();
   const [isSending, setSending] = useState(false);
   let body: RequestBodyInfo | undefined;
@@ -132,8 +169,10 @@ export function usePlayground({
       body: data?.body ?? {},
     };
   }, [examples, selected]);
-  // edited in place, they are persisted to the example by `update()` anyway
-  const stf = useStf({ defaultValues });
+  const stf = useMemo<Stf>(
+    () => ({ dataEngine: new PlaygroundForm(defaultValues, page.stf.dataEngine) }),
+    [defaultValues, page.stf.dataEngine],
+  );
   const engine = stf.dataEngine;
   const auth = useAuthFields(engine, {
     operation,
@@ -151,19 +190,18 @@ export function usePlayground({
 
   const syncExample = useEffectEvent(() => update(getRequestData()));
 
-  // its provider finishes the flow, it must be selected
-  useOnChange(returnedScheme, (scheme) => {
-    const idx = auth.requirements.findIndex((req) => req.some((item) => item.id === scheme));
+  // select the requirement of the returned flow, also on the first render of client-rendered pages
+  const [selectedFor, setSelectedFor] = useState<string>();
+  if (returnedScheme !== selectedFor) {
+    setSelectedFor(returnedScheme);
+    const idx = auth.requirements.findIndex((req) =>
+      req.some((item) => item.id === returnedScheme),
+    );
     if (idx !== -1) auth.select(idx);
-  });
-
-  useEffect(() => {
-    // same object reference = unchanged
-    if (engine.getData() !== defaultValues) engine.reset(defaultValues);
-  }, [engine, defaultValues]);
+  }
 
   const initAuth = auth.init;
-  // write the auth values again after resets, then sync the edits with a delay
+  // restore the auth values, then sync the edits with a delay
   useEffect(() => {
     const reset = initAuth();
     syncExample();
@@ -181,7 +219,7 @@ export function usePlayground({
       window.clearTimeout(timer);
       reset();
     };
-  }, [engine, defaultValues, initAuth]);
+  }, [engine, initAuth]);
 
   return {
     stf,
@@ -191,17 +229,14 @@ export function usePlayground({
       selected: auth.selected,
       select: auth.select,
       fields: auth.fields,
-      async authorize(field, { type, scopes = field.scopes, clientAuth = 'header', ...input }) {
-        const token = await requestOAuthToken(field.scheme as OAuth2SecurityScheme, type, {
-          clientId: input.clientId ?? '',
-          clientSecret: input.clientSecret ?? '',
-          username: input.username ?? '',
-          password: input.password ?? '',
+      async authorize(field, { type, scopes = field.scopes, ...input }) {
+        const token = await requestOAuthToken(field.scheme, type, {
+          ...input,
           scopes,
-          clientAuth,
           schemeId: field.schemeId,
           serverUrl: resolveUrl(),
           redirectUrl: oauthRedirectUrl,
+          proxyUrl,
           origin,
         });
         if (token) engine.update(field.fieldName, token);

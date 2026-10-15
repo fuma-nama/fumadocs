@@ -2,23 +2,11 @@
 import { type FC, useState } from 'react';
 import { SendHorizontal } from 'lucide-react';
 import { useTranslations } from '@fuma-translate/react';
-import {
-  CodeBlockTab,
-  CodeBlockTabs,
-  CodeBlockTabsList,
-  CodeBlockTabsTrigger,
-} from 'fumadocs-ui/components/codeblock';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from 'shared-api/components/select';
 import { Spinner } from 'shared-api/components/spinner';
-import { useCodeUsage, useOperation, useResponseExamples } from '@/operation';
+import { useResponseExamples } from '@/operation';
 import type { PlaygroundResponse } from '@/playground/use-playground';
 import { ClientCodeBlock } from '@/ui/components/codeblock';
+import { CodeUsages, ExampleSelect } from '@/ui/operation/usage-tabs';
 import { Markdown } from '@/ui/components/markdown';
 import { cn } from '@/utils/cn';
 import {
@@ -29,7 +17,6 @@ import {
 } from './result-display';
 import { Segmented, SegmentedList, SegmentedPanel } from '@/ui/components/segmented';
 
-/** the code usages of the request, above its response or the documented examples */
 export function ResponsePanel({
   response,
   loading,
@@ -47,7 +34,11 @@ export function ResponsePanel({
 
   return (
     <div className={cn('@container flex min-h-0 flex-col', className)}>
-      <RequestExample />
+      <CodeUsages
+        title={t('Request')}
+        className="shrink-0 border-b"
+        viewportClassName="max-h-[min(18rem,30vh)]"
+      />
       <div className="relative flex min-h-0 flex-1 flex-col">
         {response ? (
           <ResultDisplay
@@ -67,48 +58,6 @@ export function ResponsePanel({
         )}
       </div>
     </div>
-  );
-}
-
-function RequestExample() {
-  const items = Array.from(useOperation().codeUsages.map());
-  if (items.length === 0) return null;
-
-  return (
-    <CodeBlockTabs
-      groupId="fumadocs_openapi_requests"
-      defaultValue={items[0][0]}
-      className="my-0 shrink-0 rounded-none border-0 border-b bg-transparent"
-    >
-      <CodeBlockTabsList className="h-10 items-stretch border-b [scrollbar-width:none]">
-        {items.map(([id, item]) => (
-          <CodeBlockTabsTrigger key={id} value={id}>
-            {item.label ?? item.lang}
-          </CodeBlockTabsTrigger>
-        ))}
-      </CodeBlockTabsList>
-      {items.map(([id, item]) => (
-        <CodeBlockTab key={id} value={id}>
-          <UsageCode id={id} lang={item.lang} />
-        </CodeBlockTab>
-      ))}
-    </CodeBlockTabs>
-  );
-}
-
-function UsageCode({ id, lang }: { id: string; lang: string }) {
-  const code = useCodeUsage(id);
-  if (!code) return null;
-
-  return (
-    <ClientCodeBlock
-      lang={lang}
-      code={code}
-      codeblock={{
-        className: 'rounded-none border-0 bg-transparent shadow-none',
-        viewportProps: { className: 'max-h-[min(18rem,30vh)]' },
-      }}
-    />
   );
 }
 
@@ -144,31 +93,15 @@ function ResponseExamples() {
       }}
       className="flex min-h-0 flex-1 flex-col"
     >
-      <PanelHeader>
-        <span className="shrink-0 text-[0.8125rem] font-medium">{t('Response')}</span>
-        <div
-          title={tab.response.description}
-          className="min-w-0 flex-1 truncate text-xs text-fd-muted-foreground [&_*]:inline [&_a]:underline"
-        >
-          {tab.response.description && <Markdown md={tab.response.description} />}
-        </div>
+      <PanelHeader className="border-b-0">
+        <span className="me-auto text-[0.8125rem] font-medium">{t('Response')}</span>
         {examples.length > 1 && (
-          <Select
+          <ExampleSelect
             items={examples.map((item, i) => ({ value: String(i), label: item.label }))}
             value={String(selected)}
-            onValueChange={(v) => v !== null && setSelected(Number(v))}
-          >
-            <SelectTrigger className="h-7 w-auto max-w-40 shrink-0 gap-1.5 border-0 bg-transparent px-2 text-xs hover:bg-fd-accent focus:ring-0 focus-visible:ring-2">
-              <SelectValue className="truncate" />
-            </SelectTrigger>
-            <SelectContent align="end">
-              {examples.map((item, i) => (
-                <SelectItem key={i} value={String(i)} className="text-xs">
-                  {item.label}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+            onValueChange={(v) => setSelected(Number(v))}
+            className="max-w-40"
+          />
         )}
         <SegmentedList
           className="max-w-1/2 shrink-0 overflow-x-auto [scrollbar-width:none]"
@@ -178,10 +111,15 @@ function ResponseExamples() {
           }))}
         />
       </PanelHeader>
+      {tab.response.description && (
+        <div className="prose prose-xs prose-no-margin -mt-1 px-4 pb-2.5 text-fd-muted-foreground">
+          <Markdown md={tab.response.description} />
+        </div>
+      )}
       <SegmentedPanel
         key={tab.code}
         value={tab.code}
-        className="flex min-h-0 flex-1 flex-col overflow-auto"
+        className="flex min-h-0 flex-1 flex-col overflow-auto border-t"
       >
         {example ? (
           <div className="min-h-0 flex-1">

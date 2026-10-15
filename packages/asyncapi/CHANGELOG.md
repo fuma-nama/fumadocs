@@ -1,3 +1,9 @@
+## @fumadocs/asyncapi@0.4.5
+
+### Share `@fumari/stf` and `@fumadocs/json-schema` with installed UI
+
+They are depended on with a caret range instead of an exact version, so UI installed with Fumadocs CLI can share one copy with the package.
+
 ## @fumadocs/asyncapi@0.4.4
 
 ### Fix `imports` option of `generateFiles()`

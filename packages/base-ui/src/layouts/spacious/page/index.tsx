@@ -127,7 +127,7 @@ export function DocsPage({
             )}
             <layout.slots.actions className="ms-auto" />
           </header>
-          <div className="flex flex-1 items-start px-4 md:min-h-0 md:pt-(--fd-header-height) md:px-[max(--spacing(6),calc((100%-var(--fd-page-width)-var(--fd-toc-width))/2))] md:overflow-y-auto md:overscroll-y-contain md:scrollbar-thin md:scrollbar-gutter-stable">
+          <div className="flex flex-1 items-start px-4 md:min-h-0 md:pt-(--fd-header-height) md:px-[max(--spacing(6),calc((100%-var(--fd-page-width)-var(--fd-toc-width))/2))] md:overflow-y-auto md:overscroll-y-contain md:scrollbar-thin md:scrollbar-gutter-stable md:[--fd-docs-height:calc(var(--fd-layout-height)-var(--spacing)*4-2px-var(--fd-header-height))]">
             <article
               id="nd-page"
               data-full={full}

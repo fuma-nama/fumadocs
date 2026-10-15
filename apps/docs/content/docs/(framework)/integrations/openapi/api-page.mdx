@@ -193,7 +193,7 @@ function SignIn({ field, close }: AuthPanelProps) {
 
 Define providers outside of components, the auth fields are created again when they change.
 
-Rows and panels hold their own state, `Custom.useController(field.fieldName)` reads and writes the value. It starts from the default of scheme, like `Bearer `, and is remembered per scheme.
+Rows and panels hold their own state, `Custom.useController(field.fieldName)` reads and writes the value. It starts from the default of scheme, like `Bearer `, and is kept per scheme while the tab is open.
 
 <Accordions>
   <Accordion title="Sign-ins leaving the page">

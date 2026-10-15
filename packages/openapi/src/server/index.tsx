@@ -2,7 +2,6 @@ import { createProxy } from '@/server/proxy';
 import { createOAuthHandler } from '@/server/oauth';
 import { loadDocument } from '@/utils/document/load';
 import type { Document, Awaitable } from '@/types';
-import fs from 'node:fs';
 import {
   type DynamicSource,
   type LoaderPlugin,
@@ -21,7 +20,7 @@ import {
   type PageOutput,
   type WebhookOutput,
 } from '@/utils/pages/builder';
-import { toStaticData } from '@/utils/pages/to-static-data';
+import { type InternalOpenAPIMeta, toStaticData } from '@/utils/pages/to-static-data';
 import path from 'node:path';
 import type { OpenAPIPageProps_Preloaded, OpenAPIPageProps_Spec } from '@/ui';
 import type { StructuredData } from 'fumadocs-core/mdx-plugins/remark-structure';
@@ -87,9 +86,6 @@ export interface OpenAPIServer {
    * Fumadocs Source API integration, pass this to `plugins` array in `loader()`.
    */
   loaderPlugin: () => LoaderPlugin;
-
-  /** @private internal API */
-  _getWatchPaths: () => string[];
 }
 
 export interface OpenAPIPageData extends PageData {
@@ -260,9 +256,6 @@ export function createOpenAPI(options: OpenAPIOptions = {}): OpenAPIServer {
     options,
     createProxy,
     createOAuthHandler,
-    _getWatchPaths() {
-      return Object.keys(resolvedInput).filter((key) => !URL.canParse(key) && fs.existsSync(key));
-    },
     async preloadOpenAPIPage(page) {
       const out: OpenAPIPageProps_Preloaded['preloaded'] = {
         docs: {},
@@ -300,13 +293,6 @@ export function createOpenAPI(options: OpenAPIOptions = {}): OpenAPIServer {
       return openapiPlugin();
     },
   };
-}
-
-export interface InternalOpenAPIMeta {
-  method?: string;
-  webhook?: boolean;
-  deprecated?: boolean;
-  preload?: string[];
 }
 
 /**

@@ -1,3 +1,4 @@
+import { existsSync } from 'node:fs';
 import { mkdir, writeFile } from 'node:fs/promises';
 import * as path from 'node:path';
 import { generateDocument, type PagesToTextOptions, toText } from './utils/pages/to-text';
@@ -98,7 +99,10 @@ export async function generateFiles(options: Config): Promise<void> {
     const subOptions: Config = { ...options, watch: false };
 
     await generateFiles(subOptions);
-    const targets = options.input._getWatchPaths();
+    const { input = [] } = options.input.options;
+    const targets = (Array.isArray(input) ? input : Object.keys(input)).filter(
+      (key) => !URL.canParse(key) && existsSync(key),
+    );
     console.log(`[Fumadocs OpenAPI] watching ${targets.join(', ')}`);
     watch(targets, {
       ignoreInitial: true,
