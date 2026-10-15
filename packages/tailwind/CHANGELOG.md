@@ -1,3 +1,9 @@
+## @fumadocs/tailwind@0.1.4
+
+### Add `prose-xs` modifier
+
+`prose-sm` and `prose-xs` match the font size and line height of `text-sm` and `text-xs`, with an optically adjusted font weight.
+
 ## @fumadocs/tailwind@0.1.3
 
 ### Tune prose line height with `leading-*`

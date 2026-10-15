@@ -1,3 +1,9 @@
+## @fumadocs/ai-chat@0.1.1
+
+### Use `prose-sm` and `prose-xs` for small prose
+
+Small prose in TOC items, type tables, API descriptions and AI chat scales its code and headings with the text.
+
 ## @fumadocs/ai-chat@0.1.0
 
 ### New package: `@fumadocs/ai-chat`

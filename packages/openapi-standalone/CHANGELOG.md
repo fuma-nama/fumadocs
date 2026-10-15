@@ -1,7 +1,4 @@
----
-packages:
-  '@fumadocs/openapi-standalone': minor
----
+## @fumadocs/openapi-standalone@0.1.0
 
 ### New package: `@fumadocs/openapi-standalone`
 

@@ -1,3 +1,13 @@
+## @fumadocs/graphql@0.3.4
+
+### Share `@fumari/stf` and `@fumadocs/json-schema` with installed UI
+
+They are depended on with a caret range instead of an exact version, so UI installed with Fumadocs CLI can share one copy with the package.
+
+### Use `prose-sm` and `prose-xs` for small prose
+
+Small prose in TOC items, type tables, API descriptions and AI chat scales its code and headings with the text.
+
 ## @fumadocs/graphql@0.3.3
 
 ### Fix images in descriptions, show the OAuth redirect URI
