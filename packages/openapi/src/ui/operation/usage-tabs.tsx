@@ -245,7 +245,7 @@ function ResponseTabsDefaultContent({ tabs }: { tabs: ResponseTab[] }) {
               />
             )}
             {example.description && (
-              <div className="prose prose-no-margin text-xs text-fd-muted-foreground">
+              <div className="prose prose-xs prose-no-margin text-fd-muted-foreground">
                 <Markdown md={example.description} />
               </div>
             )}
@@ -335,7 +335,7 @@ function RequestTabsDefaultContent() {
         <MethodLabel className="me-2 text-xs">{requestData.method}</MethodLabel>
         <span className="font-mono">{item.pathname}</span>
         {item.description && (
-          <div className="prose prose-no-margin mt-1 text-xs text-fd-muted-foreground">
+          <div className="prose prose-xs prose-no-margin mt-1 text-fd-muted-foreground">
             <Markdown md={item.description} />
           </div>
         )}

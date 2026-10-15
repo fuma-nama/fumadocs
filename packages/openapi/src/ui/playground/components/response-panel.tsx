@@ -112,7 +112,7 @@ function ResponseExamples() {
         />
       </PanelHeader>
       {tab.response.description && (
-        <div className="prose prose-no-margin -mt-1 px-4 pb-2.5 text-xs text-fd-muted-foreground">
+        <div className="prose prose-xs prose-no-margin -mt-1 px-4 pb-2.5 text-fd-muted-foreground">
           <Markdown md={tab.response.description} />
         </div>
       )}

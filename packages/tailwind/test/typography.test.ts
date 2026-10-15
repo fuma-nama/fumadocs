@@ -39,12 +39,23 @@ describe('typography', () => {
 
     expect(smallCss).toContain('.prose-sm {');
     expect(smallCss).toContain('--tw-prose-size: 0.875;');
+    expect(smallCss).toContain('line-height: var(--tw-leading, 1.25rem);');
     expect(smallCss).not.toMatch(/\.prose-sm\s*\{[^{}]*font-weight:/);
     expect(smallCss).toContain('font-weight: 450;');
     expect(smallCss).not.toContain('font-weight: 600;');
     expect(smallCss).not.toContain('font-weight: 700;');
     expect(smallCss).not.toContain('font-weight: 800;');
     expect(smallCss).not.toContain('font-weight: 900;');
+  });
+
+  it('generates an extra small prose modifier after prose', async () => {
+    const css = await build(['prose', 'prose-xs']);
+    const xsCss = css.slice(css.indexOf('.prose-xs {'));
+
+    expect(css.indexOf('.prose {')).toBeLessThan(css.indexOf('.prose-xs {'));
+    expect(xsCss).toContain('--tw-prose-size: 0.75;');
+    expect(xsCss).toContain('line-height: var(--tw-leading, 1rem);');
+    expect(xsCss).toContain('font-weight: 450;');
   });
 
   it('removes the outer margins of blockquote content', async () => {

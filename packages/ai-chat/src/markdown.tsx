@@ -29,7 +29,7 @@ export function Markdown({ text, live }: { text: string; live: boolean }) {
   const blocks = splitBlocks(text);
 
   return (
-    <div className="prose prose-no-margin text-sm">
+    <div className="prose prose-sm prose-no-margin">
       {blocks.map((block, i) => (
         <Block
           key={i}

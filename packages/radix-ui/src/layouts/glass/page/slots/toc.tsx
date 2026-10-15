@@ -174,7 +174,7 @@ function TOCPanel({ className, style, ...props }: ComponentProps<'div'>) {
         <TOCItem
           key={item.url}
           href={item.url}
-          className="group prose prose-sm flex items-center gap-2 text-xs text-fd-muted-foreground transition-colors data-[active=true]:text-fd-primary data-[active=false]:hover:text-fd-accent-foreground xl:flex-row-reverse"
+          className="group prose prose-xs flex items-center gap-2 text-fd-muted-foreground transition-colors data-[active=true]:text-fd-primary data-[active=false]:hover:text-fd-accent-foreground xl:flex-row-reverse"
           onClick={() => setMobileOpen(false)}
           autoScroll={open && !inAnimation}
         >
