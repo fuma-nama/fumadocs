@@ -8,7 +8,7 @@ packages:
 
 - Support OAuth 2.0 `deviceAuthorization` flows, `openIdConnect` schemes and PKCE.
 - OAuth requests with a client secret and device flows go through `proxyUrl` when set, allow your authorization server in `allowedOrigins`.
-- The OAuth panel remembers client credentials.
+- The OAuth panel remembers the client ID.
 - `mutualTLS` schemes no longer send an `Authorization` header.
 - Headless: `useOpenIdConnectFlows()`, `stf` and `returned` of `usePlaygroundAuth()`, `requestOAuthToken()` accepts `onUserCode`, `signal` and `proxyUrl`.
 - Playgrounds on a page share their auth values, `useAuthFields().mapValues()` reads them from the page.

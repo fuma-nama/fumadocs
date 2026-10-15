@@ -570,7 +570,7 @@ export interface AuthField {
   scopes: string[];
   /** the field holding its value, in the auth values of page */
   fieldName: FieldKey;
-  /** `localStorage` key of its persisted value */
+  /** `sessionStorage` key of its value, kept while the tab is open */
   storageKey: string;
   defaultValue: unknown;
   provider: AuthProvider;
@@ -729,7 +729,7 @@ export function useAuthFields(
           continue;
         const value = page.get(field.fieldName);
 
-        if (value != null) localStorage.setItem(field.storageKey, JSON.stringify(value));
+        if (value != null) sessionStorage.setItem(field.storageKey, JSON.stringify(value));
       }
     },
   });
@@ -754,7 +754,7 @@ export function useAuthFields(
     init: useCallback(() => {
       for (const field of fields) {
         page.init(field.fieldName, () => {
-          const stored = localStorage.getItem(field.storageKey);
+          const stored = sessionStorage.getItem(field.storageKey);
           const parsed: unknown = stored ? JSON.parse(stored) : undefined;
           return typeof parsed === typeof field.defaultValue ? parsed : field.defaultValue;
         });

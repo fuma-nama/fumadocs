@@ -159,7 +159,8 @@ function OAuthForm({ field, flows, close }: AuthPanelProps & { flows: OAuthFlows
 
   const query = useQuery(async () => {
     const credentials = stf.dataEngine.getData() as Credentials;
-    localStorage.setItem(storageKey, JSON.stringify(credentials));
+    // the secrets are not stored
+    localStorage.setItem(storageKey, JSON.stringify({ clientId: credentials.clientId }));
     const controller = (controllerRef.current = new AbortController());
 
     try {
