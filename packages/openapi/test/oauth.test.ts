@@ -1,10 +1,5 @@
 import { afterEach, beforeEach, expect, test, vi } from 'vitest';
-import {
-  finishOAuthFlow,
-  type OAuthFlowInput,
-  readPendingFlow,
-  requestOAuthToken,
-} from '@/playground/auth';
+import { finishOAuthFlow, type OAuthFlowInput, requestOAuthToken } from '@/playground/auth';
 import type { SecuritySchemeObject } from '@/types';
 
 const input: OAuthFlowInput = {
@@ -72,7 +67,7 @@ test('authorization code flow uses PKCE', async () => {
   expect(requests[0].body.get('code_verifier')).toBe(code_verifier);
 });
 
-test('flows leaving the page return to `useAuthRedirect()`', async () => {
+test('flows leaving the page without `redirect` are finished by the page', async () => {
   const storage = new Map<string, string>();
   vi.stubGlobal('sessionStorage', {
     getItem: (key: string) => storage.get(key) ?? null,
@@ -89,7 +84,11 @@ test('flows leaving the page return to `useAuthRedirect()`', async () => {
 
   await requestOAuthToken(scheme, 'implicit', { ...input, origin: 'get /me' });
   expect(replace).toHaveBeenCalledOnce();
-  expect(readPendingFlow()).toMatchObject({ scheme: 'auth', origin: 'get /me' });
+  expect(JSON.parse(storage.get('fumadocs-openapi-flow')!)).toMatchObject({
+    scheme: 'auth',
+    origin: 'get /me',
+    oauth: true,
+  });
 });
 
 test('device authorization polls until users finish', async () => {

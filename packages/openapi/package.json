@@ -43,7 +43,7 @@
     "./ui/playground/client": "./dist/ui/playground/client.js",
     "./ui/scalar": "./dist/ui/scalar/index.js",
     "./package.json": "./package.json",
-    "./css/*": "./css/*"
+    "./css/preset.css": "./css/preset.css"
   },
   "publishConfig": {
     "access": "public"
@@ -58,9 +58,9 @@
   "dependencies": {
     "@base-ui/react": "^1.8.0",
     "@fuma-translate/react": "^1.0.2",
-    "@fumadocs/json-schema": "workspace:*",
+    "@fumadocs/json-schema": "workspace:^",
     "@fumari/json-schema-ts": "^1.0.2",
-    "@fumari/stf": "workspace:*",
+    "@fumari/stf": "workspace:^",
     "@scalar/json-magic": "^0.15.4",
     "@scalar/openapi-upgrader": "^0.4.1",
     "chokidar": "^5.0.0",

@@ -40,7 +40,7 @@ print(response.text)`;
   },
 };
 
-export function generatePythonObject(v: unknown, imports: Set<string>): string {
+function generatePythonObject(v: unknown, imports: Set<string>): string {
   if (v === null) {
     return 'None';
   } else if (typeof v === 'boolean') {

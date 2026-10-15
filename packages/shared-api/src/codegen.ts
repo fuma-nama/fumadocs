@@ -57,9 +57,7 @@ export function createCodeUsageGeneratorRegistry<Data, Context>(
       registry.set(id, {
         lang: generator.lang,
         label: generator.label,
-        generate() {
-          return typeof source === 'string' ? source : '';
-        },
+        generate: typeof source === 'string' ? () => source : source,
       });
     },
     remove(id) {

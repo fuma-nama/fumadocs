@@ -15,7 +15,7 @@ import {
   useResponseExamples,
 } from '@/operation';
 import { DataEngine } from '@fumari/stf';
-import { useAuthFields } from '@/playground/auth';
+import { useAuthFields, usePlaygroundAuth } from '@/playground/auth';
 import { createCodeUsageGeneratorRegistry } from '@/requests/generators';
 import { registerDefault } from '@/requests/generators/all';
 import type { Document, HttpMethods, OperationObject, PathItemObject } from '@/types';
@@ -259,6 +259,30 @@ test('generates inline code samples', async () => {
   expect(code).toBe('client.getMuseumHours()');
 });
 
+test('generates inline code samples from functions', async () => {
+  let code: string | undefined;
+
+  await render(
+    '/museum-hours',
+    'get',
+    function Harness() {
+      code = useCodeUsage('sdk');
+      return null;
+    },
+    ({ operation, pathItem }) => ({
+      operation: {
+        ...operation,
+        'x-codeSamples': [
+          { lang: 'js', id: 'sdk', source: (data) => `client.get(${JSON.stringify(data.url)})` },
+        ],
+      },
+      pathItem,
+    }),
+  );
+
+  expect(code).toMatch(/^client\.get\(".+\/museum-hours.*"\)$/);
+});
+
 test('renders the operations and webhooks of a page', async () => {
   const { bundled } = await loadDocument(museum);
   const doc = {
@@ -298,6 +322,7 @@ test('encodes auth fields with their providers', async () => {
 
   await render('/museum-hours', 'get', () => {
     const { operation } = useOperation();
+    const page = usePlaygroundAuth().stf.dataEngine;
     const builtin = useAuthFields(engine, { operation });
     const custom = useAuthFields(engine, {
       operation,
@@ -311,15 +336,14 @@ test('encodes auth fields with their providers', async () => {
       ],
     });
 
+    page.update(['auth', 'MuseumPlaceholderAuth'], { username: 'a', password: 'b' });
     result.push(
       builtin.fields[0].fieldName,
       custom.fields[0].defaultValue,
-      builtin.mapValues({
-        header: {},
-        auth: { MuseumPlaceholderAuth: { username: 'a', password: 'b' } },
-      }),
-      custom.mapValues({ header: {}, auth: { MuseumPlaceholderAuth: 'token' } }),
+      builtin.mapValues({ header: {} }),
     );
+    page.update(['auth', 'MuseumPlaceholderAuth'], 'token');
+    result.push(custom.mapValues({ header: {} }));
     return null;
   });
 

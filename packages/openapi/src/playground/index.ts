@@ -11,7 +11,8 @@ export {
   requestOAuthToken,
   useAuthFields,
   useAuthRedirect,
-  useOAuthFlows,
+  useOpenIdConnectFlows,
+  usePlaygroundAuth,
 } from './auth';
 export {
   type BrowserFetcherOptions,

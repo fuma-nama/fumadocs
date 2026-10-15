@@ -41,7 +41,7 @@ export default defineConfig({
         ...rest,
         // `generateFiles()` touches the filesystem, so client bundles get the stubbed build
         '.': { types: './dist/index.d.ts', browser, import: v['.'] },
-        './css/*': './css/*',
+        './css/preset.css': './css/preset.css',
       };
     },
   },

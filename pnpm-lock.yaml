@@ -2182,10 +2182,10 @@ importers:
         specifier: ^1.0.2
         version: 1.0.2(@types/react@19.3.0)(react-dom@19.3.0(react@19.3.0))(react@19.3.0)
       '@fumadocs/json-schema':
-        specifier: workspace:*
+        specifier: workspace:^
         version: link:../json-schema
       '@fumari/stf':
-        specifier: workspace:*
+        specifier: workspace:^
         version: link:../stf
       '@scalar/json-magic':
         specifier: ^0.15.4
@@ -2851,10 +2851,10 @@ importers:
         specifier: ^1.0.2
         version: 1.0.2(@types/react@19.3.0)(react-dom@19.3.0(react@19.3.0))(react@19.3.0)
       '@fumadocs/json-schema':
-        specifier: workspace:*
+        specifier: workspace:^
         version: link:../json-schema
       '@fumari/stf':
-        specifier: workspace:*
+        specifier: workspace:^
         version: link:../stf
       class-variance-authority:
         specifier: ^0.7.1
@@ -3481,13 +3481,13 @@ importers:
         specifier: ^1.0.2
         version: 1.0.2(@types/react@19.3.0)(react-dom@19.3.0(react@19.3.0))(react@19.3.0)
       '@fumadocs/json-schema':
-        specifier: workspace:*
+        specifier: workspace:^
         version: link:../json-schema
       '@fumari/json-schema-ts':
         specifier: ^1.0.2
         version: 1.0.2(json-schema-typed@8.0.2)
       '@fumari/stf':
-        specifier: workspace:*
+        specifier: workspace:^
         version: link:../stf
       '@scalar/json-magic':
         specifier: ^0.15.4
