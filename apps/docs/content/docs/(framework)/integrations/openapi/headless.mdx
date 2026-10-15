@@ -243,38 +243,6 @@ function ParameterInput({ location, name }: { location: string; name: string }) 
 
 It accepts `fetchOptions` to customise requests, like `onRequestInit()`, `authProviders` to handle security schemes, see [Authorization](/docs/integrations/openapi/api-page#authorization), and `transformAuthInputs` to customise the auth fields.
 
-### Auth
-
-`auth.fields` are the auth fields of the selected security requirement. The form holds their values at `fieldName`, they belong to the page, so the playgrounds of a page share them, and they are remembered per scheme.
-
-```tsx title="components/my-playground.tsx"
-import { useFieldValue } from '@fumari/stf';
-import type { AuthField, PlaygroundAuth } from 'fumadocs-openapi/playground';
-
-// render it in the form of `MyPlayground`, for each of `auth.fields`
-function AuthInput({ auth, field }: { auth: PlaygroundAuth; field: AuthField }) {
-  const [value, setValue] = useFieldValue(field.fieldName);
-
-  if (field.scheme.type === 'oauth2')
-    return (
-      <button onClick={() => auth.authorize(field, { type: 'authorizationCode', clientId: 'app' })}>
-        Authorize
-      </button>
-    );
-
-  // a string, or `{ username, password }` for Basic auth
-  return (
-    <input
-      aria-label={field.schemeId}
-      value={String(value ?? '')}
-      onChange={(e) => setValue(e.target.value)}
-    />
-  );
-}
-```
-
-`authorize()` obtains an OAuth 2.0 token into the field. Authorization code and implicit flows leave the page instead: when users come back, the page writes the token, and `auth.flowReturned` is set, so you can reopen the playground.
-
 ### Requests
 
 The parts `usePlayground()` builds on, to send a request without it.
