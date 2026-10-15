@@ -1,3 +1,61 @@
+## fumadocs-openapi@12.5.0
+
+### All security schemes in the API playground
+
+- Support OAuth 2.0 `deviceAuthorization` flows, `openIdConnect` schemes and PKCE.
+- OAuth requests with a client secret and device flows go through `proxyUrl` when set, allow your authorization server in `allowedOrigins`.
+- The OAuth panel remembers the client ID.
+- `mutualTLS` schemes no longer send an `Authorization` header.
+- Headless: `useOpenIdConnectFlows()`, `stf` and `returned` of `usePlaygroundAuth()`, `requestOAuthToken()` accepts `onUserCode`, `signal` and `proxyUrl`.
+- Playgrounds on a page share their auth values, `useAuthFields().mapValues()` reads them from the page.
+- The playground reopens after OAuth flows return in client-rendered sites.
+- Returning OAuth flows no longer switch the security requirement of other playgrounds.
+- Added translation keys to `@fumadocs/language`.
+
+### Share `@fumari/stf` and `@fumadocs/json-schema` with installed UI
+
+They are depended on with a caret range instead of an exact version, so UI installed with Fumadocs CLI can share one copy with the package.
+
+### Redesign the example request and response
+
+- Titled cards with selects instead of tabs, for the language, the response status and the examples of webhooks.
+- A Schema switch shows the JSON Schema of example responses.
+- Webhook examples show their body and parameters in sections instead of accordions.
+- The playground shows its code usages under a Request header, in the language selected on the page.
+- The playground shows response descriptions in full, in the Response header.
+- Added translation keys to `@fumadocs/language`.
+
+### Fix inline code samples with a function `source`
+
+`x-codeSamples` and `generateCodeSamples` with a function as `source` rendered an empty code sample.
+
+### Fix the sticky example column
+
+The example column sat under the header of Notebook layouts, and could be taller than the viewport.
+
+### Hide internal APIs
+
+- `generatePythonObject()` of `fumadocs-openapi/requests/generators/python`.
+- `InternalOpenAPIMeta` of `fumadocs-openapi/server`, and `_getWatchPaths()` of the OpenAPI server.
+- The `Awaitable` and `DistributiveOmit` types.
+- `subscribe()` of `usePlaygroundAuth()`, listen to the auth values in its `stf` instead.
+- Files under `fumadocs-openapi/css/` other than `preset.css`.
+
+### Optional `allowedOrigins` in `createProxy()`
+
+- Without `allowedOrigins`, the proxy accepts any public origin instead of its own origin, and refuses hosts on private networks (Node.js and Deno).
+- Without `allowedOrigins`, cookies of your site and `Set-Cookie` headers of responses are not forwarded.
+- Proxied responses can't run scripts on your site, and their headers that apply to your site (e.g. `Strict-Transport-Security`, `Clear-Site-Data`) are removed.
+- Redirects to other origins drop the `Authorization`, `Proxy-Authorization` and `Cookie` headers, like `fetch()`.
+- Remove all `Access-Control-*` headers of responses, some were kept before.
+- Abort the proxied request when the client disconnects.
+- Forward request bodies without a `Content-Length` header, and read them once.
+- Respond with 502 instead of 500 to upstream statuses outside 200-599 (e.g. 999).
+
+### Use `prose-sm` and `prose-xs` for small prose
+
+Small prose in TOC items, type tables, API descriptions and AI chat scales its code and headings with the text.
+
 ## fumadocs-openapi@12.4.2
 
 ### Playground focus
