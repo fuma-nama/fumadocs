@@ -31,11 +31,12 @@ export interface Proxy extends Record<(typeof methods)[number], Handler> {
 
 export interface CreateProxyOptions {
   /**
-   * List of allowed origins to proxy to, also enforced on redirects.
+   * List of allowed origins to proxy to, also enforced on redirects. Listed origins are trusted,
+   * including private ones like `http://localhost:8080`.
    *
-   * @defaultValue the proxy route's own origin (i.e. same-origin only). This
-   * prevents the proxy from being abused as an open proxy (SSRF) when no
-   * allowlist is configured; a warning is logged in that case.
+   * @defaultValue any public HTTP(S) origin. Hosts resolving to private network addresses (e.g.
+   * loopback, link-local) are refused when connecting, this requires Node.js or Deno. Cookies of
+   * your site and `Set-Cookie` headers of responses are not forwarded.
    */
   allowedOrigins?: OriginMatcher[];
 
@@ -61,10 +62,9 @@ export function createProxy(options: CreateProxyOptions = {}): Proxy {
     handle: handler,
   };
 
-  if (!allowedOrigins && !filterRequest) {
-    console.warn(
-      "[Proxy] `createProxy()` was called without `allowedOrigins` or `filterRequest`. Requests will be restricted to the proxy route's own origin. Set `allowedOrigins` to allow proxying to your API endpoints.",
-    );
+  function isAllowed(url: URL): boolean {
+    if (allowedOrigins) return allowedOrigins.some((matcher) => matchOrigin(url.origin, matcher));
+    return url.protocol === 'http:' || url.protocol === 'https:';
   }
 
   async function handler(req: Request): Promise<Response> {
@@ -83,9 +83,7 @@ export function createProxy(options: CreateProxyOptions = {}): Proxy {
         status: 400,
       });
 
-    const allowed = allowedOrigins ?? [reqUrl.origin];
-
-    if (allowed.every((matcher) => !matchOrigin(targetUrl.origin, matcher))) {
+    if (!isAllowed(targetUrl)) {
       return Response.json(`[Proxy] The origin "${targetUrl.origin}" is not allowed.`, {
         status: 400,
       });
@@ -100,8 +98,10 @@ export function createProxy(options: CreateProxyOptions = {}): Proxy {
     }
 
     try {
-      return rewriteResponse(await proxyFetch(proxied, allowed));
-    } catch (err) {
+      return await proxyFetch(proxied);
+    } catch (e) {
+      // `fetch()` wraps connection errors
+      const err = e instanceof Error && e.cause instanceof ProxyError ? e.cause : e;
       if (err instanceof ProxyError) {
         return Response.json(`[Proxy] ${err.message}`, { status: err.status });
       }
@@ -115,9 +115,11 @@ export function createProxy(options: CreateProxyOptions = {}): Proxy {
     }
   }
 
-  async function proxyFetch(initial: Request, allowed: OriginMatcher[]): Promise<Response> {
+  async function proxyFetch(initial: Request): Promise<Response> {
+    // `fetch()` can't refuse private networks
+    const send: Fetch = allowedOrigins ? fetch : await (publicFetch ??= createPublicFetch());
     let method = initial.method;
-    let url = initial.url;
+    let url = new URL(initial.url);
     const headers = new Headers(initial.headers);
     let body: ArrayBuffer | undefined =
       initial.body && methodsWithBody.has(method.toUpperCase())
@@ -125,16 +127,29 @@ export function createProxy(options: CreateProxyOptions = {}): Proxy {
         : undefined;
 
     for (let redirects = 0; redirects <= maxRedirects; redirects++) {
-      const response = await fetch(
-        new Request(url, { method, headers, body, cache: 'no-cache', redirect: 'manual' }),
-      );
+      const response = await send(url, {
+        method,
+        headers,
+        body,
+        cache: 'no-cache',
+        redirect: 'manual',
+        signal: initial.signal,
+      });
 
       const location = response.headers.get('location');
-      if (!redirectStatus.has(response.status) || !location) return response;
+      if (!redirectStatus.has(response.status) || !location) return rewriteResponse(response, url);
+      await response.body?.cancel();
 
       const next = new URL(location, url);
-      if (allowed.every((matcher) => !matchOrigin(next.origin, matcher))) {
+      if (!isAllowed(next)) {
         throw new ProxyError(`The redirect origin "${next.origin}" is not allowed.`);
+      }
+
+      // like `fetch()`, credentials are not sent to other origins
+      if (next.origin !== url.origin) {
+        headers.delete('authorization');
+        headers.delete('proxy-authorization');
+        headers.delete('cookie');
       }
 
       // Match browser semantics: 303 (and 301/302 for non-idempotent methods)
@@ -151,7 +166,7 @@ export function createProxy(options: CreateProxyOptions = {}): Proxy {
           break;
       }
 
-      url = next.href;
+      url = next;
     }
 
     throw new ProxyError('Too many redirects.', 508);
@@ -164,46 +179,70 @@ export function createProxy(options: CreateProxyOptions = {}): Proxy {
   ): Promise<Request> {
     const headers = new Headers(request.headers);
     headers.delete('origin');
+    // cookies of your site, only listed origins are trusted with them
+    if (!allowedOrigins) headers.delete('cookie');
     if (cookie) {
       headers.set('Cookie', cookie);
     }
-
-    const contentLength = headers.get('content-length');
-    const hasBody = contentLength && parseInt(contentLength) > 0;
 
     const proxied = new Request(url, {
       method: request.method,
       cache: 'no-cache',
       headers,
-      body:
-        hasBody && methodsWithBody.has(request.method.toUpperCase())
-          ? await request.arrayBuffer()
-          : undefined,
-    });
+      // a stream, read once by `proxyFetch()`
+      body: methodsWithBody.has(request.method.toUpperCase()) ? request.body : null,
+      // stops the upstream request when the client disconnects
+      signal: request.signal,
+      // required for stream bodies, missing in the DOM types
+      duplex: 'half',
+    } as RequestInit);
 
     return overrides?.request ? overrides.request(proxied) : proxied;
   }
 
-  async function rewriteResponse(response: Response): Promise<Response> {
+  async function rewriteResponse(response: Response, url: URL): Promise<Response> {
     if (overrides?.response) {
       response = overrides.response(response);
     }
 
-    const headers = new Headers(response.headers);
-    // `fetch()` already decoded the body, so the upstream content-encoding and
-    // content-length no longer describe the bytes we forward. Leaving them makes
-    // the browser try to decode plain data again (ERR_CONTENT_DECODING_FAILED).
-    headers.delete('content-encoding');
-    headers.delete('content-length');
+    // `Response` only accepts 200-599
+    if (response.status < 200 || response.status > 599) {
+      await response.body?.cancel();
+      throw new ProxyError(
+        `The upstream responded with an unsupported status ${response.status}.`,
+        502,
+      );
+    }
 
-    headers.forEach((_value, originalKey) => {
-      const key = originalKey.toLowerCase();
-
-      if (key.startsWith('access-control-')) {
-        headers.delete(originalKey);
+    const headers = new Headers();
+    response.headers.forEach((value, key) => {
+      if (key.startsWith('access-control-')) return;
+      switch (key) {
+        case 'set-cookie':
+          if (!allowedOrigins) return;
+          break;
+        // `fetch()` already decoded the body, so the upstream content-encoding and
+        // content-length no longer describe the bytes we forward. Leaving them makes
+        // the browser try to decode plain data again (ERR_CONTENT_DECODING_FAILED).
+        case 'content-encoding':
+        case 'content-length':
+        case 'alt-svc':
+        case 'clear-site-data':
+        case 'nel':
+        case 'refresh':
+        case 'report-to':
+        case 'reporting-endpoints':
+        case 'set-login':
+        case 'strict-transport-security':
+          return;
       }
+
+      headers.append(key, value);
     });
-    headers.set('X-Forwarded-Host', response.url);
+
+    headers.set('X-Forwarded-Host', url.href);
+    // proxied content is served from your origin, it must not run scripts when opened as a page
+    headers.append('Content-Security-Policy', 'sandbox');
 
     return new Response(response.body, {
       status: response.status,
@@ -217,4 +256,88 @@ export function createProxy(options: CreateProxyOptions = {}): Proxy {
   }
 
   return handlers as Proxy;
+}
+
+type Fetch = (
+  url: URL,
+  init: RequestInit & { method: string; headers: Headers; body?: ArrayBuffer },
+) => Promise<Response>;
+
+// loopback, private, link-local, CGNAT and reserved ranges (IPv4-mapped IPv6 addresses included),
+// plus IPv6 transition ranges (Teredo, 6to4, NAT64) that can embed private IPv4 addresses
+const privateRanges: [address: string, prefix: number][] = [
+  ['0.0.0.0', 8],
+  ['10.0.0.0', 8],
+  ['100.64.0.0', 10],
+  ['127.0.0.0', 8],
+  ['169.254.0.0', 16],
+  ['172.16.0.0', 12],
+  // includes the legacy metadata endpoint of Oracle Cloud
+  ['192.0.0.0', 24],
+  ['192.168.0.0', 16],
+  // used for pods by some Kubernetes clusters
+  ['240.0.0.0', 4],
+  ['::', 96],
+  ['fc00::', 7],
+  ['fe80::', 10],
+  ['2001::', 32],
+  ['2002::', 16],
+  ['64:ff9b::', 96],
+  ['64:ff9b:1::', 48],
+];
+
+let publicFetch: Promise<Fetch> | undefined;
+
+/**
+ * `fetch()` refusing hosts on private networks, checked against the resolved addresses of every
+ * connection.
+ */
+async function createPublicFetch(): Promise<Fetch> {
+  // Bun replaces `undici` with a stub that ignores `dispatcher`
+  if ('Bun' in globalThis)
+    throw new ProxyError(
+      'Private networks cannot be blocked on Bun, specify `allowedOrigins`.',
+      500,
+    );
+
+  const [{ Agent, fetch }, dns, { BlockList, isIP }] = await Promise.all([
+    import('undici'),
+    import('node:dns'),
+    import('node:net'),
+  ]);
+  const ipType = (address: string) => (isIP(address) === 6 ? 'ipv6' : 'ipv4');
+  const blockList = new BlockList();
+  for (const [address, prefix] of privateRanges) {
+    blockList.addSubnet(address, prefix, ipType(address));
+  }
+  const isPrivate = (address: string) => blockList.check(address, ipType(address));
+  // also for DNS errors, so it doesn't reveal which hosts exist in your network
+  const refuse = (hostname: string) =>
+    new ProxyError(
+      `The host "${hostname}" doesn't resolve to a public address, add its origin to \`allowedOrigins\` to proxy to private hosts.`,
+    );
+
+  // its own connection pool: reused sockets skip `lookup`
+  const dispatcher = new Agent({
+    connect: {
+      lookup(hostname, options, callback) {
+        dns.lookup(hostname, options, (err, address, family) => {
+          const addresses = typeof address === 'string' ? [{ address }] : address;
+          if (err || addresses.some((item) => isPrivate(item.address))) {
+            callback(refuse(hostname), address, family);
+          } else {
+            callback(null, address, family);
+          }
+        });
+      },
+    },
+  });
+
+  return async (url, init) => {
+    // IP addresses skip `lookup`
+    const hostname = url.hostname.replace(/^\[(.*)\]$/, '$1');
+    if (isIP(hostname) && isPrivate(hostname)) throw refuse(hostname);
+    // undici declares its own `Response` type
+    return fetch(url, { ...init, dispatcher }) as unknown as Promise<Response>;
+  };
 }

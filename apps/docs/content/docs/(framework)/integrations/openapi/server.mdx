@@ -60,21 +60,14 @@ Create a route handler for proxy server.
 ```ts tab="Next.js" title="app/api/proxy/route.ts"
 import { openapi } from '@/lib/openapi';
 
-export const { GET, HEAD, PUT, POST, PATCH, DELETE } = openapi.createProxy({
-  // important: set a list of allowed origins for proxied requests
-  // such as the origin of your Web & authorization server
-  allowedOrigins: ['https://example.com'],
-});
+export const { GET, HEAD, PUT, POST, PATCH, DELETE } = openapi.createProxy();
 ```
 
 ```ts tab="Tanstack Start" title="app/routes/api/proxy.ts"
 import { openapi } from '@/lib/openapi';
 import { createFileRoute } from '@tanstack/react-router';
 
-const proxy = openapi.createProxy({
-  // important: set a list of allowed origins for proxied requests
-  allowedOrigins: ['https://example.com'],
-});
+const proxy = openapi.createProxy();
 
 export const Route = createFileRoute('/api/proxy')({
   server: {
@@ -91,10 +84,7 @@ export const Route = createFileRoute('/api/proxy')({
 ```ts tab="Waku" title="src/pages/_api/api/proxy.ts"
 import { openapi } from '@/lib/openapi';
 
-export const { GET, HEAD, PUT, POST, PATCH, DELETE } = openapi.createProxy({
-  // important: set a list of allowed origins for proxied requests
-  allowedOrigins: ['https://example.com'],
-});
+export const { GET, HEAD, PUT, POST, PATCH, DELETE } = openapi.createProxy();
 ```
 
 And set the proxy URL in `createOpenAPI`.
@@ -106,6 +96,23 @@ export const openapi = createOpenAPI({
   proxyUrl: '/api/proxy', // [!code ++]
 });
 ```
+
+### Allowed Origins
+
+By default, the proxy accepts any public origin, refuses hosts on private networks (e.g. `localhost`), and doesn't forward your site's cookies.
+List the origins to restrict it, or to proxy private APIs:
+
+```ts title="app/api/proxy/route.ts"
+export const { GET, HEAD, PUT, POST, PATCH, DELETE } = openapi.createProxy({
+  // strings or regular expressions
+  allowedOrigins: ['https://api.example.com', 'http://localhost:8080'],
+});
+```
+
+<Callout type="warn">
+  Refusing private networks requires Node.js or Deno, specify `allowedOrigins` on other runtimes
+  (e.g. Bun).
+</Callout>
 
 ## OAuth Redirect
 
