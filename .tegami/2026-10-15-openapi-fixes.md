@@ -7,6 +7,10 @@ packages:
 
 `x-codeSamples` and `generateCodeSamples` with a function as `source` rendered an empty code sample.
 
+### Fix the sticky example column
+
+The example column sat under the header of Notebook layouts, and could be taller than the viewport.
+
 ### Hide internal APIs
 
 - `generatePythonObject()` of `fumadocs-openapi/requests/generators/python`.
