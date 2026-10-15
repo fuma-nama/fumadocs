@@ -2,7 +2,7 @@
 import { Fragment, type ReactNode, useState } from 'react';
 import { Dialog } from '@base-ui/react/dialog';
 import type { MediaTypeObject, SecuritySchemeObject } from '@/types';
-import { UsageTabs } from '@/ui/operation/usage-tabs';
+import { RequestTabs, UsageTabs } from '@/ui/operation/usage-tabs';
 import { MethodLabel } from '@/ui/components/method-label';
 import { SchemaUI } from '@/ui/components/schema';
 import { Badge } from 'shared-api/components/badge';
@@ -15,7 +15,6 @@ import {
   useOperation,
 } from '@/operation';
 import { useTranslations } from '@fuma-translate/react';
-import { RequestTabs } from './request-tabs';
 import { cn } from '@/utils/cn';
 import { SelectTabs, SelectTabTrigger, SelectTab } from 'shared-api/components/select-tab';
 import { Callout } from 'fumadocs-ui/components/callout';
@@ -270,7 +269,7 @@ function OperationContent({
           {slots.responses}
           {slots.callbacks}
         </div>
-        <div className="@4xl:sticky @4xl:top-[calc(var(--fd-docs-row-1,2rem)+1rem)] @4xl:w-[400px]">
+        <div className="@4xl:sticky @4xl:top-[calc(var(--fd-docs-row-3,0px)+1rem)] @4xl:flex @4xl:max-h-[calc(var(--fd-docs-height,100dvh)-var(--fd-docs-row-3,0px)-2rem)] @4xl:w-[400px] @4xl:flex-col">
           {slots.apiExample}
         </div>
       </div>
@@ -301,7 +300,7 @@ function OperationContent({
         {slots.responses}
         {slots.callbacks}
       </div>
-      <div className="@4xl:sticky @4xl:top-[calc(var(--fd-docs-row-1,2rem)+1rem)] @4xl:w-[400px]">
+      <div className="@4xl:sticky @4xl:top-[calc(var(--fd-docs-row-3,0px)+1rem)] @4xl:flex @4xl:max-h-[calc(var(--fd-docs-height,100dvh)-var(--fd-docs-row-3,0px)-2rem)] @4xl:w-[400px] @4xl:flex-col">
         {slots.requests}
       </div>
     </div>
@@ -578,7 +577,7 @@ function Callback({
         />
         <div
           ref={ref}
-          className="fd-scroll-container prose min-h-0 flex-1 overflow-y-auto border-t p-5 text-sm @container [--fd-docs-row-1:0px] [--fd-docs-row-3:0px]"
+          className="fd-scroll-container prose min-h-0 flex-1 overflow-y-auto border-t p-5 text-sm @container [--fd-docs-row-3:0px]"
         >
           <AnchorSection segments={segments}>
             <Operation

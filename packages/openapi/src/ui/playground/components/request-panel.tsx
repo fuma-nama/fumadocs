@@ -498,7 +498,7 @@ function Section({
 }) {
   return (
     <section className="border-b last:border-b-0">
-      <div className="sticky top-0 z-10 flex h-12 items-center gap-2 border-b bg-fd-card ps-4 pe-2 @sm:pe-7.5">
+      <div className="sticky top-0 z-10 flex h-10 items-center gap-2 border-b bg-fd-card ps-4 pe-2 @sm:pe-7.5">
         <Icon className="size-3.5 shrink-0 text-fd-primary" />
         <h3 className="text-[0.8125rem] font-medium">{title}</h3>
         {count !== undefined && (
