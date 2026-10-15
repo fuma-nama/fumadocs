@@ -588,7 +588,7 @@ export function SearchDialogListItem({
         <div
           ref={highlightRef}
           className={cn(
-            'prose prose-sm leading-5 min-w-0',
+            'prose prose-sm min-w-0',
             item.type === 'text' && 'ps-4',
             item.type === 'heading' && 'ps-8',
             item.type === 'page' || item.type === 'heading'

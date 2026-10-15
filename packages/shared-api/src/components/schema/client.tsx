@@ -644,7 +644,7 @@ function SchemaDescription({
               >
                 <span className="not-prose shrink-0 text-fd-muted-foreground">{tag.label}</span>
                 {tag.prose ? (
-                  <div className="prose-sm prose-no-margin min-w-0 flex-1">{tag.value}</div>
+                  <div className="prose-xs prose-no-margin min-w-0 flex-1">{tag.value}</div>
                 ) : (
                   <code className="not-prose min-w-0 wrap-break-word">{tag.value}</code>
                 )}

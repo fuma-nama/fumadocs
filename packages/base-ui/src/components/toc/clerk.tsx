@@ -268,7 +268,7 @@ export function TOCItem({
       href={item.url}
       {...props}
       className={cn(
-        'prose relative py-1.5 text-sm scroll-m-4 text-fd-muted-foreground hover:text-fd-accent-foreground transition-colors wrap-anywhere data-[active=true]:text-fd-primary',
+        'prose prose-sm relative py-1.5 scroll-m-4 text-fd-muted-foreground hover:text-fd-accent-foreground transition-colors wrap-anywhere data-[active=true]:text-fd-primary',
         isFirst && 'pt-0',
         isLast && 'pb-0',
         props.className,

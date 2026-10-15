@@ -577,7 +577,7 @@ function Callback({
         />
         <div
           ref={ref}
-          className="fd-scroll-container prose min-h-0 flex-1 overflow-y-auto border-t p-5 text-sm @container [--fd-docs-row-3:0px]"
+          className="fd-scroll-container prose prose-sm min-h-0 flex-1 overflow-y-auto border-t p-5 @container [--fd-docs-row-3:0px]"
         >
           <AnchorSection segments={segments}>
             <Operation
