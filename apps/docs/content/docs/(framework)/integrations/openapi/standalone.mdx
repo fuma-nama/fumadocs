@@ -1,0 +1,107 @@
+---
+title: Standalone
+description: API docs from your OpenAPI documents, without a docs site.
+---
+
+`@fumadocs/openapi-standalone` renders your OpenAPI documents with Fumadocs UI, as static HTML files or a [Hono](https://hono.dev) server.
+
+## CLI
+
+```bash
+npx @fumadocs/openapi-standalone build ./openapi.yaml
+```
+
+```bash
+npx @fumadocs/openapi-standalone serve ./openapi.yaml --port 8080
+```
+
+| Option                | Description                                 |
+| --------------------- | ------------------------------------------- |
+| `-o, --out <dir>`     | Output directory of `build`, default: `out` |
+| `--base-url <path>`   | URL path the docs are served under          |
+| `-p, --port <port>`   | Port of `serve`, default: `8080`            |
+| `--host <host>`       | Host of `serve`, default: `localhost`       |
+| `-c, --config <file>` | Config file                                 |
+
+`serve` adds a CORS proxy for the API playground, it only forwards requests to the absolute URLs in `servers` of your documents.
+
+### Config File
+
+Without inputs, the CLI reads `fumadocs-openapi.config.ts` (or `.mts`, `.js`, `.mjs`), flags override it.
+
+```ts title="fumadocs-openapi.config.ts"
+import type { Config } from '@fumadocs/openapi-standalone';
+
+export default {
+  input: ['./openapi.yaml'],
+  outDir: 'out',
+} satisfies Config;
+```
+
+## Static HTML
+
+```ts
+import { generateStatic } from '@fumadocs/openapi-standalone';
+
+await generateStatic({
+  input: ['./openapi.yaml'],
+  outDir: 'out',
+});
+```
+
+```txt title="Output"
+out/
+├── index.html                   # overview of the document
+├── pets/listPets/index.html     # a page for each operation
+├── 404.html
+└── _fumadocs/                   # scripts, styles, documents and search index
+```
+
+## Hono
+
+```ts
+import { Hono } from 'hono';
+import { createApp } from '@fumadocs/openapi-standalone/hono';
+
+const app = new Hono();
+
+// routes are under `baseUrl`
+app.route(
+  '/',
+  createApp({
+    input: ['./openapi.yaml'],
+    baseUrl: '/docs',
+    // CORS proxy for the API playground, it only forwards requests to the absolute URLs in `servers`
+    proxy: true,
+  }),
+);
+
+export default app;
+```
+
+Pages are rendered on request, the app reads its scripts from disk: run it on Node.js, Bun or Deno.
+
+## Options
+
+```ts
+await generateStatic({
+  // file paths and URLs, or a record of document ID -> file path, URL or document object
+  input: ['./openapi.yaml', './billing.yaml'],
+  // emptied before writing
+  outDir: 'out',
+  // a page for each 'operation' (default), 'tag' or 'file'
+  per: 'operation',
+  // folders of operation pages: 'tag' (default when operations have tags), 'route' or 'none'
+  groupBy: 'tag',
+  // the URL path the docs are served under, default: '/'
+  baseUrl: '/docs',
+  // default: `info.title` of the document
+  title: 'Acme API',
+  // a `createProxy()` route for the API playground
+  proxyUrl: 'https://example.com/api/proxy',
+});
+```
+
+With multiple documents, each one gets a folder and a tab in the sidebar.
+
+See [Creating Proxy](/docs/integrations/openapi/server#creating-proxy) for `proxyUrl`.

@@ -1,0 +1,63 @@
+{
+  "name": "@fumadocs/openapi-standalone",
+  "version": "0.0.1",
+  "description": "API docs from your OpenAPI spec, as static HTML or a Hono server",
+  "keywords": [
+    "Docs",
+    "Fumadocs",
+    "OpenAPI"
+  ],
+  "homepage": "https://fumadocs.dev",
+  "license": "MIT",
+  "author": "Fuma Nama",
+  "repository": "github:fuma-nama/fumadocs",
+  "bin": {
+    "openapi-standalone": "./dist/cli.js"
+  },
+  "files": [
+    "dist"
+  ],
+  "type": "module",
+  "sideEffects": false,
+  "exports": {
+    ".": "./dist/index.js",
+    "./hono": "./dist/hono.js",
+    "./package.json": "./package.json"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "scripts": {
+    "build": "tsdown && vite build",
+    "clean": "rimraf dist",
+    "lint": "oxlint .",
+    "types:check": "tsc --noEmit"
+  },
+  "dependencies": {
+    "hono": "^4.13.12"
+  },
+  "devDependencies": {
+    "@fumadocs/tailwind": "workspace:*",
+    "@hono/node-server": "^2.1.3",
+    "@tailwindcss/vite": "^4.3.3",
+    "@types/node": "26.6.4",
+    "@types/react": "^19.3.0",
+    "@types/react-dom": "^19.3.0",
+    "fumadocs-core": "workspace:*",
+    "fumadocs-openapi": "workspace:*",
+    "fumadocs-ui": "workspace:@fumadocs/base-ui@*",
+    "hast-util-to-jsx-runtime": "^2.3.6",
+    "react": "^19.3.0",
+    "react-dom": "^19.3.0",
+    "remark": "^15.0.1",
+    "remark-rehype": "^11.1.2",
+    "shiki": "^4.5.0",
+    "tailwindcss": "^4.3.3",
+    "tsconfig": "workspace:*",
+    "tsdown": "0.23.0",
+    "vite": "^8.3.2"
+  },
+  "engines": {
+    "node": ">=22.18.0"
+  }
+}

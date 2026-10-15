@@ -1,0 +1,8 @@
+@import 'tailwindcss';
+@import 'fumadocs-ui/css/neutral.css';
+@import 'fumadocs-ui/css/lib/base.css';
+@import 'fumadocs-ui/css/lib/shiki.css';
+@import 'fumadocs-ui/css/generated/shared.css';
+@import 'fumadocs-ui/css/generated/spacious.css';
+@import 'fumadocs-openapi/css/preset.css';
+@plugin '@fumadocs/tailwind/typography';
