@@ -1,7 +1,7 @@
 'use client';
 import { Fragment, type ReactNode, useState } from 'react';
 import { Dialog } from '@base-ui/react/dialog';
-import type { Awaitable, MediaTypeObject, SecuritySchemeObject } from '@/types';
+import type { MediaTypeObject, SecuritySchemeObject } from '@/types';
 import { RequestTabs, UsageTabs } from '@/ui/operation/usage-tabs';
 import { MethodLabel } from '@/ui/components/method-label';
 import { SchemaUI } from '@/ui/components/schema';
@@ -396,7 +396,7 @@ function CopyTypeScript({
   generate,
 }: {
   name: string;
-  generate: () => Awaitable<string | undefined>;
+  generate: () => string | undefined | Promise<string | undefined>;
 }) {
   const t = useTranslations({ note: 'TypeScript definitions' });
   const [isChecked, onCopy] = useCopyButton(() => {
