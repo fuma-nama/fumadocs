@@ -7,7 +7,7 @@ import { createGetUrl, getSlugs, PathUtils } from 'fumadocs-core/source';
 import { createAutoPreset, type SchemaToPagesOptions } from '@/utils/pages/preset-auto';
 import { fromSchema, type OutputGroup, type OutputEntry } from '@/utils/pages/builder';
 import type { DistributiveOmit } from './types';
-import { doubleQuote } from './requests/string-utils';
+import { jsxString } from './requests/string-utils';
 
 export interface OutputFile {
   path: string;
@@ -100,8 +100,8 @@ export async function generateFiles(options: Config): Promise<void> {
 
     await generateFiles(subOptions);
     const { input = [] } = options.input.options;
-    const targets = (Array.isArray(input) ? input : Object.keys(input)).filter(
-      (key) => !URL.canParse(key) && existsSync(key),
+    const targets = Object.values(input).filter(
+      (value): value is string => typeof value === 'string' && existsSync(value),
     );
     console.log(`[Fumadocs OpenAPI] watching ${targets.join(', ')}`);
     watch(targets, {
@@ -277,10 +277,10 @@ function writeIndexFiles(
       // cannot link to groups
       if (entry.type === 'group') continue;
       const descriptionAttr = entry.info.description
-        ? `description=${doubleQuote(entry.info.description)} `
+        ? `description=${jsxString(entry.info.description)} `
         : '';
       content.push(
-        `<Card href="${urlFn(entry.path)}" title=${doubleQuote(entry.info.title)} ${descriptionAttr}/>`,
+        `<Card href="${urlFn(entry.path)}" title=${jsxString(entry.info.title)} ${descriptionAttr}/>`,
       );
     }
 

@@ -10,37 +10,20 @@ import {
 import { DownloadIcon, FileIcon, X } from 'lucide-react';
 import type { FetchResponseResult, FetchResult } from '@/playground/fetcher';
 import { useStatusInfo } from '../status-info';
-import { buttonVariants } from 'fumadocs-ui/components/ui/button';
-import type { CodeBlockProps } from 'fumadocs-ui/components/codeblock';
 import { cn } from '@/utils/cn';
 import { ClientCodeBlock } from '@/ui/components/codeblock';
 import { useTranslations } from '@fuma-translate/react';
 import type { BuiltinLanguage, SpecialLanguage } from 'shiki';
-import { Segmented, SegmentedList, SegmentedPanel } from '@/ui/components/segmented';
+import { Segmented, SegmentedList, SegmentedPanel } from 'shared-api/components/segmented';
+import {
+  iconButtonClassName,
+  PanelHeader,
+  panelCodeBlock,
+} from 'shared-api/components/playground/panels';
 
 export interface ResultDisplayProps extends ComponentProps<'div'> {
   data: FetchResult;
   reset: () => void;
-}
-
-export const iconButtonClassName = cn(
-  buttonVariants({ variant: 'ghost', size: 'icon-sm' }),
-  'text-fd-muted-foreground [&_svg]:size-3.5',
-);
-
-/** a code block filling its panel */
-export const panelCodeBlock: CodeBlockProps = {
-  className: 'h-full rounded-none border-0 bg-transparent shadow-none',
-  viewportProps: { className: 'h-full max-h-none' },
-};
-
-export function PanelHeader({ className, ...props }: ComponentProps<'div'>) {
-  return (
-    <div
-      {...props}
-      className={cn('flex h-10 shrink-0 items-center gap-2.5 border-b ps-4 pe-1.5', className)}
-    />
-  );
 }
 
 export function DefaultResultDisplay({ data, reset, ...rest }: ResultDisplayProps) {

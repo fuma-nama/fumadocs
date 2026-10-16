@@ -1,6 +1,8 @@
 import { createMagicProxy } from '@scalar/json-magic/magic-proxy';
 import { expect, test, vi } from 'vitest';
 import type { Document } from '@/types';
+import { fromSchema } from '@/utils/pages/builder';
+import { createAutoPreset } from '@/utils/pages/preset-auto';
 import { toStaticData } from '@/utils/pages/to-static-data';
 
 vi.mock('@scalar/json-magic/magic-proxy', () => ({
@@ -26,6 +28,7 @@ test('reuses the magic proxy for the same document', () => {
   };
   const otherDocument = { ...document };
 
+  fromSchema('test', document, createAutoPreset({}));
   toStaticData(page, document);
   toStaticData(page, document);
   toStaticData(page, otherDocument);

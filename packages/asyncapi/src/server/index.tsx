@@ -1,30 +1,30 @@
 import { loadDocument } from '@/utils/document/load';
 import type { AsyncAPIObject, Awaitable } from '@/types';
 import fs from 'node:fs';
-import {
-  type DynamicSource,
-  type LoaderPlugin,
-  type PageData,
-  PathUtils,
-  type MetaData,
-  type Source,
-  type VirtualFile,
-  type Page,
+import type {
+  DynamicSource,
+  LoaderPlugin,
+  PageData,
+  MetaData,
+  Source,
+  VirtualFile,
+  Page,
 } from 'fumadocs-core/source';
 import {
   fromSchema,
+  getMetaPages,
   getPageProps,
-  type OperationOutput,
   type OutputEntry,
-  type PageOutput,
+  type OutputGroup,
 } from '@/utils/pages/builder';
 import type { AsyncAPIPageProps_Preloaded, AsyncAPIPageProps_Spec } from '@/utils/create-page';
 import { toStaticData } from '@/utils/pages/to-static-data';
+import { toMarkdown } from '@/utils/pages/to-markdown';
 import path from 'node:path';
 import type { StructuredData } from 'fumadocs-core/mdx-plugins/remark-structure';
 import type { TOCItemType } from 'fumadocs-core/toc';
 import { createAutoPreset, type SchemaToPagesOptions } from '@/utils/pages/preset-auto';
-import { ActionLabel } from '@/ui/components/badge';
+import { DirectionIcon } from '@/ui/components/direction';
 
 type SchemaRecord = Record<
   string,
@@ -33,6 +33,7 @@ type SchemaRecord = Record<
 interface LoadedDocument {
   bundled: AsyncAPIObject;
 }
+type AsyncAPIVirtualFile = VirtualFile<{ pageData: AsyncAPIPageData; metaData: MetaData }>;
 
 export interface AsyncAPIOptions {
   input?: string[] | SchemaRecord;
@@ -61,6 +62,8 @@ export interface AsyncAPIServer {
 export interface AsyncAPIPageData extends PageData {
   getAsyncAPIPageProps: () => AsyncAPIPageProps_Spec;
   getSchema: () => { id: string; bundled: AsyncAPIObject };
+  /** the operations of page in Markdown, for LLMs */
+  getText: (type: 'raw' | 'processed') => Promise<string>;
   structuredData: StructuredData;
   toc: TOCItemType[];
   _asyncapi: InternalAsyncAPIMeta;
@@ -73,143 +76,107 @@ export type AsyncAPISourceOptions = SchemaToPagesOptions & {
 
 export function createAsyncAPI(options: AsyncAPIOptions = {}): AsyncAPIServer {
   const { disableCache = false } = options;
-  type AsyncAPIVirtualFile = VirtualFile<{
-    pageData: AsyncAPIPageData;
-    metaData: MetaData;
-  }>;
   const docCache = new Map<string, Promise<LoadedDocument>>();
 
-  let resolvedInput: SchemaRecord = {};
+  let input: SchemaRecord = {};
   if (Array.isArray(options.input)) {
-    for (const item of options.input) resolvedInput[item] = item;
+    for (const item of options.input) input[item] = item;
   } else if (options.input) {
-    resolvedInput = options.input;
+    input = options.input;
   }
 
-  async function getSchema(schemaId: string): Promise<LoadedDocument> {
-    if (!Object.hasOwn(resolvedInput, schemaId)) {
+  async function getSchema(id: string): Promise<LoadedDocument> {
+    if (!Object.hasOwn(input, id)) {
       throw new Error(
-        `[Fumadocs AsyncAPI] the document "${schemaId}" is not listed in "input", only documents from "input" can be loaded.`,
+        `[Fumadocs AsyncAPI] the document "${id}" is not listed in "input", only documents from "input" can be loaded.`,
       );
     }
 
-    if (!disableCache) {
-      const cached = docCache.get(schemaId);
-      if (cached) return cached;
+    let output = disableCache ? undefined : docCache.get(id);
+    if (!output) {
+      const raw = input[id];
+      output = Promise.resolve(typeof raw === 'function' ? raw() : raw).then(loadDocument);
+      if (!disableCache) docCache.set(id, output);
     }
 
-    const raw = resolvedInput[schemaId];
-    const output = Promise.resolve(typeof raw === 'function' ? raw() : raw).then(loadDocument);
-    if (!disableCache) docCache.set(schemaId, output);
     return output;
   }
 
   async function getSchemas(): Promise<Record<string, LoadedDocument>> {
     const entries = await Promise.all(
-      Object.keys(resolvedInput).map(async (k) => [k, await getSchema(k)]),
+      Object.keys(input).map(async (id) => [id, await getSchema(id)]),
     );
     return Object.fromEntries(entries);
   }
 
   async function getVirtualFiles(
-    server: AsyncAPIServer,
     options: AsyncAPISourceOptions,
-    docFilesCache?: WeakMap<LoadedDocument, AsyncAPIVirtualFile[]>,
+    cache?: WeakMap<LoadedDocument, AsyncAPIVirtualFile[]>,
   ): Promise<AsyncAPIVirtualFile[]> {
     const { baseDir = '', meta = false } = options;
-    const files: AsyncAPIVirtualFile[] = [];
-    const builderOptions = createAutoPreset(options);
+    const { folderStyle = 'folder' } = typeof meta === 'object' ? meta : {};
+    const preset = createAutoPreset(options);
 
-    for (const [id, schema] of Object.entries(await server.getSchemas())) {
-      const cachedDocFiles = docFilesCache?.get(schema);
-      if (cachedDocFiles) {
-        files.push(...cachedDocFiles);
-        continue;
-      }
+    function toFiles(id: string, bundled: AsyncAPIObject): AsyncAPIVirtualFile[] {
+      const out: AsyncAPIVirtualFile[] = [];
 
-      const entries = onEntries(fromSchema(id, schema.bundled, builderOptions));
-      docFilesCache?.set(schema, entries);
-      files.push(...entries);
-
-      function onEntry(entry: PageOutput | OperationOutput): AsyncAPIVirtualFile {
-        const props = getPageProps(entry);
-
-        return {
-          type: 'page',
-          path: `${baseDir}/${entry.path}`,
-          data: {
-            ...entry.info,
-            getAsyncAPIPageProps() {
-              return {
-                payload: {
-                  bundled: schema.bundled,
-                },
-                ...props,
-              };
-            },
-            getSchema() {
-              return {
-                id,
-                bundled: schema.bundled,
-              };
-            },
-            ...toStaticData(props, schema.bundled),
-            _asyncapi: {
-              action: entry.type === 'operation' ? entry.item.action : undefined,
-              deprecated: entry.info.deprecated,
-            },
-          },
-        };
-      }
-
-      function onEntries(entries: OutputEntry[], parent?: OutputEntry): AsyncAPIVirtualFile[] {
-        const out: AsyncAPIVirtualFile[] = [];
-
-        if (!meta) {
-          for (const entry of entries) {
-            if (entry.type === 'group') {
-              out.push(...onEntries(entry.entries, entry));
-            } else {
-              out.push(onEntry(entry));
-            }
-          }
-          return out;
-        }
-
-        const { folderStyle = 'folder' } = meta === true ? {} : meta;
-        const pages: string[] = [];
-
+      function scan(entries: OutputEntry[], parent?: OutputGroup) {
         for (const entry of entries) {
-          const relativePath = PathUtils.slash(
-            parent ? path.relative(parent.path, entry.path) : entry.path,
-          );
-
           if (entry.type === 'group') {
-            out.push(...onEntries(entry.entries, entry));
-            if (folderStyle === 'folder') {
-              pages.push(relativePath);
-            } else {
-              pages.push(`---${entry.info.title}---`, `...${relativePath}`);
-            }
-          } else {
-            out.push(onEntry(entry));
-            pages.push(relativePath.slice(0, -path.extname(entry.path).length));
+            scan(entry.entries, entry);
+            continue;
           }
-        }
 
-        if (pages.length > 0) {
+          const props = getPageProps(entry);
           out.push({
-            type: 'meta',
-            path: path.join(baseDir, parent?.path ?? '', 'meta.json'),
+            type: 'page',
+            path: `${baseDir}/${entry.path}`,
             data: {
-              title: parent?.info.title,
-              description: parent?.info.description,
-              pages,
+              ...entry.info,
+              getAsyncAPIPageProps() {
+                return { payload: { bundled }, ...props };
+              },
+              getSchema() {
+                return { id, bundled };
+              },
+              async getText() {
+                return toMarkdown(props, bundled);
+              },
+              ...toStaticData(props, bundled),
+              _asyncapi: {
+                action: entry.type === 'operation' ? entry.item.action : undefined,
+              },
             },
           });
         }
-        return out;
+
+        if (!meta) return;
+        const pages = getMetaPages(entries, parent, folderStyle);
+        if (pages.length === 0) return;
+        out.push({
+          type: 'meta',
+          path: path.join(baseDir, parent?.path ?? '', 'meta.json'),
+          data: {
+            title: parent?.info.title,
+            description: parent?.info.description,
+            pages,
+          },
+        });
       }
+
+      scan(fromSchema(id, bundled, preset));
+      return out;
+    }
+
+    const files: AsyncAPIVirtualFile[] = [];
+    for (const [id, schema] of Object.entries(await getSchemas())) {
+      let docFiles = cache?.get(schema);
+      if (!docFiles) {
+        docFiles = toFiles(id, schema.bundled);
+        cache?.set(schema, docFiles);
+      }
+
+      for (const file of docFiles) files.push(file);
     }
 
     return files;
@@ -218,49 +185,39 @@ export function createAsyncAPI(options: AsyncAPIOptions = {}): AsyncAPIServer {
   return {
     options,
     _getWatchPaths() {
-      return Object.keys(resolvedInput).filter((key) => !URL.canParse(key) && fs.existsSync(key));
+      return Object.values(input).filter(
+        (value): value is string => typeof value === 'string' && fs.existsSync(value),
+      );
     },
     async preloadAsyncAPIPage(page) {
-      const out: AsyncAPIPageProps_Preloaded['preloaded'] = {
-        docs: {},
-      };
-      const asyncapiMeta = (page.data as { _asyncapi?: InternalAsyncAPIMeta })._asyncapi;
-      if (asyncapiMeta?.preload) {
-        out.docs = Object.fromEntries(
-          await Promise.all(
-            asyncapiMeta.preload.map(async (k) => [k, (await getSchema(k)).bundled]),
-          ),
-        );
-      }
+      const { preload = [] } = (page.data as { _asyncapi?: InternalAsyncAPIMeta })._asyncapi ?? {};
+      const docs = await Promise.all(
+        preload.map(async (id) => [id, (await getSchema(id)).bundled]),
+      );
 
-      return { preloaded: out };
+      return { preloaded: { docs: Object.fromEntries(docs) } };
     },
     getSchema,
     getSchemas,
     async staticSource(options = {}) {
-      return {
-        files: await getVirtualFiles(this, options),
-      };
+      return { files: await getVirtualFiles(options) };
     },
     dynamicSource(options = {}) {
-      const docFilesCache = new WeakMap<LoadedDocument, AsyncAPIVirtualFile[]>();
+      const cache = new WeakMap<LoadedDocument, AsyncAPIVirtualFile[]>();
       return {
         cache: 'custom',
-        files: () => getVirtualFiles(this, options, docFilesCache),
+        files: () => getVirtualFiles(options, cache),
         invalidate() {
           docCache.clear();
         },
       };
     },
-    loaderPlugin() {
-      return asyncapiPlugin();
-    },
+    loaderPlugin: asyncapiPlugin,
   };
 }
 
 export interface InternalAsyncAPIMeta {
-  action?: string;
-  deprecated?: boolean;
+  action?: 'send' | 'receive';
   preload?: string[];
 }
 
@@ -275,23 +232,14 @@ export function asyncapiPlugin(): LoaderPlugin {
         if (!file || file.format !== 'page') return node;
 
         const asyncapiData = (file.data as { _asyncapi?: InternalAsyncAPIMeta })._asyncapi;
-        if (!asyncapiData || typeof asyncapiData !== 'object') return node;
+        if (!asyncapiData?.action) return node;
 
-        if (asyncapiData.deprecated) {
-          node.name = <span className="fd-page-tree-item-name line-through">{node.name}</span>;
-        }
-
-        if (asyncapiData.action) {
-          node.name = (
-            <>
-              {node.name}{' '}
-              <ActionLabel className="ms-auto text-xs text-nowrap">
-                {asyncapiData.action}
-              </ActionLabel>
-            </>
-          );
-        }
-
+        node.name = (
+          <>
+            {node.name}{' '}
+            <DirectionIcon action={asyncapiData.action} className="ms-auto text-[0.6875rem]" />
+          </>
+        );
         return node;
       },
     },

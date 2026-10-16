@@ -36,19 +36,12 @@ import {
   useResolvedSchema,
   useSchemaContext,
   useSchemaUtils,
-} from 'shared-api/components/playground/schema';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from 'shared-api/components/select';
+} from './schema';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../select';
 import { useTranslations } from '@fuma-translate/react';
 import { buttonVariants } from 'fumadocs-ui/components/ui/button';
 import { useCopyButton } from 'fumadocs-ui/utils/use-copy-button';
 import { cn } from '@/utils/cn';
-import { Markdown } from '@/ui/components/markdown';
 
 type Schema = Exclude<JsonSchema, boolean>;
 
@@ -334,7 +327,7 @@ function FieldInfo({
             </p>
             {description && (
               <div className="mt-1.5 text-xs leading-relaxed text-fd-muted-foreground prose-no-margin [&_a]:underline [&_code]:font-mono">
-                <Markdown md={description} />
+                <FieldMarkdown md={description} />
               </div>
             )}
             {constraints.length > 0 && (
@@ -513,7 +506,7 @@ function FieldValue({
 
   if (field.type === 'boolean') {
     return (
-      <div className="flex flex-1 items-center gap-0.5 px-2">
+      <div className="flex flex-1 items-center gap-0.5 ps-1 pe-2">
         {[true, false].map((option) => (
           <button
             key={String(option)}
@@ -1042,7 +1035,7 @@ export function FieldRows({
           <>
             {showDescription && field.description && (
               <div className="border-b px-4 py-2.5 text-xs text-fd-muted-foreground [&_a]:underline">
-                <Markdown md={field.description} />
+                <FieldMarkdown md={field.description} />
               </div>
             )}
             {selector && (
@@ -1057,4 +1050,10 @@ export function FieldRows({
       }}
     </SchemaSwitch>
   );
+}
+
+function FieldMarkdown({ md }: { md: string }) {
+  const { Markdown } = useSchemaContext();
+
+  return Markdown ? <Markdown md={md} /> : md;
 }

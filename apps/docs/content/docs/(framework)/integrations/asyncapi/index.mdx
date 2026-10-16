@@ -49,7 +49,7 @@ import { asyncapiPlugin } from '@fumadocs/asyncapi/server';
 import { loader } from 'fumadocs-core/source';
 
 export const source = loader({
-  // [!code ++] optional: adds a send/receive badge to each page item in page tree
+  // [!code ++] optional: adds the direction of messages to each page item in page tree
   plugins: [asyncapiPlugin()],
 });
 ```
@@ -84,7 +84,7 @@ Generate docs with the script:
 bun ./scripts/generate-docs.ts
 ```
 
-Add the `AsyncAPIPage` component to your MDX components. Generated files use the `<APIPage />` tag.
+Add the `AsyncAPIPage` component to your MDX components. Generated files use the `<AsyncAPIPage />` tag.
 
 ```tsx tab="Server Components" title="app/docs/[[...slug]]/page.tsx"
 import { source } from '@/lib/source';
@@ -173,18 +173,17 @@ export const source = loader(
 
 **It will change the type of your pages**, make sure to update all references to your `source`.
 
-For example, where you return text for LLM:
+For example, where you return text for LLM, `getText()` returns the operations of page in Markdown, with their payloads as TypeScript types:
 
 ```ts
 import { llms } from 'fumadocs-core/source';
 import { source } from '@/lib/source';
 
 export const docsLlms = llms(source, {
-  renderPage: (page) => {
-    // [!code ++:4]
+  renderPage: async (page) => {
+    // [!code ++:3]
     if (page.type === 'asyncapi') {
-      // e.g. return the stringified AsyncAPI schema
-      return JSON.stringify(page.data.getSchema().bundled, null, 2);
+      return `# ${page.data.title}\n\n${await page.data.getText('processed')}`;
     }
 
     // your original flow below...
@@ -334,14 +333,21 @@ npm run types:check
 
 ## Features
 
-The official AsyncAPI integration supports:
+The official AsyncAPI integration supports AsyncAPI 3:
 
-- Basic operation information (send/receive)
-- Channel, message, and reply documentation
-- Message payload & header schemas
-- Security schemes
-- Message examples (from schema examples or generated samples)
-- Bindings and traits
+- The direction of messages for readers, the server and channel address of operations
+- Messages with their payload and header schemas, including Avro, Protobuf and RAML schemas
+- Message examples, from the document or generated from schemas
+- Request and reply, correlation IDs
+- Security schemes, including OAuth 2.0 flows and SASL mechanisms
+- Protocol details from bindings, for the selected server
+- A playground for WebSocket, Server-Sent Events and custom transports, with text and binary messages
+- Code samples in JavaScript and Python, for WebSocket, MQTT, Kafka, AMQP and NATS
+- TypeScript definitions of payloads and headers
+- Markdown of pages for LLMs
+- Traits
+
+AsyncAPI 2 documents can be converted with `npx @asyncapi/cli convert`.
 
 ### Demo
 

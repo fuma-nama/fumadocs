@@ -5,16 +5,14 @@ import { Play, X } from 'lucide-react';
 import { useOnChange } from 'fumadocs-core/utils/use-on-change';
 import { useOpenAPI } from '@/utils/create-page';
 import { useExampleRequests, useOperation } from '@/operation';
-import {
-  DefaultResultDisplay,
-  iconButtonClassName,
-  type ResultDisplayProps,
-} from './components/result-display';
+import { DefaultResultDisplay, type ResultDisplayProps } from './components/result-display';
 import { EndpointBar } from '@/ui/components/endpoint';
-import { DialogPopup } from '@/ui/components/dialog';
+import { Markdown } from '@/ui/components/markdown';
+import { DialogPopup } from 'shared-api/components/dialog';
 import { buttonVariants } from 'fumadocs-ui/components/ui/button';
 import { cn } from '@/utils/cn';
 import { SchemaProvider } from 'shared-api/components/playground/schema';
+import { iconButtonClassName } from 'shared-api/components/playground/panels';
 import {
   Select,
   SelectContent,
@@ -35,7 +33,7 @@ import { UrlBar } from './components/url-bar';
 import { mutualTLSProvider, RequestPanel } from './components/request-panel';
 import { oauthPanelProvider } from './components/oauth-panel';
 import { ResponsePanel } from './components/response-panel';
-import { Segmented, SegmentedList } from '@/ui/components/segmented';
+import { Segmented, SegmentedList } from 'shared-api/components/segmented';
 
 export interface PlaygroundClientProps extends ComponentProps<'div'>, PlaygroundClientOptions {
   /** @deprecated it defaults to `true` for requests */
@@ -107,7 +105,12 @@ export default function PlaygroundClient({
 
   return (
     <StfProvider value={playground.stf}>
-      <SchemaProvider docRoot={doc.dereferenced as never} writeOnly={writeOnly} readOnly={readOnly}>
+      <SchemaProvider
+        docRoot={doc.dereferenced as never}
+        writeOnly={writeOnly}
+        readOnly={readOnly}
+        Markdown={Markdown}
+      >
         <Dialog.Root open={open} onOpenChange={setOpen}>
           <EndpointBar method={method} route={path} deprecated={operation.deprecated} {...rest}>
             <Dialog.Trigger

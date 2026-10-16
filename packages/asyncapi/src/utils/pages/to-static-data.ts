@@ -1,55 +1,51 @@
 import type { AsyncAPIObject } from '@/types';
-import Slugger from 'github-slugger';
+import Slugger, { slug } from 'github-slugger';
 import type { TOCItemType } from 'fumadocs-core/toc';
 import type { StructuredData } from 'fumadocs-core/mdx-plugins';
 import type { GeneratedPageProps } from './builder';
-import { dereference } from '@fumadocs/json-schema';
-import { createMagicProxy } from '@scalar/json-magic/magic-proxy';
-import { getOperationDisplayName } from '../schema';
-
-const proxyCache = new WeakMap<AsyncAPIObject, AsyncAPIObject>();
+import { dereferenceBundledDocument } from '../document/dereference';
+import { resolveOperation } from '../schema';
 
 export function toStaticData(
   page: GeneratedPageProps,
-  doc: AsyncAPIObject,
+  document: AsyncAPIObject,
 ): {
   toc: TOCItemType[];
   structuredData: StructuredData;
 } {
-  // wrap in a magic proxy so that `dereferenceShallow` can resolve refs lazily
-  let proxied = proxyCache.get(doc);
-  if (!proxied) {
-    proxied = createMagicProxy(doc as never) as AsyncAPIObject;
-    proxyCache.set(doc, proxied);
-  }
+  const doc = dereferenceBundledDocument(document).dereferenced;
   const slugger = new Slugger();
   const toc: TOCItemType[] = [];
   const structuredData: StructuredData = { headings: [], contents: [] };
 
+  function content(text: string | undefined, heading: string | undefined) {
+    if (text) structuredData.contents.push({ content: text, heading });
+  }
+
   for (const item of page.operations ?? []) {
-    const operation = dereference(proxied.operations?.[item.id]);
-    if (!operation) continue;
+    const info = resolveOperation(doc, item.id);
+    if (!info) continue;
+    // anchors of an operation are under its heading when the page shows titles
+    let prefix = '';
+    let heading: string | undefined;
 
     if (page.showTitle) {
-      const title = getOperationDisplayName(item.id, operation);
-      const id = slugger.slug(title);
+      heading = slugger.slug(info.title);
+      prefix = `${heading}.`;
 
-      toc.push({
-        depth: 2,
-        title,
-        url: `#${id}`,
-      });
-      structuredData.headings.push({
-        content: title,
-        id,
-      });
+      toc.push({ depth: 2, title: info.title, url: `#${heading}` });
+      structuredData.headings.push({ content: info.title, id: heading });
     }
 
-    if (operation.description) {
-      structuredData.contents.push({
-        content: operation.description,
-        heading: structuredData.headings.at(-1)?.id,
-      });
+    content(info.description, heading);
+    if (info.channel.description !== info.description) content(info.channel.description, heading);
+
+    for (const { id, name, message } of info.messages) {
+      const anchor = `${prefix}messages.${slug(id)}`;
+
+      structuredData.headings.push({ content: name, id: anchor });
+      content(message.summary, anchor);
+      content(message.description, anchor);
     }
   }
 

@@ -14,6 +14,12 @@ import {
 import { Operation } from '@/ui/operation';
 
 export type { AsyncAPIPageProps, AsyncAPIPageProps_Spec, AsyncAPIPageProps_Preloaded };
+export {
+  type CodeUsageData,
+  type CodeUsageGeneratorRegistry,
+  createCodeUsageGeneratorRegistry,
+  registerDefaultCodeUsages,
+} from '@/codegen';
 
 export interface CreateAsyncAPIPageOptions extends AsyncAPIRuntimeOptions, AsyncAPIRenderOptions {
   /**

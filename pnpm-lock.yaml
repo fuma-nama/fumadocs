@@ -2184,6 +2184,9 @@ importers:
       '@fumadocs/json-schema':
         specifier: workspace:^
         version: link:../json-schema
+      '@fumari/json-schema-ts':
+        specifier: ^1.0.2
+        version: 1.0.2(json-schema-typed@8.0.2)
       '@fumari/stf':
         specifier: workspace:^
         version: link:../stf
@@ -2199,6 +2202,9 @@ importers:
       cn:
         specifier: ^0.4.0
         version: 0.4.0
+      eventsource-parser:
+        specifier: ^4.1.1
+        version: 4.1.1
       github-slugger:
         specifier: ^2.0.0
         version: 2.0.0
@@ -2236,6 +2242,9 @@ importers:
       '@types/react':
         specifier: ^19.3.0
         version: 19.3.0
+      '@types/react-dom':
+        specifier: ^19.3.0
+        version: 19.3.0(@types/react@19.3.0)
       fuma-cli:
         specifier: ^0.3.1
         version: 0.3.2

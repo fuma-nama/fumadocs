@@ -18,7 +18,7 @@ export const AsyncAPIPage = createAsyncAPIPage({
 
 ### Custom Layout
 
-You can customize how operations and message examples are laid out.
+You can customize how the sections of operations are laid out.
 
 ```tsx title="components/api-page.tsx"
 'use client';
@@ -30,8 +30,8 @@ export const AsyncAPIPage = createAsyncAPIPage({
       return (
         <div className="flex flex-col gap-6">
           {slots.header}
+          {slots.connection}
           {slots.description}
-          {slots.channel}
           {slots.parameters}
           {slots.messages}
         </div>
@@ -39,6 +39,162 @@ export const AsyncAPIPage = createAsyncAPIPage({
     },
   },
 });
+```
+
+| Slot          | Renders                                                                   |
+| ------------- | ------------------------------------------------------------------------- |
+| `header`      | the title, on pages with several operations                               |
+| `connection`  | which way messages go, the server and channel address, and the playground |
+| `description` | the descriptions of operation and its channel, and external documentation |
+| `usage`       | code samples for the selected server, beside the operation on wide pages  |
+| `authSchemes` | security schemes of the server and operation                              |
+| `parameters`  | address parameters, and the query and headers of WebSocket connections    |
+| `messages`    | the messages, with their payload, headers, examples and correlation ID    |
+| `reply`       | the reply of a request                                                    |
+| `bindings`    | protocol details of the selected server                                   |
+
+### Direction of Messages
+
+AsyncAPI describes an application with `send` and `receive` actions. Pages flip them for readers, who talk to the application: `send` is shown as **Receive**, and `receive` as **Send**. The sidebar shows them as an arrow into or out of a phone.
+
+### Playground
+
+Operations can be tried in a playground: readers connect with the address parameters, query and credentials, send messages from their examples as text, hex or Base64, and see the messages they receive.
+
+A transport connects to the servers of each protocol, WebSocket (`ws` and `wss`) is built in.
+
+```tsx title="components/api-page.tsx"
+'use client';
+import { createAsyncAPIPage } from '@fumadocs/asyncapi/ui';
+import { sseTransport } from '@fumadocs/asyncapi/playground';
+
+export const AsyncAPIPage = createAsyncAPIPage({
+  playground: {
+    // by the protocol of servers
+    transports: { http: sseTransport, https: sseTransport },
+    // set to `false` to disable the playground
+    enabled: true,
+  },
+});
+```
+
+<Callout title="Browser limits">
+  Browsers can't send headers or cookies of other sites with WebSocket connections, only credentials
+  in the query are supported. Pages served over HTTPS can only connect to `wss` servers.
+</Callout>
+
+#### Server-Sent Events
+
+`sseTransport` receives the events of `http` and `https` servers with `fetch`, readers can't send messages on it.
+
+- API keys are sent in headers or the query.
+- HTTP bearer and basic credentials are sent in the `Authorization` header.
+
+It is opt-in, since webhooks are on `http` servers too.
+
+#### Custom Transports
+
+A transport connects to a server and reports what happens through `events`. For example, MQTT over WebSocket with [MQTT.js](https://github.com/mqttjs/MQTT.js):
+
+```ts title="lib/mqtt-transport.ts"
+import mqtt from 'mqtt';
+import type { PlaygroundTransport } from '@fumadocs/asyncapi/playground';
+
+export const mqttTransport: PlaygroundTransport = {
+  // the security schemes it applies, they become inputs of the playground
+  auth: (scheme) => scheme.type === 'userPassword',
+  connect({ url, address, auth }, events) {
+    const credentials = auth[0]?.value;
+    // the server is the WebSocket listener of broker, like `localhost:9001`
+    const client = mqtt.connect(`ws://${new URL(url).host}`, {
+      ...(typeof credentials === 'object' && credentials),
+      reconnectPeriod: 0,
+    });
+
+    client.on('connect', () =>
+      client.subscribe(address, (error) => (error ? events.error(error.message) : events.open())),
+    );
+    client.on('message', (_topic, payload) => events.message(payload.toString()));
+    client.on('error', (error) => events.error(error.message));
+    client.on('close', () => events.close());
+
+    return {
+      send: (data) =>
+        client.publish(address, typeof data === 'string' ? data : (new Uint8Array(data) as Buffer)),
+      close: () => client.end(),
+    };
+  },
+};
+```
+
+```tsx title="components/api-page.tsx"
+'use client';
+import { createAsyncAPIPage } from '@fumadocs/asyncapi/ui';
+import { mqttTransport } from '@/lib/mqtt-transport';
+
+export const AsyncAPIPage = createAsyncAPIPage({
+  playground: {
+    transports: { mqtt: mqttTransport },
+  },
+});
+```
+
+See [`PlaygroundTransport`](/docs/integrations/asyncapi/headless#transports) for the details.
+
+### Code Samples
+
+Operations show how to receive or send their messages on the selected server, in JavaScript and Python.
+
+| Protocol                       | JavaScript                | Python            |
+| ------------------------------ | ------------------------- | ----------------- |
+| `ws`, `wss`                    | `WebSocket`               | `websockets`      |
+| `mqtt`, `mqtts`, `secure-mqtt` | `mqtt`                    | `paho-mqtt`       |
+| `kafka`, `kafka-secure`        | `kafkajs`                 | `confluent-kafka` |
+| `amqp`, `amqps`                | `amqplib`                 | `pika`            |
+| `nats`                         | `@nats-io/transport-node` | `nats-py`         |
+
+Add generators with `codeUsages`, or replace the default ones:
+
+```tsx title="components/api-page.tsx"
+'use client';
+import {
+  createAsyncAPIPage,
+  createCodeUsageGeneratorRegistry,
+  registerDefaultCodeUsages,
+} from '@fumadocs/asyncapi/ui';
+
+// leave out the defaults to start from scratch
+const codeUsages = registerDefaultCodeUsages(createCodeUsageGeneratorRegistry());
+
+codeUsages.add('websocat', {
+  label: 'websocat',
+  lang: 'bash',
+  // `url` is the URL to connect to WebSocket channels
+  generate({ protocol }, { url }) {
+    // hidden on other protocols
+    if (protocol !== 'ws' && protocol !== 'wss') return '';
+    return `websocat "${url}"`;
+  },
+});
+
+export const AsyncAPIPage = createAsyncAPIPage({ codeUsages });
+```
+
+<auto-type-table path="props.ts" name="CodeUsageData" />
+
+Operations can have their own samples in `x-codeSamples`, they replace the generated ones of the same `lang`, and `source: false` removes one.
+
+```yaml
+operations:
+  receiveLightMeasurement:
+    action: receive
+    x-codeSamples:
+      - lang: js
+        label: SDK
+        source: |
+          lights.onMeasured((event) => console.log(event));
+      - lang: python
+        source: false
 ```
 
 ### Schema UI
@@ -57,6 +213,22 @@ export const AsyncAPIPage = createAsyncAPIPage({
       return ctx.SchemaUI(options);
     },
   },
+});
+```
+
+### TypeScript Definitions
+
+Payloads and headers have a button to copy their TypeScript definitions, generated with [`@fumari/json-schema-ts`](https://npmjs.com/package/@fumari/json-schema-ts).
+
+Like the schemas on pages, they leave out `readOnly` properties of messages readers send, and `writeOnly` properties of messages they receive.
+
+```tsx title="components/api-page.tsx"
+'use client';
+import { createAsyncAPIPage } from '@fumadocs/asyncapi/ui';
+
+export const AsyncAPIPage = createAsyncAPIPage({
+  // or `(schema, ctx) => string | undefined` to generate your own
+  generateTypeScriptDefinitions: false,
 });
 ```
 
@@ -81,11 +253,11 @@ export const translations = i18n
   .extend(asyncapiTranslations())
   .add({
     cn: {
-      displayName: 'Chinese'
+      displayName: 'Chinese',
       // [!code ++]
       'Messages(operation page)': '消息',
-      },
-  })
+    },
+  });
 ```
 
 See [Translations](/docs/ui/translations) for more details.
@@ -156,6 +328,14 @@ The UI of a single operation, including its channel, messages and bindings.
 
 ```npm
 npx @fumadocs/cli add asyncapi/operation
+```
+
+### Playground
+
+The playground, built on [`usePlayground()`](/docs/integrations/asyncapi/headless#playground).
+
+```npm
+npx @fumadocs/cli add asyncapi/playground
 ```
 
 ```tsx title="components/api-page.tsx"

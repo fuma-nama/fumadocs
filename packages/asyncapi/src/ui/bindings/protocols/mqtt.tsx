@@ -4,213 +4,86 @@ import type {
   MqttOperationBinding,
   MqttServerBinding,
 } from '@/types/asyncapi-3';
-import {
-  createBinding,
-  hasBindingFields,
-  BindingFields,
-  BindingEmpty,
-  BindingGroup,
-  BindingFieldRow,
-  BindingScalarValue,
-  BindingSchema,
-  joinBindingSummary,
-} from '../shared';
+import { CodeRow, createBinding, Fields, GroupRow, SchemaRow, ValueRow } from '../shared';
 
-function formatQos(value: number): string {
+function formatQos(value?: number) {
   if (value === 0) return 'At most once (0)';
   if (value === 1) return 'At least once (1)';
   if (value === 2) return 'Exactly once (2)';
-  return String(value);
+  return value?.toString();
 }
 
-function formatPayloadFormatIndicator(value: number): string {
+function formatPayloadFormatIndicator(value?: number) {
   if (value === 0) return 'Unspecified bytes (0)';
   if (value === 1) return 'UTF-8 (1)';
-  return String(value);
-}
-
-function getMqttServerSummary(binding: MqttServerBinding): string | undefined {
-  return joinBindingSummary(binding.clientId, binding.lastWill?.topic);
-}
-
-function getMqttOperationSummary(binding: MqttOperationBinding): string | undefined {
-  return joinBindingSummary(
-    binding.qos !== undefined && formatQos(binding.qos),
-    binding.retain && 'retain',
-  );
-}
-
-function getMqttMessageSummary(binding: MqttMessageBinding): string | undefined {
-  return binding.contentType;
+  return value?.toString();
 }
 
 function MqttServerBinding({ binding }: { binding: MqttServerBinding }) {
-  if (!hasBindingFields(binding)) return <BindingEmpty />;
+  const { lastWill } = binding;
 
   return (
-    <BindingFields>
-      {binding.clientId && (
-        <BindingFieldRow
-          label="Client ID"
-          value={<code className="text-xs">{binding.clientId}</code>}
-        />
+    <Fields>
+      <CodeRow label="Client ID" value={binding.clientId} />
+      <ValueRow label="Clean Session" value={binding.cleanSession} />
+      <ValueRow label="Keep Alive" value={binding.keepAlive} />
+      <SchemaRow
+        label="Session Expiry Interval"
+        name="sessionExpiryInterval"
+        value={binding.sessionExpiryInterval}
+      />
+      <SchemaRow
+        label="Maximum Packet Size"
+        name="maximumPacketSize"
+        value={binding.maximumPacketSize}
+      />
+      {lastWill && (
+        <GroupRow label="Last Will">
+          <CodeRow label="Topic" value={lastWill.topic} />
+          <CodeRow label="Quality of Service" value={formatQos(lastWill.qos)} />
+          <CodeRow label="Message" value={lastWill.message} />
+          <ValueRow label="Retain" value={lastWill.retain} />
+        </GroupRow>
       )}
-      {binding.cleanSession !== undefined && (
-        <BindingFieldRow
-          label="Clean Session"
-          value={<BindingScalarValue value={binding.cleanSession} />}
-        />
-      )}
-      {binding.keepAlive !== undefined && (
-        <BindingFieldRow
-          label="Keep Alive"
-          value={<BindingScalarValue value={binding.keepAlive} />}
-        />
-      )}
-      {binding.sessionExpiryInterval !== undefined && (
-        <BindingFieldRow
-          label="Session Expiry Interval"
-          value={
-            typeof binding.sessionExpiryInterval === 'object' ? (
-              <BindingSchema name="sessionExpiryInterval" schema={binding.sessionExpiryInterval} />
-            ) : (
-              <BindingScalarValue value={binding.sessionExpiryInterval} />
-            )
-          }
-        />
-      )}
-      {binding.maximumPacketSize !== undefined && (
-        <BindingFieldRow
-          label="Maximum Packet Size"
-          value={
-            typeof binding.maximumPacketSize === 'object' ? (
-              <BindingSchema name="maximumPacketSize" schema={binding.maximumPacketSize} />
-            ) : (
-              <BindingScalarValue value={binding.maximumPacketSize} />
-            )
-          }
-        />
-      )}
-      {binding.lastWill && (
-        <BindingFieldRow
-          label="Last Will"
-          value={
-            <BindingGroup>
-              <BindingFields>
-                {binding.lastWill.topic && (
-                  <BindingFieldRow
-                    label="Topic"
-                    value={<code className="text-xs">{binding.lastWill.topic}</code>}
-                  />
-                )}
-                {binding.lastWill.qos !== undefined && (
-                  <BindingFieldRow
-                    label="Quality of Service"
-                    value={<code className="text-xs">{formatQos(binding.lastWill.qos)}</code>}
-                  />
-                )}
-                {binding.lastWill.message && (
-                  <BindingFieldRow
-                    label="Message"
-                    value={<code className="text-xs">{binding.lastWill.message}</code>}
-                  />
-                )}
-                {binding.lastWill.retain !== undefined && (
-                  <BindingFieldRow
-                    label="Retain"
-                    value={<BindingScalarValue value={binding.lastWill.retain} />}
-                  />
-                )}
-              </BindingFields>
-            </BindingGroup>
-          }
-        />
-      )}
-    </BindingFields>
+    </Fields>
   );
 }
 
 function MqttOperationBinding({ binding }: { binding: MqttOperationBinding }) {
-  if (!hasBindingFields(binding)) return <BindingEmpty />;
-
   return (
-    <BindingFields>
-      {binding.qos !== undefined && (
-        <BindingFieldRow
-          label="Quality of Service"
-          value={<code className="text-xs">{formatQos(binding.qos)}</code>}
-        />
-      )}
-      {binding.retain !== undefined && (
-        <BindingFieldRow
-          label="Retain Flag"
-          value={<BindingScalarValue value={binding.retain} />}
-        />
-      )}
-      {binding.messageExpiryInterval !== undefined && (
-        <BindingFieldRow
-          label="Message Expiry Interval"
-          value={
-            typeof binding.messageExpiryInterval === 'object' ? (
-              <BindingSchema name="messageExpiryInterval" schema={binding.messageExpiryInterval} />
-            ) : (
-              <BindingScalarValue value={binding.messageExpiryInterval} />
-            )
-          }
-        />
-      )}
-    </BindingFields>
+    <Fields>
+      <CodeRow label="Quality of Service" value={formatQos(binding.qos)} />
+      <ValueRow label="Retain Flag" value={binding.retain} />
+      <SchemaRow
+        label="Message Expiry Interval"
+        name="messageExpiryInterval"
+        value={binding.messageExpiryInterval}
+      />
+    </Fields>
   );
 }
 
 function MqttMessageBinding({ binding }: { binding: MqttMessageBinding }) {
-  if (!hasBindingFields(binding)) return <BindingEmpty />;
-
   return (
-    <BindingFields>
-      {binding.payloadFormatIndicator !== undefined && (
-        <BindingFieldRow
-          label="Payload Format Indicator"
-          value={
-            <code className="text-xs">
-              {formatPayloadFormatIndicator(binding.payloadFormatIndicator)}
-            </code>
-          }
-        />
+    <Fields>
+      <CodeRow
+        label="Payload Format Indicator"
+        value={formatPayloadFormatIndicator(binding.payloadFormatIndicator)}
+      />
+      <SchemaRow label="Correlation Data" name="correlationData" value={binding.correlationData} />
+      <CodeRow label="Content Type" value={binding.contentType} />
+      {typeof binding.responseTopic === 'object' ? (
+        <SchemaRow label="Response Topic" name="responseTopic" value={binding.responseTopic} />
+      ) : (
+        <CodeRow label="Response Topic" value={binding.responseTopic} />
       )}
-      {binding.correlationData && (
-        <BindingFieldRow
-          label="Correlation Data"
-          value={<BindingSchema name="correlationData" schema={binding.correlationData} />}
-        />
-      )}
-      {binding.contentType && (
-        <BindingFieldRow
-          label="Content Type"
-          value={<code className="text-xs">{binding.contentType}</code>}
-        />
-      )}
-      {binding.responseTopic && (
-        <BindingFieldRow
-          label="Response Topic"
-          value={
-            typeof binding.responseTopic === 'object' ? (
-              <BindingSchema name="responseTopic" schema={binding.responseTopic} />
-            ) : (
-              <code className="text-xs">{binding.responseTopic}</code>
-            )
-          }
-        />
-      )}
-    </BindingFields>
+    </Fields>
   );
 }
+
 export const mqttBinding = createBinding({
   label: 'MQTT',
   Server: MqttServerBinding,
   Operation: MqttOperationBinding,
   Message: MqttMessageBinding,
-  getServerSummary: getMqttServerSummary,
-  getOperationSummary: getMqttOperationSummary,
-  getMessageSummary: getMqttMessageSummary,
 });

@@ -21,7 +21,7 @@ export interface DereferencedDocument {
   bundled: Document;
 }
 
-// documents are read-only, pages of the same document share one proxy
+// documents are read-only, their pages and the UI share one proxy
 const cache = new WeakMap<Document, DereferencedDocument>();
 
 export function dereferenceBundledDocument(bundled: Document): DereferencedDocument {

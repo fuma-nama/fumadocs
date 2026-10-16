@@ -7,10 +7,11 @@ description: The state and logic of AsyncAPI pages, without UI.
 
 Everything outside `@fumadocs/asyncapi/ui` is headless.
 
-| Path                           | Module                                                    |
-| ------------------------------ | --------------------------------------------------------- |
-| `@fumadocs/asyncapi`           | the page: the document, its servers and your components   |
-| `@fumadocs/asyncapi/operation` | an operation: its channel, parameters, messages and reply |
+| Path                            | Module                                                    |
+| ------------------------------- | --------------------------------------------------------- |
+| `@fumadocs/asyncapi`            | the page: the document, its servers and your components   |
+| `@fumadocs/asyncapi/operation`  | an operation: its channel, parameters, messages and reply |
+| `@fumadocs/asyncapi/playground` | a session on the channel of an operation                  |
 
 ## Page
 
@@ -79,7 +80,7 @@ export function Operation(props: PageOperationProps) {
 
 function Content() {
   const { title, channel, parameters, messages } = useOperation();
-  const schemes = useOperationSecurity();
+  const security = useOperationSecurity();
 
   return (
     <>
@@ -98,19 +99,68 @@ function Content() {
           ))}
         </section>
       ))}
-      <p>{schemes.map((scheme) => scheme.type).join(', ')}</p>
+      <p>{security.operation.map((item) => item.id).join(', ')}</p>
     </>
   );
 }
 ```
 
-| Hook                     | Returns                                                                  |
-| ------------------------ | ------------------------------------------------------------------------ |
-| `useOperation()`         | the operation with its details resolved                                  |
-| `useOperationSecurity()` | security schemes of the operation, falling back to the selected server's |
+| Hook                     | Returns                                                                      |
+| ------------------------ | ---------------------------------------------------------------------------- |
+| `useOperation()`         | the operation with its details resolved                                      |
+| `useOperationSecurity()` | security schemes of the selected server and the operation, both apply        |
+| `useChannelMessages()`   | messages readers receive and send on the channel, from all of its operations |
 
 <auto-type-table path="props.ts" name="OperationInfo" />
 
 Examples of a message come from the document, or are generated from its schemas.
 
 <auto-type-table path="props.ts" name="OperationMessage" />
+
+## Playground
+
+`usePlayground()` connects to the channel of an operation with a transport, under `<OperationProvider />`.
+
+```tsx
+'use client';
+import { usePlayground } from '@fumadocs/asyncapi/playground';
+import { mqttTransport } from '@/lib/mqtt-transport';
+
+export function Playground() {
+  const { url, status, connect, disconnect, send, log } = usePlayground({
+    // on top of the page's `playground.transports`
+    transports: { mqtt: mqttTransport },
+  });
+  if (!url) return null; // no transport for the server
+
+  return (
+    <>
+      <button onClick={status === 'closed' ? connect : disconnect}>{status}</button>
+      {send && <button onClick={() => send('{"type":"ping"}')}>Ping</button>}
+      {log.map((entry) => (
+        <p key={entry.id}>
+          {entry.type} {entry.message?.name} {entry.data}
+        </p>
+      ))}
+    </>
+  );
+}
+```
+
+- The address parameters, query and auth inputs are the form `stf`, `url` follows its values.
+- `send` is available while connected, unless the connection can only receive.
+- Received messages are matched against the payloads of messages on the channel, `entry.message` is the documented message. Binary messages are `entry.binary`.
+
+<auto-type-table path="props.ts" name="Playground" />
+
+### Transports
+
+A transport connects to the servers of a protocol, see [the MQTT example](/docs/integrations/asyncapi/api-page#custom-transports). They are picked from the `transports` of `usePlayground()`, then the page's `playground.transports`, then the built-in WebSocket one.
+
+`usePlaygroundTransport()` takes the same `transports` and returns the transport of the selected server, `undefined` when none connects to it.
+
+<auto-type-table path="props.ts" name="PlaygroundTransport" />
+
+`connect()` reports to `events`: `open()`, `message(data)` with text or an `ArrayBuffer`, and `close()` or `error()`, which end the connection.
+
+<auto-type-table path="props.ts" name="ConnectTarget" />

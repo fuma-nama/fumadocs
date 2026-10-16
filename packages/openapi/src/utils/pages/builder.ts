@@ -2,8 +2,8 @@ import type { Document, HttpMethods, OperationObject, PathItemObject, TagObject 
 import { getTagDisplayName, methodKeys } from '@/utils/schema';
 import { idToTitle } from 'shared-api/utils/id-to-title';
 import { dereference } from '@fumadocs/json-schema';
-import { createMagicProxy } from '@scalar/json-magic/magic-proxy';
 import type { DereferencedShallow } from '@fumadocs/json-schema';
+import { dereferenceBundledDocument } from '@/utils/document/dereference';
 
 interface BaseEntry {
   path: string;
@@ -126,8 +126,8 @@ export function fromSchema(
 ): OutputEntry[] {
   const files: OutputEntry[] = [];
   const { toPages } = config;
-  // wrap in a magic proxy so that `dereferenceShallow` can resolve refs lazily
-  const document = createMagicProxy(bundled as Record<string, unknown>) as Document;
+  // the magic proxy of document, shared with its pages, `dereferenceShallow` resolves its refs lazily
+  const document = dereferenceBundledDocument(bundled).dereferenced;
 
   toPages({
     id: schemaId,

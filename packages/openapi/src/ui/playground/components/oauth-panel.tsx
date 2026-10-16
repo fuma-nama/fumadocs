@@ -23,8 +23,8 @@ import { Markdown } from '@/ui/components/markdown';
 import { useOpenAPI } from '@/utils/create-page';
 import { useServer } from '@/utils/use-server';
 import { cn } from '@/utils/cn';
-import { iconButtonClassName } from './result-display';
-import { CheckRow, SelectRow, TextRow, ValueRow } from './fields';
+import { iconButtonClassName } from 'shared-api/components/playground/panels';
+import { CheckRow, SelectRow, TextRow, ValueRow } from 'shared-api/components/playground/fields';
 
 type Credentials = Pick<OAuthInput, 'clientId' | 'clientSecret' | 'username' | 'password'>;
 
