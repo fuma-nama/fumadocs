@@ -313,9 +313,10 @@ export function createAutoPreset(options: SchemaToPagesOptions): PagesBuilderCon
       }
 
       if (options.per === 'tag') {
-        const tags = doc.tags ?? [];
+        const operations = groupByTag(items.operations);
+        const webhooks = groupByTag(items.webhooks);
 
-        for (const tag of tags) {
+        for (const tag of doc.tags ?? []) {
           const { displayName } = builder.fromTag(tag);
           const entry: PageOutput = {
             type: 'page',
@@ -325,8 +326,8 @@ export function createAutoPreset(options: SchemaToPagesOptions): PagesBuilderCon
               title: displayName,
               description: tag.description,
             },
-            webhooks: items.webhooks.filter((webhook) => webhook.tags?.includes(tag.name!)),
-            operations: items.operations.filter((op) => op.tags?.includes(tag.name!)),
+            webhooks: webhooks.get(tag.name!) ?? [],
+            operations: operations.get(tag.name!) ?? [],
             tag,
           };
 
@@ -373,4 +374,18 @@ export function createAutoPreset(options: SchemaToPagesOptions): PagesBuilderCon
       }
     },
   };
+}
+
+/** items by the names of their tags, in their order */
+function groupByTag<T extends { tags?: string[] }>(items: T[]): Map<string, T[]> {
+  const out = new Map<string, T[]>();
+  for (const item of items) {
+    for (const name of item.tags ?? []) {
+      const list = out.get(name);
+      if (!list) out.set(name, [item]);
+      // a tag repeated in one item
+      else if (list.at(-1) !== item) list.push(item);
+    }
+  }
+  return out;
 }
