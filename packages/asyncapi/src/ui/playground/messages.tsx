@@ -1,5 +1,5 @@
 'use client';
-import { memo, type ReactNode, useMemo, useState } from 'react';
+import { memo, type ReactNode, useState } from 'react';
 import { ArrowDownLeft, ArrowUpRight, Radio, SendHorizontal, Trash2 } from 'lucide-react';
 import { useTranslations } from '@fuma-translate/react';
 import { type JsonSchema, matches } from '@fumadocs/json-schema';
@@ -80,7 +80,7 @@ export function MessagesPanel({
             </p>
           </div>
         )}
-        <Composer playground={playground} />
+        <Composer open={status === 'open'} send={playground.send} />
       </div>
     </section>
   );
@@ -213,39 +213,40 @@ export function toHex(data: ArrayBuffer): string {
 }
 
 /** compose a message to send, starting from the example of a documented message */
-function Composer({ playground }: { playground: Playground }) {
+const Composer = memo(function Composer({
+  open,
+  send,
+}: {
+  open: boolean;
+  send: Playground['send'];
+}) {
   const t = useTranslations({ note: 'playground' });
-  const { status, send } = playground;
   const { outgoing } = useChannelMessages();
   const [selected, setSelected] = useState(outgoing[0]?.id ?? customMessage);
   const message = outgoing.find((item) => item.id === selected);
   const [text, setText] = useState(() => getExampleText(message));
   const [encoding, setEncoding] = useState<Encoding>('text');
   const isMac = typeof navigator !== 'undefined' && /Mac|iPhone|iPad/.test(navigator.userAgent);
-  const open = status === 'open';
-  const check = useMemo(() => {
-    if (!text) return;
-    if (encoding !== 'text') {
-      const data = parseBinary(text, encoding);
-      if (!data)
-        return { ok: false, text: encoding === 'hex' ? t('Invalid hex') : t('Invalid Base64') };
-      return {
-        ok: true,
-        data,
-        text: t('{length} bytes', { variables: { length: String(data.byteLength) } }),
-      };
-    }
-
-    const payload = message?.payload;
-    if (!payload || payload.schemaFormat !== undefined) return;
+  const payload = message?.payload;
+  let check: { ok: boolean; text: string; data?: ArrayBuffer } | undefined;
+  if (text && encoding !== 'text') {
+    const data = parseBinary(text, encoding);
+    check = data
+      ? {
+          ok: true,
+          data,
+          text: t('{length} bytes', { variables: { length: String(data.byteLength) } }),
+        }
+      : { ok: false, text: encoding === 'hex' ? t('Invalid hex') : t('Invalid Base64') };
+  } else if (text && payload && payload.schemaFormat === undefined) {
     try {
-      return matches(payload.schema as JsonSchema, JSON.parse(text))
+      check = matches(payload.schema as JsonSchema, JSON.parse(text))
         ? { ok: true, text: t('Matches the schema') }
         : { ok: false, text: t("Doesn't match the schema") };
     } catch {
-      return { ok: false, text: t('Invalid JSON') };
+      check = { ok: false, text: t('Invalid JSON') };
     }
-  }, [text, encoding, message, t]);
+  }
   const data = encoding === 'text' ? text : check?.data;
 
   function onSend() {
@@ -364,4 +365,4 @@ function Composer({ playground }: { playground: Playground }) {
       </div>
     </div>
   );
-}
+});

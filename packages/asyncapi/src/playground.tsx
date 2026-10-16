@@ -1,12 +1,5 @@
 'use client';
-import {
-  useCallback,
-  useEffect,
-  useEffectEvent,
-  useRef,
-  useState,
-  useSyncExternalStore,
-} from 'react';
+import { useCallback, useEffect, useRef, useState, useSyncExternalStore } from 'react';
 import { type DataEngineListener, type Stf, useStf } from '@fumari/stf';
 import { dereference, type JsonSchema, matches } from '@fumadocs/json-schema';
 import { EventSourceParserStream } from 'eventsource-parser/stream';
@@ -156,6 +149,13 @@ interface Session {
 
 /** older entries are dropped, a busy channel can send many messages */
 const maxEntries = 500;
+let nextId = 0;
+
+/** an update of the log, adding an entry that happens now */
+function addEntry(entry: Omit<LogEntry, 'id' | 'time'>) {
+  const item: LogEntry = { ...entry, id: nextId++, time: Date.now() };
+  return (log: LogEntry[]) => [...(log.length < maxEntries ? log : log.slice(1)), item];
+}
 
 /** the documented message of data, when exactly one payload matches it */
 function identifyMessage(data: string, messages: OperationMessage[]): OperationMessage | undefined {
@@ -274,7 +274,6 @@ export function usePlayground({
   const [canSend, setCanSend] = useState(false);
   const [log, setLog] = useState<LogEntry[]>([]);
   const sessionRef = useRef<Session | null>(null);
-  const nextId = useRef(0);
   const subscribe = useCallback(
     (onChange: () => void) => {
       const listener: DataEngineListener = { onUpdate: onChange };
@@ -294,35 +293,32 @@ export function usePlayground({
       : undefined;
   const url = useSyncExternalStore(subscribe, getUrl, getUrl);
 
-  function append(entry: Omit<LogEntry, 'id' | 'time'>) {
-    const item: LogEntry = { ...entry, id: nextId.current++, time: Date.now() };
-    setLog((prev) => (prev.length >= maxEntries ? [...prev.slice(1), item] : [...prev, item]));
-  }
-
-  function disconnect() {
+  // stable, so memoized UI skips the renders of arriving messages
+  const disconnect = useCallback(() => {
     const session = sessionRef.current;
     if (!session) return;
     // the session ends now, events of the closing connection are ignored
     sessionRef.current = null;
     setStatus('closed');
-    if (session.open) append({ type: 'closed' });
+    if (session.open) setLog(addEntry({ type: 'closed' }));
     session.connection?.close();
-  }
+  }, []);
 
-  // a session belongs to its URL, it ends when the URL changes and with the page
-  const endSession = useEffectEvent(disconnect);
-  useEffect(() => () => endSession(), [url]);
-
-  function send(data: string | ArrayBuffer, message?: OperationMessage) {
+  const send = useCallback((data: string | ArrayBuffer, message?: OperationMessage) => {
     const session = sessionRef.current;
     if (!session?.open || !session.connection?.send) return;
     session.connection.send(data);
-    append(
-      typeof data === 'string'
-        ? { type: 'sent', data, message }
-        : { type: 'sent', binary: data, message },
+    setLog(
+      addEntry(
+        typeof data === 'string'
+          ? { type: 'sent', data, message }
+          : { type: 'sent', binary: data, message },
+      ),
     );
-  }
+  }, []);
+
+  // a session belongs to its URL, it ends when the URL changes and with the page
+  useEffect(() => disconnect, [disconnect, url]);
 
   return {
     stf,
@@ -350,7 +346,7 @@ export function usePlayground({
         if (sessionRef.current !== session) return;
         sessionRef.current = null;
         setStatus('closed');
-        append(entry);
+        setLog(addEntry(entry));
       }
 
       sessionRef.current = session;
@@ -369,18 +365,20 @@ export function usePlayground({
               if (sessionRef.current !== session) return;
               session.open = true;
               setStatus('open');
-              append({ type: 'opened', data: url });
+              setLog(addEntry({ type: 'opened', data: url }));
             },
             message(data) {
               if (sessionRef.current !== session) return;
-              append(
-                typeof data === 'string'
-                  ? {
-                      type: 'received',
-                      data,
-                      message: identifyMessage(data, channelMessages.incoming),
-                    }
-                  : { type: 'received', binary: data },
+              setLog(
+                addEntry(
+                  typeof data === 'string'
+                    ? {
+                        type: 'received',
+                        data,
+                        message: identifyMessage(data, channelMessages.incoming),
+                      }
+                    : { type: 'received', binary: data },
+                ),
               );
             },
             // closing before it opens is failing to connect
@@ -392,7 +390,9 @@ export function usePlayground({
             },
           },
         );
-        setCanSend(session.connection.send !== undefined);
+        // transports can end it before returning the connection
+        if (sessionRef.current === session) setCanSend(session.connection.send !== undefined);
+        else session.connection.close();
       } catch (e) {
         end({ type: 'error', data: e instanceof Error ? e.message : String(e) });
       }

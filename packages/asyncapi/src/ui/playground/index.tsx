@@ -1,5 +1,5 @@
 'use client';
-import { type ReactNode, useState } from 'react';
+import { memo, useState } from 'react';
 import { Dialog } from '@base-ui/react/dialog';
 import { Play, Plug, Unplug, X } from 'lucide-react';
 import { useTranslations } from '@fuma-translate/react';
@@ -41,11 +41,10 @@ export function PlaygroundClient() {
 function PlaygroundSession() {
   const t = useTranslations({ note: 'playground' });
   const playground = usePlayground();
-  const [open, setOpen] = useState(false);
   const { status } = playground;
 
   return (
-    <Dialog.Root open={open} onOpenChange={setOpen}>
+    <Dialog.Root>
       <ConnectionBar>
         <Dialog.Trigger
           className={cn(
@@ -101,8 +100,17 @@ function StatusDot({
   );
 }
 
+// it re-renders with every log entry, the parts unaffected by the log are memoized
 function PlaygroundDialog({ playground }: { playground: Playground }) {
+  const t = useTranslations({ note: 'playground' });
   const { doc } = useAsyncAPI();
+  const { title, action } = useOperation();
+  const inputs = useConnectionInputs();
+  const hasInputs =
+    inputs.auth.length > 0 || inputs.parameters.length > 0 || inputs.query.length > 0;
+  const [selectedView, setView] = useState(hasInputs ? 'connection' : 'messages');
+  const view = hasInputs ? selectedView : 'messages';
+  const { status } = playground;
 
   return (
     <StfProvider value={playground.stf}>
@@ -112,135 +120,90 @@ function PlaygroundDialog({ playground }: { playground: Playground }) {
         writeOnly
         Markdown={Markdown}
       >
-        <PlaygroundContent playground={playground} />
+        <div className="flex min-h-0 flex-1 flex-col">
+          <div className="flex h-12 shrink-0 items-center gap-2 ps-4 pe-2 sm:ps-5">
+            <Dialog.Title className="truncate text-sm font-medium">{title}</Dialog.Title>
+            <DirectionBadge action={action} />
+            <Dialog.Close aria-label={t('Close')} className={cn(iconButtonClassName, 'ms-auto')}>
+              <X />
+            </Dialog.Close>
+          </div>
+          {/* one form, Enter in any input connects */}
+          <form
+            noValidate
+            onSubmit={(e) => {
+              e.preventDefault();
+              if (status !== 'closed') return playground.disconnect();
+              playground.connect();
+              setView('messages');
+            }}
+            className="contents"
+          >
+            <UrlBar status={status} activity={playground.log.at(-1)?.id} />
+            {hasInputs && <ViewSwitch value={view} onValueChange={setView} />}
+            <div
+              className={cn(
+                'mx-3 mb-3 grid min-h-0 flex-1 overflow-hidden rounded-xl border bg-fd-card sm:mx-4 sm:mb-4',
+                hasInputs && 'md:grid-cols-[minmax(0,11fr)_minmax(0,9fr)]',
+              )}
+            >
+              {hasInputs && (
+                <ConnectionPanel
+                  disabled={status !== 'closed'}
+                  transport={playground.transport}
+                  className={cn(view !== 'connection' && 'max-md:hidden')}
+                />
+              )}
+              <MessagesPanel
+                playground={playground}
+                className={cn(hasInputs && 'md:border-s', view !== 'messages' && 'max-md:hidden')}
+              />
+            </div>
+          </form>
+        </div>
       </SchemaProvider>
     </StfProvider>
   );
 }
 
-function PlaygroundContent({ playground }: { playground: Playground }) {
+/** switches the panels on small screens, its indicator measures the tabs on render */
+const ViewSwitch = memo(function ViewSwitch({
+  value,
+  onValueChange,
+}: {
+  value: string;
+  onValueChange: (value: string) => void;
+}) {
   const t = useTranslations({ note: 'playground' });
-  const { title, action } = useOperation();
-  const inputs = useConnectionInputs();
-  const hasInputs =
-    inputs.auth.length > 0 || inputs.parameters.length > 0 || inputs.query.length > 0;
-  const [selectedView, setView] = useState(hasInputs ? 'connection' : 'messages');
-  const view = hasInputs ? selectedView : 'messages';
-  const onSubmit = (e: { preventDefault: () => void }) => {
-    e.preventDefault();
-    if (playground.status !== 'closed') {
-      playground.disconnect();
-      return;
-    }
-
-    playground.connect();
-    setView('messages');
-  };
 
   return (
-    <div className="flex min-h-0 flex-1 flex-col">
-      <div className="flex h-12 shrink-0 items-center gap-2 ps-4 pe-2 sm:ps-5">
-        <Dialog.Title className="truncate text-sm font-medium">{title}</Dialog.Title>
-        <DirectionBadge action={action} />
-        <Dialog.Close aria-label={t('Close')} className={cn(iconButtonClassName, 'ms-auto')}>
-          <X />
-        </Dialog.Close>
-      </div>
-      {/* one form, Enter in any input connects */}
-      <form noValidate onSubmit={onSubmit} className="contents">
-        <UrlBar playground={playground} />
-        {hasInputs && (
-          <Segmented value={view} onValueChange={setView} className="shrink-0 px-3 pb-3 md:hidden">
-            <SegmentedList
-              className="*:flex-1 *:justify-center"
-              items={[
-                { value: 'connection', label: t('Connection') },
-                { value: 'messages', label: t('Messages') },
-              ]}
-            />
-          </Segmented>
-        )}
-        <div
-          className={cn(
-            'mx-3 mb-3 grid min-h-0 flex-1 overflow-hidden rounded-xl border bg-fd-card sm:mx-4 sm:mb-4',
-            hasInputs && 'md:grid-cols-[minmax(0,11fr)_minmax(0,9fr)]',
-          )}
-        >
-          {hasInputs && (
-            <ConnectionPanel
-              playground={playground}
-              inputs={inputs}
-              className={cn(view !== 'connection' && 'max-md:hidden')}
-            />
-          )}
-          <MessagesPanel
-            playground={playground}
-            className={cn(hasInputs && 'md:border-s', view !== 'messages' && 'max-md:hidden')}
-          />
-        </div>
-      </form>
-    </div>
+    <Segmented value={value} onValueChange={onValueChange} className="shrink-0 px-3 pb-3 md:hidden">
+      <SegmentedList
+        className="*:flex-1 *:justify-center"
+        items={[
+          { value: 'connection', label: t('Connection') },
+          { value: 'messages', label: t('Messages') },
+        ]}
+      />
+    </Segmented>
   );
-}
+});
 
 /** the URL of connection, with the values of its parameters */
-function UrlBar({ playground }: { playground: Playground }) {
+function UrlBar({ status, activity }: { status: ConnectionStatus; activity?: number }) {
   const t = useTranslations({ note: 'playground' });
-  const { channel, parameters } = useOperation();
-  const { servers, server } = useServer();
-  const { status } = playground;
-  const [base, path] = getUrlParts(servers[server!.id], server!.variables, channel.address ?? '');
-  let action: ReactNode;
-  if (status === 'closed') {
-    action = (
-      <>
-        <Plug className="size-3.5" />
-        {t('Connect')}
-      </>
-    );
-  } else if (status === 'connecting') {
-    action = (
-      <>
-        <Spinner className="size-3.5" />
-        {t('Connecting')}
-      </>
-    );
-  } else {
-    action = (
-      <>
-        <Unplug className="size-3.5" />
-        {t('Disconnect')}
-      </>
-    );
-  }
+  const [Icon, label] =
+    status === 'closed'
+      ? [Plug, t('Connect')]
+      : status === 'connecting'
+        ? [Spinner, t('Connecting')]
+        : [Unplug, t('Disconnect')];
 
   return (
     <div className="flex shrink-0 items-center gap-2 px-3 pb-3 sm:px-4">
       <div className="flex h-10 min-w-0 flex-1 items-center gap-1.5 rounded-xl border bg-fd-card ps-3.5 pe-2 text-[0.8125rem]">
-        <StatusDot status={status} activity={playground.log.at(-1)?.id} />
-        <div className="flex min-w-0 flex-1 items-center overflow-x-auto font-mono [scrollbar-width:none]">
-          {/* the URL is locked while connected */}
-          <fieldset disabled={status !== 'closed'} className="contents">
-            <ServerSelect label={base} className="min-w-16" />
-            <span className="flex shrink-0 items-center whitespace-pre text-fd-foreground">
-              {path.split(/(\{[^}]+\})/).map((part, i) => {
-                if (i % 2 === 0) return part;
-                const name = part.slice(1, -1);
-                const item = parameters.find((param) => param.name === name);
-
-                return (
-                  <ParamInput
-                    key={i}
-                    fieldName={['parameters', name]}
-                    name={name}
-                    schema={item?.schema}
-                    description={item?.parameter.description}
-                  />
-                );
-              })}
-            </span>
-          </fieldset>
-        </div>
+        <StatusDot status={status} activity={activity} />
+        <EditableAddress disabled={status !== 'closed'} />
       </div>
       <button
         type="submit"
@@ -249,8 +212,41 @@ function UrlBar({ playground }: { playground: Playground }) {
           'h-10 w-34 shrink-0 gap-2 rounded-xl px-4 transition-[background-color,scale] active:scale-[0.97] motion-reduce:transition-none',
         )}
       >
-        {action}
+        <Icon className="size-3.5" />
+        {label}
       </button>
     </div>
   );
 }
+
+/** the server and channel address, parameters are edited in place and locked while connected */
+const EditableAddress = memo(function EditableAddress({ disabled }: { disabled: boolean }) {
+  const { channel, parameters } = useOperation();
+  const { servers, server } = useServer();
+  const [base, path] = getUrlParts(servers[server!.id], server!.variables, channel.address ?? '');
+
+  return (
+    <div className="flex min-w-0 flex-1 items-center overflow-x-auto font-mono [scrollbar-width:none]">
+      <fieldset disabled={disabled} className="contents">
+        <ServerSelect label={base} className="min-w-16" />
+        <span className="flex shrink-0 items-center whitespace-pre text-fd-foreground">
+          {path.split(/(\{[^}]+\})/).map((part, i) => {
+            if (i % 2 === 0) return part;
+            const name = part.slice(1, -1);
+            const item = parameters.find((param) => param.name === name);
+
+            return (
+              <ParamInput
+                key={i}
+                fieldName={['parameters', name]}
+                name={name}
+                schema={item?.schema}
+                description={item?.parameter.description}
+              />
+            );
+          })}
+        </span>
+      </fieldset>
+    </div>
+  );
+});
