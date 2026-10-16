@@ -1,7 +1,9 @@
+import * as path from 'node:path';
+import { PathUtils } from 'fumadocs-core/source';
 import type { AsyncAPIObject, TagObject } from '@/types';
 import { dereference } from '@fumadocs/json-schema';
-import { createMagicProxy } from '@scalar/json-magic/magic-proxy';
 import type { DereferencedShallow } from '@fumadocs/json-schema';
+import { dereferenceBundledDocument } from '../document/dereference';
 
 interface BaseEntry {
   path: string;
@@ -57,31 +59,26 @@ export interface PagesBuilder {
 export function fromSchema(
   schemaId: string,
   bundled: AsyncAPIObject,
-  config: PagesBuilderConfig,
+  { toPages }: PagesBuilderConfig,
 ): OutputEntry[] {
   const files: OutputEntry[] = [];
-  const { toPages } = config;
-  // wrap in a magic proxy so that `dereferenceShallow` can resolve refs lazily
-  const document = createMagicProxy(bundled as never) as AsyncAPIObject;
 
   toPages({
     id: schemaId,
-    document,
-    dereferenceShallow: (s) => dereference(s),
+    // the magic proxy of document, shared with its pages, `dereferenceShallow` resolves its refs lazily
+    document: dereferenceBundledDocument(bundled).dereferenced,
+    dereferenceShallow: dereference,
     create(entry) {
       files.push(entry);
     },
-    routePathToFilePath(path) {
-      return path
-        .toLowerCase()
-        .replaceAll('.', '-')
-        .split('/')
-        .flatMap((v) => {
-          if (v.startsWith('{') && v.endsWith('}')) return v.slice(1, -1);
-          if (v.length === 0) return [];
-          return v;
-        })
-        .join('/');
+    routePathToFilePath(route) {
+      const out: string[] = [];
+      for (const segment of route.toLowerCase().replaceAll('.', '-').split('/')) {
+        if (segment.startsWith('{') && segment.endsWith('}')) out.push(segment.slice(1, -1));
+        else if (segment.length > 0) out.push(segment);
+      }
+
+      return out.join('/');
     },
   });
 
@@ -109,4 +106,25 @@ export function getPageProps(entry: PageOutput | OperationOutput): GeneratedPage
     document: entry.schemaId,
     operations: entry.operations,
   };
+}
+
+/** the `pages` of `meta.json` in the folder of `parent`, for its entries */
+export function getMetaPages(
+  entries: OutputEntry[],
+  parent: OutputGroup | undefined,
+  folderStyle: 'folder' | 'separator',
+): string[] {
+  const pages: string[] = [];
+
+  for (const entry of entries) {
+    const relativePath = PathUtils.slash(
+      parent ? path.relative(parent.path, entry.path) : entry.path,
+    );
+
+    if (entry.type !== 'group') pages.push(relativePath.slice(0, -path.extname(entry.path).length));
+    else if (folderStyle === 'folder') pages.push(relativePath);
+    else pages.push(`---${entry.info.title}---`, `...${relativePath}`);
+  }
+
+  return pages;
 }

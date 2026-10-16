@@ -7,14 +7,9 @@ import { bundle } from '@fumadocs/json-schema/bundle';
 export async function loadDocument(input: string | AsyncAPIObject): Promise<{
   bundled: AsyncAPIObject;
 }> {
-  let bundled: AsyncAPIObject;
-  try {
-    bundled = await bundle<AsyncAPIObject>(input);
-  } catch (e) {
-    throw new Error(`[AsyncAPI] Failed to resolve input: ${input}`, {
-      cause: e,
-    });
-  }
+  const bundled = await bundle<AsyncAPIObject>(input).catch((e: unknown) => {
+    throw new Error(`[AsyncAPI] Failed to resolve input: ${input}`, { cause: e });
+  });
 
   const source = typeof input === 'string' ? ` (${input})` : '';
   if (!bundled.asyncapi) {

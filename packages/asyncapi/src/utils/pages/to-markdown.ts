@@ -2,24 +2,16 @@ import type {
   AsyncAPIObject,
   ReferenceObject,
   SecuritySchemeObject,
-  ServerObject,
   WsChannelBinding,
 } from '@/types';
 import { dereference, type JsonSchema } from '@fumadocs/json-schema';
-import { generate } from '@fumari/json-schema-ts';
 import { getRaw } from '@scalar/json-magic/magic-proxy';
 import { idToTitle } from 'shared-api/utils/id-to-title';
 import type { GeneratedPageProps } from './builder';
 import { dereferenceBundledDocument } from '../document/dereference';
-import {
-  getMessageDisplayName,
-  getOperationDisplayName,
-  getOperationMessages,
-  resolveMultiFormatSchema,
-} from '../schema';
-import { applyMessageTraits, applyOperationTraits } from '../traits';
-import { getExampleMessages } from '../get-example-messages';
+import { getServers, type OperationMessage, resolveOperation, toRequirements } from '../schema';
 import { resolveServerUrl } from '../server-url';
+import { generateTypeScriptDefinitions } from '../typescript';
 
 /**
  * The operations of a page in Markdown, for LLMs.
@@ -31,17 +23,16 @@ export function toMarkdown(page: GeneratedPageProps, document: AsyncAPIObject): 
   const out: string[] = [];
 
   for (const item of page.operations ?? []) {
-    const found = dereference(doc.operations?.[item.id]);
-    if (!found) continue;
-    const operation = applyOperationTraits(found);
-    const channel = dereference(operation.channel);
+    const info = resolveOperation(doc, item.id);
+    if (!info) continue;
+    const { operation, channel } = info;
     const name = toTypeName(item.id);
     /** schemas of the operation, declared as TypeScript types at the end */
     const types: Record<string, JsonSchema> = {};
     const payloads: { $ref: string }[] = [];
 
     if (page.showTitle) {
-      out.push(`## ${getOperationDisplayName(item.id, operation)}`);
+      out.push(`## ${info.title}`);
       if (operation.description) out.push(operation.description);
     }
     if (channel.description && channel.description !== operation.description)
@@ -54,7 +45,7 @@ export function toMarkdown(page: GeneratedPageProps, document: AsyncAPIObject): 
     );
     if (channel.address) out.push(`Address: \`${channel.address}\``);
 
-    const servers = getServers(doc, channel.servers);
+    const servers = Object.entries(getServers(doc, channel));
     let lines: string[] = [];
     for (const [id, server] of servers) {
       lines.push(
@@ -82,8 +73,7 @@ export function toMarkdown(page: GeneratedPageProps, document: AsyncAPIObject): 
     if (security.length > 0) out.push(`${heading} Authorization`, ...security);
 
     lines = [];
-    for (const [key, value] of Object.entries(channel.parameters ?? {})) {
-      const parameter = dereference(value);
+    for (const { name: key, parameter } of info.parameters) {
       let line = `- \`${key}\``;
       if (parameter.description) line += `: ${parameter.description}`;
       if (parameter.enum) line += ` One of ${inlineCode(parameter.enum)}.`;
@@ -99,24 +89,18 @@ export function toMarkdown(page: GeneratedPageProps, document: AsyncAPIObject): 
     }
 
     /** `reply`: the messages go the other way, they aren't in the union of operation */
-    function messages(entries: ReturnType<typeof getOperationMessages>, reply = false) {
-      for (const { key, value } of entries) {
-        const message = applyMessageTraits(dereference(value));
-        const typeName = toTypeName(key);
-        const payload = resolveMultiFormatSchema(message.payload);
-        const headers = resolveMultiFormatSchema(message.headers);
-        const contentType = message.contentType ?? doc.defaultContentType;
-        // replies go the other way
-        const received = (operation.action === 'send') !== reply;
-        const example = getExampleMessages(message, { headers, payload, received })[0];
+    function messages(items: OperationMessage[], reply = false) {
+      for (const item of items) {
+        const { message, contentType } = item;
+        const typeName = toTypeName(item.id);
 
-        out.push(`${heading}# ${getMessageDisplayName(key, message)}`);
+        out.push(`${heading}# ${item.name}`);
         if (message.summary) out.push(message.summary);
         if (message.description) out.push(message.description);
         if (contentType) out.push(`Content type: \`${contentType}\``);
         for (const [label, schema] of [
-          ['Payload', payload],
-          ['Headers', headers],
+          ['Payload', item.payload],
+          ['Headers', item.headers],
         ] as const) {
           if (!schema) continue;
           if (schema.schemaFormat !== undefined) {
@@ -128,54 +112,39 @@ export function toMarkdown(page: GeneratedPageProps, document: AsyncAPIObject): 
             out.push(`${label}: \`${typeName}${label}\``);
           }
         }
+
+        const example = item.examples[0];
         if (example?.payload !== undefined)
           out.push('Example payload:', codeBlock(example.payload));
       }
     }
 
-    const entries = getOperationMessages(operation.messages, channel);
-    if (entries.length > 0) {
+    if (info.messages.length > 0) {
       out.push(`${heading} Messages`);
-      messages(entries);
+      messages(info.messages);
     }
 
-    if (operation.reply) {
-      const reply = dereference(operation.reply);
-      const address = dereference(reply.address);
-      const replyChannel = dereference(reply.channel);
+    if (info.reply) {
+      const { address, channel: replyChannel } = info.reply;
 
       out.push(`${heading} Reply`);
       if (address) out.push(`Sent to the address at \`${address.location}\` of the request.`);
       else if (replyChannel?.address) out.push(`Sent to \`${replyChannel.address}\`.`);
-      messages(getOperationMessages(reply.messages, replyChannel), true);
+      messages(info.reply.messages, true);
     }
 
-    const code = generateTypes(document, types, payloads, `${name}Message`);
+    // one block declares the shared types once: the payloads of operation are the root, the rest
+    // are from `$defs`, and types of both ways keep the properties of both
+    const code =
+      Object.keys(types).length > 0 &&
+      generateTypeScriptDefinitions(
+        { $defs: types, anyOf: payloads.length > 0 ? payloads : undefined },
+        { name: `${name}Message`, readOnly: true, writeOnly: true, document },
+      );
     if (code) out.push(`${heading} Types`, `\`\`\`ts\n${code.trimEnd()}\n\`\`\``);
   }
 
   return out.join('\n\n');
-}
-
-/** one block for the types of an operation, so shared types are declared once */
-function generateTypes(
-  document: AsyncAPIObject,
-  types: Record<string, JsonSchema>,
-  payloads: { $ref: string }[],
-  name: string,
-): string | undefined {
-  if (Object.keys(types).length === 0) return;
-
-  try {
-    // the payloads of operation are the root, other declarations are from `$defs`,
-    // the types of both ways share declarations, they keep the properties of both
-    return generate(
-      { ...(document as object), $defs: types, anyOf: payloads.length > 0 ? payloads : undefined },
-      { name, readOnly: true, writeOnly: true },
-    );
-  } catch (e) {
-    console.warn('Failed to generate TypeScript definitions:', e);
-  }
 }
 
 /** like `PlanetCreated` */
@@ -195,39 +164,17 @@ function isSameList(a: unknown[] | undefined, b: unknown[] | undefined): boolean
   return true;
 }
 
-function getServers(
-  doc: AsyncAPIObject,
-  refs: (ServerObject | ReferenceObject)[] | undefined,
-): [id: string, server: ServerObject][] {
-  // absent or empty: all servers, resolved values are referentially stable in the magic proxy
-  let selected: Set<ServerObject> | undefined;
-  if (refs && refs.length > 0) {
-    selected = new Set();
-    for (const ref of refs) selected.add(dereference(ref));
-  }
-
-  const out: [string, ServerObject][] = [];
-  for (const [id, value] of Object.entries(doc.servers ?? {})) {
-    const server = dereference(value);
-    if (!selected || selected.has(server)) out.push([id, server]);
-  }
-
-  return out;
-}
-
 function schemeList(schemes: (SecuritySchemeObject | ReferenceObject)[]): string {
-  const lines: string[] = [];
-  for (const item of schemes) {
-    const scheme = dereference(item);
-    const id = '$ref' in item ? item.$ref.slice(item.$ref.lastIndexOf('/') + 1) : scheme.type;
+  let out = '';
+  for (const { id, scheme } of toRequirements(schemes)) {
     let type: string = scheme.type;
     if (scheme.type === 'httpApiKey') type += ` in ${scheme.in} \`${scheme.name}\``;
     else if (scheme.type === 'apiKey') type += ` in ${scheme.in}`;
     else if (scheme.type === 'http') type += ` ${scheme.scheme}`;
-    lines.push(`- \`${id}\` (${type})${scheme.description ? `: ${scheme.description}` : ''}`);
+    out += `${out && '\n'}- \`${id}\` (${type})${scheme.description ? `: ${scheme.description}` : ''}`;
   }
 
-  return lines.join('\n');
+  return out;
 }
 
 function codeBlock(value: unknown): string {

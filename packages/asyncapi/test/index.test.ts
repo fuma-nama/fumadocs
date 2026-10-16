@@ -189,3 +189,21 @@ describe('Generate AsyncAPI documents', () => {
     ).rejects.toThrow();
   });
 });
+
+describe('createAsyncAPI()', () => {
+  const file = path.join(cwd, './fixtures/streetlights.yaml');
+
+  test('sources work without `this`', async () => {
+    const { staticSource } = createAsyncAPI({ input: { streetlights: file } });
+    const { files } = await staticSource({ per: 'file' });
+
+    expect(files.map((item) => item.path)).toEqual(['/streetlights.mdx']);
+  });
+
+  test('watches the input files', () => {
+    expect(createAsyncAPI({ input: { streetlights: file } })._getWatchPaths()).toEqual([file]);
+    expect(
+      createAsyncAPI({ input: [file, 'https://example.com/asyncapi.yaml'] })._getWatchPaths(),
+    ).toEqual([file]);
+  });
+});
