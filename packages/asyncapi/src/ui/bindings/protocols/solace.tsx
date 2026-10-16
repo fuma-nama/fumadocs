@@ -31,8 +31,8 @@ function SolaceOperationBinding({ binding }: { binding: SolaceOperationBinding }
           <CodeRow label="Queue Name" value={queue?.name} />
           <ValueRow label="Topic Subscriptions" value={queue?.topicSubscriptions} />
           <CodeRow label="Access Type" value={queue?.accessType} />
-          <CodeRow label="Max Message Spool Size" value={queue?.maxMsgSpoolSize} />
-          <CodeRow label="Max TTL" value={queue?.maxTtl} />
+          <ValueRow label="Max Message Spool Size" value={queue?.maxMsgSpoolSize} />
+          <ValueRow label="Max TTL" value={queue?.maxTtl} />
           <ValueRow label="Topic Subscriptions" value={topic?.topicSubscriptions} />
         </GroupRow>
       ))}

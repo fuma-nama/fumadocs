@@ -102,7 +102,7 @@ export async function generateFiles(options: Config): Promise<void> {
     const { input = [] } = options.input.options;
     const targets = Object.values(input).filter(
       (value): value is string =>
-        typeof value === 'string' && !URL.canParse(value) && existsSync(value),
+        typeof value === 'string' && existsSync(value),
     );
     console.log(`[Fumadocs OpenAPI] watching ${targets.join(', ')}`);
     watch(targets, {

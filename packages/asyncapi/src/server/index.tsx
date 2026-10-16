@@ -187,7 +187,7 @@ export function createAsyncAPI(options: AsyncAPIOptions = {}): AsyncAPIServer {
     _getWatchPaths() {
       return Object.values(input).filter(
         (value): value is string =>
-          typeof value === 'string' && !URL.canParse(value) && fs.existsSync(value),
+          typeof value === 'string' && fs.existsSync(value),
       );
     },
     async preloadAsyncAPIPage(page) {

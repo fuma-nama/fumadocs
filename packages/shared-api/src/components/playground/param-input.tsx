@@ -59,7 +59,9 @@ export function ParamInput({
       onChange={(e) => {
         const v = e.target.value;
         if (v.length === 0) setValue(undefined);
-        else setValue(isNumber && !Number.isNaN(Number(v)) ? Number(v) : v);
+        // a number only when it reads back as typed, like `1` but not `1.` or ` `
+        else if (isNumber && String(Number(v)) === v) setValue(Number(v));
+        else setValue(v);
       }}
       style={{ width: `calc(${Math.max(text.length, name.length, 1)}ch + 0.75rem)` }}
       className={className}
