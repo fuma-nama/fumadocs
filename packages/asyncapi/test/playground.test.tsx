@@ -41,12 +41,15 @@ describe('transports', () => {
     return null;
   }
 
-  function render(server: ServerObject, { page, hook }: { page?: Transports; hook?: Transports }) {
+  function render(
+    server: ServerObject,
+    { page, hook, bindings }: { page?: Transports; hook?: Transports; bindings?: object },
+  ) {
     const document = {
       asyncapi: '3.0.0',
       info: { title: 'Test', version: '1.0.0' },
       servers: { main: server },
-      channels: { events: { address: '/events' } },
+      channels: { events: { address: '/events', bindings } },
       operations: { onEvent: { action: 'send', channel: { $ref: '#/channels/events' } } },
     } as unknown as AsyncAPIObject;
     let out: Playground | undefined;
@@ -81,6 +84,28 @@ describe('transports', () => {
       transport: sseTransport,
       url: 'https://example.com/events',
     });
+  });
+
+  test('the query has only the inputs of the server', () => {
+    const bindings = {
+      ws: {
+        query: {
+          type: 'object',
+          required: ['token'],
+          properties: { token: { type: 'string', default: 'abc' } },
+        },
+      },
+    };
+
+    expect(render({ host: 'example.com', protocol: 'wss' }, { bindings }).url).toBe(
+      'wss://example.com/events?token=abc',
+    );
+    expect(
+      render(
+        { host: 'example.com', protocol: 'https' },
+        { bindings, page: { https: sseTransport } },
+      ).url,
+    ).toBe('https://example.com/events');
   });
 
   test('the transports of hook, then the ones of page, come first', () => {

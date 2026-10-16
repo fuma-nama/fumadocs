@@ -108,9 +108,12 @@ function PlaygroundDialog({ playground }: { playground: Playground }) {
   const inputs = useConnectionInputs();
   const hasInputs =
     inputs.auth.length > 0 || inputs.parameters.length > 0 || inputs.query.length > 0;
-  const [selectedView, setView] = useState(hasInputs ? 'connection' : 'messages');
-  const view = hasInputs ? selectedView : 'messages';
   const { status } = playground;
+  // reopened while connected, the messages matter
+  const [selectedView, setView] = useState(
+    hasInputs && status === 'closed' ? 'connection' : 'messages',
+  );
+  const view = hasInputs ? selectedView : 'messages';
 
   return (
     <StfProvider value={playground.stf}>

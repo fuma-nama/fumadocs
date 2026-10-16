@@ -192,25 +192,33 @@ function fillParameters(address: string, values: Record<string, string>, encode:
   });
 }
 
+/** the values of the query inputs that the selected server shows */
+function pickQuery(values: Record<string, unknown>, names: Set<string>): Record<string, unknown> {
+  const out: Record<string, unknown> = {};
+  for (const name of names) if (values[name] !== undefined) out[name] = values[name];
+  return out;
+}
+
 function getConnectionUrl(
   server: ServerObject,
   variables: Record<string, string>,
   address: string,
-  values: PlaygroundValues,
+  parameters: Record<string, string>,
+  query: Record<string, unknown>,
 ): string {
   // split as the URL is displayed, parameters are filled after
   const [base, path] = getUrlParts(server, variables, address);
-  const query = new URLSearchParams();
-  for (const [key, value] of Object.entries(values.query)) {
+  const search = new URLSearchParams();
+  for (const [key, value] of Object.entries(query)) {
     // arrays repeat their key, objects are JSON
     for (const item of Array.isArray(value) ? value : [value]) {
       if (item === undefined || item === null || item === '') continue;
-      query.append(key, typeof item === 'object' ? JSON.stringify(item) : String(item));
+      search.append(key, typeof item === 'object' ? JSON.stringify(item) : String(item));
     }
   }
 
-  const url = base + fillParameters(path, values.parameters, true);
-  return query.size > 0 ? `${url}?${query}` : url;
+  const url = base + fillParameters(path, parameters, true);
+  return search.size > 0 ? `${url}?${search}` : url;
 }
 
 /**
@@ -243,6 +251,22 @@ export function usePlayground({
   const { servers, server } = useServer();
   const schema = server ? servers[server.id] : undefined;
   const transport = usePlaygroundTransport(transports);
+  const wsQuery = dereference(
+    (dereference(dereference(channel.bindings)?.ws) as WsChannelBinding | undefined)?.query,
+  );
+  // values typed for other servers stay in the form, out of the URL
+  const queryNames = new Set<string>();
+  if (
+    (schema?.protocol === 'ws' || schema?.protocol === 'wss') &&
+    typeof wsQuery === 'object' &&
+    wsQuery?.properties
+  ) {
+    for (const name in wsQuery.properties) queryNames.add(name);
+  }
+  for (const { scheme } of [...security.server, ...security.operation]) {
+    if (scheme.type === 'httpApiKey' && scheme.in === 'query' && scheme.name)
+      queryNames.add(scheme.name);
+  }
   const stf = useStf({
     defaultValues: (): PlaygroundValues => {
       const out: PlaygroundValues = { parameters: {}, query: {}, auth: {} };
@@ -252,13 +276,9 @@ export function usePlayground({
       }
 
       // required values of the query start from their defaults
-      const binding = dereference(dereference(channel.bindings)?.ws) as
-        | WsChannelBinding
-        | undefined;
-      const query = dereference(binding?.query);
-      if (typeof query === 'object' && query?.properties) {
-        for (const name of query.required ?? []) {
-          const property = dereference(query.properties[name]);
+      if (typeof wsQuery === 'object' && wsQuery?.properties) {
+        for (const name of wsQuery.required ?? []) {
+          const property = dereference(wsQuery.properties[name]);
           const value: unknown = typeof property === 'object' ? property?.default : undefined;
           if (value === undefined) continue;
           // a copy without the magic proxy
@@ -282,15 +302,18 @@ export function usePlayground({
     },
     [engine],
   );
-  const getUrl = () =>
-    schema && transport
-      ? getConnectionUrl(
-          schema,
-          server!.variables,
-          channel.address ?? '',
-          engine.getData() as PlaygroundValues,
-        )
-      : undefined;
+  const getUrl = () => {
+    if (!schema || !transport) return;
+    const values = engine.getData() as PlaygroundValues;
+
+    return getConnectionUrl(
+      schema,
+      server!.variables,
+      channel.address ?? '',
+      values.parameters,
+      pickQuery(values.query, queryNames),
+    );
+  };
   const url = useSyncExternalStore(subscribe, getUrl, getUrl);
 
   // stable, so memoized UI skips the renders of arriving messages
@@ -357,7 +380,7 @@ export function usePlayground({
             url,
             server: schema,
             address: fillParameters(channel.address ?? '', values.parameters, false),
-            query: values.query,
+            query: pickQuery(values.query, queryNames),
             auth,
           },
           {
