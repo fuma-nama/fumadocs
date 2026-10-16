@@ -7,6 +7,7 @@ import { useDataEngine } from '@fumari/stf';
 import {
   type FieldEntry,
   FieldRow,
+  FieldRows,
   getRemoval,
   type NavigateFn,
 } from 'shared-api/components/playground/fields';
@@ -23,7 +24,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from 'shared-api/components/select';
-import type { Playground } from '@/playground';
+import type { Playground, PlaygroundTransport } from '@/playground';
 import { type OperationParameter, type SecurityRequirement, useOperation } from '@/operation';
 import type { SecuritySchemeObject, WsChannelBinding } from '@/types';
 import { useBindings } from '@/ui/bindings';
@@ -67,11 +68,36 @@ export function useConnectionInputs(): ConnectionInputs {
   return { auth, parameters, query };
 }
 
-/** browsers can't set the headers of WebSocket connections, only API keys in the query work */
 function isQueryKey(
   scheme: SecuritySchemeObject,
 ): scheme is SecuritySchemeObject & { name: string } {
   return scheme.type === 'httpApiKey' && scheme.in === 'query' && Boolean(scheme.name);
+}
+
+const stringSchema: JsonSchema = { type: 'string' };
+const credentialsSchema: JsonSchema = {
+  type: 'object',
+  properties: { username: stringSchema, password: { type: 'string', format: 'password' } },
+};
+
+/** the input of a scheme, `undefined` when the transport can't apply it */
+function getAuthEntry(
+  { id, scheme }: SecurityRequirement,
+  transport: PlaygroundTransport | undefined,
+): FieldEntry | undefined {
+  // API keys in the query are a part of URL
+  if (isQueryKey(scheme))
+    return { fieldName: ['query', scheme.name], name: scheme.name, schema: stringSchema };
+  if (!transport?.auth?.(scheme)) return;
+  const credentials =
+    scheme.type === 'userPassword' ||
+    (scheme.type === 'http' && scheme.scheme?.toLowerCase() === 'basic');
+
+  return {
+    fieldName: ['auth', id],
+    name: scheme.name ?? 'token',
+    schema: credentials ? credentialsSchema : stringSchema,
+  };
 }
 
 /** the inputs of connection, nested fields open in panels, locked while connected */
@@ -115,6 +141,7 @@ export function ConnectionPanel({
                   : t('Authorization')
               }
               items={items}
+              transport={playground.transport}
               onNavigate={onNavigate}
             />
           ))}
@@ -155,16 +182,16 @@ export function ConnectionPanel({
   );
 }
 
-const stringSchema: JsonSchema = { type: 'string' };
-
 /** one of the alternative schemes, readers pick the one to enter */
 function AuthSection({
   title,
   items,
+  transport,
   onNavigate,
 }: {
   title: string;
   items: SecurityRequirement[];
+  transport?: PlaygroundTransport;
   onNavigate: NavigateFn;
 }) {
   const t = useTranslations({ note: 'playground' });
@@ -172,19 +199,30 @@ function AuthSection({
   const [selected, setSelected] = useState(() =>
     Math.max(
       0,
-      items.findIndex((item) => isQueryKey(item.scheme)),
+      items.findIndex((item) => getAuthEntry(item, transport)),
     ),
   );
-  const { id, scheme } = items[selected];
+  // the selected server can change to one with fewer schemes
+  const index = selected < items.length ? selected : 0;
+  const { id, scheme } = items[index];
+  const entry = getAuthEntry(items[index], transport);
   const options = items.map((item, i) => ({ value: String(i), label: item.id }));
   let content;
 
-  if (isQueryKey(scheme)) {
-    const entry: FieldEntry = {
-      fieldName: ['query', scheme.name],
-      name: scheme.name,
-      schema: stringSchema,
-    };
+  if (!entry) {
+    content = (
+      <div className="flex gap-2 border-b px-4 py-2.5 text-xs text-fd-muted-foreground last:border-b-0">
+        <Info className="mt-px size-3.5 shrink-0" />
+        <p className="min-w-0 flex-1">
+          {t.jsx("The playground can't send {scheme}.", {
+            variables: { scheme: <code>{id}</code> },
+          })}
+        </p>
+      </div>
+    );
+  } else if (entry.schema === credentialsSchema) {
+    content = <FieldRows entry={entry} onNavigate={onNavigate} />;
+  } else {
     content = (
       <FieldRow
         entry={entry}
@@ -192,17 +230,6 @@ function AuthSection({
         description={scheme.description}
         onNavigate={() => onNavigate(entry, [entry])}
       />
-    );
-  } else {
-    content = (
-      <div className="flex gap-2 border-b px-4 py-2.5 text-xs text-fd-muted-foreground last:border-b-0">
-        <Info className="mt-px size-3.5 shrink-0" />
-        <p className="min-w-0 flex-1">
-          {t.jsx("Browsers can't send {scheme} with WebSocket connections.", {
-            variables: { scheme: <code>{id}</code> },
-          })}
-        </p>
-      </div>
     );
   }
 
@@ -214,11 +241,11 @@ function AuthSection({
         options.length > 1 ? (
           <Select
             items={options}
-            value={String(selected)}
+            value={String(index)}
             onValueChange={(v) => {
               if (v === null) return;
-              // the key of the previous scheme isn't sent anymore
-              if (isQueryKey(scheme)) engine.delete(['query', scheme.name]);
+              // the value of the previous scheme isn't sent anymore
+              if (entry) engine.delete(entry.fieldName);
               setSelected(Number(v));
             }}
           >

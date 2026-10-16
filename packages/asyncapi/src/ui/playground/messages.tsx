@@ -101,7 +101,7 @@ const Entry = memo(function Entry({ entry }: { entry: LogEntry }) {
     detail = entry.data;
   } else if (entry.type === 'closed') {
     text = t('Disconnected');
-    detail = entry.data ? `${entry.code} ${entry.data}` : String(entry.code);
+    detail = `${entry.code ?? ''} ${entry.data ?? ''}`.trim();
   } else {
     text = t('Connection error');
     // browsers hide why connections fail
@@ -163,13 +163,12 @@ function MessageEntry({ entry, time }: { entry: LogEntry; time: ReactNode }) {
           )}
         />
         {entry.message && <MessageName item={entry.message} className="shrink-0 font-medium" />}
-        {entry.data !== undefined ? (
-          <span className="min-w-0 flex-1 truncate font-mono text-fd-muted-foreground">
-            {entry.data}
-          </span>
-        ) : (
-          <span className="min-w-0 flex-1 truncate text-fd-muted-foreground">
-            {t('Binary message, {length} bytes', { variables: { length: String(entry.bytes) } })}
+        <span className="min-w-0 flex-1 truncate font-mono text-fd-muted-foreground">
+          {entry.binary ? toHex(entry.binary) : entry.data}
+        </span>
+        {entry.binary && (
+          <span className="shrink-0 text-fd-muted-foreground">
+            {t('{length} bytes', { variables: { length: String(entry.binary.byteLength) } })}
           </span>
         )}
         <span className="text-fd-muted-foreground">{time}</span>
@@ -191,6 +190,28 @@ function getExampleText(message: OperationMessage | undefined): string {
 
 const customMessage = '';
 
+type Encoding = 'text' | 'hex' | 'base64';
+
+/** the bytes of hex or Base64 text, `undefined` when it isn't valid */
+export function parseBinary(text: string, encoding: 'hex' | 'base64'): ArrayBuffer | undefined {
+  try {
+    if (encoding === 'base64') return Uint8Array.from(atob(text), (c) => c.charCodeAt(0)).buffer;
+    const hex = text.replace(/\s+/g, '');
+    if (/^(?:[\da-f]{2})*$/i.test(hex))
+      return Uint8Array.from(hex.match(/../g) ?? [], (byte) => parseInt(byte, 16)).buffer;
+  } catch {}
+}
+
+const previewBytes = 64;
+
+/** the hex of the first bytes, like `48 65 6c 6c 6f` */
+export function toHex(data: ArrayBuffer): string {
+  let out = '';
+  for (const byte of new Uint8Array(data, 0, Math.min(data.byteLength, previewBytes)))
+    out += `${byte.toString(16).padStart(2, '0')} `;
+  return data.byteLength > previewBytes ? `${out}…` : out.trimEnd();
+}
+
 /** compose a message to send, starting from the example of a documented message */
 function Composer({ playground }: { playground: Playground }) {
   const t = useTranslations({ note: 'playground' });
@@ -199,12 +220,24 @@ function Composer({ playground }: { playground: Playground }) {
   const [selected, setSelected] = useState(outgoing[0]?.id ?? customMessage);
   const message = outgoing.find((item) => item.id === selected);
   const [text, setText] = useState(() => getExampleText(message));
+  const [encoding, setEncoding] = useState<Encoding>('text');
   const isMac = typeof navigator !== 'undefined' && /Mac|iPhone|iPad/.test(navigator.userAgent);
   const open = status === 'open';
   const check = useMemo(() => {
-    const payload = message?.payload;
-    if (!text || !payload || payload.schemaFormat !== undefined) return;
+    if (!text) return;
+    if (encoding !== 'text') {
+      const data = parseBinary(text, encoding);
+      if (!data)
+        return { ok: false, text: encoding === 'hex' ? t('Invalid hex') : t('Invalid Base64') };
+      return {
+        ok: true,
+        data,
+        text: t('{length} bytes', { variables: { length: String(data.byteLength) } }),
+      };
+    }
 
+    const payload = message?.payload;
+    if (!payload || payload.schemaFormat !== undefined) return;
     try {
       return matches(payload.schema as JsonSchema, JSON.parse(text))
         ? { ok: true, text: t('Matches the schema') }
@@ -212,17 +245,23 @@ function Composer({ playground }: { playground: Playground }) {
     } catch {
       return { ok: false, text: t('Invalid JSON') };
     }
-  }, [text, message, t]);
+  }, [text, encoding, message, t]);
+  const data = encoding === 'text' ? text : check?.data;
 
   function onSend() {
-    // only messages matching their schemas are labelled in the log
-    if (open && text) send(text, check?.ok ? message : undefined);
+    // only text messages matching their schemas are labelled in the log
+    if (send && data) send(data, encoding === 'text' && check?.ok ? message : undefined);
   }
 
   const items: { value: string; label: ReactNode }[] = [
     { value: customMessage, label: t('Custom') },
   ];
   for (const item of outgoing) items.push({ value: item.id, label: <MessageName item={item} /> });
+  const encodings: { value: Encoding; label: string }[] = [
+    { value: 'text', label: t('Text') },
+    { value: 'hex', label: t('Hex') },
+    { value: 'base64', label: 'Base64' },
+  ];
 
   return (
     <div className="shrink-0 border-t">
@@ -235,6 +274,7 @@ function Composer({ playground }: { playground: Playground }) {
               if (v === null) return;
               setSelected(v);
               setText(getExampleText(outgoing.find((item) => item.id === v)));
+              setEncoding('text');
             }}
           >
             <SelectTrigger
@@ -272,18 +312,43 @@ function Composer({ playground }: { playground: Playground }) {
         <p
           className={cn(
             'min-w-0 flex-1 truncate text-xs',
-            !open || !check
+            !send || !check
               ? 'text-fd-muted-foreground'
               : check.ok
                 ? 'text-green-600 dark:text-green-400'
                 : 'text-amber-600 dark:text-amber-400',
           )}
         >
-          {open ? check?.text : t('Connect to send messages.')}
+          {!open
+            ? t('Connect to send messages.')
+            : send
+              ? check?.text
+              : t('This connection only receives messages.')}
         </p>
+        <Select
+          items={encodings}
+          value={encoding}
+          onValueChange={(v) => {
+            if (v !== null) setEncoding(v);
+          }}
+        >
+          <SelectTrigger
+            aria-label={t('Encoding')}
+            className="h-7 w-auto shrink-0 gap-1.5 border-0 bg-transparent px-2.5 text-xs hover:bg-fd-accent focus:ring-0 focus-visible:ring-2 data-popup-open:bg-fd-accent"
+          >
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent align="end">
+            {encodings.map((item) => (
+              <SelectItem key={item.value} value={item.value} className="text-xs">
+                {item.label}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
         <button
           type="button"
-          disabled={!open || !text}
+          disabled={!send || !data}
           onClick={onSend}
           className={cn(
             buttonVariants({ variant: 'primary', size: 'sm' }),

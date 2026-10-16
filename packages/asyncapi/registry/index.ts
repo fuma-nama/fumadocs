@@ -19,8 +19,8 @@ export const registry: Registry = {
       entry: 'ui/operation/index.tsx',
     },
     playground: {
-      title: 'WebSocket Playground',
-      description: 'The playground of WebSocket channels in AsyncAPI pages',
+      title: 'Playground',
+      description: 'The playground of channels in AsyncAPI pages',
       entry: 'ui/playground/index.tsx',
     },
   },

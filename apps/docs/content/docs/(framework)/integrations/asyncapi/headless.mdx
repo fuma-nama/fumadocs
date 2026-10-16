@@ -11,7 +11,7 @@ Everything outside `@fumadocs/asyncapi/ui` is headless.
 | ------------------------------- | --------------------------------------------------------- |
 | `@fumadocs/asyncapi`            | the page: the document, its servers and your components   |
 | `@fumadocs/asyncapi/operation`  | an operation: its channel, parameters, messages and reply |
-| `@fumadocs/asyncapi/playground` | a WebSocket session on the channel of an operation        |
+| `@fumadocs/asyncapi/playground` | a session on the channel of an operation                  |
 
 ## Page
 
@@ -119,20 +119,24 @@ Examples of a message come from the document, or are generated from its schemas.
 
 ## Playground
 
-`usePlayground()` connects to the channel of an operation on WebSocket servers, under `<OperationProvider />`.
+`usePlayground()` connects to the channel of an operation with a transport, under `<OperationProvider />`.
 
 ```tsx
 'use client';
 import { usePlayground } from '@fumadocs/asyncapi/playground';
+import { mqttTransport } from '@/lib/mqtt-transport';
 
 export function Playground() {
-  const { url, status, connect, disconnect, send, log } = usePlayground();
-  if (!url) return null; // not a WebSocket server
+  const { url, status, connect, disconnect, send, log } = usePlayground({
+    // on top of the page's `playground.transports`
+    transports: { mqtt: mqttTransport },
+  });
+  if (!url) return null; // no transport for the server
 
   return (
     <>
       <button onClick={status === 'closed' ? connect : disconnect}>{status}</button>
-      <button onClick={() => send('{"type":"ping"}')}>Ping</button>
+      {send && <button onClick={() => send('{"type":"ping"}')}>Ping</button>}
       {log.map((entry) => (
         <p key={entry.id}>
           {entry.type} {entry.message?.name} {entry.data}
@@ -143,7 +147,18 @@ export function Playground() {
 }
 ```
 
-- The address parameters and query are the form `stf`, `url` follows its values.
-- Received messages are matched against the payloads of messages on the channel, `entry.message` is the documented message.
+- The address parameters, query and auth inputs are the form `stf`, `url` follows its values.
+- `send` is available while connected, unless the connection can only receive.
+- Received messages are matched against the payloads of messages on the channel, `entry.message` is the documented message. Binary messages are `entry.binary`.
 
 <auto-type-table path="props.ts" name="Playground" />
+
+### Transports
+
+A transport connects to the servers of a protocol, see [the MQTT example](/docs/integrations/asyncapi/api-page#custom-transports). They are picked from the `transports` of `usePlayground()`, then the page's `playground.transports`, then the built-in WebSocket one.
+
+<auto-type-table path="props.ts" name="PlaygroundTransport" />
+
+`connect()` reports to `events`: `open()`, `message(data)` with text or an `ArrayBuffer`, and `close()` or `error()`, which end the connection.
+
+<auto-type-table path="props.ts" name="ConnectTarget" />

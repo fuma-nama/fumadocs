@@ -7,3 +7,5 @@ export type OperationInfo = Operation.OperationInfo;
 export type OperationMessage = Operation.OperationMessage;
 export type Playground = PlaygroundModule.Playground;
 export type CodeUsageData = UI.CodeUsageData;
+export type PlaygroundTransport = PlaygroundModule.PlaygroundTransport;
+export type ConnectTarget = PlaygroundModule.ConnectTarget;

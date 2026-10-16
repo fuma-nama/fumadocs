@@ -11,9 +11,11 @@ packages:
 - Messages are listed in an accordion, their examples beside the payload and headers on wide pages.
 - Example cards are titled with the name and summary of examples, selects switch to other examples and to their headers.
 - Protocol details only show the bindings of the selected server, `x-*` bindings are hidden.
-- A WebSocket playground connects to channels, sends messages from their examples and identifies the received ones.
+- A playground connects to channels, sends messages from their examples and identifies the received ones.
 - The playground edits address parameters in its URL and previews the URL to connect.
 - Code samples in JavaScript and Python for WebSocket, MQTT, Kafka, AMQP and NATS servers, and from `x-codeSamples` of operations.
+- Playground transports connect by protocol: WebSocket is built in, `sseTransport` receives Server-Sent Events.
+- The playground sends text, hex and Base64 messages, and previews binary ones in hex.
 - Security schemes show OAuth 2.0 flows, scopes and SASL mechanisms.
 - Avro, Protobuf and RAML schemas are shown as they are.
 
@@ -42,7 +44,7 @@ packages:
 | `action` prop of `<Operation />` and `<OperationProvider />`    | removed, read from the operation    |
 | `preloaded.proxyUrl` of `AsyncAPIPageProps_Preloaded`           | removed, it was never used          |
 
-- Added the `playground` option of `createAsyncAPIPage()`, and `usePlayground()` from `@fumadocs/asyncapi/playground`.
+- Added the `playground` option of `createAsyncAPIPage()` with `transports`, and `usePlayground()` and `sseTransport` from `@fumadocs/asyncapi/playground`.
 - Added the `generateTypeScriptDefinitions` option, payloads and headers can be copied as TypeScript types.
 - Added the `codeUsages` option and `slots.usage` of `renderOperationLayout`, with `createCodeUsageGeneratorRegistry()` and `registerDefaultCodeUsages()` from `@fumadocs/asyncapi/ui`.
 - Added `getText()` to the data of AsyncAPI pages, their operations in Markdown for LLMs.

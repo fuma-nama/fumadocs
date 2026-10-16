@@ -1,5 +1,6 @@
 'use client';
 import type { PageOperationProps } from '@/operation';
+import type { PlaygroundTransport } from '@/playground';
 import type { ShikiFactory } from 'fumadocs-core/highlight/shiki';
 import { defaultShikiFactory } from 'fumadocs-core/highlight/shiki/full';
 import {
@@ -87,11 +88,13 @@ export interface AsyncAPIRenderOptions {
   };
   playground?: {
     /**
-     * Try WebSocket channels in a playground, from the connection bar of operations.
+     * Try channels in a playground, from the connection bar of operations.
      *
      * @defaultValue true
      */
     enabled?: boolean;
+    /** connect to servers by protocol, on top of the built-in `ws` and `wss` */
+    transports?: Record<string, PlaygroundTransport>;
   };
   schemaUI?: {
     /**

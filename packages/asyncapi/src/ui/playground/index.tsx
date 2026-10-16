@@ -25,19 +25,17 @@ import { ConnectionPanel, useConnectionInputs } from './connection';
 import { MessagesPanel } from './messages';
 
 /**
- * The connection bar with a WebSocket playground for the channel, the bar alone for other protocols.
+ * The connection bar with a playground for the channel, the bar alone when no transport connects to the server.
  */
 export function PlaygroundClient() {
-  const { servers, server } = useServer();
-  const protocol = server && servers[server.id]?.protocol;
-  if (protocol !== 'ws' && protocol !== 'wss') return <ConnectionBar />;
+  const playground = usePlayground();
+  if (!playground.transport) return <ConnectionBar />;
 
-  return <PlaygroundSession />;
+  return <PlaygroundSession playground={playground} />;
 }
 
-function PlaygroundSession() {
+function PlaygroundSession({ playground }: { playground: Playground }) {
   const t = useTranslations({ note: 'playground' });
-  const playground = usePlayground();
   const [open, setOpen] = useState(false);
   const { status } = playground;
 

@@ -243,9 +243,6 @@ const translations = {
   'Asymmetric encryption(security scheme)': '非对称加密',
   'Authorization URL(security scheme)': '授权 URL',
   'Authorization code(security scheme)': '授权码',
-  'Binary message, {length} bytes(playground)': '二进制消息，{length} 字节',
-  "Browsers can't send {scheme} with WebSocket connections.(playground)":
-    '浏览器无法在 WebSocket 连接中发送 {scheme}。',
   'Channel(bindings)': '通道',
   'Channel(channel address)': '通道',
   'Check the URL, and whether the server accepts connections from this site.(playground)':
@@ -270,11 +267,15 @@ const translations = {
   'Discovery URL(security scheme)': '发现 URL',
   'Documentation(external documentation)': '文档',
   "Doesn't match the schema(playground)": '不符合 Schema',
+  'Encoding(playground)': '编码',
   'Example(message example)': '示例',
   'Handshake Headers(operation page)': '握手标头',
   'Headers(message example)': '标头',
+  'Hex(playground)': '十六进制',
   'Implicit(security scheme)': '隐式',
+  'Invalid Base64(playground)': '无效的 Base64',
   'Invalid JSON(playground)': '无效的 JSON',
+  'Invalid hex(playground)': '无效的十六进制',
   'Its value is at {location} of messages.(operation page)': '其值位于消息的 {location}。',
   'Matches the schema(playground)': '符合 Schema',
   'Message type(playground)': '消息类型',
@@ -304,6 +305,9 @@ const translations = {
   'Server(channel address)': '服务器',
   'Subject(channel address)': '主题',
   'Symmetric encryption(security scheme)': '对称加密',
+  'Text(playground)': '文本',
+  "The playground can't send {scheme}.(playground)": '无法在此发送 {scheme}。',
+  'This connection only receives messages.(playground)': '此连接只能接收消息。',
   'To connect to the server(operation page)': '连接服务器时',
   'To perform the operation(operation page)': '执行此操作时',
   'Token URL(security scheme)': '令牌 URL',
@@ -313,6 +317,7 @@ const translations = {
   'Write a message to send(playground)': '输入要发送的消息',
   'You send these messages to {app}(message direction)': '你向 {app} 发送这些消息',
   '{app} sends these messages to you(message direction)': '{app} 向你发送这些消息',
+  '{length} bytes(playground)': '{length} 字节',
 
   // @fumadocs/story
   '1 item(story arguments form)': '1 项',

@@ -2202,6 +2202,9 @@ importers:
       cn:
         specifier: ^0.4.0
         version: 0.4.0
+      eventsource-parser:
+        specifier: ^4.1.1
+        version: 4.1.1
       github-slugger:
         specifier: ^2.0.0
         version: 2.0.0
@@ -2239,6 +2242,9 @@ importers:
       '@types/react':
         specifier: ^19.3.0
         version: 19.3.0
+      '@types/react-dom':
+        specifier: ^19.3.0
+        version: 19.3.0(@types/react@19.3.0)
       fuma-cli:
         specifier: ^0.3.1
         version: 0.3.2
