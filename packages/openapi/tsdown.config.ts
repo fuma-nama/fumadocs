@@ -29,7 +29,7 @@ export default defineConfig({
   },
   platform: 'browser',
   deps: {
-    onlyBundle: ['shared-api', 'fast-content-type-parse', '@fastify/deepmerge', 'xml-js'],
+    onlyBundle: ['shared-api', 'fast-content-type-parse', 'xml-js'],
     neverBundle: [/^node:/, 'fs'],
   },
   exports: {

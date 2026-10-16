@@ -167,6 +167,15 @@ type Query {
     const loaded = await fromInstance.getSchema('api');
     expect(loaded.sdl).toBe(printSchema(loaded.schema));
   });
+
+  test('refuses schemas not listed in input', async () => {
+    const server = create();
+
+    await expect(server.getSchema('type Query { hello: String }')).rejects.toThrow(
+      'is not listed in "input"',
+    );
+    await expect(server.getSchema('constructor')).rejects.toThrow('is not listed in "input"');
+  });
 });
 
 describe('buildSchemaFromSDL', () => {

@@ -85,12 +85,11 @@ export function createAsyncAPI(options: AsyncAPIOptions = {}): AsyncAPIServer {
     input = options.input;
   }
 
-  function getSchema(id: string): Promise<LoadedDocument> {
-    if (!(id in input)) {
-      console.warn(
-        `[Fumadocs AsyncAPI] the document "${id}" is not listed in the input array, this may be unexpected and won't be cached properly.`,
+  async function getSchema(id: string): Promise<LoadedDocument> {
+    if (!Object.hasOwn(input, id)) {
+      throw new Error(
+        `[Fumadocs AsyncAPI] the document "${id}" is not listed in "input", only documents from "input" can be loaded.`,
       );
-      return loadDocument(id);
     }
 
     let output = disableCache ? undefined : docCache.get(id);

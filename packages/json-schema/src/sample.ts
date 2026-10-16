@@ -2,7 +2,7 @@
  * inspired by https://github.com/Redocly/openapi-sampler (MIT)
  */
 import type { JsonSchema } from './types';
-import { mergeDeep } from './utils/deep-merge';
+import { mergeDeep, setOwn } from './utils/deep-merge';
 import { isPlainObject } from './utils/is-plain-object';
 import { getRaw } from '@scalar/json-magic/magic-proxy';
 
@@ -308,15 +308,15 @@ function sampleObject(
       });
 
       if (options.skipReadOnly && sample.readOnly) {
-        if (context?.isAllOfChild) res[propertyName] = SKIP as unknown;
+        if (context?.isAllOfChild) setOwn(res, propertyName, SKIP);
         continue;
       }
       if (options.skipWriteOnly && sample.writeOnly) {
-        if (context?.isAllOfChild) res[propertyName] = SKIP as unknown;
+        if (context?.isAllOfChild) setOwn(res, propertyName, SKIP);
         continue;
       }
 
-      res[propertyName] = sample.value;
+      setOwn(res, propertyName, sample.value);
     }
   }
 
@@ -341,14 +341,14 @@ function sampleObject(
     let added = 0;
     const req = Array.isArray(schema.required) ? schema.required : [];
     for (const name of req) {
-      if (res[name] !== undefined) {
-        filtered[name] = res[name];
+      if (Object.hasOwn(res, name) && res[name] !== undefined) {
+        setOwn(filtered, name, res[name]);
         added++;
       }
     }
     for (const name of Object.keys(res)) {
-      if (added < schema.maxProperties && !(name in filtered)) {
-        filtered[name] = res[name];
+      if (added < schema.maxProperties && !Object.hasOwn(filtered, name)) {
+        setOwn(filtered, name, res[name]);
         added++;
       }
     }

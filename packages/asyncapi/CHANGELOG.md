@@ -1,3 +1,9 @@
+## @fumadocs/asyncapi@0.4.6
+
+### Refuse schemas not listed in `input`
+
+- `getSchema()` and page preloads throw for schema IDs not listed in `input`, instead of loading them as file paths or URLs.
+
 ## @fumadocs/asyncapi@0.4.5
 
 ### Share `@fumari/stf` and `@fumadocs/json-schema` with installed UI

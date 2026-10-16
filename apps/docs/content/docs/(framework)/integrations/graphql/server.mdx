@@ -18,6 +18,8 @@ The GraphQL schemas to read from, either:
 
 Record inputs accept SDL file paths/URLs, SDL text, introspection results, `GraphQLSchema` instances, and functions returning them.
 
+Only schemas listed here can be loaded, other IDs passed to `getSchema()` throw an error.
+
 ```ts tab="Basic"
 import { createGraphQL } from '@fumadocs/graphql/server';
 

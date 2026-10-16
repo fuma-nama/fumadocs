@@ -206,4 +206,11 @@ describe('createAsyncAPI()', () => {
       createAsyncAPI({ input: [file, 'https://example.com/asyncapi.yaml'] })._getWatchPaths(),
     ).toEqual([file]);
   });
+
+  test('refuses documents not listed in input', async () => {
+    const server = createAsyncAPI({ input: [file] });
+
+    await expect(server.getSchema('./asyncapi.yaml')).rejects.toThrow('is not listed in "input"');
+    await expect(server.getSchema('constructor')).rejects.toThrow('is not listed in "input"');
+  });
 });

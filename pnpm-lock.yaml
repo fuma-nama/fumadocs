@@ -2960,9 +2960,6 @@ importers:
         specifier: ^0.15.4
         version: 0.15.4
     devDependencies:
-      '@fastify/deepmerge':
-        specifier: ^3.2.1
-        version: 3.2.1
       '@types/node':
         specifier: 26.6.4
         version: 26.6.4

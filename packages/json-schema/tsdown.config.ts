@@ -10,7 +10,7 @@ export default defineConfig({
   },
   sourcemap: false,
   deps: {
-    onlyBundle: ['@fastify/deepmerge'],
+    onlyBundle: [],
     neverBundle: [/^node:/, 'fs'],
   },
   exports: true,

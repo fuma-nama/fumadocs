@@ -275,6 +275,15 @@ function stringifyOutput(output: OutputFile[]) {
   return lines.join('\n\n');
 }
 
+test('refuses documents not listed in input', async () => {
+  const server = createOpenAPI({ input: [path.join(cwd, './fixtures/petstore.yaml')] });
+
+  await expect(server.getSchema(path.join(cwd, './fixtures/museum.yaml'))).rejects.toThrow(
+    'is not listed in "input"',
+  );
+  await expect(server.getSchema('constructor')).rejects.toThrow('is not listed in "input"');
+});
+
 test('OAuth handler sends users back to the page that started the flow', () => {
   const handler = createOpenAPI().createOAuthHandler();
   const request = (page?: string) =>

@@ -4,7 +4,7 @@ export function objectGet(obj: unknown, key: (string | number)[]): unknown | und
   let cur = obj;
 
   for (const prop of key) {
-    if (isPlainObject(cur) && prop in cur) {
+    if (isPlainObject(cur) && Object.hasOwn(cur, prop)) {
       cur = cur[prop];
     } else if (typeof prop === 'number' && Array.isArray(cur)) {
       cur = cur[prop];
@@ -29,7 +29,13 @@ export function objectSet(obj: unknown, field: FieldKey, value: unknown): unknow
   const parent = objectGet(obj, field.slice(0, -1));
   const key = field[field.length - 1];
   if (isPlainObject(parent)) {
-    parent[key] = value;
+    // an own property, assigning to `__proto__` would change the prototype
+    Object.defineProperty(parent, key, {
+      value,
+      writable: true,
+      enumerable: true,
+      configurable: true,
+    });
   } else if (typeof key === 'number' && Array.isArray(parent)) {
     parent[key] = value;
   } else {
@@ -75,7 +81,7 @@ export function deepEqual(a: unknown, b: unknown): boolean {
     return false;
   }
 
-  return keysA.every((key) => key in b && deepEqual(a[key], b[key]));
+  return keysA.every((key) => Object.hasOwn(b, key) && deepEqual(a[key], b[key]));
 }
 
 export function stringifyFieldKey(fieldKey: FieldKey) {
