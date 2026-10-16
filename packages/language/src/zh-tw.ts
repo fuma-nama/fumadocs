@@ -243,9 +243,6 @@ const translations = {
   'Asymmetric encryption(security scheme)': '非對稱加密',
   'Authorization URL(security scheme)': '授權 URL',
   'Authorization code(security scheme)': '授權碼',
-  'Binary message, {length} bytes(playground)': '二進位訊息，{length} 位元組',
-  "Browsers can't send {scheme} with WebSocket connections.(playground)":
-    '瀏覽器無法在 WebSocket 連線中傳送 {scheme}。',
   'Channel(bindings)': '頻道',
   'Channel(channel address)': '頻道',
   'Check the URL, and whether the server accepts connections from this site.(playground)':
@@ -269,11 +266,15 @@ const translations = {
   'Discovery URL(security scheme)': '探索 URL',
   'Documentation(external documentation)': '文件',
   "Doesn't match the schema(playground)": '不符合 Schema',
+  'Encoding(playground)': '編碼',
   'Example(message example)': '範例',
   'Handshake Headers(operation page)': '交握標頭',
   'Headers(message example)': '標頭',
+  'Hex(playground)': '十六進位',
   'Implicit(security scheme)': '隱含',
+  'Invalid Base64(playground)': '無效的 Base64',
   'Invalid JSON(playground)': '無效的 JSON',
+  'Invalid hex(playground)': '無效的十六進位',
   'Its value is at {location} of messages.(operation page)': '其值位於訊息的 {location}。',
   'Matches the schema(playground)': '符合 Schema',
   'Message type(playground)': '訊息類型',
@@ -303,6 +304,9 @@ const translations = {
   'Server(channel address)': '伺服器',
   'Subject(channel address)': '主旨',
   'Symmetric encryption(security scheme)': '對稱加密',
+  'Text(playground)': '文字',
+  "The playground can't send {scheme}.(playground)": '無法在此傳送 {scheme}。',
+  'This connection only receives messages.(playground)': '此連線只能接收訊息。',
   'To connect to the server(operation page)': '連線至伺服器時',
   'To perform the operation(operation page)': '執行此操作時',
   'Token URL(security scheme)': '權杖 URL',
@@ -312,6 +316,7 @@ const translations = {
   'Write a message to send(playground)': '輸入要傳送的訊息',
   'You send these messages to {app}(message direction)': '你向 {app} 傳送這些訊息',
   '{app} sends these messages to you(message direction)': '{app} 向你傳送這些訊息',
+  '{length} bytes(playground)': '{length} 位元組',
 
   // @fumadocs/story
   '1 item(story arguments form)': '1 項',

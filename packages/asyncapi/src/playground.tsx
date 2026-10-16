@@ -9,10 +9,17 @@ import {
 } from 'react';
 import { type DataEngineListener, type Stf, useStf } from '@fumari/stf';
 import { dereference, type JsonSchema, matches } from '@fumadocs/json-schema';
-import { type OperationMessage, useChannelMessages, useOperation } from '@/operation';
-import type { ServerObject, WsChannelBinding } from '@/types';
+import { EventSourceParserStream } from 'eventsource-parser/stream';
+import {
+  type OperationMessage,
+  useChannelMessages,
+  useOperation,
+  useOperationSecurity,
+} from '@/operation';
+import type { SecuritySchemeObject, ServerObject, WsChannelBinding } from '@/types';
+import { useRenderContext } from '@/utils/create-page';
 import { useServer } from '@/utils/use-server';
-import { fillVariables, getUrlParts } from '@/utils/server-url';
+import { getUrlParts } from '@/utils/server-url';
 
 export type ConnectionStatus = 'closed' | 'connecting' | 'open';
 
@@ -24,8 +31,8 @@ export interface LogEntry {
   time: number;
   /** the text of messages, the URL when opened, the reason when closed, the error */
   data?: string;
-  /** the size of binary messages in bytes */
-  bytes?: number;
+  /** the data of binary messages */
+  binary?: ArrayBuffer;
   /** the close code */
   code?: number;
   /** the documented message it is */
@@ -38,20 +45,113 @@ export type PlaygroundValues = {
   parameters: Record<string, string>;
   /** the query of connection URL, including API keys */
   query: Record<string, unknown>;
+  /** values of the auth inputs, by security scheme id */
+  auth: Record<string, string | { username?: string; password?: string }>;
 };
 
 export interface Playground {
   /** the form of {@link PlaygroundValues} */
   stf: Stf;
-  /** the URL to connect with the values of form, `undefined` when the selected server isn't a WebSocket server */
+  /** the transport connecting to the selected server, `undefined` when none does */
+  transport?: PlaygroundTransport;
+  /** the URL to connect with the values of form, `undefined` without a transport */
   url?: string;
   status: ConnectionStatus;
   connect: () => void;
   disconnect: () => void;
-  /** send a message, with the documented message it is */
-  send: (data: string, message?: OperationMessage) => void;
+  /** send a message, with the documented message it is. Absent until connected, and when the connection can only receive */
+  send?: (data: string | ArrayBuffer, message?: OperationMessage) => void;
   log: LogEntry[];
   clearLog: () => void;
+}
+
+export interface PlaygroundTransport {
+  /** security schemes it can apply besides API keys in the query, they become inputs of the connection panel */
+  auth?: (scheme: SecuritySchemeObject) => boolean;
+  connect: (target: ConnectTarget, events: TransportEvents) => TransportConnection;
+}
+
+export interface ConnectTarget {
+  /** server URL, address and query, for URL-based protocols */
+  url: string;
+  server: ServerObject;
+  /** the channel address with its parameters */
+  address: string;
+  query: Record<string, unknown>;
+  /** values of the auth inputs, for the schemes accepted by `auth` */
+  auth: {
+    scheme: SecuritySchemeObject;
+    /** `{ username, password }` for `userPassword` and HTTP basic */
+    value: string | { username: string; password: string };
+  }[];
+}
+
+/** `close` and `error` end the connection */
+export interface TransportEvents {
+  open: () => void;
+  message: (data: string | ArrayBuffer) => void;
+  close: (code?: number, reason?: string) => void;
+  error: (message?: string) => void;
+}
+
+export interface TransportConnection {
+  /** absent when it can only receive, like Server-Sent Events */
+  send?: (data: string | ArrayBuffer) => void;
+  close: () => void;
+}
+
+const wsTransport: PlaygroundTransport = {
+  connect({ url }, events) {
+    const socket = new WebSocket(url);
+    socket.binaryType = 'arraybuffer';
+    socket.onopen = events.open;
+    socket.onmessage = (event: MessageEvent<string | ArrayBuffer>) => events.message(event.data);
+    // errors are followed by closing, browsers don't tell more about them
+    socket.onclose = (event) => events.close(event.code, event.reason);
+
+    return {
+      send: (data) => socket.send(data),
+      close: () => socket.close(1000),
+    };
+  },
+};
+
+/** Server-Sent Events over `fetch`, for `http`/`https`; headers carry API keys and HTTP auth */
+export const sseTransport: PlaygroundTransport = {
+  auth: (scheme) =>
+    scheme.type === 'httpApiKey'
+      ? scheme.in === 'header'
+      : scheme.type === 'http' && /^(?:basic|bearer)$/i.test(scheme.scheme ?? ''),
+  connect({ url, auth }, events) {
+    const headers = new Headers({ Accept: 'text/event-stream' });
+    for (const { scheme, value } of auth) {
+      if (typeof value === 'object')
+        headers.set('Authorization', `Basic ${btoa(`${value.username}:${value.password}`)}`);
+      else if (scheme.type === 'http') headers.set('Authorization', `Bearer ${value}`);
+      else headers.set(scheme.name!, value);
+    }
+
+    const controller = new AbortController();
+    fetch(url, { headers, signal: controller.signal })
+      .then(async (res) => {
+        if (!res.ok || !res.body) return events.error(`${res.status} ${res.statusText}`);
+        events.open();
+        await res.body
+          .pipeThrough(new TextDecoderStream())
+          .pipeThrough(new EventSourceParserStream())
+          .pipeTo(new WritableStream({ write: (event) => events.message(event.data) }));
+        events.close();
+      })
+      // it couldn't connect, or the stream broke
+      .catch(() => events.close());
+
+    return { close: () => controller.abort() };
+  },
+};
+
+interface Session {
+  open: boolean;
+  connection?: TransportConnection;
 }
 
 /** older entries are dropped, a busy channel can send many messages */
@@ -83,18 +183,23 @@ function identifyMessage(data: string, messages: OperationMessage[]): OperationM
   return found;
 }
 
+/** parameters without values stay as `{name}` */
+function fillParameters(address: string, values: Record<string, string>, encode: boolean): string {
+  return address.replace(/\{([^}]+)\}/g, (match, name: string) => {
+    const value = values[name];
+    if (!value) return match;
+    return encode ? encodeURIComponent(value) : value;
+  });
+}
+
 function getConnectionUrl(
-  server: ServerObject | undefined,
+  server: ServerObject,
   variables: Record<string, string>,
   address: string,
   values: PlaygroundValues,
-): string | undefined {
-  if (server?.protocol !== 'ws' && server?.protocol !== 'wss') return;
+): string {
   // split as the URL is displayed, parameters are filled after
   const [base, path] = getUrlParts(server, variables, address);
-  const parameters: Record<string, string> = {};
-  for (const [key, value] of Object.entries(values.parameters))
-    if (value) parameters[key] = encodeURIComponent(value);
   const query = new URLSearchParams();
   for (const [key, value] of Object.entries(values.query)) {
     // arrays repeat their key, objects are JSON
@@ -104,20 +209,32 @@ function getConnectionUrl(
     }
   }
 
-  const url = base + fillVariables(path, parameters);
+  const url = base + fillParameters(path, values.parameters, true);
   return query.size > 0 ? `${url}?${query}` : url;
 }
 
 /**
- * A WebSocket session of the channel of operation, under `<OperationProvider />`.
+ * A session on the channel of operation, under `<OperationProvider />`.
+ *
+ * It connects with the transport of the server's protocol: from `transports`, the page's `playground.transports`, then the built-in one of `ws` and `wss`.
  */
-export function usePlayground(): Playground {
+export function usePlayground({
+  transports,
+}: { transports?: Record<string, PlaygroundTransport> } = {}): Playground {
   const { parameters, channel } = useOperation();
   const channelMessages = useChannelMessages();
+  const security = useOperationSecurity();
   const { servers, server } = useServer();
+  const pageTransports = useRenderContext().playground?.transports;
+  const schema = server ? servers[server.id] : undefined;
+  const protocol = schema?.protocol ?? '';
+  const transport =
+    transports?.[protocol] ??
+    pageTransports?.[protocol] ??
+    (protocol === 'ws' || protocol === 'wss' ? wsTransport : undefined);
   const stf = useStf({
     defaultValues: (): PlaygroundValues => {
-      const out: PlaygroundValues = { parameters: {}, query: {} };
+      const out: PlaygroundValues = { parameters: {}, query: {}, auth: {} };
       for (const { name, parameter } of parameters) {
         const value = parameter.default ?? parameter.examples?.[0] ?? parameter.enum?.[0];
         if (value !== undefined) out.parameters[name] = value;
@@ -143,8 +260,9 @@ export function usePlayground(): Playground {
   });
   const engine = stf.dataEngine;
   const [status, setStatus] = useState<ConnectionStatus>('closed');
+  const [canSend, setCanSend] = useState(false);
   const [log, setLog] = useState<LogEntry[]>([]);
-  const socketRef = useRef<WebSocket | null>(null);
+  const sessionRef = useRef<Session | null>(null);
   const nextId = useRef(0);
   const subscribe = useCallback(
     (onChange: () => void) => {
@@ -155,10 +273,10 @@ export function usePlayground(): Playground {
     [engine],
   );
   const getUrl = () =>
-    server
+    schema && transport
       ? getConnectionUrl(
-          servers[server.id],
-          server.variables,
+          schema,
+          server!.variables,
           channel.address ?? '',
           engine.getData() as PlaygroundValues,
         )
@@ -171,72 +289,105 @@ export function usePlayground(): Playground {
   }
 
   function disconnect() {
-    const socket = socketRef.current;
-    if (!socket) return;
-    // the session ends now, events of the closing socket are ignored
-    socket.onopen = socket.onmessage = socket.onclose = null;
-    if (socket.readyState === WebSocket.OPEN) append({ type: 'closed', code: 1000 });
-    socket.close(1000);
-    socketRef.current = null;
+    const session = sessionRef.current;
+    if (!session) return;
+    // the session ends now, events of the closing connection are ignored
+    sessionRef.current = null;
     setStatus('closed');
+    if (session.open) append({ type: 'closed' });
+    session.connection?.close();
   }
 
   // a session belongs to its URL, it ends when the URL changes and with the page
   const endSession = useEffectEvent(disconnect);
   useEffect(() => () => endSession(), [url]);
 
+  function send(data: string | ArrayBuffer, message?: OperationMessage) {
+    const session = sessionRef.current;
+    if (!session?.open || !session.connection?.send) return;
+    session.connection.send(data);
+    append(
+      typeof data === 'string'
+        ? { type: 'sent', data, message }
+        : { type: 'sent', binary: data, message },
+    );
+  }
+
   return {
     stf,
+    transport,
     url,
     status,
     connect() {
-      if (!url || socketRef.current) return;
-      let socket: WebSocket;
-      try {
-        socket = new WebSocket(url);
-      } catch (e) {
-        append({ type: 'error', data: e instanceof Error ? e.message : String(e) });
-        return;
+      if (!schema || !transport || !url || sessionRef.current) return;
+      const values = engine.getData() as PlaygroundValues;
+      const auth: ConnectTarget['auth'] = [];
+      const added = new Set<string>();
+      for (const { id, scheme } of [...security.server, ...security.operation]) {
+        const value = values.auth[id];
+        // the server and operation can share schemes
+        if (!value || added.has(id) || !transport.auth?.(scheme)) continue;
+        added.add(id);
+        auth.push({
+          scheme,
+          value: typeof value === 'string' ? value : { username: '', password: '', ...value },
+        });
       }
 
-      let opened = false;
-      socket.binaryType = 'arraybuffer';
-      socketRef.current = socket;
-      setStatus('connecting');
-      socket.onopen = () => {
-        opened = true;
-        setStatus('open');
-        append({ type: 'opened', data: url });
-      };
-      socket.onmessage = (event: MessageEvent<string | ArrayBuffer>) => {
-        if (typeof event.data === 'string') {
-          append({
-            type: 'received',
-            data: event.data,
-            message: identifyMessage(event.data, channelMessages.incoming),
-          });
-        } else {
-          append({ type: 'received', bytes: event.data.byteLength });
-        }
-      };
-      // errors are followed by closing, browsers don't tell more about them
-      socket.onclose = (event) => {
-        socketRef.current = null;
+      const session: Session = { open: false };
+      function end(entry: Omit<LogEntry, 'id' | 'time'>) {
+        if (sessionRef.current !== session) return;
+        sessionRef.current = null;
         setStatus('closed');
-        append(
-          opened
-            ? { type: 'closed', code: event.code, data: event.reason }
-            : { type: 'error', code: event.code },
+        append(entry);
+      }
+
+      sessionRef.current = session;
+      setStatus('connecting');
+      try {
+        session.connection = transport.connect(
+          {
+            url,
+            server: schema,
+            address: fillParameters(channel.address ?? '', values.parameters, false),
+            query: values.query,
+            auth,
+          },
+          {
+            open() {
+              if (sessionRef.current !== session) return;
+              session.open = true;
+              setStatus('open');
+              append({ type: 'opened', data: url });
+            },
+            message(data) {
+              if (sessionRef.current !== session) return;
+              append(
+                typeof data === 'string'
+                  ? {
+                      type: 'received',
+                      data,
+                      message: identifyMessage(data, channelMessages.incoming),
+                    }
+                  : { type: 'received', binary: data },
+              );
+            },
+            // closing before it opens is failing to connect
+            close: (code, reason) =>
+              end(session.open ? { type: 'closed', code, data: reason } : { type: 'error', code }),
+            error(message) {
+              end({ type: 'error', data: message });
+              session.connection?.close();
+            },
+          },
         );
-      };
+        setCanSend(session.connection.send !== undefined);
+      } catch (e) {
+        end({ type: 'error', data: e instanceof Error ? e.message : String(e) });
+      }
     },
     disconnect,
-    send(data, message) {
-      const socket = socketRef.current;
-      if (!socket || socket.readyState !== WebSocket.OPEN) return;
-      socket.send(data);
-      append({ type: 'sent', data, message });
-    },
+    send: status === 'open' && canSend ? send : undefined,
     log,
     clearLog() {
       setLog([]);

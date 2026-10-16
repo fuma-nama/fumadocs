@@ -58,24 +58,87 @@ AsyncAPI describes an application with `send` and `receive` actions. Pages flip 
 
 ### Playground
 
-Operations on WebSocket servers (`ws` and `wss`) can be tried in a playground: readers connect with the address parameters, query and API keys, send messages from their examples, and see the messages they receive.
+Operations can be tried in a playground: readers connect with the address parameters, query and credentials, send messages from their examples as text, hex or Base64, and see the messages they receive.
+
+A transport connects to the servers of each protocol, WebSocket (`ws` and `wss`) is built in.
+
+```tsx title="components/api-page.tsx"
+'use client';
+import { createAsyncAPIPage } from '@fumadocs/asyncapi/ui';
+import { sseTransport } from '@fumadocs/asyncapi/playground';
+
+export const AsyncAPIPage = createAsyncAPIPage({
+  playground: {
+    // by the protocol of servers
+    transports: { http: sseTransport, https: sseTransport },
+    // set to `false` to disable the playground
+    enabled: true,
+  },
+});
+```
 
 <Callout title="Browser limits">
   Browsers can't send headers or cookies of other sites with WebSocket connections, only credentials
   in the query are supported. Pages served over HTTPS can only connect to `wss` servers.
 </Callout>
 
+#### Server-Sent Events
+
+`sseTransport` receives the events of `http` and `https` servers with `fetch`, readers can't send messages on it.
+
+- API keys are sent in headers or the query.
+- HTTP bearer and basic credentials are sent in the `Authorization` header.
+
+It is opt-in, since webhooks are on `http` servers too.
+
+#### Custom Transports
+
+A transport connects to a server and reports what happens through `events`. For example, MQTT over WebSocket with [MQTT.js](https://github.com/mqttjs/MQTT.js):
+
+```ts title="lib/mqtt-transport.ts"
+import mqtt from 'mqtt';
+import type { PlaygroundTransport } from '@fumadocs/asyncapi/playground';
+
+export const mqttTransport: PlaygroundTransport = {
+  // the security schemes it applies, they become inputs of the playground
+  auth: (scheme) => scheme.type === 'userPassword',
+  connect({ url, address, auth }, events) {
+    const credentials = auth[0]?.value;
+    // the server is the WebSocket listener of broker, like `localhost:9001`
+    const client = mqtt.connect(`ws://${new URL(url).host}`, {
+      ...(typeof credentials === 'object' && credentials),
+      reconnectPeriod: 0,
+    });
+
+    client.on('connect', () =>
+      client.subscribe(address, (error) => (error ? events.error(error.message) : events.open())),
+    );
+    client.on('message', (_topic, payload) => events.message(payload.toString()));
+    client.on('error', (error) => events.error(error.message));
+    client.on('close', () => events.close());
+
+    return {
+      send: (data) =>
+        client.publish(address, typeof data === 'string' ? data : (new Uint8Array(data) as Buffer)),
+      close: () => client.end(),
+    };
+  },
+};
+```
+
 ```tsx title="components/api-page.tsx"
 'use client';
 import { createAsyncAPIPage } from '@fumadocs/asyncapi/ui';
+import { mqttTransport } from '@/lib/mqtt-transport';
 
 export const AsyncAPIPage = createAsyncAPIPage({
   playground: {
-    // disable the playground
-    enabled: false,
+    transports: { mqtt: mqttTransport },
   },
 });
 ```
+
+See [`PlaygroundTransport`](/docs/integrations/asyncapi/headless#transports) for the details.
 
 ### Schema UI
 
@@ -212,7 +275,7 @@ npx @fumadocs/cli add asyncapi/operation
 
 ### Playground
 
-The WebSocket playground, built on [`usePlayground()`](/docs/integrations/asyncapi/headless#playground).
+The playground, built on [`usePlayground()`](/docs/integrations/asyncapi/headless#playground).
 
 ```npm
 npx @fumadocs/cli add asyncapi/playground
