@@ -4,7 +4,7 @@ export default defineConfig({
   format: 'esm',
   target: 'es2023',
   platform: 'node',
-  entry: ['./src/index.ts', './src/hono.ts', './src/cli.ts'],
+  entry: ['./src/index.ts', './src/hono.ts', './src/cli.ts', './src/worker.ts'],
   fixedExtension: false,
   minify: true,
   sourcemap: false,

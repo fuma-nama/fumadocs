@@ -1,7 +1,6 @@
 import { createHash } from 'node:crypto';
 import { readFile } from 'node:fs/promises';
 import path from 'node:path';
-import { prerender } from 'react-dom/static';
 import {
   loader,
   type MetaData,
@@ -9,28 +8,27 @@ import {
   type Source,
   type VirtualFile,
 } from 'fumadocs-core/source';
-import { deserializePageTree } from 'fumadocs-core/source/client';
 import { createFromSource } from 'fumadocs-core/search/server';
 import type * as PageTree from 'fumadocs-core/page-tree';
 import type { StructuredData } from 'fumadocs-core/mdx-plugins/remark-structure';
 import { createOpenAPI, type OpenAPIPageData, openapiPlugin } from 'fumadocs-openapi/server';
 import type { Document, GeneratedPageProps, ServerObject } from 'fumadocs-openapi';
-import { App, normalizePathname } from './app';
 import type { OverviewPageData, PageData, SiteData } from './app/types';
+import type { RenderInput } from './render';
 import type { Options } from './index';
 
 /** the client bundle built by Vite */
 export const clientDir = new URL('./client/', import.meta.url);
 export const assetsPath = '_fumadocs';
 
-export interface Site {
-  /** generated files, keyed by their path from the base URL */
+export interface SiteBuild {
+  /** generated files by their path from the base URL: the site data, documents and search index */
   files: Map<string, string>;
   /** URLs of the pages */
   urls: string[];
   /** origins of the absolute URLs in `servers` of the documents */
-  getOrigins: () => string[];
-  render: (pathname: string) => Promise<{ status: 200 | 404; html: string }>;
+  origins: string[];
+  renderInput: RenderInput;
 }
 
 type OverviewInfo = Omit<OverviewPageData, 'cards'> & { cards?: OverviewPageData['cards'] };
@@ -51,14 +49,14 @@ export function normalizeBaseUrl(baseUrl = '/'): string {
   return out;
 }
 
-export async function createSite({
+export async function buildSite({
   input,
   per = 'operation',
   groupBy,
   title,
   proxyUrl,
   ...options
-}: Options): Promise<Site> {
+}: Options): Promise<SiteBuild> {
   const base = normalizeBaseUrl(options.baseUrl);
   const record = Array.isArray(input) ? Object.fromEntries(input.map((v) => [v, v])) : input;
   const ids = Object.keys(record);
@@ -88,6 +86,7 @@ export async function createSite({
     (documents.length === 1 ? documents[0].bundled.info?.title : undefined) ??
     'API Reference';
   const files: SiteFile[] = [];
+  const origins = new Set<string>();
   for (const { dir, bundled, files: docFiles } of documents) {
     const { info } = bundled;
     const metaPath = PathUtils.joinPath(dir, 'meta.json');
@@ -119,6 +118,7 @@ export async function createSite({
     }
 
     files.push(...docFiles);
+    for (const server of bundled.servers ?? []) addOrigins(origins, server);
   }
 
   if (documents.length > 1) {
@@ -150,10 +150,10 @@ export async function createSite({
   }
 
   const documentUrls: Record<string, string> = {};
-  const bundledByName = new Map<string, Document>();
+  const documentJSON: Record<string, string> = {};
   for (const doc of documents) {
-    documentUrls[doc.name] = emit(doc.name, JSON.stringify(doc.bundled));
-    bundledByName.set(doc.name, doc.bundled);
+    documentJSON[doc.name] = JSON.stringify(doc.bundled);
+    documentUrls[doc.name] = emit(doc.name, documentJSON[doc.name]);
   }
 
   // keys are decoded, like the pathnames they are looked up with
@@ -194,50 +194,17 @@ export async function createSite({
     styles: (entry.css ?? []).map(assetUrl),
     proxyUrl,
   };
-  const siteUrl = emit('site', JSON.stringify(site));
-  const deserializedTree = deserializePageTree(structuredClone(site.tree));
-  const router = { push() {}, refresh() {} };
-  let origins: string[] | undefined;
+  const siteJSON = JSON.stringify(site);
 
   return {
     files: outFiles,
     urls: Object.keys(pages),
-    getOrigins() {
-      if (origins) return origins;
-
-      const set = new Set<string>();
-      for (const doc of documents) {
-        for (const server of doc.bundled.servers ?? []) {
-          for (const url of expandServerUrl(server)) {
-            const origin = URL.parse(url)?.origin;
-            if (origin && origin !== 'null') set.add(origin);
-          }
-        }
-      }
-      return (origins = Array.from(set));
-    },
-    async render(pathname) {
-      pathname = normalizePathname(pathname);
-      const page = site.pages[pathname];
-      const preloads = [siteUrl];
-      if (page?.type === 'api') preloads.push(site.documents[page.props.document]);
-
-      const { prelude } = await prerender(
-        <App
-          site={site}
-          tree={deserializedTree}
-          pathname={pathname}
-          router={router}
-          getDocument={(name) => bundledByName.get(name)!}
-          preloads={preloads}
-        />,
-        {
-          bootstrapModules: [assetUrl(entry.file)],
-          bootstrapScriptContent: `globalThis.__fumadocs=${JSON.stringify(siteUrl).replaceAll('<', '\\u003c')}`,
-        },
-      );
-
-      return { status: page ? 200 : 404, html: await new Response(prelude).text() };
+    origins: Array.from(origins),
+    renderInput: {
+      site: siteJSON,
+      siteUrl: emit('site', siteJSON),
+      documents: documentJSON,
+      entryUrl: assetUrl(entry.file),
     },
   };
 }
@@ -322,9 +289,9 @@ function uniqueName(id: string, names: Set<string>): string {
   return out;
 }
 
-/** the server URL with each combination of the values of variables it uses */
-function expandServerUrl({ url, variables = {} }: ServerObject): string[] {
-  if (!url) return [];
+/** add the origin of a server URL, with each combination of the values of variables it uses */
+function addOrigins(origins: Set<string>, { url, variables = {} }: ServerObject) {
+  if (!url) return;
 
   let urls = [url];
   for (const [name, variable] of Object.entries(variables)) {
@@ -337,5 +304,9 @@ function expandServerUrl({ url, variables = {} }: ServerObject): string[] {
     }
     urls = next;
   }
-  return urls;
+
+  for (const item of urls) {
+    const origin = URL.parse(item)?.origin;
+    if (origin && origin !== 'null') origins.add(origin);
+  }
 }
