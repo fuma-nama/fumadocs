@@ -14,6 +14,7 @@ import type { SchemaUIOptions } from 'shared-api/components/schema';
 import type { AsyncAPIObject, OperationObject, ServerObject } from '@/types';
 import type { DereferencedDocument } from '@/utils/document/dereference';
 import { dereferenceBundledDocument } from '@/utils/document/dereference';
+import type { CodeUsageGeneratorRegistry } from '@/codegen';
 import { dereference, type JsonSchema } from '@fumadocs/json-schema';
 import Slugger from 'github-slugger';
 import { getOperationDisplayName } from './schema';
@@ -67,6 +68,8 @@ export interface AsyncAPIRenderOptions {
         /** the server, channel address and direction of messages, with the playground */
         connection: ReactNode;
         description: ReactNode;
+        /** code samples for the selected server */
+        usage: ReactNode;
         authSchemes: ReactNode;
         parameters: ReactNode;
         /** the messages with their payload, headers and examples */
@@ -97,6 +100,8 @@ export interface AsyncAPIRenderOptions {
     render?: (options: SchemaUIOptions, ctx: RenderContext) => ReactNode;
     showExample?: boolean;
   };
+  /** generators of code samples for all operations, defaults to JavaScript and Python */
+  codeUsages?: CodeUsageGeneratorRegistry;
   /**
    * Generate TypeScript definitions of message payloads and headers, readers can copy them.
    *
@@ -195,6 +200,7 @@ export function AsyncAPIProvider({
   content,
   playground,
   schemaUI,
+  codeUsages,
   generateTypeScriptDefinitions,
   components,
   children,
@@ -220,10 +226,20 @@ export function AsyncAPIProvider({
       content,
       playground,
       schemaUI,
+      codeUsages,
       generateTypeScriptDefinitions,
       SchemaUI,
     }),
-    [shiki, shikiOptions, content, playground, schemaUI, generateTypeScriptDefinitions, SchemaUI],
+    [
+      shiki,
+      shikiOptions,
+      content,
+      playground,
+      schemaUI,
+      codeUsages,
+      generateTypeScriptDefinitions,
+      SchemaUI,
+    ],
   );
 
   return (

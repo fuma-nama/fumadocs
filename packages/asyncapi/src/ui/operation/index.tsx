@@ -14,6 +14,7 @@ import { ParametersSection } from './parameters';
 import { MessagesSection } from './messages';
 import { ReplySection } from './reply';
 import { ExternalDocs } from './section';
+import { CodeUsages } from './usage';
 
 export function Operation({ id, ...props }: PageOperationProps) {
   return (
@@ -59,6 +60,7 @@ function OperationContent({ showTitle, showDescription, anchor }: Omit<PageOpera
           <ExternalDocs docs={operation.externalDocs} />
         </div>
       ) : null,
+    usage: <CodeUsages />,
     authSchemes: <AuthSection headingLevel={headingLevel} />,
     parameters: <ParametersSection headingLevel={headingLevel} />,
     messages: messages.length > 0 && (
@@ -82,6 +84,7 @@ function OperationContent({ showTitle, showDescription, anchor }: Omit<PageOpera
         {slots.header}
         {slots.connection}
         {slots.description}
+        {slots.usage}
         {slots.authSchemes}
         {slots.parameters}
         {slots.messages}

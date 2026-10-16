@@ -94,6 +94,8 @@ export interface OperationObject extends SpecificationExtensions {
   externalDocs?: ExternalDocumentationObject | ReferenceObject;
   bindings?: OperationBindingsObject | ReferenceObject;
   traits?: Array<OperationTraitObject | ReferenceObject>;
+  /** code samples of the operation, `source: false` removes a generated one of the language */
+  'x-codeSamples'?: { lang: string; label?: string; source: string | false }[];
 }
 
 export interface OperationTraitObject extends SpecificationExtensions {

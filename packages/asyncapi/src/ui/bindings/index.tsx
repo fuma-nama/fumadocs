@@ -6,32 +6,12 @@ import { isPlainObject } from 'shared-api/utils/is-plain-object';
 import { cn } from '@/utils/cn';
 import { useOperation } from '@/operation';
 import { useServer } from '@/utils/use-server';
+import { getBindingKey } from '@/utils/server-url';
 import { SectionHeader } from '@/ui/operation/section';
 import { getProtocolBinding } from './protocols';
 import type { BindingComponent } from './shared';
 
 type Bindings = Record<string, unknown>;
-
-/** the binding key of a protocol, secure variants share the bindings */
-function getBindingKey(protocol: string): string {
-  switch (protocol) {
-    case 'wss':
-      return 'ws';
-    case 'https':
-      return 'http';
-    case 'kafka-secure':
-      return 'kafka';
-    case 'mqtts':
-    case 'secure-mqtt':
-      return 'mqtt';
-    case 'amqps':
-      return 'amqp';
-    case 'stomps':
-      return 'stomp';
-    default:
-      return protocol;
-  }
-}
 
 /** the bindings that apply to the selected server, specification extensions excluded */
 export function useBindings(bindings: unknown): Map<string, Bindings> {

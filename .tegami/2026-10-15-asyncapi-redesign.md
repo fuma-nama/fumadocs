@@ -13,6 +13,7 @@ packages:
 - Protocol details only show the bindings of the selected server, `x-*` bindings are hidden.
 - A WebSocket playground connects to channels, sends messages from their examples and identifies the received ones.
 - The playground edits address parameters in its URL and previews the URL to connect.
+- Code samples in JavaScript and Python for WebSocket, MQTT, Kafka, AMQP and NATS servers, and from `x-codeSamples` of operations.
 - Security schemes show OAuth 2.0 flows, scopes and SASL mechanisms.
 - Avro, Protobuf and RAML schemas are shown as they are.
 
@@ -43,5 +44,6 @@ packages:
 
 - Added the `playground` option of `createAsyncAPIPage()`, and `usePlayground()` from `@fumadocs/asyncapi/playground`.
 - Added the `generateTypeScriptDefinitions` option, payloads and headers can be copied as TypeScript types.
+- Added the `codeUsages` option and `slots.usage` of `renderOperationLayout`, with `createCodeUsageGeneratorRegistry()` and `registerDefaultCodeUsages()` from `@fumadocs/asyncapi/ui`.
 - Added `getText()` to the data of AsyncAPI pages, their operations in Markdown for LLMs.
 - Added `received` to `OperationMessage`, whether readers receive the message.

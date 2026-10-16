@@ -253,6 +253,7 @@ const translations = {
   'Clear(playground)': '清除',
   'Client certificate (X.509)(security scheme)': '用戶端憑證 (X.509)',
   'Client credentials(security scheme)': '用戶端認證',
+  'Code Sample(operation page)': '程式碼範例',
   'Connect to see messages.(playground)': '連線後即可查看訊息。',
   'Connect to send messages.(playground)': '連線後即可傳送訊息。',
   'Connect(playground)': '連線',

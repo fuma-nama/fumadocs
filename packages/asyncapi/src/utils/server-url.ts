@@ -34,6 +34,27 @@ export function isUrlProtocol(protocol: string): boolean {
   return urlProtocols.has(protocol);
 }
 
+/** the binding key of a protocol, secure variants share the bindings */
+export function getBindingKey(protocol: string): string {
+  switch (protocol) {
+    case 'wss':
+      return 'ws';
+    case 'https':
+      return 'http';
+    case 'kafka-secure':
+      return 'kafka';
+    case 'mqtts':
+    case 'secure-mqtt':
+      return 'mqtt';
+    case 'amqps':
+      return 'amqp';
+    case 'stomps':
+      return 'stomp';
+    default:
+      return protocol;
+  }
+}
+
 /**
  * Split the URL to a channel of URL protocols into the server part and the channel address as its path.
  *

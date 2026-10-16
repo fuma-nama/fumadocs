@@ -253,6 +253,7 @@ const translations = {
   'Clear(playground)': '清空',
   'Client certificate (X.509)(security scheme)': '客户端证书 (X.509)',
   'Client credentials(security scheme)': '客户端凭据',
+  'Code Sample(operation page)': '代码示例',
   'Connect to see messages.(playground)': '连接后即可查看消息。',
   'Connect to send messages.(playground)': '连接后即可发送消息。',
   'Connect(playground)': '连接',

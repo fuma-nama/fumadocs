@@ -26,6 +26,7 @@ export const registry: Registry = {
       type: 'components',
       target: '<dir>/api/lib/*',
     },
+    'codegen.ts': { type: 'components', target: '<dir>/api/lib/codegen.ts' },
     'utils/cn.ts': { alias: '../../radix-ui/src/utils/cn' },
   },
   dependencies: {
