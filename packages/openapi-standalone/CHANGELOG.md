@@ -1,3 +1,9 @@
+## @fumadocs/openapi-standalone@0.1.1
+
+### Faster static builds
+
+- With at least 200 pages, `generateStatic()` renders them in worker threads, up to half the logical cores.
+
 ## @fumadocs/openapi-standalone@0.1.0
 
 ### New package: `@fumadocs/openapi-standalone`
