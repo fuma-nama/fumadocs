@@ -1,3 +1,19 @@
+## fumadocs-openapi@12.5.2
+
+### Generated files
+
+- `watch` of `generateFiles()` watches the files of record inputs, like `{ petstore: './petstore.yaml' }`.
+- Index cards with quotes in titles or descriptions generate valid MDX.
+- Generated pages keep backslashes in document IDs, like Windows paths.
+- `staticSource()` and `generateFiles()` are faster on large documents, `per: 'tag'` groups operations in one pass.
+
+### Playground details
+
+- The selected server is highlighted in the server list.
+- Server list items highlight on hover without a fade.
+- Edits of server variables no longer apply to the next selected server.
+- Boolean fields line up with the values of other fields.
+
 ## fumadocs-openapi@12.5.1
 
 ### Faster API pages and search indexes
