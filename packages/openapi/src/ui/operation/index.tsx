@@ -26,8 +26,8 @@ import { buttonVariants } from 'fumadocs-ui/components/ui/button';
 import { Check, ChevronRight, Copy, Plus, X } from 'lucide-react';
 import PlaygroundClient from '@/ui/playground/client';
 import { EndpointBar } from '@/ui/components/endpoint';
-import { Segmented, SegmentedList, SegmentedPanel } from '@/ui/components/segmented';
-import { DialogPopup } from '@/ui/components/dialog';
+import { Segmented, SegmentedList, SegmentedPanel } from 'shared-api/components/segmented';
+import { DialogPopup } from 'shared-api/components/dialog';
 
 export interface OperationProps extends PageOperationProps {
   headingLevel?: number;

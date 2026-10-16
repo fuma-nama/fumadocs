@@ -1,11 +1,6 @@
 'use client';
 import type { AnypointmqChannelBinding, AnypointmqMessageBinding } from '@/types/asyncapi-3';
-import {
-  createBinding,
-  DestinationChannelBinding,
-  HeadersMessageBinding,
-  joinBindingSummary,
-} from '../shared';
+import { createBinding, DestinationChannelBinding, HeadersMessageBinding } from '../shared';
 
 export const anypointmqBinding = createBinding({
   label: 'Anypoint MQ',
@@ -15,6 +10,4 @@ export const anypointmqBinding = createBinding({
   Message: ({ binding }: { binding: AnypointmqMessageBinding }) => (
     <HeadersMessageBinding binding={binding} />
   ),
-  getChannelSummary: (binding: AnypointmqChannelBinding) =>
-    joinBindingSummary(binding.destination, binding.destinationType),
 });

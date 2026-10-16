@@ -20,11 +20,12 @@ import {
 } from '@/utils/pages/builder';
 import type { AsyncAPIPageProps_Preloaded, AsyncAPIPageProps_Spec } from '@/utils/create-page';
 import { toStaticData } from '@/utils/pages/to-static-data';
+import { toMarkdown } from '@/utils/pages/to-markdown';
 import path from 'node:path';
 import type { StructuredData } from 'fumadocs-core/mdx-plugins/remark-structure';
 import type { TOCItemType } from 'fumadocs-core/toc';
 import { createAutoPreset, type SchemaToPagesOptions } from '@/utils/pages/preset-auto';
-import { ActionLabel } from '@/ui/components/badge';
+import { DirectionIcon } from '@/ui/components/direction';
 
 type SchemaRecord = Record<
   string,
@@ -61,6 +62,8 @@ export interface AsyncAPIServer {
 export interface AsyncAPIPageData extends PageData {
   getAsyncAPIPageProps: () => AsyncAPIPageProps_Spec;
   getSchema: () => { id: string; bundled: AsyncAPIObject };
+  /** the operations of page in Markdown, for LLMs */
+  getText: (type: 'raw' | 'processed') => Promise<string>;
   structuredData: StructuredData;
   toc: TOCItemType[];
   _asyncapi: InternalAsyncAPIMeta;
@@ -154,10 +157,12 @@ export function createAsyncAPI(options: AsyncAPIOptions = {}): AsyncAPIServer {
                 bundled: schema.bundled,
               };
             },
+            async getText() {
+              return toMarkdown(props, schema.bundled);
+            },
             ...toStaticData(props, schema.bundled),
             _asyncapi: {
               action: entry.type === 'operation' ? entry.item.action : undefined,
-              deprecated: entry.info.deprecated,
             },
           },
         };
@@ -260,8 +265,7 @@ export function createAsyncAPI(options: AsyncAPIOptions = {}): AsyncAPIServer {
 }
 
 export interface InternalAsyncAPIMeta {
-  action?: string;
-  deprecated?: boolean;
+  action?: 'send' | 'receive';
   preload?: string[];
 }
 
@@ -276,23 +280,14 @@ export function asyncapiPlugin(): LoaderPlugin {
         if (!file || file.format !== 'page') return node;
 
         const asyncapiData = (file.data as { _asyncapi?: InternalAsyncAPIMeta })._asyncapi;
-        if (!asyncapiData || typeof asyncapiData !== 'object') return node;
+        if (!asyncapiData?.action) return node;
 
-        if (asyncapiData.deprecated) {
-          node.name = <span className="fd-page-tree-item-name line-through">{node.name}</span>;
-        }
-
-        if (asyncapiData.action) {
-          node.name = (
-            <>
-              {node.name}{' '}
-              <ActionLabel className="ms-auto text-xs text-nowrap">
-                {asyncapiData.action}
-              </ActionLabel>
-            </>
-          );
-        }
-
+        node.name = (
+          <>
+            {node.name}{' '}
+            <DirectionIcon action={asyncapiData.action} className="ms-auto text-[0.6875rem]" />
+          </>
+        );
         return node;
       },
     },

@@ -1,13 +1,12 @@
 import type { AsyncAPIObject } from '@/types';
-import Slugger from 'github-slugger';
+import Slugger, { slug } from 'github-slugger';
 import type { TOCItemType } from 'fumadocs-core/toc';
 import type { StructuredData } from 'fumadocs-core/mdx-plugins';
 import type { GeneratedPageProps } from './builder';
 import { dereference } from '@fumadocs/json-schema';
-import { createMagicProxy } from '@scalar/json-magic/magic-proxy';
-import { getOperationDisplayName } from '../schema';
-
-const proxyCache = new WeakMap<AsyncAPIObject, AsyncAPIObject>();
+import { dereferenceBundledDocument } from '../document/dereference';
+import { getMessageDisplayName, getOperationDisplayName, getOperationMessages } from '../schema';
+import { applyMessageTraits, applyOperationTraits } from '../traits';
 
 export function toStaticData(
   page: GeneratedPageProps,
@@ -16,40 +15,43 @@ export function toStaticData(
   toc: TOCItemType[];
   structuredData: StructuredData;
 } {
-  // wrap in a magic proxy so that `dereferenceShallow` can resolve refs lazily
-  let proxied = proxyCache.get(doc);
-  if (!proxied) {
-    proxied = createMagicProxy(doc as never) as AsyncAPIObject;
-    proxyCache.set(doc, proxied);
-  }
+  const proxied = dereferenceBundledDocument(doc).dereferenced;
   const slugger = new Slugger();
   const toc: TOCItemType[] = [];
   const structuredData: StructuredData = { headings: [], contents: [] };
 
+  function content(text: string | undefined, heading: string | undefined) {
+    if (text) structuredData.contents.push({ content: text, heading });
+  }
+
   for (const item of page.operations ?? []) {
-    const operation = dereference(proxied.operations?.[item.id]);
-    if (!operation) continue;
+    const found = dereference(proxied.operations?.[item.id]);
+    if (!found) continue;
+    const operation = applyOperationTraits(found);
+    // anchors of an operation are under its heading when the page shows titles
+    let prefix = '';
+    let heading: string | undefined;
 
     if (page.showTitle) {
       const title = getOperationDisplayName(item.id, operation);
-      const id = slugger.slug(title);
+      heading = slugger.slug(title);
+      prefix = `${heading}.`;
 
-      toc.push({
-        depth: 2,
-        title,
-        url: `#${id}`,
-      });
-      structuredData.headings.push({
-        content: title,
-        id,
-      });
+      toc.push({ depth: 2, title, url: `#${heading}` });
+      structuredData.headings.push({ content: title, id: heading });
     }
 
-    if (operation.description) {
-      structuredData.contents.push({
-        content: operation.description,
-        heading: structuredData.headings.at(-1)?.id,
-      });
+    const channel = dereference(operation.channel);
+    content(operation.description, heading);
+    if (channel.description !== operation.description) content(channel.description, heading);
+
+    for (const { key, value } of getOperationMessages(operation.messages, channel)) {
+      const message = applyMessageTraits(dereference(value));
+      const id = `${prefix}messages.${slug(key)}`;
+
+      structuredData.headings.push({ content: getMessageDisplayName(key, message), id });
+      content(message.summary, id);
+      content(message.description, id);
     }
   }
 

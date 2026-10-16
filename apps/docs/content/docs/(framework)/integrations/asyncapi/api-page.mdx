@@ -18,7 +18,7 @@ export const AsyncAPIPage = createAsyncAPIPage({
 
 ### Custom Layout
 
-You can customize how operations and message examples are laid out.
+You can customize how the sections of operations are laid out.
 
 ```tsx title="components/api-page.tsx"
 'use client';
@@ -30,13 +30,49 @@ export const AsyncAPIPage = createAsyncAPIPage({
       return (
         <div className="flex flex-col gap-6">
           {slots.header}
+          {slots.connection}
           {slots.description}
-          {slots.channel}
           {slots.parameters}
           {slots.messages}
         </div>
       );
     },
+  },
+});
+```
+
+| Slot          | Renders                                                                   |
+| ------------- | ------------------------------------------------------------------------- |
+| `header`      | the title, on pages with several operations                               |
+| `connection`  | which way messages go, the server and channel address, and the playground |
+| `description` | the descriptions of operation and its channel, and external documentation |
+| `authSchemes` | security schemes of the server and operation                              |
+| `parameters`  | address parameters, and the query and headers of WebSocket connections    |
+| `messages`    | the messages, with their payload, headers, examples and correlation ID    |
+| `reply`       | the reply of a request                                                    |
+| `bindings`    | protocol details of the selected server                                   |
+
+### Direction of Messages
+
+AsyncAPI describes an application with `send` and `receive` actions. Pages flip them for readers, who talk to the application: `send` is shown as **Receive**, and `receive` as **Send**. The sidebar shows them as an arrow into or out of a phone.
+
+### Playground
+
+Operations on WebSocket servers (`ws` and `wss`) can be tried in a playground: readers connect with the address parameters, query and API keys, send messages from their examples, and see the messages they receive.
+
+<Callout title="Browser limits">
+  Browsers can't send headers or cookies of other sites with WebSocket connections, only credentials
+  in the query are supported. Pages served over HTTPS can only connect to `wss` servers.
+</Callout>
+
+```tsx title="components/api-page.tsx"
+'use client';
+import { createAsyncAPIPage } from '@fumadocs/asyncapi/ui';
+
+export const AsyncAPIPage = createAsyncAPIPage({
+  playground: {
+    // disable the playground
+    enabled: false,
   },
 });
 ```
@@ -57,6 +93,22 @@ export const AsyncAPIPage = createAsyncAPIPage({
       return ctx.SchemaUI(options);
     },
   },
+});
+```
+
+### TypeScript Definitions
+
+Payloads and headers have a button to copy their TypeScript definitions, generated with [`@fumari/json-schema-ts`](https://npmjs.com/package/@fumari/json-schema-ts).
+
+Like the schemas on pages, they leave out `readOnly` properties of messages readers send, and `writeOnly` properties of messages they receive.
+
+```tsx title="components/api-page.tsx"
+'use client';
+import { createAsyncAPIPage } from '@fumadocs/asyncapi/ui';
+
+export const AsyncAPIPage = createAsyncAPIPage({
+  // or `(schema, ctx) => string | undefined` to generate your own
+  generateTypeScriptDefinitions: false,
 });
 ```
 
@@ -81,11 +133,11 @@ export const translations = i18n
   .extend(asyncapiTranslations())
   .add({
     cn: {
-      displayName: 'Chinese'
+      displayName: 'Chinese',
       // [!code ++]
       'Messages(operation page)': '消息',
-      },
-  })
+    },
+  });
 ```
 
 See [Translations](/docs/ui/translations) for more details.
@@ -156,6 +208,14 @@ The UI of a single operation, including its channel, messages and bindings.
 
 ```npm
 npx @fumadocs/cli add asyncapi/operation
+```
+
+### Playground
+
+The WebSocket playground, built on [`usePlayground()`](/docs/integrations/asyncapi/headless#playground).
+
+```npm
+npx @fumadocs/cli add asyncapi/playground
 ```
 
 ```tsx title="components/api-page.tsx"

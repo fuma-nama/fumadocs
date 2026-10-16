@@ -7,16 +7,24 @@ import { bundle } from '@fumadocs/json-schema/bundle';
 export async function loadDocument(input: string | AsyncAPIObject): Promise<{
   bundled: AsyncAPIObject;
 }> {
+  let bundled: AsyncAPIObject;
   try {
-    const bundled = await bundle<AsyncAPIObject>(input);
-    if (!bundled.asyncapi) {
-      throw new Error('Missing required `asyncapi` field.');
-    }
-
-    return { bundled };
+    bundled = await bundle<AsyncAPIObject>(input);
   } catch (e) {
     throw new Error(`[AsyncAPI] Failed to resolve input: ${input}`, {
       cause: e,
     });
   }
+
+  const source = typeof input === 'string' ? ` (${input})` : '';
+  if (!bundled.asyncapi) {
+    throw new Error(`[AsyncAPI] Missing required \`asyncapi\` field${source}.`);
+  }
+  if (!String(bundled.asyncapi).startsWith('3.')) {
+    throw new Error(
+      `[AsyncAPI] AsyncAPI ${bundled.asyncapi} is not supported${source}, convert it to AsyncAPI 3 with \`npx @asyncapi/cli convert\`.`,
+    );
+  }
+
+  return { bundled };
 }

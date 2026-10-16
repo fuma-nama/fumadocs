@@ -9,7 +9,6 @@ interface BaseEntry {
   info: {
     title: string;
     description?: string;
-    deprecated?: boolean;
   };
 }
 

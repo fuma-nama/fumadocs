@@ -18,12 +18,21 @@ export const registry: Registry = {
       description: 'The UI of operations in AsyncAPI pages',
       entry: 'ui/operation/index.tsx',
     },
+    playground: {
+      title: 'WebSocket Playground',
+      description: 'The playground of WebSocket channels in AsyncAPI pages',
+      entry: 'ui/playground/index.tsx',
+    },
   },
   files: {
     'registry/page.tsx': { type: 'components', target: '<dir>/asyncapi/page.tsx' },
-    'ui/{components,operation,bindings}/**': { type: 'components', target: '<dir>/asyncapi/*' },
+    'ui/{components,operation,bindings,playground}/**': {
+      type: 'components',
+      target: '<dir>/asyncapi/*',
+    },
     // only available as the `AsyncAPI` namespace of package
     '{types.ts,types/asyncapi-3.ts}': { type: 'lib', target: '<dir>/asyncapi/*' },
+    'utils/server-url.ts': { type: 'lib', target: '<dir>/asyncapi/*' },
     'utils/cn.ts': { alias: '../../radix-ui/src/utils/cn' },
   },
   dependencies: {

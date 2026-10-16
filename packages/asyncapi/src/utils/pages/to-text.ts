@@ -50,7 +50,6 @@ export function toText(
   };
   if (entry.type === 'operation') {
     meta.action = entry.item.action;
-    meta.deprecated = entry.info.deprecated;
   }
 
   const data = toStaticData(pageProps, doc);
@@ -97,7 +96,7 @@ export function generateDocument(
     out.push(`{/* ${commentContent} */}`);
   }
 
-  if (imports) {
+  if (imports && imports.length > 0) {
     out.push(
       imports
         .map((item) => `import { ${item.names.join(', ')} } from ${doubleQuote(item.from)};`)

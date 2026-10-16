@@ -6,34 +6,13 @@ import type {
 } from '@/types/asyncapi-3';
 import {
   createBinding,
-  hasBindingFields,
   BindingFields,
-  BindingEmpty,
   BindingGroup,
   BindingFieldRow,
   BindingScalarValue,
-  joinBindingSummary,
 } from '../shared';
 
-function getIbmmqServerSummary(binding: IbmmqServerBinding): string | undefined {
-  return joinBindingSummary(binding.groupId, binding.ccdtQueueManagerName);
-}
-
-function getIbmmqChannelSummary(binding: IbmmqChannelBinding): string | undefined {
-  return joinBindingSummary(
-    binding.destinationType,
-    binding.queue?.objectName,
-    binding.topic?.string,
-  );
-}
-
-function getIbmmqMessageSummary(binding: IbmmqMessageBinding): string | undefined {
-  return binding.type;
-}
-
 function IbmmqServerBinding({ binding }: { binding: IbmmqServerBinding }) {
-  if (!hasBindingFields(binding)) return <BindingEmpty />;
-
   return (
     <BindingFields>
       {binding.groupId && (
@@ -71,8 +50,6 @@ function IbmmqServerBinding({ binding }: { binding: IbmmqServerBinding }) {
 }
 
 function IbmmqChannelBinding({ binding }: { binding: IbmmqChannelBinding }) {
-  if (!hasBindingFields(binding)) return <BindingEmpty />;
-
   return (
     <BindingFields>
       {binding.destinationType && (
@@ -156,8 +133,6 @@ function IbmmqChannelBinding({ binding }: { binding: IbmmqChannelBinding }) {
 }
 
 function IbmmqMessageBinding({ binding }: { binding: IbmmqMessageBinding }) {
-  if (!hasBindingFields(binding)) return <BindingEmpty />;
-
   return (
     <BindingFields>
       {binding.type && (
@@ -186,7 +161,4 @@ export const ibmmqBinding = createBinding({
   Server: IbmmqServerBinding,
   Channel: IbmmqChannelBinding,
   Message: IbmmqMessageBinding,
-  getServerSummary: getIbmmqServerSummary,
-  getChannelSummary: getIbmmqChannelSummary,
-  getMessageSummary: getIbmmqMessageSummary,
 });

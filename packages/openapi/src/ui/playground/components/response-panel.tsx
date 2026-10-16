@@ -5,17 +5,14 @@ import { useTranslations } from '@fuma-translate/react';
 import { Spinner } from 'shared-api/components/spinner';
 import { useResponseExamples } from '@/operation';
 import type { PlaygroundResponse } from '@/playground/use-playground';
+import { ExampleSelect } from 'shared-api/components/example';
+import { PanelHeader, panelCodeBlock } from 'shared-api/components/playground/panels';
+import { Segmented, SegmentedList, SegmentedPanel } from 'shared-api/components/segmented';
 import { ClientCodeBlock } from '@/ui/components/codeblock';
-import { CodeUsages, ExampleSelect } from '@/ui/operation/usage-tabs';
+import { CodeUsages } from '@/ui/operation/usage-tabs';
 import { Markdown } from '@/ui/components/markdown';
 import { cn } from '@/utils/cn';
-import {
-  DefaultResultDisplay,
-  PanelHeader,
-  panelCodeBlock,
-  type ResultDisplayProps,
-} from './result-display';
-import { Segmented, SegmentedList, SegmentedPanel } from '@/ui/components/segmented';
+import { DefaultResultDisplay, type ResultDisplayProps } from './result-display';
 
 export function ResponsePanel({
   response,

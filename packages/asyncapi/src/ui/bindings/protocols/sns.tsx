@@ -2,13 +2,12 @@
 import type { SnsChannelBinding, SnsOperationBinding } from '@/types/asyncapi-3';
 import {
   createBinding,
-  hasBindingFields,
   BindingFields,
-  BindingEmpty,
   BindingGroup,
   BindingFieldRow,
   BindingScalarValue,
   BindingTagList,
+  BindingJson,
 } from '../shared';
 
 function SnsIdentifierFields({
@@ -56,17 +55,7 @@ function SnsIdentifierFields({
   );
 }
 
-function getSnsChannelSummary(binding: SnsChannelBinding): string | undefined {
-  return binding.name;
-}
-
-function getSnsOperationSummary(binding: SnsOperationBinding): string | undefined {
-  return binding.topic?.name ?? binding.topic?.arn;
-}
-
 function SnsChannelBinding({ binding }: { binding: SnsChannelBinding }) {
-  if (!hasBindingFields(binding)) return <BindingEmpty />;
-
   return (
     <BindingFields>
       {binding.name && (
@@ -97,6 +86,9 @@ function SnsChannelBinding({ binding }: { binding: SnsChannelBinding }) {
           }
         />
       )}
+      {binding.policy && (
+        <BindingFieldRow label="Policy" value={<BindingJson value={binding.policy} />} />
+      )}
       {binding.tags && Object.keys(binding.tags).length > 0 && (
         <BindingFieldRow label="Tags" value={<BindingTagList value={binding.tags} />} />
       )}
@@ -105,8 +97,6 @@ function SnsChannelBinding({ binding }: { binding: SnsChannelBinding }) {
 }
 
 function SnsOperationBinding({ binding }: { binding: SnsOperationBinding }) {
-  if (!hasBindingFields(binding)) return <BindingEmpty />;
-
   return (
     <BindingFields>
       {binding.topic && (
@@ -140,11 +130,41 @@ function SnsOperationBinding({ binding }: { binding: SnsOperationBinding }) {
                     value={<BindingScalarValue value={consumer.rawMessageDelivery} />}
                   />
                 )}
+                {consumer.filterPolicy && (
+                  <BindingFieldRow
+                    label="Filter Policy"
+                    value={<BindingJson value={consumer.filterPolicy} />}
+                  />
+                )}
+                {consumer.filterPolicyScope && (
+                  <BindingFieldRow
+                    label="Filter Policy Scope"
+                    value={<code className="text-xs">{consumer.filterPolicyScope}</code>}
+                  />
+                )}
+                {consumer.redrivePolicy && (
+                  <BindingFieldRow
+                    label="Redrive Policy"
+                    value={<BindingJson value={consumer.redrivePolicy} />}
+                  />
+                )}
+                {consumer.deliveryPolicy && (
+                  <BindingFieldRow
+                    label="Delivery Policy"
+                    value={<BindingJson value={consumer.deliveryPolicy} />}
+                  />
+                )}
               </BindingFields>
             </BindingGroup>
           }
         />
       ))}
+      {binding.deliveryPolicy && (
+        <BindingFieldRow
+          label="Delivery Policy"
+          value={<BindingJson value={binding.deliveryPolicy} />}
+        />
+      )}
     </BindingFields>
   );
 }
@@ -153,6 +173,4 @@ export const snsBinding = createBinding({
   label: 'Amazon SNS',
   Channel: SnsChannelBinding,
   Operation: SnsOperationBinding,
-  getChannelSummary: getSnsChannelSummary,
-  getOperationSummary: getSnsOperationSummary,
 });

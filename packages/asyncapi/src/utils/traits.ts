@@ -1,62 +1,44 @@
 import type { MessageObject, OperationObject } from '@/types';
-import type { DereferencedDocument } from '@/utils/document/dereference';
+import { dereference } from '@fumadocs/json-schema';
 import { isPlainObject } from 'shared-api/utils/is-plain-object';
 
-type Resolve = DereferencedDocument['resolve'];
-
 /**
- * Merge traits into a target object per the AsyncAPI traits merge mechanism.
+ * Merge traits into a target object: JSON Merge Patch in the order of traits, the target object wins.
  * @see https://github.com/asyncapi/spec/blob/v3.0.0/spec/asyncapi.md#traitsMergeMechanism
  */
 export function mergeTraits<T extends object>(target: T, traits: object[]): T {
-  let result: Record<string, unknown> = { ...target } as Record<string, unknown>;
-  for (const trait of traits) {
-    result = mergeTraitLayer(result, trait as Record<string, unknown>);
-  }
-  return result as T;
+  let result: unknown = {};
+  for (const trait of traits) result = mergePatch(result, trait);
+  const { traits: _applied, ...merged } = mergePatch(result, target) as Record<string, unknown>;
+
+  return merged as T;
 }
 
-function mergeTraitLayer(
-  target: Record<string, unknown>,
-  trait: Record<string, unknown>,
-): Record<string, unknown> {
-  const result: Record<string, unknown> = { ...target };
+/** `path`: the patches being merged, recursive schemas stop at them */
+function mergePatch(target: unknown, patch: unknown, path = new Set<unknown>()): unknown {
+  // Reference Objects are merged as the objects they point to
+  const value = dereference(patch);
+  const base = dereference(target);
+  if (!isPlainObject(value) || !isPlainObject(base) || base === value || path.has(value))
+    return value;
 
-  for (const [key, traitValue] of Object.entries(trait)) {
-    if (key === 'traits') continue;
-
-    const targetValue = result[key];
-    if (targetValue === undefined) {
-      result[key] = traitValue;
-    } else if (isPlainObject(targetValue) && isPlainObject(traitValue)) {
-      result[key] = mergeTraitLayer(targetValue, traitValue);
-    }
+  const result: Record<string, unknown> = { ...base };
+  path.add(value);
+  for (const key in value) {
+    if (value[key] === null) delete result[key];
+    else result[key] = key in result ? mergePatch(result[key], value[key], path) : value[key];
   }
+  path.delete(value);
 
   return result;
 }
 
-export function applyOperationTraits(
-  operation: OperationObject,
-  resolve: Resolve,
-): OperationObject {
-  const traits = operation.traits;
-  if (!traits || traits.length === 0) return operation;
-
-  const { traits: _, ...base } = operation;
-  return mergeTraits(
-    base,
-    traits.map((trait) => resolve(trait)),
-  ) as OperationObject;
+export function applyOperationTraits(operation: OperationObject): OperationObject {
+  if (!operation.traits || operation.traits.length === 0) return operation;
+  return mergeTraits(operation, operation.traits);
 }
 
-export function applyMessageTraits(message: MessageObject, resolve: Resolve): MessageObject {
-  const traits = message.traits;
-  if (!traits || traits.length === 0) return message;
-
-  const { traits: _, ...base } = message;
-  return mergeTraits(
-    base,
-    traits.map((trait) => resolve(trait)),
-  ) as MessageObject;
+export function applyMessageTraits(message: MessageObject): MessageObject {
+  if (!message.traits || message.traits.length === 0) return message;
+  return mergeTraits(message, message.traits);
 }

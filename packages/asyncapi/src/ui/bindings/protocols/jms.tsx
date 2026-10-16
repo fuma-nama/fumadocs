@@ -4,21 +4,12 @@ import {
   createBinding,
   DestinationChannelBinding,
   HeadersMessageBinding,
-  hasBindingFields,
   BindingFields,
-  BindingEmpty,
   BindingFieldRow,
   BindingScalarValue,
-  joinBindingSummary,
 } from '../shared';
 
-function getJmsServerSummary(binding: JmsServerBinding): string | undefined {
-  return joinBindingSummary(binding.jmsConnectionFactory, binding.clientID);
-}
-
 function JmsServerBinding({ binding }: { binding: JmsServerBinding }) {
-  if (!hasBindingFields(binding)) return <BindingEmpty />;
-
   return (
     <BindingFields>
       {binding.jmsConnectionFactory && (
@@ -53,7 +44,4 @@ export const jmsBinding = createBinding({
   Message: ({ binding }: { binding: JmsMessageBinding }) => (
     <HeadersMessageBinding binding={binding} />
   ),
-  getServerSummary: getJmsServerSummary,
-  getChannelSummary: (binding: JmsChannelBinding) =>
-    joinBindingSummary(binding.destination, binding.destinationType),
 });

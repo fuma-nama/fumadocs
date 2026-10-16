@@ -1,4 +1,4 @@
-import { createContext, ReactNode, use, useMemo } from 'react';
+import { createContext, type FC, ReactNode, use, useMemo } from 'react';
 import {
   dereference,
   type JsonSchema,
@@ -12,6 +12,8 @@ import { stringifyFieldKey } from '@fumari/stf/lib/utils';
 
 interface SchemaContextType extends SchemaScope {
   docRoot: Exclude<JsonSchema, boolean>;
+  /** renders the descriptions of fields */
+  Markdown?: FC<{ md: string }>;
 }
 
 export interface SchemaScope {
@@ -50,11 +52,15 @@ export function SchemaProvider({
   readOnly,
   writeOnly,
   docRoot,
+  Markdown,
   children,
 }: SchemaContextType & { children: ReactNode }) {
   return (
     <SchemaContext.Provider
-      value={useMemo(() => ({ readOnly, writeOnly, docRoot }), [docRoot, readOnly, writeOnly])}
+      value={useMemo(
+        () => ({ readOnly, writeOnly, docRoot, Markdown }),
+        [docRoot, readOnly, writeOnly, Markdown],
+      )}
     >
       {children}
     </SchemaContext.Provider>

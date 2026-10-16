@@ -6,14 +6,11 @@ import type {
 } from '@/types/asyncapi-3';
 import {
   createBinding,
-  hasBindingFields,
   BindingFields,
-  BindingEmpty,
   BindingGroup,
   BindingFieldRow,
   BindingScalarValue,
   BindingSchema,
-  joinBindingSummary,
 } from '../shared';
 
 function formatQos(value: number): string {
@@ -29,24 +26,7 @@ function formatPayloadFormatIndicator(value: number): string {
   return String(value);
 }
 
-function getMqttServerSummary(binding: MqttServerBinding): string | undefined {
-  return joinBindingSummary(binding.clientId, binding.lastWill?.topic);
-}
-
-function getMqttOperationSummary(binding: MqttOperationBinding): string | undefined {
-  return joinBindingSummary(
-    binding.qos !== undefined && formatQos(binding.qos),
-    binding.retain && 'retain',
-  );
-}
-
-function getMqttMessageSummary(binding: MqttMessageBinding): string | undefined {
-  return binding.contentType;
-}
-
 function MqttServerBinding({ binding }: { binding: MqttServerBinding }) {
-  if (!hasBindingFields(binding)) return <BindingEmpty />;
-
   return (
     <BindingFields>
       {binding.clientId && (
@@ -131,8 +111,6 @@ function MqttServerBinding({ binding }: { binding: MqttServerBinding }) {
 }
 
 function MqttOperationBinding({ binding }: { binding: MqttOperationBinding }) {
-  if (!hasBindingFields(binding)) return <BindingEmpty />;
-
   return (
     <BindingFields>
       {binding.qos !== undefined && (
@@ -164,8 +142,6 @@ function MqttOperationBinding({ binding }: { binding: MqttOperationBinding }) {
 }
 
 function MqttMessageBinding({ binding }: { binding: MqttMessageBinding }) {
-  if (!hasBindingFields(binding)) return <BindingEmpty />;
-
   return (
     <BindingFields>
       {binding.payloadFormatIndicator !== undefined && (
@@ -210,7 +186,4 @@ export const mqttBinding = createBinding({
   Server: MqttServerBinding,
   Operation: MqttOperationBinding,
   Message: MqttMessageBinding,
-  getServerSummary: getMqttServerSummary,
-  getOperationSummary: getMqttOperationSummary,
-  getMessageSummary: getMqttMessageSummary,
 });

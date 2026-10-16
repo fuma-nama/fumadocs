@@ -49,7 +49,7 @@ export function ServerProvider({
       const server = servers[id];
       if (!server) return null;
 
-      return { id, title: idToTitle(id), variables: getDefaultValues(server) };
+      return { id, title: server.title ?? idToTitle(id), variables: getDefaultValues(server) };
     },
     [servers],
   );

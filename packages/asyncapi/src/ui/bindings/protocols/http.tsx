@@ -2,46 +2,24 @@
 import type { HttpMessageBinding, HttpOperationBinding } from '@/types/asyncapi-3';
 import {
   createBinding,
-  hasBindingFields,
   BindingFields,
-  BindingEmpty,
   BindingFieldRow,
   BindingScalarValue,
   BindingSchema,
 } from '../shared';
 
-function getHttpOperationSummary(binding: HttpOperationBinding): string | undefined {
-  return binding.method;
-}
-
-function getHttpMessageSummary(binding: HttpMessageBinding): string | undefined {
-  return typeof binding.statusCode === 'number' ? String(binding.statusCode) : undefined;
-}
-
+// `query` is rendered with the other parameters of the operation
 function HttpOperationBinding({ binding }: { binding: HttpOperationBinding }) {
-  if (!hasBindingFields(binding)) return <BindingEmpty />;
+  if (!binding.method) return null;
 
   return (
     <BindingFields>
-      {binding.method && (
-        <BindingFieldRow
-          label="HTTP Method"
-          value={<BindingScalarValue value={binding.method} />}
-        />
-      )}
-      {binding.query && (
-        <BindingFieldRow
-          label="Query Parameters"
-          value={<BindingSchema name="query" schema={binding.query} />}
-        />
-      )}
+      <BindingFieldRow label="HTTP Method" value={<BindingScalarValue value={binding.method} />} />
     </BindingFields>
   );
 }
 
 function HttpMessageBinding({ binding }: { binding: HttpMessageBinding }) {
-  if (!hasBindingFields(binding)) return <BindingEmpty />;
-
   return (
     <BindingFields>
       {binding.headers && (
@@ -59,10 +37,9 @@ function HttpMessageBinding({ binding }: { binding: HttpMessageBinding }) {
     </BindingFields>
   );
 }
+
 export const httpBinding = createBinding({
   label: 'HTTP',
   Operation: HttpOperationBinding,
   Message: HttpMessageBinding,
-  getOperationSummary: getHttpOperationSummary,
-  getMessageSummary: getHttpMessageSummary,
 });

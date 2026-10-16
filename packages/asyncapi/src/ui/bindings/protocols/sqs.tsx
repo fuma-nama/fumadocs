@@ -2,13 +2,12 @@
 import type { SqsChannelBinding, SqsOperationBinding } from '@/types/asyncapi-3';
 import {
   createBinding,
-  hasBindingFields,
   BindingFields,
-  BindingEmpty,
   BindingGroup,
   BindingFieldRow,
   BindingScalarValue,
   BindingTagList,
+  BindingJson,
 } from '../shared';
 
 type SqsQueue = NonNullable<SqsChannelBinding['queue']>;
@@ -26,6 +25,30 @@ function SqsQueueFields({ queue, title }: { queue: SqsQueue; title: string }) {
             value={<BindingScalarValue value={queue.fifoQueue} />}
           />
         )}
+        {queue.deduplicationScope && (
+          <BindingFieldRow
+            label="Deduplication Scope"
+            value={<code className="text-xs">{queue.deduplicationScope}</code>}
+          />
+        )}
+        {queue.fifoThroughputLimit && (
+          <BindingFieldRow
+            label="FIFO Throughput Limit"
+            value={<code className="text-xs">{queue.fifoThroughputLimit}</code>}
+          />
+        )}
+        {queue.deliveryDelay !== undefined && (
+          <BindingFieldRow
+            label="Delivery Delay"
+            value={<BindingScalarValue value={queue.deliveryDelay} />}
+          />
+        )}
+        {queue.receiveMessageWaitTime !== undefined && (
+          <BindingFieldRow
+            label="Receive Message Wait Time"
+            value={<BindingScalarValue value={queue.receiveMessageWaitTime} />}
+          />
+        )}
         {queue.visibilityTimeout !== undefined && (
           <BindingFieldRow
             label="Visibility Timeout"
@@ -38,6 +61,15 @@ function SqsQueueFields({ queue, title }: { queue: SqsQueue; title: string }) {
             value={<BindingScalarValue value={queue.messageRetentionPeriod} />}
           />
         )}
+        {queue.redrivePolicy && (
+          <BindingFieldRow
+            label="Redrive Policy"
+            value={<BindingJson value={queue.redrivePolicy} />}
+          />
+        )}
+        {queue.policy && (
+          <BindingFieldRow label="Policy" value={<BindingJson value={queue.policy} />} />
+        )}
         {queue.tags && Object.keys(queue.tags).length > 0 && (
           <BindingFieldRow label="Tags" value={<BindingTagList value={queue.tags} />} />
         )}
@@ -46,21 +78,7 @@ function SqsQueueFields({ queue, title }: { queue: SqsQueue; title: string }) {
   );
 }
 
-function getSqsChannelSummary(binding: SqsChannelBinding): string | undefined {
-  return binding.queue?.name;
-}
-
-function getSqsOperationSummary(binding: SqsOperationBinding): string | undefined {
-  const queues = binding.queues;
-  if (!queues || queues.length === 0) return undefined;
-  const first = queues[0];
-  if (!first?.name) return undefined;
-  return queues.length > 1 ? `${first.name} +${queues.length - 1}` : first.name;
-}
-
 function SqsChannelBinding({ binding }: { binding: SqsChannelBinding }) {
-  if (!hasBindingFields(binding)) return <BindingEmpty />;
-
   return (
     <BindingFields>
       {binding.queue && (
@@ -80,8 +98,6 @@ function SqsChannelBinding({ binding }: { binding: SqsChannelBinding }) {
 }
 
 function SqsOperationBinding({ binding }: { binding: SqsOperationBinding }) {
-  if (!hasBindingFields(binding)) return <BindingEmpty />;
-
   return (
     <BindingFields>
       {binding.queues?.map((queue, index) => (
@@ -99,6 +115,4 @@ export const sqsBinding = createBinding({
   label: 'Amazon SQS',
   Channel: SqsChannelBinding,
   Operation: SqsOperationBinding,
-  getChannelSummary: getSqsChannelSummary,
-  getOperationSummary: getSqsOperationSummary,
 });

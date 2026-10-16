@@ -2,13 +2,10 @@
 import type { PulsarChannelBinding, PulsarServerBinding } from '@/types/asyncapi-3';
 import {
   createBinding,
-  hasBindingFields,
   BindingFields,
-  BindingEmpty,
   BindingGroup,
   BindingFieldRow,
   BindingScalarValue,
-  joinBindingSummary,
 } from '../shared';
 
 function formatPersistence(value: string): string {
@@ -17,13 +14,7 @@ function formatPersistence(value: string): string {
   return value;
 }
 
-function getPulsarServerSummary(binding: PulsarServerBinding): string | undefined {
-  return binding.tenant;
-}
-
 function PulsarServerBinding({ binding }: { binding: PulsarServerBinding }) {
-  if (!hasBindingFields(binding)) return <BindingEmpty />;
-
   return (
     <BindingFields>
       {binding.tenant && (
@@ -33,16 +24,7 @@ function PulsarServerBinding({ binding }: { binding: PulsarServerBinding }) {
   );
 }
 
-function getPulsarChannelSummary(binding: PulsarChannelBinding): string | undefined {
-  return joinBindingSummary(
-    binding.namespace,
-    binding.persistence ? formatPersistence(binding.persistence) : undefined,
-  );
-}
-
 function PulsarChannelBinding({ binding }: { binding: PulsarChannelBinding }) {
-  if (!hasBindingFields(binding)) return <BindingEmpty />;
-
   return (
     <BindingFields>
       {binding.namespace && (
@@ -109,6 +91,4 @@ export const pulsarBinding = createBinding({
   label: 'Apache Pulsar',
   Server: PulsarServerBinding,
   Channel: PulsarChannelBinding,
-  getServerSummary: getPulsarServerSummary,
-  getChannelSummary: getPulsarChannelSummary,
 });

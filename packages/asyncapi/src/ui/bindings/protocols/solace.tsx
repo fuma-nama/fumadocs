@@ -2,14 +2,11 @@
 import type { SolaceOperationBinding, SolaceServerBinding } from '@/types/asyncapi-3';
 import {
   createBinding,
-  hasBindingFields,
   BindingFields,
-  BindingEmpty,
   BindingGroup,
   BindingFieldRow,
   BindingScalarValue,
   BindingSchema,
-  joinBindingSummary,
 } from '../shared';
 
 function formatDeliveryMode(value: string): string {
@@ -18,13 +15,7 @@ function formatDeliveryMode(value: string): string {
   return value;
 }
 
-function getSolaceServerSummary(binding: SolaceServerBinding): string | undefined {
-  return joinBindingSummary(binding.msgVpn, binding.clientName);
-}
-
 function SolaceServerBinding({ binding }: { binding: SolaceServerBinding }) {
-  if (!hasBindingFields(binding)) return <BindingEmpty />;
-
   return (
     <BindingFields>
       {binding.msgVpn && (
@@ -43,15 +34,7 @@ function SolaceServerBinding({ binding }: { binding: SolaceServerBinding }) {
   );
 }
 
-function getSolaceOperationSummary(binding: SolaceOperationBinding): string | undefined {
-  const count = binding.destinations?.length ?? 0;
-  if (count === 0) return undefined;
-  return `${count} destination${count > 1 ? 's' : ''}`;
-}
-
 function SolaceOperationBinding({ binding }: { binding: SolaceOperationBinding }) {
-  if (!hasBindingFields(binding)) return <BindingEmpty />;
-
   return (
     <BindingFields>
       {binding.destinations?.map((destination, index) => (
@@ -93,6 +76,30 @@ function SolaceOperationBinding({ binding }: { binding: SolaceOperationBinding }
                   <BindingFieldRow
                     label="Topic Subscriptions"
                     value={<BindingScalarValue value={destination.queue.topicSubscriptions} />}
+                  />
+                )}
+                {destination.queue?.accessType && (
+                  <BindingFieldRow
+                    label="Access Type"
+                    value={<code className="text-xs">{destination.queue.accessType}</code>}
+                  />
+                )}
+                {destination.queue?.maxMsgSpoolSize && (
+                  <BindingFieldRow
+                    label="Max Message Spool Size"
+                    value={<code className="text-xs">{destination.queue.maxMsgSpoolSize}</code>}
+                  />
+                )}
+                {destination.queue?.maxTtl && (
+                  <BindingFieldRow
+                    label="Max TTL"
+                    value={<code className="text-xs">{destination.queue.maxTtl}</code>}
+                  />
+                )}
+                {destination.topic?.topicSubscriptions && (
+                  <BindingFieldRow
+                    label="Topic Subscriptions"
+                    value={<BindingScalarValue value={destination.topic.topicSubscriptions} />}
                   />
                 )}
               </BindingFields>
@@ -138,6 +145,4 @@ export const solaceBinding = createBinding({
   label: 'Solace',
   Server: SolaceServerBinding,
   Operation: SolaceOperationBinding,
-  getServerSummary: getSolaceServerSummary,
-  getOperationSummary: getSolaceOperationSummary,
 });

@@ -6,13 +6,10 @@ import type {
 } from '@/types/asyncapi-3';
 import {
   createBinding,
-  hasBindingFields,
   BindingFields,
-  BindingEmpty,
   BindingGroup,
   BindingFieldRow,
   BindingScalarValue,
-  joinBindingSummary,
 } from '../shared';
 
 function formatAmqpIs(value: string): string {
@@ -25,21 +22,6 @@ function formatAmqpDeliveryMode(value: number): string {
   if (value === 1) return 'Non-persistent (1)';
   if (value === 2) return 'Persistent (2)';
   return String(value);
-}
-
-function getAmqpChannelSummary(binding: AmqpChannelBinding): string | undefined {
-  return joinBindingSummary(
-    binding.is ? formatAmqpIs(binding.is) : undefined,
-    binding.exchange?.name ? `exchange: ${binding.exchange.name}` : undefined,
-    binding.queue?.name ? `queue: ${binding.queue.name}` : undefined,
-  );
-}
-
-function getAmqpMessageSummary(binding: AmqpMessageBinding): string | undefined {
-  const parts: string[] = [];
-  if (binding.contentEncoding) parts.push(binding.contentEncoding);
-  if (binding.messageType) parts.push(binding.messageType);
-  return parts.length > 0 ? parts.join(' · ') : undefined;
 }
 
 function AmqpExchangeFields({
@@ -103,8 +85,6 @@ function AmqpQueueFields({ queue }: { queue: NonNullable<AmqpChannelBinding['que
 }
 
 function AmqpChannelBinding({ binding }: { binding: AmqpChannelBinding }) {
-  if (!hasBindingFields(binding)) return <BindingEmpty />;
-
   return (
     <BindingFields>
       {binding.is && (
@@ -138,8 +118,6 @@ function AmqpChannelBinding({ binding }: { binding: AmqpChannelBinding }) {
 }
 
 function AmqpOperationBinding({ binding }: { binding: AmqpOperationBinding }) {
-  if (!hasBindingFields(binding)) return <BindingEmpty />;
-
   return (
     <BindingFields>
       {binding.expiration !== undefined && (
@@ -192,8 +170,6 @@ function AmqpOperationBinding({ binding }: { binding: AmqpOperationBinding }) {
 }
 
 function AmqpMessageBinding({ binding }: { binding: AmqpMessageBinding }) {
-  if (!hasBindingFields(binding)) return <BindingEmpty />;
-
   return (
     <BindingFields>
       {binding.contentEncoding && (
@@ -216,6 +192,4 @@ export const amqpBinding = createBinding({
   Channel: AmqpChannelBinding,
   Operation: AmqpOperationBinding,
   Message: AmqpMessageBinding,
-  getChannelSummary: getAmqpChannelSummary,
-  getMessageSummary: getAmqpMessageSummary,
 });

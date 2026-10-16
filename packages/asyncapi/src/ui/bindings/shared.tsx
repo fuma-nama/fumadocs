@@ -1,12 +1,11 @@
 'use client';
 import type { FC, ReactNode } from 'react';
-import { useTranslations } from '@fuma-translate/react';
 import { SchemaUI } from '@/ui/components/schema';
+import { ClientCodeBlock } from '@/ui/components/codeblock';
 import { cn } from '@/utils/cn';
 import type { AsyncAPISchemaObject } from '@/types';
 
 export type BindingComponent = FC<{ binding: Record<string, unknown> }>;
-export type BindingSummaryFn = (binding: Record<string, unknown>) => string | undefined;
 
 export interface ProtocolBindingDefinition {
   label: string;
@@ -14,13 +13,9 @@ export interface ProtocolBindingDefinition {
   Channel: BindingComponent;
   Operation: BindingComponent;
   Message: BindingComponent;
-  getServerSummary?: BindingSummaryFn;
-  getChannelSummary?: BindingSummaryFn;
-  getOperationSummary?: BindingSummaryFn;
-  getMessageSummary?: BindingSummaryFn;
 }
 
-export function formatBindingScalar(value: unknown): string {
+function formatBindingScalar(value: unknown): string {
   if (value === null || value === undefined) return '';
   if (typeof value === 'boolean') return value ? 'Yes' : 'No';
   if (typeof value === 'number') return String(value);
@@ -30,22 +25,6 @@ export function formatBindingScalar(value: unknown): string {
   }
 
   return JSON.stringify(value);
-}
-
-export function hasBindingFields(binding: object, ignore: string[] = ['bindingVersion']): boolean {
-  return Object.keys(binding).some(
-    (key) =>
-      !ignore.includes(key) &&
-      !key.startsWith('x-') &&
-      (binding as Record<string, unknown>)[key] !== undefined,
-  );
-}
-
-export function joinBindingSummary(
-  ...parts: (string | undefined | null | false)[]
-): string | undefined {
-  const filtered = parts.filter((part): part is string => Boolean(part));
-  return filtered.length > 0 ? filtered.join(' · ') : undefined;
 }
 
 export function BindingFields({
@@ -58,21 +37,15 @@ export function BindingFields({
   return <dl className={cn('not-prose', className)}>{children}</dl>;
 }
 
-export function BindingEmpty() {
-  const t = useTranslations({ note: 'bindings' });
-
-  return (
-    <p className="text-xs text-fd-muted-foreground not-prose py-2">
-      {t('No additional configuration for this binding.')}
-    </p>
-  );
-}
-
 export function BindingGroup({ title, children }: { title?: ReactNode; children: ReactNode }) {
   return (
-    <div className="rounded-lg border bg-fd-secondary/40 divide-y divide-fd-border/40">
-      {title && <p className="px-3 py-2 text-xs font-medium text-fd-muted-foreground">{title}</p>}
-      <div className="px-3 pb-1">{children}</div>
+    <div className="overflow-hidden rounded-lg border bg-fd-secondary/50">
+      {title && (
+        <p className="border-b border-fd-border/60 px-3 py-2 text-xs text-fd-muted-foreground">
+          {title}
+        </p>
+      )}
+      {children}
     </div>
   );
 }
@@ -89,12 +62,12 @@ export function BindingFieldRow({
   return (
     <div
       className={cn(
-        'grid grid-cols-1 gap-1 py-2 border-b border-fd-border/40 last:border-b-0 sm:grid-cols-[minmax(8rem,11rem)_1fr] sm:gap-4',
+        'grid grid-cols-1 gap-1 border-t border-fd-border/60 px-3 py-2.5 first:border-t-0 @sm:grid-cols-[minmax(8rem,11rem)_minmax(0,1fr)] @sm:gap-4',
         className,
       )}
     >
-      <dt className="text-xs font-medium text-fd-muted-foreground">{label}</dt>
-      <dd className="text-sm min-w-0">{value}</dd>
+      <dt className="text-[0.8125rem] text-fd-muted-foreground">{label}</dt>
+      <dd className="min-w-0 text-[0.8125rem]">{value}</dd>
     </div>
   );
 }
@@ -156,41 +129,28 @@ export function BindingSchema({ name, schema }: { name: string; schema: AsyncAPI
   );
 }
 
-function VersionOnlyBinding({ binding }: { binding: { bindingVersion?: string | number } }) {
-  if (!binding.bindingVersion) return <BindingEmpty />;
-
+/** a value with nested structure, like an access policy */
+export function BindingJson({ value }: { value: unknown }) {
   return (
-    <BindingFields>
-      <BindingFieldRow
-        label="Binding Version"
-        value={<code className="text-xs">{binding.bindingVersion}</code>}
-      />
-    </BindingFields>
+    <ClientCodeBlock
+      lang="json"
+      code={JSON.stringify(value, null, 2)}
+      codeblock={{ className: 'my-0' }}
+    />
   );
 }
 
+const Empty: BindingComponent = () => null;
+
+/** a protocol, the bindings without fields for readers render nothing */
 export function createBinding({
   label,
-  Server = VersionOnlyBinding,
-  Channel = VersionOnlyBinding,
-  Operation = VersionOnlyBinding,
-  Message = VersionOnlyBinding,
-  getServerSummary,
-  getChannelSummary,
-  getOperationSummary,
-  getMessageSummary,
+  Server = Empty,
+  Channel = Empty,
+  Operation = Empty,
+  Message = Empty,
 }: Partial<ProtocolBindingDefinition> & { label: string }): ProtocolBindingDefinition {
-  return {
-    label,
-    Server,
-    Channel,
-    Operation,
-    Message,
-    getServerSummary,
-    getChannelSummary,
-    getOperationSummary,
-    getMessageSummary,
-  };
+  return { label, Server, Channel, Operation, Message };
 }
 
 export function DestinationChannelBinding({
@@ -202,8 +162,6 @@ export function DestinationChannelBinding({
     bindingVersion?: string | number;
   };
 }) {
-  if (!hasBindingFields(binding)) return <BindingEmpty />;
-
   return (
     <BindingFields>
       {binding.destination && (
@@ -230,8 +188,6 @@ export function HeadersMessageBinding({
     bindingVersion?: string | number;
   };
 }) {
-  if (!hasBindingFields(binding)) return <BindingEmpty />;
-
   return (
     <BindingFields>
       {binding.headers != null && (

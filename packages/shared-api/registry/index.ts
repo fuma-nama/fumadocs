@@ -18,11 +18,14 @@ export const registry: Registry = {
     },
   },
   files: {
-    'components/{dialog,input,label,select,spinner}.tsx': { type: 'ui' },
+    'components/{input,label,select,spinner}.tsx': { type: 'ui' },
     'components/schema/*': { type: 'components', target: '<dir>/api/schema/*' },
     'components/**': { type: 'components', target: '<dir>/api/ui/*' },
     'auto-anchor/*': { type: 'components', target: '<dir>/api/ui/auto-anchor/*' },
-    'utils/{is-plain-object,use-query}.ts': { type: 'components', target: '<dir>/api/lib/*' },
+    'utils/{is-plain-object,use-query,id-to-title}.ts': {
+      type: 'components',
+      target: '<dir>/api/lib/*',
+    },
     'utils/cn.ts': { alias: '../../radix-ui/src/utils/cn' },
   },
   dependencies: {

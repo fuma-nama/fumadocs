@@ -1,11 +1,14 @@
 'use client';
-import { ClientCodeBlock } from '@/ui/components/codeblock';
-import { createBinding } from '../shared';
-import { useMemo } from 'react';
+import { BindingJson, createBinding } from '../shared';
 
 function UnknownBindingContent({ binding }: { binding: Record<string, unknown> }) {
-  const code = useMemo(() => JSON.stringify(binding, null, 2), [binding]);
-  return <ClientCodeBlock lang="json" code={code} />;
+  return (
+    <dl className="not-prose py-2">
+      <dd>
+        <BindingJson value={binding} />
+      </dd>
+    </dl>
+  );
 }
 
 export const unknownBinding = createBinding({

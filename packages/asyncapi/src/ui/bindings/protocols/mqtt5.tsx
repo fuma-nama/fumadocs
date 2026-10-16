@@ -2,17 +2,13 @@
 import type { Mqtt5ServerBinding } from '@/types/asyncapi-3';
 import {
   createBinding,
-  hasBindingFields,
   BindingFields,
-  BindingEmpty,
   BindingFieldRow,
   BindingScalarValue,
   BindingSchema,
 } from '../shared';
 
 function Mqtt5ServerBinding({ binding }: { binding: Mqtt5ServerBinding }) {
-  if (!hasBindingFields(binding)) return <BindingEmpty />;
-
   return (
     <BindingFields>
       {binding.sessionExpiryInterval !== undefined && (

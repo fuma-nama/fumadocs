@@ -2184,6 +2184,9 @@ importers:
       '@fumadocs/json-schema':
         specifier: workspace:^
         version: link:../json-schema
+      '@fumari/json-schema-ts':
+        specifier: ^1.0.2
+        version: 1.0.2(json-schema-typed@8.0.2)
       '@fumari/stf':
         specifier: workspace:^
         version: link:../stf

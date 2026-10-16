@@ -2,26 +2,14 @@
 import type { GooglepubsubChannelBinding, GooglepubsubMessageBinding } from '@/types/asyncapi-3';
 import {
   createBinding,
-  hasBindingFields,
   BindingFields,
-  BindingEmpty,
   BindingGroup,
   BindingFieldRow,
   BindingScalarValue,
   BindingTagList,
 } from '../shared';
 
-function getGooglepubsubChannelSummary(binding: GooglepubsubChannelBinding): string | undefined {
-  return binding.schemaSettings?.name;
-}
-
-function getGooglepubsubMessageSummary(binding: GooglepubsubMessageBinding): string | undefined {
-  return binding.orderingKey;
-}
-
 function GooglepubsubChannelBinding({ binding }: { binding: GooglepubsubChannelBinding }) {
-  if (!hasBindingFields(binding)) return <BindingEmpty />;
-
   return (
     <BindingFields>
       {binding.labels && Object.keys(binding.labels).length > 0 && (
@@ -83,8 +71,6 @@ function GooglepubsubChannelBinding({ binding }: { binding: GooglepubsubChannelB
 }
 
 function GooglepubsubMessageBinding({ binding }: { binding: GooglepubsubMessageBinding }) {
-  if (!hasBindingFields(binding)) return <BindingEmpty />;
-
   return (
     <BindingFields>
       {binding.attributes && Object.keys(binding.attributes).length > 0 && (
@@ -109,6 +95,4 @@ export const googlepubsubBinding = createBinding({
   label: 'Google Pub/Sub',
   Channel: GooglepubsubChannelBinding,
   Message: GooglepubsubMessageBinding,
-  getChannelSummary: getGooglepubsubChannelSummary,
-  getMessageSummary: getGooglepubsubMessageSummary,
 });

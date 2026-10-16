@@ -47,6 +47,8 @@ export interface ServerObject extends SpecificationExtensions {
   protocol: string;
   pathname?: string;
   protocolVersion?: string;
+  title?: string;
+  summary?: string;
   description?: string;
   variables?: Record<string, ServerVariableObject | ReferenceObject>;
   security?: Array<SecuritySchemeObject | ReferenceObject>;
@@ -268,7 +270,7 @@ export interface SecuritySchemeObjectOauth2
   extends SecuritySchemeObjectBase, SpecificationExtensions {
   type: 'oauth2';
   flows: OAuthFlowsObject;
-  scopes: string[];
+  scopes?: string[];
 }
 
 export interface SecuritySchemeObjectOpenIdConnect
@@ -340,7 +342,7 @@ export type AsyncAPISchemaObject =
       externalDocs?: ExternalDocumentationObject;
     })
   | boolean;
-export type MultiFormatObject = { schema: AsyncAPISchemaObject; schemaFormat: string | undefined };
+export type MultiFormatObject = { schema: unknown; schemaFormat: string };
 export type MultiFormatSchemaObject = AsyncAPISchemaObject | MultiFormatObject;
 
 // ---------------------------------------------------------------------------
@@ -772,6 +774,39 @@ export type MercureChannelBinding = BindingBase;
 export type MercureOperationBinding = BindingBase;
 export type MercureMessageBinding = BindingBase;
 
+export interface Ros2ServerBinding extends BindingBase {
+  /** the middleware, like `rmw_fastrtps_cpp` */
+  rmwImplementation?: string;
+  domainId?: number;
+}
+
+export type Ros2ChannelBinding = BindingBase;
+
+export interface Ros2OperationBinding extends BindingBase {
+  role?:
+    | 'publisher'
+    | 'action_client'
+    | 'service_client'
+    | 'subscriber'
+    | 'action_server'
+    | 'service_server';
+  node?: string;
+  qosPolicies?: {
+    reliability?: 'best_effort' | 'reliable';
+    history?: 'keep_last' | 'keep_all' | 'unknown';
+    durability?: 'transient_local' | 'volatile';
+    /** `-1` is infinite */
+    lifespan?: number;
+    /** `-1` is infinite */
+    deadline?: number;
+    liveliness?: 'automatic' | 'manual';
+    /** `-1` is infinite */
+    leaseDuration?: number;
+  };
+}
+
+export type Ros2MessageBinding = BindingBase;
+
 export interface ServerBindingsObject extends SpecificationExtensions {
   http?: HttpServerBinding;
   ws?: WsServerBinding;
@@ -792,6 +827,7 @@ export interface ServerBindingsObject extends SpecificationExtensions {
   ibmmq?: IbmmqServerBinding;
   googlepubsub?: GooglepubsubServerBinding;
   pulsar?: PulsarServerBinding;
+  ros2?: Ros2ServerBinding;
 }
 
 export interface ChannelBindingsObject extends SpecificationExtensions {
@@ -814,6 +850,7 @@ export interface ChannelBindingsObject extends SpecificationExtensions {
   ibmmq?: IbmmqChannelBinding;
   googlepubsub?: GooglepubsubChannelBinding;
   pulsar?: PulsarChannelBinding;
+  ros2?: Ros2ChannelBinding;
 }
 
 export interface OperationBindingsObject extends SpecificationExtensions {
@@ -836,6 +873,7 @@ export interface OperationBindingsObject extends SpecificationExtensions {
   ibmmq?: IbmmqOperationBinding;
   googlepubsub?: GooglepubsubOperationBinding;
   pulsar?: PulsarOperationBinding;
+  ros2?: Ros2OperationBinding;
 }
 
 export interface MessageBindingsObject extends SpecificationExtensions {
@@ -858,6 +896,7 @@ export interface MessageBindingsObject extends SpecificationExtensions {
   ibmmq?: IbmmqMessageBinding;
   googlepubsub?: GooglepubsubMessageBinding;
   pulsar?: PulsarMessageBinding;
+  ros2?: Ros2MessageBinding;
 }
 
 export type BindingProtocol = keyof Omit<

@@ -7,10 +7,11 @@ description: The state and logic of AsyncAPI pages, without UI.
 
 Everything outside `@fumadocs/asyncapi/ui` is headless.
 
-| Path                           | Module                                                    |
-| ------------------------------ | --------------------------------------------------------- |
-| `@fumadocs/asyncapi`           | the page: the document, its servers and your components   |
-| `@fumadocs/asyncapi/operation` | an operation: its channel, parameters, messages and reply |
+| Path                            | Module                                                    |
+| ------------------------------- | --------------------------------------------------------- |
+| `@fumadocs/asyncapi`            | the page: the document, its servers and your components   |
+| `@fumadocs/asyncapi/operation`  | an operation: its channel, parameters, messages and reply |
+| `@fumadocs/asyncapi/playground` | a WebSocket session on the channel of an operation        |
 
 ## Page
 
@@ -79,7 +80,7 @@ export function Operation(props: PageOperationProps) {
 
 function Content() {
   const { title, channel, parameters, messages } = useOperation();
-  const schemes = useOperationSecurity();
+  const security = useOperationSecurity();
 
   return (
     <>
@@ -98,19 +99,51 @@ function Content() {
           ))}
         </section>
       ))}
-      <p>{schemes.map((scheme) => scheme.type).join(', ')}</p>
+      <p>{security.operation.map((item) => item.id).join(', ')}</p>
     </>
   );
 }
 ```
 
-| Hook                     | Returns                                                                  |
-| ------------------------ | ------------------------------------------------------------------------ |
-| `useOperation()`         | the operation with its details resolved                                  |
-| `useOperationSecurity()` | security schemes of the operation, falling back to the selected server's |
+| Hook                     | Returns                                                                      |
+| ------------------------ | ---------------------------------------------------------------------------- |
+| `useOperation()`         | the operation with its details resolved                                      |
+| `useOperationSecurity()` | security schemes of the selected server and the operation, both apply        |
+| `useChannelMessages()`   | messages readers receive and send on the channel, from all of its operations |
 
 <auto-type-table path="props.ts" name="OperationInfo" />
 
 Examples of a message come from the document, or are generated from its schemas.
 
 <auto-type-table path="props.ts" name="OperationMessage" />
+
+## Playground
+
+`usePlayground()` connects to the channel of an operation on WebSocket servers, under `<OperationProvider />`.
+
+```tsx
+'use client';
+import { usePlayground } from '@fumadocs/asyncapi/playground';
+
+export function Playground() {
+  const { url, status, connect, disconnect, send, log } = usePlayground();
+  if (!url) return null; // not a WebSocket server
+
+  return (
+    <>
+      <button onClick={status === 'closed' ? connect : disconnect}>{status}</button>
+      <button onClick={() => send('{"type":"ping"}')}>Ping</button>
+      {log.map((entry) => (
+        <p key={entry.id}>
+          {entry.type} {entry.message?.name} {entry.data}
+        </p>
+      ))}
+    </>
+  );
+}
+```
+
+- The address parameters and query are the form `stf`, `url` follows its values.
+- Received messages are matched against the payloads of messages on the channel, `entry.message` is the documented message.
+
+<auto-type-table path="props.ts" name="Playground" />

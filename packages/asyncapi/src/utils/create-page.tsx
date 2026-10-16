@@ -14,7 +14,14 @@ import type { SchemaUIOptions } from 'shared-api/components/schema';
 import type { AsyncAPIObject, OperationObject, ServerObject } from '@/types';
 import type { DereferencedDocument } from '@/utils/document/dereference';
 import { dereferenceBundledDocument } from '@/utils/document/dereference';
-import type { ExampleMessageItem } from '@/utils/get-example-messages';
+import { dereference, type JsonSchema } from '@fumadocs/json-schema';
+import Slugger from 'github-slugger';
+import { getOperationDisplayName } from './schema';
+import { applyOperationTraits } from './traits';
+import {
+  generateTypeScriptDefinitions as defaultTypeScriptDefinitions,
+  type GenerateTypeScriptDefinitionsContext,
+} from './typescript';
 import { ServerProvider } from './use-server';
 
 /** components the UI renders through, so a page can replace them */
@@ -57,13 +64,15 @@ export interface AsyncAPIRenderOptions {
     renderOperationLayout?: (
       slots: {
         header: ReactNode;
+        /** the server, channel address and direction of messages, with the playground */
+        connection: ReactNode;
         description: ReactNode;
-        server: ReactNode;
-        channel: ReactNode;
         authSchemes: ReactNode;
         parameters: ReactNode;
+        /** the messages with their payload, headers and examples */
         messages: ReactNode;
         reply: ReactNode;
+        /** protocol details from the bindings of the selected server */
         bindings: ReactNode;
       },
       context: {
@@ -72,7 +81,14 @@ export interface AsyncAPIRenderOptions {
         ctx: RenderContext;
       },
     ) => ReactNode;
-    renderAPIExampleUsageTabs?: (items: ExampleMessageItem[], ctx: RenderContext) => ReactNode;
+  };
+  playground?: {
+    /**
+     * Try WebSocket channels in a playground, from the connection bar of operations.
+     *
+     * @defaultValue true
+     */
+    enabled?: boolean;
   };
   schemaUI?: {
     /**
@@ -81,6 +97,17 @@ export interface AsyncAPIRenderOptions {
     render?: (options: SchemaUIOptions, ctx: RenderContext) => ReactNode;
     showExample?: boolean;
   };
+  /**
+   * Generate TypeScript definitions of message payloads and headers, readers can copy them.
+   *
+   * Pass `false` to disable it.
+   */
+  generateTypeScriptDefinitions?:
+    | ((
+        schema: JsonSchema,
+        ctx: GenerateTypeScriptDefinitionsContext,
+      ) => string | undefined | Promise<string | undefined>)
+    | false;
 }
 
 /**
@@ -123,7 +150,6 @@ export type AsyncAPIPageProps_Spec = Omit<GeneratedPageProps, 'document'> & {
 export type AsyncAPIPageProps_Preloaded = GeneratedPageProps & {
   preloaded: {
     docs: Record<string, AsyncAPIObject>;
-    proxyUrl?: string;
   };
 };
 
@@ -167,7 +193,9 @@ export function AsyncAPIProvider({
   shiki,
   shikiOptions = defaultShikiOptions,
   content,
+  playground,
   schemaUI,
+  generateTypeScriptDefinitions,
   components,
   children,
 }: AsyncAPIProviderProps) {
@@ -177,17 +205,25 @@ export function AsyncAPIProvider({
   );
 
   const servers = useMemo(() => {
-    const { dereferenced, resolve } = runtime.doc;
     const out: Record<string, ServerObject> = {};
-    for (const [k, v] of Object.entries(dereferenced.servers ?? {})) out[k] = resolve(v);
+    for (const [k, v] of Object.entries(runtime.doc.dereferenced.servers ?? {}))
+      out[k] = dereference(v);
 
     return out;
   }, [runtime]);
 
   const { SchemaUI } = components;
   const render = useMemo<RenderContext>(
-    () => ({ shiki, shikiOptions, content, schemaUI, SchemaUI }),
-    [shiki, shikiOptions, content, schemaUI, SchemaUI],
+    () => ({
+      shiki,
+      shikiOptions,
+      content,
+      playground,
+      schemaUI,
+      generateTypeScriptDefinitions,
+      SchemaUI,
+    }),
+    [shiki, shikiOptions, content, playground, schemaUI, generateTypeScriptDefinitions, SchemaUI],
   );
 
   return (
@@ -211,8 +247,10 @@ export function AsyncAPIProvider({
 export function createAsyncAPIRenderer({
   components,
   shiki = defaultShikiFactory,
-  ...options
+  generateTypeScriptDefinitions = defaultTypeScriptDefinitions,
+  ...rest
 }: CreateAsyncAPIRendererOptions): FC<AsyncAPIPageProps> {
+  const options = { ...rest, generateTypeScriptDefinitions };
   const { Operation, Layout = DefaultLayout } = components;
   const slots: AsyncAPIComponents = {
     SchemaUI: components.SchemaUI,
@@ -222,19 +260,32 @@ export function createAsyncAPIRenderer({
 
   function Content({ showTitle, showDescription, operations }: AsyncAPIPageProps) {
     const ctx = useRenderContext();
+    const { doc } = useAsyncAPI();
+    // operations can share titles, their anchors are unique like the headings of static data
+    const slugger = new Slugger();
     const layout: PageLayoutProps = {
-      operations: operations?.map((item) => ({
-        item,
-        children: (
-          <Operation
-            key={`${item.id}:${item.action}`}
-            id={item.id}
-            action={item.action}
-            showTitle={showTitle}
-            showDescription={showDescription}
-          />
-        ),
-      })),
+      operations: operations?.map((item) => {
+        let anchor: string | undefined;
+        if (showTitle) {
+          const operation = dereference(doc.dereferenced.operations?.[item.id]);
+          anchor = slugger.slug(
+            operation ? getOperationDisplayName(item.id, applyOperationTraits(operation)) : item.id,
+          );
+        }
+
+        return {
+          item,
+          children: (
+            <Operation
+              key={item.id}
+              id={item.id}
+              anchor={anchor}
+              showTitle={showTitle}
+              showDescription={showDescription}
+            />
+          ),
+        };
+      }),
     };
 
     if (ctx.content?.renderPageLayout) return ctx.content.renderPageLayout(layout, ctx);

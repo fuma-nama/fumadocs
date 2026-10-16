@@ -1,12 +1,14 @@
 import type {
   AsyncAPISchemaObject,
+  ChannelObject,
   MessageObject,
   MultiFormatSchemaObject,
   OperationObject,
   ReferenceObject,
   TagObject,
 } from '@/types';
-import type { DereferencedDocument } from '@/utils/document/dereference';
+import { dereference } from '@fumadocs/json-schema';
+import { getRaw } from '@scalar/json-magic/magic-proxy';
 import { idToTitle } from 'shared-api/utils/id-to-title';
 
 export function getTagDisplayName(tag: TagObject): string {
@@ -16,50 +18,73 @@ export function getTagDisplayName(tag: TagObject): string {
   return idToTitle(tag.name);
 }
 
-export function getMessageDisplayName(
-  message: MessageObject | ReferenceObject,
-  resolved: MessageObject,
-  idx?: number,
-): string {
-  let v = resolved.title || resolved.name;
-  if (v) return v;
-
-  // derive the name from the `$ref` of Reference Objects (e.g. `#/components/messages/MyMessage`)
-  if ('$ref' in message && typeof message.$ref === 'string') {
-    v = message.$ref.split('/').at(-1);
-    if (v) return v;
-  }
-
-  return typeof idx === 'number' ? `Unknown Message ${idx + 1}` : 'Unknown Message';
-}
-
 export function getOperationDisplayName(id: string, operation: OperationObject): string {
   return operation.title || operation.summary || idToTitle(id);
 }
 
-export function getOperationMessages(
-  operation: OperationObject,
-  resolve: DereferencedDocument['resolve'],
-): (MessageObject | ReferenceObject)[] {
-  if (operation.messages) return operation.messages;
+export interface MessageEntry {
+  /** the key of message in its channel */
+  key: string;
+  value: MessageObject | ReferenceObject;
+}
 
-  const out: (MessageObject | ReferenceObject)[] = [];
-  const channel = resolve(operation.channel);
-  if (channel.messages) {
-    for (const [id, message] of Object.entries(channel.messages)) {
-      resolve(message).name ??= id;
-      out.push(message);
+/**
+ * The messages of an operation, all messages of its channel when it doesn't list them.
+ */
+export function getOperationMessages(
+  messages: (MessageObject | ReferenceObject)[] | undefined,
+  channel: ChannelObject | undefined,
+): MessageEntry[] {
+  const out: MessageEntry[] = [];
+
+  if (messages) {
+    for (let i = 0; i < messages.length; i++) {
+      const value = messages[i];
+      // messages are referenced from the channel, like `#/channels/root/messages/hello`
+      const key = '$ref' in value ? value.$ref.slice(value.$ref.lastIndexOf('/') + 1) : String(i);
+      out.push({ key: decodePointer(key), value });
     }
+  } else if (channel?.messages) {
+    for (const key in channel.messages) out.push({ key, value: channel.messages[key] });
   }
+
   return out;
 }
 
+function decodePointer(segment: string): string {
+  return segment.replaceAll('~1', '/').replaceAll('~0', '~');
+}
+
+export function getMessageDisplayName(key: string, message: MessageObject): string {
+  return message.title || message.name || key;
+}
+
+export type MessageSchema =
+  | { schema: AsyncAPISchemaObject; schemaFormat?: undefined }
+  | {
+      /** the schema as it is, like an Avro record or a Protobuf definition */
+      schema: unknown;
+      schemaFormat: string;
+    };
+
+/** formats rendered with Schema UI: AsyncAPI, JSON Schema and OpenAPI schemas */
+const jsonSchemaFormat =
+  /^application\/(?:vnd\.aai\.asyncapi|schema|vnd\.oai\.openapi)(?:\+json|\+yaml)?(?:;|$)/;
+
 export function resolveMultiFormatSchema(
-  schema?: MultiFormatSchemaObject,
-): AsyncAPISchemaObject | undefined {
-  if (!schema) return;
-  if (typeof schema === 'object' && schema !== null && 'schema' in schema) {
-    return schema.schema;
+  value: MultiFormatSchemaObject | ReferenceObject | undefined,
+): MessageSchema | undefined {
+  const resolved = dereference(value);
+  if (resolved == null) return;
+  if (typeof resolved !== 'object' || !('schemaFormat' in resolved)) {
+    return { schema: resolved as AsyncAPISchemaObject };
   }
-  return schema;
+
+  const { schema, schemaFormat } = resolved;
+  if (!schemaFormat || jsonSchemaFormat.test(schemaFormat)) {
+    return { schema: dereference(schema) as AsyncAPISchemaObject };
+  }
+
+  // shown as it is, without the magic proxy
+  return { schema: getRaw(dereference(schema)), schemaFormat };
 }

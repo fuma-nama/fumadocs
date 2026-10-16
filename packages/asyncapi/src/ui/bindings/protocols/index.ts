@@ -1,5 +1,4 @@
 import type { BindingProtocol } from '@/types/asyncapi-3';
-import { isPlainObject } from 'shared-api/utils/is-plain-object';
 import type { ProtocolBindingDefinition } from '../shared';
 import { amqpBinding } from './amqp';
 import { amqp1Binding } from './amqp1';
@@ -15,6 +14,7 @@ import { mqtt5Binding } from './mqtt5';
 import { natsBinding } from './nats';
 import { pulsarBinding } from './pulsar';
 import { redisBinding } from './redis';
+import { ros2Binding } from './ros2';
 import { snsBinding } from './sns';
 import { solaceBinding } from './solace';
 import { sqsBinding } from './sqs';
@@ -42,6 +42,7 @@ export const protocolBindings = {
   stomp: stompBinding,
   redis: redisBinding,
   mercure: mercureBinding,
+  ros2: ros2Binding,
 } satisfies Record<BindingProtocol, ProtocolBindingDefinition>;
 
 export function getProtocolBinding(protocol: string): ProtocolBindingDefinition {
@@ -52,27 +53,4 @@ export function getProtocolBinding(protocol: string): ProtocolBindingDefinition 
     ...unknownBinding,
     label: protocol,
   };
-}
-
-export interface BindingEntry {
-  protocol: string;
-  binding: Record<string, unknown>;
-}
-
-export function getBindingEntries(bindings: object | undefined): {
-  protocols: BindingEntry[];
-  extensions: BindingEntry[];
-} {
-  const extensions: BindingEntry[] = [];
-  const protocols: BindingEntry[] = [];
-
-  for (const [k, v] of Object.entries(bindings ?? {})) {
-    if (!isPlainObject(v)) continue;
-
-    (k.startsWith('x-') ? extensions : protocols).push({
-      protocol: k,
-      binding: v,
-    });
-  }
-  return { extensions, protocols };
 }

@@ -7,22 +7,48 @@ export function getDefaultValues(server: ServerObject): Record<string, string> {
 
   for (const [k, v] of Object.entries(server.variables)) {
     const variable = dereference(v);
-    if (variable.default) out[k] = variable.default;
+    if (variable.default !== undefined) out[k] = variable.default;
   }
 
   return out;
 }
 
+/** fill the `{name}` variables of a template, the unknown ones are kept */
+export function fillVariables(template: string, variables: Record<string, string>): string {
+  return template.replace(/\{([^}]+)\}/g, (match, name: string) => variables[name] ?? match);
+}
+
+function getPathname(server: ServerObject, variables: Record<string, string>): string {
+  const pathname = fillVariables(server.pathname ?? '', variables).replace(/\/$/, '');
+  return pathname && !pathname.startsWith('/') ? `/${pathname}` : pathname;
+}
+
 export function resolveServerUrl(server: ServerObject, variables: Record<string, string>): string {
-  let host = server.host;
-  let pathname = server.pathname ?? '';
+  return `${server.protocol}://${fillVariables(server.host, variables)}${getPathname(server, variables)}`;
+}
 
-  for (const [key, value] of Object.entries(variables)) {
-    const token = `{${key}}`;
-    host = host.replaceAll(token, value);
-    pathname = pathname.replaceAll(token, value);
-  }
+/** protocols connecting to a URL, the channel address is a path of it */
+const urlProtocols = new Set(['ws', 'wss', 'http', 'https']);
 
-  if (pathname && !pathname.startsWith('/')) pathname = `/${pathname}`;
-  return `${server.protocol}://${host}${pathname}`;
+export function isUrlProtocol(protocol: string): boolean {
+  return urlProtocols.has(protocol);
+}
+
+/**
+ * Split the URL to a channel of URL protocols into the server part and the channel address as its path.
+ *
+ * The pathname of server isn't repeated when the address already starts with it.
+ */
+export function getUrlParts(
+  server: ServerObject,
+  variables: Record<string, string>,
+  address: string,
+): [server: string, path: string] {
+  const origin = `${server.protocol}://${fillVariables(server.host, variables)}`;
+  const pathname = getPathname(server, variables);
+  const path = address.startsWith('/') ? address : `/${address}`;
+
+  if (path === '/') return [origin + pathname, pathname ? '' : '/'];
+  if (!pathname || path === pathname || path.startsWith(`${pathname}/`)) return [origin, path];
+  return [origin + pathname, path];
 }

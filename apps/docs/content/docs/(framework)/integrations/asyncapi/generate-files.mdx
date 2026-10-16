@@ -49,51 +49,48 @@ void generateFiles({
 When set to `custom`, you can pass a function to fully customize the generation process:
 
 ```ts title="Example"
-import { generateFiles, OperationOutput } from '@fumadocs/asyncapi';
+import { generateFiles } from '@fumadocs/asyncapi';
 
 void generateFiles({
   per: 'custom',
   toPages(builder) {
-    const items = builder.extract();
+    for (const [id, item] of Object.entries(builder.document.operations ?? {})) {
+      const operation = builder.dereferenceShallow(item);
 
-    for (const op of items.operations) {
-      const { operation, channel, displayName } = builder.fromExtractedOperation(op)!;
-
-      const entry: OperationOutput = {
+      builder.create({
         type: 'operation',
         schemaId: builder.id,
-        item: op,
-        path: '...',
+        item: { id, action: operation.action },
+        path: `${id}.mdx`,
         info: {
-          title: displayName,
-          description: operation.description ?? channel.description,
+          title: operation.title ?? id,
+          description: operation.description,
         },
-      };
-
-      builder.create(entry);
+      });
     }
   },
 });
 ```
 
-When set to `tag`, adding `x-displayName` to the tag definition can control the title of each page.
+When set to `tag`, tags are matched by name. Define them in `info.tags` to give their pages a description, and `x-displayName` to control the title. Operations without tags are under `unknown`.
 
 ```yaml title="asyncapi.yaml"
-tags:
-  - name: lighting
-    description: Operations related to streetlights.
-    x-displayName: Lighting
+info:
+  tags:
+    - name: lighting
+      description: Operations related to streetlights.
+      x-displayName: Lighting
 ```
 
 ### `groupBy`
 
 In `operation` mode, you can group output files with folders.
 
-| value          | output                                |
-| -------------- | ------------------------------------- |
-| tag            | `{tag}/{operationId}.mdx`             |
-| channel        | `{channel_address}/{operationId}.mdx` |
-| none (default) | `{operationId}.mdx`                   |
+| value          | output                            |
+| -------------- | --------------------------------- |
+| tag            | `{tag}/{operationId}.mdx`         |
+| channel        | `{channel key}/{operationId}.mdx` |
+| none (default) | `{operationId}.mdx`               |
 
 ```ts
 import { generateFiles } from '@fumadocs/asyncapi';
@@ -184,7 +181,7 @@ import { generateFiles } from '@fumadocs/asyncapi';
 void generateFiles({
   name(output) {
     if (output.type === 'operation') {
-      const { operation } = this.fromExtractedOperation(output.item)!;
+      const operation = this.dereferenceShallow(this.document.operations?.[output.item.id]);
       console.log(operation);
 
       return `my-dir/${output.item.id}`;

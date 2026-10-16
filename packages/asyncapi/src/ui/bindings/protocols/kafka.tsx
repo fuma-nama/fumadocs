@@ -1,6 +1,5 @@
 'use client';
 import type {
-  AsyncAPISchemaObject,
   KafkaChannelBinding,
   KafkaMessageBinding,
   KafkaOperationBinding,
@@ -8,70 +7,14 @@ import type {
 } from '@/types/asyncapi-3';
 import {
   createBinding,
-  hasBindingFields,
   BindingFields,
-  BindingEmpty,
   BindingGroup,
   BindingFieldRow,
   BindingScalarValue,
   BindingSchema,
-  formatBindingScalar,
-  joinBindingSummary,
 } from '../shared';
 
-function getKafkaServerSummary(binding: KafkaServerBinding): string | undefined {
-  return joinBindingSummary(binding.schemaRegistryUrl, binding.schemaRegistryVendor);
-}
-
-function getKafkaChannelSummary(binding: KafkaChannelBinding): string | undefined {
-  const parts: string[] = [];
-  if (binding.topic) parts.push(binding.topic);
-  if (typeof binding.partitions === 'number') {
-    parts.push(`${binding.partitions} partition${binding.partitions === 1 ? '' : 's'}`);
-  }
-  if (typeof binding.replicas === 'number') {
-    parts.push(`${binding.replicas} replica${binding.replicas === 1 ? '' : 's'}`);
-  }
-  return parts.length > 0 ? parts.join(' · ') : undefined;
-}
-
-function getKafkaOperationSummary(binding: KafkaOperationBinding): string | undefined {
-  const parts: string[] = [];
-  const groupId = getBindingSchemaSummary(binding.groupId);
-  const clientId = getBindingSchemaSummary(binding.clientId);
-  if (binding.groupId) parts.push(`group: ${groupId}`);
-  if (clientId) parts.push(`client: ${clientId}`);
-  return parts.length > 0 ? parts.join(' · ') : undefined;
-}
-
-function getBindingSchemaSummary(schema: AsyncAPISchemaObject | undefined): string | undefined {
-  if (typeof schema !== 'object') return;
-
-  if (Array.isArray(schema.enum) && schema.enum.length > 0) {
-    return schema.enum.map((item) => formatBindingScalar(item)).join(', ');
-  }
-
-  if ('const' in schema) {
-    return formatBindingScalar(schema.const);
-  }
-
-  if ('default' in schema) {
-    return formatBindingScalar(schema.default);
-  }
-
-  if (typeof schema.type === 'string') {
-    return schema.type;
-  }
-}
-
-function getKafkaMessageSummary(binding: KafkaMessageBinding): string | undefined {
-  const key = getBindingSchemaSummary(binding.key);
-  return key ? `key: ${key}` : undefined;
-}
-
 function KafkaServerBinding({ binding }: { binding: KafkaServerBinding }) {
-  if (!hasBindingFields(binding)) return <BindingEmpty />;
-
   return (
     <BindingFields>
       {binding.schemaRegistryUrl && (
@@ -91,8 +34,6 @@ function KafkaServerBinding({ binding }: { binding: KafkaServerBinding }) {
 }
 
 function KafkaChannelBinding({ binding }: { binding: KafkaChannelBinding }) {
-  if (!hasBindingFields(binding)) return <BindingEmpty />;
-
   return (
     <BindingFields>
       {binding.topic && (
@@ -130,8 +71,6 @@ function KafkaChannelBinding({ binding }: { binding: KafkaChannelBinding }) {
 }
 
 function KafkaOperationBinding({ binding }: { binding: KafkaOperationBinding }) {
-  if (!hasBindingFields(binding)) return <BindingEmpty />;
-
   return (
     <BindingFields>
       {binding.groupId && (
@@ -151,8 +90,6 @@ function KafkaOperationBinding({ binding }: { binding: KafkaOperationBinding }) 
 }
 
 function KafkaMessageBinding({ binding }: { binding: KafkaMessageBinding }) {
-  if (!hasBindingFields(binding)) return <BindingEmpty />;
-
   return (
     <BindingFields>
       {binding.key && (
@@ -189,8 +126,4 @@ export const kafkaBinding = createBinding({
   Channel: KafkaChannelBinding,
   Operation: KafkaOperationBinding,
   Message: KafkaMessageBinding,
-  getServerSummary: getKafkaServerSummary,
-  getChannelSummary: getKafkaChannelSummary,
-  getOperationSummary: getKafkaOperationSummary,
-  getMessageSummary: getKafkaMessageSummary,
 });
