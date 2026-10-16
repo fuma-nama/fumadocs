@@ -12,14 +12,15 @@ import {
 import type { GeneratedPageProps, OperationItem } from '@/utils/pages/builder';
 import { createContext, type FC, type ReactNode, use, useMemo } from 'react';
 import type { SchemaUIOptions } from 'shared-api/components/schema';
-import type { AsyncAPIObject, OperationObject, ServerObject } from '@/types';
-import type { DereferencedDocument } from '@/utils/document/dereference';
-import { dereferenceBundledDocument } from '@/utils/document/dereference';
+import type { AsyncAPIObject, OperationObject } from '@/types';
+import {
+  type DereferencedDocument,
+  dereferenceBundledDocument,
+} from '@/utils/document/dereference';
 import type { CodeUsageGeneratorRegistry } from '@/codegen';
-import { dereference, type JsonSchema } from '@fumadocs/json-schema';
+import type { JsonSchema } from '@fumadocs/json-schema';
 import Slugger from 'github-slugger';
-import { getOperationDisplayName } from './schema';
-import { applyOperationTraits } from './traits';
+import { getOperation, getOperationDisplayName, getServers } from './schema';
 import {
   generateTypeScriptDefinitions as defaultTypeScriptDefinitions,
   type GenerateTypeScriptDefinitionsContext,
@@ -213,13 +214,7 @@ export function AsyncAPIProvider({
     [document, storageKeyPrefix],
   );
 
-  const servers = useMemo(() => {
-    const out: Record<string, ServerObject> = {};
-    for (const [k, v] of Object.entries(runtime.doc.dereferenced.servers ?? {}))
-      out[k] = dereference(v);
-
-    return out;
-  }, [runtime]);
+  const servers = useMemo(() => getServers(runtime.doc.dereferenced), [runtime.doc]);
 
   const { SchemaUI } = components;
   const render = useMemo<RenderContext>(
@@ -274,7 +269,7 @@ export function createAsyncAPIRenderer({
   const slots: AsyncAPIComponents = {
     SchemaUI: components.SchemaUI,
     // fills the Markdown, code block and heading slots the page didn't replace
-    ...createPageComponents({ ...options, shiki, components }),
+    ...createPageComponents({ shiki, shikiOptions: rest.shikiOptions, components }),
   };
 
   function Content({ showTitle, showDescription, operations }: AsyncAPIPageProps) {
@@ -286,10 +281,8 @@ export function createAsyncAPIRenderer({
       operations: operations?.map((item) => {
         let anchor: string | undefined;
         if (showTitle) {
-          const operation = dereference(doc.dereferenced.operations?.[item.id]);
-          anchor = slugger.slug(
-            operation ? getOperationDisplayName(item.id, applyOperationTraits(operation)) : item.id,
-          );
+          const operation = getOperation(doc.dereferenced, item.id);
+          anchor = slugger.slug(operation ? getOperationDisplayName(item.id, operation) : item.id);
         }
 
         return {

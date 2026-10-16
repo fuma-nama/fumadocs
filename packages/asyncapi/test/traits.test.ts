@@ -1,15 +1,18 @@
 import { describe, expect, test } from 'vitest';
 import { createMagicProxy } from '@scalar/json-magic/magic-proxy';
-import { applyMessageTraits, applyOperationTraits, mergeTraits } from '@/utils/traits';
+import { applyTraits } from '@/utils/traits';
 import type { MessageObject, OperationObject } from '@/types/asyncapi-3';
 
-describe('mergeTraits', () => {
+describe('applyTraits', () => {
   test('fills missing properties without overriding target', () => {
     expect(
-      mergeTraits({ description: 'Operation description' }, [
-        { name: 'UserSignup', description: 'Trait description' },
-        { tags: [{ name: 'user' }] },
-      ]),
+      applyTraits({
+        description: 'Operation description',
+        traits: [
+          { name: 'UserSignup', description: 'Trait description' },
+          { tags: [{ name: 'user' }] },
+        ],
+      }),
     ).toEqual({
       description: 'Operation description',
       name: 'UserSignup',
@@ -19,9 +22,12 @@ describe('mergeTraits', () => {
 
   test('deep merges nested objects like bindings', () => {
     expect(
-      mergeTraits({ bindings: { kafka: { groupId: { type: 'string' } } } }, [
-        { bindings: { kafka: { clientId: { type: 'string' } }, http: { method: 'POST' } } },
-      ]),
+      applyTraits({
+        bindings: { kafka: { groupId: { type: 'string' } } },
+        traits: [
+          { bindings: { kafka: { clientId: { type: 'string' } }, http: { method: 'POST' } } },
+        ],
+      }),
     ).toEqual({
       bindings: {
         kafka: {
@@ -35,26 +41,32 @@ describe('mergeTraits', () => {
 
   test('later traits override earlier ones, the target wins', () => {
     expect(
-      mergeTraits({ summary: 'target' }, [
-        { summary: 'first', description: 'first' },
-        { summary: 'second', description: 'second' },
-      ]),
+      applyTraits({
+        summary: 'target',
+        traits: [
+          { summary: 'first', description: 'first' },
+          { summary: 'second', description: 'second' },
+        ],
+      }),
     ).toEqual({ summary: 'target', description: 'second' });
   });
 
   test('null removes a property, arrays are replaced', () => {
     expect(
-      mergeTraits({ description: null, tags: [{ name: 'target' }] } as object, [
-        { description: 'trait', tags: [{ name: 'a' }, { name: 'b' }] },
-      ]),
+      applyTraits({
+        description: null,
+        tags: [{ name: 'target' }],
+        traits: [{ description: 'trait', tags: [{ name: 'a' }, { name: 'b' }] }],
+      }),
     ).toEqual({ tags: [{ name: 'target' }] });
   });
 
   test('does not override existing nested binding fields', () => {
     expect(
-      mergeTraits({ bindings: { kafka: { groupId: 'from-operation' } } }, [
-        { bindings: { kafka: { groupId: 'from-trait', clientId: 'from-trait' } } },
-      ]),
+      applyTraits({
+        bindings: { kafka: { groupId: 'from-operation' } },
+        traits: [{ bindings: { kafka: { groupId: 'from-trait', clientId: 'from-trait' } } }],
+      }),
     ).toEqual({
       bindings: {
         kafka: {
@@ -66,9 +78,9 @@ describe('mergeTraits', () => {
   });
 });
 
-describe('applyOperationTraits', () => {
+describe('operations', () => {
   test('merges operation traits', () => {
-    const operation = applyOperationTraits({
+    const operation = applyTraits({
       action: 'receive',
       channel: { address: 'test' },
       bindings: {
@@ -97,9 +109,9 @@ describe('applyOperationTraits', () => {
   });
 });
 
-describe('applyMessageTraits', () => {
+describe('messages', () => {
   test('merges message traits into existing headers', () => {
-    const message = applyMessageTraits({
+    const message = applyTraits({
       name: 'lightMeasured',
       headers: {
         type: 'object',
@@ -130,7 +142,7 @@ describe('applyMessageTraits', () => {
   });
 
   test('applies trait headers when message has none', () => {
-    const message = applyMessageTraits({
+    const message = applyTraits({
       name: 'lightMeasured',
       traits: [
         {
@@ -154,7 +166,7 @@ describe('applyMessageTraits', () => {
 
   test('keeps properties named `traits` in schemas', () => {
     const headers = (traits: object) => ({ type: 'object', properties: { traits } });
-    const message = applyMessageTraits({
+    const message = applyTraits({
       headers: headers({ type: 'string' }),
       traits: [{ headers: headers({ type: 'array' }) }],
     } as MessageObject);
@@ -175,7 +187,7 @@ describe('applyMessageTraits', () => {
       },
     });
 
-    const headers = applyMessageTraits(doc.message as MessageObject).headers as {
+    const headers = applyTraits(doc.message as MessageObject).headers as {
       properties: { child: unknown };
     };
     // stops at the schema being merged
