@@ -104,7 +104,7 @@ function createRenderer(CodeBlock: FC<CodeBlockProps>) {
 
   return (md: string): ReactNode =>
     toJsxRuntime(
-      md && !syntax.test(md)
+      typeof md === 'string' && md && !syntax.test(md)
         ? {
             type: 'root',
             children: [
