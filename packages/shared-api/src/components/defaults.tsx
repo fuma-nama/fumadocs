@@ -1,5 +1,4 @@
 'use client';
-/* eslint-disable @typescript-eslint/no-explicit-any -- rehype-react without types */
 import {
   Children,
   type ComponentProps,
@@ -57,7 +56,7 @@ export function createPageComponents({
       <DynamicCodeBlock highlighter={() => shiki.getOrInit()} options={shikiOptions} {...props} />
     ));
 
-  let processor: ReturnType<typeof createProcessor>;
+  let render: ReturnType<typeof createRenderer>;
 
   return {
     CodeBlock,
@@ -65,9 +64,9 @@ export function createPageComponents({
       components.Markdown ??
       (({ md }) =>
         useMemo(() => {
-          processor ??= createProcessor(CodeBlock);
+          render ??= createRenderer(CodeBlock);
 
-          return processor.processSync(md).result as ReactNode;
+          return render(md);
         }, [md])),
     Heading:
       components.Heading ??
@@ -75,7 +74,13 @@ export function createPageComponents({
   };
 }
 
-function createProcessor(CodeBlock: FC<CodeBlockProps>) {
+/**
+ * Markdown syntax, line breaks, block markers at the start, surrounding whitespace and GFM autolinks.
+ * Text without them renders as a paragraph of itself.
+ */
+const syntax = /[\0\n\r&*<@[\\_`~]|^[\s\d#+>-]|\s$|:\/\/|www\./i;
+
+function createRenderer(CodeBlock: FC<CodeBlockProps>) {
   function Pre(props: ComponentProps<'pre'>) {
     const code = Children.only(props.children) as ReactElement;
     const codeProps = code.props as ComponentProps<'code'>;
@@ -91,22 +96,27 @@ function createProcessor(CodeBlock: FC<CodeBlockProps>) {
     return <CodeBlock lang={lang} code={content.trimEnd()} />;
   }
 
-  const mdxComponents = {
-    ...defaultMdxComponents,
-    img: 'img',
-    pre: Pre,
+  const options = {
+    ...JsxRuntime,
+    components: { ...defaultMdxComponents, img: 'img', pre: Pre },
   };
+  const processor = remark().use(remarkGfm).use(remarkRehype);
 
-  function rehypeReact(this: any) {
-    this.compiler = (tree: any, file: any) => {
-      return toJsxRuntime(tree, {
-        development: false,
-        filePath: file.path,
-        ...JsxRuntime,
-        components: mdxComponents,
-      });
-    };
-  }
-
-  return remark().use(remarkGfm).use(remarkRehype).use(rehypeReact);
+  return (md: string): ReactNode =>
+    toJsxRuntime(
+      md && !syntax.test(md)
+        ? {
+            type: 'root',
+            children: [
+              {
+                type: 'element',
+                tagName: 'p',
+                properties: {},
+                children: [{ type: 'text', value: md }],
+              },
+            ],
+          }
+        : processor.runSync(processor.parse(md)),
+      options,
+    );
 }
