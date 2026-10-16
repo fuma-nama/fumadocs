@@ -1,12 +1,12 @@
 'use client';
 import { Fragment, type ReactNode, useState } from 'react';
 import { Dialog } from '@base-ui/react/dialog';
-import type { MediaTypeObject, SecuritySchemeObject } from '@/types';
+import type { Awaitable, MediaTypeObject, SecuritySchemeObject } from '@/types';
 import { RequestTabs, UsageTabs } from '@/ui/operation/usage-tabs';
 import { MethodLabel } from '@/ui/components/method-label';
 import { SchemaUI } from '@/ui/components/schema';
 import { Badge } from 'shared-api/components/badge';
-import { useOpenAPI, useRenderContext, useTypeScriptDefinitions } from '@/utils/create-page';
+import { useOpenAPI, useRenderContext } from '@/utils/create-page';
 import {
   OperationProvider,
   type OperationCallback,
@@ -354,11 +354,7 @@ function MediaContent({
   request?: boolean;
 }) {
   const { method } = useOperation();
-  const ts = useTypeScriptDefinitions(schema, {
-    name: request ? 'RequestBody' : 'ResponseBody',
-    readOnly: !request,
-    writeOnly: request,
-  });
+  const { doc, generateTypeScriptDefinitions } = useOpenAPI();
 
   if (!schema)
     return (
@@ -374,8 +370,18 @@ function MediaContent({
         as: 'body',
         required,
         selector,
-        actions: ts && (
-          <CopyTypeScript code={ts} name={request ? 'request body' : 'response body'} />
+        actions: generateTypeScriptDefinitions && (
+          <CopyTypeScript
+            name={request ? 'request body' : 'response body'}
+            generate={() =>
+              generateTypeScriptDefinitions(schema, {
+                name: request ? 'RequestBody' : 'ResponseBody',
+                readOnly: !request,
+                writeOnly: request,
+                doc,
+              })
+            }
+          />
         ),
       }}
       root={schema}
@@ -385,9 +391,21 @@ function MediaContent({
   );
 }
 
-function CopyTypeScript({ code, name }: { code: string; name: string }) {
+function CopyTypeScript({
+  name,
+  generate,
+}: {
+  name: string;
+  generate: () => Awaitable<string | undefined>;
+}) {
   const t = useTranslations({ note: 'TypeScript definitions' });
-  const [isChecked, onCopy] = useCopyButton(() => navigator.clipboard.writeText(code));
+  const [isChecked, onCopy] = useCopyButton(() => {
+    const code = generate();
+    if (typeof code === 'string') return navigator.clipboard.writeText(code);
+    return Promise.resolve(code).then((code) => {
+      if (code) return navigator.clipboard.writeText(code);
+    });
+  });
 
   return (
     <button

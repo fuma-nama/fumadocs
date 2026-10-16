@@ -21,9 +21,10 @@ export default defineConfig({
     'react-dom/server.edge': 'react-dom/server.node',
   },
   deps: {
-    // json-magic imports it only to block private networks, which isn't enabled
-    neverBundle: ['undici'],
-    onlyImport: ['hono', 'undici'],
+    // json-magic imports undici only to block private networks, which isn't enabled.
+    // code blocks are highlighted in the browser, the server never loads Shiki.
+    neverBundle: ['undici', /^shiki(\/|$)/],
+    onlyImport: ['hono', 'undici', 'shiki'],
   },
   checks: {
     moduleLevelDirective: false,

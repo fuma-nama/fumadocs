@@ -1,7 +1,7 @@
 import type { SearchAPI, SearchServer } from './server';
 import Search, { type DocumentOptions } from 'flexsearch';
 import { createEndpoint } from './server/endpoint';
-import { buildBreadcrumbs, buildIndexDefault, type SharedIndex } from './server/build-index';
+import { buildIndexDefault, createBreadcrumbs, type SharedIndex } from './server/build-index';
 import { buildDocuments } from './server/build-doc';
 import type { LoaderConfig, LoaderOutput } from '@/source';
 import type { Awaitable } from '@/types';
@@ -154,13 +154,14 @@ export function flexsearchFromSource<C extends LoaderConfig>(
   const { buildIndex = buildIndexDefault, ...rest } = options;
 
   async function initServer(loader: LoaderOutput<C>): Promise<SearchServer> {
+    const getBreadcrumbs = createBreadcrumbs(loader);
     const indexes = await Promise.all(
       loader.getPages().map(async (page): Promise<IndexWithLocale> => {
         const index = await buildIndex(page);
         return {
           ...index,
           locale: page.locale!,
-          breadcrumbs: index.breadcrumbs ?? buildBreadcrumbs(loader, page),
+          breadcrumbs: index.breadcrumbs ?? getBreadcrumbs(page),
         };
       }),
     );
