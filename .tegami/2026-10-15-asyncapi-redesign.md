@@ -43,6 +43,7 @@ packages:
 | `OperationReply.messages` have `title` and `payload`            | `OperationMessage[]`                |
 | `action` prop of `<Operation />` and `<OperationProvider />`    | removed, read from the operation    |
 | `preloaded.proxyUrl` of `AsyncAPIPageProps_Preloaded`           | removed, it was never used          |
+| `meta.groupStyle` of `generateFiles()`                          | removed, use `folderStyle`          |
 
 - Added the `playground` option of `createAsyncAPIPage()` with `transports`, and `usePlayground()`, `usePlaygroundTransport()` and `sseTransport` from `@fumadocs/asyncapi/playground`.
 - Added the `generateTypeScriptDefinitions` option, payloads and headers can be copied as TypeScript types.

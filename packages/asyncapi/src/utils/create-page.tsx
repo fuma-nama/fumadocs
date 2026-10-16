@@ -112,10 +112,7 @@ export interface AsyncAPIRenderOptions {
    * Pass `false` to disable it.
    */
   generateTypeScriptDefinitions?:
-    | ((
-        schema: JsonSchema,
-        ctx: GenerateTypeScriptDefinitionsContext,
-      ) => string | undefined | Promise<string | undefined>)
+    | ((schema: JsonSchema, ctx: GenerateTypeScriptDefinitionsContext) => string | undefined)
     | false;
 }
 

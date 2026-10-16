@@ -1,5 +1,5 @@
 'use client';
-import { use, useMemo } from 'react';
+import { useMemo } from 'react';
 import { Check, Copy } from 'lucide-react';
 import { useTranslations } from '@fuma-translate/react';
 import { buttonVariants } from 'fumadocs-ui/components/ui/button';
@@ -148,7 +148,7 @@ function JsonSchemaCard({
   // like `PlanetCreatedPayload`
   const typeName =
     idToTitle(item.id).replace(/\W/g, '') + (part === 'payload' ? 'Payload' : 'Headers');
-  const result = useMemo(
+  const ts = useMemo(
     () =>
       generateTypeScriptDefinitions
         ? generateTypeScriptDefinitions(schema as JsonSchema, {
@@ -160,8 +160,6 @@ function JsonSchemaCard({
         : undefined,
     [generateTypeScriptDefinitions, schema, typeName, received, doc],
   );
-  // generators returning promises are awaited on server components
-  const ts = result instanceof Promise ? use(result) : result;
 
   return (
     <SchemaUI

@@ -8,7 +8,7 @@ import {
 } from '@/utils/pages/builder';
 import type { InternalAsyncAPIMeta } from '@/server';
 import { toStaticData } from '@/utils/pages/to-static-data';
-import { doubleQuote } from '@/utils/string-utils';
+import { doubleQuote, jsxString } from '@/utils/string-utils';
 
 export interface PagesToTextOptions {
   imports?: {
@@ -114,7 +114,7 @@ function pageContent({
   document,
   operations,
 }: GeneratedPageProps): string {
-  let out = `<AsyncAPIPage document=${doubleQuote(document)}`;
+  let out = `<AsyncAPIPage document=${jsxString(document)}`;
   // only the fields of `OperationItem`
   if (operations) out += ` operations={${JSON.stringify(operations, ['id', 'action'])}}`;
   if (showTitle) out += ' showTitle';

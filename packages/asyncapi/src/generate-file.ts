@@ -11,7 +11,7 @@ import {
   type OutputEntry,
 } from '@/utils/pages/builder';
 import type { DistributiveOmit } from './types';
-import { doubleQuote } from './utils/string-utils';
+import { jsxString } from './utils/string-utils';
 
 export interface OutputFile {
   path: string;
@@ -44,7 +44,6 @@ interface GenerateFilesConfig extends PagesToTextOptions {
 }
 
 interface MetaOptions {
-  groupStyle?: 'folder' | 'separator';
   folderStyle?: 'folder' | 'separator';
 }
 
@@ -133,7 +132,7 @@ export async function generateFilesOnly(
 
 function generateMeta(context: BeforeWriteContext, options: MetaOptions): OutputFile[] {
   const files: OutputFile[] = [];
-  const folderStyle = options.folderStyle ?? options.groupStyle ?? 'folder';
+  const folderStyle = options.folderStyle ?? 'folder';
 
   function scan(entries: OutputEntry[], parent?: OutputGroup) {
     for (const entry of entries) {
@@ -197,9 +196,9 @@ function writeIndexFiles(
       // cannot link to groups
       if (entry.type === 'group') return;
       const descriptionAttr = entry.info.description
-        ? `description=${doubleQuote(entry.info.description)} `
+        ? `description=${jsxString(entry.info.description)} `
         : '';
-      cards += `\n<Card href="${urlFn(entry.path)}" title=${doubleQuote(entry.info.title)} ${descriptionAttr}/>`;
+      cards += `\n<Card href="${urlFn(entry.path)}" title=${jsxString(entry.info.title)} ${descriptionAttr}/>`;
     }
 
     for (const item of index.only ?? Object.keys(generatedEntries)) {

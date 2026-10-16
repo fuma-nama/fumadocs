@@ -7,6 +7,7 @@ import { generateTypeScriptDefinitions } from '@/utils/typescript';
 import { toMarkdown } from '@/utils/pages/to-markdown';
 import { fromSchema } from '@/utils/pages/builder';
 import { createAutoPreset } from '@/utils/pages/preset-auto';
+import { jsxString } from '@/utils/string-utils';
 import type { AsyncAPIObject, ServerObject } from '@/types';
 
 describe('getUrlParts', () => {
@@ -214,7 +215,7 @@ describe('toMarkdown', () => {
         room: {
           address: '/rooms/{roomId}',
           description: 'Messages of a room.',
-          parameters: { roomId: { description: 'The room' } },
+          parameters: { roomId: { description: 'The room', enum: ['general', 'random'] } },
           messages: {
             said: {
               title: 'Said',
@@ -242,10 +243,17 @@ describe('toMarkdown', () => {
     expect(text).toContain('Messages of a room.\n\nChat sends these messages to you.');
     expect(text).toContain('Address: `/rooms/{roomId}`');
     expect(text).toContain('- `ws://localhost:8080` (Local, ws)');
-    expect(text).toContain('- `roomId`: The room');
+    expect(text).toContain('- `roomId`: The room. One of `general`, `random`.');
     expect(text).toContain('Payload: `SaidPayload`');
     expect(text).toContain('export type OnSaidMessage = SaidPayload;');
     expect(text).toContain('readonly id?: number;');
     expect(text).toContain('text?: string;');
+  });
+});
+
+describe('jsxString', () => {
+  test('attribute values as written, quotes in an expression', () => {
+    expect(jsxString('C:\\docs\\api.yaml')).toBe('"C:\\docs\\api.yaml"');
+    expect(jsxString('The "Light" topic')).toBe('{"The \\"Light\\" topic"}');
   });
 });

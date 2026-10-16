@@ -74,11 +74,13 @@ export function toMarkdown(page: GeneratedPageProps, document: AsyncAPIObject): 
 
     lines = [];
     for (const { name: key, parameter } of info.parameters) {
-      let line = `- \`${key}\``;
-      if (parameter.description) line += `: ${parameter.description}`;
-      if (parameter.enum) line += ` One of ${inlineCode(parameter.enum)}.`;
-      if (parameter.default) line += ` Defaults to \`${parameter.default}\`.`;
-      lines.push(line);
+      let notes = parameter.description ?? '';
+      // sentences after a description without its own period run into it
+      if (notes && !/[.!?]$/.test(notes)) notes += '.';
+      if (parameter.enum) notes += ` One of ${inlineCode(parameter.enum)}.`;
+      if (parameter.default) notes += ` Defaults to \`${parameter.default}\`.`;
+      notes = notes.trimStart();
+      lines.push(notes ? `- \`${key}\`: ${notes}` : `- \`${key}\``);
     }
     if (lines.length > 0) out.push(`${heading} Address Parameters`, lines.join('\n'));
 
