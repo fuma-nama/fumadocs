@@ -60,3 +60,21 @@ test('data engine: basic', () => {
     ]
   `);
 });
+
+test('data engine: `__proto__` is an own field', () => {
+  const engine = new DataEngine({});
+  engine.init(['body', '__proto__'], 'value');
+  engine.init(['body', 'nested', '__proto__', 'x'], 1);
+  const data = engine.getData() as Record<string, Record<string, unknown>>;
+
+  expect(Object.hasOwn(data.body, '__proto__')).toBe(true);
+  expect(JSON.stringify(data)).toBe(
+    '{"body":{"__proto__":"value","nested":{"__proto__":{"x":1}}}}',
+  );
+  expect(engine.get(['other', '__proto__'])).toBeUndefined();
+  expect(engine.update(['body', '__proto__'], 'next')).toBe(true);
+  expect(engine.get(['body', '__proto__'])).toBe('next');
+  expect(engine.delete(['body', '__proto__'])).toBe('next');
+  expect(Object.hasOwn(data.body, '__proto__')).toBe(false);
+  expect(Object.keys(Object.prototype)).toEqual([]);
+});

@@ -9,6 +9,11 @@ import type { FieldKey } from './types';
 
 export type DefaultValue<T = unknown> = T | (() => T);
 
+/** set an own property, assigning to `__proto__` would change the prototype */
+function setOwn(obj: object, key: string | number, value: unknown) {
+  Object.defineProperty(obj, key, { value, writable: true, enumerable: true, configurable: true });
+}
+
 export function getDefaultValue<T>(defaultValue: DefaultValue<T>): T {
   return typeof defaultValue === 'function' ? (defaultValue as () => T)() : defaultValue;
 }
@@ -154,12 +159,12 @@ export class DataEngine {
     for (let i = 0; i < field.length; i++) {
       const key = field[i];
       // @ts-expect-error -- allow access
-      const value: unknown = parent[key];
+      const value: unknown = Object.hasOwn(parent, key) ? parent[key] : undefined;
 
       if (i === field.length - 1) {
         if (value !== undefined) return value;
-        // @ts-expect-error -- allow access
-        const out = (parent[key] = getDefaultValue(defaultValue));
+        const out = getDefaultValue(defaultValue);
+        setOwn(parent, key, out);
 
         fieldsToInit.push(field);
         for (const initField of fieldsToInit) this.listeners.onInit(initField, ctx);
@@ -170,8 +175,9 @@ export class DataEngine {
         parentKey.push(key);
       } else {
         const nextKey = field[i + 1];
-        // @ts-expect-error -- allow access
-        parent = parent[key] = typeof nextKey === 'number' ? new Array(nextKey + 1) : {};
+        const child = typeof nextKey === 'number' ? new Array(nextKey + 1) : {};
+        setOwn(parent, key, child);
+        parent = child;
 
         if (value === undefined) {
           initStart ??= [...parentKey];
@@ -204,7 +210,7 @@ export class DataEngine {
       // it will change children's field value when removed at middle
       this.listeners.onUpdate(parentKey, { swallow: isLast, ...ctx });
       return deleted[0];
-    } else if (isPlainObject(parent) && prop in parent) {
+    } else if (isPlainObject(parent) && Object.hasOwn(parent, prop)) {
       const temp = parent[prop];
       delete parent[prop];
       this.listeners.onDelete(key, ctx);

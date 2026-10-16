@@ -17,9 +17,9 @@ export async function runStart({
   overrideNodeEnv('production');
   const port = await getFreePort(defaultPort);
   const serveFileUrl = pathToFileURL(path.resolve(baseDir, 'dist', 'waku', 'serve-node.js')).href;
-  if (host) {
-    process.env.HOST = host;
-  }
+  // the server listens on all interfaces without a host
+  host ??= process.env.HOST || 'localhost';
+  process.env.HOST = host;
   process.env.PORT = String(port);
   process.env.ROOT_DIR = process.cwd();
   if (!dirs || dirs.length === 0) {
@@ -30,7 +30,7 @@ export async function runStart({
   process.chdir(baseDir);
   await import(serveFileUrl);
 
-  console.log(`ready: Listening on http://${host || 'localhost'}:${port}/`);
+  console.log(`ready: Listening on http://${host}:${port}/`);
 }
 
 async function getFreePort(startPort: number): Promise<number> {

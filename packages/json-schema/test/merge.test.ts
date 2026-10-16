@@ -377,3 +377,16 @@ describe('Merge object schemas', () => {
     ).toEqual(false);
   });
 });
+
+test('Merge properties named `__proto__`', () => {
+  const result = mergeAllOf({
+    allOf: [
+      JSON.parse('{"properties":{"__proto__":{"type":"string"},"constructor":{"type":"string"}}}'),
+      JSON.parse('{"properties":{"__proto__":{"minLength":1}}}'),
+    ],
+  });
+
+  expect(JSON.stringify(result)).toBe(
+    '{"properties":{"__proto__":{"type":"string","minLength":1},"constructor":{"type":"string"}}}',
+  );
+});
