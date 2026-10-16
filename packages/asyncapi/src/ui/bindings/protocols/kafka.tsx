@@ -5,118 +5,51 @@ import type {
   KafkaOperationBinding,
   KafkaServerBinding,
 } from '@/types/asyncapi-3';
-import {
-  createBinding,
-  BindingFields,
-  BindingGroup,
-  BindingFieldRow,
-  BindingScalarValue,
-  BindingSchema,
-} from '../shared';
+import { CodeRow, createBinding, Fields, GroupRow, SchemaRow, ValueRow } from '../shared';
 
 function KafkaServerBinding({ binding }: { binding: KafkaServerBinding }) {
   return (
-    <BindingFields>
-      {binding.schemaRegistryUrl && (
-        <BindingFieldRow
-          label="Schema Registry URL"
-          value={<code className="text-xs">{binding.schemaRegistryUrl}</code>}
-        />
-      )}
-      {binding.schemaRegistryVendor && (
-        <BindingFieldRow
-          label="Schema Registry Vendor"
-          value={<code className="text-xs">{binding.schemaRegistryVendor}</code>}
-        />
-      )}
-    </BindingFields>
+    <Fields>
+      <CodeRow label="Schema Registry URL" value={binding.schemaRegistryUrl} />
+      <CodeRow label="Schema Registry Vendor" value={binding.schemaRegistryVendor} />
+    </Fields>
   );
 }
 
 function KafkaChannelBinding({ binding }: { binding: KafkaChannelBinding }) {
   return (
-    <BindingFields>
-      {binding.topic && (
-        <BindingFieldRow label="Topic" value={<code className="text-xs">{binding.topic}</code>} />
-      )}
-      {typeof binding.partitions === 'number' && (
-        <BindingFieldRow
-          label="Partitions"
-          value={<BindingScalarValue value={binding.partitions} />}
-        />
-      )}
-      {typeof binding.replicas === 'number' && (
-        <BindingFieldRow label="Replicas" value={<BindingScalarValue value={binding.replicas} />} />
-      )}
+    <Fields>
+      <CodeRow label="Topic" value={binding.topic} />
+      <ValueRow label="Partitions" value={binding.partitions} />
+      <ValueRow label="Replicas" value={binding.replicas} />
       {binding.topicConfiguration && (
-        <BindingFieldRow
-          label="Topic Configuration"
-          value={
-            <BindingGroup title="Kafka topic settings">
-              <BindingFields>
-                {Object.entries(binding.topicConfiguration).map(([key, value]) => (
-                  <BindingFieldRow
-                    key={key}
-                    label={key}
-                    value={<BindingScalarValue value={value} />}
-                  />
-                ))}
-              </BindingFields>
-            </BindingGroup>
-          }
-        />
+        <GroupRow label="Topic Configuration" title="Kafka topic settings">
+          {Object.entries(binding.topicConfiguration).map(([key, value]) => (
+            <ValueRow key={key} label={key} value={value} />
+          ))}
+        </GroupRow>
       )}
-    </BindingFields>
+    </Fields>
   );
 }
 
 function KafkaOperationBinding({ binding }: { binding: KafkaOperationBinding }) {
   return (
-    <BindingFields>
-      {binding.groupId && (
-        <BindingFieldRow
-          label="Consumer Group"
-          value={<BindingSchema name="groupId" schema={binding.groupId} />}
-        />
-      )}
-      {binding.clientId && (
-        <BindingFieldRow
-          label="Client ID"
-          value={<BindingSchema name="clientId" schema={binding.clientId} />}
-        />
-      )}
-    </BindingFields>
+    <Fields>
+      <SchemaRow label="Consumer Group" name="groupId" value={binding.groupId} />
+      <SchemaRow label="Client ID" name="clientId" value={binding.clientId} />
+    </Fields>
   );
 }
 
 function KafkaMessageBinding({ binding }: { binding: KafkaMessageBinding }) {
   return (
-    <BindingFields>
-      {binding.key && (
-        <BindingFieldRow
-          label="Message Key"
-          value={<BindingSchema name="key" schema={binding.key} />}
-        />
-      )}
-      {binding.schemaIdLocation && (
-        <BindingFieldRow
-          label="Schema ID Location"
-          value={<BindingScalarValue value={binding.schemaIdLocation} />}
-        />
-      )}
-      {binding.schemaIdPayloadEncoding && (
-        <BindingFieldRow
-          label="Schema ID Payload Encoding"
-          value={<code className="text-xs">{binding.schemaIdPayloadEncoding}</code>}
-        />
-      )}
-      {binding.schemaLookupStrategy && (
-        <BindingFieldRow
-          label="Schema Lookup Strategy"
-          value={<code className="text-xs">{binding.schemaLookupStrategy}</code>}
-        />
-      )}
-    </BindingFields>
+    <Fields>
+      <SchemaRow label="Message Key" name="key" value={binding.key} />
+      <ValueRow label="Schema ID Location" value={binding.schemaIdLocation} />
+      <CodeRow label="Schema ID Payload Encoding" value={binding.schemaIdPayloadEncoding} />
+      <CodeRow label="Schema Lookup Strategy" value={binding.schemaLookupStrategy} />
+    </Fields>
   );
 }
 

@@ -4,6 +4,7 @@ import { useTranslations } from '@fuma-translate/react';
 import { SelectTab, SelectTabs, SelectTabTrigger } from 'shared-api/components/select-tab';
 import type { OAuthFlowObject, OAuthFlowsObject, SecuritySchemeObject } from '@/types';
 import { type SecurityRequirement, useOperationSecurity } from '@/operation';
+import { useServer } from '@/utils/use-server';
 import { Markdown } from '@/ui/components/markdown';
 import { SectionHeader } from './section';
 
@@ -13,6 +14,7 @@ import { SectionHeader } from './section';
 export function AuthSection({ headingLevel }: { headingLevel: number }) {
   const t = useTranslations({ note: 'operation page' });
   const groups = useSecurityGroups();
+  const { server } = useServer();
   if (groups.length === 0) return null;
 
   return (
@@ -26,7 +28,8 @@ export function AuthSection({ headingLevel }: { headingLevel: number }) {
                 {i === 0 ? t('To connect to the server') : t('To perform the operation')}
               </p>
             )}
-            <RequirementCard items={items} />
+            {/* the lists differ by server, select their first scheme again */}
+            <RequirementCard key={server?.id} items={items} />
           </div>
         ))}
       </div>
@@ -167,9 +170,7 @@ function SchemeRow({ scheme }: { scheme: SecuritySchemeObject }) {
       )}
       {scheme.type === 'openIdConnect' && scheme.openIdConnectUrl && (
         <Details>
-          <Detail label={t('Discovery URL')}>
-            <code className="break-all">{scheme.openIdConnectUrl}</code>
-          </Detail>
+          <UrlDetail label={t('Discovery URL')} url={scheme.openIdConnectUrl} />
         </Details>
       )}
       {scheme.type === 'oauth2' && scheme.flows && <OAuthFlows flows={scheme.flows} />}
@@ -179,7 +180,7 @@ function SchemeRow({ scheme }: { scheme: SecuritySchemeObject }) {
 
 function OAuthFlows({ flows }: { flows: OAuthFlowsObject }) {
   const t = useTranslations({ note: 'security scheme' });
-  const names: Record<keyof OAuthFlowsObject & string, string> = {
+  const names = {
     authorizationCode: t('Authorization code'),
     clientCredentials: t('Client credentials'),
     implicit: t('Implicit'),
@@ -193,21 +194,9 @@ function OAuthFlows({ flows }: { flows: OAuthFlowsObject }) {
 
     return (
       <Details key={key} title={title}>
-        {flow.authorizationUrl && (
-          <Detail label={t('Authorization URL')}>
-            <code className="break-all">{flow.authorizationUrl}</code>
-          </Detail>
-        )}
-        {flow.tokenUrl && (
-          <Detail label={t('Token URL')}>
-            <code className="break-all">{flow.tokenUrl}</code>
-          </Detail>
-        )}
-        {flow.refreshUrl && (
-          <Detail label={t('Refresh URL')}>
-            <code className="break-all">{flow.refreshUrl}</code>
-          </Detail>
-        )}
+        <UrlDetail label={t('Authorization URL')} url={flow.authorizationUrl} />
+        <UrlDetail label={t('Token URL')} url={flow.tokenUrl} />
+        <UrlDetail label={t('Refresh URL')} url={flow.refreshUrl} />
         {scopes.length > 0 && (
           <Detail label={t('Scopes')}>
             <dl className="grid grid-cols-[auto_minmax(0,1fr)] gap-x-3 gap-y-1">
@@ -242,5 +231,15 @@ function Detail({ label, children }: { label: string; children: ReactNode }) {
       <dt className="text-fd-muted-foreground">{label}</dt>
       <dd className="min-w-0">{children}</dd>
     </div>
+  );
+}
+
+function UrlDetail({ label, url }: { label: string; url?: string }) {
+  if (!url) return null;
+
+  return (
+    <Detail label={label}>
+      <code className="break-all">{url}</code>
+    </Detail>
   );
 }

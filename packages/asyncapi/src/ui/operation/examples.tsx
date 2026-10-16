@@ -4,18 +4,11 @@ import { useTranslations } from '@fuma-translate/react';
 import { cardCodeBlock, exampleCardClassName, ExampleSelect } from 'shared-api/components/example';
 import type { OperationMessage } from '@/operation';
 import { ClientCodeBlock } from '@/ui/components/codeblock';
-import { cn } from '@/utils/cn';
 
-type Part = 'payload' | 'headers';
+export type Part = 'payload' | 'headers';
 
-/** the examples of a message, one shown at a time with its name and summary on top */
-export function MessageExamples({
-  item,
-  className,
-}: {
-  item: OperationMessage;
-  className?: string;
-}) {
+/** the examples of a message beside its schemas, one shown at a time with its name and summary on top */
+export function MessageExamples({ item }: { item: OperationMessage }) {
   const t = useTranslations({ note: 'message example' });
   const { examples } = item;
   const [selected, setSelected] = useState(0);
@@ -31,7 +24,7 @@ export function MessageExamples({
   const json = typeof value !== 'string';
 
   return (
-    <div className={cn(exampleCardClassName, 'not-prose', className)}>
+    <div className={`${exampleCardClassName} not-prose @4xl:w-[400px] @4xl:shrink-0`}>
       <div className="shrink-0 border-b ps-4 pe-1.5">
         {/* as tall as the first row of schema cards beside it */}
         <div className="flex h-9 items-center gap-2 text-[0.8125rem] font-medium">

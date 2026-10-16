@@ -1,5 +1,9 @@
 'use client';
+import { use, useMemo } from 'react';
+import { Check, Copy } from 'lucide-react';
 import { useTranslations } from '@fuma-translate/react';
+import { buttonVariants } from 'fumadocs-ui/components/ui/button';
+import { useCopyButton } from 'fumadocs-ui/utils/use-copy-button';
 import { dereference, type JsonSchema } from '@fumadocs/json-schema';
 import {
   AccordionContent,
@@ -9,40 +13,18 @@ import {
   AccordionTrigger,
 } from 'shared-api/components/accordion';
 import { useAnchorId } from 'shared-api/auto-anchor';
+import { idToTitle } from 'shared-api/utils/id-to-title';
 import type { MessageSchema, OperationMessage } from '@/operation';
 import type { AsyncAPISchemaObject } from '@/types';
+import { useAsyncAPI, useRenderContext } from '@/utils/create-page';
+import { cn } from '@/utils/cn';
 import { SchemaUI } from '@/ui/components/schema';
 import { Markdown } from '@/ui/components/markdown';
 import { ClientCodeBlock } from '@/ui/components/codeblock';
-import { MessageBindings } from '@/ui/bindings';
 import { MessageName } from '@/ui/components/message-name';
-import { CopyTypeScript, useTypeScriptDefinitions } from '@/ui/components/typescript';
-import { idToTitle } from 'shared-api/utils/id-to-title';
-import { MessageExamples } from './examples';
-import { ExternalDocs, SectionHeader } from './section';
-
-/**
- * Messages of an operation as an accordion.
- */
-export function MessagesSection({
-  id,
-  title,
-  messages,
-  headingLevel,
-}: {
-  /** anchor of section, the messages are under it */
-  id: string;
-  title: string;
-  messages: OperationMessage[];
-  headingLevel: number;
-}) {
-  return (
-    <>
-      <SectionHeader id={id} depth={headingLevel} title={title} />
-      <MessageList id={id} messages={messages} headingLevel={headingLevel + 1} />
-    </>
-  );
-}
+import { MessageBindings } from '@/ui/bindings';
+import { MessageExamples, type Part } from './examples';
+import { ExternalDocs } from './section';
 
 /**
  * The messages, linked by `#{id}.{message id}`. A single message starts open.
@@ -99,10 +81,8 @@ function MessageHeader({ item, depth }: { item: OperationMessage; depth: number 
 
 function MessageDetail({ item }: { item: OperationMessage }) {
   const t = useTranslations({ note: 'operation page' });
-  const { message, payload, headers, contentType } = item;
+  const { message, payload, headers } = item;
   const correlationId = dereference(message.correlationId);
-  // like `PlanetCreated` for the types of its schemas
-  const typeName = idToTitle(item.id).replace(/\W/g, '');
 
   return (
     // aligned with the name of message after the chevron
@@ -115,23 +95,8 @@ function MessageDetail({ item }: { item: OperationMessage }) {
       {/* wide pages put the example beside the schemas, their tops aligned */}
       <div className="flex flex-col gap-x-6 gap-y-3 @4xl:flex-row @4xl:items-start">
         <div className="flex min-w-0 flex-1 flex-col gap-3">
-          {payload && (
-            <MessageSchemaCard
-              name="payload"
-              typeName={`${typeName}Payload`}
-              schema={payload}
-              contentType={contentType}
-              received={item.received}
-            />
-          )}
-          {headers && (
-            <MessageSchemaCard
-              name="headers"
-              typeName={`${typeName}Headers`}
-              schema={headers}
-              received={item.received}
-            />
-          )}
+          {payload && <MessageSchemaCard item={item} part="payload" schema={payload} />}
+          {headers && <MessageSchemaCard item={item} part="headers" schema={headers} />}
           {correlationId && (
             <div className="not-prose flex flex-wrap items-baseline gap-x-2 gap-y-1 text-[0.8125rem]">
               <span className="text-fd-muted-foreground">{t('Correlation ID')}</span>
@@ -146,71 +111,92 @@ function MessageDetail({ item }: { item: OperationMessage }) {
           <MessageBindings bindings={message.bindings} />
           <ExternalDocs docs={message.externalDocs} />
         </div>
-        <MessageExamples item={item} className="@4xl:w-[400px] @4xl:shrink-0" />
+        <MessageExamples item={item} />
       </div>
     </div>
   );
 }
 
 function MessageSchemaCard({
-  name,
-  typeName,
+  item,
+  part,
   schema,
-  contentType,
-  received,
 }: {
-  name: string;
-  typeName: string;
+  item: OperationMessage;
+  part: Part;
   schema: MessageSchema;
-  contentType?: string;
-  received: boolean;
 }) {
   if (schema.schemaFormat !== undefined)
-    return <RawSchemaCard name={name} schema={schema.schema} schemaFormat={schema.schemaFormat} />;
+    return <RawSchemaCard name={part} schema={schema.schema} schemaFormat={schema.schemaFormat} />;
 
-  return (
-    <JsonSchemaCard
-      name={name}
-      typeName={typeName}
-      schema={schema.schema}
-      contentType={contentType}
-      received={received}
-    />
-  );
+  return <JsonSchemaCard item={item} part={part} schema={schema.schema} />;
 }
 
 /** properties readers don't see are hidden, like `readOnly` ones of messages they send */
 function JsonSchemaCard({
-  name,
-  typeName,
+  item,
+  part,
   schema,
-  contentType,
-  received,
 }: {
-  name: string;
-  typeName: string;
+  item: OperationMessage;
+  part: Part;
   schema: AsyncAPISchemaObject;
-  contentType?: string;
-  received: boolean;
 }) {
-  const ts = useTypeScriptDefinitions(schema as JsonSchema, {
-    name: typeName,
-    readOnly: received,
-    writeOnly: !received,
-  });
+  const { generateTypeScriptDefinitions } = useRenderContext();
+  const { doc } = useAsyncAPI();
+  const { received, contentType } = item;
+  // like `PlanetCreatedPayload`
+  const typeName =
+    idToTitle(item.id).replace(/\W/g, '') + (part === 'payload' ? 'Payload' : 'Headers');
+  const result = useMemo(
+    () =>
+      generateTypeScriptDefinitions
+        ? generateTypeScriptDefinitions(schema as JsonSchema, {
+            name: typeName,
+            readOnly: received,
+            writeOnly: !received,
+            document: doc.bundled,
+          })
+        : undefined,
+    [generateTypeScriptDefinitions, schema, typeName, received, doc],
+  );
+  // generators returning promises are awaited on server components
+  const ts = result instanceof Promise ? use(result) : result;
 
   return (
     <SchemaUI
       client={{
-        name,
+        name: part,
         as: 'body',
-        selector: contentType && <span className="min-w-0 px-1.5 font-mono">{contentType}</span>,
-        actions: ts && <CopyTypeScript code={ts} name={name} />,
+        selector: part === 'payload' && contentType && (
+          <span className="min-w-0 px-1.5 font-mono">{contentType}</span>
+        ),
+        actions: ts && <CopyTypeScript code={ts} name={part} />,
       }}
       root={schema as never}
       readOnly={received}
       writeOnly={!received}
     />
+  );
+}
+
+function CopyTypeScript({ code, name }: { code: string; name: string }) {
+  const t = useTranslations({ note: 'TypeScript definitions' });
+  const [isChecked, onCopy] = useCopyButton(() => navigator.clipboard.writeText(code));
+
+  return (
+    <button
+      type="button"
+      title={t('Use the {name} type in TypeScript.', { variables: { name } })}
+      onClick={onCopy}
+      className={cn(
+        buttonVariants({ variant: 'ghost', size: 'sm' }),
+        '-my-1 shrink-0 gap-1.5 text-fd-muted-foreground [&_svg]:size-3.5',
+      )}
+    >
+      {isChecked ? <Check /> : <Copy />}
+      TypeScript
+    </button>
   );
 }
 

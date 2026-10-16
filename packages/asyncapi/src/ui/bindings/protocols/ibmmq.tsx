@@ -4,158 +4,59 @@ import type {
   IbmmqMessageBinding,
   IbmmqServerBinding,
 } from '@/types/asyncapi-3';
-import {
-  createBinding,
-  BindingFields,
-  BindingGroup,
-  BindingFieldRow,
-  BindingScalarValue,
-} from '../shared';
+import { CodeRow, createBinding, Fields, GroupRow, Row, ValueRow } from '../shared';
 
 function IbmmqServerBinding({ binding }: { binding: IbmmqServerBinding }) {
   return (
-    <BindingFields>
-      {binding.groupId && (
-        <BindingFieldRow
-          label="Group ID"
-          value={<code className="text-xs">{binding.groupId}</code>}
-        />
-      )}
-      {binding.ccdtQueueManagerName && (
-        <BindingFieldRow
-          label="CCDT Queue Manager Name"
-          value={<code className="text-xs">{binding.ccdtQueueManagerName}</code>}
-        />
-      )}
-      {binding.cipherSpec && (
-        <BindingFieldRow
-          label="Cipher Spec"
-          value={<code className="text-xs">{binding.cipherSpec}</code>}
-        />
-      )}
-      {binding.multiEndpointServer !== undefined && (
-        <BindingFieldRow
-          label="Multi Endpoint Server"
-          value={<BindingScalarValue value={binding.multiEndpointServer} />}
-        />
-      )}
-      {binding.heartBeatInterval !== undefined && (
-        <BindingFieldRow
-          label="Heartbeat Interval"
-          value={<BindingScalarValue value={binding.heartBeatInterval} />}
-        />
-      )}
-    </BindingFields>
+    <Fields>
+      <CodeRow label="Group ID" value={binding.groupId} />
+      <CodeRow label="CCDT Queue Manager Name" value={binding.ccdtQueueManagerName} />
+      <CodeRow label="Cipher Spec" value={binding.cipherSpec} />
+      <ValueRow label="Multi Endpoint Server" value={binding.multiEndpointServer} />
+      <ValueRow label="Heartbeat Interval" value={binding.heartBeatInterval} />
+    </Fields>
   );
 }
 
 function IbmmqChannelBinding({ binding }: { binding: IbmmqChannelBinding }) {
+  const { queue, topic } = binding;
+
   return (
-    <BindingFields>
-      {binding.destinationType && (
-        <BindingFieldRow
-          label="Destination Type"
-          value={<BindingScalarValue value={binding.destinationType} />}
-        />
+    <Fields>
+      <ValueRow label="Destination Type" value={binding.destinationType} />
+      {queue && (
+        <GroupRow label="Queue" title="Queue">
+          <CodeRow label="Object Name" value={queue.objectName} />
+          <ValueRow label="Partitioned" value={queue.isPartitioned} />
+          <ValueRow label="Exclusive" value={queue.exclusive} />
+        </GroupRow>
       )}
-      {binding.queue && (
-        <BindingFieldRow
-          label="Queue"
-          value={
-            <BindingGroup title="Queue">
-              <BindingFields>
-                {binding.queue.objectName && (
-                  <BindingFieldRow
-                    label="Object Name"
-                    value={<code className="text-xs">{binding.queue.objectName}</code>}
-                  />
-                )}
-                {binding.queue.isPartitioned !== undefined && (
-                  <BindingFieldRow
-                    label="Partitioned"
-                    value={<BindingScalarValue value={binding.queue.isPartitioned} />}
-                  />
-                )}
-                {binding.queue.exclusive !== undefined && (
-                  <BindingFieldRow
-                    label="Exclusive"
-                    value={<BindingScalarValue value={binding.queue.exclusive} />}
-                  />
-                )}
-              </BindingFields>
-            </BindingGroup>
-          }
-        />
+      {topic && (
+        <GroupRow label="Topic" title="Topic">
+          <CodeRow label="Topic String" value={topic.string} />
+          <CodeRow label="Object Name" value={topic.objectName} />
+          <ValueRow label="Durable Permitted" value={topic.durablePermitted} />
+          <ValueRow label="Last Message Retained" value={topic.lastMsgRetained} />
+        </GroupRow>
       )}
-      {binding.topic && (
-        <BindingFieldRow
-          label="Topic"
-          value={
-            <BindingGroup title="Topic">
-              <BindingFields>
-                {binding.topic.string && (
-                  <BindingFieldRow
-                    label="Topic String"
-                    value={<code className="text-xs">{binding.topic.string}</code>}
-                  />
-                )}
-                {binding.topic.objectName && (
-                  <BindingFieldRow
-                    label="Object Name"
-                    value={<code className="text-xs">{binding.topic.objectName}</code>}
-                  />
-                )}
-                {binding.topic.durablePermitted !== undefined && (
-                  <BindingFieldRow
-                    label="Durable Permitted"
-                    value={<BindingScalarValue value={binding.topic.durablePermitted} />}
-                  />
-                )}
-                {binding.topic.lastMsgRetained !== undefined && (
-                  <BindingFieldRow
-                    label="Last Message Retained"
-                    value={<BindingScalarValue value={binding.topic.lastMsgRetained} />}
-                  />
-                )}
-              </BindingFields>
-            </BindingGroup>
-          }
-        />
-      )}
-      {binding.maxMsgLength !== undefined && (
-        <BindingFieldRow
-          label="Max Message Length"
-          value={<BindingScalarValue value={binding.maxMsgLength} />}
-        />
-      )}
-    </BindingFields>
+      <ValueRow label="Max Message Length" value={binding.maxMsgLength} />
+    </Fields>
   );
 }
 
 function IbmmqMessageBinding({ binding }: { binding: IbmmqMessageBinding }) {
   return (
-    <BindingFields>
-      {binding.type && (
-        <BindingFieldRow label="Type" value={<BindingScalarValue value={binding.type} />} />
-      )}
-      {binding.headers && (
-        <BindingFieldRow
-          label="Headers"
-          value={<code className="text-xs">{binding.headers}</code>}
-        />
-      )}
+    <Fields>
+      <ValueRow label="Type" value={binding.type} />
+      <CodeRow label="Headers" value={binding.headers} />
       {binding.description && (
-        <BindingFieldRow
-          label="Description"
-          value={<span className="text-sm">{binding.description}</span>}
-        />
+        <Row label="Description" value={<span className="text-sm">{binding.description}</span>} />
       )}
-      {binding.expiry !== undefined && (
-        <BindingFieldRow label="Expiry" value={<BindingScalarValue value={binding.expiry} />} />
-      )}
-    </BindingFields>
+      <ValueRow label="Expiry" value={binding.expiry} />
+    </Fields>
   );
 }
+
 export const ibmmqBinding = createBinding({
   label: 'IBM MQ',
   Server: IbmmqServerBinding,

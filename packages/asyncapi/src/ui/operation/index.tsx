@@ -11,9 +11,9 @@ import { PlaygroundClient } from '@/ui/playground';
 import { ConnectionBar } from './connection';
 import { AuthSection } from './auth';
 import { ParametersSection } from './parameters';
-import { MessagesSection } from './messages';
+import { MessageList } from './messages';
 import { ReplySection } from './reply';
-import { ExternalDocs } from './section';
+import { ExternalDocs, SectionHeader } from './section';
 import { CodeUsages } from './usage';
 
 export function Operation({ id, ...props }: PageOperationProps) {
@@ -31,21 +31,15 @@ function OperationContent({ showTitle, showDescription, anchor }: Omit<PageOpera
   // the channel describes what its operations share, unless the operation repeats it
   const channelDescription = channel.description !== description ? channel.description : undefined;
   const hasText = (showDescription && description) || channelDescription;
-  let headingLevel = 2;
-  let header: ReactNode = null;
-
-  if (showTitle) {
-    header = (
-      // the anchor of operation itself
-      <Heading id="" depth={headingLevel} className="mt-0! mb-4">
-        {title}
-      </Heading>
-    );
-    headingLevel++;
-  }
+  const headingLevel = showTitle ? 3 : 2;
 
   const slots = {
-    header,
+    header: showTitle ? (
+      // the anchor of operation itself
+      <Heading id="" depth={2} className="mt-0! mb-4">
+        {title}
+      </Heading>
+    ) : null,
     connection: ctx.playground?.enabled === false ? <ConnectionBar /> : <PlaygroundClient />,
     description:
       hasText || operation.externalDocs ? (
@@ -63,12 +57,10 @@ function OperationContent({ showTitle, showDescription, anchor }: Omit<PageOpera
     authSchemes: <AuthSection headingLevel={headingLevel} />,
     parameters: <ParametersSection headingLevel={headingLevel} />,
     messages: messages.length > 0 && (
-      <MessagesSection
-        id="messages"
-        title={t('Messages')}
-        messages={messages}
-        headingLevel={headingLevel}
-      />
+      <>
+        <SectionHeader id="messages" depth={headingLevel} title={t('Messages')} />
+        <MessageList id="messages" messages={messages} headingLevel={headingLevel + 1} />
+      </>
     ),
     reply: reply && <ReplySection reply={reply} headingLevel={headingLevel} />,
     bindings: <ProtocolSection headingLevel={headingLevel} />,

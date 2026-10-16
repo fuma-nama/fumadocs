@@ -4,7 +4,7 @@ import { useTranslations } from '@fuma-translate/react';
 import { useOperation } from '@/operation';
 import { useAsyncAPI } from '@/utils/create-page';
 import { useServer } from '@/utils/use-server';
-import { getUrlParts, isUrlProtocol, resolveServerUrl } from '@/utils/server-url';
+import { getBindingKey, getUrlParts, isUrlProtocol, resolveServerUrl } from '@/utils/server-url';
 import type { ChannelObject } from '@/types';
 import { DirectionBadge } from '@/ui/components/direction';
 import { ServerSelect } from '@/ui/components/server-select';
@@ -42,15 +42,17 @@ export function ConnectionBar({ children, className, ...props }: ComponentProps<
   const { action, channel } = useOperation();
   const { info } = useAsyncAPI().doc.dereferenced;
   const { servers, server } = useServer();
-  const schema = server ? servers[server.id] : undefined;
+  const schema = server && servers[server.id];
   let path = channel.address;
   let base: string | undefined;
 
-  if (schema && isUrlProtocol(schema.protocol) && path) {
-    [base, path] = getUrlParts(schema, server!.variables, path);
-    path ||= '/';
-  } else if (schema) {
-    base = resolveServerUrl(schema, server!.variables);
+  if (server && schema) {
+    if (isUrlProtocol(schema.protocol) && path) {
+      [base, path] = getUrlParts(schema, server.variables, path);
+      path ||= '/';
+    } else {
+      base = resolveServerUrl(schema, server.variables);
+    }
   }
 
   return (
@@ -107,12 +109,10 @@ function AddressLabel({ protocol, channel }: { protocol: string; channel: Channe
   const amqp = useBindings(channel.bindings).get('amqp');
   let label: string | undefined;
 
-  switch (protocol) {
+  // like `kafka` for `kafka-secure`
+  switch (getBindingKey(protocol)) {
     case 'kafka':
-    case 'kafka-secure':
     case 'mqtt':
-    case 'mqtts':
-    case 'secure-mqtt':
     case 'googlepubsub':
     case 'pulsar':
     case 'sns':
@@ -122,7 +122,6 @@ function AddressLabel({ protocol, channel }: { protocol: string; channel: Channe
       label = t('Topic');
       break;
     case 'amqp':
-    case 'amqps':
       label = amqp?.is === 'queue' ? t('Queue') : t('Routing Key');
       break;
     case 'sqs':
@@ -137,7 +136,6 @@ function AddressLabel({ protocol, channel }: { protocol: string; channel: Channe
     case 'ibmmq':
     case 'jms':
     case 'stomp':
-    case 'stomps':
     case 'anypointmq':
       label = t('Destination');
   }

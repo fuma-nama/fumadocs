@@ -1,29 +1,16 @@
 'use client';
 import type { Mqtt5ServerBinding } from '@/types/asyncapi-3';
-import {
-  createBinding,
-  BindingFields,
-  BindingFieldRow,
-  BindingScalarValue,
-  BindingSchema,
-} from '../shared';
+import { createBinding, Fields, SchemaRow } from '../shared';
 
 function Mqtt5ServerBinding({ binding }: { binding: Mqtt5ServerBinding }) {
   return (
-    <BindingFields>
-      {binding.sessionExpiryInterval !== undefined && (
-        <BindingFieldRow
-          label="Session Expiry Interval"
-          value={
-            typeof binding.sessionExpiryInterval === 'object' ? (
-              <BindingSchema name="sessionExpiryInterval" schema={binding.sessionExpiryInterval} />
-            ) : (
-              <BindingScalarValue value={binding.sessionExpiryInterval} />
-            )
-          }
-        />
-      )}
-    </BindingFields>
+    <Fields>
+      <SchemaRow
+        label="Session Expiry Interval"
+        name="sessionExpiryInterval"
+        value={binding.sessionExpiryInterval}
+      />
+    </Fields>
   );
 }
 

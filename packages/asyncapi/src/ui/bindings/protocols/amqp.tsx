@@ -4,189 +4,71 @@ import type {
   AmqpMessageBinding,
   AmqpOperationBinding,
 } from '@/types/asyncapi-3';
-import {
-  createBinding,
-  BindingFields,
-  BindingGroup,
-  BindingFieldRow,
-  BindingScalarValue,
-} from '../shared';
+import { CodeRow, createBinding, Fields, GroupRow, ValueRow } from '../shared';
 
-function formatAmqpIs(value: string): string {
+function formatAmqpIs(value?: string) {
   if (value === 'queue') return 'Queue';
   if (value === 'routingKey') return 'Routing Key';
   return value;
 }
 
-function formatAmqpDeliveryMode(value: number): string {
+function formatAmqpDeliveryMode(value?: number) {
   if (value === 1) return 'Non-persistent (1)';
   if (value === 2) return 'Persistent (2)';
-  return String(value);
+  return value?.toString();
 }
 
-function AmqpExchangeFields({
-  exchange,
-}: {
-  exchange: NonNullable<AmqpChannelBinding['exchange']>;
-}) {
+function AmqpChannelBinding({ binding: { is, exchange, queue } }: { binding: AmqpChannelBinding }) {
   return (
-    <BindingFields>
-      {exchange.name && (
-        <BindingFieldRow label="Name" value={<code className="text-xs">{exchange.name}</code>} />
+    <Fields>
+      <CodeRow label="Binding Target" value={formatAmqpIs(is)} />
+      {exchange && (
+        <GroupRow label="Exchange" title="Exchange">
+          <CodeRow label="Name" value={exchange.name} />
+          <ValueRow label="Type" value={exchange.type} />
+          <ValueRow label="Durable" value={exchange.durable} />
+          <ValueRow label="Auto Delete" value={exchange.autoDelete} />
+          <CodeRow label="Virtual Host" value={exchange.vhost} />
+        </GroupRow>
       )}
-      {exchange.type && (
-        <BindingFieldRow label="Type" value={<BindingScalarValue value={exchange.type} />} />
+      {queue && (
+        <GroupRow label="Queue" title="Queue">
+          <CodeRow label="Name" value={queue.name} />
+          <ValueRow label="Durable" value={queue.durable} />
+          <ValueRow label="Exclusive" value={queue.exclusive} />
+          <ValueRow label="Auto Delete" value={queue.autoDelete} />
+          <CodeRow label="Virtual Host" value={queue.vhost} />
+        </GroupRow>
       )}
-      {exchange.durable !== undefined && (
-        <BindingFieldRow label="Durable" value={<BindingScalarValue value={exchange.durable} />} />
-      )}
-      {exchange.autoDelete !== undefined && (
-        <BindingFieldRow
-          label="Auto Delete"
-          value={<BindingScalarValue value={exchange.autoDelete} />}
-        />
-      )}
-      {exchange.vhost && (
-        <BindingFieldRow
-          label="Virtual Host"
-          value={<code className="text-xs">{exchange.vhost}</code>}
-        />
-      )}
-    </BindingFields>
-  );
-}
-
-function AmqpQueueFields({ queue }: { queue: NonNullable<AmqpChannelBinding['queue']> }) {
-  return (
-    <BindingFields>
-      {queue.name && (
-        <BindingFieldRow label="Name" value={<code className="text-xs">{queue.name}</code>} />
-      )}
-      {queue.durable !== undefined && (
-        <BindingFieldRow label="Durable" value={<BindingScalarValue value={queue.durable} />} />
-      )}
-      {queue.exclusive !== undefined && (
-        <BindingFieldRow label="Exclusive" value={<BindingScalarValue value={queue.exclusive} />} />
-      )}
-      {queue.autoDelete !== undefined && (
-        <BindingFieldRow
-          label="Auto Delete"
-          value={<BindingScalarValue value={queue.autoDelete} />}
-        />
-      )}
-      {queue.vhost && (
-        <BindingFieldRow
-          label="Virtual Host"
-          value={<code className="text-xs">{queue.vhost}</code>}
-        />
-      )}
-    </BindingFields>
-  );
-}
-
-function AmqpChannelBinding({ binding }: { binding: AmqpChannelBinding }) {
-  return (
-    <BindingFields>
-      {binding.is && (
-        <BindingFieldRow
-          label="Binding Target"
-          value={<code className="text-xs">{formatAmqpIs(binding.is)}</code>}
-        />
-      )}
-      {binding.exchange && (
-        <BindingFieldRow
-          label="Exchange"
-          value={
-            <BindingGroup title="Exchange">
-              <AmqpExchangeFields exchange={binding.exchange} />
-            </BindingGroup>
-          }
-        />
-      )}
-      {binding.queue && (
-        <BindingFieldRow
-          label="Queue"
-          value={
-            <BindingGroup title="Queue">
-              <AmqpQueueFields queue={binding.queue} />
-            </BindingGroup>
-          }
-        />
-      )}
-    </BindingFields>
+    </Fields>
   );
 }
 
 function AmqpOperationBinding({ binding }: { binding: AmqpOperationBinding }) {
   return (
-    <BindingFields>
-      {binding.expiration !== undefined && (
-        <BindingFieldRow
-          label="Message TTL"
-          value={<BindingScalarValue value={binding.expiration} />}
-        />
-      )}
-      {binding.userId && (
-        <BindingFieldRow
-          label="User ID"
-          value={<code className="text-xs">{binding.userId}</code>}
-        />
-      )}
-      {binding.cc && binding.cc.length > 0 && (
-        <BindingFieldRow label="CC" value={<BindingScalarValue value={binding.cc} />} />
-      )}
-      {binding.bcc && binding.bcc.length > 0 && (
-        <BindingFieldRow label="BCC" value={<BindingScalarValue value={binding.bcc} />} />
-      )}
-      {binding.priority !== undefined && (
-        <BindingFieldRow label="Priority" value={<BindingScalarValue value={binding.priority} />} />
-      )}
-      {binding.deliveryMode !== undefined && (
-        <BindingFieldRow
-          label="Delivery Mode"
-          value={<code className="text-xs">{formatAmqpDeliveryMode(binding.deliveryMode)}</code>}
-        />
-      )}
-      {binding.mandatory !== undefined && (
-        <BindingFieldRow
-          label="Mandatory"
-          value={<BindingScalarValue value={binding.mandatory} />}
-        />
-      )}
-      {binding.timestamp !== undefined && (
-        <BindingFieldRow
-          label="Timestamp"
-          value={<BindingScalarValue value={binding.timestamp} />}
-        />
-      )}
-      {binding.ack !== undefined && (
-        <BindingFieldRow
-          label="Acknowledgement"
-          value={<BindingScalarValue value={binding.ack} />}
-        />
-      )}
-    </BindingFields>
+    <Fields>
+      <ValueRow label="Message TTL" value={binding.expiration} />
+      <CodeRow label="User ID" value={binding.userId} />
+      <ValueRow label="CC" value={binding.cc} />
+      <ValueRow label="BCC" value={binding.bcc} />
+      <ValueRow label="Priority" value={binding.priority} />
+      <CodeRow label="Delivery Mode" value={formatAmqpDeliveryMode(binding.deliveryMode)} />
+      <ValueRow label="Mandatory" value={binding.mandatory} />
+      <ValueRow label="Timestamp" value={binding.timestamp} />
+      <ValueRow label="Acknowledgement" value={binding.ack} />
+    </Fields>
   );
 }
 
 function AmqpMessageBinding({ binding }: { binding: AmqpMessageBinding }) {
   return (
-    <BindingFields>
-      {binding.contentEncoding && (
-        <BindingFieldRow
-          label="Content Encoding"
-          value={<code className="text-xs">{binding.contentEncoding}</code>}
-        />
-      )}
-      {binding.messageType && (
-        <BindingFieldRow
-          label="Message Type"
-          value={<code className="text-xs">{binding.messageType}</code>}
-        />
-      )}
-    </BindingFields>
+    <Fields>
+      <CodeRow label="Content Encoding" value={binding.contentEncoding} />
+      <CodeRow label="Message Type" value={binding.messageType} />
+    </Fields>
   );
 }
+
 export const amqpBinding = createBinding({
   label: 'AMQP',
   Channel: AmqpChannelBinding,
