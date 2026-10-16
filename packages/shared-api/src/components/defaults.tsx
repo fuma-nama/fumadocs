@@ -74,12 +74,6 @@ export function createPageComponents({
   };
 }
 
-/**
- * Markdown syntax, line breaks, block markers at the start, surrounding whitespace and GFM autolinks.
- * Text without them renders as a paragraph of itself.
- */
-const syntax = /[\0\n\r&*<@[\\_`~]|^[\s\d#+>-]|\s$|:\/\/|www\./i;
-
 function createRenderer(CodeBlock: FC<CodeBlockProps>) {
   function Pre(props: ComponentProps<'pre'>) {
     const code = Children.only(props.children) as ReactElement;
@@ -102,21 +96,5 @@ function createRenderer(CodeBlock: FC<CodeBlockProps>) {
   };
   const processor = remark().use(remarkGfm).use(remarkRehype);
 
-  return (md: string): ReactNode =>
-    toJsxRuntime(
-      typeof md === 'string' && md && !syntax.test(md)
-        ? {
-            type: 'root',
-            children: [
-              {
-                type: 'element',
-                tagName: 'p',
-                properties: {},
-                children: [{ type: 'text', value: md }],
-              },
-            ],
-          }
-        : processor.runSync(processor.parse(md)),
-      options,
-    );
+  return (md: string): ReactNode => toJsxRuntime(processor.runSync(processor.parse(md)), options);
 }
