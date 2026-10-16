@@ -150,6 +150,7 @@ export interface OpenAPIRenderOptions {
 
     renderAPIExampleLayout?: (
       slots: {
+        /** the select of example requests, only with `renderAPIExampleUsageTabs`, default usage tabs have it in their title */
         selector: ReactNode;
         usageTabs: ReactNode;
         responseTabs: ReactNode;
