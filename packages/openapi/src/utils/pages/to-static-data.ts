@@ -5,7 +5,7 @@ import type { StructuredData } from 'fumadocs-core/mdx-plugins';
 import type { GeneratedPageProps } from './builder';
 import { idToTitle } from 'shared-api/utils/id-to-title';
 import { dereference } from '@fumadocs/json-schema';
-import { createMagicProxy } from '@scalar/json-magic/magic-proxy';
+import { dereferenceBundledDocument } from '@/utils/document/dereference';
 
 /** the `_openapi` data of pages */
 export interface InternalOpenAPIMeta {
@@ -15,8 +15,6 @@ export interface InternalOpenAPIMeta {
   preload?: string[];
 }
 
-const proxyCache = new WeakMap<Document, Document>();
-
 export function toStaticData(
   page: GeneratedPageProps,
   doc: Document,
@@ -24,11 +22,7 @@ export function toStaticData(
   toc: TOCItemType[];
   structuredData: StructuredData;
 } {
-  let proxied = proxyCache.get(doc);
-  if (!proxied) {
-    proxied = createMagicProxy(doc as Record<string, unknown>) as Document;
-    proxyCache.set(doc, proxied);
-  }
+  const proxied = dereferenceBundledDocument(doc).dereferenced;
   const slugger = new Slugger();
   const toc: TOCItemType[] = [];
   const structuredData: StructuredData = { headings: [], contents: [] };

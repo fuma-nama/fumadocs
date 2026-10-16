@@ -58,6 +58,13 @@ export function doubleQuote(str: string): string {
 }
 
 /**
+ * A JSX attribute value, strings don't process escapes, an expression holds the ones with quotes.
+ */
+export function jsxString(str: string): string {
+  return str.includes('"') ? `{${JSON.stringify(str)}}` : `"${str}"`;
+}
+
+/**
  * Returns the input string wrapped in Python triple double-quotes,
  * escaping embedded triple quotes and backslashes.
  */
