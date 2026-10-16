@@ -58,9 +58,15 @@ export function ParamInput({
       inputMode={isNumber ? 'decimal' : undefined}
       onChange={(e) => {
         const v = e.target.value;
+        const number = Number(v);
         if (v.length === 0) setValue(undefined);
-        // a number only when it reads back as typed, like `1` but not `1.` or ` `
-        else if (isNumber && String(Number(v)) === v) setValue(Number(v));
+        // a number of the schema's type that reads back as typed, like `1` but not `1.` or ` `
+        else if (
+          isNumber &&
+          String(number) === v &&
+          (resolved.type === 'integer' ? Number.isInteger(number) : Number.isFinite(number))
+        )
+          setValue(number);
         else setValue(v);
       }}
       style={{ width: `calc(${Math.max(text.length, name.length, 1)}ch + 0.75rem)` }}
