@@ -1,3 +1,9 @@
+## @fumadocs/graphql@0.3.5
+
+### Refuse schemas not listed in `input`
+
+- `getSchema()` and page preloads throw for schema IDs not listed in `input`, instead of loading them as file paths or URLs.
+
 ## @fumadocs/graphql@0.3.4
 
 ### Share `@fumari/stf` and `@fumadocs/json-schema` with installed UI

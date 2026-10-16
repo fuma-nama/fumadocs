@@ -1,3 +1,22 @@
+## fumadocs-openapi@12.5.1
+
+### Faster API pages and search indexes
+
+- Schema UI generates the schemas it shows when they open, instead of every schema reachable from the root.
+- Inline schemas are identified by their position, links to their properties copied before this version no longer open them.
+- TypeScript definitions of bodies are generated when copied.
+- Search indexes take breadcrumbs from one walk of the page tree, instead of a search for each page.
+
+### Example request select in the card title
+
+- The select of example requests replaces the title of the example request card, its options show the descriptions of examples.
+- `renderAPIExampleLayout()` gets the `selector` slot only with `renderAPIExampleUsageTabs()`.
+- Options with descriptions line up their labels with the select.
+
+### Refuse schemas not listed in `input`
+
+- `getSchema()` and page preloads throw for schema IDs not listed in `input`, instead of loading them as file paths or URLs.
+
 ## fumadocs-openapi@12.5.0
 
 ### All security schemes in the API playground

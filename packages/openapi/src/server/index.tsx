@@ -117,13 +117,11 @@ export function createOpenAPI(options: OpenAPIOptions = {}): OpenAPIServer {
     resolvedInput = options.input;
   }
 
-  function getSchema(schemaId: string): Promise<LoadedDocument> {
-    if (!(schemaId in resolvedInput)) {
-      console.warn(
-        `[Fumadocs OpenAPI] the document "${schemaId}" is not listed in the input array, this may be unexpected and won't be cached properly.`,
+  async function getSchema(schemaId: string): Promise<LoadedDocument> {
+    if (!Object.hasOwn(resolvedInput, schemaId)) {
+      throw new Error(
+        `[Fumadocs OpenAPI] the document "${schemaId}" is not listed in "input", only documents from "input" can be loaded.`,
       );
-      // do not cache unlisted documents
-      return loadDocument(schemaId);
     }
 
     if (!disableCache) {

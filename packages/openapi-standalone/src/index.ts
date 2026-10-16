@@ -1,6 +1,9 @@
-import { cp, mkdir, rm, writeFile } from 'node:fs/promises';
+import { cp, rm } from 'node:fs/promises';
+import { availableParallelism } from 'node:os';
 import path from 'node:path';
-import { assetsPath, clientDir, createSite, normalizeBaseUrl } from './site';
+import { Worker } from 'node:worker_threads';
+import { assetsPath, buildSite, clientDir, normalizeBaseUrl } from './build';
+import { renderToFiles, write } from './render';
 
 export interface Options {
   /**
@@ -61,28 +64,47 @@ export async function generateStatic({ outDir, ...options }: StaticOptions): Pro
   if (!fromOutDir.startsWith('..') && !path.isAbsolute(fromOutDir))
     throw new Error(`The output directory ${outDir} must not contain the working directory.`);
 
-  const site = await createSite(options);
+  const { files, urls, renderInput } = await buildSite(options);
   const base = normalizeBaseUrl(options.baseUrl);
 
   await rm(outDir, { recursive: true, force: true });
   await cp(new URL('assets', clientDir), path.join(outDir, assetsPath, 'assets'), {
     recursive: true,
   });
+  for (const [file, content] of files) await write(path.join(outDir, file), content);
 
-  for (const [file, content] of site.files) await write(path.join(outDir, file), content);
-  for (const url of site.urls) {
+  const pages: [pathname: string, file: string][] = [['', path.join(outDir, '404.html')]];
+  for (const url of urls) {
     const file = path.join(outDir, url.slice(base.length), 'index.html');
     const relative = path.relative(outDir, file);
     if (relative.startsWith(`..${path.sep}`) || path.isAbsolute(relative))
       throw new Error(`The page ${url} would be written outside of ${outDir}.`);
 
-    await write(file, (await site.render(url)).html);
+    pages.push([url, file]);
   }
 
-  await write(path.join(outDir, '404.html'), (await site.render('')).html);
+  // each worker renders at least 100 pages to pay off its startup, and holds a copy of the site:
+  // past half the logical cores (SMT siblings, efficiency cores), more workers mostly add memory
+  const count = Math.min(Math.floor(availableParallelism() / 2), Math.floor(pages.length / 100));
+  if (count < 2) return renderToFiles(renderInput, pages);
+
+  const workers: Promise<void>[] = [];
+  for (let i = 0; i < count; i++) {
+    const slice: typeof pages = [];
+    for (let j = i; j < pages.length; j += count) slice.push(pages[j]);
+
+    workers.push(renderInWorker([renderInput, slice]));
+  }
+  await Promise.all(workers);
 }
 
-async function write(file: string, content: string) {
-  await mkdir(path.dirname(file), { recursive: true });
-  await writeFile(file, content);
+/** `renderToFiles()` in a worker thread */
+function renderInWorker(args: Parameters<typeof renderToFiles>): Promise<void> {
+  return new Promise((resolve, reject) => {
+    new Worker(new URL('./worker.js', import.meta.url), { workerData: args })
+      .once('error', reject)
+      .once('exit', (code) =>
+        code === 0 ? resolve() : reject(new Error(`A worker exited with code ${code}.`)),
+      );
+  });
 }

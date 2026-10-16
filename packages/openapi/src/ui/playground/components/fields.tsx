@@ -663,15 +663,17 @@ export function CellSelect({
       </SelectTrigger>
       <SelectContent>
         {items.map((item) => (
-          <SelectItem key={item.value} value={item.value} className="text-[0.8125rem]">
-            {item.description ? (
-              <span className="flex flex-col">
-                {item.label}
+          <SelectItem
+            key={item.value}
+            value={item.value}
+            description={
+              item.description && (
                 <span className="text-xs text-fd-muted-foreground">{item.description}</span>
-              </span>
-            ) : (
-              item.label
-            )}
+              )
+            }
+            className="text-[0.8125rem]"
+          >
+            {item.label}
           </SelectItem>
         ))}
       </SelectContent>

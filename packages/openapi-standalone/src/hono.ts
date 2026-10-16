@@ -1,7 +1,8 @@
 import { readdir, readFile } from 'node:fs/promises';
 import { Hono, type Context } from 'hono';
 import { createOpenAPI } from 'fumadocs-openapi/server';
-import { assetsPath, clientDir, createSite, normalizeBaseUrl, type Site } from './site';
+import { assetsPath, buildSite, clientDir, normalizeBaseUrl, type SiteBuild } from './build';
+import { createRenderer, type Render } from './render';
 import type { Options } from './index';
 
 export interface AppOptions extends Options {
@@ -24,16 +25,16 @@ export function createApp({ proxy = false, ...options }: AppOptions): Hono {
   const base = normalizeBaseUrl(options.baseUrl);
   const prefix = `${base}/${assetsPath}`;
   const app = new Hono();
-  let site: Promise<Site> | undefined;
+  let site: Promise<SiteBuild & { render: Render }> | undefined;
   let assets: Promise<Set<string>> | undefined;
 
   function getSite() {
-    return (site ??= createSite(
-      proxy ? { ...options, proxyUrl: `${prefix}/proxy` } : options,
-    ).catch((error: unknown) => {
-      site = undefined;
-      throw error;
-    }));
+    return (site ??= buildSite(proxy ? { ...options, proxyUrl: `${prefix}/proxy` } : options)
+      .then((build) => ({ ...build, render: createRenderer(build.renderInput) }))
+      .catch((error: unknown) => {
+        site = undefined;
+        throw error;
+      }));
   }
 
   if (proxy) {
@@ -41,7 +42,7 @@ export function createApp({ proxy = false, ...options }: AppOptions): Hono {
 
     // the request's own origin comes from its `Host` header, which clients can forge
     app.all(`${prefix}/proxy`, async (c) =>
-      createProxy({ allowedOrigins: (await getSite()).getOrigins() }).handle(c.req.raw),
+      createProxy({ allowedOrigins: (await getSite()).origins }).handle(c.req.raw),
     );
   }
 

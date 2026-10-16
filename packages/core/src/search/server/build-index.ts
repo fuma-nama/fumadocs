@@ -2,7 +2,7 @@ import type { LoaderConfig, LoaderOutput, Page } from '@/source';
 import type { Awaitable } from '@/types';
 import type { StructuredData } from '@/mdx-plugins/remark-structure';
 import { basename, extname } from '@/source/path';
-import { findPath } from '@/page-tree/utils';
+import type * as PageTree from '@/page-tree';
 
 export interface SharedIndex {
   id: string;
@@ -76,26 +76,38 @@ function isBreadcrumbItem(item: unknown): item is string {
   return typeof item === 'string' && item.length > 0;
 }
 
-export function buildBreadcrumbs<C extends LoaderConfig>(
+/**
+ * Get the breadcrumbs of pages, each page tree is walked once.
+ */
+export function createBreadcrumbs<C extends LoaderConfig>(
   source: LoaderOutput<C>,
-  page: C['page'],
-): string[] | undefined {
-  const pageTree = source.getPageTree(page.locale);
-  const path = findPath(pageTree.children, (node) => node.type === 'page' && node.url === page.url);
+): (page: C['page']) => string[] | undefined {
+  const trees = new Map<PageTree.Root, Map<string, string[]>>();
 
-  if (path) {
-    const breadcrumbs: string[] = [];
-    path.pop();
+  return (page) => {
+    const tree = source.getPageTree(page.locale);
+    let breadcrumbs = trees.get(tree);
+    if (!breadcrumbs) trees.set(tree, (breadcrumbs = collectBreadcrumbs(tree, [], new Map())));
+    return breadcrumbs.get(page.url);
+  };
+}
 
-    if (isBreadcrumbItem(pageTree.name)) {
-      breadcrumbs.push(pageTree.name);
-    }
+/** like `findPath()`, a page takes its first path, with the separator above it */
+function collectBreadcrumbs(
+  folder: PageTree.Root | PageTree.Folder,
+  parents: string[],
+  out: Map<string, string[]>,
+): Map<string, string[]> {
+  const path = isBreadcrumbItem(folder.name) ? [...parents, folder.name] : parents;
+  if (folder.type === 'folder' && folder.index && !out.has(folder.index.url))
+    out.set(folder.index.url, path);
 
-    for (const segment of path) {
-      if (!isBreadcrumbItem(segment.name)) continue;
-      breadcrumbs.push(segment.name);
-    }
-
-    return breadcrumbs;
+  let current = path;
+  for (const node of folder.children) {
+    if (node.type === 'separator')
+      current = isBreadcrumbItem(node.name) ? [...path, node.name] : path;
+    else if (node.type === 'folder') collectBreadcrumbs(node, current, out);
+    else if (!out.has(node.url)) out.set(node.url, current);
   }
+  return out;
 }

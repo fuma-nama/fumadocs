@@ -4,7 +4,7 @@ export default defineConfig({
   format: 'esm',
   target: 'es2023',
   platform: 'node',
-  entry: ['./src/index.ts', './src/hono.ts', './src/cli.ts'],
+  entry: ['./src/index.ts', './src/hono.ts', './src/cli.ts', './src/worker.ts'],
   fixedExtension: false,
   minify: true,
   sourcemap: false,
@@ -21,9 +21,10 @@ export default defineConfig({
     'react-dom/server.edge': 'react-dom/server.node',
   },
   deps: {
-    // json-magic imports it only to block private networks, which isn't enabled
-    neverBundle: ['undici'],
-    onlyImport: ['hono', 'undici'],
+    // json-magic imports undici only to block private networks, which isn't enabled.
+    // code blocks are highlighted in the browser, the server never loads Shiki.
+    neverBundle: ['undici', /^shiki(\/|$)/],
+    onlyImport: ['hono', 'undici', 'shiki'],
   },
   checks: {
     moduleLevelDirective: false,

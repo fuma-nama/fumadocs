@@ -64,6 +64,7 @@ export type SchemaData = FieldBase &
 
 export interface SchemaUIGeneratedData {
   $root: string;
+  /** the data of schemas by ID, generated when first read */
   refs: Record<string, SchemaData>;
 }
 
@@ -100,7 +101,20 @@ export function generateSchemaUI({
   translations = {},
 }: GenerateSchemaUIOptions): SchemaUIGeneratedData {
   const t = fromTranslations(translations, { note: 'schema UI' });
-  const refs: Record<string, SchemaData> = {};
+  const schemas = new Map<string, JsonSchema>();
+  // a UI only reads the schemas it shows
+  const refs = new Proxy<Record<string, SchemaData>>(
+    {},
+    {
+      get(generated, id) {
+        if (typeof id === 'string' && !(id in generated)) {
+          const raw = schemas.get(id);
+          if (raw !== undefined) generated[id] = generate(id, raw);
+        }
+        return Reflect.get(generated, id);
+      },
+    },
+  );
 
   function generateInfoTags(schema: Exclude<JsonSchema, boolean>) {
     const inlines: InfoTag[] = [];
@@ -191,19 +205,15 @@ export function generateSchemaUI({
     return [...inlines, ...blocks];
   }
 
-  let _counter = 0;
-  const autoIds = new WeakMap<Exclude<JsonSchema, boolean>, string>();
-  function getSchemaId(schema: JsonSchema): string {
-    if (typeof schema === 'boolean') return String(schema);
-    const rawRef = typeof schema.$ref === 'string' ? schema.$ref : undefined;
-    if (rawRef) return rawRef;
-
-    const prev = autoIds.get(schema);
-    if (prev) return prev;
-
-    const generated = `__${_counter++}`;
-    autoIds.set(schema, generated);
-    return generated;
+  /**
+   * Add a schema to `refs`, a schema without `$ref` is identified by its position under the parent,
+   * so links to it don't depend on the schemas opened before.
+   */
+  function add(raw: JsonSchema, position: string): string {
+    const id =
+      typeof raw === 'boolean' ? String(raw) : typeof raw.$ref === 'string' ? raw.$ref : position;
+    schemas.set(id, raw);
+    return id;
   }
 
   function isVisible(raw: JsonSchema): boolean {
@@ -233,76 +243,41 @@ export function generateSchemaUI({
     };
   }
 
-  function scanRefs(id: string, raw: JsonSchema) {
-    if (id in refs) return;
+  function generate(id: string, raw: JsonSchema): SchemaData {
     const schema = dereference(raw);
-    if (typeof schema === 'boolean') {
-      refs[id] = {
-        type: 'primitive',
-        ...base(raw),
-      };
-      return;
-    }
+    if (typeof schema === 'boolean') return { type: 'primitive', ...base(raw) };
 
     if (Array.isArray(schema.type)) {
-      const out: SchemaData = {
-        type: 'or',
-        items: [],
-        ...base(raw),
-      };
-      refs[id] = out;
-
+      const items: { name: string; $type: string }[] = [];
       for (const type of schema.type) {
-        const key = `${id}_type:${type}`;
-        scanRefs(key, {
-          ...schema,
-          type,
-        });
-        out.items.push({
-          name: type,
-          $type: key,
-        });
+        const $type = `${id}_type:${type}`;
+        schemas.set($type, { ...schema, type });
+        items.push({ name: type, $type });
       }
-      return;
+      return { type: 'or', items, ...base(raw) };
     }
 
     if (schema.oneOf && schema.anyOf) {
-      const out: SchemaData = {
-        type: 'and',
-        items: [],
-        ...base(raw),
-      };
-      refs[id] = out;
+      const items: { name: string; $type: string }[] = [];
       for (const omit of ['anyOf', 'oneOf'] as const) {
         const $type = `${id}_omit:${omit}`;
-        scanRefs($type, { ...schema, [omit]: undefined });
-
-        out.items.push({
-          name: refs[$type].aliasName,
-          $type,
-        });
+        schemas.set($type, { ...schema, [omit]: undefined });
+        items.push({ name: refs[$type].aliasName, $type });
       }
-      return;
+      return { type: 'and', items, ...base(raw) };
     }
 
     // display both `oneOf` & `anyOf` as OR for simplified overview
     const union = schema.oneOf ?? schema.anyOf;
     if (union) {
-      const out: SchemaData = {
-        type: 'or',
-        items: [],
-        ...base(raw),
-      };
-      refs[id] = out;
-
-      for (const rawItem of union) {
+      const items: { name: string; $type: string }[] = [];
+      for (const [i, rawItem] of union.entries()) {
         if (!rawItem || typeof rawItem !== 'object' || !isVisible(rawItem)) continue;
-        const itemId = getSchemaId(rawItem);
         const item = dereference(rawItem);
         if (typeof item !== 'object') continue;
-        const key = `${id}_extends:${itemId}`;
+        const $type = `${id}_extends:${typeof rawItem.$ref === 'string' ? rawItem.$ref : i}`;
 
-        scanRefs(key, {
+        schemas.set($type, {
           ...schema,
           oneOf: undefined,
           anyOf: undefined,
@@ -312,81 +287,52 @@ export function generateSchemaUI({
             ...item.properties,
           },
         });
-        out.items.push({
-          $type: key,
-          name: refs[itemId]?.aliasName ?? stringify(rawItem, { alias: true }),
-        });
+        items.push({ $type, name: stringify(rawItem, { alias: true }) });
       }
-      return;
+      return { type: 'or', items, ...base(raw) };
     }
 
-    if (schema.allOf) {
-      scanRefs(id, mergeAllOf(schema));
-      return;
-    }
+    if (schema.allOf) return generate(id, mergeAllOf(schema));
 
     if (schema.type === 'object') {
-      const out: SchemaData = {
-        type: 'object',
-        props: [],
-        ...base(raw),
-      };
-      refs[id] = out;
-
       const { properties = {}, patternProperties, additionalProperties } = schema;
-      const props = Object.entries(properties);
-      if (patternProperties) props.push(...Object.entries(patternProperties));
+      const entries = Object.entries(properties);
+      if (patternProperties) entries.push(...Object.entries(patternProperties));
 
-      for (const [key, prop] of props) {
+      const props: SchemaDataObjectProperty[] = [];
+      for (const [i, [key, prop]] of entries.entries()) {
         if (!prop || !isVisible(prop)) continue;
-        const $type = getSchemaId(prop);
-        scanRefs($type, prop);
-        out.props.push({
-          $type,
+        props.push({
+          $type: add(prop, `${id}#${i}`),
           name: key,
           required: schema.required?.includes(key) ?? false,
         });
       }
 
       if (additionalProperties && isVisible(additionalProperties)) {
-        const $type = getSchemaId(additionalProperties);
-        scanRefs($type, additionalProperties);
-
-        out.props.push({
-          $type,
+        props.push({
+          $type: add(additionalProperties, `${id}#*`),
           name: '[key: string]',
           required: false,
         });
       }
-      return;
+      return { type: 'object', props, ...base(raw) };
     }
 
     if (schema.type === 'array') {
-      const items = schema.items ?? true;
-      const $type = getSchemaId(items);
-
-      refs[id] = {
+      return {
         type: 'array',
-        item: {
-          $type,
-        },
+        item: { $type: add(schema.items ?? true, `${id}#items`) },
         ...base(raw),
       };
-      scanRefs($type, items);
-      return;
     }
 
-    refs[id] = {
-      type: 'primitive',
-      ...base(raw),
-    };
+    return { type: 'primitive', ...base(raw) };
   }
 
-  const $root = getSchemaId(root);
-  scanRefs($root, root);
   return {
     refs,
-    $root,
+    $root: add(root, '__root'),
   };
 }
 

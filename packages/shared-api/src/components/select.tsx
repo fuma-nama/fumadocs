@@ -120,9 +120,15 @@ function SelectLabel({
 function SelectItem({
   className,
   children,
+  description,
   ref,
   ...props
-}: React.ComponentProps<typeof SelectPrimitive.Item>) {
+}: React.ComponentProps<typeof SelectPrimitive.Item> & {
+  /** shown under the text, outside of what the trigger aligns with */
+  description?: React.ReactNode;
+}) {
+  const text = <SelectPrimitive.ItemText>{children}</SelectPrimitive.ItemText>;
+
   return (
     <SelectPrimitive.Item
       ref={ref}
@@ -132,7 +138,14 @@ function SelectItem({
       )}
       {...props}
     >
-      <SelectPrimitive.ItemText>{children}</SelectPrimitive.ItemText>
+      {description ? (
+        <div className="flex flex-col">
+          {text}
+          {description}
+        </div>
+      ) : (
+        text
+      )}
       <SelectPrimitive.ItemIndicator className="ms-auto shrink-0">
         <Check className="size-3.5 text-fd-primary" />
       </SelectPrimitive.ItemIndicator>

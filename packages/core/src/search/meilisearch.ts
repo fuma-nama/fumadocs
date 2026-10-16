@@ -2,7 +2,7 @@ import type { EnqueuedTaskPromise, Meilisearch } from 'meilisearch';
 import type { StructuredData } from '@/mdx-plugins/remark-structure';
 import type { LoaderConfig, LoaderOutput } from '@/source/loader';
 import type { Awaitable } from '@/types';
-import { buildBreadcrumbs, buildDocuments } from './server/build-index';
+import { buildDocuments, createBreadcrumbs } from './server/build-index';
 
 export interface DocumentRecord {
   title: string;
@@ -48,11 +48,12 @@ export async function toDocuments<C extends LoaderConfig>(
   } = {},
 ): Promise<DocumentRecord[]> {
   const loader = typeof source === 'function' ? await source() : source;
+  const getBreadcrumbs = createBreadcrumbs(loader);
 
   return buildDocuments(loader, (index, page) => ({
     title: index.title,
     description: index.description,
-    breadcrumbs: buildBreadcrumbs(loader, page),
+    breadcrumbs: getBreadcrumbs(page),
     url: index.url,
     structured: index.structuredData,
     tag: options.tag?.(page),

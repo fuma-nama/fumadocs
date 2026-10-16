@@ -36,14 +36,17 @@ export function UsageTabs() {
   const ctx = useRenderContext();
   const t = useTranslations({ note: 'operation page' });
   const { operation, codeUsages } = useOperation();
+  const selectable = !operation['x-exclusiveCodeSample'];
 
   const slots = {
-    selector: operation['x-exclusiveCodeSample'] ? null : <UsageTabsSelector />,
+    // the default usage tabs select example requests in their title
+    selector: ctx.content?.renderAPIExampleUsageTabs && selectable ? <UsageTabsSelector /> : null,
     usageTabs: ctx.content?.renderAPIExampleUsageTabs ? (
       ctx.content.renderAPIExampleUsageTabs(codeUsages, ctx)
     ) : (
       <CodeUsages
         title={t('Example Request')}
+        selectExample={selectable}
         className="mb-4 flex min-h-0 flex-col overflow-hidden rounded-xl border bg-fd-card"
       />
     ),
@@ -91,10 +94,10 @@ function UsageTabsSelector() {
   );
 }
 
-function ExampleHeader({ title, children }: { title: ReactNode; children?: ReactNode }) {
+function ExampleHeader({ title, children }: { title?: ReactNode; children?: ReactNode }) {
   return (
     <div className="flex h-10 shrink-0 items-center gap-2 border-b ps-4 pe-1.5 text-[0.8125rem] font-medium">
-      <span className="me-auto truncate">{title}</span>
+      {title && <span className="me-auto truncate">{title}</span>}
       {children}
     </div>
   );
@@ -104,11 +107,13 @@ export function ExampleSelect({
   items,
   value,
   onValueChange,
+  align = 'end',
   className,
 }: {
-  items: { value: string; label: ReactNode }[];
+  items: { value: string; label: ReactNode; description?: string }[];
   value: string;
   onValueChange: (value: string) => void;
+  align?: 'start' | 'end';
   className?: string;
 }) {
   return (
@@ -121,9 +126,20 @@ export function ExampleSelect({
       >
         <SelectValue className="min-w-0 truncate" />
       </SelectTrigger>
-      <SelectContent align="end">
+      <SelectContent align={align} className="max-w-80">
         {items.map((item) => (
-          <SelectItem key={item.value} value={item.value} className="text-[0.8125rem]">
+          <SelectItem
+            key={item.value}
+            value={item.value}
+            description={
+              item.description && (
+                <div className="prose prose-xs prose-no-margin font-normal text-fd-muted-foreground">
+                  <Markdown md={item.description} />
+                </div>
+              )
+            }
+            className="text-[0.8125rem] font-medium"
+          >
             {item.label}
           </SelectItem>
         ))}
@@ -151,14 +167,18 @@ function select(id: string) {
 /** the code usages of the selected example request, with a select of their languages */
 export function CodeUsages({
   title,
+  selectExample = false,
   className,
   viewportClassName,
 }: {
   title: ReactNode;
+  /** select the example request in place of the title, when there are several */
+  selectExample?: boolean;
   className?: string;
   viewportClassName?: string;
 }) {
   const generators = useOperation().codeUsages.map();
+  const examples = useExampleRequests();
   const selected = useSyncExternalStore(
     subscribe,
     () => sessionStorage.getItem(storageKey),
@@ -172,10 +192,27 @@ export function CodeUsages({
     value,
     label: item.label ?? item.lang,
   }));
+  const example =
+    selectExample && examples.items.length > 1
+      ? examples.items.find((item) => item.id === examples.selected)
+      : undefined;
 
   return (
     <div className={className}>
-      <ExampleHeader title={title}>
+      <ExampleHeader title={!example && title}>
+        {example && (
+          <ExampleSelect
+            items={examples.items.map((item) => ({
+              value: item.id,
+              label: item.name,
+              description: item.description,
+            }))}
+            value={example.id}
+            onValueChange={examples.select}
+            align="start"
+            className="-ms-2 me-auto max-w-none min-w-0 shrink text-fd-foreground"
+          />
+        )}
         {items.length > 1 ? (
           <ExampleSelect items={items} value={id} onValueChange={select} />
         ) : (
@@ -241,6 +278,7 @@ function ResponseTabsDefaultContent({ tabs }: { tabs: ResponseTab[] }) {
                 items={examples.map((item, i) => ({ value: String(i), label: item.label }))}
                 value={String(index)}
                 onValueChange={(v) => setIndex(Number(v))}
+                align="start"
                 className="-ms-2"
               />
             )}

@@ -17,6 +17,8 @@ The OpenAPI schemas to read from.
 - External URLs
 - Functions (see below)
 
+Only schemas listed here can be loaded, other IDs passed to `getSchema()` or preloaded by pages throw an error.
+
 ```ts tab="Basic"
 import { createOpenAPI } from 'fumadocs-openapi/server';
 

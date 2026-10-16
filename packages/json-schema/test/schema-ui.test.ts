@@ -1,4 +1,4 @@
-import { generateSchemaUI } from '@/react';
+import { generateSchemaUI, type SchemaData, type SchemaUIGeneratedData } from '@/react';
 import { createMagicProxy } from '@scalar/json-magic/magic-proxy';
 import { mergeAllOf, stringify } from '@/index';
 import { expect, test } from 'vitest';
@@ -7,6 +7,20 @@ import { fileURLToPath } from 'node:url';
 import path from 'node:path';
 
 const cwd = fileURLToPath(new URL('./', import.meta.url));
+
+/** generate the schemas reachable from the root */
+function readAll({ $root, refs }: SchemaUIGeneratedData) {
+  const out: Record<string, SchemaData> = {};
+  const queue = [$root];
+  for (const id of queue) {
+    if (id in out) continue;
+    const data = (out[id] = refs[id]);
+    if (data.type === 'object') for (const prop of data.props) queue.push(prop.$type);
+    else if (data.type === 'array') queue.push(data.item.$type);
+    else if (data.type !== 'primitive') for (const item of data.items) queue.push(item.$type);
+  }
+  return { $root, refs: out };
+}
 
 test('double-oneOf in allOf does not crash', async () => {
   const parsed = await fromSchema(path.join(cwd, './fixtures/double-oneof.yaml'));
@@ -22,8 +36,7 @@ test('double-oneOf in allOf does not crash', async () => {
   });
 
   // Should produce a cross-product of 4 oneOf variants, not crash
-  expect(out).toBeDefined();
-  expect(out.refs).toBeDefined();
+  expect(readAll(out).refs).toBeDefined();
 });
 
 test('test', async () => {
@@ -39,63 +52,63 @@ test('test', async () => {
     },
   });
 
-  expect(out).toMatchInlineSnapshot(`
+  expect(readAll(out)).toMatchInlineSnapshot(`
     {
-      "$root": "__0",
+      "$root": "__root",
       "refs": {
-        "__0": {
+        "__root": {
           "aliasName": "object",
           "deprecated": undefined,
           "description": undefined,
           "infoTags": [],
           "props": [
             {
-              "$type": "__1",
+              "$type": "__root#0",
               "name": "keyId",
               "required": false,
             },
             {
-              "$type": "__2",
+              "$type": "__root#1",
               "name": "valid",
               "required": true,
             },
             {
-              "$type": "__3",
+              "$type": "__root#2",
               "name": "name",
               "required": false,
             },
             {
-              "$type": "__4",
+              "$type": "__root#3",
               "name": "ownerId",
               "required": false,
             },
             {
-              "$type": "__5",
+              "$type": "__root#4",
               "name": "meta",
               "required": false,
             },
             {
-              "$type": "__7",
+              "$type": "__root#5",
               "name": "expires",
               "required": false,
             },
             {
-              "$type": "__8",
+              "$type": "__root#6",
               "name": "ratelimit",
               "required": false,
             },
             {
-              "$type": "__12",
+              "$type": "__root#7",
               "name": "remaining",
               "required": false,
             },
             {
-              "$type": "__13",
+              "$type": "__root#8",
               "name": "code",
               "required": false,
             },
             {
-              "$type": "__14",
+              "$type": "__root#9",
               "name": "enabled",
               "required": false,
             },
@@ -103,7 +116,7 @@ test('test', async () => {
           "type": "object",
           "typeName": "object",
         },
-        "__1": {
+        "__root#0": {
           "aliasName": "string",
           "deprecated": undefined,
           "description": "The id of the key",
@@ -111,7 +124,96 @@ test('test', async () => {
           "type": "primitive",
           "typeName": "string",
         },
-        "__10": {
+        "__root#1": {
+          "aliasName": "boolean",
+          "deprecated": undefined,
+          "description": "Whether the key is valid or not.
+    A key could be invalid for a number of reasons, for example if it has expired, has no more verifications left or if it has been deleted.",
+          "infoTags": [],
+          "type": "primitive",
+          "typeName": "boolean",
+        },
+        "__root#2": {
+          "aliasName": "string",
+          "deprecated": undefined,
+          "description": "The name of the key, give keys a name to easily identify their purpose",
+          "infoTags": [],
+          "type": "primitive",
+          "typeName": "string",
+        },
+        "__root#3": {
+          "aliasName": "string",
+          "deprecated": undefined,
+          "description": "The id of the tenant associated with this key. Use whatever reference you have in your system to identify the tenant. When verifying the key, we will send this field back to you, so you know who is accessing your API.",
+          "infoTags": [],
+          "type": "primitive",
+          "typeName": "string",
+        },
+        "__root#4": {
+          "aliasName": "object",
+          "deprecated": undefined,
+          "description": "Any additional metadata you want to store with the key",
+          "infoTags": [],
+          "props": [
+            {
+              "$type": "__root#4#*",
+              "name": "[key: string]",
+              "required": false,
+            },
+          ],
+          "type": "object",
+          "typeName": "object",
+        },
+        "__root#4#*": {
+          "aliasName": "unknown",
+          "deprecated": undefined,
+          "description": undefined,
+          "infoTags": [],
+          "type": "primitive",
+          "typeName": "unknown",
+        },
+        "__root#5": {
+          "aliasName": "number",
+          "deprecated": undefined,
+          "description": "The unix timestamp in milliseconds when the key will expire. If this field is null or undefined, the key is not expiring.",
+          "infoTags": [],
+          "type": "primitive",
+          "typeName": "number",
+        },
+        "__root#6": {
+          "aliasName": "object",
+          "deprecated": undefined,
+          "description": "The ratelimit configuration for this key. If this field is null or undefined, the key has no ratelimit.",
+          "infoTags": [],
+          "props": [
+            {
+              "$type": "__root#6#0",
+              "name": "limit",
+              "required": true,
+            },
+            {
+              "$type": "__root#6#1",
+              "name": "remaining",
+              "required": true,
+            },
+            {
+              "$type": "__root#6#2",
+              "name": "reset",
+              "required": true,
+            },
+          ],
+          "type": "object",
+          "typeName": "object",
+        },
+        "__root#6#0": {
+          "aliasName": "number",
+          "deprecated": undefined,
+          "description": "Maximum number of requests that can be made inside a window",
+          "infoTags": [],
+          "type": "primitive",
+          "typeName": "number",
+        },
+        "__root#6#1": {
           "aliasName": "number",
           "deprecated": undefined,
           "description": "Remaining requests after this verification",
@@ -119,7 +221,7 @@ test('test', async () => {
           "type": "primitive",
           "typeName": "number",
         },
-        "__11": {
+        "__root#6#2": {
           "aliasName": "number",
           "deprecated": undefined,
           "description": "Unix timestamp in milliseconds when the ratelimit will reset",
@@ -127,7 +229,7 @@ test('test', async () => {
           "type": "primitive",
           "typeName": "number",
         },
-        "__12": {
+        "__root#7": {
           "aliasName": "number",
           "deprecated": undefined,
           "description": "The number of requests that can be made with this key before it becomes invalid. If this field is null or undefined, the key has no request limit.",
@@ -135,7 +237,7 @@ test('test', async () => {
           "type": "primitive",
           "typeName": "number",
         },
-        "__13": {
+        "__root#8": {
           "aliasName": "string",
           "deprecated": undefined,
           "description": "If the key is invalid this field will be set to the reason why it is invalid.
@@ -165,102 +267,13 @@ test('test', async () => {
           "type": "primitive",
           "typeName": "string",
         },
-        "__14": {
+        "__root#9": {
           "aliasName": "boolean",
           "deprecated": undefined,
           "description": "Sets the key to be enabled or disabled. Disabled keys will not verify.",
           "infoTags": [],
           "type": "primitive",
           "typeName": "boolean",
-        },
-        "__2": {
-          "aliasName": "boolean",
-          "deprecated": undefined,
-          "description": "Whether the key is valid or not.
-    A key could be invalid for a number of reasons, for example if it has expired, has no more verifications left or if it has been deleted.",
-          "infoTags": [],
-          "type": "primitive",
-          "typeName": "boolean",
-        },
-        "__3": {
-          "aliasName": "string",
-          "deprecated": undefined,
-          "description": "The name of the key, give keys a name to easily identify their purpose",
-          "infoTags": [],
-          "type": "primitive",
-          "typeName": "string",
-        },
-        "__4": {
-          "aliasName": "string",
-          "deprecated": undefined,
-          "description": "The id of the tenant associated with this key. Use whatever reference you have in your system to identify the tenant. When verifying the key, we will send this field back to you, so you know who is accessing your API.",
-          "infoTags": [],
-          "type": "primitive",
-          "typeName": "string",
-        },
-        "__5": {
-          "aliasName": "object",
-          "deprecated": undefined,
-          "description": "Any additional metadata you want to store with the key",
-          "infoTags": [],
-          "props": [
-            {
-              "$type": "__6",
-              "name": "[key: string]",
-              "required": false,
-            },
-          ],
-          "type": "object",
-          "typeName": "object",
-        },
-        "__6": {
-          "aliasName": "unknown",
-          "deprecated": undefined,
-          "description": undefined,
-          "infoTags": [],
-          "type": "primitive",
-          "typeName": "unknown",
-        },
-        "__7": {
-          "aliasName": "number",
-          "deprecated": undefined,
-          "description": "The unix timestamp in milliseconds when the key will expire. If this field is null or undefined, the key is not expiring.",
-          "infoTags": [],
-          "type": "primitive",
-          "typeName": "number",
-        },
-        "__8": {
-          "aliasName": "object",
-          "deprecated": undefined,
-          "description": "The ratelimit configuration for this key. If this field is null or undefined, the key has no ratelimit.",
-          "infoTags": [],
-          "props": [
-            {
-              "$type": "__9",
-              "name": "limit",
-              "required": true,
-            },
-            {
-              "$type": "__10",
-              "name": "remaining",
-              "required": true,
-            },
-            {
-              "$type": "__11",
-              "name": "reset",
-              "required": true,
-            },
-          ],
-          "type": "object",
-          "typeName": "object",
-        },
-        "__9": {
-          "aliasName": "number",
-          "deprecated": undefined,
-          "description": "Maximum number of requests that can be made inside a window",
-          "infoTags": [],
-          "type": "primitive",
-          "typeName": "number",
         },
       },
     }
@@ -311,7 +324,7 @@ test('explicit title of a composed schema is its alias (#3529)', () => {
     renderMarkdown: (md) => md,
     renderCodeblock: () => null,
   });
-  const payload = out.refs['#/components/schemas/Payload'];
+  const payload = readAll(out).refs['#/components/schemas/Payload'];
   expect(payload.aliasName).toBe('Payload');
   expect(payload.typeName).toBe('ChildA | ChildB');
   expect(payload.type === 'or' && payload.items.map((item) => item.name)).toEqual([

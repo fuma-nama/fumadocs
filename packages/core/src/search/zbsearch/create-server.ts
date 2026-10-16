@@ -19,7 +19,7 @@ import {
 } from './create-db';
 import { searchSimple } from './search/simple';
 import { searchAdvanced } from './search/advanced';
-import { buildBreadcrumbs, buildIndexDefault, type SharedIndex } from '../server/build-index';
+import { buildIndexDefault, createBreadcrumbs, type SharedIndex } from '../server/build-index';
 import type { LoaderConfig, LoaderOutput } from '@/source/loader';
 import type { Awaitable } from '@/types';
 
@@ -330,12 +330,13 @@ export function createFromSource<C extends LoaderConfig = LoaderConfig>(
   const cache = new WeakMap<LoaderOutput<C>, Promise<SearchServer<EngineQueryOptions>>>();
 
   async function initServer(loader: LoaderOutput<C>) {
+    const getBreadcrumbs = createBreadcrumbs(loader);
     const indexes = await Promise.all(
       loader.getPages().map(async (page) => {
         const index = await buildIndex(page);
         return {
           ...index,
-          breadcrumbs: index.breadcrumbs ?? buildBreadcrumbs(loader, page),
+          breadcrumbs: index.breadcrumbs ?? getBreadcrumbs(page),
           locale: page.locale,
         };
       }),
