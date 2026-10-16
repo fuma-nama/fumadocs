@@ -1,5 +1,5 @@
 'use client';
-import { useMemo, useState } from 'react';
+import { memo, useMemo, useState } from 'react';
 import { Info, KeyRound, Route, SlidersHorizontal } from 'lucide-react';
 import { useTranslations } from '@fuma-translate/react';
 import { dereference, type JsonSchema } from '@fumadocs/json-schema';
@@ -8,7 +8,6 @@ import {
   type FieldEntry,
   FieldRow,
   FieldRows,
-  getRemoval,
   type NavigateFn,
 } from 'shared-api/components/playground/fields';
 import {
@@ -24,9 +23,9 @@ import {
   SelectTrigger,
   SelectValue,
 } from 'shared-api/components/select';
-import type { Playground, PlaygroundTransport } from '@/playground';
+import type { PlaygroundTransport } from '@/playground';
 import { type OperationParameter, type SecurityRequirement, useOperation } from '@/operation';
-import type { SecuritySchemeObject, WsChannelBinding } from '@/types';
+import type { WsChannelBinding } from '@/types';
 import { useBindings } from '@/ui/bindings';
 import { useSecurityGroups } from '@/ui/operation/auth';
 import { cn } from '@/utils/cn';
@@ -35,8 +34,8 @@ export interface ConnectionInputs {
   /** lists of alternative schemes, one of each list is required */
   auth: SecurityRequirement[][];
   parameters: OperationParameter[];
-  /** the query from the WebSocket binding of channel */
-  query: { entry: FieldEntry; required: boolean }[];
+  /** the query from the WebSocket binding of channel, optional ones can be unset */
+  query: FieldEntry[];
 }
 
 /** what readers enter before connecting */
@@ -45,20 +44,16 @@ export function useConnectionInputs(): ConnectionInputs {
   const auth = useSecurityGroups();
   const binding = useBindings(channel.bindings).get('ws') as WsChannelBinding | undefined;
   const query = useMemo(() => {
-    const out: ConnectionInputs['query'] = [];
+    const out: FieldEntry[] = [];
     const schema = dereference(binding?.query);
     if (typeof schema !== 'object' || !schema?.properties) return out;
 
     for (const [name, property] of Object.entries(schema.properties)) {
-      const required = schema.required?.includes(name) ?? false;
       out.push({
-        entry: {
-          fieldName: ['query', name],
-          name,
-          schema: property as JsonSchema,
-          removal: getRemoval(required, false),
-        },
-        required,
+        fieldName: ['query', name],
+        name,
+        schema: property as JsonSchema,
+        removal: schema.required?.includes(name) ? undefined : 'unset',
       });
     }
 
@@ -66,12 +61,6 @@ export function useConnectionInputs(): ConnectionInputs {
   }, [binding]);
 
   return { auth, parameters, query };
-}
-
-function isQueryKey(
-  scheme: SecuritySchemeObject,
-): scheme is SecuritySchemeObject & { name: string } {
-  return scheme.type === 'httpApiKey' && scheme.in === 'query' && Boolean(scheme.name);
 }
 
 const stringSchema: JsonSchema = { type: 'string' };
@@ -86,7 +75,7 @@ function getAuthEntry(
   transport: PlaygroundTransport | undefined,
 ): FieldEntry | undefined {
   // API keys in the query are a part of URL
-  if (isQueryKey(scheme))
+  if (scheme.type === 'httpApiKey' && scheme.in === 'query' && scheme.name)
     return { fieldName: ['query', scheme.name], name: scheme.name, schema: stringSchema };
   if (!transport?.auth?.(scheme)) return;
   const credentials =
@@ -100,30 +89,20 @@ function getAuthEntry(
   };
 }
 
-/** the inputs of connection, nested fields open in panels, locked while connected */
-export function ConnectionPanel({
-  playground,
-  inputs,
+/** the inputs of connection, nested fields of the query open in panels, locked while connected */
+export const ConnectionPanel = memo(function ConnectionPanel({
+  disabled,
+  transport,
   className,
 }: {
-  playground: Playground;
-  inputs: ConnectionInputs;
+  disabled: boolean;
+  transport?: PlaygroundTransport;
   className?: string;
 }) {
   const t = useTranslations({ note: 'playground' });
   const tPage = useTranslations({ note: 'operation page' });
+  const { auth, parameters, query } = useConnectionInputs();
   const fields = useFieldStack();
-  const disabled = playground.status !== 'closed';
-  const { auth, parameters, query } = inputs;
-  const sectionNames: Record<string, string> = {
-    parameters: t('Parameters'),
-    query: t('Query'),
-  };
-  const parameterEntries: FieldEntry[] = [];
-  for (const { name, schema } of parameters)
-    parameterEntries.push({ fieldName: ['parameters', name], name, schema });
-  const queryEntries: FieldEntry[] = [];
-  for (const item of query) queryEntries.push(item.entry);
   const onNavigate = fields.openNested([]);
 
   return (
@@ -141,30 +120,34 @@ export function ConnectionPanel({
                   : t('Authorization')
               }
               items={items}
-              transport={playground.transport}
+              transport={transport}
               onNavigate={onNavigate}
             />
           ))}
-          {parameterEntries.length > 0 && (
-            <Section icon={Route} title={t('Parameters')} count={parameterEntries.length}>
-              {parameterEntries.map((entry) => (
-                <FieldRow
-                  key={entry.name}
-                  entry={entry}
-                  required
-                  onNavigate={() => onNavigate(entry, parameterEntries)}
-                />
-              ))}
+          {parameters.length > 0 && (
+            <Section icon={Route} title={t('Parameters')} count={parameters.length}>
+              {parameters.map(({ name, schema }) => {
+                const entry: FieldEntry = { fieldName: ['parameters', name], name, schema };
+
+                return (
+                  <FieldRow
+                    key={name}
+                    entry={entry}
+                    required
+                    onNavigate={() => onNavigate(entry, [entry])}
+                  />
+                );
+              })}
             </Section>
           )}
-          {queryEntries.length > 0 && (
-            <Section icon={SlidersHorizontal} title={t('Query')} count={queryEntries.length}>
-              {query.map(({ entry, required }) => (
+          {query.length > 0 && (
+            <Section icon={SlidersHorizontal} title={t('Query')} count={query.length}>
+              {query.map((entry) => (
                 <FieldRow
                   key={entry.name}
                   entry={entry}
-                  required={required}
-                  onNavigate={() => onNavigate(entry, queryEntries)}
+                  required={!entry.removal}
+                  onNavigate={() => onNavigate(entry, query)}
                 />
               ))}
             </Section>
@@ -172,15 +155,11 @@ export function ConnectionPanel({
         </fieldset>
       </OverviewLayer>
       {fields.stack.length > 0 && (
-        <FieldPanel
-          fields={fields}
-          root={sectionNames[fields.stack[0].fieldName[0]]}
-          disabled={disabled}
-        />
+        <FieldPanel fields={fields} root={t('Query')} disabled={disabled} />
       )}
     </div>
   );
-}
+});
 
 /** one of the alternative schemes, readers pick the one to enter */
 function AuthSection({
