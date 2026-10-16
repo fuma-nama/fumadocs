@@ -22,10 +22,7 @@ export function generateTypeScriptDefinitions(
 
   try {
     // `generate` resolves `$ref`s against the schema root, the document is in it for in-document refs
-    return generate(
-      { ...(document as object), ...getRaw(schema) },
-      { name, readOnly, writeOnly },
-    );
+    return generate({ ...(document as object), ...getRaw(schema) }, { name, readOnly, writeOnly });
   } catch (e) {
     console.warn('Failed to generate TypeScript definitions:', e);
   }

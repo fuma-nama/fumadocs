@@ -157,6 +157,8 @@ export function Playground() {
 
 A transport connects to the servers of a protocol, see [the MQTT example](/docs/integrations/asyncapi/api-page#custom-transports). They are picked from the `transports` of `usePlayground()`, then the page's `playground.transports`, then the built-in WebSocket one.
 
+`usePlaygroundTransport()` takes the same `transports` and returns the transport of the selected server, `undefined` when none connects to it.
+
 <auto-type-table path="props.ts" name="PlaygroundTransport" />
 
 `connect()` reports to `events`: `open()`, `message(data)` with text or an `ArrayBuffer`, and `close()` or `error()`, which end the connection.

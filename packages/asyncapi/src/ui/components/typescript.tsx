@@ -6,17 +6,15 @@ import { buttonVariants } from 'fumadocs-ui/components/ui/button';
 import { useCopyButton } from 'fumadocs-ui/utils/use-copy-button';
 import type { JsonSchema } from '@fumadocs/json-schema';
 import { useAsyncAPI, useRenderContext } from '@/utils/create-page';
-import type { GenerateTypeScriptDefinitionsContext } from '@/utils/typescript';
 import { cn } from '@/utils/cn';
 
 /** the TypeScript definitions of a schema, from the `generateTypeScriptDefinitions` of page */
 export function useTypeScriptDefinitions(
   schema: JsonSchema,
-  options: Pick<GenerateTypeScriptDefinitionsContext, 'name' | 'readOnly' | 'writeOnly'>,
+  { name, readOnly, writeOnly }: { name: string; readOnly: boolean; writeOnly: boolean },
 ): string | undefined {
   const { generateTypeScriptDefinitions } = useRenderContext();
   const { doc } = useAsyncAPI();
-  const { name, readOnly, writeOnly } = options;
   const result = useMemo(
     () =>
       generateTypeScriptDefinitions

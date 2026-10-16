@@ -29,8 +29,7 @@ function OperationContent({ showTitle, showDescription, anchor }: Omit<PageOpera
   const ctx = useRenderContext();
   const { operation, channel, action, title, description, messages, reply } = useOperation();
   // the channel describes what its operations share, unless the operation repeats it
-  const channelDescription =
-    channel.description !== description ? channel.description : undefined;
+  const channelDescription = channel.description !== description ? channel.description : undefined;
   const hasText = (showDescription && description) || channelDescription;
   let headingLevel = 2;
   let header: ReactNode = null;
@@ -81,12 +80,20 @@ function OperationContent({ showTitle, showDescription, anchor }: Omit<PageOpera
   } else {
     content = (
       <div>
-        {slots.header}
-        {slots.connection}
-        {slots.description}
-        {slots.usage}
-        {slots.authSchemes}
-        {slots.parameters}
+        <div className="flex flex-col gap-x-6 gap-y-4 @4xl:flex-row @4xl:items-start">
+          <div className="min-w-0 flex-1">
+            {slots.header}
+            {slots.connection}
+            {slots.description}
+            {slots.authSchemes}
+            {slots.parameters}
+          </div>
+          {/* empty when no code sample supports the server */}
+          <div className="empty:hidden @4xl:sticky @4xl:top-[calc(var(--fd-docs-row-3,0px)+1rem)] @4xl:flex @4xl:max-h-[calc(var(--fd-docs-height,100dvh)-var(--fd-docs-row-3,0px)-2rem)] @4xl:w-[400px] @4xl:flex-col">
+            {slots.usage}
+          </div>
+        </div>
+        {/* messages lay out their examples beside them */}
         {slots.messages}
         {slots.reply}
         {slots.bindings}

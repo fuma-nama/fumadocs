@@ -214,9 +214,25 @@ function getConnectionUrl(
 }
 
 /**
- * A session on the channel of operation, under `<OperationProvider />`.
- *
- * It connects with the transport of the server's protocol: from `transports`, the page's `playground.transports`, then the built-in one of `ws` and `wss`.
+ * The transport of the selected server's protocol: from `transports`, the page's `playground.transports`, then the built-in one of `ws` and `wss`.
+ */
+export function usePlaygroundTransport(
+  transports?: Record<string, PlaygroundTransport>,
+): PlaygroundTransport | undefined {
+  const pageTransports = useRenderContext().playground?.transports;
+  const { servers, server } = useServer();
+  const protocol = server ? servers[server.id]?.protocol : undefined;
+  if (!protocol) return;
+
+  return (
+    transports?.[protocol] ??
+    pageTransports?.[protocol] ??
+    (protocol === 'ws' || protocol === 'wss' ? wsTransport : undefined)
+  );
+}
+
+/**
+ * A session on the channel of operation with its {@link usePlaygroundTransport | transport}, under `<OperationProvider />`.
  */
 export function usePlayground({
   transports,
@@ -225,13 +241,8 @@ export function usePlayground({
   const channelMessages = useChannelMessages();
   const security = useOperationSecurity();
   const { servers, server } = useServer();
-  const pageTransports = useRenderContext().playground?.transports;
   const schema = server ? servers[server.id] : undefined;
-  const protocol = schema?.protocol ?? '';
-  const transport =
-    transports?.[protocol] ??
-    pageTransports?.[protocol] ??
-    (protocol === 'ws' || protocol === 'wss' ? wsTransport : undefined);
+  const transport = usePlaygroundTransport(transports);
   const stf = useStf({
     defaultValues: (): PlaygroundValues => {
       const out: PlaygroundValues = { parameters: {}, query: {}, auth: {} };

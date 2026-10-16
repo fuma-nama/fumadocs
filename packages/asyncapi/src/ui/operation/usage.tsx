@@ -27,7 +27,6 @@ import {
 import { useBindings } from '@/ui/bindings';
 import { ClientCodeBlock } from '@/ui/components/codeblock';
 import { MessageName } from '@/ui/components/message-name';
-import { cn } from '@/utils/cn';
 
 let defaultCodeUsages: CodeUsageGeneratorRegistry | undefined;
 
@@ -122,7 +121,7 @@ export function CodeUsages() {
   const selectMessage = !data.received && messages.length > 1;
 
   return (
-    <div className={cn(exampleCardClassName, 'not-prose my-6')}>
+    <div className={`${exampleCardClassName} not-prose`}>
       <ExampleHeader title={!selectMessage && t('Code Sample')}>
         {selectMessage && (
           <ExampleSelect

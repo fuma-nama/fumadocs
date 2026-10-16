@@ -11,7 +11,12 @@ import { iconButtonClassName } from 'shared-api/components/playground/panels';
 import { ParamInput } from 'shared-api/components/playground/param-input';
 import { SchemaProvider } from 'shared-api/components/playground/schema';
 import { StfProvider } from '@fumari/stf';
-import { type ConnectionStatus, type Playground, usePlayground } from '@/playground';
+import {
+  type ConnectionStatus,
+  type Playground,
+  usePlayground,
+  usePlaygroundTransport,
+} from '@/playground';
 import { useOperation } from '@/operation';
 import { useAsyncAPI } from '@/utils/create-page';
 import { useServer } from '@/utils/use-server';
@@ -28,14 +33,14 @@ import { MessagesPanel } from './messages';
  * The connection bar with a playground for the channel, the bar alone when no transport connects to the server.
  */
 export function PlaygroundClient() {
-  const playground = usePlayground();
-  if (!playground.transport) return <ConnectionBar />;
+  if (!usePlaygroundTransport()) return <ConnectionBar />;
 
-  return <PlaygroundSession playground={playground} />;
+  return <PlaygroundSession />;
 }
 
-function PlaygroundSession({ playground }: { playground: Playground }) {
+function PlaygroundSession() {
   const t = useTranslations({ note: 'playground' });
+  const playground = usePlayground();
   const [open, setOpen] = useState(false);
   const { status } = playground;
 
