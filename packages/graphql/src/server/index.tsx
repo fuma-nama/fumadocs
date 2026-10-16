@@ -84,12 +84,11 @@ export function createGraphQL(options: GraphQLOptions = {}): GraphQLServer {
     resolvedInput = options.input;
   }
 
-  function getSchema(schemaId: string): Promise<LoadedSchema> {
-    if (!(schemaId in resolvedInput)) {
-      console.warn(
-        `[Fumadocs GraphQL] the schema "${schemaId}" is not listed in the input array, this may be unexpected and won't be cached properly.`,
+  async function getSchema(schemaId: string): Promise<LoadedSchema> {
+    if (!Object.hasOwn(resolvedInput, schemaId)) {
+      throw new Error(
+        `[Fumadocs GraphQL] the schema "${schemaId}" is not listed in "input", only schemas from "input" can be loaded.`,
       );
-      return loadSchema(schemaId);
     }
 
     if (!disableCache) {

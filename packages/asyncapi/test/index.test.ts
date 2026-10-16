@@ -152,3 +152,10 @@ describe('Generate AsyncAPI documents', () => {
     ).rejects.toThrow();
   });
 });
+
+test('refuses documents not listed in input', async () => {
+  const server = createAsyncAPI({ input: [path.join(cwd, './fixtures/streetlights.yaml')] });
+
+  await expect(server.getSchema('./asyncapi.yaml')).rejects.toThrow('is not listed in "input"');
+  await expect(server.getSchema('constructor')).rejects.toThrow('is not listed in "input"');
+});

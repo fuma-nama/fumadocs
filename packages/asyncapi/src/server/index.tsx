@@ -86,12 +86,11 @@ export function createAsyncAPI(options: AsyncAPIOptions = {}): AsyncAPIServer {
     resolvedInput = options.input;
   }
 
-  function getSchema(schemaId: string): Promise<LoadedDocument> {
-    if (!(schemaId in resolvedInput)) {
-      console.warn(
-        `[Fumadocs AsyncAPI] the document "${schemaId}" is not listed in the input array, this may be unexpected and won't be cached properly.`,
+  async function getSchema(schemaId: string): Promise<LoadedDocument> {
+    if (!Object.hasOwn(resolvedInput, schemaId)) {
+      throw new Error(
+        `[Fumadocs AsyncAPI] the document "${schemaId}" is not listed in "input", only documents from "input" can be loaded.`,
       );
-      return loadDocument(schemaId);
     }
 
     if (!disableCache) {
