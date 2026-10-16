@@ -7,8 +7,8 @@ import { cn } from '@/utils/cn';
 import { AnchorSection, useAnchorLink } from '@/auto-anchor';
 
 const Context = createContext<{
-  type: 'single' | 'multiple';
-  setValue: (v: string[]) => void;
+  /** open an item, others stay open in multiple accordions */
+  open: (item: string) => void;
 } | null>(null);
 
 export function Accordions({
@@ -24,9 +24,20 @@ export function Accordions({
     if (defaultValue) return [defaultValue];
     return [];
   });
+  const ctx = useMemo(
+    () => ({
+      open(item: string) {
+        setValue((prev) => {
+          if (type === 'single') return [item];
+          return prev.includes(item) ? prev : [...prev, item];
+        });
+      },
+    }),
+    [type],
+  );
 
   return (
-    <Context value={useMemo(() => ({ type, setValue }), [type])}>
+    <Context value={ctx}>
       <Primitive.Root
         multiple={type === 'multiple'}
         value={value}
@@ -47,7 +58,7 @@ export function AccordionItem({
   anchorSegments?: string[];
 }) {
   const ctx = use(Context)!;
-  useAnchorLink(anchorSegments ?? false, () => ctx.setValue([value]));
+  useAnchorLink(anchorSegments ?? false, () => ctx.open(value));
 
   const content = (
     <Primitive.Item

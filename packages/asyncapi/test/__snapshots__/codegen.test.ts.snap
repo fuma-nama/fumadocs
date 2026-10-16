@@ -1,0 +1,407 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`AMQP exchange > js > receive 1`] = `
+"import { connect } from "amqplib";
+
+const connection = await connect("amqp://broker.example.com:5672/city");
+const channel = await connection.createChannel();
+
+const { queue } = await channel.assertQueue("", { exclusive: true });
+await channel.bindQueue(queue, "lights", "lights.measured");
+await channel.consume(queue, (message) => {
+  console.log(message.content.toString());
+  channel.ack(message);
+});"
+`;
+
+exports[`AMQP exchange > js > send 1`] = `
+"import { connect } from "amqplib";
+
+const payload = {
+  "id": "streetlight-1",
+  "lumens": 3,
+  "on": true,
+  "note": null
+};
+
+const connection = await connect("amqp://broker.example.com:5672/city");
+const channel = await connection.createChannel();
+
+channel.publish("lights", "lights.measured", Buffer.from(JSON.stringify(payload)), { contentType: "application/json", headers: { "my-app-header": 12 } });
+await channel.close();
+await connection.close();"
+`;
+
+exports[`AMQP exchange > python > receive 1`] = `
+"import pika
+
+
+def on_message(channel, method, properties, body):
+    print(body.decode())
+    channel.basic_ack(method.delivery_tag)
+
+
+connection = pika.BlockingConnection(pika.URLParameters("amqp://broker.example.com:5672/city"))
+channel = connection.channel()
+queue = channel.queue_declare("", exclusive=True).method.queue
+channel.queue_bind(queue, "lights", "lights.measured")
+channel.basic_consume(queue, on_message)
+channel.start_consuming()"
+`;
+
+exports[`AMQP exchange > python > send 1`] = `
+"import json
+
+import pika
+
+payload = {
+    "id": "streetlight-1",
+    "lumens": 3,
+    "on": True,
+    "note": None
+}
+
+connection = pika.BlockingConnection(pika.URLParameters("amqp://broker.example.com:5672/city"))
+channel = connection.channel()
+channel.basic_publish("lights", "lights.measured", json.dumps(payload), pika.BasicProperties(content_type="application/json", headers={
+    "my-app-header": 12
+}))
+connection.close()"
+`;
+
+exports[`AMQP queue > js > receive 1`] = `
+"import { connect } from "amqplib";
+
+const connection = await connect("amqps://broker.example.com");
+const channel = await connection.createChannel();
+
+await channel.consume("measurements", (message) => {
+  console.log(message.content.toString());
+}, { noAck: true });"
+`;
+
+exports[`AMQP queue > js > send 1`] = `
+"import { connect } from "amqplib";
+
+const payload = {
+  "id": "streetlight-1",
+  "lumens": 3,
+  "on": true,
+  "note": null
+};
+
+const connection = await connect("amqps://broker.example.com");
+const channel = await connection.createChannel();
+
+channel.sendToQueue("measurements", Buffer.from(JSON.stringify(payload)), { contentType: "application/json", headers: { "my-app-header": 12 } });
+await channel.close();
+await connection.close();"
+`;
+
+exports[`AMQP queue > python > receive 1`] = `
+"import pika
+
+
+def on_message(channel, method, properties, body):
+    print(body.decode())
+
+
+connection = pika.BlockingConnection(pika.URLParameters("amqps://broker.example.com"))
+channel = connection.channel()
+channel.basic_consume("measurements", on_message, auto_ack=True)
+channel.start_consuming()"
+`;
+
+exports[`AMQP queue > python > send 1`] = `
+"import json
+
+import pika
+
+payload = {
+    "id": "streetlight-1",
+    "lumens": 3,
+    "on": True,
+    "note": None
+}
+
+connection = pika.BlockingConnection(pika.URLParameters("amqps://broker.example.com"))
+channel = connection.channel()
+channel.basic_publish("", "measurements", json.dumps(payload), pika.BasicProperties(content_type="application/json", headers={
+    "my-app-header": 12
+}))
+connection.close()"
+`;
+
+exports[`Kafka > js > receive 1`] = `
+"import { Kafka } from "kafkajs";
+
+const kafka = new Kafka({ clientId: "app", brokers: ["broker.example.com:9093"], ssl: true });
+const consumer = kafka.consumer({ groupId: "lights" });
+
+await consumer.connect();
+await consumer.subscribe({ topics: ["lights.measured"] });
+await consumer.run({
+  eachMessage: async ({ message }) => {
+    console.log(message.value.toString());
+  },
+});"
+`;
+
+exports[`Kafka > js > send 1`] = `
+"import { Kafka } from "kafkajs";
+
+const payload = {
+  "id": "streetlight-1",
+  "lumens": 3,
+  "on": true,
+  "note": null
+};
+
+const kafka = new Kafka({ clientId: "app", brokers: ["broker.example.com:9093"], ssl: true });
+const producer = kafka.producer();
+
+await producer.connect();
+await producer.send({
+  topic: "lights.measured",
+  messages: [{ key: "streetlight-1", value: JSON.stringify(payload), headers: { "my-app-header": "12" } }],
+});
+await producer.disconnect();"
+`;
+
+exports[`Kafka > python > receive 1`] = `
+"from confluent_kafka import Consumer
+
+consumer = Consumer({
+    "bootstrap.servers": "broker.example.com:9093",
+    "group.id": "lights",
+    "client.id": "app",
+    "security.protocol": "SSL"
+})
+consumer.subscribe(["lights.measured"])
+
+while True:
+    message = consumer.poll(1.0)
+    if message is not None and not message.error():
+        print(message.value().decode())"
+`;
+
+exports[`Kafka > python > send 1`] = `
+"import json
+
+from confluent_kafka import Producer
+
+payload = {
+    "id": "streetlight-1",
+    "lumens": 3,
+    "on": True,
+    "note": None
+}
+
+producer = Producer({
+    "bootstrap.servers": "broker.example.com:9093",
+    "client.id": "app",
+    "security.protocol": "SSL"
+})
+producer.produce("lights.measured", json.dumps(payload), key="streetlight-1", headers={
+    "my-app-header": "12"
+})
+producer.flush()"
+`;
+
+exports[`MQTT > js > receive 1`] = `
+"import { connectAsync } from "mqtt";
+
+const client = await connectAsync("mqtts://broker.example.com");
+
+client.on("message", (topic, message) => {
+  console.log(message.toString());
+});
+await client.subscribeAsync("lights/measured", { qos: 1 });"
+`;
+
+exports[`MQTT > js > send 1`] = `
+"import { connectAsync } from "mqtt";
+
+const payload = {
+  "id": "streetlight-1",
+  "lumens": 3,
+  "on": true,
+  "note": null
+};
+
+const client = await connectAsync("mqtts://broker.example.com");
+
+await client.publishAsync("lights/measured", JSON.stringify(payload), { qos: 1, retain: true });
+await client.endAsync();"
+`;
+
+exports[`MQTT > python > receive 1`] = `
+"import paho.mqtt.client as mqtt
+
+
+def on_connect(client, userdata, flags, reason_code, properties):
+    client.subscribe("lights/measured", qos=1)
+
+
+def on_message(client, userdata, message):
+    print(message.payload.decode())
+
+
+client = mqtt.Client(mqtt.CallbackAPIVersion.VERSION2)
+client.on_connect = on_connect
+client.on_message = on_message
+client.tls_set()
+client.connect("broker.example.com", 8883)
+client.loop_forever()"
+`;
+
+exports[`MQTT > python > send 1`] = `
+"import json
+
+import paho.mqtt.client as mqtt
+
+payload = {
+    "id": "streetlight-1",
+    "lumens": 3,
+    "on": True,
+    "note": None
+}
+
+client = mqtt.Client(mqtt.CallbackAPIVersion.VERSION2)
+client.tls_set()
+client.connect("broker.example.com", 8883)
+client.loop_start()
+client.publish("lights/measured", json.dumps(payload), qos=1, retain=True).wait_for_publish()
+client.disconnect()
+client.loop_stop()"
+`;
+
+exports[`NATS > js > receive 1`] = `
+"import { connect } from "@nats-io/transport-node";
+
+const nc = await connect({ servers: "nats://broker.example.com:4222" });
+const sub = nc.subscribe("lights.measured", { queue: "workers" });
+
+for await (const message of sub) {
+  console.log(message.string());
+}"
+`;
+
+exports[`NATS > js > send 1`] = `
+"import { connect, headers } from "@nats-io/transport-node";
+
+const payload = {
+  "id": "streetlight-1",
+  "lumens": 3,
+  "on": true,
+  "note": null
+};
+
+const nc = await connect({ servers: "nats://broker.example.com:4222" });
+const h = headers();
+h.set("my-app-header", "12");
+
+nc.publish("lights.measured", JSON.stringify(payload), { headers: h });
+await nc.drain();"
+`;
+
+exports[`NATS > python > receive 1`] = `
+"import asyncio
+
+import nats
+
+
+async def main():
+    nc = await nats.connect("nats://broker.example.com:4222")
+    sub = await nc.subscribe("lights.measured", queue="workers")
+    async for message in sub.messages:
+        print(message.data.decode())
+
+
+asyncio.run(main())"
+`;
+
+exports[`NATS > python > send 1`] = `
+"import asyncio
+import json
+
+import nats
+
+payload = {
+    "id": "streetlight-1",
+    "lumens": 3,
+    "on": True,
+    "note": None
+}
+
+
+async def main():
+    nc = await nats.connect("nats://broker.example.com:4222")
+    await nc.publish("lights.measured", json.dumps(payload).encode(), headers={
+        "my-app-header": "12"
+    })
+    await nc.drain()
+
+
+asyncio.run(main())"
+`;
+
+exports[`WebSocket > js > receive 1`] = `
+"const socket = new WebSocket("wss://api.example.com/v1/lights?api_key=YOUR_API_KEY");
+
+socket.addEventListener("message", (event) => {
+  console.log(event.data);
+});"
+`;
+
+exports[`WebSocket > js > send 1`] = `
+"const payload = {
+  "id": "streetlight-1",
+  "lumens": 3,
+  "on": true,
+  "note": null
+};
+
+const socket = new WebSocket("wss://api.example.com/v1/lights?api_key=YOUR_API_KEY");
+
+socket.addEventListener("open", () => {
+  socket.send(JSON.stringify(payload));
+});"
+`;
+
+exports[`WebSocket > python > receive 1`] = `
+"import asyncio
+
+from websockets.asyncio.client import connect
+
+
+async def main():
+    async with connect("wss://api.example.com/v1/lights?api_key=YOUR_API_KEY") as websocket:
+        async for message in websocket:
+            print(message)
+
+
+asyncio.run(main())"
+`;
+
+exports[`WebSocket > python > send 1`] = `
+"import asyncio
+import json
+
+from websockets.asyncio.client import connect
+
+payload = {
+    "id": "streetlight-1",
+    "lumens": 3,
+    "on": True,
+    "note": None
+}
+
+
+async def main():
+    async with connect("wss://api.example.com/v1/lights?api_key=YOUR_API_KEY") as websocket:
+        await websocket.send(json.dumps(payload))
+
+
+asyncio.run(main())"
+`;

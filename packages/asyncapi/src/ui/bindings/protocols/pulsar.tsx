@@ -1,107 +1,39 @@
 'use client';
 import type { PulsarChannelBinding, PulsarServerBinding } from '@/types/asyncapi-3';
-import {
-  createBinding,
-  hasBindingFields,
-  BindingFields,
-  BindingEmpty,
-  BindingGroup,
-  BindingFieldRow,
-  BindingScalarValue,
-  joinBindingSummary,
-} from '../shared';
+import { CodeRow, createBinding, Fields, GroupRow, ValueRow } from '../shared';
 
-function formatPersistence(value: string): string {
+function formatPersistence(value?: string) {
   if (value === 'persistent') return 'Persistent';
   if (value === 'non-persistent') return 'Non-persistent';
   return value;
 }
 
-function getPulsarServerSummary(binding: PulsarServerBinding): string | undefined {
-  return binding.tenant;
-}
-
 function PulsarServerBinding({ binding }: { binding: PulsarServerBinding }) {
-  if (!hasBindingFields(binding)) return <BindingEmpty />;
-
   return (
-    <BindingFields>
-      {binding.tenant && (
-        <BindingFieldRow label="Tenant" value={<code className="text-xs">{binding.tenant}</code>} />
-      )}
-    </BindingFields>
-  );
-}
-
-function getPulsarChannelSummary(binding: PulsarChannelBinding): string | undefined {
-  return joinBindingSummary(
-    binding.namespace,
-    binding.persistence ? formatPersistence(binding.persistence) : undefined,
+    <Fields>
+      <CodeRow label="Tenant" value={binding.tenant} />
+    </Fields>
   );
 }
 
 function PulsarChannelBinding({ binding }: { binding: PulsarChannelBinding }) {
-  if (!hasBindingFields(binding)) return <BindingEmpty />;
+  const { retention } = binding;
 
   return (
-    <BindingFields>
-      {binding.namespace && (
-        <BindingFieldRow
-          label="Namespace"
-          value={<code className="text-xs">{binding.namespace}</code>}
-        />
+    <Fields>
+      <CodeRow label="Namespace" value={binding.namespace} />
+      <CodeRow label="Persistence" value={formatPersistence(binding.persistence)} />
+      <ValueRow label="Compaction" value={binding.compaction} />
+      <ValueRow label="Geo Replication" value={binding['geo-replication']} />
+      {retention && (
+        <GroupRow label="Retention" title="Retention">
+          <ValueRow label="Time" value={retention.time} />
+          <ValueRow label="Size" value={retention.size} />
+        </GroupRow>
       )}
-      {binding.persistence && (
-        <BindingFieldRow
-          label="Persistence"
-          value={<code className="text-xs">{formatPersistence(binding.persistence)}</code>}
-        />
-      )}
-      {binding.compaction !== undefined && (
-        <BindingFieldRow
-          label="Compaction"
-          value={<BindingScalarValue value={binding.compaction} />}
-        />
-      )}
-      {binding['geo-replication'] && binding['geo-replication'].length > 0 && (
-        <BindingFieldRow
-          label="Geo Replication"
-          value={<BindingScalarValue value={binding['geo-replication']} />}
-        />
-      )}
-      {binding.retention && (
-        <BindingFieldRow
-          label="Retention"
-          value={
-            <BindingGroup title="Retention">
-              <BindingFields>
-                {binding.retention.time !== undefined && (
-                  <BindingFieldRow
-                    label="Time"
-                    value={<BindingScalarValue value={binding.retention.time} />}
-                  />
-                )}
-                {binding.retention.size !== undefined && (
-                  <BindingFieldRow
-                    label="Size"
-                    value={<BindingScalarValue value={binding.retention.size} />}
-                  />
-                )}
-              </BindingFields>
-            </BindingGroup>
-          }
-        />
-      )}
-      {binding.ttl !== undefined && (
-        <BindingFieldRow label="TTL" value={<BindingScalarValue value={binding.ttl} />} />
-      )}
-      {binding.deduplication !== undefined && (
-        <BindingFieldRow
-          label="Deduplication"
-          value={<BindingScalarValue value={binding.deduplication} />}
-        />
-      )}
-    </BindingFields>
+      <ValueRow label="TTL" value={binding.ttl} />
+      <ValueRow label="Deduplication" value={binding.deduplication} />
+    </Fields>
   );
 }
 
@@ -109,6 +41,4 @@ export const pulsarBinding = createBinding({
   label: 'Apache Pulsar',
   Server: PulsarServerBinding,
   Channel: PulsarChannelBinding,
-  getServerSummary: getPulsarServerSummary,
-  getChannelSummary: getPulsarChannelSummary,
 });

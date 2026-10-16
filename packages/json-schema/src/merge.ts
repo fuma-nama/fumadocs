@@ -1,6 +1,7 @@
 import { type JsonSchema } from './types';
 import { deepEqual } from './utils/deep-equal';
 import { dereference } from './dereference';
+import { setOwn } from './utils/deep-merge';
 
 /**
  * Merge `allOf` object schema
@@ -182,14 +183,14 @@ function intersection(rawA: JsonSchema, rawB: JsonSchema): JsonSchema {
         for (const k in value) allProps.add(k);
 
         for (const prop of allProps) {
-          const aProp = result[key][prop];
-          const bProp = value[prop];
+          const aProp = Object.hasOwn(result[key], prop) ? result[key][prop] : undefined;
+          const bProp = Object.hasOwn(value, prop) ? value[prop] : undefined;
           if (aProp === undefined) {
-            out[prop] = bProp;
+            setOwn(out, prop, bProp);
           } else if (bProp === undefined) {
-            out[prop] = aProp;
+            setOwn(out, prop, aProp);
           } else {
-            out[prop] = intersection(aProp, bProp);
+            setOwn(out, prop, intersection(aProp, bProp));
           }
         }
 

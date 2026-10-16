@@ -1,136 +1,45 @@
 'use client';
 import type { SolaceOperationBinding, SolaceServerBinding } from '@/types/asyncapi-3';
-import {
-  createBinding,
-  hasBindingFields,
-  BindingFields,
-  BindingEmpty,
-  BindingGroup,
-  BindingFieldRow,
-  BindingScalarValue,
-  BindingSchema,
-  joinBindingSummary,
-} from '../shared';
+import { CodeRow, createBinding, Fields, GroupRow, SchemaRow, ValueRow } from '../shared';
 
-function formatDeliveryMode(value: string): string {
+function formatDeliveryMode(value?: string) {
   if (value === 'direct') return 'Direct';
   if (value === 'persistent') return 'Persistent';
   return value;
 }
 
-function getSolaceServerSummary(binding: SolaceServerBinding): string | undefined {
-  return joinBindingSummary(binding.msgVpn, binding.clientName);
-}
-
 function SolaceServerBinding({ binding }: { binding: SolaceServerBinding }) {
-  if (!hasBindingFields(binding)) return <BindingEmpty />;
-
   return (
-    <BindingFields>
-      {binding.msgVpn && (
-        <BindingFieldRow
-          label="Message VPN"
-          value={<code className="text-xs">{binding.msgVpn}</code>}
-        />
-      )}
-      {binding.clientName && (
-        <BindingFieldRow
-          label="Client Name"
-          value={<code className="text-xs">{binding.clientName}</code>}
-        />
-      )}
-    </BindingFields>
+    <Fields>
+      <CodeRow label="Message VPN" value={binding.msgVpn} />
+      <CodeRow label="Client Name" value={binding.clientName} />
+    </Fields>
   );
 }
 
-function getSolaceOperationSummary(binding: SolaceOperationBinding): string | undefined {
-  const count = binding.destinations?.length ?? 0;
-  if (count === 0) return undefined;
-  return `${count} destination${count > 1 ? 's' : ''}`;
-}
-
 function SolaceOperationBinding({ binding }: { binding: SolaceOperationBinding }) {
-  if (!hasBindingFields(binding)) return <BindingEmpty />;
-
   return (
-    <BindingFields>
-      {binding.destinations?.map((destination, index) => (
-        <BindingFieldRow
+    <Fields>
+      {binding.destinations?.map(({ destinationType, deliveryMode, queue, topic }, index) => (
+        <GroupRow
           key={index}
           label={`Destination ${index + 1}`}
-          value={
-            <BindingGroup
-              title={
-                destination.queue?.name ??
-                destination.topic?.topicSubscriptions?.[0] ??
-                `Destination ${index + 1}`
-              }
-            >
-              <BindingFields>
-                {destination.destinationType && (
-                  <BindingFieldRow
-                    label="Destination Type"
-                    value={<code className="text-xs">{destination.destinationType}</code>}
-                  />
-                )}
-                {destination.deliveryMode && (
-                  <BindingFieldRow
-                    label="Delivery Mode"
-                    value={
-                      <code className="text-xs">
-                        {formatDeliveryMode(destination.deliveryMode)}
-                      </code>
-                    }
-                  />
-                )}
-                {destination.queue?.name && (
-                  <BindingFieldRow
-                    label="Queue Name"
-                    value={<code className="text-xs">{destination.queue.name}</code>}
-                  />
-                )}
-                {destination.queue?.topicSubscriptions && (
-                  <BindingFieldRow
-                    label="Topic Subscriptions"
-                    value={<BindingScalarValue value={destination.queue.topicSubscriptions} />}
-                  />
-                )}
-              </BindingFields>
-            </BindingGroup>
-          }
-        />
+          title={queue?.name ?? topic?.topicSubscriptions?.[0] ?? `Destination ${index + 1}`}
+        >
+          <CodeRow label="Destination Type" value={destinationType} />
+          <CodeRow label="Delivery Mode" value={formatDeliveryMode(deliveryMode)} />
+          <CodeRow label="Queue Name" value={queue?.name} />
+          <ValueRow label="Topic Subscriptions" value={queue?.topicSubscriptions} />
+          <CodeRow label="Access Type" value={queue?.accessType} />
+          <ValueRow label="Max Message Spool Size" value={queue?.maxMsgSpoolSize} />
+          <ValueRow label="Max TTL" value={queue?.maxTtl} />
+          <ValueRow label="Topic Subscriptions" value={topic?.topicSubscriptions} />
+        </GroupRow>
       ))}
-      {binding.timeToLive !== undefined && (
-        <BindingFieldRow
-          label="Time to Live"
-          value={
-            typeof binding.timeToLive === 'object' ? (
-              <BindingSchema name="timeToLive" schema={binding.timeToLive} />
-            ) : (
-              <BindingScalarValue value={binding.timeToLive} />
-            )
-          }
-        />
-      )}
-      {binding.priority !== undefined && (
-        <BindingFieldRow
-          label="Priority"
-          value={
-            typeof binding.priority === 'object' ? (
-              <BindingSchema name="priority" schema={binding.priority} />
-            ) : (
-              <BindingScalarValue value={binding.priority} />
-            )
-          }
-        />
-      )}
-      {binding.dmqEligible !== undefined && (
-        <BindingFieldRow
-          label="DMQ Eligible"
-          value={<BindingScalarValue value={binding.dmqEligible} />}
-        />
-      )}
-    </BindingFields>
+      <SchemaRow label="Time to Live" name="timeToLive" value={binding.timeToLive} />
+      <SchemaRow label="Priority" name="priority" value={binding.priority} />
+      <ValueRow label="DMQ Eligible" value={binding.dmqEligible} />
+    </Fields>
   );
 }
 
@@ -138,6 +47,4 @@ export const solaceBinding = createBinding({
   label: 'Solace',
   Server: SolaceServerBinding,
   Operation: SolaceOperationBinding,
-  getServerSummary: getSolaceServerSummary,
-  getOperationSummary: getSolaceOperationSummary,
 });

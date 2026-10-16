@@ -49,7 +49,7 @@ export function ServerProvider({
       const server = servers[id];
       if (!server) return null;
 
-      return { id, title: idToTitle(id), variables: getDefaultValues(server) };
+      return { id, title: server.title ?? idToTitle(id), variables: getDefaultValues(server) };
     },
     [servers],
   );
@@ -60,22 +60,20 @@ export function ServerProvider({
     defaultKey: Object.keys(servers)[0],
   });
 
-  const { server } = store;
-  const resolveUrl = useCallback(
-    (id?: string) => {
-      const schema = servers[id ?? server?.id ?? ''];
-      if (!schema) return;
+  const value = useMemo<ServerContextType>(
+    () => ({
+      servers,
+      ...store,
+      resolveUrl(id) {
+        const { server } = store;
+        const schema = servers[id ?? server?.id ?? ''];
+        if (!schema) return;
 
-      return resolveServerUrl(schema, id === undefined && server ? server.variables : {});
-    },
-    [servers, server],
+        return resolveServerUrl(schema, id === undefined && server ? server.variables : {});
+      },
+    }),
+    [servers, store],
   );
 
-  return (
-    <ServerContext
-      value={useMemo(() => ({ servers, resolveUrl, ...store }), [servers, resolveUrl, store])}
-    >
-      {children}
-    </ServerContext>
-  );
+  return <ServerContext value={value}>{children}</ServerContext>;
 }

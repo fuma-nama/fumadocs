@@ -1,17 +1,12 @@
 'use client';
-import { ClientCodeBlock } from '@/ui/components/codeblock';
-import { createBinding } from '../shared';
-import { useMemo } from 'react';
+import { JsonValue } from '../shared';
 
-function UnknownBindingContent({ binding }: { binding: Record<string, unknown> }) {
-  const code = useMemo(() => JSON.stringify(binding, null, 2), [binding]);
-  return <ClientCodeBlock lang="json" code={code} />;
+export function UnknownBinding({ binding }: { binding: Record<string, unknown> }) {
+  return (
+    <dl className="not-prose py-2">
+      <dd>
+        <JsonValue value={binding} />
+      </dd>
+    </dl>
+  );
 }
-
-export const unknownBinding = createBinding({
-  label: 'Unknown',
-  Server: UnknownBindingContent,
-  Channel: UnknownBindingContent,
-  Operation: UnknownBindingContent,
-  Message: UnknownBindingContent,
-});

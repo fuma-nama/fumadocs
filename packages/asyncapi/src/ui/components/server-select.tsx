@@ -1,172 +1,83 @@
 'use client';
-import { useServer } from '@/utils/use-server';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from 'shared-api/components/select';
-import { Input } from 'shared-api/components/input';
-import { Label } from 'shared-api/components/label';
-import { useRef, useState, type ComponentProps } from 'react';
-import { cn } from '@/utils/cn';
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from 'shared-api/components/dialog';
-import { StfProvider, useFieldValue, useListener, useStf } from '@fumari/stf';
-import { EditIcon } from 'lucide-react';
 import { useTranslations } from '@fuma-translate/react';
-import type { ServerObject, ServerVariableObject } from '@/types';
 import { dereference } from '@fumadocs/json-schema';
+import {
+  type ServerOption,
+  ServerPopover,
+  type ServerVariable,
+  ServerVariables,
+} from 'shared-api/components/playground/server-select';
+import { idToTitle } from 'shared-api/utils/id-to-title';
+import { useServer } from '@/utils/use-server';
+import { cn } from '@/utils/cn';
 
-export function ServerSelect(props: ComponentProps<typeof DialogTrigger>) {
+/** the server of a connection, selects one of the servers and edits its variables */
+export function ServerSelect({ label, className }: { label: string; className?: string }) {
   const { servers, server, resolveUrl, setServer, setServerVariables } = useServer();
-  const [open, setOpen] = useState(false);
-  const t = useTranslations({ note: 'playground server select' });
-  const serverSchema = server ? servers[server.id] : undefined;
+  const t = useTranslations({ note: 'asyncapi server select' });
+  const ids = Object.keys(servers);
+  const variables = server ? servers[server.id]?.variables : undefined;
 
-  return (
-    <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger
-        {...props}
-        className={cn(
-          'flex items-center gap-2 text-sm text-start px-3 py-2 transition-colors hover:bg-fd-accent hover:text-fd-accent-foreground',
-          props.className,
-        )}
-      >
-        <span className="px-2 py-0.5 font-medium rounded-lg border bg-fd-primary text-xs text-fd-primary-foreground shadow-sm">
-          {server?.title ?? t('Server URL')}
-        </span>
-        <code className="truncate min-w-0 flex-1">{resolveUrl()}</code>
-        <EditIcon className="size-4 text-fd-muted-foreground shrink-0" />
-      </DialogTrigger>
-      <DialogContent>
-        <DialogHeader>
-          <DialogTitle>{t('Server URL')}</DialogTitle>
-          <DialogDescription>{t('The base URL of your API endpoint.')}</DialogDescription>
-        </DialogHeader>
-        <Select
-          items={Object.keys(servers).map((id) => ({
-            label: <code className="font-medium">{resolveUrl(id)}</code>,
-            value: id,
-          }))}
-          value={server?.id ?? null}
-          onValueChange={(v) => v !== null && setServer(v)}
-        >
-          <SelectTrigger>
-            <SelectValue />
-          </SelectTrigger>
-          <SelectContent>
-            {Object.entries(servers).map(([id, item]) => {
-              return (
-                <SelectItem key={id} value={id}>
-                  <div className="flex flex-col gap-2">
-                    <code className="font-medium">{resolveUrl(id)}</code>
-                    {item.description && (
-                      <p className="text-fd-muted-foreground">{item.description}</p>
-                    )}
-                  </div>
-                </SelectItem>
-              );
-            })}
-          </SelectContent>
-        </Select>
-        {server?.variables && serverSchema?.variables && (
-          <ServerSelectContent
-            key={server.id}
-            defaultValues={server.variables}
-            schema={serverSchema.variables}
-            onChange={setServerVariables}
-          />
-        )}
-      </DialogContent>
-    </Dialog>
-  );
-}
-
-function ServerSelectContent({
-  defaultValues,
-  onChange,
-  schema,
-}: {
-  defaultValues: Record<string, string>;
-  onChange: (values: Record<string, string>) => void;
-  schema: NonNullable<ServerObject['variables']>;
-}) {
-  const stf = useStf({
-    defaultValues: () => structuredClone(defaultValues),
-  });
-  const timerRef = useRef<number | null>(null);
-  useListener({
-    stf,
-    onUpdate() {
-      if (timerRef.current !== null) window.clearTimeout(timerRef.current);
-
-      timerRef.current = window.setTimeout(
-        () => onChange(stf.dataEngine.getData() as Record<string, string>),
-        200,
-      );
-    },
-  });
-
-  return (
-    <StfProvider value={stf}>
-      <div className="flex flex-col gap-4">
-        {Object.entries(schema).map(([key, item]) => {
-          const variable = dereference(item);
-
-          return (
-            <fieldset key={key} className="flex flex-col gap-1">
-              <Label htmlFor={key}>{key}</Label>
-              <p className="text-xs text-fd-muted-foreground empty:hidden">
-                {variable.description}
-              </p>
-              <Field fieldName={key} variable={variable} />
-            </fieldset>
-          );
-        })}
-      </div>
-    </StfProvider>
-  );
-}
-
-function Field({ fieldName, variable }: { variable: ServerVariableObject; fieldName: string }) {
-  const t = useTranslations({ note: 'playground server select' });
-  const [value, setValue] = useFieldValue([fieldName], {
-    compute(currentValue) {
-      return typeof currentValue === 'string' ? currentValue : undefined;
-    },
-  });
-
-  if (variable.enum) {
+  if (ids.length <= 1 && !variables)
     return (
-      <Select value={value} onValueChange={setValue}>
-        <SelectTrigger id={fieldName}>
-          <SelectValue />
-        </SelectTrigger>
-        <SelectContent>
-          {variable.enum.map((value) => (
-            <SelectItem key={value} value={String(value)}>
-              {value}
-            </SelectItem>
-          ))}
-        </SelectContent>
-      </Select>
+      <span className={cn('truncate px-1.5 text-fd-muted-foreground', className)}>{label}</span>
     );
+
+  const options: ServerOption[] = [];
+  for (const id of ids) {
+    const item = servers[id];
+    const summary = item.summary ?? item.description;
+
+    options.push({
+      value: id,
+      hasVariables: item.variables !== undefined,
+      label: (
+        <>
+          <span className="flex items-baseline gap-2">
+            <span className="truncate text-[0.8125rem] font-medium">
+              {item.title ?? idToTitle(id)}
+            </span>
+            <span className="font-mono text-xs text-fd-muted-foreground">
+              {item.protocol}
+              {item.protocolVersion && ` ${item.protocolVersion}`}
+            </span>
+          </span>
+          <span className="mt-0.5 block font-mono text-xs break-all text-fd-muted-foreground">
+            {resolveUrl(id)}
+          </span>
+          {summary && (
+            <span className="mt-1 line-clamp-2 block text-xs text-fd-muted-foreground">
+              {summary}
+            </span>
+          )}
+        </>
+      ),
+    });
+  }
+
+  let resolved: Record<string, ServerVariable> | undefined;
+  if (variables) {
+    resolved = {};
+    for (const [key, item] of Object.entries(variables)) resolved[key] = dereference(item);
   }
 
   return (
-    <Input
-      id={fieldName}
-      value={value}
-      onChange={(e) => setValue(e.target.value)}
-      placeholder={t('Enter Value')}
-    />
+    <ServerPopover
+      label={label}
+      title={t('Server')}
+      value={server?.id}
+      onValueChange={setServer}
+      options={options}
+      className={className}
+    >
+      {server && resolved && (
+        <ServerVariables
+          key={server.id}
+          defaultValues={server.variables}
+          variables={resolved}
+          onChange={setServerVariables}
+        />
+      )}
+    </ServerPopover>
   );
 }

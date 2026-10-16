@@ -1,6 +1,6 @@
 {
   "name": "@fumadocs/json-schema",
-  "version": "0.3.1",
+  "version": "0.3.2",
   "description": "JSON Schema toolkit: dereference, merge, sample and stringify schemas",
   "keywords": [
     "Fumadocs",
@@ -38,7 +38,6 @@
     "@scalar/json-magic": "^0.15.4"
   },
   "devDependencies": {
-    "@fastify/deepmerge": "^3.2.1",
     "@types/node": "26.6.4",
     "@types/react": "^19.3.0",
     "json-schema-typed": "^8.0.2",
@@ -58,8 +57,5 @@
     "react": {
       "optional": true
     }
-  },
-  "inlinedDependencies": {
-    "@fastify/deepmerge": "3.2.1"
   }
 }

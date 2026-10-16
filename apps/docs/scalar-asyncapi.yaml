@@ -226,7 +226,7 @@ channels:
               description: Filter by minimum habitability index
 operations:
   subscribeToPlanetEvents:
-    action: receive
+    action: send
     channel:
       $ref: '#/channels/planetEvents'
     title: Subscribe to Planet Events
@@ -240,7 +240,7 @@ operations:
         bindingVersion: 0.1.0
         method: GET
   subscribeToUserEvents:
-    action: receive
+    action: send
     channel:
       $ref: '#/channels/userEvents'
     title: Subscribe to User Events
@@ -255,7 +255,7 @@ operations:
         bindingVersion: 0.1.0
         method: GET
   subscribeToSystemEvents:
-    action: receive
+    action: send
     channel:
       $ref: '#/channels/systemEvents'
     title: Subscribe to System Events
@@ -271,7 +271,7 @@ operations:
         windowSeconds: 60
         burstAllowance: 20
   subscribeToCelestialBodyEvents:
-    action: receive
+    action: send
     channel:
       $ref: '#/channels/celestialBodyEvents'
     title: Subscribe to Celestial Body Events

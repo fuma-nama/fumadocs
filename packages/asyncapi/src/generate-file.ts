@@ -4,9 +4,14 @@ import { generateDocument, type PagesToTextOptions, toText } from './utils/pages
 import type { AsyncAPIServer } from '@/server';
 import { createGetUrl, getSlugs, PathUtils } from 'fumadocs-core/source';
 import { createAutoPreset, type SchemaToPagesOptions } from '@/utils/pages/preset-auto';
-import { fromSchema, type OutputGroup, type OutputEntry } from '@/utils/pages/builder';
+import {
+  fromSchema,
+  getMetaPages,
+  type OutputGroup,
+  type OutputEntry,
+} from '@/utils/pages/builder';
 import type { DistributiveOmit } from './types';
-import { doubleQuote } from './utils/string-utils';
+import { jsxString } from './utils/string-utils';
 
 export interface OutputFile {
   path: string;
@@ -39,7 +44,6 @@ interface GenerateFilesConfig extends PagesToTextOptions {
 }
 
 interface MetaOptions {
-  groupStyle?: 'folder' | 'separator';
   folderStyle?: 'folder' | 'separator';
 }
 
@@ -83,43 +87,36 @@ export async function generateFiles(options: Config): Promise<void> {
 export async function generateFilesOnly(
   options: DistributiveOmit<Config, 'output'>,
 ): Promise<OutputFile[]> {
-  const schemas = await options.input.getSchemas();
-
-  const files: OutputFile[] = [];
-  const generated: Record<string, OutputFile[]> = {};
-  const generatedEntries: Record<string, OutputEntry[]> = {};
-
-  const entries = Object.entries(schemas);
-  if (entries.length === 0) {
+  const schemas = Object.entries(await options.input.getSchemas());
+  if (schemas.length === 0) {
     throw new Error('No input files found.');
   }
+
   const preset = createAutoPreset(options);
-  for (const [id, schema] of entries) {
-    const entries = fromSchema(id, schema.bundled, preset);
-    const schemaFiles: OutputFile[] = [];
+  const files: OutputFile[] = [];
+  const context: BeforeWriteContext = { generated: {}, generatedEntries: {} };
 
-    generatedEntries[id] = entries;
-    function scan(entry: OutputEntry) {
-      if (entry.type === 'group') {
-        for (const child of entry.entries) scan(child);
-        return;
+  for (const [id, { bundled }] of schemas) {
+    const entries = fromSchema(id, bundled, preset);
+    const generated: OutputFile[] = [];
+
+    function scan(entries: OutputEntry[]) {
+      for (const entry of entries) {
+        if (entry.type === 'group') {
+          scan(entry.entries);
+          continue;
+        }
+
+        const file = { path: entry.path, content: toText(entry, bundled, options) };
+        generated.push(file);
+        files.push(file);
       }
-
-      schemaFiles.push({
-        path: entry.path,
-        content: toText(entry, schema.bundled, options),
-      });
     }
 
-    for (const entry of entries) scan(entry);
-    generated[id] = schemaFiles;
-    files.push(...schemaFiles);
+    scan(entries);
+    context.generatedEntries[id] = entries;
+    context.generated[id] = generated;
   }
-
-  const context: BeforeWriteContext = {
-    generated,
-    generatedEntries,
-  };
 
   if (options.index) {
     files.push(...writeIndexFiles(context, options));
@@ -135,29 +132,14 @@ export async function generateFilesOnly(
 
 function generateMeta(context: BeforeWriteContext, options: MetaOptions): OutputFile[] {
   const files: OutputFile[] = [];
-  const folderStyle = options.folderStyle ?? options.groupStyle ?? 'folder';
+  const folderStyle = options.folderStyle ?? 'folder';
 
   function scan(entries: OutputEntry[], parent?: OutputGroup) {
-    const pages: string[] = [];
-
     for (const entry of entries) {
-      const relativePath = PathUtils.slash(
-        parent ? path.relative(parent.path, entry.path) : entry.path,
-      );
-
-      if (entry.type === 'group') {
-        scan(entry.entries, entry);
-
-        if (folderStyle === 'folder') {
-          pages.push(relativePath);
-        } else {
-          pages.push(`---${entry.info.title}---`, `...${relativePath}`);
-        }
-      } else {
-        pages.push(relativePath.slice(0, -path.extname(entry.path).length));
-      }
+      if (entry.type === 'group') scan(entry.entries, entry);
     }
 
+    const pages = getMetaPages(entries, parent, folderStyle);
     if (pages.length === 0) return;
     files.push({
       path: parent ? path.join(parent.path, 'meta.json') : 'meta.json',
@@ -184,18 +166,19 @@ function writeIndexFiles(
   context: BeforeWriteContext,
   options: SchemaToPagesOptions & Omit<GenerateFilesConfig, 'output'>,
 ): OutputFile[] {
-  const files: OutputFile[] = [];
   const { generatedEntries } = context;
-  const pathToEntry = new Map<string, OutputEntry>();
   const { items, url } = options.index!;
+  const pathToEntry = new Map<string, OutputEntry>();
 
   function indexEntry(entry: OutputEntry) {
     pathToEntry.set(PathUtils.slash(entry.path), entry);
     if (entry.type === 'group') {
-      for (const child of entry.entries) {
-        indexEntry(child);
-      }
+      for (const child of entry.entries) indexEntry(child);
     }
+  }
+
+  for (const entries of Object.values(generatedEntries)) {
+    for (const entry of entries) indexEntry(entry);
   }
 
   let urlFn: (path: string) => string;
@@ -208,53 +191,43 @@ function writeIndexFiles(
   }
 
   function fileContent(index: IndexItem): string {
-    const content: string[] = [];
-    content.push('<Cards>');
-    const outputEntries: OutputEntry[] = [];
-    const only = index.only ?? Object.keys(context.generated);
-
-    for (const item of only) {
-      if (generatedEntries[item]) {
-        for (const entry of generatedEntries[item]) {
-          outputEntries.push(entry);
-        }
-      } else {
-        const match = pathToEntry.get(item);
-        if (!match) {
-          throw new Error(
-            `${item} does not exist on "input", available: ${Object.keys(generatedEntries).join(', ')}.`,
-          );
-        }
-
-        outputEntries.push(match);
-      }
-    }
-
-    for (const entry of outputEntries) {
-      if (entry.type === 'group') continue;
+    let cards = '';
+    function card(entry: OutputEntry) {
+      // cannot link to groups
+      if (entry.type === 'group') return;
       const descriptionAttr = entry.info.description
-        ? `description=${doubleQuote(entry.info.description)} `
+        ? `description=${jsxString(entry.info.description)} `
         : '';
-      content.push(
-        `<Card href="${urlFn(entry.path)}" title=${doubleQuote(entry.info.title)} ${descriptionAttr}/>`,
-      );
+      cards += `\n<Card href="${urlFn(entry.path)}" title=${jsxString(entry.info.title)} ${descriptionAttr}/>`;
     }
 
-    content.push('</Cards>');
+    for (const item of index.only ?? Object.keys(generatedEntries)) {
+      const entries = generatedEntries[item];
+      if (entries) {
+        for (const entry of entries) card(entry);
+        continue;
+      }
+
+      const match = pathToEntry.get(item);
+      if (!match) {
+        throw new Error(
+          `${item} does not exist on "input", available: ${Object.keys(generatedEntries).join(', ')}.`,
+        );
+      }
+      card(match);
+    }
+
     return generateDocument(
       {
         title: index.title ?? 'Overview',
         description: index.description,
       },
-      content.join('\n'),
+      `<Cards>${cards}\n</Cards>`,
       options,
     );
   }
 
-  for (const list of Object.values(context.generatedEntries)) {
-    for (const item of list) indexEntry(item);
-  }
-
+  const files: OutputFile[] = [];
   for (const item of typeof items === 'function' ? items(context) : items) {
     files.push({
       path: path.extname(item.path).length === 0 ? `${item.path}.mdx` : item.path,

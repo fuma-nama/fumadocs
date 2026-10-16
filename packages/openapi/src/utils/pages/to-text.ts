@@ -10,7 +10,7 @@ import {
   type WebhookOutput,
 } from '@/utils/pages/builder';
 import { type InternalOpenAPIMeta, toStaticData } from '@/utils/pages/to-static-data';
-import { doubleQuote } from '@/requests/string-utils';
+import { doubleQuote, jsxString } from '@/requests/string-utils';
 
 export interface PagesToTextOptions {
   /**
@@ -158,7 +158,7 @@ function pageContent({
   webhooks,
   operations,
 }: GeneratedPageProps): string {
-  const propStrs: string[] = [`document=${doubleQuote(document)}`];
+  const propStrs: string[] = [`document=${jsxString(document)}`];
 
   // filter extra properties in props
   if (webhooks) {
