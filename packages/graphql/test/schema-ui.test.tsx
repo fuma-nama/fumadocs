@@ -7,7 +7,7 @@ import { getOperationField } from '@/utils/schema';
 import { generateGraphQLSchemaUI } from '@/utils/generate-schema-ui';
 
 const renderers = {
-  renderMarkdown: () => null,
+  renderMarkdown: (md: string) => md,
   renderDirectives: () => null,
   renderArguments: () => null,
   renderEnumValues: () => null,
@@ -76,5 +76,60 @@ describe('generateGraphQLSchemaUI', () => {
     });
 
     expect(summarize(generated)).toMatchSnapshot();
+  });
+
+  test('descriptions of named types', () => {
+    const { refs } = generateGraphQLSchemaUI(schema, { type: schema.getType('Order')! }, renderers);
+
+    // built-in scalars are described by the spec
+    expect(refs['Order.id'].description).toBeUndefined();
+    // enums and custom scalars describe the fields typed as them
+    expect(refs['Order.status'].description).toBe('The status of an order.');
+    expect(refs['Order.createdAt'].description).toBe('Time at which the order was created.');
+  });
+
+  test('implementations of interface', () => {
+    const { refs } = generateGraphQLSchemaUI(schema, { type: schema.getType('Node')! }, renderers);
+
+    expect(refs.$root.infoTags).toContainEqual({
+      label: 'Implemented by',
+      list: ['Customer', 'Order'],
+    });
+  });
+
+  test('a root documented by the page', () => {
+    const { refs } = generateGraphQLSchemaUI(
+      schema,
+      { type: schema.getType('Node')!, description: '' },
+      renderers,
+    );
+
+    expect(refs.$root.description).toBeUndefined();
+    expect(refs.$root.infoTags).toEqual([]);
+  });
+
+  test('one-of input object', () => {
+    const oneOf = buildSchemaFromSDL(`
+      input OrderLookup @oneOf {
+        id: ID
+        number: Int
+      }
+
+      type Query {
+        order(by: OrderLookup!): String
+      }
+    `);
+    const { refs } = generateGraphQLSchemaUI(
+      oneOf,
+      { type: oneOf.getType('OrderLookup')! },
+      renderers,
+    );
+    const root = refs.$root;
+
+    expect(root.type === 'object' && root.props.map((prop) => prop.required)).toEqual([
+      false,
+      false,
+    ]);
+    expect(root.infoTags).toHaveLength(1);
   });
 });

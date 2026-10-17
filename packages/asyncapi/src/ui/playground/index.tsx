@@ -8,6 +8,7 @@ import { DialogPopup } from 'shared-api/components/dialog';
 import { Segmented, SegmentedList } from 'shared-api/components/segmented';
 import { Spinner } from 'shared-api/components/spinner';
 import { iconButtonClassName } from 'shared-api/components/playground/panels';
+import { StatusDot } from 'shared-api/components/playground/log';
 import { ParamInput } from 'shared-api/components/playground/param-input';
 import { SchemaProvider } from 'shared-api/components/playground/schema';
 import { StfProvider } from '@fumari/stf';
@@ -69,34 +70,6 @@ function PlaygroundSession() {
         <PlaygroundDialog playground={playground} />
       </DialogPopup>
     </Dialog.Root>
-  );
-}
-
-/** the status of connection, it pops when `activity` changes, like the light of a network port */
-function StatusDot({
-  status,
-  activity,
-  label,
-  className,
-}: {
-  status: ConnectionStatus;
-  activity?: number;
-  label?: string;
-  className?: string;
-}) {
-  return (
-    <span
-      key={activity}
-      role={label ? 'img' : undefined}
-      aria-label={label}
-      className={cn(
-        'size-2 shrink-0 rounded-full transition-[background-color,scale] duration-300',
-        status === 'closed' && 'bg-fd-muted-foreground/50',
-        status === 'connecting' && 'bg-amber-500 motion-safe:animate-pulse',
-        status === 'open' && 'bg-green-500 ring-3 ring-green-500/20 motion-safe:starting:scale-150',
-        className,
-      )}
-    />
   );
 }
 

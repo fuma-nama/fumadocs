@@ -1,7 +1,52 @@
 'use client';
-import type { ReactNode } from 'react';
+import { type ReactNode, useSyncExternalStore } from 'react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './select';
 import { cn } from '@/utils/cn';
+
+// the selected language applies to every code sample of the session
+const selectedCodeUsages = new Map<string, string | null>();
+const listeners = new Set<() => void>();
+
+function subscribe(listener: () => void) {
+  listeners.add(listener);
+  return () => {
+    listeners.delete(listener);
+  };
+}
+
+/** kept in memory, also when the storage is blocked */
+function getCodeUsageId(key: string): string | null {
+  let id = selectedCodeUsages.get(key);
+  if (id === undefined) {
+    try {
+      id = sessionStorage.getItem(key);
+    } catch {
+      id = null;
+    }
+    selectedCodeUsages.set(key, id);
+  }
+
+  return id;
+}
+
+/** the id of the code sample language selected in the session, stored under `key`, `null` until one is selected */
+export function useCodeUsageId(key: string): string | null {
+  return useSyncExternalStore(
+    subscribe,
+    () => getCodeUsageId(key),
+    () => null,
+  );
+}
+
+export function selectCodeUsage(key: string, id: string) {
+  selectedCodeUsages.set(key, id);
+  try {
+    sessionStorage.setItem(key, id);
+  } catch {
+    // storage blocked, the selection lasts until reloading
+  }
+  for (const listener of listeners) listener();
+}
 
 /** a code block filling its example card */
 export const cardCodeBlock = {

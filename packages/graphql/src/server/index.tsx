@@ -25,6 +25,8 @@ import {
 } from '@/utils/pages';
 import type { GraphQLLinks, GraphQLPageProps } from '@/utils/create-page';
 import { toStaticData } from '@/utils/to-static-data';
+import { toMarkdown } from '@/utils/to-markdown';
+import { loadExamples, type OperationExamples } from '@/utils/examples';
 import type { NamedTypeKind, OperationKind } from '@/utils/schema';
 import { KindLabel } from '@/ui/components/badge';
 
@@ -38,6 +40,12 @@ export interface GraphQLOptions {
    * - a record of schema id -> input (file paths/URLs, SDL text, introspection results, or `GraphQLSchema` instances).
    */
   input?: string[] | SchemaRecord;
+  /**
+   * GraphQL documents of example operations: file paths/URLs, or GraphQL text.
+   * Each named operation becomes an example of the root fields it selects.
+   * A record maps schema ids to their documents, an array applies to every schema.
+   */
+  examples?: string[] | Record<string, string[]>;
   disableCache?: boolean;
 }
 
@@ -59,6 +67,8 @@ export interface GraphQLServer {
 export interface GraphQLPageData extends PageData {
   getGraphQLPageProps: () => GraphQLPageProps;
   getSchema: () => { id: string } & LoadedSchema;
+  /** the items of page in Markdown, for LLMs */
+  getText: (type: 'raw' | 'processed') => Promise<string>;
   structuredData: StructuredData;
   toc: TOCItemType[];
   _graphql: InternalGraphQLMeta;
@@ -72,6 +82,7 @@ export type GraphQLSourceOptions = SchemaToPagesOptions & {
 export function createGraphQL(options: GraphQLOptions = {}): GraphQLServer {
   const { disableCache = false } = options;
   const docCache = new Map<string, Promise<LoadedSchema>>();
+  let exampleCache: Promise<Record<string, OperationExamples>> | undefined;
   type GraphQLVirtualFile = VirtualFile<{
     pageData: GraphQLPageData;
     metaData: MetaData;
@@ -109,6 +120,19 @@ export function createGraphQL(options: GraphQLOptions = {}): GraphQLServer {
     return Object.fromEntries(entries);
   }
 
+  // documents of an array apply to every schema, they are matched with all schemas at once
+  function getExamples(
+    schemas: Record<string, LoadedSchema>,
+  ): Promise<Record<string, OperationExamples>> {
+    let output = disableCache ? undefined : exampleCache;
+    if (!output) {
+      output = loadExamples(options.examples ?? [], schemas);
+      if (!disableCache) exampleCache = output;
+    }
+
+    return output;
+  }
+
   function generateLinks(loader: LoaderOutput, locale?: string): GraphQLLinks {
     const out: GraphQLLinks = { types: {}, operations: {} };
 
@@ -140,7 +164,10 @@ export function createGraphQL(options: GraphQLOptions = {}): GraphQLServer {
     const { baseDir = '', meta = false } = options;
     const files: GraphQLVirtualFile[] = [];
 
-    for (const [id, schema] of Object.entries(await getSchemas())) {
+    const schemas = await getSchemas();
+    const examples = await getExamples(schemas);
+
+    for (const [id, schema] of Object.entries(schemas)) {
       const cached = docFilesCache?.get(schema);
       if (cached) {
         files.push(...cached);
@@ -154,6 +181,13 @@ export function createGraphQL(options: GraphQLOptions = {}): GraphQLServer {
       function onEntry(entry: OperationOutput | TypeOutput | PageOutput): GraphQLVirtualFile {
         const props = getPageProps(entry);
         const filePath = `${baseDir}/${entry.path}`;
+        let pageExamples: OperationExamples | undefined;
+        for (const item of props.items ?? []) {
+          if (item.type !== 'operation') continue;
+          const key = `${item.kind}:${item.name}`;
+          const list = examples[id][key];
+          if (list) (pageExamples ??= {})[key] = list;
+        }
 
         return {
           type: 'page',
@@ -165,6 +199,7 @@ export function createGraphQL(options: GraphQLOptions = {}): GraphQLServer {
                 payload: {
                   sdl: schema.sdl,
                   links: getLinks(),
+                  ...(pageExamples && { examples: pageExamples }),
                 },
                 ...props,
               };
@@ -174,6 +209,9 @@ export function createGraphQL(options: GraphQLOptions = {}): GraphQLServer {
                 id,
                 ...schema,
               };
+            },
+            async getText() {
+              return toMarkdown(props, schema.schema, pageExamples);
             },
             ...toStaticData(props, schema.schema),
             _graphql: {
@@ -262,6 +300,7 @@ export function createGraphQL(options: GraphQLOptions = {}): GraphQLServer {
         },
         invalidate() {
           docCache.clear();
+          exampleCache = undefined;
         },
       };
     },

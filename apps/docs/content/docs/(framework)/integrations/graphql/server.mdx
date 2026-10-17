@@ -57,9 +57,60 @@ export const graphql = createGraphQL({
 });
 ```
 
+### `examples`
+
+Example operations from GraphQL documents: file paths, URLs or GraphQL text.
+
+```ts tab="Basic"
+import { createGraphQL } from '@fumadocs/graphql/server';
+
+export const graphql = createGraphQL({
+  input: ['./schema.graphql'],
+  examples: ['./examples.graphql'],
+});
+```
+
+```ts tab="Record"
+import { createGraphQL } from '@fumadocs/graphql/server';
+
+export const graphql = createGraphQL({
+  input: {
+    store: './store.graphql',
+    admin: './admin.graphql',
+  },
+  examples: {
+    // [id]: documents of the schema
+    store: ['./examples/store.graphql'],
+  },
+});
+```
+
+An array applies to every schema. Each named operation becomes an example on the pages of root fields it selects, replacing the generated one:
+
+```graphql title="examples.graphql"
+# The public profile of a customer.
+query CustomerProfile($id: ID! = "cus_42") {
+  customer(id: $id) {
+    id
+    name
+  }
+}
+```
+
+| Example     | From                                                                                |
+| ----------- | ----------------------------------------------------------------------------------- |
+| title       | the operation name, like **Customer Profile** for `CustomerProfile`                 |
+| description | the `"""` description of operation, or the `#` comments right above it, in Markdown |
+| variables   | default values of variables (left out of the query), or generated for required ones |
+| response    | generated from the selection                                                        |
+
+Operations must be named and valid against the schema, otherwise the build fails.
+
+Arguments of root fields must be variables of the same names, like `customer(id: $id)`, so the playground can edit them.
+
 ### `disableCache`
 
-Disable caching of loaded schemas. Useful during development when schemas change frequently.
+Disable caching of loaded schemas and examples. Useful during development when they change frequently.
 
 ```ts
 import { createGraphQL } from '@fumadocs/graphql/server';
@@ -80,7 +131,6 @@ export const source = loader(
     docs: docs.toFumadocsSource(),
     graphql: await graphql.staticSource({
       baseDir: 'graphql',
-      baseUrl: '/docs',
     }),
   },
   // ...
@@ -91,11 +141,11 @@ export const source = loader(
 
 Customize the content of pages, default to `item`.
 
-| mode   | content                     | file path         |
-| ------ | --------------------------- | ----------------- |
-| item   | each operation & named type | `{name}.mdx`      |
-| file   | everything in same schema   | `{file_name}.mdx` |
-| custom | see below                   | N/A               |
+| mode   | content                                                             | file path         |
+| ------ | ------------------------------------------------------------------- | ----------------- |
+| item   | each operation, and each named type with `includeTypes`             | `{name}.mdx`      |
+| file   | the operations of a schema, and its named types with `includeTypes` | `{file_name}.mdx` |
+| custom | see below                                                           | N/A               |
 
 When set to `custom`, you can pass a function to fully customize the generation process:
 
@@ -119,10 +169,10 @@ await graphql.staticSource({
 
 For `per: 'item'`, customize how generated pages are grouped into folders, default to `kind`.
 
-| mode | folders                                    |
-| ---- | ------------------------------------------ |
-| kind | by their kind, e.g. `queries/`, `objects/` |
-| none | no folders                                 |
+| mode | folders                                      |
+| ---- | -------------------------------------------- |
+| kind | by their kind, e.g. `queries/`, `mutations/` |
+| none | no folders                                   |
 
 You can also pass a function that returns the group name of an entry:
 
@@ -136,7 +186,12 @@ await graphql.staticSource({
 
 ### `includeOperations` & `includeTypes`
 
-For `per: 'item'`, filter the operations (query/mutation/subscription fields) and named types to generate pages for, default to `true`.
+Filter the operations (query/mutation/subscription fields) and named types to document.
+
+- `includeOperations`: a page per operation for `per: 'item'`, default to `true`.
+- `includeTypes`: named types, their own pages for `per: 'item'` or in the page for `per: 'file'`, default to `false`. Operation pages show the types they use either way.
+
+Type pages show where the type is used, and link to each other and to operations.
 
 ```ts
 import { graphql } from '@/lib/graphql';
@@ -144,7 +199,7 @@ import { graphql } from '@/lib/graphql';
 await graphql.staticSource({
   // skip subscriptions
   includeOperations: (kind, field) => kind !== 'subscription',
-  // skip internal types
+  // document types, except internal ones
   includeTypes: (type) => !type.name.startsWith('Internal'),
 });
 ```
@@ -159,25 +214,12 @@ GraphQL names are already URL-safe, hence the original name (including its case)
 import { graphql } from '@/lib/graphql';
 
 await graphql.staticSource({
+  per: 'item',
   name: (entry) => entry.item.name.toLowerCase(),
 });
 ```
 
 `slugify` converts group names (and item names by default) into URL-friendly segments.
-
-### `baseUrl`
-
-The `baseUrl` of your `loader()`.
-
-When specified, links of generated pages are pre-generated and passed to the UI, so type & operation references are cross-linked automatically.
-
-```ts
-import { graphql } from '@/lib/graphql';
-
-await graphql.staticSource({
-  baseUrl: '/docs',
-});
-```
 
 ### `meta`
 
@@ -193,6 +235,26 @@ import { graphql } from '@/lib/graphql';
 
 await graphql.staticSource({
   meta: { folderStyle: 'separator' },
+});
+```
+
+## Markdown for LLMs
+
+`page.data.getText()` returns the items of a page in Markdown: operations with their signature, arguments, examples and the SDL of types they use, named types with their SDL and usages. For example, in [`docsLlms`](/docs/integrations/llms#docsllms):
+
+```ts
+import { llms } from 'fumadocs-core/source';
+import { source } from '@/lib/source';
+
+export const docsLlms = llms(source, {
+  renderPage: async (page) => {
+    // [!code ++:3]
+    if (page.type === 'graphql') {
+      return `# ${page.data.title}\n\n${await page.data.getText('processed')}`;
+    }
+
+    // your original flow below...
+  },
 });
 ```
 

@@ -18,7 +18,7 @@ export const GraphQLPage = createGraphQLPage({
 
 ### Playground
 
-Enable the interactive playground on operation pages by configuring an endpoint, operations are sent over HTTP POST.
+Operation pages get a playground when you configure an endpoint: readers edit the operation or pick its fields, fill the variables in a form or as JSON, and send it with their headers.
 
 ```tsx title="components/api-page.tsx"
 'use client';
@@ -39,11 +39,11 @@ export const GraphQLPage = createGraphQLPage({
 
 <Callout type="warn">
 
-Do not put secrets in `headers`, they are sent to the browser, and kept in its local storage with the URL.
+Do not put secrets in `headers`, they are sent to the browser, shown in code samples, and kept in its local storage by endpoint origin.
 
 </Callout>
 
-You can replace the default fetcher, e.g. to proxy requests:
+Queries and mutations are sent over HTTP POST, you can replace their fetcher, e.g. to proxy requests:
 
 ```tsx title="components/api-page.tsx"
 'use client';
@@ -52,25 +52,28 @@ import { createGraphQLPage } from '@fumadocs/graphql/ui';
 export const GraphQLPage = createGraphQLPage({
   playground: {
     async fetcher(request) {
+      const start = performance.now();
       const res = await fetch('/api/proxy', {
         method: 'POST',
-        headers: request.headers,
+        headers: { 'Content-Type': 'application/json', ...request.headers },
         body: JSON.stringify({ query: request.query, variables: request.variables }),
       });
 
       return {
         type: 'response',
         status: res.status,
-        time: 0,
+        time: performance.now() - start,
         body: await res.text(),
         contentType: res.headers.get('Content-Type') ?? '',
+        // optional, shown in a Headers tab
+        headers: Array.from(res.headers),
       };
     },
   },
 });
 ```
 
-Or replace the playground UI entirely with `render`:
+Or replace the playground UI entirely with `render`, it takes the place of the signature bar:
 
 ```tsx title="components/api-page.tsx"
 'use client';
@@ -85,14 +88,70 @@ export const GraphQLPage = createGraphQLPage({
 });
 ```
 
-<Callout title="Subscriptions">
-  The default fetcher sends operations over HTTP POST, which cannot serve subscriptions — the Run
-  button is disabled on subscription pages unless a custom `fetcher` is provided.
+#### Subscriptions
+
+On subscription pages, the playground subscribes to `subscriptionUrl` and logs the events it receives. It defaults to `url` with a `ws(s)://` scheme.
+
+| `subscriptionUrl`     | Protocol                                       |
+| --------------------- | ---------------------------------------------- |
+| `ws://`, `wss://`     | graphql-ws (`graphql-transport-ws`)            |
+| `http://`, `https://` | GraphQL over SSE, in distinct connections mode |
+
+```tsx title="components/api-page.tsx"
+'use client';
+import { createGraphQLPage } from '@fumadocs/graphql/ui';
+
+export const GraphQLPage = createGraphQLPage({
+  playground: {
+    url: 'https://api.example.com/graphql',
+    // GraphQL over SSE on the same endpoint
+    subscriptionUrl: 'https://api.example.com/graphql',
+  },
+});
+```
+
+<Callout title="Browser limits">
+  Browsers can't set the headers of WebSocket connections, graphql-ws sends them in the payload of
+  `connection_init` instead.
 </Callout>
+
+### Code Samples
+
+Example requests are shown in GraphQL, or as code in cURL, JavaScript, Go, Python, Java, C# and Rust that sends them to `playground.url` (a placeholder when unset) with `playground.headers`. The playground shows the same code for the request being edited. Subscription pages show their example in GraphQL only.
+
+Add generators with `codeUsages`, or remove the default ones:
+
+```tsx title="components/api-page.tsx"
+'use client';
+import {
+  createCodeUsageGeneratorRegistry,
+  createGraphQLPage,
+  registerDefaultCodeUsages,
+} from '@fumadocs/graphql/ui';
+
+// leave out the defaults to start from scratch
+const codeUsages = registerDefaultCodeUsages(createCodeUsageGeneratorRegistry());
+
+// the defaults: curl, js, go, python, java, csharp, rust
+codeUsages.remove('java');
+codeUsages.add('graphql-request', {
+  label: 'graphql-request',
+  lang: 'js',
+  generate({ url, query, variables = {} }) {
+    return `import { request } from 'graphql-request';
+
+const data = await request(${JSON.stringify(url)}, ${JSON.stringify(query)}, ${JSON.stringify(variables)});`;
+  },
+});
+
+export const GraphQLPage = createGraphQLPage({ codeUsages });
+```
+
+<auto-type-table path="props.ts" name="CodeUsageData" />
 
 ### Cross-linking
 
-Type & operation references are cross-linked automatically when `baseUrl` is passed to your source (see [`createGraphQL()`](/docs/integrations/graphql/server#baseurl)).
+[Type pages](/docs/integrations/graphql/server#includeoperations--includetypes) link to each other and to operations automatically. Operation pages keep readers on the page, type names show their definition on hover.
 
 You can also resolve the links yourself:
 
@@ -116,6 +175,10 @@ Return `undefined` for types/operations without their own page.
 
 You can customize how operation and type pages are laid out.
 
+<Tabs items={['Operation', 'Type']}>
+
+<Tab>
+
 ```tsx title="components/api-page.tsx"
 'use client';
 import { createGraphQLPage } from '@fumadocs/graphql/ui';
@@ -126,33 +189,73 @@ export const GraphQLPage = createGraphQLPage({
       return (
         <div className="flex flex-col gap-6">
           {slots.header}
+          {slots.playground}
           {slots.description}
           {slots.deprecated}
           {slots.directives}
-          {slots.playground}
           {slots.arguments}
           {slots.returns}
           {slots.example}
         </div>
       );
     },
+  },
+});
+```
+
+| Slot          | Renders                                                                     |
+| ------------- | --------------------------------------------------------------------------- |
+| `header`      | the title, on pages with several items                                      |
+| `playground`  | the signature, like `QUERY customer(id: ID!): Customer`, and the playground |
+| `description` | the description of operation                                                |
+| `deprecated`  | the deprecation reason                                                      |
+| `directives`  | directives applied to the operation                                         |
+| `arguments`   | the arguments                                                               |
+| `returns`     | the return type and its fields                                              |
+| `example`     | the example request and response, beside the operation on wide pages        |
+
+</Tab>
+
+<Tab>
+
+```tsx title="components/api-page.tsx"
+'use client';
+import { createGraphQLPage } from '@fumadocs/graphql/ui';
+
+export const GraphQLPage = createGraphQLPage({
+  content: {
     renderTypeLayout(slots) {
       return (
         <div className="flex flex-col gap-6">
           {slots.header}
+          {slots.definition}
           {slots.description}
           {slots.directives}
-          {slots.relations}
-          {slots.usages}
           {slots.fields}
           {slots.values}
-          {slots.scalar}
+          {slots.usages}
+          {slots.sdl}
         </div>
       );
     },
   },
 });
 ```
+
+| Slot          | Renders                                                                   |
+| ------------- | ------------------------------------------------------------------------- |
+| `header`      | the name, on pages with several items                                     |
+| `definition`  | the head of its SDL, like `type Order implements Node`                    |
+| `description` | the description of type                                                   |
+| `directives`  | directives applied to the type                                            |
+| `fields`      | fields of objects, interfaces and input objects, or the members of unions |
+| `values`      | values of enums                                                           |
+| `usages`      | implementations, unions, and the operations and fields using the type     |
+| `sdl`         | the SDL of type, beside it on wide pages                                  |
+
+</Tab>
+
+</Tabs>
 
 ### Schema UI
 
@@ -266,12 +369,12 @@ import { GraphQLPage } from '@/components/graphql/page'; // [!code ++]
 
 Install only the pieces you want to edit, and pass them back.
 
-| Component            | Contents                                     |
-| -------------------- | -------------------------------------------- |
-| `graphql/operation`  | operations, with their arguments and example |
-| `graphql/type-docs`  | named types, with their relations and fields |
-| `graphql/schema-ui`  | the type, argument and field details         |
-| `graphql/playground` | the interactive playground                   |
+| Component            | Contents                                      |
+| -------------------- | --------------------------------------------- |
+| `graphql/operation`  | operations, with their arguments and examples |
+| `graphql/type-docs`  | named types, with their fields and usages     |
+| `graphql/schema-ui`  | the type, argument and field details          |
+| `graphql/playground` | the interactive playground                    |
 
 ```tsx title="components/api-page.tsx"
 'use client';

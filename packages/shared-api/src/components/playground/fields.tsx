@@ -211,6 +211,8 @@ function TypeSelect({
 interface RowProps {
   name: string;
   required?: boolean;
+  /** strike the name through */
+  deprecated?: boolean;
   /** shown after the name, like the description of field */
   info?: ReactNode;
   /** id of the control labelled by `name` */
@@ -224,6 +226,7 @@ interface RowProps {
 export function Row({
   name,
   required = false,
+  deprecated = false,
   info,
   htmlFor,
   readOnly = false,
@@ -235,7 +238,10 @@ export function Row({
         <label
           htmlFor={htmlFor}
           title={name}
-          className="truncate font-mono text-[0.8125rem] text-fd-foreground"
+          className={cn(
+            'truncate font-mono text-[0.8125rem] text-fd-foreground',
+            deprecated && 'text-fd-muted-foreground line-through',
+          )}
         >
           {name}
         </label>
@@ -272,13 +278,16 @@ function formatRange(
 }
 
 /** the description and constraints of a field, opened from an info button on hover or click */
-function FieldInfo({
+export function FieldInfo({
   name,
-  field,
+  field = {},
+  type = typeLabel(field),
   description,
 }: {
   name: string;
-  field: Schema;
+  field?: Schema;
+  /** defaults to the type of `field` */
+  type?: string;
   description?: string;
 }) {
   const t = useTranslations({ note: 'schema UI' });
@@ -322,7 +331,7 @@ function FieldInfo({
             <p className="flex items-baseline gap-3">
               <span className="truncate font-mono text-[0.8125rem] font-medium">{name}</span>
               <span className="ms-auto shrink-0 font-mono text-xs text-fd-muted-foreground">
-                {typeLabel(field)}
+                {type}
               </span>
             </p>
             {description && (
@@ -598,14 +607,17 @@ function NavRow({
 }
 
 /** fills a cell, opens something else on click */
-function NavButton({
+export function NavButton({
   id,
   type,
+  disabled = false,
   onClick,
   children,
 }: {
   id?: string;
   type?: ReactNode;
+  /** nothing to open, without the chevron */
+  disabled?: boolean;
   onClick: () => void;
   children: ReactNode;
 }) {
@@ -613,13 +625,16 @@ function NavButton({
     <button
       id={id}
       type="button"
+      disabled={disabled}
       onClick={onClick}
       className="group/nav flex min-w-0 flex-1 items-center ps-3 text-start outline-none"
     >
       <span className="min-w-0 flex-1 truncate pe-2">{children}</span>
       {type && <span className={typeClassName}>{type}</span>}
       <span className={slotClassName}>
-        <ChevronRight className="size-3.5 text-fd-muted-foreground transition-transform duration-200 group-hover/nav:translate-x-0.5 motion-reduce:transition-none" />
+        {!disabled && (
+          <ChevronRight className="size-3.5 text-fd-muted-foreground transition-transform duration-200 group-hover/nav:translate-x-0.5 motion-reduce:transition-none" />
+        )}
       </span>
     </button>
   );
@@ -757,27 +772,39 @@ export function CheckRow({
   name,
   checked,
   onCheckedChange,
+  info,
+  type,
+  disabled = false,
+  deprecated,
   children,
 }: {
   name: string;
   checked: boolean;
   onCheckedChange: (checked: boolean) => void;
+  /** shown after the name, like `<FieldInfo />` */
+  info?: ReactNode;
+  /** placed before the check box */
+  type?: ReactNode;
+  disabled?: boolean;
+  deprecated?: boolean;
   children?: ReactNode;
 }) {
   const id = useId();
 
   return (
-    <Row name={name} htmlFor={id}>
+    <Row name={name} htmlFor={id} info={info} readOnly={disabled} deprecated={deprecated}>
       <button
         id={id}
         type="button"
         role="checkbox"
         aria-checked={checked}
+        disabled={disabled}
         onClick={() => onCheckedChange(!checked)}
-        className="flex min-w-0 flex-1 items-center ps-3 text-start outline-none"
+        className="flex min-w-0 flex-1 items-center ps-3 text-start outline-none disabled:cursor-not-allowed"
       >
         <span className="min-w-0 flex-1 truncate pe-2 text-fd-muted-foreground">{children}</span>
-        <span className={slotClassName}>
+        {type && <span className={typeClassName}>{type}</span>}
+        <span className={cn(slotClassName, disabled && 'opacity-50')}>
           <span
             className={cn(
               'flex size-4 items-center justify-center rounded-[5px] border transition-colors',
@@ -803,12 +830,15 @@ export function FieldRow({
   entry: { name, fieldName, schema },
   required = false,
   description,
+  type: label,
   onNavigate,
   onRemove,
 }: {
   entry: FieldEntry;
   required?: boolean;
   description?: string;
+  /** the type label, in place of the one of schema */
+  type?: ReactNode;
   onNavigate: () => void;
   onRemove?: () => void;
 }) {
@@ -841,8 +871,10 @@ export function FieldRow({
 
         // their unions are selected in their own panels
         if (type === 'object' || type === 'array')
-          return <NavRow {...props} type={typeLabel(field, true)} onNavigate={onNavigate} />;
-        return <ValueRow {...props} type={cellType(field, selector)} />;
+          return (
+            <NavRow {...props} type={label ?? typeLabel(field, true)} onNavigate={onNavigate} />
+          );
+        return <ValueRow {...props} type={selector ?? label ?? cellType(field, null)} />;
       }}
     </SchemaSwitch>
   );

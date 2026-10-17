@@ -1,13 +1,15 @@
 import {
   type ArgumentNode,
-  coerceInputLiteral,
-  type DocumentNode,
+  type ConstValueNode,
+  type ExecutableDefinitionNode,
   type FieldNode,
+  type FragmentDefinitionNode,
   getNamedType,
+  type GraphQLAbstractType,
   type GraphQLArgument,
+  type GraphQLCompositeType,
   type GraphQLDefaultInput,
   type GraphQLEnumType,
-  type GraphQLField,
   type GraphQLInputType,
   type GraphQLInterfaceType,
   type GraphQLObjectType,
@@ -15,27 +17,34 @@ import {
   type GraphQLScalarType,
   type GraphQLSchema,
   type GraphQLType,
+  isAbstractType,
   isEnumType,
+  isInterfaceType,
   isLeafType,
   isListType,
   isNonNullType,
+  isObjectType,
   isRequiredArgument,
   isRequiredInputField,
   isUnionType,
   Kind,
   type OperationDefinitionNode,
-  type OperationTypeNode,
-  parse,
   parseType,
   print,
   type SelectionNode,
   type SelectionSetNode,
+  typeFromAST,
+  valueFromASTUntyped,
   type VariableDefinitionNode,
 } from 'graphql';
-import { getOperationField } from '@/utils/schema';
+import { getOperationField, getRootType } from '@/utils/schema';
 import type { OperationItem } from '@/utils/pages';
 
 export interface OperationExample {
+  /** the title of example, `undefined` for the generated one */
+  name?: string;
+  /** Markdown */
+  description?: string;
   query: string;
   variables?: Record<string, unknown>;
   response: unknown;
@@ -54,6 +63,11 @@ const maxLeafFields = 8;
  */
 const maxCompositeFields = 2;
 
+const typenameField: FieldNode = {
+  kind: Kind.FIELD,
+  name: { kind: Kind.NAME, value: '__typename' },
+};
+
 /**
  * Generate a deterministic example (query, variables and response) for an operation.
  */
@@ -65,12 +79,9 @@ export function generateOperationExample(
   if (!field) return;
 
   const args = field.args.filter(isRequiredArgument);
-  const selected = selectionForType(field.type, 0);
-
-  const operation: OperationDefinitionNode = {
+  return createOperationExample(schema, {
     kind: Kind.OPERATION_DEFINITION,
-    // `OperationTypeNode` values are the kind names
-    operation: item.kind as OperationTypeNode,
+    operation: item.kind,
     name: {
       kind: Kind.NAME,
       value: field.name.charAt(0).toUpperCase() + field.name.slice(1),
@@ -83,27 +94,61 @@ export function generateOperationExample(
           kind: Kind.FIELD,
           name: { kind: Kind.NAME, value: field.name },
           arguments: args.map(argumentFor),
-          selectionSet: selected?.selectionSet,
+          selectionSet: selectionForType(field.type, 0),
         },
       ],
     },
-  };
+  });
+}
+
+/**
+ * The example of a valid operation: default values of variables become the variables, other
+ * non-null variables are sampled, and the response is sampled from its selections. The query is
+ * printed without the default values and descriptions, which graphql-js 16 servers reject.
+ *
+ * @param fragments the fragments the operation uses
+ */
+export function createOperationExample(
+  schema: GraphQLSchema,
+  operation: OperationDefinitionNode,
+  fragments: readonly FragmentDefinitionNode[] = [],
+): OperationExample {
+  let variables: Record<string, unknown> | undefined;
+  const variableDefinitions: VariableDefinitionNode[] = [];
+
+  for (const definition of operation.variableDefinitions ?? []) {
+    const { defaultValue, type } = definition;
+    let value: unknown;
+    if (defaultValue) value = literalValue(defaultValue);
+    // nullable variables can be absent
+    else if (type.kind === Kind.NON_NULL_TYPE) {
+      value = sampleInput(typeFromAST(schema, type) as GraphQLInputType, 0);
+    }
+
+    if (value !== undefined) (variables ??= {})[definition.variable.name.value] = value;
+    variableDefinitions.push({ ...definition, defaultValue: undefined, description: undefined });
+  }
+
+  const definitions: ExecutableDefinitionNode[] = [
+    { ...operation, description: undefined, variableDefinitions },
+  ];
+  for (const fragment of fragments) definitions.push({ ...fragment, description: undefined });
 
   return {
-    query: print({ kind: Kind.DOCUMENT, definitions: [operation] }),
-    variables:
-      args.length > 0
-        ? Object.fromEntries(args.map((arg) => [arg.name, sampleInput(arg.type, 0)]))
-        : undefined,
+    query: print({ kind: Kind.DOCUMENT, definitions }),
+    variables,
     response: {
-      data: {
-        [field.name]: selected ? wrapSample(field.type, selected.sample) : null,
-      },
+      data: sampleSelections(
+        schema,
+        getRootType(schema, operation.operation)!,
+        [operation.selectionSet],
+        fragments,
+      ),
     },
   };
 }
 
-function argumentFor(arg: GraphQLArgument): ArgumentNode {
+export function argumentFor(arg: GraphQLArgument): ArgumentNode {
   return {
     kind: Kind.ARGUMENT,
     name: { kind: Kind.NAME, value: arg.name },
@@ -114,7 +159,7 @@ function argumentFor(arg: GraphQLArgument): ArgumentNode {
   };
 }
 
-function variableDefinitionFor(arg: GraphQLArgument): VariableDefinitionNode {
+export function variableDefinitionFor(arg: GraphQLArgument): VariableDefinitionNode {
   return {
     kind: Kind.VARIABLE_DEFINITION,
     variable: {
@@ -126,188 +171,184 @@ function variableDefinitionFor(arg: GraphQLArgument): VariableDefinitionNode {
 }
 
 /**
- * @returns if the argument is the `name: $name` pair we generate, rather than a value written by hand.
+ * Group the fields of a selection set on a type by their response keys, like the execution does.
  */
-function isGeneratedArgument(node: ArgumentNode, name: string): boolean {
-  return node.value.kind === Kind.VARIABLE && node.value.name.value === name;
+export function collectFields(
+  schema: GraphQLSchema,
+  type: GraphQLObjectType | GraphQLInterfaceType,
+  selectionSet: SelectionSetNode,
+  fragments: readonly FragmentDefinitionNode[],
+  out: Map<string, FieldNode[]>,
+  visited = new Set<string>(),
+): void {
+  for (const selection of selectionSet.selections) {
+    if (selection.kind === Kind.FIELD) {
+      const key = selection.alias?.value ?? selection.name.value;
+      const nodes = out.get(key);
+      if (nodes) nodes.push(selection);
+      else out.set(key, [selection]);
+      continue;
+    }
+
+    // a fragment is collected once, cycles are left to validation
+    if (selection.kind === Kind.FRAGMENT_SPREAD) {
+      if (visited.has(selection.name.value)) continue;
+      visited.add(selection.name.value);
+    }
+    const fragment =
+      selection.kind === Kind.INLINE_FRAGMENT
+        ? selection
+        : fragments.find((item) => item.name.value === selection.name.value);
+    if (!fragment) continue;
+    const condition = fragment.typeCondition && schema.getType(fragment.typeCondition.name.value);
+    if (
+      !condition ||
+      condition === type ||
+      (isAbstractType(condition) && schema.isSubType(condition, type))
+    ) {
+      collectFields(schema, type, fragment.selectionSet, fragments, out, visited);
+    }
+  }
 }
 
 /**
- * Declare the variables of an operation for the arguments that are currently set.
- *
- * A playground shows an input for every argument, but a query only declares the ones it uses.
- * Setting an argument the document doesn't declare would send a variable nothing references,
- * which servers ignore — the request silently runs without it.
- *
- * @param query the query document, returned unchanged when it cannot be parsed (e.g. mid-edit).
- * @param field the operation being edited.
- * @param isSet whether the argument is set in the form.
- * @param prune also undeclare arguments that are no longer set. This rewrites the document on the
- * user's behalf, only do so in response to them unsetting an argument.
+ * Sample the response of selection sets on a type, abstract types are sampled as the first
+ * possible type they target.
  */
-export function syncOperationVariables(
-  query: string,
-  field: GraphQLField<unknown, unknown>,
-  isSet: (name: string) => boolean,
-  { prune = false }: { prune?: boolean } = {},
-): string {
-  let document: DocumentNode;
-  try {
-    document = parse(query);
-  } catch {
-    return query;
+function sampleSelections(
+  schema: GraphQLSchema,
+  type: GraphQLCompositeType,
+  selectionSets: readonly SelectionSetNode[],
+  fragments: readonly FragmentDefinitionNode[],
+): Record<string, unknown> {
+  const concrete = resolveType(schema, type, selectionSets, fragments);
+  const fields = new Map<string, FieldNode[]>();
+  for (const selectionSet of selectionSets) {
+    collectFields(schema, concrete, selectionSet, fragments, fields);
   }
 
-  let changed = false;
-  const definitions = document.definitions.map((definition) => {
-    if (definition.kind !== Kind.OPERATION_DEFINITION) return definition;
-    const root = definition.selectionSet.selections.find(
-      (selection): selection is FieldNode =>
-        selection.kind === Kind.FIELD && selection.name.value === field.name,
-    );
-    if (!root) return definition;
-
-    const args = [...(root.arguments ?? [])];
-    const variables = [...(definition.variableDefinitions ?? [])];
-    let updated = false;
-
-    for (const arg of field.args) {
-      const argIndex = args.findIndex((item) => item.name.value === arg.name);
-      const variableIndex = variables.findIndex((item) => item.variable.name.value === arg.name);
-      const argNode = argIndex === -1 ? undefined : args[argIndex];
-      // values written by hand are never ours to touch
-      const isOurs = !argNode || isGeneratedArgument(argNode, arg.name);
-
-      if (isSet(arg.name)) {
-        if (!isOurs) continue;
-
-        if (!argNode) {
-          args.push(argumentFor(arg));
-          updated = true;
-        }
-
-        if (variableIndex === -1) {
-          variables.push(variableDefinitionFor(arg));
-          updated = true;
-        }
-
-        continue;
-      }
-
-      if (!prune || !argNode || !isOurs) continue;
-      args.splice(argIndex, 1);
-      if (variableIndex !== -1) variables.splice(variableIndex, 1);
-      updated = true;
+  const out: Record<string, unknown> = {};
+  for (const [key, nodes] of fields) {
+    const name = nodes[0].name.value;
+    if (name === '__typename') {
+      out[key] = concrete.name;
+      continue;
     }
 
-    if (!updated) return definition;
-    changed = true;
+    const field = concrete.getFields()[name];
+    if (!field) continue;
+    const named = getNamedType(field.type);
+    if (isLeafType(named)) {
+      out[key] = wrapSample(field.type, sampleLeaf(named));
+      continue;
+    }
 
-    return {
-      ...definition,
-      variableDefinitions: variables,
-      selectionSet: {
-        ...definition.selectionSet,
-        selections: definition.selectionSet.selections.map((selection) =>
-          selection === root ? { ...root, arguments: args } : selection,
-        ),
-      },
-    } satisfies OperationDefinitionNode;
-  });
+    // fields of the same response key are merged
+    const subSets: SelectionSetNode[] = [];
+    for (const node of nodes) if (node.selectionSet) subSets.push(node.selectionSet);
+    out[key] = wrapSample(field.type, sampleSelections(schema, named, subSets, fragments));
+  }
 
-  if (!changed) return query;
-  return print({ kind: Kind.DOCUMENT, definitions });
+  return out;
 }
 
-interface Selected {
-  selectionSet?: SelectionSetNode;
-  /**
-   * a sample value of the **named** type, apply `wrapSample` to get the value of a wrapped type.
-   */
-  sample: unknown;
+function resolveType(
+  schema: GraphQLSchema,
+  type: GraphQLCompositeType,
+  selectionSets: readonly SelectionSetNode[],
+  fragments: readonly FragmentDefinitionNode[],
+): GraphQLObjectType | GraphQLInterfaceType {
+  if (isObjectType(type)) return type;
+  const possibleTypes = schema.getPossibleTypes(type);
+  // sample interfaces without implementations by their own fields
+  if (possibleTypes.length === 0 && isInterfaceType(type)) return type;
+
+  for (const selectionSet of selectionSets) {
+    const target = findTargetType(schema, type, selectionSet, fragments);
+    if (target) return target;
+  }
+  return possibleTypes[0];
 }
 
-function selectionForType(type: GraphQLOutputType, depth: number): Selected {
+/**
+ * The first possible type of an abstract type that a type condition of the selection set names.
+ */
+function findTargetType(
+  schema: GraphQLSchema,
+  type: GraphQLAbstractType,
+  selectionSet: SelectionSetNode,
+  fragments: readonly FragmentDefinitionNode[],
+): GraphQLObjectType | undefined {
+  for (const selection of selectionSet.selections) {
+    if (selection.kind === Kind.FIELD) continue;
+    const fragment =
+      selection.kind === Kind.INLINE_FRAGMENT
+        ? selection
+        : fragments.find((item) => item.name.value === selection.name.value);
+    if (!fragment) continue;
+
+    const condition = fragment.typeCondition && schema.getType(fragment.typeCondition.name.value);
+    if (isObjectType(condition)) {
+      if (schema.isSubType(type, condition)) return condition;
+      continue;
+    }
+
+    const target = findTargetType(schema, type, fragment.selectionSet, fragments);
+    if (target) return target;
+  }
+}
+
+function selectionForType(type: GraphQLOutputType, depth: number): SelectionSetNode | undefined {
   const named = getNamedType(type);
-  if (isLeafType(named)) return { sample: sampleLeaf(named) };
+  if (isLeafType(named)) return;
+  if (!isUnionType(named)) return objectSelection(named, depth);
 
-  if (isUnionType(named)) {
-    const first = named.getTypes()[0];
-    const selections: SelectionNode[] = [
-      {
-        kind: Kind.FIELD,
-        name: { kind: Kind.NAME, value: '__typename' },
+  const selections: SelectionNode[] = [typenameField];
+  const first = named.getTypes()[0];
+  if (first && depth < maxDepth) {
+    selections.push({
+      kind: Kind.INLINE_FRAGMENT,
+      typeCondition: {
+        kind: Kind.NAMED_TYPE,
+        name: { kind: Kind.NAME, value: first.name },
       },
-    ];
-    let sample: Record<string, unknown> = {};
-
-    if (first && depth < maxDepth) {
-      const sub = objectSelection(first, depth + 1);
-      selections.push({
-        kind: Kind.INLINE_FRAGMENT,
-        typeCondition: {
-          kind: Kind.NAMED_TYPE,
-          name: { kind: Kind.NAME, value: first.name },
-        },
-        selectionSet: sub.selectionSet!,
-      });
-      sample = sub.sample as Record<string, unknown>;
-    }
-
-    return {
-      selectionSet: { kind: Kind.SELECTION_SET, selections },
-      sample: { __typename: first?.name, ...sample },
-    };
+      selectionSet: objectSelection(first, depth + 1),
+    });
   }
 
-  return objectSelection(named, depth);
+  return { kind: Kind.SELECTION_SET, selections };
 }
 
-function objectSelection(type: GraphQLObjectType | GraphQLInterfaceType, depth: number): Selected {
+function objectSelection(
+  type: GraphQLObjectType | GraphQLInterfaceType,
+  depth: number,
+): SelectionSetNode {
   const selections: SelectionNode[] = [];
-  const sample: Record<string, unknown> = {};
   let leafCount = 0;
   let compositeCount = 0;
 
   for (const field of Object.values(type.getFields())) {
     if (field.deprecationReason != null || field.args.some(isRequiredArgument)) continue;
-    const named = getNamedType(field.type);
+    let selectionSet: SelectionSetNode | undefined;
 
-    if (isLeafType(named)) {
+    if (isLeafType(getNamedType(field.type))) {
       if (leafCount >= maxLeafFields) continue;
       leafCount++;
-
-      selections.push({
-        kind: Kind.FIELD,
-        name: { kind: Kind.NAME, value: field.name },
-      } satisfies FieldNode);
-      sample[field.name] = wrapSample(field.type, sampleLeaf(named));
-    } else if (depth < maxDepth && compositeCount < maxCompositeFields) {
-      const sub = selectionForType(field.type, depth + 1);
-      if (!sub.selectionSet) continue;
+    } else {
+      if (depth >= maxDepth || compositeCount >= maxCompositeFields) continue;
       compositeCount++;
-
-      selections.push({
-        kind: Kind.FIELD,
-        name: { kind: Kind.NAME, value: field.name },
-        selectionSet: sub.selectionSet,
-      } satisfies FieldNode);
-      sample[field.name] = wrapSample(field.type, sub.sample);
+      selectionSet = selectionForType(field.type, depth + 1);
     }
-  }
 
-  if (selections.length === 0) {
     selections.push({
       kind: Kind.FIELD,
-      name: { kind: Kind.NAME, value: '__typename' },
+      name: { kind: Kind.NAME, value: field.name },
+      selectionSet,
     });
-    sample.__typename = type.name;
   }
 
-  return {
-    selectionSet: { kind: Kind.SELECTION_SET, selections },
-    sample,
-  };
+  if (selections.length === 0) selections.push(typenameField);
+  return { kind: Kind.SELECTION_SET, selections };
 }
 
 function sampleInput(type: GraphQLInputType, depth: number): unknown {
@@ -323,21 +364,25 @@ function sampleInput(type: GraphQLInputType, depth: number): unknown {
   let included = fields.filter(
     (field) => isRequiredInputField(field) || field.default !== undefined,
   );
-  if (included.length === 0) included = fields.slice(0, 2);
+  // `@oneOf` input objects take exactly one field
+  if (included.length === 0) included = fields.slice(0, type.isOneOf ? 1 : 2);
 
   for (const field of included) {
-    out[field.name] =
-      field.default !== undefined
-        ? resolveDefaultValue(field.default, field.type)
-        : sampleInput(field.type, depth + 1);
+    out[field.name] = field.default
+      ? defaultValueOf(field.default)
+      : sampleInput(field.type, depth + 1);
   }
 
   return out;
 }
 
-function resolveDefaultValue(defaultInput: GraphQLDefaultInput, type: GraphQLInputType): unknown {
-  if (defaultInput.literal) return coerceInputLiteral(defaultInput.literal, type);
-  return defaultInput.value;
+function defaultValueOf(defaultInput: GraphQLDefaultInput): unknown {
+  return defaultInput.literal ? literalValue(defaultInput.literal) : defaultInput.value;
+}
+
+/** the JSON value of a literal, `valueFromASTUntyped` creates objects without prototypes */
+function literalValue(node: ConstValueNode): unknown {
+  return JSON.parse(JSON.stringify(valueFromASTUntyped(node)));
 }
 
 function wrapSample(type: GraphQLType, sample: unknown): unknown {

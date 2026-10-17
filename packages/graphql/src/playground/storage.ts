@@ -1,21 +1,17 @@
 const StorageKey = 'fumadocs-graphql-playground';
 
-export interface HeaderItem {
-  key: string;
-  value: string;
-}
-
 export interface StoredState {
   url?: string;
   /**
-   * stored header rows, keyed by endpoint origin so headers entered for one
-   * endpoint are never replayed against another.
+   * headers by endpoint origin, so headers entered for one endpoint are never sent to another.
    */
-  headers?: Record<string, HeaderItem[]>;
+  headers?: Record<string, Record<string, string>>;
 }
 
 /**
  * the origin used to scope stored headers, `undefined` for invalid URLs.
+ *
+ * WebSocket URLs share the origin of their HTTP endpoint.
  */
 export function getEndpointOrigin(url: string, base?: string): string | undefined {
   if (url.length === 0) return undefined;
@@ -24,51 +20,42 @@ export function getEndpointOrigin(url: string, base?: string): string | undefine
     return new URL(
       url,
       base ?? (typeof window !== 'undefined' ? window.location.origin : undefined),
-    ).origin;
+    ).origin.replace(/^ws(s?):/, 'http$1:');
   } catch {
     return undefined;
   }
 }
 
-export function filterHeaderItems(items: unknown): HeaderItem[] {
-  if (!Array.isArray(items)) return [];
-
-  return items.filter(
-    (item): item is HeaderItem =>
-      typeof item === 'object' &&
-      item !== null &&
-      typeof (item as HeaderItem).key === 'string' &&
-      typeof (item as HeaderItem).value === 'string',
-  );
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === 'object' && value !== null && !Array.isArray(value);
 }
 
 /**
  * parse & validate the persisted state, unknown shapes are dropped.
- *
- * the legacy shape stored a single headers array shared by every endpoint,
- * it is ignored instead of being migrated.
  */
 export function parseStoredState(raw: string | null): StoredState {
   if (!raw) return {};
 
   try {
     const parsed = JSON.parse(raw) as unknown;
-    if (typeof parsed !== 'object' || parsed === null || Array.isArray(parsed)) return {};
+    if (!isRecord(parsed)) return {};
 
-    const { url, headers } = parsed as Record<string, unknown>;
     const out: StoredState = {};
-    if (typeof url === 'string') out.url = url;
+    if (typeof parsed.url === 'string') out.url = parsed.url;
+    if (!isRecord(parsed.headers)) return out;
 
-    if (typeof headers === 'object' && headers !== null && !Array.isArray(headers)) {
-      const scoped: Record<string, HeaderItem[]> = {};
-
-      for (const [origin, items] of Object.entries(headers)) {
-        if (Array.isArray(items)) scoped[origin] = filterHeaderItems(items);
+    const scoped: [string, Record<string, string>][] = [];
+    for (const [origin, headers] of Object.entries(parsed.headers)) {
+      if (!isRecord(headers)) continue;
+      const valid: [string, string][] = [];
+      for (const [name, value] of Object.entries(headers)) {
+        if (typeof value === 'string') valid.push([name, value]);
       }
 
-      out.headers = scoped;
+      scoped.push([origin, Object.fromEntries(valid)]);
     }
 
+    out.headers = Object.fromEntries(scoped);
     return out;
   } catch {
     return {};

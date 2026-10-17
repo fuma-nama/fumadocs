@@ -2,9 +2,9 @@ import { fileURLToPath } from 'node:url';
 import path from 'node:path';
 import fs from 'node:fs';
 import { describe, expect, test } from 'vitest';
-import { generateOperationExample, syncOperationVariables } from '@/utils/example';
+import { type FragmentDefinitionNode, type OperationDefinitionNode, parse } from 'graphql';
+import { createOperationExample, generateOperationExample } from '@/utils/example';
 import { buildSchemaFromSDL } from '@/utils/build-schema';
-import { getOperationField } from '@/utils/schema';
 
 const cwd = fileURLToPath(new URL('./', import.meta.url));
 const schema = buildSchemaFromSDL(
@@ -186,78 +186,95 @@ describe('generateOperationExample', () => {
       `);
   });
 
+  test('interface return type', () => {
+    expect(generateOperationExample(schema, { kind: 'query', name: 'node' })?.response).toEqual({
+      data: { node: { id: '1' } },
+    });
+  });
+
+  test('@oneOf input objects take one field', () => {
+    const oneOf = buildSchemaFromSDL(`
+input UserBy @oneOf {
+  id: ID
+  email: String
+}
+
+type Query {
+  user(by: UserBy!): String
+}`);
+
+    expect(generateOperationExample(oneOf, { kind: 'query', name: 'user' })?.variables).toEqual({
+      by: { id: '1' },
+    });
+  });
+
   test('unknown operation', () => {
     expect(generateOperationExample(schema, { kind: 'query', name: 'unknown' })).toBeUndefined();
   });
 });
 
-describe('syncOperationVariables', () => {
-  // `orders(filter: OrderFilter)`: every argument is optional
-  const orders = getOperationField(schema, 'query', 'orders')!;
-  const example = generateOperationExample(schema, { kind: 'query', name: 'orders' })!;
+describe('createOperationExample', () => {
+  test('values of literals are plain JSON data', () => {
+    const plot = buildSchemaFromSDL(`
+input Tag {
+  name: String
+}
 
-  /** what the send path does: declare what's set, never touch anything else */
-  function declare(query: string, set: string[]) {
-    return syncOperationVariables(query, orders, (name) => set.includes(name));
+input Range {
+  min: Int
+  tags: [Tag!]
+}
+
+input Area {
+  range: Range = { min: 1, tags: [{ name: "a" }] }
+}
+
+type Query {
+  plot(ranges: [Range!]!, area: Area!): Int
+}`);
+    const [operation] = parse(`
+query Plot($ranges: [Range!]! = [{ min: 2, tags: [{ name: "b" }] }], $area: Area!) {
+  plot(ranges: $ranges, area: $area)
+}`).definitions as [OperationDefinitionNode];
+    const variables = createOperationExample(plot, operation).variables as {
+      ranges: { tags: object[] }[];
+      // sampled with the default of field
+      area: { range: { tags: object[] } };
+    };
+
+    for (const value of [
+      variables.ranges[0],
+      variables.ranges[0].tags[0],
+      variables.area.range,
+      variables.area.range.tags[0],
+    ]) {
+      expect(Object.getPrototypeOf(value)).toBe(Object.prototype);
+    }
+  });
+
+  test('merges fields of the same response key', () => {
+    const document = parse(`
+query Contact {
+  customer(id: "1") {
+    contact {
+      email
+    }
+    ...Phone
   }
+}
 
-  /** what unsetting an argument does: declare what's set, undeclare what isn't */
-  function prune(query: string, set: string[]) {
-    return syncOperationVariables(query, orders, (name) => set.includes(name), { prune: true });
+fragment Phone on Customer {
+  contact {
+    phone
   }
+}`);
+    const [operation, fragment] = document.definitions as [
+      OperationDefinitionNode,
+      FragmentDefinitionNode,
+    ];
 
-  test('declares an optional argument once it is set', () => {
-    // the generated example only declares required arguments
-    expect(example.query).not.toContain('$filter');
-
-    const synced = declare(example.query, ['filter']);
-    expect(synced).toContain('query Orders($filter: OrderFilter) {');
-    expect(synced).toContain('orders(filter: $filter) {');
-  });
-
-  test('undeclares the argument when it is unset again', () => {
-    expect(prune(declare(example.query, ['filter']), [])).toBe(example.query);
-  });
-
-  test('keeps an undeclared argument out of the document unless pruning', () => {
-    const query = declare(example.query, ['filter']);
-
-    // the send path leaves a declaration alone, it may have been written by hand
-    expect(declare(query, [])).toBe(query);
-  });
-
-  test('returns the same query when nothing changes', () => {
-    const query = 'query Orders {\n  orders {\n    id\n  }\n}';
-
-    expect(declare(query, [])).toBe(query);
-    expect(prune(query, [])).toBe(query);
-  });
-
-  test('keeps hand-written values', () => {
-    const query = 'query Orders {\n  orders(filter: {status: PENDING}) {\n    id\n  }\n}';
-
-    // no variable is declared for it, that would leave the variable unused
-    expect(declare(query, ['filter'])).toBe(query);
-    expect(prune(query, [])).toBe(query);
-  });
-
-  test('keeps required arguments declared', () => {
-    const search = generateOperationExample(schema, { kind: 'query', name: 'search' })!;
-    const field = getOperationField(schema, 'query', 'search')!;
-
-    expect(syncOperationVariables(search.query, field, () => true)).toBe(search.query);
-    expect(syncOperationVariables(search.query, field, () => true, { prune: true })).toBe(
-      search.query,
-    );
-  });
-
-  test('ignores an unparsable query', () => {
-    expect(declare('query Orders {', ['filter'])).toBe('query Orders {');
-  });
-
-  test('ignores operations that do not select the field', () => {
-    const query = 'query Other {\n  search(term: $term) {\n    __typename\n  }\n}';
-
-    expect(prune(query, ['filter'])).toBe(query);
+    expect(createOperationExample(schema, operation, [fragment]).response).toEqual({
+      data: { customer: { contact: { email: 'string', phone: 'string' } } },
+    });
   });
 });

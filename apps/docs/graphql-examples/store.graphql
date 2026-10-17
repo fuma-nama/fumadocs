@@ -1,0 +1,61 @@
+# The public profile of a customer.
+query CustomerProfile($id: ID! = "cus_42") {
+  customer(id: $id) {
+    id
+    name
+  }
+}
+
+# A customer with their contact details and latest orders.
+query CustomerWithOrders($id: ID! = "cus_42") {
+  customer(id: $id) {
+    name
+    contact {
+      email
+      phone
+    }
+    latestOrders: orders(first: 3) {
+      ...OrderSummary
+    }
+  }
+}
+
+# Orders still pending since the start of October.
+query PendingOrders($filter: OrderFilter = { status: PENDING, after: "2026-10-01T00:00:00Z" }) {
+  orders(filter: $filter) {
+    ...OrderSummary
+    customer {
+      name
+    }
+  }
+}
+
+# Customers and orders matching a term, `__typename` tells them apart.
+query SearchStore($term: String! = "ada") {
+  search(term: $term) {
+    __typename
+    ... on Customer {
+      id
+      name
+    }
+    ... on Order {
+      id
+      total
+      status
+    }
+  }
+}
+
+# Place an order for a customer.
+mutation PlaceOrder($input: OrderCreateInput! = { customerId: "cus_42", total: 129.99 }) {
+  createOrder(input: $input) {
+    ...OrderSummary
+  }
+}
+
+fragment OrderSummary on Order {
+  id
+  status
+  total
+  createdAt
+}

@@ -94,12 +94,6 @@ interface ItemConfig extends BaseConfig {
   includeOperations?:
     | boolean
     | ((kind: OperationKind, field: GraphQLField<unknown, unknown>) => boolean);
-  /**
-   * generate pages for named types (objects, interfaces, unions, enums, inputs, scalars).
-   *
-   * @default true
-   */
-  includeTypes?: boolean | ((type: GraphQLNamedType) => boolean);
   name?: NameFn<OperationOutput | TypeOutput>;
 }
 
@@ -128,6 +122,15 @@ interface BaseConfig {
    * GraphQL names are already URL-safe, hence it keeps the original name (including its case) by default.
    */
   slugify?: (name: string) => string;
+  /**
+   * document named types (objects, interfaces, unions, enums, inputs, scalars): their own pages
+   * for `per: 'item'`, or in the page for `per: 'file'`.
+   *
+   * Operation pages show the types they use either way.
+   *
+   * @default false
+   */
+  includeTypes?: boolean | ((type: GraphQLNamedType) => boolean);
 }
 
 const KindGroups: Record<OperationKind | NamedTypeKind, { path: string; title: string }> = {
@@ -161,7 +164,9 @@ export function schemaToPages(
     return entries;
   }
 
-  const { slugify = (name) => name } = options;
+  const { slugify = (name) => name, includeTypes = false } = options;
+  let types = includeTypes ? getDocumentedTypes(schema) : [];
+  if (typeof includeTypes === 'function') types = types.filter((type) => includeTypes(type));
 
   if (options.per === 'file') {
     // named after the schema file, or a generic fallback for remote inputs
@@ -178,7 +183,7 @@ export function schemaToPages(
         items.push({ type: 'operation', kind, name: field.name });
       }
     }
-    for (const type of getDocumentedTypes(schema)) {
+    for (const type of types) {
       items.push({ type: 'type', kind: getNamedTypeKind(type), name: type.name });
     }
 
@@ -195,7 +200,7 @@ export function schemaToPages(
     return entries;
   }
 
-  const { groupBy = 'kind', includeOperations = true, includeTypes = true } = options;
+  const { groupBy = 'kind', includeOperations = true } = options;
   const nameFn: NameFn<OperationOutput | TypeOutput> =
     options.name ?? ((result) => slugify(result.item.name));
 
@@ -262,23 +267,20 @@ export function schemaToPages(
     }
   }
 
-  if (includeTypes !== false) {
-    for (const type of getDocumentedTypes(schema)) {
-      if (typeof includeTypes === 'function' && !includeTypes(type)) continue;
-      const kind = getNamedTypeKind(type);
+  for (const type of types) {
+    const kind = getNamedTypeKind(type);
 
-      place(
-        {
-          type: 'type',
-          item: { kind, name: type.name },
-          info: {
-            title: type.name,
-            description: type.description ?? undefined,
-          },
+    place(
+      {
+        type: 'type',
+        item: { kind, name: type.name },
+        info: {
+          title: type.name,
+          description: type.description ?? undefined,
         },
-        KindGroups[kind],
-      );
-    }
+      },
+      KindGroups[kind],
+    );
   }
 
   for (const entry of rest) builder.create(entry);

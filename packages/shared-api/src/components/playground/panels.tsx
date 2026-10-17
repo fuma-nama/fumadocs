@@ -159,7 +159,7 @@ export function Panel({
   );
 }
 
-const crumbClassName =
+export const crumbClassName =
   'truncate rounded-md px-1.5 py-1 text-fd-muted-foreground transition-colors hover:bg-fd-accent hover:text-fd-accent-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-fd-ring';
 
 /** the bar on top of a panel, going back to the overview from `root` */

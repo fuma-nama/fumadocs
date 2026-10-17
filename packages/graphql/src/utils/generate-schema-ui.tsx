@@ -19,13 +19,13 @@ import {
   isObjectType,
   isRequiredInputField,
   isScalarType,
+  isSpecifiedScalarType,
   isUnionType,
-  print,
-  valueToLiteral,
 } from 'graphql';
 import { fromTranslations } from '@fuma-translate/react';
 import type { InfoTag, SchemaData, SchemaUIGeneratedData } from '@fumadocs/json-schema/react';
 import { getCustomDirectives } from '@/utils/schema';
+import { printDefaultValue } from '@/utils/sdl';
 import type { SchemaViewRoot } from '@/utils/create-page';
 
 export interface GenerateGraphQLSchemaUIOptions {
@@ -103,24 +103,27 @@ export function generateGraphQLSchemaUI(
     return key;
   }
 
-  function buildData(type: GraphQLType, doc: DocInfo): SchemaData {
+  /** `namedTags` is false when the page documents the named type */
+  function buildData(type: GraphQLType, doc: DocInfo, namedTags = true): SchemaData {
     if (isNonNullType(type) || isListType(type)) {
       // collapse wrappers into the named type, GraphQL-style annotations (e.g. `[User!]!`) are
       // kept in `aliasName` to communicate list/non-null.
       return {
-        ...buildData(type.ofType, doc),
+        ...buildData(type.ofType, doc, namedTags),
         aliasName: String(type),
       };
     }
 
     const named = getNamedType(type);
-    const description = doc.description ?? named.description;
+    // built-in scalars are described by the spec rather than the schema
+    const description =
+      doc.description ?? (isSpecifiedScalarType(named) ? undefined : named.description);
     const base = {
       typeName: named.name,
       aliasName: String(type),
       deprecated: doc.deprecationReason != null,
       description: description ? renderMarkdown(description) : undefined,
-      infoTags: [...buildDocTags(doc), ...buildNamedTags(named)],
+      infoTags: namedTags ? [...buildDocTags(doc), ...buildNamedTags(named)] : buildDocTags(doc),
     };
 
     if (isScalarType(named) || isEnumType(named)) {
@@ -145,7 +148,7 @@ export function generateGraphQLSchemaUI(
         props: Object.values(named.getFields()).map((field) => ({
           name: field.name,
           $type: ensureField(named, field),
-          required: isRequiredInputField(field),
+          required: !named.isOneOf && isRequiredInputField(field),
         })),
       };
     }
@@ -209,45 +212,35 @@ export function generateGraphQLSchemaUI(
       });
     }
 
+    if (isInputObjectType(named) && named.isOneOf) {
+      tags.push({
+        node: <p className="not-prose w-full text-xs">{t('Exactly one field must be set.')}</p>,
+      });
+    }
+
     if (isInterfaceType(named)) {
       const { objects } = schema.getImplementations(named);
 
       if (objects.length > 0) {
-        tags.push({
-          label: t('Implemented by'),
-          value: objects.map((item) => item.name).join(' | '),
-        });
+        tags.push({ label: t('Implemented by'), list: objects.map((item) => item.name) });
       }
     }
 
     return tags;
   }
 
-  refs.$root = buildData(root.type, {
-    description: root.description,
-    deprecationReason: root.deprecationReason,
-    args: root.args,
-    defaultText: printDefaultValue(root.default, root.type as GraphQLInputType),
-    directives: getCustomDirectives(root.astNode),
-  });
+  refs.$root = buildData(
+    root.type,
+    {
+      description: root.description,
+      deprecationReason: root.deprecationReason,
+      args: root.args,
+      defaultText: printDefaultValue(root.default, root.type as GraphQLInputType),
+      directives: getCustomDirectives(root.astNode),
+    },
+    // an empty description leaves the type to the page, like type pages
+    root.description !== '',
+  );
 
   return { $root: '$root', refs };
-}
-
-function printDefaultValue(
-  defaultInput: GraphQLDefaultInput | undefined,
-  type: GraphQLInputType,
-): string | undefined {
-  if (!defaultInput) return;
-  if (defaultInput.literal) return print(defaultInput.literal);
-  if (defaultInput.value === undefined) return;
-
-  try {
-    const node = valueToLiteral(defaultInput.value, type);
-    if (node) return print(node);
-  } catch {
-    // fall through
-  }
-
-  return JSON.stringify(defaultInput.value);
 }
