@@ -19,6 +19,12 @@ The OpenAPI schemas to read from.
 
 Only schemas listed here can be loaded, other IDs passed to `getSchema()` or preloaded by pages throw an error.
 
+<Callout type="warn">
+
+Do not pass untrusted schemas to `input`, their `$ref`s can read local files and fetch URLs, private hosts included.
+
+</Callout>
+
 ```ts tab="Basic"
 import { createOpenAPI } from 'fumadocs-openapi/server';
 
@@ -50,9 +56,10 @@ We use it for:
 - Executing HTTP requests on the OpenAPI playground, when the target API endpoints do not have CORS configured correctly.
 - OAuth requests of confidential clients (with a client secret) and device flows.
 
-<Callout type="warn" title="Warning">
-  Do not use this on unreliable sites and API endpoints, the proxy server will forward all received
-  headers & body, including HTTP-only `Cookies` and `Authorization` header.
+<Callout type="warn">
+
+The proxy is public without authentication, it forwards the headers and body of requests, including `Authorization`. Restrict it with [`allowedOrigins`](#allowed-origins) and `filterRequest`.
+
 </Callout>
 
 ### Setup
@@ -111,10 +118,21 @@ export const { GET, HEAD, PUT, POST, PATCH, DELETE } = openapi.createProxy({
 });
 ```
 
+Redirects are checked by the same rules.
+
 <Callout type="warn">
   Refusing private networks requires Node.js or Deno, specify `allowedOrigins` on other runtimes
   (e.g. Bun).
 </Callout>
+
+Use `filterRequest` to refuse requests, for example to only allow reads:
+
+```ts title="app/api/proxy/route.ts"
+export const { GET, HEAD, PUT, POST, PATCH, DELETE } = openapi.createProxy({
+  // proxied requests that return false are refused
+  filterRequest: (request) => request.method === 'GET',
+});
+```
 
 ## OAuth Redirect
 

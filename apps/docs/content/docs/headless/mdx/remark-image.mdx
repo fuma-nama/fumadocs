@@ -43,6 +43,12 @@ Next.js can handle image imports with its built-in image loader.
 
 Otherwise, it uses the file system or an HTTP request to download the image and obtain its size.
 
+<Callout type="warn">
+
+Do not pass untrusted image URLs, they are fetched when compiling, private hosts included. Set `external: false` to skip external images.
+
+</Callout>
+
 ### Options
 
 <auto-type-table

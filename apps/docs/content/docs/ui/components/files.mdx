@@ -76,3 +76,9 @@ Generate `<Files />` component from glob.
 
 <auto-files dir="./my-dir" pattern="**/*.{ts,tsx}" defaultOpenAll />
 ```
+
+<Callout type="warn">
+
+Do not pass untrusted values to `dir`, it can list files in any directory on your machine.
+
+</Callout>

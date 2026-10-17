@@ -31,11 +31,17 @@ export const GraphQLPage = createGraphQLPage({
     allowUrlEdit: false,
     // default headers of playground requests
     headers: {
-      Authorization: 'Bearer <token>',
+      'X-Client-Name': 'docs',
     },
   },
 });
 ```
+
+<Callout type="warn">
+
+Do not put secrets in `headers`, they are sent to the browser, and kept in its local storage with the URL.
+
+</Callout>
 
 You can replace the default fetcher, e.g. to proxy requests:
 

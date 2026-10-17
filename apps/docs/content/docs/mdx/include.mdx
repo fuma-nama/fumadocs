@@ -17,6 +17,12 @@ To display content from another Markdown/MDX file, specify its path relative to 
 ::include[./another.mdx]
 ```
 
+<Callout type="warn">
+
+Do not pass untrusted paths to `<include>`, it can embed any file on your machine, like `.env`.
+
+</Callout>
+
 <Callout title='For Markdown'>
 
 Markdown (`.md`) files do not support JSX syntax. To use `<include />`, you need to configure `remark-directive`.

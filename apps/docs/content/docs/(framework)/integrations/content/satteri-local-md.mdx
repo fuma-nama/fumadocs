@@ -16,6 +16,12 @@ Reach for it when you want Sätteri's compiler and its plugin model, and to reus
 - Compilation always produces JavaScript, so there is no virtual JavaScript engine option. Rendering uses the native engine.
 - Plugins are Sätteri plugins, configured through `satteriOptions`, not remark/rehype plugins.
 
+<Callout type="warn">
+
+Do not put untrusted Markdown/MDX files in `dir`, they can run as JavaScript or reference server-side files.
+
+</Callout>
+
 ## Setup
 
 ```package-install
