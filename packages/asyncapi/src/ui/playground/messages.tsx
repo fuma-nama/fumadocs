@@ -12,7 +12,12 @@ import {
   SelectValue,
 } from 'shared-api/components/select';
 import { cardCodeBlock, ExampleHeader } from 'shared-api/components/example';
-import { iconButtonClassName, PanelHeader } from 'shared-api/components/playground/panels';
+import {
+  iconButtonClassName,
+  PanelHeader,
+  Placeholder,
+  SendShortcut,
+} from 'shared-api/components/playground/panels';
 import { DataEntry, LogList, LogTime, StatusEntry } from 'shared-api/components/playground/log';
 import type { LogEntry, Playground } from '@/playground';
 import { type OperationMessage, useChannelMessages } from '@/operation';
@@ -58,14 +63,9 @@ export function MessagesPanel({
             {(entry) => <Entry key={entry.id} entry={entry} />}
           </LogList>
         ) : (
-          <div className="flex min-h-40 flex-1 flex-col items-center justify-center gap-3 p-6 text-center">
-            <div className="rounded-xl border bg-fd-secondary p-2.5 text-fd-muted-foreground">
-              <Radio className="size-4" />
-            </div>
-            <p className="text-sm text-fd-muted-foreground">
-              {status === 'open' ? t('Waiting for messages.') : t('Connect to see messages.')}
-            </p>
-          </div>
+          <Placeholder icon={Radio} className="min-h-40">
+            {status === 'open' ? t('Waiting for messages.') : t('Connect to see messages.')}
+          </Placeholder>
         )}
         <Composer open={status === 'open'} send={playground.send} />
       </div>
@@ -195,7 +195,6 @@ const Composer = memo(function Composer({
   const message = outgoing.find((item) => item.id === selected);
   const [text, setText] = useState(() => getExampleText(message));
   const [encoding, setEncoding] = useState<Encoding>('text');
-  const isMac = typeof navigator !== 'undefined' && /Mac|iPhone|iPad/.test(navigator.userAgent);
   const payload = message?.payload;
   let check: { ok: boolean; text: string; data?: ArrayBuffer } | undefined;
   if (text && encoding !== 'text') {
@@ -327,9 +326,7 @@ const Composer = memo(function Composer({
         >
           <SendHorizontal className="size-3.5" />
           {t('Send')}
-          <kbd className="hidden font-sans text-xs text-fd-primary-foreground/60 sm:inline">
-            {isMac ? '⌘' : 'Ctrl'} ↵
-          </kbd>
+          <SendShortcut />
         </button>
       </div>
     </div>

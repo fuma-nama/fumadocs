@@ -8,7 +8,6 @@ import {
   type GraphQLAbstractType,
   type GraphQLArgument,
   type GraphQLCompositeType,
-  type GraphQLDefaultInput,
   type GraphQLEnumType,
   type GraphQLInputType,
   type GraphQLInterfaceType,
@@ -37,7 +36,6 @@ import {
   valueFromASTUntyped,
   type VariableDefinitionNode,
 } from 'graphql';
-import { getOperationField, getRootType } from '@/utils/schema';
 import type { OperationItem } from '@/utils/pages';
 
 export interface OperationExample {
@@ -75,7 +73,7 @@ export function generateOperationExample(
   schema: GraphQLSchema,
   item: OperationItem,
 ): OperationExample | undefined {
-  const field = getOperationField(schema, item.kind, item.name);
+  const field = schema.getRootType(item.kind)?.getFields()[item.name];
   if (!field) return;
 
   const args = field.args.filter(isRequiredArgument);
@@ -140,7 +138,7 @@ export function createOperationExample(
     response: {
       data: sampleSelections(
         schema,
-        getRootType(schema, operation.operation)!,
+        schema.getRootType(operation.operation)!,
         [operation.selectionSet],
         fragments,
       ),
@@ -195,10 +193,7 @@ export function collectFields(
       if (visited.has(selection.name.value)) continue;
       visited.add(selection.name.value);
     }
-    const fragment =
-      selection.kind === Kind.INLINE_FRAGMENT
-        ? selection
-        : fragments.find((item) => item.name.value === selection.name.value);
+    const fragment = getFragment(selection, fragments);
     if (!fragment) continue;
     const condition = fragment.typeCondition && schema.getType(fragment.typeCondition.name.value);
     if (
@@ -263,38 +258,37 @@ function resolveType(
   // sample interfaces without implementations by their own fields
   if (possibleTypes.length === 0 && isInterfaceType(type)) return type;
 
-  for (const selectionSet of selectionSets) {
-    const target = findTargetType(schema, type, selectionSet, fragments);
-    if (target) return target;
-  }
-  return possibleTypes[0];
+  return findTargetType(schema, type, selectionSets, fragments) ?? possibleTypes[0];
 }
 
 /**
- * The first possible type of an abstract type that a type condition of the selection set names.
+ * The first possible type of an abstract type that a type condition of the selection sets names.
  */
 function findTargetType(
   schema: GraphQLSchema,
   type: GraphQLAbstractType,
-  selectionSet: SelectionSetNode,
+  selectionSets: readonly SelectionSetNode[],
   fragments: readonly FragmentDefinitionNode[],
 ): GraphQLObjectType | undefined {
-  for (const selection of selectionSet.selections) {
-    if (selection.kind === Kind.FIELD) continue;
-    const fragment =
-      selection.kind === Kind.INLINE_FRAGMENT
-        ? selection
-        : fragments.find((item) => item.name.value === selection.name.value);
-    if (!fragment) continue;
+  for (const { selections } of selectionSets) {
+    for (const selection of selections) {
+      const fragment = getFragment(selection, fragments);
+      if (!fragment) continue;
 
-    const condition = fragment.typeCondition && schema.getType(fragment.typeCondition.name.value);
-    if (isObjectType(condition)) {
-      if (schema.isSubType(type, condition)) return condition;
-      continue;
+      const condition = fragment.typeCondition && schema.getType(fragment.typeCondition.name.value);
+      const target = isObjectType(condition)
+        ? condition
+        : findTargetType(schema, type, [fragment.selectionSet], fragments);
+      if (target && schema.isSubType(type, target)) return target;
     }
+  }
+}
 
-    const target = findTargetType(schema, type, fragment.selectionSet, fragments);
-    if (target) return target;
+/** the fragment of an inline fragment or a fragment spread */
+function getFragment(selection: SelectionNode, fragments: readonly FragmentDefinitionNode[]) {
+  if (selection.kind === Kind.INLINE_FRAGMENT) return selection;
+  if (selection.kind === Kind.FRAGMENT_SPREAD) {
+    return fragments.find((item) => item.name.value === selection.name.value);
   }
 }
 
@@ -352,32 +346,27 @@ function objectSelection(
 }
 
 function sampleInput(type: GraphQLInputType, depth: number): unknown {
-  if (isNonNullType(type)) return sampleInput(type.ofType, depth);
-  if (isListType(type)) return [sampleInput(type.ofType, depth)];
-  if (isLeafType(type)) return sampleLeaf(type);
+  const named = getNamedType(type);
+  if (isLeafType(named)) return wrapSample(type, sampleLeaf(named));
 
   const out: Record<string, unknown> = {};
-  // input object, guard against cyclic references
-  if (depth >= 4) return out;
+  // guard against cyclic references
+  if (depth >= 4) return wrapSample(type, out);
 
-  const fields = Object.values(type.getFields());
+  const fields = Object.values(named.getFields());
   let included = fields.filter(
     (field) => isRequiredInputField(field) || field.default !== undefined,
   );
   // `@oneOf` input objects take exactly one field
-  if (included.length === 0) included = fields.slice(0, type.isOneOf ? 1 : 2);
+  if (included.length === 0) included = fields.slice(0, named.isOneOf ? 1 : 2);
 
   for (const field of included) {
-    out[field.name] = field.default
-      ? defaultValueOf(field.default)
-      : sampleInput(field.type, depth + 1);
+    if (!field.default) out[field.name] = sampleInput(field.type, depth + 1);
+    else if (field.default.literal) out[field.name] = literalValue(field.default.literal);
+    else out[field.name] = field.default.value;
   }
 
-  return out;
-}
-
-function defaultValueOf(defaultInput: GraphQLDefaultInput): unknown {
-  return defaultInput.literal ? literalValue(defaultInput.literal) : defaultInput.value;
+  return wrapSample(type, out);
 }
 
 /** the JSON value of a literal, `valueFromASTUntyped` creates objects without prototypes */

@@ -2,7 +2,7 @@ import { fileURLToPath } from 'node:url';
 import path from 'node:path';
 import fs from 'node:fs';
 import { describe, expect, test } from 'vitest';
-import { parse, validate } from 'graphql';
+import { parse, print, validate } from 'graphql';
 import { buildSchemaFromSDL } from '@/utils/build-schema';
 import { readSelection, toggleField } from '@/playground/selection';
 
@@ -13,6 +13,9 @@ const schema = buildSchemaFromSDL(
 
 const customer = { kind: 'query', name: 'customer' } as const;
 const search = { kind: 'query', name: 'search' } as const;
+
+/** the document printed like `toggleField()` prints it */
+const doc = (query: string) => print(parse(query));
 
 /** toggle, and check the result against the schema */
 function toggle(...args: Parameters<typeof toggleField>): string {
@@ -56,7 +59,7 @@ describe('readSelection', () => {
     }
   `);
 
-  test('nested paths, aliases count as their field', () => {
+  test('the fields and inline fragments at a path, aliases count as their field', () => {
     expect(readSelection(document, customer, [])).toMatchObject({
       fields: new Set(['id', 'name', 'contact', 'orders']),
       fragments: new Set(),
@@ -64,6 +67,24 @@ describe('readSelection', () => {
     expect(
       readSelection(document, customer, [{ field: 'orders' }, { field: 'customer' }])?.fields,
     ).toEqual(new Set(['name']));
+
+    const searched = parse(`
+      query Search {
+        search(term: "a") {
+          __typename
+          ... on Customer { id contact { phone } }
+          ... on Order { id }
+        }
+      }
+    `);
+    expect(readSelection(searched, search, [])).toEqual({
+      fields: new Set(['__typename']),
+      fragments: new Set(['Customer', 'Order']),
+      spread: new Map(),
+    });
+    expect(
+      readSelection(searched, search, [{ on: 'Customer' }, { field: 'contact' }])?.fields,
+    ).toEqual(new Set(['phone']));
   });
 
   test('fields of fragment spreads, nested and cyclic ones included', () => {
@@ -84,34 +105,6 @@ describe('readSelection', () => {
     });
   });
 
-  test('inline fragments', () => {
-    const document = parse(`
-      query Search {
-        search(term: "a") {
-          __typename
-          ... on Customer {
-            id
-            contact {
-              phone
-            }
-          }
-          ... on Order {
-            id
-          }
-        }
-      }
-    `);
-
-    expect(readSelection(document, search, [])).toEqual({
-      fields: new Set(['__typename']),
-      fragments: new Set(['Customer', 'Order']),
-      spread: new Map(),
-    });
-    expect(
-      readSelection(document, search, [{ on: 'Customer' }, { field: 'contact' }])?.fields,
-    ).toEqual(new Set(['phone']));
-  });
-
   test('not selected', () => {
     expect(readSelection(document, customer, [{ field: 'orders' }, { field: 'id' }])).toBe(
       undefined,
@@ -126,44 +119,10 @@ describe('toggleField', () => {
   const query = 'query Customer($id: ID!) { customer(id: $id) { id } }';
   const searchQuery = 'query Search { search(term: "a") { __typename } }';
 
-  test('select a leaf field', () => {
-    expect(toggle(schema, query, customer, [], 'name', true)).toMatchInlineSnapshot(`
-      "query Customer($id: ID!) {
-        customer(id: $id) {
-          id
-          name
-        }
-      }"
-    `);
-  });
-
-  test('select a composite field with a default sub-selection', () => {
-    // `Order` has an `id` field
-    expect(toggle(schema, query, customer, [], 'orders', true)).toMatchInlineSnapshot(`
-      "query Customer($id: ID!) {
-        customer(id: $id) {
-          id
-          orders {
-            id
-          }
-        }
-      }"
-    `);
-    // `ContactInfo` doesn't, its leaf fields are selected instead
-    expect(toggle(schema, query, customer, [], 'contact', true)).toMatchInlineSnapshot(`
-      "query Customer($id: ID!) {
-        customer(id: $id) {
-          id
-          contact {
-            email
-            phone
-          }
-        }
-      }"
-    `);
-  });
-
-  test('select inside missing parents', () => {
+  test('select, creating missing parents and inline fragments', () => {
+    expect(toggle(schema, query, customer, [], 'name', true)).toBe(
+      doc('query Customer($id: ID!) { customer(id: $id) { id name } }'),
+    );
     expect(
       toggle(
         schema,
@@ -173,64 +132,30 @@ describe('toggleField', () => {
         'contact',
         true,
       ),
-    ).toMatchInlineSnapshot(`
-      "query Customer($id: ID!) {
-        customer(id: $id) {
-          id
-          orders {
-            customer {
-              contact {
-                email
-                phone
-              }
-            }
-          }
-        }
-      }"
-    `);
+    ).toBe(
+      doc(
+        'query Customer($id: ID!) { customer(id: $id) { id orders { customer { contact { email phone } } } } }',
+      ),
+    );
+    expect(toggle(schema, searchQuery, search, [{ on: 'Customer' }], 'name', true)).toBe(
+      doc('query Search { search(term: "a") { __typename ... on Customer { name } } }'),
+    );
+    // a field without a selection set
+    expect(
+      toggle(schema, 'query Customer($id: ID!) { customer(id: $id) }', customer, [], 'name', true),
+    ).toBe(doc('query Customer($id: ID!) { customer(id: $id) { name } }'));
   });
 
-  test('select inside a missing inline fragment', () => {
-    expect(toggle(schema, searchQuery, search, [{ on: 'Customer' }], 'name', true))
-      .toMatchInlineSnapshot(`
-      "query Search {
-        search(term: "a") {
-          __typename
-          ... on Customer {
-            name
-          }
-        }
-      }"
-    `);
-  });
+  test('default sub-selections', () => {
+    // `Order` has an `id` field, `ContactInfo` doesn't: its leaf fields are selected instead
+    expect(toggle(schema, query, customer, [], 'orders', true)).toBe(
+      doc('query Customer($id: ID!) { customer(id: $id) { id orders { id } } }'),
+    );
+    expect(toggle(schema, query, customer, [], 'contact', true)).toBe(
+      doc('query Customer($id: ID!) { customer(id: $id) { id contact { email phone } } }'),
+    );
 
-  test('`__typename` of abstract types', () => {
-    const query = 'query Search { search(term: "a") { ... on Customer { id } } }';
-
-    const selected = toggle(schema, query, search, [], '__typename', true);
-    expect(selected).toMatchInlineSnapshot(`
-      "query Search {
-        search(term: "a") {
-          ... on Customer {
-            id
-          }
-          __typename
-        }
-      }"
-    `);
-    expect(toggle(schema, selected, search, [], '__typename', false)).toMatchInlineSnapshot(`
-      "query Search {
-        search(term: "a") {
-          ... on Customer {
-            id
-          }
-        }
-      }"
-    `);
-  });
-
-  test('default sub-selections of other types', () => {
-    const schema = buildSchemaFromSDL(`
+    const other = buildSchemaFromSDL(`
       type Query { post: Post }
       type Post { author: Author, attachments: [Attachment!]!, related: Related }
       type Author { name: String!, handle: String @deprecated, avatar(size: Int!): String }
@@ -240,94 +165,47 @@ describe('toggleField', () => {
       type Related { posts: [Post!]! }
     `);
     const post = { kind: 'query', name: 'post' } as const;
-    const query = '{ post { __typename } }';
-
+    const postQuery = '{ post { __typename } }';
     // deprecated fields and fields with required arguments are left out
-    expect(toggle(schema, query, post, [], 'author', true)).toMatchInlineSnapshot(`
-      "{
-        post {
-          author {
-            name
-          }
-        }
-      }"
-    `);
+    expect(toggle(other, postQuery, post, [], 'author', true)).toBe(
+      doc('{ post { author { name } } }'),
+    );
     // unions and objects without leaf fields
-    expect(toggle(schema, query, post, [], 'attachments', true)).toMatchInlineSnapshot(`
-      "{
-        post {
-          attachments {
-            __typename
-          }
-        }
-      }"
-    `);
-    expect(toggle(schema, query, post, [], 'related', true)).toMatchInlineSnapshot(`
-      "{
-        post {
-          related {
-            __typename
-          }
-        }
-      }"
-    `);
+    expect(toggle(other, postQuery, post, [], 'attachments', true)).toBe(
+      doc('{ post { attachments { __typename } } }'),
+    );
+    expect(toggle(other, postQuery, post, [], 'related', true)).toBe(
+      doc('{ post { related { __typename } } }'),
+    );
   });
 
-  test('select into a field without a selection set', () => {
-    expect(
-      toggle(schema, 'query Customer($id: ID!) { customer(id: $id) }', customer, [], 'name', true),
-    ).toMatchInlineSnapshot(`
-      "query Customer($id: ID!) {
-        customer(id: $id) {
-          name
-        }
-      }"
-    `);
+  test('`__typename` of abstract types', () => {
+    const query = 'query Search { search(term: "a") { ... on Customer { id } } }';
+    const selected = toggle(schema, query, search, [], '__typename', true);
+
+    expect(selected).toBe(
+      doc('query Search { search(term: "a") { ... on Customer { id } __typename } }'),
+    );
+    expect(toggle(schema, selected, search, [], '__typename', false)).toBe(doc(query));
   });
 
   test('fragment spreads are kept', () => {
     const query = `
-      query Customer($id: ID!) {
-        customer(id: $id) {
-          ...CustomerFields
-          id
-        }
-      }
-
-      fragment CustomerFields on Customer {
-        name
-      }
+      query Customer($id: ID!) { customer(id: $id) { ...CustomerFields id } }
+      fragment CustomerFields on Customer { name }
     `;
 
     // not read as selected, the field is added explicitly
-    expect(toggle(schema, query, customer, [], 'name', true)).toMatchInlineSnapshot(`
-      "query Customer($id: ID!) {
-        customer(id: $id) {
-          ...CustomerFields
-          id
-          name
-        }
-      }
-
-      fragment CustomerFields on Customer {
-        name
-      }"
-    `);
+    expect(toggle(schema, query, customer, [], 'name', true)).toBe(
+      doc(query.replace('id }', 'id name }')),
+    );
     // a level with a spread left isn't empty
-    expect(toggle(schema, query, customer, [], 'id', false)).toMatchInlineSnapshot(`
-      "query Customer($id: ID!) {
-        customer(id: $id) {
-          ...CustomerFields
-        }
-      }
-
-      fragment CustomerFields on Customer {
-        name
-      }"
-    `);
+    expect(toggle(schema, query, customer, [], 'id', false)).toBe(
+      doc(query.replace(' id }', ' }')),
+    );
   });
 
-  test('deselect every selection of the field', () => {
+  test('deselect every selection of the field, emptied levels are removed', () => {
     expect(
       toggle(
         schema,
@@ -337,16 +215,7 @@ describe('toggleField', () => {
         'name',
         false,
       ),
-    ).toMatchInlineSnapshot(`
-      "query Customer($id: ID!) {
-        customer(id: $id) {
-          id
-        }
-      }"
-    `);
-  });
-
-  test('deselect the last field of a nested object', () => {
+    ).toBe(doc(query));
     expect(
       toggle(
         schema,
@@ -356,16 +225,7 @@ describe('toggleField', () => {
         'email',
         false,
       ),
-    ).toMatchInlineSnapshot(`
-      "query Customer($id: ID!) {
-        customer(id: $id) {
-          id
-        }
-      }"
-    `);
-  });
-
-  test('deselect the last field of an inline fragment', () => {
+    ).toBe(doc(query));
     expect(
       toggle(
         schema,
@@ -375,24 +235,11 @@ describe('toggleField', () => {
         'name',
         false,
       ),
-    ).toMatchInlineSnapshot(`
-      "query Search {
-        search(term: "a") {
-          __typename
-        }
-      }"
-    `);
-  });
+    ).toBe(doc(searchQuery));
 
-  test('deselect the last field of the root', () => {
-    expect(toggle(schema, query, customer, [], 'id', false)).toMatchInlineSnapshot(`
-      "query Customer($id: ID!) {
-        customer(id: $id) {
-          __typename
-        }
-      }"
-    `);
-    // emptied levels are removed up to the root
+    // up to the root field, it keeps `__typename`
+    const emptied = doc('query Customer($id: ID!) { customer(id: $id) { __typename } }');
+    expect(toggle(schema, query, customer, [], 'id', false)).toBe(emptied);
     expect(
       toggle(
         schema,
@@ -402,82 +249,25 @@ describe('toggleField', () => {
         'name',
         false,
       ),
-    ).toMatchInlineSnapshot(`
-      "query Customer($id: ID!) {
-        customer(id: $id) {
-          __typename
-        }
-      }"
-    `);
+    ).toBe(emptied);
   });
 
-  test('a new field replaces the `__typename` placeholder', () => {
-    // uncheck everything under the root
-    let query = toggle(
-      schema,
-      'query Customer($id: ID!) { customer(id: $id) { id contact { email } } }',
-      customer,
-      [],
-      'id',
-      false,
+  test('the `__typename` placeholder', () => {
+    const placeholder = 'query Customer($id: ID!) { customer(id: $id) { __typename } }';
+
+    // replaced by a new field, also by a created parent
+    expect(toggle(schema, placeholder, customer, [], 'name', true)).toBe(
+      doc('query Customer($id: ID!) { customer(id: $id) { name } }'),
     );
-    query = toggle(schema, query, customer, [{ field: 'contact' }], 'email', false);
-
-    expect(toggle(schema, query, customer, [], 'name', true)).toMatchInlineSnapshot(`
-      "query Customer($id: ID!) {
-        customer(id: $id) {
-          name
-        }
-      }"
-    `);
-    // also by a created parent
-    expect(toggle(schema, query, customer, [{ field: 'contact' }], 'phone', true))
-      .toMatchInlineSnapshot(`
-      "query Customer($id: ID!) {
-        customer(id: $id) {
-          contact {
-            phone
-          }
-        }
-      }"
-    `);
-  });
-
-  test('a `__typename` with an alias or directives is kept', () => {
-    expect(
-      toggle(
-        schema,
-        'query Customer($id: ID!) { customer(id: $id) { type: __typename } }',
-        customer,
-        [],
-        'name',
-        true,
-      ),
-    ).toMatchInlineSnapshot(`
-      "query Customer($id: ID!) {
-        customer(id: $id) {
-          type: __typename
-          name
-        }
-      }"
-    `);
-    expect(
-      toggle(
-        schema,
-        'query Customer($id: ID!) { customer(id: $id) { __typename @include(if: true) } }',
-        customer,
-        [],
-        'name',
-        true,
-      ),
-    ).toMatchInlineSnapshot(`
-      "query Customer($id: ID!) {
-        customer(id: $id) {
-          __typename @include(if: true)
-          name
-        }
-      }"
-    `);
+    expect(toggle(schema, placeholder, customer, [{ field: 'contact' }], 'phone', true)).toBe(
+      doc('query Customer($id: ID!) { customer(id: $id) { contact { phone } } }'),
+    );
+    // kept with an alias or directives
+    for (const kept of ['type: __typename', '__typename @include(if: true)']) {
+      expect(
+        toggle(schema, placeholder.replace('__typename', kept), customer, [], 'name', true),
+      ).toBe(doc(placeholder.replace('__typename', `${kept} name`)));
+    }
   });
 
   test('variables, arguments, directives and aliases are untouched', () => {
@@ -485,46 +275,18 @@ describe('toggleField', () => {
       query Customer($id: ID!, $withContact: Boolean!) {
         customer(id: $id) {
           id
-          primary: contact @include(if: $withContact) {
-            email
-          }
-          orders(status: SHIPPED, first: 5) @skip(if: false) {
-            id
-          }
+          primary: contact @include(if: $withContact) { email }
+          orders(status: SHIPPED, first: 5) @skip(if: false) { id }
         }
       }
     `;
 
-    expect(toggle(schema, query, customer, [{ field: 'contact' }], 'phone', true))
-      .toMatchInlineSnapshot(`
-        "query Customer($id: ID!, $withContact: Boolean!) {
-          customer(id: $id) {
-            id
-            primary: contact @include(if: $withContact) {
-              email
-              phone
-            }
-            orders(status: SHIPPED, first: 5) @skip(if: false) {
-              id
-            }
-          }
-        }"
-      `);
-    expect(toggle(schema, query, customer, [{ field: 'orders' }], 'total', true))
-      .toMatchInlineSnapshot(`
-        "query Customer($id: ID!, $withContact: Boolean!) {
-          customer(id: $id) {
-            id
-            primary: contact @include(if: $withContact) {
-              email
-            }
-            orders(status: SHIPPED, first: 5) @skip(if: false) {
-              id
-              total
-            }
-          }
-        }"
-      `);
+    expect(toggle(schema, query, customer, [{ field: 'contact' }], 'phone', true)).toBe(
+      doc(query.replace('{ email }', '{ email phone }')),
+    );
+    expect(toggle(schema, query, customer, [{ field: 'orders' }], 'total', true)).toBe(
+      doc(query.replace('{ id }', '{ id total }')),
+    );
   });
 
   test('only the first operation selecting the root field', () => {
@@ -534,26 +296,9 @@ describe('toggleField', () => {
       query Second { customer(id: "2") { id } }
     `;
 
-    expect(toggle(schema, query, customer, [], 'name', true)).toMatchInlineSnapshot(`
-      "query Orders {
-        orders {
-          id
-        }
-      }
-
-      query First($id: ID!) {
-        customer(id: $id) {
-          id
-          name
-        }
-      }
-
-      query Second {
-        customer(id: "2") {
-          id
-        }
-      }"
-    `);
+    expect(toggle(schema, query, customer, [], 'name', true)).toBe(
+      doc(query.replace('customer(id: $id) { id }', 'customer(id: $id) { id name }')),
+    );
   });
 
   test('unchanged', () => {

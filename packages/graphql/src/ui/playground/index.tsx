@@ -1,24 +1,22 @@
 'use client';
-import { memo, useState } from 'react';
+import { useMemo, useState } from 'react';
 import { Dialog } from '@base-ui/react/dialog';
-import { Play, Radio, SendHorizontal, Square, X } from 'lucide-react';
+import { Play, Radio, Square, X } from 'lucide-react';
 import { useTranslations } from '@fuma-translate/react';
 import { StfProvider } from '@fumari/stf';
 import { buttonVariants } from 'fumadocs-ui/components/ui/button';
 import { Badge } from 'shared-api/components/badge';
 import { DialogPopup } from 'shared-api/components/dialog';
-import { Segmented, SegmentedList } from 'shared-api/components/segmented';
 import { Spinner } from 'shared-api/components/spinner';
-import { iconButtonClassName } from 'shared-api/components/playground/panels';
+import {
+  iconButtonClassName,
+  RequestExampleSelect,
+  SendButton,
+  SendShortcut,
+  ViewSwitch,
+} from 'shared-api/components/playground/panels';
 import { StatusDot } from 'shared-api/components/playground/log';
 import { SchemaProvider } from 'shared-api/components/playground/schema';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from 'shared-api/components/select';
 import { useOperation } from '@/operation';
 import { useRenderContext } from '@/utils/create-page';
 import { OperationBar } from '@/ui/operation/bar';
@@ -70,9 +68,16 @@ export function OperationPlayground() {
 
 function PlaygroundDialog({ playground }: { playground: Playground }) {
   const t = useTranslations({ note: 'graphql playground' });
-  const { title, kind, field } = useOperation();
+  const { title, kind, field, examples, selected } = useOperation();
   const { fetcher } = useRenderContext().playground ?? {};
   const [view, setView] = useState('request');
+  const views = useMemo(
+    () => [
+      { value: 'request', label: t('Request') },
+      { value: 'response', label: t('Response') },
+    ],
+    [t],
+  );
   const isSubscription = kind === 'subscription';
   const active = playground.status !== 'closed';
 
@@ -108,7 +113,15 @@ function PlaygroundDialog({ playground }: { playground: Playground }) {
               </span>
             )}
             <div className="ms-auto flex items-center gap-1">
-              <ExampleSelect playground={playground} disabled={active} />
+              <RequestExampleSelect
+                items={examples.map((example, i) => ({
+                  value: i,
+                  label: example.name ?? String(i + 1),
+                }))}
+                value={selected}
+                disabled={active}
+                onValueChange={playground.select}
+              />
               <Dialog.Close aria-label={t('Close')} className={iconButtonClassName}>
                 <X />
               </Dialog.Close>
@@ -117,7 +130,7 @@ function PlaygroundDialog({ playground }: { playground: Playground }) {
           {/* one form, Enter in any input sends */}
           <form noValidate className="contents" onSubmit={onSubmit}>
             <EndpointBar playground={playground} />
-            <ViewSwitch value={view} onValueChange={setView} />
+            <ViewSwitch value={view} onValueChange={setView} items={views} />
             <div className="mx-3 mb-3 grid min-h-0 flex-1 overflow-hidden rounded-xl border bg-fd-card sm:mx-4 sm:mb-4 md:grid-cols-[minmax(0,11fr)_minmax(0,9fr)]">
               <RequestPanel
                 key={playground.loaded}
@@ -139,120 +152,14 @@ function PlaygroundDialog({ playground }: { playground: Playground }) {
   );
 }
 
-function ExampleSelect({ playground, disabled }: { playground: Playground; disabled: boolean }) {
-  const t = useTranslations({ note: 'graphql playground' });
-  const { examples, selected } = useOperation();
-  if (examples.length <= 1) return null;
-  const options = examples.map((example, i) => ({
-    value: i,
-    label: example.name ?? String(i + 1),
-  }));
-
-  return (
-    <Select
-      items={options}
-      value={selected}
-      disabled={disabled}
-      onValueChange={(v) => v !== null && playground.select(v)}
-    >
-      <SelectTrigger className="h-8 w-auto max-w-64 gap-1.5 border-0 bg-transparent px-2 text-xs hover:bg-fd-accent focus:ring-0 focus-visible:ring-2">
-        <span className="text-fd-muted-foreground">{t('Example')}</span>
-        <SelectValue className="truncate font-medium" />
-      </SelectTrigger>
-      <SelectContent align="end">
-        {options.map((option) => (
-          <SelectItem key={option.value} value={option.value}>
-            {option.label}
-          </SelectItem>
-        ))}
-      </SelectContent>
-    </Select>
-  );
-}
-
-/** switches the panels on small screens, its indicator measures the tabs on render */
-const ViewSwitch = memo(function ViewSwitch({
-  value,
-  onValueChange,
-}: {
-  value: string;
-  onValueChange: (value: string) => void;
-}) {
-  const t = useTranslations({ note: 'graphql playground' });
-
-  return (
-    <Segmented value={value} onValueChange={onValueChange} className="shrink-0 px-3 pb-3 md:hidden">
-      <SegmentedList
-        className="*:flex-1 *:justify-center"
-        items={[
-          { value: 'request', label: t('Request') },
-          { value: 'response', label: t('Response') },
-        ]}
-      />
-    </Segmented>
-  );
-});
-
 /** the endpoint and how the operation is sent, locked while subscribed */
 function EndpointBar({ playground }: { playground: Playground }) {
   const t = useTranslations({ note: 'graphql playground' });
   const { kind } = useOperation();
   const { allowUrlEdit = true, fetcher } = useRenderContext().playground ?? {};
   const { url, status, isSending } = playground;
-  const isMac = typeof navigator !== 'undefined' && /Mac|iPhone|iPad/.test(navigator.userAgent);
   const isSubscription = kind === 'subscription';
   const active = status !== 'closed';
-  const shortcut = (
-    <kbd className="hidden font-sans text-xs opacity-60 sm:inline">{isMac ? '⌘' : 'Ctrl'} ↵</kbd>
-  );
-
-  let button;
-  if (!isSubscription) {
-    button = (
-      <button
-        type="submit"
-        disabled={isSending || (!url && !fetcher)}
-        className={cn(
-          buttonVariants({ variant: 'primary' }),
-          'h-10 shrink-0 gap-2 rounded-xl px-4 transition-[background-color,scale] active:scale-[0.97] disabled:opacity-80 motion-reduce:transition-none',
-        )}
-      >
-        {isSending ? <Spinner className="size-3.5" /> : <SendHorizontal className="size-3.5" />}
-        {t('Send')}
-        {shortcut}
-      </button>
-    );
-  } else {
-    button = (
-      <button
-        type="submit"
-        disabled={!active && !url}
-        className={cn(
-          buttonVariants({ variant: active ? 'secondary' : 'primary' }),
-          'h-10 shrink-0 rounded-xl border px-4 transition-[background-color,scale] active:scale-[0.97] disabled:opacity-80 motion-reduce:transition-none',
-          !active && 'border-transparent',
-        )}
-      >
-        {/* both states take space, so the button keeps its width */}
-        <span className="grid *:flex *:items-center *:justify-center *:gap-2 *:[grid-area:1/1]">
-          <span className={cn(active && 'invisible')}>
-            <Radio className="size-3.5" />
-            {t('Subscribe')}
-            {shortcut}
-          </span>
-          <span className={cn(!active && 'invisible')}>
-            {status === 'connecting' ? (
-              <Spinner className="size-3.5" />
-            ) : (
-              <Square className="size-3 fill-current" />
-            )}
-            {t('Stop')}
-            {shortcut}
-          </span>
-        </span>
-      </button>
-    );
-  }
 
   return (
     <div className="flex shrink-0 items-center gap-2 px-3 pb-3 sm:px-4">
@@ -281,7 +188,37 @@ function EndpointBar({ playground }: { playground: Playground }) {
           <span className="min-w-0 flex-1 truncate px-1.5 font-mono">{url}</span>
         )}
       </div>
-      {button}
+      {isSubscription ? (
+        <button
+          type="submit"
+          disabled={!active && !url}
+          className={cn(
+            buttonVariants({ variant: active ? 'secondary' : 'primary' }),
+            'h-10 shrink-0 rounded-xl border px-4 transition-[background-color,scale] active:scale-[0.97] disabled:opacity-80 motion-reduce:transition-none',
+            !active && 'border-transparent',
+          )}
+        >
+          {/* both states take space, so the button keeps its width */}
+          <span className="grid *:flex *:items-center *:justify-center *:gap-2 *:[grid-area:1/1]">
+            <span className={cn(active && 'invisible')}>
+              <Radio className="size-3.5" />
+              {t('Subscribe')}
+              <SendShortcut />
+            </span>
+            <span className={cn(!active && 'invisible')}>
+              {status === 'connecting' ? (
+                <Spinner className="size-3.5" />
+              ) : (
+                <Square className="size-3 fill-current" />
+              )}
+              {t('Stop')}
+              <SendShortcut />
+            </span>
+          </span>
+        </button>
+      ) : (
+        <SendButton sending={isSending} disabled={!url && !fetcher} />
+      )}
     </div>
   );
 }

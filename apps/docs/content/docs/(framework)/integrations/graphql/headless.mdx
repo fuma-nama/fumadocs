@@ -175,7 +175,7 @@ function Content() {
 | `subscribeGraphQL(request, handlers)`         | starts a subscription, returns a function to stop it                  |
 | `getSubscriptionUrl(url)`                     | the default subscription endpoint: `url` with a `ws(s)://` scheme     |
 | `inputTypeToJsonSchema(type)`                 | the JSON Schema of an input type, for forms of variables              |
-| `syncOperationVariables(query, field, isSet)` | declares the variables of arguments set in a form                     |
+| `syncOperationVariables(query, field, isSet)` | declares the variables of required and set optional arguments         |
 | `readStored()`, `writeStored(state)`          | the endpoint and headers in local storage, headers by endpoint origin |
 
 `subscribeGraphQL()` picks the protocol by the URL scheme, like [`subscriptionUrl`](/docs/integrations/graphql/api-page#subscriptions).

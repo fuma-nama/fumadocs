@@ -17,7 +17,7 @@ var query = ${csharpRawString(query)};
       out += `var variables = JsonNode.Parse(${csharpRawString(JSON.stringify(variables, null, 2))});\n\n`;
     }
     // `JsonNode` serializes without reflection, which file-based apps disable
-    out += `var body = new JsonObject { ${variables ? '["query"] = query, ["variables"] = variables' : '["query"] = query'} };
+    out += `var body = new JsonObject { ["query"] = query${variables ? ', ["variables"] = variables' : ''} };
 
 var client = new HttpClient();
 `;

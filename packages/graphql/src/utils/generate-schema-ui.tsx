@@ -1,20 +1,15 @@
 import type { ReactNode } from 'react';
 import {
   type DirectiveNode,
-  type FieldDefinitionNode,
   getNamedType,
   type GraphQLArgument,
-  type GraphQLDefaultInput,
   type GraphQLEnumType,
   type GraphQLInputType,
   type GraphQLNamedType,
   type GraphQLSchema,
-  type GraphQLType,
-  type InputValueDefinitionNode,
   isEnumType,
   isInputObjectType,
   isInterfaceType,
-  isListType,
   isNonNullType,
   isObjectType,
   isRequiredInputField,
@@ -38,24 +33,6 @@ export interface GenerateGraphQLSchemaUIOptions {
   renderEnumValues: (type: GraphQLEnumType) => ReactNode;
 }
 
-interface DocInfo {
-  description?: string | null;
-  deprecationReason?: string | null;
-  args?: readonly GraphQLArgument[];
-  defaultText?: string;
-  directives?: readonly DirectiveNode[];
-}
-
-interface FieldLike {
-  name: string;
-  description?: string | null;
-  deprecationReason?: string | null;
-  type: GraphQLType;
-  args?: readonly GraphQLArgument[];
-  default?: GraphQLDefaultInput;
-  astNode?: (FieldDefinitionNode | InputValueDefinitionNode) | null;
-}
-
 /**
  * Generate the data of the Schema UI for a type, field or argument of the schema.
  */
@@ -71,73 +48,56 @@ export function generateGraphQLSchemaUI(
   }: GenerateGraphQLSchemaUIOptions,
 ): SchemaUIGeneratedData {
   const t = fromTranslations(translations, { note: 'graphql schema ui' });
-  const refs: Record<string, SchemaData> = {};
+  // a UI only reads the schemas it shows
+  const refs = new Proxy<Record<string, SchemaData>>(
+    {},
+    {
+      get(generated, key) {
+        if (typeof key === 'string' && !Object.hasOwn(generated, key)) {
+          const data = generate(key);
+          if (data) generated[key] = data;
+        }
+        return Reflect.get(generated, key);
+      },
+    },
+  );
 
-  function ensureType(type: GraphQLType): string {
-    const key = String(type);
-    if (key in refs) return key;
+  /** keys are `$root`, the names of union members, and `Parent.field` */
+  function generate(key: string): SchemaData | undefined {
+    // an empty description leaves the type to the page, like type pages
+    if (key === '$root') return buildData(root, root.description !== '');
 
-    const data = {} as SchemaData;
-    // register before recursion to guard against cyclic references
-    refs[key] = data;
-    Object.assign(data, buildData(type, {}));
-    return key;
-  }
-
-  function ensureField(parent: GraphQLNamedType, field: FieldLike): string {
-    const key = `${parent.name}.${field.name}`;
-    if (key in refs) return key;
-
-    const data = {} as SchemaData;
-    refs[key] = data;
-    Object.assign(
-      data,
-      buildData(field.type, {
-        description: field.description,
-        deprecationReason: field.deprecationReason,
-        args: field.args,
-        defaultText: printDefaultValue(field.default, field.type as GraphQLInputType),
-        directives: getCustomDirectives(field.astNode),
-      }),
-    );
-    return key;
+    const [name, fieldName] = key.split('.');
+    const type = schema.getType(name);
+    if (fieldName === undefined) return type ? buildData({ type }) : undefined;
+    if (isObjectType(type) || isInterfaceType(type) || isInputObjectType(type)) {
+      const field = type.getFields()[fieldName];
+      if (field) return buildData(field);
+    }
   }
 
   /** `namedTags` is false when the page documents the named type */
-  function buildData(type: GraphQLType, doc: DocInfo, namedTags = true): SchemaData {
-    if (isNonNullType(type) || isListType(type)) {
-      // collapse wrappers into the named type, GraphQL-style annotations (e.g. `[User!]!`) are
-      // kept in `aliasName` to communicate list/non-null.
-      return {
-        ...buildData(type.ofType, doc, namedTags),
-        aliasName: String(type),
-      };
-    }
-
-    const named = getNamedType(type);
+  function buildData(field: SchemaViewRoot, namedTags = true): SchemaData {
+    const named = getNamedType(field.type);
     // built-in scalars are described by the spec rather than the schema
     const description =
-      doc.description ?? (isSpecifiedScalarType(named) ? undefined : named.description);
+      field.description ?? (isSpecifiedScalarType(named) ? undefined : named.description);
     const base = {
       typeName: named.name,
-      aliasName: String(type),
-      deprecated: doc.deprecationReason != null,
+      // wrappers collapse into the named type, the annotation (e.g. `[User!]!`) shows them
+      aliasName: String(field.type),
+      deprecated: field.deprecationReason != null,
       description: description ? renderMarkdown(description) : undefined,
-      infoTags: namedTags ? [...buildDocTags(doc), ...buildNamedTags(named)] : buildDocTags(doc),
+      infoTags: namedTags
+        ? [...buildFieldTags(field), ...buildNamedTags(named)]
+        : buildFieldTags(field),
     };
-
-    if (isScalarType(named) || isEnumType(named)) {
-      return { ...base, type: 'primitive' };
-    }
 
     if (isUnionType(named)) {
       return {
         ...base,
         type: 'or',
-        items: named.getTypes().map((item) => ({
-          name: item.name,
-          $type: ensureType(item),
-        })),
+        items: named.getTypes().map((item) => ({ name: item.name, $type: item.name })),
       };
     }
 
@@ -145,10 +105,10 @@ export function generateGraphQLSchemaUI(
       return {
         ...base,
         type: 'object',
-        props: Object.values(named.getFields()).map((field) => ({
-          name: field.name,
-          $type: ensureField(named, field),
-          required: !named.isOneOf && isRequiredInputField(field),
+        props: Object.values(named.getFields()).map((item) => ({
+          name: item.name,
+          $type: `${named.name}.${item.name}`,
+          required: !named.isOneOf && isRequiredInputField(item),
         })),
       };
     }
@@ -157,10 +117,10 @@ export function generateGraphQLSchemaUI(
       return {
         ...base,
         type: 'object',
-        props: Object.values(named.getFields()).map((field) => ({
-          name: field.name,
-          $type: ensureField(named, field),
-          required: isNonNullType(field.type),
+        props: Object.values(named.getFields()).map((item) => ({
+          name: item.name,
+          $type: `${named.name}.${item.name}`,
+          required: isNonNullType(item.type),
         })),
       };
     }
@@ -168,27 +128,29 @@ export function generateGraphQLSchemaUI(
     return { ...base, type: 'primitive' };
   }
 
-  function buildDocTags(doc: DocInfo): InfoTag[] {
+  function buildFieldTags(field: SchemaViewRoot): InfoTag[] {
     const tags: InfoTag[] = [];
+    const defaultText = printDefaultValue(field.default, field.type as GraphQLInputType);
+    const directives = getCustomDirectives(field.astNode);
 
-    if (doc.deprecationReason) {
+    if (field.deprecationReason) {
       tags.push({
         label: t('Deprecated'),
-        value: renderMarkdown(doc.deprecationReason),
+        value: renderMarkdown(field.deprecationReason),
         prose: true,
       });
     }
 
-    if (doc.defaultText !== undefined) {
-      tags.push({ label: t('Default'), value: doc.defaultText });
+    if (defaultText !== undefined) {
+      tags.push({ label: t('Default'), value: defaultText });
     }
 
-    if (doc.directives && doc.directives.length > 0) {
-      tags.push({ node: renderDirectives(doc.directives) });
+    if (directives.length > 0) {
+      tags.push({ node: renderDirectives(directives) });
     }
 
-    if (doc.args && doc.args.length > 0) {
-      tags.push({ node: renderArguments(doc.args) });
+    if (field.args && field.args.length > 0) {
+      tags.push({ node: renderArguments(field.args) });
     }
 
     return tags;
@@ -228,19 +190,6 @@ export function generateGraphQLSchemaUI(
 
     return tags;
   }
-
-  refs.$root = buildData(
-    root.type,
-    {
-      description: root.description,
-      deprecationReason: root.deprecationReason,
-      args: root.args,
-      defaultText: printDefaultValue(root.default, root.type as GraphQLInputType),
-      directives: getCustomDirectives(root.astNode),
-    },
-    // an empty description leaves the type to the page, like type pages
-    root.description !== '',
-  );
 
   return { $root: '$root', refs };
 }

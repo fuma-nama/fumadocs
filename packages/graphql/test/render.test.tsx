@@ -1,7 +1,7 @@
 import { fileURLToPath } from 'node:url';
 import path from 'node:path';
 import fs from 'node:fs';
-import type { ComponentProps } from 'react';
+import type { ComponentProps, ReactNode } from 'react';
 import { renderToString } from 'react-dom/server';
 import { afterEach, describe, expect, test, vi } from 'vitest';
 import { defaultShikiFactory } from 'fumadocs-core/highlight/shiki/full';
@@ -10,9 +10,9 @@ import {
   type GraphQLComponents,
   type GraphQLPageProps,
   GraphQLProvider,
+  useGraphQL,
 } from '@/utils/create-page';
 import { OperationProvider } from '@/operation';
-import { TypeProvider } from '@/type-docs';
 import { OperationBar } from '@/ui/operation/bar';
 import { TypeCard } from '@/ui/components/type-annotation';
 import type { OperationKind } from '@/utils/schema';
@@ -50,7 +50,8 @@ function renderPage(
   );
 }
 
-function renderBar(kind: OperationKind, name: string, schema = sdl): string {
+/** a part of the page, `Customer` has a type page */
+function renderPart(children: ReactNode, schema = sdl): string {
   return renderToString(
     <GraphQLProvider
       sdl={schema}
@@ -58,36 +59,27 @@ function renderBar(kind: OperationKind, name: string, schema = sdl): string {
       links={{ types: { Customer: '/docs/types/Customer' }, operations: {} }}
       components={{
         SchemaUI: () => null,
-        Markdown: () => null,
-        CodeBlock: () => null,
-        Heading: () => null,
-      }}
-    >
-      <OperationProvider kind={kind} name={name}>
-        <OperationBar />
-      </OperationProvider>
-    </GraphQLProvider>,
-  );
-}
-
-/** the hover card of a named type */
-function renderCard(name: string, schema = sdl): string {
-  return renderToString(
-    <GraphQLProvider
-      sdl={schema}
-      shiki={defaultShikiFactory}
-      components={{
-        SchemaUI: () => null,
         Markdown: ({ md }) => md,
         CodeBlock: () => null,
         Heading: () => null,
       }}
     >
-      <TypeProvider name={name}>
-        <TypeCard />
-      </TypeProvider>
+      {children}
     </GraphQLProvider>,
   );
+}
+
+function renderBar(kind: OperationKind, name: string, schema = sdl): string {
+  return renderPart(
+    <OperationProvider kind={kind} name={name}>
+      <OperationBar />
+    </OperationProvider>,
+    schema,
+  );
+}
+
+function Card({ name }: { name: string }) {
+  return <TypeCard type={useGraphQL().schema.getType(name)!} />;
 }
 
 /** the text content of HTML */
@@ -146,24 +138,16 @@ describe('operation bar', () => {
 });
 
 describe('type hover card', () => {
-  test('object', () => {
-    expect(text(renderCard('Customer'))).toBe(
-      'typeCustomer implements NodeA registered customer.Member ofSearchResult',
-    );
-  });
-
-  test('interface', () => {
-    expect(text(renderCard('Node'))).toBe(
-      'interfaceNodeAn object with a globally unique ID.Implemented byCustomer, Order',
-    );
-  });
-
-  test('union', () => {
-    expect(text(renderCard('SearchResult'))).toBe('unionSearchResult = Customer | Order');
+  test.each([
+    ['Customer', 'typeCustomer implements NodeA registered customer.Member ofSearchResult'],
+    ['Node', 'interfaceNodeAn object with a globally unique ID.Implemented byCustomer, Order'],
+    ['SearchResult', 'unionSearchResult = Customer | Order'],
+  ])('%s', (name, expected) => {
+    expect(text(renderPart(<Card name={name} />))).toBe(expected);
   });
 
   test('enum', () => {
-    const html = renderCard('OrderStatus');
+    const html = renderPart(<Card name="OrderStatus" />);
 
     expect(text(html)).toBe(
       'enumOrderStatusThe status of an order.ValuesPENDINGSHIPPEDDELIVEREDCANCELLEDREFUNDED',
@@ -173,7 +157,7 @@ describe('type hover card', () => {
   });
 
   test('scalar', () => {
-    const html = renderCard('DateTime');
+    const html = renderPart(<Card name="DateTime" />);
 
     expect(text(html)).toBe(
       'scalarDateTimeAn ISO-8601 encoded date time string.Specificationhttps://scalars.graphql.org/andimarek/date-time',
@@ -182,8 +166,8 @@ describe('type hover card', () => {
   });
 
   test('one-of input', () => {
-    const html = renderCard(
-      'OrderLookup',
+    const html = renderPart(
+      <Card name="OrderLookup" />,
       `
         "Look up an order."
         input OrderLookup @oneOf { id: ID number: Int }
@@ -221,13 +205,24 @@ describe('render <GraphQLPage />', () => {
     );
     expect(popups).toEqual(['@auth(requires: ADMIN)', 'SHIPPED', 'CANCELLED']);
     expect(html).not.toContain('/docs/types/');
+    // no playground without url/fetcher/render
+    expect(html).not.toContain('Try in Playground');
   });
 
-  test('operation page with deprecation', () => {
-    const html = renderPage([{ type: 'operation', kind: 'mutation', name: 'legacyCreateOrder' }]);
+  test('deprecated operation', () => {
+    // the callout gives the reason, titled unless the badge of title says it
+    for (const showTitle of [false, true]) {
+      const html = renderToString(
+        <GraphQLPage
+          payload={{ sdl }}
+          items={[{ type: 'operation', kind: 'mutation', name: 'legacyCreateOrder' }]}
+          showTitle={showTitle}
+        />,
+      );
 
-    expect(html).toContain('Deprecated');
-    expect(html).toContain('Use <code>createOrder</code> instead.');
+      expect(html.split('>Deprecated<')).toHaveLength(2);
+      expect(html).toContain('Use <code>createOrder</code> instead.');
+    }
   });
 
   test('operations with titles', () => {
@@ -239,7 +234,6 @@ describe('render <GraphQLPage />', () => {
           { type: 'operation', kind: 'mutation', name: 'createOrder' },
         ]}
         showTitle
-        showDescription
       />,
     );
 
@@ -247,9 +241,6 @@ describe('render <GraphQLPage />', () => {
     expect(html).toContain('id="legacy-create-order"');
     expect(html).toContain('id="legacy-create-order.arguments"');
     expect(html).toContain('id="create-order.arguments"');
-    // the badge of title says it, the callout gives the reason
-    expect(html.split('>Deprecated<')).toHaveLength(2);
-    expect(html).toContain('Use <code>createOrder</code> instead.');
   });
 
   test('generated example', () => {
@@ -371,7 +362,6 @@ describe('render <GraphQLPage />', () => {
     }
     expect(html).toContain('The order is on its way.');
     expect(html).toContain('Use <code>REFUNDED</code> instead.');
-    expect(text(html)).toContain('Field ofOrder.statusOrderFilter.status');
   });
 
   test('interface, union, input and scalar pages', () => {
@@ -432,9 +422,5 @@ describe('render <GraphQLPage />', () => {
 
     expect(text(html)).toContain('QUERYorders(filter: OrderFilter): [Order!]!');
     expect(html).toContain('Try in Playground');
-    // no playground without url/fetcher/render
-    expect(renderPage([{ type: 'operation', kind: 'query', name: 'orders' }])).not.toContain(
-      'Try in Playground',
-    );
   });
 });

@@ -30,3 +30,4 @@ packages:
 - Added `createCodeUsageGeneratorRegistry()` and `registerDefaultCodeUsages()` to `@fumadocs/graphql/ui`.
 - Added `subscribeGraphQL()`, `getSubscriptionUrl()` and the `SubscriptionError` type to `@fumadocs/graphql/playground`.
 - Added `relations.unions` to `useNamedType()`.
+- `syncOperationVariables()` always declares the variables of required arguments.

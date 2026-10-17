@@ -12,7 +12,7 @@ export const javascript: CodeUsageGenerator = {
     return `${out}const response = await fetch(${JSON.stringify(url)}, {
   method: "POST",
   headers: ${init.replaceAll('\n', '\n  ')},
-  body: JSON.stringify({ ${variables ? 'query, variables' : 'query'} }),
+  body: JSON.stringify({ query${variables ? ', variables' : ''} }),
 });
 
 console.log(await response.json());`;

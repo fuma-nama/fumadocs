@@ -1,8 +1,8 @@
 import {
-  type ArgumentNode,
   type DocumentNode,
   type FieldNode,
   type GraphQLField,
+  isRequiredArgument,
   Kind,
   type OperationDefinitionNode,
   parse,
@@ -11,22 +11,15 @@ import {
 import { argumentFor, variableDefinitionFor } from '@/utils/example';
 
 /**
- * @returns if the argument is the `name: $name` pair we generate, rather than a value written by hand.
- */
-function isGeneratedArgument(node: ArgumentNode, name: string): boolean {
-  return node.value.kind === Kind.VARIABLE && node.value.name.value === name;
-}
-
-/**
  * Declare the variables of an operation for the arguments that are currently set.
  *
  * A playground shows an input for every argument, but a query only declares the ones it uses.
  * Setting an argument the document doesn't declare would send a variable nothing references,
- * which servers ignore — the request silently runs without it.
+ * which servers ignore, the request silently runs without it.
  *
  * @param query the query document, returned unchanged when it cannot be parsed (e.g. mid-edit).
  * @param field the operation being edited.
- * @param isSet whether the argument is set in the form.
+ * @param isSet whether an optional argument is set in the form, required arguments are always declared.
  * @param prune also undeclare arguments that are no longer set. This rewrites the document on the
  * user's behalf, only do so in response to them unsetting an argument.
  */
@@ -60,10 +53,11 @@ export function syncOperationVariables(
       const argIndex = args.findIndex((item) => item.name.value === arg.name);
       const variableIndex = variables.findIndex((item) => item.variable.name.value === arg.name);
       const argNode = argIndex === -1 ? undefined : args[argIndex];
-      // values written by hand are never ours to touch
-      const isOurs = !argNode || isGeneratedArgument(argNode, arg.name);
+      // only the `name: $name` pairs we generate, values written by hand are never ours to touch
+      const isOurs =
+        !argNode || (argNode.value.kind === Kind.VARIABLE && argNode.value.name.value === arg.name);
 
-      if (isSet(arg.name)) {
+      if (isRequiredArgument(arg) || isSet(arg.name)) {
         if (!isOurs) continue;
 
         if (!argNode) {

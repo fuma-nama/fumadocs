@@ -11,8 +11,8 @@ import {
 import { printDefaultValue } from '@/utils/sdl';
 import { cn } from '@/utils/cn';
 import { Markdown } from './components/markdown';
-import { chipClassName, ChipPopover, detailsMarkdownClassName } from './components/chip';
-import { Directives } from './components/directive';
+import { chipClassName, DetailsPopover, detailsMarkdownClassName } from './components/chip';
+import { DeprecatedLabel, Directives } from './components/directive';
 import { TypeAnnotation } from './components/type-annotation';
 
 const renderers: Omit<GenerateGraphQLSchemaUIOptions, 'translations'> = {
@@ -62,9 +62,7 @@ function ArgumentList({ args }: { args: readonly GraphQLArgument[] }) {
                 </span>
                 <TypeAnnotation type={arg.type} />
                 {value !== undefined && <span>= {value}</span>}
-                {deprecationReason != null && (
-                  <span className="text-yellow-600 dark:text-yellow-400">{t('Deprecated')}</span>
-                )}
+                {deprecationReason != null && <DeprecatedLabel />}
               </p>
               {arg.description && (
                 <div className="mt-0.5 prose-no-margin">
@@ -101,8 +99,9 @@ function EnumValues({ type }: { type: GraphQLEnumType }) {
 
         const className = deprecationReason != null ? 'line-through' : undefined;
         return (
-          <ChipPopover
+          <DetailsPopover
             key={name}
+            chip
             className={className}
             details={
               <>
@@ -114,9 +113,7 @@ function EnumValues({ type }: { type: GraphQLEnumType }) {
                 )}
                 {deprecationReason != null && (
                   <div className="mt-1.5 flex items-baseline gap-1.5 text-xs">
-                    <span className="shrink-0 font-mono text-yellow-600 dark:text-yellow-400">
-                      {t('Deprecated')}
-                    </span>
+                    <DeprecatedLabel />
                     <div className={cn('min-w-0', detailsMarkdownClassName)}>
                       <Markdown md={deprecationReason} />
                     </div>
@@ -126,7 +123,7 @@ function EnumValues({ type }: { type: GraphQLEnumType }) {
             }
           >
             {name}
-          </ChipPopover>
+          </DetailsPopover>
         );
       })}
     </div>

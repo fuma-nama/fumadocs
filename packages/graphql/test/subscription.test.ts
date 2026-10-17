@@ -146,21 +146,17 @@ describe('graphql-ws', () => {
     expect(log).toEqual([['open']]);
   });
 
-  test('unexpected close', async () => {
+  test('closing is an error, also before the ack', async () => {
     const { ended, socket } = accepted();
     socket.onclose!({ code: 4403, reason: 'Forbidden' });
-
     expect(await ended).toEqual([
       ['open'],
       ['error', { type: 'close', code: 4403, reason: 'Forbidden' }],
     ]);
-  });
 
-  test('failing to connect', async () => {
-    const { ended } = subscribe(url);
+    const failed = subscribe(url);
     FakeWebSocket.last.onclose!({ code: 1006, reason: '' });
-
-    expect(await ended).toEqual([['error', { type: 'close', code: 1006, reason: '' }]]);
+    expect(await failed.ended).toEqual([['error', { type: 'close', code: 1006, reason: '' }]]);
   });
 
   test('ack timeout', () => {
@@ -174,13 +170,11 @@ describe('graphql-ws', () => {
     vi.advanceTimersByTime(1);
     expect(log).toEqual([['error', { type: 'timeout' }]]);
     expect(socket.closed).toBe(1000);
-  });
 
-  test('ack clears the timeout', () => {
-    vi.useFakeTimers();
-    const { log } = accepted();
+    // the ack clears it
+    const acked = accepted();
     vi.advanceTimersByTime(60_000);
-    expect(log).toEqual([['open']]);
+    expect(acked.log).toEqual([['open']]);
   });
 
   test('stop', () => {
@@ -196,19 +190,16 @@ describe('graphql-ws', () => {
     stop();
     expect(log).toEqual([['open'], ['next', { data: {} }]]);
     expect(socket.sent).toEqual([init, subscribeMessage, { id: '1', type: 'complete' }]);
-  });
 
-  test('stop before the ack', () => {
+    // before the ack, nothing is subscribed to complete
     vi.useFakeTimers();
-    const { log, stop } = subscribe(url);
-    const socket = FakeWebSocket.last;
-    socket.open();
-    stop();
+    const early = subscribe(url);
+    FakeWebSocket.last.open();
+    early.stop();
     vi.advanceTimersByTime(60_000);
-
-    expect(socket.sent).toEqual([init]);
-    expect(socket.closed).toBe(1000);
-    expect(log).toEqual([]);
+    expect(FakeWebSocket.last.sent).toEqual([init]);
+    expect(FakeWebSocket.last.closed).toBe(1000);
+    expect(early.log).toEqual([]);
   });
 
   test('invalid URL', async () => {
@@ -254,34 +245,6 @@ describe('GraphQL over SSE', () => {
     return fetch;
   }
 
-  const text = [
-    ': connected',
-    '',
-    'event: next',
-    'data: {"data":',
-    'data: {"orderUpdated":{"status":"PENDING","note":"café"}}}',
-    '',
-    ': keep-alive',
-    'id: 1',
-    'retry: 1000',
-    '',
-    'event:next',
-    'data:{"data":null}',
-    '',
-    'event: complete',
-    'data:',
-    '',
-    'event: next',
-    'data: {"data":"after complete"}',
-    '',
-  ];
-  const expected = [
-    ['open'],
-    ['next', { data: { orderUpdated: { status: 'PENDING', note: 'café' } } }],
-    ['next', { data: null }],
-    ['complete'],
-  ];
-
   test('request', async () => {
     const fetch = mockFetch(eventStream(['event: complete\ndata:\n\n']).response);
     const { ended } = subscribe('/api/graphql');
@@ -300,35 +263,38 @@ describe('GraphQL over SSE', () => {
     expect(init.signal).toBeInstanceOf(AbortSignal);
   });
 
-  test('events, multi-line data and comments', async () => {
-    mockFetch(eventStream([text.join('\n')]).response);
-    expect(await subscribe('/api/graphql').ended).toEqual(expected);
-  });
-
-  test('chunk boundaries split lines, line breaks and characters', async () => {
+  test('events with multi-line data and comments, split at every byte', async () => {
+    const text = [
+      ': connected',
+      '',
+      'event: next',
+      'data: {"data":',
+      'data: {"orderUpdated":{"status":"PENDING","note":"café"}}}',
+      '',
+      ': keep-alive',
+      'id: 1',
+      'retry: 1000',
+      '',
+      'event:next',
+      'data:{"data":null}',
+      '',
+      'event: complete',
+      'data:',
+      '',
+      'event: next',
+      'data: {"data":"after complete"}',
+      '',
+    ];
     // CRLF line breaks, one byte per chunk
     const bytes = encoder.encode(text.join('\r\n'));
     const chunks: Uint8Array[] = [];
     for (let i = 0; i < bytes.length; i++) chunks.push(bytes.subarray(i, i + 1));
     mockFetch(eventStream(chunks).response);
 
-    expect(await subscribe('/api/graphql').ended).toEqual(expected);
-  });
-
-  test('chunk boundaries split events', async () => {
-    mockFetch(
-      eventStream([
-        'event: ne',
-        'xt\ndata: {"data":1}\n',
-        '\nevent: next\nda',
-        'ta: {"data":2}\n\n',
-      ]).response,
-    );
-
     expect(await subscribe('/api/graphql').ended).toEqual([
       ['open'],
-      ['next', { data: 1 }],
-      ['next', { data: 2 }],
+      ['next', { data: { orderUpdated: { status: 'PENDING', note: 'café' } } }],
+      ['next', { data: null }],
       ['complete'],
     ]);
   });
@@ -377,17 +343,17 @@ describe('GraphQL over SSE', () => {
     expect(await subscribe('/api/graphql').ended).toEqual(error('500 Server Error'));
   });
 
-  test('network error', async () => {
+  test('network errors and invalid data', async () => {
     mockFetch(Promise.reject(new TypeError('Failed to fetch')));
     expect(await subscribe('/api/graphql').ended).toEqual([
       ['error', { type: 'network', message: 'Failed to fetch' }],
     ]);
-  });
 
-  test('invalid data', async () => {
     mockFetch(eventStream(['event: next\ndata: {\n\n']).response);
-    const [open, [type]] = await subscribe('/api/graphql').ended;
-    expect([open, type]).toEqual([['open'], 'error']);
+    expect(await subscribe('/api/graphql').ended).toMatchObject([
+      ['open'],
+      ['error', { type: 'response' }],
+    ]);
   });
 
   test('stop', async () => {
@@ -407,35 +373,23 @@ describe('GraphQL over SSE', () => {
   });
 });
 
-describe('getSubscriptionUrl', () => {
-  beforeEach(() => {
-    vi.stubGlobal('window', {
-      location: { href: 'https://docs.example.com/docs/subscriptions/orderUpdated' },
-    });
+test('getSubscriptionUrl', () => {
+  vi.stubGlobal('window', {
+    location: { href: 'https://docs.example.com/docs/subscriptions/orderUpdated' },
   });
 
-  test('absolute URLs', () => {
-    expect(getSubscriptionUrl('https://api.example.com/graphql')).toBe(
-      'wss://api.example.com/graphql',
-    );
-    expect(getSubscriptionUrl('http://localhost:4000/graphql?x=1')).toBe(
-      'ws://localhost:4000/graphql?x=1',
-    );
-  });
-
-  test('relative URLs', () => {
-    expect(getSubscriptionUrl('/api/graphql')).toBe('wss://docs.example.com/api/graphql');
-    expect(getSubscriptionUrl('graphql')).toBe('wss://docs.example.com/docs/subscriptions/graphql');
-  });
-
-  test('WebSocket URLs', () => {
-    expect(getSubscriptionUrl('ws://localhost:4000/graphql')).toBe('ws://localhost:4000/graphql');
-    expect(getSubscriptionUrl('wss://api.example.com/graphql')).toBe(
-      'wss://api.example.com/graphql',
-    );
-  });
-
-  test('invalid URLs', () => {
-    expect(getSubscriptionUrl('http://[')).toBe('http://[');
-  });
+  expect(getSubscriptionUrl('https://api.example.com/graphql')).toBe(
+    'wss://api.example.com/graphql',
+  );
+  expect(getSubscriptionUrl('http://localhost:4000/graphql?x=1')).toBe(
+    'ws://localhost:4000/graphql?x=1',
+  );
+  // relative URLs resolve against the page
+  expect(getSubscriptionUrl('/api/graphql')).toBe('wss://docs.example.com/api/graphql');
+  expect(getSubscriptionUrl('graphql')).toBe('wss://docs.example.com/docs/subscriptions/graphql');
+  // WebSocket URLs are kept
+  expect(getSubscriptionUrl('ws://localhost:4000/graphql')).toBe('ws://localhost:4000/graphql');
+  expect(getSubscriptionUrl('wss://api.example.com/graphql')).toBe('wss://api.example.com/graphql');
+  // invalid URLs
+  expect(getSubscriptionUrl('http://[')).toBe('http://[');
 });

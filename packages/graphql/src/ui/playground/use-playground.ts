@@ -1,6 +1,6 @@
 'use client';
-import { useCallback, useEffect, useMemo, useRef, useState, useSyncExternalStore } from 'react';
-import { isRequiredArgument } from 'graphql';
+import { useCallback, useEffect, useRef, useState, useSyncExternalStore } from 'react';
+import { type GraphQLField, isRequiredArgument } from 'graphql';
 import { type DataEngine, type DataEngineListener, useStf } from '@fumari/stf';
 import { isPlainObject } from '@fumari/stf/lib/utils';
 import {
@@ -41,11 +41,8 @@ const addEntry = addLogEntry<LogEntry>;
 export function useFormSnapshot<T>(engine: DataEngine, getSnapshot: () => T): T {
   const subscribe = useCallback(
     (onChange: () => void) => {
-      const listener: DataEngineListener = {
-        onInit: onChange,
-        onUpdate: onChange,
-        onDelete: onChange,
-      };
+      // inits and deletes also update their parent
+      const listener: DataEngineListener = { onUpdate: onChange };
       engine.listen(listener);
       return () => engine.unlisten(listener);
     },
@@ -69,6 +66,16 @@ export function toRequestValues(json: string): Pick<PlaygroundRequest, 'variable
   };
 }
 
+/** the optional arguments with values, as a string to compare */
+function getSetArguments(field: GraphQLField<unknown, unknown>, variables: unknown): string {
+  let out = '';
+  if (!isPlainObject(variables)) return out;
+  for (const arg of field.args) {
+    if (!isRequiredArgument(arg) && variables[arg.name] !== undefined) out += `${arg.name},`;
+  }
+  return out;
+}
+
 /**
  * The state of the operation playground: the edited endpoint, document and form, the response of queries and mutations, and the log of subscriptions.
  */
@@ -79,7 +86,8 @@ export function usePlayground() {
   // the example in the editor and form, the selected one is loaded when the dialog opens
   const [loaded, setLoaded] = useState(selected);
   const example = examples.at(loaded);
-  const [url, setUrl] = useState(options.url ?? '');
+  // restored with its headers when the dialog opens for the first time
+  const [url, setUrl] = useState('');
   const [query, setQuery] = useState(example?.query ?? '');
   const stf = useStf({
     // the form mutates its values in place, examples are also rendered as static docs
@@ -93,33 +101,19 @@ export function usePlayground() {
   const [response, setResponse] = useState<PlaygroundResponse>();
   const [status, setStatus] = useState<ConnectionStatus>('closed');
   const [log, setLog] = useState<LogEntry[]>([]);
-  const sessionRef = useRef<{ stop?: () => void } | null>(null);
-  // `localStorage` is read when the dialog opens for the first time
+  // stops the running subscription
+  const stopRef = useRef<(() => void) | null>(null);
   const restoredRef = useRef(false);
 
-  const optional = useMemo(() => {
-    const out: string[] = [];
-    for (const arg of field.args) if (!isRequiredArgument(arg)) out.push(arg.name);
-    return out;
-  }, [field]);
-
-  /** optional arguments with values, required ones are always declared */
-  const getSetArguments = useCallback(() => {
-    const variables = engine.get(['variables']);
-    let out = '';
-    if (!isPlainObject(variables)) return out;
-    for (const name of optional) if (variables[name] !== undefined) out += `${name},`;
-    return out;
-  }, [engine, optional]);
-
   function isSet(name: string) {
-    if (!optional.includes(name)) return true;
     const variables = engine.get(['variables']);
     return isPlainObject(variables) && variables[name] !== undefined;
   }
 
   // setting or unsetting an optional argument, in the form or as JSON, (un)declares its variable
-  const setArguments = useFormSnapshot(engine, getSetArguments);
+  const setArguments = useFormSnapshot(engine, () =>
+    getSetArguments(field, engine.get(['variables'])),
+  );
   const [syncedArguments, setSyncedArguments] = useState(setArguments);
   if (syncedArguments !== setArguments) {
     setSyncedArguments(setArguments);
@@ -129,22 +123,32 @@ export function usePlayground() {
   const load = useCallback(
     (index: number) => {
       const item = examples.at(index);
-      engine.reset({
-        variables: structuredClone(item?.variables) ?? {},
-        headers: engine.get(['headers']),
-      });
+      const variables = structuredClone(item?.variables) ?? {};
+      engine.reset({ variables, headers: engine.get(['headers']) });
       setQuery(item?.query ?? '');
-      setSyncedArguments(getSetArguments());
+      // the example keeps its document
+      setSyncedArguments(getSetArguments(field, variables));
       setLoaded(index);
     },
-    [engine, examples, getSetArguments],
+    [engine, examples, field],
   );
   const reset = useCallback(() => load(selected), [load, selected]);
+
+  /** headers are stored by endpoint origin, a new origin swaps them out */
+  function changeUrl(value: string) {
+    const origin = getEndpointOrigin(value);
+    if (origin !== getEndpointOrigin(url)) {
+      const stored = origin ? readStored().headers?.[origin] : undefined;
+      engine.update(['headers'], { ...(stored ?? options.headers) });
+    }
+
+    setUrl(value);
+  }
 
   /** the request of the form, its document declares the variables set, its headers are stored for the endpoint */
   function prepare() {
     const document = syncOperationVariables(query, field, isSet);
-    if (document !== query) setQuery(document);
+    setQuery(document);
     const values = toRequestValues(JSON.stringify(engine.getData()));
     const stored = readStored();
     const origin = getEndpointOrigin(url);
@@ -159,12 +163,12 @@ export function usePlayground() {
 
   // stable, so it can end the subscription with the page
   const stop = useCallback(() => {
-    const session = sessionRef.current;
-    if (!session) return;
-    sessionRef.current = null;
+    const stopSubscription = stopRef.current;
+    if (!stopSubscription) return;
+    stopRef.current = null;
     setStatus('closed');
     setLog(addEntry({ type: 'stopped' }));
-    session.stop?.();
+    stopSubscription();
   }, []);
 
   useEffect(() => stop, [stop]);
@@ -188,30 +192,16 @@ export function usePlayground() {
     open() {
       if (!restoredRef.current) {
         restoredRef.current = true;
-        const stored = readStored();
-        let next = options.url || stored.url || '';
+        let next = options.url || readStored().url || '';
         if (kind === 'subscription')
           next = options.subscriptionUrl ?? (next && getSubscriptionUrl(next));
-        const origin = getEndpointOrigin(next);
-        const headers = origin ? stored.headers?.[origin] : undefined;
-
-        setUrl(next);
-        if (headers) engine.update(['headers'], headers);
+        changeUrl(next);
       }
 
       // the running subscription keeps its document
-      if (loaded !== selected && !sessionRef.current) load(selected);
+      if (loaded !== selected && !stopRef.current) load(selected);
     },
-    /** headers are stored by endpoint origin, a new origin swaps them out */
-    changeUrl(value: string) {
-      const origin = getEndpointOrigin(value);
-      if (origin !== getEndpointOrigin(url)) {
-        const stored = origin ? readStored().headers?.[origin] : undefined;
-        engine.update(['headers'], { ...(stored ?? options.headers) });
-      }
-
-      setUrl(value);
-    },
+    changeUrl,
     isSending,
     response,
     clearResponse() {
@@ -237,30 +227,22 @@ export function usePlayground() {
       setLog([]);
     },
     subscribe() {
-      if (sessionRef.current) return;
+      if (stopRef.current) return;
       const request = prepare();
-      const session: { stop?: () => void } = {};
-      const isActive = () => sessionRef.current === session;
+      // no handler runs after the subscription is stopped
       function end(entry: Omit<LogEntry, 'id' | 'time'>) {
-        if (!isActive()) return;
-        sessionRef.current = null;
+        stopRef.current = null;
         setStatus('closed');
         setLog(addEntry(entry));
       }
 
-      sessionRef.current = session;
       setStatus('connecting');
-      session.stop = subscribeGraphQL(request, {
+      stopRef.current = subscribeGraphQL(request, {
         onOpen() {
-          if (!isActive()) return;
           setStatus('open');
           setLog(addEntry({ type: 'subscribed', data: request.url }));
         },
-        onNext(result) {
-          if (!isActive()) return;
-          setStatus('open');
-          setLog(addEntry({ type: 'next', data: result }));
-        },
+        onNext: (result) => setLog(addEntry({ type: 'next', data: result })),
         onError: (error) => end({ type: 'error', data: error }),
         onComplete: () => end({ type: 'completed' }),
       });

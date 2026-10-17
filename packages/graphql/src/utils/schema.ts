@@ -1,8 +1,6 @@
-import { idToTitle } from 'shared-api/utils/id-to-title';
 import {
   type DirectiveNode,
   getNamedType,
-  type GraphQLField,
   type GraphQLNamedType,
   type GraphQLObjectType,
   type GraphQLSchema,
@@ -23,35 +21,6 @@ export type NamedTypeKind = 'object' | 'interface' | 'union' | 'enum' | 'input' 
 
 export const OperationKinds: OperationKind[] = ['query', 'mutation', 'subscription'];
 
-export function getRootType(
-  schema: GraphQLSchema,
-  kind: OperationKind,
-): GraphQLObjectType | undefined | null {
-  switch (kind) {
-    case 'query':
-      return schema.getQueryType();
-    case 'mutation':
-      return schema.getMutationType();
-    case 'subscription':
-      return schema.getSubscriptionType();
-  }
-}
-
-/**
- * Get the display title of an operation, e.g. `createOrder` -> `Create Order`.
- */
-export function getOperationTitle(name: string): string {
-  return idToTitle(name);
-}
-
-export function getOperationField(
-  schema: GraphQLSchema,
-  kind: OperationKind,
-  name: string,
-): GraphQLField<unknown, unknown> | undefined {
-  return getRootType(schema, kind)?.getFields()[name];
-}
-
 export function getNamedTypeKind(type: GraphQLNamedType): NamedTypeKind {
   if (isObjectType(type)) return 'object';
   if (isInterfaceType(type)) return 'interface';
@@ -68,18 +37,15 @@ export function getNamedTypeKind(type: GraphQLNamedType): NamedTypeKind {
  * - root operation types (documented as operations instead).
  */
 export function getDocumentedTypes(schema: GraphQLSchema): GraphQLNamedType[] {
-  const roots = new Set(
-    OperationKinds.flatMap((kind) => {
-      const root = getRootType(schema, kind);
-      return root ? [root] : [];
-    }),
+  const roots = new Set<GraphQLNamedType | null | undefined>(
+    OperationKinds.map((kind) => schema.getRootType(kind)),
   );
   const out: GraphQLNamedType[] = [];
 
   for (const type of Object.values(schema.getTypeMap())) {
     if (isIntrospectionType(type)) continue;
     if (isScalarType(type) && isSpecifiedScalarType(type)) continue;
-    if (isObjectType(type) && roots.has(type)) continue;
+    if (roots.has(type)) continue;
 
     out.push(type);
   }
@@ -184,7 +150,7 @@ function getIndex(schema: GraphQLSchema): SchemaIndex {
   // a field is listed once when several of its arguments use the type, they are visited in a row
   const rootNames = new Set<string>();
   for (const kind of OperationKinds) {
-    const root = getRootType(schema, kind);
+    const root = schema.getRootType(kind);
     if (!root) continue;
     rootNames.add(root.name);
 

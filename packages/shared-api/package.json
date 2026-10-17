@@ -20,6 +20,7 @@
     "./components/playground/log": "./dist/components/playground/log.js",
     "./components/playground/panels": "./dist/components/playground/panels.js",
     "./components/playground/param-input": "./dist/components/playground/param-input.js",
+    "./components/playground/result": "./dist/components/playground/result.js",
     "./components/playground/schema": "./dist/components/playground/schema.js",
     "./components/playground/server-select": "./dist/components/playground/server-select.js",
     "./components/schema": "./dist/components/schema/index.js",

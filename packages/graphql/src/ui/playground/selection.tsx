@@ -6,13 +6,10 @@ import {
   type DocumentNode,
   getNamedType,
   type GraphQLField,
-  type GraphQLNamedType,
-  type GraphQLSchema,
   isAbstractType,
   isCompositeType,
-  isInterfaceType,
-  isObjectType,
   isRequiredArgument,
+  isUnionType,
 } from 'graphql';
 import { buttonVariants } from 'fumadocs-ui/components/ui/button';
 import { CheckRow, FieldInfo, NavButton, Row } from 'shared-api/components/playground/fields';
@@ -29,6 +26,7 @@ import { useGraphQL } from '@/utils/create-page';
 import { Markdown } from '@/ui/components/markdown';
 import {
   findOperation,
+  getSelectionType,
   readSelection,
   type SelectionLevel,
   type SelectionStep,
@@ -41,14 +39,15 @@ export interface SelectionProps {
   /** the query can't be parsed */
   invalid: boolean;
   onToggle: (path: SelectionStep[], field: string, selected: boolean) => void;
+  /** open the level at `path`, `[]` goes back to the overview */
   onOpen: (path: SelectionStep[]) => void;
 }
 
 /** the fields selected from the root field, nested levels open in panels */
 export function SelectionSection(props: SelectionProps) {
   const t = useTranslations({ note: 'graphql playground' });
-  const { kind, name, field } = useOperation();
-  const level = props.document && readSelection(props.document, { kind, name }, []);
+  const operation = useOperation();
+  const level = props.document && readSelection(props.document, operation, []);
 
   return (
     <Section
@@ -56,7 +55,7 @@ export function SelectionSection(props: SelectionProps) {
       title={t('Fields')}
       actions={
         <code className="me-0.5 min-w-0 truncate text-xs text-fd-muted-foreground">
-          {String(field.type)}
+          {String(operation.field.type)}
         </code>
       }
     >
@@ -70,27 +69,24 @@ export function SelectionPanel({
   path,
   motion,
   locked,
-  onNavigate,
   ...props
 }: SelectionProps & {
   path: SelectionStep[];
   motion: Motion;
   locked: boolean;
-  onNavigate: (path: SelectionStep[]) => void;
 }) {
   const t = useTranslations({ note: 'graphql playground' });
   const { schema } = useGraphQL();
-  const { kind, name, field } = useOperation();
+  const operation = useOperation();
   const last = path[path.length - 1];
   const parent = path.slice(0, -1);
-  const level = props.document && readSelection(props.document, { kind, name }, path);
+  const level = props.document && readSelection(props.document, operation, path);
   let description: string | null | undefined;
   if ('on' in last) {
     description = schema.getType(last.on)?.description;
   } else {
-    const type = getLevelType(schema, getNamedType(field.type), parent);
-    if (isObjectType(type) || isInterfaceType(type))
-      description = type.getFields()[last.field]?.description;
+    const type = getSelectionType(schema, operation, parent);
+    if (type && !isUnionType(type)) description = type.getFields()[last.field]?.description;
   }
   const labels = path.map((step) => ('on' in step ? `on ${step.on}` : step.field));
 
@@ -101,8 +97,8 @@ export function SelectionPanel({
       nav={
         <PanelNav
           root={t('Fields')}
-          onRoot={() => onNavigate([])}
-          onBack={() => onNavigate(parent)}
+          onRoot={() => props.onOpen([])}
+          onBack={() => props.onOpen(parent)}
           end={
             'field' in last &&
             level && (
@@ -111,7 +107,7 @@ export function SelectionPanel({
                 disabled={locked}
                 onClick={() => {
                   props.onToggle(parent, last.field, false);
-                  onNavigate(parent);
+                  props.onOpen(parent);
                 }}
                 className={cn(
                   buttonVariants({ variant: 'ghost', size: 'sm' }),
@@ -128,7 +124,7 @@ export function SelectionPanel({
               {i < labels.length - 1 ? (
                 <button
                   type="button"
-                  onClick={() => onNavigate(path.slice(0, i + 1))}
+                  onClick={() => props.onOpen(path.slice(0, i + 1))}
                   className={cn(crumbClassName, 'font-mono')}
                 >
                   {label}
@@ -155,19 +151,6 @@ export function SelectionPanel({
   );
 }
 
-/** the composite type at `path` from the root field */
-function getLevelType(schema: GraphQLSchema, root: GraphQLNamedType, path: SelectionStep[]) {
-  let type: GraphQLNamedType | undefined = root;
-  for (const step of path) {
-    if ('on' in step) type = schema.getType(step.on);
-    else if (isObjectType(type) || isInterfaceType(type))
-      type = getNamedType(type.getFields()[step.field]?.type);
-    else return;
-  }
-
-  return isCompositeType(type) ? type : undefined;
-}
-
 function SelectionRows({
   document,
   invalid,
@@ -182,23 +165,22 @@ function SelectionRows({
 }) {
   const t = useTranslations({ note: 'graphql playground' });
   const { schema } = useGraphQL();
-  const { kind, name, field } = useOperation();
-  const operation = { kind, name };
+  const operation = useOperation();
   if (invalid) return <Note>{t('Fix the query to pick fields.')}</Note>;
   if (!document || !findOperation(document, operation))
     return (
       <Note>
         {t.jsx('Write an operation that selects {field} to pick its fields.', {
-          variables: { field: <code>{name}</code> },
+          variables: { field: <code>{operation.name}</code> },
         })}
       </Note>
     );
 
-  const type = getLevelType(schema, getNamedType(field.type), path);
+  const type = getSelectionType(schema, operation, path);
   if (!type) return null;
   const rows: ReactNode[] = [];
 
-  if (isObjectType(type) || isInterfaceType(type)) {
+  if (!isUnionType(type)) {
     for (const item of Object.values(type.getFields())) {
       const selected = level?.fields.has(item.name) ?? false;
       const next = [...path, { field: item.name }];

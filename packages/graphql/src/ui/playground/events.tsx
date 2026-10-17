@@ -2,7 +2,11 @@
 import { memo } from 'react';
 import { ArrowDownLeft, Radio, Trash2, TriangleAlert } from 'lucide-react';
 import { useTranslations } from '@fuma-translate/react';
-import { iconButtonClassName, PanelHeader } from 'shared-api/components/playground/panels';
+import {
+  iconButtonClassName,
+  PanelHeader,
+  Placeholder,
+} from 'shared-api/components/playground/panels';
 import { DataEntry, LogList, LogTime, StatusEntry } from 'shared-api/components/playground/log';
 import type { SubscriptionError } from '@/playground/subscription';
 import { ClientCodeBlock } from '@/ui/components/codeblock';
@@ -35,12 +39,7 @@ export function EventLog({ playground }: { playground: Playground }) {
           {(entry) => <Entry key={entry.id} entry={entry} />}
         </LogList>
       ) : (
-        <div className="flex flex-1 flex-col items-center justify-center gap-3 p-6 text-center">
-          <div className="rounded-xl border bg-fd-secondary p-2.5 text-fd-muted-foreground">
-            <Radio className="size-4" />
-          </div>
-          <p className="text-sm text-fd-muted-foreground">{t('Waiting for events.')}</p>
-        </div>
+        <Placeholder icon={Radio}>{t('Waiting for events.')}</Placeholder>
       )}
     </>
   );

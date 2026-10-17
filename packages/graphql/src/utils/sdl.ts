@@ -1,9 +1,7 @@
 import {
   type DocumentNode,
-  type GraphQLArgument,
   GraphQLDirective,
   type GraphQLDefaultInput,
-  type GraphQLField,
   type GraphQLInputType,
   type GraphQLNamedType,
   Kind,
@@ -42,29 +40,6 @@ export function printDefinition(
       },
     }),
   );
-}
-
-/**
- * The signature of a field, like `orders(status: OrderStatus, first: Int = 10): [Order!]!`.
- */
-export function printFieldSignature(field: GraphQLField<unknown, unknown>): string {
-  let out = field.name;
-  if (field.args.length > 0) out += `(${printArguments(field.args)})`;
-  return `${out}: ${String(field.type)}`;
-}
-
-/**
- * Arguments like `status: OrderStatus, first: Int = 10`.
- */
-export function printArguments(args: readonly GraphQLArgument[]): string {
-  let out = '';
-  for (const arg of args) {
-    if (out.length > 0) out += ', ';
-    out += `${arg.name}: ${String(arg.type)}`;
-    const value = printDefaultValue(arg.default, arg.type);
-    if (value !== undefined) out += ` = ${value}`;
-  }
-  return out;
 }
 
 /**

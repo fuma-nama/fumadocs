@@ -1,37 +1,36 @@
 'use client';
 import { Fragment, type ReactNode } from 'react';
-import { Popover } from '@base-ui/react/popover';
 import { useTranslations } from '@fuma-translate/react';
 import {
   getNamedType,
   type GraphQLNamedType,
   type GraphQLType,
+  type GraphQLUnionType,
   isEnumType,
   isInputObjectType,
+  isInterfaceType,
+  isObjectType,
   isScalarType,
   isSpecifiedScalarType,
+  isUnionType,
 } from 'graphql';
 import Link from 'fumadocs-core/link';
 import { Badge } from 'shared-api/components/badge';
-import { TypeProvider, useNamedType } from '@/type-docs';
 import { useGraphQL, useTypeLink } from '@/utils/create-page';
+import { getNamedTypeKind } from '@/utils/schema';
 import { cn } from '@/utils/cn';
 import { getKindColor } from './badge';
-import { chipClassName, detailsMarkdownClassName, popupClassName } from './chip';
+import { chipClassName, DetailsPopover, detailsMarkdownClassName } from './chip';
 import { Markdown } from './markdown';
 
 /** a link to a reference, like the page of an operation */
 export const linkClassName =
   'underline decoration-fd-muted-foreground/50 underline-offset-4 transition-colors hover:text-fd-accent-foreground hover:decoration-current';
 
-// dotted like the types Schema UI opens
-const triggerClassName =
-  'underline decoration-dotted underline-offset-4 transition-colors hover:text-fd-accent-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-fd-ring data-popup-open:text-fd-accent-foreground';
-
 /**
  * A named type: a link to `href` where the type is explained, otherwise its hover card. Built-in scalars are plain text.
  */
-export function TypeRef({ name, href }: { name: string; href?: string }) {
+function TypeRef({ name, href }: { name: string; href?: string }) {
   const type = useGraphQL().schema.getType(name);
   if (href)
     return (
@@ -41,22 +40,7 @@ export function TypeRef({ name, href }: { name: string; href?: string }) {
     );
   if (!type || isSpecifiedScalarType(type)) return name;
 
-  return (
-    <Popover.Root>
-      <Popover.Trigger openOnHover delay={200} closeDelay={100} className={triggerClassName}>
-        {name}
-      </Popover.Trigger>
-      <Popover.Portal>
-        <Popover.Positioner side="bottom" align="start" sideOffset={6} className="z-50">
-          <Popover.Popup className={popupClassName}>
-            <TypeProvider name={name}>
-              <TypeCard />
-            </TypeProvider>
-          </Popover.Popup>
-        </Popover.Positioner>
-      </Popover.Portal>
-    </Popover.Root>
-  );
+  return <DetailsPopover details={<TypeCard type={type} />}>{name}</DetailsPopover>;
 }
 
 /** a named type linked to its page, or its hover card when it has none */
@@ -67,21 +51,13 @@ export function TypeLink({ name }: { name: string }) {
 /**
  * A type annotation like `[User!]!`, its named type links to `href` when set, otherwise has a hover card.
  */
-export function TypeAnnotation({
-  type,
-  href,
-  className,
-}: {
-  type: GraphQLType;
-  href?: string;
-  className?: string;
-}) {
+export function TypeAnnotation({ type, href }: { type: GraphQLType; href?: string }) {
   const { name } = getNamedType(type);
   const annotation = String(type);
   const start = annotation.indexOf(name);
 
   return (
-    <code className={cn('font-mono text-fd-muted-foreground', className)}>
+    <code className="font-mono text-fd-muted-foreground">
       {annotation.slice(0, start)}
       <TypeRef name={name} href={href} />
       {annotation.slice(start + name.length)}
@@ -90,12 +66,18 @@ export function TypeAnnotation({
 }
 
 /**
- * The SDL head of the named type in context, like `type Customer implements Node`.
+ * The SDL head of a named type, like `type Customer implements Node`.
  *
  * `interactive` types link to their pages, or have hover cards without one.
  */
-export function TypeHead({ interactive = false }: { interactive?: boolean }) {
-  const { name, kind, type, relations } = useNamedType();
+export function TypeHead({
+  type,
+  interactive = false,
+}: {
+  type: GraphQLNamedType;
+  interactive?: boolean;
+}) {
+  const kind = getNamedTypeKind(type);
 
   return (
     <>
@@ -103,19 +85,18 @@ export function TypeHead({ interactive = false }: { interactive?: boolean }) {
         {kind === 'object' ? 'type' : kind}
       </Badge>
       <code className="min-w-0 wrap-break-word">
-        {name}
-        <TypeList
-          keyword="implements"
-          separator="&"
-          types={relations.implements}
-          interactive={interactive}
-        />
-        <TypeList
-          keyword="="
-          separator="|"
-          types={relations.possibleTypes}
-          interactive={interactive}
-        />
+        {type.name}
+        {(isObjectType(type) || isInterfaceType(type)) && (
+          <TypeList
+            keyword="implements"
+            separator="&"
+            types={type.getInterfaces()}
+            interactive={interactive}
+          />
+        )}
+        {isUnionType(type) && (
+          <TypeList keyword="=" separator="|" types={type.getTypes()} interactive={interactive} />
+        )}
         {isInputObjectType(type) && type.isOneOf && (
           <span className="text-fd-muted-foreground"> @oneOf</span>
         )}
@@ -150,16 +131,21 @@ function TypeList({
   );
 }
 
-/** the summary of the named type in context, its fields are left to Schema UI */
-export function TypeCard() {
+/** the summary of a named type, its fields are left to Schema UI */
+export function TypeCard({ type }: { type: GraphQLNamedType }) {
   const t = useTranslations({ note: 'type card' });
-  const { type, relations } = useNamedType();
+  const { schema } = useGraphQL();
   let detail: ReactNode = null;
 
-  if (relations.implementedBy.length > 0) {
-    detail = <Detail label={t('Implemented by')}>{names(relations.implementedBy)}</Detail>;
-  } else if (relations.unions.length > 0) {
-    detail = <Detail label={t('Member of')}>{names(relations.unions)}</Detail>;
+  if (isInterfaceType(type)) {
+    const { objects } = schema.getImplementations(type);
+    if (objects.length > 0) detail = <Detail label={t('Implemented by')}>{names(objects)}</Detail>;
+  } else if (isObjectType(type)) {
+    const unions: GraphQLUnionType[] = [];
+    for (const item of Object.values(schema.getTypeMap())) {
+      if (isUnionType(item) && item.getTypes().includes(type)) unions.push(item);
+    }
+    if (unions.length > 0) detail = <Detail label={t('Member of')}>{names(unions)}</Detail>;
   } else if (isEnumType(type)) {
     detail = (
       <Detail label={t('Values')}>
@@ -197,7 +183,7 @@ export function TypeCard() {
   return (
     <>
       <p className="flex items-baseline gap-2 text-[0.8125rem]">
-        <TypeHead />
+        <TypeHead type={type} />
       </p>
       {type.description && (
         <div className={cn('mt-1.5', detailsMarkdownClassName)}>

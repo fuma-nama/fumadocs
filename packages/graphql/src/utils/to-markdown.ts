@@ -7,18 +7,11 @@ import {
   isRequiredArgument,
   isSpecifiedScalarType,
 } from 'graphql';
+import { idToTitle } from 'shared-api/utils/id-to-title';
 import type { GeneratedPageProps } from '@/utils/pages';
 import { generateOperationExample, type OperationExample } from '@/utils/example';
-import {
-  type FieldRef,
-  getOperationField,
-  getOperationTitle,
-  getRootType,
-  getTypeUsages,
-  getUnions,
-  type OperationRef,
-} from '@/utils/schema';
-import { printDefaultValue, printDefinition, printFieldSignature } from '@/utils/sdl';
+import { type FieldRef, getTypeUsages, getUnions, type OperationRef } from '@/utils/schema';
+import { printDefaultValue, printDefinition } from '@/utils/sdl';
 
 /**
  * The items of a page in Markdown, for LLMs.
@@ -41,7 +34,7 @@ export function toMarkdown(
   }
   // schema coordinates, like `Query.customer`
   const operationCoordinate = (ref: OperationRef) =>
-    `${getRootType(schema, ref.kind)!.name}.${ref.name}`;
+    `${schema.getRootType(ref.kind)!.name}.${ref.name}`;
   const fieldCoordinate = (ref: FieldRef) => `${ref.parent}.${ref.field}`;
 
   for (const item of page.items ?? []) {
@@ -78,25 +71,26 @@ export function toMarkdown(
       continue;
     }
 
-    const field = getOperationField(schema, item.kind, item.name);
-    if (!field) continue;
+    const root = schema.getRootType(item.kind);
+    const field = root?.getFields()[item.name];
+    if (!root || !field) continue;
 
-    if (page.showTitle) out.push(`## ${getOperationTitle(field.name)}`);
+    if (page.showTitle) out.push(`## ${idToTitle(field.name)}`);
     if (page.showDescription && field.description) out.push(field.description);
     if (field.deprecationReason != null) out.push(`Deprecated: ${field.deprecationReason}`);
-    out.push(
-      codeBlock(
-        'graphql',
-        `type ${getRootType(schema, item.kind)!.name} {\n  ${printFieldSignature(field)}\n}`,
-      ),
-    );
 
+    // the arguments of signature, like `status: OrderStatus, first: Int = 10`
+    let params = '';
     let lines = '';
     for (const arg of field.args) {
+      const value = printDefaultValue(arg.default, arg.type);
+      params += `${params && ', '}${arg.name}: ${arg.type}`;
       let notes = `\`${arg.type}\``;
       if (isRequiredArgument(arg)) notes += ', required';
-      const value = printDefaultValue(arg.default, arg.type);
-      if (value !== undefined) notes += `, default \`${value}\``;
+      if (value !== undefined) {
+        params += ` = ${value}`;
+        notes += `, default \`${value}\``;
+      }
 
       let text = arg.description ?? '';
       if (arg.deprecationReason != null) {
@@ -106,6 +100,8 @@ export function toMarkdown(
       }
       lines += `${lines && '\n'}- \`${arg.name}\` (${notes})${text && `: ${text}`}`;
     }
+    const signature = `${field.name}${params && `(${params})`}: ${field.type}`;
+    out.push(codeBlock('graphql', `type ${root.name} {\n  ${signature}\n}`));
     if (lines) out.push(`${heading} Arguments`, lines);
 
     const returnType = getNamedType(field.type);

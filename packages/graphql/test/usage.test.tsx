@@ -5,42 +5,13 @@ import { renderToString } from 'react-dom/server';
 import type { GraphQLObjectType } from 'graphql';
 import { describe, expect, test } from 'vitest';
 import { defaultShikiFactory } from 'fumadocs-core/highlight/shiki/full';
-import { type GraphQLComponents, GraphQLProvider } from '@/utils/create-page';
-import { TypeProvider, type TypeUsages, useNamedType } from '@/type-docs';
+import { GraphQLProvider } from '@/utils/create-page';
 import { TypeDocs } from '@/ui/type-docs';
 import { buildSchemaFromSDL } from '@/utils/build-schema';
-import * as Schema from '@/utils/schema';
+import { getTypeUsages, getUnions } from '@/utils/schema';
 
 const cwd = fileURLToPath(new URL('./', import.meta.url));
 const sdl = fs.readFileSync(path.join(cwd, './fixtures/store.graphql'), 'utf8');
-
-const components: GraphQLComponents = {
-  SchemaUI: () => null,
-  Markdown: () => null,
-  CodeBlock: () => null,
-  Heading: () => null,
-};
-
-/** the usages `<TypeProvider />` derives for a named type */
-function getTypeUsages(name: string): TypeUsages {
-  let usages: TypeUsages | undefined;
-
-  function Probe() {
-    // oxlint-disable-next-line react/globals -- a single sync render, the value is read after it
-    usages = useNamedType().relations.usages;
-    return null;
-  }
-
-  renderToString(
-    <GraphQLProvider sdl={sdl} shiki={defaultShikiFactory} components={components}>
-      <TypeProvider name={name}>
-        <Probe />
-      </TypeProvider>
-    </GraphQLProvider>,
-  );
-
-  return usages as TypeUsages;
-}
 
 /** the text of the usages card on the page of a named type */
 function renderUsages(name: string, schema = sdl): { html: string; text: string } {
@@ -48,7 +19,12 @@ function renderUsages(name: string, schema = sdl): { html: string; text: string 
     <GraphQLProvider
       sdl={schema}
       shiki={defaultShikiFactory}
-      components={components}
+      components={{
+        SchemaUI: () => null,
+        Markdown: () => null,
+        CodeBlock: () => null,
+        Heading: () => null,
+      }}
       typeLinks={(type) => `/docs/types/${type}`}
       operationLinks={(kind, operation) => `/docs/${kind}/${operation}`}
     >
@@ -61,96 +37,9 @@ function renderUsages(name: string, schema = sdl): { html: string; text: string 
 }
 
 describe('type usages', () => {
-  test('object type: returned by operations & member of fields', () => {
-    expect(getTypeUsages('Order')).toEqual({
-      returnedBy: [
-        { kind: 'query', name: 'orders' },
-        { kind: 'mutation', name: 'createOrder' },
-        { kind: 'mutation', name: 'legacyCreateOrder' },
-        { kind: 'subscription', name: 'orderUpdated' },
-      ],
-      memberOf: [{ parent: 'Customer', field: 'orders' }],
-      inputFor: [],
-      argumentOf: [],
-    });
-
-    expect(getTypeUsages('Customer')).toEqual({
-      returnedBy: [{ kind: 'query', name: 'customer' }],
-      memberOf: [{ parent: 'Order', field: 'customer' }],
-      inputFor: [],
-      argumentOf: [],
-    });
-  });
-
-  test('input object types: input for operations', () => {
-    expect(getTypeUsages('OrderFilter')).toEqual({
-      returnedBy: [],
-      memberOf: [],
-      inputFor: [{ kind: 'query', name: 'orders' }],
-      argumentOf: [],
-    });
-
-    expect(getTypeUsages('OrderCreateInput')).toEqual({
-      returnedBy: [],
-      memberOf: [],
-      inputFor: [{ kind: 'mutation', name: 'createOrder' }],
-      argumentOf: [],
-    });
-  });
-
-  test('enum: member of output/input fields & argument of fields', () => {
-    expect(getTypeUsages('OrderStatus')).toEqual({
-      returnedBy: [],
-      memberOf: [
-        { parent: 'Order', field: 'status' },
-        { parent: 'OrderFilter', field: 'status' },
-      ],
-      inputFor: [],
-      argumentOf: [{ parent: 'Customer', field: 'orders' }],
-    });
-  });
-
-  test('custom scalar', () => {
-    expect(getTypeUsages('DateTime')).toEqual({
-      returnedBy: [],
-      memberOf: [
-        { parent: 'Order', field: 'createdAt' },
-        { parent: 'OrderFilter', field: 'after' },
-      ],
-      inputFor: [],
-      argumentOf: [],
-    });
-  });
-
-  test('interface & union return types', () => {
-    expect(getTypeUsages('Node')).toEqual({
-      returnedBy: [{ kind: 'query', name: 'node' }],
-      memberOf: [],
-      inputFor: [],
-      argumentOf: [],
-    });
-
-    expect(getTypeUsages('SearchResult')).toEqual({
-      returnedBy: [{ kind: 'query', name: 'search' }],
-      memberOf: [],
-      inputFor: [],
-      argumentOf: [],
-    });
-  });
-
-  test('type without usages', () => {
-    // `Role` is only referenced from directive arguments
-    expect(getTypeUsages('Role')).toEqual({
-      returnedBy: [],
-      memberOf: [],
-      inputFor: [],
-      argumentOf: [],
-    });
-  });
-
   test('usages card', () => {
     const order = renderUsages('Order');
-    // operations with their kinds, fields with their parents
+    // operations by kind and name, fields by parent and name
     expect(order.text).toBe(
       'Member ofSearchResultReturned byQUERYordersMUTATIONcreateOrderMUTATIONlegacyCreateOrderSUBSCRIPTIONorderUpdatedField ofCustomer.orders',
     );
@@ -165,9 +54,12 @@ describe('type usages', () => {
 
     expect(renderUsages('Node').text).toBe('Implemented byCustomerOrderReturned byQUERYnode');
     expect(renderUsages('OrderFilter').text).toBe('Input forQUERYorders');
+    // output and input fields
     expect(renderUsages('OrderStatus').text).toBe(
       'Field ofOrder.statusOrderFilter.statusArgument ofCustomer.orders',
     );
+    // `Role` is only referenced from directive arguments
+    expect(renderUsages('Role').text).toBe('');
   });
 
   test('deprecated fields in usages', () => {
@@ -199,7 +91,7 @@ describe('type usages', () => {
       union Result = Item
     `);
 
-    expect(Schema.getTypeUsages(schema, 'Tag')).toEqual({
+    expect(getTypeUsages(schema, 'Tag')).toEqual({
       returnedBy: [],
       memberOf: [],
       inputFor: [
@@ -209,6 +101,6 @@ describe('type usages', () => {
       argumentOf: [{ parent: 'Item', field: 'tags' }],
     });
     const item = schema.getType('Item') as GraphQLObjectType;
-    expect(Schema.getUnions(schema, item)).toEqual([schema.getType('Result')]);
+    expect(getUnions(schema, item)).toEqual([schema.getType('Result')]);
   });
 });

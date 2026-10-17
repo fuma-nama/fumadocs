@@ -4,7 +4,7 @@ import type { HighlighterCore } from 'shiki';
 import { toJsxRuntime } from 'hast-util-to-jsx-runtime';
 import * as JsxRuntime from 'react/jsx-runtime';
 import { highlightHast } from 'fumadocs-core/highlight/shiki';
-import type { RenderContext } from '@/utils/create-page';
+import { useRenderContext } from '@/utils/create-page';
 import { cn } from '@/utils/cn';
 
 const sharedClass =
@@ -18,15 +18,14 @@ export function CodeEditor({
   value,
   onValueChange,
   lang,
-  shiki,
-  shikiOptions,
   className,
   ...props
 }: Omit<ComponentProps<'textarea'>, 'value' | 'onChange'> & {
   value: string;
   onValueChange: (value: string) => void;
   lang: string;
-} & Pick<RenderContext, 'shiki' | 'shikiOptions'>) {
+}) {
+  const { shiki, shikiOptions } = useRenderContext();
   const [highlighter, setHighlighter] = useState<HighlighterCore | null>(null);
 
   useEffect(() => {

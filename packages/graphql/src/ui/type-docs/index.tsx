@@ -1,13 +1,16 @@
 'use client';
 import { type ReactNode, useMemo } from 'react';
+import { ExternalLink } from 'lucide-react';
 import { useTranslations } from '@fuma-translate/react';
 import {
   type GraphQLEnumType,
+  type GraphQLNamedType,
   isEnumType,
   isInputObjectType,
   isInterfaceType,
+  isLeafType,
   isObjectType,
-  isUnionType,
+  isScalarType,
 } from 'graphql';
 import Link from 'fumadocs-core/link';
 import { AnchorSection } from 'shared-api/auto-anchor';
@@ -25,12 +28,11 @@ import { cn } from '@/utils/cn';
 import { SchemaUI } from '@/ui/components/schema';
 import { KindLabel } from '../components/badge';
 import { ClientCodeBlock } from '../components/codeblock';
-import { Directives } from '../components/directive';
+import { DeprecatedLabel, Directives } from '../components/directive';
 import { Heading } from '../components/heading';
 import { Markdown } from '../components/markdown';
 import { SectionHeader } from '../components/section';
-import { linkClassName, TypeLink } from '../components/type-annotation';
-import { TypeDefinition } from './definition';
+import { linkClassName, TypeHead, TypeLink } from '../components/type-annotation';
 
 export function TypeDocs({ name, ...props }: PageTypeProps) {
   return (
@@ -49,8 +51,8 @@ function TypeDocsContent({ showTitle, showDescription }: Omit<PageTypeProps, 'na
   const headingLevel = showTitle ? 3 : 2;
 
   let fields: ReactNode = null;
-  if (isObjectType(type) || isInterfaceType(type) || isInputObjectType(type) || isUnionType(type)) {
-    const union = isUnionType(type);
+  if (!isLeafType(type)) {
+    const union = kind === 'union';
     const id = union ? 'possible-types' : 'fields';
 
     fields = (
@@ -79,7 +81,24 @@ function TypeDocsContent({ showTitle, showDescription }: Omit<PageTypeProps, 'na
         {name}
       </Heading>
     ) : null,
-    definition: <TypeDefinition />,
+    definition: (
+      <div className="not-prose flex min-h-11 items-start gap-3 rounded-xl border bg-fd-card p-1.5 ps-3.5 text-sm text-fd-card-foreground">
+        <div className="flex min-w-0 flex-1 items-baseline gap-3 py-1.5 text-[0.8125rem] leading-5">
+          <TypeHead type={type} interactive />
+        </div>
+        {isScalarType(type) && type.specifiedByURL && (
+          <a
+            href={type.specifiedByURL}
+            target="_blank"
+            rel="noreferrer noopener"
+            className="inline-flex h-8 shrink-0 items-center gap-1.5 pe-2 text-fd-muted-foreground transition-colors hover:text-fd-accent-foreground"
+          >
+            <ExternalLink className="size-3.5" />
+            {t('Specification')}
+          </a>
+        )}
+      </div>
+    ),
     description:
       showDescription && type.description ? (
         <div className="prose-no-margin">
@@ -149,11 +168,7 @@ function EnumValues({ type, headingLevel }: { type: GraphQLEnumType; headingLeve
                 >
                   {value.name}
                 </code>
-                {deprecationReason != null && (
-                  <span className="font-mono text-xs text-yellow-600 dark:text-yellow-400">
-                    {t('Deprecated')}
-                  </span>
-                )}
+                {deprecationReason != null && <DeprecatedLabel />}
               </div>
               {(value.description || deprecationReason || directives.length > 0) && (
                 <div className="mt-1 flex flex-col gap-2 text-fd-muted-foreground">
@@ -182,79 +197,51 @@ function EnumValues({ type, headingLevel }: { type: GraphQLEnumType; headingLeve
 function Usages({ headingLevel }: { headingLevel: number }) {
   const t = useTranslations({ note: 'type page' });
   const { implementedBy, unions, usages } = useNamedType().relations;
-  const { returnedBy, inputFor, memberOf, argumentOf } = usages;
-  if (
-    implementedBy.length === 0 &&
-    unions.length === 0 &&
-    returnedBy.length === 0 &&
-    inputFor.length === 0 &&
-    memberOf.length === 0 &&
-    argumentOf.length === 0
-  )
-    return null;
+  const rows: [label: string, items: ReactNode[]][] = [
+    [t('Implemented by'), implementedBy.map(typeUsage)],
+    [t('Member of'), unions.map(typeUsage)],
+    [t('Returned by'), usages.returnedBy.map(operationUsage)],
+    [t('Input for'), usages.inputFor.map(operationUsage)],
+    [t('Field of'), usages.memberOf.map(fieldUsage)],
+    [t('Argument of'), usages.argumentOf.map(fieldUsage)],
+  ];
+  if (rows.every(([, items]) => items.length === 0)) return null;
 
   return (
     <>
       <SectionHeader id="usages" depth={headingLevel} title={t('Usages')} />
       <dl className="not-prose rounded-xl border bg-fd-card px-3 text-[0.8125rem]">
-        {implementedBy.length > 0 && (
-          <Usage label={t('Implemented by')}>
-            {implementedBy.map((item) => (
-              <code key={item.name}>
-                <TypeLink name={item.name} />
-              </code>
-            ))}
-          </Usage>
-        )}
-        {unions.length > 0 && (
-          <Usage label={t('Member of')}>
-            {unions.map((item) => (
-              <code key={item.name}>
-                <TypeLink name={item.name} />
-              </code>
-            ))}
-          </Usage>
-        )}
-        {returnedBy.length > 0 && (
-          <Usage label={t('Returned by')}>
-            {returnedBy.map((item) => (
-              <OperationUsage key={`${item.kind}:${item.name}`} item={item} />
-            ))}
-          </Usage>
-        )}
-        {inputFor.length > 0 && (
-          <Usage label={t('Input for')}>
-            {inputFor.map((item) => (
-              <OperationUsage key={`${item.kind}:${item.name}`} item={item} />
-            ))}
-          </Usage>
-        )}
-        {memberOf.length > 0 && (
-          <Usage label={t('Field of')}>
-            {memberOf.map((item) => (
-              <FieldUsage key={`${item.parent}.${item.field}`} item={item} />
-            ))}
-          </Usage>
-        )}
-        {argumentOf.length > 0 && (
-          <Usage label={t('Argument of')}>
-            {argumentOf.map((item) => (
-              <FieldUsage key={`${item.parent}.${item.field}`} item={item} />
-            ))}
-          </Usage>
+        {rows.map(
+          ([label, items]) =>
+            items.length > 0 && (
+              <div
+                key={label}
+                className="grid grid-cols-1 gap-1 border-t py-2.5 first:border-t-0 @sm:grid-cols-[8rem_minmax(0,1fr)] @sm:gap-3"
+              >
+                <dt className="text-fd-muted-foreground">{label}</dt>
+                <dd className="flex min-w-0 flex-wrap gap-x-4 gap-y-1">{items}</dd>
+              </div>
+            ),
         )}
       </dl>
     </>
   );
 }
 
-function Usage({ label, children }: { label: string; children: ReactNode }) {
+function typeUsage(type: GraphQLNamedType) {
   return (
-    <div className="grid grid-cols-1 gap-1 border-t py-2.5 first:border-t-0 @sm:grid-cols-[8rem_minmax(0,1fr)] @sm:gap-3">
-      <dt className="text-fd-muted-foreground">{label}</dt>
-      <dd className="flex min-w-0 flex-wrap gap-x-4 gap-y-1">{children}</dd>
-    </div>
+    <code key={type.name}>
+      <TypeLink name={type.name} />
+    </code>
   );
+}
+
+function operationUsage(item: OperationRef) {
+  return <OperationUsage key={`${item.kind}:${item.name}`} item={item} />;
+}
+
+function fieldUsage(item: FieldRef) {
+  return <FieldUsage key={`${item.parent}.${item.field}`} item={item} />;
 }
 
 function OperationUsage({ item }: { item: OperationRef }) {

@@ -7,21 +7,19 @@ import { cn } from '@/utils/cn';
 export const chipClassName =
   'rounded-md border bg-fd-secondary px-1.5 py-0.5 font-mono text-xs text-fd-secondary-foreground';
 
-/** the details opened from chips and types */
-export const popupClassName =
-  'w-72 max-w-[calc(100vw-2rem)] origin-(--transform-origin) rounded-xl border bg-fd-popover p-3 text-fd-popover-foreground shadow-lg outline-none transition-[opacity,scale] duration-150 ease-out data-ending-style:scale-95 data-ending-style:opacity-0 data-starting-style:scale-95 data-starting-style:opacity-0 motion-reduce:transition-none';
-
 /** Markdown in the details */
 export const detailsMarkdownClassName =
   'text-xs leading-relaxed text-fd-muted-foreground prose-no-margin [&_a]:underline [&_code]:font-mono';
 
-/** a chip opening its `details` on hover, click or keyboard */
-export function ChipPopover({
+/** a chip, or a dotted name like the types Schema UI opens, opening its `details` on hover, click or keyboard */
+export function DetailsPopover({
   details,
+  chip = false,
   className,
   children,
 }: {
   details: ReactNode;
+  chip?: boolean;
   className?: string;
   children: ReactNode;
 }) {
@@ -32,8 +30,10 @@ export function ChipPopover({
         delay={200}
         closeDelay={100}
         className={cn(
-          chipClassName,
-          'transition-colors hover:bg-fd-accent hover:text-fd-accent-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-fd-ring data-popup-open:bg-fd-accent data-popup-open:text-fd-accent-foreground',
+          'transition-colors hover:text-fd-accent-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-fd-ring data-popup-open:text-fd-accent-foreground',
+          chip
+            ? [chipClassName, 'hover:bg-fd-accent data-popup-open:bg-fd-accent']
+            : 'underline decoration-dotted underline-offset-4',
           className,
         )}
       >
@@ -41,7 +41,9 @@ export function ChipPopover({
       </Popover.Trigger>
       <Popover.Portal>
         <Popover.Positioner side="bottom" align="start" sideOffset={6} className="z-50">
-          <Popover.Popup className={popupClassName}>{details}</Popover.Popup>
+          <Popover.Popup className="w-72 max-w-[calc(100vw-2rem)] origin-(--transform-origin) rounded-xl border bg-fd-popover p-3 text-fd-popover-foreground shadow-lg outline-none transition-[opacity,scale] duration-150 ease-out data-ending-style:scale-95 data-ending-style:opacity-0 data-starting-style:scale-95 data-starting-style:opacity-0 motion-reduce:transition-none">
+            {details}
+          </Popover.Popup>
         </Popover.Positioner>
       </Popover.Portal>
     </Popover.Root>

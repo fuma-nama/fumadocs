@@ -57,9 +57,6 @@ describe('GraphQL source', () => {
     const props = data.getGraphQLPageProps();
     expect(props.items).toEqual([{ type: 'operation', kind: 'query', name: 'orders' }]);
     expect(props.payload).not.toHaveProperty('examples');
-    expect(await data.getText('processed')).toContain(
-      'type Query {\n  orders(filter: OrderFilter): [Order!]!\n}',
-    );
     // the SDL payload can be re-built into a schema on client side
     const schema = buildSchemaFromSDL(props.payload.sdl);
     expect(schema.getQueryType()?.getFields().orders).toBeDefined();

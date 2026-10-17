@@ -27,7 +27,7 @@ function isURL(input: string): boolean {
   return /^https?:\/\//.test(input);
 }
 
-export function isFilePath(input: string): boolean {
+function isFilePath(input: string): boolean {
   return !input.includes('\n') && /\.(graphqls?|gql)$/i.test(input) && !isURL(input);
 }
 

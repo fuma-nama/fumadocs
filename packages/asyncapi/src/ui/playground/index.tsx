@@ -1,13 +1,12 @@
 'use client';
-import { memo, useState } from 'react';
+import { memo, useMemo, useState } from 'react';
 import { Dialog } from '@base-ui/react/dialog';
 import { Play, Plug, Unplug, X } from 'lucide-react';
 import { useTranslations } from '@fuma-translate/react';
 import { buttonVariants } from 'fumadocs-ui/components/ui/button';
 import { DialogPopup } from 'shared-api/components/dialog';
-import { Segmented, SegmentedList } from 'shared-api/components/segmented';
 import { Spinner } from 'shared-api/components/spinner';
-import { iconButtonClassName } from 'shared-api/components/playground/panels';
+import { iconButtonClassName, ViewSwitch } from 'shared-api/components/playground/panels';
 import { StatusDot } from 'shared-api/components/playground/log';
 import { ParamInput } from 'shared-api/components/playground/param-input';
 import { SchemaProvider } from 'shared-api/components/playground/schema';
@@ -87,6 +86,13 @@ function PlaygroundDialog({ playground }: { playground: Playground }) {
     hasInputs && status === 'closed' ? 'connection' : 'messages',
   );
   const view = hasInputs ? selectedView : 'messages';
+  const views = useMemo(
+    () => [
+      { value: 'connection', label: t('Connection') },
+      { value: 'messages', label: t('Messages') },
+    ],
+    [t],
+  );
 
   return (
     <StfProvider value={playground.stf}>
@@ -116,7 +122,7 @@ function PlaygroundDialog({ playground }: { playground: Playground }) {
             className="contents"
           >
             <UrlBar status={status} activity={playground.log.at(-1)?.id} />
-            {hasInputs && <ViewSwitch value={view} onValueChange={setView} />}
+            {hasInputs && <ViewSwitch value={view} onValueChange={setView} items={views} />}
             <div
               className={cn(
                 'mx-3 mb-3 grid min-h-0 flex-1 overflow-hidden rounded-xl border bg-fd-card sm:mx-4 sm:mb-4',
@@ -141,29 +147,6 @@ function PlaygroundDialog({ playground }: { playground: Playground }) {
     </StfProvider>
   );
 }
-
-/** switches the panels on small screens, its indicator measures the tabs on render */
-const ViewSwitch = memo(function ViewSwitch({
-  value,
-  onValueChange,
-}: {
-  value: string;
-  onValueChange: (value: string) => void;
-}) {
-  const t = useTranslations({ note: 'playground' });
-
-  return (
-    <Segmented value={value} onValueChange={onValueChange} className="shrink-0 px-3 pb-3 md:hidden">
-      <SegmentedList
-        className="*:flex-1 *:justify-center"
-        items={[
-          { value: 'connection', label: t('Connection') },
-          { value: 'messages', label: t('Messages') },
-        ]}
-      />
-    </Segmented>
-  );
-});
 
 /** the URL of connection, with the values of its parameters */
 function UrlBar({ status, activity }: { status: ConnectionStatus; activity?: number }) {

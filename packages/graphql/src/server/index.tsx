@@ -133,17 +133,12 @@ export function createGraphQL(options: GraphQLOptions = {}): GraphQLServer {
     return output;
   }
 
-  function generateLinks(loader: LoaderOutput, locale?: string): GraphQLLinks {
+  function generateLinks(loader: LoaderOutput): GraphQLLinks {
     const out: GraphQLLinks = { types: {}, operations: {} };
 
-    for (const page of loader.getPages(locale)) {
-      if (
-        !('_graphql' in page.data) ||
-        !page.data._graphql ||
-        typeof page.data._graphql !== 'object'
-      )
-        continue;
-      const meta = page.data._graphql as InternalGraphQLMeta;
+    for (const page of loader.getPages()) {
+      const meta = (page.data as { _graphql?: InternalGraphQLMeta })._graphql;
+      if (!meta) continue;
 
       for (const item of meta.items ?? []) {
         if (item.type === 'operation') {
@@ -180,7 +175,6 @@ export function createGraphQL(options: GraphQLOptions = {}): GraphQLServer {
 
       function onEntry(entry: OperationOutput | TypeOutput | PageOutput): GraphQLVirtualFile {
         const props = getPageProps(entry);
-        const filePath = `${baseDir}/${entry.path}`;
         let pageExamples: OperationExamples | undefined;
         for (const item of props.items ?? []) {
           if (item.type !== 'operation') continue;
@@ -191,7 +185,7 @@ export function createGraphQL(options: GraphQLOptions = {}): GraphQLServer {
 
         return {
           type: 'page',
-          path: filePath,
+          path: `${baseDir}/${entry.path}`,
           data: {
             ...entry.info,
             getGraphQLPageProps() {

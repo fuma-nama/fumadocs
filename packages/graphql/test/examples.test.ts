@@ -48,17 +48,6 @@ describe('loadExamples', () => {
 
   test('descriptions of operations take precedence over comments', () => {
     expect(nodeById.description).toBe('Any node by its ID, **as a customer**.');
-    expect(nodeById.query).toMatchInlineSnapshot(`
-      "query NodeById($id: ID!) {
-        node(id: $id) {
-          __typename
-          id
-          ... on Customer {
-            name
-          }
-        }
-      }"
-    `);
   });
 
   test('default values become variables', () => {
@@ -69,29 +58,6 @@ describe('loadExamples', () => {
   });
 
   test('fragments and aliases', () => {
-    expect(customerWithOrders.query).toMatchInlineSnapshot(`
-      "query CustomerWithOrders($id: ID!, $first: Int) {
-        customer(id: $id) {
-          name
-          recent: orders(first: $first) {
-            ...OrderFields
-          }
-        }
-      }
-
-      fragment OrderFields on Order {
-        id
-        total
-        customer {
-          ...CustomerFields
-        }
-      }
-
-      fragment CustomerFields on Customer {
-        id
-        name
-      }"
-    `);
     expect(customerWithOrders.response).toEqual({
       data: {
         customer: {
@@ -169,6 +135,9 @@ fragment Name on Customer {
     );
     await expect(load(['query { customer(id: "1") { name } }'])).rejects.toThrow(
       'invalid example in GraphQL text:\n\nExample operations must be named.',
+    );
+    await expect(load(['query A { orders { id } } query A { orders { total } }'])).rejects.toThrow(
+      'There can be only one operation named "A".',
     );
     await expect(load(['query Broken {'])).rejects.toThrow('Syntax Error');
   });

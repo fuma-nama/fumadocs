@@ -20,8 +20,7 @@ export function OperationBar({ children, className, ...props }: ComponentProps<'
   const returns = useAnchorId(['returns']);
   // the width of one-line signature, the names of arguments are padded
   let length = field.name.length + String(field.type).length + 2;
-  if (args.length > 0) length += 2 * args.length;
-  for (const arg of args) length += arg.name.length + String(arg.type).length + 2;
+  for (const arg of args) length += arg.name.length + String(arg.type).length + 4;
 
   return (
     <div

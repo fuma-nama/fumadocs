@@ -13,8 +13,8 @@ import type { JsonSchema } from '@fumadocs/json-schema';
 
 type Schema = Exclude<JsonSchema, boolean>;
 
-/** one schema per input object, recursive inputs reference their own schema */
-const objectSchemas = new WeakMap<GraphQLInputObjectType, Schema>();
+/** the schemas of input objects in a conversion, recursive inputs reference their own schema */
+type ObjectSchemas = Map<GraphQLInputObjectType, Schema>;
 
 /**
  * Convert a GraphQL input type into JSON Schema, for the playground form.
@@ -22,11 +22,15 @@ const objectSchemas = new WeakMap<GraphQLInputObjectType, Schema>();
  * Input objects are converted once, the schema of a recursive input is a cyclic object graph.
  */
 export function inputTypeToJsonSchema(type: GraphQLInputType): Schema {
-  if (isNonNullType(type)) return inputTypeToJsonSchema(type.ofType);
+  return typeToSchema(type, new Map());
+}
+
+function typeToSchema(type: GraphQLInputType, objectSchemas: ObjectSchemas): Schema {
+  if (isNonNullType(type)) return typeToSchema(type.ofType, objectSchemas);
   if (isListType(type))
     return {
       type: 'array',
-      items: inputTypeToJsonSchema(type.ofType),
+      items: typeToSchema(type.ofType, objectSchemas),
     };
 
   if (isEnumType(type)) {
@@ -73,7 +77,7 @@ export function inputTypeToJsonSchema(type: GraphQLInputType): Schema {
         // the label of member in selects
         title: field.name,
         type: 'object',
-        properties: { [field.name]: inputFieldToJsonSchema(field) },
+        properties: { [field.name]: fieldToSchema(field, objectSchemas) },
         required: [field.name],
         additionalProperties: false,
       });
@@ -89,15 +93,15 @@ export function inputTypeToJsonSchema(type: GraphQLInputType): Schema {
     (schema = { ...base, type: 'object', properties, required, additionalProperties: false }),
   );
   for (const field of fields) {
-    properties[field.name] = inputFieldToJsonSchema(field);
+    properties[field.name] = fieldToSchema(field, objectSchemas);
     if (isRequiredInputField(field)) required.push(field.name);
   }
 
   return schema;
 }
 
-function inputFieldToJsonSchema(field: GraphQLInputField): Schema {
-  const schema = inputTypeToJsonSchema(field.type);
+function fieldToSchema(field: GraphQLInputField, objectSchemas: ObjectSchemas): Schema {
+  const schema = typeToSchema(field.type, objectSchemas);
   const defaultInput = field.default;
   if (!field.description && !defaultInput) return schema;
 

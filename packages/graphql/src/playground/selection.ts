@@ -22,12 +22,7 @@ import {
   type SelectionSetNode,
   TypeNameMetaFieldDef,
 } from 'graphql';
-import type { OperationKind } from '@/utils/schema';
-
-interface OperationRef {
-  kind: OperationKind;
-  name: string;
-}
+import type { OperationRef } from '@/utils/schema';
 
 /** a step from the root field into its selection: a field, or the inline fragment of a possible type */
 export type SelectionStep = { field: string } | { on: string };
@@ -105,14 +100,9 @@ export function toggleField(
   field: string,
   selected: boolean,
 ): string {
-  const steps: readonly SelectionStep[] = [{ field: operation.name }, ...path];
-  let type: GraphQLNamedType | null | undefined = schema.getRootType(operation.kind);
-  for (const step of steps) {
-    type = 'on' in step ? schema.getType(step.on) : getNamedType(getField(type, step.field)?.type);
-    if (!isCompositeType(type)) return query;
-  }
+  const type = getSelectionType(schema, operation, path);
   const target = field === '__typename' ? TypeNameMetaFieldDef : getField(type, field);
-  if (!target) return query;
+  if (!type || !target) return query;
 
   let document: DocumentNode;
   try {
@@ -122,6 +112,7 @@ export function toggleField(
   }
   const definition = findOperation(document, operation);
   if (!definition) return query;
+  const steps = [{ field: operation.name }, ...path];
   const named = getNamedType(target.type);
 
   // the selections at `depth` of `steps` after the change, `undefined` when unchanged
@@ -170,6 +161,21 @@ export function toggleField(
     kind: Kind.DOCUMENT,
     definitions: document.definitions.map((item) => (item === definition ? updated : item)),
   });
+}
+
+/** the composite type at `path` from the root field, `undefined` when the schema has no such path */
+export function getSelectionType(
+  schema: GraphQLSchema,
+  { kind, name }: OperationRef,
+  path: readonly SelectionStep[],
+): GraphQLCompositeType | undefined {
+  let type = getNamedType(getField(schema.getRootType(kind), name)?.type);
+  for (const step of path) {
+    if (!isCompositeType(type)) return;
+    type = 'on' in step ? schema.getType(step.on) : getNamedType(getField(type, step.field)?.type);
+  }
+
+  return isCompositeType(type) ? type : undefined;
 }
 
 /** the first operation of `kind` selecting the root field `name` */

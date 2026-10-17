@@ -1,11 +1,12 @@
 'use client';
 import { Fragment } from 'react';
 import { type DirectiveNode, print } from 'graphql';
+import { useTranslations } from '@fuma-translate/react';
 import { useGraphQL } from '@/utils/create-page';
 import { printDefaultValue } from '@/utils/sdl';
 import { cn } from '@/utils/cn';
 import { Markdown } from './markdown';
-import { chipClassName, ChipPopover, detailsMarkdownClassName } from './chip';
+import { chipClassName, DetailsPopover, detailsMarkdownClassName } from './chip';
 
 /** applied directives like `@auth(requires: USER)`, a chip opens the definition of its directive */
 export function Directives({
@@ -37,7 +38,8 @@ function Directive({ node }: { node: DirectiveNode }) {
     return <code className={chipClassName}>{label}</code>;
 
   return (
-    <ChipPopover
+    <DetailsPopover
+      chip
       details={
         <>
           <p className="flex flex-wrap items-baseline gap-x-3 gap-y-0.5">
@@ -78,6 +80,17 @@ function Directive({ node }: { node: DirectiveNode }) {
       }
     >
       {label}
-    </ChipPopover>
+    </DetailsPopover>
+  );
+}
+
+/** `@deprecated` on arguments and enum values */
+export function DeprecatedLabel() {
+  const t = useTranslations({ note: 'graphql schema ui' });
+
+  return (
+    <span className="shrink-0 font-mono text-xs text-yellow-600 dark:text-yellow-400">
+      {t('Deprecated')}
+    </span>
   );
 }

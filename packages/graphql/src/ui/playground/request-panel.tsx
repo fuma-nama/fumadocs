@@ -31,7 +31,7 @@ import {
 import { JsonEditor } from 'shared-api/components/playground/json-editor';
 import { Segmented, SegmentedList } from 'shared-api/components/segmented';
 import { useOperation } from '@/operation';
-import { useGraphQL, useRenderContext } from '@/utils/create-page';
+import { useGraphQL } from '@/utils/create-page';
 import { inputTypeToJsonSchema } from '@/playground/json-schema';
 import { type SelectionStep, toggleField } from '@/playground/selection';
 import { CodeEditor } from '@/ui/components/code-editor';
@@ -113,7 +113,6 @@ export const RequestPanel = memo(function RequestPanel({
           path={selection.path}
           motion={selection.motion}
           locked={locked}
-          onNavigate={selectionProps.onOpen}
         />
       )}
     </div>
@@ -155,7 +154,6 @@ function OperationSection({
   errors,
 }: OperationSectionProps) {
   const t = useTranslations({ note: 'graphql playground' });
-  const { shiki, shikiOptions } = useRenderContext();
   const { examples } = useOperation();
   const errorsId = useId();
   const items: ReactNode[] = [];
@@ -212,8 +210,6 @@ function OperationSection({
         value={query}
         onValueChange={onQueryChange}
         lang="graphql"
-        shiki={shiki}
-        shikiOptions={shikiOptions}
         aria-label={t('Operation')}
         aria-invalid={errors.length > 0}
         aria-describedby={errors.length > 0 ? errorsId : undefined}

@@ -1,3 +1,5 @@
+import { isPlainObject } from '@fumari/stf/lib/utils';
+
 const StorageKey = 'fumadocs-graphql-playground';
 
 export interface StoredState {
@@ -26,10 +28,6 @@ export function getEndpointOrigin(url: string, base?: string): string | undefine
   }
 }
 
-function isRecord(value: unknown): value is Record<string, unknown> {
-  return typeof value === 'object' && value !== null && !Array.isArray(value);
-}
-
 /**
  * parse & validate the persisted state, unknown shapes are dropped.
  */
@@ -37,25 +35,28 @@ export function parseStoredState(raw: string | null): StoredState {
   if (!raw) return {};
 
   try {
-    const parsed = JSON.parse(raw) as unknown;
-    if (!isRecord(parsed)) return {};
+    const parsed: unknown = JSON.parse(raw);
+    if (!isPlainObject(parsed)) return {};
 
+    const { url, headers } = parsed;
     const out: StoredState = {};
-    if (typeof parsed.url === 'string') out.url = parsed.url;
-    if (!isRecord(parsed.headers)) return out;
+    if (typeof url === 'string') out.url = url;
+    if (!isPlainObject(headers)) return out;
 
-    const scoped: [string, Record<string, string>][] = [];
-    for (const [origin, headers] of Object.entries(parsed.headers)) {
-      if (!isRecord(headers)) continue;
-      const valid: [string, string][] = [];
-      for (const [name, value] of Object.entries(headers)) {
-        if (typeof value === 'string') valid.push([name, value]);
+    // `JSON.parse()` defines `__proto__` keys as own properties, invalid entries are deleted in place
+    for (const origin of Object.keys(headers)) {
+      const scoped = headers[origin];
+      if (!isPlainObject(scoped)) {
+        delete headers[origin];
+        continue;
       }
 
-      scoped.push([origin, Object.fromEntries(valid)]);
+      for (const name of Object.keys(scoped)) {
+        if (typeof scoped[name] !== 'string') delete scoped[name];
+      }
     }
 
-    out.headers = Object.fromEntries(scoped);
+    out.headers = headers as StoredState['headers'];
     return out;
   } catch {
     return {};

@@ -1,11 +1,10 @@
 import * as path from 'node:path';
 import type { GraphQLField, GraphQLNamedType, GraphQLSchema } from 'graphql';
+import { idToTitle } from 'shared-api/utils/id-to-title';
 import type { DistributiveOmit } from '@/types';
 import {
   getDocumentedTypes,
   getNamedTypeKind,
-  getOperationTitle,
-  getRootType,
   type NamedTypeKind,
   type OperationKind,
   OperationKinds,
@@ -176,7 +175,7 @@ export function schemaToPages(
 
     const items: GraphQLPageItem[] = [];
     for (const kind of OperationKinds) {
-      const root = getRootType(schema, kind);
+      const root = schema.getRootType(kind);
       if (!root) continue;
 
       for (const field of Object.values(root.getFields())) {
@@ -245,7 +244,7 @@ export function schemaToPages(
 
   if (includeOperations !== false) {
     for (const kind of OperationKinds) {
-      const root = getRootType(schema, kind);
+      const root = schema.getRootType(kind);
       if (!root) continue;
 
       for (const field of Object.values(root.getFields())) {
@@ -256,7 +255,7 @@ export function schemaToPages(
             type: 'operation',
             item: { kind, name: field.name },
             info: {
-              title: getOperationTitle(field.name),
+              title: idToTitle(field.name),
               description: field.description ?? undefined,
               deprecated: field.deprecationReason != null || undefined,
             },

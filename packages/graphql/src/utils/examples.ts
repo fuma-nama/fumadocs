@@ -8,14 +8,14 @@ import {
   type OperationDefinitionNode,
   parse,
   print,
-  type SelectionSetNode,
+  separateOperations,
   Source,
   TokenKind,
   validate,
 } from 'graphql';
+import { idToTitle } from 'shared-api/utils/id-to-title';
 import { type LoadedSchema, readGraphQL } from '@/utils/load-schema';
 import { collectFields, createOperationExample, type OperationExample } from '@/utils/example';
-import { getOperationTitle, getRootType } from '@/utils/schema';
 
 /** examples by `${kind}:${name}` of the root fields they select */
 export type OperationExamples = Record<string, OperationExample[]>;
@@ -38,20 +38,22 @@ export async function loadExamples(
   for (const id in schemas) out[id] = {};
 
   function add({ name, document }: ExampleDocument, ids: string[]) {
-    const fragments = new Map<string, FragmentDefinitionNode>();
-    for (const definition of document.definitions) {
-      if (definition.kind === Kind.FRAGMENT_DEFINITION) {
-        fragments.set(definition.name.value, definition);
-      }
-    }
+    const executables = separateOperations(document);
 
     for (const operation of document.definitions) {
       if (operation.kind !== Kind.OPERATION_DEFINITION) continue;
       if (!operation.name) fail(name, 'Example operations must be named.', operation);
 
-      const used = getUsedFragments(operation.selectionSet, fragments, []);
-      const executable: DocumentNode = { kind: Kind.DOCUMENT, definitions: [operation, ...used] };
-      const title = getOperationTitle(operation.name.value);
+      // the operation with its fragments, the last operation of a name is kept
+      const executable = executables[operation.name.value];
+      if (!executable.definitions.includes(operation)) {
+        fail(name, `There can be only one operation named "${operation.name.value}".`, operation);
+      }
+      const used: FragmentDefinitionNode[] = [];
+      for (const definition of executable.definitions) {
+        if (definition.kind === Kind.FRAGMENT_DEFINITION) used.push(definition);
+      }
+      const title = idToTitle(operation.name.value);
       const description = getDescription(operation);
       let errors = '';
       let matched = false;
@@ -121,26 +123,6 @@ async function loadDocument(input: string): Promise<ExampleDocument> {
   }
 }
 
-function getUsedFragments(
-  selectionSet: SelectionSetNode,
-  fragments: Map<string, FragmentDefinitionNode>,
-  out: FragmentDefinitionNode[],
-): FragmentDefinitionNode[] {
-  for (const selection of selectionSet.selections) {
-    if (selection.kind !== Kind.FRAGMENT_SPREAD) {
-      if (selection.selectionSet) getUsedFragments(selection.selectionSet, fragments, out);
-      continue;
-    }
-
-    const fragment = fragments.get(selection.name.value);
-    if (!fragment || out.includes(fragment)) continue;
-    out.push(fragment);
-    getUsedFragments(fragment.selectionSet, fragments, out);
-  }
-
-  return out;
-}
-
 /**
  * The `${kind}:${name}` of root fields a valid operation selects, and errors of their arguments not
  * passed as the variables of their names, which the playground edits them as.
@@ -150,7 +132,7 @@ function getRootFields(
   operation: OperationDefinitionNode,
   fragments: readonly FragmentDefinitionNode[],
 ): { keys: string[]; errors: GraphQLError[] } {
-  const root = getRootType(schema, operation.operation)!;
+  const root = schema.getRootType(operation.operation)!;
   const fields = new Map<string, FieldNode[]>();
   collectFields(schema, root, operation.selectionSet, fragments, fields);
 

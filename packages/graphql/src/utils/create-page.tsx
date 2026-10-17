@@ -32,7 +32,7 @@ import {
 import { buildSchemaFromSDL } from '@/utils/build-schema';
 
 /**
- * pre-generated links of generated pages, see `baseUrl` in source options.
+ * links of generated pages, generated when the source is attached to a loader.
  */
 export interface GraphQLLinks {
   /**
@@ -89,9 +89,6 @@ export interface GraphQLRuntimeOptions {
 export interface GraphQLRuntime extends GraphQLRuntimeOptions {
   schema: GraphQLSchema;
   sdl: string;
-  /**
-   * pre-generated links of generated pages, see `baseUrl` in source options.
-   */
   links?: GraphQLLinks;
   /**
    * examples of the page's operations from the `examples` option of server, by `${kind}:${name}`.

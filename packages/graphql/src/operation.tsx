@@ -1,12 +1,8 @@
 'use client';
 import { createContext, type ReactNode, use, useMemo, useState } from 'react';
 import type { DirectiveNode, GraphQLField } from 'graphql';
-import {
-  getCustomDirectives,
-  getOperationField,
-  getOperationTitle,
-  type OperationKind,
-} from '@/utils/schema';
+import { idToTitle } from 'shared-api/utils/id-to-title';
+import { getCustomDirectives, type OperationKind } from '@/utils/schema';
 import { generateOperationExample, type OperationExample } from '@/utils/example';
 import { useGraphQL } from '@/utils/create-page';
 
@@ -53,12 +49,12 @@ export function OperationProvider({ kind, name, children }: OperationProviderPro
   const custom = allExamples?.[`${kind}:${name}`];
   const [selected, select] = useState(0);
   const base = useMemo(() => {
-    const field = getOperationField(schema, kind, name);
+    const field = schema.getRootType(kind)?.getFields()[name];
     if (!field)
       throw new Error(`[Fumadocs GraphQL] Operation not found in schema: ${kind} ${name}`);
 
     let examples = custom;
-    if (!examples || examples.length === 0) {
+    if (!examples?.length) {
       const generated = generateOperationExample(schema, { kind, name });
       examples = generated ? [generated] : empty;
     }
@@ -66,7 +62,7 @@ export function OperationProvider({ kind, name, children }: OperationProviderPro
     return {
       kind,
       name,
-      title: getOperationTitle(name),
+      title: idToTitle(name),
       field,
       directives: getCustomDirectives(field.astNode),
       examples,

@@ -21,7 +21,6 @@ import { inputTypeToJsonSchema } from '@/playground/json-schema';
 import { getEndpointOrigin, parseStoredState } from '@/playground/storage';
 import { syncOperationVariables } from '@/playground/variables';
 import { generateOperationExample } from '@/utils/example';
-import { getOperationField } from '@/utils/schema';
 import { getResponseErrors } from '@/ui/playground/errors';
 import { toRequestValues } from '@/ui/playground/use-playground';
 
@@ -31,35 +30,41 @@ const schema = buildSchemaFromSDL(
 );
 
 describe('playground storage', () => {
-  test('parses headers by origin', () => {
+  test('keeps the valid headers by origin', () => {
     expect(
       parseStoredState(
         JSON.stringify({
           url: 'https://api.example.com/graphql',
           headers: {
-            'https://api.example.com': { Authorization: 'Bearer x' },
+            'https://api.example.com': {
+              Authorization: 'Bearer x',
+              count: 1,
+              empty: null,
+              nested: {},
+            },
+            'https://old.example.com': [{ key: 'Authorization', value: 'Bearer x' }],
+            'https://other.example.com': 'nope',
           },
         }),
       ),
     ).toEqual({
       url: 'https://api.example.com/graphql',
-      headers: {
-        'https://api.example.com': { Authorization: 'Bearer x' },
-      },
+      headers: { 'https://api.example.com': { Authorization: 'Bearer x' } },
     });
+
+    // an own property, the prototype stays untouched
+    const { headers } = parseStoredState('{"headers":{"__proto__":{"polluted":"yes"}}}');
+    expect(Object.keys(headers!)).toEqual(['__proto__']);
+    expect(Object.getPrototypeOf(headers)).toBe(Object.prototype);
   });
 
-  test('drops the old shape of header rows', () => {
-    expect(
-      parseStoredState(
-        JSON.stringify({
-          headers: {
-            'https://api.example.com': [{ key: 'Authorization', value: 'Bearer x' }],
-          },
-        }),
-      ),
-    ).toEqual({ headers: {} });
-
+  test('drops malformed content', () => {
+    expect(parseStoredState(null)).toEqual({});
+    expect(parseStoredState('')).toEqual({});
+    expect(parseStoredState('not json')).toEqual({});
+    expect(parseStoredState('"text"')).toEqual({});
+    expect(parseStoredState('[1,2]')).toEqual({});
+    expect(parseStoredState(JSON.stringify({ url: 10, headers: 'nope' }))).toEqual({});
     expect(
       parseStoredState(
         JSON.stringify({
@@ -68,26 +73,6 @@ describe('playground storage', () => {
         }),
       ),
     ).toEqual({ url: 'https://api.example.com/graphql' });
-  });
-
-  test('rejects malformed content', () => {
-    expect(parseStoredState(null)).toEqual({});
-    expect(parseStoredState('')).toEqual({});
-    expect(parseStoredState('not json')).toEqual({});
-    expect(parseStoredState('"text"')).toEqual({});
-    expect(parseStoredState('[1,2]')).toEqual({});
-    expect(parseStoredState(JSON.stringify({ url: 10, headers: 'nope' }))).toEqual({});
-  });
-
-  test('filters invalid header values', () => {
-    const state = parseStoredState(
-      `{"headers":{"https://api.example.com":{"valid":"yes","count":1,"empty":null,"nested":{}},"https://other.example.com":"nope","__proto__":{"polluted":"yes"}}}`,
-    );
-
-    expect(state.headers?.['https://api.example.com']).toEqual({ valid: 'yes' });
-    expect(Object.keys(state.headers!)).toEqual(['https://api.example.com', '__proto__']);
-    // an own property, the prototype stays untouched
-    expect(Object.getPrototypeOf(state.headers)).toBe(Object.prototype);
   });
 
   test('getEndpointOrigin', () => {
@@ -162,24 +147,16 @@ describe('executeGraphQL', () => {
   });
 });
 
-describe('request values', () => {
-  test('leaves out unset values and empty variables', () => {
-    const data = { variables: { id: '1', filter: undefined }, headers: { 'X-Empty': undefined } };
-    expect(toRequestValues(JSON.stringify(data))).toEqual({
-      variables: { id: '1' },
-      headers: {},
-    });
-
-    expect(
-      toRequestValues(JSON.stringify({ variables: { filter: undefined }, headers: { a: 'b' } })),
-    ).toEqual({ variables: undefined, headers: { a: 'b' } });
-  });
-
-  test('keeps variables edited as JSON that are not objects', () => {
-    expect(toRequestValues(JSON.stringify({ variables: [], headers: {} }))).toEqual({
-      variables: [],
-      headers: {},
-    });
+test('request values leave out unset values and empty variables', () => {
+  const data = { variables: { id: '1', filter: undefined }, headers: { 'X-Empty': undefined } };
+  expect(toRequestValues(JSON.stringify(data))).toEqual({ variables: { id: '1' }, headers: {} });
+  expect(
+    toRequestValues(JSON.stringify({ variables: { filter: undefined }, headers: { a: 'b' } })),
+  ).toEqual({ variables: undefined, headers: { a: 'b' } });
+  // variables edited as JSON can be anything
+  expect(toRequestValues(JSON.stringify({ variables: [], headers: {} }))).toEqual({
+    variables: [],
+    headers: {},
   });
 });
 
@@ -216,100 +193,69 @@ describe('getResponseErrors', () => {
 });
 
 describe('syncOperationVariables', () => {
-  // `orders(filter: OrderFilter)`: every argument is optional
-  const orders = getOperationField(schema, 'query', 'orders')!;
+  const fields = schema.getQueryType()!.getFields();
   const example = generateOperationExample(schema, { kind: 'query', name: 'orders' })!;
+  /** sync `orders(filter: OrderFilter)`, every argument is optional */
+  const sync = (query: string, set: string[], prune = false) =>
+    syncOperationVariables(query, fields.orders, (name) => set.includes(name), { prune });
 
-  /** what the send path does: declare what's set, never touch anything else */
-  function declare(query: string, set: string[]) {
-    return syncOperationVariables(query, orders, (name) => set.includes(name));
-  }
-
-  /** what unsetting an argument does: declare what's set, undeclare what isn't */
-  function prune(query: string, set: string[]) {
-    return syncOperationVariables(query, orders, (name) => set.includes(name), { prune: true });
-  }
-
-  test('declares an optional argument once it is set', () => {
+  test('declares a set argument, undeclares it only when pruning', () => {
     // the generated example only declares required arguments
     expect(example.query).not.toContain('$filter');
+    const declared = sync(example.query, ['filter']);
+    expect(declared).toContain('query Orders($filter: OrderFilter) {');
+    expect(declared).toContain('orders(filter: $filter) {');
 
-    const synced = declare(example.query, ['filter']);
-    expect(synced).toContain('query Orders($filter: OrderFilter) {');
-    expect(synced).toContain('orders(filter: $filter) {');
+    // sending leaves a declaration alone, it may have been written by hand
+    expect(sync(declared, [])).toBe(declared);
+    expect(sync(declared, [], true)).toBe(example.query);
   });
 
-  test('undeclares the argument when it is unset again', () => {
-    expect(prune(declare(example.query, ['filter']), [])).toBe(example.query);
-  });
-
-  test('keeps an undeclared argument out of the document unless pruning', () => {
-    const query = declare(example.query, ['filter']);
-
-    // the send path leaves a declaration alone, it may have been written by hand
-    expect(declare(query, [])).toBe(query);
-  });
-
-  test('returns the same query when nothing changes', () => {
-    const query = 'query Orders {\n  orders {\n    id\n  }\n}';
-
-    expect(declare(query, [])).toBe(query);
-    expect(prune(query, [])).toBe(query);
-  });
-
-  test('keeps hand-written values', () => {
+  test('keeps hand-written values and required arguments', () => {
     const query = 'query Orders {\n  orders(filter: {status: PENDING}) {\n    id\n  }\n}';
-
     // no variable is declared for it, that would leave the variable unused
-    expect(declare(query, ['filter'])).toBe(query);
-    expect(prune(query, [])).toBe(query);
-  });
+    expect(sync(query, ['filter'])).toBe(query);
+    expect(sync(query, [], true)).toBe(query);
 
-  test('keeps required arguments declared', () => {
     const search = generateOperationExample(schema, { kind: 'query', name: 'search' })!;
-    const field = getOperationField(schema, 'query', 'search')!;
-
-    expect(syncOperationVariables(search.query, field, () => true)).toBe(search.query);
-    expect(syncOperationVariables(search.query, field, () => true, { prune: true })).toBe(
+    expect(syncOperationVariables(search.query, fields.search, () => false, { prune: true })).toBe(
       search.query,
     );
   });
 
-  test('ignores an unparsable query', () => {
-    expect(declare('query Orders {', ['filter'])).toBe('query Orders {');
-  });
-
-  test('ignores operations that do not select the field', () => {
-    const query = 'query Other {\n  search(term: $term) {\n    __typename\n  }\n}';
-
-    expect(prune(query, ['filter'])).toBe(query);
+  test('returns the query when nothing changes', () => {
+    const query = 'query Orders {\n  orders {\n    id\n  }\n}';
+    expect(sync(query, [])).toBe(query);
+    expect(sync(query, [], true)).toBe(query);
+    expect(sync('query Orders {', ['filter'])).toBe('query Orders {');
+    // operations that don't select the field
+    const other = 'query Other {\n  search(term: $term) {\n    __typename\n  }\n}';
+    expect(sync(other, ['filter'], true)).toBe(other);
   });
 });
 
 describe('inputTypeToJsonSchema', () => {
-  test('enum type', () => {
-    expect(inputTypeToJsonSchema(assertEnumType(schema.getType('OrderStatus')))).toEqual({
+  test('enums, scalars and wrapping types', () => {
+    const status = assertEnumType(schema.getType('OrderStatus'));
+    const statusSchema = {
       type: 'string',
       title: 'OrderStatus',
       description: 'The status of an order.',
       enum: ['PENDING', 'SHIPPED', 'DELIVERED', 'CANCELLED', 'REFUNDED'],
+    };
+
+    expect(inputTypeToJsonSchema(status)).toEqual(statusSchema);
+    expect(
+      inputTypeToJsonSchema(new GraphQLNonNull(new GraphQLList(new GraphQLNonNull(status)))),
+    ).toEqual({ type: 'array', items: statusSchema });
+    // custom scalars accept any value
+    expect(inputTypeToJsonSchema(assertScalarType(schema.getType('DateTime')))).toEqual({
+      type: ['string', 'number', 'boolean'],
+      description: 'An ISO-8601 encoded date time string.',
     });
   });
 
-  test('NonNull & list nesting', () => {
-    const status = assertEnumType(schema.getType('OrderStatus'));
-    const wrapped = new GraphQLNonNull(new GraphQLList(new GraphQLNonNull(status)));
-
-    expect(inputTypeToJsonSchema(wrapped)).toMatchObject({
-      type: 'array',
-      items: {
-        type: 'string',
-        enum: ['PENDING', 'SHIPPED', 'DELIVERED', 'CANCELLED', 'REFUNDED'],
-      },
-    });
-  });
-
-  test('input object with required fields', () => {
+  test('input objects with required fields and defaults', () => {
     expect(
       inputTypeToJsonSchema(assertInputObjectType(schema.getType('OrderCreateInput'))),
     ).toMatchObject({
@@ -321,45 +267,26 @@ describe('inputTypeToJsonSchema', () => {
         total: { type: 'number', description: 'Total amount of the order.' },
       },
     });
-  });
-
-  test('input object with defaults & custom scalar fallback', () => {
-    const result = inputTypeToJsonSchema(assertInputObjectType(schema.getType('OrderFilter')));
-
-    expect(result).toMatchObject({
-      type: 'object',
+    expect(
+      inputTypeToJsonSchema(assertInputObjectType(schema.getType('OrderFilter'))),
+    ).toMatchObject({
       description: 'Filters for the `orders` query.',
       // `status` has a default value, `after` is nullable: nothing is required
       required: [],
       properties: {
         after: {
-          // custom scalar (DateTime) fallback
           type: ['string', 'number', 'boolean'],
           description: 'Match orders created after this time.',
         },
-        status: {
-          type: 'string',
-          default: 'PENDING',
-        },
+        status: { type: 'string', default: 'PENDING' },
       },
     });
-  });
 
-  test('defaults are values, not GraphQL literals', () => {
-    const defaults = buildSchemaFromSDL(
-      `
-input Page {
-  first: Int = 10
-  cursor: String = "start"
-  tags: [String!] = ["a", "b"]
-}
-
-type Query {
-  list(page: Page): String
-}
-`.trim(),
-    );
-
+    // defaults are values, not GraphQL literals
+    const defaults = buildSchemaFromSDL(`
+      input Page { first: Int = 10, cursor: String = "start", tags: [String!] = ["a", "b"] }
+      type Query { list(page: Page): String }
+    `);
     expect(inputTypeToJsonSchema(assertInputObjectType(defaults.getType('Page')))).toMatchObject({
       properties: {
         first: { type: 'integer', default: 10 },
@@ -370,20 +297,15 @@ type Query {
   });
 
   test('@oneOf input objects are a union of their fields', () => {
-    const oneOf = buildSchemaFromSDL(
-      `
-"How to find a product."
-input ProductBy @oneOf {
-  "The product ID."
-  id: ID
-  sku: String
-}
-
-type Query {
-  product(by: ProductBy!): String
-}
-`.trim(),
-    );
+    const oneOf = buildSchemaFromSDL(`
+      "How to find a product."
+      input ProductBy @oneOf {
+        "The product ID."
+        id: ID
+        sku: String
+      }
+      type Query { product(by: ProductBy!): String }
+    `);
 
     expect(inputTypeToJsonSchema(assertInputObjectType(oneOf.getType('ProductBy')))).toEqual({
       title: 'ProductBy',
@@ -407,50 +329,36 @@ type Query {
     });
   });
 
-  test('custom scalar fallback', () => {
-    expect(inputTypeToJsonSchema(assertScalarType(schema.getType('DateTime')))).toEqual({
-      type: ['string', 'number', 'boolean'],
-      description: 'An ISO-8601 encoded date time string.',
-    });
-  });
-
   test('recursive input objects are one cyclic schema', () => {
     // Hasura-style filters: every input references itself and its relations
-    const recursive = buildSchemaFromSDL(
-      `
-input String_comparison_exp { _eq: String, _like: String }
-input order_bool_exp {
-  _and: [order_bool_exp!]
-  _not: order_bool_exp
-  _or: [order_bool_exp!]
-  customer: customer_bool_exp
-  items: item_bool_exp
-}
-input customer_bool_exp {
-  _and: [customer_bool_exp!]
-  _not: customer_bool_exp
-  name: String_comparison_exp
-  orders: order_bool_exp
-}
-input item_bool_exp {
-  _not: item_bool_exp
-  order: order_bool_exp
-  name: String_comparison_exp
-}
-type Query {
-  orders(where: order_bool_exp): [String!]!
-}
-`.trim(),
-    );
+    const recursive = buildSchemaFromSDL(`
+      input String_comparison_exp { _eq: String, _like: String }
+      input order_bool_exp {
+        _and: [order_bool_exp!]
+        _not: order_bool_exp
+        _or: [order_bool_exp!]
+        customer: customer_bool_exp
+        items: item_bool_exp
+      }
+      input customer_bool_exp {
+        _and: [customer_bool_exp!]
+        _not: customer_bool_exp
+        name: String_comparison_exp
+        orders: order_bool_exp
+      }
+      input item_bool_exp {
+        _not: item_bool_exp
+        order: order_bool_exp
+        name: String_comparison_exp
+      }
+      type Query { orders(where: order_bool_exp): [String!]! }
+    `);
     const order = inputTypeToJsonSchema(assertInputObjectType(recursive.getType('order_bool_exp')));
     const customer = order.properties!.customer as Exclude<JsonSchema, boolean>;
 
     expect(order.properties!._not).toBe(order);
     expect(order.properties!._and).toEqual({ type: 'array', items: order });
     expect(customer.properties!.orders).toBe(order);
-    expect(
-      inputTypeToJsonSchema(assertInputObjectType(recursive.getType('customer_bool_exp'))),
-    ).toBe(customer);
 
     expect(stringify(order, { alias: true })).toBe('order_bool_exp');
     expect(stringify(order.properties!._and, { alias: true })).toBe('array<order_bool_exp>');

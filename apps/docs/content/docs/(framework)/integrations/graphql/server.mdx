@@ -104,7 +104,7 @@ query CustomerProfile($id: ID! = "cus_42") {
 | variables   | default values of variables (left out of the query), or generated for required ones |
 | response    | generated from the selection                                                        |
 
-Operations must be named and valid against the schema, otherwise the build fails.
+Operations must have unique names and be valid against the schema, otherwise the build fails.
 
 Arguments of root fields must be variables of the same names, like `customer(id: $id)`, so the playground can edit them.
 
