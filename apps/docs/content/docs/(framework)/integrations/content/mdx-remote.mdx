@@ -8,9 +8,19 @@ description: Compiled Markdown/MDX content on demand.
 Fumadocs offers the **MDX Remote** package, it is a helper to integrate Markdown/MDX content sources with Fumadocs.
 You can think it as a `next-mdx-remote` with built-in plugins for Fumadocs.
 
-<Callout type='warn' title="Be Careful">
+<Callout type="warn">
 
-The Passed MDX content must be trusted as it allows code execution by default.
+Do not pass untrusted MDX to the compiler, it runs as JavaScript in your app. Compile untrusted content as Markdown instead, it can't run JavaScript or raw HTML:
+
+```ts
+import { createCompiler } from '@fumadocs/mdx-remote';
+
+const compiler = createCompiler({
+  format: 'md',
+  // skip reading files and fetching URLs for image sizes
+  remarkImageOptions: false,
+});
+```
 
 </Callout>
 

@@ -19,6 +19,12 @@ The AsyncAPI schemas to read from.
 
 Only schemas listed here can be loaded, other IDs passed to `getSchema()` or preloaded by pages throw an error.
 
+<Callout type="warn">
+
+Do not pass untrusted schemas to `input`, their `$ref`s can read local files and fetch URLs, private hosts included.
+
+</Callout>
+
 ```ts tab="Basic"
 import { createAsyncAPI } from '@fumadocs/asyncapi/server';
 

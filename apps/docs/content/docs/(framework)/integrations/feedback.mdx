@@ -52,6 +52,12 @@ export default async function Page() {
 You can specify a server action, or any function (in client component) to handle the user feedback.
 For example, to report user feedback as a `on_rate_docs` event on PostHog.
 
+<Callout type="warn">
+
+Validate the feedback before storing or sending it, anyone can call a server action with any input.
+
+</Callout>
+
 ### Feedback Block
 
 You can also configure block-level feedback (e.g. a feedback popover as user select text).
