@@ -2,7 +2,7 @@
 import type { FC } from 'react';
 import type { ShikiFactory } from 'fumadocs-core/highlight/shiki';
 import { Schema } from 'shared-api/components/schema';
-import { createOpenAPIRenderer, type PageLayoutProps } from '@/utils/create-page';
+import { createRenderer, type PageLayoutProps } from '@/utils/create-page';
 import { Operation } from '@/ui/operation';
 import type { CreateOpenAPIPageOptions, OpenAPIPageProps } from '.';
 
@@ -12,7 +12,7 @@ import type { CreateOpenAPIPageOptions, OpenAPIPageProps } from '.';
 export function createOpenAPIPageBase(
   options: CreateOpenAPIPageOptions & { shiki: ShikiFactory },
 ): FC<OpenAPIPageProps> {
-  return createOpenAPIRenderer({
+  return createRenderer({
     ...options,
     components: { SchemaUI: Schema, Operation, Layout, ...options.components },
   });

@@ -2,7 +2,7 @@ import { fileURLToPath } from 'node:url';
 import { renderToString } from 'react-dom/server';
 import { expect, test } from 'vitest';
 import { loadDocument } from '@/utils/document/load';
-import { createOpenAPIRenderer } from '@/utils/create-page';
+import { createOpenAPIRenderer } from '@/index.browser';
 import type { PageOperationProps } from '@/operation';
 import {
   type ExampleRequest,
