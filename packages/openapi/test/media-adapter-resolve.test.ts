@@ -47,7 +47,9 @@ describe('Media Adapter Resolution', () => {
 
   test('resolves text/plain with parameters', () => {
     const adapter = resolveMediaAdapter('text/plain; charset=utf-8', defaultAdapters);
-    expect(adapter).toBe(defaultAdapters['application/json']);
+    expect(adapter).toBe(defaultAdapters['text/plain']);
+    // the text itself, not a JSON string
+    expect(adapter?.encode({ body: 'say "hi"' })).toBe('say "hi"');
   });
 
   test('returns undefined for unsupported media type', () => {

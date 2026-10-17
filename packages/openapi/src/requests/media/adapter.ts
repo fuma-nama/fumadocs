@@ -1,10 +1,12 @@
 import {
-  backtickQuote,
-  goRawStringLiteral,
-  inputToString,
-  rustRawStringLiteral,
-  tripleDoubleQuote,
-} from '@/requests/string-utils';
+  csharpRawString,
+  goString,
+  javaTextBlock,
+  jsTemplateLiteral,
+  pythonString,
+  rustString,
+} from 'shared-api/codegen';
+import { inputToString } from '@/requests/string-utils';
 import type { RequestData } from '@/requests/types';
 import { resolveMediaAdapter } from './resolve-adapter';
 // @ts-expect-error -- untyped
@@ -94,6 +96,14 @@ export const defaultAdapters = {
     },
     generateExample(data, ctx) {
       return str(data.body, 'application/x-ndjson', ctx);
+    },
+  },
+  'text/plain': {
+    encode(data) {
+      return inputToString(data.body, 'text/plain');
+    },
+    generateExample(data, ctx) {
+      return str(data.body, 'text/plain', ctx);
     },
   },
   'application/x-www-form-urlencoded': {
@@ -246,7 +256,8 @@ function str(
     | 'application/x-www-form-urlencoded'
     | 'application/x-ndjson'
     | 'application/json'
-    | 'application/xml',
+    | 'application/xml'
+    | 'text/plain',
   ctx: MediaContext,
 ) {
   if (ctx.lang === 'js' && mediaType === 'application/json') {
@@ -256,18 +267,18 @@ function str(
   const text = inputToString(init, mediaType);
   switch (ctx.lang) {
     case 'js':
-      return `const body = ${backtickQuote(text)}`;
+      return `const body = ${jsTemplateLiteral(text)}`;
     case 'python':
-      return `body = ${tripleDoubleQuote(text)}`;
+      return `body = ${pythonString(text)}`;
     case 'go':
       (ctx as GoContext).addImport('strings');
-      return `body := strings.NewReader(${goRawStringLiteral(text)})`;
+      return `body := strings.NewReader(${goString(text)})`;
     case 'java':
       (ctx as JavaContext).addImport('java.net.http.HttpRequest.BodyPublishers');
-      return `var body = BodyPublishers.ofString(${tripleDoubleQuote(`\n${text}`)});`;
+      return `var body = BodyPublishers.ofString(${javaTextBlock(text)});`;
     case 'csharp':
-      return `var body = new StringContent("""\n${text}\n""", Encoding.UTF8, "${mediaType}");`;
+      return `var body = new StringContent(${csharpRawString(text)}, Encoding.UTF8, "${mediaType}");`;
     case 'rust':
-      return `let body = ${rustRawStringLiteral(text)};`;
+      return `let body = ${rustString(text)};`;
   }
 }
