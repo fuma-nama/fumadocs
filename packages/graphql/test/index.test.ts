@@ -56,11 +56,15 @@ describe('GraphQL source', () => {
 
     const props = data.getGraphQLPageProps();
     expect(props.items).toEqual([{ type: 'operation', kind: 'query', name: 'orders' }]);
+    expect(props.payload).not.toHaveProperty('examples');
     // the SDL payload can be re-built into a schema on client side
     const schema = buildSchemaFromSDL(props.payload.sdl);
     expect(schema.getQueryType()?.getFields().orders).toBeDefined();
 
-    const typeFile = source.files.find((file) => file.path === '/objects/Order.mdx');
+    // type pages are opt-in
+    expect(source.files.some((file) => file.path.startsWith('/objects/'))).toBe(false);
+    const typeSource = await create().staticSource({ includeTypes: true });
+    const typeFile = typeSource.files.find((file) => file.path === '/objects/Order.mdx');
     expect(typeFile).toBeDefined();
     const typeProps = (typeFile!.data as GraphQLPageData).getGraphQLPageProps();
     expect(typeProps.items).toEqual([{ type: 'type', kind: 'object', name: 'Order' }]);
@@ -72,6 +76,7 @@ describe('GraphQL source', () => {
     const source = await create().staticSource({
       // route group folders are ignored in page URLs
       baseDir: '(graphql)',
+      includeTypes: true,
     });
     source.configureStatic?.({
       loader: {
@@ -119,18 +124,19 @@ describe('GraphQL source', () => {
         "Create Order",
         "Legacy Create Order",
         "Order Updated",
-        "Role",
-        "DateTime",
-        "Node",
-        "OrderStatus",
-        "Customer",
-        "ContactInfo",
-        "Order",
-        "SearchResult",
-        "OrderFilter",
-        "OrderCreateInput",
       ]
     `);
+
+    const withTypes = await create().staticSource({
+      per: 'file',
+      includeTypes: (type) => type.name.startsWith('Order'),
+    });
+    expect((withTypes.files[0].data as GraphQLPageData).toc.slice(7)).toEqual([
+      { depth: 2, title: 'OrderStatus', url: '#orderstatus' },
+      { depth: 2, title: 'Order', url: '#order' },
+      { depth: 2, title: 'OrderFilter', url: '#orderfilter' },
+      { depth: 2, title: 'OrderCreateInput', url: '#ordercreateinput' },
+    ]);
   });
 
   test('custom pages builder', async () => {

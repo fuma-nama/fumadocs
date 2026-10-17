@@ -6,9 +6,9 @@ async fn main() -> Result<()> {
 
   let url = "http://localhost:8080/hello_world?search=ai";
   let body = r#"{
-    "id": "id",
-    "note": "it's \"quoted\" \\ `a` ${b}"
-  }"#;
+  "id": "id",
+  "note": "it's \"quoted\" \\ `a` ${b}"
+}"#;
 
   let res = client
     .request(Method::GET, url)

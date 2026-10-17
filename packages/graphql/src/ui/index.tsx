@@ -21,6 +21,13 @@ export type {
   PageOperationProps as OperationProps,
   PageTypeProps as TypeDocsProps,
 };
+export {
+  type CodeUsageData,
+  type CodeUsageGenerator,
+  type CodeUsageGeneratorRegistry,
+  createCodeUsageGeneratorRegistry,
+  registerDefaultCodeUsages,
+} from '@/codegen';
 
 export interface CreateGraphQLPageOptions extends GraphQLRuntimeOptions, GraphQLRenderOptions {
   /**

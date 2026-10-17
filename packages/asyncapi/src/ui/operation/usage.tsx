@@ -1,11 +1,13 @@
 'use client';
-import { useState, useSyncExternalStore } from 'react';
+import { useState } from 'react';
 import { useTranslations } from '@fuma-translate/react';
 import {
   cardCodeBlock,
   exampleCardClassName,
   ExampleHeader,
   ExampleSelect,
+  selectCodeUsage,
+  useCodeUsageId,
 } from 'shared-api/components/example';
 import { useOperation, useOperationSecurity } from '@/operation';
 import { useRenderContext } from '@/utils/create-page';
@@ -30,21 +32,7 @@ import { MessageName } from '@/ui/components/message-name';
 
 let defaultCodeUsages: CodeUsageGeneratorRegistry | undefined;
 
-// the selected language applies to every code sample of the session
 const storageKey = 'fumadocs-asyncapi-code-usage';
-const listeners = new Set<() => void>();
-
-function subscribe(listener: () => void) {
-  listeners.add(listener);
-  return () => {
-    listeners.delete(listener);
-  };
-}
-
-function select(id: string) {
-  sessionStorage.setItem(storageKey, id);
-  for (const listener of listeners) listener();
-}
 
 /** code samples of the operation for the selected server, with a select of their languages */
 export function CodeUsages() {
@@ -56,11 +44,7 @@ export function CodeUsages() {
   const security = useOperationSecurity();
   const { servers, server } = useServer();
   const [messageId, setMessageId] = useState<string>();
-  const selected = useSyncExternalStore(
-    subscribe,
-    () => sessionStorage.getItem(storageKey),
-    () => null,
-  );
+  const selected = useCodeUsageId(storageKey);
   const schema = server ? servers[server.id] : undefined;
   const key = schema ? getBindingKey(schema.protocol) : '';
   const message = messages.find((item) => item.id === messageId) ?? messages[0];
@@ -137,7 +121,11 @@ export function CodeUsages() {
           />
         )}
         {samples.length > 1 ? (
-          <ExampleSelect items={samples} value={sample.value} onValueChange={select} />
+          <ExampleSelect
+            items={samples}
+            value={sample.value}
+            onValueChange={(value) => selectCodeUsage(storageKey, value)}
+          />
         ) : (
           <span className="px-2 text-fd-muted-foreground">{sample.label}</span>
         )}

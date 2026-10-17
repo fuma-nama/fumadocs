@@ -1,5 +1,5 @@
 'use client';
-import { type ReactNode, useState, useSyncExternalStore } from 'react';
+import { type ReactNode, useState } from 'react';
 import { Switch } from '@base-ui/react/switch';
 import { getRaw } from '@scalar/json-magic/magic-proxy';
 import { useTranslations } from '@fuma-translate/react';
@@ -16,6 +16,8 @@ import {
   exampleCardClassName,
   ExampleHeader,
   ExampleSelect,
+  selectCodeUsage,
+  useCodeUsageId,
 } from 'shared-api/components/example';
 import { ClientCodeBlock } from '@/ui/components/codeblock';
 import { Markdown } from '@/ui/components/markdown';
@@ -93,21 +95,7 @@ function UsageTabsSelector() {
   );
 }
 
-// the selected code usage applies to every code usage of the session
 const storageKey = 'fumadocs_openapi_requests';
-const listeners = new Set<() => void>();
-
-function subscribe(listener: () => void) {
-  listeners.add(listener);
-  return () => {
-    listeners.delete(listener);
-  };
-}
-
-function select(id: string) {
-  sessionStorage.setItem(storageKey, id);
-  for (const listener of listeners) listener();
-}
 
 /** the code usages of the selected example request, with a select of their languages */
 export function CodeUsages({
@@ -124,11 +112,7 @@ export function CodeUsages({
 }) {
   const generators = useOperation().codeUsages.map();
   const examples = useExampleRequests();
-  const selected = useSyncExternalStore(
-    subscribe,
-    () => sessionStorage.getItem(storageKey),
-    () => null,
-  );
+  const selected = useCodeUsageId(storageKey);
   const id =
     selected !== null && generators.has(selected) ? selected : generators.keys().next().value;
   const code = useCodeUsage(id ?? '');
@@ -159,7 +143,11 @@ export function CodeUsages({
           />
         )}
         {items.length > 1 ? (
-          <ExampleSelect items={items} value={id} onValueChange={select} />
+          <ExampleSelect
+            items={items}
+            value={id}
+            onValueChange={(value) => selectCodeUsage(storageKey, value)}
+          />
         ) : (
           <span className="px-2 text-fd-muted-foreground">{items[0].label}</span>
         )}

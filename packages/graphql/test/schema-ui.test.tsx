@@ -3,11 +3,10 @@ import path from 'node:path';
 import fs from 'node:fs';
 import { describe, expect, test } from 'vitest';
 import { buildSchemaFromSDL } from '@/utils/build-schema';
-import { getOperationField } from '@/utils/schema';
 import { generateGraphQLSchemaUI } from '@/utils/generate-schema-ui';
 
 const renderers = {
-  renderMarkdown: () => null,
+  renderMarkdown: (md: string) => md,
   renderDirectives: () => null,
   renderArguments: () => null,
   renderEnumValues: () => null,
@@ -19,62 +18,102 @@ const schema = buildSchemaFromSDL(
 );
 
 /**
- * `description`/`infoTags` are ReactNode, keep only the shape-relevant parts.
+ * The refs reachable from the root, `description`/`infoTags` are ReactNode, keep only the shape-relevant parts.
  */
-function summarize(generated: ReturnType<typeof generateGraphQLSchemaUI>) {
-  const refs: Record<string, unknown> = {};
+function summarize({ $root, refs }: ReturnType<typeof generateGraphQLSchemaUI>) {
+  const out: Record<string, unknown> = {};
+  const queue = [$root];
 
-  for (const [key, data] of Object.entries(generated.refs)) {
-    refs[key] = {
+  for (const key of queue) {
+    if (key in out) continue;
+    const data = refs[key];
+    out[key] = {
       type: data.type,
       aliasName: data.aliasName,
       deprecated: data.deprecated,
       props: 'props' in data ? data.props.map((prop) => prop.name) : undefined,
     };
+    if (data.type === 'object') for (const prop of data.props) queue.push(prop.$type);
+    if (data.type === 'or') for (const item of data.items) queue.push(item.$type);
   }
 
-  return { $root: generated.$root, refs };
+  return { $root, refs: out };
 }
 
 describe('generateGraphQLSchemaUI', () => {
-  test('Customer object with cyclic references', () => {
-    const type = schema.getType('Customer');
-    expect(type).toBeDefined();
+  test('refs of a wrapped type and its cyclic references', () => {
+    const field = schema.getQueryType()!.getFields().orders;
+    const generated = generateGraphQLSchemaUI(schema, { type: field.type }, renderers);
+    const { refs } = generated;
 
-    const generated = generateGraphQLSchemaUI(schema, { type: type! }, renderers);
-
-    // cycle: Customer.orders -> Order -> Order.customer -> Customer, each
-    // field ref is registered exactly once instead of recursing forever
-    expect(generated.refs['Customer.orders']).toMatchObject({
-      typeName: 'Order',
-      aliasName: '[Order!]!',
-      type: 'object',
-    });
-    expect(generated.refs['Order.customer']).toMatchObject({
+    // generated when read
+    expect(Object.keys(refs)).toEqual([]);
+    // `[Order!]!` collapses into the named type, `aliasName` keeps the annotation
+    expect(refs.$root).toMatchObject({ typeName: 'Order', aliasName: '[Order!]!', type: 'object' });
+    // cycle: Order.customer -> Customer -> Customer.orders -> Order
+    expect(refs['Order.customer']).toMatchObject({
       typeName: 'Customer',
       aliasName: 'Customer!',
       type: 'object',
     });
-    // deprecated field
-    expect(generated.refs['Customer.email']).toMatchObject({ deprecated: true });
+    expect(refs['Customer.orders']).toMatchObject({ typeName: 'Order', aliasName: '[Order!]!' });
+    expect(refs['Customer.email']).toMatchObject({ deprecated: true });
 
     expect(summarize(generated)).toMatchSnapshot();
   });
 
-  test('orders query return type keeps wrapper alias', () => {
-    const field = getOperationField(schema, 'query', 'orders');
-    expect(field).toBeDefined();
+  test('descriptions of named types', () => {
+    const { refs } = generateGraphQLSchemaUI(schema, { type: schema.getType('Order')! }, renderers);
 
-    const generated = generateGraphQLSchemaUI(schema, { type: field!.type }, renderers);
+    // built-in scalars are described by the spec
+    expect(refs['Order.id'].description).toBeUndefined();
+    // enums and custom scalars describe the fields typed as them
+    expect(refs['Order.status'].description).toBe('The status of an order.');
+    expect(refs['Order.createdAt'].description).toBe('Time at which the order was created.');
+  });
 
-    // wrapper collapsing: `[Order!]!` collapses into the named type while the
-    // GraphQL-style annotation is kept in `aliasName`
-    expect(generated.refs.$root).toMatchObject({
-      typeName: 'Order',
-      aliasName: '[Order!]!',
-      type: 'object',
+  test('implementations of interface', () => {
+    const { refs } = generateGraphQLSchemaUI(schema, { type: schema.getType('Node')! }, renderers);
+
+    expect(refs.$root.infoTags).toContainEqual({
+      label: 'Implemented by',
+      list: ['Customer', 'Order'],
     });
+  });
 
-    expect(summarize(generated)).toMatchSnapshot();
+  test('a root documented by the page', () => {
+    const { refs } = generateGraphQLSchemaUI(
+      schema,
+      { type: schema.getType('Node')!, description: '' },
+      renderers,
+    );
+
+    expect(refs.$root.description).toBeUndefined();
+    expect(refs.$root.infoTags).toEqual([]);
+  });
+
+  test('one-of input object', () => {
+    const oneOf = buildSchemaFromSDL(`
+      input OrderLookup @oneOf {
+        id: ID
+        number: Int
+      }
+
+      type Query {
+        order(by: OrderLookup!): String
+      }
+    `);
+    const { refs } = generateGraphQLSchemaUI(
+      oneOf,
+      { type: oneOf.getType('OrderLookup')! },
+      renderers,
+    );
+    const root = refs.$root;
+
+    expect(root.type === 'object' && root.props.map((prop) => prop.required)).toEqual([
+      false,
+      false,
+    ]);
+    expect(root.infoTags).toHaveLength(1);
   });
 });

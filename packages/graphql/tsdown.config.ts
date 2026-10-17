@@ -10,7 +10,6 @@ export default defineConfig({
   entry: [
     './src/{index,i18n}.ts',
     './src/{operation,type-docs}.tsx',
-    './src/utils/snippets.ts',
     './src/playground/index.ts',
     './src/ui/index.tsx',
     './src/ui/playground/index.tsx',

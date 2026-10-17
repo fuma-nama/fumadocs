@@ -2,21 +2,10 @@
 import js2xml from 'xml-js/lib/js2xml';
 
 /**
- * Convert input value to hardcoded string (with quotes)
+ * The text of a body value in the format of a media type, strings are already serialized.
  */
-export function inputToString(
-  value: unknown,
-  format:
-    | 'application/x-www-form-urlencoded'
-    | 'application/x-ndjson'
-    | 'application/json'
-    | 'application/xml' = 'application/json',
-): string {
+export function inputToString(value: unknown, format = 'application/json'): string {
   if (typeof value === 'string') return value;
-
-  if (format === 'application/json') {
-    return JSON.stringify(value, null, 2);
-  }
 
   if (format === 'application/x-ndjson') {
     return Array.isArray(value)
@@ -38,7 +27,9 @@ export function inputToString(
     return params.toString();
   }
 
-  return js2xml(value, { compact: true, spaces: 2 });
+  if (format === 'application/xml') return js2xml(value, { compact: true, spaces: 2 });
+
+  return JSON.stringify(value, null, 2);
 }
 
 /**
@@ -62,43 +53,6 @@ export function doubleQuote(str: string): string {
  */
 export function jsxString(str: string): string {
   return str.includes('"') ? `{${JSON.stringify(str)}}` : `"${str}"`;
-}
-
-/**
- * Returns the input string wrapped in Python triple double-quotes,
- * escaping embedded triple quotes and backslashes.
- */
-export function tripleDoubleQuote(str: string): string {
-  // Escape \ first, then triple double quotes
-  return `"""${str.replace(/\\/g, '\\\\').replace(/"""/g, '\\"\\"\\"')}"""`;
-}
-
-/**
- * Returns the input string wrapped in a JavaScript template literal, escaping internal backticks, backslashes and `${`.
- */
-export function backtickQuote(str: string): string {
-  return `\`${str.replace(/[\\`]|\$\{/g, '\\$&')}\``;
-}
-
-/**
- * Returns the input string wrapped inside a Go raw string literal, where backticks can't be escaped and are concatenated instead.
- */
-export function goRawStringLiteral(str: string): string {
-  return `\`${str.replaceAll('`', '` + "`" + `')}\``;
-}
-
-/**
- * Returns the input string wrapped inside a Rust string literal,
- * with increasing number of # to escape `"#`
- */
-export function rustRawStringLiteral(str: string): string {
-  let hashes = '#';
-
-  while (str.includes(`"${hashes}`)) {
-    hashes += '#';
-  }
-
-  return `r${hashes}"${str}"${hashes}`;
 }
 
 export function indent(code: string, tab: number = 1) {

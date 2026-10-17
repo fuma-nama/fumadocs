@@ -10,9 +10,9 @@ Everything outside `@fumadocs/graphql/ui` is headless.
 | Path                           | Module                                                               |
 | ------------------------------ | -------------------------------------------------------------------- |
 | `@fumadocs/graphql`            | the page: the schema built from SDL, cross-links and your components |
-| `@fumadocs/graphql/operation`  | an operation: its field, title, directives and generated example     |
+| `@fumadocs/graphql/operation`  | an operation: its field, title, directives and examples              |
 | `@fumadocs/graphql/type-docs`  | a named type: its kind, directives, relations and usages             |
-| `@fumadocs/graphql/playground` | the fetcher, form model and stored state of the playground           |
+| `@fumadocs/graphql/playground` | sending operations and subscriptions, the stored state of playground |
 
 ## Page
 
@@ -53,13 +53,13 @@ Pass `typeLinks` and `operationLinks` to override the [cross-links](/docs/integr
 
 Components under the page read its state.
 
-| Hook                           | Returns                                                 |
-| ------------------------------ | ------------------------------------------------------- |
-| `useGraphQL()`                 | the built `schema`, its `sdl` and the page links        |
-| `useComponents()`              | the components passed to the page                       |
-| `useTypeLink(name)`            | the page URL of a named type, `undefined` when unlinked |
-| `useOperationLink(kind, name)` | the page URL of an operation                            |
-| `useRenderContext()`           | the render options of the page, like `playground`       |
+| Hook                           | Returns                                                            |
+| ------------------------------ | ------------------------------------------------------------------ |
+| `useGraphQL()`                 | the built `schema`, its `sdl`, the page links and examples         |
+| `useComponents()`              | the components passed to the page                                  |
+| `useTypeLink(name)`            | the page URL of a named type, `undefined` when unlinked            |
+| `useOperationLink(kind, name)` | the page URL of an operation                                       |
+| `useRenderContext()`           | the render options of the page, like `playground` and `codeUsages` |
 
 To render operations yourself, mount `<GraphQLProvider sdl={sdl} shiki={shiki} components={...} />` in place of `createGraphQLRenderer()`.
 
@@ -85,14 +85,24 @@ export function Operation({ kind, name }: PageOperationProps) {
 }
 
 function Content() {
-  const { title, field, example } = useOperation();
+  const { title, field, examples, selected, select } = useOperation();
   const { CodeBlock, SchemaUI } = useComponents();
+  const example = examples.at(selected);
 
   return (
     <>
       <h2>{title}</h2>
       {field.args.map((arg) => (
-        <SchemaUI key={arg.name} client={{ name: arg.name }} root={{ type: arg.type }} />
+        <SchemaUI
+          key={arg.name}
+          client={{ name: arg.name, rootId: arg.name }}
+          root={{ type: arg.type }}
+        />
+      ))}
+      {examples.map((item, i) => (
+        <button key={i} onClick={() => select(i)}>
+          {item.name ?? 'Example'}
+        </button>
       ))}
       {example && <CodeBlock lang="graphql" code={example.query} />}
     </>
@@ -100,7 +110,11 @@ function Content() {
 }
 ```
 
+`examples` are the ones from the [`examples` option](/docs/integrations/graphql/server#examples), or a generated one. `selected` is shared by everything under the provider, like the example card and the playground.
+
 <auto-type-table path="props.ts" name="OperationInfo" />
+
+<auto-type-table path="props.ts" name="OperationExample" />
 
 ## Type
 
@@ -131,7 +145,7 @@ function Content() {
       {relations.usages.returnedBy.map((op) => (
         <span key={`${op.kind}:${op.name}`}>{op.name}</span>
       ))}
-      <SchemaUI client={{ name, as: 'body' }} root={{ type }} />
+      <SchemaUI client={{ name, rootId: name, as: 'body' }} root={{ type }} />
     </>
   );
 }
@@ -139,6 +153,51 @@ function Content() {
 
 <auto-type-table path="props.ts" name="NamedTypeInfo" />
 
-`relations.usages` is where the type appears across the schema.
+`relations` connects the type to the rest of schema:
+
+| Relation        | Is                                          |
+| --------------- | ------------------------------------------- |
+| `implements`    | the interfaces it implements                |
+| `unions`        | the unions including it, for objects        |
+| `implementedBy` | the objects implementing it, for interfaces |
+| `possibleTypes` | the members of unions                       |
+| `usages`        | where it appears across the schema          |
 
 <auto-type-table path="props.ts" name="TypeUsages" />
+
+## Playground
+
+`@fumadocs/graphql/playground` is the logic of the playground, without UI.
+
+| Export                                        | Does                                                                  |
+| --------------------------------------------- | --------------------------------------------------------------------- |
+| `executeGraphQL(request)`                     | sends a query or mutation over HTTP POST, the default `fetcher`       |
+| `subscribeGraphQL(request, handlers)`         | starts a subscription, returns a function to stop it                  |
+| `getSubscriptionUrl(url)`                     | the default subscription endpoint: `url` with a `ws(s)://` scheme     |
+| `inputTypeToJsonSchema(type)`                 | the JSON Schema of an input type, for forms of variables              |
+| `syncOperationVariables(query, field, isSet)` | declares the variables of required and set optional arguments         |
+| `readStored()`, `writeStored(state)`          | the endpoint and headers in local storage, headers by endpoint origin |
+
+`subscribeGraphQL()` picks the protocol by the URL scheme, like [`subscriptionUrl`](/docs/integrations/graphql/api-page#subscriptions).
+
+```ts
+import { getSubscriptionUrl, subscribeGraphQL } from '@fumadocs/graphql/playground';
+
+const stop = subscribeGraphQL(
+  {
+    url: getSubscriptionUrl('/api/graphql'),
+    query: 'subscription { orderUpdated(id: "1") { status } }',
+    headers: {},
+  },
+  {
+    onNext: (result) => console.log(result),
+    onError: (message) => console.error(message),
+    onComplete: () => console.log('completed'),
+  },
+);
+
+// no handler is called after it
+stop();
+```
+
+<auto-type-table path="props.ts" name="SubscriptionHandlers" />

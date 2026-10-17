@@ -3,6 +3,7 @@ import { useCallback, useEffect, useRef, useState, useSyncExternalStore } from '
 import { type DataEngineListener, type Stf, useStf } from '@fumari/stf';
 import { dereference, type JsonSchema, matches } from '@fumadocs/json-schema';
 import { EventSourceParserStream } from 'eventsource-parser/stream';
+import { addLogEntry } from 'shared-api/components/playground/log';
 import {
   type OperationMessage,
   useChannelMessages,
@@ -147,15 +148,7 @@ interface Session {
   connection?: TransportConnection;
 }
 
-/** older entries are dropped, a busy channel can send many messages */
-const maxEntries = 500;
-let nextId = 0;
-
-/** an update of the log, adding an entry that happens now */
-function addEntry(entry: Omit<LogEntry, 'id' | 'time'>) {
-  const item: LogEntry = { ...entry, id: nextId++, time: Date.now() };
-  return (log: LogEntry[]) => [...(log.length < maxEntries ? log : log.slice(1)), item];
-}
+const addEntry = addLogEntry<LogEntry>;
 
 /** the documented message of data, when exactly one payload matches it */
 function identifyMessage(data: string, messages: OperationMessage[]): OperationMessage | undefined {

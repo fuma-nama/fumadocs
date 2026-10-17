@@ -2,11 +2,15 @@
 import { type FC, useState } from 'react';
 import { SendHorizontal } from 'lucide-react';
 import { useTranslations } from '@fuma-translate/react';
-import { Spinner } from 'shared-api/components/spinner';
 import { useResponseExamples } from '@/operation';
 import type { PlaygroundResponse } from '@/playground/use-playground';
 import { ExampleSelect } from 'shared-api/components/example';
-import { PanelHeader, panelCodeBlock } from 'shared-api/components/playground/panels';
+import {
+  PanelHeader,
+  panelCodeBlock,
+  Placeholder,
+  SendingOverlay,
+} from 'shared-api/components/playground/panels';
 import { Segmented, SegmentedList, SegmentedPanel } from 'shared-api/components/segmented';
 import { ClientCodeBlock } from '@/ui/components/codeblock';
 import { CodeUsages } from '@/ui/operation/usage-tabs';
@@ -47,12 +51,7 @@ export function ResponsePanel({
         ) : (
           <ResponseExamples />
         )}
-        {loading && (
-          <div className="absolute inset-0 flex items-center justify-center gap-2 bg-fd-card/70 text-sm text-fd-muted-foreground backdrop-blur-[1px] transition-opacity delay-150 duration-200 starting:opacity-0">
-            <Spinner className="size-3.5" />
-            {t('Sending request...')}
-          </div>
-        )}
+        {loading && <SendingOverlay />}
       </div>
     </div>
   );
@@ -64,18 +63,10 @@ function ResponseExamples() {
   const [code, setCode] = useState<string>();
   const [selected, setSelected] = useState(0);
 
-  if (tabs.length === 0) {
+  if (tabs.length === 0)
     return (
-      <div className="flex flex-1 flex-col items-center justify-center gap-3 p-6 text-center">
-        <div className="rounded-xl border bg-fd-secondary p-2.5 text-fd-muted-foreground">
-          <SendHorizontal className="size-4" />
-        </div>
-        <p className="text-sm text-fd-muted-foreground">
-          {t('Send a request to see its response.')}
-        </p>
-      </div>
+      <Placeholder icon={SendHorizontal}>{t('Send a request to see its response.')}</Placeholder>
     );
-  }
 
   const tab = tabs.find((item) => item.code === code) ?? tabs[0];
   const examples = tab.examples ?? [];

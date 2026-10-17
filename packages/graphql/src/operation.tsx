@@ -1,12 +1,8 @@
 'use client';
-import { createContext, type ReactNode, use, useMemo } from 'react';
+import { createContext, type ReactNode, use, useMemo, useState } from 'react';
 import type { DirectiveNode, GraphQLField } from 'graphql';
-import {
-  getCustomDirectives,
-  getOperationField,
-  getOperationTitle,
-  type OperationKind,
-} from '@/utils/schema';
+import { idToTitle } from 'shared-api/utils/id-to-title';
+import { getCustomDirectives, type OperationKind } from '@/utils/schema';
 import { generateOperationExample, type OperationExample } from '@/utils/example';
 import { useGraphQL } from '@/utils/create-page';
 
@@ -22,9 +18,12 @@ export interface OperationInfo {
   /** custom directive applications */
   directives: DirectiveNode[];
   /**
-   * a generated example, `undefined` when the operation cannot be sampled.
+   * examples from the `examples` option of server, otherwise a generated one, empty when the operation cannot be sampled.
    */
-  example?: OperationExample;
+  examples: OperationExample[];
+  /** index of the selected example, shared by the example cards and playground */
+  selected: number;
+  select: (index: number) => void;
 }
 
 /** props of the component rendering an operation of a page */
@@ -43,22 +42,33 @@ export interface OperationProviderProps {
 
 const OperationContext = createContext<OperationInfo | null>(null);
 
+const empty: OperationExample[] = [];
+
 export function OperationProvider({ kind, name, children }: OperationProviderProps) {
-  const { schema } = useGraphQL();
-  const info = useMemo<OperationInfo>(() => {
-    const field = getOperationField(schema, kind, name);
+  const { schema, examples: allExamples } = useGraphQL();
+  const custom = allExamples?.[`${kind}:${name}`];
+  const [selected, select] = useState(0);
+  const base = useMemo(() => {
+    const field = schema.getRootType(kind)?.getFields()[name];
     if (!field)
       throw new Error(`[Fumadocs GraphQL] Operation not found in schema: ${kind} ${name}`);
+
+    let examples = custom;
+    if (!examples?.length) {
+      const generated = generateOperationExample(schema, { kind, name });
+      examples = generated ? [generated] : empty;
+    }
 
     return {
       kind,
       name,
-      title: getOperationTitle(name),
+      title: idToTitle(name),
       field,
       directives: getCustomDirectives(field.astNode),
-      example: generateOperationExample(schema, { kind, name }),
+      examples,
     };
-  }, [schema, kind, name]);
+  }, [schema, kind, name, custom]);
+  const info = useMemo<OperationInfo>(() => ({ ...base, selected, select }), [base, selected]);
 
   return <OperationContext value={info}>{children}</OperationContext>;
 }

@@ -23,18 +23,25 @@ export interface LoadedSchema {
   sdl: string;
 }
 
-export function isFilePath(input: string): boolean {
-  return !input.includes('\n') && /\.(graphqls?|gql)$/i.test(input) && !/^https?:\/\//.test(input);
+function isURL(input: string): boolean {
+  return /^https?:\/\//.test(input);
 }
 
-async function readSDL(input: string): Promise<string> {
-  if (/^https?:\/\//.test(input)) {
+function isFilePath(input: string): boolean {
+  return !input.includes('\n') && /\.(graphqls?|gql)$/i.test(input) && !isURL(input);
+}
+
+/**
+ * Read the GraphQL text of a file path or `http(s)` URL, other inputs are GraphQL text already.
+ */
+export async function readGraphQL(input: string): Promise<string> {
+  if (isURL(input)) {
     const res = await fetch(input);
     if (!res.ok) throw new Error(`failed to fetch ${input}: HTTP ${res.status}`);
     return await res.text();
   }
 
-  return await fs.readFile(input, 'utf8');
+  return isFilePath(input) ? await fs.readFile(input, 'utf8') : input;
 }
 
 /**
@@ -53,9 +60,7 @@ export async function loadSchema(input: GraphQLSchemaInput): Promise<LoadedSchem
 
     if (Array.isArray(input) || typeof input === 'string') {
       const parts = Array.isArray(input) ? input : [input];
-      const sources = await Promise.all(
-        parts.map((part) => (isFilePath(part) || /^https?:\/\//.test(part) ? readSDL(part) : part)),
-      );
+      const sources = await Promise.all(parts.map(readGraphQL));
       const sdl = sources.join('\n\n');
       const schema = buildSchemaFromSDL(sdl);
       // `buildSchemaFromSDL` skips validation for client-side usages, surface schema errors clearly here

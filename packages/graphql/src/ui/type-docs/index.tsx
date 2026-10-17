@@ -1,27 +1,38 @@
 'use client';
-import type { ReactNode } from 'react';
+import { type ReactNode, useMemo } from 'react';
+import { ExternalLink } from 'lucide-react';
 import { useTranslations } from '@fuma-translate/react';
-import { AnchorSection } from 'shared-api/auto-anchor';
 import {
+  type GraphQLEnumType,
+  type GraphQLNamedType,
   isEnumType,
   isInputObjectType,
   isInterfaceType,
+  isLeafType,
   isObjectType,
   isScalarType,
-  isUnionType,
 } from 'graphql';
-import { useOperationLink, useRenderContext, useTypeLink } from '@/utils/create-page';
-import type { PageTypeProps } from '@/type-docs';
-import { TypeProvider, useNamedType } from '@/type-docs';
+import Link from 'fumadocs-core/link';
+import { AnchorSection } from 'shared-api/auto-anchor';
+import { cardCodeBlock, exampleCardClassName, ExampleHeader } from 'shared-api/components/example';
+import {
+  type SchemaViewRoot,
+  useGraphQL,
+  useOperationLink,
+  useRenderContext,
+} from '@/utils/create-page';
+import { type PageTypeProps, TypeProvider, useNamedType } from '@/type-docs';
+import { type FieldRef, getCustomDirectives, type OperationRef } from '@/utils/schema';
+import { printDefinition } from '@/utils/sdl';
+import { cn } from '@/utils/cn';
 import { SchemaUI } from '@/ui/components/schema';
-import type { OperationKind } from '@/utils/schema';
 import { KindLabel } from '../components/badge';
+import { ClientCodeBlock } from '../components/codeblock';
+import { DeprecatedLabel, Directives } from '../components/directive';
 import { Heading } from '../components/heading';
 import { Markdown } from '../components/markdown';
-import { EnumValueList } from '../components/enum-values';
-import { DirectiveList, ReferenceLink, TypeAnnotation } from '../components/type-annotation';
-import { Braces, CornerUpLeft, Import, Layers, Variable } from 'lucide-react';
-import Link from 'fumadocs-core/link';
+import { SectionHeader } from '../components/section';
+import { linkClassName, TypeHead, TypeLink } from '../components/type-annotation';
 
 export function TypeDocs({ name, ...props }: PageTypeProps) {
   return (
@@ -34,257 +45,235 @@ export function TypeDocs({ name, ...props }: PageTypeProps) {
 function TypeDocsContent({ showTitle, showDescription }: Omit<PageTypeProps, 'name'>) {
   const t = useTranslations({ note: 'type page' });
   const ctx = useRenderContext();
-  const { name, kind, type, directives, relations } = useNamedType();
-  let headingLevel = 2;
+  const { name, kind, type, directives } = useNamedType();
+  // the page documents the type, the Schema UI lists its fields
+  const root = useMemo<SchemaViewRoot>(() => ({ type, description: '' }), [type]);
+  const headingLevel = showTitle ? 3 : 2;
 
-  let headNode: ReactNode = null;
-  if (showTitle) {
-    headNode = (
-      <div className="flex gap-2 items-center justify-between">
-        <Heading id={name} depth={headingLevel} className="my-0!">
-          {name}
-        </Heading>
-        <KindLabel className="text-xs">{kind}</KindLabel>
-      </div>
-    );
-    headingLevel++;
-  }
+  let fields: ReactNode = null;
+  if (!isLeafType(type)) {
+    const union = kind === 'union';
+    const id = union ? 'possible-types' : 'fields';
 
-  const descriptionNode = showDescription && type.description && <Markdown md={type.description} />;
-
-  const directivesNode = directives.length > 0 && <DirectiveList directives={directives} />;
-
-  const { usages } = relations;
-  const relationNodes: ReactNode[] = [];
-  if (relations.implements.length > 0) {
-    relationNodes.push(
-      <TypeRelation key="implements" label={t('Implements')}>
-        {relations.implements.map((i) => (
-          <TypeAnnotation key={i.name} type={i} />
-        ))}
-      </TypeRelation>,
-    );
-  }
-  if (relations.implementedBy.length > 0) {
-    relationNodes.push(
-      <TypeRelation key="implemented-by" label={t('Implemented by')}>
-        {relations.implementedBy.map((o) => (
-          <TypeAnnotation key={o.name} type={o} />
-        ))}
-      </TypeRelation>,
-    );
-  }
-  if (relations.possibleTypes.length > 0) {
-    relationNodes.push(
-      <TypeRelation key="possible-types" label={t('Possible types')}>
-        {relations.possibleTypes.map((o) => (
-          <TypeAnnotation key={o.name} type={o} />
-        ))}
-      </TypeRelation>,
-    );
-  }
-  if (usages.returnedBy.length > 0) {
-    relationNodes.push(
-      <TypeRelation key="returned-by" label={t('Returned by')} icon={CornerUpLeft}>
-        {usages.returnedBy.map((op) => (
-          <OperationChip key={`${op.kind}:${op.name}`} kind={op.kind} name={op.name} />
-        ))}
-      </TypeRelation>,
-    );
-  }
-  if (usages.inputFor.length > 0) {
-    relationNodes.push(
-      <TypeRelation key="input-for" label={t('Input for')} icon={Import}>
-        {usages.inputFor.map((op) => (
-          <OperationChip key={`${op.kind}:${op.name}`} kind={op.kind} name={op.name} />
-        ))}
-      </TypeRelation>,
-    );
-  }
-  if (usages.memberOf.length > 0) {
-    relationNodes.push(
-      <TypeRelation key="field-of" label={t('Field of')} icon={Braces}>
-        {usages.memberOf.map((ref) => (
-          <FieldChip key={`${ref.parent}.${ref.field}`} parent={ref.parent} field={ref.field} />
-        ))}
-      </TypeRelation>,
-    );
-  }
-  if (usages.argumentOf.length > 0) {
-    relationNodes.push(
-      <TypeRelation key="argument-of" label={t('Argument of')} icon={Variable}>
-        {usages.argumentOf.map((ref) => (
-          <FieldChip key={`${ref.parent}.${ref.field}`} parent={ref.parent} field={ref.field} />
-        ))}
-      </TypeRelation>,
-    );
-  }
-
-  const relationsNode: ReactNode = relationNodes.length > 0 && (
-    <TypeRelations>{relationNodes}</TypeRelations>
-  );
-
-  let fieldsNode: ReactNode = null;
-  if (isObjectType(type) || isInterfaceType(type) || isInputObjectType(type)) {
-    fieldsNode = (
+    fields = (
       <>
-        <Heading id="fields" depth={headingLevel} className="mt-10">
-          {t('Fields')}
-        </Heading>
-        <AnchorSection segments={['fields']}>
-          <SchemaUI
-            client={{
-              name: type.name,
-              as: 'body',
-            }}
-            root={{
-              type,
-              // already displayed on the page
-              description: '',
-            }}
-          />
+        <SectionHeader
+          id={id}
+          depth={headingLevel}
+          title={union ? t('Possible Types') : t('Fields')}
+        />
+        {isInputObjectType(type) && type.isOneOf && (
+          <p className="not-prose mb-3 text-fd-muted-foreground">
+            {t('Exactly one field must be set.')}
+          </p>
+        )}
+        <AnchorSection segments={[id]}>
+          <SchemaUI client={{ name, as: 'body' }} root={root} />
         </AnchorSection>
       </>
-    );
-  } else if (isUnionType(type)) {
-    fieldsNode = (
-      <AnchorSection segments={['types']}>
-        <SchemaUI
-          client={{
-            name: type.name,
-            as: 'body',
-          }}
-          root={{
-            type,
-            // already displayed on the page
-            description: '',
-          }}
-        />
-      </AnchorSection>
-    );
-  }
-
-  let valuesNode: ReactNode = null;
-  if (isEnumType(type)) {
-    valuesNode = (
-      <>
-        <Heading id="values" depth={headingLevel} className="mt-10">
-          {t('Values')}
-        </Heading>
-        <EnumValueList
-          type={type}
-          className="p-2 bg-fd-card text-fd-card-foreground border rounded-lg shadow-md"
-        />
-      </>
-    );
-  }
-
-  let scalarNode: ReactNode = null;
-  if (isScalarType(type) && type.specifiedByURL) {
-    scalarNode = (
-      <p className="text-sm">
-        {t('Specification')}:{' '}
-        <a
-          href={type.specifiedByURL}
-          rel="noreferrer noopener"
-          className="not-prose underline text-fd-muted-foreground hover:text-fd-accent-foreground"
-        >
-          {type.specifiedByURL}
-        </a>
-      </p>
     );
   }
 
   const slots = {
-    header: headNode,
-    description: descriptionNode,
-    directives: directivesNode,
-    relations: relationsNode,
-    fields: fieldsNode,
-    values: valuesNode,
-    scalar: scalarNode,
+    header: showTitle ? (
+      // the anchor of type itself
+      <Heading id="" depth={2} className="mt-0! mb-4">
+        {name}
+      </Heading>
+    ) : null,
+    definition: (
+      <div className="not-prose flex min-h-11 items-start gap-3 rounded-xl border bg-fd-card p-1.5 ps-3.5 text-sm text-fd-card-foreground">
+        <div className="flex min-w-0 flex-1 items-baseline gap-3 py-1.5 text-[0.8125rem] leading-5">
+          <TypeHead type={type} interactive />
+        </div>
+        {isScalarType(type) && type.specifiedByURL && (
+          <a
+            href={type.specifiedByURL}
+            target="_blank"
+            rel="noreferrer noopener"
+            className="inline-flex h-8 shrink-0 items-center gap-1.5 pe-2 text-fd-muted-foreground transition-colors hover:text-fd-accent-foreground"
+          >
+            <ExternalLink className="size-3.5" />
+            {t('Specification')}
+          </a>
+        )}
+      </div>
+    ),
+    description:
+      showDescription && type.description ? (
+        <div className="prose-no-margin">
+          <Markdown md={type.description} />
+        </div>
+      ) : null,
+    directives: directives.length > 0 ? <Directives directives={directives} /> : null,
+    fields,
+    values: isEnumType(type) ? <EnumValues type={type} headingLevel={headingLevel} /> : null,
+    usages: <Usages headingLevel={headingLevel} />,
+    sdl: (
+      <div className={exampleCardClassName}>
+        <ExampleHeader title="SDL" />
+        <ClientCodeBlock lang="graphql" code={printDefinition(type)} codeblock={cardCodeBlock} />
+      </div>
+    ),
   };
 
-  if (ctx.content?.renderTypeLayout)
-    return ctx.content.renderTypeLayout(slots, { type, kind, ctx });
+  let content: ReactNode;
+  if (ctx.content?.renderTypeLayout) {
+    content = ctx.content.renderTypeLayout(slots, { type, kind, ctx });
+  } else {
+    content = (
+      <div className="flex flex-col gap-x-6 gap-y-4 @4xl:flex-row @4xl:items-start">
+        <div className="min-w-0 flex-1">
+          {slots.header}
+          {slots.definition}
+          <div className="my-6 flex flex-col gap-3 empty:hidden">
+            {slots.description}
+            {slots.directives}
+          </div>
+          {slots.fields}
+          {slots.values}
+          {slots.usages}
+        </div>
+        <div className="@4xl:sticky @4xl:top-[calc(var(--fd-docs-row-3,0px)+1rem)] @4xl:flex @4xl:max-h-[calc(var(--fd-docs-height,100dvh)-var(--fd-docs-row-3,0px)-2rem)] @4xl:w-[400px] @4xl:flex-col">
+          {slots.sdl}
+        </div>
+      </div>
+    );
+  }
 
-  return (
-    <div className="prose-no-margin">
-      {slots.header}
-      {slots.description}
-      {slots.directives}
-      {slots.relations}
-      {slots.fields}
-      {slots.values}
-      {slots.scalar}
-    </div>
-  );
+  // ids of sections are unique when a page has several items
+  if (showTitle) return <AnchorSection segments={[name]}>{content}</AnchorSection>;
+  return content;
 }
 
-function TypeRelations({ children }: { children: ReactNode }) {
-  return (
-    <div className="grid grid-cols-[auto_1fr] not-prose bg-fd-card text-sm text-fd-card-foreground rounded-lg border shadow-md overflow-hidden my-4">
-      {children}
-    </div>
-  );
-}
+function EnumValues({ type, headingLevel }: { type: GraphQLEnumType; headingLevel: number }) {
+  const t = useTranslations({ note: 'type page' });
 
-function TypeRelation({
-  label,
-  icon: Icon = Layers,
-  children,
-}: {
-  label: ReactNode;
-  icon?: typeof Layers;
-  children: ReactNode;
-}) {
   return (
     <>
-      <div className="size-full font-medium border-e bg-fd-secondary text-fd-secondary-foreground p-2 border-b last:border-b-none">
-        <p className="flex items-center gap-1.5">
-          <Icon className="text-fd-primary size-3.5" />
-          {label}
-        </p>
+      <SectionHeader id="values" depth={headingLevel} title={t('Values')} />
+      <div className="rounded-xl border bg-fd-card px-3">
+        {type.getValues().map((value) => {
+          const { deprecationReason } = value;
+          const directives = getCustomDirectives(value.astNode);
+
+          return (
+            <div key={value.name} className="border-t py-2.5 first:border-t-0">
+              <div className="not-prose flex flex-wrap items-center gap-x-2 gap-y-1">
+                <code
+                  className={cn(
+                    'text-[0.8125rem] font-medium text-fd-primary',
+                    deprecationReason != null && 'line-through opacity-80',
+                  )}
+                >
+                  {value.name}
+                </code>
+                {deprecationReason != null && <DeprecatedLabel />}
+              </div>
+              {(value.description || deprecationReason || directives.length > 0) && (
+                <div className="mt-1 flex flex-col gap-2 text-fd-muted-foreground">
+                  {value.description && (
+                    <div className="prose-no-margin">
+                      <Markdown md={value.description} />
+                    </div>
+                  )}
+                  {deprecationReason && (
+                    <div className="prose-no-margin">
+                      <Markdown md={deprecationReason} />
+                    </div>
+                  )}
+                  {directives.length > 0 && <Directives directives={directives} />}
+                </div>
+              )}
+            </div>
+          );
+        })}
       </div>
-      <div className="flex flex-wrap items-center gap-4 p-2">{children}</div>
     </>
   );
 }
 
-function OperationChip({ kind, name }: { kind: OperationKind; name: string }) {
-  const href = useOperationLink(kind, name);
-
-  if (href) {
-    return (
-      <Link
-        href={href}
-        className="inline-flex items-center font-mono gap-1.5 transition-opacity hover:opacity-80"
-      >
-        <KindLabel className="text-xs p-0.5 bg-fd-secondary rounded-md border shadow-sm">
-          {kind}
-        </KindLabel>
-        {name}
-      </Link>
-    );
-  }
+/** where the type is used, and the implementations of interfaces */
+function Usages({ headingLevel }: { headingLevel: number }) {
+  const t = useTranslations({ note: 'type page' });
+  const { implementedBy, unions, usages } = useNamedType().relations;
+  const rows: [label: string, items: ReactNode[]][] = [
+    [t('Implemented by'), implementedBy.map(typeUsage)],
+    [t('Member of'), unions.map(typeUsage)],
+    [t('Returned by'), usages.returnedBy.map(operationUsage)],
+    [t('Input for'), usages.inputFor.map(operationUsage)],
+    [t('Field of'), usages.memberOf.map(fieldUsage)],
+    [t('Argument of'), usages.argumentOf.map(fieldUsage)],
+  ];
+  if (rows.every(([, items]) => items.length === 0)) return null;
 
   return (
-    <span className="inline-flex items-center gap-1.5 text-fd-muted-foreground font-mono">
-      <KindLabel className="text-xs p-0.5 bg-fd-secondary rounded-md border shadow-sm">
-        {kind}
-      </KindLabel>
-      {name}
+    <>
+      <SectionHeader id="usages" depth={headingLevel} title={t('Usages')} />
+      <dl className="not-prose rounded-xl border bg-fd-card px-3 text-[0.8125rem]">
+        {rows.map(
+          ([label, items]) =>
+            items.length > 0 && (
+              <div
+                key={label}
+                className="grid grid-cols-1 gap-1 border-t py-2.5 first:border-t-0 @sm:grid-cols-[8rem_minmax(0,1fr)] @sm:gap-3"
+              >
+                <dt className="text-fd-muted-foreground">{label}</dt>
+                <dd className="flex min-w-0 flex-wrap gap-x-4 gap-y-1">{items}</dd>
+              </div>
+            ),
+        )}
+      </dl>
+    </>
+  );
+}
+
+function typeUsage(type: GraphQLNamedType) {
+  return (
+    <code key={type.name}>
+      <TypeLink name={type.name} />
+    </code>
+  );
+}
+
+function operationUsage(item: OperationRef) {
+  return <OperationUsage key={`${item.kind}:${item.name}`} item={item} />;
+}
+
+function fieldUsage(item: FieldRef) {
+  return <FieldUsage key={`${item.parent}.${item.field}`} item={item} />;
+}
+
+function OperationUsage({ item }: { item: OperationRef }) {
+  const href = useOperationLink(item.kind, item.name);
+  const field = useGraphQL().schema.getRootType(item.kind)?.getFields()[item.name];
+
+  return (
+    <span className="inline-flex items-baseline gap-1.5">
+      <KindLabel className="text-xs">{item.kind}</KindLabel>
+      <code className={field?.deprecationReason != null ? 'line-through' : undefined}>
+        {href ? (
+          <Link href={href} className={linkClassName}>
+            {item.name}
+          </Link>
+        ) : (
+          item.name
+        )}
+      </code>
     </span>
   );
 }
 
-function FieldChip({ parent, field }: { parent: string; field: string }) {
-  const href = useTypeLink(parent);
+function FieldUsage({ item }: { item: FieldRef }) {
+  const parent = useGraphQL().schema.getType(item.parent);
+  const field =
+    isObjectType(parent) || isInterfaceType(parent) || isInputObjectType(parent)
+      ? parent.getFields()[item.field]
+      : undefined;
 
   return (
-    <code className="font-mono text-fd-muted-foreground">
-      {href ? <ReferenceLink href={href}>{parent}</ReferenceLink> : parent}
-      {`.${field}`}
+    <code className={field?.deprecationReason != null ? 'line-through' : undefined}>
+      <TypeLink name={item.parent} />.{item.field}
     </code>
   );
 }

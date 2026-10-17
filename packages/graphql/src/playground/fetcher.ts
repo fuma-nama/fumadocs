@@ -15,6 +15,8 @@ export type PlaygroundResult =
       time: number;
       body: string;
       contentType: string;
+      /** the response headers, the playground shows them when given */
+      headers?: [name: string, value: string][];
     }
   | {
       type: 'client_error';
@@ -47,6 +49,7 @@ export async function executeGraphQL(request: PlaygroundRequest): Promise<Playgr
       time: performance.now() - start,
       body: await res.text(),
       contentType: res.headers.get('Content-Type') ?? '',
+      headers: Array.from(res.headers),
     };
   } catch (e) {
     return {

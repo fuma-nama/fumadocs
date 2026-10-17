@@ -1,11 +1,16 @@
 import type { HTMLAttributes } from 'react';
 import { Badge, type BadgeColor } from 'shared-api/components/badge';
 
-function getKindColor(kind: string): BadgeColor {
-  switch (kind.toLowerCase()) {
+/** the color of an operation kind or named type kind */
+export function getKindColor(kind: string): BadgeColor {
+  switch (kind) {
     case 'query':
+    case 'object':
+    case 'interface':
+    case 'union':
       return 'green';
     case 'mutation':
+    case 'input':
       return 'blue';
     case 'subscription':
       return 'orange';
