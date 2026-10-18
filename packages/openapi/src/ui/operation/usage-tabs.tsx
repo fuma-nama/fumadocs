@@ -11,6 +11,7 @@ import {
   SelectValue,
 } from 'shared-api/components/select';
 import {
+  captionCodeBlock,
   cardCodeBlock,
   exampleActions,
   exampleCardClassName,
@@ -138,7 +139,7 @@ export function CodeUsages({
             value={example.id}
             onValueChange={examples.select}
             align="start"
-            className="-ms-2 max-w-full"
+            className="-ms-2 max-w-full text-fd-foreground"
           />
         ) : (
           title
@@ -312,6 +313,7 @@ function RequestTabsDefaultContent() {
             lang="json"
             code={json}
             codeblock={{
+              ...captionCodeBlock,
               title: v,
               Actions:
                 k === 'body'
@@ -319,7 +321,6 @@ function RequestTabsDefaultContent() {
                       <span className="me-2 font-mono text-xs">{requestData.bodyMediaType}</span>,
                     )
                   : undefined,
-              className: cn(exampleCodeBlock.className, 'rounded-none border-x-0 border-b-0'),
             }}
           />
         );

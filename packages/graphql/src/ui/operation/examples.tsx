@@ -2,6 +2,7 @@
 import type { ReactNode } from 'react';
 import { useTranslations } from '@fuma-translate/react';
 import {
+  captionCodeBlock,
   cardCodeBlock,
   exampleCardClassName,
   exampleCodeBlock,
@@ -84,7 +85,7 @@ function RequestExample({ example }: { example: OperationExample }) {
             codeblock={{
               title: t('Variables'),
               // the query scrolls before its variables
-              className: 'shrink-0 rounded-none border-x-0 border-b-0',
+              className: `${captionCodeBlock.className} shrink-0`,
               viewportProps: { className: 'max-h-60' },
             }}
           />
@@ -116,7 +117,7 @@ function RequestExample({ example }: { example: OperationExample }) {
             value={String(selected)}
             onValueChange={(v) => select(Number(v))}
             align="start"
-            className="-ms-2 me-auto max-w-none min-w-0 shrink"
+            className="-ms-2 me-auto max-w-none min-w-0 shrink text-fd-foreground"
           />
         )}
         <ExampleSelect items={languages} value={value} onValueChange={selectCodeUsage} />

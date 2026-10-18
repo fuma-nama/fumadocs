@@ -119,7 +119,7 @@ export function CodeUsages() {
             value={message.id}
             onValueChange={setMessageId}
             align="start"
-            className="-ms-2 max-w-full"
+            className="-ms-2 max-w-full text-fd-foreground"
           />
         ) : (
           t('Code Sample')

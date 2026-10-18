@@ -202,11 +202,7 @@ function ResponseResult({
           <ErrorList errors={errors} className="max-h-1/3 shrink-0 overflow-y-auto border-b" />
         )}
         <div className="min-h-0 flex-1">
-          <ClientCodeBlock
-            lang={lang}
-            code={code}
-            codeblock={{ ...panelCodeBlock, title: data.contentType }}
-          />
+          <ClientCodeBlock lang={lang} code={code} codeblock={panelCodeBlock} />
         </div>
       </div>
     </ResponseView>

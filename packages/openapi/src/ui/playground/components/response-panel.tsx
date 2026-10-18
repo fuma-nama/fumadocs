@@ -114,7 +114,7 @@ function ResponseExamples() {
             <ClientCodeBlock
               lang="json"
               code={JSON.stringify(example.sample, null, 2)}
-              codeblock={{ ...panelCodeBlock, title: tab.mediaType }}
+              codeblock={panelCodeBlock}
             />
           </div>
         ) : (

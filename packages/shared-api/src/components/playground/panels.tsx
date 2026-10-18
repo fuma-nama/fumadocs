@@ -6,6 +6,7 @@ import { stringifyFieldKey } from '@fumari/stf/lib/utils';
 import { useTranslations } from '@fuma-translate/react';
 import { buttonVariants } from 'fumadocs-ui/components/ui/button';
 import type { CodeBlockProps } from 'fumadocs-ui/components/codeblock';
+import { titleBarClassName } from '../example';
 import { Segmented, SegmentedList } from '../segmented';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../select';
 import { Spinner } from '../spinner';
@@ -37,18 +38,15 @@ export const iconButtonClassName = cn(
   'text-fd-muted-foreground [&_svg]:size-3.5',
 );
 
-// the title bars of code blocks are as tall as the panel headers beside them
-const panelTitleBar = '[&>div:has(>figcaption)]:h-10';
-
 /** a code block filling its panel */
 export const panelCodeBlock: CodeBlockProps = {
-  className: `flex h-full flex-col rounded-none border-0 bg-transparent shadow-none ${panelTitleBar}`,
+  className: `flex h-full flex-col rounded-none border-0 bg-transparent shadow-none ${titleBarClassName}`,
   viewportProps: { className: 'min-h-0 flex-1 max-h-none' },
 };
 
 /** a code block on top of a panel */
 export const panelTopCodeBlock: CodeBlockProps = {
-  className: `shrink-0 rounded-none border-0 border-b ${panelTitleBar}`,
+  className: `shrink-0 rounded-none border-0 border-b ${titleBarClassName}`,
 };
 
 export function PanelHeader({ className, ...props }: ComponentProps<'div'>) {

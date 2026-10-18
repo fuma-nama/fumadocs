@@ -53,10 +53,20 @@ export function selectCodeUsage(key: string, id: string) {
   for (const listener of listeners) listener();
 }
 
+/** styles the title bar of a code block like `<ExampleHeader />` */
+export const titleBarClassName =
+  '[&>div:has(>figcaption)]:h-10 [&_figcaption]:text-[0.8125rem] [&_figcaption]:font-medium [&_figcaption]:text-fd-foreground';
+
 /** an example card, a code block with its controls in its title bar, it shrinks with its column */
 export const exampleCodeBlock = {
   // selects in the title reach into its padding
-  className: 'grid min-h-0 grid-rows-[auto_minmax(0,1fr)] [&_figcaption]:overflow-visible',
+  className: `grid min-h-0 grid-rows-[auto_minmax(0,1fr)] [&_figcaption]:overflow-visible ${titleBarClassName}`,
+};
+
+/** a code block under another one in its example card, its title is a caption */
+export const captionCodeBlock = {
+  className:
+    'grid min-h-0 grid-rows-[auto_minmax(0,1fr)] rounded-none border-x-0 border-b-0 [&_figcaption]:text-xs [&_figcaption]:font-medium',
 };
 
 /** the actions of a code block's title bar, `controls` before its copy button */
@@ -121,9 +131,14 @@ export function ExampleHeader({
   children?: ReactNode;
 }) {
   return (
-    <div className="shrink-0 border-b ps-4 pe-2 text-sm text-fd-muted-foreground">
-      <div className={cn('flex h-[calc(--spacing(9.5)-1px)] items-center', className)}>
-        {title && <span className="me-auto truncate">{title}</span>}
+    <div className="shrink-0 border-b ps-4 pe-2 text-fd-muted-foreground">
+      <div
+        className={cn(
+          'flex h-[calc(--spacing(10)-1px)] items-center text-[0.8125rem] font-medium',
+          className,
+        )}
+      >
+        {title && <span className="me-auto truncate text-fd-foreground">{title}</span>}
         {children}
         {copy && <ExampleCopy text={copy} />}
       </div>

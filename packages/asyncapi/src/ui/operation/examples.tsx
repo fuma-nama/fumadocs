@@ -53,7 +53,7 @@ export function MessageExamples({ item }: { item: OperationMessage }) {
             value={String(selected)}
             onValueChange={(v) => setSelected(Number(v))}
             align="start"
-            className="-ms-2 me-auto max-w-none min-w-0 shrink"
+            className="-ms-2 me-auto max-w-none min-w-0 shrink text-fd-foreground"
           />
         )}
         {parts.length > 1 && (

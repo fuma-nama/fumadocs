@@ -142,7 +142,7 @@ function TextResult({
     <ClientCodeBlock
       lang={code.length > 5000 ? 'text' : lang}
       code={code}
-      codeblock={{ ...panelCodeBlock, title: data.mediaType }}
+      codeblock={panelCodeBlock}
     />
   );
 }
