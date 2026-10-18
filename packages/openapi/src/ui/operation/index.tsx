@@ -21,9 +21,9 @@ import { Callout } from 'fumadocs-ui/components/callout';
 import { AnchorSection, useAnchorLink } from 'shared-api/auto-anchor';
 import { Heading } from '@/ui/components/heading';
 import { Markdown } from '../components/markdown';
-import { useCopyButton } from 'fumadocs-ui/utils/use-copy-button';
 import { buttonVariants } from 'fumadocs-ui/components/ui/button';
-import { Check, ChevronRight, Copy, Plus, X } from 'lucide-react';
+import { ChevronRight, Plus, X } from 'lucide-react';
+import { CopyTypeScript } from 'shared-api/components/copy-typescript';
 import PlaygroundClient from '@/ui/playground/client';
 import { EndpointBar } from '@/ui/components/endpoint';
 import { Segmented, SegmentedList, SegmentedPanel } from 'shared-api/components/segmented';
@@ -375,38 +375,6 @@ function MediaContent({
       readOnly={!request || method === 'get'}
       writeOnly={request && method !== 'get'}
     />
-  );
-}
-
-function CopyTypeScript({
-  name,
-  generate,
-}: {
-  name: string;
-  generate: () => string | undefined | Promise<string | undefined>;
-}) {
-  const t = useTranslations({ note: 'TypeScript definitions' });
-  const [isChecked, onCopy] = useCopyButton(() => {
-    const code = generate();
-    if (typeof code === 'string') return navigator.clipboard.writeText(code);
-    return Promise.resolve(code).then((code) => {
-      if (code) return navigator.clipboard.writeText(code);
-    });
-  });
-
-  return (
-    <button
-      type="button"
-      title={t('Use the {name} type in TypeScript.', { variables: { name } })}
-      onClick={onCopy}
-      className={cn(
-        buttonVariants({ variant: 'ghost', size: 'sm' }),
-        '-my-1 shrink-0 gap-1.5 text-fd-muted-foreground [&_svg]:size-3.5',
-      )}
-    >
-      {isChecked ? <Check /> : <Copy />}
-      TypeScript
-    </button>
   );
 }
 
