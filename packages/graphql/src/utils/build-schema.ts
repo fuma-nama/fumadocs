@@ -10,7 +10,7 @@ export function buildSchemaFromSDL(sdl: string): GraphQLSchema {
   const cached = cache.get(sdl);
   if (cached) return cached;
 
-  // skip schema validation on client, it is done on server when loading the schema.
+  // documented as written, real schemas (like GitHub's) don't always pass validation;
   // nothing reads the locations of schema nodes
   const schema = buildSchema(sdl, { assumeValidSDL: true, assumeValid: true, noLocation: true });
 
