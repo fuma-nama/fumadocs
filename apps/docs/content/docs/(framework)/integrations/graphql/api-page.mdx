@@ -151,7 +151,7 @@ export const GraphQLPage = createGraphQLPage({ codeUsages });
 
 ### Cross-linking
 
-[Type pages](/docs/integrations/graphql/server#includeoperations--includetypes) link to each other and to operations automatically. Operation pages keep readers on the page, type names show their definition on hover.
+[Type pages](/docs/integrations/graphql/server#includeoperations--includetypes) link to each other and to operations automatically. Operation pages keep readers on the page, their types open in the Schema UI.
 
 You can also resolve the links yourself:
 
@@ -192,7 +192,6 @@ export const GraphQLPage = createGraphQLPage({
           {slots.playground}
           {slots.description}
           {slots.deprecated}
-          {slots.directives}
           {slots.arguments}
           {slots.returns}
           {slots.example}
@@ -203,16 +202,15 @@ export const GraphQLPage = createGraphQLPage({
 });
 ```
 
-| Slot          | Renders                                                                     |
-| ------------- | --------------------------------------------------------------------------- |
-| `header`      | the title, on pages with several items                                      |
-| `playground`  | the signature, like `QUERY customer(id: ID!): Customer`, and the playground |
-| `description` | the description of operation                                                |
-| `deprecated`  | the deprecation reason                                                      |
-| `directives`  | directives applied to the operation                                         |
-| `arguments`   | the arguments                                                               |
-| `returns`     | the return type and its fields                                              |
-| `example`     | the example request and response, beside the operation on wide pages        |
+| Slot          | Renders                                                                                    |
+| ------------- | ------------------------------------------------------------------------------------------ |
+| `header`      | the title, on pages with several items                                                     |
+| `playground`  | the signature, like `QUERY customer(id: ID!): Customer`, its directives and the playground |
+| `description` | the description of operation                                                               |
+| `deprecated`  | the deprecation reason                                                                     |
+| `arguments`   | the arguments                                                                              |
+| `returns`     | the return type and its fields                                                             |
+| `example`     | the example request and response, beside the operation on wide pages                       |
 
 </Tab>
 
@@ -230,7 +228,6 @@ export const GraphQLPage = createGraphQLPage({
           {slots.header}
           {slots.definition}
           {slots.description}
-          {slots.directives}
           {slots.fields}
           {slots.values}
           {slots.usages}
@@ -242,16 +239,15 @@ export const GraphQLPage = createGraphQLPage({
 });
 ```
 
-| Slot          | Renders                                                                   |
-| ------------- | ------------------------------------------------------------------------- |
-| `header`      | the name, on pages with several items                                     |
-| `definition`  | the head of its SDL, like `type Order implements Node`                    |
-| `description` | the description of type                                                   |
-| `directives`  | directives applied to the type                                            |
-| `fields`      | fields of objects, interfaces and input objects, or the members of unions |
-| `values`      | values of enums                                                           |
-| `usages`      | implementations, unions, and the operations and fields using the type     |
-| `sdl`         | the SDL of type, beside it on wide pages                                  |
+| Slot          | Renders                                                                    |
+| ------------- | -------------------------------------------------------------------------- |
+| `header`      | the name, on pages with several items                                      |
+| `definition`  | the head of its SDL, like `type Order implements Node`, and its directives |
+| `description` | the description of type                                                    |
+| `fields`      | fields of objects, interfaces and input objects, or the members of unions  |
+| `values`      | values of enums                                                            |
+| `usages`      | implementations, unions, and the operations and fields using the type      |
+| `sdl`         | the SDL of type, beside it on wide pages                                   |
 
 </Tab>
 

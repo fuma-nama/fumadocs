@@ -28,7 +28,12 @@ import { cn } from '@/utils/cn';
 import { SchemaUI } from '@/ui/components/schema';
 import { KindLabel } from '../components/badge';
 import { ClientCodeBlock } from '../components/codeblock';
-import { DeprecatedLabel, Directives } from '../components/directive';
+import {
+  DeprecatedLabel,
+  DeprecationReason,
+  DirectiveRow,
+  Directives,
+} from '../components/directive';
 import { Heading } from '../components/heading';
 import { Markdown } from '../components/markdown';
 import { SectionHeader } from '../components/section';
@@ -62,13 +67,9 @@ function TypeDocsContent({ showTitle, showDescription }: Omit<PageTypeProps, 'na
           depth={headingLevel}
           title={union ? t('Possible Types') : t('Fields')}
         />
-        {isInputObjectType(type) && type.isOneOf && (
-          <p className="not-prose mb-3 text-fd-muted-foreground">
-            {t('Exactly one field must be set.')}
-          </p>
-        )}
         <AnchorSection segments={[id]}>
-          <SchemaUI client={{ name, as: 'body' }} root={root} />
+          {/* the title and definition already name the type */}
+          <SchemaUI client={{ name: union ? 'types' : 'fields', as: 'body' }} root={root} />
         </AnchorSection>
       </>
     );
@@ -82,21 +83,24 @@ function TypeDocsContent({ showTitle, showDescription }: Omit<PageTypeProps, 'na
       </Heading>
     ) : null,
     definition: (
-      <div className="not-prose flex min-h-11 items-start gap-3 rounded-xl border bg-fd-card p-1.5 ps-3.5 text-sm text-fd-card-foreground">
-        <div className="flex min-w-0 flex-1 items-baseline gap-3 py-1.5 text-[0.8125rem] leading-5">
-          <TypeHead type={type} interactive />
+      <div className="not-prose rounded-xl border bg-fd-card text-sm text-fd-card-foreground">
+        <div className="flex min-h-11 items-start gap-3 p-1.5 ps-3.5">
+          <div className="flex min-w-0 flex-1 items-baseline gap-3 py-1.5 text-[0.8125rem] leading-5">
+            <TypeHead type={type} />
+          </div>
+          {isScalarType(type) && type.specifiedByURL && (
+            <a
+              href={type.specifiedByURL}
+              target="_blank"
+              rel="noreferrer noopener"
+              className="inline-flex h-8 shrink-0 items-center gap-1.5 pe-2 text-fd-muted-foreground transition-colors hover:text-fd-accent-foreground"
+            >
+              <ExternalLink className="size-3.5" />
+              {t('Specification')}
+            </a>
+          )}
         </div>
-        {isScalarType(type) && type.specifiedByURL && (
-          <a
-            href={type.specifiedByURL}
-            target="_blank"
-            rel="noreferrer noopener"
-            className="inline-flex h-8 shrink-0 items-center gap-1.5 pe-2 text-fd-muted-foreground transition-colors hover:text-fd-accent-foreground"
-          >
-            <ExternalLink className="size-3.5" />
-            {t('Specification')}
-          </a>
-        )}
+        <DirectiveRow directives={directives} />
       </div>
     ),
     description:
@@ -105,7 +109,6 @@ function TypeDocsContent({ showTitle, showDescription }: Omit<PageTypeProps, 'na
           <Markdown md={type.description} />
         </div>
       ) : null,
-    directives: directives.length > 0 ? <Directives directives={directives} /> : null,
     fields,
     values: isEnumType(type) ? <EnumValues type={type} headingLevel={headingLevel} /> : null,
     usages: <Usages headingLevel={headingLevel} />,
@@ -126,10 +129,7 @@ function TypeDocsContent({ showTitle, showDescription }: Omit<PageTypeProps, 'na
         <div className="min-w-0 flex-1">
           {slots.header}
           {slots.definition}
-          <div className="my-6 flex flex-col gap-3 empty:hidden">
-            {slots.description}
-            {slots.directives}
-          </div>
+          <div className="my-6 empty:hidden">{slots.description}</div>
           {slots.fields}
           {slots.values}
           {slots.usages}
@@ -177,11 +177,7 @@ function EnumValues({ type, headingLevel }: { type: GraphQLEnumType; headingLeve
                       <Markdown md={value.description} />
                     </div>
                   )}
-                  {deprecationReason && (
-                    <div className="prose-no-margin">
-                      <Markdown md={deprecationReason} />
-                    </div>
-                  )}
+                  {deprecationReason && <DeprecationReason reason={deprecationReason} />}
                   {directives.length > 0 && <Directives directives={directives} />}
                 </div>
               )}

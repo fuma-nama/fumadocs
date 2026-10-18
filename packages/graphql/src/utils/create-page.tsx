@@ -13,7 +13,6 @@ import type { GeneratedPageProps, GraphQLPageItem } from '@/utils/pages';
 import { createContext, type FC, type ReactNode, use, useMemo } from 'react';
 import type {
   DirectiveNode,
-  GraphQLArgument,
   GraphQLDefaultInput,
   GraphQLField,
   GraphQLNamedType,
@@ -52,14 +51,14 @@ export interface SchemaViewRoot {
   type: GraphQLType;
   description?: string | null;
   deprecationReason?: string | null;
-  args?: readonly GraphQLArgument[];
   default?: GraphQLDefaultInput;
   astNode?: { readonly directives?: readonly DirectiveNode[] } | null;
 }
 
 export interface SchemaViewProps {
   client: Omit<SchemaUIProps, 'generated'>;
-  root: SchemaViewRoot;
+  /** a field-like root, or a schema coordinate like `Query.orders` (`Query.orders()` for its arguments) */
+  root: SchemaViewRoot | string;
 }
 
 /** components the UI renders through, so a page can replace them */
@@ -157,7 +156,6 @@ export interface GraphQLRenderOptions {
         header: ReactNode;
         description: ReactNode;
         deprecated: ReactNode;
-        directives: ReactNode;
         playground: ReactNode;
         arguments: ReactNode;
         returns: ReactNode;
@@ -175,7 +173,6 @@ export interface GraphQLRenderOptions {
         /** the definition of type in SDL, like `type Customer implements Node` */
         definition: ReactNode;
         description: ReactNode;
-        directives: ReactNode;
         /** fields of objects, interfaces and input objects, or the members of unions */
         fields: ReactNode;
         values: ReactNode;

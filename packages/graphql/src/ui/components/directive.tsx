@@ -25,6 +25,19 @@ export function Directives({
   );
 }
 
+/** the directives applied to an operation or type, a row of its bar */
+export function DirectiveRow({ directives }: { directives: readonly DirectiveNode[] }) {
+  const t = useTranslations({ note: 'graphql schema ui' });
+  if (directives.length === 0) return null;
+
+  return (
+    <div className="flex min-h-9 flex-wrap items-center gap-1.5 border-t py-1.5 ps-3.5 pe-1.5">
+      <span className="me-0.5 text-xs text-fd-muted-foreground">{t('Directives')}</span>
+      <Directives directives={directives} className="contents" />
+    </div>
+  );
+}
+
 function Directive({ node }: { node: DirectiveNode }) {
   const name = node.name.value;
   const definition = useGraphQL().schema.getDirective(name);
@@ -39,13 +52,12 @@ function Directive({ node }: { node: DirectiveNode }) {
 
   return (
     <DetailsPopover
-      chip
       details={
         <>
-          <p className="flex flex-wrap items-baseline gap-x-3 gap-y-0.5">
-            <span className="font-mono text-[0.8125rem] font-medium">{`@${name}`}</span>
-            <span className="ms-auto font-mono text-xs text-fd-muted-foreground">
-              {definition.locations.join(' | ')}
+          <p className="font-mono text-[0.8125rem]">
+            <span className="font-medium">{`@${name}`}</span>
+            <span className="text-xs text-fd-muted-foreground">
+              {` on ${definition.locations.join(' | ')}`}
             </span>
           </p>
           {definition.description && (
@@ -84,7 +96,7 @@ function Directive({ node }: { node: DirectiveNode }) {
   );
 }
 
-/** `@deprecated` on arguments and enum values */
+/** `@deprecated` on enum values, like the label of Schema UI */
 export function DeprecatedLabel() {
   const t = useTranslations({ note: 'graphql schema ui' });
 
@@ -92,5 +104,14 @@ export function DeprecatedLabel() {
     <span className="shrink-0 font-mono text-xs text-yellow-600 dark:text-yellow-400">
       {t('Deprecated')}
     </span>
+  );
+}
+
+/** the reason of `@deprecated` in the tone of its label, like the Schema UI rows */
+export function DeprecationReason({ reason, className }: { reason: string; className?: string }) {
+  return (
+    <div className={cn('prose-no-margin text-yellow-700 dark:text-yellow-400', className)}>
+      <Markdown md={reason} />
+    </div>
   );
 }

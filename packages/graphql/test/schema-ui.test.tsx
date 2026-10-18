@@ -8,7 +8,6 @@ import { generateGraphQLSchemaUI } from '@/utils/generate-schema-ui';
 const renderers = {
   renderMarkdown: (md: string) => md,
   renderDirectives: () => null,
-  renderArguments: () => null,
   renderEnumValues: () => null,
 };
 
@@ -72,6 +71,28 @@ describe('generateGraphQLSchemaUI', () => {
     expect(refs['Order.createdAt'].description).toBe('Time at which the order was created.');
   });
 
+  test('arguments of a field', () => {
+    const { $root, refs } = generateGraphQLSchemaUI(schema, 'Query.orders()', renderers);
+
+    // the arguments of an operation as the root
+    expect($root).toBe('Query.orders()');
+    expect(refs.$root).toBeUndefined();
+    expect(refs['Query.orders()']).toMatchObject({
+      type: 'object',
+      props: [{ name: 'filter', $type: 'Query.orders(filter:)', required: false }],
+    });
+    // a field opens its arguments from a tag
+    expect(refs['Customer.orders'].infoTags).toContainEqual({
+      label: 'Arguments',
+      value: 'status, first',
+      open: { name: 'orders(…)', $ref: 'Customer.orders()' },
+    });
+    expect(refs['Customer.orders(first:)'].infoTags).toEqual([{ label: 'Default', value: '10' }]);
+    // not keys of the schemas, like the properties tools read
+    expect(refs['Missing.field']).toBeUndefined();
+    expect(refs.$$typeof).toBeUndefined();
+  });
+
   test('implementations of interface', () => {
     const { refs } = generateGraphQLSchemaUI(schema, { type: schema.getType('Node')! }, renderers);
 
@@ -114,6 +135,6 @@ describe('generateGraphQLSchemaUI', () => {
       false,
       false,
     ]);
-    expect(root.infoTags).toHaveLength(1);
+    expect(root.infoTags).toEqual([{ label: 'Exactly one of', list: ['id', 'number'] }]);
   });
 });

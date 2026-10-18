@@ -1,10 +1,10 @@
 'use client';
 import type { ComponentProps, CSSProperties } from 'react';
-import type { GraphQLArgument } from 'graphql';
 import { useAnchorId } from 'shared-api/auto-anchor';
 import { useOperation } from '@/operation';
 import { cn } from '@/utils/cn';
 import { KindLabel } from '../components/badge';
+import { DirectiveRow } from '../components/directive';
 import { TypeAnnotation } from '../components/type-annotation';
 
 // each argument takes a line of its own when the one-line signature doesn't fit (the "Fab Four" technique)
@@ -15,9 +15,11 @@ const argumentClassName =
  * The signature of operation, like `QUERY customer(id: ID!): Customer`, actions like the playground trigger go in `children`.
  */
 export function OperationBar({ children, className, ...props }: ComponentProps<'div'>) {
-  const { kind, field } = useOperation();
+  const { kind, field, directives } = useOperation();
   const { args } = field;
   const returns = useAnchorId(['returns']);
+  // the root of the arguments card, its rows are `${id}.${name}`
+  const argumentsId = useAnchorId(['arguments', 'arguments']);
   // the width of one-line signature, the names of arguments are padded
   let length = field.name.length + String(field.type).length + 2;
   for (const arg of args) length += arg.name.length + String(arg.type).length + 4;
@@ -48,7 +50,19 @@ export function OperationBar({ children, className, ...props }: ComponentProps<'
           </span>
           {args.map((arg, i) => (
             <span key={arg.name} className={argumentClassName}>
-              <ArgumentLink arg={arg} />
+              <a href={`#${argumentsId}.${arg.name}`} className="group/argument">
+                <span
+                  className={cn(
+                    'rounded-md bg-fd-primary/10 px-1 text-fd-primary transition-colors group-hover/argument:bg-fd-primary/20',
+                    arg.deprecationReason != null && 'line-through',
+                  )}
+                >
+                  {arg.name}
+                </span>
+                <span className="text-fd-muted-foreground transition-colors group-hover/argument:text-fd-accent-foreground">
+                  : {String(arg.type)}
+                </span>
+              </a>
               {i < args.length - 1 && <span className="text-fd-muted-foreground">, </span>}
             </span>
           ))}
@@ -58,25 +72,7 @@ export function OperationBar({ children, className, ...props }: ComponentProps<'
         </code>
         {children && <div className="ms-auto flex h-8 shrink-0 items-center">{children}</div>}
       </div>
+      <DirectiveRow directives={directives} />
     </div>
-  );
-}
-
-/** `name: Type` of an argument, linked to its row */
-function ArgumentLink({ arg }: { arg: GraphQLArgument }) {
-  return (
-    <a href={`#${useAnchorId(['arguments', arg.name])}`} className="group/argument">
-      <span
-        className={cn(
-          'rounded-md bg-fd-primary/10 px-1 text-fd-primary transition-colors group-hover/argument:bg-fd-primary/20',
-          arg.deprecationReason != null && 'line-through',
-        )}
-      >
-        {arg.name}
-      </span>
-      <span className="text-fd-muted-foreground transition-colors group-hover/argument:text-fd-accent-foreground">
-        : {String(arg.type)}
-      </span>
-    </a>
   );
 }

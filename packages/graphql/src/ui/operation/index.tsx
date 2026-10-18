@@ -1,18 +1,17 @@
 'use client';
 import { type ReactNode, useMemo } from 'react';
 import { useTranslations } from '@fuma-translate/react';
-import { getNamedType, isLeafType, isNonNullType, isRequiredArgument } from 'graphql';
+import { getNamedType, isLeafType, isNonNullType } from 'graphql';
 import { AnchorSection } from 'shared-api/auto-anchor';
 import { Badge } from 'shared-api/components/badge';
 import { Callout } from 'fumadocs-ui/components/callout';
-import { type SchemaViewRoot, useRenderContext } from '@/utils/create-page';
+import { type SchemaViewRoot, useGraphQL, useRenderContext } from '@/utils/create-page';
 import { OperationProvider, type PageOperationProps, useOperation } from '@/operation';
 import { SchemaUI } from '@/ui/components/schema';
 import { OperationPlayground } from '@/ui/playground';
 import { Heading } from '../components/heading';
 import { Markdown } from '../components/markdown';
 import { SectionHeader } from '../components/section';
-import { Directives } from '../components/directive';
 import { OperationBar } from './bar';
 import { OperationExamples } from './examples';
 
@@ -30,7 +29,8 @@ function OperationContent({
 }: Omit<PageOperationProps, 'kind' | 'name'>) {
   const t = useTranslations({ note: 'operation page' });
   const ctx = useRenderContext();
-  const { kind, name, title, field, directives } = useOperation();
+  const { schema } = useGraphQL();
+  const { kind, name, title, field } = useOperation();
   const { deprecationReason } = field;
   const returns = useMemo<SchemaViewRoot>(() => ({ type: field.type }), [field]);
   const headingLevel = showTitle ? 3 : 2;
@@ -71,33 +71,23 @@ function OperationContent({
           <Markdown md={deprecationReason} />
         </Callout>
       ) : null,
-    directives: directives.length > 0 ? <Directives directives={directives} /> : null,
     playground,
     arguments:
       field.args.length > 0 ? (
         <>
           <SectionHeader id="arguments" depth={headingLevel} title={t('Arguments')} />
+          {/* the signature bar links to its rows */}
           <AnchorSection segments={['arguments']}>
-            <div className="rounded-xl border bg-fd-card px-3">
-              {field.args.map((arg) => (
-                <SchemaUI
-                  key={arg.name}
-                  client={{ name: arg.name, required: isRequiredArgument(arg) }}
-                  root={arg}
-                />
-              ))}
-            </div>
+            <SchemaUI
+              client={{ name: 'arguments', as: 'body' }}
+              root={`${schema.getRootType(kind)!.name}.${name}()`}
+            />
           </AnchorSection>
         </>
       ) : null,
     returns: (
       <>
-        <SectionHeader id="returns" depth={headingLevel} title={t('Returns')}>
-          {/* the card below explains the type */}
-          <code className="not-prose text-[0.8125rem] text-fd-muted-foreground">
-            {String(field.type)}
-          </code>
-        </SectionHeader>
+        <SectionHeader id="returns" depth={headingLevel} title={t('Returns')} />
         <AnchorSection segments={['returns']}>
           {isLeafType(getNamedType(field.type)) ? (
             <div className="rounded-xl border bg-fd-card px-3">
@@ -125,10 +115,7 @@ function OperationContent({
           {slots.header}
           {slots.deprecated}
           {slots.playground}
-          <div className="my-6 flex flex-col gap-3 empty:hidden">
-            {slots.description}
-            {slots.directives}
-          </div>
+          <div className="my-6 empty:hidden">{slots.description}</div>
           {slots.arguments}
           {slots.returns}
         </div>

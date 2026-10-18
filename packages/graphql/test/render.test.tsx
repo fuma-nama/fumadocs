@@ -1,7 +1,7 @@
 import { fileURLToPath } from 'node:url';
 import path from 'node:path';
 import fs from 'node:fs';
-import type { ComponentProps, ReactNode } from 'react';
+import type { ComponentProps } from 'react';
 import { renderToString } from 'react-dom/server';
 import { afterEach, describe, expect, test, vi } from 'vitest';
 import { defaultShikiFactory } from 'fumadocs-core/highlight/shiki/full';
@@ -10,11 +10,9 @@ import {
   type GraphQLComponents,
   type GraphQLPageProps,
   GraphQLProvider,
-  useGraphQL,
 } from '@/utils/create-page';
 import { OperationProvider } from '@/operation';
 import { OperationBar } from '@/ui/operation/bar';
-import { TypeCard } from '@/ui/components/type-annotation';
 import type { OperationKind } from '@/utils/schema';
 
 const codeUsage = vi.hoisted(() => ({ id: null as string | null }));
@@ -50,8 +48,7 @@ function renderPage(
   );
 }
 
-/** a part of the page, `Customer` has a type page */
-function renderPart(children: ReactNode, schema = sdl): string {
+function renderBar(kind: OperationKind, name: string, schema = sdl): string {
   return renderToString(
     <GraphQLProvider
       sdl={schema}
@@ -64,22 +61,11 @@ function renderPart(children: ReactNode, schema = sdl): string {
         Heading: () => null,
       }}
     >
-      {children}
+      <OperationProvider kind={kind} name={name}>
+        <OperationBar />
+      </OperationProvider>
     </GraphQLProvider>,
   );
-}
-
-function renderBar(kind: OperationKind, name: string, schema = sdl): string {
-  return renderPart(
-    <OperationProvider kind={kind} name={name}>
-      <OperationBar />
-    </OperationProvider>,
-    schema,
-  );
-}
-
-function Card({ name }: { name: string }) {
-  return <TypeCard type={useGraphQL().schema.getType(name)!} />;
 }
 
 /** the text content of HTML */
@@ -104,7 +90,7 @@ describe('operation bar', () => {
     expect(text(html)).toBe('QUERYcustomer(id: ID!): Customer');
     // links to where the page explains them: `name: Type` to the row of argument, the return type to its section
     expect(html).toMatch(
-      /<a href="#arguments.id" class="group\/argument"><span class="[^"]*">id<\/span><span class="[^"]*">: <!-- -->ID!<\/span><\/a>/,
+      /<a href="#arguments.arguments.id" class="group\/argument"><span class="[^"]*">id<\/span><span class="[^"]*">: <!-- -->ID!<\/span><\/a>/,
     );
     expect(html).toMatch(/<a href="#returns" class="[^"]*">Customer<\/a>/);
     // no hover cards, and no links to type pages
@@ -115,6 +101,20 @@ describe('operation bar', () => {
   test('deprecated operation', () => {
     expect(renderBar('mutation', 'legacyCreateOrder')).toContain(
       '<span class="line-through">legacyCreateOrder</span>',
+    );
+  });
+
+  test('directives in a row of the bar', () => {
+    const html = renderBar('query', 'orders');
+
+    expect(text(html)).toBe(
+      'QUERYorders(filter: OrderFilter): [Order!]!Directives@auth(requires: ADMIN)',
+    );
+    // the chip opens the definition of directive
+    expect(html).toMatch(/aria-haspopup="dialog"[^>]*>@auth<span/);
+    // camel case names link to the rows as they are
+    expect(renderBar('mutation', 'legacyCreateOrder')).toContain(
+      'href="#arguments.arguments.customerId"',
     );
   });
 
@@ -137,50 +137,6 @@ describe('operation bar', () => {
   });
 });
 
-describe('type hover card', () => {
-  test.each([
-    ['Customer', 'typeCustomer implements NodeA registered customer.Member ofSearchResult'],
-    ['Node', 'interfaceNodeAn object with a globally unique ID.Implemented byCustomer, Order'],
-    ['SearchResult', 'unionSearchResult = Customer | Order'],
-  ])('%s', (name, expected) => {
-    expect(text(renderPart(<Card name={name} />))).toBe(expected);
-  });
-
-  test('enum', () => {
-    const html = renderPart(<Card name="OrderStatus" />);
-
-    expect(text(html)).toBe(
-      'enumOrderStatusThe status of an order.ValuesPENDINGSHIPPEDDELIVEREDCANCELLEDREFUNDED',
-    );
-    expect(html).toContain('title="The order is on its way."');
-    expect(html).toMatch(/class="[^"]*line-through[^"]*">CANCELLED<\/code>/);
-  });
-
-  test('scalar', () => {
-    const html = renderPart(<Card name="DateTime" />);
-
-    expect(text(html)).toBe(
-      'scalarDateTimeAn ISO-8601 encoded date time string.Specificationhttps://scalars.graphql.org/andimarek/date-time',
-    );
-    expect(html).toContain('href="https://scalars.graphql.org/andimarek/date-time"');
-  });
-
-  test('one-of input', () => {
-    const html = renderPart(
-      <Card name="OrderLookup" />,
-      `
-        "Look up an order."
-        input OrderLookup @oneOf { id: ID number: Int }
-        type Query { order(by: OrderLookup!): String }
-      `,
-    );
-
-    expect(text(html)).toBe(
-      'inputOrderLookup @oneOfLook up an order.Exactly one field must be set.',
-    );
-  });
-});
-
 describe('render <GraphQLPage />', () => {
   test('operation page', () => {
     const html = renderPage([{ type: 'operation', kind: 'query', name: 'orders' }]);
@@ -188,17 +144,17 @@ describe('render <GraphQLPage />', () => {
     expect(html).toContain('List all orders.');
     expect(html).toContain('Arguments');
     expect(html).toContain('Returns');
-    // custom directive chip
-    expect(text(html)).toContain('@auth(requires: ADMIN)');
-    // the operation bar without playground
-    expect(text(html)).toContain('QUERYorders(filter: OrderFilter): [Order!]!');
-    expect(html).toContain('href="#arguments.filter"');
-    expect(html).toContain('href="#returns"');
-    // the card below explains the return type
-    expect(html).toMatch(
-      /<h2 id="returns"[\s\S]*?<\/h2><div class="ms-auto flex min-w-0 items-center"><code class="[^"]*">\[Order!\]!<\/code><\/div>/,
+    // the operation bar without playground, its directives in a row
+    expect(text(html)).toContain(
+      'QUERYorders(filter: OrderFilter): [Order!]!Directives@auth(requires: ADMIN)',
     );
-    // the only popup is the definition of directive, the page links only within itself
+    expect(html).toContain('href="#returns"');
+    // one card for the arguments, the bar links to its rows
+    expect(html).toContain('href="#arguments.arguments.filter"');
+    expect(html).toContain('id="arguments.arguments.filter"');
+    // the card below explains the return type, the heading doesn't repeat it
+    expect(text(html)).not.toContain('[Order!]!Returns');
+    expect(text(html)).not.toContain('Returns[Order!]!');
     // popups open the definition of directive and the details of enum values, never types
     const popups = Array.from(html.matchAll(/aria-haspopup="dialog"[^>]*>(.*?)<\/button>/g), (m) =>
       text(m[1]),
@@ -328,10 +284,12 @@ describe('render <GraphQLPage />', () => {
     }
     // built-in scalars don't repeat the description of spec
     expect(html).not.toContain('unique identifier');
-    // field arguments nested under the field, nothing else on the page explains their types
-    expect(text(html)).toContain('statusOrderStatus');
-    expect(html).toMatch(/aria-haspopup="dialog"[^>]*>OrderStatus<\/button>/);
-    expect(text(html)).toContain('firstInt= 10');
+    // the card doesn't repeat the name of type
+    expect(html).toMatch(/aria-current="page"[^>]*>fields</);
+    // a field opens its arguments in a panel
+    expect(text(html)).toContain('Argumentsstatus, first');
+    // the reason of deprecation once, the row labels it
+    expect(text(html)).toContain("The customer's email address.Use contact instead.");
     // the SDL
     expect(html).toContain('<pre data-lang="graphql"><code>type Customer implements Node {');
   });
@@ -399,7 +357,7 @@ describe('render <GraphQLPage />', () => {
     });
 
     expect(text(html)).toContain('inputOrderLookup @oneOf');
-    expect(html).toContain('Exactly one field must be set.');
+    expect(text(html)).toContain('Exactly one ofidnumber');
     // fields are optional
     expect(html).not.toContain('text-red-400');
   });

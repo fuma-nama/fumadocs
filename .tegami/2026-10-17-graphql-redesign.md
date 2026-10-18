@@ -6,7 +6,7 @@ packages:
 
 ### Redesigned GraphQL pages
 
-- Operation pages start with their signature, like `QUERY customer(id: ID!): Customer`, and keep the types they use in place: Schema UI cards to explore them, hover cards with their definitions.
+- Operation pages start with their signature and directives, like `QUERY customer(id: ID!): Customer`, and keep the types they use in place: arguments and return types open in Schema UI panels.
 - Pages of named types are opt-in with `includeTypes`, they show the SDL of types and where they are used.
 - Example requests and responses beside operations, with a select of examples and code samples in cURL, JavaScript, Go, Python, Java, C# and Rust.
 - Named examples from GraphQL documents with the `examples` option of `createGraphQL()`.
@@ -26,8 +26,11 @@ packages:
 | `@fumadocs/graphql/utils/snippets`                                       | the `codeUsages` option                                    |
 | `HeaderItem` and `filterHeaderItems` from `@fumadocs/graphql/playground` | stored headers are objects by origin                       |
 | `inputTypeToJsonSchema(type, depth)`                                     | `inputTypeToJsonSchema(type)`, recursive inputs are shared |
+| `slots.directives` of `renderOperationLayout` and `renderTypeLayout`     | in `slots.playground` and `slots.definition`               |
+| `renderArguments` of `generateGraphQLSchemaUI()`, `SchemaViewRoot.args`  | arguments open in their own panel                          |
 
 - Added `createCodeUsageGeneratorRegistry()` and `registerDefaultCodeUsages()` to `@fumadocs/graphql/ui`.
 - Added `subscribeGraphQL()`, `getSubscriptionUrl()` and the `SubscriptionError` type to `@fumadocs/graphql/playground`.
 - Added `relations.unions` to `useNamedType()`.
+- The Schema UI root also takes a schema coordinate, like `Query.orders()` for the arguments of `Query.orders`.
 - `syncOperationVariables()` always declares the variables of required arguments.
