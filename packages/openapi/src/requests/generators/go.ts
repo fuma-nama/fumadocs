@@ -11,12 +11,10 @@ export const go: CodeUsageGenerator = {
       lang: 'go',
       addImport: (name) => imports.add(name),
     });
-    const s = [`url := ${doubleQuote(data.url)}`];
-
-    if (body) s.push(body);
-    s.push(
+    const multipart = data.bodyMediaType === 'multipart/form-data';
+    const s = [
       `req, _ := http.NewRequest("${data.method.toUpperCase()}", url, ${body ? 'body' : 'nil'})`,
-    );
+    ];
     for (const k in data.header) {
       s.push(`req.Header.Add(${doubleQuote(k)}, ${doubleQuote(data.header[k].value)})`);
     }
@@ -24,10 +22,7 @@ export const go: CodeUsageGenerator = {
     const cookie = cookieString(data.cookie);
     if (cookie) s.push(`req.Header.Add("Cookie", ${doubleQuote(cookie)})`);
     if (body) {
-      const type =
-        data.bodyMediaType === 'multipart/form-data'
-          ? 'mp.FormDataContentType()'
-          : doubleQuote(data.bodyMediaType!);
+      const type = multipart ? 'mp.FormDataContentType()' : doubleQuote(data.bodyMediaType!);
 
       s.push(`req.Header.Add("Content-Type", ${type})`);
     }
@@ -41,6 +36,7 @@ export const go: CodeUsageGenerator = {
       'fmt.Println(string(resBody))',
     );
 
+    // a text body is a single statement, its next lines are inside the string literal
     return `package main
 
 import (
@@ -48,7 +44,8 @@ ${indent(Array.from(imports, (name) => `"${name}"`).join('\n'))}
 )
 
 func main() {
-${indent(s.join('\n'))}
+  url := ${doubleQuote(data.url)}
+${body ? `${multipart ? indent(body) : `  ${body}`}\n` : ''}${indent(s.join('\n'))}
 }`;
   },
 };

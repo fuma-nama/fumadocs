@@ -1,10 +1,7 @@
 'use client';
-import { useMemo } from 'react';
-import { Check, Copy } from 'lucide-react';
 import { useTranslations } from '@fuma-translate/react';
-import { buttonVariants } from 'fumadocs-ui/components/ui/button';
-import { useCopyButton } from 'fumadocs-ui/utils/use-copy-button';
 import { dereference, type JsonSchema } from '@fumadocs/json-schema';
+import { CopyTypeScript } from 'shared-api/components/copy-typescript';
 import {
   AccordionContent,
   AccordionHeader,
@@ -17,7 +14,6 @@ import { idToTitle } from 'shared-api/utils/id-to-title';
 import type { MessageSchema, OperationMessage } from '@/operation';
 import type { AsyncAPISchemaObject } from '@/types';
 import { useAsyncAPI, useRenderContext } from '@/utils/create-page';
-import { cn } from '@/utils/cn';
 import { SchemaUI } from '@/ui/components/schema';
 import { Markdown } from '@/ui/components/markdown';
 import { ClientCodeBlock } from '@/ui/components/codeblock';
@@ -148,18 +144,6 @@ function JsonSchemaCard({
   // like `PlanetCreatedPayload`
   const typeName =
     idToTitle(item.id).replace(/\W/g, '') + (part === 'payload' ? 'Payload' : 'Headers');
-  const ts = useMemo(
-    () =>
-      generateTypeScriptDefinitions
-        ? generateTypeScriptDefinitions(schema as JsonSchema, {
-            name: typeName,
-            readOnly: received,
-            writeOnly: !received,
-            document: doc.bundled,
-          })
-        : undefined,
-    [generateTypeScriptDefinitions, schema, typeName, received, doc],
-  );
 
   return (
     <SchemaUI
@@ -169,32 +153,24 @@ function JsonSchemaCard({
         selector: part === 'payload' && contentType && (
           <span className="min-w-0 px-1.5 font-mono">{contentType}</span>
         ),
-        actions: ts && <CopyTypeScript code={ts} name={part} />,
+        actions: generateTypeScriptDefinitions && (
+          <CopyTypeScript
+            name={part}
+            generate={() =>
+              generateTypeScriptDefinitions(schema as JsonSchema, {
+                name: typeName,
+                readOnly: received,
+                writeOnly: !received,
+                document: doc.bundled,
+              })
+            }
+          />
+        ),
       }}
       root={schema as never}
       readOnly={received}
       writeOnly={!received}
     />
-  );
-}
-
-function CopyTypeScript({ code, name }: { code: string; name: string }) {
-  const t = useTranslations({ note: 'TypeScript definitions' });
-  const [isChecked, onCopy] = useCopyButton(() => navigator.clipboard.writeText(code));
-
-  return (
-    <button
-      type="button"
-      title={t('Use the {name} type in TypeScript.', { variables: { name } })}
-      onClick={onCopy}
-      className={cn(
-        buttonVariants({ variant: 'ghost', size: 'sm' }),
-        '-my-1 shrink-0 gap-1.5 text-fd-muted-foreground [&_svg]:size-3.5',
-      )}
-    >
-      {isChecked ? <Check /> : <Copy />}
-      TypeScript
-    </button>
   );
 }
 

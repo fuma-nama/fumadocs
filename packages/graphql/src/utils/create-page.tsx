@@ -13,7 +13,6 @@ import type { GeneratedPageProps, GraphQLPageItem } from '@/utils/pages';
 import { createContext, type FC, type ReactNode, use, useMemo } from 'react';
 import type {
   DirectiveNode,
-  GraphQLArgument,
   GraphQLDefaultInput,
   GraphQLField,
   GraphQLNamedType,
@@ -23,10 +22,16 @@ import type {
 import type { SchemaUIProps } from 'shared-api/components/schema';
 import type { NamedTypeKind, OperationKind } from '@/utils/schema';
 import type { PlaygroundRequest, PlaygroundResult } from '@/playground/fetcher';
+import type { OperationExample } from '@/utils/example';
+import {
+  type CodeUsageGeneratorRegistry,
+  createCodeUsageGeneratorRegistry,
+  registerDefaultCodeUsages,
+} from '@/codegen';
 import { buildSchemaFromSDL } from '@/utils/build-schema';
 
 /**
- * pre-generated links of generated pages, see `baseUrl` in source options.
+ * links of generated pages, generated when the source is attached to a loader.
  */
 export interface GraphQLLinks {
   /**
@@ -46,14 +51,14 @@ export interface SchemaViewRoot {
   type: GraphQLType;
   description?: string | null;
   deprecationReason?: string | null;
-  args?: readonly GraphQLArgument[];
   default?: GraphQLDefaultInput;
   astNode?: { readonly directives?: readonly DirectiveNode[] } | null;
 }
 
 export interface SchemaViewProps {
   client: Omit<SchemaUIProps, 'generated'>;
-  root: SchemaViewRoot;
+  /** a field-like root, or a schema coordinate like `Query.orders` (`Query.orders()` for its arguments) */
+  root: SchemaViewRoot | string;
 }
 
 /** components the UI renders through, so a page can replace them */
@@ -83,10 +88,11 @@ export interface GraphQLRuntimeOptions {
 export interface GraphQLRuntime extends GraphQLRuntimeOptions {
   schema: GraphQLSchema;
   sdl: string;
-  /**
-   * pre-generated links of generated pages, see `baseUrl` in source options.
-   */
   links?: GraphQLLinks;
+  /**
+   * examples of the page's operations from the `examples` option of server, by `${kind}:${name}`.
+   */
+  examples?: Record<string, OperationExample[]>;
 }
 
 export interface PageLayoutProps {
@@ -100,6 +106,10 @@ export interface GraphQLRenderOptions {
   /** the Shiki highlighter of code blocks */
   shiki?: ShikiFactory;
   shikiOptions?: ShikiOptions;
+  /**
+   * code samples of operations, defaults to cURL, JavaScript, Python, Go, Java, C# and Rust.
+   */
+  codeUsages?: CodeUsageGeneratorRegistry;
   /**
    * interactive playground, shown on operation pages when `url`, `fetcher` or `render` is provided.
    */
@@ -120,7 +130,13 @@ export interface GraphQLRenderOptions {
      */
     headers?: Record<string, string>;
     /**
-     * replace the default fetcher, e.g. to proxy requests.
+     * the endpoint of subscriptions: `ws(s)://` URLs use the graphql-ws protocol, `http(s)://` URLs GraphQL over SSE.
+     *
+     * @defaultValue `url` with a `ws(s)://` scheme
+     */
+    subscriptionUrl?: string;
+    /**
+     * replace the default fetcher of queries and mutations, e.g. to proxy requests.
      */
     fetcher?: (request: PlaygroundRequest, ctx: RenderContext) => Promise<PlaygroundResult>;
     /**
@@ -140,7 +156,6 @@ export interface GraphQLRenderOptions {
         header: ReactNode;
         description: ReactNode;
         deprecated: ReactNode;
-        directives: ReactNode;
         playground: ReactNode;
         arguments: ReactNode;
         returns: ReactNode;
@@ -155,12 +170,16 @@ export interface GraphQLRenderOptions {
     renderTypeLayout?: (
       slots: {
         header: ReactNode;
+        /** the definition of type in SDL, like `type Customer implements Node` */
+        definition: ReactNode;
         description: ReactNode;
-        directives: ReactNode;
-        relations: ReactNode;
+        /** fields of objects, interfaces and input objects, or the members of unions */
         fields: ReactNode;
         values: ReactNode;
-        scalar: ReactNode;
+        /** where the type is used, and the implementations of interfaces */
+        usages: ReactNode;
+        /** the full SDL of type */
+        sdl: ReactNode;
       },
       context: {
         type: GraphQLNamedType;
@@ -183,6 +202,7 @@ export interface GraphQLRenderOptions {
 export interface RenderContext extends GraphQLRenderOptions {
   shiki: ShikiFactory;
   shikiOptions: ShikiOptions;
+  codeUsages: CodeUsageGeneratorRegistry;
   /** the Schema UI of the page */
   SchemaUI: FC<SchemaViewProps>;
 }
@@ -191,6 +211,7 @@ export interface GraphQLProviderProps extends GraphQLRuntimeOptions, GraphQLRend
   shiki: ShikiFactory;
   sdl: string;
   links?: GraphQLLinks;
+  examples?: Record<string, OperationExample[]>;
   components: GraphQLComponents;
   children: ReactNode;
 }
@@ -211,6 +232,8 @@ export type GraphQLPageProps = GeneratedPageProps & {
   payload: {
     links?: GraphQLLinks;
     sdl: string;
+    /** examples of the page's operations, by `${kind}:${name}` */
+    examples?: Record<string, OperationExample[]>;
   };
 };
 
@@ -263,13 +286,19 @@ export function useOperationLink(kind: OperationKind, name: string): string | un
   return operationLinks?.(kind, name) ?? links?.operations[`${kind}:${name}`];
 }
 
+let defaultCodeUsages: CodeUsageGeneratorRegistry | undefined;
+
 export function GraphQLProvider({
   sdl,
   links,
+  examples,
   typeLinks,
   operationLinks,
   shiki,
   shikiOptions = defaultShikiOptions,
+  codeUsages = (defaultCodeUsages ??= registerDefaultCodeUsages(
+    createCodeUsageGeneratorRegistry(),
+  )),
   playground,
   content,
   schemaUI,
@@ -278,13 +307,13 @@ export function GraphQLProvider({
 }: GraphQLProviderProps) {
   const schema = useMemo(() => buildSchemaFromSDL(sdl), [sdl]);
   const runtime = useMemo<GraphQLRuntime>(
-    () => ({ schema, sdl, links, typeLinks, operationLinks }),
-    [schema, sdl, links, typeLinks, operationLinks],
+    () => ({ schema, sdl, links, examples, typeLinks, operationLinks }),
+    [schema, sdl, links, examples, typeLinks, operationLinks],
   );
   const { SchemaUI } = components;
   const render = useMemo<RenderContext>(
-    () => ({ shiki, shikiOptions, playground, content, schemaUI, SchemaUI }),
-    [shiki, shikiOptions, playground, content, schemaUI, SchemaUI],
+    () => ({ shiki, shikiOptions, codeUsages, playground, content, schemaUI, SchemaUI }),
+    [shiki, shikiOptions, codeUsages, playground, content, schemaUI, SchemaUI],
   );
 
   return (
@@ -349,6 +378,7 @@ export function createGraphQLRenderer({
         shiki={shiki}
         sdl={props.payload.sdl}
         links={props.payload.links}
+        examples={props.payload.examples}
         components={slots}
       >
         <Content {...props} />

@@ -1,9 +1,15 @@
+import type * as GraphQL from '@fumadocs/graphql';
 import type * as Operation from '@fumadocs/graphql/operation';
+import type * as PlaygroundModule from '@fumadocs/graphql/playground';
 import type * as TypeDocs from '@fumadocs/graphql/type-docs';
+import type * as UI from '@fumadocs/graphql/ui';
 
-export type PageOperationProps = Operation.PageOperationProps;
 export type OperationInfo = Operation.OperationInfo;
+export type OperationExample = GraphQL.OperationExample;
 
-export type PageTypeProps = TypeDocs.PageTypeProps;
 export type NamedTypeInfo = TypeDocs.NamedTypeInfo;
 export type TypeUsages = TypeDocs.TypeUsages;
+
+export type CodeUsageData = UI.CodeUsageData;
+export type Playground = PlaygroundModule.Playground;
+export type SubscriptionHandlers = PlaygroundModule.SubscriptionHandlers;

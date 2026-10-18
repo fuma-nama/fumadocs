@@ -1,5 +1,6 @@
+import { shellQuote } from 'shared-api/codegen';
 import { inputToString } from '@/requests/string-utils';
-import { resolveMediaAdapter } from '@/requests/media/resolve-adapter';
+import { resolveMediaType } from '@/requests/media/resolve-adapter';
 import type { CodeUsageGenerator } from '@/requests/generators';
 
 export const curl: CodeUsageGenerator = {
@@ -17,34 +18,18 @@ export const curl: CodeUsageGenerator = {
       s.push(`--cookie ${shellQuote(`${k}=${data.cookie[k].value}`)}`);
     }
 
-    if (data.body && data.bodyMediaType === 'multipart/form-data') {
+    const type = data.bodyMediaType && resolveMediaType(data.bodyMediaType, mediaAdapters);
+    if (data.body && type === 'multipart/form-data') {
       if (typeof data.body !== 'object') throw new Error('[CURL] request body must be an object.');
 
       for (const [key, value] of Object.entries(data.body)) {
         s.push(`-F ${shellQuote(`${key}=${inputToString(value)}`)}`);
       }
-    } else if (
-      data.body &&
-      data.bodyMediaType &&
-      resolveMediaAdapter(data.bodyMediaType, mediaAdapters)
-    ) {
-      const escaped = shellQuote(
-        inputToString(
-          data.body,
-          // @ts-expect-error -- assume the body media type is supported
-          data.bodyMediaType,
-        ),
-      );
-
+    } else if (data.body && type) {
       s.push(`-H 'Content-Type: ${data.bodyMediaType}'`);
-      s.push(`-d ${escaped}`);
+      s.push(`-d ${shellQuote(inputToString(data.body, type))}`);
     }
 
     return s.join(' \\\n  ');
   },
 };
-
-/** single quotes keep the string literal, each `'` closes them to add an escaped quote */
-function shellQuote(str: string): string {
-  return `'${str.replaceAll("'", `'\\''`)}'`;
-}

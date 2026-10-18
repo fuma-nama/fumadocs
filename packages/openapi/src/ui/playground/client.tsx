@@ -1,25 +1,21 @@
 'use client';
 import { type ComponentProps, type FC, type ReactNode, useMemo, useState } from 'react';
 import { Dialog } from '@base-ui/react/dialog';
-import { Play, X } from 'lucide-react';
+import { X } from 'lucide-react';
 import { useOnChange } from 'fumadocs-core/utils/use-on-change';
 import { useOpenAPI } from '@/utils/create-page';
 import { useExampleRequests, useOperation } from '@/operation';
 import { DefaultResultDisplay, type ResultDisplayProps } from './components/result-display';
 import { EndpointBar } from '@/ui/components/endpoint';
 import { Markdown } from '@/ui/components/markdown';
-import { DialogPopup } from 'shared-api/components/dialog';
-import { buttonVariants } from 'fumadocs-ui/components/ui/button';
+import { DialogPopup, PlaygroundTrigger } from 'shared-api/components/dialog';
 import { cn } from '@/utils/cn';
 import { SchemaProvider } from 'shared-api/components/playground/schema';
-import { iconButtonClassName } from 'shared-api/components/playground/panels';
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from 'shared-api/components/select';
+  iconButtonClassName,
+  RequestExampleSelect,
+  ViewSwitch,
+} from 'shared-api/components/playground/panels';
 import { type FieldKey, StfProvider, useFieldValue } from '@fumari/stf';
 import type { ParameterObject } from '@/types';
 import { useTranslations } from '@fuma-translate/react';
@@ -30,10 +26,9 @@ import {
   usePlayground,
 } from '@/playground/use-playground';
 import { UrlBar } from './components/url-bar';
-import { mutualTLSProvider, RequestPanel } from './components/request-panel';
-import { oauthPanelProvider } from './components/oauth-panel';
+import { builtinAuthProviders } from './components/auth';
+import { RequestPanel } from './components/request-panel';
 import { ResponsePanel } from './components/response-panel';
-import { Segmented, SegmentedList } from 'shared-api/components/segmented';
 
 export interface PlaygroundClientProps extends ComponentProps<'div'>, PlaygroundClientOptions {
   /** @deprecated it defaults to `true` for requests */
@@ -88,11 +83,10 @@ export default function PlaygroundClient({
   renderBodyField,
   ...rest
 }: PlaygroundClientProps) {
-  const t = useTranslations({ note: 'playground' });
   const { doc } = useOpenAPI();
   const { path, method, operation } = useOperation();
   const providers = useMemo(
-    () => [...(authProviders ?? []), oauthPanelProvider, mutualTLSProvider],
+    () => [...(authProviders ?? []), ...builtinAuthProviders],
     [authProviders],
   );
   const playground = usePlayground({ authProviders: providers, transformAuthInputs, fetchOptions });
@@ -113,15 +107,7 @@ export default function PlaygroundClient({
       >
         <Dialog.Root open={open} onOpenChange={setOpen}>
           <EndpointBar method={method} route={path} deprecated={operation.deprecated} {...rest}>
-            <Dialog.Trigger
-              className={cn(
-                buttonVariants({ variant: 'primary', size: 'sm' }),
-                'group shrink-0 gap-1.5 rounded-lg px-3 transition-[background-color,scale] active:scale-[0.97] motion-reduce:transition-none',
-              )}
-            >
-              <Play className="size-3 fill-current transition-transform duration-200 group-hover:translate-x-px motion-reduce:transition-none" />
-              {t('Try in Playground')}
-            </Dialog.Trigger>
+            <PlaygroundTrigger />
           </EndpointBar>
           <DialogPopup className="sm:h-[min(52rem,calc(100dvh-3rem))] sm:w-[min(80rem,calc(100vw-3rem))]">
             <PlaygroundDialog
@@ -150,6 +136,13 @@ function PlaygroundDialog({
   const { title, method, path, operation, parameters } = useOperation();
   const { response, isSending, send, clearResponse } = playground;
   const [view, setView] = useState('request');
+  const views = useMemo(
+    () => [
+      { value: 'request', label: t('Request') },
+      { value: 'response', label: t('Response') },
+    ],
+    [t],
+  );
   const onSubmit = (e: { preventDefault: () => void }) => {
     e.preventDefault();
     void send();
@@ -186,15 +179,7 @@ function PlaygroundDialog({
           loading={isSending}
         />
       </form>
-      <Segmented value={view} onValueChange={setView} className="shrink-0 px-3 pb-3 md:hidden">
-        <SegmentedList
-          className="*:flex-1 *:justify-center"
-          items={[
-            { value: 'request', label: t('Request') },
-            { value: 'response', label: t('Response') },
-          ]}
-        />
-      </Segmented>
+      <ViewSwitch value={view} onValueChange={setView} items={views} />
       <div className="mx-3 mb-3 grid min-h-0 flex-1 overflow-hidden rounded-xl border bg-fd-card sm:mx-4 sm:mb-4 md:grid-cols-[minmax(0,11fr)_minmax(0,9fr)]">
         <RequestPanel
           playground={playground}
@@ -217,25 +202,9 @@ function PlaygroundDialog({
 
 function ExampleSelect() {
   const { items, selected, select } = useExampleRequests();
-  const t = useTranslations({ note: 'playground' });
-  if (items.length <= 1) return null;
   const options = items.map((item) => ({ value: item.id, label: item.name }));
 
-  return (
-    <Select items={options} value={selected ?? null} onValueChange={(v) => v !== null && select(v)}>
-      <SelectTrigger className="h-8 w-auto max-w-64 gap-1.5 border-0 bg-transparent px-2 text-xs hover:bg-fd-accent focus:ring-0 focus-visible:ring-2">
-        <span className="text-fd-muted-foreground">{t('Example')}</span>
-        <SelectValue className="truncate font-medium" />
-      </SelectTrigger>
-      <SelectContent align="end">
-        {options.map((option) => (
-          <SelectItem key={option.value} value={option.value}>
-            {option.label}
-          </SelectItem>
-        ))}
-      </SelectContent>
-    </Select>
-  );
+  return <RequestExampleSelect items={options} value={selected ?? null} onValueChange={select} />;
 }
 
 export const Custom = {

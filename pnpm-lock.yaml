@@ -2871,6 +2871,9 @@ importers:
       cn:
         specifier: ^0.4.0
         version: 0.4.0
+      eventsource-parser:
+        specifier: ^4.1.1
+        version: 4.1.1
       github-slugger:
         specifier: ^2.0.0
         version: 2.0.0
@@ -2987,6 +2990,9 @@ importers:
       '@fumadocs/asyncapi':
         specifier: workspace:*
         version: link:../asyncapi
+      '@fumadocs/graphql':
+        specifier: workspace:*
+        version: link:../graphql
       '@fumadocs/story':
         specifier: workspace:*
         version: link:../story

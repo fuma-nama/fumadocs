@@ -614,6 +614,8 @@ function SchemaDescription({
           {infoTags.map((tag, i) => {
             if ('node' in tag) return <Fragment key={i}>{tag.node}</Fragment>;
 
+            if ('open' in tag) return <OpenTag key={i} {...tag} />;
+
             if ('list' in tag)
               return (
                 <div
@@ -654,5 +656,34 @@ function SchemaDescription({
         </div>
       )}
     </div>
+  );
+}
+
+/** a tag opening a schema, like the type of a property */
+function OpenTag({
+  label,
+  value,
+  open: { name, $ref },
+}: {
+  label: ReactNode;
+  value?: ReactNode;
+  open: { name: string; $ref: string };
+}) {
+  const { open, isExpanded } = use(TypeContext)!;
+
+  return (
+    <button
+      type="button"
+      aria-expanded={isExpanded?.(name, $ref)}
+      onClick={() => open(name, $ref)}
+      className={cn(
+        tagClassName,
+        'group/open inline-flex max-w-full items-center gap-1.5 text-start transition-colors hover:bg-fd-accent hover:text-fd-accent-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-fd-ring aria-expanded:bg-fd-accent',
+      )}
+    >
+      <span className="not-prose shrink-0 text-fd-muted-foreground">{label}</span>
+      {value && <code className="not-prose min-w-0 truncate">{value}</code>}
+      <ChevronRightIcon className="size-3 shrink-0 text-fd-muted-foreground transition-transform duration-200 group-hover/open:translate-x-0.5 motion-reduce:transition-none" />
+    </button>
   );
 }

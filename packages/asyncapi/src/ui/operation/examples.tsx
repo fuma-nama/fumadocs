@@ -1,7 +1,12 @@
 'use client';
 import { useState } from 'react';
 import { useTranslations } from '@fuma-translate/react';
-import { cardCodeBlock, exampleCardClassName, ExampleSelect } from 'shared-api/components/example';
+import {
+  cardCodeBlock,
+  exampleCardClassName,
+  ExampleHeader,
+  ExampleSelect,
+} from 'shared-api/components/example';
 import type { OperationMessage } from '@/operation';
 import { ClientCodeBlock } from '@/ui/components/codeblock';
 
@@ -22,49 +27,44 @@ export function MessageExamples({ item }: { item: OperationMessage }) {
   const part = parts.find((item) => item.value === selectedPart) ?? parts[0];
   const value = example[part.value];
   const json = typeof value !== 'string';
+  const code = json ? JSON.stringify(value, null, 2) : value;
 
   return (
     <div className={`${exampleCardClassName} not-prose @4xl:w-[400px] @4xl:shrink-0`}>
-      <div className="shrink-0 border-b ps-4 pe-1.5">
-        {/* as tall as the first row of schema cards beside it */}
-        <div className="flex h-9 items-center gap-2 text-[0.8125rem] font-medium">
-          {examples.length > 1 ? (
-            <ExampleSelect
-              items={examples.map((item, i) => ({
-                value: String(i),
-                label: item.name,
-                description: item.description,
-              }))}
-              value={String(selected)}
-              onValueChange={(v) => setSelected(Number(v))}
-              align="start"
-              className="-ms-2 me-auto max-w-none min-w-0 shrink text-fd-foreground"
-            />
-          ) : (
-            <span className="me-auto truncate">
-              {/* examples generated from schemas have no name of their own */}
-              {example.id === 'default' ? t('Example') : example.name}
-            </span>
-          )}
-          {parts.length > 1 && (
-            <ExampleSelect
-              items={parts}
-              value={part.value}
-              onValueChange={(v) => setPart(v as Part)}
-            />
-          )}
-        </div>
-        {example.description && (
-          <p className="-mt-1.5 pe-2.5 pb-2 text-xs text-fd-muted-foreground">
-            {example.description}
-          </p>
+      <ExampleHeader
+        // examples generated from schemas have no name of their own
+        title={examples.length === 1 && (example.id === 'default' ? t('Example') : example.name)}
+        description={
+          example.description && (
+            <p className="-mt-1.5 pe-2.5 pb-2 text-xs">{example.description}</p>
+          )
+        }
+        copy={code}
+        // as tall as the first row of schema cards beside it
+        className="h-9"
+      >
+        {examples.length > 1 && (
+          <ExampleSelect
+            items={examples.map((item, i) => ({
+              value: String(i),
+              label: item.name,
+              description: item.description,
+            }))}
+            value={String(selected)}
+            onValueChange={(v) => setSelected(Number(v))}
+            align="start"
+            className="-ms-2 me-auto max-w-none min-w-0 shrink text-fd-foreground"
+          />
         )}
-      </div>
-      <ClientCodeBlock
-        lang={json ? 'json' : 'text'}
-        code={json ? JSON.stringify(value, null, 2) : value}
-        codeblock={cardCodeBlock}
-      />
+        {parts.length > 1 && (
+          <ExampleSelect
+            items={parts}
+            value={part.value}
+            onValueChange={(v) => setPart(v as Part)}
+          />
+        )}
+      </ExampleHeader>
+      <ClientCodeBlock lang={json ? 'json' : 'text'} code={code} codeblock={cardCodeBlock} />
     </div>
   );
 }

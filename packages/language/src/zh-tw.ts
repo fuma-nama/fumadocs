@@ -2,9 +2,14 @@ import type { TranslationPreset } from 'fumadocs-core/i18n';
 import type { Translations as UITranslations } from 'fumadocs-ui/i18n';
 import type { Translations as OpenAPITranslations } from 'fumadocs-openapi/i18n';
 import type { Translations as AsyncAPITranslations } from '@fumadocs/asyncapi/i18n';
+import type { Translations as GraphQLTranslations } from '@fumadocs/graphql/i18n';
 import type { Translations as StoryTranslations } from '@fumadocs/story/i18n';
 
-type Translations = UITranslations & OpenAPITranslations & AsyncAPITranslations & StoryTranslations;
+type Translations = UITranslations &
+  OpenAPITranslations &
+  AsyncAPITranslations &
+  GraphQLTranslations &
+  StoryTranslations;
 
 const translations = {
   displayName: '繁體中文',
@@ -87,18 +92,14 @@ const translations = {
   'Length(schema UI)': '長度',
   'Match(schema UI)': '符合',
   'Multiple Of(schema UI)': '倍數',
-  'New Item(playground)': '新增項目',
-  'New(playground)': '新增',
   'No property matching(schema UI)': '沒有符合的屬性',
   'Properties(schema UI)': '屬性',
   'Range(schema UI)': '範圍',
   'Remove Item(playground)(aria-label)': '移除項目',
   'Select(playground)': '選擇',
-  'Selected(playground)': '已選取',
   'Show Path(schema UI)(aria-label)': '顯示路徑',
   'Show Property(playground)': '顯示屬性',
   'Unset(playground)': '無',
-  'Upload(playground)': '上傳',
   'Value in(schema UI)': '值於',
 
   // fumadocs-openapi
@@ -318,6 +319,63 @@ const translations = {
   'You send these messages to {app}(message direction)': '你向 {app} 傳送這些訊息',
   '{app} sends these messages to you(message direction)': '{app} 向你傳送這些訊息',
   '{length} bytes(playground)': '{length} 位元組',
+
+  // @fumadocs/graphql
+  '+{count} more(graphql playground)': '還有 {count} 項',
+  'Argument of(type page)': '用作參數',
+  'Arguments(graphql schema ui)': '參數',
+  'Arguments(operation page)': '參數',
+  'Check the URL, and whether the server accepts connections from this site.(graphql playground)':
+    '請檢查 URL，以及伺服器是否接受來自此網站的連線。',
+  'Clear(graphql playground)': '清除',
+  'Close(graphql playground)': '關閉',
+  'Completed(graphql playground)': '已完成',
+  'Default(graphql schema ui)': '預設',
+  'Deprecated(graphql playground)': '已棄用',
+  'Deprecated(graphql schema ui)': '已棄用',
+  'Directives(graphql schema ui)': '指令',
+  'Editor(graphql playground)': '編輯器',
+  'Errors(graphql playground)': '錯誤',
+  'Events(graphql playground)': '事件',
+  'Exactly one of(graphql schema ui)': '必須且只能設定其一',
+  'Example Response(graphql playground)': '範例回應',
+  'Field of(type page)': '用作欄位',
+  'Fields(type page)': '欄位',
+  'Form(graphql playground)': '表單',
+  'Format(graphql playground)': '格式化',
+  'GraphQL endpoint(graphql playground)': 'GraphQL 端點',
+  'Headers(graphql playground)': '標頭',
+  'Implemented by(graphql schema ui)': '實作型別',
+  'Implemented by(type page)': '實作型別',
+  'Input for(type page)': '用作輸入',
+  'Member of(type page)': '屬於',
+  'Operation(graphql playground)': '操作',
+  'Possible Types(type page)': '可能的型別',
+  'Request(graphql playground)': '請求',
+  'Reset(graphql playground)': '重設',
+  'Response(graphql playground)': '回應',
+  'Result(graphql playground)': '結果',
+  'Returned by(type page)': '用作回傳值',
+  'Returns(operation page)': '回傳值',
+  'Send a request to see its response.(graphql playground)': '傳送請求以查看回應。',
+  'Specification(graphql schema ui)': '規範',
+  'Specification(type page)': '規範',
+  'Stop(graphql playground)': '停止',
+  'Stopped(graphql playground)': '已停止',
+  'Subscribe to see its events.(graphql playground)': '訂閱後即可查看事件。',
+  'Subscribe(graphql playground)': '訂閱',
+  'Subscribed(graphql playground)': '已訂閱',
+  'Subscribing(graphql playground)': '訂閱中',
+  'Subscription failed(graphql playground)': '訂閱失敗',
+  'The connection closed with code {code}.(graphql playground)': '連線已關閉，狀態碼為 {code}。',
+  'The server did not acknowledge the connection.(graphql playground)': '伺服器未確認連線。',
+  'This operation has no arguments.(graphql playground)': '此操作沒有參數。',
+  'Usages(type page)': '使用位置',
+  'Value in(graphql schema ui)': '值於',
+  'Values(type page)': '列舉值',
+  'Variables(graphql playground)': '變數',
+  'Variables(operation page)': '變數',
+  'Waiting for events.(graphql playground)': '正在等待事件。',
 
   // @fumadocs/story
   '1 item(story arguments form)': '1 項',

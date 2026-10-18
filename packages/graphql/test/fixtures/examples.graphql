@@ -1,0 +1,66 @@
+# Examples of the store schema, not a description.
+
+# A customer with their latest orders.
+#
+# - `first` limits the orders
+query CustomerWithOrders($id: ID! = "cus_42", $first: Int = 3) {
+  customer(id: $id) {
+    name
+    recent: orders(first: $first) {
+      ...OrderFields
+    }
+  }
+}
+
+# Search results with the pending orders.
+query Dashboard($term: String!, $filter: OrderFilter) {
+  __typename
+  search(term: $term) {
+    ...SearchFields
+  }
+  pending: orders(filter: $filter) {
+    id
+  }
+} # not a description of the next operation
+query CustomerName($id: ID! = "cus_42") {
+  customer(id: $id) {
+    name
+  }
+}
+
+# not a description, the string below is
+"""
+Any node by its ID, **as a customer**.
+"""
+query NodeById($id: ID! = "cus_42") {
+  node(id: $id) {
+    __typename
+    id
+    ... on Customer {
+      name
+    }
+  }
+}
+
+fragment OrderFields on Order {
+  id
+  total
+  customer {
+    ...CustomerFields
+  }
+}
+
+fragment CustomerFields on Customer {
+  id
+  name
+}
+
+fragment SearchFields on SearchResult {
+  __typename
+  ... on Order {
+    status
+  }
+  ... on Customer {
+    name
+  }
+}

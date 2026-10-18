@@ -18,7 +18,7 @@ export const registry: Registry = {
     },
   },
   files: {
-    'components/{input,label,select,spinner}.tsx': { type: 'ui' },
+    'components/{select,spinner}.tsx': { type: 'ui' },
     'components/schema/*': { type: 'components', target: '<dir>/api/schema/*' },
     'components/**': { type: 'components', target: '<dir>/api/ui/*' },
     'auto-anchor/*': { type: 'components', target: '<dir>/api/ui/auto-anchor/*' },

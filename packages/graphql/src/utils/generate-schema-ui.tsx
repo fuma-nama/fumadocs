@@ -1,31 +1,28 @@
 import type { ReactNode } from 'react';
 import {
   type DirectiveNode,
-  type FieldDefinitionNode,
   getNamedType,
   type GraphQLArgument,
-  type GraphQLDefaultInput,
   type GraphQLEnumType,
   type GraphQLInputType,
-  type GraphQLNamedType,
   type GraphQLSchema,
-  type GraphQLType,
-  type InputValueDefinitionNode,
   isEnumType,
   isInputObjectType,
   isInterfaceType,
-  isListType,
   isNonNullType,
   isObjectType,
+  isRequiredArgument,
   isRequiredInputField,
   isScalarType,
+  isSpecifiedScalarType,
   isUnionType,
-  print,
-  valueToLiteral,
+  resolveSchemaCoordinate,
 } from 'graphql';
+import { ArrowUpRightIcon } from 'lucide-react';
 import { fromTranslations } from '@fuma-translate/react';
 import type { InfoTag, SchemaData, SchemaUIGeneratedData } from '@fumadocs/json-schema/react';
 import { getCustomDirectives } from '@/utils/schema';
+import { printDefaultValue } from '@/utils/sdl';
 import type { SchemaViewRoot } from '@/utils/create-page';
 
 export interface GenerateGraphQLSchemaUIOptions {
@@ -33,108 +30,163 @@ export interface GenerateGraphQLSchemaUIOptions {
   renderMarkdown: (md: string) => ReactNode;
   /** the custom directives of a type, field or argument */
   renderDirectives: (directives: readonly DirectiveNode[]) => ReactNode;
-  /** the arguments of a field */
-  renderArguments: (args: readonly GraphQLArgument[]) => ReactNode;
   renderEnumValues: (type: GraphQLEnumType) => ReactNode;
 }
 
-interface DocInfo {
-  description?: string | null;
-  deprecationReason?: string | null;
-  args?: readonly GraphQLArgument[];
-  defaultText?: string;
-  directives?: readonly DirectiveNode[];
-}
-
-interface FieldLike {
-  name: string;
-  description?: string | null;
-  deprecationReason?: string | null;
-  type: GraphQLType;
-  args?: readonly GraphQLArgument[];
-  default?: GraphQLDefaultInput;
-  astNode?: (FieldDefinitionNode | InputValueDefinitionNode) | null;
-}
+/** a type, field, input field or argument */
+type FieldLike = SchemaViewRoot & { name?: string; args?: readonly GraphQLArgument[] };
 
 /**
- * Generate the data of the Schema UI for a type, field or argument of the schema.
+ * Generate the data of the Schema UI for a field-like root, or a schema coordinate like `Query.orders`.
+ *
+ * Schemas are keyed by schema coordinates: `Customer` for a union member, `Customer.orders` for a field,
+ * `Customer.orders()` for its arguments and `Customer.orders(status:)` for one of them.
  */
 export function generateGraphQLSchemaUI(
   schema: GraphQLSchema,
-  root: SchemaViewRoot,
+  root: SchemaViewRoot | string,
   {
     translations = {},
     renderMarkdown,
     renderDirectives,
-    renderArguments,
     renderEnumValues,
   }: GenerateGraphQLSchemaUIOptions,
 ): SchemaUIGeneratedData {
   const t = fromTranslations(translations, { note: 'graphql schema ui' });
-  const refs: Record<string, SchemaData> = {};
+  // a UI only reads the schemas it shows
+  const refs = new Proxy<Record<string, SchemaData>>(
+    {},
+    {
+      get(generated, key) {
+        if (typeof key === 'string' && !Object.hasOwn(generated, key)) {
+          const data = generate(key);
+          if (data) generated[key] = data;
+        }
+        return Reflect.get(generated, key);
+      },
+    },
+  );
 
-  function ensureType(type: GraphQLType): string {
-    const key = String(type);
-    if (key in refs) return key;
+  function generate(key: string): SchemaData | undefined {
+    // an empty description leaves the type to the page, like type pages
+    if (key === '$root' && typeof root === 'object')
+      return buildData(root, undefined, root.description === '');
 
-    const data = {} as SchemaData;
-    // register before recursion to guard against cyclic references
-    refs[key] = data;
-    Object.assign(data, buildData(type, {}));
-    return key;
-  }
-
-  function ensureField(parent: GraphQLNamedType, field: FieldLike): string {
-    const key = `${parent.name}.${field.name}`;
-    if (key in refs) return key;
-
-    const data = {} as SchemaData;
-    refs[key] = data;
-    Object.assign(
-      data,
-      buildData(field.type, {
-        description: field.description,
-        deprecationReason: field.deprecationReason,
-        args: field.args,
-        defaultText: printDefaultValue(field.default, field.type as GraphQLInputType),
-        directives: getCustomDirectives(field.astNode),
-      }),
-    );
-    return key;
-  }
-
-  function buildData(type: GraphQLType, doc: DocInfo): SchemaData {
-    if (isNonNullType(type) || isListType(type)) {
-      // collapse wrappers into the named type, GraphQL-style annotations (e.g. `[User!]!`) are
-      // kept in `aliasName` to communicate list/non-null.
-      return {
-        ...buildData(type.ofType, doc),
-        aliasName: String(type),
-      };
+    const coordinate = key.endsWith('()') ? key.slice(0, -2) : key;
+    let element;
+    try {
+      element = resolveSchemaCoordinate(schema, coordinate);
+    } catch {
+      return;
     }
 
-    const named = getNamedType(type);
-    const description = doc.description ?? named.description;
+    if (coordinate !== key) {
+      if (element?.kind === 'Field') return buildArguments(coordinate, element.field.args);
+      return;
+    }
+
+    switch (element?.kind) {
+      case 'NamedType':
+        return buildData({ type: element.type });
+      case 'Field':
+        return buildData(element.field, key);
+      case 'InputField':
+        return buildData(element.inputField);
+      case 'FieldArgument':
+        return buildData(element.fieldArgument);
+    }
+  }
+
+  /**
+   * @param coordinate - the schema coordinate of a field, its arguments open from it
+   * @param documented - the page documents the named type
+   */
+  function buildData(field: FieldLike, coordinate?: string, documented = false): SchemaData {
+    const named = getNamedType(field.type);
+    // built-in scalars are described by the spec rather than the schema
+    const description =
+      field.description ?? (isSpecifiedScalarType(named) ? undefined : named.description);
+    const defaultText = printDefaultValue(field.default, field.type as GraphQLInputType);
+    const directives = getCustomDirectives(field.astNode);
+    const tags: InfoTag[] = [];
+
+    // the row labels it deprecated, the reason reads in the same tone
+    if (field.deprecationReason) {
+      tags.push({
+        node: (
+          <div className="w-full prose-no-margin text-yellow-700 dark:text-yellow-400">
+            {renderMarkdown(field.deprecationReason)}
+          </div>
+        ),
+      });
+    }
+
+    if (defaultText !== undefined) {
+      tags.push({ label: t('Default'), value: defaultText });
+    }
+
+    if (directives.length > 0) {
+      tags.push({ node: renderDirectives(directives) });
+    }
+
+    if (coordinate && field.args && field.args.length > 0) {
+      let names = '';
+      for (const arg of field.args) names += names ? `, ${arg.name}` : arg.name;
+      tags.push({
+        label: t('Arguments'),
+        value: names,
+        open: { name: `${field.name}(…)`, $ref: `${coordinate}()` },
+      });
+    }
+
+    if (isEnumType(named)) {
+      tags.push({ node: renderEnumValues(named) });
+    }
+
+    if (isScalarType(named) && named.specifiedByURL) {
+      tags.push({
+        node: (
+          <a
+            href={named.specifiedByURL}
+            target="_blank"
+            rel="noreferrer noopener"
+            title={named.specifiedByURL}
+            className="not-prose group/spec inline-flex items-center gap-1.5 rounded-md border bg-fd-secondary px-1.5 py-0.5 text-xs text-fd-muted-foreground transition-colors hover:bg-fd-accent hover:text-fd-accent-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-fd-ring"
+          >
+            {t('Specification')}
+            <ArrowUpRightIcon className="size-3 transition-transform duration-200 group-hover/spec:-translate-y-px group-hover/spec:translate-x-px motion-reduce:transition-none" />
+          </a>
+        ),
+      });
+    }
+
+    if (isInputObjectType(named) && named.isOneOf) {
+      tags.push({ label: t('Exactly one of'), list: Object.keys(named.getFields()) });
+    }
+
+    // type pages list the implementations in their usages
+    if (isInterfaceType(named) && !documented) {
+      const { objects } = schema.getImplementations(named);
+
+      if (objects.length > 0) {
+        tags.push({ label: t('Implemented by'), list: objects.map((item) => item.name) });
+      }
+    }
+
     const base = {
       typeName: named.name,
-      aliasName: String(type),
-      deprecated: doc.deprecationReason != null,
+      // wrappers collapse into the named type, the annotation (e.g. `[User!]!`) shows them
+      aliasName: String(field.type),
+      deprecated: field.deprecationReason != null,
       description: description ? renderMarkdown(description) : undefined,
-      infoTags: [...buildDocTags(doc), ...buildNamedTags(named)],
+      infoTags: tags,
     };
-
-    if (isScalarType(named) || isEnumType(named)) {
-      return { ...base, type: 'primitive' };
-    }
 
     if (isUnionType(named)) {
       return {
         ...base,
         type: 'or',
-        items: named.getTypes().map((item) => ({
-          name: item.name,
-          $type: ensureType(item),
-        })),
+        items: named.getTypes().map((item) => ({ name: item.name, $type: item.name })),
       };
     }
 
@@ -142,10 +194,10 @@ export function generateGraphQLSchemaUI(
       return {
         ...base,
         type: 'object',
-        props: Object.values(named.getFields()).map((field) => ({
-          name: field.name,
-          $type: ensureField(named, field),
-          required: isRequiredInputField(field),
+        props: Object.values(named.getFields()).map((item) => ({
+          name: item.name,
+          $type: `${named.name}.${item.name}`,
+          required: !named.isOneOf && isRequiredInputField(item),
         })),
       };
     }
@@ -154,10 +206,10 @@ export function generateGraphQLSchemaUI(
       return {
         ...base,
         type: 'object',
-        props: Object.values(named.getFields()).map((field) => ({
-          name: field.name,
-          $type: ensureField(named, field),
-          required: isNonNullType(field.type),
+        props: Object.values(named.getFields()).map((item) => ({
+          name: item.name,
+          $type: `${named.name}.${item.name}`,
+          required: isNonNullType(item.type),
         })),
       };
     }
@@ -165,89 +217,19 @@ export function generateGraphQLSchemaUI(
     return { ...base, type: 'primitive' };
   }
 
-  function buildDocTags(doc: DocInfo): InfoTag[] {
-    const tags: InfoTag[] = [];
-
-    if (doc.deprecationReason) {
-      tags.push({
-        label: t('Deprecated'),
-        value: renderMarkdown(doc.deprecationReason),
-        prose: true,
-      });
-    }
-
-    if (doc.defaultText !== undefined) {
-      tags.push({ label: t('Default'), value: doc.defaultText });
-    }
-
-    if (doc.directives && doc.directives.length > 0) {
-      tags.push({ node: renderDirectives(doc.directives) });
-    }
-
-    if (doc.args && doc.args.length > 0) {
-      tags.push({ node: renderArguments(doc.args) });
-    }
-
-    return tags;
+  /** the arguments of a field as an object */
+  function buildArguments(coordinate: string, args: readonly GraphQLArgument[]): SchemaData {
+    return {
+      type: 'object',
+      typeName: coordinate,
+      aliasName: coordinate,
+      props: args.map((arg) => ({
+        name: arg.name,
+        $type: `${coordinate}(${arg.name}:)`,
+        required: isRequiredArgument(arg),
+      })),
+    };
   }
 
-  function buildNamedTags(named: GraphQLNamedType): InfoTag[] {
-    const tags: InfoTag[] = [];
-
-    if (isEnumType(named)) {
-      tags.push({ node: renderEnumValues(named) });
-    }
-
-    if (isScalarType(named) && named.specifiedByURL) {
-      tags.push({
-        label: t('Specification'),
-        value: (
-          <a href={named.specifiedByURL} rel="noreferrer noopener" className="underline">
-            {named.specifiedByURL}
-          </a>
-        ),
-      });
-    }
-
-    if (isInterfaceType(named)) {
-      const { objects } = schema.getImplementations(named);
-
-      if (objects.length > 0) {
-        tags.push({
-          label: t('Implemented by'),
-          value: objects.map((item) => item.name).join(' | '),
-        });
-      }
-    }
-
-    return tags;
-  }
-
-  refs.$root = buildData(root.type, {
-    description: root.description,
-    deprecationReason: root.deprecationReason,
-    args: root.args,
-    defaultText: printDefaultValue(root.default, root.type as GraphQLInputType),
-    directives: getCustomDirectives(root.astNode),
-  });
-
-  return { $root: '$root', refs };
-}
-
-function printDefaultValue(
-  defaultInput: GraphQLDefaultInput | undefined,
-  type: GraphQLInputType,
-): string | undefined {
-  if (!defaultInput) return;
-  if (defaultInput.literal) return print(defaultInput.literal);
-  if (defaultInput.value === undefined) return;
-
-  try {
-    const node = valueToLiteral(defaultInput.value, type);
-    if (node) return print(node);
-  } catch {
-    // fall through
-  }
-
-  return JSON.stringify(defaultInput.value);
+  return { $root: typeof root === 'string' ? root : '$root', refs };
 }

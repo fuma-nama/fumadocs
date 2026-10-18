@@ -32,7 +32,7 @@ export const registry: Registry = {
     },
     // only available as the `AsyncAPI` namespace of package
     '{types.ts,types/asyncapi-3.ts}': { type: 'lib', target: '<dir>/asyncapi/*' },
-    'utils/server-url.ts': { type: 'lib', target: '<dir>/asyncapi/*' },
+    'utils/server-url.ts': { type: 'lib', target: '<dir>/asyncapi/server-url.ts' },
     'codegen/*': { type: 'lib', target: '<dir>/asyncapi/codegen/*' },
     'utils/cn.ts': { alias: '../../radix-ui/src/utils/cn' },
   },

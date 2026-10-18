@@ -1,12 +1,15 @@
 'use client';
-import { type ComponentProps, type ReactNode, useState } from 'react';
-import { ArrowLeft, ChevronRight, type LucideIcon } from 'lucide-react';
+import { type ComponentProps, memo, type ReactNode, useState } from 'react';
+import { ArrowLeft, ChevronRight, type LucideIcon, SendHorizontal } from 'lucide-react';
 import { useDataEngine } from '@fumari/stf';
 import { stringifyFieldKey } from '@fumari/stf/lib/utils';
 import { useTranslations } from '@fuma-translate/react';
 import { buttonVariants } from 'fumadocs-ui/components/ui/button';
 import type { CodeBlockProps } from 'fumadocs-ui/components/codeblock';
+import { titleBarClassName } from '../example';
+import { Segmented, SegmentedList } from '../segmented';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../select';
+import { Spinner } from '../spinner';
 import { useSchemaUtils } from './schema';
 import {
   type FieldEntry,
@@ -37,8 +40,13 @@ export const iconButtonClassName = cn(
 
 /** a code block filling its panel */
 export const panelCodeBlock: CodeBlockProps = {
-  className: 'h-full rounded-none border-0 bg-transparent shadow-none',
-  viewportProps: { className: 'h-full max-h-none' },
+  className: `flex h-full flex-col rounded-none border-0 bg-transparent shadow-none ${titleBarClassName}`,
+  viewportProps: { className: 'min-h-0 flex-1 max-h-none' },
+};
+
+/** a code block on top of a panel */
+export const panelTopCodeBlock: CodeBlockProps = {
+  className: `shrink-0 rounded-none border-0 border-b ${titleBarClassName}`,
 };
 
 export function PanelHeader({ className, ...props }: ComponentProps<'div'>) {
@@ -364,5 +372,125 @@ export function Section({
       </div>
       {children}
     </section>
+  );
+}
+
+/** switches the panels of a playground on small screens, memoized as its indicator measures the tabs on render */
+export const ViewSwitch = memo(function ViewSwitch({
+  value,
+  onValueChange,
+  items,
+}: {
+  value: string;
+  onValueChange: (value: string) => void;
+  /** keep it the same object across renders */
+  items: { value: string; label: ReactNode }[];
+}) {
+  return (
+    <Segmented value={value} onValueChange={onValueChange} className="shrink-0 px-3 pb-3 md:hidden">
+      <SegmentedList className="*:flex-1 *:justify-center" items={items} />
+    </Segmented>
+  );
+});
+
+/** the example request loaded in a playground, in the header of its dialog */
+export function RequestExampleSelect<V extends string | number>({
+  items,
+  value,
+  onValueChange,
+  disabled,
+}: {
+  items: { value: V; label: ReactNode }[];
+  value: V | null;
+  onValueChange: (value: V) => void;
+  disabled?: boolean;
+}) {
+  const t = useTranslations({ note: 'playground' });
+  if (items.length <= 1) return null;
+
+  return (
+    <Select
+      items={items}
+      value={value}
+      disabled={disabled}
+      onValueChange={(v) => v !== null && onValueChange(v)}
+    >
+      <SelectTrigger className="h-8 w-auto max-w-64 gap-1.5 border-0 bg-transparent px-2 text-xs hover:bg-fd-accent focus:ring-0 focus-visible:ring-2">
+        <span className="text-fd-muted-foreground">{t('Example')}</span>
+        <SelectValue className="truncate font-medium" />
+      </SelectTrigger>
+      <SelectContent align="end">
+        {items.map((item) => (
+          <SelectItem key={item.value} value={item.value}>
+            {item.label}
+          </SelectItem>
+        ))}
+      </SelectContent>
+    </Select>
+  );
+}
+
+/** the keyboard shortcut to send */
+export function SendShortcut() {
+  const isMac = typeof navigator !== 'undefined' && /Mac|iPhone|iPad/.test(navigator.userAgent);
+
+  return (
+    <kbd className="hidden font-sans text-xs opacity-60 sm:inline">{isMac ? '⌘' : 'Ctrl'} ↵</kbd>
+  );
+}
+
+export function SendButton({ sending, disabled }: { sending: boolean; disabled?: boolean }) {
+  const t = useTranslations({ note: 'playground' });
+
+  return (
+    <button
+      type="submit"
+      disabled={sending || disabled}
+      className={cn(
+        buttonVariants({ variant: 'primary' }),
+        'h-10 shrink-0 gap-2 rounded-xl px-4 transition-[background-color,scale] active:scale-[0.97] disabled:opacity-80 motion-reduce:transition-none',
+      )}
+    >
+      {sending ? <Spinner className="size-3.5" /> : <SendHorizontal className="size-3.5" />}
+      {t('Send')}
+      <SendShortcut />
+    </button>
+  );
+}
+
+/** an empty panel, telling what fills it */
+export function Placeholder({
+  icon: Icon,
+  className,
+  children,
+}: {
+  icon: LucideIcon;
+  className?: string;
+  children: ReactNode;
+}) {
+  return (
+    <div
+      className={cn(
+        'flex flex-1 flex-col items-center justify-center gap-3 p-6 text-center',
+        className,
+      )}
+    >
+      <div className="rounded-xl border bg-fd-secondary p-2.5 text-fd-muted-foreground">
+        <Icon className="size-4" />
+      </div>
+      <p className="text-sm text-fd-muted-foreground">{children}</p>
+    </div>
+  );
+}
+
+/** covers the response while its request is sent */
+export function SendingOverlay() {
+  const t = useTranslations({ note: 'playground' });
+
+  return (
+    <div className="absolute inset-0 flex items-center justify-center gap-2 bg-fd-card/70 text-sm text-fd-muted-foreground backdrop-blur-[1px] transition-opacity delay-150 duration-200 starting:opacity-0">
+      <Spinner className="size-3.5" />
+      {t('Sending request...')}
+    </div>
   );
 }
