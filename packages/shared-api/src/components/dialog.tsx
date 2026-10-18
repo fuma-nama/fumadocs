@@ -24,12 +24,11 @@ export function DialogPopup({ className, children }: { className?: string; child
 }
 
 /** opens the playground dialog, `children` replace its icon, like the status of a connection */
-export function PlaygroundTrigger({ children, ...props }: Dialog.Trigger.Props) {
+export function PlaygroundTrigger({ children }: { children?: ReactNode }) {
   const t = useTranslations({ note: 'playground' });
 
   return (
     <Dialog.Trigger
-      {...props}
       className={cn(
         buttonVariants({ variant: 'primary', size: 'sm' }),
         'group shrink-0 gap-1.5 rounded-[5px] px-3 transition-[background-color,scale] active:scale-[0.97] motion-reduce:transition-none',
