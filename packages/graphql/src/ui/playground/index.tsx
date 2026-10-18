@@ -19,11 +19,11 @@ import { StatusDot } from 'shared-api/components/playground/log';
 import { SchemaProvider } from 'shared-api/components/playground/schema';
 import { useOperation } from '@/operation';
 import { useRenderContext } from '@/utils/create-page';
+import { type Playground, usePlayground } from '@/playground';
 import { OperationBar } from '@/ui/operation/bar';
 import { KindLabel } from '@/ui/components/badge';
 import { Markdown } from '@/ui/components/markdown';
 import { cn } from '@/utils/cn';
-import { type Playground, usePlayground } from './use-playground';
 import { RequestPanel } from './request-panel';
 import { ResponsePanel } from './response-panel';
 

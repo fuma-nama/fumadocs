@@ -8,10 +8,9 @@ import {
   Placeholder,
 } from 'shared-api/components/playground/panels';
 import { DataEntry, LogList, LogTime, StatusEntry } from 'shared-api/components/playground/log';
-import type { SubscriptionError } from '@/playground/subscription';
+import type { LogEntry, Playground, SubscriptionError } from '@/playground';
 import { ClientCodeBlock } from '@/ui/components/codeblock';
 import { cn } from '@/utils/cn';
-import type { LogEntry, Playground } from './use-playground';
 import { ErrorList, getResponseErrors } from './errors';
 
 /** the events of subscription, the latest at the bottom */

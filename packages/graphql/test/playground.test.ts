@@ -22,12 +22,16 @@ import { getEndpointOrigin, parseStoredState } from '@/playground/storage';
 import { syncOperationVariables } from '@/playground/variables';
 import { generateOperationExample } from '@/utils/example';
 import { getResponseErrors } from '@/ui/playground/errors';
-import { toRequestValues } from '@/ui/playground/use-playground';
+import { toRequestValues } from '@/playground/use-playground';
 
 const cwd = fileURLToPath(new URL('./', import.meta.url));
 const schema = buildSchemaFromSDL(
   fs.readFileSync(path.join(cwd, './fixtures/store.graphql'), 'utf8'),
 );
+
+afterEach(() => {
+  vi.unstubAllGlobals();
+});
 
 describe('playground storage', () => {
   test('keeps the valid headers by origin', () => {
@@ -76,24 +80,21 @@ describe('playground storage', () => {
   });
 
   test('getEndpointOrigin', () => {
+    vi.stubGlobal('window', { location: { origin: 'http://localhost:3000' } });
     expect(getEndpointOrigin('https://api.example.com/graphql')).toBe('https://api.example.com');
     expect(getEndpointOrigin('http://localhost:4000/api/graphql')).toBe('http://localhost:4000');
     // the default subscription URL of an endpoint
     expect(getEndpointOrigin('wss://api.example.com/graphql')).toBe('https://api.example.com');
     expect(getEndpointOrigin('ws://localhost:4000/graphql')).toBe('http://localhost:4000');
-    // relative URLs resolve against the given base (`window.location.origin` in browsers)
-    expect(getEndpointOrigin('/graphql', 'http://localhost:3000')).toBe('http://localhost:3000');
+    // relative URLs resolve against the page
+    expect(getEndpointOrigin('/graphql')).toBe('http://localhost:3000');
     // invalid URLs
-    expect(getEndpointOrigin('not a url')).toBeUndefined();
+    expect(getEndpointOrigin('http://[')).toBeUndefined();
     expect(getEndpointOrigin('')).toBeUndefined();
   });
 });
 
 describe('executeGraphQL', () => {
-  afterEach(() => {
-    vi.unstubAllGlobals();
-  });
-
   test('returns the response with its headers', async () => {
     const fetch = vi.fn(
       async () =>

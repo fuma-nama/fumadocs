@@ -363,7 +363,7 @@ import { GraphQLPage } from '@/components/graphql/page'; // [!code ++]
 
 ### Parts
 
-Install only the pieces you want to edit, and pass them back.
+Install only the pieces you want to edit, and pass them back through `components`. The playground has no slot there: an installed `graphql/operation` renders it, or return `<OperationPlayground />` from [`playground.render`](#playground).
 
 | Component            | Contents                                      |
 | -------------------- | --------------------------------------------- |

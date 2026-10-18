@@ -18,19 +18,18 @@ packages:
 
 ### API changes
 
-| Before                                                                   | Now                                                        |
-| ------------------------------------------------------------------------ | ---------------------------------------------------------- |
-| pages of named types by default                                          | `includeTypes: true`, also for `per: 'file'`               |
-| `useOperation().example`                                                 | `examples`, with `selected` and `select()`                 |
-| `slots.relations` and `slots.scalar` of `renderTypeLayout`               | `slots.definition`, `usages` and `sdl`                     |
-| `@fumadocs/graphql/utils/snippets`                                       | the `codeUsages` option                                    |
-| `HeaderItem` and `filterHeaderItems` from `@fumadocs/graphql/playground` | stored headers are objects by origin                       |
-| `inputTypeToJsonSchema(type, depth)`                                     | `inputTypeToJsonSchema(type)`, recursive inputs are shared |
-| `slots.directives` of `renderOperationLayout` and `renderTypeLayout`     | in `slots.playground` and `slots.definition`               |
-| `renderArguments` of `generateGraphQLSchemaUI()`, `SchemaViewRoot.args`  | arguments open in their own panel                          |
+| Before                                                                  | Now                                                        |
+| ----------------------------------------------------------------------- | ---------------------------------------------------------- |
+| pages of named types by default                                         | `includeTypes: true`, also for `per: 'file'`               |
+| `useOperation().example`                                                | `examples`, with `selected` and `select()`                 |
+| `slots.relations` and `slots.scalar` of `renderTypeLayout`              | `slots.definition`, `usages` and `sdl`                     |
+| `@fumadocs/graphql/utils/snippets`                                      | the `codeUsages` option                                    |
+| `inputTypeToJsonSchema(type, depth)`                                    | `inputTypeToJsonSchema(type)`, recursive inputs are shared |
+| `slots.directives` of `renderOperationLayout` and `renderTypeLayout`    | in `slots.playground` and `slots.definition`               |
+| `renderArguments` of `generateGraphQLSchemaUI()`, `SchemaViewRoot.args` | arguments open in their own panel                          |
 
 - Added `createCodeUsageGeneratorRegistry()` and `registerDefaultCodeUsages()` to `@fumadocs/graphql/ui`.
-- Added `subscribeGraphQL()`, `getSubscriptionUrl()` and the `SubscriptionError` type to `@fumadocs/graphql/playground`.
+- Added `usePlayground()`, `useRequestValues()` and `subscribeGraphQL()` to `@fumadocs/graphql/playground`, the installed playground runs on them.
+- Removed `HeaderItem`, `filterHeaderItems()`, `readStored()`, `writeStored()`, `getEndpointOrigin()` and `syncOperationVariables()` from `@fumadocs/graphql/playground`, `usePlayground()` keeps headers by endpoint origin.
 - Added `relations.unions` to `useNamedType()`.
 - The Schema UI root also takes a schema coordinate, like `Query.orders()` for the arguments of `Query.orders`.
-- `syncOperationVariables()` always declares the variables of required arguments.

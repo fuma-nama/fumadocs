@@ -2,7 +2,6 @@
 import { type ComponentProps, memo, type ReactNode, useDeferredValue, useMemo } from 'react';
 import { Radio, SendHorizontal } from 'lucide-react';
 import { useTranslations } from '@fuma-translate/react';
-import { useDataEngine } from '@fumari/stf';
 import { exampleActions, ExampleSelect } from 'shared-api/components/example';
 import {
   panelCodeBlock,
@@ -14,7 +13,7 @@ import { RequestError, ResponseView } from 'shared-api/components/playground/res
 import { useOperation } from '@/operation';
 import { useRenderContext } from '@/utils/create-page';
 import type { OperationExample } from '@/utils/example';
-import type { PlaygroundResult } from '@/playground/fetcher';
+import { type Playground, type PlaygroundResult, useRequestValues } from '@/playground';
 import { ClientCodeBlock } from '@/ui/components/codeblock';
 import {
   codeUsageHeaders,
@@ -23,7 +22,6 @@ import {
   useEndpointUrl,
 } from '@/ui/components/code-usage';
 import { cn } from '@/utils/cn';
-import { type Playground, toRequestValues, useFormSnapshot } from './use-playground';
 import { EventLog } from './events';
 import { ErrorList, getResponseErrors, type ResponseError } from './errors';
 
@@ -72,16 +70,14 @@ export function ResponsePanel({
 const RequestCode = memo(function RequestCode({ url, query }: { url: string; query: string }) {
   const t = useTranslations({ note: 'graphql playground' });
   const { codeUsages } = useRenderContext();
-  const engine = useDataEngine();
   const generators = codeUsages.map();
   const selected = useCodeUsageId();
   const id =
     selected !== null && generators.has(selected) ? selected : generators.keys().next().value;
   const endpoint = useEndpointUrl(url);
-  const values = useFormSnapshot(engine, () => JSON.stringify(engine.getData()));
+  const { variables, headers } = useRequestValues();
   const generator = id === undefined ? undefined : generators.get(id);
   if (id === undefined || !generator) return null;
-  const { variables, headers } = toRequestValues(values);
   const code = generator.generate(
     {
       url: endpoint,

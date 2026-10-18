@@ -29,7 +29,7 @@ import { JsonEditor } from 'shared-api/components/playground/json-editor';
 import { Segmented, SegmentedList } from 'shared-api/components/segmented';
 import { useOperation } from '@/operation';
 import { useGraphQL } from '@/utils/create-page';
-import { inputTypeToJsonSchema } from '@/playground/json-schema';
+import { inputTypeToJsonSchema } from '@/playground';
 import { CodeEditor } from '@/ui/components/code-editor';
 import { cn } from '@/utils/cn';
 

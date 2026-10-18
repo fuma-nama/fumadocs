@@ -15,14 +15,11 @@ export interface StoredState {
  *
  * WebSocket URLs share the origin of their HTTP endpoint.
  */
-export function getEndpointOrigin(url: string, base?: string): string | undefined {
+export function getEndpointOrigin(url: string): string | undefined {
   if (url.length === 0) return undefined;
 
   try {
-    return new URL(
-      url,
-      base ?? (typeof window !== 'undefined' ? window.location.origin : undefined),
-    ).origin.replace(/^ws(s?):/, 'http$1:');
+    return new URL(url, window.location.origin).origin.replace(/^ws(s?):/, 'http$1:');
   } catch {
     return undefined;
   }

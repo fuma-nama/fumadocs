@@ -12,7 +12,7 @@ Everything outside `@fumadocs/graphql/ui` is headless.
 | `@fumadocs/graphql`            | the page: the schema built from SDL, cross-links and your components |
 | `@fumadocs/graphql/operation`  | an operation: its field, title, directives and examples              |
 | `@fumadocs/graphql/type-docs`  | a named type: its kind, directives, relations and usages             |
-| `@fumadocs/graphql/playground` | sending operations and subscriptions, the stored state of playground |
+| `@fumadocs/graphql/playground` | the state of playground, sending operations and subscriptions        |
 
 ## Page
 
@@ -28,7 +28,10 @@ export const GraphQLPage = createGraphQLRenderer({
   components: {
     Operation,
     TypeDocs,
-    SchemaUI: ({ client, root }) => <pre>{`${client.name}: ${root.type}`}</pre>,
+    // `root` is a field-like root, or a schema coordinate like `Query.orders()`
+    SchemaUI: ({ client, root }) => (
+      <pre>{`${client.name}: ${typeof root === 'string' ? root : root.type}`}</pre>
+    ),
     CodeBlock({ lang, code }: CodeBlockProps) {
       return (
         <pre>
@@ -167,31 +170,75 @@ function Content() {
 
 ## Playground
 
-`@fumadocs/graphql/playground` is the logic of the playground, without UI.
+`usePlayground()` holds the playground of the operation under `<OperationProvider />`, configured by the page's [`playground` option](/docs/integrations/graphql/api-page#playground).
 
-| Export                                        | Does                                                                  |
-| --------------------------------------------- | --------------------------------------------------------------------- |
-| `executeGraphQL(request)`                     | sends a query or mutation over HTTP POST, the default `fetcher`       |
-| `subscribeGraphQL(request, handlers)`         | starts a subscription, returns a function to stop it                  |
-| `getSubscriptionUrl(url)`                     | the default subscription endpoint: `url` with a `ws(s)://` scheme     |
-| `inputTypeToJsonSchema(type)`                 | the JSON Schema of an input type, for forms of variables              |
-| `syncOperationVariables(query, field, isSet)` | declares the variables of required and set optional arguments         |
-| `readStored()`, `writeStored(state)`          | the endpoint and headers in local storage, headers by endpoint origin |
+```tsx title="components/my-playground.tsx"
+'use client';
+import { StfProvider, useFieldValue } from '@fumari/stf';
+import { useOperation } from '@fumadocs/graphql/operation';
+import { usePlayground } from '@fumadocs/graphql/playground';
+
+export function MyPlayground() {
+  const { field } = useOperation();
+  const { stf, open, url, changeUrl, query, setQuery, send, isSending, response } = usePlayground();
+
+  return (
+    // opening restores the endpoint and headers of previous visits
+    <details onToggle={(e) => e.currentTarget.open && open()}>
+      <summary>Try it</summary>
+      <input value={url} onChange={(e) => changeUrl(e.target.value)} />
+      <textarea value={query} onChange={(e) => setQuery(e.target.value)} />
+      <StfProvider value={stf}>
+        {field.args.map((arg) => (
+          <Variable key={arg.name} name={arg.name} />
+        ))}
+      </StfProvider>
+      <button disabled={isSending} onClick={send}>
+        Send
+      </button>
+      {response?.result.type === 'response' && <pre>{response.result.body}</pre>}
+    </details>
+  );
+}
+
+function Variable({ name }: { name: string }) {
+  const [value, setValue] = useFieldValue(['variables', name]);
+
+  return (
+    <input
+      aria-label={name}
+      value={String(value ?? '')}
+      onChange={(e) => setValue(e.target.value)}
+    />
+  );
+}
+```
+
+Subscriptions use `subscribe()`, `stop()`, `status` and `log` in place of `send()` and `response`.
+
+<auto-type-table path="props.ts" name="Playground" />
+
+| Export                                | Does                                                                                      |
+| ------------------------------------- | ----------------------------------------------------------------------------------------- |
+| `useRequestValues()`                  | the `variables` and `headers` the form under `<StfProvider />` sends, following its edits |
+| `executeGraphQL(request)`             | sends a query or mutation over HTTP POST, the default `fetcher`                           |
+| `subscribeGraphQL(request, handlers)` | starts a subscription, returns a function to stop it                                      |
+| `inputTypeToJsonSchema(type)`         | the JSON Schema of an input type, for forms of variables                                  |
 
 `subscribeGraphQL()` picks the protocol by the URL scheme, like [`subscriptionUrl`](/docs/integrations/graphql/api-page#subscriptions).
 
 ```ts
-import { getSubscriptionUrl, subscribeGraphQL } from '@fumadocs/graphql/playground';
+import { subscribeGraphQL } from '@fumadocs/graphql/playground';
 
 const stop = subscribeGraphQL(
   {
-    url: getSubscriptionUrl('/api/graphql'),
+    url: 'wss://api.example.com/graphql',
     query: 'subscription { orderUpdated(id: "1") { status } }',
     headers: {},
   },
   {
     onNext: (result) => console.log(result),
-    onError: (message) => console.error(message),
+    onError: (error) => console.error(error.type),
     onComplete: () => console.log('completed'),
   },
 );

@@ -11,4 +11,5 @@ export type NamedTypeInfo = TypeDocs.NamedTypeInfo;
 export type TypeUsages = TypeDocs.TypeUsages;
 
 export type CodeUsageData = UI.CodeUsageData;
+export type Playground = PlaygroundModule.Playground;
 export type SubscriptionHandlers = PlaygroundModule.SubscriptionHandlers;
