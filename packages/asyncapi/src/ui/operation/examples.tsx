@@ -1,7 +1,12 @@
 'use client';
 import { useState } from 'react';
 import { useTranslations } from '@fuma-translate/react';
-import { cardCodeBlock, exampleCardClassName, ExampleSelect } from 'shared-api/components/example';
+import {
+  cardCodeBlock,
+  exampleCardClassName,
+  ExampleCopy,
+  ExampleSelect,
+} from 'shared-api/components/example';
 import type { OperationMessage } from '@/operation';
 import { ClientCodeBlock } from '@/ui/components/codeblock';
 
@@ -22,6 +27,7 @@ export function MessageExamples({ item }: { item: OperationMessage }) {
   const part = parts.find((item) => item.value === selectedPart) ?? parts[0];
   const value = example[part.value];
   const json = typeof value !== 'string';
+  const code = json ? JSON.stringify(value, null, 2) : value;
 
   return (
     <div className={`${exampleCardClassName} not-prose @4xl:w-[400px] @4xl:shrink-0`}>
@@ -53,6 +59,7 @@ export function MessageExamples({ item }: { item: OperationMessage }) {
               onValueChange={(v) => setPart(v as Part)}
             />
           )}
+          <ExampleCopy text={code} />
         </div>
         {example.description && (
           <p className="-mt-1.5 pe-2.5 pb-2 text-xs text-fd-muted-foreground">
@@ -60,11 +67,7 @@ export function MessageExamples({ item }: { item: OperationMessage }) {
           </p>
         )}
       </div>
-      <ClientCodeBlock
-        lang={json ? 'json' : 'text'}
-        code={json ? JSON.stringify(value, null, 2) : value}
-        codeblock={cardCodeBlock}
-      />
+      <ClientCodeBlock lang={json ? 'json' : 'text'} code={code} codeblock={cardCodeBlock} />
     </div>
   );
 }

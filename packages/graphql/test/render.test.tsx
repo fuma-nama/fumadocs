@@ -204,7 +204,8 @@ describe('render <GraphQLPage />', () => {
 
     expect(html).toContain('Example Request');
     expect(html).toContain('<pre data-lang="graphql"><code>query Customer($id: ID!) {');
-    expect(text(html)).toContain('Variables{\n  "id": "1"\n}');
+    // the caption of variables holds their copy button
+    expect(text(html)).toContain('VariablesCopy Text{\n  "id": "1"\n}');
     expect(html).toContain('Example Response');
   });
 

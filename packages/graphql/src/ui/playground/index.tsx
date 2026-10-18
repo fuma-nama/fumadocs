@@ -43,7 +43,7 @@ export function OperationPlayground() {
         <Dialog.Trigger
           className={cn(
             buttonVariants({ variant: 'primary', size: 'sm' }),
-            'group shrink-0 gap-1.5 rounded-lg px-3 transition-[background-color,scale] active:scale-[0.97] motion-reduce:transition-none',
+            'group shrink-0 gap-1.5 rounded-[5px] px-3 transition-[background-color,scale] active:scale-[0.97] motion-reduce:transition-none',
           )}
         >
           {status === 'closed' ? (

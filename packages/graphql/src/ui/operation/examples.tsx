@@ -4,6 +4,7 @@ import { useTranslations } from '@fuma-translate/react';
 import {
   captionedCodeBlock,
   cardCodeBlock,
+  ExampleCopy,
   exampleCardClassName,
   ExampleHeader,
   ExampleSelect,
@@ -35,18 +36,17 @@ export function OperationExamples() {
   const { examples, selected } = useOperation();
   const example = examples.at(selected);
   if (!example) return null;
+  const response = example.response !== undefined && JSON.stringify(example.response, null, 2);
 
   return (
     <div className="flex min-h-0 flex-col gap-4">
       <RequestExample example={example} />
-      {example.response !== undefined && (
+      {response && (
         <div className={exampleCardClassName}>
-          <ExampleHeader title={t('Example Response')} />
-          <ClientCodeBlock
-            lang="json"
-            code={JSON.stringify(example.response, null, 2)}
-            codeblock={cardCodeBlock}
-          />
+          <ExampleHeader title={t('Example Response')}>
+            <ExampleCopy text={response} />
+          </ExampleHeader>
+          <ClientCodeBlock lang="json" code={response} codeblock={cardCodeBlock} />
         </div>
       )}
     </div>
@@ -70,34 +70,28 @@ function RequestExample({ example }: { example: OperationExample }) {
   }
   const generator = generators.get(value);
 
+  let code = example.query;
   let body: ReactNode;
   if (generator) {
     const headers = codeUsageHeaders(playground?.headers);
+    code = generator.generate(
+      { url, query: example.query, variables: example.variables, headers },
+      undefined,
+    );
+    body = <ClientCodeBlock lang={generator.lang} code={code} codeblock={cardCodeBlock} />;
+  } else {
+    const variables = example.variables && JSON.stringify(example.variables, null, 2);
 
     body = (
-      <ClientCodeBlock
-        lang={generator.lang}
-        code={generator.generate(
-          { url, query: example.query, variables: example.variables, headers },
-          undefined,
-        )}
-        codeblock={cardCodeBlock}
-      />
-    );
-  } else {
-    body = (
       <>
-        <ClientCodeBlock lang="graphql" code={example.query} codeblock={cardCodeBlock} />
-        {example.variables !== undefined && (
+        <ClientCodeBlock lang="graphql" code={code} codeblock={cardCodeBlock} />
+        {variables !== undefined && (
           <div className="flex shrink-0 flex-col border-t">
-            <div className="px-4 pt-3 text-xs font-medium text-fd-muted-foreground">
-              {t('Variables')}
+            <div className="flex items-center px-4 pt-3 text-xs font-medium text-fd-muted-foreground">
+              <span className="me-auto">{t('Variables')}</span>
+              <ExampleCopy text={variables} caption />
             </div>
-            <ClientCodeBlock
-              lang="json"
-              code={JSON.stringify(example.variables, null, 2)}
-              codeblock={variablesCodeBlock}
-            />
+            <ClientCodeBlock lang="json" code={variables} codeblock={variablesCodeBlock} />
           </div>
         )}
       </>
@@ -128,6 +122,7 @@ function RequestExample({ example }: { example: OperationExample }) {
           ) : (
             <span className="px-2 text-fd-muted-foreground">{languages[0].label}</span>
           )}
+          <ExampleCopy text={code} />
         </div>
         {example.description && (
           <div className="-mt-1.5 pe-2.5 pb-2.5 prose prose-xs prose-no-margin text-fd-muted-foreground">

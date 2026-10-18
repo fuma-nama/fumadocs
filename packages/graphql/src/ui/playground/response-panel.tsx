@@ -3,7 +3,12 @@ import { type ComponentProps, memo, type ReactNode, useDeferredValue, useMemo } 
 import { Radio, SendHorizontal } from 'lucide-react';
 import { useTranslations } from '@fuma-translate/react';
 import { useDataEngine } from '@fumari/stf';
-import { cardCodeBlock, ExampleHeader, ExampleSelect } from 'shared-api/components/example';
+import {
+  cardCodeBlock,
+  ExampleCopy,
+  ExampleHeader,
+  ExampleSelect,
+} from 'shared-api/components/example';
 import {
   PanelHeader,
   panelCodeBlock,
@@ -104,6 +109,7 @@ const RequestCode = memo(function RequestCode({ url, query }: { url: string; que
         ) : (
           <span className="px-2 text-fd-muted-foreground">{items[0].label}</span>
         )}
+        <ExampleCopy text={code} />
       </ExampleHeader>
       <ClientCodeBlock
         lang={generator.lang}

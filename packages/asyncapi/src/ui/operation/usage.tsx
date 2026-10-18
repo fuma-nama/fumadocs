@@ -4,6 +4,7 @@ import { useTranslations } from '@fuma-translate/react';
 import {
   cardCodeBlock,
   exampleCardClassName,
+  ExampleCopy,
   ExampleHeader,
   ExampleSelect,
   selectCodeUsage,
@@ -129,6 +130,7 @@ export function CodeUsages() {
         ) : (
           <span className="px-2 text-fd-muted-foreground">{sample.label}</span>
         )}
+        <ExampleCopy text={sample.code} />
       </ExampleHeader>
       <ClientCodeBlock lang={sample.lang} code={sample.code} codeblock={cardCodeBlock} />
     </div>

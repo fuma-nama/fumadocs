@@ -14,7 +14,12 @@ import {
 } from 'graphql';
 import Link from 'fumadocs-core/link';
 import { AnchorSection } from 'shared-api/auto-anchor';
-import { cardCodeBlock, exampleCardClassName, ExampleHeader } from 'shared-api/components/example';
+import {
+  cardCodeBlock,
+  exampleCardClassName,
+  ExampleCopy,
+  ExampleHeader,
+} from 'shared-api/components/example';
 import {
   type SchemaViewRoot,
   useGraphQL,
@@ -53,6 +58,7 @@ function TypeDocsContent({ showTitle, showDescription }: Omit<PageTypeProps, 'na
   const { name, kind, type, directives } = useNamedType();
   // the page documents the type, the Schema UI lists its fields
   const root = useMemo<SchemaViewRoot>(() => ({ type, description: '' }), [type]);
+  const sdl = printDefinition(type);
   const headingLevel = showTitle ? 3 : 2;
 
   let fields: ReactNode = null;
@@ -114,8 +120,10 @@ function TypeDocsContent({ showTitle, showDescription }: Omit<PageTypeProps, 'na
     usages: <Usages headingLevel={headingLevel} />,
     sdl: (
       <div className={exampleCardClassName}>
-        <ExampleHeader title="SDL" />
-        <ClientCodeBlock lang="graphql" code={printDefinition(type)} codeblock={cardCodeBlock} />
+        <ExampleHeader title="SDL">
+          <ExampleCopy text={sdl} />
+        </ExampleHeader>
+        <ClientCodeBlock lang="graphql" code={sdl} codeblock={cardCodeBlock} />
       </div>
     ),
   };

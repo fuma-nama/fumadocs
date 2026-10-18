@@ -14,6 +14,7 @@ import {
   captionedCodeBlock,
   cardCodeBlock,
   exampleCardClassName,
+  ExampleCopy,
   ExampleHeader,
   ExampleSelect,
   selectCodeUsage,
@@ -151,6 +152,7 @@ export function CodeUsages({
         ) : (
           <span className="px-2 text-fd-muted-foreground">{items[0].label}</span>
         )}
+        {code && <ExampleCopy text={code} />}
       </ExampleHeader>
       {code && (
         <ClientCodeBlock
@@ -189,18 +191,15 @@ function ResponseTabsDefaultContent({ tabs }: { tabs: ResponseTab[] }) {
   const example = examples.at(index);
   const schema = tab.mediaType ? resolve(tab.response.content?.[tab.mediaType])?.schema : undefined;
   let body: ReactNode;
+  let text: string | undefined;
 
   if (showSchema && schema !== undefined) {
-    body = (
-      <ClientCodeBlock
-        lang="json"
-        // the schema as written in the document, with its `$ref`s
-        code={JSON.stringify(resolve(schema), (_, value) => getRaw(value), 2)}
-        codeblock={cardCodeBlock}
-      />
-    );
+    // the schema as written in the document, with its `$ref`s
+    text = JSON.stringify(resolve(schema), (_, value) => getRaw(value), 2);
+    body = <ClientCodeBlock lang="json" code={text} codeblock={cardCodeBlock} />;
   } else if (example) {
     const captioned = examples.length > 1 || example.description !== undefined;
+    text = JSON.stringify(example.sample, null, 2);
 
     body = (
       <>
@@ -224,7 +223,7 @@ function ResponseTabsDefaultContent({ tabs }: { tabs: ResponseTab[] }) {
         )}
         <ClientCodeBlock
           lang="json"
-          code={JSON.stringify(example.sample, null, 2)}
+          code={text}
           codeblock={captioned ? captionedCodeBlock : cardCodeBlock}
         />
       </>
@@ -256,6 +255,7 @@ function ResponseTabsDefaultContent({ tabs }: { tabs: ResponseTab[] }) {
             setIndex(0);
           }}
         />
+        {text !== undefined && <ExampleCopy text={text} />}
       </ExampleHeader>
       {body}
     </div>
@@ -314,20 +314,18 @@ function RequestTabsDefaultContent() {
       {Object.entries(displayNames).map(([k, v]) => {
         const data = requestData[k as keyof ExampleRequest['data']];
         if (!data || Object.keys(data).length === 0) return;
+        const json = JSON.stringify(data, null, 2);
 
         return (
           <div key={k} className="flex min-h-0 flex-col border-t">
-            <div className="flex shrink-0 px-4 pt-3 text-xs font-medium text-fd-muted-foreground">
-              {v}
+            <div className="flex shrink-0 items-center gap-2 px-4 pt-3 text-xs font-medium text-fd-muted-foreground">
+              <span className="me-auto">{v}</span>
               {k === 'body' && (
-                <span className="ms-auto font-mono font-normal">{requestData.bodyMediaType}</span>
+                <span className="font-mono font-normal">{requestData.bodyMediaType}</span>
               )}
+              <ExampleCopy text={json} caption />
             </div>
-            <ClientCodeBlock
-              lang="json"
-              code={JSON.stringify(data, null, 2)}
-              codeblock={captionedCodeBlock}
-            />
+            <ClientCodeBlock lang="json" code={json} codeblock={captionedCodeBlock} />
           </div>
         );
       })}

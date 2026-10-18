@@ -1,5 +1,9 @@
 'use client';
 import { type ReactNode, useSyncExternalStore } from 'react';
+import { Check, Clipboard } from 'lucide-react';
+import { useTranslations } from '@fuma-translate/react';
+import { buttonVariants } from 'fumadocs-ui/components/ui/button';
+import { useCopyButton } from 'fumadocs-ui/utils/use-copy-button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './select';
 import { cn } from '@/utils/cn';
 
@@ -48,10 +52,11 @@ export function selectCodeUsage(key: string, id: string) {
   for (const listener of listeners) listener();
 }
 
-/** a code block filling its example card */
+/** a code block filling its example card, its copy button goes in the row above (`<ExampleCopy />`) */
 export const cardCodeBlock = {
   className: 'flex min-h-0 flex-col rounded-none border-0 bg-transparent shadow-none',
   viewportProps: { className: 'min-h-0' },
+  allowCopy: false,
 };
 
 /** a code block under its caption */
@@ -62,6 +67,33 @@ export const captionedCodeBlock = {
 
 export const exampleCardClassName =
   'flex min-h-0 flex-col overflow-hidden rounded-xl border bg-fd-card';
+
+/** copies the code below, at the end of an example card's header or caption */
+export function ExampleCopy({ text, caption = false }: { text: string; caption?: boolean }) {
+  const t = useTranslations({ note: 'code block' });
+  const [checked, onCopy] = useCopyButton(() => navigator.clipboard.writeText(text));
+
+  return (
+    <button
+      type="button"
+      aria-live="polite"
+      onClick={onCopy}
+      className={cn(
+        buttonVariants({ variant: 'ghost', size: 'icon-sm' }),
+        'shrink-0 text-fd-muted-foreground',
+        // a caption keeps its height, its icon centered under the header's
+        caption ? '-my-1 -me-2 p-[5px] [&_svg]:size-3.5' : '[&_svg]:size-4',
+      )}
+    >
+      {checked ? <Check /> : <Clipboard />}
+      <span className="sr-only">
+        {checked
+          ? t('Copied Text', { note: 'aria-label' })
+          : t('Copy Text', { note: 'aria-label' })}
+      </span>
+    </button>
+  );
+}
 
 /** the header of an example card, its controls at the end */
 export function ExampleHeader({ title, children }: { title?: ReactNode; children?: ReactNode }) {
