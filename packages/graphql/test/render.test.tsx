@@ -91,9 +91,9 @@ describe('operation bar', () => {
     const html = renderBar('query', 'customer');
 
     expect(text(html)).toBe('QUERYcustomer(id: ID!): Customer');
-    // links to where the page explains them: `name: Type` to the row of argument, the return type to its section
+    // links to the sections explaining them
     expect(html).toMatch(
-      /<a href="#arguments.arguments.id" class="group\/argument"><span class="[^"]*">id<\/span><span class="[^"]*">: <!-- -->ID!<\/span><\/a>/,
+      /<a href="#arguments" class="group\/argument"><span class="[^"]*">id<\/span><span class="[^"]*">: <!-- -->ID!<\/span><\/a>/,
     );
     expect(html).toMatch(/<a href="#returns" class="[^"]*">Customer<\/a>/);
     // no hover cards, and no links to type pages
@@ -115,10 +115,6 @@ describe('operation bar', () => {
     );
     // the chip opens the definition of directive
     expect(html).toMatch(/aria-haspopup="dialog"[^>]*>@auth<span/);
-    // camel case names link to the rows as they are
-    expect(renderBar('mutation', 'legacyCreateOrder')).toContain(
-      'href="#arguments.arguments.customerId"',
-    );
   });
 
   test('the width of one-line signature', () => {
@@ -152,9 +148,7 @@ describe('render <GraphQLPage />', () => {
       'QUERYorders(filter: OrderFilter): [Order!]!Directives@auth(requires: ADMIN)',
     );
     expect(html).toContain('href="#returns"');
-    // one card for the arguments, the bar links to its rows
-    expect(html).toContain('href="#arguments.arguments.filter"');
-    expect(html).toContain('id="arguments.arguments.filter"');
+    expect(html).toContain('href="#arguments"');
     // the card below explains the return type, the heading doesn't repeat it
     expect(text(html)).not.toContain('[Order!]!Returns');
     expect(text(html)).not.toContain('Returns[Order!]!');

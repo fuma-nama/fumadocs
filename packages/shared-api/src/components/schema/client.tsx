@@ -1,14 +1,5 @@
 'use client';
-import {
-  createContext,
-  Fragment,
-  type ReactNode,
-  use,
-  useCallback,
-  useEffect,
-  useRef,
-  useState,
-} from 'react';
+import { createContext, Fragment, type ReactNode, use, useCallback, useRef, useState } from 'react';
 import { flushSync } from 'react-dom';
 import { useTranslations } from '@fuma-translate/react';
 import { buttonVariants } from 'fumadocs-ui/components/ui/button';
@@ -179,23 +170,6 @@ function SchemaCard({
   const described = from > 0 && index === from && $ref === path[0].$ref;
   let content: ReactNode = null;
 
-  // a link to a root property, like the arguments of an operation's signature, needs the root panel to scroll to
-  useEffect(() => {
-    if (!id || index === 0) return;
-    function onClick(e: MouseEvent) {
-      const link = e.target instanceof Element ? e.target.closest('a[href^="#"]') : null;
-      if (!link?.getAttribute('href')!.startsWith(`#${id}.`)) return;
-      // before the browser scrolls to the target
-      flushSync(() => {
-        setMotion('back');
-        back(0);
-      });
-    }
-
-    document.addEventListener('click', onClick, true);
-    return () => document.removeEventListener('click', onClick, true);
-  }, [id, index, back]);
-
   // the opened schema replaces the properties above, scroll back to the breadcrumbs
   function navigate(direction: keyof typeof motionClassNames, update: () => void) {
     // render the panel before scrolling, Safari stops the scroll when the layout changes
@@ -213,8 +187,6 @@ function SchemaCard({
       props.push(
         <ObjectProperty
           key={prop.name}
-          // the properties of a card's root can be linked to
-          id={id && index === 0 ? `${id}.${prop.name}` : undefined}
           name={prop.name}
           $type={prop.$type}
           required={prop.required}

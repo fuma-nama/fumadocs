@@ -76,7 +76,6 @@ function OperationContent({
       field.args.length > 0 ? (
         <>
           <SectionHeader id="arguments" depth={headingLevel} title={t('Arguments')} />
-          {/* the signature bar links to its rows */}
           <AnchorSection segments={['arguments']}>
             <SchemaUI
               client={{ name: 'arguments', as: 'body' }}

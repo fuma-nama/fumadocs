@@ -18,8 +18,7 @@ export function OperationBar({ children, className, ...props }: ComponentProps<'
   const { kind, field, directives } = useOperation();
   const { args } = field;
   const returns = useAnchorId(['returns']);
-  // the root of the arguments card, its rows are `${id}.${name}`
-  const argumentsId = useAnchorId(['arguments', 'arguments']);
+  const argumentsId = useAnchorId(['arguments']);
   // the width of one-line signature, the names of arguments are padded
   let length = field.name.length + String(field.type).length + 2;
   for (const arg of args) length += arg.name.length + String(arg.type).length + 4;
@@ -50,7 +49,7 @@ export function OperationBar({ children, className, ...props }: ComponentProps<'
           </span>
           {args.map((arg, i) => (
             <span key={arg.name} className={argumentClassName}>
-              <a href={`#${argumentsId}.${arg.name}`} className="group/argument">
+              <a href={`#${argumentsId}`} className="group/argument">
                 <span
                   className={cn(
                     'rounded-md bg-fd-primary/10 px-1 text-fd-primary transition-colors group-hover/argument:bg-fd-primary/20',
