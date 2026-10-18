@@ -1,7 +1,7 @@
 'use client';
 import { type ReactNode, useMemo } from 'react';
 import { useTranslations } from '@fuma-translate/react';
-import { getNamedType, isLeafType, isNonNullType } from 'graphql';
+import { getNamedType, isLeafType, isNonNullType, isRequiredArgument } from 'graphql';
 import { AnchorSection } from 'shared-api/auto-anchor';
 import { Badge } from 'shared-api/components/badge';
 import { Callout } from 'fumadocs-ui/components/callout';
@@ -77,10 +77,15 @@ function OperationContent({
         <>
           <SectionHeader id="arguments" depth={headingLevel} title={t('Arguments')} />
           <AnchorSection segments={['arguments']}>
-            <SchemaUI
-              client={{ name: 'arguments', as: 'body' }}
-              root={`${schema.getRootType(kind)!.name}.${name}()`}
-            />
+            <div className="rounded-xl border bg-fd-card px-3">
+              {field.args.map((arg) => (
+                <SchemaUI
+                  key={arg.name}
+                  client={{ name: arg.name, required: isRequiredArgument(arg) }}
+                  root={`${schema.getRootType(kind)!.name}.${name}(${arg.name}:)`}
+                />
+              ))}
+            </div>
           </AnchorSection>
         </>
       ) : null,

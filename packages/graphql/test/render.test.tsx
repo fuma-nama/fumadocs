@@ -142,6 +142,8 @@ describe('render <GraphQLPage />', () => {
 
     expect(html).toContain('List all orders.');
     expect(html).toContain('Arguments');
+    // a row for each argument, like the parameters of OpenAPI
+    expect(html).toContain('id="arguments.filter"');
     expect(html).toContain('Returns');
     // the operation bar without playground, its directives in a row
     expect(text(html)).toContain(
