@@ -137,10 +137,10 @@ codeUsages.remove('java');
 codeUsages.add('graphql-request', {
   label: 'graphql-request',
   lang: 'js',
-  generate({ url, query, variables = {} }) {
+  generate({ url, query, variables = {}, headers }) {
     return `import { request } from 'graphql-request';
 
-const data = await request(${JSON.stringify(url)}, ${JSON.stringify(query)}, ${JSON.stringify(variables)});`;
+const data = await request(${JSON.stringify(url)}, ${JSON.stringify(query)}, ${JSON.stringify(variables)}, ${JSON.stringify(headers)});`;
   },
 });
 
