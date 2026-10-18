@@ -36,7 +36,7 @@ import { inputTypeToJsonSchema } from '@/playground/json-schema';
 import { type SelectionStep, toggleField } from '@/playground/selection';
 import { CodeEditor } from '@/ui/components/code-editor';
 import { cn } from '@/utils/cn';
-import { SelectionPanel, SelectionSection } from './selection';
+import { Note, SelectionPanel, SelectionSection } from './selection';
 
 const variablesField: FieldKey = ['variables'];
 
@@ -251,11 +251,7 @@ function VariablesSection({ onNavigate }: { onNavigate: NavigateFn }) {
 
   let content: ReactNode;
   if (entries.length === 0) {
-    content = (
-      <p className="px-4 py-3 text-xs text-fd-muted-foreground">
-        {t('This operation has no arguments.')}
-      </p>
-    );
+    content = <Note>{t('This operation has no arguments.')}</Note>;
   } else if (mode === 'json') {
     content = <JsonEditor fieldName={variablesField} />;
   } else {

@@ -11,10 +11,10 @@ import {
   SelectValue,
 } from 'shared-api/components/select';
 import {
-  captionedCodeBlock,
   cardCodeBlock,
+  exampleActions,
   exampleCardClassName,
-  ExampleCopy,
+  exampleCodeBlock,
   ExampleHeader,
   ExampleSelect,
   selectCodeUsage,
@@ -46,11 +46,7 @@ export function UsageTabs() {
     usageTabs: ctx.content?.renderAPIExampleUsageTabs ? (
       ctx.content.renderAPIExampleUsageTabs(codeUsages, ctx)
     ) : (
-      <CodeUsages
-        title={t('Example Request')}
-        selectExample={selectable}
-        className={cn('mb-4', exampleCardClassName)}
-      />
+      <CodeUsages title={t('Example Request')} selectExample={selectable} className="mb-4" />
     ),
     responseTabs: <ResponseTabs />,
   };
@@ -128,9 +124,11 @@ export function CodeUsages({
       : undefined;
 
   return (
-    <div className={className}>
-      <ExampleHeader title={!example && title}>
-        {example && (
+    <ClientCodeBlock
+      lang={generators.get(id)!.lang}
+      code={code ?? ''}
+      codeblock={{
+        title: example ? (
           <ExampleSelect
             items={examples.items.map((item) => ({
               value: item.id,
@@ -140,33 +138,22 @@ export function CodeUsages({
             value={example.id}
             onValueChange={examples.select}
             align="start"
-            className="-ms-2 me-auto max-w-none min-w-0 shrink text-fd-foreground"
+            className="-ms-2 max-w-full"
           />
-        )}
-        {items.length > 1 ? (
+        ) : (
+          title
+        ),
+        Actions: exampleActions(
           <ExampleSelect
             items={items}
             value={id}
             onValueChange={(value) => selectCodeUsage(storageKey, value)}
-          />
-        ) : (
-          <span className="px-2 text-fd-muted-foreground">{items[0].label}</span>
-        )}
-        {code && <ExampleCopy text={code} />}
-      </ExampleHeader>
-      {code && (
-        <ClientCodeBlock
-          lang={generators.get(id)!.lang}
-          code={code}
-          codeblock={{
-            ...cardCodeBlock,
-            viewportProps: {
-              className: cn(cardCodeBlock.viewportProps.className, viewportClassName),
-            },
-          }}
-        />
-      )}
-    </div>
+          />,
+        ),
+        className: cn(exampleCodeBlock.className, className),
+        viewportProps: { className: viewportClassName },
+      }}
+    />
   );
 }
 
@@ -224,7 +211,11 @@ function ResponseTabsDefaultContent({ tabs }: { tabs: ResponseTab[] }) {
         <ClientCodeBlock
           lang="json"
           code={text}
-          codeblock={captioned ? captionedCodeBlock : cardCodeBlock}
+          codeblock={
+            captioned
+              ? { ...cardCodeBlock, viewportProps: { className: 'min-h-0 pt-2' } }
+              : cardCodeBlock
+          }
         />
       </>
     );
@@ -234,9 +225,9 @@ function ResponseTabsDefaultContent({ tabs }: { tabs: ResponseTab[] }) {
 
   return (
     <div className={cn('mb-4', exampleCardClassName)}>
-      <ExampleHeader title={t('Example Response')}>
+      <ExampleHeader title={t('Example Response')} copy={text}>
         {schema !== undefined && (
-          <label className="flex shrink-0 items-center gap-2 text-fd-muted-foreground">
+          <label className="me-2 flex shrink-0 items-center gap-2">
             {t('Schema')}
             <Switch.Root
               checked={showSchema}
@@ -255,7 +246,6 @@ function ResponseTabsDefaultContent({ tabs }: { tabs: ResponseTab[] }) {
             setIndex(0);
           }}
         />
-        {text !== undefined && <ExampleCopy text={text} />}
       </ExampleHeader>
       {body}
     </div>
@@ -317,16 +307,21 @@ function RequestTabsDefaultContent() {
         const json = JSON.stringify(data, null, 2);
 
         return (
-          <div key={k} className="flex min-h-0 flex-col border-t">
-            <div className="flex shrink-0 items-center gap-2 px-4 pt-3 text-xs font-medium text-fd-muted-foreground">
-              <span className="me-auto">{v}</span>
-              {k === 'body' && (
-                <span className="font-mono font-normal">{requestData.bodyMediaType}</span>
-              )}
-              <ExampleCopy text={json} caption />
-            </div>
-            <ClientCodeBlock lang="json" code={json} codeblock={captionedCodeBlock} />
-          </div>
+          <ClientCodeBlock
+            key={k}
+            lang="json"
+            code={json}
+            codeblock={{
+              title: v,
+              Actions:
+                k === 'body'
+                  ? exampleActions(
+                      <span className="me-2 font-mono text-xs">{requestData.bodyMediaType}</span>,
+                    )
+                  : undefined,
+              className: cn(exampleCodeBlock.className, 'rounded-none border-x-0 border-b-0'),
+            }}
+          />
         );
       })}
     </div>

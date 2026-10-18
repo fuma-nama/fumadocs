@@ -1,10 +1,10 @@
 'use client';
 import { memo, useMemo, useState } from 'react';
 import { Dialog } from '@base-ui/react/dialog';
-import { Play, Plug, Unplug, X } from 'lucide-react';
+import { Plug, Unplug, X } from 'lucide-react';
 import { useTranslations } from '@fuma-translate/react';
 import { buttonVariants } from 'fumadocs-ui/components/ui/button';
-import { DialogPopup } from 'shared-api/components/dialog';
+import { DialogPopup, PlaygroundTrigger } from 'shared-api/components/dialog';
 import { Spinner } from 'shared-api/components/spinner';
 import { iconButtonClassName, ViewSwitch } from 'shared-api/components/playground/panels';
 import { StatusDot } from 'shared-api/components/playground/log';
@@ -46,15 +46,8 @@ function PlaygroundSession() {
   return (
     <Dialog.Root>
       <ConnectionBar>
-        <Dialog.Trigger
-          className={cn(
-            buttonVariants({ variant: 'primary', size: 'sm' }),
-            'group shrink-0 gap-1.5 rounded-[5px] px-3 transition-[background-color,scale] active:scale-[0.97] motion-reduce:transition-none',
-          )}
-        >
-          {status === 'closed' ? (
-            <Play className="size-3 fill-current transition-transform duration-200 group-hover:translate-x-px motion-reduce:transition-none" />
-          ) : (
+        <PlaygroundTrigger>
+          {status !== 'closed' && (
             <StatusDot
               status={status}
               activity={playground.log.at(-1)?.id}
@@ -62,8 +55,7 @@ function PlaygroundSession() {
               className="ring-fd-primary-foreground/30"
             />
           )}
-          {t('Try in Playground')}
-        </Dialog.Trigger>
+        </PlaygroundTrigger>
       </ConnectionBar>
       <DialogPopup className="sm:h-[min(52rem,calc(100dvh-3rem))] sm:w-[min(80rem,calc(100vw-3rem))]">
         <PlaygroundDialog playground={playground} />

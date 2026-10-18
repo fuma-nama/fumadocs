@@ -25,11 +25,14 @@ const cwd = fileURLToPath(new URL('./', import.meta.url));
 const sdl = fs.readFileSync(path.join(cwd, './fixtures/store.graphql'), 'utf8');
 
 // avoid async highlighting in tests
-function CodeBlock({ lang, code }: ComponentProps<GraphQLComponents['CodeBlock']>) {
+function CodeBlock({ lang, code, codeblock }: ComponentProps<GraphQLComponents['CodeBlock']>) {
   return (
-    <pre data-lang={lang}>
-      <code>{code}</code>
-    </pre>
+    <figure>
+      {codeblock?.title && <figcaption>{codeblock.title}</figcaption>}
+      <pre data-lang={lang}>
+        <code>{code}</code>
+      </pre>
+    </figure>
   );
 }
 
@@ -204,8 +207,8 @@ describe('render <GraphQLPage />', () => {
 
     expect(html).toContain('Example Request');
     expect(html).toContain('<pre data-lang="graphql"><code>query Customer($id: ID!) {');
-    // the caption of variables holds their copy button
-    expect(text(html)).toContain('VariablesCopy Text{\n  "id": "1"\n}');
+    // variables are a code block of their own, titled
+    expect(text(html)).toContain('Variables{\n  "id": "1"\n}');
     expect(html).toContain('Example Response');
   });
 

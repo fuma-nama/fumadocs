@@ -1,15 +1,14 @@
 'use client';
 import { type ComponentProps, type FC, type ReactNode, useMemo, useState } from 'react';
 import { Dialog } from '@base-ui/react/dialog';
-import { Play, X } from 'lucide-react';
+import { X } from 'lucide-react';
 import { useOnChange } from 'fumadocs-core/utils/use-on-change';
 import { useOpenAPI } from '@/utils/create-page';
 import { useExampleRequests, useOperation } from '@/operation';
 import { DefaultResultDisplay, type ResultDisplayProps } from './components/result-display';
 import { EndpointBar } from '@/ui/components/endpoint';
 import { Markdown } from '@/ui/components/markdown';
-import { DialogPopup } from 'shared-api/components/dialog';
-import { buttonVariants } from 'fumadocs-ui/components/ui/button';
+import { DialogPopup, PlaygroundTrigger } from 'shared-api/components/dialog';
 import { cn } from '@/utils/cn';
 import { SchemaProvider } from 'shared-api/components/playground/schema';
 import {
@@ -84,7 +83,6 @@ export default function PlaygroundClient({
   renderBodyField,
   ...rest
 }: PlaygroundClientProps) {
-  const t = useTranslations({ note: 'playground' });
   const { doc } = useOpenAPI();
   const { path, method, operation } = useOperation();
   const providers = useMemo(
@@ -109,15 +107,7 @@ export default function PlaygroundClient({
       >
         <Dialog.Root open={open} onOpenChange={setOpen}>
           <EndpointBar method={method} route={path} deprecated={operation.deprecated} {...rest}>
-            <Dialog.Trigger
-              className={cn(
-                buttonVariants({ variant: 'primary', size: 'sm' }),
-                'group shrink-0 gap-1.5 rounded-[5px] px-3 transition-[background-color,scale] active:scale-[0.97] motion-reduce:transition-none',
-              )}
-            >
-              <Play className="size-3 fill-current transition-transform duration-200 group-hover:translate-x-px motion-reduce:transition-none" />
-              {t('Try in Playground')}
-            </Dialog.Trigger>
+            <PlaygroundTrigger />
           </EndpointBar>
           <DialogPopup className="sm:h-[min(52rem,calc(100dvh-3rem))] sm:w-[min(80rem,calc(100vw-3rem))]">
             <PlaygroundDialog

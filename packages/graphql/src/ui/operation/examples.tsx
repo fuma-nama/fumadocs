@@ -2,10 +2,9 @@
 import type { ReactNode } from 'react';
 import { useTranslations } from '@fuma-translate/react';
 import {
-  captionedCodeBlock,
   cardCodeBlock,
-  ExampleCopy,
   exampleCardClassName,
+  exampleCodeBlock,
   ExampleHeader,
   ExampleSelect,
 } from 'shared-api/components/example';
@@ -24,12 +23,6 @@ import { Markdown } from '@/ui/components/markdown';
 /** the code usage of the GraphQL document itself */
 const graphqlId = 'graphql';
 
-/** the query scrolls before its variables */
-const variablesCodeBlock = {
-  ...captionedCodeBlock,
-  viewportProps: { className: 'pt-2 max-h-60' },
-};
-
 /** the request of the selected example and its response */
 export function OperationExamples() {
   const t = useTranslations({ note: 'operation page' });
@@ -42,12 +35,11 @@ export function OperationExamples() {
     <div className="flex min-h-0 flex-col gap-4">
       <RequestExample example={example} />
       {response && (
-        <div className={exampleCardClassName}>
-          <ExampleHeader title={t('Example Response')}>
-            <ExampleCopy text={response} />
-          </ExampleHeader>
-          <ClientCodeBlock lang="json" code={response} codeblock={cardCodeBlock} />
-        </div>
+        <ClientCodeBlock
+          lang="json"
+          code={response}
+          codeblock={{ ...exampleCodeBlock, title: t('Example Response') }}
+        />
       )}
     </div>
   );
@@ -86,13 +78,16 @@ function RequestExample({ example }: { example: OperationExample }) {
       <>
         <ClientCodeBlock lang="graphql" code={code} codeblock={cardCodeBlock} />
         {variables !== undefined && (
-          <div className="flex shrink-0 flex-col border-t">
-            <div className="flex items-center px-4 pt-3 text-xs font-medium text-fd-muted-foreground">
-              <span className="me-auto">{t('Variables')}</span>
-              <ExampleCopy text={variables} caption />
-            </div>
-            <ClientCodeBlock lang="json" code={variables} codeblock={variablesCodeBlock} />
-          </div>
+          <ClientCodeBlock
+            lang="json"
+            code={variables}
+            codeblock={{
+              title: t('Variables'),
+              // the query scrolls before its variables
+              className: 'shrink-0 rounded-none border-x-0 border-b-0',
+              viewportProps: { className: 'max-h-60' },
+            }}
+          />
         )}
       </>
     );
@@ -100,36 +95,32 @@ function RequestExample({ example }: { example: OperationExample }) {
 
   return (
     <div className={exampleCardClassName}>
-      <div className="shrink-0 border-b ps-4 pe-1.5">
-        <div className="flex h-10 items-center gap-2 text-[0.8125rem] font-medium">
-          {examples.length > 1 ? (
-            <ExampleSelect
-              items={examples.map((item, i) => ({
-                value: String(i),
-                label: item.name ?? t('Example Request'),
-                description: item.description && <Markdown md={item.description} />,
-              }))}
-              value={String(selected)}
-              onValueChange={(v) => select(Number(v))}
-              align="start"
-              className="-ms-2 me-auto max-w-none min-w-0 shrink text-fd-foreground"
-            />
-          ) : (
-            <span className="me-auto truncate">{example.name ?? t('Example Request')}</span>
-          )}
-          {languages.length > 1 ? (
-            <ExampleSelect items={languages} value={value} onValueChange={selectCodeUsage} />
-          ) : (
-            <span className="px-2 text-fd-muted-foreground">{languages[0].label}</span>
-          )}
-          <ExampleCopy text={code} />
-        </div>
-        {example.description && (
-          <div className="-mt-1.5 pe-2.5 pb-2.5 prose prose-xs prose-no-margin text-fd-muted-foreground">
-            <Markdown md={example.description} />
-          </div>
+      <ExampleHeader
+        title={examples.length === 1 && (example.name ?? t('Example Request'))}
+        description={
+          example.description && (
+            <div className="-mt-1.5 pe-2.5 pb-2.5 prose prose-xs prose-no-margin text-fd-muted-foreground">
+              <Markdown md={example.description} />
+            </div>
+          )
+        }
+        copy={code}
+      >
+        {examples.length > 1 && (
+          <ExampleSelect
+            items={examples.map((item, i) => ({
+              value: String(i),
+              label: item.name ?? t('Example Request'),
+              description: item.description && <Markdown md={item.description} />,
+            }))}
+            value={String(selected)}
+            onValueChange={(v) => select(Number(v))}
+            align="start"
+            className="-ms-2 me-auto max-w-none min-w-0 shrink"
+          />
         )}
-      </div>
+        <ExampleSelect items={languages} value={value} onValueChange={selectCodeUsage} />
+      </ExampleHeader>
       {body}
     </div>
   );

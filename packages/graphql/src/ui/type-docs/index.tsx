@@ -14,12 +14,7 @@ import {
 } from 'graphql';
 import Link from 'fumadocs-core/link';
 import { AnchorSection } from 'shared-api/auto-anchor';
-import {
-  cardCodeBlock,
-  exampleCardClassName,
-  ExampleCopy,
-  ExampleHeader,
-} from 'shared-api/components/example';
+import { exampleCodeBlock } from 'shared-api/components/example';
 import {
   type SchemaViewRoot,
   useGraphQL,
@@ -119,12 +114,11 @@ function TypeDocsContent({ showTitle, showDescription }: Omit<PageTypeProps, 'na
     values: isEnumType(type) ? <EnumValues type={type} headingLevel={headingLevel} /> : null,
     usages: <Usages headingLevel={headingLevel} />,
     sdl: (
-      <div className={exampleCardClassName}>
-        <ExampleHeader title="SDL">
-          <ExampleCopy text={sdl} />
-        </ExampleHeader>
-        <ClientCodeBlock lang="graphql" code={sdl} codeblock={cardCodeBlock} />
-      </div>
+      <ClientCodeBlock
+        lang="graphql"
+        code={sdl}
+        codeblock={{ ...exampleCodeBlock, title: 'SDL' }}
+      />
     ),
   };
 

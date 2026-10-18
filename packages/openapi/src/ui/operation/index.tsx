@@ -114,7 +114,7 @@ function OperationContent({
             <MediaContent
               schema={content.schema}
               required={requestBody.required}
-              selector={<CardSelector items={items} />}
+              selector={<SelectTabTrigger items={items} />}
               request
             />
           </SelectTab>
@@ -198,7 +198,7 @@ function OperationContent({
         <SectionHeader id="authorization" depth={headingLevel} title={t('Authorization')} />
         <div className="overflow-hidden rounded-xl border bg-fd-card">
           <div className="flex h-9 items-center border-b ps-1.5 pe-1 text-[0.8125rem] not-prose">
-            <CardSelector items={items} />
+            <SelectTabTrigger items={items} />
           </div>
           {security.map((requirement, i) => (
             <SelectTab key={i} value={items[i].value} className="px-3">
@@ -326,19 +326,6 @@ function SectionHeader({
       {children}
     </div>
   );
-}
-
-/** selects the variant shown in a card, like the media type */
-function CardSelector({ items }: { items: { label: ReactNode; value: string }[] }) {
-  if (items.length > 1)
-    return (
-      <SelectTabTrigger
-        items={items}
-        className="h-7 w-auto gap-1 border-0 bg-transparent px-1.5 py-0 text-[0.8125rem] font-medium hover:bg-fd-accent hover:text-fd-accent-foreground focus:ring-0 focus-visible:ring-2 focus-visible:ring-inset data-popup-open:bg-fd-accent"
-      />
-    );
-
-  return <span className="min-w-0 px-1.5 font-medium">{items[0].label}</span>;
 }
 
 /** the schema of a request body or response in a media type */
@@ -474,7 +461,7 @@ function ResponseContent({
           )}
           {contentTypes.map(([mediaType, media]) => (
             <SelectTab key={mediaType} value={mediaType} anchorSegments={[mediaType]}>
-              <MediaContent schema={media.schema} selector={<CardSelector items={items} />} />
+              <MediaContent schema={media.schema} selector={<SelectTabTrigger items={items} />} />
             </SelectTab>
           ))}
         </SelectTabs>

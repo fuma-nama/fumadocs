@@ -2,10 +2,8 @@
 import { useState } from 'react';
 import { useTranslations } from '@fuma-translate/react';
 import {
-  cardCodeBlock,
-  exampleCardClassName,
-  ExampleCopy,
-  ExampleHeader,
+  exampleActions,
+  exampleCodeBlock,
   ExampleSelect,
   selectCodeUsage,
   useCodeUsageId,
@@ -106,9 +104,12 @@ export function CodeUsages() {
   const selectMessage = !data.received && messages.length > 1;
 
   return (
-    <div className={`${exampleCardClassName} not-prose`}>
-      <ExampleHeader title={!selectMessage && t('Code Sample')}>
-        {selectMessage && (
+    <ClientCodeBlock
+      lang={sample.lang}
+      code={sample.code}
+      codeblock={{
+        ...exampleCodeBlock,
+        title: selectMessage ? (
           <ExampleSelect
             items={messages.map((item) => ({
               value: item.id,
@@ -118,21 +119,19 @@ export function CodeUsages() {
             value={message.id}
             onValueChange={setMessageId}
             align="start"
-            className="-ms-2 me-auto max-w-none min-w-0 shrink text-fd-foreground"
+            className="-ms-2 max-w-full"
           />
-        )}
-        {samples.length > 1 ? (
+        ) : (
+          t('Code Sample')
+        ),
+        Actions: exampleActions(
           <ExampleSelect
             items={samples}
             value={sample.value}
             onValueChange={(value) => selectCodeUsage(storageKey, value)}
-          />
-        ) : (
-          <span className="px-2 text-fd-muted-foreground">{sample.label}</span>
-        )}
-        <ExampleCopy text={sample.code} />
-      </ExampleHeader>
-      <ClientCodeBlock lang={sample.lang} code={sample.code} codeblock={cardCodeBlock} />
-    </div>
+          />,
+        ),
+      }}
+    />
   );
 }

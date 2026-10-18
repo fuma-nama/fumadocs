@@ -375,7 +375,6 @@ const translations = {
   'The connection closed with code {code}.(graphql playground)': '連線已關閉，狀態碼為 {code}。',
   'The server did not acknowledge the connection.(graphql playground)': '伺服器未確認連線。',
   'This operation has no arguments.(graphql playground)': '此操作沒有參數。',
-  'Try in Playground(graphql playground)': '測試',
   'Usages(type page)': '使用位置',
   'Value in(graphql schema ui)': '值於',
   'Values(type page)': '列舉值',

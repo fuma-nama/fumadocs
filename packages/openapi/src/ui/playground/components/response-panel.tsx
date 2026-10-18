@@ -8,6 +8,7 @@ import { ExampleSelect } from 'shared-api/components/example';
 import {
   PanelHeader,
   panelCodeBlock,
+  panelTopCodeBlock,
   Placeholder,
   SendingOverlay,
 } from 'shared-api/components/playground/panels';
@@ -37,7 +38,7 @@ export function ResponsePanel({
     <div className={cn('@container flex min-h-0 flex-col', className)}>
       <CodeUsages
         title={t('Request')}
-        className="shrink-0 border-b"
+        className={panelTopCodeBlock.className}
         viewportClassName="max-h-[min(18rem,30vh)]"
       />
       <div className="relative flex min-h-0 flex-1 flex-col">
@@ -88,7 +89,6 @@ function ResponseExamples() {
             items={examples.map((item, i) => ({ value: String(i), label: item.label }))}
             value={String(selected)}
             onValueChange={(v) => setSelected(Number(v))}
-            className="max-w-40"
           />
         )}
         <SegmentedList
@@ -114,7 +114,7 @@ function ResponseExamples() {
             <ClientCodeBlock
               lang="json"
               code={JSON.stringify(example.sample, null, 2)}
-              codeblock={panelCodeBlock}
+              codeblock={{ ...panelCodeBlock, title: tab.mediaType }}
             />
           </div>
         ) : (

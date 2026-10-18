@@ -3,15 +3,10 @@ import { type ComponentProps, memo, type ReactNode, useDeferredValue, useMemo } 
 import { Radio, SendHorizontal } from 'lucide-react';
 import { useTranslations } from '@fuma-translate/react';
 import { useDataEngine } from '@fumari/stf';
+import { exampleActions, ExampleSelect } from 'shared-api/components/example';
 import {
-  cardCodeBlock,
-  ExampleCopy,
-  ExampleHeader,
-  ExampleSelect,
-} from 'shared-api/components/example';
-import {
-  PanelHeader,
   panelCodeBlock,
+  panelTopCodeBlock,
   Placeholder,
   SendingOverlay,
 } from 'shared-api/components/playground/panels';
@@ -102,26 +97,18 @@ const RequestCode = memo(function RequestCode({ url, query }: { url: string; que
   }));
 
   return (
-    <div className="shrink-0 border-b">
-      <ExampleHeader title={t('Request')}>
-        {items.length > 1 ? (
-          <ExampleSelect items={items} value={id} onValueChange={selectCodeUsage} />
-        ) : (
-          <span className="px-2 text-fd-muted-foreground">{items[0].label}</span>
-        )}
-        <ExampleCopy text={code} />
-      </ExampleHeader>
-      <ClientCodeBlock
-        lang={generator.lang}
-        code={code}
-        codeblock={{
-          ...cardCodeBlock,
-          viewportProps: {
-            className: cn(cardCodeBlock.viewportProps.className, 'max-h-[min(18rem,30vh)]'),
-          },
-        }}
-      />
-    </div>
+    <ClientCodeBlock
+      lang={generator.lang}
+      code={code}
+      codeblock={{
+        ...panelTopCodeBlock,
+        title: t('Request'),
+        Actions: exampleActions(
+          <ExampleSelect items={items} value={id} onValueChange={selectCodeUsage} />,
+        ),
+        viewportProps: { className: 'max-h-[min(18rem,30vh)]' },
+      }}
+    />
   );
 });
 
@@ -138,18 +125,13 @@ function ExampleResponse({ example }: { example?: OperationExample }) {
   }
 
   return (
-    <>
-      <PanelHeader>
-        <span className="me-auto text-[0.8125rem] font-medium">{t('Example Response')}</span>
-      </PanelHeader>
-      <div className="min-h-0 flex-1">
-        <ClientCodeBlock
-          lang="json"
-          code={JSON.stringify(example.response, null, 2)}
-          codeblock={panelCodeBlock}
-        />
-      </div>
-    </>
+    <div className="min-h-0 flex-1">
+      <ClientCodeBlock
+        lang="json"
+        code={JSON.stringify(example.response, null, 2)}
+        codeblock={{ ...panelCodeBlock, title: t('Example Response') }}
+      />
+    </div>
   );
 }
 
@@ -220,7 +202,11 @@ function ResponseResult({
           <ErrorList errors={errors} className="max-h-1/3 shrink-0 overflow-y-auto border-b" />
         )}
         <div className="min-h-0 flex-1">
-          <ClientCodeBlock lang={lang} code={code} codeblock={panelCodeBlock} />
+          <ClientCodeBlock
+            lang={lang}
+            code={code}
+            codeblock={{ ...panelCodeBlock, title: data.contentType }}
+          />
         </div>
       </div>
     </ResponseView>

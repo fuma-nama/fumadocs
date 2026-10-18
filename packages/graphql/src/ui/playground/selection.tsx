@@ -347,6 +347,6 @@ function Preview({ selection }: { selection?: SelectionLevel }) {
   );
 }
 
-function Note({ children }: { children: ReactNode }) {
+export function Note({ children }: { children: ReactNode }) {
   return <p className="px-4 py-3 text-xs text-fd-muted-foreground">{children}</p>;
 }

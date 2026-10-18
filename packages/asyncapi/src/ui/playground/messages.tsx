@@ -11,10 +11,10 @@ import {
   SelectTrigger,
   SelectValue,
 } from 'shared-api/components/select';
-import { cardCodeBlock, ExampleCopy, ExampleHeader } from 'shared-api/components/example';
 import {
   iconButtonClassName,
   PanelHeader,
+  panelTopCodeBlock,
   Placeholder,
   SendShortcut,
 } from 'shared-api/components/playground/panels';
@@ -39,12 +39,11 @@ export function MessagesPanel({
   return (
     <section className={cn('flex min-h-0 flex-col', className)}>
       {url && (
-        <div className="shrink-0 border-b">
-          <ExampleHeader title={t('Connection URL')}>
-            <ExampleCopy text={url} />
-          </ExampleHeader>
-          <ClientCodeBlock lang="text" code={url} codeblock={cardCodeBlock} />
-        </div>
+        <ClientCodeBlock
+          lang="text"
+          code={url}
+          codeblock={{ ...panelTopCodeBlock, title: t('Connection URL') }}
+        />
       )}
       <PanelHeader>
         <h3 className="me-auto text-[0.8125rem] font-medium">{t('Messages')}</h3>

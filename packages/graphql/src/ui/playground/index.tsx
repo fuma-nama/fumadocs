@@ -1,12 +1,12 @@
 'use client';
 import { useMemo, useState } from 'react';
 import { Dialog } from '@base-ui/react/dialog';
-import { Play, Radio, Square, X } from 'lucide-react';
+import { Radio, Square, X } from 'lucide-react';
 import { useTranslations } from '@fuma-translate/react';
 import { StfProvider } from '@fumari/stf';
 import { buttonVariants } from 'fumadocs-ui/components/ui/button';
 import { Badge } from 'shared-api/components/badge';
-import { DialogPopup } from 'shared-api/components/dialog';
+import { DialogPopup, PlaygroundTrigger } from 'shared-api/components/dialog';
 import { Spinner } from 'shared-api/components/spinner';
 import {
   iconButtonClassName,
@@ -40,15 +40,8 @@ export function OperationPlayground() {
   return (
     <Dialog.Root onOpenChange={(open) => open && playground.open()}>
       <OperationBar>
-        <Dialog.Trigger
-          className={cn(
-            buttonVariants({ variant: 'primary', size: 'sm' }),
-            'group shrink-0 gap-1.5 rounded-[5px] px-3 transition-[background-color,scale] active:scale-[0.97] motion-reduce:transition-none',
-          )}
-        >
-          {status === 'closed' ? (
-            <Play className="size-3 fill-current transition-transform duration-200 group-hover:translate-x-px motion-reduce:transition-none" />
-          ) : (
+        <PlaygroundTrigger>
+          {status !== 'closed' && (
             <StatusDot
               status={status}
               activity={playground.log.at(-1)?.id}
@@ -56,8 +49,7 @@ export function OperationPlayground() {
               className="ring-fd-primary-foreground/30"
             />
           )}
-          {t('Try in Playground')}
-        </Dialog.Trigger>
+        </PlaygroundTrigger>
       </OperationBar>
       <DialogPopup className="sm:h-[min(52rem,calc(100dvh-3rem))] sm:w-[min(80rem,calc(100vw-3rem))]">
         <PlaygroundDialog playground={playground} />

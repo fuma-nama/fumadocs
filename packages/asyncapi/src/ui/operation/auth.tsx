@@ -65,15 +65,7 @@ function RequirementCard({ items }: { items: SecurityRequirement[] }) {
     <SelectTabs defaultValue="0">
       <div className="overflow-hidden rounded-xl border bg-fd-card">
         <div className="flex h-9 items-center border-b ps-1.5 pe-1 text-[0.8125rem] not-prose">
-          {options.length > 1 ? (
-            <SelectTabTrigger
-              aria-label={t('Security scheme')}
-              items={options}
-              className="h-7 w-auto gap-1 border-0 bg-transparent px-1.5 py-0 text-[0.8125rem] font-medium hover:bg-fd-accent hover:text-fd-accent-foreground focus:ring-0 focus-visible:ring-2 focus-visible:ring-inset data-popup-open:bg-fd-accent"
-            />
-          ) : (
-            <span className="min-w-0 px-1.5 font-medium">{options[0].label}</span>
-          )}
+          <SelectTabTrigger aria-label={t('Security scheme')} items={options} />
         </div>
         {items.map((item, i) => (
           <SelectTab key={i} value={String(i)} className="px-3">
