@@ -1,6 +1,6 @@
 'use client';
 import { type ReactNode, Suspense, useEffect, useRef, useState } from 'react';
-import { Check, Copy, ExternalLink } from 'lucide-react';
+import { Check, Copy, ExternalLink, ShieldCheck } from 'lucide-react';
 import { StfProvider, useDataEngine, useStf } from '@fumari/stf';
 import { useTranslations } from '@fuma-translate/react';
 import { buttonVariants } from 'fumadocs-ui/components/ui/button';
@@ -28,41 +28,61 @@ import { CheckRow, SelectRow, TextRow, ValueRow } from 'shared-api/components/pl
 
 type Credentials = Pick<OAuthInput, 'clientId' | 'clientSecret' | 'username' | 'password'>;
 
-/** OAuth 2.0 and OpenID Connect schemes, authorized in a panel */
-export const oauthPanelProvider: AuthProvider = {
-  on: ({ scheme }) => scheme.type === 'oauth2' || scheme.type === 'openIdConnect',
-  render: function OAuthRows({ field, Value, Panel }) {
-    const t = useTranslations({ note: 'playground' });
-    const engine = useDataEngine();
-    const query = useQuery(async (token: Promise<string> | string) => {
-      engine.update(field.fieldName, await token);
-    });
+/** the rows of OAuth and mutual TLS schemes in the built-in UI, after the providers of page */
+export const builtinAuthProviders: AuthProvider[] = [
+  {
+    // authorized in a panel
+    on: ({ scheme }) => scheme.type === 'oauth2' || scheme.type === 'openIdConnect',
+    render: function OAuthRows({ field, Value, Panel }) {
+      const t = useTranslations({ note: 'playground' });
+      const engine = useDataEngine();
+      const query = useQuery(async (token: Promise<string> | string) => {
+        engine.update(field.fieldName, await token);
+      });
 
-    useAuthRedirect(field, (url, data) => {
-      const token = finishOAuthFlow(url, data);
-      if (token !== undefined) void query.start(token);
-    });
+      useAuthRedirect(field, (url, data) => {
+        const token = finishOAuthFlow(url, data);
+        if (token !== undefined) void query.start(token);
+      });
 
-    return (
-      <>
-        <Value name="Authorization" type="header" description={field.scheme.description} />
-        {query.isLoading && (
-          <p className="flex items-center gap-1.5 border-b px-4 py-2.5 text-xs text-fd-muted-foreground">
-            <Spinner className="size-3" />
-            {t('Fetching token...')}
-          </p>
-        )}
-        {query.error != null && (
-          <div className="border-b px-4 py-2.5 text-xs">
-            <p className="font-medium text-red-400">{t('Failed to fetch token')}</p>
-            <p className="text-fd-muted-foreground">{String(query.error)}</p>
-          </div>
-        )}
-        <Panel title={t('Authorize')} component={OAuthPanel} />
-      </>
-    );
+      return (
+        <>
+          <Value name="Authorization" type="header" description={field.scheme.description} />
+          {query.isLoading && (
+            <p className="flex items-center gap-1.5 border-b px-4 py-2.5 text-xs text-fd-muted-foreground">
+              <Spinner className="size-3" />
+              {t('Fetching token...')}
+            </p>
+          )}
+          {query.error != null && (
+            <div className="border-b px-4 py-2.5 text-xs">
+              <p className="font-medium text-red-400">{t('Failed to fetch token')}</p>
+              <p className="text-fd-muted-foreground">{String(query.error)}</p>
+            </div>
+          )}
+          <Panel title={t('Authorize')} component={OAuthPanel} />
+        </>
+      );
+    },
   },
-};
+  {
+    // they have no value, the browser presents a client certificate
+    on: ({ scheme }) => scheme.type === 'mutualTLS',
+    render: function MutualTLSNote({ field }) {
+      const t = useTranslations({ note: 'playground' });
+
+      return (
+        <div className="flex gap-2 border-b px-4 py-2.5 text-xs text-fd-muted-foreground last:border-b-0">
+          <ShieldCheck className="mt-px size-3.5 shrink-0" />
+          <div className="min-w-0 flex-1 [&_a]:underline">
+            <p>{t('Requires a client certificate installed in your browser.')}</p>
+            {field.scheme.description && <Markdown md={field.scheme.description} />}
+          </div>
+        </div>
+      );
+    },
+  },
+];
 
 /** obtain the access token of an OAuth 2.0 or OpenID Connect scheme */
 function OAuthPanel({ field, close }: AuthPanelProps) {

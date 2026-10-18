@@ -26,8 +26,8 @@ import {
   usePlayground,
 } from '@/playground/use-playground';
 import { UrlBar } from './components/url-bar';
-import { mutualTLSProvider, RequestPanel } from './components/request-panel';
-import { oauthPanelProvider } from './components/oauth-panel';
+import { builtinAuthProviders } from './components/auth';
+import { RequestPanel } from './components/request-panel';
 import { ResponsePanel } from './components/response-panel';
 
 export interface PlaygroundClientProps extends ComponentProps<'div'>, PlaygroundClientOptions {
@@ -86,7 +86,7 @@ export default function PlaygroundClient({
   const { doc } = useOpenAPI();
   const { path, method, operation } = useOperation();
   const providers = useMemo(
-    () => [...(authProviders ?? []), oauthPanelProvider, mutualTLSProvider],
+    () => [...(authProviders ?? []), ...builtinAuthProviders],
     [authProviders],
   );
   const playground = usePlayground({ authProviders: providers, transformAuthInputs, fetchOptions });

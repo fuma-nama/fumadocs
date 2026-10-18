@@ -16,7 +16,6 @@ import {
   PlusIcon,
   Route,
   Rows3,
-  ShieldCheck,
   SlidersHorizontal,
 } from 'lucide-react';
 import type { FieldKey } from '@fumari/stf';
@@ -51,16 +50,10 @@ import {
   SelectValue,
 } from 'shared-api/components/select';
 import { Segmented, SegmentedList } from 'shared-api/components/segmented';
-import {
-  type AuthField,
-  type AuthPanelProps,
-  type AuthProvider,
-  type AuthRenderProps,
-} from '@/playground/auth';
+import type { AuthField, AuthPanelProps, AuthRenderProps } from '@/playground/auth';
 import type { Playground, PlaygroundAuth, RequestBodyInfo } from '@/playground/use-playground';
 import { type OperationParameters, useOperation } from '@/operation';
 import type { ParameterObject } from '@/types';
-import { Markdown } from '@/ui/components/markdown';
 import { cn } from '@/utils/cn';
 
 interface RenderOptions {
@@ -320,24 +313,6 @@ function AuthPanelRow({ title, component }: ComponentProps<AuthRenderProps['Pane
     </LinkRow>
   );
 }
-
-/** mutual TLS schemes, they have no value */
-export const mutualTLSProvider: AuthProvider = {
-  on: ({ scheme }) => scheme.type === 'mutualTLS',
-  render: function MutualTLSNote({ field }) {
-    const t = useTranslations({ note: 'playground' });
-
-    return (
-      <div className="flex gap-2 border-b px-4 py-2.5 text-xs text-fd-muted-foreground last:border-b-0">
-        <ShieldCheck className="mt-px size-3.5 shrink-0" />
-        <div className="min-w-0 flex-1 [&_a]:underline">
-          <p>{t('Requires a client certificate installed in your browser.')}</p>
-          {field.scheme.description && <Markdown md={field.scheme.description} />}
-        </div>
-      </div>
-    );
-  },
-};
 
 function BodySection({
   body,
