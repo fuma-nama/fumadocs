@@ -10,7 +10,7 @@ packages:
 - Pages of named types are opt-in with `includeTypes`, they show the SDL of types and where they are used.
 - Example requests and responses beside operations, with a select of examples and code samples in cURL, JavaScript, Go, Python, Java, C# and Rust.
 - Named examples from GraphQL documents with the `examples` option of `createGraphQL()`.
-- The playground opens in a dialog: an editor with validation and formatting, a field picker, variables as a form or JSON, headers, and responses with their GraphQL errors.
+- The playground opens in a dialog: an editor with validation and formatting, variables as a form or JSON, headers, and responses with their GraphQL errors.
 - The playground runs subscriptions over graphql-ws or GraphQL over SSE (`subscriptionUrl`), and logs their events.
 - Directives applied in the schema show their definitions, `@oneOf` input objects are supported.
 - `getText()` returns pages in Markdown for LLMs, operations with the SDL of types they use.

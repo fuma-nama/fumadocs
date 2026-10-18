@@ -4,10 +4,8 @@ import { Braces, RotateCcw, Rows3, Variable, WandSparkles } from 'lucide-react';
 import { useTranslations } from '@fuma-translate/react';
 import {
   type DocumentNode,
-  getNamedType,
   GraphQLError,
   type GraphQLSchema,
-  isCompositeType,
   isRequiredArgument,
   parse,
   print,
@@ -23,7 +21,6 @@ import {
 import {
   FieldPanel,
   iconButtonClassName,
-  type Motion,
   OverviewLayer,
   Section,
   useFieldStack,
@@ -33,10 +30,8 @@ import { Segmented, SegmentedList } from 'shared-api/components/segmented';
 import { useOperation } from '@/operation';
 import { useGraphQL } from '@/utils/create-page';
 import { inputTypeToJsonSchema } from '@/playground/json-schema';
-import { type SelectionStep, toggleField } from '@/playground/selection';
 import { CodeEditor } from '@/ui/components/code-editor';
 import { cn } from '@/utils/cn';
-import { Note, SelectionPanel, SelectionSection } from './selection';
 
 const variablesField: FieldKey = ['variables'];
 
@@ -46,58 +41,26 @@ const headersEntry: FieldEntry = {
   schema: { type: 'object', additionalProperties: { type: 'string' } },
 };
 
-/** the inputs of request, nested variables and fields open in panels, locked while subscribed */
+/** the inputs of request, nested variables open in panels, locked while subscribed */
 export const RequestPanel = memo(function RequestPanel({
   query,
   onQueryChange,
   onReset,
   locked,
   className,
-}: Omit<OperationSectionProps, 'document' | 'errors'> & {
+}: OperationSectionProps & {
   locked: boolean;
   className?: string;
 }) {
   const t = useTranslations({ note: 'graphql playground' });
-  const { schema } = useGraphQL();
-  const { kind, name, field } = useOperation();
   const fields = useFieldStack();
   const onNavigate = fields.openNested([]);
-  const [selection, setSelection] = useState<{ path: SelectionStep[]; motion: Motion }>({
-    path: [],
-    motion: 'forward',
-  });
-  // validating is expensive, the errors trail the editor at a low priority instead of blocking keystrokes
-  const deferredQuery = useDeferredValue(query);
-  const { document, errors } = useMemo(
-    () => validateQuery(schema, deferredQuery),
-    [schema, deferredQuery],
-  );
-  const selectionProps = {
-    document,
-    invalid: errors.length > 0 && !document,
-    onToggle(path: SelectionStep[], target: string, selected: boolean) {
-      onQueryChange(toggleField(schema, query, { kind, name }, path, target, selected));
-    },
-    onOpen(path: SelectionStep[]) {
-      setSelection({
-        path,
-        motion: path.length >= selection.path.length ? 'forward' : 'back',
-      });
-    },
-  };
 
   return (
     <div className={cn('@container grid min-h-0', className)}>
-      <OverviewLayer covered={fields.stack.length > 0 || selection.path.length > 0}>
+      <OverviewLayer covered={fields.stack.length > 0}>
         <fieldset disabled={locked} className="contents">
-          <OperationSection
-            query={query}
-            onQueryChange={onQueryChange}
-            onReset={onReset}
-            document={document}
-            errors={errors}
-          />
-          {isCompositeType(getNamedType(field.type)) && <SelectionSection {...selectionProps} />}
+          <OperationSection query={query} onQueryChange={onQueryChange} onReset={onReset} />
           <VariablesSection onNavigate={onNavigate} />
           <Section icon={Rows3} title={t('Headers')}>
             <FieldRows entry={headersEntry} onNavigate={onNavigate} />
@@ -106,14 +69,6 @@ export const RequestPanel = memo(function RequestPanel({
       </OverviewLayer>
       {fields.stack.length > 0 && (
         <FieldPanel fields={fields} root={t('Variables')} disabled={locked} />
-      )}
-      {selection.path.length > 0 && (
-        <SelectionPanel
-          {...selectionProps}
-          path={selection.path}
-          motion={selection.motion}
-          locked={locked}
-        />
       )}
     </div>
   );
@@ -138,23 +93,21 @@ interface OperationSectionProps {
   onQueryChange: (query: string) => void;
   /** load the selected example again */
   onReset: () => void;
-  /** the parsed query, it trails the editor */
-  document?: DocumentNode;
-  errors: readonly GraphQLError[];
 }
 
 /** errors listed under the editor, the rest are counted */
 const maxErrors = 3;
 
-function OperationSection({
-  query,
-  onQueryChange,
-  onReset,
-  document,
-  errors,
-}: OperationSectionProps) {
+function OperationSection({ query, onQueryChange, onReset }: OperationSectionProps) {
   const t = useTranslations({ note: 'graphql playground' });
+  const { schema } = useGraphQL();
   const { examples } = useOperation();
+  // validating is expensive, the errors trail the editor at a low priority instead of blocking keystrokes
+  const deferredQuery = useDeferredValue(query);
+  const { document, errors } = useMemo(
+    () => validateQuery(schema, deferredQuery),
+    [schema, deferredQuery],
+  );
   const errorsId = useId();
   const items: ReactNode[] = [];
   for (let i = 0; i < Math.min(errors.length, maxErrors); i++) {
@@ -251,7 +204,11 @@ function VariablesSection({ onNavigate }: { onNavigate: NavigateFn }) {
 
   let content: ReactNode;
   if (entries.length === 0) {
-    content = <Note>{t('This operation has no arguments.')}</Note>;
+    content = (
+      <p className="px-4 py-3 text-xs text-fd-muted-foreground">
+        {t('This operation has no arguments.')}
+      </p>
+    );
   } else if (mode === 'json') {
     content = <JsonEditor fieldName={variablesField} />;
   } else {
