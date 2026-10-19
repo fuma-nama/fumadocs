@@ -115,6 +115,21 @@ body {
   --ui-color: #a9ceff;
 }
 
+/* #region pele */
+.pele {
+  --pele-font: var(--font-sans);
+  --pele-font-mono: var(--font-mono);
+  --pele-bg: var(--color-fd-background);
+  --pele-fg: var(--color-fd-foreground);
+  --pele-muted: var(--color-fd-muted-foreground);
+  --pele-line: var(--color-fd-muted-foreground);
+  --pele-surface: var(--color-fd-card);
+  --pele-surface-alt: var(--color-fd-secondary);
+  --pele-border: var(--color-fd-border);
+  --pele-accent: var(--color-fd-primary);
+}
+/* #endregion */
+
 @keyframes circuit_1 {
   0% {
     transform: translateY(-20px);
