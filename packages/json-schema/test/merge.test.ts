@@ -1,5 +1,7 @@
 import { describe, expect, test } from 'vitest';
+import { createMagicProxy } from '@scalar/json-magic/magic-proxy';
 import { mergeAllOf } from '@/merge';
+import type { JsonSchema } from '@/types';
 
 describe('Merge object schemas', () => {
   test('Merge multiple objects', () => {
@@ -387,6 +389,119 @@ test('Merge properties named `__proto__`', () => {
   });
 
   expect(JSON.stringify(result)).toBe(
-    '{"properties":{"__proto__":{"type":"string","minLength":1},"constructor":{"type":"string"}}}',
+    '{"properties":{"__proto__":{"allOf":[{"type":"string"},{"minLength":1}]},"constructor":{"type":"string"}}}',
   );
+});
+
+describe('Recursive schemas', () => {
+  /** plain JSON of a merged schema, without the virtual `$ref-value` of magic proxies */
+  function toJson(schema: JsonSchema) {
+    return JSON.parse(JSON.stringify(schema, (k, v) => (k === '$ref-value' ? undefined : v)));
+  }
+
+  test('a parent listing its subtypes in `oneOf` (#3724)', () => {
+    const doc = createMagicProxy({
+      components: {
+        schemas: {
+          RuleNode: {
+            type: 'object',
+            properties: { id: { type: 'string' } },
+            oneOf: [
+              { $ref: '#/components/schemas/GroupNode' },
+              { $ref: '#/components/schemas/ConditionNode' },
+            ],
+          },
+          GroupNode: {
+            allOf: [
+              { $ref: '#/components/schemas/RuleNode' },
+              {
+                type: 'object',
+                properties: {
+                  children: { type: 'array', items: { $ref: '#/components/schemas/RuleNode' } },
+                },
+              },
+            ],
+          },
+          ConditionNode: { type: 'object', properties: { field: { type: 'string' } } },
+        },
+      },
+    }) as any;
+
+    expect(toJson(mergeAllOf(doc.components.schemas.GroupNode))).toEqual({
+      type: 'object',
+      properties: {
+        id: { type: 'string' },
+        children: { type: 'array', items: { $ref: '#/components/schemas/RuleNode' } },
+      },
+    });
+  });
+
+  test('nested schemas are merged when reading', () => {
+    const doc = createMagicProxy({
+      components: {
+        schemas: {
+          Tree: {
+            type: 'object',
+            properties: {
+              children: { type: 'array', items: { $ref: '#/components/schemas/Tree' } },
+            },
+          },
+          Extended: {
+            allOf: [
+              { $ref: '#/components/schemas/Tree' },
+              {
+                properties: {
+                  children: { type: 'array', items: { $ref: '#/components/schemas/Extended' } },
+                  extra: { type: 'string' },
+                },
+              },
+            ],
+          },
+        },
+      },
+    }) as any;
+
+    const merged = mergeAllOf(doc.components.schemas.Extended) as any;
+    expect(toJson(merged)).toEqual({
+      type: 'object',
+      properties: {
+        children: {
+          allOf: [
+            { type: 'array', items: { $ref: '#/components/schemas/Tree' } },
+            { type: 'array', items: { $ref: '#/components/schemas/Extended' } },
+          ],
+        },
+        extra: { type: 'string' },
+      },
+    });
+
+    const children = mergeAllOf(merged.properties.children) as any;
+    expect(toJson(children)).toEqual({
+      type: 'array',
+      items: {
+        allOf: [{ $ref: '#/components/schemas/Tree' }, { $ref: '#/components/schemas/Extended' }],
+      },
+    });
+    const item = mergeAllOf(children.items) as any;
+    expect(Object.keys(item.properties)).toEqual(['children', 'extra']);
+  });
+
+  test('cycles of `allOf` and unions', () => {
+    const doc = createMagicProxy({
+      components: {
+        schemas: {
+          A: { title: 'A', allOf: [{ $ref: '#/components/schemas/B' }] },
+          B: { title: 'B', allOf: [{ $ref: '#/components/schemas/A' }, { type: 'object' }] },
+          C: { oneOf: [{ $ref: '#/components/schemas/D' }, { type: 'string' }] },
+          D: { oneOf: [{ $ref: '#/components/schemas/C' }, { type: 'number' }] },
+        },
+      },
+    }) as any;
+
+    expect(toJson(mergeAllOf(doc.components.schemas.A))).toEqual({ type: 'object', title: 'A' });
+    expect(toJson(mergeAllOf({ allOf: [doc.components.schemas.C, { title: 'Other' }] }))).toEqual({
+      title: 'Other',
+      oneOf: [{}, { type: 'string' }],
+    });
+  });
 });

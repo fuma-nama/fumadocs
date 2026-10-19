@@ -140,8 +140,11 @@ async function updateImage(
 }
 
 function getImportPath(file: string, dir: string): string {
-  const relative = path.relative(dir, file).replaceAll(path.sep, '/');
-  return relative.startsWith('../') ? relative : `./${relative}`;
+  const relative = path.relative(dir, file);
+  const posix = relative.replaceAll(path.sep, '/');
+  // across Windows drives, `path.relative()` returns an absolute path
+  if (path.isAbsolute(relative) || posix.startsWith('../')) return posix;
+  return `./${posix}`;
 }
 
 function parseSrc(src: string, publicDir: string, dir?: string): Source | undefined {
