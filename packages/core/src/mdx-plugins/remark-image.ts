@@ -244,9 +244,12 @@ export function remarkImage({
 }
 
 function getImportPath(file: string, dir: string): string {
-  const relative = path.relative(dir, file).replaceAll(path.sep, '/');
+  const relative = path.relative(dir, file);
+  const posix = relative.replaceAll(path.sep, '/');
+  // across Windows drives, `path.relative()` returns an absolute path
+  if (path.isAbsolute(relative) || posix.startsWith('../')) return posix;
 
-  return relative.startsWith('../') ? relative : `./${relative}`;
+  return `./${posix}`;
 }
 
 /**

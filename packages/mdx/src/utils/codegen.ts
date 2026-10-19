@@ -134,8 +134,11 @@ export function createCodegen({
         filename = file;
       }
 
-      const importPath = slash(path.relative(outDir, filename));
-      return importPath.startsWith('.') ? importPath : `./${importPath}`;
+      const relative = path.relative(outDir, filename);
+      const importPath = slash(relative);
+      // across Windows drives, `path.relative()` returns an absolute path
+      if (path.isAbsolute(relative) || importPath.startsWith('../')) return importPath;
+      return `./${importPath}`;
     },
     toString() {
       return [...banner, ...this.lines].join('\n');
