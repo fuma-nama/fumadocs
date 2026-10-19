@@ -6,6 +6,7 @@ import type { OpenAPIServer } from '@/server';
 import { createGetUrl, getSlugs, PathUtils } from 'fumadocs-core/source';
 import { createAutoPreset, type SchemaToPagesOptions } from '@/utils/pages/preset-auto';
 import { fromSchema, type OutputGroup, type OutputEntry } from '@/utils/pages/builder';
+import { getMetaPages } from 'shared-api/source';
 import type { DistributiveOmit } from './types';
 import { jsxString } from './requests/string-utils';
 
@@ -181,26 +182,11 @@ function generateMeta(context: BeforeWriteContext, options: MetaOptions): Output
   const folderStyle = options.folderStyle ?? 'folder';
 
   function scan(entries: OutputEntry[], parent?: OutputGroup) {
-    const pages: string[] = [];
-
     for (const entry of entries) {
-      const relativePath = PathUtils.slash(
-        parent ? path.relative(parent.path, entry.path) : entry.path,
-      );
-
-      if (entry.type === 'group') {
-        scan(entry.entries, entry);
-
-        if (folderStyle === 'folder') {
-          pages.push(relativePath);
-        } else {
-          pages.push(`---${entry.info.title}---`, `...${relativePath}`);
-        }
-      } else {
-        pages.push(relativePath.slice(0, -path.extname(entry.path).length));
-      }
+      if (entry.type === 'group') scan(entry.entries, entry);
     }
 
+    const pages = getMetaPages(entries, parent, folderStyle);
     if (pages.length === 0) return;
     files.push({
       path: parent ? path.join(parent.path, 'meta.json') : 'meta.json',
@@ -273,9 +259,12 @@ function writeIndexFiles(
       }
     }
 
-    for (const entry of outputEntries) {
+    function card(entry: OutputEntry) {
       // cannot link to groups
-      if (entry.type === 'group') continue;
+      if (entry.type === 'group') {
+        for (const child of entry.entries) card(child);
+        return;
+      }
       const descriptionAttr = entry.info.description
         ? `description=${jsxString(entry.info.description)} `
         : '';
@@ -284,6 +273,7 @@ function writeIndexFiles(
       );
     }
 
+    for (const entry of outputEntries) card(entry);
     content.push('</Cards>');
     return generateDocument(
       {

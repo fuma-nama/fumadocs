@@ -35,7 +35,7 @@ describe('GraphQL source', () => {
 
   test('page data & props', async () => {
     const source = await create().staticSource();
-    const file = source.files.find((file) => file.path === '/queries/orders.mdx');
+    const file = source.files.find((file) => file.path === 'queries/orders.mdx');
 
     expect(file).toBeDefined();
     expect(file!.type).toBe('page');
@@ -62,9 +62,9 @@ describe('GraphQL source', () => {
     expect(schema.getQueryType()?.getFields().orders).toBeDefined();
 
     // type pages are opt-in
-    expect(source.files.some((file) => file.path.startsWith('/objects/'))).toBe(false);
+    expect(source.files.some((file) => file.path.startsWith('objects/'))).toBe(false);
     const typeSource = await create().staticSource({ includeTypes: true });
-    const typeFile = typeSource.files.find((file) => file.path === '/objects/Order.mdx');
+    const typeFile = typeSource.files.find((file) => file.path === 'objects/Order.mdx');
     expect(typeFile).toBeDefined();
     const typeProps = (typeFile!.data as GraphQLPageData).getGraphQLPageProps();
     expect(typeProps.items).toEqual([{ type: 'type', kind: 'object', name: 'Order' }]);
@@ -112,7 +112,7 @@ describe('GraphQL source', () => {
 
     expect(source.files).toHaveLength(1);
     const file = source.files[0];
-    expect(file.path).toBe('/store.mdx');
+    expect(file.path).toBe('store.mdx');
 
     const data = file.data as GraphQLPageData;
     expect(data.toc.map((item) => item.title)).toMatchInlineSnapshot(`
@@ -153,7 +153,7 @@ describe('GraphQL source', () => {
     });
 
     expect(source.files).toHaveLength(1);
-    expect(source.files[0].path).toBe('/my-orders.mdx');
+    expect(source.files[0].path).toBe('my-orders.mdx');
     expect(source.files[0].data.title).toBe('My Orders');
   });
 

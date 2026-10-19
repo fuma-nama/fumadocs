@@ -3,6 +3,7 @@ import { afterEach, describe, expect, test, vi } from 'vitest';
 import { generateFiles, generateFilesOnly, type OutputFile } from '@/generate-file';
 import { createOpenAPI } from '@/server';
 import path from 'node:path';
+import { loader } from 'fumadocs-core/source';
 
 const cwd = fileURLToPath(new URL('./', import.meta.url));
 
@@ -109,6 +110,91 @@ describe('Generate documents', () => {
     await expect(stringifyOutput(out)).toMatchFileSnapshot('./out/tag-hierarchy.md');
   });
 
+  test('Generate Files - per tag with `x-tagGroups`', async () => {
+    const out = await generateFilesOnly({
+      input: createOpenAPI({
+        input: {
+          example: {
+            openapi: '3.1.0',
+            info: { title: 'Example', version: '1.0.0' },
+            tags: [{ name: 'Contexts' }, { name: 'Submissions' }, { name: 'VAT' }],
+            'x-tagGroups': [
+              { name: 'KSeF', tags: ['Contexts', 'Submissions'] },
+              { name: 'Verification', tags: ['VAT'] },
+            ],
+            paths: {
+              '/ksef/contexts': { get: { tags: ['Contexts'], summary: 'List contexts' } },
+              '/ksef/submissions': {
+                post: { tags: ['Submissions'], summary: 'Submit an invoice' },
+              },
+              '/vat/{taxId}': { get: { tags: ['VAT'], summary: 'Verify a VAT number' } },
+            },
+          } as never,
+        },
+      }),
+      per: 'tag',
+      meta: true,
+    });
+
+    expect(out.map((file) => file.path).sort()).toEqual([
+      'ksef/contexts.mdx',
+      'ksef/meta.json',
+      'ksef/submissions.mdx',
+      'meta.json',
+      'verification/meta.json',
+      'verification/vat.mdx',
+    ]);
+  });
+
+  test('Generate Files - per tag with tag hierarchy', async () => {
+    const warn = vi.spyOn(console, 'warn').mockImplementation(() => {});
+    const out = await generateFilesOnly({
+      input: createOpenAPI({
+        input: {
+          store: {
+            openapi: '3.2.0',
+            info: { title: 'Store API', version: '1.0.0' },
+            tags: [
+              { name: 'store', summary: 'Store' },
+              { name: 'products', parent: 'store' },
+              { name: 'beta', kind: 'badge' },
+            ],
+            paths: {
+              '/store': { get: { operationId: 'getStore', tags: ['store'] } },
+              '/products': {
+                get: { operationId: 'listProducts', tags: ['products', 'products', 'beta'] },
+              },
+              '/orders': { get: { operationId: 'listOrders', tags: ['orders'] } },
+              '/health': { get: { operationId: 'healthCheck', tags: ['beta'] } },
+            },
+          },
+        },
+      }),
+      per: 'tag',
+      meta: true,
+    });
+    const content = (file: string) => out.find((item) => item.path === file)?.content ?? '';
+
+    expect(warn).toHaveBeenCalledOnce();
+    expect(out.map((file) => file.path).sort()).toEqual([
+      'meta.json',
+      'orders.mdx',
+      'store/meta.json',
+      'store/products.mdx',
+      'store/store.mdx',
+      'unknown.mdx',
+    ]);
+    expect(JSON.parse(content('meta.json'))).toEqual({ pages: ['store', 'orders', 'unknown'] });
+    expect(JSON.parse(content('store/meta.json'))).toEqual({
+      title: 'Store',
+      pages: ['store', 'products'],
+    });
+    // listed once, despite the repeated tag
+    expect(content('store/products.mdx')).toContain(
+      'operations={[{"path":"/products","method":"get"}]}',
+    );
+  });
+
   test('Generate Files - with index', async () => {
     const out = await generateFilesOnly({
       input: createOpenAPI({
@@ -136,6 +222,27 @@ describe('Generate documents', () => {
     });
 
     await expect(stringifyOutput(out)).toMatchFileSnapshot('./out/products-with-index.md');
+  });
+
+  test('Generate Files - with index of pages in folders', async () => {
+    vi.spyOn(console, 'warn').mockImplementation(() => {});
+    const out = await generateFilesOnly({
+      input: createOpenAPI({
+        input: {
+          store: path.join(cwd, './fixtures/tag-hierarchy.yaml'),
+        },
+      }),
+      per: 'tag',
+      index: {
+        url: { baseUrl: '/docs', contentDir: '' },
+        items: [{ path: 'index' }],
+      },
+    });
+
+    const index = out.find((file) => file.path === 'index.mdx')?.content;
+    expect(index).toContain('<Card href="/docs/store/products" ');
+    expect(index).toContain('<Card href="/docs/store/inventory" ');
+    expect(index).toContain('<Card href="/docs/unknown" ');
   });
 
   test('Generate Files - with meta', async () => {
@@ -274,6 +381,21 @@ function stringifyOutput(output: OutputFile[]) {
   }
   return lines.join('\n\n');
 }
+
+test.each(['dot', 'dir'] as const)('static source in every language, %s parser', async (parser) => {
+  const source = await createOpenAPI({
+    input: { museum: path.join(cwd, './fixtures/museum.yaml') },
+  }).staticSource({ per: 'tag', meta: true, baseDir: 'api' });
+
+  const { pageTree } = loader(source, {
+    baseUrl: '/docs',
+    i18n: { languages: ['en', 'de'], defaultLanguage: 'en', fallbackLanguage: null, parser },
+  });
+  // pages and `meta.json` are shared without fallback
+  expect(pageTree.de.children[0]).toMatchObject({
+    children: [{ name: 'Operations' }, { name: 'Events' }, { name: 'Tickets' }],
+  });
+});
 
 test('refuses documents not listed in input', async () => {
   const server = createOpenAPI({ input: [path.join(cwd, './fixtures/petstore.yaml')] });

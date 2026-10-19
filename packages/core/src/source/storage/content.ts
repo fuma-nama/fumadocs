@@ -50,8 +50,8 @@ const EmptyLang = Symbol();
 export function createContentStorageBuilder(loaderConfig: ResolvedLoaderConfig) {
   const { input, plugins, i18n } = loaderConfig;
 
-  let parser: (normalizedPath: string) => [string, (string | string[])?] = (path) => [path];
-  if (i18n) {
+  let parser: (normalizedPath: string) => [string, string?] = (path) => [path];
+  if (i18n && i18n.parser !== 'none') {
     const langSet = new Set(i18n.languages);
 
     parser = (path) => {
@@ -72,8 +72,7 @@ export function createContentStorageBuilder(loaderConfig: ResolvedLoaderConfig) 
         rest = path.slice(0, dot) + path.slice(ext);
       }
 
-      if (langSet.has(locale)) return [rest, locale];
-      if (locale === '$') return [rest, i18n.languages];
+      if (locale === '$' || langSet.has(locale)) return [rest, locale];
       return [path];
     };
   }
@@ -110,10 +109,11 @@ export function createContentStorageBuilder(loaderConfig: ResolvedLoaderConfig) 
         };
       }
 
-      const [storageKey, locale = i18n ? i18n.defaultLanguage : EmptyLang] = parser(path);
+      const [storageKey, locale = i18n ? i18n.defaultLanguage : EmptyLang] =
+        i18n && inputFile.locale ? [path, inputFile.locale] : parser(path);
       const entry = [storageKey, file] as const;
-      if (Array.isArray(locale)) {
-        for (const item of locale) pushMapList(fileMap, item, entry);
+      if (i18n && locale === '$') {
+        for (const item of i18n.languages) pushMapList(fileMap, item, entry);
       } else {
         pushMapList(fileMap, locale, entry);
       }

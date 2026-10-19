@@ -103,6 +103,13 @@ interface BaseVirtualFile {
    * Absolute path of the file
    */
   absolutePath?: string;
+
+  /**
+   * Locale of the file when i18n is enabled, `$` for every language.
+   *
+   * Parsed from `path` if unspecified.
+   */
+  locale?: string;
 }
 
 interface VirtualPage<Data extends PageData> extends BaseVirtualFile {

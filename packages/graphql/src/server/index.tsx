@@ -1,13 +1,11 @@
-import path from 'node:path';
-import {
-  type DynamicSource,
-  type LoaderPlugin,
-  type MetaData,
-  PathUtils,
-  type PageData,
-  type Source,
-  type VirtualFile,
-  type LoaderOutput,
+import type {
+  DynamicSource,
+  LoaderPlugin,
+  MetaData,
+  PageData,
+  Source,
+  VirtualFile,
+  LoaderOutput,
 } from 'fumadocs-core/source';
 import type { StructuredData } from 'fumadocs-core/mdx-plugins/remark-structure';
 import type { TOCItemType } from 'fumadocs-core/toc';
@@ -17,11 +15,7 @@ import {
   getPageProps,
   GraphQLPageItem,
   schemaToPages,
-  type OperationOutput,
-  type OutputEntry,
-  type PageOutput,
   type SchemaToPagesOptions,
-  type TypeOutput,
 } from '@/utils/pages';
 import type { GraphQLLinks, GraphQLPageProps } from '@/utils/create-page';
 import { toStaticData } from '@/utils/to-static-data';
@@ -29,6 +23,7 @@ import { toMarkdown } from '@/utils/to-markdown';
 import { loadExamples, type OperationExamples } from '@/utils/examples';
 import type { NamedTypeKind, OperationKind } from '@/utils/schema';
 import { KindLabel } from '@/ui/components/badge';
+import { type SourceOptions, toVirtualFiles } from 'shared-api/source';
 
 type SchemaRecord = Record<string, GraphQLSchemaInput | (() => Awaitable<GraphQLSchemaInput>)>;
 
@@ -74,10 +69,7 @@ export interface GraphQLPageData extends PageData {
   _graphql: InternalGraphQLMeta;
 }
 
-export type GraphQLSourceOptions = SchemaToPagesOptions & {
-  baseDir?: string;
-  meta?: boolean | { folderStyle?: 'folder' | 'separator' };
-};
+export type GraphQLSourceOptions = SchemaToPagesOptions & SourceOptions;
 
 export function createGraphQL(options: GraphQLOptions = {}): GraphQLServer {
   const { disableCache = false } = options;
@@ -156,7 +148,6 @@ export function createGraphQL(options: GraphQLOptions = {}): GraphQLServer {
     getLinks: () => GraphQLLinks | undefined,
     docFilesCache?: WeakMap<LoadedSchema, GraphQLVirtualFile[]>,
   ): Promise<GraphQLVirtualFile[]> {
-    const { baseDir = '', meta = false } = options;
     const files: GraphQLVirtualFile[] = [];
 
     const schemas = await getSchemas();
@@ -169,24 +160,20 @@ export function createGraphQL(options: GraphQLOptions = {}): GraphQLServer {
         continue;
       }
 
-      const entries = onEntries(schemaToPages(id, schema.schema, options));
-      docFilesCache?.set(schema, entries);
-      files.push(...entries);
+      const entries = toVirtualFiles(
+        schemaToPages(id, schema.schema, options),
+        options,
+        (entry) => {
+          const props = getPageProps(entry);
+          let pageExamples: OperationExamples | undefined;
+          for (const item of props.items ?? []) {
+            if (item.type !== 'operation') continue;
+            const key = `${item.kind}:${item.name}`;
+            const list = examples[id][key];
+            if (list) (pageExamples ??= {})[key] = list;
+          }
 
-      function onEntry(entry: OperationOutput | TypeOutput | PageOutput): GraphQLVirtualFile {
-        const props = getPageProps(entry);
-        let pageExamples: OperationExamples | undefined;
-        for (const item of props.items ?? []) {
-          if (item.type !== 'operation') continue;
-          const key = `${item.kind}:${item.name}`;
-          const list = examples[id][key];
-          if (list) (pageExamples ??= {})[key] = list;
-        }
-
-        return {
-          type: 'page',
-          path: `${baseDir}/${entry.path}`,
-          data: {
+          return {
             ...entry.info,
             getGraphQLPageProps() {
               return {
@@ -213,57 +200,11 @@ export function createGraphQL(options: GraphQLOptions = {}): GraphQLServer {
               deprecated: entry.info.deprecated,
               items: props.items,
             },
-          },
-        };
-      }
-
-      function onEntries(entries: OutputEntry[], parent?: OutputEntry): GraphQLVirtualFile[] {
-        const out: GraphQLVirtualFile[] = [];
-        if (!meta) {
-          for (const entry of entries) {
-            if (entry.type === 'group') {
-              out.push(...onEntries(entry.entries, entry));
-            } else {
-              out.push(onEntry(entry));
-            }
-          }
-          return out;
-        }
-
-        const { folderStyle = 'folder' } = meta === true ? {} : meta;
-        const pages: string[] = [];
-
-        for (const entry of entries) {
-          const relativePath = PathUtils.slash(
-            parent ? path.relative(parent.path, entry.path) : entry.path,
-          );
-
-          if (entry.type === 'group') {
-            out.push(...onEntries(entry.entries, entry));
-            if (folderStyle === 'folder') {
-              pages.push(relativePath);
-            } else {
-              pages.push(`---${entry.info.title}---`, `...${relativePath}`);
-            }
-          } else {
-            out.push(onEntry(entry));
-            pages.push(relativePath.slice(0, -path.extname(entry.path).length));
-          }
-        }
-
-        if (pages.length > 0) {
-          out.push({
-            type: 'meta',
-            path: path.join(baseDir, parent?.path ?? '', 'meta.json'),
-            data: {
-              title: parent?.info.title,
-              description: parent?.info.description,
-              pages,
-            },
-          });
-        }
-        return out;
-      }
+          };
+        },
+      );
+      docFilesCache?.set(schema, entries);
+      files.push(...entries);
     }
 
     return files;

@@ -76,6 +76,8 @@ export function createMySource(): StaticSource<{
 }
 ```
 
+With [i18n](/docs/headless/internationalization/config), the language of a file is parsed from its path, unless the file specifies a `locale`.
+
 ### Dynamic Source
 
 For content sources with revalidation, return a `DynamicSource` instead:

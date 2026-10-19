@@ -4,12 +4,8 @@ import { generateDocument, type PagesToTextOptions, toText } from './utils/pages
 import type { AsyncAPIServer } from '@/server';
 import { createGetUrl, getSlugs, PathUtils } from 'fumadocs-core/source';
 import { createAutoPreset, type SchemaToPagesOptions } from '@/utils/pages/preset-auto';
-import {
-  fromSchema,
-  getMetaPages,
-  type OutputGroup,
-  type OutputEntry,
-} from '@/utils/pages/builder';
+import { fromSchema, type OutputGroup, type OutputEntry } from '@/utils/pages/builder';
+import { getMetaPages } from 'shared-api/source';
 import type { DistributiveOmit } from './types';
 import { jsxString } from './utils/string-utils';
 

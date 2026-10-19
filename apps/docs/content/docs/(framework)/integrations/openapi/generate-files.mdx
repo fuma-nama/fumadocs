@@ -82,6 +82,17 @@ tags:
     x-displayName: My Test Name
 ```
 
+Pages follow the tag hierarchy of OpenAPI 3.2 like [`groupBy`](#groupby), tags without operations get no page.
+
+```yaml title="openapi.yaml"
+tags:
+  - name: store
+    kind: nav
+  # output: store/products.mdx
+  - name: products
+    parent: store
+```
+
 ### `groupBy`
 
 In `operation` mode, you can group output files with folders.

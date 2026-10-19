@@ -18,25 +18,25 @@ async function getText(filePath: string, options?: GraphQLSourceOptions) {
 }
 
 test('operation page', async () => {
-  await expect(await getText('/queries/customer.mdx')).toMatchFileSnapshot(
+  await expect(await getText('queries/customer.mdx')).toMatchFileSnapshot(
     './out/markdown/operation.md',
   );
 });
 
 test('type page', async () => {
-  await expect(await getText('/objects/Customer.mdx', { includeTypes: true })).toMatchFileSnapshot(
+  await expect(await getText('objects/Customer.mdx', { includeTypes: true })).toMatchFileSnapshot(
     './out/markdown/type.md',
   );
 });
 
 test('page of a whole schema', async () => {
-  await expect(await getText('/store.mdx', { per: 'file' })).toMatchFileSnapshot(
+  await expect(await getText('store.mdx', { per: 'file' })).toMatchFileSnapshot(
     './out/markdown/file.md',
   );
 });
 
 test('types of a whole schema page', async () => {
-  const text = await getText('/store.mdx', {
+  const text = await getText('store.mdx', {
     per: 'file',
     includeTypes: (type) => type.name === 'OrderStatus',
   });

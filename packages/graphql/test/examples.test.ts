@@ -192,9 +192,9 @@ describe('server', () => {
         source.files.find((file) => file.path === filePath)!.data as GraphQLPageData
       ).getGraphQLPageProps().payload;
 
-    expect(Object.keys(payload('/queries/customer.mdx').examples!)).toEqual(['query:customer']);
-    expect(payload('/queries/customer.mdx').examples!['query:customer']).toHaveLength(2);
-    expect(payload('/mutations/createOrder.mdx')).not.toHaveProperty('examples');
+    expect(Object.keys(payload('queries/customer.mdx').examples!)).toEqual(['query:customer']);
+    expect(payload('queries/customer.mdx').examples!['query:customer']).toHaveLength(2);
+    expect(payload('mutations/createOrder.mdx')).not.toHaveProperty('examples');
   });
 
   test('documents are cached with schemas', async () => {

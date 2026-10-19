@@ -197,7 +197,7 @@ describe('createAsyncAPI()', () => {
     const { staticSource } = createAsyncAPI({ input: { streetlights: file } });
     const { files } = await staticSource({ per: 'file' });
 
-    expect(files.map((item) => item.path)).toEqual(['/streetlights.mdx']);
+    expect(files.map((item) => item.path)).toEqual(['streetlights.mdx']);
   });
 
   test('watches the input files', () => {
