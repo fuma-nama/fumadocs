@@ -10,9 +10,9 @@ import (
 func main() {
   url := "http://localhost:8080/hello_world?search=ai"
   body := strings.NewReader(`{
-    "id": "id",
-    "note": "it's \"quoted\" \\ ` + "`" + `a` + "`" + ` ${b}"
-  }`)
+  "id": "id",
+  "note": "it's \"quoted\" \\ ` + "`" + `a` + "`" + ` ${b}"
+}`)
   req, _ := http.NewRequest("GET", url, body)
   req.Header.Add("authorization", "Bearer")
   req.Header.Add("if-none-match", "\"etag\"")

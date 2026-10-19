@@ -5,7 +5,7 @@ export default defineConfig({
   format: 'esm',
   target: 'es2023',
   entry: [
-    './src/{codegen,i18n}.ts',
+    './src/{codegen,i18n,source}.ts',
     './src/{components,auto-anchor}/**/*',
     // exported from `components/schema`
     '!./src/components/schema/client.tsx',

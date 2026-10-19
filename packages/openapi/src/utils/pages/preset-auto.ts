@@ -146,151 +146,6 @@ export function createAutoPreset(options: SchemaToPagesOptions): PagesBuilderCon
     };
   }
 
-  function group(
-    builder: PagesBuilder,
-    entries: DistributiveOmit<OperationOutput | WebhookOutput, 'path'>[],
-  ): OutputEntry[] {
-    const groups = new Map<string, OutputGroup>();
-    const rest: OutputEntry[] = [];
-    const doc = builder.document;
-    const { groupBy = 'none' } = options as OperationConfig;
-
-    const docTags = new Map<string, TagObject>();
-    if (groupBy === 'tag') {
-      for (const tag of doc.tags ?? []) {
-        if (tag.name) docTags.set(tag.name, tag);
-      }
-    }
-    const tagGroups = new Map<string, OutputGroup>();
-    let warnedUntagged = false;
-
-    function tagGroup(name: string, seen?: Set<string>): OutputGroup {
-      let group = tagGroups.get(name);
-      if (group) return group;
-
-      const tag = docTags.get(name);
-      let parent: OutputGroup | undefined;
-      if (tag?.parent) {
-        // `seen` guards against cyclic `parent` references, which are invalid in OpenAPI
-        (seen ??= new Set()).add(name);
-        if (!seen.has(tag.parent)) parent = tagGroup(tag.parent, seen);
-      }
-
-      group = {
-        type: 'group',
-        info: {
-          title: getTagDisplayName(tag ?? { name }),
-          description: tag?.description,
-        },
-        tag,
-        entries: [],
-        schemaId: builder.id,
-        path: path.join(parent?.path ?? '', slugify(name)),
-      };
-      tagGroups.set(name, group);
-      (parent ? parent.entries : rest).push(group);
-      return group;
-    }
-
-    for (const entry of entries) {
-      switch (groupBy) {
-        case 'route': {
-          const groupName = builder.routePathToFilePath(
-            entry.type === 'operation' ? entry.item.path : entry.item.name,
-          );
-
-          let group = groups.get(groupName);
-          if (!group) {
-            group = {
-              type: 'group',
-              info: { title: groupName },
-              entries: [],
-              schemaId: builder.id,
-              path: groupName,
-            };
-            groups.set(groupName, group);
-          }
-
-          group.entries.push({
-            ...entry,
-            path: path.join(groupName, `${entry.item.method.toLowerCase()}.mdx`),
-          });
-          break;
-        }
-        case 'tag': {
-          const operation =
-            entry.type === 'operation'
-              ? dereference(doc.paths?.[entry.item.path])?.[entry.item.method]
-              : dereference(doc.webhooks?.[entry.item.name])?.[entry.item.method];
-
-          const tags: string[] = [];
-          for (const name of operation?.tags ?? []) {
-            // tags with a `kind` other than `nav` aren't for navigation (OpenAPI 3.2)
-            const kind = docTags.get(name)?.kind;
-            if (!kind || kind === 'nav') tags.push(name);
-          }
-
-          if (tags.length === 0) {
-            if (!warnedUntagged) {
-              warnedUntagged = true;
-              console.warn(
-                '[Fumadocs OpenAPI] found operations without tags, they will be grouped under "unknown".',
-              );
-            }
-
-            tags.push('unknown');
-          }
-
-          const fileName = `${nameFn.call(builder, entry)}.mdx`;
-          for (const name of tags) {
-            const group = tagGroup(name);
-
-            group.entries.push({
-              ...entry,
-              path: path.join(group.path, fileName),
-            });
-          }
-
-          break;
-        }
-        default: {
-          const fileName = `${nameFn.call(builder, entry)}.mdx`;
-
-          if (typeof groupBy === 'function') {
-            const groupDisplayName = groupBy(entry);
-            const groupName = slugify(groupDisplayName);
-
-            let group = groups.get(groupName);
-            if (!group) {
-              group = {
-                type: 'group',
-                info: { title: groupDisplayName },
-                entries: [],
-                schemaId: builder.id,
-                path: groupName,
-              };
-              groups.set(groupName, group);
-            }
-
-            group.entries.push({
-              ...entry,
-              path: path.join(groupName, fileName),
-            });
-            break;
-          }
-
-          rest.push({
-            ...entry,
-            path: fileName,
-          });
-        }
-      }
-    }
-
-    rest.push(...groups.values());
-    return rest;
-  }
-
   return {
     toPages(builder) {
       const doc = builder.document;
@@ -312,80 +167,183 @@ export function createAutoPreset(options: SchemaToPagesOptions): PagesBuilderCon
         return;
       }
 
-      if (options.per === 'tag') {
-        const operations = groupByTag(items.operations);
-        const webhooks = groupByTag(items.webhooks);
+      const root: OutputEntry[] = [];
+      const groups = new Map<string, OutputGroup>();
+      const tags = new Map<string, TagObject>();
+      // tags with a `kind` other than `nav` aren't for navigation (OpenAPI 3.2)
+      const hidden = new Set<string>();
+      for (const tag of doc.tags ?? []) {
+        if (!tag.name) continue;
+        tags.set(tag.name, tag);
+        if (tag.kind && tag.kind !== 'nav') hidden.add(tag.name);
+      }
+      let warnedUntagged = false;
 
-        for (const tag of doc.tags ?? []) {
-          const { displayName } = builder.fromTag(tag);
-          const entry: PageOutput = {
+      /** the navigation tags of an operation, `unknown` if none */
+      function navTags(names: string[] = []): string[] {
+        const out: string[] = [];
+        for (const name of names) {
+          if (!hidden.has(name) && !out.includes(name)) out.push(name);
+        }
+        if (out.length > 0) return out;
+
+        if (!warnedUntagged) {
+          warnedUntagged = true;
+          console.warn(
+            '[Fumadocs OpenAPI] found operations without tags, they will be grouped under "unknown".',
+          );
+        }
+        return ['unknown'];
+      }
+
+      /** the folder of a tag, nested in the folder of its `parent` */
+      function tagFolder(name: string, seen?: Set<string>): OutputGroup {
+        let group = groups.get(name);
+        if (group) return group;
+
+        const tag = tags.get(name);
+        let parent: OutputGroup | undefined;
+        if (tag?.parent) {
+          // `seen` guards against cyclic `parent` references, which are invalid in OpenAPI
+          (seen ??= new Set()).add(name);
+          if (!seen.has(tag.parent)) parent = tagFolder(tag.parent, seen);
+        }
+
+        group = {
+          type: 'group',
+          info: { title: getTagDisplayName(tag ?? { name }), description: tag?.description },
+          tag,
+          entries: [],
+          schemaId: builder.id,
+          path: path.join(parent?.path ?? '', slugify(name)),
+        };
+        groups.set(name, group);
+        (parent?.entries ?? root).push(group);
+        return group;
+      }
+
+      if (options.per === 'tag') {
+        // declared tags come first
+        const pages = new Map<string, Pick<PageOutput, 'operations' | 'webhooks'>>();
+        const parents = new Set<string>();
+        for (const [name, tag] of tags) {
+          pages.set(name, { operations: [], webhooks: [] });
+          if (tag.parent) parents.add(tag.parent);
+        }
+        function tagItems(name: string) {
+          let out = pages.get(name);
+          if (!out) pages.set(name, (out = { operations: [], webhooks: [] }));
+          return out;
+        }
+
+        for (const item of items.operations) {
+          for (const name of navTags(item.tags)) tagItems(name).operations.push(item);
+        }
+        for (const item of items.webhooks) {
+          for (const name of navTags(item.tags)) tagItems(name).webhooks.push(item);
+        }
+
+        for (const [name, { operations, webhooks }] of pages) {
+          if (operations.length === 0 && webhooks.length === 0) continue;
+          const tag: TagObject = tags.get(name) ?? { name };
+          const page: PageOutput = {
             type: 'page',
             path: '',
             schemaId: builder.id,
-            info: {
-              title: displayName,
-              description: tag.description,
-            },
-            webhooks: webhooks.get(tag.name!) ?? [],
-            operations: operations.get(tag.name!) ?? [],
+            info: { title: getTagDisplayName(tag), description: tag.description },
+            operations,
+            webhooks,
             tag,
           };
+          // a folder shadows the page next to it in `meta.json`, put the page inside
+          const folder = parents.has(name) ? name : tag.parent;
+          const group = folder ? tagFolder(folder) : undefined;
+          page.path = path.join(group?.path ?? '', `${nameFn.call(builder, page)}.mdx`);
+          (group?.entries ?? root).push(page);
+        }
+      } else {
+        const { groupBy = 'none' } = options;
 
-          entry.path = `${nameFn.call(builder, entry)}.mdx`;
-          builder.create(entry);
+        function folder(dir: string, title: string): OutputGroup {
+          let group = groups.get(dir);
+          if (!group) {
+            group = {
+              type: 'group',
+              info: { title },
+              entries: [],
+              schemaId: builder.id,
+              path: dir,
+            };
+            groups.set(dir, group);
+            root.push(group);
+          }
+          return group;
         }
 
-        return;
+        function add(
+          entry: DistributiveOmit<OperationOutput | WebhookOutput, 'path'>,
+          tagNames?: string[],
+        ) {
+          if (groupBy === 'route') {
+            const dir = builder.routePathToFilePath(
+              entry.type === 'operation' ? entry.item.path : entry.item.name,
+            );
+            const file = `${entry.item.method.toLowerCase()}.mdx`;
+            folder(dir, dir).entries.push({ ...entry, path: path.join(dir, file) });
+            return;
+          }
+
+          const file = `${nameFn.call(builder, entry)}.mdx`;
+          if (groupBy === 'tag') {
+            for (const name of navTags(tagNames)) {
+              const group = tagFolder(name);
+              group.entries.push({ ...entry, path: path.join(group.path, file) });
+            }
+          } else if (typeof groupBy === 'function') {
+            const title = groupBy(entry);
+            const dir = slugify(title);
+            folder(dir, title).entries.push({ ...entry, path: path.join(dir, file) });
+          } else {
+            root.push({ ...entry, path: file });
+          }
+        }
+
+        for (const item of items.operations) {
+          const { pathItem, operation, displayName } = builder.fromExtractedOperation(item)!;
+          add(
+            {
+              type: 'operation',
+              schemaId: builder.id,
+              item,
+              info: {
+                title: displayName,
+                description: operation.description ?? pathItem.description,
+                deprecated: operation.deprecated,
+              },
+            },
+            item.tags,
+          );
+        }
+
+        for (const item of items.webhooks) {
+          const { pathItem, operation, displayName } = builder.fromExtractedWebhook(item)!;
+          add(
+            {
+              type: 'webhook',
+              schemaId: builder.id,
+              item,
+              info: {
+                title: displayName,
+                description: operation.description ?? pathItem.description,
+                deprecated: operation.deprecated,
+              },
+            },
+            item.tags,
+          );
+        }
       }
 
-      const entries: DistributiveOmit<OperationOutput | WebhookOutput, 'path'>[] = [];
-      for (const op of items.operations) {
-        const { pathItem, operation, displayName } = builder.fromExtractedOperation(op)!;
-
-        entries.push({
-          type: 'operation',
-          schemaId: builder.id,
-          item: op,
-          info: {
-            title: displayName,
-            description: operation.description ?? pathItem.description,
-            deprecated: operation.deprecated,
-          },
-        });
-      }
-
-      for (const webhook of items.webhooks) {
-        const { pathItem, operation, displayName } = builder.fromExtractedWebhook(webhook)!;
-
-        entries.push({
-          type: 'webhook',
-          schemaId: builder.id,
-          info: {
-            title: displayName,
-            description: operation.description ?? pathItem.description,
-            deprecated: operation.deprecated,
-          },
-          item: webhook,
-        });
-      }
-
-      for (const entry of group(builder, entries)) {
-        builder.create(entry);
-      }
+      for (const entry of root) builder.create(entry);
     },
   };
-}
-
-/** items by the names of their tags, in their order */
-function groupByTag<T extends { tags?: string[] }>(items: T[]): Map<string, T[]> {
-  const out = new Map<string, T[]>();
-  for (const item of items) {
-    for (const name of item.tags ?? []) {
-      const list = out.get(name);
-      if (!list) out.set(name, [item]);
-      // a tag repeated in one item
-      else if (list.at(-1) !== item) list.push(item);
-    }
-  }
-  return out;
 }

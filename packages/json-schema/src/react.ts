@@ -2,7 +2,7 @@ import type { ReactNode } from 'react';
 import { fromTranslations } from '@fuma-translate/react';
 import { dereference, type JsonSchema, mergeAllOf, stringify } from './index';
 
-/** a labelled value, a labelled list of values, or a custom node */
+/** a labelled value, a labelled list of values, a custom node, or a schema to open */
 export type InfoTag =
   | {
       label: ReactNode;
@@ -13,7 +13,13 @@ export type InfoTag =
       prose?: boolean;
     }
   | { label: ReactNode; list: string[] }
-  | { node: ReactNode };
+  | { node: ReactNode }
+  | {
+      label: ReactNode;
+      value?: ReactNode;
+      /** opens the schema `$ref` like the type of a property named `name` */
+      open: { name: string; $ref: string };
+    };
 
 export interface FieldBase {
   description?: ReactNode;

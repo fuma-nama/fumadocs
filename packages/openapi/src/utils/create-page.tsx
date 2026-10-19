@@ -19,7 +19,6 @@ import type { JsonSchema } from '@fumadocs/json-schema';
 import type { SchemaUIOptions } from 'shared-api/components/schema';
 import type { PlaygroundClientOptions } from '@/ui/playground/client';
 import type { ShikiFactory } from 'fumadocs-core/highlight/shiki';
-import { defaultShikiFactory } from 'fumadocs-core/highlight/shiki/full';
 import {
   createPageComponents,
   defaultShikiOptions,
@@ -386,12 +385,13 @@ const defaultTypeScriptDefinitions: OpenAPIRuntimeOptions['generateTypeScriptDef
 };
 
 /**
- * Create `<OpenAPIPage />` from your own UI, it takes the props of generated pages.
+ * `createOpenAPIRenderer()` without the full Shiki bundle.
  */
-export function createOpenAPIRenderer(options: CreateOpenAPIRendererOptions): FC<OpenAPIPageProps> {
+export function createRenderer(
+  options: CreateOpenAPIRendererOptions & { shiki: ShikiFactory },
+): FC<OpenAPIPageProps> {
   return createOpenAPIBaseRenderer({
     ...options,
-    shiki: options.shiki ?? defaultShikiFactory,
     codeUsages:
       options.codeUsages ??
       (defaultCodeUsages ??= registerDefault(createCodeUsageGeneratorRegistry())),

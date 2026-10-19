@@ -19,8 +19,81 @@ npm install mermaid next-themes
 
 Create the Mermaid component:
 
+```tsx title="components/mdx/mermaid.tsx"
+'use client';
+
+import { use, useId, useSyncExternalStore } from 'react';
+import { useTheme } from 'next-themes';
+
+export function Mermaid({ chart }: { chart: string }) {
+  // `false` on the server and during hydration
+  const isClient = useSyncExternalStore(
+    () => () => {},
+    () => true,
+    () => false,
+  );
+
+  if (!isClient) return;
+  return <MermaidContent chart={chart} />;
+}
+
+const cache = new Map<string, Promise<unknown>>();
+
+function cachePromise<T>(key: string, setPromise: () => Promise<T>): Promise<T> {
+  const cached = cache.get(key);
+  if (cached) return cached as Promise<T>;
+
+  const promise = setPromise();
+  cache.set(key, promise);
+  return promise;
+}
+
+function MermaidContent({ chart }: { chart: string }) {
+  const id = useId();
+  const { resolvedTheme } = useTheme();
+  const { default: mermaid } = use(cachePromise('mermaid', () => import('mermaid')));
+
+  mermaid.initialize({
+    startOnLoad: false,
+    securityLevel: 'loose',
+    fontFamily: 'inherit',
+    themeCSS: 'margin: 1.5rem auto 0;',
+    theme: resolvedTheme === 'dark' ? 'dark' : 'default',
+  });
+
+  const { svg, bindFunctions } = use(
+    cachePromise(`${chart}-${resolvedTheme}`, () => {
+      return mermaid.render(id, chart.replaceAll('\\n', '\n'));
+    }),
+  );
+
+  return (
+    <div
+      ref={(container) => {
+        if (container) bindFunctions?.(container);
+      }}
+      dangerouslySetInnerHTML={{ __html: svg }}
+    />
+  );
+}
+```
+
+### Pele
+
+[Pele](https://pele.run) is a lightweight Mermaid renderer that outputs themeable SVG.
+
+```npm
+npm install pele
+```
+
 <include cwd meta='title="components/mdx/mermaid.tsx"'>
   ./components/mdx/mermaid.tsx
+</include>
+
+Map its fonts and colors to Fumadocs, so diagrams follow light/dark mode:
+
+<include cwd meta='title="app/global.css"'>
+  ./app/global.css#pele
 </include>
 
 ### Beautiful Mermaid

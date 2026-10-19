@@ -13,6 +13,7 @@ exports[`GraphQL source > per item with meta files 1`] = `
       ],
       "title": "Queries",
     },
+    "locale": "$",
     "path": "queries/meta.json",
     "type": "meta",
   },
@@ -25,6 +26,7 @@ exports[`GraphQL source > per item with meta files 1`] = `
       ],
       "title": "Mutations",
     },
+    "locale": "$",
     "path": "mutations/meta.json",
     "type": "meta",
   },
@@ -36,77 +38,8 @@ exports[`GraphQL source > per item with meta files 1`] = `
       ],
       "title": "Subscriptions",
     },
+    "locale": "$",
     "path": "subscriptions/meta.json",
-    "type": "meta",
-  },
-  {
-    "data": {
-      "description": undefined,
-      "pages": [
-        "Customer",
-        "ContactInfo",
-        "Order",
-      ],
-      "title": "Objects",
-    },
-    "path": "objects/meta.json",
-    "type": "meta",
-  },
-  {
-    "data": {
-      "description": undefined,
-      "pages": [
-        "Node",
-      ],
-      "title": "Interfaces",
-    },
-    "path": "interfaces/meta.json",
-    "type": "meta",
-  },
-  {
-    "data": {
-      "description": undefined,
-      "pages": [
-        "SearchResult",
-      ],
-      "title": "Unions",
-    },
-    "path": "unions/meta.json",
-    "type": "meta",
-  },
-  {
-    "data": {
-      "description": undefined,
-      "pages": [
-        "Role",
-        "OrderStatus",
-      ],
-      "title": "Enums",
-    },
-    "path": "enums/meta.json",
-    "type": "meta",
-  },
-  {
-    "data": {
-      "description": undefined,
-      "pages": [
-        "OrderFilter",
-        "OrderCreateInput",
-      ],
-      "title": "Input Objects",
-    },
-    "path": "inputs/meta.json",
-    "type": "meta",
-  },
-  {
-    "data": {
-      "description": undefined,
-      "pages": [
-        "DateTime",
-      ],
-      "title": "Scalars",
-    },
-    "path": "scalars/meta.json",
     "type": "meta",
   },
   {
@@ -116,15 +49,10 @@ exports[`GraphQL source > per item with meta files 1`] = `
         "queries",
         "mutations",
         "subscriptions",
-        "objects",
-        "interfaces",
-        "unions",
-        "enums",
-        "inputs",
-        "scalars",
       ],
       "title": undefined,
     },
+    "locale": "$",
     "path": "meta.json",
     "type": "meta",
   },
@@ -146,7 +74,7 @@ exports[`GraphQL source > per item, grouped by kind 1`] = `
       "kind": "query",
     },
     "deprecated": undefined,
-    "path": "/queries/customer.mdx",
+    "path": "queries/customer.mdx",
     "title": "Customer",
   },
   {
@@ -162,7 +90,7 @@ exports[`GraphQL source > per item, grouped by kind 1`] = `
       "kind": "query",
     },
     "deprecated": undefined,
-    "path": "/queries/orders.mdx",
+    "path": "queries/orders.mdx",
     "title": "Orders",
   },
   {
@@ -178,7 +106,7 @@ exports[`GraphQL source > per item, grouped by kind 1`] = `
       "kind": "query",
     },
     "deprecated": undefined,
-    "path": "/queries/search.mdx",
+    "path": "queries/search.mdx",
     "title": "Search",
   },
   {
@@ -194,7 +122,7 @@ exports[`GraphQL source > per item, grouped by kind 1`] = `
       "kind": "query",
     },
     "deprecated": undefined,
-    "path": "/queries/node.mdx",
+    "path": "queries/node.mdx",
     "title": "Node",
   },
   {
@@ -210,7 +138,7 @@ exports[`GraphQL source > per item, grouped by kind 1`] = `
       "kind": "mutation",
     },
     "deprecated": undefined,
-    "path": "/mutations/createOrder.mdx",
+    "path": "mutations/createOrder.mdx",
     "title": "Create Order",
   },
   {
@@ -226,7 +154,7 @@ exports[`GraphQL source > per item, grouped by kind 1`] = `
       "kind": "mutation",
     },
     "deprecated": true,
-    "path": "/mutations/legacyCreateOrder.mdx",
+    "path": "mutations/legacyCreateOrder.mdx",
     "title": "Legacy Create Order",
   },
   {
@@ -242,168 +170,8 @@ exports[`GraphQL source > per item, grouped by kind 1`] = `
       "kind": "subscription",
     },
     "deprecated": undefined,
-    "path": "/subscriptions/orderUpdated.mdx",
+    "path": "subscriptions/orderUpdated.mdx",
     "title": "Order Updated",
-  },
-  {
-    "_graphql": {
-      "deprecated": undefined,
-      "items": [
-        {
-          "kind": "object",
-          "name": "Customer",
-          "type": "type",
-        },
-      ],
-      "kind": "object",
-    },
-    "deprecated": undefined,
-    "path": "/objects/Customer.mdx",
-    "title": "Customer",
-  },
-  {
-    "_graphql": {
-      "deprecated": undefined,
-      "items": [
-        {
-          "kind": "object",
-          "name": "ContactInfo",
-          "type": "type",
-        },
-      ],
-      "kind": "object",
-    },
-    "deprecated": undefined,
-    "path": "/objects/ContactInfo.mdx",
-    "title": "ContactInfo",
-  },
-  {
-    "_graphql": {
-      "deprecated": undefined,
-      "items": [
-        {
-          "kind": "object",
-          "name": "Order",
-          "type": "type",
-        },
-      ],
-      "kind": "object",
-    },
-    "deprecated": undefined,
-    "path": "/objects/Order.mdx",
-    "title": "Order",
-  },
-  {
-    "_graphql": {
-      "deprecated": undefined,
-      "items": [
-        {
-          "kind": "interface",
-          "name": "Node",
-          "type": "type",
-        },
-      ],
-      "kind": "interface",
-    },
-    "deprecated": undefined,
-    "path": "/interfaces/Node.mdx",
-    "title": "Node",
-  },
-  {
-    "_graphql": {
-      "deprecated": undefined,
-      "items": [
-        {
-          "kind": "union",
-          "name": "SearchResult",
-          "type": "type",
-        },
-      ],
-      "kind": "union",
-    },
-    "deprecated": undefined,
-    "path": "/unions/SearchResult.mdx",
-    "title": "SearchResult",
-  },
-  {
-    "_graphql": {
-      "deprecated": undefined,
-      "items": [
-        {
-          "kind": "enum",
-          "name": "Role",
-          "type": "type",
-        },
-      ],
-      "kind": "enum",
-    },
-    "deprecated": undefined,
-    "path": "/enums/Role.mdx",
-    "title": "Role",
-  },
-  {
-    "_graphql": {
-      "deprecated": undefined,
-      "items": [
-        {
-          "kind": "enum",
-          "name": "OrderStatus",
-          "type": "type",
-        },
-      ],
-      "kind": "enum",
-    },
-    "deprecated": undefined,
-    "path": "/enums/OrderStatus.mdx",
-    "title": "OrderStatus",
-  },
-  {
-    "_graphql": {
-      "deprecated": undefined,
-      "items": [
-        {
-          "kind": "input",
-          "name": "OrderFilter",
-          "type": "type",
-        },
-      ],
-      "kind": "input",
-    },
-    "deprecated": undefined,
-    "path": "/inputs/OrderFilter.mdx",
-    "title": "OrderFilter",
-  },
-  {
-    "_graphql": {
-      "deprecated": undefined,
-      "items": [
-        {
-          "kind": "input",
-          "name": "OrderCreateInput",
-          "type": "type",
-        },
-      ],
-      "kind": "input",
-    },
-    "deprecated": undefined,
-    "path": "/inputs/OrderCreateInput.mdx",
-    "title": "OrderCreateInput",
-  },
-  {
-    "_graphql": {
-      "deprecated": undefined,
-      "items": [
-        {
-          "kind": "scalar",
-          "name": "DateTime",
-          "type": "type",
-        },
-      ],
-      "kind": "scalar",
-    },
-    "deprecated": undefined,
-    "path": "/scalars/DateTime.mdx",
-    "title": "DateTime",
   },
 ]
 `;

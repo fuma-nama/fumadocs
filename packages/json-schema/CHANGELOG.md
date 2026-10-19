@@ -1,3 +1,9 @@
+## @fumadocs/json-schema@0.3.3
+
+### Info tags that open schemas
+
+- An `InfoTag` with `open: { name, $ref }` opens the schema `$ref` in Schema UI, like the type of a property.
+
 ## @fumadocs/json-schema@0.3.2
 
 ### Support `__proto__` as a property name

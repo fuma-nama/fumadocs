@@ -42,6 +42,14 @@ describe('Code Sample Generators', () => {
     bodyMediaType: 'multipart/form-data',
   } satisfies typeof data;
 
+  // string bodies are sent as is
+  const text = {
+    ...data,
+    method: 'post',
+    body: '  "quoted" """" `${x}` \\ "# \n\ttabbed\t\nends with ""',
+    bodyMediaType: 'text/plain',
+  } satisfies typeof data;
+
   const context = {
     mediaAdapters: defaultAdapters,
     custom: null,
@@ -60,5 +68,17 @@ describe('Code Sample Generators', () => {
     await expect(generator.generate(multipart, context)).toMatchFileSnapshot(
       `./out/samples/multipart.${ext}`,
     );
+    await expect(generator.generate(text, context)).toMatchFileSnapshot(
+      `./out/samples/text.${ext}`,
+    );
+  });
+
+  test('cURL encodes the body in the format of its media adapter', () => {
+    for (const bodyMediaType of [
+      'application/merge-patch+json',
+      'application/json; charset=utf-8',
+    ]) {
+      expect(curl.generate({ ...data, bodyMediaType }, context)).toContain(`-d '{\n  "id": "id",`);
+    }
   });
 });

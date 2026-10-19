@@ -4,11 +4,11 @@ import type { HighlighterCore } from 'shiki';
 import { toJsxRuntime } from 'hast-util-to-jsx-runtime';
 import * as JsxRuntime from 'react/jsx-runtime';
 import { highlightHast } from 'fumadocs-core/highlight/shiki';
-import type { RenderContext } from '@/utils/create-page';
+import { useRenderContext } from '@/utils/create-page';
 import { cn } from '@/utils/cn';
 
 const sharedClass =
-  'font-mono text-[0.8125rem] leading-5.5 whitespace-pre-wrap break-words wrap-break-word';
+  'px-4 py-3 font-mono text-[0.8125rem] leading-relaxed whitespace-pre-wrap wrap-break-word';
 
 /**
  * A plain text editor with syntax highlighting, by overlaying a transparent
@@ -18,15 +18,14 @@ export function CodeEditor({
   value,
   onValueChange,
   lang,
-  shiki,
-  shikiOptions,
   className,
   ...props
 }: Omit<ComponentProps<'textarea'>, 'value' | 'onChange'> & {
   value: string;
   onValueChange: (value: string) => void;
   lang: string;
-} & Pick<RenderContext, 'shiki' | 'shikiOptions'>) {
+}) {
+  const { shiki, shikiOptions } = useRenderContext();
   const [highlighter, setHighlighter] = useState<HighlighterCore | null>(null);
 
   useEffect(() => {
@@ -63,10 +62,18 @@ export function CodeEditor({
   }, [highlighter, value, shikiOptions, lang]);
 
   return (
-    <div className={cn('relative', sharedClass, className)}>
+    <div
+      className={cn(
+        'relative ring-fd-ring ring-inset transition-shadow has-focus-visible:ring-1',
+        className,
+      )}
+    >
       <div
         aria-hidden
-        className="min-h-20 px-3 py-2.5 [&_span]:text-(--shiki-light) dark:[&_span]:text-(--shiki-dark)"
+        className={cn(
+          sharedClass,
+          'min-h-24 [&_span]:text-(--shiki-light) dark:[&_span]:text-(--shiki-dark)',
+        )}
       >
         {highlighted}
         {'\n'}
@@ -90,7 +97,7 @@ export function CodeEditor({
         autoCorrect="off"
         className={cn(
           sharedClass,
-          'absolute inset-0 size-full resize-none overflow-hidden bg-transparent px-3 py-2.5 text-transparent caret-fd-foreground selection:bg-fd-primary/20 focus:outline-none',
+          'absolute inset-0 size-full resize-none overflow-hidden bg-transparent text-transparent caret-fd-foreground outline-none selection:bg-fd-primary/20',
         )}
         {...props}
       />

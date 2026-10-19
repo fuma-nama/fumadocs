@@ -63,12 +63,11 @@ import { docs } from 'collections/server';
 import { graphql } from '@/lib/graphql';
 
 export const source = loader(
-  // [!code ++:7]
+  // [!code ++:6]
   {
     docs: docs.toFumadocsSource(),
     graphql: await graphql.staticSource({
       baseDir: 'graphql',
-      baseUrl: '/docs',
     }),
   },
   {
@@ -80,7 +79,7 @@ export const source = loader(
 );
 ```
 
-It generates a page per operation & named type by default, grouped into folders by their kind (e.g. `queries/`, `objects/`). Pass the `baseUrl` of your `loader()` to pre-generate links, so type & operation references are cross-linked automatically.
+It generates a page per operation by default, grouped into folders by their kind (e.g. `queries/`, `mutations/`). Operation pages show the types they use in place, pages of named types are [opt-in](/docs/integrations/graphql/server#includeoperations--includetypes).
 
 **It will change the type of your pages**, make sure to update all references to your `source`, and update your page renderer:
 
@@ -121,11 +120,14 @@ npm run types:check
 
 The official GraphQL integration supports:
 
-- A page per operation (query/mutation/subscription) and named type
-- Arguments, fields, deprecations, default values, and custom directive callouts
-- Usage backlinks on type pages (returned by, field of, input for)
-- Generated example queries/responses & request snippets (cURL, JavaScript)
-- Interactive playground: highlighted query editor with live validation, a variables form generated from argument types, and custom headers
+- A page per operation (query/mutation/subscription), with the types it uses explored in place
+- Arguments, fields, deprecations, default values and `@oneOf` input objects
+- Directives applied in the schema, with their definitions
+- Example requests and responses, generated or from [your own operations](/docs/integrations/graphql/server#examples)
+- Code samples in cURL, JavaScript, Go, Python, Java, C# and Rust
+- A playground with a variables form, it runs [subscriptions](/docs/integrations/graphql/api-page#subscriptions) over WebSocket or SSE too
+- [Markdown of pages](/docs/integrations/graphql/server#markdown-for-llms) for LLMs
+- Optional pages for named types, with their usages across the schema
 
 ### Demo
 

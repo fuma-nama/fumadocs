@@ -1,13 +1,13 @@
 'use client';
-import { memo, useState } from 'react';
+import { memo, useMemo, useState } from 'react';
 import { Dialog } from '@base-ui/react/dialog';
-import { Play, Plug, Unplug, X } from 'lucide-react';
+import { Plug, Unplug, X } from 'lucide-react';
 import { useTranslations } from '@fuma-translate/react';
 import { buttonVariants } from 'fumadocs-ui/components/ui/button';
-import { DialogPopup } from 'shared-api/components/dialog';
-import { Segmented, SegmentedList } from 'shared-api/components/segmented';
+import { DialogPopup, PlaygroundTrigger } from 'shared-api/components/dialog';
 import { Spinner } from 'shared-api/components/spinner';
-import { iconButtonClassName } from 'shared-api/components/playground/panels';
+import { iconButtonClassName, ViewSwitch } from 'shared-api/components/playground/panels';
+import { StatusDot } from 'shared-api/components/playground/log';
 import { ParamInput } from 'shared-api/components/playground/param-input';
 import { SchemaProvider } from 'shared-api/components/playground/schema';
 import { StfProvider } from '@fumari/stf';
@@ -46,15 +46,8 @@ function PlaygroundSession() {
   return (
     <Dialog.Root>
       <ConnectionBar>
-        <Dialog.Trigger
-          className={cn(
-            buttonVariants({ variant: 'primary', size: 'sm' }),
-            'group shrink-0 gap-1.5 rounded-lg px-3 transition-[background-color,scale] active:scale-[0.97] motion-reduce:transition-none',
-          )}
-        >
-          {status === 'closed' ? (
-            <Play className="size-3 fill-current transition-transform duration-200 group-hover:translate-x-px motion-reduce:transition-none" />
-          ) : (
+        <PlaygroundTrigger>
+          {status !== 'closed' && (
             <StatusDot
               status={status}
               activity={playground.log.at(-1)?.id}
@@ -62,41 +55,12 @@ function PlaygroundSession() {
               className="ring-fd-primary-foreground/30"
             />
           )}
-          {t('Try in Playground')}
-        </Dialog.Trigger>
+        </PlaygroundTrigger>
       </ConnectionBar>
       <DialogPopup className="sm:h-[min(52rem,calc(100dvh-3rem))] sm:w-[min(80rem,calc(100vw-3rem))]">
         <PlaygroundDialog playground={playground} />
       </DialogPopup>
     </Dialog.Root>
-  );
-}
-
-/** the status of connection, it pops when `activity` changes, like the light of a network port */
-function StatusDot({
-  status,
-  activity,
-  label,
-  className,
-}: {
-  status: ConnectionStatus;
-  activity?: number;
-  label?: string;
-  className?: string;
-}) {
-  return (
-    <span
-      key={activity}
-      role={label ? 'img' : undefined}
-      aria-label={label}
-      className={cn(
-        'size-2 shrink-0 rounded-full transition-[background-color,scale] duration-300',
-        status === 'closed' && 'bg-fd-muted-foreground/50',
-        status === 'connecting' && 'bg-amber-500 motion-safe:animate-pulse',
-        status === 'open' && 'bg-green-500 ring-3 ring-green-500/20 motion-safe:starting:scale-150',
-        className,
-      )}
-    />
   );
 }
 
@@ -114,6 +78,13 @@ function PlaygroundDialog({ playground }: { playground: Playground }) {
     hasInputs && status === 'closed' ? 'connection' : 'messages',
   );
   const view = hasInputs ? selectedView : 'messages';
+  const views = useMemo(
+    () => [
+      { value: 'connection', label: t('Connection') },
+      { value: 'messages', label: t('Messages') },
+    ],
+    [t],
+  );
 
   return (
     <StfProvider value={playground.stf}>
@@ -143,7 +114,7 @@ function PlaygroundDialog({ playground }: { playground: Playground }) {
             className="contents"
           >
             <UrlBar status={status} activity={playground.log.at(-1)?.id} />
-            {hasInputs && <ViewSwitch value={view} onValueChange={setView} />}
+            {hasInputs && <ViewSwitch value={view} onValueChange={setView} items={views} />}
             <div
               className={cn(
                 'mx-3 mb-3 grid min-h-0 flex-1 overflow-hidden rounded-xl border bg-fd-card sm:mx-4 sm:mb-4',
@@ -168,29 +139,6 @@ function PlaygroundDialog({ playground }: { playground: Playground }) {
     </StfProvider>
   );
 }
-
-/** switches the panels on small screens, its indicator measures the tabs on render */
-const ViewSwitch = memo(function ViewSwitch({
-  value,
-  onValueChange,
-}: {
-  value: string;
-  onValueChange: (value: string) => void;
-}) {
-  const t = useTranslations({ note: 'playground' });
-
-  return (
-    <Segmented value={value} onValueChange={onValueChange} className="shrink-0 px-3 pb-3 md:hidden">
-      <SegmentedList
-        className="*:flex-1 *:justify-center"
-        items={[
-          { value: 'connection', label: t('Connection') },
-          { value: 'messages', label: t('Messages') },
-        ]}
-      />
-    </Segmented>
-  );
-});
 
 /** the URL of connection, with the values of its parameters */
 function UrlBar({ status, activity }: { status: ConnectionStatus; activity?: number }) {

@@ -10,17 +10,11 @@ import type {
   VirtualFile,
   Page,
 } from 'fumadocs-core/source';
-import {
-  fromSchema,
-  getMetaPages,
-  getPageProps,
-  type OutputEntry,
-  type OutputGroup,
-} from '@/utils/pages/builder';
+import { fromSchema, getPageProps } from '@/utils/pages/builder';
 import type { AsyncAPIPageProps_Preloaded, AsyncAPIPageProps_Spec } from '@/utils/create-page';
 import { toStaticData } from '@/utils/pages/to-static-data';
 import { toMarkdown } from '@/utils/pages/to-markdown';
-import path from 'node:path';
+import { type SourceOptions, toVirtualFiles } from 'shared-api/source';
 import type { StructuredData } from 'fumadocs-core/mdx-plugins/remark-structure';
 import type { TOCItemType } from 'fumadocs-core/toc';
 import { createAutoPreset, type SchemaToPagesOptions } from '@/utils/pages/preset-auto';
@@ -69,10 +63,7 @@ export interface AsyncAPIPageData extends PageData {
   _asyncapi: InternalAsyncAPIMeta;
 }
 
-export type AsyncAPISourceOptions = SchemaToPagesOptions & {
-  baseDir?: string;
-  meta?: boolean | { folderStyle?: 'folder' | 'separator' };
-};
+export type AsyncAPISourceOptions = SchemaToPagesOptions & SourceOptions;
 
 export function createAsyncAPI(options: AsyncAPIOptions = {}): AsyncAPIServer {
   const { disableCache = false } = options;
@@ -113,59 +104,29 @@ export function createAsyncAPI(options: AsyncAPIOptions = {}): AsyncAPIServer {
     options: AsyncAPISourceOptions,
     cache?: WeakMap<LoadedDocument, AsyncAPIVirtualFile[]>,
   ): Promise<AsyncAPIVirtualFile[]> {
-    const { baseDir = '', meta = false } = options;
-    const { folderStyle = 'folder' } = typeof meta === 'object' ? meta : {};
     const preset = createAutoPreset(options);
 
     function toFiles(id: string, bundled: AsyncAPIObject): AsyncAPIVirtualFile[] {
-      const out: AsyncAPIVirtualFile[] = [];
+      return toVirtualFiles(fromSchema(id, bundled, preset), options, (entry) => {
+        const props = getPageProps(entry);
 
-      function scan(entries: OutputEntry[], parent?: OutputGroup) {
-        for (const entry of entries) {
-          if (entry.type === 'group') {
-            scan(entry.entries, entry);
-            continue;
-          }
-
-          const props = getPageProps(entry);
-          out.push({
-            type: 'page',
-            path: `${baseDir}/${entry.path}`,
-            data: {
-              ...entry.info,
-              getAsyncAPIPageProps() {
-                return { payload: { bundled }, ...props };
-              },
-              getSchema() {
-                return { id, bundled };
-              },
-              async getText() {
-                return toMarkdown(props, bundled);
-              },
-              ...toStaticData(props, bundled),
-              _asyncapi: {
-                action: entry.type === 'operation' ? entry.item.action : undefined,
-              },
-            },
-          });
-        }
-
-        if (!meta) return;
-        const pages = getMetaPages(entries, parent, folderStyle);
-        if (pages.length === 0) return;
-        out.push({
-          type: 'meta',
-          path: path.join(baseDir, parent?.path ?? '', 'meta.json'),
-          data: {
-            title: parent?.info.title,
-            description: parent?.info.description,
-            pages,
+        return {
+          ...entry.info,
+          getAsyncAPIPageProps() {
+            return { payload: { bundled }, ...props };
           },
-        });
-      }
-
-      scan(fromSchema(id, bundled, preset));
-      return out;
+          getSchema() {
+            return { id, bundled };
+          },
+          async getText() {
+            return toMarkdown(props, bundled);
+          },
+          ...toStaticData(props, bundled),
+          _asyncapi: {
+            action: entry.type === 'operation' ? entry.item.action : undefined,
+          },
+        };
+      });
     }
 
     const files: AsyncAPIVirtualFile[] = [];

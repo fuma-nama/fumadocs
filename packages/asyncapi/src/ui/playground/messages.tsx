@@ -11,20 +11,19 @@ import {
   SelectTrigger,
   SelectValue,
 } from 'shared-api/components/select';
-import { cardCodeBlock, ExampleHeader } from 'shared-api/components/example';
-import { iconButtonClassName, PanelHeader } from 'shared-api/components/playground/panels';
+import {
+  iconButtonClassName,
+  PanelHeader,
+  panelTopCodeBlock,
+  Placeholder,
+  SendShortcut,
+} from 'shared-api/components/playground/panels';
+import { DataEntry, LogList, LogTime, StatusEntry } from 'shared-api/components/playground/log';
 import type { LogEntry, Playground } from '@/playground';
 import { type OperationMessage, useChannelMessages } from '@/operation';
 import { ClientCodeBlock } from '@/ui/components/codeblock';
 import { MessageName } from '@/ui/components/message-name';
 import { cn } from '@/utils/cn';
-
-const timeFormat = new Intl.DateTimeFormat(undefined, {
-  hour: '2-digit',
-  minute: '2-digit',
-  second: '2-digit',
-  hour12: false,
-});
 
 /** the URL to connect, then the messages of session with the latest above the composer */
 export function MessagesPanel({
@@ -36,17 +35,15 @@ export function MessagesPanel({
 }) {
   const t = useTranslations({ note: 'playground' });
   const { url, log, status } = playground;
-  const items: ReactNode[] = [];
-  // a reversed column keeps the scroll at the bottom as messages arrive, unless readers scroll up
-  for (let i = log.length - 1; i >= 0; i--) items.push(<Entry key={log[i].id} entry={log[i]} />);
 
   return (
     <section className={cn('flex min-h-0 flex-col', className)}>
       {url && (
-        <div className="shrink-0 border-b">
-          <ExampleHeader title={t('Connection URL')} />
-          <ClientCodeBlock lang="text" code={url} codeblock={cardCodeBlock} />
-        </div>
+        <ClientCodeBlock
+          lang="text"
+          code={url}
+          codeblock={{ ...panelTopCodeBlock, title: t('Connection URL') }}
+        />
       )}
       <PanelHeader>
         <h3 className="me-auto text-[0.8125rem] font-medium">{t('Messages')}</h3>
@@ -63,22 +60,13 @@ export function MessagesPanel({
       </PanelHeader>
       <div className="flex min-h-0 flex-1 flex-col">
         {log.length > 0 ? (
-          <div
-            role="log"
-            aria-label={t('Messages')}
-            className="fd-scroll-container flex min-h-0 flex-1 flex-col-reverse overflow-y-auto py-1"
-          >
-            {items}
-          </div>
+          <LogList label={t('Messages')} entries={log}>
+            {(entry) => <Entry key={entry.id} entry={entry} />}
+          </LogList>
         ) : (
-          <div className="flex min-h-40 flex-1 flex-col items-center justify-center gap-3 p-6 text-center">
-            <div className="rounded-xl border bg-fd-secondary p-2.5 text-fd-muted-foreground">
-              <Radio className="size-4" />
-            </div>
-            <p className="text-sm text-fd-muted-foreground">
-              {status === 'open' ? t('Waiting for messages.') : t('Connect to see messages.')}
-            </p>
-          </div>
+          <Placeholder icon={Radio} className="min-h-40">
+            {status === 'open' ? t('Waiting for messages.') : t('Connect to see messages.')}
+          </Placeholder>
         )}
         <Composer open={status === 'open'} send={playground.send} />
       </div>
@@ -89,10 +77,8 @@ export function MessagesPanel({
 // entries don't change once added, a busy channel re-renders only the new one
 const Entry = memo(function Entry({ entry }: { entry: LogEntry }) {
   const t = useTranslations({ note: 'playground' });
-  const time = <time className="shrink-0 tabular-nums">{timeFormat.format(entry.time)}</time>;
 
-  if (entry.type === 'received' || entry.type === 'sent')
-    return <MessageEntry entry={entry} time={time} />;
+  if (entry.type === 'received' || entry.type === 'sent') return <MessageEntry entry={entry} />;
 
   let text: ReactNode;
   let detail: string | undefined;
@@ -110,75 +96,59 @@ const Entry = memo(function Entry({ entry }: { entry: LogEntry }) {
   }
 
   return (
-    <div
-      className={cn(
-        'flex items-baseline gap-2 px-4 py-1.5 text-xs text-fd-muted-foreground motion-safe:transition-opacity motion-safe:duration-300 motion-safe:starting:opacity-0',
-        entry.type === 'error' && 'text-red-600 dark:text-red-400',
-      )}
-    >
-      <span className="shrink-0 font-medium">{text}</span>
-      <span className="min-w-0 flex-1 truncate font-mono" title={detail}>
-        {detail}
-      </span>
-      {time}
-    </div>
+    <StatusEntry label={text} detail={detail} time={entry.time} error={entry.type === 'error'} />
   );
 });
 
-function MessageEntry({ entry, time }: { entry: LogEntry; time: ReactNode }) {
+function MessageEntry({ entry }: { entry: LogEntry }) {
   const t = useTranslations({ note: 'playground' });
-  const [open, setOpen] = useState(false);
   const received = entry.type === 'received';
   const Icon = received ? ArrowDownLeft : ArrowUpRight;
-  let code: [lang: string, code: string] | undefined;
-  if (open && entry.data !== undefined) {
-    try {
-      code = ['json', JSON.stringify(JSON.parse(entry.data), null, 2)];
-    } catch {
-      code = ['text', entry.data];
-    }
-  }
 
   return (
-    <div
-      className={cn(
-        'border-b border-fd-border/60 motion-safe:transition-[opacity,translate] motion-safe:duration-300 motion-safe:ease-[cubic-bezier(0.16,1,0.3,1)] motion-safe:starting:opacity-0',
-        // they come from the side of sender
-        received ? 'motion-safe:starting:-translate-x-2' : 'motion-safe:starting:translate-x-2',
-      )}
-    >
-      <button
-        type="button"
-        aria-expanded={open}
-        disabled={entry.data === undefined}
-        onClick={() => setOpen(!open)}
-        className="flex w-full items-center gap-2 px-4 py-2 text-start text-xs transition-colors hover:bg-fd-accent/40 focus-visible:bg-fd-accent/40 focus-visible:outline-none"
-      >
-        <Icon
-          role="img"
-          aria-label={received ? t('Received') : t('Sent')}
-          className={cn(
-            'size-3.5 shrink-0',
-            received ? 'text-green-600 dark:text-green-400' : 'text-blue-600 dark:text-blue-400',
-          )}
-        />
-        {entry.message && <MessageName item={entry.message} className="shrink-0 font-medium" />}
-        <span className="min-w-0 flex-1 truncate font-mono text-fd-muted-foreground">
-          {entry.binary ? toHex(entry.binary) : entry.data}
-        </span>
-        {entry.binary && (
-          <span className="shrink-0 text-fd-muted-foreground">
-            {t('{length} bytes', { variables: { length: String(entry.binary.byteLength) } })}
+    <DataEntry
+      received={received}
+      disabled={entry.data === undefined}
+      summary={
+        <>
+          <Icon
+            role="img"
+            aria-label={received ? t('Received') : t('Sent')}
+            className={cn(
+              'size-3.5 shrink-0',
+              received ? 'text-green-600 dark:text-green-400' : 'text-blue-600 dark:text-blue-400',
+            )}
+          />
+          {entry.message && <MessageName item={entry.message} className="shrink-0 font-medium" />}
+          <span className="min-w-0 flex-1 truncate font-mono text-fd-muted-foreground">
+            {entry.binary ? toHex(entry.binary) : entry.data}
           </span>
-        )}
-        <span className="text-fd-muted-foreground">{time}</span>
-      </button>
-      {code && (
-        <div className="px-3 pb-3">
-          <ClientCodeBlock lang={code[0]} code={code[1]} codeblock={{ className: 'my-0' }} />
-        </div>
-      )}
-    </div>
+          {entry.binary && (
+            <span className="shrink-0 text-fd-muted-foreground">
+              {t('{length} bytes', { variables: { length: String(entry.binary.byteLength) } })}
+            </span>
+          )}
+          <span className="text-fd-muted-foreground">
+            <LogTime time={entry.time} />
+          </span>
+        </>
+      }
+      details={() => {
+        if (entry.data === undefined) return;
+        let code: [lang: string, code: string];
+        try {
+          code = ['json', JSON.stringify(JSON.parse(entry.data), null, 2)];
+        } catch {
+          code = ['text', entry.data];
+        }
+
+        return (
+          <div className="px-3 pb-3">
+            <ClientCodeBlock lang={code[0]} code={code[1]} codeblock={{ className: 'my-0' }} />
+          </div>
+        );
+      }}
+    />
   );
 }
 
@@ -226,7 +196,6 @@ const Composer = memo(function Composer({
   const message = outgoing.find((item) => item.id === selected);
   const [text, setText] = useState(() => getExampleText(message));
   const [encoding, setEncoding] = useState<Encoding>('text');
-  const isMac = typeof navigator !== 'undefined' && /Mac|iPhone|iPad/.test(navigator.userAgent);
   const payload = message?.payload;
   let check: { ok: boolean; text: string; data?: ArrayBuffer } | undefined;
   if (text && encoding !== 'text') {
@@ -358,9 +327,7 @@ const Composer = memo(function Composer({
         >
           <SendHorizontal className="size-3.5" />
           {t('Send')}
-          <kbd className="hidden font-sans text-xs text-fd-primary-foreground/60 sm:inline">
-            {isMac ? '⌘' : 'Ctrl'} ↵
-          </kbd>
+          <SendShortcut />
         </button>
       </div>
     </div>

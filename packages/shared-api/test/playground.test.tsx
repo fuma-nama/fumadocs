@@ -3,7 +3,7 @@ import { renderToString } from 'react-dom/server';
 import { expect, test } from 'vitest';
 import { createMagicProxy } from '@scalar/json-magic/magic-proxy';
 import { SchemaProvider } from '@/components/playground/schema';
-import { FieldSet } from '@/components/playground/inputs';
+import { FieldRows } from '@/components/playground/fields';
 import { StfProvider, useStf } from '@fumari/stf';
 
 test('renders playground fields of circular schemas', () => {
@@ -50,17 +50,19 @@ test('renders playground fields of circular schemas', () => {
           readOnly: false,
           children: null,
         },
-        h(FieldSet, {
-          field: doc.components.schemas.Planet as never,
-          fieldName: ['body'],
-          collapsible: false,
-          isRequired: true,
+        h(FieldRows, {
+          entry: {
+            fieldName: ['body'],
+            name: 'body',
+            schema: doc.components.schemas.Planet as never,
+          },
+          onNavigate() {},
         }),
       ),
     );
   }
 
   const html = renderToString(h(Harness));
-  expect(html.length).toBeGreaterThan(100);
+  expect(html).toContain('satellites');
   expect(html).not.toContain('$ref-value');
 });

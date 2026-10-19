@@ -803,12 +803,15 @@ export function FieldRow({
   entry: { name, fieldName, schema },
   required = false,
   description,
+  type: label,
   onNavigate,
   onRemove,
 }: {
   entry: FieldEntry;
   required?: boolean;
   description?: string;
+  /** the type label, in place of the one of schema */
+  type?: ReactNode;
   onNavigate: () => void;
   onRemove?: () => void;
 }) {
@@ -841,8 +844,10 @@ export function FieldRow({
 
         // their unions are selected in their own panels
         if (type === 'object' || type === 'array')
-          return <NavRow {...props} type={typeLabel(field, true)} onNavigate={onNavigate} />;
-        return <ValueRow {...props} type={cellType(field, selector)} />;
+          return (
+            <NavRow {...props} type={label ?? typeLabel(field, true)} onNavigate={onNavigate} />
+          );
+        return <ValueRow {...props} type={selector ?? label ?? cellType(field, null)} />;
       }}
     </SchemaSwitch>
   );

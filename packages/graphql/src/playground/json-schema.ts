@@ -1,27 +1,42 @@
 import {
+  coerceInputLiteral,
+  type GraphQLInputField,
+  type GraphQLInputObjectType,
   type GraphQLInputType,
   isEnumType,
   isListType,
   isNonNullType,
+  isRequiredInputField,
   isScalarType,
-  print,
 } from 'graphql';
 import type { JsonSchema } from '@fumadocs/json-schema';
 
+type Schema = Exclude<JsonSchema, boolean>;
+
+/** the schemas of input objects in a conversion, recursive inputs reference their own schema */
+type ObjectSchemas = Map<GraphQLInputObjectType, Schema>;
+
 /**
  * Convert a GraphQL input type into JSON Schema, for the playground form.
+ *
+ * Input objects are converted once, the schema of a recursive input is a cyclic object graph.
  */
-export function inputTypeToJsonSchema(type: GraphQLInputType, depth = 0): JsonSchema {
-  if (isNonNullType(type)) return inputTypeToJsonSchema(type.ofType, depth);
+export function inputTypeToJsonSchema(type: GraphQLInputType): Schema {
+  return typeToSchema(type, new Map());
+}
+
+function typeToSchema(type: GraphQLInputType, objectSchemas: ObjectSchemas): Schema {
+  if (isNonNullType(type)) return typeToSchema(type.ofType, objectSchemas);
   if (isListType(type))
     return {
       type: 'array',
-      items: inputTypeToJsonSchema(type.ofType, depth),
+      items: typeToSchema(type.ofType, objectSchemas),
     };
 
   if (isEnumType(type)) {
     return {
       type: 'string',
+      title: type.name,
       description: type.description ?? undefined,
       enum: type.getValues().map((value) => value.name),
     };
@@ -47,39 +62,54 @@ export function inputTypeToJsonSchema(type: GraphQLInputType, depth = 0): JsonSc
     }
   }
 
-  // input object, guard against cyclic references
-  if (depth >= 8) {
-    return { type: 'object', additionalProperties: true };
-  }
+  let schema = objectSchemas.get(type);
+  if (schema) return schema;
 
-  const properties: Record<string, JsonSchema> = {};
-  const required: string[] = [];
-
-  for (const field of Object.values(type.getFields())) {
-    const schema = inputTypeToJsonSchema(field.type, depth + 1);
-
-    properties[field.name] = {
-      ...(typeof schema === 'object' ? schema : {}),
-      description:
-        field.description ?? (typeof schema === 'object' ? schema.description : undefined),
-      default:
-        field.default !== undefined
-          ? field.default.literal
-            ? print(field.default.literal)
-            : field.default.value
-          : undefined,
-    };
-
-    if (isNonNullType(field.type) && field.default === undefined) {
-      required.push(field.name);
+  const fields = Object.values(type.getFields());
+  const base = { title: type.name, description: type.description ?? undefined };
+  // cached before its fields are converted, so they can reference it
+  if (type.isOneOf) {
+    // a `@oneOf` input object takes exactly one of its fields
+    const oneOf: Schema[] = [];
+    objectSchemas.set(type, (schema = { ...base, oneOf }));
+    for (const field of fields) {
+      oneOf.push({
+        // the label of member in selects
+        title: field.name,
+        type: 'object',
+        properties: { [field.name]: fieldToSchema(field, objectSchemas) },
+        required: [field.name],
+        additionalProperties: false,
+      });
     }
+
+    return schema;
   }
+
+  const properties: Record<string, Schema> = {};
+  const required: string[] = [];
+  objectSchemas.set(
+    type,
+    (schema = { ...base, type: 'object', properties, required, additionalProperties: false }),
+  );
+  for (const field of fields) {
+    properties[field.name] = fieldToSchema(field, objectSchemas);
+    if (isRequiredInputField(field)) required.push(field.name);
+  }
+
+  return schema;
+}
+
+function fieldToSchema(field: GraphQLInputField, objectSchemas: ObjectSchemas): Schema {
+  const schema = typeToSchema(field.type, objectSchemas);
+  const defaultInput = field.default;
+  if (!field.description && !defaultInput) return schema;
 
   return {
-    type: 'object',
-    description: type.description ?? undefined,
-    properties,
-    required,
-    additionalProperties: false,
+    ...schema,
+    description: field.description ?? schema.description,
+    default: defaultInput?.literal
+      ? coerceInputLiteral(defaultInput.literal, field.type)
+      : defaultInput?.value,
   };
 }

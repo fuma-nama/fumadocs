@@ -1,25 +1,12 @@
 'use client';
-import {
-  type ComponentProps,
-  Fragment,
-  type ReactNode,
-  useCallback,
-  useMemo,
-  useState,
-} from 'react';
-import { DownloadIcon, FileIcon, X } from 'lucide-react';
+import { type ComponentProps, type ReactNode, useCallback, useMemo } from 'react';
+import { DownloadIcon, FileIcon } from 'lucide-react';
 import type { FetchResponseResult, FetchResult } from '@/playground/fetcher';
-import { useStatusInfo } from '../status-info';
-import { cn } from '@/utils/cn';
 import { ClientCodeBlock } from '@/ui/components/codeblock';
 import { useTranslations } from '@fuma-translate/react';
 import type { BuiltinLanguage, SpecialLanguage } from 'shiki';
-import { Segmented, SegmentedList, SegmentedPanel } from 'shared-api/components/segmented';
-import {
-  iconButtonClassName,
-  PanelHeader,
-  panelCodeBlock,
-} from 'shared-api/components/playground/panels';
+import { iconButtonClassName, panelCodeBlock } from 'shared-api/components/playground/panels';
+import { RequestError, ResponseView } from 'shared-api/components/playground/result';
 
 export interface ResultDisplayProps extends ComponentProps<'div'> {
   data: FetchResult;
@@ -27,37 +14,10 @@ export interface ResultDisplayProps extends ComponentProps<'div'> {
 }
 
 export function DefaultResultDisplay({ data, reset, ...rest }: ResultDisplayProps) {
-  const t = useTranslations({ note: 'playground result display' });
+  if (data.type === 'client_error')
+    return <RequestError {...rest} message={data.message} url={data.url} onClear={reset} />;
 
-  if (data.type === 'client_error') {
-    return (
-      <div {...rest} className={cn('flex min-h-0 flex-1 flex-col', rest.className)}>
-        <PanelHeader>
-          <span className="size-2 shrink-0 rounded-full bg-red-500" />
-          <span className="text-[0.8125rem] font-medium">{t('Request Failed')}</span>
-          <button
-            type="button"
-            aria-label={t('Clear')}
-            className={cn(iconButtonClassName, 'ms-auto')}
-            onClick={reset}
-          >
-            <X />
-          </button>
-        </PanelHeader>
-        <div className="flex flex-col gap-3 overflow-auto p-4 text-sm">
-          <p>{data.message}</p>
-          <p className="font-mono text-xs break-all text-fd-muted-foreground">{data.url}</p>
-          <p className="rounded-lg border bg-fd-secondary p-3 text-xs text-fd-muted-foreground">
-            {t(
-              'Check the server URL. If the API does not allow cross-origin requests from this site, a proxy is needed.',
-            )}
-          </p>
-        </div>
-      </div>
-    );
-  }
-
-  return <ResponseResult data={data} reset={reset} {...rest} />;
+  return <ResponseResult {...rest} data={data} reset={reset} />;
 }
 
 function getTextFormat(mime: string): BuiltinLanguage | SpecialLanguage | null {
@@ -84,16 +44,6 @@ function getTextFormat(mime: string): BuiltinLanguage | SpecialLanguage | null {
   return null;
 }
 
-function formatDuration(ms: number): string {
-  return ms < 1000 ? `${Math.round(ms)} ms` : `${(ms / 1000).toFixed(2)} s`;
-}
-
-function formatSize(bytes: number): string {
-  if (bytes < 1024) return `${bytes} B`;
-  if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} kB`;
-  return `${(bytes / 1024 / 1024).toFixed(1)} MB`;
-}
-
 function ResponseResult({
   data,
   reset,
@@ -103,11 +53,9 @@ function ResponseResult({
   reset: () => void;
 }) {
   const t = useTranslations({ note: 'playground result display' });
-  const statusInfo = useStatusInfo(data.status);
-  const [view, setView] = useState('body');
   const type = data.mediaType ?? 'text/plain';
-  const headers = Array.from(data.headers);
   const size = data.body.byteLength;
+  const lang = getTextFormat(type);
   // link elements to the body, its object URL is revoked with them
   const bodyUrlRef = useCallback(
     (element: HTMLImageElement | HTMLAnchorElement | null) => {
@@ -127,110 +75,49 @@ function ResponseResult({
         <img ref={bodyUrlRef} alt="" className="max-w-full rounded-lg border" />
       </div>
     );
-  } else if (size > 0) {
-    const lang = getTextFormat(type);
-
-    if (lang) {
-      body = <TextResult lang={lang} data={data} />;
-    } else {
-      body = (
-        <div className="flex h-full flex-col items-center justify-center gap-2 p-6 text-center">
-          <FileIcon className="size-5 text-fd-muted-foreground" />
-          <p className="text-sm font-medium">
-            {t('Binary response body, {length} bytes', {
-              variables: {
-                length: String(size),
-              },
-            })}
-          </p>
-          {type && <p className="font-mono text-xs text-fd-muted-foreground">{type}</p>}
-        </div>
-      );
-    }
+  } else if (lang) {
+    body = <TextResult lang={lang} data={data} />;
   } else {
     body = (
-      <div className="flex h-full flex-col items-center justify-center gap-1 p-6 text-center">
-        <p className="text-4xl font-light tracking-tight tabular-nums">{data.status}</p>
-        <p className="text-sm text-fd-muted-foreground">{t('Empty response body')}</p>
+      <div className="flex h-full flex-col items-center justify-center gap-2 p-6 text-center">
+        <FileIcon className="size-5 text-fd-muted-foreground" />
+        <p className="text-sm font-medium">
+          {t('Binary response body, {length} bytes', {
+            variables: {
+              length: String(size),
+            },
+          })}
+        </p>
+        {type && <p className="font-mono text-xs text-fd-muted-foreground">{type}</p>}
       </div>
     );
   }
 
   return (
-    <div {...rest} className={cn('flex min-h-0 flex-1 flex-col', rest.className)}>
-      <Segmented value={view} onValueChange={setView} className="flex min-h-0 flex-1 flex-col">
-        <PanelHeader>
-          <span
-            className={cn(
-              'size-2 shrink-0 rounded-full motion-safe:transition-transform motion-safe:duration-300 motion-safe:starting:scale-0',
-              statusInfo.color,
-            )}
-          />
-          <p className="min-w-0 truncate text-[0.8125rem] font-medium">
-            <span className="tabular-nums">{data.status}</span>{' '}
-            <span className="font-normal text-fd-muted-foreground">{statusInfo.description}</span>
-          </p>
-          <p className="hidden shrink-0 text-xs text-fd-muted-foreground tabular-nums @md:block">
-            {formatDuration(data.duration)} · {formatSize(size)}
-          </p>
-          <SegmentedList
-            className="ms-auto shrink-0"
-            items={[
-              { value: 'body', label: t('Body') },
-              {
-                value: 'headers',
-                label: (
-                  <>
-                    {t('Headers')}
-                    <span className="text-fd-muted-foreground tabular-nums">{headers.length}</span>
-                  </>
-                ),
-              },
-            ]}
-          />
-          <div className="flex shrink-0 items-center">
-            {size > 0 && (
-              <a
-                ref={bodyUrlRef}
-                download={data.fileName ?? 'response'}
-                aria-label={t('Download')}
-                title={t('Download')}
-                className={iconButtonClassName}
-              >
-                <DownloadIcon />
-              </a>
-            )}
-            <button
-              type="button"
-              aria-label={t('Clear')}
-              title={t('Clear')}
-              className={iconButtonClassName}
-              onClick={reset}
-            >
-              <X />
-            </button>
-          </div>
-        </PanelHeader>
-        <SegmentedPanel value="body" className="min-h-0 flex-1 overflow-auto">
-          {body}
-        </SegmentedPanel>
-        <SegmentedPanel value="headers" className="min-h-0 flex-1 overflow-auto">
-          <p className="border-b px-4 py-2.5 font-mono text-xs break-all text-fd-muted-foreground">
-            {data.url}
-          </p>
-          <dl className="grid grid-cols-[minmax(0,2fr)_minmax(0,3fr)] font-mono text-xs">
-            {headers.map(([name, value]) => (
-              <Fragment key={name}>
-                <dt className="truncate border-b py-2 ps-4 pe-2 text-fd-muted-foreground">
-                  {name}
-                </dt>
-                <dd className="border-b border-s px-3 py-2 break-all">{value}</dd>
-              </Fragment>
-            ))}
-          </dl>
-        </SegmentedPanel>
-      </Segmented>
-    </div>
+    <ResponseView
+      {...rest}
+      status={data.status}
+      duration={data.duration}
+      size={size}
+      url={data.url}
+      headers={Array.from(data.headers)}
+      onClear={reset}
+      actions={
+        size > 0 && (
+          <a
+            ref={bodyUrlRef}
+            download={data.fileName ?? 'response'}
+            aria-label={t('Download')}
+            title={t('Download')}
+            className={iconButtonClassName}
+          >
+            <DownloadIcon />
+          </a>
+        )
+      }
+    >
+      {body}
+    </ResponseView>
   );
 }
 

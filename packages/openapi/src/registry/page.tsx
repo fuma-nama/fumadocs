@@ -1,6 +1,6 @@
 'use client';
 import { Schema } from 'shared-api/components/schema';
-import { createOpenAPIRenderer } from '@/utils/create-page';
+import { createOpenAPIRenderer } from '@/index.browser';
 import { Operation } from '@/ui/operation';
 
 export const OpenAPIPage = createOpenAPIRenderer({

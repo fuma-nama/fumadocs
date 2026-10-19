@@ -43,24 +43,31 @@ export function SelectTab({
   );
 }
 
+/** selects the tab shown in a card, like a media type, a single item is a plain label */
 export function SelectTabTrigger({
   items,
   className,
-  placeholder,
   ...props
 }: ComponentProps<typeof SelectTrigger> & {
-  placeholder?: ReactNode;
   items: {
     label: ReactNode;
     value: string;
   }[];
 }) {
   const { value, setValue } = use(Context)!;
+  if (items.length === 1)
+    return <span className="min-w-0 px-1.5 font-medium">{items[0].label}</span>;
 
   return (
     <Select items={items} value={value} onValueChange={setValue}>
-      <SelectTrigger className={cn('not-prose w-fit min-w-0 *:min-w-0', className)} {...props}>
-        <SelectValue placeholder={placeholder} />
+      <SelectTrigger
+        className={cn(
+          'not-prose h-7 w-auto min-w-0 gap-1 border-0 bg-transparent px-1.5 py-0 text-[0.8125rem] font-medium *:min-w-0 hover:bg-fd-accent hover:text-fd-accent-foreground focus:ring-0 focus-visible:ring-2 focus-visible:ring-inset data-popup-open:bg-fd-accent',
+          className,
+        )}
+        {...props}
+      >
+        <SelectValue />
       </SelectTrigger>
       <SelectContent>
         {items.map(({ label, value }) => (

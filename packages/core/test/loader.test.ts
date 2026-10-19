@@ -390,6 +390,51 @@ test('Internationalized Routing: locale-only pages do not leak into other locale
   expect(names('cn')).toStrictEqual(['Extra CN', 'Shared']);
 });
 
+test('Internationalized Routing: locale of virtual files', () => {
+  const result = loader({
+    baseUrl: '/',
+    i18n: {
+      languages: ['en', 'cn'],
+      defaultLanguage: 'en',
+      fallbackLanguage: null,
+      parser: 'dir',
+    },
+    source: {
+      files: [
+        { type: 'meta', path: 'api/meta.json', data: { title: 'API' }, locale: '$' },
+        { type: 'page', path: 'api/get.mdx', data: { title: 'Get' }, locale: '$' },
+        { type: 'page', path: 'api/extra.mdx', data: { title: 'Extra' }, locale: 'cn' },
+      ],
+    },
+  });
+
+  const urls = (locale: string) =>
+    result
+      .getPages(locale)
+      .map((page) => page.url)
+      .sort();
+  expect(urls('en')).toStrictEqual(['/en/api/get']);
+  expect(urls('cn')).toStrictEqual(['/cn/api/extra', '/cn/api/get']);
+  expect(result.getPageTree('cn').children[0].name).toBe('API');
+});
+
+test('Internationalized Routing: `none` parser', () => {
+  const result = loader({
+    baseUrl: '/',
+    i18n: {
+      languages: ['en', 'cn'],
+      defaultLanguage: 'en',
+      parser: 'none',
+    },
+    source: {
+      files: [{ type: 'page', path: 'page.cn.mdx', data: { title: 'Page' } }],
+    },
+  });
+
+  expect(result.getPage(['page.cn'], 'en')?.locale).toBe('en');
+  expect(result.getPage(['page'], 'cn')).toBeUndefined();
+});
+
 test('Loader: Allow duplicate pages when explicitly referenced twice', () => {
   const result = loader({
     baseUrl: '/',

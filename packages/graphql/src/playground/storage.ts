@@ -1,74 +1,59 @@
-const StorageKey = 'fumadocs-graphql-playground';
+import { isPlainObject } from '@fumari/stf/lib/utils';
 
-export interface HeaderItem {
-  key: string;
-  value: string;
-}
+const StorageKey = 'fumadocs-graphql-playground';
 
 export interface StoredState {
   url?: string;
   /**
-   * stored header rows, keyed by endpoint origin so headers entered for one
-   * endpoint are never replayed against another.
+   * headers by endpoint origin, so headers entered for one endpoint are never sent to another.
    */
-  headers?: Record<string, HeaderItem[]>;
+  headers?: Record<string, Record<string, string>>;
 }
 
 /**
  * the origin used to scope stored headers, `undefined` for invalid URLs.
+ *
+ * WebSocket URLs share the origin of their HTTP endpoint.
  */
-export function getEndpointOrigin(url: string, base?: string): string | undefined {
+export function getEndpointOrigin(url: string): string | undefined {
   if (url.length === 0) return undefined;
 
   try {
-    return new URL(
-      url,
-      base ?? (typeof window !== 'undefined' ? window.location.origin : undefined),
-    ).origin;
+    return new URL(url, window.location.origin).origin.replace(/^ws(s?):/, 'http$1:');
   } catch {
     return undefined;
   }
 }
 
-export function filterHeaderItems(items: unknown): HeaderItem[] {
-  if (!Array.isArray(items)) return [];
-
-  return items.filter(
-    (item): item is HeaderItem =>
-      typeof item === 'object' &&
-      item !== null &&
-      typeof (item as HeaderItem).key === 'string' &&
-      typeof (item as HeaderItem).value === 'string',
-  );
-}
-
 /**
  * parse & validate the persisted state, unknown shapes are dropped.
- *
- * the legacy shape stored a single headers array shared by every endpoint,
- * it is ignored instead of being migrated.
  */
 export function parseStoredState(raw: string | null): StoredState {
   if (!raw) return {};
 
   try {
-    const parsed = JSON.parse(raw) as unknown;
-    if (typeof parsed !== 'object' || parsed === null || Array.isArray(parsed)) return {};
+    const parsed: unknown = JSON.parse(raw);
+    if (!isPlainObject(parsed)) return {};
 
-    const { url, headers } = parsed as Record<string, unknown>;
+    const { url, headers } = parsed;
     const out: StoredState = {};
     if (typeof url === 'string') out.url = url;
+    if (!isPlainObject(headers)) return out;
 
-    if (typeof headers === 'object' && headers !== null && !Array.isArray(headers)) {
-      const scoped: Record<string, HeaderItem[]> = {};
-
-      for (const [origin, items] of Object.entries(headers)) {
-        if (Array.isArray(items)) scoped[origin] = filterHeaderItems(items);
+    // `JSON.parse()` defines `__proto__` keys as own properties, invalid entries are deleted in place
+    for (const origin of Object.keys(headers)) {
+      const scoped = headers[origin];
+      if (!isPlainObject(scoped)) {
+        delete headers[origin];
+        continue;
       }
 
-      out.headers = scoped;
+      for (const name of Object.keys(scoped)) {
+        if (typeof scoped[name] !== 'string') delete scoped[name];
+      }
     }
 
+    out.headers = headers as StoredState['headers'];
     return out;
   } catch {
     return {};

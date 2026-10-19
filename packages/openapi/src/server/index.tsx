@@ -2,26 +2,18 @@ import { createProxy } from '@/server/proxy';
 import { createOAuthHandler } from '@/server/oauth';
 import { loadDocument } from '@/utils/document/load';
 import type { Document, Awaitable } from '@/types';
-import {
-  type DynamicSource,
-  type LoaderPlugin,
-  type PageData,
-  PathUtils,
-  type MetaData,
-  type Source,
-  type VirtualFile,
-  type Page,
+import type {
+  DynamicSource,
+  LoaderPlugin,
+  PageData,
+  MetaData,
+  Source,
+  VirtualFile,
+  Page,
 } from 'fumadocs-core/source';
-import {
-  fromSchema,
-  getPageProps,
-  type OperationOutput,
-  type OutputEntry,
-  type PageOutput,
-  type WebhookOutput,
-} from '@/utils/pages/builder';
+import { fromSchema, getPageProps } from '@/utils/pages/builder';
 import { type InternalOpenAPIMeta, toStaticData } from '@/utils/pages/to-static-data';
-import path from 'node:path';
+import { type SourceOptions, toVirtualFiles } from 'shared-api/source';
 import type { OpenAPIPageProps_Preloaded, OpenAPIPageProps_Spec } from '@/ui';
 import type { StructuredData } from 'fumadocs-core/mdx-plugins/remark-structure';
 import type { TOCItemType } from 'fumadocs-core/toc';
@@ -96,11 +88,7 @@ export interface OpenAPIPageData extends PageData {
   _openapi: InternalOpenAPIMeta;
 }
 
-export type OpenAPISourceOptions = SchemaToPagesOptions & {
-  baseDir?: string;
-  /** Generate `meta.json` files */
-  meta?: boolean | { folderStyle?: 'folder' | 'separator' };
-};
+export type OpenAPISourceOptions = SchemaToPagesOptions & SourceOptions;
 
 export function createOpenAPI(options: OpenAPIOptions = {}): OpenAPIServer {
   const { disableCache = false } = options;
@@ -147,7 +135,6 @@ export function createOpenAPI(options: OpenAPIOptions = {}): OpenAPIServer {
     options: OpenAPISourceOptions,
     docFilesCache?: WeakMap<LoadedDocument, OpenAPIVirtualFile[]>,
   ): Promise<OpenAPIVirtualFile[]> {
-    const { baseDir = '', meta = false } = options;
     const files: OpenAPIVirtualFile[] = [];
 
     for (const [id, schema] of Object.entries(await server.getSchemas())) {
@@ -157,17 +144,13 @@ export function createOpenAPI(options: OpenAPIOptions = {}): OpenAPIServer {
         continue;
       }
 
-      const entries = onEntries(fromSchema(id, schema.bundled, createAutoPreset(options)));
-      docFilesCache?.set(schema, entries);
-      files.push(...entries);
+      const entries = toVirtualFiles(
+        fromSchema(id, schema.bundled, createAutoPreset(options)),
+        options,
+        (entry) => {
+          const props = getPageProps(entry);
 
-      function onEntry(entry: PageOutput | OperationOutput | WebhookOutput): OpenAPIVirtualFile {
-        const props = getPageProps(entry);
-
-        return {
-          type: 'page',
-          path: `${baseDir}/${entry.path}`,
-          data: {
+          return {
             ...entry.info,
             getOpenAPIPageProps() {
               return {
@@ -193,58 +176,11 @@ export function createOpenAPI(options: OpenAPIOptions = {}): OpenAPIServer {
               webhook: entry.type === 'webhook',
               deprecated: entry.info.deprecated,
             },
-          },
-        };
-      }
-
-      function onEntries(entries: OutputEntry[], parent?: OutputEntry): OpenAPIVirtualFile[] {
-        const out: OpenAPIVirtualFile[] = [];
-
-        if (!meta) {
-          for (const entry of entries) {
-            if (entry.type === 'group') {
-              out.push(...onEntries(entry.entries, entry));
-            } else {
-              out.push(onEntry(entry));
-            }
-          }
-          return out;
-        }
-
-        const { folderStyle = 'folder' } = meta === true ? {} : meta;
-        const pages: string[] = [];
-
-        for (const entry of entries) {
-          const relativePath = PathUtils.slash(
-            parent ? path.relative(parent.path, entry.path) : entry.path,
-          );
-
-          if (entry.type === 'group') {
-            out.push(...onEntries(entry.entries, entry));
-            if (folderStyle === 'folder') {
-              pages.push(relativePath);
-            } else {
-              pages.push(`---${entry.info.title}---`, `...${relativePath}`);
-            }
-          } else {
-            out.push(onEntry(entry));
-            pages.push(relativePath.slice(0, -path.extname(entry.path).length));
-          }
-        }
-
-        if (pages.length > 0) {
-          out.push({
-            type: 'meta',
-            path: path.join(baseDir, parent?.path ?? '', 'meta.json'),
-            data: {
-              title: parent?.info.title,
-              description: parent?.info.description,
-              pages,
-            },
-          });
-        }
-        return out;
-      }
+          };
+        },
+      );
+      docFilesCache?.set(schema, entries);
+      files.push(...entries);
     }
 
     return files;

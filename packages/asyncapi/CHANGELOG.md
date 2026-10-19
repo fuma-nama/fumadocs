@@ -1,3 +1,22 @@
+## @fumadocs/asyncapi@0.5.1
+
+### TypeScript definitions on copy
+
+- Message schemas generate their TypeScript definitions when the button copies them, not on every render.
+
+### Example cards with code block title bars
+
+- Example cards put their controls in the title bar of their code block, next to its copy button, so code no longer runs under the button on narrow screens.
+- Selects with a single option, like one status code, show a plain label.
+- The playground button follows the corner radius of the bar around it.
+
+### Generated pages in every language
+
+- Virtual files accept a `locale`, `$` for every language, instead of parsing it from their path.
+- Pages from `staticSource()` and `dynamicSource()` of OpenAPI, AsyncAPI and GraphQL are shared with every language of `loader()`.
+
+Fix [#3720](https://github.com/fuma-nama/fumadocs/issues/3720)
+
 ## @fumadocs/asyncapi@0.5.0
 
 ### Redesigned AsyncAPI pages

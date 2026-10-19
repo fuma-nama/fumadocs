@@ -1,5 +1,3 @@
-import * as path from 'node:path';
-import { PathUtils } from 'fumadocs-core/source';
 import type { AsyncAPIObject, TagObject } from '@/types';
 import { dereference } from '@fumadocs/json-schema';
 import type { DereferencedShallow } from '@fumadocs/json-schema';
@@ -106,25 +104,4 @@ export function getPageProps(entry: PageOutput | OperationOutput): GeneratedPage
     document: entry.schemaId,
     operations: entry.operations,
   };
-}
-
-/** the `pages` of `meta.json` in the folder of `parent`, for its entries */
-export function getMetaPages(
-  entries: OutputEntry[],
-  parent: OutputGroup | undefined,
-  folderStyle: 'folder' | 'separator',
-): string[] {
-  const pages: string[] = [];
-
-  for (const entry of entries) {
-    const relativePath = PathUtils.slash(
-      parent ? path.relative(parent.path, entry.path) : entry.path,
-    );
-
-    if (entry.type !== 'group') pages.push(relativePath.slice(0, -path.extname(entry.path).length));
-    else if (folderStyle === 'folder') pages.push(relativePath);
-    else pages.push(`---${entry.info.title}---`, `...${relativePath}`);
-  }
-
-  return pages;
 }

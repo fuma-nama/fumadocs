@@ -8,8 +8,8 @@ import {
   isInterfaceType,
   isObjectType,
 } from 'graphql';
+import { idToTitle } from 'shared-api/utils/id-to-title';
 import type { GeneratedPageProps } from '@/utils/pages';
-import { getOperationField, getOperationTitle } from '@/utils/schema';
 
 export function toStaticData(
   page: GeneratedPageProps,
@@ -47,10 +47,10 @@ export function toStaticData(
 
   for (const item of page.items ?? []) {
     if (item.type === 'operation') {
-      const field = getOperationField(schema, item.kind, item.name);
+      const field = schema.getRootType(item.kind)?.getFields()[item.name];
       if (!field) continue;
 
-      if (page.showTitle) onHeading(getOperationTitle(field.name));
+      if (page.showTitle) onHeading(idToTitle(field.name));
       onContent(field.description);
       for (const arg of field.args) {
         onContent(arg.description && `${arg.name}: ${arg.description}`);

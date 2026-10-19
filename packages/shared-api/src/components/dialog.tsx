@@ -1,6 +1,9 @@
 'use client';
 import { Dialog } from '@base-ui/react/dialog';
 import type { ReactNode } from 'react';
+import { Play } from 'lucide-react';
+import { useTranslations } from '@fuma-translate/react';
+import { buttonVariants } from 'fumadocs-ui/components/ui/button';
 import { cn } from '@/utils/cn';
 
 /** the popup of a dialog, a window on larger screens and the full screen on smaller ones */
@@ -17,5 +20,24 @@ export function DialogPopup({ className, children }: { className?: string; child
         {children}
       </Dialog.Popup>
     </Dialog.Portal>
+  );
+}
+
+/** opens the playground dialog, `children` replace its icon, like the status of a connection */
+export function PlaygroundTrigger({ children }: { children?: ReactNode }) {
+  const t = useTranslations({ note: 'playground' });
+
+  return (
+    <Dialog.Trigger
+      className={cn(
+        buttonVariants({ variant: 'primary', size: 'sm' }),
+        'group shrink-0 gap-1.5 rounded-[5px] px-3 transition-[background-color,scale] active:scale-[0.97] motion-reduce:transition-none',
+      )}
+    >
+      {children || (
+        <Play className="size-3 fill-current transition-transform duration-200 group-hover:translate-x-px motion-reduce:transition-none" />
+      )}
+      {t('Try in Playground')}
+    </Dialog.Trigger>
   );
 }

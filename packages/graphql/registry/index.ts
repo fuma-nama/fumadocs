@@ -40,6 +40,7 @@ export const registry: Registry = {
       type: 'components',
       target: '<dir>/graphql/*',
     },
+    'utils/sdl.ts': { type: 'lib', target: '<dir>/graphql/sdl.ts' },
     'utils/cn.ts': { alias: '../../radix-ui/src/utils/cn' },
   },
   dependencies: {

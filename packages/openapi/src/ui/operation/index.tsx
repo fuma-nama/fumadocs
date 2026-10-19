@@ -21,9 +21,9 @@ import { Callout } from 'fumadocs-ui/components/callout';
 import { AnchorSection, useAnchorLink } from 'shared-api/auto-anchor';
 import { Heading } from '@/ui/components/heading';
 import { Markdown } from '../components/markdown';
-import { useCopyButton } from 'fumadocs-ui/utils/use-copy-button';
 import { buttonVariants } from 'fumadocs-ui/components/ui/button';
-import { Check, ChevronRight, Copy, Plus, X } from 'lucide-react';
+import { ChevronRight, Plus, X } from 'lucide-react';
+import { CopyTypeScript } from 'shared-api/components/copy-typescript';
 import PlaygroundClient from '@/ui/playground/client';
 import { EndpointBar } from '@/ui/components/endpoint';
 import { Segmented, SegmentedList, SegmentedPanel } from 'shared-api/components/segmented';
@@ -114,7 +114,7 @@ function OperationContent({
             <MediaContent
               schema={content.schema}
               required={requestBody.required}
-              selector={<CardSelector items={items} />}
+              selector={<SelectTabTrigger items={items} />}
               request
             />
           </SelectTab>
@@ -198,7 +198,7 @@ function OperationContent({
         <SectionHeader id="authorization" depth={headingLevel} title={t('Authorization')} />
         <div className="overflow-hidden rounded-xl border bg-fd-card">
           <div className="flex h-9 items-center border-b ps-1.5 pe-1 text-[0.8125rem] not-prose">
-            <CardSelector items={items} />
+            <SelectTabTrigger items={items} />
           </div>
           {security.map((requirement, i) => (
             <SelectTab key={i} value={items[i].value} className="px-3">
@@ -328,19 +328,6 @@ function SectionHeader({
   );
 }
 
-/** selects the variant shown in a card, like the media type */
-function CardSelector({ items }: { items: { label: ReactNode; value: string }[] }) {
-  if (items.length > 1)
-    return (
-      <SelectTabTrigger
-        items={items}
-        className="h-7 w-auto gap-1 border-0 bg-transparent px-1.5 py-0 text-[0.8125rem] font-medium hover:bg-fd-accent hover:text-fd-accent-foreground focus:ring-0 focus-visible:ring-2 focus-visible:ring-inset data-popup-open:bg-fd-accent"
-      />
-    );
-
-  return <span className="min-w-0 px-1.5 font-medium">{items[0].label}</span>;
-}
-
 /** the schema of a request body or response in a media type */
 function MediaContent({
   schema,
@@ -388,38 +375,6 @@ function MediaContent({
       readOnly={!request || method === 'get'}
       writeOnly={request && method !== 'get'}
     />
-  );
-}
-
-function CopyTypeScript({
-  name,
-  generate,
-}: {
-  name: string;
-  generate: () => string | undefined | Promise<string | undefined>;
-}) {
-  const t = useTranslations({ note: 'TypeScript definitions' });
-  const [isChecked, onCopy] = useCopyButton(() => {
-    const code = generate();
-    if (typeof code === 'string') return navigator.clipboard.writeText(code);
-    return Promise.resolve(code).then((code) => {
-      if (code) return navigator.clipboard.writeText(code);
-    });
-  });
-
-  return (
-    <button
-      type="button"
-      title={t('Use the {name} type in TypeScript.', { variables: { name } })}
-      onClick={onCopy}
-      className={cn(
-        buttonVariants({ variant: 'ghost', size: 'sm' }),
-        '-my-1 shrink-0 gap-1.5 text-fd-muted-foreground [&_svg]:size-3.5',
-      )}
-    >
-      {isChecked ? <Check /> : <Copy />}
-      TypeScript
-    </button>
   );
 }
 
@@ -474,7 +429,7 @@ function ResponseContent({
           )}
           {contentTypes.map(([mediaType, media]) => (
             <SelectTab key={mediaType} value={mediaType} anchorSegments={[mediaType]}>
-              <MediaContent schema={media.schema} selector={<CardSelector items={items} />} />
+              <MediaContent schema={media.schema} selector={<SelectTabTrigger items={items} />} />
             </SelectTab>
           ))}
         </SelectTabs>

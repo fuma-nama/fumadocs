@@ -1,6 +1,6 @@
 'use client';
 import { useMemo } from 'react';
-import { type GraphQLArgument, type GraphQLEnumType, isRequiredArgument } from 'graphql';
+import type { GraphQLEnumType } from 'graphql';
 import { useTranslations } from '@fuma-translate/react';
 import { SchemaUI } from 'shared-api/components/schema';
 import { type SchemaViewProps, useGraphQL } from '@/utils/create-page';
@@ -8,19 +8,16 @@ import {
   type GenerateGraphQLSchemaUIOptions,
   generateGraphQLSchemaUI,
 } from '@/utils/generate-schema-ui';
+import { cn } from '@/utils/cn';
 import { Markdown } from './components/markdown';
-import { EnumValueList } from './components/enum-values';
-import { DirectiveList } from './components/type-annotation';
-
-const TagCardClass = 'flex flex-col w-full bg-fd-secondary border rounded-lg shadow-md';
-const TagCardTitleClass =
-  'font-medium text-xs text-fd-muted-foreground rounded-t-[inherit] bg-fd-muted not-prose border-b';
+import { chipClassName, DetailsPopover, detailsMarkdownClassName } from './components/chip';
+import { DeprecatedLabel, DeprecationReason, Directives } from './components/directive';
 
 const renderers: Omit<GenerateGraphQLSchemaUIOptions, 'translations'> = {
   renderMarkdown: (md) => <Markdown md={md} />,
-  renderDirectives: (directives) => <DirectiveList directives={directives} />,
-  renderArguments: (args) => <ArgumentsCard args={args} />,
-  renderEnumValues: (type) => <ValuesCard type={type} />,
+  // the chips join the other tags
+  renderDirectives: (directives) => <Directives directives={directives} className="contents" />,
+  renderEnumValues: (type) => <EnumValues type={type} />,
 };
 
 export function GraphQLSchemaView({ client, root }: SchemaViewProps) {
@@ -34,37 +31,52 @@ export function GraphQLSchemaView({ client, root }: SchemaViewProps) {
   return <SchemaUI {...client} generated={generated} />;
 }
 
-function ArgumentsCard({ args }: { args: readonly GraphQLArgument[] }) {
+/** the values of an enum as chips, a value opens its description and deprecation */
+function EnumValues({ type }: { type: GraphQLEnumType }) {
   const t = useTranslations({ note: 'graphql schema ui' });
 
   return (
-    <div className={TagCardClass}>
-      <p className={`${TagCardTitleClass} p-2`}>{t('Arguments')}</p>
-      {args.map((arg) => (
-        <div key={arg.name} className="text-xs px-2 py-1.5">
-          <div className="flex items-center not-prose gap-2">
-            <code className="font-medium text-fd-primary">{arg.name}</code>
-            <code className="text-fd-muted-foreground">{String(arg.type)}</code>
-            {isRequiredArgument(arg) && <span className="text-red-400">*</span>}
-          </div>
-          {arg.description && (
-            <div className="prose-no-margin text-fd-muted-foreground mt-1">
-              <Markdown md={arg.description} />
-            </div>
-          )}
-        </div>
-      ))}
-    </div>
-  );
-}
+    <div className="not-prose flex w-full flex-wrap items-center gap-1.5 text-xs">
+      {t('Value in')}
+      {type.getValues().map(({ name, description, deprecationReason }) => {
+        if (!description && deprecationReason == null)
+          return (
+            <code key={name} className={chipClassName}>
+              {name}
+            </code>
+          );
 
-function ValuesCard({ type }: { type: GraphQLEnumType }) {
-  const t = useTranslations({ note: 'graphql schema ui' });
-
-  return (
-    <div className={TagCardClass}>
-      <p className={`${TagCardTitleClass} px-2 py-1.5`}>{t('Values')}</p>
-      <EnumValueList type={type} className="p-2" />
+        const className = deprecationReason != null ? 'line-through' : undefined;
+        return (
+          <DetailsPopover
+            key={name}
+            className={className}
+            details={
+              <>
+                <p className="flex flex-wrap items-baseline gap-x-2">
+                  <span className={cn('font-mono text-[0.8125rem] font-medium', className)}>
+                    {name}
+                  </span>
+                  {deprecationReason != null && <DeprecatedLabel />}
+                </p>
+                {description && (
+                  <div className={cn('mt-1.5', detailsMarkdownClassName)}>
+                    <Markdown md={description} />
+                  </div>
+                )}
+                {deprecationReason && (
+                  <DeprecationReason
+                    reason={deprecationReason}
+                    className="mt-1.5 text-xs leading-relaxed"
+                  />
+                )}
+              </>
+            }
+          >
+            {name}
+          </DetailsPopover>
+        );
+      })}
     </div>
   );
 }

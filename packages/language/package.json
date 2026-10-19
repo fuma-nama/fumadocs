@@ -1,6 +1,6 @@
 {
   "name": "@fumadocs/language",
-  "version": "0.2.15",
+  "version": "0.2.16",
   "description": "Common language packs for Fumadocs",
   "keywords": [
     "documentation",
@@ -32,6 +32,7 @@
   },
   "devDependencies": {
     "@fumadocs/asyncapi": "workspace:*",
+    "@fumadocs/graphql": "workspace:*",
     "@fumadocs/story": "workspace:*",
     "fumadocs-core": "workspace:*",
     "fumadocs-openapi": "workspace:*",
@@ -42,6 +43,7 @@
   },
   "peerDependencies": {
     "@fumadocs/asyncapi": "*",
+    "@fumadocs/graphql": "*",
     "@fumadocs/story": "*",
     "fumadocs-core": "*",
     "fumadocs-openapi": "*",
@@ -49,6 +51,9 @@
   },
   "peerDependenciesMeta": {
     "@fumadocs/asyncapi": {
+      "optional": true
+    },
+    "@fumadocs/graphql": {
       "optional": true
     },
     "@fumadocs/story": {

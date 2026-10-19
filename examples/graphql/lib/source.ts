@@ -13,6 +13,8 @@ export const source = loader(
       // a route group, generated pages won't have a `/graphql` prefix in their URLs
       baseDir: '(graphql)',
       meta: true,
+      // a page per named type too
+      includeTypes: true,
     }),
   },
   {

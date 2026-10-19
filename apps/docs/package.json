@@ -1,6 +1,6 @@
 {
   "name": "docs",
-  "version": "0.1.57",
+  "version": "0.1.58",
   "private": true,
   "scripts": {
     "build": "pnpm build:pre && next build && pnpm build:post",
@@ -49,11 +49,11 @@
     "graphql": "^17.0.2",
     "katex": "0.19.0",
     "lucide-react": "^1.50.0",
-    "mermaid": "^12.1.0",
     "motion": "^14.0.0",
     "next": "16.3.8",
     "next-themes": "^0.4.6",
     "octokit": "^5.0.5",
+    "pele": "^1.6.0",
     "react": "^19.3.0",
     "react-dom": "^19.3.0",
     "react-force-graph-2d": "^1.29.2",

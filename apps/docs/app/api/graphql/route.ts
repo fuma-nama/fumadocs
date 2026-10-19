@@ -1,14 +1,20 @@
 import {
+  assertEnumType,
   execute,
   getNamedType,
+  getOperationAST,
   GraphQLError,
   isEnumType,
   isListType,
   isNonNullType,
   parse,
   specifiedRules,
+  subscribe,
   validate,
   type DocumentNode,
+  type ExecutionArgs,
+  type ExecutionResult,
+  type GraphQLSchema,
   type ValidationRule,
 } from 'graphql';
 import { graphql } from '@/lib/graphql';
@@ -42,8 +48,36 @@ function depthLimit(maxDepth: number): ValidationRule {
   };
 }
 
+/** The events of `orderUpdated`: the order goes through every status, half a second apart. */
+async function* orderUpdates(schema: GraphQLSchema, signal: AbortSignal) {
+  for (const { name } of assertEnumType(schema.getType('OrderStatus')).getValues()) {
+    if (signal.aborted) return;
+    yield { orderUpdated: { status: name } };
+    await new Promise((resolve) => setTimeout(resolve, 500));
+  }
+}
+
+/** Stream the results of a subscription with the GraphQL over SSE protocol. */
+function eventStream(results: AsyncIterable<ExecutionResult>, signal: AbortSignal) {
+  const encoder = new TextEncoder();
+
+  return new ReadableStream<Uint8Array>({
+    async start(controller) {
+      for await (const result of results) {
+        controller.enqueue(encoder.encode(`event: next\ndata: ${JSON.stringify(result)}\n\n`));
+      }
+
+      // the stream is canceled already when the client disconnected
+      if (signal.aborted) return;
+      controller.enqueue(encoder.encode('event: complete\ndata:\n\n'));
+      controller.close();
+    },
+  });
+}
+
 /**
  * A mock GraphQL endpoint for the playground, it responds with sample values.
+ * Subscriptions are streamed with Server-Sent Events.
  *
  * Replace it with your own GraphQL server in a real app.
  */
@@ -80,7 +114,7 @@ export async function POST(req: Request) {
     return Response.json({ errors }, { status: 400 });
   }
 
-  const result = await execute({
+  const args: ExecutionArgs = {
     schema,
     document,
     variableValues: body.variables,
@@ -103,7 +137,21 @@ export async function POST(req: Request) {
 
       return isListType(type) ? [sample] : sample;
     },
-  });
+    typeResolver: (_value, _ctx, info, type) => info.schema.getPossibleTypes(type)[0]?.name,
+  };
 
-  return Response.json(result);
+  if (getOperationAST(document)?.operation === 'subscription') {
+    const result = await subscribe({
+      ...args,
+      subscribeFieldResolver: () => orderUpdates(schema, req.signal),
+    });
+    // errors before the first event, like invalid variables, are a single result
+    if (!(Symbol.asyncIterator in result)) return Response.json(result);
+
+    return new Response(eventStream(result, req.signal), {
+      headers: { 'Content-Type': 'text/event-stream', 'Cache-Control': 'no-cache' },
+    });
+  }
+
+  return Response.json(await execute(args));
 }

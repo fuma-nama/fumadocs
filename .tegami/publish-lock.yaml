@@ -1,59 +1,79 @@
 core:changelogs:
-  - content: "---\npackages:\n  \"@fumadocs/asyncapi\":\n    type: minor\n  \"@fumadocs/language\":\n    type: patch\n---\n\n### Redesigned AsyncAPI pages\n\n- Messages are labelled **Receive** and **Send** for readers, instead of the `send` and `receive` of the documented application, the sidebar shows them as icons.\n- A connection bar shows the channel address with the server below it, brokers label the address as a topic, queue or subject.\n- Messages are listed in an accordion, their examples beside the payload and headers on wide pages.\n- Example cards are titled with the name and summary of examples, selects switch to other examples and to their headers.\n- Protocol details only show the bindings of the selected server, `x-*` bindings are hidden.\n- A playground connects to channels, sends messages from their examples and identifies the received ones.\n- The playground edits address parameters in its URL and previews the URL to connect.\n- Code samples beside operations in JavaScript and Python for WebSocket, MQTT, Kafka, AMQP and NATS servers, and from `x-codeSamples` of operations.\n- Playground transports connect by protocol: WebSocket is built in, `sseTransport` receives Server-Sent Events.\n- The playground sends text, hex and Base64 messages, and previews binary ones in hex.\n- Security schemes show OAuth 2.0 flows, scopes and SASL mechanisms.\n- Avro, Protobuf and RAML schemas are shown as they are.\n\n### Fixes\n\n- Later traits override earlier ones, as the spec merges them in order.\n- `defaultContentType` applies to messages without `contentType`.\n- `per: 'tag'` matches tags by name, operations without tags are under `unknown`.\n- `groupBy: 'channel'` names folders by channel keys and files by operation ids.\n- Channels with empty `servers` are available on all servers.\n- Operations sharing a title on one page get unique anchors.\n- AsyncAPI 2 documents throw an error instead of generating no pages.\n- `imports: []` no longer adds an empty line to generated files.\n- Operations show the description of their channel, it is in search and Markdown too.\n- `readOnly` properties are hidden from messages readers send and `writeOnly` ones from messages they receive, in schemas, TypeScript types and generated examples, instead of both from all messages.\n\n### API changes\n\n| Before                                                          | Now                                 |\n| --------------------------------------------------------------- | ----------------------------------- |\n| `slots.server` and `slots.channel` of `renderOperationLayout`   | `slots.connection`                  |\n| `content.renderAPIExampleUsageTabs`                             | removed, examples are in messages   |\n| `useOperationSecurity()` returns schemes of operation or server | `{ server, operation }`, both apply |\n| `payload` and `headers` of `OperationMessage` are schemas       | `{ schema, schemaFormat? }`         |\n| `OperationReply.messages` have `title` and `payload`            | `OperationMessage[]`                |\n| `action` prop of `<Operation />` and `<OperationProvider />`    | removed, read from the operation    |\n| `preloaded.proxyUrl` of `AsyncAPIPageProps_Preloaded`           | removed, it was never used          |\n| `meta.groupStyle` of `generateFiles()`                          | removed, use `folderStyle`          |\n\n- Added the `playground` option of `createAsyncAPIPage()` with `transports`, and `usePlayground()`, `usePlaygroundTransport()` and `sseTransport` from `@fumadocs/asyncapi/playground`.\n- Added the `generateTypeScriptDefinitions` option, payloads and headers can be copied as TypeScript types.\n- Added the `codeUsages` option and `slots.usage` of `renderOperationLayout`, with `createCodeUsageGeneratorRegistry()` and `registerDefaultCodeUsages()` from `@fumadocs/asyncapi/ui`.\n- Added `getText()` to the data of AsyncAPI pages, their operations in Markdown for LLMs.\n- Added `received` to `OperationMessage`, whether readers receive the message.\n"
-    filename: 2026-10-15-asyncapi-redesign.md
+  - content: "---\npackages:\n  \"@fumadocs/asyncapi\":\n    type: patch\n---\n\n### TypeScript definitions on copy\n\n- Message schemas generate their TypeScript definitions when the button copies them, not on every render.\n"
+    filename: 2026-10-18-asyncapi-typescript-on-copy.md
     v: 0.0.0
-  - content: "---\npackages:\n  \"@fumari/stf\":\n    type: patch\n  \"@fumadocs/json-schema\":\n    type: patch\n---\n\n### Support `__proto__` as a property name\n\n- Fields named `__proto__` are stored as own properties, instead of changing the prototype of their parent object.\n- Samples and merged schemas keep properties named `__proto__`, `constructor` and `prototype`.\n"
-    filename: 2026-10-16-proto-keys.md
+  - content: "---\npackages:\n  fumadocs-openapi:\n    type: patch\n  \"@fumadocs/asyncapi\":\n    type: patch\n---\n\n### Example cards with code block title bars\n\n- Example cards put their controls in the title bar of their code block, next to its copy button, so code no longer runs under the button on narrow screens.\n- Selects with a single option, like one status code, show a plain label.\n- The playground button follows the corner radius of the bar around it.\n"
+    filename: 2026-10-18-example-card-copy.md
     v: 0.0.0
-  - content: "---\npackages:\n  fumadocs-openapi:\n    type: patch\n---\n\n### Generated files\n\n- `watch` of `generateFiles()` watches the files of record inputs, like `{ petstore: './petstore.yaml' }`.\n- Index cards with quotes in titles or descriptions generate valid MDX.\n- Generated pages keep backslashes in document IDs, like Windows paths.\n- `staticSource()` and `generateFiles()` are faster on large documents, `per: 'tag'` groups operations in one pass.\n"
-    filename: 2026-10-16-openapi-generate-files.md
+  - content: "---\npackages:\n  fumadocs-core:\n    type: patch\n  fumadocs-openapi:\n    type: patch\n  \"@fumadocs/asyncapi\":\n    type: patch\n  \"@fumadocs/graphql\":\n    type: patch\n---\n\n### Generated pages in every language\n\n- Virtual files accept a `locale`, `$` for every language, instead of parsing it from their path.\n- Pages from `staticSource()` and `dynamicSource()` of OpenAPI, AsyncAPI and GraphQL are shared with every language of `loader()`.\n\nFix [#3720](https://github.com/fuma-nama/fumadocs/issues/3720)\n"
+    filename: 2026-10-19-shared-generated-pages.md
     v: 0.0.0
-  - content: "---\npackages:\n  fumadocs-openapi:\n    type: patch\n---\n\n### Playground details\n\n- The selected server is highlighted in the server list.\n- Server list items highlight on hover without a fade.\n- Edits of server variables no longer apply to the next selected server.\n- Boolean fields line up with the values of other fields.\n"
-    filename: 2026-10-16-openapi-playground-shared.md
+  - content: "---\npackages:\n  fumadocs-core:\n    type: patch\n---\n\n### i18n `parser: 'none'`\n\n- `parser: 'none'` no longer parses locales from file paths, files without a `locale` belong to the default language.\n"
+    filename: 2026-10-19-core-none-parser.md
     v: 0.0.0
-  - content: "---\npackages:\n  fumadocs-preview:\n    type: patch\n---\n\n### Listen on `localhost` by default\n\n- The server listens on `localhost` unless `--host` or `HOST` is set, instead of every network interface.\n"
-    filename: 2026-10-16-preview-localhost.md
+  - content: "---\npackages:\n  \"@fumadocs/graphql\":\n    type: minor\n  \"@fumadocs/language\":\n    type: patch\n---\n\n### Redesigned GraphQL pages\n\n- Operation pages start with their signature and directives, like `QUERY customer(id: ID!): Customer`, and keep the types they use in place: arguments and return types open in Schema UI panels.\n- Pages of named types are opt-in with `includeTypes`, they show the SDL of types and where they are used.\n- Example requests and responses beside operations, with a select of examples and code samples in cURL, JavaScript, Go, Python, Java, C# and Rust.\n- Named examples from GraphQL documents with the `examples` option of `createGraphQL()`.\n- The playground opens in a dialog: an editor with validation and formatting, variables as a form or JSON, headers, and responses with their GraphQL errors.\n- The playground runs subscriptions over graphql-ws or GraphQL over SSE (`subscriptionUrl`), and logs their events.\n- Directives applied in the schema show their definitions, `@oneOf` input objects are supported.\n- `getText()` returns pages in Markdown for LLMs, operations with the SDL of types they use.\n- Chinese translations of GraphQL pages in `@fumadocs/language`.\n\n### API changes\n\n| Before                                                                  | Now                                                        |\n| ----------------------------------------------------------------------- | ---------------------------------------------------------- |\n| pages of named types by default                                         | `includeTypes: true`, also for `per: 'file'`               |\n| `useOperation().example`                                                | `examples`, with `selected` and `select()`                 |\n| `slots.relations` and `slots.scalar` of `renderTypeLayout`              | `slots.definition`, `usages` and `sdl`                     |\n| `@fumadocs/graphql/utils/snippets`                                      | the `codeUsages` option                                    |\n| `inputTypeToJsonSchema(type, depth)`                                    | `inputTypeToJsonSchema(type)`, recursive inputs are shared |\n| `slots.directives` of `renderOperationLayout` and `renderTypeLayout`    | in `slots.playground` and `slots.definition`               |\n| `renderArguments` of `generateGraphQLSchemaUI()`, `SchemaViewRoot.args` | arguments open in their own panel                          |\n\n- Added `createCodeUsageGeneratorRegistry()` and `registerDefaultCodeUsages()` to `@fumadocs/graphql/ui`.\n- Added `usePlayground()`, `useRequestValues()` and `subscribeGraphQL()` to `@fumadocs/graphql/playground`, the installed playground runs on them.\n- Removed `HeaderItem`, `filterHeaderItems()`, `readStored()`, `writeStored()`, `getEndpointOrigin()` and `syncOperationVariables()` from `@fumadocs/graphql/playground`, `usePlayground()` keeps headers by endpoint origin.\n- Added `relations.unions` to `useNamedType()`.\n- The Schema UI root also takes a schema coordinate, like `Query.orders()` for the arguments of `Query.orders`.\n"
+    filename: 2026-10-17-graphql-redesign.md
+    v: 0.0.0
+  - content: "---\npackages:\n  \"@fumadocs/json-schema\":\n    type: patch\n---\n\n### Info tags that open schemas\n\n- An `InfoTag` with `open: { name, $ref }` opens the schema `$ref` in Schema UI, like the type of a property.\n"
+    filename: 2026-10-18-schema-ui-open-tag.md
+    v: 0.0.0
+  - content: "---\npackages:\n  fumadocs-openapi:\n    type: patch\n---\n\n### Smaller bundles\n\n- `fumadocs-openapi/ui/base` and `createOpenAPIBaseRenderer()` no longer bundle the full Shiki bundle.\n\nFix [#3714](https://github.com/fuma-nama/fumadocs/issues/3714)\n"
+    filename: 2026-10-17-openapi-base-shiki.md
+    v: 0.0.0
+  - content: "---\npackages:\n  fumadocs-openapi:\n    type: patch\n---\n\n### Code samples\n\n- Bodies with quotes, line breaks, NUL, BOM or bidi characters produce valid Python, Java, Go, Rust, JavaScript and C# samples that send them exactly.\n- Go and Rust samples no longer indent the lines of multi-line bodies.\n- `text/plain` bodies are sent as written, in samples and the playground.\n- cURL samples send JSON bodies of `+json` and `; charset=` media types as JSON.\n"
+    filename: 2026-10-17-openapi-code-samples.md
+    v: 0.0.0
+  - content: "---\npackages:\n  fumadocs-openapi:\n    type: patch\n---\n\n### Tag hierarchy in `per: 'tag'`\n\n- Pages follow the OpenAPI 3.2 tag hierarchy, in the folder of their `parent` tag.\n- Tags without operations or with a `kind` other than `nav` get no page.\n- Undeclared tags get pages too, untagged operations are listed in `unknown`.\n- Index cards of `generateFiles()` include pages in folders.\n\nFix [#3719](https://github.com/fuma-nama/fumadocs/issues/3719)\n"
+    filename: 2026-10-19-openapi-per-tag-hierarchy.md
     v: 0.0.0
 core:packages:
   - id: npm:@fumadocs/ai-chat
     updated: false
   - changelogIds:
-      - 2026-10-15-asyncapi-redesign.md
+      - 2026-10-18-asyncapi-typescript-on-copy.md
+      - 2026-10-18-example-card-copy.md
+      - 2026-10-19-shared-generated-pages.md
     id: npm:@fumadocs/asyncapi
     updated: true
-  - id: npm:@fumadocs/base-ui
-    updated: false
   - id: npm:@fumadocs/basehub
     updated: false
+  - id: npm:@fumadocs/base-ui
+    updated: true
   - id: npm:@fumadocs/changelog
-    updated: false
-  - id: npm:@fumadocs/cli
     updated: false
   - id: npm:@fumadocs/content
     updated: false
   - id: npm:@fumadocs/content-collections
     updated: false
-  - id: npm:fumadocs-core
+  - id: npm:@fumadocs/cli
     updated: false
+  - changelogIds:
+      - 2026-10-19-core-none-parser.md
+      - 2026-10-19-shared-generated-pages.md
+    id: npm:fumadocs-core
+    updated: true
   - id: npm:create-fumadocs-app
-    updated: false
+    updated: true
   - id: npm:create-fumadocs-versions
-    updated: false
+    updated: true
   - id: npm:fumadocs-docgen
     updated: false
   - id: npm:fumadocs-epub
     updated: false
-  - id: npm:@fumadocs/graphql
-    updated: false
+  - changelogIds:
+      - 2026-10-17-graphql-redesign.md
+      - 2026-10-19-shared-generated-pages.md
+    id: npm:@fumadocs/graphql
+    updated: true
   - id: npm:@fumari/image-size
     updated: false
   - changelogIds:
-      - 2026-10-16-proto-keys.md
-    id: npm:@fumadocs/json-schema
+      - 2026-10-17-graphql-redesign.md
+    id: npm:@fumadocs/language
     updated: true
   - changelogIds:
-      - 2026-10-15-asyncapi-redesign.md
-    id: npm:@fumadocs/language
+      - 2026-10-18-schema-ui-open-tag.md
+    id: npm:@fumadocs/json-schema
     updated: true
   - id: npm:@fumadocs/local-content
     updated: false
@@ -70,34 +90,33 @@ core:packages:
   - id: npm:fumadocs-obsidian
     updated: false
   - changelogIds:
-      - 2026-10-16-openapi-generate-files.md
-      - 2026-10-16-openapi-playground-shared.md
+      - 2026-10-17-openapi-base-shiki.md
+      - 2026-10-17-openapi-code-samples.md
+      - 2026-10-18-example-card-copy.md
+      - 2026-10-19-openapi-per-tag-hierarchy.md
+      - 2026-10-19-shared-generated-pages.md
     id: npm:fumadocs-openapi
     updated: true
+  - id: npm:fumadocs-preview
+    updated: false
   - id: npm:@fumadocs/openapi-standalone
     updated: false
-  - changelogIds:
-      - 2026-10-16-preview-localhost.md
-    id: npm:fumadocs-preview
-    updated: true
   - id: npm:fumadocs-python
     updated: false
   - id: npm:fumadocs-ui
+    updated: true
+  - id: npm:@fumadocs/satteri
     updated: false
   - id: npm:@fumadocs/sanity
     updated: false
-  - id: npm:@fumadocs/satteri
-    updated: false
   - id: npm:@fumadocs/shadcn
+    updated: false
+  - id: npm:@fumari/stf
     updated: false
   - id: npm:shared-api
     updated: true
-  - changelogIds:
-      - 2026-10-16-proto-keys.md
-    id: npm:@fumari/stf
-    updated: true
   - id: npm:@fumadocs/story
-    updated: true
+    updated: false
   - id: npm:@fumadocs/tailwind
     updated: false
   - id: npm:fumadocs-twoslash
@@ -109,12 +128,12 @@ core:packages:
 npm:packages:
   - id: npm:@fumadocs/ai-chat
   - id: npm:@fumadocs/asyncapi
-  - id: npm:@fumadocs/base-ui
   - id: npm:@fumadocs/basehub
+  - id: npm:@fumadocs/base-ui
   - id: npm:@fumadocs/changelog
-  - id: npm:@fumadocs/cli
   - id: npm:@fumadocs/content
   - id: npm:@fumadocs/content-collections
+  - id: npm:@fumadocs/cli
   - id: npm:fumadocs-core
   - id: npm:create-fumadocs-app
   - id: npm:create-fumadocs-versions
@@ -122,8 +141,8 @@ npm:packages:
   - id: npm:fumadocs-epub
   - id: npm:@fumadocs/graphql
   - id: npm:@fumari/image-size
-  - id: npm:@fumadocs/json-schema
   - id: npm:@fumadocs/language
+  - id: npm:@fumadocs/json-schema
   - id: npm:@fumadocs/local-content
   - id: npm:@fumadocs/local-html
   - id: npm:@fumadocs/local-md
@@ -132,26 +151,48 @@ npm:packages:
   - id: npm:@fumadocs/notion
   - id: npm:fumadocs-obsidian
   - id: npm:fumadocs-openapi
-  - id: npm:@fumadocs/openapi-standalone
   - id: npm:fumadocs-preview
+  - id: npm:@fumadocs/openapi-standalone
   - id: npm:fumadocs-python
   - id: npm:fumadocs-ui
-  - id: npm:@fumadocs/sanity
   - id: npm:@fumadocs/satteri
+  - id: npm:@fumadocs/sanity
   - id: npm:@fumadocs/shadcn
-  - id: npm:shared-api
   - id: npm:@fumari/stf
+  - id: npm:shared-api
   - id: npm:@fumadocs/story
   - id: npm:@fumadocs/tailwind
   - id: npm:fumadocs-twoslash
   - id: npm:fumadocs-typescript
   - id: npm:@fumadocs/vite
   - id: npm:docs
-  - id: npm:example-asyncapi
+  - id: npm:example-graphql
   - id: npm:example-i18n
   - id: npm:example-react-router-i18n
   - id: npm:example-tanstack-start-i18n
   - id: npm:example-waku-i18n
   - id: npm:example-openapi
   - id: npm:example-tanstack-start-openapi
+  - id: npm:example-asyncapi
+  - id: npm:example-astro
+  - id: npm:example-base-ui
+  - id: npm:example-content-collections
+  - id: npm:example-marble-cms
+  - id: npm:example-next
+  - id: npm:example-next-local-html
+  - id: npm:example-next-local-md
+  - id: npm:example-next-min
+  - id: npm:example-next-shadcn
+  - id: npm:example-next-static
+  - id: npm:example-obsidian
+  - id: npm:example-python
+  - id: npm:example-react-router
+  - id: npm:example-react-router-min
+  - id: npm:example-react-router-rsc
+  - id: npm:example-react-router-spa
+  - id: npm:example-tanstack-start
+  - id: npm:example-tanstack-start-local-md
+  - id: npm:example-tanstack-start-min
+  - id: npm:example-tanstack-start-spa
   - id: npm:example-tanstack-start-story
+  - id: npm:example-waku

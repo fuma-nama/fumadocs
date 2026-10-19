@@ -1,3 +1,40 @@
+## fumadocs-openapi@12.5.3
+
+### Smaller bundles
+
+- `fumadocs-openapi/ui/base` and `createOpenAPIBaseRenderer()` no longer bundle the full Shiki bundle.
+
+Fix [#3714](https://github.com/fuma-nama/fumadocs/issues/3714)
+
+### Code samples
+
+- Bodies with quotes, line breaks, NUL, BOM or bidi characters produce valid Python, Java, Go, Rust, JavaScript and C# samples that send them exactly.
+- Go and Rust samples no longer indent the lines of multi-line bodies.
+- `text/plain` bodies are sent as written, in samples and the playground.
+- cURL samples send JSON bodies of `+json` and `; charset=` media types as JSON.
+
+### Example cards with code block title bars
+
+- Example cards put their controls in the title bar of their code block, next to its copy button, so code no longer runs under the button on narrow screens.
+- Selects with a single option, like one status code, show a plain label.
+- The playground button follows the corner radius of the bar around it.
+
+### Tag hierarchy in `per: 'tag'`
+
+- Pages follow the OpenAPI 3.2 tag hierarchy, in the folder of their `parent` tag.
+- Tags without operations or with a `kind` other than `nav` get no page.
+- Undeclared tags get pages too, untagged operations are listed in `unknown`.
+- Index cards of `generateFiles()` include pages in folders.
+
+Fix [#3719](https://github.com/fuma-nama/fumadocs/issues/3719)
+
+### Generated pages in every language
+
+- Virtual files accept a `locale`, `$` for every language, instead of parsing it from their path.
+- Pages from `staticSource()` and `dynamicSource()` of OpenAPI, AsyncAPI and GraphQL are shared with every language of `loader()`.
+
+Fix [#3720](https://github.com/fuma-nama/fumadocs/issues/3720)
+
 ## fumadocs-openapi@12.5.2
 
 ### Generated files
