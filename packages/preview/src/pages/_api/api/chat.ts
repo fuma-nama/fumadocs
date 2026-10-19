@@ -135,7 +135,7 @@ export async function POST(req: Request) {
     tools: {
       search: searchTool,
     },
-    system: systemPrompt,
+    instructions: systemPrompt,
     messages: await convertToModelMessages(reqJson.messages ?? [], {
       convertDataPart(part) {
         if (part.type === 'data-client')
