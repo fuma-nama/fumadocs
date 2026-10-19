@@ -388,3 +388,47 @@ test('untitled `allOf` keeps combined alias', () => {
   });
   expect(stringify(merged, { alias: true })).toBe('Readable & Writable');
 });
+
+test('subtypes listed in `oneOf` of the parent they extend (#3724)', () => {
+  const doc = createMagicProxy({
+    components: {
+      schemas: {
+        RuleNode: {
+          oneOf: [
+            { $ref: '#/components/schemas/GroupNode' },
+            { $ref: '#/components/schemas/ConditionNode' },
+          ],
+        },
+        GroupNode: {
+          allOf: [
+            { $ref: '#/components/schemas/RuleNode' },
+            {
+              type: 'object',
+              properties: {
+                children: { type: 'array', items: { $ref: '#/components/schemas/RuleNode' } },
+              },
+            },
+          ],
+        },
+        ConditionNode: { type: 'object', properties: { field: { type: 'string' } } },
+      },
+    },
+    body: { $ref: '#/components/schemas/RuleNode' },
+  }) as any;
+
+  const { $root, refs } = readAll(
+    generateSchemaUI({
+      root: doc.body,
+      renderMarkdown: (md) => md,
+      renderCodeblock: () => null,
+    }),
+  );
+  const root = refs[$root];
+  expect(root.typeName).toBe('GroupNode | ConditionNode');
+
+  const group = root.type === 'or' ? refs[root.items[0].$type] : undefined;
+  const props = group?.type === 'object' ? group.props : [];
+  expect(props.map((prop) => [prop.name, refs[prop.$type].typeName])).toEqual([
+    ['children', 'array<RuleNode>'],
+  ]);
+});

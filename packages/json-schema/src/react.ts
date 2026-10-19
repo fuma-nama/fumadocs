@@ -108,6 +108,8 @@ export function generateSchemaUI({
 }: GenerateSchemaUIOptions): SchemaUIGeneratedData {
   const t = fromTranslations(translations, { note: 'schema UI' });
   const schemas = new Map<string, JsonSchema>();
+  /** merged `allOf` of schemas, read by both their visibility and their data */
+  const merged = new WeakMap<object, JsonSchema>();
   // a UI only reads the schemas it shows
   const refs = new Proxy<Record<string, SchemaData>>(
     {},
@@ -222,8 +224,16 @@ export function generateSchemaUI({
     return id;
   }
 
-  function isVisible(raw: JsonSchema): boolean {
+  function merge(raw: JsonSchema): JsonSchema {
     const schema = dereference(raw);
+    if (typeof schema === 'boolean' || !schema.allOf) return schema;
+    let out = merged.get(schema);
+    if (out === undefined) merged.set(schema, (out = mergeAllOf(schema)));
+    return out;
+  }
+
+  function isVisible(raw: JsonSchema): boolean {
+    const schema = merge(raw);
     if (typeof schema === 'boolean') return true;
     if (schema.writeOnly) return writeOnly;
     if (schema.readOnly) return readOnly;
@@ -298,7 +308,7 @@ export function generateSchemaUI({
       return { type: 'or', items, ...base(raw) };
     }
 
-    if (schema.allOf) return generate(id, mergeAllOf(schema));
+    if (schema.allOf) return generate(id, merge(schema));
 
     if (schema.type === 'object') {
       const { properties = {}, patternProperties, additionalProperties } = schema;
