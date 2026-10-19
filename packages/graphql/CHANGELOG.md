@@ -1,3 +1,42 @@
+## @fumadocs/graphql@0.4.0
+
+### Redesigned GraphQL pages
+
+- Operation pages start with their signature and directives, like `QUERY customer(id: ID!): Customer`, and keep the types they use in place: arguments and return types open in Schema UI panels.
+- Pages of named types are opt-in with `includeTypes`, they show the SDL of types and where they are used.
+- Example requests and responses beside operations, with a select of examples and code samples in cURL, JavaScript, Go, Python, Java, C# and Rust.
+- Named examples from GraphQL documents with the `examples` option of `createGraphQL()`.
+- The playground opens in a dialog: an editor with validation and formatting, variables as a form or JSON, headers, and responses with their GraphQL errors.
+- The playground runs subscriptions over graphql-ws or GraphQL over SSE (`subscriptionUrl`), and logs their events.
+- Directives applied in the schema show their definitions, `@oneOf` input objects are supported.
+- `getText()` returns pages in Markdown for LLMs, operations with the SDL of types they use.
+- Chinese translations of GraphQL pages in `@fumadocs/language`.
+
+### API changes
+
+| Before                                                                  | Now                                                        |
+| ----------------------------------------------------------------------- | ---------------------------------------------------------- |
+| pages of named types by default                                         | `includeTypes: true`, also for `per: 'file'`               |
+| `useOperation().example`                                                | `examples`, with `selected` and `select()`                 |
+| `slots.relations` and `slots.scalar` of `renderTypeLayout`              | `slots.definition`, `usages` and `sdl`                     |
+| `@fumadocs/graphql/utils/snippets`                                      | the `codeUsages` option                                    |
+| `inputTypeToJsonSchema(type, depth)`                                    | `inputTypeToJsonSchema(type)`, recursive inputs are shared |
+| `slots.directives` of `renderOperationLayout` and `renderTypeLayout`    | in `slots.playground` and `slots.definition`               |
+| `renderArguments` of `generateGraphQLSchemaUI()`, `SchemaViewRoot.args` | arguments open in their own panel                          |
+
+- Added `createCodeUsageGeneratorRegistry()` and `registerDefaultCodeUsages()` to `@fumadocs/graphql/ui`.
+- Added `usePlayground()`, `useRequestValues()` and `subscribeGraphQL()` to `@fumadocs/graphql/playground`, the installed playground runs on them.
+- Removed `HeaderItem`, `filterHeaderItems()`, `readStored()`, `writeStored()`, `getEndpointOrigin()` and `syncOperationVariables()` from `@fumadocs/graphql/playground`, `usePlayground()` keeps headers by endpoint origin.
+- Added `relations.unions` to `useNamedType()`.
+- The Schema UI root also takes a schema coordinate, like `Query.orders()` for the arguments of `Query.orders`.
+
+### Generated pages in every language
+
+- Virtual files accept a `locale`, `$` for every language, instead of parsing it from their path.
+- Pages from `staticSource()` and `dynamicSource()` of OpenAPI, AsyncAPI and GraphQL are shared with every language of `loader()`.
+
+Fix [#3720](https://github.com/fuma-nama/fumadocs/issues/3720)
+
 ## @fumadocs/graphql@0.3.5
 
 ### Refuse schemas not listed in `input`
