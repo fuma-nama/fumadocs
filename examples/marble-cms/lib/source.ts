@@ -1,6 +1,6 @@
 import { loader, type MetaData, type StaticSource, type VirtualFile } from 'fumadocs-core/source';
 import { getPosts } from '@/lib/query';
-import type { Post } from '@/lib/types';
+import type { Post } from '@usemarble/sdk/models';
 import type { StructuredData } from 'fumadocs-core/mdx-plugins';
 
 const PageTag = 'page';
@@ -18,7 +18,7 @@ async function createMarbleSource(): Promise<
   }>
 > {
   return {
-    files: (await getPosts()).posts.flatMap((post) => {
+    files: (await getPosts()).flatMap((post) => {
       if (!post.tags.some((tag) => tag.slug === PageTag)) return [];
 
       const slugs = post.slug.split('/');

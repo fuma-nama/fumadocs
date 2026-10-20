@@ -707,6 +707,9 @@ importers:
 
   examples/marble-cms:
     dependencies:
+      '@usemarble/sdk':
+        specifier: ^1.3.0
+        version: 1.3.0
       fumadocs-core:
         specifier: workspace:*
         version: link:../../packages/core
@@ -9652,6 +9655,9 @@ packages:
 
   '@ungap/structured-clone@1.4.0':
     resolution: {integrity: sha512-1mEZtMKPM09vDmQt5y7YvmN2+DFTP7Tg0EWXdic8/C6VRnpb33e4ghisCIE3WZjsE2N8mf+QV1Zqh7ZFYLWInQ==}
+
+  '@usemarble/sdk@1.3.0':
+    resolution: {integrity: sha512-AY6iC1ayfc/V7Ao8x7NT4/KjsU43CH0RDXJlKm9+ocuf+xGQ17KE9Qd0iiOFEI2cbQPNFtRrbqnG6xThK048Og==}
 
   '@vanilla-extract/dynamic@2.1.5':
     resolution: {integrity: sha512-QGIFGb1qyXQkbzx6X6i3+3LMc/iv/ZMBttMBL+Wm/DetQd36KsKsFg5CtH3qy+1hCA/5w93mEIIAiL4fkM8ycw==}
@@ -21169,6 +21175,10 @@ snapshots:
       '@typescript/old': typescript@6.0.3
 
   '@ungap/structured-clone@1.4.0': {}
+
+  '@usemarble/sdk@1.3.0':
+    dependencies:
+      zod: 4.6.7
 
   '@vanilla-extract/dynamic@2.1.5':
     dependencies:
