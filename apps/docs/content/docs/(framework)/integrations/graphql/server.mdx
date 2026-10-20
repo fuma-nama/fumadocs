@@ -121,6 +121,94 @@ export const graphql = createGraphQL({
 });
 ```
 
+## Loading Schemas Once
+
+Pages receive the whole schema in their props, every page load, navigation and prefetch sends it again. For large schemas, leave it out:
+
+```ts title="lib/graphql.ts"
+import { createGraphQL } from '@fumadocs/graphql/server';
+
+export const graphql = createGraphQL({
+  // IDs end up in URLs, keep them URL-safe
+  input: { store: './store.graphql' },
+  includeSchema: false, // [!code ++]
+});
+```
+
+`<GraphQLPage />` loads the SDL with `loadSchema` instead, once per browser session. It also runs during server rendering, read the schema directly there:
+
+```tsx title="components/api-page.tsx"
+'use client';
+import { createGraphQLPage } from '@fumadocs/graphql/ui';
+
+export const GraphQLPage = createGraphQLPage({
+  async loadSchema(id) {
+    // use `import.meta.env.SSR` with Vite, e.g. Waku and React Router
+    if (typeof window === 'undefined') {
+      const { graphql } = await import('@/lib/graphql');
+      return (await graphql.getSchema(id)).sdl;
+    }
+
+    const res = await fetch(`/api/graphql-schema/${id}`);
+    return res.text();
+  },
+});
+```
+
+And serve schemas to the browser:
+
+```ts tab="Next.js" title="app/api/graphql-schema/[id]/route.ts"
+import { graphql } from '@/lib/graphql';
+
+export async function GET(_req: Request, { params }: RouteContext<'/api/graphql-schema/[id]'>) {
+  const { id } = await params;
+  return new Response((await graphql.getSchema(id)).sdl);
+}
+
+// for static exports
+export async function generateStaticParams() {
+  return Object.keys(await graphql.getSchemas()).map((id) => ({ id }));
+}
+```
+
+```ts tab="Waku" title="src/pages/_api/api/graphql-schema/[id].ts"
+import type { ApiContext } from 'waku/router';
+import { graphql } from '@/lib/graphql';
+
+export async function GET(_: Request, { params }: ApiContext<'/api/graphql-schema/[id]'>) {
+  return new Response((await graphql.getSchema(params.id)).sdl);
+}
+```
+
+```ts tab="React Router" title="app/routes/graphql-schema.ts"
+// registered with `route('api/graphql-schema/:id', 'routes/graphql-schema.ts')` in `app/routes.ts`
+import type { Route } from './+types/graphql-schema';
+import { graphql } from '@/lib/graphql';
+
+export async function loader({ params }: Route.LoaderArgs) {
+  return new Response((await graphql.getSchema(params.id)).sdl);
+}
+```
+
+With Tanstack Start, a server function replaces the route and the server check:
+
+```tsx title="src/components/api-page.tsx"
+import { createServerFn } from '@tanstack/react-start';
+import { createGraphQLPage } from '@fumadocs/graphql/ui';
+import { graphql } from '@/lib/graphql';
+
+const getSchema = createServerFn({ method: 'GET' })
+  .validator((id: string) => id)
+  .handler(async ({ data: id }) => (await graphql.getSchema(id)).sdl);
+
+export const GraphQLPage = createGraphQLPage({
+  loadSchema: (id) => getSchema({ data: id }),
+});
+```
+
+- Keep the server check in your own code, bundlers drop `@/lib/graphql` from browser bundles with it.
+- For the [UI installed by Fumadocs CLI](/docs/integrations/graphql/api-page#full-ui), pass `loadSchema` to `createGraphQLRenderer()`.
+
 ## Generating Pages
 
 `staticSource()` and `dynamicSource()` generate pages for your `loader()`, they share the same options.

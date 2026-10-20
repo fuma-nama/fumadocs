@@ -17,6 +17,7 @@ import { generate } from '@fumari/json-schema-ts';
 import { getRaw } from '@scalar/json-magic/magic-proxy';
 import type { JsonSchema } from '@fumadocs/json-schema';
 import type { SchemaUIOptions } from 'shared-api/components/schema';
+import { createDocumentCache } from 'shared-api/utils/document-cache';
 import type { PlaygroundClientOptions } from '@/ui/playground/client';
 import type { ShikiFactory } from 'fumadocs-core/highlight/shiki';
 import {
@@ -247,11 +248,18 @@ export interface CreateOpenAPIRendererOptions extends OpenAPIRuntimeOptions, Ope
     /** wraps the rendered operations and webhooks */
     Layout?: FC<PageLayoutProps>;
   };
+  /**
+   * Load a bundled document by ID, for page props without one (`includeDocument: false`).
+   *
+   * It runs during server rendering and in the browser, which loads each document once per session.
+   */
+  loadDocument?: (id: string) => Promise<Document>;
 }
 
 const OpenAPIContext = createContext<OpenAPIRuntime | null>(null);
 const ComponentsContext = createContext<OpenAPIComponents | null>(null);
 const OptionsContext = createContext<RenderContext | null>(null);
+const load = createDocumentCache<Document>();
 
 /**
  * The runtime of the API page: the document and request options.
@@ -406,6 +414,7 @@ export function createRenderer(
  */
 export function createOpenAPIBaseRenderer({
   components,
+  loadDocument,
   ...options
 }: CreateOpenAPIRendererOptions & { shiki: ShikiFactory }): FC<OpenAPIPageProps> {
   const { Operation, Layout = DefaultLayout } = components;
@@ -477,26 +486,40 @@ export function createOpenAPIBaseRenderer({
     return <Layout {...layout} />;
   }
 
-  return function OpenAPIPage(props) {
-    let document: Document;
-    let proxyUrl: string | undefined;
-    if ('preloaded' in props) {
-      document = props.preloaded.docs[props.document];
-      if (!document)
-        throw new Error(
-          `[Fumadocs OpenAPI] the document ${props.document} is not preloaded, make sure to pass the "preloaded" prop to <OpenAPIPage />`,
-        );
-      proxyUrl = props.preloaded.proxyUrl;
-    } else {
-      document = props.payload.bundled;
-      proxyUrl = props.payload.proxyUrl;
-    }
+  function renderPage(document: Document, props: OpenAPIPageProps) {
+    const proxyUrl = 'preloaded' in props ? props.preloaded.proxyUrl : props.payload.proxyUrl;
 
     return (
       <OpenAPIProvider {...options} document={document} proxyUrl={proxyUrl} components={slots}>
         <Content {...props} />
       </OpenAPIProvider>
     );
+  }
+
+  function LoadedPage({
+    document,
+    props,
+  }: {
+    document: Promise<Document>;
+    props: OpenAPIPageProps;
+  }) {
+    return renderPage(use(document), props);
+  }
+
+  return function OpenAPIPage(props) {
+    const document =
+      'preloaded' in props ? props.preloaded.docs[props.document] : props.payload.bundled;
+    if (document) return renderPage(document, props);
+
+    const id = props.document;
+    if (!id) throw new Error('[Fumadocs OpenAPI] the page props have no document or document ID');
+    if (!loadDocument)
+      throw new Error(
+        `[Fumadocs OpenAPI] the document "${id}" is not in the page props, pass \`loadDocument\` to \`createOpenAPIPage()\``,
+      );
+
+    // load here, React renders <LoadedPage /> again after it suspends
+    return <LoadedPage document={load(id, loadDocument)} props={props} />;
   };
 }
 

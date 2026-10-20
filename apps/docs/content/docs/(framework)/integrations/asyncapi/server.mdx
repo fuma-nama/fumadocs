@@ -59,3 +59,91 @@ export const asyncapi = createAsyncAPI({
   disableCache: true,
 });
 ```
+
+## Loading Documents Once
+
+Pages receive the whole document in their props, every page load, navigation and prefetch sends it again. For large documents, leave it out:
+
+```ts title="lib/asyncapi.ts"
+import { createAsyncAPI } from '@fumadocs/asyncapi/server';
+
+export const asyncapi = createAsyncAPI({
+  // IDs end up in URLs, keep them URL-safe
+  input: { streetlights: './streetlights.yaml' },
+  includeDocument: false, // [!code ++]
+});
+```
+
+`<AsyncAPIPage />` loads them with `loadDocument` instead, once per browser session. It also runs during server rendering, read the document directly there:
+
+```tsx title="components/api-page.tsx"
+'use client';
+import { createAsyncAPIPage } from '@fumadocs/asyncapi/ui';
+
+export const AsyncAPIPage = createAsyncAPIPage({
+  async loadDocument(id) {
+    // use `import.meta.env.SSR` with Vite, e.g. Waku and React Router
+    if (typeof window === 'undefined') {
+      const { asyncapi } = await import('@/lib/asyncapi');
+      return (await asyncapi.getSchema(id)).bundled;
+    }
+
+    const res = await fetch(`/api/asyncapi/${id}`);
+    return res.json();
+  },
+});
+```
+
+And serve documents to the browser:
+
+```ts tab="Next.js" title="app/api/asyncapi/[id]/route.ts"
+import { asyncapi } from '@/lib/asyncapi';
+
+export async function GET(_req: Request, { params }: RouteContext<'/api/asyncapi/[id]'>) {
+  const { id } = await params;
+  return Response.json((await asyncapi.getSchema(id)).bundled);
+}
+
+// for static exports
+export async function generateStaticParams() {
+  return Object.keys(await asyncapi.getSchemas()).map((id) => ({ id }));
+}
+```
+
+```ts tab="Waku" title="src/pages/_api/api/asyncapi/[id].ts"
+import type { ApiContext } from 'waku/router';
+import { asyncapi } from '@/lib/asyncapi';
+
+export async function GET(_: Request, { params }: ApiContext<'/api/asyncapi/[id]'>) {
+  return Response.json((await asyncapi.getSchema(params.id)).bundled);
+}
+```
+
+```ts tab="React Router" title="app/routes/asyncapi.ts"
+// registered with `route('api/asyncapi/:id', 'routes/asyncapi.ts')` in `app/routes.ts`
+import type { Route } from './+types/asyncapi';
+import { asyncapi } from '@/lib/asyncapi';
+
+export async function loader({ params }: Route.LoaderArgs) {
+  return Response.json((await asyncapi.getSchema(params.id)).bundled);
+}
+```
+
+With Tanstack Start, a server function replaces the route and the server check:
+
+```tsx title="src/components/api-page.tsx"
+import { createServerFn } from '@tanstack/react-start';
+import { createAsyncAPIPage } from '@fumadocs/asyncapi/ui';
+import { asyncapi } from '@/lib/asyncapi';
+
+const getDocument = createServerFn({ method: 'GET' })
+  .validator((id: string) => id)
+  .handler(async ({ data: id }) => (await asyncapi.getSchema(id)).bundled);
+
+export const AsyncAPIPage = createAsyncAPIPage({
+  loadDocument: (id) => getDocument({ data: id }),
+});
+```
+
+- Keep the server check in your own code, bundlers drop `@/lib/asyncapi` from browser bundles with it.
+- Generated MDX files need no changes. For the [UI installed by Fumadocs CLI](/docs/integrations/asyncapi/api-page#full-ui), pass `loadDocument` to `createAsyncAPIRenderer()`.

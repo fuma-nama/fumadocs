@@ -42,6 +42,14 @@ export interface GraphQLOptions {
    */
   examples?: string[] | Record<string, string[]>;
   disableCache?: boolean;
+  /**
+   * Include the SDL of schemas in page props.
+   *
+   * Set to `false` to leave it out, `<GraphQLPage />` loads it with `loadSchema` instead, once per browser session.
+   *
+   * @defaultValue true
+   */
+  includeSchema?: boolean;
 }
 
 export type { GraphQLPageProps };
@@ -72,7 +80,7 @@ export interface GraphQLPageData extends PageData {
 export type GraphQLSourceOptions = SchemaToPagesOptions & SourceOptions;
 
 export function createGraphQL(options: GraphQLOptions = {}): GraphQLServer {
-  const { disableCache = false } = options;
+  const { disableCache = false, includeSchema = true } = options;
   const docCache = new Map<string, Promise<LoadedSchema>>();
   let exampleCache: Promise<Record<string, OperationExamples>> | undefined;
   type GraphQLVirtualFile = VirtualFile<{
@@ -177,8 +185,9 @@ export function createGraphQL(options: GraphQLOptions = {}): GraphQLServer {
             ...entry.info,
             getGraphQLPageProps() {
               return {
+                document: id,
                 payload: {
-                  sdl: schema.sdl,
+                  ...(includeSchema && { sdl: schema.sdl }),
                   links: getLinks(),
                   ...(pageExamples && { examples: pageExamples }),
                 },

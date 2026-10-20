@@ -29,6 +29,7 @@ import {
   registerDefaultCodeUsages,
 } from '@/codegen';
 import { buildSchemaFromSDL } from '@/utils/build-schema';
+import { createDocumentCache } from 'shared-api/utils/document-cache';
 
 /**
  * links of generated pages, generated when the source is attached to a loader.
@@ -226,12 +227,21 @@ export interface CreateGraphQLRendererOptions extends GraphQLRuntimeOptions, Gra
     /** wraps the rendered items */
     Layout?: FC<PageLayoutProps>;
   };
+  /**
+   * Load the SDL of a schema by ID, for page props without one (`includeSchema: false`).
+   *
+   * It runs during server rendering and in the browser, which loads each schema once per session.
+   */
+  loadSchema?: (id: string) => Promise<string>;
 }
 
 export type GraphQLPageProps = GeneratedPageProps & {
+  /** the schema ID, loaded with `loadSchema` when the payload has no SDL */
+  document?: string;
   payload: {
     links?: GraphQLLinks;
-    sdl: string;
+    /** the SDL of schema, left out with `includeSchema: false` */
+    sdl?: string;
     /** examples of the page's operations, by `${kind}:${name}` */
     examples?: Record<string, OperationExample[]>;
   };
@@ -240,6 +250,7 @@ export type GraphQLPageProps = GeneratedPageProps & {
 const GraphQLContext = createContext<GraphQLRuntime | null>(null);
 const ComponentsContext = createContext<GraphQLComponents | null>(null);
 const OptionsContext = createContext<RenderContext | null>(null);
+const load = createDocumentCache<string>();
 
 /**
  * The runtime of a GraphQL page: the schema and its cross-links.
@@ -333,6 +344,7 @@ export function GraphQLProvider({
 export function createGraphQLRenderer({
   components,
   shiki = defaultShikiFactory,
+  loadSchema,
   ...options
 }: CreateGraphQLRendererOptions): FC<GraphQLPageProps> {
   const { Operation, TypeDocs, Layout = DefaultLayout } = components;
@@ -371,12 +383,12 @@ export function createGraphQLRenderer({
     return <Layout {...layout} />;
   }
 
-  return function GraphQLPage(props) {
+  function renderPage(sdl: string, props: GraphQLPageProps) {
     return (
       <GraphQLProvider
         {...options}
         shiki={shiki}
-        sdl={props.payload.sdl}
+        sdl={sdl}
         links={props.payload.links}
         examples={props.payload.examples}
         components={slots}
@@ -384,6 +396,25 @@ export function createGraphQLRenderer({
         <Content {...props} />
       </GraphQLProvider>
     );
+  }
+
+  function LoadedPage({ sdl, props }: { sdl: Promise<string>; props: GraphQLPageProps }) {
+    return renderPage(use(sdl), props);
+  }
+
+  return function GraphQLPage(props) {
+    const { sdl } = props.payload;
+    if (sdl !== undefined) return renderPage(sdl, props);
+
+    const id = props.document;
+    if (!id) throw new Error('[Fumadocs GraphQL] the page props have no SDL or schema ID');
+    if (!loadSchema)
+      throw new Error(
+        `[Fumadocs GraphQL] the schema "${id}" is not in the page props, pass \`loadSchema\` to \`createGraphQLPage()\``,
+      );
+
+    // load here, React renders <LoadedPage /> again after it suspends
+    return <LoadedPage sdl={load(id, loadSchema)} props={props} />;
   };
 }
 

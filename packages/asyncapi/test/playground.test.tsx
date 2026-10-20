@@ -1,5 +1,6 @@
 import { afterEach, describe, expect, test, vi } from 'vitest';
 import { renderToString } from 'react-dom/server';
+import { prerender } from 'react-dom/static';
 import {
   type ConnectTarget,
   type Playground,
@@ -9,6 +10,7 @@ import {
 } from '@/playground';
 import { OperationProvider } from '@/operation';
 import { AsyncAPIProvider } from '@/utils/create-page';
+import { createAsyncAPIPage } from '@/ui';
 import { parseBinary, toHex } from '@/ui/playground/messages';
 import type { AsyncAPIObject, ServerObject } from '@/types';
 
@@ -226,5 +228,40 @@ describe('sseTransport', () => {
     await settled();
 
     expect(events).toEqual([['close']]);
+  });
+});
+
+describe('<AsyncAPIPage />', () => {
+  const document = {
+    asyncapi: '3.0.0',
+    info: { title: 'Test', version: '1.0.0' },
+    channels: { events: { address: '/events' } },
+    operations: {
+      onEvent: { action: 'send', title: 'Send events', channel: { $ref: '#/channels/events' } },
+    },
+  } as unknown as AsyncAPIObject;
+
+  test('loads documents left out of page props', async () => {
+    const loadDocument = vi.fn(async () => document);
+    const AsyncAPIPage = createAsyncAPIPage({ loadDocument });
+    const { prelude } = await prerender(
+      <AsyncAPIPage
+        document="events"
+        operations={[{ id: 'onEvent', action: 'send' }]}
+        showTitle
+        payload={{}}
+      />,
+    );
+
+    expect(await new Response(prelude).text()).toContain('Send events');
+    expect(loadDocument).toHaveBeenCalledExactlyOnceWith('events');
+  });
+
+  test('page props without documents need `loadDocument`', () => {
+    const AsyncAPIPage = createAsyncAPIPage();
+
+    expect(() => renderToString(<AsyncAPIPage document="events" payload={{}} />)).toThrow(
+      'pass `loadDocument`',
+    );
   });
 });

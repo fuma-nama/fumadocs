@@ -43,6 +43,15 @@ export interface OpenAPIOptions {
    * The url of proxy to avoid CORS issues
    */
   proxyUrl?: string;
+
+  /**
+   * Include bundled documents in page props.
+   *
+   * Set to `false` to leave them out, `<OpenAPIPage />` loads them with `loadDocument` instead, once per browser session.
+   *
+   * @defaultValue true
+   */
+  includeDocument?: boolean;
 }
 
 // avoid "cannot be named without reference" error in TypeScript.
@@ -91,7 +100,7 @@ export interface OpenAPIPageData extends PageData {
 export type OpenAPISourceOptions = SchemaToPagesOptions & SourceOptions;
 
 export function createOpenAPI(options: OpenAPIOptions = {}): OpenAPIServer {
-  const { disableCache = false } = options;
+  const { disableCache = false, includeDocument = true } = options;
   type OpenAPIVirtualFile = VirtualFile<{
     pageData: OpenAPIPageData;
     metaData: MetaData;
@@ -155,7 +164,7 @@ export function createOpenAPI(options: OpenAPIOptions = {}): OpenAPIServer {
             getOpenAPIPageProps() {
               return {
                 payload: {
-                  bundled: schema.bundled,
+                  ...(includeDocument && { bundled: schema.bundled }),
                   proxyUrl: server.options.proxyUrl,
                 },
                 ...props,
@@ -196,7 +205,7 @@ export function createOpenAPI(options: OpenAPIOptions = {}): OpenAPIServer {
         proxyUrl: options.proxyUrl,
       };
       const openapiMeta = (page.data as { _openapi?: InternalOpenAPIMeta })._openapi;
-      if (openapiMeta?.preload) {
+      if (includeDocument && openapiMeta?.preload) {
         out.docs = Object.fromEntries(
           await Promise.all(
             openapiMeta.preload.map(async (k) => [k, (await getSchema(k)).bundled]),

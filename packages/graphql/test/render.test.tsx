@@ -3,6 +3,7 @@ import path from 'node:path';
 import fs from 'node:fs';
 import type { ComponentProps } from 'react';
 import { renderToString } from 'react-dom/server';
+import { prerender } from 'react-dom/static';
 import { afterEach, describe, expect, test, vi } from 'vitest';
 import { defaultShikiFactory } from 'fumadocs-core/highlight/shiki/full';
 import { createGraphQLPage } from '@/ui';
@@ -380,5 +381,29 @@ describe('render <GraphQLPage />', () => {
 
     expect(text(html)).toContain('QUERYorders(filter: OrderFilter): [Order!]!');
     expect(html).toContain('Try in Playground');
+  });
+
+  test('loads the schema of page props without SDL', async () => {
+    const loadSchema = vi.fn(async () => sdl);
+    const Page = createGraphQLPage({ components: { CodeBlock }, loadSchema });
+    const { prelude } = await prerender(
+      <Page
+        document="store"
+        payload={{}}
+        items={[{ type: 'operation', kind: 'query', name: 'orders' }]}
+      />,
+    );
+
+    expect(text(await new Response(prelude).text())).toContain(
+      'QUERYorders(filter: OrderFilter): [Order!]!',
+    );
+    expect(loadSchema).toHaveBeenCalledExactlyOnceWith('store');
+  });
+
+  test('page props without SDL need a loader', () => {
+    expect(() => renderToString(<GraphQLPage document="store" payload={{}} />)).toThrow(
+      'the schema "store" is not in the page props, pass `loadSchema`',
+    );
+    expect(() => renderToString(<GraphQLPage payload={{}} />)).toThrow('no SDL or schema ID');
   });
 });

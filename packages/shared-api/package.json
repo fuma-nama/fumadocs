@@ -31,6 +31,7 @@
     "./components/spinner": "./dist/components/spinner.js",
     "./i18n": "./dist/i18n.js",
     "./source": "./dist/source.js",
+    "./utils/document-cache": "./dist/utils/document-cache.js",
     "./utils/id-to-title": "./dist/utils/id-to-title.js",
     "./utils/is-plain-object": "./dist/utils/is-plain-object.js",
     "./utils/url": "./dist/utils/url.js",

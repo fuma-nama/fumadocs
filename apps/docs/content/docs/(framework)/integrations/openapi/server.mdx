@@ -47,6 +47,94 @@ export const openapi = createOpenAPI({
 });
 ```
 
+## Loading Documents Once
+
+Pages receive the whole document in their props, every page load, navigation and prefetch sends it again. For large documents, leave it out:
+
+```ts title="lib/openapi.ts"
+import { createOpenAPI } from 'fumadocs-openapi/server';
+
+export const openapi = createOpenAPI({
+  // IDs end up in URLs, keep them URL-safe
+  input: { museum: './museum.yaml' },
+  includeDocument: false, // [!code ++]
+});
+```
+
+`<OpenAPIPage />` loads them with `loadDocument` instead, once per browser session. It also runs during server rendering, read the document directly there:
+
+```tsx title="components/api-page.tsx"
+'use client';
+import { createOpenAPIPage } from 'fumadocs-openapi/ui';
+
+export const OpenAPIPage = createOpenAPIPage({
+  async loadDocument(id) {
+    // use `import.meta.env.SSR` with Vite, e.g. Waku and React Router
+    if (typeof window === 'undefined') {
+      const { openapi } = await import('@/lib/openapi');
+      return (await openapi.getSchema(id)).bundled;
+    }
+
+    const res = await fetch(`/api/openapi/${id}`);
+    return res.json();
+  },
+});
+```
+
+And serve documents to the browser:
+
+```ts tab="Next.js" title="app/api/openapi/[id]/route.ts"
+import { openapi } from '@/lib/openapi';
+
+export async function GET(_req: Request, { params }: RouteContext<'/api/openapi/[id]'>) {
+  const { id } = await params;
+  return Response.json((await openapi.getSchema(id)).bundled);
+}
+
+// for static exports
+export async function generateStaticParams() {
+  return Object.keys(await openapi.getSchemas()).map((id) => ({ id }));
+}
+```
+
+```ts tab="Waku" title="src/pages/_api/api/openapi/[id].ts"
+import type { ApiContext } from 'waku/router';
+import { openapi } from '@/lib/openapi';
+
+export async function GET(_: Request, { params }: ApiContext<'/api/openapi/[id]'>) {
+  return Response.json((await openapi.getSchema(params.id)).bundled);
+}
+```
+
+```ts tab="React Router" title="app/routes/openapi.ts"
+// registered with `route('api/openapi/:id', 'routes/openapi.ts')` in `app/routes.ts`
+import type { Route } from './+types/openapi';
+import { openapi } from '@/lib/openapi';
+
+export async function loader({ params }: Route.LoaderArgs) {
+  return Response.json((await openapi.getSchema(params.id)).bundled);
+}
+```
+
+With Tanstack Start, a server function replaces the route and the server check:
+
+```tsx title="src/components/api-page.tsx"
+import { createServerFn } from '@tanstack/react-start';
+import { createOpenAPIPage } from 'fumadocs-openapi/ui';
+import { openapi } from '@/lib/openapi';
+
+const getDocument = createServerFn({ method: 'GET' })
+  .validator((id: string) => id)
+  .handler(async ({ data: id }) => (await openapi.getSchema(id)).bundled);
+
+export const OpenAPIPage = createOpenAPIPage({
+  loadDocument: (id) => getDocument({ data: id }),
+});
+```
+
+- Keep the server check in your own code, bundlers drop `@/lib/openapi` from browser bundles with it.
+- Generated MDX files need no changes. For the [UI installed by Fumadocs CLI](/docs/integrations/openapi/api-page#full-ui), pass `loadDocument` to `createOpenAPIRenderer()`.
+
 ## Creating Proxy
 
 A proxy server is useful for executing HTTP (`fetch`) requests, as it doesn't have CORS constraints like on the browser.

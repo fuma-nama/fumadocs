@@ -32,6 +32,14 @@ type AsyncAPIVirtualFile = VirtualFile<{ pageData: AsyncAPIPageData; metaData: M
 export interface AsyncAPIOptions {
   input?: string[] | SchemaRecord;
   disableCache?: boolean;
+  /**
+   * Include bundled documents in page props.
+   *
+   * Set to `false` to leave them out, `<AsyncAPIPage />` loads them with `loadDocument` instead, once per browser session.
+   *
+   * @defaultValue true
+   */
+  includeDocument?: boolean;
 }
 
 export type { AsyncAPIPageProps_Spec, AsyncAPIPageProps_Preloaded };
@@ -66,7 +74,7 @@ export interface AsyncAPIPageData extends PageData {
 export type AsyncAPISourceOptions = SchemaToPagesOptions & SourceOptions;
 
 export function createAsyncAPI(options: AsyncAPIOptions = {}): AsyncAPIServer {
-  const { disableCache = false } = options;
+  const { disableCache = false, includeDocument = true } = options;
   const docCache = new Map<string, Promise<LoadedDocument>>();
 
   let input: SchemaRecord = {};
@@ -113,7 +121,7 @@ export function createAsyncAPI(options: AsyncAPIOptions = {}): AsyncAPIServer {
         return {
           ...entry.info,
           getAsyncAPIPageProps() {
-            return { payload: { bundled }, ...props };
+            return { payload: includeDocument ? { bundled } : {}, ...props };
           },
           getSchema() {
             return { id, bundled };
@@ -151,6 +159,7 @@ export function createAsyncAPI(options: AsyncAPIOptions = {}): AsyncAPIServer {
       );
     },
     async preloadAsyncAPIPage(page) {
+      if (!includeDocument) return { preloaded: { docs: {} } };
       const { preload = [] } = (page.data as { _asyncapi?: InternalAsyncAPIMeta })._asyncapi ?? {};
       const docs = await Promise.all(
         preload.map(async (id) => [id, (await getSchema(id)).bundled]),
