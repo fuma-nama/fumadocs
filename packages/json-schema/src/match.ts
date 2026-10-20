@@ -19,7 +19,7 @@ function jsonTypeOf(value: unknown): JsonType | undefined {
   }
 }
 
-export function matchesType(value: unknown, type: JsonType): boolean {
+export function matchesType(value: unknown, type: string): boolean {
   const actual = jsonTypeOf(value);
   if (actual === undefined) return false;
   // an integer is also a valid `number`
@@ -60,7 +60,7 @@ function match(schema: JsonSchema, value: unknown, seen: Set<object>): boolean {
   }
 
   if (resolved.type !== undefined) {
-    const types = Array.isArray(resolved.type) ? resolved.type : [resolved.type];
+    const types = [resolved.type].flat();
     if (types.every((type) => !matchesType(value, type))) return false;
   }
 

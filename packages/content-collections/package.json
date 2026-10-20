@@ -40,15 +40,15 @@
   },
   "dependencies": {
     "unified": "^11.0.5",
-    "zod": "^4.6.5"
+    "zod": "^4.6.7"
   },
   "devDependencies": {
     "@content-collections/core": "0.15.3",
     "@content-collections/mdx": "^0.2.2",
-    "@types/node": "26.6.4",
+    "@types/node": "26.6.5",
     "fumadocs-core": "workspace:*",
     "tsconfig": "workspace:*",
-    "tsdown": "0.23.0"
+    "tsdown": "0.23.1"
   },
   "peerDependencies": {
     "@content-collections/core": "0.x.x",

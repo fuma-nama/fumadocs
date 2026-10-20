@@ -1,7 +1,7 @@
 import { fileURLToPath } from 'node:url';
 import { describe, expect, test } from 'vitest';
 import { generateFilesOnly } from '@/generate-file';
-import { createAsyncAPI } from '@/server';
+import { type AsyncAPIPageData, createAsyncAPI } from '@/server';
 import path from 'node:path';
 
 const cwd = fileURLToPath(new URL('./', import.meta.url));
@@ -212,5 +212,14 @@ describe('createAsyncAPI()', () => {
 
     await expect(server.getSchema('./asyncapi.yaml')).rejects.toThrow('is not listed in "input"');
     await expect(server.getSchema('constructor')).rejects.toThrow('is not listed in "input"');
+  });
+
+  test('leaves documents out of page props with `includeDocument: false`', async () => {
+    const server = createAsyncAPI({ input: { streetlights: file }, includeDocument: false });
+    const { files } = await server.staticSource({ per: 'file' });
+    const generated = { data: { _asyncapi: { preload: ['streetlights'] } } } as never;
+
+    expect((files[0].data as AsyncAPIPageData).getAsyncAPIPageProps().payload).toEqual({});
+    expect(await server.preloadAsyncAPIPage(generated)).toEqual({ preloaded: { docs: {} } });
   });
 });

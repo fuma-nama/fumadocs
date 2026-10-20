@@ -32,6 +32,8 @@ type AsyncAPIVirtualFile = VirtualFile<{ pageData: AsyncAPIPageData; metaData: M
 export interface AsyncAPIOptions {
   input?: string[] | SchemaRecord;
   disableCache?: boolean;
+  /** set `false` to leave documents out of page props, pages load each once per browser session with `loadDocument` */
+  includeDocument?: boolean;
 }
 
 export type { AsyncAPIPageProps_Spec, AsyncAPIPageProps_Preloaded };
@@ -54,7 +56,8 @@ export interface AsyncAPIServer {
 }
 
 export interface AsyncAPIPageData extends PageData {
-  getAsyncAPIPageProps: () => AsyncAPIPageProps_Spec;
+  // `AsyncAPIPageProps_Spec & {}` would be flattened into types that consumers cannot name
+  getAsyncAPIPageProps: () => Omit<AsyncAPIPageProps_Spec, 'document'> & { document: string };
   getSchema: () => { id: string; bundled: AsyncAPIObject };
   /** the operations of page in Markdown, for LLMs */
   getText: (type: 'raw' | 'processed') => Promise<string>;
@@ -66,7 +69,7 @@ export interface AsyncAPIPageData extends PageData {
 export type AsyncAPISourceOptions = SchemaToPagesOptions & SourceOptions;
 
 export function createAsyncAPI(options: AsyncAPIOptions = {}): AsyncAPIServer {
-  const { disableCache = false } = options;
+  const { disableCache = false, includeDocument = true } = options;
   const docCache = new Map<string, Promise<LoadedDocument>>();
 
   let input: SchemaRecord = {};
@@ -113,7 +116,7 @@ export function createAsyncAPI(options: AsyncAPIOptions = {}): AsyncAPIServer {
         return {
           ...entry.info,
           getAsyncAPIPageProps() {
-            return { payload: { bundled }, ...props };
+            return { payload: includeDocument ? { bundled } : {}, ...props };
           },
           getSchema() {
             return { id, bundled };
@@ -151,6 +154,7 @@ export function createAsyncAPI(options: AsyncAPIOptions = {}): AsyncAPIServer {
       );
     },
     async preloadAsyncAPIPage(page) {
+      if (!includeDocument) return { preloaded: { docs: {} } };
       const { preload = [] } = (page.data as { _asyncapi?: InternalAsyncAPIMeta })._asyncapi ?? {};
       const docs = await Promise.all(
         preload.map(async (id) => [id, (await getSchema(id)).bundled]),

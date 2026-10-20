@@ -29,6 +29,7 @@ import {
   registerDefaultCodeUsages,
 } from '@/codegen';
 import { buildSchemaFromSDL } from '@/utils/build-schema';
+import { createDocumentCache } from 'shared-api/utils/document-cache';
 
 /**
  * links of generated pages, generated when the source is attached to a loader.
@@ -209,7 +210,7 @@ export interface RenderContext extends GraphQLRenderOptions {
 
 export interface GraphQLProviderProps extends GraphQLRuntimeOptions, GraphQLRenderOptions {
   shiki: ShikiFactory;
-  sdl: string;
+  sdl: string | Promise<string>;
   links?: GraphQLLinks;
   examples?: Record<string, OperationExample[]>;
   components: GraphQLComponents;
@@ -226,12 +227,16 @@ export interface CreateGraphQLRendererOptions extends GraphQLRuntimeOptions, Gra
     /** wraps the rendered items */
     Layout?: FC<PageLayoutProps>;
   };
+  /** load the SDL of schemas left out of page props (`includeSchema: false`) by ID, in server rendering too */
+  loadSchema?: (id: string) => Promise<string>;
 }
 
 export type GraphQLPageProps = GeneratedPageProps & {
+  /** schema ID */
+  schema?: string;
   payload: {
     links?: GraphQLLinks;
-    sdl: string;
+    sdl?: string;
     /** examples of the page's operations, by `${kind}:${name}` */
     examples?: Record<string, OperationExample[]>;
   };
@@ -289,7 +294,7 @@ export function useOperationLink(kind: OperationKind, name: string): string | un
 let defaultCodeUsages: CodeUsageGeneratorRegistry | undefined;
 
 export function GraphQLProvider({
-  sdl,
+  sdl: input,
   links,
   examples,
   typeLinks,
@@ -305,6 +310,7 @@ export function GraphQLProvider({
   components,
   children,
 }: GraphQLProviderProps) {
+  const sdl = typeof input === 'string' ? input : use(input);
   const schema = useMemo(() => buildSchemaFromSDL(sdl), [sdl]);
   const runtime = useMemo<GraphQLRuntime>(
     () => ({ schema, sdl, links, examples, typeLinks, operationLinks }),
@@ -333,9 +339,11 @@ export function GraphQLProvider({
 export function createGraphQLRenderer({
   components,
   shiki = defaultShikiFactory,
+  loadSchema,
   ...options
 }: CreateGraphQLRendererOptions): FC<GraphQLPageProps> {
   const { Operation, TypeDocs, Layout = DefaultLayout } = components;
+  const load = createDocumentCache<string>();
   const slots: GraphQLComponents = {
     SchemaUI: components.SchemaUI,
     // fills the Markdown, code block and heading slots the page didn't replace
@@ -372,11 +380,21 @@ export function createGraphQLRenderer({
   }
 
   return function GraphQLPage(props) {
+    let sdl: string | Promise<string> | undefined = props.payload.sdl;
+    if (sdl === undefined) {
+      if (!props.schema || !loadSchema)
+        throw new Error(
+          `[Fumadocs GraphQL] the schema "${props.schema}" is not in the page props, pass \`loadSchema\` to \`createGraphQLPage()\``,
+        );
+      // loaded outside of the provider, which suspends on it
+      sdl = load(props.schema, loadSchema);
+    }
+
     return (
       <GraphQLProvider
         {...options}
         shiki={shiki}
-        sdl={props.payload.sdl}
+        sdl={sdl}
         links={props.payload.links}
         examples={props.payload.examples}
         components={slots}

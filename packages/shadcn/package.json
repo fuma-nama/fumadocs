@@ -32,19 +32,19 @@
   },
   "dependencies": {
     "@shikijs/transformers": "^4.5.0",
-    "zod-3": "npm:zod@^3.25.76"
+    "zod-3": "npm:zod@^4.6.7"
   },
   "devDependencies": {
-    "@types/node": "26.6.4",
+    "@types/node": "26.6.5",
     "@types/react": "^19.3.0",
     "fumadocs-core": "workspace:*",
     "fumadocs-ui": "workspace:@fumadocs/base-ui@*",
-    "react": "^19.3.0",
-    "react-dom": "^19.3.0",
-    "shadcn": "^4.21.1",
+    "react": "^19.3.1",
+    "react-dom": "^19.3.1",
+    "shadcn": "^4.22.1",
     "tailwindcss": "^4.3.3",
     "tsconfig": "workspace:*",
-    "tsdown": "0.23.0"
+    "tsdown": "0.23.1"
   },
   "peerDependencies": {
     "@types/react": "*",

@@ -59,3 +59,120 @@ export const asyncapi = createAsyncAPI({
   disableCache: true,
 });
 ```
+
+## Loading Documents Once
+
+Pages receive the whole document in their props, every page load, navigation and prefetch sends it again. For large documents, leave it out:
+
+```ts title="lib/asyncapi.ts"
+import { createAsyncAPI } from '@fumadocs/asyncapi/server';
+
+export const asyncapi = createAsyncAPI({
+  // IDs end up in URLs, keep them URL-safe
+  input: { streetlights: './streetlights.yaml' },
+  includeDocument: false, // [!code ++]
+});
+```
+
+On Next.js, Waku and React Router, `<AsyncAPIPage />` loads each document once per browser session with `loadDocument`, it also runs during server rendering:
+
+```tsx title="components/api-page.tsx"
+'use client';
+import { preload } from 'react-dom';
+import { createAsyncAPIPage } from '@fumadocs/asyncapi/ui';
+
+export const AsyncAPIPage = createAsyncAPIPage({
+  async loadDocument(id) {
+    // `import.meta.env.SSR` on Waku and React Router
+    if (typeof window === 'undefined') {
+      // the browser starts downloading it with the page
+      preload(`/api/asyncapi/${id}`, { as: 'fetch', crossOrigin: 'anonymous' });
+      const { asyncapi } = await import('@/lib/asyncapi');
+      return (await asyncapi.getSchema(id)).bundled;
+    }
+    return (await fetch(`/api/asyncapi/${id}`)).json();
+  },
+});
+```
+
+And serve documents to the browser:
+
+```ts tab="Next.js" title="app/api/asyncapi/[id]/route.ts"
+import { asyncapi } from '@/lib/asyncapi';
+
+export async function GET(_req: Request, { params }: RouteContext<'/api/asyncapi/[id]'>) {
+  return Response.json((await asyncapi.getSchema((await params).id)).bundled);
+}
+
+// for static exports
+export async function generateStaticParams() {
+  return Object.keys(await asyncapi.getSchemas()).map((id) => ({ id }));
+}
+```
+
+```ts tab="Waku" title="src/pages/_api/api/asyncapi/[id].ts"
+import type { ApiContext } from 'waku/router';
+import { asyncapi } from '@/lib/asyncapi';
+
+export async function GET(_: Request, { params }: ApiContext<'/api/asyncapi/[id]'>) {
+  return Response.json((await asyncapi.getSchema(params.id)).bundled);
+}
+```
+
+```ts tab="React Router" title="app/routes/asyncapi.ts"
+import type { Route } from './+types/asyncapi';
+import { asyncapi } from '@/lib/asyncapi';
+
+export async function loader({ params }: Route.LoaderArgs) {
+  return Response.json((await asyncapi.getSchema(params.id)).bundled);
+}
+```
+
+```ts tab="React Router" title="app/routes.ts"
+import { route, type RouteConfig } from '@react-router/dev/routes';
+
+export default [
+  // [!code ++]
+  route('api/asyncapi/:id', 'routes/asyncapi.ts'),
+  // ...
+] satisfies RouteConfig;
+```
+
+On Tanstack Start, route loaders run on both sides, call a server function only when the browser doesn't have the document yet:
+
+```tsx title="src/routes/docs/$.tsx"
+import { createServerFn } from '@tanstack/react-start';
+import type { AsyncAPI } from '@fumadocs/asyncapi';
+import { asyncapi } from '@/lib/asyncapi';
+
+// documents the browser has loaded
+const documents = new Map<string, AsyncAPI.AsyncAPIObject>();
+
+const getDocument = createServerFn({ method: 'GET' })
+  .validator((id: string) => id)
+  .handler(async ({ data: id }) => (await asyncapi.getSchema(id)).bundled);
+
+export const Route = createFileRoute('/docs/$')({
+  component: Page,
+  loader: async ({ params }) => {
+    const data = await serverLoader({ data: params._splat?.split('/') ?? [] });
+    if (data.type === 'asyncapi') {
+      const { document: id, payload } = data.props;
+      payload.bundled = documents.get(id) ?? (await getDocument({ data: id }));
+    }
+    return data;
+  },
+});
+
+function Page() {
+  const page = useFumadocsLoader(Route.useLoaderData());
+  // the document of the first page too
+  if (page.type === 'asyncapi' && typeof window !== 'undefined')
+    documents.set(page.props.document, page.props.payload.bundled!);
+  // ...
+}
+```
+
+- With generated MDX files, only Tanstack Start needs a change: put documents in `preloaded.docs` instead.
+- For the [UI installed by Fumadocs CLI](/docs/integrations/asyncapi/api-page#full-ui), pass `loadDocument` to `createAsyncAPIRenderer()`.
+- Browsers keep each document until a reload. With [`disableCache`](#disablecache), leave `includeDocument` on.

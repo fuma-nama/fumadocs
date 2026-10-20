@@ -5,8 +5,6 @@ import {
   type AsyncAPIPageProps,
   type AsyncAPIPageProps_Preloaded,
   type AsyncAPIPageProps_Spec,
-  type AsyncAPIRenderOptions,
-  type AsyncAPIRuntimeOptions,
   createAsyncAPIRenderer,
   type CreateAsyncAPIRendererOptions,
   type PageLayoutProps,
@@ -21,7 +19,10 @@ export {
   registerDefaultCodeUsages,
 } from '@/codegen';
 
-export interface CreateAsyncAPIPageOptions extends AsyncAPIRuntimeOptions, AsyncAPIRenderOptions {
+export interface CreateAsyncAPIPageOptions extends Omit<
+  CreateAsyncAPIRendererOptions,
+  'components'
+> {
   /**
    * Replace parts of the UI, e.g. the ones installed with Fumadocs CLI.
    */

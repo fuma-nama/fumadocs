@@ -5,8 +5,6 @@ import {
   type CreateGraphQLRendererOptions,
   type GraphQLLinks,
   type GraphQLPageProps,
-  type GraphQLRenderOptions,
-  type GraphQLRuntimeOptions,
   type PageLayoutProps,
 } from '@/utils/create-page';
 import { Operation } from '@/ui/operation';
@@ -29,7 +27,7 @@ export {
   registerDefaultCodeUsages,
 } from '@/codegen';
 
-export interface CreateGraphQLPageOptions extends GraphQLRuntimeOptions, GraphQLRenderOptions {
+export interface CreateGraphQLPageOptions extends Omit<CreateGraphQLRendererOptions, 'components'> {
   /**
    * Replace parts of the UI, e.g. the ones installed with Fumadocs CLI.
    */

@@ -36,19 +36,19 @@
   },
   "devDependencies": {
     "@sanity/client": "^8.9.0",
-    "@sanity/types": "^6.17.0",
-    "@types/node": "26.6.4",
+    "@sanity/types": "^6.19.0",
+    "@types/node": "26.6.5",
     "@types/react": "^19.3.0",
     "fuma-cli": "^0.3.1",
     "fumadocs-core": "workspace:*",
     "fumadocs-ui": "workspace:@fumadocs/base-ui@*",
     "next-sanity": "^13.3.4",
-    "react": "^19.3.0",
-    "sanity": "^6.17.0",
+    "react": "^19.3.1",
+    "sanity": "^6.19.0",
     "tsconfig": "workspace:*",
-    "tsdown": "0.23.0",
+    "tsdown": "0.23.1",
     "typescript": "^7.0.2",
-    "vitest": "^5.0.3"
+    "vitest": "^5.0.5"
   },
   "peerDependencies": {
     "@sanity/client": "^7.22.0 || ^8.0.0",

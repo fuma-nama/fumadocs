@@ -229,6 +229,31 @@ readFileSync('file.txt', 'utf-8');
   `);
 });
 
+test('calls of one function each show their own signature', () => {
+  const result = twoslasher(`
+declare function pick<const T extends readonly string[]>(values: T): T[number];
+pick(['x', 'y']);
+pick(['z']);
+`);
+
+  expect(
+    hovers(result)
+      .filter((v) => v.target === 'pick')
+      .map((v) => v.text),
+  ).toMatchInlineSnapshot(`
+    [
+      "function pick<const T extends readonly string[]>(values: T): T[number]",
+      "function pick(values: readonly [
+        "x",
+        "y"
+    ]): "x" | "y"",
+      "function pick(values: readonly [
+        "z"
+    ]): "z"",
+    ]
+  `);
+});
+
 test('queries and completions', () => {
   const result = twoslasher(`
 // @noErrors

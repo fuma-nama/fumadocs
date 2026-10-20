@@ -68,8 +68,8 @@
     "katex": "^0.19.0",
     "npm-to-yarn": "^3.2.0",
     "satteri": "^0.10.5",
-    "yuku-codegen": "^0.17.0",
-    "yuku-parser": "^0.17.0"
+    "yuku-codegen": "^0.19.0",
+    "yuku-parser": "^0.19.0"
   },
   "devDependencies": {
     "@types/estree": "^1.0.9",
@@ -77,17 +77,17 @@
     "@types/hast": "^3.0.5",
     "@types/mdast": "^4.0.4",
     "@types/mdx": "^2.0.14",
-    "@types/node": "26.6.4",
+    "@types/node": "26.6.5",
     "@types/react": "^19.3.0",
     "@types/react-dom": "^19.3.0",
     "fumadocs-core": "workspace:*",
-    "react": "^19.3.0",
-    "react-dom": "^19.3.0",
+    "react": "^19.3.1",
+    "react-dom": "^19.3.1",
     "shiki": "^4.5.0",
     "tsconfig": "workspace:*",
-    "tsdown": "0.23.0",
+    "tsdown": "0.23.1",
     "typescript": "^7.0.2",
-    "vitest": "^5.0.3"
+    "vitest": "^5.0.5"
   },
   "peerDependencies": {
     "@types/hast": "*",

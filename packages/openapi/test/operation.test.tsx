@@ -1,6 +1,7 @@
 import { fileURLToPath } from 'node:url';
 import { renderToString } from 'react-dom/server';
-import { expect, test } from 'vitest';
+import { prerender } from 'react-dom/static';
+import { expect, test, vi } from 'vitest';
 import { loadDocument } from '@/utils/document/load';
 import { createOpenAPIRenderer } from '@/index.browser';
 import type { PageOperationProps } from '@/operation';
@@ -314,6 +315,24 @@ test('renders the operations and webhooks of a page', async () => {
     'operation get /museum-hours Get museum hours true',
     'webhook post /newExhibition New exhibition true',
   ]);
+});
+
+test('loads documents left out of page props', async () => {
+  const { bundled } = await loadDocument(museum);
+  const load = vi.fn(async () => bundled as Document);
+  const Operation = ({ operation }: PageOperationProps) => <h2>{operation.summary}</h2>;
+  const OpenAPIPage = createOpenAPIRenderer({
+    components: { ...components, Operation },
+    loadDocument: load,
+  });
+  const operations = [{ path: '/museum-hours', method: 'get' as const }];
+  const { prelude } = await prerender(
+    <OpenAPIPage document="museum" payload={{}} operations={operations} />,
+  );
+
+  expect(await new Response(prelude).text()).toContain('<h2>Get museum hours</h2>');
+  expect(load).toHaveBeenCalledExactlyOnceWith('museum');
+  expect(() => renderToString(<OpenAPIPage payload={{}} />)).toThrow('pass `loadDocument`');
 });
 
 test('encodes auth fields with their providers', async () => {

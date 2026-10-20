@@ -406,6 +406,16 @@ test('refuses documents not listed in input', async () => {
   await expect(server.getSchema('constructor')).rejects.toThrow('is not listed in "input"');
 });
 
+test('leaves documents out of page props with `includeDocument: false`', async () => {
+  const input = { museum: path.join(cwd, './fixtures/museum.yaml') };
+  const server = createOpenAPI({ input, proxyUrl: '/api/proxy', includeDocument: false });
+  const page = (await server.staticSource()).files.find((item) => item.type === 'page')!;
+  const generated = { data: { _openapi: { preload: ['museum'] } } } as never;
+
+  expect(page.data.getOpenAPIPageProps().payload).toStrictEqual({ proxyUrl: '/api/proxy' });
+  expect((await server.preloadOpenAPIPage(generated)).preloaded.docs).toEqual({});
+});
+
 test('OAuth handler sends users back to the page that started the flow', () => {
   const handler = createOpenAPI().createOAuthHandler();
   const request = (page?: string) =>

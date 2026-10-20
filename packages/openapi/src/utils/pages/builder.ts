@@ -250,8 +250,9 @@ export interface GeneratedPageProps {
 export type OpenAPIPageProps = OpenAPIPageProps_Spec | OpenAPIPageProps_Preloaded;
 
 export type OpenAPIPageProps_Spec = Omit<GeneratedPageProps, 'document'> & {
+  document?: string;
   payload: {
-    bundled: Document;
+    bundled?: Document;
     proxyUrl?: string;
   };
 };

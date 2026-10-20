@@ -121,6 +121,121 @@ export const graphql = createGraphQL({
 });
 ```
 
+## Loading Schemas Once
+
+Pages receive the whole schema in their props, every page load, navigation and prefetch sends it again. For large schemas, leave it out:
+
+```ts title="lib/graphql.ts"
+import { createGraphQL } from '@fumadocs/graphql/server';
+
+export const graphql = createGraphQL({
+  // IDs end up in URLs, keep them URL-safe
+  input: { store: './store.graphql' },
+  includeSchema: false, // [!code ++]
+});
+```
+
+On Next.js, Waku and React Router, `<GraphQLPage />` loads the SDL of each schema once per browser session with `loadSchema`, it also runs during server rendering:
+
+```tsx title="components/api-page.tsx"
+'use client';
+import { preload } from 'react-dom';
+import { createGraphQLPage } from '@fumadocs/graphql/ui';
+
+export const GraphQLPage = createGraphQLPage({
+  async loadSchema(id) {
+    // `import.meta.env.SSR` on Waku and React Router
+    if (typeof window === 'undefined') {
+      // the browser starts downloading it with the page
+      preload(`/api/graphql-schema/${id}`, { as: 'fetch', crossOrigin: 'anonymous' });
+      const { graphql } = await import('@/lib/graphql');
+      return (await graphql.getSchema(id)).sdl;
+    }
+    return (await fetch(`/api/graphql-schema/${id}`)).text();
+  },
+});
+```
+
+And serve schemas to the browser:
+
+```ts tab="Next.js" title="app/api/graphql-schema/[id]/route.ts"
+import { graphql } from '@/lib/graphql';
+
+export async function GET(_req: Request, { params }: RouteContext<'/api/graphql-schema/[id]'>) {
+  return new Response((await graphql.getSchema((await params).id)).sdl);
+}
+
+// for static exports
+export async function generateStaticParams() {
+  return Object.keys(await graphql.getSchemas()).map((id) => ({ id }));
+}
+```
+
+```ts tab="Waku" title="src/pages/_api/api/graphql-schema/[id].ts"
+import type { ApiContext } from 'waku/router';
+import { graphql } from '@/lib/graphql';
+
+export async function GET(_: Request, { params }: ApiContext<'/api/graphql-schema/[id]'>) {
+  return new Response((await graphql.getSchema(params.id)).sdl);
+}
+```
+
+```ts tab="React Router" title="app/routes/graphql-schema.ts"
+import type { Route } from './+types/graphql-schema';
+import { graphql } from '@/lib/graphql';
+
+export async function loader({ params }: Route.LoaderArgs) {
+  return new Response((await graphql.getSchema(params.id)).sdl);
+}
+```
+
+```ts tab="React Router" title="app/routes.ts"
+import { route, type RouteConfig } from '@react-router/dev/routes';
+
+export default [
+  // [!code ++]
+  route('api/graphql-schema/:id', 'routes/graphql-schema.ts'),
+  // ...
+] satisfies RouteConfig;
+```
+
+On Tanstack Start, route loaders run on both sides, call a server function only when the browser doesn't have the schema yet:
+
+```tsx title="src/routes/docs/$.tsx"
+import { createServerFn } from '@tanstack/react-start';
+import { graphql } from '@/lib/graphql';
+
+// schemas the browser has loaded
+const schemas = new Map<string, string>();
+
+const getSchema = createServerFn({ method: 'GET' })
+  .validator((id: string) => id)
+  .handler(async ({ data: id }) => (await graphql.getSchema(id)).sdl);
+
+export const Route = createFileRoute('/docs/$')({
+  component: Page,
+  loader: async ({ params }) => {
+    const data = await serverLoader({ data: params._splat?.split('/') ?? [] });
+    if (data.type === 'graphql') {
+      const { schema: id, payload } = data.props;
+      payload.sdl = schemas.get(id) ?? (await getSchema({ data: id }));
+    }
+    return data;
+  },
+});
+
+function Page() {
+  const page = useFumadocsLoader(Route.useLoaderData());
+  // the schema of the first page too
+  if (page.type === 'graphql' && typeof window !== 'undefined')
+    schemas.set(page.props.schema, page.props.payload.sdl!);
+  // ...
+}
+```
+
+- For the [UI installed by Fumadocs CLI](/docs/integrations/graphql/api-page#full-ui), pass `loadSchema` to `createGraphQLRenderer()`.
+- Browsers keep each schema until a reload. With [`disableCache`](#disablecache), leave `includeSchema` on.
+
 ## Generating Pages
 
 `staticSource()` and `dynamicSource()` generate pages for your `loader()`, they share the same options.

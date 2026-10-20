@@ -31,12 +31,12 @@
     "types:check": "tsc --noEmit"
   },
   "devDependencies": {
-    "@fastify/deepmerge": "^3.2.1",
-    "@types/node": "^26.6.4",
+    "@fastify/deepmerge": "^3.2.2",
+    "@types/node": "^26.6.5",
     "postcss-selector-parser": "^7.1.6",
     "tailwindcss": "^4.3.3",
     "tsconfig": "workspace:*",
-    "tsdown": "0.23.0"
+    "tsdown": "0.23.1"
   },
   "peerDependencies": {
     "tailwindcss": "^4.0.0"

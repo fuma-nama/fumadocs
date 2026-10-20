@@ -119,7 +119,7 @@ export function createNodeEvaluator(env: { root: string; outDir: string }): Macr
     });
 
     try {
-      await import(pathToFileURL(outfile).href);
+      await import(/* turbopackIgnore: true */ pathToFileURL(outfile).href);
     } finally {
       await fs.rm(outfile, { force: true });
     }

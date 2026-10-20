@@ -1,3 +1,10 @@
+## fumadocs-openapi@12.5.4
+
+### Load documents once
+
+- `includeDocument: false` of `createOpenAPI()` and `createAsyncAPI()` leaves documents out of page props, pages load each one once per browser session with `loadDocument` of `createOpenAPIPage()` and `createAsyncAPIPage()`.
+- Same for GraphQL schemas: `includeSchema: false` of `createGraphQL()` with `loadSchema` of `createGraphQLPage()`.
+
 ## fumadocs-openapi@12.5.3
 
 ### Smaller bundles

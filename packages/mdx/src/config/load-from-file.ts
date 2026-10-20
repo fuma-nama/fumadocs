@@ -70,5 +70,8 @@ export async function loadConfig(core: Core, build = false): Promise<LoadConfigR
   // always return a new config
   url.searchParams.set('hash', Date.now().toString());
 
-  return { config: buildConfig(await import(url.href), process.cwd()), fromFile: true };
+  return {
+    config: buildConfig(await import(/* turbopackIgnore: true */ url.href), process.cwd()),
+    fromFile: true,
+  };
 }

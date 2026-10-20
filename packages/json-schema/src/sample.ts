@@ -490,6 +490,11 @@ function traverseOneOrAnyOf(
   return subExample;
 }
 
+// `isPlainObject()` narrows schema objects to `Record<string, unknown>` instead
+function isSchemaObject(schema: JsonSchema): schema is Exclude<JsonSchema, boolean> {
+  return isPlainObject(schema);
+}
+
 function traverse(
   schema: JsonSchema,
   options: ResolvedOptions,
@@ -507,7 +512,7 @@ function traverse(
     return { value: getCircularPlaceholder(inferType(schema)) };
   }
 
-  if (!isPlainObject(schema)) {
+  if (!isSchemaObject(schema)) {
     popStack(context);
     return { value: schema };
   }

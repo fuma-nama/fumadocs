@@ -1,11 +1,7 @@
 'use client';
 import type { FC } from 'react';
 import { defaultShikiFactory } from 'fumadocs-core/highlight/shiki/full';
-import type {
-  CreateOpenAPIRendererOptions,
-  OpenAPIRenderOptions,
-  OpenAPIRuntimeOptions,
-} from '@/utils/create-page';
+import type { CreateOpenAPIRendererOptions } from '@/utils/create-page';
 import type {
   OpenAPIPageProps,
   OpenAPIPageProps_Preloaded,
@@ -15,7 +11,7 @@ import { createOpenAPIPageBase } from './base';
 
 export type { OpenAPIPageProps, OpenAPIPageProps_Spec, OpenAPIPageProps_Preloaded };
 
-export interface CreateOpenAPIPageOptions extends OpenAPIRuntimeOptions, OpenAPIRenderOptions {
+export interface CreateOpenAPIPageOptions extends Omit<CreateOpenAPIRendererOptions, 'components'> {
   /**
    * Replace parts of the UI, e.g. the ones installed with Fumadocs CLI.
    */

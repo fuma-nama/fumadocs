@@ -55,10 +55,11 @@ describe('GraphQL source', () => {
     `);
 
     const props = data.getGraphQLPageProps();
+    expect(props.schema).toBe('store');
     expect(props.items).toEqual([{ type: 'operation', kind: 'query', name: 'orders' }]);
     expect(props.payload).not.toHaveProperty('examples');
     // the SDL payload can be re-built into a schema on client side
-    const schema = buildSchemaFromSDL(props.payload.sdl);
+    const schema = buildSchemaFromSDL(props.payload.sdl!);
     expect(schema.getQueryType()?.getFields().orders).toBeDefined();
 
     // type pages are opt-in
@@ -70,6 +71,15 @@ describe('GraphQL source', () => {
     expect(typeProps.items).toEqual([{ type: 'type', kind: 'object', name: 'Order' }]);
     // links are generated when the source is attached to a loader
     expect(typeProps.payload.links).toBeUndefined();
+  });
+
+  test('page props without the SDL', async () => {
+    const input = { store: path.join(cwd, './fixtures/store.graphql') };
+    const { files } = await createGraphQL({ input, includeSchema: false }).staticSource();
+
+    expect((files[0].data as GraphQLPageData).getGraphQLPageProps().payload).not.toHaveProperty(
+      'sdl',
+    );
   });
 
   test('generates links after attaching to a loader', async () => {

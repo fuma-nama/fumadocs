@@ -12,6 +12,7 @@ import {
 import type { GeneratedPageProps, OperationItem } from '@/utils/pages/builder';
 import { createContext, type FC, type ReactNode, use, useMemo } from 'react';
 import type { SchemaUIOptions } from 'shared-api/components/schema';
+import { createDocumentCache } from 'shared-api/utils/document-cache';
 import type { AsyncAPIObject, OperationObject } from '@/types';
 import {
   type DereferencedDocument,
@@ -129,7 +130,7 @@ export interface RenderContext extends AsyncAPIRenderOptions {
 export interface AsyncAPIProviderProps extends AsyncAPIRuntimeOptions, AsyncAPIRenderOptions {
   shiki: ShikiFactory;
   /** the bundled AsyncAPI document */
-  document: AsyncAPIObject;
+  document: AsyncAPIObject | Promise<AsyncAPIObject>;
   components: AsyncAPIComponents;
   children: ReactNode;
 }
@@ -143,13 +144,16 @@ export interface CreateAsyncAPIRendererOptions
     /** wraps the rendered operations */
     Layout?: FC<PageLayoutProps>;
   };
+  /** load documents left out of page props (`includeDocument: false`) by ID, in server rendering too */
+  loadDocument?: (id: string) => Promise<AsyncAPIObject>;
 }
 
 export type AsyncAPIPageProps = AsyncAPIPageProps_Spec | AsyncAPIPageProps_Preloaded;
 
 export type AsyncAPIPageProps_Spec = Omit<GeneratedPageProps, 'document'> & {
+  document?: string;
   payload: {
-    bundled: AsyncAPIObject;
+    bundled?: AsyncAPIObject;
   };
 };
 
@@ -194,7 +198,7 @@ export function useRenderContext(): RenderContext {
  * The runtime of an API page, for UIs built from the headless hooks.
  */
 export function AsyncAPIProvider({
-  document,
+  document: input,
   storageKeyPrefix = 'fumadocs-asyncapi-',
   shiki,
   shikiOptions = defaultShikiOptions,
@@ -206,6 +210,7 @@ export function AsyncAPIProvider({
   components,
   children,
 }: AsyncAPIProviderProps) {
+  const document = input instanceof Promise ? use(input) : input;
   const runtime = useMemo<AsyncAPIRuntime>(
     () => ({ doc: dereferenceBundledDocument(document), storageKeyPrefix }),
     [document, storageKeyPrefix],
@@ -259,10 +264,12 @@ export function createAsyncAPIRenderer({
   components,
   shiki = defaultShikiFactory,
   generateTypeScriptDefinitions = defaultTypeScriptDefinitions,
+  loadDocument,
   ...rest
 }: CreateAsyncAPIRendererOptions): FC<AsyncAPIPageProps> {
   const options = { ...rest, generateTypeScriptDefinitions };
   const { Operation, Layout = DefaultLayout } = components;
+  const load = createDocumentCache<AsyncAPIObject>();
   const slots: AsyncAPIComponents = {
     SchemaUI: components.SchemaUI,
     // fills the Markdown, code block and heading slots the page didn't replace
@@ -302,15 +309,15 @@ export function createAsyncAPIRenderer({
   }
 
   return function AsyncAPIPage(props) {
-    let document: AsyncAPIObject;
-    if ('preloaded' in props) {
-      document = props.preloaded.docs[props.document];
-      if (!document)
+    let document: AsyncAPIObject | Promise<AsyncAPIObject> | undefined =
+      'preloaded' in props ? props.preloaded.docs[props.document] : props.payload.bundled;
+    if (!document) {
+      if (!props.document || !loadDocument)
         throw new Error(
-          `[Fumadocs AsyncAPI] the document ${props.document} is not preloaded, make sure to pass the "preloaded" prop to <AsyncAPIPage />`,
+          `[Fumadocs AsyncAPI] the document "${props.document}" is not in the page props, pass \`loadDocument\` to \`createAsyncAPIPage()\``,
         );
-    } else {
-      document = props.payload.bundled;
+      // loaded outside of the provider, which suspends on it
+      document = load(props.document, loadDocument);
     }
 
     return (

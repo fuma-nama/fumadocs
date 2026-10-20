@@ -43,6 +43,9 @@ export interface OpenAPIOptions {
    * The url of proxy to avoid CORS issues
    */
   proxyUrl?: string;
+
+  /** set `false` to leave documents out of page props, pages load each once per browser session with `loadDocument` */
+  includeDocument?: boolean;
 }
 
 // avoid "cannot be named without reference" error in TypeScript.
@@ -81,7 +84,8 @@ export interface OpenAPIServer {
 }
 
 export interface OpenAPIPageData extends PageData {
-  getOpenAPIPageProps: () => OpenAPIPageProps_Spec;
+  // `OpenAPIPageProps_Spec & {}` would be flattened into types that consumers cannot name
+  getOpenAPIPageProps: () => Omit<OpenAPIPageProps_Spec, 'document'> & { document: string };
   getSchema: () => { id: string; bundled: Document };
   structuredData: StructuredData;
   toc: TOCItemType[];
@@ -91,7 +95,7 @@ export interface OpenAPIPageData extends PageData {
 export type OpenAPISourceOptions = SchemaToPagesOptions & SourceOptions;
 
 export function createOpenAPI(options: OpenAPIOptions = {}): OpenAPIServer {
-  const { disableCache = false } = options;
+  const { disableCache = false, includeDocument = true } = options;
   type OpenAPIVirtualFile = VirtualFile<{
     pageData: OpenAPIPageData;
     metaData: MetaData;
@@ -155,7 +159,7 @@ export function createOpenAPI(options: OpenAPIOptions = {}): OpenAPIServer {
             getOpenAPIPageProps() {
               return {
                 payload: {
-                  bundled: schema.bundled,
+                  ...(includeDocument && { bundled: schema.bundled }),
                   proxyUrl: server.options.proxyUrl,
                 },
                 ...props,
@@ -196,7 +200,7 @@ export function createOpenAPI(options: OpenAPIOptions = {}): OpenAPIServer {
         proxyUrl: options.proxyUrl,
       };
       const openapiMeta = (page.data as { _openapi?: InternalOpenAPIMeta })._openapi;
-      if (openapiMeta?.preload) {
+      if (includeDocument && openapiMeta?.preload) {
         out.docs = Object.fromEntries(
           await Promise.all(
             openapiMeta.preload.map(async (k) => [k, (await getSchema(k)).bundled]),

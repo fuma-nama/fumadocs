@@ -17,6 +17,7 @@ import { generate } from '@fumari/json-schema-ts';
 import { getRaw } from '@scalar/json-magic/magic-proxy';
 import type { JsonSchema } from '@fumadocs/json-schema';
 import type { SchemaUIOptions } from 'shared-api/components/schema';
+import { createDocumentCache } from 'shared-api/utils/document-cache';
 import type { PlaygroundClientOptions } from '@/ui/playground/client';
 import type { ShikiFactory } from 'fumadocs-core/highlight/shiki';
 import {
@@ -233,7 +234,7 @@ export interface RenderContext extends OpenAPIRenderOptions {
 interface OpenAPIProviderProps extends OpenAPIRuntimeOptions, OpenAPIRenderOptions {
   shiki: ShikiFactory;
   /** the bundled OpenAPI document */
-  document: Document;
+  document: Document | Promise<Document>;
   proxyUrl?: string;
   components: OpenAPIComponents;
   children: ReactNode;
@@ -247,6 +248,8 @@ export interface CreateOpenAPIRendererOptions extends OpenAPIRuntimeOptions, Ope
     /** wraps the rendered operations and webhooks */
     Layout?: FC<PageLayoutProps>;
   };
+  /** load documents left out of page props (`includeDocument: false`) by ID, in server rendering too */
+  loadDocument?: (id: string) => Promise<Document>;
 }
 
 const OpenAPIContext = createContext<OpenAPIRuntime | null>(null);
@@ -304,7 +307,7 @@ export function useTypeScriptDefinitions(
 }
 
 function OpenAPIProvider({
-  document,
+  document: input,
   mediaAdapters,
   codeUsages,
   generateCodeSamples,
@@ -321,6 +324,7 @@ function OpenAPIProvider({
   components,
   children,
 }: OpenAPIProviderProps) {
+  const document = input instanceof Promise ? use(input) : input;
   const runtime = useMemo<OpenAPIRuntime>(
     () => ({
       doc: dereferenceBundledDocument(document),
@@ -406,9 +410,11 @@ export function createRenderer(
  */
 export function createOpenAPIBaseRenderer({
   components,
+  loadDocument,
   ...options
 }: CreateOpenAPIRendererOptions & { shiki: ShikiFactory }): FC<OpenAPIPageProps> {
   const { Operation, Layout = DefaultLayout } = components;
+  const load = createDocumentCache<Document>();
   const slots: OpenAPIComponents = {
     SchemaUI: components.SchemaUI,
     // fills the Markdown, code block and heading slots the page didn't replace
@@ -478,18 +484,22 @@ export function createOpenAPIBaseRenderer({
   }
 
   return function OpenAPIPage(props) {
-    let document: Document;
+    let document: Document | Promise<Document> | undefined;
     let proxyUrl: string | undefined;
     if ('preloaded' in props) {
       document = props.preloaded.docs[props.document];
-      if (!document)
-        throw new Error(
-          `[Fumadocs OpenAPI] the document ${props.document} is not preloaded, make sure to pass the "preloaded" prop to <OpenAPIPage />`,
-        );
       proxyUrl = props.preloaded.proxyUrl;
     } else {
       document = props.payload.bundled;
       proxyUrl = props.payload.proxyUrl;
+    }
+    if (!document) {
+      if (!props.document || !loadDocument)
+        throw new Error(
+          `[Fumadocs OpenAPI] the document "${props.document}" is not in the page props, pass \`loadDocument\` to \`createOpenAPIPage()\``,
+        );
+      // loaded outside of the provider, which suspends on it
+      document = load(props.document, loadDocument);
     }
 
     return (
