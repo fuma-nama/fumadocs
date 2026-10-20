@@ -84,7 +84,8 @@ export interface OpenAPIServer {
 }
 
 export interface OpenAPIPageData extends PageData {
-  getOpenAPIPageProps: () => OpenAPIPageProps_Spec & { document: string };
+  // `OpenAPIPageProps_Spec & {}` would be flattened into types that consumers cannot name
+  getOpenAPIPageProps: () => Omit<OpenAPIPageProps_Spec, 'document'> & { document: string };
   getSchema: () => { id: string; bundled: Document };
   structuredData: StructuredData;
   toc: TOCItemType[];

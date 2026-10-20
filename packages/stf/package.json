@@ -27,10 +27,10 @@
     "types:check": "tsc --noEmit"
   },
   "devDependencies": {
-    "@types/node": "26.6.4",
+    "@types/node": "26.6.5",
     "@types/react": "^19.3.0",
     "tsconfig": "workspace:*",
-    "tsdown": "0.23.0"
+    "tsdown": "0.23.1"
   },
   "peerDependencies": {
     "@types/react": "*",

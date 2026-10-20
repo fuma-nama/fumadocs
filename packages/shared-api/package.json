@@ -47,30 +47,30 @@
     "types:check": "tsc --noEmit"
   },
   "dependencies": {
-    "@base-ui/react": "^1.8.0",
+    "@base-ui/react": "^1.9.0",
     "@fuma-translate/react": "^1.0.2",
     "@fumadocs/json-schema": "workspace:*",
     "@fumari/stf": "workspace:*",
     "class-variance-authority": "^0.7.1",
-    "cn": "^0.4.0",
+    "cn": "^0.5.0",
     "github-slugger": "^2.0.0",
     "hast-util-to-jsx-runtime": "^2.3.6",
-    "lucide-react": "^1.50.0",
+    "lucide-react": "^1.59.0",
     "remark": "^15.0.1",
     "remark-rehype": "^11.1.2",
     "shiki": "^4.5.0"
   },
   "devDependencies": {
-    "@scalar/json-magic": "^0.15.4",
-    "@types/node": "26.6.4",
+    "@scalar/json-magic": "^0.16.0",
+    "@types/node": "26.6.5",
     "@types/react": "^19.3.0",
     "@types/react-dom": "^19.3.0",
     "fuma-cli": "^0.3.1",
     "fumadocs-core": "workspace:*",
     "fumadocs-ui": "workspace:@fumadocs/base-ui@*",
-    "json-schema-typed": "^8.0.2",
+    "json-schema-typed": "^9.0.0",
     "tsconfig": "workspace:*",
-    "tsdown": "0.23.0"
+    "tsdown": "0.23.1"
   },
   "peerDependencies": {
     "@types/react": "*",

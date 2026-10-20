@@ -36,29 +36,29 @@
     "types:check": "tsc --noEmit"
   },
   "dependencies": {
-    "@base-ui/react": "^1.8.0",
+    "@base-ui/react": "^1.9.0",
     "@fuma-translate/react": "^1.0.2",
-    "cn": "^0.4.0",
+    "cn": "^0.5.0",
     "hast-util-to-jsx-runtime": "^2.3.6",
-    "lucide-react": "^1.50.0",
+    "lucide-react": "^1.59.0",
     "remark": "^15.0.1",
     "remark-gfm": "^4.0.1",
     "remark-rehype": "^11.1.2",
     "remend": "^1.4.0"
   },
   "devDependencies": {
-    "@ai-sdk/react": "^4.0.130",
+    "@ai-sdk/react": "^4.0.147",
     "@types/hast": "^3.0.5",
-    "@types/node": "26.6.4",
+    "@types/node": "26.6.5",
     "@types/react": "^19.3.0",
-    "ai": "^7.0.127",
+    "ai": "^7.0.143",
     "fuma-cli": "^0.3.1",
     "fumadocs-core": "workspace:*",
     "fumadocs-ui": "workspace:@fumadocs/base-ui@*",
-    "react": "^19.3.0",
-    "react-dom": "^19.3.0",
+    "react": "^19.3.1",
+    "react-dom": "^19.3.1",
     "tsconfig": "workspace:*",
-    "tsdown": "0.23.0"
+    "tsdown": "0.23.1"
   },
   "peerDependencies": {
     "@ai-sdk/react": "^4.0.0",

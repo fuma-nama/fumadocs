@@ -12,17 +12,17 @@
     "fumadocs-ui": "workspace:@fumadocs/base-ui@*",
     "github-slugger": "^2.0.0",
     "html-react-parser": "^6.1.8",
-    "next": "16.3.8",
-    "react": "^19.3.0",
-    "react-dom": "^19.3.0",
+    "next": "16.4.2",
+    "react": "^19.3.1",
+    "react-dom": "^19.3.1",
     "shiki": "^4.5.0"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4.3.3",
-    "@types/node": "26.6.4",
+    "@types/node": "26.6.5",
     "@types/react": "^19.3.0",
     "@types/react-dom": "^19.3.0",
-    "postcss": "^8.5.28",
+    "postcss": "^8.5.31",
     "tailwindcss": "^4.3.3",
     "typescript": "^7.0.2"
   }
