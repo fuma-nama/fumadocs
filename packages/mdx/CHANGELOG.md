@@ -1,3 +1,9 @@
+## fumadocs-mdx@15.4.9
+
+### Turbopack loader warnings
+
+- Next.js 16.4 builds no longer warn `Module not found: Can't resolve <dynamic>` for the config imports of the loaders.
+
 ## fumadocs-mdx@15.4.8
 
 ### Imports across Windows drives
