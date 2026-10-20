@@ -32,13 +32,7 @@ type AsyncAPIVirtualFile = VirtualFile<{ pageData: AsyncAPIPageData; metaData: M
 export interface AsyncAPIOptions {
   input?: string[] | SchemaRecord;
   disableCache?: boolean;
-  /**
-   * Include bundled documents in page props.
-   *
-   * Set to `false` to leave them out, `<AsyncAPIPage />` loads them with `loadDocument` instead, once per browser session.
-   *
-   * @defaultValue true
-   */
+  /** set `false` to leave documents out of page props, pages load each once per browser session with `loadDocument` */
   includeDocument?: boolean;
 }
 
@@ -62,7 +56,7 @@ export interface AsyncAPIServer {
 }
 
 export interface AsyncAPIPageData extends PageData {
-  getAsyncAPIPageProps: () => AsyncAPIPageProps_Spec;
+  getAsyncAPIPageProps: () => AsyncAPIPageProps_Spec & { document: string };
   getSchema: () => { id: string; bundled: AsyncAPIObject };
   /** the operations of page in Markdown, for LLMs */
   getText: (type: 'raw' | 'processed') => Promise<string>;

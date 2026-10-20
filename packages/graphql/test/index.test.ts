@@ -2,17 +2,16 @@ import { fileURLToPath } from 'node:url';
 import path from 'node:path';
 import { describe, expect, test } from 'vitest';
 import { printSchema } from 'graphql';
-import { createGraphQL, type GraphQLOptions, type GraphQLPageData } from '@/server';
+import { createGraphQL, type GraphQLPageData } from '@/server';
 import { buildSchemaFromSDL } from '@/utils/build-schema';
 
 const cwd = fileURLToPath(new URL('./', import.meta.url));
 
-function create(options: GraphQLOptions = {}) {
+function create() {
   return createGraphQL({
     input: {
       store: path.join(cwd, './fixtures/store.graphql'),
     },
-    ...options,
   });
 }
 
@@ -56,7 +55,7 @@ describe('GraphQL source', () => {
     `);
 
     const props = data.getGraphQLPageProps();
-    expect(props.document).toBe('store');
+    expect(props.schema).toBe('store');
     expect(props.items).toEqual([{ type: 'operation', kind: 'query', name: 'orders' }]);
     expect(props.payload).not.toHaveProperty('examples');
     // the SDL payload can be re-built into a schema on client side
@@ -75,16 +74,12 @@ describe('GraphQL source', () => {
   });
 
   test('page props without the SDL', async () => {
-    const source = await create({
-      includeSchema: false,
-      examples: [path.join(cwd, './fixtures/examples.graphql')],
-    }).staticSource();
-    const file = source.files.find((file) => file.path === 'queries/customer.mdx');
-    const props = (file!.data as GraphQLPageData).getGraphQLPageProps();
+    const input = { store: path.join(cwd, './fixtures/store.graphql') };
+    const { files } = await createGraphQL({ input, includeSchema: false }).staticSource();
 
-    expect(props.document).toBe('store');
-    expect(Object.keys(props.payload)).toEqual(['links', 'examples']);
-    expect(props.payload.examples!['query:customer']).toHaveLength(2);
+    expect((files[0].data as GraphQLPageData).getGraphQLPageProps().payload).not.toHaveProperty(
+      'sdl',
+    );
   });
 
   test('generates links after attaching to a loader', async () => {

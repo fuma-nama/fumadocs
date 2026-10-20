@@ -1,8 +1,7 @@
 import { openapi } from '@/lib/openapi';
 
 export async function GET(_req: Request, { params }: RouteContext<'/api/openapi/[id]'>) {
-  const { id } = await params;
-  return Response.json((await openapi.getSchema(id)).bundled);
+  return Response.json((await openapi.getSchema((await params).id)).bundled);
 }
 
 export async function generateStaticParams() {

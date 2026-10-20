@@ -234,7 +234,7 @@ export interface RenderContext extends OpenAPIRenderOptions {
 interface OpenAPIProviderProps extends OpenAPIRuntimeOptions, OpenAPIRenderOptions {
   shiki: ShikiFactory;
   /** the bundled OpenAPI document */
-  document: Document;
+  document: Document | Promise<Document>;
   proxyUrl?: string;
   components: OpenAPIComponents;
   children: ReactNode;
@@ -248,18 +248,13 @@ export interface CreateOpenAPIRendererOptions extends OpenAPIRuntimeOptions, Ope
     /** wraps the rendered operations and webhooks */
     Layout?: FC<PageLayoutProps>;
   };
-  /**
-   * Load a bundled document by ID, for page props without one (`includeDocument: false`).
-   *
-   * It runs during server rendering and in the browser, which loads each document once per session.
-   */
+  /** load documents left out of page props (`includeDocument: false`) by ID, in server rendering too */
   loadDocument?: (id: string) => Promise<Document>;
 }
 
 const OpenAPIContext = createContext<OpenAPIRuntime | null>(null);
 const ComponentsContext = createContext<OpenAPIComponents | null>(null);
 const OptionsContext = createContext<RenderContext | null>(null);
-const load = createDocumentCache<Document>();
 
 /**
  * The runtime of the API page: the document and request options.
@@ -312,7 +307,7 @@ export function useTypeScriptDefinitions(
 }
 
 function OpenAPIProvider({
-  document,
+  document: input,
   mediaAdapters,
   codeUsages,
   generateCodeSamples,
@@ -329,6 +324,7 @@ function OpenAPIProvider({
   components,
   children,
 }: OpenAPIProviderProps) {
+  const document = input instanceof Promise ? use(input) : input;
   const runtime = useMemo<OpenAPIRuntime>(
     () => ({
       doc: dereferenceBundledDocument(document),
@@ -418,6 +414,7 @@ export function createOpenAPIBaseRenderer({
   ...options
 }: CreateOpenAPIRendererOptions & { shiki: ShikiFactory }): FC<OpenAPIPageProps> {
   const { Operation, Layout = DefaultLayout } = components;
+  const load = createDocumentCache<Document>();
   const slots: OpenAPIComponents = {
     SchemaUI: components.SchemaUI,
     // fills the Markdown, code block and heading slots the page didn't replace
@@ -486,40 +483,30 @@ export function createOpenAPIBaseRenderer({
     return <Layout {...layout} />;
   }
 
-  function renderPage(document: Document, props: OpenAPIPageProps) {
-    const proxyUrl = 'preloaded' in props ? props.preloaded.proxyUrl : props.payload.proxyUrl;
+  return function OpenAPIPage(props) {
+    let document: Document | Promise<Document> | undefined;
+    let proxyUrl: string | undefined;
+    if ('preloaded' in props) {
+      document = props.preloaded.docs[props.document];
+      proxyUrl = props.preloaded.proxyUrl;
+    } else {
+      document = props.payload.bundled;
+      proxyUrl = props.payload.proxyUrl;
+    }
+    if (!document) {
+      if (!props.document || !loadDocument)
+        throw new Error(
+          `[Fumadocs OpenAPI] the document "${props.document}" is not in the page props, pass \`loadDocument\` to \`createOpenAPIPage()\``,
+        );
+      // loaded outside of the provider, which suspends on it
+      document = load(props.document, loadDocument);
+    }
 
     return (
       <OpenAPIProvider {...options} document={document} proxyUrl={proxyUrl} components={slots}>
         <Content {...props} />
       </OpenAPIProvider>
     );
-  }
-
-  function LoadedPage({
-    document,
-    props,
-  }: {
-    document: Promise<Document>;
-    props: OpenAPIPageProps;
-  }) {
-    return renderPage(use(document), props);
-  }
-
-  return function OpenAPIPage(props) {
-    const document =
-      'preloaded' in props ? props.preloaded.docs[props.document] : props.payload.bundled;
-    if (document) return renderPage(document, props);
-
-    const id = props.document;
-    if (!id) throw new Error('[Fumadocs OpenAPI] the page props have no document or document ID');
-    if (!loadDocument)
-      throw new Error(
-        `[Fumadocs OpenAPI] the document "${id}" is not in the page props, pass \`loadDocument\` to \`createOpenAPIPage()\``,
-      );
-
-    // load here, React renders <LoadedPage /> again after it suspends
-    return <LoadedPage document={load(id, loadDocument)} props={props} />;
   };
 }
 

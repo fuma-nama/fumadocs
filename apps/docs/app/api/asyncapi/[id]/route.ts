@@ -1,8 +1,7 @@
 import { asyncapi } from '@/lib/asyncapi';
 
 export async function GET(_req: Request, { params }: RouteContext<'/api/asyncapi/[id]'>) {
-  const { id } = await params;
-  return Response.json((await asyncapi.getSchema(id)).bundled);
+  return Response.json((await asyncapi.getSchema((await params).id)).bundled);
 }
 
 export async function generateStaticParams() {

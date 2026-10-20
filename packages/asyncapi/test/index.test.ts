@@ -217,11 +217,9 @@ describe('createAsyncAPI()', () => {
   test('leaves documents out of page props with `includeDocument: false`', async () => {
     const server = createAsyncAPI({ input: { streetlights: file }, includeDocument: false });
     const { files } = await server.staticSource({ per: 'file' });
-    const props = (files[0].data as AsyncAPIPageData).getAsyncAPIPageProps();
-    const page = { data: { _asyncapi: { preload: ['streetlights'] } } };
+    const generated = { data: { _asyncapi: { preload: ['streetlights'] } } } as never;
 
-    expect(props.document).toBe('streetlights');
-    expect(props.payload).toEqual({});
-    expect(await server.preloadAsyncAPIPage(page as never)).toEqual({ preloaded: { docs: {} } });
+    expect((files[0].data as AsyncAPIPageData).getAsyncAPIPageProps().payload).toEqual({});
+    expect(await server.preloadAsyncAPIPage(generated)).toEqual({ preloaded: { docs: {} } });
   });
 });

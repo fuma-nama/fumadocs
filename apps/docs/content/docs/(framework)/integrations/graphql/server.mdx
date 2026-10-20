@@ -135,22 +135,23 @@ export const graphql = createGraphQL({
 });
 ```
 
-`<GraphQLPage />` loads the SDL with `loadSchema` instead, once per browser session. It also runs during server rendering, read the schema directly there:
+On Next.js, Waku and React Router, `<GraphQLPage />` loads the SDL of each schema once per browser session with `loadSchema`, it also runs during server rendering:
 
 ```tsx title="components/api-page.tsx"
 'use client';
+import { preload } from 'react-dom';
 import { createGraphQLPage } from '@fumadocs/graphql/ui';
 
 export const GraphQLPage = createGraphQLPage({
   async loadSchema(id) {
-    // use `import.meta.env.SSR` with Vite, e.g. Waku and React Router
+    // `import.meta.env.SSR` on Waku and React Router
     if (typeof window === 'undefined') {
+      // the browser starts downloading it with the page
+      preload(`/api/graphql-schema/${id}`, { as: 'fetch', crossOrigin: 'anonymous' });
       const { graphql } = await import('@/lib/graphql');
       return (await graphql.getSchema(id)).sdl;
     }
-
-    const res = await fetch(`/api/graphql-schema/${id}`);
-    return res.text();
+    return (await fetch(`/api/graphql-schema/${id}`)).text();
   },
 });
 ```
@@ -161,8 +162,7 @@ And serve schemas to the browser:
 import { graphql } from '@/lib/graphql';
 
 export async function GET(_req: Request, { params }: RouteContext<'/api/graphql-schema/[id]'>) {
-  const { id } = await params;
-  return new Response((await graphql.getSchema(id)).sdl);
+  return new Response((await graphql.getSchema((await params).id)).sdl);
 }
 
 // for static exports
@@ -181,7 +181,6 @@ export async function GET(_: Request, { params }: ApiContext<'/api/graphql-schem
 ```
 
 ```ts tab="React Router" title="app/routes/graphql-schema.ts"
-// registered with `route('api/graphql-schema/:id', 'routes/graphql-schema.ts')` in `app/routes.ts`
 import type { Route } from './+types/graphql-schema';
 import { graphql } from '@/lib/graphql';
 
@@ -190,24 +189,52 @@ export async function loader({ params }: Route.LoaderArgs) {
 }
 ```
 
-With Tanstack Start, a server function replaces the route and the server check:
+```ts tab="React Router" title="app/routes.ts"
+import { route, type RouteConfig } from '@react-router/dev/routes';
 
-```tsx title="src/components/api-page.tsx"
+export default [
+  // [!code ++]
+  route('api/graphql-schema/:id', 'routes/graphql-schema.ts'),
+  // ...
+] satisfies RouteConfig;
+```
+
+On Tanstack Start, route loaders run on both sides, call a server function only when the browser doesn't have the schema yet:
+
+```tsx title="src/routes/docs/$.tsx"
 import { createServerFn } from '@tanstack/react-start';
-import { createGraphQLPage } from '@fumadocs/graphql/ui';
 import { graphql } from '@/lib/graphql';
+
+// schemas the browser has loaded
+const schemas = new Map<string, string>();
 
 const getSchema = createServerFn({ method: 'GET' })
   .validator((id: string) => id)
   .handler(async ({ data: id }) => (await graphql.getSchema(id)).sdl);
 
-export const GraphQLPage = createGraphQLPage({
-  loadSchema: (id) => getSchema({ data: id }),
+export const Route = createFileRoute('/docs/$')({
+  component: Page,
+  loader: async ({ params }) => {
+    const data = await serverLoader({ data: params._splat?.split('/') ?? [] });
+    if (data.type === 'graphql') {
+      const { schema: id, payload } = data.props;
+      payload.sdl = schemas.get(id) ?? (await getSchema({ data: id }));
+    }
+    return data;
+  },
 });
+
+function Page() {
+  const page = useFumadocsLoader(Route.useLoaderData());
+  // the schema of the first page too
+  if (page.type === 'graphql' && typeof window !== 'undefined')
+    schemas.set(page.props.schema, page.props.payload.sdl!);
+  // ...
+}
 ```
 
-- Keep the server check in your own code, bundlers drop `@/lib/graphql` from browser bundles with it.
 - For the [UI installed by Fumadocs CLI](/docs/integrations/graphql/api-page#full-ui), pass `loadSchema` to `createGraphQLRenderer()`.
+- Browsers keep each schema until a reload. With [`disableCache`](#disablecache), leave `includeSchema` on.
 
 ## Generating Pages
 

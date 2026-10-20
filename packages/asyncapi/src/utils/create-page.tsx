@@ -130,7 +130,7 @@ export interface RenderContext extends AsyncAPIRenderOptions {
 export interface AsyncAPIProviderProps extends AsyncAPIRuntimeOptions, AsyncAPIRenderOptions {
   shiki: ShikiFactory;
   /** the bundled AsyncAPI document */
-  document: AsyncAPIObject;
+  document: AsyncAPIObject | Promise<AsyncAPIObject>;
   components: AsyncAPIComponents;
   children: ReactNode;
 }
@@ -144,21 +144,15 @@ export interface CreateAsyncAPIRendererOptions
     /** wraps the rendered operations */
     Layout?: FC<PageLayoutProps>;
   };
-  /**
-   * Load a bundled document by ID, for page props without one (`includeDocument: false`).
-   *
-   * It runs during server rendering and in the browser, which loads each document once per session.
-   */
+  /** load documents left out of page props (`includeDocument: false`) by ID, in server rendering too */
   loadDocument?: (id: string) => Promise<AsyncAPIObject>;
 }
 
 export type AsyncAPIPageProps = AsyncAPIPageProps_Spec | AsyncAPIPageProps_Preloaded;
 
 export type AsyncAPIPageProps_Spec = Omit<GeneratedPageProps, 'document'> & {
-  /** the document ID, loaded with `loadDocument` when the payload has no document */
   document?: string;
   payload: {
-    /** the bundled document, left out with `includeDocument: false` */
     bundled?: AsyncAPIObject;
   };
 };
@@ -172,7 +166,6 @@ export type AsyncAPIPageProps_Preloaded = GeneratedPageProps & {
 const AsyncAPIContext = createContext<AsyncAPIRuntime | null>(null);
 const ComponentsContext = createContext<AsyncAPIComponents | null>(null);
 const OptionsContext = createContext<RenderContext | null>(null);
-const load = createDocumentCache<AsyncAPIObject>();
 
 /**
  * The runtime of the API page: the document and its options.
@@ -205,7 +198,7 @@ export function useRenderContext(): RenderContext {
  * The runtime of an API page, for UIs built from the headless hooks.
  */
 export function AsyncAPIProvider({
-  document,
+  document: input,
   storageKeyPrefix = 'fumadocs-asyncapi-',
   shiki,
   shikiOptions = defaultShikiOptions,
@@ -217,6 +210,7 @@ export function AsyncAPIProvider({
   components,
   children,
 }: AsyncAPIProviderProps) {
+  const document = input instanceof Promise ? use(input) : input;
   const runtime = useMemo<AsyncAPIRuntime>(
     () => ({ doc: dereferenceBundledDocument(document), storageKeyPrefix }),
     [document, storageKeyPrefix],
@@ -275,6 +269,7 @@ export function createAsyncAPIRenderer({
 }: CreateAsyncAPIRendererOptions): FC<AsyncAPIPageProps> {
   const options = { ...rest, generateTypeScriptDefinitions };
   const { Operation, Layout = DefaultLayout } = components;
+  const load = createDocumentCache<AsyncAPIObject>();
   const slots: AsyncAPIComponents = {
     SchemaUI: components.SchemaUI,
     // fills the Markdown, code block and heading slots the page didn't replace
@@ -313,38 +308,23 @@ export function createAsyncAPIRenderer({
     return <Layout {...layout} />;
   }
 
-  function renderPage(document: AsyncAPIObject, props: AsyncAPIPageProps) {
+  return function AsyncAPIPage(props) {
+    let document: AsyncAPIObject | Promise<AsyncAPIObject> | undefined =
+      'preloaded' in props ? props.preloaded.docs[props.document] : props.payload.bundled;
+    if (!document) {
+      if (!props.document || !loadDocument)
+        throw new Error(
+          `[Fumadocs AsyncAPI] the document "${props.document}" is not in the page props, pass \`loadDocument\` to \`createAsyncAPIPage()\``,
+        );
+      // loaded outside of the provider, which suspends on it
+      document = load(props.document, loadDocument);
+    }
+
     return (
       <AsyncAPIProvider {...options} shiki={shiki} document={document} components={slots}>
         <Content {...props} />
       </AsyncAPIProvider>
     );
-  }
-
-  function LoadedPage({
-    document,
-    props,
-  }: {
-    document: Promise<AsyncAPIObject>;
-    props: AsyncAPIPageProps;
-  }) {
-    return renderPage(use(document), props);
-  }
-
-  return function AsyncAPIPage(props) {
-    const document =
-      'preloaded' in props ? props.preloaded.docs[props.document] : props.payload.bundled;
-    if (document) return renderPage(document, props);
-
-    const id = props.document;
-    if (!id) throw new Error('[Fumadocs AsyncAPI] the page props have no document or document ID');
-    if (!loadDocument)
-      throw new Error(
-        `[Fumadocs AsyncAPI] the document "${id}" is not in the page props, pass \`loadDocument\` to \`createAsyncAPIPage()\``,
-      );
-
-    // load here, React renders <LoadedPage /> again after it suspends
-    return <LoadedPage document={load(id, loadDocument)} props={props} />;
   };
 }
 

@@ -231,37 +231,19 @@ describe('sseTransport', () => {
   });
 });
 
-describe('<AsyncAPIPage />', () => {
-  const document = {
-    asyncapi: '3.0.0',
-    info: { title: 'Test', version: '1.0.0' },
-    channels: { events: { address: '/events' } },
-    operations: {
-      onEvent: { action: 'send', title: 'Send events', channel: { $ref: '#/channels/events' } },
-    },
-  } as unknown as AsyncAPIObject;
+test('<AsyncAPIPage /> loads documents left out of page props', async () => {
+  const operations = {
+    onEvent: { action: 'send', title: 'Send events', channel: { address: '/' } },
+  };
+  const document = { asyncapi: '3.0.0', info: {}, operations } as unknown as AsyncAPIObject;
+  const loadDocument = vi.fn(async () => document);
+  const AsyncAPIPage = createAsyncAPIPage({ loadDocument });
+  const items = [{ id: 'onEvent', action: 'send' as const }];
+  const { prelude } = await prerender(
+    <AsyncAPIPage document="events" operations={items} showTitle payload={{}} />,
+  );
 
-  test('loads documents left out of page props', async () => {
-    const loadDocument = vi.fn(async () => document);
-    const AsyncAPIPage = createAsyncAPIPage({ loadDocument });
-    const { prelude } = await prerender(
-      <AsyncAPIPage
-        document="events"
-        operations={[{ id: 'onEvent', action: 'send' }]}
-        showTitle
-        payload={{}}
-      />,
-    );
-
-    expect(await new Response(prelude).text()).toContain('Send events');
-    expect(loadDocument).toHaveBeenCalledExactlyOnceWith('events');
-  });
-
-  test('page props without documents need `loadDocument`', () => {
-    const AsyncAPIPage = createAsyncAPIPage();
-
-    expect(() => renderToString(<AsyncAPIPage document="events" payload={{}} />)).toThrow(
-      'pass `loadDocument`',
-    );
-  });
+  expect(await new Response(prelude).text()).toContain('Send events');
+  expect(loadDocument).toHaveBeenCalledExactlyOnceWith('events');
+  expect(() => renderToString(<AsyncAPIPage payload={{}} />)).toThrow('pass `loadDocument`');
 });

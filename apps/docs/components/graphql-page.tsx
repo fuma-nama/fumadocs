@@ -1,5 +1,6 @@
 'use client';
 import { defaultShikiOptions } from '@/lib/shiki';
+import { preload } from 'react-dom';
 import { createGraphQLPage } from '@fumadocs/graphql/ui';
 
 export const GraphQLPage = createGraphQLPage({
@@ -11,11 +12,10 @@ export const GraphQLPage = createGraphQLPage({
   },
   async loadSchema(id) {
     if (typeof window === 'undefined') {
+      preload(`/api/graphql-schema/${id}`, { as: 'fetch', crossOrigin: 'anonymous' });
       const { graphql } = await import('@/lib/graphql');
       return (await graphql.getSchema(id)).sdl;
     }
-
-    const res = await fetch(`/api/graphql-schema/${id}`);
-    return res.text();
+    return (await fetch(`/api/graphql-schema/${id}`)).text();
   },
 });

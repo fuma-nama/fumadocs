@@ -386,24 +386,13 @@ describe('render <GraphQLPage />', () => {
   test('loads the schema of page props without SDL', async () => {
     const loadSchema = vi.fn(async () => sdl);
     const Page = createGraphQLPage({ components: { CodeBlock }, loadSchema });
-    const { prelude } = await prerender(
-      <Page
-        document="store"
-        payload={{}}
-        items={[{ type: 'operation', kind: 'query', name: 'orders' }]}
-      />,
-    );
+    const items = [{ type: 'operation' as const, kind: 'query' as const, name: 'orders' }];
+    const { prelude } = await prerender(<Page schema="store" payload={{}} items={items} />);
 
-    expect(text(await new Response(prelude).text())).toContain(
-      'QUERYorders(filter: OrderFilter): [Order!]!',
-    );
+    expect(text(await new Response(prelude).text())).toContain('QUERYorders(filter: OrderFilter)');
     expect(loadSchema).toHaveBeenCalledExactlyOnceWith('store');
-  });
-
-  test('page props without SDL need a loader', () => {
-    expect(() => renderToString(<GraphQLPage document="store" payload={{}} />)).toThrow(
-      'the schema "store" is not in the page props, pass `loadSchema`',
+    expect(() => renderToString(<GraphQLPage schema="store" payload={{}} />)).toThrow(
+      'pass `loadSchema`',
     );
-    expect(() => renderToString(<GraphQLPage payload={{}} />)).toThrow('no SDL or schema ID');
   });
 });

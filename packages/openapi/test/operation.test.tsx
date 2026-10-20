@@ -320,24 +320,19 @@ test('renders the operations and webhooks of a page', async () => {
 test('loads documents left out of page props', async () => {
   const { bundled } = await loadDocument(museum);
   const load = vi.fn(async () => bundled as Document);
-  const options = {
-    components: {
-      ...components,
-      Operation: ({ operation }: PageOperationProps) => <h2>{operation.summary}</h2>,
-    },
-  };
-  const OpenAPIPage = createOpenAPIRenderer({ ...options, loadDocument: load });
-  const WithoutLoader = createOpenAPIRenderer(options);
+  const Operation = ({ operation }: PageOperationProps) => <h2>{operation.summary}</h2>;
+  const OpenAPIPage = createOpenAPIRenderer({
+    components: { ...components, Operation },
+    loadDocument: load,
+  });
   const operations = [{ path: '/museum-hours', method: 'get' as const }];
-
   const { prelude } = await prerender(
     <OpenAPIPage document="museum" payload={{}} operations={operations} />,
   );
+
   expect(await new Response(prelude).text()).toContain('<h2>Get museum hours</h2>');
   expect(load).toHaveBeenCalledExactlyOnceWith('museum');
-  expect(() =>
-    renderToString(<WithoutLoader document="museum" payload={{}} operations={operations} />),
-  ).toThrow('the document "museum" is not in the page props');
+  expect(() => renderToString(<OpenAPIPage payload={{}} />)).toThrow('pass `loadDocument`');
 });
 
 test('encodes auth fields with their providers', async () => {

@@ -44,13 +44,7 @@ export interface OpenAPIOptions {
    */
   proxyUrl?: string;
 
-  /**
-   * Include bundled documents in page props.
-   *
-   * Set to `false` to leave them out, `<OpenAPIPage />` loads them with `loadDocument` instead, once per browser session.
-   *
-   * @defaultValue true
-   */
+  /** set `false` to leave documents out of page props, pages load each once per browser session with `loadDocument` */
   includeDocument?: boolean;
 }
 
@@ -90,7 +84,7 @@ export interface OpenAPIServer {
 }
 
 export interface OpenAPIPageData extends PageData {
-  getOpenAPIPageProps: () => OpenAPIPageProps_Spec;
+  getOpenAPIPageProps: () => OpenAPIPageProps_Spec & { document: string };
   getSchema: () => { id: string; bundled: Document };
   structuredData: StructuredData;
   toc: TOCItemType[];
