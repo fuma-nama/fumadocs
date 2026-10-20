@@ -631,7 +631,8 @@ function analyze(
     }
 
     const call = getCall(node);
-    const key = `${target.id}:${type.id}:${call ? 1 : 0}`;
+    // a call displays its own resolved signature, so each call site gets its own entry
+    const key = `${target.id}:${type.id}:${call ? call.pos : -1}`;
     let text = described.get(key);
     if (text === undefined) {
       text = describeSymbol(project, target, type, identifier, call, typeToString);
