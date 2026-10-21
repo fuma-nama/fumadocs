@@ -27,14 +27,17 @@ describe('getExampleRequests', () => {
     responses: {},
   });
 
-  const pathnames = (op: OperationObject) =>
+  const requests = (op: OperationObject) =>
     getExampleRequests({
       path: '/pets/{petId}',
       method: 'put',
       operation: op,
       parameters: [petId],
       mediaAdapters: defaultAdapters,
-    }).map((item) => [item.id, pathnameFromRequest('/pets/{petId}', item.encoded)]);
+    });
+
+  const pathnames = (op: OperationObject) =>
+    requests(op).map((item) => [item.id, pathnameFromRequest('/pets/{petId}', item.encoded)]);
 
   test('uses the parameter example with the same key as the request body example', () => {
     expect(
@@ -44,6 +47,11 @@ describe('getExampleRequests', () => {
       ['dog', '/pets/rex'],
       ['', '/pets/nemo'],
     ]);
+  });
+
+  test('uses the request body example under an empty key', () => {
+    const [item] = requests(operation({ '': { value: { name: 'nemo' } } }));
+    expect(item.data.body).toEqual({ name: 'nemo' });
   });
 
   test('falls back to the first parameter example without a matching key', () => {
