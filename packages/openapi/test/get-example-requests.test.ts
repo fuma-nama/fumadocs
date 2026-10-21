@@ -13,6 +13,7 @@ describe('getExampleRequests', () => {
     examples: {
       cat: { value: 'tom' },
       dog: { value: 'rex' },
+      '': { value: 'nemo' },
     },
   };
 
@@ -36,13 +37,20 @@ describe('getExampleRequests', () => {
     }).map((item) => [item.id, pathnameFromRequest('/pets/{petId}', item.encoded)]);
 
   test('uses the parameter example with the same key as the request body example', () => {
-    expect(pathnames(operation({ cat: { value: {} }, dog: { value: {} } }))).toEqual([
+    expect(
+      pathnames(operation({ cat: { value: {} }, dog: { value: {} }, '': { value: {} } })),
+    ).toEqual([
       ['cat', '/pets/tom'],
       ['dog', '/pets/rex'],
+      ['', '/pets/nemo'],
     ]);
   });
 
   test('falls back to the first parameter example without a matching key', () => {
-    expect(pathnames(operation({ bird: { value: {} } }))).toEqual([['bird', '/pets/tom']]);
+    // an inherited property such as `constructor` is not a parameter example
+    expect(pathnames(operation({ bird: { value: {} }, constructor: { value: {} } }))).toEqual([
+      ['bird', '/pets/tom'],
+      ['constructor', '/pets/tom'],
+    ]);
   });
 });
