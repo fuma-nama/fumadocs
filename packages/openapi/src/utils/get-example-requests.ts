@@ -94,7 +94,10 @@ function getRequestData({
   };
 
   for (const param of parameters) {
-    let value = pickExample(param as never);
+    // a parameter example under the same key as the request body example belongs to it
+    const keyed = sampleKey ? param.examples?.[sampleKey] : undefined;
+    let value =
+      keyed !== undefined ? getExampleValue(dereference(keyed)) : pickExample(param as never);
 
     if (value === undefined && param.required) {
       if (param.schema) {
