@@ -165,8 +165,9 @@ export function remarkImage({
         const { url, alt, title } = node;
         // bundlers serve page-relative images at their own URLs, which the imports resolve to
         if (!url.startsWith('/')) {
-          const markdown = `![${(alt ?? '').replace(/[\\[\]]/g, '\\$&')}](`;
-          const end = title ? ` "${title.replace(/["\\]/g, '\\$&')}")` : ')';
+          // in angle brackets, the URLs can have spaces & parentheses
+          const markdown = `![${(alt ?? '').replace(/[\\[\]]/g, '\\$&')}](<`;
+          const end = title ? `> "${title.replace(/["\\]/g, '\\$&')}")` : '>)';
           replaceSource(
             file,
             node,

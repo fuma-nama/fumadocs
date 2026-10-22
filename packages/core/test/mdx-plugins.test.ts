@@ -317,8 +317,8 @@ test('Remark Image: images in embedded content', async () => {
     { heading: undefined, content: 'Intro text.' },
     { heading: undefined, content: 'With .' },
   ]);
-  const s = createStringifier(file, undefined, () => '<url>');
-  expect(s.stringify(tree)).toBe('Intro text.\n\nWith ![image](<url>).\n');
+  const s = createStringifier(file, undefined, () => 'URL');
+  expect(s.stringify(tree)).toBe('Intro text.\n\nWith ![image](<URL>).\n');
 });
 
 test('converts mermaid codeblock to MDX Mermaid component', async () => {

@@ -125,8 +125,9 @@ async function updateImage(
 
     // bundlers serve page-relative images at their own URLs, which the imports resolve to
     if (!node.url.startsWith('/')) {
-      const markdown = `![${(node.alt ?? '').replace(/[\\[\]]/g, '\\$&')}](`;
-      const end = node.title ? ` "${node.title.replace(/["\\]/g, '\\$&')}")` : ')';
+      // in angle brackets, the URLs can have spaces & parentheses
+      const markdown = `![${(node.alt ?? '').replace(/[\\[\]]/g, '\\$&')}](<`;
+      const end = node.title ? `> "${node.title.replace(/["\\]/g, '\\$&')}")` : '>)';
       // a URL with Vite, `StaticImageData` with Next.js
       const code = `${variableName}.src ?? ${variableName}`;
       replaceSource(ctx, out, (s) => markdown + s.expression(code, node.url) + end);

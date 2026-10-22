@@ -86,7 +86,7 @@ test('Remark LLMs: URLs of imported images', async () => {
   };
 
   const expected =
-    '![Test](/test/fixtures/test.png "A \\"title\\"")\n\n![Public](/remark-image.svg)';
+    '![Test](</test/fixtures/test.png> "A \\"title\\"")\n\n![Public](/remark-image.svg)';
   await expect(load('string')).resolves.toBe(`${expected}\n`);
   const Md = (await load('function')) as FC;
   await expect(renderToMarkdown(<Md />)).resolves.toBe(expected);
