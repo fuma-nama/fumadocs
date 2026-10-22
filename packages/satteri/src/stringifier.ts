@@ -136,14 +136,23 @@ export interface Stringifier {
   inner: (node: ParentNode) => string;
   /** whether `range` is output inside `outer`, embedded sources are output in place of the node they replace */
   within: (range: Range, outer: Range) => boolean;
+  /**
+   * Markdown evaluated where the output is exported, like the URL of an imported file. `fallback` in outputs that
+   * can't evaluate it.
+   *
+   * @param code - a JS expression
+   */
+  expression: (code: string, fallback: string) => string;
 }
 
 /**
  * @param namespace - also apply the edits of this namespace, like `search` for search records
+ * @param expression - output the expressions of replacements, their fallbacks are output without it
  */
 export function createStringifier(
   ctx: MdastVisitorContext,
   namespace?: 'search' | (string & {}),
+  expression: Stringifier['expression'] = (_, fallback) => fallback,
 ): Stringifier {
   const source = ctx.source + (ctx.data._embeddedSource ?? '');
   const embeds = ctx.data._embeds ?? [];
@@ -267,6 +276,7 @@ export function createStringifier(
       return end > start ? s.slice(start, end) : '';
     },
     within: (range, outer) => lift(range, outer) !== undefined,
+    expression,
   };
 
   /** `range` as output inside `outer`, embedded sources are output in place of the node they replace */

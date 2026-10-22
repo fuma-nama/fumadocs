@@ -4,6 +4,7 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { compile } from '@mdx-js/mdx';
 import { remarkLLMs } from '@/mdx-plugins/remark-llms';
+import { remarkImage } from '@/mdx-plugins/remark-image';
 import { asMarkdown, md, renderToMarkdown } from '@/server';
 import type { FC, ReactNode } from 'react';
 
@@ -57,4 +58,36 @@ test('Remark LLMs: jsx', async () => {
 
     Ending paragraph."
   `);
+});
+
+test('Remark LLMs: URLs of imported images', async () => {
+  // a page-relative image, and one in the public directory
+  const value = '![Test](./test.png "A \\"title\\"")\n\n![Public](/remark-image.svg)\n';
+  const load = async (output: 'function' | 'string') => {
+    const compiled = String(
+      await compile(
+        { value, path: path.resolve(cwd, './fixtures/page.mdx') },
+        {
+          remarkPlugins: [
+            [remarkImage, { publicDir: path.resolve(cwd, './fixtures') }],
+            [remarkLLMs, { output }],
+          ],
+        },
+      ),
+    );
+    const evalFile = path.resolve(cwd, `./fixtures/remark-llms-image-${output}.out.js`);
+    await fs.writeFile(
+      evalFile,
+      compiled.replace('"fumadocs-core/server"', '"../../src/server.ts"'),
+    );
+    const { _markdown } = await import(evalFile);
+    await fs.rm(evalFile);
+    return _markdown;
+  };
+
+  const expected =
+    '![Test](</test/fixtures/test.png> "A \\"title\\"")\n\n![Public](/remark-image.svg)';
+  await expect(load('string')).resolves.toBe(`${expected}\n`);
+  const Md = (await load('function')) as FC;
+  await expect(renderToMarkdown(<Md />)).resolves.toBe(expected);
 });

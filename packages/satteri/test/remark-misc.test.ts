@@ -83,6 +83,19 @@ describe('remark-image', () => {
     expect(code).toContain('alt: "test image"');
   });
 
+  it('resolves sizes at runtime, where imports are unavailable', async () => {
+    const options = await applySatteriPreset({ rehypeCodeOptions: false })('runtime');
+    const { code } = await compileMdx({
+      source: '![test image](./img.png)',
+      filePath: path.join(fixtures, 'page.mdx'),
+      environment: 'runtime',
+      options,
+    });
+
+    expect(code).not.toContain('__img0');
+    expect(code).toContain('width: "1"');
+  });
+
   it('resolves sizes directly when useImport is disabled', async () => {
     const { code } = await compile(
       '![test image](./img.png)',

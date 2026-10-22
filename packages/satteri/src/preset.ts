@@ -93,7 +93,11 @@ export function applySatteriPreset(
           generateToc: false,
           ...remarkHeadingOptions,
         }),
-        remarkImageOptions !== false && remarkImage(remarkImageOptions),
+        remarkImageOptions !== false &&
+          remarkImage({
+            ...remarkImageOptions,
+            useImport: remarkImageOptions?.useImport ?? environment === 'bundler',
+          }),
         remarkCodeTabOptions !== false && remarkCodeTab(remarkCodeTabOptions),
         remarkNpmOptions !== false && remarkNpm(remarkNpmOptions),
         ...plugins,

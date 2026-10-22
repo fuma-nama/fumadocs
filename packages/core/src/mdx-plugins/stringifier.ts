@@ -1,3 +1,4 @@
+import type { Expression } from 'estree-jsx';
 import type { Nodes } from 'mdast';
 import type { VFile } from 'vfile';
 
@@ -120,12 +121,22 @@ export interface Stringifier {
   inner: (node: Nodes) => string;
   /** whether `range` is output inside `outer`, embedded sources are output in place of the node they replace */
   within: (range: Range, outer: Range) => boolean;
+  /**
+   * Markdown evaluated where the output is exported, like the URL of an imported file. `fallback` in outputs that
+   * can't evaluate it.
+   */
+  expression: (expression: Expression, fallback: string) => string;
 }
 
 /**
  * @param namespace - also apply the edits of this namespace, like `search` for search records
+ * @param expression - output the expressions of replacements, their fallbacks are output without it
  */
-export function createStringifier(file: VFile, namespace?: 'search' | (string & {})): Stringifier {
+export function createStringifier(
+  file: VFile,
+  namespace?: 'search' | (string & {}),
+  expression: Stringifier['expression'] = (_, fallback) => fallback,
+): Stringifier {
   const doc = documents.get(file);
   const ranges = doc?.ranges;
   const embeds = doc?.embeds ?? [];
@@ -246,6 +257,7 @@ export function createStringifier(file: VFile, namespace?: 'search' | (string & 
       return end > start ? s.slice(start, end) : '';
     },
     within: (range, outer) => lift(range, outer) !== undefined,
+    expression,
   };
 
   /** `range` as output inside `outer`, embedded sources are output in place of the node they replace */

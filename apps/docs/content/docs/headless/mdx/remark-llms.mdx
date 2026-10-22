@@ -51,6 +51,20 @@ With Fumadocs MDX, read it from your pages:
 const markdown = await page.data.getText('processed');
 ```
 
+## Images
+
+Images beside your pages, imported by [Remark Image](/docs/headless/mdx/remark-image), get the URLs your bundler serves them at:
+
+```md tab="Input"
+![How a calculation flows](./flow.png)
+```
+
+```md tab="Output"
+![How a calculation flows](/assets/flow-Dxg6sAyC.png)
+```
+
+Images in the public directory keep their address. Vite inlines images smaller than [`build.assetsInlineLimit`](https://vite.dev/config/build-options#build-assetsinlinelimit) as `data:` URLs.
+
 ## JSX Elements
 
 JSX elements are kept as you wrote them. To change them:

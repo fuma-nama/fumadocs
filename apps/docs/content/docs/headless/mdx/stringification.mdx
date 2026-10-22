@@ -16,7 +16,7 @@ The output is the source of your document, with the edits of plugins applied. No
 - A node with a `position` outputs its source.
 - A node without one, like those inserted by plugins, outputs nothing. Its plugin defines its Markdown instead.
 
-For example, [Remark Image](/docs/headless/mdx/remark-image) turns `![alt](./image.png)` into an `<img>` element, the output keeps `![alt](./image.png)`.
+For example, [Remark Image](/docs/headless/mdx/remark-image) turns `![alt](/image.png)` into an `<img>` element, the output keeps `![alt](/image.png)`.
 
 ## Editing the Output
 
@@ -52,6 +52,19 @@ replaceSource(file, node, (s) => s.stringify(node).replace(' [step]', ''), 'sear
 ```
 
 For search, a plugin adds the records of its nodes with [`data.structuredData`](/docs/headless/mdx/structure#plugins).
+
+### Runtime Values
+
+For Markdown only known at runtime, output a JS expression with `s.expression()`. Remark LLMs evaluates it where it exports the Markdown, other outputs use the fallback:
+
+```ts
+import type { Expression } from 'estree';
+
+// the URL of `import image from './image.png'` in the compiled document
+const url: Expression = { type: 'Identifier', name: 'image' };
+
+replaceSource(file, node, (s) => `![alt](${s.expression(url, './image.png')})`);
+```
 
 ## Embedded Content
 

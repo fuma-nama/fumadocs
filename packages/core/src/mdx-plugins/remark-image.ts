@@ -1,8 +1,8 @@
 import * as path from 'node:path';
-import type { Image, Nodes, Root, RootContent } from 'mdast';
+import type { Image, Nodes, Root } from 'mdast';
 import type { Transformer } from 'unified';
-import type { MdxjsEsm } from 'mdast-util-mdx';
-import type { MdxJsxFlowElement } from 'mdast-util-mdx';
+import type { Expression } from 'estree-jsx';
+import type { MdxJsxFlowElement, MdxjsEsm } from 'mdast-util-mdx';
 import { fileURLToPath } from 'node:url';
 import { replaceSource } from './stringifier';
 import { walk } from './utils';
@@ -95,7 +95,7 @@ export function remarkImage({
     const importsToInject: { variableName: string; importPath: string }[] = [];
     const promises: Promise<void>[] = [];
 
-    async function updateImage(src: Source, node: Image): Promise<RootContent | undefined> {
+    async function updateImage(src: Source, node: Image): Promise<void> {
       if (src.type === 'file' && useImport) {
         // Unique variable name for the given static image URL
         const variableName = `__img${importsToInject.length}`;
@@ -117,7 +117,6 @@ export function remarkImage({
           children: [],
           type: 'mdxJsxFlowElement',
           name: 'img',
-          position: node.position,
           attributes: [
             {
               type: 'mdxJsxAttribute',
@@ -163,7 +162,25 @@ export function remarkImage({
           });
         }
 
-        return out;
+        const { url, alt, title } = node;
+        // bundlers serve page-relative images at their own URLs, which the imports resolve to
+        if (!url.startsWith('/')) {
+          // in angle brackets, the URLs can have spaces & parentheses
+          const markdown = `![${(alt ?? '').replace(/[\\[\]]/g, '\\$&')}](<`;
+          const end = title ? `> "${title.replace(/["\\]/g, '\\$&')}")` : '>)';
+          replaceSource(
+            file,
+            node,
+            (s) => markdown + s.expression(importedUrl(variableName), url) + end,
+          );
+        }
+
+        // in place, so stringifiers find its source in included content too
+        delete (node as Partial<Image>).url;
+        delete node.alt;
+        delete node.title;
+        Object.assign(node, out);
+        return;
       }
 
       const size = await getImageSize(src, external).catch((e) => {
@@ -189,26 +206,21 @@ export function remarkImage({
       const src = parseSrc(decodeURI(node.url), publicDir, file.dirname);
       if (!src) return;
 
-      const task = updateImage(src, node)
-        .catch((e) => {
-          // ignore SVG as it is not always needed
-          if (onError === 'ignore' || node.url.endsWith('.svg')) {
-            return;
-          }
+      const task = updateImage(src, node).catch((e) => {
+        // ignore SVG as it is not always needed
+        if (onError === 'ignore' || node.url.endsWith('.svg')) {
+          return;
+        }
 
-          if (onError === 'hide') {
-            replaceSource(file, node, '');
-            parent.children.splice(parent.children.indexOf(node), 1);
-            return;
-          }
+        if (onError === 'hide') {
+          replaceSource(file, node, '');
+          parent.children.splice(parent.children.indexOf(node), 1);
+          return;
+        }
 
-          if (onError === 'error') throw e;
-          onError(e);
-        })
-        .then((res) => {
-          // other images of the parent may be removed before
-          if (res) parent.children[parent.children.indexOf(node)] = res;
-        });
+        if (onError === 'error') throw e;
+        onError(e);
+      });
 
       promises.push(task);
     });
@@ -240,6 +252,22 @@ export function remarkImage({
     );
 
     tree.children.unshift(...imports);
+  };
+}
+
+/** the URL of an imported image, like a string with Vite, or `StaticImageData` with Next.js */
+function importedUrl(name: string): Expression {
+  return {
+    type: 'LogicalExpression',
+    operator: '??',
+    left: {
+      type: 'MemberExpression',
+      object: { type: 'Identifier', name },
+      property: { type: 'Identifier', name: 'src' },
+      computed: false,
+      optional: false,
+    },
+    right: { type: 'Identifier', name },
   };
 }
 
