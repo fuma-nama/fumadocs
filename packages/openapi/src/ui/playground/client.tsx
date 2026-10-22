@@ -55,7 +55,7 @@ export interface PlaygroundClientOptions extends PlaygroundOptions {
   };
 
   /**
-   * render the parameter inputs of API endpoint.
+   * render the parameter inputs of API endpoint, return `undefined` to keep the default input of a parameter.
    *
    * for updating values, use:
    * - the `Custom.useController()` from `fumadocs-openapi/ui/playground/client`.
