@@ -553,6 +553,8 @@ export interface AuthRenderProps {
     description?: string;
     schema?: Exclude<JsonSchema, boolean>;
     path?: string;
+    /** after the input, like a button filling the value */
+    end?: ReactNode;
   }>;
   /** a row opening `component` in a panel */
   Panel: FC<{ title: ReactNode; component: FC<AuthPanelProps> }>;
