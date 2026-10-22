@@ -1,5 +1,6 @@
 import { describe, expect, test } from 'vitest';
 import fs from 'node:fs/promises';
+import os from 'node:os';
 import path from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 import { createElement } from 'react';
@@ -233,5 +234,34 @@ describe('localMd source', () => {
     expect(second.find((file) => file.path === 'guide.md')).not.toBe(
       first.find((file) => file.path === 'guide.md'),
     );
+  });
+
+  test('recompiles a page when its included file changes', async () => {
+    const root = await fs.mkdtemp(path.join(os.tmpdir(), 'satteri-local-md-'));
+
+    try {
+      const dir = path.join(root, 'docs');
+      const partial = path.join(root, 'partial.md');
+      await fs.mkdir(dir);
+      await fs.writeFile(partial, 'version one\n');
+      await fs.writeFile(
+        path.join(dir, 'page.mdx'),
+        '---\ntitle: Page\n---\n\n<include>../partial.md</include>\n',
+      );
+
+      const instance = localMd({ dir });
+      const render = async () => {
+        const page = (await instance.staticSource()).files.find((file) => file.type === 'page');
+        if (page?.type !== 'page') throw new Error('expected a page');
+        return renderToStaticMarkup((await (await page.data.load()).render()).body);
+      };
+
+      expect(await render()).toContain('version one');
+      await fs.writeFile(partial, 'version two\n');
+      expect(instance.invalidateFile(partial)).toBe(true);
+      expect(await render()).toContain('version two');
+    } finally {
+      await fs.rm(root, { recursive: true, force: true });
+    }
   });
 });

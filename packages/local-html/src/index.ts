@@ -40,8 +40,6 @@ export interface LocalHtml<MetaSchema extends StandardSchemaV1> extends Watchabl
     pageData: LocalHtmlPage;
     metaData: StandardSchemaV1.InferOutput<MetaSchema> & MetaData;
   }>;
-
-  invalidateFile: (file: string) => void;
 }
 
 export interface LocalHtmlPage extends PageData {

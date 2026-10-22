@@ -1,0 +1,37 @@
+---
+title: Remark Include
+description: Reuse content from other files.
+---
+
+## Usage
+
+Fumadocs MDX and [Local Markdown](/docs/integrations/content/local-md) enable it by default, see [Include](/docs/mdx/include) for the syntax.
+
+For other compilers, add it to your Remark plugins. Paths are relative to the compiled file, so pass a file with its `path`:
+
+```ts title="MDX Compiler"
+import { compile } from '@mdx-js/mdx';
+import { VFile } from 'vfile';
+import { remarkInclude } from 'fumadocs-core/mdx-plugins';
+
+await compile(new VFile({ path: 'content/page.mdx', value: '...' }), {
+  remarkPlugins: [remarkInclude],
+});
+```
+
+Included Markdown & MDX files are parsed by the current processor, pass `getProcessor` to parse them by their own format instead:
+
+```ts
+import { createProcessor } from '@mdx-js/mdx';
+
+const processors = {
+  md: createProcessor({ format: 'md' }),
+  mdx: createProcessor({ format: 'mdx' }),
+};
+
+await compile(file, {
+  remarkPlugins: [[remarkInclude, { getProcessor: (format) => processors[format] }]],
+});
+```
+
+<auto-type-table type="import('fumadocs-core/mdx-plugins/remark-include').RemarkIncludeOptions" />

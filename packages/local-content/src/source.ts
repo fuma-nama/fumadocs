@@ -15,8 +15,14 @@ export interface WatchableSource {
   readonly dir: string;
   /** glob patterns to scan, relative to {@link dir} */
   readonly include: string[];
-  /** drop caches for a file so the next read picks up its content */
-  invalidateFile: (file: string) => void;
+  /** drop the caches of a file & the files depending on it, returns whether the source uses the file */
+  invalidateFile: (file: string) => boolean;
+  /**
+   * Listen to the files that parsed files depend on (e.g. included files), to watch them along with {@link dir}.
+   *
+   * The listener is called with the known files first.
+   */
+  onDependency: (listener: (file: string) => void) => () => void;
 }
 
 export interface SourceOptions {
@@ -76,8 +82,9 @@ export function createLocalSource<Page extends PageData, Meta extends MetaData>(
       storage.clearCache();
     },
     invalidateFile(file) {
-      storage.invalidateCache(path.resolve(file));
+      return storage.invalidate(path.resolve(file));
     },
+    onDependency: storage.onDependency,
     dynamicSource(options) {
       return {
         cache: 'custom',

@@ -2,11 +2,11 @@ import { applyMdxPreset } from '@/config/preset';
 import type { BuildEnvironment, DocCollectionItem, LoadedConfig } from '@/config/build';
 import type { Core } from '@/core';
 import { createProcessor, type ProcessorOptions } from '@mdx-js/mdx';
+import { remarkInclude } from 'fumadocs-core/mdx-plugins/remark-include';
 import { VFile } from 'vfile';
-import { remarkInclude } from './remark-include';
 import { type PostprocessOptions, remarkPostprocess } from './remark-postprocess';
 import { resolveLastModified } from './last-modified';
-import type { BuildMDXOptions, CompilerOptions } from './build';
+import type { BuildMDXOptions } from './build';
 
 type Processor = ReturnType<typeof createProcessor>;
 
@@ -20,16 +20,6 @@ export interface FumadocsDataMap {
    * [Fumadocs MDX] additional ESM exports to write
    */
   'mdx-export'?: { name: string; value: unknown }[];
-
-  /**
-   * [Fumadocs MDX] The compiler object from loader
-   */
-  _compiler?: CompilerOptions;
-
-  /**
-   * [Fumadocs MDX] get internal processor, do not use this on user land.
-   */
-  _getProcessor?: (format: 'md' | 'mdx') => Processor;
 }
 
 declare module 'vfile' {
@@ -60,7 +50,7 @@ export async function buildJSMDX(
         development: isDevelopment,
         ...mdxOptions,
         remarkPlugins: [
-          remarkInclude,
+          [remarkInclude, { getProcessor }],
           ...(mdxOptions.remarkPlugins ?? []),
           [remarkPostprocess, postprocessOptions],
         ],
@@ -77,7 +67,7 @@ export async function buildJSMDX(
     value: source,
     path: filePath,
     cwd: collection?.cwd,
-    data: { frontmatter, _compiler, _getProcessor: getProcessor },
+    data: { frontmatter, _compiler },
   });
 
   if (collection) {

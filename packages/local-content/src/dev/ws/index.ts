@@ -35,7 +35,13 @@ export async function watchWithDevServer(
     includes: source.include,
   });
 
-  return conn.subscribe((event) => {
+  const unwatch = source.onDependency((file) => conn.send({ type: 'watch-file', file }));
+  const unsubscribe = conn.subscribe((event) => {
     if (event.type === 'change') source.invalidateFile(event.absolutePath);
   });
+
+  return () => {
+    unwatch();
+    unsubscribe();
+  };
 }
