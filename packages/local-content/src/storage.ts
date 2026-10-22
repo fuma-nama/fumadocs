@@ -18,17 +18,20 @@ export function createStorage<Page, Meta>(config: StorageConfig<Page, Meta>) {
   const { dir, integration, include = integration.include } = config;
   const isContentFile = picomatch(include);
   let cache = new Map<string, ParsedFile<Page, Meta>>();
-  /** file -> the parsed files depending on it */
-  const dependents = new Map<string, Set<string>>();
+  /** parsed file -> the files it depends on, dropped on invalidation and added again by the next compile */
+  const dependencies = new Map<string, Set<string>>();
+  /** every dependency seen, watchers keep watching them */
+  const watched = new Set<string>();
   const listeners = new Set<(file: string) => void>();
 
   function addDependency(dependent: string, file: string) {
-    let files = dependents.get(file);
-    if (!files) {
-      dependents.set(file, (files = new Set()));
-      for (const listener of listeners) listener(file);
-    }
-    files.add(dependent);
+    let files = dependencies.get(dependent);
+    if (!files) dependencies.set(dependent, (files = new Set()));
+    files.add(file);
+
+    if (watched.has(file)) return;
+    watched.add(file);
+    for (const listener of listeners) listener(file);
   }
 
   return {
@@ -37,17 +40,21 @@ export function createStorage<Page, Meta>(config: StorageConfig<Page, Meta>) {
     },
     invalidate(absolutePath: string): boolean {
       cache.delete(absolutePath);
-      const files = dependents.get(absolutePath);
-      if (files) {
-        for (const file of files) cache.delete(file);
-        return true;
+      dependencies.delete(absolutePath);
+      let used = false;
+      for (const [file, files] of dependencies) {
+        if (!files.has(absolutePath)) continue;
+        cache.delete(file);
+        dependencies.delete(file);
+        used = true;
       }
+      if (used) return true;
 
       const relative = path.relative(dir, absolutePath);
       return !relative.startsWith('..') && !path.isAbsolute(relative) && isContentFile(relative);
     },
     onDependency(listener: (file: string) => void): () => void {
-      for (const file of dependents.keys()) listener(file);
+      for (const file of watched) listener(file);
       listeners.add(listener);
       return () => {
         listeners.delete(listener);

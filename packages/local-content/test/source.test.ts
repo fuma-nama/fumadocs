@@ -158,6 +158,7 @@ describe('createLocalSource', () => {
     const parsed: string[] = [];
     const notified: string[] = [];
     const shared = path.join(dir, '../shared.md');
+    let includes = true;
     const source = createLocalSource({
       dir,
       include: ['*.md'],
@@ -165,7 +166,7 @@ describe('createLocalSource', () => {
         include: ['*.md'],
         async parse(file) {
           parsed.push(file.path);
-          if (file.path === 'guide.md') file.addDependency(shared);
+          if (includes && file.path === 'guide.md') file.addDependency(shared);
           return { type: 'page', data: { title: file.path } };
         },
       },
@@ -179,6 +180,12 @@ describe('createLocalSource', () => {
     expect(source.invalidateFile(shared)).toBe(true);
     await source.staticSource();
     expect(parsed).toEqual(['guide.md']);
+
+    // the page changed and no longer depends on it
+    includes = false;
+    source.invalidateFile(path.join(dir, 'guide.md'));
+    await source.staticSource();
+    expect(source.invalidateFile(shared)).toBe(false);
   });
 
   test('invalidateFile reports whether the source uses a file', () => {
