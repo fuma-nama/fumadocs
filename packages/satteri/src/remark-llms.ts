@@ -1,7 +1,6 @@
 import type { MdastPluginEntry } from 'satteri';
 import { defineMdastPlugin } from 'satteri';
 import { createStringifier, type PositionedNode, type Stringifier } from './stringifier';
-import type { ExtraPluginHooks } from './compile';
 import { stringifyHeadingId } from './heading-id';
 import type { JsxElementNode } from './utils';
 
@@ -44,6 +43,9 @@ interface KeptElement {
   children: string;
 }
 
+/** kept JSX elements & expressions, by their markers */
+type Kept = KeptElement | { code: string; fallback: string };
+
 const componentNameRegex = /^[A-Z][\w$]*$/;
 const markerRegex = /\0(\d+)\0/g;
 
@@ -55,10 +57,10 @@ export function remarkLlms({
   as = '_markdown',
   headingIds = true,
   output = 'string',
-}: LLMsOptions = {}) {
+}: LLMsOptions = {}): MdastPluginEntry {
   const jsx = output === 'function';
   const factory = () => {
-    const kept: KeptElement[] = [];
+    const kept: Kept[] = [];
     let s: Stringifier;
 
     const drop = (node: PositionedNode) => s.replace(node, '');
@@ -88,7 +90,11 @@ export function remarkLlms({
       name: 'remark-llms',
       options: { position: true },
       before(_root, ctx) {
-        s = createStringifier(ctx);
+        s = createStringifier(
+          ctx,
+          undefined,
+          (code, fallback) => `\0${kept.push({ code, fallback }) - 1}\0`,
+        );
       },
       mdxjsEsm: drop,
       yaml: drop,
@@ -101,7 +107,16 @@ export function remarkLlms({
         const value = text ? `${text}\n` : '';
 
         if (!jsx) {
-          ctx.data.markdown ??= value;
+          // string output only keeps expressions, `data.markdown` uses their fallbacks
+          ctx.data.markdown ??= value.replace(
+            markerRegex,
+            (_, i: string) => (kept[Number(i)] as { fallback: string }).fallback,
+          );
+          if (as)
+            ctx.prependChild(root, {
+              type: 'mdxjsEsm',
+              value: `export const ${as} = ${toStringCode(value, kept)};`,
+            });
           return;
         }
         if (!as) return;
@@ -115,11 +130,7 @@ export function remarkLlms({
     });
   };
 
-  return Object.assign(factory, {
-    collectExports({ data, addExport }) {
-      if (as && !jsx) addExport(as, JSON.stringify(data.markdown ?? ''));
-    },
-  } satisfies ExtraPluginHooks) as MdastPluginEntry & ExtraPluginHooks;
+  return factory;
 }
 
 function toComponentCode(as: string, body: string, hasJsx: boolean): string {
@@ -133,11 +144,22 @@ function toComponentCode(as: string, body: string, hasJsx: boolean): string {
   ].join('\n');
 }
 
+/** Markdown with the markers of expressions as one string */
+function toStringCode(text: string, kept: Kept[]): string {
+  // text & the indexes of expressions, alternating
+  const parts = text.split(markerRegex);
+  let out = JSON.stringify(parts[0]);
+  for (let i = 1; i < parts.length; i += 2)
+    out += ` + (${(kept[Number(parts[i])] as { code: string }).code}) + ${JSON.stringify(parts[i + 1])}`;
+
+  return out;
+}
+
 /**
- * Generate the JSX for Markdown with the markers of kept elements: Markdown becomes string literals, kept elements
- * stay as JSX with `_c.`-prefixed names and their attributes.
+ * Generate the JSX for Markdown with the markers of kept elements & expressions: Markdown becomes string literals, kept
+ * elements stay as JSX with `_c.`-prefixed names and their attributes.
  */
-function toCode(text: string, kept: KeptElement[]): string {
+function toCode(text: string, kept: Kept[]): string {
   let out = '';
   let idx = 0;
   const pushText = (chunk: string) => {
@@ -146,11 +168,17 @@ function toCode(text: string, kept: KeptElement[]): string {
 
   for (const match of text.matchAll(markerRegex)) {
     pushText(text.slice(idx, match.index));
-    const { open, name, inline, children } = kept[Number(match[1])];
+    idx = match.index + match[0].length;
+    const item = kept[Number(match[1])];
+    if (!('open' in item)) {
+      out += `{${item.code}}`;
+      continue;
+    }
+
+    const { open, name, inline, children } = item;
     const element = children ? `${open}>${toCode(children, kept)}</_c.${name}>` : `${open} />`;
     // keep inline elements in inline context when rendered
     out += inline ? `<span>${element}</span>` : element;
-    idx = match.index + match[0].length;
   }
   pushText(text.slice(idx));
 

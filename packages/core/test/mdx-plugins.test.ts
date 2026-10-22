@@ -29,7 +29,12 @@ import { renderPlaceholder } from '@/mdx-plugins/remark-llms.runtime';
 import type { Heading, Nodes, Root, RootContent } from 'mdast';
 import type { MdxJsxFlowElement } from 'mdast-util-mdx';
 import { VFile } from 'vfile';
-import { embedSource, type Replacement, replaceSource } from '@/mdx-plugins/stringifier';
+import {
+  createStringifier,
+  embedSource,
+  type Replacement,
+  replaceSource,
+} from '@/mdx-plugins/stringifier';
 import { walk } from '@/mdx-plugins/utils';
 
 const cwd = path.dirname(fileURLToPath(import.meta.url));
@@ -290,6 +295,30 @@ test('Remark Image: hidden images', async () => {
   expect(hidden.tree.children[0]).toMatchObject({
     children: [{ value: 'A ' }, { value: ' B ' }, { value: ' C ' }, { type: 'imageReference' }],
   });
+});
+
+test('Remark Image: images in embedded content', async () => {
+  const embedded = 'With ![image](./test.png).\n';
+  const file = new VFile({
+    value: 'Intro text.\n\nINCLUDE\n',
+    path: path.resolve(cwd, './fixtures/page.md'),
+  });
+  const processor = remark()
+    .use(() => (tree: Root) => {
+      const content = remark().parse(embedded).children;
+      embedSource(file, tree.children[1], embedded, content);
+      tree.children.splice(1, 1, ...content);
+    })
+    .use(remarkImage, { publicDir: path.resolve(cwd, './fixtures') })
+    .use(remarkStructure);
+  const tree = await processor.run(processor.parse(file), file);
+
+  expect(file.data.structuredData?.contents).toEqual([
+    { heading: undefined, content: 'Intro text.' },
+    { heading: undefined, content: 'With .' },
+  ]);
+  const s = createStringifier(file, undefined, () => '<url>');
+  expect(s.stringify(tree)).toBe('Intro text.\n\nWith ![image](<url>).\n');
 });
 
 test('converts mermaid codeblock to MDX Mermaid component', async () => {

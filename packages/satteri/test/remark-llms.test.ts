@@ -300,3 +300,47 @@ test('remark-llms function output exports a component', async () => {
     Ending paragraph."
   `);
 });
+
+test('remark-llms outputs the URLs of imported images', async () => {
+  const fixtures = path.resolve(import.meta.dirname, './fixtures');
+  const load = async (output: 'function' | 'string') => {
+    const options = await applySatteriPreset({
+      rehypeCodeOptions: false,
+      remarkImageOptions: { publicDir: fixtures },
+      mdastPlugins: [remarkLlms({ output })],
+    })('bundler');
+    const result = await compileMdx({
+      // a page-relative image, and one in the public directory
+      source: '![Image](./img.png "A \\"title\\"")\n\n![Public](/img.png)\n',
+      filePath: path.join(fixtures, 'page.md'),
+      options,
+    });
+
+    const evalFile = path.join(fixtures, `remark-llms-image-${output}.out.js`);
+    await fs.writeFile(evalFile, result.code);
+    const { _markdown } = await import(evalFile);
+    await fs.rm(evalFile);
+    return _markdown;
+  };
+
+  const expected = '![Image](/test/fixtures/img.png "A \\"title\\"")\n\n![Public](/img.png)';
+  await expect(load('string')).resolves.toBe(`${expected}\n`);
+  await expect(renderToMarkdown(createElement(await load('function')))).resolves.toBe(expected);
+});
+
+test('included images use the URLs of their imports', async () => {
+  const options = await applySatteriPreset({ rehypeCodeOptions: false })('bundler');
+  options.mdastPlugins = [remarkInclude(), ...(options.mdastPlugins ?? []), remarkLlms()];
+
+  const result = await compileMdx({
+    source: 'Intro text.\n\n<include>./image.md</include>\n',
+    filePath: path.resolve(import.meta.dirname, './fixtures/remark-include/entry.mdx'),
+    options,
+  });
+
+  expect(result.code).toContain('With ![image](" + (__img0.src ?? __img0) + ").');
+  expect(result.data?.structuredData?.contents).toEqual([
+    { heading: undefined, content: 'Intro text.' },
+    { heading: undefined, content: 'With .' },
+  ]);
+});
