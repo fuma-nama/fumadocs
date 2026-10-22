@@ -154,6 +154,42 @@ describe('createLocalSource', () => {
     expect(files.map((file) => file.path)).toEqual(['notes.txt']);
   });
 
+  test('invalidates the files depending on a changed file', async () => {
+    const parsed: string[] = [];
+    const notified: string[] = [];
+    const shared = path.join(dir, '../shared.md');
+    const source = createLocalSource({
+      dir,
+      include: ['*.md'],
+      integration: {
+        include: ['*.md'],
+        async parse(file) {
+          parsed.push(file.path);
+          if (file.path === 'guide.md') file.addDependency(shared);
+          return { type: 'page', data: { title: file.path } };
+        },
+      },
+    });
+
+    await source.staticSource();
+    source.onDependency((file) => notified.push(file));
+    expect(notified).toEqual([shared]);
+
+    parsed.length = 0;
+    expect(source.invalidateFile(shared)).toBe(true);
+    await source.staticSource();
+    expect(parsed).toEqual(['guide.md']);
+  });
+
+  test('invalidateFile reports whether the source uses a file', () => {
+    const source = createLocalSource({ dir, integration: integration() });
+
+    // content files, even before they are parsed
+    expect(source.invalidateFile(path.join(dir, 'new.md'))).toBe(true);
+    expect(source.invalidateFile(path.join(dir, 'notes.txt'))).toBe(false);
+    expect(source.invalidateFile(path.join(dir, '../index.md'))).toBe(false);
+  });
+
   test('a throwing parse is reported and skipped, not fatal', async () => {
     const source = createLocalSource({
       dir,

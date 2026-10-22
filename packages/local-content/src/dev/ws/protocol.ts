@@ -4,9 +4,13 @@ export const DEV_SERVER_PATH = '/_fumadocs_local_md';
 
 export type DevWatchEvent = 'add' | 'addDir' | 'change' | 'unlink' | 'unlinkDir';
 
-export interface DevClientEvent extends WatchDirOptions {
-  type: 'watch-dir';
-}
+export type DevClientEvent =
+  | ({ type: 'watch-dir' } & WatchDirOptions)
+  | {
+      type: 'watch-file';
+      /** absolute path */
+      file: string;
+    };
 
 export interface WatchDirOptions {
   dir: string;

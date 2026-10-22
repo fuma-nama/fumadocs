@@ -5,6 +5,7 @@ import Slugger from 'github-slugger';
 import { defineMdastPlugin, markdownToMdast, mdxToMdast } from 'satteri';
 import type { MdastNode, MdastPluginDefinition, MdastVisitorContext, Features } from 'satteri';
 import { frontmatter } from 'fumadocs-core/content/md/frontmatter';
+import { extractCodeRegion } from 'fumadocs-core/mdx-plugins/remark-include';
 import { embedSource, replaceSource } from '@/stringifier';
 import { flattenNode } from '@/utils';
 import type { Code, Heading, RootContent } from 'mdast';
@@ -126,8 +127,8 @@ async function readCodeInclude(
   state: IncludeState,
 ): Promise<Code> {
   const content = await readInclude(targetPath, state);
-  let value = content;
-  if (section) value = extractCodeRegion(content, section.trim(), targetPath);
+  const value = section ? extractCodeRegion(content, section.trim()) : content;
+  if (value === undefined) throw new Error(`Region "${section}" not found in ${targetPath}`);
 
   return {
     type: 'code',
@@ -360,88 +361,4 @@ function extractSectionRaw(
   }
 
   return sliceByPosition(source, start, end);
-}
-
-// VS Code–style region extraction
-// Adapted from VitePress:
-// https://github.com/vuejs/vitepress/blob/main/src/node/markdown/plugins/snippet.ts
-const REGION_MARKERS = [
-  {
-    start: /^\s*\/\/\s*#?region\b\s*(.*?)\s*$/,
-    end: /^\s*\/\/\s*#?endregion\b\s*(.*?)\s*$/,
-  },
-  {
-    start: /^\s*<!--\s*#?region\b\s*(.*?)\s*-->/,
-    end: /^\s*<!--\s*#?endregion\b\s*(.*?)\s*-->/,
-  },
-  {
-    start: /^\s*\/\*\s*#region\b\s*(.*?)\s*\*\//,
-    end: /^\s*\/\*\s*#endregion\b\s*(.*?)\s*\*\//,
-  },
-  {
-    start: /^\s*#[rR]egion\b\s*(.*?)\s*$/,
-    end: /^\s*#[eE]nd ?[rR]egion\b\s*(.*?)\s*$/,
-  },
-  {
-    start: /^\s*#\s*#?region\b\s*(.*?)\s*$/,
-    end: /^\s*#\s*#?endregion\b\s*(.*?)\s*$/,
-  },
-  {
-    start: /^\s*(?:--|::|@?REM)\s*#region\b\s*(.*?)\s*$/,
-    end: /^\s*(?:--|::|@?REM)\s*#endregion\b\s*(.*?)\s*$/,
-  },
-  {
-    start: /^\s*#pragma\s+region\b\s*(.*?)\s*$/,
-    end: /^\s*#pragma\s+endregion\b\s*(.*?)\s*$/,
-  },
-  {
-    start: /^\s*\(\*\s*#region\b\s*(.*?)\s*\*\)/,
-    end: /^\s*\(\*\s*#endregion\b\s*(.*?)\s*\*\)/,
-  },
-];
-
-function dedent(lines: string[]): string {
-  const minIndent = lines.reduce((min, line) => {
-    const match = line.match(/^(\s*)\S/);
-    return match ? Math.min(min, match[1]!.length) : min;
-  }, Infinity);
-
-  return minIndent === Infinity
-    ? lines.join('\n')
-    : lines.map((l) => l.slice(minIndent)).join('\n');
-}
-
-function extractCodeRegion(content: string, regionName: string, file: string): string {
-  const lines = content.split('\n');
-
-  for (let i = 0; i < lines.length; i++) {
-    for (const re of REGION_MARKERS) {
-      let match = re.start.exec(lines[i]!);
-      if (match?.[1] !== regionName) continue;
-
-      let depth = 1;
-      const extractedLines: string[] = [];
-      for (let j = i + 1; j < lines.length; j++) {
-        match = re.start.exec(lines[j]!);
-        if (match) {
-          depth++;
-          continue;
-        }
-
-        match = re.end.exec(lines[j]!);
-        if (match) {
-          if (match[1] === regionName) depth = 0;
-          else if (match[1] === '') depth--;
-          else continue;
-
-          if (depth > 0) continue;
-          return dedent(extractedLines);
-        }
-
-        extractedLines.push(lines[j]!);
-      }
-    }
-  }
-
-  throw new Error(`Region "${regionName}" not found in ${file}`);
 }
