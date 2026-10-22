@@ -1,7 +1,7 @@
 ---
 packages:
-  '@fumadocs/local-md': patch
-  '@fumadocs/satteri': patch
+  '@fumadocs/local-md': minor
+  '@fumadocs/satteri': minor
 ---
 
 ### `<include>` in Local Markdown
