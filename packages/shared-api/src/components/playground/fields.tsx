@@ -76,6 +76,20 @@ function getType(field: Schema): string | undefined {
   if (field.items) return 'array';
 }
 
+/** the options of a union whose members are all `const`, labelled by their `title`, like an enum with names */
+function getConstOptions(field: Schema): { value: unknown; label: string }[] | undefined {
+  const union = field.anyOf ?? field.oneOf;
+  if (!union || union.length === 0) return;
+
+  const out: { value: unknown; label: string }[] = [];
+  for (const item of union) {
+    if (typeof item !== 'object' || item.const === undefined) return;
+    const label = typeof item.const === 'string' ? item.const : JSON.stringify(item.const);
+    out.push({ value: item.const, label: item.title ?? label });
+  }
+  return out;
+}
+
 function typeLabel(field: Schema, alias = false): string {
   return field.const !== undefined ? JSON.stringify(field.const) : stringify(field, { alias });
 }
@@ -144,7 +158,8 @@ function SchemaSwitch({
     if (types) return { ...field, type: info.selectedType ?? types[0] };
   }, [field, union, types, info.oneOf, info.selectedType]);
 
-  if (member === undefined) return children(field, null);
+  // a union of `const` members is one select, not a switch between them
+  if (member === undefined || getConstOptions(field)) return children(field, null);
 
   let selector: ReactNode = null;
   if (union && union.length > 1) {
@@ -434,7 +449,12 @@ export function ValueRow({
 function cellType(field: Schema, selector: ReactNode): ReactNode {
   if (selector) return selector;
   // the options of selects and `null` tell the type already
-  if (field.enum === undefined && field.const === undefined && field.type !== 'null')
+  if (
+    field.enum === undefined &&
+    field.const === undefined &&
+    field.type !== 'null' &&
+    !getConstOptions(field)
+  )
     return typeLabel(field);
 }
 
@@ -480,12 +500,15 @@ function FieldValue({
     );
   }
 
-  const options = field.const !== undefined ? [field.const] : field.enum;
+  const labelled = getConstOptions(field);
+  const options =
+    labelled?.map((option) => option.value) ??
+    (field.const !== undefined ? [field.const] : field.enum);
   if (options && options.length > 0) {
     const idx = options.indexOf(value);
     const items: { value: string; label: ReactNode }[] = options.map((item, i) => ({
       value: String(i),
-      label: typeof item === 'string' ? item : JSON.stringify(item),
+      label: labelled?.[i].label ?? (typeof item === 'string' ? item : JSON.stringify(item)),
     }));
     if (!required)
       items.push({

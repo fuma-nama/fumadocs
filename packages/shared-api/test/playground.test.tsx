@@ -66,3 +66,40 @@ test('renders playground fields of circular schemas', () => {
   expect(html).toContain('satellites');
   expect(html).not.toContain('$ref-value');
 });
+
+test('renders a union of const members as one select labelled by their titles', () => {
+  const schema = {
+    type: 'object',
+    properties: {
+      project: {
+        type: 'string',
+        oneOf: [
+          { const: 'prj_1', title: 'Docs Site' },
+          { const: 'prj_2', title: 'Mobile App' },
+        ],
+      },
+    },
+  };
+
+  function Harness() {
+    const stf = useStf({ defaultValues: { body: { project: 'prj_2' } } });
+
+    return h(
+      StfProvider,
+      { value: stf, children: null },
+      h(
+        SchemaProvider,
+        { docRoot: {} as never, writeOnly: true, readOnly: false, children: null },
+        h(FieldRows, {
+          entry: { fieldName: ['body'], name: 'body', schema: schema as never },
+          onNavigate() {},
+        }),
+      ),
+    );
+  }
+
+  const html = renderToString(h(Harness));
+  expect(html).toContain('Mobile App');
+  // no type switch between the members
+  expect(html).not.toContain('&quot;prj_1&quot; | &quot;prj_2&quot;');
+});
