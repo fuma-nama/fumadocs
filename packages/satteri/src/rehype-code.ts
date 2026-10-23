@@ -5,7 +5,7 @@ import {
   type RehypeCodeOptions,
 } from 'fumadocs-core/mdx-plugins/rehype-code';
 import {
-  rehypeCodeFromHighlighter as createTransformer,
+  rehypeCodeFromHighlighter as createHighlighterTransformer,
   type RehypeCodeFromHighlighterOptions,
 } from 'fumadocs-core/mdx-plugins/rehype-code.core';
 import { highlightPlugin } from './utils';
@@ -28,5 +28,9 @@ export function rehypeCodeFromHighlighter(
   highlighter: Highlighter | ((options: { transformers: ShikiTransformer[] }) => Highlighter),
   options?: RehypeCodeFromHighlighterOptions,
 ) {
-  return highlightPlugin('rehype-code', createTransformer(highlighter, options), options?.inline);
+  return highlightPlugin(
+    'rehype-code',
+    createHighlighterTransformer(highlighter, options),
+    options?.inline,
+  );
 }

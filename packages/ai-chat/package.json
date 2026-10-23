@@ -39,7 +39,6 @@
     "@base-ui/react": "^1.9.0",
     "@fuma-translate/react": "^1.0.2",
     "cn": "^0.5.0",
-    "hast-util-to-jsx-runtime": "^2.3.6",
     "lucide-react": "^1.59.0",
     "remark": "^15.0.1",
     "remark-gfm": "^4.0.1",
@@ -64,7 +63,7 @@
     "@ai-sdk/react": "^4.0.0",
     "@types/react": "*",
     "ai": "^7.0.0",
-    "fumadocs-core": "^16.10.0",
+    "fumadocs-core": "^16.17.8",
     "fumadocs-ui": "^16.10.0",
     "react": "^19.2.0",
     "react-dom": "^19.2.0"

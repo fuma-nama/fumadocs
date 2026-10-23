@@ -10,8 +10,7 @@ import type {
 import type { ReactNode } from 'react';
 import type { Root } from 'hast';
 import { defaultShikiFactory, wasmShikiFactory } from './shiki/full';
-import { type Components, toJsxRuntime } from 'hast-util-to-jsx-runtime';
-import * as JsxRuntime from 'react/jsx-runtime';
+import { type Components, toJsx } from '@/utils/hast-to-jsx';
 import { highlightHast as highlightHastBase } from './shiki';
 import { applyDefaultThemes, loadMissingLanguage, loadMissingTheme } from './utils';
 
@@ -86,9 +85,5 @@ export async function getHighlighter(
 }
 
 export async function highlight(code: string, options: HighlightOptions): Promise<ReactNode> {
-  return toJsxRuntime(await highlightHast(code, options), {
-    ...JsxRuntime,
-    development: false,
-    components: options.components,
-  });
+  return toJsx(await highlightHast(code, options), { components: options.components });
 }

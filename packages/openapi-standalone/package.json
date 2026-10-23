@@ -47,7 +47,6 @@
     "fumadocs-core": "workspace:*",
     "fumadocs-openapi": "workspace:*",
     "fumadocs-ui": "workspace:@fumadocs/base-ui@*",
-    "hast-util-to-jsx-runtime": "^2.3.6",
     "react": "^19.3.1",
     "react-dom": "^19.3.1",
     "remark": "^15.0.1",

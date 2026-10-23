@@ -1,8 +1,7 @@
 'use client';
 import { type ComponentProps, Suspense, use } from 'react';
 import type { Highlighter } from 'fumadocs-core/highlight';
-import { toJsxRuntime } from 'hast-util-to-jsx-runtime';
-import * as JsxRuntime from 'react/jsx-runtime';
+import { toJsx } from 'fumadocs-core/utils/hast-to-jsx';
 import { useRenderContext } from '@/utils/create-page';
 import { cn } from '@/utils/cn';
 
@@ -87,13 +86,13 @@ function Highlighted({
   value: string;
 }) {
   if (highlighter.loadLanguage) {
-    let loaded = languages.get(highlighter);
-    if (!loaded) languages.set(highlighter, (loaded = new Map()));
-    let loading = loaded.get(lang);
+    let loading = languages.get(highlighter);
+    if (!loading) languages.set(highlighter, (loading = new Map()));
+    let promise = loading.get(lang);
     // once the language loads, keystrokes highlight synchronously
-    if (!loading) loaded.set(lang, (loading = highlighter.loadLanguage(lang)));
-    use(loading);
+    if (!promise) loading.set(lang, (promise = highlighter.loadLanguage(lang)));
+    use(promise);
   }
 
-  return toJsxRuntime(highlighter.codeToHast(value, { lang, structure: 'inline' }), JsxRuntime);
+  return toJsx(highlighter.codeToHast(value, { lang, structure: 'inline' }));
 }

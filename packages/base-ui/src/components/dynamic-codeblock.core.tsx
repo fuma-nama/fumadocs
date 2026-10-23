@@ -3,8 +3,7 @@ import { CodeBlock, type CodeBlockProps, Pre } from '@/components/codeblock';
 import type { UseShikiOptions } from 'fumadocs-core/highlight/shiki/react';
 import type { Highlighter } from 'fumadocs-core/highlight';
 import { createShikiHighlighter } from 'fumadocs-core/highlight/shiki';
-import { type Components, toJsxRuntime } from 'hast-util-to-jsx-runtime';
-import * as JsxRuntime from 'react/jsx-runtime';
+import { type Components, toJsx } from 'fumadocs-core/utils/hast-to-jsx';
 import { cn } from '@/utils/cn';
 import { type ComponentProps, createContext, type FC, Suspense, use, useMemo, useRef } from 'react';
 import type { HighlighterCore } from 'shiki';
@@ -51,7 +50,7 @@ function DefaultPre(props: ComponentProps<'pre'>) {
  */
 export function createDynamicCodeBlock({ highlighter }: { highlighter: Highlighter }) {
   return function DynamicCodeBlock(props: Omit<DynamicCodeblockProps, 'highlighter' | 'options'>) {
-    return <Base highlighter={highlighter} {...props} />;
+    return <Base highlighter={highlighter} components={{ pre: DefaultPre }} {...props} />;
   };
 }
 
@@ -73,7 +72,7 @@ export function DynamicCodeBlock({
   const node = (
     <Base
       highlighter={instance}
-      components={options?.components}
+      components={{ pre: DefaultPre, ...options?.components }}
       wrapInSuspense={wrapInSuspense}
       {...props}
     />
@@ -89,12 +88,11 @@ function Base({
   code,
   codeblock,
   wrapInSuspense = true,
-  components: customComponents,
+  components,
 }: Omit<DynamicCodeblockProps, 'highlighter' | 'options'> & {
   highlighter: Highlighter;
-  components?: Partial<Components>;
+  components: Partial<Components>;
 }) {
-  const components = { pre: DefaultPre, ...customComponents };
   let node = (
     <Highlighted highlighter={highlighter} lang={lang} code={code} components={components} />
   );
@@ -122,14 +120,14 @@ function Highlighted({
   components: Partial<Components>;
 }) {
   if (highlighter.loadLanguage) {
-    let loaded = languages.get(highlighter);
-    if (!loaded) languages.set(highlighter, (loaded = new Map()));
-    let loading = loaded.get(lang);
-    if (!loading) loaded.set(lang, (loading = highlighter.loadLanguage(lang)));
-    use(loading);
+    let loading = languages.get(highlighter);
+    if (!loading) languages.set(highlighter, (loading = new Map()));
+    let promise = loading.get(lang);
+    if (!promise) loading.set(lang, (promise = highlighter.loadLanguage(lang)));
+    use(promise);
   }
 
-  return toJsxRuntime(highlighter.codeToHast(code, { lang }), { ...JsxRuntime, components });
+  return toJsx(highlighter.codeToHast(code, { lang }), { components });
 }
 
 function Placeholder({

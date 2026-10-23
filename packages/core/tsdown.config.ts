@@ -22,6 +22,7 @@ export default defineConfig({
     'src/search/client/*.ts',
     'src/utils/use-on-change.ts',
     'src/utils/use-media-query.ts',
+    'src/utils/hast-to-jsx.ts',
     'src/i18n/*.ts',
     'src/highlight/{index,client,highlights}.ts',
     'src/highlight/shiki/*',

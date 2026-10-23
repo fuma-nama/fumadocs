@@ -1,6 +1,5 @@
 import { type ParameterNode, type TypeNode, TypeTable } from 'fumadocs-ui/components/type-table';
-import { toJsxRuntime } from 'hast-util-to-jsx-runtime';
-import * as JsxRuntime from 'react/jsx-runtime';
+import { toJsx } from 'fumadocs-core/utils/hast-to-jsx';
 import defaultMdxComponents from 'fumadocs-ui/mdx';
 import type { ComponentProps, ReactNode } from 'react';
 import { type BaseTypeTableProps, type GenerateTypeTableOptions } from '@/lib/type-table';
@@ -37,8 +36,8 @@ export async function AutoTypeTable({
 }: AutoTypeTableProps) {
   if (!renderType || !renderMarkdown) {
     const renderer = markdownRenderer(highlighter, shiki);
-    renderType ??= async (v) => toJsx(await renderer.renderTypeToHast(v));
-    renderMarkdown ??= async (v) => toJsx(await renderer.renderMarkdownToHast(v));
+    renderType ??= async (v) => render(await renderer.renderTypeToHast(v));
+    renderMarkdown ??= async (v) => render(await renderer.renderMarkdownToHast(v));
   }
 
   const output = await generator.generateTypeTable({ name, path, type }, options);
@@ -82,9 +81,6 @@ export async function AutoTypeTable({
   });
 }
 
-function toJsx(hast: Nodes) {
-  return toJsxRuntime(hast, {
-    ...JsxRuntime,
-    components: { ...defaultMdxComponents, img: 'img' },
-  });
+function render(hast: Nodes) {
+  return toJsx(hast, { components: { ...defaultMdxComponents, img: 'img' } });
 }

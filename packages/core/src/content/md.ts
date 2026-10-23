@@ -3,10 +3,9 @@
 import { remark } from 'remark';
 import remarkRehype, { type Options as RemarkRehypeOptions } from 'remark-rehype';
 import { type Compatible, VFile } from 'vfile';
-import { type Components, toJsxRuntime } from 'hast-util-to-jsx-runtime';
+import { type Components, toJsx } from '@/utils/hast-to-jsx';
 import type { Root } from 'hast';
 import type * as Mdast from 'mdast';
-import * as JsxRuntime from 'react/jsx-runtime';
 import type { PluggableList } from 'unified';
 import { type FC, use, useMemo } from 'react';
 
@@ -23,7 +22,7 @@ export interface MarkdownRenderer {
 
 export interface MarkdownProps {
   async?: boolean;
-  components?: Components;
+  components?: Partial<Components>;
   children: Compatible;
 }
 
@@ -38,15 +37,6 @@ export function createMarkdownRenderer({
     .use(rehypePlugins);
   const promises: Record<string, Promise<Root>> = {};
 
-  function render(tree: Root, file: VFile, props: MarkdownProps) {
-    return toJsxRuntime(tree, {
-      development: false,
-      filePath: file.path,
-      components: props.components,
-      ...JsxRuntime,
-    });
-  }
-
   function parse(file: VFile): Mdast.Root {
     return processor.parse(file) as Mdast.Root;
   }
@@ -60,16 +50,16 @@ export function createMarkdownRenderer({
       if (async) {
         promises[id] ??= processor.run(parse(file), file);
         const out = use(promises[id]);
-        return render(out, file, props);
+        return toJsx(out, { components: props.components });
       }
 
       const v = useMemo(() => processor.runSync(parse(file), file), [id]);
-      return render(v, file, props);
+      return toJsx(v, { components: props.components });
     },
     async MarkdownServer(props) {
       const file = new VFile(props.children);
 
-      return render(await processor.run(parse(file), file), file, props);
+      return toJsx(await processor.run(parse(file), file), { components: props.components });
     },
   };
 }

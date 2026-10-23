@@ -1,13 +1,8 @@
 import { remark } from 'remark';
 import remarkRehype, { type Options as RemarkRehypeOptions } from 'remark-rehype';
 import { type Compatible, VFile } from 'vfile';
-import {
-  type Components,
-  type Options as RenderOptions,
-  toJsxRuntime,
-} from 'hast-util-to-jsx-runtime';
+import { type Components, toJsx } from 'fumadocs-core/utils/hast-to-jsx';
 import type { Root } from 'hast';
-import * as JsxRuntime from 'react/jsx-runtime';
 import type { Pluggable, PluggableList, Plugin } from 'unified';
 import type { ReactNode } from 'react';
 
@@ -20,13 +15,13 @@ export interface MarkdownCompilerOptions {
 export interface CompileResult {
   tree: Root;
   file: VFile;
-  render: (components?: Components) => ReactNode;
+  render: (components?: Partial<Components>) => ReactNode;
 }
 
 export interface MarkdownCompiler {
   compile: (input: Compatible) => Promise<CompileResult>;
 
-  render: (tree: Root, file: VFile, components?: Components) => ReactNode;
+  render: (tree: Root, components?: Partial<Components>) => ReactNode;
 }
 
 export function createMarkdownCompiler({
@@ -39,23 +34,19 @@ export function createMarkdownCompiler({
     .use(remarkRehype, remarkRehypeOptions)
     .use(rehypePlugins);
 
-  function renderOptions(override?: Partial<RenderOptions>): RenderOptions {
-    return {
-      development: false,
-      createEvaluater() {
-        return {
-          evaluateProgram() {
-            throw new Error('Program is not allowed');
-          },
-          evaluateExpression(node) {
-            if (node.type === 'Identifier') return override?.components?.[node.name];
-            throw new Error(`${node.type} node is not allowed`);
-          },
-        };
+  function render(tree: Root, components?: Partial<Components>): ReactNode {
+    return toJsx(tree, {
+      components,
+      evaluator: {
+        evaluateProgram() {
+          throw new Error('Program is not allowed');
+        },
+        evaluateExpression(node) {
+          if (node.type === 'Identifier') return components?.[node.name as keyof Components];
+          throw new Error(`${node.type} node is not allowed`);
+        },
       },
-      ...JsxRuntime,
-      ...override,
-    };
+    });
   }
 
   return {
@@ -65,26 +56,10 @@ export function createMarkdownCompiler({
       return {
         tree,
         file,
-        render(components) {
-          return toJsxRuntime(
-            tree,
-            renderOptions({
-              filePath: file.path,
-              components,
-            }),
-          );
-        },
+        render: (components) => render(tree, components),
       };
     },
-    render(tree, file, components) {
-      return toJsxRuntime(
-        tree,
-        renderOptions({
-          filePath: file.path,
-          components,
-        }),
-      );
-    },
+    render,
   };
 }
 

@@ -1,6 +1,5 @@
 import type { ComponentProps } from 'react';
-import { toJsxRuntime } from 'hast-util-to-jsx-runtime';
-import * as JsxRuntime from 'react/jsx-runtime';
+import { toJsx } from 'fumadocs-core/utils/hast-to-jsx';
 import { CodeBlock, type CodeBlockProps, Pre } from './codeblock';
 import { highlight, type Highlighter, type HighlightOptions } from 'fumadocs-core/highlight';
 import { cn } from '@/utils/cn';
@@ -38,9 +37,7 @@ export function createServerCodeBlock({ highlighter }: { highlighter: Highlighte
   }: Pick<ServerCodeBlockProps, 'code' | 'lang' | 'codeblock'>) {
     await highlighter.loadLanguage?.(lang);
 
-    return toJsxRuntime(highlighter.codeToHast(code, { lang }), {
-      ...JsxRuntime,
-      development: false,
+    return toJsx(highlighter.codeToHast(code, { lang }), {
       components: { pre: createPre(codeblock) },
     });
   };

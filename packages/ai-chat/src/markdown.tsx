@@ -3,9 +3,8 @@ import { CodeBlock, Pre as CodePre } from 'fumadocs-ui/components/codeblock';
 import { DynamicCodeBlock } from 'fumadocs-ui/components/dynamic-codeblock';
 import defaultMdxComponents from 'fumadocs-ui/mdx';
 import type { Element, ElementContent, Root } from 'hast';
-import { type Components, toJsxRuntime } from 'hast-util-to-jsx-runtime';
+import { type Components, toJsx } from 'fumadocs-core/utils/hast-to-jsx';
 import { type ComponentProps, memo, useState } from 'react';
-import { Fragment, jsx, jsxs } from 'react/jsx-runtime';
 import { remark } from 'remark';
 import remarkGfm from 'remark-gfm';
 import remarkRehype from 'remark-rehype';
@@ -14,13 +13,13 @@ import remend from 'remend';
 const processor = remark().use(remarkGfm).use(remarkRehype);
 const streamProcessor = remark().use(remarkGfm).use(remarkRehype).use(rehypeWords);
 
-const components: Components = {
+const components: Partial<Components> = {
   ...defaultMdxComponents,
   pre: Pre,
   img: 'img',
 };
 // code is highlighted once its block settles
-const liveComponents: Components = { ...components, pre: LivePre };
+const liveComponents: Partial<Components> = { ...components, pre: LivePre };
 
 /**
  * An answer in Markdown. While `live`, only its last block re-renders, with unclosed syntax completed.
@@ -46,13 +45,7 @@ const Block = memo(function Block({ text, live }: { text: string; live: boolean 
   const [streamed] = useState(live);
   const p = streamed ? streamProcessor : processor;
 
-  return toJsxRuntime(p.runSync(p.parse(text)), {
-    development: false,
-    Fragment,
-    jsx,
-    jsxs,
-    components: live ? liveComponents : components,
-  });
+  return toJsx(p.runSync(p.parse(text)), { components: live ? liveComponents : components });
 });
 
 const listItem = /^(?:[-*+]|\d{1,9}[.)])\s/;

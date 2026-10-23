@@ -10,8 +10,7 @@ import {
 import { remark } from 'remark';
 import remarkRehype from 'remark-rehype';
 import { remarkGfm } from 'fumadocs-core/mdx-plugins/remark-gfm';
-import { toJsxRuntime } from 'hast-util-to-jsx-runtime';
-import * as JsxRuntime from 'react/jsx-runtime';
+import { toJsx, type ToJsxOptions } from 'fumadocs-core/utils/hast-to-jsx';
 import defaultMdxComponents from 'fumadocs-ui/mdx';
 import { Heading } from 'fumadocs-ui/components/heading';
 import {
@@ -100,11 +99,8 @@ function createRenderer(CodeBlock: FC<CodeBlockProps>) {
     return <CodeBlock lang={lang} code={content.trimEnd()} />;
   }
 
-  const options = {
-    ...JsxRuntime,
-    components: { ...defaultMdxComponents, img: 'img', pre: Pre },
-  };
+  const options: ToJsxOptions = { components: { ...defaultMdxComponents, img: 'img', pre: Pre } };
   const processor = remark().use(remarkGfm).use(remarkRehype);
 
-  return (md: string): ReactNode => toJsxRuntime(processor.runSync(processor.parse(md)), options);
+  return (md: string): ReactNode => toJsx(processor.runSync(processor.parse(md)), options);
 }

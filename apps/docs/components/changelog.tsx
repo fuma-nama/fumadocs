@@ -20,7 +20,7 @@ const { Markdown } = createMarkdownRenderer({
 
 const mdxComponents = {
   ...defaultMdxComponents,
-  img: 'img',
+  img: 'img' as const,
 };
 
 const monthFormat = new Intl.DateTimeFormat('en-US', {

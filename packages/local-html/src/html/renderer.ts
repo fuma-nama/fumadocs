@@ -1,8 +1,7 @@
 import type { TOCItemType } from 'fumadocs-core/toc';
 import type { RehypeTOCItemType, StructuredData } from 'fumadocs-core/mdx-plugins';
 import type { ReactNode } from 'react';
-import * as JsxRuntime from 'react/jsx-runtime';
-import { type Components, toJsxRuntime } from 'hast-util-to-jsx-runtime';
+import { type Components, toJsx } from 'fumadocs-core/utils/hast-to-jsx';
 import type { Root } from 'hast';
 
 export interface HtmlRenderer {
@@ -26,7 +25,6 @@ export interface HtmlRendererOptions {
 
 export function fromAst(options: HtmlRendererOptions): HtmlRenderer {
   const {
-    filePath,
     structuredData = {
       headings: [],
       contents: [],
@@ -37,12 +35,7 @@ export function fromAst(options: HtmlRendererOptions): HtmlRenderer {
 
   function renderSync(components?: Partial<Components>): HtmlRendererResult {
     function render(tree: Root): ReactNode {
-      return toJsxRuntime(tree, {
-        filePath,
-        components,
-        development: false,
-        ...JsxRuntime,
-      });
+      return toJsx(tree, { components });
     }
 
     const toc = rehypeToc.map((item): TOCItemType => ({

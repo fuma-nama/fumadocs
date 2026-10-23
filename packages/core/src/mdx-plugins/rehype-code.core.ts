@@ -133,17 +133,13 @@ export function rehypeCodeFromHighlighter(
           transformers: icon === false ? transformers : [...transformers, transformerIcon(icon)],
         })
       : highlighter;
-
   async function onNode(
     tree: Root,
     node: Element,
     parsed: ShikiParsedData,
-  ): Promise<Root | Element | undefined> {
-    const { lang = defaultLanguage } = parsed;
+    lang: string,
+  ): Promise<Root | Element> {
     let { meta: metaString = '', code } = parsed;
-    if (!lang) return;
-
-    await instance.loadLanguage?.(lang);
     if (filterMetaString) {
       metaString = filterMetaString(metaString);
     }
@@ -176,8 +172,14 @@ export function rehypeCodeFromHighlighter(
     };
   }
 
+  function handleError(error: unknown) {
+    if (!onError) throw error;
+    onError(error);
+  }
+
   return async (tree) => {
-    const queue: Promise<void>[] = [];
+    const langs = new Set<string>();
+    const queue: (() => Promise<void>)[] = [];
 
     walk<Nodes>(tree, (node, index, parent) => {
       let parsed: ShikiParsedData | undefined;
@@ -194,27 +196,24 @@ export function rehypeCodeFromHighlighter(
       }
 
       if (!parsed) return 'skip';
+      const lang = parsed.lang ?? defaultLanguage;
+      if (!lang) return 'skip';
 
-      queue.push(
-        onNode(tree, node, parsed)
-          .then((fragment) => {
-            if (fragment) parent.children[index] = fragment as never;
-          })
-          .catch((error) => {
-            if (onError) {
-              onError(error);
-            } else {
-              throw error;
-            }
-          }),
-      );
-
+      langs.add(lang);
+      queue.push(async () => {
+        parent.children[index] = (await onNode(tree, node, parsed, lang)) as never;
+      });
       return 'skip';
     });
+    if (queue.length === 0) return;
 
-    if (queue.length > 0) {
-      await Promise.all(queue);
+    try {
+      await instance.loadLanguage?.(...langs);
+    } catch (error) {
+      handleError(error);
+      return;
     }
+    await Promise.all(queue.map((task) => task().catch(handleError)));
   };
 }
 
@@ -399,10 +398,10 @@ export function createRehypeCode<
 
         return {
           ...shiki,
-          async loadLanguage(lang) {
-            await shiki.loadLanguage(lang);
+          codeToHastAsync(code, options) {
             // without a fallback language, unknown languages fail like in Shiki
-            if (!isSpecialLang(lang)) highlighter.getLanguage(lang);
+            if (!isSpecialLang(options.lang)) highlighter.getLanguage(options.lang);
+            return shiki.codeToHastAsync(code, options);
           },
         };
       },

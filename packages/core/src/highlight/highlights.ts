@@ -58,7 +58,7 @@ export function createHighlights(highlightsOptions: HighlightsOptions = {}): Hig
   }
 
   function render(code: string, options: CodeToHastOptions): Root {
-    const ordered = (options.transformers ?? []).toSorted((a, b) => order(a) - order(b));
+    const transformers = (options.transformers ?? []).toSorted((a, b) => order(a) - order(b));
     const context: ShikiTransformerContextCommon = {
       meta: {},
       options,
@@ -66,24 +66,23 @@ export function createHighlights(highlightsOptions: HighlightsOptions = {}): Hig
       codeToTokens: (code, { lang = 'text' }) => tokenize(code, lang),
     };
 
-    let input = code;
-    for (const transformer of ordered) {
-      input = transformer.preprocess?.call(context, input, options) || input;
+    for (const transformer of transformers) {
+      code = transformer.preprocess?.call(context, code, options) || code;
     }
 
-    const { tokens: tokenized, ...rest } = tokenize(input, options.lang);
-    let tokens = tokenized;
-    const source: ShikiTransformerContextSource = { ...context, source: input };
-    for (const transformer of ordered) {
+    const result = tokenize(code, options.lang);
+    let tokens = result.tokens;
+    const source: ShikiTransformerContextSource = { ...context, source: code };
+    for (const transformer of transformers) {
       tokens = transformer.tokens?.call(source, tokens) || tokens;
     }
 
-    return tokensToHast(tokens, { ...rest, ...options }, ordered, source);
+    return tokensToHast(tokens, { ...result, ...options }, transformers, source);
   }
 
-  function getCodeOptions(options: HighlightCodeOptions) {
+  function getCodeOptions(codeOptions: HighlightCodeOptions) {
     return {
-      ...options,
+      ...codeOptions,
       themes: themeIds,
       defaultColor: false,
       transformers: shikiTransformers,
@@ -91,14 +90,17 @@ export function createHighlights(highlightsOptions: HighlightsOptions = {}): Hig
   }
 
   return {
-    codeToHast: (code, options) => render(code, getCodeOptions(options)),
-    async codeToHastAsync(code, options) {
-      const codeOptions = getCodeOptions(options);
+    codeToHast: (code, codeOptions) => render(code, getCodeOptions(codeOptions)),
+    async codeToHastAsync(code, codeOptions) {
+      const hastOptions = getCodeOptions(codeOptions);
       // languages are built in, so only `_fd_prepare` applies
-      await Promise.all(
-        shikiTransformers.map((transformer) => transformer._fd_prepare?.(code, codeOptions)),
-      );
-      return render(code, codeOptions);
+      const prepare: Promise<void>[] = [];
+      for (const transformer of shikiTransformers) {
+        const task = transformer._fd_prepare?.(code, hastOptions);
+        if (task) prepare.push(task);
+      }
+      if (prepare.length > 0) await Promise.all(prepare);
+      return render(code, hastOptions);
     },
     override: (options) => createHighlights({ ...highlightsOptions, ...options }),
   };

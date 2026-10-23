@@ -50,7 +50,6 @@
     "cn": "^0.5.0",
     "eventsource-parser": "^4.1.2",
     "github-slugger": "^2.0.0",
-    "hast-util-to-jsx-runtime": "^2.3.6",
     "lucide-react": "^1.59.0",
     "remark": "^15.0.1",
     "remark-rehype": "^11.1.2",

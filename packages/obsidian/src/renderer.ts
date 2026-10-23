@@ -1,10 +1,9 @@
 import type { RehypeTOCItemType, StructuredData } from 'fumadocs-core/mdx-plugins';
 import type { TOCItemType } from 'fumadocs-core/toc';
 import type { Root } from 'hast';
-import { type Evaluater, toJsxRuntime } from 'hast-util-to-jsx-runtime';
+import { type Components, type Evaluator, toJsx } from 'fumadocs-core/utils/hast-to-jsx';
 import type { MDXComponents } from 'mdx/types';
 import type { ReactNode } from 'react';
-import * as JsxRuntime from 'react/jsx-runtime';
 
 export interface ObsidianRendererOptions {
   tree: Root;
@@ -44,7 +43,7 @@ export function createRenderer(options: ObsidianRendererOptions): ObsidianRender
   function renderSync(components?: MDXComponents): ObsidianRendererResult {
     // component names of JSX elements compile into identifiers, resolve them
     // from the passed components, arbitrary JavaScript is never evaluated
-    const evaluater: Evaluater = {
+    const evaluator: Evaluator = {
       evaluateExpression(expression) {
         if (expression.type === 'Identifier') {
           if (components && expression.name in components) return components[expression.name];
@@ -62,15 +61,7 @@ export function createRenderer(options: ObsidianRendererOptions): ObsidianRender
     };
 
     function render(tree: Root): ReactNode {
-      return toJsxRuntime(tree, {
-        filePath,
-        components,
-        development: false,
-        createEvaluater() {
-          return evaluater;
-        },
-        ...JsxRuntime,
-      });
+      return toJsx(tree, { components: components as Partial<Components>, evaluator });
     }
 
     const toc = rehypeToc.map((item): TOCItemType => ({

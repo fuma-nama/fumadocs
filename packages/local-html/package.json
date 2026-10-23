@@ -42,7 +42,6 @@
     "@standard-schema/spec": "^1.1.0",
     "github-slugger": "^2.0.0",
     "hast-util-from-html": "^2.0.3",
-    "hast-util-to-jsx-runtime": "^2.3.6",
     "shiki": "^4.5.0",
     "unified": "^11.0.5"
   },

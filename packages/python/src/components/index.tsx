@@ -7,8 +7,7 @@ import { ChevronRight } from 'lucide-react';
 import type { Highlighter } from 'fumadocs-core/highlight';
 import { createShikiHighlighter } from 'fumadocs-core/highlight/shiki';
 import { defaultShikiFactory } from 'fumadocs-core/highlight/shiki/full';
-import { toJsxRuntime } from 'hast-util-to-jsx-runtime';
-import * as JsxRuntime from 'react/jsx-runtime';
+import { toJsx } from 'fumadocs-core/utils/hast-to-jsx';
 import { badgeVariants } from '../badge';
 
 const cardVariants = cva('bg-fd-card rounded-lg text-sm my-6 p-3 border');
@@ -25,9 +24,7 @@ export function createPythonComponents({ highlighter }: { highlighter: Highlight
   }) {
     await highlighter.loadLanguage?.(lang);
 
-    return toJsxRuntime(highlighter.codeToHast(code, { lang }), {
-      ...JsxRuntime,
-      development: false,
+    return toJsx(highlighter.codeToHast(code, { lang }), {
       components: {
         pre: (props) => (
           <span {...props} {...rest} className={cn(rest.className, props.className)} />

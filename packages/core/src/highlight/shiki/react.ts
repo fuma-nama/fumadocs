@@ -9,9 +9,8 @@ import {
   useState,
   useRef,
 } from 'react';
-import * as JsxRuntime from 'react/jsx-runtime';
 import type { Awaitable } from '@/types';
-import { toJsxRuntime, type Components } from 'hast-util-to-jsx-runtime';
+import { type Components, toJsx } from '@/utils/hast-to-jsx';
 import type { HighlighterCore } from 'shiki';
 import { highlightHast, type HighlightHastOptions } from '.';
 
@@ -28,10 +27,7 @@ async function render(
 ): Promise<ReactNode> {
   const instance = typeof highlighter === 'function' ? await highlighter() : highlighter;
 
-  return toJsxRuntime(await highlightHast(instance, code, options), {
-    ...JsxRuntime,
-    components: options.components,
-  });
+  return toJsx(await highlightHast(instance, code, options), { components: options.components });
 }
 
 /**

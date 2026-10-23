@@ -6,15 +6,12 @@ import type {
   CodeOptionsThemes,
   CodeToHastOptionsCommon,
   HighlighterCore,
+  ShikiTransformer,
+  ShikiTransformerContextMeta,
 } from 'shiki';
 import type { Highlighter, HighlightCodeOptions } from '..';
 import type { Awaitable, DistributiveOmit } from '@/types';
-import {
-  codeToHastWithHooks,
-  loadMissingLanguage,
-  loadMissingTheme,
-  getRequiredThemes,
-} from '../utils';
+import { loadMissingLanguage, loadMissingTheme, getRequiredThemes } from '../utils';
 
 interface InitOptions {
   langAlias?: Record<string, string>;
@@ -72,13 +69,25 @@ export function createShikiHighlighter(
   let instance = typeof shiki === 'function' ? undefined : shiki;
   // languages `loadLanguage()` couldn't load, highlighted as the fallback language
   const fallbacks = new Set<string>();
+  // tasks of the last `codeToHast()`, transformers like Twoslash finish their work after it
+  let postprocess: ShikiTransformerContextMeta['_fd_postprocess'];
+  const transformers: ShikiTransformer[] = [
+    ...(options.transformers ?? []),
+    {
+      enforce: 'post',
+      root() {
+        postprocess = this.meta._fd_postprocess;
+      },
+    },
+  ];
 
   function getCodeOptions({ lang, structure = options.structure, meta }: HighlightCodeOptions) {
     return {
       ...options,
       lang: fallbacks.has(lang) ? fallbackLanguage : lang,
       structure,
-      meta: meta ? { ...options.meta, ...meta } : options.meta,
+      meta: options.meta ? { ...options.meta, ...meta } : meta,
+      transformers,
     };
   }
 
@@ -121,8 +130,22 @@ export function createShikiHighlighter(
     codeToHast(code, codeOptions) {
       return getInstance().codeToHast(code, getCodeOptions(codeOptions));
     },
-    codeToHastAsync(code, codeOptions) {
-      return codeToHastWithHooks(getInstance(), code, getCodeOptions(codeOptions));
+    async codeToHastAsync(code, codeOptions) {
+      const highlighter = getInstance();
+      // transformers key their prepared results by this object
+      const hastOptions = getCodeOptions(codeOptions);
+      const prepare: Promise<void>[] = [];
+      for (const transformer of transformers) {
+        const task = transformer._fd_prepare?.(code, hastOptions);
+        if (task) prepare.push(task);
+      }
+      if (prepare.length > 0) await Promise.all(prepare);
+
+      const root = highlighter.codeToHast(code, hastOptions);
+      if (postprocess && postprocess.length > 0) {
+        await Promise.all(postprocess.map((task) => task({ highlighter })));
+      }
+      return root;
     },
     override(overrides) {
       return createShikiHighlighter(instance ?? shiki, {

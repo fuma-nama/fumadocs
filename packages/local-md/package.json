@@ -45,7 +45,6 @@
     "@standard-schema/spec": "^1.1.0",
     "estree-util-build-jsx": "^3.0.1",
     "estree-util-to-js": "^2.0.0",
-    "hast-util-to-jsx-runtime": "^2.3.6",
     "remark": "^15.0.1",
     "remark-rehype": "^11.1.2",
     "vfile": "^6.0.3"
