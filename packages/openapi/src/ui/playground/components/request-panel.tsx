@@ -198,19 +198,28 @@ function Overview({
             {items.map((param, i) => {
               const renderDefault = (schema?: JsonSchema) => {
                 const entry = schema === undefined ? entries[i] : { ...entries[i], schema };
+                // keep the override when switching between siblings in the navigated panel
+                const siblings =
+                  schema === undefined
+                    ? entries
+                    : entries.map((item, index) => (index === i ? entry : item));
 
                 return (
                   <FieldRow
                     entry={entry}
                     required={param.required}
                     description={param.description}
-                    onNavigate={() => onNavigate(entry, entries)}
+                    onNavigate={() => onNavigate(entry, siblings)}
                   />
                 );
               };
               const custom = renderParameterField?.(entries[i].fieldName, param, { renderDefault });
 
-              return <Fragment key={param.name}>{custom === undefined ? renderDefault() : custom}</Fragment>;
+              return (
+                <Fragment key={param.name}>
+                  {custom === undefined ? renderDefault() : custom}
+                </Fragment>
+              );
             })}
           </Section>
         );
