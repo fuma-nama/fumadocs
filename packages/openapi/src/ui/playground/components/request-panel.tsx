@@ -56,8 +56,17 @@ import { type OperationParameters, useOperation } from '@/operation';
 import type { ParameterObject } from '@/types';
 import { cn } from '@/utils/cn';
 
+export interface ParameterFieldContext {
+  /** the default input of parameter, `schema` replaces its schema, like an `enum` of values loaded at runtime */
+  renderDefault: (schema?: JsonSchema) => ReactNode;
+}
+
 interface RenderOptions {
-  renderParameterField?: (fieldName: FieldKey, param: ParameterObject) => ReactNode;
+  renderParameterField?: (
+    fieldName: FieldKey,
+    param: ParameterObject,
+    ctx: ParameterFieldContext,
+  ) => ReactNode;
   renderBodyField?: (fieldName: 'body', info: RequestBodyInfo) => ReactNode;
 }
 
@@ -187,18 +196,21 @@ function Overview({
             count={items.length}
           >
             {items.map((param, i) => {
-              const custom = renderParameterField?.(entries[i].fieldName, param);
-              if (custom !== undefined) return <Fragment key={param.name}>{custom}</Fragment>;
+              const renderDefault = (schema?: JsonSchema) => {
+                const entry = schema === undefined ? entries[i] : { ...entries[i], schema };
 
-              return (
-                <FieldRow
-                  key={param.name}
-                  entry={entries[i]}
-                  required={param.required}
-                  description={param.description}
-                  onNavigate={() => onNavigate(entries[i], entries)}
-                />
-              );
+                return (
+                  <FieldRow
+                    entry={entry}
+                    required={param.required}
+                    description={param.description}
+                    onNavigate={() => onNavigate(entry, entries)}
+                  />
+                );
+              };
+              const custom = renderParameterField?.(entries[i].fieldName, param, { renderDefault });
+
+              return <Fragment key={param.name}>{custom === undefined ? renderDefault() : custom}</Fragment>;
             })}
           </Section>
         );
