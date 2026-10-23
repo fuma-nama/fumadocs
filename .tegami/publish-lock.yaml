@@ -1,167 +1,243 @@
 core:changelogs:
-  - content: "---\npackages:\n  fumadocs-openapi:\n    type: patch\n  \"@fumadocs/asyncapi\":\n    type: patch\n  \"@fumadocs/graphql\":\n    type: patch\n---\n\n### Load documents once\n\n- `includeDocument: false` of `createOpenAPI()` and `createAsyncAPI()` leaves documents out of page props, pages load each one once per browser session with `loadDocument` of `createOpenAPIPage()` and `createAsyncAPIPage()`.\n- Same for GraphQL schemas: `includeSchema: false` of `createGraphQL()` with `loadSchema` of `createGraphQLPage()`.\n"
-    filename: 2026-10-20-load-documents-once.md
+  - content: "---\npackages:\n  fumadocs-core:\n    type: patch\n  fumadocs-ui:\n    type: patch\n  \"@fumadocs/base-ui\":\n    type: patch\n  fumadocs-openapi:\n    type: patch\n  \"@fumadocs/openapi-standalone\":\n    type: patch\n  \"@fumadocs/graphql\":\n    type: patch\n  \"@fumadocs/asyncapi\":\n    type: patch\n  fumadocs-typescript:\n    type: patch\n  \"@fumadocs/satteri\":\n    type: patch\n  fumadocs-python:\n    type: patch\n  \"@fumadocs/local-html\":\n    type: patch\n  \"@fumadocs/shadcn\":\n    type: patch\n  \"@fumadocs/ai-chat\":\n    type: patch\n  \"@fumadocs/local-md\":\n    type: patch\n  fumadocs-obsidian:\n    type: patch\n  fumadocs-preview:\n    type: patch\n  fumadocs-twoslash:\n    type: patch\n---\n\n### Bring your own highlighter\n\nShiki stays the default, and isn't loaded when you highlight code with another highlighter.\n\n- `fumadocs-core/highlight` exports a `Highlighter` interface, created with `createHighlights()` from `fumadocs-core/highlight/highlights` (`@pierre/highlights`) or `createShikiHighlighter()` from `fumadocs-core/highlight/shiki`, `override()` creates one with other options.\n- `rehypeCodeFromHighlighter` from `fumadocs-core/mdx-plugins/rehype-code.core` highlights code blocks with a highlighter, or a function creating one with the transformers of Fumadocs. `createRehypeCode` is deprecated, Sätteri has `rehypeCodeFromHighlighter` in `@fumadocs/satteri/rehype-code`. Pass `transformerTwoslash()` in its `transformers` option to analyze Twoslash blocks in batches.\n- `createServerCodeBlock()` and `createDynamicCodeBlock()` in Fumadocs UI create code blocks from a highlighter. Dynamic code blocks are highlighted on the server too.\n- `toJsx()` from `fumadocs-core/utils/hast-to-jsx` converts hast into React elements like `toJsxRuntime()` of `hast-util-to-jsx-runtime`, MDX nodes through an `evaluator`, over 10x faster on highlighted code, whose spans render as one HTML string. Every Fumadocs renderer uses it, `hast-util-to-jsx-runtime` is no longer a dependency.\n- Twoslash loads the languages of code blocks in popups before highlighting, an unknown language there no longer fails the code block.\n- OpenAPI Standalone highlights code blocks with Highlights, in its server-rendered pages too.\n- The page factories of OpenAPI, GraphQL and AsyncAPI, type tables, `createPython()`, `createPythonComponents()`, `localHtml()` and the shadcn `createSnippet()` take a `highlighter`.\n- Deprecated `shiki` and `shikiOptions` of the API pages and `shiki` of type tables, pass a `highlighter` instead.\n- Integrations require `fumadocs-core` 16.17.8, the API pages and shadcn also require `fumadocs-ui` 16.17.8.\n"
+    filename: 2026-10-22-unified-highlighter.md
     v: 0.0.0
-  - content: "---\npackages:\n  fumadocs-mdx:\n    type: patch\n---\n\n### Turbopack loader warnings\n\n- Next.js 16.4 builds no longer warn `Module not found: Can't resolve <dynamic>` for the config imports of the loaders.\n"
-    filename: 2026-10-20-mdx-turbopack-loader-warnings.md
+  - content: "---\npackages:\n  fumadocs-core:\n    type: patch\n  fumadocs-mdx:\n    type: patch\n---\n\n### `remarkInclude` in `fumadocs-core`\n\n`<include>` moved from Fumadocs MDX to `fumadocs-core/mdx-plugins/remark-include`, a unified plugin for any MDX or Markdown pipeline.\n\n- `fumadocs-mdx/config` still exports `remarkInclude`, forwarded from `fumadocs-core`.\n- `getProcessor` parses included files by their format, like a `.md` file included in an `.mdx` page.\n- Headings in an included section get IDs unique among the page's own headings.\n- Circular includes throw instead of hanging, and included code files no longer end with an empty line.\n- `fumadocs-mdx` requires `fumadocs-core` 16.17.8.\n"
+    filename: 2026-10-22-core-remark-include.md
     v: 0.0.0
-  - content: "---\npackages:\n  fumadocs-preview:\n    type: patch\n---\n\n### AI chat prompt as `instructions`\n\nPass the AI chat system prompt as `instructions`, replacing the `system` option deprecated in AI SDK 7.\n"
-    filename: 2026-10-18-preview-ai-instructions.md
+  - content: "---\npackages:\n  fumadocs-core:\n    type: patch\n  \"@fumadocs/satteri\":\n    type: patch\n---\n\n### Processed Markdown links page-relative images at their served URLs\n\n- Images imported by Remark Image get the URLs bundlers serve them at in Remark LLMs, instead of their relative paths\n- Stringifiers output JS expressions with `s.expression()`, for Markdown only known at runtime\n- Search records of included content with images are no longer cut\n- The Sätteri preset only imports images in bundlers, at runtime it resolves their sizes like the MDX preset\n"
+    filename: 2026-10-22-llms-image-urls.md
     v: 0.0.0
-  - content: "---\npackages:\n  fumadocs-twoslash:\n    type: patch\n---\n\n### Hover signatures of repeated calls\n\nHovering a call shows that call's own resolved signature again. Repeated calls of the same function, such as two `z.enum([...])` calls with different values, all showed the first call's signature, since the hover cache did not tell call sites apart.\n\nFix [#3727](https://github.com/fuma-nama/fumadocs/issues/3727)\n"
-    filename: 2026-10-20-twoslash-call-signatures.md
+  - content: "---\npackages:\n  \"@fumadocs/json-schema\":\n    type: patch\n---\n\n### Schema UI links through unions\n\nCopied property links restore the selected `oneOf`/`anyOf` members and the schemas opened from them again, instead of staying at the root.\n\nFix [#3732](https://github.com/fuma-nama/fumadocs/issues/3732)\n"
+    filename: 2026-10-21-schema-ui-union-links.md
+    v: 0.0.0
+  - content: "---\npackages:\n  \"@fumadocs/local-content\":\n    type: minor\n  \"@fumadocs/local-html\":\n    type: minor\n  fumadocs-obsidian:\n    type: minor\n---\n\n### Watch the dependencies of local content\n\n- Integrations call `file.addDependency(path)` for the files a parsed file depends on, like included files. A change to them invalidates the file, and the Vite & dev server watchers watch them, even outside the content directory.\n- `invalidateFile()` returns whether the source uses the file, `onDependency()` listens to the dependencies. Custom sources passed to the watchers need both.\n- `watchWithVite()` called after the Vite server started now watches content directories outside of Vite's root.\n"
+    filename: 2026-10-22-local-content-dependencies.md
+    v: 0.0.0
+  - content: "---\npackages:\n  \"@fumadocs/local-html\":\n    type: patch\n---\n\n### Unknown languages in Local HTML\n\nCode blocks in languages Shiki doesn't know render as plain text, instead of failing the page.\n"
+    filename: 2026-10-22-local-html-unknown-language.md
+    v: 0.0.0
+  - content: "---\npackages:\n  \"@fumadocs/local-md\":\n    type: minor\n  \"@fumadocs/satteri\":\n    type: minor\n---\n\n### `<include>` in Local Markdown\n\n[`<include>`](https://fumadocs.dev/docs/mdx/include) is enabled by default in `@fumadocs/local-md` and `@fumadocs/satteri/local-md`, and pages reload when the files they include change, with both the Vite and dev server watchers.\n\n- `invalidateFile()` returns whether the source uses the file.\n- Both require `fumadocs-core` 16.17.8.\n"
+    filename: 2026-10-22-local-md-include.md
+    v: 0.0.0
+  - content: "---\npackages:\n  fumadocs-openapi:\n    type: patch\n---\n\n### `Value` rows of auth providers accept `end`\n\nThe `Value` row an auth provider renders can take `end`, which shows after the input, like a button that fills the value. The playground already rendered it, now its type has it.\n"
+    filename: 2026-10-21-openapi-auth-value-end.md
+    v: 0.0.0
+  - content: "---\npackages:\n  fumadocs-openapi:\n    type: patch\n---\n\n### Parameter examples follow the selected request example\n\nWhen a parameter has an example under the same key as a request body example, that example's request uses it, so each example can show its own path, query, header or cookie values. Without a matching key, a parameter still uses its first example.\n"
+    filename: 2026-10-21-openapi-keyed-parameter-examples.md
+    v: 0.0.0
+  - content: "---\npackages:\n  fumadocs-openapi:\n    type: patch\n---\n\n### `renderParameterField` can keep the default input\n\nWhen `renderParameterField` returns `undefined` for a parameter, the playground renders its default input, so you can customize a few parameters without re-implementing the rest. Return `null` to render nothing.\n"
+    filename: 2026-10-21-openapi-render-parameter-field-fallback.md
+    v: 0.0.0
+  - content: "---\npackages:\n  \"@fumadocs/story\":\n    type: patch\n---\n\n### Faster story controls in dev servers\n\nStory files requested together share one TypeScript program, and Vite environments share their results. A cold start with 300 story files takes 4s instead of 30s, without blocking the Vite dev server.\n\nFix [#3742](https://github.com/fuma-nama/fumadocs/issues/3742)\n"
+    filename: 2026-10-23-story-batched-controls.md
+    v: 0.0.0
+  - content: "---\npackages:\n  fumadocs-twoslash:\n    type: patch\n  fumadocs-typescript:\n    type: minor\n  \"@fumadocs/story\":\n    type: patch\n---\n\n### TypeScript 7.1\n\nTwoslash, type tables and story controls run on the stable API of TypeScript 7.1 (`typescript@7.1.0-beta`), with code loaded as in-memory files.\n\n- Twoslash no longer writes code blocks to the `.twoslash` directory, you can remove it from `.gitignore`.\n- Twoslash completions work in the global scope, relative paths in compiler options (like `paths`) resolve from `cwd`.\n- No `tsconfig.fumadocs-typescript.json` or `tsconfig.fumadocs-story.json` is generated.\n- Type tables are 2.4x faster on large API references, each from a program of its file and the files it imports.\n- The `transform` option of type tables gets the checker of TypeScript 7.1, `typeToString()` takes `TypeFormatFlags`.\n"
+    filename: 2026-10-23-typescript-7-1.md
     v: 0.0.0
 core:packages:
-  - id: npm:@fumadocs/ai-chat
-    updated: false
-  - id: npm:@fumadocs/basehub
-    updated: false
   - changelogIds:
-      - 2026-10-20-load-documents-once.md
+      - 2026-10-22-unified-highlighter.md
+    id: npm:@fumadocs/ai-chat
+    updated: true
+  - changelogIds:
+      - 2026-10-22-unified-highlighter.md
     id: npm:@fumadocs/asyncapi
     updated: true
-  - id: npm:@fumadocs/base-ui
-    updated: false
-  - id: npm:@fumadocs/changelog
+  - changelogIds:
+      - 2026-10-22-unified-highlighter.md
+    id: npm:@fumadocs/base-ui
+    updated: true
+  - id: npm:@fumadocs/basehub
     updated: false
   - id: npm:@fumadocs/cli
     updated: false
   - id: npm:@fumadocs/content
     updated: false
+  - id: npm:@fumadocs/changelog
+    updated: false
   - id: npm:@fumadocs/content-collections
     updated: false
+  - changelogIds:
+      - 2026-10-22-core-remark-include.md
+      - 2026-10-22-llms-image-urls.md
+      - 2026-10-22-unified-highlighter.md
+    id: npm:fumadocs-core
+    updated: true
   - id: npm:create-fumadocs-app
     updated: true
-  - id: npm:fumadocs-core
+  - id: npm:fumadocs-epub
     updated: false
   - id: npm:create-fumadocs-versions
     updated: true
-  - id: npm:fumadocs-docgen
-    updated: false
-  - id: npm:fumadocs-epub
-    updated: false
   - changelogIds:
-      - 2026-10-20-load-documents-once.md
+      - 2026-10-22-unified-highlighter.md
     id: npm:@fumadocs/graphql
     updated: true
   - id: npm:@fumari/image-size
     updated: false
-  - id: npm:@fumadocs/json-schema
-    updated: false
+  - changelogIds:
+      - 2026-10-21-schema-ui-union-links.md
+    id: npm:@fumadocs/json-schema
+    updated: true
   - id: npm:@fumadocs/language
     updated: false
-  - id: npm:@fumadocs/local-content
-    updated: false
-  - id: npm:@fumadocs/local-html
-    updated: false
-  - id: npm:@fumadocs/local-md
+  - id: npm:fumadocs-docgen
     updated: false
   - changelogIds:
-      - 2026-10-20-mdx-turbopack-loader-warnings.md
+      - 2026-10-22-local-content-dependencies.md
+      - 2026-10-22-local-html-unknown-language.md
+      - 2026-10-22-unified-highlighter.md
+    id: npm:@fumadocs/local-html
+    updated: true
+  - changelogIds:
+      - 2026-10-22-local-content-dependencies.md
+    id: npm:@fumadocs/local-content
+    updated: true
+  - changelogIds:
+      - 2026-10-22-local-md-include.md
+      - 2026-10-22-unified-highlighter.md
+    id: npm:@fumadocs/local-md
+    updated: true
+  - changelogIds:
+      - 2026-10-22-core-remark-include.md
     id: npm:fumadocs-mdx
     updated: true
   - id: npm:@fumadocs/mdx-remote
     updated: false
   - id: npm:@fumadocs/notion
     updated: false
-  - id: npm:fumadocs-obsidian
-    updated: false
-  - id: npm:@fumadocs/openapi-standalone
-    updated: false
   - changelogIds:
-      - 2026-10-20-load-documents-once.md
-    id: npm:fumadocs-openapi
+      - 2026-10-22-local-content-dependencies.md
+      - 2026-10-22-unified-highlighter.md
+    id: npm:fumadocs-obsidian
     updated: true
-  - id: npm:fumadocs-python
-    updated: false
-  - id: npm:@fumadocs/sanity
-    updated: false
-  - id: npm:fumadocs-ui
-    updated: false
   - changelogIds:
-      - 2026-10-18-preview-ai-instructions.md
+      - 2026-10-22-unified-highlighter.md
     id: npm:fumadocs-preview
     updated: true
-  - id: npm:@fumadocs/satteri
+  - changelogIds:
+      - 2026-10-21-openapi-auth-value-end.md
+      - 2026-10-21-openapi-keyed-parameter-examples.md
+      - 2026-10-21-openapi-render-parameter-field-fallback.md
+      - 2026-10-22-unified-highlighter.md
+    id: npm:fumadocs-openapi
+    updated: true
+  - changelogIds:
+      - 2026-10-22-unified-highlighter.md
+    id: npm:fumadocs-python
+    updated: true
+  - changelogIds:
+      - 2026-10-22-unified-highlighter.md
+    id: npm:@fumadocs/openapi-standalone
+    updated: true
+  - changelogIds:
+      - 2026-10-22-unified-highlighter.md
+    id: npm:fumadocs-ui
+    updated: true
+  - id: npm:@fumadocs/sanity
     updated: false
-  - id: npm:@fumadocs/shadcn
-    updated: false
+  - changelogIds:
+      - 2026-10-22-llms-image-urls.md
+      - 2026-10-22-local-md-include.md
+      - 2026-10-22-unified-highlighter.md
+    id: npm:@fumadocs/satteri
+    updated: true
+  - changelogIds:
+      - 2026-10-22-unified-highlighter.md
+    id: npm:@fumadocs/shadcn
+    updated: true
   - id: npm:shared-api
-    updated: false
+    updated: true
   - id: npm:@fumari/stf
-    updated: false
-  - id: npm:@fumadocs/story
     updated: false
   - id: npm:@fumadocs/tailwind
     updated: false
-  - id: npm:fumadocs-typescript
-    updated: false
   - changelogIds:
-      - 2026-10-20-twoslash-call-signatures.md
+      - 2026-10-23-story-batched-controls.md
+      - 2026-10-23-typescript-7-1.md
+    id: npm:@fumadocs/story
+    updated: true
+  - changelogIds:
+      - 2026-10-22-unified-highlighter.md
+      - 2026-10-23-typescript-7-1.md
     id: npm:fumadocs-twoslash
+    updated: true
+  - changelogIds:
+      - 2026-10-22-unified-highlighter.md
+      - 2026-10-23-typescript-7-1.md
+    id: npm:fumadocs-typescript
     updated: true
   - id: npm:@fumadocs/vite
     updated: false
 npm:packages:
   - id: npm:@fumadocs/ai-chat
-  - id: npm:@fumadocs/basehub
   - id: npm:@fumadocs/asyncapi
   - id: npm:@fumadocs/base-ui
-  - id: npm:@fumadocs/changelog
+  - id: npm:@fumadocs/basehub
   - id: npm:@fumadocs/cli
   - id: npm:@fumadocs/content
+  - id: npm:@fumadocs/changelog
   - id: npm:@fumadocs/content-collections
-  - id: npm:create-fumadocs-app
   - id: npm:fumadocs-core
-  - id: npm:create-fumadocs-versions
-  - id: npm:fumadocs-docgen
+  - id: npm:create-fumadocs-app
   - id: npm:fumadocs-epub
+  - id: npm:create-fumadocs-versions
   - id: npm:@fumadocs/graphql
   - id: npm:@fumari/image-size
   - id: npm:@fumadocs/json-schema
   - id: npm:@fumadocs/language
-  - id: npm:@fumadocs/local-content
+  - id: npm:fumadocs-docgen
   - id: npm:@fumadocs/local-html
+  - id: npm:@fumadocs/local-content
   - id: npm:@fumadocs/local-md
   - id: npm:fumadocs-mdx
   - id: npm:@fumadocs/mdx-remote
   - id: npm:@fumadocs/notion
   - id: npm:fumadocs-obsidian
-  - id: npm:@fumadocs/openapi-standalone
+  - id: npm:fumadocs-preview
   - id: npm:fumadocs-openapi
   - id: npm:fumadocs-python
-  - id: npm:@fumadocs/sanity
+  - id: npm:@fumadocs/openapi-standalone
   - id: npm:fumadocs-ui
-  - id: npm:fumadocs-preview
+  - id: npm:@fumadocs/sanity
   - id: npm:@fumadocs/satteri
   - id: npm:@fumadocs/shadcn
   - id: npm:shared-api
   - id: npm:@fumari/stf
-  - id: npm:@fumadocs/story
   - id: npm:@fumadocs/tailwind
-  - id: npm:fumadocs-typescript
+  - id: npm:@fumadocs/story
   - id: npm:fumadocs-twoslash
+  - id: npm:fumadocs-typescript
   - id: npm:@fumadocs/vite
   - id: npm:example-openapi
   - id: npm:example-tanstack-start-openapi
   - id: npm:docs
   - id: npm:example-asyncapi
-  - id: npm:example-graphql
+  - id: npm:example-astro
+  - id: npm:example-content-collections
   - id: npm:example-base-ui
+  - id: npm:example-graphql
   - id: npm:example-i18n
   - id: npm:example-next
+  - id: npm:example-next-local-html
+  - id: npm:example-marble-cms
+  - id: npm:example-next-local-md
   - id: npm:example-next-min
   - id: npm:example-next-shadcn
+  - id: npm:example-obsidian
+  - id: npm:example-react-router
+  - id: npm:example-python
   - id: npm:example-next-static
   - id: npm:example-react-router-i18n
-  - id: npm:example-react-router
   - id: npm:example-react-router-min
-  - id: npm:example-react-router-spa
   - id: npm:example-react-router-rsc
-  - id: npm:example-tanstack-start-i18n
+  - id: npm:example-react-router-spa
   - id: npm:example-tanstack-start
+  - id: npm:example-tanstack-start-i18n
+  - id: npm:example-tanstack-start-local-md
   - id: npm:example-tanstack-start-min
   - id: npm:example-tanstack-start-spa
   - id: npm:example-tanstack-start-story
-  - id: npm:example-waku
   - id: npm:example-waku-i18n
+  - id: npm:example-waku
