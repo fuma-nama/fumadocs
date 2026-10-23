@@ -16,13 +16,13 @@ import { walk } from './html/walk';
 
 export const defaultInclude = ['**/*.{html,json}'];
 
-export interface LocalHtmlConfig<MetaSchema extends StandardSchemaV1> extends ProcessHtmlOptions {
+export type LocalHtmlConfig<MetaSchema extends StandardSchemaV1> = ProcessHtmlOptions & {
   /** root directory for content files */
   dir: string;
   /** a list of glob patterns, customize the content files to be scanned */
   include?: string[];
   metaSchema?: MetaSchema;
-}
+};
 
 export interface LocalHtml<MetaSchema extends StandardSchemaV1> extends WatchableSource {
   /**

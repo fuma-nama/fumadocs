@@ -35,6 +35,7 @@
     "./framework/waku": "./dist/framework/waku.js",
     "./highlight": "./dist/highlight/index.js",
     "./highlight/client": "./dist/highlight/client.js",
+    "./highlight/highlights": "./dist/highlight/highlights.js",
     "./highlight/shiki": "./dist/highlight/shiki/index.js",
     "./highlight/shiki/full": "./dist/highlight/shiki/full.js",
     "./highlight/shiki/react": "./dist/highlight/shiki/react.js",
@@ -145,6 +146,7 @@
     "@modelcontextprotocol/server": "2.3.1",
     "@orama/core": "^1.2.19",
     "@oramacloud/client": "^2.1.4",
+    "@pierre/highlights": "^0.2.0",
     "@shikijs/transformers": "^4.5.0",
     "@tanstack/react-router": "1.170.45",
     "@types/estree-jsx": "^1.0.5",
@@ -175,6 +177,7 @@
     "@modelcontextprotocol/server": "2.x.x",
     "@orama/core": "1.x.x",
     "@oramacloud/client": "2.x.x",
+    "@pierre/highlights": "^0.2.0",
     "@tanstack/react-router": "1.x.x",
     "@types/estree-jsx": "*",
     "@types/hast": "*",
@@ -193,6 +196,9 @@
   },
   "peerDependenciesMeta": {
     "flexsearch": {
+      "optional": true
+    },
+    "@pierre/highlights": {
       "optional": true
     },
     "@mdx-js/mdx": {

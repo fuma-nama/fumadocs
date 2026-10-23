@@ -61,6 +61,24 @@ export default defineConfig({
 });
 ```
 
+### Highlighter
+
+The plugin uses Shiki, `rehypeCodeFromHighlighter` takes another [highlighter](/docs/headless/utils/shiki) like Highlights. It has the options other than Shiki's, and a function is created with the transformers of the plugin:
+
+```ts
+import { rehypeCodeFromHighlighter } from 'fumadocs-core/mdx-plugins/rehype-code.core';
+import { highlighter } from '@/lib/highlighter';
+
+await compile('...', {
+  rehypePlugins: [
+    [
+      rehypeCodeFromHighlighter,
+      ({ transformers }) => highlighter.override({ shikiTransformers: transformers }),
+    ],
+  ],
+});
+```
+
 ### Meta
 
 It parses the `title` meta string, and adds it to the `pre` element as an attribute.

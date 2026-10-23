@@ -68,6 +68,7 @@
     "katex": "^0.19.0",
     "npm-to-yarn": "^3.2.0",
     "satteri": "^0.10.5",
+    "shiki": "^4.5.0",
     "yuku-codegen": "^0.19.0",
     "yuku-parser": "^0.19.0"
   },
@@ -83,7 +84,6 @@
     "fumadocs-core": "workspace:*",
     "react": "^19.3.1",
     "react-dom": "^19.3.1",
-    "shiki": "^4.5.0",
     "tsconfig": "workspace:*",
     "tsdown": "0.23.1",
     "typescript": "^7.0.2",

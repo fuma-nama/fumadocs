@@ -15,10 +15,11 @@ import * as JsxRuntime from 'react/jsx-runtime';
 import defaultMdxComponents from 'fumadocs-ui/mdx';
 import { Heading } from 'fumadocs-ui/components/heading';
 import {
-  DynamicCodeBlock,
+  createDynamicCodeBlock,
   type DynamicCodeblockProps,
 } from 'fumadocs-ui/components/dynamic-codeblock.core';
-import type { ShikiFactory } from 'fumadocs-core/highlight/shiki';
+import type { Highlighter } from 'fumadocs-core/highlight';
+import { createShikiHighlighter, type ShikiFactory } from 'fumadocs-core/highlight/shiki';
 import type { BundledTheme, CodeOptionsThemes, CodeToHastOptionsCommon } from 'shiki';
 
 export type CodeBlockProps = Omit<DynamicCodeblockProps, 'highlighter' | 'options'>;
@@ -27,6 +28,21 @@ export type ShikiOptions = Omit<CodeToHastOptionsCommon, 'lang'> & CodeOptionsTh
 export const defaultShikiOptions: ShikiOptions = {
   themes: { light: 'github-light', dark: 'github-dark' },
 };
+
+export function resolveHighlighter({
+  highlighter,
+  shiki,
+  shikiOptions = defaultShikiOptions,
+}: {
+  highlighter?: Highlighter;
+  shiki?: ShikiFactory;
+  shikiOptions?: ShikiOptions;
+}): Highlighter {
+  if (highlighter) return highlighter;
+  if (!shiki) throw new Error('[Fumadocs] pass a `highlighter` for code blocks');
+
+  return createShikiHighlighter(() => shiki.getOrInit(), { defaultColor: false, ...shikiOptions });
+}
 
 /** components an API page renders its content through */
 export interface PageComponents {
@@ -41,20 +57,14 @@ export interface PageComponents {
  * Markdown is rendered with Remark, its code blocks go through {@link PageComponents}.
  */
 export function createPageComponents({
-  shiki,
-  shikiOptions = defaultShikiOptions,
+  highlighter,
   components,
 }: {
-  shiki: ShikiFactory;
-  shikiOptions?: ShikiOptions;
+  highlighter: Highlighter;
   /** replace the default components */
   components: Partial<PageComponents>;
 }): PageComponents {
-  const CodeBlock =
-    components.CodeBlock ??
-    ((props: CodeBlockProps) => (
-      <DynamicCodeBlock highlighter={() => shiki.getOrInit()} options={shikiOptions} {...props} />
-    ));
+  const CodeBlock = components.CodeBlock ?? createDynamicCodeBlock({ highlighter });
 
   let render: ReturnType<typeof createRenderer>;
 

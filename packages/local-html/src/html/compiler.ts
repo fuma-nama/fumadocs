@@ -2,11 +2,14 @@ import { fromHtml } from 'hast-util-from-html';
 import Slugger from 'github-slugger';
 import type { RehypeTOCItemType, StructuredData } from 'fumadocs-core/mdx-plugins';
 import type { Element, ElementContent, Nodes, Properties, Root } from 'hast';
+import type { ShikiTransformer } from 'shiki';
+import type { Highlighter } from 'fumadocs-core/highlight';
 import type { RehypeCodeOptions } from 'fumadocs-core/mdx-plugins/rehype-code';
+import type { RehypeCodeFromHighlighterOptions } from 'fumadocs-core/mdx-plugins/rehype-code.core';
 import { highlightCode } from './highlight';
 import { walk } from './walk';
 
-export interface ProcessHtmlOptions {
+export type ProcessHtmlOptions = {
   /**
    * pick the element holding the page content.
    *
@@ -25,12 +28,26 @@ export interface ProcessHtmlOptions {
    * @defaultValue true
    */
   adaptStyles?: boolean;
+} & (
+  | {
+      /**
+       * options for Shiki syntax highlighting, `false` to leave code blocks as they are
+       */
+      rehypeCodeOptions?: Partial<RehypeCodeOptions> | false;
+      highlighter?: undefined;
+    }
+  | {
+      /**
+       * options for code blocks, `false` to leave them as they are
+       */
+      rehypeCodeOptions?: RehypeCodeFromHighlighterOptions | false;
 
-  /**
-   * options for Shiki syntax highlighting, `false` to leave code blocks as they are
-   */
-  rehypeCodeOptions?: RehypeCodeOptions | false;
-}
+      /**
+       * highlight code blocks with your own highlighter instead of Shiki, a function is created with the transformers of code blocks
+       */
+      highlighter?: Highlighter | ((options: { transformers: ShikiTransformer[] }) => Highlighter);
+    }
+);
 
 export interface ProcessedHtml {
   tree: Root;
@@ -127,7 +144,7 @@ export async function processHtml(
   input: Root,
   options: ProcessHtmlOptions = {},
 ): Promise<ProcessedHtml> {
-  const { selectContent, exclude = [], adaptStyles = true, rehypeCodeOptions } = options;
+  const { selectContent, exclude = [], adaptStyles = true } = options;
   const scope = selectContent?.(input) ?? findScope(input, 'main') ?? findScope(input, 'article');
   const content = scope ?? findScope(input, 'body') ?? input;
   const dropped = new Set([...NonContentTags, ...exclude, ...(scope ? [] : ChromeTags)]);
@@ -213,7 +230,7 @@ export async function processHtml(
   return {
     // last, so the highlighted markup keeps the classes and colors it is given, and the code is
     // indexed as it was written
-    tree: rehypeCodeOptions === false ? tree : await highlightCode(tree, rehypeCodeOptions),
+    tree: await highlightCode(tree, options),
     toc,
     structuredData,
   };

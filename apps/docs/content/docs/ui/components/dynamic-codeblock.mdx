@@ -58,15 +58,17 @@ import { ServerCodeBlock } from 'fumadocs-ui/components/codeblock.rsc';
 <ServerCodeBlock
   lang="ts"
   code='console.log("Hello World")'
-  options={{
-    themes: {
-      light: 'github-light',
-      dark: 'github-dark',
-    },
-    components: {
-      // override components (e.g. `pre` and `code`)
-    },
-    // other Shiki options
+  themes={{
+    light: 'github-light',
+    dark: 'github-dark',
   }}
+  components={
+    {
+      // override components (e.g. `pre` and `code`)
+    }
+  }
+  // other Shiki options
 />;
 ```
+
+To highlight with your own highlighter, see [Highlighter](/docs/headless/utils/shiki#usage).

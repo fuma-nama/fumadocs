@@ -23,7 +23,7 @@ export default defineConfig({
     'src/utils/use-on-change.ts',
     'src/utils/use-media-query.ts',
     'src/i18n/*.ts',
-    'src/highlight/{index,client}.ts',
+    'src/highlight/{index,client,highlights}.ts',
     'src/highlight/shiki/*',
     'src/mdx-plugins/{index,codeblock-utils}.ts',
     'src/mdx-plugins/remark-*.ts',

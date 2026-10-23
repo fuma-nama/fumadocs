@@ -12,11 +12,12 @@ import defaultMdxComponents from 'fumadocs-ui/mdx';
 import { DocsLayout } from 'fumadocs-ui/layouts/spacious';
 import { DocsBody, DocsDescription, DocsPage, DocsTitle } from 'fumadocs-ui/layouts/spacious/page';
 import { Card, Cards } from 'fumadocs-ui/components/card';
-import { createOpenAPIPage } from 'fumadocs-openapi/ui';
+import { createOpenAPIPageBase } from 'fumadocs-openapi/ui/base';
+import { createHighlights } from 'fumadocs-core/highlight/highlights';
 import type { Document } from 'fumadocs-openapi';
 import type { OverviewPageData, PageData, SiteData } from './types';
 
-const OpenAPIPage = createOpenAPIPage();
+const OpenAPIPage = createOpenAPIPageBase({ highlighter: createHighlights() });
 const SearchDialog = lazy(() => import('./search'));
 const markdown = remark().use(remarkGfm).use(remarkRehype);
 const mdxComponents = { ...defaultMdxComponents, img: 'img' };

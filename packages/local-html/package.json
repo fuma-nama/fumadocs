@@ -43,6 +43,7 @@
     "github-slugger": "^2.0.0",
     "hast-util-from-html": "^2.0.3",
     "hast-util-to-jsx-runtime": "^2.3.6",
+    "shiki": "^4.5.0",
     "unified": "^11.0.5"
   },
   "devDependencies": {
@@ -60,7 +61,7 @@
   "peerDependencies": {
     "@types/hast": "*",
     "@types/react": "*",
-    "fumadocs-core": "^16.8.0",
+    "fumadocs-core": "^16.17.8",
     "react": "^19.2.0"
   },
   "peerDependenciesMeta": {

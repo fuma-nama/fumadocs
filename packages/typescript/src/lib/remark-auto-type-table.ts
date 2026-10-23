@@ -11,6 +11,7 @@ import { type ParameterTag, parseTags } from '@/lib/parse-tags';
 import type { MdxJsxAttribute, MdxJsxExpressionAttribute, MdxJsxFlowElement } from 'mdast-util-mdx';
 import type { VFile } from 'vfile';
 import type { StructuredData } from 'fumadocs-core/mdx-plugins/remark-structure';
+import type { Highlighter } from 'fumadocs-core/highlight';
 import { tableRowToStructuredData } from 'fumadocs-core/search';
 import { markdownTable, replaceSource } from 'fumadocs-core/mdx-plugins/stringifier';
 
@@ -121,9 +122,13 @@ export interface RemarkAutoTypeTableOptions {
   outputName?: string;
 
   /**
-   * config for Shiki when using default `renderMarkdown` & `renderType`.
+   * @deprecated use `highlighter`, like `createShikiHighlighter()`
    */
   shiki?: ShikiOptions;
+  /**
+   * highlight code with your own highlighter when using default `renderMarkdown` & `renderType`.
+   */
+  highlighter?: Highlighter;
   renderMarkdown?: MarkdownRenderer['renderMarkdownToHast'];
   renderType?: MarkdownRenderer['renderTypeToHast'];
 
@@ -203,13 +208,14 @@ export function remarkAutoTypeTable(
     renderMarkdown,
     renderType,
     shiki,
+    highlighter,
   } = config;
   let renderer: MarkdownRenderer;
 
   if (renderMarkdown && renderType) {
     renderer = { renderMarkdownToHast: renderMarkdown, renderTypeToHast: renderType };
   } else {
-    renderer = markdownRenderer(shiki);
+    renderer = markdownRenderer(highlighter, shiki);
     if (renderMarkdown) renderer.renderMarkdownToHast = renderMarkdown;
     if (renderType) renderer.renderTypeToHast = renderType;
   }

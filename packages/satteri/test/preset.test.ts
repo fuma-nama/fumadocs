@@ -1,6 +1,8 @@
 import { describe, expect, it } from 'vitest';
 import { compileMdx } from '@/compile';
 import { applySatteriPreset } from '@/preset';
+import { createHighlights } from 'fumadocs-core/highlight/highlights';
+import { rehypeCodeFromHighlighter } from '@/rehype-code';
 
 describe('@fumadocs/satteri', () => {
   it('does not leak mutable compile data between files', async () => {
@@ -39,5 +41,21 @@ describe('@fumadocs/satteri', () => {
     expect(code.match(/export const toc/g)).toHaveLength(1);
     expect(code).toContain('#one');
     expect(code).toContain('#two');
+  });
+
+  it('highlights code with Highlights', async () => {
+    const options = await applySatteriPreset({
+      rehypeCodeOptions: false,
+      hastPlugins: [
+        rehypeCodeFromHighlighter(({ transformers }) =>
+          createHighlights({ shikiTransformers: transformers }),
+        ),
+      ],
+    })('bundler');
+    const source = '```js title="a.js"\nconst a = 1;\n```';
+    const { code } = await compileMdx({ source, filePath: '/tmp/code.mdx', options });
+
+    expect(code).toContain('--shiki-light');
+    expect(code).toContain('title: "a.js"');
   });
 });

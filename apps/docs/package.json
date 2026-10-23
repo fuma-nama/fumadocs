@@ -30,6 +30,7 @@
     "@openrouter/ai-sdk-provider": "^3.0.0",
     "@orama/core": "^1.2.19",
     "@paper-design/shaders-react": "^0.0.81",
+    "@pierre/highlights": "^0.2.0",
     "@shikijs/transformers": "^4.5.0",
     "ai": "^7.0.143",
     "class-variance-authority": "^0.7.1",

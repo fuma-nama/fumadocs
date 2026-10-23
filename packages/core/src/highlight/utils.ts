@@ -1,10 +1,49 @@
+import type { Root } from 'hast';
 import type {
   HighlighterCore,
   ThemeRegistrationAny,
   LanguageRegistration,
   CodeOptionsThemes,
   BundledTheme,
+  CodeToHastOptions,
+  ShikiTransformer,
+  ShikiTransformerContextMeta,
 } from 'shiki';
+
+/**
+ * Highlight with Shiki, running the `_fd_prepare` and `_fd_postprocess` transformer hooks around it.
+ */
+export async function codeToHastWithHooks(
+  highlighter: HighlighterCore,
+  code: string,
+  options: CodeToHastOptions,
+): Promise<Root> {
+  let postprocess: ShikiTransformerContextMeta['_fd_postprocess'];
+  const transformers: ShikiTransformer[] = [
+    ...(options.transformers ?? []),
+    {
+      enforce: 'post',
+      root() {
+        postprocess = this.meta._fd_postprocess;
+      },
+    },
+  ];
+  // transformers key their prepared results by this object
+  const codeOptions = { ...options, transformers };
+
+  const prepare: Promise<void>[] = [];
+  for (const transformer of transformers) {
+    const task = transformer._fd_prepare?.(code, codeOptions);
+    if (task) prepare.push(task);
+  }
+  if (prepare.length > 0) await Promise.all(prepare);
+
+  const root = highlighter.codeToHast(code, codeOptions);
+  if (postprocess && postprocess.length > 0) {
+    await Promise.all(postprocess.map((task) => task({ highlighter })));
+  }
+  return root;
+}
 
 export async function loadMissingTheme(
   highlighter: HighlighterCore,

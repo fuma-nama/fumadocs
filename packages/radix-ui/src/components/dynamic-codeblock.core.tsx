@@ -1,8 +1,12 @@
 'use client';
 import { CodeBlock, type CodeBlockProps, Pre } from '@/components/codeblock';
-import { useShikiDynamic, type UseShikiOptions } from 'fumadocs-core/highlight/shiki/react';
+import type { UseShikiOptions } from 'fumadocs-core/highlight/shiki/react';
+import type { Highlighter } from 'fumadocs-core/highlight';
+import { createShikiHighlighter } from 'fumadocs-core/highlight/shiki';
+import { type Components, toJsxRuntime } from 'hast-util-to-jsx-runtime';
+import * as JsxRuntime from 'react/jsx-runtime';
 import { cn } from '@/utils/cn';
-import { type ComponentProps, createContext, type FC, use, useId } from 'react';
+import { type ComponentProps, createContext, type FC, Suspense, use, useMemo, useRef } from 'react';
 import type { HighlighterCore } from 'shiki';
 
 export interface DynamicCodeblockProps {
@@ -42,28 +46,90 @@ function DefaultPre(props: ComponentProps<'pre'>) {
   );
 }
 
+/**
+ * Create a code block that highlights with your own highlighter.
+ */
+export function createDynamicCodeBlock({ highlighter }: { highlighter: Highlighter }) {
+  return function DynamicCodeBlock(props: Omit<DynamicCodeblockProps, 'highlighter' | 'options'>) {
+    return <Base highlighter={highlighter} {...props} />;
+  };
+}
+
 export function DynamicCodeBlock({
+  highlighter,
+  options,
+  wrapInSuspense = true,
+  ...props
+}: DynamicCodeblockProps) {
+  const initial = useRef({ highlighter, options });
+  const instance = useMemo(
+    () =>
+      createShikiHighlighter(initial.current.highlighter, {
+        defaultColor: false,
+        ...initial.current.options,
+      }),
+    [],
+  );
+  const node = (
+    <Base
+      highlighter={instance}
+      components={options?.components}
+      wrapInSuspense={wrapInSuspense}
+      {...props}
+    />
+  );
+
+  // a parent boundary suspending on it would discard `instance`
+  return wrapInSuspense ? node : <Suspense>{node}</Suspense>;
+}
+
+function Base({
+  highlighter,
   lang,
   code,
   codeblock,
-  options,
   wrapInSuspense = true,
-  highlighter,
-}: DynamicCodeblockProps) {
-  const id = useId();
-  const shikiOptions: UseShikiOptions = {
-    lang,
-    defaultColor: false,
-    ...options,
-    components: {
-      pre: DefaultPre,
-      ...options?.components,
-    },
-  };
-  let node = useShikiDynamic(highlighter, code, shikiOptions, [id, lang, code]);
-  if (wrapInSuspense) node ??= <Placeholder code={code} components={shikiOptions.components} />;
+  components: customComponents,
+}: Omit<DynamicCodeblockProps, 'highlighter' | 'options'> & {
+  highlighter: Highlighter;
+  components?: Partial<Components>;
+}) {
+  const components = { pre: DefaultPre, ...customComponents };
+  let node = (
+    <Highlighted highlighter={highlighter} lang={lang} code={code} components={components} />
+  );
+  // only loading suspends, React keeps the fallback of large boundaries in server HTML
+  if (wrapInSuspense && highlighter.loadLanguage) {
+    node = (
+      <Suspense fallback={<Placeholder code={code} components={components} />}>{node}</Suspense>
+    );
+  }
 
   return <PropsContext value={codeblock}>{node}</PropsContext>;
+}
+
+const languages = new WeakMap<Highlighter, Map<string, Promise<void>>>();
+
+function Highlighted({
+  highlighter,
+  lang,
+  code,
+  components,
+}: {
+  highlighter: Highlighter;
+  lang: string;
+  code: string;
+  components: Partial<Components>;
+}) {
+  if (highlighter.loadLanguage) {
+    let loaded = languages.get(highlighter);
+    if (!loaded) languages.set(highlighter, (loaded = new Map()));
+    let loading = loaded.get(lang);
+    if (!loading) loaded.set(lang, (loading = highlighter.loadLanguage(lang)));
+    use(loading);
+  }
+
+  return toJsxRuntime(highlighter.codeToHast(code, { lang }), { ...JsxRuntime, components });
 }
 
 function Placeholder({

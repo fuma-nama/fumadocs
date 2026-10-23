@@ -1,7 +1,11 @@
 import { jsx, toJs } from 'estree-util-to-js';
-import type { Nodes } from 'hast';
+import type { Element, Nodes, Root, RootContent } from 'hast';
 import { defaultHandlers, type Handle, toEstree } from 'hast-util-to-estree';
-import type { MdastNode } from 'satteri';
+import { defineHastPlugin, type MdastNode } from 'satteri';
+import type {
+  rehypeCodeFromHighlighter,
+  RehypeCodeFromHighlighterOptions,
+} from 'fumadocs-core/mdx-plugins/rehype-code.core';
 
 export interface JsxElementNode {
   name?: string | null;
@@ -60,4 +64,86 @@ export function jsxToSource(hast: Nodes): string {
   });
   const source = toJs(estree, { handlers: jsx }).value.trim();
   return source.endsWith(';') ? source.slice(0, -1) : source;
+}
+
+// Shiki writes literal HTML attribute names into hast `properties`. The
+// classic pipeline normalizes them via hast-util-to-estree, but satteri emits
+// property keys verbatim, so React would receive `class`/`tabindex` props and
+// render them over the component's own `className` (hydration mismatch).
+const ATTRIBUTE_TO_PROP = Object.entries({
+  class: 'className',
+  tabindex: 'tabIndex',
+  readonly: 'readOnly',
+  contenteditable: 'contentEditable',
+});
+
+function normalizeProperties(node: RootContent | Root) {
+  if (node.type === 'element' && node.properties) {
+    for (const [attribute, prop] of ATTRIBUTE_TO_PROP) {
+      if (attribute in node.properties) {
+        node.properties[prop] ??= node.properties[attribute];
+        delete node.properties[attribute];
+      }
+    }
+  }
+
+  if ('children' in node) {
+    for (const child of node.children) normalizeProperties(child);
+  }
+}
+
+function elementClasses(element: Element): string[] {
+  const className = element.properties.className as string[] | string;
+  if (Array.isArray(className)) return className.map(String);
+  if (typeof className === 'string') return className.split(/\s+/);
+  return [];
+}
+
+const skipClasses = new Set(['shiki', 'language-math', 'math-inline', 'math-display']);
+
+function shouldSkipHighlight(element: Element) {
+  const classes = elementClasses(element);
+  if (classes.some((c) => skipClasses.has(c))) return true;
+
+  if (element.tagName === 'pre') {
+    for (const child of element.children) {
+      if (child.type === 'element' && shouldSkipHighlight(child)) return true;
+    }
+  }
+
+  return false;
+}
+
+/** run the transformer of a rehype code plugin on each code block */
+export function highlightPlugin(
+  name: string,
+  transformer: ReturnType<typeof rehypeCodeFromHighlighter>,
+  inline: RehypeCodeFromHighlighterOptions['inline'],
+) {
+  return defineHastPlugin({
+    name,
+    element: {
+      // every matched node crosses into JS, inline code only matches when it is highlighted
+      filter: inline ? ['pre', 'code'] : ['pre'],
+      async visit(element, ctx) {
+        if (shouldSkipHighlight(element)) return;
+
+        // `code` inside `pre` is handled by the `pre` visit; highlighting it
+        // separately queues transforms on a replaced node, which get dropped
+        if (element.tagName === 'code') {
+          const parent = ctx.parent(element);
+          if (parent?.type === 'element' && parent.tagName === 'pre') return;
+        }
+
+        const tree: Root = { type: 'root', children: [element] };
+        await transformer(tree, null as never, () => undefined);
+        const next = tree.children[0] as RootContent | Root;
+        // not highlighted, replacing it with itself still costs a re-encode in Sätteri
+        if (next === element) return;
+        normalizeProperties(next);
+        if (next.type !== 'root') ctx.replaceNode(element, next);
+        else if (next.children.length > 0) ctx.replaceNode(element, next.children);
+      },
+    },
+  });
 }

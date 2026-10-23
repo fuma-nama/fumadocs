@@ -21,6 +21,19 @@ export type UseShikiOptions = HighlightHastOptions & {
   components?: Partial<Components>;
 };
 
+async function render(
+  highlighter: HighlighterCore | (() => Awaitable<HighlighterCore>),
+  code: string,
+  options: UseShikiOptions,
+): Promise<ReactNode> {
+  const instance = typeof highlighter === 'function' ? await highlighter() : highlighter;
+
+  return toJsxRuntime(await highlightHast(instance, code, options), {
+    ...JsxRuntime,
+    components: options.components,
+  });
+}
+
 /**
  * get highlighted results (uncached), use `useEffect` instead of React 19 APIs.
  */
@@ -34,16 +47,7 @@ export function useShikiDynamic(
   const lastTask = useRef<Promise<ReactNode> | null>(null);
 
   useEffect(() => {
-    async function task() {
-      const instance = typeof highlighter === 'function' ? await highlighter() : highlighter;
-
-      return toJsxRuntime(await highlightHast(instance, code, options), {
-        ...JsxRuntime,
-        components: options.components,
-      });
-    }
-
-    const promise = task();
+    const promise = render(highlighter, code, options);
     lastTask.current = promise;
 
     void promise.then((res) => {
@@ -71,14 +75,5 @@ export function useShiki(
 ): ReactNode {
   const key = useMemo(() => JSON.stringify(deps), [deps]);
 
-  async function run() {
-    const instance = typeof highlighter === 'function' ? await highlighter() : highlighter;
-
-    return toJsxRuntime(await highlightHast(instance, code, options), {
-      ...JsxRuntime,
-      components: options.components,
-    });
-  }
-
-  return use((promises[key] ??= run()));
+  return use((promises[key] ??= render(highlighter, code, options)));
 }

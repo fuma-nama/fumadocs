@@ -7,8 +7,9 @@ import type {
   MdxJsxExpressionAttributeNode as MdxJsxExpressionAttribute,
   MdxJsxFlowElement,
 } from 'satteri';
-import { highlightHast, type HighlightHastOptions } from 'fumadocs-core/highlight';
-import { rehypeCode } from 'fumadocs-core/mdx-plugins/rehype-code';
+import { createShikiHighlighter } from 'fumadocs-core/highlight/shiki';
+import { defaultShikiFactory } from 'fumadocs-core/highlight/shiki/full';
+import { rehypeCodeFromHighlighter } from 'fumadocs-core/mdx-plugins/rehype-code.core';
 import {
   createGenerator,
   type DocEntry,
@@ -110,17 +111,19 @@ export function remarkAutoTypeTable(config: RemarkAutoTypeTableOptions = {}) {
     renderMarkdown: renderMarkdownOption,
     renderType: renderTypeOption,
     shiki,
+    highlighter = createShikiHighlighter(() => defaultShikiFactory.getOrInit(), {
+      defaultColor: false,
+      fallbackLanguage: 'plaintext',
+      transformers: [],
+      ...(shiki ?? { themes: { light: 'github-light', dark: 'github-dark' } }),
+    }),
   } = config;
 
   const renderType: RenderHast =
     renderTypeOption ??
     (async (type) => {
-      const nodes = await highlightHast(type, {
-        lang: 'ts',
-        structure: 'inline',
-        defaultColor: false,
-        ...(shiki as HighlightHastOptions | undefined),
-      });
+      await highlighter.loadLanguage?.('ts');
+      const nodes = highlighter.codeToHast(type, { lang: 'ts', structure: 'inline' });
       return {
         type: 'element',
         tagName: 'span',
@@ -136,20 +139,13 @@ export function remarkAutoTypeTable(config: RemarkAutoTypeTableOptions = {}) {
       };
     });
 
-  let highlightCode: ReturnType<typeof rehypeCode> | undefined;
+  // code blocks here have no title
+  const highlightCode = rehypeCodeFromHighlighter(highlighter, { parseMetaString: undefined });
   const renderMarkdown: RenderHast =
     renderMarkdownOption ??
     (async (md) => {
       md = md.replace(/{@link (?<link>[^}]*)}/g, '$1');
       const tree = markdownToHast(md, { features: { gfm: true }, position: false }) as Root;
-      highlightCode ??= rehypeCode.call({} as never, {
-        // disable default transformers, meta parser and icons, code blocks here have no title
-        transformers: [],
-        parseMetaString: undefined,
-        icon: false,
-        fallbackLanguage: 'plaintext',
-        ...shiki,
-      });
       await highlightCode(tree, null as never, () => undefined);
       return tree;
     });

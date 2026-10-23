@@ -6,13 +6,17 @@ import { type Components, type Evaluater, toJsxRuntime } from 'hast-util-to-jsx-
 import type { MDXComponents } from 'mdx/types';
 import type { ReactNode } from 'react';
 import * as JsxRuntime from 'react/jsx-runtime';
-import * as PythonComponents from './components';
+import type { Highlighter } from 'fumadocs-core/highlight';
+import * as Python from './components';
 import defaultMdxComponents from 'fumadocs-ui/mdx';
+
+const { createPythonComponents, ...PythonComponents } = Python;
 
 export interface PythonRendererOptions {
   tree: Root;
   structuredData?: StructuredData;
   rehypeToc?: RehypeTOCItemType[];
+  highlighter?: Highlighter;
 }
 
 export interface PythonRendererResult {
@@ -42,6 +46,7 @@ export function createRenderer(options: PythonRendererOptions): PythonRenderer {
       const components: MDXComponents = {
         ...defaultMdxComponents,
         ...PythonComponents,
+        ...(options.highlighter && createPythonComponents({ highlighter: options.highlighter })),
         ...userComponents,
       };
 

@@ -15,6 +15,30 @@ import * as JsxRuntime from 'react/jsx-runtime';
 import { highlightHast as highlightHastBase } from './shiki';
 import { applyDefaultThemes, loadMissingLanguage, loadMissingTheme } from './utils';
 
+/**
+ * A syntax highlighter, like Shiki or Highlights.
+ */
+export interface Highlighter {
+  /** Load languages before highlighting, for highlighters loading them on demand. Unsupported languages are highlighted as plain text. */
+  loadLanguage?: (...langs: string[]) => Promise<void>;
+  /** Highlight code into `pre > code > span.line`, with `meta` added to `<pre>`. */
+  codeToHast: (code: string, options: HighlightCodeOptions) => Root;
+  /** `codeToHast` with async transformer hooks, like the batched analysis of Twoslash, preferred by rehype plugins. */
+  codeToHastAsync?: (code: string, options: HighlightCodeOptions) => Promise<Root>;
+}
+
+export interface HighlightCodeOptions {
+  lang: string;
+  /**
+   * `inline` renders the content of `<code>` only.
+   *
+   * @defaultValue 'classic'
+   */
+  structure?: 'classic' | 'inline';
+  /** Attributes of the code block, like its title. */
+  meta?: Record<string, unknown>;
+}
+
 export type HighlightOptions = HighlightHastOptions & {
   components?: Partial<Components>;
 };

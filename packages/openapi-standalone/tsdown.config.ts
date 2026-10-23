@@ -16,13 +16,12 @@ export default defineConfig({
     'process.env.NODE_ENV': '"production"',
   },
   alias: {
-    'fumadocs-core/highlight/shiki/full': new URL('./src/app/shiki.ts', import.meta.url).pathname,
     // `serializePageTree()` imports it, the Node build shares its renderer with `react-dom/static`
     'react-dom/server.edge': 'react-dom/server.node',
   },
   deps: {
     // json-magic imports undici only to block private networks, which isn't enabled.
-    // code blocks are highlighted in the browser, the server never loads Shiki.
+    // code blocks are highlighted with Highlights, the server never loads Shiki.
     neverBundle: ['undici', /^shiki(\/|$)/],
     onlyImport: ['hono', 'undici', 'shiki'],
   },

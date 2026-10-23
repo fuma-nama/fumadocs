@@ -39,6 +39,7 @@
   "devDependencies": {
     "@fumadocs/tailwind": "workspace:*",
     "@hono/node-server": "^2.1.5",
+    "@pierre/highlights": "^0.2.0",
     "@tailwindcss/vite": "^4.3.3",
     "@types/node": "26.6.5",
     "@types/react": "^19.3.0",
@@ -51,7 +52,6 @@
     "react-dom": "^19.3.1",
     "remark": "^15.0.1",
     "remark-rehype": "^11.1.2",
-    "shiki": "^4.5.0",
     "tailwindcss": "^4.3.3",
     "tsconfig": "workspace:*",
     "tsdown": "0.23.1",

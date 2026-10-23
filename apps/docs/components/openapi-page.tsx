@@ -1,10 +1,10 @@
 'use client';
-import { defaultShikiOptions } from '@/lib/shiki';
+import { apiHighlighter } from '@/lib/highlighter';
 import { preload } from 'react-dom';
 import { createOpenAPIPage } from 'fumadocs-openapi/ui';
 
 export const OpenAPIPage = createOpenAPIPage({
-  shikiOptions: defaultShikiOptions,
+  highlighter: apiHighlighter,
   async loadDocument(id) {
     if (typeof window === 'undefined') {
       preload(`/api/openapi/${id}`, { as: 'fetch', crossOrigin: 'anonymous' });

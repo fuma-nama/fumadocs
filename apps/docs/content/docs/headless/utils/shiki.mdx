@@ -1,13 +1,89 @@
 ---
-title: Shiki (Internal)
-description: Manage the Shiki instances.
+title: Highlighter
+description: Highlight code with Shiki, or a highlighter of your choice.
 ---
 
-## Overview
+Fumadocs highlights code with [Shiki](https://shiki.style) by default. You can create a highlighter and pass it to the places that highlight code instead, Shiki isn't loaded then.
 
-Fumadocs use its own Shiki factory API to manage internal Shiki instances.
+```ts tab="Highlights" title="lib/highlighter.ts"
+// npm i @pierre/highlights
+import { createHighlights } from 'fumadocs-core/highlight/highlights';
+import githubLight from '@pierre/highlights/themes/github-light';
+import githubDark from '@pierre/highlights/themes/github-dark';
 
-You can customize it for special purposes like using fine-grained bundles, for example:
+export const highlighter = createHighlights({
+  themes: { light: githubLight, dark: githubDark },
+});
+```
+
+```ts tab="Shiki" title="lib/highlighter.ts"
+import { createShikiHighlighter } from 'fumadocs-core/highlight/shiki';
+import { defaultShikiFactory } from 'fumadocs-core/highlight/shiki/full';
+
+export const highlighter = createShikiHighlighter(() => defaultShikiFactory.getOrInit(), {
+  themes: { light: 'github-light', dark: 'github-dark' },
+  // Fumadocs UI colors tokens with CSS variables
+  defaultColor: false,
+});
+```
+
+[Highlights](https://diffs.com/highlights) is written in WebAssembly and many times faster than Shiki. It has 80 languages built in (others are highlighted as plain text), uses [its own themes](https://diffs.com/docs#highlights) from `@pierre/highlights/themes`, and runs Shiki transformers through `shikiTransformers`, a compatibility layer.
+
+`highlighter.override()` creates a highlighter with other options, like other transformers.
+
+## Usage
+
+```ts tab="MDX" title="source.config.ts"
+import { defineConfig } from 'fumadocs-mdx/config';
+import { rehypeCodeFromHighlighter } from 'fumadocs-core/mdx-plugins/rehype-code.core';
+import { highlighter } from './lib/highlighter';
+
+export default defineConfig({
+  mdxOptions: {
+    // disable the default Shiki plugin
+    rehypeCodeOptions: false,
+    rehypePlugins: (v) => [
+      [
+        rehypeCodeFromHighlighter,
+        // created with the transformers of Fumadocs, like notations and icons
+        ({ transformers }) => highlighter.override({ shikiTransformers: transformers }),
+      ],
+      ...v,
+    ],
+  },
+});
+```
+
+```tsx tab="Server Code Block" title="components/codeblock.tsx"
+import { createServerCodeBlock } from 'fumadocs-ui/components/codeblock.rsc';
+import { highlighter } from '@/lib/highlighter';
+
+export const ServerCodeBlock = createServerCodeBlock({ highlighter });
+```
+
+```tsx tab="Dynamic Code Block" title="components/dynamic-codeblock.tsx"
+'use client';
+import { createDynamicCodeBlock } from 'fumadocs-ui/components/dynamic-codeblock.core';
+import { highlighter } from '@/lib/highlighter';
+
+export const DynamicCodeBlock = createDynamicCodeBlock({ highlighter });
+```
+
+Integrations take it in their main entry:
+
+| Integration                                                                                      | Option                                                                              |
+| ------------------------------------------------------------------------------------------------ | ----------------------------------------------------------------------------------- |
+| [Sätteri](/docs/integrations/content/satteri-local-md)                                           | `rehypeCodeFromHighlighter()` from `@fumadocs/satteri/rehype-code` in `hastPlugins` |
+| [Python](/docs/integrations/content/python), [Local HTML](/docs/integrations/content/local-html) | `createPython({ highlighter })`, `localHtml({ highlighter })`                       |
+| [OpenAPI](/docs/integrations/openapi), GraphQL, AsyncAPI                                         | `createOpenAPIPage({ highlighter })`                                                |
+| [Type Table](/docs/ui/components/auto-type-table)                                                | `remarkAutoTypeTable({ highlighter })`, `<AutoTypeTable highlighter />`             |
+| shadcn                                                                                           | `createSnippet({ highlighter })` from `@fumadocs/shadcn/rsc`                        |
+
+Where Fumadocs adds transformers to code blocks, like `rehypeCodeFromHighlighter()` and the ones of Python, Local HTML and shadcn, a function receives them.
+
+## Shiki Factory
+
+Fumadocs manages Shiki instances with Shiki factories, you can create one for special purposes like using fine-grained bundles:
 
 ```ts
 import { createShikiFactory } from 'fumadocs-core/highlight/shiki';
@@ -30,7 +106,7 @@ Then pass it to different modules/features:
 
 ```tsx tab="Dynamic CodeBlock (UI)"
 'use client';
-import * as Base from 'fumadocs-ui/dynamic-codeblock.core';
+import * as Base from 'fumadocs-ui/components/dynamic-codeblock.core';
 
 export type DynamicCodeblockProps = Omit<Base.DynamicCodeblockProps, 'highlighter'>;
 
@@ -39,8 +115,35 @@ export function DynamicCodeBlock(props: DynamicCodeblockProps) {
 }
 ```
 
-```ts tab="Rehype Code (Core)"
-import { createRehypeCode } from 'fumadocs-core/mdx-plugins/rehype-code.core';
+```ts tab="Highlighter"
+import { createShikiHighlighter } from 'fumadocs-core/highlight/shiki';
 
-const rehypeCode = createRehypeCode(myShikiFactory);
+export const highlighter = createShikiHighlighter(() => myShikiFactory.getOrInit(), {
+  themes: { light: 'github-light', dark: 'github-dark' },
+  defaultColor: false,
+});
+```
+
+## Custom Highlighter
+
+Implement the `Highlighter` interface:
+
+```ts
+import type { Highlighter } from 'fumadocs-core/highlight';
+
+export const highlighter: Highlighter = {
+  codeToHast(code, { lang, structure, meta }) {
+    // return `pre > code > span.line` with `meta` on `<pre>`, or the content of `<code>` when `structure` is `inline`
+  },
+  // optional, for languages loaded on demand
+  async loadLanguage(...langs) {},
+};
+```
+
+Fumadocs UI colors the tokens with CSS variables like `--shiki-light` and `--shiki-dark`. Pass it like other highlighters, or highlight a rehype pipeline of your own with `rehypeCodeFromHighlighter`:
+
+```ts
+import { rehypeCodeFromHighlighter } from 'fumadocs-core/mdx-plugins/rehype-code.core';
+
+unified().use(rehypeCodeFromHighlighter, highlighter);
 ```

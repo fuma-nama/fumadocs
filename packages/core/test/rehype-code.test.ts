@@ -1,9 +1,11 @@
 import { describe, expect, test } from 'vitest';
 import { remark } from 'remark';
 import remarkRehype from 'remark-rehype';
-import type { Nodes, Root } from 'hast';
+import type { Element, Nodes, Root } from 'hast';
 import { rehypeCode } from '@/mdx-plugins';
 import { walk } from '@/mdx-plugins/utils';
+import { rehypeCodeFromHighlighter } from '@/mdx-plugins/rehype-code.core';
+import { createHighlights } from '@/highlight/highlights';
 
 async function process(source: string): Promise<Root> {
   const processor = remark().use(remarkRehype).use(rehypeCode, { inline: 'tailing-curly-colon' });
@@ -54,5 +56,53 @@ describe('Rehype Code', () => {
     const tree = await process('1. item `console.log("hello"){:ts}`');
 
     expect(countTokens(tree, 'code')).toBeGreaterThan(0);
+  });
+});
+
+function findPre(tree: Root): Element | undefined {
+  let pre: Element | undefined;
+  walk<Nodes>(tree, (node) => {
+    if (node.type === 'element' && node.tagName === 'pre') pre ??= node;
+  });
+  return pre;
+}
+
+describe('Rehype Code (custom highlighter)', () => {
+  const source = [
+    '```ts title="a.ts"',
+    'console.log("hello"); // [!code highlight]',
+    '```',
+    '',
+    '`console.log(1){:ts}`',
+    '',
+    '```unknown',
+    'plain',
+    '```',
+  ].join('\n');
+
+  test('a function is created with the transformers and icons of Fumadocs', async () => {
+    const processor = remark()
+      .use(remarkRehype)
+      .use(
+        rehypeCodeFromHighlighter,
+        ({ transformers }) => createHighlights({ shikiTransformers: transformers }),
+        { inline: 'tailing-curly-colon' },
+      );
+    const tree = await processor.run(processor.parse(source));
+
+    expect(countTokens(tree, 'pre')).toBeGreaterThan(0);
+    expect(countTokens(tree, 'code')).toBeGreaterThan(0);
+    expect(JSON.stringify(tree)).toContain('"highlighted"');
+    expect(findPre(tree)?.properties).toMatchObject({ title: 'a.ts', icon: expect.any(String) });
+  });
+
+  test('a highlighter is used as it is', async () => {
+    const processor = remark().use(remarkRehype).use(rehypeCodeFromHighlighter, createHighlights());
+    const tree = await processor.run(processor.parse(source));
+
+    expect(countTokens(tree, 'pre')).toBeGreaterThan(0);
+    expect(JSON.stringify(tree)).not.toContain('"highlighted"');
+    expect(findPre(tree)?.properties).toMatchObject({ title: 'a.ts' });
+    expect(findPre(tree)?.properties.icon).toBeUndefined();
   });
 });

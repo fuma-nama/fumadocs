@@ -8,12 +8,15 @@ import { type Generator } from '@/lib/base';
 import type { Nodes } from 'hast';
 import { parseTags } from '@/lib/parse-tags';
 import { markdownRenderer, type ShikiOptions } from '@/markdown';
+import type { Highlighter } from 'fumadocs-core/highlight';
 
 export interface AutoTypeTableProps extends BaseTypeTableProps, ComponentProps<'div'> {
   generator: Generator;
 
-  /** Shiki configuration when using default `renderMarkdown` & `renderType` */
+  /** @deprecated use `highlighter`, like `createShikiHighlighter()` */
   shiki?: ShikiOptions;
+  /** highlight code with your own highlighter when using default `renderMarkdown` & `renderType` */
+  highlighter?: Highlighter;
   options?: GenerateTypeTableOptions;
 
   renderMarkdown?: (md: string) => Promise<ReactNode>;
@@ -26,13 +29,14 @@ export async function AutoTypeTable({
   renderType,
   renderMarkdown,
   shiki,
+  highlighter,
   name,
   path,
   type,
   ...props
 }: AutoTypeTableProps) {
   if (!renderType || !renderMarkdown) {
-    const renderer = markdownRenderer(shiki);
+    const renderer = markdownRenderer(highlighter, shiki);
     renderType ??= async (v) => toJsx(await renderer.renderTypeToHast(v));
     renderMarkdown ??= async (v) => toJsx(await renderer.renderMarkdownToHast(v));
   }

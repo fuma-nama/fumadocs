@@ -1,4 +1,6 @@
-import { ServerCodeBlock } from 'fumadocs-ui/components/codeblock.rsc';
+import { createServerCodeBlock, ServerCodeBlock } from 'fumadocs-ui/components/codeblock.rsc';
+import type { Highlighter } from 'fumadocs-core/highlight';
+import type { ShikiTransformer } from 'shiki';
 import type { ManualInstallationSnippet } from './manual-installation';
 import { transformerIcon } from 'fumadocs-core/mdx-plugins/transformer-icon';
 import {
@@ -26,6 +28,25 @@ function getTitle(item: ManualInstallationSnippet): string | undefined {
 }
 
 export async function Snippet({ item }: { item: ManualInstallationSnippet }) {
+  return renderSnippet(item, ServerCodeBlock);
+}
+
+/** Create a `Snippet` that highlights with your own highlighter, a function receives the transformers of `Snippet`. */
+export function createSnippet({
+  highlighter,
+}: {
+  highlighter: Highlighter | ((options: { transformers: ShikiTransformer[] }) => Highlighter);
+}) {
+  const CodeBlock = createServerCodeBlock({
+    highlighter: typeof highlighter === 'function' ? highlighter({ transformers }) : highlighter,
+  });
+
+  return function Snippet({ item }: { item: ManualInstallationSnippet }) {
+    return renderSnippet(item, CodeBlock);
+  };
+}
+
+function renderSnippet(item: ManualInstallationSnippet, CodeBlock: typeof ServerCodeBlock) {
   if (item.kind === 'docs') {
     return <p className="text-fd-muted-foreground text-sm whitespace-pre-wrap">{item.content}</p>;
   }
@@ -47,7 +68,7 @@ export async function Snippet({ item }: { item: ManualInstallationSnippet }) {
           </CodeBlockTabsList>
           {tabs.map(([k, v]) => (
             <CodeBlockTab key={k} value={k}>
-              <ServerCodeBlock code={v} lang={item.lang} />
+              <CodeBlock code={v} lang={item.lang} />
             </CodeBlockTab>
           ))}
         </CodeBlockTabs>
@@ -57,7 +78,8 @@ export async function Snippet({ item }: { item: ManualInstallationSnippet }) {
   const title = getTitle(item);
 
   return (
-    <ServerCodeBlock
+    // Shiki transformers, a code block of your own highlighter ignores them
+    <CodeBlock
       code={item.code}
       lang={item.lang}
       codeblock={{ title }}

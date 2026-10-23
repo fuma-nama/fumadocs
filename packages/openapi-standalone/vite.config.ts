@@ -5,11 +5,6 @@ export default defineConfig({
   // assets are served under the `baseUrl` of users
   base: './',
   plugins: [tailwindcss()],
-  resolve: {
-    alias: {
-      'fumadocs-core/highlight/shiki/full': new URL('./src/app/shiki.ts', import.meta.url).pathname,
-    },
-  },
   build: {
     outDir: 'dist/client',
     manifest: true,

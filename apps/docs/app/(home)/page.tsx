@@ -13,7 +13,7 @@ import {
   TimerIcon,
 } from 'lucide-react';
 import { Marquee } from '@/app/(home)/marquee';
-import { ServerCodeBlock } from 'fumadocs-ui/components/codeblock.rsc';
+import { ServerCodeBlock } from '@/components/server-codeblock';
 import {
   Hero,
   AgnosticBackground,
