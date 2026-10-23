@@ -96,6 +96,34 @@ describe('Rehype Code (custom highlighter)', () => {
     expect(findPre(tree)?.properties).toMatchObject({ title: 'a.ts', icon: expect.any(String) });
   });
 
+  test('a notation on its own line marks the next line, like with Shiki', async () => {
+    const processor = remark()
+      .use(remarkRehype)
+      .use(rehypeCodeFromHighlighter, ({ transformers }) =>
+        createHighlights({ shikiTransformers: transformers }),
+      );
+    const tree = await processor.run(
+      processor.parse(
+        ['```js', 'const a = {', '  // [!code ++]', '  b: 1,', '};', '```'].join('\n'),
+      ),
+    );
+    const text = (node: Nodes): string =>
+      node.type === 'text'
+        ? node.value
+        : 'children' in node
+          ? node.children.map(text).join('')
+          : '';
+    const lines: string[] = [];
+    walk<Nodes>(tree, (node) => {
+      if (node.type !== 'element' || node.properties.class?.toString().split(/[ ,]/)[0] !== 'line')
+        return;
+      lines.push(`${node.properties.class}: ${text(node)}`);
+      return 'skip';
+    });
+
+    expect(lines).toEqual(['line: const a = {', 'line,diff,add:   b: 1,', 'line: };']);
+  });
+
   test('a highlighter is used as it is', async () => {
     const processor = remark().use(remarkRehype).use(rehypeCodeFromHighlighter, createHighlights());
     const tree = await processor.run(processor.parse(source));

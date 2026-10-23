@@ -70,7 +70,7 @@ export function createHighlights(highlightsOptions: HighlightsOptions = {}): Hig
     }
 
     const result = tokenize(code, options.lang);
-    let tokens = result.tokens;
+    let tokens = mergeWhitespaces(result.tokens);
     const source: ShikiTransformerContextSource = { ...context, source: code };
     for (const transformer of transformers) {
       tokens = transformer.tokens?.call(source, tokens) || tokens;
@@ -98,6 +98,38 @@ function order(transformer: ShikiTransformer) {
   if (transformer.enforce === 'pre') return -1;
   if (transformer.enforce === 'post') return 1;
   return 0;
+}
+
+/**
+ * White space tokens join the next token, like the default `mergeWhitespaces` of Shiki: its transformers
+ * expect it, the notations find comment-only lines as lines of one token.
+ */
+function mergeWhitespaces(lines: ThemedToken[][]): ThemedToken[][] {
+  const out: ThemedToken[][] = [];
+  for (const line of lines) {
+    const merged: ThemedToken[] = [];
+    let carry = '';
+    let offset = 0;
+    for (let i = 0; i < line.length; i++) {
+      const token = line[i];
+      // underline and strikethrough show on white space
+      const mergeable = ((token.fontStyle ?? 0) & 12) === 0;
+      if (mergeable && i < line.length - 1 && /^\s+$/.test(token.content)) {
+        if (!carry) offset = token.offset;
+        carry += token.content;
+      } else if (!carry) {
+        merged.push(token);
+      } else if (mergeable) {
+        merged.push({ ...token, offset, content: carry + token.content });
+        carry = '';
+      } else {
+        merged.push({ content: carry, offset }, token);
+        carry = '';
+      }
+    }
+    out.push(merged);
+  }
+  return out;
 }
 
 function getTokenStyle(token: ThemedToken): string {
