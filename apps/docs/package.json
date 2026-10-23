@@ -1,6 +1,6 @@
 {
   "name": "docs",
-  "version": "0.1.60",
+  "version": "0.1.61",
   "private": true,
   "scripts": {
     "build": "pnpm build:pre && next build && pnpm build:post",
