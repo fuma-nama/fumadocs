@@ -64,7 +64,7 @@
     "tsconfig": "workspace:*",
     "tsdown": "0.23.1",
     "unified": "^11.0.5",
-    "vite": "^8.3.4"
+    "vite": "^8.3.5"
   },
   "peerDependencies": {
     "@types/estree": "*",

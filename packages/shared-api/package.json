@@ -54,13 +54,13 @@
     "class-variance-authority": "^0.7.1",
     "cn": "^0.5.0",
     "github-slugger": "^2.0.0",
-    "lucide-react": "^1.59.0",
+    "lucide-react": "^1.61.0",
     "remark": "^15.0.1",
     "remark-rehype": "^11.1.2",
     "shiki": "^4.5.0"
   },
   "devDependencies": {
-    "@scalar/json-magic": "^0.16.0",
+    "@scalar/json-magic": "^0.16.1",
     "@types/node": "26.6.5",
     "@types/react": "^19.3.0",
     "@types/react-dom": "^19.3.0",

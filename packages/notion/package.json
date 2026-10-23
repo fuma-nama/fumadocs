@@ -53,7 +53,7 @@
   "dependencies": {
     "@base-ui/react": "^1.9.0",
     "cn": "^0.5.0",
-    "lucide-react": "^1.59.0"
+    "lucide-react": "^1.61.0"
   },
   "devDependencies": {
     "@notionhq/client": "^5.27.1",

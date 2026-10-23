@@ -54,7 +54,7 @@
     "tailwindcss": "^4.3.3",
     "tsconfig": "workspace:*",
     "tsdown": "0.23.1",
-    "vite": "^8.3.4"
+    "vite": "^8.3.5"
   },
   "engines": {
     "node": ">=22.18.0"

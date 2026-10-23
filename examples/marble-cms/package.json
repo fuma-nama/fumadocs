@@ -12,7 +12,7 @@
     "fumadocs-core": "workspace:*",
     "fumadocs-ui": "workspace:@fumadocs/base-ui@*",
     "github-slugger": "^2.0.0",
-    "html-react-parser": "^6.1.8",
+    "html-react-parser": "^6.1.9",
     "next": "16.4.2",
     "react": "^19.3.1",
     "react-dom": "^19.3.1",

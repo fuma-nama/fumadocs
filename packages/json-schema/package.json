@@ -35,7 +35,7 @@
   },
   "dependencies": {
     "@fuma-translate/react": "^1.0.2",
-    "@scalar/json-magic": "^0.16.0"
+    "@scalar/json-magic": "^0.16.1"
   },
   "devDependencies": {
     "@types/node": "26.6.5",

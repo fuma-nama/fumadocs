@@ -55,7 +55,7 @@
     "react-dom": "^19.3.1",
     "tsconfig": "workspace:*",
     "tsdown": "0.23.1",
-    "vite": "^8.3.4"
+    "vite": "^8.3.5"
   },
   "peerDependencies": {
     "@types/hast": "*",
