@@ -95,7 +95,7 @@ async function getDocuments() {
   return documents;
 }`;
 
-/** `scripts/sync-content.ts`, syncing the search indexes pre-rendered to `output` */
+/** `scripts/sync-content.ts`, syncing the search indexes pre-rendered to `output`, the first match of a glob pattern (Next.js) */
 export const syncScript = (
   output: string,
   imports: string,
@@ -103,7 +103,13 @@ export const syncScript = (
 ) => `import * as fs from 'node:fs/promises';
 ${imports}
 
-const records = JSON.parse(await fs.readFile('${output}', 'utf-8')) as DocumentRecord[];
+${
+  output.includes('*')
+    ? `// Next.js writes it under \`route-cache\` when built with an adapter, like on Vercel
+const [file] = await Array.fromAsync(fs.glob('${output}'));
+const records = JSON.parse(await fs.readFile(file, 'utf-8')) as DocumentRecord[];`
+    : `const records = JSON.parse(await fs.readFile('${output}', 'utf-8')) as DocumentRecord[];`
+}
 
 ${body}
 console.log(\`search updated: \${records.length} records\`);
@@ -416,7 +422,7 @@ export const staticRoute = (framework: ReactFramework, head: string, documents: 
 export function staticOutput(framework: ReactFramework, config = ''): string {
   switch (framework) {
     case 'next':
-      return '.next/server/app/static.json.body';
+      return '.next/server/{app,route-cache/*/*/$}/static.json.body';
     case 'react-router':
       return 'build/client/static.json';
     case 'waku':

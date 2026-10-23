@@ -8,8 +8,11 @@ export async function updateSearchIndexes(): Promise<void> {
     return;
   }
 
-  const content = await fs.readFile('.next/server/app/static.json.body');
-  const records = JSON.parse(content.toString()) as OramaDocument[];
+  // Next.js writes it under `route-cache` when built with an adapter, like on Vercel
+  const [file] = await Array.fromAsync(
+    fs.glob('.next/server/{app,route-cache/*/*/$}/static.json.body'),
+  );
+  const records = JSON.parse(await fs.readFile(file, 'utf-8')) as OramaDocument[];
 
   await sync(orama, {
     index: DataSourceId,
