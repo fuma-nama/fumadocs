@@ -94,7 +94,13 @@ function getRequestData({
   };
 
   for (const param of parameters) {
-    let value = pickExample(param as never);
+    // a parameter example under the same key as the request body example belongs to it
+    const keyed =
+      sampleKey !== undefined && param.examples && Object.hasOwn(param.examples, sampleKey)
+        ? param.examples[sampleKey]
+        : undefined;
+    let value =
+      keyed !== undefined ? getExampleValue(dereference(keyed)) : pickExample(param as never);
 
     if (value === undefined && param.required) {
       if (param.schema) {
@@ -132,7 +138,7 @@ function getRequestData({
     result.bodyMediaType = type as RawRequestData['bodyMediaType'];
     const bodyOfType = dereference(body.content[type]);
 
-    if (bodyOfType.examples && sampleKey) {
+    if (bodyOfType.examples && sampleKey !== undefined) {
       result.body = getExampleValue(dereference(bodyOfType.examples[sampleKey]));
     } else if (bodyOfType.example) {
       result.body = getRaw(bodyOfType.example);

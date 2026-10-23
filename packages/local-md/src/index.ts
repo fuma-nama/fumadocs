@@ -57,8 +57,6 @@ export interface LocalMarkdown<
     pageData: LocalMarkdownPage<StandardSchemaV1.InferOutput<FrontmatterSchema>, ModuleExports>;
     metaData: StandardSchemaV1.InferOutput<MetaSchema> & MetaData;
   }>;
-
-  invalidateFile: (file: string) => void;
 }
 
 export interface LocalMarkdownPage<
@@ -99,7 +97,7 @@ export function localMd<
     const res = await compiler.compile({
       path: file.absolutePath,
       value: content,
-      data: { frontmatter },
+      data: { frontmatter, _compiler: file },
     });
 
     return res.type === 'ast'

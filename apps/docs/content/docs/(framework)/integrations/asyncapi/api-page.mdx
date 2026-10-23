@@ -264,22 +264,14 @@ See [Translations](/docs/ui/translations) for more details.
 
 ### Syntax Highlighting
 
-AsyncAPI pages use Shiki for code blocks. You can customize the highlighter and themes.
+AsyncAPI pages highlight code blocks with Shiki, pass a [highlighter](/docs/headless/utils/shiki) to customize it.
 
 ```tsx title="components/api-page.tsx"
 'use client';
 import { createAsyncAPIPage } from '@fumadocs/asyncapi/ui';
-import { defaultShikiFactory } from 'fumadocs-core/highlight/shiki/full';
+import { highlighter } from '@/lib/highlighter';
 
-export const AsyncAPIPage = createAsyncAPIPage({
-  shiki: defaultShikiFactory,
-  shikiOptions: {
-    themes: {
-      light: 'github-light',
-      dark: 'github-dark',
-    },
-  },
-});
+export const AsyncAPIPage = createAsyncAPIPage({ highlighter });
 ```
 
 ### Custom Components

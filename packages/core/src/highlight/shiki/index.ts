@@ -7,8 +7,9 @@ import type {
   CodeToHastOptionsCommon,
   HighlighterCore,
 } from 'shiki';
-import type { Awaitable } from '@/types';
-import { loadMissingTheme, getRequiredThemes } from '../utils';
+import type { Highlighter, HighlightCodeOptions } from '..';
+import type { Awaitable, DistributiveOmit } from '@/types';
+import { loadMissingLanguage, loadMissingTheme, getRequiredThemes } from '../utils';
 
 interface InitOptions {
   langAlias?: Record<string, string>;
@@ -46,28 +47,90 @@ export type HighlightHastOptions = CodeToHastOptionsCommon<BundledLanguage> &
     fallbackLanguage?: BundledLanguage | (string & {});
   };
 
+export type ShikiHighlighterOptions = DistributiveOmit<HighlightHastOptions, 'lang'>;
+
+export interface ShikiHighlighter extends Highlighter {
+  loadLanguage: (...langs: string[]) => Promise<void>;
+  /** Create a highlighter with `options` in place of its own, like other transformers. */
+  override: (options: Partial<ShikiHighlighterOptions>) => ShikiHighlighter;
+}
+
+/**
+ * Use Shiki as a highlighter, `options` apply to every code block.
+ */
+export function createShikiHighlighter(
+  shiki: HighlighterCore | (() => Awaitable<HighlighterCore>),
+  shikiOptions: ShikiHighlighterOptions,
+): ShikiHighlighter {
+  const { fallbackLanguage = 'text', ...options } = shikiOptions;
+  let instance = typeof shiki === 'function' ? undefined : shiki;
+  // languages `loadLanguage()` couldn't load, highlighted as the fallback language
+  const fallbacks = new Set<string>();
+
+  function getCodeOptions({ lang, structure = options.structure, meta }: HighlightCodeOptions) {
+    return {
+      ...options,
+      lang: fallbacks.has(lang) ? fallbackLanguage : lang,
+      structure,
+      meta: options.meta ? { ...options.meta, ...meta } : meta,
+    };
+  }
+
+  function getInstance() {
+    // a factory resolves the instance in `loadLanguage()`
+    if (!instance) throw new Error('[Fumadocs] load the language before highlighting');
+    return instance;
+  }
+
+  const loading = new Map<string, Promise<void>>();
+  async function load(lang: string) {
+    const [highlighter, { isSpecialLang }] = await Promise.all([
+      typeof shiki === 'function' ? shiki() : shiki,
+      import('shiki/core'),
+    ]);
+    await Promise.all([
+      loadMissingTheme(highlighter, getRequiredThemes(options)),
+      loadMissingLanguage(highlighter, [lang, fallbackLanguage]),
+    ]);
+
+    if (!isSpecialLang(lang) && !highlighter.getLoadedLanguages().includes(lang)) {
+      fallbacks.add(lang);
+    }
+    instance = highlighter;
+  }
+
+  return {
+    async loadLanguage(...langs) {
+      const tasks: Promise<void>[] = [];
+      for (const lang of langs) {
+        let task = loading.get(lang);
+        if (!task) {
+          loading.set(lang, (task = load(lang)));
+          task.catch(() => loading.delete(lang));
+        }
+        tasks.push(task);
+      }
+      await Promise.all(tasks);
+    },
+    codeToHast(code, codeOptions) {
+      return getInstance().codeToHast(code, getCodeOptions(codeOptions));
+    },
+    override(overrides) {
+      return createShikiHighlighter(instance ?? shiki, {
+        ...shikiOptions,
+        ...overrides,
+      } as ShikiHighlighterOptions);
+    },
+  };
+}
+
 export async function highlightHast(
   highlighter: HighlighterCore,
   code: string,
   options: HighlightHastOptions,
 ): Promise<Root> {
-  const { fallbackLanguage = 'text', ...resolved } = options;
-  const { isSpecialLang } = await import('shiki/core');
-  const loaded = highlighter.getLoadedLanguages();
-  if (
-    !isSpecialLang(resolved.lang) &&
-    !(resolved.lang in highlighter.getBundledLanguages()) &&
-    !loaded.includes(resolved.lang)
-  ) {
-    resolved.lang = fallbackLanguage;
-  }
+  const instance = createShikiHighlighter(highlighter, options);
+  await instance.loadLanguage(options.lang);
 
-  await Promise.all([
-    loadMissingTheme(highlighter, getRequiredThemes(resolved)),
-    !isSpecialLang(resolved.lang) &&
-      !loaded.includes(resolved.lang) &&
-      highlighter.loadLanguage(resolved.lang as never),
-  ]);
-
-  return highlighter.codeToHast(code, resolved);
+  return instance.codeToHast(code, options);
 }

@@ -33,7 +33,7 @@
   "devDependencies": {
     "@fastify/deepmerge": "^3.2.2",
     "@types/node": "^26.6.5",
-    "postcss-selector-parser": "^7.1.6",
+    "postcss-selector-parser": "^7.1.7",
     "tailwindcss": "^4.3.3",
     "tsconfig": "workspace:*",
     "tsdown": "0.23.1"
@@ -47,9 +47,9 @@
     }
   },
   "inlinedDependencies": {
-    "@fastify/deepmerge": "3.2.1",
+    "@fastify/deepmerge": "3.2.2",
     "cssesc": "3.0.0",
-    "postcss-selector-parser": "7.1.6",
+    "postcss-selector-parser": "7.1.7",
     "util-deprecate": "1.0.2"
   }
 }

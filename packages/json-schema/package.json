@@ -1,6 +1,6 @@
 {
   "name": "@fumadocs/json-schema",
-  "version": "0.3.4",
+  "version": "0.3.5",
   "description": "JSON Schema toolkit: dereference, merge, sample and stringify schemas",
   "keywords": [
     "Fumadocs",
@@ -35,7 +35,7 @@
   },
   "dependencies": {
     "@fuma-translate/react": "^1.0.2",
-    "@scalar/json-magic": "^0.16.0"
+    "@scalar/json-magic": "^0.16.1"
   },
   "devDependencies": {
     "@types/node": "26.6.5",

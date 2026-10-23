@@ -189,7 +189,6 @@ async function MdContent({
         type: 'root',
         children: item.title.children,
       },
-      compiled.file,
       mdxComponents,
     ),
   }));

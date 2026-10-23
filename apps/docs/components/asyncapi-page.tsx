@@ -1,10 +1,10 @@
 'use client';
-import { defaultShikiOptions } from '@/lib/shiki';
+import { apiHighlighter } from '@/lib/highlighter';
 import { preload } from 'react-dom';
 import { createAsyncAPIPage } from '@fumadocs/asyncapi/ui';
 
 export const AsyncAPIPage = createAsyncAPIPage({
-  shikiOptions: defaultShikiOptions,
+  highlighter: apiHighlighter,
   async loadDocument(id) {
     if (typeof window === 'undefined') {
       preload(`/api/asyncapi/${id}`, { as: 'fetch', crossOrigin: 'anonymous' });

@@ -1,9 +1,8 @@
 import { type ComponentProps, createContext, lazy, use } from 'react';
-import * as runtime from 'react/jsx-runtime';
 import { preload } from 'react-dom';
 import { remark } from 'remark';
 import remarkRehype from 'remark-rehype';
-import { toJsxRuntime } from 'hast-util-to-jsx-runtime';
+import { type Components, toJsx } from 'fumadocs-core/utils/hast-to-jsx';
 import { FrameworkProvider, type Router } from 'fumadocs-core/framework';
 import type * as PageTree from 'fumadocs-core/page-tree';
 import { remarkGfm } from 'fumadocs-core/mdx-plugins/remark-gfm';
@@ -12,14 +11,15 @@ import defaultMdxComponents from 'fumadocs-ui/mdx';
 import { DocsLayout } from 'fumadocs-ui/layouts/spacious';
 import { DocsBody, DocsDescription, DocsPage, DocsTitle } from 'fumadocs-ui/layouts/spacious/page';
 import { Card, Cards } from 'fumadocs-ui/components/card';
-import { createOpenAPIPage } from 'fumadocs-openapi/ui';
+import { createOpenAPIPageBase } from 'fumadocs-openapi/ui/base';
+import { createHighlights } from 'fumadocs-core/highlight/highlights';
 import type { Document } from 'fumadocs-openapi';
 import type { OverviewPageData, PageData, SiteData } from './types';
 
-const OpenAPIPage = createOpenAPIPage();
+const OpenAPIPage = createOpenAPIPageBase({ highlighter: createHighlights() });
 const SearchDialog = lazy(() => import('./search'));
 const markdown = remark().use(remarkGfm).use(remarkRehype);
-const mdxComponents = { ...defaultMdxComponents, img: 'img' };
+const mdxComponents: Partial<Components> = { ...defaultMdxComponents, img: 'img' };
 
 export interface AppProps {
   site: SiteData;
@@ -138,10 +138,7 @@ function Overview({ page }: { page: OverviewPageData }) {
       {page.description && <DocsDescription>{page.description}</DocsDescription>}
       <DocsBody>
         {page.body &&
-          toJsxRuntime(markdown.runSync(markdown.parse(page.body)), {
-            ...runtime,
-            components: mdxComponents,
-          })}
+          toJsx(markdown.runSync(markdown.parse(page.body)), { components: mdxComponents })}
         <Cards>
           {page.cards.map((card) => (
             <Card

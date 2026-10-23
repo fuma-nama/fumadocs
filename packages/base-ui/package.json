@@ -1,6 +1,6 @@
 {
   "name": "@fumadocs/base-ui",
-  "version": "16.17.7",
+  "version": "16.17.8",
   "description": "The Base UI version of Fumadocs UI",
   "keywords": [
     "Docs",
@@ -147,9 +147,8 @@
     "@fumadocs/tailwind": "workspace:*",
     "class-variance-authority": "^0.7.1",
     "cn": "^0.5.0",
-    "hast-util-to-jsx-runtime": "^2.3.6",
-    "lucide-react": "^1.59.0",
-    "motion": "^14.4.0",
+    "lucide-react": "^1.61.0",
+    "motion": "^14.6.0",
     "next-themes": "^0.4.6",
     "react-remove-scroll": "^2.7.2",
     "scroll-into-view-if-needed": "^3.1.0",

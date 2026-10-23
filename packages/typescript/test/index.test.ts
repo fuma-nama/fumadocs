@@ -1,7 +1,7 @@
 import { expect, test } from 'vitest';
 import { createGenerator, createProject } from '@/lib/base';
 import { getSimpleForm } from '@/lib/get-simple-form';
-import { isVariableDeclaration, type Node } from 'typescript/unstable/ast';
+import { isVariableDeclaration, type Node } from 'typescript/ast';
 import path from 'node:path';
 import { fileURLToPath } from 'url';
 

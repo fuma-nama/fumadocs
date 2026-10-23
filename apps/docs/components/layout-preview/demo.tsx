@@ -5,7 +5,7 @@ import { Callout } from 'fumadocs-ui/components/callout';
 import { Card, Cards } from 'fumadocs-ui/components/card';
 import { Heading } from 'fumadocs-ui/components/heading';
 import { Tab, Tabs } from 'fumadocs-ui/components/tabs';
-import { DynamicCodeBlock } from 'fumadocs-ui/components/dynamic-codeblock';
+import { DynamicCodeBlock } from '@/components/dynamic-codeblock';
 import { Book, LayoutTemplate, Palette, Rocket, Server, Terminal } from 'lucide-react';
 import { usePathname } from 'fumadocs-core/framework';
 import type { FC, ReactNode } from 'react';

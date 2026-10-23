@@ -172,3 +172,37 @@ test('load() compiles each page only once', async () => {
     await fs.rm(dir, { recursive: true, force: true });
   }
 });
+
+test('includes files and recompiles a page when they change', async () => {
+  const root = await fs.mkdtemp(path.join(os.tmpdir(), 'local-md-include-'));
+
+  try {
+    const dir = path.join(root, 'docs');
+    const partial = path.join(root, 'partial.md');
+    await fs.mkdir(dir);
+    // an expression in MDX, text in Markdown
+    await fs.writeFile(partial, 'version one {braces}\n');
+    await fs.writeFile(
+      path.join(dir, 'page.mdx'),
+      '---\ntitle: Page\n---\n\n<include>../partial.md</include>\n',
+    );
+
+    const docs = localMd({ dir });
+    const dependencies: string[] = [];
+    docs.onDependency((file) => dependencies.push(file));
+    const render = async () => {
+      const page = (await docs.staticSource()).files.find((file) => file.type === 'page');
+      if (page?.type !== 'page') throw new Error('expected a page');
+      return renderToStaticMarkup((await (await page.data.load()).render()).body);
+    };
+
+    expect(await render()).toContain('version one {braces}');
+    expect(dependencies).toEqual([partial]);
+
+    await fs.writeFile(partial, 'version two\n');
+    expect(docs.invalidateFile(partial)).toBe(true);
+    expect(await render()).toContain('version two');
+  } finally {
+    await fs.rm(root, { recursive: true, force: true });
+  }
+});

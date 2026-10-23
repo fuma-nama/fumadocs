@@ -1,14 +1,14 @@
 import {
   type Checker,
   isObjectType,
-  NodeBuilderFlags,
   ObjectFlags,
   type Project as TsProject,
   type Symbol as TsSymbol,
   SymbolFlags,
   type Type,
-} from 'typescript/unstable/sync';
-import type { Node } from 'typescript/unstable/ast';
+  TypeFormatFlags,
+} from 'typescript/sync';
+import type { Node } from 'typescript/ast';
 import fs from 'node:fs/promises';
 import {
   type BaseTypeTableProps,
@@ -52,7 +52,7 @@ export interface RawTag {
 
 interface EntryContext extends GenerateOptions {
   /**
-   * The TypeScript project (from `typescript/unstable/sync`) containing the declaration.
+   * The TypeScript project (from `typescript/sync`) containing the declaration.
    */
   program: TsProject;
   checker: Checker;
@@ -147,7 +147,6 @@ export function createGenerator(options: GeneratorOptions = {}) {
           const declaration = symbol.declarations[0].resolve(tsProject);
           if (!declaration) continue;
           const type = checker.getTypeAtLocation(declaration);
-          if (!type) continue;
 
           const entryContext: EntryContext = {
             ...options,
@@ -231,7 +230,7 @@ function getDocEntry(prop: TsSymbol, context: EntryContext): DocEntry | undefine
     type: checker.typeToString(
       subType,
       declaration,
-      NodeBuilderFlags.UseAliasDefinedOutsideCurrentScope | NodeBuilderFlags.NoTruncation,
+      TypeFormatFlags.UseAliasDefinedOutsideCurrentScope | TypeFormatFlags.NoTruncation,
     ),
     simplifiedType: getSimpleForm(subType, checker, declaration, {
       ...context.typeSimplifier,

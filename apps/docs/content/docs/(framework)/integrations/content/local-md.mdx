@@ -88,6 +88,25 @@ export default async function Layout({ children }: LayoutProps<'/docs'>) {
 
 The returned source from `docsLoader.get()` is a normal [content loader](/docs/headless/source-api) instance.
 
+### Include
+
+[`<include>`](/docs/mdx/include) is enabled by default:
+
+```mdx title="content/docs/page.mdx"
+<include>../shared/note.md</include>
+```
+
+In Markdown files, use the `::include[../shared/note.md]` directive with `remark-directive` configured:
+
+```ts title="lib/source.ts"
+import remarkDirective from 'remark-directive';
+
+const docs = localMd({
+  dir: 'content/docs',
+  mdOptions: { remarkPlugins: [remarkDirective] },
+});
+```
+
 ### Hot Reload
 
 `local-md` works at runtime, so nothing watches your files by default. During development, pick one of the two watchers.
@@ -141,7 +160,7 @@ The command publishes its URL through an environment variable, so no configurati
 void watchWithDevServer(docs, { url: 'ws://127.0.0.1:8000/_fumadocs_local_md' });
 ```
 
-Both keep the loader in sync when local Markdown or MDX files change. To wire up your own watcher instead, call `docs.invalidateFile(path)` when a file changes.
+Both keep the loader in sync when local Markdown or MDX files, or the files they include, change. To wire up your own watcher instead, watch `docs.dir` and the files passed to `docs.onDependency()`, then call `docs.invalidateFile(path)` when one changes.
 
 ### JavaScript Engine
 

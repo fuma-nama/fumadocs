@@ -10,10 +10,31 @@ import type {
 import type { ReactNode } from 'react';
 import type { Root } from 'hast';
 import { defaultShikiFactory, wasmShikiFactory } from './shiki/full';
-import { type Components, toJsxRuntime } from 'hast-util-to-jsx-runtime';
-import * as JsxRuntime from 'react/jsx-runtime';
+import { type Components, toJsx } from '@/utils/hast-to-jsx';
 import { highlightHast as highlightHastBase } from './shiki';
 import { applyDefaultThemes, loadMissingLanguage, loadMissingTheme } from './utils';
+
+/**
+ * A syntax highlighter, like Shiki or Highlights.
+ */
+export interface Highlighter {
+  /** Load languages before highlighting, for highlighters loading them on demand. Unsupported languages are highlighted as plain text. */
+  loadLanguage?: (...langs: string[]) => Promise<void>;
+  /** Highlight code into `pre > code > span.line`, with `meta` added to `<pre>`. */
+  codeToHast: (code: string, options: HighlightCodeOptions) => Root;
+}
+
+export interface HighlightCodeOptions {
+  lang: string;
+  /**
+   * `inline` renders the content of `<code>` only.
+   *
+   * @defaultValue 'classic'
+   */
+  structure?: 'classic' | 'inline';
+  /** Attributes of the code block, like its title. */
+  meta?: Record<string, unknown>;
+}
 
 export type HighlightOptions = HighlightHastOptions & {
   components?: Partial<Components>;
@@ -62,9 +83,5 @@ export async function getHighlighter(
 }
 
 export async function highlight(code: string, options: HighlightOptions): Promise<ReactNode> {
-  return toJsxRuntime(await highlightHast(code, options), {
-    ...JsxRuntime,
-    development: false,
-    components: options.components,
-  });
+  return toJsx(await highlightHast(code, options), { components: options.components });
 }

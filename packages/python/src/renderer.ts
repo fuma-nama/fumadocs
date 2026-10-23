@@ -2,17 +2,20 @@ import type { RehypeTOCItemType, StructuredData } from 'fumadocs-core/mdx-plugin
 import type { TOCItemType } from 'fumadocs-core/toc';
 import type { Expression } from 'estree';
 import type { Root } from 'hast';
-import { type Components, type Evaluater, toJsxRuntime } from 'hast-util-to-jsx-runtime';
+import { type Components, type Evaluator, toJsx } from 'fumadocs-core/utils/hast-to-jsx';
 import type { MDXComponents } from 'mdx/types';
 import type { ReactNode } from 'react';
-import * as JsxRuntime from 'react/jsx-runtime';
-import * as PythonComponents from './components';
+import type { Highlighter } from 'fumadocs-core/highlight';
+import * as Python from './components';
 import defaultMdxComponents from 'fumadocs-ui/mdx';
+
+const { createPythonComponents, ...PythonComponents } = Python;
 
 export interface PythonRendererOptions {
   tree: Root;
   structuredData?: StructuredData;
   rehypeToc?: RehypeTOCItemType[];
+  highlighter?: Highlighter;
 }
 
 export interface PythonRendererResult {
@@ -42,6 +45,7 @@ export function createRenderer(options: PythonRendererOptions): PythonRenderer {
       const components: MDXComponents = {
         ...defaultMdxComponents,
         ...PythonComponents,
+        ...(options.highlighter && createPythonComponents({ highlighter: options.highlighter })),
         ...userComponents,
       };
 
@@ -60,7 +64,7 @@ export function createRenderer(options: PythonRendererOptions): PythonRenderer {
         }
       }
 
-      const evaluater: Evaluater = {
+      const evaluator: Evaluator = {
         evaluateExpression: evaluate,
         evaluateProgram() {
           throw new Error('cannot evaluate programs in generated content');
@@ -68,12 +72,7 @@ export function createRenderer(options: PythonRendererOptions): PythonRenderer {
       };
 
       function render(tree: Root): ReactNode {
-        return toJsxRuntime(tree, {
-          components: components as Partial<Components>,
-          development: false,
-          createEvaluater: () => evaluater,
-          ...JsxRuntime,
-        });
+        return toJsx(tree, { components: components as Partial<Components>, evaluator });
       }
 
       return {

@@ -307,6 +307,13 @@ test('a code block without a language still renders', async () => {
   expect(html).toContain('plain text');
 });
 
+test('a code block in an unknown language renders as plain text', async () => {
+  const { html } = await loadOnly('<pre><code class="language-xyz">plain text</code></pre>');
+
+  expect(html).toContain('shiki');
+  expect(html).toContain('plain text');
+});
+
 test('rehypeCodeOptions: false keeps the language hint and skips Shiki', async () => {
   const { html } = await loadOnly(
     '<pre><code class="language-ts">const answer = 42;</code></pre>',
@@ -314,6 +321,23 @@ test('rehypeCodeOptions: false keeps the language hint and skips Shiki', async (
   );
 
   expect(html).toContain('language-ts');
+  expect(html).not.toContain('shiki');
+});
+
+test('a custom highlighter replaces Shiki', async () => {
+  const { html } = await loadOnly(
+    '<pre><code class="language-ts">const answer = 42;</code></pre>',
+    {
+      highlighter: {
+        codeToHast: (code, { lang }) => ({
+          type: 'root',
+          children: [{ type: 'element', tagName: 'pre', properties: { lang }, children: [] }],
+        }),
+      },
+    },
+  );
+
+  expect(html).toContain('<pre lang="ts"');
   expect(html).not.toContain('shiki');
 });
 

@@ -1,134 +1,67 @@
-import { API, type Project as TsProject, type Snapshot } from 'typescript/unstable/sync';
-import type { SourceFile } from 'typescript/unstable/ast';
-import fs from 'node:fs';
+import {
+  API,
+  type CompilerOptions,
+  type Project as TsProject,
+  type Snapshot,
+  type SyntheticProjectId,
+} from 'typescript/sync';
+import { createFileSystemLayer } from 'typescript/fs';
 import path from 'node:path';
 
 export interface Project {
   /**
-   * The underlying `typescript/unstable/sync` API instance (a native TypeScript process).
-   */
-  readonly api: API;
-  readonly tsconfigPath: string;
-
-  /**
-   * Load a source file into the project, and optionally override its content with an in-memory version.
+   * Make the given files, with their in-memory content, the root files of the program (similar to `tsc` with `files` set).
    *
-   * Only loaded files (and the files they import) are part of the program, similar to `tsc` with `files` set.
+   * @param files - absolute file path to content
    */
-  getSourceFile(
-    filePath: string,
-    content?: string,
-  ): { project: TsProject; sourceFile: SourceFile } | undefined;
-
-  /**
-   * Stop the TypeScript process.
-   */
-  close(): void;
-}
-
-function normalizePath(p: string): string {
-  let out = path.resolve(p).replaceAll('\\', '/');
-  if (process.platform === 'win32' && /^[A-Z]:/.test(out)) {
-    out = out[0].toLowerCase() + out.slice(1);
-  }
-  return out;
-}
-
-function readDiskFile(filePath: string): string | undefined {
-  try {
-    return fs.readFileSync(filePath, 'utf-8');
-  } catch {
-    return;
-  }
+  load(files: Map<string, string>): TsProject;
 }
 
 export function createProject(tsconfigPath: string): Project {
-  tsconfigPath = normalizePath(tsconfigPath);
-  if (!fs.existsSync(tsconfigPath)) throw new Error(`tsconfig file not found: ${tsconfigPath}`);
-
-  const dir = path.posix.dirname(tsconfigPath);
-  /** in-memory files, overriding the file system */
-  const virtualFiles = new Map<string, string>();
-  /** root files of the generated tsconfig */
-  const rootFiles = new Set<string>();
+  const api = new API();
+  let compilerOptions: CompilerOptions;
+  try {
+    compilerOptions = api.parseConfigFile(path.resolve(tsconfigPath)).options;
+  } catch (error) {
+    api.close();
+    throw error;
+  }
+  let rootFiles: string[] = [];
+  /** content of in-memory files */
+  const contents = new Map<string, string>();
   let snapshot: Snapshot | undefined;
-
-  // a virtual tsconfig extending the user's one, with only loaded files as roots.
-  // this keeps the program (and memory) small compared to loading the entire project.
-  let configPath = `${dir}/tsconfig.fumadocs-story.json`;
-  for (let i = 0; fs.existsSync(configPath); i++) {
-    configPath = `${dir}/tsconfig.fumadocs-story.${i}.json`;
-  }
-
-  function writeConfig() {
-    virtualFiles.set(
-      configPath,
-      JSON.stringify({
-        extends: `./${path.posix.basename(tsconfigPath)}`,
-        include: [],
-        files: Array.from(rootFiles),
-      }),
-    );
-  }
-
-  const api = new API({
-    cwd: dir,
-    fs: {
-      // return `undefined` to fall back to the real file system
-      readFile: (fileName) => virtualFiles.get(normalizePath(fileName)),
-    },
-  });
+  let id: SyntheticProjectId | undefined;
 
   return {
-    api,
-    tsconfigPath,
-    getSourceFile(filePath, content) {
-      const key = normalizePath(filePath);
-      const changed: string[] = [];
-      const created: string[] = [];
-
-      if (content !== undefined) {
-        const isVirtual = virtualFiles.has(key);
-        const current = isVirtual ? virtualFiles.get(key) : readDiskFile(key);
-
-        if (current !== content) {
-          virtualFiles.set(key, content);
-          if (current !== undefined) changed.push(key);
-          else created.push(key);
-        }
+    load(files) {
+      const changed: [string, string][] = [];
+      for (const [file, content] of files) {
+        if (contents.get(file) !== content) changed.push([file, content]);
       }
+      const reconfigure =
+        files.size !== rootFiles.length || rootFiles.some((file) => !files.has(file));
 
-      if (!rootFiles.has(key)) {
-        rootFiles.add(key);
-        writeConfig();
-        changed.push(configPath);
-      }
-
-      if (!snapshot) {
-        snapshot = api.updateSnapshot({ openProjects: [configPath] });
-      } else if (changed.length > 0 || created.length > 0) {
+      if (!snapshot || reconfigure || changed.length > 0) {
+        const fileSystem = createFileSystemLayer(changed);
+        const program = { rootFiles: Array.from(files.keys()), compilerOptions };
         const prev = snapshot;
-        snapshot = api.updateSnapshot({
-          fileChanges: {
-            changed: changed.length > 0 ? changed : undefined,
-            created: created.length > 0 ? created : undefined,
-          },
-        });
-        prev.dispose();
+        if (!prev) {
+          const created = api.createSnapshot({ fileSystem, createPrograms: [program] });
+          id = created.operation.createdPrograms[0].id;
+          snapshot = created;
+        } else {
+          snapshot = prev.update(
+            reconfigure
+              ? { fileSystem, reconfigurePrograms: [{ id: id!, ...program }] }
+              : { fileSystem, ensurePrograms: [id!] },
+          );
+          prev.dispose();
+        }
+        rootFiles = program.rootFiles;
+        for (const [file, content] of changed) contents.set(file, content);
       }
 
-      const project = snapshot.getProject(configPath);
-      if (!project) return;
-
-      const sourceFile = project.program.getSourceFile(key);
-      if (!sourceFile) return;
-
-      return { project, sourceFile };
-    },
-    close() {
-      snapshot?.dispose();
-      snapshot = undefined;
-      api.close();
+      return snapshot.getProject(id!)!;
     },
   };
 }

@@ -41,6 +41,7 @@ export async function startDevServer(options: DevServerOptions): Promise<DevServ
       if (!_stats || !_stats.isFile()) return false;
 
       for (const client of clients) {
+        if (client.files.has(file)) return false;
         for (const [dir, { matcher }] of client.watching) {
           if (matcher(path.relative(dir, file))) return false;
         }
@@ -89,11 +90,19 @@ export async function startDevServer(options: DevServerOptions): Promise<DevServ
           client.addWatching(absolutePath, decoded);
           watcher.add(absolutePath);
         }
+      } else if (decoded.type === 'watch-file') {
+        const absolutePath = path.resolve(decoded.file);
+
+        if (!client.files.has(absolutePath)) {
+          client.files.add(absolutePath);
+          watcher.add(absolutePath);
+        }
       }
     });
 
     _client.on('close', () => {
       clients.delete(client);
+      // files stay watched, unwatching makes chokidar ignore them in the directories of other clients
       for (const dir of client.watching.keys()) removeWatchDir(dir);
     });
   });
@@ -173,6 +182,8 @@ function rawDataToString(data: RawData): string {
 class Client {
   /** dir -> options */
   readonly watching = new Map<string, { matcher: Matcher }>();
+  /** single files to watch, e.g. included files */
+  readonly files = new Set<string>();
 
   constructor(readonly socket: WebSocket) {}
 

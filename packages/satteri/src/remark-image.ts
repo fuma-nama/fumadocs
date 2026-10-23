@@ -4,7 +4,7 @@ import type { MdastPluginDefinition, MdastVisitorContext } from 'satteri';
 import type { Image } from 'mdast';
 import type { MdxJsxFlowElement } from 'satteri';
 import type { ExtraPluginHooks } from './compile';
-import { replaceSource } from './stringifier';
+import { type PositionedNode, replaceSource } from './stringifier';
 
 const VALID_BLUR_EXT = ['.jpeg', '.png', '.webp', '.avif', '.jpg'];
 const EXTERNAL_URL_REGEX = /^https?:\/\//;
@@ -110,7 +110,9 @@ async function updateImage(
         },
       ],
       // Sätteri drops the position of inserted nodes, stringifiers read the image's from here
-      data: { position: node.position } as MdxJsxFlowElement['data'],
+      data: {
+        position: node.position ?? (node.data as PositionedNode | undefined)?.position,
+      } as MdxJsxFlowElement['data'],
     };
 
     if (node.title) {
@@ -119,6 +121,16 @@ async function updateImage(
 
     if (options.placeholder === 'blur' && VALID_BLUR_EXT.some((ext) => src.file.endsWith(ext))) {
       out.attributes.push({ type: 'mdxJsxAttribute', name: 'placeholder', value: 'blur' });
+    }
+
+    // bundlers serve page-relative images at their own URLs, which the imports resolve to
+    if (!node.url.startsWith('/')) {
+      // in angle brackets, the URLs can have spaces & parentheses
+      const markdown = `![${(node.alt ?? '').replace(/[\\[\]]/g, '\\$&')}](<`;
+      const end = node.title ? `> "${node.title.replace(/["\\]/g, '\\$&')}")` : '>)';
+      // a URL with Vite, `StaticImageData` with Next.js
+      const code = `${variableName}.src ?? ${variableName}`;
+      replaceSource(ctx, out, (s) => markdown + s.expression(code, node.url) + end);
     }
 
     ctx.replaceNode(node, out);

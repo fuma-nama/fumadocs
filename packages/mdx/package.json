@@ -1,6 +1,6 @@
 {
   "name": "fumadocs-mdx",
-  "version": "15.4.9",
+  "version": "15.4.10",
   "description": "The built-in source for Fumadocs",
   "keywords": [
     "Docs",
@@ -60,7 +60,7 @@
   "dependencies": {
     "@mdx-js/mdx": "^3.1.1",
     "@standard-schema/spec": "^1.1.0",
-    "chokidar": "^5.0.0",
+    "chokidar": "^6.0.0",
     "esbuild": "^0.28.2",
     "estree-util-value-to-estree": "^3.5.0",
     "github-slugger": "^2.0.0",
@@ -93,11 +93,11 @@
     "remark": "^15.0.1",
     "remark-directive": "^4.0.0",
     "remark-mdx": "^3.1.1",
-    "rolldown": "^1.2.14",
+    "rolldown": "^1.2.15",
     "satteri": "^0.10.5",
     "tsconfig": "workspace:*",
     "tsdown": "0.23.1",
-    "vite": "^8.3.4",
+    "vite": "^8.3.5",
     "webpack": "^5.112.0"
   },
   "peerDependencies": {
@@ -105,7 +105,7 @@
     "@types/mdast": "*",
     "@types/mdx": "*",
     "@types/react": "*",
-    "fumadocs-core": "^16.17.0",
+    "fumadocs-core": "^16.17.8",
     "mdast-util-directive": "*",
     "next": "^15.3.0 || ^16.0.0",
     "react": "^19.2.0",

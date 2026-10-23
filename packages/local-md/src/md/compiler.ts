@@ -9,6 +9,7 @@ import {
 import { rehypeCode, type RehypeCodeOptions } from 'fumadocs-core/mdx-plugins/rehype-code';
 import { rehypeToc, type RehypeTocOptions } from 'fumadocs-core/mdx-plugins/rehype-toc';
 import { remarkStructure, type StructureOptions } from 'fumadocs-core/mdx-plugins/remark-structure';
+import { remarkInclude, type RemarkIncludeOptions } from 'fumadocs-core/mdx-plugins/remark-include';
 import { Compatible, VFile } from 'vfile';
 import type { Root } from 'hast';
 import * as Mdx from '@mdx-js/mdx';
@@ -62,6 +63,9 @@ export type CompileResult =
 export function createMarkdownCompiler(options?: MarkdownCompilerOptions): MarkdownCompiler {
   let mdx: ReturnType<typeof createMdxCompiler> | undefined;
   let md: ReturnType<typeof createMdCompiler> | undefined;
+  // included files are parsed by the processor of their format
+  const getProcessor: RemarkIncludeOptions['getProcessor'] = (format) =>
+    format === 'mdx' ? (mdx ??= createMdxCompiler()) : (md ??= createMdCompiler());
 
   function createMdCompiler() {
     const {
@@ -79,6 +83,7 @@ export function createMarkdownCompiler(options?: MarkdownCompilerOptions): Markd
     return remark()
       .use(
         plugins(
+          plugin(remarkInclude, { getProcessor }),
           remarkGfm,
           remarkHeadingOptions !== false &&
             plugin(remarkHeading, { generateToc: false, ...remarkHeadingOptions }),
@@ -120,6 +125,7 @@ export function createMarkdownCompiler(options?: MarkdownCompilerOptions): Markd
       outputFormat: 'function-body',
       development: false,
       remarkPlugins: plugins(
+        plugin(remarkInclude, { getProcessor }),
         remarkGfm,
         remarkHeadingOptions !== false &&
           plugin(remarkHeading, { generateToc: false, ...remarkHeadingOptions }),

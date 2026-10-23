@@ -3,7 +3,7 @@ import { renderToString } from 'react-dom/server';
 import { expect, test } from 'vitest';
 import { generateSchemaUI } from '@fumadocs/json-schema/react';
 import { defaultShikiFactory } from 'fumadocs-core/highlight/shiki/full';
-import { createPageComponents } from '@/components/defaults';
+import { createPageComponents, resolveHighlighter } from '@/components/defaults';
 import { SchemaUI } from '@/components/schema';
 
 const generated = generateSchemaUI({
@@ -55,7 +55,8 @@ test('renders the root property with its type', () => {
 });
 
 test('renders images of Markdown', () => {
-  const { Markdown } = createPageComponents({ shiki: defaultShikiFactory, components: {} });
+  const highlighter = resolveHighlighter({ shiki: defaultShikiFactory });
+  const { Markdown } = createPageComponents({ highlighter, components: {} });
   const html = renderToString(h(Markdown, { md: '![flow](https://example.com/flow.png)' }));
 
   expect(html).toContain('<p><img src="https://example.com/flow.png" alt="flow"/></p>');

@@ -1,9 +1,11 @@
 import type { ElementContent, Nodes } from 'hast';
 import { remark } from 'remark';
 import { remarkGfm } from 'fumadocs-core/mdx-plugins/remark-gfm';
-import { rehypeCode } from 'fumadocs-core/mdx-plugins/rehype-code';
+import { rehypeCodeFromHighlighter } from 'fumadocs-core/mdx-plugins/rehype-code.core';
 import remarkRehype from 'remark-rehype';
-import { highlightHast } from 'fumadocs-core/highlight';
+import type { Highlighter } from 'fumadocs-core/highlight';
+import { createShikiHighlighter } from 'fumadocs-core/highlight/shiki';
+import { defaultShikiFactory } from 'fumadocs-core/highlight/shiki/full';
 import type { CodeToHastOptionsCommon, CodeOptionsThemes, BundledTheme } from 'shiki';
 
 export interface MarkdownRenderer {
@@ -13,26 +15,26 @@ export interface MarkdownRenderer {
 
 export type ShikiOptions = Omit<CodeToHastOptionsCommon, 'lang'> & CodeOptionsThemes<BundledTheme>;
 
-export function markdownRenderer(options?: ShikiOptions): MarkdownRenderer {
+export function markdownRenderer(
+  highlighter?: Highlighter,
+  shiki?: ShikiOptions,
+): MarkdownRenderer {
+  highlighter ??= createShikiHighlighter(() => defaultShikiFactory.getOrInit(), {
+    defaultColor: false,
+    fallbackLanguage: 'plaintext',
+    transformers: [],
+    ...(shiki ?? { themes: { light: 'github-light', dark: 'github-dark' } }),
+  });
   const processor = remark()
     .use(remarkGfm)
     .use(remarkRehype)
-    .use(rehypeCode, {
-      // disable default transformers, meta parser and icons, code blocks here have no title
-      transformers: [],
-      parseMetaString: undefined,
-      icon: false,
-      fallbackLanguage: 'plaintext',
-      ...options,
-    });
+    // code blocks here have no title
+    .use(rehypeCodeFromHighlighter, highlighter, { parseMetaString: undefined });
+
   return {
     async renderTypeToHast(type) {
-      const nodes = await highlightHast(type, {
-        lang: 'ts',
-        structure: 'inline',
-        defaultColor: false,
-        ...options,
-      });
+      await highlighter.loadLanguage?.('ts');
+      const nodes = highlighter.codeToHast(type, { lang: 'ts', structure: 'inline' });
 
       return {
         type: 'element',

@@ -26,8 +26,7 @@ import {
   type SearchResultRecord,
   type SearchResultTable,
 } from 'fumadocs-core/search/client';
-import { type Options, toJsxRuntime } from 'hast-util-to-jsx-runtime';
-import * as JsxRuntime from 'react/jsx-runtime';
+import { toJsx, type ToJsxOptions } from 'fumadocs-core/utils/hast-to-jsx';
 import { cva } from 'class-variance-authority';
 import { useRouter } from 'fumadocs-core/framework';
 import type { SharedProps } from '@/contexts/search';
@@ -101,7 +100,7 @@ const mdComponents = {
   mark(props: ComponentProps<'mark'>) {
     return <span {...props} className="text-fd-primary underline" />;
   },
-  a: 'span',
+  a: 'span' as const,
   p(props: ComponentProps<'p'>) {
     return <p {...props} className="min-w-0" />;
   },
@@ -149,7 +148,7 @@ const mdComponents = {
   },
 };
 
-const renderOptions: Options = { development: false, components: mdComponents, ...JsxRuntime };
+const renderOptions: ToJsxOptions = { components: mdComponents };
 
 function Children({ children }: { children?: ReactNode }) {
   return children;
@@ -160,8 +159,7 @@ function TableCell(props: ComponentProps<'div'>) {
 }
 
 // tables of cards render their cells only, the grid of `<SearchDialogListTable />` lays them out
-const tableRenderOptions: Options = {
-  ...renderOptions,
+const tableRenderOptions: ToJsxOptions = {
   components: {
     ...mdComponents,
     table: Children,
@@ -174,8 +172,7 @@ const tableRenderOptions: Options = {
 };
 
 // rows of tables with header, `<SearchDialogListTable />` shows the header once
-const rowRenderOptions: Options = {
-  ...tableRenderOptions,
+const rowRenderOptions: ToJsxOptions = {
   components: { ...tableRenderOptions.components, thead: () => null },
 };
 
@@ -488,7 +485,7 @@ export function SearchDialogListTable({ table, Item, onSelect }: TableProps) {
   const highlightRef = useHighlightQuery(query);
   const headerId = `fd-search-table-${table.id}`;
   const header = useMemo(
-    () => table.header && toJsxRuntime(table.header, tableRenderOptions),
+    () => table.header && toJsx(table.header, tableRenderOptions),
     [table.header],
   );
 
@@ -547,8 +544,8 @@ export function SearchDialogListItem({
     if (item.type === 'action') return item.node;
     if (renderMarkdown && typeof item.content === 'string') return renderMarkdown(item.content);
     if (!('hastContent' in item)) return item.content;
-    if (!table) return toJsxRuntime(item.hastContent, renderOptions);
-    return toJsxRuntime(item.hastContent, table.header ? rowRenderOptions : tableRenderOptions);
+    if (!table) return toJsx(item.hastContent, renderOptions);
+    return toJsx(item.hastContent, table.header ? rowRenderOptions : tableRenderOptions);
   }, [item, renderMarkdown, table]);
 
   if (item.type === 'action') {

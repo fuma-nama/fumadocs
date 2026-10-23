@@ -10,6 +10,7 @@
     "@types/node": "^26.6.5",
     "fuma-translate": "^1.0.2",
     "tsconfig": "workspace:*",
-    "tsdown": "0.23.1"
+    "tsdown": "0.23.1",
+    "typescript": "^7.0.2"
   }
 }

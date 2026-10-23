@@ -1,10 +1,10 @@
 'use client';
-import { defaultShikiOptions } from '@/lib/shiki';
+import { apiHighlighter } from '@/lib/highlighter';
 import { preload } from 'react-dom';
 import { createGraphQLPage } from '@fumadocs/graphql/ui';
 
 export const GraphQLPage = createGraphQLPage({
-  shikiOptions: defaultShikiOptions,
+  highlighter: apiHighlighter,
   playground: {
     url: '/api/graphql',
     // Next.js route handlers can't serve WebSockets, so subscriptions use GraphQL over SSE

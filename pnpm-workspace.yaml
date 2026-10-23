@@ -63,6 +63,7 @@ minimumReleaseAgeExclude:
   - satteri@0.10.3
   - cn@0.2.4
   - '@fuma-cli/interactive@0.1.2'
+  - '@pierre/highlights@0.2.0'
 allowBuilds:
   '@mixedbread/cli': true
   '@parcel/watcher': false

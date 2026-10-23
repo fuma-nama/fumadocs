@@ -1,11 +1,11 @@
-import fs from 'node:fs/promises';
-
 export interface SourceFile {
   /** path relative to the content directory */
   path: string;
   absolutePath: string;
   /** read the file as UTF-8 */
   read: () => Promise<string>;
+  /** invalidate this file when another file changes, like the files it includes */
+  addDependency: (file: string) => void;
 }
 
 export type ParsedFile<Page, Meta> = { type: 'page'; data: Page } | { type: 'meta'; data: Meta };
@@ -26,12 +26,4 @@ export interface ContentIntegration<Page, Meta> {
    * returned data (such as compiling) should be memoized per call.
    */
   parse: (file: SourceFile) => Promise<ParsedFile<Page, Meta> | undefined>;
-}
-
-export function createSourceFile(path: string, absolutePath: string): SourceFile {
-  return {
-    path,
-    absolutePath,
-    read: () => fs.readFile(absolutePath, 'utf-8'),
-  };
 }

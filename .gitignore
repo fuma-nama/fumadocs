@@ -22,7 +22,6 @@ dist
 .contentlayer
 .eslintcache
 .source
-.twoslash
 
 # production
 /build

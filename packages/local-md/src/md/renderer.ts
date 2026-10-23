@@ -2,7 +2,7 @@ import type { TOCItemType } from 'fumadocs-core/toc';
 import type { RehypeTOCItemType, StructuredData } from 'fumadocs-core/mdx-plugins';
 import type { ReactNode } from 'react';
 import * as JsxRuntime from 'react/jsx-runtime';
-import { type Evaluater, toJsxRuntime } from 'hast-util-to-jsx-runtime';
+import { type Components, type Evaluator, toJsx } from 'fumadocs-core/utils/hast-to-jsx';
 import type { Root } from 'hast';
 import type { JSExecutor, JSExecutorConfig } from '@/js/executor';
 import type { MDXComponents, MDXContent } from 'mdx/types';
@@ -74,18 +74,10 @@ export function fromAst<M>(options: MarkdownRendererASTOptions): MarkdownRendere
       jsx: JsxRuntime,
       filePath,
     });
-    const evaluater = toEvaluater(executor, context);
+    const evaluator = toEvaluator(executor, context);
 
     function render(tree: Root): ReactNode {
-      return toJsxRuntime(tree, {
-        filePath,
-        components,
-        development: false,
-        createEvaluater() {
-          return evaluater;
-        },
-        ...JsxRuntime,
-      });
+      return toJsx(tree, { components: components as Partial<Components>, evaluator });
     }
 
     const toc = rehypeToc.map((item): TOCItemType => ({
@@ -190,7 +182,7 @@ export function fromSerialized<M>(options: MarkdownRendererSerializedOptions): M
   return fromAst(options);
 }
 
-function toEvaluater(executor: JSExecutor, context: Record<string, unknown>): Evaluater {
+function toEvaluator(executor: JSExecutor, context: Record<string, unknown>): Evaluator {
   return {
     evaluateProgram(program) {
       return executor.program(program, context);

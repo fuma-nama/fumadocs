@@ -5,6 +5,7 @@ import { fileURLToPath } from 'node:url';
 import { createElement } from 'react';
 import type { MDXComponents } from 'mdx/types';
 import { renderToStaticMarkup } from 'react-dom/server';
+import { prerender } from 'react-dom/static';
 import { dynamicLoader, loader } from 'fumadocs-core/source';
 import { convert, createPython, type ModuleInterface } from '@/index';
 
@@ -133,6 +134,25 @@ describe('createPython', () => {
     expect(names.get('/docs/demo/utils')).toContain('>module</span>');
     // folders stay plain
     expect(names.get('logger')).toBe('logger');
+  });
+
+  test('highlights with your own highlighter', async () => {
+    const python = createPython({
+      file,
+      highlighter: {
+        codeToHast: (code, { lang }) => ({
+          type: 'root',
+          children: [{ type: 'element', tagName: 'pre', properties: { lang }, children: [] }],
+        }),
+      },
+    });
+    const source = loader(await python.staticSource(), { baseUrl: '/docs' });
+    const { body } = await (await source.getPage(['demo', 'logger'])!.data.load()).render();
+    const html = await new Response((await prerender(body)).prelude).text();
+
+    expect(html).toMatch(/<figure[^>]* lang="python"/);
+    expect(html).toContain('<span lang="python"');
+    expect(html).not.toContain('--shiki');
   });
 
   test('keeps docstring markdown as data', () => {

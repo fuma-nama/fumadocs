@@ -1,11 +1,13 @@
 import * as fs from 'node:fs/promises';
+import path from 'node:path';
 import { collapse } from './type-tree/collapse';
 import { cached, type Cache } from './cache';
 import type { TypeNode } from './type-tree/types';
 import type { ComponentPropsWithoutRef, ComponentType, FC } from 'react';
 import { fileURLToPath } from 'node:url';
 import { createHash } from 'node:crypto';
-import { createControlsProject, generateControls } from './utils/generate';
+import { generateControls, getControlsAlias } from './utils/generate';
+import { createProject, type Project } from './utils/project';
 import { mergeArgs } from './utils/args';
 import type { StoryFrameOptions, VariantInfo, WithControlProps } from './provider';
 import { StoryFrame } from './client/frame';
@@ -100,20 +102,23 @@ export interface StoryFactory {
  * You're **highly** encouraged to use build-time plugins + clients over this.
  */
 export function defineStoryFactory(factoryOptions: StoryFactoryOptions = {}): StoryFactory {
-  let _project: ReturnType<typeof createControlsProject> | undefined;
+  let project: Project | undefined;
   const { cache = false } = factoryOptions;
-
-  function initProject() {
-    const { tsconfigPath = './tsconfig.json' } = factoryOptions.tsc ?? {};
-    return (_project ??= createControlsProject(tsconfigPath));
-  }
 
   async function generateControlsCached(filePath: string, name: string): Promise<TypeNode> {
     const fileContent = await fs.readFile(filePath, 'utf-8');
 
-    return cached(cache, getHash(`controls:${filePath}:${name}:${fileContent}`), async () => {
-      const project = await initProject();
-      return generateControls('@fumadocs/story/next/client', project, filePath, name, fileContent);
+    return cached(cache, getHash(`controls:${filePath}:${name}:${fileContent}`), () => {
+      const { tsconfigPath = './tsconfig.json' } = factoryOptions.tsc ?? {};
+      const mode = '@fumadocs/story/next/client';
+      const alias = getControlsAlias(mode, name);
+      const file = path.resolve(filePath);
+      const content = fileContent.includes(alias.code)
+        ? fileContent
+        : `${fileContent}\n${alias.code}`;
+
+      project ??= createProject(tsconfigPath);
+      return generateControls(mode, project.load(new Map([[file, content]])), file, name);
     });
   }
 

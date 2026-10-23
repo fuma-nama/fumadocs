@@ -1,8 +1,10 @@
 import type { Element, Nodes, Root } from 'hast';
 import { walk } from './walk';
-import type { RehypeCodeOptions } from 'fumadocs-core/mdx-plugins/rehype-code';
+import type { ProcessHtmlOptions } from './compiler';
 
 const LanguagePrefix = 'language-';
+// languages in HTML from other tools can be anything, render them as text instead of failing
+const fallbackLanguage = 'plaintext';
 
 function languageOf(properties: Element['properties']): string | undefined {
   const classes = properties.className;
@@ -40,13 +42,24 @@ function prepareCodeBlocks(tree: Root): boolean {
 }
 
 /**
- * Highlight the `<pre><code>` blocks of a cleaned tree with Shiki, reading the language from the
- * `language-*` class kept through style adaptation.
+ * Highlight the `<pre><code>` blocks of a cleaned tree with Shiki or `highlighter`, reading the
+ * language from the `language-*` class kept through style adaptation.
  *
  * Shiki and its languages are loaded lazily, so content without code blocks never pays for it.
  */
-export async function highlightCode(tree: Root, options?: RehypeCodeOptions): Promise<Root> {
-  if (!prepareCodeBlocks(tree)) return tree;
+export async function highlightCode(tree: Root, options: ProcessHtmlOptions): Promise<Root> {
+  if (options.rehypeCodeOptions === false || !prepareCodeBlocks(tree)) return tree;
+
+  if (options.highlighter) {
+    const [{ unified }, { rehypeCodeFromHighlighter }] = await Promise.all([
+      import('unified'),
+      import('fumadocs-core/mdx-plugins/rehype-code.core'),
+    ]);
+
+    return unified()
+      .use(rehypeCodeFromHighlighter, options.highlighter, options.rehypeCodeOptions)
+      .run(tree);
+  }
 
   const [{ unified }, { rehypeCode }] = await Promise.all([
     import('unified'),
@@ -57,7 +70,8 @@ export async function highlightCode(tree: Root, options?: RehypeCodeOptions): Pr
     .use(rehypeCode, {
       // the `tab` meta only exists in Markdown, and its transformer emits MDX nodes
       tab: false,
-      ...options,
+      fallbackLanguage,
+      ...options.rehypeCodeOptions,
     })
     .run(tree);
 }

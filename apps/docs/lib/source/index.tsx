@@ -11,7 +11,7 @@ import {
   createGenerator,
   RemarkAutoTypeTableOptions,
 } from 'fumadocs-typescript';
-import { defaultShikiOptions } from '../shiki';
+import { apiHighlighter } from '../highlighter';
 import type { ShikiTransformer } from 'shiki';
 import type { ElementContent } from 'hast';
 import { remarkSteps } from '@fumadocs/satteri/remark-steps';
@@ -20,7 +20,11 @@ import { remarkTs2js } from '@fumadocs/satteri/remark-ts2js';
 import { remarkFeature } from '@/lib/remark-feature';
 import { type BlogAuthor, blogPageSchema } from '@/lib/blog';
 import { remarkAutoTypeTable } from '@fumadocs/satteri/remark-auto-type-table';
-import { rehypeCodeDefaultOptions } from 'fumadocs-core/mdx-plugins/rehype-code';
+import { createHighlights } from 'fumadocs-core/highlight/highlights';
+import { rehypeCodeFromHighlighter } from '@fumadocs/satteri/rehype-code';
+import { rehypeCodeDefaultOptions } from 'fumadocs-core/mdx-plugins/rehype-code.core';
+import catppuccinLatte from '@pierre/highlights/themes/catppuccin-latte';
+import catppuccinMocha from '@pierre/highlights/themes/catppuccin-mocha';
 import { transformerTwoslash } from 'fumadocs-twoslash';
 import { createFileSystemTypesCache } from 'fumadocs-twoslash/cache-fs';
 import type { MdastPluginDefinition } from 'satteri';
@@ -30,6 +34,9 @@ const typeTableGenerator = createGenerator({
 });
 
 const isLint = process.env.LINT === '1';
+const contentHighlighter = createHighlights({
+  themes: { light: catppuccinLatte, dark: catppuccinMocha },
+});
 
 declare module 'satteri' {
   interface DataMap {
@@ -76,34 +83,38 @@ const docs = defineDocs({
     satteriOptions() {
       const typeTableOptions: RemarkAutoTypeTableOptions = {
         generator: typeTableGenerator,
-        shiki: defaultShikiOptions,
+        highlighter: apiHighlighter,
       };
 
       return {
         features: {
           math: true,
         },
-        rehypeCodeOptions: isLint
-          ? false
-          : {
-              inline: 'tailing-curly-colon',
-              themes: {
-                light: 'catppuccin-latte',
-                dark: 'catppuccin-mocha',
-              },
-              transformers: [
-                ...(rehypeCodeDefaultOptions.transformers ?? []),
-                transformerTwoslash({
-                  typesCache: createFileSystemTypesCache(),
-                  twoslashOptions: {
-                    compilerOptions: {
-                      types: ['@types/node'],
-                    },
-                  },
-                }),
-                transformerEscape(),
-              ],
-            },
+        rehypeCodeOptions: false,
+        hastPlugins: isLint
+          ? []
+          : [
+              rehypeCodeFromHighlighter(
+                ({ transformers }) =>
+                  contentHighlighter.override({
+                    shikiTransformers: [...transformers, transformerEscape()],
+                  }),
+                {
+                  inline: 'tailing-curly-colon',
+                  transformers: [
+                    ...(rehypeCodeDefaultOptions().transformers ?? []),
+                    transformerTwoslash({
+                      typesCache: createFileSystemTypesCache(),
+                      twoslashOptions: {
+                        compilerOptions: {
+                          types: ['@types/node'],
+                        },
+                      },
+                    }),
+                  ],
+                },
+              ),
+            ],
         remarkCodeTabOptions: {
           parseMdx: true,
         },
@@ -159,19 +170,19 @@ const blog = defineCollections({
   }),
   async: true,
   async satteriOptions() {
-    const { rehypeCodeDefaultOptions } = await import('fumadocs-core/mdx-plugins/rehype-code');
-
     return {
-      rehypeCodeOptions: isLint
-        ? false
-        : {
-            inline: 'tailing-curly-colon',
-            themes: {
-              light: 'catppuccin-latte',
-              dark: 'catppuccin-mocha',
-            },
-            transformers: [...(rehypeCodeDefaultOptions.transformers ?? []), transformerEscape()],
-          },
+      rehypeCodeOptions: false,
+      hastPlugins: isLint
+        ? []
+        : [
+            rehypeCodeFromHighlighter(
+              ({ transformers }) =>
+                contentHighlighter.override({
+                  shikiTransformers: [...transformers, transformerEscape()],
+                }),
+              { inline: 'tailing-curly-colon' },
+            ),
+          ],
       remarkCodeTabOptions: {
         parseMdx: true,
       },

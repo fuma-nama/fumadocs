@@ -281,25 +281,14 @@ function renderMarkdown(this: ShikiTransformerContext, md: string): ElementConte
           try {
             return onCode(lang, node);
           } catch (e) {
-            const def = defaultHandlers.code(state, node);
-
-            if (e instanceof ShikiError) {
-              this.meta._fd_postprocess ??= [];
-              this.meta._fd_postprocess.push(async ({ highlighter }) => {
-                await highlighter.loadLanguage(lang as never);
-                Object.assign(def, onCode(lang, node));
-              });
-
-              return def;
-            }
-
-            if (e instanceof Error) {
+            // languages that aren't loaded stay plain
+            if (!(e instanceof ShikiError) && e instanceof Error) {
               console.error(
                 `[fumadocs-twoslash] encountered an error when highlighting codeblock in a Twoslash popup: ${e.message}`,
               );
             }
 
-            return def;
+            return defaultHandlers.code(state, node);
           }
         },
       },

@@ -1,6 +1,6 @@
 {
   "name": "@fumadocs/story",
-  "version": "1.5.1",
+  "version": "1.5.2",
   "description": "Story integration to Fumadocs.",
   "keywords": [],
   "license": "MIT",
@@ -49,8 +49,8 @@
     "@fuma-translate/react": "^1.0.2",
     "@fumari/stf": "workspace:*",
     "cn": "^0.5.0",
-    "lucide-react": "^1.59.0",
-    "typescript": "~7.0.2"
+    "lucide-react": "^1.61.0",
+    "typescript": "7.1.0-beta"
   },
   "devDependencies": {
     "@types/node": "26.6.5",
@@ -67,7 +67,7 @@
     "tailwindcss": "^4.3.3",
     "tsconfig": "workspace:*",
     "tsdown": "0.23.1",
-    "vite": "^8.3.4",
+    "vite": "^8.3.5",
     "webpack": "^5.112.0"
   },
   "peerDependencies": {

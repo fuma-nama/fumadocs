@@ -1,6 +1,6 @@
 {
   "name": "@fumadocs/graphql",
-  "version": "0.4.1",
+  "version": "0.4.2",
   "description": "Generate docs for your GraphQL schema",
   "keywords": [
     "Docs",
@@ -50,8 +50,7 @@
     "cn": "^0.5.0",
     "eventsource-parser": "^4.1.2",
     "github-slugger": "^2.0.0",
-    "hast-util-to-jsx-runtime": "^2.3.6",
-    "lucide-react": "^1.59.0",
+    "lucide-react": "^1.61.0",
     "remark": "^15.0.1",
     "remark-rehype": "^11.1.2",
     "shiki": "^4.5.0"
@@ -73,8 +72,8 @@
   },
   "peerDependencies": {
     "@types/react": "*",
-    "fumadocs-core": "^16.15.0",
-    "fumadocs-ui": "^16.15.0",
+    "fumadocs-core": "^16.17.8",
+    "fumadocs-ui": "^16.17.8",
     "graphql": "^17.0.0",
     "json-schema-typed": "*",
     "react": "^19.2.0",

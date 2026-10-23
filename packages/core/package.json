@@ -1,6 +1,6 @@
 {
   "name": "fumadocs-core",
-  "version": "16.17.7",
+  "version": "16.17.8",
   "description": "The React.js library for building a documentation website",
   "keywords": [
     "Docs",
@@ -35,6 +35,7 @@
     "./framework/waku": "./dist/framework/waku.js",
     "./highlight": "./dist/highlight/index.js",
     "./highlight/client": "./dist/highlight/client.js",
+    "./highlight/highlights": "./dist/highlight/highlights.js",
     "./highlight/shiki": "./dist/highlight/shiki/index.js",
     "./highlight/shiki/full": "./dist/highlight/shiki/full.js",
     "./highlight/shiki/react": "./dist/highlight/shiki/react.js",
@@ -55,6 +56,7 @@
     "./mdx-plugins/remark-gfm": "./dist/mdx-plugins/remark-gfm.js",
     "./mdx-plugins/remark-heading": "./dist/mdx-plugins/remark-heading.js",
     "./mdx-plugins/remark-image": "./dist/mdx-plugins/remark-image.js",
+    "./mdx-plugins/remark-include": "./dist/mdx-plugins/remark-include.js",
     "./mdx-plugins/remark-llms": "./dist/mdx-plugins/remark-llms.js",
     "./mdx-plugins/remark-llms.runtime": "./dist/mdx-plugins/remark-llms.runtime.js",
     "./mdx-plugins/remark-mdx-files": "./dist/mdx-plugins/remark-mdx-files.js",
@@ -97,6 +99,7 @@
     "./source/plugins/status-badges": "./dist/source/plugins/status-badges.js",
     "./source/schema": "./dist/source/schema.js",
     "./toc": "./dist/toc.js",
+    "./utils/hast-to-jsx": "./dist/utils/hast-to-jsx.js",
     "./utils/use-media-query": "./dist/utils/use-media-query.js",
     "./utils/use-on-change": "./dist/utils/use-on-change.js",
     "./package.json": "./package.json",
@@ -121,7 +124,6 @@
     "github-slugger": "^2.0.0",
     "hast-util-from-dom": "^5.0.1",
     "hast-util-to-estree": "^3.1.3",
-    "hast-util-to-jsx-runtime": "^2.3.6",
     "mdast-util-mdx": "^3.0.0",
     "micromark": "^4.0.3",
     "micromark-extension-gfm-table": "^2.1.2",
@@ -144,6 +146,7 @@
     "@modelcontextprotocol/server": "2.3.1",
     "@orama/core": "^1.2.19",
     "@oramacloud/client": "^2.1.4",
+    "@pierre/highlights": "^0.2.0",
     "@shikijs/transformers": "^4.5.0",
     "@tanstack/react-router": "1.170.45",
     "@types/estree-jsx": "^1.0.5",
@@ -154,7 +157,8 @@
     "@types/react-dom": "^19.3.0",
     "algoliasearch": "5.60.0",
     "flexsearch": "^0.8.212",
-    "lucide-react": "^1.59.0",
+    "hast-util-to-jsx-runtime": "^2.3.6",
+    "lucide-react": "^1.61.0",
     "meilisearch": "0.62.0",
     "next": "16.4.2",
     "path-to-regexp": "^8.4.2",
@@ -165,7 +169,7 @@
     "tsconfig": "workspace:*",
     "tsdown": "0.23.1",
     "typescript": "^7.0.2",
-    "waku": "1.0.0-rc.3",
+    "waku": "1.0.0-rc.4",
     "zod": "4.6.7"
   },
   "peerDependencies": {
@@ -174,6 +178,7 @@
     "@modelcontextprotocol/server": "2.x.x",
     "@orama/core": "1.x.x",
     "@oramacloud/client": "2.x.x",
+    "@pierre/highlights": "^0.2.0",
     "@tanstack/react-router": "1.x.x",
     "@types/estree-jsx": "*",
     "@types/hast": "*",
@@ -192,6 +197,9 @@
   },
   "peerDependenciesMeta": {
     "flexsearch": {
+      "optional": true
+    },
+    "@pierre/highlights": {
       "optional": true
     },
     "@mdx-js/mdx": {

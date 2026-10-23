@@ -323,13 +323,9 @@ test('truncate long types', () => {
             kind: "f1";
             label: string | undefined;
         };
-        field2: (label?: string | undefined) => {
-            ...;
-        };
+        field2: (label?: string | undefined) => ...;
         ... 26 more ...;
-        field29: (label?: string | undefined) => {
-            ...;
-        };
+        field29: ...;
     }",
       "function getFields(): {
         field0: (label?: string) => {
@@ -345,9 +341,7 @@ test('truncate long types', () => {
             label: string | undefined;
         };
         ... 26 more ...;
-        field29: (label?: string) => {
-            ...;
-        };
+        field29: ...;
     }",
     ]
   `);
@@ -386,6 +380,8 @@ import { value } from './sub/util';
 value;
 `);
   expect(hovers(result).at(-1)?.text).toBe('(alias) const value: 1\nimport value');
+  // files of the previous block are gone
+  expect(() => twoslasher(`import { value } from './sub/util';`)).toThrow(/2307/);
   expect(() => twoslasher('// @filename: ../../../util.ts\nexport {};')).toThrow(
     /Invalid filename/,
   );
@@ -399,10 +395,13 @@ ${dot}
 type S = 'alpha' | 'beta';
 const s: S = 'a';
 //             ^|
+const c = consol
+//              ^|
 `);
   expect(byType(result, 'completion').map((v) => [v.completionsPrefix, v.completions])).toEqual([
     ['', [{ name: 'alpha', kind: 'property' }]],
     ['a', [{ name: 'alpha', kind: 'string' }]],
+    ['consol', [{ name: 'console' }]],
   ]);
 });
 

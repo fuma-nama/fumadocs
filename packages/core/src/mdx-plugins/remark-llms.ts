@@ -1,5 +1,5 @@
 import type { Transformer } from 'unified';
-import { isJsxElement, toMdxExport } from './utils';
+import { isJsxElement, toMdxExportRaw } from './utils';
 import type { Nodes, Root } from 'mdast';
 import type { MdxJsxFlowElement, MdxJsxTextElement, MdxjsEsm } from 'mdast-util-mdx';
 import type { PlaceholderData } from './remark-llms.runtime';
@@ -87,8 +87,15 @@ export function remarkLLMs({
   const jsx = output === 'function';
 
   return (tree, file) => {
-    const s = createStringifier(file);
-    const collect: JsxCollect = [];
+    const collect: Collect = [];
+    const s = createStringifier(
+      file,
+      undefined,
+      (expression, fallback) => `\0${collect.push({ expression, fallback }) - 1}\0`,
+    );
+    // string output only collects expressions, static text (e.g. placeholders) uses their fallbacks
+    const toStatic = (text: string) =>
+      text.replace(Marker, (_, i: string) => (collect[Number(i)] as { fallback: string }).fallback);
 
     const visit = (nodes: Nodes[]) => {
       for (const node of nodes) {
@@ -105,7 +112,7 @@ export function remarkLLMs({
           stringifyHeadingId(s, node, headingIds);
         } else if (isJsxElement(node) && node.name) {
           if (!jsx && mdxAsPlaceholder?.includes(node.name))
-            s.replace(node, (s) => toPlaceholder(node, s.inner(node)));
+            s.replace(node, (s) => toPlaceholder(node, toStatic(s.inner(node))));
           else if (jsx && componentNameRegex.test(node.name))
             s.replace(node, (s) => {
               let children = s.inner(node);
@@ -120,14 +127,15 @@ export function remarkLLMs({
     visit(tree.children);
     const text = s.stringify(tree).trim();
     const value = text ? `${text}\n` : '';
+    const chunks = toJsxChunks(value, collect);
 
     if (jsx) {
-      tree.children.unshift(jsxToEstree(as, toJsxChunks(value, collect)));
+      tree.children.unshift(jsxToEstree(as, chunks));
       return;
     }
 
-    tree.children.unshift(toMdxExport(as, value));
-    if (_data) file.data.markdown = value;
+    tree.children.unshift(toMdxExportRaw(as, concat(chunks as Expression[])));
+    if (_data) file.data.markdown = toStatic(value);
   };
 }
 
@@ -145,32 +153,49 @@ function toPlaceholder(node: JsxElement, children: string): string {
   } satisfies PlaceholderData)}\0`;
 }
 
-type JsxCollect = { node: JsxElement; children: string }[];
+/** kept JSX elements & expressions, by their markers */
+type Collect = (
+  | { node: JsxElement; children: string }
+  | { expression: Expression; fallback: string }
+)[];
 
 interface JsxChunkElement {
   node: JsxElement;
   children: JsxChunk[];
 }
 
-type JsxChunk = string | JsxChunkElement;
+type JsxChunk = JsxChunkElement | Expression;
 
 const Marker = /\0(\d+)\0/g;
 
 /**
- * Split stringified Markdown on the markers of kept JSX elements into
- * alternating text chunks and kept JSX elements, recursively for their children.
+ * Split stringified Markdown on markers into text literals, kept JSX elements and expressions, recursively for the
+ * children of elements.
  */
-function toJsxChunks(text: string, collect: JsxCollect): JsxChunk[] {
+function toJsxChunks(text: string, collect: Collect): JsxChunk[] {
   const out: JsxChunk[] = [];
   let idx = 0;
 
   for (const match of text.matchAll(Marker)) {
-    if (match.index > idx) out.push(text.slice(idx, match.index));
-    const { node, children } = collect[Number(match[1])];
-    out.push({ node, children: toJsxChunks(children, collect) });
+    if (match.index > idx) out.push(literal(text.slice(idx, match.index)));
+    const item = collect[Number(match[1])];
+    out.push(
+      'node' in item
+        ? { node: item.node, children: toJsxChunks(item.children, collect) }
+        : item.expression,
+    );
     idx = match.index + match[0].length;
   }
-  if (idx < text.length) out.push(text.slice(idx));
+  if (idx < text.length) out.push(literal(text.slice(idx)));
+
+  return out;
+}
+
+/** the chunks as one string */
+function concat(chunks: Expression[]): Expression {
+  let out = chunks[0] ?? literal('');
+  for (let i = 1; i < chunks.length; i++)
+    out = { type: 'BinaryExpression', operator: '+', left: out, right: chunks[i] };
 
   return out;
 }
@@ -179,10 +204,9 @@ function toJsxChunks(text: string, collect: JsxCollect): JsxChunk[] {
  * Generate the component export as an ESM node with estree, for the MDX.js compiler.
  */
 function jsxToEstree(as: string, chunks: JsxChunk[]): MdxjsEsm {
-  const hasJsx = chunks.some((chunk) => typeof chunk !== 'string');
+  const hasJsx = chunks.some((chunk) => 'node' in chunk);
   let value: Expression;
-  if (chunks.length === 0) value = literal('');
-  else if (typeof chunks[0] === 'string' && chunks.length === 1) value = literal(chunks[0]);
+  if (!hasJsx) value = concat(chunks as Expression[]);
   else if (chunks.length === 1) value = elementToEstree(chunks[0] as JsxChunkElement);
   else {
     value = {
@@ -289,9 +313,9 @@ function childrenToEstree(chunks: JsxChunk[]): JSXFragment['children'] {
   const out: JSXFragment['children'] = [];
   for (const chunk of chunks) {
     out.push(
-      typeof chunk === 'string'
-        ? { type: 'JSXExpressionContainer', expression: literal(chunk) }
-        : elementToEstree(chunk),
+      'node' in chunk
+        ? elementToEstree(chunk)
+        : { type: 'JSXExpressionContainer', expression: chunk },
     );
   }
 

@@ -186,12 +186,11 @@ function Overview({
             title={sectionNames[type]}
             count={items.length}
           >
-            {items.map((param, i) =>
-              renderParameterField ? (
-                <Fragment key={param.name}>
-                  {renderParameterField(entries[i].fieldName, param)}
-                </Fragment>
-              ) : (
+            {items.map((param, i) => {
+              const custom = renderParameterField?.(entries[i].fieldName, param);
+              if (custom !== undefined) return <Fragment key={param.name}>{custom}</Fragment>;
+
+              return (
                 <FieldRow
                   key={param.name}
                   entry={entries[i]}
@@ -199,8 +198,8 @@ function Overview({
                   description={param.description}
                   onNavigate={() => onNavigate(entries[i], entries)}
                 />
-              ),
-            )}
+              );
+            })}
           </Section>
         );
       })}

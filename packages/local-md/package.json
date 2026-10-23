@@ -1,6 +1,6 @@
 {
   "name": "@fumadocs/local-md",
-  "version": "0.3.5",
+  "version": "0.4.0",
   "description": "The local Markdown files content source for Fumadocs",
   "keywords": [
     "Docs",
@@ -45,7 +45,6 @@
     "@standard-schema/spec": "^1.1.0",
     "estree-util-build-jsx": "^3.0.1",
     "estree-util-to-js": "^2.0.0",
-    "hast-util-to-jsx-runtime": "^2.3.6",
     "remark": "^15.0.1",
     "remark-rehype": "^11.1.2",
     "vfile": "^6.0.3"
@@ -65,7 +64,7 @@
     "tsconfig": "workspace:*",
     "tsdown": "0.23.1",
     "unified": "^11.0.5",
-    "vite": "^8.3.4"
+    "vite": "^8.3.5"
   },
   "peerDependencies": {
     "@types/estree": "*",
@@ -73,7 +72,7 @@
     "@types/hast": "*",
     "@types/mdx": "*",
     "@types/react": "*",
-    "fumadocs-core": "^16.8.0",
+    "fumadocs-core": "^16.17.8",
     "react": "^19.2.0",
     "react-dom": "^19.2.0",
     "unified": "*"

@@ -3,10 +3,12 @@ import type { PageOperationProps } from '@/operation';
 import type { PlaygroundTransport } from '@/playground';
 import type { ShikiFactory } from 'fumadocs-core/highlight/shiki';
 import { defaultShikiFactory } from 'fumadocs-core/highlight/shiki/full';
+import type { Highlighter } from 'fumadocs-core/highlight';
 import {
   createPageComponents,
   defaultShikiOptions,
   type PageComponents,
+  resolveHighlighter,
   type ShikiOptions,
 } from 'shared-api/components/defaults';
 import type { GeneratedPageProps, OperationItem } from '@/utils/pages/builder';
@@ -60,8 +62,11 @@ export interface PageLayoutProps {
  * The options the UI renders with, read from `useRenderContext()`.
  */
 export interface AsyncAPIRenderOptions {
-  /** the Shiki highlighter of code blocks */
+  /** the highlighter of code blocks, defaults to Shiki */
+  highlighter?: Highlighter;
+  /** @deprecated use `highlighter`, like `createShikiHighlighter()` */
   shiki?: ShikiFactory;
+  /** @deprecated use `highlighter`, like `createShikiHighlighter()` */
   shikiOptions?: ShikiOptions;
   content?: {
     renderPageLayout?: (slots: PageLayoutProps, ctx: RenderContext) => ReactNode;
@@ -121,14 +126,16 @@ export interface AsyncAPIRenderOptions {
  * The render options of the page with their defaults applied, read from `useRenderContext()`.
  */
 export interface RenderContext extends AsyncAPIRenderOptions {
+  /** @deprecated use `highlighter` */
   shiki: ShikiFactory;
+  /** @deprecated use `highlighter` */
   shikiOptions: ShikiOptions;
+  highlighter: Highlighter;
   /** the Schema UI of the page */
   SchemaUI: FC<SchemaUIOptions>;
 }
 
 export interface AsyncAPIProviderProps extends AsyncAPIRuntimeOptions, AsyncAPIRenderOptions {
-  shiki: ShikiFactory;
   /** the bundled AsyncAPI document */
   document: AsyncAPIObject | Promise<AsyncAPIObject>;
   components: AsyncAPIComponents;
@@ -200,8 +207,9 @@ export function useRenderContext(): RenderContext {
 export function AsyncAPIProvider({
   document: input,
   storageKeyPrefix = 'fumadocs-asyncapi-',
-  shiki,
+  shiki = defaultShikiFactory,
   shikiOptions = defaultShikiOptions,
+  highlighter,
   content,
   playground,
   schemaUI,
@@ -223,6 +231,7 @@ export function AsyncAPIProvider({
     () => ({
       shiki,
       shikiOptions,
+      highlighter: resolveHighlighter({ highlighter, shiki, shikiOptions }),
       content,
       playground,
       schemaUI,
@@ -233,6 +242,7 @@ export function AsyncAPIProvider({
     [
       shiki,
       shikiOptions,
+      highlighter,
       content,
       playground,
       schemaUI,
@@ -258,7 +268,7 @@ export function AsyncAPIProvider({
 /**
  * Create `<AsyncAPIPage />` from your own UI, it takes the props of generated pages.
  *
- * Code blocks are highlighted with the full Shiki bundle, pass `shiki` to trim it.
+ * Code blocks are highlighted with the full Shiki bundle unless you pass a `highlighter`.
  */
 export function createAsyncAPIRenderer({
   components,
@@ -267,13 +277,14 @@ export function createAsyncAPIRenderer({
   loadDocument,
   ...rest
 }: CreateAsyncAPIRendererOptions): FC<AsyncAPIPageProps> {
-  const options = { ...rest, generateTypeScriptDefinitions };
+  const highlighter = resolveHighlighter({ ...rest, shiki });
+  const options = { ...rest, generateTypeScriptDefinitions, highlighter };
   const { Operation, Layout = DefaultLayout } = components;
   const load = createDocumentCache<AsyncAPIObject>();
   const slots: AsyncAPIComponents = {
     SchemaUI: components.SchemaUI,
     // fills the Markdown, code block and heading slots the page didn't replace
-    ...createPageComponents({ shiki, shikiOptions: rest.shikiOptions, components }),
+    ...createPageComponents({ highlighter, components }),
   };
 
   function Content({ showTitle, showDescription, operations }: AsyncAPIPageProps) {

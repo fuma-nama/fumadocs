@@ -7,6 +7,7 @@ import { createProcessor } from '@mdx-js/mdx';
 import { remarkHeading } from 'fumadocs-core/mdx-plugins/remark-heading';
 import { remarkStructure } from 'fumadocs-core/mdx-plugins/remark-structure';
 import { remarkLLMs } from 'fumadocs-core/mdx-plugins/remark-llms';
+import type { Highlighter } from 'fumadocs-core/highlight';
 
 const relative = (s: string): string => path.resolve(fileURLToPath(new URL(s, import.meta.url)));
 
@@ -104,4 +105,20 @@ test('Markdown of type tables', async () => {
     | \`age\`  | \`timestamp\` |                                     |
     "
   `);
+});
+
+test('Run on MDX files with your own highlighter', async () => {
+  const file = relative('./fixtures/test.mdx');
+  const highlighter: Highlighter = {
+    codeToHast: (code, { lang }) => ({
+      type: 'root',
+      children: [{ type: 'text', value: lang + code }],
+    }),
+  };
+  const processor = createProcessor({
+    remarkPlugins: [[remarkAutoTypeTable, { generator, highlighter }]],
+  });
+
+  const output = await processor.process({ path: file, value: await fs.readFile(file, 'utf-8') });
+  expect(String(output.value)).toContain('children: "tstimestamp"');
 });

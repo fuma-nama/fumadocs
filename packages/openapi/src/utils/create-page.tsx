@@ -20,10 +20,12 @@ import type { SchemaUIOptions } from 'shared-api/components/schema';
 import { createDocumentCache } from 'shared-api/utils/document-cache';
 import type { PlaygroundClientOptions } from '@/ui/playground/client';
 import type { ShikiFactory } from 'fumadocs-core/highlight/shiki';
+import type { Highlighter } from 'fumadocs-core/highlight';
 import {
   createPageComponents,
   defaultShikiOptions,
   type PageComponents,
+  resolveHighlighter,
   type ShikiOptions,
 } from 'shared-api/components/defaults';
 import { PlaygroundAuthProvider } from '@/playground/auth';
@@ -120,8 +122,11 @@ export interface PageLayoutProps {
  * The options the UI renders with, read from `useRenderContext()`.
  */
 export interface OpenAPIRenderOptions {
-  /** the Shiki highlighter of code blocks */
+  /** the highlighter of code blocks, defaults to Shiki */
+  highlighter?: Highlighter;
+  /** @deprecated use `highlighter`, like `createShikiHighlighter()` */
   shiki?: ShikiFactory;
+  /** @deprecated use `highlighter`, like `createShikiHighlighter()` */
   shikiOptions?: ShikiOptions;
 
   /**
@@ -227,12 +232,13 @@ export interface OpenAPIRenderOptions {
  * The render options of the page with their defaults applied, read from `useRenderContext()`.
  */
 export interface RenderContext extends OpenAPIRenderOptions {
-  shiki: ShikiFactory;
+  /** @deprecated use `highlighter` */
   shikiOptions: ShikiOptions;
+  highlighter: Highlighter;
 }
 
 interface OpenAPIProviderProps extends OpenAPIRuntimeOptions, OpenAPIRenderOptions {
-  shiki: ShikiFactory;
+  highlighter: Highlighter;
   /** the bundled OpenAPI document */
   document: Document | Promise<Document>;
   proxyUrl?: string;
@@ -317,6 +323,7 @@ function OpenAPIProvider({
   oauthRedirectUrl,
   shiki,
   shikiOptions = defaultShikiOptions,
+  highlighter,
   showResponseSchema,
   content,
   schemaUI,
@@ -348,8 +355,8 @@ function OpenAPIProvider({
     ],
   );
   const render = useMemo<RenderContext>(
-    () => ({ shiki, shikiOptions, showResponseSchema, content, schemaUI, playground }),
-    [shiki, shikiOptions, showResponseSchema, content, schemaUI, playground],
+    () => ({ shiki, shikiOptions, highlighter, showResponseSchema, content, schemaUI, playground }),
+    [shiki, shikiOptions, highlighter, showResponseSchema, content, schemaUI, playground],
   );
 
   return (
@@ -391,9 +398,7 @@ const defaultTypeScriptDefinitions: OpenAPIRuntimeOptions['generateTypeScriptDef
 /**
  * `createOpenAPIRenderer()` without the full Shiki bundle.
  */
-export function createRenderer(
-  options: CreateOpenAPIRendererOptions & { shiki: ShikiFactory },
-): FC<OpenAPIPageProps> {
+export function createRenderer(options: CreateOpenAPIRendererOptions): FC<OpenAPIPageProps> {
   return createOpenAPIBaseRenderer({
     ...options,
     codeUsages:
@@ -405,20 +410,22 @@ export function createRenderer(
 }
 
 /**
- * `createOpenAPIRenderer()` with nothing built in: it highlights through the `shiki` you pass, and
- * generates code usages and TypeScript definitions only when you pass them.
+ * `createOpenAPIRenderer()` with nothing built in: it highlights through the `highlighter` you pass,
+ * and generates code usages and TypeScript definitions only when you pass them.
  */
 export function createOpenAPIBaseRenderer({
   components,
   loadDocument,
-  ...options
-}: CreateOpenAPIRendererOptions & { shiki: ShikiFactory }): FC<OpenAPIPageProps> {
+  ...rest
+}: CreateOpenAPIRendererOptions): FC<OpenAPIPageProps> {
+  const highlighter = resolveHighlighter(rest);
+  const options = { ...rest, highlighter };
   const { Operation, Layout = DefaultLayout } = components;
   const load = createDocumentCache<Document>();
   const slots: OpenAPIComponents = {
     SchemaUI: components.SchemaUI,
     // fills the Markdown, code block and heading slots the page didn't replace
-    ...createPageComponents({ ...options, components }),
+    ...createPageComponents({ highlighter, components }),
   };
 
   function Content({ showTitle, showDescription, operations, webhooks }: OpenAPIPageProps) {

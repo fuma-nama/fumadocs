@@ -1,9 +1,7 @@
 'use client';
-import { type ComponentProps, type ReactNode, useEffect, useMemo, useState } from 'react';
-import type { HighlighterCore } from 'shiki';
-import { toJsxRuntime } from 'hast-util-to-jsx-runtime';
-import * as JsxRuntime from 'react/jsx-runtime';
-import { highlightHast } from 'fumadocs-core/highlight/shiki';
+import { type ComponentProps, Suspense, use } from 'react';
+import type { Highlighter } from 'fumadocs-core/highlight';
+import { toJsx } from 'fumadocs-core/utils/hast-to-jsx';
 import { useRenderContext } from '@/utils/create-page';
 import { cn } from '@/utils/cn';
 
@@ -25,41 +23,8 @@ export function CodeEditor({
   onValueChange: (value: string) => void;
   lang: string;
 }) {
-  const { shiki, shikiOptions } = useRenderContext();
-  const [highlighter, setHighlighter] = useState<HighlighterCore | null>(null);
-
-  useEffect(() => {
-    let cancelled = false;
-
-    void (async () => {
-      const instance = await shiki.getOrInit();
-      // pre-load the language & themes, so highlighting can be done synchronously on keystrokes
-      await highlightHast(instance, '', { ...shikiOptions, lang });
-      if (!cancelled) setHighlighter(instance);
-    })();
-
-    return () => {
-      cancelled = true;
-    };
-  }, [shiki, shikiOptions, lang]);
-
-  const highlighted: ReactNode = useMemo(() => {
-    if (!highlighter) return value;
-
-    try {
-      return toJsxRuntime(
-        highlighter.codeToHast(value, {
-          ...shikiOptions,
-          lang,
-          defaultColor: false,
-          structure: 'inline',
-        }),
-        JsxRuntime,
-      );
-    } catch {
-      return value;
-    }
-  }, [highlighter, value, shikiOptions, lang]);
+  const { highlighter } = useRenderContext();
+  const highlighted = <Highlighted highlighter={highlighter} lang={lang} value={value} />;
 
   return (
     <div
@@ -75,7 +40,11 @@ export function CodeEditor({
           'min-h-24 [&_span]:text-(--shiki-light) dark:[&_span]:text-(--shiki-dark)',
         )}
       >
-        {highlighted}
+        {highlighter.loadLanguage ? (
+          <Suspense fallback={value}>{highlighted}</Suspense>
+        ) : (
+          highlighted
+        )}
         {'\n'}
       </div>
       <textarea
@@ -103,4 +72,27 @@ export function CodeEditor({
       />
     </div>
   );
+}
+
+const languages = new WeakMap<Highlighter, Map<string, Promise<void>>>();
+
+function Highlighted({
+  highlighter,
+  lang,
+  value,
+}: {
+  highlighter: Highlighter;
+  lang: string;
+  value: string;
+}) {
+  if (highlighter.loadLanguage) {
+    let loading = languages.get(highlighter);
+    if (!loading) languages.set(highlighter, (loading = new Map()));
+    let promise = loading.get(lang);
+    // once the language loads, keystrokes highlight synchronously
+    if (!promise) loading.set(lang, (promise = highlighter.loadLanguage(lang)));
+    use(promise);
+  }
+
+  return toJsx(highlighter.codeToHast(value, { lang, structure: 'inline' }));
 }

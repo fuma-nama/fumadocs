@@ -1,6 +1,7 @@
-import type { MdxCompileOptions } from 'satteri';
+import type { Data, MdxCompileOptions } from 'satteri';
 import { compileMdx } from '@/compile';
 import { applySatteriPreset, type SatteriPresetOptions } from '@/preset';
+import { remarkInclude } from '@/remark-include';
 import type { StructuredData } from '@/remark-structure';
 
 export type SatteriOptionsInput =
@@ -15,9 +16,7 @@ export interface MarkdownCompilerOptions {
 export interface CompileInput {
   path: string;
   value: string;
-  data?: {
-    frontmatter?: Record<string, unknown>;
-  };
+  data?: Data;
 }
 
 export interface CompileResult {
@@ -34,7 +33,8 @@ export interface MarkdownCompiler {
 async function resolveOptions(input: SatteriOptionsInput | undefined): Promise<MdxCompileOptions> {
   const options = typeof input === 'function' ? await input() : input;
   // 'runtime' sets `outputFormat: 'function-body'`, executable via `new Function()`
-  return applySatteriPreset(options)('runtime');
+  const resolved = await applySatteriPreset(options)('runtime');
+  return { ...resolved, mdastPlugins: [remarkInclude(), ...(resolved.mdastPlugins ?? [])] };
 }
 
 export function createMarkdownCompiler(config: MarkdownCompilerOptions = {}): MarkdownCompiler {
@@ -48,11 +48,8 @@ export function createMarkdownCompiler(config: MarkdownCompilerOptions = {}): Ma
       const result = await compileMdx({
         source: input.value,
         filePath: input.path,
-        format: input.path.endsWith('.mdx') ? 'mdx' : 'md',
-        frontmatter: input.data?.frontmatter,
         environment: 'runtime',
-        // `data` is mutated in place per compile, so it must not be shared
-        options: { ...options, data: { ...options.data } },
+        options: { ...options, data: { ...options.data, ...input.data } },
       });
 
       return {

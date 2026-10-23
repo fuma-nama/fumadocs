@@ -1,6 +1,5 @@
 'use client';
 import type { FC } from 'react';
-import type { ShikiFactory } from 'fumadocs-core/highlight/shiki';
 import { Schema } from 'shared-api/components/schema';
 import { createRenderer, type PageLayoutProps } from '@/utils/create-page';
 import { Operation } from '@/ui/operation';
@@ -9,9 +8,7 @@ import type { CreateOpenAPIPageOptions, OpenAPIPageProps } from '.';
 /**
  * Create `<OpenAPIPage />` (a client component) without the full Shiki bundle.
  */
-export function createOpenAPIPageBase(
-  options: CreateOpenAPIPageOptions & { shiki: ShikiFactory },
-): FC<OpenAPIPageProps> {
+export function createOpenAPIPageBase(options: CreateOpenAPIPageOptions): FC<OpenAPIPageProps> {
   return createRenderer({
     ...options,
     components: { SchemaUI: Schema, Operation, Layout, ...options.components },

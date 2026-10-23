@@ -1,6 +1,6 @@
 {
   "name": "@fumadocs/openapi-standalone",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "API docs from your OpenAPI spec, as static HTML or a Hono server",
   "keywords": [
     "Docs",
@@ -39,6 +39,7 @@
   "devDependencies": {
     "@fumadocs/tailwind": "workspace:*",
     "@hono/node-server": "^2.1.5",
+    "@pierre/highlights": "^0.2.0",
     "@tailwindcss/vite": "^4.3.3",
     "@types/node": "26.6.5",
     "@types/react": "^19.3.0",
@@ -46,16 +47,14 @@
     "fumadocs-core": "workspace:*",
     "fumadocs-openapi": "workspace:*",
     "fumadocs-ui": "workspace:@fumadocs/base-ui@*",
-    "hast-util-to-jsx-runtime": "^2.3.6",
     "react": "^19.3.1",
     "react-dom": "^19.3.1",
     "remark": "^15.0.1",
     "remark-rehype": "^11.1.2",
-    "shiki": "^4.5.0",
     "tailwindcss": "^4.3.3",
     "tsconfig": "workspace:*",
     "tsdown": "0.23.1",
-    "vite": "^8.3.4"
+    "vite": "^8.3.5"
   },
   "engines": {
     "node": ">=22.18.0"

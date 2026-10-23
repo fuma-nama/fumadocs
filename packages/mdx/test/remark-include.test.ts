@@ -1,40 +1,49 @@
 import { expect, test } from 'vitest';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import remarkMdx from 'remark-mdx';
-import { remarkInclude } from '@/loaders/mdx/remark-include';
 import remarkDirective from 'remark-directive';
+import { defineCollections } from '@/config';
+import { buildConfig } from '@/config/build';
+import { createCore } from '@/core';
+import { buildMDX } from '@/loaders/mdx/build';
 
-import fs from 'node:fs/promises';
-import { remark } from 'remark';
-import { VFile } from 'vfile';
-import { removePosition } from 'unist-util-remove-position';
+const dir = path.join(path.dirname(fileURLToPath(import.meta.url)), 'fixtures/remark-include');
 
-const dir = path.dirname(fileURLToPath(import.meta.url));
-const processor = remark().use(remarkMdx).use(remarkInclude).use(remarkDirective);
-
-test('remark include', async () => {
-  const file = path.join(dir, 'fixtures/remark-include/index.mdx');
-
-  const vfile = new VFile({
-    path: file,
-    value: await fs.readFile(file),
-    data: {
-      _getProcessor() {
-        return processor as any;
-      },
+test('buildMDX resolves includes', async () => {
+  const core = createCore({
+    configPath: 'source.config.ts',
+    environment: 'test',
+    outDir: '.source',
+  });
+  const config = buildConfig(
+    {
+      docs: defineCollections({ type: 'doc', dir }),
+      default: { mdxOptions: { rehypeCodeOptions: false, remarkPlugins: [remarkDirective] } },
     },
+    process.cwd(),
+  );
+  await core.init({ config });
+
+  const collection = config.collections.get('docs');
+  if (collection?.type !== 'doc') throw new Error('missing collection');
+  const dependencies: string[] = [];
+  const { code } = await buildMDX(core, collection, {
+    filePath: path.join(dir, 'page.mdx'),
+    source: [
+      '<include>./test.mdx#section-in-jsx</include>',
+      '<include>./braces.md</include>',
+      '<include>./code.ts#a</include>',
+    ].join('\n\n'),
+    environment: 'bundler',
+    isDevelopment: false,
+    _compiler: { addDependency: (file) => dependencies.push(file) },
   });
 
-  const parsed = processor.parse(vfile);
-  removePosition(parsed);
-  await expect(parsed).toMatchFileSnapshot('fixtures/remark-include/index.in.mdast');
-
-  const out = await processor.run(parsed, vfile);
-  removePosition(out);
-  await expect(out).toMatchFileSnapshot('fixtures/remark-include/index.out.mdast');
-
-  await expect(processor.stringify(out, vfile)).toMatchFileSnapshot(
-    'fixtures/remark-include/index.out.mdx',
+  expect(code).toContain('This is My Test.');
+  // parsed as Markdown, not as an MDX expression
+  expect(code).toContain('literal {braces} in Markdown');
+  expect(code).toContain("console.log('hello world');");
+  expect(dependencies.sort()).toEqual(
+    ['braces.md', 'code.ts', 'test.mdx'].map((file) => path.join(dir, file)),
   );
 });

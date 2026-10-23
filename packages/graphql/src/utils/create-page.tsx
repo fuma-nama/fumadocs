@@ -3,10 +3,12 @@ import type { PageOperationProps } from '@/operation';
 import type { PageTypeProps } from '@/type-docs';
 import type { ShikiFactory } from 'fumadocs-core/highlight/shiki';
 import { defaultShikiFactory } from 'fumadocs-core/highlight/shiki/full';
+import type { Highlighter } from 'fumadocs-core/highlight';
 import {
   createPageComponents,
   defaultShikiOptions,
   type PageComponents,
+  resolveHighlighter,
   type ShikiOptions,
 } from 'shared-api/components/defaults';
 import type { GeneratedPageProps, GraphQLPageItem } from '@/utils/pages';
@@ -104,8 +106,11 @@ export interface PageLayoutProps {
  * The options the UI renders with, read from `useRenderContext()`.
  */
 export interface GraphQLRenderOptions {
-  /** the Shiki highlighter of code blocks */
+  /** the highlighter of code blocks, defaults to Shiki */
+  highlighter?: Highlighter;
+  /** @deprecated use `highlighter`, like `createShikiHighlighter()` */
   shiki?: ShikiFactory;
+  /** @deprecated use `highlighter`, like `createShikiHighlighter()` */
   shikiOptions?: ShikiOptions;
   /**
    * code samples of operations, defaults to cURL, JavaScript, Python, Go, Java, C# and Rust.
@@ -201,15 +206,17 @@ export interface GraphQLRenderOptions {
  * The render options of the page with their defaults applied, read from `useRenderContext()`.
  */
 export interface RenderContext extends GraphQLRenderOptions {
+  /** @deprecated use `highlighter` */
   shiki: ShikiFactory;
+  /** @deprecated use `highlighter` */
   shikiOptions: ShikiOptions;
+  highlighter: Highlighter;
   codeUsages: CodeUsageGeneratorRegistry;
   /** the Schema UI of the page */
   SchemaUI: FC<SchemaViewProps>;
 }
 
 export interface GraphQLProviderProps extends GraphQLRuntimeOptions, GraphQLRenderOptions {
-  shiki: ShikiFactory;
   sdl: string | Promise<string>;
   links?: GraphQLLinks;
   examples?: Record<string, OperationExample[]>;
@@ -299,8 +306,9 @@ export function GraphQLProvider({
   examples,
   typeLinks,
   operationLinks,
-  shiki,
+  shiki = defaultShikiFactory,
   shikiOptions = defaultShikiOptions,
+  highlighter,
   codeUsages = (defaultCodeUsages ??= registerDefaultCodeUsages(
     createCodeUsageGeneratorRegistry(),
   )),
@@ -318,8 +326,17 @@ export function GraphQLProvider({
   );
   const { SchemaUI } = components;
   const render = useMemo<RenderContext>(
-    () => ({ shiki, shikiOptions, codeUsages, playground, content, schemaUI, SchemaUI }),
-    [shiki, shikiOptions, codeUsages, playground, content, schemaUI, SchemaUI],
+    () => ({
+      shiki,
+      shikiOptions,
+      highlighter: resolveHighlighter({ highlighter, shiki, shikiOptions }),
+      codeUsages,
+      playground,
+      content,
+      schemaUI,
+      SchemaUI,
+    }),
+    [shiki, shikiOptions, highlighter, codeUsages, playground, content, schemaUI, SchemaUI],
   );
 
   return (
@@ -334,7 +351,7 @@ export function GraphQLProvider({
 /**
  * Create `<GraphQLPage />` from your own UI, it takes the props of generated pages.
  *
- * Code blocks are highlighted with the full Shiki bundle, pass `shiki` to trim it.
+ * Code blocks are highlighted with the full Shiki bundle unless you pass a `highlighter`.
  */
 export function createGraphQLRenderer({
   components,
@@ -342,12 +359,13 @@ export function createGraphQLRenderer({
   loadSchema,
   ...options
 }: CreateGraphQLRendererOptions): FC<GraphQLPageProps> {
+  const highlighter = resolveHighlighter({ ...options, shiki });
   const { Operation, TypeDocs, Layout = DefaultLayout } = components;
   const load = createDocumentCache<string>();
   const slots: GraphQLComponents = {
     SchemaUI: components.SchemaUI,
     // fills the Markdown, code block and heading slots the page didn't replace
-    ...createPageComponents({ ...options, shiki, components }),
+    ...createPageComponents({ highlighter, components }),
   };
 
   function Content({ items, showTitle, showDescription }: GraphQLPageProps) {
@@ -394,6 +412,7 @@ export function createGraphQLRenderer({
       <GraphQLProvider
         {...options}
         shiki={shiki}
+        highlighter={highlighter}
         sdl={sdl}
         links={props.payload.links}
         examples={props.payload.examples}

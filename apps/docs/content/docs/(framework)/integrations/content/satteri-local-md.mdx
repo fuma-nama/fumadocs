@@ -127,6 +127,14 @@ export function Content({ serialized }) {
 }
 ```
 
+### Include
+
+[`<include>`](/docs/mdx/include) and the `::include` directive are enabled by default:
+
+```mdx title="content/docs/page.mdx"
+<include>../shared/note.md</include>
+```
+
 ### Hot Reload
 
 The source works at runtime, so nothing watches your files by default.
@@ -168,7 +176,7 @@ if (process.env.NODE_ENV === 'development') {
 }
 ```
 
-To wire up your own watcher instead, call `docs.invalidateFile(path)` when a file changes.
+Included files are watched too. To wire up your own watcher instead, watch `docs.dir` and the files passed to `docs.onDependency()`, then call `docs.invalidateFile(path)` when one changes.
 
 ### Disable Revalidation
 

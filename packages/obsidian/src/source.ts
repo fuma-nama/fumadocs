@@ -255,12 +255,14 @@ export function obsidian<
       source.invalidateAll();
     },
     invalidateFile(file) {
+      if (!source.invalidateFile(file)) return false;
       // Every page can resolve names and aliases from every other vault file.
       // Rebuild the snapshot so a rename cannot leave stale links behind, but
       // only re-read the invalidated file from disk.
       invalidated.add(path.resolve(file));
       vault = undefined;
       source.invalidateAll();
+      return true;
     },
   };
 }

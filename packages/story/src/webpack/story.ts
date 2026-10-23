@@ -1,8 +1,6 @@
 import path from 'node:path';
 import type { LoaderDefinitionFunction } from 'webpack';
-import { createControlsProject } from '@/utils/generate';
-import { transformStoryFile } from '@/utils/transform';
-import type { Project } from '@/utils/generate';
+import { createStoryTransformer, type StoryTransformer } from '@/utils/transform';
 
 export interface StoryLoaderOptions {
   /**
@@ -13,34 +11,18 @@ export interface StoryLoaderOptions {
   tsconfigPath?: string;
 }
 
-let projectPromise: Promise<Project> | undefined;
+let transform: StoryTransformer | undefined;
 
 const loader: LoaderDefinitionFunction<StoryLoaderOptions> = function (source) {
   const callback = this.async();
-  const options = this.getOptions();
+  const { tsconfigPath = path.join(this.rootContext, 'tsconfig.json') } = this.getOptions();
   this.cacheable(true);
 
-  const run = async () => {
-    if (!projectPromise) {
-      const resolvedTsconfig = options.tsconfigPath ?? path.join(this.rootContext, 'tsconfig.json');
-      projectPromise = createControlsProject(resolvedTsconfig);
-    }
-
-    try {
-      const transformed = transformStoryFile(
-        '@fumadocs/story/next/client',
-        source,
-        this.resourcePath,
-        await projectPromise!,
-      );
-      callback(undefined, transformed ?? source);
-    } catch (error) {
-      if (!(error instanceof Error)) throw error;
-      callback(error);
-    }
-  };
-
-  void run();
+  transform ??= createStoryTransformer('@fumadocs/story/next/client', tsconfigPath);
+  transform(source, this.resourcePath).then(
+    (transformed) => callback(undefined, transformed ?? source),
+    (error) => callback(error),
+  );
 };
 
 export default loader;
