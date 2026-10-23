@@ -22,8 +22,6 @@ export interface Highlighter {
   loadLanguage?: (...langs: string[]) => Promise<void>;
   /** Highlight code into `pre > code > span.line`, with `meta` added to `<pre>`. */
   codeToHast: (code: string, options: HighlightCodeOptions) => Root;
-  /** `codeToHast` with async transformer hooks, like the batched analysis of Twoslash, preferred by rehype plugins. */
-  codeToHastAsync?: (code: string, options: HighlightCodeOptions) => Promise<Root>;
 }
 
 export interface HighlightCodeOptions {

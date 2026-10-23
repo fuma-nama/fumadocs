@@ -11,7 +11,6 @@ import type {
   BuiltinTheme,
   CodeOptionsMeta,
   CodeOptionsThemes,
-  CodeToHastOptions,
   CodeToHastOptionsCommon,
   HighlighterCore,
   LanguageInput,
@@ -30,7 +29,7 @@ import { transformerIcon } from './transformer-icon';
 import { parseCodeBlockAttributes } from '@/mdx-plugins/codeblock-utils';
 import { walk } from './utils';
 import type { Awaitable } from '@/types';
-import type { Highlighter } from '@/highlight';
+import type { Highlighter, HighlightCodeOptions } from '@/highlight';
 import { createShikiHighlighter, type ShikiFactory } from '@/highlight/shiki';
 import { defaultThemes } from '@/highlight/utils';
 
@@ -124,21 +123,26 @@ export function rehypeCodeFromHighlighter(
     inline = false,
     cache,
     onError,
-    transformers = defaultTransformers(),
     icon,
   } = { defaultLanguage: 'plaintext', parseMetaString: parseMeta, ...options };
-  const instance =
-    typeof highlighter === 'function'
-      ? highlighter({
-          transformers: icon === false ? transformers : [...transformers, transformerIcon(icon)],
-        })
-      : highlighter;
+  // transformers of the highlighter created here, their `_fd_prepare` hooks run before highlighting
+  const transformers: ShikiTransformer[] = [];
+  if (typeof highlighter === 'function') {
+    transformers.push(...(options.transformers ?? defaultTransformers()));
+    if (icon !== false) transformers.push(transformerIcon(icon));
+  }
+  const instance = typeof highlighter === 'function' ? highlighter({ transformers }) : highlighter;
+
+  /**
+   * Run the `_fd_prepare` hooks of the code block, the returned function highlights it.
+   */
   async function onNode(
     tree: Root,
     node: Element,
     parsed: ShikiParsedData,
     lang: string,
-  ): Promise<Root | Element> {
+    langs: Set<string>,
+  ): Promise<() => Root | Element> {
     let { meta: metaString = '', code } = parsed;
     if (filterMetaString) {
       metaString = filterMetaString(metaString);
@@ -147,28 +151,37 @@ export function rehypeCodeFromHighlighter(
     const cacheKey = cache ? `${lang}:${metaString}:${code}` : '';
     const cachedValue = cache?.get(cacheKey);
     if (cachedValue) {
-      return cachedValue;
+      return () => cachedValue;
     }
 
     if (stripEndNewline && code.endsWith('\n')) code = code.slice(0, -1);
-    const codeOptions = {
+    const codeOptions: HighlightCodeOptions = {
       lang,
       structure: parsed.structure,
       meta: { __raw: metaString, ...parseMetaString?.(metaString, node, tree) },
     };
-    const fragment = await (instance.codeToHastAsync
-      ? instance.codeToHastAsync(code, codeOptions)
-      : instance.codeToHast(code, codeOptions));
-    cache?.set(cacheKey, fragment);
+    const tasks: Promise<string[] | void>[] = [];
+    for (const transformer of transformers) {
+      const task = transformer._fd_prepare?.(code, codeOptions);
+      if (task) tasks.push(task);
+    }
+    for (const required of await Promise.all(tasks)) {
+      if (required) for (const name of required) langs.add(name);
+    }
 
-    if (parsed.structure === 'classic') return fragment;
-    return {
-      type: 'element',
-      tagName: 'code',
-      properties: {
-        class: 'shiki',
-      },
-      children: fragment.children as ElementContent[],
+    return () => {
+      const fragment = instance.codeToHast(code, codeOptions);
+      cache?.set(cacheKey, fragment);
+
+      if (parsed.structure === 'classic') return fragment;
+      return {
+        type: 'element',
+        tagName: 'code',
+        properties: {
+          class: 'shiki',
+        },
+        children: fragment.children as ElementContent[],
+      };
     };
   }
 
@@ -179,7 +192,7 @@ export function rehypeCodeFromHighlighter(
 
   return async (tree) => {
     const langs = new Set<string>();
-    const queue: (() => Promise<void>)[] = [];
+    const queue: Promise<(() => void) | void>[] = [];
 
     walk<Nodes>(tree, (node, index, parent) => {
       let parsed: ShikiParsedData | undefined;
@@ -200,20 +213,32 @@ export function rehypeCodeFromHighlighter(
       if (!lang) return 'skip';
 
       langs.add(lang);
-      queue.push(async () => {
-        parent.children[index] = (await onNode(tree, node, parsed, lang)) as never;
-      });
+      queue.push(
+        onNode(tree, node, parsed, lang, langs).then(
+          (highlight) => () => {
+            parent.children[index] = highlight() as never;
+          },
+          handleError,
+        ),
+      );
       return 'skip';
     });
     if (queue.length === 0) return;
 
+    const highlights = await Promise.all(queue);
     try {
       await instance.loadLanguage?.(...langs);
     } catch (error) {
       handleError(error);
       return;
     }
-    await Promise.all(queue.map((task) => task().catch(handleError)));
+    for (const highlight of highlights) {
+      try {
+        highlight?.();
+      } catch (error) {
+        handleError(error);
+      }
+    }
   };
 }
 
@@ -259,14 +284,9 @@ function parseMeta(meta: string): Record<string, unknown> {
 }
 
 declare module 'shiki' {
-  interface ShikiTransformerContextMeta {
-    /** [Fumadocs: rehype-code] run async tasks after process */
-    _fd_postprocess?: ((ctx: { highlighter: HighlighterCore }) => Promise<void>)[];
-  }
-
   interface ShikiTransformer {
-    /** [Fumadocs: rehype-code] run async tasks before highlighting the code block */
-    _fd_prepare?: (code: string, options: CodeToHastOptions) => Promise<void> | void;
+    /** [Fumadocs: rehype-code] async work before highlighting the code block, resolves to more languages to load */
+    _fd_prepare?: (code: string, options: HighlightCodeOptions) => Promise<string[] | void> | void;
   }
 }
 
@@ -398,10 +418,10 @@ export function createRehypeCode<
 
         return {
           ...shiki,
-          codeToHastAsync(code, options) {
+          codeToHast(code, options) {
             // without a fallback language, unknown languages fail like in Shiki
             if (!isSpecialLang(options.lang)) highlighter.getLanguage(options.lang);
-            return shiki.codeToHastAsync(code, options);
+            return shiki.codeToHast(code, options);
           },
         };
       },

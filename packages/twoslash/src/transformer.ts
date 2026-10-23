@@ -142,6 +142,16 @@ export interface TransformerTwoslashOptions {
 const RE_TWOSLASH = /\btwoslash\b/;
 const RE_INCLUDE_MARKER = /\/\/ @include: (.*)$/gm;
 const RE_INCLUDE_META = /include\s+([\w-]+)\b.*/;
+const RE_CODE_FENCE = /^[ \t>]*(?:`{3,}|~{3,})[ \t]*([^\s`{]+)/gm;
+
+interface PreparedBlock {
+  /** the code with includes resolved */
+  code: string;
+  /** read from the types cache */
+  result?: TwoslashReturn;
+  /** the analysis in a batch, see `Twoslasher.prepare` */
+  analysis?: PromiseSettledResult<TwoslashReturn>;
+}
 
 /**
  * Apply Twoslash to code blocks with the `twoslash` meta string.
@@ -187,8 +197,6 @@ export function transformerTwoslash(options: TransformerTwoslashOptions = {}): S
   const getInstance = () => (instance ??= createTwoslasher(twoslashOptions));
   const twoslasher: TwoslashFunction =
     options.twoslasher ?? ((code, lang) => getInstance()(code, lang));
-  /** code blocks prepared by `_fd_prepare`, keyed by the options Shiki passes to both hooks */
-  const prepared = new WeakMap<CodeToHastOptions, { code: string; result?: TwoslashReturn }>();
   typesCache?.init?.();
 
   function addInclude(name: string, code: string) {
@@ -213,7 +221,7 @@ export function transformerTwoslash(options: TransformerTwoslashOptions = {}): S
     lang: string,
     hastOptions: CodeToHastOptions,
     meta?: ShikiTransformerContextMeta,
-  ) {
+  ): PreparedBlock {
     code = code.replaceAll(RE_INCLUDE_MARKER, (_, key: string) => {
       const included = includesMap.get(key);
       if (included === undefined) {
@@ -235,30 +243,48 @@ export function transformerTwoslash(options: TransformerTwoslashOptions = {}): S
 
   return {
     name: 'fumadocs:twoslash',
-    // analyze the code blocks of documents compiled concurrently in one batch, see `Twoslasher.prepare`
-    _fd_prepare(code, hastOptions) {
-      if (options.twoslasher) return;
+    // analyze the code blocks of documents compiled concurrently in one batch, and resolve the languages of their popups
+    _fd_prepare(code, codeOptions) {
+      const { meta } = codeOptions;
+      // only `lang` and `meta` are read, the highlighter adds its own options later
+      const hastOptions = codeOptions as CodeToHastOptions;
       const lang = getLang(hastOptions);
-      if (!filter(lang, code, hastOptions)) return;
-      let entry;
+      if (options.twoslasher || !meta || !filter(lang, code, hastOptions)) return;
+      let entry: PreparedBlock;
       try {
         entry = prepare(code, lang, hastOptions);
       } catch {
         // reported by `preprocess`
         return;
       }
-      prepared.set(hastOptions, entry);
-      if (!entry.result) return getInstance().prepare(entry.code, lang);
+      // read by `preprocess`, keys starting with `_` aren't rendered
+      meta._twoslash = entry;
+      if (entry.result) return Promise.resolve(getPopupLanguages(entry.result));
+
+      const instance = getInstance();
+      return instance.prepare(entry.code, lang).then(() => {
+        try {
+          const value = instance(entry.code, lang);
+          entry.analysis = { status: 'fulfilled', value };
+          return getPopupLanguages(value);
+        } catch (reason) {
+          entry.analysis = { status: 'rejected', reason };
+        }
+      });
     },
     preprocess(code) {
       const lang = getLang(this.options);
       if (!filter(lang, code, this.options, this)) return;
 
       try {
-        const entry = prepared.get(this.options) ?? prepare(code, lang, this.options, this.meta);
+        const entry =
+          (this.options.meta?._twoslash as PreparedBlock | undefined) ??
+          prepare(code, lang, this.options, this.meta);
         let { result } = entry;
         if (!result) {
-          result = twoslasher(entry.code, lang, twoslashOptions, this.meta);
+          if (entry.analysis?.status === 'rejected') throw entry.analysis.reason;
+          result =
+            entry.analysis?.value ?? twoslasher(entry.code, lang, twoslashOptions, this.meta);
           typesCache?.write(entry.code, result, lang, twoslashOptions, this.meta);
         }
         this.meta.twoslash = result;
@@ -412,6 +438,20 @@ export function transformerTwoslash(options: TransformerTwoslashOptions = {}): S
       for (const wrap of wraps) wrap();
     },
   };
+}
+
+/**
+ * Languages of the code blocks in the docs of popups
+ */
+function getPopupLanguages(result: TwoslashReturn): string[] {
+  const langs = new Set<string>();
+  for (const node of result.nodes) {
+    if (node.type !== 'hover' && node.type !== 'query') continue;
+    let text = node.docs ?? '';
+    for (const [, value] of node.tags ?? []) if (value) text += `\n${value}`;
+    for (const [, lang] of text.matchAll(RE_CODE_FENCE)) langs.add(lang);
+  }
+  return Array.from(langs);
 }
 
 /**

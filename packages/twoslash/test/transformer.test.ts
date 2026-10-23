@@ -190,3 +190,9 @@ test('prepared blocks', async () => {
   // analyzed in the same batch, in separate directories
   expect(() => highlighter.codeToHast('const b = a;', b)).toThrow(/2304/);
 });
+
+test('languages of popups are resolved by `_fd_prepare`', async () => {
+  const code = '/**\n * ```php\n * $a = 1;\n * ```\n */\nconst a = 1;';
+  const langs = await transformer._fd_prepare!(code, { lang: 'ts', meta: { __raw: 'twoslash' } });
+  expect(langs).toEqual(['php']);
+});

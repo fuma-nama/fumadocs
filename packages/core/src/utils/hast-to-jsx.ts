@@ -1,4 +1,4 @@
-import type { Element, Nodes, Parents } from 'hast';
+import type { Element, ElementContent, Nodes, Parents } from 'hast';
 import type {
   Expression,
   ExpressionStatement,
@@ -32,6 +32,8 @@ interface State extends ToJsxOptions {
   components: Partial<Components>;
   /** parsed `style` attributes of this call, code repeats a few */
   styles: Map<string, Record<string, string>>;
+  /** `style` attributes of this call as React writes them */
+  styleAttributes: Map<string, string>;
 }
 
 interface Schema {
@@ -59,6 +61,15 @@ const svg: Schema = {
   commaSeparated: ['g1', 'g2', 'glyphName'],
 };
 const tableElements = new Set(['table', 'tbody', 'thead', 'tfoot', 'tr']);
+// `escapeTextForBrowser()` of React
+const escapable = /["&'<>]/g;
+const escapes: Record<string, string> = {
+  '"': '&quot;',
+  '&': '&amp;',
+  "'": '&#x27;',
+  '<': '&lt;',
+  '>': '&gt;',
+};
 // `estree-util-is-identifier-name`
 const identifier = /^[$_\p{ID_Start}][$_\p{Join_Control}\p{ID_Continue}]*$/u;
 const styleError = 'Cannot parse `style` attribute';
@@ -83,7 +94,8 @@ const chars = Uint8Array.from({ length: 128 }, (_, code) => {
  * Convert hast, with MDX nodes, into React elements like `toJsxRuntime()` from `hast-util-to-jsx-runtime`, but faster.
  */
 export function toJsx(tree: Nodes, { components = {}, evaluator }: ToJsxOptions = {}): ReactNode {
-  const result = one(tree, { components, evaluator, styles: new Map() }, html, undefined);
+  const state: State = { components, evaluator, styles: new Map(), styleAttributes: new Map() };
+  const result = one(tree, state, html, undefined);
   if (result && typeof result !== 'string') return result;
   return jsx(Fragment, { children: result || undefined });
 }
@@ -155,7 +167,75 @@ function element(
   const type = Object.hasOwn(state.components, node.tagName)
     ? state.components[node.tagName as keyof Components]
     : node.tagName;
+  const first = node.children[0];
+  // React's work per element dominates highlighted code, its spans render as one HTML string
+  if (
+    typeof type === 'string' &&
+    first?.type === 'element' &&
+    first.tagName === 'span' &&
+    !state.components.span &&
+    !tableElements.has(node.tagName)
+  ) {
+    const html = toHtml(node.children, state);
+    if (html !== undefined) {
+      props.dangerouslySetInnerHTML = { __html: html };
+      return create(type as ElementType, props, [], key);
+    }
+  }
   return create(type as ElementType, props, children(node, state, schema), key);
+}
+
+/** spans with class, style and `data-*` attributes, and text, as the HTML React renders; `undefined` for other content */
+function toHtml(nodes: ElementContent[], state: State): string | undefined {
+  let html = '';
+  for (const node of nodes) {
+    if (node.type === 'text') {
+      html += escape(node.value);
+      continue;
+    }
+    if (node.type !== 'element' || node.tagName !== 'span') return;
+
+    html += '<span';
+    for (const name in node.properties) {
+      const value = node.properties[name];
+      if (value === null || value === undefined || Number.isNaN(value) || name === 'children')
+        continue;
+      if (name === 'style' && typeof value === 'string') {
+        html += styleAttribute(value, state);
+        continue;
+      }
+      const attribute = name === 'className' ? 'class' : name;
+      if (attribute !== 'class' && !attribute.startsWith('data-')) return;
+      if (typeof value !== 'string' && typeof value !== 'number' && !Array.isArray(value)) return;
+      html += ` ${attribute}="${escape(Array.isArray(value) ? value.join(' ').trim() : String(value))}"`;
+    }
+
+    const children = toHtml(node.children, state);
+    if (children === undefined) return;
+    html += `>${children}</span>`;
+  }
+  return html;
+}
+
+/** the `style` attribute React writes for the parsed `input` */
+function styleAttribute(input: string, { styleAttributes }: State): string {
+  let attribute = styleAttributes.get(input);
+  if (attribute !== undefined) return attribute;
+
+  attribute = '';
+  for (const [name, value] of Object.entries(parseStyle(input))) {
+    const property = name.startsWith('--')
+      ? name
+      : name.replace(/[A-Z]/g, (char) => `-${char.toLowerCase()}`).replace(/^ms-/, '-ms-');
+    attribute += `${attribute ? ';' : ' style="'}${escape(property)}:${escape(value)}`;
+  }
+  if (attribute) attribute += '"';
+  styleAttributes.set(input, attribute);
+  return attribute;
+}
+
+function escape(value: string): string {
+  return value.replace(escapable, (char) => escapes[char]);
 }
 
 function children(node: Parents, state: State, schema: Schema): ReactNode[] {

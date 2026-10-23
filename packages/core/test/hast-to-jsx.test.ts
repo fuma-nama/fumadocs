@@ -376,3 +376,80 @@ describe('MDX', () => {
     expect(() => toJsx(mdx('{/* a */}')(), { evaluator })).toThrow(TypeError);
   });
 });
+
+describe('spans as HTML', () => {
+  /** same HTML as `toJsxRuntime()`, `html` tells if span content became one HTML string */
+  function expectHtml(tree: () => Nodes, html: boolean, components: Partial<Components> = {}) {
+    const ours = toJsx(tree(), { components });
+    const original = toJsxRuntime(tree(), { ...JsxRuntime, components });
+    expect(renderToStaticMarkup(ours)).toBe(renderToStaticMarkup(original));
+    expect(JSON.stringify(serialize(ours)).includes('dangerouslySetInnerHTML')).toBe(html);
+  }
+  const line = (...children: ElementContent[]) => h('span', { class: 'line' }, ...children);
+
+  test('highlighted code', () => {
+    expectHtml(
+      () =>
+        h(
+          'pre',
+          { class: 'shiki' },
+          h(
+            'code',
+            {},
+            line(
+              h(
+                'span',
+                { style: '--shiki-light:#24292E;--shiki-dark:#E1E4E8' },
+                text('a <b> & "c"'),
+              ),
+            ),
+            text('\n'),
+            line(
+              h(
+                'span',
+                { style: 'Background-Color : blue; -ms-flex: 1; /* x */ color:red;' },
+                text("'d'"),
+              ),
+              text('e'),
+              text(''),
+              text('f'),
+            ),
+            text('\n'),
+            line(
+              h('span', {
+                className: ['highlighted', '', 'word'],
+                'data-line': 2,
+                'data-x': ['a', 'b'],
+              }),
+              h('span', { style: '', 'data-y': '"' }, text('')),
+            ),
+          ),
+        ),
+      true,
+    );
+    // inline code, and lines under a component
+    expectHtml(() => h('code', {}, h('span', { style: 'color:red' }, text('a'))), true);
+    expectHtml(() => h('code', {}, line(h('span', {}, text('a')))), true, {
+      code: (props: object) => createElement('kbd', props),
+    });
+  });
+
+  test('other content stays elements', () => {
+    const mdxElement: ElementContent = {
+      type: 'mdxJsxTextElement',
+      name: 'abbr',
+      attributes: [],
+      children: [],
+    };
+    expectHtml(() => h('code', {}, h('span', {}, text('a')), h('b', {}, text('b'))), false);
+    expectHtml(() => h('code', {}, h('span', {}, mdxElement)), false);
+    expectHtml(() => h('code', {}, h('span', { id: 'a' })), false);
+    expectHtml(() => h('code', {}, h('span', { 'data-a': true })), false);
+    expectHtml(() => h('code', {}, h('span', { style: { color: 'red' } as never })), false);
+    expectHtml(() => h('code', {}, text('a'), h('span')), false);
+    expectHtml(() => h('tr', {}, h('span', {}, text('a'))), false);
+    expectHtml(() => h('code', {}, h('span', {}, text('a'))), false, {
+      span: (props: object) => createElement('i', props),
+    });
+  });
+});

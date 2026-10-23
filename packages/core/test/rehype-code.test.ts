@@ -105,4 +105,49 @@ describe('Rehype Code (custom highlighter)', () => {
     expect(findPre(tree)?.properties).toMatchObject({ title: 'a.ts' });
     expect(findPre(tree)?.properties.icon).toBeUndefined();
   });
+
+  test('`_fd_prepare` hooks run before highlighting', async () => {
+    const loaded: string[][] = [];
+    const errors: unknown[] = [];
+    const processor = remark()
+      .use(remarkRehype)
+      .use(
+        rehypeCodeFromHighlighter,
+        ({ transformers }) => ({
+          ...createHighlights({ shikiTransformers: transformers }),
+          async loadLanguage(...langs: string[]) {
+            loaded.push(langs);
+          },
+        }),
+        {
+          transformers: [
+            {
+              async _fd_prepare(_code, options) {
+                if (options.meta) options.meta._prepared = true;
+                return ['php'];
+              },
+              pre(pre) {
+                pre.properties.prepared = this.options.meta?._prepared;
+              },
+            },
+          ],
+          parseMetaString(meta) {
+            if (meta === 'throw') throw new Error('invalid meta');
+            return {};
+          },
+          onError: (error) => errors.push(error),
+        },
+      );
+    const tree = await processor.run(processor.parse('```ts\na\n```\n\n```ts throw\nb\n```'));
+
+    expect(loaded).toEqual([['ts', 'php']]);
+    expect(errors).toEqual([new Error('invalid meta')]);
+    const prepared: unknown[] = [];
+    walk<Nodes>(tree, (node) => {
+      if (node.type === 'element' && node.tagName === 'pre')
+        prepared.push(node.properties.prepared);
+    });
+    // the code block with an error isn't highlighted
+    expect(prepared).toEqual([true, undefined]);
+  });
 });

@@ -28,7 +28,6 @@ export interface HighlightsOptions {
 }
 
 export interface HighlightsHighlighter extends Highlighter {
-  codeToHastAsync: (code: string, options: HighlightCodeOptions) => Promise<Root>;
   /** Create a highlighter with `options` in place of its own, like other Shiki transformers. */
   override: (options: HighlightsOptions) => HighlightsHighlighter;
 }
@@ -91,17 +90,6 @@ export function createHighlights(highlightsOptions: HighlightsOptions = {}): Hig
 
   return {
     codeToHast: (code, codeOptions) => render(code, getCodeOptions(codeOptions)),
-    async codeToHastAsync(code, codeOptions) {
-      const hastOptions = getCodeOptions(codeOptions);
-      // languages are built in, so only `_fd_prepare` applies
-      const prepare: Promise<void>[] = [];
-      for (const transformer of shikiTransformers) {
-        const task = transformer._fd_prepare?.(code, hastOptions);
-        if (task) prepare.push(task);
-      }
-      if (prepare.length > 0) await Promise.all(prepare);
-      return render(code, hastOptions);
-    },
     override: (options) => createHighlights({ ...highlightsOptions, ...options }),
   };
 }

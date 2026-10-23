@@ -22,6 +22,7 @@ import { type BlogAuthor, blogPageSchema } from '@/lib/blog';
 import { remarkAutoTypeTable } from '@fumadocs/satteri/remark-auto-type-table';
 import { createHighlights } from 'fumadocs-core/highlight/highlights';
 import { rehypeCodeFromHighlighter } from '@fumadocs/satteri/rehype-code';
+import { rehypeCodeDefaultOptions } from 'fumadocs-core/mdx-plugins/rehype-code.core';
 import catppuccinLatte from '@pierre/highlights/themes/catppuccin-latte';
 import catppuccinMocha from '@pierre/highlights/themes/catppuccin-mocha';
 import { transformerTwoslash } from 'fumadocs-twoslash';
@@ -96,20 +97,22 @@ const docs = defineDocs({
               rehypeCodeFromHighlighter(
                 ({ transformers }) =>
                   contentHighlighter.override({
-                    shikiTransformers: [
-                      ...transformers,
-                      transformerTwoslash({
-                        typesCache: createFileSystemTypesCache(),
-                        twoslashOptions: {
-                          compilerOptions: {
-                            types: ['@types/node'],
-                          },
-                        },
-                      }),
-                      transformerEscape(),
-                    ],
+                    shikiTransformers: [...transformers, transformerEscape()],
                   }),
-                { inline: 'tailing-curly-colon' },
+                {
+                  inline: 'tailing-curly-colon',
+                  transformers: [
+                    ...(rehypeCodeDefaultOptions().transformers ?? []),
+                    transformerTwoslash({
+                      typesCache: createFileSystemTypesCache(),
+                      twoslashOptions: {
+                        compilerOptions: {
+                          types: ['@types/node'],
+                        },
+                      },
+                    }),
+                  ],
+                },
               ),
             ],
         remarkCodeTabOptions: {
