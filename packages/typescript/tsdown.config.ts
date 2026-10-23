@@ -1,8 +1,10 @@
 import { defineConfig } from 'tsdown';
+import { workspaceTsgo } from '../shared/tsgo.ts';
 
 export default defineConfig({
   dts: {
     sourcemap: false,
+    ...workspaceTsgo(),
   },
   fixedExtension: false,
   target: 'es2023',

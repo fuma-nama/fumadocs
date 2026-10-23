@@ -1,4 +1,5 @@
 import { defineConfig } from 'tsdown';
+import { workspaceTsgo } from '../shared/tsgo.ts';
 import { packageTranslationsPlugin } from '../shared/compile-package-translations.ts';
 
 export default defineConfig({
@@ -16,6 +17,7 @@ export default defineConfig({
   ignoreWatch: ['src/.translations/**'],
   dts: {
     sourcemap: false,
+    ...workspaceTsgo(),
   },
   platform: 'browser',
   plugins: [packageTranslationsPlugin()],
