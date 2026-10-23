@@ -3,12 +3,12 @@ import {
   isIntersectionType,
   isObjectType,
   isUnionType,
-  NodeBuilderFlags,
   SignatureKind,
   type Type,
   TypeFlags,
-} from 'typescript/unstable/sync';
-import type { Node } from 'typescript/unstable/ast';
+  TypeFormatFlags,
+} from 'typescript/sync';
+import type { Node } from 'typescript/ast';
 
 interface TypeSimplifierContext {
   type: Type;
@@ -41,11 +41,7 @@ export function getSimpleForm(
   if (overridden) return overridden;
 
   if (shouldSimplify && !shouldSimplify({ checker, type, location })) {
-    return checker.typeToString(
-      type,
-      location,
-      NodeBuilderFlags.UseAliasDefinedOutsideCurrentScope,
-    );
+    return checker.typeToString(type, location, TypeFormatFlags.UseAliasDefinedOutsideCurrentScope);
   }
 
   const alias = type.getAliasSymbol();
@@ -93,7 +89,7 @@ export function getSimpleForm(
     return 'function';
   }
 
-  return checker.typeToString(type, location, NodeBuilderFlags.UseAliasDefinedOutsideCurrentScope);
+  return checker.typeToString(type, location, TypeFormatFlags.UseAliasDefinedOutsideCurrentScope);
 }
 
 function dedupe<T>(arr: T[]): T[] {

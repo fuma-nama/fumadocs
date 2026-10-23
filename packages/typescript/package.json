@@ -43,7 +43,7 @@
     "remark": "^15.0.1",
     "remark-rehype": "^11.1.2",
     "shiki": "^4.5.0",
-    "typescript": "~7.0.2",
+    "typescript": "7.1.0-beta",
     "unified": "^11.0.5"
   },
   "devDependencies": {

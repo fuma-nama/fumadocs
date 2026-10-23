@@ -1,8 +1,6 @@
 import path from 'node:path';
 import type { Plugin } from 'vite';
-import { createControlsProject } from '@/utils/generate';
-import { transformStoryFile } from '@/utils/transform';
-import type { Project } from '@/utils/generate';
+import { createStoryTransformer, type StoryTransformer } from '@/utils/transform';
 
 export interface StoryPluginOptions {
   /**
@@ -22,21 +20,21 @@ export interface StoryPluginOptions {
 
 export default function story(pluginOptions: StoryPluginOptions = {}): Plugin {
   const { filter = /\.story\.(js|jsx|ts|tsx)$/ } = pluginOptions;
-  let tsconfigPath: string;
-  let projectPromise: Promise<Project> | undefined;
+  let transform: StoryTransformer;
 
   return {
     name: 'fumadocs:story',
     enforce: 'pre',
     configResolved(resolved) {
-      tsconfigPath = pluginOptions.tsconfigPath ?? path.join(resolved.root, 'tsconfig.json');
+      transform = createStoryTransformer(
+        '@fumadocs/story/vite/client',
+        pluginOptions.tsconfigPath ?? path.join(resolved.root, 'tsconfig.json'),
+      );
     },
     transform: {
       filter: { id: filter },
-      async handler(code, id) {
-        projectPromise ??= createControlsProject(tsconfigPath);
-
-        return transformStoryFile('@fumadocs/story/vite/client', code, id, await projectPromise);
+      handler(code, id) {
+        return transform(code, id);
       },
     },
   };

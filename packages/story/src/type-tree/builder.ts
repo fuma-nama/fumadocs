@@ -7,20 +7,20 @@ import {
   isObjectType,
   isTypeReference,
   isUnionType,
-  NodeBuilderFlags,
   type Project,
   SignatureKind,
   SymbolFlags,
   type Type,
   TypeFlags,
-} from 'typescript/unstable/sync';
+  TypeFormatFlags,
+} from 'typescript/sync';
 import {
   isEnumDeclaration,
   isNumericLiteral,
   isStringLiteral,
   type Node,
   SyntaxKind,
-} from 'typescript/unstable/ast';
+} from 'typescript/ast';
 import type { LiteralNode, TypeNode } from './types';
 import { unwrapUnion } from './collapse';
 
@@ -40,7 +40,7 @@ export type Handler = (options: {
 
   builder: TypeTreeBuilder;
   /**
-   * The TypeScript project (from `typescript/unstable/sync`) of the type, use `project.checker` for type checking.
+   * The TypeScript project (from `typescript/sync`) of the type, use `project.checker` for type checking.
    */
   project: Project;
   cache: Map<TypeToNodeFlag, WeakMap<Type, TypeNode>>;
@@ -247,7 +247,7 @@ const baseHandler: Handler = ({ type, flag, location, project, setCache, root })
     displayName: checker.typeToString(
       type,
       location,
-      NodeBuilderFlags.UseAliasDefinedOutsideCurrentScope,
+      TypeFormatFlags.UseAliasDefinedOutsideCurrentScope,
     ),
   };
 };

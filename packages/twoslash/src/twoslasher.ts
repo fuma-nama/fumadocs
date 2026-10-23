@@ -4,14 +4,20 @@ import {
   NodeBuilderFlags,
   SignatureKind,
   SymbolFlags,
-  type CompletionInfo,
+  TypeFormatFlags,
+  type Checker,
+  type CompilerOptions,
+  type CreateSnapshotProgramParams,
   type Diagnostic,
+  type Printer,
   type Project,
+  type ReconfigureSnapshotProgramParams,
   type Signature,
   type Snapshot,
   type Symbol,
+  type SyntheticProjectId,
   type Type,
-} from 'typescript/unstable/sync';
+} from 'typescript/sync';
 import {
   NodeFlags,
   SyntaxKind,
@@ -21,7 +27,8 @@ import {
   type NodeArray,
   type PropertyAccessExpression,
   type SourceFile,
-} from 'typescript/unstable/ast';
+} from 'typescript/ast';
+import { createFileSystemLayer } from 'typescript/fs';
 import {
   createPositionConverter,
   defaultHandbookOptions,
@@ -45,15 +52,13 @@ import {
   type TwoslashNode,
   type VirtualFile,
 } from './notations';
-import { randomUUID } from 'node:crypto';
-import fs from 'node:fs';
 import path from 'node:path';
 
 export type ExtraFiles = Record<string, string | { prepend?: string; append?: string }>;
 
 export interface TwoslasherOptions {
   /**
-   * Code blocks are placed in the `.twoslash` directory of it while being analyzed, modules are resolved from there.
+   * Code blocks are analyzed as in-memory files in the `.twoslash` directory of it, modules are resolved from there.
    *
    * @defaultValue process.cwd()
    */
@@ -114,10 +119,9 @@ const defaultCompilerOptions = {
 const supportedExtensions = ['ts', 'tsx', 'js', 'jsx'];
 /** the time to wait for other code blocks to join a batch */
 const batchDelay = 10;
+/** also used as node builder flags, which share the values */
 const typeFlags =
-  NodeBuilderFlags.UseAliasDefinedOutsideCurrentScope |
-  NodeBuilderFlags.MultilineObjectLiterals |
-  NodeBuilderFlags.IgnoreErrors;
+  TypeFormatFlags.UseAliasDefinedOutsideCurrentScope | TypeFormatFlags.MultilineObjectLiterals;
 /** longer types are truncated by the checker */
 const maxTypeLength = 500;
 
@@ -174,7 +178,7 @@ function qualifiedName(symbol: Symbol): string {
 
 function variableKeyword(symbol: Symbol): string {
   // binding elements in destructuring are nested in the parameter or variable declaration
-  let declaration = symbol.valueDeclaration?.resolve();
+  let declaration: Node | undefined = symbol.valueDeclaration?.resolve();
   while (
     declaration &&
     declaration.kind !== SyntaxKind.Parameter &&
@@ -215,46 +219,51 @@ function getObjectLiteral(node: Node): Expression | undefined {
   return isKey ? (parent.parent as Expression) : undefined;
 }
 
-function printType(project: Project, type: Type, location?: Node, flags = typeFlags): string {
-  const { checker, emitter } = project;
-  const text = checker.typeToString(type, location, flags | NodeBuilderFlags.NoTruncation);
+function printType(
+  checker: Checker,
+  printer: Printer,
+  type: Type,
+  location?: Node,
+  flags = typeFlags,
+): string {
+  const text = checker.typeToString(type, location, flags | TypeFormatFlags.NoTruncation);
   if (text.length <= maxTypeLength) return text;
   // `typeToString` cuts truncated types at 320 characters
-  const node = checker.typeToTypeNode(type, location, flags);
-  return node ? emitter.printNode(node) : text;
+  const node = checker.typeToTypeNode(type, location, flags | NodeBuilderFlags.IgnoreErrors);
+  return node ? printer.printNode(node) : text;
 }
 
 function printSignature(
-  project: Project,
+  checker: Checker,
+  printer: Printer,
   signature: Signature,
   location: Node,
 ): string | undefined {
-  const { checker, emitter } = project;
   const print = (flags: number) => {
     const node = checker.signatureToSignatureDeclaration(
       signature,
       SyntaxKind.MethodSignature,
       location,
-      flags,
+      flags | NodeBuilderFlags.IgnoreErrors,
     );
-    return node && emitter.printNode(node);
+    return node && printer.printNode(node);
   };
   const text = print(typeFlags | NodeBuilderFlags.NoTruncation);
   return text && text.length > maxTypeLength ? print(typeFlags) : text;
 }
 
 /**
- * Approximate the display string of quick info, TypeScript 7 doesn't provide a language service.
+ * Approximate the display string of quick info, the TypeScript API doesn't provide it.
  */
 function describeSymbol(
-  project: Project,
+  checker: Checker,
+  printer: Printer,
   symbol: Symbol,
   type: Type,
   identifier: Identifier,
   call: CallExpression | undefined,
   typeToString: (type: Type) => string,
 ): string {
-  const { checker, emitter } = project;
   const { flags } = symbol;
   const { node } = identifier;
   const name = symbol.name === 'default' ? identifier.text : symbol.name;
@@ -264,8 +273,9 @@ function describeSymbol(
 
   if (flags & (SymbolFlags.Function | SymbolFlags.Method)) {
     const signatures = checker.getSignaturesOfType(type, SignatureKind.Call);
-    const signature = (call && checker.getResolvedSignature(call)) ?? signatures[0];
-    const printed = signature && printSignature(project, signature, node);
+    const resolved = call && checker.getResolvedSignature(call);
+    const signature = resolved && !checker.isUnknownSignature(resolved) ? resolved : signatures[0];
+    const printed = signature && printSignature(checker, printer, signature, node);
 
     if (printed) {
       const head =
@@ -288,13 +298,13 @@ function describeSymbol(
     const declaration = symbol.declarations[0]?.resolve() as { typeParameters?: NodeArray<Node> };
     let text = name;
     if (declaration?.typeParameters?.length) {
-      text += `<${declaration.typeParameters.map((param) => emitter.printNode(param)).join(', ')}>`;
+      text += `<${declaration.typeParameters.map((param) => printer.printNode(param)).join(', ')}>`;
     }
 
     if (flags & SymbolFlags.Class) return `class ${text}`;
     if (flags & SymbolFlags.Interface) return `interface ${text}`;
     const declared = checker.getDeclaredTypeOfSymbol(symbol);
-    return `type ${text} = ${printType(project, declared, node, typeFlags | NodeBuilderFlags.InTypeAlias)}`;
+    return `type ${text} = ${printType(checker, printer, declared, node, typeFlags | TypeFormatFlags.InTypeAlias)}`;
   }
   if (flags & SymbolFlags.TypeParameter) return `(type parameter) ${name}`;
 
@@ -309,12 +319,19 @@ function describeSymbol(
   return `${head}: ${typeToString(type)}`;
 }
 
+/** a set of compiler options, and the program of blocks using it */
+interface Config {
+  options: CompilerOptions;
+  errors: Diagnostic[];
+  id?: SyntheticProjectId;
+}
+
 interface Block {
   key: string;
   /** number of calls waiting for the result */
   refs: number;
   code: string;
-  configPath: string;
+  config: Config;
   notations: Notations;
   /** files of the code block supported by the compiler */
   files: VirtualFile[];
@@ -325,20 +342,18 @@ interface Block {
 
 export function createTwoslasher(options: TwoslasherOptions = {}): Twoslasher {
   const cwd = path.resolve(options.cwd ?? process.cwd());
-  const root = `${path.join(cwd, '.twoslash', randomUUID()).replaceAll('\\', '/')}/`;
-  /** the tsconfig of each project, and the root files, `''` when unused by the current batch */
-  const files = new Map<string, string>();
-  const rootFiles: string[] = [];
-  /** tsconfig path of each set of compiler options */
-  const configs = new Map<string, string>();
-  const opened = new Set<string>();
+  const root = `${path.join(cwd, '.twoslash').replaceAll('\\', '/')}/`;
+  /** configs by compiler options in `tsconfig.json` form */
+  const configs = new Map<string, Config>();
+  /** content of the files in the last batch */
+  let files = new Map<string, string>();
   const results = new Map<string, { refs: number; value?: TwoslashReturn; error?: unknown }>();
   const pending = new Map<string, Block>();
   let scheduled: Promise<void> | undefined;
   let api: API | undefined;
   let snapshot: Snapshot | undefined;
 
-  /** directory of the block at `index` of a batch, the block is placed in a stable slot to keep the project unchanged */
+  /** directory of the block at `index` of a batch, the block is placed in a stable slot to keep the root files unchanged */
   const slot = (index: number) => `${root}${index}/`;
 
   function parse(code: string, extension: string): Block {
@@ -358,10 +373,26 @@ export function createTwoslasher(options: TwoslasherOptions = {}): Twoslasher {
     findQueryMarkers(code, pc, notations);
 
     const compilerOptions = JSON.stringify(notations.compilerOptions);
-    let configPath = configs.get(compilerOptions);
-    if (!configPath) {
-      configPath = `${root}tsconfig.${configs.size}.json`;
-      configs.set(compilerOptions, configPath);
+    let config = configs.get(compilerOptions);
+    if (!config) {
+      api ??= new API({ cwd });
+      // `files` keeps cwd from being globbed, its emptiness is reported as error 18002
+      const parsed = api.parseJsonConfigFileContent(
+        { compilerOptions: notations.compilerOptions, files: [] },
+        { configDirectory: cwd },
+      );
+      config = {
+        options: parsed.options,
+        errors: parsed.errors.filter((error) => error.code !== 18002),
+      };
+      configs.set(compilerOptions, config);
+    }
+    if (config.errors.length > 0 && !notations.handbookOptions.noErrorValidation) {
+      throw new TwoslashError(
+        'Invalid compiler options',
+        config.errors.map((d) => d.text).join('\n'),
+        'Check the inline compiler flags in the code block.',
+      );
     }
 
     const files = splitFiles(code, `index.${extension}`).filter(
@@ -370,7 +401,7 @@ export function createTwoslasher(options: TwoslasherOptions = {}): Twoslasher {
         (file.extension === 'json' && !!notations.compilerOptions.resolveJsonModule),
     );
     for (const file of files) {
-      // the files are written to the disk
+      // it could shadow a project file, which a later batch would hide by removing it
       if (file.filename.split(/[/\\]/).includes('..')) {
         throw new TwoslashError(
           'Invalid filename',
@@ -394,7 +425,7 @@ export function createTwoslasher(options: TwoslasherOptions = {}): Twoslasher {
       key: getKey(code, extension),
       refs: 1,
       code,
-      configPath,
+      config,
       notations,
       files,
       extraFiles: extra,
@@ -403,75 +434,61 @@ export function createTwoslasher(options: TwoslasherOptions = {}): Twoslasher {
   }
 
   /**
-   * Load the blocks into the projects, in one snapshot
+   * Load the blocks into the programs of their configs, in one snapshot
    */
   function open(blocks: Block[]): Snapshot {
     const next = new Map<string, string>();
-    const openProjects: string[] = [];
+    const roots = new Map<Config, string[]>();
     for (let i = 0; i < blocks.length; i++) {
       const block = blocks[i];
       const dir = slot(i);
+      const rootFiles = roots.get(block.config) ?? [];
+      roots.set(block.config, rootFiles);
       for (const file of block.files) {
-        next.set(dir + file.filename, (file.prepend ?? '') + file.content + (file.append ?? ''));
+        // the layer rejects two spellings of a path, like `./index.ts` and `index.ts`
+        const filePath = path.posix.join(dir, file.filename);
+        next.set(filePath, (file.prepend ?? '') + file.content + (file.append ?? ''));
+        rootFiles.push(filePath);
       }
-      for (const [filename, content] of block.extraFiles) next.set(dir + filename, content);
-      if (!opened.has(block.configPath) && !openProjects.includes(block.configPath)) {
-        openProjects.push(block.configPath);
+      for (const [filename, content] of block.extraFiles) {
+        const filePath = path.posix.join(dir, filename);
+        next.set(filePath, content);
+        rootFiles.push(filePath);
       }
     }
 
-    const changed: string[] = [];
-    const created: string[] = [];
-    for (const file of rootFiles) {
-      if (!next.has(file) && files.get(file) !== '') {
-        files.set(file, '');
-        changed.push(file);
-      }
-    }
+    const changed: [string, string][] = [];
     for (const [file, content] of next) {
-      const current = files.get(file);
-      if (current === content) continue;
-      if (current === undefined) {
-        created.push(file);
-        rootFiles.push(file);
-      } else {
-        changed.push(file);
-      }
-      files.set(file, content);
+      if (files.get(file) !== content) changed.push([file, content]);
     }
-    // a config change costs a project reload, the file list only grows
-    if (created.length > 0 || openProjects.length > 0) {
-      const list = JSON.stringify(rootFiles);
-      for (const [compilerOptions, configPath] of configs) {
-        const content = `{"compilerOptions":${compilerOptions},"files":${list}}`;
-        if (files.get(configPath) === content) continue;
-        if (opened.has(configPath)) changed.push(configPath);
-        files.set(configPath, content);
-      }
+    // stale files of previous blocks must not be imported
+    const removedPaths: string[] = [];
+    for (const file of files.keys()) {
+      if (!next.has(file)) removedPaths.push(file);
+    }
+    const createPrograms: CreateSnapshotProgramParams[] = [];
+    const reconfigurePrograms: ReconfigureSnapshotProgramParams[] = [];
+    for (const [config, rootFiles] of roots) {
+      const { id, options: compilerOptions } = config;
+      if (id) reconfigurePrograms.push({ id, rootFiles, compilerOptions });
+      else createPrograms.push({ rootFiles, compilerOptions });
     }
 
-    api ??= new API({ cwd });
-    if (snapshot && changed.length === 0 && created.length === 0 && openProjects.length === 0) {
-      return snapshot;
-    }
-    // only read while creating the snapshot, FS callbacks cost a round trip for each lookup of module resolution
-    for (const [file, content] of files) {
-      fs.mkdirSync(path.dirname(file), { recursive: true });
-      fs.writeFileSync(file, content);
-    }
-    const prev = snapshot;
-    try {
-      snapshot = api.updateSnapshot({ openProjects, fileChanges: { changed, created } });
-    } finally {
-      fs.rmSync(root, { recursive: true, force: true });
-      try {
-        fs.rmdirSync(path.dirname(root));
-      } catch {
-        // used by other instances
-      }
-    }
-    prev?.dispose();
-    for (const configPath of openProjects) opened.add(configPath);
+    snapshot ??= api!.createSnapshot({
+      userPreferences: { includeCompletionsForModuleExports: false },
+    });
+    const updated = snapshot.update({
+      fileSystem: createFileSystemLayer(changed, { removedPaths }),
+      createPrograms,
+      reconfigurePrograms,
+    });
+    // configs without a program are in the order of `createPrograms`
+    const created = updated.operation.createdPrograms;
+    let index = 0;
+    for (const config of roots.keys()) config.id ??= created[index++].id;
+    snapshot.dispose();
+    snapshot = updated;
+    files = next;
     return snapshot;
   }
 
@@ -480,11 +497,8 @@ export function createTwoslasher(options: TwoslasherOptions = {}): Twoslasher {
     for (let i = 0; i < blocks.length; i++) {
       const block = blocks[i];
       try {
-        const project = snapshot.getProject(block.configPath);
-        if (!project) {
-          throw new TwoslashError('Failed to load project', `Cannot open ${block.configPath}`);
-        }
-        const value = analyze(block, project, slot(i), options);
+        const project = snapshot.getProject(block.config.id!)!;
+        const value = analyze(block, project, api!.printer, slot(i), options);
         results.set(block.key, { refs: block.refs, value });
       } catch (error) {
         results.set(block.key, { refs: block.refs, error });
@@ -550,6 +564,7 @@ function getKey(code: string, extension: string): string {
 function analyze(
   block: Block,
   project: Project,
+  printer: Printer,
   dir: string,
   { shouldGetHoverInfo, filterNode }: TwoslasherOptions,
 ): TwoslashReturn {
@@ -559,15 +574,7 @@ function analyze(
   const isInRemoval = (index: number) =>
     index >= code.length || index < 0 || isInRanges(index, removals, false);
 
-  const { checker, program } = project;
-  const configErrors = program.getConfigFileParsingDiagnostics();
-  if (configErrors.length > 0 && !handbookOptions.noErrorValidation) {
-    throw new TwoslashError(
-      'Invalid compiler options',
-      configErrors.map((d) => d.text).join('\n'),
-      'Check the inline compiler flags in the code block.',
-    );
-  }
+  const { checker, program, languageService } = project;
 
   const identifiersMap = new Map<VirtualFile, Identifier[]>();
   function getIdentifiersOfFile(file: VirtualFile): Identifier[] {
@@ -595,7 +602,7 @@ function analyze(
   function typeToString(type: Type): string {
     let text = typeStrings.get(type.id);
     if (text === undefined) {
-      text = printType(project, type);
+      text = printType(checker, printer, type);
       typeStrings.set(type.id, text);
     }
     return text;
@@ -626,7 +633,7 @@ function analyze(
         (!contextual.isUnionType() || property.declarations.length === 1)
       ) {
         target = property;
-        type = checker.getTypeOfSymbol(property) ?? type;
+        type = checker.getTypeOfSymbol(property);
       }
     }
 
@@ -635,7 +642,7 @@ function analyze(
     const key = `${target.id}:${type.id}:${call ? call.pos : -1}`;
     let text = described.get(key);
     if (text === undefined) {
-      text = describeSymbol(project, target, type, identifier, call, typeToString);
+      text = describeSymbol(checker, printer, target, type, identifier, call, typeToString);
       described.set(key, text);
     }
     if (symbol.flags & SymbolFlags.Alias) {
@@ -674,8 +681,7 @@ function analyze(
     const out: NodeWithoutPosition<NodeHover>[] = [];
     for (let i = 0; i < identifiers.length; i++) {
       const symbol = symbols[i];
-      const type = types[i];
-      if (symbol && type) out.push(getHover(file, identifiers[i], symbol, type));
+      if (symbol) out.push(getHover(file, identifiers[i], symbol, types[i]));
     }
     return out;
   }
@@ -733,15 +739,10 @@ function analyze(
     }
 
     const prefix = /[$\w]+$/.exec(code.slice(0, target))?.[0] ?? '';
-    let result: CompletionInfo | undefined;
-    try {
-      result = checker.getCompletionsAtPosition(
-        dir + file.filename,
-        toFile(file, target) - (prefix ? 1 : 0),
-      );
-    } catch {
-      // completions of the global scope are refused, they would need auto imports
-    }
+    const result = languageService.getCompletionsAtPosition(
+      dir + file.filename,
+      toFile(file, target),
+    );
     const completions: CompletionEntry[] = [];
     for (const entry of result?.entries ?? []) {
       if (!entry.name.startsWith(prefix)) continue;

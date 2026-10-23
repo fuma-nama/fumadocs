@@ -1,10 +1,10 @@
-import { type Project, SymbolFlags } from 'typescript/unstable/sync';
+import { type Project, SymbolFlags } from 'typescript/sync';
 import {
   type CallExpression,
   isCallExpression,
   isVariableDeclaration,
   type SourceFile,
-} from 'typescript/unstable/ast';
+} from 'typescript/ast';
 
 export interface ParsedStoryCall {
   call: CallExpression;

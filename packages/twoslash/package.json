@@ -51,7 +51,7 @@
     "cn": "^0.5.0",
     "mdast-util-from-markdown": "^2.1.0",
     "mdast-util-to-hast": "^13.2.1",
-    "typescript": "~7.0.2"
+    "typescript": "7.1.0-beta"
   },
   "devDependencies": {
     "@types/mdast": "^4.0.4",

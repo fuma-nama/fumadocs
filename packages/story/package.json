@@ -50,7 +50,7 @@
     "@fumari/stf": "workspace:*",
     "cn": "^0.5.0",
     "lucide-react": "^1.59.0",
-    "typescript": "~7.0.2"
+    "typescript": "7.1.0-beta"
   },
   "devDependencies": {
     "@types/node": "26.6.5",
