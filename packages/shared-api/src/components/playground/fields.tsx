@@ -76,16 +76,18 @@ function getType(field: Schema): string | undefined {
   if (field.items) return 'array';
 }
 
-/** the options of a union whose members are all `const`, labelled by their `title`, like an enum with names */
-function getConstOptions(field: Schema): { value: unknown; label: string }[] | undefined {
+/** the options of a union whose members are all `const`, labelled by their `title` and `description`, like an enum with names */
+function getConstOptions(
+  field: Schema,
+): { value: unknown; label: string; description?: string }[] | undefined {
   const union = field.anyOf ?? field.oneOf;
   if (!union || union.length === 0) return;
 
-  const out: { value: unknown; label: string }[] = [];
+  const out: { value: unknown; label: string; description?: string }[] = [];
   for (const item of union) {
     if (typeof item !== 'object' || item.const === undefined) return;
     const label = typeof item.const === 'string' ? item.const : JSON.stringify(item.const);
-    out.push({ value: item.const, label: item.title ?? label });
+    out.push({ value: item.const, label: item.title ?? label, description: item.description });
   }
   return out;
 }
@@ -506,9 +508,10 @@ function FieldValue({
     (field.const !== undefined ? [field.const] : field.enum);
   if (options && options.length > 0) {
     const idx = options.indexOf(value);
-    const items: { value: string; label: ReactNode }[] = options.map((item, i) => ({
+    const items: CellSelectItem[] = options.map((item, i) => ({
       value: String(i),
       label: labelled?.[i].label ?? (typeof item === 'string' ? item : JSON.stringify(item)),
+      description: labelled?.[i].description,
     }));
     if (!required)
       items.push({
