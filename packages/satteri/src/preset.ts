@@ -6,7 +6,7 @@ import { remarkCodeTab, type RemarkCodeTabOptions } from '@/remark-code-tab';
 import { remarkNpm, type RemarkNpmOptions } from '@/remark-npm';
 import { remarkStructure, type StructureOptions } from '@/remark-structure';
 import { rehypeCode, type RehypeCodeOptions } from '@/rehype-code';
-import { rehypeToc } from '@/rehype-toc';
+import { rehypeToc, type RehypeTocOptions } from '@/rehype-toc';
 import { rehypeTable } from '@/rehype-table';
 import { rehypeKatex, type RehypeKatexOptions } from '@/rehype-katex';
 import type { MdastPluginInput } from 'satteri';
@@ -23,6 +23,7 @@ export type DefaultSatteriOptions = Omit<MdxCompileOptions, 'mdastPlugins' | 'ha
   remarkCodeTabOptions?: RemarkCodeTabOptions | false;
   remarkNpmOptions?: RemarkNpmOptions | false;
   rehypeCodeOptions?: RehypeCodeOptions | false;
+  rehypeTocOptions?: RehypeTocOptions;
   /**
    * KaTeX rendering, applied only when the `math` feature is enabled. Pass
    * options to customize it, or `false` to keep math unrendered.
@@ -80,6 +81,7 @@ export function applySatteriPreset(
       remarkCodeTabOptions,
       remarkNpmOptions,
       rehypeKatexOptions,
+      rehypeTocOptions,
       mdastPlugins,
       hastPlugins,
       features,
@@ -121,7 +123,7 @@ export function applySatteriPreset(
           }),
         ...plugins,
         rehypeTable(),
-        rehypeToc(),
+        rehypeToc(rehypeTocOptions),
       ],
       hastPlugins,
     );
