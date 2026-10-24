@@ -368,15 +368,15 @@ import Mixedbread from '@mixedbread/sdk';`,
 `,
       ),
     searchRoute: (() => {
-      // Astro only loads `.env` files into `import.meta.env`
+      // Astro inlines `import.meta.env` at build time, `getSecret()` reads secrets at runtime
       const server = (
         astro = false,
       ) => `import { createMixedbreadSearchAPI } from 'fumadocs-core/search/mixedbread';
-import Mixedbread from '@mixedbread/sdk';
+import Mixedbread from '@mixedbread/sdk';${astro ? "\nimport { getSecret } from 'astro:env/server';" : ''}
 
 const server = createMixedbreadSearchAPI({
-  client: new Mixedbread(${astro ? '{ apiKey: import.meta.env.MXBAI_API_KEY }' : ''}),
-  storeIdentifier: ${astro ? 'import.meta.env' : 'process.env'}.MIXEDBREAD_STORE_ID!,
+  client: new Mixedbread(${astro ? "{ apiKey: getSecret('MXBAI_API_KEY') }" : ''}),
+  storeIdentifier: ${astro ? "getSecret('MIXEDBREAD_STORE_ID')" : 'process.env.MIXEDBREAD_STORE_ID'}!,
 });
 `;
       return {

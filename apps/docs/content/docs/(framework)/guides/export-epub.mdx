@@ -127,13 +127,14 @@ export const { GET } = createEpubExportAPI({
 
 ```ts tab="Astro" title="src/pages/export/epub.ts"
 import type { APIRoute } from 'astro';
+import { getSecret } from 'astro:env/server';
 import { source } from '@/lib/source';
 import { createEpubExportAPI } from 'fumadocs-epub';
 
 const api = createEpubExportAPI({
   source,
   title: 'My Documentation',
-  secret: import.meta.env.EXPORT_SECRET,
+  secret: getSecret('EXPORT_SECRET'),
 });
 
 // requires `output: 'server'`
