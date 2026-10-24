@@ -435,11 +435,15 @@ function formatName(name: string): string {
 }
 
 function UnionSelect({ union: { schema, value, select } }: { union: SchemaUnion }) {
+  const t = useTranslations({ note: 'schema UI' });
   const items = schema.items.map((item) => ({ label: item.name, value: item.$type }));
 
   return (
     <Select items={items} value={value} onValueChange={(v) => v && select(v)}>
-      <SelectTrigger className="h-7 w-auto min-w-0 gap-1 border-0 bg-transparent px-1.5 py-0 text-[0.8125rem] font-medium text-fd-foreground hover:bg-fd-accent focus:ring-0 focus-visible:ring-2 focus-visible:ring-inset data-popup-open:bg-fd-accent">
+      <SelectTrigger
+        aria-label={t('Schema variant')}
+        className="h-7 w-auto min-w-0 gap-1 border-0 bg-transparent px-1.5 py-0 text-[0.8125rem] font-medium text-fd-foreground hover:bg-fd-accent focus:ring-0 focus-visible:ring-2 focus-visible:ring-inset data-popup-open:bg-fd-accent"
+      >
         <SelectValue className="truncate" />
       </SelectTrigger>
       <SelectContent>
