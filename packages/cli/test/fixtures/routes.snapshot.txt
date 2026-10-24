@@ -1,4 +1,14 @@
 {
+  "llms.txt (astro)": {
+    "file": "pages/llms.txt.ts",
+    "path": "/llms.txt",
+    "pattern": "/llms.txt",
+  },
+  "llms.txt (astro, i18n)": {
+    "file": "pages/llms.txt.ts",
+    "path": "/llms.txt",
+    "pattern": "/llms.txt",
+  },
   "llms.txt (next)": {
     "file": "app/llms.txt/route.ts",
     "path": "/llms.txt",
@@ -38,6 +48,16 @@
     "file": "pages/_api/llms.txt.ts",
     "path": "/llms.txt",
     "pattern": "/llms.txt",
+  },
+  "markdown (astro)": {
+    "file": "pages/llms.mdx/docs/[...slug]/content.md.ts",
+    "path": "/llms.mdx/docs/[...slug]/content.md",
+    "pattern": "/llms.mdx/docs/:slug*",
+  },
+  "markdown (astro, i18n)": {
+    "file": "pages/[...lang]/llms.mdx/docs/[...slug]/content.md.ts",
+    "path": "/[...lang]/llms.mdx/docs/[...slug]/content.md",
+    "pattern": "/:lang/llms.mdx/docs/:slug*",
   },
   "markdown (next)": {
     "file": "app/llms.mdx/docs/[[...slug]]/route.ts",
@@ -79,6 +99,16 @@
     "path": "/[lang]/llms.mdx/docs/[...slug]/content.md",
     "pattern": "/:lang/llms.mdx/docs/:slug*",
   },
+  "mcp (astro)": {
+    "file": "pages/api/mcp.ts",
+    "path": "/api/mcp",
+    "pattern": "/api/mcp",
+  },
+  "mcp (astro, i18n)": {
+    "file": "pages/api/mcp.ts",
+    "path": "/api/mcp",
+    "pattern": "/api/mcp",
+  },
   "mcp (next)": {
     "file": "app/api/mcp/route.ts",
     "path": "/api/mcp",
@@ -119,6 +149,16 @@
     "path": "/api/mcp",
     "pattern": "/api/mcp",
   },
+  "og (astro)": {
+    "file": "pages/og/docs/[...slug]/image.png.ts",
+    "path": "/og/docs/[...slug]/image.png",
+    "pattern": "/og/docs/:slug*",
+  },
+  "og (astro, i18n)": {
+    "file": "pages/[...lang]/og/docs/[...slug]/image.png.ts",
+    "path": "/[...lang]/og/docs/[...slug]/image.png",
+    "pattern": "/:lang/og/docs/:slug*",
+  },
   "og (next)": {
     "file": "app/og/docs/[...slug]/route.ts",
     "path": "/og/docs/[...slug]",
@@ -158,6 +198,16 @@
     "file": "pages/_api/[lang]/og/docs/[...slug]/image.png.ts",
     "path": "/[lang]/og/docs/[...slug]/image.png",
     "pattern": "/:lang/og/docs/:slug*",
+  },
+  "root docs markdown (astro)": {
+    "file": "pages/llms.mdx/[...slug]/content.md.ts",
+    "path": "/llms.mdx/[...slug]/content.md",
+    "pattern": "/llms.mdx/:slug*",
+  },
+  "root docs markdown (astro, i18n)": {
+    "file": "pages/llms.mdx/[...slug]/content.md.ts",
+    "path": "/llms.mdx/[...slug]/content.md",
+    "pattern": "/llms.mdx/:slug*",
   },
   "root docs markdown (next)": {
     "file": "app/llms.mdx/[...slug]/route.ts",

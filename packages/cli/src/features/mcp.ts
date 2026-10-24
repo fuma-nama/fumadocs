@@ -1,16 +1,10 @@
 import path from 'node:path';
 import type { Feature } from '@/features';
-import type { ReactFramework } from '@/project';
+import type { Framework } from '@/project';
 import { type FormattedRoute, formatRoute, routeModule } from '@/project/route';
 import { addReactRouterPrerenderArray } from '@/codemod';
 import { llms } from './llms';
-import {
-  reactFramework,
-  registerReactRouterRoutes,
-  requiresMarkdown,
-  type SourceRef,
-  sourceRef,
-} from './utils';
+import { registerReactRouterRoutes, requiresMarkdown, type SourceRef, sourceRef } from './utils';
 
 const server = ({
   ref,
@@ -32,7 +26,7 @@ const handler = createMcpHandler(() => {
 });
 `;
 
-export const templates = (framework: ReactFramework, route: FormattedRoute, src: SourceRef) =>
+export const templates = (framework: Framework, route: FormattedRoute, src: SourceRef) =>
   routeModule(framework, route, {
     imports: server(src),
     body: 'handler.fetch(request)',
@@ -40,7 +34,7 @@ export const templates = (framework: ReactFramework, route: FormattedRoute, src:
     methods: ['GET', 'POST', 'DELETE'],
   });
 
-export const mcpRoute = (framework: ReactFramework) =>
+export const mcpRoute = (framework: Framework) =>
   formatRoute({ segments: ['api/mcp'] }, framework, null);
 
 export const mcp: Feature = {
@@ -51,8 +45,7 @@ export const mcp: Feature = {
   supports: (project) =>
     project.static ? 'MCP requires a server at runtime' : requiresMarkdown(project),
   async apply(ctx) {
-    const { baseDir } = ctx.project;
-    const framework = reactFramework(ctx.project);
+    const { baseDir, framework } = ctx.project;
     ctx.addDependencies({ '@modelcontextprotocol/server': null, zod: null });
 
     const route = mcpRoute(framework);

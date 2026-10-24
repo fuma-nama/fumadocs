@@ -1,13 +1,17 @@
 import path from 'node:path';
 import type { Feature } from '@/features';
-import type { ReactFramework } from '@/project';
-import { type FormattedRoute, formatRoute, reactRouterTypes } from '@/project/route';
+import type { Framework, I18nInfo } from '@/project';
+import {
+  astroPageRoute,
+  type FormattedRoute,
+  formatRoute,
+  reactRouterTypes,
+} from '@/project/route';
 import { addElements, getConfigObject, getProperty } from '@/codemod';
 import { docs } from './docs';
 import { extendNextProxy } from './llms';
 import {
   addPageUrl,
-  reactFramework,
   registerReactRouterRoutes,
   sharedRoute,
   type SourceRef,
@@ -37,9 +41,14 @@ const image = (engine: Engine) => `generateOGImage({
 
 const ext = (engine: Engine) => (engine === 'takumi' ? 'webp' : 'png');
 
-type Template = (route: FormattedRoute, engine: Engine, i18n: boolean, src: SourceRef) => string;
+type Template = (
+  route: FormattedRoute,
+  engine: Engine,
+  i18n: I18nInfo | null,
+  src: SourceRef,
+) => string;
 
-const templates: Record<ReactFramework, Template> = {
+const templates: Record<Framework, Template> = {
   next: (route, engine, i18n, src) => `import { ${src.ref} } from '@/lib/source';
 import { notFound } from 'next/navigation';
 ${imports(engine)}
@@ -114,6 +123,12 @@ export async function getConfig() {
   } as const;
 }
 `,
+  astro: (_route, engine, i18n, src) =>
+    astroPageRoute(
+      i18n,
+      `${imports(engine)}\nimport { ${src.ref} } from '@/lib/source';`,
+      image(engine),
+    ),
 };
 
 export const og: Feature<{ engine: Engine }> = {
@@ -131,8 +146,7 @@ export const og: Feature<{ engine: Engine }> = {
     },
   },
   async apply(ctx, { engine }) {
-    const { baseDir, configFile, i18n, source } = ctx.project;
-    const framework = reactFramework(ctx.project);
+    const { baseDir, configFile, i18n, source, framework } = ctx.project;
     if (engine === 'next-og' && framework !== 'next')
       throw new Error('next/og is only available on Next.js');
     if (engine === 'takumi') ctx.addDependencies({ 'takumi-js': null });
@@ -161,7 +175,7 @@ export const og: Feature<{ engine: Engine }> = {
     );
     await ctx.write(
       path.join(baseDir, route.file),
-      templates[framework](route, engine, i18n !== null, sourceRef(ctx.project.source.dynamic)),
+      templates[framework](route, engine, i18n, sourceRef(ctx.project.source.dynamic)),
     );
 
     if (framework === 'react-router') await registerReactRouterRoutes(ctx, [route]);

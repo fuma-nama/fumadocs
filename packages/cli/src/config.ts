@@ -4,11 +4,20 @@ import { existsSync } from 'node:fs';
 import path from 'node:path';
 import { detectFramework } from 'fuma-cli/detect';
 
+// self-contained, the tsdown config imports this file
 const frameworks = ['next', 'astro', 'waku', 'react-router', 'tanstack-start'] as const;
 export type Framework = (typeof frameworks)[number];
 
 function isSupportedFramework(v: string): v is Framework {
   return frameworks.includes(v as Framework);
+}
+
+/** `fuma-cli` doesn't detect Astro */
+async function detect(cwd: string): Promise<Framework> {
+  const files = await fs.readdir(cwd).catch(() => []);
+  if (files.some((file) => file.startsWith('astro.config.'))) return 'astro';
+  const framework = await detectFramework(cwd);
+  return isSupportedFramework(framework) ? framework : 'next';
 }
 
 /** directories from shadcn's `components.json`, so components are installed at the same place */
@@ -40,8 +49,7 @@ export async function createConfigSchema(cwd = process.cwd()) {
     utils: shadcn.utils,
   };
 
-  let framework = await detectFramework(cwd);
-  if (!isSupportedFramework(framework)) framework = 'next';
+  const framework = await detect(cwd);
 
   return z.object({
     $schema: z.string().default('node_modules/@fumadocs/cli/dist/schema.json').optional(),
@@ -60,9 +68,11 @@ export async function createConfigSchema(cwd = process.cwd()) {
     baseDir: z.string().default(() => {
       if (framework === 'react-router') return 'app';
       // the routes directory of the framework decides whether app code lives in `src`
-      const routes = { next: 'app', waku: 'pages', 'tanstack-start': 'routes' }[framework] ?? '';
+      const routes = { next: 'app', waku: 'pages', 'tanstack-start': 'routes', astro: 'pages' }[
+        framework
+      ];
       if (existsSync(path.resolve(cwd, 'src', routes))) return 'src';
-      if (routes && existsSync(path.resolve(cwd, routes))) return '';
+      if (existsSync(path.resolve(cwd, routes))) return '';
       return existsSync(path.resolve(cwd, 'src')) ? 'src' : '';
     }),
     uiLibrary: z.enum(['radix-ui', 'base-ui']).default('base-ui'),

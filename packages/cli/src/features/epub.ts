@@ -1,16 +1,10 @@
 import path from 'node:path';
 import type { Feature } from '@/features';
-import type { ReactFramework } from '@/project';
+import type { Framework } from '@/project';
 import { type FormattedRoute, formatRoute, routeModule } from '@/project/route';
 import { addReactRouterPrerenderArray, enableProcessedMarkdown } from '@/codemod';
 import { docs } from './docs';
-import {
-  reactFramework,
-  registerReactRouterRoutes,
-  requiresMarkdown,
-  type SourceRef,
-  sourceRef,
-} from './utils';
+import { registerReactRouterRoutes, requiresMarkdown, type SourceRef, sourceRef } from './utils';
 
 const api = ({ dynamic, ref }: SourceRef) => `import { ${ref} } from '@/lib/source';
 import { createEpubExportAPI } from 'fumadocs-epub';
@@ -25,7 +19,7 @@ const api = createEpubExportAPI({
 });
 `;
 
-const templates = (framework: ReactFramework, route: FormattedRoute, src: SourceRef) =>
+const templates = (framework: Framework, route: FormattedRoute, src: SourceRef) =>
   routeModule(framework, route, {
     imports: api(src),
     body: 'api.GET(request)',
@@ -41,14 +35,13 @@ export const epub: Feature = {
   supports: (project) =>
     project.static ? 'the export route needs a server at runtime' : requiresMarkdown(project),
   async apply(ctx) {
-    const { baseDir, source } = ctx.project;
-    const framework = reactFramework(ctx.project);
+    const { baseDir, source, framework } = ctx.project;
     ctx.addDependencies({ 'fumadocs-epub': null });
 
     if (source.collections) {
       await ctx.source(source.collections, (file) => {
         if (!enableProcessedMarkdown(file))
-          throw new Error(`cannot find \`defineDocs()\` in ${source.collections}`);
+          throw new Error(`cannot enable \`includeProcessedMarkdown\` in ${source.collections}`);
       });
     }
 

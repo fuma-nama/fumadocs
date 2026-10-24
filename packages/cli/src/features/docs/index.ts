@@ -7,12 +7,19 @@ import {
   addJsxAttribute,
   addVitePlugin,
   findJsxElement,
+  type SourceFile,
   wrapNextConfig,
 } from '@/codemod';
 import { exists } from '@/utils/fs';
 import { localeSegment } from '@/project/route';
-import { nextProxy, sampleContent, sampleContentCn, templates } from './templates';
-import { reactFramework, reactOnly, registerReactRouterRoutes } from '../utils';
+import {
+  astroContentConfig,
+  nextProxy,
+  sampleContent,
+  sampleContentCn,
+  templates,
+} from './templates';
+import { registerReactRouterRoutes } from '../utils';
 
 const cssImports = (preset: string) => [
   `@import 'fumadocs-ui/css/${preset}.css';`,
@@ -23,7 +30,6 @@ export const docs: Feature<{ i18n: boolean }> = {
   id: 'docs',
   title: 'Docs',
   description: 'set up Fumadocs on your app, in a dedicated route group',
-  supports: reactOnly,
   options: {
     i18n: { message: 'Enable internationalization?', initialValue: false },
   },
@@ -32,8 +38,7 @@ export const docs: Feature<{ i18n: boolean }> = {
   },
   async apply(ctx, options) {
     const { project } = ctx;
-    const { baseDir, packageJson, config } = project;
-    const framework = reactFramework(project);
+    const { baseDir, packageJson, config, framework } = project;
     // Waku has no optional route segments, the locale is always in the URL
     const i18n = project.i18n ?? (options.i18n ? { optionalLocale: framework !== 'waku' } : null);
     const providerProps: string[] = [];
@@ -43,10 +48,32 @@ export const docs: Feature<{ i18n: boolean }> = {
 
     ctx.addDependencies({
       'fumadocs-core': null,
-      'fumadocs-mdx': null,
       'fumadocs-ui': config.uiLibrary === 'base-ui' ? 'npm:@fumadocs/base-ui' : null,
     });
-    ctx.addDependencies({ '@types/mdx': null }, true);
+    // the language pack of `cn`
+    if (i18n) ctx.addDependencies({ '@fumadocs/language': null });
+    if (framework === 'astro') {
+      // the integrations and Tailwind CSS of the Astro config
+      ctx.addDependencies({
+        '@fumadocs/astro': null,
+        '@astrojs/react': null,
+        '@astrojs/mdx': null,
+        react: null,
+        'react-dom': null,
+      });
+      ctx.addDependencies(
+        {
+          '@types/react': null,
+          '@types/react-dom': null,
+          tailwindcss: null,
+          '@tailwindcss/vite': null,
+        },
+        true,
+      );
+    } else {
+      ctx.addDependencies({ 'fumadocs-mdx': null });
+      ctx.addDependencies({ '@types/mdx': null }, true);
+    }
 
     const files = templates[framework]({
       static: project.static,
@@ -59,12 +86,14 @@ export const docs: Feature<{ i18n: boolean }> = {
     }
     await ctx.write('content/docs/index.mdx', sampleContent);
     if (i18n) await ctx.write('content/docs/index.cn.mdx', sampleContentCn);
-    await ctx.append('.gitignore', ['.source']);
+    if (framework === 'astro') await configureCollections(ctx);
+    else await ctx.append('.gitignore', ['.source']);
     if (i18n && framework === 'next') await configureProxy(ctx);
 
     await configureBundler(ctx);
     await configureCss(ctx);
-    await suppressHydrationWarning(ctx);
+    // Astro renders `<html>` without React
+    if (framework !== 'astro') await suppressHydrationWarning(ctx);
     if (framework === 'react-router') await configureRoutes(ctx, i18n);
 
     const tsconfig = await fs
@@ -84,6 +113,18 @@ export const docs: Feature<{ i18n: boolean }> = {
       ctx.note(
         'When prerendering, list the docs pages with `source.getPages().map((page) => page.url)` instead of globbing content files, see https://fumadocs.dev/docs/internationalization/react-router.',
       );
+    }
+    if (framework === 'astro') {
+      const layout = path.join(baseDir, project.info.rootFile);
+      const content = await fs.readFile(path.join(project.cwd, layout), 'utf-8').catch(() => '');
+      if (!content.includes('Astro.props'))
+        ctx.note(
+          `Docs pages render in \`${layout}\` with \`title\` and \`description\` props, add them to its \`<head>\`.`,
+        );
+      if (i18n)
+        ctx.note(
+          `Docs pages pass the locale as \`lang\` to \`${layout}\`, set it on \`<html lang>\`.`,
+        );
     }
     if (i18n) {
       ctx.note(
@@ -119,29 +160,80 @@ async function configureProxy(ctx: FeatureContext) {
   );
 }
 
+function bundlerEdits({ framework, baseDir }: Project): ((file: SourceFile) => boolean)[] {
+  if (framework === 'next') return [wrapNextConfig];
+  if (framework === 'astro') {
+    const integration = (name: string, from: string, call?: string) => (file: SourceFile) =>
+      addVitePlugin(file, { name, from, call, default: true }, ['integrations']);
+
+    return [
+      integration('react', '@astrojs/react'),
+      integration('mdx', '@astrojs/mdx'),
+      integration(
+        'fumadocs',
+        '@fumadocs/astro',
+        `fumadocs({ components: './${path.posix.join(baseDir, 'components/mdx.tsx')}' })`,
+      ),
+      (file) =>
+        addVitePlugin(file, { name: 'tailwindcss', from: '@tailwindcss/vite', default: true }, [
+          'vite',
+          'plugins',
+        ]),
+    ];
+  }
+
+  return [
+    (file) =>
+      addVitePlugin(
+        file,
+        { name: 'fumadocsMdx', from: 'fumadocs-mdx/vite' },
+        framework === 'waku' ? ['vite', 'plugins'] : ['plugins'],
+      ),
+  ];
+}
+
 async function configureBundler(ctx: FeatureContext) {
   const { framework, configFile } = ctx.project;
-  const edited =
-    configFile !== undefined &&
-    (await ctx
-      .source(configFile, (file) => {
-        const ok =
-          framework === 'next'
-            ? wrapNextConfig(file)
-            : addVitePlugin(
-                file,
-                { name: 'fumadocsMdx', from: 'fumadocs-mdx/vite' },
-                framework === 'waku' ? ['vite', 'plugins'] : ['plugins'],
-              );
-        if (!ok) throw new Error(`cannot update ${configFile}`);
-      })
-      .catch(() => false));
+  let edited = false;
+  if (configFile) {
+    // parse the file for each edit, so it sees the edits before it
+    for (const edit of bundlerEdits(ctx.project)) {
+      edited = await ctx
+        .source(configFile, (file) => {
+          if (!edit(file)) throw new Error(`cannot update ${configFile}`);
+        })
+        .catch(() => false);
+      if (!edited) break;
+    }
+  }
+  if (edited) return;
 
-  if (!edited) {
+  if (framework === 'next') {
     ctx.note(
-      framework === 'next'
-        ? "Wrap your Next.js config with `createMDX()` from 'fumadocs-mdx/next', see https://fumadocs.dev/docs/mdx/next."
-        : "Add `fumadocsMdx()` from 'fumadocs-mdx/vite' to the Vite plugins of your config file.",
+      "Wrap your Next.js config with `createMDX()` from 'fumadocs-mdx/next', see https://fumadocs.dev/docs/mdx/next.",
+    );
+  } else if (framework === 'astro') {
+    ctx.note(
+      'Add the integrations of Fumadocs to your Astro config, see https://fumadocs.dev/docs/manual-installation/astro.',
+    );
+  } else {
+    ctx.note(
+      "Add `fumadocsMdx()` from 'fumadocs-mdx/vite' to the Vite plugins of your config file.",
+    );
+  }
+}
+
+/** Astro content collections of the docs */
+async function configureCollections(ctx: FeatureContext) {
+  // Astro warns about empty collections
+  await ctx.write('content/docs/meta.json', '{\n  "pages": ["..."]\n}\n');
+  const file = path.join(ctx.project.baseDir, 'content.config.ts');
+  const content = await fs.readFile(path.join(ctx.project.cwd, file), 'utf-8').catch(() => null);
+  if (content === null) {
+    await ctx.write(file, astroContentConfig);
+  } else if (!content.includes('docsLoader(')) {
+    ctx.note(
+      `A content config already exists at ${file}, add the collections of docs to it:\n${astroContentConfig}`,
     );
   }
 }

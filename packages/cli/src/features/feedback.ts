@@ -15,7 +15,12 @@ export const feedback: Feature = {
 
     // server actions are only available on RSC frameworks, static export has none
     const serverAction = framework === 'next' || framework === 'waku';
-    const page = await findSource(cwd, path.join(baseDir, info.routesDir), '<DocsPage');
+    // Astro renders docs pages in a React island, from its components
+    const page = await findSource(
+      cwd,
+      framework === 'astro' ? baseDir : path.join(baseDir, info.routesDir),
+      '<DocsPage',
+    );
     const edited =
       page !== undefined &&
       !(serverAction && isStatic) &&
