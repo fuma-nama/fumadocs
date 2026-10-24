@@ -1,3 +1,9 @@
+## @fumadocs/satteri@0.7.1
+
+### TOC options in preset
+
+- Add `rehypeTocOptions` to the preset options.
+
 ## @fumadocs/satteri@0.7.0
 
 ### Processed Markdown links page-relative images at their served URLs

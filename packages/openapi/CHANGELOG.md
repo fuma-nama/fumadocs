@@ -1,3 +1,17 @@
+## fumadocs-openapi@12.5.6
+
+### Unions of `const` members render as a labelled select
+
+- In the playground, a `oneOf`/`anyOf` whose members are all `const` is one select labelled by each member's `title`, instead of a switch between members.
+
+### `renderParameterField` can render the default input with another schema
+
+`renderParameterField` gets `ctx.renderDefault(schema)` as its third argument, which renders the parameter's default input with `schema` replacing its own. For example, an `enum` of values loaded at runtime shows the playground's select.
+
+### Names for the selects of operation pages
+
+The selects that switch the code language, the example request, the response status, the media type, the security scheme and the variant of a union schema now have an accessible name, so a screen reader announces what they choose and not only their value. The names go through `t()` like the other labels. `ExampleSelect` accepts an `aria-label`.
+
 ## fumadocs-openapi@12.5.5
 
 ### `Value` rows of auth providers accept `end`

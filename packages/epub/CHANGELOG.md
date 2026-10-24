@@ -1,3 +1,9 @@
+## fumadocs-epub@1.2.4
+
+### Export without a bundler
+
+- Use the named `EPub` export of `epub-gen-memory`, its CommonJS default export broke the export on runtimes without a bundler, like Astro.
+
 ## fumadocs-epub@1.2.3
 
 ### Fix Markdown output and search records

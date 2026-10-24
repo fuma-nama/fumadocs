@@ -1,3 +1,9 @@
+## @fumadocs/base-ui@16.17.9
+
+### Keep the theme on Astro navigations
+
+- The Astro `RootProvider` keeps the theme across navigations of the Astro client router.
+
 ## @fumadocs/base-ui@16.17.8
 
 ### Bring your own highlighter

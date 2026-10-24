@@ -1,3 +1,9 @@
+## @fumadocs/asyncapi@0.5.4
+
+### Unions of `const` members render as a labelled select
+
+- In the playground, a `oneOf`/`anyOf` whose members are all `const` is one select labelled by each member's `title`, instead of a switch between members.
+
 ## @fumadocs/asyncapi@0.5.3
 
 ### Bring your own highlighter
