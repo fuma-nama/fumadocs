@@ -1,0 +1,14 @@
+---
+import Layout from '@/layouts/Layout.astro';
+import { App } from '@/components/app';
+---
+
+<Layout title="Fumadocs on Astro" description="The truly flexible docs framework on React.js.">
+  <App
+    client:load
+    transition:persist="app"
+    page="home"
+    pathname={Astro.url.pathname}
+    params={Astro.params}
+  />
+</Layout>

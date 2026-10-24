@@ -6,7 +6,7 @@ icon: SquareBookmark
 
 ## What is this?
 
-Fumadocs Core offers server-side functions and headless components to build docs on React.js frameworks like Next.js, Waku, and Astro with React islands.
+Fumadocs Core offers server-side functions and headless components to build docs on React.js frameworks like Next.js and Waku, or on Astro.
 
 - [Search](/docs/headless/search)
 - Breadcrumb, Sidebar, TOC Components
@@ -70,20 +70,22 @@ export function Root({ children }: { children: ReactNode }) {
 ```
 
 ```tsx tab="Astro"
+import { navigate } from 'astro:transitions/client';
 import type { ReactNode } from 'react';
 import { AstroProvider } from 'fumadocs-core/framework/astro';
 
-export function DocsIsland({
-  children,
+// wrap your React islands, pass `Astro.url.pathname` and `Astro.params` from `.astro` pages
+export function Provider({
   pathname,
   params,
+  children,
 }: {
-  children: ReactNode;
   pathname: string;
-  params: Record<string, string | string[] | undefined>;
+  params: Record<string, string | undefined>;
+  children: ReactNode;
 }) {
   return (
-    <AstroProvider pathname={pathname} params={params}>
+    <AstroProvider pathname={pathname} params={params} navigate={navigate}>
       {children}
     </AstroProvider>
   );

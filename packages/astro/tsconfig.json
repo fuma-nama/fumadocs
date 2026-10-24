@@ -1,0 +1,15 @@
+{
+  "extends": "tsconfig/base.json",
+  "compilerOptions": {
+    "paths": {
+      "@/*": ["./src/*"]
+    },
+    "types": ["@types/node", "@types/hast", "astro/client"],
+    "jsx": "react-jsx",
+    "noEmit": true,
+    "lib": ["ESNext", "DOM"],
+    "module": "ESNext",
+    "target": "ES2023"
+  },
+  "exclude": ["node_modules", "dist"]
+}
