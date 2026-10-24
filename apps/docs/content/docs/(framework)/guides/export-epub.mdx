@@ -133,7 +133,7 @@ import { createEpubExportAPI } from 'fumadocs-epub';
 const api = createEpubExportAPI({
   source,
   title: 'My Documentation',
-  secret: process.env.EXPORT_SECRET,
+  secret: import.meta.env.EXPORT_SECRET,
 });
 
 // requires `output: 'server'`

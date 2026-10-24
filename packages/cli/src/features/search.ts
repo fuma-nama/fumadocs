@@ -368,26 +368,29 @@ import Mixedbread from '@mixedbread/sdk';`,
 `,
       ),
     searchRoute: (() => {
-      const server = `import { createMixedbreadSearchAPI } from 'fumadocs-core/search/mixedbread';
+      // Astro only loads `.env` files into `import.meta.env`
+      const server = (
+        astro = false,
+      ) => `import { createMixedbreadSearchAPI } from 'fumadocs-core/search/mixedbread';
 import Mixedbread from '@mixedbread/sdk';
 
 const server = createMixedbreadSearchAPI({
-  client: new Mixedbread(),
-  storeIdentifier: process.env.MIXEDBREAD_STORE_ID!,
+  client: new Mixedbread(${astro ? '{ apiKey: import.meta.env.MXBAI_API_KEY }' : ''}),
+  storeIdentifier: ${astro ? 'import.meta.env' : 'process.env'}.MIXEDBREAD_STORE_ID!,
 });
 `;
       return {
-        next: `${server}
+        next: `${server()}
 export const { GET } = server;
 `,
         'react-router': `import type { Route } from './+types/search';
-${server}
+${server()}
 export async function loader({ request }: Route.LoaderArgs) {
   return server.GET(request);
 }
 `,
         'tanstack-start': `import { createFileRoute } from '@tanstack/react-router';
-${server}
+${server()}
 export const Route = createFileRoute('/api/search')({
   server: {
     handlers: {
@@ -396,11 +399,11 @@ export const Route = createFileRoute('/api/search')({
   },
 });
 `,
-        waku: `${server}
+        waku: `${server()}
 export const { GET } = server;
 `,
         astro: `import type { APIRoute } from 'astro';
-${server}
+${server(true)}
 export const GET: APIRoute = ({ request }) => server.GET(request);
 `,
       };

@@ -6,7 +6,8 @@ import { addReactRouterPrerenderArray, enableProcessedMarkdown } from '@/codemod
 import { docs } from './docs';
 import { registerReactRouterRoutes, requiresMarkdown, type SourceRef, sourceRef } from './utils';
 
-const api = ({ dynamic, ref }: SourceRef) => `import { ${ref} } from '@/lib/source';
+/** `env` reads the environment variables, Astro only loads `.env` files into `import.meta.env` */
+const api = ({ dynamic, ref }: SourceRef, env: string) => `import { ${ref} } from '@/lib/source';
 import { createEpubExportAPI } from 'fumadocs-epub';
 
 const api = createEpubExportAPI({
@@ -15,13 +16,13 @@ const api = createEpubExportAPI({
   author: 'Your Team',
   description: 'Exported documentation',
   // guards the route, requests must send \`Authorization: Bearer <secret>\`
-  secret: process.env.EXPORT_SECRET,
+  secret: ${env}.EXPORT_SECRET,
 });
 `;
 
 const templates = (framework: Framework, route: FormattedRoute, src: SourceRef) =>
   routeModule(framework, route, {
-    imports: api(src),
+    imports: api(src, framework === 'astro' ? 'import.meta.env' : 'process.env'),
     body: 'api.GET(request)',
     request: true,
     revalidate: true,
