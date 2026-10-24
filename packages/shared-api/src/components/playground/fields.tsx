@@ -76,22 +76,34 @@ function getType(field: Schema): string | undefined {
   if (field.items) return 'array';
 }
 
-/** the options of a union whose members are all `const`, labelled by their `title`, like an enum with names */
-function getConstOptions(field: Schema): { value: unknown; label: string }[] | undefined {
-  const union = field.anyOf ?? field.oneOf;
-  if (!union || union.length === 0) return;
-
-  const out: { value: unknown; label: string }[] = [];
-  for (const item of union) {
-    if (typeof item !== 'object' || item.const === undefined) return;
-    const label = typeof item.const === 'string' ? item.const : JSON.stringify(item.const);
-    out.push({ value: item.const, label: item.title ?? label });
-  }
-  return out;
-}
-
 function typeLabel(field: Schema, alias = false): string {
   return field.const !== undefined ? JSON.stringify(field.const) : stringify(field, { alias });
+}
+
+/** a union of `const` members, an `enum` whose values are named by their `title` */
+function isConstUnion(union: readonly JsonSchema[] | undefined): union is Schema[] {
+  return (
+    union !== undefined &&
+    union.length > 0 &&
+    union.every((item) => typeof item === 'object' && item.const !== undefined)
+  );
+}
+
+/** the values of a field rendered as a select */
+function getOptions(field: Schema): { value: unknown; label: string }[] | undefined {
+  const union = field.anyOf ?? field.oneOf;
+  if (isConstUnion(union))
+    return union.map((item) => ({
+      value: item.const,
+      label: item.title ?? valueLabel(item.const),
+    }));
+
+  const values = field.const !== undefined ? [field.const] : field.enum;
+  return values?.map((value) => ({ value, label: valueLabel(value) }));
+}
+
+function valueLabel(value: unknown): string {
+  return typeof value === 'string' ? value : JSON.stringify(value);
 }
 
 /**
@@ -159,7 +171,7 @@ function SchemaSwitch({
   }, [field, union, types, info.oneOf, info.selectedType]);
 
   // a union of `const` members is one select, not a switch between them
-  if (member === undefined || getConstOptions(field)) return children(field, null);
+  if (member === undefined || isConstUnion(union)) return children(field, null);
 
   let selector: ReactNode = null;
   if (union && union.length > 1) {
@@ -449,13 +461,7 @@ export function ValueRow({
 function cellType(field: Schema, selector: ReactNode): ReactNode {
   if (selector) return selector;
   // the options of selects and `null` tell the type already
-  if (
-    field.enum === undefined &&
-    field.const === undefined &&
-    field.type !== 'null' &&
-    !getConstOptions(field)
-  )
-    return typeLabel(field);
+  if (field.type !== 'null' && !getOptions(field)) return typeLabel(field);
 }
 
 /** the input of a primitive field */
@@ -500,15 +506,12 @@ function FieldValue({
     );
   }
 
-  const labelled = getConstOptions(field);
-  const options =
-    labelled?.map((option) => option.value) ??
-    (field.const !== undefined ? [field.const] : field.enum);
+  const options = getOptions(field);
   if (options && options.length > 0) {
-    const idx = options.indexOf(value);
-    const items: { value: string; label: ReactNode }[] = options.map((item, i) => ({
+    const idx = options.findIndex((option) => option.value === value);
+    const items: { value: string; label: ReactNode }[] = options.map((option, i) => ({
       value: String(i),
-      label: labelled?.[i].label ?? (typeof item === 'string' ? item : JSON.stringify(item)),
+      label: option.label,
     }));
     if (!required)
       items.push({
@@ -521,7 +524,7 @@ function FieldValue({
         id={id}
         items={items}
         value={idx !== -1 ? String(idx) : required ? null : '-1'}
-        onValueChange={(v) => setValue(v === '-1' ? undefined : options[Number(v)])}
+        onValueChange={(v) => setValue(v === '-1' ? undefined : options[Number(v)].value)}
         placeholder={t('Select')}
       />
     );

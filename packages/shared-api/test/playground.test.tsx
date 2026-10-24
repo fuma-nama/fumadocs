@@ -99,7 +99,6 @@ test('renders a union of const members as one select labelled by their titles', 
   }
 
   const html = renderToString(h(Harness));
-  expect(html).toContain('Mobile App');
-  // no type switch between the members
-  expect(html).not.toContain('&quot;prj_1&quot; | &quot;prj_2&quot;');
+  expect(html).not.toContain('aria-label="Type"');
+  expect(html).toMatch(/id="_body\._project"[^>]*><span class="truncate">Mobile App</);
 });
