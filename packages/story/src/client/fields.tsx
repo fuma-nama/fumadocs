@@ -52,7 +52,7 @@ const inputClassName =
   'min-w-0 flex-1 bg-transparent px-3 text-fd-foreground outline-none placeholder:text-fd-muted-foreground/70';
 
 const rowButtonClassName =
-  'flex h-10 w-full items-center gap-2 px-4 text-[0.8125rem] text-fd-muted-foreground transition-colors hover:bg-fd-accent/40 hover:text-fd-accent-foreground focus-visible:bg-fd-secondary focus-visible:text-fd-accent-foreground focus-visible:outline-none';
+  'flex h-10 w-full items-center gap-2 px-4 last:h-11 last:pb-1 text-[0.8125rem] text-fd-muted-foreground transition-colors hover:bg-fd-accent/40 hover:text-fd-accent-foreground focus-visible:bg-fd-secondary focus-visible:text-fd-accent-foreground focus-visible:outline-none';
 
 /** the type a field is edited as, unions resolve to the member matching its value */
 export function resolveNode(node: TypeNode, value: unknown): TypeNode {
@@ -189,8 +189,8 @@ function Row({
   children: ReactNode;
 }) {
   return (
-    <div className="grid border-b last:border-b-0 @max-sm:pb-3 @sm:min-h-10 @sm:grid-cols-[minmax(9rem,1fr)_minmax(0,2fr)]">
-      <div className="flex min-w-0 items-center gap-1 py-2 ps-4 pe-3 @max-sm:pb-1.5">
+    <div className="group/row grid border-b last:border-b-0 @max-sm:pb-3 @max-sm:last:pb-4 @sm:min-h-10 @sm:last:min-h-11 @sm:grid-cols-[minmax(9rem,1fr)_minmax(0,2fr)]">
+      <div className="flex min-w-0 items-center gap-1 py-2 ps-4 pe-3 @max-sm:pb-1.5 @sm:group-last/row:pb-3">
         <label
           htmlFor={htmlFor}
           title={name}
@@ -202,7 +202,7 @@ function Row({
       </div>
       <div
         className={cn(
-          'flex min-h-9 min-w-0 items-stretch text-[0.8125rem] transition-colors @max-sm:mx-4 @max-sm:overflow-hidden @max-sm:rounded-lg @max-sm:border @max-sm:bg-fd-secondary/50 @sm:min-h-10 @sm:border-s',
+          'flex min-h-9 min-w-0 items-stretch text-[0.8125rem] transition-colors @max-sm:mx-4 @max-sm:overflow-hidden @max-sm:rounded-lg @max-sm:border @max-sm:bg-fd-secondary/50 @sm:min-h-10 @sm:border-s @sm:group-last/row:pb-1',
           !readOnly &&
             'hover:bg-fd-accent/40 has-focus-visible:border-fd-ring has-focus-visible:bg-fd-secondary',
         )}
