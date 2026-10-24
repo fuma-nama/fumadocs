@@ -132,8 +132,15 @@ import { asyncapi } from '@/lib/asyncapi';
 
 await asyncapi.staticSource({
   meta: true,
+});
+```
 
-  // or customize how folders are represented:
+Or customize how folders are represented:
+
+```ts
+import { asyncapi } from '@/lib/asyncapi';
+
+await asyncapi.staticSource({
   meta: {
     folderStyle: 'separator',
   },
@@ -206,8 +213,8 @@ export async function loader({ slug }) {
   };
 }
 
-// e.g. in your page renderer
-export default function Page() {
+// e.g. where you render the MDX content of a page
+function Content({ MdxContent }) {
   // consume loader data
   const { asyncapiData } = useLoaderData();
 
