@@ -1,0 +1,33 @@
+import type { ComponentProps, ReactNode } from 'react';
+import { cn } from '@/lib/cn';
+
+export interface WindowProps extends Omit<ComponentProps<'div'>, 'title'> {
+  title?: ReactNode;
+  /** extra content at the end of the title bar */
+  actions?: ReactNode;
+}
+
+/** a window of the landing's desktop: hairline frame, striped title bar */
+export function Window({ title, actions, children, className, ...props }: WindowProps) {
+  return (
+    <div
+      {...props}
+      className={cn('flex flex-col border border-lp-line-strong bg-lp-paper', className)}
+    >
+      <div className="relative flex h-7 shrink-0 items-center gap-1.5 border-b border-lp-line-strong px-1.5">
+        <div aria-hidden className="lp-pinstripe absolute inset-x-1.5 inset-y-0" />
+        <span aria-hidden className="relative size-3.5 border border-lp-line-strong bg-lp-paper" />
+        <span className="relative mx-auto truncate bg-lp-paper px-2 font-pixel text-[13px] leading-none">
+          {title}
+        </span>
+        {actions ?? (
+          <span
+            aria-hidden
+            className="relative size-3.5 border border-lp-line-strong bg-lp-paper"
+          />
+        )}
+      </div>
+      {children}
+    </div>
+  );
+}
