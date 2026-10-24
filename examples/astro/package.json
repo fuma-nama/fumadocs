@@ -1,6 +1,6 @@
 {
   "name": "example-astro",
-  "version": "0.0.47",
+  "version": "0.0.48",
   "private": true,
   "type": "module",
   "scripts": {

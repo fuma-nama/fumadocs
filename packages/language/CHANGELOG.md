@@ -1,3 +1,9 @@
+## @fumadocs/language@0.2.17
+
+### Names of OpenAPI selects
+
+- Add Chinese translations for the names of the selects on operation pages and union schemas.
+
 ## @fumadocs/language@0.2.16
 
 ### Redesigned GraphQL pages

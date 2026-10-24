@@ -1,3 +1,9 @@
+## fumadocs-core@16.17.9
+
+### Copy the page tree on deserialization
+
+- `deserializePageTree()` and `useFumadocsLoader()` no longer mutate the serialized page tree.
+
 ## fumadocs-core@16.17.8
 
 ### `remarkInclude` in `fumadocs-core`

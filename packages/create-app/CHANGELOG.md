@@ -1,3 +1,18 @@
+## create-fumadocs-app@16.2.27
+
+### Official Astro support
+
+- New `@fumadocs/astro` integration, running the Markdown features of Fumadocs on the Sätteri processor of Astro.
+- MDX content renders as one React island, Fumadocs UI components work in full.
+- The `wrapper` component receives the props of `<Content />`, for providers like i18n.
+- Islands with `transition:persist` keep their state on navigation, the content of the new page moves into them.
+- Content collection loaders and `toFumadocsSource()` for the source of Fumadocs.
+- The Astro template uses `@fumadocs/astro`.
+
+### Hide server-only search on static templates
+
+- The search prompt hides Mixedbread on static, SPA and Astro templates.
+
 ## create-fumadocs-app@16.2.18
 
 ### OG images in every template
