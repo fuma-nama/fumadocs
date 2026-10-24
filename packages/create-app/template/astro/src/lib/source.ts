@@ -1,50 +1,18 @@
-import type { StaticSource } from 'fumadocs-core/source';
-import { loader } from 'fumadocs-core/source';
-import { type CollectionEntry, getCollection } from 'astro:content';
-import * as path from 'node:path';
-import { structure, type StructuredData } from 'fumadocs-core/mdx-plugins';
+import { getCollection } from 'astro:content';
+import { llms, loader } from 'fumadocs-core/source';
+import { toFumadocsSource } from '@fumadocs/astro/source';
+import { docsRoute } from './shared';
 
 export const source = loader({
-  source: await createMySource(),
-  baseUrl: '/',
+  source: toFumadocsSource(await getCollection('docs'), await getCollection('meta')),
+  baseUrl: docsRoute,
 });
 
-export function getStructuredData(entry: CollectionEntry<'docs'>): StructuredData {
-  return structure(entry.body);
-}
+// the same for every page, serialize it once
+export const pageTree = await source.serializePageTree(source.getPageTree());
 
-async function createMySource() {
-  const out: StaticSource<{
-    metaData: CollectionEntry<'meta'>['data'];
-    pageData: CollectionEntry<'docs'>['data'] & {
-      _raw: CollectionEntry<'docs'>;
-    };
-  }> = {
-    files: [],
-  };
+export const docsLlms = llms(source, {
+  renderPage: async (page) => `# ${page.data.title} (${page.url})
 
-  for (const page of await getCollection('docs')) {
-    const virtualPath = path.relative('content/docs', page.filePath!);
-
-    out.files.push({
-      type: 'page',
-      path: virtualPath,
-      data: {
-        ...page.data,
-        _raw: page,
-      },
-    });
-  }
-
-  for (const meta of await getCollection('meta')) {
-    const virtualPath = path.relative('content/docs', meta.filePath!);
-
-    out.files.push({
-      type: 'meta',
-      path: virtualPath,
-      data: meta.data,
-    });
-  }
-
-  return out;
-}
+${await page.data.getText('processed')}`,
+});

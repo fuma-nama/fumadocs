@@ -78,7 +78,8 @@ export default function Layout({ children }) {
 import { navigate } from 'astro:transitions/client';
 import { RootProvider } from 'fumadocs-ui/provider/astro';
 
-export function DocsIsland({ children, pathname, params }) {
+// wrap your React islands, pass `Astro.url.pathname` and `Astro.params` from `.astro` pages
+export function Provider({ pathname, params, children }) {
   return (
     <RootProvider pathname={pathname} params={params} navigate={navigate}>
       {children}

@@ -1,8 +1,8 @@
 import { expect, test } from 'vitest';
 import { formatRoute, type RouteDescriptor } from '@/project/route';
-import type { ReactFramework } from '@/project';
+import type { Framework } from '@/project';
 
-const frameworks: ReactFramework[] = ['next', 'react-router', 'tanstack-start', 'waku'];
+const frameworks: Framework[] = ['next', 'react-router', 'tanstack-start', 'waku', 'astro'];
 
 const routes: Record<string, RouteDescriptor> = {
   markdown: {

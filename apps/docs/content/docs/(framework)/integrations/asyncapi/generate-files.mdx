@@ -1,26 +1,13 @@
 ---
-title: generateFiles()
+title: Generating Pages
 description: Generate pages from AsyncAPI schema.
 ---
 
-The `generateFiles()` function generates MDX files for API documentation.
+`staticSource()` and `dynamicSource()` generate pages for your [`loader()`](/docs/integrations/asyncapi#generate-pages), `generateFiles()` writes them into your content directory as MDX files instead. They accept the same options.
 
 Note that the page content is still rendered by the `<AsyncAPIPage />` component, the docs generator only arranges the operations to render for each page.
 
-## Usage
-
-It takes an AsyncAPI instance.
-
-```ts
-import { generateFiles } from '@fumadocs/asyncapi';
-import { asyncapi } from '@/lib/asyncapi';
-
-void generateFiles({
-  input: asyncapi,
-  // The output directory.
-  output: '/content/docs',
-});
-```
+## Options
 
 ### `per`
 
@@ -39,9 +26,9 @@ Customize the content of pages, default to `operation`.
 | custom    | see below                      | N/A                 |
 
 ```ts
-import { generateFiles } from '@fumadocs/asyncapi';
+import { asyncapi } from '@/lib/asyncapi';
 
-void generateFiles({
+await asyncapi.staticSource({
   per: 'tag',
 });
 ```
@@ -49,9 +36,9 @@ void generateFiles({
 When set to `custom`, you can pass a function to fully customize the generation process:
 
 ```ts title="Example"
-import { generateFiles } from '@fumadocs/asyncapi';
+import { asyncapi } from '@/lib/asyncapi';
 
-void generateFiles({
+await asyncapi.staticSource({
   per: 'custom',
   toPages(builder) {
     for (const [id, item] of Object.entries(builder.document.operations ?? {})) {
@@ -93,13 +80,168 @@ In `operation` mode, you can group output files with folders.
 | none (default) | `{operationId}.mdx`               |
 
 ```ts
-import { generateFiles } from '@fumadocs/asyncapi';
+import { asyncapi } from '@/lib/asyncapi';
 
-void generateFiles({
+await asyncapi.staticSource({
   per: 'operation',
   groupBy: 'tag',
 });
 ```
+
+### `name`
+
+A function that controls the file name of generated pages.
+
+```ts
+import { asyncapi } from '@/lib/asyncapi';
+
+await asyncapi.staticSource({
+  name(output) {
+    if (output.type === 'operation') {
+      const operation = this.dereferenceShallow(this.document.operations?.[output.item.id]);
+      console.log(operation);
+
+      return `my-dir/${output.item.id}`;
+    }
+
+    return 'my-dir/filename';
+  },
+});
+```
+
+You can also use the `algorithm` option:
+
+```ts
+import { asyncapi } from '@/lib/asyncapi';
+
+await asyncapi.staticSource({
+  // v2 (default): use operation id
+  // v1: use `{operationId}/{action}`
+  name: { algorithm: 'v1' },
+});
+```
+
+### `meta`
+
+Generate [`meta.json`](/docs/page-conventions#meta) files automatically.
+
+You can always define the `meta.json` files manually for maximal flexibility.
+
+```ts
+import { asyncapi } from '@/lib/asyncapi';
+
+await asyncapi.staticSource({
+  meta: true,
+});
+```
+
+Or customize how folders are represented:
+
+```ts
+import { asyncapi } from '@/lib/asyncapi';
+
+await asyncapi.staticSource({
+  meta: {
+    folderStyle: 'separator',
+  },
+});
+```
+
+## MDX Files
+
+To write pages as MDX files, create a script:
+
+```ts title="scripts/generate-docs.ts"
+import { generateFiles } from '@fumadocs/asyncapi';
+import { asyncapi } from '@/lib/asyncapi';
+
+void generateFiles({
+  input: asyncapi,
+  output: './content/docs',
+  // we recommend to enable it
+  // make sure your operation description doesn't break MDX syntax.
+  includeDescription: true,
+});
+```
+
+Generate docs with the script:
+
+```bash
+bun ./scripts/generate-docs.ts
+```
+
+Add the `AsyncAPIPage` component to your MDX components. Generated files use the `<AsyncAPIPage />` tag.
+
+```tsx tab="Server Components" title="app/docs/[[...slug]]/page.tsx"
+import { source } from '@/lib/source';
+import { asyncapi } from '@/lib/asyncapi';
+import { AsyncAPIPage } from '@/components/api-page';
+import { getMDXComponents } from '@/components/mdx';
+
+// e.g. in your page renderer
+export default function Page({ slug }) {
+  const page = source.getPage(slug);
+  const MdxContent = page.data.body;
+
+  return (
+    <MdxContent
+      components={getMDXComponents({
+        // [!code ++:3] add the MDX component
+        AsyncAPIPage: async (props) => (
+          <AsyncAPIPage {...await asyncapi.preloadAsyncAPIPage(page)} {...props} />
+        ),
+      })}
+    />
+  );
+}
+```
+
+```tsx tab="Without Server Components" title="docs/[...slug]"
+import { source } from '@/lib/source';
+import { asyncapi } from '@/lib/asyncapi';
+import { AsyncAPIPage } from '@/components/api-page';
+import { getMDXComponents } from '@/components/mdx';
+
+// e.g. where you return server payload to client
+export async function loader({ slug }) {
+  const page = source.getPage(slug);
+
+  return {
+    // [!code ++]
+    asyncapiData: await asyncapi.preloadAsyncAPIPage(page),
+    // ...
+  };
+}
+
+// e.g. where you render the MDX content of a page
+function Content({ MdxContent }) {
+  // consume loader data
+  const { asyncapiData } = useLoaderData();
+
+  return (
+    <MdxContent
+      components={getMDXComponents({
+        // [!code ++] add the MDX component
+        AsyncAPIPage: (props) => <AsyncAPIPage {...asyncapiData} {...props} />,
+      })}
+    />
+  );
+}
+```
+
+Add the plugin to your `loader()`:
+
+```ts title="lib/source.ts"
+import { asyncapiPlugin } from '@fumadocs/asyncapi/server';
+import { loader } from 'fumadocs-core/source';
+
+export const source = loader({
+  // [!code ++] optional: adds the direction of messages to each page item in page tree
+  plugins: [asyncapiPlugin()],
+});
+```
+
+`generateFiles()` also accepts the options below.
 
 ### `index`
 
@@ -129,25 +271,6 @@ void generateFiles({
 });
 ```
 
-### `meta`
-
-Generate [`meta.json`](/docs/page-conventions#meta) files automatically.
-
-You can always define the `meta.json` files manually for maximal flexibility.
-
-```ts
-import { generateFiles } from '@fumadocs/asyncapi';
-
-void generateFiles({
-  meta: true,
-
-  // or customize how folders are represented:
-  meta: {
-    folderStyle: 'separator',
-  },
-});
-```
-
 ### `imports`
 
 Add custom imports to generated MDX files. This is useful for including components, utilities, or other dependencies in your generated documentation.
@@ -169,39 +292,6 @@ This will add the following imports to all generated MDX files:
 
 ```ts
 import { API_BASE_URL } from '@/constants';
-```
-
-### `name`
-
-A function that controls the output file name of MDX pages.
-
-```ts
-import { generateFiles } from '@fumadocs/asyncapi';
-
-void generateFiles({
-  name(output) {
-    if (output.type === 'operation') {
-      const operation = this.dereferenceShallow(this.document.operations?.[output.item.id]);
-      console.log(operation);
-
-      return `my-dir/${output.item.id}`;
-    }
-
-    return 'my-dir/filename';
-  },
-});
-```
-
-You can also use the `algorithm` option:
-
-```ts
-import { generateFiles } from '@fumadocs/asyncapi';
-
-void generateFiles({
-  // v2 (default): use operation id
-  // v1: use `{operationId}/{action}`
-  name: { algorithm: 'v1' },
-});
 ```
 
 ### `frontmatter`

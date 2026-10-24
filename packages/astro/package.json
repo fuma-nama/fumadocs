@@ -1,0 +1,68 @@
+{
+  "name": "@fumadocs/astro",
+  "version": "0.1.0",
+  "description": "The Astro integration for Fumadocs",
+  "keywords": [
+    "Astro",
+    "Docs",
+    "astro-integration",
+    "fumadocs",
+    "withastro"
+  ],
+  "homepage": "https://fumadocs.dev",
+  "license": "MIT",
+  "author": "Fuma Nama",
+  "repository": "github:fuma-nama/fumadocs",
+  "files": [
+    "dist"
+  ],
+  "type": "module",
+  "sideEffects": false,
+  "exports": {
+    ".": "./dist/index.js",
+    "./island": "./dist/island.js",
+    "./loaders": "./dist/loaders.js",
+    "./source": "./dist/source.js",
+    "./package.json": "./package.json"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "scripts": {
+    "build": "tsdown",
+    "clean": "rimraf dist",
+    "dev": "tsdown --watch",
+    "lint": "oxlint .",
+    "test": "vitest run",
+    "types:check": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@fumadocs/satteri": "workspace:^",
+    "yuku-parser": "^0.19.0"
+  },
+  "devDependencies": {
+    "@astrojs/markdown-satteri": "^0.4.5",
+    "@types/estree-jsx": "^1.0.5",
+    "@types/hast": "^3.0.5",
+    "@types/node": "26.6.5",
+    "@types/react": "^19.3.0",
+    "@types/react-dom": "^19.3.0",
+    "astro": "^7.4.2",
+    "fumadocs-core": "workspace:*",
+    "react": "^19.3.1",
+    "react-dom": "^19.3.1",
+    "satteri": "^0.10.5",
+    "tsconfig": "workspace:*",
+    "tsdown": "0.23.1",
+    "typescript": "^7.0.2",
+    "vitest": "^5.0.5"
+  },
+  "peerDependencies": {
+    "@astrojs/mdx": "^8.0.0",
+    "@astrojs/react": "^7.0.0",
+    "astro": "^7.4.0",
+    "fumadocs-core": "^16.17.8",
+    "react": "^19.2.0",
+    "react-dom": "^19.2.0"
+  }
+}

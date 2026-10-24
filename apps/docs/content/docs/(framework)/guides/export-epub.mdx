@@ -29,7 +29,7 @@ npm install fumadocs-epub
 
 EPUB export requires `includeProcessedMarkdown` in your docs collection config:
 
-```ts title="source.config.ts"
+```ts tab="Fumadocs MDX" title="source.config.ts"
 import { defineDocs } from 'fumadocs-mdx/config';
 
 export const docs = defineDocs({
@@ -39,6 +39,13 @@ export const docs = defineDocs({
       includeProcessedMarkdown: true,
     },
   },
+});
+```
+
+```js tab="Astro" title="astro.config.mjs"
+fumadocs({
+  // [!code ++]
+  includeProcessedMarkdown: true,
 });
 ```
 
@@ -118,6 +125,22 @@ export const { GET } = createEpubExportAPI({
 });
 ```
 
+```ts tab="Astro" title="src/pages/export/epub.ts"
+import type { APIRoute } from 'astro';
+import { getSecret } from 'astro:env/server';
+import { source } from '@/lib/source';
+import { createEpubExportAPI } from 'fumadocs-epub';
+
+const api = createEpubExportAPI({
+  source,
+  title: 'My Documentation',
+  secret: getSecret('EXPORT_SECRET'),
+});
+
+// requires `output: 'server'`
+export const GET: APIRoute = ({ request }) => api.GET(request);
+```
+
 For a public endpoint, or to build the file yourself (e.g. in a script), call `exportEpub()` directly and return the buffer.
 
 ### Using the CLI
@@ -129,7 +152,7 @@ fumadocs export epub --framework next
 # or: astro | tanstack-start | react-router | waku
 ```
 
-This fetches from your running server (Next.js) or copies from the build output (other frameworks). Run a production build first for non-Next.js frameworks.
+This fetches from your running server (Next.js and Astro) or copies from the build output (other frameworks). Run a production build first for the other frameworks.
 
 ## Options
 

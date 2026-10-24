@@ -44,109 +44,11 @@ import { createOpenAPIPage } from 'fumadocs-openapi/ui';
 export const OpenAPIPage = createOpenAPIPage();
 ```
 
-```ts tab="lib/source.ts"
-import { openapiPlugin } from 'fumadocs-openapi/server';
-import { loader } from 'fumadocs-core/source';
-
-export const source = loader({
-  // [!code ++] optional: adds a badge to each page item in page tree
-  plugins: [openapiPlugin()],
-});
-```
-
 See [`createOpenAPI()`](/docs/integrations/openapi/server) & [`createOpenAPIPage()`](/docs/integrations/openapi/api-page) for available options.
 
 ### Generate Pages
 
-<Tabs items={["MDX Files", "Virtual Files"]}>
-<Tab>
-
-You can generate MDX files directly from your OpenAPI schema.
-
-Create a script:
-
-```js title="scripts/generate-docs.ts"
-import { generateFiles } from 'fumadocs-openapi';
-import { openapi } from '@/lib/openapi';
-
-void generateFiles({
-  input: openapi,
-  output: './content/docs',
-  // we recommend to enable it
-  // make sure your endpoint description doesn't break MDX syntax.
-  includeDescription: true,
-});
-```
-
-Generate docs with the script:
-
-```bash
-bun ./scripts/generate-docs.ts
-```
-
-Add the `OpenAPIPage` component to your MDX components.
-
-```tsx tab="Server Components" title="app/docs/[[...slug]]/page.tsx"
-import { source } from '@/lib/source';
-import { openapi } from '@/lib/openapi';
-import { OpenAPIPage } from '@/components/api-page';
-import { getMDXComponents } from '@/components/mdx';
-
-// e.g. in your page renderer
-export default function Page({ slug }) {
-  const page = source.getPage(slug);
-  const MdxContent = page.data.body;
-
-  return (
-    <MdxContent
-      components={getMDXComponents({
-        // [!code ++:3] add the MDX component
-        OpenAPIPage: async (props) => (
-          <OpenAPIPage {...await openapi.preloadOpenAPIPage(page)} {...props} />
-        ),
-      })}
-    />
-  );
-}
-```
-
-```tsx tab="Without Server Components" title="docs/[...slug]"
-import { source } from '@/lib/source';
-import { openapi } from '@/lib/openapi';
-import { OpenAPIPage } from '@/components/api-page';
-import { getMDXComponents } from '@/components/mdx';
-
-// e.g. where you return server payload to client
-export function loader({ slug }) {
-  const page = source.getPage(slug);
-
-  return {
-    // [!code ++]
-    openapiData: await openapi.preloadOpenAPIPage(page),
-    // ...
-  };
-}
-
-// e.g. in your page renderer
-export default function Page() {
-  // consume loader data
-  const { openapiData } = useLoaderData();
-
-  return (
-    <MdxContent
-      components={getMDXComponents({
-        // [!code ++] add the MDX component
-        OpenAPIPage: (props) => <OpenAPIPage {...openapiData} {...props} />,
-      })}
-    />
-  );
-}
-```
-
-</Tab>
-<Tab>
-
-You can also use it without generating real files by integrating into [Loader API](/docs/headless/source-api/source).
+Integrate into [Loader API](/docs/headless/source-api/source) to generate pages, without generating real files.
 
 ```ts title="lib/source.ts"
 import { loader } from 'fumadocs-core/source';
@@ -163,13 +65,14 @@ export const source = loader(
   },
   {
     baseUrl: '/docs',
+    // [!code ++] optional: adds a badge to each page item in page tree
     plugins: [openapi.loaderPlugin()],
     // ...
   },
 );
 ```
 
-`staticSource()` is a server-side API that generates pages directly to your `loader()`, hence it allows dynamic content generation, such as re-generating page tree as schema changes.
+It generates a page per operation by default, see [Generating Pages](/docs/integrations/openapi/generate-files) to customize them.
 
 **It will change the type of your pages**, make sure to update all references to your `source`.
 
@@ -328,8 +231,7 @@ npm run types:check
 
 </Callout>
 
-</Tab>
-</Tabs>
+To write MDX files into your content directory instead, see [MDX Files](/docs/integrations/openapi/generate-files#mdx-files).
 
 ## Features
 

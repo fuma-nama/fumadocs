@@ -40,29 +40,40 @@ export function getConfigObject(file: SourceFile): ObjectExpression | undefined 
 }
 
 /**
- * Add a plugin call to the `plugins` array of a Vite config, skip if the same plugin is already added.
+ * Add a plugin call to an array of a config file, like the `plugins` of Vite or the `integrations` of Astro, skip if the same plugin is already added.
  *
- * @param path - property path to the plugins array, e.g. `['vite', 'plugins']` for Waku
+ * @param path - property path to the array, e.g. `['vite', 'plugins']` for Waku, missing objects on it are created
  */
 export function addVitePlugin(
   file: SourceFile,
-  plugin: { name: string; from: string; call?: string },
+  plugin: {
+    name: string;
+    from: string;
+    call?: string;
+    /** imported as the default export */
+    default?: boolean;
+  },
   path: string[] = ['plugins'],
 ): boolean {
   let object = getConfigObject(file);
-  for (let i = 0; object && i < path.length - 1; i++) {
-    let value = getProperty(object, path[i])?.value;
+  let depth = 0;
+  for (; object && depth < path.length - 1; depth++) {
+    let value = getProperty(object, path[depth])?.value;
+    if (!value) break;
     // e.g. `vite: { ... } satisfies UserConfig as Config['vite']`
-    while (value?.type === 'TSSatisfiesExpression' || value?.type === 'TSAsExpression')
+    while (value.type === 'TSSatisfiesExpression' || value.type === 'TSAsExpression')
       value = value.expression;
-    object = value?.type === 'ObjectExpression' ? value : undefined;
+    object = value.type === 'ObjectExpression' ? value : undefined;
   }
   if (!object) return false;
 
   const call = plugin.call ?? `${plugin.name}()`;
-  const plugins = getProperty(object, path[path.length - 1])?.value;
+  const plugins = getProperty(object, path[depth])?.value;
   if (!plugins) {
-    addElements(file, object, [`${path[path.length - 1]}: [${call}]`]);
+    // e.g. `vite: { plugins: [tailwindcss()] }`
+    let item = `[${call}]`;
+    for (let i = path.length - 1; i > depth; i--) item = `{ ${path[i]}: ${item} }`;
+    addElements(file, object, [`${path[depth]}: ${item}`]);
   } else if (plugins.type === 'ArrayExpression') {
     for (const element of plugins.elements) {
       if (
@@ -77,7 +88,12 @@ export function addVitePlugin(
     return false;
   }
 
-  addImport(file, { from: plugin.from, named: [plugin.name] });
+  addImport(
+    file,
+    plugin.default
+      ? { from: plugin.from, default: plugin.name }
+      : { from: plugin.from, named: [plugin.name] },
+  );
   return true;
 }
 

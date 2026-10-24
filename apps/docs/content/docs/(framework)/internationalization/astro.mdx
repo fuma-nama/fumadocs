@@ -1,0 +1,102 @@
+---
+title: Astro
+description: Support i18n routing on your Astro + Fumadocs app.
+---
+
+## Setup
+
+Define the i18n configurations in a file, we will import it with `@/lib/i18n` in this guide.
+
+<include cwd meta='title="src/lib/i18n.ts"'>
+  ../../examples/astro-i18n/src/lib/i18n.ts
+</include>
+
+> See [available options](/docs/headless/internationalization/config) for i18n config.
+
+### Routing
+
+Move your pages into a `[...lang]` folder. With `hideLocale: 'default-locale'`, the parameter is empty for the default language (e.g. `/docs`), and the locale for others (e.g. `/cn/docs`).
+
+<Files>
+  <Folder name="src/pages" defaultOpen>
+    <Folder name="[...lang]" defaultOpen>
+      <File name="index.astro" />
+      <File name="docs/[...slug].astro" />
+    </Folder>
+    <Folder name="api" defaultOpen>
+      <File name="search.ts" />
+    </Folder>
+  </Folder>
+</Files>
+
+To always prefix the locale, remove `hideLocale` and use a `[lang]` folder instead.
+
+### Translations
+
+Define your translations in `lib/layout.shared.tsx`, see [Translations](/docs/ui/translations) for more details (including official language packs).
+
+You can also add `locale` parameter to `baseOptions()` for localized layout options:
+
+<include cwd meta='title="src/lib/layout.shared.tsx"'>
+  ../../examples/astro-i18n/src/lib/layout.shared.tsx
+</include>
+
+### Provider
+
+Pass translations to `<RootProvider />`. The MDX content renders in an island of its own, add a provider for it too, without theme and search:
+
+<include cwd meta='title="src/components/provider.tsx"'>
+  ../../examples/astro-i18n/src/components/provider.tsx
+</include>
+
+The `wrapper` of your MDX components receives the props of `<Content />`, wrap the content with `ContentProvider`:
+
+<include cwd meta='title="src/components/mdx.tsx"'>
+  ../../examples/astro-i18n/src/components/mdx.tsx
+</include>
+
+### Pass Locale
+
+Pass the locale to Fumadocs in your pages and layouts.
+
+<include cwd meta='tab="src/lib/source.ts"'>
+  ../../examples/astro-i18n/src/lib/source.ts
+</include>
+<include cwd meta='tab="Home Page" title="src/pages/[...lang]/index.astro"'>
+  ../../examples/astro-i18n/src/pages/[...lang]/index.astro
+</include>
+<include cwd meta='tab="Docs Page" title="src/pages/[...lang]/docs/[...slug].astro"'>
+  ../../examples/astro-i18n/src/pages/[...lang]/docs/[...slug].astro
+</include>
+<include cwd meta='tab="App Island" title="src/components/app.tsx"'>
+  ../../examples/astro-i18n/src/components/app.tsx
+</include>
+
+Your HTML layout can set `<html lang={lang}>` from the `lang` prop.
+
+### Search
+
+The search endpoint indexes every language, the [search dialog](/docs/manual-installation/astro#search) searches the current one with `useI18n()`:
+
+<include cwd meta='title="src/pages/api/search.ts"'>
+  ../../examples/astro-i18n/src/pages/api/search.ts
+</include>
+
+See [Internationalization](/docs/headless/search/orama#internationalization) for the tokenizers of other languages, like Chinese and Japanese.
+
+## Writing Documents
+
+See [i18n routing](/docs/page-conventions#i18n-routing) to learn how to create pages for specific locales.
+
+### Navigation
+
+Fumadocs only handles navigation for its own layouts (e.g. sidebar).
+For other places, prepend the locale to links.
+
+In MDX content, use the `DynamicLink` from your MDX components, it fills `[lang]` with the locale:
+
+```mdx title="content.mdx"
+<DynamicLink href="/[lang]/another-page">This is a link</DynamicLink>
+```
+
+Register it in your MDX components rather than importing it, imported components are rendered by Astro, outside the providers of content.

@@ -70,6 +70,10 @@ cli
   })
   .action(main);
 
+/** templates without a server at runtime */
+const isStatic = (template: Template) =>
+  template === 'astro' || template === '+next+fuma-docs-mdx+static' || template.endsWith('-spa');
+
 function checkOption(name: string, value: string | undefined, choices: readonly string[]) {
   if (value !== undefined && !choices.includes(value))
     throw new Error(`invalid value for --${name}: ${value}, expected: ${choices.join(', ')}`);
@@ -157,7 +161,7 @@ async function main(defaultName: string | undefined, config: CliOptions): Promis
               ],
         });
       },
-      search: async () => {
+      search: async ({ results }: { results: { template?: Template } }) => {
         if (config.search !== undefined) return config.search;
         if (skipPrompts) return 'orama';
 
@@ -177,7 +181,10 @@ async function main(defaultName: string | undefined, config: CliOptions): Promis
             { value: 'algolia', label: 'Algolia', hint: 'signup needed' },
             { value: 'meilisearch', label: 'Meilisearch', hint: 'self-hosted or cloud' },
             { value: 'typesense', label: 'Typesense', hint: 'self-hosted or cloud' },
-            { value: 'mixedbread', label: 'Mixedbread', hint: 'AI search, signup needed' },
+            // searches on a server
+            ...(isStatic(results.template!)
+              ? []
+              : [{ value: 'mixedbread', label: 'Mixedbread', hint: 'AI search, signup needed' }]),
           ],
         });
       },
@@ -204,13 +211,7 @@ async function main(defaultName: string | undefined, config: CliOptions): Promis
       },
       aiChat: async ({ results }: { results: { template?: Template } }) => {
         if (config.aiChat !== undefined) return config.aiChat;
-        if (
-          skipPrompts ||
-          results.template === 'astro' ||
-          results.template === '+next+fuma-docs-mdx+static' ||
-          results.template!.endsWith('-spa')
-        )
-          return false;
+        if (skipPrompts || isStatic(results.template!)) return false;
 
         return select<false | 'openrouter' | 'llmgateway' | 'inkeep'>({
           message: 'Configure AI Chat?',

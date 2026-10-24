@@ -49,6 +49,40 @@ export const source = loader({ baseUrl: docsRoute, source: docs.toFumadocsSource
   expect(source.baseUrl).toBe('/guide');
 });
 
+test('project: Astro', async () => {
+  const files = {
+    'package.json': JSON.stringify({ dependencies: { astro: '7.4.2' } }),
+    'astro.config.mjs': `export default defineConfig({ integrations: [fumadocs({ dir: 'content/guide' })] });`,
+    'src/pages/index.astro': '',
+    'src/lib/shared.ts': `export const docsRoute = '/guide';`,
+    'src/lib/source.ts': `import { toFumadocsSource } from '@fumadocs/astro/source';
+import { docsRoute } from './shared';
+
+export const source = loader({
+  source: toFumadocsSource(await getCollection('docs'), await getCollection('meta')),
+  baseUrl: docsRoute,
+});`,
+  };
+  const { framework, baseDir, static: isStatic, source } = await project(files);
+  expect(framework).toBe('astro');
+  expect(baseDir).toBe('src');
+  expect(isStatic).toBe(true);
+  expect(source).toEqual({
+    loader: true,
+    dynamic: false,
+    collections: 'astro.config.mjs',
+    async: true,
+    baseUrl: '/guide',
+    dir: 'content/guide',
+  });
+
+  const server = await project({
+    ...files,
+    'astro.config.mjs': `export default defineConfig({ output: 'server', integrations: [fumadocs()] });`,
+  });
+  expect(server.static).toBe(false);
+});
+
 test('project: other content sources', async () => {
   const { source } = await project({
     'package.json': pkg,

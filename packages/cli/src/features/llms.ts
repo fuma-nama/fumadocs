@@ -1,7 +1,8 @@
 import path from 'node:path';
 import type { Feature, FeatureContext } from '@/features';
-import type { I18nInfo, ReactFramework } from '@/project';
+import type { Framework, I18nInfo } from '@/project';
 import {
+  astroPageRoute,
   type FormattedRoute,
   formatRoute,
   reactRouterTypes,
@@ -19,7 +20,6 @@ import { docs, findNextProxy } from './docs';
 import {
   addExport,
   addPageUrl,
-  reactFramework,
   type SourceRef,
   sourceRef,
   registerReactRouterRoutes,
@@ -84,10 +84,10 @@ interface Routes {
   markdown: FormattedRoute;
 }
 
-type Template = (route: FormattedRoute, i18n: boolean, src: SourceRef) => string;
+type Template = (route: FormattedRoute, i18n: I18nInfo | null, src: SourceRef) => string;
 
 /** the per-page Markdown route, the only one reading route params */
-const markdownTemplates: Record<ReactFramework, Template> = {
+const markdownTemplates: Record<Framework, Template> = {
   next: (route, i18n, src) => `${pageImports(src)}
 import { notFound } from 'next/navigation';
 
@@ -164,12 +164,13 @@ export async function getConfig() {
   } as const;
 }
 `,
+  astro: (_route, i18n, src) => astroPageRoute(i18n, pageImports(src), markdown),
 };
 
 export function templates(
-  framework: ReactFramework,
+  framework: Framework,
   routes: Routes,
-  i18n: boolean,
+  i18n: I18nInfo | null,
   src: SourceRef,
 ): [route: FormattedRoute, content: string][] {
   const index = (body: string) => ({ imports, body, revalidate: true, static: true });
@@ -188,7 +189,7 @@ export function templates(
 }
 
 export function llmsRoutes(
-  framework: ReactFramework,
+  framework: Framework,
   i18n: I18nInfo | null,
   docsRoute: string,
   contentRoute: string,
@@ -218,15 +219,14 @@ export const llms: Feature = {
   requires: [docs],
   supports: requiresMarkdown,
   async apply(ctx) {
-    const { baseDir, i18n, source, configFile } = ctx.project;
-    const framework = reactFramework(ctx.project);
+    const { baseDir, i18n, source, configFile, framework } = ctx.project;
     const sourceFile = path.join(baseDir, 'lib/source.ts');
     const src = sourceRef(ctx.project.source.dynamic);
     // runtime content sources already give raw Markdown
     if (source.collections) {
       await ctx.source(source.collections, (file) => {
         if (!enableProcessedMarkdown(file))
-          throw new Error(`cannot find \`defineDocs()\` in ${source.collections}`);
+          throw new Error(`cannot enable \`includeProcessedMarkdown\` in ${source.collections}`);
       });
     }
     if (await addExport(ctx, sourceFile, 'docsLlms', docsLlms(src))) {
@@ -245,7 +245,7 @@ export const llms: Feature = {
       await addPageUrl(ctx, 'getPageMarkdownUrl', markdownUrl(i18n !== null));
     }
     const routes = llmsRoutes(framework, i18n, docsRoute, contentRoute);
-    for (const [route, content] of templates(framework, routes, i18n !== null, src))
+    for (const [route, content] of templates(framework, routes, i18n, src))
       await ctx.write(path.join(baseDir, route.file), content);
 
     if (framework === 'react-router') {
@@ -259,7 +259,7 @@ export const llms: Feature = {
       if (i18n) await extendNextProxy(ctx, routes.markdown);
       await configureMarkdownUrl(ctx, docsRoute, routes.markdown);
     }
-    if (ctx.project.static && framework !== 'next') {
+    if (ctx.project.static && (framework === 'react-router' || framework === 'tanstack-start')) {
       ctx.note(
         'Per-page Markdown routes are dynamic, add the pages to your prerender config to serve them statically.',
       );

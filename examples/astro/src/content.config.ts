@@ -1,26 +1,8 @@
-import { glob } from 'astro/loaders';
-import { defineCollection, z } from 'astro:content';
-
-const docs = defineCollection({
-  loader: glob({ pattern: '**/*.{md,mdx}', base: './content/docs' }),
-  schema: z.object({
-    title: z.string(),
-    description: z.string().optional(),
-    icon: z.string().optional(),
-  }),
-});
-
-const meta = defineCollection({
-  loader: glob({ pattern: '**/*.{json,yaml}', base: './content/docs' }),
-  schema: z.object({
-    title: z.string().optional(),
-    description: z.string().optional(),
-    pages: z.array(z.string()).optional(),
-    icon: z.string().optional(),
-  }),
-});
+import { defineCollection } from 'astro:content';
+import { docsLoader, metaLoader } from '@fumadocs/astro/loaders';
+import { metaSchema, pageSchema } from 'fumadocs-core/source/schema';
 
 export const collections = {
-  docs,
-  meta,
+  docs: defineCollection({ loader: docsLoader(), schema: pageSchema }),
+  meta: defineCollection({ loader: metaLoader(), schema: metaSchema }),
 };

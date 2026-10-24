@@ -31,8 +31,10 @@ export const ai: Feature<{ provider: AIProvider }> = {
       })),
     },
   },
-  supports: (project) =>
-    project.static ? 'AI chat requires a server to run the chat route handler.' : true,
+  supports: (project) => {
+    if (project.framework === 'astro') return 'Astro is not supported by this feature';
+    return project.static ? 'AI chat requires a server to run the chat route handler.' : true;
+  },
   async apply(ctx, { provider }) {
     await ctx.install(`ai/${provider}`);
     ctx.env(providers[provider].env, '');
