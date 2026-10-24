@@ -12,7 +12,7 @@ export type Serialized<Data> = {
 };
 
 export function deserializePageTree(serialized: SerializedPageTree): PageTree.Root {
-  // copy nodes, the serialized data may still be read (e.g. island props of Astro)
+  // copy nodes, callers may still read the serialized tree
   return visit(serialized.data as PageTree.Root, (item) => {
     item = { ...item };
     if ('children' in item) item.children = [...item.children];
