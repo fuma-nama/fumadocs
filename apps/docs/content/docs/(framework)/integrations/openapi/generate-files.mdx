@@ -1,26 +1,13 @@
 ---
-title: generateFiles()
+title: Generating Pages
 description: Generate pages from OpenAPI schema.
 ---
 
-The `generateFiles()` function generates MDX files for API documentation.
+`staticSource()` and `dynamicSource()` generate pages for your [`loader()`](/docs/integrations/openapi#generate-pages), `generateFiles()` writes them into your content directory as MDX files instead. They accept the same options.
 
-Note that the page content is still rendered by the `APIpage` component, docs generator only arranges the endpoints/webhooks to render for each page.
+Note that the page content is still rendered by the `<OpenAPIPage />` component, the docs generator only arranges the endpoints/webhooks to render for each page.
 
-## Usage
-
-It takes an OpenAPI instance.
-
-```ts
-import { generateFiles } from 'fumadocs-openapi';
-import { openapi } from '@/lib/openapi';
-
-void generateFiles({
-  input: openapi,
-  // The output directory.
-  output: '/content/docs',
-});
-```
+## Options
 
 ### `per`
 
@@ -28,17 +15,17 @@ Customize the content of pages, default to `operation`.
 
 <Callout>Operation refers to an API endpoint with specific method like `/api/weather:GET`.</Callout>
 
-| mode      | content                        | file path                             |
-| --------- | ------------------------------ | ------------------------------------- |
-| tag       | operations with same tag       | `{tag_name}.mdx`                      |
-| file      | operations in same schema file | `{file_name}.mdx`                     |
-| operation | each operation                 | `{operationId ?? endpoint_path}.mdx`) |
-| custom    | see below                      | N/A                                   |
+| mode      | content                        | file path                            |
+| --------- | ------------------------------ | ------------------------------------ |
+| tag       | operations with same tag       | `{tag_name}.mdx`                     |
+| file      | operations in same schema file | `{file_name}.mdx`                    |
+| operation | each operation                 | `{operationId ?? endpoint_path}.mdx` |
+| custom    | see below                      | N/A                                  |
 
 ```ts
-import { generateFiles } from 'fumadocs-openapi';
+import { openapi } from '@/lib/openapi';
 
-void generateFiles({
+await openapi.staticSource({
   per: 'tag',
 });
 ```
@@ -46,9 +33,10 @@ void generateFiles({
 When set to `custom`, you can pass a function to fully customize the generation process:
 
 ```ts title="Example"
-import { generateFiles, OperationOutput } from 'fumadocs-openapi';
+import type { OperationOutput } from 'fumadocs-openapi';
+import { openapi } from '@/lib/openapi';
 
-void generateFiles({
+await openapi.staticSource({
   per: 'custom',
   toPages(builder) {
     const items = builder.extract();
@@ -104,9 +92,9 @@ In `operation` mode, you can group output files with folders.
 | none (default) | `{operationId ?? endpoint_path}.mdx`                   |
 
 ```ts
-import { generateFiles } from 'fumadocs-openapi';
+import { openapi } from '@/lib/openapi';
 
-void generateFiles({
+await openapi.staticSource({
   per: 'operation',
   groupBy: 'tag',
 });
@@ -131,6 +119,147 @@ paths:
 ```
 
 Operations without tags are grouped under an `unknown` folder.
+
+### `name`
+
+A function that controls the file name of generated pages.
+
+```ts
+import { openapi } from '@/lib/openapi';
+
+await openapi.staticSource({
+  name(output) {
+    const doc = this.document;
+    if (output.type === 'operation') {
+      const operation = doc.paths![output.item.path]![output.item.method]!;
+      // operation object
+      console.log(operation);
+
+      return 'my-dir/filename';
+    }
+
+    const hook = this.dereferenceShallow(doc.webhooks![output.item.name])[output.item.method]!;
+    // webhook object
+    console.log(hook);
+    return 'my-dir/filename';
+  },
+});
+```
+
+### `meta`
+
+Generate [`meta.json`](/docs/page-conventions#meta) files automatically.
+
+You can always define the `meta.json` files manually for maximal flexibility.
+
+```ts
+import { openapi } from '@/lib/openapi';
+
+await openapi.staticSource({
+  meta: true,
+
+  // or customize how folders are represented:
+  meta: {
+    folderStyle: 'separator',
+  },
+});
+```
+
+## MDX Files
+
+To write pages as MDX files, create a script:
+
+```ts title="scripts/generate-docs.ts"
+import { generateFiles } from 'fumadocs-openapi';
+import { openapi } from '@/lib/openapi';
+
+void generateFiles({
+  input: openapi,
+  output: './content/docs',
+  // we recommend to enable it
+  // make sure your endpoint description doesn't break MDX syntax.
+  includeDescription: true,
+});
+```
+
+Generate docs with the script:
+
+```bash
+bun ./scripts/generate-docs.ts
+```
+
+Add the `OpenAPIPage` component to your MDX components.
+
+```tsx tab="Server Components" title="app/docs/[[...slug]]/page.tsx"
+import { source } from '@/lib/source';
+import { openapi } from '@/lib/openapi';
+import { OpenAPIPage } from '@/components/api-page';
+import { getMDXComponents } from '@/components/mdx';
+
+// e.g. in your page renderer
+export default function Page({ slug }) {
+  const page = source.getPage(slug);
+  const MdxContent = page.data.body;
+
+  return (
+    <MdxContent
+      components={getMDXComponents({
+        // [!code ++:3] add the MDX component
+        OpenAPIPage: async (props) => (
+          <OpenAPIPage {...await openapi.preloadOpenAPIPage(page)} {...props} />
+        ),
+      })}
+    />
+  );
+}
+```
+
+```tsx tab="Without Server Components" title="docs/[...slug]"
+import { source } from '@/lib/source';
+import { openapi } from '@/lib/openapi';
+import { OpenAPIPage } from '@/components/api-page';
+import { getMDXComponents } from '@/components/mdx';
+
+// e.g. where you return server payload to client
+export async function loader({ slug }) {
+  const page = source.getPage(slug);
+
+  return {
+    // [!code ++]
+    openapiData: await openapi.preloadOpenAPIPage(page),
+    // ...
+  };
+}
+
+// e.g. in your page renderer
+export default function Page() {
+  // consume loader data
+  const { openapiData } = useLoaderData();
+
+  return (
+    <MdxContent
+      components={getMDXComponents({
+        // [!code ++] add the MDX component
+        OpenAPIPage: (props) => <OpenAPIPage {...openapiData} {...props} />,
+      })}
+    />
+  );
+}
+```
+
+Add the plugin to your `loader()`:
+
+```ts title="lib/source.ts"
+import { openapiPlugin } from 'fumadocs-openapi/server';
+import { loader } from 'fumadocs-core/source';
+
+export const source = loader({
+  // [!code ++] optional: adds a badge to each page item in page tree
+  plugins: [openapiPlugin()],
+});
+```
+
+`generateFiles()` also accepts the options below.
 
 ### `index`
 
@@ -160,25 +289,6 @@ void generateFiles({
 });
 ```
 
-### `meta`
-
-Generate [`meta.json`](/docs/page-conventions#meta) files automatically.
-
-You can always define the `meta.json` files manually for maximal flexibility.
-
-```ts
-import { generateFiles } from 'fumadocs-openapi';
-
-void generateFiles({
-  meta: true,
-
-  // or customize how folders are represented:
-  meta: {
-    folderStyle: 'separator',
-  },
-});
-```
-
 ### `imports`
 
 Add custom imports to generated MDX files. This is useful for including components, utilities, or other dependencies in your generated documentation.
@@ -200,32 +310,6 @@ This will add the following imports to all generated MDX files:
 
 ```ts
 import { API_BASE_URL } from '@/constants';
-```
-
-### `name`
-
-A function that controls the output file name of MDX pages.
-
-```ts
-import { generateFiles } from 'fumadocs-openapi';
-
-void generateFiles({
-  name(output) {
-    const doc = this.document;
-    if (output.type === 'operation') {
-      const operation = doc.paths![output.item.path]![output.item.method]!;
-      // operation object
-      console.log(operation);
-
-      return 'my-dir/filename';
-    }
-
-    const hook = this.dereferenceShallow(doc.webhooks![output.item.name])[output.item.method]!;
-    // webhook object
-    console.log(hook);
-    return 'my-dir/filename';
-  },
-});
 ```
 
 ### `frontmatter`
