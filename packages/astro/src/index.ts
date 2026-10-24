@@ -101,10 +101,10 @@ export default function fumadocs({
         }
 
         const names = new Set(config.integrations.map((integration) => integration.name));
-        for (const name of ['@astrojs/react', '@astrojs/mdx']) {
-          if (!names.has(name))
+        for (const name of ['react', 'mdx']) {
+          if (!names.has(`@astrojs/${name}`))
             throw new Error(
-              `Fumadocs requires \`${name}\`, add it with \`npx astro add ${name.slice(8)}\`.`,
+              `Fumadocs requires \`@astrojs/${name}\`, add it with \`npx astro add ${name}\`.`,
             );
         }
 
@@ -151,18 +151,35 @@ document.addEventListener('astro:before-swap', onBeforeSwap);`,
         );
         updateConfig({
           vite: {
-            resolve: {
-              alias: {
-                [componentsId]: components.startsWith('.')
-                  ? path.resolve(root, components)
+            plugins: [
+              componentsPlugin(
+                components.startsWith('.')
+                  ? path.resolve(root, components).replaceAll(path.sep, '/')
                   : components,
-              },
-            },
+              ),
+            ],
             optimizeDeps: { exclude: ['@fumadocs/astro'] },
             ssr: { noExternal: ['@fumadocs/astro'] },
           },
         });
       },
+    },
+  };
+}
+
+/** a virtual module, so the components module resolves from the project rather than this package */
+function componentsPlugin(module: string) {
+  const resolved = `\0${componentsId}`;
+
+  return {
+    name: '@fumadocs/astro:components',
+    resolveId: {
+      filter: { id: new RegExp(`^${componentsId}$`) },
+      handler: () => resolved,
+    },
+    load: {
+      filter: { id: new RegExp(`^\\0${componentsId}$`) },
+      handler: () => `export { default } from ${JSON.stringify(module)};`,
     },
   };
 }
