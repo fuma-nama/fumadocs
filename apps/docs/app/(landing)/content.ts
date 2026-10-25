@@ -8,11 +8,12 @@ const beats = [
   {
     title: '3 layers deep.',
     description:
-      'Content feeds the core, the core feeds the UI. Each layer is a library on its own.',
+      'Content feeds the core and the core feeds the UI, on the framework you choose. Each layer is a library on its own.',
   },
   {
-    title: 'Swap any layer.',
-    description: 'Bring your own CMS, framework or UI. Everything else keeps working.',
+    title: 'Swap one, keep the rest.',
+    description:
+      'Bring your own content source, framework or UI. Each one plugs into the same core.',
   },
 ];
 
@@ -22,10 +23,10 @@ const beats = [
  */
 export const copy = {
   hero: {
-    lead: 'Beautiful docs.',
+    lead: 'The React docs framework.',
     title: 'Flexible to the core.',
     description:
-      'Fumadocs is a documentation framework for React, built in layers you can swap: content, core and UI. Change one, keep the rest.',
+      'You get a beautiful UI, first-party integrations and MDX, and you can swap out any part for your own.',
   },
   parts: {
     lead: 'Inside a page.',
@@ -36,25 +37,31 @@ export const copy = {
     lead: 'Write in Markdown.',
     title: 'Reach for React.',
     description:
-      'MDX gives writers plain Markdown and developers components and type-checked code. Fumadocs compiles both into the same page.',
+      'With MDX, writers stay in plain Markdown while developers add React components and type-checked code. Fumadocs compiles both into one page.',
   },
   style: {
     lead: 'Beautiful by default.',
     title: 'Yours by design.',
     description:
-      'Pick from 6 layouts and 12 themes, all built from the same parts. Restyle them with CSS variables, or copy the source into your project.',
+      'Pick from 6 layouts and 12 themes, all built from the same parts. Restyle them with CSS variables, or copy a layout into your project.',
   },
-  batteries: {
-    lead: 'Batteries included.',
-    title: 'First-party integrations.',
+  cli: {
+    lead: 'Break it open.',
+    title: 'The source is yours.',
     description:
-      'Search, API references, i18n, AI and more ship as optional modules. Install what you need, leave out the rest.',
+      'The Fumadocs CLI copies layouts and components into your project and points your imports at them. Edit them like the rest of your code.',
+  },
+  integrations: {
+    lead: 'Integrations.',
+    title: 'Add only what you need.',
+    description:
+      'Search, API references, AI chat, i18n and more ship in first-party packages. Each one starts with a single command.',
   },
   proof: {
     lead: 'Built in the open.',
     title: 'Running in production.',
     description:
-      'UI libraries, auth frameworks, databases and AI platforms ship their docs on Fumadocs.',
+      'Projects like shadcn/ui, Better Auth, Prisma and Zod ship their docs on Fumadocs.',
   },
   start: {
     lead: 'Your turn.',

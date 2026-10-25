@@ -1,5 +1,5 @@
 /*
- * 05 Batteries: the board, its seams and power-on, and the parts of the mechanisms. Each
+ * 05 Integrations: the board, its seams and power-on, and the parts of the mechanisms. Each
  * mechanism's keyframes come from `choreography.ts`, poses held on the 125 ms tick grid.
  */
 
@@ -356,7 +356,7 @@
   animation-play-state: paused;
 }
 
-/* row 13: further batteries */
+/* row 13: further integrations */
 .bt-track {
   animation: bt-marquee 80s linear infinite;
 }

@@ -3,7 +3,6 @@ import { type KeyboardEvent, memo, type ReactNode, useMemo, useState } from 'rea
 import { useReducedMotion } from 'motion/react';
 import { Chip, type Layer } from '../../ui/spec';
 import { Window } from '../../ui/window';
-import { setStatus } from '../../lib/status';
 import { cn } from '@/lib/cn';
 import { type Option, slots } from './data';
 
@@ -15,16 +14,6 @@ export type Snippets = Record<SwapLayer, ReactNode[]>;
 export function optionsOf(layer: Layer): Option[] {
   for (const slot of slots) if (slot.layer === layer) return slot.options;
   return [];
-}
-
-/**
- * The figure's status line: shown now when `active`, and kept on the figure so the status bar
- * shows it again when the reader comes back.
- */
-export function report(from: Element, text: string, active = true) {
-  const figure = from.closest<HTMLElement>('[data-figure]');
-  if (figure) figure.dataset.status = text;
-  if (active) setStatus(text);
 }
 
 export interface Swap {

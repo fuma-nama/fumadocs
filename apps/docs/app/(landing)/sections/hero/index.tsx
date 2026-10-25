@@ -28,7 +28,7 @@ export function Hero() {
         {/* three lines, sized by width and by the height left for the sky, so the horizon stays on screen */}
         <h1 className="text-[clamp(3rem,7.2vw,6.5rem)] leading-[0.95] font-medium tracking-[-0.045em] lg:max-xl:text-[clamp(3rem,min(6.4vw,calc((100svh-530px)/2.85)),6.5rem)] xl:text-[clamp(3rem,min(7.2vw,calc((100svh-470px)/2.85)),6.5rem)]">
           <Lead className="text-[0.6em]">
-            Beautiful <Mark>docs</Mark>.
+            The React <Mark>docs</Mark> framework.
           </Lead>{' '}
           <Glitch>Flexible</Glitch>
           <br />

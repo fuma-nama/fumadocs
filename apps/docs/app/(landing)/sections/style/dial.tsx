@@ -1,66 +1,101 @@
 'use client';
-import { useCallback, useEffect, useRef } from 'react';
-import { THEMES, type ThemeId } from './data';
-import { Drum, turnDrum } from './drum';
+import { type ReactNode, useCallback, useEffect, useId, useRef, useState } from 'react';
+import { cn } from '@/lib/cn';
+import { BAYER4 } from '../../lib/bayer';
+import { paint, THEME_NAMES, THEMES, type ThemeId } from './data';
+import { createIntent } from './intent';
 import type { InkTable } from './presets';
 import { STEP } from './rope';
 import { createSprings, settleSprings, stepSprings } from './spring';
 
-export interface DialProps {
-  table: InkTable;
-  /** the theme shown, the drum turns to it */
-  shown: ThemeId;
-  onPreview: (theme: ThemeId | null) => void;
-  onPin: (theme: ThemeId) => void;
+/** the dial's box in px, the axle's place in it: the names on the left run a little longer */
+const W = 320;
+const H = 194;
+const CX = 164;
+const CY = 97;
+/** the knob's base, how deep its sides show, and its pointer: a hub tapering to a tip */
+const BASE = 42;
+const SIDE = 5;
+const TIP = 64;
+const HUB = 17;
+/** where the chips and the names sit, from the axle */
+const CHIP = 74;
+const LABEL = 88;
+/** the detents 30° apart; the stop sits at the bottom, between the last preset and the first */
+const SWEEP = 330;
+const START = -SWEEP / 2;
+const DEG = SWEEP / (THEMES.length - 1);
+const LAST = THEMES.length - 1;
+/** the radius inside which a drag turns the knob by its height, not around the axle */
+const NEAR = 16;
+
+function angleOf(index: number) {
+  return START + index * DEG;
 }
 
-interface DialEngine {
+function polar(r: number, deg: number): [x: number, y: number] {
+  const a = (deg * Math.PI) / 180;
+  return [CX + r * Math.sin(a), CY - r * Math.cos(a)];
+}
+
+/** an ordered dither of `level` / 16 cells of `cell` px, as a path for a pattern */
+function ditherPath(level: number, cell: number) {
+  let d = '';
+  for (let i = 0; i < 16; i++) {
+    if (BAYER4[i] < level)
+      d += `M${(i % 4) * cell} ${Math.floor(i / 4) * cell}h${cell}v${cell}h${-cell}z`;
+  }
+  return d;
+}
+
+/** the pointer of a chicken-head knob pointing up from the axle */
+const POINTER = (() => {
+  const a = Math.acos(HUB / TIP);
+  const x = HUB * Math.sin(a);
+  const y = CY - HUB * Math.cos(a);
+  return `M${CX} ${CY - TIP}L${(CX + x).toFixed(2)} ${y.toFixed(2)}A${HUB} ${HUB} 0 1 1 ${(CX - x).toFixed(2)} ${y.toFixed(2)}Z`;
+})();
+
+/** the scale's ring through the detents, open at the stop */
+const SCALE = (() => {
+  const [x1, y1] = polar(CHIP, START);
+  const [x2, y2] = polar(CHIP, -START);
+  return `M${x1.toFixed(2)} ${y1.toFixed(2)}A${CHIP} ${CHIP} 0 1 1 ${x2.toFixed(2)} ${y2.toFixed(2)}`;
+})();
+
+function rotate(deg: number) {
+  return `rotate(${deg.toFixed(2)} ${CX} ${CY})`;
+}
+
+interface Engine {
   turnTo: (index: number) => void;
   destroy: () => void;
 }
 
-/** a turn of the drum to the nearest equivalent of `index`, it never spins the long way */
-function nearest(turn: number, index: number) {
-  const n = THEMES.length;
-  const delta = ((((index - turn) % n) + n * 1.5) % n) - n / 2;
-  return turn + delta;
-}
-
-function wrap(turn: number) {
-  const n = THEMES.length;
-  return ((Math.round(turn) % n) + n) % n;
-}
-
 /**
- * The drum turns on a spring to the theme shown. Drag it with a mouse and it follows, the face at
- * the front previewing its theme; it snaps on release, with the throw, and pins the theme.
+ * The knob as a physical thing. Dragged, it follows the pointer around its axle with a pull toward
+ * the nearest detent, and the preset changes as it crosses one; let go, it snaps onto the detent.
+ * A name held under the pointer, or clicked, turns it there on a spring.
  */
-function createDial(
-  element: HTMLElement,
+function createKnob(
+  root: HTMLElement,
   initial: number,
-  onPreview: (theme: ThemeId | null) => void,
-  onPin: (theme: ThemeId) => void,
-): DialEngine {
-  const drum = element.querySelector<HTMLElement>('[data-drum]')!;
+  onChange: (index: number, turning: boolean) => void,
+): Engine {
+  const face = root.querySelector<SVGGElement>('[data-face]')!;
+  const side = root.querySelector<SVGGElement>('[data-side]')!;
+  const handle = root.querySelector<HTMLElement>('[role="slider"]')!;
   const reduce = matchMedia('(prefers-reduced-motion: reduce)');
-  const turn = createSprings(1, initial);
-  let face = 44;
+  const turn = createSprings(1, angleOf(initial));
+  let value = initial;
   let raf = 0;
   let last = 0;
   let acc = 0;
-  let drag: {
-    id: number;
-    y: number;
-    turn: number;
-    moved: boolean;
-    v: number;
-    t: number;
-    /** a finger taps a face, it never turns the drum: its drag scrolls the page */
-    touch: boolean;
-  } | null = null;
+  let drag: { id: number; prev: number; y: number; raw: number } | null = null;
 
   function draw() {
-    turnDrum(drum, turn.value[0], face);
+    face.setAttribute('transform', rotate(turn.value[0]));
+    side.setAttribute('transform', `translate(0 ${SIDE}) ${rotate(turn.value[0])}`);
   }
 
   function frame(now: number) {
@@ -68,164 +103,265 @@ function createDial(
     const dt = last === 0 ? STEP : Math.min(0.05, (now - last) / 1000);
     last = now;
     acc += dt;
-    let energy = 0;
+    // a frame shorter than a step (a 120 Hz screen) steps nothing: it settles nothing either
+    let energy = Infinity;
     while (acc >= STEP) {
       acc -= STEP;
-      energy = stepSprings(turn, STEP, 210, 21);
+      energy = stepSprings(turn, STEP, 320, 24);
     }
     draw();
-    if (energy > 1e-4 && !drag) raf = requestAnimationFrame(frame);
+    if (energy > 0.01 && !drag) raf = requestAnimationFrame(frame);
     else last = acc = 0;
   }
 
-  function schedule() {
+  function settle() {
+    turn.target[0] = angleOf(value);
     if (reduce.matches) {
       settleSprings(turn);
       draw();
-      return;
+    } else if (raf === 0) raf = requestAnimationFrame(frame);
+  }
+
+  function set(index: number, turning: boolean) {
+    if (index !== value) {
+      value = index;
+      onChange(index, turning);
     }
-    if (raf === 0) raf = requestAnimationFrame(frame);
   }
 
-  function themeOf(event: PointerEvent): ThemeId | null {
-    const face = (event.target as HTMLElement).closest<HTMLElement>('[data-face]');
-    return (face?.dataset.face as ThemeId | undefined) ?? null;
-  }
-
-  function onOver(event: PointerEvent) {
-    if (drag) return;
-    const theme = themeOf(event);
-    if (theme) onPreview(theme);
+  /** the pointer around the axle: its angle (0 up, clockwise) and distance */
+  function polarOf(event: PointerEvent): [deg: number, r: number] {
+    const box = handle.getBoundingClientRect();
+    const x = event.clientX - (box.left + box.width / 2);
+    const y = event.clientY - (box.top + box.height / 2);
+    return [(Math.atan2(x, -y) * 180) / Math.PI, Math.hypot(x, y)];
   }
 
   function onDown(event: PointerEvent) {
     if (event.button !== 0) return;
-    face = Number.parseFloat(getComputedStyle(element).getPropertyValue('--face')) || face;
-    const touch = event.pointerType === 'touch';
-    drag = {
-      id: event.pointerId,
-      y: event.clientY,
-      turn: turn.value[0],
-      moved: false,
-      v: 0,
-      t: event.timeStamp,
-      touch,
-    };
-    if (!touch) element.setPointerCapture(event.pointerId);
+    // a drag turns the knob, it never selects the page's text
+    event.preventDefault();
+    handle.focus({ preventScroll: true });
+    handle.setPointerCapture(event.pointerId);
+    drag = { id: event.pointerId, prev: polarOf(event)[0], y: event.clientY, raw: turn.value[0] };
+    cancelAnimationFrame(raf);
+    raf = 0;
+    turn.velocity[0] = 0;
+    intent.cancel();
   }
 
   function onMove(event: PointerEvent) {
     if (!drag || event.pointerId !== drag.id) return;
-    const dy = event.clientY - drag.y;
-    if (!drag.moved && Math.abs(dy) < 4) return;
-    drag.moved = true;
-    if (drag.touch) return;
-    const next = drag.turn - dy / face;
-    const dt = Math.max(1, event.timeStamp - drag.t);
-    drag.v = (next - turn.value[0]) / (dt / 1000);
-    drag.t = event.timeStamp;
-    turn.value[0] = turn.target[0] = next;
-    turn.velocity[0] = 0;
+    const [deg, r] = polarOf(event);
+    let delta = deg - drag.prev;
+    if (delta > 180) delta -= 360;
+    if (delta < -180) delta += 360;
+    // near the axle the angle jumps about, the knob turns by the height of the drag instead
+    if (r < NEAR) delta = (drag.y - event.clientY) * 1.5;
+    drag.prev = deg;
+    drag.y = event.clientY;
+    // past a stop it gives a little, then holds
+    drag.raw = Math.min(angleOf(LAST) + 12, Math.max(angleOf(0) - 12, drag.raw + delta));
+    const index = Math.min(LAST, Math.max(0, Math.round((drag.raw - START) / DEG)));
+    turn.value[0] = turn.target[0] = drag.raw + (angleOf(index) - drag.raw) * 0.35;
     draw();
-    onPreview(THEMES[wrap(next)]);
+    set(index, true);
   }
 
   function onUp(event: PointerEvent) {
     if (!drag || event.pointerId !== drag.id) return;
-    const { moved, v, touch } = drag;
     drag = null;
-    if (!touch) element.releasePointerCapture(event.pointerId);
-    if (!moved) {
-      const theme = themeOf(event);
-      if (theme) onPin(theme);
-      return;
-    }
-    if (touch) return;
-    // the throw carries it on a little before it snaps
-    const target = Math.round(turn.value[0] + Math.max(-3, Math.min(3, v * 0.12)));
-    turn.target[0] = target;
-    turn.velocity[0] = v;
-    schedule();
-    onPin(THEMES[wrap(target)]);
+    onChange(value, false);
+    settle();
   }
 
-  /** the page took the gesture: no tap, no throw */
-  function onCancel(event: PointerEvent) {
-    if (!drag || event.pointerId !== drag.id) return;
-    if (!drag.touch) element.releasePointerCapture(event.pointerId);
-    drag = null;
-    turn.target[0] = Math.round(turn.value[0]);
-    schedule();
+  function onKey(event: KeyboardEvent) {
+    const keys: Record<string, number> = {
+      ArrowRight: value + 1,
+      ArrowUp: value + 1,
+      ArrowLeft: value - 1,
+      ArrowDown: value - 1,
+      PageUp: value + 3,
+      PageDown: value - 3,
+      Home: 0,
+      End: LAST,
+    };
+    const next = keys[event.key];
+    if (next === undefined) return;
+    event.preventDefault();
+    set(Math.min(LAST, Math.max(0, next)), false);
+    settle();
   }
 
-  function onLeave() {
-    if (!drag) onPreview(null);
+  // a name held under the pointer is chosen, the knob turns to it
+  const intent = createIntent<number>((index) => {
+    set(index, false);
+    settle();
+  });
+
+  function onHover(event: PointerEvent) {
+    if (drag || event.pointerType === 'touch') return;
+    const label = (event.target as Element).closest<HTMLElement>('[data-theme]');
+    const index = label ? THEMES.indexOf(label.dataset.theme as ThemeId) : -1;
+    intent.move(index >= 0 && index !== value ? index : null);
   }
 
-  element.addEventListener('pointerover', onOver);
-  element.addEventListener('pointerdown', onDown);
-  element.addEventListener('pointermove', onMove);
-  element.addEventListener('pointerup', onUp);
-  element.addEventListener('pointercancel', onCancel);
-  element.addEventListener('pointerleave', onLeave);
+  handle.addEventListener('pointerdown', onDown);
+  handle.addEventListener('pointermove', onMove);
+  handle.addEventListener('pointerup', onUp);
+  handle.addEventListener('pointercancel', onUp);
+  handle.addEventListener('keydown', onKey);
+  root.addEventListener('pointermove', onHover);
+  root.addEventListener('pointerleave', intent.cancel);
 
   return {
     turnTo(index) {
-      if (drag) return;
-      face = Number.parseFloat(getComputedStyle(element).getPropertyValue('--face')) || face;
-      turn.target[0] = nearest(turn.value[0], index);
-      schedule();
+      if (drag || index === value) return;
+      value = index;
+      settle();
     },
     destroy() {
       cancelAnimationFrame(raf);
-      element.removeEventListener('pointerover', onOver);
-      element.removeEventListener('pointerdown', onDown);
-      element.removeEventListener('pointermove', onMove);
-      element.removeEventListener('pointerup', onUp);
-      element.removeEventListener('pointercancel', onCancel);
-      element.removeEventListener('pointerleave', onLeave);
+      intent.cancel();
+      handle.removeEventListener('pointerdown', onDown);
+      handle.removeEventListener('pointermove', onMove);
+      handle.removeEventListener('pointerup', onUp);
+      handle.removeEventListener('pointercancel', onUp);
+      handle.removeEventListener('keydown', onKey);
+      root.removeEventListener('pointermove', onHover);
+      root.removeEventListener('pointerleave', intent.cancel);
     },
   };
 }
 
-/** the presets on a drum: hover a face to preview it, click to pin, drag to turn */
-export function Dial({ table, shown, onPreview, onPin }: DialProps) {
-  const engine = useRef<DialEngine | null>(null);
-  const handlers = useRef({ onPreview, onPin });
+export interface DialProps {
+  table: InkTable;
+  value: ThemeId;
+  /** `turning` while the knob is dragged through the presets */
+  onChange: (theme: ThemeId, turning: boolean) => void;
+}
+
+/**
+ * The 12 presets on a rotary selector: a knob over a ring of their colours with their names
+ * around it. Turn the knob, hold the pointer on a name, click it, or use the keys.
+ */
+export function Dial({ table, value, onChange }: DialProps) {
+  const id = useId();
+  const engine = useRef<Engine | null>(null);
+  const change = useRef(onChange);
   useEffect(() => {
-    handlers.current = { onPreview, onPin };
+    change.current = onChange;
   });
-  const ref = useCallback((element: HTMLDivElement | null) => {
-    if (!element) return;
-    const instance = createDial(
-      element,
-      0,
-      (theme) => handlers.current.onPreview(theme),
-      (theme) => handlers.current.onPin(theme),
-    );
-    engine.current = instance;
-    return () => {
-      instance.destroy();
-      engine.current = null;
-    };
-  }, []);
+  const index = THEMES.indexOf(value);
+  // the server draws the knob where it starts; from then on the engine turns it
+  const [start] = useState(index);
+  const ref = useCallback(
+    (element: HTMLDivElement | null) => {
+      if (!element) return;
+      const instance = createKnob(element, start, (i, turning) =>
+        change.current(THEMES[i], turning),
+      );
+      engine.current = instance;
+      return () => {
+        instance.destroy();
+        engine.current = null;
+      };
+    },
+    [start],
+  );
 
   useEffect(() => {
-    engine.current?.turnTo(THEMES.indexOf(shown));
-  }, [shown]);
+    engine.current?.turnTo(index);
+  }, [index]);
+
+  const bg = table.tokens.indexOf('background');
+  const primary = table.tokens.indexOf('primary');
+  const chips: Record<'light' | 'dark', ReactNode[]> = { light: [], dark: [] };
+  const labels = [];
+  for (let i = 0; i < THEMES.length; i++) {
+    const theme = THEMES[i];
+    const deg = angleOf(i);
+    const [cx, cy] = polar(CHIP, deg);
+    for (const mode of ['light', 'dark'] as const) {
+      const ink = table.inks[theme][mode];
+      chips[mode].push(
+        <g key={theme}>
+          <rect
+            x={cx - 4.5}
+            y={cy - 4.5}
+            width={9}
+            height={9}
+            fill={paint(ink[bg])}
+            className="stroke-lp-ink"
+            shapeRendering="crispEdges"
+          />
+          <rect x={cx - 1.5} y={cy - 1.5} width={3} height={3} fill={paint(ink[primary])} />
+        </g>,
+      );
+    }
+    const [lx, ly] = polar(LABEL, deg);
+    const left = Math.sin((deg * Math.PI) / 180) < 0;
+    labels.push(
+      <button
+        key={theme}
+        type="button"
+        data-theme={theme}
+        tabIndex={-1}
+        onClick={() => onChange(theme, false)}
+        className={cn(
+          'absolute -translate-y-1/2 px-1.5 font-pixel text-[13px] leading-5 whitespace-nowrap transition-none',
+          i === index ? 'bg-lp-yellow text-[#121210]' : 'hover:bg-lp-ink hover:text-lp-paper',
+        )}
+        style={left ? { right: W - lx, top: ly } : { left: lx, top: ly }}
+      >
+        {THEME_NAMES[theme]}
+      </button>,
+    );
+  }
+  const [sx, sy] = polar(CHIP, 180);
+  const turned = rotate(angleOf(start));
 
   return (
-    <div className="flex flex-col justify-center gap-3">
+    <div ref={ref} className="relative mx-auto" style={{ width: W, height: H }}>
+      <svg aria-hidden viewBox={`0 0 ${W} ${H}`} className="absolute inset-0 overflow-visible">
+        <defs>
+          <pattern id={`${id}-shadow`} width="4" height="4" patternUnits="userSpaceOnUse">
+            <path d={ditherPath(4, 1)} className="fill-lp-ink-2" />
+          </pattern>
+          <pattern id={`${id}-side`} width="4" height="4" patternUnits="userSpaceOnUse">
+            <path d={ditherPath(6, 1)} className="fill-lp-ink" />
+          </pattern>
+        </defs>
+        <path d={SCALE} className="fill-none stroke-lp-line-strong" />
+        <g className="dark:hidden">{chips.light}</g>
+        <g className="hidden dark:inline">{chips.dark}</g>
+        <rect x={sx - 2} y={sy - 6} width={4} height={12} className="fill-lp-ink" />
+        <circle cx={CX + 5} cy={CY + 10} r={BASE} fill={`url(#${id}-shadow)`} />
+        <circle cx={CX} cy={CY + SIDE} r={BASE} className="fill-lp-paper stroke-lp-ink" />
+        <circle cx={CX} cy={CY + SIDE} r={BASE} fill={`url(#${id}-side)`} />
+        <circle cx={CX} cy={CY} r={BASE} className="fill-lp-paper stroke-lp-ink" />
+        <g data-side transform={`translate(0 ${SIDE}) ${turned}`}>
+          <path d={POINTER} className="fill-lp-paper stroke-lp-ink" />
+          <path d={POINTER} fill={`url(#${id}-side)`} />
+        </g>
+        <g data-face transform={turned}>
+          <path d={POINTER} className="fill-lp-paper stroke-lp-ink" />
+          <path d={`M${CX} ${CY - 8}V${CY - TIP + 9}`} strokeWidth={2} className="stroke-lp-ink" />
+        </g>
+        <circle cx={CX} cy={CY} r={3} className="fill-lp-paper stroke-lp-ink" />
+      </svg>
       <div
-        ref={ref}
-        aria-hidden
-        className="cursor-grab select-none [--face:36px] active:cursor-grabbing xl:[--face:44px]"
-      >
-        <Drum table={table} />
-      </div>
-      <code className="font-mono text-xs text-lp-ink-2">
-        @import &apos;fumadocs-ui/css/<span className="text-lp-ink">{shown}</span>.css&apos;;
-      </code>
+        role="slider"
+        tabIndex={0}
+        aria-label="Theme"
+        aria-valuemin={0}
+        aria-valuemax={LAST}
+        aria-valuenow={index}
+        aria-valuetext={THEME_NAMES[value]}
+        className="absolute cursor-grab touch-none rounded-full focus-visible:outline focus-visible:outline-offset-2 focus-visible:outline-lp-ink active:cursor-grabbing"
+        style={{ left: CX - 56, top: CY - 56, width: 112, height: 112 }}
+      />
+      {labels}
     </div>
   );
 }

@@ -16,7 +16,7 @@ import { SearchMechanism } from './mechanisms/search';
 import { StoryMechanism } from './mechanisms/story';
 import { TwoslashMechanism } from './mechanisms/twoslash';
 import { TypeTableMechanism } from './mechanisms/type-table';
-import './batteries.css';
+import './integrations.css';
 
 /** the mechanism of each module, by its number */
 const mechanisms: Record<number, ReactNode> = {
@@ -37,16 +37,16 @@ const mechanisms: Record<number, ReactNode> = {
 const modules: Module[] = [];
 for (const item of info) modules.push({ ...item, mechanism: mechanisms[item.n] });
 
-export function Batteries() {
+export function Integrations() {
   return (
-    <Figure n={5} id="batteries" aria-label="Batteries" status="12 modules loaded">
+    <Figure n={5} id="integrations" aria-label="Integrations" status="12 integrations loaded">
       <Board
         modules={modules}
         header={
           <FigureHeader
-            lead={copy.batteries.lead}
-            title={copy.batteries.title}
-            description={copy.batteries.description}
+            lead={copy.integrations.lead}
+            title={copy.integrations.title}
+            description={copy.integrations.description}
           />
         }
       >

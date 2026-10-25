@@ -84,7 +84,8 @@ function Wires({
     const tick = (now: number) => {
       acc += last === 0 ? STEP : Math.min(0.05, (now - last) / 1000);
       last = now;
-      let energy = 0;
+      // a frame shorter than a step (a 120 Hz screen) steps nothing: it settles nothing either
+      let energy = Infinity;
       while (acc >= STEP) {
         acc -= STEP;
         energy = stepSprings(s, STEP, 320, 20);

@@ -2,6 +2,7 @@
 import { type ReactNode, useCallback, useRef, useState } from 'react';
 import { Lead } from '../../ui/figure';
 import { copy } from '../../content';
+import { report } from '../../lib/status';
 import { cn } from '@/lib/cn';
 import { STATUS } from './data';
 import { PAGE, PERSPECTIVE, planTransformCss } from './camera';
@@ -10,7 +11,6 @@ import {
   CodeWindow,
   Keys,
   optionsOf,
-  report,
   type Snippets,
   type Swap,
   type SwapActions,

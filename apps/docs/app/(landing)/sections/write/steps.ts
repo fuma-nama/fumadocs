@@ -1,18 +1,9 @@
-/** a block of `quick-start.mdx` and how it plays */
+/** a block of `quick-start.mdx` and how it is pressed */
 export interface Step {
-  /** status bar line while it compiles */
+  /** its Markdown, on the tab the arm grips */
+  tab: string;
+  /** status bar line while it is pressed */
   status: string;
-  /** the block's kind, on its balloon */
-  kind: string;
-  /** label of its slot's target frame */
-  label: string;
-  /** each glyph flies this many times */
-  copies?: number;
-  /** its heading gets a TOC entry */
-  toc?: boolean;
-  /** parts of the output that come after it lands, in reading order: a part led by a path
-   * draws like a pen, the others dither in */
-  late?: string;
 }
 
 export interface FileLine {
@@ -37,7 +28,7 @@ export type Tone = 0 | 1 | 2;
 const SYNTAX =
   /(---|^#{1,6}(?= )|```\w*|<\/?|\/?>|[{}[\]()=:;,"']|\/\/.*$|\b(?:import|from|const|export)\b)|(\b\d+\b)/g;
 
-/** split a source line into runs of one tone, for the editor and the glyph colours */
+/** split a source line into runs of one tone */
 export function tokenize(line: string): [text: string, tone: Tone][] {
   const out: [string, Tone][] = [];
   let last = 0;

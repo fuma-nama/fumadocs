@@ -14,6 +14,26 @@ export const THEMES = [
 ] as const;
 
 export type ThemeId = (typeof THEMES)[number];
+
+/** what a reader calls a preset; the id is its file, `fumadocs-ui/css/<id>.css` */
+export const THEME_NAMES: Record<ThemeId, string> = {
+  neutral: 'Neutral',
+  black: 'Black',
+  vitepress: 'VitePress',
+  dusk: 'Dusk',
+  catppuccin: 'Catppuccin',
+  ocean: 'Ocean',
+  purple: 'Purple',
+  solar: 'Solar',
+  emerald: 'Emerald',
+  ruby: 'Ruby',
+  aspen: 'Aspen',
+  shadcn: 'shadcn/ui',
+};
+
+/** under the dial: the one preset without colours of its own */
+export const SHADCN_NOTE = "shadcn/ui takes your app's theme; here, this page's.";
+
 export type LayoutId = 'docs' | 'notebook' | 'flux' | 'glass' | 'spacious' | 'home';
 
 /** values of a preset, in the order of `InkTable.tokens` */
@@ -49,23 +69,23 @@ export const LAYOUTS: LayoutInfo[] = [
 export const FRAME_W = 1280;
 export const FRAME_H = 800;
 
-// same arguments as `content/docs/ui/layouts/layouts.story.tsx`
-const base = {
+// same arguments as `content/docs/ui/layouts/layouts.story.tsx`; the shared ones fit every layout
+export const SHARED_ARGS = {
   nav: { title: 'My Docs' },
   themeSwitch: { enabled: true, mode: 'light-dark' },
   searchToggle: { enabled: true },
 };
 
 export const STORY_ARGS: Record<LayoutId, object> = {
-  docs: { ...base, tabMode: 'auto', sidebar: { collapsible: true } },
+  docs: { ...SHARED_ARGS, tabMode: 'auto', sidebar: { collapsible: true } },
   notebook: {
-    ...base,
-    nav: { ...base.nav, mode: 'auto' },
+    ...SHARED_ARGS,
+    nav: { ...SHARED_ARGS.nav, mode: 'auto' },
     tabMode: 'sidebar',
     sidebar: { collapsible: true },
   },
-  flux: base,
-  glass: { ...base, sidebar: { collapsible: true } },
-  spacious: base,
-  home: { ...base, nav: { ...base.nav, transparentMode: 'top' } },
+  flux: SHARED_ARGS,
+  glass: { ...SHARED_ARGS, sidebar: { collapsible: true } },
+  spacious: SHARED_ARGS,
+  home: { ...SHARED_ARGS, nav: { ...SHARED_ARGS.nav, transparentMode: 'top' } },
 };

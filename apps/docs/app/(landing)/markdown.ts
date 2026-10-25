@@ -1,10 +1,10 @@
 import { baseUrl } from '@/lib/metadata';
 import { showcases, vercel } from '@/lib/showcases';
 import { command, copy, frameworks, quotes } from './content';
-import { modules, more } from './sections/batteries/modules';
+import { modules, more } from './sections/integrations/modules';
 import { parts, slots } from './sections/parts/data';
 import { getContributorCount, getDownloads, getStars } from './sections/proof/data';
-import { LAYOUTS, THEMES } from './sections/style/data';
+import { LAYOUTS, THEME_NAMES, THEMES } from './sections/style/data';
 import { blocks, fileLines } from './sections/write/blocks';
 
 const format = new Intl.NumberFormat('en-US');
@@ -91,6 +91,8 @@ export async function landingMarkdown(): Promise<string> {
 
   const layouts: string[] = [];
   for (const layout of LAYOUTS) layouts.push(layout.name);
+  const themes: string[] = [];
+  for (const id of THEMES) themes.push(`${THEME_NAMES[id]} (\`${id}\`)`);
   out.push(
     '',
     `## ${heading(copy.style)}`,
@@ -98,11 +100,22 @@ export async function landingMarkdown(): Promise<string> {
     copy.style.description,
     '',
     `- Layouts: ${join(layouts)} (${url('/docs/ui/layouts')})`,
-    `- Themes: ${join([...THEMES])} (${url('/docs/ui/theme')})`,
-    '- Customize: `npx @fumadocs/cli customize` copies a layout into your project.',
+    `- Themes: ${join(themes)}, each a stylesheet imported as \`@import 'fumadocs-ui/css/<id>.css';\` (${url('/docs/ui/theme')})`,
   );
 
-  out.push('', `## ${heading(copy.batteries)}`, '', copy.batteries.description, '');
+  out.push(
+    '',
+    `## ${heading(copy.cli)}`,
+    '',
+    copy.cli.description,
+    '',
+    `- \`npx @fumadocs/cli customize\` copies a layout into \`layouts/\` and points your route files at it.`,
+    `- \`npx @fumadocs/cli add banner files\` installs components from the Fumadocs registry, with their imports rewritten for your project.`,
+    `- \`npx @fumadocs/cli feature <name>\` sets up a feature, such as \`ai\` or \`search\`, and wires it into your app.`,
+    `- CLI guide: ${url('/docs/cli')}`,
+  );
+
+  out.push('', `## ${heading(copy.integrations)}`, '', copy.integrations.description, '');
   for (const item of modules) {
     out.push(
       `- [${item.title}](${url(item.href ?? '/docs/search')}) (\`${item.pkg}\`): ${item.line}`,

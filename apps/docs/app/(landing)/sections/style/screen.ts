@@ -1,41 +1,44 @@
 import { TICK } from '../../lib/motion';
 import { ditherKeyframes } from '../../ui/dither';
-import { FRAME_H, FRAME_W, type LayoutId, type ThemeId } from './data';
-import { createFrames, type Frames } from './frames';
+import { FRAME_W, type LayoutId, type ThemeId } from './data';
 import type { InkTable } from './presets';
+import { createFrames, type Frames } from './frames';
 
 export interface Screen {
-  /** what the screen shows; the newest wins */
-  show: (layout: LayoutId, theme: ThemeId, extra?: string) => void;
+  /** what the screen shows; the newest wins. `instant` inks a theme without the print */
+  show: (layout: LayoutId, theme: ThemeId, instant: boolean) => void;
   destroy: () => void;
 }
 
-/** a theme re-inks in place, a layout prints in over its blueprint, an old one prints out */
+/** a layout prints in over the one on screen, a theme re-inks in place */
+const PRINT = 2 * TICK;
 const INK = 2 * TICK;
-const PRINT = 3 * TICK;
-const OUT = 2 * TICK;
-/** hovering past a window doesn't load it */
-const LOAD = TICK;
 /** a dither cell, in screen px */
 const CELL = 3;
 
 /**
- * The live preview: two same-origin frames of `/story/<layout>`. The one on screen re-inks in
- * place for a new theme; a new layout loads in the other one, over its blueprint, and prints in.
+ * The live preview: two same-origin frames of `/story/<layout>`. The one on screen stays until the
+ * other has the next layout rendered in the current theme, then that one prints in over it, once.
+ * A theme re-inks the one on screen in place. `onLoading` names the layout on its way, or `null`.
  */
-export function createScreen(screen: HTMLElement, table: InkTable): Screen {
+export function createScreen(
+  screen: HTMLElement,
+  table: InkTable,
+  onLoading: (layout: LayoutId | null) => void,
+): Screen {
   const live = screen.querySelector<HTMLElement>('[data-live]')!;
   const reduce = matchMedia('(prefers-reduced-motion: reduce)');
   const wrappers: HTMLElement[] = [];
   let frames: Frames | null = null;
   /** the slot on screen, -1 while the blueprint shows */
   let front = -1;
-  /** the slot shown last, the other one loads */
-  let recent = 0;
-  let want: { layout: LayoutId; theme: ThemeId; extra: string } | null = null;
+  let want: { layout: LayoutId; theme: ThemeId; instant: boolean } | null = null;
+  /** frames are as wide as a desktop and as tall as the screen shows, at this scale */
   let scale = screen.clientWidth / FRAME_W || 1;
-  let timer = 0;
-  const animations: (Animation | null)[] = [null, null];
+  let height = Math.round(screen.clientHeight / scale);
+  let swap: Animation | null = null;
+  /** counts the asks, a load that lands after a newer one is ignored */
+  let asks = 0;
 
   function create() {
     if (frames) return;
@@ -51,7 +54,7 @@ export function createScreen(screen: HTMLElement, table: InkTable): Screen {
       frame.tabIndex = -1;
       frame.inert = true;
       frame.width = String(FRAME_W);
-      frame.height = String(FRAME_H);
+      frame.height = String(height);
       frame.className = 'pointer-events-none origin-top-left border-0 bg-transparent';
       frame.style.transform = `scale(${scale})`;
       // what the pointer hits: Chrome latches a wheel to an iframe under the pointer even with
@@ -67,111 +70,90 @@ export function createScreen(screen: HTMLElement, table: InkTable): Screen {
     sync();
   }
 
-  function animate(index: number, frames: Keyframe[], duration: number, then: () => void) {
-    animations[index]?.cancel();
-    if (reduce.matches) {
-      then();
-      return;
-    }
-    const animation = wrappers[index].animate(frames, { duration });
-    animations[index] = animation;
-    animation.onfinish = () => {
-      animations[index] = null;
-      then();
-    };
-  }
-
-  function hide(index: number) {
-    wrappers[index].style.visibility = 'hidden';
-  }
-
-  /** the slot prints in over the blueprint and whatever was on screen */
-  function printIn(index: number) {
+  /** the slot prints in over the one on screen, which hides once it is covered */
+  function bringIn(index: number) {
     const before = front;
     front = index;
-    recent = index;
-    wrappers[index].style.visibility = 'visible';
-    wrappers[index].style.zIndex = '2';
-    if (before >= 0 && before !== index) wrappers[before].style.zIndex = '1';
-    animate(index, ditherKeyframes(CELL), PRINT, () => {
-      if (before >= 0 && before !== index && front === index) hide(before);
-    });
-  }
-
-  /** the slot on screen prints out, its layout isn't the one shown anymore */
-  function printOut() {
-    if (front < 0) return;
-    const index = front;
-    front = -1;
-    animate(index, ditherKeyframes(CELL, true), OUT, () => {
-      if (front !== index) hide(index);
-    });
+    swap?.finish();
+    const wrapper = wrappers[index];
+    wrapper.style.visibility = 'visible';
+    wrapper.style.zIndex = '2';
+    if (before >= 0) wrappers[before].style.zIndex = '1';
+    const covered = () => {
+      if (before >= 0 && before !== index && front === index)
+        wrappers[before].style.visibility = 'hidden';
+    };
+    if (reduce.matches) return covered();
+    const animation = wrapper.animate(ditherKeyframes(CELL), { duration: PRINT });
+    swap = animation;
+    animation.onfinish = () => {
+      if (swap === animation) swap = null;
+      covered();
+    };
   }
 
   function sync() {
     if (!frames || !want) return;
-    const { layout, theme, extra } = want;
+    const { layout, theme, instant } = want;
     const slots = frames.slots;
-    const ink = reduce.matches ? 0 : INK;
-    // the layout on screen: a new theme re-inks in place
+    const ask = ++asks;
     if (front >= 0 && slots[front].layout === layout && slots[front].ready) {
-      frames.reink(slots[front], theme, extra, ink, CELL / scale);
+      onLoading(null);
+      frames.print(slots[front], theme, instant || reduce.matches ? 0 : INK, CELL / scale);
       return;
     }
-    printOut();
-    // the other slot has it already
-    for (let i = 0; i < 2; i++) {
-      if (slots[i].layout !== layout || !slots[i].ready) continue;
-      frames.ink(slots[i], theme, extra);
-      printIn(i);
+    // the slot off screen takes the next layout; before any is on screen, the one that has it
+    const index = front >= 0 ? 1 - front : slots[1].layout === layout ? 1 : 0;
+    const slot = slots[index];
+    frames.ink(slot, theme);
+    if (slot.layout === layout && slot.ready) {
+      onLoading(null);
+      bringIn(index);
       return;
     }
-    clearTimeout(timer);
-    timer = window.setTimeout(() => {
-      if (!frames || !want || want.layout !== layout) return;
-      const index = front === -1 ? 1 - recent : 1 - front;
-      const slot = frames.slots[index];
-      frames.ink(slot, want.theme, want.extra);
-      void frames.load(slot, layout).then((ok) => {
-        if (!ok || !want || want.layout !== layout || slot.layout !== layout) return;
-        frames!.ink(slot, want.theme, want.extra);
-        printIn(index);
-      });
-    }, LOAD);
+    onLoading(layout);
+    void frames.load(slot, layout).then((ok) => {
+      if (!ok || !frames || !want || ask !== asks) return;
+      frames.ink(slot, want.theme);
+      onLoading(null);
+      bringIn(index);
+    });
   }
 
   const resize = new ResizeObserver(() => {
     scale = screen.clientWidth / FRAME_W || 1;
-    for (const wrapper of wrappers)
-      wrapper.querySelector('iframe')!.style.transform = `scale(${scale})`;
+    height = Math.round(screen.clientHeight / scale);
+    for (const wrapper of wrappers) {
+      const frame = wrapper.querySelector('iframe')!;
+      frame.style.transform = `scale(${scale})`;
+      frame.height = String(height);
+    }
   });
   const near = new IntersectionObserver(
     ([entry]) => {
       if (entry.isIntersecting) create();
     },
-    { rootMargin: '50% 0px' },
+    { rootMargin: '100% 0px' },
   );
   // shadcn takes this page's palette, its frames ink again when the page's theme changes
-  const theme = new MutationObserver(() => {
+  const mode = new MutationObserver(() => {
     if (!frames) return;
-    for (const slot of frames.slots)
-      if (slot.theme === 'shadcn') frames.ink(slot, 'shadcn', slot.extra);
+    for (const slot of frames.slots) if (slot.theme === 'shadcn') frames.ink(slot, 'shadcn');
   });
   resize.observe(screen);
   near.observe(screen);
-  theme.observe(document.documentElement, { attributes: true, attributeFilter: ['class'] });
+  mode.observe(document.documentElement, { attributes: true, attributeFilter: ['class'] });
 
   return {
-    show(layout, theme, extra = '') {
-      want = { layout, theme, extra };
+    show(layout, theme, instant) {
+      want = { layout, theme, instant };
       sync();
     },
     destroy() {
-      clearTimeout(timer);
       resize.disconnect();
       near.disconnect();
-      theme.disconnect();
-      for (const animation of animations) animation?.cancel();
+      mode.disconnect();
+      swap?.cancel();
       frames?.destroy();
       live.replaceChildren();
     },

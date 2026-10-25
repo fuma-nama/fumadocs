@@ -109,7 +109,7 @@ export const modules: ModuleInfo[] = [
   },
 ];
 
-/** further batteries, numbered after the board */
+/** further integrations, in the row under the board */
 export const more: { name: string; href: string }[] = [
   { name: 'Changelog', href: '/docs/integrations/changelog' },
   { name: 'Blog', href: '/docs/integrations/blog' },

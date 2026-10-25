@@ -18,7 +18,7 @@ export const install = [
 ];
 
 /** the status line of each chapter; the first is also the figure's own */
-export const STATUS = ['8 parts, 8 APIs', 'layers: ui, core, content', 'swap any layer'];
+export const STATUS = ['8 parts, 8 APIs', 'layers: ui, core, content', 'swap a layer'];
 
 export interface PartInfo {
   name: string;
@@ -227,7 +227,7 @@ return (
   },
   {
     name: '@/layouts/docs',
-    title: 'Own copy',
+    title: 'Your copy',
     file: 'app/docs/layout.tsx',
     lang: 'tsx',
     command: 'npx @fumadocs/cli customize',

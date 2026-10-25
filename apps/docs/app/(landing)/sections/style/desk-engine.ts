@@ -1,176 +1,125 @@
-import type { LayoutId } from './data';
-import { BOARD, HUB, hubPort, restRopes, SLOTS, WINDOW, windowPort } from './board';
+import { DITHER_MASKS } from '../../lib/bayer';
+import { createIntent } from './intent';
 import { ropePath, STEP, stepRopes } from './rope';
 import { createSprings, settleSprings, stepSprings } from './spring';
+import {
+  BOARD,
+  cableEnds,
+  createPose,
+  hangRopes,
+  hubTransform,
+  pose,
+  shadowLevel,
+  shadowTransform,
+  shiftX,
+  shiftY,
+  SLOTS,
+  WINDOW,
+  windowTransform,
+} from './board';
 
 export interface DeskEngine {
-  setPinned: (id: LayoutId) => void;
+  /** the selection changed, from here or from React */
+  select: (index: number) => void;
   destroy: () => void;
 }
 
-/**
- * The hovered window grows into the free space, its neighbours squeeze away from it. It grows from
- * its outer edge, so its inner edge comes `GROW * WINDOW.w` closer to the hub: less than their gap.
- */
-const GROW = 0.09;
-const PINNED_GROW = 0.03;
-const PRESS = 0.05;
-const SQUEEZE = 0.93;
-const SQUEEZE_FAR = 0.97;
-/** a hovered window reels its cable in */
-const TAUT = 0.97;
-/** how far the hub moves away from a hovered window, in board units */
-const SHIFT = 12;
-/** the caption under a window, in px: it stays on the board too */
-const CAPTION = 20;
+/** the caption by a window, in px: the hover target reaches out to it */
+const CAPTION = 28;
 
 /**
- * The desk as a physical thing: the windows ride springs (offset and scale), the cables are ropes
- * hanging from their ports. Hover or focus brings a window forward: it grows into the free space
- * of the desk, its neighbours squeeze away from it and its cable pulls taut. Nothing ever leaves
- * the board; the cables follow the windows' live positions each step.
+ * The desk as a physical thing: the windows ride springs (slide, scale, lift), the cables are
+ * ropes between live ports. The window under the pointer lifts at once; held there, it is chosen:
+ * it grows toward the hub, its cable pulls taut and the hub leans to it, its neighbours make room.
+ * Hover targets are the windows' resting places in the current pose, never their moving boxes.
  */
 export function createDeskEngine(
   board: HTMLElement,
-  pinned: LayoutId,
-  onPreview: (id: LayoutId | null) => void,
+  selected: number,
+  onSelect: (index: number) => void,
 ): DeskEngine {
-  const windows = SLOTS.map((slot) =>
-    board.querySelector<HTMLElement>(`[data-slot="${slot.id}"]`)!,
-  );
+  const windows: HTMLElement[] = [];
+  const shadows: HTMLElement[] = [];
+  const captions: HTMLElement[] = [];
+  const cables: SVGPathElement[] = [];
+  for (const slot of SLOTS) {
+    const element = board.querySelector<HTMLElement>(`[data-slot="${slot.id}"]`)!;
+    windows.push(element);
+    shadows.push(element.querySelector<HTMLElement>('[data-shadow]')!);
+    captions.push(element.querySelector<HTMLElement>('[data-caption]')!);
+    cables.push(board.querySelector<SVGPathElement>(`[data-cable="${slot.id}"]`)!);
+  }
   const hub = board.querySelector<HTMLElement>('[data-hub]')!;
-  const cables = SLOTS.map((slot) =>
-    board.querySelector<SVGPathElement>(`[data-cable="${slot.id}"]`)!,
-  );
   const reduce = matchMedia('(prefers-reduced-motion: reduce)');
 
-  // per window: offset x, y (board units) and scale, from its top left corner; then the hub's offset
-  const move = createSprings(SLOTS.length * 2 + 2);
-  const size = createSprings(SLOTS.length, 1);
-  const ropes = restRopes();
-  /** the cables' lengths at rest */
-  const slack = ropes.rest.slice();
-  /** each window's port and its hub port, relative to its top left corner and absolute */
-  const ports = SLOTS.map((slot) => {
-    const [px, py] = windowPort(slot);
-    const [qx, qy] = hubPort(slot);
-    return [px - slot.x, py - slot.y, qx, qy];
-  });
-  /** where each window is drawn this frame, kept inside the board */
-  const at = new Float64Array(SLOTS.length * 2);
-
+  let current = selected;
   let hovered = -1;
-  let pressed = -1;
-  let current = SLOTS.findIndex((slot) => slot.id === pinned);
-  let scale = 1;
+  const target = pose(current, hovered, createPose());
+  /** slides and the hub, scales, lifts */
+  const move = createSprings(SLOTS.length + 2);
+  const size = createSprings(SLOTS.length, 1);
+  const lift = createSprings(SLOTS.length);
+  const ropes = hangRopes(target);
+  const at = createPose();
+  const levels = new Int8Array(SLOTS.length).fill(-1);
+  sync(true);
+
+  let scale = board.clientWidth / BOARD.w || 1;
   let raf = 0;
   let last = 0;
   let acc = 0;
   let onScreen = false;
-  let leave = 0;
+  /** where the pointer was last, a move to the same point is the page scrolling under it */
+  let px = -1;
+  let py = -1;
 
-  /** the corner a window grows or shrinks from: its outer side, and the row's side away from `from` */
-  function anchor(i: number, from: number): [x: number, y: number] {
-    const slot = SLOTS[i];
-    const x = slot.column === 0 ? 0 : WINDOW.w;
-    const row = from >= 0 ? SLOTS[from].row : slot.row;
-    let y = WINDOW.h / 2;
-    if (i === from || from < 0) y = slot.row === 0 ? 0 : slot.row === 2 ? WINDOW.h : WINDOW.h / 2;
-    else if (slot.row < row) y = 0;
-    else if (slot.row > row) y = WINDOW.h;
-    else y = slot.row === 0 ? 0 : slot.row === 2 ? WINDOW.h : WINDOW.h / 2;
-    return [x, y];
-  }
-
-  function targets() {
-    const h = hovered;
+  function sync(jump: boolean) {
     for (let i = 0; i < SLOTS.length; i++) {
-      let s = i === current ? 1 + PINNED_GROW : 1;
-      if (i === h) s = 1 + (i === pressed ? PRESS : GROW);
-      else if (h >= 0) s = SLOTS[i].column === SLOTS[h].column ? SQUEEZE : SQUEEZE_FAR;
-      const [ax, ay] = anchor(i, h >= 0 ? h : i === current ? i : -1);
-      move.target[i * 2] = ax * (1 - s);
-      move.target[i * 2 + 1] = ay * (1 - s);
-      size.target[i] = s;
-      ropes.rest[i] = slack[i];
+      move.target[i] = target.windows[i * 3];
+      size.target[i] = target.windows[i * 3 + 1];
+      lift.target[i] = target.windows[i * 3 + 2];
+      ropes.rest[i] = target.length[i];
     }
-    // the hub makes room too, it shifts away from the hovered window; their cable pulls taut
-    const hx = SLOTS.length * 2;
-    move.target[hx] = 0;
-    move.target[hx + 1] = 0;
-    if (h >= 0) {
-      const slot = SLOTS[h];
-      const dx = HUB.x + HUB.w / 2 - (slot.x + WINDOW.w / 2);
-      const dy = HUB.y + HUB.h / 2 - (slot.y + WINDOW.h / 2);
-      const d = Math.hypot(dx, dy);
-      move.target[hx] = (dx / d) * SHIFT;
-      move.target[hx + 1] = (dy / d) * SHIFT;
-      const [px, py, qx, qy] = ports[h];
-      const s = size.target[h];
-      const ax = slot.x + move.target[h * 2] + px * s;
-      const ay = slot.y + move.target[h * 2 + 1] + py * s;
-      ropes.rest[h] = Math.hypot(qx + move.target[hx] - ax, qy + move.target[hx + 1] - ay) * TAUT;
-    }
-    for (let i = 0; i < SLOTS.length; i++) {
-      const on = i === h || i === current;
-      cables[i].setAttribute('stroke-dasharray', on ? 'none' : '4 3');
-      cables[i].setAttribute('stroke-width', i === h ? '1.5' : '1');
-      windows[i].style.zIndex = i === h ? '3' : i === current ? '2' : '';
-    }
-    if (reduce.matches) {
-      // still: the windows stay in place, and so do the cables
-      move.target.fill(0);
-      size.target.fill(1);
-      ropes.rest.set(slack);
+    move.target[SLOTS.length] = target.hub[0];
+    move.target[SLOTS.length + 1] = target.hub[1];
+    if (jump) {
       settleSprings(move);
       settleSprings(size);
-      place();
-      write();
-      return;
+      settleSprings(lift);
     }
-    schedule();
   }
 
-  /** the windows' boxes this frame, held inside the board even when a spring overshoots */
-  function place() {
-    const caption = CAPTION / scale;
+  /** the springs' values as a pose, for the cables' ends */
+  function read() {
     for (let i = 0; i < SLOTS.length; i++) {
-      const slot = SLOTS[i];
-      const s = size.value[i];
-      let x = slot.x + move.value[i * 2];
-      let y = slot.y + move.value[i * 2 + 1];
-      x = Math.min(Math.max(x, 0), BOARD.w - WINDOW.w * s);
-      y = Math.min(Math.max(y, 0), BOARD.h - WINDOW.h * s - caption * s);
-      at[i * 2] = x;
-      at[i * 2 + 1] = y;
+      at.windows[i * 3] = move.value[i];
+      at.windows[i * 3 + 1] = size.value[i];
+      at.windows[i * 3 + 2] = Math.max(0, lift.value[i]);
     }
+    at.hub[0] = move.value[SLOTS.length];
+    at.hub[1] = move.value[SLOTS.length + 1];
   }
 
-  /** the cables' ends from where the windows and the hub are now */
   function ends() {
-    const hx = move.value[SLOTS.length * 2];
-    const hy = move.value[SLOTS.length * 2 + 1];
-    for (let i = 0; i < SLOTS.length; i++) {
-      const [px, py, qx, qy] = ports[i];
-      const s = size.value[i];
-      ropes.ends[i * 4] = at[i * 2] + px * s;
-      ropes.ends[i * 4 + 1] = at[i * 2 + 1] + py * s;
-      ropes.ends[i * 4 + 2] = qx + hx;
-      ropes.ends[i * 4 + 3] = qy + hy;
-    }
+    for (let i = 0; i < SLOTS.length; i++) cableEnds(i, at.windows, at.hub, ropes.ends, i * 4);
   }
 
   function write() {
     for (let i = 0; i < SLOTS.length; i++) {
-      const dx = (at[i * 2] - SLOTS[i].x) * scale;
-      const dy = (at[i * 2 + 1] - SLOTS[i].y) * scale;
-      windows[i].style.transform =
-        `translate(${dx.toFixed(2)}px,${dy.toFixed(2)}px) scale(${size.value[i].toFixed(4)})`;
+      const s = at.windows[i * 3 + 1];
+      const l = at.windows[i * 3 + 2];
+      windows[i].style.transform = windowTransform(SLOTS[i], at.windows[i * 3], s, l);
+      captions[i].style.transform = `scale(${(1 / s).toFixed(4)})`;
+      const level = shadowLevel(l);
+      if (level !== levels[i]) {
+        levels[i] = level;
+        shadows[i].hidden = level === 0;
+        shadows[i].style.maskImage = DITHER_MASKS[level];
+      }
+      shadows[i].style.transform = shadowTransform(SLOTS[i], l);
       cables[i].setAttribute('d', ropePath(ropes, i));
     }
-    const hx = move.value[SLOTS.length * 2] * scale;
-    const hy = move.value[SLOTS.length * 2 + 1] * scale;
-    hub.style.transform = `translate(${hx.toFixed(2)}px,${hy.toFixed(2)}px)`;
+    hub.style.transform = hubTransform(at.hub[0], at.hub[1]);
   }
 
   function frame(now: number) {
@@ -178,75 +127,108 @@ export function createDeskEngine(
     const dt = last === 0 ? STEP : Math.min(0.05, (now - last) / 1000);
     last = now;
     acc += dt;
-    let energy = 0;
-    let moved = 0;
+    // a frame shorter than a step (a 120 Hz screen) steps nothing: it settles nothing either
+    let energy = Infinity;
+    let moved = Infinity;
     while (acc >= STEP) {
       acc -= STEP;
-      energy = Math.max(stepSprings(move, STEP, 200, 20), stepSprings(size, STEP, 260, 22));
-      place();
+      energy = Math.max(
+        stepSprings(move, STEP, 220, 22),
+        stepSprings(size, STEP, 260, 22),
+        stepSprings(lift, STEP, 320, 26),
+      );
+      read();
       ends();
       moved = stepRopes(ropes);
     }
     write();
-    if (energy > 0.005 || moved > 0.01) schedule();
-    else {
-      last = 0;
-      acc = 0;
-    }
+    if (energy > 0.004 || moved > 0.01) schedule();
+    else last = acc = 0;
   }
 
   function schedule() {
     if (raf === 0 && onScreen && !document.hidden) raf = requestAnimationFrame(frame);
   }
 
+  function update() {
+    pose(current, hovered, target);
+    if (reduce.matches) {
+      sync(true);
+      read();
+      ends();
+      // still: the cables hang in their new pose at once
+      const still = hangRopes(target);
+      ropes.x.set(still.x);
+      ropes.y.set(still.y);
+      ropes.px.set(still.px);
+      ropes.py.set(still.py);
+      write();
+      return;
+    }
+    sync(false);
+    schedule();
+  }
+
+  /** the window whose resting place in the current pose holds the point, with its caption */
+  function hit(clientX: number, clientY: number): number {
+    const box = board.getBoundingClientRect();
+    const x = (clientX - box.left) / scale;
+    const y = (clientY - box.top) / scale;
+    const caption = CAPTION / scale;
+    for (let i = 0; i < SLOTS.length; i++) {
+      const s = target.windows[i * 3 + 1];
+      const left = SLOTS[i].x + shiftX(SLOTS[i], target.windows[i * 3], s);
+      const top = SLOTS[i].y + shiftY(SLOTS[i], s, 0);
+      const above = SLOTS[i].row === 0 ? caption : 0;
+      const below = SLOTS[i].row === 1 ? caption : 0;
+      if (
+        x >= left &&
+        x <= left + WINDOW.w * s &&
+        y >= top - above &&
+        y <= top + WINDOW.h * s + below
+      )
+        return i;
+    }
+    return -1;
+  }
+
   function hover(index: number) {
-    clearTimeout(leave);
     if (index === hovered) return;
     hovered = index;
-    pressed = -1;
-    onPreview(index >= 0 ? SLOTS[index].id : null);
-    targets();
+    update();
   }
 
-  /** leaving one window for the gap or another window: wait a moment before letting go */
-  function release() {
-    clearTimeout(leave);
-    leave = window.setTimeout(() => hover(-1), 90);
+  const intent = createIntent<number>((index) => {
+    if (index !== current) onSelect(index);
+  });
+
+  function onMove(event: PointerEvent) {
+    if (event.pointerType === 'touch') return;
+    const index = hit(event.clientX, event.clientY);
+    hover(index);
+    // the page scrolled under a still pointer: it lifts what is there, it chooses nothing
+    if (event.clientX === px && event.clientY === py) return;
+    px = event.clientX;
+    py = event.clientY;
+    intent.move(index >= 0 && index !== current ? index : null);
   }
 
-  const cleanups: (() => void)[] = [];
-  function on<K extends keyof HTMLElementEventMap>(
-    target: HTMLElement,
-    type: K,
-    listener: (event: HTMLElementEventMap[K]) => void,
-  ) {
-    target.addEventListener(type, listener);
-    cleanups.push(() => target.removeEventListener(type, listener));
+  function onOver(event: PointerEvent) {
+    if (event.pointerType !== 'touch') hover(hit(event.clientX, event.clientY));
   }
 
-  for (let i = 0; i < windows.length; i++) {
-    const index = i;
-    on(windows[i], 'pointerenter', () => hover(index));
-    on(windows[i], 'pointerleave', release);
-    // keyboard focus previews; a click or a tap focuses too, the pointer already did
-    on(windows[i], 'focus', () => {
-      if (windows[index].matches(':focus-visible')) hover(index);
-    });
-    on(windows[i], 'blur', release);
-    on(windows[i], 'pointerdown', () => {
-      pressed = index;
-      targets();
-    });
-    on(windows[i], 'pointerup', () => {
-      pressed = -1;
-      targets();
-    });
+  function onLeave() {
+    intent.cancel();
+    px = py = -1;
+    hover(-1);
   }
+
+  board.addEventListener('pointermove', onMove);
+  board.addEventListener('pointerover', onOver);
+  board.addEventListener('pointerleave', onLeave);
 
   const resize = new ResizeObserver(() => {
     scale = board.clientWidth / BOARD.w || 1;
-    place();
-    write();
   });
   const visibility = new IntersectionObserver(([entry]) => {
     onScreen = entry.isIntersecting;
@@ -260,19 +242,21 @@ export function createDeskEngine(
   resize.observe(board);
   visibility.observe(board);
   document.addEventListener('visibilitychange', schedule);
-  scale = board.clientWidth / BOARD.w || 1;
-  place();
-  targets();
+  read();
 
   return {
-    setPinned(id) {
-      current = SLOTS.findIndex((slot) => slot.id === id);
-      targets();
+    select(index) {
+      if (index === current) return;
+      current = index;
+      intent.cancel();
+      update();
     },
     destroy() {
       cancelAnimationFrame(raf);
-      clearTimeout(leave);
-      for (const cleanup of cleanups) cleanup();
+      intent.cancel();
+      board.removeEventListener('pointermove', onMove);
+      board.removeEventListener('pointerover', onOver);
+      board.removeEventListener('pointerleave', onLeave);
       resize.disconnect();
       visibility.disconnect();
       document.removeEventListener('visibilitychange', schedule);

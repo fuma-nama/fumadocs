@@ -73,7 +73,7 @@ export function StatusBar() {
               href={`#${figure.id}`}
               aria-current={active === figure.n ? 'location' : undefined}
               className={cn(
-                'flex items-center border-e border-lp-line-strong px-2.5 hover:bg-lp-ink hover:text-lp-paper',
+                'flex items-center border-e border-lp-line-strong px-2 hover:bg-lp-ink hover:text-lp-paper lg:px-2.5',
                 active === figure.n && 'bg-lp-yellow text-[#121210]',
               )}
             >

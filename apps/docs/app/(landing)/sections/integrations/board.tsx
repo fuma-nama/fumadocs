@@ -33,7 +33,7 @@ export interface Module {
   mechanism: ReactNode;
 }
 
-const LOADED = '12 modules loaded';
+const LOADED = '12 integrations loaded';
 
 /** the board's columns and the delay before its first cell, read from its CSS */
 interface Layout {

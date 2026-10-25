@@ -3,7 +3,7 @@ import { type ReactNode, useCallback, useEffect, useRef, useState } from 'react'
 import { File, Files, Folder } from 'fumadocs-ui/components/files';
 import { cn } from '@/lib/cn';
 import { TICK } from '../../lib/motion';
-import { setStatus } from '../../lib/status';
+import { report } from '../../lib/status';
 import { DitherSwap } from '../../ui/dither';
 import { Window } from '../../ui/window';
 import { EDIT, INSTALLED, ROLL, TIMELINE } from './session';
@@ -113,7 +113,7 @@ export function Customize() {
       timers.current.push(
         window.setTimeout(() => {
           setStep(i);
-          setStatus(STATUS[i]);
+          if (root.current) report(root.current, STATUS[i]);
         }, TIMELINE[i]),
       );
     }

@@ -4,6 +4,7 @@ import { FullSearchTrigger } from 'fumadocs-ui/layouts/shared/slots/search-trigg
 import { FigureHeader } from '../../ui/figure';
 import { cn } from '@/lib/cn';
 import { copy } from '../../content';
+import { report } from '../../lib/status';
 import { parts, STATUS } from './data';
 import { DRAWERS, PAGE } from './camera';
 import { Front, PageFace } from './drawers';
@@ -12,7 +13,6 @@ import {
   CodeWindow,
   Keys,
   optionsOf,
-  report,
   type Snippets,
   type Swap,
   type SwapActions,

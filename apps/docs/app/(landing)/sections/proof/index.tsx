@@ -27,7 +27,7 @@ export async function Proof() {
   if (downloads)
     counters.push({ label: 'Weekly downloads', value: downloads.downloads, note: 'fumadocs-core' });
   if (contributors !== undefined) counters.push({ label: 'Contributors', value: contributors });
-  counters.push({ label: 'Showcased docs', value: online });
+  counters.push({ label: 'Showcased sites', value: online });
 
   return (
     <Figure
