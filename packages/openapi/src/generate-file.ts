@@ -125,7 +125,7 @@ export async function generateFiles(options: Config): Promise<void> {
 }
 
 export async function generateFilesOnly(
-  options: DistributiveOmit<Config, 'output'>,
+  options: DistributiveOmit<Config, 'output'> & Partial<Pick<Config, 'output'>>,
 ): Promise<OutputFile[]> {
   const schemas = await options.input.getSchemas();
 
@@ -211,7 +211,9 @@ function generateMeta(context: BeforeWriteContext, options: MetaOptions): Output
 
 function writeIndexFiles(
   context: BeforeWriteContext,
-  options: SchemaToPagesOptions & Omit<GenerateFilesConfig, 'output'>,
+  options: SchemaToPagesOptions &
+    Omit<GenerateFilesConfig, 'output'> &
+    Partial<Pick<GenerateFilesConfig, 'output'>>,
 ): OutputFile[] {
   const files: OutputFile[] = [];
   const { generatedEntries } = context;
@@ -230,8 +232,11 @@ function writeIndexFiles(
   let urlFn: (path: string) => string;
   if (typeof url === 'object') {
     const getUrl = createGetUrl(url.baseUrl);
+    const { output = '' } = options;
 
-    urlFn = (file) => getUrl(getSlugs(path.relative(url.contentDir, file)));
+    // file paths are relative to the output directory
+    urlFn = (file) =>
+      getUrl(getSlugs(PathUtils.slash(path.relative(url.contentDir, path.join(output, file)))));
   } else {
     urlFn = url;
   }
