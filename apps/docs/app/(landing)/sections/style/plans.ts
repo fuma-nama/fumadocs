@@ -5,7 +5,7 @@ import type { LayoutId } from './data';
  * `x, y, w, h` rectangles in a row: panels (dotted), outlined boxes, outlines (regions and
  * icons), solid fills (text lines and active items).
  */
-export interface Plan {
+interface Plan {
   dots: number[];
   boxes: number[];
   lines: number[];

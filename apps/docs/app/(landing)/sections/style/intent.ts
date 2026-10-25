@@ -2,7 +2,7 @@
 const REST = 120;
 const LINGER = 320;
 
-export interface Intent<T> {
+interface Intent<T> {
   /** the pointer moved over `target`, `null` when it is over none */
   move: (target: T | null) => void;
   cancel: () => void;

@@ -33,6 +33,6 @@ export function useNow(): Date | null {
   return time === 0 ? null : new Date(time);
 }
 
-export function pad(value: number, length = 2): string {
-  return String(value).padStart(length, '0');
+export function pad(value: number): string {
+  return String(value).padStart(2, '0');
 }

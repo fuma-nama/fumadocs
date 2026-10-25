@@ -9,14 +9,14 @@ export const COLS = 80;
 export const ROWS = 24;
 
 /** default foreground, dim, the CLI colours (cyan, green, magenta), inverse block on a colour, inverse block on the text */
-export const TEXT = 0;
-export const DIM = 1;
-export const ACCENT = 2;
-export const INVERSE = 3;
-export const CURSOR = 4;
+const TEXT = 0;
+const DIM = 1;
+const ACCENT = 2;
+const INVERSE = 3;
+const CURSOR = 4;
 
-export type Span = readonly [text: string, style: number];
-export type Line = readonly Span[];
+type Span = readonly [text: string, style: number];
+type Line = readonly Span[];
 
 export interface Frame {
   at: number;
@@ -26,7 +26,7 @@ export interface Frame {
   status?: string;
 }
 
-export interface Session {
+interface Session {
   frames: Frame[];
   duration: number;
 }
@@ -90,17 +90,6 @@ function heading(symbol: string, message: string): Line {
   return [
     [symbol, ACCENT],
     [`  ${message}`, TEXT],
-  ];
-}
-
-function answer(value: string): Line[] {
-  return [
-    [[BAR, DIM]],
-    [
-      [BAR, DIM],
-      ['  ', TEXT],
-      [value, DIM],
-    ],
   ];
 }
 
@@ -229,6 +218,15 @@ export function createSession(): Session {
     at += wait;
   }
 
+  /** a prompt once answered: its message and the answer stay in the log */
+  function answered(message: string, value: string) {
+    log.push([[BAR, DIM]], heading('◇', message), [
+      [BAR, DIM],
+      ['  ', TEXT],
+      [value, DIM],
+    ]);
+  }
+
   function shell(typed: string, cursor: boolean): Line[] {
     const line: Span[] = [
       ['$ ', DIM],
@@ -257,12 +255,12 @@ export function createSession(): Session {
       show(selectPrompt(message, options, cursor), 2 * TICK);
     }
     if (moves > 0) at += TICK;
-    log.push([[BAR, DIM]], heading('◇', message), answer(options[cursor].label)[1]);
+    answered(message, options[cursor].label);
   }
 
   function confirm(message: string, value: boolean) {
     show(confirmPrompt(message, value), 6 * TICK);
-    log.push([[BAR, DIM]], heading('◇', message), answer(value ? 'Yes' : 'No')[1]);
+    answered(message, value ? 'Yes' : 'No');
   }
 
   show(shell('', true), BEAT);
@@ -281,7 +279,7 @@ export function createSession(): Session {
   for (let i = 1; i <= NAME.length; i++)
     show(textPrompt('Project name', 'my-app', NAME.slice(0, i)), 40);
   at += 3 * TICK;
-  log.push([[BAR, DIM]], heading('◇', 'Project name'), answer(NAME)[1]);
+  answered('Project name', NAME);
   show([], TICK);
 
   select('Choose a template', templates, templates.length, 5 * TICK, 'choosing a template');

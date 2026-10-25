@@ -6,31 +6,13 @@ export interface Step {
   status: string;
 }
 
-export interface FileLine {
-  text: string;
-  /** the step that types it, a blank line between steps belongs to the next one */
-  step: number;
-}
-
-/** the sources of the steps as one file */
-export function fileLines(sources: string[]): FileLine[] {
-  const out: FileLine[] = [];
-  for (let i = 0; i < sources.length; i++) {
-    if (i > 0) out.push({ text: '', step: i });
-    for (const text of sources[i].trimEnd().split('\n')) out.push({ text, step: i });
-  }
-  return out;
-}
-
-export type Tone = 0 | 1 | 2;
-
 /** ink, syntax (ink-2), numbers (orange) */
 const SYNTAX =
   /(---|^#{1,6}(?= )|```\w*|<\/?|\/?>|[{}[\]()=:;,"']|\/\/.*$|\b(?:import|from|const|export)\b)|(\b\d+\b)/g;
 
 /** split a source line into runs of one tone */
-export function tokenize(line: string): [text: string, tone: Tone][] {
-  const out: [string, Tone][] = [];
+export function tokenize(line: string): [text: string, tone: 0 | 1 | 2][] {
+  const out: [string, 0 | 1 | 2][] = [];
   let last = 0;
   for (const match of line.matchAll(SYNTAX)) {
     if (match.index > last) out.push([line.slice(last, match.index), 0]);

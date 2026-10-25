@@ -7,6 +7,8 @@
   --cols: 1;
   --rows: 12;
   --bt-lead: 250ms;
+  /* the 96x40 cells of a mechanism */
+  --bt-stage: 288px;
 }
 
 @media (min-width: 640px) {
@@ -112,15 +114,9 @@
 }
 
 /* cells */
-.bt-board {
-  /* the 96x40 cells of a mechanism */
-  --bt-stage: 288px;
-}
-
 .bt-cell {
   --bt-ink: var(--lp-ink);
   --bt-paper: var(--lp-paper);
-  --bt-hi: var(--lp-yellow);
   --bt-speed: 1;
   /* orange over ink-filled cards: vivid while the ink is dark */
   --bt-on-ink: var(--lp-sun);
@@ -239,7 +235,7 @@
 }
 
 .bt-hi {
-  fill: var(--bt-hi);
+  fill: var(--lp-yellow);
 }
 
 .bt-text {

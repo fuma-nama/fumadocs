@@ -1,20 +1,15 @@
 'use client';
 import { type CSSProperties, useEffect, useRef, useState } from 'react';
-import Image, { type StaticImageData } from 'next/image';
+import Image from 'next/image';
 import { useReducedMotion } from 'motion/react';
 import { cn } from '@/lib/cn';
+import type { ShowcaseObject } from '@/lib/showcases';
 import { BEAT, TICK } from '../lib/motion';
 import { setStatus } from '../lib/status';
 import { Roller } from '../ui/roller';
 import { address } from '../ui/site-tile';
 import { Window } from '../ui/window';
 import { develop, dither, isDithering } from './develop';
-
-export interface Slide {
-  name: string;
-  url: string;
-  image: StaticImageData | string;
-}
 
 /** windows in the stack */
 const DEPTH = 3;
@@ -44,7 +39,13 @@ function place(depth: number): CSSProperties {
  * steps forward, a new window opens at the back and the new front develops from its 1-bit print.
  * Hover or focus holds it.
  */
-export function Cascade({ sites, className }: { sites: Slide[]; className?: string }) {
+export function Cascade({
+  sites,
+  className,
+}: {
+  sites: Required<ShowcaseObject>[];
+  className?: string;
+}) {
   const reduced = useReducedMotion();
   const [front, setFront] = useState(0);
   const stage = useRef<HTMLDivElement>(null);

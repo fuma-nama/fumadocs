@@ -1,12 +1,13 @@
 import { DITHER_MASKS } from '../../lib/bayer';
 import { createIntent } from './intent';
-import { ropePath, STEP, stepRopes } from './rope';
-import { createSprings, settleSprings, stepSprings } from './spring';
+import { ropePath, stepRopes } from './rope';
+import { createSprings, due, settleSprings, STEP, stepSprings } from './spring';
 import {
   BOARD,
   cableEnds,
   createPose,
   hangRopes,
+  type Hung,
   hubTransform,
   pose,
   shadowLevel,
@@ -36,6 +37,8 @@ const CAPTION = 28;
 export function createDeskEngine(
   board: HTMLElement,
   selected: number,
+  /** the cables hanging still in that pose, as the server settled them */
+  hung: Hung,
   onSelect: (index: number) => void,
 ): DeskEngine {
   const windows: HTMLElement[] = [];
@@ -59,15 +62,15 @@ export function createDeskEngine(
   const move = createSprings(SLOTS.length + 2);
   const size = createSprings(SLOTS.length, 1);
   const lift = createSprings(SLOTS.length);
-  const ropes = hangRopes(target);
+  let ropes = hangRopes(target, hung);
   const at = createPose();
   const levels = new Int8Array(SLOTS.length).fill(-1);
   sync(true);
+  read();
 
   let scale = board.clientWidth / BOARD.w || 1;
   let raf = 0;
-  let last = 0;
-  let acc = 0;
+  const clock = { last: 0, acc: 0 };
   let onScreen = false;
   /** where the pointer was last, a move to the same point is the page scrolling under it */
   let px = -1;
@@ -89,7 +92,7 @@ export function createDeskEngine(
     }
   }
 
-  /** the springs' values as a pose, for the cables' ends */
+  /** the springs' values as a pose, and the cables' ends on it */
   function read() {
     for (let i = 0; i < SLOTS.length; i++) {
       at.windows[i * 3] = move.value[i];
@@ -98,9 +101,6 @@ export function createDeskEngine(
     }
     at.hub[0] = move.value[SLOTS.length];
     at.hub[1] = move.value[SLOTS.length + 1];
-  }
-
-  function ends() {
     for (let i = 0; i < SLOTS.length; i++) cableEnds(i, at.windows, at.hub, ropes.ends, i * 4);
   }
 
@@ -124,26 +124,20 @@ export function createDeskEngine(
 
   function frame(now: number) {
     raf = 0;
-    const dt = last === 0 ? STEP : Math.min(0.05, (now - last) / 1000);
-    last = now;
-    acc += dt;
-    // a frame shorter than a step (a 120 Hz screen) steps nothing: it settles nothing either
     let energy = Infinity;
     let moved = Infinity;
-    while (acc >= STEP) {
-      acc -= STEP;
+    for (let i = due(clock, now); i > 0; i--) {
       energy = Math.max(
         stepSprings(move, STEP, 220, 22),
         stepSprings(size, STEP, 260, 22),
         stepSprings(lift, STEP, 320, 26),
       );
       read();
-      ends();
       moved = stepRopes(ropes);
     }
     write();
     if (energy > 0.004 || moved > 0.01) schedule();
-    else last = acc = 0;
+    else clock.last = clock.acc = 0;
   }
 
   function schedule() {
@@ -155,13 +149,8 @@ export function createDeskEngine(
     if (reduce.matches) {
       sync(true);
       read();
-      ends();
       // still: the cables hang in their new pose at once
-      const still = hangRopes(target);
-      ropes.x.set(still.x);
-      ropes.y.set(still.y);
-      ropes.px.set(still.px);
-      ropes.py.set(still.py);
+      ropes = hangRopes(target);
       write();
       return;
     }
@@ -236,13 +225,12 @@ export function createDeskEngine(
     else {
       cancelAnimationFrame(raf);
       raf = 0;
-      last = 0;
+      clock.last = 0;
     }
   });
   resize.observe(board);
   visibility.observe(board);
   document.addEventListener('visibilitychange', schedule);
-  read();
 
   return {
     select(index) {

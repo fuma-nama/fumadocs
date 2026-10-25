@@ -56,7 +56,7 @@ export function dither(x: number, y: number, w: number, h: number, level: number
 }
 
 /** a horizontal dashed rule, `on` cells drawn then `off` cells skipped */
-export function dashes(x: number, y: number, w: number, on = 2, off = 2): string {
+export function dashes(x: number, y: number, w: number, on: number, off: number): string {
   let d = '';
   for (let c = 0; c < w; c += on + off) d += rect(x + c, y, Math.min(on, w - c), 1);
   return d;

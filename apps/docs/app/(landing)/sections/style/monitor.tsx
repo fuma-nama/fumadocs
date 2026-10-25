@@ -9,7 +9,7 @@ import { Plan } from './plan';
 import type { InkTable } from './presets';
 import { createScreen, type Screen } from './screen';
 
-export interface MonitorProps {
+interface MonitorProps {
   table: InkTable;
   layout: LayoutId;
   theme: ThemeId;
@@ -64,7 +64,7 @@ export function Monitor({ table, layout, theme, instant, className }: MonitorPro
   return (
     <Window
       className={className}
-      title={<Scramble text={`fumadocs-ui/layouts/${layout}`} trigger="mount" speed={14} />}
+      title={<Scramble text={`fumadocs-ui/layouts/${layout}`} speed={14} />}
       actions={loading ? <Busy /> : undefined}
     >
       <div

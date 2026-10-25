@@ -148,14 +148,6 @@ body:has(.landing),
   }
 }
 
-/* hairline grid of the drawing sheet, 24px pitch */
-.lp-grid {
-  background-image:
-    linear-gradient(to right, var(--lp-line) 1px, transparent 1px),
-    linear-gradient(to bottom, var(--lp-line) 1px, transparent 1px);
-  background-size: 24px 24px;
-}
-
 .lp-dots {
   background-image: radial-gradient(var(--lp-line-strong) 0.75px, transparent 0.75px);
   background-size: 12px 12px;

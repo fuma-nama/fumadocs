@@ -6,7 +6,7 @@ import { cn } from '@/lib/cn';
 import { setStatus } from '../lib/status';
 import { Caret } from './text';
 
-export interface CommandProps extends ComponentProps<'div'> {
+interface CommandProps extends ComponentProps<'div'> {
   command: string;
   /** a blinking caret after the command */
   caret?: boolean;

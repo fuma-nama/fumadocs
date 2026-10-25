@@ -1,7 +1,7 @@
 import type { ComponentProps, ReactNode } from 'react';
 import { cn } from '@/lib/cn';
 
-export interface FigureProps extends ComponentProps<'section'> {
+interface FigureProps extends ComponentProps<'section'> {
   /** figure number, the status bar links figures by it */
   n: number;
   id: string;
@@ -38,7 +38,7 @@ function Mark({ className }: { className: string }) {
   );
 }
 
-export interface FigureHeaderProps extends Omit<ComponentProps<'div'>, 'title'> {
+interface FigureHeaderProps extends Omit<ComponentProps<'div'>, 'title'> {
   /** the opening of the title, set in the orange pixel type */
   lead: ReactNode;
   /** the rest of the title */

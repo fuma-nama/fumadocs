@@ -4,6 +4,7 @@ import { Hero } from './sections/hero';
 import { Parts } from './sections/parts';
 import { Write } from './sections/write';
 import { Style } from './sections/style';
+import { Cli } from './sections/cli';
 import { Integrations } from './sections/integrations';
 import { Proof } from './sections/proof';
 import { Start } from './sections/start';
@@ -23,6 +24,7 @@ export default function Page() {
       <Parts />
       <Write />
       <Style />
+      <Cli />
       <Integrations />
       <Proof />
       <Start />

@@ -49,7 +49,7 @@ export function paint(value: string): string {
   return value.startsWith('var(--') ? `var(--color-fd-${value.slice(6)}` : value;
 }
 
-export interface LayoutInfo {
+interface LayoutInfo {
   id: LayoutId;
   name: string;
   /** the element a story renders once its lazy layout loaded */

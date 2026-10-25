@@ -1,10 +1,10 @@
+import { STEP } from './spring';
+
 /** points per cable, its two ends included */
 const POINTS = 14;
 const GRAVITY = 2600;
 const DAMPING = 0.985;
 const ITERATIONS = 10;
-/** fixed physics step (s): the same motion at any frame rate, and on the server */
-export const STEP = 1 / 120;
 
 /**
  * Cables as verlet ropes in board units: points pulled down by gravity, held at their rest

@@ -5,7 +5,7 @@ import { createMetadata } from '@/lib/metadata';
 import { blogs, type ShowcaseObject, showcases } from '@/lib/showcases';
 import { Figure, FigureHeader, Lead } from '../ui/figure';
 import { address, SiteTile } from '../ui/site-tile';
-import { Cascade, type Slide } from './cascade';
+import { Cascade } from './cascade';
 import { copy, kinds, suggest } from './data';
 import { Develop } from './develop';
 import { Featured } from './featured';
@@ -24,7 +24,7 @@ export const metadata: Metadata = createMetadata({
 const figure = 'flex flex-col gap-12 px-(--lp-gutter) py-16 md:gap-16 md:py-20';
 
 export default function Page() {
-  const slides: Slide[] = [];
+  const slides: Required<ShowcaseObject>[] = [];
   for (const { name, url, image } of showcases) if (image) slides.push({ name, url, image });
 
   return (

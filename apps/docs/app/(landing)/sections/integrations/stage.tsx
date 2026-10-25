@@ -24,7 +24,7 @@ export function Stage({ c, children }: { c: Choreography; children: ReactNode })
   );
 }
 
-export interface PxProps {
+interface PxProps {
   x?: number;
   y?: number;
   w?: number;

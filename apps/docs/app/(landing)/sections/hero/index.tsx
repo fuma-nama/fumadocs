@@ -1,6 +1,6 @@
 import Link from 'next/link';
 import { Figure, Lead } from '../../ui/figure';
-import { Glitch, Mark } from './beats';
+import { Glitch } from './beats';
 import { Command } from '../../ui/command';
 import { MoonStage } from './moon';
 import { command, copy, frameworks } from '../../content';
@@ -27,10 +27,7 @@ export function Hero() {
       <div className="relative z-10 flex flex-col pt-8 lg:my-auto lg:py-6">
         {/* three lines, sized by width and by the height left for the sky, so the horizon stays on screen */}
         <h1 className="text-[clamp(3rem,7.2vw,6.5rem)] leading-[0.95] font-medium tracking-[-0.045em] lg:max-xl:text-[clamp(3rem,min(6.4vw,calc((100svh-530px)/2.85)),6.5rem)] xl:text-[clamp(3rem,min(7.2vw,calc((100svh-470px)/2.85)),6.5rem)]">
-          <Lead className="text-[0.6em]">
-            The React <Mark>docs</Mark> framework.
-          </Lead>{' '}
-          <Glitch>Flexible</Glitch>
+          <Lead className="text-[0.6em]">{copy.hero.lead}</Lead> <Glitch>Flexible</Glitch>
           <br />
           to the core.
         </h1>

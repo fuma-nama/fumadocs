@@ -6,7 +6,7 @@ import type { InkTable } from './presets';
 const FALLBACK = 2500;
 
 /** a frame of `/story/<layout>`, inked with a preset */
-export interface Slot {
+interface Slot {
   frame: HTMLIFrameElement;
   /** the layout asked for, whether it landed in the frame, and whether it rendered */
   layout: LayoutId | null;

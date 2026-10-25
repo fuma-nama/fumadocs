@@ -5,7 +5,7 @@ import { cn } from '@/lib/cn';
 
 const ALPHABET = ' abcdefghijklmnopqrstuvwxyz0123456789-_./:@';
 
-export interface RollerProps {
+interface RollerProps {
   value: string;
   className?: string;
   /** ms per character tick */
@@ -37,7 +37,7 @@ export function Roller({ value, className, step = 36, stagger = 24 }: RollerProp
     cells.push(
       <Cell
         key={`${state.id}:${i}`}
-        strip={reduced || from === to ? [to] : path(from, to)}
+        strip={from === to ? [to] : path(from, to)}
         step={step}
         delay={i * stagger}
       />,

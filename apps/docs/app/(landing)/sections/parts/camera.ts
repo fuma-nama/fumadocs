@@ -26,14 +26,14 @@ export interface Pose {
   scale: number;
 }
 
-export type Vec3 = readonly [x: number, y: number, z: number];
+type Vec3 = readonly [x: number, y: number, z: number];
 
 export interface Size {
   width: number;
   height: number;
 }
 
-export interface Box extends Size {
+interface Box extends Size {
   x: number;
   y: number;
 }
@@ -53,7 +53,7 @@ export function cameraTransform({ x, y, pitch, yaw, scale }: Pose): string {
 }
 
 /** where a point of the block (page px, z toward the reader) lands on the canvas */
-export function project(canvas: Size, pose: Pose, [px, py, pz]: Vec3): [number, number] {
+function project(canvas: Size, pose: Pose, [px, py, pz]: Vec3): [number, number] {
   const a = (pose.pitch * Math.PI) / 180;
   const b = (pose.yaw * Math.PI) / 180;
   const sx = (px - PAGE.width / 2) * pose.scale;

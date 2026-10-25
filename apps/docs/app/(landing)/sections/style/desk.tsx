@@ -1,5 +1,5 @@
 'use client';
-import { type KeyboardEvent, memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { type KeyboardEvent, memo, useCallback, useEffect, useRef, useState } from 'react';
 import { cn } from '@/lib/cn';
 import { DITHER_MASKS } from '../../lib/bayer';
 import { LAYOUTS, type LayoutId } from './data';
@@ -9,6 +9,7 @@ import {
   BOARD,
   createPose,
   hangRopes,
+  type Hung,
   HUB,
   hubPort,
   hubTransform,
@@ -23,8 +24,10 @@ import {
 } from './board';
 import { createDeskEngine, type DeskEngine } from './desk-engine';
 
-export interface DeskProps {
+interface DeskProps {
   selected: LayoutId;
+  /** the cables of the first pose hanging still, settled on the server */
+  hung: Hung;
   onSelect: (id: LayoutId) => void;
   className?: string;
 }
@@ -66,17 +69,13 @@ const STEPS: Record<string, number> = { ArrowRight: 1, ArrowDown: 3, ArrowLeft: 
  * The desk: the 6 layouts as windows, each cabled to the search trigger they all render. Held
  * under the pointer, a window is chosen; a click, a tap or the arrow keys choose at once.
  */
-export const Desk = memo(function Desk({ selected, onSelect, className }: DeskProps) {
+export const Desk = memo(function Desk({ selected, hung, onSelect, className }: DeskProps) {
   // the server draws the first pose; from then on the engine moves everything
-  const [initial] = useState(selected);
-  const first = useMemo(() => {
-    const at = pose(
-      SLOTS.findIndex((slot) => slot.id === initial),
-      -1,
-      createPose(),
-    );
-    return { at, ropes: hangRopes(at) };
-  }, [initial]);
+  const [first] = useState(() => {
+    const index = SLOTS.findIndex((slot) => slot.id === selected);
+    const at = pose(index, -1, createPose());
+    return { index, at, hung, ropes: hangRopes(at, hung) };
+  });
   const index = SLOTS.findIndex((slot) => slot.id === selected);
 
   const engine = useRef<DeskEngine | null>(null);
@@ -87,10 +86,8 @@ export const Desk = memo(function Desk({ selected, onSelect, className }: DeskPr
   const ref = useCallback(
     (board: HTMLDivElement | null) => {
       if (!board) return;
-      const instance = createDeskEngine(
-        board,
-        SLOTS.findIndex((slot) => slot.id === initial),
-        (i) => select.current(SLOTS[i].id),
+      const instance = createDeskEngine(board, first.index, first.hung, (i) =>
+        select.current(SLOTS[i].id),
       );
       engine.current = instance;
       return () => {
@@ -98,7 +95,7 @@ export const Desk = memo(function Desk({ selected, onSelect, className }: DeskPr
         engine.current = null;
       };
     },
-    [initial],
+    [first],
   );
 
   useEffect(() => {
@@ -117,12 +114,13 @@ export const Desk = memo(function Desk({ selected, onSelect, className }: DeskPr
     event.currentTarget.querySelector<HTMLElement>(`[data-slot="${to}"]`)?.focus();
   }
 
+  const { windows: w } = first.at;
   const cables = [];
   const windows = [];
+  const ports = [];
   for (let i = 0; i < SLOTS.length; i++) {
     const slot = SLOTS[i];
     const active = i === index;
-    const { windows: w } = first.at;
     cables.push(
       <path
         key={slot.id}
@@ -189,12 +187,8 @@ export const Desk = memo(function Desk({ selected, onSelect, className }: DeskPr
         </span>
       </button>,
     );
-  }
-
-  const ports = [];
-  for (const slot of SLOTS) {
-    const [x, y] = hubPort(slot);
-    ports.push(<Port key={slot.id} x={x} y={y} w={HUB.w} h={HUB.h} />);
+    const [hx, hy] = hubPort(slot);
+    ports.push(<Port key={slot.id} x={hx} y={hy} w={HUB.w} h={HUB.h} />);
   }
 
   return (

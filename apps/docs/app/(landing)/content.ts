@@ -23,10 +23,10 @@ const beats = [
  */
 export const copy = {
   hero: {
-    lead: 'The React docs framework.',
+    lead: 'Fumadocs.',
     title: 'Flexible to the core.',
     description:
-      'You get a beautiful UI, first-party integrations and MDX, and you can swap out any part for your own.',
+      'A documentation framework for React. It comes with a beautiful UI, MDX and integrations, and you can swap any part for your own.',
   },
   parts: {
     lead: 'Inside a page.',
@@ -46,10 +46,10 @@ export const copy = {
       'Pick from 6 layouts and 12 themes, all built from the same parts. Restyle them with CSS variables, or copy a layout into your project.',
   },
   cli: {
-    lead: 'Break it open.',
-    title: 'The source is yours.',
+    lead: 'Full control.',
+    title: 'Install the UI into your codebase.',
     description:
-      'The Fumadocs CLI copies layouts and components into your project and points your imports at them. Edit them like the rest of your code.',
+      'The Fumadocs CLI copies layouts and components into your project and points your imports at them. Edit them like your own code.',
   },
   integrations: {
     lead: 'Integrations.',

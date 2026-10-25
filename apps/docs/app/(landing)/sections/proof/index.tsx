@@ -1,10 +1,10 @@
 import Link from 'next/link';
-import { showcases, vercel } from '@/lib/showcases';
+import { type ShowcaseObject, showcases, vercel } from '@/lib/showcases';
 import { copy, quotes } from '../../content';
 import { Figure, FigureHeader } from '../../ui/figure';
 import { type Counter, Counters } from './counters';
 import { getContributorCount, getDownloads, getStars } from './data';
-import { Press, type Site } from './press';
+import { Press } from './press';
 import { Wire } from './wire';
 
 /** tiles on the wall, the rest are on the showcase page */
@@ -16,7 +16,7 @@ export async function Proof() {
     getDownloads(),
     getContributorCount(),
   ]);
-  const sites: Site[] = [];
+  const sites: Required<ShowcaseObject>[] = [];
   for (const { name, url, image } of showcases) {
     if (image && sites.length < WALL) sites.push({ name, url, image });
   }
@@ -24,8 +24,8 @@ export async function Proof() {
 
   const counters: Counter[] = [];
   if (stars !== undefined) counters.push({ label: 'GitHub stars', value: stars });
-  if (downloads)
-    counters.push({ label: 'Weekly downloads', value: downloads.downloads, note: 'fumadocs-core' });
+  if (downloads !== undefined)
+    counters.push({ label: 'Weekly downloads', value: downloads, note: 'fumadocs-core' });
   if (contributors !== undefined) counters.push({ label: 'Contributors', value: contributors });
   counters.push({ label: 'Showcased sites', value: online });
 

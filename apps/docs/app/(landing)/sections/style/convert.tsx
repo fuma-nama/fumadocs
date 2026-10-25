@@ -5,10 +5,9 @@ import { TICK } from '../../lib/motion';
 import { DitherSwap } from '../../ui/dither';
 import { paint } from './data';
 import type { Wiring } from './presets';
-import { STEP } from './rope';
-import { createSprings, type Springs, stepSprings } from './spring';
+import { createSprings, due, type Springs, STEP, stepSprings } from './spring';
 
-export interface ConvertProps {
+interface ConvertProps {
   /** the variables, without `--color-fd-` */
   names: string[];
   light: Wiring;
@@ -78,18 +77,11 @@ function Wires({
       return;
     }
     const s = springs;
+    const clock = { last: 0, acc: 0 };
     let raf = 0;
-    let last = 0;
-    let acc = 0;
     const tick = (now: number) => {
-      acc += last === 0 ? STEP : Math.min(0.05, (now - last) / 1000);
-      last = now;
-      // a frame shorter than a step (a 120 Hz screen) steps nothing: it settles nothing either
       let energy = Infinity;
-      while (acc >= STEP) {
-        acc -= STEP;
-        energy = stepSprings(s, STEP, 320, 20);
-      }
+      for (let i = due(clock, now); i > 0; i--) energy = stepSprings(s, STEP, 320, 20);
       for (let i = 0; i < lines.length; i++) lines[i].setAttribute('y2', s.value[i].toFixed(3));
       if (energy > 0.002) raf = requestAnimationFrame(tick);
     };

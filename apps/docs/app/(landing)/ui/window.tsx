@@ -1,7 +1,7 @@
 import type { ComponentProps, ReactNode } from 'react';
 import { cn } from '@/lib/cn';
 
-export interface WindowProps extends Omit<ComponentProps<'div'>, 'title'> {
+interface WindowProps extends Omit<ComponentProps<'div'>, 'title'> {
   title?: ReactNode;
   /** extra content at the end of the title bar */
   actions?: ReactNode;

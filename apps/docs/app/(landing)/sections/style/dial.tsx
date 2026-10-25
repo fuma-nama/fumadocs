@@ -1,12 +1,11 @@
 'use client';
 import { type ReactNode, useCallback, useEffect, useId, useRef, useState } from 'react';
 import { cn } from '@/lib/cn';
-import { BAYER4 } from '../../lib/bayer';
+import { ditherPath } from '../../lib/bayer';
 import { paint, THEME_NAMES, THEMES, type ThemeId } from './data';
 import { createIntent } from './intent';
 import type { InkTable } from './presets';
-import { STEP } from './rope';
-import { createSprings, settleSprings, stepSprings } from './spring';
+import { createSprings, due, settleSprings, STEP, stepSprings } from './spring';
 
 /** the dial's box in px, the axle's place in it: the names on the left run a little longer */
 const W = 320;
@@ -36,16 +35,6 @@ function angleOf(index: number) {
 function polar(r: number, deg: number): [x: number, y: number] {
   const a = (deg * Math.PI) / 180;
   return [CX + r * Math.sin(a), CY - r * Math.cos(a)];
-}
-
-/** an ordered dither of `level` / 16 cells of `cell` px, as a path for a pattern */
-function ditherPath(level: number, cell: number) {
-  let d = '';
-  for (let i = 0; i < 16; i++) {
-    if (BAYER4[i] < level)
-      d += `M${(i % 4) * cell} ${Math.floor(i / 4) * cell}h${cell}v${cell}h${-cell}z`;
-  }
-  return d;
 }
 
 /** the pointer of a chicken-head knob pointing up from the axle */
@@ -87,10 +76,9 @@ function createKnob(
   const handle = root.querySelector<HTMLElement>('[role="slider"]')!;
   const reduce = matchMedia('(prefers-reduced-motion: reduce)');
   const turn = createSprings(1, angleOf(initial));
+  const clock = { last: 0, acc: 0 };
   let value = initial;
   let raf = 0;
-  let last = 0;
-  let acc = 0;
   let drag: { id: number; prev: number; y: number; raw: number } | null = null;
 
   function draw() {
@@ -100,18 +88,11 @@ function createKnob(
 
   function frame(now: number) {
     raf = 0;
-    const dt = last === 0 ? STEP : Math.min(0.05, (now - last) / 1000);
-    last = now;
-    acc += dt;
-    // a frame shorter than a step (a 120 Hz screen) steps nothing: it settles nothing either
     let energy = Infinity;
-    while (acc >= STEP) {
-      acc -= STEP;
-      energy = stepSprings(turn, STEP, 320, 24);
-    }
+    for (let i = due(clock, now); i > 0; i--) energy = stepSprings(turn, STEP, 320, 24);
     draw();
     if (energy > 0.01 && !drag) raf = requestAnimationFrame(frame);
-    else last = acc = 0;
+    else clock.last = clock.acc = 0;
   }
 
   function settle() {
@@ -234,7 +215,7 @@ function createKnob(
   };
 }
 
-export interface DialProps {
+interface DialProps {
   table: InkTable;
   value: ThemeId;
   /** `turning` while the knob is dragged through the presets */
@@ -326,10 +307,10 @@ export function Dial({ table, value, onChange }: DialProps) {
       <svg aria-hidden viewBox={`0 0 ${W} ${H}`} className="absolute inset-0 overflow-visible">
         <defs>
           <pattern id={`${id}-shadow`} width="4" height="4" patternUnits="userSpaceOnUse">
-            <path d={ditherPath(4, 1)} className="fill-lp-ink-2" />
+            <path d={ditherPath(4)} className="fill-lp-ink-2" />
           </pattern>
           <pattern id={`${id}-side`} width="4" height="4" patternUnits="userSpaceOnUse">
-            <path d={ditherPath(6, 1)} className="fill-lp-ink" />
+            <path d={ditherPath(6)} className="fill-lp-ink" />
           </pattern>
         </defs>
         <path d={SCALE} className="fill-none stroke-lp-line-strong" />

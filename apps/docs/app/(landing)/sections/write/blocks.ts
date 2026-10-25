@@ -1,7 +1,5 @@
 import { quickStart } from './quick-start';
 
-export { fileLines } from './steps';
-
 /** the authored source of each block of `quick-start.mdx`, as Fumadocs MDX compiled it */
 export const blocks: string[] = [];
 for (const entry of quickStart.entries) {
@@ -13,4 +11,14 @@ for (const entry of quickStart.entries) {
   const raw = entry._exports.raw;
   if (typeof raw === 'string' && raw) source += (source ? '\n\n' : '') + raw;
   blocks.push(source);
+}
+
+/** the sources as one file, a blank line between blocks */
+export function fileLines(sources: string[]): string[] {
+  const out: string[] = [];
+  for (let i = 0; i < sources.length; i++) {
+    if (i > 0) out.push('');
+    for (const line of sources[i].trimEnd().split('\n')) out.push(line);
+  }
+  return out;
 }

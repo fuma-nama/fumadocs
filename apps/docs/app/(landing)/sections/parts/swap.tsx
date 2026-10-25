@@ -1,13 +1,14 @@
 'use client';
 import { type KeyboardEvent, memo, type ReactNode, useMemo, useState } from 'react';
 import { useReducedMotion } from 'motion/react';
+import { report } from '../../lib/status';
 import { Chip, type Layer } from '../../ui/spec';
 import { Window } from '../../ui/window';
 import { cn } from '@/lib/cn';
 import { type Option, slots } from './data';
 
 export type SwapLayer = 'ui' | 'content' | 'framework';
-export type Picks = Record<SwapLayer, number>;
+type Picks = Record<SwapLayer, number>;
 /** the real setup of every option, highlighted on the server, by layer */
 export type Snippets = Record<SwapLayer, ReactNode[]>;
 
@@ -23,7 +24,7 @@ export interface Swap {
   shown: Picks;
   /** the layer that landed last, its file is in the code window */
   last: SwapLayer;
-  /** how many picks landed: nothing dithers before the first */
+  /** how many picks landed */
   swaps: number;
 }
 
@@ -73,7 +74,7 @@ export function useSwap() {
   return { state, actions };
 }
 
-export type OnPick = (layer: SwapLayer, option: number, from: Element) => void;
+type OnPick = (layer: SwapLayer, option: number) => void;
 
 const key =
   '-ms-px flex h-8 items-center border border-lp-line-strong px-3 text-[13px] whitespace-nowrap first:ms-0';
@@ -110,6 +111,11 @@ function Group({
   pick: number;
   onPick: OnPick;
 }) {
+  function choose(next: number, from: Element) {
+    onPick(layer, next);
+    report(from, `${layer}: ${options[next].title}`);
+  }
+
   function onKeyDown(event: KeyboardEvent<HTMLButtonElement>) {
     const step =
       event.key === 'ArrowDown' || event.key === 'ArrowRight'
@@ -121,7 +127,7 @@ function Group({
     event.preventDefault();
     const next = (pick + step + options.length) % options.length;
     const group = event.currentTarget.parentElement!;
-    onPick(layer, next, group);
+    choose(next, group);
     (group.children[next] as HTMLElement).focus();
   }
 
@@ -134,7 +140,7 @@ function Group({
         role="radio"
         aria-checked={i === pick}
         tabIndex={i === pick ? 0 : -1}
-        onClick={(event) => i !== pick && onPick(layer, i, event.currentTarget)}
+        onClick={(event) => i !== pick && choose(i, event.currentTarget)}
         onKeyDown={onKeyDown}
         className={cn(
           key,
@@ -170,16 +176,14 @@ function File({ option, children }: { option: Option; children: ReactNode }) {
 
 /**
  * One of several layers in one cell, by key. At rest only the layer shown is mounted: a new one
- * mounts on top and dithers in over the old, which unmounts once it is covered. With `animate` off
- * (before the first swap) or reduced motion, it replaces the old at once.
+ * mounts on top and dithers in over the old, which unmounts once it is covered. With reduced
+ * motion, it replaces the old at once.
  */
 export function Crossfade({
   shown,
-  animate,
   render,
 }: {
   shown: string;
-  animate: boolean;
   render: (key: string) => ReactNode;
 }) {
   const reduced = useReducedMotion();
@@ -188,7 +192,7 @@ export function Crossfade({
   if (current[current.length - 1] !== shown) {
     // the layer it covers keeps its DOM until the dither ends; any older one is already covered,
     // and in a hidden layout, where no dither runs, they stay at two
-    current = animate && !reduced ? [current[current.length - 1], shown] : [shown];
+    current = reduced ? [shown] : [current[current.length - 1], shown];
     setLayers(current);
   }
 
@@ -241,13 +245,11 @@ export const CodeWindow = memo(function CodeWindow({
   layer,
   option,
   snippets,
-  animate,
   className,
 }: {
   layer: SwapLayer;
   option: number;
   snippets: Snippets;
-  animate: boolean;
   className?: string;
 }) {
   const info = optionsOf(layer)[option];
@@ -279,7 +281,6 @@ export const CodeWindow = memo(function CodeWindow({
         {sizers}
         <Crossfade
           shown={`${layer}:${option}`}
-          animate={animate}
           render={(key) => {
             const [name, index] = key.split(':') as [SwapLayer, string];
             return (

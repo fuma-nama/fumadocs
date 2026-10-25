@@ -23,14 +23,8 @@ export function Waveform({ className }: { className?: string }) {
       let lastTime = performance.now();
       let color = '';
 
-      const draw = () => {
-        raf = 0;
-        amplitude += (energy - amplitude) * 0.25;
-        energy *= 0.88;
-        phase += 0.3 + amplitude * 0.9;
-        samples.copyWithin(0, 1);
-        samples[SAMPLES - 1] = Math.sin(phase) * amplitude * (0.55 + 0.45 * Math.sin(phase * 0.29));
-
+      /** the samples as steps of pixels in the current ink; returns the loudest */
+      const paint = () => {
         const dpr = Math.min(window.devicePixelRatio, 2);
         const width = canvas.clientWidth * dpr;
         const height = canvas.clientHeight * dpr;
@@ -53,7 +47,17 @@ export function Waveform({ className }: { className?: string }) {
           ctx.fillRect(Math.floor(i * step), top, Math.ceil(step), bottom - top + px);
           prev = y;
         }
-        if (peak > 0.01 || energy > 0.01) raf = requestAnimationFrame(draw);
+        return peak;
+      };
+
+      const draw = () => {
+        raf = 0;
+        amplitude += (energy - amplitude) * 0.25;
+        energy *= 0.88;
+        phase += 0.3 + amplitude * 0.9;
+        samples.copyWithin(0, 1);
+        samples[SAMPLES - 1] = Math.sin(phase) * amplitude * (0.55 + 0.45 * Math.sin(phase * 0.29));
+        if (paint() > 0.01 || energy > 0.01) raf = requestAnimationFrame(draw);
       };
 
       const onScroll = () => {
@@ -61,18 +65,21 @@ export function Waveform({ className }: { className?: string }) {
         const speed = Math.abs(window.scrollY - lastY) / Math.max(1, now - lastTime);
         lastY = window.scrollY;
         lastTime = now;
-        if (reduced) return;
         energy = Math.min(1, energy + speed * 0.12);
-        if (raf === 0) {
-          color = getComputedStyle(canvas).color;
-          raf = requestAnimationFrame(draw);
-        }
+        if (raf === 0) raf = requestAnimationFrame(draw);
       };
+      // a new theme repaints the line in its ink at once
+      const theme = new MutationObserver(() => {
+        color = getComputedStyle(canvas).color;
+        paint();
+      });
 
       color = getComputedStyle(canvas).color;
       draw();
-      window.addEventListener('scroll', onScroll, { passive: true });
+      theme.observe(document.documentElement, { attributes: true, attributeFilter: ['class'] });
+      if (!reduced) window.addEventListener('scroll', onScroll, { passive: true });
       return () => {
+        theme.disconnect();
         window.removeEventListener('scroll', onScroll);
         cancelAnimationFrame(raf);
       };

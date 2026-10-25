@@ -1,8 +1,9 @@
 'use client';
+import { later } from '../../lib/later';
 import { createSand } from './sand';
 
 function mount(host: HTMLDivElement | null) {
-  if (host) return createSand(host);
+  if (host) return later(() => createSand(host));
 }
 
 /** the footer wordmark, filled by falling glyphs */

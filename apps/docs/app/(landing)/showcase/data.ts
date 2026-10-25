@@ -3,7 +3,7 @@ import { showcases, vercel } from '@/lib/showcases';
 export const suggest = 'https://github.com/fuma-nama/fumadocs/discussions/30';
 
 /** projects with docs on Fumadocs: the showcase and Vercel's SDKs */
-export const online = showcases.length + vercel.length;
+const online = showcases.length + vercel.length;
 
 const range = 'from UI libraries and auth frameworks to databases and AI platforms';
 

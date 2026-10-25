@@ -18,17 +18,9 @@ import { useIsClient } from '../../lib/use-is-client';
 import { Roller } from '../../ui/roller';
 import { Scramble } from '../../ui/text';
 import { Window } from '../../ui/window';
+import type { ModuleInfo } from './modules';
 
-export interface Module {
-  n: number;
-  title: string;
-  /** one line under the title */
-  line: string;
-  /** the package or import path that ships it */
-  pkg: string;
-  /** docs page; without it the cell opens the search dialog */
-  href?: string;
-  install: string;
+export interface Module extends ModuleInfo {
   /** a `<Stage>`, its `--bt-dur` sets how long the cell stays active */
   mechanism: ReactNode;
 }
@@ -293,11 +285,7 @@ function Cell({ module, index, on, boot, active, onEnter, onLeave }: CellProps) 
             {module.title}
           </span>
           <span className="font-mono text-xs text-lp-ink-2 group-hover:text-lp-paper/60 group-focus-visible:text-lp-paper/60">
-            {boot === undefined ? (
-              module.pkg
-            ) : (
-              <Scramble text={module.pkg} trigger="mount" delay={boot} />
-            )}
+            {boot === undefined ? module.pkg : <Scramble text={module.pkg} delay={boot} />}
           </span>
         </span>
         {!module.href && (

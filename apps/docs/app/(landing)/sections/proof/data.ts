@@ -20,14 +20,11 @@ export async function getStars(): Promise<number | undefined> {
   return data?.stargazers_count;
 }
 
-export interface Downloads {
-  downloads: number;
-  start: string;
-  end: string;
-}
-
-export function getDownloads(): Promise<Downloads | undefined> {
-  return getJson<Downloads>('https://api.npmjs.org/downloads/point/last-week/fumadocs-core');
+export async function getDownloads(): Promise<number | undefined> {
+  const data = await getJson<{ downloads: number }>(
+    'https://api.npmjs.org/downloads/point/last-week/fumadocs-core',
+  );
+  return data?.downloads;
 }
 
 export function getContributorCount(): Promise<number | undefined> {

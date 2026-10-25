@@ -11,7 +11,7 @@ export const BOARD = { w: 1000, h: 620 };
 /** a window's box and its title bar; its content is 1.6:1 inside the frame line */
 export const WINDOW = { w: 290, h: 210, bar: 28 };
 
-export interface Slot {
+interface Slot {
   id: LayoutId;
   x: number;
   y: number;
@@ -67,7 +67,7 @@ const SLACK = 1.04;
 const TAUT = 0.985;
 
 /** where everything sits for a choice and a hover: what the springs settle to */
-export interface Pose {
+interface Pose {
   /** per window: how far it slides along its row, its scale, its lift (0 to 1) */
   windows: Float64Array;
   /** the hub's `x, y` from its place */
@@ -156,14 +156,30 @@ export function cableEnds(
   out[at + 3] = HUB.y + hub[1] + PORTS[i * 4 + 3];
 }
 
-/** the cables hanging still in a pose, the same on the server and in the browser */
-export function hangRopes(at: Pose): Ropes {
+/** the points of cables hanging still: settled on the server, they reach the browser as they are */
+export interface Hung {
+  x: number[];
+  y: number[];
+}
+
+/**
+ * The cables hanging still in a pose. Settling them takes a while, so the browser starts from the
+ * shape the server settled for the same pose, `hung`.
+ */
+export function hangRopes(at: Pose, hung?: Hung): Ropes {
   const ropes = createRopes(SLOTS.length);
   for (let i = 0; i < SLOTS.length; i++) {
     cableEnds(i, at.windows, at.hub, ropes.ends, i * 4);
     ropes.rest[i] = at.length[i];
   }
-  settleRopes(ropes);
+  if (!hung) settleRopes(ropes);
+  else {
+    // at rest: no speed left
+    ropes.x.set(hung.x);
+    ropes.px.set(hung.x);
+    ropes.y.set(hung.y);
+    ropes.py.set(hung.y);
+  }
   return ropes;
 }
 

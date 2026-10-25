@@ -26,12 +26,6 @@ function fenceFor(lines: string[]): string {
   return '`'.repeat(longest + 1);
 }
 
-function join(items: string[]): string {
-  let out = '';
-  for (let i = 0; i < items.length; i++) out += (i > 0 ? ', ' : '') + items[i];
-  return out;
-}
-
 /** the landing page as Markdown, served at `/index.md` and to clients that prefer Markdown */
 export async function landingMarkdown(): Promise<string> {
   const [stars, downloads, contributors] = await Promise.all([
@@ -52,7 +46,7 @@ export async function landingMarkdown(): Promise<string> {
     '',
     `- Get started: ${url('/docs')}`,
     `- Create a project: \`${command}\``,
-    `- Runs on: ${join(runsOn)}`,
+    `- Runs on: ${runsOn.join(', ')}`,
     `- For LLMs: [llms.txt](${url('/llms.txt')}) indexes the docs, [llms-full.txt](${url('/llms-full.txt')}) has all of them; add \`.md\` to a docs URL for its Markdown.`,
   );
 
@@ -72,11 +66,10 @@ export async function landingMarkdown(): Promise<string> {
   for (const slot of slots) {
     const names: string[] = [];
     for (const option of slot.options) names.push(`${option.title} (\`${option.name}\`)`);
-    out.push(`- ${slot.layer}${slot.swappable ? '' : ' (kept)'}: ${join(names)}`);
+    out.push(`- ${slot.layer}${slot.swappable ? '' : ' (kept)'}: ${names.join(', ')}`);
   }
 
-  const source: string[] = [];
-  for (const line of fileLines(blocks)) source.push(line.text);
+  const source = fileLines(blocks);
   const fence = fenceFor(source);
   out.push(
     '',
@@ -99,8 +92,8 @@ export async function landingMarkdown(): Promise<string> {
     '',
     copy.style.description,
     '',
-    `- Layouts: ${join(layouts)} (${url('/docs/ui/layouts')})`,
-    `- Themes: ${join(themes)}, each a stylesheet imported as \`@import 'fumadocs-ui/css/<id>.css';\` (${url('/docs/ui/theme')})`,
+    `- Layouts: ${layouts.join(', ')} (${url('/docs/ui/layouts')})`,
+    `- Themes: ${themes.join(', ')}, each a stylesheet imported as \`@import 'fumadocs-ui/css/<id>.css';\` (${url('/docs/ui/theme')})`,
   );
 
   out.push(
@@ -123,19 +116,19 @@ export async function landingMarkdown(): Promise<string> {
   }
   const extras: string[] = [];
   for (const item of more) extras.push(`[${item.name}](${url(item.href)})`);
-  out.push(`- More: ${join(extras)}`);
+  out.push(`- More: ${extras.join(', ')}`);
 
   const counts: string[] = [];
   if (stars !== undefined) counts.push(`${format.format(stars)} GitHub stars`);
-  if (downloads)
-    counts.push(`${format.format(downloads.downloads)} weekly downloads of \`fumadocs-core\``);
+  if (downloads !== undefined)
+    counts.push(`${format.format(downloads)} weekly downloads of \`fumadocs-core\``);
   if (contributors !== undefined) counts.push(`${format.format(contributors)} contributors`);
   const sites: string[] = [];
   for (const site of showcases) sites.push(`[${site.name}](${site.url})`);
   for (const site of vercel) sites.push(`[${site.name}](${site.url})`);
   out.push('', `## ${heading(copy.proof)}`, '', copy.proof.description, '');
-  if (counts.length > 0) out.push(`- ${join(counts)}.`);
-  out.push(`- Showcase (${url('/showcase')}): ${join(sites)}`);
+  if (counts.length > 0) out.push(`- ${counts.join(', ')}.`);
+  out.push(`- Showcase (${url('/showcase')}): ${sites.join(', ')}`);
   for (const quote of quotes)
     out.push('', `> ${quote.message}`, `>`, `> ${quote.name}, ${quote.role}`);
 

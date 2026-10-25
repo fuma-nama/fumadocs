@@ -12,7 +12,7 @@ function mount(stage: HTMLDivElement | null) {
   if (stage) return createPress(stage);
 }
 
-export interface PressProps {
+interface PressProps {
   steps: Step[];
   /** the source of each step's block */
   sources: string[];

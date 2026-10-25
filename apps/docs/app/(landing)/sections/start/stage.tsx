@@ -1,18 +1,21 @@
 'use client';
 import type { ReactNode } from 'react';
+import { later } from '../../lib/later';
 import { createStart } from './engine';
 
 function mount(pin: HTMLDivElement | null) {
   if (!pin) return;
   const find = (name: string) => pin.querySelector<HTMLElement>(`[data-${name}]`)!;
-  return createStart({
-    pin,
-    stage: find('stage'),
-    canvas: pin.querySelector('canvas')!,
-    slot: find('slot'),
-    cta: find('cta'),
-    readout: find('readout'),
-  });
+  return later(() =>
+    createStart({
+      pin,
+      stage: find('stage'),
+      canvas: pin.querySelector('canvas')!,
+      slot: find('slot'),
+      cta: find('cta'),
+      readout: find('readout'),
+    }),
+  );
 }
 
 /** the pinned stage: a toon 3D terminal the camera pulls out of, with the call to action beside it */

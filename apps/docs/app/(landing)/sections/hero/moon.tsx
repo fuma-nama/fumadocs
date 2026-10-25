@@ -12,7 +12,7 @@ import { createShaderCanvas } from '../../lib/gl';
 import { settle, TICK } from '../../lib/motion';
 import { setStatus } from '../../lib/status';
 import { Chip, type Layer } from '../../ui/spec';
-import { BEAT_AT, bootStart } from './boot';
+import { BEAT_AT, bootStart, untilBeat } from './boot';
 import { moonFragment, PRISMS } from './shader';
 
 const ease = cubicBezier(settle[0], settle[1], settle[2], settle[3]);
@@ -210,7 +210,7 @@ function mount(
         const { top, bottom } = figure.getBoundingClientRect();
         if (top <= innerHeight / 2 && bottom >= innerHeight / 2) setStatus('ready');
       },
-      start + BEAT_AT.ready * TICK - performance.now(),
+      untilBeat(start, BEAT_AT.ready),
     );
   }
 

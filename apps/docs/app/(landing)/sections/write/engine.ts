@@ -192,10 +192,9 @@ export function createPress(stage: HTMLElement): () => void {
     });
   }
 
-  const shader = createShaderCanvas(canvas, { fragment, onFrame, maxDpr: 2 });
+  const shader = createShaderCanvas(canvas, { fragment, onFrame });
 
   // metrics, stage px
-  let height = 0;
   let scale = 1;
   let foot: Vec2 = [0, 0];
   let base: Vec2 = [0, 0];
@@ -203,7 +202,6 @@ export function createPress(stage: HTMLElement): () => void {
   let riding = false;
   const rail = [0, 0, 0];
   let advance = 8;
-  let lineHeight = 20;
   /** inside the window's frame, where the dust settles */
   let inside: Rect = { x: 0, y: 0, w: 0, h: 0 };
 
@@ -243,7 +241,6 @@ export function createPress(stage: HTMLElement): () => void {
       b.carried = '';
     }
     const s = stage.getBoundingClientRect();
-    height = s.height;
     if (s.width === 0) return;
     const page = box(doc, s);
     inside = box(doc.lastElementChild!, s);
@@ -251,9 +248,9 @@ export function createPress(stage: HTMLElement): () => void {
     // beside the window the arm stands on its own; on a phone it rides a rail down the window's side
     const beside = room.w > 160;
     scale = beside ? 1 : 0.38;
-    foot = [page.x + page.w / 2, height * 0.3];
+    foot = [page.x + page.w / 2, s.height * 0.3];
     riding = !beside;
-    if (beside) base = [room.x + Math.min(150, room.w * 0.42), height * 0.5];
+    if (beside) base = [room.x + Math.min(150, room.w * 0.42), s.height * 0.5];
     else {
       base = [room.x + room.w / 2, page.y + page.h - 24];
       rail[0] = base[0];
@@ -261,10 +258,9 @@ export function createPress(stage: HTMLElement): () => void {
       rail[2] = page.y + page.h - 24;
     }
     const first = blocks[0].lines[0];
-    const style = getComputedStyle(first);
-    lineHeight = Number.parseFloat(style.lineHeight) || 20;
+    const lineHeight = Number.parseFloat(getComputedStyle(first).lineHeight) || 20;
     let longest = 0;
-    let row = blocks[0].lines[0];
+    let row = first;
     for (const b of blocks) {
       for (let i = 0; i < b.lines.length; i++) {
         if (b.lengths[i] > longest) {
@@ -539,6 +535,13 @@ export function createPress(stage: HTMLElement): () => void {
     shader.set('uClip', [bounds[0], bounds[1], bounds[2], bounds[3]]);
   }
 
+  /** measure the stage again, and draw the state at the clock in it */
+  function refresh() {
+    layout();
+    apply();
+    shader?.invalidate();
+  }
+
   function say(text: string) {
     if (text === lastStatus) return;
     lastStatus = text;
@@ -633,15 +636,10 @@ export function createPress(stage: HTMLElement): () => void {
     },
     { rootMargin: '-50% 0px -50% 0px' },
   );
-  const resize = new ResizeObserver(() => {
-    layout();
-    apply();
-    shader?.invalidate();
-  });
+  const resize = new ResizeObserver(refresh);
   const theme = new MutationObserver(colours);
 
-  layout();
-  apply();
+  refresh();
   colours();
   resize.observe(stage);
   view.observe(stage);
@@ -650,10 +648,7 @@ export function createPress(stage: HTMLElement): () => void {
   button?.addEventListener('click', replay);
   let disposed = false;
   void document.fonts.ready.then(() => {
-    if (disposed) return;
-    layout();
-    apply();
-    shader?.invalidate();
+    if (!disposed) refresh();
   });
 
   return () => {

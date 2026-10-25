@@ -1,6 +1,6 @@
 import { copy } from '../../content';
 import { Figure, FigureHeader } from '../../ui/figure';
-import { Customize } from './customize';
+import { createPose, hangRopes, pose, SLOTS } from './board';
 import { THEMES, type ThemeId } from './data';
 import { loadInks, wire, type Wiring } from './presets';
 import { Studio } from './studio';
@@ -18,18 +18,21 @@ export async function Style() {
     };
   }
 
+  // the desk's cables in its first pose (docs, where the studio starts) settle here, once: the
+  // browser takes their shape
+  const first = SLOTS.findIndex((slot) => slot.id === 'docs');
+  const ropes = hangRopes(pose(first, -1, createPose()));
+  const hung = { x: Array.from(ropes.x), y: Array.from(ropes.y) };
+
   return (
-    <Figure n={4} id="style" aria-label="Style" status="layout: docs">
+    <Figure n={4} id="style" aria-label="Style" status="layout: docs" className="pb-16">
       <FigureHeader
         lead={copy.style.lead}
         title={copy.style.title}
         description={copy.style.description}
         className="px-(--lp-gutter) pt-16 pb-10"
       />
-      <Studio table={table} names={names} wirings={wirings} />
-      <div className="mt-16 border-t border-lp-line pt-12 pb-16">
-        <Customize />
-      </div>
+      <Studio table={table} names={names} wirings={wirings} hung={hung} />
     </Figure>
   );
 }

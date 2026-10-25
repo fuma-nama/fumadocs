@@ -100,7 +100,7 @@ export function address(url: string): string {
   return host + pathname.replace(/\/$/, '');
 }
 
-export interface SiteTileProps extends Omit<ComponentProps<'a'>, 'href' | 'children'> {
+interface SiteTileProps extends Omit<ComponentProps<'a'>, 'href' | 'children'> {
   site: ShowcaseObject;
   /** `sizes` of the screenshot */
   sizes: string;

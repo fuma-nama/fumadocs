@@ -23,17 +23,15 @@ export function setStatus(next: string) {
 
 /**
  * A figure's status line: kept on the figure, so the status bar shows it again when the reader
- * comes back, and shown now while `active`: by default, while the figure covers the middle of
- * the viewport, the one the status bar names.
+ * comes back, and shown now while the figure covers the middle of the viewport, the one the
+ * status bar names.
  */
-export function report(from: Element, text: string, active?: boolean) {
+export function report(from: Element, text: string) {
   const figure = from.closest<HTMLElement>('[data-figure]');
-  if (figure) figure.dataset.status = text;
-  if (active === undefined && figure) {
-    const box = figure.getBoundingClientRect();
-    active = box.top < innerHeight / 2 && box.bottom > innerHeight / 2;
-  }
-  if (active) setStatus(text);
+  if (!figure) return;
+  figure.dataset.status = text;
+  const box = figure.getBoundingClientRect();
+  if (box.top < innerHeight / 2 && box.bottom > innerHeight / 2) setStatus(text);
 }
 
 export function useStatus(): string {

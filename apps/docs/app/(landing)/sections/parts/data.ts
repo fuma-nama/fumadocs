@@ -20,7 +20,7 @@ export const install = [
 /** the status line of each chapter; the first is also the figure's own */
 export const STATUS = ['8 parts, 8 APIs', 'layers: ui, core, content', 'swap a layer'];
 
-export interface PartInfo {
+interface PartInfo {
   name: string;
   /** the API that renders or produces the part */
   api: string;
@@ -50,7 +50,7 @@ export interface Option {
   command?: string;
 }
 
-export interface Slot {
+interface Slot {
   layer: Layer;
   /** `false` for the core, every other layer plugs into it */
   swappable: boolean;

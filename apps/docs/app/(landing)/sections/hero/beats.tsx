@@ -1,7 +1,6 @@
 'use client';
 import { useEffect, useRef } from 'react';
 import { useReducedMotion } from 'motion/react';
-import { TICK } from '../../lib/motion';
 import { BEAT_AT, bootStart, untilBeat } from './boot';
 
 const slice = 'invisible absolute inset-y-0 -inset-x-[0.12em] bg-lp-paper px-[0.12em]';
@@ -68,46 +67,6 @@ export function Glitch({ children }: { children: string }) {
         {children}
       </span>
       <span aria-hidden className={slice}>
-        {children}
-      </span>
-    </span>
-  );
-}
-
-/** a yellow block wipes in behind it in eight steps */
-export function Mark({ children }: { children: string }) {
-  const ref = useRef<HTMLSpanElement>(null);
-
-  useEffect(() => {
-    const block = ref.current!;
-    const start = bootStart(block);
-    if (start === null) {
-      block.dataset.done = '';
-      return;
-    }
-    const animation = block.animate(
-      [{ clipPath: 'inset(0 100% 0 0)' }, { clipPath: 'inset(0 0 0 0)' }],
-      {
-        duration: 3 * TICK,
-        delay: Math.max(0, untilBeat(start, BEAT_AT.mark)),
-        easing: 'steps(8, end)',
-        fill: 'both',
-      },
-    );
-    animation.onfinish = () => {
-      block.dataset.done = '';
-    };
-    return () => animation.cancel();
-  }, []);
-
-  return (
-    <span className="relative inline-block">
-      {children}
-      <span
-        ref={ref}
-        aria-hidden
-        className="absolute inset-y-0 -inset-x-[0.06em] bg-lp-yellow px-[0.06em] text-[#121210] motion-safe:[@media(scripting:enabled)]:not-data-done:[clip-path:inset(0_100%_0_0)]"
-      >
         {children}
       </span>
     </span>

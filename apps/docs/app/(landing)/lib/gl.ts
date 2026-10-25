@@ -1,10 +1,10 @@
-export type Uniform =
+type Uniform =
   | number
   | readonly [number, number]
   | readonly [number, number, number]
   | readonly [number, number, number, number];
 
-export interface ShaderCanvasOptions {
+interface ShaderCanvasOptions {
   /**
    * GLSL ES 3.00 fragment shader. Provided uniforms: `vec2 uResolution` (device px),
    * `float uDpr`, `float uTime` (seconds since creation). Write to `out vec4 color`.
@@ -12,12 +12,11 @@ export interface ShaderCanvasOptions {
   fragment: string;
   /** redraw every frame while on screen, otherwise only after `invalidate()` */
   loop?: boolean;
-  maxDpr?: number;
   /** runs before each draw, set animated uniforms here */
   onFrame?: (time: number) => void;
 }
 
-export interface ShaderCanvas {
+interface ShaderCanvas {
   set: (name: string, value: Uniform) => void;
   /** upload (or re-upload after drawing to it) an image or canvas to a `sampler2D` uniform */
   texture: (name: string, source: TexImageSource) => void;
@@ -32,7 +31,7 @@ void main() { gl_Position = vec4(p, 0.0, 1.0); }`;
 /** a full-canvas fragment shader that only renders while the canvas is on screen */
 export function createShaderCanvas(
   canvas: HTMLCanvasElement,
-  { fragment, loop = false, maxDpr = 2, onFrame }: ShaderCanvasOptions,
+  { fragment, loop = false, onFrame }: ShaderCanvasOptions,
 ): ShaderCanvas | null {
   const gl = canvas.getContext('webgl2', { antialias: false, premultipliedAlpha: true });
   if (!gl) return null;
@@ -86,8 +85,8 @@ export function createShaderCanvas(
   const start = performance.now();
   let raf = 0;
   let onScreen = false;
-  // a GPU that can't keep up renders at 1x instead: running frames under ~40fps for a second
-  let limit = maxDpr;
+  // at most 2x; a GPU that can't keep up renders at 1x instead: running frames under ~40fps for a second
+  let limit = 2;
   let last = 0;
   let slow = 0;
 

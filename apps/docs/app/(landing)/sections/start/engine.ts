@@ -21,7 +21,7 @@ const cameraEase = cubicBezier(...camera);
 const OPEN = [0.002, 0.08, 0.4, 1];
 const LIGHT = { azimuth: 0.85, elevation: 0.62 };
 
-export interface StartElements {
+interface StartElements {
   /** the tall element the stage is pinned in */
   pin: HTMLElement;
   stage: HTMLElement;
@@ -34,7 +34,7 @@ export interface StartElements {
 
 /** the figure's scene: camera on scroll, the session on a timer, both only while on screen */
 export function createStart(el: StartElements): () => void {
-  const shader = createShaderCanvas(el.canvas, { fragment, onFrame, maxDpr: 2 });
+  const shader = createShaderCanvas(el.canvas, { fragment, onFrame });
   if (!shader) return () => {};
 
   const root = document.documentElement;

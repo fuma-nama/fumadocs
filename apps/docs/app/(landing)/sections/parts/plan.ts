@@ -2,7 +2,7 @@ import { parts } from './data';
 import { PAGE } from './camera';
 
 /** where a part's label sits around the page: beside it, or above it */
-export type Side = 'left' | 'top' | 'right';
+type Side = 'left' | 'top' | 'right';
 
 const SIDES: Record<string, Side> = {
   navbar: 'left',

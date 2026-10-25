@@ -4,17 +4,15 @@ import { useReducedMotion } from 'motion/react';
 import { DITHER_MASKS } from '../lib/bayer';
 import { cn } from '@/lib/cn';
 
-/** WAAPI keyframes that dither an element in (or out with `reverse`) */
-export function ditherKeyframes(cell = 4, reverse = false): Keyframe[] {
+/** WAAPI keyframes that dither an element in, `cell` CSS px per dither pixel */
+export function ditherKeyframes(cell: number): Keyframe[] {
   const size = `${cell * 4}px ${cell * 4}px`;
   const frames: Keyframe[] = [];
-  for (let i = 0; i <= 16; i++) {
-    frames.push({ maskImage: DITHER_MASKS[reverse ? 16 - i : i], maskSize: size });
-  }
+  for (let i = 0; i <= 16; i++) frames.push({ maskImage: DITHER_MASKS[i], maskSize: size });
   return frames;
 }
 
-export interface DitherSwapProps {
+interface DitherSwapProps {
   /** a new key dithers the new children in over the old ones */
   swapKey: Key;
   /** keep them static for a given key, the outgoing layer reuses them */

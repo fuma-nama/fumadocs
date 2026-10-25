@@ -3,7 +3,7 @@ const SYMBOLS = '│└┌◆◇●○◒◐◓◑█↑↓•';
 const ASCII = 95;
 
 export const ATLAS_COLUMNS = 16;
-export const GLYPHS = ASCII + SYMBOLS.length;
+const GLYPHS = ASCII + SYMBOLS.length;
 
 export function glyphOf(char: string): number {
   const code = char.charCodeAt(0);
@@ -12,7 +12,7 @@ export function glyphOf(char: string): number {
   return i === -1 ? 0 : ASCII + i;
 }
 
-export interface Atlas {
+interface Atlas {
   /** white glyphs on black, one cell per glyph */
   canvas: HTMLCanvasElement;
   /** ink coverage of each glyph, 0 to 255 */

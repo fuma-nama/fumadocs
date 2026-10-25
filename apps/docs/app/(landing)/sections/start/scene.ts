@@ -372,9 +372,9 @@ export interface Rect {
 
 const FOV = (30 * Math.PI) / 180;
 /** where the camera ends up, to the left of the terminal */
-export const YAW = -0.5;
+const YAW = -0.5;
 
-export function focalOf(height: number): number {
+function focalOf(height: number): number {
   return height / 2 / Math.tan(FOV / 2);
 }
 
@@ -392,7 +392,7 @@ export function insideView(width: number, height: number): View {
 }
 
 /** a world point in stage CSS px, with its distance along the view direction */
-export function project(
+function project(
   view: View,
   width: number,
   height: number,

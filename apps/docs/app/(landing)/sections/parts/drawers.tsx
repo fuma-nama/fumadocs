@@ -14,7 +14,7 @@ const shade =
   'bg-lp-ink [mask-image:var(--shade)] [mask-size:8px_8px] dark:[mask-image:var(--shade-dark)]';
 const shades = { '--shade': DITHER_MASKS[12], '--shade-dark': DITHER_MASKS[5] } as const;
 
-export interface BlockProps {
+interface BlockProps {
   swap: Swap;
   /** the page in Fumadocs UI, its code block highlighted on the server */
   page: ReactNode;
@@ -36,7 +36,7 @@ export function Block({ swap, page, snippets }: BlockProps) {
     const layer = DRAWERS[index];
     const option = layer === 'core' ? 0 : shown[layer as SwapLayer];
     let top: ReactNode = null;
-    if (layer === 'ui') top = <PageFace option={option} page={page} animate={swaps > 0} />;
+    if (layer === 'ui') top = <PageFace option={option} page={page} />;
     // a drawer's file only shows once it is out: mounted from its first pick on
     else if (layer !== 'core' && (swaps > 0 || picks[layer as SwapLayer] !== option))
       top = <Contents layer={layer as SwapLayer} option={option} snippets={snippets} />;
@@ -181,11 +181,9 @@ export const Front = memo(function Front({
 export const PageFace = memo(function PageFace({
   option,
   page,
-  animate,
 }: {
   option: number;
   page: ReactNode;
-  animate: boolean;
 }) {
   const { name, title } = optionsOf('ui')[option];
   // no UI package: your own UI on the core
@@ -194,7 +192,6 @@ export const PageFace = memo(function PageFace({
     <div className="relative grid">
       <Crossfade
         shown={headless ? 'headless' : 'page'}
-        animate={animate}
         render={(key) => (key === 'headless' ? <HeadlessPreview /> : page)}
       />
       {option > 0 && <Stamp key={name} label={title} value={name} />}

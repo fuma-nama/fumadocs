@@ -51,7 +51,7 @@ interface Drawer {
   hold: number;
 }
 
-export interface TrackOptions {
+interface TrackOptions {
   onBeat: (beat: number) => void;
   /** a drawer is out: the pick for its layer lands */
   onLand: (layer: SwapLayer, option: number) => void;
@@ -134,6 +134,8 @@ export function createTrack(root: HTMLElement, options: TrackOptions): Track {
   let beat = -1;
   let swapping = false;
   let measured = false;
+  /** the stage is hidden on small screens and with reduced motion: nothing to pin, nothing to draw */
+  let shown = false;
   let visible = false;
   let raf = 0;
   let last = 0;
@@ -155,8 +157,8 @@ export function createTrack(root: HTMLElement, options: TrackOptions): Track {
   }
 
   function layout() {
-    // the stage is hidden on small screens and with reduced motion: nothing to pin
-    if (root.offsetHeight === 0) return;
+    shown = root.offsetHeight > 0;
+    if (!shown) return;
     size.width = canvas.clientWidth;
     size.height = canvas.clientHeight;
     plan = planPose(size);
@@ -246,7 +248,7 @@ export function createTrack(root: HTMLElement, options: TrackOptions): Track {
       drawer.x = 0;
       drawer.hold = 0;
     }
-    render(true);
+    if (shown) render(true);
   }
 
   function frame(now: number) {
@@ -278,7 +280,7 @@ export function createTrack(root: HTMLElement, options: TrackOptions): Track {
   }
 
   function wake() {
-    if (raf !== 0 || !visible || root.offsetHeight === 0) return;
+    if (raf !== 0 || !visible || !shown) return;
     last = performance.now();
     raf = requestAnimationFrame(frame);
   }
@@ -294,6 +296,8 @@ export function createTrack(root: HTMLElement, options: TrackOptions): Track {
       window.scrollTo({ top: top - sticky + range, behavior: 'instant' });
   }
 
+  // the observer's first call lays the stage out once the page has its own layout, not while
+  // React commits
   const resize = new ResizeObserver(layout);
   const view = new IntersectionObserver(([entry]) => {
     visible = entry.isIntersecting;
@@ -309,14 +313,11 @@ export function createTrack(root: HTMLElement, options: TrackOptions): Track {
   view.observe(root);
   window.addEventListener('scroll', onScroll, { passive: true });
   for (const el of panel) el.addEventListener('focusin', onFocus);
-  // the observer's first call lays the stage out once the page has its own layout, not while
-  // React commits
 
   return {
     want(layer, option) {
-      const drawer = drawers.get(layer)!;
-      drawer.want = option;
-      if (visible && root.offsetHeight > 0) wake();
+      drawers.get(layer)!.want = option;
+      if (visible) wake();
       else settle();
     },
     reset(layer, option) {

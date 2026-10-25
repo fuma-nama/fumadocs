@@ -7,7 +7,6 @@ export const BEAT_AT = {
   satellites: 6,
   readout: 8,
   glitch: 9,
-  mark: 10,
   ready: 13,
 } as const;
 

@@ -10,7 +10,6 @@ import { Block } from './drawers';
 import {
   CodeWindow,
   Keys,
-  optionsOf,
   type Snippets,
   type Swap,
   type SwapActions,
@@ -19,7 +18,7 @@ import {
 import { Labels } from './labels';
 import { createTrack, HOLDS, type Track, TRACK } from './track';
 
-export interface StageProps {
+interface StageProps {
   swap: Swap;
   actions: SwapActions;
   /** the page in Fumadocs UI, its code block highlighted on the server */
@@ -43,9 +42,7 @@ export function Stage({ swap, actions, page, snippets }: StageProps) {
       const current = createTrack(element, {
         onBeat(next) {
           setBeat(next);
-          // the status follows the beat while the figure is the one in view
-          const box = element.getBoundingClientRect();
-          report(element, STATUS[next], box.top < innerHeight / 2 && box.bottom > innerHeight / 2);
+          report(element, STATUS[next]);
         },
         onLand: actions.land,
         onBack() {
@@ -63,9 +60,8 @@ export function Stage({ swap, actions, page, snippets }: StageProps) {
   );
 
   const pick = useCallback(
-    (layer: SwapLayer, option: number, from: Element) => {
+    (layer: SwapLayer, option: number) => {
       actions.pick(layer, option);
-      report(from, `${layer}: ${optionsOf(layer)[option].title}`);
       track.current?.want(layer, option);
     },
     [actions],
@@ -119,7 +115,6 @@ export function Stage({ swap, actions, page, snippets }: StageProps) {
               layer={swap.last}
               option={swap.shown[swap.last]}
               snippets={snippets}
-              animate={swap.swaps > 0}
               className="[&_pre]:w-full [&_pre]:wrap-anywhere [&_pre]:whitespace-pre-wrap"
             />
           </div>

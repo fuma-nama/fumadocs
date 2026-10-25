@@ -1,20 +1,14 @@
 'use client';
 import { memo, type ReactNode, useEffect, useLayoutEffect, useRef, useState } from 'react';
-import type { StaticImageData } from 'next/image';
 import { useReducedMotion } from 'motion/react';
 import { cn } from '@/lib/cn';
+import type { ShowcaseObject } from '@/lib/showcases';
 import { pad } from '../../lib/clock';
 import { BEAT, TICK } from '../../lib/motion';
 import { setStatus } from '../../lib/status';
 import { useIsClient } from '../../lib/use-is-client';
 import { Roller } from '../../ui/roller';
 import { level, print, show, SiteTile } from '../../ui/site-tile';
-
-export interface Site {
-  name: string;
-  url: string;
-  image: StaticImageData | string;
-}
 
 /** tiles on phones, the rest are on desktop only */
 const PHONE_TILES = 12;
@@ -59,7 +53,7 @@ function fit(name: string): string {
 }
 
 interface TileProps {
-  site: Site;
+  site: Required<ShowcaseObject>;
   index: number;
   /** the print run has started: names leave the title bars at once and roll back in */
   played: boolean;
@@ -124,7 +118,7 @@ export function Press({
   className,
   children,
 }: {
-  sites: Site[];
+  sites: Required<ShowcaseObject>[];
   className?: string;
   children: ReactNode;
 }) {
@@ -292,7 +286,7 @@ export function Press({
               site={site}
               index={i}
               played={live && phase !== 'rest'}
-              printable={live}
+              printable={printing}
               printed={!running || i < developed || peek === i}
               onPeek={setPeek}
             />

@@ -12,7 +12,6 @@ import { Plan } from './labels';
 import {
   CodeWindow,
   Keys,
-  optionsOf,
   type Snippets,
   type Swap,
   type SwapActions,
@@ -28,7 +27,7 @@ import {
   TreeItems,
 } from './preview';
 
-export interface ColumnProps {
+interface ColumnProps {
   swap: Swap;
   actions: SwapActions;
   /** the page's code block tabs, and the page they are in */
@@ -62,10 +61,9 @@ export function Column({ swap, actions, code, page, snippets }: ColumnProps) {
   }, []);
 
   const pick = useCallback(
-    (layer: SwapLayer, option: number, from: Element) => {
+    (layer: SwapLayer, option: number) => {
       actions.pick(layer, option);
       actions.land(layer, option);
-      report(from, `${layer}: ${optionsOf(layer)[option].title}`);
     },
     [actions],
   );
@@ -112,7 +110,7 @@ export function Column({ swap, actions, code, page, snippets }: ColumnProps) {
                 } as CSSProperties
               }
             >
-              <PageFace option={swap.shown.ui} page={page} animate={swap.swaps > 0} />
+              <PageFace option={swap.shown.ui} page={page} />
             </div>
           </div>
           {fronts}
@@ -124,7 +122,6 @@ export function Column({ swap, actions, code, page, snippets }: ColumnProps) {
           layer={swap.last}
           option={swap.shown[swap.last]}
           snippets={snippets}
-          animate={swap.swaps > 0}
           // long lines wrap on a phone instead of running out of the window
           className="[&_pre]:w-full [&_pre]:wrap-anywhere [&_pre]:whitespace-pre-wrap"
         />

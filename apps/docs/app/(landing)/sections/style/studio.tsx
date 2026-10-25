@@ -2,6 +2,7 @@
 import { useCallback, useRef, useState } from 'react';
 import { report } from '../../lib/status';
 import { Window } from '../../ui/window';
+import type { Hung } from './board';
 import { Convert } from './convert';
 import { type LayoutId, SHADCN_NOTE, type ThemeId } from './data';
 import type { InkTable, Wiring } from './presets';
@@ -9,18 +10,20 @@ import { Desk } from './desk';
 import { Dial } from './dial';
 import { Monitor } from './monitor';
 
-export interface StudioProps {
+interface StudioProps {
   table: InkTable;
   /** the variables of the convert window */
   names: string[];
   wirings: Record<ThemeId, { light: Wiring; dark: Wiring }>;
+  /** the desk's cables in its first pose, settled on the server */
+  hung: Hung;
 }
 
 /**
  * One layout and one theme on the live preview. The desk picks the layout and the dial the theme:
  * held under the pointer, clicked, tapped or keyed, a choice stays until the next one.
  */
-export function Studio({ table, names, wirings }: StudioProps) {
+export function Studio({ table, names, wirings, hung }: StudioProps) {
   const [layout, setLayout] = useState<LayoutId>('docs');
   const [theme, setTheme] = useState<ThemeId>('neutral');
   const [turning, setTurning] = useState(false);
@@ -42,7 +45,12 @@ export function Studio({ table, names, wirings }: StudioProps) {
       ref={root}
       className="grid gap-8 px-(--lp-gutter) lg:grid-cols-[340px_minmax(0,1fr)] xl:grid-cols-[440px_minmax(0,1fr)]"
     >
-      <Desk selected={layout} onSelect={selectLayout} className="lg:col-start-1 lg:row-start-1" />
+      <Desk
+        selected={layout}
+        hung={hung}
+        onSelect={selectLayout}
+        className="lg:col-start-1 lg:row-start-1"
+      />
       <Monitor
         table={table}
         layout={layout}
