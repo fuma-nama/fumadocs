@@ -79,7 +79,8 @@ export function Stage({ header, page, headless, snippets }: StageProps) {
   }
 
   return (
-    <div ref={ref} className="parts-pin">
+    // the figure takes focus when the panel goes from under it
+    <div ref={ref} tabIndex={-1} className="parts-pin outline-none">
       <div className="parts-stage">
         <div data-head className="parts-head @container">
           {header}

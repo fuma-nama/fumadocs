@@ -140,12 +140,6 @@
   .parts-pin:not([data-flat]) .parts-panel:not([data-shown]) {
     pointer-events: none;
   }
-
-  /* shown, they stand in front of the stack when the reader scrolls back under them */
-  .parts-pin:not([data-flat]) .parts-head[data-shown],
-  .parts-pin:not([data-flat]) .parts-panel[data-shown] {
-    background: var(--lp-paper);
-  }
 }
 
 /* the canvas pins across the sheet, the header and the panel pass over its right part */
@@ -185,7 +179,6 @@
     order: 1;
     position: relative;
     z-index: 1;
-    background: var(--lp-paper);
     align-self: flex-end;
     width: calc((100% - 2 * var(--lp-gutter) - 48px) * 5 / 12);
     margin-right: var(--lp-gutter);

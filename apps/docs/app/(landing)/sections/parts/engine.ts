@@ -31,9 +31,6 @@ const PULL = 0.2;
 const HOLD = 8 * TICK;
 /** how long the camera stays still before the faces raster again at their own scale, ms */
 const STILL = 150;
-/** once in, the header and the panel only leave near the page straight on: below these parts of the run */
-const HEAD_LEAVES = 0.08;
-const PANEL_LEAVES = 0.15;
 const UNIFORM_MIN = ['uMin[0]', 'uMin[1]', 'uMin[2]', 'uMin[3]'];
 const UNIFORM_MAX = ['uMax[0]', 'uMax[1]', 'uMax[2]', 'uMax[3]'];
 
@@ -90,13 +87,14 @@ export function createStack(root: HTMLElement, { onLand }: StackOptions): StackE
   const trays = new Map<SwapLayer, Tray>();
   for (const layer of SWAPS) trays.set(layer, { want: 0, shown: 0, out: 0, unlatch: 0, hold: 0 });
 
-  function settle() {
+  /** every pick lands now; `stow` puts the trays in at once, else they ease back in */
+  function settle(stow = true) {
     for (const [layer, tray] of trays) {
       if (tray.want !== tray.shown) {
         tray.shown = tray.want;
         onLand(layer, tray.shown);
       }
-      tray.out = 0;
+      if (stow) tray.out = 0;
       tray.hold = 0;
     }
   }
@@ -169,9 +167,6 @@ export function createStack(root: HTMLElement, { onLand }: StackOptions): StackE
   let instant = true;
   /** the stack is on the screen: a pick plays */
   let seen = false;
-  /** the reader is in the panel: it stays */
-  let pointerIn = false;
-  let focusIn = false;
 
   function colours() {
     const style = getComputedStyle(document.documentElement);
@@ -248,16 +243,25 @@ export function createStack(root: HTMLElement, { onLand }: StackOptions): StackE
     // canvas until the header has risen into it, or the code window reaches the band's foot
     runFrom = root.getBoundingClientRect().top + scroll - menu;
     if (mode === 'stage') runTo = runFrom + spacer.offsetHeight;
-    else if (mode === 'column') runTo = runFrom + 1.2 * height;
-    else runTo = code.getBoundingClientRect().top + scroll - menu - height;
+    else if (mode === 'column') {
+      // the header and the panel scroll in over the canvas' right part after their spacer: the run is
+      // as long as makes them arrive just as the stack has left that part, so they never cross it
+      let clear = 0;
+      for (let i = 100; i >= 0 && clear === 0; i--) {
+        const box = stackBox(aimAt(i / 100));
+        if (panelLeft - (box.x + box.w) < 24) clear = Math.min(1, (i + 1) / 100);
+      }
+      runTo = runFrom + spacer.offsetHeight / Math.max(clear, 0.3);
+    } else runTo = code.getBoundingClientRect().top + scroll - menu - height;
     shader!.set('uCell', 2);
     shader!.set('uPost', [W / 2 - 0.05 * W, D / 2 - 0.07 * D, Math.max(3, 0.006 * W)]);
     shader!.set('uLight', [LIGHT[0] / length, LIGHT[1] / length, LIGHT[2] / length]);
-    // the floor stops short of the panel's column, where the header and the panel stand
+    // the floor stops short of where the header and the panel stand
+    const stage = mode === 'stage';
     shader!.set('uFloor', [
       0,
-      0,
-      mode === 'stage' || mode === 'column' ? panelLeft - 12 : width,
+      stage ? headFoot + 12 : 0,
+      stage || mode === 'column' ? panelLeft - 12 : width,
       height,
     ]);
     // on the stage they wait for the camera, which the frame below decides at once
@@ -273,6 +277,27 @@ export function createStack(root: HTMLElement, { onLand }: StackOptions): StackE
     target =
       mode === 'still' ? 1 : clamp((window.scrollY - runFrom) / Math.max(1, runTo - runFrom));
     shader!.invalidate();
+  }
+
+  /** the camera at `p` of the run into `cam`; returns how far the layers have parted */
+  function aimAt(p: number): number {
+    const dolly = 1 - (1 - clamp(p / 0.6)) ** 1.6;
+    const tilt = easeTilt(clamp(p / 0.7));
+    const swing = easeCamera(clamp((p - 0.05) / 0.55));
+    viewAt(view, from, to, dolly, tilt, swing);
+    aim(cam, view, width, height);
+    return easeCamera(clamp((p - 0.4) / 0.4));
+  }
+
+  /** the stack's box on the canvas with its layers parted by `part`, no tray out */
+  function stackBox(part: number) {
+    lo[0] = -W / 2;
+    lo[1] = 0;
+    lo[2] = -D / 2;
+    hi[0] = W / 2;
+    hi[1] = 4 * T + 3 * GAP * T * part;
+    hi[2] = D / 2;
+    return boundsOf(cam, lo, hi);
   }
 
   /**
@@ -318,7 +343,6 @@ export function createStack(root: HTMLElement, { onLand }: StackOptions): StackE
     if (Math.abs(target - progress) < 1e-4) progress = target;
     else moving = true;
 
-    let picking = false;
     for (const [layer, tray] of trays) {
       const swapping = tray.want !== tray.shown;
       const out = swapping || now < tray.hold;
@@ -332,16 +356,10 @@ export function createStack(root: HTMLElement, { onLand }: StackOptions): StackE
       }
       const front = fronts[LAYERS.indexOf(layer)];
       if (out !== front.hasAttribute('data-open')) front.toggleAttribute('data-open', out);
-      if (out || tray.out > 0) picking = true;
       if (out || tray.out !== goal) moving = true;
     }
 
-    const dolly = 1 - (1 - clamp(progress / 0.6)) ** 1.6;
-    const tilt = easeTilt(clamp(progress / 0.7));
-    const swing = easeCamera(clamp((progress - 0.05) / 0.55));
-    const part = easeCamera(clamp((progress - 0.4) / 0.4));
-    viewAt(view, from, to, dolly, tilt, swing);
-    aim(cam, view, width, height);
+    const part = aimAt(progress);
     shader!.set('uEye', cam.eye);
     shader!.set('uRight', cam.right);
     shader!.set('uUp', cam.up);
@@ -414,17 +432,22 @@ export function createStack(root: HTMLElement, { onLand }: StackOptions): StackE
       }, STILL);
     }
 
-    // the header and the panel come in as soon as the camera has cleared their place, and stay:
-    // they leave only near the page straight on, the panel never while the reader is in it or a
-    // tray is out
+    // the header and the panel hold the room the camera has cleared, both ways of the scroll: each
+    // comes in once the stack leaves its place and goes before the stack would reach it, 16 to 24px
+    // apart so it never flickers. A pick still on its way lands as the panel goes, and focus in the
+    // panel moves to the figure.
     if (mode === 'stage') {
-      hi[2] = D / 2;
-      const box = boundsOf(cam, lo, hi);
-      if (!headShown && box.y >= headFoot + 16) show(head, headItems, true);
-      else if (headShown && progress < HEAD_LEAVES) show(head, headItems, false);
-      if (!panelShown && box.x + box.w <= panelLeft - 24) show(panel, panelItems, true);
-      else if (panelShown && progress < PANEL_LEAVES && !pointerIn && !focusIn && !picking)
-        show(panel, panelItems, false);
+      const box = stackBox(part);
+      const headRoom = box.y - headFoot;
+      const panelRoom = panelLeft - (box.x + box.w);
+      if (headShown ? headRoom < 0 : headRoom >= 16) show(head, headItems, !headShown);
+      if (panelShown ? panelRoom < 0 : panelRoom >= 24) {
+        if (panelShown) {
+          settle(false);
+          if (panel.contains(document.activeElement)) root.focus({ preventScroll: true });
+        }
+        show(panel, panelItems, !panelShown);
+      }
     }
     instant = false;
     if (moving) shader!.invalidate();
@@ -510,38 +533,29 @@ export function createStack(root: HTMLElement, { onLand }: StackOptions): StackE
   }
 
   function onFocusIn() {
-    focusIn = true;
     // keyboard focus reaches the panel before the camera has cleared it: finish the move first
     if (mode === 'stage' && !panelShown) window.scrollTo({ top: runTo, behavior: 'instant' });
-  }
-
-  function onFocusOut(event: FocusEvent) {
-    focusIn = panel.contains(event.relatedTarget as Node | null);
-    shader!.invalidate();
-  }
-
-  function onPointer(event: PointerEvent) {
-    pointerIn = event.type === 'pointerenter';
-    shader!.invalidate();
   }
 
   const resize = new ResizeObserver(measure);
   const visibility = new IntersectionObserver(([entry]) => {
     seen = entry.isIntersecting;
-    if (!seen) settle();
+    if (!seen) return settle();
+    // frames stop off screen: coming back, the camera takes the pose the scroll has it in at once
+    // rather than catching up through the states between
+    scrolled();
+    progress = target;
   });
   const stopTheme = onTheme(colours);
   resize.observe(cell);
   resize.observe(root);
+  resize.observe(document.documentElement);
   visibility.observe(cell);
   window.addEventListener('scroll', scrolled, { passive: true });
   full.addEventListener('change', measure);
   wide.addEventListener('change', measure);
   reduce.addEventListener('change', measure);
   panel.addEventListener('focusin', onFocusIn);
-  panel.addEventListener('focusout', onFocusOut);
-  panel.addEventListener('pointerenter', onPointer);
-  panel.addEventListener('pointerleave', onPointer);
   colours();
   measure();
 
@@ -557,9 +571,6 @@ export function createStack(root: HTMLElement, { onLand }: StackOptions): StackE
       wide.removeEventListener('change', measure);
       reduce.removeEventListener('change', measure);
       panel.removeEventListener('focusin', onFocusIn);
-      panel.removeEventListener('focusout', onFocusOut);
-      panel.removeEventListener('pointerenter', onPointer);
-      panel.removeEventListener('pointerleave', onPointer);
       shader.destroy();
     },
   };
