@@ -4,6 +4,7 @@ import type { ReactElement } from 'react';
 import { removeUndefined } from '@/utils/remove-undefined';
 import { lucideIconsPlugin } from '@/source/plugins/lucide-icons';
 import { slugsFromData } from '@/source/plugins/slugs';
+import { deserializePageTree } from '@/source/client';
 
 test('get slugs', () => {
   expect(getSlugs('index.mdx')).toStrictEqual([]);
@@ -750,6 +751,11 @@ test('Loader: Serialize data', async () => {
   `);
 
   expect(JSON.stringify(result.pageTree), 'page tree unchanged').toBe(prev);
+
+  const serialized = await result.serializePageTree(result.pageTree);
+  const json = JSON.stringify(serialized);
+  expect(typeof deserializePageTree(serialized).children[0].name).toBe('object');
+  expect(JSON.stringify(serialized), 'serialized tree unchanged').toBe(json);
 });
 
 test('Loader: configureStatic is called with the loader output', () => {

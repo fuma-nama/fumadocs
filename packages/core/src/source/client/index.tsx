@@ -12,8 +12,10 @@ export type Serialized<Data> = {
 };
 
 export function deserializePageTree(serialized: SerializedPageTree): PageTree.Root {
-  const root = serialized.data as PageTree.Root;
-  visit(root, (item) => {
+  // copy nodes, callers may still read the serialized tree
+  return visit(serialized.data as PageTree.Root, (item) => {
+    item = { ...item };
+    if ('children' in item) item.children = [...item.children];
     if ('icon' in item && typeof item.icon === 'string') {
       item.icon = (
         <span
@@ -33,9 +35,8 @@ export function deserializePageTree(serialized: SerializedPageTree): PageTree.Ro
         />
       );
     }
+    return item;
   });
-
-  return root;
 }
 
 /**

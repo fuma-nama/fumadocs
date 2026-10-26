@@ -1,4 +1,4 @@
-import type { I18nInfo, ReactFramework } from '@/project';
+import type { Framework, I18nInfo } from '@/project';
 
 export type RouteSegment =
   /** static path, can contain multiple segments like `/llms.mdx/docs` */
@@ -34,7 +34,10 @@ interface Convention {
   path: (segments: string[]) => string;
 }
 
-const conventions: Record<ReactFramework, Convention> = {
+const restParam: Convention['param'] = (name, catchAll, _optional, suffix) =>
+  catchAll ? `[...${name}]${suffix ? `/${suffix}` : ''}` : `[${name}]`;
+
+const conventions: Record<Framework, Convention> = {
   next: {
     locale: () => '[lang]',
     param: (name, catchAll, optional) =>
@@ -58,21 +61,28 @@ const conventions: Record<ReactFramework, Convention> = {
   },
   waku: {
     locale: () => '[lang]',
-    param: (name, catchAll, _optional, suffix) =>
-      catchAll ? `[...${name}]${suffix ? `/${suffix}` : ''}` : `[${name}]`,
+    param: restParam,
     file: (segments, ext) => `pages/_api/${segments.join('/')}.${ext}`,
+    path: (segments) => `/${segments.join('/')}`,
+  },
+  astro: {
+    // the rest parameter is `undefined` for the default locale
+    locale: (optional) => (optional ? '[...lang]' : '[lang]'),
+    param: restParam,
+    // endpoints can't be `.tsx`
+    file: (segments) => `pages/${segments.join('/')}.ts`,
     path: (segments) => `/${segments.join('/')}`,
   },
 };
 
 /** the locale segment of route files, with a trailing slash */
-export function localeSegment(framework: ReactFramework, i18n: I18nInfo | null) {
+export function localeSegment(framework: Framework, i18n: I18nInfo | null) {
   return i18n ? `${conventions[framework].locale(i18n.optionalLocale)}/` : '';
 }
 
 export function formatRoute(
   route: RouteDescriptor,
-  framework: ReactFramework,
+  framework: Framework,
   i18n: I18nInfo | null,
   ext = 'ts',
 ): FormattedRoute {
@@ -116,19 +126,26 @@ export interface RouteModule {
   methods?: string[];
   /** Next.js: never revalidate the route */
   revalidate?: boolean;
-  /** Waku: prerender the route */
+  /** Waku & Astro: prerender the route */
   static?: boolean;
 }
 
 /** the route module of a handler that only reads the request, per framework */
-export function routeModule(
-  framework: ReactFramework,
-  route: FormattedRoute,
-  mod: RouteModule,
-): string {
+export function routeModule(framework: Framework, route: FormattedRoute, mod: RouteModule): string {
   const { imports, body, request, methods = ['GET'], revalidate, static: isStatic } = mod;
   const arg = request ? 'request: Request' : '';
   const head = `${imports.trim()}\n\n`;
+
+  if (framework === 'astro') {
+    const out: string[] = [];
+    if (isStatic) out.push('export const prerender = true;\n');
+    for (const method of methods)
+      out.push(
+        `export const ${method}: APIRoute = async (${request ? '{ request }' : ''}) => ${body};\n`,
+      );
+
+    return `import type { APIRoute } from 'astro';\n${head}${out.join('\n')}`;
+  }
 
   if (framework === 'react-router') {
     const out: string[] = [];
@@ -179,6 +196,51 @@ ${out.join('\n')}
 `;
   }
 }
+
+/**
+ * `getStaticPaths()` of an Astro route per docs page, also prerendered with `output: 'server'`.
+ * With i18n, the route is under the locale segment, and reads `i18n` of `@/lib/i18n` for an optional locale.
+ */
+export function astroPagePaths(i18n: I18nInfo | null) {
+  const prerender = 'export const prerender = true;\n\n';
+  if (!i18n)
+    return `${prerender}export const getStaticPaths = (() => {
+  return source.getPages().map((page) => ({
+    params: { slug: page.slugs.join('/') || undefined },
+    props: { page },
+  }));
+}) satisfies GetStaticPaths;`;
+
+  return `${prerender}export const getStaticPaths = (() => {
+  const paths = [];
+  for (const { language, pages } of source.getLanguages()) {
+    for (const page of pages) {
+      paths.push({
+        params: {
+          ${i18n.optionalLocale ? '// the default language has no prefix\n          lang: language === i18n.defaultLanguage ? undefined : language' : 'lang: language'},
+          slug: page.slugs.join('/') || undefined,
+        },
+        props: { lang: language, page },
+      });
+    }
+  }
+  return paths;
+}) satisfies GetStaticPaths;`;
+}
+
+/** an Astro endpoint per docs page, `body` is the response of `page` */
+export const astroPageRoute = (i18n: I18nInfo | null, imports: string, body: string) =>
+  `import type { APIRoute, GetStaticPaths, InferGetStaticPropsType } from 'astro';
+${imports.trim()}
+${i18n?.optionalLocale ? "import { i18n } from '@/lib/i18n';\n" : ''}
+${astroPagePaths(i18n)}
+
+export const GET: APIRoute<InferGetStaticPropsType<typeof getStaticPaths>> = async ({
+  props: { page },
+}) => {
+  return ${body};
+};
+`;
 
 /** import of the generated types of a React Router route module */
 export const reactRouterTypes = (route: FormattedRoute) =>

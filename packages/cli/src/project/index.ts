@@ -7,8 +7,6 @@ import { exists } from '@/utils/fs';
 export type PackageManager = NonNullable<Awaited<ReturnType<typeof detectPackageManager>>>['name'];
 
 export type Framework = 'next' | 'react-router' | 'tanstack-start' | 'waku' | 'astro';
-/** frameworks supported by features that generate routes */
-export type ReactFramework = Exclude<Framework, 'astro'>;
 
 export interface FrameworkInfo {
   /** import specifier of `RootProvider` */
@@ -54,7 +52,8 @@ export const frameworks: Record<Framework, FrameworkInfo> = {
     provider: 'fumadocs-ui/provider/astro',
     rootFile: 'layouts/Layout.astro',
     routesDir: 'pages',
-    configFiles: ['astro.config.mjs', 'astro.config.ts'],
+    configFiles: ['astro.config.mjs', 'astro.config.ts', 'astro.config.js', 'astro.config.mts'],
+    isStatic: (config) => !/output:\s*['"]server['"]/.test(config),
   },
 };
 
@@ -64,7 +63,7 @@ export interface SourceInfo {
   loader: boolean;
   /** `lib/source.ts` exports `getSource()`, a runtime content source resolved on demand */
   dynamic: boolean;
-  /** file defining the Fumadocs MDX collections, relative to cwd: `lib/source.ts` (macro) or `source.config.ts`; `null` for other content sources */
+  /** file configuring the collections, relative to cwd: `lib/source.ts` (Fumadocs MDX macro), `source.config.ts` or the Astro config; `null` for other content sources */
   collections: string | null;
   /** collections are loaded lazily, `structuredData` is a function */
   async: boolean;
@@ -133,8 +132,8 @@ export async function loadProject(
       .readFile(path.join(cwd, 'react-router.config.ts'), 'utf-8')
       .catch(() => '');
     isStatic = /ssr:\s*false/.test(content);
-  } else if (configContent && info.isStatic) {
-    isStatic = info.isStatic(configContent);
+  } else if (info.isStatic) {
+    isStatic = info.isStatic(configContent ?? '');
   }
 
   const read = (file: string) => fs.readFile(path.join(cwd, file), 'utf-8').catch(() => null);
@@ -154,7 +153,7 @@ export async function loadProject(
     config,
     configFile,
     packageJson,
-    source: await detectSource(cwd, config.baseDir, read),
+    source: await detectSource(cwd, config.baseDir, read, configFile, configContent),
   };
 }
 
@@ -162,13 +161,20 @@ async function detectSource(
   cwd: string,
   baseDir: string,
   read: (file: string) => Promise<string | null>,
+  configFile?: string,
+  configContent?: string,
 ): Promise<SourceInfo> {
   const sourceFile = path.join(baseDir, 'lib/source.ts');
   const source = (await read(sourceFile)) ?? '';
   let collections: string | null = null;
   let content = source;
+  const astro = source.includes('@fumadocs/astro/source');
   if (source.includes('defineDocs(')) {
     collections = sourceFile;
+  } else if (astro) {
+    // the options of `fumadocs()` in Astro config
+    collections = configFile ?? null;
+    content = configContent ?? '';
   } else if (await exists(path.join(cwd, 'source.config.ts'))) {
     collections = 'source.config.ts';
     content = (await read(collections)) ?? '';
@@ -186,7 +192,8 @@ async function detectSource(
     loader: /export const source\b/.test(source),
     dynamic: /export (async )?function getSource\b/.test(source),
     collections,
-    async: /async:\s*true/.test(content),
+    // pages of Astro collections load their data on demand
+    async: astro || /async:\s*true/.test(content),
     baseUrl: baseUrl ?? '/docs',
     dir: /dir:\s*['"]([^'"]*)['"]/.exec(content)?.[1] ?? 'content/docs',
   };

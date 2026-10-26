@@ -13,9 +13,9 @@ npx @fumadocs/cli@latest add changelog
 
 ## Usage
 
-Fetch a page of entries, render them with `ChangelogTimeline`, and link to the other pages with `ChangelogPagination`:
+Create a page under your [Home Layout](/docs/ui/layouts/home-layout). Fetch a page of entries, render them with `ChangelogTimeline`, and link to the other pages with `ChangelogPagination`:
 
-```tsx tab="Next.js" title="app/changelog/[[...page]]/page.tsx"
+```tsx tab="Next.js" title="app/(home)/changelog/[[...page]]/page.tsx"
 import { notFound } from 'next/navigation';
 import { githubReleases } from '@fumadocs/changelog/github';
 import { ChangelogPagination, ChangelogTimeline } from '@/components/changelog';
@@ -34,20 +34,22 @@ export default async function Page(props: PageProps<'/changelog/[[...page]]'>) {
   if (entries.length === 0) notFound();
 
   return (
-    <>
+    <div className="mx-auto flex w-full max-w-[900px] flex-col gap-10 px-4 py-12">
       <ChangelogTimeline entries={entries} />
       <ChangelogPagination
         newer={page > 1 ? `/changelog/${page - 1}` : undefined}
         older={nextPage ? `/changelog/${nextPage}` : undefined}
       />
-    </>
+    </div>
   );
 }
 ```
 
 ```tsx tab="React Router" title="app/routes/changelog.tsx"
 import type { Route } from './+types/changelog';
+import { HomeLayout } from 'fumadocs-ui/layouts/home';
 import { githubReleases } from '@fumadocs/changelog/github';
+import { baseOptions } from '@/lib/layout.shared';
 import { ChangelogPagination, ChangelogTimeline } from '@/components/changelog';
 
 export async function loader({ params }: Route.LoaderArgs) {
@@ -67,13 +69,15 @@ export default function Page({ loaderData }: Route.ComponentProps) {
   const { page, entries, nextPage } = loaderData;
 
   return (
-    <>
-      <ChangelogTimeline entries={entries} />
-      <ChangelogPagination
-        newer={page > 1 ? `/changelog/${page - 1}` : undefined}
-        older={nextPage ? `/changelog/${nextPage}` : undefined}
-      />
-    </>
+    <HomeLayout {...baseOptions()}>
+      <div className="mx-auto flex w-full max-w-[900px] flex-col gap-10 px-4 py-12">
+        <ChangelogTimeline entries={entries} />
+        <ChangelogPagination
+          newer={page > 1 ? `/changelog/${page - 1}` : undefined}
+          older={nextPage ? `/changelog/${nextPage}` : undefined}
+        />
+      </div>
+    </HomeLayout>
   );
 }
 ```
@@ -90,7 +94,9 @@ export default [
 ```tsx tab="Tanstack Start" title="src/routes/changelog.{-$page}.tsx"
 import { createFileRoute, notFound } from '@tanstack/react-router';
 import { createServerFn } from '@tanstack/react-start';
+import { HomeLayout } from 'fumadocs-ui/layouts/home';
 import { githubReleases } from '@fumadocs/changelog/github';
+import { baseOptions } from '@/lib/layout.shared';
 import { ChangelogPagination, ChangelogTimeline } from '@/components/changelog';
 
 const getReleases = createServerFn({ method: 'GET' })
@@ -119,13 +125,15 @@ function Page() {
   const { page, entries, nextPage } = Route.useLoaderData();
 
   return (
-    <>
-      <ChangelogTimeline entries={entries} />
-      <ChangelogPagination
-        newer={page > 1 ? `/changelog/${page - 1}` : undefined}
-        older={nextPage ? `/changelog/${nextPage}` : undefined}
-      />
-    </>
+    <HomeLayout {...baseOptions()}>
+      <div className="mx-auto flex w-full max-w-[900px] flex-col gap-10 px-4 py-12">
+        <ChangelogTimeline entries={entries} />
+        <ChangelogPagination
+          newer={page > 1 ? `/changelog/${page - 1}` : undefined}
+          older={nextPage ? `/changelog/${nextPage}` : undefined}
+        />
+      </div>
+    </HomeLayout>
   );
 }
 ```
@@ -153,7 +161,7 @@ Entries are plain objects, create them from any source:
 
 For example, a collection of MDX files. Pass `body` to render the content yourself:
 
-```tsx title="app/changelog/page.tsx"
+```tsx title="app/(home)/changelog/page.tsx"
 import { changelogSource } from '@/lib/source';
 import { getMDXComponents } from '@/components/mdx';
 import { ChangelogTimeline, type ChangelogTimelineEntry } from '@/components/changelog';
@@ -170,6 +178,10 @@ export default function Page() {
     };
   });
 
-  return <ChangelogTimeline entries={entries} />;
+  return (
+    <div className="mx-auto w-full max-w-[900px] px-4 py-12">
+      <ChangelogTimeline entries={entries} />
+    </div>
+  );
 }
 ```

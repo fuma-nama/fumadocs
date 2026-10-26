@@ -1,0 +1,29 @@
+---
+import type { GetStaticPaths, InferGetStaticPropsType } from 'astro';
+import Layout from '@/layouts/Layout.astro';
+import { App } from '@/components/app';
+import { i18n } from '@/lib/i18n';
+
+export const getStaticPaths = (() => {
+  return i18n.languages.map((lang) => ({
+    // the default language has no prefix
+    params: { lang: lang === i18n.defaultLanguage ? undefined : lang },
+    props: { lang },
+  }));
+}) satisfies GetStaticPaths;
+
+type Props = InferGetStaticPropsType<typeof getStaticPaths>;
+
+const { lang } = Astro.props;
+---
+
+<Layout lang={lang} title="Fumadocs on Astro">
+  <App
+    client:load
+    transition:persist="app"
+    page="home"
+    lang={lang}
+    pathname={Astro.url.pathname}
+    params={Astro.params}
+  />
+</Layout>

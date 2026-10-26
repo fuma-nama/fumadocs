@@ -1,4 +1,4 @@
-import epub, { type Options } from 'epub-gen-memory';
+import { EPub, type Options } from 'epub-gen-memory';
 import path from 'node:path';
 import { pathToFileURL } from 'node:url';
 import type { LoaderConfig, Page } from 'fumadocs-core/source';
@@ -190,7 +190,8 @@ export async function exportEpub<C extends LoaderConfig>(
     content: ch.content,
   }));
 
-  const buffer = await epub(epubOptions, content);
+  // the named export, Node.js gives `module.exports` as the default export of CommonJS
+  const buffer = await new EPub(epubOptions, content).genEpub();
 
   if (outputPath) {
     const fs = await import('node:fs/promises');

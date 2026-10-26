@@ -23,10 +23,10 @@ async function readPackageJson(cwd: string): Promise<PackageJson | null> {
   }
 }
 
-/** Path of pre-rendered EPUB, choose one according to your React framework. Next.js fetches from the running server instead. */
+/** Path of pre-rendered EPUB, choose one according to your React framework. Next.js and Astro fetch from the running server instead. */
 const EPUB_BUILD_PATHS: Record<string, string> = {
   next: '', // Fetched from /export/epub at runtime; route handlers don't produce static files
-  astro: 'dist/export/epub',
+  astro: '', // the route renders on demand
   'tanstack-start': '.output/public/export/epub',
   'tanstack-start-spa': 'dist/client/export/epub',
   'react-router': 'build/client/export/epub',
@@ -78,15 +78,15 @@ export async function exportEpub(options: { output?: string; framework: string }
     }
   }
 
-  if (framework === 'next') {
+  if (!buildPath) {
     const secret = process.env.EXPORT_SECRET;
     if (!secret) {
       console.error(
-        picocolors.red('EXPORT_SECRET is required for Next.js export. Set it in your environment.'),
+        picocolors.red('EXPORT_SECRET is required to fetch the EPUB. Set it in your environment.'),
       );
       process.exit(1);
     }
-    const port = process.env.PORT || '3000';
+    const port = process.env.PORT || (framework === 'astro' ? '4321' : '3000');
     const url = `http://localhost:${port}/export/epub`;
     spin.start('Fetching EPUB from server');
     const controller = new AbortController();
