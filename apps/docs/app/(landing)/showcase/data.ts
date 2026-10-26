@@ -1,4 +1,4 @@
-import { showcases, vercel } from '@/lib/showcases';
+import { type ShowcaseObject, showcases, vercel } from '@/lib/showcases';
 
 export const suggest = 'https://github.com/fuma-nama/fumadocs/discussions/30';
 
@@ -35,3 +35,16 @@ export const kinds: Record<string, string> = {
   'https://flags-sdk.dev': 'feature flags',
   'https://chat-sdk.dev': 'chat bots',
 };
+
+/** the wall's order: the featured with a screenshot, every other site with one, then the rest */
+export function arrange(sites: ShowcaseObject[]) {
+  const featured: Required<ShowcaseObject>[] = [];
+  const shots: Required<ShowcaseObject>[] = [];
+  const blank: ShowcaseObject[] = [];
+  for (const site of sites) {
+    if (!site.image) blank.push(site);
+    else if (kinds[site.url]) featured.push({ ...site, image: site.image });
+    else shots.push({ ...site, image: site.image });
+  }
+  return { featured, shots, blank };
+}

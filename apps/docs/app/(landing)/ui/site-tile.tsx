@@ -3,38 +3,26 @@ import Image from 'next/image';
 import { cn } from '@/lib/cn';
 import type { ShowcaseObject } from '@/lib/showcases';
 import { BAYER4 } from '../lib/bayer';
+import { isDark } from '../lib/theme';
 
 /** size of a printed dot in CSS px */
 const DOT = 2;
 /** steps of a dither crossfade, each one adds two of the 16 Bayer levels */
 const STEPS = 8;
 
-interface Print {
-  /** the 1-bit print in the theme's ink and paper */
-  full: ImageData;
-  /** what the canvas shows: the print where the Bayer threshold is under `level` */
-  shown: ImageData;
-  /** 0 to 16 */
-  level: number;
-}
-
-const prints = new WeakMap<HTMLCanvasElement, Print>();
-
-/** prints the screenshot as an ordered 4x4 dither in the theme's ink and paper, once */
-export function print(canvas: HTMLCanvasElement, image: HTMLImageElement) {
-  const box = canvas.parentElement!;
-  if (box.clientWidth === 0 || image.naturalWidth === 0) return;
-  const cols = Math.ceil(box.clientWidth / DOT);
-  const rows = Math.ceil(box.clientHeight / DOT);
-  canvas.width = cols;
-  canvas.height = rows;
-  // exact dot sizes, the box clips the last partial dot
-  canvas.style.width = `${cols * DOT}px`;
-  canvas.style.height = `${rows * DOT}px`;
-
+/**
+ * Prints the screenshot on the canvas at its size, a dot a pixel: object-cover and centred like the
+ * <img>, an ordered 4x4 dither in the theme's ink and paper.
+ */
+export function printDots(
+  canvas: HTMLCanvasElement,
+  image: HTMLImageElement,
+): CanvasRenderingContext2D {
+  const cols = canvas.width;
+  const rows = canvas.height;
   const ctx = canvas.getContext('2d', { willReadFrequently: true })!;
-  // object-cover, centred, like the <img>; the whole image goes in, a source rectangle would be in
-  // bitmap pixels while `naturalWidth` of a `srcset` image is density-corrected
+  // the whole image goes in, a source rectangle would be in bitmap pixels while `naturalWidth` of
+  // a `srcset` image is density-corrected
   const scale = Math.max(cols / image.naturalWidth, rows / image.naturalHeight);
   const width = image.naturalWidth * scale;
   const height = image.naturalHeight * scale;
@@ -55,7 +43,7 @@ export function print(canvas: HTMLCanvasElement, image: HTMLImageElement) {
   const style = getComputedStyle(canvas);
   const ink = style.getPropertyValue('--lp-ink').trim();
   const paper = style.getPropertyValue('--lp-paper').trim();
-  const dark = document.documentElement.classList.contains('dark');
+  const dark = isDark();
   ctx.globalCompositeOperation = 'source-in';
   ctx.fillStyle = dark ? paper : ink;
   ctx.fillRect(0, 0, cols, rows);
@@ -63,7 +51,33 @@ export function print(canvas: HTMLCanvasElement, image: HTMLImageElement) {
   ctx.fillStyle = dark ? ink : paper;
   ctx.fillRect(0, 0, cols, rows);
   ctx.globalCompositeOperation = 'source-over';
+  return ctx;
+}
 
+interface Print {
+  /** the 1-bit print in the theme's ink and paper */
+  full: ImageData;
+  /** what the canvas shows: the print where the Bayer threshold is under `level` */
+  shown: ImageData;
+  /** 0 to 16 */
+  level: number;
+}
+
+const prints = new WeakMap<HTMLCanvasElement, Print>();
+
+/** prints the screenshot in 2px dots over the box it covers, once */
+export function print(canvas: HTMLCanvasElement, image: HTMLImageElement) {
+  const box = canvas.parentElement!;
+  if (box.clientWidth === 0 || image.naturalWidth === 0) return;
+  const cols = Math.ceil(box.clientWidth / DOT);
+  const rows = Math.ceil(box.clientHeight / DOT);
+  canvas.width = cols;
+  canvas.height = rows;
+  // exact dot sizes, the box clips the last partial dot
+  canvas.style.width = `${cols * DOT}px`;
+  canvas.style.height = `${rows * DOT}px`;
+
+  const ctx = printDots(canvas, image);
   const full = ctx.getImageData(0, 0, cols, rows);
   const shown = new ImageData(new Uint8ClampedArray(full.data), cols, rows);
   const level = prints.get(canvas)?.level ?? 16;
@@ -111,8 +125,6 @@ interface SiteTileProps extends Omit<ComponentProps<'a'>, 'href' | 'children'> {
   printed?: boolean;
   /** a canvas over the screenshot for its 1-bit print, see `print()` */
   printable?: boolean;
-  /** under the screenshot, like a window's status bar */
-  children?: ReactNode;
 }
 
 /**
@@ -127,7 +139,6 @@ export function SiteTile({
   printed = true,
   printable = false,
   className,
-  children,
   ...props
 }: SiteTileProps) {
   const box = cn(
@@ -185,7 +196,6 @@ export function SiteTile({
           </span>
         </span>
       )}
-      {children}
     </a>
   );
 }

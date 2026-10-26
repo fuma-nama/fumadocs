@@ -36,7 +36,11 @@ export const Keys = memo(function Keys({ picks, onPick }: { picks: Picks; onPick
   for (const layer of SWAPS) {
     groups.push(
       <Fragment key={layer}>
-        <Chip layer={layer} className="h-8 justify-self-start @min-[24rem]:justify-self-stretch" />
+        <Chip
+          data-rise
+          layer={layer}
+          className="h-8 justify-self-start @min-[24rem]:justify-self-stretch"
+        />
         <Group layer={layer} options={OPTIONS[layer]} pick={picks[layer]} onPick={onPick} />
       </Fragment>,
     );
@@ -93,6 +97,7 @@ function Group({
 
   return (
     <div
+      data-rise
       role="radiogroup"
       aria-label={`${layer} layer`}
       className="grid grid-cols-2 gap-2 @min-[33rem]:grid-cols-3"
@@ -112,10 +117,12 @@ export function Crossfade({
   shown,
   render,
   fit = false,
+  className,
 }: {
   shown: string;
   render: (key: string) => ReactNode;
   fit?: boolean;
+  className?: string;
 }) {
   const reduced = useReducedMotion();
   const [layers, setLayers] = useState([shown]);
@@ -150,7 +157,7 @@ export function Crossfade({
       </div>,
     );
   }
-  return <div className="relative grid">{out}</div>;
+  return <div className={cn('relative grid', className)}>{out}</div>;
 }
 
 /** an option's file: the command that wrote it, if any, and its code */
@@ -208,7 +215,7 @@ export const CodeWindow = memo(function CodeWindow({
   }, [shown]);
 
   return (
-    <div className={cn('@container', className)}>
+    <div data-rise data-window className={cn('@container', className)}>
       <Window
         ref={ref}
         title={

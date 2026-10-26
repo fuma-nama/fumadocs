@@ -1,6 +1,5 @@
 /** the modules on the board, shared by the figure and the page's Markdown version */
 export interface ModuleInfo {
-  n: number;
   title: string;
   /** one line under the title */
   line: string;
@@ -13,14 +12,12 @@ export interface ModuleInfo {
 
 export const modules: ModuleInfo[] = [
   {
-    n: 1,
     title: 'Search',
     line: 'ZBSearch built in, or Algolia and more.',
     pkg: 'fumadocs-core/search',
     install: 'npx @fumadocs/cli feature search',
   },
   {
-    n: 2,
     title: 'OpenAPI',
     line: 'API pages and a playground from your spec.',
     pkg: 'fumadocs-openapi',
@@ -28,7 +25,6 @@ export const modules: ModuleInfo[] = [
     install: 'npm i fumadocs-openapi shiki',
   },
   {
-    n: 3,
     title: 'AsyncAPI',
     line: 'Docs for your event-driven APIs.',
     pkg: '@fumadocs/asyncapi',
@@ -36,7 +32,6 @@ export const modules: ModuleInfo[] = [
     install: 'npm i @fumadocs/asyncapi shiki',
   },
   {
-    n: 4,
     title: 'GraphQL',
     line: 'Types, operations and a playground.',
     pkg: '@fumadocs/graphql',
@@ -44,7 +39,6 @@ export const modules: ModuleInfo[] = [
     install: 'npm i @fumadocs/graphql graphql',
   },
   {
-    n: 10,
     title: 'AI Chat',
     line: 'Ask AI, answered from your docs.',
     pkg: '@fumadocs/ai-chat',
@@ -52,7 +46,6 @@ export const modules: ModuleInfo[] = [
     install: 'npx @fumadocs/cli feature ai',
   },
   {
-    n: 9,
     title: 'llms.txt',
     line: 'Every page as Markdown for AI agents.',
     pkg: 'fumadocs-core/source',
@@ -60,7 +53,6 @@ export const modules: ModuleInfo[] = [
     install: 'npx @fumadocs/cli feature llms',
   },
   {
-    n: 7,
     title: 'i18n',
     line: 'Localized routes, page trees and UI text.',
     pkg: 'fumadocs-core/i18n',
@@ -68,7 +60,6 @@ export const modules: ModuleInfo[] = [
     install: 'npx @fumadocs/cli init --i18n',
   },
   {
-    n: 8,
     title: 'OG Image',
     line: 'Open Graph images for every page.',
     pkg: 'fumadocs-ui/og',
@@ -76,7 +67,6 @@ export const modules: ModuleInfo[] = [
     install: 'npx @fumadocs/cli feature og',
   },
   {
-    n: 5,
     title: 'Twoslash',
     line: 'Compiler types on hover in code blocks.',
     pkg: 'fumadocs-twoslash',
@@ -84,7 +74,6 @@ export const modules: ModuleInfo[] = [
     install: 'npm i fumadocs-twoslash',
   },
   {
-    n: 6,
     title: 'Type Table',
     line: 'Props tables from your TypeScript types.',
     pkg: 'fumadocs-typescript',
@@ -92,7 +81,6 @@ export const modules: ModuleInfo[] = [
     install: 'npm i fumadocs-typescript',
   },
   {
-    n: 11,
     title: 'Story',
     line: 'Component previews with prop controls.',
     pkg: '@fumadocs/story',
@@ -100,7 +88,6 @@ export const modules: ModuleInfo[] = [
     install: 'npm i @fumadocs/story',
   },
   {
-    n: 12,
     title: 'Obsidian',
     line: 'Render an Obsidian vault as docs.',
     pkg: 'fumadocs-obsidian',

@@ -1,11 +1,11 @@
-import type { CSSProperties, ReactNode } from 'react';
+import type { ReactNode } from 'react';
 import { DITHER_MASKS } from '../../lib/bayer';
 import { cn } from '@/lib/cn';
 
 /**
- * The stack's hardware in the sheet's 1-bit language: paper and ink with a dither for anything
- * darker, hardware in the mid-grey ink so the page and the nameplates stay the strongest marks.
- * Sizes are in the stack's own px; the camera scales them with it.
+ * A front's hardware in the sheet's 1-bit language: paper and ink with a dither for anything
+ * darker, hardware in the mid-grey ink so the nameplate stays the strongest mark. Sizes are in the
+ * front's own px; the camera scales them with it.
  */
 
 /** an ink dither over its box, `level` of 16 cells */
@@ -106,39 +106,6 @@ export function Latch({ className }: { className?: string }) {
         {/* its knob, the handle a hand pulls */}
         <span className="absolute top-1/2 left-[46%] h-7 w-3.5 -translate-y-1/2 border-[1.5px] border-lp-ink bg-lp-sun" />
       </span>
-    </span>
-  );
-}
-
-/** a pin header's socket on the top of a tray: two rows of holes the tray above plugs into */
-export function Socket({ className }: { className?: string }) {
-  const holes: ReactNode[] = [];
-  for (let i = 0; i < 16; i++)
-    holes.push(<span key={i} className="size-2 rounded-full bg-lp-paper" />);
-  return (
-    <span
-      aria-hidden
-      className={cn(
-        'absolute grid w-[136px] grid-cols-8 place-items-center gap-y-1.5 border-[1.5px] border-lp-ink bg-lp-ink-2 px-1.5 py-1.5',
-        className,
-      )}
-    >
-      {holes}
-    </span>
-  );
-}
-
-/** the pins under a tray that go into the socket of the one below, edge on to the camera */
-export function Pins({ className, style }: { className: string; style: CSSProperties }) {
-  const pins: ReactNode[] = [];
-  for (let i = 0; i < 8; i++) pins.push(<span key={i} className="h-full w-[3px] bg-lp-ink-2" />);
-  return (
-    <span
-      aria-hidden
-      className={cn('absolute flex justify-between px-[9px]', className)}
-      style={style}
-    >
-      {pins}
     </span>
   );
 }

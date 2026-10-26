@@ -1,10 +1,20 @@
 'use client';
-import { memo, type ReactNode, useEffect, useLayoutEffect, useRef, useState } from 'react';
+import {
+  memo,
+  type ReactNode,
+  useCallback,
+  useEffect,
+  useLayoutEffect,
+  useRef,
+  useState,
+} from 'react';
 import { useReducedMotion } from 'motion/react';
 import { cn } from '@/lib/cn';
 import type { ShowcaseObject } from '@/lib/showcases';
+import { whenSeen } from '../../lib/later';
 import { TICK } from '../../lib/motion';
 import { report } from '../../lib/status';
+import { onTheme } from '../../lib/theme';
 import { useIsClient } from '../../lib/use-is-client';
 import { Roller } from '../../ui/roller';
 import { level, print, show, SiteTile } from '../../ui/site-tile';
@@ -142,78 +152,80 @@ export function Press({
 
   // prints are computed once per tile when its screenshot is decoded, again on theme or size
   // changes, a few per frame; the run starts once the wall is 40% on screen with its prints
-  useEffect(() => {
-    if (!printing) return;
-    const list = grid.current!;
-    const images = new Map<HTMLCanvasElement, HTMLImageElement>();
-    const queue = new Set<HTMLCanvasElement>();
-    let frame = 0;
-    let pending = 0;
-    let disposed = false;
-    let onReady: () => void;
-    const ready = new Promise<void>((resolve) => (onReady = resolve));
+  const wall = useCallback(
+    (list: HTMLUListElement | null) => {
+      grid.current = list;
+      if (!list || !printing) return;
+      const images = new Map<HTMLCanvasElement, HTMLImageElement>();
+      const queue = new Set<HTMLCanvasElement>();
+      let frame = 0;
+      let pending = 0;
+      let disposed = false;
+      let onReady: () => void;
+      const ready = new Promise<void>((resolve) => (onReady = resolve));
 
-    const flush = () => {
-      const end = performance.now() + 4;
-      for (const canvas of queue) {
-        queue.delete(canvas);
-        const image = images.get(canvas)!;
-        if (image.complete && canvas.offsetParent !== null) print(canvas, image);
-        if (performance.now() > end) break;
+      const flush = () => {
+        const end = performance.now() + 4;
+        for (const canvas of queue) {
+          queue.delete(canvas);
+          const image = images.get(canvas)!;
+          if (image.complete && canvas.offsetParent !== null) print(canvas, image);
+          if (performance.now() > end) break;
+        }
+        frame = queue.size > 0 ? requestAnimationFrame(flush) : 0;
+        if (frame === 0 && pending === 0) onReady();
+      };
+      const enqueue = (canvas: HTMLCanvasElement) => {
+        queue.add(canvas);
+        if (frame === 0) frame = requestAnimationFrame(flush);
+      };
+      const reprint = () => {
+        for (const canvas of images.keys()) enqueue(canvas);
+      };
+
+      for (const canvas of list.querySelectorAll('canvas')) {
+        const image = canvas.parentElement!.querySelector('img');
+        if (!image) continue;
+        images.set(canvas, image);
+        if (canvas.offsetParent === null) continue;
+        pending++;
+        void image
+          .decode()
+          .catch(() => undefined)
+          .then(() => {
+            pending--;
+            if (!disposed) enqueue(canvas);
+          });
       }
-      frame = queue.size > 0 ? requestAnimationFrame(flush) : 0;
-      if (frame === 0 && pending === 0) onReady();
-    };
-    const enqueue = (canvas: HTMLCanvasElement) => {
-      queue.add(canvas);
-      if (frame === 0) frame = requestAnimationFrame(flush);
-    };
-    const reprint = () => {
-      for (const canvas of images.keys()) enqueue(canvas);
-    };
 
-    for (const canvas of list.querySelectorAll('canvas')) {
-      const image = canvas.parentElement!.querySelector('img');
-      if (!image) continue;
-      images.set(canvas, image);
-      if (canvas.offsetParent === null) continue;
-      pending++;
-      void image
-        .decode()
-        .catch(() => undefined)
-        .then(() => {
-          pending--;
-          if (!disposed) enqueue(canvas);
-        });
-    }
-
-    const resize = new ResizeObserver(reprint);
-    resize.observe(list);
-    const theme = new MutationObserver(reprint);
-    theme.observe(document.documentElement, { attributes: true, attributeFilter: ['class'] });
-    const view = new IntersectionObserver(
-      ([entry]) => {
-        if (!entry.isIntersecting) return;
-        view.disconnect();
-        void Promise.race([ready, new Promise((resolve) => setTimeout(resolve, 3000))]).then(() => {
-          if (disposed) return;
-          // the prints start blank, so showing them changes nothing until the plate prints in
-          for (const canvas of images.keys()) show(canvas, 0);
-          setTotal(rowsOf(list).at(-1)?.to ?? 0);
-          setPhase((current) => (current === 'rest' ? 'run' : current));
-        });
-      },
-      { threshold: 0.4 },
-    );
-    view.observe(list);
-    return () => {
-      disposed = true;
-      cancelAnimationFrame(frame);
-      resize.disconnect();
-      theme.disconnect();
-      view.disconnect();
-    };
-  }, [printing]);
+      const resize = new ResizeObserver(reprint);
+      resize.observe(list);
+      const stopTheme = onTheme(reprint);
+      const run = () => {
+        if (disposed) return;
+        // the prints start blank, so showing them changes nothing until the plate prints in
+        for (const canvas of images.keys()) show(canvas, 0);
+        setTotal(rowsOf(list).at(-1)?.to ?? 0);
+        setPhase('run');
+      };
+      const stopView = whenSeen(
+        list,
+        () => {
+          const fallback = new Promise((resolve) => setTimeout(resolve, 3000));
+          void Promise.race([ready, fallback]).then(run);
+        },
+        { threshold: 0.4 },
+      );
+      return () => {
+        disposed = true;
+        cancelAnimationFrame(frame);
+        resize.disconnect();
+        stopTheme();
+        stopView();
+      };
+    },
+    [printing],
+  );
 
   // the run, one loop: the plate prints in (Dither), rests a tick, then the head steps down a row
   // at a time while the row above it dithers into colour; its names roll in as it leaves the row
@@ -269,7 +281,7 @@ export function Press({
     <div className="flex flex-col gap-4">
       <div className="relative">
         <ul
-          ref={grid}
+          ref={wall}
           className="grid grid-cols-2 gap-px border border-lp-line-strong bg-lp-line-strong md:grid-cols-5"
         >
           {sites.map((site, i) => (

@@ -1,4 +1,5 @@
 import { BEAT } from '../../lib/motion';
+import { onTheme } from '../../lib/theme';
 
 const GLYPHS = '#-*>[]{}/=+fumadocs';
 const WORD = 'Fumadocs';
@@ -23,7 +24,6 @@ export function createSand(host: HTMLElement): () => void {
   const ctx = canvas.getContext('2d')!;
   const sprites = document.createElement('canvas');
   const reduce = matchMedia('(prefers-reduced-motion: reduce)');
-  const root = document.documentElement;
 
   let cols = 0;
   let rows = 0;
@@ -308,7 +308,7 @@ export function createSand(host: HTMLElement): () => void {
     pointer = -1;
   }
 
-  function onTheme() {
+  function repaint() {
     if (!ready) return;
     paintSprites();
     ctx.clearRect(0, 0, canvas.width, canvas.height);
@@ -326,7 +326,7 @@ export function createSand(host: HTMLElement): () => void {
       raf = 0;
     }
   });
-  const theme = new MutationObserver(onTheme);
+  const stopTheme = onTheme(repaint);
   const onPreference = () => {
     layout();
     start();
@@ -339,7 +339,6 @@ export function createSand(host: HTMLElement): () => void {
     start();
   });
   visibility.observe(host);
-  theme.observe(root, { attributes: true, attributeFilter: ['class'] });
   reduce.addEventListener('change', onPreference);
   host.addEventListener('pointermove', onPointer);
   host.addEventListener('pointerleave', onLeave);
@@ -349,7 +348,7 @@ export function createSand(host: HTMLElement): () => void {
     cancelAnimationFrame(raf);
     resize.disconnect();
     visibility.disconnect();
-    theme.disconnect();
+    stopTheme();
     reduce.removeEventListener('change', onPreference);
     host.removeEventListener('pointermove', onPointer);
     host.removeEventListener('pointerleave', onLeave);

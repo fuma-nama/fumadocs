@@ -1,4 +1,5 @@
 import { bayer8 } from '../../lib/glsl';
+import { mix, type Rect } from '../../lib/math';
 import { ATLAS_COLUMNS } from './atlas';
 import { COLS, ROWS } from './session';
 
@@ -384,13 +385,6 @@ export interface View {
   shift: [number, number];
 }
 
-export interface Rect {
-  x: number;
-  y: number;
-  w: number;
-  h: number;
-}
-
 const FOV = (30 * Math.PI) / 180;
 /** where the camera ends up, to the left of the terminal */
 const YAW = -0.5;
@@ -495,10 +489,6 @@ export function unproject(
   const dir: Vec3 = [-s * f + c * dx, dy, -c * f - s * dx];
   const k = distance / Math.hypot(dir[0], dir[1], dir[2]);
   return [view.eye[0] + dir[0] * k, view.eye[1] + dir[1] * k, view.eye[2] + dir[2] * k];
-}
-
-function mix(a: number, b: number, t: number) {
-  return a + (b - a) * t;
 }
 
 /**

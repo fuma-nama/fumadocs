@@ -1,11 +1,12 @@
 import { idle } from '../../lib/later';
 import { TICK } from '../../lib/motion';
+import { onTheme } from '../../lib/theme';
 import { ditherKeyframes } from '../../ui/dither';
 import { FRAME_W, type LayoutId, type ThemeId } from './data';
 import type { InkTable } from './presets';
 import { createFrames, type Frames } from './frames';
 
-export interface Screen {
+interface Screen {
   /** what the screen shows; the newest wins. `instant` inks a theme without the print */
   show: (layout: LayoutId, theme: ThemeId, instant: boolean) => void;
   destroy: () => void;
@@ -156,14 +157,13 @@ export function createScreen(
     },
     { rootMargin: '100% 0px' },
   );
+  resize.observe(screen);
+  near.observe(screen);
   // shadcn takes this page's palette, its frames ink again when the page's theme changes
-  const mode = new MutationObserver(() => {
+  const stopTheme = onTheme(() => {
     if (!frames) return;
     for (const slot of frames.slots) if (slot.theme === 'shadcn') frames.ink(slot, 'shadcn');
   });
-  resize.observe(screen);
-  near.observe(screen);
-  mode.observe(document.documentElement, { attributes: true, attributeFilter: ['class'] });
 
   return {
     show(layout, theme, instant) {
@@ -174,7 +174,7 @@ export function createScreen(
       pending?.();
       resize.disconnect();
       near.disconnect();
-      mode.disconnect();
+      stopTheme();
       swap?.cancel();
       frames?.destroy();
       live.replaceChildren();

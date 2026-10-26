@@ -1,6 +1,7 @@
-import { BAYER4 } from '../lib/bayer';
+import { clamp } from '../lib/math';
 import { BEAT } from '../lib/motion';
-import { level, print, show } from '../ui/site-tile';
+import { isDark } from '../lib/theme';
+import { level, print, printDots, show } from '../ui/site-tile';
 import {
   DANCER,
   DRIVER,
@@ -53,14 +54,14 @@ const DAMP = 0.012;
 const NEEDLE_STIFF = 0.0016;
 const NEEDLE_DAMP = 0.05;
 
-export interface ProjectorEvents {
+interface ProjectorEvents {
   /** the strip leaves frame `from` for frame `to` */
   leave: (from: number, to: number) => void;
   /** frame `index` locked in the gate */
   arrive: (index: number) => void;
 }
 
-export interface Projector {
+export interface ProjectorEngine {
   /** run the strip to frame `index` */
   seek: (index: number) => void;
   /** the run switch: the reel plays on, or stops at the frame it stands on */
@@ -69,6 +70,9 @@ export interface Projector {
   boot: () => void;
   destroy: () => void;
 }
+
+/** the drums' centres, the take-up reel's first like the radii of `reels()` */
+const CENTRES = [DRUMS.take, DRUMS.feed];
 
 function rotate(deg: number, [x, y]: readonly [number, number]) {
   return `rotate(${deg.toFixed(2)} ${x} ${y})`;
@@ -90,7 +94,7 @@ export function createProjector(
   count: number,
   reduced: boolean,
   events: ProjectorEvents,
-): Projector {
+): ProjectorEngine {
   const part = (name: string) => root.querySelector<SVGElement>(`[data-part="${name}"]`)!;
   const reel = root.querySelector<HTMLElement>('[data-reel]')!;
   const track = reel.parentElement!;
@@ -153,10 +157,9 @@ export function createProjector(
     pulley.setAttribute('transform', rotate((motor * 180) / Math.PI, MOTOR));
     belt.style.strokeDashoffset = (-motor * PULLEY).toFixed(2);
     const r = reels(position, count);
-    const centres = [DRUMS.take, DRUMS.feed];
     for (let i = 0; i < 2; i++) {
       wounds[i].setAttribute('r', r[i].toFixed(2));
-      const spun = rotate((-turned[i] * 180) / Math.PI, centres[i]);
+      const spun = rotate((-turned[i] * 180) / Math.PI, CENTRES[i]);
       for (const element of spins[i]) element.setAttribute('transform', spun);
       rollers[i].setAttribute('transform', rotate((-roll * 180) / Math.PI, ROLLERS[i]));
     }
@@ -216,7 +219,7 @@ export function createProjector(
 
   function step(now: number) {
     // a frame's timestamp can come before the moment the loop woke
-    const dt = Math.max(0, Math.min(48, now - last));
+    const dt = clamp(now - last, 0, 48);
     last = Math.max(last, now);
     const from = position;
     let target = 0;
@@ -258,7 +261,7 @@ export function createProjector(
     motor += way * motorSpeed * dt;
 
     // the dancer lifts with the strip's speed; the needle reads the motor on a log scale
-    const lift = Math.max(-18, Math.min(18, (-LIFT * travel) / Math.max(dt, 1)));
+    const lift = clamp((-LIFT * travel) / Math.max(dt, 1), -18, 18);
     const reading = Math.log2(1 + motorSpeed / MOTOR_TURN) / Math.log2(1 + MOTOR_MAX / MOTOR_TURN);
     for (let t = 0; t < dt; t += 8) {
       const h = Math.min(8, dt - t);
@@ -284,7 +287,7 @@ export function createProjector(
   }
 
   function seek(index: number) {
-    const to = Math.max(0, Math.min(count - 1, index));
+    const to = clamp(index, 0, count - 1);
     if (reduced) {
       if (to === position) return;
       events.leave(position, to);
@@ -295,18 +298,14 @@ export function createProjector(
       events.arrive(to);
       return;
     }
-    // a run, or the strip before it has printed in, finishes first
-    if (mode === 'run' || !booted) {
-      queued = to;
-      return;
-    }
-    if (mode === 'turn' && Math.abs(to - position) > FAR) {
+    // a run, a far pick in a turn, or the strip before it has printed in: it finishes first
+    if (mode === 'run' || !booted || (mode === 'turn' && Math.abs(to - position) > FAR)) {
       queued = to;
       return;
     }
     if (mode === 'rest' && to === position) return;
     clearTimeout(timer);
-    start(to, Math.max(PICK_MIN, Math.min(PICK, (PICK * 2) / (Math.abs(to - position) + 1))));
+    start(to, clamp((PICK * 2) / (Math.abs(to - position) + 1), PICK_MIN, PICK));
   }
 
   const view = new IntersectionObserver(([entry]) => {
@@ -367,33 +366,7 @@ export function printFrame(canvas: HTMLCanvasElement, image: HTMLImageElement) {
   if (width === 0 || !image.complete || image.naturalWidth === 0) return;
   canvas.width = width;
   canvas.height = height;
-  const ctx = canvas.getContext('2d', { willReadFrequently: true })!;
-  const scale = Math.max(width / image.naturalWidth, height / image.naturalHeight);
-  const w = image.naturalWidth * scale;
-  const h = image.naturalHeight * scale;
-  ctx.imageSmoothingQuality = 'high';
-  ctx.drawImage(image, (width - w) / 2, (height - h) / 2, w, h);
-  const pixels = ctx.getImageData(0, 0, width, height);
-  const data = pixels.data;
-  for (let y = 0; y < height; y++) {
-    for (let x = 0; x < width; x++) {
-      const i = (y * width + x) * 4;
-      const light = (0.2126 * data[i] + 0.7152 * data[i + 1] + 0.0722 * data[i + 2]) / 255;
-      data[i + 3] = light > (BAYER4[(y % 4) * 4 + (x % 4)] + 0.5) / 16 ? 0 : 255;
-    }
-  }
-  ctx.putImageData(pixels, 0, 0);
-  const style = getComputedStyle(canvas);
-  const ink = style.getPropertyValue('--lp-ink').trim();
-  const paper = style.getPropertyValue('--lp-paper').trim();
-  const dark = document.documentElement.classList.contains('dark');
-  ctx.globalCompositeOperation = 'source-in';
-  ctx.fillStyle = dark ? paper : ink;
-  ctx.fillRect(0, 0, width, height);
-  ctx.globalCompositeOperation = 'destination-over';
-  ctx.fillStyle = dark ? ink : paper;
-  ctx.fillRect(0, 0, width, height);
-  ctx.globalCompositeOperation = 'source-over';
+  printDots(canvas, image);
 }
 
 const runs = new Map<HTMLCanvasElement, number>();
@@ -404,7 +377,7 @@ const made = new WeakMap<HTMLCanvasElement, string>();
 function prepare(canvas: HTMLCanvasElement, image: HTMLImageElement): boolean {
   if (!image.complete || image.naturalWidth === 0) return false;
   const box = canvas.parentElement!;
-  const key = `${box.clientWidth}x${box.clientHeight} ${document.documentElement.classList.contains('dark')}`;
+  const key = `${box.clientWidth}x${box.clientHeight} ${isDark()}`;
   if (made.get(canvas) !== key) {
     print(canvas, image);
     made.set(canvas, key);
@@ -443,7 +416,7 @@ export function dither(
 }
 
 /** the screenshot back in colour at once */
-export function restore(canvas: HTMLCanvasElement) {
+export function hidePrint(canvas: HTMLCanvasElement) {
   cancelAnimationFrame(runs.get(canvas) ?? 0);
   runs.delete(canvas);
   show(canvas, 0);

@@ -33,6 +33,9 @@ export const THEME_NAMES: Record<ThemeId, string> = {
 
 export type LayoutId = 'docs' | 'notebook' | 'flux' | 'glass' | 'spacious' | 'home';
 
+/** the layout the desk starts on, its cables settled on the server */
+export const FIRST: LayoutId = 'docs';
+
 export const TABS = ['layouts', 'story', 'openapi', 'graphql', 'asyncapi'] as const;
 
 export type TabId = (typeof TABS)[number];
@@ -40,12 +43,24 @@ export type TabId = (typeof TABS)[number];
 /** the tabs that frame a demo page */
 export type DemoId = Exclude<TabId, 'layouts'>;
 
-/** where each demo's UI comes from, the monitor's title; the layouts name theirs */
-export const SOURCES: Record<DemoId, string> = {
-  story: '@fumadocs/story',
-  openapi: 'fumadocs-openapi/ui',
-  graphql: '@fumadocs/graphql/ui',
-  asyncapi: '@fumadocs/asyncapi/ui',
+/**
+ * Each demo's `source`, where its UI comes from, which the monitor's bar names (the layouts name
+ * theirs), and the `title` of its frame, the accessible name.
+ */
+export const DEMOS: Record<DemoId, { source: string; title: string }> = {
+  story: { source: '@fumadocs/story', title: 'Story of a Callout, with its controls' },
+  openapi: {
+    source: 'fumadocs-openapi/ui',
+    title: 'OpenAPI page of an operation, with its playground',
+  },
+  graphql: {
+    source: '@fumadocs/graphql/ui',
+    title: 'GraphQL page of a query, with its playground',
+  },
+  asyncapi: {
+    source: '@fumadocs/asyncapi/ui',
+    title: 'AsyncAPI page of a channel, with its playground',
+  },
 };
 
 /** values of a preset, in the order of `InkTable.tokens` */

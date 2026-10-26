@@ -1,71 +1,144 @@
 import type { ReactNode } from 'react';
-import { Book, ChevronDown, Menu, Palette, Rocket, Search, SidebarIcon, Text } from 'lucide-react';
+import {
+  Book,
+  ChevronDown,
+  CircleQuestionMark,
+  CpuIcon,
+  DatabaseIcon,
+  Menu,
+  PanelsTopLeftIcon,
+  Rocket,
+  Scale,
+  Search,
+  SidebarIcon,
+  TerminalIcon,
+  Text,
+  Wrench,
+} from 'lucide-react';
 import { Callout } from 'fumadocs-ui/components/callout';
+import { Card, Cards } from 'fumadocs-ui/components/card';
 import { buttonVariants } from 'fumadocs-ui/components/ui/button';
 import { DocsBody, DocsDescription } from 'fumadocs-ui/layouts/docs/page';
 import { FullSearchTrigger } from 'fumadocs-ui/layouts/shared/slots/search-trigger';
 import { ThemeSwitch } from 'fumadocs-ui/layouts/shared/slots/theme-switch';
 import { cn } from '@/lib/cn';
 import { toc } from './data';
-import { NARROW, WIDE } from './geometry';
 
 // classes of `layouts/docs/slots/sidebar.tsx`
 const item =
   'relative flex flex-row items-center gap-2 rounded-lg p-2 text-start text-fd-muted-foreground wrap-anywhere [&_svg]:size-4 [&_svg]:shrink-0';
 
-/** the page tree of the sample docs, as `source.getPageTree()` would hand it to the sidebar */
+/** the sidebar of fumadocs.dev's own docs, as `source.getPageTree()` hands it over */
 const tree = [
-  { name: 'Introduction', icon: <Book /> },
+  { separator: 'Introduction' },
   { name: 'Quick Start', icon: <Rocket />, active: true },
-  { name: 'Themes', icon: <Palette /> },
+  { name: 'What is Fumadocs', icon: <CircleQuestionMark /> },
+  { name: 'Comparisons', icon: <Scale /> },
+  { name: 'Manual Installation', icon: <Wrench /> },
+  { name: 'Guides', icon: <Book />, folder: true },
   { separator: 'Writing' },
-  { name: 'Markdown' },
-  { name: 'Search' },
-  { name: 'Components', folder: true },
+  { name: 'Page Slugs & Page Tree' },
+  { name: 'Markdown', folder: true },
 ];
 
-const grid = 'grid grid-cols-[268px_minmax(0,1fr)_268px] grid-rows-1';
+/** the layers on fumadocs.dev's Quick Start, as its `<Cards>` list them */
+const layers = [
+  {
+    title: 'Fumadocs Core',
+    icon: <CpuIcon />,
+    text: 'Handles most of the logic, including document search, content source adapters, and Markdown extensions.',
+  },
+  {
+    title: 'Fumadocs UI',
+    icon: <PanelsTopLeftIcon />,
+    text: 'The default theme of Fumadocs offers a beautiful look for documentation sites and interactive components.',
+  },
+  {
+    title: 'Content Source',
+    icon: <DatabaseIcon />,
+    text: 'The source of your content, can be a CMS or local data layers like Fumadocs MDX (the official content source).',
+  },
+  {
+    title: 'Fumadocs CLI',
+    icon: <TerminalIcon />,
+    text: 'A command line tool to install UI components and automate things, useful for customizing layouts.',
+  },
+];
+
+/** the icon buttons of the docs layout's navbar */
+const navButton = cn(
+  buttonVariants({ variant: 'ghost', size: 'icon-sm' }),
+  'text-fd-muted-foreground',
+);
+
+/** a prose heading as text: the page's headings are not the landing's */
+const heading = 'not-prose mt-[2em] mb-[1em] text-[1.5em] leading-[1.333] font-semibold [&+*]:mt-0';
 
 /**
- * The default docs layout with a quick start page, at its desktop sizes. Callout, code block,
- * description, body, search trigger and theme switch are the real components; the layout chrome
- * mirrors the markup of `fumadocs-ui/layouts/docs`, whose providers need a full page, and its
- * links are plain text here.
+ * fumadocs.dev's Quick Start in the default docs layout, reflowing with the face it is laid on like
+ * the real layout: a phone's navbar, the sidebar from 700px, the table of contents from 1100px.
+ * Callout, cards, code block, description, body, search trigger and theme switch are the real
+ * components; the layout chrome mirrors the markup of `fumadocs-ui/layouts/docs`, whose providers
+ * need a full page, and its links are plain text here.
  */
 export function DocsPreview({ code }: { code: ReactNode }) {
+  const cards: ReactNode[] = [];
+  for (const layer of layers)
+    cards.push(
+      <Card key={layer.title} icon={layer.icon} title={layer.title}>
+        {layer.text}
+      </Card>,
+    );
+
   return (
-    <div
-      className={cn(grid, 'relative isolate bg-fd-background text-fd-foreground')}
-      style={{ width: WIDE.width, height: WIDE.height }}
-    >
-      {/* a foot 12px or more clear of the slab's front edge on screen */}
-      <div className="flex min-h-0 flex-col border-e bg-fd-card pb-6 text-sm">
+    <div className="flex size-full flex-col bg-fd-background text-fd-foreground @min-[700px]:grid @min-[700px]:grid-cols-[248px_minmax(0,1fr)] @min-[1100px]:grid-cols-[268px_minmax(0,1fr)_240px]">
+      <div className="flex h-14 shrink-0 items-center gap-1 border-b px-4 @min-[700px]:hidden">
+        <Brand />
+        <span className={navButton}>
+          <Search />
+        </span>
+        <span className={navButton}>
+          <Menu />
+        </span>
+      </div>
+      <div className="hidden min-h-0 flex-col border-e bg-fd-card pb-6 text-sm @min-[700px]:flex">
         <div className="flex flex-col gap-3 p-4 pb-2">
           <div className="flex">
-            <NavRow />
+            <Brand />
+            <span className={cn(navButton, 'mb-auto')}>
+              <SidebarIcon />
+            </span>
           </div>
-          <div className="flex flex-col">
-            <FullSearchTrigger />
-          </div>
+          <FullSearchTrigger />
         </div>
-        <TreeItems className="px-2" />
+        <Tree />
         <div className="flex-1" />
         <SidebarFooter />
       </div>
-
-      <article className="flex min-w-0 flex-col gap-4 px-8 pt-12 pb-6">
+      <article className="flex min-w-0 flex-col px-4 pt-6 @min-[700px]:px-8 @min-[700px]:pt-12">
         <div className="mb-8 flex flex-col gap-4">
-          <TitleBlock />
+          {/* the classes of `DocsTitle`, not an h1 so the landing keeps one */}
+          <p className="text-[1.75em] font-semibold">Quick Start</p>
+          <DocsDescription className="mb-0">Getting Started with Fumadocs</DocsDescription>
         </div>
         <DocsBody>
-          <div>
-            <CalloutBlock />
-          </div>
-          <CodeSection code={code} />
+          <p className={heading}>Introduction</p>
+          <p>
+            Fumadocs <span className="text-sm text-fd-muted-foreground">(Foo-ma docs)</span> is a{' '}
+            <strong>documentation framework</strong>, designed to be fast, flexible, and composes
+            seamlessly into your React framework. It consists of multiple layers:
+          </p>
+          <Cards>{cards}</Cards>
+          <Callout title="Want to learn more?">
+            Read our in-depth <span className="font-medium underline">What is Fumadocs</span>{' '}
+            introduction.
+          </Callout>
+          <p className={heading}>Automatic Installation</p>
+          <p>A minimum version of Node.js 22 required.</p>
+          <div>{code}</div>
         </DocsBody>
       </article>
-
-      <div className="-ms-3 mt-8 flex min-h-0 flex-col self-start p-3">
+      <div className="-ms-3 mt-12 hidden min-h-0 flex-col self-start p-3 @min-[1100px]:flex">
         <TocBlock />
       </div>
     </div>
@@ -74,8 +147,7 @@ export function DocsPreview({ code }: { code: ReactNode }) {
 
 /**
  * The same page with the UI swapped for your own: what `fumadocs-core` hands over (the page tree,
- * the TOC, the page's title and body) rendered as plain elements, the starting point of a UI you
- * build yourself.
+ * the TOC, the page's title and body) as plain elements, the start of a UI you build yourself.
  */
 export function HeadlessPreview() {
   const items: ReactNode[] = [];
@@ -104,30 +176,36 @@ export function HeadlessPreview() {
     );
   }
 
+  const list: ReactNode[] = [];
+  for (const layer of layers)
+    list.push(
+      <li key={layer.title}>
+        <span className="font-semibold">{layer.title}</span>: {layer.text}
+      </li>,
+    );
+
   return (
-    <div
-      className={cn(grid, 'bg-lp-paper text-base leading-normal text-lp-ink')}
-      style={{ width: WIDE.width, height: WIDE.height }}
-    >
-      <div className="flex flex-col gap-3 p-4">
-        <p className="font-semibold">My Docs</p>
+    <div className="flex size-full flex-col gap-4 bg-lp-paper px-4 pt-5 text-base leading-normal text-lp-ink @min-[700px]:grid @min-[700px]:grid-cols-[220px_minmax(0,1fr)] @min-[700px]:gap-0 @min-[700px]:p-0 @min-[1100px]:grid-cols-[220px_minmax(0,1fr)_220px]">
+      <p className="flex justify-between @min-[700px]:hidden">
+        <span className="font-semibold">Fumadocs</span>
+        <span className="underline underline-offset-2">Menu</span>
+      </p>
+      <div className="hidden flex-col gap-3 p-4 @min-[700px]:flex">
+        <p className="font-semibold">Fumadocs</p>
         <p className="text-lp-ink-2">Search</p>
         <ul className="list-disc ps-5">{items}</ul>
       </div>
-      <article className="flex flex-col gap-4 px-8 pt-14">
+      <article className="flex flex-col gap-4 @min-[700px]:px-8 @min-[700px]:pt-14">
         <p className="text-[2em] leading-tight font-bold">Quick Start</p>
-        <p>Create your first docs site.</p>
-        <blockquote className="border-s-2 border-lp-line-strong ps-4">
-          <p className="font-semibold">Good to know</p>
-          <p>
-            For full control over the UI, install the layout with Fumadocs CLI and edit the
-            components directly.
-          </p>
-        </blockquote>
-        <p className="mt-2 text-[1.5em] font-bold">Installation</p>
-        <pre className="font-mono text-sm">npm create fumadocs-app</pre>
+        <p>Getting Started with Fumadocs</p>
+        <p className="mt-2 text-[1.5em] font-bold">Introduction</p>
+        <p>
+          Fumadocs (Foo-ma docs) is a documentation framework, designed to be fast, flexible, and
+          composes seamlessly into your React framework. It consists of multiple layers:
+        </p>
+        <ul className="list-disc ps-5">{list}</ul>
       </article>
-      <div className="flex flex-col gap-2 p-4 pt-10">
+      <div className="hidden flex-col gap-2 p-4 pt-10 @min-[1100px]:flex">
         <p className="font-semibold">On this page</p>
         <ul className="list-disc ps-5">{headings}</ul>
       </div>
@@ -135,98 +213,24 @@ export function HeadlessPreview() {
   );
 }
 
-/** the icon buttons of the docs layout's navbar on a phone */
-const navButton = cn(
-  buttonVariants({ variant: 'ghost', size: 'icon-sm' }),
-  'text-fd-muted-foreground',
-);
-
-/**
- * The same page at a phone's width: the docs layout's navbar, the sidebar behind its menu button,
- * then the page. Callout, code block and description are the real components.
- */
-export function MobilePreview({ code }: { code: ReactNode }) {
+function Brand() {
   return (
-    <div
-      className="flex flex-col bg-fd-background text-fd-foreground"
-      style={{ width: NARROW.width, height: NARROW.height }}
-    >
-      <div className="flex h-14 shrink-0 items-center gap-1 border-b px-4">
-        <span className="me-auto inline-flex items-center gap-2.5 text-[0.9375rem] font-medium">
-          <span className="size-5 rounded-full border bg-fd-primary" />
-          My Docs
-        </span>
-        <span className={navButton}>
-          <Search />
-        </span>
-        <span className={navButton}>
-          <Menu />
-        </span>
-      </div>
-      <article className="flex min-w-0 flex-col gap-4 px-4 pt-6">
-        <div className="mb-2 flex flex-col gap-4">
-          <TitleBlock />
-        </div>
-        <DocsBody>
-          <CalloutBlock />
-          <CodeSection code={code} />
-        </DocsBody>
-      </article>
-    </div>
+    <span className="me-auto inline-flex items-center gap-2.5 text-[0.9375rem] font-medium">
+      <span className="size-5 rounded-full border bg-fd-primary" />
+      Fumadocs
+    </span>
   );
 }
 
-/** the headless page at a phone's width: the page itself, the tree behind its menu */
-export function MobileHeadlessPreview() {
-  return (
-    <div
-      className="flex flex-col gap-4 bg-lp-paper px-4 pt-5 text-base leading-normal text-lp-ink"
-      style={{ width: NARROW.width, height: NARROW.height }}
-    >
-      <p className="flex justify-between">
-        <span className="font-semibold">My Docs</span>
-        <span className="underline underline-offset-2">Menu</span>
-      </p>
-      <p className="mt-4 text-[2em] leading-tight font-bold">Quick Start</p>
-      <p>Create your first docs site.</p>
-      <blockquote className="border-s-2 border-lp-line-strong ps-4">
-        <p className="font-semibold">Good to know</p>
-        <p>
-          For full control over the UI, install the layout with Fumadocs CLI and edit the components
-          directly.
-        </p>
-      </blockquote>
-      <p className="mt-2 text-[1.5em] font-bold">Installation</p>
-      <pre className="font-mono text-sm">npm create fumadocs-app</pre>
-    </div>
-  );
-}
-
-function NavRow() {
-  return (
-    <>
-      <span className="me-auto inline-flex items-center gap-2.5 text-[0.9375rem] font-medium">
-        <span className="size-5 rounded-full border bg-fd-primary" />
-        My Docs
-      </span>
-      <span
-        className={cn(
-          buttonVariants({ variant: 'ghost', size: 'icon-sm' }),
-          'mb-auto text-fd-muted-foreground',
-        )}
-      >
-        <SidebarIcon />
-      </span>
-    </>
-  );
-}
-
-function TreeItems({ className }: { className?: string }) {
+function Tree() {
   const items: ReactNode[] = [];
   for (const node of tree) {
     if ('separator' in node) {
       items.push(
-        <p key={node.separator} className="mt-6 mb-1 inline-flex items-center gap-2 px-2">
+        <p
+          key={node.separator}
+          className="mt-6 mb-1 inline-flex items-center gap-2 px-2 first:mt-0"
+        >
           {node.separator}
         </p>,
       );
@@ -247,7 +251,7 @@ function TreeItems({ className }: { className?: string }) {
       </span>,
     );
   }
-  return <div className={cn('flex flex-col gap-0.5 p-4', className)}>{items}</div>;
+  return <div className="flex flex-col gap-0.5 p-4 px-2">{items}</div>;
 }
 
 function SidebarFooter() {
@@ -260,37 +264,6 @@ function SidebarFooter() {
         <ThemeSwitch className="ms-auto rounded-none border-y-0 border-e-0 px-1 py-0 *:rounded-md" />
       </div>
     </div>
-  );
-}
-
-function TitleBlock() {
-  return (
-    <>
-      {/* the classes of `DocsTitle`, not an h1 so the landing keeps one */}
-      <p className="text-[1.75em] font-semibold">Quick Start</p>
-      <DocsDescription className="mb-0">Create your first docs site.</DocsDescription>
-    </>
-  );
-}
-
-function CalloutBlock() {
-  return (
-    <Callout title="Good to know">
-      For full control over the UI, install the layout with Fumadocs CLI and edit the components
-      directly.
-    </Callout>
-  );
-}
-
-function CodeSection({ code }: { code: ReactNode }) {
-  return (
-    <>
-      {/* the prose `h2`, as text: the page's headings are not the landing's */}
-      <p className="not-prose mt-[2em] mb-[1em] text-[1.5em] leading-[1.333] font-semibold [&+*]:mt-0">
-        Installation
-      </p>
-      <div>{code}</div>
-    </>
   );
 }
 

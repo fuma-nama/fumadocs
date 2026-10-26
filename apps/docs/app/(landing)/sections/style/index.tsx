@@ -2,7 +2,7 @@ import { copy } from '../../content';
 import { Figure, FigureHeader } from '../../ui/figure';
 import { createPose, hangRopes, pose, SLOTS } from './board';
 import { createHardware } from './hardware';
-import { THEMES, type ThemeId } from './data';
+import { FIRST, THEMES, type ThemeId } from './data';
 import { loadInks, wire, type Wiring } from './presets';
 import { Studio } from './studio';
 
@@ -19,14 +19,13 @@ export async function Style() {
     };
   }
 
-  // the desk's cables in its first pose (docs, where the studio starts) settle here, once: the
-  // browser takes their shape
-  const first = SLOTS.findIndex((slot) => slot.id === 'docs');
+  // the desk's cables in its first pose settle here, once: the browser takes their shape
+  const first = SLOTS.findIndex((slot) => slot.id === FIRST);
   const ropes = hangRopes(pose(first, createPose()));
   const hung = { x: Array.from(ropes.x), y: Array.from(ropes.y) };
 
   return (
-    <Figure id="style" aria-label="Style" status="layout: docs" className="pb-16">
+    <Figure id="style" aria-label="Style" status={`layout: ${FIRST}`} className="pb-16">
       <FigureHeader
         lead={copy.style.lead}
         title={copy.style.title}

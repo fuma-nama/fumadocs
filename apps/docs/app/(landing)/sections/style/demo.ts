@@ -1,7 +1,8 @@
 import { TICK } from '../../lib/motion';
+import { onTheme } from '../../lib/theme';
 import { ditherKeyframes } from '../../ui/dither';
 import type { ThemeId } from './data';
-import { inkCss, pageTheme } from './frames';
+import { inkCss, pageTheme, printIn } from './frames';
 import type { InkTable } from './presets';
 
 /** a new theme dithers in over the old one, a cell 3px on screen */
@@ -39,7 +40,6 @@ export function createDemo(
   let doc: Document | null = null;
   let theme: ThemeId | null = null;
   let ready = false;
-  let printing = 0;
 
   function apply() {
     const win = doc?.defaultView as (Window & typeof globalThis) | null | undefined;
@@ -64,36 +64,23 @@ export function createDemo(
   frame.addEventListener('load', onLoad);
 
   // shadcn takes this page's palette, the demo inks again when the page's theme changes
-  const mode = new MutationObserver(() => {
+  const stopTheme = onTheme(() => {
     if (theme === 'shadcn') apply();
   });
-  mode.observe(document.documentElement, { attributes: true, attributeFilter: ['class'] });
 
   return {
     ink(next, print) {
       const same = theme === null || theme === next;
       theme = next;
-      const root = doc?.documentElement;
-      if (same || !print || !doc || !root || !doc.startViewTransition || reduce.matches)
-        return apply();
-      const id = ++printing;
-      root.style.setProperty('--lp-print-ms', `${PRINT}ms`);
-      root.style.setProperty('--lp-print-size', `${CELL * 4}px`);
-      root.dataset.lpPrint = '';
-      const transition = doc.startViewTransition(apply);
-      transition.ready.catch(() => {});
-      transition.finished
-        .catch(() => {})
-        .finally(() => {
-          if (printing === id) delete root.dataset.lpPrint;
-        });
+      if (same || !print || !doc || reduce.matches) return apply();
+      printIn(doc, PRINT, CELL, apply);
     },
     show() {
       if (reduce.matches) return;
       box.animate(ditherKeyframes(CELL), { duration: PRINT });
     },
     destroy() {
-      mode.disconnect();
+      stopTheme();
       frame.removeEventListener('load', onLoad);
       frame.remove();
     },

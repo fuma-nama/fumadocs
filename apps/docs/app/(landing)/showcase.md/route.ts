@@ -1,5 +1,5 @@
 import { blogs, showcases, vercel } from '@/lib/showcases';
-import { copy, kinds, suggest } from '../showcase/data';
+import { arrange, copy, kinds, suggest } from '../showcase/data';
 
 export const dynamic = 'force-static';
 
@@ -22,18 +22,11 @@ function showcaseMarkdown(): string {
     '',
   ];
   // the wall's order: the featured with their own words, Vercel's SDKs, then every other site
-  for (const site of showcases) {
-    const kind = kinds[site.url];
-    if (kind) out.push(`- ${link(site.name, site.url)}: ${kind}`);
-  }
+  const { featured, shots, blank } = arrange(showcases);
+  for (const site of featured) out.push(`- ${link(site.name, site.url)}: ${kinds[site.url]}`);
   out.push(`- Vercel: ${copy.vercel}`);
   for (const site of vercel) out.push(`  - ${link(site.name, site.url)}: ${kinds[site.url]}`);
-  for (const site of showcases) {
-    if (!kinds[site.url] && site.image) out.push(`- ${link(site.name, site.url)}`);
-  }
-  for (const site of showcases) {
-    if (!kinds[site.url] && !site.image) out.push(`- ${link(site.name, site.url)}`);
-  }
+  for (const site of [...shots, ...blank]) out.push(`- ${link(site.name, site.url)}`);
 
   out.push('', `## ${copy.blogs.lead} ${copy.blogs.title}`, '');
   for (const site of blogs) out.push(`- ${link(site.name, site.url)}`);

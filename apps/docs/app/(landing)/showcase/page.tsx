@@ -4,9 +4,9 @@ import { createMetadata } from '@/lib/metadata';
 import { blogs, showcases, vercel } from '@/lib/showcases';
 import { Figure, FigureHeader, Lead } from '../ui/figure';
 import { address } from '../ui/site-tile';
-import { copy, kinds, suggest } from './data';
+import { arrange, copy, suggest } from './data';
 import { DeckBack, DeckFront } from './deck';
-import { Projector, type Reel } from './projector';
+import { Projector } from './projector';
 import { Blogs, Wall } from './wall';
 
 export const metadata: Metadata = createMetadata({
@@ -24,13 +24,8 @@ const figure = 'flex flex-col gap-12 px-(--lp-gutter) py-16 md:gap-16 md:py-20';
 
 export default function Page() {
   // the reel runs in the wall's order: the featured first, then every other site with a screenshot
-  const reel: Reel[] = [];
-  for (const { name, url, image } of showcases) {
-    if (image && kinds[url]) reel.push({ name, url, image });
-  }
-  for (const { name, url, image } of showcases) {
-    if (image && !kinds[url]) reel.push({ name, url, image });
-  }
+  const { featured, shots } = arrange(showcases);
+  const reel = [...featured, ...shots];
 
   return (
     <>

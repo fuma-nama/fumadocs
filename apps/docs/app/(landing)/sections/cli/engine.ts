@@ -1,18 +1,13 @@
 import { cubicBezier } from 'motion/react';
-import { createShaderCanvas } from '../../lib/gl';
+import { createShaderCanvas, cssRgb } from '../../lib/gl';
+import { clamp, mix, type Rect, rectIn } from '../../lib/math';
 import { settle, TICK } from '../../lib/motion';
 import { report } from '../../lib/status';
+import { isDark, onTheme } from '../../lib/theme';
 import { ditherKeyframes } from '../../ui/dither';
 import { createFlaps, type Flaps } from './flap';
-import { cables, PLUG, pointAt, RADIUS, type Route, type Vec3 } from './cable';
+import { PLUG, pointAt, RADIUS, type Route, routes, type Vec3 } from './cable';
 import { CARDS, fragment, ROPE_POINTS } from './scene';
-
-interface Rect {
-  x: number;
-  y: number;
-  w: number;
-  h: number;
-}
 
 /** the camera: how far it stands from the wall, CSS px */
 const CAM = 2400;
@@ -157,14 +152,14 @@ interface Scene {
   /** the window's list, it scrolls when the folders you open make it longer */
   list: HTMLElement;
   counter: HTMLElement;
-  flaps: Flaps;
+  /** made the first time they show, after the stage is measured */
+  flaps?: Flaps;
   rows: Map<string, HTMLElement>;
   added: HTMLElement[];
   cards: Card[];
   strikes: Strike[];
   /** per cable: the tab of its file, the row it plugs into */
-  cabled: number[];
-  targets: HTMLElement[];
+  cables: { tab: number; row: HTMLElement }[];
   editCut: HTMLElement;
   /** the page's window, and the page before your edit and after it */
   preview: HTMLElement;
@@ -203,11 +198,16 @@ interface Beats {
 export function createCli(root: HTMLElement): () => void {
   const canvas = root.querySelector('canvas')!;
   // its frames step the scene once the scene is set up
-  let ready = false;
+  let built = false;
   // the stage, the windows, and your project's list, whose folders move the rows the cables reach;
   // text set again in another font. Made before the canvas's own observer, so a canvas that
-  // resizes with the stage draws after this layout, in the same frame
-  const resize = new ResizeObserver(layout);
+  // resizes with the stage draws after this layout, in the same frame. Its first round only reports
+  // the sizes the setup has just measured
+  let observed = false;
+  const resize = new ResizeObserver(() => {
+    if (observed) layout();
+    observed = true;
+  });
   // the scene steps in the canvas's own frame, so the files and the machine move together
   const shader = createShaderCanvas(canvas, { fragment, onFrame });
   if (!shader) return () => {};
@@ -278,12 +278,10 @@ export function createCli(root: HTMLElement): () => void {
       });
     }
     // a cable per file whose imports now resolve into your project
-    const cabled: number[] = [];
-    const targets: HTMLElement[] = [];
+    const cables: Scene['cables'] = [];
     for (const tab of tabs) {
       if (tab.dataset.target === undefined) continue;
-      cabled.push(Number(tab.dataset.tab));
-      targets.push(row(tab.dataset.target)!);
+      cables.push({ tab: Number(tab.dataset.tab), row: row(tab.dataset.target)! });
     }
     const open = tabs.findIndex((tab) => tab.ariaSelected === 'true');
     const counter = root.querySelector<HTMLElement>(`[data-counter][data-scene="${index}"]`)!;
@@ -306,13 +304,11 @@ export function createCli(root: HTMLElement): () => void {
       tree,
       list: find('list', tree),
       counter,
-      flaps: createFlaps(counter),
       rows,
       added,
       cards,
       strikes,
-      cabled,
-      targets,
+      cables,
       editCut: find('cut', find('edit-line', editor)),
       preview: find('preview', column),
       page: find('page', column),
@@ -396,11 +392,6 @@ export function createCli(root: HTMLElement): () => void {
     return [foot[0] + (x - foot[0]) / k, foot[1] + (y - foot[1]) / k, z];
   }
 
-  function box(el: Element, s: DOMRect): Rect {
-    const r = el.getBoundingClientRect();
-    return { x: r.left - s.left, y: r.top - s.top, w: r.width, h: r.height };
-  }
-
   /** screen bounds of a world box, with its shadow on the wall */
   function bounds(min: Vec3, max: Vec3, pad = 6): [number, number, number, number] {
     let x0 = Infinity;
@@ -431,9 +422,9 @@ export function createCli(root: HTMLElement): () => void {
 
   function colours() {
     const style = getComputedStyle(html);
-    const night = html.classList.contains('dark');
-    const paper = rgb(style.getPropertyValue('--lp-paper'));
-    const ink = rgb(style.getPropertyValue('--lp-ink'));
+    const night = isDark();
+    const paper = cssRgb(style.getPropertyValue('--lp-paper'));
+    const ink = cssRgb(style.getPropertyValue('--lp-ink'));
     gl.set('uLit', night ? ink : paper);
     gl.set('uShade', night ? paper : ink);
     gl.set('uPen', ink);
@@ -444,7 +435,7 @@ export function createCli(root: HTMLElement): () => void {
       paper[1] + (ink[1] - paper[1]) * line,
       paper[2] + (ink[2] - paper[2]) * line,
     ]);
-    gl.set('uAccent', rgb(style.getPropertyValue(night ? '--lp-orange' : '--lp-sun')));
+    gl.set('uAccent', cssRgb(style.getPropertyValue(night ? '--lp-orange' : '--lp-sun')));
     gl.invalidate();
   }
 
@@ -544,7 +535,7 @@ export function createCli(root: HTMLElement): () => void {
       const strike = scene.strikes[i];
       strikes.push(t);
       // a file's cable moves once its last import is rewritten, while the diff is read
-      const c = scene.cabled.indexOf(strike.tab);
+      const c = scene.cables.findIndex((cable) => cable.tab === strike.tab);
       if (c >= 0 && scene.strikes[i + 1]?.tab !== strike.tab) {
         plugs[c] = t + 300 + strike.after.length * 70 + 60;
         free = wires[c] ? plugs[c] + windTime(wires[c]) + 260 : t + strikeTime(strike);
@@ -611,7 +602,7 @@ export function createCli(root: HTMLElement): () => void {
     for (const el of scene.added) el.style.display = '';
 
     // the crate's front face is its slot
-    const slot = box(crate, s);
+    const slot = rectIn(crate, s);
     // as deep as about a third of its width: the bigger crate of a wide stage stays a box
     const depth = desktop ? Math.max(92, Math.round(slot.w * 0.37)) : 80;
     const a = unproject(slot.x, slot.y, CRATE_Z);
@@ -624,7 +615,7 @@ export function createCli(root: HTMLElement): () => void {
     gl.set('uCrate', centre);
     gl.set('uCrateSize', size);
     gl.set('uLidT', LID_T);
-    const tag = box(label, s);
+    const tag = rectIn(label, s);
     gl.set('uLabel', [tag.x, tag.y, tag.x + tag.w, tag.y + tag.h]);
     housing('uLabel', tag, CRATE_Z + 3, 3, 6);
     // the sockets stand above the corner caps, right of the label's plate; the right one's cable
@@ -645,14 +636,14 @@ export function createCli(root: HTMLElement): () => void {
     }
 
     // the drive unit frames the registry's plate and turns the chain
-    const sign = box(plate, s);
+    const sign = rectIn(plate, s);
     gl.set('uPlate', [sign.x, sign.y, sign.x + sign.w, sign.y + sign.h]);
     housing('uDrive', sign, CHAIN_Z + 22, 18, 8);
     // the hopper frames the counter, its spout rests on the title bar of your project
-    const counter = box(scene.counter, s);
+    const counter = rectIn(scene.counter, s);
     gl.set('uCounter', [counter.x, counter.y, counter.x + counter.w, counter.y + counter.h]);
     housing('uCounter', counter, HOPPER_Z + 24, 4, 5);
-    const treeBox = box(scene.tree, s);
+    const treeBox = rectIn(scene.tree, s);
     // placed by its front face, the one around the counter: far down a tall stage the perspective
     // would otherwise move it off its window
     const middle = counter.x + counter.w / 2;
@@ -756,17 +747,13 @@ export function createCli(root: HTMLElement): () => void {
       for (const card of scene.cards) card.slide = inlet + card.w * card.scale - slideFrom[0] + 1;
     }
 
-    const editor = box(scene.editor, s);
+    const editor = rectIn(scene.editor, s);
     for (const strike of scene.strikes) strike.key = '';
     editCaretKey = '';
-    {
-      // the edit caret is a character cell of the code
-      const range = document.createRange();
-      range.selectNodeContents(scene.editCut);
-      const cut = range.getBoundingClientRect();
-      editCaret.style.width = `${cut.width / Math.max(scene.editCut.textContent!.length, 1)}px`;
-      editCaret.style.height = `${cut.height}px`;
-    }
+    // the edit caret is a character cell of the code
+    const range = document.createRange();
+    range.selectNodeContents(scene.editCut);
+    const cut = range.getBoundingClientRect();
 
     // cables: off a reel on the editor's edge beside a file's tab, down the gutter, along the
     // floor to the crate
@@ -776,16 +763,16 @@ export function createCli(root: HTMLElement): () => void {
       // viewer, far enough to pass under your project's window
       const lanes = [treeBox.x + treeBox.w + 10, treeBox.x + treeBox.w + 21];
       const front = [CRATE_Z + 40, CRATE_Z + 58];
-      const view = box(scene.list, s);
-      for (let i = 0; i < scene.cabled.length; i++) {
-        const tab = box(scene.tabs[scene.cabled[i]], s);
+      const view = rectIn(scene.list, s);
+      for (let i = 0; i < scene.cables.length; i++) {
+        const tab = rectIn(scene.tabs[scene.cables[i].tab], s);
         const reel: Vec3 = [editor.x - REEL - 2, tab.y + tab.h / 2, WALL];
-        const row = box(scene.targets[i], s);
+        const row = rectIn(scene.cables[i].row, s);
         const lane = lanes[i];
         // a row scrolled out of the list keeps its plug on the list's edge
         const plug = Math.min(view.y + view.h - 10, Math.max(view.y + 10, row.y + row.h / 2));
         const target: Vec3 = [treeBox.x + treeBox.w + 3, plug, WALL];
-        const { sealed, done, branch, turn } = cables({
+        const { sealed, done, branch, turn } = routes({
           reel: [reel[0] - REEL, reel[1], WALL],
           lane,
           wall: WALL,
@@ -795,7 +782,7 @@ export function createCli(root: HTMLElement): () => void {
           socket: [sockets[i][0], sockets[i][1], CRATE_Z + 2],
           target,
         });
-        wires.push({ sealed, done, branch, turn, row: scene.targets[i] });
+        wires.push({ sealed, done, branch, turn, row: scene.cables[i].row });
         gl.set(`uReel[${i}]`, reel);
         gl.set(`uJack[${i}]`, [target[0] - 3, target[1], WALL]);
       }
@@ -825,11 +812,14 @@ export function createCli(root: HTMLElement): () => void {
         ? bounds([treeBox.x + treeBox.w - 12, editor.y, 0], [editor.x + 12, floor, 24])
         : [0, 0, 0, 0],
     );
-    const windows = [scene.tree, scene.editor, find('preview', scene.column)];
+    const windows = [scene.tree, scene.editor, scene.preview];
     for (let i = 0; i < windows.length; i++) {
-      const r = box(windows[i], s);
+      const r = rectIn(windows[i], s);
       gl.set(`uWindow[${i}]`, [r.x, r.y, r.x + r.w, r.y + r.h]);
     }
+    // written once the stage is read, so reading it never waits for a layout
+    editCaret.style.width = `${cut.width / Math.max(scene.editCut.textContent!.length, 1)}px`;
+    editCaret.style.height = `${cut.height}px`;
 
     beats = schedule();
     // a waiting run waits where its act now starts
@@ -1148,6 +1138,7 @@ export function createCli(root: HTMLElement): () => void {
     if (landed !== landedShown) {
       const animate = live && landedShown >= 0 && landed > landedShown;
       landedShown = landed;
+      scene.flaps ??= createFlaps(scene.counter);
       scene.flaps.set(live ? landed : scene.cards.length, animate);
       for (const el of scene.added) el.style.display = live ? 'none' : '';
       if (live) {
@@ -1197,7 +1188,7 @@ export function createCli(root: HTMLElement): () => void {
   }
 
   function onFrame(time: number) {
-    if (!ready || phase !== 'play') return;
+    if (!built || phase !== 'play') return;
     const now = time * 1000;
     const dt = last < 0 ? 0 : Math.min(50, now - last);
     last = now;
@@ -1383,7 +1374,6 @@ export function createCli(root: HTMLElement): () => void {
     scrolled = event.timeStamp;
   };
 
-  const theme = new MutationObserver(colours);
   resize.observe(root);
   for (const s of scenes) {
     resize.observe(s.tree);
@@ -1393,10 +1383,12 @@ export function createCli(root: HTMLElement): () => void {
     // a scroll event comes before this frame paints: the cables follow their rows in it
     s.list.addEventListener('scroll', layout, { passive: true });
   }
-  void document.fonts.ready.then(() => {
-    if (!disposed) layout();
-  });
-  theme.observe(html, { attributes: true, attributeFilter: ['class'] });
+  if (document.fonts.status !== 'loaded') {
+    void document.fonts.ready.then(() => {
+      if (!disposed) layout();
+    });
+  }
+  const stopTheme = onTheme(colours);
   atMiddle.observe(root);
   parts.observe(crate);
   parts.observe(commandBox);
@@ -1413,7 +1405,7 @@ export function createCli(root: HTMLElement): () => void {
       tab.addEventListener('keydown', onTab);
     }
   }
-  ready = true;
+  built = true;
   colours();
   layout();
   // every load waits for the reader, the figure on screen or not
@@ -1430,7 +1422,7 @@ export function createCli(root: HTMLElement): () => void {
     clearTimeout(dwell);
     removeEventListener('scroll', onScroll);
     resize.disconnect();
-    theme.disconnect();
+    stopTheme();
     replay.removeEventListener('click', play);
     for (const chip of chips) chip.removeEventListener('click', onPlay);
     for (const s of scenes) {
@@ -1439,7 +1431,7 @@ export function createCli(root: HTMLElement): () => void {
         tab.removeEventListener('click', onTab);
         tab.removeEventListener('keydown', onTab);
       }
-      s.flaps.destroy();
+      s.flaps?.destroy();
     }
     gl.destroy();
   };
@@ -1489,21 +1481,7 @@ function bezier(a: number, b: number, c: number, t: number) {
   return s * s * a + 2 * s * t * b + t * t * c;
 }
 
-function clamp(v: number) {
-  return Math.min(1, Math.max(0, v));
-}
-
-function mix(a: number, b: number, t: number) {
-  return a + (b - a) * t;
-}
-
 function normalize(v: Vec3): Vec3 {
   const l = Math.hypot(v[0], v[1], v[2]);
   return [v[0] / l, v[1] / l, v[2] / l];
-}
-
-function rgb(value: string): [number, number, number] {
-  const hex = value.trim().slice(1);
-  const n = Number.parseInt(hex.length === 3 ? hex.replace(/./g, '$&$&') : hex.slice(0, 6), 16);
-  return [((n >> 16) & 255) / 255, ((n >> 8) & 255) / 255, (n & 255) / 255];
 }

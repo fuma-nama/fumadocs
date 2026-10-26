@@ -1,12 +1,14 @@
 import type { TOCItemType } from 'fumadocs-core/toc';
 import type { Layer } from '../../ui/spec';
 
-/** headings of the sample page */
+/** headings of fumadocs.dev's Quick Start */
 export const toc: TOCItemType[] = [
-  { title: 'Installation', url: '#installation', depth: 2 },
-  { title: 'Usage', url: '#usage', depth: 2 },
-  { title: 'Configuration', url: '#configuration', depth: 3 },
-  { title: 'Deployment', url: '#deployment', depth: 2 },
+  { title: 'Introduction', url: '#introduction', depth: 2 },
+  { title: 'Terminology', url: '#terminology', depth: 3 },
+  { title: 'Automatic Installation', url: '#automatic-installation', depth: 2 },
+  { title: 'Enjoy!', url: '#enjoy', depth: 3 },
+  { title: 'FAQ', url: '#faq', depth: 2 },
+  { title: 'Learn More', url: '#learn-more', depth: 2 },
 ];
 
 /** the npm code block of the page, as `remarkNpm` converts it */
@@ -29,12 +31,6 @@ export type SwapLayer = Exclude<Layer, 'core'>;
 /** the swaps in the order of the trays */
 export const SWAPS: SwapLayer[] = ['ui', 'content', 'framework'];
 
-/** what a layer holds with an option in: where its pages or its routes live */
-export interface Holds {
-  root: string;
-  items: string[];
-}
-
 export interface Option {
   /** its name in prose, as the docs spell it: the label of its key */
   title: string;
@@ -46,7 +42,6 @@ export interface Option {
   code: string;
   /** a command that produced the file */
   command?: string;
-  holds?: Holds;
 }
 
 interface Framework extends Option {
@@ -126,9 +121,6 @@ export function Page({ items, children }: { items: TOCItemType[]; children: Reac
   },
 ];
 
-const pages = ['index.mdx', 'quick-start.mdx', 'meta.json'];
-const titles = ['Introduction', 'Quick Start', 'Themes'];
-
 // examples/next-min and examples/content-collections, then integrations/content/*.mdx without
 // their optional options and comments
 const content: Option[] = [
@@ -137,7 +129,6 @@ const content: Option[] = [
     name: 'fumadocs-mdx',
     file: 'lib/source.ts',
     lang: 'ts',
-    holds: { root: 'content/docs', items: pages },
     code: `import { loader } from 'fumadocs-core/source';
 import { defineDocs } from 'fumadocs-mdx/macro';
 
@@ -155,7 +146,6 @@ export const source = loader({
     name: '@fumadocs/content-collections',
     file: 'lib/source.ts',
     lang: 'ts',
-    holds: { root: 'content/docs', items: pages },
     code: `import { allDocs, allMetas } from 'content-collections';
 import { loader } from 'fumadocs-core/source';
 import { createMDXSource } from '@fumadocs/content-collections';
@@ -170,7 +160,6 @@ export const source = loader({
     name: '@fumadocs/local-md',
     file: 'lib/source.ts',
     lang: 'ts',
-    holds: { root: 'content/docs', items: pages },
     code: `import { dynamicLoader } from 'fumadocs-core/source';
 import { localMd } from '@fumadocs/local-md';
 
@@ -191,7 +180,6 @@ export async function getSource() {
     name: '@fumadocs/notion',
     file: 'lib/source.ts',
     lang: 'ts',
-    holds: { root: 'Notion database', items: titles },
     code: `import { dynamicLoader } from 'fumadocs-core/source';
 import { notion } from '@/lib/notion';
 
@@ -208,7 +196,6 @@ export async function getSource() {
     name: 'fumadocs-obsidian',
     file: 'lib/source.ts',
     lang: 'ts',
-    holds: { root: 'public/vault', items: ['Introduction.md', 'Quick Start.md', 'Themes.md'] },
     code: `import { dynamicLoader } from 'fumadocs-core/source';
 import { obsidian } from 'fumadocs-obsidian';
 
@@ -234,7 +221,6 @@ export function getSource() {
     name: '@fumadocs/sanity',
     file: 'lib/source.ts',
     lang: 'ts',
-    holds: { root: "docType: 'docs'", items: titles },
     code: `import { dynamicLoader } from 'fumadocs-core/source';
 import { createSanitySource } from '@fumadocs/sanity';
 import { client } from '@/sanity/lib/client';
@@ -286,7 +272,6 @@ const framework: Framework[] = [
       name: 'next',
       file: 'app/layout.tsx',
       lang: 'tsx',
-      holds: { root: 'app', items: ['layout.tsx', 'docs/[[...slug]]/page.tsx'] },
     },
     'next',
     'NextProvider',
@@ -309,7 +294,6 @@ export default function Layout({ children }: LayoutProps<'/'>) {
       name: 'react-router',
       file: 'app/root.tsx',
       lang: 'tsx',
-      holds: { root: 'app', items: ['root.tsx', 'routes.ts', 'routes/docs.tsx'] },
     },
     'react-router',
     'ReactRouterProvider',
@@ -341,7 +325,6 @@ export function Layout({ children }: { children: React.ReactNode }) {
       name: '@tanstack/react-start',
       file: 'src/routes/__root.tsx',
       lang: 'tsx',
-      holds: { root: 'src/routes', items: ['__root.tsx', 'docs/$.tsx', 'api/search.ts'] },
     },
     'tanstack',
     'TanstackProvider',
@@ -379,7 +362,6 @@ function RootComponent() {
       name: 'waku',
       file: 'src/components/provider.tsx',
       lang: 'tsx',
-      holds: { root: 'src', items: ['components/provider.tsx', 'pages/docs/[...slugs].tsx'] },
     },
     'waku',
     'WakuProvider',
@@ -397,7 +379,6 @@ export function Provider({ children }: { children: ReactNode }) {
       name: 'astro',
       file: 'src/components/docs.tsx',
       lang: 'tsx',
-      holds: { root: 'src', items: ['components/docs.tsx', 'pages/[...slug].astro'] },
     },
     'astro',
     'AstroProvider',

@@ -1,22 +1,21 @@
 'use client';
 import type { ReactNode } from 'react';
+import { whenSeen } from '../../lib/later';
 import { createCli } from './engine';
 
 function mount(root: HTMLDivElement | null) {
   if (!root) return;
   // the WebGL context and its shader wait until the figure is within a viewport of the screen
   let destroy: (() => void) | undefined;
-  const observer = new IntersectionObserver(
-    ([entry]) => {
-      if (!entry.isIntersecting) return;
-      observer.disconnect();
+  const stopView = whenSeen(
+    root,
+    () => {
       destroy = createCli(root);
     },
     { rootMargin: '100% 0px' },
   );
-  observer.observe(root);
   return () => {
-    observer.disconnect();
+    stopView();
     destroy?.();
   };
 }

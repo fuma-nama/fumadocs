@@ -1,10 +1,11 @@
 import { cubicBezier } from 'motion/react';
-import { createShaderCanvas } from '../../lib/gl';
+import { createShaderCanvas, cssRgb } from '../../lib/gl';
+import { clamp, rectIn, smoothstep } from '../../lib/math';
 import { camera, settleCss, TICK } from '../../lib/motion';
-import { setStatus } from '../../lib/status';
+import { report } from '../../lib/status';
+import { isDark, onTheme } from '../../lib/theme';
 import { createAtlas } from './atlas';
 import {
-  type Rect,
   type Vec3,
   type View,
   fragment,
@@ -14,7 +15,7 @@ import {
   unproject,
   viewAt,
 } from './scene';
-import { COLS, createSession, finalFrame, type Frame, paint, ROWS } from './session';
+import { COLS, createSession, type Frame, paint, ROWS } from './session';
 
 const cameraEase = cubicBezier(...camera);
 /** CRT power on: the raster opens from a line, one step per tick */
@@ -68,22 +69,21 @@ export function createStart(el: StartElements): () => void {
 
   let density: Uint8Array | undefined;
   let visible = false;
-  /** the stage holds most of the view, so the session may speak in the status bar */
-  let focused = false;
   let current = 0;
   let timer = 0;
+  let spinner = 0;
   let openAt = -1;
   let shown = true;
   let disposed = false;
 
   function colours() {
     const style = getComputedStyle(root);
-    const night = root.classList.contains('dark');
-    const paper = rgb(style.getPropertyValue('--lp-paper'));
-    const ink = rgb(style.getPropertyValue('--lp-ink'));
+    const night = isDark();
+    const paper = cssRgb(style.getPropertyValue('--lp-paper'));
+    const ink = cssRgb(style.getPropertyValue('--lp-ink'));
     shader!.set('uLit', night ? ink : paper);
     shader!.set('uShade', night ? paper : ink);
-    shader!.set('uAccent', rgb(style.getPropertyValue(night ? '--lp-yellow' : '--lp-sun')));
+    shader!.set('uAccent', cssRgb(style.getPropertyValue(night ? '--lp-yellow' : '--lp-sun')));
     shader!.set('uNight', night ? 1 : 0);
     shader!.invalidate();
   }
@@ -93,13 +93,7 @@ export function createStart(el: StartElements): () => void {
     height = el.stage.clientHeight;
     if (width === 0 || height === 0) return;
     const stage = el.stage.getBoundingClientRect();
-    const box = el.slot.getBoundingClientRect();
-    const slot: Rect = {
-      x: box.left - stage.left,
-      y: box.top - stage.top,
-      w: box.width,
-      h: box.height,
-    };
+    const slot = rectIn(el.slot, stage);
     pinned = wide.matches && !reduce.matches;
     beside = wide.matches;
     const cta = el.cta.getBoundingClientRect();
@@ -226,7 +220,7 @@ export function createStart(el: StartElements): () => void {
     if (!density) return;
     paint(frame, chars.data, density);
     shader!.texture('uChars', chars);
-    if (frame.status && focused) setStatus(frame.status);
+    if (frame.status) report(el.pin, frame.status);
   }
 
   function play() {
@@ -234,7 +228,7 @@ export function createStart(el: StartElements): () => void {
     if (!density) return;
     if (reduce.matches) {
       openAt = -1;
-      render(finalFrame(session));
+      render(session.rest);
       return;
     }
     openAt = performance.now();
@@ -257,23 +251,33 @@ export function createStart(el: StartElements): () => void {
       const fill =
         entry.intersectionRect.height /
         Math.min(entry.boundingClientRect.height, window.innerHeight);
-      focused = fill > 0.5;
       if (!visible && fill > 0.85) {
         visible = true;
         play();
+        spinner = window.setInterval(turn, 2 * TICK);
       } else if (visible && !entry.isIntersecting) {
         visible = false;
         clearTimeout(timer);
+        clearInterval(spinner);
       }
     },
     { threshold: [0, 0.25, 0.5, 0.75, 0.9, 1] },
   );
 
-  const spinner = window.setInterval(() => {
-    if (!visible || reduce.matches) return;
+  // the camera follows the page's scroll only while the stage is on screen
+  const follow = new IntersectionObserver(([entry]) => {
+    if (entry.isIntersecting) {
+      window.addEventListener('scroll', scroll, { passive: true });
+      scroll();
+    } else window.removeEventListener('scroll', scroll);
+  });
+
+  /** the moon turns a step at a time while the screen is on */
+  function turn() {
+    if (reduce.matches) return;
     spin += 0.02;
-    shader.invalidate();
-  }, 2 * TICK);
+    shader!.invalidate();
+  }
 
   function onPointer(event: PointerEvent) {
     if (event.pointerType !== 'mouse' || reduce.matches) return;
@@ -300,15 +304,14 @@ export function createStart(el: StartElements): () => void {
   }
 
   const resize = new ResizeObserver(layout);
-  const theme = new MutationObserver(colours);
+  const stopTheme = onTheme(colours);
   resize.observe(el.stage);
   resize.observe(el.pin);
   resize.observe(root);
   // the title and description rewrap as fonts load, moving the call to action's foot
   resize.observe(items[0].parentElement!);
-  theme.observe(root, { attributes: true, attributeFilter: ['class'] });
   visibility.observe(el.stage);
-  window.addEventListener('scroll', scroll, { passive: true });
+  follow.observe(el.stage);
   wide.addEventListener('change', onPreference);
   reduce.addEventListener('change', onPreference);
   el.stage.addEventListener('pointermove', onPointer);
@@ -336,8 +339,9 @@ export function createStart(el: StartElements): () => void {
     clearTimeout(timer);
     clearInterval(spinner);
     resize.disconnect();
-    theme.disconnect();
+    stopTheme();
     visibility.disconnect();
+    follow.disconnect();
     window.removeEventListener('scroll', scroll);
     wide.removeEventListener('change', onPreference);
     reduce.removeEventListener('change', onPreference);
@@ -346,19 +350,4 @@ export function createStart(el: StartElements): () => void {
     el.cta.removeEventListener('focusin', onFocus);
     shader.destroy();
   };
-}
-
-function clamp(value: number) {
-  return Math.min(1, Math.max(0, value));
-}
-
-function smoothstep(a: number, b: number, t: number) {
-  const x = clamp((t - a) / (b - a));
-  return x * x * (3 - 2 * x);
-}
-
-function rgb(value: string): [number, number, number] {
-  const hex = value.trim().slice(1);
-  const n = Number.parseInt(hex.length === 3 ? hex.replace(/./g, '$&$&') : hex.slice(0, 6), 16);
-  return [((n >> 16) & 255) / 255, ((n >> 8) & 255) / 255, (n & 255) / 255];
 }

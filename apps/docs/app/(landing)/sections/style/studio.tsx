@@ -5,12 +5,13 @@ import { report } from '../../lib/status';
 import { Window } from '../../ui/window';
 import type { Hung } from './board';
 import { Convert } from './convert';
-import { type DemoId, type LayoutId, TABS, type TabId, type ThemeId } from './data';
+import { FIRST, type LayoutId, TABS, type TabId, type ThemeId } from './data';
 import { Desk } from './desk';
 import { Dial } from './dial';
 import type { Hardware } from './hardware';
 import { Monitor } from './monitor';
 import type { InkTable, Wiring } from './presets';
+import type { Stage } from './stage';
 import { type SwitchItem, Switches } from './switches';
 
 interface StudioProps {
@@ -24,16 +25,8 @@ interface StudioProps {
   hardware: Hardware;
 }
 
-const SWITCHES: SwitchItem[] = [];
+const SWITCHES: SwitchItem<TabId>[] = [];
 for (const id of TABS) SWITCHES.push({ id, label: copy.style.tabs[id].label });
-
-/** the accessible names of the demos' frames */
-const TITLES: Record<DemoId, string> = {
-  story: 'Story of a Callout, with its controls',
-  openapi: 'OpenAPI page of an operation, with its playground',
-  graphql: 'GraphQL page of a query, with its playground',
-  asyncapi: 'AsyncAPI page of a channel, with its playground',
-};
 
 /** the id prefix of the tabs and their panel */
 const ID = 'style';
@@ -44,17 +37,19 @@ const ID = 'style';
  */
 export function Studio({ table, names, wirings, hung, hardware }: StudioProps) {
   const [tab, setTab] = useState<TabId>('layouts');
-  const [layout, setLayout] = useState<LayoutId>('docs');
+  const [layout, setLayout] = useState<LayoutId>(FIRST);
   const [theme, setTheme] = useState<ThemeId>('neutral');
   const [turning, setTurning] = useState(false);
   const [busy, setBusy] = useState(false);
-  const [intent, setIntent] = useState<TabId | null>(null);
   const root = useRef<HTMLDivElement>(null);
+  const stage = useRef<Stage | null>(null);
 
   function selectTab(next: TabId) {
     setTab(next);
     if (root.current) report(root.current, `tab: ${next}`);
   }
+
+  const preload = useCallback((id: TabId) => stage.current?.preload(id), []);
 
   const selectLayout = useCallback((next: LayoutId) => {
     setLayout(next);
@@ -62,11 +57,11 @@ export function Studio({ table, names, wirings, hung, hardware }: StudioProps) {
     if (root.current) report(root.current, `layout: ${next}`);
   }, []);
 
-  function changeTheme(id: ThemeId, dragging: boolean) {
+  const changeTheme = useCallback((id: ThemeId, dragging: boolean) => {
     setTheme(id);
     setTurning(dragging);
     if (root.current) report(root.current, `theme: ${id}`);
-  }
+  }, []);
 
   // One grid places every block. From 1024 the desk and the monitor sit side by side over the dial
   // and the variables, read row by row as the markup runs; below it the real UI comes first, then
@@ -82,8 +77,8 @@ export function Studio({ table, names, wirings, hung, hardware }: StudioProps) {
       <Switches
         items={SWITCHES}
         value={tab}
-        onChange={(id) => selectTab(id as TabId)}
-        onIntent={(id) => setIntent(id as TabId)}
+        onChange={selectTab}
+        onIntent={preload}
         idPrefix={ID}
         className="max-lg:order-2 lg:col-start-1 lg:row-start-1"
       />
@@ -94,8 +89,8 @@ export function Studio({ table, names, wirings, hung, hardware }: StudioProps) {
         layout={layout}
         theme={theme}
         instant={turning}
-        intent={intent}
-        titles={TITLES}
+        busy={busy}
+        stageRef={stage}
         panelId={`${ID}-panel`}
         labelledBy={`${ID}-tab-${tab}`}
         onBusy={setBusy}

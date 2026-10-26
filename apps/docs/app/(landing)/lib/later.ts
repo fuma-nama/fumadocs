@@ -10,6 +10,21 @@ export function later(setup: () => (() => void) | undefined): () => void {
   };
 }
 
+/** runs `task` once `element` comes on screen, by `init`'s terms; returns its cancel */
+export function whenSeen(
+  element: Element,
+  task: () => void,
+  init?: IntersectionObserverInit,
+): () => void {
+  const observer = new IntersectionObserver(([entry]) => {
+    if (!entry.isIntersecting) return;
+    observer.disconnect();
+    task();
+  }, init);
+  observer.observe(element);
+  return () => observer.disconnect();
+}
+
 /** ms without a scroll event before the page counts as still */
 const STILL = 150;
 
@@ -20,7 +35,6 @@ const STILL = 150;
 export function idle(task: () => void): () => void {
   let timer = 0;
   let callback = 0;
-  // Safari has no idle callbacks: a task of its own instead
   function cancel() {
     clearTimeout(timer);
     if (window.cancelIdleCallback) window.cancelIdleCallback(callback);
@@ -29,6 +43,7 @@ export function idle(task: () => void): () => void {
   function wait() {
     cancel();
     timer = window.setTimeout(() => {
+      // Safari has no idle callbacks: a task of its own instead
       if (window.requestIdleCallback) callback = window.requestIdleCallback(run);
       else callback = window.setTimeout(run);
     }, STILL);

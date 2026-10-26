@@ -1,8 +1,8 @@
 'use client';
-import { type KeyboardEvent, memo, useCallback, useEffect, useRef, useState } from 'react';
+import { type KeyboardEvent, memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { cn } from '@/lib/cn';
 import { DITHER_MASKS } from '../../lib/bayer';
-import { LAYOUTS, type LayoutId } from './data';
+import { FIRST, LAYOUTS, type LayoutId } from './data';
 import { Plan } from './plan';
 import { ropePath } from './rope';
 import {
@@ -89,11 +89,11 @@ export const Desk = memo(function Desk({
   className,
 }: DeskProps) {
   // the server draws the first pose; from then on the engine moves everything
-  const [first] = useState(() => {
-    const index = SLOTS.findIndex((slot) => slot.id === selected);
+  const first = useMemo(() => {
+    const index = SLOTS.findIndex((slot) => slot.id === FIRST);
     const at = pose(index, createPose());
-    return { index, at, hung, ropes: hangRopes(at, hung) };
-  });
+    return { index, at, ropes: hangRopes(at, hung) };
+  }, [hung]);
   const index = SLOTS.findIndex((slot) => slot.id === selected);
   // the relay clicks over each time a layout is patched in
   const [relay, setRelay] = useState({ selected, flip: false });
@@ -103,14 +103,14 @@ export const Desk = memo(function Desk({
   const ref = useCallback(
     (board: HTMLDivElement | null) => {
       if (!board) return;
-      const instance = createDeskEngine(board, first.index, first.hung);
+      const instance = createDeskEngine(board, first.index, hung);
       engine.current = instance;
       return () => {
         instance.destroy();
         engine.current = null;
       };
     },
-    [first],
+    [first, hung],
   );
 
   useEffect(() => {

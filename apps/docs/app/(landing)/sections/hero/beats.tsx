@@ -1,5 +1,5 @@
 'use client';
-import { useEffect, useRef } from 'react';
+import { useCallback } from 'react';
 import { useReducedMotion } from 'motion/react';
 import { BEAT_AT, bootStart, untilBeat } from './boot';
 
@@ -41,24 +41,25 @@ function keyframes(layer: number): Keyframe[] {
 /** a burst of slice offsets at boot, then every 5-9s */
 export function Glitch({ children }: { children: string }) {
   const reduced = useReducedMotion();
-  const ref = useRef<HTMLSpanElement>(null);
-
-  useEffect(() => {
-    const root = ref.current!;
-    const start = bootStart(root);
-    if (reduced) return;
-    const layers = root.querySelectorAll('span');
-    let timer = 0;
-    const play = () => {
-      for (let i = 0; i < layers.length; i++) layers[i].animate(keyframes(i), { duration: 150 });
-      timer = window.setTimeout(play, 5000 + Math.random() * 4000);
-    };
-    timer = window.setTimeout(
-      play,
-      start === null ? 5000 + Math.random() * 4000 : untilBeat(start, BEAT_AT.glitch),
-    );
-    return () => clearTimeout(timer);
-  }, [reduced]);
+  const ref = useCallback(
+    (root: HTMLSpanElement | null) => {
+      if (!root) return;
+      const start = bootStart(root);
+      if (reduced) return;
+      const layers = root.querySelectorAll('span');
+      let timer = 0;
+      const play = () => {
+        for (let i = 0; i < layers.length; i++) layers[i].animate(keyframes(i), { duration: 150 });
+        timer = window.setTimeout(play, 5000 + Math.random() * 4000);
+      };
+      timer = window.setTimeout(
+        play,
+        start === null ? 5000 + Math.random() * 4000 : untilBeat(start, BEAT_AT.glitch),
+      );
+      return () => clearTimeout(timer);
+    },
+    [reduced],
+  );
 
   return (
     <span ref={ref} className="relative inline-block">

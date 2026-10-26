@@ -304,13 +304,7 @@
 
 /* idle micro-motion of the resting cells: a caret, a status light */
 .bt-cell:not([data-active]) .bt-blink {
-  animation: bt-blink 1s steps(1, end) infinite;
-}
-
-@keyframes bt-blink {
-  50% {
-    opacity: 0;
-  }
+  animation: lp-caret 1s steps(1, end) infinite;
 }
 
 /* the second unit of a flap display follows one tick later */

@@ -1,21 +1,11 @@
 'use client';
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { type RefObject, useCallback, useEffect } from 'react';
 import { ArrowUpRight } from 'lucide-react';
-import { useReducedMotion } from 'motion/react';
 import { copy } from '../../content';
 import { TICK } from '../../lib/motion';
 import { Scramble } from '../../ui/text';
 import { Window } from '../../ui/window';
-import {
-  type DemoId,
-  LAYOUTS,
-  type LayoutId,
-  SOURCES,
-  TABS,
-  type TabId,
-  THEME_NAMES,
-  type ThemeId,
-} from './data';
+import { DEMOS, LAYOUTS, type LayoutId, TABS, type TabId, THEME_NAMES, type ThemeId } from './data';
 import { Plan } from './plan';
 import type { InkTable } from './presets';
 import { createStage, type Stage } from './stage';
@@ -27,10 +17,9 @@ interface MonitorProps {
   theme: ThemeId;
   /** ink a theme without the print, while the dial turns */
   instant: boolean;
-  /** a tab the reader is reaching for: its demo loads ahead */
-  intent: TabId | null;
-  /** the names of the demos' frames */
-  titles: Record<DemoId, string>;
+  /** the next screen is on its way */
+  busy: boolean;
+  stageRef: RefObject<Stage | null>;
   /** the screen is the tabs' panel */
   panelId: string;
   labelledBy: string;
@@ -41,22 +30,13 @@ interface MonitorProps {
 const SPIN = '◒◐◓◑';
 
 /** clack's spinner in the title bar while the next screen is on its way, still for reduced motion */
-function Busy() {
-  const reduced = useReducedMotion();
-  const [frame, setFrame] = useState(0);
-  useEffect(() => {
-    if (reduced) return;
-    const timer = window.setInterval(() => setFrame((n) => n + 1), TICK);
-    return () => clearInterval(timer);
-  }, [reduced]);
-  return (
-    <span
-      aria-hidden
-      className="relative flex size-3.5 items-center justify-center bg-lp-paper font-mono text-xs leading-none"
-    >
-      {SPIN[frame % SPIN.length]}
-    </span>
-  );
+function spin(span: HTMLSpanElement | null) {
+  if (!span || matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+  let frame = 0;
+  const timer = window.setInterval(() => {
+    span.textContent = SPIN[++frame % SPIN.length];
+  }, TICK);
+  return () => clearInterval(timer);
 }
 
 /** the live layout, or a hands-on demo, in the chosen theme */
@@ -66,45 +46,32 @@ export function Monitor({
   layout,
   theme,
   instant,
-  intent,
-  titles,
+  busy,
+  stageRef,
   panelId,
   labelledBy,
   onBusy,
   className,
 }: MonitorProps) {
-  const stage = useRef<Stage | null>(null);
-  const [busy, setBusy] = useState(false);
-  const busyRef = useRef(onBusy);
-  useEffect(() => {
-    busyRef.current = onBusy;
-  });
   const ref = useCallback(
     (element: HTMLDivElement | null) => {
       if (!element) return;
-      const instance = createStage(element, table, titles, (next) => {
-        setBusy(next);
-        busyRef.current(next);
-      });
-      stage.current = instance;
+      const instance = createStage(element, table, onBusy);
+      stageRef.current = instance;
       return () => {
         instance.destroy();
-        stage.current = null;
+        stageRef.current = null;
       };
     },
-    [table, titles],
+    [table, onBusy, stageRef],
   );
 
   useEffect(() => {
-    stage.current?.show(tab, layout, theme, instant);
-  }, [tab, layout, theme, instant]);
-
-  useEffect(() => {
-    if (intent) stage.current?.preload(intent);
-  }, [intent]);
+    stageRef.current?.show(tab, layout, theme, instant);
+  }, [stageRef, tab, layout, theme, instant]);
 
   const name = LAYOUTS.find((item) => item.id === layout)!.name;
-  const title = tab === 'layouts' ? `fumadocs-ui/layouts/${layout}` : SOURCES[tab];
+  const title = tab === 'layouts' ? `fumadocs-ui/layouts/${layout}` : DEMOS[tab].source;
   const docs = copy.style.tabs[tab];
   const screens = [];
   for (const id of TABS) {
@@ -125,7 +92,13 @@ export function Monitor({
       title={<Scramble text={title} speed={14} />}
       actions={
         busy ? (
-          <Busy />
+          <span
+            ref={spin}
+            aria-hidden
+            className="relative flex size-3.5 items-center justify-center bg-lp-paper font-mono text-xs leading-none"
+          >
+            {SPIN[0]}
+          </span>
         ) : (
           // the box at the end of the bar opens the tab's docs, its hit area 24px around it
           <a

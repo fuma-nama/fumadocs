@@ -1,9 +1,9 @@
 'use client';
-import { type CSSProperties, useEffect, useRef, useState } from 'react';
+import { type CSSProperties, useCallback, useState } from 'react';
 import { useReducedMotion } from 'motion/react';
 import { cn } from '@/lib/cn';
+import { whenSeen } from '../../lib/later';
 import { TICK } from '../../lib/motion';
-import { useIsClient } from '../../lib/use-is-client';
 import { Roller } from '../../ui/roller';
 
 export interface Counter {
@@ -31,38 +31,36 @@ function spans(i: number, count: number): CSSProperties {
 
 /** the counters under the wall and the testimonials, from xl a subgrid of their two columns */
 export function Counters({ items }: { items: Counter[] }) {
-  const isClient = useIsClient();
   const reduced = useReducedMotion();
-  const live = isClient && !reduced;
-  const ref = useRef<HTMLDivElement>(null);
   // counters rolled in so far, `null` at rest (the final numbers)
   const [printed, setPrinted] = useState<number | null>(null);
 
-  useEffect(() => {
-    if (!live) return;
-    let timer = 0;
-    let count = 0;
-    const next = () => {
-      setPrinted(++count);
-      if (count < items.length) timer = window.setTimeout(next, TICK);
-    };
-    const observer = new IntersectionObserver(
-      ([entry]) => {
-        if (!entry.isIntersecting) return;
-        observer.disconnect();
-        // the entrance starts from zeros only now, on screen
-        setPrinted(0);
-        timer = window.setTimeout(next, TICK);
-      },
-      { threshold: 0.4 },
-    );
-    observer.observe(ref.current!);
-    return () => {
-      observer.disconnect();
-      clearTimeout(timer);
-      setPrinted(null);
-    };
-  }, [live, items.length]);
+  const ref = useCallback(
+    (root: HTMLDivElement | null) => {
+      if (!root || reduced) return;
+      let timer = 0;
+      let count = 0;
+      const next = () => {
+        setPrinted(++count);
+        if (count < items.length) timer = window.setTimeout(next, TICK);
+      };
+      const stopView = whenSeen(
+        root,
+        () => {
+          // the entrance starts from zeros only now, on screen
+          setPrinted(0);
+          timer = window.setTimeout(next, TICK);
+        },
+        { threshold: 0.4 },
+      );
+      return () => {
+        stopView();
+        clearTimeout(timer);
+        setPrinted(null);
+      };
+    },
+    [reduced, items.length],
+  );
 
   const cells = [];
   for (let i = 0; i < items.length; i++) {

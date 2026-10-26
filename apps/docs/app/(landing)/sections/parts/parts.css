@@ -1,0 +1,231 @@
+/*
+ * 02 Parts: the stage's layouts, by what the screen has room for. The base is the still one (reduced
+ * motion, no JS, no WebGL, which marks the figure `data-flat`): no pin, the stack at rest, or the
+ * page straight on without the engine.
+ */
+
+.parts-pin {
+  padding: 32px var(--lp-gutter) 40px;
+}
+
+.parts-stage {
+  display: grid;
+  gap: 24px;
+}
+
+/* the canvas, the page on the stack's top and the layers' fronts */
+.parts-cell {
+  position: relative;
+  aspect-ratio: 4 / 5;
+  overflow: hidden;
+}
+
+.parts-page {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  transform-origin: 0 0;
+}
+
+.parts-front {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 420px;
+  height: 64px;
+  transform-origin: 0 0;
+  visibility: hidden;
+  background: var(--lp-paper);
+  color: var(--lp-ink);
+}
+
+/* in dark mode the stack is a light object, as Start's terminal is: its fronts take the shader's tones */
+.dark .parts-front {
+  --lp-paper: #eceae2;
+  --lp-paper-2: #e0ddd3;
+  --lp-ink: #0d0d0c;
+  --lp-ink-2: rgb(13 13 12 / 0.62);
+  --lp-line-strong: rgb(13 13 12 / 0.82);
+  --lp-sun: #f25c05;
+}
+
+.parts-slot,
+.parts-run {
+  display: none;
+}
+
+/* with nothing to draw the stack, the page keeps its edge */
+.parts-pin[data-flat] .parts-page {
+  outline: 1px solid var(--lp-line-strong);
+  outline-offset: -1px;
+}
+
+@media (scripting: none) {
+  .parts-page {
+    outline: 1px solid var(--lp-line-strong);
+    outline-offset: -1px;
+  }
+}
+
+@media (min-width: 768px) {
+  .parts-front {
+    width: 1069px;
+    height: 72px;
+  }
+}
+
+@media (min-width: 1024px) {
+  .parts-stage {
+    grid-template-columns: minmax(0, 7fr) minmax(0, 5fr);
+    column-gap: 48px;
+    row-gap: 32px;
+  }
+
+  .parts-head {
+    grid-column: 1 / -1;
+  }
+
+  .parts-cell {
+    aspect-ratio: 16 / 10;
+  }
+}
+
+/* the whole stage pins: the header and the panel come in on it once the camera clears their place */
+@media (min-width: 1348px) and (min-height: 884px) and (prefers-reduced-motion: no-preference) and (scripting: enabled) {
+  .parts-pin:not([data-flat]) {
+    padding: 0;
+  }
+
+  .parts-pin:not([data-flat]) .parts-stage {
+    position: sticky;
+    top: var(--lp-menu-h);
+    height: calc(100svh - var(--lp-menu-h) - var(--lp-status-h));
+    grid-template-rows: auto minmax(0, 1fr);
+    padding: 24px var(--lp-gutter);
+    overflow: hidden;
+  }
+
+  .parts-pin:not([data-flat]) .parts-cell {
+    position: absolute;
+    inset: 0;
+    aspect-ratio: auto;
+  }
+
+  .parts-pin:not([data-flat]) .parts-page {
+    inset: var(--lp-gutter);
+  }
+
+  .parts-pin:not([data-flat]) .parts-head,
+  .parts-pin:not([data-flat]) .parts-panel {
+    position: relative;
+    z-index: 1;
+  }
+
+  .parts-pin:not([data-flat]) .parts-slot {
+    display: block;
+  }
+
+  .parts-pin:not([data-flat]) .parts-run {
+    display: block;
+    height: 140svh;
+  }
+
+  .parts-pin:not([data-flat]) .parts-stage [data-rise] {
+    opacity: 0;
+    pointer-events: none;
+  }
+
+  /* hidden, their boxes let the page under them take the pointer and selection */
+  .parts-pin:not([data-flat]) .parts-head:not([data-shown]),
+  .parts-pin:not([data-flat]) .parts-panel:not([data-shown]) {
+    pointer-events: none;
+  }
+
+  /* shown, they stand in front of the stack when the reader scrolls back under them */
+  .parts-pin:not([data-flat]) .parts-head[data-shown],
+  .parts-pin:not([data-flat]) .parts-panel[data-shown] {
+    background: var(--lp-paper);
+  }
+}
+
+/* the canvas pins across the sheet, the header and the panel pass over its right part */
+@media (min-width: 1024px) and (max-width: 1347px) and (prefers-reduced-motion: no-preference) and (scripting: enabled),
+  (min-width: 1024px) and (max-height: 883px) and (prefers-reduced-motion: no-preference) and (scripting: enabled) {
+  .parts-pin:not([data-flat]) {
+    display: flex;
+    flex-direction: column;
+    padding: 0 0 40px;
+  }
+
+  .parts-pin:not([data-flat]) .parts-stage {
+    display: contents;
+  }
+
+  .parts-pin:not([data-flat]) .parts-cell {
+    order: -1;
+    position: sticky;
+    top: var(--lp-menu-h);
+    height: calc(100svh - var(--lp-menu-h) - var(--lp-status-h));
+    aspect-ratio: auto;
+  }
+
+  .parts-pin:not([data-flat]) .parts-page {
+    inset: var(--lp-gutter);
+  }
+
+  /* the header comes in once the camera has cleared the right part, near the run's middle */
+  .parts-pin:not([data-flat]) .parts-run {
+    display: block;
+    order: 0;
+    height: calc((100svh - var(--lp-menu-h) - var(--lp-status-h)) * 0.54);
+  }
+
+  .parts-pin:not([data-flat]) .parts-head,
+  .parts-pin:not([data-flat]) .parts-panel {
+    order: 1;
+    position: relative;
+    z-index: 1;
+    background: var(--lp-paper);
+    align-self: flex-end;
+    width: calc((100% - 2 * var(--lp-gutter) - 48px) * 5 / 12);
+    margin-right: var(--lp-gutter);
+  }
+
+  .parts-pin:not([data-flat]) .parts-panel {
+    order: 2;
+    margin-top: 32px;
+  }
+}
+
+/* the canvas pins as a band on top, the header and the panel pass beneath it */
+@media (max-width: 1023px) and (prefers-reduced-motion: no-preference) and (scripting: enabled) {
+  .parts-pin:not([data-flat]) {
+    display: flex;
+    flex-direction: column;
+    padding: 0 0 40px;
+  }
+
+  .parts-pin:not([data-flat]) .parts-stage {
+    display: contents;
+  }
+
+  .parts-pin:not([data-flat]) .parts-cell {
+    order: -1;
+    position: sticky;
+    top: var(--lp-menu-h);
+    z-index: 1;
+    height: calc((100svh - var(--lp-menu-h) - var(--lp-status-h)) * 0.56);
+    aspect-ratio: auto;
+    border-bottom: 1px solid var(--lp-line);
+    background: var(--lp-paper);
+  }
+
+  .parts-pin:not([data-flat]) .parts-page {
+    inset: var(--lp-gutter);
+  }
+
+  .parts-pin:not([data-flat]) .parts-head,
+  .parts-pin:not([data-flat]) .parts-panel {
+    padding: 24px var(--lp-gutter) 0;
+  }
+}

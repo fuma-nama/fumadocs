@@ -2,6 +2,7 @@
 import { useCallback } from 'react';
 import { useReducedMotion } from 'motion/react';
 import { cn } from '@/lib/cn';
+import { onTheme } from './lib/theme';
 
 const SAMPLES = 120;
 /** size of a waveform pixel in CSS px */
@@ -84,20 +85,19 @@ export function Waveform({ className }: { className?: string }) {
         cssHeight = canvas.clientHeight;
         paint();
       });
-      // a new theme repaints the line in its ink at once
-      const theme = new MutationObserver(() => {
-        color = getComputedStyle(canvas).color;
-        paint();
-      });
 
       color = getComputedStyle(canvas).color;
       draw();
       resize.observe(canvas);
-      theme.observe(document.documentElement, { attributes: true, attributeFilter: ['class'] });
+      // a new theme repaints the line in its ink at once
+      const stopTheme = onTheme(() => {
+        color = getComputedStyle(canvas).color;
+        paint();
+      });
       if (!reduced) window.addEventListener('scroll', onScroll, { passive: true });
       return () => {
         resize.disconnect();
-        theme.disconnect();
+        stopTheme();
         window.removeEventListener('scroll', onScroll);
         cancelAnimationFrame(raf);
       };

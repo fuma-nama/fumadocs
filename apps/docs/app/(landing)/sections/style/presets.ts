@@ -71,21 +71,19 @@ export interface InkTable {
 export async function loadInks(): Promise<InkTable> {
   const defaults = parse(await readFile(`${DIR}/lib/default-colors.css`, 'utf8'));
   const names = Object.keys(defaults.light);
+  // read together, filled in preset order: the page's payload is the same every build
+  const files = await Promise.all(THEMES.map((theme) => readFile(`${DIR}/${theme}.css`, 'utf8')));
   const inks = {} as Record<ThemeId, Ink>;
-
-  await Promise.all(
-    THEMES.map(async (theme) => {
-      const preset = parse(await readFile(`${DIR}/${theme}.css`, 'utf8'));
-      const light: string[] = [];
-      const dark: string[] = [];
-      for (const name of names) {
-        light.push(preset.light[name] ?? defaults.light[name]);
-        dark.push(preset.dark[name] ?? defaults.dark[name]);
-      }
-      inks[theme] = { light, dark, rules: preset.rules.join('\n') };
-    }),
-  );
-
+  for (let i = 0; i < THEMES.length; i++) {
+    const preset = parse(files[i]);
+    const light: string[] = [];
+    const dark: string[] = [];
+    for (const name of names) {
+      light.push(preset.light[name] ?? defaults.light[name]);
+      dark.push(preset.dark[name] ?? defaults.dark[name]);
+    }
+    inks[THEMES[i]] = { light, dark, rules: preset.rules.join('\n') };
+  }
   return { tokens: names, inks };
 }
 
@@ -104,14 +102,20 @@ export interface Wiring {
 export function wire(values: string[]): Wiring {
   const background = rgba(values[0]);
   const chips: string[] = [];
-  const keys: string[] = [];
   const light: number[] = [];
+  const seen = new Map<string, number>();
+  /** each variable's chip, in `chips` order until they are sorted */
+  const to: number[] = [];
   for (const value of values) {
     const key = value.replace(/\s+/g, ' ').toLowerCase();
-    if (keys.includes(key)) continue;
-    keys.push(key);
-    chips.push(value);
-    light.push(lightness(value, background));
+    let chip = seen.get(key);
+    if (chip === undefined) {
+      chip = chips.length;
+      seen.set(key, chip);
+      chips.push(value);
+      light.push(lightness(value, background));
+    }
+    to.push(chip);
   }
   const order: number[] = [];
   for (let i = 0; i < chips.length; i++) order.push(i);
@@ -125,8 +129,7 @@ export function wire(values: string[]): Wiring {
     sorted.push(chips[order[i]]);
     at[order[i]] = i;
   }
-  const to: number[] = [];
-  for (const value of values) to.push(at[keys.indexOf(value.replace(/\s+/g, ' ').toLowerCase())]);
+  for (let i = 0; i < to.length; i++) to[i] = at[to[i]];
   return { chips: sorted, to };
 }
 

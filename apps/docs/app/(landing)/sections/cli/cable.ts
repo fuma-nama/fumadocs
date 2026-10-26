@@ -93,10 +93,11 @@ interface CableAnchors {
 }
 
 /**
- * The cable plugged into the crate, and plugged into your folder. Both share their start up to the
- * branch, where the gutter reaches your folder's row: `branch` along the first, `turn` along the second.
+ * A cable's routes: plugged into the crate, and plugged into your folder. Both share their start up
+ * to the branch, where the gutter reaches your folder's row: `branch` along the first, `turn` along
+ * the second.
  */
-export function cables(c: CableAnchors): {
+export function routes(c: CableAnchors): {
   sealed: Route;
   done: Route;
   branch: number;

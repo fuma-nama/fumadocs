@@ -1,5 +1,5 @@
 'use client';
-import { type ReactNode, useCallback, useEffect, useId, useRef, useState } from 'react';
+import { type ReactNode, useCallback, useId, useRef, useState } from 'react';
 import { cn } from '@/lib/cn';
 import { ditherPath } from '../../lib/bayer';
 import { paint, THEME_NAMES, THEMES, type ThemeId } from './data';
@@ -209,31 +209,21 @@ interface DialProps {
 export function Dial({ table, value, onChange }: DialProps) {
   const id = useId();
   const engine = useRef<Engine | null>(null);
-  const change = useRef(onChange);
-  useEffect(() => {
-    change.current = onChange;
-  });
   const index = THEMES.indexOf(value);
   // the server draws the knob where it starts; from then on the engine turns it
   const [start] = useState(index);
   const ref = useCallback(
     (element: HTMLDivElement | null) => {
       if (!element) return;
-      const instance = createKnob(element, start, (i, turning) =>
-        change.current(THEMES[i], turning),
-      );
+      const instance = createKnob(element, start, (i, turning) => onChange(THEMES[i], turning));
       engine.current = instance;
       return () => {
         instance.destroy();
         engine.current = null;
       };
     },
-    [start],
+    [start, onChange],
   );
-
-  useEffect(() => {
-    engine.current?.turnTo(index);
-  }, [index]);
 
   const bg = table.tokens.indexOf('background');
   const primary = table.tokens.indexOf('primary');
@@ -267,7 +257,10 @@ export function Dial({ table, value, onChange }: DialProps) {
         key={theme}
         type="button"
         tabIndex={-1}
-        onClick={() => onChange(theme, false)}
+        onClick={() => {
+          engine.current?.turnTo(i);
+          onChange(theme, false);
+        }}
         className={cn(
           'absolute -translate-y-1/2 px-1.5 font-pixel text-[13px] leading-5 whitespace-nowrap transition-none',
           i === index ? 'bg-lp-yellow text-[#121210]' : 'hover:bg-lp-ink hover:text-lp-paper',

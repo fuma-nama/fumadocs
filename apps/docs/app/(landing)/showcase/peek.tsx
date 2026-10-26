@@ -2,7 +2,7 @@
 import { type ReactNode, useCallback } from 'react';
 import { useReducedMotion } from 'motion/react';
 import { BEAT } from '../lib/motion';
-import { setStatus } from '../lib/status';
+import { restore, setStatus } from '../lib/status';
 import { address } from '../ui/site-tile';
 
 /** Morph: sweeps a glyph through every pixel shape of Geist Pixel in a beat */
@@ -34,8 +34,7 @@ export function Peek({ children }: { children: ReactNode }) {
 
       function leave() {
         current = null;
-        const figure = element!.closest<HTMLElement>('[data-figure]');
-        if (figure?.dataset.status) setStatus(figure.dataset.status);
+        restore();
       }
 
       const onPointerOver = (event: PointerEvent) => {

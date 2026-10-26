@@ -215,3 +215,20 @@ export function createShaderCanvas(
     },
   };
 }
+
+/** a computed CSS colour, `#rgb`, `#rrggbb`, `#rrggbbaa` or `rgb(r g b / a)`, as 0-1 channels */
+export function cssRgba(value: string): [r: number, g: number, b: number, a: number] {
+  const text = value.trim();
+  if (text.startsWith('#')) {
+    const hex = text.length < 6 ? text.slice(1).replace(/./g, '$&$&') : text.slice(1);
+    const n = (i: number) => Number.parseInt(hex.slice(i, i + 2), 16) / 255;
+    return [n(0), n(2), n(4), hex.length === 8 ? n(6) : 1];
+  }
+  const [r, g, b, a = 1] = text.match(/[\d.]+/g)!.map(Number);
+  return [r / 255, g / 255, b / 255, a];
+}
+
+export function cssRgb(value: string): [r: number, g: number, b: number] {
+  const [r, g, b] = cssRgba(value);
+  return [r, g, b];
+}

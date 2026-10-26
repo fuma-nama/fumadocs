@@ -29,6 +29,8 @@ export interface Frame {
 interface Session {
   frames: Frame[];
   duration: number;
+  /** the finished session at rest, its last output on screen */
+  rest: Frame;
 }
 
 interface Option {
@@ -338,22 +340,14 @@ export function createSession(): Session {
     log.push(line);
     show([], TICK);
   }
+  const rest = frames[frames.length - 1];
   for (let i = 0; i < 4; i++) {
     show(shell('', true), BEAT);
     show(shell('', false), BEAT);
   }
   type('clear', 40);
   show(shell('clear', true), 2 * TICK);
-  return { frames, duration: at };
-}
-
-/** the last frame, a finished session at rest */
-export function finalFrame(session: Session): Frame {
-  for (let i = session.frames.length - 1; i >= 0; i--) {
-    const frame = session.frames[i];
-    if (frame.status === 'project generated') return session.frames[i + 8] ?? frame;
-  }
-  return session.frames[session.frames.length - 1];
+  return { frames, duration: at, rest };
 }
 
 /** write the visible rows of `frame` into an RGBA cell buffer: glyph, style, glyph density */

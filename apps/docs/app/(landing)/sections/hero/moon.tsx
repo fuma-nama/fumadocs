@@ -7,9 +7,10 @@ import {
   useReducedMotion,
   useSpring,
 } from 'motion/react';
-import { createShaderCanvas } from '../../lib/gl';
+import { createShaderCanvas, cssRgb } from '../../lib/gl';
 import { settle, TICK } from '../../lib/motion';
-import { setStatus } from '../../lib/status';
+import { report } from '../../lib/status';
+import { isDark, onTheme } from '../../lib/theme';
 import { Chip, type Layer } from '../../ui/spec';
 import { BEAT_AT, bootStart, untilBeat } from './boot';
 import { moonFragment, PRISMS } from './shader';
@@ -101,9 +102,9 @@ interface MountOptions {
 
 function mount(stage: HTMLDivElement, { reduced, sunX, sunY, springX, springY }: MountOptions) {
   const clip = stage.firstElementChild as HTMLElement;
-  const [scene, anchor] = clip.children as unknown as [HTMLElement, HTMLElement];
+  const scene = clip.children[0] as HTMLElement;
+  const anchor = clip.children[1] as HTMLElement;
   const labels = anchor.children as HTMLCollectionOf<HTMLElement>;
-  const figure = stage.closest<HTMLElement>('[data-figure]');
   const root = document.documentElement;
   const hover = matchMedia('(hover: hover) and (pointer: fine)');
 
@@ -129,28 +130,21 @@ function mount(stage: HTMLDivElement, { reduced, sunX, sunY, springX, springY }:
     onFrame: frame,
   });
   // scripts can run before the stylesheet applies: read the colours until they resolve
-  const probe = document.createElement('canvas').getContext('2d')!;
   let colors = false;
-  function color(style: CSSStyleDeclaration, name: string): [number, number, number] {
-    probe.fillStyle = style.getPropertyValue(name).trim();
-    const hex = Number.parseInt(probe.fillStyle.slice(1), 16);
-    return [(hex >> 16) / 255, ((hex >> 8) & 255) / 255, (hex & 255) / 255];
-  }
   function readColors() {
     const style = getComputedStyle(stage);
     colors =
       style.getPropertyValue('--moon-lit') !== '' && style.getPropertyValue('--lp-paper') !== '';
     if (!colors) return;
-    shader?.set('uLit', color(style, '--moon-lit'));
-    shader?.set('uPaper', color(style, '--lp-paper'));
-    shader?.set('uInk', color(style, '--lp-ink'));
-    shader?.set('uDark', root.classList.contains('dark') ? 1 : 0);
+    shader?.set('uLit', cssRgb(style.getPropertyValue('--moon-lit')));
+    shader?.set('uPaper', cssRgb(style.getPropertyValue('--lp-paper')));
+    shader?.set('uInk', cssRgb(style.getPropertyValue('--lp-ink')));
+    shader?.set('uDark', isDark() ? 1 : 0);
     shader?.invalidate();
   }
   readColors();
   if (!colors) scene.style.visibility = 'hidden';
-  const themeObserver = new MutationObserver(readColors);
-  themeObserver.observe(root, { attributes: true, attributeFilter: ['class'] });
+  const stopTheme = onTheme(readColors);
 
   const resize = new ResizeObserver(() => {
     radius = scene.clientWidth / 3.2;
@@ -206,16 +200,9 @@ function mount(stage: HTMLDivElement, { reduced, sunX, sunY, springX, springY }:
   if (!reduced) view.observe(stage);
 
   let readyTimer = 0;
-  if (start !== null && figure) {
-    setStatus('booting');
-    readyTimer = window.setTimeout(
-      () => {
-        // only while the hero is the figure the status bar follows (it covers the middle)
-        const { top, bottom } = figure.getBoundingClientRect();
-        if (top <= innerHeight / 2 && bottom >= innerHeight / 2) setStatus('ready');
-      },
-      untilBeat(start, BEAT_AT.ready),
-    );
+  if (start !== null) {
+    report(stage, 'booting');
+    readyTimer = window.setTimeout(() => report(stage, 'ready'), untilBeat(start, BEAT_AT.ready));
   }
 
   /** ms since the boot started, `Infinity` without a boot */
@@ -346,7 +333,7 @@ function mount(stage: HTMLDivElement, { reduced, sunX, sunY, springX, springY }:
   return () => {
     shader?.destroy();
     cancelAnimationFrame(raf);
-    themeObserver.disconnect();
+    stopTheme();
     resize.disconnect();
     view.disconnect();
     window.removeEventListener('scroll', onScroll);

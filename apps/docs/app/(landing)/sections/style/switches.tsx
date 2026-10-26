@@ -1,21 +1,21 @@
 'use client';
-import { type KeyboardEvent, useEffect, useMemo, useRef } from 'react';
+import { type KeyboardEvent, useEffect, useMemo } from 'react';
 import { cn } from '@/lib/cn';
 import { ditherPath } from '../../lib/bayer';
 import { createIntent } from './intent';
 import { Hazard, Led, Screw } from './parts';
 
-export interface SwitchItem {
-  id: string;
+export interface SwitchItem<T extends string> {
+  id: T;
   label: string;
 }
 
-interface SwitchesProps {
-  items: SwitchItem[];
-  value: string;
-  onChange: (id: string) => void;
+interface SwitchesProps<T extends string> {
+  items: SwitchItem<T>[];
+  value: T;
+  onChange: (id: T) => void;
   /** the pointer rests on a switch, or the focus came to it: it may be flipped next */
-  onIntent?: (id: string) => void;
+  onIntent: (id: T) => void;
   /** ids of the tabs and their panel */
   idPrefix: string;
   className?: string;
@@ -56,13 +56,16 @@ function Toggle({ on, side }: { on: boolean; side: string }) {
  * The tabs as a row of toggle switches on the desk, one up at a time: flipping one drops the one
  * that was up. Each has its pilot lamp and its name.
  */
-export function Switches({ items, value, onChange, onIntent, idPrefix, className }: SwitchesProps) {
-  const intended = useRef(onIntent);
-  useEffect(() => {
-    intended.current = onIntent;
-  });
+export function Switches<T extends string>({
+  items,
+  value,
+  onChange,
+  onIntent,
+  idPrefix,
+  className,
+}: SwitchesProps<T>) {
   // a sweep across the row counts none of them
-  const intent = useMemo(() => createIntent<string>((id) => intended.current?.(id)), []);
+  const intent = useMemo(() => createIntent(onIntent), [onIntent]);
   useEffect(() => intent.cancel, [intent]);
 
   function onKeyDown(event: KeyboardEvent<HTMLDivElement>) {
@@ -93,7 +96,7 @@ export function Switches({ items, value, onChange, onIntent, idPrefix, className
         onClick={() => onChange(item.id)}
         onPointerMove={() => intent.move(item.id)}
         onPointerLeave={intent.cancel}
-        onFocus={() => onIntent?.(item.id)}
+        onFocus={() => onIntent(item.id)}
         className="group/switch relative flex min-w-0 flex-1 cursor-pointer scroll-mt-[calc(var(--lp-menu-h)+16px)] flex-col items-center pt-2 pb-2.5 outline-none"
       >
         <span className="relative">

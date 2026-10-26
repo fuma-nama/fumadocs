@@ -130,7 +130,7 @@ export function plugTransform(i: number, ends: Float64Array, end: 0 | 1): string
  * The x of a window's top left corner from its slot, slid by `slide`. It grows and shrinks with
  * its plate on the board's edge, the middle one around its centre.
  */
-export function shiftX(slot: Slot, slide: number, s: number) {
+function shiftX(slot: Slot, slide: number, s: number) {
   const inset = PLATE * (s - 1);
   if (slot.column === 0) return inset + slide;
   if (slot.column === 2) return WINDOW.w * (1 - s) - inset + slide;
@@ -138,7 +138,7 @@ export function shiftX(slot: Slot, slide: number, s: number) {
 }
 
 /** the y of a window's top left corner from its slot, risen by `lift`: its plate on the board's edge */
-export function shiftY(slot: Slot, s: number, lift: number) {
+function shiftY(slot: Slot, s: number, lift: number) {
   const inset = PLATE * (s - 1);
   return (slot.row === 0 ? inset : WINDOW.h * (1 - s) - inset) - lift * RISE;
 }

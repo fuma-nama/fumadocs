@@ -4,7 +4,8 @@ import { ArrowUpRight } from 'lucide-react';
 import { cn } from '@/lib/cn';
 import { type ShowcaseObject, vercel } from '@/lib/showcases';
 import { address, SiteTile } from '../ui/site-tile';
-import { copy, kinds, suggest } from './data';
+import { TitleBar } from '../ui/window';
+import { arrange, copy, kinds, suggest } from './data';
 import { Peek } from './peek';
 
 const featuredSizes =
@@ -27,22 +28,8 @@ function fit(name: string, budget: number): string {
   return `${name.slice(0, end > 0 ? end : budget - 1)}…`;
 }
 
-/** a larger window's title bar: stripes, its two boxes, the name */
-function Bar({ children }: { children: ReactNode }) {
-  return (
-    <span className="relative flex h-7 shrink-0 items-center gap-1.5 border-b border-lp-line-strong px-1.5">
-      <span aria-hidden className="lp-pinstripe absolute inset-x-1.5 inset-y-0" />
-      <span aria-hidden className="relative size-3.5 border border-lp-line-strong bg-lp-paper" />
-      <span className="relative mx-auto truncate bg-lp-paper px-2 font-pixel text-[13px] leading-[17px]">
-        {children}
-      </span>
-      <span aria-hidden className="relative size-3.5 border border-lp-line-strong bg-lp-paper" />
-    </span>
-  );
-}
-
 /** a featured project: a larger window, and what it is in its own words */
-function Featured({ site, kind }: { site: ShowcaseObject; kind: string }) {
+function Featured({ site }: { site: Required<ShowcaseObject> }) {
   return (
     <li className={cn('col-span-2', cell)}>
       <a
@@ -54,14 +41,10 @@ function Featured({ site, kind }: { site: ShowcaseObject; kind: string }) {
           frame,
         )}
       >
-        <Bar>
-          <span className={cn('-mx-2 block px-2', invert)}>{site.name}</span>
-        </Bar>
-        {site.image && (
-          <span className="relative block aspect-[1.91/1] overflow-hidden">
-            <Image src={site.image} alt="" fill sizes={featuredSizes} className="object-cover" />
-          </span>
-        )}
+        <TitleBar title={<span className={cn('-mx-2 block px-2', invert)}>{site.name}</span>} />
+        <span className="relative block aspect-[1.91/1] overflow-hidden">
+          <Image src={site.image} alt="" fill sizes={featuredSizes} className="object-cover" />
+        </span>
         <span
           className={cn(
             'mt-auto flex h-9 items-center justify-between gap-3 border-t border-lp-line-strong px-3 font-mono text-xs',
@@ -69,7 +52,7 @@ function Featured({ site, kind }: { site: ShowcaseObject; kind: string }) {
           )}
         >
           <span className="text-lp-ink-2 group-hover:text-lp-paper group-focus-visible:text-lp-paper">
-            {kind}
+            {kinds[site.url]}
           </span>
           <span className="inline-flex items-center gap-1">
             {address(site.url)}
@@ -104,14 +87,16 @@ function Vercel() {
   }
   return (
     <li className={cn('col-span-2 flex flex-col border border-lp-line-strong bg-lp-paper', cell)}>
-      <Bar>
-        <span className="inline-flex items-center gap-1.5">
-          <svg aria-hidden viewBox="0 0 74 64" className="h-2.5 w-3 fill-current">
-            <path d="M37.59.25 74.54 64.25H.64L37.59.25Z" />
-          </svg>
-          Vercel
-        </span>
-      </Bar>
+      <TitleBar
+        title={
+          <span className="inline-flex items-center gap-1.5">
+            <svg aria-hidden viewBox="0 0 74 64" className="h-2.5 w-3 fill-current">
+              <path d="M37.59.25 74.54 64.25H.64L37.59.25Z" />
+            </svg>
+            Vercel
+          </span>
+        }
+      />
       <p className="p-3 text-sm leading-normal text-pretty">{copy.vercel}</p>
       <ul className="flex flex-1 flex-col border-t border-lp-line-strong">{rows}</ul>
     </li>
@@ -181,16 +166,12 @@ function Slot() {
  * place for yours.
  */
 export function Wall({ sites }: { sites: ShowcaseObject[] }) {
+  const { featured, shots, blank } = arrange(sites);
   const cells: ReactNode[] = [];
-  const rest: ReactNode[] = [];
-  const blank: ReactNode[] = [];
-  for (const site of sites) {
-    const kind = kinds[site.url];
-    if (kind && site.image) cells.push(<Featured key={site.url} site={site} kind={kind} />);
-    else if (site.image) rest.push(<Tile key={site.url} site={site} />);
-    else blank.push(<Tile key={site.url} site={site} />);
-  }
-  cells.push(<Vercel key="vercel" />, ...rest, ...blank, <Slot key="slot" />);
+  for (const site of featured) cells.push(<Featured key={site.url} site={site} />);
+  cells.push(<Vercel key="vercel" />);
+  for (const site of [...shots, ...blank]) cells.push(<Tile key={site.url} site={site} />);
+  cells.push(<Slot key="slot" />);
 
   return (
     <Peek>

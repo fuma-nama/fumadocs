@@ -22,8 +22,6 @@ interface Slot {
   settle: ((ok: boolean) => void) | null;
   pending: Promise<boolean> | null;
   fallback: number;
-  /** the dither print running in the frame */
-  printing: number;
   /** cancels the other layouts' prefetch while it waits for the reader to pause */
   prefetch: (() => void) | null;
 }
@@ -107,6 +105,29 @@ ${PRINT}
 ${ink.rules}`;
 }
 
+let prints = 0;
+
+/**
+ * Run `update` in a view transition of `doc` that prints the new look in over `ms`, through the
+ * dither of `inkCss` in `cell` px cells. Without view transitions it runs at once.
+ */
+export function printIn(doc: Document, ms: number, cell: number, update: () => void) {
+  if (!doc.startViewTransition) return update();
+  const root = doc.documentElement;
+  // the newest print holds the attribute until it ends
+  const id = String(++prints);
+  root.style.setProperty('--lp-print-ms', `${ms}ms`);
+  root.style.setProperty('--lp-print-size', `${cell * 4}px`);
+  root.dataset.lpPrint = id;
+  const transition = doc.startViewTransition(update);
+  transition.ready.catch(() => {});
+  transition.finished
+    .catch(() => {})
+    .finally(() => {
+      if (root.dataset.lpPrint === id) delete root.dataset.lpPrint;
+    });
+}
+
 function emptySlot(frame: HTMLIFrameElement): Slot {
   return {
     frame,
@@ -120,7 +141,6 @@ function emptySlot(frame: HTMLIFrameElement): Slot {
     settle: null,
     pending: null,
     fallback: 0,
-    printing: 0,
     prefetch: null,
   };
 }
@@ -228,24 +248,9 @@ export function createFrames(table: InkTable, elements: HTMLIFrameElement[]): Fr
   }
 
   function print(slot: Slot, theme: ThemeId, ms: number, cell: number) {
-    const doc = slot.doc;
     const same = slot.inked === theme && theme !== 'shadcn';
-    if (same || ms <= 0 || !doc || !slot.ready || !doc.startViewTransition) {
-      ink(slot, theme);
-      return;
-    }
-    const root = doc.documentElement;
-    const id = ++slot.printing;
-    root.style.setProperty('--lp-print-ms', `${ms}ms`);
-    root.style.setProperty('--lp-print-size', `${cell * 4}px`);
-    root.dataset.lpPrint = '';
-    const transition = doc.startViewTransition(() => ink(slot, theme));
-    transition.ready.catch(() => {});
-    transition.finished
-      .catch(() => {})
-      .finally(() => {
-        if (slot.printing === id) delete root.dataset.lpPrint;
-      });
+    if (same || ms <= 0 || !slot.doc || !slot.ready) return ink(slot, theme);
+    printIn(slot.doc, ms, cell, () => ink(slot, theme));
   }
 
   /** the wanted preset; shadcn borrows this page's palette, so it inks again */

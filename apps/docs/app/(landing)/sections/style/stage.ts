@@ -1,6 +1,6 @@
 import { TICK } from '../../lib/motion';
 import { ditherKeyframes } from '../../ui/dither';
-import type { DemoId, LayoutId, TabId, ThemeId } from './data';
+import { DEMOS, type DemoId, type LayoutId, type TabId, type ThemeId } from './data';
 import { createDemo, type Demo } from './demo';
 import type { InkTable } from './presets';
 import { createScreen } from './screen';
@@ -21,7 +21,6 @@ export interface Stage {
 export function createStage(
   root: HTMLElement,
   table: InkTable,
-  titles: Record<DemoId, string>,
   onBusy: (busy: boolean) => void,
 ): Stage {
   const boxes = new Map<TabId, HTMLElement>();
@@ -43,7 +42,7 @@ export function createStage(
     let instance = demos.get(tab);
     if (instance) return instance;
     const box = boxes.get(tab)!;
-    instance = createDemo(box, table, tab, titles[tab], () => {
+    instance = createDemo(box, table, tab, DEMOS[tab].title, () => {
       ready.add(tab);
       if (current !== tab) return;
       onBusy(false);

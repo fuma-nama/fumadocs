@@ -1,15 +1,9 @@
 'use client';
-import { useEffect, useState } from 'react';
 import { cn } from '@/lib/cn';
 import { pad, useNow } from './lib/clock';
-import { getStatus, setStatus, useStatus } from './lib/status';
+import { useActive, useFigures, useStatus } from './lib/status';
 import { Scramble } from './ui/text';
 import { Waveform } from './waveform';
-
-interface FigureEntry {
-  id: string;
-  label: string;
-}
 
 /** the bar itself never re-renders: the status, the figure links and the clock each subscribe */
 export function StatusBar() {
@@ -37,41 +31,8 @@ function Status() {
 }
 
 function Figures() {
-  const [figures, setFigures] = useState<FigureEntry[]>([]);
-  const [active, setActive] = useState<string | null>(null);
-
-  useEffect(() => {
-    const sections = document.querySelectorAll<HTMLElement>('[data-figure]');
-    const entries: FigureEntry[] = [];
-    const visible = new Set<HTMLElement>();
-
-    for (const section of sections) {
-      entries.push({ id: section.id, label: section.getAttribute('aria-label') ?? section.id });
-    }
-    setFigures(entries);
-
-    // the active figure is the one covering the middle of the viewport; its default status
-    // replaces the line when the figure changes, so a figure can keep its own (`booting`)
-    let current: HTMLElement | undefined;
-    const observer = new IntersectionObserver(
-      (records) => {
-        for (const record of records) {
-          const section = record.target as HTMLElement;
-          if (record.isIntersecting) visible.add(section);
-          else visible.delete(section);
-        }
-        const [section] = visible;
-        setActive(section?.id ?? null);
-        if (section === current) return;
-        if (current !== undefined || getStatus() === 'ready')
-          setStatus(section?.dataset.status ?? 'ready');
-        current = section;
-      },
-      { rootMargin: '-50% 0px -50% 0px' },
-    );
-    for (const section of sections) observer.observe(section);
-    return () => observer.disconnect();
-  }, []);
+  const figures = useFigures();
+  const active = useActive();
 
   return (
     <nav aria-label="Figures" className="flex items-stretch max-md:hidden">

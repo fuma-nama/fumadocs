@@ -18,30 +18,33 @@ import { TwoslashMechanism } from './mechanisms/twoslash';
 import { TypeTableMechanism } from './mechanisms/type-table';
 import './integrations.css';
 
-/** the mechanism of each module, by its number */
-const mechanisms: Record<number, ReactNode> = {
-  1: <SearchMechanism />,
-  2: <OpenAPIMechanism />,
-  3: <AsyncAPIMechanism />,
-  4: <GraphQLMechanism />,
-  5: <TwoslashMechanism />,
-  6: <TypeTableMechanism />,
-  7: <I18nMechanism />,
-  8: <OGMechanism />,
-  9: <LLMsMechanism />,
-  10: <AIChatMechanism />,
-  11: <StoryMechanism />,
-  12: <ObsidianMechanism />,
+/** the mechanism of each module, by its title */
+const mechanisms: Record<string, ReactNode> = {
+  Search: <SearchMechanism />,
+  OpenAPI: <OpenAPIMechanism />,
+  AsyncAPI: <AsyncAPIMechanism />,
+  GraphQL: <GraphQLMechanism />,
+  'AI Chat': <AIChatMechanism />,
+  'llms.txt': <LLMsMechanism />,
+  i18n: <I18nMechanism />,
+  'OG Image': <OGMechanism />,
+  Twoslash: <TwoslashMechanism />,
+  'Type Table': <TypeTableMechanism />,
+  Story: <StoryMechanism />,
+  Obsidian: <ObsidianMechanism />,
 };
 
 const modules: Module[] = [];
-for (const item of info) modules.push({ ...item, mechanism: mechanisms[item.n] });
+for (const item of info) modules.push({ ...item, mechanism: mechanisms[item.title] });
+
+const loaded = `${modules.length} integrations loaded`;
 
 export function Integrations() {
   return (
-    <Figure id="integrations" aria-label="Integrations" status="12 integrations loaded">
+    <Figure id="integrations" aria-label="Integrations" status={loaded}>
       <Board
         modules={modules}
+        loaded={loaded}
         header={
           <FigureHeader
             lead={copy.integrations.lead}

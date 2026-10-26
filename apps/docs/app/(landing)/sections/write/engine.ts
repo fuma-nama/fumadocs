@@ -1,7 +1,9 @@
 import { cubicBezier } from 'motion/react';
-import { createShaderCanvas } from '../../lib/gl';
+import { createShaderCanvas, cssRgb, cssRgba } from '../../lib/gl';
+import { clamp, type Rect, rectIn } from '../../lib/math';
 import { camera, settle, TICK } from '../../lib/motion';
-import { setStatus } from '../../lib/status';
+import { report } from '../../lib/status';
+import { isDark, onTheme } from '../../lib/theme';
 import {
   BED,
   BED_DECK,
@@ -16,6 +18,7 @@ import {
   YOKE,
 } from './arm';
 import {
+  ARM_BOX,
   CROWN_CELL,
   MATE_H,
   MATE_PAD,
@@ -24,6 +27,8 @@ import {
   type MateInk,
   ORBIT_STEPS,
   paintMate,
+  POSE_BOX,
+  poseOf,
   SEAT_CELL,
   silhouette,
   SPRITE_H,
@@ -70,6 +75,8 @@ const BEND_RATE = 110;
 const SWING = 1;
 const SWUNG = 0.3;
 const OVERLAP = 0.35;
+/** ms an arm caught mid-move by a press brakes for, along its way, before it sets off anew */
+const BRAKE = 32;
 /** the elbow's inner angle, rad: at both ends of every slide it stays between these; folded at
  * rest, it leaves this much */
 const INNER: Vec2 = [(50 * Math.PI) / 180, (150 * Math.PI) / 180];
@@ -129,6 +136,15 @@ const BLINK = 33;
 const GAUGE: [number, number, number] = [0.2, 0.75, 1];
 /** her eyes follow the pencil or the cursor once it is this far from her head, stage px */
 const GLANCE = 60;
+/** she raises her remote this long before a planned press sets off; her arm swings a pose every
+ * this many ms */
+const LEAD = TICK;
+const SWAY = 48;
+/** degrees from her shoulder: her remote goes low below the first, up above the second, and keeps
+ * its height this much past either; px past her middle before she points it with her other hand */
+const RAISE: Vec2 = [-30, 50];
+const RAISE_SLACK = 8;
+const HAND_SLACK = 8;
 /** px: her pencil's point keeps this far inside a cell's edges; the boom's pivot this far clear of
  * the sides of a tab it stands past, she this far clear of a tab */
 const INSET = 2;
@@ -142,23 +158,10 @@ const DOWN = Math.PI / 2;
 const ease = cubicBezier(...settle);
 const inOut = cubicBezier(...camera);
 
-function clamp(v: number, lo: number, hi: number): number {
-  return Math.min(hi, Math.max(lo, v));
-}
-
-function clamp01(u: number): number {
-  return clamp(u, 0, 1);
-}
-
-/** every value on one curve */
-function together(u: number): number {
-  return inOut(u);
-}
-
 /** the progress through window w (shares of a move) at u */
 function within(u: number, w: Vec2): number {
   if (w[1] <= w[0]) return u >= w[1] ? 1 : 0;
-  return clamp01((u - w[0]) / (w[1] - w[0]));
+  return clamp((u - w[0]) / (w[1] - w[0]));
 }
 
 /** progress over a long move with ramps of share r of its time: the first half of the camera
@@ -199,7 +202,7 @@ function crosses(x0: number, y0: number, x1: number, y1: number, r: number, b: R
 }
 
 /** whether point (x, y) lies in box b grown by r on every side */
-function within2(x: number, y: number, r: number, b: Rect): boolean {
+function inBox(x: number, y: number, r: number, b: Rect): boolean {
   return x > b.x - r && x < b.x + b.w + r && y > b.y - r && y < b.y + b.h + r;
 }
 
@@ -212,13 +215,6 @@ function nearest(angle: number, near: number): number {
 function normalize(x: number, y: number, z: number): [number, number, number] {
   const l = Math.hypot(x, y, z);
   return [x / l, y / l, z / l];
-}
-
-interface Rect {
-  x: number;
-  y: number;
-  w: number;
-  h: number;
 }
 
 /** a move from `a` to `b` between `t0` and `t1`, each value on its own curve, and her pencil's tilt
@@ -395,7 +391,7 @@ export function createPress(stage: HTMLElement): () => void {
   }
 
   const shader = createShaderCanvas(canvas, { fragment, onFrame });
-  shader?.texture('uSprite', silhouette());
+  shader?.texture('uSprite', silhouette(0));
 
   // metrics, stage px
   const size: Vec2 = [0, 0];
@@ -439,6 +435,9 @@ export function createPress(stage: HTMLElement): () => void {
    * its point on the window's border */
   let fold = TUCK;
   let from: number[] = park;
+  /** the plan a press took over from mid-move, its first pose, and when: the arm brakes along it */
+  let brake: { track: Segment[]; from: number[]; at: number } | null = null;
+  const other = [0, 0, 0, 0];
   let since = 0;
   let total = 0;
   let clock = 0;
@@ -450,11 +449,8 @@ export function createPress(stage: HTMLElement): () => void {
   let playing = false;
   let fading = 0;
   let last = -1;
-  let started = false;
   /** the stage is on screen, where her idle plays */
   let onScreen = false;
-  let active = false;
-  let lastStatus = '';
 
   // once the sequence has played, the rig is the reader's: off its plan, on springs that point her
   // pencil at a mouse's cursor, then back to its park
@@ -508,12 +504,23 @@ export function createPress(stage: HTMLElement): () => void {
   /** her eyes' frame from the work, and the colours she is painted in */
   let gaze = 0;
   let ink: MateInk | undefined;
+  /** her remote: the hand she holds it in (-1 idle, 0 her left, 1 her right) and how high (0 ready,
+   * 1 low, 2 out, 3 up), shown and wanted; its light, wanted while she commands; when her arm may
+   * swing to its next pose; what she points it at, and where her sprite was; the pose her
+   * silhouette was cast in, and each pose's, cast once */
+  let hand = -1;
+  let height = 0;
+  let wantHand = -1;
+  let wantHeight = 0;
+  let wantLit = false;
+  let swayAt = 0;
+  const aimed: Vec2 = [0, 0];
+  const herAt: Vec2 = [0, 0];
+  let castPose = 0;
+  const casts: ImageData[] = [];
+  /** the reader's springs have come to rest */
+  let steady = false;
   const none: Rect = { x: 0, y: 0, w: 0, h: 0 };
-
-  function box(el: Element, s: DOMRect): Rect {
-    const r = el.getBoundingClientRect();
-    return { x: r.left - s.left, y: r.top - s.top, w: r.width, h: r.height };
-  }
 
   /** where a source line's rows after its first start, in characters, as the browser wrapped it */
   function breaksOf(line: HTMLElement): number[] {
@@ -543,10 +550,11 @@ export function createPress(stage: HTMLElement): () => void {
     const dpr = window.devicePixelRatio || 1;
     stage.style.top = '';
     for (const b of blocks) b.el.style.minHeight = '';
-    const heights = blocks.map((b) => b.el.getBoundingClientRect().height);
-    blocks.forEach((b, i) => {
-      b.el.style.minHeight = `${Math.ceil(heights[i] * dpr - 0.01) / dpr}px`;
-    });
+    const heights: number[] = [];
+    for (const b of blocks) heights.push(b.el.getBoundingClientRect().height);
+    for (let i = 0; i < blocks.length; i++) {
+      blocks[i].el.style.minHeight = `${Math.ceil(heights[i] * dpr - 0.01) / dpr}px`;
+    }
     const top = (stage.getBoundingClientRect().top + scrollY) * dpr;
     const off = top - Math.floor(top + 0.01);
     if (off > 0.01) stage.style.top = `${-off / dpr}px`;
@@ -562,10 +570,10 @@ export function createPress(stage: HTMLElement): () => void {
     size[1] = s.height;
     stageAt[0] = s.left + scrollX;
     stageAt[1] = s.top + scrollY;
-    const page = box(doc, s);
-    inside = box(doc.lastElementChild!, s);
+    const page = rectIn(doc, s);
+    inside = rectIn(doc.lastElementChild!, s);
     // the carriage rides the bed's rail band, or a phone's column beside the window
-    band = box(bed, s);
+    band = rectIn(bed, s);
     const onBed = band.w > 0;
     along = onBed ? 0 : 1;
     rig = onBed ? BED_RIG : COLUMN_RIG;
@@ -581,7 +589,7 @@ export function createPress(stage: HTMLElement): () => void {
       below = inside.y + inside.h > band.y + band.h + 8;
       deck = BED_DECK;
     } else {
-      const c = box(column, s);
+      const c = rectIn(column, s);
       bay = c;
       rail[0] = c.x + c.w / 2;
       rail[1] = page.y + COLUMN_END[0];
@@ -593,7 +601,7 @@ export function createPress(stage: HTMLElement): () => void {
       // would open wider than it may
       let tabs = 0;
       for (const b of blocks) {
-        const t = box(b.tab, s);
+        const t = rectIn(b.tab, s);
         tabs = Math.max(tabs, t.x + t.w);
       }
       span = rail[0] - tabs - TAB_CLEAR;
@@ -623,9 +631,9 @@ export function createPress(stage: HTMLElement): () => void {
     probe.remove();
     lineHeight = Number.parseFloat(getComputedStyle(blocks[0].lines[0]).lineHeight) || 20;
     for (const b of blocks) {
-      b.box = box(b.el, s);
-      b.tabBox = box(b.tab, s);
-      b.cell = box(b.src.parentElement!, s);
+      b.box = rectIn(b.el, s);
+      b.tabBox = rectIn(b.tab, s);
+      b.cell = rectIn(b.src.parentElement!, s);
       b.rows = [];
       b.breaks = [];
       for (const line of b.lines) {
@@ -640,13 +648,14 @@ export function createPress(stage: HTMLElement): () => void {
       for (const b of blocks) station(b, end);
       rail[2] = rail[0];
       for (const b of blocks) rail[2] = Math.max(rail[2], b.stop);
-      blocks.forEach((b, i) => {
-        if (!stations[i]) return;
-        stations[i].style.left = `${Math.round(b.stop - band.x - 8)}px`;
+      for (let i = 0; i < blocks.length && i < stations.length; i++) {
+        const stop = blocks[i].stop;
+        stations[i].style.left = `${Math.round(stop - band.x - 8)}px`;
         // plates worked from one stop share its detent
-        const shared = blocks.slice(0, i).some((o) => Math.abs(o.stop - b.stop) < 20);
+        let shared = false;
+        for (let j = 0; j < i; j++) if (Math.abs(blocks[j].stop - stop) < 20) shared = true;
         stations[i].style.visibility = shared ? 'hidden' : '';
-      });
+      }
     } else {
       // up a phone's column her pencil lies flat across each plate's right part from an elbow on the
       // column's middle, slanted away from the boom: the boom up the column over a plate it can
@@ -687,7 +696,8 @@ export function createPress(stage: HTMLElement): () => void {
     const up = b.cell.y < rail[1];
     const near = up ? rail[1] - b.range[1] : b.range[0] - rail[1];
     const far = up ? rail[1] - b.range[0] : b.range[1] - rail[1];
-    const row = blocks.filter((o) => o.cell.y < rail[1] === up).map((o) => o.tabBox);
+    const row: Rect[] = [];
+    for (const o of blocks) if (o.cell.y < rail[1] === up) row.push(o.tabBox);
     const turns = blocks.some((o) => o.cell.y > rail[1]);
     const half = (SPRITE_W / 2) * rig.cell;
     const crown = (SEAT_CELL[1] + MATE_RISE) * rig.cell + 2;
@@ -864,20 +874,29 @@ export function createPress(stage: HTMLElement): () => void {
    * they can, from it as late */
   function move(a: number[], b: number[], pace = 1, least = 0): Leg {
     const turn = boomAngle(b[1]);
+    const limit = reachMax - boom * widest(a[1], turn);
     // up a phone's column her pencil folds back flat along the boom as the move starts, as at rest,
-    // goes round with it folded, and unfolds as it ends: never stood up end-on
+    // goes round with it folded, and unfolds as it ends: never stood up end-on. On the bed the trip
+    // home brings the elbow down out of the plates before the carriage drives off, her stood pencil
+    // turning to point off along the band meanwhile, away from the tabs, then folds it home
     const flat = along === 1;
+    const home = !flat && stowed([b[0], turn]) && !stowed(a) && a[0] <= limit;
     const fa = flat ? foldAt(a[1], a[2]) : a[2];
-    const fb = flat ? foldAt(turn, fa) : a[2];
-    const end = [b[0], turn, nearest(b[2], flat ? fb : a[2]), b[3]];
+    const fb = flat ? foldAt(turn, fa) : home ? nearest(-turn, a[2]) : a[2];
+    const end = [b[0], turn, nearest(b[2], fb), b[3]];
     const run = Math.abs(b[0] - a[0]);
     // a move that goes nowhere only tips her pencil across
     const stays = run < 0.5 && Math.abs(end[1] - a[1]) < 1e-3 && Math.abs(end[2] - a[2]) < 1e-3;
-    let upT = ((UPRIGHT - a[3]) / UPRIGHT) * TIP_UP * pace;
-    let downT = ((UPRIGHT - b[3]) / UPRIGHT) * TIP_DOWN * pace;
+    // her pencil tips in the time its drawn length takes to change, so a part tip near upright,
+    // where that length changes fastest, runs no quicker than a whole one
+    let upT = Math.cos(a[3]) * TIP_UP * pace;
+    let downT = Math.cos(b[3]) * TIP_DOWN * pace;
+    // the elbow's turns before and after the boom's
+    const preT = Math.abs(fa - a[2]) * BEND_RATE * pace;
+    const postT = Math.abs(end[2] - fb) * BEND_RATE * pace;
     if (flat) {
-      upT = Math.abs(fa - a[2]) * BEND_RATE * pace;
-      downT = Math.abs(end[2] - fb) * BEND_RATE * pace;
+      upT = preT;
+      downT = postT;
     }
     if (stays) {
       upT = 0;
@@ -885,11 +904,11 @@ export function createPress(stage: HTMLElement): () => void {
     }
     const turnT =
       Math.abs(end[1] - a[1]) * (flat ? Math.max(TURN_RATE, boom / SWING) : TURN_RATE) * pace;
-    const jointT = Math.max(turnT, Math.abs((flat ? fb - fa : end[2] - a[2]) * BEND_RATE * pace));
-    const limit = reachMax - boom * widest(a[1], end[1]);
+    const bendT = Math.abs((flat || home ? fb - fa : end[2] - a[2]) * BEND_RATE * pace);
+    const jointT = home ? preT + Math.max(turnT, bendT) + postT : Math.max(turnT, bendT);
     let time = Math.max(
       least,
-      pace * driveTime(run),
+      pace * driveTime(run) + (home ? upT + jointT : 0),
       upT + jointT + downT - OVERLAP * (Math.min(upT, jointT) + Math.min(jointT, downT)),
       160,
     );
@@ -912,18 +931,24 @@ export function createPress(stage: HTMLElement): () => void {
     }
     const up: Vec2 = [0, upT / time];
     const down: Vec2 = [1 - downT / time, 1];
+    // the boom's turn: on the trip home between the elbow's, and the carriage only after them
+    const turns: Vec2 = home ? [joints[0] + preT / time, joints[1] - postT / time] : joints;
+    const drive: Vec2 = home ? [joints[1], 1] : [0, 1];
+    if (home) curve = run > SHORT ? cruise(RAMP / (time * (1 - drive[0]))) : inOut;
+    const before: Vec2 = flat ? up : [joints[0], turns[0]];
+    const after: Vec2 = flat ? down : [turns[1], joints[1]];
     const carriage = curve;
     return {
       end,
       time,
-      ease: (u, i) => (i === 0 ? carriage(u) : inOut(within(u, joints))),
+      ease: (u, i) => (i === 0 ? carriage(within(u, drive)) : inOut(within(u, turns))),
       bend:
-        flat && !stays
+        (flat || home) && !stays
           ? (u) =>
               a[2] +
-              (fa - a[2]) * inOut(within(u, up)) +
-              (fb - fa) * inOut(within(u, joints)) +
-              (end[2] - fb) * inOut(within(u, down))
+              (fa - a[2]) * inOut(within(u, before)) +
+              (fb - fa) * inOut(within(u, turns)) +
+              (end[2] - fb) * inOut(within(u, after))
           : undefined,
       tilt: (u) =>
         stays || flat
@@ -1038,7 +1063,7 @@ export function createPress(stage: HTMLElement): () => void {
         t1: hit,
         a: start,
         b: done,
-        ease: together,
+        ease: inOut,
         task: { a, b: z, bend: b.bend },
       });
       // the quill lifts it, and it tips up off the plate, out of the way; up a phone's column it
@@ -1151,8 +1176,21 @@ export function createPress(stage: HTMLElement): () => void {
     for (const b of blocks) b.base = shown(b, t);
     asks.length = 0;
     for (const ask of waiting) asks.push(ask);
-    from = aiming ? [...aimPose] : [...pose];
+    // caught mid-move, the arm brakes along its way first, its speed falling to nothing, so it never
+    // stops dead: it covers half the way the old plan would have in that time
+    brake = null;
     since = t;
+    if (aiming) from = [...aimPose];
+    else {
+      const stop = [...pose];
+      sample(track, t - 16, from, other);
+      if (other.some((v, i) => Math.abs(v - pose[i]) > 1e-3)) {
+        brake = { track: [...track], from, at: t };
+        sample(track, t + BRAKE / 2, from, stop);
+        since = t + BRAKE;
+      }
+      from = stop;
+    }
     aiming = false;
     plan();
   }
@@ -1186,11 +1224,11 @@ export function createPress(stage: HTMLElement): () => void {
   /** whether stage point (x, y) is on a tab or on her, grown by her pencil's radius */
   function blocked(x: number, y: number): boolean {
     const r = PENCIL.radius * 1.16 * scale + 2;
-    for (const b of blocks) if (within2(x, y, r, b.tabBox)) return true;
+    for (const b of blocks) if (inBox(x, y, r, b.tabBox)) return true;
     const cell = rig.cell;
     const left = seat[0] - SEAT_CELL[0] * cell;
     const top = seat[1] - (SEAT_CELL[1] + MATE_RISE) * cell;
-    return within2(x, y, r, {
+    return inBox(x, y, r, {
       x: left,
       y: top,
       w: SPRITE_W * cell,
@@ -1281,12 +1319,13 @@ export function createPress(stage: HTMLElement): () => void {
     if (following) aimFor(aimAt);
     lift = Math.min(PEN.up, lift + ((PEN.up - PEN.down) / LIFT) * 1000 * dt);
     const turn = boomAngle(aimAt[1]);
-    // up a phone's column her pencil folds back flat along the boom while the boom swings round
-    const swinging = along === 1 && Math.abs(turn - aimPose[1]) > SWUNG;
+    const swinging = Math.abs(turn - aimPose[1]) > SWUNG;
+    // up a phone's column her pencil folds back flat along the boom while the boom swings round; on
+    // the bed, going home, the carriage waits while the elbow comes down out of the plates
     const targets = [
-      aimAt[0],
+      along === 0 && !following && swinging ? aimPose[0] : aimAt[0],
       turn,
-      swinging ? foldAt(aimPose[1], aimPose[2]) : nearest(aimAt[2], aimPose[2]),
+      along === 1 && swinging ? foldAt(aimPose[1], aimPose[2]) : nearest(aimAt[2], aimPose[2]),
     ];
     const stiff = along === 1 && !mouse ? SCROLL_AIM : AIM;
     // up a phone's column the boom's elbow sweeps no faster than a move's
@@ -1317,6 +1356,14 @@ export function createPress(stage: HTMLElement): () => void {
     aimPose[3] = clamp(aimPose[3] + aimSpeed[3] * dt, 0, UPRIGHT);
     if (Math.abs(need - aimPose[3]) > 0.004 || Math.abs(aimSpeed[3]) > 0.05) still = false;
     return still && lift === PEN.up;
+  }
+
+  /** the rig's pose at time t into `out`: the plan's, or braking along the one it took over from */
+  function poseAt(t: number, out: number[]) {
+    if (brake && t < brake.at + BRAKE) {
+      const s = t - brake.at;
+      sample(brake.track, brake.at + s - (s * s) / (2 * BRAKE), brake.from, out);
+    } else sample(track, t, from, out);
   }
 
   /** the state at the clock */
@@ -1379,7 +1426,7 @@ export function createPress(stage: HTMLElement): () => void {
 
     // the rig
     if (aiming) for (let i = 0; i < 4; i++) pose[i] = aimPose[i];
-    else sample(track, t, from, pose);
+    else poseAt(t, pose);
     sample(pen, t, up, sole);
     const z = aiming ? lift : sole[0];
     place(pose);
@@ -1410,6 +1457,9 @@ export function createPress(stage: HTMLElement): () => void {
     const mateX = Math.round(seat[0] - SEAT_CELL[0] * cell);
     const mateY = Math.round(seat[1] - SEAT_CELL[1] * cell);
     const crownX = mateX + CROWN_CELL[0] * cell;
+    aimHer(t, mateX, mateY);
+    sway(performance.now());
+    const herPose = hand < 0 ? 0 : poseOf(hand, height);
 
     // the strips
     for (const b of blocks) {
@@ -1438,7 +1488,7 @@ export function createPress(stage: HTMLElement): () => void {
       // the output over the Markdown: shown above the pencil's line while it slides
       const out = flip ? flip.ask.out : b.base;
       let wipe = out ? 1 : 0;
-      if (flip && t < flip.hit && sliding === b) wipe = clamp01((lineY - b.cell.y) / b.cell.h);
+      if (flip && t < flip.hit && sliding === b) wipe = clamp((lineY - b.cell.y) / b.cell.h);
       if (wipe !== b.wipe) {
         b.wipe = wipe;
         b.out.style.visibility = wipe <= 0 ? 'hidden' : '';
@@ -1465,7 +1515,7 @@ export function createPress(stage: HTMLElement): () => void {
     }
 
     if (t < noteUntil) status = note;
-    if (active && status) say(status);
+    if (status) report(stage, status);
 
     bounds[0] = Infinity;
     bounds[1] = Infinity;
@@ -1510,10 +1560,11 @@ export function createPress(stage: HTMLElement): () => void {
     // her shadow on the rig and the bay
     const shadowX = (-LIGHT[0] / LIGHT[2]) * seat[2];
     const shadowY = (-LIGHT[1] / LIGHT[2]) * seat[2];
-    bounds[0] = Math.min(bounds[0], mateX + Math.min(0, shadowX));
-    bounds[1] = Math.min(bounds[1], mateY + Math.min(0, shadowY));
-    bounds[2] = Math.max(bounds[2], mateX + SPRITE_W * cell + Math.max(0, shadowX));
-    bounds[3] = Math.max(bounds[3], mateY + SPRITE_H * cell + Math.max(0, shadowY));
+    const [x0, y0, x1, y1] = POSE_BOX[herPose];
+    bounds[0] = Math.min(bounds[0], mateX + x0 * cell + Math.min(0, shadowX));
+    bounds[1] = Math.min(bounds[1], mateY + y0 * cell + Math.min(0, shadowY));
+    bounds[2] = Math.max(bounds[2], mateX + x1 * cell + Math.max(0, shadowX));
+    bounds[3] = Math.max(bounds[3], mateY + y1 * cell + Math.max(0, shadowY));
     if (sliding) {
       bounds[0] = Math.min(bounds[0], sliding.cell.x);
       bounds[1] = Math.min(bounds[1], lineY - 1);
@@ -1560,7 +1611,7 @@ export function createPress(stage: HTMLElement): () => void {
     set2('uValve', deck.valve[0], deck.valve[1]);
     set2('uDial', deck.gauge[0], deck.gauge[1]);
     set2('uMotor', deck.motor[0], deck.motor[1]);
-    set3('uMate', mateX, mateY, cell);
+    set3('uMate', mateX - MATE_PAD[0] * cell, mateY - MATE_PAD[1] * cell, cell);
     shader.set('uMateZ', seat[2]);
   }
 
@@ -1579,18 +1630,133 @@ export function createPress(stage: HTMLElement): () => void {
     bend.style.transform = `translateX(${b - 9}px)`;
   }
 
-  /** her frame and her moon's step: her gaze, a blink now and then, the moon's orbit in steps */
+  /** her frame and her moon's step: her pose and remote's light, her gaze, a blink now and then,
+   * the moon's orbit in steps; a new pose casts its silhouette on the rig */
   function paint() {
     if (!ink) return;
-    const ticks = reduced ? 0 : Math.floor(performance.now() / TICK);
+    const now = performance.now();
+    sway(now);
+    const herPose = hand < 0 ? 0 : poseOf(hand, height);
+    const lit = wantLit && herPose > 0 && hand === wantHand && height > 0;
+    const ticks = reduced ? 0 : Math.floor(now / TICK);
     const eyes = !reduced && ticks % BLINK === 0 ? 1 : gaze;
     const step = Math.floor(ticks / STEP) % ORBIT_STEPS;
-    const shown = (eyes * ORBIT_STEPS + step) * 64 + rig.ring;
+    const shown = (((herPose * 2 + (lit ? 1 : 0)) * 4 + eyes) * ORBIT_STEPS + step) * 64 + rig.ring;
     if (shown === mateShown) return;
     mateShown = shown;
-    paintMate(mateImage, eyes, step, rig.ring, ink, LIGHT);
+    paintMate(mateImage, herPose, lit, eyes, step, rig.ring, ink, LIGHT);
     mate.getContext('2d')!.putImageData(mateImage, 0, 0);
     mate.style.visibility = 'visible';
+    if (herPose !== castPose) {
+      castPose = herPose;
+      shader?.texture('uSprite', castOf(herPose));
+    }
+  }
+
+  function castOf(pose: number): ImageData {
+    casts[pose] ??= silhouette(pose);
+    return casts[pose];
+  }
+
+  /**
+   * Where she wants her remote at time t, her sprite at (x, y): pointed at what the arm works at,
+   * from the hand on its side and as high as it lies from her shoulder, lower while that arm would
+   * touch a tab. A press: the slide's start from just before it sets off, the pencil's point as it
+   * slides, the slide's end till it's done, lit till the pencil lifts. The reader's springs: the
+   * cursor, lit while the arm moves to it, or up a phone's column the line it reads at. Nothing to
+   * point at: idle.
+   */
+  function aimHer(t: number, x: number, y: number) {
+    herAt[0] = x;
+    herAt[1] = y;
+    let target = false;
+    wantLit = false;
+    if (begun && !reduced) {
+      if (aiming && following) {
+        target = true;
+        aimed[0] = mouse ? cursorAt[0] : tipAt[0];
+        aimed[1] = mouse ? cursorAt[1] : tipAt[1];
+        wantLit = mouse && !steady;
+      } else {
+        for (const job of jobs) {
+          if (t < job.go - LEAD || t >= job.free) continue;
+          const b = job.ask.block;
+          target = true;
+          if (t >= job.touch && t < job.hit) {
+            aimed[0] = tipAt[0];
+            aimed[1] = tipAt[1];
+          } else {
+            aimed[0] = b.tipX;
+            aimed[1] = (t < job.touch ? job.ask.out : !job.ask.out) ? b.range[0] : b.range[1];
+          }
+          wantLit = t < job.hit;
+          break;
+        }
+      }
+    }
+    if (!target) {
+      wantHand = -1;
+      return;
+    }
+    const cell = rig.cell;
+    const middle = x + (SPRITE_W / 2) * cell;
+    const held = wantHand;
+    if (held < 0 || Math.abs(aimed[0] - middle) > HAND_SLACK) wantHand = aimed[0] > middle ? 0 : 1;
+    const e =
+      (Math.atan2(
+        y + 30.5 * cell - aimed[1],
+        Math.abs(aimed[0] - x - (wantHand === 0 ? 23 : 6) * cell),
+      ) *
+        180) /
+      Math.PI;
+    const was = wantHand === held ? wantHeight : 2;
+    wantHeight =
+      e > RAISE[1] + (was === 3 ? -RAISE_SLACK : RAISE_SLACK)
+        ? 3
+        : e < RAISE[0] + (was === 1 ? RAISE_SLACK : -RAISE_SLACK)
+          ? 1
+          : 2;
+    while (wantHeight >= 0 && !armClear(x, y, poseOf(wantHand, wantHeight))) wantHeight--;
+    if (wantHeight < 0) wantHand = -1;
+  }
+
+  /** her arm a pose nearer the one she wants, a pose every SWAY ms: down to change hands or to idle,
+   * through ready from idle; at once lower while it would touch a tab where she now stands */
+  function sway(now: number) {
+    while (hand >= 0 && !armClear(herAt[0], herAt[1], poseOf(hand, height))) {
+      height--;
+      if (height < 0) {
+        hand = -1;
+        height = 0;
+      }
+    }
+    if (now >= swayAt) {
+      const was = hand < 0 ? -1 : poseOf(hand, height);
+      if (hand >= 0 && hand !== wantHand) {
+        if (height > 0) height--;
+        else hand = -1;
+      } else if (hand < 0 && wantHand >= 0) {
+        hand = wantHand;
+        height = 0;
+      } else if (hand >= 0 && height !== wantHeight) height += height < wantHeight ? 1 : -1;
+      if ((hand < 0 ? -1 : poseOf(hand, height)) !== was) swayAt = now + SWAY;
+    }
+  }
+
+  /** whether her arm in `pose`, her sprite at (x, y), keeps clear of every tab as her canvas does */
+  function armClear(x: number, y: number, pose: number): boolean {
+    const cell = rig.cell;
+    const [x0, y0, x1, y1] = ARM_BOX[pose];
+    for (const { tabBox: t } of blocks) {
+      if (
+        x + x1 * cell > t.x - HER_CLEAR &&
+        x + x0 * cell < t.x + t.w + HER_CLEAR &&
+        y + y1 * cell > t.y &&
+        y + y0 * cell < t.y + t.h
+      )
+        return false;
+    }
+    return true;
   }
 
   function set2(name: string, x: number, y: number) {
@@ -1621,12 +1787,6 @@ export function createPress(stage: HTMLElement): () => void {
     layout();
     apply();
     shader?.invalidate();
-  }
-
-  function say(text: string) {
-    if (text === lastStatus) return;
-    lastStatus = text;
-    setStatus(text);
   }
 
   function onFrame(time: number) {
@@ -1672,6 +1832,7 @@ export function createPress(stage: HTMLElement): () => void {
     let still = false;
     if (aiming) {
       still = aimStep(dt / 1000);
+      steady = still;
       if (still && !following) {
         // back at its park; stopped short of it, it drives the rest of the way
         const short = Math.abs(aimAt[0] - aimPose[0]) >= 1;
@@ -1688,6 +1849,7 @@ export function createPress(stage: HTMLElement): () => void {
   function write() {
     begun = true;
     playing = true;
+    brake = null;
     let t = 0;
     asks.length = 0;
     for (const b of blocks) {
@@ -1712,7 +1874,6 @@ export function createPress(stage: HTMLElement): () => void {
   /** dither the page out, then write it again from the arm's pose */
   function replay() {
     if (!shader) return;
-    started = true;
     from = [...pose];
     aiming = false;
     following = false;
@@ -1734,28 +1895,30 @@ export function createPress(stage: HTMLElement): () => void {
 
   function colours() {
     const style = getComputedStyle(stage);
-    const night = document.documentElement.classList.contains('dark');
+    const night = isDark();
+    const paper = cssRgb(style.getPropertyValue('--lp-paper'));
+    const ink3 = cssRgb(style.getPropertyValue('--lp-ink'));
+    const yellow = cssRgb(style.getPropertyValue('--lp-yellow'));
+    const accent = night ? yellow : cssRgb(style.getPropertyValue('--lp-sun'));
     // she keeps her look in either theme: a light jacket, black clothes, an outline in the ink
-    const paperBytes = bytes(style.getPropertyValue('--lp-paper'));
-    const inkBytes = bytes(style.getPropertyValue('--lp-ink'));
+    const paperBytes = bytes(paper);
+    const inkBytes = bytes(ink3);
     ink = {
       line: night ? paperBytes : inkBytes,
       pen: inkBytes,
       lit: night ? inkBytes : paperBytes,
-      yellow: bytes(style.getPropertyValue('--lp-yellow')),
+      yellow: bytes(yellow),
       paper: paperBytes,
-      accent: bytes(style.getPropertyValue(night ? '--lp-yellow' : '--lp-sun')),
+      accent: bytes(accent),
     };
     mateShown = -1;
     paint();
     if (!shader) return;
-    const paper = rgb(style.getPropertyValue('--lp-paper'));
-    const ink3 = rgb(style.getPropertyValue('--lp-ink'));
     shader.set('uLit', night ? ink3 : paper);
     shader.set('uShade', night ? paper : ink3);
-    shader.set('uAccent', rgb(style.getPropertyValue(night ? '--lp-yellow' : '--lp-sun')));
-    shader.set('uYellow', rgb(style.getPropertyValue('--lp-yellow')));
-    shader.set('uLine', rgba(style.getPropertyValue('--lp-line-strong')));
+    shader.set('uAccent', accent);
+    shader.set('uYellow', yellow);
+    shader.set('uLine', cssRgba(style.getPropertyValue('--lp-line-strong')));
     shader.set('uNight', night ? 1 : 0);
     shader.set('uL', LIGHT);
     shader.invalidate();
@@ -1773,14 +1936,15 @@ export function createPress(stage: HTMLElement): () => void {
   function take() {
     // it rests by the cursor a while before going back
     movedAt = performance.now();
-    sample(track, clock, from, aimPose);
+    poseAt(clock, aimPose);
     sample(pen, clock, up, sole);
     lift = sole[0];
     const before = [0, 0, 0, 0];
-    sample(track, clock - 16, from, before);
+    poseAt(clock - 16, before);
     aimSpeed[0] = (aimPose[0] - before[0]) / 0.016;
     for (let i = 1; i < 4; i++) aimSpeed[i] = (aimPose[i] - nearest(before[i], aimPose[i])) / 0.016;
     aiming = true;
+    steady = false;
   }
 
   /** a mouse moves or clicks in the stage: once the sequence has played, the arm follows it */
@@ -1926,25 +2090,17 @@ export function createPress(stage: HTMLElement): () => void {
         addEventListener('scroll', onScroll, passive);
         onScroll();
       } else removeEventListener('scroll', onScroll);
-      if (started || reduced || !shader) return;
+      // started: the writer begun and past its empty file
+      if ((begun && phase !== 'ready') || reduced || !shader) return;
       // a stage taller than the viewport counts by the share of the viewport it fills
       const seen =
         entry.intersectionRatio >= START || entry.intersectionRect.height >= innerHeight * START;
       if (seen) {
-        started = true;
         if (phase === 'ready') wake();
         else replay();
       } else if (!entry.isIntersecting && phase === 'rest' && !begun) ready();
     },
     { threshold: [0, 0.1, 0.2, START, 0.6] },
-  );
-  const middle = new IntersectionObserver(
-    ([entry]) => {
-      active = entry.isIntersecting;
-      // the bar says the figure's own line as it becomes active, so ours is said again
-      if (active) lastStatus = '';
-    },
-    { rootMargin: '-50% 0px -50% 0px' },
   );
   const resize = new ResizeObserver(refresh);
   // a section above that changes height moves the stage off whole pixels again
@@ -1954,15 +2110,13 @@ export function createPress(stage: HTMLElement): () => void {
     stageAt[0] = s.left + scrollX;
     stageAt[1] = s.top + scrollY;
   });
-  const theme = new MutationObserver(colours);
 
   refresh();
   colours();
   resize.observe(stage);
   moved.observe(document.body);
   view.observe(stage);
-  if (figure) middle.observe(figure);
-  theme.observe(document.documentElement, { attributes: true, attributeFilter: ['class'] });
+  const stopTheme = onTheme(colours);
   button?.addEventListener('click', replay);
   // her idle between the arm's frames: a blink now and then, her moon's next step
   const ticker = window.setInterval(() => {
@@ -1976,10 +2130,9 @@ export function createPress(stage: HTMLElement): () => void {
   return () => {
     disposed = true;
     view.disconnect();
-    middle.disconnect();
     resize.disconnect();
     moved.disconnect();
-    theme.disconnect();
+    stopTheme();
     button?.removeEventListener('click', replay);
     stage.removeEventListener('pointerenter', onEnter);
     stage.removeEventListener('pointermove', onMove);
@@ -1995,25 +2148,7 @@ export function createPress(stage: HTMLElement): () => void {
   };
 }
 
-/** a CSS colour, `#rgb`, `#rrggbb`, `#rrggbbaa` or `rgb(r g b / a)`, as the shader's */
-function rgba(value: string): [number, number, number, number] {
-  const text = value.trim();
-  if (text.startsWith('#')) {
-    const hex = text.length < 6 ? text.slice(1).replace(/./g, '$&$&') : text.slice(1);
-    const n = (i: number) => Number.parseInt(hex.slice(i, i + 2), 16) / 255;
-    return [n(0), n(2), n(4), hex.length === 8 ? n(6) : 1];
-  }
-  const [r, g, b, a = 1] = text.match(/[\d.]+/g)!.map(Number);
-  return [r / 255, g / 255, b / 255, a];
-}
-
-function rgb(value: string): [number, number, number] {
-  const [r, g, b] = rgba(value);
-  return [r, g, b];
-}
-
-/** a CSS colour as bytes, for a 2D canvas */
-function bytes(value: string): [number, number, number] {
-  const [r, g, b] = rgba(value);
+/** a colour as bytes, for a 2D canvas */
+function bytes([r, g, b]: readonly [number, number, number]): [number, number, number] {
   return [Math.round(r * 255), Math.round(g * 255), Math.round(b * 255)];
 }

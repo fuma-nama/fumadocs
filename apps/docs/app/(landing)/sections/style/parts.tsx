@@ -20,13 +20,12 @@ export interface PartProps {
 }
 
 /** a slotted screw head */
-export function Screw({ angle, className, style }: PartProps & { angle: number }) {
+export function Screw({ angle, className }: { angle: number; className?: string }) {
   return (
     <svg
       aria-hidden
       viewBox="-5 -5 10 10"
       className={cn('absolute size-[max(6px,1.2cqw)] -translate-1/2 overflow-visible', className)}
-      style={style}
     >
       <circle r="4.4" className="fill-lp-paper stroke-lp-ink-2" style={LINE} />
       <path
@@ -40,7 +39,15 @@ export function Screw({ angle, className, style }: PartProps & { angle: number }
 }
 
 /** a status LED, lit in the sun's orange */
-export function Led({ on, blink, className, style }: PartProps & { on: boolean; blink?: boolean }) {
+export function Led({
+  on,
+  blink,
+  className,
+}: {
+  on: boolean;
+  blink?: boolean;
+  className?: string;
+}) {
   return (
     <span
       aria-hidden
@@ -50,7 +57,6 @@ export function Led({ on, blink, className, style }: PartProps & { on: boolean; 
         on && blink && 'lp-caret',
         className,
       )}
-      style={style}
     />
   );
 }
@@ -77,12 +83,16 @@ export function Stamp({
   tilt,
   active,
   className,
-  style,
-}: PartProps & { children: ReactNode; tilt: number; active?: boolean }) {
+}: {
+  children: ReactNode;
+  tilt: number;
+  active?: boolean;
+  className?: string;
+}) {
   return (
     <span
       className={cn('relative inline-block font-pixel leading-4 whitespace-nowrap', className)}
-      style={{ ...style, rotate: `${tilt}deg` }}
+      style={{ rotate: `${tilt}deg` }}
     >
       <span
         aria-hidden

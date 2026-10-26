@@ -8,11 +8,15 @@ import {
   useRef,
   useState,
 } from 'react';
-import Image, { type StaticImageData } from 'next/image';
+import Image from 'next/image';
 import { useReducedMotion } from 'motion/react';
 import { cn } from '@/lib/cn';
+import type { ShowcaseObject } from '@/lib/showcases';
+import { whenSeen } from '../lib/later';
+import { clamp } from '../lib/math';
 import { TICK } from '../lib/motion';
 import { report } from '../lib/status';
+import { onTheme } from '../lib/theme';
 import { useIsClient } from '../lib/use-is-client';
 import { Roller } from '../ui/roller';
 import { address } from '../ui/site-tile';
@@ -21,9 +25,9 @@ import {
   createProjector,
   DEVELOP,
   dither,
+  hidePrint,
   printFrame,
-  type Projector as Engine,
-  restore,
+  type ProjectorEngine,
 } from './engine';
 import {
   BAND,
@@ -38,14 +42,8 @@ import {
   W,
 } from './film';
 
-export interface Reel {
-  name: string;
-  url: string;
-  image: StaticImageData | string;
-}
-
 interface ProjectorProps {
-  sites: Reel[];
+  sites: Required<ShowcaseObject>[];
   /** the deck's fixed hardware, drawn on the server: under the strip, and over it */
   back: ReactNode;
   front: ReactNode;
@@ -92,24 +90,14 @@ const PERFS = `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg'
 function Leader({ style }: { style: CSSProperties }) {
   return (
     <span aria-hidden className="absolute bg-lp-paper" style={style}>
-      <svg viewBox={`0 0 ${FRAME_W} ${FRAME_H}`} className={cn('size-full', reveal)}>
-        <circle
-          cx={FRAME_W / 2}
-          cy={FRAME_H / 2}
-          r={12}
-          className="fill-none stroke-lp-ink-2"
-          style={LINE}
-        />
-        <circle
-          cx={FRAME_W / 2}
-          cy={FRAME_H / 2}
-          r={7.5}
-          className="fill-none stroke-lp-ink-2"
-          style={LINE}
-        />
+      <svg
+        viewBox={`0 0 ${FRAME_W} ${FRAME_H}`}
+        className={cn('size-full fill-none stroke-lp-ink-2', reveal)}
+      >
+        <circle cx={FRAME_W / 2} cy={FRAME_H / 2} r={12} style={LINE} />
+        <circle cx={FRAME_W / 2} cy={FRAME_H / 2} r={7.5} style={LINE} />
         <path
           d={`M${FRAME_W / 2} 2v${FRAME_H - 4}M8 ${FRAME_H / 2}h${FRAME_W - 16}`}
-          className="stroke-lp-ink-2"
           style={LINE}
         />
       </svg>
@@ -124,17 +112,19 @@ function Leader({ style }: { style: CSSProperties }) {
  */
 export function Projector({ sites, back, front, className }: ProjectorProps) {
   const reduced = useReducedMotion() === true;
+  const client = useIsClient();
   const [current, setCurrent] = useState(0);
-  const [title, setTitle] = useState(0);
-  const [incoming, setIncoming] = useState(1);
   const [picked, setPicked] = useState<number | null>(null);
   /** the frame the strip is on its way to */
   const [heading, setHeading] = useState<number | null>(null);
   const [on, setOn] = useState(true);
-  const engine = useRef<Engine | null>(null);
+  const engine = useRef<ProjectorEngine | null>(null);
   const screen = useRef<HTMLSpanElement>(null);
   const arrived = useRef(false);
   const site = sites[current];
+  /** the name on the base, and the frame the screen has ready next */
+  const title = heading ?? current;
+  const incoming = heading ?? (current + 1) % sites.length;
   const frames = sites.length + LEADER * 2;
   // a roll covers the longer of two names: the cells of the longest one start within the budget
   let longest = 1;
@@ -148,23 +138,27 @@ export function Projector({ sites, back, front, className }: ProjectorProps) {
         const box = screen.current?.querySelector<HTMLElement>(`[data-layer="${index}"]`);
         return { canvas: box?.querySelector('canvas'), image: box?.querySelector('img') };
       };
+      /** strips that left so far: an arrival from before the last one is stale */
+      let leaves = 0;
       const instance = createProjector(element, sites.length, reduced, {
         leave(from, to) {
+          leaves++;
           const { canvas, image } = layer(from);
           if (canvas && image && !reduced) dither(canvas, image, 0, 16, DARKEN);
-          setTitle(to);
-          setIncoming(to);
           setHeading(to);
           report(element, `showing ${address(sites[to].url)}`);
         },
         arrive(index) {
           // the screen keeps the last frame until the new one is ready to show
+          const at = leaves;
           const show = () => {
+            if (at !== leaves) return;
             arrived.current = true;
             setCurrent(index);
             setPicked(null);
             setHeading(null);
-            setIncoming(index + 1 < sites.length ? index + 1 : 0);
+            // the same line as at the leave, unless a pick turned the strip on its way
+            report(element, `showing ${address(sites[index].url)}`);
           };
           const { image } = layer(index);
           if (image) void image.decode().then(show, show);
@@ -183,26 +177,23 @@ export function Projector({ sites, back, front, className }: ProjectorProps) {
       };
       const resize = new ResizeObserver(reprint);
       resize.observe(element.querySelector('[data-reel]')!);
-      const theme = new MutationObserver(reprint);
-      theme.observe(document.documentElement, { attributes: true, attributeFilter: ['class'] });
+      const stopTheme = onTheme(reprint);
 
       // the first time the reel is in view, the frames on the strip print in, then it plays
       let boot = 0;
-      const view = new IntersectionObserver(
-        ([entry]) => {
-          if (!entry.isIntersecting) return;
-          view.disconnect();
+      const stopView = whenSeen(
+        element,
+        () => {
           element.dataset.booted = '';
           boot = window.setTimeout(instance.boot, reduced ? 0 : PRINT_IN);
         },
         { threshold: 0.4 },
       );
-      view.observe(element);
       return () => {
         clearTimeout(boot);
-        view.disconnect();
+        stopView();
         resize.disconnect();
-        theme.disconnect();
+        stopTheme();
         instance.destroy();
         engine.current = null;
       };
@@ -217,7 +208,7 @@ export function Projector({ sites, back, front, className }: ProjectorProps) {
       const canvas = layer.querySelector('canvas');
       const image = layer.querySelector('img');
       if (!canvas || !image) continue;
-      if (layer.dataset.layer !== String(current) || reduced) restore(canvas);
+      if (layer.dataset.layer !== String(current) || reduced) hidePrint(canvas);
       else dither(canvas, image, 16, 0, DEVELOP);
     }
   }, [current, reduced]);
@@ -234,7 +225,7 @@ export function Projector({ sites, back, front, className }: ProjectorProps) {
     else if (event.key === 'ArrowLeft' || event.key === 'ArrowUp') to = from - 1;
     else return;
     event.preventDefault();
-    to = Math.max(0, Math.min(sites.length - 1, to));
+    to = clamp(to, 0, sites.length - 1);
     pick(to);
     event.currentTarget.querySelector<HTMLElement>(`[data-frame="${to}"]`)?.focus();
   }
@@ -288,6 +279,7 @@ export function Projector({ sites, back, front, className }: ProjectorProps) {
         site={item}
         near={i >= first && i <= last}
         shown={i >= low - SIDE && i <= high + SIDE}
+        loading={client ? 'eager' : 'lazy'}
         checked={i === checked}
         style={{ ...slot(i, frames), ...(i <= SIDE ? pop(i) : undefined) }}
         onPick={pick}
@@ -364,20 +356,21 @@ export function Projector({ sites, back, front, className }: ProjectorProps) {
 interface FrameProps {
   index: number;
   count: number;
-  site: Reel;
+  site: Required<ShowcaseObject>;
   /** its screenshot loads */
   near: boolean;
   /** on the strip, where the reader can see it */
   shown: boolean;
+  /** eager once hydrated: on the server it would add a preload for every frame */
+  loading: 'eager' | 'lazy';
   checked: boolean;
   style: CSSProperties;
   onPick: (index: number) => void;
 }
 
-function Frame({ index, count, site, near, shown, checked, style, onPick }: FrameProps) {
+function Frame({ index, count, site, near, shown, loading, checked, style, onPick }: FrameProps) {
   const canvas = useRef<HTMLCanvasElement>(null);
   const image = useRef<HTMLImageElement>(null);
-  const client = useIsClient();
   // a frame prints when it comes onto the strip: a hidden one has no size to print at
   useLayoutEffect(() => {
     if (shown && image.current) printFrame(canvas.current!, image.current);
@@ -406,8 +399,7 @@ function Frame({ index, count, site, near, shown, checked, style, onPick }: Fram
           alt=""
           width={FRAME_W + 1}
           height={FRAME_H + 1}
-          // eager once hydrated: on the server it would add a preload for every frame
-          loading={client ? 'eager' : 'lazy'}
+          loading={loading}
           onLoad={(event) => printFrame(canvas.current!, event.currentTarget)}
           className="invisible absolute inset-0 size-full object-cover [@media(scripting:none)]:visible"
         />

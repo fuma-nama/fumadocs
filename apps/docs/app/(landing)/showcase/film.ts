@@ -1,3 +1,5 @@
+import { clamp } from '../lib/math';
+
 /**
  * The projector's deck, drawn in its own units: 640 wide, y down from the viewer's bottom edge.
  * The deck scales with its column, so every part keeps its place at any width.
@@ -19,7 +21,7 @@ export const GATE = (TRACK_LEFT + TRACK_RIGHT) / 2;
 /** the drums the reels turn in, and the radius of film wound on a reel: empty to full */
 export const DRUM_R = 56;
 export const DRUMS = { take: [68, STRIP_Y], feed: [572, STRIP_Y] } as const;
-export const HUB = 12;
+const HUB = 12;
 export const FULL = 44;
 
 /** the Geneva drive under the gate: its wheel, the driver beside it, their centre distance */
@@ -58,7 +60,7 @@ const ENGAGE = Math.PI / 4;
  * The pin enters a slot at -45°, turns the wheel a quarter, leaves at 45°; the rest of the turn the
  * driver's locking disc holds the wheel still.
  */
-export function geneva(alpha: number): { progress: number; turn: number } {
+function geneva(alpha: number): { progress: number; turn: number } {
   if (alpha <= -ENGAGE) return { progress: 0, turn: 0 };
   if (alpha >= ENGAGE) return { progress: 1, turn: -90 };
   const slot = Math.atan2(-CRANK * Math.sin(alpha), GENEVA_C - CRANK * Math.cos(alpha));
@@ -86,7 +88,7 @@ export const LEADER = 3;
 
 /** the radius of film on a reel holding `share` of the reel, the area of film kept */
 function wound(share: number): number {
-  return Math.sqrt(HUB * HUB + Math.min(1, Math.max(0, share)) * (FULL * FULL - HUB * HUB));
+  return Math.sqrt(HUB * HUB + clamp(share) * (FULL * FULL - HUB * HUB));
 }
 
 /** the film wound on the take-up and the feed reel, as radii, with frame `position` in the gate */

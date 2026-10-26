@@ -15,7 +15,7 @@ import { useReducedMotion } from 'motion/react';
 import { useSearchContext } from 'fumadocs-ui/contexts/search';
 import { useCopyButton } from 'fumadocs-ui/utils/use-copy-button';
 import { TICK } from '../../lib/motion';
-import { report, setStatus } from '../../lib/status';
+import { report, restore, setStatus } from '../../lib/status';
 import { useIsClient } from '../../lib/use-is-client';
 import { Roller } from '../../ui/roller';
 import { Scramble } from '../../ui/text';
@@ -26,8 +26,6 @@ export interface Module extends ModuleInfo {
   /** a `<Stage>`, its `--bt-dur` sets how long the cell stays active */
   mechanism: ReactNode;
 }
-
-const LOADED = '12 integrations loaded';
 
 /** the docs pages already prefetched, each once */
 const prefetched = new Set<string>();
@@ -48,10 +46,13 @@ function diagonal(i: number, { cols, stacked }: Layout) {
 export function Board({
   header,
   modules,
+  loaded,
   children,
 }: {
   header: ReactNode;
   modules: Module[];
+  /** the figure's line once the board is up */
+  loaded: string;
   /** the marquee row under the board */
   children: ReactNode;
 }) {
@@ -74,6 +75,7 @@ export function Board({
   const shown = hovered ?? (scanning ? active : null);
   const boardElement = useRef<HTMLDivElement | null>(null);
   const router = useRouter();
+  const search = useSearchContext();
 
   // a link's page is prefetched once a mouse moves onto it, never as it scrolls past: that parsed
   // every page's payload mid-scroll, and content scrolling under a still pointer doesn't move it
@@ -100,12 +102,10 @@ export function Board({
       const cells = board.querySelectorAll<HTMLElement>('[data-i]');
       const style = getComputedStyle(board);
       const cols = Number(style.getPropertyValue('--cols'));
+      const lead = parseFloat(style.getPropertyValue('--bt-lead'));
       const isStacked = cols < 3;
-      setLayout({
-        cols,
-        lead: parseFloat(style.getPropertyValue('--bt-lead')),
-        stacked: isStacked,
-      });
+      setLayout({ cols, lead, stacked: isStacked });
+      let wave = 0;
       const power = new IntersectionObserver(
         (entries) => {
           let bits = 0;
@@ -116,7 +116,18 @@ export function Board({
             const i = (entry.target as HTMLElement).dataset.i;
             bits |= i === undefined ? all : 1 << Number(i);
           }
-          if (bits !== 0) setPowered((prev) => (prev ?? 0) | bits);
+          if (bits === 0) return;
+          setPowered((prev) => (prev ?? 0) | bits);
+          if (isStacked) return;
+          // a wide board powers every cell at once; the wave ends on the last cell's inverted
+          // frame, then one more tick
+          report(board, 'powering on');
+          const end =
+            lead + (diagonal(cells.length - 1, { cols, lead, stacked: false }) + 2) * TICK;
+          wave = window.setTimeout(() => {
+            report(board, loaded);
+            setWaveDone(true);
+          }, end);
         },
         // the wide board waits until it fills the view, stacked cells boot as they arrive
         { rootMargin: isStacked ? '0px 0px -15% 0px' : '0px 0px -45% 0px' },
@@ -138,25 +149,13 @@ export function Board({
         power.observe(board);
       }
       return () => {
+        clearTimeout(wave);
         power.disconnect();
         middle.disconnect();
       };
     },
-    [reduced, all],
+    [reduced, all, loaded],
   );
-
-  useEffect(() => {
-    const board = boardElement.current;
-    if (!board || layout === null || layout.stacked || powered !== all) return;
-    report(board, 'powering on');
-    // the last cell's inverted frame, then one more tick
-    const wave = layout.lead + (diagonal(modules.length - 1, layout) + 2) * TICK;
-    const timer = setTimeout(() => {
-      report(board, LOADED);
-      setWaveDone(true);
-    }, wave);
-    return () => clearTimeout(timer);
-  }, [powered, all, layout, modules.length]);
 
   useEffect(() => {
     const stage = boardElement.current?.querySelector(`[data-i="${active}"] .bt-stage`);
@@ -176,7 +175,7 @@ export function Board({
 
   function leave() {
     setHovered(null);
-    setStatus(LOADED);
+    restore();
   }
 
   const cells = [];
@@ -184,9 +183,10 @@ export function Board({
     const on = powered === null || (powered & (1 << i)) !== 0;
     cells.push(
       <Cell
-        key={modules[i].n}
+        key={modules[i].title}
         module={modules[i]}
         index={i}
+        search={search}
         on={on}
         // the readout decodes after the cell's inverted frame
         boot={
@@ -274,6 +274,8 @@ function Install({ command }: { command: string }) {
 interface CellProps {
   module: Module;
   index: number;
+  /** the dialog the cell without a docs page opens */
+  search: ReturnType<typeof useSearchContext>;
   on: boolean;
   /** ms after power-on when the readout decodes, while the cell boots */
   boot?: number;
@@ -282,8 +284,7 @@ interface CellProps {
   onLeave: () => void;
 }
 
-function Cell({ module, index, on, boot, active, onEnter, onLeave }: CellProps) {
-  const { setOpenSearch, hotKey } = useSearchContext();
+function Cell({ module, index, search, on, boot, active, onEnter, onLeave }: CellProps) {
   const props = {
     'data-i': index,
     'data-on': on ? '' : undefined,
@@ -307,7 +308,7 @@ function Cell({ module, index, on, boot, active, onEnter, onLeave }: CellProps) 
         </span>
         {!module.href && (
           <span className="flex gap-1 font-pixel text-xs max-md:hidden">
-            {hotKey.map((key, i) => (
+            {search.hotKey.map((key, i) => (
               <kbd key={i} className="border border-current px-1.5 leading-5">
                 {key.display}
               </kbd>
@@ -336,7 +337,7 @@ function Cell({ module, index, on, boot, active, onEnter, onLeave }: CellProps) 
   }
 
   return (
-    <button type="button" onClick={() => setOpenSearch(true)} {...props}>
+    <button type="button" onClick={() => search.setOpenSearch(true)} {...props}>
       {content}
     </button>
   );

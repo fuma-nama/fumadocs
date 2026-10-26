@@ -1,5 +1,7 @@
+'use client';
 import type { ComponentProps, ReactNode } from 'react';
 import { cn } from '@/lib/cn';
+import { registerFigure } from '../lib/status';
 
 interface FigureProps extends ComponentProps<'section'> {
   id: string;
@@ -12,6 +14,7 @@ export function Figure({ status, className, children, ...props }: FigureProps) {
   return (
     <section
       {...props}
+      ref={registerFigure}
       data-figure=""
       data-status={status}
       className={cn('relative scroll-mt-(--lp-menu-h) border-t border-lp-line', className)}
