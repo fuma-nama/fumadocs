@@ -18,7 +18,7 @@ import {
 import { COLS, createSession, type Frame, paint, ROWS } from './session';
 
 const cameraEase = cubicBezier(...camera);
-/** CRT power on: the raster opens from a line, one step per tick */
+/** CRT power on: the raster opens from a line, one step per half tick, while the session starts */
 const OPEN = [0.002, 0.08, 0.4, 1];
 const LIGHT = { azimuth: 0.85, elevation: 0.62 };
 
@@ -171,7 +171,7 @@ export function createStart(el: StartElements): () => void {
 
     let open = 1;
     if (openAt >= 0) {
-      const step = Math.floor((performance.now() - openAt) / TICK);
+      const step = Math.floor((performance.now() - openAt) / (TICK / 2));
       open = OPEN[Math.min(step, OPEN.length - 1)];
       if (step < OPEN.length) moving = true;
     } else if (!reduce.matches) open = 0;
@@ -196,8 +196,9 @@ export function createStart(el: StartElements): () => void {
       for (const animation of item.getAnimations()) animation.cancel();
       const from = { transform: 'translateY(24px)', clipPath: 'inset(0 0 24px 0)' };
       const to = { transform: 'none', clipPath: 'inset(0 0 0 0)' };
+      // no transform or clip-path stays filled: a hidden item is see-through, and a rise ends
+      // at the item's own style (filled ones in the sticky, clipped stage crash Chromium 156)
       if (instant || !next) {
-        item.animate([next ? to : from, next ? to : from], { duration: 1, fill: 'forwards' });
         item.animate([{ opacity: next ? 1 : 0 }, { opacity: next ? 1 : 0 }], {
           duration: instant ? 1 : 120,
           fill: 'forwards',
@@ -205,7 +206,7 @@ export function createStart(el: StartElements): () => void {
         continue;
       }
       const delay = i * TICK;
-      item.animate([from, to], { duration: 700, delay, easing: settleCss, fill: 'both' });
+      item.animate([from, to], { duration: 700, delay, easing: settleCss, fill: 'backwards' });
       item.animate([{ opacity: 0 }, { opacity: 1 }], { duration: 120, delay, fill: 'both' });
       if (i === 0) {
         item.animate(
@@ -234,7 +235,7 @@ export function createStart(el: StartElements): () => void {
     openAt = performance.now();
     current = 0;
     render(session.frames[0]);
-    timer = window.setTimeout(next, OPEN.length * TICK + session.frames[1].at);
+    timer = window.setTimeout(next, session.frames[1].at);
   }
 
   function next() {
@@ -247,11 +248,11 @@ export function createStart(el: StartElements): () => void {
 
   const visibility = new IntersectionObserver(
     ([entry]) => {
-      // the screen powers on once the glass fills the view (the stage may be taller than it)
+      // the screen powers on once half the glass is in view (the stage may be taller than it)
       const fill =
         entry.intersectionRect.height /
         Math.min(entry.boundingClientRect.height, window.innerHeight);
-      if (!visible && fill > 0.85) {
+      if (!visible && fill >= 0.5) {
         visible = true;
         play();
         spinner = window.setInterval(turn, 2 * TICK);

@@ -265,12 +265,11 @@ export function createSession(): Session {
     answered(message, value ? 'Yes' : 'No');
   }
 
-  show(shell('', true), BEAT);
-  show(shell('', false), BEAT);
-  type(COMMAND, 36, `typing ${COMMAND}`);
+  show(shell('', true), 2 * TICK);
+  type(COMMAND, 28, `typing ${COMMAND}`);
   show(shell(COMMAND, true), 2 * TICK);
   log.push(shell(COMMAND, false)[0]);
-  show([], 3 * TICK);
+  show([], 2 * TICK);
 
   log.push([
     ['┌', DIM],
