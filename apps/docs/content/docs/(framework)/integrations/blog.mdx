@@ -66,17 +66,21 @@ image: /blog/hello-world.png
 
 ## Pages
 
-`getPosts()` resolves the authors and tags of pages, newest first. Render them in your routes.
+`getPosts()` resolves the authors and tags of pages, newest first. Render them in your routes under `app/(home)`, so they share the [Home Layout](/docs/ui/layouts/home-layout).
 
 ### Posts
 
-```tsx title="app/blog/page.tsx"
+```tsx title="app/(home)/blog/page.tsx"
 import { blogAuthors, blogSource } from '@/lib/source';
 import { getPosts } from '@/lib/blog';
 import { BlogCards } from '@/components/blog';
 
 export default function Page() {
-  return <BlogCards posts={getPosts(blogSource.getPages(), blogAuthors)} />;
+  return (
+    <div className="mx-auto w-full max-w-(--fd-layout-width) px-4 py-12">
+      <BlogCards posts={getPosts(blogSource.getPages(), blogAuthors)} />
+    </div>
+  );
 }
 ```
 
@@ -84,7 +88,7 @@ export default function Page() {
 
 `findPost()` finds a post along with the newer and older posts. With `toc`, a floating panel shows the table of contents and a share button.
 
-```tsx title="app/blog/[slug]/page.tsx"
+```tsx title="app/(home)/blog/[slug]/page.tsx"
 import { notFound } from 'next/navigation';
 import { blogAuthors, blogSource } from '@/lib/source';
 import { findPost, getPosts } from '@/lib/blog';
@@ -134,7 +138,7 @@ export default async function Page(props: PageProps<'/blog/[slug]'>) {
 
 List all tags with `getTags()`:
 
-```tsx title="app/blog/tags/page.tsx"
+```tsx title="app/(home)/blog/tags/page.tsx"
 import { blogSource } from '@/lib/source';
 import { getPosts, getTags } from '@/lib/blog';
 import { BlogHeader, BlogTagCards, BlogTitle } from '@/components/blog';
@@ -143,19 +147,19 @@ export default function Page() {
   const tags = getTags(getPosts(blogSource.getPages()));
 
   return (
-    <>
+    <div className="mx-auto flex w-full max-w-(--fd-layout-width) flex-col gap-4 px-4 py-12">
       <BlogHeader>
         <BlogTitle>All Tags</BlogTitle>
       </BlogHeader>
       <BlogTagCards tags={tags} />
-    </>
+    </div>
   );
 }
 ```
 
 And the posts of a tag with `getTagPosts()`, it returns `undefined` for unknown tags:
 
-```tsx title="app/blog/tags/[tag]/page.tsx"
+```tsx title="app/(home)/blog/tags/[tag]/page.tsx"
 import { notFound } from 'next/navigation';
 import { blogAuthors, blogSource } from '@/lib/source';
 import { getPosts, getTagPosts, getTags } from '@/lib/blog';
@@ -167,12 +171,12 @@ export default async function Page(props: PageProps<'/blog/tags/[tag]'>) {
   if (!result) notFound();
 
   return (
-    <>
+    <div className="mx-auto flex w-full max-w-(--fd-layout-width) flex-col gap-4 px-4 py-12">
       <BlogHeader>
         <BlogTitle>{result.tag.name}</BlogTitle>
       </BlogHeader>
       <BlogCards posts={result.posts} />
-    </>
+    </div>
   );
 }
 
