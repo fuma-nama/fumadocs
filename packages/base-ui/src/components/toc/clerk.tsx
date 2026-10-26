@@ -1,125 +1,18 @@
 'use client';
 import * as Primitive from 'fumadocs-core/toc';
-import {
-  type ComponentProps,
-  type ReactNode,
-  useCallback,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-} from 'react';
+import { type ComponentProps, useCallback, useMemo } from 'react';
 import { cn } from '@/utils/cn';
 import { useTOCItems } from '.';
-import { mergeRefs } from '@/utils/merge-refs';
 import { useTranslations } from '@fuma-translate/react';
-
-interface ComputedSVG {
-  width: number;
-  height: number;
-  content: ReactNode;
-  d: string;
-  positions: [top: number, bottom: number, x: number][];
-  itemLineLengths: [top: number, bottom: number][];
-}
 
 export type TOCItemsProps = ComponentProps<'div'>;
 
-export function TOCItems({ ref, className, children, ...props }: TOCItemsProps) {
-  const containerRef = useRef<HTMLDivElement>(null);
+export function TOCItems({ className, children, ...props }: TOCItemsProps) {
   const items = useTOCItems();
-  const [svg, setSvg] = useState<ComputedSVG | null>(null);
-
-  const onPrint = useCallback(() => {
-    const container = containerRef.current;
-    if (!container || container.clientHeight === 0) return;
-    if (items.length === 0) {
-      setSvg(null);
-      return;
-    }
-    let w = 0;
-    let h = 0;
-    let d = '';
-    const positions: [top: number, bottom: number, x: number][] = [];
-    const output: ReactNode[] = [];
-
-    for (let i = 0; i < items.length; i++) {
-      const item = items[i];
-      const element: HTMLElement | null = container.querySelector(`a[href="${item.url}"]`);
-      if (!element) continue;
-
-      const styles = getComputedStyle(element);
-      const x = getLineOffset(item.depth) + 0.5;
-      const top = element.offsetTop + parseFloat(styles.paddingTop);
-      const bottom = element.offsetTop + element.clientHeight - parseFloat(styles.paddingBottom);
-
-      w = Math.max(x + 8, w);
-      h = Math.max(h, bottom);
-
-      if (i === 0) {
-        d += ` M${x} ${top} L${x} ${bottom}`;
-      } else {
-        const [, upperBottom, upperX] = i > 0 ? positions[i - 1] : [0, 0, 0];
-
-        d += ` L ${upperX} ${upperBottom} ${x} ${top} L${x} ${bottom}`;
-      }
-
-      if (item._step !== undefined) {
-        output.push(
-          <g key={i} transform={`translate(${x}, ${(top + bottom) / 2})`}>
-            <circle cx="0" cy="0" r="8" className="fill-fd-primary" />
-            <text
-              cx="0"
-              cy="0"
-              textAnchor="middle"
-              alignmentBaseline="central"
-              dominantBaseline="middle"
-              className="fill-fd-primary-foreground font-medium text-xs leading-none font-mono rtl:-scale-x-100"
-            >
-              {item._step}
-            </text>
-          </g>,
-        );
-      }
-
-      positions.push([top, bottom, x]);
-    }
-
-    output.unshift(
-      <path key="path" d={d} className="stroke-fd-primary" strokeWidth="1" fill="none" />,
-    );
-
-    const itemLineLengths: [top: number, bottom: number][] = [];
-
-    setSvg({
-      content: output,
-      width: w,
-      height: h,
-      d,
-      itemLineLengths,
-      positions,
-    });
-  }, [items]);
-
-  useEffect(() => {
-    const container = containerRef.current;
-    if (!container) return;
-
-    const observer = new ResizeObserver(onPrint);
-    observer.observe(container);
-    onPrint();
-    return () => {
-      observer.unobserve(container);
-    };
-  }, [onPrint]);
 
   return (
-    <div
-      ref={mergeRefs(containerRef, ref)}
-      className={cn('relative flex flex-col', className)}
-      {...props}
-    >
-      {svg && <ThumbTrack computed={svg} />}
+    <div className={cn('relative flex flex-col', className)} {...props}>
+      {items.length > 0 && <ThumbTrack items={items} />}
       {children}
     </div>
   );
@@ -134,51 +27,114 @@ export function TOCEmpty() {
     </div>
   );
 }
-function ThumbTrack({ computed }: { computed: ComputedSVG }) {
-  const ref = useRef<HTMLDivElement>(null);
-  const tocInfo = Primitive.useTOC();
 
-  function calculate(items: Primitive.TOCItemInfo[]) {
-    const out: Record<string, string> = {};
-    const startIdx = items.findIndex((item) => item.active);
-    if (startIdx === -1) return out;
+interface ItemPosition {
+  x: number;
+  top: number;
+  bottom: number;
+}
 
-    const endIdx = items.findLastIndex((item) => item.active);
-    out['--track-top'] = `${computed.positions[startIdx][0]}px`;
-    out['--track-bottom'] = `${computed.positions[endIdx][1]}px`;
-    return out;
-  }
+function ThumbTrack({ items }: { items: Primitive.TOCItemType[] }) {
+  const toc = Primitive.useTOC();
+  const ref = useCallback(
+    (track: HTMLDivElement) => {
+      const container = track.parentElement!;
+      const svg = track.querySelector('svg')!;
+      const path = svg.querySelector('path')!;
+      const steps = svg.getElementsByTagName('g');
+      const positions = new Map<string, ItemPosition>();
 
-  Primitive.useTOCListener((items) => {
-    const element = ref.current;
-    if (!element) return;
+      const update = (infos: Primitive.TOCItemInfo[]) => {
+        let top = -1;
+        let bottom = -1;
+        for (const info of infos) {
+          const position = info.active ? positions.get(info.original.url) : undefined;
+          if (!position) continue;
+          if (top === -1) top = position.top;
+          bottom = position.bottom;
+        }
+        if (top !== -1)
+          svg.style.clipPath = `polygon(0 ${top}px, 100% ${top}px, 100% ${bottom}px, 0 ${bottom}px)`;
+      };
 
-    for (const [k, v] of Object.entries(calculate(items))) {
-      element.style.setProperty(k, v);
-    }
-  });
+      // called after layout and before paint, so the track never lags behind the items
+      const observer = new ResizeObserver(() => {
+        if (container.clientHeight === 0) return;
+        const anchors = new Map<string | null, HTMLElement>();
+        for (const anchor of container.getElementsByTagName('a'))
+          anchors.set(anchor.getAttribute('href'), anchor);
+
+        let d = '';
+        let width = 0;
+        let height = 0;
+        let last: ItemPosition | undefined;
+        positions.clear();
+
+        for (const item of items) {
+          const anchor = anchors.get(item.url);
+          if (!anchor) continue;
+
+          const styles = getComputedStyle(anchor);
+          const x = getLineOffset(item.depth) + 0.5;
+          const top = anchor.offsetTop + parseFloat(styles.paddingTop);
+          const bottom = anchor.offsetTop + anchor.clientHeight - parseFloat(styles.paddingBottom);
+
+          d += last ? ` L ${last.x} ${last.bottom} ${x} ${top}` : `M${x} ${top}`;
+          d += ` L${x} ${bottom}`;
+          last = { x, top, bottom };
+          positions.set(item.url, last);
+          width = Math.max(width, x + 8);
+          height = Math.max(height, bottom);
+        }
+
+        // write after all reads, a write between them forces another layout
+        let step = 0;
+        for (const item of items) {
+          if (item._step === undefined) continue;
+          const position = positions.get(item.url);
+          const g = steps[step++];
+          if (position)
+            g.setAttribute(
+              'transform',
+              `translate(${position.x}, ${(position.top + position.bottom) / 2})`,
+            );
+        }
+        path.setAttribute('d', d);
+        track.style.width = `${width}px`;
+        track.style.height = `${height}px`;
+        update(toc.get());
+      });
+
+      observer.observe(container);
+      toc.listen(update);
+      return () => {
+        observer.disconnect();
+        toc.unlisten(update);
+      };
+    },
+    [items, toc],
+  );
 
   return (
-    <div
-      ref={ref}
-      className="absolute top-0 inset-s-0 origin-center rtl:-scale-x-100"
-      style={{
-        width: computed.width,
-        height: computed.height,
-        ...calculate(tocInfo.get()),
-      }}
-    >
-      <svg
-        xmlns="http://www.w3.org/2000/svg"
-        viewBox={`0 0 ${computed.width} ${computed.height}`}
-        className="absolute transition-[clip-path]"
-        style={{
-          width: computed.width,
-          height: computed.height,
-          clipPath: `polygon(0 var(--track-top,0), 100% var(--track-top,0), 100% var(--track-bottom,0), 0 var(--track-bottom,0))`,
-        }}
-      >
-        {computed.content}
+    <div ref={ref} className="absolute top-0 inset-s-0 origin-center rtl:-scale-x-100">
+      <svg className="absolute size-full [clip-path:polygon(0_0,100%_0,100%_0,0_0)] transition-[clip-path]">
+        <path className="stroke-fd-primary" strokeWidth="1" fill="none" />
+        {items.map(
+          (item) =>
+            item._step !== undefined && (
+              <g key={item.url}>
+                <circle r="8" className="fill-fd-primary" />
+                <text
+                  textAnchor="middle"
+                  alignmentBaseline="central"
+                  dominantBaseline="middle"
+                  className="fill-fd-primary-foreground font-medium text-xs leading-none font-mono rtl:-scale-x-100"
+                >
+                  {item._step}
+                </text>
+              </g>
+            ),
+        )}
       </svg>
     </div>
   );
