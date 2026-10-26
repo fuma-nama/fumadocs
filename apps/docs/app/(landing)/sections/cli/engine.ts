@@ -68,10 +68,23 @@ const PULL = 0.004;
 /** the reels on the editor's edge: radius, and cable speed when they wind (px per ms) */
 const REEL = 8;
 const WIND = 1.6;
-/** an act starts once the reader sees what it acts on, all of it but this much (px), or as much of
- * the screen as it fills; or this share of it once they scrolled past it */
-const CUT = 16;
-const PAST = 0.8;
+/**
+ * An act starts once the reader is at what it works on. The run starts once the stage has reached
+ * the middle of the screen, or this share of the crate under the machine is on screen: after this
+ * long there (ms) once the reader pauses this long, or after this long however they scroll. A
+ * reader flinging past is there for less, it doesn't start. On a phone or a tablet the rewrites
+ * wait for this share of the editor, the page's change for this share of its window. The command
+ * is typed only when this share of it is on screen as the run starts
+ */
+const CRATE = 0.5;
+const DWELL = 200;
+const PAUSE = 100;
+const LONG = 300;
+const EDITOR = 0.6;
+const PAGE = 0.25;
+const COMMAND = 0.5;
+/** the caret's moment before the command is typed */
+const TYPE = 60;
 
 const ease = cubicBezier(...settle);
 
@@ -346,7 +359,13 @@ export function createCli(root: HTMLElement): () => void {
    * page it changes */
   let act = 0;
   let last = -1;
-  let first = true;
+  /** the stage has reached the middle of the screen; how much of each part an act waits for is on
+   * screen, from their observers; since when the reader is at the stage, when they last scrolled */
+  let middle = false;
+  const ratios = new WeakMap<Element, number>();
+  let dwell = 0;
+  let since = 0;
+  let scrolled = 0;
   let disposed = false;
   let shownStatus = '';
   let landedShown = -1;
@@ -470,7 +489,8 @@ export function createCli(root: HTMLElement): () => void {
   }
 
   function schedule(): Beats {
-    const typed = 220 + scene.command.children.length * 25;
+    // the command starts being typed almost at once: the run shows it started
+    const typed = TYPE + scene.command.children.length * 25;
     const latch: [number, number] = [typed + 120, typed + 120 + TICK];
     const lid = latch[1] + 2 * TICK;
     const belt = lid + 480;
@@ -535,7 +555,7 @@ export function createCli(root: HTMLElement): () => void {
     // typed within the run's last beat: a long edit types faster
     const editFor = Math.min(scene.editCut.dataset.new!.length * 40, 240);
     return {
-      type: 220,
+      type: TYPE,
       typed,
       latch,
       lid,
@@ -1203,52 +1223,17 @@ export function createCli(root: HTMLElement): () => void {
     return beats.page;
   }
 
-  /** the top and bottom on screen of what act `i` acts on: the command; the machine and the top of
-   * your project's window, where it delivers; the editor; the page */
-  function span(i: number): [number, number] {
-    let top = Infinity;
-    let bottom = -Infinity;
-    const add = (el: Element, height = Infinity) => {
-      const r = el.getBoundingClientRect();
-      top = Math.min(top, r.top);
-      bottom = Math.max(bottom, Math.min(r.bottom, r.top + height));
-    };
-    if (i === 0) add(commandBox);
-    else if (i === 1) {
-      add(plate);
-      add(scene.counter);
-      add(crate);
-      add(scene.tree, 40);
-    } else if (i === 2) add(scene.editor);
-    else add(scene.preview);
-    return [top, bottom];
+  /** the reader is at the stage */
+  function arrived(): boolean {
+    return middle || (ratios.get(crate) ?? 0) >= CRATE;
   }
 
-  /** the reader's view: between the menu and the status bar */
-  function view(): [number, number] {
-    const style = getComputedStyle(root);
-    return [
-      Number.parseFloat(style.getPropertyValue('--lp-menu-h')) || 0,
-      innerHeight - (Number.parseFloat(style.getPropertyValue('--lp-status-h')) || 0),
-    ];
-  }
-
-  /** act `i` can start: the reader sees what it acts on, all of it or as much of the screen as it
-   * fills. It waits for the acts after it too while the screen holds them all, so the run doesn't
-   * stop again. Once the reader scrolled past its best place, it starts while most of it is still
-   * in view; the command is only typed on screen */
+  /** act `i` can start: the reader is at what it works on; on a desktop, the rest follows */
   function onScreen(i: number): boolean {
-    const [from, to] = view();
-    let [top, bottom] = span(i);
-    for (let next = i + 1; next < 4; next++) {
-      const [a, b] = span(next);
-      if (Math.max(bottom, b) - Math.min(top, a) > to - from) break;
-      top = Math.min(top, a);
-      bottom = Math.max(bottom, b);
-    }
-    const seen = Math.min(bottom, to) - Math.max(top, from);
-    const room = Math.min(bottom - top, to - from);
-    return seen >= room - CUT || (i > 0 && top < from && seen >= PAST * room);
+    if (i < 2) return arrived();
+    if (desktopQuery.matches) return true;
+    if (i === 2) return (ratios.get(scene.editor) ?? 0) >= EDITOR;
+    return (ratios.get(scene.preview) ?? 0) >= PAGE;
   }
 
   /** the run waits, calm: the command typed; every file landed and the counter at its total; or
@@ -1260,22 +1245,38 @@ export function createCli(root: HTMLElement): () => void {
     flash(undefined, clock);
   }
 
-  /** a scroll or a resize: a waiting run goes on once the reader sees its next act */
+  /** the reader moved: a waiting run goes on once they're at its next act, one not started yet starts
+   * once the stage has stayed at the middle of the screen a moment */
   function check() {
     if (phase === 'ready') {
-      if (onScreen(0)) play();
-      else if (span(0)[1] < view()[0] && onScreen(1)) {
-        // the reader scrolled past the command before it was typed: it reads typed, the delivery
-        // starts
-        play();
-        clock = actAt(1);
-        act = 2;
+      if (!arrived()) since = 0;
+      else {
+        since ||= performance.now();
+        if (!dwell) dwell = window.setTimeout(arrive, DWELL);
       }
     } else if (phase === 'hold' && onScreen(act)) {
       act++;
       phase = 'play';
       last = -1;
       gl.invalidate();
+    }
+  }
+
+  function arrive() {
+    dwell = 0;
+    if (phase !== 'ready' || !arrived()) return;
+    // a reader still scrolling on: once they pause, or once they've been here a while
+    const now = performance.now();
+    const wait = Math.min(PAUSE - (now - scrolled), LONG - (now - since));
+    if (wait > 0) {
+      dwell = window.setTimeout(arrive, wait);
+      return;
+    }
+    play();
+    // the command off screen: it reads typed, the delivery starts
+    if ((ratios.get(commandBox) ?? 0) < COMMAND) {
+      clock = actAt(1);
+      act = 2;
     }
   }
 
@@ -1292,7 +1293,7 @@ export function createCli(root: HTMLElement): () => void {
       return;
     }
     // the first frame comes with the canvas's next one, so files and machine start together. It
-    // starts where the reader sees the command: a click on it, or the scroll that showed it
+    // starts where the reader is at the command: a click on it, or their reaching the stage
     phase = 'play';
     clock = 0;
     act = 1;
@@ -1350,24 +1351,36 @@ export function createCli(root: HTMLElement): () => void {
     play();
   }
 
-  // any of the stage on screen at load: it stays finished, the replay is there; otherwise it waits,
-  // and each act plays once the reader sees what it acts on. The canvas pauses itself off screen,
-  // the clock skips that time
-  const observer = new IntersectionObserver((entries) => {
-    for (const entry of entries) {
-      if (entry.target === root) {
-        if (first && !entry.isIntersecting && !reduce.matches) {
-          phase = 'ready';
-          landedShown = -1;
-          render(0);
-        }
-        first = false;
-        continue;
-      }
+  // where the reader is, without reading the layout as they scroll: the stage in the band from the
+  // menu down to the middle of the screen, and how much of each part an act waits for is on screen,
+  // between the menu and the status bar
+  const style = getComputedStyle(root);
+  const menu = Number.parseFloat(style.getPropertyValue('--lp-menu-h')) || 0;
+  const bar = Number.parseFloat(style.getPropertyValue('--lp-status-h')) || 0;
+  const atMiddle = new IntersectionObserver(
+    (entries) => {
+      middle = entries[entries.length - 1].isIntersecting;
+      // the canvas pauses itself off screen, the clock skips that time
       last = -1;
-    }
-    check();
-  });
+      check();
+    },
+    { rootMargin: `-${menu}px 0px -50% 0px` },
+  );
+  const parts = new IntersectionObserver(
+    (entries) => {
+      for (const entry of entries)
+        ratios.set(entry.target, entry.isIntersecting ? entry.intersectionRatio : 0);
+      check();
+    },
+    {
+      rootMargin: `-${menu}px 0px -${bar}px 0px`,
+      threshold: [0, PAGE, CRATE, COMMAND, EDITOR, 1],
+    },
+  );
+  // the reader's last scroll, its time only: no layout read
+  const onScroll = (event: Event) => {
+    scrolled = event.timeStamp;
+  };
 
   const theme = new MutationObserver(colours);
   resize.observe(root);
@@ -1383,9 +1396,14 @@ export function createCli(root: HTMLElement): () => void {
     if (!disposed) layout();
   });
   theme.observe(html, { attributes: true, attributeFilter: ['class'] });
-  observer.observe(root);
-  observer.observe(crate);
-  addEventListener('scroll', check, { passive: true });
+  atMiddle.observe(root);
+  parts.observe(crate);
+  parts.observe(commandBox);
+  for (const s of scenes) {
+    parts.observe(s.editor);
+    parts.observe(s.preview);
+  }
+  addEventListener('scroll', onScroll, { passive: true });
   replay.addEventListener('click', play);
   for (const chip of chips) chip.addEventListener('click', onPlay);
   for (const s of scenes) {
@@ -1397,13 +1415,21 @@ export function createCli(root: HTMLElement): () => void {
   ready = true;
   colours();
   layout();
+  // every load waits for the reader, the figure on screen or not
+  if (!reduce.matches) {
+    phase = 'ready';
+    landedShown = -1;
+    render(0);
+  }
 
   return () => {
     disposed = true;
-    observer.disconnect();
+    atMiddle.disconnect();
+    parts.disconnect();
+    clearTimeout(dwell);
+    removeEventListener('scroll', onScroll);
     resize.disconnect();
     theme.disconnect();
-    removeEventListener('scroll', check);
     replay.removeEventListener('click', play);
     for (const chip of chips) chip.removeEventListener('click', onPlay);
     for (const s of scenes) {

@@ -1,5 +1,6 @@
 import type { ReactNode } from 'react';
 import Image from 'next/image';
+import { ArrowUpRight } from 'lucide-react';
 import { cn } from '@/lib/cn';
 import { type ShowcaseObject, vercel } from '@/lib/showcases';
 import { address, SiteTile } from '../ui/site-tile';
@@ -70,7 +71,10 @@ function Featured({ site, kind }: { site: ShowcaseObject; kind: string }) {
           <span className="text-lp-ink-2 group-hover:text-lp-paper group-focus-visible:text-lp-paper">
             {kind}
           </span>
-          <span>{address(site.url)} ↗</span>
+          <span className="inline-flex items-center gap-1">
+            {address(site.url)}
+            <ArrowUpRight aria-hidden className="size-3.5" />
+          </span>
         </span>
       </a>
     </li>
@@ -90,8 +94,9 @@ function Vercel() {
           className="group flex min-h-9 flex-1 items-center justify-between gap-3 px-3 font-mono text-xs hover:bg-lp-ink hover:text-lp-paper focus-visible:bg-lp-ink focus-visible:text-lp-paper focus-visible:outline-none"
         >
           <span className="font-sans text-[15px] font-medium">{item.name}</span>
-          <span className="text-lp-ink-2 group-hover:text-lp-paper group-focus-visible:text-lp-paper">
-            {kinds[item.url]} ↗
+          <span className="inline-flex items-center gap-1 text-lp-ink-2 group-hover:text-lp-paper group-focus-visible:text-lp-paper">
+            {kinds[item.url]}
+            <ArrowUpRight aria-hidden className="size-3.5" />
           </span>
         </a>
       </li>,
@@ -161,8 +166,9 @@ function Slot() {
       >
         <span aria-hidden className="h-5" />
         <span aria-hidden className="aspect-[1.91/1]" />
-        <span className="absolute inset-2 flex items-center justify-center border border-dashed border-lp-line-strong px-3 text-center text-sm font-medium group-hover:border-solid group-hover:bg-lp-ink group-hover:text-lp-paper group-focus-visible:bg-lp-ink group-focus-visible:text-lp-paper">
-          Suggest yours ↗
+        <span className="absolute inset-2 flex items-center justify-center gap-1.5 border border-dashed border-lp-line-strong px-3 text-center text-sm font-medium group-hover:border-solid group-hover:bg-lp-ink group-hover:text-lp-paper group-focus-visible:bg-lp-ink group-focus-visible:text-lp-paper">
+          Suggest yours
+          <ArrowUpRight aria-hidden className="size-4" />
         </span>
       </a>
     </li>

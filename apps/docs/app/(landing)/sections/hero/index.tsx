@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import { ArrowUpRight } from 'lucide-react';
 import { Figure, Lead } from '../../ui/figure';
 import { Glitch } from './beats';
 import { Command } from '../../ui/command';
@@ -49,9 +50,10 @@ export function Hero() {
             href="https://stackblitz.com/github/fuma-nama/fumadocs/tree/main/examples/stackblitz"
             target="_blank"
             rel="noreferrer noopener"
-            className={`-ms-2 inline-flex h-11 items-center px-2 font-medium underline decoration-lp-line-strong underline-offset-4 ${invert}`}
+            className={`-ms-2 inline-flex h-11 items-center gap-1 px-2 font-medium underline decoration-lp-line-strong underline-offset-4 ${invert}`}
           >
-            Open in StackBlitz ↗
+            Open in StackBlitz
+            <ArrowUpRight aria-hidden className="size-4" />
           </a>
         </div>
         <p className="mt-5 font-mono text-xs leading-relaxed text-lp-ink-2">
