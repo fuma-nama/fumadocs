@@ -56,7 +56,7 @@ export const copy = {
     },
   },
   cli: {
-    lead: 'Need more than CSS?',
+    lead: 'Need more control?',
     title: 'Own the source code.',
     description:
       'The Fumadocs CLI installs layouts and components into your codebase and updates the imports, so you can change any line.',
@@ -65,7 +65,7 @@ export const copy = {
     lead: 'Integrations.',
     title: 'Add only what you need.',
     description:
-      'Search, API references, AI chat, i18n and more ship in first-party packages. Each one starts with a single command.',
+      'Search, API references, AI chat, i18n and more ship in first-party packages. They all start with a single command.',
   },
   proof: {
     lead: 'Built in the open.',

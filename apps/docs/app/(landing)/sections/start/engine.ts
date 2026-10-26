@@ -29,7 +29,6 @@ interface StartElements {
   /** where the terminal stands in the final composition */
   slot: HTMLElement;
   cta: HTMLElement;
-  readout: HTMLElement;
 }
 
 /** the figure's scene: camera on scroll, the session on a timer, both only while on screen */
@@ -43,7 +42,6 @@ export function createStart(el: StartElements): () => void {
   const session = createSession();
   const chars = new ImageData(COLS, ROWS);
   const items = el.cta.querySelectorAll<HTMLElement>('[data-rise-group] > *, [data-rise]');
-  const values = el.readout.querySelectorAll<HTMLElement>('[data-value]');
 
   let width = 0;
   let height = 0;
@@ -76,7 +74,6 @@ export function createStart(el: StartElements): () => void {
   let timer = 0;
   let openAt = -1;
   let shown = true;
-  let readoutShown = true;
   let disposed = false;
 
   function colours() {
@@ -193,7 +190,6 @@ export function createStart(el: StartElements): () => void {
     if (Math.abs(opening - clear[3]) < 1e-3) clear[3] = opening;
     else moving = true;
     shader!.set('uClear', clear);
-    readout(view, pinned && dolly > 0.5);
     if (moving) shader!.invalidate();
   }
 
@@ -224,18 +220,6 @@ export function createStart(el: StartElements): () => void {
         );
       }
     }
-  }
-
-  function readout(view: View, next: boolean) {
-    if (next !== readoutShown) {
-      readoutShown = next;
-      el.readout.style.visibility = next ? '' : 'hidden';
-    }
-    if (!next || values.length < 2) return;
-    const yaw = `${((view.yaw * 180) / Math.PI).toFixed(1)}°`;
-    const distance = Math.hypot(view.eye[0], view.eye[2]).toFixed(2);
-    if (values[0].textContent !== yaw) values[0].textContent = yaw;
-    if (values[1].textContent !== distance) values[1].textContent = distance;
   }
 
   function render(frame: Frame) {

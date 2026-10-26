@@ -1,5 +1,4 @@
 import { BEAT } from '../../lib/motion';
-import { setStatus } from '../../lib/status';
 
 const GLYPHS = '#-*>[]{}/=+fumadocs';
 const WORD = 'Fumadocs';
@@ -321,10 +320,8 @@ export function createSand(host: HTMLElement): () => void {
   });
   const visibility = new IntersectionObserver(([entry]) => {
     visible = entry.isIntersecting;
-    if (visible) {
-      setStatus('end of sheet');
-      start();
-    } else {
+    if (visible) start();
+    else {
       cancelAnimationFrame(raf);
       raf = 0;
     }

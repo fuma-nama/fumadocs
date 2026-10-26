@@ -30,29 +30,50 @@ const VERTEX = `#version 300 es
 in vec2 p;
 void main() { gl_Position = vec4(p, 0.0, 1.0); }`;
 
-/** a full-canvas fragment shader that only renders while the canvas is on screen */
+/**
+ * A full-canvas fragment shader that only renders while the canvas is on screen. Making one never
+ * waits for the GPU: it compiles while the page goes on, and the first frame drawn reads the link,
+ * so a canvas made off screen is ready by the time it shows.
+ */
 export function createShaderCanvas(
   canvas: HTMLCanvasElement,
   { fragment, loop = false, onFrame }: ShaderCanvasOptions,
 ): ShaderCanvas | null {
   const gl = canvas.getContext('webgl2', { antialias: false, premultipliedAlpha: true });
   if (!gl) return null;
-  const program = link(gl, fragment);
-  if (!program) return null;
+  const program = gl.createProgram();
+  const shaders: WebGLShader[] = [];
+  for (const [type, source] of [
+    [gl.VERTEX_SHADER, VERTEX],
+    [gl.FRAGMENT_SHADER, fragment],
+  ] as const) {
+    const shader = gl.createShader(type)!;
+    gl.shaderSource(shader, source);
+    gl.compileShader(shader);
+    gl.attachShader(program, shader);
+    shaders.push(shader);
+  }
+  // the position's location is set before the link, so nothing waits to look it up
+  gl.bindAttribLocation(program, 0, 'p');
+  gl.linkProgram(program);
+  gl.flush();
 
-  gl.useProgram(program);
   const buffer = gl.createBuffer();
   gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
   gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1, -1, 3, -1, -1, 3]), gl.STATIC_DRAW);
-  const position = gl.getAttribLocation(program, 'p');
-  gl.enableVertexAttribArray(position);
-  gl.vertexAttribPointer(position, 2, gl.FLOAT, false, 0, 0);
+  gl.enableVertexAttribArray(0);
+  gl.vertexAttribPointer(0, 2, gl.FLOAT, false, 0, 0);
 
+  /** `null` until the first frame reads the link */
+  let linked: boolean | null = null;
   const locations = new Map<string, WebGLUniformLocation | null>();
-  function set(name: string, value: Uniform) {
+  /** uniforms set before that, written then */
+  const pending = new Map<string, number | number[]>();
+
+  function write(name: string, value: number | readonly number[]) {
     let location = locations.get(name);
     if (location === undefined) {
-      location = gl!.getUniformLocation(program!, name);
+      location = gl!.getUniformLocation(program, name);
       locations.set(name, location);
     }
     if (!location) return;
@@ -60,6 +81,12 @@ export function createShaderCanvas(
     else if (value.length === 2) gl!.uniform2f(location, value[0], value[1]);
     else if (value.length === 3) gl!.uniform3f(location, value[0], value[1], value[2]);
     else gl!.uniform4f(location, value[0], value[1], value[2], value[3]);
+  }
+
+  function set(name: string, value: Uniform) {
+    if (linked) write(name, value);
+    // callers reuse their arrays between uniforms
+    else if (linked === null) pending.set(name, typeof value === 'number' ? value : [...value]);
   }
 
   const textures = new Map<string, { tex: WebGLTexture; unit: number }>();
@@ -76,12 +103,28 @@ export function createShaderCanvas(
       gl!.texParameteri(gl!.TEXTURE_2D, gl!.TEXTURE_MAG_FILTER, gl!.LINEAR);
       gl!.texParameteri(gl!.TEXTURE_2D, gl!.TEXTURE_WRAP_S, gl!.CLAMP_TO_EDGE);
       gl!.texParameteri(gl!.TEXTURE_2D, gl!.TEXTURE_WRAP_T, gl!.CLAMP_TO_EDGE);
-      gl!.uniform1i(gl!.getUniformLocation(program!, name), entry.unit);
+      if (linked) gl!.uniform1i(gl!.getUniformLocation(program, name), entry.unit);
       textures.set(name, entry);
     }
     gl!.pixelStorei(gl!.UNPACK_FLIP_Y_WEBGL, true);
     gl!.texImage2D(gl!.TEXTURE_2D, 0, gl!.RGBA, gl!.RGBA, gl!.UNSIGNED_BYTE, source);
     invalidate();
+  }
+
+  /** reads the link, waiting for the GPU only if it hasn't finished, and puts the program to use */
+  function link() {
+    linked = gl!.getProgramParameter(program, gl!.LINK_STATUS) as boolean;
+    if (!linked) {
+      for (const shader of shaders) console.error(gl!.getShaderInfoLog(shader));
+      console.error(gl!.getProgramInfoLog(program));
+      return;
+    }
+    gl!.useProgram(program);
+    for (const [name, entry] of textures) {
+      gl!.uniform1i(gl!.getUniformLocation(program, name), entry.unit);
+    }
+    for (const [name, value] of pending) write(name, value);
+    pending.clear();
   }
 
   const start = performance.now();
@@ -94,6 +137,7 @@ export function createShaderCanvas(
 
   function frame(now: number) {
     raf = 0;
+    if (linked === null) link();
     const dt = now - last;
     if (limit > 1 && dt < 100) {
       slow = dt > 25 ? slow + 1 : Math.max(0, slow - 2);
@@ -106,7 +150,7 @@ export function createShaderCanvas(
     const time = (now - start) / 1000;
     set('uTime', time);
     onFrame?.(time);
-    gl!.drawArrays(gl!.TRIANGLES, 0, 3);
+    if (linked) gl!.drawArrays(gl!.TRIANGLES, 0, 3);
     if (loop) invalidate();
   }
 
@@ -126,7 +170,9 @@ export function createShaderCanvas(
   }
 
   function fit() {
-    const dpr = Math.min(window.devicePixelRatio, limit);
+    // under the limit by a whole factor of the screen's density, so its pixels stretch evenly:
+    // a 3x screen renders at 1.5x, each pixel 2 device pixels
+    const dpr = window.devicePixelRatio / Math.ceil(window.devicePixelRatio / limit);
     canvas.width = Math.max(1, Math.round(canvas.clientWidth * dpr));
     canvas.height = Math.max(1, Math.round(canvas.clientHeight * dpr));
     // below the screen's density, upscale in whole pixels: the shaders draw pixel art
@@ -168,27 +214,4 @@ export function createShaderCanvas(
       gl.deleteProgram(program);
     },
   };
-}
-
-function link(gl: WebGL2RenderingContext, fragment: string): WebGLProgram | null {
-  const program = gl.createProgram();
-  for (const [type, source] of [
-    [gl.VERTEX_SHADER, VERTEX],
-    [gl.FRAGMENT_SHADER, fragment],
-  ] as const) {
-    const shader = gl.createShader(type)!;
-    gl.shaderSource(shader, source);
-    gl.compileShader(shader);
-    if (!gl.getShaderParameter(shader, gl.COMPILE_STATUS)) {
-      console.error(gl.getShaderInfoLog(shader));
-      return null;
-    }
-    gl.attachShader(program, shader);
-  }
-  gl.linkProgram(program);
-  if (!gl.getProgramParameter(program, gl.LINK_STATUS)) {
-    console.error(gl.getProgramInfoLog(program));
-    return null;
-  }
-  return program;
 }

@@ -12,49 +12,53 @@ export interface Deck {
   seat: [number, number, number];
 }
 
-/** on the bed: she stands left of the mast, over her plate's blank corner, the valve and the gauge
- * past her; the servo turns the ring from below it, so nothing reaches far right of the mast and the
- * head gets as close to the last plate's edge as to any seam */
+/** on the bed: she stands on the deck's far end, left of the pivot and clear of the boom's
+ * counterweight; the valve block and the gauge stand on its front edge, where she leaves it bare */
 export const BED_DECK: Deck = {
-  box: [-53, 0, 97, 58],
-  valve: [-122, 34],
-  gauge: [-124, -34],
+  box: [-52, 0, 110, 58],
+  valve: [-72, 36],
+  gauge: [40, 38],
   motor: [0, 49],
-  seat: [-44, 0, 186],
+  seat: [-120, 0, 186],
 };
 
-/** up a phone's column: all of it inside the column, she over the ring with the mast behind her */
+/** up a phone's column: all of it inside the column, she over the pivot with the boom behind her,
+ * the deck running on under her feet to the valve block and the gauge; the engine widens it to her */
 export const COLUMN_DECK: Deck = {
-  box: [0, 0, 58, 58],
-  valve: [-38, 40],
-  gauge: [38, 40],
+  box: [0, 14, 58, 88],
+  valve: [-40, 82],
+  gauge: [40, 82],
   motor: [0, 49],
-  seat: [3, 0, 186],
+  seat: [0, 0, 186],
 };
 /** the rail band at the bed's foot, CSS px: its height and the rail's line; where the carriage
  * parks, in from the left end (its travel ends at the last plate's station); and how far from the
  * right end the drag chain is anchored */
-export const BED = { height: 76, rail: 38, start: 160, anchor: 30 } as const;
-/** the telescoping mast, arm units: its base stage, the 3 that slide out of it and how much each
- * overlaps the last, so it reaches from `base` (retracted) to `base + 3 * (stage - overlap)` */
-export const MAST = { base: 140, stage: 146, overlap: 20 } as const;
-export const MAST_MAX = MAST.base + 3 * (MAST.stage - MAST.overlap);
-/** the head at the mast's tip: half its length along the mast and its width across, arm units;
- * along, it stays inside the margin round a plate's cell */
-export const HEAD = { along: 13, across: 22, top: 184 } as const;
-/** her pencil, on a pin under the head's middle: its body's length from the pin, its cone and its
- * radius, arm units; how high it rides, down on the plate and lifted */
-export const PENCIL = { length: 130, cone: 52, radius: 11 } as const;
-export const PEN = { down: 26, up: 60 } as const;
+export const BED = { height: 76, rail: 38, start: 208, anchor: 30 } as const;
+/** the arm, arm units: its boom from the pivot to the elbow; her pencil, its forearm: from the
+ * elbow to its point, to the trunnion it tips up on (its butt there), its radius and its cone */
+export const BOOM = 340;
+export const PENCIL = { reach: 290, wrist: 48, radius: 18, cone: 52 } as const;
+/** how high the elbow's quill holds her pencil's axis: down, its body just off the page, and
+ * lifted; the quill's yoke rides this far over it */
+export const PEN = { down: 24, up: 72 } as const;
+export const YOKE = 146;
+/** the elbow ram: its clevis along the boom, its barrel, and the crank it pushes on the elbow */
+const RAM_AT = 80;
+const BARREL = 180;
+const CRANK = 40;
+const CRANK_ANGLE = Math.PI - 0.5;
 
 /**
- * A punk plotter on a carriage, drawn in arm units around its pivot: a bolted deck with a hazard
- * band, a valve block and a gauge; a slewing ring low on its housing, turned by a servo's pinion,
- * the rig's Y axis on it, a 4-stage hydraulic mast fed by a hose from the valve; at its tip a head,
- * and on a pin under it her pencil, which tips up out of the page to unfold across a plate and drags
- * its line down it. The stage is the page, z = 0, with z up toward the viewer; the camera's image
- * plane stays parallel to it, so the windows stay frontal and only the rig, a solid, shows its
- * sides. She stands on the deck, drawn apart; here she only casts her shadow.
+ * A punk pencil arm on a carriage, drawn in arm units around its pivot: a bolted deck with a hazard
+ * band, a valve block and a gauge; a slewing ring low on its housing, turned by a servo's pinion;
+ * the column and the hub, where a boom with a hazard counterweight on its tail is keyed, a hydraulic
+ * ram on top working the elbow, fed by its hoses; at the elbow a quill whose wrist holds her pencil
+ * as the forearm, lowering it onto a plate and lifting it off, and tipping it up out of the page on
+ * its trunnion while the arm moves. The stage is the page, z = 0, with z up
+ * toward the viewer; the camera's image plane stays parallel to it, so the windows stay frontal and
+ * only the rig, a solid, shows its sides. She stands on the deck, drawn apart; here she only casts
+ * her shadow.
  */
 export const fragment = `#version 300 es
 precision highp float;
@@ -64,11 +68,18 @@ uniform float uDpr;
 uniform vec3 uCam;
 uniform vec2 uB;
 uniform float uS;
-uniform float uTheta;
-uniform float uM;
-uniform float uPsi;
-uniform float uPitch;
+/** the elbow, arm units from the pivot; the pencil's direction on the page; its axis's height, and
+ * how far it is tipped up out of the page on its trunnion */
+uniform vec2 uE;
+uniform vec2 uF;
 uniform float uPen;
+uniform float uPitch;
+/** the boom's angle, which turns the ring gear and the pinion; the elbow ram's clevis, barrel end and
+ * crank pin, arm units */
+uniform float uTurn;
+uniform vec2 uRamA;
+uniform vec2 uRamB;
+uniform vec2 uRamC;
 uniform float uGauge;
 uniform vec4 uScan;
 uniform vec4 uDoc;
@@ -94,13 +105,14 @@ uniform vec2 uDial;
 uniform vec2 uMotor;
 out vec4 color;
 ${bayer8}
-const float BASE = ${MAST.base}.0;
-const float STAGE = ${MAST.stage}.0;
-const float MAST_Z = 158.0;
-const vec2 HEAD = vec2(${HEAD.along}.0, ${HEAD.across}.0);
+const float BOOM = ${BOOM}.0;
+const float REACH = ${PENCIL.reach}.0;
+const float WRIST = ${PENCIL.wrist}.0;
+const float LP = REACH - WRIST;
 const float PENCIL_R = ${PENCIL.radius}.0;
-const float LP = ${PENCIL.length}.0;
 const float CONE = ${PENCIL.cone}.0;
+const float YOKE = ${YOKE}.0;
+const float RAM_Z = 142.0;
 
 float seg(vec2 p, vec2 a, vec2 b) {
   vec2 pa = p - a;
@@ -144,12 +156,6 @@ float hex(vec2 p, float r) {
 }
 
 vec2 perp(vec2 v) { return vec2(-v.y, v.x); }
-
-vec2 rot(vec2 v, float a) {
-  float c = cos(a);
-  float s = sin(a);
-  return vec2(c * v.x - s * v.y, s * v.x + c * v.y);
-}
 
 /** p folded into the first of n sectors around the origin */
 vec2 fold(vec2 p, float n) {
@@ -195,38 +201,39 @@ float bezier(vec2 pos, vec2 A, vec2 B, vec2 C) {
   return sqrt(min(dot(e, e), dot(g, g)));
 }
 
-
-// the frames, set once a pixel: the mast along d, its side n, the head h; the pencil on its pin
-// under the head at height uPen, turned to e and tipped up out of the page by uPitch: along a,
-// across pe, and c, up from its top face; all from the pivot in arm units
-vec2 d;
-vec2 n;
-vec2 e;
-vec2 pe;
-vec2 h;
-vec3 a;
-vec3 c;
-/** the ring gear and the pinion turned with the mast: cos, sin of each */
+// the frames, set once a pixel: the boom along u1 and across n1, the wrist along u2 and across
+// n2; her pencil from its trunnion at the wrist's end, tipped up by uPitch: along a3, and c3 up
+// from its top face; the ring gear and the pinion turned with the boom, cos and sin of each
+vec2 u1;
+vec2 n1;
+vec2 u2;
+vec2 n2;
+vec3 a3;
+vec3 c3;
+vec3 trunnion;
 vec4 spin;
 void frames() {
-  spin = vec4(cos(uTheta), -sin(uTheta), cos(uTheta * 4.4), sin(uTheta * 4.4));
-  d = vec2(cos(uTheta), sin(uTheta));
-  n = vec2(d.y, -d.x);
-  e = vec2(cos(uPsi), sin(uPsi));
-  pe = perp(e);
-  h = d * uM;
-  a = vec3(e * cos(uPitch), sin(uPitch));
-  c = vec3(-e * sin(uPitch), cos(uPitch));
+  u1 = uE / BOOM;
+  n1 = perp(u1);
+  u2 = uF;
+  n2 = perp(uF);
+  a3 = vec3(u2 * cos(uPitch), sin(uPitch));
+  c3 = vec3(-u2 * sin(uPitch), cos(uPitch));
+  trunnion = vec3(uE + u2 * WRIST, uPen);
+  spin = vec4(cos(uTurn), -sin(uTurn), cos(uTurn * 4.4), sin(uTurn * 4.4));
 }
 
-/** q in the pencil's frame: along it from the pin, across it, and up from its axis */
-vec3 pencil(vec3 q) {
-  vec3 r = q - vec3(h, uPen);
-  return vec3(dot(r, a), dot(r.xy, pe), dot(r, c));
+/** q in her pencil's frame: along it from its butt in the trunnion, across it, up from its axis */
+vec3 pencilAt(vec3 q) {
+  vec3 r = q - trunnion;
+  return vec3(dot(r, a3), dot(r.xy, n2), dot(r, c3));
 }
 
-// ---- the deck and the pedestal, bolted to the page: the slewing ring sits low on its housing, so
-// from high up nothing of it reaches much past the mast's sides
+/** q turned with the boom */
+vec2 turned(vec2 q) { return vec2(spin.x * q.x - spin.y * q.y, spin.y * q.x + spin.x * q.y); }
+
+// ---- the deck and the pedestal, bolted to the page: the slewing ring low on its housing, the
+// column up to the hub the boom is keyed on
 float dPlate(vec3 q) { return slab(box2(q.xy - uDeck.xy, uDeck.zw - 14.0) - 14.0, q.z, 0.0, 10.0, 2.0); }
 float dBolts(vec3 q) {
   vec2 c = abs(q.xy - uDeck.xy) - uDeck.zw + 16.0;
@@ -237,21 +244,19 @@ float dHousing(vec3 q) { return cyl(q, vec2(0.0), 42.0, 8.0, 50.0, 3.0); }
 float dRing(vec3 q) {
   float r = length(q.xy);
   if (r > 47.0 || abs(q.z - 55.0) > 11.0) return max(r - 41.0, abs(q.z - 55.0) - 5.0);
-  vec2 g = vec2(spin.x * q.x - spin.y * q.y, spin.y * q.x + spin.x * q.y);
-  return slab(r < 32.0 ? r - 36.0 : gear(g, 36.0, 28.0, 5.0), q.z, 50.0, 60.0, 1.0);
+  return slab(r < 32.0 ? r - 36.0 : gear(turned(q.xy), 36.0, 28.0, 5.0), q.z, 50.0, 60.0, 1.0);
 }
 /** a circle of bolts on the ring's top face, turning with it */
 float dRimBolts(vec3 q) {
   float r = length(q.xy);
   if (abs(r - 33.5) > 5.0 || abs(q.z - 61.5) > 5.0) return max(abs(r - 33.5) - 2.5, abs(q.z - 61.5) - 2.0);
-  vec2 g = vec2(spin.x * q.x - spin.y * q.y, spin.y * q.x + spin.x * q.y);
-  return slab(hex(fold(g, 10.0) - vec2(33.5, 0.0), 1.9), q.z, 59.0, 63.0, 0.6);
+  return slab(hex(fold(turned(q.xy), 10.0) - vec2(33.5, 0.0), 1.9), q.z, 59.0, 63.0, 0.6);
 }
 float dColumn(vec3 q) {
   float r = length(q.xy);
   float d = r - 27.0;
   if (r < 38.0) d = min(d, box2(fold(q.xy, 10.0) - vec2(29.0, 0.0), vec2(3.0, 2.2)));
-  return slab(d, q.z, 60.0, 146.0, 1.5);
+  return slab(d, q.z, 60.0, 100.0, 1.5);
 }
 /** the servo under the pinion that turns the ring */
 float dMotor(vec3 q) {
@@ -279,64 +284,126 @@ float dValve(vec3 q) {
   return d;
 }
 float dGauge(vec3 q) { return cyl(q, uDial, 12.0, 8.0, 30.0, 2.5); }
-float dHub(vec3 q) { return cyl(q, vec2(0.0), 28.0, 146.0, 166.0, 3.0); }
-/** the pivot's nut on its washer */
-float dNut(vec3 q) {
-  if (dot(q.xy, q.xy) > 260.0 || q.z < 166.0) return max(length(q.xy) - 14.0, 168.0 - q.z);
-  return min(cyl(q, vec2(0.0), 13.0, 170.0, 175.0, 1.0), slab(hex(q.xy, 8.5), q.z, 172.0, 181.0, 1.5));
+/** the hub the boom is keyed on, its nut on top */
+float dHub(vec3 q) {
+  float d = cyl(q, vec2(0.0), 30.0, 98.0, 130.0, 3.0);
+  if (dot(q.xy, q.xy) > 260.0 || q.z < 126.0) return min(d, max(length(q.xy) - 14.0, 128.0 - q.z));
+  return min(d, min(cyl(q, vec2(0.0), 13.0, 128.0, 133.0, 1.0), slab(hex(turned(q.xy), 8.5), q.z, 130.0, 139.0, 1.5)));
+}
+/** the line from the valve block to the swivel in the housing's side */
+float dPipe(vec3 q) {
+  vec2 a = uValve + vec2(uValve.x < 0.0 ? 12.0 : -12.0, -9.0);
+  vec2 b = normalize(a) * 43.0;
+  return tube(q, vec3(a, 30.0), vec3(b, 36.0), 3.0);
 }
 
-// ---- the mast: a base stage on the ring, 3 stages sliding out of it, a gland ring at each mouth
-/** a stage's box in the mast's frame (x along it, y across): from a to b, w wide, hz high */
-float stage(vec3 q, vec2 m, float a, float b, float w, float hz) {
-  return slab(box2(vec2(m.x - 0.5 * (a + b), m.y), vec2(0.5 * (b - a), w)), q.z, MAST_Z - hz, MAST_Z + hz, 2.0);
+// ---- the boom: keyed on the hub, its counterweight on its tail, rivet rows and a slot; the elbow
+// ram on top fed by a hose from the hub's swivel and a line along its barrel; the quill's air line
+// tied along its side
+float dBoom(vec3 q, vec2 b) {
+  float d = seg(b, vec2(-26.0, 0.0), vec2(BOOM, 0.0)) - 19.0;
+  float slot = seg(b, vec2(BOOM - 80.0, 0.0), vec2(BOOM - 44.0, 0.0)) - 6.5;
+  return slab(max(d, -slot), q.z, 106.0, 126.0, 4.0);
 }
-float dBaseStage(vec3 q, vec2 m) { return stage(q, m, -18.0, BASE, 13.0, 14.0); }
-float dStages(vec3 q, vec2 m) {
-  float x = max(uM - BASE, 0.0) / 3.0;
-  float d = stage(q, m, BASE - STAGE + x, BASE + x, 10.5, 11.5);
-  d = min(d, stage(q, m, BASE - STAGE + 2.0 * x, BASE + 2.0 * x, 8.0, 9.0));
-  return min(d, stage(q, m, BASE - STAGE + 3.0 * x, BASE + 3.0 * x, 5.5, 6.5));
+float dEye(vec3 q) { return cyl(q, uE, 26.0, 106.0, 126.0, 4.0); }
+float dWeight(vec3 q, vec2 b) {
+  vec2 k = b - vec2(-40.0, 0.0);
+  float d = slab(box2(k, vec2(10.0, 18.0)) - 4.0, q.z, 104.0, 144.0, 4.0);
+  // its lifting eye
+  return min(d, slab(abs(length(k) - 5.0) - 1.6, q.z, 142.0, 150.0, 1.0));
 }
-float dGlands(vec3 q, vec2 m) {
-  float x = max(uM - BASE, 0.0) / 3.0;
-  float d = stage(q, m, BASE - 7.0, BASE, 15.5, 16.0);
-  d = min(d, stage(q, m, BASE + x - 6.0, BASE + x, 13.0, 13.5));
-  return min(d, stage(q, m, BASE + 2.0 * x - 5.0, BASE + 2.0 * x, 10.5, 11.0));
-}
-/** the hose from the valve block up to the base stage's side nearer it */
-float dHose(vec3 q) {
-  vec2 a = uValve + vec2(uValve.x < 0.0 ? 10.0 : -10.0, -10.0);
-  float side = dot(n, uValve) < 0.0 ? -1.0 : 1.0;
-  vec2 b = d * 52.0 + n * (16.0 * side);
-  vec2 k = 0.5 * (a + b) + n * (26.0 * side);
-  float bound = max(box2(q.xy - 0.5 * (a + b), abs(0.5 * (b - a)) + 34.0), q.z - 172.0);
+float dBarrel(vec3 q) { return tube(q, vec3(uRamA, RAM_Z), vec3(uRamB, RAM_Z), 10.0); }
+float dRamCaps(vec3 q) {
+  vec2 u = normalize(uRamB - uRamA);
+  float bound = max(seg(q.xy, uRamA, uRamB + u * 8.0) - 14.0, abs(q.z - RAM_Z - 3.0) - 15.0);
   if (bound > 4.0) return bound;
-  float t = clamp(dot(q.xy - a, b - a) / dot(b - a, b - a), 0.0, 1.0);
-  return length(vec2(bezier(q.xy, a, k, b), q.z - mix(32.0, MAST_Z, t))) - 3.0;
+  float d = tube(q, vec3(uRamA, RAM_Z), vec3(uRamA + u * 10.0, RAM_Z), 11.5);
+  d = min(d, tube(q, vec3(uRamB - u * 10.0, RAM_Z), vec3(uRamB, RAM_Z), 11.5));
+  // the gland the rod slides out of, and the two port fittings on top
+  d = min(d, tube(q, vec3(uRamB, RAM_Z), vec3(uRamB + u * 8.0, RAM_Z), 7.0));
+  d = min(d, cyl(q, uRamA + u * 18.0, 3.4, RAM_Z + 8.0, RAM_Z + 15.0, 1.0));
+  return min(d, cyl(q, uRamB - u * 18.0, 3.4, RAM_Z + 8.0, RAM_Z + 15.0, 1.0));
+}
+float dRod(vec3 q) { return tube(q, vec3(uRamB, RAM_Z), vec3(uRamC, RAM_Z), 4.5); }
+float dClevis(vec3 q) {
+  return min(cyl(q, uRamA, 8.5, 124.0, 154.0, 2.0), cyl(q, uRamC, 8.0, 132.0, 154.0, 2.0));
+}
+/** the hose from the hub's swivel to the ram's rear port */
+float dHose(vec3 q) {
+  vec2 u = normalize(uRamB - uRamA);
+  vec2 a = u1 * 12.0 + n1 * 15.0;
+  vec2 c = uRamA + u * 18.0;
+  vec2 k = u1 * 34.0 + n1 * 40.0;
+  vec2 lo = min(min(a, c), k) - 6.0;
+  vec2 hi = max(max(a, c), k) + 6.0;
+  float bound = max(box2(q.xy - 0.5 * (lo + hi), 0.5 * (hi - lo)), abs(q.z - RAM_Z) - 22.0);
+  if (bound > 4.0) return bound;
+  float t = clamp(dot(q.xy - a, c - a) / dot(c - a, c - a), 0.0, 1.0);
+  return length(vec2(bezier(q.xy, a, k, c), q.z - mix(136.0, RAM_Z + 15.0, t))) - 3.4;
+}
+/** the steel line from the rear port along the barrel to its front port */
+float dLine(vec3 q) {
+  vec2 u = normalize(uRamB - uRamA);
+  return tube(q, vec3(uRamA + u * 18.0, RAM_Z + 13.0), vec3(uRamB - u * 18.0, RAM_Z + 13.0), 2.2);
+}
+/** the quill's air line, tied along the boom's side, up to the quill */
+float dAir(vec3 q) {
+  vec3 a = vec3(u1 * 34.0 - n1 * 22.0, 126.0);
+  vec3 b = vec3(uE - u1 * 30.0 - n1 * 22.0, 126.0);
+  vec3 c = vec3(uE - u1 * 12.0 - n1 * 11.0, 150.0);
+  return min(tube(q, a, b, 2.6), tube(q, b, c, 2.6));
 }
 
-// ---- the head at the mast's tip, the pin under it, her pencil on the pin
-float dHead(vec3 q, vec2 m) {
-  return slab(box2(vec2(m.x - uM, m.y), HEAD - 4.0) - 4.0, q.z, 146.0, ${HEAD.top}.0, 4.0);
+// ---- the elbow: the quill standing on the eye, its rod down through it to the wrist that holds her
+// pencil, its guide rods and their yoke riding with the wrist; the crank the ram pushes
+float dQuill(vec3 q) {
+  return min(cyl(q, uE, 15.0, 124.0, 162.0, 3.0), cyl(q, uE, 10.0, 160.0, 167.0, 2.0));
 }
-float dPost(vec3 q) { return cyl(q, h, 6.0, uPen + 10.0, 160.0, 2.0); }
-/** her pencil, f in its frame: its butt end stays under the head, folded along the mast or out
- * across a plate */
+float dCrank(vec3 q) { return bar(q, uE, uRamC, 8.0, 134.0, 150.0, 3.0); }
+float dGuides(vec3 q) {
+  vec2 g = n2 * 22.0;
+  float top = uPen + YOKE;
+  float d = min(cyl(q, uE + g, 3.2, uPen + 10.0, top, 1.0), cyl(q, uE - g, 3.2, uPen + 10.0, top, 1.0));
+  // the quill's rod, and the bar that carries the rods' feet under the wrist
+  d = min(d, cyl(q, uE, 6.0, uPen + 8.0, 124.0, 1.0));
+  return min(d, bar(q, uE + g, uE - g, 5.0, uPen + 6.0, uPen + 14.0, 2.0));
+}
+float dYoke(vec3 q) {
+  vec2 g = n2 * 22.0;
+  float z = uPen + YOKE;
+  float d = bar(q, uE + g, uE - g, 5.5, z, z + 7.0, 2.0);
+  d = min(d, slab(hex(q.xy - uE - g, 4.5), q.z, z + 6.0, z + 10.0, 1.0));
+  return min(d, slab(hex(q.xy - uE + g, 4.5), q.z, z + 6.0, z + 10.0, 1.0));
+}
+/** the wrist, g in the frame of its turn from the elbow: its arm out from under the eye, the fork
+ * either side of her pencil's butt with the trunnion's bosses, and f, the pencil's frame, for the
+ * ferrule it grips */
+float dWrist(vec3 q, vec2 g, vec3 f) {
+  float bound = max(box2(g - vec2(0.5 * WRIST, 0.0), vec2(0.5 * WRIST + PENCIL_R + 8.0, PENCIL_R + 14.0)), abs(q.z - uPen) - PENCIL_R - 10.0);
+  if (bound > 4.0) return bound;
+  float d = slab(seg(g, vec2(0.0), vec2(WRIST - 16.0, 0.0)) - 8.0, q.z, uPen - 7.0, uPen + 7.0, 2.0);
+  vec2 k = vec2(g.x - WRIST + 8.0, abs(g.y) - PENCIL_R - 5.0);
+  d = min(d, slab(box2(k, vec2(10.0, 2.6)), q.z, uPen - 9.0, uPen + 9.0, 1.2));
+  vec2 boss = vec2(length(vec2(g.x - WRIST, q.z - uPen)) - 7.0, abs(abs(g.y) - PENCIL_R - 7.5) - 2.6);
+  d = min(d, min(max(boss.x, boss.y), 0.0) + length(max(boss, 0.0)));
+  return min(d, max(hex(f.yz, PENCIL_R + 3.0), abs(f.x - 7.0) - 7.0));
+}
+/** her pencil, f in its frame: its butt in the trunnion, its point LP along */
 float dPencil(vec3 f) {
-  vec2 yz = f.yz;
-  float body = max(hex(yz, PENCIL_R), max(-12.0 - f.x, f.x - LP - 4.0));
-  float u = clamp((f.x - LP - 4.0) / CONE, 0.0, 1.0);
-  float cone = max(hex(yz, PENCIL_R * (1.0 - u) + 0.6), max(LP + 4.0 - f.x, f.x - LP - 4.0 - CONE));
+  float body = max(hex(f.yz, PENCIL_R), max(-f.x, f.x - LP + CONE));
+  float u = clamp((f.x - LP + CONE) / CONE, 0.0, 1.0);
+  float cone = max(hex(f.yz, PENCIL_R * (1.0 - u) + 0.6), max(LP - CONE - f.x, f.x - LP));
   return min(body, cone);
 }
 
-#define N 19
+#define N 26
 float part[N];
 
 /** every part's distance at q (arm units) */
 void parts(vec3 q) {
-  vec2 m = vec2(dot(q.xy, d), dot(q.xy, perp(d)));
+  vec2 b = vec2(dot(q.xy, u1), dot(q.xy, n1));
+  vec2 g = vec2(dot(q.xy - uE, u2), dot(q.xy - uE, n2));
+  vec3 f = pencilAt(q);
   part[0] = dPlate(q);
   part[1] = dBolts(q);
   part[2] = dHousing(q);
@@ -348,41 +415,67 @@ void parts(vec3 q) {
   part[8] = dGauge(q);
   part[9] = dRing(q);
   part[10] = dHub(q);
-  part[11] = dNut(q);
-  part[12] = dBaseStage(q, m);
-  part[13] = dStages(q, m);
-  part[14] = dGlands(q, m);
-  part[15] = dHose(q);
-  part[16] = dHead(q, m);
-  part[17] = dPost(q);
-  part[18] = dPencil(pencil(q));
+  part[11] = dBoom(q, b);
+  part[12] = dEye(q);
+  part[13] = dBarrel(q);
+  part[14] = dRamCaps(q);
+  part[15] = dRod(q);
+  part[16] = dClevis(q);
+  part[17] = min(min(dHose(q), dLine(q)), dPipe(q));
+  part[18] = dWeight(q, b);
+  part[19] = dQuill(q);
+  part[20] = dCrank(q);
+  part[21] = dGuides(q);
+  part[22] = dYoke(q);
+  part[23] = dPencil(f);
+  part[24] = dWrist(q, g, f);
+  part[25] = dAir(q);
 }
 
 /** the rig's distance at q (arm units), each group only near its bound */
 float rig(vec3 q) {
   float d0;
-  float bound = max(box2(q.xy - uDeck.xy, uDeck.zw), q.z - 156.0);
+  float bound = max(box2(q.xy - uDeck.xy, uDeck.zw + 6.0), q.z - 142.0);
   if (bound < 6.0) {
     d0 = q.z - 70.0;
     if (q.z < 76.0) {
       d0 = min(min(dPlate(q), dBolts(q)), min(dHousing(q), dRing(q)));
       d0 = min(d0, min(min(dValve(q), dGauge(q)), min(dMotor(q), dPinion(q))));
-      d0 = min(d0, dRimBolts(q));
+      d0 = min(d0, min(dRimBolts(q), dPipe(q)));
     }
-    d0 = min(d0, dColumn(q));
+    // the column and the hub, only round the pivot
+    float pole = max(length(q.xy) - 34.0, q.z - 142.0);
+    d0 = min(d0, pole < 6.0 ? min(dColumn(q), dHub(q)) : pole);
   } else d0 = bound;
-  bound = max(length(q.xy) - 34.0, abs(q.z - 164.0) - 22.0);
-  if (bound < 6.0) d0 = min(d0, min(dHub(q), dNut(q)));
-  else d0 = min(d0, bound);
-  vec2 m = vec2(dot(q.xy, d), dot(q.xy, perp(d)));
-  bound = max(box2(vec2(m.x - 0.5 * (uM - 20.0), m.y), vec2(0.5 * (uM + 20.0), 18.0)), abs(q.z - MAST_Z) - 20.0);
-  if (bound < 6.0) d0 = min(d0, min(min(dBaseStage(q, m), dStages(q, m)), dGlands(q, m)));
-  else d0 = min(d0, bound);
-  d0 = min(d0, dHose(q));
-  vec3 pin = vec3(h, uPen);
-  bound = max(box2(vec2(m.x - uM, m.y), HEAD + 6.0), q.z - 190.0);
-  bound = min(bound, tube(q, pin - a * 16.0, pin + a * (LP + CONE + 6.0), 18.0));
-  if (bound < 6.0) d0 = min(d0, min(min(dHead(q, m), dPost(q)), dPencil(pencil(q))));
+  vec2 b = vec2(dot(q.xy, u1), dot(q.xy, n1));
+  bound = max(box2(b - vec2(0.5 * BOOM - 5.0, 0.0), vec2(0.5 * BOOM + 55.0, 50.0)), abs(q.z - 132.0) - 30.0);
+  if (bound < 6.0) {
+    d0 = min(d0, min(dBoom(q, b), dEye(q)));
+    // the counterweight, only by the tail
+    float near = max(box2(b - vec2(-40.0, 0.0), vec2(20.0, 28.0)), abs(q.z - 127.0) - 25.0);
+    d0 = min(d0, near < 6.0 ? dWeight(q, b) : near);
+    // the ram, its clevises and its steel line, only along it
+    near = max(seg(q.xy, uRamA, uRamC) - 16.0, abs(q.z - RAM_Z) - 20.0);
+    if (near < 6.0) {
+      d0 = min(d0, min(dBarrel(q), dRamCaps(q)));
+      d0 = min(d0, min(dRod(q), dClevis(q)));
+      d0 = min(d0, dLine(q));
+    } else d0 = min(d0, near);
+    d0 = min(d0, dHose(q));
+    // the air line, only by the boom's side
+    near = max(box2(b - vec2(0.5 * BOOM + 11.0, -16.5), vec2(0.5 * BOOM - 19.0, 8.5)), abs(q.z - 138.0) - 16.0);
+    d0 = min(d0, near < 6.0 ? dAir(q) : near);
+  } else d0 = min(d0, bound);
+  vec3 f = pencilAt(q);
+  bound = max(length(q.xy - uE) - 74.0, max(uPen - PENCIL_R - 16.0 - q.z, q.z - uPen - YOKE - 14.0));
+  if (bound < 6.0) {
+    vec2 g = vec2(dot(q.xy - uE, u2), dot(q.xy - uE, n2));
+    d0 = min(d0, min(dQuill(q), dCrank(q)));
+    d0 = min(d0, min(dGuides(q), dYoke(q)));
+    d0 = min(d0, dWrist(q, g, f));
+  } else d0 = min(d0, bound);
+  bound = tube(q, trunnion - a3 * 6.0, trunnion + a3 * (LP + 4.0), PENCIL_R + 12.0);
+  if (bound < 6.0) d0 = min(d0, dPencil(f));
   else d0 = min(d0, bound);
   return d0;
 }
@@ -417,9 +510,8 @@ bool underMate(vec3 p) {
 
 /** 2D distance to the rig's footprint, arm units: a bound for every part */
 float skeleton(vec2 p) {
-  float d0 = min(box2(p - uDeck.xy, uDeck.zw), seg(p, -d * 24.0, d * (uM + 24.0)) - 30.0);
-  d0 = min(d0, seg(p, h - a.xy * 18.0, h + a.xy * (LP + CONE + 8.0)) - 20.0);
-  return min(d0, box2(p - uValve, vec2(40.0)));
+  float d0 = min(box2(p - uDeck.xy, uDeck.zw), seg(p, -u1 * 60.0, uE) - 66.0);
+  return min(d0, seg(p, trunnion.xy - a3.xy * 8.0, trunnion.xy + a3.xy * (LP + 6.0)) - PENCIL_R - 16.0);
 }
 
 float segseg(vec2 a, vec2 b, vec2 p, vec2 q) {
@@ -435,26 +527,29 @@ float segseg(vec2 a, vec2 b, vec2 p, vec2 q) {
   return min(min(seg(a, p, q), seg(b, p, q)), min(seg(p, a, b), seg(q, a, b)));
 }
 
-/** whether page point p (arm units) is in the shadow of the carriage: the parts riding in the bay */
+/** whether page point p (arm units) is in the shadow of what rides in the bay: the housing, the
+ * column and the hub, and the servo */
 bool shadedCarriage(vec2 p) {
   vec2 s = uL.xy / uL.z;
   vec2 o = vec2(0.0);
   if (segseg(p + s * 8.0, p + s * 60.0, o, o) < 41.0) return true;
-  if (segseg(p + s * 60.0, p + s * 146.0, o, o) < 29.0) return true;
-  if (segseg(p + s * 8.0, p + s * 60.0, uMotor, uMotor) < 11.0) return true;
-  return segseg(p + s * 146.0, p + s * 181.0, o, o) < 28.0;
+  if (segseg(p + s * 60.0, p + s * 139.0, o, o) < 29.0) return true;
+  return segseg(p + s * 8.0, p + s * 60.0, uMotor, uMotor) < 11.0;
 }
 
-/** whether page point p is in the shadow of what reaches over the plates: the mast, its head and
- * the pencil under it */
+/** whether page point p is in the shadow of what reaches over the plates: the boom with its ram and
+ * counterweight, the elbow and its quill, the yoke, her pencil */
 bool shadedReach(vec2 p) {
   vec2 s = uL.xy / uL.z;
-  if (segseg(p + s * 144.0, p + s * 172.0, d * 30.0, h) < 13.0) return true;
-  vec2 across = perp(d) * (HEAD.y - HEAD.x);
-  if (segseg(p + s * 146.0, p + s * ${HEAD.top}.0, h - across, h + across) < HEAD.x) return true;
-  if (segseg(p + s * (uPen + 10.0), p + s * 160.0, h, h) < 6.0) return true;
-  vec3 p0 = vec3(h, uPen) - a * 12.0;
-  vec3 p1 = vec3(h, uPen) + a * (LP + 4.0 + 0.6 * CONE);
+  if (segseg(p + s * 106.0, p + s * 126.0, u1 * 28.0, uE) < 19.0) return true;
+  if (segseg(p + s * 104.0, p + s * 150.0, -u1 * 54.0, -u1 * 26.0) < 22.0) return true;
+  if (segseg(p + s * 131.0, p + s * 153.0, uRamA, uRamC) < 10.0) return true;
+  if (segseg(p + s * 106.0, p + s * 167.0, uE, uE) < 22.0) return true;
+  vec2 g = n2 * 22.0;
+  if (segseg(p + s * (uPen + YOKE), p + s * (uPen + YOKE + 10.0), uE - g, uE + g) < 5.5) return true;
+  if (segseg(p + s * uPen, p + s * uPen, uE, trunnion.xy) < 9.0) return true;
+  vec3 p0 = trunnion - a3 * 4.0;
+  vec3 p1 = trunnion + a3 * (LP - 0.4 * CONE);
   return seg(p, p0.xy - s * p0.z, p1.xy - s * p1.z) < PENCIL_R;
 }
 
@@ -483,13 +578,14 @@ bool glyph(int bits, ivec2 k) {
   return ((bits >> ((4 - k.y) * 3 + (2 - k.x))) & 1) == 1;
 }
 
-/** "MDX", stencilled on the head's face, 2.8 arm units a cell */
-bool stencil(vec2 p) {
-  ivec2 i = ivec2(floor(p / 2.8 + vec2(5.5, 2.5)));
+/** "REACT", stencilled along the boom's root between the hub's cap and the ram's clevis, a cell
+ * this many arm units */
+bool stencil(vec2 p, float cell) {
+  ivec2 i = ivec2(floor(p / cell + vec2(9.5, 2.5)));
   int letter = i.x / 4;
   ivec2 k = ivec2(i.x - letter * 4, i.y);
-  if (i.x < 0 || letter > 2 || k.x > 2) return false;
-  int bits = letter == 0 ? 0x5FED : letter == 1 ? 0x6B6E : 0x5AAD;
+  if (i.x < 0 || letter >= 5 || k.x > 2) return false;
+  int bits = letter == 0 ? 0x6BAD : letter == 1 ? 0x79A7 : letter == 2 ? 0x2BED : letter == 3 ? 0x3923 : 0x7492;
   return glyph(bits, k);
 }
 
@@ -497,6 +593,8 @@ void main() {
   vec2 px = vec2(gl_FragCoord.x, uResolution.y - gl_FragCoord.y) / uDpr;
   color = vec4(0.0);
   if (px.x < uClip.x || px.y < uClip.y || px.x > uClip.z || px.y > uClip.w) return;
+  // she stands over the rig on a canvas of her own: what lies under her never shows
+  if (mateAt(px)) return;
   frames();
 
   vec3 ro = uCam;
@@ -563,15 +661,18 @@ void main() {
       } else if (dd < second) second = dd;
     }
     bool face = nn.z > 0.7;
-    // painted plates, the hub, the base stage and the head; black anodised steel; chrome stages
-    bool painted = id == 0 || id == 2 || id == 7 || id == 8 || id == 10 || id == 12 || id == 16;
-    bool chrome = id == 13 || id == 17;
+    // painted: the deck, the housing, the valve block and the gauge, the hub, the boom and its eye,
+    // the ram's barrel, the counterweight, the quill and the crank, and her pencil; black anodised
+    // steel the rest; chrome the ram's rod and the quill's guide rods
+    bool painted = id == 0 || id == 2 || id == 7 || id == 8 || id == 10 || id == 11 || id == 12 ||
+      id == 13 || id == 18 || id == 19 || id == 20 || id == 23;
+    bool chrome = id == 15 || id == 21;
     float tone = painted ? clamp((v - 0.12) / 0.3, 0.0, 1.0) : clamp((v - 0.74) / 0.14, 0.0, 1.0);
     if (chrome) tone = v > 0.86 ? 1.0 : 0.0;
     col = tone > threshold ? uLit : uShade;
     if (id == 1 || id == 3) col = tone > 0.4 ? uYellow : uShade;
-    vec2 m = vec2(dot(q.xy, d), dot(q.xy, perp(d)));
-    vec2 f = pencil(q).xy;
+    vec2 b = vec2(dot(q.xy, u1), dot(q.xy, n1));
+    vec3 f = pencilAt(q);
     if (id == 0 && face) {
       // a hazard band round the deck, rivets inside it
       vec2 k = q.xy - uDeck.xy;
@@ -601,35 +702,52 @@ void main() {
       vec2 v2 = q.xy - uValve;
       if (abs(abs(v2.x) - 5.0) < lw && abs(v2.y) < 8.0) col = uShade;
     }
+    if (id == 10 && face) {
+      // the hub's bolt circle round its nut, turning with the boom
+      if (length(fold(turned(q.xy), 6.0) - vec2(22.0, 0.0)) < 2.4) col = uShade;
+    }
+    if (id == 11 && face) {
+      // rivet rows down the boom's edges, and what it is for, stencilled by its root
+      bool rivet = abs(abs(b.y) - 15.0) < 1.5 && abs(mod(b.x - 4.0, 14.0) - 7.0) < 1.5 && b.x > 34.0 && b.x < BOOM - 34.0;
+      if (rivet || stencil(vec2(b.x - 50.0, b.y), 1.8)) col = uShade;
+    }
     if (id == 12 && face) {
-      // rivet rows down the base stage, and chevrons toward its mouth
-      bool rivet = abs(abs(m.y) - 9.0) < 1.4 && abs(mod(m.x - 4.0, 14.0) - 7.0) < 1.4 && m.x > 8.0 && m.x < BASE - 34.0;
-      float cx = m.x - (BASE - 30.0);
-      bool chevron = cx > 0.0 && cx < 20.0 && abs(m.y) < 8.0 && mod(cx - abs(m.y) * 0.8, 10.0) < 3.5;
-      if (rivet || chevron) col = uShade;
+      // the eye's bolt circle round the quill
+      vec2 e = vec2(dot(q.xy - uE, u1), dot(q.xy - uE, n1));
+      if (length(fold(e, 6.0) - vec2(20.5, 0.0)) < 2.2) col = uShade;
     }
-    if (id == 16 && face) {
-      // the head's corner bolts and its stencil
-      vec2 k = vec2(m.x - uM, m.y);
-      vec2 a = abs(k) - HEAD + 5.0;
-      if (length(a) < 2.2 || stencil(vec2(k.y, -k.x))) col = uShade;
-    }
-    if (id == 15) {
+    if (id == 17) {
       // cable ties round the hose
-      if (abs(mod(length(q.xy - uValve), 26.0) - 13.0) < 1.4) col = tone > 0.5 ? uLit : uYellow;
+      if (abs(mod(length(q.xy - u1 * 12.0), 24.0) - 12.0) < 1.4) col = tone > 0.5 ? uLit : uYellow;
     }
-    if (id == 18) {
-      // her pencil: black bands, the black and yellow one by the point, the facets, bare wood and
-      // the lead
-      bool ringBand = f.x > LP - 16.0 && f.x < LP - 13.0;
-      bool black = f.x < -4.0 || (f.x > 36.0 && f.x < 44.0) || (f.x > LP - 48.0 && f.x < LP - 40.0) || (f.x > LP - 20.0 && f.x < LP - 9.0);
-      if (black) col = tone > 0.92 ? uLit : uShade;
-      if (ringBand) col = uYellow;
-      if (f.x > LP + 4.0) {
-        col = tone > 0.25 && threshold < 0.8 ? uLit : uShade;
-        if (f.x > LP + 4.0 + CONE - 15.0) col = uShade;
+    if (id == 18 && face) {
+      // hazard stripes across the counterweight, its lifting eye
+      vec2 k = b - vec2(-40.0, 0.0);
+      col = mod(k.x + k.y + 40.0, 10.0) < 5.0 ? uYellow : uShade;
+      if (abs(length(k) - 5.0) < 2.6) col = tone > 0.5 ? uLit : uShade;
+    }
+    if (id == 19 && face) {
+      // the seam round the quill's cap
+      if (abs(length(q.xy - uE) - 12.5) < lw) col = uShade;
+    }
+    if (id == 25) {
+      // ties hold the air line to the boom
+      if (abs(mod(b.x, 36.0) - 18.0) < 1.6) col = uYellow;
+    }
+    if (id == 23) {
+      // her pencil, painted white however it turns and tips: a black band by its butt with a yellow
+      // ring, a black band, the black and yellow band before the cone; then bare wood, a light half
+      // tone, and the lead; the edges of its top facet along it
+      float end = LP - CONE;
+      bool ring = (f.x > 20.0 && f.x < 24.0) || (f.x > end - 22.0 && f.x < end - 17.0);
+      bool black = f.x < 28.0 || (f.x > 0.45 * end && f.x < 0.45 * end + 10.0) || (f.x > end - 30.0 && f.x < end - 9.0);
+      if (black) col = uShade;
+      if (ring) col = uYellow;
+      if (f.x > end) {
+        col = tone > 0.3 && threshold < 0.8 ? uLit : uShade;
+        if (f.x > LP - 15.0) col = uShade;
       }
-      if (!black && !ringBand && f.x > -4.0 && f.x < LP + 4.0 && abs(abs(f.y) - 0.57735 * PENCIL_R) < lw) col = uShade;
+      if (!black && !ring && f.x < end && abs(abs(f.y) - 0.57735 * PENCIL_R) < lw) col = uShade;
     }
     if (second < lw) col = tone > 0.5 ? uShade : uLit;
     if (edge < 1.25) col = pen;
@@ -642,7 +760,7 @@ void main() {
     return;
   }
 
-  // the line the pencil drags across its plate: the output above it, the Markdown below
+  // the line her pencil's point drags across its plate: the output above it, the Markdown below
   if (uScan.w > 0.5 && px.x >= uScan.x && px.x < uScan.y && px.y >= uScan.z && px.y < uScan.z + 1.0) {
     color = vec4(pen, 1.0);
     return;
@@ -663,3 +781,18 @@ void main() {
   if (shadow && threshold < 0.14) color = line;
 }
 `;
+
+/** writes the elbow ram's clevis, barrel end and crank pin (arm units) into `out`, for the elbow at
+ * (ex, ey) and the pencil pointing (fx, fy) */
+export function ram(ex: number, ey: number, fx: number, fy: number, out: number[]) {
+  const l1 = Math.hypot(ex, ey);
+  out[0] = (ex / l1) * RAM_AT;
+  out[1] = (ey / l1) * RAM_AT;
+  const c = Math.cos(CRANK_ANGLE);
+  const s = Math.sin(CRANK_ANGLE);
+  out[4] = ex + CRANK * (c * fx - s * fy);
+  out[5] = ey + CRANK * (s * fx + c * fy);
+  const d = Math.hypot(out[4] - out[0], out[5] - out[1]);
+  out[2] = out[0] + ((out[4] - out[0]) / d) * BARREL;
+  out[3] = out[1] + ((out[5] - out[1]) / d) * BARREL;
+}

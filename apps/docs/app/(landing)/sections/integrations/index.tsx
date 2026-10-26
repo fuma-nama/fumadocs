@@ -39,7 +39,7 @@ for (const item of info) modules.push({ ...item, mechanism: mechanisms[item.n] }
 
 export function Integrations() {
   return (
-    <Figure n={5} id="integrations" aria-label="Integrations" status="12 integrations loaded">
+    <Figure id="integrations" aria-label="Integrations" status="12 integrations loaded">
       <Board
         modules={modules}
         header={
@@ -63,6 +63,7 @@ function Marquee() {
       <li key={more[i].name}>
         <Link
           href={more[i].href}
+          prefetch={false}
           className="flex h-11 items-center px-4 font-mono text-[13px] text-lp-ink-2 hover:bg-lp-ink hover:text-lp-paper focus-visible:bg-lp-ink focus-visible:text-lp-paper focus-visible:outline-none"
         >
           {more[i].name}

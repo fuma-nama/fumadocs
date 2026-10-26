@@ -27,11 +27,9 @@ export async function Proof() {
   if (downloads !== undefined)
     counters.push({ label: 'Weekly downloads', value: downloads, note: 'fumadocs-core' });
   if (contributors !== undefined) counters.push({ label: 'Contributors', value: contributors });
-  counters.push({ label: 'Showcased sites', value: online });
 
   return (
     <Figure
-      n={6}
       id="proof"
       aria-label="Showcase"
       status={`${online} sites online`}
@@ -44,7 +42,6 @@ export async function Proof() {
       />
       {/* 9 | 3 of 12 columns, the wall's rounded to whole pixels: a half pixel left a seam inside its frame */}
       <div className="grid gap-6 xl:grid-cols-[round(75%_-_6px,1px)_minmax(0,1fr)]">
-        <Counters items={counters} />
         <Press sites={sites}>
           {/* ends level with the testimonials when they run longer than the wall */}
           <div className="mt-auto flex flex-wrap items-baseline justify-between gap-x-6 gap-y-2">
@@ -73,7 +70,9 @@ export async function Proof() {
             </p>
           </div>
         </Press>
-        <Wire quotes={quotes} />
+        {counters.length > 0 && <Counters items={counters} />}
+        {/* beside the wall from xl, under the counters below it */}
+        <Wire quotes={quotes} className="xl:col-start-2 xl:row-start-1" />
       </div>
     </Figure>
   );

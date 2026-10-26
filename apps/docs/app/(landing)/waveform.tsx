@@ -21,13 +21,18 @@ export function Waveform({ className }: { className?: string }) {
       let raf = 0;
       let lastY = window.scrollY;
       let lastTime = performance.now();
+      /** the latest scroll event; the frame after it reads the position */
+      let scrolledAt = lastTime;
+      // the size in CSS px, read when it changes and never in a frame; 0 while hidden (below lg)
+      let cssWidth = 0;
+      let cssHeight = 0;
       let color = '';
 
       /** the samples as steps of pixels in the current ink; returns the loudest */
       const paint = () => {
         const dpr = Math.min(window.devicePixelRatio, 2);
-        const width = canvas.clientWidth * dpr;
-        const height = canvas.clientHeight * dpr;
+        const width = cssWidth * dpr;
+        const height = cssHeight * dpr;
         if (canvas.width !== width || canvas.height !== height) {
           canvas.width = width;
           canvas.height = height;
@@ -52,6 +57,15 @@ export function Waveform({ className }: { className?: string }) {
 
       const draw = () => {
         raf = 0;
+        // read here, not in the scroll event: there the read forces a style and layout pass that
+        // the frame's own animations then dirty again
+        if (scrolledAt !== lastTime) {
+          const y = window.scrollY;
+          const speed = Math.abs(y - lastY) / Math.max(1, scrolledAt - lastTime);
+          lastY = y;
+          lastTime = scrolledAt;
+          energy = Math.min(1, energy + speed * 0.12);
+        }
         amplitude += (energy - amplitude) * 0.25;
         energy *= 0.88;
         phase += 0.3 + amplitude * 0.9;
@@ -61,13 +75,15 @@ export function Waveform({ className }: { className?: string }) {
       };
 
       const onScroll = () => {
-        const now = performance.now();
-        const speed = Math.abs(window.scrollY - lastY) / Math.max(1, now - lastTime);
-        lastY = window.scrollY;
-        lastTime = now;
-        energy = Math.min(1, energy + speed * 0.12);
+        if (cssWidth === 0) return;
+        scrolledAt = performance.now();
         if (raf === 0) raf = requestAnimationFrame(draw);
       };
+      const resize = new ResizeObserver(() => {
+        cssWidth = canvas.clientWidth;
+        cssHeight = canvas.clientHeight;
+        paint();
+      });
       // a new theme repaints the line in its ink at once
       const theme = new MutationObserver(() => {
         color = getComputedStyle(canvas).color;
@@ -76,9 +92,11 @@ export function Waveform({ className }: { className?: string }) {
 
       color = getComputedStyle(canvas).color;
       draw();
+      resize.observe(canvas);
       theme.observe(document.documentElement, { attributes: true, attributeFilter: ['class'] });
       if (!reduced) window.addEventListener('scroll', onScroll, { passive: true });
       return () => {
+        resize.disconnect();
         theme.disconnect();
         window.removeEventListener('scroll', onScroll);
         cancelAnimationFrame(raf);

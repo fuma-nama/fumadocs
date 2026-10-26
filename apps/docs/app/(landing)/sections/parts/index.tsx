@@ -53,17 +53,20 @@ export function Parts() {
   for (const option of OPTIONS.framework) snippets.core.push(highlight(option.lang, option.core));
 
   return (
-    <Figure n={2} id="parts" aria-label="Parts" status={STATUS}>
-      <div className="flex flex-col gap-8 px-(--lp-gutter) pt-8 pb-10">
-        <div className="grid gap-4 lg:grid-cols-[minmax(0,7fr)_minmax(0,5fr)] lg:items-end lg:gap-x-12">
-          <h2 className="text-4xl leading-[1.02] font-medium tracking-[-0.035em] text-balance md:text-6xl">
-            <Lead>{copy.parts.lead}</Lead> {copy.parts.title}
-          </h2>
-          <p className="max-w-[46ch] text-lg leading-relaxed text-pretty text-lp-ink-2">
-            {copy.parts.description}
-          </p>
-        </div>
+    <Figure id="parts" aria-label="Parts" status={STATUS}>
+      <div className="px-(--lp-gutter) pt-8 pb-10">
         <Stack
+          header={
+            // split like the stage's columns only when it spans the stage
+            <div className="grid gap-4 @min-[60rem]:grid-cols-[minmax(0,7fr)_minmax(0,5fr)] @min-[60rem]:items-end @min-[60rem]:gap-x-12">
+              <h2 className="text-4xl leading-[1.02] font-medium tracking-[-0.035em] text-balance md:text-6xl">
+                <Lead>{copy.parts.lead}</Lead> {copy.parts.title}
+              </h2>
+              <p className="max-w-[46ch] text-lg leading-relaxed text-pretty text-lp-ink-2">
+                {copy.parts.description}
+              </p>
+            </div>
+          }
           page={{ wide: <DocsPreview code={code} />, narrow: <MobilePreview code={code} /> }}
           headless={{ wide: <HeadlessPreview />, narrow: <MobileHeadlessPreview /> }}
           snippets={snippets}

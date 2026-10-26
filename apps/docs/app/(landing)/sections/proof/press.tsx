@@ -3,7 +3,6 @@ import { memo, type ReactNode, useEffect, useLayoutEffect, useRef, useState } fr
 import { useReducedMotion } from 'motion/react';
 import { cn } from '@/lib/cn';
 import type { ShowcaseObject } from '@/lib/showcases';
-import { pad } from '../../lib/clock';
 import { TICK } from '../../lib/motion';
 import { report } from '../../lib/status';
 import { useIsClient } from '../../lib/use-is-client';
@@ -132,7 +131,6 @@ export function Press({
   const live = isClient && !reduced;
   const grid = useRef<HTMLUListElement>(null);
   const head = useRef<HTMLDivElement>(null);
-  const carriage = useRef<HTMLSpanElement>(null);
   /** rest: the finished colour wall, before and after its one print run */
   const [phase, setPhase] = useState<'rest' | 'run' | 'done'>('rest');
   const [developed, setDeveloped] = useState(0);
@@ -218,29 +216,17 @@ export function Press({
   }, [printing]);
 
   // the run, one loop: the plate prints in (Dither), rests a tick, then the head steps down a row
-  // at a time while the row above it dithers into colour; its names roll in as it leaves the row,
-  // and the carriage readout crosses each row like a printer's
+  // at a time while the row above it dithers into colour; its names roll in as it leaves the row
   useEffect(() => {
     if (!running) return;
     const list = grid.current!;
     const rows = rowsOf(list);
     const count = rows.at(-1)?.to ?? 0;
     const perRow = HEAD / rows.length;
-    const travel = list.clientWidth - carriage.current!.offsetWidth;
-    const sweep: Keyframe[] = [];
-    for (let r = 0; r <= rows.length; r++) {
-      sweep.push({ transform: `translateX(${r % 2 === 0 ? 0 : travel}px)` });
-    }
-    const animations = [
-      head.current!.animate(
-        [
-          { transform: 'translateY(0)' },
-          { transform: `translateY(${rows.at(-1)?.bottom ?? 0}px)` },
-        ],
-        { delay: SWEEP, duration: HEAD, easing: `steps(${rows.length}, start)`, fill: 'both' },
-      ),
-      carriage.current!.animate(sweep, { delay: SWEEP, duration: HEAD, fill: 'both' }),
-    ];
+    const animation = head.current!.animate(
+      [{ transform: 'translateY(0)' }, { transform: `translateY(${rows.at(-1)?.bottom ?? 0}px)` }],
+      { delay: SWEEP, duration: HEAD, easing: `steps(${rows.length}, start)`, fill: 'both' },
+    );
     report(list, `developing ${count} sites`);
 
     const start = performance.now();
@@ -275,7 +261,7 @@ export function Press({
     return () => {
       cancelAnimationFrame(raf);
       clearTimeout(timer);
-      for (const animation of animations) animation.cancel();
+      animation.cancel();
     };
   }, [running]);
 
@@ -303,18 +289,6 @@ export function Press({
             <div ref={head} className="absolute inset-x-0 top-0">
               {/* across the wall, frame to frame: the sheet's gutters stay clear */}
               <div className="absolute -inset-x-px -top-px border-y border-t-lp-ink border-b-lp-paper" />
-              <span
-                ref={carriage}
-                className="absolute top-0 left-0 flex h-5 -translate-y-1/2 items-center gap-1.5 border border-lp-line-strong bg-lp-paper px-1.5 font-mono text-[11px] whitespace-nowrap text-lp-ink-2"
-              >
-                developing
-                <Roller
-                  value={`${pad(developed)}/${pad(total)}`}
-                  step={TICK / 8}
-                  stagger={TICK / 16}
-                  className="text-lp-orange"
-                />
-              </span>
             </div>
           </div>
         )}

@@ -1,7 +1,7 @@
 import type { ReactNode } from 'react';
 import { cn } from '@/lib/cn';
 import { DITHER_MASKS } from '../../lib/bayer';
-import { BOARD, HUB, hubPort, percent, SLOTS, WINDOW, windowPort } from './board';
+import { HUB, hubPort, percent, SLOTS, WINDOW, windowPort } from './board';
 import type { LayoutId } from './data';
 import { Hazard, LINE, type PartProps, Screw, Stamp } from './parts';
 
@@ -16,8 +16,6 @@ export interface Hardware {
   junction: ReactNode;
   /** the parts screwed to the board around the box */
   bench: ReactNode;
-  /** the stripboard on the strip under the desk */
-  stripboard: ReactNode;
 }
 
 /** a dither of ink over the box, `level` of 16 cells */
@@ -85,34 +83,6 @@ function Tape({ className, style }: PartProps) {
       style={style}
     >
       <Dither level={2} />
-    </span>
-  );
-}
-
-/** a sticker slapped on the board, one corner peeling */
-function Sticker({
-  children,
-  tilt,
-  className,
-  style,
-}: PartProps & { children: ReactNode; tilt: number }) {
-  return (
-    <span
-      className={cn(
-        'absolute border border-lp-ink-2 bg-lp-paper px-[0.6em] font-mono text-[clamp(8px,1.9cqw,11px)] leading-[1.5] whitespace-nowrap text-lp-ink-2 [clip-path:polygon(0_0,calc(100%-7px)_0,100%_7px,100%_100%,0_100%)]',
-        className,
-      )}
-      style={{ ...style, rotate: `${tilt}deg` }}
-    >
-      {children}
-      {/* the corner that came loose, folded over */}
-      <svg
-        aria-hidden
-        viewBox="0 0 7 7"
-        className="absolute -top-px -right-px size-[7px] overflow-visible"
-      >
-        <path d="M0 0L7 7H0z" className="fill-lp-paper stroke-lp-ink-2" style={LINE} />
-      </svg>
     </span>
   );
 }
@@ -238,14 +208,9 @@ function Crystal({ style }: Pick<PartProps, 'style'>) {
 }
 
 /** a safety pin, closed */
-function SafetyPin({ className, style }: PartProps) {
+function SafetyPin({ style }: Pick<PartProps, 'style'>) {
   return (
-    <svg
-      aria-hidden
-      viewBox="0 0 48 12"
-      className={cn('absolute overflow-visible', className)}
-      style={style}
-    >
+    <svg aria-hidden viewBox="0 0 48 12" className="absolute overflow-visible" style={style}>
       <path d="M8 3.5H40M8 8.5H38" className="stroke-lp-ink-2" style={LINE} />
       <circle cx={6} cy={6} r={3.5} className="fill-none stroke-lp-ink-2" style={LINE} />
       <path
@@ -254,105 +219,6 @@ function SafetyPin({ className, style }: PartProps) {
         style={LINE}
       />
     </svg>
-  );
-}
-
-/* the parts on the strip, in px of their own box */
-
-/** how much larger than their drawing the strip's parts show */
-const PART = 1.3;
-
-/** a DIP chip: notch, pins on both sides */
-function Chip({ pins }: { pins: number }) {
-  const w = pins * 8 + 4;
-  let legs = '';
-  for (let i = 0; i < pins; i++) legs += `M${6 + i * 8} 1v3M${6 + i * 8} 17v3`;
-  return (
-    <svg
-      aria-hidden
-      viewBox={`0 0 ${w} 21`}
-      width={w * PART}
-      height={21 * PART}
-      className="shrink-0 overflow-visible"
-    >
-      <path d={legs} className="stroke-lp-ink-2" style={LINE} />
-      <rect x="0.5" y="4.5" width={w - 1} height="12" className="fill-lp-ink-2" />
-      <path d="M0.5 8.5a2 2 0 0 1 0 4" className="fill-lp-paper" />
-      <circle cx="4.5" cy="13.2" r="0.9" className="fill-lp-paper" />
-    </svg>
-  );
-}
-
-/** a resistor: body with bands, its leads to the pads */
-function Resistor() {
-  return (
-    <svg
-      aria-hidden
-      viewBox="0 0 34 9"
-      width={34 * PART}
-      height={9 * PART}
-      className="shrink-0 overflow-visible"
-    >
-      <path d="M0 4.5h8M26 4.5h8" className="stroke-lp-ink-2" style={LINE} />
-      <rect
-        x="8.5"
-        y="1.5"
-        width="17"
-        height="6"
-        rx="2"
-        className="fill-lp-paper stroke-lp-ink-2"
-        style={LINE}
-      />
-      <path d="M12 1.5v6M15 1.5v6M21 1.5v6" className="stroke-lp-ink-2" style={LINE} />
-    </svg>
-  );
-}
-
-/** an electrolytic capacitor from the side: the stripe of its minus lead dithered */
-function Capacitor() {
-  return (
-    <span aria-hidden className="relative block h-6 w-3.5 shrink-0">
-      <span className="absolute inset-x-0 top-0 bottom-1 overflow-hidden rounded-t-[4px] border border-lp-ink-2 bg-lp-paper">
-        <span className="absolute inset-x-0 top-[3px] h-px bg-lp-ink-2" />
-        <Dither level={8} className="right-auto w-1" />
-      </span>
-      <span className="absolute bottom-0 left-1 h-1 w-px bg-lp-ink-2" />
-      <span className="absolute right-1 bottom-0 h-1 w-px bg-lp-ink-2" />
-    </span>
-  );
-}
-
-/** a diode: a body with its band */
-function Diode() {
-  return (
-    <svg
-      aria-hidden
-      viewBox="0 0 26 7"
-      width={26 * PART}
-      height={7 * PART}
-      className="shrink-0 overflow-visible"
-    >
-      <path d="M0 3.5h6M20 3.5h6" className="stroke-lp-ink-2" style={LINE} />
-      <rect
-        x="6.5"
-        y="0.5"
-        width="13"
-        height="6"
-        className="fill-lp-paper stroke-lp-ink-2"
-        style={LINE}
-      />
-      <rect x="15" y="0.5" width="2.5" height="6" className="fill-lp-ink-2" />
-    </svg>
-  );
-}
-
-/** a blob of solder on a pad */
-function Solder({ className }: { className?: string }) {
-  return (
-    <span
-      aria-hidden
-      className={cn('block size-1.5 shrink-0 rounded-[45%_55%_50%_50%] bg-lp-ink-2', className)}
-    />
   );
 }
 
@@ -453,13 +319,8 @@ const CHASSIS: Record<LayoutId, ReactNode> = {
   ),
 };
 
-/** a place on the board, in its units */
-function place(x: number, y: number) {
-  return { left: `${(x / BOARD.w) * 100}%`, top: `${(y / BOARD.h) * 100}%` };
-}
-
-/** the desk's fixed hardware, `version` of `fumadocs-ui` on its sticker */
-export function createHardware(version: string): Hardware {
+/** the desk's fixed hardware */
+export function createHardware(): Hardware {
   const plates = {} as Record<LayoutId, ReactNode>;
   const jacks = [];
   for (const slot of SLOTS) {
@@ -496,61 +357,11 @@ export function createHardware(version: string): Hardware {
     // move, under the windows and the cables, in the mid-grey ink; a small desk keeps the fewest
     bench: (
       <div aria-hidden className="pointer-events-none absolute inset-0">
-        <Sticker tilt={-4} className="@max-[300px]:hidden" style={place(32, 408)}>
-          MIT
-        </Sticker>
-        <SafetyPin
-          className="@max-[300px]:hidden"
-          style={{ ...percent(14, 406, 60, 15), rotate: '-16deg' }}
-        />
-        <Sticker tilt={5} className="@max-[430px]:hidden" style={place(110, 414)}>
-          RSC
-        </Sticker>
+        <SafetyPin style={{ ...percent(14, 406, 60, 15), rotate: '-16deg' }} />
         <Trimmer style={percent(792, 344, 30, 34)} />
         <Crystal style={percent(830, 352, 44, 22)} />
         <Transformer style={percent(890, 344, 82, 60)} />
         <Fuse style={percent(792, 388, 84, 21)} />
-        <Sticker
-          tilt={2}
-          className="text-[clamp(8px,1.6cqw,10px)] @max-[470px]:hidden"
-          style={place(792, 416)}
-        >
-          fumadocs-ui {version}
-        </Sticker>
-      </div>
-    ),
-    // the parts drop out as the strip narrows (its content box less the readouts' 220px), the
-    // dark chips before the resistor; a strip too narrow for it goes too
-    stripboard: (
-      <div
-        aria-hidden
-        className="relative flex h-10 min-w-0 flex-1 items-center justify-center gap-2.5 overflow-hidden bg-[radial-gradient(var(--lp-line-strong)_0.6px,transparent_0.6px)] bg-size-[6px_6px] px-2 @max-[280px]:hidden"
-      >
-        <span className="absolute inset-x-0 top-1/2 h-px bg-lp-line-strong" />
-        <span className="relative flex items-center gap-1">
-          <Solder className="@max-[300px]:hidden" />
-          <Resistor />
-          <Solder className="@max-[300px]:hidden" />
-        </span>
-        <span className="relative @max-[357px]:hidden">
-          <Chip pins={4} />
-        </span>
-        <span className="relative flex items-end gap-1.5 @max-[401px]:hidden">
-          <Capacitor />
-          <Capacitor />
-        </span>
-        <span className="relative flex items-center gap-1 @max-[465px]:hidden">
-          <Solder />
-          <Diode />
-          <Solder />
-        </span>
-        <span className="relative @max-[553px]:hidden">
-          <Chip pins={7} />
-        </span>
-        <span className="relative flex items-center gap-1 @max-[617px]:hidden">
-          <Resistor />
-          <Solder />
-        </span>
       </div>
     ),
   };

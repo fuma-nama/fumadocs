@@ -31,9 +31,6 @@ export const THEME_NAMES: Record<ThemeId, string> = {
   shadcn: 'shadcn/ui',
 };
 
-/** under the dial: the one preset without colours of its own */
-export const SHADCN_NOTE = "shadcn/ui takes your app's theme; here, this page's.";
-
 export type LayoutId = 'docs' | 'notebook' | 'flux' | 'glass' | 'spacious' | 'home';
 
 export const TABS = ['layouts', 'story', 'openapi', 'graphql', 'asyncapi'] as const;

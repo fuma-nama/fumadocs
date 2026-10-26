@@ -1,6 +1,9 @@
 'use client';
-import { useEffect } from 'react';
+import { type ReactNode, useEffect } from 'react';
+import NextLink from 'next/link';
 import { useRouter } from 'next/navigation';
+import type { Framework } from 'fumadocs-core/framework';
+import { NextProvider } from 'fumadocs-core/framework/next';
 
 /** the layouts' code: loaded ahead, a story navigated to renders without waiting for it */
 const PRELOAD: Record<string, () => Promise<unknown>> = {
@@ -26,8 +29,17 @@ function preload() {
     if (load) void load().finally(preload);
     else preload();
   };
-  if (window.requestIdleCallback) window.requestIdleCallback(run, { timeout: 3000 });
+  if (window.requestIdleCallback) window.requestIdleCallback(run);
   else window.setTimeout(run, 300);
+}
+
+/** the story's own links never prefetch: the frame shares its parent's main thread */
+const Link: Framework['Link'] = ({ href, ...props }) => (
+  <NextLink {...props} href={href ?? '#'} prefetch={false} />
+);
+
+export function StoryLinks({ children }: { children: ReactNode }) {
+  return <NextProvider Link={Link}>{children}</NextProvider>;
 }
 
 /**

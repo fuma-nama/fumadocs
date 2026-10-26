@@ -19,13 +19,12 @@ export interface PreviewProps {
  * The template's first page in the docs layout, `content/docs/index.mdx` as it is. Title,
  * description, cards and banner are the real components; the chrome mirrors the markup of
  * `fumadocs-ui/layouts/docs`, its links plain text: on a phone the header with search and the
- * sidebar's trigger, zoomed out so the page and the editor fit one screen; from 768px the sidebar,
- * and the table of contents once the page is wide. Your edits apply as the classes they produce, `cn`
- * merges them the same way.
+ * sidebar's trigger; from 768px the sidebar, and the table of contents once the page is wide. Your
+ * edits apply as the classes they produce, `cn` merges them the same way.
  */
 export function Preview({ title, banner }: PreviewProps) {
   return (
-    <div className="@container isolate flex h-full flex-col bg-fd-background text-[13px] text-fd-foreground max-sm:[zoom:0.78]">
+    <div className="@container isolate flex h-full flex-col bg-fd-background text-[13px] text-fd-foreground">
       {banner !== undefined && (
         // static: the page doesn't scroll inside the preview
         <Banner changeLayout={false} className={cn('static z-0', banner)}>

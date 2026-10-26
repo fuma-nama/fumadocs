@@ -13,7 +13,6 @@ function mount(pin: HTMLDivElement | null) {
       canvas: pin.querySelector('canvas')!,
       slot: find('slot'),
       cta: find('cta'),
-      readout: find('readout'),
     }),
   );
 }
@@ -33,18 +32,6 @@ export function Stage({ children }: { children: ReactNode }) {
             {children}
           </div>
         </div>
-        <p
-          data-readout
-          aria-hidden
-          className="absolute right-(--lp-gutter) bottom-4 flex gap-3 border border-lp-line-strong bg-lp-paper px-3 py-1 font-mono text-xs text-lp-ink-2 max-md:hidden"
-        >
-          <span>
-            yaw <span data-value className="text-lp-orange" />
-          </span>
-          <span>
-            dist <span data-value className="text-lp-orange" />
-          </span>
-        </p>
       </div>
     </div>
   );

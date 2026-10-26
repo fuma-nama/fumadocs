@@ -1,3 +1,4 @@
+import { idle } from '../../lib/later';
 import { TICK } from '../../lib/motion';
 import { ditherKeyframes } from '../../ui/dither';
 import { FRAME_W, type LayoutId, type ThemeId } from './data';
@@ -146,9 +147,12 @@ export function createScreen(
       frame.height = String(height);
     }
   });
+  // the frames load pages of this site on this main thread: near, once the reader pauses
+  let pending: (() => void) | undefined;
   const near = new IntersectionObserver(
     ([entry]) => {
-      if (entry.isIntersecting) create();
+      pending?.();
+      pending = entry.isIntersecting && !frames ? idle(create) : undefined;
     },
     { rootMargin: '100% 0px' },
   );
@@ -167,6 +171,7 @@ export function createScreen(
       sync();
     },
     destroy() {
+      pending?.();
       resize.disconnect();
       near.disconnect();
       mode.disconnect();

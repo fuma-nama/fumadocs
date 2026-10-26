@@ -153,36 +153,6 @@ export function Crossfade({
   return <div className="relative grid">{out}</div>;
 }
 
-interface FileInfo {
-  option: Option;
-  code: string;
-}
-
-function rows(file: FileInfo) {
-  return file.code.split('\n').length + (file.option.command ? 2 : 0);
-}
-
-/** the files that can be the tallest: the most lines when nothing wraps, the most characters when it all does */
-const TALLEST: FileInfo[] = (() => {
-  let lines: FileInfo | undefined;
-  let chars: FileInfo | undefined;
-  for (const layer of SWAPS) {
-    const options = OPTIONS[layer];
-    for (let i = 0; i < options.length; i++) {
-      const codes =
-        layer === 'framework'
-          ? [OPTIONS.framework[i].code, OPTIONS.framework[i].core]
-          : [options[i].code];
-      for (const code of codes) {
-        const file = { option: options[i], code };
-        if (!lines || rows(file) > rows(lines)) lines = file;
-        if (!chars || code.length > chars.code.length) chars = file;
-      }
-    }
-  }
-  return lines === chars ? [lines!] : [lines!, chars!];
-})();
-
 /** an option's file: the command that wrote it, if any, and its code */
 function File({ option, children }: { option: Option; children: ReactNode }) {
   return (
@@ -198,39 +168,26 @@ function File({ option, children }: { option: Option; children: ReactNode }) {
   );
 }
 
-/** the code block's own metrics: its viewport's padding and its lines' */
-const metrics =
-  'py-3 ps-4 pe-8 font-mono text-[12px]/[16px] wrap-anywhere whitespace-pre-wrap max-sm:text-[11px]/[15px]';
-
 /**
- * The real setup of the option in use of the layer that landed last, in a window that fits it.
- * Beside the stack, plain copies of the tallest files hold the room it may grow into as they wrap
- * at its width, so a swap never moves what is after it; under the stack, only what follows the
- * window moves, with the pick. On a swap the window eases to its new height while the new file
- * dithers in.
+ * The real setup of the option in use of the layer that landed last, in a window that fits it,
+ * every file of them whole: on a swap the window eases to its new height while the new file
+ * dithers in. Where the whole stage pins at a MacBook Air's height, the code is a size smaller so
+ * the tallest file still fits beside the stack.
  */
 export const CodeWindow = memo(function CodeWindow({
+  className,
   layer,
   option,
   headless,
   snippets,
 }: {
+  className?: string;
   layer: SwapLayer;
   option: number;
   headless: boolean;
   snippets: Snippets;
 }) {
   const info = OPTIONS[layer][option];
-  const sizers: ReactNode[] = [];
-  for (const file of TALLEST) {
-    sizers.push(
-      <Window key={file.code} aria-hidden className="invisible max-lg:hidden">
-        <File option={file.option}>
-          <pre className={metrics}>{file.code}</pre>
-        </File>
-      </Window>,
-    );
-  }
 
   const shown = `${layer}:${option}:${layer === 'framework' && headless ? 'core' : 'ui'}`;
   const ref = useRef<HTMLDivElement>(null);
@@ -251,8 +208,7 @@ export const CodeWindow = memo(function CodeWindow({
   }, [shown]);
 
   return (
-    <div className="grid items-start *:col-start-1 *:row-start-1">
-      {sizers}
+    <div className={cn('@container', className)}>
       <Window
         ref={ref}
         title={
@@ -262,7 +218,7 @@ export const CodeWindow = memo(function CodeWindow({
             <span className="text-lp-ink-2">{info.file}</span>
           </span>
         }
-        className="overflow-hidden [&_pre]:w-full [&_pre]:wrap-anywhere [&_pre]:whitespace-pre-wrap max-sm:[&_pre]:text-[11px]/[15px]"
+        className="overflow-hidden [&_pre]:w-full [&_pre]:wrap-anywhere [&_pre]:whitespace-pre-wrap max-sm:[&_pre]:text-[11px]/[15px] [@media(min-width:1348px)_and_(min-height:884px)_and_(max-height:947px)]:[&_pre]:text-[11px]/[15px]"
       >
         <Crossfade
           fit

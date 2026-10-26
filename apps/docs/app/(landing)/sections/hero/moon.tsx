@@ -5,7 +5,6 @@ import {
   type MotionValue,
   useMotionValue,
   useReducedMotion,
-  useScroll,
   useSpring,
 } from 'motion/react';
 import { createShaderCanvas } from '../../lib/gl';
@@ -19,7 +18,6 @@ const ease = cubicBezier(settle[0], settle[1], settle[2], settle[3]);
 const MOSAIC = [64, 32, 16, 8, 4, 3];
 const RISE_MS = 1100;
 const SPIN = (Math.PI * 2) / 240;
-const GLYPHS = '0123456789<>/{}[]=+*#';
 
 /** the icon's light: from the bottom-right, ~35° above the sheet (sun position in moon radii) */
 const REST = { x: 0.86, y: 0.86 };
@@ -61,7 +59,6 @@ const ROTATION_UNIFORMS = ['uPrismRotation[0]', 'uPrismRotation[1]', 'uPrismRota
 
 export function MoonStage() {
   const reduced = useReducedMotion();
-  const { scrollY } = useScroll();
   const sunX = useMotionValue(REST.x);
   const sunY = useMotionValue(REST.y);
   const springX = useSpring(sunX, { stiffness: 38, damping: 13 });
@@ -70,9 +67,9 @@ export function MoonStage() {
   const ref = useCallback(
     (stage: HTMLDivElement | null) => {
       if (!stage) return;
-      return mount(stage, { reduced: reduced === true, scrollY, sunX, sunY, springX, springY });
+      return mount(stage, { reduced: reduced === true, sunX, sunY, springX, springY });
     },
-    [reduced, scrollY, sunX, sunY, springX, springY],
+    [reduced, sunX, sunY, springX, springY],
   );
 
   return (
@@ -90,34 +87,22 @@ export function MoonStage() {
           ))}
         </div>
       </div>
-      <p className="invisible absolute right-(--lp-gutter) bottom-[calc(var(--h)-var(--cut)+var(--d)+24px)] z-6 border border-lp-line-strong bg-lp-paper px-2 py-1 font-mono text-xs whitespace-pre text-lp-ink-2">
-        <span>light </span>
-        <span className="text-lp-orange">315°</span>
-        <span> · elevation </span>
-        <span className="text-lp-orange">35°</span>
-      </p>
     </div>
   );
 }
 
 interface MountOptions {
   reduced: boolean;
-  scrollY: MotionValue<number>;
   sunX: MotionValue<number>;
   sunY: MotionValue<number>;
   springX: MotionValue<number>;
   springY: MotionValue<number>;
 }
 
-function mount(
-  stage: HTMLDivElement,
-  { reduced, scrollY, sunX, sunY, springX, springY }: MountOptions,
-) {
+function mount(stage: HTMLDivElement, { reduced, sunX, sunY, springX, springY }: MountOptions) {
   const clip = stage.firstElementChild as HTMLElement;
   const [scene, anchor] = clip.children as unknown as [HTMLElement, HTMLElement];
   const labels = anchor.children as HTMLCollectionOf<HTMLElement>;
-  const readout = stage.lastElementChild as HTMLElement;
-  const texts = readout.children;
   const figure = stage.closest<HTMLElement>('[data-figure]');
   const root = document.documentElement;
   const hover = matchMedia('(hover: hover) and (pointer: fine)');
@@ -132,7 +117,6 @@ function mount(
   // the moon starts to set once the horizon reaches the bottom of the viewport
   let exitStart = 0;
   let span = 1;
-  let readoutAt = 0;
   let pointerSeen = false;
   let raf = 0;
   // uniform values written every frame, reused
@@ -202,7 +186,24 @@ function mount(
   }
   window.addEventListener('pointermove', onPointerMove, { passive: true });
   root.addEventListener('pointerleave', onPointerLeave);
-  const unsubscribeScroll = scrollY.on('change', place);
+
+  // the moon sets as the page scrolls, placed once a frame while the hero is on screen: the
+  // canvas's own frames stop once the moon has set behind the horizon
+  let placing = 0;
+  function onScroll() {
+    if (placing !== 0) return;
+    placing = requestAnimationFrame(() => {
+      placing = 0;
+      place();
+    });
+  }
+  const view = new IntersectionObserver(([entry]) => {
+    if (entry.isIntersecting) {
+      window.addEventListener('scroll', onScroll, { passive: true });
+      place();
+    } else window.removeEventListener('scroll', onScroll);
+  });
+  if (!reduced) view.observe(stage);
 
   let readyTimer = 0;
   if (start !== null && figure) {
@@ -224,7 +225,7 @@ function mount(
 
   /** px scrolled since the moon started to set */
   function exitScroll() {
-    return reduced ? 0 : Math.max(0, scrollY.get() - exitStart);
+    return reduced ? 0 : Math.max(0, window.scrollY - exitStart);
   }
 
   function round(v: number) {
@@ -340,35 +341,6 @@ function mount(
       chip.style.background = state === 1 ? 'var(--lp-ink)' : '';
       chip.style.color = state === 1 ? 'var(--lp-paper)' : '';
     }
-
-    // Scramble: the readout resolves on its tick, then quotes the light at most ~12 times a second
-    const now = performance.now();
-    const scrambleAt = BEAT_AT.readout * TICK;
-    if (t < scrambleAt || now - readoutAt < 80) return;
-    if (readoutAt === 0) readout.style.visibility = 'visible';
-    readoutAt = now;
-    const values = [
-      'light ',
-      `${(Math.round((azimuth * 180) / Math.PI) + 360) % 360}°`,
-      ' · elevation ',
-      `${Math.round(elevation)}°`,
-    ];
-    const resolved = (t - scrambleAt) / 24;
-    let index = 0;
-    for (let i = 0; i < values.length; i++) {
-      let out = values[i];
-      if (resolved < 40) {
-        out = '';
-        for (const char of values[i]) {
-          out +=
-            index++ < resolved || char === ' '
-              ? char
-              : GLYPHS[Math.floor(Math.random() * GLYPHS.length)];
-        }
-      }
-      const node = texts[i].firstChild!;
-      if (node.nodeValue !== out) node.nodeValue = out;
-    }
   }
 
   return () => {
@@ -376,7 +348,9 @@ function mount(
     cancelAnimationFrame(raf);
     themeObserver.disconnect();
     resize.disconnect();
-    unsubscribeScroll();
+    view.disconnect();
+    window.removeEventListener('scroll', onScroll);
+    cancelAnimationFrame(placing);
     clearTimeout(readyTimer);
     window.removeEventListener('pointermove', onPointerMove);
     root.removeEventListener('pointerleave', onPointerLeave);

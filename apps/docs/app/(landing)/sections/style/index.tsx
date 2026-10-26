@@ -1,9 +1,7 @@
-import pkg from 'fumadocs-ui/package.json';
 import { copy } from '../../content';
 import { Figure, FigureHeader } from '../../ui/figure';
 import { createPose, hangRopes, pose, SLOTS } from './board';
 import { createHardware } from './hardware';
-import { tensionOf } from './rope';
 import { THEMES, type ThemeId } from './data';
 import { loadInks, wire, type Wiring } from './presets';
 import { Studio } from './studio';
@@ -26,10 +24,9 @@ export async function Style() {
   const first = SLOTS.findIndex((slot) => slot.id === 'docs');
   const ropes = hangRopes(pose(first, createPose()));
   const hung = { x: Array.from(ropes.x), y: Array.from(ropes.y) };
-  const tension = tensionOf(ropes, first);
 
   return (
-    <Figure n={4} id="style" aria-label="Style" status="layout: docs" className="pb-16">
+    <Figure id="style" aria-label="Style" status="layout: docs" className="pb-16">
       <FigureHeader
         lead={copy.style.lead}
         title={copy.style.title}
@@ -41,8 +38,7 @@ export async function Style() {
         names={names}
         wirings={wirings}
         hung={hung}
-        tension={tension}
-        hardware={createHardware(pkg.version)}
+        hardware={createHardware()}
       />
     </Figure>
   );

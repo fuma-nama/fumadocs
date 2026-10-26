@@ -11,13 +11,14 @@ const LINKS =
  * seam and two in each plate; in the 2x2 bed, every other one */
 const BRACKETS = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11];
 
-/** where the carriage stops for each plate, about: just inside its right edge, on the 4-plate bed
- * and the 2x2 one. The engine sets each to the stop it computes, which allows for the camera */
+/** where the carriage stops for each plate, about: by the seam before or after it, on the 4-plate
+ * bed and the 2x2 one, the boom's pivot off the line her pencil runs down. The engine sets each to
+ * the stop it computes */
 const STOPS = [
-  'md:left-[calc(50%-28px)] xl:left-[calc(25%-28px)]',
-  'md:left-[calc(100%-28px)] xl:left-[calc(50%-28px)]',
-  'md:left-[calc(50%-28px)] xl:left-[calc(75%-28px)]',
-  'md:left-[calc(100%-28px)] xl:left-[calc(100%-28px)]',
+  'md:left-[calc(50%-14px)] xl:left-[calc(25%-16px)]',
+  'md:left-[calc(50%-23px)] xl:left-[calc(25%-27px)]',
+  'md:left-[calc(50%-66px)] xl:left-[calc(50%-27px)]',
+  'md:left-[calc(50%-15px)] xl:left-[calc(75%-27px)]',
 ];
 
 /** a hex bolt head, its centre at (x, y) */
@@ -140,27 +141,29 @@ export function RailBed() {
   );
 }
 
-/** the rail up a phone's column, bolted to the window's frame by brackets to its left */
+/** the rail up a phone's column, down its middle, bolted to the window's frame by brackets to its
+ * left */
 export function RailColumn() {
   return (
     <div aria-hidden className="pointer-events-none absolute inset-0 overflow-hidden">
       <svg
-        className="absolute top-[24px] left-0 h-[calc(100%-48px)] w-[14px]"
+        className="absolute top-[24px] left-0 h-[calc(100%-48px)] w-[26px]"
         shapeRendering="crispEdges"
       >
         <defs>
-          <pattern id="write-bracket-y" width="14" height="96" patternUnits="userSpaceOnUse">
-            <path d="M15 42.5H6.5V36.5H0.5V59.5H6.5V53.5H15" className={PART} />
+          <pattern id="write-bracket-y" width="26" height="96" patternUnits="userSpaceOnUse">
+            <path d="M27 42.5H6.5V36.5H0.5V59.5H6.5V53.5H27" className={PART} />
             <Bolt x={3.5} y={48} />
+            <Bolt x={16} y={48} />
           </pattern>
         </defs>
-        <rect width="14" height="100%" fill="url(#write-bracket-y)" />
+        <rect width="26" height="100%" fill="url(#write-bracket-y)" />
       </svg>
-      <span className="absolute inset-y-[6px] left-[14px] w-[20px] border border-lp-ink-2 bg-lp-paper" />
-      <span className="absolute inset-y-[12px] left-[18px] w-[3px] bg-[repeating-linear-gradient(to_bottom,var(--lp-ink-2)_0_1px,transparent_1px_3px)]" />
-      <span className="absolute inset-y-[12px] left-[21px] w-[6px] bg-[linear-gradient(to_right,var(--lp-ink-2)_2px,var(--lp-paper)_2px_4px,var(--lp-ink-2)_4px)]" />
-      <span className="absolute top-[2px] left-[16px] h-[8px] w-[16px] border border-lp-ink-2 bg-[repeating-linear-gradient(45deg,var(--lp-ink-2)_0_2px,var(--lp-paper)_2px_4px)]" />
-      <span className="absolute bottom-[2px] left-[16px] h-[8px] w-[16px] border border-lp-ink-2 bg-[repeating-linear-gradient(-45deg,var(--lp-ink-2)_0_2px,var(--lp-paper)_2px_4px)]" />
+      <span className="absolute inset-y-[6px] left-[26px] w-[20px] border border-lp-ink-2 bg-lp-paper" />
+      <span className="absolute inset-y-[12px] left-[30px] w-[3px] bg-[repeating-linear-gradient(to_bottom,var(--lp-ink-2)_0_1px,transparent_1px_3px)]" />
+      <span className="absolute inset-y-[12px] left-[33px] w-[6px] bg-[linear-gradient(to_right,var(--lp-ink-2)_2px,var(--lp-paper)_2px_4px,var(--lp-ink-2)_4px)]" />
+      <span className="absolute top-[2px] left-[28px] h-[8px] w-[16px] border border-lp-ink-2 bg-[repeating-linear-gradient(45deg,var(--lp-ink-2)_0_2px,var(--lp-paper)_2px_4px)]" />
+      <span className="absolute bottom-[2px] left-[28px] h-[8px] w-[16px] border border-lp-ink-2 bg-[repeating-linear-gradient(-45deg,var(--lp-ink-2)_0_2px,var(--lp-paper)_2px_4px)]" />
     </div>
   );
 }

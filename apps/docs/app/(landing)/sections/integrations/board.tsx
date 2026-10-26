@@ -1,6 +1,7 @@
 'use client';
 import {
   type CSSProperties,
+  type PointerEvent,
   type ReactNode,
   useCallback,
   useEffect,
@@ -8,6 +9,7 @@ import {
   useState,
 } from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { Check, Clipboard } from 'lucide-react';
 import { useReducedMotion } from 'motion/react';
 import { useSearchContext } from 'fumadocs-ui/contexts/search';
@@ -26,6 +28,9 @@ export interface Module extends ModuleInfo {
 }
 
 const LOADED = '12 integrations loaded';
+
+/** the docs pages already prefetched, each once */
+const prefetched = new Set<string>();
 
 /** the board's columns and the delay before its first cell, read from its CSS */
 interface Layout {
@@ -68,6 +73,17 @@ export function Board({
   const [hovered, setHovered] = useState<number | null>(null);
   const shown = hovered ?? (scanning ? active : null);
   const boardElement = useRef<HTMLDivElement | null>(null);
+  const router = useRouter();
+
+  // a link's page is prefetched once a mouse moves onto it, never as it scrolls past: that parsed
+  // every page's payload mid-scroll, and content scrolling under a still pointer doesn't move it
+  function prefetch(event: PointerEvent) {
+    if (event.pointerType !== 'mouse' || (event.movementX === 0 && event.movementY === 0)) return;
+    const href = (event.target as Element).closest('a')?.getAttribute('href');
+    if (!href?.startsWith('/') || prefetched.has(href)) return;
+    prefetched.add(href);
+    router.prefetch(href);
+  }
 
   const rootRef = useCallback((root: HTMLDivElement | null) => {
     if (!root) return;
@@ -211,6 +227,7 @@ export function Board({
     <div
       ref={rootRef}
       data-run={visible === null ? undefined : visible ? 'on' : 'off'}
+      onPointerMove={prefetch}
       className="flex flex-col"
     >
       <div className="flex flex-col gap-10 p-(--lp-gutter) pt-16 pb-12 lg:flex-row lg:items-end lg:justify-between">
@@ -234,10 +251,10 @@ function Install({ command }: { command: string }) {
   const [copied, onCopy] = useCopyButton(() => navigator.clipboard.writeText(command));
 
   return (
-    <Window title="install" className="w-full shrink-0 lg:w-[420px]">
-      {/* the longest command fits a 320px screen without the prompt, a size down */}
-      <div className="flex items-center gap-3 px-3 py-2.5 font-mono text-[13px] max-[344px]:text-[11.5px]">
-        <span aria-hidden className="text-lp-ink-2 max-[364px]:hidden">
+    // below 1024 each cell shows its own command: the window would sit screens above most cells
+    <Window title="install" className="w-[420px] shrink-0 max-lg:hidden">
+      <div className="flex items-center gap-3 px-3 py-2.5 font-mono text-[13px]">
+        <span aria-hidden className="text-lp-ink-2">
           $
         </span>
         <Roller value={command} step={24} stagger={6} className="min-w-0 flex-1 overflow-clip" />
@@ -279,17 +296,14 @@ function Cell({ module, index, on, boot, active, onEnter, onLeave }: CellProps) 
     onFocus: onEnter,
     onBlur: onLeave,
   };
+  const readout = (text: string) =>
+    boot === undefined ? text : <Scramble text={text} delay={boot} />;
   const content = (
     <>
       {/* as wide as the mechanism, so the hotkeys end on its right edge */}
       <span className="flex max-w-(--bt-stage) items-start justify-between gap-4">
-        <span className="flex flex-col items-start gap-1.5">
-          <span className="bt-num -ms-[3px] px-[3px] font-pixel text-[28px] leading-none text-lp-orange">
-            {module.title}
-          </span>
-          <span className="font-mono text-xs text-lp-ink-2 group-hover:text-lp-paper/60 group-focus-visible:text-lp-paper/60">
-            {boot === undefined ? module.pkg : <Scramble text={module.pkg} delay={boot} />}
-          </span>
+        <span className="bt-num -ms-[3px] px-[3px] font-pixel text-[28px] leading-none text-lp-orange">
+          {module.title}
         </span>
         {!module.href && (
           <span className="flex gap-1 font-pixel text-xs max-md:hidden">
@@ -301,6 +315,11 @@ function Cell({ module, index, on, boot, active, onEnter, onLeave }: CellProps) 
           </span>
         )}
       </span>
+      {/* the command takes the package's place where the install window is hidden */}
+      <span className="mt-1.5 font-mono text-xs text-lp-ink-2 group-hover:text-lp-paper/60 group-focus-visible:text-lp-paper/60">
+        <span className="lg:hidden">{readout(module.install)}</span>
+        <span className="max-lg:hidden">{readout(module.pkg)}</span>
+      </span>
       <span className="mt-4 block">{module.mechanism}</span>
       <span className="mt-auto pt-4 text-sm leading-snug text-pretty text-lp-ink-2 group-hover:text-lp-paper/60 group-focus-visible:text-lp-paper/60">
         {module.line}
@@ -310,7 +329,7 @@ function Cell({ module, index, on, boot, active, onEnter, onLeave }: CellProps) 
 
   if (module.href) {
     return (
-      <Link href={module.href} {...props}>
+      <Link href={module.href} prefetch={false} {...props}>
         {content}
       </Link>
     );

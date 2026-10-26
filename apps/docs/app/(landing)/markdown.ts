@@ -26,7 +26,7 @@ function fenceFor(lines: string[]): string {
   return '`'.repeat(longest + 1);
 }
 
-/** the landing page as Markdown, served at `/index.md` and to clients that prefer Markdown */
+/** the landing page as Markdown, in the page's order, served at `/index.md` and to clients that prefer Markdown */
 export async function landingMarkdown(): Promise<string> {
   const [stars, downloads, contributors] = await Promise.all([
     getStars(),
@@ -50,27 +50,6 @@ export async function landingMarkdown(): Promise<string> {
     `- For LLMs: [llms.txt](${url('/llms.txt')}) indexes the docs, [llms-full.txt](${url('/llms-full.txt')}) has all of them; add \`.md\` to a docs URL for its Markdown.`,
   );
 
-  out.push('', `## ${heading(copy.parts)}`, '', copy.parts.description, '');
-  for (const layer of LAYERS) {
-    const names: string[] = [];
-    for (const option of layer === 'core' ? [CORE] : OPTIONS[layer])
-      names.push(`${option.title} (\`${option.name}\`)`);
-    out.push(`- ${layer}${layer === 'core' ? ' (kept)' : ''}: ${names.join(', ')}`);
-  }
-
-  const source = fileLines(blocks);
-  const fence = fenceFor(source);
-  out.push(
-    '',
-    `## ${heading(copy.write)}`,
-    '',
-    copy.write.description,
-    '',
-    `${fence}mdx title="quick-start.mdx"`,
-    ...source,
-    fence,
-  );
-
   const layouts: string[] = [];
   for (const layout of LAYOUTS) layouts.push(layout.name);
   const themes: string[] = [];
@@ -86,6 +65,37 @@ export async function landingMarkdown(): Promise<string> {
     );
   }
 
+  const source = fileLines(blocks);
+  const fence = fenceFor(source);
+  out.push(
+    '',
+    `## ${heading(copy.write)}`,
+    '',
+    copy.write.description,
+    '',
+    `${fence}mdx title="quick-start.mdx"`,
+    ...source,
+    fence,
+  );
+
+  out.push('', `## ${heading(copy.parts)}`, '', copy.parts.description, '');
+  for (const layer of LAYERS) {
+    const names: string[] = [];
+    for (const option of layer === 'core' ? [CORE] : OPTIONS[layer])
+      names.push(`${option.title} (\`${option.name}\`)`);
+    out.push(`- ${layer}${layer === 'core' ? ' (kept)' : ''}: ${names.join(', ')}`);
+  }
+
+  out.push('', `## ${heading(copy.integrations)}`, '', copy.integrations.description, '');
+  for (const item of modules) {
+    out.push(
+      `- [${item.title}](${url(item.href ?? '/docs/search')}) (\`${item.pkg}\`): ${item.line}`,
+    );
+  }
+  const extras: string[] = [];
+  for (const item of more) extras.push(`[${item.name}](${url(item.href)})`);
+  out.push(`- More: ${extras.join(', ')}`);
+
   out.push(
     '',
     `## ${heading(copy.cli)}`,
@@ -97,16 +107,6 @@ export async function landingMarkdown(): Promise<string> {
     `- \`npx @fumadocs/cli feature <name>\` sets up a feature, such as \`ai\` or \`search\`, and wires it into your app.`,
     `- CLI guide: ${url('/docs/cli')}`,
   );
-
-  out.push('', `## ${heading(copy.integrations)}`, '', copy.integrations.description, '');
-  for (const item of modules) {
-    out.push(
-      `- [${item.title}](${url(item.href ?? '/docs/search')}) (\`${item.pkg}\`): ${item.line}`,
-    );
-  }
-  const extras: string[] = [];
-  for (const item of more) extras.push(`[${item.name}](${url(item.href)})`);
-  out.push(`- More: ${extras.join(', ')}`);
 
   const counts: string[] = [];
   if (stars !== undefined) counts.push(`${format.format(stars)} GitHub stars`);

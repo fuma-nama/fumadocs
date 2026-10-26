@@ -20,7 +20,7 @@ const button =
 
 export function Start() {
   return (
-    <Figure n={7} id="start" aria-label="Start" status="awaiting input">
+    <Figure id="start" aria-label="Start" status="awaiting input">
       <Stage>
         <FigureHeader
           data-rise-group

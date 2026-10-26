@@ -5,7 +5,6 @@ export const BEAT_AT = {
   orbits: 2,
   outline: 5,
   satellites: 6,
-  readout: 8,
   glitch: 9,
   ready: 13,
 } as const;

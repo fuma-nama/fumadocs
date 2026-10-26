@@ -21,6 +21,41 @@ const PLATES = [
   { place: 'md:col-start-2 md:row-start-3 xl:col-start-4 xl:row-start-1', foot: false },
 ];
 
+/**
+ * A source line's words, each an inline block: a line too long for its plate wraps between words,
+ * a word moving down whole rather than breaking at its hyphen, and only a word wider than the plate
+ * breaks, anywhere in it.
+ */
+function words(line: string): ReactNode[] {
+  const out: ReactNode[] = [];
+  let word: ReactNode[] = [];
+  function end() {
+    if (word.length > 0)
+      out.push(
+        <span key={out.length} className="inline-block">
+          {word}
+        </span>,
+      );
+    word = [];
+  }
+  for (const [text, tone] of tokenize(line)) {
+    for (const part of text.split(/( +)/)) {
+      if (part === '') continue;
+      if (part.startsWith(' ')) {
+        end();
+        out.push(part);
+      } else
+        word.push(
+          <span key={word.length} className={TONES[tone]}>
+            {part}
+          </span>,
+        );
+    }
+  }
+  end();
+  return out;
+}
+
 function mount(stage: HTMLDivElement | null) {
   if (stage) return createPress(stage);
 }
@@ -52,10 +87,10 @@ export function Press({ steps, sources, slots, bed, column }: PressProps) {
             <button
               type="button"
               data-replay
-              className="relative inline-flex h-6 items-center gap-1 bg-lp-paper px-1.5 font-pixel text-[11px] leading-none text-lp-ink-2 transition-none hover:bg-lp-ink hover:text-lp-paper focus-visible:bg-lp-ink focus-visible:text-lp-paper focus-visible:outline-none motion-reduce:hidden [@media(scripting:none)]:hidden"
+              aria-label="Replay"
+              className="relative inline-flex size-6 items-center justify-center bg-lp-paper text-lp-ink-2 transition-none hover:bg-lp-ink hover:text-lp-paper focus-visible:bg-lp-ink focus-visible:text-lp-paper focus-visible:outline-none motion-reduce:hidden [@media(scripting:none)]:hidden"
             >
-              <RotateCcw aria-hidden className="size-3" />
-              replay
+              <RotateCcw aria-hidden className="size-4" />
             </button>
           }
           className="min-w-0 flex-1"
@@ -94,30 +129,26 @@ export function Press({ steps, sources, slots, bed, column }: PressProps) {
                 >
                   <div
                     data-src
-                    // 12px where a plate holds its longest line, 11px where it has to
-                    className="invisible font-mono text-[11px] leading-[17px] [font-variant-ligatures:none] @min-[296px]:text-xs @min-[296px]:leading-[18px]"
+                    // 13px on a phone, where the plates stack full width; from md 12px where a
+                    // plate holds its longest line, 11px where it has to
+                    className="invisible font-mono text-[13px] leading-[20px] [font-variant-ligatures:none] md:text-[11px] md:leading-[17px] md:@min-[296px]:text-xs md:@min-[296px]:leading-[18px]"
                   >
                     {sources[i].split('\n').map((line, j) => (
-                      // a line too long for the plate wraps at any character, so its rows are even
                       <div
                         key={j}
                         data-line
-                        className="min-h-[1lh] break-all whitespace-break-spaces"
+                        className="min-h-[1lh] wrap-anywhere whitespace-break-spaces"
                       >
-                        {tokenize(line).map(([text, tone], k) => (
-                          <span key={k} className={TONES[tone]}>
-                            {text}
-                          </span>
-                        ))}
+                        {words(line)}
                       </div>
                     ))}
                   </div>
                   <div
                     data-out
-                    // the page zoomed out like a browser to fit its plate; its own stacking context
-                    // keeps popovers like Twoslash's under the arm
+                    // the page zoomed out like a browser to fit its plate, full size on a phone;
+                    // its own stacking context keeps popovers like Twoslash's under the arm
                     className={cn(
-                      'isolate bg-lp-paper [zoom:0.82] md:max-xl:[zoom:0.8] [&_.twoslash-completion-list]:w-56! [&_.twoslash-completion-list]:select-text!',
+                      'isolate bg-lp-paper md:max-lg:[zoom:0.9] lg:max-xl:[zoom:0.8] xl:[zoom:0.82] [&_.twoslash-completion-list]:w-56! [&_.twoslash-completion-list]:select-text!',
                       i > 0 && 'prose [&>:first-child]:mt-0 [&>:last-child]:mb-0',
                     )}
                   >
@@ -135,13 +166,13 @@ export function Press({ steps, sources, slots, bed, column }: PressProps) {
             </div>
           </div>
         </Window>
-        <div data-bay-phone className="relative w-12 shrink-0 md:hidden">
+        <div data-bay-phone className="relative w-[72px] shrink-0 md:hidden">
           {column}
         </div>
         <span
           data-caret
           aria-hidden
-          className="lp-caret pointer-events-none invisible absolute top-0 left-0 bg-lp-ink"
+          className="pointer-events-none invisible absolute top-0 left-0 bg-lp-ink"
         />
         <canvas
           data-arm

@@ -6,7 +6,17 @@ import { Roller } from '../../ui/roller';
 import { Chip, type Layer } from '../../ui/spec';
 import { cn } from '@/lib/cn';
 import { createStack, type StackEngine } from './engine';
-import { NARROW, restCss, roomOf, type Scene, SHADOW, WIDE } from './geometry';
+import {
+  aspectOf,
+  FLAT,
+  NARROW,
+  poseCss,
+  restOf,
+  roomOf,
+  type Scene,
+  SHADOW,
+  WIDE,
+} from './geometry';
 import { Bolt, Hazard, Latch, Pins, Rivets, Screw, Socket } from './hardware';
 import { CORE, type Holds as HoldsInfo, LAYERS, OPTIONS, type SwapLayer } from './data';
 import { CodeWindow, Crossfade, HEADLESS, Keys, type Picks, type Snippets } from './panel';
@@ -18,13 +28,15 @@ interface Faces {
 }
 
 interface StackProps {
+  /** the figure's title and description */
+  header: ReactNode;
   page: Faces;
   /** the same page with the UI swapped for your own */
   headless: Faces;
   snippets: Snippets;
 }
 
-/** a scene's sizes as CSS variables, `key` naming the width they are for */
+/** a scene's sizes as CSS variables, `key` naming the width they are for, and its page straight on */
 function sceneVars(scene: Scene, key: string) {
   return {
     [`--${key}-w`]: `${scene.width}px`,
@@ -32,16 +44,20 @@ function sceneVars(scene: Scene, key: string) {
     [`--${key}-t`]: `${scene.tray}px`,
     [`--${key}-g`]: `${scene.gap}px`,
     [`--${key}-f`]: `${scene.frame}px`,
+    [`--${key}-flat`]: poseCss(scene, FLAT, true),
   };
 }
 
-/** the camera's first frame and the canvas' aspect, with the stack above the panel or beside it */
+/** the rest pose and the canvas' aspect, with the stack above the panel or beside it */
 function restVars(scene: Scene, key: string, beside: boolean) {
-  const rest = restCss(scene, roomOf(beside));
-  return { [`--${key}-cam`]: rest.css, [`--${key}-aspect`]: rest.aspect };
+  const room = roomOf(beside);
+  return {
+    [`--${key}-rest`]: poseCss(scene, restOf(scene, room), false),
+    [`--${key}-aspect`]: aspectOf(scene, room),
+  };
 }
 
-/** the stack's units for each width, the camera's first frame among them */
+/** the stack's units for each width, the camera's first frames among them */
 const units = {
   ...sceneVars(NARROW, 'n'),
   ...restVars(NARROW, 'n', false),
@@ -56,7 +72,43 @@ const units = {
 
 /** the narrow scene's units, the wide one's from the engine's breakpoints up */
 const sizes =
-  'aspect-(--n-aspect) [--cam:var(--n-cam)] [--f:var(--n-f)] [--g:var(--n-g)] [--h:var(--n-h)] [--t:var(--n-t)] [--w:var(--n-w)] sm:aspect-(--w-aspect) sm:[--cam:var(--w-cam)] sm:[--f:var(--w-f)] sm:[--g:var(--w-g)] sm:[--h:var(--w-h)] sm:[--t:var(--w-t)] sm:[--w:var(--w-w)] lg:aspect-(--l-aspect) lg:[--cam:var(--l-cam)]';
+  'aspect-(--n-aspect) [--f:var(--n-f)] [--flat:var(--n-flat)] [--g:var(--n-g)] [--h:var(--n-h)] [--rest:var(--n-rest)] [--t:var(--n-t)] [--w:var(--n-w)] sm:aspect-(--w-aspect) sm:[--f:var(--w-f)] sm:[--flat:var(--w-flat)] sm:[--g:var(--w-g)] sm:[--h:var(--w-h)] sm:[--rest:var(--w-rest)] sm:[--t:var(--w-t)] sm:[--w:var(--w-w)] lg:aspect-(--l-aspect) lg:[--rest:var(--l-rest)]';
+
+/**
+ * The camera before any JS: the page straight on, as the scroll has a stack still on its way into
+ * view; at rest where nothing will turn it, with reduced motion or without JS
+ */
+const firstFrame =
+  'transform-(--flat) motion-reduce:transform-(--rest) [@media(scripting:none)]:transform-(--rest)';
+
+/** a flat part that comes in as the stack stands up: hidden in a straight-on first frame */
+const fades = 'opacity-0 motion-reduce:opacity-100 [@media(scripting:none)]:opacity-100';
+
+/**
+ * The figure pins under the navbar while the scroll turns the camera, so the camera's move is the
+ * only motion. From a MacBook's size up the whole stage pins for a run of scroll after it: header,
+ * stack, keys and code in one view (11px code where it is just tall enough). On a shorter or
+ * narrower desktop the stack's column pins while its title, keys and code pass beside it; under
+ * the stack's width, the stack pins and they pass beneath it.
+ */
+const layout = {
+  // the whole stage's run follows it with no gap, so it pins for exactly the run
+  pin: 'flex flex-col gap-6 lg:grid lg:grid-cols-[minmax(0,7fr)_minmax(0,5fr)] lg:grid-rows-[auto_1fr] lg:items-start lg:gap-x-12 lg:gap-y-8 [@media(min-width:1348px)_and_(min-height:884px)]:gap-y-0!',
+  stage:
+    'contents [@media(min-width:1348px)_and_(min-height:884px)]:col-span-2 [@media(min-width:1348px)_and_(min-height:884px)]:grid [@media(min-width:1348px)_and_(min-height:884px)]:h-[calc(100svh-var(--lp-menu-h)-var(--lp-status-h))] [@media(min-width:1348px)_and_(min-height:884px)]:grid-cols-[minmax(0,7fr)_minmax(0,5fr)] [@media(min-width:1348px)_and_(min-height:884px)]:grid-rows-[auto_minmax(0,1fr)] [@media(min-width:1348px)_and_(min-height:884px)]:gap-x-12 [@media(min-width:1348px)_and_(min-height:884px)_and_(prefers-reduced-motion:no-preference)_and_(scripting:enabled)]:sticky [@media(min-width:1348px)_and_(min-height:884px)]:top-(--lp-menu-h) [@media(min-width:1348px)_and_(min-height:948px)]:gap-y-6 [@media(min-width:1348px)_and_(min-height:948px)]:py-6 [@media(min-width:1348px)_and_(min-height:884px)_and_(max-height:947px)]:gap-y-4 [@media(min-width:1348px)_and_(min-height:884px)_and_(max-height:947px)]:py-4',
+  head: '@container max-lg:order-2 lg:col-start-2 lg:row-start-1 [@media(min-width:1348px)_and_(min-height:884px)]:col-span-2! [@media(min-width:1348px)_and_(min-height:884px)]:col-start-1!',
+  column:
+    'max-lg:order-1 max-lg:-mx-(--lp-gutter) max-lg:border-b max-lg:border-lp-line max-lg:bg-lp-paper max-lg:px-(--lp-gutter) max-lg:pb-4 max-lg:[@media(prefers-reduced-motion:no-preference)_and_(scripting:enabled)]:sticky max-lg:[@media(prefers-reduced-motion:no-preference)_and_(scripting:enabled)]:top-(--lp-menu-h) max-lg:[@media(prefers-reduced-motion:no-preference)_and_(scripting:enabled)]:z-10 lg:col-start-1 lg:row-span-2 lg:row-start-1 lg:min-h-0 lg:self-stretch [@media(min-width:1348px)_and_(min-height:884px)]:row-span-1! [@media(min-width:1348px)_and_(min-height:884px)]:row-start-2!',
+  canvas:
+    'lg:[@media(prefers-reduced-motion:no-preference)_and_(scripting:enabled)]:sticky lg:top-(--lp-menu-h) [@media(min-width:1348px)_and_(min-height:884px)]:h-full [@media(min-width:1348px)_and_(min-height:884px)]:aspect-auto!',
+  /** the run the stack's column pins for, where the whole stage does not */
+  columnRun:
+    'hidden h-[110svh] [@media(min-width:1024px)_and_(max-width:1347px)_and_(prefers-reduced-motion:no-preference)_and_(scripting:enabled),(min-width:1024px)_and_(max-height:883px)_and_(prefers-reduced-motion:no-preference)_and_(scripting:enabled)]:block',
+  /** the run the whole stage pins for */
+  stageRun:
+    'hidden h-[110svh] lg:col-span-2 [@media(min-width:1348px)_and_(min-height:884px)_and_(prefers-reduced-motion:no-preference)_and_(scripting:enabled)]:block',
+  panel: 'flex flex-col gap-4 max-lg:contents lg:col-start-2 lg:row-start-2',
+};
 
 /** from a tray's top to the bottom of the stack, at rest */
 const depth = 'calc(4 * var(--t) + 3 * var(--g))';
@@ -74,18 +126,16 @@ const shade =
 const frameShade =
   'bg-lp-ink [mask-image:var(--frame)] [mask-size:6px_6px] dark:[mask-image:var(--frame-dark)]';
 
-/** a solid part, edge on and hidden while the camera looks at the page straight on */
-const solid = 'group-data-flat/stack:invisible';
-
 const initial: Picks = { ui: 0, content: 0, framework: 0 };
 
 /**
  * The page as the top of a stack of trays, one per layer, in CSS 3D: real DOM on the faces, toon
  * sides, a frame down the left with the rails the trays slide on, the pins where each layer plugs
- * into the next. A pick unlatches its tray, slides it out to take the new module and back in,
- * and the code window beside it shows that option's real setup.
+ * into the next. The scroll turns the camera from the page to the stack; a pick unlatches its
+ * tray, slides it out to take the new module and back in, and the code window shows that
+ * option's real setup.
  */
-export function Stack({ page, headless, snippets }: StackProps) {
+export function Stack({ header, page, headless, snippets }: StackProps) {
   const [picks, setPicks] = useState<Picks>(initial);
   const [shown, setShown] = useState<Picks>(initial);
   const [last, setLast] = useState<SwapLayer>('content');
@@ -129,38 +179,52 @@ export function Stack({ page, headless, snippets }: StackProps) {
   }
 
   return (
-    <div
-      ref={ref}
-      className="group/stack grid gap-8 lg:grid-cols-[minmax(0,7fr)_minmax(0,5fr)] lg:items-start lg:gap-x-12"
-    >
-      <div data-canvas="" className={cn('relative [container-type:size]', sizes)} style={units}>
-        <div
-          data-camera=""
-          className="absolute top-0 left-0 h-(--h) w-(--w) origin-top-left transform-(--cam) transform-3d"
-        >
+    <div ref={ref} className={layout.pin}>
+      <div data-stage="" className={layout.stage}>
+        <div className={layout.head}>{header}</div>
+        <div className={layout.column}>
           <div
-            aria-hidden
-            data-shadow=""
-            className={cn('absolute inset-0 bg-lp-line-strong [mask-size:12px_12px]', solid)}
-            style={{
-              maskImage: DITHER_MASKS[4],
-              transform: `translate3d(${SHADOW.x}px, ${SHADOW.y}px, calc(-1 * ${depth} - 1px))`,
-            }}
+            data-canvas=""
+            className={cn('relative [container-type:size]', sizes, layout.canvas)}
+            style={units}
+          >
+            <div
+              data-camera=""
+              className={cn(
+                'absolute top-0 left-0 h-(--h) w-(--w) origin-top-left transform-3d',
+                firstFrame,
+              )}
+            >
+              <div
+                aria-hidden
+                data-shadow=""
+                className={cn('absolute inset-0 bg-lp-line-strong [mask-size:12px_12px]', fades)}
+                style={{
+                  maskImage: DITHER_MASKS[4],
+                  transform: `translate3d(${SHADOW.x}px, ${SHADOW.y}px, calc(-1 * ${depth} - 1px))`,
+                }}
+              />
+              <Frame />
+              {trays}
+            </div>
+          </div>
+          <div data-run="" aria-hidden className={layout.columnRun} />
+        </div>
+        {/* the keys as far from the window as its code is from its frame */}
+        <div className={layout.panel}>
+          <div data-keys="" className="@container max-lg:order-3">
+            <Keys picks={picks} onPick={pick} />
+          </div>
+          <CodeWindow
+            className="max-lg:order-4"
+            layer={last}
+            option={shown[last]}
+            headless={shown.ui === HEADLESS}
+            snippets={snippets}
           />
-          <Frame />
-          {trays}
         </div>
       </div>
-      {/* the keys as far from the window as its code is from its frame */}
-      <div className="flex flex-col gap-4 @container">
-        <Keys picks={picks} onPick={pick} />
-        <CodeWindow
-          layer={last}
-          option={shown[last]}
-          headless={shown.ui === HEADLESS}
-          snippets={snippets}
-        />
-      </div>
+      <div data-run="" aria-hidden className={layout.stageRun} />
     </div>
   );
 }
@@ -205,7 +269,7 @@ function Frame() {
   }
 
   return (
-    <div aria-hidden className={cn('absolute inset-0 transform-3d', solid)}>
+    <div aria-hidden className="absolute inset-0 transform-3d">
       <div
         data-frame="side"
         className="absolute top-0 h-(--h) origin-right border-[1.5px] border-lp-ink bg-lp-paper"
@@ -222,7 +286,13 @@ function Frame() {
         className="absolute left-[calc(-1*var(--f))] w-(--f) origin-top border-[1.5px] border-lp-ink bg-lp-paper-2"
         style={{ top: 'var(--h)', height: depth, transform: 'rotateX(-90deg)' }}
       />
-      <div className="absolute top-0 left-[calc(-1*var(--f))] h-(--h) w-(--f) border-[1.5px] border-lp-ink bg-lp-paper-2">
+      <div
+        data-frame="cap"
+        className={cn(
+          'absolute top-0 left-[calc(-1*var(--f))] h-(--h) w-(--f) border-[1.5px] border-lp-ink bg-lp-paper-2 will-change-[opacity]',
+          fades,
+        )}
+      >
         <Screw angle={40} className="top-[6%] left-1/2" />
         <Screw angle={-25} className="top-[94%] left-1/2" />
       </div>
@@ -282,7 +352,7 @@ const Tray = memo(function Tray({
       >
         {top}
         {/* clear of what the tray holds, which slides out under the pins of the tray above */}
-        {index > 0 && <Socket className={cn('right-10 bottom-1 sm:right-[196px]', solid)} />}
+        {index > 0 && <Socket className="right-10 bottom-1 sm:right-[196px]" />}
         {/* its edge over the page, which fills the whole top */}
         <span
           aria-hidden
@@ -290,20 +360,14 @@ const Tray = memo(function Tray({
         />
       </div>
       <div
-        className={cn(
-          'absolute left-0 h-(--t) w-full origin-top border-[1.5px] border-lp-ink bg-lp-paper',
-          solid,
-        )}
+        className="absolute left-0 h-(--t) w-full origin-top border-[1.5px] border-lp-ink bg-lp-paper"
         style={{ top: 'var(--h)', transform: 'rotateX(-90deg)' }}
       >
         <Front layer={layer} title={info.title} name={info.name} />
       </div>
       <div
         aria-hidden
-        className={cn(
-          'absolute top-0 left-[calc(-1*var(--t))] h-(--h) w-(--t) origin-right border-[1.5px] border-lp-ink',
-          solid,
-        )}
+        className="absolute top-0 left-[calc(-1*var(--t))] h-(--h) w-(--t) origin-right border-[1.5px] border-lp-ink"
         style={{ transform: 'rotateY(-90deg)' }}
       >
         <div className={cn('absolute inset-0', shade)} />
@@ -312,7 +376,7 @@ const Tray = memo(function Tray({
       </div>
       {index < LAYERS.length - 1 && (
         <Pins
-          className={cn('right-11 h-(--g) w-[128px] origin-top sm:right-[200px]', solid)}
+          className="right-11 h-(--g) w-[128px] origin-top sm:right-[200px]"
           style={{
             top: 'calc(var(--h) - 26px)',
             transform: 'translateZ(calc(-1 * var(--t))) rotateX(-90deg)',

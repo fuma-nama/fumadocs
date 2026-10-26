@@ -2,21 +2,19 @@ import type { ComponentProps, ReactNode } from 'react';
 import { cn } from '@/lib/cn';
 
 interface FigureProps extends ComponentProps<'section'> {
-  /** figure number, the status bar links figures by it */
-  n: number;
   id: string;
   /** default status bar line while this figure is on screen */
   status?: string;
 }
 
 /** a sheet of the drawing set: one section with its top seam and registration marks */
-export function Figure({ n, status, className, children, ...props }: FigureProps) {
+export function Figure({ status, className, children, ...props }: FigureProps) {
   return (
     <section
       {...props}
-      data-figure={n}
+      data-figure=""
       data-status={status}
-      className={cn('relative border-t border-lp-line', className)}
+      className={cn('relative scroll-mt-(--lp-menu-h) border-t border-lp-line', className)}
     >
       <Mark className="-top-[5.5px] -left-[5.5px]" />
       <Mark className="-top-[5.5px] -right-[5.5px]" />

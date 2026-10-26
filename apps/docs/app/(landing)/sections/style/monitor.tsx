@@ -1,6 +1,8 @@
 'use client';
 import { useCallback, useEffect, useRef, useState } from 'react';
+import { ArrowUpRight } from 'lucide-react';
 import { useReducedMotion } from 'motion/react';
+import { copy } from '../../content';
 import { TICK } from '../../lib/motion';
 import { Scramble } from '../../ui/text';
 import { Window } from '../../ui/window';
@@ -103,6 +105,7 @@ export function Monitor({
 
   const name = LAYOUTS.find((item) => item.id === layout)!.name;
   const title = tab === 'layouts' ? `fumadocs-ui/layouts/${layout}` : SOURCES[tab];
+  const docs = copy.style.tabs[tab];
   const screens = [];
   for (const id of TABS) {
     if (id === 'layouts') continue;
@@ -120,7 +123,20 @@ export function Monitor({
     <Window
       className={className}
       title={<Scramble text={title} speed={14} />}
-      actions={busy ? <Busy /> : undefined}
+      actions={
+        busy ? (
+          <Busy />
+        ) : (
+          // the box at the end of the bar opens the tab's docs, its hit area 24px around it
+          <a
+            href={docs.href}
+            aria-label={`${docs.label} docs`}
+            className="relative flex size-3.5 items-center justify-center bg-lp-paper text-lp-ink transition-none after:absolute after:-inset-[5px] hover:bg-lp-ink hover:text-lp-paper focus-visible:outline focus-visible:outline-offset-2 focus-visible:outline-lp-ink"
+          >
+            <ArrowUpRight aria-hidden className="size-3.5" />
+          </a>
+        )
+      }
     >
       <div
         ref={ref}

@@ -8,7 +8,7 @@ import { cn } from '@/lib/cn';
  * (`cqw`) with a floor, so parts stay crisp on a phone.
  *
  * These are the parts the browser draws too: the ones that change with the reader, and a few the
- * switches and the strip share with the fixed hardware drawn on the server (`hardware.tsx`).
+ * switches share with the fixed hardware drawn on the server (`hardware.tsx`).
  */
 
 /** strokes stay 1px at any size */

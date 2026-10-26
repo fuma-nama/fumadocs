@@ -1,5 +1,5 @@
 import { DITHER_MASKS } from '../../lib/bayer';
-import { ropePath, type Ropes, stepRopes, tensionOf, tieAt } from './rope';
+import { ropePath, type Ropes, stepRopes, tieAt } from './rope';
 import { createSprings, due, settleSprings, STEP, stepSprings } from './spring';
 import {
   cableEnds,
@@ -48,8 +48,6 @@ export function createDeskEngine(
   selected: number,
   /** the cables hanging still in that pose, as the server settled them */
   hung: Hung,
-  /** how taut the chosen cable is, 0 to 1, for the gauge */
-  onTension: (tension: number) => void,
 ): DeskEngine {
   const windows: HTMLElement[] = [];
   const shadows: HTMLElement[] = [];
@@ -135,7 +133,6 @@ export function createDeskEngine(
       plugs[i * 2 + 1].setAttribute('transform', plugTransform(i, ropes.ends, 1));
     }
     hub.style.transform = hubTransform(at.hub[0], at.hub[1]);
-    onTension(current < 0 ? 0 : tensionOf(ropes, current));
   }
 
   function frame(now: number) {

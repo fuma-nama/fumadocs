@@ -861,7 +861,8 @@ export function createCli(root: HTMLElement): () => void {
     if (typing !== caretMode) {
       caretMode = typing;
       caret.style.visibility = typing === 'none' ? 'hidden' : 'visible';
-      caret.style.animation = typing === 'solid' ? 'none' : '';
+      // it blinks only while it shows: a hidden caret's animation would still tick
+      caret.classList.toggle('lp-caret', typing === 'blink');
     }
     const end = shown * 3;
     const at = `translate(${scene.ends[end].toFixed(1)}px, ${(scene.ends[end + 1] + (scene.ends[end + 2] - caretHeight) / 2).toFixed(1)}px)`;
@@ -1063,8 +1064,8 @@ export function createCli(root: HTMLElement): () => void {
     if (caretKey !== editCaretKey) {
       editCaretKey = caretKey;
       editCaret.style.visibility = target ? 'visible' : '';
-      // solid while it types, like an editor's; it blinks while the run waits
-      editCaret.style.animation = target && phase !== 'hold' ? 'none' : '';
+      // solid while it types, like an editor's; it blinks while the run waits, never hidden
+      editCaret.classList.toggle('lp-caret', !!target && phase === 'hold');
       if (target) {
         measure(target, editEnds);
         editCaret.style.transform = `translate(${editEnds.x1.toFixed(1)}px, ${editEnds.y1.toFixed(1)}px)`;

@@ -21,7 +21,6 @@ const geometry =
 export function Hero() {
   return (
     <Figure
-      n={1}
       id="fumadocs"
       aria-label="Fumadocs"
       status="ready"
@@ -75,29 +74,15 @@ export function Hero() {
   );
 }
 
-/** the horizon: a hairline ruler with ticks every 24px and a label every 240px, zero on the gutter */
+/** the horizon: a hairline ruler with a tick every 24px and a longer one every 240px, from the gutter */
 function Ruler() {
-  const labels = [];
-  for (let x = 0; x < 1440; x += 240) {
-    labels.push(
-      <span
-        key={x}
-        className="absolute top-3 ps-1"
-        style={{ left: `calc(var(--lp-gutter) + ${x}px)` }}
-      >
-        {x}
-      </span>,
-    );
-  }
-
   return (
     <div
       aria-hidden
-      className="absolute inset-x-0 bottom-(--lp-status-h) z-10 h-10 overflow-clip border-t border-lp-line-strong font-mono text-[10px] text-lp-ink-2"
+      className="absolute inset-x-0 bottom-(--lp-status-h) z-10 h-10 border-t border-lp-line-strong"
     >
       <div className="h-1.5 bg-[repeating-linear-gradient(to_right,var(--lp-line-strong)_0_1px,transparent_1px_24px)] bg-position-[var(--lp-gutter)_0]" />
       <div className="absolute inset-x-0 top-0 h-2.5 bg-[repeating-linear-gradient(to_right,var(--lp-line-strong)_0_1px,transparent_1px_240px)] bg-position-[var(--lp-gutter)_0]" />
-      {labels}
     </div>
   );
 }

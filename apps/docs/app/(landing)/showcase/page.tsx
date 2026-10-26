@@ -35,7 +35,6 @@ export default function Page() {
   return (
     <>
       <Figure
-        n={1}
         id="showcase"
         aria-label="Showcase"
         status={`showing ${address(reel[0].url)}`}
@@ -63,7 +62,6 @@ export default function Page() {
         <Projector sites={reel} back={<DeckBack count={reel.length} />} front={<DeckFront />} />
       </Figure>
       <Figure
-        n={2}
         id="sites"
         aria-label="Sites"
         status={`${showcases.length + vercel.length} sites online`}
@@ -73,7 +71,6 @@ export default function Page() {
         <Wall sites={showcases} />
       </Figure>
       <Figure
-        n={3}
         id="blogs"
         aria-label="Blogs"
         status={`${blogs.length} blogs online`}

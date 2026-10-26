@@ -7,7 +7,6 @@ import { Scramble } from './ui/text';
 import { Waveform } from './waveform';
 
 interface FigureEntry {
-  n: number;
   id: string;
   label: string;
 }
@@ -39,19 +38,15 @@ function Status() {
 
 function Figures() {
   const [figures, setFigures] = useState<FigureEntry[]>([]);
-  const [active, setActive] = useState<number | null>(null);
+  const [active, setActive] = useState<string | null>(null);
 
   useEffect(() => {
     const sections = document.querySelectorAll<HTMLElement>('[data-figure]');
     const entries: FigureEntry[] = [];
-    const visible = new Map<HTMLElement, number>();
+    const visible = new Set<HTMLElement>();
 
     for (const section of sections) {
-      entries.push({
-        n: Number(section.dataset.figure),
-        id: section.id,
-        label: section.getAttribute('aria-label') ?? section.id,
-      });
+      entries.push({ id: section.id, label: section.getAttribute('aria-label') ?? section.id });
     }
     setFigures(entries);
 
@@ -62,11 +57,11 @@ function Figures() {
       (records) => {
         for (const record of records) {
           const section = record.target as HTMLElement;
-          if (record.isIntersecting) visible.set(section, Number(section.dataset.figure));
+          if (record.isIntersecting) visible.add(section);
           else visible.delete(section);
         }
-        const [section] = visible.keys();
-        setActive(section ? Number(section.dataset.figure) : null);
+        const [section] = visible;
+        setActive(section?.id ?? null);
         if (section === current) return;
         if (current !== undefined || getStatus() === 'ready')
           setStatus(section?.dataset.status ?? 'ready');
@@ -84,10 +79,10 @@ function Figures() {
         <a
           key={figure.id}
           href={`#${figure.id}`}
-          aria-current={active === figure.n ? 'location' : undefined}
+          aria-current={active === figure.id ? 'location' : undefined}
           className={cn(
             'flex items-center border-e border-lp-line-strong px-1.5 hover:bg-lp-ink hover:text-lp-paper lg:px-2.5',
-            active === figure.n && 'bg-lp-yellow text-[#121210]',
+            active === figure.id && 'bg-lp-yellow text-[#121210]',
           )}
         >
           {figure.label}

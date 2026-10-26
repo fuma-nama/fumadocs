@@ -81,14 +81,16 @@ interface Bounds {
 
 /**
  * The box the stack takes on the screen at scale 1, about the page's centre: frame, shadow and a
- * tray out included.
+ * tray out included. The frame and the shadow come in with the first quarter of the turn, so the
+ * box grows from the page's without a jump.
  */
 function boundsOf(scene: Scene, pose: Pose): Bounds {
   const pitch = (pose.pitch * Math.PI) / 180;
   const yaw = (pose.yaw * Math.PI) / 180;
   const bottom = bottomZ(scene, pose.spread);
   const front = scene.height + scene.pull * pose.reach;
-  const left = -scene.frame * Math.min(1, pose.spread * 4);
+  const comes = Math.min(1, (pose.pitch / scene.pitch) * 4);
+  const left = -scene.frame * comes;
   let x0 = Infinity;
   let y0 = Infinity;
   let x1 = -Infinity;
@@ -105,9 +107,9 @@ function boundsOf(scene: Scene, pose: Pose): Bounds {
   }
   for (let i = 0; i < 8; i++)
     add(i & 1 ? scene.width : left, i & 2 ? front : 0, i & 4 ? bottom : 0);
-  if (pose.spread > 0) {
-    for (let i = 0; i < 4; i++)
-      add(SHADOW.x + (i & 1 ? scene.width : 0), SHADOW.y + (i & 2 ? scene.height : 0), bottom);
+  for (let i = 0; i < 4; i++) {
+    const x = SHADOW.x * comes + (i & 1 ? scene.width : 0);
+    add(x, SHADOW.y * comes + (i & 2 ? scene.height : 0), bottom);
   }
   return { x: x0, y: y0, width: x1 - x0, height: y1 - y0 };
 }
@@ -116,15 +118,6 @@ export const FLAT: Pose = { pitch: 0, yaw: 0, spread: 0, reach: 0 };
 
 export function restOf(scene: Scene, room: number): Pose {
   return { pitch: scene.pitch, yaw: scene.yaw, spread: 1, reach: room };
-}
-
-export function mix(a: Pose, b: Pose, k: number): Pose {
-  return {
-    pitch: a.pitch + (b.pitch - a.pitch) * k,
-    yaw: a.yaw + (b.yaw - a.yaw) * k,
-    spread: a.spread + (b.spread - a.spread) * k,
-    reach: a.reach + (b.reach - a.reach) * k,
-  };
 }
 
 /** the camera as one CSS transform, its scale and centre given in px or CSS lengths */
@@ -136,31 +129,48 @@ function cameraCss(
   return `translate3d(${view.x}, ${view.y}, 0) rotateX(${pose.pitch}deg) rotateZ(${pose.yaw}deg) scale3d(${view.scale}, ${view.scale}, ${view.scale}) translate3d(${-scene.width / 2}px, ${-scene.height / 2}px, 0)`;
 }
 
-/** the camera that fits `pose` in a canvas of `width` by `height` px, centred */
-export function cameraAt(scene: Scene, pose: Pose, width: number, height: number): string {
+export interface Fit {
+  box: Bounds;
+  /** the scale that fits the box in the canvas */
+  scale: number;
+}
+
+/** `pose` fit to a canvas of `width` by `height` px */
+export function fitOf(scene: Scene, pose: Pose, width: number, height: number): Fit {
   const box = boundsOf(scene, pose);
-  const scale = Math.min(width / box.width, height / box.height);
-  return cameraCss(scene, pose, {
-    x: `${width / 2 - (box.x + box.width / 2) * scale}px`,
-    y: `${height / 2 - (box.y + box.height / 2) * scale}px`,
-    scale: String(scale),
-  });
+  return { box, scale: Math.min(width / box.width, height / box.height) };
 }
 
 /**
- * The rest pose in CSS, before any JS: the canvas takes the stack's aspect ratio, so the scale is
- * its width over the stack's, read from container units.
+ * The camera for `pose` at `fit`, centred across, the stack's top `top` px below the canvas' top:
+ * the stack's top is the page's far edge in every pose.
  */
-export function restCss(scene: Scene, room: number) {
-  const pose = restOf(scene, room);
+export function cameraAt(scene: Scene, pose: Pose, fit: Fit, width: number, top: number): string {
+  return cameraCss(scene, pose, {
+    x: `${width / 2 - (fit.box.x + fit.box.width / 2) * fit.scale}px`,
+    y: `${top - fit.box.y * fit.scale}px`,
+    scale: String(fit.scale),
+  });
+}
+
+/** the canvas' aspect ratio: the stack's box at rest, which the rest pose fills */
+export function aspectOf(scene: Scene, room: number): string {
+  const box = boundsOf(scene, restOf(scene, room));
+  return `${box.width} / ${box.height}`;
+}
+
+/**
+ * `pose` in CSS alone, for the first frame before any JS: fit to the canvas from container units,
+ * centred or with its top on the canvas' top
+ */
+export function poseCss(scene: Scene, pose: Pose, centred: boolean): string {
   const box = boundsOf(scene, pose);
-  const scale = `tan(atan2(100cqw, ${box.width}px))`;
-  return {
-    aspect: `${box.width} / ${box.height}`,
-    css: cameraCss(scene, pose, {
-      x: `calc(50cqw - ${box.x + box.width / 2}px * ${scale})`,
-      y: `calc(50cqh - ${box.y + box.height / 2}px * ${scale})`,
-      scale,
-    }),
-  };
+  const scale = `min(tan(atan2(100cqw, ${box.width}px)), tan(atan2(100cqh, ${box.height}px)))`;
+  return cameraCss(scene, pose, {
+    x: `calc(50cqw - ${box.x + box.width / 2}px * ${scale})`,
+    y: centred
+      ? `calc(50cqh - ${box.y + box.height / 2}px * ${scale})`
+      : `calc(${-box.y}px * ${scale})`,
+    scale,
+  });
 }

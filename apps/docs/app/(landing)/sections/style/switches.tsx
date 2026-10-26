@@ -102,7 +102,7 @@ export function Switches({ items, value, onChange, onIntent, idPrefix, className
         </span>
         <span
           className={cn(
-            'mt-1 max-w-full truncate px-1 font-pixel text-[12px] leading-4 sm:px-1.5 sm:text-[13px]',
+            'mt-1 max-w-full truncate px-1 font-pixel text-[12px] leading-4 @min-[400px]:px-1.5 @min-[400px]:text-[13px]',
             on
               ? 'bg-lp-yellow text-[#121210]'
               : 'group-hover/switch:bg-lp-ink group-hover/switch:text-lp-paper',
@@ -116,17 +116,23 @@ export function Switches({ items, value, onChange, onIntent, idPrefix, className
   }
 
   return (
-    <div className={cn('relative border border-lp-ink bg-lp-paper px-3 sm:px-7', className)}>
+    // a narrow row, on a phone or beside the monitor, gets screws for stripes and smaller names
+    <div className={cn('@container relative border border-lp-ink bg-lp-paper', className)}>
       <svg aria-hidden className="absolute size-0">
         <pattern id={`${idPrefix}-side`} width="4" height="4" patternUnits="userSpaceOnUse">
           <path d={ditherPath(6)} className="fill-lp-ink" />
         </pattern>
       </svg>
-      <Hazard className="inset-y-0 left-0 w-4 border-e border-lp-ink max-sm:hidden" />
-      <Hazard className="inset-y-0 right-0 w-4 border-s border-lp-ink max-sm:hidden" />
-      <Screw angle={35} className="top-2.5 left-2.5 size-2 sm:hidden" />
-      <Screw angle={-50} className="top-2.5 right-2.5 size-2 translate-x-1/2 sm:hidden" />
-      <div role="tablist" aria-label="Hands-on" onKeyDown={onKeyDown} className="flex">
+      <Hazard className="inset-y-0 left-0 w-4 border-e border-lp-ink @max-[400px]:hidden" />
+      <Hazard className="inset-y-0 right-0 w-4 border-s border-lp-ink @max-[400px]:hidden" />
+      <Screw angle={35} className="top-2.5 left-2.5 size-2 @min-[400px]:hidden" />
+      <Screw angle={-50} className="top-2.5 right-2.5 size-2 translate-x-1/2 @min-[400px]:hidden" />
+      <div
+        role="tablist"
+        aria-label="Hands-on"
+        onKeyDown={onKeyDown}
+        className="flex px-3 @min-[400px]:px-7"
+      >
         {switches}
       </div>
     </div>

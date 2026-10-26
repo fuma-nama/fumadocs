@@ -1,4 +1,5 @@
 import { DITHER_MASKS } from '../../lib/bayer';
+import { idle } from '../../lib/later';
 import { LAYOUTS, SHARED_ARGS, STORY_ARGS, type LayoutId, type ThemeId } from './data';
 import type { InkTable } from './presets';
 
@@ -23,6 +24,8 @@ interface Slot {
   fallback: number;
   /** the dither print running in the frame */
   printing: number;
+  /** cancels the other layouts' prefetch while it waits for the reader to pause */
+  prefetch: (() => void) | null;
 }
 
 export interface Frames {
@@ -118,6 +121,7 @@ function emptySlot(frame: HTMLIFrameElement): Slot {
     pending: null,
     fallback: 0,
     printing: 0,
+    prefetch: null,
   };
 }
 
@@ -165,14 +169,18 @@ export function createFrames(table: InkTable, elements: HTMLIFrameElement[]): Fr
       slot.doc = win.document;
       slot.sheet = null;
       slot.inked = null;
-      // a story arrives sooner when the router has it already
-      for (const item of LAYOUTS) {
-        if (item.id !== layout)
-          win.postMessage(
-            { type: 'fumadocs-story:prefetch', href: `/story/${item.id}` },
-            location.origin,
-          );
-      }
+      // a story arrives sooner when the router has it already; its code loads on this main
+      // thread, once the reader pauses
+      slot.prefetch?.();
+      slot.prefetch = idle(() => {
+        for (const item of LAYOUTS) {
+          if (item.id !== layout)
+            win.postMessage(
+              { type: 'fumadocs-story:prefetch', href: `/story/${item.id}` },
+              location.origin,
+            );
+        }
+      });
     }
     win.postMessage({ type: 'fumadocs-story:args', args: STORY_ARGS[layout] }, location.origin);
     apply(slot);
@@ -265,6 +273,7 @@ export function createFrames(table: InkTable, elements: HTMLIFrameElement[]): Fr
       window.removeEventListener('message', onMessage);
       for (const slot of slots) {
         clearTimeout(slot.fallback);
+        slot.prefetch?.();
         done(slot, false);
       }
     },

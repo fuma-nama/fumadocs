@@ -45,7 +45,7 @@ export function Write() {
   }
 
   return (
-    <Figure n={3} id="write" aria-label="Write" status="compiled quick-start.mdx">
+    <Figure id="write" aria-label="Write" status="compiled quick-start.mdx">
       <FigureHeader
         lead={copy.write.lead}
         title={copy.write.title}

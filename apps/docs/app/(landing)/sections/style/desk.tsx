@@ -36,10 +36,6 @@ interface DeskProps {
   /** the cables of the first pose hanging still, settled on the server */
   hung: Hung;
   onSelect: (id: LayoutId) => void;
-  /** how taut the chosen cable is, 0 to 1, every frame it moves */
-  onTension?: (tension: number) => void;
-  /** layouts the reader swapped in so far, the relay clicks over at each */
-  swaps: number;
   /** the fixed hardware, drawn on the server */
   hardware: Hardware;
   className?: string;
@@ -89,8 +85,6 @@ export const Desk = memo(function Desk({
   busy,
   hung,
   onSelect,
-  onTension,
-  swaps,
   hardware,
   className,
 }: DeskProps) {
@@ -101,18 +95,15 @@ export const Desk = memo(function Desk({
     return { index, at, hung, ropes: hangRopes(at, hung) };
   });
   const index = SLOTS.findIndex((slot) => slot.id === selected);
+  // the relay clicks over each time a layout is patched in
+  const [relay, setRelay] = useState({ selected, flip: false });
+  if (relay.selected !== selected) setRelay({ selected, flip: !relay.flip });
 
   const engine = useRef<DeskEngine | null>(null);
-  const tension = useRef(onTension);
-  useEffect(() => {
-    tension.current = onTension;
-  });
   const ref = useCallback(
     (board: HTMLDivElement | null) => {
       if (!board) return;
-      const instance = createDeskEngine(board, first.index, first.hung, (value) =>
-        tension.current?.(value),
-      );
+      const instance = createDeskEngine(board, first.index, first.hung);
       engine.current = instance;
       return () => {
         instance.destroy();
@@ -272,7 +263,7 @@ export const Desk = memo(function Desk({
             style={percent(10, 344, 120, 50)}
           />
           <Relay
-            flip={swaps % 2 === 1}
+            flip={relay.flip}
             className="pointer-events-none"
             style={percent(140, 346, 56, 42)}
           />

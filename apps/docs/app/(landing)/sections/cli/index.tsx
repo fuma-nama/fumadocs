@@ -120,10 +120,12 @@ export function Cli() {
           edit={plan.edit}
           className="col-start-1 row-start-1"
         />
+        {/* a phone's window keeps a height that fits it under the editor on one screen, the page
+            cut off at its foot like a browser's */}
         <Window
           data-preview
           title="localhost:3000/docs"
-          className="col-start-1 row-start-2 min-h-0 overflow-hidden"
+          className="col-start-1 row-start-2 min-h-0 overflow-hidden max-sm:h-[376px]"
         >
           {/* the page before your edit and after it, in one place; `data-edited` says which shows.
               Only ever hidden, never forced visible, so an inactive run's page stays unseen. A
@@ -181,7 +183,7 @@ export function Cli() {
   }
 
   return (
-    <Figure n={8} id="cli" aria-label="CLI" status={plans[0].done}>
+    <Figure id="cli" aria-label="CLI" status={plans[0].done}>
       {/* the section's text and the runs to pick; the stage under them plays the one picked */}
       <div className="flex flex-col gap-8 px-(--lp-gutter) pt-16 pb-10 lg:flex-row lg:items-end lg:justify-between lg:gap-16">
         <FigureHeader
@@ -205,7 +207,7 @@ export function Cli() {
                 <span
                   data-caret
                   aria-hidden
-                  className="lp-caret invisible absolute top-0 left-0 h-[1.1em] w-[0.6em] bg-current"
+                  className="invisible absolute top-0 left-0 h-[1.1em] w-[0.6em] bg-current"
                 />
               </span>
             </div>
@@ -263,7 +265,7 @@ export function Cli() {
         <span
           data-edit-caret
           aria-hidden
-          className="lp-caret pointer-events-none invisible absolute top-0 left-0 z-[7] bg-lp-ink"
+          className="pointer-events-none invisible absolute top-0 left-0 z-[7] bg-lp-ink"
         />
       </Stage>
     </Figure>
