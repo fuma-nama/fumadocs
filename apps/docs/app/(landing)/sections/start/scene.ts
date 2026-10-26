@@ -29,6 +29,8 @@ uniform float uNight;
 uniform vec4 uMoon;
 uniform float uSpin;
 uniform vec2 uHorizon;
+// the call to action's left and right edges and its foot (stage px), and how far the valley under it is open
+uniform vec4 uClear;
 uniform float uOpen;
 uniform float uCell;
 uniform sampler2D uAtlas;
@@ -184,6 +186,21 @@ float ridge(int k, float theta) {
   return RIDGE_H[k] * (0.08 + 0.92 * n * n * (1.6 - 0.6 * n));
 }
 
+/**
+ * Ridge k's height \`h\` at \`depth\` under stage column x, lowered under the call to action: a
+ * valley a little wider than it, whose hills stay 16px under its foot.
+ */
+float valley(int k, float h, float depth, float x, float cy) {
+  float side = smoothstep(uClear.x - 160.0, uClear.x, x) * (1.0 - smoothstep(uClear.y, uClear.y + 160.0, x));
+  // the height whose top meets the foot on screen at this depth
+  float cap = max(uEye.y + (cy - uClear.z) * depth / uFocal, 1e-3);
+  // the hills shrink in shape until a usual peak (0.6 of the ridge) fits, a rarer one eases in
+  float low = h * min(1.0, cap / (0.6 * RIDGE_H[k]));
+  float knee = 0.8 * cap;
+  if (low > knee) low = knee + (cap - knee) * tanh((low - knee) / (cap - knee));
+  return mix(h, low, side * uClear.w);
+}
+
 /** where a ray from inside leaves the vertical cylinder of radius r around the terminal */
 float cylinder(vec3 ro, vec3 rd, float r) {
   float a = dot(rd.xz, rd.xz);
@@ -298,11 +315,15 @@ void main() {
       vec3 p = ro + rd * t;
       float theta = atan(p.z, p.x);
       float h = ridge(k, theta);
+      float along = t * dot(rd, fwd);
+      if (uClear.w > 0.0) h = valley(k, h, along, px.x, centre.y);
       if (p.y > h) continue;
       depth = t;
       sky = false;
       float w = t * pixel;
-      float slope = (ridge(k, theta + 0.002) - h) / (0.002 * RIDGE_R[k]);
+      float next = ridge(k, theta + 0.002);
+      if (uClear.w > 0.0) next = valley(k, next, along, px.x, centre.y);
+      float slope = (next - h) / (0.002 * RIDGE_R[k]);
       float stipple = bayer8(floor(px / 3.0) + float(k) * 3.0);
       if ((h - p.y) / sqrt(1.0 + slope * slope) < 0.9 * w) col = pen;
       else {

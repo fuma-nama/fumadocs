@@ -65,7 +65,7 @@ const SHADCN_VARS = [
 ];
 
 /** the shadcn preset adopts your theme variables, this page's palette stands in for them */
-function pageTheme(element: Element): string {
+export function pageTheme(element: Element): string {
   const style = getComputedStyle(element);
   let vars = '';
   for (const name of SHADCN_VARS)
@@ -73,8 +73,16 @@ function pageTheme(element: Element): string {
   return `${vars}--sidebar:var(--card);--sidebar-foreground:var(--foreground);--sidebar-border:var(--border);--sidebar-accent:var(--accent);--sidebar-accent-foreground:var(--accent-foreground);--sidebar-ring:var(--ring);--sidebar-primary-foreground:var(--primary-foreground);`;
 }
 
-/** the CSS of a preset as the frame would get it from `@import 'fumadocs-ui/css/<theme>.css'` */
-function inkCss({ tokens, inks }: InkTable, theme: ThemeId, own: string): string {
+/**
+ * The CSS of a preset as the frame would get it from `@import 'fumadocs-ui/css/<theme>.css'`;
+ * `still` frames are pictures, nothing in them fades (the dither is the transition).
+ */
+export function inkCss(
+  { tokens, inks }: InkTable,
+  theme: ThemeId,
+  own: string,
+  still = true,
+): string {
   const ink = inks[theme];
   let light = '';
   let dark = '';
@@ -83,12 +91,12 @@ function inkCss({ tokens, inks }: InkTable, theme: ThemeId, own: string): string
     dark += `--color-fd-${tokens[i]}:${ink.dark[i]};`;
   }
   // the frame is a page of this site: reset its section colour on `body` and neutral's sidebar rule;
-  // it never scrolls, nothing in it fades (the dither is the transition), the dev overlay stays out
+  // it never scrolls, the dev overlay stays out
   return `:root{${own}${light}}.dark{${dark}}
 :root body{--color-fd-primary:inherit}
 .dark #nd-sidebar{--color-fd-muted:inherit;--color-fd-secondary:inherit;--color-fd-muted-foreground:inherit}
 html{overflow:hidden}
-*,::before,::after{transition:none!important}
+${still ? '*,::before,::after{transition:none!important}' : ''}
 nextjs-portal{display:none}
 html[data-lp-print]::view-transition-old(root),html[data-lp-print]::view-transition-new(root){animation:none;mix-blend-mode:normal}
 html[data-lp-print]::view-transition-new(root){animation:lp-print var(--lp-print-ms) steps(8,end) both;mask-size:var(--lp-print-size) var(--lp-print-size)}

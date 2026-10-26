@@ -42,10 +42,12 @@ export async function Proof() {
         title={copy.proof.title}
         description={copy.proof.description}
       />
-      <Counters items={counters} />
-      <div className="grid items-start gap-10 xl:grid-cols-12 xl:gap-6">
-        <Press sites={sites} className="xl:col-span-9">
-          <div className="flex flex-wrap items-baseline justify-between gap-x-6 gap-y-2">
+      {/* 9 | 3 of 12 columns, the wall's rounded to whole pixels: a half pixel left a seam inside its frame */}
+      <div className="grid gap-6 xl:grid-cols-[round(75%_-_6px,1px)_minmax(0,1fr)]">
+        <Counters items={counters} />
+        <Press sites={sites}>
+          {/* ends level with the testimonials when they run longer than the wall */}
+          <div className="mt-auto flex flex-wrap items-baseline justify-between gap-x-6 gap-y-2">
             <Link
               href="/showcase"
               className="-ms-1.5 inline-flex items-baseline gap-2 px-1.5 text-sm font-medium underline decoration-lp-line-strong underline-offset-4 hover:bg-lp-ink hover:text-lp-paper hover:no-underline focus-visible:bg-lp-ink focus-visible:text-lp-paper focus-visible:no-underline focus-visible:outline-none"
@@ -71,7 +73,7 @@ export async function Proof() {
             </p>
           </div>
         </Press>
-        <Wire quotes={quotes} className="xl:col-span-3" />
+        <Wire quotes={quotes} />
       </div>
     </Figure>
   );

@@ -4,10 +4,10 @@ import { bayer8 } from '../../lib/glsl';
  * The machine, raymarched in stage px: x right, y down, z out of the wall toward the viewer. The
  * camera looks straight at the wall (z = 0), where the windows hang at their own size, so flat
  * things stay frontal and only the solids show their sides. Groups, each drawn only inside its
- * screen box: 0 crate, 1 riser with its drive unit, 2 hopper and chute, 3 print head,
- * 4 reels and sockets. The cables are tubes in screen space along their routes.
+ * screen box: 0 crate, 1 riser with its drive unit, 2 hopper, 3 reels and sockets. The cables are
+ * tubes in screen space along their routes.
  */
-const GROUPS = 5;
+const GROUPS = 4;
 export const ROPE_POINTS = 32;
 export const CARDS = 24;
 
@@ -27,6 +27,7 @@ uniform vec3 uAccent;
 uniform float uCell;
 uniform vec2 uFloor;
 uniform vec4 uBox[${GROUPS}];
+uniform vec2 uFrame;
 uniform vec4 uWindow[4];
 
 uniform vec3 uCrate;
@@ -41,7 +42,11 @@ uniform vec3 uSocket[2];
 
 uniform vec4 uChain;
 uniform vec2 uChainLength;
+uniform vec2 uChainSide;
+uniform vec3 uDriveGear;
 uniform float uPitch;
+uniform float uJaw;
+uniform vec2 uJawBox;
 uniform float uPhase;
 uniform float uSpin;
 uniform vec3 uDriveC;
@@ -50,13 +55,9 @@ uniform vec4 uPlate;
 
 uniform vec3 uHopper;
 uniform vec4 uHopperSize;
-uniform vec4 uChute;
 uniform vec4 uCounter;
 uniform vec3 uCounterC;
 uniform vec3 uCounterB;
-
-uniform vec4 uHead;
-uniform vec4 uHeadRail;
 
 uniform vec3 uReel[2];
 uniform vec2 uReelSpin;
@@ -145,7 +146,7 @@ vec2 crate(vec3 p) {
   for (int i = 0; i < 2; i++) {
     if (float(i) >= uCables) break;
     vec3 s = p - uSocket[i];
-    float ring = sdDisc(s - vec3(0.0, 0.0, 3.0), 10.0, 3.0);
+    float ring = sdDisc(s - vec3(0.0, 0.0, 3.0), 9.0, 3.0);
     ring = max(ring, -sdDisc(s - vec3(0.0, 0.0, 4.0), 4.5, 4.0));
     r = opU(r, vec2(ring, DARK));
   }
@@ -232,36 +233,41 @@ vec2 boom(vec3 p, vec2 a, vec2 b, float z) {
 }
 
 /**
- * The riser: a chain from its tail uChain.xy straight up, uChainLength.x long at depth
- * uChainLength.y. Its grippers hold the files on its left, its boom stands on its right, the drive
- * unit with the registry's plate turns the head sprocket.
+ * The chain from its tail uChain.xy along uChain.zw, uChainLength.x long at depth uChainLength.y:
+ * a riser going up on a desktop, a beam going right on a phone. Its grippers hold the files on the
+ * side away from uChainSide, its boom stands on that side, the drive unit with the registry's plate
+ * turns a sprocket through the gear at uDriveGear.
  */
 vec2 riser(vec3 p) {
   vec2 tail = uChain.xy;
+  vec2 dir = uChain.zw;
+  vec2 side = uChainSide;
   float len = uChainLength.x;
   float z = uChainLength.y;
-  vec2 head = tail - vec2(0.0, len);
-  vec2 r = boom(p, tail + vec2(15.0, 6.0), head + vec2(15.0, -6.0), z);
-  float s = tail.y - p.y;
+  vec2 head = tail + dir * len;
+  vec2 r = boom(p, tail + side * 15.0 - dir * 6.0, head + side * 15.0 + dir * 6.0, z);
+  float s = dot(p.xy - tail, dir);
   float k = floor((s - uPhase) / uPitch);
   for (int j = 0; j < 2; j++) {
     float at = uPhase + (k + float(j)) * uPitch;
     if (at < 6.0 || at > len - 6.0) continue;
-    // an arm off the chain, its jaw clamping the file's right edge
-    vec3 g = p - vec3(tail.x, tail.y - at, z);
-    r = opU(r, vec2(sdCapsule(g, vec3(0.0), vec3(-8.0, 0.0, 0.0), 2.2), DARK));
-    r = opU(r, vec2(sdBox(g - vec3(-10.0, 0.0, 0.0), vec3(2.5, 13.0, 3.5)), ACCENT));
+    // an arm off the chain, its jaw clamping the file's edge along the chain
+    vec3 g = p - vec3(tail + dir * at, z);
+    vec2 across = vec2(dot(g.xy, -side), dot(g.xy, dir));
+    r = opU(r, vec2(sdCapsule(vec3(across, g.z), vec3(0.0), vec3(uJaw - 2.0, 0.0, 0.0), 2.2), DARK));
+    // the jaw lies along the edge it clamps: a file's top under a beam, its right side on a riser
+    r = opU(r, vec2(sdBox(g - vec3(-side * uJaw, 0.0), vec3(uJawBox, 3.5)), ACCENT));
   }
   // sprockets at both ends on brackets to the wall
   for (int i = 0; i < 2; i++) {
     vec3 w = p - vec3(i == 0 ? tail : head, z);
     r = opU(r, vec2(sdGear(w - vec3(0.0, 0.0, 12.0), 12.0, 10.0, uSpin, 3.0), BODY));
     r = opU(r, vec2(sdDisc(w - vec3(0.0, 0.0, 16.0), 3.8, 2.5), ACCENT));
-    r = opU(r, vec2(sdBox(vec3(w.x - 15.0, w.y, p.z - z * 0.5 + 4.0), vec3(8.0, 8.0, z * 0.5 - 4.0)), DARK));
+    r = opU(r, vec2(sdBox(vec3(w.xy - side * 15.0, p.z - z * 0.5 + 4.0), vec3(8.0, 8.0, z * 0.5 - 4.0)), DARK));
   }
-  // the drive unit, its gear meshing with the head sprocket
+  // the drive unit, its gear meshing with a sprocket
   r = opU(r, vec2(sdRoundBox(p - uDriveC, uDriveB, 2.0), BODY));
-  vec3 g = p - vec3(uDriveC.x + uDriveB.x - 12.0, head.y, uDriveC.z + uDriveB.z);
+  vec3 g = p - uDriveGear;
   r = opU(r, vec2(sdGear(g - vec3(0.0, 0.0, 3.0), 8.0, 8.0, -uSpin * 1.5, 3.0), DARK));
   r = opU(r, vec2(sdDisc(g - vec3(0.0, 0.0, 6.5), 2.6, 1.0), ACCENT));
   return r;
@@ -281,30 +287,10 @@ vec2 hopper(vec3 p) {
   // a lip around the mouth, the counter's frame on its front
   r = opU(r, vec2(max(sdBox(q + vec3(0.0, H.z * 0.5 - 3.0, 0.0), vec3(H.x + 3.0, 3.0, H.w + 3.0)), -inner), DARK));
   r = opU(r, vec2(sdRoundBox(p - uCounterC, uCounterB, 1.0), BODY));
-  // the chute from its neck into your project, flanged at both ends
-  vec3 a = vec3(uChute.xy, uHopper.z);
-  vec3 b = vec3(uChute.zw, uHopper.z);
-  vec3 dir = normalize(b - a);
-  r = opU(r, vec2(sdCapsule(p, a, b, 10.0), BODY));
-  r = opU(r, vec2(sdCapsule(p, a + dir * 4.0, a + dir * 10.0, 13.0), DARK));
-  r = opU(r, vec2(sdCapsule(p, b - dir * 10.0, b - dir * 4.0, 13.0), DARK));
   return r;
 }
 
-vec2 head(vec3 p) {
-  vec3 rail = p - vec3((uHeadRail.x + uHeadRail.y) * 0.5, uHeadRail.z, uHeadRail.w);
-  vec2 r = vec2(sdBox(rail, vec3(abs(uHeadRail.y - uHeadRail.x) * 0.5, 2.5, 3.0)), DARK);
-  vec3 c = p - vec3(uHead.x, uHeadRail.z, uHeadRail.w + 4.0);
-  r = opU(r, vec2(sdRoundBox(c, vec3(11.0, 7.0, 7.0), 1.0), BODY));
-  float reach = uHead.y - uHeadRail.z;
-  vec3 rod = p - vec3(uHead.x, uHeadRail.z + reach * 0.5, uHeadRail.w + 6.0);
-  r = opU(r, vec2(sdBox(rod, vec3(2.0, max(reach * 0.5, 0.5), 2.0)), DARK));
-  vec3 nose = p - vec3(uHead.x, uHead.y - 4.0, uHeadRail.w + 6.0);
-  r = opU(r, vec2(sdBox(nose, vec3(5.0, 4.0, 5.0)), ACCENT));
-  return r;
-}
-
-/** the reels on the imports' window, the sockets on your folders */
+/** the reels on the editor's edge, the sockets on your folders */
 vec2 jacks(vec3 p) {
   vec2 r = vec2(1e9, BODY);
   for (int i = 0; i < 2; i++) {
@@ -332,8 +318,7 @@ vec2 map(vec3 p) {
   if ((gMask & 1) != 0) r = opU(r, crate(p));
   if ((gMask & 2) != 0) r = opU(r, riser(p));
   if ((gMask & 4) != 0) r = opU(r, hopper(p));
-  if ((gMask & 8) != 0) r = opU(r, head(p));
-  if ((gMask & 16) != 0) r = opU(r, jacks(p));
+  if ((gMask & 8) != 0) r = opU(r, jacks(p));
   return r;
 }
 
@@ -380,6 +365,11 @@ bool inside(vec2 px, vec4 b) {
 
 void main() {
   vec2 px = vec2(gl_FragCoord.x, uResolution.y - gl_FragCoord.y) / uDpr;
+  // nothing is drawn past the sheet's gutters
+  if (px.x < uFrame.x || px.x > uFrame.y) {
+    color = vec4(0.0);
+    return;
+  }
   gMask = 0;
   for (int g = 0; g < ${GROUPS}; g++) {
     if (inside(px, uBox[g])) gMask |= 1 << g;
@@ -400,7 +390,10 @@ void main() {
   // the wall and the floor in front of it
   float tWall = uEye.z / -rd.z;
   float tFloor = rd.y > 0.0 ? (uFloor.x - ro.y) / rd.y : 1e9;
-  bool onFloor = tFloor < tWall && (ro + rd * tFloor).z <= uFloor.y;
+  // the floor the crate stands on, from its back to its front and just past its sides: the wall
+  // shows above and behind it, a phone's hopper hangs below its level beside it
+  vec3 f = ro + rd * tFloor;
+  bool onFloor = tFloor < tWall && f.z <= uFloor.y && f.z >= uCrate.z - uCrateSize.z - 10.0 && abs(f.x - uCrate.x) < uCrateSize.x + 24.0;
   float tBack = onFloor ? tFloor : tWall;
 
   float hit = -1.0;
@@ -520,7 +513,11 @@ void main() {
     if (inside(px, uCard[i])) {
       float z = uCardZ[i / 4][i % 4];
       float t = (uEye.z - z) / -rd.z;
-      if (t < depth) col = vec4(0.0);
+      // the outlines of what is behind it stay behind it too
+      if (t < depth) {
+        col = vec4(0.0);
+        depth = t;
+      }
     }
   }
 

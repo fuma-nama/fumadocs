@@ -18,20 +18,24 @@ function showcaseMarkdown(): string {
     '',
     `- Suggest yours: ${suggest}`,
     '',
-    '## Featured',
+    `## ${copy.sites.lead} ${copy.sites.title}`,
     '',
   ];
+  // the wall's order: the featured with their own words, Vercel's SDKs, then every other site
   for (const site of showcases) {
     const kind = kinds[site.url];
     if (kind) out.push(`- ${link(site.name, site.url)}: ${kind}`);
   }
-  out.push('', '### Vercel', '', copy.vercel, '');
-  for (const site of vercel) out.push(`- ${link(site.name, site.url)}: ${kinds[site.url]}`);
+  out.push(`- Vercel: ${copy.vercel}`);
+  for (const site of vercel) out.push(`  - ${link(site.name, site.url)}: ${kinds[site.url]}`);
+  for (const site of showcases) {
+    if (!kinds[site.url] && site.image) out.push(`- ${link(site.name, site.url)}`);
+  }
+  for (const site of showcases) {
+    if (!kinds[site.url] && !site.image) out.push(`- ${link(site.name, site.url)}`);
+  }
 
-  out.push('', '## All sites', '');
-  for (const site of showcases) out.push(`- ${link(site.name, site.url)}`);
-
-  out.push('', '## Blogs', '', copy.blogs.title, '');
+  out.push('', `## ${copy.blogs.lead} ${copy.blogs.title}`, '');
   for (const site of blogs) out.push(`- ${link(site.name, site.url)}`);
   out.push('');
   return out.join('\n');

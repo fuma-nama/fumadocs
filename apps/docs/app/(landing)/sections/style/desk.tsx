@@ -11,39 +11,41 @@ import {
   hangRopes,
   type Hung,
   HUB,
-  hubPort,
   hubTransform,
   percent,
+  PLUG,
+  plugTransform,
   pose,
+  shadowInset,
   shadowLevel,
   shadowTransform,
   SLOTS,
   WINDOW,
-  windowPort,
   windowTransform,
 } from './board';
 import { createDeskEngine, type DeskEngine } from './desk-engine';
+import type { Hardware } from './hardware';
+import { DipBank, Led, Relay, Stamp } from './parts';
 
 interface DeskProps {
   selected: LayoutId;
+  /** the layouts feed the monitor; off, every cable hangs slack and the windows wait for a click */
+  live: boolean;
+  /** the monitor is loading the next layout */
+  busy: boolean;
   /** the cables of the first pose hanging still, settled on the server */
   hung: Hung;
   onSelect: (id: LayoutId) => void;
+  /** how taut the chosen cable is, 0 to 1, every frame it moves */
+  onTension?: (tension: number) => void;
+  /** layouts the reader swapped in so far, the relay clicks over at each */
+  swaps: number;
+  /** the fixed hardware, drawn on the server */
+  hardware: Hardware;
   className?: string;
 }
 
-/** a port on a frame line, where a cable plugs in; `x, y` from the top left of a `w` by `h` box */
-function Port({ x, y, w, h }: { x: number; y: number; w: number; h: number }) {
-  return (
-    <span
-      aria-hidden
-      className="absolute size-[7px] -translate-1/2 border border-lp-ink bg-lp-yellow"
-      style={{ left: `${(x / w) * 100}%`, top: `${(y / h) * 100}%` }}
-    />
-  );
-}
-
-/** the title bar of a mini window, striped when it is the chosen one */
+/** the title bar of a mini window, striped when it is the chosen one; its lamp lights then */
 function Bar({ active }: { active?: boolean }) {
   return (
     <span
@@ -58,36 +60,58 @@ function Bar({ active }: { active?: boolean }) {
         )}
       />
       <span className="relative aspect-square h-1/2 border border-lp-line-strong bg-lp-paper" />
-      <span className="relative aspect-square h-1/2 border border-lp-line-strong bg-lp-paper" />
+      <span
+        className={cn(
+          'relative aspect-square h-[55%] rounded-full border',
+          active ? 'border-lp-ink bg-lp-sun' : 'border-lp-line-strong bg-lp-paper',
+        )}
+      />
     </span>
   );
 }
 
+/** a plug from its jack (0, 0) out to its tail: the sleeve, then a boot tapering to the cable */
+const PLUG_BODY = `M4 -5.5H${PLUG - 8}L${PLUG} -2V2L${PLUG - 8} 5.5H4z`;
+/** the ribs of the boot, the cable's strain relief */
+const PLUG_RIBS = `M${PLUG - 6} -4.6v9.2M${PLUG - 3.5} -3.7v7.4`;
+
 const STEPS: Record<string, number> = { ArrowRight: 1, ArrowDown: 3, ArrowLeft: -1, ArrowUp: -3 };
+/** stamps sit a little off their line, each its own way */
+const TILTS = [-1.5, 1, -0.5, 1.5, -1, 0.5];
 
 /**
- * The desk: the 6 layouts as windows, each cabled to the search trigger they all render. Held
- * under the pointer, a window is chosen; a click, a tap or the arrow keys choose at once.
+ * The desk: the 6 layouts as windows bolted to scrap plates, each cabled from its search trigger
+ * to the junction box they all share. A click, a tap or the arrow keys choose one.
  */
-export const Desk = memo(function Desk({ selected, hung, onSelect, className }: DeskProps) {
+export const Desk = memo(function Desk({
+  selected,
+  live,
+  busy,
+  hung,
+  onSelect,
+  onTension,
+  swaps,
+  hardware,
+  className,
+}: DeskProps) {
   // the server draws the first pose; from then on the engine moves everything
   const [first] = useState(() => {
     const index = SLOTS.findIndex((slot) => slot.id === selected);
-    const at = pose(index, -1, createPose());
+    const at = pose(index, createPose());
     return { index, at, hung, ropes: hangRopes(at, hung) };
   });
   const index = SLOTS.findIndex((slot) => slot.id === selected);
 
   const engine = useRef<DeskEngine | null>(null);
-  const select = useRef(onSelect);
+  const tension = useRef(onTension);
   useEffect(() => {
-    select.current = onSelect;
+    tension.current = onTension;
   });
   const ref = useCallback(
     (board: HTMLDivElement | null) => {
       if (!board) return;
-      const instance = createDeskEngine(board, first.index, first.hung, (i) =>
-        select.current(SLOTS[i].id),
+      const instance = createDeskEngine(board, first.index, first.hung, (value) =>
+        tension.current?.(value),
       );
       engine.current = instance;
       return () => {
@@ -99,8 +123,8 @@ export const Desk = memo(function Desk({ selected, hung, onSelect, className }: 
   );
 
   useEffect(() => {
-    engine.current?.select(index);
-  }, [index]);
+    engine.current?.select(live ? index : -1);
+  }, [index, live]);
 
   function onKeyDown(event: KeyboardEvent<HTMLDivElement>) {
     const from = SLOTS.findIndex((slot) => slot.id === (event.target as HTMLElement).dataset.slot);
@@ -116,24 +140,56 @@ export const Desk = memo(function Desk({ selected, hung, onSelect, className }: 
 
   const { windows: w } = first.at;
   const cables = [];
+  const ties = [];
+  const plugs = [];
   const windows = [];
-  const ports = [];
   for (let i = 0; i < SLOTS.length; i++) {
     const slot = SLOTS[i];
     const active = i === index;
+    const on = active && live;
+    const d = ropePath(first.ropes, i);
+    // the patched cable is a coax, its core showing down the middle; the others hang slack
     cables.push(
-      <path
-        key={slot.id}
-        data-cable={slot.id}
-        d={ropePath(first.ropes, i)}
-        strokeDasharray={active ? undefined : '4 3'}
-        strokeWidth={active ? 1.5 : 1}
-        vectorEffect="non-scaling-stroke"
-        className="fill-none stroke-lp-ink"
-      />,
+      <g key={slot.id}>
+        <path
+          data-cable={slot.id}
+          d={d}
+          strokeDasharray={on ? undefined : '4 3'}
+          strokeWidth={on ? 3.5 : 1}
+          strokeLinecap="round"
+          vectorEffect="non-scaling-stroke"
+          className="fill-none stroke-lp-ink"
+        />
+        <path
+          data-cable={slot.id}
+          d={d}
+          visibility={on ? undefined : 'hidden'}
+          strokeWidth={1.2}
+          vectorEffect="non-scaling-stroke"
+          className="fill-none stroke-lp-paper"
+        />
+      </g>,
     );
-    const [px, py] = windowPort(slot);
-    const name = LAYOUTS.find((item) => item.id === slot.id)!.name;
+    ties.push(
+      <g key={slot.id} data-tie={slot.id}>
+        <rect x={-2.5} y={-6} width={5} height={12} className="fill-lp-paper stroke-lp-ink" />
+        <path d="M2.5 -3h6" className="stroke-lp-ink" />
+      </g>,
+    );
+    for (const end of [0, 1] as const) {
+      plugs.push(
+        <g
+          key={`${slot.id}-${end}`}
+          data-plug={slot.id}
+          transform={plugTransform(i, first.ropes.ends, end)}
+        >
+          <path d={PLUG_BODY} className="fill-lp-ink" />
+          <path d={PLUG_RIBS} className="stroke-lp-paper" />
+          <rect x={1.5} y={-7.5} width={4.5} height={15} className="fill-lp-paper stroke-lp-ink" />
+        </g>,
+      );
+    }
+    const item = LAYOUTS.find((entry) => entry.id === slot.id)!;
     const lift = w[i * 3 + 2];
     const level = shadowLevel(lift);
     windows.push(
@@ -145,7 +201,7 @@ export const Desk = memo(function Desk({ selected, hung, onSelect, className }: 
         data-slot={slot.id}
         tabIndex={active ? 0 : -1}
         onClick={() => onSelect(slot.id)}
-        className="group/window absolute origin-top-left cursor-pointer text-start outline-none"
+        className="group/window absolute isolate origin-top-left cursor-pointer text-start outline-none"
         style={{
           ...percent(slot.x, slot.y, WINDOW.w, WINDOW.h),
           transform: windowTransform(slot, w[i * 3], w[i * 3 + 1], lift),
@@ -155,114 +211,107 @@ export const Desk = memo(function Desk({ selected, hung, onSelect, className }: 
           data-shadow
           aria-hidden
           hidden={level === 0}
-          className="absolute inset-0 -z-10 bg-lp-ink-2"
+          className="absolute -z-20 bg-lp-ink-2"
           style={{
+            inset: shadowInset(slot),
             maskImage: DITHER_MASKS[level],
             maskSize: '4px 4px',
             transform: shadowTransform(slot, lift),
           }}
         />
+        {hardware.plates[slot.id]}
         <span
           className={cn(
-            'flex size-full flex-col border bg-lp-paper group-focus-visible/window:outline group-focus-visible/window:outline-offset-2 group-focus-visible/window:outline-lp-ink',
-            active ? 'border-lp-ink' : 'border-lp-line-strong',
+            'flex size-full flex-col border bg-lp-paper group-focus-visible/window:outline group-focus-visible/window:outline-offset-[calc(var(--plate)+2px)] group-focus-visible/window:outline-lp-ink',
+            on ? 'border-lp-ink' : 'border-lp-line-strong',
           )}
         >
-          <Bar active={active} />
+          <Bar active={on} />
           <span className="relative block flex-1">
             <Plan layout={slot.id} />
           </span>
         </span>
-        <Port x={px} y={py} w={WINDOW.w} h={WINDOW.h} />
         <span
           data-caption
           className={cn(
-            'absolute left-0 -ms-1.5 px-1.5 font-pixel text-[13px] leading-4 whitespace-nowrap',
-            slot.row === 0 ? 'bottom-full mb-3 origin-[6px_100%]' : 'top-full mt-3 origin-[6px_0]',
-            active && 'bg-lp-yellow text-[#121210]',
+            'absolute left-0 -ms-1 text-[13px]',
+            slot.row === 0
+              ? 'bottom-[calc(100%+var(--plate)+8px)] origin-[6px_100%]'
+              : 'top-[calc(100%+var(--plate)+8px)] origin-[6px_0]',
           )}
           style={{ transform: `scale(${(1 / w[i * 3 + 1]).toFixed(4)})` }}
         >
-          {name}
+          <Stamp tilt={TILTS[i]} active={on}>
+            {item.name}
+          </Stamp>
         </span>
       </button>,
     );
-    const [hx, hy] = hubPort(slot);
-    ports.push(<Port key={slot.id} x={hx} y={hy} w={HUB.w} h={HUB.h} />);
   }
 
   return (
-    <div className={cn('flex flex-col gap-2', className)}>
-      {/* the captions sit in the padding, outside the board */}
-      <div role="radiogroup" aria-label="Layouts" onKeyDown={onKeyDown} className="pt-9 pb-7">
+    <div
+      role="radiogroup"
+      aria-label="Layouts"
+      onKeyDown={onKeyDown}
+      className={cn('@container py-11 [--plate:max(6px,1.4cqw)] sm:py-14 lg:py-11', className)}
+    >
+      {/* the plates stand out of the board by `--plate`, more on a chosen window grown from its edge,
+          and never thinner than a stamp stands out of its window; the stamps above and below take the
+          room around it, more on a wide desk's thicker plates */}
+      <div className="px-[calc(var(--plate)*1.1)]">
         <div
           ref={ref}
-          className="relative w-full"
+          className="@container relative w-full"
           style={{ aspectRatio: `${BOARD.w} / ${BOARD.h}` }}
         >
-          <svg
-            aria-hidden
-            viewBox={`0 0 ${BOARD.w} ${BOARD.h}`}
-            preserveAspectRatio="none"
-            className="pointer-events-none absolute inset-0 size-full overflow-visible"
-          >
-            {cables}
-          </svg>
+          {hardware.bench}
+          <DipBank
+            on={live ? index : -1}
+            className="pointer-events-none"
+            style={percent(10, 344, 120, 50)}
+          />
+          <Relay
+            flip={swaps % 2 === 1}
+            className="pointer-events-none"
+            style={percent(140, 346, 56, 42)}
+          />
           <div
             data-hub
             aria-hidden
-            className="absolute flex flex-col border border-lp-ink bg-lp-paper"
+            className="absolute"
             style={{
               ...percent(HUB.x, HUB.y, HUB.w, HUB.h),
               transform: hubTransform(first.at.hub[0], first.at.hub[1]),
             }}
           >
-            <Bar active />
-            <span className="flex flex-1 items-center justify-center">
-              {/* ink on the yellow is always the dark one, in both themes */}
-              <svg viewBox="0 0 72 24" className="w-[78%] overflow-visible">
-                <rect
-                  x="0.5"
-                  y="0.5"
-                  width="71"
-                  height="23"
-                  rx="6"
-                  className="fill-lp-yellow stroke-[#121210]"
-                  vectorEffect="non-scaling-stroke"
-                />
-                <circle
-                  cx="11"
-                  cy="11"
-                  r="4"
-                  className="fill-none stroke-[#121210]"
-                  vectorEffect="non-scaling-stroke"
-                />
-                <path
-                  d="M14 14l3.5 3.5"
-                  className="stroke-[#121210]"
-                  vectorEffect="non-scaling-stroke"
-                />
-                <rect x="22" y="10.5" width="22" height="3" className="fill-[#121210]" />
-                <rect
-                  x="53"
-                  y="6.5"
-                  width="13"
-                  height="11"
-                  rx="2"
-                  className="fill-none stroke-[#121210]"
-                  vectorEffect="non-scaling-stroke"
-                />
-              </svg>
-            </span>
-            {ports}
+            <span
+              className="absolute inset-0 bg-lp-ink-2"
+              style={{ maskImage: DITHER_MASKS[4], maskSize: '4px 4px', translate: '5px 7px' }}
+            />
+            <span className="absolute inset-0 border border-lp-ink bg-lp-paper" />
+            {hardware.junction}
+            <Led on blink={busy} className="top-[31%] left-[50%]" />
           </div>
+          {/* the cables run over the desk and behind the windows, their plugs over both */}
+          <svg
+            aria-hidden
+            viewBox={`0 0 ${BOARD.w} ${BOARD.h}`}
+            className="pointer-events-none absolute inset-0 size-full overflow-visible"
+          >
+            {cables}
+            {ties}
+          </svg>
           {windows}
+          <svg
+            aria-hidden
+            viewBox={`0 0 ${BOARD.w} ${BOARD.h}`}
+            className="pointer-events-none absolute inset-0 size-full overflow-visible"
+          >
+            {plugs}
+          </svg>
         </div>
       </div>
-      <p className="flex items-center gap-2 font-mono text-xs text-lp-ink-2">
-        <span aria-hidden className="size-3 shrink-0 border border-lp-ink bg-lp-yellow" />
-        layouts/shared/slots/search-trigger.tsx
-      </p>
     </div>
   );
 });

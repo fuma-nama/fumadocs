@@ -15,11 +15,29 @@ export interface Counter {
 
 const format = new Intl.NumberFormat('en-US');
 
+/**
+ * Columns a counter spans, on the wall's columns: halves on phones, two rows of 2 | 3 from md, one
+ * row of 1 | 2 | 1 | 1 from lg, and from xl 2 | 2 | 1 over the wall with the last counter over the
+ * testimonials. With a counter missing, a lone last one fills its row, and a single row gives two
+ * columns each and the rest to the last.
+ */
+function spans(i: number, count: number): CSSProperties {
+  const last = i === count - 1;
+  const alone = count % 2 === 1 && last;
+  return {
+    '--span': alone ? 2 : 1,
+    '--span-md': alone ? 5 : i % 2 === 0 ? 2 : 3,
+    '--span-lg': count === 4 ? (i === 1 ? 2 : 1) : last ? 5 - 2 * i : 2,
+    '--span-xl': last ? 1 : i === count - 2 ? 5 - 2 * i : 2,
+  } as CSSProperties;
+}
+
+/** the counters over the wall and the testimonials, from xl a subgrid of their two columns */
 export function Counters({ items }: { items: Counter[] }) {
   const isClient = useIsClient();
   const reduced = useReducedMotion();
   const live = isClient && !reduced;
-  const ref = useRef<HTMLDListElement>(null);
+  const ref = useRef<HTMLDivElement>(null);
   // counters rolled in so far, `null` at rest (the final numbers)
   const [printed, setPrinted] = useState<number | null>(null);
 
@@ -29,7 +47,7 @@ export function Counters({ items }: { items: Counter[] }) {
     let count = 0;
     const next = () => {
       setPrinted(++count);
-      if (count < items.length) timer = window.setTimeout(next, TICK * 2);
+      if (count < items.length) timer = window.setTimeout(next, TICK);
     };
     const observer = new IntersectionObserver(
       ([entry]) => {
@@ -49,44 +67,54 @@ export function Counters({ items }: { items: Counter[] }) {
     };
   }, [live, items.length]);
 
-  let columns = '';
-  for (const item of items) columns += `${format.format(item.value).length + 4}fr `;
+  const cells = [];
+  for (let i = 0; i < items.length; i++) {
+    const item = items[i];
+    const text = format.format(item.value);
+    const shown = printed === null || i < printed;
+
+    cells.push(
+      <div
+        key={item.label}
+        style={{ '--len': text.length, ...spans(i, items.length) } as CSSProperties}
+        className="col-span-(--span) flex flex-col bg-lp-paper p-4 @container md:col-span-(--span-md) md:py-5 lg:col-span-(--span-lg) xl:col-span-(--span-xl)"
+      >
+        <dt className="text-[15px] leading-tight">{item.label}</dt>
+        <dd
+          className={cn(
+            // a long number keeps to its cell on a narrow phone: a digit is under half an em
+            'mt-5 font-pixel text-[length:min(28px,calc(200cqw/var(--len)))] leading-none text-lp-orange tabular-nums md:mt-8 md:text-5xl xl:text-[64px] min-[87.5rem]:text-7xl',
+            shown
+              ? "transition-[font-variation-settings] duration-250 ease-[steps(4,end)] [font-variation-settings:'ELSH'_0]"
+              : "[font-variation-settings:'ELSH'_20]",
+          )}
+        >
+          <Roller
+            key={printed === null ? 'rest' : 'roll'}
+            value={shown ? text : text.replace(/\d/g, '0')}
+            step={TICK / 3}
+            stagger={TICK / 8}
+          />
+        </dd>
+        {item.note && <dd className="mt-3 font-mono text-xs text-lp-ink-2">{item.note}</dd>}
+      </div>,
+    );
+  }
+  const last = cells.pop();
 
   return (
-    <dl
+    <div
       ref={ref}
-      style={{ '--cols': columns } as CSSProperties}
-      className="grid grid-cols-2 gap-px border border-lp-line-strong bg-lp-line-strong lg:grid-cols-(--cols)"
+      className="grid grid-cols-2 gap-px border border-lp-line-strong bg-lp-line-strong md:grid-cols-5 xl:col-span-full xl:grid-cols-subgrid xl:gap-[normal] xl:border-0 xl:bg-transparent"
     >
-      {items.map((item, i) => {
-        const text = format.format(item.value);
-        const shown = printed === null || i < printed;
-
-        return (
-          <div
-            key={item.label}
-            className="flex flex-col bg-lp-paper p-4 max-lg:odd:last:col-span-2 md:p-5"
-          >
-            <dt className="text-[15px] leading-tight">{item.label}</dt>
-            <dd
-              className={cn(
-                'mt-5 font-pixel text-[28px] leading-none text-lp-orange tabular-nums md:mt-8 md:text-5xl lg:text-[56px] xl:text-7xl',
-                shown
-                  ? "transition-[font-variation-settings] duration-500 ease-[steps(4,end)] [font-variation-settings:'ELSH'_0]"
-                  : "[font-variation-settings:'ELSH'_20]",
-              )}
-            >
-              <Roller
-                key={printed === null ? 'rest' : 'roll'}
-                value={shown ? text : text.replace(/\d/g, '0')}
-                step={TICK / 2}
-                stagger={TICK / 4}
-              />
-            </dd>
-            {item.note && <dd className="mt-3 font-mono text-xs text-lp-ink-2">{item.note}</dd>}
-          </div>
-        );
-      })}
-    </dl>
+      {cells.length > 0 && (
+        <dl className="contents xl:grid xl:grid-cols-5 xl:gap-px xl:border xl:border-lp-line-strong xl:bg-lp-line-strong">
+          {cells}
+        </dl>
+      )}
+      <dl className="contents xl:col-start-2 xl:grid xl:border xl:border-lp-line-strong xl:bg-lp-line-strong">
+        {last}
+      </dl>
+    </div>
   );
 }

@@ -70,9 +70,10 @@ export function createSand(host: HTMLElement): () => void {
     const height = host.clientHeight;
     if (width === 0 || height === 0) return;
     const narrow = width < 640;
-    cellW = narrow ? 5 : 9;
+    cols = Math.floor(width / (narrow ? 5 : 9));
+    // the columns stretch a fraction of a pixel to fill the width, so the word meets both gutters
+    cellW = width / cols;
     cellH = narrow ? 6 : 12;
-    cols = Math.floor(width / cellW);
     rows = Math.floor(height / cellH);
     dpr = Math.min(window.devicePixelRatio, 2);
     canvas.width = Math.round(cols * cellW * dpr);
@@ -168,7 +169,7 @@ export function createSand(host: HTMLElement): () => void {
       const want = grain[i] ? 2 + (grain[i] - 1) * 3 + look : inside[i] ? GHOST : EMPTY;
       if (!all && want === drawn[i]) continue;
       drawn[i] = want;
-      const x = (i % cols) * w;
+      const x = Math.round((i % cols) * cellW * dpr);
       const y = Math.floor(i / cols) * h;
       ctx.clearRect(x, y, w, h);
       if (want === GHOST) {

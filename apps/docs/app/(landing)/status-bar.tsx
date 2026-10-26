@@ -20,7 +20,7 @@ export function StatusBar() {
         {/* decoration that follows the page, the figure links are the only part for assistive tech */}
         <p
           aria-hidden
-          className="flex min-w-0 flex-1 items-center gap-2 ps-(--lp-gutter) pe-3 md:w-56 md:flex-none md:border-e md:border-lp-line-strong lg:w-72"
+          className="flex min-w-0 flex-1 items-center gap-2 ps-(--lp-gutter) pe-3 md:border-e md:border-lp-line-strong lg:w-72 lg:flex-none xl:w-80"
         >
           <span className="text-lp-ink-2">status:</span>
           <Status />
@@ -86,7 +86,7 @@ function Figures() {
           href={`#${figure.id}`}
           aria-current={active === figure.n ? 'location' : undefined}
           className={cn(
-            'flex items-center border-e border-lp-line-strong px-2 hover:bg-lp-ink hover:text-lp-paper lg:px-2.5',
+            'flex items-center border-e border-lp-line-strong px-1.5 hover:bg-lp-ink hover:text-lp-paper lg:px-2.5',
             active === figure.n && 'bg-lp-yellow text-[#121210]',
           )}
         >

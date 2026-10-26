@@ -1,11 +1,11 @@
-import type { ReactNode } from 'react';
+import type { CSSProperties, ReactNode } from 'react';
 import { File as FileIcon, RotateCcw } from 'lucide-react';
 import pkg from 'fumadocs-ui/package.json';
 import { cn } from '@/lib/cn';
 import { copy } from '../../content';
 import { Figure, FigureHeader } from '../../ui/figure';
 import { Window } from '../../ui/window';
-import { EditLines, Imports } from './code';
+import { Editor } from './code';
 import { deliveries, type Plan, plans } from './data';
 import { Preview, type PreviewProps } from './preview';
 import { Stage } from './stage';
@@ -19,16 +19,13 @@ const previews: Record<Plan['id'], [PreviewProps, PreviewProps]> = {
 
 /** a part of the machine: in its block on a phone, against the tree's column from 1024px */
 function machine(className: string) {
-  return cn(
-    'absolute lg:col-start-2 lg:row-start-3 lg:row-end-4 xl:col-start-3 xl:row-start-1',
-    className,
-  );
+  return cn('absolute lg:col-start-2 lg:row-start-1 lg:row-end-2', className);
 }
 
 const chip =
-  'inline-flex h-7 items-center border border-lp-line-strong bg-lp-paper px-2.5 font-mono text-xs transition-none hover:bg-lp-ink hover:text-lp-paper focus-visible:outline focus-visible:outline-offset-2 focus-visible:outline-lp-ink aria-pressed:bg-lp-yellow aria-pressed:text-[#121210]';
+  'inline-flex h-7 items-center justify-center border border-lp-line-strong bg-lp-paper px-2.5 font-mono text-xs transition-none hover:bg-lp-ink hover:text-lp-paper focus-visible:outline focus-visible:outline-offset-2 focus-visible:outline-lp-ink aria-pressed:bg-lp-yellow aria-pressed:text-[#121210]';
 
-/** the split-flap file count on the hopper */
+/** the split-flap file count on the hopper, smaller on a phone's narrow one */
 function Counter({
   scene,
   count,
@@ -45,7 +42,7 @@ function Counter({
       <span
         key={i}
         data-flap
-        className="relative grid h-7 w-[18px] place-items-center overflow-hidden bg-lp-ink font-pixel text-[22px] leading-none text-lp-sun tabular-nums after:absolute after:inset-x-0 after:top-1/2 after:h-px after:bg-lp-paper dark:bg-lp-paper-2"
+        className="relative grid h-6 w-[15px] place-items-center overflow-hidden bg-lp-ink font-pixel text-[18px] leading-none text-lp-sun tabular-nums after:absolute after:inset-x-0 after:top-1/2 after:h-px after:bg-lp-paper md:h-7 md:w-[18px] md:text-[22px] dark:bg-lp-paper-2"
       >
         {digits[i]}
       </span>,
@@ -57,13 +54,13 @@ function Counter({
       data-scene={scene}
       hidden={scene > 0}
       className={cn(
-        'z-[6] flex items-center gap-2 border border-lp-line-strong bg-lp-paper px-3 py-1',
+        'z-[6] flex items-center gap-1.5 border border-lp-line-strong bg-lp-paper px-3 py-1 md:gap-2',
         className,
       )}
     >
       <span className="flex gap-px">{flaps}</span>
       {/* the plural keeps its width while the count is 1 */}
-      <span className="grid font-pixel text-xs text-lp-ink-2 *:col-start-1 *:row-start-1">
+      <span className="grid font-pixel text-[11px] text-lp-ink-2 *:col-start-1 *:row-start-1 md:text-xs">
         <span aria-hidden className="invisible">
           files
         </span>
@@ -104,29 +101,42 @@ export function Cli() {
         data-done={plan.done}
         data-fetch={plan.fetch}
         data-edit-name={plan.edit.name}
-        hidden={i > 0}
-        className="mt-6 lg:col-start-2 lg:row-start-3 lg:mt-(--cli-top) xl:col-start-3 xl:row-span-3 xl:row-start-1"
+        inert={i > 0}
+        className="col-start-1 row-start-2 mt-4 inert:invisible md:col-start-2 md:mt-6 lg:row-start-1 lg:mt-(--cli-top)"
       >
-        <Window data-tree title="my-app">
+        {/* a phone's window is short, a row cut in half at its foot: the list reads as one that scrolls */}
+        <Window data-tree title="my-app" className="h-[266px] md:h-full">
           <Tree entries={plan.tree} />
         </Window>
       </div>,
     );
+    // its editor and its page each share their cell with the other run's: switching keeps them
     columns.push(
-      <div
-        key={plan.id}
-        data-column={i}
-        hidden={i > 0}
-        className="mt-6 flex flex-col gap-4 lg:col-start-4 lg:row-start-3 lg:mt-(--cli-top) xl:col-start-5 xl:row-span-3 xl:row-start-1"
-      >
-        <Imports rewires={plan.rewires} />
-        <EditLines edit={plan.edit} />
-        <Window data-preview title="localhost:3000/docs">
-          <div className="grid *:col-start-1 *:row-start-1">
-            <div data-before className="invisible">
+      <div key={plan.id} data-column={i} inert={i > 0} className="contents inert:invisible">
+        <Editor
+          id={`cli-${plan.id}`}
+          sources={plan.sources}
+          rewires={plan.rewires}
+          edit={plan.edit}
+          className="col-start-1 row-start-1"
+        />
+        <Window
+          data-preview
+          title="localhost:3000/docs"
+          className="col-start-1 row-start-2 min-h-0 overflow-hidden"
+        >
+          {/* the page before your edit and after it, in one place; `data-edited` says which shows.
+              Only ever hidden, never forced visible, so an inactive run's page stays unseen. A
+              short screen's window shows the top of the page, cut off like a browser's */}
+          <div
+            data-page
+            data-edited
+            className="group grid min-h-0 flex-1 *:col-start-1 *:row-start-1"
+          >
+            <div className="group-data-edited:invisible">
               <Preview {...previews[plan.id][0]} />
             </div>
-            <div data-after>
+            <div data-after className="group-[:not([data-edited])]:invisible">
               <Preview {...previews[plan.id][1]} />
             </div>
           </div>
@@ -139,51 +149,66 @@ export function Cli() {
         scene={i}
         count={plan.files.length}
         className={machine(
-          'top-[40px] right-[8px] lg:top-[calc(var(--cli-top)_-_48px)] lg:right-auto lg:left-[21px]',
+          'right-4 -bottom-1.5 md:right-[130px] md:-bottom-3.5 md:translate-x-1/2 lg:top-[calc(var(--cli-top)_-_48px)] lg:right-auto lg:bottom-auto lg:left-[21px] lg:translate-x-0',
         )}
       />,
     );
+    // a character per span: typing shows them in place, so the command never reflows
+    const text = `npx @fumadocs/cli ${plan.args}`;
+    const characters: ReactNode[] = [];
+    for (let n = 0; n < text.length; n++) {
+      characters.push(
+        <span key={n} style={{ '--i': n } as CSSProperties}>
+          {text[n]}
+        </span>,
+      );
+    }
     commands.push(
-      <span key={plan.id} aria-hidden className="invisible pe-[0.6em]">
-        npx @fumadocs/cli {plan.args}
-      </span>,
+      <code
+        key={plan.id}
+        data-command={i}
+        inert={i > 0}
+        className="col-start-1 row-start-1 block inert:invisible *:[opacity:clamp(0,calc(var(--typed,999)_-_var(--i)),1)]"
+      >
+        {characters}
+      </code>,
     );
     chips.push(
       <button key={plan.id} type="button" data-play={i} aria-pressed={i === 0} className={chip}>
-        {plan.args}
+        {plan.label}
       </button>,
     );
   }
 
   return (
     <Figure n={8} id="cli" aria-label="CLI" status={plans[0].done}>
-      <Stage>
+      {/* the section's text and the runs to pick; the stage under them plays the one picked */}
+      <div className="flex flex-col gap-8 px-(--lp-gutter) pt-16 pb-10 lg:flex-row lg:items-end lg:justify-between lg:gap-16">
         <FigureHeader
           data-header
           lead={copy.cli.lead}
           title={copy.cli.title}
           description={copy.cli.description}
-          className="lg:contents lg:[&>h2]:col-start-1 lg:[&>h2]:row-span-2 lg:[&>h2]:row-start-1 lg:[&>h2]:self-end lg:[&>p]:col-span-3 lg:[&>p]:col-start-2 lg:[&>p]:row-start-1 lg:[&>p]:self-end xl:col-start-1 xl:row-start-1 xl:flex xl:max-w-[340px]"
         />
-        <div className="mt-6 flex flex-col gap-3 lg:col-span-3 lg:col-start-2 lg:row-start-2 lg:mt-5 lg:flex-row lg:flex-wrap lg:items-center xl:col-span-1 xl:col-start-1 xl:row-start-2 xl:mt-6 xl:flex-col xl:items-start xl:self-start">
-          <div className="flex h-11 w-fit max-w-full items-stretch border border-lp-line-strong bg-lp-paper">
-            <code className="flex min-w-0 items-center px-3 font-mono text-sm whitespace-nowrap">
-              <span aria-hidden className="me-2 text-lp-ink-2 select-none">
+        {/* the runs and the command share both edges: the stage's width on a phone and a tablet,
+            the command's from 1024px, against the stage's right edge */}
+        <div className="flex flex-col gap-3 lg:shrink-0">
+          <div className="grid grid-cols-2 gap-2 [@media(scripting:none)]:hidden">{chips}</div>
+          <div className="flex max-w-full items-stretch border border-lp-line-strong bg-lp-paper">
+            <div className="flex min-w-0 flex-1 gap-2 px-3 py-[11px] font-mono text-[13px] leading-5 sm:text-sm">
+              <span aria-hidden className="text-lp-ink-2 select-none">
                 $
               </span>
-              {/* as wide as the longest command, switching commands moves nothing */}
-              <span className="grid *:col-start-1 *:row-start-1">
+              {/* both commands in one place: the box keeps the size of the longer one */}
+              <span className="relative grid min-w-0">
                 {commands}
-                <span className="flex justify-self-start">
-                  <span data-command>npx @fumadocs/cli {plans[0].args}</span>
-                  <span
-                    data-caret
-                    aria-hidden
-                    className="lp-caret invisible ms-px h-[1.1em] w-[0.6em] bg-current"
-                  />
-                </span>
+                <span
+                  data-caret
+                  aria-hidden
+                  className="lp-caret invisible absolute top-0 left-0 h-[1.1em] w-[0.6em] bg-current"
+                />
               </span>
-            </code>
+            </div>
             <button
               type="button"
               data-replay
@@ -193,29 +218,35 @@ export function Cli() {
               <RotateCcw aria-hidden className="size-4" />
             </button>
           </div>
-          <div className="flex flex-wrap gap-2 [@media(scripting:none)]:hidden">{chips}</div>
         </div>
-        {/* on a phone the machine has a block of its own above your project; from 1024px its
-            parts are placed against the tree's column */}
-        <div className="relative mt-6 h-[520px] lg:contents">
+      </div>
+      <Stage>
+        {/* on a phone and a tablet the machine has a block of its own above your project: the
+            drive unit and its beam on top, the crate and the hopper under it; from 1024px it
+            stands left of your project, its riser climbing to the hopper */}
+        <div className="relative col-start-1 row-start-1 h-[360px] md:col-span-2 lg:contents">
           <div
             data-crate
             className={machine(
-              'bottom-0 left-0 h-[184px] w-[180px] lg:right-[calc(100%_+_50px)] lg:left-auto lg:h-[190px] lg:w-[220px] xl:bottom-[30px] xl:w-[250px]',
+              'bottom-0 left-0.5 h-[160px] w-[min(180px,calc(50%-8px))] lg:right-[calc(100%_+_40px)] lg:left-auto lg:h-[180px] lg:w-[188px] xl:h-[190px] xl:w-[218px]',
             )}
           >
             <p
               data-label
-              className="absolute bottom-[24px] left-[18px] z-[6] flex flex-col gap-1 border border-lp-line-strong bg-lp-paper px-3 py-2 leading-none lg:bottom-[30px] lg:left-[22px] xl:bottom-[34px] xl:left-[24px]"
+              className="absolute bottom-4 left-4 z-[6] flex flex-col gap-1 border border-lp-line-strong bg-lp-paper px-3 py-2 leading-none lg:bottom-[38px] lg:py-1 xl:bottom-[36px] xl:left-[22px] xl:py-1.5"
             >
-              <span className="font-mono text-[13px]">fumadocs-ui</span>
-              <span className="font-pixel text-sm text-lp-orange">{pkg.version}</span>
+              <span className="font-mono text-[13px] lg:text-[10px] xl:text-[13px]">
+                fumadocs-ui
+              </span>
+              <span className="font-pixel text-sm text-lp-orange lg:text-[11px] xl:text-sm">
+                {pkg.version}
+              </span>
             </p>
           </div>
           <p
             data-plate
             className={machine(
-              'top-[8px] left-[44px] z-[6] border border-lp-line-strong bg-lp-paper px-3 py-1 font-mono text-[11px] leading-none whitespace-nowrap text-lp-ink-2 lg:top-[calc(var(--cli-top)_-_80px)] lg:right-[calc(100%_+_69px)] lg:left-auto',
+              'top-2 left-2 z-[6] border border-lp-line-strong bg-lp-paper px-3 py-1 font-mono text-[11px] leading-none whitespace-nowrap text-lp-ink-2 lg:top-[calc(var(--cli-top)_-_80px)] lg:right-[calc(100%_+_69px)] lg:left-auto lg:text-[10px] xl:text-[11px]',
             )}
           >
             fumadocs.dev/registry
@@ -223,7 +254,9 @@ export function Cli() {
           {counters}
         </div>
         {cells}
-        {columns}
+        <div className="col-start-1 row-start-3 mt-4 grid min-h-0 grid-cols-[minmax(0,1fr)] grid-rows-[auto_minmax(0,1fr)] gap-4 md:row-start-2 md:mt-6 md:gap-6 lg:col-start-4 lg:row-start-1 lg:mt-0">
+          {columns}
+        </div>
         <div data-cards aria-hidden className="pointer-events-none absolute inset-0 z-[5]">
           {cards}
         </div>

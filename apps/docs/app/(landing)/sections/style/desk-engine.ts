@@ -1,66 +1,82 @@
 import { DITHER_MASKS } from '../../lib/bayer';
-import { createIntent } from './intent';
-import { ropePath, stepRopes } from './rope';
+import { ropePath, type Ropes, stepRopes, tensionOf, tieAt } from './rope';
 import { createSprings, due, settleSprings, STEP, stepSprings } from './spring';
 import {
-  BOARD,
   cableEnds,
+  centre,
   createPose,
   hangRopes,
   type Hung,
   hubTransform,
+  plugTransform,
   pose,
   shadowLevel,
   shadowTransform,
-  shiftX,
-  shiftY,
   SLOTS,
-  WINDOW,
   windowTransform,
 } from './board';
 
 export interface DeskEngine {
-  /** the selection changed, from here or from React */
+  /** the selection changed; `-1` unplugs every cable */
   select: (index: number) => void;
   destroy: () => void;
 }
 
-/** the caption by a window, in px: the hover target reaches out to it */
-const CAPTION = 28;
+/** the rope point a cable's tie holds, counted from the window */
+const TIE = 4;
+/** the pose's spring, per second: underdamped, so a window overshoots its new size and settles */
+const STIFFNESS = 240;
+const DAMPING = 17;
+/**
+ * The share of the way a cable's length goes toward its new pose's in a step, about 60ms in all:
+ * let out at once, a taut cable has nowhere to put the slack and buckles.
+ */
+const PAY = 1 - Math.exp(-STEP / 0.06);
+
+function tieTransform(ropes: Ropes, cable: number): string {
+  const [x, y, deg] = tieAt(ropes, cable, TIE);
+  return `translate(${x.toFixed(1)} ${y.toFixed(1)}) rotate(${deg.toFixed(1)})`;
+}
 
 /**
- * The desk as a physical thing: the windows ride springs (slide, scale, lift), the cables are
- * ropes between live ports. The window under the pointer lifts at once; held there, it is chosen:
- * it grows toward the hub, its cable pulls taut and the hub leans to it, its neighbours make room.
- * Hover targets are the windows' resting places in the current pose, never their moving boxes.
+ * The desk as a physical thing: the windows and the hub ride springs, the cables are ropes between
+ * live ports. A new choice grows its window toward the hub, past its size and back, its cable
+ * pulls taut; the others step back, the hub steps out of its way, their cables sag.
  */
 export function createDeskEngine(
   board: HTMLElement,
   selected: number,
   /** the cables hanging still in that pose, as the server settled them */
   hung: Hung,
-  onSelect: (index: number) => void,
+  /** how taut the chosen cable is, 0 to 1, for the gauge */
+  onTension: (tension: number) => void,
 ): DeskEngine {
   const windows: HTMLElement[] = [];
   const shadows: HTMLElement[] = [];
   const captions: HTMLElement[] = [];
-  const cables: SVGPathElement[] = [];
+  /** each cable's paths: its sheath and its core */
+  const cables: SVGPathElement[][] = [];
+  const ties: SVGGElement[] = [];
+  /** each cable's plugs, on the window and on the hub */
+  const plugs: SVGGElement[] = [];
   for (const slot of SLOTS) {
     const element = board.querySelector<HTMLElement>(`[data-slot="${slot.id}"]`)!;
     windows.push(element);
     shadows.push(element.querySelector<HTMLElement>('[data-shadow]')!);
     captions.push(element.querySelector<HTMLElement>('[data-caption]')!);
-    cables.push(board.querySelector<SVGPathElement>(`[data-cable="${slot.id}"]`)!);
+    cables.push(Array.from(board.querySelectorAll<SVGPathElement>(`[data-cable="${slot.id}"]`)));
+    ties.push(board.querySelector<SVGGElement>(`[data-tie="${slot.id}"]`)!);
+    for (const plug of board.querySelectorAll<SVGGElement>(`[data-plug="${slot.id}"]`))
+      plugs.push(plug);
   }
   const hub = board.querySelector<HTMLElement>('[data-hub]')!;
   const reduce = matchMedia('(prefers-reduced-motion: reduce)');
 
   let current = selected;
-  let hovered = -1;
-  const target = pose(current, hovered, createPose());
-  /** slides and the hub, scales, lifts */
-  const move = createSprings(SLOTS.length + 2);
-  const size = createSprings(SLOTS.length, 1);
+  const target = pose(current, createPose());
+  /** the windows' scales and the hub's `x, y` share a spring, so every gap opens and closes in step */
+  const scale = createSprings(SLOTS.length, 1);
+  const shift = createSprings(2);
   const lift = createSprings(SLOTS.length);
   let ropes = hangRopes(target, hung);
   const at = createPose();
@@ -68,39 +84,34 @@ export function createDeskEngine(
   sync(true);
   read();
 
-  let scale = board.clientWidth / BOARD.w || 1;
   let raf = 0;
   const clock = { last: 0, acc: 0 };
   let onScreen = false;
-  /** where the pointer was last, a move to the same point is the page scrolling under it */
-  let px = -1;
-  let py = -1;
 
   function sync(jump: boolean) {
     for (let i = 0; i < SLOTS.length; i++) {
-      move.target[i] = target.windows[i * 3];
-      size.target[i] = target.windows[i * 3 + 1];
+      scale.target[i] = target.windows[i * 3 + 1];
       lift.target[i] = target.windows[i * 3 + 2];
-      ropes.rest[i] = target.length[i];
     }
-    move.target[SLOTS.length] = target.hub[0];
-    move.target[SLOTS.length + 1] = target.hub[1];
+    shift.target[0] = target.hub[0];
+    shift.target[1] = target.hub[1];
     if (jump) {
-      settleSprings(move);
-      settleSprings(size);
+      settleSprings(scale);
+      settleSprings(shift);
       settleSprings(lift);
+      ropes.rest.set(target.length);
     }
   }
 
   /** the springs' values as a pose, and the cables' ends on it */
   function read() {
     for (let i = 0; i < SLOTS.length; i++) {
-      at.windows[i * 3] = move.value[i];
-      at.windows[i * 3 + 1] = size.value[i];
+      at.windows[i * 3 + 1] = scale.value[i];
       at.windows[i * 3 + 2] = Math.max(0, lift.value[i]);
     }
-    at.hub[0] = move.value[SLOTS.length];
-    at.hub[1] = move.value[SLOTS.length + 1];
+    centre(at.windows);
+    at.hub[0] = shift.value[0];
+    at.hub[1] = shift.value[1];
     for (let i = 0; i < SLOTS.length; i++) cableEnds(i, at.windows, at.hub, ropes.ends, i * 4);
   }
 
@@ -117,26 +128,38 @@ export function createDeskEngine(
         shadows[i].style.maskImage = DITHER_MASKS[level];
       }
       shadows[i].style.transform = shadowTransform(SLOTS[i], l);
-      cables[i].setAttribute('d', ropePath(ropes, i));
+      const d = ropePath(ropes, i);
+      for (const path of cables[i]) path.setAttribute('d', d);
+      ties[i].setAttribute('transform', tieTransform(ropes, i));
+      plugs[i * 2].setAttribute('transform', plugTransform(i, ropes.ends, 0));
+      plugs[i * 2 + 1].setAttribute('transform', plugTransform(i, ropes.ends, 1));
     }
     hub.style.transform = hubTransform(at.hub[0], at.hub[1]);
+    onTension(current < 0 ? 0 : tensionOf(ropes, current));
   }
 
   function frame(now: number) {
     raf = 0;
     let energy = Infinity;
     let moved = Infinity;
+    let paying = Infinity;
     for (let i = due(clock, now); i > 0; i--) {
       energy = Math.max(
-        stepSprings(move, STEP, 220, 22),
-        stepSprings(size, STEP, 260, 22),
+        stepSprings(scale, STEP, STIFFNESS, DAMPING),
+        stepSprings(shift, STEP, STIFFNESS, DAMPING),
         stepSprings(lift, STEP, 320, 26),
       );
+      paying = 0;
+      for (let c = 0; c < SLOTS.length; c++) {
+        const left = target.length[c] - ropes.rest[c];
+        ropes.rest[c] += left * PAY;
+        paying = Math.max(paying, Math.abs(left));
+      }
       read();
       moved = stepRopes(ropes);
     }
     write();
-    if (energy > 0.004 || moved > 0.01) schedule();
+    if (energy > 0.004 || moved > 0.01 || paying > 0.01) schedule();
     else clock.last = clock.acc = 0;
   }
 
@@ -144,81 +167,6 @@ export function createDeskEngine(
     if (raf === 0 && onScreen && !document.hidden) raf = requestAnimationFrame(frame);
   }
 
-  function update() {
-    pose(current, hovered, target);
-    if (reduce.matches) {
-      sync(true);
-      read();
-      // still: the cables hang in their new pose at once
-      ropes = hangRopes(target);
-      write();
-      return;
-    }
-    sync(false);
-    schedule();
-  }
-
-  /** the window whose resting place in the current pose holds the point, with its caption */
-  function hit(clientX: number, clientY: number): number {
-    const box = board.getBoundingClientRect();
-    const x = (clientX - box.left) / scale;
-    const y = (clientY - box.top) / scale;
-    const caption = CAPTION / scale;
-    for (let i = 0; i < SLOTS.length; i++) {
-      const s = target.windows[i * 3 + 1];
-      const left = SLOTS[i].x + shiftX(SLOTS[i], target.windows[i * 3], s);
-      const top = SLOTS[i].y + shiftY(SLOTS[i], s, 0);
-      const above = SLOTS[i].row === 0 ? caption : 0;
-      const below = SLOTS[i].row === 1 ? caption : 0;
-      if (
-        x >= left &&
-        x <= left + WINDOW.w * s &&
-        y >= top - above &&
-        y <= top + WINDOW.h * s + below
-      )
-        return i;
-    }
-    return -1;
-  }
-
-  function hover(index: number) {
-    if (index === hovered) return;
-    hovered = index;
-    update();
-  }
-
-  const intent = createIntent<number>((index) => {
-    if (index !== current) onSelect(index);
-  });
-
-  function onMove(event: PointerEvent) {
-    if (event.pointerType === 'touch') return;
-    const index = hit(event.clientX, event.clientY);
-    hover(index);
-    // the page scrolled under a still pointer: it lifts what is there, it chooses nothing
-    if (event.clientX === px && event.clientY === py) return;
-    px = event.clientX;
-    py = event.clientY;
-    intent.move(index >= 0 && index !== current ? index : null);
-  }
-
-  function onOver(event: PointerEvent) {
-    if (event.pointerType !== 'touch') hover(hit(event.clientX, event.clientY));
-  }
-
-  function onLeave() {
-    intent.cancel();
-    px = py = -1;
-    hover(-1);
-  }
-
-  board.addEventListener('pointermove', onMove);
-  board.addEventListener('pointerover', onOver);
-  board.addEventListener('pointerleave', onLeave);
-
-  const resize = new ResizeObserver(() => {
-    scale = board.clientWidth / BOARD.w || 1;
-  });
   const visibility = new IntersectionObserver(([entry]) => {
     onScreen = entry.isIntersecting;
     if (onScreen) schedule();
@@ -228,7 +176,6 @@ export function createDeskEngine(
       clock.last = 0;
     }
   });
-  resize.observe(board);
   visibility.observe(board);
   document.addEventListener('visibilitychange', schedule);
 
@@ -236,16 +183,20 @@ export function createDeskEngine(
     select(index) {
       if (index === current) return;
       current = index;
-      intent.cancel();
-      update();
+      pose(current, target);
+      if (reduce.matches) {
+        sync(true);
+        read();
+        // still: the cables hang in their new pose at once
+        ropes = hangRopes(target);
+        write();
+        return;
+      }
+      sync(false);
+      schedule();
     },
     destroy() {
       cancelAnimationFrame(raf);
-      intent.cancel();
-      board.removeEventListener('pointermove', onMove);
-      board.removeEventListener('pointerover', onOver);
-      board.removeEventListener('pointerleave', onLeave);
-      resize.disconnect();
       visibility.disconnect();
       document.removeEventListener('visibilitychange', schedule);
     },

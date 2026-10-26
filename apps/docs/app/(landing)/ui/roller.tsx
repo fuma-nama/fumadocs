@@ -16,71 +16,74 @@ interface RollerProps {
 
 /**
  * Characters that tick to a new value cell by cell, like an odometer. Works with proportional
- * fonts (Geist Pixel is one): a cell takes the width of its final character, which is also its
- * resting style, so a step easing that lands a hair before its end never leaves the previous one.
+ * fonts (Geist Pixel is one): while it rolls, a cell takes the width of its final character and
+ * its glyph is swapped in place on each tick, by one frame loop for the whole value. Plain text
+ * before and after a roll.
  */
 export function Roller({ value, className, step = 36, stagger = 24 }: RollerProps) {
   const reduced = useReducedMotion();
-  const [state, setState] = useState({ value, from: value, id: 0 });
-  if (state.value !== value) setState({ value, from: state.value, id: state.id + 1 });
+  // `from` is the value it rolls from, `null` at rest
+  const [roll, setRoll] = useState<{ value: string; from: string | null; id: number }>({
+    value,
+    from: null,
+    id: 0,
+  });
+  if (roll.value !== value) setRoll({ value, from: reduced ? null : roll.value, id: roll.id + 1 });
+  const rolling = roll.from !== null && !reduced;
+  const cells = useRef<HTMLSpanElement>(null);
 
-  // plain text until the first roll: a cell per character only once one can move
-  if (state.id === 0 || reduced) {
+  useLayoutEffect(() => {
+    if (!rolling) return;
+    const from = roll.from!;
+    const row = cells.current!.children;
+    const glyphs: Text[] = [];
+    const strips: string[][] = [];
+    for (let i = 0; i < row.length; i++) {
+      const was = from[i] ?? ' ';
+      const to = roll.value[i] ?? ' ';
+      glyphs.push(row[i].lastChild!.firstChild as Text);
+      strips.push(was === to ? [to] : path(was, to));
+    }
+    // tick `t` of cell `i` lands at `i * stagger + t * step` after the roll's first frame
+    let start = -1;
+    let frame = requestAnimationFrame(function tick(now) {
+      if (start < 0) start = now;
+      let moving = false;
+      for (let i = 0; i < glyphs.length; i++) {
+        const strip = strips[i];
+        const at = Math.min(
+          strip.length - 1,
+          Math.floor(Math.max(0, now - start - i * stagger) / step),
+        );
+        if (at < strip.length - 1) moving = true;
+        if (glyphs[i].data !== strip[at]) glyphs[i].data = strip[at];
+      }
+      if (moving) frame = requestAnimationFrame(tick);
+      else setRoll((current) => (current === roll ? { ...current, from: null } : current));
+    });
+    return () => cancelAnimationFrame(frame);
+  }, [roll, rolling, step, stagger]);
+
+  if (!rolling) {
     return <span className={cn('inline-flex whitespace-pre', className)}>{value}</span>;
   }
 
-  const cells = [];
-  const length = Math.max(state.from.length, value.length);
+  const items = [];
+  const length = Math.max(roll.from!.length, value.length);
   for (let i = 0; i < length; i++) {
-    const from = state.from[i] ?? ' ';
-    const to = value[i] ?? ' ';
-    cells.push(
-      <Cell
-        key={`${state.id}:${i}`}
-        strip={from === to ? [to] : path(from, to)}
-        step={step}
-        delay={i * stagger}
-      />,
+    items.push(
+      <span key={`${roll.id}:${i}`} className="relative h-[1lh] overflow-hidden">
+        <span className="invisible">{value[i] ?? ' '}</span>
+        <span className="absolute inset-x-0 top-0 flex justify-center">{roll.from![i] ?? ' '}</span>
+      </span>,
     );
   }
 
   return (
     <span className={cn('inline-flex whitespace-pre', className)}>
       <span className="sr-only">{value}</span>
-      <span aria-hidden className="inline-flex">
-        {cells}
-      </span>
-    </span>
-  );
-}
-
-function Cell({ strip, step, delay }: { strip: string[]; step: number; delay: number }) {
-  const ref = useRef<HTMLSpanElement>(null);
-  const ticks = strip.length - 1;
-  const end = `translateY(${(-100 * ticks) / strip.length}%)`;
-
-  useLayoutEffect(() => {
-    if (ticks === 0) return;
-    const animation = ref.current!.animate([{ transform: 'translateY(0)' }, { transform: end }], {
-      duration: ticks * step,
-      delay,
-      easing: `steps(${ticks}, end)`,
-      fill: 'backwards',
-    });
-    return () => animation.cancel();
-  }, [ticks, end, step, delay]);
-
-  return (
-    <span className="relative h-[1lh] overflow-hidden">
-      <span className="invisible">{strip[ticks]}</span>
-      <span
-        ref={ref}
-        style={{ transform: end }}
-        className="absolute inset-x-0 top-0 flex flex-col items-center"
-      >
-        {strip.map((char, i) => (
-          <span key={i}>{char}</span>
-        ))}
+      <span ref={cells} aria-hidden className="inline-flex">
+        {items}
       </span>
     </span>
   );

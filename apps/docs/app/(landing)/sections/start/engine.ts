@@ -56,6 +56,10 @@ export function createStart(el: StartElements): () => void {
   let stickyTop = 0;
   let range = 1;
   let pinned = false;
+  /** the call to action stands beside the terminal, over the hills */
+  let beside = false;
+  /** its edges and foot on the stage, and how far the valley under it is open */
+  const clear: [number, number, number, number] = [0, 0, 0, 0];
 
   let target = 0;
   let progress = 0;
@@ -100,6 +104,12 @@ export function createStart(el: StartElements): () => void {
       h: box.height,
     };
     pinned = wide.matches && !reduce.matches;
+    beside = wide.matches;
+    const cta = el.cta.getBoundingClientRect();
+    const foot = items[items.length - 1];
+    clear[0] = cta.left - stage.left;
+    clear[1] = cta.right - stage.left;
+    clear[2] = cta.top - stage.top + foot.offsetTop + foot.offsetHeight + 16;
     // the terminal takes the slot's left part, the moon rises in the rest
     final = framedView(width, height, { ...slot, w: slot.w * 0.8 });
     inside = insideView(width, height);
@@ -177,6 +187,12 @@ export function createStart(el: StartElements): () => void {
     shader!.set('uOpen', open);
 
     reveal(!pinned || (shown ? e > 0.6 : e > 0.8));
+    // the hills under the call to action open into a valley as it rises
+    const opening = beside && shown ? 1 : 0;
+    clear[3] = pinned ? clear[3] + (opening - clear[3]) * (1 - Math.exp(-dt / 0.12)) : opening;
+    if (Math.abs(opening - clear[3]) < 1e-3) clear[3] = opening;
+    else moving = true;
+    shader!.set('uClear', clear);
     readout(view, pinned && dolly > 0.5);
     if (moving) shader!.invalidate();
   }
@@ -304,6 +320,8 @@ export function createStart(el: StartElements): () => void {
   resize.observe(el.stage);
   resize.observe(el.pin);
   resize.observe(root);
+  // the title and description rewrap as fonts load, moving the call to action's foot
+  resize.observe(items[0].parentElement!);
   theme.observe(root, { attributes: true, attributeFilter: ['class'] });
   visibility.observe(el.stage);
   window.addEventListener('scroll', scroll, { passive: true });

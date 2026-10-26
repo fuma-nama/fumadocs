@@ -7,14 +7,27 @@
   --cols: 1;
   --rows: 12;
   --bt-lead: 250ms;
-  /* the 96x40 cells of a mechanism */
+}
+
+/* the 96x40 cells of a mechanism */
+.bt-board,
+.bt-more {
   --bt-stage: 288px;
+}
+
+/* row 13 at rest (reduced motion): two names to each column of the board */
+.bt-more {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
 }
 
 @media (min-width: 640px) {
   .bt-board {
     --cols: 2;
     --rows: 6;
+  }
+
+  .bt-more {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
   }
 }
 
@@ -24,12 +37,35 @@
     --rows: 4;
     --bt-lead: 500ms;
   }
+
+  .bt-more {
+    grid-template-columns: repeat(6, minmax(0, 1fr));
+  }
 }
 
 @media (min-width: 1280px) {
   .bt-board {
     --cols: 4;
     --rows: 3;
+  }
+
+  .bt-more {
+    grid-template-columns: repeat(8, minmax(0, 1fr));
+  }
+}
+
+/* the last column ends on the sheet's wider gutter: room for a mechanism between two gutters */
+@media (min-width: 1400px) {
+  .bt-board {
+    grid-template-columns:
+      repeat(3, minmax(0, 1fr))
+      minmax(calc(var(--bt-stage) + 2 * var(--lp-gutter)), 1fr);
+  }
+
+  .bt-more {
+    grid-template-columns:
+      repeat(6, minmax(0, 1fr))
+      repeat(2, minmax(calc(var(--bt-stage) / 2 + var(--lp-gutter)), 1fr));
   }
 }
 
@@ -368,18 +404,38 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .bt-track {
-    flex-wrap: wrap;
-    width: auto;
-    animation: none;
+  .bt-more {
+    display: grid;
   }
 
+  .bt-more > p {
+    border-inline-end-width: 0;
+  }
+
+  .bt-more :is(.bt-marquee, .bt-track),
   .bt-track > ul {
-    flex-wrap: wrap;
+    display: contents;
+  }
+
+  .bt-track {
+    animation: none;
   }
 
   .bt-track > ul + ul {
     display: none;
+  }
+
+  /*
+   * each name on its column's content edge, like the titles above, its highlight bleeding past
+   * it; a size down so the longest one fits half a column
+   */
+  .bt-track a {
+    width: max-content;
+    height: 36px;
+    margin-inline-start: calc(var(--lp-gutter) - 8px);
+    padding-inline: 8px;
+    font-size: 12px;
+    white-space: nowrap;
   }
 
   .bt-board :is(.bt-a, .bt-blink),

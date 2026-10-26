@@ -27,7 +27,7 @@ export function Command({ command, caret = false, className, ...props }: Command
         className,
       )}
     >
-      <code className="flex min-w-0 flex-1 items-center gap-2 px-3 font-mono text-sm whitespace-nowrap">
+      <code className="flex min-w-0 flex-1 items-center gap-2 px-3 font-mono text-sm whitespace-nowrap max-[359px]:text-[13px]">
         <span aria-hidden className="text-lp-ink-2 select-none">
           $
         </span>

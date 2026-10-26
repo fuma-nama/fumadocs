@@ -36,6 +36,21 @@ export const SHADCN_NOTE = "shadcn/ui takes your app's theme; here, this page's.
 
 export type LayoutId = 'docs' | 'notebook' | 'flux' | 'glass' | 'spacious' | 'home';
 
+export const TABS = ['layouts', 'story', 'openapi', 'graphql', 'asyncapi'] as const;
+
+export type TabId = (typeof TABS)[number];
+
+/** the tabs that frame a demo page */
+export type DemoId = Exclude<TabId, 'layouts'>;
+
+/** where each demo's UI comes from, the monitor's title; the layouts name theirs */
+export const SOURCES: Record<DemoId, string> = {
+  story: '@fumadocs/story',
+  openapi: 'fumadocs-openapi/ui',
+  graphql: '@fumadocs/graphql/ui',
+  asyncapi: '@fumadocs/asyncapi/ui',
+};
+
 /** values of a preset, in the order of `InkTable.tokens` */
 export interface Ink {
   light: string[];

@@ -1,11 +1,10 @@
 import Image from 'next/image';
-import { cn } from '@/lib/cn';
 import type { Quote } from '../../content';
 
 /** testimonials as a notification feed */
-export function Wire({ quotes, className }: { quotes: Quote[]; className?: string }) {
+export function Wire({ quotes }: { quotes: Quote[] }) {
   return (
-    <div className={cn('grid gap-2 md:grid-cols-2 xl:grid-cols-1', className)}>
+    <div className="grid gap-2 md:grid-cols-2 xl:grid-cols-1">
       {quotes.map((quote) => (
         <figure key={quote.name} className="flex flex-col border border-lp-line-strong bg-lp-paper">
           <blockquote className="flex-1 px-4 pt-3.5 pb-4 text-[15px] leading-normal text-pretty">

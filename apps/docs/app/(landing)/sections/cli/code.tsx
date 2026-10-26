@@ -1,10 +1,10 @@
 import type { ComponentProps, ReactNode } from 'react';
 import { cn } from '@/lib/cn';
 import { Window } from '../../ui/window';
-import type { Edit, Rewire } from './data';
+import type { Edit, Rewire, Source } from './data';
 
-const KEYWORDS = /\b(import|from|export|function|return)\b/g;
-const SEPARATORS = "/-[] '";
+const KEYWORDS = /\b(import|from|export|function|return|default)\b/g;
+const SEPARATORS = "/-[] '.";
 
 /** a piece of code, keywords dimmed */
 function tone(code: string): ReactNode[] {
@@ -24,12 +24,10 @@ function tone(code: string): ReactNode[] {
 }
 
 /**
- * `code` with `from` changed to `to`, as it reads after: the characters that change are a
- * `data-cut` span that knows both versions, so the scene can write them again. Both versions lie
- * under it unseen, so the line keeps the box of the longer one while it is rewritten.
+ * `code` with `from` in it changed to `to`, in pieces: what stays before and after, and the part
+ * that changes, kept to whole path segments and words (`1.75` -> `2.5` changes it all)
  */
-function Changed({ code, from, to }: { code: string; from: string; to: string }) {
-  // the common start and end, kept to whole path segments and words: `1.75` -> `2.5` changes it all
+function split(code: string, from: string, to: string) {
   let head = 0;
   while (head < from.length && head < to.length && from[head] === to[head]) head++;
   while (head > 0 && !SEPARATORS.includes(from[head - 1])) head--;
@@ -42,60 +40,85 @@ function Changed({ code, from, to }: { code: string; from: string; to: string })
     tail++;
   while (tail > 0 && !SEPARATORS.includes(from[from.length - tail])) tail--;
   const at = code.indexOf(from);
-  const before = code.slice(0, at);
-  const after = code.slice(at + from.length);
+  return {
+    before: code.slice(0, at) + from.slice(0, head),
+    old: from.slice(head, from.length - tail),
+    next: to.slice(head, to.length - tail),
+    after: from.slice(from.length - tail) + code.slice(at + from.length),
+  };
+}
+
+/**
+ * The line as it reads after the change: the part that changes is a `data-cut` span that knows
+ * both versions, so the scene can write it again. The versions it shows lie under it unseen, so the
+ * line keeps the box of the longer one while it is rewritten; an `added` line is typed from
+ * nothing, it only ever shows the new one.
+ */
+function Changed({
+  code,
+  from,
+  to,
+  added = false,
+}: {
+  code: string;
+  from: string;
+  to: string;
+  added?: boolean;
+}) {
+  const { before, old, next, after } = split(code, from, to);
   return (
     <code className="grid *:col-start-1 *:row-start-1">
+      {!added && (
+        <span aria-hidden className="invisible">
+          {before}
+          {old}
+          {after}
+        </span>
+      )}
       <span aria-hidden className="invisible">
         {before}
-        {from}
-        {after}
-      </span>
-      <span aria-hidden className="invisible">
-        {before}
-        {to}
+        {next}
         {after}
       </span>
       <span>
         {tone(before)}
-        {to.slice(0, head)}
-        <span
-          data-cut
-          data-old={from.slice(head, from.length - tail)}
-          data-new={to.slice(head, to.length - tail)}
-        >
-          {to.slice(head, to.length - tail)}
+        <span data-cut data-old={old} data-new={next}>
+          {next}
         </span>
-        {to.slice(to.length - tail)}
         {after}
       </span>
     </code>
   );
 }
 
-const text = 'font-mono text-xs leading-5 [font-variant-ligatures:none]';
+const text =
+  'font-mono text-[11px] leading-4 [font-variant-ligatures:none] md:text-xs md:leading-5';
 
 /**
  * A numbered line of code as an editor soft-wraps it: the number is pseudo content (a copy takes the
- * code only), the indent is padding and a wrapped row hangs 2 columns in, so no space hangs at its end.
+ * code only), then the diff's sign, the indent is padding and a wrapped row hangs 2 columns in.
  */
 function Line({
   n,
   code,
+  sign,
   className,
   children,
   ...props
-}: ComponentProps<'div'> & { n: number; code: string }) {
+}: ComponentProps<'div'> & { n: number; code: string; sign?: string }) {
   const indent = code.length - code.trimStart().length;
   return (
     <div
       {...props}
       data-n={n}
       className={cn(
-        'flex gap-3 before:w-[3ch] before:shrink-0 before:text-end before:text-lp-ink-2 before:content-[attr(data-n)]',
+        'flex gap-2 before:w-[3ch] before:shrink-0 before:text-end before:text-lp-ink-2 before:content-[attr(data-n)]',
         className,
       )}
     >
+      <span aria-hidden data-sign className="w-[1ch] shrink-0 select-none">
+        {sign}
+      </span>
       <span
         className="min-w-0 flex-1 -indent-[2ch]"
         style={{ paddingInlineStart: `${indent + 2}ch` }}
@@ -106,53 +129,141 @@ function Line({
   );
 }
 
-/** the imports a command points at your copy, rewired; files named when they differ */
-export function Imports({ rewires }: { rewires: Rewire[] }) {
-  let dir = rewires[0].file;
-  let shared = true;
-  for (const rewire of rewires) {
-    if (rewire.file !== dir) shared = false;
-    while (!rewire.file.startsWith(dir)) dir = dir.slice(0, dir.lastIndexOf('/'));
-  }
-  const rows: ReactNode[] = [];
-  for (let i = 0; i < rewires.length; i++) {
-    const rewire = rewires[i];
-    rows.push(
-      <div key={i} data-rewire={i} data-target={rewire.target} className="flex flex-col">
-        {!shared && (
-          <p className="ps-[calc(3ch+12px)] text-lp-ink-2">{rewire.file.slice(dir.length + 1)}</p>
-        )}
-        <Line data-line n={rewire.line} code={rewire.code}>
-          <Changed code={rewire.code} from={rewire.from} to={rewire.to} />
-        </Line>
+/**
+ * A rewired import as a diff: the line that pointed at the package, struck, the line that points at
+ * your copy under it. Until the scene rewrites it (`data-diff` off) the old line reads as code, the
+ * new one keeps its place unseen.
+ */
+function Diff({ code, rewire, index }: { code: string; rewire: Rewire; index: number }) {
+  const was = code.replace(rewire.to, rewire.from);
+  const { before, old, after } = split(was.trimStart(), rewire.from, rewire.to);
+  return (
+    <div data-rewire={index} data-diff className="group flex flex-col">
+      <Line
+        n={rewire.line}
+        code={was}
+        sign="-"
+        className="group-data-diff:text-lp-ink-2 group-data-diff:[&_code]:line-through group-[:not([data-diff])]:[&_[data-sign]]:invisible"
+      >
+        <code>
+          {tone(before)}
+          <span data-from>{old}</span>
+          {after}
+        </code>
+      </Line>
+      <Line
+        n={rewire.line}
+        code={code}
+        sign="+"
+        className="bg-lp-yellow/40 group-[:not([data-diff])]:invisible dark:bg-lp-yellow/15"
+      >
+        <Changed code={was.trimStart()} from={rewire.from} to={rewire.to} added />
+      </Line>
+    </div>
+  );
+}
+
+/**
+ * Your project in an editor: the files the run changes as tabs, each showing its lines around the
+ * change, an import rewired as a diff, your edit in place. It opens on the file you edit.
+ */
+export function Editor({
+  id,
+  sources,
+  rewires,
+  edit,
+  className,
+}: {
+  id: string;
+  sources: Source[];
+  rewires: Rewire[];
+  edit: Edit;
+  className?: string;
+}) {
+  const open = sources.findIndex((source) => source.file === edit.file);
+  const tabs: ReactNode[] = [];
+  const panels: ReactNode[] = [];
+  for (let i = 0; i < sources.length; i++) {
+    const source = sources[i];
+    tabs.push(
+      <button
+        key={source.file}
+        type="button"
+        role="tab"
+        id={`${id}-tab-${i}`}
+        aria-controls={`${id}-panel-${i}`}
+        aria-selected={i === open}
+        data-tab={i}
+        data-file={source.file}
+        data-target={source.target}
+        className="flex h-7 shrink-0 items-center px-3 font-mono text-xs text-lp-ink-2 transition-none hover:text-lp-ink focus-visible:outline focus-visible:-outline-offset-2 focus-visible:outline-lp-ink aria-selected:bg-lp-paper-2 aria-selected:text-lp-ink md:h-8"
+      >
+        {source.file.slice(source.file.lastIndexOf('/') + 1)}
+      </button>,
+    );
+    const rows: ReactNode[] = [];
+    for (let k = 0; k < source.hunks.length; k++) {
+      const hunk = source.hunks[k];
+      // the lines in between, folded
+      if (k > 0)
+        rows.push(
+          <div
+            key={`fold-${k}`}
+            aria-hidden
+            className="my-1.5 border-t border-dashed border-lp-line-strong/40"
+          />,
+        );
+      for (let j = 0; j < hunk.lines.length; j++) {
+        const n = hunk.line + j;
+        const code = hunk.lines[j];
+        const rewire = rewires.findIndex((r) => r.file === source.file && r.line === n);
+        if (rewire >= 0)
+          rows.push(<Diff key={n} code={code} rewire={rewires[rewire]} index={rewire} />);
+        else if (edit.file === source.file && edit.line === n)
+          rows.push(
+            <Line key={n} data-edit-line n={n} code={code}>
+              <Changed code={code.trimStart()} from={edit.from} to={edit.to} />
+            </Line>,
+          );
+        else
+          rows.push(
+            <Line key={n} n={n} code={code}>
+              <code>{tone(code.trimStart())}</code>
+            </Line>,
+          );
+      }
+    }
+    panels.push(
+      <div
+        key={source.file}
+        role="tabpanel"
+        id={`${id}-panel-${i}`}
+        aria-labelledby={`${id}-tab-${i}`}
+        data-panel={i}
+        inert={i !== open}
+        className="col-start-1 row-start-1 flex flex-col px-3 py-2 inert:invisible md:py-3 md:pe-4"
+      >
+        {rows}
       </div>,
     );
   }
   return (
-    <Window data-imports title={dir} className={text}>
-      <div className={cn('flex flex-col px-4 py-3', !shared && 'gap-2')}>{rows}</div>
-    </Window>
-  );
-}
-
-/** your edit in your copy, made */
-export function EditLines({ edit }: { edit: Edit }) {
-  const rows: ReactNode[] = [];
-  for (let i = 0; i < edit.lines.length; i++) {
-    const code = edit.lines[i];
-    rows.push(
-      <Line key={i} n={edit.line + i} code={code}>
-        {i === edit.at ? (
-          <Changed code={code.trimStart()} from={edit.from} to={edit.to} />
-        ) : (
-          <code>{tone(code.trimStart())}</code>
-        )}
-      </Line>,
-    );
-  }
-  return (
-    <Window data-edit title={edit.file} className={text}>
-      <div className="flex flex-col px-4 py-3">{rows}</div>
+    <Window
+      data-editor
+      title={<span data-title>{sources[open].file}</span>}
+      className={cn(text, className)}
+    >
+      <div className="flex min-h-0 flex-1 flex-col md:flex-row">
+        <div
+          role="tablist"
+          aria-label="Files"
+          className="flex border-b border-lp-line-strong md:w-max md:shrink-0 md:flex-col md:border-e md:border-b-0"
+        >
+          {tabs}
+        </div>
+        {/* every file in one place: the editor keeps the size of the longest */}
+        <div className="grid min-w-0 flex-1">{panels}</div>
+      </div>
     </Window>
   );
 }

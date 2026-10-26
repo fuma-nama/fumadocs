@@ -22,14 +22,18 @@ function mount(root: HTMLDivElement | null) {
 }
 
 /**
- * The stage: the page's windows on the wall, the machine drawn in front of them. A phone stacks
- * them; from 1024px they share a grid, from 1280px in one screen.
+ * The stage, a row of its own under the section's text: the page's windows on the wall, the
+ * machine drawn in front of them. A phone stacks them, a tablet puts your project beside the editor
+ * and the page; from 1024px the machine and your project stand on the left, the editor and the
+ * page take the rest, in a stage of a fixed height, lower on a short screen so each act's parts are
+ * on it together. Both runs' windows share their cells, so nothing changes size when you switch,
+ * and your project's window never takes the size of its list.
  */
 export function Stage({ children }: { children: ReactNode }) {
   return (
     <div
       ref={mount}
-      className="relative flex flex-col px-(--lp-gutter) pt-14 pb-16 lg:grid lg:grid-cols-[minmax(0,1fr)_236px_40px_300px] lg:grid-rows-[auto_auto_1fr] lg:pt-10 lg:pb-12 lg:[--cli-top:112px] xl:h-[max(800px,min(816px,calc(100svh-var(--lp-menu-h)-var(--lp-status-h))))] xl:grid-cols-[340px_minmax(0,1fr)_236px_44px_minmax(0,30%)] xl:pb-0 xl:[--cli-top:120px]"
+      className="relative grid grid-cols-[minmax(0,1fr)] px-(--lp-gutter) pb-16 md:grid-cols-[minmax(0,1fr)_240px] md:gap-x-6 lg:h-[clamp(680px,calc(100svh_-_var(--lp-menu-h)_-_var(--lp-status-h)_+_32px),920px)] lg:grid-cols-[230px_240px_40px_minmax(0,1fr)] lg:gap-x-0 lg:pb-12 lg:[--cli-top:112px] xl:h-[clamp(640px,calc(100svh_-_var(--lp-menu-h)_-_var(--lp-status-h)_+_24px),810px)] xl:grid-cols-[260px_244px_44px_minmax(0,1fr)] xl:pb-10 xl:[--cli-top:120px]"
     >
       {children}
       <canvas aria-hidden className="pointer-events-none absolute inset-0 z-10 size-full" />

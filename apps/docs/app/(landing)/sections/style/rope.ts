@@ -118,3 +118,29 @@ export function ropePath(r: Ropes, c: number): string {
   d += `L${f(r.x[end])} ${f(r.y[end])}`;
   return d;
 }
+
+/** a cable tie's place on cable `c`: at its `point`, turned along the cable */
+export function tieAt(r: Ropes, c: number, point: number): [x: number, y: number, deg: number] {
+  const k = c * POINTS + point;
+  const angle = Math.atan2(r.y[k + 1] - r.y[k - 1], r.x[k + 1] - r.x[k - 1]);
+  return [r.x[k], r.y[k], (angle * 180) / Math.PI];
+}
+
+/** how straight cable `c` runs: the way between its ends over its length, 1 when taut */
+function straightnessOf(r: Ropes, c: number): number {
+  const base = c * POINTS;
+  let length = 0;
+  for (let i = 0; i < POINTS - 1; i++) {
+    length += Math.hypot(r.x[base + i + 1] - r.x[base + i], r.y[base + i + 1] - r.y[base + i]);
+  }
+  const end = base + POINTS - 1;
+  return Math.hypot(r.x[end] - r.x[base], r.y[end] - r.y[base]) / (length || 1);
+}
+
+/** a cable hanging slack runs this straight: the zero of its tension */
+const SLACK = 0.955;
+
+/** cable `c` from hanging slack (0) to pulled taut (1), what the gauge reads */
+export function tensionOf(r: Ropes, c: number): number {
+  return Math.min(1, Math.max(0, (straightnessOf(r, c) - SLACK) / (1 - SLACK)));
+}

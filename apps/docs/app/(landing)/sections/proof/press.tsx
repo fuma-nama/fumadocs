@@ -4,18 +4,21 @@ import { useReducedMotion } from 'motion/react';
 import { cn } from '@/lib/cn';
 import type { ShowcaseObject } from '@/lib/showcases';
 import { pad } from '../../lib/clock';
-import { BEAT, TICK } from '../../lib/motion';
-import { setStatus } from '../../lib/status';
+import { TICK } from '../../lib/motion';
+import { report } from '../../lib/status';
 import { useIsClient } from '../../lib/use-is-client';
 import { Roller } from '../../ui/roller';
 import { level, print, show, SiteTile } from '../../ui/site-tile';
 
 /** tiles on phones, the rest are on desktop only */
 const PHONE_TILES = 12;
-/** the plate prints in and rests a beat, then the head develops one row per beat */
-const PLATE = BEAT;
-const SWEEP = PLATE + BEAT;
-const ROW = BEAT;
+/**
+ * the plate prints in over two ticks and rests one, then the head develops the wall in six ticks
+ * whatever its rows: one row per tick on both the 5 and the 2 column wall
+ */
+const PLATE = TICK * 2;
+const SWEEP = PLATE + TICK;
+const HEAD = TICK * 6;
 
 const sizes = '(min-width: 1280px) 208px, (min-width: 768px) 20vw, 50vw';
 
@@ -46,10 +49,14 @@ function rowsOf(list: HTMLUListElement): Row[] {
   return rows;
 }
 
-/** a title bar fits about 24 characters of the pixel type; longer names end on a word */
+/**
+ * the narrowest title bar (five columns at 768px) fits about 17 characters of the pixel type;
+ * longer names end on a word
+ */
 function fit(name: string): string {
-  if (name.length <= 24) return name;
-  return `${name.slice(0, name.lastIndexOf(' ', 23))}…`;
+  if (name.length <= 17) return name;
+  const end = name.lastIndexOf(' ', 16);
+  return `${name.slice(0, end > 0 ? end : 16)}…`;
 }
 
 interface TileProps {
@@ -91,8 +98,8 @@ const Tile = memo(function Tile({ site, index, played, printable, printed, onPee
               <Roller
                 key={played ? 'print' : 'rest'}
                 value={printed ? fit(site.name) : ''}
-                step={TICK / 3}
-                stagger={TICK / 6}
+                step={TICK / 4}
+                stagger={TICK / 16}
               />
             </span>
           </>
@@ -115,11 +122,9 @@ const Tile = memo(function Tile({ site, index, played, printable, printed, onPee
  */
 export function Press({
   sites,
-  className,
   children,
 }: {
   sites: Required<ShowcaseObject>[];
-  className?: string;
   children: ReactNode;
 }) {
   const isClient = useIsClient();
@@ -131,6 +136,7 @@ export function Press({
   /** rest: the finished colour wall, before and after its one print run */
   const [phase, setPhase] = useState<'rest' | 'run' | 'done'>('rest');
   const [developed, setDeveloped] = useState(0);
+  /** tiles the run develops, the rest are hidden on phones and stay as they are */
   const [total, setTotal] = useState(sites.length);
   const [peek, setPeek] = useState(-1);
   const running = phase === 'run';
@@ -211,15 +217,15 @@ export function Press({
     };
   }, [printing]);
 
-  // the run, one loop: the plate prints in (Dither), rests a beat, then the head steps down on
-  // ticks while each row it crosses dithers into colour; its names roll in as it leaves the row,
+  // the run, one loop: the plate prints in (Dither), rests a tick, then the head steps down a row
+  // at a time while the row above it dithers into colour; its names roll in as it leaves the row,
   // and the carriage readout crosses each row like a printer's
   useEffect(() => {
     if (!running) return;
     const list = grid.current!;
     const rows = rowsOf(list);
     const count = rows.at(-1)?.to ?? 0;
-    const duration = rows.length * ROW;
+    const perRow = HEAD / rows.length;
     const travel = list.clientWidth - carriage.current!.offsetWidth;
     const sweep: Keyframe[] = [];
     for (let r = 0; r <= rows.length; r++) {
@@ -231,11 +237,11 @@ export function Press({
           { transform: 'translateY(0)' },
           { transform: `translateY(${rows.at(-1)?.bottom ?? 0}px)` },
         ],
-        { delay: SWEEP, duration, easing: `steps(${rows.length * 4}, end)`, fill: 'both' },
+        { delay: SWEEP, duration: HEAD, easing: `steps(${rows.length}, start)`, fill: 'both' },
       ),
-      carriage.current!.animate(sweep, { delay: SWEEP, duration, fill: 'both' }),
+      carriage.current!.animate(sweep, { delay: SWEEP, duration: HEAD, fill: 'both' }),
     ];
-    setStatus(`developing ${count} sites`);
+    report(list, `developing ${count} sites`);
 
     const start = performance.now();
     let raf = 0;
@@ -247,9 +253,9 @@ export function Press({
         const plate = level(t, PLATE);
         for (const row of rows) for (const canvas of row.prints) show(canvas, plate);
       } else {
-        const r = Math.floor((t - SWEEP) / ROW);
+        const r = Math.floor((t - SWEEP) / perRow);
         if (r < rows.length) {
-          const fade = 16 - level(t - SWEEP - r * ROW, ROW);
+          const fade = 16 - level(t - SWEEP - r * perRow, perRow);
           for (const canvas of rows[r].prints) show(canvas, fade);
         }
         if (Math.min(r, rows.length) > done) {
@@ -261,7 +267,7 @@ export function Press({
       // the head leaves two ticks after the last row, in a frame of its own
       else
         timer = setTimeout(() => {
-          setStatus(`${count} sites developed`);
+          report(list, `${count} sites developed`);
           setPhase('done');
         }, TICK * 2);
     };
@@ -274,7 +280,7 @@ export function Press({
   }, [running]);
 
   return (
-    <div className={cn('flex flex-col gap-4', className)}>
+    <div className="flex flex-col gap-4">
       <div className="relative">
         <ul
           ref={grid}
@@ -287,7 +293,7 @@ export function Press({
               index={i}
               played={live && phase !== 'rest'}
               printable={printing}
-              printed={!running || i < developed || peek === i}
+              printed={!running || i < developed || i >= total || peek === i}
               onPeek={setPeek}
             />
           ))}
@@ -295,14 +301,8 @@ export function Press({
         {running && (
           <div aria-hidden className="pointer-events-none absolute inset-px">
             <div ref={head} className="absolute inset-x-0 top-0">
-              <div className="absolute -inset-x-2.5 -top-px border-y border-t-lp-ink border-b-lp-paper" />
-              <svg
-                viewBox="0 0 5 9"
-                shapeRendering="crispEdges"
-                className="absolute top-0 -left-2.5 h-[9px] w-[5px] -translate-x-full -translate-y-1/2 fill-lp-ink"
-              >
-                <path d="M0 0h1v9H0zM1 1h1v7H1zM2 2h1v5H2zM3 3h1v3H3zM4 4h1v1H4z" />
-              </svg>
+              {/* across the wall, frame to frame: the sheet's gutters stay clear */}
+              <div className="absolute -inset-x-px -top-px border-y border-t-lp-ink border-b-lp-paper" />
               <span
                 ref={carriage}
                 className="absolute top-0 left-0 flex h-5 -translate-y-1/2 items-center gap-1.5 border border-lp-line-strong bg-lp-paper px-1.5 font-mono text-[11px] whitespace-nowrap text-lp-ink-2"
@@ -310,8 +310,8 @@ export function Press({
                 developing
                 <Roller
                   value={`${pad(developed)}/${pad(total)}`}
-                  step={TICK / 3}
-                  stagger={TICK / 6}
+                  step={TICK / 8}
+                  stagger={TICK / 16}
                   className="text-lp-orange"
                 />
               </span>

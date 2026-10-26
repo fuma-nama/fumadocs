@@ -16,7 +16,7 @@ const links = [
 ];
 
 const button =
-  'inline-flex h-11 items-center border border-lp-line-strong px-4 text-sm font-medium transition-none hover:bg-lp-ink hover:text-lp-paper focus-visible:outline focus-visible:outline-offset-2 focus-visible:outline-lp-ink';
+  'inline-flex h-11 items-center justify-center border border-lp-line-strong px-3 text-sm font-medium transition-none hover:bg-lp-ink hover:text-lp-paper focus-visible:outline focus-visible:outline-offset-2 focus-visible:outline-lp-ink';
 
 export function Start() {
   return (
@@ -24,12 +24,15 @@ export function Start() {
       <Stage>
         <FigureHeader
           data-rise-group
+          // one line beside the terminal: shrinks with the column, ends clear of the controls' edge
+          className="lg:[&_h2]:text-[length:min(3.75rem,calc(100cqw/9.05))]"
           lead={copy.start.lead}
           title={copy.start.title}
           description={copy.start.description}
         />
-        <Command command={command} data-rise />
-        <div data-rise className="flex flex-wrap gap-2">
+        <Command command={command} data-rise className="w-full" />
+        {/* 24.75rem: three of the widest button ("Why Fumadocs") and the gaps */}
+        <div data-rise className="grid grid-cols-2 gap-2 @min-[24.75rem]:grid-cols-3">
           <Link href="/docs" className={cn(button, 'bg-lp-yellow text-[#121210]')}>
             Get started
           </Link>
@@ -40,7 +43,7 @@ export function Start() {
             href="https://github.com/fuma-nama/fumadocs"
             target="_blank"
             rel="noreferrer noopener"
-            className={cn(button, 'bg-lp-paper')}
+            className={cn(button, 'col-span-2 bg-lp-paper @min-[24.75rem]:col-span-1')}
           >
             Star on GitHub
           </a>
@@ -48,7 +51,7 @@ export function Start() {
       </Stage>
       <footer className="border-t border-lp-line pt-10">
         <Wordmark />
-        <div className="flex flex-col gap-3 px-(--lp-gutter) pt-4 pb-8 md:flex-row md:items-center md:justify-between">
+        <div className="flex flex-wrap items-center justify-between gap-3 px-(--lp-gutter) pt-4 pb-8">
           <nav aria-label="Footer" className="-mx-2.5 flex flex-wrap font-pixel text-sm">
             {links.map((link) => (
               <Link

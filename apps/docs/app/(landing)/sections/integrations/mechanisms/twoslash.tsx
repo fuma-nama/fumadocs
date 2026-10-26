@@ -1,6 +1,6 @@
 import { choreograph, pop } from '../choreography';
 import { art, frame, rect } from '../px';
-import { Clip, Layer, Px, Stage, Text } from '../stage';
+import { Layer, Px, Stage, Text } from '../stage';
 
 const POINTER = [
   '#......',
@@ -16,7 +16,7 @@ const POINTER = [
 ];
 
 // the pointer comes from its rest at the corner in four steps and leaves the same way
-const REST = 'transform:translate(153px,51px)';
+const REST = 'transform:translate(153px,36px)';
 
 const twoslash = choreograph('twoslash', 32, {
   pointer: {
@@ -47,15 +47,14 @@ export function TwoslashMechanism() {
         }
         orange={rect(5, 6, 8, 1)}
       />
-      <Clip x={1} y={1} w={94} h={38}>
-        <Text x={4} y={14.2} className="bt-code">
-          <span className="bt-orange-text">const</span>
-          {" player: Player = { name: 'Hello World' };"}
-        </Text>
-      </Clip>
+      {/* a size down from the board's code, so the docs' whole line fits in the frame */}
+      <Text x={5} y={15.2} className="bt-code text-[9px]!">
+        <span className="bt-orange-text">const</span>
+        {" player: Player = { name: 'Hello World' };"}
+      </Text>
       <Layer className={c.popup}>
-        <Px paper={rect(15, 3, 44, 9)} ink={frame(15, 3, 44, 9) + rect(20, 12, 1, 1)} />
-        <Text x={17} y={5.6} className="bt-code">
+        <Px paper={rect(15, 3, 40, 9)} ink={frame(15, 3, 40, 9) + rect(20, 12, 1, 1)} />
+        <Text x={17} y={5.6} className="bt-code text-[9px]!">
           <span className="bt-orange-text">const</span> player: Player
         </Text>
       </Layer>

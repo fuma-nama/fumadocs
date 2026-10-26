@@ -7,15 +7,16 @@ import { copy } from '../../content';
 import { Figure, FigureHeader } from '../../ui/figure';
 import { blocks } from './blocks';
 import { Press } from './press';
+import { RailBed, RailColumn } from './rail';
 import { quickStart } from './quick-start';
 import type { Step } from './steps';
 
 /** how the files of `content/` are pressed, in order */
 const steps: Step[] = [
-  { tab: '---', status: 'stamping <DocsTitle>' },
-  { tab: '```npm', status: 'stamping <CodeBlockTabs>' },
+  { tab: '---', status: 'rendering <DocsTitle>' },
+  { tab: '```npm', status: 'rendering <CodeBlockTabs>' },
   { tab: '```ts twoslash', status: 'running Twoslash' },
-  { tab: '<Mermaid />', status: 'stamping <Mermaid>' },
+  { tab: '<Mermaid />', status: 'rendering <Mermaid>' },
 ];
 
 const { h2: H2 } = defaultMdxComponents;
@@ -49,9 +50,16 @@ export function Write() {
         lead={copy.write.lead}
         title={copy.write.title}
         description={copy.write.description}
-        className="p-(--lp-gutter) pb-10 md:pt-10"
+        // from lg one row: the title on the window's edge, the description on the bed's middle seam
+        className="p-(--lp-gutter) pb-8 md:pt-10 lg:grid lg:grid-cols-2 lg:items-end lg:gap-x-0 lg:max-xl:pb-6 lg:max-xl:[&_h2]:text-5xl"
       />
-      <Press steps={steps} sources={blocks} slots={slots} />
+      <Press
+        steps={steps}
+        sources={blocks}
+        slots={slots}
+        bed={<RailBed />}
+        column={<RailColumn />}
+      />
     </Figure>
   );
 }

@@ -11,7 +11,7 @@ import { Start } from './sections/start';
 import { copy } from './content';
 
 export const metadata: Metadata = createMetadata({
-  description: `${copy.hero.lead} ${copy.hero.title} ${copy.hero.description}`,
+  description: `${copy.hero.lead} ${copy.hero.description}`,
   alternates: {
     types: { 'text/markdown': '/index.md' },
   },

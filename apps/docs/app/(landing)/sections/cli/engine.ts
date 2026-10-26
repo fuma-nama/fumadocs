@@ -1,6 +1,6 @@
 import { cubicBezier } from 'motion/react';
 import { createShaderCanvas } from '../../lib/gl';
-import { camera, settle, TICK } from '../../lib/motion';
+import { settle, TICK } from '../../lib/motion';
 import { report } from '../../lib/status';
 import { ditherKeyframes } from '../../ui/dither';
 import { createFlaps, type Flaps } from './flap';
@@ -25,29 +25,64 @@ const LID_T = 30;
 const LID_OPEN = 1.62;
 const LATCH_OPEN = 2.15;
 const LIGHT = normalize([-0.25, -0.42, 0.87]);
-/** gripper spacing, chain speed (px per ms), its spin-up and spin-down */
+/** a riser's gripper spacing, chain speed (px per ms) on a riser and on a beam, its spin-up and
+ * spin-down */
 const PITCH = 36;
-const SPEED = 0.72;
+const SPEED = 1.1;
+const BEAM_SPEED = 2.4;
 const ACCEL = 380;
 const DECEL = 460;
-/** chain travel of a file rising out of the crate (whole pitches, it meets its gripper) and
- * dropping into the hopper; how far left of the chain a gripper's jaw holds it */
+/** chain travel of a file rising out of the crate (whole pitches, it meets its gripper); how far off
+ * the chain a gripper's jaw holds it, clear of the sprockets' teeth at both ends */
 const RISE = 3 * PITCH;
-const DROP = 96;
-const JAW = 10;
-/** the reels on the imports' window: radius, and cable speed when they wind (px per ms) */
+const JAW = 20;
+/** a file rises out of the crate at the crate's depth, in front of the open lid; its jaw takes it
+ * back to the chain over this much travel once it holds it */
+const SETTLE = 48;
+/**
+ * A riser hands its files to the hopper one at a time: it fills, stops with the first file at its
+ * head, then steps a pitch at a time, and while it stands the file at the head slides off its jaw,
+ * across the riser in front of it and into the side of the hopper, behind its front. It steps once
+ * a tick for its first files, then comes up to speed like a ratchet, each step this much shorter,
+ * down to the quickest; a step takes this share of its tick. A file slides at least this fast (px
+ * per ms) after a short start, at this depth, fast enough to clear the file under it before that
+ * one rises into its row; it finishes its slide behind the hopper's front while the next one starts.
+ */
+const SLOW = 3;
+const RAMP = 0.7;
+const QUICK = 52;
+const STEP = 0.32;
+const SLIDE = 2.2;
+const SLIDE_START = 0.16;
+const SLIDE_Z = 58;
+/**
+ * A beam lifts each file out of the crate to just under its row, pops it into the jaw once the
+ * file ahead is clear of it, and lets it fall into the hopper with a push: the lift's chain travel,
+ * the pop's part of it, the room a pitch leaves between files on the beam for that pop, and the
+ * fall's start speed (px per ms) and pull
+ */
+const LIFT = 300;
+const POP = 40;
+const FALL = 2;
+const PULL = 0.004;
+/** the reels on the editor's edge: radius, and cable speed when they wind (px per ms) */
 const REEL = 8;
 const WIND = 1.6;
-/** share of the crate in view that starts the scene */
-const START = 0.6;
+/** an act starts once the reader sees what it acts on, all of it but this much (px), or as much of
+ * the screen as it fills; or this share of it once they scrolled past it */
+const CUT = 16;
+const PAST = 0.8;
 
 const ease = cubicBezier(...settle);
-const inOut = cubicBezier(...camera);
 
 interface Card {
   el: HTMLElement;
   w: number;
   h: number;
+  /** a phone's beam hangs wide files smaller, so they stay inside the gutters */
+  scale: number;
+  /** how far a riser's file slides until the hopper's front hides it */
+  slide: number;
   /** the row that takes it, and the rows it shows */
   inlet: HTMLElement | undefined;
   reveals: HTMLElement[];
@@ -62,12 +97,17 @@ interface Ends {
   y1: number;
 }
 
+/** an import rewired: the line that pointed at the package, the line that points at your copy */
 interface Strike {
-  line: HTMLElement;
+  /** its file's tab */
+  tab: number;
+  diff: HTMLElement;
+  /** the part of the old line that changes, and the new line's, written as it is typed */
+  from: HTMLElement;
   cut: HTMLElement;
-  before: string;
   after: string;
-  /** the cut's text when it was last measured, and where it was */
+  /** what it shows, and where the cut's text was when it was last measured */
+  state: string;
   key: string;
   ends: Ends;
 }
@@ -84,24 +124,38 @@ interface Cable {
 
 interface Scene {
   args: string;
+  /** the command, a span per character, and where each character ends: x, top, height */
+  command: HTMLElement;
+  ends: Float32Array;
   done: string;
   fetch: string;
   /** what your edit changes */
   name: string;
   cell: HTMLElement;
   column: HTMLElement;
+  editor: HTMLElement;
+  /** the editor's tabs and their files, its title, the tab of the file you edit and the one shown */
+  tabs: HTMLButtonElement[];
+  panels: HTMLElement[];
+  title: HTMLElement;
+  open: number;
+  shown: number;
   tree: HTMLElement;
+  /** the window's list, it scrolls when the folders you open make it longer */
+  list: HTMLElement;
   counter: HTMLElement;
   flaps: Flaps;
   rows: Map<string, HTMLElement>;
   added: HTMLElement[];
   cards: Card[];
   strikes: Strike[];
-  /** the rewired imports' target rows */
+  /** per cable: the tab of its file, the row it plugs into */
+  cabled: number[];
   targets: HTMLElement[];
-  edit: HTMLElement;
   editCut: HTMLElement;
-  before: HTMLElement;
+  /** the page's window, and the page before your edit and after it */
+  preview: HTMLElement;
+  page: HTMLElement;
   after: HTMLElement;
   /** the preview shows your edit */
   edited: boolean;
@@ -112,18 +166,35 @@ interface Beats {
   typed: number;
   latch: [number, number];
   lid: number;
+  /** the chain starts, cruises until `stop`, and has moved `travel` in the end; a riser's first file
+   * reaches its head at `feed`. Per file: when it leaves the chain, when it is in the hopper */
   belt: number;
   stop: number;
+  feed: number;
   travel: number;
-  /** per rewired import: the print head's strike, the cable's move */
+  release: number[];
+  landed: number[];
+  /** a riser's files: how fast each slides, and how long it takes to start */
+  slides: number[];
+  starts: number[];
+  /** per rewired import its rewrite, per cable its move */
   strikes: number[];
   plugs: number[];
+  /** your edit: selected, typed in `editFor`, and when the page shows it */
   edit: number;
+  editFor: number;
+  page: number;
   end: number;
 }
 
 export function createCli(root: HTMLElement): () => void {
   const canvas = root.querySelector('canvas')!;
+  // its frames step the scene once the scene is set up
+  let ready = false;
+  // the stage, the windows, and your project's list, whose folders move the rows the cables reach;
+  // text set again in another font. Made before the canvas's own observer, so a canvas that
+  // resizes with the stage draws after this layout, in the same frame
+  const resize = new ResizeObserver(layout);
   // the scene steps in the canvas's own frame, so the files and the machine move together
   const shader = createShaderCanvas(canvas, { fragment, onFrame });
   if (!shader) return () => {};
@@ -133,14 +204,16 @@ export function createCli(root: HTMLElement): () => void {
   const desktopQuery = matchMedia('(min-width: 1024px)');
   const find = (name: string, from: ParentNode = root) =>
     from.querySelector<HTMLElement>(`[data-${name}]`)!;
+  // the runs to pick and their command sit in the figure's header, above the stage
+  const header = root.closest('[data-figure]') ?? root;
 
-  const command = find('command');
-  const caret = find('caret');
+  const caret = find('caret', header);
   const crate = find('crate');
   const label = find('label');
   const plate = find('plate');
-  const replay = find('replay');
-  const chips = root.querySelectorAll<HTMLButtonElement>('[data-play]');
+  const replay = find('replay', header);
+  const commandBox = replay.parentElement!;
+  const chips = header.querySelectorAll<HTMLButtonElement>('[data-play]');
 
   const scenes: Scene[] = [];
   for (const cell of root.querySelectorAll<HTMLElement>('[data-tree-cell]')) {
@@ -164,42 +237,72 @@ export function createCli(root: HTMLElement): () => void {
         const at = rows.get(path);
         if (at?.dataset.added !== undefined) reveals.push(at);
       }
-      cards.push({ el, w: 0, h: 0, inlet: row(el.dataset.card!), reveals, at: '' });
+      cards.push({
+        el,
+        w: 0,
+        h: 0,
+        scale: 1,
+        slide: 0,
+        inlet: row(el.dataset.card!),
+        reveals,
+        at: '',
+      });
     }
+    const editor = find('editor', column);
+    const tabs = [...editor.querySelectorAll<HTMLButtonElement>('[data-tab]')];
     const strikes: Strike[] = [];
-    const targets: HTMLElement[] = [];
-    for (const el of find('imports', column).querySelectorAll<HTMLElement>('[data-rewire]')) {
+    for (const el of editor.querySelectorAll<HTMLElement>('[data-rewire]')) {
       const cut = find('cut', el);
       strikes.push({
-        line: find('line', el),
+        tab: Number(el.closest<HTMLElement>('[data-panel]')!.dataset.panel),
+        diff: el,
+        from: find('from', el),
         cut,
-        before: cut.dataset.old!,
         after: cut.dataset.new!,
+        state: '',
         key: '',
         ends: { x0: 0, y0: 0, x1: 0, y1: 0 },
       });
-      targets.push(row(el.dataset.target!)!);
     }
+    // a cable per file whose imports now resolve into your project
+    const cabled: number[] = [];
+    const targets: HTMLElement[] = [];
+    for (const tab of tabs) {
+      if (tab.dataset.target === undefined) continue;
+      cabled.push(Number(tab.dataset.tab));
+      targets.push(row(tab.dataset.target)!);
+    }
+    const open = tabs.findIndex((tab) => tab.ariaSelected === 'true');
     const counter = root.querySelector<HTMLElement>(`[data-counter][data-scene="${index}"]`)!;
-    const edit = find('edit', column);
+    const command = header.querySelector<HTMLElement>(`[data-command="${index}"]`)!;
     scenes[index] = {
       args: cell.dataset.args!,
+      command,
+      ends: new Float32Array(command.children.length * 3 + 3),
       done: cell.dataset.done!,
       fetch: cell.dataset.fetch!,
       name: cell.dataset.editName!,
       cell,
       column,
+      editor,
+      tabs,
+      panels: [...editor.querySelectorAll<HTMLElement>('[data-panel]')],
+      title: find('title', editor),
+      open,
+      shown: open,
       tree,
+      list: find('list', tree),
       counter,
       flaps: createFlaps(counter),
       rows,
       added,
       cards,
       strikes,
+      cabled,
       targets,
-      edit,
-      editCut: find('cut', edit),
-      before: find('before', column),
+      editCut: find('cut', find('edit-line', editor)),
+      preview: find('preview', column),
+      page: find('page', column),
       after: find('after', column),
       edited: true,
     };
@@ -208,24 +311,43 @@ export function createCli(root: HTMLElement): () => void {
   const editCaret = find('edit-caret');
 
   // geometry, stage px; world points are CSS px with z toward the viewer
+  const stage: [number, number] = [0, 0];
   let foot: [number, number] = [0, 0];
-  /** the chain, straight up from its tail */
-  const chain = { tail: [0, 0] as [number, number], length: 1 };
+  /** the chain from its tail: a riser going up, or on a phone a beam going right */
+  const chain = {
+    tail: [0, 0] as [number, number],
+    dir: [0, -1] as [number, number],
+    /** the side its boom stands on, the files hang on the other */
+    side: [1, 0] as [number, number],
+    length: 1,
+  };
+  let beam = false;
+  /** the files' spacing on the chain and its speed: a phone's short beam carries them spaced by
+   * the widest and the room for a pop, faster, so the delivery keeps about its time */
+  let pitch = PITCH;
+  let speed = SPEED;
   let hopper: Vec3 = [0, 0, 0];
   /** the hopper's mouth, stage px: a file falling in shrinks to fit it */
   let mouth = 0;
   let inside: Vec3 = [0, 0, 0];
-  let headRail: [number, number, number, number] = [0, 0, 0, 0];
-  let commandWidth = 0;
+  /** a riser's file leaves its jaw from here, at the depth it slides at; a beam's file is lifted to
+   * just under the files on it, and falls this far into the hopper */
+  let slideFrom: Vec3 = [0, 0, 0];
+  let band = 0;
+  let fall = 0;
   const editEnds: Ends = { x0: 0, y0: 0, x1: 0, y1: 0 };
   const wires: Cable[] = [];
   let beats = schedule();
 
   // state
-  let phase: 'rest' | 'ready' | 'play' = 'rest';
+  let phase: 'rest' | 'ready' | 'play' | 'hold' = 'rest';
   let clock = 0;
+  /** the next act to start: 0 the command, 1 the delivery, 2 the rewrites and your edit, 3 the
+   * page it changes */
+  let act = 0;
   let last = -1;
   let first = true;
+  let disposed = false;
   let shownStatus = '';
   let landedShown = -1;
   let flashed = -1;
@@ -233,7 +355,11 @@ export function createCli(root: HTMLElement): () => void {
   let flashRow: HTMLElement | undefined;
   let caretMode = '';
   let caretAt = '';
+  let typedShown = -1;
+  let caretHeight = 0;
   let editCaretKey = '';
+  /** the tab the play last turned to: a tab you pick mid-play stays until the next beat */
+  let beatTab = -1;
   const scratch: [number, number, number] = [0, 0, 0];
   const point: Vec3 = [0, 0, 0];
   const holeDepth = new Float32Array(CARDS);
@@ -303,17 +429,39 @@ export function createCli(root: HTMLElement): () => void {
     gl.invalidate();
   }
 
-  /** chain travel at time t, ms */
+  /** chain travel at time t, ms: spin-up, cruise, spin-down, then a riser's steps */
   function travel(t: number): number {
     const t0 = t - beats.belt;
     if (t0 <= 0) return 0;
-    if (t0 < ACCEL) return (SPEED * t0 * t0) / (2 * ACCEL);
+    const v = speed;
+    if (t0 < ACCEL) return (v * t0 * t0) / (2 * ACCEL);
     const cruise = beats.stop - beats.belt;
-    if (t0 < cruise) return (SPEED * ACCEL) / 2 + SPEED * (t0 - ACCEL);
+    if (t0 < cruise) return (v * ACCEL) / 2 + v * (t0 - ACCEL);
     const d = Math.min(t0 - cruise, DECEL);
-    return (
-      (SPEED * ACCEL) / 2 + SPEED * (cruise - ACCEL) + SPEED * d - (SPEED * d * d) / (2 * DECEL)
-    );
+    const run = (v * ACCEL) / 2 + v * (cruise - ACCEL) + v * d - (v * d * d) / (2 * DECEL);
+    if (beam || t <= beats.feed) return run;
+    // each step brings the next file to the head as its turn comes
+    const turns = beats.release;
+    let k = 1;
+    while (k < turns.length && t >= turns[k]) k++;
+    let step = 0;
+    if (k < turns.length) {
+      const length = (turns[k] - turns[k - 1]) * STEP;
+      step = inOutQuad(clamp((t - turns[k] + length) / length));
+    }
+    return run + (k - 1 + step) * pitch;
+  }
+
+  /** where a riser's file is along its slide, `out` ms after it left its jaw */
+  function slid(b: Beats, i: number, out: number): number {
+    const v = b.slides[i];
+    const start = b.starts[i];
+    return out < start ? (v * out * out) / (2 * start) : v * (out - start / 2);
+  }
+
+  /** a beam's file: from leaving its jaw until it is in the hopper */
+  function fallTime(): number {
+    return (Math.sqrt(FALL * FALL + 2 * PULL * fall) - FALL) / PULL;
   }
 
   /** a cable's plug travel and its wind, from its start: out of the crate, along the floor, up the gutter */
@@ -322,26 +470,70 @@ export function createCli(root: HTMLElement): () => void {
   }
 
   function schedule(): Beats {
-    const typed = 220 + command.textContent!.length * 30;
-    const latch: [number, number] = [typed + 200, typed + 200 + TICK];
+    const typed = 220 + scene.command.children.length * 25;
+    const latch: [number, number] = [typed + 120, typed + 120 + TICK];
     const lid = latch[1] + 2 * TICK;
-    const belt = lid + 560;
-    // the chain runs until the last file drops, then spins down
-    const distance = RISE + (scene.cards.length - 1) * PITCH + chain.length + DROP;
-    const cruise = ACCEL + (distance - (SPEED * ACCEL) / 2 - (SPEED * DECEL) / 2) / SPEED;
-    const stop = belt + Math.max(cruise, ACCEL);
+    const belt = lid + 480;
+    const v = speed;
+    const n = scene.cards.length;
+    const rise = beam ? LIFT : RISE;
+    const release: number[] = [];
+    const landed: number[] = [];
+    const slides: number[] = [];
+    const starts: number[] = [];
+    let stop: number;
+    let feed: number;
+    let distance: number;
+    if (beam) {
+      // the beam runs until its last file lets go, then spins down; the files fall on their own
+      const last = rise + (n - 1) * pitch + chain.length;
+      stop = belt + ACCEL + (last - (v * ACCEL) / 2) / v;
+      for (let i = 0; i < n; i++) {
+        release.push(stop - ((n - 1 - i) * pitch) / v);
+        landed.push(release[i] + fallTime());
+      }
+      feed = release[0];
+      distance = last + (v * DECEL) / 2;
+    } else {
+      // the riser fills, stops with its first file at the head, then steps a pitch at a time
+      const first = rise + chain.length;
+      feed = belt + ACCEL + (first - (v * ACCEL) / 2 - (v * DECEL) / 2) / v + DECEL;
+      stop = feed - DECEL;
+      let turn = TICK;
+      let at = feed;
+      for (let i = 0; i < n; i++) {
+        const card = scene.cards[i];
+        // the next file rises into this one's row a third into the next step
+        const clear = turn * (1 - STEP * 0.67);
+        starts.push(turn * SLIDE_START);
+        slides.push(
+          i < n - 1 ? Math.max(SLIDE, (card.w * card.scale + 6) / (clear - starts[i] / 2)) : SLIDE,
+        );
+        release.push(at);
+        landed.push(at + starts[i] / 2 + card.slide / slides[i]);
+        at += turn;
+        if (i + 1 >= SLOW) turn = Math.max(QUICK, turn * RAMP);
+      }
+      distance = first + (n - 1) * pitch;
+    }
     const strikes: number[] = [];
     const plugs: number[] = [];
-    let t = stop + DECEL * 0.6;
+    let t = landed[n - 1] + TICK / 2;
     let free = t;
     for (let i = 0; i < scene.strikes.length; i++) {
+      const strike = scene.strikes[i];
       strikes.push(t);
-      const cable = wires[i];
-      plugs.push(t + strikeTime(scene.strikes[i]) - 60);
-      free = cable ? plugs[i] + windTime(cable) + 260 : t + strikeTime(scene.strikes[i]);
-      t += strikeTime(scene.strikes[i]) + 160;
+      // a file's cable moves once its last import is rewritten, while the diff is read
+      const c = scene.cabled.indexOf(strike.tab);
+      if (c >= 0 && scene.strikes[i + 1]?.tab !== strike.tab) {
+        plugs[c] = t + 300 + strike.after.length * 70 + 60;
+        free = wires[c] ? plugs[c] + windTime(wires[c]) + 260 : t + strikeTime(strike);
+      }
+      t += strikeTime(strike) + 160;
     }
     const edit = Math.max(free, t) + 120;
+    // typed within the run's last beat: a long edit types faster
+    const editFor = Math.min(scene.editCut.dataset.new!.length * 40, 240);
     return {
       type: 220,
       typed,
@@ -349,16 +541,24 @@ export function createCli(root: HTMLElement): () => void {
       lid,
       belt,
       stop,
+      feed,
       travel: distance,
+      release,
+      landed,
+      slides,
+      starts,
       strikes,
       plugs,
       edit,
+      editFor,
+      page: edit + 300 + editFor + 120,
       end: edit + 980,
     };
   }
 
+  /** an import's rewrite: selected, struck, the new line typed, then a moment to read the diff */
   function strikeTime(s: Strike) {
-    return 300 + 120 + s.after.length * 70 + 120;
+    return 300 + s.after.length * 70 + 640;
   }
 
   function layout() {
@@ -369,16 +569,31 @@ export function createCli(root: HTMLElement): () => void {
     gl.set('uEye', [foot[0], foot[1], CAM]);
     gl.set('uLight', LIGHT);
     gl.set('uCell', 2);
-    commandWidth = command.offsetWidth;
+    // where each character of the command ends, the first entry where it starts
+    {
+      const chars = scene.command.children;
+      const first = chars[0] as HTMLElement;
+      scene.ends[0] = first.offsetLeft;
+      scene.ends[1] = first.offsetTop;
+      scene.ends[2] = first.offsetHeight;
+      for (let i = 0; i < chars.length; i++) {
+        const char = chars[i] as HTMLElement;
+        scene.ends[i * 3 + 3] = char.offsetLeft + char.offsetWidth;
+        scene.ends[i * 3 + 4] = char.offsetTop;
+        scene.ends[i * 3 + 5] = char.offsetHeight;
+      }
+      caretAt = '';
+      typedShown = -1;
+      caretHeight = caret.offsetHeight;
+    }
 
-    // the tree's frame at its final size, before any row comes in
+    // every row in, to find where the cables plug; the play hides them again
     for (const el of scene.added) el.style.display = '';
-    scene.tree.style.height = '';
-    scene.tree.style.height = `${scene.tree.offsetHeight}px`;
 
     // the crate's front face is its slot
     const slot = box(crate, s);
-    const depth = desktop ? 92 : 80;
+    // as deep as about a third of its width: the bigger crate of a wide stage stays a box
+    const depth = desktop ? Math.max(92, Math.round(slot.w * 0.37)) : 80;
     const a = unproject(slot.x, slot.y, CRATE_Z);
     const b = unproject(slot.x + slot.w, slot.y + slot.h, CRATE_Z);
     const floor = b[1];
@@ -392,9 +607,13 @@ export function createCli(root: HTMLElement): () => void {
     const tag = box(label, s);
     gl.set('uLabel', [tag.x, tag.y, tag.x + tag.w, tag.y + tag.h]);
     housing('uLabel', tag, CRATE_Z + 3, 3, 6);
+    // the sockets stand above the corner caps, right of the label's plate; the right one's cable
+    // drops clear of its cap
+    const socket = centre[0] + size[0] - 30;
+    const beside = unproject(tag.x + tag.w + 6, 0, CRATE_Z)[0] + 15;
     const sockets: Vec3[] = [
-      [centre[0] + size[0] - 30, floor - 30, CRATE_Z],
-      [centre[0] + size[0] - 60, floor - 30, CRATE_Z],
+      [socket, floor - 37, CRATE_Z],
+      [Math.max(socket - 30, beside), floor - 37, CRATE_Z],
     ];
     gl.set('uSocket[0]', sockets[0]);
     gl.set('uSocket[1]', sockets[1]);
@@ -405,41 +624,119 @@ export function createCli(root: HTMLElement): () => void {
       card.at = '';
     }
 
-    // the drive unit frames the registry's plate, the chain hangs from the head sprocket on its right
+    // the drive unit frames the registry's plate and turns the chain
     const sign = box(plate, s);
     gl.set('uPlate', [sign.x, sign.y, sign.x + sign.w, sign.y + sign.h]);
     housing('uDrive', sign, CHAIN_Z + 22, 18, 8);
-    // the hopper frames the counter, its chute drops into the title bar of your project
+    // the hopper frames the counter, its spout rests on the title bar of your project
     const counter = box(scene.counter, s);
     gl.set('uCounter', [counter.x, counter.y, counter.x + counter.w, counter.y + counter.h]);
     housing('uCounter', counter, HOPPER_Z + 24, 4, 5);
     const treeBox = box(scene.tree, s);
+    // placed by its front face, the one around the counter: far down a tall stage the perspective
+    // would otherwise move it off its window
     const middle = counter.x + counter.w / 2;
-    hopper = unproject(middle, counter.y - 14, HOPPER_Z);
-    const neck = unproject(middle, counter.y + counter.h + 10, HOPPER_Z);
-    const entry = unproject(middle, treeBox.y + 4, HOPPER_Z);
-    mouth = counter.w + (desktop ? 80 : 20);
-    const halfWidth = mouth / 2 / (CAM / (CAM - HOPPER_Z));
+    const face = HOPPER_Z + 22;
+    hopper = unproject(middle, counter.y - 14, face);
+    hopper[2] = HOPPER_Z;
+    const neck = unproject(middle, treeBox.y, face);
+    // a funnel wide enough to take a file falling flat, its lip inside the gutters
+    const gutter = Number.parseFloat(getComputedStyle(root).paddingLeft);
+    const lip = HOPPER_Z + 25;
+    // on a phone it stands beside the crate: clear of the lid's ram
+    const ram = project(centre[0] + size[0] + 16, 0, CRATE_Z - 30)[0];
+    const left = desktop ? gutter : Math.max(gutter, ram + 8);
+    const halfWidth = Math.min(
+      (counter.w + (desktop ? 80 : 40)) / 2 / (CAM / (CAM - HOPPER_Z)),
+      unproject(s.width - gutter, 0, lip)[0] - hopper[0] - 4,
+      hopper[0] - unproject(left, 0, lip)[0] - 4,
+    );
+    mouth = halfWidth * 2 * (CAM / (CAM - HOPPER_Z));
+    gl.set('uFrame', [gutter, s.width - gutter]);
     gl.set('uHopper', hopper);
-    gl.set('uHopperSize', [halfWidth, counter.w / 2 + 6, neck[1] - hopper[1], 22]);
-    gl.set('uChute', [neck[0], neck[1], entry[0], entry[1]]);
+    gl.set('uHopperSize', [
+      halfWidth,
+      Math.min(counter.w / 2 + 6, halfWidth),
+      neck[1] - hopper[1],
+      22,
+    ]);
 
-    // the chain climbs from above the open lid to the head; files ride on its left
-    const head = unproject(sign.x + sign.w + 25, counter.y - 4, CHAIN_Z);
-    const lid = project(centre[0], top - 2 * size[2] - 6, centre[2] - size[2])[1];
-    const tail = unproject(0, lid - 14 - scene.cards[0].h / 2, CHAIN_Z);
-    // files let go of their jaw this far below the head sprocket
-    chain.tail = [head[0], tail[1]];
-    chain.length = tail[1] - head[1] - 30;
-    gl.set('uChain', [head[0], tail[1], 0, -1]);
-    gl.set('uChainLength', [tail[1] - head[1], CHAIN_Z]);
-    gl.set('uPitch', PITCH);
+    // a desktop's riser climbs from above the open lid to the head beside the hopper, the files
+    // clamped on its left; a phone's beam runs from under the drive unit to over the hopper, the
+    // files hanging under it
+    beam = !desktop;
+    gl.set('uJaw', JAW);
+    gl.set('uJawBox', beam ? [13, 2.5] : [2.5, 13]);
+    const front = CHAIN_Z + 22;
+    let tail: Vec3;
+    let head: Vec3;
+    if (beam) {
+      // low enough that the drive's gear on top of its tail clears the plate
+      tail = unproject(sign.x + 80, sign.y + sign.h + 38, CHAIN_Z);
+      head = unproject(middle, sign.y + sign.h + 38, CHAIN_Z);
+      chain.dir = [1, 0];
+      chain.side = [0, -1];
+      chain.length = head[0] - tail[0] - 6;
+      gl.set('uDriveGear', [tail[0], tail[1] - 23, front]);
+    } else {
+      head = unproject(sign.x + sign.w + 25, counter.y - 4, CHAIN_Z);
+      const lid = project(centre[0], top - 2 * size[2] - 6, centre[2] - size[2])[1];
+      tail = [head[0], unproject(0, lid - 14 - scene.cards[0].h / 2, CHAIN_Z)[1], CHAIN_Z];
+      chain.dir = [0, -1];
+      chain.side = [1, 0];
+      // files let go of their jaw this far below the head sprocket: they slide off between its
+      // teeth and your project's window
+      chain.length = tail[1] - head[1] - 33;
+      gl.set('uDriveGear', [unproject(sign.x + sign.w + 8, 0, front)[0] - 12, head[1], front]);
+    }
+    chain.tail = [tail[0], tail[1]];
+    gl.set('uChain', [tail[0], tail[1], chain.dir[0], chain.dir[1]]);
+    gl.set('uChainLength', [Math.hypot(head[0] - tail[0], head[1] - tail[1]), CHAIN_Z]);
+    gl.set('uChainSide', chain.side);
     inside = [centre[0], top + 30, centre[2]];
+    // under a beam the files hang centred: wide ones shrink to stay inside the gutters, on the
+    // beam and on their way up from the crate, nearer and so larger
+    const [tailX, , k] = project(tail[0], tail[1], CHAIN_Z);
+    const headX = project(head[0], head[1], CHAIN_Z)[0];
+    const [crateX, , near] = project(inside[0], inside[1], inside[2]);
+    const climb = Math.min(crateX, project(tail[0], tail[1], inside[2])[0]) - gutter - 4;
+    const reach = s.width - gutter - 4 - headX;
+    // and a riser's widest, hanging left of their jaws, stay inside the gutter too
+    const hang = tailX - JAW * k - gutter - 4;
+    let widest = 0;
+    for (const card of scene.cards) {
+      card.scale = beam
+        ? Math.min(
+            0.8,
+            (2 * Math.min(tailX - gutter - 4, reach)) / (card.w * k),
+            (2 * climb) / (card.w * near),
+          )
+        : Math.min(1, hang / (card.w * k), (2 * (crateX - gutter - 4)) / (card.w * near));
+      widest = Math.max(widest, card.w * card.scale * k);
+    }
+    // a beam spaces its files by the widest and the room for a pop between them
+    pitch = beam ? widest + 4 + POP : PITCH;
+    speed = beam ? BEAM_SPEED : SPEED;
+    gl.set('uPitch', pitch);
+    gripper(chain.length);
+    if (beam) {
+      band = 0;
+      for (const card of scene.cards) band = Math.max(band, card.h * card.scale);
+      fall = hopper[1] + 16 - point[1];
+    } else {
+      // a file sliding off the head is gone once its left edge passes the hopper's front edge, at
+      // the height of the file's bottom
+      const [jawX, jawY] = project(point[0], point[1], CHAIN_Z);
+      slideFrom = unproject(jawX, jawY, SLIDE_Z);
+      const bottom = project(0, slideFrom[1] + scene.cards[0].h, SLIDE_Z)[1];
+      const y = unproject(0, bottom, face)[1];
+      const taper = clamp((y - hopper[1]) / (neck[1] - hopper[1]));
+      const edge = hopper[0] - mix(halfWidth, Math.min(counter.w / 2 + 6, halfWidth), taper);
+      const inlet = unproject(project(edge, y, face)[0], 0, SLIDE_Z)[0];
+      for (const card of scene.cards) card.slide = inlet + card.w * card.scale - slideFrom[0] + 1;
+    }
 
-    // the print head rides over the imports
-    const imports = box(find('imports', scene.column), s);
-    headRail = [imports.x + 24, imports.x + imports.w - 6, imports.y - 13, 10];
-    gl.set('uHeadRail', headRail);
+    const editor = box(scene.editor, s);
     for (const strike of scene.strikes) strike.key = '';
     editCaretKey = '';
     {
@@ -451,25 +748,30 @@ export function createCli(root: HTMLElement): () => void {
       editCaret.style.height = `${cut.height}px`;
     }
 
-    // cables: off a reel on the imports' edge, down the gutter, along the floor to the crate
+    // cables: off a reel on the editor's edge beside a file's tab, down the gutter, along the
+    // floor to the crate
     wires.length = 0;
     if (desktop) {
-      // both lanes keep to the tree's side of the gutter: the run to the floor swings out toward the viewer
+      // both lanes keep to the tree's side of the gutter: the run to the floor swings out toward the
+      // viewer, far enough to pass under your project's window
       const lanes = [treeBox.x + treeBox.w + 10, treeBox.x + treeBox.w + 21];
-      const front = [CRATE_Z + 22, CRATE_Z + 40];
-      for (let i = 0; i < scene.strikes.length; i++) {
-        // on the line's first row: a rewired line keeps room for its longer version
-        const line = box(scene.strikes[i].line, s);
-        const reel: Vec3 = [imports.x - REEL - 2, line.y + 10, WALL];
+      const front = [CRATE_Z + 40, CRATE_Z + 58];
+      const view = box(scene.list, s);
+      for (let i = 0; i < scene.cabled.length; i++) {
+        const tab = box(scene.tabs[scene.cabled[i]], s);
+        const reel: Vec3 = [editor.x - REEL - 2, tab.y + tab.h / 2, WALL];
         const row = box(scene.targets[i], s);
         const lane = lanes[i];
-        const target: Vec3 = [treeBox.x + treeBox.w + 3, row.y + row.h / 2, WALL];
+        // a row scrolled out of the list keeps its plug on the list's edge
+        const plug = Math.min(view.y + view.h - 10, Math.max(view.y + 10, row.y + row.h / 2));
+        const target: Vec3 = [treeBox.x + treeBox.w + 3, plug, WALL];
         const { sealed, done, branch, turn } = cables({
           reel: [reel[0] - REEL, reel[1], WALL],
           lane,
           wall: WALL,
           floor,
           front: front[i],
+          forward: unproject(project(lane, 0, WALL)[0], 0, front[i])[0],
           socket: [sockets[i][0], sockets[i][1], CRATE_Z + 2],
           target,
         });
@@ -494,36 +796,32 @@ export function createCli(root: HTMLElement): () => void {
       'uBox[2]',
       bounds(
         [hopper[0] - halfWidth - 6, hopper[1] - 8, 0],
-        [hopper[0] + halfWidth + 6, entry[1] + 8, HOPPER_Z + 30],
+        [hopper[0] + halfWidth + 6, neck[1] + 8, HOPPER_Z + 30],
       ),
     );
     gl.set(
       'uBox[3]',
-      bounds(
-        [headRail[0] - 16, headRail[2] - 12, 0],
-        [headRail[1] + 16, imports.y + imports.h, 24],
-      ),
-    );
-    gl.set(
-      'uBox[4]',
       desktop
-        ? bounds([treeBox.x + treeBox.w - 12, imports.y, 0], [imports.x + 12, floor, 24])
+        ? bounds([treeBox.x + treeBox.w - 12, editor.y, 0], [editor.x + 12, floor, 24])
         : [0, 0, 0, 0],
     );
-    const windows = [
-      scene.tree,
-      find('imports', scene.column),
-      scene.edit,
-      find('preview', scene.column),
-    ];
+    const windows = [scene.tree, scene.editor, find('preview', scene.column)];
     for (let i = 0; i < windows.length; i++) {
       const r = box(windows[i], s);
       gl.set(`uWindow[${i}]`, [r.x, r.y, r.x + r.w, r.y + r.h]);
     }
 
     beats = schedule();
+    // a waiting run waits where its act now starts
+    if (phase === 'hold') clock = actAt(act) - 1;
     landedShown = -1;
     render(phase === 'rest' ? beats.end : clock);
+    // rows that moved this frame have their cables drawn on them now, not a frame late; a stage
+    // that changed size is drawn as its canvas resizes, right after
+    if (s.width === stage[0] && s.height === stage[1]) gl.draw();
+    stage[0] = s.width;
+    stage[1] = s.height;
+    check();
   }
 
   /** the scene at time t, ms */
@@ -531,19 +829,22 @@ export function createCli(root: HTMLElement): () => void {
     const live = phase !== 'rest';
     const b = beats;
 
-    // the command, typed
-    const length = command.textContent!.length;
+    // the command, typed: the characters not typed yet keep their place, unseen
+    const length = scene.command.children.length;
     const shown = live ? Math.round(clamp((t - b.type) / (b.typed - b.type)) * length) : length;
-    const hidden = 1 - shown / length;
-    const clip = hidden > 0 ? `inset(0 ${(hidden * 100).toFixed(2)}% 0 0)` : '';
-    if (command.style.clipPath !== clip) command.style.clipPath = clip;
+    if (shown !== typedShown) {
+      typedShown = shown;
+      if (shown < length) scene.command.style.setProperty('--typed', String(shown));
+      else scene.command.style.removeProperty('--typed');
+    }
     const typing = !live || t > b.lid ? 'none' : t < b.type || t > b.typed ? 'blink' : 'solid';
     if (typing !== caretMode) {
       caretMode = typing;
       caret.style.visibility = typing === 'none' ? 'hidden' : 'visible';
       caret.style.animation = typing === 'solid' ? 'none' : '';
     }
-    const at = `translateX(${(-hidden * commandWidth).toFixed(1)}px)`;
+    const end = shown * 3;
+    const at = `translate(${scene.ends[end].toFixed(1)}px, ${(scene.ends[end + 1] + (scene.ends[end + 2] - caretHeight) / 2).toFixed(1)}px)`;
     if (at !== caretAt) {
       caretAt = at;
       caret.style.transform = at;
@@ -563,44 +864,74 @@ export function createCli(root: HTMLElement): () => void {
     let holes = 0;
     let landed = 0;
     const cards = scene.cards;
+    const rise = beam ? LIFT : RISE;
     for (let i = 0; i < cards.length; i++) {
       const card = cards[i];
-      const s = distance - RISE - i * PITCH;
-      if (s >= chain.length + DROP) landed++;
-      if (!live || s <= -RISE || s >= chain.length + DROP) {
+      const s = distance - rise - i * pitch;
+      const out = t - b.release[i];
+      if (live && t >= b.landed[i]) landed++;
+      if (!live || s <= -rise || t >= b.landed[i]) {
         if (card.el.style.visibility !== '') card.el.style.visibility = '';
         continue;
       }
-      // clamped by its right edge left of the chain; centred in the crate and over the hopper
-      let anchor = card.w;
+      // a riser clamps it by its right edge, a beam holds it by the middle of its top; centred in
+      // the crate and over the hopper
+      let anchor = beam ? card.w / 2 : card.w;
       let fit = 1;
       let x: number;
       let y: number;
       let z = CHAIN_Z;
-      if (s < 0) {
-        // up out of the crate in front of the lid, into its jaw at the chain's speed
-        const u = (s + RISE) / RISE;
+      if (out >= 0 && beam) {
+        // let go over the hopper with a push, it falls in
+        const u = out / (b.landed[i] - b.release[i]);
+        gripper(chain.length);
+        x = mix(point[0], hopper[0], ease(u));
+        y = point[1] + FALL * out + (PULL * out * out) / 2;
+        z = mix(CHAIN_Z, HOPPER_Z, u);
+        fit = mix(1, Math.min(1, (mouth - 12) / (card.w * card.scale)), ease(u));
+      } else if (out >= 0) {
+        // off its jaw, across the riser in front of it and into the hopper's side
+        x = slideFrom[0] + slid(b, i, out);
+        y = slideFrom[1];
+        z = SLIDE_Z;
+      } else if (s < 0 && beam) {
+        // under the tail: up out of the crate to just under the files on the beam, then into the
+        // jaw once the one ahead has moved clear
         gripper(0);
-        x = bezier(inside[0], point[0], point[0], u);
+        const lift = rise - POP;
+        z = inside[2];
+        if (s < -POP) {
+          const u = (s + rise) / lift;
+          x = mix(inside[0], point[0], ease(Math.min(1, u * 2)));
+          y = mix(inside[1], point[1] + band + 6, 1 - (1 - u) * (1 - u));
+        } else {
+          x = point[0];
+          y = mix(point[1] + band + 6, point[1], (s + POP) / POP);
+        }
+      } else if (s < 0) {
+        // straight up out of the crate in front of the lid, to its jaw at the chain's speed
+        const u = (s + rise) / rise;
+        gripper(0);
+        x = inside[0];
         y = bezier(inside[1], point[1] + RISE / 2, point[1], u);
-        z = mix(inside[2], CHAIN_Z, u * u * u);
-        anchor = mix(card.w / 2, anchor, u);
-      } else if (s <= chain.length) {
+        z = inside[2];
+        anchor = card.w / 2;
+      } else {
         gripper(s);
         x = point[0];
         y = point[1];
-      } else {
-        // swung out past the head in front of its gears, under the drive unit, into the hopper
-        const u = (s - chain.length) / DROP;
-        gripper(chain.length);
-        x = bezier(point[0], point[0] + 40, hopper[0], u);
-        y = bezier(point[1], point[1] - 24, hopper[1] + 16, u);
-        z = mix(CHAIN_Z, HOPPER_Z, u) + Math.sin(Math.min(1, u / 0.7) * Math.PI) * 44;
-        anchor = mix(anchor, card.w / 2, u);
-        fit = mix(1, Math.min(1, (mouth - 12) / card.w), ease(u));
+        if (s < SETTLE) {
+          // the jaw takes it back to the chain, from over the crate on a riser
+          const v = ease(s / SETTLE);
+          z = mix(inside[2], CHAIN_Z, v);
+          if (!beam) {
+            x = mix(inside[0], point[0], v);
+            anchor = mix(card.w / 2, anchor, v);
+          }
+        }
       }
       const [sx, sy, depth] = project(x, y, z);
-      const k = depth * fit;
+      const k = depth * fit * card.scale;
       const left = sx - anchor * k;
       const transform = `translate(${left.toFixed(1)}px, ${sy.toFixed(1)}px) scale(${k.toFixed(4)})`;
       if (transform !== card.at) {
@@ -608,6 +939,9 @@ export function createCli(root: HTMLElement): () => void {
         card.el.style.transform = transform;
       }
       if (card.el.style.visibility !== 'visible') card.el.style.visibility = 'visible';
+      // a file sliding off the head passes in front of the riser
+      const layer = String(Math.round(z));
+      if (card.el.style.zIndex !== layer) card.el.style.zIndex = layer;
       if (holes < CARDS) {
         gl.set(`uCard[${holes}]`, [left, sy, left + card.w * k, sy + card.h * k]);
         holeDepth[holes] = z;
@@ -625,43 +959,37 @@ export function createCli(root: HTMLElement): () => void {
     gl.set('uCards', holes);
     land(t, live, landed);
 
-    // the rewire: the head strikes each import, then its cable moves from the crate to your folder
-    let headX = headRail[1] - 14;
-    let headY = headRail[2] + 6;
+    // the editor turns to the file each beat acts on: the first to rewire, each one rewired, the
+    // one you edit
+    if (live) {
+      let tab = scene.strikes.length > 0 ? scene.strikes[0].tab : scene.open;
+      for (let i = 0; i < scene.strikes.length; i++)
+        if (t >= b.strikes[i]) tab = scene.strikes[i].tab;
+      if (t >= b.edit) tab = scene.open;
+      if (tab !== beatTab) {
+        beatTab = tab;
+        pick(scene, tab);
+      }
+    }
+
+    // each import: its old line selected, struck, the new line under it typed; then its file's
+    // cable moves from the crate to your folder
+    let writing: Strike | undefined;
     for (let i = 0; i < scene.strikes.length; i++) {
       const strike = scene.strikes[i];
-      const u = t - b.strikes[i];
-      const write = 420;
-      const typing = write + strike.after.length * 70;
-      const active = live && u >= 0 && u < strikeTime(strike);
-      let text = live && u < write ? strike.before : strike.after;
-      let chars = 0;
-      if (active && u >= write && u < typing) {
-        chars = Math.min(strike.after.length, 1 + Math.floor((u - write) / 70));
-        text = strike.after.slice(0, chars);
-      }
-      const selected = active && u >= 300 && u < write;
+      const u = live ? t - b.strikes[i] : Infinity;
+      const chars = u < 300 ? 0 : Math.min(strike.after.length, 1 + Math.floor((u - 300) / 70));
+      const text = strike.after.slice(0, chars);
+      const state = `${u >= 220 ? 'diff' : ''}|${u >= 60 && u < 220 ? 'selected' : ''}|${text}`;
+      if (state === strike.state) continue;
+      strike.state = state;
+      strike.diff.toggleAttribute('data-diff', u >= 220);
+      const selected = u >= 60 && u < 220;
+      strike.from.style.background = selected ? 'var(--lp-yellow)' : '';
+      strike.from.style.color = selected ? '#121210' : '';
       if (strike.cut.textContent !== text) strike.cut.textContent = text;
-      const background = selected ? 'var(--lp-yellow)' : '';
-      if (strike.cut.style.background !== background) {
-        strike.cut.style.background = background;
-        strike.cut.style.color = selected ? '#121210' : '';
-      }
-      if (!active) continue;
-      // the line reflows as it is rewritten: find the cut again whenever its text changed
-      if (strike.key !== text) {
-        strike.key = text;
-        measure(strike.cut, strike.ends);
-      }
-      // over the cut, down, select it, a blow per character typed, up
-      const e = strike.ends;
-      const from = i === 0 ? headRail[1] - 14 : scene.strikes[i - 1].ends.x1 - 4;
-      headX = u < 220 ? mix(from, e.x0 + 4, inOut(u / 220)) : chars > 0 ? e.x1 - 4 : e.x0 + 4;
-      const drop = u < 220 ? 0 : u < 300 ? (u - 220) / 80 : u < typing ? 1 : 1 - (u - typing) / 120;
-      headY = mix(headRail[2] + 6, (chars > 0 ? e.y1 : e.y0) + 2, ease(clamp(drop)));
-      if (chars > 0 && (u - write) % 70 < 26) headY += 2;
+      if (u >= 220 && u < strikeTime(strike)) writing = strike;
     }
-    gl.set('uHead', [headX, headY, 0, 0]);
 
     const spin: [number, number] = [0, 0];
     const plugged: [number, number] = [0, 0];
@@ -698,8 +1026,8 @@ export function createCli(root: HTMLElement): () => void {
     let value = live && e < 300 ? cut.dataset.old! : next;
     const select = live && e >= 120 && e < 300;
     let typed = -1;
-    if (live && e >= 300 && e < 300 + next.length * 40) {
-      typed = Math.min(next.length, 1 + Math.floor((e - 300) / 40));
+    if (live && e >= 300 && e < 300 + b.editFor) {
+      typed = Math.min(next.length, 1 + Math.floor(((e - 300) / b.editFor) * next.length));
       value = next.slice(0, typed);
     }
     if (cut.textContent !== value) cut.textContent = value;
@@ -708,30 +1036,41 @@ export function createCli(root: HTMLElement): () => void {
       cut.style.background = background;
       cut.style.color = select ? '#121210' : '';
     }
-    // the caret after the edited text, found again whenever the line reflows
-    const caretShown = live && e >= 0 && e < 300 + next.length * 40 + 200;
-    const caretKey = caretShown ? value : '';
+    // the caret after the text being typed, found again whenever its line reflows
+    const editing = live && e >= 0 && e < 300 + b.editFor + 200;
+    const target = editing ? cut : writing?.cut;
+    const caretKey = target ? `${editing ? 'edit' : writing!.tab}|${target.textContent}` : '';
     if (caretKey !== editCaretKey) {
       editCaretKey = caretKey;
-      editCaret.style.visibility = caretShown ? 'visible' : '';
-      // solid while it types, like an editor's
-      editCaret.style.animation = caretShown ? 'none' : '';
-      if (caretShown) {
-        measure(cut, editEnds);
+      editCaret.style.visibility = target ? 'visible' : '';
+      // solid while it types, like an editor's; it blinks while the run waits
+      editCaret.style.animation = target && phase !== 'hold' ? 'none' : '';
+      if (target) {
+        measure(target, editEnds);
         editCaret.style.transform = `translate(${editEnds.x1.toFixed(1)}px, ${editEnds.y1.toFixed(1)}px)`;
       }
     }
-    const edited = !live || e >= 300 + next.length * 40 + 120;
+    const edited = !live || t >= b.page;
     if (edited !== scene.edited) {
       scene.edited = edited;
-      scene.before.style.visibility = edited ? 'hidden' : 'visible';
-      scene.after.style.visibility = edited ? 'visible' : 'hidden';
+      scene.page.toggleAttribute('data-edited', edited);
       if (edited && live)
         scene.after.animate(ditherKeyframes(2), { duration: 3 * TICK, easing: 'linear' });
     }
 
     status(t, live);
     gl.invalidate();
+  }
+
+  /** the editor shows the file of tab `i`: its tab picked, its lines, its path in the title */
+  function pick(s: Scene, i: number) {
+    if (s.shown === i) return;
+    s.shown = i;
+    for (let k = 0; k < s.tabs.length; k++) {
+      s.tabs[k].ariaSelected = String(k === i);
+      s.panels[k].inert = k !== i;
+    }
+    s.title.textContent = s.tabs[i].dataset.file!;
   }
 
   /** where `el`'s text is now; a layout read, so only when its text changed */
@@ -748,10 +1087,11 @@ export function createCli(root: HTMLElement): () => void {
     out.y1 = last.top - s.top;
   }
 
-  /** where a file's top right corner sits, `s` along the chain: in its gripper's jaw */
+  /** where a file is held `s` along the chain: in its gripper's jaw, the top right corner of a file
+   * on a riser, the middle of its top under a beam */
   function gripper(s: number) {
-    point[0] = chain.tail[0] - JAW;
-    point[1] = chain.tail[1] - s - 12;
+    point[0] = chain.tail[0] + chain.dir[0] * s - chain.side[0] * JAW;
+    point[1] = chain.tail[1] + chain.dir[1] * s - chain.side[1] * JAW + (beam ? 2 : -12);
     point[2] = CHAIN_Z;
   }
 
@@ -823,6 +1163,8 @@ export function createCli(root: HTMLElement): () => void {
     if (live) {
       if (t < b.latch[0]) text = `npx @fumadocs/cli ${scene.args}`;
       else if (t < b.belt) text = 'opening fumadocs-ui';
+      else if (phase === 'hold' && t < b.edit)
+        text = `fetched ${scene.fetch} from fumadocs.dev/registry`;
       else if (t < b.strikes[0]) text = `fetching ${scene.fetch} from fumadocs.dev/registry`;
       else if (t < b.edit) text = 'rewriting imports';
       else if (t < b.end - 200) text = `editing ${scene.name}`;
@@ -834,13 +1176,107 @@ export function createCli(root: HTMLElement): () => void {
   }
 
   function onFrame(time: number) {
-    if (phase !== 'play') return;
+    if (!ready || phase !== 'play') return;
     const now = time * 1000;
     const dt = last < 0 ? 0 : Math.min(50, now - last);
     last = now;
     clock += dt;
+    // an act waits just before its start until the reader sees what it acts on
+    while (act < 4 && clock >= actAt(act)) {
+      if (!onScreen(act)) {
+        clock = actAt(act) - 1;
+        hold();
+        return;
+      }
+      act++;
+    }
     if (clock < beats.end) render(clock);
     else rest();
+  }
+
+  /** when act `i` starts: the command, the latches once it's typed, the first rewrite once every
+   * file has landed, the page once your edit is typed */
+  function actAt(i: number): number {
+    if (i === 0) return 0;
+    if (i === 1) return beats.typed + 60;
+    if (i === 2) return beats.strikes[0] ?? beats.edit;
+    return beats.page;
+  }
+
+  /** the top and bottom on screen of what act `i` acts on: the command; the machine and the top of
+   * your project's window, where it delivers; the editor; the page */
+  function span(i: number): [number, number] {
+    let top = Infinity;
+    let bottom = -Infinity;
+    const add = (el: Element, height = Infinity) => {
+      const r = el.getBoundingClientRect();
+      top = Math.min(top, r.top);
+      bottom = Math.max(bottom, Math.min(r.bottom, r.top + height));
+    };
+    if (i === 0) add(commandBox);
+    else if (i === 1) {
+      add(plate);
+      add(scene.counter);
+      add(crate);
+      add(scene.tree, 40);
+    } else if (i === 2) add(scene.editor);
+    else add(scene.preview);
+    return [top, bottom];
+  }
+
+  /** the reader's view: between the menu and the status bar */
+  function view(): [number, number] {
+    const style = getComputedStyle(root);
+    return [
+      Number.parseFloat(style.getPropertyValue('--lp-menu-h')) || 0,
+      innerHeight - (Number.parseFloat(style.getPropertyValue('--lp-status-h')) || 0),
+    ];
+  }
+
+  /** act `i` can start: the reader sees what it acts on, all of it or as much of the screen as it
+   * fills. It waits for the acts after it too while the screen holds them all, so the run doesn't
+   * stop again. Once the reader scrolled past its best place, it starts while most of it is still
+   * in view; the command is only typed on screen */
+  function onScreen(i: number): boolean {
+    const [from, to] = view();
+    let [top, bottom] = span(i);
+    for (let next = i + 1; next < 4; next++) {
+      const [a, b] = span(next);
+      if (Math.max(bottom, b) - Math.min(top, a) > to - from) break;
+      top = Math.min(top, a);
+      bottom = Math.max(bottom, b);
+    }
+    const seen = Math.min(bottom, to) - Math.max(top, from);
+    const room = Math.min(bottom - top, to - from);
+    return seen >= room - CUT || (i > 0 && top < from && seen >= PAST * room);
+  }
+
+  /** the run waits, calm: the command typed; every file landed and the counter at its total; or
+   * your edit typed */
+  function hold() {
+    phase = 'hold';
+    editCaretKey = '';
+    render(clock);
+    flash(undefined, clock);
+  }
+
+  /** a scroll or a resize: a waiting run goes on once the reader sees its next act */
+  function check() {
+    if (phase === 'ready') {
+      if (onScreen(0)) play();
+      else if (span(0)[1] < view()[0] && onScreen(1)) {
+        // the reader scrolled past the command before it was typed: it reads typed, the delivery
+        // starts
+        play();
+        clock = actAt(1);
+        act = 2;
+      }
+    } else if (phase === 'hold' && onScreen(act)) {
+      act++;
+      phase = 'play';
+      last = -1;
+      gl.invalidate();
+    }
   }
 
   function rest() {
@@ -855,13 +1291,16 @@ export function createCli(root: HTMLElement): () => void {
       rest();
       return;
     }
-    // the first frame comes with the canvas's next one, so files and machine start together
+    // the first frame comes with the canvas's next one, so files and machine start together. It
+    // starts where the reader sees the command: a click on it, or the scroll that showed it
     phase = 'play';
     clock = 0;
+    act = 1;
     last = -1;
     landedShown = -1;
     flashed = -1;
     editCaretKey = '';
+    beatTab = -1;
     for (const strike of scene.strikes) strike.key = '';
     gl.invalidate();
   }
@@ -876,13 +1315,33 @@ export function createCli(root: HTMLElement): () => void {
     scene = next;
     for (let i = 0; i < scenes.length; i++) {
       const on = scenes[i] === scene;
-      scenes[i].cell.hidden = !on;
-      scenes[i].column.hidden = !on;
+      scenes[i].cell.inert = !on;
+      scenes[i].column.inert = !on;
       scenes[i].counter.hidden = !on;
       chips[i].ariaPressed = String(on);
     }
-    command.textContent = `npx @fumadocs/cli ${scene.args}`;
+    for (const s of scenes) s.command.inert = s !== scene;
     layout();
+  }
+
+  function onTab(event: Event) {
+    const tab = event.currentTarget as HTMLButtonElement;
+    const i = Number(tab.dataset.tab);
+    if (event instanceof KeyboardEvent) {
+      const step =
+        event.key === 'ArrowDown' || event.key === 'ArrowRight'
+          ? 1
+          : event.key === 'ArrowUp' || event.key === 'ArrowLeft'
+            ? -1
+            : 0;
+      if (step === 0) return;
+      event.preventDefault();
+      const next = scene.tabs[(i + step + scene.tabs.length) % scene.tabs.length];
+      next.focus();
+      pick(scene, Number(next.dataset.tab));
+      return;
+    }
+    pick(scene, i);
   }
 
   function onPlay(event: MouseEvent) {
@@ -891,45 +1350,70 @@ export function createCli(root: HTMLElement): () => void {
     play();
   }
 
-  // any of the stage on screen at load: it stays finished, the replay is there; otherwise it plays
-  // once the crate comes into view. The canvas pauses itself off screen, the clock skips that time
-  const observer = new IntersectionObserver(
-    (entries) => {
-      for (const entry of entries) {
-        if (entry.target === root) {
-          if (first && !entry.isIntersecting && !reduce.matches) {
-            phase = 'ready';
-            landedShown = -1;
-            render(0);
-          }
-          first = false;
-          continue;
+  // any of the stage on screen at load: it stays finished, the replay is there; otherwise it waits,
+  // and each act plays once the reader sees what it acts on. The canvas pauses itself off screen,
+  // the clock skips that time
+  const observer = new IntersectionObserver((entries) => {
+    for (const entry of entries) {
+      if (entry.target === root) {
+        if (first && !entry.isIntersecting && !reduce.matches) {
+          phase = 'ready';
+          landedShown = -1;
+          render(0);
         }
-        last = -1;
-        if (phase === 'ready' && entry.intersectionRatio >= START) play();
+        first = false;
+        continue;
       }
-    },
-    { threshold: [0, START] },
-  );
+      last = -1;
+    }
+    check();
+  });
 
-  const resize = new ResizeObserver(layout);
   const theme = new MutationObserver(colours);
   resize.observe(root);
+  for (const s of scenes) {
+    resize.observe(s.tree);
+    resize.observe(s.list.firstElementChild!);
+    resize.observe(s.editor);
+    resize.observe(s.preview);
+    // a scroll event comes before this frame paints: the cables follow their rows in it
+    s.list.addEventListener('scroll', layout, { passive: true });
+  }
+  void document.fonts.ready.then(() => {
+    if (!disposed) layout();
+  });
   theme.observe(html, { attributes: true, attributeFilter: ['class'] });
   observer.observe(root);
   observer.observe(crate);
+  addEventListener('scroll', check, { passive: true });
   replay.addEventListener('click', play);
   for (const chip of chips) chip.addEventListener('click', onPlay);
+  for (const s of scenes) {
+    for (const tab of s.tabs) {
+      tab.addEventListener('click', onTab);
+      tab.addEventListener('keydown', onTab);
+    }
+  }
+  ready = true;
   colours();
   layout();
 
   return () => {
+    disposed = true;
     observer.disconnect();
     resize.disconnect();
     theme.disconnect();
+    removeEventListener('scroll', check);
     replay.removeEventListener('click', play);
     for (const chip of chips) chip.removeEventListener('click', onPlay);
-    for (const s of scenes) s.flaps.destroy();
+    for (const s of scenes) {
+      s.list.removeEventListener('scroll', layout);
+      for (const tab of s.tabs) {
+        tab.removeEventListener('click', onTab);
+        tab.removeEventListener('keydown', onTab);
+      }
+      s.flaps.destroy();
+    }
     gl.destroy();
   };
 }

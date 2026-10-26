@@ -3,7 +3,6 @@ import { type ReactNode, useCallback, useEffect, useId, useRef, useState } from 
 import { cn } from '@/lib/cn';
 import { ditherPath } from '../../lib/bayer';
 import { paint, THEME_NAMES, THEMES, type ThemeId } from './data';
-import { createIntent } from './intent';
 import type { InkTable } from './presets';
 import { createSprings, due, settleSprings, STEP, stepSprings } from './spring';
 
@@ -64,7 +63,7 @@ interface Engine {
 /**
  * The knob as a physical thing. Dragged, it follows the pointer around its axle with a pull toward
  * the nearest detent, and the preset changes as it crosses one; let go, it snaps onto the detent.
- * A name held under the pointer, or clicked, turns it there on a spring.
+ * A name clicked turns it there on a spring.
  */
 function createKnob(
   root: HTMLElement,
@@ -128,7 +127,6 @@ function createKnob(
     cancelAnimationFrame(raf);
     raf = 0;
     turn.velocity[0] = 0;
-    intent.cancel();
   }
 
   function onMove(event: PointerEvent) {
@@ -174,26 +172,11 @@ function createKnob(
     settle();
   }
 
-  // a name held under the pointer is chosen, the knob turns to it
-  const intent = createIntent<number>((index) => {
-    set(index, false);
-    settle();
-  });
-
-  function onHover(event: PointerEvent) {
-    if (drag || event.pointerType === 'touch') return;
-    const label = (event.target as Element).closest<HTMLElement>('[data-theme]');
-    const index = label ? THEMES.indexOf(label.dataset.theme as ThemeId) : -1;
-    intent.move(index >= 0 && index !== value ? index : null);
-  }
-
   handle.addEventListener('pointerdown', onDown);
   handle.addEventListener('pointermove', onMove);
   handle.addEventListener('pointerup', onUp);
   handle.addEventListener('pointercancel', onUp);
   handle.addEventListener('keydown', onKey);
-  root.addEventListener('pointermove', onHover);
-  root.addEventListener('pointerleave', intent.cancel);
 
   return {
     turnTo(index) {
@@ -203,14 +186,11 @@ function createKnob(
     },
     destroy() {
       cancelAnimationFrame(raf);
-      intent.cancel();
       handle.removeEventListener('pointerdown', onDown);
       handle.removeEventListener('pointermove', onMove);
       handle.removeEventListener('pointerup', onUp);
       handle.removeEventListener('pointercancel', onUp);
       handle.removeEventListener('keydown', onKey);
-      root.removeEventListener('pointermove', onHover);
-      root.removeEventListener('pointerleave', intent.cancel);
     },
   };
 }
@@ -224,7 +204,7 @@ interface DialProps {
 
 /**
  * The 12 presets on a rotary selector: a knob over a ring of their colours with their names
- * around it. Turn the knob, hold the pointer on a name, click it, or use the keys.
+ * around it. Turn the knob, click a name, or use the keys.
  */
 export function Dial({ table, value, onChange }: DialProps) {
   const id = useId();
@@ -286,7 +266,6 @@ export function Dial({ table, value, onChange }: DialProps) {
       <button
         key={theme}
         type="button"
-        data-theme={theme}
         tabIndex={-1}
         onClick={() => onChange(theme, false)}
         className={cn(

@@ -1,0 +1,557 @@
+import type { ReactNode } from 'react';
+import { cn } from '@/lib/cn';
+import { DITHER_MASKS } from '../../lib/bayer';
+import { BOARD, HUB, hubPort, percent, SLOTS, WINDOW, windowPort } from './board';
+import type { LayoutId } from './data';
+import { Hazard, LINE, type PartProps, Screw, Stamp } from './parts';
+
+/**
+ * The fixed hardware of the desk, drawn on the server: what never moves on its own or changes
+ * with the reader. The desk places it, and moves what it is bolted to.
+ */
+export interface Hardware {
+  /** each window's plate, and the jack its cable plugs into */
+  plates: Record<LayoutId, ReactNode>;
+  /** the face of the junction box, with a jack for each cable */
+  junction: ReactNode;
+  /** the parts screwed to the board around the box */
+  bench: ReactNode;
+  /** the stripboard on the strip under the desk */
+  stripboard: ReactNode;
+}
+
+/** a dither of ink over the box, `level` of 16 cells */
+function Dither({ level, className }: { level: number; className?: string }) {
+  return (
+    <span
+      aria-hidden
+      className={cn('pointer-events-none absolute inset-0 bg-lp-ink', className)}
+      style={{ maskImage: DITHER_MASKS[level], maskSize: '4px 4px' }}
+    />
+  );
+}
+
+/** a domed rivet: its far side in a dither */
+function Rivet({ className, style }: PartProps) {
+  return (
+    <span
+      aria-hidden
+      className={cn(
+        'absolute size-[max(5px,1cqw)] -translate-1/2 overflow-hidden rounded-full border border-lp-ink-2 bg-lp-paper',
+        className,
+      )}
+      style={style}
+    >
+      <Dither level={6} className="left-1/2" />
+    </span>
+  );
+}
+
+/** a socket a cable plugs into, over the frame line it sits on */
+function Jack({ style }: { style: PartProps['style'] }) {
+  return (
+    <span
+      aria-hidden
+      className="absolute z-[1] grid size-[max(8px,1.7cqw)] -translate-1/2 place-items-center rounded-full border border-lp-ink-2 bg-lp-paper"
+      style={style}
+    >
+      <span className="size-[38%] rounded-full bg-lp-ink-2" />
+    </span>
+  );
+}
+
+/** a speaker grille: holes punched in a plate */
+function Grille({ className }: { className: string }) {
+  return (
+    <span
+      aria-hidden
+      className={cn(
+        'absolute rounded-[3px] border border-lp-ink-2 bg-[radial-gradient(var(--lp-ink-2)_1px,transparent_1.4px)] bg-size-[5px_5px] bg-center',
+        className,
+      )}
+    />
+  );
+}
+
+/** a strip of worn tape over a corner: torn ends, a hairline, a dither of grime */
+function Tape({ className, style }: PartProps) {
+  return (
+    <span
+      aria-hidden
+      className={cn(
+        'absolute h-[max(6px,1.8cqw)] w-[max(20px,6.5cqw)] border-y border-lp-ink-2 bg-lp-paper [clip-path:polygon(0_0,100%_0,94%_25%,100%_50%,95%_75%,100%_100%,0_100%,5%_70%,0_45%,6%_20%)]',
+        className,
+      )}
+      style={style}
+    >
+      <Dither level={2} />
+    </span>
+  );
+}
+
+/** a sticker slapped on the board, one corner peeling */
+function Sticker({
+  children,
+  tilt,
+  className,
+  style,
+}: PartProps & { children: ReactNode; tilt: number }) {
+  return (
+    <span
+      className={cn(
+        'absolute border border-lp-ink-2 bg-lp-paper px-[0.6em] font-mono text-[clamp(8px,1.9cqw,11px)] leading-[1.5] whitespace-nowrap text-lp-ink-2 [clip-path:polygon(0_0,calc(100%-7px)_0,100%_7px,100%_100%,0_100%)]',
+        className,
+      )}
+      style={{ ...style, rotate: `${tilt}deg` }}
+    >
+      {children}
+      {/* the corner that came loose, folded over */}
+      <svg
+        aria-hidden
+        viewBox="0 0 7 7"
+        className="absolute -top-px -right-px size-[7px] overflow-visible"
+      >
+        <path d="M0 0L7 7H0z" className="fill-lp-paper stroke-lp-ink-2" style={LINE} />
+      </svg>
+    </span>
+  );
+}
+
+/* the hardware screwed to the board, in its own units; the box sizes it */
+
+/** a glass fuse in its clips, the wire running through it */
+function Fuse({ style }: Pick<PartProps, 'style'>) {
+  return (
+    <svg aria-hidden viewBox="0 0 96 24" className="absolute overflow-visible" style={style}>
+      <path
+        d="M10 22V6a4 4 0 0 1 8 0v16M78 22V6a4 4 0 0 1 8 0v16"
+        className="fill-none stroke-lp-ink-2"
+        style={LINE}
+      />
+      <rect
+        x={4.5}
+        y={5.5}
+        width={87}
+        height={13}
+        rx={2}
+        className="fill-lp-paper stroke-lp-ink-2"
+        style={LINE}
+      />
+      <rect x={4.5} y={5.5} width={12} height={13} className="fill-lp-ink-2" />
+      <rect x={79.5} y={5.5} width={12} height={13} className="fill-lp-ink-2" />
+      <path
+        d="M17 12h8l3-3 4 6 4-6 4 6 4-6 4 6 4-6 4 6 3-3h17"
+        className="fill-none stroke-lp-ink-2"
+        style={LINE}
+      />
+    </svg>
+  );
+}
+
+/** a small transformer: laminated core, two wound bobbins, feet with their screws */
+function Transformer({ style }: Pick<PartProps, 'style'>) {
+  let lamination = '';
+  for (let y = 12; y <= 52; y += 4) lamination += `M14 ${y}h68`;
+  let winding = '';
+  for (let x = 22; x <= 38; x += 2) winding += `M${x} 18v28`;
+  for (let x = 58; x <= 74; x += 2) winding += `M${x} 18v28`;
+  return (
+    <svg aria-hidden viewBox="0 0 96 70" className="absolute overflow-visible" style={style}>
+      <path d="M2.5 60.5h91v8h-91z" className="fill-lp-paper stroke-lp-ink-2" style={LINE} />
+      <circle cx={9} cy={64.5} r={2} className="fill-lp-paper stroke-lp-ink-2" style={LINE} />
+      <circle cx={87} cy={64.5} r={2} className="fill-lp-paper stroke-lp-ink-2" style={LINE} />
+      <rect
+        x={12.5}
+        y={8.5}
+        width={71}
+        height={52}
+        className="fill-lp-paper stroke-lp-ink-2"
+        style={LINE}
+      />
+      <path d={lamination} className="stroke-lp-line-strong" style={LINE} />
+      <rect
+        x={19.5}
+        y={16.5}
+        width={22}
+        height={32}
+        className="fill-lp-paper stroke-lp-ink-2"
+        style={LINE}
+      />
+      <rect
+        x={55.5}
+        y={16.5}
+        width={22}
+        height={32}
+        className="fill-lp-paper stroke-lp-ink-2"
+        style={LINE}
+      />
+      <path d={winding} className="stroke-lp-ink-2" style={LINE} />
+      <path d="M26 8.5V2M34 8.5V2M62 8.5V2M70 8.5V2" className="stroke-lp-ink-2" style={LINE} />
+    </svg>
+  );
+}
+
+/** a trimmer potentiometer: a square body, a slotted rotor, its three legs */
+function Trimmer({ style }: Pick<PartProps, 'style'>) {
+  return (
+    <svg aria-hidden viewBox="0 0 30 34" className="absolute overflow-visible" style={style}>
+      <path d="M7 27v6M15 27v6M23 27v6" className="stroke-lp-ink-2" style={LINE} />
+      <rect
+        x={0.5}
+        y={0.5}
+        width={29}
+        height={27}
+        className="fill-lp-paper stroke-lp-ink-2"
+        style={LINE}
+      />
+      <circle cx={15} cy={14} r={8.5} className="fill-lp-paper stroke-lp-ink-2" style={LINE} />
+      <path d="M10 9l10 10" strokeWidth={2} className="stroke-lp-ink-2" style={LINE} />
+    </svg>
+  );
+}
+
+/** a crystal in its can: a long rounded body on two leads */
+function Crystal({ style }: Pick<PartProps, 'style'>) {
+  return (
+    <svg aria-hidden viewBox="0 0 44 22" className="absolute overflow-visible" style={style}>
+      <path d="M14 16v6M30 16v6" className="stroke-lp-ink-2" style={LINE} />
+      <rect
+        x={0.5}
+        y={0.5}
+        width={43}
+        height={15}
+        rx={7.5}
+        className="fill-lp-paper stroke-lp-ink-2"
+        style={LINE}
+      />
+      <rect
+        x={5.5}
+        y={4.5}
+        width={33}
+        height={7}
+        rx={3.5}
+        className="fill-none stroke-lp-line-strong"
+        style={LINE}
+      />
+    </svg>
+  );
+}
+
+/** a safety pin, closed */
+function SafetyPin({ className, style }: PartProps) {
+  return (
+    <svg
+      aria-hidden
+      viewBox="0 0 48 12"
+      className={cn('absolute overflow-visible', className)}
+      style={style}
+    >
+      <path d="M8 3.5H40M8 8.5H38" className="stroke-lp-ink-2" style={LINE} />
+      <circle cx={6} cy={6} r={3.5} className="fill-none stroke-lp-ink-2" style={LINE} />
+      <path
+        d="M38 2.5h6.5a2.5 2.5 0 0 1 0 7H38z"
+        className="fill-lp-paper stroke-lp-ink-2"
+        style={LINE}
+      />
+    </svg>
+  );
+}
+
+/* the parts on the strip, in px of their own box */
+
+/** how much larger than their drawing the strip's parts show */
+const PART = 1.3;
+
+/** a DIP chip: notch, pins on both sides */
+function Chip({ pins }: { pins: number }) {
+  const w = pins * 8 + 4;
+  let legs = '';
+  for (let i = 0; i < pins; i++) legs += `M${6 + i * 8} 1v3M${6 + i * 8} 17v3`;
+  return (
+    <svg
+      aria-hidden
+      viewBox={`0 0 ${w} 21`}
+      width={w * PART}
+      height={21 * PART}
+      className="shrink-0 overflow-visible"
+    >
+      <path d={legs} className="stroke-lp-ink-2" style={LINE} />
+      <rect x="0.5" y="4.5" width={w - 1} height="12" className="fill-lp-ink-2" />
+      <path d="M0.5 8.5a2 2 0 0 1 0 4" className="fill-lp-paper" />
+      <circle cx="4.5" cy="13.2" r="0.9" className="fill-lp-paper" />
+    </svg>
+  );
+}
+
+/** a resistor: body with bands, its leads to the pads */
+function Resistor() {
+  return (
+    <svg
+      aria-hidden
+      viewBox="0 0 34 9"
+      width={34 * PART}
+      height={9 * PART}
+      className="shrink-0 overflow-visible"
+    >
+      <path d="M0 4.5h8M26 4.5h8" className="stroke-lp-ink-2" style={LINE} />
+      <rect
+        x="8.5"
+        y="1.5"
+        width="17"
+        height="6"
+        rx="2"
+        className="fill-lp-paper stroke-lp-ink-2"
+        style={LINE}
+      />
+      <path d="M12 1.5v6M15 1.5v6M21 1.5v6" className="stroke-lp-ink-2" style={LINE} />
+    </svg>
+  );
+}
+
+/** an electrolytic capacitor from the side: the stripe of its minus lead dithered */
+function Capacitor() {
+  return (
+    <span aria-hidden className="relative block h-6 w-3.5 shrink-0">
+      <span className="absolute inset-x-0 top-0 bottom-1 overflow-hidden rounded-t-[4px] border border-lp-ink-2 bg-lp-paper">
+        <span className="absolute inset-x-0 top-[3px] h-px bg-lp-ink-2" />
+        <Dither level={8} className="right-auto w-1" />
+      </span>
+      <span className="absolute bottom-0 left-1 h-1 w-px bg-lp-ink-2" />
+      <span className="absolute right-1 bottom-0 h-1 w-px bg-lp-ink-2" />
+    </span>
+  );
+}
+
+/** a diode: a body with its band */
+function Diode() {
+  return (
+    <svg
+      aria-hidden
+      viewBox="0 0 26 7"
+      width={26 * PART}
+      height={7 * PART}
+      className="shrink-0 overflow-visible"
+    >
+      <path d="M0 3.5h6M20 3.5h6" className="stroke-lp-ink-2" style={LINE} />
+      <rect
+        x="6.5"
+        y="0.5"
+        width="13"
+        height="6"
+        className="fill-lp-paper stroke-lp-ink-2"
+        style={LINE}
+      />
+      <rect x="15" y="0.5" width="2.5" height="6" className="fill-lp-ink-2" />
+    </svg>
+  );
+}
+
+/** a blob of solder on a pad */
+function Solder({ className }: { className?: string }) {
+  return (
+    <span
+      aria-hidden
+      className={cn('block size-1.5 shrink-0 rounded-[45%_55%_50%_50%] bg-lp-ink-2', className)}
+    />
+  );
+}
+
+/** a point on a box as % of its size */
+function at(x: number, y: number, w: number, h: number) {
+  return { left: `${(x / w) * 100}%`, top: `${(y / h) * 100}%` };
+}
+
+/** a plate around a window, `--plate` wider on each side */
+function Plate({ className, children }: { className?: string; children?: ReactNode }) {
+  return (
+    <span
+      aria-hidden
+      className={cn(
+        'absolute -inset-(--plate) -z-10 border border-lp-line-strong bg-lp-paper [--rim:calc(var(--plate)*0.5)]',
+        className,
+      )}
+    >
+      {children}
+    </span>
+  );
+}
+
+/** a row of rivets along an edge of a plate, from `from`% to `to`% of it */
+function Rivets({
+  edge,
+  from,
+  to,
+  count,
+}: {
+  edge: 'top' | 'bottom' | 'right';
+  from: number;
+  to: number;
+  count: number;
+}) {
+  const rivets = [];
+  for (let i = 0; i < count; i++) {
+    const offset = `${from + ((to - from) * i) / (count - 1)}%`;
+    rivets.push(
+      <Rivet
+        key={i}
+        className={
+          edge === 'top'
+            ? 'top-[var(--rim)]'
+            : edge === 'bottom'
+              ? 'top-[calc(100%-var(--rim))]'
+              : 'left-[calc(100%-var(--rim))]'
+        }
+        style={edge === 'right' ? { top: offset } : { left: offset }}
+      />,
+    );
+  }
+  return rivets;
+}
+
+/** the scrap each window is bolted to, none alike */
+const CHASSIS: Record<LayoutId, ReactNode> = {
+  docs: (
+    <Plate>
+      <Screw angle={20} className="top-[var(--rim)] left-[var(--rim)]" />
+      <Screw angle={-35} className="top-[var(--rim)] right-[var(--rim)] translate-x-1/2" />
+      <Screw angle={70} className="bottom-[var(--rim)] left-[var(--rim)] translate-y-1/2" />
+      <Screw angle={5} className="right-[var(--rim)] bottom-[var(--rim)] translate-1/2" />
+      <Rivets edge="bottom" from={14} to={86} count={7} />
+    </Plate>
+  ),
+  notebook: (
+    <Plate className="bg-[repeating-linear-gradient(-45deg,var(--lp-line)_0_1px,transparent_1px_5px)]">
+      <Rivets edge="top" from={12} to={88} count={5} />
+    </Plate>
+  ),
+  flux: (
+    <Plate className="bg-[radial-gradient(var(--lp-line-strong)_0.6px,transparent_0.6px)] bg-size-[5px_5px]">
+      <Screw angle={-60} className="top-[var(--rim)] left-[var(--rim)]" />
+      <Screw angle={45} className="right-[var(--rim)] bottom-[var(--rim)] translate-1/2" />
+      <Rivets edge="right" from={18} to={82} count={4} />
+    </Plate>
+  ),
+  glass: (
+    <>
+      <Tape className="-top-[2%] -left-[5%]" style={{ rotate: '-32deg' }} />
+      <Tape className="-top-[2%] -right-[5%]" style={{ rotate: '28deg' }} />
+    </>
+  ),
+  spacious: (
+    <Plate className="outline outline-1 outline-offset-[calc(var(--plate)*-0.45)] outline-lp-ink-2">
+      <Screw angle={80} className="top-[var(--rim)] left-[var(--rim)]" />
+      <Screw angle={10} className="top-[var(--rim)] right-[var(--rim)] translate-x-1/2" />
+      <Screw angle={-25} className="bottom-[var(--rim)] left-[var(--rim)] translate-y-1/2" />
+      <Screw angle={55} className="right-[var(--rim)] bottom-[var(--rim)] translate-1/2" />
+    </Plate>
+  ),
+  home: (
+    <Plate>
+      <Hazard className="inset-x-[12%] -bottom-px h-[var(--plate)] border-x border-lp-ink-2" />
+      <Rivets edge="top" from={8} to={92} count={9} />
+    </Plate>
+  ),
+};
+
+/** a place on the board, in its units */
+function place(x: number, y: number) {
+  return { left: `${(x / BOARD.w) * 100}%`, top: `${(y / BOARD.h) * 100}%` };
+}
+
+/** the desk's fixed hardware, `version` of `fumadocs-ui` on its sticker */
+export function createHardware(version: string): Hardware {
+  const plates = {} as Record<LayoutId, ReactNode>;
+  const jacks = [];
+  for (const slot of SLOTS) {
+    const [x, y] = windowPort(slot);
+    plates[slot.id] = (
+      <>
+        {CHASSIS[slot.id]}
+        <Jack style={at(x, y, WINDOW.w, WINDOW.h)} />
+      </>
+    );
+    const [hx, hy] = hubPort(slot);
+    jacks.push(<Jack key={slot.id} style={at(hx, hy, HUB.w, HUB.h)} />);
+  }
+
+  return {
+    plates,
+    junction: (
+      <>
+        <Hazard className="inset-x-0 top-0 h-[16%] border-b border-lp-ink" />
+        <Screw angle={30} className="top-[30%] left-[7%]" />
+        <Screw angle={-40} className="top-[30%] right-[7%] translate-x-1/2" />
+        <Screw angle={75} className="bottom-[12%] left-[7%]" />
+        <Screw angle={-10} className="right-[7%] bottom-[12%] translate-x-1/2" />
+        <span className="absolute inset-x-0 top-[16%] bottom-0 flex items-center justify-center">
+          <Stamp tilt={-2} className="text-[max(9px,1.2cqw)]">
+            search
+          </Stamp>
+        </span>
+        <Grille className="right-[14%] bottom-[12%] h-[24%] w-[18%]" />
+        {jacks}
+      </>
+    ),
+    // in the two bands beside the box that no window, shadow or cable reaches in any frame of a
+    // move, under the windows and the cables, in the mid-grey ink; a small desk keeps the fewest
+    bench: (
+      <div aria-hidden className="pointer-events-none absolute inset-0">
+        <Sticker tilt={-4} className="@max-[300px]:hidden" style={place(32, 408)}>
+          MIT
+        </Sticker>
+        <SafetyPin
+          className="@max-[300px]:hidden"
+          style={{ ...percent(14, 406, 60, 15), rotate: '-16deg' }}
+        />
+        <Sticker tilt={5} className="@max-[430px]:hidden" style={place(110, 414)}>
+          RSC
+        </Sticker>
+        <Trimmer style={percent(792, 344, 30, 34)} />
+        <Crystal style={percent(830, 352, 44, 22)} />
+        <Transformer style={percent(890, 344, 82, 60)} />
+        <Fuse style={percent(792, 388, 84, 21)} />
+        <Sticker
+          tilt={2}
+          className="text-[clamp(8px,1.6cqw,10px)] @max-[470px]:hidden"
+          style={place(792, 416)}
+        >
+          fumadocs-ui {version}
+        </Sticker>
+      </div>
+    ),
+    // the parts drop out as the strip narrows (its content box less the readouts' 220px), the
+    // dark chips before the resistor; a strip too narrow for it goes too
+    stripboard: (
+      <div
+        aria-hidden
+        className="relative flex h-10 min-w-0 flex-1 items-center justify-center gap-2.5 overflow-hidden bg-[radial-gradient(var(--lp-line-strong)_0.6px,transparent_0.6px)] bg-size-[6px_6px] px-2 @max-[280px]:hidden"
+      >
+        <span className="absolute inset-x-0 top-1/2 h-px bg-lp-line-strong" />
+        <span className="relative flex items-center gap-1">
+          <Solder className="@max-[300px]:hidden" />
+          <Resistor />
+          <Solder className="@max-[300px]:hidden" />
+        </span>
+        <span className="relative @max-[357px]:hidden">
+          <Chip pins={4} />
+        </span>
+        <span className="relative flex items-end gap-1.5 @max-[401px]:hidden">
+          <Capacitor />
+          <Capacitor />
+        </span>
+        <span className="relative flex items-center gap-1 @max-[465px]:hidden">
+          <Solder />
+          <Diode />
+          <Solder />
+        </span>
+        <span className="relative @max-[553px]:hidden">
+          <Chip pins={7} />
+        </span>
+        <span className="relative flex items-center gap-1 @max-[617px]:hidden">
+          <Resistor />
+          <Solder />
+        </span>
+      </div>
+    ),
+  };
+}

@@ -13,16 +13,15 @@ const range = 'from UI libraries and auth frameworks to databases and AI platfor
  */
 export const copy = {
   header: {
-    lead: 'Built with Fumadocs.',
-    title: 'Docs designed with care.',
+    lead: 'Showcase.',
+    title: 'Built with Fumadocs.',
     description: `${online} projects ship their docs with it, ${range}.`,
     /** for search results, link previews and the Markdown, where "it" has nothing to refer to */
     summary: `Docs built with Fumadocs: ${online} projects, ${range}.`,
   },
-  featured: { lead: 'In good company.', title: 'Projects you already know.' },
+  sites: { lead: 'Every site.', title: 'Some you already know.' },
   vercel: 'Fumadocs powers the docs of its open source SDKs.',
-  sites: { lead: 'The full list.', title: 'Every site, one framework.' },
-  blogs: { lead: 'Beyond docs.', title: 'Fumadocs can power your blog, too.' },
+  blogs: { lead: 'Beyond docs.', title: 'Blogs, too.' },
 };
 
 /** the featured projects by URL, and what they are in their own words */

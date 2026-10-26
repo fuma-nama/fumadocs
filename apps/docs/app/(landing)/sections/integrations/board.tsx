@@ -13,7 +13,7 @@ import { useReducedMotion } from 'motion/react';
 import { useSearchContext } from 'fumadocs-ui/contexts/search';
 import { useCopyButton } from 'fumadocs-ui/utils/use-copy-button';
 import { TICK } from '../../lib/motion';
-import { setStatus } from '../../lib/status';
+import { report, setStatus } from '../../lib/status';
 import { useIsClient } from '../../lib/use-is-client';
 import { Roller } from '../../ui/roller';
 import { Scramble } from '../../ui/text';
@@ -130,12 +130,13 @@ export function Board({
   );
 
   useEffect(() => {
-    if (layout === null || layout.stacked || powered !== all) return;
-    setStatus('powering on');
+    const board = boardElement.current;
+    if (!board || layout === null || layout.stacked || powered !== all) return;
+    report(board, 'powering on');
     // the last cell's inverted frame, then one more tick
     const wave = layout.lead + (diagonal(modules.length - 1, layout) + 2) * TICK;
     const timer = setTimeout(() => {
-      setStatus(LOADED);
+      report(board, LOADED);
       setWaveDone(true);
     }, wave);
     return () => clearTimeout(timer);
@@ -234,8 +235,9 @@ function Install({ command }: { command: string }) {
 
   return (
     <Window title="install" className="w-full shrink-0 lg:w-[420px]">
-      <div className="flex items-center gap-3 px-3 py-2.5 font-mono text-[13px]">
-        <span aria-hidden className="text-lp-ink-2">
+      {/* the longest command fits a 320px screen without the prompt, a size down */}
+      <div className="flex items-center gap-3 px-3 py-2.5 font-mono text-[13px] max-[344px]:text-[11.5px]">
+        <span aria-hidden className="text-lp-ink-2 max-[364px]:hidden">
           $
         </span>
         <Roller value={command} step={24} stagger={6} className="min-w-0 flex-1 overflow-clip" />
@@ -279,7 +281,8 @@ function Cell({ module, index, on, boot, active, onEnter, onLeave }: CellProps) 
   };
   const content = (
     <>
-      <span className="flex items-start justify-between gap-4">
+      {/* as wide as the mechanism, so the hotkeys end on its right edge */}
+      <span className="flex max-w-(--bt-stage) items-start justify-between gap-4">
         <span className="flex flex-col items-start gap-1.5">
           <span className="bt-num -ms-[3px] px-[3px] font-pixel text-[28px] leading-none text-lp-orange">
             {module.title}

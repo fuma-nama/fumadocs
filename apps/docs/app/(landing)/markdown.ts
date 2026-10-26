@@ -2,9 +2,9 @@ import { baseUrl } from '@/lib/metadata';
 import { showcases, vercel } from '@/lib/showcases';
 import { command, copy, frameworks, quotes } from './content';
 import { modules, more } from './sections/integrations/modules';
-import { parts, slots } from './sections/parts/data';
+import { CORE, LAYERS, OPTIONS } from './sections/parts/data';
 import { getContributorCount, getDownloads, getStars } from './sections/proof/data';
-import { LAYOUTS, THEME_NAMES, THEMES } from './sections/style/data';
+import { LAYOUTS, TABS, THEME_NAMES, THEMES } from './sections/style/data';
 import { blocks, fileLines } from './sections/write/blocks';
 
 const format = new Intl.NumberFormat('en-US');
@@ -50,23 +50,12 @@ export async function landingMarkdown(): Promise<string> {
     `- For LLMs: [llms.txt](${url('/llms.txt')}) indexes the docs, [llms-full.txt](${url('/llms-full.txt')}) has all of them; add \`.md\` to a docs URL for its Markdown.`,
   );
 
-  out.push(
-    '',
-    `## ${heading(copy.parts)}`,
-    '',
-    copy.parts.description,
-    '',
-    '| Part | API |',
-    '| --- | --- |',
-  );
-  for (const part of parts) out.push(`| ${part.name} | \`${part.api}\` |`);
-  for (const beat of copy.parts.beats.slice(1))
-    out.push('', `### ${beat.title}`, '', beat.description);
-  out.push('');
-  for (const slot of slots) {
+  out.push('', `## ${heading(copy.parts)}`, '', copy.parts.description, '');
+  for (const layer of LAYERS) {
     const names: string[] = [];
-    for (const option of slot.options) names.push(`${option.title} (\`${option.name}\`)`);
-    out.push(`- ${slot.layer}${slot.swappable ? '' : ' (kept)'}: ${names.join(', ')}`);
+    for (const option of layer === 'core' ? [CORE] : OPTIONS[layer])
+      names.push(`${option.title} (\`${option.name}\`)`);
+    out.push(`- ${layer}${layer === 'core' ? ' (kept)' : ''}: ${names.join(', ')}`);
   }
 
   const source = fileLines(blocks);
@@ -86,15 +75,16 @@ export async function landingMarkdown(): Promise<string> {
   for (const layout of LAYOUTS) layouts.push(layout.name);
   const themes: string[] = [];
   for (const id of THEMES) themes.push(`${THEME_NAMES[id]} (\`${id}\`)`);
-  out.push(
-    '',
-    `## ${heading(copy.style)}`,
-    '',
-    copy.style.description,
-    '',
-    `- Layouts: ${layouts.join(', ')} (${url('/docs/ui/layouts')})`,
-    `- Themes: ${themes.join(', ')}, each a stylesheet imported as \`@import 'fumadocs-ui/css/<id>.css';\` (${url('/docs/ui/theme')})`,
-  );
+  out.push('', `## ${heading(copy.style)}`, '', copy.style.description, '');
+  for (const id of TABS) {
+    const tab = copy.style.tabs[id];
+    out.push(`- [${tab.label}](${url(tab.href)}): ${tab.line}`);
+    if (id !== 'layouts') continue;
+    out.push(
+      `  - Layouts: ${layouts.join(', ')}`,
+      `  - Themes: ${themes.join(', ')}, each a stylesheet imported as \`@import 'fumadocs-ui/css/<id>.css';\` (${url('/docs/ui/theme')})`,
+    );
+  }
 
   out.push(
     '',

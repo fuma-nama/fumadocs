@@ -1,5 +1,5 @@
 import type { ReactNode } from 'react';
-import { Book, ChevronDown, Palette, Rocket, SidebarIcon, Text } from 'lucide-react';
+import { Book, ChevronDown, Menu, Palette, Rocket, Search, SidebarIcon, Text } from 'lucide-react';
 import { Callout } from 'fumadocs-ui/components/callout';
 import { buttonVariants } from 'fumadocs-ui/components/ui/button';
 import { DocsBody, DocsDescription } from 'fumadocs-ui/layouts/docs/page';
@@ -7,7 +7,7 @@ import { FullSearchTrigger } from 'fumadocs-ui/layouts/shared/slots/search-trigg
 import { ThemeSwitch } from 'fumadocs-ui/layouts/shared/slots/theme-switch';
 import { cn } from '@/lib/cn';
 import { toc } from './data';
-import { PAGE } from './camera';
+import { NARROW, WIDE } from './geometry';
 
 // classes of `layouts/docs/slots/sidebar.tsx`
 const item =
@@ -30,20 +30,21 @@ const grid = 'grid grid-cols-[268px_minmax(0,1fr)_268px] grid-rows-1';
  * The default docs layout with a quick start page, at its desktop sizes. Callout, code block,
  * description, body, search trigger and theme switch are the real components; the layout chrome
  * mirrors the markup of `fumadocs-ui/layouts/docs`, whose providers need a full page, and its
- * links are plain text here. Each part carries `data-part`, the figure points at it.
+ * links are plain text here.
  */
 export function DocsPreview({ code }: { code: ReactNode }) {
   return (
     <div
       className={cn(grid, 'relative isolate bg-fd-background text-fd-foreground')}
-      style={{ width: PAGE.width, height: PAGE.height }}
+      style={{ width: WIDE.width, height: WIDE.height }}
     >
-      <div data-part="sidebar" className="flex min-h-0 flex-col border-e bg-fd-card text-sm">
+      {/* a foot 12px or more clear of the slab's front edge on screen */}
+      <div className="flex min-h-0 flex-col border-e bg-fd-card pb-6 text-sm">
         <div className="flex flex-col gap-3 p-4 pb-2">
-          <div data-part="navbar" className="flex">
+          <div className="flex">
             <NavRow />
           </div>
-          <div data-part="search" className="flex flex-col">
+          <div className="flex flex-col">
             <FullSearchTrigger />
           </div>
         </div>
@@ -52,12 +53,12 @@ export function DocsPreview({ code }: { code: ReactNode }) {
         <SidebarFooter />
       </div>
 
-      <article className="flex min-w-0 flex-col gap-4 px-8 pt-14 pb-6">
-        <div data-part="title" className="mb-8 flex flex-col gap-4">
+      <article className="flex min-w-0 flex-col gap-4 px-8 pt-12 pb-6">
+        <div className="mb-8 flex flex-col gap-4">
           <TitleBlock />
         </div>
         <DocsBody>
-          <div data-part="callout">
+          <div>
             <CalloutBlock />
           </div>
           <CodeSection code={code} />
@@ -106,7 +107,7 @@ export function HeadlessPreview() {
   return (
     <div
       className={cn(grid, 'bg-lp-paper text-base leading-normal text-lp-ink')}
-      style={{ width: PAGE.width, height: PAGE.height }}
+      style={{ width: WIDE.width, height: WIDE.height }}
     >
       <div className="flex flex-col gap-3 p-4">
         <p className="font-semibold">My Docs</p>
@@ -134,7 +135,74 @@ export function HeadlessPreview() {
   );
 }
 
-export function NavRow() {
+/** the icon buttons of the docs layout's navbar on a phone */
+const navButton = cn(
+  buttonVariants({ variant: 'ghost', size: 'icon-sm' }),
+  'text-fd-muted-foreground',
+);
+
+/**
+ * The same page at a phone's width: the docs layout's navbar, the sidebar behind its menu button,
+ * then the page. Callout, code block and description are the real components.
+ */
+export function MobilePreview({ code }: { code: ReactNode }) {
+  return (
+    <div
+      className="flex flex-col bg-fd-background text-fd-foreground"
+      style={{ width: NARROW.width, height: NARROW.height }}
+    >
+      <div className="flex h-14 shrink-0 items-center gap-1 border-b px-4">
+        <span className="me-auto inline-flex items-center gap-2.5 text-[0.9375rem] font-medium">
+          <span className="size-5 rounded-full border bg-fd-primary" />
+          My Docs
+        </span>
+        <span className={navButton}>
+          <Search />
+        </span>
+        <span className={navButton}>
+          <Menu />
+        </span>
+      </div>
+      <article className="flex min-w-0 flex-col gap-4 px-4 pt-6">
+        <div className="mb-2 flex flex-col gap-4">
+          <TitleBlock />
+        </div>
+        <DocsBody>
+          <CalloutBlock />
+          <CodeSection code={code} />
+        </DocsBody>
+      </article>
+    </div>
+  );
+}
+
+/** the headless page at a phone's width: the page itself, the tree behind its menu */
+export function MobileHeadlessPreview() {
+  return (
+    <div
+      className="flex flex-col gap-4 bg-lp-paper px-4 pt-5 text-base leading-normal text-lp-ink"
+      style={{ width: NARROW.width, height: NARROW.height }}
+    >
+      <p className="flex justify-between">
+        <span className="font-semibold">My Docs</span>
+        <span className="underline underline-offset-2">Menu</span>
+      </p>
+      <p className="mt-4 text-[2em] leading-tight font-bold">Quick Start</p>
+      <p>Create your first docs site.</p>
+      <blockquote className="border-s-2 border-lp-line-strong ps-4">
+        <p className="font-semibold">Good to know</p>
+        <p>
+          For full control over the UI, install the layout with Fumadocs CLI and edit the components
+          directly.
+        </p>
+      </blockquote>
+      <p className="mt-2 text-[1.5em] font-bold">Installation</p>
+      <pre className="font-mono text-sm">npm create fumadocs-app</pre>
+    </div>
+  );
+}
+
+function NavRow() {
   return (
     <>
       <span className="me-auto inline-flex items-center gap-2.5 text-[0.9375rem] font-medium">
@@ -153,7 +221,7 @@ export function NavRow() {
   );
 }
 
-export function TreeItems({ className }: { className?: string }) {
+function TreeItems({ className }: { className?: string }) {
   const items: ReactNode[] = [];
   for (const node of tree) {
     if ('separator' in node) {
@@ -167,8 +235,6 @@ export function TreeItems({ className }: { className?: string }) {
     items.push(
       <span
         key={node.name}
-        // the first item stands for the tree
-        data-part={items.length === 0 ? 'page tree' : undefined}
         className={cn(
           item,
           node.active && 'bg-fd-primary/10 text-fd-primary',
@@ -184,7 +250,7 @@ export function TreeItems({ className }: { className?: string }) {
   return <div className={cn('flex flex-col gap-0.5 p-4', className)}>{items}</div>;
 }
 
-export function SidebarFooter() {
+function SidebarFooter() {
   return (
     <div className="flex flex-col p-4 pt-2">
       <div className="flex items-center rounded-lg border bg-fd-secondary/50 p-0.5 pe-0 text-fd-muted-foreground">
@@ -197,7 +263,7 @@ export function SidebarFooter() {
   );
 }
 
-export function TitleBlock() {
+function TitleBlock() {
   return (
     <>
       {/* the classes of `DocsTitle`, not an h1 so the landing keeps one */}
@@ -207,7 +273,7 @@ export function TitleBlock() {
   );
 }
 
-export function CalloutBlock() {
+function CalloutBlock() {
   return (
     <Callout title="Good to know">
       For full control over the UI, install the layout with Fumadocs CLI and edit the components
@@ -216,14 +282,14 @@ export function CalloutBlock() {
   );
 }
 
-export function CodeSection({ code }: { code: ReactNode }) {
+function CodeSection({ code }: { code: ReactNode }) {
   return (
     <>
       {/* the prose `h2`, as text: the page's headings are not the landing's */}
       <p className="not-prose mt-[2em] mb-[1em] text-[1.5em] leading-[1.333] font-semibold [&+*]:mt-0">
         Installation
       </p>
-      <div data-part="code block">{code}</div>
+      <div>{code}</div>
     </>
   );
 }
@@ -234,7 +300,7 @@ function lineOffset(depth: number) {
   return depth <= 2 ? BASE : depth === 3 ? 8 + BASE : 16 + BASE;
 }
 
-export function TocBlock() {
+function TocBlock() {
   const items: ReactNode[] = [];
   for (let i = 0; i < toc.length; i++) {
     const entry = toc[i];
@@ -285,10 +351,7 @@ export function TocBlock() {
 
   return (
     <>
-      <p
-        data-part="table of contents"
-        className="inline-flex items-center gap-1.5 text-sm text-fd-muted-foreground"
-      >
+      <p className="inline-flex items-center gap-1.5 text-sm text-fd-muted-foreground">
         <Text className="size-4" />
         On this page
       </p>

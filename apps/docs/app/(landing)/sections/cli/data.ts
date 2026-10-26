@@ -17,27 +17,29 @@ export interface Entry {
   added?: boolean;
 }
 
-/** an import the command points at your copy */
+/** a file the editor shows: its lines around what the run changes in it, as written once it ran */
+export interface Source {
+  file: string;
+  /** runs of lines, each from the number of its first */
+  hunks: { line: number; lines: string[] }[];
+  /** the row of your project its imports now resolve to: its cable plugs in there */
+  target?: string;
+}
+
+/** an import the command points at your copy: the path in that line, before and after */
 export interface Rewire {
   file: string;
   line: number;
-  code: string;
   from: string;
   to: string;
-  /** the row of your project it resolves to once rewired */
-  target: string;
 }
 
-/** a line you change in your copy */
+/** the line you change in your copy */
 export interface Edit {
   /** what it changes */
   name: string;
   file: string;
-  /** the number of the first line */
   line: number;
-  lines: string[];
-  /** the index of the changed line */
-  at: number;
   from: string;
   to: string;
 }
@@ -46,6 +48,8 @@ export interface Plan {
   id: 'customize' | 'add';
   /** after `npx @fumadocs/cli ` */
   args: string;
+  /** its button */
+  label: string;
   /** what the registry hands over, for the status line */
   fetch: string;
   /** the CLI's line once it is done */
@@ -56,6 +60,8 @@ export interface Plan {
   files: string[];
   /** your project once it ran */
   tree: Entry[];
+  /** the files the editor shows, in its tabs' order */
+  sources: Source[];
   rewires: Rewire[];
   edit: Edit;
 }
@@ -167,6 +173,7 @@ export const plans: Plan[] = [
   {
     id: 'customize',
     args: 'customize',
+    label: 'Customize layout',
     fetch: 'layouts/docs',
     done: 'layouts/docs installed',
     target: 'layouts',
@@ -178,34 +185,86 @@ export const plans: Plan[] = [
       'layouts/docs/page/slots',
       'layouts/docs/slots',
     ]),
+    sources: [
+      {
+        file: 'app/docs/layout.tsx',
+        target: 'layouts/docs',
+        hunks: [
+          {
+            line: 1,
+            lines: [
+              "import { source } from '@/lib/source';",
+              "import { DocsLayout } from '@/layouts/docs';",
+              "import { baseOptions } from '@/lib/layout.shared';",
+              '',
+              "export default function Layout({ children }: LayoutProps<'/docs'>) {",
+              '  return (',
+              '    <DocsLayout tree={source.getPageTree()} {...baseOptions()}>',
+              '      {children}',
+              '    </DocsLayout>',
+              '  );',
+              '}',
+            ],
+          },
+        ],
+      },
+      {
+        file: 'app/docs/[[...slug]]/page.tsx',
+        target: 'layouts/docs/page',
+        hunks: [
+          {
+            line: 1,
+            lines: [
+              "import { source } from '@/lib/source';",
+              'import {',
+              '  DocsBody,',
+              '  DocsDescription,',
+              '  DocsPage,',
+              '  DocsTitle,',
+              '  MarkdownCopyButton,',
+              '  ViewOptionsPopover,',
+              "} from '@/layouts/docs/page';",
+              "import { notFound } from 'next/navigation';",
+            ],
+          },
+        ],
+      },
+      {
+        file: 'layouts/docs/page/index.tsx',
+        hunks: [
+          {
+            line: 197,
+            lines: [
+              "export function DocsTitle({ children, className, ...props }: ComponentProps<'h1'>) {",
+              '  return (',
+              "    <h1 {...props} className={cn('text-[1.75em] font-semibold', className)}>",
+              '      {children}',
+              '    </h1>',
+              '  );',
+              '}',
+            ],
+          },
+        ],
+      },
+    ],
     rewires: [
       {
         file: 'app/docs/layout.tsx',
         line: 2,
-        code: "import { DocsLayout } from 'fumadocs-ui/layouts/docs';",
         from: 'fumadocs-ui/layouts/docs',
         to: '@/layouts/docs',
-        target: 'layouts/docs',
       },
       {
         file: 'app/docs/[[...slug]]/page.tsx',
         line: 9,
-        code: "} from 'fumadocs-ui/layouts/docs/page';",
         from: 'fumadocs-ui/layouts/docs/page',
         to: '@/layouts/docs/page',
-        target: 'layouts/docs/page',
       },
     ],
     edit: {
       name: 'DocsTitle',
       file: 'layouts/docs/page/index.tsx',
-      line: 197,
-      lines: [
-        "export function DocsTitle({ children, className, ...props }: ComponentProps<'h1'>) {",
-        '  return (',
-        "    <h1 {...props} className={cn('text-[1.75em] font-semibold', className)}>",
-      ],
-      at: 2,
+      line: 199,
       from: '1.75',
       to: '2.5',
     },
@@ -213,38 +272,63 @@ export const plans: Plan[] = [
   {
     id: 'add',
     args: 'add banner files',
+    label: 'Add components',
     fetch: 'banner, files',
     done: 'banner, files installed',
     target: 'components',
     files: addFiles,
     tree: tree(addFiles, ['components', 'components/ui', 'lib']),
-    rewires: [
+    sources: [
       {
         file: 'components/banner.tsx',
-        line: 6,
-        code: "import { buttonVariants } from '@/components/ui/button';",
-        from: '@/components/ui/button',
-        to: './ui/button',
         target: 'components/ui/button.tsx',
+        hunks: [
+          {
+            line: 3,
+            lines: [
+              "import { type HTMLAttributes, useEffect, useState } from 'react';",
+              "import { X } from 'lucide-react';",
+              "import { cn } from '../lib/cn';",
+              "import { buttonVariants } from './ui/button';",
+              "import { useTranslations } from '@fuma-translate/react';",
+            ],
+          },
+          {
+            line: 67,
+            lines: [
+              "        variant === 'normal' && 'bg-fd-secondary',",
+              "        variant === 'rainbow' && 'bg-fd-background',",
+              "        !open && 'hidden',",
+            ],
+          },
+        ],
       },
       {
         file: 'components/files.tsx',
-        line: 6,
-        code: "import { cn } from '@/utils/cn';",
-        from: '@/utils/cn',
-        to: '../lib/cn',
         target: 'lib/cn.ts',
+        hunks: [
+          {
+            line: 3,
+            lines: [
+              "import { cva } from 'class-variance-authority';",
+              "import { FileIcon, FolderIcon, FolderOpen } from 'lucide-react';",
+              "import { type HTMLAttributes, type ReactNode, useState } from 'react';",
+              "import { cn } from '../lib/cn';",
+              "import { Collapsible, CollapsibleContent, CollapsibleTrigger } from './ui/collapsible';",
+            ],
+          },
+        ],
       },
+    ],
+    rewires: [
+      { file: 'components/banner.tsx', line: 5, from: '@/utils/cn', to: '../lib/cn' },
+      { file: 'components/banner.tsx', line: 6, from: '@/components/ui/button', to: './ui/button' },
+      { file: 'components/files.tsx', line: 6, from: '@/utils/cn', to: '../lib/cn' },
     ],
     edit: {
       name: 'Banner',
       file: 'components/banner.tsx',
       line: 67,
-      lines: [
-        "        variant === 'normal' && 'bg-fd-secondary',",
-        "        variant === 'rainbow' && 'bg-fd-background',",
-      ],
-      at: 0,
       from: 'bg-fd-secondary',
       to: 'bg-fd-primary text-fd-primary-foreground',
     },

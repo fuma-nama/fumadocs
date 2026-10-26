@@ -15,6 +15,20 @@ const PRINT = 2 * TICK;
 const INK = 2 * TICK;
 /** a dither cell, in screen px */
 const CELL = 3;
+/** a screen narrower than this shows the layouts as a phone does, at its width */
+const PHONE_MAX = 480;
+const PHONE_W = 390;
+/** a wider screen shows them at this many times its width, a desktop's at most */
+const ZOOM_OUT = 2.2;
+
+/**
+ * The width the frames lay out at: a phone's on a narrow screen, else as wide as the screen
+ * shows legibly, up to a desktop's.
+ */
+function frameWidth(screen: HTMLElement): number {
+  const width = screen.clientWidth;
+  return width < PHONE_MAX ? PHONE_W : Math.min(FRAME_W, Math.round(width * ZOOM_OUT));
+}
 
 /**
  * The live preview: two same-origin frames of `/story/<layout>`. The one on screen stays until the
@@ -33,8 +47,9 @@ export function createScreen(
   /** the slot on screen, -1 while the blueprint shows */
   let front = -1;
   let want: { layout: LayoutId; theme: ThemeId; instant: boolean } | null = null;
-  /** frames are as wide as a desktop and as tall as the screen shows, at this scale */
-  let scale = screen.clientWidth / FRAME_W || 1;
+  /** frames are as wide as a desktop (or a phone) and as tall as the screen shows, at this scale */
+  let width = frameWidth(screen);
+  let scale = screen.clientWidth / width || 1;
   let height = Math.round(screen.clientHeight / scale);
   let swap: Animation | null = null;
   /** counts the asks, a load that lands after a newer one is ignored */
@@ -53,7 +68,7 @@ export function createScreen(
       frame.setAttribute('scrolling', 'no');
       frame.tabIndex = -1;
       frame.inert = true;
-      frame.width = String(FRAME_W);
+      frame.width = String(width);
       frame.height = String(height);
       frame.className = 'pointer-events-none origin-top-left border-0 bg-transparent';
       frame.style.transform = `scale(${scale})`;
@@ -121,11 +136,13 @@ export function createScreen(
   }
 
   const resize = new ResizeObserver(() => {
-    scale = screen.clientWidth / FRAME_W || 1;
+    width = frameWidth(screen);
+    scale = screen.clientWidth / width || 1;
     height = Math.round(screen.clientHeight / scale);
     for (const wrapper of wrappers) {
       const frame = wrapper.querySelector('iframe')!;
       frame.style.transform = `scale(${scale})`;
+      frame.width = String(width);
       frame.height = String(height);
     }
   });

@@ -1,37 +1,19 @@
-/** the beats of the parts figure under its lead, the first is its title */
-const beats = [
-  {
-    title: 'Every part has an API.',
-    description:
-      'The navbar, sidebar, code blocks and the rest are components and functions you can import, restyle or replace.',
-  },
-  {
-    title: '3 layers deep.',
-    description:
-      'Content feeds the core and the core feeds the UI, on the framework you choose. Each layer is a library on its own.',
-  },
-  {
-    title: 'Swap one, keep the rest.',
-    description:
-      'Bring your own content source, framework or UI. Each one plugs into the same core.',
-  },
-];
-
 /**
  * The copy of every figure, shared by the page and its Markdown version (`/index.md`). A title
  * reads `lead` then `title`, the lead set in the orange pixel type.
  */
 export const copy = {
   hero: {
-    lead: 'Fumadocs.',
-    title: 'Flexible to the core.',
+    lead: 'Meet Fumadocs.',
+    title: 'Build better docs.',
     description:
-      'A documentation framework for React. It comes with a beautiful UI, MDX and integrations, and you can swap any part for your own.',
+      'A React documentation framework for developers, built to fit the framework and content source you already use.',
   },
   parts: {
     lead: 'Inside a page.',
-    ...beats[0],
-    beats,
+    title: 'Swap one, keep the rest.',
+    description:
+      'Every page runs on a UI, a core and a content source, on the framework you choose. Each is a library on its own.',
   },
   write: {
     lead: 'Write in Markdown.',
@@ -43,13 +25,41 @@ export const copy = {
     lead: 'Beautiful by default.',
     title: 'Yours by design.',
     description:
-      'Pick from 6 layouts and 12 themes, all built from the same parts. Restyle them with CSS variables, or copy a layout into your project.',
+      'Try 6 layouts and 12 themes, plus API references and component previews. Restyle any of them with CSS variables.',
+    /** the hands-on tabs, each with its line and its docs */
+    tabs: {
+      layouts: {
+        label: 'Layouts',
+        line: '6 layouts and 12 themes, all interchangeable.',
+        href: '/docs/ui/layouts',
+      },
+      story: {
+        label: 'Story',
+        line: 'Live previews of your components, with prop controls.',
+        href: '/docs/integrations/story',
+      },
+      openapi: {
+        label: 'OpenAPI',
+        line: 'API pages with a playground and code samples.',
+        href: '/docs/integrations/openapi',
+      },
+      graphql: {
+        label: 'GraphQL',
+        line: 'A page per operation, with types and a playground.',
+        href: '/docs/integrations/graphql',
+      },
+      asyncapi: {
+        label: 'AsyncAPI',
+        line: 'Channels and messages, with a WebSocket playground.',
+        href: '/docs/integrations/asyncapi',
+      },
+    },
   },
   cli: {
-    lead: 'Full control.',
-    title: 'Install the UI into your codebase.',
+    lead: 'Need more than CSS?',
+    title: 'Own the source code.',
     description:
-      'The Fumadocs CLI copies layouts and components into your project and points your imports at them. Edit them like your own code.',
+      'The Fumadocs CLI installs layouts and components into your codebase and updates the imports, so you can change any line.',
   },
   integrations: {
     lead: 'Integrations.',

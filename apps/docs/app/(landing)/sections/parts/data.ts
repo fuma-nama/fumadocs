@@ -17,56 +17,129 @@ export const install = [
   { value: 'bun', code: 'bunx create-fumadocs-app' },
 ];
 
-/** the status line of each chapter; the first is also the figure's own */
-export const STATUS = ['8 parts, 8 APIs', 'layers: ui, core, content', 'swap a layer'];
+/** the figure's status line at rest; a swap reports its layer and option */
+export const STATUS = '4 layers';
 
-interface PartInfo {
-  name: string;
-  /** the API that renders or produces the part */
-  api: string;
+/** the layers top down, the page is the top of the first */
+export const LAYERS: Layer[] = ['ui', 'core', 'content', 'framework'];
+
+/** the layers that swap; the core is the one every other plugs into */
+export type SwapLayer = Exclude<Layer, 'core'>;
+
+/** the swaps in the order of the trays */
+export const SWAPS: SwapLayer[] = ['ui', 'content', 'framework'];
+
+/** what a layer holds with an option in: where its pages or its routes live */
+export interface Holds {
+  root: string;
+  items: string[];
 }
 
-export const parts: PartInfo[] = [
-  { name: 'navbar', api: '<DocsLayout nav>' },
-  { name: 'search', api: '<SearchDialog>' },
-  { name: 'sidebar', api: '<DocsLayout sidebar>' },
-  { name: 'page tree', api: 'source.getPageTree()' },
-  { name: 'title', api: '<DocsTitle>' },
-  { name: 'callout', api: '<Callout>' },
-  { name: 'code block', api: '<CodeBlockTabs>' },
-  { name: 'table of contents', api: '<DocsPage toc>' },
-];
-
 export interface Option {
-  /** the module */
-  name: string;
   /** its name in prose, as the docs spell it: the label of its key */
   title: string;
+  /** the module, on the layer's nameplate */
+  name: string;
   /** title of the code window */
   file: string;
   lang: string;
   code: string;
   /** a command that produced the file */
   command?: string;
+  holds?: Holds;
 }
 
-interface Slot {
-  layer: Layer;
-  /** `false` for the core, every other layer plugs into it */
-  swappable: boolean;
-  options: Option[];
+interface Framework extends Option {
+  /** the same file on a headless UI: the provider of `fumadocs-core` instead of Fumadocs UI's */
+  core: string;
 }
 
-// from content/docs/mdx/(integrations)/next.mdx, headless/content-collections,
-// integrations/content/{local-md,notion,obsidian,sanity}.mdx
+/** the core never swaps: every other layer plugs into it */
+export const CORE: Option = {
+  title: 'Fumadocs Core',
+  name: 'fumadocs-core',
+  file: '',
+  lang: 'ts',
+  code: '',
+};
+
+// examples/waku/src/pages/docs/_layout.tsx, with its import as `npx @fumadocs/cli customize`
+// rewrites it (packages/cli/src/commands/customise.ts)
+function layout(from: string) {
+  return `import type { ReactNode } from 'react';
+import { DocsLayout } from '${from}';
+import { source } from '@/lib/source';
+import { baseOptions } from '@/lib/layout.shared';
+
+export default function Layout({ children }: { children: ReactNode }) {
+  return (
+    <DocsLayout {...baseOptions()} tree={source.getPageTree()}>
+      {children}
+    </DocsLayout>
+  );
+}`;
+}
+
+const ui: Option[] = [
+  {
+    title: 'Fumadocs UI',
+    name: 'fumadocs-ui',
+    file: 'layout.tsx',
+    lang: 'tsx',
+    code: layout('fumadocs-ui/layouts/docs'),
+  },
+  // content/docs/headless/components/toc-example.tsx
+  {
+    title: 'Headless',
+    name: 'fumadocs-core/toc',
+    file: 'components/toc.tsx',
+    lang: 'tsx',
+    code: `import { AnchorProvider, ScrollProvider, TOCItem, type TOCItemType } from 'fumadocs-core/toc';
+import { type ReactNode, useRef } from 'react';
+
+export function Page({ items, children }: { items: TOCItemType[]; children: ReactNode }) {
+  const viewRef = useRef<HTMLDivElement>(null);
+
+  return (
+    <AnchorProvider toc={items}>
+      <div ref={viewRef} className="overflow-auto">
+        <ScrollProvider containerRef={viewRef}>
+          {items.map((item) => (
+            <TOCItem key={item.url} href={item.url}>
+              {item.title}
+            </TOCItem>
+          ))}
+        </ScrollProvider>
+      </div>
+      {children}
+    </AnchorProvider>
+  );
+}`,
+  },
+  {
+    title: 'Your copy',
+    name: '@/layouts/docs',
+    file: 'layout.tsx',
+    lang: 'tsx',
+    command: 'npx @fumadocs/cli customize',
+    code: layout('@/layouts/docs'),
+  },
+];
+
+const pages = ['index.mdx', 'quick-start.mdx', 'meta.json'];
+const titles = ['Introduction', 'Quick Start', 'Themes'];
+
+// examples/next-min and examples/content-collections, then integrations/content/*.mdx without
+// their optional options and comments
 const content: Option[] = [
   {
-    name: 'fumadocs-mdx',
     title: 'Fumadocs MDX',
+    name: 'fumadocs-mdx',
     file: 'lib/source.ts',
     lang: 'ts',
-    code: `import { defineDocs } from 'fumadocs-mdx/macro';
-import { loader } from 'fumadocs-core/source';
+    holds: { root: 'content/docs', items: pages },
+    code: `import { loader } from 'fumadocs-core/source';
+import { defineDocs } from 'fumadocs-mdx/macro';
 
 const docs = defineDocs({
   dir: 'content/docs',
@@ -78,10 +151,11 @@ export const source = loader({
 });`,
   },
   {
-    name: '@fumadocs/content-collections',
     title: 'Content Collections',
+    name: '@fumadocs/content-collections',
     file: 'lib/source.ts',
     lang: 'ts',
+    holds: { root: 'content/docs', items: pages },
     code: `import { allDocs, allMetas } from 'content-collections';
 import { loader } from 'fumadocs-core/source';
 import { createMDXSource } from '@fumadocs/content-collections';
@@ -92,16 +166,16 @@ export const source = loader({
 });`,
   },
   {
-    name: '@fumadocs/local-md',
     title: 'Local Markdown',
+    name: '@fumadocs/local-md',
     file: 'lib/source.ts',
     lang: 'ts',
+    holds: { root: 'content/docs', items: pages },
     code: `import { dynamicLoader } from 'fumadocs-core/source';
 import { localMd } from '@fumadocs/local-md';
 
 const docs = localMd({
   dir: 'content/docs',
-  // options
 });
 
 const docsLoader = dynamicLoader(docs.dynamicSource(), {
@@ -113,44 +187,39 @@ export async function getSource() {
 }`,
   },
   {
-    name: '@fumadocs/notion',
     title: 'Notion',
+    name: '@fumadocs/notion',
     file: 'lib/source.ts',
     lang: 'ts',
+    holds: { root: 'Notion database', items: titles },
     code: `import { dynamicLoader } from 'fumadocs-core/source';
 import { notion } from '@/lib/notion';
 
-const source = dynamicLoader(
-  notion.dynamicSource({
-    // map Notion properties to page fields
-    properties: {
-      title: 'Name',
-      slug: 'Slug',
-      description: 'Description',
-    },
-  }),
-  {
-    baseUrl: '/docs',
-  },
-);
+const source = dynamicLoader(notion.dynamicSource(), {
+  baseUrl: '/docs',
+});
 
 export async function getSource() {
   return source.get();
 }`,
   },
   {
-    name: 'fumadocs-obsidian',
     title: 'Obsidian',
+    name: 'fumadocs-obsidian',
     file: 'lib/source.ts',
     lang: 'ts',
+    holds: { root: 'public/vault', items: ['Introduction.md', 'Quick Start.md', 'Themes.md'] },
     code: `import { dynamicLoader } from 'fumadocs-core/source';
 import { obsidian } from 'fumadocs-obsidian';
 
 const vault = obsidian({
   dir: 'public/vault',
-  // map vault attachments to their public URLs
   url: (path) => \`/vault/\${path}\`,
 });
+
+if (process.env.NODE_ENV === 'development') {
+  void vault.devServer();
+}
 
 const vaultLoader = dynamicLoader(vault.dynamicSource(), {
   baseUrl: '/docs',
@@ -161,10 +230,11 @@ export function getSource() {
 }`,
   },
   {
-    name: '@fumadocs/sanity',
     title: 'Sanity',
+    name: '@fumadocs/sanity',
     file: 'lib/source.ts',
     lang: 'ts',
+    holds: { root: "docType: 'docs'", items: titles },
     code: `import { dynamicLoader } from 'fumadocs-core/source';
 import { createSanitySource } from '@fumadocs/sanity';
 import { client } from '@/sanity/lib/client';
@@ -186,198 +256,173 @@ export async function getSource() {
   },
 ];
 
-// from content/docs/ui/layouts/docs.mdx, headless/components/toc.mdx and the
-// `customize` command of the CLI, which rewrites the layout imports of examples/next-min
-const ui: Option[] = [
-  {
-    name: 'fumadocs-ui',
-    title: 'Fumadocs UI',
-    file: 'layout.tsx',
-    lang: 'tsx',
-    code: `import { DocsLayout } from 'fumadocs-ui/layouts/docs';
-import { source } from '@/lib/source';
-import type { ReactNode } from 'react';
+/** the provider a root file wraps the app in: Fumadocs UI's, or the core's on a headless UI */
+interface Provider {
+  name: string;
+  from: string;
+}
 
-export default function Layout({ children }: { children: ReactNode }) {
-  return (
-    <DocsLayout
-      tree={source.getPageTree()}
-      // other props
-    >
-      {children}
-    </DocsLayout>
-  );
-}`,
-  },
-  {
-    name: 'fumadocs-core',
-    title: 'Headless',
-    file: 'fumadocs-core/toc',
-    lang: 'tsx',
-    code: `import * as Base from 'fumadocs-core/toc';
-
-return (
-  <Base.AnchorProvider>
-    <Base.ScrollProvider>
-      <Base.TOCItem />
-      <Base.TOCItem />
-    </Base.ScrollProvider>
-  </Base.AnchorProvider>
-);`,
-  },
-  {
-    name: '@/layouts/docs',
-    title: 'Your copy',
-    file: 'app/docs/layout.tsx',
-    lang: 'tsx',
-    command: 'npx @fumadocs/cli customize',
-    code: `import { source } from '@/lib/source';
-import { DocsLayout } from '@/layouts/docs';
-import { baseOptions } from '@/lib/layout.shared';
-
-export default function Layout({ children }: LayoutProps<'/docs'>) {
-  return (
-    <DocsLayout tree={source.getPageTree()} {...baseOptions()}>
-      {children}
-    </DocsLayout>
-  );
-}`,
-  },
-];
-
-// from examples/{next-min,react-router-min,tanstack-start-min,waku,astro}, included by
-// content/docs/(framework)/manual-installation/*.mdx
-const framework: Option[] = [
-  {
-    name: 'next',
-    title: 'Next.js',
-    file: 'app/docs/layout.tsx',
-    lang: 'tsx',
-    code: `import { source } from '@/lib/source';
-import { DocsLayout } from 'fumadocs-ui/layouts/docs';
-import { baseOptions } from '@/lib/layout.shared';
-
-export default function Layout({ children }: LayoutProps<'/docs'>) {
-  return (
-    <DocsLayout tree={source.getPageTree()} {...baseOptions()}>
-      {children}
-    </DocsLayout>
-  );
-}`,
-  },
-  {
-    name: 'react-router',
-    title: 'React Router',
-    file: 'app/routes/docs.tsx',
-    lang: 'tsx',
-    code: `export async function loader({ params }: Route.LoaderArgs) {
-  const slugs = params['*'].split('/').filter((v) => v.length > 0);
-  const page = source.getPage(slugs);
-  if (!page) throw new Response('Not found', { status: 404 });
-
+function frameworkOf(
+  option: Omit<Framework, 'code' | 'core'>,
+  path: string,
+  core: string,
+  write: (provider: Provider) => string,
+): Framework {
   return {
-    path: page.path,
-    url: page.url,
-    pageTree: await source.serializePageTree(source.getPageTree()),
+    ...option,
+    code: write({ name: 'RootProvider', from: `fumadocs-ui/provider/${path}` }),
+    core: write({ name: core, from: `fumadocs-core/framework/${path}` }),
   };
 }
 
-export default function Page({ loaderData }: Route.ComponentProps) {
-  const { path, pageTree } = useFumadocsLoader(loaderData);
+// where each framework takes the provider: examples/next-min without its font, the root.tsx of
+// manual-installation/react-router.mdx, examples/tanstack-start-min without its page metadata,
+// examples/waku, and the Astro island of ui/layouts/root-provider.mdx typed as in
+// headless/index.mdx, whose providers stand in on a headless UI
+const framework: Framework[] = [
+  frameworkOf(
+    {
+      title: 'Next.js',
+      name: 'next',
+      file: 'app/layout.tsx',
+      lang: 'tsx',
+      holds: { root: 'app', items: ['layout.tsx', 'docs/[[...slug]]/page.tsx'] },
+    },
+    'next',
+    'NextProvider',
+    ({ name, from }) => `import { ${name} } from '${from}';
+import './global.css';
 
+export default function Layout({ children }: LayoutProps<'/'>) {
   return (
-    <DocsLayout {...baseOptions()} tree={pageTree}>
-      <Content path={path} />
-    </DocsLayout>
+    <html lang="en" suppressHydrationWarning>
+      <body className="flex flex-col min-h-screen">
+        <${name}>{children}</${name}>
+      </body>
+    </html>
   );
 }`,
-  },
-  {
-    name: '@tanstack/react-start',
-    title: 'TanStack Start',
-    file: 'routes/docs/$.tsx',
-    lang: 'tsx',
-    code: `export const Route = createFileRoute('/docs/$')({
-  component: Page,
-  loader: async ({ params }) => {
-    const slugs = params._splat?.split('/') ?? [];
-    const data = await serverLoader({ data: slugs });
-    await docs.getPage(data.path)?.preload();
-    return data;
-  },
+  ),
+  frameworkOf(
+    {
+      title: 'React Router',
+      name: 'react-router',
+      file: 'app/root.tsx',
+      lang: 'tsx',
+      holds: { root: 'app', items: ['root.tsx', 'routes.ts', 'routes/docs.tsx'] },
+    },
+    'react-router',
+    'ReactRouterProvider',
+    ({ name, from }) => `import { Links, Meta, Scripts, ScrollRestoration } from 'react-router';
+import { ${name} } from '${from}';
+import './app.css';
+
+export function Layout({ children }: { children: React.ReactNode }) {
+  return (
+    <html lang="en" suppressHydrationWarning>
+      <head>
+        <meta charSet="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <Meta />
+        <Links />
+      </head>
+      <body className="flex flex-col min-h-screen">
+        <${name}>{children}</${name}>
+        <ScrollRestoration />
+        <Scripts />
+      </body>
+    </html>
+  );
+}`,
+  ),
+  frameworkOf(
+    {
+      title: 'TanStack Start',
+      name: '@tanstack/react-start',
+      file: 'src/routes/__root.tsx',
+      lang: 'tsx',
+      holds: { root: 'src/routes', items: ['__root.tsx', 'docs/$.tsx', 'api/search.ts'] },
+    },
+    'tanstack',
+    'TanstackProvider',
+    ({
+      name,
+      from,
+    }) => `import { createRootRoute, HeadContent, Outlet, Scripts } from '@tanstack/react-router';
+import { ${name} } from '${from}';
+import appCss from '@/styles/app.css?url';
+
+export const Route = createRootRoute({
+  head: () => ({ links: [{ rel: 'stylesheet', href: appCss }] }),
+  component: RootComponent,
 });
 
-function Page() {
-  const data = useFumadocsLoader(Route.useLoaderData());
-
+function RootComponent() {
   return (
-    <DocsLayout {...baseOptions()} tree={data.pageTree}>
-      <Suspense>
-        <Content path={data.path} />
-      </Suspense>
-    </DocsLayout>
+    <html suppressHydrationWarning>
+      <head>
+        <HeadContent />
+      </head>
+      <body className="flex flex-col min-h-screen">
+        <${name}>
+          <Outlet />
+        </${name}>
+        <Scripts />
+      </body>
+    </html>
   );
 }`,
-  },
-  {
-    name: 'waku',
-    title: 'Waku',
-    file: 'pages/docs/_layout.tsx',
-    lang: 'tsx',
-    code: `import type { ReactNode } from 'react';
-import { DocsLayout } from 'fumadocs-ui/layouts/docs';
-import { source } from '@/lib/source';
-import { baseOptions } from '@/lib/layout.shared';
+  ),
+  frameworkOf(
+    {
+      title: 'Waku',
+      name: 'waku',
+      file: 'src/components/provider.tsx',
+      lang: 'tsx',
+      holds: { root: 'src', items: ['components/provider.tsx', 'pages/docs/[...slugs].tsx'] },
+    },
+    'waku',
+    'WakuProvider',
+    ({ name, from }) => `'use client';
+import type { ReactNode } from 'react';
+import { ${name} } from '${from}';
 
-export default function Layout({ children }: { children: ReactNode }) {
+export function Provider({ children }: { children: ReactNode }) {
+  return <${name}>{children}</${name}>;
+}`,
+  ),
+  frameworkOf(
+    {
+      title: 'Astro',
+      name: 'astro',
+      file: 'src/components/docs.tsx',
+      lang: 'tsx',
+      holds: { root: 'src', items: ['components/docs.tsx', 'pages/[...slug].astro'] },
+    },
+    'astro',
+    'AstroProvider',
+    ({ name, from }) => {
+      const ui = name === 'RootProvider';
+      return `import type { ReactNode } from 'react';
+${ui ? "import { navigate } from 'astro:transitions/client';\n" : ''}import { ${name} } from '${from}';
+
+export function DocsIsland({
+  children,
+  pathname,
+  params,
+}: {
+  children: ReactNode;
+  pathname: string;
+  params: Record<string, string | string[] | undefined>;
+}) {
   return (
-    <DocsLayout {...baseOptions()} tree={source.getPageTree()}>
+    <${name} pathname={pathname} params={params}${ui ? ' navigate={navigate}' : ''}>
       {children}
-    </DocsLayout>
+    </${name}>
   );
-}`,
-  },
-  {
-    name: 'astro',
-    title: 'Astro',
-    file: 'src/pages/[...slug].astro',
-    lang: 'astro',
-    code: `<Layout>
-  <title>{page.data.title}</title>
-  <meta name="title" content={page.data.title} />
-  <meta name="description" content={page.data.description} />
-  <meta property="og:image" content={image} />
-  <Docs
-    tree={source.getPageTree()}
-    pathname={Astro.url.pathname}
-    params={Astro.params}
-    page={{ toc }}
-    client:load
-  >
-    <h1 class="font-semibold text-3xl">{page.data.title}</h1>
-    <p class="text-lg text-fd-muted-foreground mb-8">{page.data.description}</p>
-    <div class="prose flex-1">
-      <Content components={{ ...defaultMdxComponents }} />
-    </div>
-  </Docs>
-</Layout>`,
-  },
+}`;
+    },
+  ),
 ];
 
-// the hub every other layer plugs into, it is never swapped
-const core: Option[] = [
-  {
-    name: 'fumadocs-core',
-    title: 'Fumadocs Core',
-    file: '',
-    lang: 'ts',
-    code: '',
-  },
-];
-
-export const slots: Slot[] = [
-  { layer: 'ui', swappable: true, options: ui },
-  { layer: 'core', swappable: false, options: core },
-  { layer: 'content', swappable: true, options: content },
-  { layer: 'framework', swappable: true, options: framework },
-];
+export const OPTIONS = { ui, content, framework } satisfies Record<SwapLayer, Option[]>;

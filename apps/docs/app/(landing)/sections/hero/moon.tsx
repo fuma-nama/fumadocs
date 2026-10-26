@@ -173,13 +173,16 @@ function mount(
     dpr = Math.min(2, window.devicePixelRatio);
     span = window.innerHeight;
     exitStart = Math.max(0, clip.getBoundingClientRect().bottom + window.scrollY - span * 0.92);
-    // labels stay inside the frame: their centre's range relative to the moon's centre
-    const centre = scene.offsetLeft + radius * 1.6;
+    // labels stay inside the gutters: their centre's range relative to the moon's centre, the
+    // anchor, measured in sub-pixels
+    const box = clip.getBoundingClientRect();
+    const centre = anchor.getBoundingClientRect().left - box.left;
+    const gutter = Number.parseFloat(getComputedStyle(stage).getPropertyValue('--lp-gutter'));
     for (let i = 0; i < labels.length; i++) {
-      const half = labels[i].offsetWidth / 2;
+      const half = labels[i].getBoundingClientRect().width / 2;
       labelBox[i * 3] = half;
-      labelBox[i * 3 + 1] = half + 8 - centre;
-      labelBox[i * 3 + 2] = clip.clientWidth - half - 8 - centre;
+      labelBox[i * 3 + 1] = half + gutter - centre;
+      labelBox[i * 3 + 2] = box.width - half - gutter - centre;
     }
     place();
   });

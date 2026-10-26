@@ -10,10 +10,12 @@ const invert =
 
 /**
  * Moon geometry: `--d` diameter, `--cut` part below the horizon, `--cx` centre from the left,
- * `--h` horizon height above the figure's bottom edge (the status bar overlays it on md+).
+ * `--h` horizon height above the figure's bottom edge (the status bar overlays it on md+). The
+ * drawing, the outer ring with its prisms, is 1.46 diameters wide and stays inside the gutters
+ * (`cqw`: the figure's width between them); on xl it takes the room right of the 607px CTA row.
  */
 const geometry =
-  '[--h:calc(var(--lp-status-h)+40px)] [--d:260px] sm:[--d:320px] lg:[--d:360px] xl:[--d:clamp(440px,36vw,500px)] [--cut:calc(var(--d)*0.12)] [--cx:50%] lg:[--cx:calc(100%-var(--d)*0.78)] xl:[--cx:calc(100%-var(--d)*0.73)] [--moon-lit:var(--lp-sun)] dark:[--moon-lit:var(--lp-yellow)]';
+  '[--h:calc(var(--lp-status-h)+40px)] [--d:min(260px,calc(100cqw/1.46))] sm:[--d:320px] lg:[--d:360px] xl:[--d:min(480px,calc((100cqw-640px)/1.46))] [--cut:calc(var(--d)*0.12)] [--cx:50%] lg:[--cx:calc(100%-var(--d)*0.78)] xl:[--cx:calc(100%-var(--lp-gutter)-var(--d)*0.73)] [--moon-lit:var(--lp-sun)] dark:[--moon-lit:var(--lp-yellow)]';
 
 export function Hero() {
   return (
@@ -22,14 +24,14 @@ export function Hero() {
       id="fumadocs"
       aria-label="Fumadocs"
       status="ready"
-      className={`isolate flex min-h-[calc(100svh-var(--lp-menu-h))] flex-col px-(--lp-gutter) pb-(--h) ${geometry}`}
+      className={`isolate flex min-h-[calc(100svh-var(--lp-menu-h))] flex-col px-(--lp-gutter) pb-(--h) @container ${geometry}`}
     >
       <div className="relative z-10 flex flex-col pt-8 lg:my-auto lg:py-6">
         {/* three lines, sized by width and by the height left for the sky, so the horizon stays on screen */}
         <h1 className="text-[clamp(3rem,7.2vw,6.5rem)] leading-[0.95] font-medium tracking-[-0.045em] lg:max-xl:text-[clamp(3rem,min(6.4vw,calc((100svh-530px)/2.85)),6.5rem)] xl:text-[clamp(3rem,min(7.2vw,calc((100svh-470px)/2.85)),6.5rem)]">
-          <Lead className="text-[0.6em]">{copy.hero.lead}</Lead> <Glitch>Flexible</Glitch>
+          <Lead className="text-[0.6em]">{copy.hero.lead}</Lead> Build <Glitch>better</Glitch>
           <br />
-          to the core.
+          docs.
         </h1>
         <p className="mt-7 max-w-[46ch] text-lg leading-snug text-pretty text-lp-ink-2 lg:text-xl lg:max-xl:max-w-[40ch]">
           {copy.hero.description}

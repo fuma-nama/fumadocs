@@ -21,6 +21,8 @@ interface ShaderCanvas {
   /** upload (or re-upload after drawing to it) an image or canvas to a `sampler2D` uniform */
   texture: (name: string, source: TexImageSource) => void;
   invalidate: () => void;
+  /** draw right away instead of in the next frame, for a change this frame shows, e.g. from a ResizeObserver */
+  draw: () => void;
   destroy: () => void;
 }
 
@@ -97,7 +99,7 @@ export function createShaderCanvas(
       slow = dt > 25 ? slow + 1 : Math.max(0, slow - 2);
       if (slow > 40) {
         limit = 1;
-        size();
+        fit();
       }
     }
     last = now;
@@ -112,12 +114,18 @@ export function createShaderCanvas(
     if (raf === 0 && onScreen && !document.hidden) raf = requestAnimationFrame(frame);
   }
 
+  function draw() {
+    if (!onScreen || document.hidden) return;
+    cancelAnimationFrame(raf);
+    frame(performance.now());
+  }
+
   function pause() {
     cancelAnimationFrame(raf);
     raf = 0;
   }
 
-  function size() {
+  function fit() {
     const dpr = Math.min(window.devicePixelRatio, limit);
     canvas.width = Math.max(1, Math.round(canvas.clientWidth * dpr));
     canvas.height = Math.max(1, Math.round(canvas.clientHeight * dpr));
@@ -126,10 +134,13 @@ export function createShaderCanvas(
     gl!.viewport(0, 0, canvas.width, canvas.height);
     set('uResolution', [canvas.width, canvas.height]);
     set('uDpr', dpr);
-    invalidate();
   }
 
-  const resize = new ResizeObserver(size);
+  // resizing clears the canvas, and a frame requested now would come after this one paints it blank
+  const resize = new ResizeObserver(() => {
+    fit();
+    draw();
+  });
   const visibility = new IntersectionObserver(([entry]) => {
     onScreen = entry.isIntersecting;
     if (onScreen) invalidate();
@@ -145,6 +156,7 @@ export function createShaderCanvas(
     set,
     texture,
     invalidate,
+    draw,
     destroy() {
       pause();
       resize.disconnect();

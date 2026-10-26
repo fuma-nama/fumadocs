@@ -83,6 +83,9 @@ interface CableAnchors {
   /** the floor, and the depth of its run in front of everything */
   floor: number;
   front: number;
+  /** where its run toward the viewer meets the front: straight down the screen from the gutter, so
+   * the perspective doesn't swing it onto the windows beside it */
+  forward: number;
   /** the socket on the crate's front, its plug enters toward -z */
   socket: Vec3;
   /** the socket on your folder's row, at the window's right edge, entered toward -x */
@@ -104,7 +107,7 @@ export function cables(c: CableAnchors): {
     c.reel,
     [c.lane, c.reel[1], c.wall],
     [c.lane, y, c.wall],
-    [c.lane, y, c.front],
+    [c.forward, y, c.front],
     [c.socket[0], y, c.front],
     [c.socket[0], c.socket[1], c.front],
     c.socket,
