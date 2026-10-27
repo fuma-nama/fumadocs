@@ -34,7 +34,7 @@ export const Keys = memo(function Keys({
       event.preventDefault();
       const next = (pick + step + options.length) % options.length;
       onPick(layer, next);
-      (event.currentTarget.parentElement!.children[next] as HTMLElement).focus();
+      event.currentTarget.parentElement!.querySelectorAll('button')[next].focus();
     };
     const buttons: ReactNode[] = [];
     for (let i = 0; i < options.length; i++) {
@@ -58,7 +58,7 @@ export const Keys = memo(function Keys({
         <Chip
           data-rise
           layer={layer}
-          className="h-8 justify-self-start @min-[24rem]:justify-self-stretch"
+          className="h-8 @max-[24rem]:hidden @min-[24rem]:justify-self-stretch"
         />
         <div
           data-rise
@@ -66,6 +66,8 @@ export const Keys = memo(function Keys({
           aria-label={`${layer} layer`}
           className="grid grid-cols-2 gap-2 @min-[33rem]:grid-cols-3"
         >
+          {/* in a narrow panel the label is the group's first cell, a row shorter */}
+          <Chip aria-hidden layer={layer} className="h-8 @min-[24rem]:hidden" />
           {buttons}
         </div>
       </Fragment>,

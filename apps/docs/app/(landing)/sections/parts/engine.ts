@@ -24,6 +24,8 @@ const DEG = Math.PI / 180;
 const LIGHT: Vec3 = [0.44, 0.83, 0.34];
 /** the gap the layers part to, in layer thicknesses */
 const GAP = 1.15;
+/** a phone's, so its fronts fill a short stage */
+const PHONE_GAP = 0.6;
 /** how far a tray slides out, a part of the page's depth */
 const PULL = 0.2;
 /** how long a tray stays out once its pick has landed, ms */
@@ -32,9 +34,18 @@ const HOLD = 8 * TICK;
 const STILL = 150;
 const UNIFORM_MIN = ['uMin[0]', 'uMin[1]', 'uMin[2]', 'uMin[3]'];
 const UNIFORM_MAX = ['uMax[0]', 'uMax[1]', 'uMax[2]', 'uMax[3]'];
+/** how close to its end the run counts as parted, and the margin it keeps once it is */
+const PARTED = 0.02;
+/** how near a rest, in parts of the run, a scroll coming to rest on its way there glides onto it */
+const REACH = 0.3;
+/** ms without a scroll before it counts as at rest, where the browser has no `scrollend` */
+const QUIET = 150;
 
-/** the layouts of `parts.css`; `still` is reduced motion: no pin, the stack at rest */
-type Mode = 'stage' | 'column' | 'band' | 'still';
+/**
+ * The layouts of `parts.css`; `still` is reduced motion and landscape phones too small to pin: no
+ * pin, the stack at rest
+ */
+type Mode = 'stage' | 'column' | 'phone' | 'still';
 
 interface Tray {
   /** the option picked, and the one the tray holds */
@@ -71,7 +82,7 @@ export function createStack(
   const slot = find('slot');
   const spacer = find('run');
   const code = find('window');
-  const headItems = head.querySelectorAll<HTMLElement>('[data-rise]');
+  const headItems = head.querySelectorAll<HTMLElement>('[data-rise-group] > *');
   const panelItems = panel.querySelectorAll<HTMLElement>('[data-rise]');
 
   const trays = new Map<SwapLayer, Tray>();
@@ -105,6 +116,8 @@ export function createStack(
   const full = matchMedia('(min-width: 1348px) and (min-height: 884px)');
   const wide = matchMedia('(min-width: 1024px)');
   const reduce = matchMedia('(prefers-reduced-motion: reduce)');
+  const cramped = matchMedia('(max-width: 759px) and (max-height: 499px)');
+  const ends = 'onscrollend' in window;
 
   let mode: Mode = 'still';
   let width = 0;
@@ -114,16 +127,25 @@ export function createStack(
   let D = 1;
   let T = 1;
   let pull = 0;
+  let gap = GAP;
   /** where the CSS lays the page out in the canvas, which its transform starts from */
   let pageX = 0;
   let pageY = 0;
   /** a front's own size, in CSS px */
   let frontW = 1;
   let frontH = 1;
-  let headFoot = 0;
   let panelLeft = 0;
   let runFrom = 0;
   let runTo = 1;
+  /** where the stage's header has room, to come in and to go, and the parted rest's scroll */
+  let headIn = 0;
+  let headOut = 0;
+  let parted = false;
+  let rest2 = 0;
+  /** the last scroll's place and way */
+  let lastY = 0;
+  let down = true;
+  let quiet = 0;
   /** the page straight on, and the stack at rest */
   const from: View = {
     target: [0, 0, 0],
@@ -176,7 +198,14 @@ export function createStack(
     W = page.offsetWidth;
     D = page.offsetHeight;
     if (width === 0 || height === 0 || W === 0) return;
-    mode = reduce.matches ? 'still' : full.matches ? 'stage' : wide.matches ? 'column' : 'band';
+    mode =
+      reduce.matches || cramped.matches
+        ? 'still'
+        : full.matches
+          ? 'stage'
+          : wide.matches
+            ? 'column'
+            : 'phone';
     frontW = fronts[0].offsetWidth;
     frontH = fronts[0].offsetHeight;
     T = (W * frontH) / frontW;
@@ -187,14 +216,14 @@ export function createStack(
     const origin = cell.getBoundingClientRect();
     const scroll = window.scrollY;
     const headBox = rectIn(head, origin);
-    headFoot = headBox.y + headBox.h;
+    const headFoot = headBox.y + headBox.h;
     panelLeft = rectIn(panel, origin).x;
 
     let rest: Rect;
     if (mode === 'stage') rest = rectIn(slot, origin);
     else if (mode === 'column')
       rest = { x: gutter, y: gutter, w: panelLeft - 48 - gutter, h: height - 2 * gutter };
-    else if (mode === 'band') rest = { x: 12, y: 12, w: width - 24, h: height - 24 };
+    else if (mode === 'phone') rest = { x: 12, y: 12, w: width - 24, h: height - 24 };
     else rest = { x: 0, y: 0, w: width, h: height };
 
     // straight on: the page's face at 1:1, where the CSS lays it out
@@ -206,14 +235,18 @@ export function createStack(
     pageY = page.offsetTop;
     from.shift[0] = pageX + W / 2 - width / 2;
     from.shift[1] = pageY + D / 2 - height / 2;
-    const top = 4 * T + 3 * GAP * T;
-    const band = mode === 'band';
-    box(0, top, -D / 2, D / 2 + pull);
+    const phone = mode === 'phone';
+    gap = phone ? PHONE_GAP : GAP;
+    const top = 4 * T + 3 * gap * T;
+    // where a phone's stage leaves the stack a short place, its rest frames the four fronts, where
+    // the picks play; elsewhere the whole stack
+    const near = phone && rest.w > 1.4 * rest.h;
+    box(0, top, near ? D / 2 : -D / 2, D / 2 + pull);
     to = fitView(
       {
-        target: [0, top / 2, pull / 2],
-        elev: (band ? 30 : 27) * DEG,
-        yaw: (band ? -22 : -27) * DEG,
+        target: [0, top / 2, near ? D / 2 + pull / 2 : pull / 2],
+        elev: (phone ? 30 : 27) * DEG,
+        yaw: (phone ? -22 : -27) * DEG,
         focal,
       },
       lo,
@@ -223,24 +256,36 @@ export function createStack(
       rest,
     );
 
-    // it pins from the figure's top (never read from what is stuck): the stage for its spacer, the
-    // canvas until the header has risen into it, or the code window reaches the band's foot
+    // it pins from the figure's top (never read from what is stuck), the stage or the phone's for
+    // its spacer, the column's canvas until the header and the keys have come in
     runFrom = root.getBoundingClientRect().top + scroll - menu;
-    if (mode === 'stage') runTo = runFrom + spacer.offsetHeight;
-    else if (mode === 'column') {
-      // as long as makes the header and the panel arrive over the canvas' right part just as the
-      // stack has left it, so they never cross it
+    runTo = runFrom + spacer.offsetHeight;
+    rest2 = runTo;
+    if (mode === 'column') {
+      // the header comes in over the canvas' right part once the stack has left it, and the camera
+      // is parted before the keys come in; the parted rest has the header at the top
       let clear = 0;
       for (let i = 100; i >= 0 && clear === 0; i--) {
         const stack = stackBox(aimAt(i / 100));
         if (panelLeft - (stack.x + stack.w) < 24) clear = Math.min(1, (i + 1) / 100);
       }
-      runTo = runFrom + spacer.offsetHeight / Math.max(clear, 0.3);
-    } else runTo = code.getBoundingClientRect().top + scroll - menu - height;
+      const keys = panel.getBoundingClientRect().top - spacer.getBoundingClientRect().top;
+      runTo = runFrom + Math.min(spacer.offsetHeight / Math.max(clear, 0.3), keys);
+      rest2 = Math.max(runTo, head.getBoundingClientRect().top + scroll - menu - gutter);
+    } else if (mode === 'stage') {
+      // the header shows once the stack is 16px clear of it, and goes before the stack reaches it
+      headIn = 0;
+      headOut = 0;
+      for (let i = 100; i >= 0 && headOut === 0; i--) {
+        const room = stackBox(aimAt(i / 100)).y - headFoot;
+        if (room < 16 && headIn === 0) headIn = (i + 1) / 100;
+        if (room < 0) headOut = (i + 1) / 100;
+      }
+    }
     shader!.set('uCell', 2);
     shader!.set('uPost', [W / 2 - 0.05 * W, D / 2 - 0.07 * D, Math.max(3, 0.006 * W)]);
     shader!.set('uLight', [LIGHT[0] / length, LIGHT[1] / length, LIGHT[2] / length]);
-    // the floor stops short of where the header and the panel stand
+    // the floor stops short of where the header and the panel stand over the canvas
     const stage = mode === 'stage';
     shader!.set('uFloor', [
       0,
@@ -248,18 +293,22 @@ export function createStack(
       stage || mode === 'column' ? panelLeft - 12 : width,
       height,
     ]);
-    // on the stage they wait for the camera, which the frame below decides at once
     instant = true;
-    show(head, mode !== 'stage');
-    show(panel, mode !== 'stage');
     scrolled();
     progress = target;
+    place(true);
     shader!.draw();
   }
 
   function scrolled() {
-    target =
-      mode === 'still' ? 1 : clamp((window.scrollY - runFrom) / Math.max(1, runTo - runFrom));
+    const y = window.scrollY;
+    target = mode === 'still' ? 1 : clamp((y - runFrom) / Math.max(1, runTo - runFrom));
+    if (y !== lastY) down = y > lastY;
+    lastY = y;
+    if (!ends) {
+      clearTimeout(quiet);
+      quiet = window.setTimeout(arrive, QUIET);
+    }
     shader!.invalidate();
   }
 
@@ -285,7 +334,7 @@ export function createStack(
 
   /** the stack's box on the canvas with its layers parted by `part`, no tray out */
   function stackBox(part: number) {
-    box(0, 4 * T + 3 * GAP * T * part, -D / 2, D / 2);
+    box(0, 4 * T + 3 * gap * T * part, -D / 2, D / 2);
     return boundsOf(cam, lo, hi);
   }
 
@@ -346,7 +395,7 @@ export function createStack(
     shader!.set('uCentre', cam.centre);
 
     // the layers top down, parted by `part`, each slid out by its tray; the real faces on them
-    const step = T + GAP * T * part;
+    const step = T + gap * T * part;
     let reach = 0;
     for (let i = 0; i < 4; i++) {
       const out = trays.get(LAYERS[i] as SwapLayer)?.out ?? 0;
@@ -377,7 +426,7 @@ export function createStack(
     // the floor's shadow and grid come in once the camera has left overhead, so the page starts flat
     const world = clamp((84 - view.elev / DEG) / 18);
     shader!.set('uShadow', 0.28 * world);
-    grid[0] = mode === 'band' ? 24 : 48;
+    grid[0] = mode === 'phone' ? 24 : 48;
     grid[1] = 0.14 * world;
     grid[2] = 0.8 * Math.max(W, D);
     shader!.set('uGrid', grid);
@@ -390,25 +439,33 @@ export function createStack(
       }, STILL);
     }
 
-    // the header and the panel hold the room the camera has cleared, both ways of the scroll: each
-    // comes in once the stack leaves its place and goes before the stack would reach it, 16 to 24px
-    // apart so it never flickers. A pick still on its way lands as the panel goes, and focus in the
-    // panel moves to the figure.
-    if (mode === 'stage') {
-      const stack = stackBox(part);
-      const headRoom = stack.y - headFoot;
-      const panelRoom = panelLeft - (stack.x + stack.w);
-      if (headShown ? headRoom < 0 : headRoom >= 16) show(head, !headShown);
-      if (panelShown ? panelRoom < 0 : panelRoom >= 24) {
-        if (panelShown) {
-          settle(false);
-          if (panel.contains(document.activeElement)) root.focus({ preventScroll: true });
-        }
-        show(panel, !panelShown);
-      }
-    }
+    place();
     instant = false;
     if (moving) shader!.invalidate();
+  }
+
+  /**
+   * The header and the panel by the camera's state, both ways of the scroll. The layers count as
+   * parted near the run's end, with a margin so a reader resting there never flickers: the stage
+   * and the phone show the keys then (the phone's header gives way to them), and the stage's header
+   * holds the room the stack has left. A pick still on its way lands as the keys go, and focus in
+   * them moves to the figure.
+   */
+  function place(force = false) {
+    parted = progress >= 1 - (parted ? 2 : 1) * PARTED;
+    const docked = mode === 'stage' || mode === 'phone';
+    let headNext = true;
+    if (mode === 'stage') headNext = progress >= (headShown ? headOut : headIn);
+    else if (mode === 'phone') headNext = !parted;
+    const panelNext = !docked || parted;
+    if (force || headNext !== headShown) show(head, headNext);
+    if (force || panelNext !== panelShown) {
+      if (panelShown && !panelNext) {
+        settle(false);
+        if (panel.contains(document.activeElement)) root.focus({ preventScroll: true });
+      }
+      show(panel, panelNext);
+    }
   }
 
   /**
@@ -436,8 +493,10 @@ export function createStack(
       if (instant || !next) {
         const end = next ? shown : hidden;
         const opacity = next ? 1 : 0;
+        // the phone's header and keys share a place: the one going leaves it at once
+        const fade = instant || mode === 'phone' ? 1 : 120;
         item.animate([end, end], { duration: 1, fill: 'forwards' });
-        item.animate([{ opacity }, { opacity }], { duration: instant ? 1 : 120, fill: 'forwards' });
+        item.animate([{ opacity }, { opacity }], { duration: fade, fill: 'forwards' });
         continue;
       }
       const delay = quick ? (opens ? 70 : Math.floor(i / 2) * 35) : i * TICK;
@@ -458,18 +517,31 @@ export function createStack(
     }
   }
 
+  /**
+   * The run's two rests, the page straight on and the stack parted: a scroll that comes to rest in
+   * the run near the one it was heading for glides onto it. Never back against the scroll's way, and
+   * never once it has left the run, so nothing can hold a scroll in the figure.
+   */
+  function arrive() {
+    const y = window.scrollY;
+    if (mode === 'still' || y <= runFrom || y >= rest2) return;
+    const goal = down ? rest2 : runFrom;
+    if (Math.abs(goal - y) < REACH * (rest2 - runFrom))
+      window.scrollTo({ top: goal, behavior: 'smooth' });
+  }
+
   function want(layer: SwapLayer, option: number) {
     const tray = trays.get(layer)!;
     tray.want = option;
-    // a tray slides where it has room: the layers parted and the stack on the screen
-    if (!seen || mode === 'still' || progress < 0.8) settle();
+    // the drawer plays when the layers are parted and on the screen; elsewhere a pick lands at once
+    if (!seen || mode === 'still' || !parted) settle();
     else if (tray.out === 0) tray.unlatch = performance.now() + TICK;
     shader!.invalidate();
   }
 
   function onFocusIn() {
-    // keyboard focus reaches the panel before the camera has cleared it: finish the move first
-    if (mode === 'stage' && !panelShown) window.scrollTo({ top: runTo, behavior: 'instant' });
+    // keyboard focus reaches the keys before they show: finish the move to the parted rest first
+    if (!panelShown) window.scrollTo({ top: rest2, behavior: 'instant' });
   }
 
   const resize = new ResizeObserver(measure);
@@ -491,6 +563,7 @@ export function createStack(
   wide.addEventListener('change', measure);
   reduce.addEventListener('change', measure);
   panel.addEventListener('focusin', onFocusIn);
+  if (ends) window.addEventListener('scrollend', arrive);
   colours();
   measure();
 
@@ -506,6 +579,8 @@ export function createStack(
       wide.removeEventListener('change', measure);
       reduce.removeEventListener('change', measure);
       panel.removeEventListener('focusin', onFocusIn);
+      window.removeEventListener('scrollend', arrive);
+      clearTimeout(quiet);
       shader.destroy();
     },
   };

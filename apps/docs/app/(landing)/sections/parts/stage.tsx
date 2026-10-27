@@ -10,7 +10,7 @@ import { CodeWindow, Keys, type Picks, type Snippets } from './panel';
 import './parts.css';
 
 interface StageProps {
-  /** the figure's title and description, their parts marked `data-rise` */
+  /** the figure's title and description, in an element marked `data-rise-group` */
   header: ReactNode;
   /** a docs page in Fumadocs UI, and the same page with the UI swapped for your own */
   page: ReactNode;
@@ -67,31 +67,39 @@ export function Stage({ header, page, headless, snippets }: StageProps) {
   }
   const isHeadless = shown.ui === HEADLESS;
 
+  const code = (
+    <CodeWindow layer={last} option={shown[last]} headless={isHeadless} snippets={snippets} />
+  );
+
   return (
-    // the figure takes focus when the panel goes from under it
-    <div ref={ref} tabIndex={-1} className="parts-pin outline-none">
-      <div className="parts-stage">
-        <div data-head className="parts-head @container">
-          {header}
-        </div>
-        <div data-cell className="parts-cell">
-          <div data-page className="parts-page @container">
-            <DitherSwap swapKey={isHeadless ? 'headless' : 'page'} opaque className="size-full">
-              {isHeadless ? headless : page}
-            </DitherSwap>
+    <>
+      {/* the figure takes focus when the panel goes from under it */}
+      <div ref={ref} tabIndex={-1} className="parts-pin outline-none">
+        <div className="parts-stage">
+          <div data-head className="parts-head @container">
+            {header}
           </div>
-          {fronts}
-          <canvas aria-hidden className="pointer-events-none absolute inset-0 size-full" />
-        </div>
-        <div data-slot aria-hidden className="parts-slot" />
-        <div data-panel className="parts-panel flex flex-col gap-4">
-          <div className="@container">
-            <Keys picks={picks} onPick={pick} />
+          <div data-cell className="parts-cell">
+            <div data-page className="parts-page @container">
+              <DitherSwap swapKey={isHeadless ? 'headless' : 'page'} opaque className="size-full">
+                {isHeadless ? headless : page}
+              </DitherSwap>
+            </div>
+            {fronts}
+            <canvas aria-hidden className="pointer-events-none absolute inset-0 size-full" />
           </div>
-          <CodeWindow layer={last} option={shown[last]} headless={isHeadless} snippets={snippets} />
+          <div data-slot aria-hidden className="parts-slot" />
+          <div data-panel className="parts-panel flex flex-col gap-4">
+            <div className="@container">
+              <Keys picks={picks} onPick={pick} />
+            </div>
+            {code}
+          </div>
         </div>
+        <div data-run aria-hidden className="parts-run" />
       </div>
-      <div data-run aria-hidden className="parts-run" />
-    </div>
+      {/* a phone's stage has room for the keys alone: its code window follows the stage */}
+      <div className="parts-after">{code}</div>
+    </>
   );
 }
