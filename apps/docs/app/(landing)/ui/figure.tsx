@@ -75,7 +75,7 @@ interface FigureHeaderProps extends Omit<ComponentProps<'div'>, 'title'> {
 export function FigureHeader({ lead, title, description, className, ...props }: FigureHeaderProps) {
   return (
     <div {...props} className={cn('flex flex-col gap-4', className)}>
-      <h2 className="text-[clamp(1.625rem,1rem+2vw,2.5rem)] leading-[1.1] font-medium tracking-[-0.028em] text-pretty whitespace-pre-line">
+      <h2 className="text-[clamp(1.625rem,1rem+2vw,2.5rem)] leading-[1.2] font-medium md:leading-[1.1] tracking-[-0.028em] text-pretty whitespace-pre-line">
         {lead && <Lead>{lead}</Lead>} {title}
       </h2>
       {description && (

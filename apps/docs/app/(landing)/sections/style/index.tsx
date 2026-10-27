@@ -34,7 +34,7 @@ function Title() {
       <span className="block max-w-[29em]">
         <Terms runs={copy.style.title} />
       </span>{' '}
-      <span className="mt-[0.5em] block font-pixel text-[length:max(0.6em,16px)] leading-[1.25] font-normal tracking-normal">
+      <span className="mt-4 flex flex-col gap-2.5 font-pixel text-[length:max(0.6em,16px)] leading-[1.4] font-normal tracking-normal md:mt-[0.5em] md:gap-0 md:leading-[1.25]">
         {claims}
       </span>
     </>

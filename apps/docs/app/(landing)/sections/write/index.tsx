@@ -64,7 +64,7 @@ export function Press({
         lead={lead}
         title={typeof title === 'string' ? title : <Terms runs={title} />}
         description={description}
-        className="p-(--lp-gutter) pb-8 md:pt-10"
+        className="px-(--lp-gutter) pt-16 pb-10 md:pt-10 md:pb-8"
       />
       <Stage
         file={file}
